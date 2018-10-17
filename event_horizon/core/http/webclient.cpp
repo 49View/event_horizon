@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <unordered_set>
 
+#include "config_cpp.cfg"
 #include "../util.h"
 #include "../platform_util.h"
 
@@ -158,8 +159,8 @@ namespace Http {
     const std::string CLOUD_SERVER() {
         if ( sUseLocalhost ) {
             return "localhost";
-        } else{
-            return "rest-49view.herokuapp.com";
+        } else {
+            return Config::HOSTNAME;
         }
     }
 
