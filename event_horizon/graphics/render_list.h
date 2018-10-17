@@ -1,0 +1,481 @@
+//
+//  render_list.h
+//  SixthView
+//
+//  Created byDado on 11/01/1613.
+//  Copyright (c) 2013Dado. All rights reserved.
+//
+
+#pragma once
+
+#include <map>
+#include <ostream>
+#include <atomic>
+#include <mutex>
+#include "graphic_constants.h"
+#include "vertex_processing.h"
+
+class Framebuffer;
+class CommandBuffer;
+class CameraRig;
+class ShaderManager;
+class Renderer;
+class CommandBufferList;
+class ShadowMapManager;
+class Skybox;
+class CubeEnvironmentMap;
+class PrefilterSpecularMap;
+class PrefilterBRDF;
+class RLTarget;
+class Camera;
+
+using MVList = std::map<std::string, std::shared_ptr<VPList>>;
+
+class RenderStats {
+public:
+    int NumTriangles() const { return mNumTriangles; }
+    int& NumTriangles() { return mNumTriangles; }
+    void NumTriangles( int val ) { mNumTriangles = val; }
+    int NumVerts() const { return mNumVerts; }
+    void NumVerts( int val ) { mNumVerts = val; }
+    int& NumVerts() { return mNumVerts; }
+    int NumIndices() const { return mNumIndices; }
+    void NumIndices( int val ) { mNumIndices = val; }
+    int& NumIndices() { return mNumIndices; }
+    int NumNormals() const { return mNumNormals; }
+    void NumNormals( int val ) { mNumNormals = val; }
+    int& NumNormals() { return mNumNormals; }
+
+    //void addMaterial( std::shared_ptr<RenderMaterial> _mat ) { mMaterialSet.insert( _mat ); }
+    //int NumMaterials() const { return mNumMaterials; }
+    //void NumMaterials( int val ) { mNumMaterials = val; }
+    //int& NumMaterials() { return mNumMaterials; }
+
+    int NumGeoms() const { return mNumGeoms; }
+    void NumGeoms( int val ) { mNumGeoms = val; }
+    int& NumGeoms() { return mNumGeoms; }
+
+    void clear() {
+        mNumTriangles = 0;
+        mNumVerts = 0;
+        mNumIndices = 0;
+        mNumNormals = 0;
+        mNumGeoms = 0;
+    }
+
+private:
+    int mNumTriangles;
+    int mNumVerts;
+    int mNumIndices;
+    int mNumNormals;
+    //	int mNumMaterials;
+    int mNumGeoms;
+    //	std::set < std::shared_ptr<RenderMaterial> > mMaterialSet;
+};
+
+enum CommandBufferFlags {
+    CBF_None = 0,
+    CBF_DoNotSort = 1,
+};
+
+enum class CommandBufferCommandName {
+    nop,
+    depthWriteTrue,
+    depthWriteFalse,
+    depthTestFalse,
+    depthTestTrue,
+    depthTestLEqual,
+    depthTestLess,
+
+    cullModeNone,
+    cullModeFront,
+    cullModeBack,
+
+    alphaBlendingTrue,
+    alphaBlendingFalse,
+
+    wireFrameModeTrue,
+    wireFrameModeFalse,
+
+    colorBufferBind,
+    colorBufferBindAndClear,
+    colorBufferClear,
+
+    clearDefaultFramebuffer,
+
+    setCameraUniforms,
+    setGlobalTextures,
+
+    shadowMapBufferBind,
+    shadowMapClearDepthBufferZero,
+    shadowMapClearDepthBufferOne,
+
+    blitToScreen,
+    blitPBROffscreen,
+    blitPRB,
+
+    targetVP,
+};
+
+class CommandBufferCommand {
+public:
+    CommandBufferCommand( CommandBufferCommandName name = CommandBufferCommandName::nop ) : name( name ) {}
+
+    void issue( Renderer& rr, CommandBuffer *sourceCB ) const;
+
+    CommandBufferCommandName name;
+};
+
+class CommandBufferEntry {
+public:
+    int64_t mHash = -1;
+    VertexProcessing mVPList;
+    std::shared_ptr<RenderMaterial> mMaterial;
+    std::shared_ptr<Matrix4f> mModelMatrix;
+};
+
+enum class CommandBufferFrameBufferType {
+    sourceColor,
+    shadowMap,
+    finalResolve,
+    blurVertical,
+    blurHorizontal
+};
+
+enum class CommandBufferEntryCommandType {
+    Comamnd,
+    VP
+};
+
+class CommandBufferEntryCommand {
+public:
+    CommandBufferEntryCommand( CommandBufferCommand _command );
+    CommandBufferEntryCommand( CommandBufferEntry _vp );
+
+    void run( Renderer& rr, CommandBuffer* cb ) const;
+
+    CommandBufferEntryCommandType Type() const;
+    void Type( CommandBufferEntryCommandType type );
+
+    std::string entryName() const;
+
+    std::shared_ptr<CommandBufferEntry>& entry();
+
+private:
+    CommandBufferEntryCommandType mType;
+    CommandBufferCommand mCommand;
+    std::shared_ptr<CommandBufferEntry> mVP;
+};
+
+class CommandBuffer {
+public:
+    CommandBuffer() {}
+    CommandBuffer( CommandBufferFlags flags ) : flags( flags ) {}
+    void push( const CommandBufferEntry& entry );
+    void push( const CommandBufferCommand& entry );
+    void clear();
+    void render( Renderer& rr );
+    void sort();
+    bool findEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _wp );
+
+    std::shared_ptr<Framebuffer> fb( CommandBufferFrameBufferType fbt );
+    Rect2f                       destViewport();
+    Rect2f                       sourceViewport();
+    std::string                  renderIndex();
+    int                          mipMapIndex();
+
+private:
+    std::vector<CommandBufferEntryCommand> mCommandList;
+
+public:
+    // Stack
+    std::shared_ptr<RLTarget> mTarget;
+    std::unique_ptr<char[]> UBOCameraBuffer;
+    CommandBufferFlags flags = CommandBufferFlags::CBF_None;
+};
+
+class CommandBufferNewEntry {
+public:
+    std::weak_ptr<VPList> mVPList;
+    std::shared_ptr<cpuVBIB> mVBIB;
+//    std::string mName;
+};
+
+class CommandBufferList {
+public:
+    CommandBufferList( Renderer& rr ) : rr( rr ) {}
+
+    void start();
+    void end();
+
+    void startTarget( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr );
+
+    void pushVP( std::shared_ptr<VertexProcessing> _vp,
+                 std::shared_ptr<RenderMaterial> _mat,
+                 std::shared_ptr<Matrix4f> _modelMatrix );
+    void pushCommand( const CommandBufferCommand& _cmd );
+
+    void startList( std::shared_ptr<RLTarget> _target, CommandBufferFlags flags = CommandBufferFlags::CBF_None );
+    void render( int eye );
+    void setCameraUniforms( std::shared_ptr<Camera> c0 );
+    void getCommandBufferEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& wp );
+
+private:
+    Renderer& rr;
+    CommandBuffer* mCurrent = nullptr;
+    std::vector<CommandBuffer> mCommandBuffers;
+};
+
+struct CommandBufferListVector {
+    CommandBufferFlags flags = CommandBufferFlags::CBF_None;
+    std::vector<std::shared_ptr<VPList>> mVList;
+    std::vector<std::shared_ptr<VPList>> mVListTransparent;
+};
+
+enum class RLClearFlag {
+    DontIncludeCore,
+    All
+};
+
+enum class CompositeFinalDest {
+    OnScreen,
+    OffScreen
+};
+
+class Composite {
+public:
+    Composite( Renderer& rr ) : rr( rr ) {}
+    virtual ~Composite() {}
+
+    virtual void blit(CommandBufferList& cbl) = 0;
+
+    const std::shared_ptr<Framebuffer>& getColorFB() const {
+        return mColorFB;
+    }
+
+    void setColorFB( const std::shared_ptr<Framebuffer>& _ColorFB ) {
+        mColorFB = _ColorFB;
+    }
+
+    void takeScreenshot( std::shared_ptr<Framebuffer> _fb, bool crop = false,
+                         const Vector2f& cropSize = Vector2f{512, 512} );
+
+protected:
+    Renderer& rr;
+    std::shared_ptr<Framebuffer> mColorFB;
+    CompositeFinalDest mCompositeFinalDest = CompositeFinalDest::OnScreen;
+};
+
+class CompositePlain : public Composite {
+public:
+    virtual ~CompositePlain() = default;
+    CompositePlain( Renderer& rr, const std::string& _name, const Rect2f& _destViewport,
+                    CompositeFinalDest _cfd =  CompositeFinalDest::OnScreen );
+    void blit(CommandBufferList& cbl) override;
+};
+
+class CompositePBR : public Composite {
+public:
+    virtual ~CompositePBR() {}
+    CompositePBR( Renderer& rr, const std::string& _name, const Rect2f& _destViewport,
+                  CompositeFinalDest _cfd =  CompositeFinalDest::OnScreen );
+
+    const std::shared_ptr<Framebuffer>& getColorFinalFB() const {
+        return mColorFinalFB;
+    }
+
+    void setColorFinalFB( const std::shared_ptr<Framebuffer>& _ColorFinalFB ) {
+        mColorFinalFB = _ColorFinalFB;
+    }
+
+    const std::shared_ptr<Framebuffer>& getBlurHorizontalFB() const {
+        return mBlurHorizontalFB;
+    }
+
+    void setBlurHorizontalFB( const std::shared_ptr<Framebuffer>& _BlurHorizontalFB ) {
+        mBlurHorizontalFB = _BlurHorizontalFB;
+    }
+
+    const std::shared_ptr<Framebuffer>& getBlurVerticalFB() const {
+        return mBlurVerticalFB;
+    }
+
+    void setBlurVerticalFB( const std::shared_ptr<Framebuffer>& _BlurVerticalFB ) {
+        mBlurVerticalFB = _BlurVerticalFB;
+    }
+
+    bool isUsingBloom() const {
+        return mbUseBloom;
+    }
+
+    void useBloom( bool _mbUseBloom ) {
+        mbUseBloom = _mbUseBloom;
+    }
+
+    std::shared_ptr<VPList> getVPFinalCombine() const;
+
+    void blit( CommandBufferList& cbl ) override;
+
+private:
+    void bloom();
+
+private:
+    bool mbUseBloom = false;
+    std::shared_ptr<Framebuffer> mColorFinalFB;
+    std::shared_ptr<Framebuffer> mBlurHorizontalFB;
+    std::shared_ptr<Framebuffer> mBlurVerticalFB;
+};
+
+class RLTarget : public std::enable_shared_from_this<RLTarget> {
+public:
+    RLTarget( Renderer& _rr ) : rr( _rr ) {}
+    RLTarget( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, Renderer& _rr ) : cameraRig(
+            cameraRig ), screenViewport( screenViewport ), rr( _rr ) {}
+    virtual ~RLTarget() {}
+
+    std::shared_ptr<Camera> getCamera();
+    void addToCBCore( CommandBufferList& cb );
+    virtual void addToCB( CommandBufferList& cb ) = 0;
+    virtual void startCL( CommandBufferList& fbt ) = 0;
+    virtual void endCL( CommandBufferList& fbt ) = 0;
+    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) = 0;
+    virtual void blit( CommandBufferList& cbl ) = 0;
+
+    void clearCB( CommandBufferList& cb );
+
+    bool isKeyInRange( const int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
+
+public:
+    std::shared_ptr<CameraRig> cameraRig;
+    Rect2f screenViewport;
+    std::string  renderIndex;
+    int mipMapIndex = 0;
+    std::vector<std::pair<int, int>> bucketRanges;
+
+protected:
+    Renderer& rr;
+};
+
+class RLTargetPlain : public RLTarget {
+public:
+    RLTargetPlain( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, Renderer& rr );
+    virtual ~RLTargetPlain() {}
+
+    void addToCB( CommandBufferList& cb ) override;
+    virtual void blit(CommandBufferList& cbl) override;
+    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
+    void startCL( CommandBufferList& fbt ) override;
+    void endCL( CommandBufferList& fbt ) override;
+protected:
+    std::shared_ptr<CompositePlain> mComposite;
+};
+
+class RLTargetFB : public RLTarget {
+public:
+    RLTargetFB( std::shared_ptr<Framebuffer> _fbt, [[maybe_unused]] Renderer& _rr );
+    virtual ~RLTargetFB() {}
+    void addToCB( CommandBufferList& cb ) override {}
+    virtual void blit(CommandBufferList& cbl) override {};
+    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;;
+    void startCL( CommandBufferList& fbt ) override {};
+    void endCL( CommandBufferList& fbt ) override {}
+
+protected:
+    std::shared_ptr<Framebuffer> framebuffer;
+};
+
+class RLTargetProbe : public RLTarget {
+public:
+    RLTargetProbe( const std::string& _cameraRig, const int _faceIndex, Renderer& _rr, int _mipmapIndex = 0 );
+    virtual ~RLTargetProbe() {}
+    void addToCB( CommandBufferList& cb ) override {}
+    virtual void blit(CommandBufferList& cbl) override {};
+    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
+    void startCL( CommandBufferList& fbt ) override;;
+    void endCL( CommandBufferList& fbt ) override {}
+
+protected:
+    std::string  cameraName;
+};
+
+class RLTargetPBR : public RLTarget {
+public:
+    RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, Renderer& rr );
+    virtual ~RLTargetPBR() {}
+    void addToCB( CommandBufferList& cb ) override;
+    virtual void blit(CommandBufferList& cbl) override;
+    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
+    void startCL( CommandBufferList& fbt ) override;
+    void endCL( CommandBufferList& fbt ) override;
+protected:
+    std::shared_ptr<CompositePBR> mComposite;
+
+//    static RLTarget skyboxProbe( std::shared_ptr<CameraRig> _cameraRig, const std::string& _face );
+};
+
+struct VSGUIDData {
+    Color4f color2d;
+};
+
+using GUIDT = std::tuple<std::string, VSGUIDData>;
+
+template<typename T>
+struct GUIDMapInput {
+    uint64_t Hash() const { return as->hash; }
+
+    std::shared_ptr<T> as;
+    Color4f color2d;
+};
+
+class VPSGUID {
+public:
+    static VPSGUID& getInstance() {
+        static VPSGUID instance; // Guaranteed to be destroyed.
+        return instance;// Instantiated on first use.
+    }
+
+private:
+    VPSGUID() {}
+    VPSGUID( VPSGUID const& ) = delete;
+    void operator=( VPSGUID const& ) = delete;
+public:
+
+    template<typename T>
+    std::string add( const GUIDMapInput<T>& _data ) {
+
+        mHashMapCount[_data.Hash()].push_back( { _data.color2d } );
+
+        return GUID( _data.Hash(), mHashMapCount[_data.Hash()].size() );
+    }
+
+    template<typename T>
+    std::vector<GUIDT> getNames( std::shared_ptr<T> _data ) {
+        std::vector<GUIDT> ret;
+        size_t size = mHashMapCount[_data->hash].size();
+
+        for ( uint32_t q = 0; q < size; q++ ) {
+            uint64_t k1 = _data->hash;
+            uint64_t k2 = q+1;
+            ret.push_back( { GUID( k1, k2 ), mHashMapCount[_data->hash][q] } );
+        }
+
+        return ret;
+    }
+
+private:
+    std::string GUID( uint64_t k1, uint32_t k2 ) {
+        uint64_t z = ((k1+k2)*(k1+k2+1)/2) + k2;
+//        uint32_t ci = (( static_cast<uint32_t >(_col.x()*255.0f) & 0xff) << 16) +
+//        (( static_cast<uint32_t >(_col.y()*255.0f) & 0xff) << 8) +
+//        ( static_cast<uint32_t >(_col.z()*255.0f) & 0xff);
+        return prefix + std::to_string( z );
+    }
+
+private:
+    std::unordered_map<uint64_t, std::vector<VSGUIDData>> mHashMapCount;
+    const std::string prefix = "VPG2D";
+};
+
+#define VPG VPSGUID::getInstance()
+#define VPGADD( X ) VPG.add<X>( { Data(), color2d } )
+

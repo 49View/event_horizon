@@ -1,0 +1,142 @@
+#include "skybox.h"
+#include "core/math/poly_shapes.hpp"
+#include "vertex_processing.h"
+#include "program_list.h"
+#include "camera_manager.h"
+#include "framebuffer.h"
+#include "renderer.h"
+
+void Skybox::equirectangularTextureInit( const std::vector<std::string>& params ) {
+
+    PolyStruct sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f}, 0 );
+    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
+    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
+                                                                           sp.numIndices, vpos3d, sp.indices );
+
+    VPBuilder<Pos3dStrip>{rr}.vl(mVPList).p(colorStrip).s(S::EQUIRECTANGULAR).t(params[0]).n("skybox")
+    .build();
+
+    isReadyToRender = true;
+}
+
+void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
+    mVPList = std::make_shared<VPList>();
+    mode = _sbm;
+    PolyStruct sp;
+    bool bBuildVP = true;
+    static bool skyBoxEquilateral = false;
+
+    if ( skyBoxEquilateral ) {
+        equirectangularTextureInit( {_textureName} );
+        return;
+    }
+
+    switch ( mode ) {
+        case SkyBoxMode::SphereProcedural:
+            sp = createGeomForSphere( Vector3f::ZERO, 1.0f, 3 );
+            isReadyToRender = true;
+            break;
+        case SkyBoxMode::CubeProcedural:
+            sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f}, 0 );
+            isReadyToRender = true;
+            break;
+        case SkyBoxMode::EquirectangularTexture:
+            ImageBuilder{_textureName}
+                    .cc(std::bind(&Skybox::equirectangularTextureInit, this, std::placeholders::_1), {_textureName})
+                    .build(rr.RIDM());
+            bBuildVP = false;
+            skyBoxEquilateral = true;
+    }
+
+    if ( bBuildVP ) {
+        std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
+        std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
+                                                                               sp.numIndices, vpos3d, sp.indices );
+        VPBuilder<Pos3dStrip>{rr}.vl(mVPList).p(colorStrip).s(S::SKYBOX).n("skybox").build();
+    }
+
+}
+
+void Skybox::render( float _sunHDRMult ) {
+    if ( isReadyToRender ) {
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+        mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
+        mVPList->addToCommandBuffer( rr );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
+    }
+}
+
+Skybox::Skybox( Renderer& rr, const SkyBoxInitParams& _params ) : RenderModule( rr ) {
+    init( _params.mode, _params.assetString );
+}
+
+//bool Skybox::needsReprobing( int _renderCounter ) {
+//    if ( mode == SkyBoxMode::CubeProcedural || mode == SkyBoxMode::SphereProcedural ) {
+//        if ( !isReadyToRender && _renderCounter == renderIndexExtraFrameToAvoidGlitch+1 ) {
+//            isReadyToRender = true;
+//            return true;
+//        }
+//        renderIndexExtraFrameToAvoidGlitch = _renderCounter;
+//    }
+//    if ( mode == SkyBoxMode::EquirectangularTexture ) {
+//        if ( bTriggerReprobing ) {
+//            if ( _renderCounter == renderIndexExtraFrameToAvoidGlitch + 2 ) {
+//                bTriggerReprobing = false;
+//                isReadyToRender = true;
+//                return true;
+//            }
+//        } else {
+//            renderIndexExtraFrameToAvoidGlitch = _renderCounter;
+//        }
+//    }
+//    return false;
+//}
+
+void CubeEnvironmentMap::init() {
+    mVPList = std::make_shared<VPList>();
+
+    auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f}, 0 );
+
+    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
+    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
+                                                                           sp.numIndices, vpos3d, sp.indices );
+
+    VPBuilder<Pos3dStrip>{rr}.vl(mVPList).p(colorStrip).s(S::CONVOLUTION).n("cubeEnvMap").build();
+}
+
+void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
+    rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt );
+    mVPList->addToCommandBuffer( rr );
+}
+
+void PrefilterSpecularMap::init() {
+    mVPList = std::make_shared<VPList>();
+
+    auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f}, 0 );
+
+    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
+    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
+                                                                           sp.numIndices, vpos3d, sp.indices );
+
+    VPBuilder<Pos3dStrip>{rr}.vl(mVPList).p(colorStrip).s(S::IBL_SPECULAR).n("iblSpecularEnvMap").build();
+}
+
+void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float roughness ) {
+    rr.CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt );
+    mVPList->setMaterialConstant( UniformNames::roughness, roughness );
+    mVPList->addToCommandBuffer( rr );
+}
+
+void PrefilterBRDF::init() {
+    mBRDF = FrameBufferBuilder{ rr, "ibl_brdf" }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
+            PIXEL_FORMAT_HDR_RG_16 ). IM(S::IBL_BRDF).noDepth().build();
+}
+
+void PrefilterBRDF::render( ) {
+    rr.CB_U().startTarget( mBRDF, rr );
+    mBRDF->VP()->addToCommandBuffer( rr );
+}

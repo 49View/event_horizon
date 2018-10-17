@@ -1,0 +1,10 @@
+#include "layout_pos_tex3d.glsl"
+       #include "camera_uniforms.glsl"
+
+       uniform mat4 u_modelMatrix;
+
+       void main() {
+       v_texCoord = a_t1;
+       gl_Position = u_screenSpaceMatrix * u_modelMatrix * vec4( a_position, 1.0 );
+       }
+    
