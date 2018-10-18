@@ -250,6 +250,11 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->render_im();
 
             break;
+        case CommandBufferCommandName::takeScreenShot: {
+            auto fb = cstack->fb(CommandBufferFrameBufferType::finalResolve);
+            auto outB = std::make_unique<unsigned char[]>( fb->getWidth() * fb->getHeight() * 4 );
+            glReadPixels( 0, 0, fb->getWidth(), fb->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, outB.get());
+        }    break;
         case CommandBufferCommandName::targetVP:
             break;
 
@@ -286,13 +291,6 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     mComposite = std::make_shared<CompositePBR>( rr, cameraRig->getMainCamera()->Name(), svss );
     cameraRig->setFramebuffer( mComposite->getColorFB() );
     bucketRanges.push_back( {CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd} );
-
-//    cameraRig->getMainCamera()->goTo( Vector3f{ 1.0f, 1.0f, 0.0f },
-//                   Vector3f{ 0.0f, 0.0f, 0.0f },
-//                   Vector3f{ 0.0f, -M_PI_2, 0.0f }, 1.0f );
-    cameraRig->getMainCamera()->goTo( Vector3f{ 0.0f, 1.6f, 1.0f },
-                                      Vector3f{ 0.0f, 0.0f, 0.0f },
-                                      Vector3f{ 0.0f, 0.0f, 0.0f }, 1.0f );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
 
 }
@@ -366,6 +364,10 @@ CompositePlain::CompositePlain( Renderer& _rr, const std::string& _name, const R
 
 void RLTargetPBR::blit(CommandBufferList& cbl) {
     mComposite->blit( cbl );
+    if ( isTakingScreenShot() ) {
+        cbl.pushCommand( { CommandBufferCommandName::takeScreenShot } );
+        takeScreenShot(false);
+    }
 }
 
 void CompositePBR::blit( CommandBufferList& cbl ) {
@@ -585,42 +587,4 @@ bool RLTarget::isKeyInRange( const int _key, RLClearFlag _clearFlags ) const {
 
 std::shared_ptr<Camera> RLTarget::getCamera() {
     return cameraRig->getMainCamera();
-}
-
-void Composite::takeScreenshot( std::shared_ptr<Framebuffer> _fb, bool bCrop, const Vector2f& cropSize ) {
-    auto outB = std::make_unique<unsigned char[]>(_fb->getWidth() * _fb->getHeight() * 4);
-    glReadPixels( 0, 0, _fb->getWidth(), _fb->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, outB.get() );
-//    cimg_library::CImg<unsigned char> image( _fb->getWidth(), _fb->getHeight(), 1, 4 );
-//    for ( auto y = 0; y < _fb->getHeight(); y++ ) {
-//        for ( auto x = 0; x < _fb->getWidth(); x++ ) {
-//            image( x, y, 0, 0 ) = outB[y * _fb->getWidth() * 4 + x * 4 + 0];
-//            image( x, y, 0, 1 ) = outB[y * _fb->getWidth() * 4 + x * 4 + 1];
-//            image( x, y, 0, 2 ) = outB[y * _fb->getWidth() * 4 + x * 4 + 2];
-//            image( x, y, 0, 3 ) = outB[y * _fb->getWidth() * 4 + x * 4 + 3];
-//        }
-//    }
-
-    if ( bCrop ) {
-//        image.autocrop();
-//        float ratio = static_cast<float>( image.width()) / static_cast<float>( image.height());
-//        image.resize( cropSize.x(), static_cast<int>( cropSize.y() / ratio ), 1, 4, 6 );
-//        unsigned char *outB2 = new unsigned char[image.width() * image.height() * 4];
-//
-//        for ( auto x = 0; x < image.width(); x++ ) {
-//            for ( auto y = 0; y < image.height(); y++ ) {
-//                outB2[y * image.width() * 4 + x * 4 + 0] = image( x, y, 0, 0 );
-//                outB2[y * image.width() * 4 + x * 4 + 1] = image( x, y, 0, 1 );
-//                outB2[y * image.width() * 4 + x * 4 + 2] = image( x, y, 0, 2 );
-//                outB2[y * image.width() * 4 + x * 4 + 3] = image( x, y, 0, 3 );
-//            }
-//        }
-//        stbi_write_png(_screenshotFilename.c_str(), image.width(), image.height(), 4,
-//                       outB2, image.width() * 4 );
-//        delete[] outB2;
-    } else {
-//        stbi_write_png(_screenshotFilename.c_str(), image.width(), image.height(), 4,
-//                       outB, image.width() * 4 );
-    }
-
-//    delete[] outB;
 }

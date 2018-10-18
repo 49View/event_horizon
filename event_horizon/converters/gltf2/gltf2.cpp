@@ -948,7 +948,7 @@ void GLTF2::convert() {
 
     hierScene->calcCompleteBBox3d();
 //    hierScene->BBox3d( );
-//    hierScene->serialize(_path);
+    hierScene->serialize();
 }
 
 void GLTF2::fixupMaterials() {

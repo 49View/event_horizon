@@ -69,8 +69,7 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
 void HierGeomRenderObserver::notified( std::shared_ptr<HierGeom> _source, const std::string& generator ) {
     rr.invalidateShadowMaps();
 
-    auto lNameHash = std::to_string(_source->Hash()) + "__s" + UTCMillisToString() + std::to_string(
-            static_cast<uint64_t>(unitRand() * 665435645745923));
+    auto lNameHash = std::to_string(_source->Hash());
 
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, lNameHash, _source->getLocalHierTransform(), 1.0f );
     VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr }.vl(lvl)

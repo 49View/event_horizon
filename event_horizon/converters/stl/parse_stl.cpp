@@ -104,7 +104,7 @@ namespace stl {
         }
 
         auto fname = getFileNameOnly(stl_path);
-        geom->serialize(fname);
+        geom->serialize();
 
         return info;
     }

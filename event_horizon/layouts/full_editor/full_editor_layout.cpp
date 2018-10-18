@@ -84,6 +84,8 @@ void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresente
                                       topX + uivl.main3dWindowSize.x(), uivl.main3dWindowSize.y() },
                      CameraControls::Fly );
 
+    _layout->addBox( Name::Sierra, { 0.0f, 0.0f, 512.0f, 512.0f }, CameraControls::Fly );
+
     Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
 }
 
@@ -265,10 +267,15 @@ void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path
     }
 
     if ( isGeom ) {
+        static float ni = 0.0f;
         GLTF2 newObject{ finalPath };
         newObject.convert();
         p->getCamera(Name::Foxtrot)->center(newObject.Hier()->BBox3d(), {0.25f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
+        newObject.Hier()->updateTransform( Vector3f::X_AXIS * ni );
         p->RSG().add( newObject.Hier(), newObject.Materials() );
+        p->takeScreenShot( Name::Sierra );
+        ni+=1.0f;
+
 //        GeomBuilder{GeomBuilderType::file, getFileNameOnly(finalPath) }.at(Vector3f::ZERO).build(rsg);
     }
 }

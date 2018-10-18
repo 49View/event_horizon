@@ -30,9 +30,9 @@ struct OneShotReadBuf : public std::streambuf {
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
-	SerializeBin( const std::string& filename, SerializeVersionFormat vf, const std::string& _entityType  ) {
+	SerializeBin( SerializeVersionFormat vf, const std::string& _entityType  ) {
 		entityType = _entityType;
-		open( filename, vf );
+		open( vf );
 	}
 
 	template<typename T>
@@ -103,11 +103,8 @@ public:
 		write( str.c_str() );
 	}
 
-	void open( const std::string& filename, SerializeVersionFormat vf ) {
-		mFilename = filename;
-		std::size_t fhash = std::hash<std::string>{}( filename );
-		filenameHashed = std::to_string( fhash );
-		f.open( ( cacheFolder() + filenameHashed ).c_str(), std::ios_base::binary );
+	void open( SerializeVersionFormat vf ) {
+//		f.open( ( cacheFolder() + filenameHashed ).c_str(), std::ios_base::binary );
 		if ( vf == SerializeVersionFormat::Float ) {
 			write( 1.0f );
 		} else {
@@ -115,16 +112,8 @@ public:
 		}
 	}
 
-	void close() {
-		f.close();
-		auto fn = zlibUtil::deflateMemory( FM::readLocalFile(cacheFolder() + filenameHashed) );
-		Http::post( Url( Http::restEntityPrefix( entityType, mFilename ) ), fn );
-//		Http::post( )
-//		FM::copyLocalToRemote( cacheFolder() + filenameHashed, mFilename, HttpUrlEncode::No );
-	}
-
 private:
-	std::ofstream f;
+	std::ostringstream f;
 	std::string mFilename;
 	std::string filenameHashed;
 	std::string entityType;

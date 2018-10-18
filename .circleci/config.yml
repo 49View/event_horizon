@@ -1,0 +1,87 @@
+# c++ build
+#
+
+defaults: &defaults
+  docker:
+    - image: sixthview/build:1.0.8
+      auth:
+        username: sixthview
+        password: $DOCKERHUB_PASSWORD
+  working_directory: /app
+
+version: 2.0
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: mkdir builds
+
+      # event_horizon_em
+#      - run: >
+#          source /3rdpartylibs/emsdk/emsdk_env.sh && mkdir builds/event_horizon_em && cd builds/event_horizon_em/ &&
+#          cmake -DCMAKE_BUILD_TYPE=Release
+#          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
+#          ../../event_horizon/
+#      - run: make -j8 -C 'builds/event_horizon_em/'
+#      - run: make install -C 'builds/event_horizon_em/'
+
+      # event_horizon
+      - run: >
+          mkdir builds/event_horizon && cd builds/event_horizon/ &&
+          cmake -DCMAKE_BUILD_TYPE=Release
+          ../../event_horizon/
+      - run: make -j8 -C 'builds/event_horizon/'
+      - run: make install -C 'builds/event_horizon/'
+
+      # House Maker Deemon
+#      - run: >
+#          mkdir builds/house_maker && cd builds/house_maker/ && cmake -DCMAKE_BUILD_TYPE=Release
+#          ../../projects/house_maker/
+#      - run: make -j8 -C 'builds/house_maker/'
+
+      # Sandbox
+#      - run: >
+#          mkdir builds/sandbox_em && cd builds/sandbox_em/ && cmake -DCMAKE_BUILD_TYPE=Release
+#          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
+#          ../../projects/sandbox/
+#      - run: make -j8 -C 'builds/sandbox_em/'
+
+#      - persist_to_workspace:
+#          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+#          # taken to be the root directory of the workspace.
+#          root: /app/builds
+#          # Must be relative path from root
+#          paths:
+#            - sandbox_em
+
+      # run tests!
+
+      - run: |
+          curl --data-binary @/app/builds/sandbox_em/sandbox.wasm -H Content-Type:application/octet-stream https://rest-49view.herokuapp.com/fs/upload/wasm%2Fbuilds%2Fsandbox.wasm
+      - run: |
+          curl --data-binary @/app/builds/sandbox_em/sandbox.js -H Content-Type:application/octet-stream https://rest-49view.herokuapp.com/fs/upload/wasm%2Fbuilds%2Fsandbox.js
+
+  deploy:
+    machine:
+      enabled: true
+    steps:
+      - run: |
+          curl https://rest-49view.herokuapp.com/deploy/all
+
+  #      - attach_workspace:
+#          # Must be absolute path or relative path from working_directory
+#          at: /app/build
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
+      - deploy:
+          requires:
+            - build

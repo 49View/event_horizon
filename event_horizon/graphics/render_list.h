@@ -114,6 +114,8 @@ enum class CommandBufferCommandName {
     blitPBROffscreen,
     blitPRB,
 
+    takeScreenShot,
+
     targetVP,
 };
 
@@ -257,9 +259,6 @@ public:
         mColorFB = _ColorFB;
     }
 
-    void takeScreenshot( std::shared_ptr<Framebuffer> _fb, bool crop = false,
-                         const Vector2f& cropSize = Vector2f{512, 512} );
-
 protected:
     Renderer& rr;
     std::shared_ptr<Framebuffer> mColorFB;
@@ -345,11 +344,20 @@ public:
 
     bool isKeyInRange( const int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
 
+    bool isTakingScreenShot() const {
+        return mbTakeScreenShot;
+    }
+
+    void takeScreenShot( bool _value = true ) {
+        mbTakeScreenShot = _value;
+    }
+
 public:
     std::shared_ptr<CameraRig> cameraRig;
     Rect2f screenViewport;
     std::string  renderIndex;
     int mipMapIndex = 0;
+    bool mbTakeScreenShot = false;
     std::vector<std::pair<int, int>> bucketRanges;
 
 protected:

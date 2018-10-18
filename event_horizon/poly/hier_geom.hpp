@@ -32,31 +32,10 @@ enum UpdateTypeFlag {
 class HierGeom : public ObservableShared<HierGeom>, public std::enable_shared_from_this<HierGeom> {
 public:
     HierGeom();
-    HierGeom( const std::string& _name );
-    HierGeom( std::shared_ptr<uint8_p> _data );
-    HierGeom( const Vector3f& pos, const Vector3f& rot = Vector3f::ZERO, const Vector3f& scale = Vector3f::ONE );
-    HierGeom( std::shared_ptr<GeomData> data, HierGeom *papa = nullptr );
-
-//    HierGeom( const HierGeom& source );
-//
-//    HierGeom() {
-//        initialiseCTOR( "DadoEmptyCons", nullptr, Vector3f::ZERO, Vector3f::ZERO, Vector3f::ONE );
-//    }
-//
-//
-//    HierGeom( const char *name ) {
-//        initialiseCTOR( name, nullptr, Vector3f::ZERO, Vector3f::ZERO, Vector3f::ONE );
-//    }
-//
-//    HierGeom( const char *name, const Vector3f& pos, const Vector3f& rot, HierGeom *papa = nullptr ) {
-//        initialiseCTOR( name, papa, pos, rot, Vector3f::ONE );
-//    }
-//
-//
-//    HierGeom( std::shared_ptr<GeomData> data, HierGeom *papa = nullptr ) {
-//        initialiseCTOR( data->Name().c_str(), papa, Vector3f::ZERO, Vector3f::ZERO, Vector3f::ONE );
-//        mData = data;
-//    }
+    explicit HierGeom( const std::string& _name );
+    explicit HierGeom( std::shared_ptr<uint8_p> _data );
+    explicit HierGeom( const Vector3f& pos, const Vector3f& rot = Vector3f::ZERO, const Vector3f& scale = Vector3f::ONE );
+    explicit HierGeom( std::shared_ptr<GeomData> data, HierGeom *papa = nullptr );
 
     int64_t Hash() const { return mHash; }
     void Hash( const int64_t _hashToSet ) { mHash = _hashToSet; }
@@ -104,10 +83,8 @@ public:
     void generateLocalTransformData( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale = Vector3f::ONE );
     void generateLocalTransformData( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale=Vector3f::ONE );
 
-    void calcSHBounce();
     void SHReceiver( bool _isReceiver ) { mSHReceiver = _isReceiver; }
     bool SHReceiver() const { return mSHReceiver; }
-    bool hasDataBacked() const { return mDataBacked != nullptr; }
 
     void subscribeRec( std::shared_ptr<ObserverShared<HierGeom>> _val );
 
@@ -120,13 +97,9 @@ public:
     std::shared_ptr<GeomData> Geom() { return mData; }
     const std::shared_ptr<GeomData> Geom() const { return mData; }
     void Geom( std::shared_ptr<GeomData> val ) { mData = val; }
-    std::shared_ptr<GeomData> BakedGeom() { return mDataBacked; }
-    const std::shared_ptr<GeomData> BakedGeom() const { return mDataBacked; }
-    void BakedGeom( std::shared_ptr<GeomData> val ) { mDataBacked = val; }
     std::vector<std::shared_ptr<HierGeom>> Children() const { return children; }
     std::vector<std::shared_ptr<HierGeom>>& Children() { return children; }
 
-    void bake();
     int numVerts();
 
     void removeTypeRec( const GeomHierType gt );
@@ -153,7 +126,7 @@ public:
     void generateSOA();
     void gatherStats();
 
-    void serialize( const std::string& lFilename );
+    std::vector<unsigned char> serialize();
     bool deserialize( std::shared_ptr<DeserializeBin>& reader );
 
     const std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>& getSOAData() const { return mSOAData; }
@@ -207,14 +180,15 @@ protected:
 protected:
     std::string mName;
     int64_t mHash;
+    static int64_t globalHierHash;
+
     GeomHierType mGHType = GHTypeGeneric;
 
     HierGeom *father = nullptr;
     std::shared_ptr<GeomData> mData;
-    std::shared_ptr<GeomData> mDataBacked;
     std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> mSOAData;
 
-    Matrix4f mLocalTransform    = Matrix4f::IDENTITY;
+    Matrix4f mLocalTransform = Matrix4f::IDENTITY;
     std::shared_ptr<Matrix4f> mLocalHierTransform;
 
     MatrixAnim mTRS;
@@ -223,7 +197,22 @@ protected:
     bool mSHReceiver = false;
     bool mCastShadows = true;
 
-    static int64_t globalHierHash;
-
     std::vector<std::shared_ptr<HierGeom>> children;
+};
+
+class Geom : public ObservableShared<HierGeom>, public std::enable_shared_from_this<HierGeom> {
+public:
+    const std::shared_ptr<HierGeom>& Hier() const {
+        return hier;
+    }
+    std::shared_ptr<HierGeom> Hier() {
+        return hier;
+    }
+
+    void Hier( std::shared_ptr <HierGeom> _hier ) {
+        hier = _hier;
+    }
+
+private:
+    std::shared_ptr<HierGeom> hier;
 };

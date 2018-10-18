@@ -202,6 +202,10 @@ const std::shared_ptr<ImGuiConsole>& UiPresenter::Console() const {
 	return console;
 }
 
+void UiPresenter::takeScreenShot( const std::string& _viewportName ) {
+	rr.getTarget(_viewportName)->takeScreenShot();
+}
+
 void PresenterLayout::setDragAndDropFunction( DragAndDropFunction dd ) {
 	dragAndDropFunc = dd;
 }

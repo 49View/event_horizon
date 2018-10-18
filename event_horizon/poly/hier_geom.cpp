@@ -150,15 +150,18 @@ void HierGeom::deserializeRec( std::shared_ptr<DeserializeBin> reader, HierGeom 
     }
 }
 
-void HierGeom::serialize( const std::string& _filename ) {
-    std::string filenameGeom = getFileNameOnly(_filename) + ".geom";
+std::vector<unsigned char> HierGeom::serialize() {
 
-    auto writer = std::make_shared<SerializeBin>( filenameGeom, SerializeVersionFormat::UInt64, entityGroup() );
+    std::vector<unsigned char> ret;
+
+    auto writer = std::make_shared<SerializeBin>( SerializeVersionFormat::UInt64, entityGroup() );
 
     serializeDependencies( writer );
     serializeRec( writer );
 
-    writer->close();
+    return ret;
+//    auto fn = zlibUtil::deflateMemory( FM::readLocalFile(cacheFolder() + filenameHashed) );
+//		Http::post( Url( Http::restEntityPrefix( entityType, mFilename ) ), fn );
 }
 
 bool HierGeom::deserialize( std::shared_ptr<DeserializeBin>& reader ) {
@@ -302,10 +305,6 @@ void HierGeom::generateMatrixHierarchy( Matrix4f cmat ) {
     for ( auto& c : children ) {
         c->generateMatrixHierarchy( *mLocalHierTransform.get() );
     }
-}
-
-void HierGeom::bake() {
-    if ( mData ) mData->bake( *mLocalHierTransform.get(), mDataBacked );
 }
 
 void HierGeom::numVertsRec( int& currNumVerts ) {
@@ -577,17 +576,8 @@ void HierGeom::subscribeRec( std::shared_ptr<ObserverShared<HierGeom>> _val ) {
     }
 }
 
-void HierGeom::calcSHBounce() {
-    if ( mDataBacked && !mSHReceiver ) mDataBacked->calcSHBounce( this, mData.get());
-
-    for ( auto& c : children ) {
-        c->calcSHBounce();
-    }
-}
-
 void HierGeom::finalize() {
-    createLocalHierMatrix( fatherRootTransform());
-    bake();
+    createLocalHierMatrix(fatherRootTransform());
 
     for ( auto& c : Children()) {
         c->finalize();

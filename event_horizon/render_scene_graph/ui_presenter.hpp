@@ -120,14 +120,12 @@ public:
         mRigs[lRig->Name()] = lRig;
     }
 
-    void onTouchDown( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE );
-	virtual void onTouchDownImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
-	void onTouchMove( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE );
+    void takeScreenShot( const std::string& _viewportName );
+
 	virtual void onTouchUpImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
 	virtual void onSimpleTapImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
 	virtual void onDoubleTapImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
-	void onTouchMoveM( float* x, float *y, int size, ModifiersKey mod = GMK_MOD_NONE );
-	void onScroll( float /*amount*/, ModifiersKey /*mod*/ = GMK_MOD_NONE ) {}
+
 	void inputPollUpdate();
 	void update( GameTime& gt );
 	void render();
@@ -138,7 +136,7 @@ public:
     void cmdEnableKeyboard( const std::vector<std::string>& params );
     void cmdDisableKeyboard( const std::vector<std::string>& params );
 
-    virtual void notified( MouseInput& _source, const std::string& generator ) override;
+    void notified( MouseInput& _source, const std::string& generator ) override;
 
 	bool checkKeyPressed( int keyCode );
 

@@ -77,7 +77,7 @@ private:
 class Renderer : public DependencyMaker {
 public:
 	Renderer( CommandQueue& cq, ShaderManager& sm, FontManager& fm, TextureManager& tm, CameraManager& _cm );
-	virtual ~Renderer() {}
+	virtual ~Renderer() = default;
 
 	bool exists( [[maybe_unused]] const std::string& _key ) const override { return false; };
     void cmdReloadShaders( const std::vector<std::string>& _params );
