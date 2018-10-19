@@ -4,7 +4,12 @@
 
 #include "geom_builder.h"
 
-std::map<std::string, std::shared_ptr<HierGeom>> geomCache;
+GeomBuilder::GeomBuilder( std::shared_ptr<HierGeom> _h, const std::vector<std::shared_ptr<MaterialBuilder>>& _mbs ) {
+    builderType = GeomBuilderType::import;
+    elem = _h;
+    matBuilders = _mbs;
+    Name( _h->Name() );
+}
 
 GeomBuilder::GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull ) {
     std::vector<Vector3f> lverts;
@@ -32,12 +37,14 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 
     SceneGraph& sg = static_cast<SceneGraph&>(_md);
 
-    if ( builderType == GeomBuilderType::file ) {
-        addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
-    } else {
-        addDependency<MaterialBuilder>( materialName, materialType, shaderName, sg.ML());
-        if ( builderType == GeomBuilderType::follower ) {
-            addDependency<ProfileBuilder>( mProfileSchema.name, sg.PL());
+    if ( builderType != GeomBuilderType::import ) {
+        if ( builderType == GeomBuilderType::file ) {
+            addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
+        } else {
+            addDependency<MaterialBuilder>( materialName, materialType, shaderName, sg.ML());
+            if ( builderType == GeomBuilderType::follower ) {
+                addDependency<ProfileBuilder>( mProfileSchema.name, sg.PL());
+            }
         }
     }
 
@@ -69,6 +76,9 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
     std::unique_ptr<GeomDataBuilder> gb;
 
     switch ( builderType ) {
+        case GeomBuilderType::import:
+            sg.add( matBuilders );
+        break;
         case GeomBuilderType::file:
             if ( auto ret = sg.AL().findHier( Name()); ret != nullptr ) {
                 createFromAsset( ret->clone());
@@ -144,4 +154,42 @@ GeomBuilder& GeomBuilder::addPoly( const PolyLine2d& _polyLine2d, const float he
 GeomBuilder& GeomBuilder::addOutline( const std::vector<Vector3f>& _polyLine, const float _raise ) {
     outlineVerts.push_back( { _polyLine, _raise } );
     return *this;
+}
+
+std::string GeomBuilder::generateThumbnail() const {
+    if ( thumb ) {
+        return { thumb->begin(), thumb->end() };
+    }
+    return std::string();
+}
+
+std::string GeomBuilder::generateRawData() const {
+
+    if ( elem ) {
+        auto s = elem->serialize();
+        auto f = zlibUtil::deflateMemory( { s.begin(), s.end() } );
+        auto rawm = bn::encode_b64( f );
+        return std::string{ rawm.begin(), rawm.end() };
+    } else {
+        return "";
+    }
+}
+
+std::string GeomBuilder::toMetaData() {
+    MegaWriter writer;
+
+    writer.StartObject();
+    writer.serialize( "name", Name() );
+    writer.serialize( "thumb", generateThumbnail() );
+    writer.serialize( "raw", generateRawData() );
+    writer.EndObject();
+
+    return writer.getString();
+}
+
+ScreenShotContainerPtr& GeomBuilder::Thumb() {
+    if ( !thumb ) {
+        thumb = std::make_shared<ScreenShotContainer>();
+    }
+    return thumb;
 }

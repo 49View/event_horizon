@@ -28,7 +28,7 @@ void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char *
 
 	UiPresenter::callbackPaths.clear();
 	for ( auto i = 0; i < count; i++ ) {
-		UiPresenter::callbackPaths.push_back( std::string(paths[i]) );
+		UiPresenter::callbackPaths.emplace_back( std::string(paths[i]) );
 	}
 }
 
@@ -202,8 +202,8 @@ const std::shared_ptr<ImGuiConsole>& UiPresenter::Console() const {
 	return console;
 }
 
-void UiPresenter::takeScreenShot( const std::string& _viewportName ) {
-	rr.getTarget(_viewportName)->takeScreenShot();
+void UiPresenter::takeScreenShot( const std::string& _viewportName, ScreenShotContainerPtr _outdata ) {
+	rr.getTarget(_viewportName)->takeScreenShot( _outdata );
 }
 
 void PresenterLayout::setDragAndDropFunction( DragAndDropFunction dd ) {
@@ -224,9 +224,9 @@ void PresenterLayout::activate( UiPresenter* _target ) {
 
 	for ( const auto& [k,v] : boxes ) {
 		if ( v.cc == CameraControls::Plan2d ) {
-			_target->addViewport<RLTargetPlain>( k, v.r );
+			_target->addViewport<RLTargetPlain>( k, v.r, v.bt );
 		} else if ( v.cc == CameraControls::Walk || v.cc == CameraControls::Fly ){
-			_target->addViewport<RLTargetPBR>( k, v.r );
+			_target->addViewport<RLTargetPBR>( k, v.r, v.bt );
 			if ( v.cc == CameraControls::Walk ) {
 				_target->CM().getCamera(k)->LockAtWalkingHeight(true);
 			}

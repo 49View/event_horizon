@@ -67,9 +67,25 @@ void resizeCallback(void* ctx, void*data, int size) {
     *rawThumbl = { p.begin(), p.end() };
 }
 
-std::string MaterialBuilder::toMetaData() {
+std::string MaterialBuilder::generateThumbnail() {
+    auto thumb = std::make_unique<std::string>();
 
-    //    std::ofstream tagStream(tarname, std::ios::binary);
+    std::unique_ptr<uint8_t[]> lthumb;
+    int thumbSize = 64;
+    int oc = 3;
+    int obpp = 8;
+    if ( const auto& it = buffers.find(pbrPrefix() + MPBRTextures::basecolorString ); it != buffers.end() ) {
+        lthumb = imageUtil::resize( it->second.first.get(), it->second.second, thumbSize, thumbSize, oc, obpp );
+    } else {
+        lthumb = imageUtil::zeroImage3( Vector4f{baseSolidColor}.RGBATOI(), 1, 1 );
+    }
+    stbi_write_png_to_func( resizeCallback, reinterpret_cast<void*>(thumb.get()),
+                            thumbSize, thumbSize, oc, lthumb.get(), thumbSize*oc*(obpp/8) );
+
+    return std::string{ thumb->data(), thumb->size() };
+}
+
+std::string MaterialBuilder::generateRawData() {
     std::stringstream tagStream;
     tarUtil::TarWrite tar{ tagStream };
 
@@ -79,37 +95,30 @@ std::string MaterialBuilder::toMetaData() {
     tar.finish();
 
     auto f = zlibUtil::deflateMemory( tagStream.str() );
-    std::vector<unsigned char> rawm = bn::encode_b64( f );
-    std::unique_ptr<std::string> rawThumb = std::make_unique<std::string>();
+    auto rawm = bn::encode_b64( f );
+    return std::string{ rawm.begin(), rawm.end() };
+}
 
-    std::unique_ptr<uint8_t[]> thumb;
-    int thumbSize = 64;
-    int oc = 3;
-    int obpp = 8;
-    if ( const auto& it = buffers.find(pbrPrefix() + MPBRTextures::basecolorString ); it != buffers.end() ) {
-        thumb = imageUtil::resize( it->second.first.get(), it->second.second, thumbSize, thumbSize, oc, obpp );
-    } else {
-        thumb = imageUtil::zeroImage3( Vector4f{baseSolidColor}.RGBATOI(), 1, 1 );
-    }
-    stbi_write_png_to_func( resizeCallback, reinterpret_cast<void*>(rawThumb.get()),
-                            thumbSize, thumbSize, oc, thumb.get(), thumbSize*oc*(obpp/8) );
-    std::ostringstream streamHalf1;
-    std::ostringstream streamHalf2;
-    std::ostringstream streamRaw;
-    streamHalf1 << "{\"name\":\"" << Name() << "\",";
-    streamHalf2 <<  "\"color\":" << baseSolidColor.toStringJSONArray() << ",";
-    streamHalf2 <<  "\"metallicValue\":" << metallicValue << ",";
-    streamHalf2 <<  "\"roughnessValue\":" << roughnessValue << ",";
-    streamHalf2 <<  "\"aoValue\":" << aoValue << ",";
-    streamHalf2 <<  "\"thumb\":\"" << *rawThumb << "\"}";
-    std::string str = streamHalf1.str() + streamHalf2.str();
-    streamRaw <<   "\"raw\":\"" << std::string{ rawm.begin(), rawm.end() } << "\",";
-    return streamHalf1.str() + streamRaw.str() + streamHalf2.str();
+std::string MaterialBuilder::toMetaData() {
+
+    MegaWriter writer;
+
+    writer.StartObject();
+    writer.serialize( "name", Name() );
+    writer.serialize( "color", baseSolidColor );
+    writer.serialize( "metallicValue", metallicValue );
+    writer.serialize( "roughnessValue", roughnessValue );
+    writer.serialize( "aoValue", aoValue );
+    writer.serialize( "thumb", generateThumbnail() );
+    writer.serialize( "raw", generateRawData() );
+    writer.EndObject();
+
+    return writer.getString();
 }
 
 bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
 
-    MaterialManager& sg = static_cast<MaterialManager&>(_md);
+    auto& sg = static_cast<MaterialManager&>(_md);
 
     std::string downloadedMatName = Name();
 
@@ -136,7 +145,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
 }
 
 void MaterialBuilder::handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName ) {
-    MaterialManager& sg = static_cast<MaterialManager&>(_md);
+    auto& sg = static_cast<MaterialManager&>(_md);
 
     if ( materialType == MaterialType::PBR ) {
         for ( const auto& td : PBRMaterial::textureDependencies( _keyTextureName ))
@@ -190,7 +199,7 @@ std::vector<std::shared_ptr<Material>> MaterialManager::list() const {
 
 bool ColorBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
 
-    ColorManager& sg = static_cast<ColorManager&>(_md);
+    auto& sg = static_cast<ColorManager&>(_md);
     MaterialColor col{ _data };
     sg.add( *this, col );
 

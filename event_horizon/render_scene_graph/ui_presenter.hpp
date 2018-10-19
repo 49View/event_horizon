@@ -60,20 +60,25 @@ public:
 	PresenterLayout( InitLayoutFunction initLayout,
 					 RenderLayoutFunction _renderFunction = nullptr,
 					 DragAndDropFunction _dd = nullptr,
-					 InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal )
-			: initLayout( initLayout ), renderFunction(_renderFunction), dragAndDropFunc(_dd), initFlags( initFlags ) {
+					 InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal ) :
+			  initLayout( initLayout ), renderFunction(_renderFunction), dragAndDropFunc(_dd), initFlags( initFlags ) {
 	}
 
 	struct Boxes {
 		Rect2f r;
-		CameraControls cc;
+		CameraControls cc= CameraControls::Fly;
+		BlitType bt = BlitType::OnScreen;
 	};
 
-	void addBox( const std::string& _name, const Rect2f& _r, CameraControls _cc ) {
-		boxes[_name] = { _r, _cc };
+	void addBox( const std::string& _name, const Rect2f& _r, CameraControls _cc, BlitType _bt = BlitType::OnScreen ) {
+		boxes[_name] = { _r, _cc, _bt };
 	}
 
-	InitializeWindowFlagsT getInitFlags() const {
+    void addOffScreenBox(const std::string& _name, const Vector2f& _s, CameraControls _cc = CameraControls::Fly ) {
+        boxes[_name] = { Rect2f(Vector2f::ZERO, _s), _cc, BlitType::OffScreen };
+    }
+
+    InitializeWindowFlagsT getInitFlags() const {
 		return initFlags;
 	}
 
@@ -115,12 +120,12 @@ public:
 	virtual ~UiPresenter() = default;
 
     template <typename T>
-    void addViewport( const std::string& _name, const Rect2f& _viewport ) {
-        auto lRig = rr.addTarget<T>( _name, _viewport, cm );
+    void addViewport( const std::string& _name, const Rect2f& _viewport, BlitType _bt ) {
+        auto lRig = rr.addTarget<T>( _name, _viewport, _bt, cm );
         mRigs[lRig->Name()] = lRig;
     }
 
-    void takeScreenShot( const std::string& _viewportName );
+    void takeScreenShot( const std::string& _viewportName, ScreenShotContainerPtr _outdata );
 
 	virtual void onTouchUpImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
 	virtual void onSimpleTapImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}

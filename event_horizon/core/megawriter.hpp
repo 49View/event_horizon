@@ -21,8 +21,16 @@ using namespace rapidjson;
 
 class MegaWriter {
 public:
-	MegaWriter( StringBuffer& os ) {
+	MegaWriter() {
+		writer = std::make_unique<Writer<StringBuffer>>( internalOS );
+	}
+
+	explicit MegaWriter( StringBuffer& os ) {
 		writer = std::make_unique<Writer<StringBuffer>>( os );
+	}
+
+	std::string getString() const {
+		return std::string(internalOS.GetString());
 	}
 
 	void StartObject() {
@@ -427,4 +435,5 @@ public:
 
 private:
 	std::unique_ptr<Writer<StringBuffer>> writer;
+	StringBuffer internalOS;
 };

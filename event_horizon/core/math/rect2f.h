@@ -36,51 +36,50 @@ public:
 		return a;
 	}
 
-	Rect2f() {
-	}
+	Rect2f() = default;
 
-	Rect2f( const float _square ) {
+	explicit Rect2f( const float _square ) {
 		mTopLeft = Vector2f{-_square*0.5f, -_square*0.5f};
 		mBottomRight = Vector2f{_square*0.5f, _square*0.5f};
 	}
 
-	Rect2f( const Vector2f& topLeft ) {
+	explicit Rect2f( const Vector2f& topLeft ) {
 		mTopLeft = topLeft;
 		mBottomRight = Vector2f::ZERO;
 	}
 
-	Rect2f( const Vector2f& topLeft, const Vector2f& bottomRight ) {
+	explicit Rect2f( const Vector2f& topLeft, const Vector2f& bottomRight ) {
 		mTopLeft = topLeft;
 		mBottomRight = bottomRight;
 	}
 
-	Rect2f( const Vector2f& topLeft, const Vector2f& bottomRight, bool /*expand*/ ) {
+	explicit Rect2f( const Vector2f& topLeft, const Vector2f& bottomRight, bool /*expand*/ ) {
 		*this = INVALID;
 		expand( topLeft );
 		expand( topLeft + bottomRight );
 	}
 
-	Rect2f( float left, float top, float right, float bottom ) {
+	explicit Rect2f( float left, float top, float right, float bottom ) {
 		mTopLeft.set( left, top );
 		mBottomRight.set( right, bottom );
 	}
 
-	Rect2f( const std::vector<Vector2f>& points ) {
+	explicit Rect2f( const std::vector<Vector2f>& points ) {
 		*this = INVALID;
 		for ( auto& p : points ) expand( p );
 	}
 
-	Rect2f( const std::initializer_list<Vector2f>& points ) {
+	explicit Rect2f( const std::initializer_list<Vector2f>& points ) {
 		*this = INVALID;
 		for ( auto& p : points ) expand( p );
 	}
 
-	Rect2f( const std::vector<Vector3f>& points ) {
+	explicit Rect2f( const std::vector<Vector3f>& points ) {
 		*this = INVALID;
 		for ( auto& p : points ) expand( p.xy() );
 	}
 
-	Rect2f( const Vector3f* points, size_t vsize ) {
+	explicit Rect2f( const Vector3f* points, size_t vsize ) {
 		*this = INVALID;
 		for ( size_t t = 0; t < vsize; t++ ) expand( points[t].xy() );
 	}

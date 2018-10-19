@@ -53,7 +53,7 @@ public:
 	}
 
 	Rect2f getScreenRect() const {
-		return { Vector2f::ZERO, mScreenSizef };
+		return Rect2f{ Vector2f::ZERO, mScreenSizef };
 	}
 
 	Vector2f getAspectRatio2dFromUnnormalizedScreenPos( const Vector2f& _pos ) const {

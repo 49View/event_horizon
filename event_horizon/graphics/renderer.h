@@ -87,9 +87,10 @@ public:
 	bool isInitialized() const;
 
 	template<typename T>
-	std::shared_ptr<CameraRig> addTarget( const std::string& _name, const Rect2f& _viewport, CameraManager& _cm ) {
+	std::shared_ptr<CameraRig> addTarget( const std::string& _name, const Rect2f& _viewport,
+										  BlitType _bt, CameraManager& _cm ) {
 		auto rig = _cm.addRig( *this, _name, _viewport );
-		mTargets.push_back( std::make_shared<T>(T{ rig, _viewport, *this }) );
+		mTargets.push_back( std::make_shared<T>(T{ rig, _viewport, _bt, *this }) );
 		return rig;
 	}
 

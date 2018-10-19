@@ -933,9 +933,9 @@ void GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
     matMap[mat.name] = im;
 }
 
-void GLTF2::convert() {
+std::shared_ptr<HierGeom> GLTF2::convert() {
 
-    hierScene = std::make_shared<HierGeom>( name );
+    auto hierScene = std::make_shared<HierGeom>( name );
 
     for ( size_t m = 0; m < model.materials.size(); m++ ) {
         elaborateMaterial( model.materials[m] );
@@ -948,7 +948,8 @@ void GLTF2::convert() {
 
     hierScene->calcCompleteBBox3d();
 //    hierScene->BBox3d( );
-    hierScene->serialize();
+//    hierScene->serialize();
+    return hierScene;
 }
 
 void GLTF2::fixupMaterials() {

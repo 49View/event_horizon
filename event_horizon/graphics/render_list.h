@@ -111,7 +111,6 @@ enum class CommandBufferCommandName {
     shadowMapClearDepthBufferOne,
 
     blitToScreen,
-    blitPBROffscreen,
     blitPRB,
 
     takeScreenShot,
@@ -140,6 +139,7 @@ enum class CommandBufferFrameBufferType {
     sourceColor,
     shadowMap,
     finalResolve,
+    finalBlit,
     blurVertical,
     blurHorizontal
 };
@@ -186,6 +186,9 @@ public:
     std::string                  renderIndex();
     int                          mipMapIndex();
 
+    std::shared_ptr<RLTarget>& Target() {
+        return mTarget;
+    }
 private:
     std::vector<CommandBufferEntryCommand> mCommandList;
 
@@ -239,15 +242,10 @@ enum class RLClearFlag {
     All
 };
 
-enum class CompositeFinalDest {
-    OnScreen,
-    OffScreen
-};
-
 class Composite {
 public:
-    Composite( Renderer& rr ) : rr( rr ) {}
-    virtual ~Composite() {}
+    explicit Composite( Renderer& rr ) : rr( rr ) {}
+    virtual ~Composite() = default;
 
     virtual void blit(CommandBufferList& cbl) = 0;
 
@@ -255,29 +253,37 @@ public:
         return mColorFB;
     }
 
+    const std::shared_ptr<Framebuffer>& getOffScreenFB() const {
+        return mOffScreenBlitFB;
+    }
+
     void setColorFB( const std::shared_ptr<Framebuffer>& _ColorFB ) {
         mColorFB = _ColorFB;
+    }
+
+    bool blitOnScreen() const {
+        return mCompositeFinalDest == BlitType::OnScreen;
     }
 
 protected:
     Renderer& rr;
     std::shared_ptr<Framebuffer> mColorFB;
-    CompositeFinalDest mCompositeFinalDest = CompositeFinalDest::OnScreen;
+    std::shared_ptr<Framebuffer> mOffScreenBlitFB;
+    BlitType mCompositeFinalDest = BlitType::OnScreen;
 };
 
 class CompositePlain : public Composite {
 public:
-    virtual ~CompositePlain() = default;
+    ~CompositePlain() override = default;
     CompositePlain( Renderer& rr, const std::string& _name, const Rect2f& _destViewport,
-                    CompositeFinalDest _cfd =  CompositeFinalDest::OnScreen );
+                    BlitType _bt = BlitType::OnScreen );
     void blit(CommandBufferList& cbl) override;
 };
 
 class CompositePBR : public Composite {
 public:
-    virtual ~CompositePBR() {}
-    CompositePBR( Renderer& rr, const std::string& _name, const Rect2f& _destViewport,
-                  CompositeFinalDest _cfd =  CompositeFinalDest::OnScreen );
+    CompositePBR( Renderer& rr, const std::string& _name, const Rect2f& _destViewport, BlitType _bt );
+    ~CompositePBR() override = default;
 
     const std::shared_ptr<Framebuffer>& getColorFinalFB() const {
         return mColorFinalFB;
@@ -327,9 +333,9 @@ private:
 
 class RLTarget : public std::enable_shared_from_this<RLTarget> {
 public:
-    RLTarget( Renderer& _rr ) : rr( _rr ) {}
-    RLTarget( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, Renderer& _rr ) : cameraRig(
-            cameraRig ), screenViewport( screenViewport ), rr( _rr ) {}
+    explicit RLTarget( Renderer& _rr ) : rr( _rr ) {}
+    RLTarget( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& _rr ) :
+        cameraRig( cameraRig ), screenViewport( screenViewport ), finalDestBlit(_bt), rr( _rr ) {}
     virtual ~RLTarget() {}
 
     std::shared_ptr<Camera> getCamera();
@@ -352,12 +358,25 @@ public:
         mbTakeScreenShot = _value;
     }
 
+    void takeScreenShot( ScreenShotContainerPtr _outdata ) {
+        mbTakeScreenShot = true;
+        screenShotContainer = _outdata;
+    }
+
+    BlitType FinalDestBlit() const {
+        return finalDestBlit;
+    }
+
+    ScreenShotContainerPtr& ScreenShotData() { return screenShotContainer; }
+
 public:
     std::shared_ptr<CameraRig> cameraRig;
     Rect2f screenViewport;
-    std::string  renderIndex;
+    std::string renderIndex;
     int mipMapIndex = 0;
+    BlitType finalDestBlit = BlitType::OnScreen;
     bool mbTakeScreenShot = false;
+    ScreenShotContainerPtr screenShotContainer;
     std::vector<std::pair<int, int>> bucketRanges;
 
 protected:
@@ -366,12 +385,12 @@ protected:
 
 class RLTargetPlain : public RLTarget {
 public:
-    RLTargetPlain( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, Renderer& rr );
-    virtual ~RLTargetPlain() {}
+    RLTargetPlain( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& rr );
+    ~RLTargetPlain() override {}
 
     void addToCB( CommandBufferList& cb ) override;
     virtual void blit(CommandBufferList& cbl) override;
-    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
+    std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void startCL( CommandBufferList& fbt ) override;
     void endCL( CommandBufferList& fbt ) override;
 protected:
@@ -408,7 +427,7 @@ protected:
 
 class RLTargetPBR : public RLTarget {
 public:
-    RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, Renderer& rr );
+    RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& rr );
     virtual ~RLTargetPBR() {}
     void addToCB( CommandBufferList& cb ) override;
     virtual void blit(CommandBufferList& cbl) override;

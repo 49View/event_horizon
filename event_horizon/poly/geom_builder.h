@@ -19,9 +19,6 @@
 #include "scene_graph.h"
 #include "di_modules.h"
 
-// Flyweight
-extern std::map<std::string, std::shared_ptr<HierGeom>> geomCache;
-
 enum class GeomBuilderType {
     shape,
     follower,
@@ -30,6 +27,7 @@ enum class GeomBuilderType {
     mesh,
     asset,
     file,
+    import,
 
     unknown
 };
@@ -143,6 +141,9 @@ public:
         builderType = gbt;
         Name(concatenate( "_", _tags ));
     }
+
+    // Impoorted object
+    GeomBuilder( std::shared_ptr<HierGeom>, const std::vector<std::shared_ptr<MaterialBuilder>>& );
 
     // Polygon list
     GeomBuilder( const std::vector<Vector3f>& _vlist ) {
@@ -285,12 +286,16 @@ public:
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
     void assemble( DependencyMaker& _md ) override;
+    std::string toMetaData();
+    ScreenShotContainerPtr& Thumb();
 
 protected:
     bool validate() const override;
     void deserializeDependencies( DependencyMaker& _md );
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg );
     void createFromAsset( std::shared_ptr<HierGeom> asset );
+    std::string generateThumbnail() const;
+    std::string generateRawData() const;
 
 private:
     uint64_t mId = 0;
@@ -316,5 +321,8 @@ private:
 
     GeomBuilderType builderType = GeomBuilderType::unknown;
 
+    std::vector<std::shared_ptr<MaterialBuilder>> matBuilders;
+
+    ScreenShotContainerPtr thumb;
     friend class GeomData;
 };

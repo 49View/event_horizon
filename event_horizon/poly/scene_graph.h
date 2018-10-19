@@ -63,6 +63,7 @@ public:
 
 DEPENDENCY_MAKER_EXIST(geoms);
     void add(std::shared_ptr<HierGeom> _geom);
+    void add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials );
     void add(std::shared_ptr<HierGeom> _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials);
     void cmdChangeTime( const std::vector<std::string>& _params );
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );

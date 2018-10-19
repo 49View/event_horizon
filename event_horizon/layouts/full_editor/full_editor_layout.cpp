@@ -20,7 +20,8 @@ struct UIViewLayout {
 };
 
 std::shared_ptr<MaterialBuilder> mb;
-//std::string remoteMaterialsString;
+std::shared_ptr<GeomBuilder> gbt;
+std::string remoteMaterialsString;
 
 UIViewLayout uivl;
 
@@ -49,29 +50,27 @@ void materialPBRCallback( const rapidjson::Document& data ) {
     }
 }
 
-//    Http::get( Url{ HttpFilePrefix::entities_all + "material/tomato" }, [&](const Http::Result& _res) {
-//        remoteMaterialsString = std::string{ reinterpret_cast<char*>(_res.buffer.get()), _res.length };
-//        addUpdateCallback( std::bind( &UiMaterialBuilderPresenter::listCloudMaterialCallback, this ) );
-//    } );
-
-//void listCloudMaterialCallback( UiPresenter* p ) {
-//    rapidjson::Document document;
-//    document.Parse<rapidjson::kParseStopWhenDoneFlag>( remoteMaterialsString.c_str() );
-//    MegaReader reader( document );
-//    if ( !reader.isEmpty() ) {
-//        if (reader.isArray() ) {
-//            auto doc = reader.at( static_cast<rapidjson::SizeType>(0));
-//            if ( doc->FindMember( "thumb" ) != doc->MemberEnd() ) {
-//                std::string ret = std::string{ ( *( doc ) )["thumb"].GetString() };
-//                std::vector<unsigned char> rd;
-//                bn::decode_b64( ret.begin(), ret.end(), std::back_inserter(rd) );
-//                ImageBuilder{ "thumb" }.makeDirect( rsg.TL(), { rd.data(), rd.size()} );
-//            }
-//        }
-//    }
-//}
+void listCloudMaterialCallback( UiPresenter* p ) {
+    rapidjson::Document document;
+    document.Parse<rapidjson::kParseStopWhenDoneFlag>( remoteMaterialsString.c_str() );
+    MegaReader reader( document );
+    if ( !reader.isEmpty() ) {
+        if (reader.isArray() ) {
+            auto doc = reader.at( static_cast<rapidjson::SizeType>(0));
+            if ( doc->FindMember( "thumb" ) != doc->MemberEnd() ) {
+                std::string ret = std::string{ ( *( doc ) )["thumb"].GetString() };
+                std::vector<unsigned char> rd;
+                bn::decode_b64( ret.begin(), ret.end(), std::back_inserter(rd) );
+                ImageBuilder{ "thumb" }.makeDirect( p->RSG().TL(), { rd.data(), rd.size()} );
+            }
+        }
+    }
+}
 
 void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresenter* p ) {
+
+//    auto gbt = GeomBuilder{}.n("ullala");
+//    Http::post( Url{ Http::restEntityPrefix( HierGeom::entityGroup(), gbt.Name() + ".geom" ) }, gbt.toMetaData() );
 
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
@@ -80,13 +79,21 @@ void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresente
                               _screenRect.size().y() * (1.0-(uivl.consoleHeight + uivl.timeLinePanelSize.y())) };
 
     float topX = _screenRect.size().x() * uivl.rightPanelWidth;
-    _layout->addBox( Name::Foxtrot, { topX, 0.0f,
-                                      topX + uivl.main3dWindowSize.x(), uivl.main3dWindowSize.y() },
+    _layout->addBox( Name::Foxtrot, Rect2f{ topX, 0.0f,
+                     topX + uivl.main3dWindowSize.x(), uivl.main3dWindowSize.y() },
                      CameraControls::Fly );
 
-    _layout->addBox( Name::Sierra, { 0.0f, 0.0f, 512.0f, 512.0f }, CameraControls::Fly );
+//    _layout->addBox( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{ 128.0f, 128.0f } ),
+//                     CameraControls::Fly );
+    _layout->addOffScreenBox( Name::Sierra, { 128.0f, 128.0f } );
 
     Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
+
+    Http::get( Url{ HttpFilePrefix::entities_all + "geom/beb" }, [&](const Http::Result& _res) {
+        remoteMaterialsString = std::string{ reinterpret_cast<char*>(_res.buffer.get()), _res.length };
+        UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
+    } );
+
 }
 
 void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 size, std::shared_ptr<Texture> t,
@@ -157,6 +164,15 @@ void ImGuiGeoms( UiPresenter* p ) {
 //        ImGui::Text( "Verts: %lld", it->Hash());
         ImGui::EndGroup();
     }
+    if ( gbt ) {
+        ImGui::BeginGroup();
+        ImGui::Text( "Name: %s", gbt->Name().c_str());
+        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+            Http::post( Url{ Http::restEntityPrefix( HierGeom::entityGroup(), gbt->Name() + ".geom" ) }, gbt->toMetaData() );
+        }
+        ImGui::EndGroup();
+
+    }
 }
 
 void ImGuiCamera( std::shared_ptr<Camera> cam ) {
@@ -202,7 +218,7 @@ void render( UiPresenter* p ) {
     ImGui::SetNextWindowPos( ImVec2{ 0, sceneSectionY3*2.0f } );
     ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY3 } );
 //    ImGui::Begin( "Images",  nullptr, ImGuiWindowFlags_NoCollapse );
-//        ImGuiImages();
+//        ImGuiImages(p);
 //    ImGui::End();
     ImGui::Begin( "Camera",  nullptr, ImGuiWindowFlags_NoCollapse );
     ImGuiCamera(p->getCamera(Name::Foxtrot));
@@ -269,13 +285,15 @@ void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path
     if ( isGeom ) {
         static float ni = 0.0f;
         GLTF2 newObject{ finalPath };
-        newObject.convert();
-        p->getCamera(Name::Foxtrot)->center(newObject.Hier()->BBox3d(), {0.25f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
-        newObject.Hier()->updateTransform( Vector3f::X_AXIS * ni );
-        p->RSG().add( newObject.Hier(), newObject.Materials() );
-        p->takeScreenShot( Name::Sierra );
-        ni+=1.0f;
+        auto hierScene = newObject.convert();
+        p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d(), {0.25f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
+        p->getCamera(Name::Sierra)->center(hierScene->BBox3d(), {0.25f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
+        hierScene->updateTransform( Vector3f::X_AXIS * ni );
+        gbt = std::make_shared<GeomBuilder>( hierScene, newObject.Materials() );
+        gbt->build(p->RSG());
+        p->takeScreenShot( Name::Sierra, gbt->Thumb() );
 
+        ni+=1.0f;
 //        GeomBuilder{GeomBuilderType::file, getFileNameOnly(finalPath) }.at(Vector3f::ZERO).build(rsg);
     }
 }

@@ -275,6 +275,7 @@ endmacro(add_lib)
 
 macro(compile)
 
+    include_directories(${PROJECT_SOURCE_DIR}/..)
     include_directories(${PROJECT_SOURCE_DIR}/../..)
     include_directories(${PROJECT_SOURCE_DIR}/../event_horizon)
     include_directories(${PROJECT_SOURCE_DIR}/../../event_horizon)

@@ -54,8 +54,7 @@ public:
     using MaterialMap = std::unordered_map<std::string, IntermediateMaterial>;
 
     GLTF2( const std::string& _path );
-    std::shared_ptr<HierGeom> Hier() { return hierScene; }
-    void convert();
+    std::shared_ptr<HierGeom> convert();
     void fixupMaterials();
     std::vector<std::shared_ptr<MaterialBuilder>> Materials();
 
@@ -67,7 +66,6 @@ private:
     void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic );
 private:
     MaterialMap matMap;
-    std::shared_ptr<HierGeom> hierScene;
     std::string basePath;
     std::string name;
     tinygltf::Model model;

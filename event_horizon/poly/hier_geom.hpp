@@ -199,20 +199,3 @@ protected:
 
     std::vector<std::shared_ptr<HierGeom>> children;
 };
-
-class Geom : public ObservableShared<HierGeom>, public std::enable_shared_from_this<HierGeom> {
-public:
-    const std::shared_ptr<HierGeom>& Hier() const {
-        return hier;
-    }
-    std::shared_ptr<HierGeom> Hier() {
-        return hier;
-    }
-
-    void Hier( std::shared_ptr <HierGeom> _hier ) {
-        hier = _hier;
-    }
-
-private:
-    std::shared_ptr<HierGeom> hier;
-};
