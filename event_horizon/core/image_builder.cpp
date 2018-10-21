@@ -45,7 +45,7 @@ bool ImageBuilder::makeDirect( DependencyMaker& _md, const uint8_p& _data ) {
 
 bool ImageBuilder::makeDirect( DependencyMaker& _md, const RawImage& _data ) {
     mbIsRaw = true;
-    return makeDirect( _md, {_data.data(), _data.size()} );
+    return makeDirect( _md, ucchar_p{_data.data(), _data.size()} );
 }
 
 bool ImageBuilder::makeDefault( DependencyMaker& _md ) {
