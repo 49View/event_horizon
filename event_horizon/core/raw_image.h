@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <cstring>
 #include <string>
 #include "math/vector2i.h"
 #include "htypes_shared.hpp"

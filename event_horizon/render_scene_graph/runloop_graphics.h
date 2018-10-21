@@ -50,8 +50,4 @@ protected:
 	std::shared_ptr<UiPresenter> pm;
 };
 
-#ifdef EMSCRIPTEN
-#include "platform/em/runloop_graphics_em.h"
-#else
-#include "platform/desktop/runloop_graphics_desktop.h"
-#endif
+void mainLoop( std::shared_ptr<UiPresenter> p );

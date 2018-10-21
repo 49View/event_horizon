@@ -39,7 +39,7 @@ RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, 
     name = _name;
 }
 
-RawImage::RawImage( const std::string& _name, uint _w, uint _h, const uint8_t _col ) {
+RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint8_t _col ) {
     width = _w;
     height = _h;
     channels = 1;

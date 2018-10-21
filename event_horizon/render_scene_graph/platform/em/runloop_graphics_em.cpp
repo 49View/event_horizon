@@ -45,3 +45,8 @@ EMSCRIPTEN_BINDINGS(my_module) {
 void main_loop_em() {
 	rl.singleThreadLoop();
 }
+
+void mainLoop( std::shared_ptr<UiPresenter> p ) {
+	rl.initWindow( p );
+	emscripten_set_main_loop( main_loop_em, 0, 0 );
+}
