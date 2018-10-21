@@ -9,6 +9,7 @@
 #include "image_constants.h"
 
 struct ImageBuilder;
+struct RawImage;
 
 struct ImageParams {
     int width = 0;
@@ -42,7 +43,7 @@ struct RBUILDER( ImageBuilder, images, , Binary, BuilderQueryType::Exact )
     uint32_t backup_color = 0xffffffff;
     bool bForceHDR16BitTarget = true;
     bool useImagePrefix = true;
-    bool mbIsRow = false;
+    bool mbIsRaw = false;
 
     ImageBuilder& setId( const std::string& _id ) {
         Name( _id );
@@ -142,13 +143,14 @@ struct RBUILDER( ImageBuilder, images, , Binary, BuilderQueryType::Exact )
     }
 
     ImageBuilder& raw( const bool _value ) {
-        mbIsRow = _value;
+        mbIsRaw = _value;
         return *this;
     }
 
 public:
     bool makeDirect( DependencyMaker& _md, const ucchar_p& _data );
     bool makeDirect( DependencyMaker& _md, const uint8_p& _data );
+    bool makeDirect( DependencyMaker& _md, const RawImage& _data );
     bool makeDefault( DependencyMaker& _md );
 
 private:

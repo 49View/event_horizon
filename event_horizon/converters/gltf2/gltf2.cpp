@@ -690,17 +690,6 @@ Primitive gltfToPrimitive( int mode ) {
     return PRIMITIVE_TRIANGLES;
 }
 
-uint8_p bufferToPngMemory( int w, int h, int comp, void* data ) {
-    uint8_p pngBuffer;
-    stbi_write_png_to_func( [](void* ctx, void*data, int size) {
-                                auto* src = reinterpret_cast<uint8_p*>(ctx);
-                                src->second = static_cast<uint64_t >(size);
-                                src->first = std::make_unique<uint8_t[]>(src->second);
-                                std::memcpy( src->first.get(), data, src->second );
-                            }, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 0 );
-    return pngBuffer;
-}
-
 void GLTF2::addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<HierGeom> father ) {
 
     auto mesh = model.meshes[meshIndex];
@@ -782,77 +771,32 @@ void readParameterJsonDoubleValue( const tinygltf::Parameter v,
     }
 }
 
-void sigmoidMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im,
-                 SigmoidSlope _sg ) {
+void sigmoidMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im, SigmoidSlope _sg ) {
 
-    cv::Mat greyValue(_im.grayScaleBaseColor.rows, _im.grayScaleBaseColor.cols, CV_8UC1, ic.value.RGBTOI() );
+    RawImage greyValue = _im.grayScaleBaseColor;
 
-    float lFloor =  _sg == SigmoidSlope::Positive ? 1.0f - ic.value.x() : ic.value.x();
-    lFloor *= 0.5f;
-    for ( int y = 0; y < _im.grayScaleBaseColor.rows; y++ ) {
-        for ( int x = 0; x < _im.grayScaleBaseColor.cols; x++ ) {
-            float v = (static_cast<float>(_im.grayScaleBaseColor.at<uint8_t>(y, x)) -127.0f) / 127.0f;
-            float vn = clamp( ic.value.x() + (v * lFloor), 0.0f, 1.0f );
-            greyValue.at<uint8_t>(y, x) = static_cast<uint8_t >(vn*255.0f);
-        }
-    }
-    _im.mb->buffer( ic.baseName,
-                    bufferToPngMemory(greyValue.cols, greyValue.rows, greyValue.channels(), greyValue.data) );
+    float lFloor = (_sg == SigmoidSlope::Positive ? 1.0f - ic.value.x() : ic.value.x() ) * 0.5f;
 
-//    stbi_write_png( _filename.c_str(),
-//                    greyValue.cols, greyValue.rows, greyValue.channels(), greyValue.data, greyValue.step );
-//    stbi_write_png( std::string{_filename + "_out.png"}.c_str(),
-//                    greyValue.cols, greyValue.rows, greyValue.channels(), greyValue.data, greyValue.step );
+    greyValue.transform<uint8_t >( [&]( uint8_t& _value ) {
+        float v = (static_cast<float>(_value) -127.0f) / 127.0f;
+        float vn = std::clamp( ic.value.x() + (v * lFloor), 0.0f, 1.0f );
+        _value = static_cast<uint8_t >(vn*255.0f);
+    } );
+
+    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory( greyValue ) );
 }
 
 void grayscaleToNormalMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
-    cv::Mat normalMap(_im.grayScaleBaseColor.rows, _im.grayScaleBaseColor.cols, CV_8UC4);
-    for ( int y = 0; y < _im.grayScaleBaseColor.rows; y++ ) {
-        int prevY = y == 0 ?  _im.grayScaleBaseColor.rows - 1 : y - 1;
-        int nextY = y == _im.grayScaleBaseColor.rows - 1 ?  0 : y + 1;
-        for ( int x = 0; x < _im.grayScaleBaseColor.cols; x++ ) {
-            int prevX = x == 0 ?  _im.grayScaleBaseColor.cols - 1 : x - 1;
-            int nextX = x == _im.grayScaleBaseColor.cols - 1 ?  0 : x + 1;
-
-            int ynp = _im.grayScaleBaseColor.at<uint8_t>(prevY, x);
-            int ynn = _im.grayScaleBaseColor.at<uint8_t>(nextY, x);
-            int xnp = _im.grayScaleBaseColor.at<uint8_t>(y, prevX);
-            int xnn = _im.grayScaleBaseColor.at<uint8_t>(y, nextX);
-
-            Vector2f vn2d = Vector2f{ xnp - xnn, ynp - ynn } / 255.0f;
-            Vector3f vnt{ vn2d, sqrt(1.0f - vn2d.x()*vn2d.x() - vn2d.y()*vn2d.y())};
-            Vector4f vn = vnt * Vector3f{0.5f, 0.5f, 1.0f} + Vector3f(0.5f, 0.5f, 0.0f);
-            normalMap.at<uint32_t>(y, x) = vn.RGBATOI();
-        }
-    }
-    _im.mb->buffer( ic.baseName,
-                    bufferToPngMemory(normalMap.cols, normalMap.rows, normalMap.channels(), normalMap.data) );
-//    stbi_write_png( _filename.c_str(),
-//                    normalMap.cols, normalMap.rows, normalMap.channels(), normalMap.data, normalMap.step );
-//    stbi_write_png( std::string{_filename + "_out.png"}.c_str(),
-//                    normalMap.cols, normalMap.rows, normalMap.channels(), normalMap.data, normalMap.step );
+    RawImage normalMap = _im.grayScaleBaseColor.toNormalMap();
+    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(normalMap) );
 }
 
 void colorToBasecolorMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
-    cv::Mat tm = cv::Mat::zeros( 4, 4, CV_8UC4 );
-    _im.grayScaleBaseColor = tm;//cv::Mat{16, 16, CV_8UC4 }.clone();
+    _im.grayScaleBaseColor = RawImage{ "grayBase", 1, 1, ic.value.RGBATOI()};
 
-    for ( int y = 0; y < _im.grayScaleBaseColor.rows; y++ ) {
-        for ( int x = 0; x < _im.grayScaleBaseColor.cols; x++ ) {
-            _im.grayScaleBaseColor.at<uint32_t>(y, x) = ic.value.RGBATOI();
-        }
-    }
-    _im.mb->buffer( ic.baseName,
-                    bufferToPngMemory( _im.grayScaleBaseColor.cols, _im.grayScaleBaseColor.rows,
-                                       _im.grayScaleBaseColor.channels(), _im.grayScaleBaseColor.data) );
+    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(_im.grayScaleBaseColor) );
 
-//    stbi_write_png( _filename.c_str(),
-//                    _im.grayScaleBaseColor.cols, _im.grayScaleBaseColor.rows, _im.grayScaleBaseColor.channels(),
-//                    _im.grayScaleBaseColor.data, _im.grayScaleBaseColor.step );
-//    stbi_write_png( std::string{_filename + "_out.png"}.c_str(),
-//                    _im.grayScaleBaseColor.cols, _im.grayScaleBaseColor.rows, _im.grayScaleBaseColor.channels(),
-//                    _im.grayScaleBaseColor.data, _im.grayScaleBaseColor.step );
-    toGrayScale( _im.grayScaleBaseColor, _im.grayScaleBaseColor );
+    _im.grayScaleBaseColor.grayScale();
 }
 
 void GLTF2::saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic ) {
@@ -883,11 +827,12 @@ void GLTF2::saveInternalPBRComponent( const IntermediateMaterial& _im, const Int
             baseFileName = basePath + _im.name + ic.baseName + ext;
             imgBuffer = FM::readLocalFile(basePath + image.name);
         } else {
-            imgBuffer = bufferToPngMemory(image.width, image.height, image.component, image.image.data());
+            imgBuffer = imageUtil::bufferToPngMemory(image.width, image.height, image.component, image.image.data());
         }
         if ( ic.textureReconstructionMode == InternalPBRTextureReconstructionMode::GrayScaleCreate ) {
-            toGrayScale( decodeRawImageIntoMat( rawImageDecodeFromMemory(imgBuffer) ), _im.grayScaleBaseColor );
-            _im.grayScaleBaseColor.convertTo( _im.grayScaleBaseColor, -1, 2.2, 100 );
+            _im.grayScaleBaseColor = rawImageDecodeFromMemory(imgBuffer);
+            _im.grayScaleBaseColor.grayScale();
+            _im.grayScaleBaseColor.brightnessContrast( 2.2f, 100 );
         }
         _im.mb->buffer( ic.baseName, std::move(imgBuffer) );
     }
@@ -899,8 +844,6 @@ void GLTF2::saveMaterial( const IntermediateMaterial& im ) {
     saveInternalPBRComponent( im, im.metallic);
     saveInternalPBRComponent( im, im.roughness );
     saveInternalPBRComponent( im, im.normal );
-
-//    SubstanceDriver::elaborateFromTextureSet( basePath + im.name, md );
 }
 
 void GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
@@ -961,8 +904,7 @@ GLTF2::GLTF2( const std::string& _path ) {
     tinygltf::TinyGLTF gltf_ctx;
     std::string err;
     std::string warn;
-    std::string input_filename = _path;
-    std::string ext = GetFilePathExtension( input_filename );
+    std::string ext = GetFilePathExtension( _path );
     basePath = getFileNamePath( _path ) + "/";
     name = getFileNameOnly(_path);
 
@@ -970,11 +912,11 @@ GLTF2::GLTF2( const std::string& _path ) {
     if ( ext.compare( "glb" ) == 0 ) {
         std::cout << "Reading binary glTF" << std::endl;
         // assume binary glTF.
-        ret = gltf_ctx.LoadBinaryFromFile( &model, &err, &warn, input_filename.c_str());
+        ret = gltf_ctx.LoadBinaryFromFile( &model, &err, &warn, _path.c_str());
     } else {
         std::cout << "Reading ASCII glTF" << std::endl;
         // assume ascii glTF.
-        ret = gltf_ctx.LoadASCIIFromFile( &model, &err, &warn, input_filename.c_str());
+        ret = gltf_ctx.LoadASCIIFromFile( &model, &err, &warn, _path.c_str());
     }
 
     if ( !warn.empty()) {
@@ -997,7 +939,7 @@ std::vector<std::shared_ptr<MaterialBuilder>> GLTF2::Materials() {
     std::vector<std::shared_ptr<MaterialBuilder>> ret;
 
     for ( const auto& [k,v] : matMap ) {
-        ret.push_back( v.mb );
+        ret.emplace_back( v.mb );
     }
     return ret;
 }

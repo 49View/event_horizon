@@ -5,7 +5,8 @@
 #include "tiny_gltf.h"
 #include <core/math/vector4f.h>
 #include <core/descriptors/material.h>
-#include "opencvutils/cvmatutil.hpp"
+#include <core/raw_image.h>
+//#include <render_scene_graph/di_modules.h>
 
 class HierGeom;
 struct MaterialBuilder;
@@ -40,7 +41,7 @@ public:
     struct IntermediateMaterial {
         std::string name;
         mutable std::shared_ptr<MaterialBuilder> mb;
-        mutable cv::Mat grayScaleBaseColor;
+        mutable RawImage grayScaleBaseColor;
         InternalPBRComponent baseColor{MPBRTextures::basecolorString,
         InternalPBRTextureReconstructionMode::GrayScaleCreate };
         InternalPBRComponent metallic{MPBRTextures::metallicString,
@@ -53,7 +54,7 @@ public:
 
     using MaterialMap = std::unordered_map<std::string, IntermediateMaterial>;
 
-    GLTF2( const std::string& _path );
+    explicit GLTF2( const std::string& _path );
     std::shared_ptr<HierGeom> convert();
     void fixupMaterials();
     std::vector<std::shared_ptr<MaterialBuilder>> Materials();

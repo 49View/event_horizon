@@ -89,10 +89,10 @@ void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresente
 
     Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
 
-    Http::get( Url{ HttpFilePrefix::entities_all + "geom/beb" }, [&](const Http::Result& _res) {
-        remoteMaterialsString = std::string{ reinterpret_cast<char*>(_res.buffer.get()), _res.length };
-        UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
-    } );
+//    Http::get( Url{ HttpFilePrefix::entities_all + "geom/beb" }, [&](const Http::Result& _res) {
+//        remoteMaterialsString = std::string{ reinterpret_cast<char*>(_res.buffer.get()), _res.length };
+//        UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
+//    } );
 
 }
 
@@ -217,12 +217,12 @@ void render( UiPresenter* p ) {
     ImGui::End();
     ImGui::SetNextWindowPos( ImVec2{ 0, sceneSectionY3*2.0f } );
     ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY3 } );
-//    ImGui::Begin( "Images",  nullptr, ImGuiWindowFlags_NoCollapse );
-//        ImGuiImages(p);
-//    ImGui::End();
-    ImGui::Begin( "Camera",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGuiCamera(p->getCamera(Name::Foxtrot));
+    ImGui::Begin( "Images",  nullptr, ImGuiWindowFlags_NoCollapse );
+        ImGuiImages(p);
     ImGui::End();
+//    ImGui::Begin( "Camera",  nullptr, ImGuiWindowFlags_NoCollapse );
+//    ImGuiCamera(p->getCamera(Name::Foxtrot));
+//    ImGui::End();
 
     // Server side
     ImGui::SetNextWindowPos( ImVec2{ getScreenSizefUI.x() - sceneSectionX, 0.0f } );

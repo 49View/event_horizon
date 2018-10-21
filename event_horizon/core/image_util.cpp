@@ -7,6 +7,9 @@
 
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb/stb_image_resize.h>
+#include <stb/stb_image_write.h>
+#include <core/raw_image.h>
+
 
 namespace imageUtil {
 
@@ -103,4 +106,18 @@ namespace imageUtil {
         return decodedData;
     }
 
+    uint8_p bufferToPngMemory( int w, int h, int comp, void* data ) {
+        uint8_p pngBuffer;
+        stbi_write_png_to_func( [](void* ctx, void*data, int size) {
+            auto* src = reinterpret_cast<uint8_p*>(ctx);
+            src->second = static_cast<uint64_t >(size);
+            src->first = std::make_unique<uint8_t[]>(src->second);
+            std::memcpy( src->first.get(), data, src->second );
+        }, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 0 );
+        return pngBuffer;
+    }
+
+    uint8_p rawToPngMemory( const RawImage& _input ) {
+        return bufferToPngMemory( _input.width, _input.height, _input.channels, _input.data() );
+    }
 }

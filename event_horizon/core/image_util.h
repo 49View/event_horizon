@@ -5,6 +5,8 @@
 #include "stb/stb_image.h"
 #include "htypes_shared.hpp"
 
+struct RawImage;
+
 namespace imageUtil {
     template<typename T>
     std::unique_ptr<uint8_t[]> decodeFromStream( T* _data, int& width, int& height, int& channels ) {
@@ -27,4 +29,7 @@ namespace imageUtil {
     std::unique_ptr<uint8_t[]> zeroImage( uint32_t color, int& width, int& height, int& channels );
     std::unique_ptr<uint8_t[]> zeroImage3( uint32_t color, int& width, int& height, int& channels );
     std::unique_ptr<uint8_t[]> zeroImage3( uint32_t color, int width, int height );
+
+    uint8_p bufferToPngMemory( int w, int h, int comp, void* data );
+    uint8_p rawToPngMemory( const RawImage& _input );
 }
