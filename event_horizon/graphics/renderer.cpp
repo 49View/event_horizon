@@ -99,7 +99,7 @@ void Renderer::init() {
     rcm.init();
     am.init();
     lm.init();
-    mSkyBoxParams.mode = SkyBoxMode::EquirectangularTexture;
+    mSkyBoxParams.mode = SkyBoxMode::CubeProcedural;
 }
 
 void Renderer::afterShaderSetup() {

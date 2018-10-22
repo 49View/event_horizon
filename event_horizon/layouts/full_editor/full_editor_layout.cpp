@@ -83,9 +83,9 @@ void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresente
                      topX + uivl.main3dWindowSize.x(), uivl.main3dWindowSize.y() },
                      CameraControls::Fly );
 
-//    _layout->addBox( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{ 128.0f, 128.0f } ),
+//    _layout->addBox( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{ 512.0f, 512.0f } ),
 //                     CameraControls::Fly );
-    _layout->addOffScreenBox( Name::Sierra, { 128.0f, 128.0f } );
+    _layout->addOffScreenBox( Name::Sierra, { 256.0f, 256.0f } );
 
     Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
 

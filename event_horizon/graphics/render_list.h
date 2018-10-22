@@ -185,6 +185,7 @@ public:
     Rect2f                       sourceViewport();
     std::string                  renderIndex();
     int                          mipMapIndex();
+    void                         postBlit();
 
     std::shared_ptr<RLTarget>& Target() {
         return mTarget;
@@ -350,8 +351,9 @@ public:
 
     bool isKeyInRange( const int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
 
-    bool isTakingScreenShot() const {
-        return mbTakeScreenShot;
+    bool isTakingScreenShot() {
+        if ( mbTakeScreenShot && ++mTakeScreenShotDelay > 2 ) return true;
+        return false;
     }
 
     void takeScreenShot( bool _value = true ) {
@@ -361,6 +363,7 @@ public:
     void takeScreenShot( ScreenShotContainerPtr _outdata ) {
         mbTakeScreenShot = true;
         screenShotContainer = _outdata;
+        mTakeScreenShotDelay = 0;
     }
 
     BlitType FinalDestBlit() const {
@@ -375,11 +378,12 @@ public:
     std::string renderIndex;
     int mipMapIndex = 0;
     BlitType finalDestBlit = BlitType::OnScreen;
-    bool mbTakeScreenShot = false;
     ScreenShotContainerPtr screenShotContainer;
     std::vector<std::pair<int, int>> bucketRanges;
 
 protected:
+    bool mbTakeScreenShot = false;
+    int  mTakeScreenShotDelay = 0;
     Renderer& rr;
 };
 

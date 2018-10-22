@@ -5,6 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+const globalConfig = require('../config_api.js')
+
 var index = require('./routes/index');
 var catalog = require('./routes/catalog');
 var calculus = require('./routes/calculus');
@@ -19,9 +21,8 @@ var app = express();
 
 //Set up default mongoose connection
 var mongoose = require('mongoose');
-var mongoDB = "mongodb+srv://dado:luckycarrot1803@sixthviewmdb001-a0hba.mongodb.net";
-//var mongoDB = 'mongodb://localhost:27017/sixthviewdb';
-mongoose.connect(mongoDB, { dbName: 'sixthviewdb', useNewUrlParser: true });
+const mongoDB = `mongodb+srv://${globalConfig.MongoDBUser}:${globalConfig.MongoDBPass}@${globalConfig.MongoDBURI}`;
+mongoose.connect(mongoDB, { dbName: globalConfig.MongoDBdbName, useNewUrlParser: true });
 
 //Get the default connection
 let db = mongoose.connection;

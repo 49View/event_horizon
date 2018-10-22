@@ -79,6 +79,27 @@ bool CommandBuffer::findEntry( const std::string& _key, std::weak_ptr<CommandBuf
     return false;
 }
 
+void screenShotBase64Callback( void* ctx, void*data, int size ) {
+    auto* rawThumbl = reinterpret_cast<ScreenShotContainer*>(ctx);
+    ScreenShotContainer img{  reinterpret_cast<unsigned char*>(data), reinterpret_cast<unsigned char*>(data) + size };
+    *rawThumbl = bn::encode_b64( img );
+}
+
+void CommandBuffer::postBlit() {
+    if ( Target()->isTakingScreenShot() ) {
+        auto lfb = fb(CommandBufferFrameBufferType::finalBlit);
+        auto ssd = Target()->ScreenShotData();
+        ssd->clear();
+        int w = lfb->getWidth();
+        int h = lfb->getHeight();
+        auto outB = std::make_unique<unsigned char[]>( w * h * 4 );
+        glReadPixels( 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, outB.get() );
+        // stbi_write_jpg( "urcascreen.jpg", w, h, 4, outB.get(), 95 ); // Debug
+        stbi_write_jpg_to_func(screenShotBase64Callback, reinterpret_cast<void*>(ssd.get()), w, h, 4, outB.get(), 90);
+        Target()->takeScreenShot(false);
+    }
+}
+
 void CommandBufferList::start() {
     mCommandBuffers.clear();
     mCurrent = nullptr;
@@ -148,12 +169,6 @@ void CommandBufferList::setCameraUniforms( std::shared_ptr<Camera> c0 ) {
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyePos, c0->getPosition(), mCurrent->UBOCameraBuffer.get());
 
     pushCommand( { CommandBufferCommandName::setCameraUniforms } );
-}
-
-void screenShotBase64Callback( void* ctx, void*data, int size ) {
-    auto* rawThumbl = reinterpret_cast<ScreenShotContainer*>(ctx);
-    ScreenShotContainer img{  reinterpret_cast<unsigned char*>(data), reinterpret_cast<unsigned char*>(data) + size };
-    *rawThumbl = bn::encode_b64( img );
 }
 
 void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
@@ -249,17 +264,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
                     rr.getShadowMapFB()->RenderToTexture());
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->render_im();
 
-            break;
-        case CommandBufferCommandName::takeScreenShot: {
-            auto fb = cstack->fb(CommandBufferFrameBufferType::finalBlit);
-            auto ssd = cstack->Target()->ScreenShotData();
-            ssd->clear();
-            fb->bind();
-            auto outB = std::make_unique<unsigned char[]>( fb->getWidth() * fb->getHeight() * 4 );
-            glReadPixels( 0, 0, fb->getWidth(), fb->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, outB.get() );
-            stbi_write_png_to_func( screenShotBase64Callback, reinterpret_cast<void*>(ssd.get()),
-                                    fb->getWidth(), fb->getHeight(), 4, outB.get(), 0 );
-        } break;
+            cstack->postBlit();
+
+        break;
         case CommandBufferCommandName::targetVP:
             break;
 
@@ -299,6 +306,11 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
 
     float svtop = getScreenSizef.y()-screenViewport.bottom();
     Rect2f svss{ screenViewport.left(), svtop, screenViewport.right(), svtop + screenViewport.height() };
+
+    if ( _bt == BlitType::OffScreen) {
+        svss = screenViewport;
+    }
+
     mComposite = std::make_shared<CompositePBR>( rr, cameraRig->getMainCamera()->Name(), svss, finalDestBlit );
     cameraRig->setFramebuffer( mComposite->getColorFB() );
     bucketRanges.push_back( {CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd} );
@@ -371,22 +383,18 @@ void CompositePlain::blit(CommandBufferList& cbl) {
 }
 
 CompositePlain::CompositePlain( Renderer& _rr, const std::string& _name, const Rect2f& _destViewport,
-                                BlitType _cfd ) : Composite(_rr ) {
-    mCompositeFinalDest = _cfd;
+                                BlitType _bt ) : Composite(_rr ) {
+    mCompositeFinalDest = _bt;
     auto vsize = _destViewport.size();
     mColorFB = FrameBufferBuilder{ rr, _name }.size(vsize).build();
     if ( mCompositeFinalDest == BlitType::OffScreen){
-        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer"}.size(vsize).noDepth().dv(_destViewport)
-                .format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).IM(S::FINAL_COMBINE).build();
+        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer"}.size(vsize).noDepth().
+                dv(_destViewport, _bt).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).IM(S::FINAL_COMBINE).build();
     }
 }
 
 void RLTargetPBR::blit(CommandBufferList& cbl) {
     mComposite->blit( cbl );
-    if ( isTakingScreenShot() ) {
-        cbl.pushCommand( { CommandBufferCommandName::takeScreenShot } );
-        takeScreenShot(false);
-    }
 }
 
 void CompositePBR::blit( CommandBufferList& cbl ) {
@@ -404,11 +412,11 @@ CompositePBR::CompositePBR( Renderer& _rr, const std::string& _name, const Rect2
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_HORIZONTAL).build();
     mBlurVerticalFB = FrameBufferBuilder{ rr, "blur_vertical_b" }.size(vsize*bloomScale).noDepth()
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_VERTICAL).build();
-    mColorFinalFB = FrameBufferBuilder{ rr, "colorFinalFrameBuffer"}.size(vsize).noDepth().dv(_destViewport)
+    mColorFinalFB = FrameBufferBuilder{ rr, "colorFinalFrameBuffer"}.size(vsize).noDepth().dv(_destViewport, _bt)
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).IM(S::FINAL_COMBINE).build();
-    if ( mCompositeFinalDest == BlitType::OffScreen){
-        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer"}.size(vsize).noDepth().dv(_destViewport)
-                .format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).IM(S::FINAL_COMBINE).build();
+    if ( mCompositeFinalDest == BlitType::OffScreen) {
+        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer"}.size(vsize).noDepth()
+                .dv(_destViewport, _bt).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).IM(S::FINAL_COMBINE).build();
     }
 }
 

@@ -143,8 +143,9 @@ public:
         return *this;
     }
 
-    FrameBufferBuilder& dv( const Rect2f& _destViewport ) {
-        mDestViewport = _destViewport * (1.0f/getScreenSizef);
+    FrameBufferBuilder& dv( const Rect2f& _destViewport, BlitType _bt ) {
+        Vector2f oneOverSize = _bt == BlitType::OnScreen ? (1.0f/getScreenSizef) : (1.0f/_destViewport.size());
+        mDestViewport = _destViewport * oneOverSize;
         return *this;
     }
 

@@ -1,4 +1,5 @@
 var AWS = require('aws-sdk');
+const globalConfig = require('../../config_api.js')
 
 AWS.config = new AWS.Config();
 AWS.config.accessKeyId = "AKIAJWSLLXTAUPNWMBOA";
@@ -11,7 +12,7 @@ function listInternal ( key, complete ) {
 	return new Promise( (resolve, reject) => {
 		const key_name = "Key";
 		const params = {
-			Bucket: "sixthviewfs",
+			Bucket: globalConfig.S3Bucket,
 			Prefix: key
 		};
 
