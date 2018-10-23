@@ -108,13 +108,11 @@ std::string MaterialBuilder::toMetaData() const {
     MegaWriter writer;
 
     writer.StartObject();
-    writer.serialize( "name", Name() );
+    writer.serialize( CoreMetaData{Name(), Material::entityGroup(), generateThumbnail(), generateRawData()} );
     writer.serialize( "color", baseSolidColor );
     writer.serialize( "metallicValue", metallicValue );
     writer.serialize( "roughnessValue", roughnessValue );
     writer.serialize( "aoValue", aoValue );
-    writer.serialize( "thumb", generateThumbnail() );
-    writer.serialize( "raw", generateRawData() );
     writer.EndObject();
 
     return writer.getString();

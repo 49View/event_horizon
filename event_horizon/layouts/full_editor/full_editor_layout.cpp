@@ -22,6 +22,7 @@ struct UIViewLayout {
 std::shared_ptr<MaterialBuilder> mb;
 std::shared_ptr<GeomBuilder> gbt;
 std::string remoteMaterialsString;
+std::multimap<std::string, CoreMetaData> cloudEntitiesTypeMap;
 
 UIViewLayout uivl;
 
@@ -49,20 +50,24 @@ void materialPBRCallback( const rapidjson::Document& data ) {
     }
 }
 
+void assignMetaValues( const rapidjson::Value* _value ) {
+//    std::string type = "aa";//std::string{ ( *_value )["type"].GetString() };
+//    rapidjson::Value x = _value->;
+}
+
 void listCloudMaterialCallback( UiPresenter* p ) {
+    std::vector<CoreMetaData> newFilteredResult;
+
     rapidjson::Document document;
     document.Parse<rapidjson::kParseStopWhenDoneFlag>( remoteMaterialsString.c_str() );
     MegaReader reader( document );
-    if ( !reader.isEmpty() ) {
-        if (reader.isArray() ) {
-            auto doc = reader.at( static_cast<rapidjson::SizeType>(0));
-            if ( doc->FindMember( "thumb" ) != doc->MemberEnd() ) {
-                std::string ret = std::string{ ( *( doc ) )["thumb"].GetString() };
-                std::vector<unsigned char> rd;
-                bn::decode_b64( ret.begin(), ret.end(), std::back_inserter(rd) );
-                ImageBuilder{ "thumb" }.makeDirect( p->RSG().TL(), { rd.data(), rd.size()} );
-            }
-        }
+    reader.deserialize( newFilteredResult );
+
+    for ( const auto& elem : newFilteredResult ) {
+        std::vector<unsigned char> rd;
+        bn::decode_b64( elem.getThumb().begin(), elem.getThumb().end(), std::back_inserter(rd) );
+        ImageBuilder{ elem.getName()+"thumb" }.makeDirect( p->RSG().TL(), { rd.data(), rd.size()} );
+        cloudEntitiesTypeMap.insert( {elem.getType(), elem} );
     }
 }
 
@@ -71,7 +76,6 @@ void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresente
 //    auto gbt = GeomBuilder{}.n("ullala");
 //    Http::post( Url{ Http::restEntityPrefix( HierGeom::entityGroup(), gbt.Name() + ".geom" ) }, gbt.toMetaData() );
 
-//    Http::useLocalHost(true);
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
     uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
@@ -88,11 +92,6 @@ void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresente
     _layout->addOffScreenBox( Name::Sierra, { 256.0f, 256.0f } );
 
     Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
-
-//    Http::get( Url{ HttpFilePrefix::entities_all + "geom/beb" }, [&](const Http::Result& _res) {
-//        remoteMaterialsString = std::string{ reinterpret_cast<char*>(_res.buffer.get()), _res.length };
-//        UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
-//    } );
 
 }
 
@@ -182,11 +181,35 @@ void ImGuiCamera( std::shared_ptr<Camera> cam ) {
     ImGui::EndGroup();
 }
 
-void ImGuiCloudMaterials() {
+void ImGuiCloudMaterials( UiPresenter* p ) {
 
 }
 
-void ImGuiCloudGeoms() {
+void ImGuiCloudGeoms( UiPresenter* p ) {
+    static char buf[1024];
+    if ( ImGui::InputText( "", buf, 1024,
+                      ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|
+                      ImGuiInputTextFlags_CallbackHistory,
+                      [](ImGuiTextEditCallbackData* data) -> int {
+                        //        if ( data->EventKey == ImGuiKey_Enter) {
+                        //        }
+                                return 0;
+    } ) ) {
+        Http::get( Url{ HttpFilePrefix::entities_all + "geom/" + std::string(buf) }, [&](const Http::Result& _res) {
+            remoteMaterialsString = std::string{ reinterpret_cast<char*>(_res.buffer.get()), _res.length };
+            UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
+        } );
+    };
+
+    ;
+    for ( auto it = cloudEntitiesTypeMap.find(HierGeom::entityGroup()); it != cloudEntitiesTypeMap.end(); ++it ) {
+        ImGui::BeginGroup();
+        auto& elem = it->second;
+        ImGui::Text( "Name: %s", elem.getName().c_str());
+        auto tex = p->TM().TD( elem.getName()+"thumb" );
+        ImGui::Image( reinterpret_cast<void *>(tex->getHandle()), ImVec2{ 100, 100 } );
+        ImGui::EndGroup();
+    }
 
 }
 
@@ -226,12 +249,12 @@ void render( UiPresenter* p ) {
     ImGui::SetNextWindowPos( ImVec2{ getScreenSizefUI.x() - sceneSectionX, 0.0f } );
     ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY2 } );
     ImGui::Begin( "Cloud Materials",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGuiCloudGeoms();
+    ImGuiCloudMaterials(p);
     ImGui::End();
     ImGui::SetNextWindowPos( ImVec2{ getScreenSizefUI.x() - sceneSectionX, sceneSectionY2 } );
     ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY2 } );
     ImGui::Begin( "Cloud Geoms",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGuiCloudMaterials();
+    ImGuiCloudGeoms(p);
     ImGui::End();
 
     // Timeline

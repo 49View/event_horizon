@@ -179,9 +179,7 @@ std::string GeomBuilder::toMetaData() const {
     MegaWriter writer;
 
     writer.StartObject();
-    writer.serialize( "name", Name() );
-    writer.serialize( "thumb", generateThumbnail() );
-    writer.serialize( "raw", generateRawData() );
+    writer.serialize( CoreMetaData{Name(), HierGeom::entityGroup(), generateThumbnail(), generateRawData()} );
     writer.EndObject();
 
     return writer.getString();

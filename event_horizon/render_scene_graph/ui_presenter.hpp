@@ -17,35 +17,6 @@ namespace PresenterEventFunctionKey {
 	const static std::string Activate = "activate";
 }
 
-namespace Name {
-	const static std::string Alpha	  = "Alpha	 ";
-	const static std::string Bravo	  = "Bravo	 ";
-	const static std::string Charlie  = "Charlie ";
-	const static std::string Delta	  = "Delta	 ";
-	const static std::string Echo	  = "Echo	 ";
-	const static std::string Foxtrot  = "Foxtrot ";
-	const static std::string Golf	  = "Golf	 ";
-	const static std::string Hotel	  = "Hotel	 ";
-	const static std::string India	  = "India	 ";
-	const static std::string Juliett  = "Juliett ";
-	const static std::string Kilo	  = "Kilo	 ";
-	const static std::string Lima	  = "Lima	 ";
-	const static std::string Mike	  = "Mike	 ";
-	const static std::string November = "November";
-	const static std::string Oscar	  = "Oscar	 ";
-	const static std::string Papa	  = "Papa	 ";
-	const static std::string Quebec   = "Quebec  ";
-	const static std::string Romeo	  = "Romeo	 ";
-	const static std::string Sierra   = "Sierra  ";
-	const static std::string Tango	  = "Tango	 ";
-	const static std::string Uniform  = "Uniform ";
-	const static std::string Victor   = "Victor  ";
-	const static std::string Whiske   = "Whiske  ";
-	const static std::string X_Ray	  = "X_Ray	 ";
-	const static std::string Yankee   = "Yankee  ";
-	const static std::string Zulu	  = "Zulu	 ";
-}
-
 struct ImGuiConsole;
 class PresenterLayout;
 

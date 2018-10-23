@@ -16,6 +16,7 @@
 #include "math/rect2f.h"
 #include "math/aabb.h"
 #include "math/vector4f.h"
+#include "metadata.h"
 
 using namespace rapidjson;
 
@@ -431,6 +432,13 @@ public:
 			}
 			writer->EndArray();
 		}
+	}
+
+	void serialize( const CoreMetaData& _md ) {
+		serialize( MetaData::Name.c_str(), _md.getName() );
+		serialize( MetaData::Type.c_str(), _md.getType() );
+		serialize( MetaData::Thumb.c_str(), _md.getThumb() );
+		serialize( MetaData::Raw.c_str(), _md.getRaw() );
 	}
 
 private:

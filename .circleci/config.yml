@@ -46,6 +46,7 @@ jobs:
       - run:
           name: Deploy to heroku
           command: |
+            # git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
             git subtree push --prefix node-api-server https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
 
   buildCPP:
@@ -94,10 +95,10 @@ jobs:
 
       # run tests!
 
-      - run: |
-          curl --data-binary @/app/builds/sandbox_em/sandbox.wasm -H Content-Type:application/octet-stream https://rest-49view.herokuapp.com/fs/upload/wasm%2Fbuilds%2Fsandbox.wasm
-      - run: |
-          curl --data-binary @/app/builds/sandbox_em/sandbox.js -H Content-Type:application/octet-stream https://rest-49view.herokuapp.com/fs/upload/wasm%2Fbuilds%2Fsandbox.js
+#      - run: |
+#          curl --data-binary @/app/builds/sandbox_em/sandbox.wasm -H Content-Type:application/octet-stream https://rest-49view.herokuapp.com/fs/upload/wasm%2Fbuilds%2Fsandbox.wasm
+#      - run: |
+#          curl --data-binary @/app/builds/sandbox_em/sandbox.js -H Content-Type:application/octet-stream https://rest-49view.herokuapp.com/fs/upload/wasm%2Fbuilds%2Fsandbox.js
 
   deployCPP:
     machine:
@@ -114,17 +115,17 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - buildNODEJSAPI
-#      - buildCPP:
-#          filters:
-#            branches:
-#              only: master
-      - deployNODEJSAPI:
-          requires:
-            - buildNODEJSAPI
+#      - buildNODEJSAPI
+      - buildCPP:
           filters:
             branches:
               only: master
-#      - deployCPP:
+#      - deployNODEJSAPI:
 #          requires:
-#            - buildCPP
+#            - buildNODEJSAPI
+#          filters:
+#            branches:
+#              only: master
+      - deployCPP:
+          requires:
+            - buildCPP

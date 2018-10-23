@@ -14,6 +14,7 @@
 #include "rapidjson/document.h"
 #include "math/rect2f.h"
 #include "math/aabb.h"
+#include "metadata.h"
 
 using namespace rapidjson;
 
@@ -421,6 +422,19 @@ public:
 				}
 				ret.push_back( sv );
 			}
+		}
+	}
+
+	void deserialize( std::vector<CoreMetaData>& _vec ) {
+		for ( SizeType t = 0; t < (*value).Size(); t++ ) {
+			CoreMetaData elem;
+			elem.setName( (*value)[t][MetaData::Name.c_str()].GetString() );
+			elem.setType( (*value)[t][MetaData::Type.c_str()].GetString() );
+			elem.setThumb( (*value)[t][MetaData::Thumb.c_str()].GetString() );
+//			deserialize( MetaData::Name.c_str(),  elem.Name() );
+//			deserialize( MetaData::Type.c_str(),  elem.Type() );
+//			deserialize( MetaData::Thumb.c_str(), elem.Thumb() );
+			_vec.push_back( elem );
 		}
 	}
 
