@@ -112,28 +112,24 @@ public:
 		}
 	}
 
+	std::vector<unsigned char> close() const {
+		std::vector<unsigned char> ret;
+		std::copy( f.str().begin(), f.str().end(), std::back_inserter(ret) );
+		return ret;
+	}
+
 private:
 	std::ostringstream f;
-	std::string mFilename;
-	std::string filenameHashed;
 	std::string entityType;
 };
 
 class DeserializeBin : public std::enable_shared_from_this<DeserializeBin> {
 public:
-	DeserializeBin( std::shared_ptr<uint8_p> _data, SerializeVersionFormat vf = SerializeVersionFormat::UInt64 ) {
-		osrb = std::make_shared<OneShotReadBuf>( reinterpret_cast<char *>(_data->first.get()), _data->second );
-		fi = std::make_shared<std::istream>( osrb.get() );
+	explicit DeserializeBin( const std::vector<char>& _data,
+							 SerializeVersionFormat vf = SerializeVersionFormat::UInt64 ) {
+		fi = std::make_shared<std::istringstream>( std::string{ _data.begin(), _data.end() } );
 		readVersion( vf );
 	}
-
-	size_t tellg() const {
-	    return static_cast<size_t >(fi->tellg());
-	}
-
-    void seekg( const size_t offset )  {
-        fi->seekg( offset );
-    }
 
     template<typename T>
 	void read( std::vector<T>& v ) {
@@ -251,6 +247,5 @@ public:
 	}
 
 private:
-	std::shared_ptr<std::istream> fi;
-	std::shared_ptr<OneShotReadBuf> osrb;
+	std::shared_ptr<std::istringstream> fi;
 };

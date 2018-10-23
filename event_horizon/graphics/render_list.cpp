@@ -93,9 +93,8 @@ void CommandBuffer::postBlit() {
         int w = lfb->getWidth();
         int h = lfb->getHeight();
         auto outB = std::make_unique<unsigned char[]>( w * h * 4 );
-        glReadPixels( 0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, outB.get() );
-        // stbi_write_jpg( "urcascreen.jpg", w, h, 4, outB.get(), 95 ); // Debug
-        stbi_write_jpg_to_func(screenShotBase64Callback, reinterpret_cast<void*>(ssd.get()), w, h, 4, outB.get(), 90);
+        grabScreen( 0, 0, w, h , reinterpret_cast<void*>(outB.get()) );
+        stbi_write_png_to_func(screenShotBase64Callback, reinterpret_cast<void*>(ssd.get()), w, h, 4, outB.get(), 0);
         Target()->takeScreenShot(false);
     }
 }

@@ -199,6 +199,8 @@ public:
         builderType = GeomBuilderType::follower;
     }
 
+    void publish() const;
+
     GeomBuilder& bt( const GeomBuilderType _gbt ) {
         builderType = _gbt;
         return *this;
@@ -286,7 +288,6 @@ public:
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
     void assemble( DependencyMaker& _md ) override;
-    std::string toMetaData();
     ScreenShotContainerPtr& Thumb();
 
 protected:
@@ -294,6 +295,7 @@ protected:
     void deserializeDependencies( DependencyMaker& _md );
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg );
     void createFromAsset( std::shared_ptr<HierGeom> asset );
+    std::string toMetaData() const;
     std::string generateThumbnail() const;
     std::string generateRawData() const;
 

@@ -33,7 +33,7 @@ class HierGeom : public ObservableShared<HierGeom>, public std::enable_shared_fr
 public:
     HierGeom();
     explicit HierGeom( const std::string& _name );
-    explicit HierGeom( std::shared_ptr<uint8_p> _data );
+    explicit HierGeom( std::vector<char>_data );
     explicit HierGeom( const Vector3f& pos, const Vector3f& rot = Vector3f::ZERO, const Vector3f& scale = Vector3f::ONE );
     explicit HierGeom( std::shared_ptr<GeomData> data, HierGeom *papa = nullptr );
 

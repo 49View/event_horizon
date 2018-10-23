@@ -43,7 +43,6 @@ void materialPBRCallback( const rapidjson::Document& data ) {
                 if ( !p->RR().hasTag(9300) ) {
                     GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).build( p->RSG() );
                 }
-//                    Http::post( Url{ Http::restEntityPrefix( Material::entityGroup(), mb->Name() + ".mat" ) }, mb->toMetaData() );
                 p->RR().changeMaterialOnTags( 9300, std::dynamic_pointer_cast<PBRMaterial>(p->ML().get(mb->Name())) );
             } );
         } );
@@ -72,6 +71,7 @@ void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresente
 //    auto gbt = GeomBuilder{}.n("ullala");
 //    Http::post( Url{ Http::restEntityPrefix( HierGeom::entityGroup(), gbt.Name() + ".geom" ) }, gbt.toMetaData() );
 
+//    Http::useLocalHost(true);
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
     uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
@@ -161,17 +161,15 @@ void ImGuiGeoms( UiPresenter* p ) {
         ImGui::BeginGroup();
         ImGui::Text( "Name: %s", it->Name().c_str());
         ImGui::Text( "Hash: %lld", it->Hash());
-//        ImGui::Text( "Verts: %lld", it->Hash());
         ImGui::EndGroup();
     }
     if ( gbt ) {
         ImGui::BeginGroup();
         ImGui::Text( "Name: %s", gbt->Name().c_str());
         if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-            Http::post( Url{ Http::restEntityPrefix( HierGeom::entityGroup(), gbt->Name() + ".geom" ) }, gbt->toMetaData() );
+            gbt->publish();
         }
         ImGui::EndGroup();
-
     }
 }
 
@@ -294,7 +292,6 @@ void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path
         p->takeScreenShot( Name::Sierra, gbt->Thumb() );
 
         ni+=1.0f;
-//        GeomBuilder{GeomBuilderType::file, getFileNameOnly(finalPath) }.at(Vector3f::ZERO).build(rsg);
     }
 }
 

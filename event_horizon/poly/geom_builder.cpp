@@ -22,7 +22,7 @@ void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
 
     SceneGraph& sg = static_cast<SceneGraph&>(_md);
 
-    auto reader = std::make_shared<DeserializeBin>( sg.AL().get( Name()));
+    auto reader = std::make_shared<DeserializeBin>(sg.AL().get( Name()));
     auto deps = gatherGeomDependencies( reader );
 
     for ( const auto& d : deps.textureDeps ) {
@@ -89,7 +89,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
                 return;
             }
         case GeomBuilderType::asset: {
-            auto asset = std::make_shared<HierGeom>( sg.AL().get( Name()));
+            auto asset = std::make_shared<HierGeom>( sg.AL().get(Name()) );
             sg.AL().add( Name(), asset );
             createFromAsset( asset );
         }
@@ -175,7 +175,7 @@ std::string GeomBuilder::generateRawData() const {
     }
 }
 
-std::string GeomBuilder::toMetaData() {
+std::string GeomBuilder::toMetaData() const {
     MegaWriter writer;
 
     writer.StartObject();
@@ -192,4 +192,14 @@ ScreenShotContainerPtr& GeomBuilder::Thumb() {
         thumb = std::make_shared<ScreenShotContainer>();
     }
     return thumb;
+}
+
+void GeomBuilder::publish() const {
+    // Publish all materials first
+
+    for ( const auto& mb : matBuilders ) {
+        mb->publish();
+    }
+
+    Http::post( Url{ Http::restEntityPrefix( HierGeom::entityGroup(), Name() + ".geom" ) }, toMetaData() );
 }

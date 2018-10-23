@@ -41,7 +41,7 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
     MaterialBuilder( const std::string& _name, const MaterialType _mt, const std::string& _sn = "" );
     void makeDefault( DependencyMaker& _md );
     void makeDirect( DependencyMaker& _md );
-    std::string toMetaData();
+    void publish() const;
 
     MaterialBuilder& buffer( const std::string& _bname, uint8_p&& _data ) {
         if ( _data.second > 0 ) {
@@ -108,8 +108,9 @@ protected:
     }
     void handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName );
     void createDefaultPBRTextures( std::shared_ptr<PBRMaterial> mat, DependencyMaker& _md );
-    std::string generateThumbnail();
-    std::string generateRawData();
+    std::string generateThumbnail() const;
+    std::string generateRawData() const;
+    std::string toMetaData() const;
 
 private:
     MaterialType            materialType = MaterialType::PBR;

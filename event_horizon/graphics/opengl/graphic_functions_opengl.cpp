@@ -61,3 +61,9 @@ std::string cubemapFaceToString( const CubemapFaces cmf ) {
 	}
 	return "";
 }
+
+void grabScreen( int x, int y, int w, int h, void* buffer ) {
+	for ( auto q = h+y-1, c=0; q >= y; q--, c++ ) {
+		GLCALL( glReadPixels( x, q, w, 1, GL_RGBA, GL_UNSIGNED_BYTE, (void*)((char*)buffer + (c*w*4))) );
+	}
+}

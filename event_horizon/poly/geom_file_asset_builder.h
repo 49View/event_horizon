@@ -9,6 +9,6 @@
 
 struct GeomFileAssetBuilder;
 
-struct RBUILDER( GeomFileAssetBuilder, geoms, geom, Binary, BuilderQueryType::NotExact )
+struct RBUILDER( GeomFileAssetBuilder, geom, geom, Binary, BuilderQueryType::NotExact )
 
 };

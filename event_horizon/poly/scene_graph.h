@@ -27,12 +27,12 @@ typedef AssetHierContainer::const_iterator AssetHierContainerCIt;
 class AssetManager : public DependencyMaker {
 public:
 DEPENDENCY_MAKER_EXIST(assetsList);
-    bool add( GeomFileAssetBuilder& gb, uint8_p&& _data ) {
-        assetsList[gb.Name()] = std::make_shared<uint8_p>( std::move(_data) );
+    bool add( GeomFileAssetBuilder& gb, const std::vector<char>& _data ) {
+        assetsList[gb.Name()] = _data;
         return true;
     }
     void add( const std::string& _key, std::shared_ptr<HierGeom> _h );
-    std::shared_ptr<uint8_p> get( const std::string& _key ) { return assetsList[_key]; }
+    std::vector<char> get( const std::string& _key ) { return assetsList[_key]; }
     std::shared_ptr<HierGeom> findHier( const std::string& _key );
 
     AssetHierContainerIt begin();
@@ -41,7 +41,7 @@ DEPENDENCY_MAKER_EXIST(assetsList);
     AssetHierContainerCIt end() const;
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<uint8_p>> assetsList;
+    std::unordered_map<std::string, std::vector<char>> assetsList;
     std::unordered_map<std::string, std::shared_ptr<HierGeom>> assetsHierList;
 };
 

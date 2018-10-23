@@ -9,7 +9,7 @@ bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, cons
     AssetManager& sg = static_cast<AssetManager&>(_md);
 
     if ( _status == DependencyStatus::LoadedSuccessfully ) {
-        sg.add( *this, std::move(_data) );
+        sg.add( *this, zlibUtil::inflateFromMemory( std::move(_data) ) );
     } else {
         return false;
     }

@@ -20,6 +20,7 @@ void enableDepthTest( bool enabled );
 void setCullMode( CullMode cm );
 void setDepthFunction( DepthFunction dp );
 void enableMultiSample( bool enabled );
+void grabScreen( int x, int y, int w, int h, void* buffer );
 
 std::string cubemapFaceToString( const CubemapFaces cmf );
 PixelFormat channelsToFormat( int _channels );

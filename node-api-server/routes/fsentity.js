@@ -282,6 +282,35 @@ const getEntities = async (req, res, randomElementNumber) => {
     
 }
 
+const deleteId = async (eId) => {
+
+    let result = { entity: null, entityKeys: null, error : null};
+    let entity = {};
+
+    entity = await entityModel.findOne({ _id: mongoose.Types.ObjectId(eId)});
+
+    if (entity!==null) {
+        entity=entity.toObject();
+    }
+
+    try {
+        if (entity===null) {
+            throw "Entity doesn't exist";
+        }
+        if (entity.metadata.file!==null) {
+            const path = getFilePath(entity.group, entity.metadata.file);
+            await fsc.cloudStorageDelete(path);
+        }
+        result.entity=await deleteEntity(eId);
+        result.entityKeys = await deleteEntityKeys(eId);
+    }
+    catch (ex) {
+        result.error=ex;
+    }
+
+    return result;
+}
+
 router.get('/entities/one/:group/:keys', async (req, res, next) => {
 
     let result = null;
@@ -362,7 +391,7 @@ router.post('/entities/:group/:filename', async (req, res, next) => {
         //Check name exists
         let entity = await checkNameExists(group,keyname);
         if (entity!==null) {
-            throw "Entity with name '"+keyname+"' exists";
+            await deleteId( entity.id );
         }
         const metadata = req.body;
         if (!('raw' in metadata)) {
@@ -523,35 +552,10 @@ router.put('/entities/addKeys/:entityId/:keys', async (req, res, next) => {
 
 router.delete('/entities/byId/:entityId', async (req, res, next) => {
 
-    const result = { entity: null, entityKeys: null};
-    let entity = {};
-    let error = null;
-    let path = null;
+    const result = await deleteId(req.params.entityId);
 
-    entity = await entityModel.findOne({ _id: mongoose.Types.ObjectId(req.params.entityId)});
-
-    if (entity!==null) {
-        entity=entity.toObject();
-    }
-
-    try {
-        if (entity===null) {
-            throw "Entity doesn't exist";
-        }
-        if (entity.metadata.file!==null) {
-            const path = getFilePath(entity.group, entity.metadata.file);
-            //path="entities/"+entity.group+"/"+entity.metadata.file;
-            await fsc.cloudStorageDelete(path);
-        }
-        result.entity=await deleteEntity(req.params.entityId);
-        result.entityKeys = await deleteEntityKeys(req.params.entityId);
-    }
-    catch (ex) {
-        error=ex;
-    }
-
-    if (error) {
-        res.status(500).send(error);
+    if (result.error) {
+        res.status(500).send(result.error);
     } else {
         res.send(result);
     }

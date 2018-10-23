@@ -60,6 +60,10 @@ void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     sg.add( *this, mat );
 }
 
+void MaterialBuilder::publish() const {
+    Http::post( Url{ Http::restEntityPrefix( Material::entityGroup(), Name() + postFix ) }, toMetaData() );
+}
+
 void resizeCallback(void* ctx, void*data, int size) {
     auto* rawThumbl = reinterpret_cast<std::string*>(ctx);
     std::string img{ reinterpret_cast<const char*>(data), static_cast<size_t>(size) };
@@ -67,7 +71,7 @@ void resizeCallback(void* ctx, void*data, int size) {
     *rawThumbl = { p.begin(), p.end() };
 }
 
-std::string MaterialBuilder::generateThumbnail() {
+std::string MaterialBuilder::generateThumbnail() const {
     auto thumb = std::make_unique<std::string>();
 
     std::unique_ptr<uint8_t[]> lthumb;
@@ -85,7 +89,7 @@ std::string MaterialBuilder::generateThumbnail() {
     return std::string{ thumb->data(), thumb->size() };
 }
 
-std::string MaterialBuilder::generateRawData() {
+std::string MaterialBuilder::generateRawData() const {
     std::stringstream tagStream;
     tarUtil::TarWrite tar{ tagStream };
 
@@ -99,7 +103,7 @@ std::string MaterialBuilder::generateRawData() {
     return std::string{ rawm.begin(), rawm.end() };
 }
 
-std::string MaterialBuilder::toMetaData() {
+std::string MaterialBuilder::toMetaData() const {
 
     MegaWriter writer;
 

@@ -67,7 +67,7 @@ void elaborateSbsarLayer( const std::string& mainFileName, const std::string& la
 
 //    LOGR( mb.toMetaData().c_str() );
 
-    Http::post( Url{ Http::restEntityPrefix( Material::entityGroup(), metadataHttp ) }, mb.toMetaData() );
+//    Http::post( Url{ Http::restEntityPrefix( Material::entityGroup(), metadataHttp ) }, mb.toMetaData() );
 //
 //    std::string rmcl = cdInto + "\n rm -f " fileb + " " + fileh + " " + filem + " " + filer
 //                       + " " + filen + " " + filea;

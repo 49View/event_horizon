@@ -26,7 +26,7 @@ HierGeom::HierGeom( const std::string& _name ) : HierGeom() {
     mName = _name;
 }
 
-HierGeom::HierGeom( std::shared_ptr<uint8_p> _data ) : HierGeom() {
+HierGeom::HierGeom( std::vector<char> _data ) : HierGeom() {
     std::shared_ptr<DeserializeBin> reader = std::make_shared<DeserializeBin>( _data  );
     gatherGeomDependencies( reader );
     deserialize( reader );
@@ -152,15 +152,13 @@ void HierGeom::deserializeRec( std::shared_ptr<DeserializeBin> reader, HierGeom 
 
 std::vector<unsigned char> HierGeom::serialize() {
 
-    std::vector<unsigned char> ret;
-
     auto writer = std::make_shared<SerializeBin>( SerializeVersionFormat::UInt64, entityGroup() );
 
     serializeDependencies( writer );
     serializeRec( writer );
 
-    return ret;
-//    auto fn = zlibUtil::deflateMemory( FM::readLocalFile(cacheFolder() + filenameHashed) );
+    return writer->close();
+
 //		Http::post( Url( Http::restEntityPrefix( entityType, mFilename ) ), fn );
 }
 
