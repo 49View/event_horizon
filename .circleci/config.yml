@@ -31,7 +31,8 @@ jobs:
             - node-api-server/node_modules
           key: v2-dependencies-{{ checksum "node-api-server/package.json" }}
       # run tests!
-      - run: npm test
+      - run: >
+          cd node-api-server && npm test
       # - persist_to_workspace:
       #     root: /app
       #     paths:
