@@ -21,14 +21,15 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "package.json" }}
+            - v2-dependencies-{{ checksum "node-api-server/package.json" }}
             # fallback to using the latest cache if no exact match is found
             - v2-dependencies-
-      - run: npm install
+      - run: >
+          cd node-api-server && npm install
       - save_cache:
           paths:
-            - node_modules
-          key: v2-dependencies-{{ checksum "package.json" }}
+            - node-api-server/node_modules
+          key: v2-dependencies-{{ checksum "node-api-server/package.json" }}
       # run tests!
       - run: npm test
       # - persist_to_workspace:
