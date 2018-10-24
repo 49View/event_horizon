@@ -1,5 +1,5 @@
 var AWS = require('aws-sdk');
-const globalConfig = require('../../config_api.js')
+const globalConfig = require('../config_api.js')
 
 AWS.config = new AWS.Config();
 AWS.config.accessKeyId = "AKIAJWSLLXTAUPNWMBOA";

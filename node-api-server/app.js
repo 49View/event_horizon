@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-const globalConfig = require('../config_api.js')
+const globalConfig = require('./config_api.js')
 
 var index = require('./routes/index');
 var catalog = require('./routes/catalog');
