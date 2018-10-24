@@ -1,4 +1,9 @@
 
+#ifndef STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#endif
+#include <stb/stb_image_write.h>
+
 #include <core/http/webclient.h>
 #include <core/util.h>
 #include <sys/types.h>
