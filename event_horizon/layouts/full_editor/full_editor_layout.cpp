@@ -194,7 +194,8 @@ void ImGuiCloudEntities( UiPresenter* p, const std::string& _entType ) {
     } ) ) {
         Http::get( Url{ HttpFilePrefix::entities_all + _entType + "/" + std::string(buf) },
             [&](const Http::Result&_res) {
-                remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()), _res.length };
+                remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()),
+                                                  static_cast<std::string::size_type>(_res.length) };
                 UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
         } );
     };
@@ -217,7 +218,7 @@ void ImGuiTimeline() {
 void render( UiPresenter* p ) {
 
     p->Console()->Draw( ImVec2( 0.0, getScreenSizefUI.y()-(getScreenSizefUI.y() * uivl.consoleHeight) ),
-                   ImVec2(getScreenSizefUI.x(), getScreenSizefUI.y() * uivl.consoleHeight ) );
+                        ImVec2( getScreenSizefUI.x(), getScreenSizefUI.y() * uivl.consoleHeight ) );
 
     float sceneY = getScreenSizefUI.y() * (1.0f-uivl.consoleHeight);
     float sceneSectionY3 = sceneY / 3.0f;

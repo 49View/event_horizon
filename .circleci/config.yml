@@ -39,15 +39,13 @@ jobs:
       #       - target/*
   deployNODEJSAPI:
     working_directory: ~/repo
-    docker:
-      - image: circleci/node:10.3.0
+    machine:
+      enabled: true
     steps:
-      - checkout
       - run:
-          name: Deploy to heroku
+          name: Deploy to Digital Ocean
           command: |
-            # git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
-            git subtree push --prefix node-api-server https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP "./deploy.sh"
 
   buildCPP:
     <<: *defaults
@@ -115,17 +113,17 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-#      - buildNODEJSAPI
-      - buildCPP:
-          filters:
-            branches:
-              only: master
-#      - deployNODEJSAPI:
-#          requires:
-#            - buildNODEJSAPI
+      - buildNODEJSAPI
+#      - buildCPP:
 #          filters:
 #            branches:
 #              only: master
-      - deployCPP:
+      - deployNODEJSAPI:
           requires:
-            - buildCPP
+            - buildNODEJSAPI
+          filters:
+            branches:
+              only: master
+#      - deployCPP:
+#          requires:
+#            - buildCPP

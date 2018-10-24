@@ -505,7 +505,7 @@ macro(link_boost)
 endmacro(link_boost)
 
 macro(link_sockets)
-    link_libraries_multi("socket.io-client-cpp" "sioclient" "sioclient" "sioclient" OFF)
+    link_libraries_multi("socket.io-client-cpp" "sioclient_tls" "sioclient_tls" "sioclient_tls" OFF)
 endmacro(link_sockets)
 
 macro(link_ffmpeg)
