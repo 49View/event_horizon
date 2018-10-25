@@ -1,6 +1,4 @@
-#ifdef UE4
-#include "SixthViewer.h"
-#endif
+
 #include "aabb.h"
 
 

@@ -274,8 +274,9 @@ AABB HierGeom::containingAABB() const {
 
 void HierGeom::calcCompleteBBox3dRec( AABB& _bb ) {
     if ( mData ) {
-        _bb.merge( mData->BBox3d() );
-        _bb.transform( *mLocalHierTransform.get() );
+        AABB lBBox = mData->BBox3d();
+        lBBox.transform( *mLocalHierTransform.get() );
+        _bb.merge( lBBox );
     }
 
     for ( auto& c : children ) {

@@ -193,7 +193,7 @@ protected:
 
     MatrixAnim mTRS;
 
-    AABB bbox3d;
+    AABB bbox3d = AABB::INVALID;
     bool mSHReceiver = false;
     bool mCastShadows = true;
 
