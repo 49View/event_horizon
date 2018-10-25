@@ -61,7 +61,7 @@ public:
 
 private:
     void addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<HierGeom> father );
-    void addNodeToHier( const int nodeIndex, std::shared_ptr<HierGeom> hier );
+    void addNodeToHier( const int nodeIndex, std::shared_ptr<HierGeom>& hier );
     void elaborateMaterial( const tinygltf::Material& mat );
     void saveMaterial( const IntermediateMaterial& im );
     void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic );

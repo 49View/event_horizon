@@ -729,7 +729,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<HierGeom
     father->Geom( geom );
 }
 
-void GLTF2::addNodeToHier( const int nodeIndex, std::shared_ptr<HierGeom> hier ) {
+void GLTF2::addNodeToHier( const int nodeIndex, std::shared_ptr<HierGeom>& hier ) {
 
     auto node =  model.nodes[nodeIndex];
     Vector3f pos = Vector3f::ZERO;
@@ -740,23 +740,27 @@ void GLTF2::addNodeToHier( const int nodeIndex, std::shared_ptr<HierGeom> hier )
         pos = { node.translation[0], node.translation[1], node.translation[2] };
     }
     if ( !node.rotation.empty() ) {
-        rot = Quaternion{ node.rotation[0], node.rotation[1], node.rotation[2], node.rotation[3] };
-        Vector3f erot = rot.euler() * -1.0f;
-        rot.euler( erot );
+        rot = Quaternion{ -node.rotation[0], -node.rotation[1], -node.rotation[2], node.rotation[3] };
+//        Vector3f erot = rot.euler();// * -1.0f;
+//        rot.euler( erot );
     }
 
     if ( !node.scale.empty() ) {
         scale = { node.scale[0], node.scale[1], node.scale[2] };
     }
 
-    hier->updateTransform( pos, rot, scale );
+//    if ( node.name == "RootNode" || node.mesh >= 0 ) {
+        hier->generateLocalTransformData( pos, rot, scale );
+//    }
+
     if ( node.mesh >= 0 ) {
         for ( size_t k = 0; k < model.meshes[node.mesh].primitives.size(); k++ ) {
             addGeom( node.mesh, k , hier );
         }
     }
-    for ( size_t ci = 0; ci < node.children.size(); ci++ ) {
-        addNodeToHier( node.children[ci], hier->addChildren() );
+    for ( const auto& ci : node.children ) {
+        auto c = hier->addChildren();
+        addNodeToHier( ci, c );
     }
 }
 
@@ -889,6 +893,7 @@ std::shared_ptr<HierGeom> GLTF2::convert() {
         addNodeToHier( scene.nodes[0], hierScene );
     }
 
+    hierScene->generateMatrixHierarchy( Matrix4f::MIDENTITY() );
     hierScene->calcCompleteBBox3d();
 //    hierScene->BBox3d( );
 //    hierScene->serialize();
