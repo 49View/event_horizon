@@ -243,12 +243,12 @@
 
         #define_code shadow_code
         float visibility = 1.0;
-        // if ( dot( N, normalize( u_sunPosition - Position_worldspace ) ) > 0.25 )  {
+         if ( dot( N, normalize( u_sunPosition - Position_worldspace ) ) > 0.25 )  {
             for ( int i = 0; i < 4; i++ ) {
                 int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;
                 visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3.xy + poissonDisk[index] / 4096.0, v_shadowmap_coord3.z ) ) * 0.25;// * u_timeOfTheDay;
             }
-        // }
+         }
         #end_code
 
         #define_code final_combine
@@ -262,24 +262,29 @@
         kD *= 1.0 - metallic;
 
         vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
+        float gr = irradiance.r * 0.3 + irradiance.g * 0.59 + irradiance.b * 0.11;
+        irradiance.rgb = vec3(gr);
         vec3 aoLightmapColor = texture(lightmapTexture, v_texCoord2).rgb;
-        vec3 diffuseV   = (irradiance * albedo );
+        vec3 diffuseV   = (irradiance * 10.0 * (albedo / 1.0f) );
 
         // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
         const float MAX_REFLECTION_LOD = 6.0;
         vec3 R = reflect(-V, N);
         vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness * MAX_REFLECTION_LOD).rgb;
+        // gr = prefilteredColor.r * 0.3 + prefilteredColor.g * 0.59 + prefilteredColor.b * 0.11;
+        // prefilteredColor.rgb = vec3(gr);
         vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
         vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+        // specular = pow(specular, vec3(2.2/1.0)); 
 
-        vec3 ambient = (kD * diffuseV + specular) * visibility * ao * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
+        vec3 ambient = (kD * diffuseV + specular) * visibility * ao;// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
         // vec3 ambient = (kD );
 
         //vec3 finalColor = (Lo * visibility) + ambient;
         vec3 finalColor = ambient;//pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
 
         finalColor = finalColor / ( finalColor + vec3(1.0));
-        // finalColor = pow(finalColor, vec3(1.0/2.2)); 
+        // finalColor = pow(finalColor, vec3(2.2/1.0)); 
 
         FragColor = vec4( finalColor, opacity * alpha );
 
