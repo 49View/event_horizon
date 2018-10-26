@@ -372,7 +372,7 @@ router.get('/entities/onebinary/:group/:keys', async (req, res, next) => {
         if (binaryContent!==null) {
             sendFile(res, binaryContent);
         } else {
-            res.send(result);
+            res.status(204).send();
         }
     }
 });
