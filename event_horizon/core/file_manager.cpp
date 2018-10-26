@@ -9,6 +9,14 @@
 #include "http/webclient.h"
 #include "util.h"
 
+bool callbackSuccessfulStatus( DependencyStatus dp ) {
+    if ( dp == DependencyStatus::LoadedSuccessfully ||
+         dp == DependencyStatus::LoadedSuccessfully204 ) {
+        return true;
+    }
+    return false;
+}
+
 namespace FileManager {
 
     std::unordered_map< std::string, std::shared_ptr<FileCallbackHandler> > callbacksDataMap;
@@ -153,20 +161,23 @@ namespace FileManager {
         auto it = callbacksDataMap.find( key );
         auto& v = it->second->cbData;
 
-        if ( ( header.length == 0 ) || (!header.isSuccessStatusCode()) ) {
-            LOGE( "[***FAILED***] %s, %d, %s", key.c_str(), header.statusCode, header.uri.c_str() );
+        if ( !header.isSuccessStatusCode() ) {
+            LOGE( "[ERROR] %s, %d, %s", key.c_str(), header.statusCode, header.uri.c_str() );
             v->status = DependencyStatus::LoadingFailed;
             return;
         }
 
         LOGR( "[LOAD OK] %s - %llu bytes", key.c_str(), header.length );
-        v->status = DependencyStatus::LoadedSuccessfully;
-        if ( header.flags == Http::ResponseFlags::Text  ) {
-            std::unique_ptr<uint8_t[]> buf = std::make_unique<uint8_t[]>(header.length);
-            std::memcpy( buf.get(), header.bufferString.c_str(), header.length );
-            v->data = { std::move( buf ), header.length };
-        } else {
-            v->data = { std::move( header.buffer ), header.length };
+        v->status = header.length == 0 ? DependencyStatus::LoadedSuccessfully204 : DependencyStatus::LoadedSuccessfully;
+        v->data.second = header.length;
+        if ( v->status == DependencyStatus::LoadedSuccessfully ) {
+            if ( header.flags == Http::ResponseFlags::Text  ) {
+                std::unique_ptr<uint8_t[]> buf = std::make_unique<uint8_t[]>(header.length);
+                std::memcpy( buf.get(), header.bufferString.c_str(), header.length );
+                v->data = { std::move( buf ), header.length };
+            } else {
+                v->data = { std::move( header.buffer ), header.length };
+            }
         }
     }
 

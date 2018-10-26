@@ -24,10 +24,12 @@ struct FileInfo {
 using FileCallback = std::function<void(const uint8_p&)>;
 using FileStringCallback = std::function<void(const std::string&)>;
 
+bool callbackSuccessfulStatus( DependencyStatus dp );
+
 struct CallbackData {
     virtual void init() {}
 	bool hasFinishedLoading() const {
-		return ( status == DependencyStatus::LoadedSuccessfully ||
+		return ( callbackSuccessfulStatus(status) ||
 				 status == DependencyStatus::LoadingFailed );
 	}
 	bool isComplete() const {
@@ -100,7 +102,7 @@ struct FileCallbackHandlerSimple : FileCallbackHandler {
     }
 
     bool executeCallback( const DependencyStatus _status ) {
-        if ( _status == DependencyStatus::LoadedSuccessfully ) {
+        if ( callbackSuccessfulStatus(_status) ) {
             simpleCallback( cbData->data );
             return true;
         }

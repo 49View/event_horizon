@@ -3,7 +3,7 @@
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char *argv[] ) {
 
-    Http::useLocalHost(true);
+//    Http::useLocalHost(true);
     EventHorizon ev{ fullEditor() };
 
     return 0;

@@ -17,6 +17,7 @@ using ddContainer = std::vector<std::string>;
 enum class DependencyStatus {
     Loading = 0,
     LoadedSuccessfully,
+    LoadedSuccessfully204,
     LoadingFailed,
     CallbackSuccessfullyExectuted,
     CallbackFailedOnExectution,

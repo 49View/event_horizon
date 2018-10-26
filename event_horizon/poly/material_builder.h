@@ -29,8 +29,8 @@ private:
 
 struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact )
 
-    MaterialBuilder( MaterialBuilder& a )
-            : materialType( a.materialType ), shaderName( a.shaderName ), baseSolidColor( a.baseSolidColor ),
+    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a.Name()),
+              materialType( a.materialType ), shaderName( a.shaderName ), baseSolidColor( a.baseSolidColor ),
               metallicValue( a.metallicValue ), roughnessValue( a.roughnessValue ), aoValue( a.aoValue ),
               imageExt( a.imageExt ) {
         for ( auto&& [k,v] : a.buffers ) {
