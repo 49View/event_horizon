@@ -85,7 +85,13 @@ void ImGuiConsole::Draw( const ImVec2& _pos, const ImVec2& _size ) {
         } else if (strncmp(item, "# ", 2) == 0) {
             col = ImColor(1.0f,0.78f,0.58f,1.0f);
         } else if (strstr(item, "[HTTP-GET]")) {
-            col = ImColor(0.2f,0.78f,0.28f,1.0f);
+            if (strstr(item, "[HTTP-GET] http")) {
+                col = ImColor( 0.2f, 0.98f, 0.28f, 1.0f );
+            } else if (strstr(item, "[HTTP-GET] Response code: 2")) {
+                col = ImColor( 0.2f, 0.78f, 0.28f, 1.0f );
+            } else  {
+                col = ImColor( 1.0f,0.48f,0.38f,1.0f );
+            }
         }
         ImGui::PushStyleColor(ImGuiCol_Text, col);
         ImGui::TextUnformatted(item);
