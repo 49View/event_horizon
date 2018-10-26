@@ -372,7 +372,7 @@ router.get('/entities/onebinary/:group/:keys', async (req, res, next) => {
         if (binaryContent!==null) {
             sendFile(res, binaryContent);
         } else {
-            res.status(404).send("Entity not found");
+            res.send(result);
         }
     }
 });
