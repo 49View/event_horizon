@@ -39,7 +39,7 @@ void materialPBRCallback( const rapidjson::Document& data ) {
                     mb->buffer( r, fi.dataPtr );
                 }
             }
-            UiPresenter::sUpdateCallbacks.push_back( []( UiPresenter* p ) {
+            UiPresenter::sUpdateCallbacks.emplace_back( []( UiPresenter* p ) {
                 mb->makeDirect( p->ML() );
                 if ( !p->RR().hasTag(9300) ) {
                     GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).build( p->RSG() );
@@ -305,8 +305,8 @@ void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path
         static float ni = 0.0f;
         GLTF2 newObject{ finalPath };
         auto hierScene = newObject.convert();
-        p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d(), {0.25f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
-        p->getCamera(Name::Sierra)->center(hierScene->BBox3d(), {0.25f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
+        p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d(), {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
+        p->getCamera(Name::Sierra)->center(hierScene->BBox3d(), {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
         hierScene->updateTransform( Vector3f::X_AXIS * ni );
         gbt = std::make_shared<GeomBuilder>( hierScene, newObject.Materials() );
         gbt->build(p->RSG());

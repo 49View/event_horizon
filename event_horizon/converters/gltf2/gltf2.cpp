@@ -790,6 +790,12 @@ void sigmoidMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::Intermediat
     _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory( greyValue ) );
 }
 
+void valueToColorMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
+    auto vc = RawImage{ ic.baseName, 1, 1, ic.value.RGBATOI()};
+    vc.grayScale();
+    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(vc) );
+}
+
 void grayscaleToNormalMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
     RawImage normalMap = _im.grayScaleBaseColor.toNormalMap();
     _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(normalMap) );
@@ -812,9 +818,11 @@ void GLTF2::saveInternalPBRComponent( const IntermediateMaterial& _im, const Int
                 break;
             case InternalPBRTextureReconstructionMode::SigmoidFloor:
                 sigmoidMap( ic, _im, SigmoidSlope::Negative );
+//                valueToColorMap( ic, _im );
                 break;
             case InternalPBRTextureReconstructionMode::SigmoidCeiling:
                 sigmoidMap( ic, _im, SigmoidSlope::Positive );
+//                valueToColorMap( ic, _im );
                 break;
             case InternalPBRTextureReconstructionMode::NormalMap:
                 grayscaleToNormalMap( ic, _im );

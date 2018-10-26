@@ -136,6 +136,8 @@ public:
 
 public:
 	static std::vector<std::string> callbackPaths;
+	static Vector2i callbackResizeWindow;
+	static Vector2i callbackResizeFrameBuffer;
 
 protected:
 	void activate();

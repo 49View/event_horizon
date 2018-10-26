@@ -15,6 +15,8 @@
 #include <stb/stb_image.h>
 
 std::vector<std::string> UiPresenter::callbackPaths;
+Vector2i UiPresenter::callbackResizeWindow = Vector2i(-1, -1);
+Vector2i UiPresenter::callbackResizeFrameBuffer = Vector2i(-1, -1);
 std::vector<PresenterUpdateCallbackFunc> UiPresenter::sUpdateCallbacks;
 
 CommandScriptPresenterManager::CommandScriptPresenterManager( UiPresenter& _hm ) {
@@ -30,6 +32,14 @@ void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char *
 	for ( auto i = 0; i < count; i++ ) {
 		UiPresenter::callbackPaths.emplace_back( std::string(paths[i]) );
 	}
+}
+
+void GResizeWindowCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
+	UiPresenter::callbackResizeWindow = Vector2i{w, h};
+}
+
+void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
+	UiPresenter::callbackResizeFrameBuffer = Vector2i{w, h};
 }
 
 UiPresenter::UiPresenter( Renderer& _rr, RenderSceneGraph& _rsg, UiControlManager& _uicm, TextInput& ti, MouseInput& mi,
@@ -55,6 +65,18 @@ void UiPresenter::updateCallbacks() {
 		}
 		callbackPaths.clear();
 	}
+
+	if ( callbackResizeWindow.x() > 0 && callbackResizeWindow.y() > 0 ) {
+		LOGR("Resized window: [%d, %d]", callbackResizeWindow.x(), callbackResizeWindow.y() );
+		callbackResizeWindow = Vector2i{-1, -1};
+	}
+
+	if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
+		LOGR("Resized framebuffer: [%d, %d]", callbackResizeFrameBuffer.x(), callbackResizeFrameBuffer.y() );
+		callbackResizeFrameBuffer = Vector2i{-1, -1};
+		WH::gatherMainScreenInfo();
+	}
+
 }
 
 void UiPresenter::update( GameTime& gt ) {
@@ -79,6 +101,9 @@ void UiPresenter::activate() {
 	if ( !rr.isInitialized() ) return;
 
 	WH::setDropCallback( GDropCallback );
+	WH::setResizeWindowCallback( GResizeWindowCallback );
+	WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
+
     //stbi_set_flip_vertically_on_load(true);
 
 	Socket::on( "cloudStorageFileUpdate-shaders/shaders.shd",

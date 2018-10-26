@@ -495,11 +495,11 @@ void Camera::center( const AABB& _bbox, const Vector3f& _angles, const Vector3f&
 	if ( !mbEnableInputs ) return;
 	float aperture = ( tanf( degToRad( 90.0f - (mFov->value) ) ) ) / mViewPort.ratio();
 
-	float bdiameter = _bbox.calcDiameter();
+	float bdiameter = _bbox.calcDiameter()*0.65f;
 	float bh = _bbox.calcHeight();
 	Vector3f cp = { 0.0f, 0.0f, aperture + bdiameter };
 	Matrix4f rt{ Vector3f::ZERO, -_angles.y(), Vector3f::Y_AXIS, Vector3f::ONE};
-	mPos->value = rt.transform( cp ) + Vector3f::Y_AXIS*( bh * ( 0.5f + _offsets.y() ) );
+	mPos->value = rt.transform( cp ) + Vector3f::Y_AXIS*( bh * ( 1.0f + _offsets.y() ) );
 	mTarget->value = _bbox.centre();
 	qangle->value = _angles;
 //	Vector3f z = normalize( eye - at );  // Forward

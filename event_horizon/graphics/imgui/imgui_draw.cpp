@@ -1542,7 +1542,7 @@ ImFont* ImFontAtlas::AddFontDefault(const ImFontConfig* font_cfg_template)
         font_cfg.PixelSnapH = true;
     }
     if (font_cfg.Name[0] == '\0') strcpy(font_cfg.Name, "ProggyClean.ttf, 13px");
-    if (font_cfg.SizePixels <= 0.0f) font_cfg.SizePixels = 13.0f;
+    if (font_cfg.SizePixels <= 0.0f) font_cfg.SizePixels = 26.0f;
 
     const char* ttf_compressed_base85 = GetDefaultCompressedFontDataTTFBase85();
     const ImWchar* glyph_ranges = font_cfg.GlyphRanges != NULL ? font_cfg.GlyphRanges : GetGlyphRangesDefault();

@@ -13,14 +13,22 @@ namespace WindowHandling {
         glfwSetDropCallback( window, fn );
     }
 
+    void setResizeWindowCallback( GLFWwindowsizefun fn ) {
+        glfwSetWindowSizeCallback( window, fn );
+    }
+
+    void setResizeFramebufferCallback( GLFWframebuffersizefun fn ) {
+        glfwSetFramebufferSizeCallback( window, fn );
+    }
+
     void gatherMainScreenInfo() {
         GLint dfb;
         GLCALL ( glGetIntegerv( GL_FRAMEBUFFER_BINDING, &dfb ));
-        LOGI( "Default framebuffer: %d", dfb );
         JMATH::Rect2f r = Framebuffer::getCurrentViewport();
+        Vector2i sizei{ static_cast<int>( r.width()), static_cast<int>( r.height()) };
         AppGlobals::getInstance().setScreenSizef( r.size());
-        AppGlobals::getInstance().setScreenSizei(
-                Vector2i( static_cast<int>( r.width()), static_cast<int>( r.height())));
+        AppGlobals::getInstance().setScreenSizei( sizei );
+        LOGI( "Default framebuffer index: [%d] - size: [%d, %d]", dfb, sizei.x(), sizei.y() );
     }
 
     bool shouldWindowBeClosed() {
@@ -35,7 +43,7 @@ namespace WindowHandling {
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
-//        ImGui::GetIO().FontGlobalScale = 1.0f / 2.0f;
+        ImGui::GetIO().FontGlobalScale = 0.5f;
 //        ImGui::GetIO().FontAllowUserScaling = true;
         ImGui_ImplGlfw_InitForOpenGL(window, true);
 #ifdef __EMSCRIPTEN__

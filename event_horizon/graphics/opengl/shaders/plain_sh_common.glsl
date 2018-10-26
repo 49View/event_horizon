@@ -265,14 +265,14 @@
         float gr = irradiance.r * 0.3 + irradiance.g * 0.59 + irradiance.b * 0.11;
         irradiance.rgb = vec3(gr);
         vec3 aoLightmapColor = texture(lightmapTexture, v_texCoord2).rgb;
-        vec3 diffuseV   = (irradiance * 10.0 * (albedo / 1.0f) );
+        vec3 diffuseV   = (irradiance * 5.0 * (albedo / 1.0f) );
 
         // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
         const float MAX_REFLECTION_LOD = 6.0;
         vec3 R = reflect(-V, N);
         vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness * MAX_REFLECTION_LOD).rgb;
-        // gr = prefilteredColor.r * 0.3 + prefilteredColor.g * 0.59 + prefilteredColor.b * 0.11;
-        // prefilteredColor.rgb = vec3(gr);
+        gr = prefilteredColor.r * 0.3 + prefilteredColor.g * 0.59 + prefilteredColor.b * 0.11;
+        prefilteredColor.rgb = vec3(gr);
         vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
         vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
         // specular = pow(specular, vec3(2.2/1.0)); 

@@ -20,6 +20,8 @@ namespace WindowHandling {
 	void imguiUpdateEnd();
 	void gatherMainScreenInfo();
 	void setDropCallback( GLFWdropfun fn );
+	void setResizeWindowCallback( GLFWwindowsizefun fn );
+	void setResizeFramebufferCallback( GLFWframebuffersizefun fn );
 
 	extern GLFWwindow* window;
 	extern bool bUseGLFWPoll;
