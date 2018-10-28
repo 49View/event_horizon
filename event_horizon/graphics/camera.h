@@ -24,6 +24,7 @@ int glhUnProjectf( float winx, float winy, float winz, float *modelview, float *
 int glhProjectf( float objx, float objy, float objz, float *modelview, float *projection, int *viewport, float *windowCoordinate );
 
 enum class CameraControls {
+	Edit2d,
 	Plan2d,
 	Fly,
 	Walk
@@ -214,7 +215,10 @@ public:
 	void Status( CameraState val ) { mStatus = val; }
 
 	JMATH::Rect2f ViewPort() const { return mViewPort; }
-	void ViewPort( JMATH::Rect2f val ) { mViewPort = val; }
+	void ViewPort( JMATH::Rect2f val ) {
+		mViewPort = val;
+		mScreenAspectRatio.setAspectRatioMatrixScreenSpace( mViewPort.ratio() );
+	}
 
 private:
 	void translate( const Vector3f& pos );

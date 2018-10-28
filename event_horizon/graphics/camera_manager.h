@@ -60,6 +60,9 @@ public:
     }
     void setViewport( const Rect2f& viewport ) {
         mViewport = viewport;
+        mCamera->ViewPort( viewport );
+        mCameraVRLeftEye->ViewPort( viewport );
+        mCameraVRRightEye->ViewPort( viewport );
     }
 
     bool contains( const Vector2f& pos ) const;

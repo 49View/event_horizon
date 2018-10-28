@@ -19,10 +19,41 @@ Vector2i UiPresenter::callbackResizeWindow = Vector2i(-1, -1);
 Vector2i UiPresenter::callbackResizeFrameBuffer = Vector2i(-1, -1);
 std::vector<PresenterUpdateCallbackFunc> UiPresenter::sUpdateCallbacks;
 
+float sPresenterArrangerLeftFunction( float _value ) {
+	return getScreenSizefUI.x() * _value;
+}
+
+float sPresenterArrangerRightFunction( float _value ) {
+	return getScreenSizefUI.x() * _value;
+}
+
+float sPresenterArrangerTopFunction( float _value ) {
+	return getScreenSizefUI.y() * ( _value );
+}
+
+float sPresenterArrangerBottomFunction( float _value ) {
+	return getScreenSizefUI.y() * _value;
+}
+
+float sPresenterArrangerLeftFunction3d( float _value ) {
+	return getScreenSizef.x() * _value;
+}
+
+float sPresenterArrangerRightFunction3d( float _value ) {
+	return getScreenSizef.x() * _value;
+}
+
+float sPresenterArrangerTopFunction3d( float _value ) {
+	return getScreenSizef.y() - ( getScreenSizef.y() * ( _value ) );
+}
+
+float sPresenterArrangerBottomFunction3d( float _value ) {
+	return getScreenSizef.y() - ( getScreenSizef.y() * ( _value ) );
+}
+
 CommandScriptPresenterManager::CommandScriptPresenterManager( UiPresenter& _hm ) {
-    addCommandDefinition( "enable keyboard", std::bind(&UiPresenter::cmdEnableKeyboard, &_hm, std::placeholders::_1 ) );
-    addCommandDefinition( "disable keyboard", std::bind(&UiPresenter::cmdDisableKeyboard, &_hm, std::placeholders::_1
-    ) );
+    addCommandDefinition("enable keyboard", std::bind(&UiPresenter::cmdEnableKeyboard, &_hm, std::placeholders::_1));
+    addCommandDefinition("disable keyboard", std::bind(&UiPresenter::cmdDisableKeyboard, &_hm, std::placeholders::_1));
 }
 
 void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
@@ -72,9 +103,11 @@ void UiPresenter::updateCallbacks() {
 	}
 
 	if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
+		WH::gatherMainScreenInfo();
+		RR().resetDefaultFB();
+		layout->resizeCallback( this, callbackResizeFrameBuffer );
 		LOGR("Resized framebuffer: [%d, %d]", callbackResizeFrameBuffer.x(), callbackResizeFrameBuffer.y() );
 		callbackResizeFrameBuffer = Vector2i{-1, -1};
-		WH::gatherMainScreenInfo();
 	}
 
 }
@@ -154,15 +187,6 @@ void UiPresenter::inputPollUpdate() {
 		accumulatedVelocity = 0.0003f;
 	}
 
-//	if ( ti.checkKeyPressed( GMK_LEFT ) ) mi.leftArrowPressed( 2.0f );
-//	if ( ti.checkKeyPressed( GMK_RIGHT ) ) mi.rightArrowPressed( 2.0f );
-
-//	if ( ti.checkKeyToggleOn( GMK_V ) ) {
-//		VRM.toggleOnOff();
-//	}
-
-//	inputPollUpdateImpl();
-
 	cm.updateFromInputData( { cvtTggles,
 						      mi.getCurrPosSS(),
 	                          mi.isTouchedDown(),
@@ -236,7 +260,9 @@ void PresenterLayout::setDragAndDropFunction( DragAndDropFunction dd ) {
 }
 
 void initDefaultLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresenter* _target ) {
-	_layout->addBox(UiPresenter::DC(), _screenRect, CameraControls::Fly );
+	_layout->addBox(UiPresenter::DC(), _screenRect.origin().x(), _screenRect.origin().y(),
+			_screenRect.origin().x() + _screenRect.size().x(), _screenRect.origin().y() + _screenRect.size().y(),
+			CameraControls::Fly );
 }
 
 std::shared_ptr<PresenterLayout> PresenterLayout::makeDefault() {
@@ -247,14 +273,24 @@ void PresenterLayout::activate( UiPresenter* _target ) {
 
 	initLayout( getScreenRect, this, _target );
 
-	for ( const auto& [k,v] : boxes ) {
+	for ( auto& [k,v] : boxes ) {
 		if ( v.cc == CameraControls::Plan2d ) {
-			_target->addViewport<RLTargetPlain>( k, v.r, v.bt );
-		} else if ( v.cc == CameraControls::Walk || v.cc == CameraControls::Fly ){
-			_target->addViewport<RLTargetPBR>( k, v.r, v.bt );
+			_target->addViewport<RLTargetPlain>( k, v.updateAndGetRect(), v.bt );
+		} else if ( v.cc == CameraControls::Walk || v.cc == CameraControls::Fly ) {
+			_target->addViewport<RLTargetPBR>( k, v.updateAndGetRect(), v.bt );
 			if ( v.cc == CameraControls::Walk ) {
 				_target->CM().getCamera(k)->LockAtWalkingHeight(true);
 			}
+		}
+	}
+}
+
+void PresenterLayout::resizeCallback( UiPresenter* _target, const Vector2i& _resize ) {
+	for ( auto& [k,v] : boxes ) {
+		if ( v.cc == CameraControls::Fly ) {
+			auto r = v.updateAndGetRect();
+			_target->RR().getTarget( k )->resize( r );
+			_target->CM().getRig(k)->setViewport( r );
 		}
 	}
 }

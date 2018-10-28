@@ -249,6 +249,7 @@ public:
     virtual ~Composite() = default;
 
     virtual void blit(CommandBufferList& cbl) = 0;
+    virtual void setup( const Rect2f& _destViewport ) = 0;
 
     const std::shared_ptr<Framebuffer>& getColorFB() const {
         return mColorFB;
@@ -279,12 +280,15 @@ public:
     CompositePlain( Renderer& rr, const std::string& _name, const Rect2f& _destViewport,
                     BlitType _bt = BlitType::OnScreen );
     void blit(CommandBufferList& cbl) override;
+    void setup( const Rect2f& _destViewport ) override;
 };
 
 class CompositePBR : public Composite {
 public:
     CompositePBR( Renderer& rr, const std::string& _name, const Rect2f& _destViewport, BlitType _bt );
     ~CompositePBR() override = default;
+
+    void setup( const Rect2f& _destViewport ) override;
 
     const std::shared_ptr<Framebuffer>& getColorFinalFB() const {
         return mColorFinalFB;
@@ -337,7 +341,7 @@ public:
     explicit RLTarget( Renderer& _rr ) : rr( _rr ) {}
     RLTarget( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& _rr ) :
         cameraRig( cameraRig ), screenViewport( screenViewport ), finalDestBlit(_bt), rr( _rr ) {}
-    virtual ~RLTarget() {}
+    virtual ~RLTarget() = default;
 
     std::shared_ptr<Camera> getCamera();
     void addToCBCore( CommandBufferList& cb );
@@ -346,6 +350,7 @@ public:
     virtual void endCL( CommandBufferList& fbt ) = 0;
     virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) = 0;
     virtual void blit( CommandBufferList& cbl ) = 0;
+    virtual void resize( const Rect2f& _r ) = 0;
 
     void clearCB( CommandBufferList& cb );
 
@@ -374,7 +379,7 @@ public:
 
 public:
     std::shared_ptr<CameraRig> cameraRig;
-    Rect2f screenViewport;
+    Rect2f screenViewport = Rect2f::INVALID;
     std::string renderIndex;
     int mipMapIndex = 0;
     BlitType finalDestBlit = BlitType::OnScreen;
@@ -390,13 +395,15 @@ protected:
 class RLTargetPlain : public RLTarget {
 public:
     RLTargetPlain( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& rr );
-    ~RLTargetPlain() override {}
+    ~RLTargetPlain() override = default;
 
     void addToCB( CommandBufferList& cb ) override;
     virtual void blit(CommandBufferList& cbl) override;
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void startCL( CommandBufferList& fbt ) override;
     void endCL( CommandBufferList& fbt ) override;
+    void resize( const Rect2f& _r ) override;
+
 protected:
     std::shared_ptr<CompositePlain> mComposite;
 };
@@ -404,12 +411,13 @@ protected:
 class RLTargetFB : public RLTarget {
 public:
     RLTargetFB( std::shared_ptr<Framebuffer> _fbt, [[maybe_unused]] Renderer& _rr );
-    virtual ~RLTargetFB() {}
+    ~RLTargetFB() override = default;
     void addToCB( CommandBufferList& cb ) override {}
-    virtual void blit(CommandBufferList& cbl) override {};
-    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;;
+    void blit(CommandBufferList& cbl) override {};
+    std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void startCL( CommandBufferList& fbt ) override {};
     void endCL( CommandBufferList& fbt ) override {}
+    void resize( const Rect2f& _r ) override;
 
 protected:
     std::shared_ptr<Framebuffer> framebuffer;
@@ -418,12 +426,13 @@ protected:
 class RLTargetProbe : public RLTarget {
 public:
     RLTargetProbe( const std::string& _cameraRig, const int _faceIndex, Renderer& _rr, int _mipmapIndex = 0 );
-    virtual ~RLTargetProbe() {}
+    ~RLTargetProbe() override = default;
     void addToCB( CommandBufferList& cb ) override {}
     virtual void blit(CommandBufferList& cbl) override {};
     virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void startCL( CommandBufferList& fbt ) override;;
     void endCL( CommandBufferList& fbt ) override {}
+    void resize( const Rect2f& _r ) override {}
 
 protected:
     std::string  cameraName;
@@ -432,12 +441,13 @@ protected:
 class RLTargetPBR : public RLTarget {
 public:
     RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& rr );
-    virtual ~RLTargetPBR() {}
+    ~RLTargetPBR() override = default;
     void addToCB( CommandBufferList& cb ) override;
     virtual void blit(CommandBufferList& cbl) override;
-    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
+    std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void startCL( CommandBufferList& fbt ) override;
     void endCL( CommandBufferList& fbt ) override;
+    void resize( const Rect2f& _r ) override;
 protected:
     std::shared_ptr<CompositePBR> mComposite;
 

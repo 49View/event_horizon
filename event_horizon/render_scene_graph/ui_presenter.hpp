@@ -24,32 +24,125 @@ using PresenterUpdateCallbackFunc = std::function<void(UiPresenter* p)>;
 using DragAndDropFunction = std::function<void(UiPresenter* p, const std::string&)>;
 using InitLayoutFunction = std::function<void(
 		const Rect2f& _screenRect, PresenterLayout* _layout, UiPresenter*_target)>;
-using RenderLayoutFunction = std::function<void( UiPresenter* _target )>;
+using RenderFunction = std::function<void( UiPresenter* )>;
+using RenderLayoutFunction = std::function<void( UiPresenter* _target, const Rect2f&  )>;
+
+using PresenterArrangeFunction = std::function<float( float )>;
+
+//        Rect2f r{ getScreenSizefUI.x() * 0.0f, getScreenSizefUI.y() * uivl.consoleHeight,
+//                  getScreenSizefUI.x() * 1.0f, getScreenSizefUI.y()-(getScreenSizefUI.y() * uivl.consoleHeight) };
+
+float sPresenterArrangerLeftFunction( float _value );
+float sPresenterArrangerRightFunction( float _value );
+float sPresenterArrangerTopFunction( float _value );
+float sPresenterArrangerBottomFunction( float _value );
+
+float sPresenterArrangerLeftFunction3d( float _value );
+float sPresenterArrangerRightFunction3d( float _value );
+float sPresenterArrangerTopFunction3d( float _value );
+float sPresenterArrangerBottomFunction3d( float _value );
+
+class PresenterRectArranger {
+public:
+	PresenterRectArranger() = default;
+
+	explicit PresenterRectArranger( const Rect2f& _r ) {
+		setRect( _r );
+	}
+
+	PresenterRectArranger( float leftValue, float rightValue, float topValue, float bottomValue ) : leftValue(
+			leftValue ), rightValue( rightValue ), topValue( topValue ), bottomValue( bottomValue ) {}
+
+	PresenterRectArranger( const PresenterArrangeFunction& leftFunc, const PresenterArrangeFunction& rightFunc,
+						   const PresenterArrangeFunction& topFunc, const PresenterArrangeFunction& bottomFunc,
+						   float leftValue, float rightValue, float topValue, float bottomValue ) :
+						   leftFunc( leftFunc ), rightFunc( rightFunc ), topFunc( topFunc ), bottomFunc( bottomFunc ),
+						   leftValue(leftValue), rightValue(rightValue), topValue(topValue), bottomValue(bottomValue) {}
+
+	void set() {
+		rect.setLeft(leftFunc(leftValue));
+		rect.setBottom( bottomFunc(bottomValue) );
+		rect.setRight(rightFunc(rightValue));
+		rect.setTop( topFunc(topValue) );
+	}
+
+	const Rect2f& getRect() const {
+		return rect;
+	}
+
+	void setRect( const Rect2f& rect ) {
+		PresenterRectArranger::rect = rect;
+	}
+
+private:
+	PresenterArrangeFunction leftFunc   = sPresenterArrangerLeftFunction;
+	PresenterArrangeFunction rightFunc  = sPresenterArrangerRightFunction;
+	PresenterArrangeFunction topFunc    = sPresenterArrangerTopFunction;
+	PresenterArrangeFunction bottomFunc = sPresenterArrangerBottomFunction;
+
+	float leftValue = 0.0f;
+	float rightValue = 1.0f;
+	float topValue = 0.0f;
+	float bottomValue = 1.0f;
+
+	Rect2f rect = Rect2f::INVALID;
+};
 
 class PresenterLayout {
 public:
-	PresenterLayout( InitLayoutFunction initLayout,
-					 RenderLayoutFunction _renderFunction = nullptr,
-					 DragAndDropFunction _dd = nullptr,
-					 InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal ) :
+	explicit PresenterLayout( InitLayoutFunction&& initLayout,
+							  RenderFunction&& _renderFunction = nullptr,
+					 		  DragAndDropFunction&& _dd = nullptr,
+					 		  InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal ) :
 			  initLayout( initLayout ), renderFunction(_renderFunction), dragAndDropFunc(_dd), initFlags( initFlags ) {
 	}
 
 	struct Boxes {
-		Rect2f r;
+		Rect2f updateAndGetRect() {
+			rectArranger.set();
+			return rectArranger.getRect();
+		}
+		Rect2f getRect() const {
+			return rectArranger.getRect();
+		}
+		PresenterRectArranger rectArranger;
 		CameraControls cc= CameraControls::Fly;
 		BlitType bt = BlitType::OnScreen;
+		RenderLayoutFunction renderFunction = nullptr;
+		static const Boxes INVALID;
 	};
 
-	void addBox( const std::string& _name, const Rect2f& _r, CameraControls _cc, BlitType _bt = BlitType::OnScreen ) {
-		boxes[_name] = { _r, _cc, _bt };
+	void addBox( const std::string& _name, float _l, float _r, float _t, float _b, RenderLayoutFunction&& rlf ) {
+		boxes[_name] = { { _l, _r, _t, _b}, CameraControls::Edit2d, BlitType::OnScreen, rlf };
+	}
+
+	void addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc  ) {
+		boxes[_name] = { {
+			sPresenterArrangerLeftFunction3d,
+			sPresenterArrangerRightFunction3d,
+			sPresenterArrangerTopFunction3d,
+			sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, _cc, BlitType::OnScreen, nullptr };
 	}
 
     void addOffScreenBox(const std::string& _name, const Vector2f& _s, CameraControls _cc = CameraControls::Fly ) {
-        boxes[_name] = { Rect2f(Vector2f::ZERO, _s), _cc, BlitType::OffScreen };
+        boxes[_name] = { PresenterRectArranger{Rect2f(Vector2f::ZERO, _s)}, _cc, BlitType::OffScreen };
     }
 
-    InitializeWindowFlagsT getInitFlags() const {
+    const Boxes& Box( const std::string& _key ) const {
+		if ( const auto& it = boxes.find(_key); it != boxes.end() ) {
+			return it->second;
+		}
+		return Boxes::INVALID;
+	}
+
+	Rect2f BoxUpdateAndGet( const std::string& _key ) {
+		if ( const auto& it = boxes.find(_key); it != boxes.end() ) {
+			return it->second.updateAndGetRect();
+		}
+		return Rect2f::INVALID;
+	}
+
+	InitializeWindowFlagsT getInitFlags() const {
 		return initFlags;
 	}
 
@@ -59,8 +152,15 @@ public:
 
 	static std::shared_ptr<PresenterLayout> makeDefault();
 
+	void resizeCallback( UiPresenter* _target, const Vector2i& _resize );
+
 	void render( UiPresenter* _target ) {
-		if ( renderFunction ) renderFunction( _target );
+		for ( const auto& [k,v] : boxes ) {
+			if ( v.renderFunction ) {
+				v.renderFunction( _target, BoxUpdateAndGet(k) );
+			}
+		}
+//		if ( renderFunction ) renderFunction( _target );
 	}
 
 	void setDragAndDropFunction( DragAndDropFunction dd );
@@ -70,7 +170,7 @@ private:
 
 	std::unordered_map<std::string, Boxes> boxes;
 	InitLayoutFunction initLayout;
-	RenderLayoutFunction renderFunction;
+	RenderFunction renderFunction;
 	DragAndDropFunction dragAndDropFunc;
 	InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal;
 
@@ -79,8 +179,8 @@ private:
 
 class CommandScriptPresenterManager : public CommandScript {
 public:
-    CommandScriptPresenterManager( UiPresenter& hm );
-    virtual ~CommandScriptPresenterManager() {}
+    explicit CommandScriptPresenterManager( UiPresenter& hm );
+    virtual ~CommandScriptPresenterManager() = default;
 };
 
 class UiPresenter : public Observer<MouseInput> {
@@ -128,6 +228,7 @@ public:
     std::shared_ptr<Camera> getCamera( const std::string& _name ) { return CM().getCamera(_name); }
 
 	void Layout( std::shared_ptr<PresenterLayout> _l );
+	std::shared_ptr<PresenterLayout> Layout() { return layout; }
 	InitializeWindowFlagsT getLayoutInitFlags() const;
 
 	const std::shared_ptr<ImGuiConsole>& Console() const;

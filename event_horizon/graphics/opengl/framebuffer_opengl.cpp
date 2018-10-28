@@ -27,18 +27,6 @@ void Framebuffer::attachDepthBuffer() {
 
     GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture) );
 
-//    glGenTextures( 1, &depthTexture );
-//    GLenum glTextureTarget = framebufferTextureTarget( mMultisample );
-//    glBindTexture( glTextureTarget, depthTexture );
-//
-//    if ( mMultisample ) {
-//        texImage2DMultisample(4, GL_DEPTH_COMPONENT32F, mWidth, mHeight );
-//    } else {
-//        glTexImage2D( glTextureTarget, 0, GL_DEPTH_COMPONENT32F, mWidth, mHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0 );
-//    }
-//
-//    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, glTextureTarget, depthTexture, 0 );
-
     checkFrameBufferStatus();
 }
 
@@ -58,18 +46,6 @@ void Framebuffer::attachColorBuffer( TextureManager& tm, const std::string& _nam
 
     GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, depthBuffer) );
 
-//    GLenum glTextureTarget = framebufferTextureTarget( mMultisample );
-//
-//    mColorAttachment1Texture = tm.addTextureWithData( ImageBuilder{ _name }.size( mWidth, mHeight )
-//                                                              .setWrapMode( WRAP_MODE_CLAMP_TO_EDGE )
-//                                                              .format( mFormat )
-//                                                              .setIsFramebufferTarget( true ).GPUSlot( mTextureGPUSlot )
-//                                                      .setInitOnRenderThreadImmediatly( true )
-//                                                      .setGenerateMipMaps(mUseMipMaps).setMultisample(mMultisample) );
-//
-//    GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, glTextureTarget,
-//                                    mColorAttachment1Texture->getHandle(), 0 ));
-
     checkFrameBufferStatus();
     std::unique_ptr<GLuint[]> attachments( new GLuint[index + 1] );
     for ( unsigned int t = 0; t < index + 1; t++ ) attachments[t] = GL_COLOR_ATTACHMENT0 + t;
@@ -86,13 +62,9 @@ void Framebuffer::initDepth( TextureManager& tm ) {
                                                       .format( PIXEL_FORMAT_DEPTH_32 ).setIsFramebufferTarget( true )
                                                       .GPUSlot( mTextureGPUSlot ).setGenerateMipMaps(false) );
 
-//    glBindTexture( GL_TEXTURE_2D, mRenderToTexture->getHandle() );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
-
     glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mRenderToTexture->getHandle(), 0 );
-//    glReadBuffer( GL_NONE ); // No color buffer is drawn to.
-//    glDrawBuffer( GL_NONE ); // No color buffer is drawn to.
 
     checkFrameBufferStatus();
 }

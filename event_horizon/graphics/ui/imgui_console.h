@@ -8,6 +8,10 @@
 #include "graphics/imgui/imgui.h"
 #include "core/util.h"
 
+namespace  JMATH {
+    class Rect2f;
+}
+
 struct ImGuiConsole
 {
     char                  InputBuf[512]{};
@@ -31,7 +35,7 @@ struct ImGuiConsole
     void ClearLog();
     void AddLogLine(const char* buf );
     void AddLog(const char* fmt, ...) IM_FMTARGS(2);
-    void Draw(const ImVec2& _pos, const ImVec2& _size);
+    void Draw( const JMATH::Rect2f& _r );
     void ExecCommand(const char* command_line);
 
     static int TextEditCallbackStub(ImGuiTextEditCallbackData* data);

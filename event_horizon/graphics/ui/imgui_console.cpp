@@ -3,6 +3,7 @@
 //
 
 #include "imgui_console.h"
+#include "core/math/rect2f.h"
 
 ImGuiConsole::ImGuiConsole(CommandQueue& _cq) : cq(_cq) {
     ClearLog();
@@ -44,9 +45,9 @@ void ImGuiConsole::AddLog( const char *fmt, ... ) {
     AddLogLine(buf);
 }
 
-void ImGuiConsole::Draw( const ImVec2& _pos, const ImVec2& _size ) {
-    mPos = _pos;
-    mSize = _size;
+void ImGuiConsole::Draw( const JMATH::Rect2f& _r ) {
+    mPos = ImVec2{ _r.origin().x(), _r.origin().y() };
+    mSize = ImVec2{ _r.size().x(), _r.size().y() };
     ImGui::SetNextWindowPos(mPos);
     ImGui::SetNextWindowSize(mSize);
     if (!ImGui::Begin("Command Console", nullptr, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize))

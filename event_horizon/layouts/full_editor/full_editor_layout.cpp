@@ -15,8 +15,10 @@
 struct UIViewLayout {
     float consoleHeight = 0.0f;
     float rightPanelWidth = 0.0f;
+    float leftPanelHeight = 0.0f;
     Vector2f main3dWindowSize = Vector2f::ZERO;
     Vector2f timeLinePanelSize = Vector2f::ZERO;
+    Rect2f foxLayout;
 };
 
 std::shared_ptr<MaterialBuilder> mb;
@@ -50,11 +52,6 @@ void materialPBRCallback( const rapidjson::Document& data ) {
     }
 }
 
-void assignMetaValues( const rapidjson::Value* _value ) {
-//    std::string type = "aa";//std::string{ ( *_value )["type"].GetString() };
-//    rapidjson::Value x = _value->;
-}
-
 void listCloudMaterialCallback( UiPresenter* p ) {
     std::vector<CoreMetaData> newFilteredResult;
 
@@ -71,28 +68,31 @@ void listCloudMaterialCallback( UiPresenter* p ) {
     }
 }
 
-void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresenter* p ) {
+void ImGuiGeoms( UiPresenter* p, const Rect2f& _r ) {
+    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
+    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
+    ImGui::Begin( "Geometry", nullptr, ImGuiWindowFlags_NoCollapse );
 
-//    auto gbt = GeomBuilder{}.n("ullala");
-//    Http::post( Url{ Http::restEntityPrefix( HierGeom::entityGroup(), gbt.Name() + ".geom" ) }, gbt.toMetaData() );
+    for ( const auto& it: p->RSG().Geoms() ) {
+        auto gname = std::to_string(it->Hash());
+        ImGui::BeginGroup();
+        ImGui::Text( "Name: %s", it->Name().c_str());
+        ImGui::Text( "Hash: %lld", it->Hash());
+        ImGui::EndGroup();
+    }
+    if ( gbt ) {
+        ImGui::BeginGroup();
+        ImGui::Text( "Name: %s", gbt->Name().c_str());
+        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+            gbt->publish();
+        }
+        ImGui::EndGroup();
+    }
+    ImGui::End();
+}
 
-    uivl.consoleHeight = 0.15f;
-    uivl.rightPanelWidth = 0.25f;
-    uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
-    uivl.main3dWindowSize = { _screenRect.size().x() * (1.0-uivl.rightPanelWidth*2.0f),
-                              _screenRect.size().y() * (1.0-(uivl.consoleHeight + uivl.timeLinePanelSize.y())) };
-
-    float topX = _screenRect.size().x() * uivl.rightPanelWidth;
-    _layout->addBox( Name::Foxtrot, Rect2f{ topX, 0.0f,
-                     topX + uivl.main3dWindowSize.x(), uivl.main3dWindowSize.y() },
-                     CameraControls::Fly );
-
-//    _layout->addBox( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{ 512.0f, 512.0f } ),
-//                     CameraControls::Fly );
-    _layout->addOffScreenBox( Name::Sierra, { 256.0f, 256.0f } );
-
-    Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
-
+void ImGuiConsole( UiPresenter* p, const Rect2f& _r ) {
+    p->Console()->Draw( _r );
 }
 
 void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 size, std::shared_ptr<Texture> t,
@@ -113,7 +113,12 @@ void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 si
     }
 }
 
-void ImGuiMaterials( UiPresenter* p ) {
+void ImGuiMaterials( UiPresenter* p, const Rect2f& _r ) {
+
+    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
+    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
+    ImGui::Begin( "Materials",  nullptr, ImGuiWindowFlags_NoCollapse );
+
     float ts = (getScreenSizefUI.x()*uivl.rightPanelWidth)/6.5f;
     ImVec2 textureSize{ ts, ts };
 
@@ -140,9 +145,14 @@ void ImGuiMaterials( UiPresenter* p ) {
         ImGui::EndGroup();
         ImGui::Separator();
     }
+
+    ImGui::End();
 }
 
-void ImGuiImages( UiPresenter* p ) {
+void ImGuiImages( UiPresenter* p, const Rect2f& _r ) {
+    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
+    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
+    ImGui::Begin( "Images",  nullptr, ImGuiWindowFlags_NoCollapse );
     int ic = 0;
     for ( const auto& it: p->TM() ) {
         std::string tname = it.first;
@@ -152,24 +162,38 @@ void ImGuiImages( UiPresenter* p ) {
         ImGui::EndGroup();
         if ( ++ic % 6 != 0 ) { ImGui::SameLine(); }
     }
+    ImGui::End();
 }
 
-void ImGuiGeoms( UiPresenter* p ) {
-    for ( const auto& it: p->RSG().Geoms() ) {
-        auto gname = std::to_string(it->Hash());
-        ImGui::BeginGroup();
-        ImGui::Text( "Name: %s", it->Name().c_str());
-        ImGui::Text( "Hash: %lld", it->Hash());
-        ImGui::EndGroup();
-    }
-    if ( gbt ) {
-        ImGui::BeginGroup();
-        ImGui::Text( "Name: %s", gbt->Name().c_str());
-        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-            gbt->publish();
-        }
-        ImGui::EndGroup();
-    }
+void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresenter* p ) {
+
+    uivl.consoleHeight = 0.15f;
+    uivl.rightPanelWidth = 0.25f;
+    uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
+    uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
+    uivl.main3dWindowSize = { _screenRect.size().x() * (1.0-uivl.rightPanelWidth*2.0f),
+                              _screenRect.size().y() * (1.0-(uivl.consoleHeight + uivl.timeLinePanelSize.y())) };
+    float topX = uivl.rightPanelWidth;
+
+    _layout->addBox( "Console", 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f,
+                     std::bind(ImGuiConsole, std::placeholders::_1, std::placeholders::_2) );
+
+    _layout->addBox( "SceneGeometry", 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight,
+                     std::bind(ImGuiGeoms, std::placeholders::_1, std::placeholders::_2) );
+
+    _layout->addBox( "SceneMaterials", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f,
+                     std::bind(ImGuiMaterials, std::placeholders::_1, std::placeholders::_2) );
+
+    _layout->addBox( "SceneImages", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight*2.0f, uivl.leftPanelHeight*3.0f,
+                     std::bind(ImGuiImages, std::placeholders::_1, std::placeholders::_2) );
+
+    _layout->addBox( Name::Foxtrot,
+                     topX, topX + (1.0f-uivl.rightPanelWidth*2.0f),
+                     0.0f, (1.0f-(uivl.consoleHeight + uivl.timeLinePanelSize.y())), CameraControls::Fly );
+
+//    _layout->addOffScreenBox( Name::Sierra, { 128.0f, 128.0f } );
+
+    Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
 }
 
 void ImGuiCamera( std::shared_ptr<Camera> cam ) {
@@ -217,28 +241,12 @@ void ImGuiTimeline() {
 
 void render( UiPresenter* p ) {
 
-    p->Console()->Draw( ImVec2( 0.0, getScreenSizefUI.y()-(getScreenSizefUI.y() * uivl.consoleHeight) ),
-                        ImVec2( getScreenSizefUI.x(), getScreenSizefUI.y() * uivl.consoleHeight ) );
-
     float sceneY = getScreenSizefUI.y() * (1.0f-uivl.consoleHeight);
     float sceneSectionY3 = sceneY / 3.0f;
     float sceneSectionY2 = sceneY / 2.0f;
     float sceneSectionX = getScreenSizefUI.x() * uivl.rightPanelWidth;
-    ImGui::SetNextWindowPos( ImVec2{ 0, 0 } );
-    ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY3 } );
-    ImGui::Begin( "Geometry",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGuiGeoms(p);
-    ImGui::End();
-    ImGui::SetNextWindowPos( ImVec2{ 0, sceneSectionY3 } );
-    ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY3 } );
-    ImGui::Begin( "Materials",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGuiMaterials(p);
-    ImGui::End();
     ImGui::SetNextWindowPos( ImVec2{ 0, sceneSectionY3*2.0f } );
     ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY3 } );
-    ImGui::Begin( "Images",  nullptr, ImGuiWindowFlags_NoCollapse );
-        ImGuiImages(p);
-    ImGui::End();
 //    ImGui::Begin( "Camera",  nullptr, ImGuiWindowFlags_NoCollapse );
 //    ImGuiCamera(p->getCamera(Name::Foxtrot));
 //    ImGui::End();
@@ -293,9 +301,6 @@ void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path
         isGeom = true;
     } else if ( extl == ".sbsar" ) {
         FM::copyLocalToRemote( pathSanitized, MDaemonPaths::UploadDir + getFileName(pathSanitized) );
-//        SubstanceDriver::elaborateSbsarLayer( pathSanitized, MQSettings::Medium,  512 , p->ML() );
-    } else if ( extl == ".zip" ) {
-//        SubstanceDriver::elaborateFromTextureSet( getFileNameNoExt(finalPath), p->ML(), ".jpg" );
     }
     else if ( extl == ".gltf") {
         isGeom = true;

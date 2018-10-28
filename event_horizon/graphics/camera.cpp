@@ -349,7 +349,7 @@ Camera::Camera( const std::string cameraName, CameraState _state, const Rect2f& 
 	Status( _state );
 
 	mMode = CameraMode::Edit2d;
-	mViewPort = _viewport;
+	ViewPort( _viewport);
 
 	mHAngle = 1.0f;
 	mVAngle = 1.0f;
@@ -372,7 +372,6 @@ Camera::Camera( const std::string cameraName, CameraState _state, const Rect2f& 
 	mProjection.setPerspective( mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ );
 	mMVP = Matrix4f::MIDENTITY();
 	mOrthogonal = Matrix4f::MIDENTITY();
-	mScreenAspectRatio.setAspectRatioMatrixScreenSpace( mViewPort.ratio() );
 
 	setPosition( Vector3f( 0.0f, 1.0f, 0.0f ) );
 }

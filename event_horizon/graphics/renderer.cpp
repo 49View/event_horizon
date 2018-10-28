@@ -94,8 +94,12 @@ void Renderer::postInit() {
     mbIsInitialized = true;
 }
 
-void Renderer::init() {
+void Renderer::resetDefaultFB() {
     mDefaultFB = FrameBufferBuilder{ *this, "default" }.build();
+}
+
+void Renderer::init() {
+    resetDefaultFB();
     rcm.init();
     am.init();
     lm.init();

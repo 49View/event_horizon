@@ -303,18 +303,10 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
                           BlitType _bt, Renderer& rr )
                         : RLTarget( cameraRig, screenViewport, _bt, rr ) {
 
-    float svtop = getScreenSizef.y()-screenViewport.bottom();
-    Rect2f svss{ screenViewport.left(), svtop, screenViewport.right(), svtop + screenViewport.height() };
-
-    if ( _bt == BlitType::OffScreen) {
-        svss = screenViewport;
-    }
-
-    mComposite = std::make_shared<CompositePBR>( rr, cameraRig->getMainCamera()->Name(), svss, finalDestBlit );
+    mComposite = std::make_shared<CompositePBR>(rr, cameraRig->getMainCamera()->Name(), screenViewport, finalDestBlit);
     cameraRig->setFramebuffer( mComposite->getColorFB() );
     bucketRanges.push_back( {CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd} );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
-
 }
 
 std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBufferType fbt ) {
@@ -384,11 +376,16 @@ void CompositePlain::blit(CommandBufferList& cbl) {
 CompositePlain::CompositePlain( Renderer& _rr, const std::string& _name, const Rect2f& _destViewport,
                                 BlitType _bt ) : Composite(_rr ) {
     mCompositeFinalDest = _bt;
+    setup( _destViewport );
+}
+
+void CompositePlain::setup( const Rect2f& _destViewport ) {
     auto vsize = _destViewport.size();
-    mColorFB = FrameBufferBuilder{ rr, _name }.size(vsize).build();
+    mColorFB = FrameBufferBuilder{ rr, "plainFrameBuffer" }.size(vsize).build();
     if ( mCompositeFinalDest == BlitType::OffScreen){
         mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer"}.size(vsize).noDepth().
-                dv(_destViewport, _bt).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).IM(S::FINAL_COMBINE).build();
+                dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).
+                IM(S::FINAL_COMBINE).build();
     }
 }
 
@@ -400,9 +397,7 @@ void CompositePBR::blit( CommandBufferList& cbl ) {
     cbl.pushCommand( { CommandBufferCommandName::blitPRB } );
 }
 
-CompositePBR::CompositePBR( Renderer& _rr, const std::string& _name, const Rect2f& _destViewport,
-                            BlitType _bt ) : Composite( _rr ) {
-    mCompositeFinalDest = _bt;
+void CompositePBR::setup( const Rect2f& _destViewport ) {
     float bloomScale = 1.0f/8.0f;
     Vector2f vsize = _destViewport.size();
     mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
@@ -411,12 +406,21 @@ CompositePBR::CompositePBR( Renderer& _rr, const std::string& _name, const Rect2
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_HORIZONTAL).build();
     mBlurVerticalFB = FrameBufferBuilder{ rr, "blur_vertical_b" }.size(vsize*bloomScale).noDepth()
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_VERTICAL).build();
-    mColorFinalFB = FrameBufferBuilder{ rr, "colorFinalFrameBuffer"}.size(vsize).noDepth().dv(_destViewport, _bt)
-            .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).IM(S::FINAL_COMBINE).build();
+    mColorFinalFB = FrameBufferBuilder{ rr, "colorFinalFrameBuffer"}.size(vsize).noDepth().
+            dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).
+            IM(S::FINAL_COMBINE).build();
     if ( mCompositeFinalDest == BlitType::OffScreen) {
         mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer"}.size(vsize).noDepth()
-                .dv(_destViewport, _bt).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).IM(S::FINAL_COMBINE).build();
+                .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).
+                IM(S::FINAL_COMBINE).build();
     }
+}
+
+CompositePBR::CompositePBR( Renderer& _rr, const std::string& _name, const Rect2f& _destViewport,
+                            BlitType _bt ) : Composite( _rr ) {
+
+    mCompositeFinalDest = _bt;
+    setup(_destViewport);
 }
 
 void RLTarget::addToCBCore( CommandBufferList& cb ) {
@@ -485,6 +489,11 @@ void RLTargetPlain::addToCB( CommandBufferList& cb ) {
     endCL( cb );
 }
 
+void RLTargetPlain::resize( const Rect2f& _r ) {
+    mComposite->setup( _r );
+    cameraRig->setFramebuffer( mComposite->getColorFB() );
+}
+
 void RLTarget::clearCB( CommandBufferList& cb ) {
     for ( auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange( k, RLClearFlag::DontIncludeCore ) ) {
@@ -536,12 +545,20 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     endCL( cb );
 }
 
+void RLTargetPBR::resize( const Rect2f& _r ) {
+    mComposite->setup( _r );
+    cameraRig->setFramebuffer( mComposite->getColorFB() );
+}
+
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {
     framebuffer = _fbt;
 }
 
 std::shared_ptr<Framebuffer> RLTargetFB::getFrameBuffer( CommandBufferFrameBufferType fbt ) {
     return framebuffer;
+}
+
+void RLTargetFB::resize( const Rect2f& _r ) {
 }
 
 RLTargetProbe::RLTargetProbe( const std::string& _cameraRig, const int _faceIndex,

@@ -158,6 +158,8 @@ public:
 	void addShadowMaps( std::shared_ptr<RLTarget> _target );
 	void addProbes();
 
+	void resetDefaultFB();
+
 protected:
 	void postInit();
 
