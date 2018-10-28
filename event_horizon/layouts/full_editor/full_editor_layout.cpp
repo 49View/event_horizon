@@ -16,6 +16,8 @@ struct UIViewLayout {
     float consoleHeight = 0.0f;
     float rightPanelWidth = 0.0f;
     float leftPanelHeight = 0.0f;
+    float leftPanelHeight2 = 0.0f;
+    float rightPanelHeight = 0.0f;
     Vector2f main3dWindowSize = Vector2f::ZERO;
     Vector2f timeLinePanelSize = Vector2f::ZERO;
     Rect2f foxLayout;
@@ -91,9 +93,9 @@ void ImGuiGeoms( UiPresenter* p, const Rect2f& _r ) {
     ImGui::End();
 }
 
-void ImGuiConsole( UiPresenter* p, const Rect2f& _r ) {
+auto ImGuiConsole = []( UiPresenter* p, const Rect2f& _r ) {
     p->Console()->Draw( _r );
-}
+};
 
 void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 size, std::shared_ptr<Texture> t,
                     float backup = -1.0f ) {
@@ -165,63 +167,49 @@ void ImGuiImages( UiPresenter* p, const Rect2f& _r ) {
     ImGui::End();
 }
 
-void initLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresenter* p ) {
+void ImGuiCamera( UiPresenter* p, const Rect2f& _r ) {
+    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
+    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
+    ImGui::Begin( "Cameras",  nullptr, ImGuiWindowFlags_NoCollapse );
 
-    uivl.consoleHeight = 0.15f;
-    uivl.rightPanelWidth = 0.25f;
-    uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
-    uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
-    uivl.main3dWindowSize = { _screenRect.size().x() * (1.0-uivl.rightPanelWidth*2.0f),
-                              _screenRect.size().y() * (1.0-(uivl.consoleHeight + uivl.timeLinePanelSize.y())) };
-    float topX = uivl.rightPanelWidth;
-
-    _layout->addBox( "Console", 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f,
-                     std::bind(ImGuiConsole, std::placeholders::_1, std::placeholders::_2) );
-
-    _layout->addBox( "SceneGeometry", 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight,
-                     std::bind(ImGuiGeoms, std::placeholders::_1, std::placeholders::_2) );
-
-    _layout->addBox( "SceneMaterials", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f,
-                     std::bind(ImGuiMaterials, std::placeholders::_1, std::placeholders::_2) );
-
-    _layout->addBox( "SceneImages", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight*2.0f, uivl.leftPanelHeight*3.0f,
-                     std::bind(ImGuiImages, std::placeholders::_1, std::placeholders::_2) );
-
-    _layout->addBox( Name::Foxtrot,
-                     topX, topX + (1.0f-uivl.rightPanelWidth*2.0f),
-                     0.0f, (1.0f-(uivl.consoleHeight + uivl.timeLinePanelSize.y())), CameraControls::Fly );
-
-//    _layout->addOffScreenBox( Name::Sierra, { 128.0f, 128.0f } );
-
-    Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
-}
-
-void ImGuiCamera( std::shared_ptr<Camera> cam ) {
+    auto cam = p->CM().getCamera( Name::Foxtrot);
     ImGui::BeginGroup();
     ImGui::Text( "Name: %s", cam->Name().c_str());
     ImGui::Text( "Pos: %f, %f, %f", cam->getPosition().x(), cam->getPosition().y(), cam->getPosition().z());
     ImGui::Text( "Angles: %f, %f, %f", cam->quatAngle().x(), cam->quatAngle().y(), cam->quatAngle().z());
     ImGui::Text( "Fov: %f", cam->FoV());
     ImGui::EndGroup();
+    ImGui::End();
 }
 
-void ImGuiCloudEntities( UiPresenter* p, const std::string& _entType ) {
+void ImGuiTimeline( UiPresenter* p, const Rect2f& _r ) {
+    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
+    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
+    ImGui::Begin( "Timeline",  nullptr, ImGuiWindowFlags_NoCollapse );
+    ImGui::End();
+}
+
+void ImGuiCloudEntities( UiPresenter* p, const Rect2f& _r, const std::string _title, const std::string& _entType ) {
+
+    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
+    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
+    ImGui::Begin( _title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse );
 
     static char buf[1024];
     if ( ImGui::InputText( "", buf, 1024,
-                      ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|
-                      ImGuiInputTextFlags_CallbackHistory,
-                      [](ImGuiTextEditCallbackData* data) -> int {
-                        //        if ( data->EventKey == ImGuiKey_Enter) {
-                        //        }
-                                return 0;
-    } ) ) {
+                           ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|
+                           ImGuiInputTextFlags_CallbackHistory,
+                           [](ImGuiTextEditCallbackData* data) -> int {
+                               //        if ( data->EventKey == ImGuiKey_Enter) {
+                               //        }
+                               return 0;
+                           } ) ) {
         Http::get( Url{ HttpFilePrefix::entities_all + _entType + "/" + std::string(buf) },
-            [&](const Http::Result&_res) {
-                remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()),
-                                                  static_cast<std::string::size_type>(_res.length) };
-                UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
-        } );
+                   [&](const Http::Result&_res) {
+                       remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()),
+                                                         static_cast<std::string::size_type>(_res.length) };
+                       UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
+                   } );
     };
 
     for ( auto it = cloudEntitiesTypeMap.find(_entType); it != cloudEntitiesTypeMap.end(); ++it ) {
@@ -232,46 +220,59 @@ void ImGuiCloudEntities( UiPresenter* p, const std::string& _entType ) {
         ImGui::Image( reinterpret_cast<void *>(tex->getHandle()), ImVec2{ 100, 100 } );
         ImGui::EndGroup();
     }
+    ImGui::End();
 
 }
 
-void ImGuiTimeline() {
+void ImGuiCloudEntitiesMaterials( UiPresenter* p, const Rect2f& _r ) {
+    ImGuiCloudEntities( p, _r, "Cloud Materials", Material::entityGroup() );
+}
 
+void ImGuiCloudEntitiesGeom( UiPresenter* p, const Rect2f& _r ) {
+    ImGuiCloudEntities( p, _r, "Cloud Geometry", HierGeom::entityGroup() );
+}
+
+void initLayout( PresenterLayout* _layout, UiPresenter* p ) {
+
+    uivl.consoleHeight = 0.15f;
+    uivl.rightPanelWidth = 0.25f;
+    uivl.rightPanelHeight = (1.0f - uivl.consoleHeight)/2.0f;
+    uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
+    uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/4.5f;
+    uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
+    float topX = uivl.rightPanelWidth;
+
+    _layout->addBox( "Console", 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f, ImGuiConsole );
+    _layout->addBox( "SceneGeometry", 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight, ImGuiGeoms );
+    _layout->addBox( "SceneMaterials", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f,
+                     ImGuiMaterials );
+
+    float imageTY = uivl.leftPanelHeight*2.0f + uivl.leftPanelHeight2;
+    _layout->addBox( "SceneImages", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight*2.0f, imageTY, ImGuiImages );
+
+    _layout->addBox( "SceneCameras", 0.0f, uivl.rightPanelWidth, imageTY, imageTY + uivl.leftPanelHeight2,ImGuiCamera );
+
+    float timeLineY = 1.0f-(uivl.consoleHeight+uivl.timeLinePanelSize.y());
+    _layout->addBox( "SceneTimeline", uivl.rightPanelWidth, uivl.rightPanelWidth + uivl.timeLinePanelSize.x(),
+                     timeLineY, timeLineY + uivl.timeLinePanelSize.y(), ImGuiTimeline );
+
+    _layout->addBox( "CloudMaterial", 1.0f-uivl.rightPanelWidth, 1.0f, 0.0f, uivl.rightPanelHeight,
+                     ImGuiCloudEntitiesMaterials );
+
+    _layout->addBox( "CloudGeometry", 1.0f-uivl.rightPanelWidth, 1.0f, uivl.rightPanelHeight, uivl.rightPanelHeight*2,
+                     ImGuiCloudEntitiesGeom );
+
+    _layout->addBox( Name::Foxtrot,
+                     topX, topX + (1.0f-uivl.rightPanelWidth*2.0f),
+                     0.0f, (1.0f-(uivl.consoleHeight + uivl.timeLinePanelSize.y())), CameraControls::Fly );
+
+//    _layout->addOffScreenBox( Name::Sierra, { 128.0f, 128.0f } );
+
+    Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
 }
 
 void render( UiPresenter* p ) {
 
-    float sceneY = getScreenSizefUI.y() * (1.0f-uivl.consoleHeight);
-    float sceneSectionY3 = sceneY / 3.0f;
-    float sceneSectionY2 = sceneY / 2.0f;
-    float sceneSectionX = getScreenSizefUI.x() * uivl.rightPanelWidth;
-    ImGui::SetNextWindowPos( ImVec2{ 0, sceneSectionY3*2.0f } );
-    ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY3 } );
-//    ImGui::Begin( "Camera",  nullptr, ImGuiWindowFlags_NoCollapse );
-//    ImGuiCamera(p->getCamera(Name::Foxtrot));
-//    ImGui::End();
-
-    // Server side
-    ImGui::SetNextWindowPos( ImVec2{ getScreenSizefUI.x() - sceneSectionX, 0.0f } );
-    ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY2 } );
-    ImGui::Begin( "Cloud Materials",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGuiCloudEntities(p, Material::entityGroup());
-    ImGui::End();
-    ImGui::SetNextWindowPos( ImVec2{ getScreenSizefUI.x() - sceneSectionX, sceneSectionY2 } );
-    ImGui::SetNextWindowSize( ImVec2{ sceneSectionX, sceneSectionY2 } );
-    ImGui::Begin( "Cloud Geoms",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGuiCloudEntities(p, HierGeom::entityGroup() );
-    ImGui::End();
-
-    // Timeline
-    ImGui::SetNextWindowPos( ImVec2{ sceneSectionX,
-                                     getScreenSizefUI.y()-(getScreenSizefUI.y() *
-                                     (uivl.consoleHeight+uivl.timeLinePanelSize.y() )) } );
-    ImGui::SetNextWindowSize( ImVec2{ getScreenSizefUI.x()* uivl.timeLinePanelSize.x(),
-                                      getScreenSizefUI.y() * uivl.timeLinePanelSize.y() } );
-    ImGui::Begin( "Timeline",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGuiTimeline();
-    ImGui::End();
 }
 
 void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path ) {

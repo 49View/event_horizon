@@ -188,7 +188,7 @@ void UiPresenter::inputPollUpdate() {
 	}
 
 	cm.updateFromInputData( { cvtTggles,
-						      mi.getCurrPosSS(),
+						      mi.getCurrPos(),
 	                          mi.isTouchedDown(),
 						      mi.getScrollValue(),
 							  mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
@@ -259,10 +259,8 @@ void PresenterLayout::setDragAndDropFunction( DragAndDropFunction dd ) {
 	dragAndDropFunc = dd;
 }
 
-void initDefaultLayout( const Rect2f& _screenRect, PresenterLayout* _layout, UiPresenter* _target ) {
-	_layout->addBox(UiPresenter::DC(), _screenRect.origin().x(), _screenRect.origin().y(),
-			_screenRect.origin().x() + _screenRect.size().x(), _screenRect.origin().y() + _screenRect.size().y(),
-			CameraControls::Fly );
+void initDefaultLayout( PresenterLayout* _layout, UiPresenter* _target ) {
+	_layout->addBox(UiPresenter::DC(), 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
 }
 
 std::shared_ptr<PresenterLayout> PresenterLayout::makeDefault() {
@@ -271,7 +269,7 @@ std::shared_ptr<PresenterLayout> PresenterLayout::makeDefault() {
 
 void PresenterLayout::activate( UiPresenter* _target ) {
 
-	initLayout( getScreenRect, this, _target );
+	initLayout( this, _target );
 
 	for ( auto& [k,v] : boxes ) {
 		if ( v.cc == CameraControls::Plan2d ) {

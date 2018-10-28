@@ -22,8 +22,7 @@ class PresenterLayout;
 
 using PresenterUpdateCallbackFunc = std::function<void(UiPresenter* p)>;
 using DragAndDropFunction = std::function<void(UiPresenter* p, const std::string&)>;
-using InitLayoutFunction = std::function<void(
-		const Rect2f& _screenRect, PresenterLayout* _layout, UiPresenter*_target)>;
+using InitLayoutFunction = std::function<void(PresenterLayout* _layout, UiPresenter*_target)>;
 using RenderFunction = std::function<void( UiPresenter* )>;
 using RenderLayoutFunction = std::function<void( UiPresenter* _target, const Rect2f&  )>;
 
