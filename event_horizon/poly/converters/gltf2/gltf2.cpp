@@ -10,7 +10,7 @@
 #include <core/image_util.h>
 //#include "substance_driver.h"
 
-uint accessorTypeToNumberOfComponent( int ty ) {
+unsigned int accessorTypeToNumberOfComponent( int ty ) {
     if ( ty == TINYGLTF_TYPE_SCALAR) {
         return 1;
     } else if ( ty == TINYGLTF_TYPE_VECTOR) {
@@ -34,7 +34,7 @@ uint accessorTypeToNumberOfComponent( int ty ) {
     return 0;
 }
 
-uint componentTypeToByteSize( int ct, int type ) {
+unsigned int componentTypeToByteSize( int ct, int type ) {
     auto bsize = 1;
     switch ( ct ) {
         case 5120:
@@ -67,7 +67,7 @@ uint componentTypeToByteSize( int ct, int type ) {
 struct UCharFiller {
     const unsigned char *data;
     size_t size;
-    uint stride;
+    unsigned int stride;
 };
 
 UCharFiller accessorFiller( const tinygltf::Model& model, int _index, GLTF2::ExtraAccessorData* _ead = nullptr ) {

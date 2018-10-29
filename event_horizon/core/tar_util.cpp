@@ -108,7 +108,7 @@ namespace tarUtil {
         std::strcpy(TARHEADER->version, " ");
         std::sprintf(TARHEADER->mtime,"%011lo",time(NULL));
         std::sprintf(TARHEADER->mode,"%07o",0644);
-        char * s = ::getlogin();
+        const char * s = userComputerName().c_str();
         if(s!=NULL)  std::snprintf( reinterpret_cast<char*>(TARHEADER),32,"%s",s);
         std::sprintf(TARHEADER->gname,"%s","users");
     }
