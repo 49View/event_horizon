@@ -20,7 +20,7 @@ void listCloudMaterialCallback( Scene* p ) {
     for ( const auto& elem : newFilteredResult ) {
         std::vector<unsigned char> rd;
         bn::decode_b64( elem.getThumb().begin(), elem.getThumb().end(), std::back_inserter(rd) );
-        ImageBuilder{ elem.getName() }.makeDirect( p->RSG().TL(), { rd.data(), rd.size()} );
+        ImageBuilder{ elem.getName() }.makeDirect( p->RSG().TL(), ucchar_p{ rd.data(), rd.size()} );
         cloudEntitiesTypeMap.insert( {elem.getType(), elem} );
     }
 }

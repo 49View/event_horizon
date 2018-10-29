@@ -6,8 +6,8 @@
 
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/scene_layout.h>
-#include <converters/stl/parse_stl.h>
-#include <converters/gltf2/gltf2.h>
+#include <poly/converters/stl/parse_stl.h>
+#include <poly/converters/gltf2/gltf2.h>
 #include "core/tar_util.h"
 #include "poly/hier_geom.hpp"
 #include "poly/geom_builder.h"
@@ -69,7 +69,6 @@ void initLayout( SceneLayout* _layout, Scene* p ) {
     uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/6.f;
     uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
     float topX = uivl.rightPanelWidth;
-
 
     _layout->addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f );
     _layout->addBox( SceneLayoutDefaultNames::Geom, 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight );

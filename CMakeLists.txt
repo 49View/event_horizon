@@ -138,6 +138,7 @@ endmacro(register_graphics_module)
 
 macro(register_poly_module)
 
+    register_module("converters")
     register_module("polyclipping")
     register_module("poly2tri")
     register_module("lightmapper")
