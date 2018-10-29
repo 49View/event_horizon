@@ -4,7 +4,8 @@
 
 #include "full_editor_layout.h"
 
-#include <render_scene_graph/ui_presenter.hpp>
+#include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/scene_layout.h>
 #include <converters/stl/parse_stl.h>
 #include <converters/gltf2/gltf2.h>
 #include "core/tar_util.h"
@@ -48,7 +49,7 @@ void materialPBRCallback( const rapidjson::Document& data ) {
                     mb->buffer( r, fi.dataPtr );
                 }
             }
-            UiPresenter::sUpdateCallbacks.emplace_back( []( UiPresenter* p ) {
+            Scene::sUpdateCallbacks.emplace_back( []( Scene* p ) {
                 mb->makeDirect( p->ML() );
                 if ( !p->RR().hasTag(9300) ) {
                     GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).build( p->RSG() );
@@ -59,35 +60,37 @@ void materialPBRCallback( const rapidjson::Document& data ) {
     }
 }
 
-void initLayout( PresenterLayout* _layout, UiPresenter* p ) {
+void initLayout( SceneLayout* _layout, Scene* p ) {
 
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
     uivl.rightPanelHeight = (1.0f - uivl.consoleHeight)/2.0f;
     uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
-    uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/4.5f;
+    uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/6.f;
     uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
     float topX = uivl.rightPanelWidth;
 
-    _layout->addBox( "Console", 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f, ImGuiConsoleLayout );
-    _layout->addBox( "SceneGeometry", 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight, ImGuiGeoms );
-    _layout->addBox( "SceneMaterials", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f,
-                     ImGuiMaterials );
+
+    _layout->addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f );
+    _layout->addBox( SceneLayoutDefaultNames::Geom, 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight );
+    _layout->addBox( SceneLayoutDefaultNames::Material,
+                     0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f );
 
     float imageTY = uivl.leftPanelHeight*2.0f + uivl.leftPanelHeight2;
-    _layout->addBox( "SceneImages", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight*2.0f, imageTY, ImGuiImages );
+    _layout->addBox( SceneLayoutDefaultNames::Image, 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight*2.0f, imageTY );
 
-    _layout->addBox( "SceneCameras", 0.0f, uivl.rightPanelWidth, imageTY, imageTY + uivl.leftPanelHeight2,ImGuiCamera );
+    _layout->addBox( SceneLayoutDefaultNames::Camera, 0.0f, uivl.rightPanelWidth, imageTY, imageTY + uivl.leftPanelHeight2 );
 
     float timeLineY = 1.0f-(uivl.consoleHeight+uivl.timeLinePanelSize.y());
-    _layout->addBox( "SceneTimeline", uivl.rightPanelWidth, uivl.rightPanelWidth + uivl.timeLinePanelSize.x(),
-                     timeLineY, timeLineY + uivl.timeLinePanelSize.y(), ImGuiTimeline );
+    _layout->addBox( SceneLayoutDefaultNames::Timeline,
+                     uivl.rightPanelWidth, uivl.rightPanelWidth + uivl.timeLinePanelSize.x(),
+                     timeLineY, timeLineY + uivl.timeLinePanelSize.y() );
 
-    _layout->addBox( "CloudMaterial", 1.0f-uivl.rightPanelWidth, 1.0f, 0.0f, uivl.rightPanelHeight,
-                     ImGuiCloudEntitiesMaterials );
+    _layout->addBox( SceneLayoutDefaultNames::CloudMaterial,
+                     1.0f-uivl.rightPanelWidth, 1.0f, 0.0f, uivl.rightPanelHeight );
 
-    _layout->addBox( "CloudGeometry", 1.0f-uivl.rightPanelWidth, 1.0f, uivl.rightPanelHeight, uivl.rightPanelHeight*2,
-                     ImGuiCloudEntitiesGeom );
+    _layout->addBox( SceneLayoutDefaultNames::CloudGeom,
+                     1.0f-uivl.rightPanelWidth, 1.0f, uivl.rightPanelHeight, uivl.rightPanelHeight*2 );
 
     _layout->addBox( Name::Foxtrot,
                      topX, topX + (1.0f-uivl.rightPanelWidth*2.0f),
@@ -96,11 +99,11 @@ void initLayout( PresenterLayout* _layout, UiPresenter* p ) {
     Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
 }
 
-void render( UiPresenter* p ) {
+void render( Scene* p ) {
 
 }
 
-void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path ) {
+void allConversionsDragAndDropCallback( Scene* p, const std::string& _path ) {
     std::string pathSanitized = url_encode_spacesonly(_path);
     std::string ext = getFileNameExt( pathSanitized );
     std::string extl = toLower(ext);
@@ -145,6 +148,6 @@ void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path
     }
 }
 
-std::shared_ptr<PresenterLayout> fullEditor() {
-    return std::make_shared<PresenterLayout>(initLayout, render, allConversionsDragAndDropCallback);
+std::shared_ptr<SceneLayout> fullEditor() {
+    return std::make_shared<SceneLayout>(initLayout, render, allConversionsDragAndDropCallback);
 }

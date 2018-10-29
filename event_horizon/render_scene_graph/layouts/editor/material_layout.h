@@ -4,6 +4,6 @@
 
 #pragma once
 #include <core/math/rect2f.h>
-class UiPresenter;
+class Scene;
 
-void ImGuiMaterials( UiPresenter* p, const Rect2f& _r );
+void ImGuiMaterials( Scene* p, const Rect2f& _r );

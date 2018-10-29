@@ -4,6 +4,8 @@
 
 #pragma once
 #include <core/math/rect2f.h>
-class UiPresenter;
+class Scene;
 
-void ImGuiCloudEntitiesGeom( UiPresenter* p, const Rect2f& _r );
+void ImGuiCloudEntitiesMaterials( Scene* p, const Rect2f& _r );
+
+

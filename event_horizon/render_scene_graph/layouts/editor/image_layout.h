@@ -3,10 +3,7 @@
 //
 
 #pragma once
-
 #include <core/math/rect2f.h>
-class UiPresenter;
+class Scene;
 
-void ImGuiGeoms( UiPresenter* p, const Rect2f& _r );
-
-
+void ImGuiImages( Scene* p, const Rect2f& _r );

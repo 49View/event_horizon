@@ -13,14 +13,14 @@
 #include "core/callback_dependency.h"
 
 #include "runloop_graphics.h"
-#include "ui_presenter.hpp"
+#include "scene.hpp"
 #include "graphics/window_handling.hpp"
 
 bool profileUpdateRenderer = false;
 
 std::atomic_bool mIsClosingFlag;
 
-void RunLoopGraphics::initWindow( std::shared_ptr<UiPresenter> _presenter ) {
+void RunLoopGraphics::initWindow( std::shared_ptr<Scene> _presenter ) {
 	WH::initializeWindow( _presenter->getLayoutInitFlags(), ti, mi, rr );
 
 	rr.init();

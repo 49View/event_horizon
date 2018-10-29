@@ -3,9 +3,7 @@
 //
 
 #pragma once
-
 #include <core/math/rect2f.h>
+class Scene;
 
-class UiPresenter;
-
-void ImGuiTimeline( UiPresenter* p, const Rect2f& _r );
+void ImGuiCamera( Scene* p, const Rect2f& _r );

@@ -4,8 +4,8 @@
 
 #include "console_layout.h"
 #include "graphics/ui/imgui_console.h"
-#include <render_scene_graph/ui_presenter.hpp>
+#include <render_scene_graph/scene.hpp>
 
-void ImGuiConsoleLayout( UiPresenter* p, const Rect2f& _r ) {
+void ImGuiConsoleLayout( Scene* p, const Rect2f& _r ) {
     p->Console()->Draw( _r );
 };

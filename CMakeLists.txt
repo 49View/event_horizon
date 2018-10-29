@@ -156,6 +156,7 @@ endmacro(register_poly_module)
 macro(register_render_scene_graph_module)
 
     register_module("ui")
+    register_module("layouts")
     register_platform_module_files("platform")
 
     if (NOT BUILD_FROM_SOURCE)
@@ -255,15 +256,6 @@ macro(register_converters_module)
 
 endmacro(register_converters_module)
 
-macro(register_full_editor)
-
-    set( MODULE_ROOT_COMP ${MODULE_ROOT})
-    register_module("layouts/full_editor")
-
-    register_converters_module()
-endmacro(register_full_editor)
-
-
 macro(add_lib)
     set(modules ${ARGN})
     FOREACH (module ${modules})
@@ -324,8 +316,6 @@ macro(compile)
             register_osm_module()
         elseif (${module} STREQUAL "fbx")
             register_fbx_module()
-        elseif (${module} STREQUAL "full_editor_layout")
-            register_full_editor()
         elseif (${module} STREQUAL "converters")
             register_converters_module()
         elseif (${module} STREQUAL "sh")

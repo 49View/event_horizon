@@ -3,7 +3,7 @@ include(../../CMakeLists.txt NO_POLICY_SCOPE)
 project(editor)
 
 set(BUILD_FROM_SOURCE TRUE)
-compile( core graphics poly render_scene_graph full_editor_layout )
+compile( core graphics poly render_scene_graph converters )
 
 add_executable(${PROJECT_NAME} ${BUILD_FILES})
 

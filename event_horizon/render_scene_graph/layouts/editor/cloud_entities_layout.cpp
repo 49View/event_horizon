@@ -4,12 +4,12 @@
 
 #include "cloud_entities_layout.h"
 #include <graphics/imgui/imgui.h>
-#include <render_scene_graph/ui_presenter.hpp>
+#include <render_scene_graph/scene.hpp>
 
 static std::string remoteFilterString;
 static std::multimap<std::string, CoreMetaData> cloudEntitiesTypeMap;
 
-void listCloudMaterialCallback( UiPresenter* p ) {
+void listCloudMaterialCallback( Scene* p ) {
     std::vector<CoreMetaData> newFilteredResult;
 
     rapidjson::Document document;
@@ -25,7 +25,7 @@ void listCloudMaterialCallback( UiPresenter* p ) {
     }
 }
 
-void ImGuiCloudEntities( UiPresenter* p, const Rect2f& _r, const std::string _title, const std::string& _entType ) {
+void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, const std::string& _entType ) {
 
     ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
@@ -44,7 +44,7 @@ void ImGuiCloudEntities( UiPresenter* p, const Rect2f& _r, const std::string _ti
                    [&](const Http::Result&_res) {
                        remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()),
                                                          static_cast<std::string::size_type>(_res.length) };
-                       UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
+                       Scene::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
                    } );
     };
 

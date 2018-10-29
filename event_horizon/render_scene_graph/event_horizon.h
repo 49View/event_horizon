@@ -6,33 +6,34 @@
 
 #include <memory>
 #include "render_scene_graph/runloop_graphics.h"
-#include "render_scene_graph/ui_presenter.hpp"
+#include "render_scene_graph/scene.hpp"
+#include "render_scene_graph/scene_layout.h"
 
 class EventHorizon {
 
 public:
     EventHorizon( InitializeWindowFlagsT initFlags ) {
-        auto l = PresenterLayout::makeDefault();
+        auto l = SceneLayout::makeDefault();
         l->setInitFlags( initFlags );
         construct( l );
     }
 
     EventHorizon() {
-        construct( PresenterLayout::makeDefault() );
+        construct( SceneLayout::makeDefault() );
     }
 
-    EventHorizon( std::shared_ptr<PresenterLayout> _layout ) {
+    EventHorizon( std::shared_ptr<SceneLayout> _layout ) {
         construct( _layout );
     }
 
 private:
-    void construct( std::shared_ptr<PresenterLayout> _layout ) {
-        presenter = di::make_injector(APP_RSGINJECTOR).template create<std::shared_ptr<UiPresenter>>();
+    void construct( std::shared_ptr<SceneLayout> _layout ) {
+        presenter = di::make_injector(APP_RSGINJECTOR).template create<std::shared_ptr<Scene>>();
         presenter->Layout( _layout );
 
         mainLoop( presenter );
     }
 
 private:
-    std::shared_ptr<UiPresenter> presenter;
+    std::shared_ptr<Scene> presenter;
 };

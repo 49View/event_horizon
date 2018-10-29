@@ -11,7 +11,7 @@
 #include "core/runloop_core.h"
 #include "di_modules.h"
 
-class UiPresenter;
+class Scene;
 
 class RunLoopGraphics : public RunLoop {
 public:
@@ -29,7 +29,7 @@ public:
     TextInput& TI() { return ti; }
 	MouseInput& MI() { return mi; }
 
-	void initWindow( std::shared_ptr<UiPresenter> _presenter );
+	void initWindow( std::shared_ptr<Scene> _presenter );
 
 protected:
 	void elaborateAllSignals();
@@ -47,7 +47,7 @@ protected:
 	int nRenders = 0;
 	GameTime update_gt;
 	UpdateSignals mUpdateSignals;
-	std::shared_ptr<UiPresenter> pm;
+	std::shared_ptr<Scene> pm;
 };
 
-void mainLoop( std::shared_ptr<UiPresenter> p );
+void mainLoop( std::shared_ptr<Scene> p );

@@ -1,9 +1,9 @@
 //
-//  UiPresenter
+//  Scene
 //
 //
 
-#include "ui_presenter.hpp"
+#include "scene.hpp"
 
 #include "graphics/ui/ui_control_manager.hpp"
 #include "graphics/camera_manager.h"
@@ -12,68 +12,38 @@
 #include "graphics/window_handling.hpp"
 #include "graphics/ui/imgui_console.h"
 
+#include <render_scene_graph/scene_layout.h>
+
 #include <stb/stb_image.h>
 
-std::vector<std::string> UiPresenter::callbackPaths;
-Vector2i UiPresenter::callbackResizeWindow = Vector2i(-1, -1);
-Vector2i UiPresenter::callbackResizeFrameBuffer = Vector2i(-1, -1);
-std::vector<PresenterUpdateCallbackFunc> UiPresenter::sUpdateCallbacks;
+std::vector<std::string> Scene::callbackPaths;
+Vector2i Scene::callbackResizeWindow = Vector2i(-1, -1);
+Vector2i Scene::callbackResizeFrameBuffer = Vector2i(-1, -1);
+std::vector<PresenterUpdateCallbackFunc> Scene::sUpdateCallbacks;
 
-float sPresenterArrangerLeftFunction( float _value ) {
-	return getScreenSizefUI.x() * _value;
-}
-
-float sPresenterArrangerRightFunction( float _value ) {
-	return getScreenSizefUI.x() * _value;
-}
-
-float sPresenterArrangerTopFunction( float _value ) {
-	return getScreenSizefUI.y() * ( _value );
-}
-
-float sPresenterArrangerBottomFunction( float _value ) {
-	return getScreenSizefUI.y() * _value;
-}
-
-float sPresenterArrangerLeftFunction3d( float _value ) {
-	return getScreenSizef.x() * _value;
-}
-
-float sPresenterArrangerRightFunction3d( float _value ) {
-	return getScreenSizef.x() * _value;
-}
-
-float sPresenterArrangerTopFunction3d( float _value ) {
-	return getScreenSizef.y() - ( getScreenSizef.y() * ( _value ) );
-}
-
-float sPresenterArrangerBottomFunction3d( float _value ) {
-	return getScreenSizef.y() - ( getScreenSizef.y() * ( _value ) );
-}
-
-CommandScriptPresenterManager::CommandScriptPresenterManager( UiPresenter& _hm ) {
-    addCommandDefinition("enable keyboard", std::bind(&UiPresenter::cmdEnableKeyboard, &_hm, std::placeholders::_1));
-    addCommandDefinition("disable keyboard", std::bind(&UiPresenter::cmdDisableKeyboard, &_hm, std::placeholders::_1));
+CommandScriptPresenterManager::CommandScriptPresenterManager( Scene& _hm ) {
+    addCommandDefinition("enable keyboard", std::bind(&Scene::cmdEnableKeyboard, &_hm, std::placeholders::_1));
+    addCommandDefinition("disable keyboard", std::bind(&Scene::cmdDisableKeyboard, &_hm, std::placeholders::_1));
 }
 
 void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
 	ASSERT( count > 0 );
 
-	UiPresenter::callbackPaths.clear();
+	Scene::callbackPaths.clear();
 	for ( auto i = 0; i < count; i++ ) {
-		UiPresenter::callbackPaths.emplace_back( std::string(paths[i]) );
+		Scene::callbackPaths.emplace_back( std::string(paths[i]) );
 	}
 }
 
 void GResizeWindowCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
-	UiPresenter::callbackResizeWindow = Vector2i{w, h};
+	Scene::callbackResizeWindow = Vector2i{w, h};
 }
 
 void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
-	UiPresenter::callbackResizeFrameBuffer = Vector2i{w, h};
+	Scene::callbackResizeFrameBuffer = Vector2i{w, h};
 }
 
-UiPresenter::UiPresenter( Renderer& _rr, RenderSceneGraph& _rsg, UiControlManager& _uicm, TextInput& ti, MouseInput& mi,
+Scene::Scene( Renderer& _rr, RenderSceneGraph& _rsg, UiControlManager& _uicm, TextInput& ti, MouseInput& mi,
 						  CameraManager& cm, CommandQueue& cq ) :
 		cm(cm), rr(_rr), rsg(_rsg), uicm( _uicm ), ti( ti), mi( mi ), cq( cq) {
 	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
@@ -81,7 +51,7 @@ UiPresenter::UiPresenter( Renderer& _rr, RenderSceneGraph& _rsg, UiControlManage
 	console = std::make_shared<ImGuiConsole>(cq);
 }
 
-void UiPresenter::updateCallbacks() {
+void Scene::updateCallbacks() {
 
 	if ( !sUpdateCallbacks.empty() ) {
 		for ( auto& c : sUpdateCallbacks ) {
@@ -112,7 +82,7 @@ void UiPresenter::updateCallbacks() {
 
 }
 
-void UiPresenter::update( GameTime& gt ) {
+void Scene::update( GameTime& gt ) {
 
 	if ( !activated() ) {
 		activate();
@@ -126,10 +96,10 @@ void UiPresenter::update( GameTime& gt ) {
 	updateCallbacks();
 }
 
-void UiPresenter::deactivate() {
+void Scene::deactivate() {
 }
 
-void UiPresenter::activate() {
+void Scene::activate() {
 
 	if ( !rr.isInitialized() ) return;
 
@@ -140,7 +110,7 @@ void UiPresenter::activate() {
     //stbi_set_flip_vertically_on_load(true);
 
 	Socket::on( "cloudStorageFileUpdate-shaders/shaders.shd",
-			    std::bind(&UiPresenter::reloadShaders, this, std::placeholders::_1 ) );
+			    std::bind(&Scene::reloadShaders, this, std::placeholders::_1 ) );
 
 	MaterialBuilder{"white"}.makeDefault(rsg.ML());
 
@@ -152,15 +122,15 @@ void UiPresenter::activate() {
 	mbActivated = true;
 }
 
-void UiPresenter::reloadShaders( [[maybe_unused]] const rapidjson::Document& _data ) {
+void Scene::reloadShaders( [[maybe_unused]] const rapidjson::Document& _data ) {
 	cq.script( "reload shaders" );
 }
 
-void UiPresenter::enableInputs( bool _bEnabled ) {
+void Scene::enableInputs( bool _bEnabled ) {
 	ti.setEnabled( _bEnabled );
 }
 
-void UiPresenter::inputPollUpdate() {
+void Scene::inputPollUpdate() {
 
 	ViewportTogglesT cvtTggles = ViewportToggles::None;
 	// Keyboards
@@ -197,11 +167,11 @@ void UiPresenter::inputPollUpdate() {
     cm.update();
 }
 
-bool UiPresenter::checkKeyPressed( int keyCode ) {
+bool Scene::checkKeyPressed( int keyCode ) {
 	return ti.checkKeyPressed( keyCode );
 }
 
-void UiPresenter::notified( MouseInput& _source, const std::string& generator ) {
+void Scene::notified( MouseInput& _source, const std::string& generator ) {
 
 	if ( generator == "onTouchUp" ) {
 		onTouchUpImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
@@ -215,82 +185,46 @@ void UiPresenter::notified( MouseInput& _source, const std::string& generator ) 
 	//LOGR( generator.c_str() );
 }
 
-void UiPresenter::render() {
+void Scene::render() {
 	layout->render( this );
 }
 
-void UiPresenter::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
+void Scene::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
 	sUpdateCallbacks.push_back( uc );
 }
 
-const std::string UiPresenter::DC() {
+const std::string Scene::DC() {
 	return Name::Foxtrot;
 }
 
-void UiPresenter::cmdEnableKeyboard( const std::vector<std::string>& params ) {
+void Scene::cmdEnableKeyboard( const std::vector<std::string>& params ) {
     WH::enableInputCallbacks();
 }
 
-void UiPresenter::cmdDisableKeyboard( const std::vector<std::string>& params ) {
+void Scene::cmdDisableKeyboard( const std::vector<std::string>& params ) {
     WH::disableInputCallbacks();
 }
 
-void UiPresenter::addEventFunction( const std::string& _key, std::function<void(UiPresenter*)> _f ) {
+void Scene::addEventFunction( const std::string& _key, std::function<void(Scene*)> _f ) {
 	eventFunctions[_key] = _f;
 }
 
-void UiPresenter::Layout( std::shared_ptr<PresenterLayout> _l ) {
+void Scene::Layout( std::shared_ptr<SceneLayout> _l ) {
 	layout = _l;
 }
 
-InitializeWindowFlagsT UiPresenter::getLayoutInitFlags() const {
+InitializeWindowFlagsT Scene::getLayoutInitFlags() const {
 	return layout->getInitFlags();
 }
 
-const std::shared_ptr<ImGuiConsole>& UiPresenter::Console() const {
+const std::shared_ptr<ImGuiConsole>& Scene::Console() const {
 	return console;
 }
 
-void UiPresenter::takeScreenShot( const AABB& _box, ScreenShotContainerPtr _outdata ) {
+void Scene::takeScreenShot( const AABB& _box, ScreenShotContainerPtr _outdata ) {
     addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box, {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
     rr.getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
 
-void PresenterLayout::setDragAndDropFunction( DragAndDropFunction dd ) {
-	dragAndDropFunc = dd;
-}
 
-void initDefaultLayout( PresenterLayout* _layout, UiPresenter* _target ) {
-	_layout->addBox(UiPresenter::DC(), 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
-}
-
-std::shared_ptr<PresenterLayout> PresenterLayout::makeDefault() {
-	return std::make_shared<PresenterLayout>(initDefaultLayout);
-}
-
-void PresenterLayout::activate( UiPresenter* _target ) {
-
-	initLayout( this, _target );
-
-	for ( auto& [k,v] : boxes ) {
-		if ( v.cc == CameraControls::Plan2d ) {
-			_target->addViewport<RLTargetPlain>( k, v.updateAndGetRect(), v.bt );
-		} else if ( v.cc == CameraControls::Walk || v.cc == CameraControls::Fly ) {
-			_target->addViewport<RLTargetPBR>( k, v.updateAndGetRect(), v.bt );
-			if ( v.cc == CameraControls::Walk ) {
-				_target->CM().getCamera(k)->LockAtWalkingHeight(true);
-			}
-		}
-	}
-}
-
-void PresenterLayout::resizeCallback( UiPresenter* _target, const Vector2i& _resize ) {
-	for ( auto& [k,v] : boxes ) {
-		if ( v.cc == CameraControls::Fly ) {
-			auto r = v.updateAndGetRect();
-			_target->RR().getTarget( k )->resize( r );
-			_target->CM().getRig(k)->setViewport( r );
-		}
-	}
-}
