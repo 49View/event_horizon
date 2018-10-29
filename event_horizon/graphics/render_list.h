@@ -363,12 +363,14 @@ public:
 
     void takeScreenShot( bool _value = true ) {
         mbTakeScreenShot = _value;
+        disable();
     }
 
     void takeScreenShot( ScreenShotContainerPtr _outdata ) {
         mbTakeScreenShot = true;
         screenShotContainer = _outdata;
         mTakeScreenShotDelay = 0;
+        enable();
     }
 
     BlitType FinalDestBlit() const {
@@ -377,11 +379,23 @@ public:
 
     ScreenShotContainerPtr& ScreenShotData() { return screenShotContainer; }
 
+    bool enabled() const {
+        return bEnabled;
+    }
+
+    void enable( bool _b ) {
+        bEnabled = _b;
+    }
+
+    void enable() { bEnabled = true; }
+    void disable() { bEnabled = false; }
+
 public:
     std::shared_ptr<CameraRig> cameraRig;
     Rect2f screenViewport = Rect2f::INVALID;
     std::string renderIndex;
     int mipMapIndex = 0;
+    bool bEnabled = true;
     BlitType finalDestBlit = BlitType::OnScreen;
     ScreenShotContainerPtr screenShotContainer;
     std::vector<std::pair<int, int>> bucketRanges;

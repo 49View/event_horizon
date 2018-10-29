@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <array>
+#include <unordered_set>
 #include "framebuffer.h"
 #include "core/math/matrix4f.h"
 #include "core/image_builder.h"
@@ -30,6 +31,24 @@ namespace CommandBufferLimits {
 	const static int UIEnd = 9999;
 	const static int PBRStart = 10000;
 	const static int PBREnd = 99999999;
+}
+
+namespace FBNames {
+
+	const static std::string shadowmap = "shadowMap_d";
+	const static std::string lightmap = "lightMap_t";
+	const static std::string sceneprobe = "sceneprobe";
+	const static std::string convolution = "convolution";
+	const static std::string specular_prefilter = "specular_prefilter";
+	const static std::string ibl_brdf = "ibl_brdf";
+	const static std::string blur_horizontal = "blur_horizontal_b";
+	const static std::string blur_vertical = "blur_vertical_b";
+	const static std::string colorFinalFrameBuffer = "colorFinalFrameBuffer";
+	const static std::string offScreenFinalFrameBuffer = "offScreenFinalFrameBuffer";
+
+	static std::unordered_set<std::string> mFBNames;
+
+	bool isPartOf( const std::string& _val );
 }
 
 using CommandBufferLimitsT = int;
@@ -160,6 +179,14 @@ public:
 
 	void resetDefaultFB();
 
+	std::shared_ptr<Framebuffer> getDefaultFB() {
+		return mDefaultFB;
+	}
+
+	std::shared_ptr<Framebuffer> getShadowMapFB() {
+		return mShadowMapFB;
+	}
+
 protected:
 	void postInit();
 
@@ -192,26 +219,12 @@ protected:
     std::unique_ptr<CubeEnvironmentMap> mConvolution;
     std::unique_ptr<PrefilterSpecularMap> mIBLPrefilterSpecular;
     std::unique_ptr<PrefilterBRDF> mIBLPrefilterBRDF;
-
-protected:
 	std::shared_ptr<Framebuffer> mDefaultFB;
-public:
-	std::shared_ptr<Framebuffer> getDefaultFB() {
-		return mDefaultFB;
-	}
-
-    std::shared_ptr<Framebuffer> getShadowMapFB() {
-        return mShadowMapFB;
-    }
-
-protected:
 
 	std::unordered_map<MaterialType, std::shared_ptr<RenderMaterial>> materialCache;
 	std::unordered_map<int64_t, std::shared_ptr<RenderMaterial>> materialMap;
 
 	std::shared_ptr<CommandScriptRendererManager> hcs;
-
-protected:
 
 	int mUpdateCounter = 0;
 	Vector3f mCachedSunPosition;
@@ -326,7 +339,6 @@ public:
 		ASSERT( !name.empty() );
 		std::shared_ptr<cpuVBIB> vbib = VertexProcessing::create_cpuVBIB( ps, rmaterial, name );
 		vpl->create( vbib, tag );
-//		rr.mVPToAdd.push_back( { vpl, vbib } );
 	}
 
 private:

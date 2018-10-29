@@ -10,7 +10,15 @@
 #include "core/tar_util.h"
 #include "poly/hier_geom.hpp"
 #include "poly/geom_builder.h"
-#include "graphics/ui/imgui_console.h"
+#include "timeline_layout.h"
+#include "console_layout.h"
+#include "geom_layout.h"
+#include "material_layout.h"
+#include "image_layout.h"
+#include "camera_layout.h"
+#include "cloud_entities_layout.h"
+#include "cloud_geom_layout.h"
+#include "cloud_material_layout.h"
 
 struct UIViewLayout {
     float consoleHeight = 0.0f;
@@ -24,9 +32,6 @@ struct UIViewLayout {
 };
 
 std::shared_ptr<MaterialBuilder> mb;
-std::shared_ptr<GeomBuilder> gbt;
-std::string remoteFilterString;
-std::multimap<std::string, CoreMetaData> cloudEntitiesTypeMap;
 
 UIViewLayout uivl;
 
@@ -54,184 +59,6 @@ void materialPBRCallback( const rapidjson::Document& data ) {
     }
 }
 
-void listCloudMaterialCallback( UiPresenter* p ) {
-    std::vector<CoreMetaData> newFilteredResult;
-
-    rapidjson::Document document;
-    document.Parse<rapidjson::kParseStopWhenDoneFlag>( remoteFilterString.c_str() );
-    MegaReader reader( document );
-    reader.deserialize( newFilteredResult );
-
-    for ( const auto& elem : newFilteredResult ) {
-        std::vector<unsigned char> rd;
-        bn::decode_b64( elem.getThumb().begin(), elem.getThumb().end(), std::back_inserter(rd) );
-        ImageBuilder{ elem.getName() }.makeDirect( p->RSG().TL(), { rd.data(), rd.size()} );
-        cloudEntitiesTypeMap.insert( {elem.getType(), elem} );
-    }
-}
-
-void ImGuiGeoms( UiPresenter* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Geometry", nullptr, ImGuiWindowFlags_NoCollapse );
-
-    for ( const auto& it: p->RSG().Geoms() ) {
-        auto gname = std::to_string(it->Hash());
-        ImGui::BeginGroup();
-        ImGui::Text( "Name: %s", it->Name().c_str());
-        ImGui::Text( "Hash: %lld", it->Hash());
-        ImGui::EndGroup();
-    }
-    if ( gbt ) {
-        ImGui::BeginGroup();
-        ImGui::Text( "Name: %s", gbt->Name().c_str());
-        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-            gbt->publish();
-        }
-        ImGui::EndGroup();
-    }
-    ImGui::End();
-}
-
-auto ImGuiConsole = []( UiPresenter* p, const Rect2f& _r ) {
-    p->Console()->Draw( _r );
-};
-
-void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 size, std::shared_ptr<Texture> t,
-                    float backup = -1.0f ) {
-
-    if ( t && (t->getWidth() > 4 || backup >= 0.0f) ) {
-        if ( t->getWidth() > 4 && name != "Base" ) ImGui::SameLine();
-        ImGui::BeginGroup();
-        if ( t->getWidth() > 4 ) {
-            ImGui::TextColored( col.Value, "%s", name.c_str() );
-            ImGui::Image( reinterpret_cast<void *>(t->getHandle()), size );
-        } else {
-            ImGui::PushID( t->getHandle() );
-            ImGui::SliderFloat( name.c_str(), &backup, 0.0f, 1.0f );
-            ImGui::PopID();
-        }
-        ImGui::EndGroup();
-    }
-}
-
-void ImGuiMaterials( UiPresenter* p, const Rect2f& _r ) {
-
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Materials",  nullptr, ImGuiWindowFlags_NoCollapse );
-
-    float ts = (getScreenSizefUI.x()*uivl.rightPanelWidth)/6.5f;
-    ImVec2 textureSize{ ts, ts };
-
-    for ( const auto& mat : p->ML().list()) {
-        if ( !mat ) continue;
-        ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", mat->getName().c_str() );
-        float dc[3] = { mat->getColor().x(), mat->getColor().y(), mat->getColor().z() };
-        ImGui::PushID( (mat->getName() + "dc").c_str() );
-        ImGui::ColorEdit3( "Diffuse", dc );
-        ImGui::PopID();
-        if ( mat->getType() == MaterialType::PBR ) {
-            std::shared_ptr<PBRMaterial> matPBR = std::dynamic_pointer_cast<PBRMaterial>( mat );
-            ImGuiMatImage( "Base", ImColor{200, 200, 200}, textureSize, p->TM().TD(matPBR->getBaseColor()) );
-            ImGuiMatImage( "Normal", ImColor{100, 100, 250}, textureSize, p->TM().TD( matPBR->getNormal()) );
-            ImGuiMatImage( "Roughness", ImColor{250, 250, 100}, textureSize, p->TM().TD( matPBR->getRoughness()),
-                           matPBR->getRoughnessValue() );
-            ImGuiMatImage( "Metallic", ImColor{240, 240, 240}, textureSize, p->TM().TD( matPBR->getMetallic()),
-                           matPBR->getMetallicValue() );
-            ImGuiMatImage( "AO", ImColor{100, 100, 100}, textureSize, p->TM().TD( matPBR->getAmbientOcclusion()),
-                           matPBR->getAoValue());
-            ImGuiMatImage( "Height", ImColor{32, 200, 32}, textureSize, p->TM().TD( matPBR->getHeight()) );
-        }
-        ImGui::BeginGroup();
-        ImGui::EndGroup();
-        ImGui::Separator();
-    }
-
-    ImGui::End();
-}
-
-void ImGuiImages( UiPresenter* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Images",  nullptr, ImGuiWindowFlags_NoCollapse );
-    int ic = 0;
-    for ( const auto& it: p->TM() ) {
-        std::string tname = it.first;
-        ImGui::BeginGroup();
-        ImGui::TextColored( ImVec4{0.0f,1.0f,1.0f,1.0f}, "%s", tname.c_str());
-        ImGui::Image( reinterpret_cast<void *>(it.second->getHandle()), ImVec2{ 100, 100 } );
-        ImGui::EndGroup();
-        if ( ++ic % 6 != 0 ) { ImGui::SameLine(); }
-    }
-    ImGui::End();
-}
-
-void ImGuiCamera( UiPresenter* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Cameras",  nullptr, ImGuiWindowFlags_NoCollapse );
-
-    auto cam = p->CM().getCamera( Name::Foxtrot);
-    ImGui::BeginGroup();
-    ImGui::Text( "Name: %s", cam->Name().c_str());
-    ImGui::Text( "Pos: %f, %f, %f", cam->getPosition().x(), cam->getPosition().y(), cam->getPosition().z());
-    ImGui::Text( "Angles: %f, %f, %f", cam->quatAngle().x(), cam->quatAngle().y(), cam->quatAngle().z());
-    ImGui::Text( "Fov: %f", cam->FoV());
-    ImGui::EndGroup();
-    ImGui::End();
-}
-
-void ImGuiTimeline( UiPresenter* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Timeline",  nullptr, ImGuiWindowFlags_NoCollapse );
-    ImGui::End();
-}
-
-void ImGuiCloudEntities( UiPresenter* p, const Rect2f& _r, const std::string _title, const std::string& _entType ) {
-
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( _title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse );
-
-    static char buf[1024];
-    if ( ImGui::InputText( "", buf, 1024,
-                           ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|
-                           ImGuiInputTextFlags_CallbackHistory,
-                           [](ImGuiTextEditCallbackData* data) -> int {
-                               //        if ( data->EventKey == ImGuiKey_Enter) {
-                               //        }
-                               return 0;
-                           } ) ) {
-        Http::get( Url{ HttpFilePrefix::entities_all + _entType + "/" + std::string(buf) },
-                   [&](const Http::Result&_res) {
-                       remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()),
-                                                         static_cast<std::string::size_type>(_res.length) };
-                       UiPresenter::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
-                   } );
-    };
-
-    for ( auto it = cloudEntitiesTypeMap.find(_entType); it != cloudEntitiesTypeMap.end(); ++it ) {
-        ImGui::BeginGroup();
-        auto& elem = it->second;
-        ImGui::Text( "Name: %s", elem.getName().c_str());
-        auto tex = p->TM().TD( elem.getName() );
-        ImGui::Image( reinterpret_cast<void *>(tex->getHandle()), ImVec2{ 100, 100 } );
-        ImGui::EndGroup();
-    }
-    ImGui::End();
-
-}
-
-void ImGuiCloudEntitiesMaterials( UiPresenter* p, const Rect2f& _r ) {
-    ImGuiCloudEntities( p, _r, "Cloud Materials", Material::entityGroup() );
-}
-
-void ImGuiCloudEntitiesGeom( UiPresenter* p, const Rect2f& _r ) {
-    ImGuiCloudEntities( p, _r, "Cloud Geometry", HierGeom::entityGroup() );
-}
-
 void initLayout( PresenterLayout* _layout, UiPresenter* p ) {
 
     uivl.consoleHeight = 0.15f;
@@ -242,7 +69,7 @@ void initLayout( PresenterLayout* _layout, UiPresenter* p ) {
     uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
     float topX = uivl.rightPanelWidth;
 
-    _layout->addBox( "Console", 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f, ImGuiConsole );
+    _layout->addBox( "Console", 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f, ImGuiConsoleLayout );
     _layout->addBox( "SceneGeometry", 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight, ImGuiGeoms );
     _layout->addBox( "SceneMaterials", 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f,
                      ImGuiMaterials );
@@ -266,8 +93,6 @@ void initLayout( PresenterLayout* _layout, UiPresenter* p ) {
                      topX, topX + (1.0f-uivl.rightPanelWidth*2.0f),
                      0.0f, (1.0f-(uivl.consoleHeight + uivl.timeLinePanelSize.y())), CameraControls::Fly );
 
-//    _layout->addOffScreenBox( Name::Sierra, { 128.0f, 128.0f } );
-
     Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
 }
 
@@ -286,8 +111,8 @@ void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path
         // Convert to GLTF
         std::string cmd = "cd " + getFileNamePath(pathSanitized) + "\n FBX2glTF " + pathSanitized;
         std::system( cmd.c_str() );
-        finalPath = getFileNamePath(pathSanitized) + "/" + getFileNameOnly(finalPath) + "_out/" + getFileNameOnly(finalPath)
-                    + ".gltf";
+        finalPath = getFileNamePath(pathSanitized) + "/" + getFileNameOnly(finalPath) + "_out/" +
+                getFileNameOnly(finalPath) + ".gltf";
         isGeom = true;
     } else if ( extl == ".obj" ) {
         // Convert to GLTF
@@ -312,12 +137,10 @@ void allConversionsDragAndDropCallback( UiPresenter* p, const std::string& _path
         GLTF2 newObject{ finalPath };
         auto hierScene = newObject.convert();
         p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d(), {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
-        p->getCamera(Name::Sierra)->center(hierScene->BBox3d(), {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
         hierScene->updateTransform( Vector3f::X_AXIS * ni );
-        gbt = std::make_shared<GeomBuilder>( hierScene, newObject.Materials() );
+        static auto gbt = std::make_shared<GeomBuilder>( hierScene, newObject.Materials() );
         gbt->build(p->RSG());
-        p->takeScreenShot( Name::Sierra, gbt->Thumb() );
-
+        p->takeScreenShot( hierScene->BBox3d(), gbt->Thumb() );
         ni+=1.0f;
     }
 }

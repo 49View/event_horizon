@@ -169,9 +169,9 @@ std::map<std::string, unsigned int> ProgramUniformSet::mUBOHandles;
 ////    assign( UniformNames::roughnessTexture, TM.TD( "black.png", TSLOT_ROUGHNESS ));
 ////    assign( UniformNames::metallicTexture, TM.TD( "black.png", TSLOT_METALLIC ));
 //
-//    assign( UniformNames::ibl_irradianceMap, TM.TD( "convolution", TSLOT_IBL_IRRADIANCE ));
-//    assign( UniformNames::ibl_specularMap, TM.TD( "specular_prefilter", TSLOT_IBL_PREFILTER ));
-//    assign( UniformNames::ibl_brdfLUTMap, TM.TD( "ibl_brdf", TSLOT_IBL_BRDFLUT ));
+//    assign( UniformNames::ibl_irradianceMap, TM.TD( FBNames::convolution, TSLOT_IBL_IRRADIANCE ));
+//    assign( UniformNames::ibl_specularMap, TM.TD( FBNames::specular_prefilter, TSLOT_IBL_PREFILTER ));
+//    assign( UniformNames::ibl_brdfLUTMap, TM.TD( FBNames::ibl_brdf, TSLOT_IBL_BRDFLUT ));
 //
 //    assign( UniformNames::diffuseColor, color.xyz());
 //    assign( UniformNames::metallic, metallic );
@@ -199,9 +199,9 @@ std::map<std::string, unsigned int> ProgramUniformSet::mUBOHandles;
 //            TM.T( ImageBuilder{ base + "_height" + ext }.GPUSlot( TSLOT_HEIGHT ).backup( "black.png" )
 //            ));
 //
-//    assign( UniformNames::ibl_irradianceMap, TM.TD( "convolution", TSLOT_IBL_IRRADIANCE ));
-//    assign( UniformNames::ibl_specularMap, TM.TD( "specular_prefilter", TSLOT_IBL_PREFILTER ));
-//    assign( UniformNames::ibl_brdfLUTMap, TM.TD( "ibl_brdf", TSLOT_IBL_BRDFLUT ));
+//    assign( UniformNames::ibl_irradianceMap, TM.TD( FBNames::convolution, TSLOT_IBL_IRRADIANCE ));
+//    assign( UniformNames::ibl_specularMap, TM.TD( FBNames::specular_prefilter, TSLOT_IBL_PREFILTER ));
+//    assign( UniformNames::ibl_brdfLUTMap, TM.TD( FBNames::ibl_brdf, TSLOT_IBL_BRDFLUT ));
 //
 //    assign( UniformNames::diffuseColor, color.xyz());
 //    assign( UniformNames::metallic, 1.0f );

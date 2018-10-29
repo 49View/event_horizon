@@ -531,7 +531,7 @@ int RenderSceneGraph::bake(scene_t *scene)
     free(data);
 
     rr.clearTargets();
-    rr.TM().addTextureWithGPUHandle( "lightMap_t", scene->lightmap, TSLOT_LIGHTMAP );
+    rr.TM().addTextureWithGPUHandle( FBNames::lightmap, scene->lightmap, TSLOT_LIGHTMAP );
 
     for ( const auto&[k, v] : geoms ) {
         v->generateSOA();

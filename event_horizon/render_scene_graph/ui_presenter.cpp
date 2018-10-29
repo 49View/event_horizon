@@ -251,8 +251,10 @@ const std::shared_ptr<ImGuiConsole>& UiPresenter::Console() const {
 	return console;
 }
 
-void UiPresenter::takeScreenShot( const std::string& _viewportName, ScreenShotContainerPtr _outdata ) {
-	rr.getTarget(_viewportName)->takeScreenShot( _outdata );
+void UiPresenter::takeScreenShot( const AABB& _box, ScreenShotContainerPtr _outdata ) {
+    addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
+    getCamera(Name::Sierra)->center(_box, {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
+    rr.getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
 
 void PresenterLayout::setDragAndDropFunction( DragAndDropFunction dd ) {

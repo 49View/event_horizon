@@ -88,6 +88,7 @@ void screenShotBase64Callback( void* ctx, void*data, int size ) {
 void CommandBuffer::postBlit() {
     if ( Target()->isTakingScreenShot() ) {
         auto lfb = fb(CommandBufferFrameBufferType::finalBlit);
+        lfb->bind();
         auto ssd = Target()->ScreenShotData();
         ssd->clear();
         int w = lfb->getWidth();
@@ -402,15 +403,15 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
     Vector2f vsize = _destViewport.size();
     mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
             (PIXEL_FORMAT_HDR_RGBA_16).addColorBufferAttachments({ "colorFrameBufferAtth1", 1 }).build();
-    mBlurHorizontalFB = FrameBufferBuilder{ rr, "blur_horizontal_b" }.size(vsize*bloomScale).noDepth()
+    mBlurHorizontalFB = FrameBufferBuilder{ rr, FBNames::blur_horizontal }.size(vsize*bloomScale).noDepth()
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_HORIZONTAL).build();
-    mBlurVerticalFB = FrameBufferBuilder{ rr, "blur_vertical_b" }.size(vsize*bloomScale).noDepth()
+    mBlurVerticalFB = FrameBufferBuilder{ rr, FBNames::blur_vertical }.size(vsize*bloomScale).noDepth()
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_VERTICAL).build();
-    mColorFinalFB = FrameBufferBuilder{ rr, "colorFinalFrameBuffer"}.size(vsize).noDepth().
+    mColorFinalFB = FrameBufferBuilder{ rr, FBNames::colorFinalFrameBuffer}.size(vsize).noDepth().
             dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).
             IM(S::FINAL_COMBINE).build();
     if ( mCompositeFinalDest == BlitType::OffScreen) {
-        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer"}.size(vsize).noDepth()
+        mOffScreenBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer}.size(vsize).noDepth()
                 .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).
                 IM(S::FINAL_COMBINE).build();
     }

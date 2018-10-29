@@ -117,11 +117,11 @@ MaterialPBRUniformRenderSetup::operator()( std::shared_ptr<Program> program, std
     pus->assign( tub.u( UniformNames::metallicTexture ).t( pmat->getMetallic()).s( TSLOT_METALLIC ));
     pus->assign( tub.u( UniformNames::heightTexture ).t( pmat->getHeight()).s( TSLOT_HEIGHT ));
 
-//    pus->assign( tub.u( UniformNames::shadowMapTexture ).t( "shadowMap_d" ).s( TSLOT_SHADOWMAP ));
-//    pus->assign( tub.u( UniformNames::lightmapTexture ).t( "lightMap_t" ).s( TSLOT_LIGHTMAP ));
-    pus->assign( tub.u( UniformNames::ibl_irradianceMap ).t( "convolution" ).s( TSLOT_IBL_IRRADIANCE ));
-    pus->assign( tub.u( UniformNames::ibl_specularMap ).t( "specular_prefilter" ).s( TSLOT_IBL_PREFILTER ));
-    pus->assign( tub.u( UniformNames::ibl_brdfLUTMap ).t( "ibl_brdf" ).s( TSLOT_IBL_BRDFLUT ));
+//    pus->assign( tub.u( UniformNames::shadowMapTexture ).t( FBNames::shadowmap ).s( TSLOT_SHADOWMAP ));
+//    pus->assign( tub.u( UniformNames::lightmapTexture ).t( FBNames::lightmap ).s( TSLOT_LIGHTMAP ));
+    pus->assign( tub.u( UniformNames::ibl_irradianceMap ).t( FBNames::convolution ).s( TSLOT_IBL_IRRADIANCE ));
+    pus->assign( tub.u( UniformNames::ibl_specularMap ).t( FBNames::specular_prefilter ).s( TSLOT_IBL_PREFILTER ));
+    pus->assign( tub.u( UniformNames::ibl_brdfLUTMap ).t( FBNames::ibl_brdf ).s( TSLOT_IBL_BRDFLUT ));
 
     pus->assign( program, UniformNames::metallic, pmat->getMetallicValue());
     pus->assign( program, UniformNames::roughness, pmat->getRoughnessValue());

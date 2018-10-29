@@ -132,7 +132,7 @@ void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float rou
 }
 
 void PrefilterBRDF::init() {
-    mBRDF = FrameBufferBuilder{ rr, "ibl_brdf" }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
+    mBRDF = FrameBufferBuilder{ rr, FBNames::ibl_brdf }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
             PIXEL_FORMAT_HDR_RG_16 ). IM(S::IBL_BRDF).noDepth().build();
 }
 

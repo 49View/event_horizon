@@ -21,6 +21,27 @@
 #include <stb/stb_image_write.h>
 #include "core/service_factory.h"
 
+namespace FBNames {
+    static std::unordered_set<std::string> sFBNames;
+
+    bool isPartOf( const std::string& _val ) {
+        if ( sFBNames.empty() ) {
+            sFBNames.insert( shadowmap );
+            sFBNames.insert( lightmap );
+            sFBNames.insert( sceneprobe );
+            sFBNames.insert( convolution );
+            sFBNames.insert( specular_prefilter );
+            sFBNames.insert( ibl_brdf );
+            sFBNames.insert( blur_horizontal );
+            sFBNames.insert( blur_vertical );
+            sFBNames.insert( colorFinalFrameBuffer );
+            sFBNames.insert( offScreenFinalFrameBuffer );
+        }
+        return sFBNames.find( _val ) != sFBNames.end();
+    }
+
+}
+
 //#include "vr_manager.hpp"
 
 CommandScriptRendererManager::CommandScriptRendererManager( Renderer& _rr ) {
@@ -66,7 +87,7 @@ void Renderer::postInit() {
 
     if ( mbIsInitialized ) return;
 
-    mShadowMapFB = FrameBufferBuilder{ *this, "shadowMap_d" }.size(4096).GPUSlot(TSLOT_SHADOWMAP).depthOnly().build();
+    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).GPUSlot(TSLOT_SHADOWMAP).depthOnly().build();
 
     smm = std::make_unique<ShadowMapManager>(*this);
     smm->init();
@@ -77,9 +98,9 @@ void Renderer::postInit() {
     // Create a default skybox
     mSkybox = createSkybox();
 
-    cm.addCubeMapRig( *this, CameraCubeMapRigBuilder{"sceneprobe"}.s( 512 ) );
-    cm.addCubeMapRig( *this, CameraCubeMapRigBuilder{"convolution"}.s(128) );
-    cm.addCubeMapRig( *this, CameraCubeMapRigBuilder{"specular_prefilter"}.s( 512 ).useMips() );
+    cm.addCubeMapRig( *this, CameraCubeMapRigBuilder{FBNames::sceneprobe}.s( 512 ) );
+    cm.addCubeMapRig( *this, CameraCubeMapRigBuilder{FBNames::convolution}.s(128) );
+    cm.addCubeMapRig( *this, CameraCubeMapRigBuilder{FBNames::specular_prefilter}.s( 512 ).useMips() );
 
     // Create PBR resources
     mConvolution = std::make_unique<CubeEnvironmentMap>(*this);
@@ -89,7 +110,7 @@ void Renderer::postInit() {
     mIBLPrefilterBRDF = std::make_unique<PrefilterBRDF>(*this);
     mIBLPrefilterBRDF->init();
 
-    tm.addTextureWithData("lightMap_t", RawImage::WHITE4x4, TSLOT_LIGHTMAP );
+    tm.addTextureWithData(FBNames::lightmap, RawImage::WHITE4x4, TSLOT_LIGHTMAP );
 
     mbIsInitialized = true;
 }
@@ -119,10 +140,10 @@ std::unique_ptr<Skybox> Renderer::createSkybox() {
 void Renderer::setGlobalTextures() {
     auto p = sm.P(S::SH);
 
-    auto lmt = tm.TD("lightMap_t");
+    auto lmt = tm.TD(FBNames::lightmap);
     lmt->bind( lmt->textureSlot(), p->handle(), UniformNames::lightmapTexture.c_str() );
 
-    auto smt = tm.TD("shadowMap_d");
+    auto smt = tm.TD(FBNames::shadowmap);
     smt->bind( smt->textureSlot(), p->handle(), UniformNames::shadowMapTexture.c_str() );
 }
 
@@ -136,7 +157,9 @@ void Renderer::directRenderLoop( const GameTime& gt ) {
     CB_U().pushCommand( { CommandBufferCommandName::setGlobalTextures } );
 
     for ( const auto& target : mTargets ) {
-        target->addToCB( CB_U() );
+        if ( target->enabled() ) {
+            target->addToCB( CB_U() );
+        }
     }
     CB_U().end();
 
@@ -214,7 +237,7 @@ void Renderer::addProbeToCB( const std::string& _probeCameraName, [[maybe_unused
     }
     // convolution
     for ( int t = 0; t < 6; t++ ) {
-        auto probe = std::make_shared<RLTargetProbe>( "convolution", t, *this );
+        auto probe = std::make_shared<RLTargetProbe>( FBNames::convolution, t, *this );
         probe->startCL( CB_U() );
         mConvolution->render( tm.TD(_probeCameraName, TSLOT_CUBEMAP) );
     }
@@ -222,7 +245,7 @@ void Renderer::addProbeToCB( const std::string& _probeCameraName, [[maybe_unused
     int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)512 ) ) );
     for ( int m = 0; m < preFilterMipMaps; m++ ) {
         for ( int t = 0; t < 6; t++ ) {
-            auto probe = std::make_shared<RLTargetProbe>( "specular_prefilter", t, *this, m );
+            auto probe = std::make_shared<RLTargetProbe>( FBNames::specular_prefilter, t, *this, m );
             probe->startCL( CB_U() );
             float roughness = (float)m / (float)(preFilterMipMaps - 1);
             mIBLPrefilterSpecular->render( tm.TD( _probeCameraName, TSLOT_CUBEMAP ), roughness );
@@ -311,7 +334,7 @@ void Renderer::addProbes() {
     if ( !mSkybox ) return;
 
     if ( mSkybox->needsRefresh(mUpdateCounter, 2) ) {
-        addProbeToCB( "sceneprobe", Vector3f::ZERO );
+        addProbeToCB( FBNames::sceneprobe, Vector3f::ZERO );
     }
 }
 

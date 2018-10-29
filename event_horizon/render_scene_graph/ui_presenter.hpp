@@ -159,7 +159,7 @@ public:
 				v.renderFunction( _target, BoxUpdateAndGet(k) );
 			}
 		}
-//		if ( renderFunction ) renderFunction( _target );
+		if ( renderFunction ) renderFunction( _target );
 	}
 
 	void setDragAndDropFunction( DragAndDropFunction dd );
@@ -195,7 +195,7 @@ public:
         mRigs[lRig->Name()] = lRig;
     }
 
-    void takeScreenShot( const std::string& _viewportName, ScreenShotContainerPtr _outdata );
+    void takeScreenShot( const AABB& _box, ScreenShotContainerPtr _outdata );
 
 	virtual void onTouchUpImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
 	virtual void onSimpleTapImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
