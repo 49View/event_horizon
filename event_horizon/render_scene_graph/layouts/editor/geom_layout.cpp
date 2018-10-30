@@ -19,7 +19,7 @@ void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
         auto gname = std::to_string(it->Hash());
         ImGui::BeginGroup();
         ImGui::Text( "Name: %s", it->Name().c_str());
-        ImGui::Text( "Hash: %lld", it->Hash());
+//        ImGui::Text( "Hash: %lld", it->Hash());
         ImGui::EndGroup();
     }
     if ( gbt ) {
