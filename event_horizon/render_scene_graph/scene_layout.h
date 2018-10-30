@@ -103,8 +103,7 @@ public:
             return rectArranger.getRect();
         }
         SceneRectArranger rectArranger;
-        CameraControls cc= CameraControls::Fly;
-        BlitType bt = BlitType::OnScreen;
+        CameraControls cc = CameraControls::Fly;
         RenderLayoutFunction renderFunction = nullptr;
         static const Boxes INVALID;
     };

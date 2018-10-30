@@ -233,8 +233,9 @@ void Framebuffer::blitWithRect( std::shared_ptr<Framebuffer> source,
     }
 
     GLCALL( glBlitFramebuffer( _sourceRect.left(), _sourceRect.top(),
-                               _sourceRect.calcWidth(), _sourceRect.calcHeight(),
-                               _destRect.left(), _destRect.bottom(),
-                               _destRect.calcWidth(), _destRect.bottom() + _destRect.calcHeight(),
+                               _sourceRect.right(), _sourceRect.bottom(),
+                               _destRect.left(), _destRect.top(),
+                               _destRect.right(), _destRect.bottom(),
                                GL_COLOR_BUFFER_BIT, GL_LINEAR ));
+
 }

@@ -20,13 +20,13 @@ CameraRig::CameraRig( Renderer& rr, const std::string& _name, std::shared_ptr<Fr
     mViewport = Rect2f{ Vector2f::ZERO, {_fb->getWidth(), _fb->getHeight()} };
     mFramebuffer = _fb;
 
-    mCamera = std::make_shared<Camera>( _name, CameraState::Active, _fb->getCurrentViewport() );
-    mCameraVRLeftEye = std::make_shared<Camera>( _name + "LeftEye", CameraState::Active, _fb->getCurrentViewport() );
-    mCameraVRRightEye = std::make_shared<Camera>( _name + "RightEye", CameraState::Active, _fb->getCurrentViewport() );
+    mCamera = std::make_shared<Camera>( _name, CameraState::Active, mViewport );
+    mCameraVRLeftEye = std::make_shared<Camera>( _name + "LeftEye", CameraState::Active, mViewport );
+    mCameraVRRightEye = std::make_shared<Camera>( _name + "RightEye", CameraState::Active, mViewport );
 }
 
 void CameraRig::setFramebuffer( std::shared_ptr<Framebuffer> framebuffer ) {
-//    mViewport = Rect2f{ Vector2f::ZERO, {framebuffer->getWidth(), framebuffer->getHeight()} };
+    mViewport = Rect2f{ Vector2f::ZERO, {framebuffer->getWidth(), framebuffer->getHeight()} };
     mFramebuffer = framebuffer;
 
 //    mCamera->ViewPort( mViewport );

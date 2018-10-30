@@ -20,6 +20,7 @@ namespace PresenterEventFunctionKey {
 }
 
 using PresenterUpdateCallbackFunc = std::function<void(Scene* p)>;
+using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraRig>>;
 
 class CommandScriptPresenterManager : public CommandScript {
 public:
@@ -79,6 +80,10 @@ public:
 
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
 
+	const cameraRigsMap& getRigs() const {
+		return mRigs;
+	}
+
 public:
 	static std::vector<std::string> callbackPaths;
 	static Vector2i callbackResizeWindow;
@@ -99,7 +104,9 @@ protected:
     TextInput& ti;
     MouseInput& mi;
 	CommandQueue& cq;
-    std::unordered_map<std::string, std::shared_ptr<CameraRig>> mRigs;
+	cameraRigsMap mRigs;
+
+protected:
 	bool mbActivated = false;
     std::shared_ptr<CommandScriptPresenterManager> hcs;
 
