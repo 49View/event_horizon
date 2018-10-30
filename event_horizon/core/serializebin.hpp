@@ -73,13 +73,7 @@ public:
 		for ( size_t q = 0; q < size; q++ ) {
 			f.emplace_back( b[q] );
 		}
-//		f.write( reinterpret_cast<const char*>( &v ), sizeof( T ) );
 	}
-
-//	template<typename T>
-//	void write( T* v ) {
-////		f.write( reinterpret_cast<const char*>( v ), sizeof( intptr_t ) );
-//	}
 
 	void write( const char* str ) {
 		int32_t nameLength = 0;
@@ -88,10 +82,9 @@ public:
 		} else {
 			nameLength = static_cast<int32_t>( strlen( str ) );
 			write( nameLength );
-			for ( size_t q = 0; q < nameLength; q++ ) {
+			for ( int32_t q = 0; q < nameLength; q++ ) {
 				f.emplace_back( str[q] );
 			}
-//			f.write( str, nameLength );
 		}
 	}
 
@@ -100,7 +93,6 @@ public:
 	}
 
 	void open( SerializeVersionFormat vf ) {
-//		f.open( ( cacheFolder() + filenameHashed ).c_str(), std::ios_base::binary );
 		if ( vf == SerializeVersionFormat::Float ) {
 			write( 1.0f );
 		} else {
@@ -134,19 +126,6 @@ public:
 		T value;
 		for ( int t = 0; t < vectorSize; t++ ) {
 			fi->read( reinterpret_cast<char*>( &value ), sizeof( T ) );
-			v.push_back( value );
-		}
-	}
-
-	template<typename T>
-	void read( std::vector<std::shared_ptr<T>>& v ) {
-
-		int32_t vectorSize = 0;
-		v.clear();
-		fi->read( reinterpret_cast<char*>( &vectorSize ), sizeof( int32_t ) );
-		for ( int t = 0; t < vectorSize; t++ ) {
-			std::shared_ptr<T> value = std::make_shared<T>();
-			value->deserialize( shared_from_this() );
 			v.push_back( value );
 		}
 	}
@@ -220,11 +199,6 @@ public:
 		( cstr )[nameLength] = '\0';
 		str = cstr;
 		delete[] cstr;
-	}
-
-	template<typename T>
-	void read( T* v ) {
-		fi->read( reinterpret_cast<char*>( &v ), sizeof( intptr_t ) );
 	}
 
 	void readVersion( SerializeVersionFormat vf ) {
