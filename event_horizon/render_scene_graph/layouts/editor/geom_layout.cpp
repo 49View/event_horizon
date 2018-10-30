@@ -7,8 +7,17 @@
 #include <render_scene_graph/scene.hpp>
 #include "poly/hier_geom.hpp"
 #include "poly/geom_builder.h"
+#include "poly/converters/gltf2/gltf2.h"
 
 std::shared_ptr<GeomBuilder> gbt;
+
+void loadGeomInGui( Scene* p, GLTF2& _newObject ) {
+    auto hierScene = _newObject.convert();
+    p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d(), {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
+    gbt = std::make_shared<GeomBuilder>( hierScene, _newObject.Materials() );
+    gbt->build(p->RSG());
+    p->takeScreenShot( hierScene->BBox3d(), gbt->Thumb() );
+}
 
 void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
     ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );

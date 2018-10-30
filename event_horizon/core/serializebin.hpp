@@ -22,12 +22,6 @@ enum class SerializeVersionFormat {
 
 static const uint64_t SBinVersion = 2030;
 
-struct OneShotReadBuf : public std::streambuf {
-	OneShotReadBuf( char* s, std::size_t n ) {
-		setg( s, s, s + n );
-	}
-};
-
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
 	SerializeBin( SerializeVersionFormat vf, const std::string& _entityType  ) {
@@ -38,27 +32,20 @@ public:
 	template<typename T>
 	void write( const std::vector<T>& v ) {
 		int32_t nameLength = static_cast<int32_t>( v.size() );
-		f.write( reinterpret_cast<const char*>( &nameLength ), sizeof( int32_t ) );
-		for ( auto& d : v ) f.write( reinterpret_cast<const char*>( &d ), sizeof( T ) );
-	}
-
-	template<typename T>
-	void write( const std::vector<std::shared_ptr<T>>& v ) {
-		int32_t vsize = static_cast<int32_t>( v.size() );
-		f.write( reinterpret_cast<const char*>( &vsize ), sizeof( int32_t ) );
-		for ( auto& d : v ) d->serialize( shared_from_this() );
+		write( nameLength );
+		for ( const auto& d : v ) write( d );
 	}
 
 	template<typename T>
 	void write( std::unique_ptr<T[]>& v, int32_t numIndices ) {
-		f.write( reinterpret_cast<const char*>( &numIndices ), sizeof( int32_t ) );
-		for ( int t = 0; t < numIndices; t++ ) f.write( reinterpret_cast<const char*>( &v[t] ), sizeof( T ) );
+		write( numIndices );
+		for ( int t = 0; t < numIndices; t++ ) write( v[t] );
 	}
 
 	template<typename T, typename M>
 	void write( const std::map<T, M>& v ) {
 		int32_t nameLength = static_cast<int32_t>( v.size() );
-		f.write( reinterpret_cast<const char*>( &nameLength ), sizeof( int32_t ) );
+		write( nameLength );
 		for ( auto& d : v ) {
 			write( d.first );
 			write( d.second );
@@ -68,7 +55,7 @@ public:
 	template<typename T, typename M>
 	void write( const std::map<T, std::vector<M>>& v ) {
 		int32_t nameLength = static_cast<int32_t>( v.size() );
-		f.write( reinterpret_cast<const char*>( &nameLength ), sizeof( int32_t ) );
+		write( nameLength );
 		for ( auto& d : v ) {
 			write( d.first );
 			write( static_cast<int32_t>( d.second.size() ) );
@@ -80,22 +67,31 @@ public:
 
 	template<typename T>
 	void write( const T& v ) {
-		f.write( reinterpret_cast<const char*>( &v ), sizeof( T ) );
+		size_t size = sizeof( T );
+		auto b = std::make_unique<unsigned char[]>(size);
+		memcpy( b.get(), reinterpret_cast<const void*>( &v ), size );
+		for ( size_t q = 0; q < size; q++ ) {
+			f.emplace_back( b[q] );
+		}
+//		f.write( reinterpret_cast<const char*>( &v ), sizeof( T ) );
 	}
 
-	template<typename T>
-	void write( T* v ) {
-		f.write( reinterpret_cast<const char*>( v ), sizeof( intptr_t ) );
-	}
+//	template<typename T>
+//	void write( T* v ) {
+////		f.write( reinterpret_cast<const char*>( v ), sizeof( intptr_t ) );
+//	}
 
 	void write( const char* str ) {
 		int32_t nameLength = 0;
 		if ( str == nullptr ) {
-			f.write( reinterpret_cast<const char*>( &nameLength ), sizeof( int32_t ) );
+			write( nameLength );
 		} else {
 			nameLength = static_cast<int32_t>( strlen( str ) );
-			f.write( reinterpret_cast<const char*>( &nameLength ), sizeof( int32_t ) );
-			f.write( str, nameLength );
+			write( nameLength );
+			for ( size_t q = 0; q < nameLength; q++ ) {
+				f.emplace_back( str[q] );
+			}
+//			f.write( str, nameLength );
 		}
 	}
 
@@ -112,14 +108,12 @@ public:
 		}
 	}
 
-	std::vector<unsigned char> close() const {
-		std::vector<unsigned char> ret;
-		std::copy( f.str().begin(), f.str().end(), std::back_inserter(ret) );
-		return ret;
+	std::vector<unsigned char> buffer() const {
+		return f;
 	}
 
 private:
-	std::ostringstream f;
+	std::vector<unsigned char> f;
 	std::string entityType;
 };
 

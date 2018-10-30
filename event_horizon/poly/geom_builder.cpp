@@ -180,6 +180,7 @@ std::string GeomBuilder::toMetaData() const {
 
     writer.StartObject();
     writer.serialize( CoreMetaData{Name(), HierGeom::entityGroup(), generateThumbnail(), generateRawData()} );
+    writer.serialize( "BBox3d", elem->BBox3d() );
     writer.EndObject();
 
     return writer.getString();

@@ -106,7 +106,9 @@ namespace Http {
         settings->set_connection_timeout( std::chrono::seconds( 86400 ));
 
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
-        LOGR( "[HTTP-POST-DATA] %s", _data.c_str() );
+        auto dataCut = _data.substr(0, 512);
+        if ( _data.size() > 512 ) dataCut += "...";
+        LOGR( "[HTTP-POST-DATA] %s", dataCut.c_str() );
         try {
         restbed::Http::async( request,
                               [&](std::shared_ptr< restbed::Request > request,

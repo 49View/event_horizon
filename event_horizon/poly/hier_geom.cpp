@@ -157,9 +157,7 @@ std::vector<unsigned char> HierGeom::serialize() {
     serializeDependencies( writer );
     serializeRec( writer );
 
-    return writer->close();
-
-//		Http::post( Url( Http::restEntityPrefix( entityType, mFilename ) ), fn );
+    return writer->buffer();
 }
 
 bool HierGeom::deserialize( std::shared_ptr<DeserializeBin>& reader ) {

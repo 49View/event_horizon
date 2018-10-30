@@ -135,15 +135,8 @@ void allConversionsDragAndDropCallback( Scene* p, const std::string& _path ) {
     }
 
     if ( isGeom ) {
-        static float ni = 0.0f;
         GLTF2 newObject{ finalPath };
-        auto hierScene = newObject.convert();
-        p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d(), {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
-        hierScene->updateTransform( Vector3f::X_AXIS * ni );
-        static auto gbt = std::make_shared<GeomBuilder>( hierScene, newObject.Materials() );
-        gbt->build(p->RSG());
-        p->takeScreenShot( hierScene->BBox3d(), gbt->Thumb() );
-        ni+=1.0f;
+        loadGeomInGui( p, newObject );
     }
 }
 
