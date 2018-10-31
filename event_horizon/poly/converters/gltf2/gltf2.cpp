@@ -760,7 +760,7 @@ void GLTF2::addNodeToHier( const int nodeIndex, std::shared_ptr<HierGeom>& hier 
         }
     }
     for ( const auto& ci : node.children ) {
-        auto c = hier->addChildren();
+        auto c = hier->addChildren( model.nodes[ci].name );
         addNodeToHier( ci, c );
     }
 }
@@ -899,13 +899,14 @@ std::shared_ptr<HierGeom> GLTF2::convert() {
     for ( size_t s = 0; s < model.scenes.size(); s++ ) {
         auto scene = model.scenes[s];
         if ( scene.nodes.empty() ) continue;
-        addNodeToHier( scene.nodes[0], hierScene );
+        // NDDADO: Hardcoding zero "0" seems weird here but it's guaranteed by the standard to be the root node.
+        auto ci = scene.nodes[0];
+        auto c =  hierScene->addChildren( model.nodes[ci].name );
+        addNodeToHier( ci, c );
     }
 
-    hierScene->generateMatrixHierarchy( Matrix4f::MIDENTITY() );
-    hierScene->calcCompleteBBox3d();
-//    hierScene->BBox3d( );
-//    hierScene->serialize();
+    hierScene->prune();
+    hierScene->generateMatrixHierarchy();
     return hierScene;
 }
 

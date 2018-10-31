@@ -414,6 +414,9 @@ public:
     void setWindingOrderFlagOnly( const WindingOrderT _wo );
     WindingOrderT getWindingOrder() const;
 
+    template<typename TV> \
+	void visit() const { traverseWithHelper<TV>( "Name,BBbox", mName,mBBox3d ); }
+
 protected:
 
     // All internal add polygons are now not accessible to the outside to handle topology better

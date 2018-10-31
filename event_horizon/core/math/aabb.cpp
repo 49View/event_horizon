@@ -7,8 +7,8 @@ const JMATH::AABB JMATH::AABB::IDENTITY = AABB( Vector3f::ZERO, Vector3f::ONE );
 const JMATH::AABB JMATH::AABB::ZERO = AABB( Vector3f::ZERO, Vector3f::ZERO );
 
 void JMATH::AABB::merge( const AABB& val ) {
-	expand( val.mMaxPoint );
-	expand( val.mMinPoint );
+	expandMax( val.mMaxPoint );
+	expandMin( val.mMinPoint );
 }
 
 JMATH::Rect2f JMATH::AABB::demoteTo2d() const {

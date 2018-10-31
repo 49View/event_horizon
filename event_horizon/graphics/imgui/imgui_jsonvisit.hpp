@@ -26,6 +26,7 @@ namespace ImGUIJsonColors {
 	const static ImVec4 Float4 = ImVec4(0.9f, 0.6f, 0.4f, 1.0f);
 	const static ImVec4 SquareBracket = ImVec4(0.1f, 0.7f, 0.8f, 1.0f);
 	const static ImVec4 CurlyBracket  = ImVec4(0.95f, 0.7f, 0.8f, 1.0f);
+	const static ImVec4 Danger  = ImVec4(0.95f, 0.0f, 0.0f, 1.0f);
 }
 
 void drawKey( const char* _name ) {
@@ -65,7 +66,7 @@ void drawVector( const T& value ) {
 	}
 	for ( auto st = 0; st < size; st++ ) {
 		ImGui::SameLine(0.0f, 0.0f);
-		ImGui::TextColored( fc, "%.02f", value[st] );
+		drawFloatFormatted( value[st], fc );
 		if ( st != size - 1 ) {
 			ImGui::SameLine(0.0f, 0.0f);
 			ImGui::TextColored( ImGUIJsonColors::SquareBracket, "%s", "," );
@@ -73,7 +74,6 @@ void drawVector( const T& value ) {
 	}
 	ImGui::SameLine(0.0f, 0.0f);
 	ImGui::TextColored( ImGUIJsonColors::SquareBracket, "%s", "]" );
-
 }
 
 void drawBool( const char* _name, const bool& value ) {
@@ -95,9 +95,22 @@ void drawInt( const T& value ) {
 }
 
 template<typename T>
-void drawFloat( const T& value ) {
+void drawFloatFormatted( const T& value, const ImVec4& col ) {
+	if ( value == std::numeric_limits<float>::lowest() ) {
+		ImGui::TextColored( ImGUIJsonColors::Danger, "-INF" );
+		return;
+	}
+	if ( value == std::numeric_limits<float>::max() ) {
+		ImGui::TextColored( ImGUIJsonColors::Danger, "INF" );
+		return;
+	}
+	ImGui::TextColored( col, "%.02f", value );
+}
+
+template<typename T>
+void drawFloat( const T& value, const ImVec4& col = ImVec4{1,1,1,1} ) {
 	ImGui::SameLine();
-	ImGui::Text( "%.02f", value );
+	drawFloatFormatted( value, col );
 }
 
 template<typename T>
@@ -240,30 +253,43 @@ public:
 
 	template<typename T>
 	void visit( const char* _name, const T& value ) {
-		drawKey( _name );
 		if (ImGui::TreeNode(_name)) {
 			value.template visit<ImGUIJson>();
 			ImGui::TreePop();
 		}
 	}
 
+	template<typename T>
+	void visit( const char* _name, std::shared_ptr<T> value ) {
+		if ( value ) {
+			if (ImGui::TreeNode(_name)) {
+				value->template visit<ImGUIJson>();
+				ImGui::TreePop();
+			}
+		}
+	}
+
 	template<typename T, std::size_t N>
 	void visit( const char* _name, const std::array<T, N>& array ) {
+		if ( array.empty() ) return;
 		arrayVisitDot
 	}
 
 	template<typename T>
 	void visit( const char* _name, const std::vector<T>& array ) {
+		if ( array.empty() ) return;
 		arrayVisitDot
 	}
 
 	template<typename T>
 	void visit( const char* _name, const std::vector<std::shared_ptr<T>>& array ) {
+		if ( array.empty() ) return;
 		arrayVisitPtr
 	}
 
 	template<typename T>
 	void visit( const char* _name, const std::vector<std::vector<T>>& arrayOfArray ) {
+		if ( arrayOfArray.empty() ) return;
 		if (ImGui::TreeNode(_name))
 		{
 			for ( auto& array : arrayOfArray ) {
@@ -438,6 +464,29 @@ public:
 		int q = 0;
 		for ( auto subarray : array ) {
 			drawArrayOfVector( std::to_string(q++).c_str(), subarray );
+		}
+	}
+
+};
+
+class ImGUIJsonN : public ImGUIJson {
+
+	template<typename T>
+	void visitN( const char* _name, const T& value ) {
+		drawKey( _name );
+		if (ImGui::TreeNode(_name)) {
+			value.template visitN<ImGUIJson>();
+			ImGui::TreePop();
+		}
+	}
+
+	template<typename T>
+	void visitN( const char* _name, std::shared_ptr<T> value ) {
+		if ( value ) {
+			if (ImGui::TreeNode(value->Name().c_str())) {
+				value->template visitN<ImGUIJson>();
+				ImGui::TreePop();
+			}
 		}
 	}
 

@@ -102,6 +102,18 @@ public:
 		if ( p.z() > mMaxPoint.z() ) mMaxPoint.setZ( p.z() );
 	}
 
+	void expandMin( const Vector3f& p ) {
+		if ( p.x() < mMinPoint.x() ) mMinPoint.setX( p.x() );
+		if ( p.y() < mMinPoint.y() ) mMinPoint.setY( p.y() );
+		if ( p.z() < mMinPoint.z() ) mMinPoint.setZ( p.z() );
+	}
+
+	void expandMax( const Vector3f& p ) {
+		if ( p.x() > mMaxPoint.x() ) mMaxPoint.setX( p.x() );
+		if ( p.y() > mMaxPoint.y() ) mMaxPoint.setY( p.y() );
+		if ( p.z() > mMaxPoint.z() ) mMaxPoint.setZ( p.z() );
+	}
+
 	void merge( const AABB& val );
 
 	Rect2f demoteTo2d() const;

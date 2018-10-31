@@ -67,7 +67,7 @@ public:
     int totalChildrenWithGeom() const;
     int totalChildrenOfType( GeomHierType _gt ) const;
 
-    void generateMatrixHierarchy( Matrix4f cmat );
+    void generateMatrixHierarchy( Matrix4f cmat = Matrix4f::IDENTITY );
     void updateTransform( const std::string& nodeName, const Vector3f& pos, const Vector3f& rot, const Vector3f& scale,
                           UpdateTypeFlag whatToUpdate );
 
@@ -121,6 +121,7 @@ public:
     void removeChildrenWithHash( int64_t _hash );
     void removeChildrenWithType( GeomHierType gt );
 
+    void prune();
     void relightSH( bool includeChildren = true );
     void finalize();
     void generateSOA();
@@ -153,6 +154,10 @@ public:
         return "geom";
     }
 
+    template<typename TV> \
+	void visit() const { traverseWithHelper<TV>( "Name,GHType,Geom,BBbox,Children", mName,mGHType,mData,bbox3d,
+	        children ); }
+
 private:
     void intersectLineRec( const Vector3f& linePos, const Vector3f& lineDir, bool& doesHit );
     void
@@ -170,18 +175,18 @@ private:
 
 protected:
 
+    void pruneRec();
+    void generateMatrixHierarchyRec( Matrix4f cmat );
     void findRecursive( const char *name, HierGeom *& foundObj );
     int totalChildrenRec( int& start ) const;
     int totalChildrenWithGeomRec( int& numC ) const;
     int totalChildrenOfTypeRec( GeomHierType _gt, int& numC ) const;
     void containingAABBRec( AABB& _bbox ) const;
-    void calcCompleteBBox3dRec( AABB& _bb );
+    AABB calcCompleteBBox3dRec();
 
 protected:
     std::string mName;
     int64_t mHash;
-    static int64_t globalHierHash;
-
     GeomHierType mGHType = GHTypeGeneric;
 
     HierGeom *father = nullptr;
@@ -198,4 +203,6 @@ protected:
     bool mCastShadows = true;
 
     std::vector<std::shared_ptr<HierGeom>> children;
+
+    static int64_t globalHierHash;
 };

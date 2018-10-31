@@ -270,25 +270,26 @@ AABB HierGeom::containingAABB() const {
     return ret;
 }
 
-void HierGeom::calcCompleteBBox3dRec( AABB& _bb ) {
+AABB HierGeom::calcCompleteBBox3dRec() {
     if ( mData ) {
         AABB lBBox = mData->BBox3d();
-        lBBox.transform( *mLocalHierTransform.get() );
-        _bb.merge( lBBox );
+        lBBox.transform( *mLocalHierTransform );
+        bbox3d = lBBox;
     }
 
     for ( auto& c : children ) {
-        c->calcCompleteBBox3dRec( _bb );
+        bbox3d.merge( c->calcCompleteBBox3dRec() );
     }
+
+    return bbox3d;
 }
 
 void HierGeom::calcCompleteBBox3d() {
-    bbox3d = AABB::INVALID;
-    calcCompleteBBox3dRec( bbox3d );
+    bbox3d = calcCompleteBBox3dRec();
 }
 
 void HierGeom::createLocalHierMatrix( Matrix4f cmat ) {
-    Matrix4f& lLHT = *mLocalHierTransform.get();
+    Matrix4f& lLHT = *mLocalHierTransform;
     lLHT = mLocalTransform * cmat;
 //    if ( mData ) {
 //        bbox3d = mData->BBox3d();
@@ -296,12 +297,18 @@ void HierGeom::createLocalHierMatrix( Matrix4f cmat ) {
 //    }
 }
 
-void HierGeom::generateMatrixHierarchy( Matrix4f cmat ) {
+void HierGeom::generateMatrixHierarchyRec( Matrix4f cmat ) {
     createLocalHierMatrix( cmat );
 
     for ( auto& c : children ) {
-        c->generateMatrixHierarchy( *mLocalHierTransform.get() );
+        c->generateMatrixHierarchyRec( *mLocalHierTransform );
     }
+}
+
+void HierGeom::generateMatrixHierarchy( Matrix4f cmat ) {
+    generateMatrixHierarchyRec( cmat );
+    calcCompleteBBox3d();
+
 }
 
 void HierGeom::numVertsRec( int& currNumVerts ) {
@@ -723,3 +730,21 @@ Vector3f HierGeom::position() const {
     return mLocalHierTransform->getPosition3();
 }
 
+
+void HierGeom::pruneRec() {
+
+    using vi = std::vector<std::shared_ptr<HierGeom>>::iterator;
+
+    for ( vi it = children.begin(); it != children.end(); ) {
+        if ( (*it)->Children().empty() && !((*it)->Geom()) ) {
+            it = children.erase( it );
+        } else {
+            (*it)->pruneRec();
+            ++it;
+        }
+    }
+}
+
+void HierGeom::prune() {
+    pruneRec();
+}
