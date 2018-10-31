@@ -1220,6 +1220,15 @@ void VData::changeHandness() {
 	}
 }
 
+void VData::sanitizeUVMap() {
+	if ( vUVs.size() == 0 ) {
+		for ( const auto& v : vcoords3d ) {
+			vUVs.emplace_back( v.dominantVector2() );
+			vUV2s.emplace_back( v.dominantVector2() );
+		}
+	}
+}
+
 void VData::calcBinormal() {
     if ( vtangents3d.size() == 0 ) {
         vtangents3d = vnormals3d;

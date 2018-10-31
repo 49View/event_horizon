@@ -118,6 +118,7 @@ struct VData {
     void fillColors( const std::vector<Vector4f>& _colors );
     void allocateSpaceForVertices( const int _numVerts );
     void changeWindingOrder();
+    void sanitizeUVMap();
     void calcBinormal();
     void changeHandness();
     void mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );

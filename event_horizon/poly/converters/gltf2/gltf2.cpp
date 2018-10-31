@@ -723,6 +723,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<HierGeom
         }
     }
 
+    geom->vData().sanitizeUVMap();
     geom->vData().calcBinormal();
     geom->BBox3d( AABB{ geom->vData().getMin(), geom->vData().getMax() } );
 

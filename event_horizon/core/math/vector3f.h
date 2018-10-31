@@ -370,6 +370,16 @@ public:
 		return 2;
 	}
 
+	Vector2f dominantVector2() const {
+		if ( fabs( x() ) >= fabs( y() ) && fabs( x() ) >= fabs( z() ) ) {
+			return Vector2f{ mY, mZ };
+		}
+		if ( fabs( y() ) >= fabs( x() ) && fabs( y() ) >= fabs( z() ) ) {
+			return Vector2f{ mX, mZ };
+		}
+		return Vector2f{ mX, mY};
+	}
+
 	std::pair<int32_t, int32_t> dominantPair() const {
 		if ( fabs( x() ) >= fabs( y() ) && fabs( x() ) >= fabs( z() ) ) {
 			return std::make_pair<int32_t, int32_t>( 1, 2 );
