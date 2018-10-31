@@ -656,7 +656,7 @@ void Camera::updateFromInputData( const CameraInputData& mi ) {
 
 	if ( Mode() == CameraMode::Edit2d ) {
 		if ( mi.isMouseTouchedDown) {
-			pan( Vector3f( -mi.moveDiff, 0.0f ) );
+			pan( Vector3f( mi.moveDiff * Vector2f{-1.0f, 1.0f}, 0.0f ) );
 		}
 		zoom2d(mi.scrollValue); // It's safe to call it every frame as no gesture on wheel/magic mouse
 		// will mean zero value so unchanged
