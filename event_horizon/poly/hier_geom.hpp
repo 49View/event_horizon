@@ -154,7 +154,7 @@ public:
         return "geom";
     }
 
-    template<typename TV> \
+    template<typename TV>
 	void visit() const { traverseWithHelper<TV>( "Name,GHType,Geom,BBbox,Children", mName,mGHType,mData,bbox3d,
 	        children ); }
 

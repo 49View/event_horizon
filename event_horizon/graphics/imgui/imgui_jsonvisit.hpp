@@ -9,6 +9,7 @@
 #pragma once
 
 #include <array>
+#include <event_horizon/core/math/matrix_anim.h>
 
 #include "core/htypes_shared.hpp"
 #include "core/math/rect2f.h"
@@ -63,8 +64,10 @@ void drawVector( const T& value ) {
 		case 4:
 			fc = ImGUIJsonColors::Float4;
 			break;
+		default:
+			fc = ImGUIJsonColors::Float2;
 	}
-	for ( auto st = 0; st < size; st++ ) {
+	for ( size_t st = 0; st < size; st++ ) {
 		ImGui::SameLine(0.0f, 0.0f);
 		drawFloatFormatted( value[st], fc );
 		if ( st != size - 1 ) {
@@ -248,246 +251,397 @@ std::string arrayName( const char* _name, const std::vector<T>& array ) {
 #define arrayVisitDot arrayVisitStart . arrayVisitEnd
 #define arrayVisitPtr arrayVisitStart -> arrayVisitEnd
 
-class ImGUIJson {
+class ImGuiStandardJson {
 public:
 
-	template<typename T>
-	void visit( const char* _name, const T& value ) {
-		if (ImGui::TreeNode(_name)) {
-			value.template visit<ImGUIJson>();
-			ImGui::TreePop();
-		}
-	}
-
-	template<typename T>
-	void visit( const char* _name, std::shared_ptr<T> value ) {
-		if ( value ) {
-			if (ImGui::TreeNode(_name)) {
-				value->template visit<ImGUIJson>();
-				ImGui::TreePop();
-			}
-		}
-	}
-
-	template<typename T, std::size_t N>
-	void visit( const char* _name, const std::array<T, N>& array ) {
-		if ( array.empty() ) return;
-		arrayVisitDot
-	}
-
-	template<typename T>
-	void visit( const char* _name, const std::vector<T>& array ) {
-		if ( array.empty() ) return;
-		arrayVisitDot
-	}
-
-	template<typename T>
-	void visit( const char* _name, const std::vector<std::shared_ptr<T>>& array ) {
-		if ( array.empty() ) return;
-		arrayVisitPtr
-	}
-
-	template<typename T>
-	void visit( const char* _name, const std::vector<std::vector<T>>& arrayOfArray ) {
-		if ( arrayOfArray.empty() ) return;
-		if (ImGui::TreeNode(_name))
-		{
-			for ( auto& array : arrayOfArray ) {
-				arrayVisitDot
-			}
-			ImGui::TreePop();
-		}
-	}
-
-	void visit( const char* _name, const char* value ) {
+	static void visit( const char* _name, const char* value ) {
 		drawString( _name, value );
 	}
 
-	void visit( const char* _name, const double& value ) {
-		drawFloat( _name, value );
-	}
-
-	void visit( const char* _name, const float& value ) {
-		drawFloat( _name, value );
-	}
-
-	void visit( const char* _name, const bool& value ) {
-		drawBool( _name, value );
-	}
-
-	void visit( const char* _name, const int32_t& value ) {
-		drawInt( _name, value );
-	}
-
-	void visit( const char* _name, const uint32_t& value ) {
-		drawInt( _name, value );
-	}
-
-	void visit( const char* _name, const int64_t& value ) {
-		drawInt( _name, value );
-	}
-
-	void visit( const char* _name, const uint64_t& value ) {
-		drawInt( _name, value );
-	}
-
-	void visit( const char* _name, const std::string& value ) {
+	static void visit( const char* _name, const std::string& value ) {
 		drawString( _name, value.c_str() );
 	}
 
-	void visit( const char* _name, const Vector2f& value ) {
+	static void visit( const char* _name, const double& value ) {
+		drawFloat( _name, value );
+	}
+
+	static void visit( const char* _name, const float& value ) {
+		drawFloat( _name, value );
+	}
+
+	static void visit( const char* _name, const bool& value ) {
+		drawBool( _name, value );
+	}
+
+	static void visit( const char* _name, const int32_t& value ) {
+		drawInt( _name, value );
+	}
+
+	static void visit( const char* _name, const uint32_t& value ) {
+		drawInt( _name, value );
+	}
+
+	static void visit( const char* _name, const int64_t& value ) {
+		drawInt( _name, value );
+	}
+
+	static void visit( const char* _name, const uint64_t& value ) {
+		drawInt( _name, value );
+	}
+
+	static void visit( const char* _name, const Vector2f& value ) {
 		drawVector( _name, value );
 	}
 
-	void visit( const char* _name, const Vector3f& value ) {
+	static void visit( const char* _name, const Vector3f& value ) {
 		drawVector( _name, value );
 	}
 
-	void visit( const char* _name, const Vector4f& value ) {
+	static void visit( const char* _name, const Vector4f& value ) {
 		drawVector( _name, value );
 	}
 
-	void visit( const char* _name, const std::pair<int, int>& value ) {
+	static void visit( const char* _name, const std::pair<int, int>& value ) {
 		drawPair( _name, value );
 	}
 
-	void visit( const char* _name, const JMATH::Rect2f& rect ) {
+	static void visit( const char* _name, const JMATH::Rect2f& rect ) {
 		drawRect( _name, rect );
 	}
 
-	void visit( const char* _name, const JMATH::AABB& rect ) {
+	static void visit( const char* _name, const Quaternion& q ) {
+		drawVector( _name, q );
+	}
+
+	static void visit( const char* _name, const MatrixAnim& q ) {
+		drawVector( "Pos  ", q.pos->value );
+		drawVector( "Rot  ", q.rot->value );
+		drawVector( "Scale", q.scale->value );
+	}
+
+	static void visit( const char* _name, const JMATH::AABB& rect ) {
 		drawKey( _name );
 		drawVector( rect.minPoint() );
 		drawVector( rect.maxPoint() );
 	}
 
-	void visit( const char* _name, const std::vector<Vector2f>& array ) {
-		drawArrayOfVector( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<Triangle2d>& array ) {
-		drawKey( _name );
-		for ( auto& value : array ) {
-			drawVector( Vector2f{ std::get<0>( value ).x(), std::get<0>( value ).y()} );
-			ImGui::SameLine(0.0f, 0.0f);
-			ImGui::TextColored( ImGUIJsonColors::SquareBracket, "%s", "," );
-			drawVector( Vector2f{ std::get<1>( value ).x(), std::get<1>( value ).y()} );
-			ImGui::SameLine(0.0f, 0.0f);
-			ImGui::TextColored( ImGUIJsonColors::SquareBracket, "%s", "," );
-			drawVector( Vector2f{ std::get<2>( value ).x(), std::get<2>( value ).y()} );
-		}
-	}
-
-	template<std::size_t N>
-	void visit( const char* _name, const std::array<Vector2f, N>& array ) {
-		drawKey( _name );
-		if (ImGui::TreeNode(_name)) {
-			for ( auto& value : array ) {
-				drawVector( value );
-			}
-			ImGui::TreePop();
-		}
-	}
-
-	void visit( const char* _name, const std::vector<Vector3f>& array ) {
-		drawArrayOfVector( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<Vector4f>& array ) {
-		drawArrayOfVector( _name, array );
-	}
-
-	template<std::size_t N>
-	void visit( const char* _name, const std::array<int32_t, N>& array ) {
-		drawArrayOfInt( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<uint32_t>& array ) {
-		drawArrayOfInt( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<int32_t>& array ) {
-		drawArrayOfInt( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<uint64_t>& array ) {
-		drawArrayOfInt( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<int64_t>& array ) {
-		drawArrayOfInt( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<float>& array ) {
-		drawArrayOfFloat( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<double>& array ) {
-		drawArrayOfFloat( _name, array );
-	}
-
-	void visit( const char* _name, const std::vector<std::string>& value ) {
-		drawArrayOfString( _name, value );
-	}
-
-	void visit( const char* _name, const std::vector<JMATH::Rect2f>& value ) {
-		drawArrayOfRect( _name, value );
-	}
-
-	void visit( const char* _name, const std::vector<std::vector<double>>& array ) {
-		drawKey( _name );
-		int q = 0;
-		for ( auto subarray : array ) {
-			drawArrayOfFloat( std::to_string(q++).c_str(), subarray );
-		}
-	}
-
-	template<std::size_t N>
-	void visit( const char* _name, const std::vector<std::array<double, N>>& array ) {
-		drawKey( _name );
-		int q = 0;
-		for ( auto subarray : array ) {
-			drawArrayOfFloat( std::to_string(q++).c_str(), subarray );
-		}
-	}
-
-	void visit( const char* _name, const std::vector<std::vector<Vector2f>>& array ) {
-		drawKey( _name );
-		int q = 0;
-		for ( auto subarray : array ) {
-			drawArrayOfVector( std::to_string(q++).c_str(), subarray );
-		}
-	}
-
-	void visit( const char* _name, const std::vector<std::vector<Vector3f>>& array ) {
-		drawKey( _name );
-		int q = 0;
-		for ( auto subarray : array ) {
-			drawArrayOfVector( std::to_string(q++).c_str(), subarray );
-		}
-	}
-
 };
 
-class ImGUIJsonN : public ImGUIJson {
-
-	template<typename T>
-	void visitN( const char* _name, const T& value ) {
-		drawKey( _name );
+class ImGuiStandardJsonArrays {
+public:
+	template <typename C, typename T>
+	static void visit( const char* _name, const T& value ) {
 		if (ImGui::TreeNode(_name)) {
-			value.template visitN<ImGUIJson>();
+			value.template visit<C>();
 			ImGui::TreePop();
 		}
 	}
 
-	template<typename T>
-	void visitN( const char* _name, std::shared_ptr<T> value ) {
+	template <typename C, typename T>
+	static void visit( const char* _name, std::shared_ptr<T> value ) {
 		if ( value ) {
-			if (ImGui::TreeNode(value->Name().c_str())) {
-				value->template visitN<ImGUIJson>();
+			if (ImGui::TreeNode(_name)) {
+				value->template visit<C>();
 				ImGui::TreePop();
 			}
 		}
 	}
 
+	template <typename C, typename T>
+	static void visit( const char* _name, const std::vector<std::shared_ptr<T>>& array ) {
+		if ( array.empty()) return;
+		if (ImGui::TreeNode( arrayName( _name, array).c_str() )) {
+			for ( size_t i = 0; i < array.size(); i++ ) {
+				if ( ImGui::TreeNode( std::to_string( i ).c_str())) {
+					array[i]->template visit<C>();
+					ImGui::TreePop();
+				}
+			}
+			ImGui::TreePop();
+		}
+	}
+
+	template<typename T, std::size_t N>
+	static void visit( const char* _name, const std::array<T, N>& array ) {
+//		if ( array.empty() ) return;
+//		arrayVisitDot
+	}
+
 };
+
+class ImGuiStandardJsonArraysNamed {
+public:
+	template <typename C, typename T>
+	static void visit( const char* _name, const T& value ) {
+		if (ImGui::TreeNode(value.Name().c_str())) {
+			value.template visit<C>();
+			ImGui::TreePop();
+		}
+	}
+
+	template <typename C, typename T>
+	static void visit( const char* _name, std::shared_ptr<T> value ) {
+		if ( value ) {
+			if (ImGui::TreeNode(value->Name().c_str())) {
+				value->template visit<C>();
+				ImGui::TreePop();
+			}
+		}
+	}
+
+	template <typename C, typename T>
+    static void visit( const char* _name, const std::vector<std::shared_ptr<T>>& array ) {
+        if ( array.empty()) return;
+        if ( array.size() == 1 ) {
+			if ( ImGui::TreeNode( array[0]->Name().c_str())) {
+				array[0]->template visit<C>();
+				ImGui::TreePop();
+			}
+        } else {
+			if (ImGui::TreeNode( arrayName( _name, array).c_str() )) {
+				for ( size_t i = 0; i < array.size(); i++ ) {
+					if ( ImGui::TreeNode( array[i]->Name().c_str())) {
+						array[i]->template visit<C>();
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+        }
+    }
+
+	template<typename T, std::size_t N>
+	static void visit( const char* _name, const std::array<T, N>& array ) {
+//		if ( array.empty() ) return;
+//		arrayVisitDot
+	}
+
+};
+
+template <typename J, typename B, typename A>
+class JVisitor {
+public:
+	template<typename T>
+    void visit( const char* _name, const T& value ) {
+        A::template visit<J,T>( _name, value );
+    }
+
+    template<typename T>
+    void visit( const char* _name, std::shared_ptr<T> value ) {
+        A::template visit<J,T>( _name, value );
+    }
+
+	void visit( const char* _name, const std::string& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const char* value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const double& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const float& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const bool& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const int32_t& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const uint32_t& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const int64_t& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const uint64_t& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const Vector2f& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const Vector3f& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const Vector4f& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const std::pair<int, int>& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const JMATH::Rect2f& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const Quaternion& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const MatrixAnim& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const JMATH::AABB& value ) {
+		B::visit( _name, value );
+	}
+
+	// std::array
+
+	template<typename T, std::size_t N>
+	void visit( const char* _name, const std::array<T, N>& array ) {
+		A::visit( _name, array );
+	}
+
+//	template<std::size_t N>
+//	void visit( const char* _name, const std::array<int32_t, N>& array ) {
+//		drawArrayOfInt( _name, array );
+//	}
+//
+//	template<std::size_t N>
+//	void visit( const char* _name, const std::array<Vector2f, N>& array ) {
+//		drawKey( _name );
+//		if (ImGui::TreeNode(_name)) {
+//			for ( auto& value : array ) {
+//				drawVector( value );
+//			}
+//			ImGui::TreePop();
+//		}
+//	}
+
+	// std::vector
+
+	template<typename T>
+	void visit( const char* _name, const std::vector<std::shared_ptr<T>>& array ) {
+		A::template visit<J,T>( _name, array );
+	}
+
+//	template<typename T>
+//	void visit( const char* _name, const std::vector<T>& array ) {
+//		if ( array.empty() ) return;
+//		arrayVisitDot
+//	}
+//
+//	void visit( const char* _name, const std::vector<Vector2f>& array ) {
+//		drawArrayOfVector( _name, array );
+//	}
+//
+//	void visit( const char* _name, const std::vector<Triangle2d>& array ) {
+//		drawKey( _name );
+//		for ( auto& value : array ) {
+//			drawVector( Vector2f{ std::get<0>( value ).x(), std::get<0>( value ).y()} );
+//			ImGui::SameLine(0.0f, 0.0f);
+//			ImGui::TextColored( ImGUIJsonColors::SquareBracket, "%s", "," );
+//			drawVector( Vector2f{ std::get<1>( value ).x(), std::get<1>( value ).y()} );
+//			ImGui::SameLine(0.0f, 0.0f);
+//			ImGui::TextColored( ImGUIJsonColors::SquareBracket, "%s", "," );
+//			drawVector( Vector2f{ std::get<2>( value ).x(), std::get<2>( value ).y()} );
+//		}
+//	}
+//	void visit( const char* _name, const std::vector<Vector3f>& array ) {
+//		drawArrayOfVector( _name, array );
+//	}
+//
+//	void visit( const char* _name, const std::vector<Vector4f>& array ) {
+//		drawArrayOfVector( _name, array );
+//	}
+//
+//
+//	void visit( const char* _name, const std::vector<uint32_t>& array ) {
+//		drawArrayOfInt( _name, array );
+//	}
+//
+//	void visit( const char* _name, const std::vector<int32_t>& array ) {
+//		drawArrayOfInt( _name, array );
+//	}
+//
+//	void visit( const char* _name, const std::vector<uint64_t>& array ) {
+//		drawArrayOfInt( _name, array );
+//	}
+//
+//	void visit( const char* _name, const std::vector<int64_t>& array ) {
+//		drawArrayOfInt( _name, array );
+//	}
+//
+//	void visit( const char* _name, const std::vector<float>& array ) {
+//		drawArrayOfFloat( _name, array );
+//	}
+//
+//	void visit( const char* _name, const std::vector<double>& array ) {
+//		drawArrayOfFloat( _name, array );
+//	}
+//
+//	void visit( const char* _name, const std::vector<std::string>& value ) {
+//		drawArrayOfString( _name, value );
+//	}
+//
+//	void visit( const char* _name, const std::vector<JMATH::Rect2f>& value ) {
+//		drawArrayOfRect( _name, value );
+//	}
+
+	// std::vector of vector
+
+//	template<typename T>
+//	void visit( const char* _name, const std::vector<std::vector<T>>& arrayOfArray ) {
+//		if ( arrayOfArray.empty() ) return;
+//		if (ImGui::TreeNode(_name))
+//		{
+//			for ( auto& array : arrayOfArray ) {
+//				arrayVisitDot
+//			}
+//			ImGui::TreePop();
+//		}
+//	}
+//
+//	void visit( const char* _name, const std::vector<std::vector<double>>& array ) {
+//		drawKey( _name );
+//		int q = 0;
+//		for ( auto subarray : array ) {
+//			drawArrayOfFloat( std::to_string(q++).c_str(), subarray );
+//		}
+//	}
+//
+//	template<std::size_t N>
+//	void visit( const char* _name, const std::vector<std::array<double, N>>& array ) {
+//		drawKey( _name );
+//		int q = 0;
+//		for ( auto subarray : array ) {
+//			drawArrayOfFloat( std::to_string(q++).c_str(), subarray );
+//		}
+//	}
+//
+//	void visit( const char* _name, const std::vector<std::vector<Vector2f>>& array ) {
+//		drawKey( _name );
+//		int q = 0;
+//		for ( auto subarray : array ) {
+//			drawArrayOfVector( std::to_string(q++).c_str(), subarray );
+//		}
+//	}
+//
+//	void visit( const char* _name, const std::vector<std::vector<Vector3f>>& array ) {
+//		drawKey( _name );
+//		int q = 0;
+//		for ( auto subarray : array ) {
+//			drawArrayOfVector( std::to_string(q++).c_str(), subarray );
+//		}
+//	}
+
+};
+
+class ImGUIJsonNamed : public JVisitor<ImGUIJsonNamed, ImGuiStandardJson, ImGuiStandardJsonArraysNamed> {};
+
+class ImGUIJson : public JVisitor<ImGUIJson, ImGuiStandardJson, ImGuiStandardJsonArrays> {};

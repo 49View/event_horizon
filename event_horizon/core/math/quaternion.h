@@ -74,6 +74,7 @@ public:
 
 	float real() const { return mData[3]; }
 	void real( float r ) { mData[3] = r; }
+	constexpr size_t size() const { return 4; }
 
 	Quaternion conjugate( void ) const {
 		return Quaternion( -complex(), real() );
@@ -411,6 +412,11 @@ public:
 	float* row( uint32_t i ) { return mData + i; }
 	// Const version of the above.
 	const float* row( uint32_t i ) const { return mData + i; }
+
+	float operator[]( size_t i ) const {
+		return mData[i];
+	}
+
 };
 
 /**

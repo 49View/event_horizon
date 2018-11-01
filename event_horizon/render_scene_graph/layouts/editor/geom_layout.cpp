@@ -26,8 +26,8 @@ void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
     ImGui::Begin( "Geometry", nullptr, ImGuiWindowFlags_NoCollapse );
 
     for ( const auto& it: p->RSG().Geoms() ) {
-        it->visit<ImGUIJson>();
-        auto gname = std::to_string(it->Hash());
+        it->visit<ImGUIJsonNamed>();
+//        auto gname = std::to_string(it->Hash());
 //        ImGui::BeginGroup();
 //        ImGui::Text( "Name: %s", it->Name().c_str());
 //        ImGui::Text( "Type: %s", std::to_string(it->GHType()).c_str());
