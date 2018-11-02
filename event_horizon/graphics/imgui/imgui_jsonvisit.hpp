@@ -94,7 +94,11 @@ void drawVector( const char* _name, const T& value ) {
 template<typename T>
 void drawInt( const T& value ) {
 	ImGui::SameLine();
+#if LINUX
+	ImGui::Text( "%ld", static_cast<int64_t>(value) );
+#else
 	ImGui::Text( "%lld", static_cast<int64_t>(value) );
+#endif
 }
 
 template<typename T>
@@ -124,7 +128,13 @@ void drawInt( const char* _name, const T& value ) {
 
 void drawString( const char* value ) {
 	ImGui::SameLine();
-	ImGui::Text( "%s", value );
+    static char buf[1024];
+    std::strcpy( buf, value );
+    if ( ImGui::InputText( "", buf, 1024, ImGuiInputTextFlags_EnterReturnsTrue ) ) {
+        LOGR( buf );
+        // Inser code here
+    };
+//	ImGui::InputText( "%s", value );
 }
 
 void drawString( const char* _name, const char* value ) {
@@ -234,23 +244,6 @@ std::string arrayName( const char* _name, const std::vector<T>& array ) {
 	return ret;
 }
 
-#define arrayVisitStart \
-	if (ImGui::TreeNode( arrayName( _name, array).c_str() )) { \
-		for ( size_t i = 0; i < array.size(); i++ ) { \
-			if (ImGui::TreeNode(std::to_string(i).c_str())) { \
-				array[i]
-
-#define arrayVisitEnd \
-					template visit<ImGUIJson>(); \
-				ImGui::TreePop(); \
-			} \
-		} \
-		ImGui::TreePop(); \
-	}
-
-#define arrayVisitDot arrayVisitStart . arrayVisitEnd
-#define arrayVisitPtr arrayVisitStart -> arrayVisitEnd
-
 class ImGuiStandardJson {
 public:
 
@@ -328,6 +321,24 @@ public:
 
 };
 
+#define arrayVisitStart \
+    if ( array.empty()) return; \
+	if (ImGui::TreeNode( arrayName( _name, array).c_str() )) { \
+		for ( size_t i = 0; i < array.size(); i++ ) { \
+			if (ImGui::TreeNode(std::to_string(i).c_str())) { \
+				array[i]
+
+#define arrayVisitEnd \
+					template visit<C>(); \
+				ImGui::TreePop(); \
+			} \
+		} \
+		ImGui::TreePop(); \
+	}
+
+#define arrayVisitDot arrayVisitStart . arrayVisitEnd
+#define arrayVisitPtr arrayVisitStart -> arrayVisitEnd
+
 class ImGuiStandardJsonArrays {
 public:
 	template <typename C, typename T>
@@ -350,23 +361,29 @@ public:
 
 	template <typename C, typename T>
 	static void visit( const char* _name, const std::vector<std::shared_ptr<T>>& array ) {
-		if ( array.empty()) return;
-		if (ImGui::TreeNode( arrayName( _name, array).c_str() )) {
-			for ( size_t i = 0; i < array.size(); i++ ) {
-				if ( ImGui::TreeNode( std::to_string( i ).c_str())) {
-					array[i]->template visit<C>();
-					ImGui::TreePop();
-				}
+        arrayVisitPtr
+	}
+
+	template<typename C, typename T, std::size_t N>
+	static void visit( const char* _name, const std::array<T, N>& array ) {
+		arrayVisitDot
+	}
+
+    template<std::size_t N>
+    void visit( const char* _name, const std::array<int32_t, N>& array ) {
+		drawArrayOfInt( _name, array );
+    }
+
+    template<std::size_t N>
+    void visit( const char* _name, const std::array<Vector2f, N>& array ) {
+		drawKey( _name );
+		if (ImGui::TreeNode(_name)) {
+			for ( auto& value : array ) {
+				drawVector( value );
 			}
 			ImGui::TreePop();
 		}
-	}
-
-	template<typename T, std::size_t N>
-	static void visit( const char* _name, const std::array<T, N>& array ) {
-//		if ( array.empty() ) return;
-//		arrayVisitDot
-	}
+    }
 
 };
 
@@ -411,11 +428,26 @@ public:
         }
     }
 
-	template<typename T, std::size_t N>
-	static void visit( const char* _name, const std::array<T, N>& array ) {
-//		if ( array.empty() ) return;
-//		arrayVisitDot
-	}
+    template<typename C, typename T, std::size_t N>
+    static void visit( const char* _name, const std::array<T, N>& array ) {
+        arrayVisitDot
+    }
+
+    template<std::size_t N>
+    void visit( const char* _name, const std::array<int32_t, N>& array ) {
+        drawArrayOfInt( _name, array );
+    }
+
+    template<std::size_t N>
+    void visit( const char* _name, const std::array<Vector2f, N>& array ) {
+        drawKey( _name );
+        if (ImGui::TreeNode(_name)) {
+            for ( auto& value : array ) {
+                drawVector( value );
+            }
+            ImGui::TreePop();
+        }
+    }
 
 };
 
@@ -507,21 +539,15 @@ public:
 		A::visit( _name, array );
 	}
 
-//	template<std::size_t N>
-//	void visit( const char* _name, const std::array<int32_t, N>& array ) {
-//		drawArrayOfInt( _name, array );
-//	}
-//
-//	template<std::size_t N>
-//	void visit( const char* _name, const std::array<Vector2f, N>& array ) {
-//		drawKey( _name );
-//		if (ImGui::TreeNode(_name)) {
-//			for ( auto& value : array ) {
-//				drawVector( value );
-//			}
-//			ImGui::TreePop();
-//		}
-//	}
+	template<std::size_t N>
+	void visit( const char* _name, const std::array<int32_t, N>& array ) {
+        A::visit( _name, array );
+	}
+
+	template<std::size_t N>
+	void visit( const char* _name, const std::array<Vector2f, N>& array ) {
+        A::visit( _name, array );
+	}
 
 	// std::vector
 
@@ -530,11 +556,11 @@ public:
 		A::template visit<J,T>( _name, array );
 	}
 
-//	template<typename T>
-//	void visit( const char* _name, const std::vector<T>& array ) {
-//		if ( array.empty() ) return;
+	template<typename T>
+	void visit( const char* _name, const std::vector<T>& array ) {
+        A::template visit<J,T>( _name, array );
 //		arrayVisitDot
-//	}
+	}
 //
 //	void visit( const char* _name, const std::vector<Vector2f>& array ) {
 //		drawArrayOfVector( _name, array );
