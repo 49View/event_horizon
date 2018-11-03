@@ -63,12 +63,12 @@ jobs:
 #      - run: make install -C 'builds/event_horizon_em/'
 
       # event_horizon
-#      - run: >
-#          mkdir builds/event_horizon && cd builds/event_horizon/ &&
-#          cmake -DCMAKE_BUILD_TYPE=Release
-#          ../../event_horizon/
-#      - run: make -j8 -C 'builds/event_horizon/'
-#      - run: make install -C 'builds/event_horizon/'
+      - run: >
+          mkdir builds/event_horizon && cd builds/event_horizon/ &&
+          cmake -DCMAKE_BUILD_TYPE=Release
+          ../../event_horizon/
+      - run: make -j8 -C 'builds/event_horizon/'
+      - run: make install -C 'builds/event_horizon/'
 
       # House Maker Deemon
 #      - run: >
