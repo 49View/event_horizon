@@ -63,12 +63,12 @@ jobs:
 #      - run: make install -C 'builds/event_horizon_em/'
 
       # event_horizon
-      - run: >
-          mkdir builds/event_horizon && cd builds/event_horizon/ &&
-          cmake -DCMAKE_BUILD_TYPE=Release
-          ../../event_horizon/
-      - run: make -j8 -C 'builds/event_horizon/'
-      - run: make install -C 'builds/event_horizon/'
+#      - run: >
+#          mkdir builds/event_horizon && cd builds/event_horizon/ &&
+#          cmake -DCMAKE_BUILD_TYPE=Release
+#          ../../event_horizon/
+#      - run: make -j8 -C 'builds/event_horizon/'
+#      - run: make install -C 'builds/event_horizon/'
 
       # House Maker Deemon
 #      - run: >
@@ -76,6 +76,12 @@ jobs:
 #          ../../projects/house_maker/
 #      - run: make -j8 -C 'builds/house_maker/'
 
+      # Substance daemon
+      - run: >
+          mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release ../../daemons/substance_daemon/
+      - run: make -j8 -C 'builds/sat/'
+      - run: |
+          curl --data-binary @/app/builds/sat/substance_deamon -H Content-Type:application/octet-stream https://49view-api.icu/fs/upload/artifacts%2Fsubstance_daemon
       # Sandbox
 #      - run: >
 #          mkdir builds/sandbox_em && cd builds/sandbox_em/ && cmake -DCMAKE_BUILD_TYPE=Release
