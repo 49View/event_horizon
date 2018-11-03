@@ -1,9 +1,12 @@
 # c++ build
 #
 
+parameters:
+  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.0.9
+
 defaults: &defaults
   docker:
-    - image: sixthview/build:1.0.9
+    - image: *docker_cpp_build_version
       auth:
         username: sixthview
         password: $DOCKERHUB_PASSWORD
@@ -45,7 +48,7 @@ jobs:
       - run:
           name: Deploy to Digital Ocean
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP "./deploy.sh"
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP ./deploy.sh
 
   buildCPP:
     <<: *defaults
@@ -108,8 +111,10 @@ jobs:
     machine:
       enabled: true
     steps:
-      - run: |
-          curl https://rest-49view.herokuapp.com/deploy/all
+      - run:
+          name: Deploy Substance daemon
+          command: |
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP ./deploy_substance_daemon.sh *docker_cpp_build_version
 
   #      - attach_workspace:
 #          # Must be absolute path or relative path from working_directory
@@ -130,6 +135,6 @@ workflows:
           filters:
             branches:
               only: master
-#      - deployCPP:
-#          requires:
-#            - buildCPP
+      - deployCPP:
+          requires:
+            - buildCPP
