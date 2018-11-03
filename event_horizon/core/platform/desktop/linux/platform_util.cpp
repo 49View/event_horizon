@@ -29,11 +29,17 @@ std::string cacheFolder() {
 }
 
 const std::string userComputerName() {
+    static const char* defUser = "Unknown";
+    static const char* defHost = "Unknown";
     const char *uname = getenv( "USER" );
+    if ( uname == nullptr ) {
+        uname = defUser;
+    }
     char cname[512];
     char *cnameEnv = getenv( "HOSTNAME" );
     if ( cnameEnv == nullptr ) {
-        if ( gethostname( cname, 512 ) == 0 ) { // success = 0, failure = -1
+        if ( gethostname( cname, 512 ) == -1 ) { // success = 0, failure = -1
+            strcpy( cname, defHost );
         }
     } else {
         strcpy( cname, cnameEnv );

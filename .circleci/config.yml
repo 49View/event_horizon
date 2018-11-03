@@ -3,7 +3,7 @@
 
 defaults: &defaults
   docker:
-    - image: sixthview/build:1.0.8
+    - image: sixthview/build:1.0.9
       auth:
         username: sixthview
         password: $DOCKERHUB_PASSWORD

@@ -27,26 +27,6 @@ void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
 
     for ( const auto& it: p->RSG().Geoms() ) {
         it->visit<ImGUIJsonNamed>();
-//        auto gname = std::to_string(it->Hash());
-//        ImGui::BeginGroup();
-//        ImGui::Text( "Name: %s", it->Name().c_str());
-//        ImGui::Text( "Type: %s", std::to_string(it->GHType()).c_str());
-//        auto ab = it->BBox3d();
-//        auto trs = it->TRS();
-//        auto pos = trs.pos->value;
-//        auto rot = trs.rot->value;
-//        auto scale = trs.scale->value;
-//        ImGui::Text( "Pos  : [%02f, %02f, %02f]", pos.x(), pos.y(), pos.z());
-//        ImGui::Text( "Rot  : [%02f, %02f, %02f]", rot.x(), rot.y(), rot.z());
-//        ImGui::Text( "Scale: [%02f, %02f, %02f]", scale.x(), scale.y(), scale.z());
-//        if ( it->Geom() ) {
-//            ImGui::Text( "Min : [%02f, %02f, %02f]", ab.minPoint().x(), ab.minPoint().y(), ab.minPoint().z());
-//            ImGui::Text( "Max : [%02f, %02f, %02f]", ab.maxPoint().x(), ab.maxPoint().y(), ab.maxPoint().z());
-//            ImGui::Text( "Size: [%02f, %02f, %02f]", ab.calcWidth(), ab.calcHeight(), ab.calcDepth());
-//        }
-//        ImGui::EndGroup();
-//        ImGui::Separator();
-//        ImGui::Separator();
     }
     if ( gbt ) {
         ImGui::BeginGroup();
