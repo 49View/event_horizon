@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 class Scene;
 
 using entityDaemonCallbackFunction = void( const std::string&, const std::vector<char>& );
