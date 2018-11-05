@@ -114,7 +114,7 @@ jobs:
       - run:
           name: Deploy Substance daemon
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP ./deploy_substance_daemon.sh *docker_cpp_build_version
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP ./deploy_substance_daemon.sh sixthview/build:1.1.0
 
   #      - attach_workspace:
 #          # Must be absolute path or relative path from working_directory
