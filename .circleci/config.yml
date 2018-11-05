@@ -2,7 +2,7 @@
 #
 
 parameters:
-  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.0.9
+  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.1.0
 
 defaults: &defaults
   docker:

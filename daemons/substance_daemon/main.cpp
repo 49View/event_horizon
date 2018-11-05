@@ -126,7 +126,8 @@ void elaborateGeom( const std::string& _filename ) {
             std::string mainFileName = "/" + filename;
             FM::writeLocalFile( mainFileName, reinterpret_cast<const char*>(_res.buffer.get()), _res.length );
 
-            std::string cmd = "FBX2glTF -b --pbr-metallic-roughness " + mainFileName;
+            std::string cmd = "FBX2glTF -b --pbr-metallic-roughness -o /" + getFileNameOnly(filename) + " " +
+                    mainFileName;
 
             std::system( cmd.c_str() );
 
