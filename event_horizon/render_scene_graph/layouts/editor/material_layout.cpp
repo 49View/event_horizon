@@ -5,6 +5,10 @@
 #include "material_layout.h"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
+#include <poly/geom_builder.h>
+#include <core/tar_util.h>
+
+std::shared_ptr<MaterialBuilder> mb;
 
 void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 size, std::shared_ptr<Texture> t,
                     float backup = -1.0f ) {
@@ -58,4 +62,21 @@ void ImGuiMaterials( Scene* p, const Rect2f& _r ) {
     }
 
     ImGui::End();
+}
+
+void callbackMaterial( const std::string& _filename, const std::vector<char>& _data ) {
+    mb = std::make_shared<MaterialBuilder>(getFileNameOnly(_filename));
+    auto files = tarUtil::untar( _data );
+    for ( const auto& fi  : files ) {
+        if ( const auto r = MPBRTextures::findTextureInString(fi.name); !r.empty() ) {
+            mb->buffer( r, fi.dataPtr );
+        }
+    }
+    Scene::sUpdateCallbacks.emplace_back( []( Scene* p ) {
+        mb->makeDirect( p->ML() );
+        if ( !p->RR().hasTag(9300) ) {
+            GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).build( p->RSG() );
+        }
+        p->RR().changeMaterialOnTags( 9300, std::dynamic_pointer_cast<PBRMaterial>(p->ML().get(mb->Name())) );
+    } );
 }

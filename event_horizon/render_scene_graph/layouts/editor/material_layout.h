@@ -7,3 +7,4 @@
 class Scene;
 
 void ImGuiMaterials( Scene* p, const Rect2f& _r );
+void callbackMaterial( const std::string& _filename, const std::vector<char>& _data );

@@ -6,6 +6,7 @@
 #include "config_cpp.cfg"
 #include "../util.h"
 #include "../platform_util.h"
+#include "core/zlib_util.h"
 
 static bool sUseLocalhost = false;
 
@@ -13,6 +14,13 @@ const std::string Url::WsProtocol = "ws";
 const std::string Url::WssProtocol = "wss";
 const std::string Url::HttpProtocol = "http";
 const std::string Url::HttpsProtocol = "https";
+
+namespace zlibUtil {
+    // Decompress
+    std::vector<char> inflateFromMemory( const Http::Result& _fin ) {
+        return inflateFromMemory( uint8_p{std::move(_fin.buffer), _fin.length} );
+    }
+}
 
 Url::Url( std::string _uri ) : uri( _uri ) {
 }

@@ -134,6 +134,11 @@ namespace Http {
     short CLOUD_PORT_SSL();
 };
 
+namespace zlibUtil {
+    // Decompress
+    std::vector<char> inflateFromMemory( const Http::Result& fin );
+}
+
 struct Url {
     Url() {}
     Url( std::string _uri );

@@ -6,9 +6,10 @@
 
 #include <core/math/rect2f.h>
 class Scene;
-class GLTF2;
 
-void loadGeomInGui( Scene* p, std::shared_ptr<GLTF2> _newObject );
+void callbackGeom( const std::string& _filename, const std::vector<char>& _data );
+void callbackGeomGLTF( const std::string& _filename );
+
 void ImGuiGeoms( Scene* p, const Rect2f& _r );
 
 
