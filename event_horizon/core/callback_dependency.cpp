@@ -18,7 +18,7 @@ namespace DependencyHandler {
         return g_deps;
     };
 
-    bool needsDependencies( const std::string& _key ) {
+    bool needsDependencies( [[maybe_unused]] const std::string& _key ) {
         return true;
     }
 

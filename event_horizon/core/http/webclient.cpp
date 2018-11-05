@@ -164,7 +164,7 @@ namespace Http {
         }
     }
 
-    const short CLOUD_PORT() {
+    short CLOUD_PORT() {
         if ( sUseLocalhost ) {
             return 3000;
         } else{
@@ -172,7 +172,7 @@ namespace Http {
         }
     }
 
-    const short CLOUD_PORT_SSL() {
+    short CLOUD_PORT_SSL() {
         if ( sUseLocalhost ) {
             return 3000;
         } else{

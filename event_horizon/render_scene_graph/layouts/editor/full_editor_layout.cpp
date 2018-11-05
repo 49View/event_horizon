@@ -120,7 +120,6 @@ void allConversionsDragAndDropCallback( Scene* p, const std::string& _path ) {
     std::string ext = getFileNameExt( pathSanitized );
     std::string extl = toLower(ext);
     std::string finalPath = pathSanitized;
-    bool isGeom = false;
 
     if ( extl == ".fbx" ) {
         FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(EntityGroup::Geom) + getFileName(pathSanitized) );
@@ -136,18 +135,16 @@ void allConversionsDragAndDropCallback( Scene* p, const std::string& _path ) {
         std::string cmd = "cd " + getFileNamePath(pathSanitized) + "\n obj2gltf -i " + pathSanitized +
                           " -o " + finalPath;
         std::system( cmd.c_str() );
-        isGeom = true;
     }
     else if ( extl == ".stl" ) {
         stl::parse_stl(pathSanitized);
-        isGeom = true;
     } else if ( extl == ".sbsar" ) {
         FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(EntityGroup::Material)
                                + getFileName(pathSanitized) );
     }
-    else if ( extl == ".gltf" || extl == ".glb" ) {
-        isGeom = true;
-    }
+//    else if ( extl == ".gltf" || extl == ".glb" ) {
+//        isGeom = true;
+//    }
 
 //    if ( isGeom ) {
 //        GLTF2 newObject{ finalPath };

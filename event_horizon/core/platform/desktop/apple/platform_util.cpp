@@ -9,7 +9,7 @@
 
 #include "../../../util.h"
 
-void saveImageFromClipboard(const std::string& folderName) {
+void saveImageFromClipboard( [[maybe_unused]] const std::string& folderName) {
 }
 
 bool isalnumCC(char c) {

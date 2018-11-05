@@ -366,7 +366,8 @@ void Cube( Topology& mesh ) {
 //    *targetV = (-normal->y + 1) / 2;
 //}
 
-PolyStruct createGeom( Topology& mesh, const Vector3f& center, const Vector3f& size, GeomMapping mt, int subdivs ) {
+PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, const Vector3f& size, GeomMapping mt,
+        int subdivs ) {
 
     for ( int j = 0; j < subdivs; ++j ) {
         mesh = SubdivideMesh( mesh );

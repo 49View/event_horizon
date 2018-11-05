@@ -28,7 +28,7 @@ namespace Socket {
         _lock.unlock();
     }
 
-    void onClose( sio::client::close_reason const& reason ) {
+    void onClose( [[maybe_unused]] sio::client::close_reason const& reason ) {
         std::cout << "sio closed " << std::endl;
     }
 

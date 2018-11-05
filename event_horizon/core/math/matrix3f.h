@@ -164,7 +164,7 @@ public:
 		mRows[2] = Vector3f( x * z * ( 1 - c ) + y * s, y * z * ( 1 - c ) - x * s, z * z * ( 1 - c ) + c );
 	}
 
-	inline const int size() const { return 9; }
+	inline int size() const { return 9; }
 
 	Vector3f mRows[3];
 };

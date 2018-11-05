@@ -141,7 +141,7 @@ void platform_sleep( long long milliseconds ) {
 	std::this_thread::sleep_for( std::chrono::milliseconds( milliseconds ) );
 }
 
-const int64_t HashInc() {
+int64_t HashInc() {
 	return ++globalHash;
 }
 

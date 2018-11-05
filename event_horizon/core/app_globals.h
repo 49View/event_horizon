@@ -40,7 +40,7 @@ public:
 		return mScreenSizei;
 	}
 
-	const float getScreenAspectRatio() const {
+	float getScreenAspectRatio() const {
 		return mScreenSizef.x() / mScreenSizef.y();
 	}
 

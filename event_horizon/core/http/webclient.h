@@ -130,8 +130,8 @@ namespace Http {
 
     const std::string CLOUD_PROTOCOL();
     const std::string CLOUD_SERVER();
-    const short CLOUD_PORT();
-    const short CLOUD_PORT_SSL();
+    short CLOUD_PORT();
+    short CLOUD_PORT_SSL();
 };
 
 struct Url {
