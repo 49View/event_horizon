@@ -57,13 +57,13 @@ jobs:
       - run: mkdir builds
 
       # event_horizon_em
-#      - run: >
-#          source /3rdpartylibs/emsdk/emsdk_env.sh && mkdir builds/event_horizon_em && cd builds/event_horizon_em/ &&
-#          cmake -DCMAKE_BUILD_TYPE=Release
-#          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
-#          ../../event_horizon/
-#      - run: make -j8 -C 'builds/event_horizon_em/'
-#      - run: make install -C 'builds/event_horizon_em/'
+      - run: >
+          source /3rdpartylibs/emsdk/emsdk_env.sh && mkdir builds/event_horizon_em && cd builds/event_horizon_em/ &&
+          cmake -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
+          ../../event_horizon/
+      - run: make -j8 -C 'builds/event_horizon_em/'
+      - run: make install -C 'builds/event_horizon_em/'
 
       # event_horizon
       - run: >
@@ -85,20 +85,19 @@ jobs:
       - run: make -j8 -C 'builds/sat/'
       - run: |
           curl --data-binary @/app/builds/sat/substance_deamon -H Content-Type:application/octet-stream https://49view-api.icu/fs/upload/artifacts%2Fsubstance_daemon
-      # Sandbox
-#      - run: >
-#          mkdir builds/sandbox_em && cd builds/sandbox_em/ && cmake -DCMAKE_BUILD_TYPE=Release
-#          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
-#          ../../projects/sandbox/
-#      - run: make -j8 -C 'builds/sandbox_em/'
 
-#      - persist_to_workspace:
-#          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
-#          # taken to be the root directory of the workspace.
-#          root: /app/builds
-#          # Must be relative path from root
-#          paths:
-#            - sandbox_em
+      # Editor
+      - run: >
+          mkdir builds/editor_em && cd builds/editor_em/ && cmake -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
+          ../../dev_tools/editor/
+      - run: make -j8 -C 'builds/editor_em/'
+      - run: |
+          curl --data-binary @/app/builds/editor_em/editor.js -H Content-Type:application/octet-stream
+          https://49view-api.icu/fs/upload/artifacts%2editor.js
+      - run: |
+          curl --data-binary @/app/builds/editor_em/editor.wasm -H Content-Type:application/octet-stream
+          https://49view-api.icu/fs/upload/artifacts%2editor.wasm
 
       # run tests!
 

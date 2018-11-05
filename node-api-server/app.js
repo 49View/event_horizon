@@ -19,6 +19,8 @@ var deploy = require('./routes/deploy');
 
 var app = express();
 
+express.static.mime.types["wasm"] = "application/wasm";
+
 //Set up default mongoose connection
 var mongoose = require('mongoose');
 const mongoDB = `mongodb+srv://${globalConfig.MongoDBUser}:${globalConfig.MongoDBPass}@${globalConfig.MongoDBURI}`;
