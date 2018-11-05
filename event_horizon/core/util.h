@@ -107,6 +107,13 @@ bool ensureFolderExists( const std::string& folder, bool throwOnError = false );
 ucchar_p uint8_pTouucchar_p( const uint8_p& _source );
 uint8_p ucchar_pTouint8_p( const ucchar_p& _source );
 
+namespace DaemonPaths {
+	const static std::string UploadDir = "elaborate/";
+
+	std::string upload( const std::string& _type, const std::string& _name = "" );
+	std::string store( const std::string& _type, const std::string& _name = "" );
+};
+
 template <typename intType, typename utype>
 utype getCircularArrayIndex( intType pi, utype size ) {
 	if ( std::llabs( pi ) == size ) return 0;

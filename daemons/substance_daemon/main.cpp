@@ -60,7 +60,7 @@ void initDeamon() {
     close(STDERR_FILENO);
 }
 
-void elaborate( const std::string& _filename ) {
+void elaborateMat( const std::string& _filename ) {
     FM::readRemoteSimpleCallback( _filename,
     [](const Http::Result& _res) {
         std::string filename =  getFileName(_res.uri);
@@ -114,8 +114,28 @@ void elaborate( const std::string& _filename ) {
         tar.putFile( ( "/" + filea).c_str(), filea.c_str() );
         tar.finish();
 
-        Http::removeFile( MDaemonPaths::UploadDir + filename );
-        Http::postFile( MDaemonPaths::StoredOutput + tarname, zlibUtil::deflateMemory(tagStream.str()) );
+        Http::postFile( DaemonPaths::store( EntityGroup::Material, tarname ),
+                        zlibUtil::deflateMemory(tagStream.str() ) );
+    } );
+}
+
+void elaborateGeom( const std::string& _filename ) {
+    FM::readRemoteSimpleCallback( _filename,
+        [](const Http::Result& _res) {
+            std::string filename =  getFileName(_res.uri);
+            std::string mainFileName = "/" + filename;
+            FM::writeLocalFile( mainFileName, reinterpret_cast<const char*>(_res.buffer.get()), _res.length );
+
+            std::string cmd = "FBX2glTF -b --pbr-metallic-roughness " + mainFileName;
+
+            std::system( cmd.c_str() );
+
+            std::string filenameglb = getFileNameOnly(filename) + ".glb";
+
+            std::string finalPath = "/" + filenameglb;
+
+            Http::postFile( DaemonPaths::store( EntityGroup::Geom, filenameglb ),
+                            zlibUtil::deflateMemory(FM::readLocalFile( finalPath )) );
     } );
 }
 
@@ -124,8 +144,10 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 //    initDeamon();
     Socket::on( "cloudStorageFileUpdate", []( const rapidjson::Document& data ) {
         std::string filename = data["name"].GetString();
-        if ( filename.find(MDaemonPaths::UploadDir) != std::string::npos ){
-            elaborate( filename );
+        if ( filename.find(DaemonPaths::upload(EntityGroup::Material)) != std::string::npos ){
+            elaborateMat( filename );
+        } else if ( filename.find(DaemonPaths::upload(EntityGroup::Geom)) != std::string::npos ){
+            elaborateGeom( filename );
         }
     } );
 

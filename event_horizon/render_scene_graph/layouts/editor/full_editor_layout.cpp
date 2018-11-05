@@ -33,12 +33,25 @@ struct UIViewLayout {
 };
 
 std::shared_ptr<MaterialBuilder> mb;
+std::shared_ptr<GLTF2> gltf;
 
 UIViewLayout uivl;
 
 void materialPBRCallback( const rapidjson::Document& data ) {
     std::string filename = data["name"].GetString();
-    if ( filename.find(MDaemonPaths::StoredOutput) != std::string::npos ){
+}
+
+void cloudCallback( const rapidjson::Document& data ) {
+    std::string filename = data["name"].GetString();
+    if ( filename.find(DaemonPaths::store(EntityGroup::Geom)) != std::string::npos ) {
+        FM::readRemoteSimpleCallback( filename, [&](const Http::Result& _res) {
+            auto inflatedData = zlibUtil::inflateFromMemory( uint8_p{std::move(_res.buffer), _res.length} );
+            gltf = std::make_shared<GLTF2>( inflatedData, filename );
+            Scene::sUpdateCallbacks.emplace_back( []( Scene* p ) {
+                loadGeomInGui( p, gltf );
+            } );
+        } );
+    } else if ( filename.find(DaemonPaths::store(EntityGroup::Material)) != std::string::npos ) {
         FM::readRemoteSimpleCallback( filename, [&](const Http::Result& _res) {
             auto inflatedData = zlibUtil::inflateFromMemory( uint8_p{std::move(_res.buffer), _res.length} );
             auto fn = getFileNameOnly(filename);
@@ -95,7 +108,7 @@ void initLayout( SceneLayout* _layout, Scene* p ) {
                      topX, topX + (1.0f-uivl.rightPanelWidth*2.0f),
                      0.0f, (1.0f-(uivl.consoleHeight + uivl.timeLinePanelSize.y())), CameraControls::Fly );
 
-    Socket::on( "cloudStorageFileUpdate", materialPBRCallback );
+    Socket::on( "cloudStorageFileUpdate", cloudCallback );
 }
 
 void render( Scene* p ) {
@@ -110,12 +123,13 @@ void allConversionsDragAndDropCallback( Scene* p, const std::string& _path ) {
     bool isGeom = false;
 
     if ( extl == ".fbx" ) {
+        FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(EntityGroup::Geom) + getFileName(pathSanitized) );
         // Convert to GLTF
-        std::string cmd = "cd " + getFileNamePath(pathSanitized) + "\n FBX2glTF " + pathSanitized;
-        std::system( cmd.c_str() );
-        finalPath = getFileNamePath(pathSanitized) + "/" + getFileNameOnly(finalPath) + "_out/" +
-                getFileNameOnly(finalPath) + ".gltf";
-        isGeom = true;
+//        std::string cmd = "cd " + getFileNamePath(pathSanitized) + "\n FBX2glTF -e -b --pbr-metallic-roughness " +
+//                pathSanitized;
+//        std::system( cmd.c_str() );
+//        finalPath = getFileNamePath(pathSanitized)  + "/" + getFileNameOnly(finalPath) + ".glb";
+//        isGeom = true;
     } else if ( extl == ".obj" ) {
         // Convert to GLTF
         finalPath = getFileNamePath(pathSanitized) + "/" + getFileNameOnly(finalPath) + ".gltf";
@@ -128,16 +142,17 @@ void allConversionsDragAndDropCallback( Scene* p, const std::string& _path ) {
         stl::parse_stl(pathSanitized);
         isGeom = true;
     } else if ( extl == ".sbsar" ) {
-        FM::copyLocalToRemote( pathSanitized, MDaemonPaths::UploadDir + getFileName(pathSanitized) );
+        FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(EntityGroup::Material)
+                               + getFileName(pathSanitized) );
     }
-    else if ( extl == ".gltf") {
+    else if ( extl == ".gltf" || extl == ".glb" ) {
         isGeom = true;
     }
 
-    if ( isGeom ) {
-        GLTF2 newObject{ finalPath };
-        loadGeomInGui( p, newObject );
-    }
+//    if ( isGeom ) {
+//        GLTF2 newObject{ finalPath };
+//        loadGeomInGui( p, newObject );
+//    }
 }
 
 std::shared_ptr<SceneLayout> fullEditor() {

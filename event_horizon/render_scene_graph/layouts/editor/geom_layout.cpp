@@ -12,10 +12,10 @@
 
 std::shared_ptr<GeomBuilder> gbt;
 
-void loadGeomInGui( Scene* p, GLTF2& _newObject ) {
-    auto hierScene = _newObject.convert();
+void loadGeomInGui( Scene* p, std::shared_ptr<GLTF2> _newObject ) {
+    auto hierScene = _newObject->convert();
     p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d(), {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
-    gbt = std::make_shared<GeomBuilder>( hierScene, _newObject.Materials() );
+    gbt = std::make_shared<GeomBuilder>( hierScene, _newObject->Materials() );
     gbt->build(p->RSG());
     p->takeScreenShot( hierScene->BBox3d(), gbt->Thumb() );
 }

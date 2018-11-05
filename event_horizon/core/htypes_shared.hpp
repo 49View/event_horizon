@@ -267,3 +267,9 @@ namespace Name {
 	const static std::string Yankee   = "Yankee  ";
 	const static std::string Zulu	  = "Zulu	 ";
 }
+
+namespace EntityGroup {
+	const static std::string Material = "material";
+	const static std::string Color = "color";
+	const static std::string Geom = "geom";
+}

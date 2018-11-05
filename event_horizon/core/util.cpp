@@ -439,3 +439,13 @@ bool FrameInvalidator::needsRefresh( int _counter, int _frameGap ) {
 
 	return false;
 }
+
+namespace DaemonPaths {
+	std::string upload( const std::string& _type, const std::string& _name ) {
+		return UploadDir + _type + "/" + _name;
+	}
+
+	std::string store( const std::string& _type, const std::string& _name ) {
+		return UploadDir + _type + "_outputs/" + _name;
+	}
+}

@@ -914,6 +914,39 @@ void GLTF2::fixupMaterials() {
 
 }
 
+GLTF2::GLTF2( const std::vector<char>& _array, const std::string& _name ) {
+    tinygltf::TinyGLTF gltf_ctx;
+    std::string err;
+    std::string warn;
+    std::string ext = GetFilePathExtension( _name );
+
+    bool ret = false;
+    if ( ext.compare( "glb" ) == 0 ) {
+        std::cout << "Reading binary glTF" << std::endl;
+        // assume binary glTF.
+        ret = gltf_ctx.LoadBinaryFromMemory( &model, &err, &warn,
+                                             reinterpret_cast<const unsigned char*>(_array.data()), _array.size() );
+    } else {
+        std::cout << "Reading ASCII glTF" << std::endl;
+        // assume ascii glTF.
+        auto str = std::string( _array.begin(), _array.end());
+        ret = gltf_ctx.LoadASCIIFromString( &model, &err, &warn, str.c_str(), str.size(), "" );
+    }
+
+    if ( !warn.empty()) {
+        LOGR( "Warn: %s", warn.c_str());
+    }
+
+    if ( !err.empty()) {
+        LOGR( "Err: %s", err.c_str());
+    }
+
+    if ( !ret ) {
+        LOGR( "Failed to parse glTF" );
+        return;
+    }
+}
+
 GLTF2::GLTF2( const std::string& _path ) {
 
     tinygltf::TinyGLTF gltf_ctx;

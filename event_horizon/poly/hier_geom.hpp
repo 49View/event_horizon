@@ -150,10 +150,6 @@ public:
 
     std::vector<Vector3f> getLocatorsPos();
 
-    static const std::string entityGroup() {
-        return "geom";
-    }
-
     template<typename TV>
 	void visit() const { traverseWithHelper<TV>( "Name,GHType,Geom,BBbox,Children", mName,mGHType,mData,bbox3d,
 	        children ); }

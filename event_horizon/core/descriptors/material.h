@@ -15,11 +15,6 @@ const static uint32_t dependecyTagTexture = 1;
 const static uint32_t dependecyTagMaterial = 2;
 using TextureDependencyBuilderPair = std::pair<std::string, uint32_t>;
 
-namespace MDaemonPaths {
-    const static std::string UploadDir = "elaborate/materials/";
-    const static std::string StoredOutput = "elaborate/material_outputs/";
-};
-
 namespace MQSettings {
     const static std::string Low = "_lowqDD256";
     const static std::string Medium = "";
@@ -85,9 +80,6 @@ JSONDATA_R( MaterialColor, name, color, category, brand, code, application )
         return streamHalf1.str() + streamRaw.str() + streamHalf2.str();
     }
 
-    static const std::string entityGroup() {
-        return "color";
-    }
 };
 
 JSONDATA_R( MaterialProperties, pixelTexelRatio )
@@ -212,10 +204,6 @@ public:
         reader->read( textureName );
         reader->read( color );
         reader->read( opacity );
-    }
-
-    static const std::string entityGroup() {
-        return "material";
     }
 
 protected:

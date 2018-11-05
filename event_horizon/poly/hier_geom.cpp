@@ -152,7 +152,7 @@ void HierGeom::deserializeRec( std::shared_ptr<DeserializeBin> reader, HierGeom 
 
 std::vector<unsigned char> HierGeom::serialize() {
 
-    auto writer = std::make_shared<SerializeBin>( SerializeVersionFormat::UInt64, entityGroup() );
+    auto writer = std::make_shared<SerializeBin>( SerializeVersionFormat::UInt64, EntityGroup::Geom );
 
     serializeDependencies( writer );
     serializeRec( writer );

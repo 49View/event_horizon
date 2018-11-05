@@ -179,7 +179,7 @@ std::string GeomBuilder::toMetaData() const {
     MegaWriter writer;
 
     writer.StartObject();
-    writer.serialize( CoreMetaData{Name(), HierGeom::entityGroup(), generateThumbnail(), generateRawData()} );
+    writer.serialize( CoreMetaData{Name(), EntityGroup::Geom, generateThumbnail(), generateRawData()} );
     writer.serialize( "BBox3d", elem->BBox3d() );
     writer.EndObject();
 
@@ -200,5 +200,5 @@ void GeomBuilder::publish() const {
         mb->publish();
     }
 
-    Http::post( Url{ Http::restEntityPrefix( HierGeom::entityGroup(), Name() + ".geom" ) }, toMetaData() );
+    Http::post( Url{ Http::restEntityPrefix( EntityGroup::Geom, Name() + ".geom" ) }, toMetaData() );
 }

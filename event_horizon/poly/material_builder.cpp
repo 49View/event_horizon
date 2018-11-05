@@ -61,7 +61,7 @@ void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
 }
 
 void MaterialBuilder::publish() const {
-    Http::post( Url{ Http::restEntityPrefix( Material::entityGroup(), Name() + postFix ) }, toMetaData() );
+    Http::post( Url{ Http::restEntityPrefix( EntityGroup::Material, Name() + postFix ) }, toMetaData() );
 }
 
 void resizeCallback(void* ctx, void*data, int size) {
@@ -108,7 +108,7 @@ std::string MaterialBuilder::toMetaData() const {
     MegaWriter writer;
 
     writer.StartObject();
-    writer.serialize( CoreMetaData{Name(), Material::entityGroup(), generateThumbnail(), generateRawData()} );
+    writer.serialize( CoreMetaData{Name(), EntityGroup::Material, generateThumbnail(), generateRawData()} );
     writer.serialize( "color", baseSolidColor );
     writer.serialize( "metallicValue", metallicValue );
     writer.serialize( "roughnessValue", roughnessValue );

@@ -8,7 +8,7 @@
 class Scene;
 class GLTF2;
 
-void loadGeomInGui( Scene* p, GLTF2& _newObject );
+void loadGeomInGui( Scene* p, std::shared_ptr<GLTF2> _newObject );
 void ImGuiGeoms( Scene* p, const Rect2f& _r );
 
 

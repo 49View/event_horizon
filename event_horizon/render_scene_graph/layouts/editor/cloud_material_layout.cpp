@@ -8,5 +8,5 @@
 #include <render_scene_graph/scene.hpp>
 
 void ImGuiCloudEntitiesMaterials( Scene* p, const Rect2f& _r ) {
-    ImGuiCloudEntities( p, _r, "Cloud Materials", Material::entityGroup() );
+    ImGuiCloudEntities( p, _r, "Cloud Materials", EntityGroup::Material );
 }
