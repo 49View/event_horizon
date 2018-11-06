@@ -73,12 +73,6 @@ jobs:
       - run: make -j8 -C 'builds/event_horizon/'
       - run: make install -C 'builds/event_horizon/'
 
-      # House Maker Deemon
-#      - run: >
-#          mkdir builds/house_maker && cd builds/house_maker/ && cmake -DCMAKE_BUILD_TYPE=Release
-#          ../../projects/house_maker/
-#      - run: make -j8 -C 'builds/house_maker/'
-
       # Substance daemon
       - run: >
           mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release ../../daemons/substance_daemon/
@@ -93,18 +87,11 @@ jobs:
           ../../dev_tools/editor/
       - run: make -j8 -C 'builds/editor_em/'
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.js -H Content-Type:application/octet-stream
-          https://49view-api.icu/fs/upload/artifacts%2editor.js
+          curl --data-binary @/app/builds/editor_em/editor.js -H Content-Type:application/octet-stream https://49view-api.icu/fs/upload/artifacts%2editor.js
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.wasm -H Content-Type:application/octet-stream
-          https://49view-api.icu/fs/upload/artifacts%2editor.wasm
+          curl --data-binary @/app/builds/editor_em/editor.wasm -H Content-Type:application/octet-stream https://49view-api.icu/fs/upload/artifacts%2editor.wasm
 
       # run tests!
-
-#      - run: |
-#          curl --data-binary @/app/builds/sandbox_em/sandbox.wasm -H Content-Type:application/octet-stream https://rest-49view.herokuapp.com/fs/upload/wasm%2Fbuilds%2Fsandbox.wasm
-#      - run: |
-#          curl --data-binary @/app/builds/sandbox_em/sandbox.js -H Content-Type:application/octet-stream https://rest-49view.herokuapp.com/fs/upload/wasm%2Fbuilds%2Fsandbox.js
 
   deployCPP:
     machine:
