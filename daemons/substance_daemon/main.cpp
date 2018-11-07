@@ -114,7 +114,7 @@ void elaborateMat( const std::string& _filename ) {
         tar.putFile( ( "/" + filea).c_str(), filea.c_str() );
         tar.finish();
 
-        Http::postFile( DaemonPaths::store( EntityGroup::Material, tarname ),
+        FM::writeRemoteFile( DaemonPaths::store( EntityGroup::Material, tarname ),
                         zlibUtil::deflateMemory(tagStream.str() ) );
     } );
 }
@@ -135,7 +135,7 @@ void elaborateGeom( const std::string& _filename ) {
 
             std::string finalPath = "/" + filenameglb;
 
-            Http::postFile( DaemonPaths::store( EntityGroup::Geom, filenameglb ),
+            FM::writeRemoteFile( DaemonPaths::store( EntityGroup::Geom, filenameglb ),
                             zlibUtil::deflateMemory(FM::readLocalFile( finalPath )) );
     } );
 }
