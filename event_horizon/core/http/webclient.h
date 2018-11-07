@@ -111,18 +111,12 @@ namespace Http {
               ResponseFlags rf = ResponseFlags::None );
     void getInternal( const Url& url, const std::function<void(const Http::Result&)> callback,
               ResponseFlags rf = ResponseFlags::None );
+
+    void postInternal( const Url& url, const char *buff, uint64_t length );
+
     void post( const Url& url, const std::string& _data ); // text data
-    void post( const Url& url, const char *buff, uint64_t length );
     void post( const Url& url, const uint8_p& buffer );
     void post( const Url& url, const std::vector<unsigned char>& buffer );
-    // binary data
-
-    // TODO: This will be need to be moved
-    void postFile( const std::string& _filename, const char *buff, uint64_t length,
-                   HttpUrlEncode _filenameEnc = HttpUrlEncode::Yes); // binary data
-    void postFile( const std::string& _filename, const std::vector<unsigned char>& _data ); // binary data
-    void removeFile( const std::string& _filename );
-    void listFiles( const std::string& _subfolder ); // this will be a json string
 
     bool Ping();
 

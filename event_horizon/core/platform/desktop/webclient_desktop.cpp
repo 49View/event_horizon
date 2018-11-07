@@ -100,71 +100,35 @@ namespace Http {
         }
     }
 
-    void post( const Url& url, const std::string& _data ) {
-        auto request = makePostRequest( url, _data );
+    void postInternal( const Url& url, const char *buff, uint64_t length ) {
+        LOGR( "[HTTP-POST] %s", url.toString().c_str() );
+        LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
+
+//        auto dataCut = _data.substr(0, 512);
+//        if ( _data.size() > 512 ) dataCut += "...";
+//        LOGR( "[HTTP-POST-DATA] %s", dataCut.c_str() );
+
+        auto request = makePostRequest( url, buff, length );
         auto settings = std::make_shared<restbed::Settings>();
         settings->set_connection_timeout( std::chrono::seconds( 86400 ));
 
-        LOGR( "[HTTP-POST] %s", url.toString().c_str() );
-        auto dataCut = _data.substr(0, 512);
-        if ( _data.size() > 512 ) dataCut += "...";
-        LOGR( "[HTTP-POST-DATA] %s", dataCut.c_str() );
         try {
-        restbed::Http::async( request,
-                              [&](std::shared_ptr< restbed::Request > request,
-                                  std::shared_ptr< restbed::Response > res) {
-                                  auto rcode = res->get_status_code();
-                                  LOGR("[HTTP-POST] Response code %d - %s ", rcode, res->get_status_message().c_str() );
-                                  if ( !isSuccessStatusCode(rcode) ) {
-                                      LOGR("Reason: %s", res->get_status_message().c_str());
-                                  }
-                              }, settings );
+            restbed::Http::async( request,
+                                  [&](std::shared_ptr< restbed::Request > request,
+                                      std::shared_ptr< restbed::Response > res) {
+                                      auto rcode = res->get_status_code();
+                                      LOGR("[HTTP-POST] Response code %d - %s ", rcode,
+                                                                                 res->get_status_message().c_str() );
+                                      if ( !isSuccessStatusCode(rcode) ) {
+                                          LOGR("Reason: %s", res->get_status_message().c_str());
+                                      }
+                                  }, settings );
         } catch ( const std::exception& ex ) {
             LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
             LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
         } catch ( ... ) {
             LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
         }
-    }
-
-    void post( const Url& url, const char *buff, uint64_t length ) {
-        LOGR( "[HTTP-POST] %s", url.toString().c_str() );
-        LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
-
-        auto request = makePostRequest( url, buff, length );
-        auto settings = std::make_shared<restbed::Settings>();
-        settings->set_connection_timeout( std::chrono::seconds( 86400 ));
-
-        restbed::Http::async( request,
-                              [&](std::shared_ptr< restbed::Request > request,
-                                  std::shared_ptr< restbed::Response > res) {
-                                  LOGR("[HTTP-POST] Response code %d - %s ",  res->get_status_code(),
-                                          res->get_status_message().c_str() );
-                              }, settings );
-    }
-
-    void post( const Url& url, const uint8_p& buffer ) {
-        post( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second );
-    }
-
-    void post( const Url& url, const std::vector<unsigned  char>& buffer ) {
-        post( url, reinterpret_cast<const char*>(buffer.data()), buffer.size() );
-    }
-
-    void postFile( const std::string& _filename, const char *buff, uint64_t length, HttpUrlEncode _filenameEnc ) {
-        auto fn = _filenameEnc == HttpUrlEncode::Yes ? url_encode( _filename ) : _filename;
-        auto request = makePostRequest( Url( "/fs/upload/" + fn ), buff, length );
-        auto settings = std::make_shared<restbed::Settings>();
-        settings->set_connection_timeout( std::chrono::seconds( 86400 ));
-
-        restbed::Http::async( request, [&](std::shared_ptr< restbed::Request > request,
-                                           std::shared_ptr< restbed::Response > res) {
-            LOGR( "[HTTP RES %d]: %s", res->get_status_code(), request->get_path().c_str() );
-        }, settings );
-    }
-
-    void postFile( const std::string& _filename, const std::vector<unsigned char>& _data ) {
-        post( Url{HttpFilePrefix::fileupload + url_encode(_filename)}, _data );
     }
 
     void removeFile( const std::string& _filename ) {

@@ -152,6 +152,18 @@ namespace Http {
         }
     }
 
+    void post( const Url& url, const std::string& _data ) {
+        postInternal( url, _data.data(), _data.size() );
+    }
+
+    void post( const Url& url, const uint8_p& buffer ) {
+        postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second );
+    }
+
+    void post( const Url& url, const std::vector<unsigned  char>& buffer ) {
+        postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size() );
+    }
+
     void useLocalHost( const bool _flag ) {
         sUseLocalhost = _flag;
     }

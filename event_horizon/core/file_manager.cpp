@@ -185,13 +185,13 @@ namespace FileManager {
 // REMOTE FILE SYSTEM
 // ********************************************************************************************************************
 
-    void readRemoteSimpleCallback( const std::string& filename, std::function<void(const Http::Result&)> simpleCallback ) {
-        Http::get( Url(HttpFilePrefix::get + url_encode(filename)), simpleCallback,
-                Http::ResponseFlags::ExcludeFromCache );
+    void readRemoteSimpleCallback( const std::string& filename,
+                                   std::function<void(const Http::Result&)> simpleCallback ) {
+        Http::get( Url( HttpFilePrefix::get + url_encode(filename)), simpleCallback,
+                        Http::ResponseFlags::ExcludeFromCache );
     }
 
     void readRemote( const Url& url, std::shared_ptr<FileCallbackHandler> _handler, Http::ResponseFlags rf ) {
-
         auto fkey = getFileNameCallbackKey( url.toString() );
         if ( _handler->needsReload() || callbacksDataMap.find( fkey ) == callbacksDataMap.end() ) {
             callbacksDataMap.insert( { fkey, _handler } );
@@ -205,65 +205,14 @@ namespace FileManager {
         }
     }
 
-    void writeRemoteFile( const std::string& filename, const char *buff, uint64_t length, HttpUrlEncode _filenameEnc ) {
-        Http::postFile( filename, buff, length, _filenameEnc );
+    void writeRemoteFile( const std::string& _filename, const char *buff, uint64_t length,
+                          HttpUrlEncode _filenameEnc ) {
+        auto fn = _filenameEnc == HttpUrlEncode::Yes ? url_encode( _filename ) : _filename;
+        Http::postInternal( Url{HttpFilePrefix::fileupload + fn}, buff, length );
     }
 
-    void renameRemoteFile( const std::string& oldfilename, const std::string& newfilename ) {
-//        readRemoteFile( oldfilename, lambaFM {
-//            writeRemoteFile( newfilename, reinterpret_cast<char *>(ret.first.get()), ret.second );
-//            removeRemoteFile( oldfilename );
-//            LOGR( "[S3 FILE RENAMED] from %s to %s", oldfilename.c_str(), newfilename.c_str());
-//        });
-    }
-
-    void makeRemoteDir( const std::string& dirname ) {
-        // I don't know any way of creating a folder in S3 apart from having a new empty file!
-        char a = 0;
-        writeRemoteFile( dirname + "/empty", &a, 0 );
-    }
-
-    void removeRemoteFile( const std::string& filename ) {
-        Http::removeFile( filename );
-    }
-
-    std::vector<FileInfo>
-    listRemoteFolder( const std::string& _folderName, const std::string& _maskOut ) {
-
-        // maskOut is useful when you want to remove part of the filename return from the result, IE:
-        // images/floorplans/fp1.png
-        // If you pass that name to addTexture function it will add images by default hence having the full file name as:
-        // image/images/floorplans/fp1.png
-        // Passing "images/" as a mask out will return just floorplans/fp1.png instead
-
-        Http::listFiles( _folderName );
-
-        std::vector<FileInfo> ret;
-//
-//        if ( !res.empty()) {
-//        for ( auto const& s3_object : object_list ) {
-//            if ( !isFilenameAFolder( s3_object.GetKey())) {
-//                FileInfo fi;
-//                std::string fname = s3_object.GetKey();
-//                if ( !_maskOut.empty()) {
-//                    auto pos = fname.find_first_of( _maskOut );
-//                    if ( pos == 0 ) { fname.erase( fname.begin(), fname.begin() + _maskOut.size()); }
-//                }
-//                fi.name = fname;
-//                fi.date_modified = s3_object.GetLastModified().Millis();
-//                fi.fullPath = s3_object.GetKey();
-//                fi.nameWithoutExt = getFileNameNoExt( fi.name );
-//                fi.extension = getFileNameExt( fi.name );
-//                fi.size = s3_object.GetSize();
-//                fi.attributes = 0;
-//                ret.push_back( fi );
-//            }
-//        }
-//        } else {
-//            LOGR( "[S3 ERROR] ListFolder error: %s", _folderName.c_str());
-//        }
-
-        return ret;
+    void writeRemoteFile( const std::string& _filename, const std::vector<unsigned char>& _data ) {
+        Http::post( Url{HttpFilePrefix::fileupload + url_encode(_filename)}, _data );
     }
 
 // ********************************************************************************************************************

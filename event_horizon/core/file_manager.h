@@ -206,10 +206,11 @@ namespace FileManager {
 
     void writeRemoteFile( const std::string& filename, const char *buff, uint64_t length,
                           HttpUrlEncode _filenameEnc = HttpUrlEncode::Yes );
-	void renameRemoteFile( const std::string& filename, const std::string& newfilename );
-	void removeRemoteFile( const std::string& filename );
-	std::vector<FileInfo> listRemoteFolder( const std::string& _folderName, const std::string& _maskOut = "" );
-	void makeRemoteDir( const std::string& dirname );
+    void writeRemoteFile( const std::string& _filename, const std::vector<unsigned char>& _data );
+//	void renameRemoteFile( const std::string& filename, const std::string& newfilename );
+//	void removeRemoteFile( const std::string& filename );
+//	std::vector<FileInfo> listRemoteFolder( const std::string& _folderName, const std::string& _maskOut = "" );
+//	void makeRemoteDir( const std::string& dirname );
 
 	// Local file access
     uint8_p readLocalFile( const std::string& filename );

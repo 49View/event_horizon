@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <emscripten.h>
 #include <emscripten/fetch.h>
+#include <emscripten/val.h>
 
 namespace Http {
 
@@ -46,69 +47,24 @@ namespace Http {
                                     onProgressWget);
     }
 
-    void post( const Url& url, const std::string& _data ) {
+    void postInternal( const Url& uri, const char *buff, uint64_t length ) {
 
-        std::string script = std::string( R"( var http = new XMLHttpRequest();
-                var url = ")" );
-        script += url.toString();
-        script += std::string( R"("; var params = JSON.stringify()" );
-        script += _data;
-        script += std::string( R"();
-                http.open("POST", url, true);
-                http.setRequestHeader("Content-type", "application/json");
-                http.onreadystatechange = function() {
-                    if(http.readyState == 4 && http.status == 200) {
-                        //alert(http.responseText);
-                    }
-                }
-                http.send(params);
-        )" );
+        LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
+        LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
-//        LOGR( "HTTP Post script: %s", script.c_str() );
+        emscripten::val xhr = emscripten::val::global("XMLHttpRequest").new_();
+        xhr.call<void>( "open", std::string("POST"), uri.toString() );
+        xhr.call<void>( "setRequestHeader", std::string("Content-type"), std::string("application/octet-stream") );
+        // NDDado: due to security reasons *Content-length* header has been blocked on modern browsers, DO NOT USE IT
+//        xhr.call<void>( "setRequestHeader", std::string("Content-length"), (int)length );
 
-        emscripten_run_script( script.c_str());
-    }
+        emscripten::val buffArray = emscripten::val::global("ArrayBuffer").new_((int)length);
+        emscripten::val buffI8Array = emscripten::val::global("Int8Array").new_(buffArray);
 
-    void postFile( const std::string& _filename, const char *buff, uint64_t length ) {
-        LOGE( "Unimplemented postFile" );
-    }
-
-    void postFile( const std::string& _filename, const std::vector<unsigned char>& _data ) {
-        LOGE( "Unimplemented postFile" );
-    }
-
-    void getFile( const std::string& _filename, const bool addTrailingZero ) {
-        LOGE( "Unimplemented getFile" );
-
-//        return getRaw( Url( "/fs/get/" + url_encode( _filename )), addTrailingZero );
-    }
-
-    void getFileHeader( const std::string& _filename ) {
-        LOGE( "Unimplemented getFileHeader" );
-
-    }
-
-    void removeFile( const std::string& _filename ) {
-        LOGE( "Unimplemented removeFile" );
-
-//        auto request = makeRequest( Url( "/fs/remove/" + url_encode( _filename )) );
-//        auto result = restbed::Http::sync( request );
-//        return responseHeader( result );
-    }
-
-    void listFiles( const std::string& _filename ) {
-        LOGE( "Unimplemented listFiles" );
-//        auto request = makeRequest( Url( "/fs/list/" + url_encode( _filename )) );
-//        auto result = restbed::Http::sync( request );
-//        if ( isSuccessStatusCode( result->get_status_code()) ) {
-//            return resultToString( result );
-//        }
-//        return "";
-    }
-
-    void getRaw( const Url& url, const bool addTrailingZero ) {
-        LOGE( "Unimplemented getRaw" );
-
+        for (uint64_t i=0; i< length; i++) {
+            buffI8Array.call<void>( "fill", buff[i], (int)i, (int)(i+1) );
+        }
+        xhr.call<void>( "send", buffArray );
     }
 
     bool Result::isSuccessStatusCode() const {
