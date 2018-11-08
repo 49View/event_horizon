@@ -12,6 +12,190 @@
 #include "megareader_fs.hpp"
 #include "string_util.h"
 
+template <typename J, typename B, typename A>
+class JVisitor {
+public:
+	template<typename T>
+	void visit( const char* _name, const T& value ) {
+		A::template visit<J,T>( _name, value );
+	}
+
+	template<typename T>
+	void visit( const char* _name, std::shared_ptr<T> value ) {
+		A::template visit<J,T>( _name, value );
+	}
+
+	void visit( const char* _name, const std::string& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const char* value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const double& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const float& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const bool& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const int32_t& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const uint32_t& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const int64_t& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const uint64_t& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const Vector2f& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const Vector3f& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const Vector4f& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const std::pair<int, int>& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const JMATH::Rect2f& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const Quaternion& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const MatrixAnim& value ) {
+		B::visit( _name, value );
+	}
+
+	void visit( const char* _name, const JMATH::AABB& value ) {
+		B::visit( _name, value );
+	}
+
+	// std::array
+
+	template<typename T, std::size_t N>
+	void visit( const char* _name, const std::array<T, N>& array ) {
+		A::visit( _name, array );
+	}
+
+	template<std::size_t N>
+	void visit( const char* _name, const std::array<int32_t, N>& array ) {
+		A::visit( _name, array );
+	}
+
+	template<std::size_t N>
+	void visit( const char* _name, const std::array<Vector2f, N>& array ) {
+		A::visit( _name, array );
+	}
+
+	// std::vector
+
+	template<typename T>
+	void visit( const char* _name, const std::vector<std::shared_ptr<T>>& array ) {
+		A::template visit<J,T>( _name, array );
+	}
+
+	template<typename T>
+	void visit( const char* _name, const std::vector<T>& array ) {
+		A::template visit<J,T>( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<Vector2f>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<Triangle2d>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<Vector3f>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<Vector4f>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<uint32_t>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<int32_t>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<uint64_t>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<int64_t>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<float>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<double>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<std::string>& array ) {
+		A::visit( _name, array );
+	}
+
+	void visit( const char* _name, const std::vector<JMATH::Rect2f>& array ) {
+		A::visit( _name, array );
+	}
+
+	// std::vector of vector
+
+	template<typename T>
+	void visit( const char* _name, const std::vector<std::vector<T>>& arrayOfArray ) {
+		A::template visit<J,T>( _name, arrayOfArray );
+	}
+
+	void visit( const char* _name, const std::vector<std::vector<double>>& arrayOfArray ) {
+		A::visit( _name, arrayOfArray );
+	}
+
+	template<std::size_t N>
+	void visit( const char* _name, const std::vector<std::array<double, N>>& arrayOfArray ) {
+		A::visit( _name, arrayOfArray );
+	}
+
+	void visit( const char* _name, const std::vector<std::vector<Vector2f>>& arrayOfArray ) {
+		A::visit( _name, arrayOfArray );
+	}
+
+	void visit( const char* _name, const std::vector<std::vector<Vector3f>>& arrayOfArray ) {
+		A::visit( _name, arrayOfArray );
+	}
+
+};
+
 //specialize a type for all of the STL containers.
 namespace is_stl_container_impl {
 template <typename T>       struct is_stl_container :std::false_type {};

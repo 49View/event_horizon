@@ -87,9 +87,9 @@ jobs:
           ../../dev_tools/editor/
       - run: make -j8 -C 'builds/editor_em/'
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.js -H Content-Type:application/octet-stream https://49view-api.icu/fs/upload/artifacts%2editor.js
+          curl --data-binary @/app/builds/editor_em/editor.js -H Content-Type:application/octet-stream https://49view-api.icu/fs/upload/artifacts%2Feditor.js
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.wasm -H Content-Type:application/octet-stream https://49view-api.icu/fs/upload/artifacts%2editor.wasm
+          curl --data-binary @/app/builds/editor_em/editor.wasm -H Content-Type:application/octet-stream https://49view-api.icu/fs/upload/artifacts%2Feditor.wasm
 
       # run tests!
 
