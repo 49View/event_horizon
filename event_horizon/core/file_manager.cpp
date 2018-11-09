@@ -208,7 +208,7 @@ namespace FileManager {
     void writeRemoteFile( const std::string& _filename, const char *buff, uint64_t length,
                           HttpUrlEncode _filenameEnc ) {
         auto fn = _filenameEnc == HttpUrlEncode::Yes ? url_encode( _filename ) : _filename;
-        Http::postInternal( Url{HttpFilePrefix::fileupload + fn}, buff, length );
+        Http::postInternal( Url{HttpFilePrefix::fileupload + fn}, buff, length, HttpQuery::Binary );
     }
 
     void writeRemoteFile( const std::string& _filename, const std::vector<unsigned char>& _data ) {

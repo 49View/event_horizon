@@ -153,15 +153,15 @@ namespace Http {
     }
 
     void post( const Url& url, const std::string& _data ) {
-        postInternal( url, _data.data(), _data.size() );
+        postInternal( url, _data.data(), _data.size(), HttpQuery::JSON );
     }
 
     void post( const Url& url, const uint8_p& buffer ) {
-        postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second );
+        postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second, HttpQuery::Binary );
     }
 
     void post( const Url& url, const std::vector<unsigned  char>& buffer ) {
-        postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size() );
+        postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary );
     }
 
     void useLocalHost( const bool _flag ) {
@@ -170,7 +170,7 @@ namespace Http {
 
     const std::string CLOUD_PROTOCOL() {
         if ( sUseLocalhost ) {
-            return Url::HttpProtocol;
+            return Url::HttpsProtocol;
         } else{
             return Url::HttpsProtocol;
         }

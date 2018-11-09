@@ -16,26 +16,20 @@ namespace Http {
         return request;
     }
 
-    std::shared_ptr<restbed::Request> makePostRequest( const Url& url, const std::string& _data ) {
-        auto request = std::make_shared<restbed::Request>( restbed::Uri( url.toString()));
-
-        request->set_header( "Accept", "*/*" );
-        request->set_header( "Host", url.host );
-        request->set_header( "Content-Type", "application/json; charset=utf-8" );
-        request->set_header( "Content-Length", std::to_string( _data.size()));
-        request->set_header( "Connection", "keep-alive" );
-        request->set_method( "POST" );
-        request->set_body( _data );
-
-        return request;
-    }
-
-    std::shared_ptr<restbed::Request> makePostRequest( const Url& url, const char *buff, uint64_t length ) {
+    std::shared_ptr<restbed::Request> makePostRequest( const Url& url, const char *buff, uint64_t length, HttpQuery qt) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri( url.toString()) );
 
         request->set_header( "Accept", "*/*" );
         request->set_header( "Host", url.host );
-        request->set_header( "Content-Type", "application/octet-stream" );
+        switch (qt) {
+            case HttpQuery::Binary:
+                request->set_header( "Content-Type", "application/octet-stream" );
+                break;
+            case HttpQuery::JSON:
+            case HttpQuery::Text:
+                request->set_header( "Content-Type", "application/json; charset=utf-8" );
+                break;
+        }
         request->set_header( "Content-Length", std::to_string( length ) );
         request->set_method( "POST" );
         request->set_header( "Connection", "keep-alive" );
@@ -78,8 +72,30 @@ namespace Http {
 
     void getInternal( const Url& url, std::function<void(const Http::Result&)> callback, ResponseFlags rf ) {
         auto request = makeRequest( url );
+//        auto ssl_settings = std::make_shared< restbed::SSLSettings >( );
+
+//        settings->set_client_authentication_enabled( true );
+//        ssl_settings->set_private_key( restbed::Uri( "file:///Users/Dado/Documents/49View/event_horizon/configurations/certificates/client1-key.pem" ));
+//        ssl_settings->set_certificate( restbed::Uri( "file:///Users/Dado/Documents/49View/event_horizon/configurations/certificates/client1-crt.pem" ) );
+//        ssl_settings->set_certificate_authority_pool( restbed::Uri( "file:///Users/Dado/Documents/49View/event_horizon/configurations/certificates/ca-crt.pem" ) );
+
+//        auto settings = make_shared< Settings >( );
+//        settings->set_ssl_settings( ssl_settings );
+//
+
         auto settings = std::make_shared< restbed::Settings >( );
         settings->set_connection_limit( 0 );
+//        settings->set_ssl_settings( ssl_settings );
+
+//        try {
+//            auto lres = restbed::Http::sync( request, settings );
+//            LOGR( "%d", lres->get_status_code() );
+//        } catch ( const std::exception& ex ) {
+//            LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
+//            LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
+//        } catch ( ... ) {
+//            LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
+//        }
 
         std::shared_ptr< restbed::Response > res;
         try {
@@ -100,7 +116,7 @@ namespace Http {
         }
     }
 
-    void postInternal( const Url& url, const char *buff, uint64_t length ) {
+    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt ) {
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
@@ -108,7 +124,7 @@ namespace Http {
 //        if ( _data.size() > 512 ) dataCut += "...";
 //        LOGR( "[HTTP-POST-DATA] %s", dataCut.c_str() );
 
-        auto request = makePostRequest( url, buff, length );
+        auto request = makePostRequest( url, buff, length, qt );
         auto settings = std::make_shared<restbed::Settings>();
         settings->set_connection_timeout( std::chrono::seconds( 86400 ));
 
