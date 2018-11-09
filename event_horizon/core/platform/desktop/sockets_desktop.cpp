@@ -47,8 +47,10 @@ namespace Socket {
         }
 
         handler.socket()->on( "message",
-            sio::socket::event_listener_aux( [&]( std::string const& name, sio::message::ptr const& data,
-                                                  bool isAck, sio::message::list& ack_resp ) {
+            sio::socket::event_listener_aux( [&]( [[maybe_unused]] std::string const& name,
+                                                  sio::message::ptr const& data,
+                                                  [[maybe_unused]] bool isAck,
+                                                  [[maybe_unused]]sio::message::list& ack_resp ) {
                                                       _lock.lock();
                                                       ASSERT( data->get_flag() == sio::message::flag::flag_string );
                                                       onMessage( data->get_string() );

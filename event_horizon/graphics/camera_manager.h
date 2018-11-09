@@ -45,8 +45,8 @@ struct CameraCubeMapRigBuilder {
 
 class CameraRig {
 public:
-    CameraRig( Renderer& rr, const std::string &_name, const Rect2f& _viewport );
-    CameraRig( Renderer& rr, const std::string &_name, std::shared_ptr<Framebuffer> _fb );
+    CameraRig( const std::string &_name, const Rect2f& _viewport );
+    CameraRig( const std::string &_name, std::shared_ptr<Framebuffer> _fb );
 
     std::shared_ptr<Camera> getCamera();
     std::shared_ptr<Camera> getMainCamera() { return mCamera; }
@@ -89,8 +89,8 @@ protected:
 
 class CameraManager {
 public:
-    std::shared_ptr<CameraRig> addRig( Renderer& rr, const std::string &_name, const Rect2f& _viewport );
-    std::shared_ptr<CameraRig> addRig( Renderer& rr, const std::string &_name, std::shared_ptr<Framebuffer> _fb );
+    std::shared_ptr<CameraRig> addRig( const std::string &_name, const Rect2f& _viewport );
+    std::shared_ptr<CameraRig> addRig( const std::string &_name, std::shared_ptr<Framebuffer> _fb );
     std::shared_ptr<CameraRig>& getRig( const std::string &_name );
 
     void updateFromInputData( const CameraInputData& mi );

@@ -76,7 +76,7 @@ struct VFA1 {
 
     static int stride() { return sizeof( P ); }
 
-    static VFAttribTypes type( uint64_t index ) { return VFAttribTypes::Float; }
+    static VFAttribTypes type( [[maybe_unused]] uint64_t index ) { return VFAttribTypes::Float; }
 
     static int size( uint64_t /*index*/ ) { return sizeof( P ) / sizeof( float ); }
 

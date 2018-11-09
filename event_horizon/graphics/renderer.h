@@ -110,7 +110,7 @@ public:
 										  BlitType _bt, CameraManager& _cm ) {
 		auto rig = _cm.getRig( _name );
 		if ( !rig ) {
-			rig = _cm.addRig( *this, _name, _viewport );
+			rig = _cm.addRig( _name, _viewport );
 			mTargets.push_back( std::make_shared<T>(T{ rig, _viewport, _bt, *this }) );
 		}
 		return rig;

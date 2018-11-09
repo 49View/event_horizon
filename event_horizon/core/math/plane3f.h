@@ -39,7 +39,7 @@ struct Plane3f {
 		return a + ( ba*( ( d - nDotA ) / nDotBA ) );
 	}
 
-	inline const float checkSide( const Vector3f& i ) const {
+	inline float checkSide( const Vector3f& i ) const {
 		return dot( i, n ) - d;
 	}
 

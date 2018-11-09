@@ -47,7 +47,7 @@ struct ObservableShared {
         observer = _val;
     }
 
-    void unsubscribe( std::shared_ptr<ObserverShared<T>> _val ) {
+    void unsubscribe( [[maybe_unused]] std::shared_ptr<ObserverShared<T>> _val ) {
         observer = nullptr;
 //        observers.erase( remove( observers.begin(), observers.end(), _val), observers.end() );
     }

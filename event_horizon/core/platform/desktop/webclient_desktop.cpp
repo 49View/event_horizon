@@ -100,7 +100,7 @@ namespace Http {
         std::shared_ptr< restbed::Response > res;
         try {
             restbed::Http::async(
-                    request, [&](std::shared_ptr< restbed::Request > request,
+                    request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
                                  std::shared_ptr< restbed::Response > res) {
                         LOGR( "[HTTP-GET] Response code: %d - %s",
                               res->get_status_code(), res->get_status_message().c_str() );
@@ -130,7 +130,7 @@ namespace Http {
 
         try {
             restbed::Http::async( request,
-                                  [&](std::shared_ptr< restbed::Request > request,
+                                  [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
                                       std::shared_ptr< restbed::Response > res) {
                                       auto rcode = res->get_status_code();
                                       LOGR("[HTTP-POST] Response code %d - %s ", rcode,

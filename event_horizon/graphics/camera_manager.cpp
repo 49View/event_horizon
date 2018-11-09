@@ -5,7 +5,7 @@
 #include "framebuffer.h"
 //#include "vr_manager.hpp"
 
-CameraRig::CameraRig( Renderer& rr, const std::string& _name, const Rect2f& _viewport ) {
+CameraRig::CameraRig( const std::string& _name, const Rect2f& _viewport ) {
     mName = _name;
     mCamera = std::make_shared<Camera>( _name, CameraState::Active, _viewport );
     mCameraVRLeftEye = std::make_shared<Camera>( _name + "LeftEye", CameraState::Active, _viewport );
@@ -14,7 +14,7 @@ CameraRig::CameraRig( Renderer& rr, const std::string& _name, const Rect2f& _vie
     mViewport = _viewport;
 }
 
-CameraRig::CameraRig( Renderer& rr, const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
+CameraRig::CameraRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
     ASSERT(_fb != nullptr);
     mName = _name;
     mViewport = Rect2f{ Vector2f::ZERO, {_fb->getWidth(), _fb->getHeight()} };
@@ -103,7 +103,7 @@ void CameraManager::addCubeMapRig( Renderer& rr, const CameraCubeMapRigBuilder& 
                                                  .cubemap().mipMaps(_builder.useMipMaps).build();
 
     float cubeMapFOV = 90.0f;//degToRad(90.0f);
-    auto ctop = addRig( rr, _builder.name + "_" + cubemapFaceToString(CubemapFaces::Top), cbfb );
+    auto ctop = addRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Top), cbfb );
     ctop->getCamera()->setFoV( cubeMapFOV );
     ctop->getCamera()->setPosition( _builder.pos );
     ctop->getCamera()->setQuatAngles( Vector3f{ M_PI_2, 0.0f, 0.0f } );
@@ -111,7 +111,7 @@ void CameraManager::addCubeMapRig( Renderer& rr, const CameraCubeMapRigBuilder& 
     ctop->getCamera()->ViewPort( cubemapViewport );
     ctop->getCamera()->enableInputs(false);
 
-    auto cbottom = addRig( rr, _builder.name + "_" + cubemapFaceToString(CubemapFaces::Bottom), cbfb );
+    auto cbottom = addRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Bottom), cbfb );
     cbottom->getCamera()->setFoV( cubeMapFOV );
     cbottom->getCamera()->setPosition( _builder.pos );
     cbottom->getCamera()->setQuatAngles( Vector3f{ -M_PI_2, 0.0f, 0.0f } );
@@ -119,7 +119,7 @@ void CameraManager::addCubeMapRig( Renderer& rr, const CameraCubeMapRigBuilder& 
     cbottom->getCamera()->ViewPort( cubemapViewport );
     cbottom->getCamera()->enableInputs(false);
 
-    auto cleft = addRig( rr, _builder.name + "_" + cubemapFaceToString(CubemapFaces::Left), cbfb );
+    auto cleft = addRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Left), cbfb );
     cleft->getCamera()->setFoV( cubeMapFOV );
     cleft->getCamera()->setPosition( _builder.pos );
     cleft->getCamera()->setQuatAngles( Vector3f{ 0.0f, -M_PI_2, 0.0f } );
@@ -127,7 +127,7 @@ void CameraManager::addCubeMapRig( Renderer& rr, const CameraCubeMapRigBuilder& 
     cleft->getCamera()->ViewPort( cubemapViewport );
     cleft->getCamera()->enableInputs(false);
 
-    auto cright = addRig( rr, _builder.name + "_" + cubemapFaceToString(CubemapFaces::Right), cbfb );
+    auto cright = addRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Right), cbfb );
     cright->getCamera()->setFoV( cubeMapFOV );
     cright->getCamera()->setPosition( _builder.pos );
     cright->getCamera()->setQuatAngles( Vector3f{ 0.0f, M_PI_2, 0.0f } );
@@ -135,7 +135,7 @@ void CameraManager::addCubeMapRig( Renderer& rr, const CameraCubeMapRigBuilder& 
     cright->getCamera()->ViewPort( cubemapViewport );
     cright->getCamera()->enableInputs(false);
 
-    auto cfront = addRig( rr, _builder.name + "_" + cubemapFaceToString(CubemapFaces::Front), cbfb );
+    auto cfront = addRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Front), cbfb );
     cfront->getCamera()->setFoV( cubeMapFOV );
     cfront->getCamera()->setPosition( _builder.pos );
     cfront->getCamera()->setQuatAngles( Vector3f{ 0.0f } );
@@ -143,7 +143,7 @@ void CameraManager::addCubeMapRig( Renderer& rr, const CameraCubeMapRigBuilder& 
     cfront->getCamera()->ViewPort( cubemapViewport );
     cfront->getCamera()->enableInputs(false);
 
-    auto cback = addRig( rr, _builder.name + "_" + cubemapFaceToString(CubemapFaces::Back), cbfb );
+    auto cback = addRig(  _builder.name + "_" + cubemapFaceToString(CubemapFaces::Back), cbfb );
     cback->getCamera()->setFoV( cubeMapFOV );
     cback->getCamera()->setPosition( _builder.pos );
     cback->getCamera()->setQuatAngles( Vector3f{ 0.0f, M_PI, 0.0f } );
@@ -152,14 +152,14 @@ void CameraManager::addCubeMapRig( Renderer& rr, const CameraCubeMapRigBuilder& 
     cback->getCamera()->enableInputs(false);
 }
 
-std::shared_ptr<CameraRig> CameraManager::addRig( Renderer& rr, const std::string& _name, const Rect2f& _viewport) {
-    auto c = std::make_shared<CameraRig>( rr, _name, _viewport );
+std::shared_ptr<CameraRig> CameraManager::addRig( const std::string& _name, const Rect2f& _viewport) {
+    auto c = std::make_shared<CameraRig>( _name, _viewport );
     mCameraRigs[_name] = c;
     return c;
 }
 
-std::shared_ptr<CameraRig> CameraManager::addRig( Renderer& rr, const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
-    auto c = std::make_shared<CameraRig>( rr, _name, _fb );
+std::shared_ptr<CameraRig> CameraManager::addRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
+    auto c = std::make_shared<CameraRig>( _name, _fb );
     mCameraRigs[_name] = c;
     return c;
 }
