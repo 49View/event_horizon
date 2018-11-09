@@ -112,7 +112,7 @@ namespace Http {
     void getInternal( const Url& url, const std::function<void(const Http::Result&)> callback,
               ResponseFlags rf = ResponseFlags::None );
 
-    void postInternal( const Url& url, const char *buff, uint64_t length );
+    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt );
 
     void post( const Url& url, const std::string& _data ); // text data
     void post( const Url& url, const uint8_p& buffer );

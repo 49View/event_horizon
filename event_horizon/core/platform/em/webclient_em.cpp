@@ -47,14 +47,22 @@ namespace Http {
                                     onProgressWget);
     }
 
-    void postInternal( const Url& uri, const char *buff, uint64_t length ) {
+    void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt ) {
 
         LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
         emscripten::val xhr = emscripten::val::global("XMLHttpRequest").new_();
         xhr.call<void>( "open", std::string("POST"), uri.toString() );
-        xhr.call<void>( "setRequestHeader", std::string("Content-type"), std::string("application/octet-stream") );
+        switch ( qt ) {
+            case HttpQuery::Binary:
+                xhr.call<void>( "setRequestHeader", std::string("Content-type"), std::string("application/octet-stream") );
+                break;
+            case HttpQuery::JSON:
+            case HttpQuery::Text:
+                xhr.call<void>( "setRequestHeader", std::string("Content-type"), std::string("application/json; charset=utf-8") );
+                break;
+        }
         // NDDado: due to security reasons *Content-length* header has been blocked on modern browsers, DO NOT USE IT
 //        xhr.call<void>( "setRequestHeader", std::string("Content-length"), (int)length );
 
