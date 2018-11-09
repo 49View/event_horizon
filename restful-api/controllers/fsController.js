@@ -1,5 +1,5 @@
 
-var cloudApi = require('../third_party_api/s3');
+const cloudApi = require('../third_party_api/s3');
 
 exports.cloudStorageFileUpdate = (body, key) => {
 	return cloudApi.upload( body, key );

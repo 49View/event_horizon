@@ -1,5 +1,5 @@
 class GlobalConfig {
-	constructor(lS3Bucket, lMongoDBUser, lMongoDBPass, lMongoDBURI, lMongoDBdbName, lAWSAccessId, lAWSSecretKeyId) {
+	constructor(lS3Bucket, lMongoDBUser, lMongoDBPass, lMongoDBURI, lMongoDBdbName, lAWSAccessId, lAWSSecretKeyId, lJWTSecret) {
 		this.mS3Bucket = lS3Bucket;
 		this.mMongoDBUser = lMongoDBUser;
 		this.mMongoDBPass = lMongoDBPass;
@@ -7,7 +7,7 @@ class GlobalConfig {
 		this.mMongoDBdbName = lMongoDBdbName;			
 		this.mAWSConfigAccessKeyId = lAWSAccessId;
 		this.mAWSConfigSecretKeyId = lAWSSecretKeyId;
-
+		this.mJWTSecret = lJWTSecret;
 	}
 
 	get S3Bucket() {
@@ -31,8 +31,11 @@ class GlobalConfig {
 	get AWSConfigSecretKeyId() {
 		return this.mAWSConfigSecretKeyId;
 	}
+	get JWTSecret() {
+		return this.mJWTSecret;
+	}
 }
 
-const gc = new GlobalConfig("sixthviewfs", "dado", "luckycarrot1803", "sixthviewmdb001-a0hba.mongodb.net", "sixthviewdb", "AKIAJWSLLXTAUPNWMBOA", "9lP99+jK8Ki1XD/MoDv/Ci2/Bo6pzurZjntltd0r");
+const gc = new GlobalConfig("sixthviewfs", "dado", "luckycarrot1803", "sixthviewmdb001-a0hba.mongodb.net", "sixthviewdb", "AKIAJWSLLXTAUPNWMBOA", "9lP99+jK8Ki1XD/MoDv/Ci2/Bo6pzurZjntltd0r", "1sg5+d69hZXX57hs3+1t6-36jh/4fgmm++");
 
 module.exports = gc;

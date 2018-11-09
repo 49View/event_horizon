@@ -1,5 +1,5 @@
 
-var server = require('../bin/www');
+const server = require('../bin/www');
 
 exports.ping = ( req, res ) => {
     const jr = { msg: 'ping', text: "ping" };

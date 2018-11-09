@@ -5,7 +5,6 @@ AWS.config = new AWS.Config();
 AWS.config.accessKeyId = globalConfig.AWSConfigAccessKeyId;
 AWS.config.secretAccessKey = globalConfig.AWSConfigSecretAccessKey;
 
-var uuid = require('node-uuid');
 var s3 = new AWS.S3();
 
 function listInternal ( key, complete ) {
