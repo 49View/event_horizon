@@ -223,7 +223,7 @@ const std::shared_ptr<ImGuiConsole>& Scene::Console() const {
 
 void Scene::takeScreenShot( const AABB& _box, ScreenShotContainerPtr _outdata ) {
     addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
-    getCamera(Name::Sierra)->center(_box, {0.35f, 0.5f, 0.0f}, {0.0f, 0.25f, 0.0f});
+    getCamera(Name::Sierra)->center(_box);
     rr.getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
 

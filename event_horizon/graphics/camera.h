@@ -85,8 +85,7 @@ public:
 	void lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay = 0.0f );
 	void lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& up );
 	void pan( const Vector3f& posDiff );
-	void center( const AABB& _bbox, const Vector3f& _angles = Vector3f::ZERO,
-				 const Vector3f& _offsets = Vector3f::ZERO );
+	void center( const AABB& _bbox );
 
 	void updateFromInputData( const CameraInputData& mi );
 	void update();
