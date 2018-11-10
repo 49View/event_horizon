@@ -365,18 +365,23 @@ public:
         arrayVisitPtr
 	}
 
+	template <typename C, typename T>
+	static void visit( const char* _name, const std::vector<T>& array ) {
+		arrayVisitDot
+	}
+
 	template<typename C, typename T, std::size_t N>
 	static void visit( const char* _name, const std::array<T, N>& array ) {
 		arrayVisitDot
 	}
 
     template<std::size_t N>
-    void visit( const char* _name, const std::array<int32_t, N>& array ) {
+    static void visit( const char* _name, const std::array<int32_t, N>& array ) {
 		drawArrayOfInt( _name, array );
     }
 
     template<std::size_t N>
-    void visit( const char* _name, const std::array<Vector2f, N>& array ) {
+    static void visit( const char* _name, const std::array<Vector2f, N>& array ) {
 		drawKey( _name );
 		if (ImGui::TreeNode(_name)) {
 			for ( auto& value : array ) {
@@ -386,11 +391,11 @@ public:
 		}
     }
 
-	void visit( const char* _name, const std::vector<Vector2f>& array ) {
+	static void visit( const char* _name, const std::vector<Vector2f>& array ) {
 		drawArrayOfVector( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<Triangle2d>& array ) {
+	static void visit( const char* _name, const std::vector<Triangle2d>& array ) {
 		drawKey( _name );
 		for ( auto& value : array ) {
 			drawVector( Vector2f{ std::get<0>( value ).x(), std::get<0>( value ).y()} );
@@ -403,48 +408,48 @@ public:
 		}
 	}
 
-	void visit( const char* _name, const std::vector<Vector3f>& array ) {
+	static void visit( const char* _name, const std::vector<Vector3f>& array ) {
 		drawArrayOfVector( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<Vector4f>& array ) {
+	static void visit( const char* _name, const std::vector<Vector4f>& array ) {
 		drawArrayOfVector( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<uint32_t>& array ) {
+	static void visit( const char* _name, const std::vector<uint32_t>& array ) {
 		drawArrayOfInt( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<int32_t>& array ) {
+	static void visit( const char* _name, const std::vector<int32_t>& array ) {
 		drawArrayOfInt( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<uint64_t>& array ) {
+	static void visit( const char* _name, const std::vector<uint64_t>& array ) {
 		drawArrayOfInt( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<int64_t>& array ) {
+	static void visit( const char* _name, const std::vector<int64_t>& array ) {
 		drawArrayOfInt( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<float>& array ) {
+	static void visit( const char* _name, const std::vector<float>& array ) {
 		drawArrayOfFloat( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<double>& array ) {
+	static void visit( const char* _name, const std::vector<double>& array ) {
 		drawArrayOfFloat( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<std::string>& array ) {
+	static void visit( const char* _name, const std::vector<std::string>& array ) {
 		drawArrayOfString( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<JMATH::Rect2f>& array ) {
+	static void visit( const char* _name, const std::vector<JMATH::Rect2f>& array ) {
 		drawArrayOfRect( _name, array );
 	}
 
 	template <typename C, typename T>
-	void visit( const char* _name, const std::vector<std::vector<T>>& arrayOfArray ) {
+	static void visit( const char* _name, const std::vector<std::vector<T>>& arrayOfArray ) {
 		if ( arrayOfArray.empty() ) return;
 		if (ImGui::TreeNode(_name))
 		{
@@ -455,7 +460,7 @@ public:
 		}
 	}
 
-	void visit( const char* _name, const std::vector<std::vector<double>>& array ) {
+	static void visit( const char* _name, const std::vector<std::vector<double>>& array ) {
 		drawKey( _name );
 		int q = 0;
 		for ( auto subarray : array ) {
@@ -464,7 +469,7 @@ public:
 	}
 
 	template<std::size_t N>
-	void visit( const char* _name, const std::vector<std::array<double, N>>& array ) {
+	static void visit( const char* _name, const std::vector<std::array<double, N>>& array ) {
 		drawKey( _name );
 		int q = 0;
 		for ( auto subarray : array ) {
@@ -472,7 +477,7 @@ public:
 		}
 	}
 
-	void visit( const char* _name, const std::vector<std::vector<Vector2f>>& array ) {
+	static void visit( const char* _name, const std::vector<std::vector<Vector2f>>& array ) {
 		drawKey( _name );
 		int q = 0;
 		for ( auto subarray : array ) {
@@ -480,7 +485,7 @@ public:
 		}
 	}
 
-	void visit( const char* _name, const std::vector<std::vector<Vector3f>>& array ) {
+	static void visit( const char* _name, const std::vector<std::vector<Vector3f>>& array ) {
 		drawKey( _name );
 		int q = 0;
 		for ( auto subarray : array ) {
@@ -531,18 +536,39 @@ public:
         }
     }
 
+	template <typename C, typename T>
+	static void visit( const char* _name, const std::vector<T>& array ) {
+		if ( array.empty()) return;
+		if ( array.size() == 1 ) {
+			if ( ImGui::TreeNode( array[0].Name().c_str())) {
+				array[0].template visit<C>();
+				ImGui::TreePop();
+			}
+		} else {
+			if (ImGui::TreeNode( arrayName( _name, array).c_str() )) {
+				for ( size_t i = 0; i < array.size(); i++ ) {
+					if ( ImGui::TreeNode( array[i]->Name().c_str())) {
+						array[i].template visit<C>();
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+		}
+	}
+
     template<typename C, typename T, std::size_t N>
     static void visit( const char* _name, const std::array<T, N>& array ) {
         arrayVisitDot
     }
 
     template<std::size_t N>
-    void visit( const char* _name, const std::array<int32_t, N>& array ) {
+    static void visit( const char* _name, const std::array<int32_t, N>& array ) {
         drawArrayOfInt( _name, array );
     }
 
     template<std::size_t N>
-    void visit( const char* _name, const std::array<Vector2f, N>& array ) {
+    static void visit( const char* _name, const std::array<Vector2f, N>& array ) {
         drawKey( _name );
         if (ImGui::TreeNode(_name)) {
             for ( auto& value : array ) {
@@ -552,11 +578,11 @@ public:
         }
     }
 
-	void visit( const char* _name, const std::vector<Vector2f>& array ) {
+	static void visit( const char* _name, const std::vector<Vector2f>& array ) {
 		drawArrayOfVector( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<Triangle2d>& array ) {
+	static void visit( const char* _name, const std::vector<Triangle2d>& array ) {
 		drawKey( _name );
 		for ( auto& value : array ) {
 			drawVector( Vector2f{ std::get<0>( value ).x(), std::get<0>( value ).y()} );
@@ -569,48 +595,48 @@ public:
 		}
 	}
 
-	void visit( const char* _name, const std::vector<Vector3f>& array ) {
+	static void visit( const char* _name, const std::vector<Vector3f>& array ) {
 		drawArrayOfVector( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<Vector4f>& array ) {
+	static void visit( const char* _name, const std::vector<Vector4f>& array ) {
 		drawArrayOfVector( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<uint32_t>& array ) {
+	static void visit( const char* _name, const std::vector<uint32_t>& array ) {
 		drawArrayOfInt( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<int32_t>& array ) {
+	static void visit( const char* _name, const std::vector<int32_t>& array ) {
 		drawArrayOfInt( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<uint64_t>& array ) {
+	static void visit( const char* _name, const std::vector<uint64_t>& array ) {
 		drawArrayOfInt( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<int64_t>& array ) {
+	static void visit( const char* _name, const std::vector<int64_t>& array ) {
 		drawArrayOfInt( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<float>& array ) {
+	static void visit( const char* _name, const std::vector<float>& array ) {
 		drawArrayOfFloat( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<double>& array ) {
+	static void visit( const char* _name, const std::vector<double>& array ) {
 		drawArrayOfFloat( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<std::string>& array ) {
+	static void visit( const char* _name, const std::vector<std::string>& array ) {
 		drawArrayOfString( _name, array );
 	}
 
-	void visit( const char* _name, const std::vector<JMATH::Rect2f>& array ) {
+	static void visit( const char* _name, const std::vector<JMATH::Rect2f>& array ) {
 		drawArrayOfRect( _name, array );
 	}
 
 	template <typename C, typename T>
-	void visit( const char* _name, const std::vector<std::vector<T>>& arrayOfArray ) {
+	static void visit( const char* _name, const std::vector<std::vector<T>>& arrayOfArray ) {
 		if ( arrayOfArray.empty() ) return;
 		if (ImGui::TreeNode(_name))
 		{
@@ -621,7 +647,7 @@ public:
 		}
 	}
 
-	void visit( const char* _name, const std::vector<std::vector<double>>& array ) {
+	static void visit( const char* _name, const std::vector<std::vector<double>>& array ) {
 		drawKey( _name );
 		int q = 0;
 		for ( auto subarray : array ) {
@@ -630,7 +656,7 @@ public:
 	}
 
 	template<std::size_t N>
-	void visit( const char* _name, const std::vector<std::array<double, N>>& array ) {
+	static void visit( const char* _name, const std::vector<std::array<double, N>>& array ) {
 		drawKey( _name );
 		int q = 0;
 		for ( auto subarray : array ) {
@@ -638,7 +664,7 @@ public:
 		}
 	}
 
-	void visit( const char* _name, const std::vector<std::vector<Vector2f>>& array ) {
+	static void visit( const char* _name, const std::vector<std::vector<Vector2f>>& array ) {
 		drawKey( _name );
 		int q = 0;
 		for ( auto subarray : array ) {
@@ -646,7 +672,7 @@ public:
 		}
 	}
 
-	void visit( const char* _name, const std::vector<std::vector<Vector3f>>& array ) {
+	static void visit( const char* _name, const std::vector<std::vector<Vector3f>>& array ) {
 		drawKey( _name );
 		int q = 0;
 		for ( auto subarray : array ) {
