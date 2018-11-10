@@ -919,6 +919,7 @@ GLTF2::GLTF2( const std::vector<char>& _array, const std::string& _name ) {
     std::string err;
     std::string warn;
     std::string ext = GetFilePathExtension( _name );
+    name = getFileNameOnly( _name );
 
     bool ret = false;
     if ( ext.compare( "glb" ) == 0 ) {

@@ -6,11 +6,14 @@
 
 #include <memory>
 #include <vector>
+#include <set>
 #include <string>
 #include <typeinfo>
 
 #include "htypes_shared.hpp"
 #include "http/webclient.h"
+#include <core/util.h>
+
 
 using ddContainer = std::vector<std::string>;
 
@@ -133,14 +136,23 @@ namespace DH = DependencyHandler;
 
 class BaseBuilder {
 public:
-    BaseBuilder() {}
-    BaseBuilder( const std::string& _name ) : name( _name ) {}
+    BaseBuilder() = default;
+    explicit BaseBuilder( const std::string& _name ) : name( _name ) {}
 
     static const std::string typeName()  { return ""; }
     const std::string& Name() const { return name; }
     void Name( const std::string& _name ) { name = _name; }
+
+    void clearTags() { tags.clear();}
+    void addTag( const std::string& _tag ) { tags.emplace(_tag); }
+    const std::set<std::string>& Tags() const { return tags; }
+    void Tags( const std::set<std::string>& _tags ) { tags = _tags; }
+
+    std::set<std::string> generateTags() const;
+
 private:
     std::string name;
+    std::set<std::string> tags;
 };
 
 template <typename T>

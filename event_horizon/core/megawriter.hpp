@@ -9,6 +9,7 @@
 #pragma once
 
 #include <array>
+#include <set>
 
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
@@ -74,6 +75,15 @@ public:
 		writer->StartArray();
 		for ( auto& value : array ) {
 			value.serialize( this );
+		}
+		writer->EndArray();
+	}
+
+	void serialize( const char* _name, const std::set<std::string>& array ) {
+		if ( _name != nullptr ) writer->String( _name );
+		writer->StartArray();
+		for ( auto& value : array ) {
+			writer->String( value.c_str() );
 		}
 		writer->EndArray();
 	}
@@ -439,6 +449,7 @@ public:
 		serialize( MetaData::Type.c_str(), _md.getType() );
 		serialize( MetaData::Thumb.c_str(), _md.getThumb() );
 		serialize( MetaData::Raw.c_str(), _md.getRaw() );
+		serialize( MetaData::Tags.c_str(), _md.getTags() );
 	}
 
 private:

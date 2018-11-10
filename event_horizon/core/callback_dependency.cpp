@@ -85,3 +85,13 @@ namespace DependencyHandler {
     }
 
 };
+
+std::set<std::string> BaseBuilder::generateTags() const {
+    std::set<std::string> ret = tags;
+    auto lcname = toLower( name );
+    auto ltags = split( lcname, "_" );
+    for ( const auto& v : ltags ) {
+        ret.emplace( v );
+    }
+    return ret;
+}

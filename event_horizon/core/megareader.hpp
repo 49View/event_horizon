@@ -6,11 +6,11 @@
 //
 //
 
-#ifndef megareader_h
-#define megareader_h
+#pragma once
 
 #include <vector>
 #include <array>
+#include <set>
 #include "rapidjson/document.h"
 #include "math/rect2f.h"
 #include "math/aabb.h"
@@ -190,6 +190,15 @@ public:
 	}
 
 	template<typename T>
+	void deserialize( const char* name, std::set<T>& ret ) const {
+		if ( value->FindMember( name ) != value->MemberEnd() ) {
+			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+				ret.emplace( T( ( *( value ) )[name][t] ) );
+			}
+		}
+	}
+
+	template<typename T>
 	void deserialize( const char* name, std::vector<std::shared_ptr<T>>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
@@ -201,7 +210,7 @@ public:
 	void deserialize( const char* name, std::vector<Vector2f>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
-				Vector2f v1;
+				Vector2f v1 = Vector2f::ZERO;
 				for ( SizeType m = 0; m < ( *( value ) )[name][t].Size(); m++ ) {
 					v1[m] = ( ( *( value ) )[name][t][m].GetFloat() );
 				}
@@ -439,5 +448,3 @@ public:
 	}
 
 };
-
-#endif /* megaReader_h */

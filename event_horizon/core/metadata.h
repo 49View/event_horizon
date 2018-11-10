@@ -4,18 +4,22 @@
 
 #pragma once
 
+#include <set>
+
 namespace MetaData {
-    const static std::string Name = "name";
-    const static std::string Type = "type";
+    const static std::string Name  = "name";
+    const static std::string Type  = "type";
     const static std::string Thumb = "thumb";
-    const static std::string Raw = "raw";
+    const static std::string Raw   = "raw";
+    const static std::string Tags  = "tags";
 }
 
 class CoreMetaData {
 public:
     CoreMetaData() = default;
-    explicit CoreMetaData( const std::string& _n, const std::string& _e, std::string&& _t, std::string&& _r ) :
-                  name(_n), type(_e), thumb(_t), raw(_r) {}
+    CoreMetaData( const std::string& name, const std::string& type, const std::string& thumb, const std::string& raw,
+                  const std::set<std::string>& tags ) : name( name ), type( type ), thumb( thumb ), raw( raw ),
+                                                           tags( tags ) {}
 
     std::string& Name() {
         return name;
@@ -29,6 +33,9 @@ public:
     }
     std::string& Raw() {
         return raw;
+    }
+    std::set<std::string>& Tags() {
+        return tags;
     }
 
     const std::string& getName() const {
@@ -63,9 +70,18 @@ public:
         CoreMetaData::raw = raw;
     }
 
+    const std::set<std::string>& getTags() const {
+        return tags;
+    }
+
+    void setTags( const std::set<std::string>& tags ) {
+        CoreMetaData::tags = tags;
+    }
+
 private:
     std::string name;
     std::string type;
     std::string thumb;
     std::string raw;
+    std::set<std::string> tags;
 };
