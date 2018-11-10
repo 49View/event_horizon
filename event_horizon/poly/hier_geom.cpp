@@ -240,7 +240,7 @@ int HierGeom::totalChildrenOfType( GeomHierType _gt ) const {
     return totalChildrenOfTypeRec( _gt, numC );
 }
 
-void HierGeom::mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox ) {
+void HierGeom::mirrorFlip( [[maybe_unused]] WindingOrderT wow, [[maybe_unused]] WindingOrderT woh, [[maybe_unused]] const Rect2f& bbox ) {
 //	if ( mData ) {
 //		mData->mirrorFlip( wow, woh, bbox );
 //	}
@@ -674,7 +674,7 @@ std::shared_ptr<HierGeom> HierGeom::clone() const {
 
 std::shared_ptr<HierGeom>
 HierGeom::addChildren( std::shared_ptr<GeomData> data, const Vector3f& pos, const Vector3f& rot,
-                       const Vector3f& scale, bool visible ) {
+                       const Vector3f& scale, [[maybe_unused]] bool visible ) {
     std::shared_ptr<HierGeom> geom = std::make_shared<HierGeom>( data, this );
     geom->updateTransform( pos, rot, scale );
     children.push_back( geom );
@@ -682,7 +682,7 @@ HierGeom::addChildren( std::shared_ptr<GeomData> data, const Vector3f& pos, cons
 }
 
 void HierGeom::addChildren( std::shared_ptr<GeomData> data, std::shared_ptr<HierGeom> _child, const Vector3f& pos,
-                            const Vector3f& rot, const Vector3f& scale, bool visible ) {
+                            const Vector3f& rot, const Vector3f& scale, [[maybe_unused]] bool visible ) {
     _child = std::make_shared<HierGeom>( data, this );
     _child->updateTransform( pos, rot, scale );
     children.push_back( _child );

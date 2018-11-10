@@ -12,7 +12,7 @@ class MouseInput;
 class Renderer;
 
 namespace WindowHandling {
-	void initializeWindow( uint64_t flags, TextInput& ti, MouseInput& mi, Renderer& rr );
+	void initializeWindow( uint64_t flags, Renderer& rr );
 	bool shouldWindowBeClosed();
 	void flush();
 	void pollEvents();

@@ -426,11 +426,11 @@ class RLTargetFB : public RLTarget {
 public:
     RLTargetFB( std::shared_ptr<Framebuffer> _fbt, [[maybe_unused]] Renderer& _rr );
     ~RLTargetFB() override = default;
-    void addToCB( CommandBufferList& cb ) override {}
-    void blit(CommandBufferList& cbl) override {};
+    void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
+    void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
-    void startCL( CommandBufferList& fbt ) override {};
-    void endCL( CommandBufferList& fbt ) override {}
+    void startCL( [[maybe_unused]] CommandBufferList& fbt ) override {};
+    void endCL( [[maybe_unused]] CommandBufferList& fbt ) override {}
     void resize( const Rect2f& _r ) override;
 
 protected:
@@ -441,12 +441,12 @@ class RLTargetProbe : public RLTarget {
 public:
     RLTargetProbe( const std::string& _cameraRig, const int _faceIndex, Renderer& _rr, int _mipmapIndex = 0 );
     ~RLTargetProbe() override = default;
-    void addToCB( CommandBufferList& cb ) override {}
-    virtual void blit(CommandBufferList& cbl) override {};
+    void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
+    virtual void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
     virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void startCL( CommandBufferList& fbt ) override;;
-    void endCL( CommandBufferList& fbt ) override {}
-    void resize( const Rect2f& _r ) override {}
+    void endCL( [[maybe_unused]] CommandBufferList& fbt ) override {}
+    void resize( [[maybe_unused]] const Rect2f& _r ) override {}
 
 protected:
     std::string  cameraName;

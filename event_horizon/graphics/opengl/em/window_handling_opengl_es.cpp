@@ -12,7 +12,7 @@ namespace WindowHandling {
         fprintf( stderr, "GLFW Error: %s\n", msg );
     }
 
-    void initializeWindow( [[maybe_unused]] uint64_t flags, TextInput& ti, MouseInput& mi, Renderer& rr ) {
+    void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
 
         double width{ 1920.0 };
         double height{ 1080.0 };

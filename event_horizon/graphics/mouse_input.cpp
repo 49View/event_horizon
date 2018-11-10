@@ -55,7 +55,8 @@ void MouseInput::onTouchMove( const Vector2f& pos, UpdateSignals& _updateSignals
 	_updateSignals.NeedsUpdate(true);
 }
 
-void MouseInput::onTouchMoveM( float* x, float *y, int size, UpdateSignals& _updateSignals ) {
+void MouseInput::onTouchMoveM( [[maybe_unused]] float* x, [[maybe_unused]] float *y,
+							   [[maybe_unused]] int size, UpdateSignals& _updateSignals ) {
 	mMouseButtonStatus = MouseButtonStatusValues::MOVING;
 	mCanTriggerLongTap = false;
     notify( *this, "onTouchMoveM");
@@ -251,7 +252,8 @@ Vector3f MouseInput::mousePickOnUIPlane( const Vector2f& mousePos ) const {
 	return mousePickOnUIPlane( mousePos, mUIPlane );
 }
 
-Vector3f MouseInput::mousePickOnUIPlane( const Vector2f& mousePos, const Plane3f& uiPlane, CameraProjectionType pt ) const {
+Vector3f MouseInput::mousePickOnUIPlane( const Vector2f& mousePos, [[maybe_unused]] const Plane3f& uiPlane,
+										 CameraProjectionType pt ) const {
 	if ( pt == CameraProjectionType::Perspective ) {
 		// TODO Reimplement mousePickOnUIPlane on perspective camera
 		return Vector3f::ZERO;

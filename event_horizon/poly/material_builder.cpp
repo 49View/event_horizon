@@ -199,7 +199,7 @@ std::vector<std::shared_ptr<Material>> MaterialManager::list() const {
     return ret;
 }
 
-bool ColorBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
+bool ColorBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, [[maybe_unused]] const DependencyStatus _status ) {
 
     auto& sg = static_cast<ColorManager&>(_md);
     MaterialColor col{ _data };

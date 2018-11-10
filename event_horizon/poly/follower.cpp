@@ -260,62 +260,61 @@ bool Follower::skipGapAt( int t ) {
     return ( mGaps.isStartGapAt( t + 1 ) && mGaps.isVisibleAt( t + 1 ));
 }
 
-void averagePoly( std::vector<FollowerPoly>& polys, uint64_t pi, uint64_t i,
-                  uint64_t i1, uint64_t i2, uint64_t i3 ) {
-//    Vector3f vn = polys[pi].vn;
-//    polys[pi].vncs[i] = vn;
-
-//	float w1 = dot( vn,  polys[i1].vn ) > 0.05f ? 1.0f : 0.0f;
-//	polys[pi].vncs[i] += polys[i1].vn * w1;
+//void averagePoly( std::vector<FollowerPoly>& polys, uint64_t pi, uint64_t i,
+//                  uint64_t i1, uint64_t i2, uint64_t i3 ) {
+////    Vector3f vn = polys[pi].vn;
+////    polys[pi].vncs[i] = vn;
 //
-//	w1 = dot( vn, polys[i2].vn ) > 0.05f ? 1.0f : 0.0f;
-//	polys[pi].vncs[i] += polys[i2].vn * w1;
+////	float w1 = dot( vn,  polys[i1].vn ) > 0.05f ? 1.0f : 0.0f;
+////	polys[pi].vncs[i] += polys[i1].vn * w1;
+////
+////	w1 = dot( vn, polys[i2].vn ) > 0.05f ? 1.0f : 0.0f;
+////	polys[pi].vncs[i] += polys[i2].vn * w1;
+////
+////	w1 = dot( vn, polys[i3].vn ) > 0.05f ? 1.0f : 0.0f;
+////	polys[pi].vncs[i] += polys[i3].vn * w1;
 //
-//	w1 = dot( vn, polys[i3].vn ) > 0.05f ? 1.0f : 0.0f;
-//	polys[pi].vncs[i] += polys[i3].vn * w1;
-
-//    polys[pi].vncs[i] = normalize( polys[pi].vncs[i] );
-}
+////    polys[pi].vncs[i] = normalize( polys[pi].vncs[i] );
+//}
 
 void Follower::compositePolys( std::shared_ptr<GeomData> _geom, std::vector<FollowerPoly>& polys,
                                [[maybe_unused]] const CompositeWrapping cpw ) {
     if ( polys.empty()) return;
 
-    auto numProfilePolys = mProfile->numVerts();
-    int numSegments = static_cast<int>( polys.size() / numProfilePolys );
-    int pi = 0;
-    for ( auto q = 0; q < numSegments; q++ ) {
-        auto pc = q == 0 ? numSegments - 1 : -1;
-        auto nc = q == numSegments - 1 ? ( -( numSegments - 1 )) : 1;
-        pc *= numProfilePolys;
-        nc *= numProfilePolys;
-        for ( auto t = 0; t < numProfilePolys; t++ ) {
-            auto pr = t == 0 ? numProfilePolys - 1 : t - 1;
-            auto nr = t == numProfilePolys - 1 ? 0 : t + 1;
-
-            // left
-            auto bl = pi + pc + pr;
-            auto l = pi + pc;
-            auto tl = pi + pc + nr;
-
-            // center
-            auto tc = pi + nr;
-            auto bc = pi + pr;
-
-            // left
-            auto br = pi + nc + pr;
-            auto r = pi + nc;
-            auto tr = pi + nc + nr;
-
-            // Index 0
-            averagePoly( polys, pi, 0, tc, tl, l );
-            averagePoly( polys, pi, 1, tc, tr, r );
-            averagePoly( polys, pi, 2, l, bl, bc );
-            averagePoly( polys, pi, 3, r, bc, br );
-            ++pi;
-        }
-
-    }
+//    auto numProfilePolys = mProfile->numVerts();
+//    int numSegments = static_cast<int>( polys.size() / numProfilePolys );
+//    int pi = 0;
+//    for ( auto q = 0; q < numSegments; q++ ) {
+//        auto pc = q == 0 ? numSegments - 1 : -1;
+//        auto nc = q == numSegments - 1 ? ( -( numSegments - 1 )) : 1;
+//        pc *= numProfilePolys;
+//        nc *= numProfilePolys;
+//        for ( auto t = 0; t < numProfilePolys; t++ ) {
+//            auto pr = t == 0 ? numProfilePolys - 1 : t - 1;
+//            auto nr = t == numProfilePolys - 1 ? 0 : t + 1;
+//
+//            // left
+//            auto bl = pi + pc + pr;
+//            auto l = pi + pc;
+//            auto tl = pi + pc + nr;
+//
+//            // center
+//            auto tc = pi + nr;
+//            auto bc = pi + pr;
+//
+//            // left
+//            auto br = pi + nc + pr;
+//            auto r = pi + nc;
+//            auto tr = pi + nc + nr;
+//
+//            // Index 0
+//            averagePoly( polys, pi, 0, tc, tl, l );
+//            averagePoly( polys, pi, 1, tc, tr, r );
+//            averagePoly( polys, pi, 2, l, bl, bc );
+//            averagePoly( polys, pi, 3, r, bc, br );
+//            ++pi;
+//        }
+//    }
 
     for ( auto& fp : polys ) {
         _geom->pushQuadSubDiv( fp.vs, fp.vtcs, fp.vncs );
@@ -421,7 +420,7 @@ Follower::operator()( std::shared_ptr<PBRMaterial> material,
 }
 
 std::shared_ptr<HierGeom>
-Follower::extrude( const std::vector<Vector3f>& verts, std::shared_ptr<Profile> profile, const FollowerGap& gaps ) {
+Follower::extrude( [[maybe_unused]] const std::vector<Vector3f>& verts, [[maybe_unused]] std::shared_ptr<Profile> profile, [[maybe_unused]] const FollowerGap& gaps ) {
 //    mProfile = profile;
 //    Rect2f profilebbox( mProfile->Points());
 //    mBBoxProfile.createRect( profilebbox, mProfile->PPP());

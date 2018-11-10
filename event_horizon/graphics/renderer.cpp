@@ -255,7 +255,7 @@ void Renderer::addProbeToCB( const std::string& _probeCameraName, [[maybe_unused
 }
 
 std::shared_ptr<VPList> Renderer::VPL( const int _bucket,
-                                       const std::string& _key,
+                                       [[maybe_unused]] const std::string& _key,
                                        std::shared_ptr<Matrix4f> m,
                                        float alpha ) {
     auto nvp = std::make_shared<VPList>(m);

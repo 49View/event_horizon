@@ -9,7 +9,7 @@ bool ProfileBuilder::finalizaMake( DependencyMaker& _md, std::shared_ptr<Profile
     return sg.add( *this, profile );
 }
 
-bool ProfileBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
+bool ProfileBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, [[maybe_unused]] const DependencyStatus _status ) {
 
     std::shared_ptr<Profile> profile = std::make_shared<Profile>( Name(), std::move(_data));
 

@@ -15,7 +15,7 @@ class Scene;
 
 class RunLoopGraphics : public RunLoop {
 public:
-	RunLoopGraphics( CommandQueue& _cq, UiControlManager& _uicm, Renderer& rr, TextInput& ti, MouseInput& mi )
+	RunLoopGraphics( CommandQueue& _cq, Renderer& rr, TextInput& ti, MouseInput& mi )
                    : RunLoop( _cq ), rr( rr ), ti( ti), mi( mi) {}
 
 	void run();

@@ -397,8 +397,9 @@ Vector2f UiControlGroup::fullWidthWithMargins( const float _heightPerc, const Ui
     return Vector2f{ mRect.size().x() - _margins.Width() - _padding.Width(), _heightPerc };
 }
 
-Vector2f UiControlGroup::remainingWidthWithMargins( const float _heightPerc, const UiAlignElement& _margins,
-                                               const UiAlignElement& _padding ) const {
+Vector2f UiControlGroup::remainingWidthWithMargins( const float _heightPerc,
+                                                    [[maybe_unused]] const UiAlignElement& _margins,
+                                                    [[maybe_unused]] const UiAlignElement& _padding ) const {
     return Vector2f{ mRect.size().x() - mOffsets.x() + mStartPosition.x(), _heightPerc };
 }
 

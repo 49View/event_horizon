@@ -308,7 +308,7 @@ public:
 		drawVector( _name, q );
 	}
 
-	static void visit( const char* _name, const MatrixAnim& q ) {
+	static void visit( [[maybe_unused]] const char* _name, const MatrixAnim& q ) {
 		drawVector( "Pos  ", q.pos->value );
 		drawVector( "Rot  ", q.rot->value );
 		drawVector( "Scale", q.scale->value );
@@ -493,7 +493,7 @@ public:
 class ImGuiStandardJsonArraysNamed {
 public:
 	template <typename C, typename T>
-	static void visit( const char* _name, const T& value ) {
+	static void visit( [[maybe_unused]] const char* _name, const T& value ) {
 		if (ImGui::TreeNode(value.Name().c_str())) {
 			value.template visit<C>();
 			ImGui::TreePop();
@@ -501,7 +501,7 @@ public:
 	}
 
 	template <typename C, typename T>
-	static void visit( const char* _name, std::shared_ptr<T> value ) {
+	static void visit( [[maybe_unused]] const char* _name, std::shared_ptr<T> value ) {
 		if ( value ) {
 			if (ImGui::TreeNode(value->Name().c_str())) {
 				value->template visit<C>();

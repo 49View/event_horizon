@@ -32,7 +32,7 @@ public:
 		return mId.c_str();
 	}
 
-	const GLuint getHandle() const {
+	GLuint getHandle() const {
 		return mHandle;
 	}
 

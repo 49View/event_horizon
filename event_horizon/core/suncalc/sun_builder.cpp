@@ -190,7 +190,7 @@ void SunBuilder::setCurrentTimeUniforms() {
 //	SMM.SunPosition( { sp.x, sp.y, sp.z } );
 }
 
-void SunBuilder::update( float timeStamp ) {
+void SunBuilder::update( [[maybe_unused]] float timeStamp ) {
 //	if ( AOS->sunOptions.autoTransition ) {
 //		auto elapsedSeconds = mPrevtimeStamp - timeStamp;
 //

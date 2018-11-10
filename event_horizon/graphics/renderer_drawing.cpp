@@ -159,18 +159,6 @@ void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vec
     VPBuilder<Pos3dStrip>{*this}.vl(_vpl).p(colorStrip).s(S::COLOR_3D).c(color).n(_name).build();
 }
 
-
-void Renderer::draw3dPoint( std::shared_ptr<VPList> _vpl, const Vector3f& center, const Vector4f& color, const float size,
-                  const std::string& _name ) {
-    LOGE("Use geom builders for generating 3d points");
-//    PolyStruct sp = createGeomForSphere( center, size, 0 );
-//
-//    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
-//    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
-//                                                                           sp.numIndices, vpos3d, sp.indices );
-//    RL.addVP( _vpl, VertexProcessing::create_cpuVBIB( colorStrip, MF( S::COLOR_3D, color ), _name ), _name );
-}
-
 void Renderer::drawCylinder( std::shared_ptr<VPList> _vpl, const Vector3f& pos, const Vector3f& dir, const Vector4f&
 color, float size,
               const std::string& _name ) {
@@ -184,7 +172,7 @@ void Renderer::drawCone( std::shared_ptr<VPList> /*_vpl*/, const Vector3f& /*pos
 
 void Renderer::draw3dVector( std::shared_ptr<VPList> _vpl, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
               const std::string& _name ) {
-    draw3dPoint( _vpl, pos, color, size * 1.25f, _name );
+//    draw3dPoint( _vpl, pos, color, size * 1.25f, _name );
     drawCylinder( _vpl, pos, pos + dir, color, size, _name );
 }
 

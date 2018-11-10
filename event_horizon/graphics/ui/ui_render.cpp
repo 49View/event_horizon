@@ -246,7 +246,7 @@ void UiControlRenderer::OrigRot( const Matrix4f& val ) {
 //    return mVertexBuffer;
 //}
 
-void UiControlRenderer::update( const MatrixAnim& dadTransform ) {
+void UiControlRenderer::update( [[maybe_unused]] const MatrixAnim& dadTransform ) {
 
     auto _control = mControl.lock();
 
@@ -267,7 +267,7 @@ UiControlRenderer::~UiControlRenderer() {
 }
 
 void UiTextInputRenderer::printTextInput( const std::string& _title, const std::string& _text,
-                                          const Utility::TTFCore::Font& _font) {
+                                          [[maybe_unused]] const Utility::TTFCore::Font& _font) {
     float tsize = 0.25f;
     float tcenter = 0.5f;
     float tpad = 0.01f;

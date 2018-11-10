@@ -204,7 +204,7 @@ void GeomData::serialize( std::shared_ptr<SerializeBin> f ) {
 	f->write( mWindingOrder );
 }
 
-void GeomData::serializeSphericalHarmonics( std::shared_ptr<SerializeBin> writer ) {
+void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<SerializeBin> writer ) {
 //	writer->write( mVdata.vSHCoeffsR );
 //	writer->write( mVdata.vSHCoeffsG );
 //	writer->write( mVdata.vSHCoeffsB );
@@ -230,7 +230,7 @@ void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 //	mVdata.allocateEmptySHData();
 }
 
-void GeomData::deserializeSphericalHarmonics( std::shared_ptr<DeserializeBin> reader ) {
+void GeomData::deserializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<DeserializeBin> reader ) {
 //	reader->read( mVdata.vSHCoeffsR );
 //	reader->read( mVdata.vSHCoeffsG );
 //	reader->read( mVdata.vSHCoeffsB );
@@ -240,7 +240,7 @@ void GeomData::serializeDependencies( std::shared_ptr<SerializeBin> writer ) {
 	material->serializeDependencies( writer );
 }
 
-void GeomData::deserializeDependencies( std::shared_ptr<SerializeBin> reader ) {
+void GeomData::deserializeDependencies( [[maybe_unused]] std::shared_ptr<SerializeBin> reader ) {
 
 }
 

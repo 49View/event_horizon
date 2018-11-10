@@ -30,7 +30,7 @@ void Framebuffer::attachDepthBuffer() {
     checkFrameBufferStatus();
 }
 
-void Framebuffer::attachColorBuffer( TextureManager& tm, const std::string& _name, unsigned int index ) {
+void Framebuffer::attachColorBuffer( unsigned int index ) {
 
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 

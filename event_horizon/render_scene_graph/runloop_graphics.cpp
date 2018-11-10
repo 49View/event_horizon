@@ -21,7 +21,7 @@ bool profileUpdateRenderer = false;
 std::atomic_bool mIsClosingFlag;
 
 void RunLoopGraphics::initWindow( std::shared_ptr<Scene> _presenter ) {
-	WH::initializeWindow( _presenter->getLayoutInitFlags(), ti, mi, rr );
+	WH::initializeWindow( _presenter->getLayoutInitFlags(), rr );
 
 	rr.init();
 	mi.subscribe( _presenter );
