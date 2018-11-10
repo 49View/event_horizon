@@ -7,6 +7,7 @@ const globalConfig = require('./config_api.js')
 const indexRoute = require('./routes/indexRoute');
 const entitiesRoute = require('./routes/entitiesRoute');
 const usersRoute = require('./routes/usersRoute');
+const tokenRoute = require('./routes/tokenRoute');
 const authController = require('./controllers/authController');
 
 const app = express();
@@ -23,7 +24,7 @@ let db = mongoose.connection;
 //Bind connection to error event (to get notification of connection errors)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-authController.InitializeAuthentication(globalConfig);
+authController.InitializeAuthentication();
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -38,6 +39,7 @@ app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 
 app.use('/', indexRoute);
+app.use('/', tokenRoute);
 
 app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
 
