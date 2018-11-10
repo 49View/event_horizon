@@ -78,7 +78,7 @@ jobs:
           mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release ../../daemons/substance_daemon/
       - run: make -j8 -C 'builds/sat/'
       - run: |
-          curl --data-binary @/app/builds/sat/substance_deamon -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Fsubstance_daemon
+          curl --data-binary @/app/builds/sat/substance_deamon -k -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Fsubstance_daemon
 
       # Editor
       - run: >
@@ -87,9 +87,9 @@ jobs:
           ../../dev_tools/editor/
       - run: make -j8 -C 'builds/editor_em/'
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.js -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Feditor.js
+          curl --data-binary @/app/builds/editor_em/editor.js -k -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Feditor.js
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.wasm -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Feditor.wasm
+          curl --data-binary @/app/builds/editor_em/editor.wasm -k -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Feditor.wasm
 
       # run tests!
 
