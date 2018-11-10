@@ -83,10 +83,10 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
     return 0;
 }
 
-void PolySceneGraph::addImpl( std::shared_ptr<HierGeom> _geom ) {
+void PolySceneGraph::addImpl( [[maybe_unused]] std::shared_ptr<HierGeom> _geom ) {
 }
 
-void AssetManager::add( const std::string& _key, std::shared_ptr<HierGeom> _h ) {
+void AssetManager::add( [[maybe_unused]] const std::string& _key, std::shared_ptr<HierGeom> _h ) {
     assetsHierList[_h->Name()] = _h;
 }
 

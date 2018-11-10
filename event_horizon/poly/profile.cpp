@@ -252,7 +252,7 @@ std::vector<Vector3f> Profile::rotatePoints( const Vector3f& nx, const Vector3f&
 	return retArray;
 }
 
-Profile::Profile( const std::string& _name, uint8_p&& _data ) {
+Profile::Profile( [[maybe_unused]] const std::string& _name, uint8_p&& _data ) {
 	std::string svgString( reinterpret_cast<const char*>(_data.first.get()), _data.second );
 	if ( !svgString.empty() ) {
 		auto prof = std::make_unique<char[]>( svgString.length() );

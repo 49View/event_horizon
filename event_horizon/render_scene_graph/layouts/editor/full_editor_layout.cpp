@@ -21,7 +21,7 @@ struct UIViewLayout {
 
 UIViewLayout uivl;
 
-void initLayout( SceneLayout* _layout, Scene* p ) {
+void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
@@ -59,7 +59,7 @@ void initLayout( SceneLayout* _layout, Scene* p ) {
     allCallbacksEntitySetup();
 }
 
-void render( Scene* p ) {
+void render( [[maybe_unused]] Scene* p ) {
 
 }
 

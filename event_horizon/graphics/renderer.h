@@ -266,8 +266,6 @@ public:
 			   float angle, float arrowlength, float _z, float percToBeDrawn, const std::string& _name1,
 			   const std::string& _name2 );
 
-	void draw3dPoint( std::shared_ptr<VPList> _vpl, const Vector3f& center, const Vector4f& color, const float size,
-					  const std::string& _name = "" );
 	void drawLine( std::shared_ptr<VPList> _vpl, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
 				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
 				   const std::string& _name = "" );

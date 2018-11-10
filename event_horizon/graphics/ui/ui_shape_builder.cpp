@@ -227,7 +227,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRect(const QuadVertices2& uvm
                                             uvm, 0.0f );
 }
 
-std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRoundedRect( const QuadVertices2& uvm ) {
+std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRoundedRect( [[maybe_unused]] const QuadVertices2& uvm ) {
     // The rect is created from [0,0] to [X, -Y], so from it's top left coordinate downward basically
     std::shared_ptr<PosTex3dStrip> pts;
     const uint32_t numSubDivs = 8;

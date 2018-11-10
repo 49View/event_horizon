@@ -43,7 +43,7 @@ public:
 	void init( TextureManager& tm );
 	void initDepth( TextureManager& tm );
 	void attachDepthBuffer();
-	void attachColorBuffer( TextureManager& tm, const std::string& _name, unsigned int index );
+	void attachColorBuffer( unsigned int index );
 
 	void bind( const std::string& renderTargetIndex = "", const int _mipMapIndex = 0 );
 	void bindAndClear( const std::string& renderTargetIndex = "", const int _mipMapIndex = 0  );

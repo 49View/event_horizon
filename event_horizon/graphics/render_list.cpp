@@ -374,7 +374,7 @@ void CompositePlain::blit(CommandBufferList& cbl) {
     cbl.pushCommand( { CommandBufferCommandName::blitToScreen } );
 }
 
-CompositePlain::CompositePlain( Renderer& _rr, const std::string& _name, const Rect2f& _destViewport,
+CompositePlain::CompositePlain( Renderer& _rr, [[maybe_unused]] const std::string& _name, const Rect2f& _destViewport,
                                 BlitType _bt ) : Composite(_rr ) {
     mCompositeFinalDest = _bt;
     setup( _destViewport );
@@ -417,7 +417,7 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
     }
 }
 
-CompositePBR::CompositePBR( Renderer& _rr, const std::string& _name, const Rect2f& _destViewport,
+CompositePBR::CompositePBR( Renderer& _rr, [[maybe_unused]] const std::string& _name, const Rect2f& _destViewport,
                             BlitType _bt ) : Composite( _rr ) {
 
     mCompositeFinalDest = _bt;
@@ -495,7 +495,7 @@ void RLTargetPlain::resize( const Rect2f& _r ) {
     cameraRig->setFramebuffer( mComposite->getColorFB() );
 }
 
-void RLTarget::clearCB( CommandBufferList& cb ) {
+void RLTarget::clearCB( [[maybe_unused]] CommandBufferList& cb ) {
     for ( auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange( k, RLClearFlag::DontIncludeCore ) ) {
             vl.mVListTransparent.clear();
@@ -555,11 +555,11 @@ RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLT
     framebuffer = _fbt;
 }
 
-std::shared_ptr<Framebuffer> RLTargetFB::getFrameBuffer( CommandBufferFrameBufferType fbt ) {
+std::shared_ptr<Framebuffer> RLTargetFB::getFrameBuffer( [[maybe_unused]] CommandBufferFrameBufferType fbt ) {
     return framebuffer;
 }
 
-void RLTargetFB::resize( const Rect2f& _r ) {
+void RLTargetFB::resize( [[maybe_unused]] const Rect2f& _r ) {
 }
 
 RLTargetProbe::RLTargetProbe( const std::string& _cameraRig, const int _faceIndex,

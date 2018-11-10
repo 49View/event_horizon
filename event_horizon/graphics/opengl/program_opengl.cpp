@@ -90,7 +90,7 @@ bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
                                     std::shared_ptr<Shader> geometryShader,
                                     std::shared_ptr<Shader> fragmentShader,
                                     std::shared_ptr<Shader> computeShader, const std::string& cacheFolder,
-                                    const std::string& cacheLabel, CreateUpdateFlag cou ) {
+                                    const std::string& cacheLabel, [[maybe_unused]] CreateUpdateFlag cou ) {
 
     if ( mHandle != 0 ) glDeleteProgram( mHandle );
 

@@ -39,7 +39,7 @@ std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
 
     if ( mAttachDepth ) ret->attachDepthBuffer();
     for ( const auto& [cbname, index] : mColorBufferAttachments ) {
-        ret->attachColorBuffer( rr.TM(), cbname, index );
+        ret->attachColorBuffer( index );
     }
 
     if ( !mIMShaderName.empty()) {

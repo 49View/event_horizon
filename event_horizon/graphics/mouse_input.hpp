@@ -53,7 +53,7 @@ public: // these are globals data accessed from low level functions on inputs et
 	float checkLinearSwipe( const vector2fList& targetSwipes, const vector2fList& playerSwipes );
 	SwipeDirection checkSwipe();
 	void setPaused( bool isPaused );
-	inline const bool isPaused() { return mPaused; }
+	inline bool isPaused() { return mPaused; }
 	inline bool isTouchedDown() const { return mTouchedDown; }
 	inline float getScrollValue() const { return mScrollValue; }
 	inline const vector2fList& getGestureTaps() const { return mGesturesTaps; }

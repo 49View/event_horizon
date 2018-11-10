@@ -43,9 +43,9 @@ public:
 
     void takeScreenShot( const AABB& _box, ScreenShotContainerPtr _outdata );
 
-	virtual void onTouchUpImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
-	virtual void onSimpleTapImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
-	virtual void onDoubleTapImpl( const Vector2f& pos, ModifiersKey mod = GMK_MOD_NONE ) {}
+	virtual void onTouchUpImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
+	virtual void onSimpleTapImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
+	virtual void onDoubleTapImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
 
 	void inputPollUpdate();
 	void update( GameTime& gt );
