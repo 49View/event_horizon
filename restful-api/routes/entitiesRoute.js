@@ -330,6 +330,7 @@ router.get('/entities/one/:group/:keys', async (req, res, next) => {
 
 router.get('/entities/all/:group/:keys', async (req, res, next) => {
 
+    console.log("/entities/all", req.route);
     let result = null;
     let error = null;
     try {

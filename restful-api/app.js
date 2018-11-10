@@ -6,25 +6,26 @@ const passport = require('passport');
 const globalConfig = require('./config_api.js')
 const indexRoute = require('./routes/indexRoute');
 const entitiesRoute = require('./routes/entitiesRoute');
+const usersRoute = require('./routes/usersRoute');
 const authController = require('./controllers/authController');
-
-authController.InitializeAuthentication(globalConfig);
 
 const app = express();
 
 express.static.mime.types["wasm"] = "application/wasm";
 
-// //Set up default mongoose connection
-// const mongoDB = `mongodb+srv://${globalConfig.MongoDBUser}:${globalConfig.MongoDBPass}@${globalConfig.MongoDBURI}`;
-// mongoose.connect(mongoDB, { dbName: globalConfig.MongoDBdbName, useNewUrlParser: true });
+//Set up default mongoose connection
+const mongoDB = `mongodb+srv://${globalConfig.MongoDBUser}:${globalConfig.MongoDBPass}@${globalConfig.MongoDBURI}`;
+mongoose.connect(mongoDB, { dbName: globalConfig.MongoDBdbName, useNewUrlParser: true });
 
-// //Get the default connection
-// let db = mongoose.connection;
+//Get the default connection
+let db = mongoose.connection;
 
-// //Bind connection to error event (to get notification of connection errors)
-// db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-app.use(function(req, res, next) {
+authController.InitializeAuthentication(globalConfig);
+
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control");
@@ -36,21 +37,23 @@ app.use(bodyParser.raw({limit: '100mb'}));
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 
+app.use('/', indexRoute);
+
 app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
 
-app.use('/', indexRoute);
+app.use('/user', usersRoute);
 app.use('/fs', entitiesRoute);
 
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use((err, req, res, next) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
