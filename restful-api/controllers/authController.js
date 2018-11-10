@@ -11,25 +11,17 @@ exports.InitializeAuthentication = (globalConfig) => {
     //
     passport.use(new ClientCertificateStrategy((clientCert, done) => {
 
-        
-
-        if (clientCert===undefined) {
-            console.log("Undefined client cert");
-            console.log(clientCert);
-        }
-
-        console.log("CLient Certificate:", clientCert);
-
         var cn = clientCert.subject.CN,
         user = null;
     
         console.log('CLIENT CERTIFICATE AUTH: '+cn);
 
         // The CN will typically be checked against a database
-        if(cn === 'client1') {
+        if (cn === 'client1') {
             user = { name: 'Test User' };
         }
-    
+        console.log(user);
+
         done(null, user);
     }));
 
@@ -46,8 +38,12 @@ exports.InitializeAuthentication = (globalConfig) => {
     }
 
     passport.use(new JwtStrategy(jwtOptions, (jwtPayload, done) => {
-
         //Check user in payload
         console.log('JWT AUTH: ',jwtPayload);
+
+        user = { name: 'Test User' };
+        console.log(user);
+
+        done(null, user);
     }));
 }
