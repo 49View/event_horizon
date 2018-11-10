@@ -51,13 +51,23 @@ const checkNameExists = async (group, name) => {
 
 const getKeysFromName = (group, name) => {
 
-    const keys = name.split(/[\s_\.]+/).map(k => k.toLowerCase());
+    const keysInNames = name.split(/[\s_\.]+/).map(k => k.toLowerCase());
+    const keys = new Set(keysInNames);
     if (group!==null) {
-        keys.push("group_"+group);
+        keys.add("group_"+group);
     }
 
     console.log("KEYS: ",keys);
     return keys;
+}
+
+const getKeysFromMetadata = (group, metadata) => {
+    const entityKeys = new Set(metadata.tags);        
+    if (group!==null) {
+        entityKeys.add("group_"+group);
+    }
+
+    return entityKeys
 }
 
 // const getKeysFromFilename = (group, filename) => {
@@ -244,6 +254,8 @@ const getEntities = async (req, res, randomElementNumber) => {
     const keys = req.params.keys.split(",");
     keys.push("group_"+req.params.group);
 
+    console.log( keys );
+
     const aggregationQuery = prepareAggregationQuery(keys);
     if (randomElementNumber!==null) {
         aggregationQuery.push(
@@ -282,9 +294,44 @@ const getEntities = async (req, res, randomElementNumber) => {
     
 }
 
+const deleteEntityWithDependencies = async (entity ) => {
+    let result = { entity: null, entityKeys: null, error : null};
+
+    if (entity===null) {
+        throw "Entity doesn't exist";
+    }
+    if (entity.metadata.file!==null) {
+        const path = getFilePath(entity.group, entity.metadata.file);
+        await fsc.cloudStorageDelete(path);
+    }
+    result.entity=await deleteEntity(entity._id);
+    result.entityKeys = await deleteEntityKeys(entity._id);
+
+    return result;
+}
+
+const deleteListWithDependencies = async (entities) => {
+    let result = { entity: null, entityKeys: null, error : null};
+    if (entities===null) {
+        throw "Entity doesn't exist";
+    }
+
+    try {
+        let resArray = [];
+        for ( eo of entities ) {
+            resArray.push( await deleteEntityWithDependencies( eo.toObject() ) );
+        }
+        return resArray;
+    }
+    catch (ex) {
+        result.error=ex;
+    }
+
+    return result;
+}
+
 const deleteId = async (eId) => {
 
-    let result = { entity: null, entityKeys: null, error : null};
     let entity = {};
 
     entity = await entityModel.findOne({ _id: mongoose.Types.ObjectId(eId)});
@@ -294,21 +341,25 @@ const deleteId = async (eId) => {
     }
 
     try {
-        if (entity===null) {
-            throw "Entity doesn't exist";
-        }
-        if (entity.metadata.file!==null) {
-            const path = getFilePath(entity.group, entity.metadata.file);
-            await fsc.cloudStorageDelete(path);
-        }
-        result.entity=await deleteEntity(eId);
-        result.entityKeys = await deleteEntityKeys(eId);
+        return await deleteEntityWithDependencies( entity );
     }
     catch (ex) {
         result.error=ex;
     }
 
     return result;
+}
+
+const deleteGroup = async (eGroup) => {
+    let entities = [];
+    entities = await entityModel.find({ group : eGroup });
+    return await deleteListWithDependencies(entities);
+}
+
+const deleteEntities = async () => {
+    let entities = [];
+    entities = await entityModel.find();
+    return await deleteListWithDependencies(entities);
 }
 
 router.get('/entities/one/:group/:keys', async (req, res, next) => {
@@ -397,6 +448,9 @@ router.post('/entities/:group/:filename', async (req, res, next) => {
         if (!('raw' in metadata)) {
             throw "Metadata doesn't contain file content";
         }
+        if (!('tags' in metadata)) {
+            throw "Metadata doesn't contain entity's tags";
+        }
 
         //Parse file content
         const fileContent = new Buffer(metadata.raw, "base64");
@@ -405,9 +459,9 @@ router.post('/entities/:group/:filename', async (req, res, next) => {
         metadata.keyname=keyname;
         metadata.file=filename;
 
-        //Get keys from name
-        const entityKeys = getKeysFromName(group, keyname);        
-
+        //Get keys from name and tags
+        const entityKeys = getKeysFromMetadata(group, metadata);        
+    
         //Upload file
         const filenamePath=getFilePath(group, filename);
         const uploadResult=await fsc.cloudStorageFileUpdate(fileContent, filenamePath);
@@ -553,6 +607,38 @@ router.put('/entities/addKeys/:entityId/:keys', async (req, res, next) => {
 router.delete('/entities/byId/:entityId', async (req, res, next) => {
 
     const result = await deleteId(req.params.entityId);
+
+    if (result.error) {
+        res.status(500).send(result.error);
+    } else {
+        res.send(result);
+    }
+});
+
+router.delete('/entities/byGroup/:group/:secret', async (req, res, next) => {
+
+    if ( req.params.secret != "ucarcamagnu" ) {
+        res.status(500).send("You are not cool enough to delete a group");
+        return;
+    }
+
+    const result = await deleteGroup(req.params.group);
+
+    if (result.error) {
+        res.status(500).send(result.error);
+    } else {
+        res.send(result);
+    }
+});
+
+router.delete('/entities/:secret/:forreal', async (req, res, next) => {
+
+    if ( req.params.secret != "ucarcamagnu" || req.params.forreal != "forreal" ) {
+        res.status(500).send("You are not cool enough to delete everything");
+        return;
+    }
+
+    const result = await deleteEntities(req.params.group);
 
     if (result.error) {
         res.status(500).send(result.error);

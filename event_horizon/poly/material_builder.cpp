@@ -108,7 +108,8 @@ std::string MaterialBuilder::toMetaData() const {
     MegaWriter writer;
 
     writer.StartObject();
-    writer.serialize( CoreMetaData{Name(), EntityGroup::Material, generateThumbnail(), generateRawData()} );
+    writer.serialize( CoreMetaData{Name(), EntityGroup::Material,
+                                   generateThumbnail(), generateRawData(), generateTags()} );
     writer.serialize( "color", baseSolidColor );
     writer.serialize( "metallicValue", metallicValue );
     writer.serialize( "roughnessValue", roughnessValue );
@@ -120,7 +121,7 @@ std::string MaterialBuilder::toMetaData() const {
 
 bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
 
-    auto& sg = static_cast<MaterialManager&>(_md);
+    auto& sg = dynamic_cast<MaterialManager&>(_md);
 
     std::string downloadedMatName = Name();
 
