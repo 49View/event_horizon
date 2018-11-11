@@ -4,319 +4,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 const entityModel = require('../models/entity');
-const entityKeyModel = require('../models/entity_key');
-const asyncModelOperations = require('../assistants/asyncModelOperations');
+const entityController = require('../controllers/entityController');
 
-const sendFile = ( res, data ) => {
-    res.writeHead(200, {
-        'Content-Type': data.ContentType,
-        'Content-Last-Modified': data.LastModified,
-        'ETag': data.ETag,
-        'Content-Length': data.ContentLength
-    });
-    res.end(data["Body"]);
-}
-
-const getFilePath = (group, filename) => {
-    return "entities/"+group+"/"+filename;
-}
-
-// const checkFileExists = async (group, filename) => {
-
-//     let result = null;
-//     try {
-//         const query = {$and: [{"metadata.file":filename}, {"group":group}]};
-//         //const query = { "metadata.file": key};
-//         console.log(query);
-//         result=await entityModel.findOne(query);
-//         console.log(result);
-//     } catch (ex) {
-//         console.log("checkFileExists", ex);
-//         result=null;
-//     }
-//     return result;
-// }
-
-const checkNameExists = async (group, name) => {
-
-    let result = null;
-    try {
-        const query = {$and: [{"metadata.keyname":name}, {"group":group}]};
-        result=await entityModel.findOne(query);
-    } catch (ex) {
-        result=null;
-    }
-    return result;
-}
-
-const getKeysFromName = (group, name) => {
-
-    const keys = name.split(/[\s_\.]+/).map(k => k.toLowerCase());
-    if (group!==null) {
-        keys.push("group_"+group);
-    }
-
-    console.log("KEYS: ",keys);
-    return keys;
-}
-
-// const getKeysFromFilename = (group, filename) => {
-
-//     const keys = path.parse(filename).name.split(/[\s_\.]+/).map(k => k.toLowerCase());
-//     keys.push("group_"+group);
-
-//     console.log("KEYS: ",keys);
-//     return keys;
-// }
-
-// const createEntityForFile = async (group, filename) => {
-//     const newEntityDB = new entityModel({ group: group, metadata: {file: filename, name: path.parse(filename).name}});
-//     await newEntityDB.save();
-//     return newEntityDB.toObject();
-// }
-
-
-// const createEntityForNoFile = async (group, name, metadata) => {
-//     const entityMetaData = { ...metadata
-//         , name: name
-//     };
-//     const newEntityDB = new entityModel({ group: group, metadata: entityMetaData});
-//     await newEntityDB.save();
-//     return newEntityDB.toObject();
-// }
-
-const createEntityKeysRelations = async(entityId,keys) => {
-
-    const upsertOps = [];
-    keys.forEach(key => {
-        upsertOps.push(
-            {
-                updateOne: {
-                    filter: { key: key},
-                    update: {
-                        "$addToSet": {"entities": mongoose.Types.ObjectId(entityId)},
-                        "$setOnInsert": { "key": key}
-                    },
-                    upsert: true
-                }
-            }
-        );
-    });
-    console.log("UPSERT OPS:", JSON.stringify(upsertOps));
-    let result=null;
-    try {
-        result=await entityKeyModel.bulkWrite(upsertOps, {ordered: false});
-    } catch (ex) {
-        console.log("ERROR:",ex);
-        //console.log(ex.writeErrors[0].err);
-        result=null;
-    }
-    return result;
-}
-
-const deleteEntity = async (entityId) => {
-    let result=null;
-    try {
-        result=await entityModel.deleteOne({ _id: mongoose.Types.ObjectId(entityId)});
-        console.log("RESULT: ", result.data);
-    } catch (ex) {
-        console.log("ERROR:",ex);
-        //console.log(ex.writeErrors[0].err);
-        throw ex;
-    }
-    return result;
-}
-
-const deleteEntityKeys = async (entityId) => {
-    const updateOps = [
-        {
-            updateMany: {
-                filter: { entities: { $elemMatch: { $eq: mongoose.Types.ObjectId(entityId) }}},
-                update: {
-                    $pull: { entities: mongoose.Types.ObjectId(entityId)}
-                }
-            }
-        },
-        {   
-            deleteMany: {
-                filter: { entities: { $size: 0 }}
-            }
-        }
-    ];
-    let result=null;
-    try {
-        result=await entityKeyModel.bulkWrite(updateOps, {ordered: true});
-        console.log("RESULT: ", result.data);
-    } catch (ex) {
-        console.log("ERROR:",ex);
-        //console.log(ex.writeErrors[0].err);
-        throw ex;
-    }
-    return result;
-}
-
-const updateEntity = async (filterQuery, updateQuery) => {
-
-    let result=null;
-    try{
-        result=await entityModel.updateOne(filterQuery, updateQuery);
-        console.log(result);        
-    } catch (ex) {
-        console.log("ERROR:",ex);
-        throw ex;
-    }
-
-    return result;
-}
-
-const addMetadataToEntityById = async (entityId, metadata) => {
-
-    const newMetadata = {};
-
-    for (let m in metadata) {
-        newMetadata["metadata."+m]=metadata[m];
-    }
-    const filterQuery = { _id: mongoose.Types.ObjectId(entityId) };
-    const updateQuery = { $set: newMetadata };
-
-    return await updateEntity(filterQuery, updateQuery);
-}
-
-const addMetadataToEntityByGroupAndName = async (group, name, metadata) => {
-
-    const newMetadata = {};
-
-    for (let m in metadata) {
-        newMetadata["metadata."+m]=metadata[m];
-    }
-    const filterQuery = { group: group, "metadata.keyname": name };
-    const updateQuery = { $set: newMetadata };
-
-    return await updateEntity(filterQuery, updateQuery);
-}
-
-const addMetadataToEntityByGroupAndFilename = async (group, filename, metadata) => {
-
-    const newMetadata = {};
-
-    for (let m in metadata) {
-        newMetadata["metadata."+m]=metadata[m];
-    }
-    const filterQuery = { group: group, "metadata.file": filename };
-    const updateQuery = { $set: newMetadata };
-
-    return await updateEntity(filterQuery, updateQuery);
-}
-
-const prepareAggregationQuery = (keys) => {
-
-    return [
-        { $match: { 
-            key: {$in: keys } 
-        }},
-        { $group: {
-            _id: 0,
-            "sets": {
-                $push: "$entities"
-            },
-            "initialSet": {
-                $first: "$entities"
-            }
-        }},
-        { $project: {
-            "result": {
-                $reduce: {
-                    input: "$sets",
-                    initialValue: { $cond: { if: { $eq: [{$size:"$sets"}, keys.length]}, then: "$initialSet", else:[] }},
-                    in: { "$setIntersection": [ "$$value", "$$this"] }
-                }
-            }            
-        }},
-        { $unwind: {
-                path: "$result"
-        }}
-    ]
-
-}
-
-const getEntities = async (req, res, randomElementNumber) => {
-    //Prepare keys
-    const keys = req.params.keys.split(",");
-    keys.push("group_"+req.params.group);
-
-    const aggregationQuery = prepareAggregationQuery(keys);
-    if (randomElementNumber!==null) {
-        aggregationQuery.push(
-            { $sample: {
-                size: randomElementNumber
-            }}
-        );
-
-    }
-    aggregationQuery.push(
-        { $lookup: {
-            from: "entities",
-            localField: "result",
-            foreignField: "_id",
-            as: "entities"
-        }}
-    );
-    aggregationQuery.push(
-        { $project: {
-            _id: 0,
-            entity: { $arrayElemAt: ["$entities",0] }
-        }}
-    );
-    // aggregationQuery.push(
-    //     { $unwind: {
-    //         path: "$entity"
-    //     }}
-    // );
-    aggregationQuery.push(
-        { $replaceRoot: { 
-            newRoot: "$entity.metadata" 
-        }}
-    );
-
-    return await asyncModelOperations.aggregate(entityKeyModel, aggregationQuery);
-    
-}
-
-const deleteId = async (eId) => {
-
-    let result = { entity: null, entityKeys: null, error : null};
-    let entity = {};
-
-    entity = await entityModel.findOne({ _id: mongoose.Types.ObjectId(eId)});
-
-    if (entity!==null) {
-        entity=entity.toObject();
-    }
-
-    try {
-        if (entity===null) {
-            throw "Entity doesn't exist";
-        }
-        if (entity.metadata.file!==null) {
-            const path = getFilePath(entity.group, entity.metadata.file);
-            await fsc.cloudStorageDelete(path);
-        }
-        result.entity=await deleteEntity(eId);
-        result.entityKeys = await deleteEntityKeys(eId);
-    }
-    catch (ex) {
-        result.error=ex;
-    }
-
-    return result;
-}
 
 router.get('/entities/one/:group/:keys', async (req, res, next) => {
 
     let result = null;
     let error = null;
     try {
-        result=await getEntities(req, res, 1);
+        result=await entityController.getEntities(req, res, 1);
     } catch (ex)
     {
         error=ex;
@@ -334,7 +30,7 @@ router.get('/entities/all/:group/:keys', async (req, res, next) => {
     let result = null;
     let error = null;
     try {
-        result=await getEntities(req, res, null);
+        result=await entityController.getEntities(req, res, null);
     } catch (ex)
     {
         error=ex;
@@ -352,13 +48,13 @@ router.get('/entities/onebinary/:group/:keys', async (req, res, next) => {
     let error = null;
     let binaryContent = null;
     try {
-        result=await getEntities(req, res, 1);
+        result=await entityController.getEntities(req, res, 1);
         if (result && result.length>0) {
             console.log(result);
             const entityMetadata = result[0];
             console.log(entityMetadata.file);
             if (entityMetadata.file) {
-                let path=getFilePath(req.params.group, entityMetadata.file);
+                let path=entityController.getFilePath(req.params.group, entityMetadata.file);
                 binaryContent = await fsc.cloudStorageFileGet(path);
             }
         }
@@ -390,7 +86,7 @@ router.post('/entities/:group/:filename', async (req, res, next) => {
         console.log(group+","+filename+","+keyname);
 
         //Check name exists
-        let entity = await checkNameExists(group,keyname);
+        let entity = await entityController.checkNameExists(group,keyname);
         if (entity!==null) {
             await deleteId( entity.id );
         }
@@ -407,10 +103,10 @@ router.post('/entities/:group/:filename', async (req, res, next) => {
         metadata.file=filename;
 
         //Get keys from name
-        const entityKeys = getKeysFromName(group, keyname);        
+        const entityKeys = entityController.getKeysFromName(group, keyname);        
 
         //Upload file
-        const filenamePath=getFilePath(group, filename);
+        const filenamePath=entityController.getFilePath(group, filename);
         const uploadResult=await fsc.cloudStorageFileUpdate(fileContent, filenamePath);
 
         //Create entity
@@ -419,7 +115,7 @@ router.post('/entities/:group/:filename', async (req, res, next) => {
         const newEntity=newEntityDB.toObject();
 
         //Create entity keys relations
-        await createEntityKeysRelations(newEntity._id.toString(), entityKeys);
+        await entityController.createEntityKeysRelations(newEntity._id.toString(), entityKeys);
 
         res.send({ entity: newEntity, keys: entityKeys, upload: uploadResult});
     } catch (ex) {
@@ -428,68 +124,13 @@ router.post('/entities/:group/:filename', async (req, res, next) => {
     }
 });
 
-
-
-// router.post('/entities/nofile/:group/:name', async (req, res, next) => {
-
-//     let entity = await checkNameExists(req.params.group,req.params.name);
-
-//     if (entity!==null) {
-//         res.status(500).send(`Entity with name ${req.params.name} exists`);
-//         return;
-//     }
-//     const entityKeys = getKeysFromName(req.params.group, req.params.name);
-//     try {
-//         //Create entity
-//         const newEntity = await createEntityForNoFile(req.params.group, req.params.name, req.body);
-
-//         //Create entity keys relations
-//         createEntityKeysRelations(newEntity._id.toString(), entityKeys);
-
-//         res.send({ entity: newEntity, keys: entityKeys});
-//     } catch (ex) {
-//         console.log(ex);
-//         res.status(500).send(`Entity ${req.params.name} could not be created`)
-//     }
-// });
-
-// router.post('/entities/withfile/:group/:filename', async (req, res, next) => {
-
-//     let entity = await checkFileExists(req.params.group,req.params.filename);
-
-//     if (entity!==null) {
-//         res.status(500).send(`Entity with filename ${req.params.filename} exists`);
-//         return;
-//     }
-
-//     //Build file destination path
-//     const path = getFilePath(req.params.group, req.params.filename);
-//     // const path = "entities/"+req.params.group+"/"+req.params.filename;
-//     //Get entity keys from file name
-//     const entityKeys = getKeysFromFilename(req.params.group, req.params.filename);
-//     try {
-//         //Uplaod file
-//         const uploadData = await fsc.cloudStorageFileUpdate(req.body, path);
-//         //Create entity
-//         const newEntity = await createEntityForFile(req.params.group, req.params.filename);
-//         //Create entity keys relations
-//         createEntityKeysRelations(newEntity._id.toString(), entityKeys);
-
-//         res.send({ entity: newEntity, keys: entityKeys});
-
-//     } catch (ex) {
-//         console.log(ex);
-//         res.status(500).send(`File ${req.params.filename} could not be uploaded`)
-//     }
-// });
-
 router.put('/entities/addMetadata/byId/:entityId', async (req, res, next) => {
 
     let result=null;
     let error=null;
     
     try {
-        result=addMetadataToEntityById(req.params.entityId, req.body);
+        result=entityController.addMetadataToEntityById(req.params.entityId, req.body);
     } catch (ex) {
         error=ex;
     }
@@ -507,7 +148,7 @@ router.put('/entities/addMetadata/byGroupAndName/:group/:keyname', async (req, r
     let error=null;
     
     try {
-        result=addMetadataToEntityByGroupAndName(req.params.group, req.params.keyname, req.body);
+        result=entityController.addMetadataToEntityByGroupAndName(req.params.group, req.params.keyname, req.body);
     } catch (ex) {
         error=ex;
     }
@@ -525,7 +166,7 @@ router.put('/entities/addMetadata/byGroupAndFilename/:group/:filename', async (r
     let error=null;
     
     try {
-        result=addMetadataToEntityByGroupAndFilename(req.params.group, req.params.filename, req.body);
+        result=entityController.addMetadataToEntityByGroupAndFilename(req.params.group, req.params.filename, req.body);
     } catch (ex) {
         error=ex;
     }
@@ -545,15 +186,15 @@ router.put('/entities/addKeys/:entityId/:keys', async (req, res, next) => {
     console.log(entityExist);
     if (entityExist!==null) {
         result.error=false;
-        const entityKeys = getKeysFromName(null, req.params.keys);
-        result.error=result.error || await createEntityKeysRelations(req.params.entityId, entityKeys);
+        const entityKeys = entityController.getKeysFromName(null, req.params.keys);
+        result.error=result.error || await entityController.createEntityKeysRelations(req.params.entityId, entityKeys);
     }
     res.send(result);
 });
 
 router.delete('/entities/byId/:entityId', async (req, res, next) => {
 
-    const result = await deleteId(req.params.entityId);
+    const result = await entityController.deleteId(req.params.entityId);
 
     if (result.error) {
         res.status(500).send(result.error);

@@ -43,6 +43,16 @@ app.use('/', tokenRoute);
 
 app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
 
+app.use((req,res,next) => {
+  console.log("METHOD: ",req.method);
+  console.log("ORIGINAL URL: ",req.originalUrl);
+  console.log("BASE URL: ", req.baseUrl);
+  console.log("PATH: ", req.path);
+  console.log("USER: ", req.user);
+  next();
+});
+
+
 app.use('/user', usersRoute);
 app.use('/fs', entitiesRoute);
 

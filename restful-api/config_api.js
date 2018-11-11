@@ -36,6 +36,6 @@ class GlobalConfig {
 	}
 }
 
-const gc = new GlobalConfig("sixthviewfs", "dado", "luckycarrot1803", "sixthviewmdb001-a0hba.mongodb.net", "sixthviewdb", "AKIAJWSLLXTAUPNWMBOA", "9lP99+jK8Ki1XD/MoDv/Ci2/Bo6pzurZjntltd0r", "1sg5+d69hZXX57hs3+1t6-36jh/4fgmm++");
+const gc = new GlobalConfig("sixthviewfs", "dado", "luckycarrot1803", "sixthviewmdb001-a0hba.mongodb.net", "sixthviewdb", "AKIAJWSLLXTAUPNWMBOA", "9lP99+jK8Ki1XD/MoDv/Ci2/Bo6pzurZjntltd0r", "1sg2&db9(4h23bd?dhs3+1t6-36jh/4fgmm++");
 
 module.exports = gc;

@@ -1,7 +1,10 @@
+const mongoose = require('mongoose');
 const crypto = require('crypto');
 const userModel = require('../models/user');
 const userRoleModel = require('../models/user_role');
 const asyncModelOperations = require('../assistants/asyncModelOperations');
+
+const ObjectId = mongoose.Types.ObjectId;
 
 const getUserByEmail = async (email) => {
     
@@ -19,6 +22,26 @@ const getUserWithRolesByEmailProject = async (email,project) => {
     let dbUser = null;
     const query = [];
     query.push({ $match: {"email": email}});
+    query.push({ $lookup: {"from": "users_roles", "localField": "_id", "foreignField": "userId", "as": 'roles'}});
+    query.push({ $unwind: {"path": "$roles"}});
+    query.push({ $match: {"roles.project": project}});  
+    query.push({ $group: {"_id": "$_id", "name": { "$first": "$name" }, "email": { "$first": "$email" }, "cipherPassword": { "$first": "$cipherPassword" }, "active": { "$first": "$active" }, "roles": { "$first": "$roles.roles" }}});
+
+    dbUser=await asyncModelOperations.aggregate(userModel,query);
+    if (dbUser.length>0) {
+        dbUser=dbUser[0];
+    } else {
+        dbUser=null;
+    }
+
+    return dbUser;
+}
+
+const getUserWithRolesByIdProject = async (id,project) => {
+    
+    let dbUser = null;
+    const query = [];
+    query.push({ $match: {"_id": ObjectId(id)}});
     query.push({ $lookup: {"from": "users_roles", "localField": "_id", "foreignField": "userId", "as": 'roles'}});
     query.push({ $unwind: {"path": "$roles"}});
     query.push({ $match: {"roles.project": project}});  
@@ -65,6 +88,15 @@ exports.getUserByEmailPasswordProject = async (email, project, password) => {
         if (hash!==cipherPasswordParts[1]) {
             dbUser=null;
         }
+    }
+    return dbUser;
+}
+
+exports.getUserByIdProject = async (id, project) => {
+
+    let dbUser = await getUserWithRolesByIdProject(id, project);
+    if (dbUser!==null) {
+        delete dbUser.cipherPassword;
     }
     return dbUser;
 }
