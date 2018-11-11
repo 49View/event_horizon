@@ -109,10 +109,10 @@ namespace Http {
                         }
                     }, settings );
         } catch ( const std::exception& ex ) {
-            LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
+            LOGR( "[HTTP-GET-RESPONSE][ERROR] on %s", url.toString().c_str());
             LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
         } catch ( ... ) {
-            LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
+            LOGR( "[HTTP-GET-RESPONSE][ERROR] on %s", url.toString().c_str());
         }
     }
 
@@ -140,10 +140,10 @@ namespace Http {
                                       }
                                   }, settings );
         } catch ( const std::exception& ex ) {
-            LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
+            LOGR( "[HTTP-POST-RESPONSE][ERROR] on %s", url.toString().c_str());
             LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
         } catch ( ... ) {
-            LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
+            LOGR( "[HTTP-POST-RESPONSE][ERROR] on %s", url.toString().c_str());
         }
     }
 

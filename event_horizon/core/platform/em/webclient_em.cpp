@@ -1,6 +1,5 @@
 #include <unordered_map>
 #include "../../http/webclient.h"
-#include "../../file_manager.h"
 #include "../../util.h"
 
 #include <iomanip>
@@ -10,20 +9,22 @@
 
 namespace Http {
 
-    int arcIncCallback = 0;
-    std::unordered_map<int, std::string> argCallbackMap;
+    std::unordered_map<std::string, std::function<void( const Http::Result& )>> argCallbackMap;
 
-    void onSuccessWget( [[maybe_unused]] unsigned boh, void* arg , void* data, unsigned numBytes ) {
-        int ud = reinterpret_cast<int>(arg);
-        FileManager::setCallbackData( { argCallbackMap[ud],
-                                        reinterpret_cast<const char*>(data),
-                                        numBytes, 200 } );
+    void onSuccessWget( unsigned boh, void* arg , void* data, unsigned numBytes ) {
+        auto ckey = reinterpret_cast<char*>(arg);
+        auto skey = std::string( ckey );
+        LOGR( "[HTTP-GET] Response code: 200, handle %d", boh );
+        argCallbackMap[skey]( { skey,
+                                reinterpret_cast<const char*>(data),
+                                numBytes, 200 } );
+        delete [] ckey;
     }
 
     void onFailWget( [[maybe_unused]] unsigned boh, void *arg, int code, const char* why ) {
-        int ud = reinterpret_cast<int>(arg);
-        LOGR(" [EM] : Fail to wget %s -- %s", argCallbackMap[ud].c_str(), why );
-        FileManager::setCallbackData( { argCallbackMap[ud], nullptr, 0, code } );
+        auto ckey = reinterpret_cast<char*>(arg);
+        LOGR("[HTTP-GET-RESPONSE][ERROR] handle: %d code: %d URI: %s -- %s", boh, code, ckey, why );
+        delete [] ckey;
     }
 
     void onProgressWget( [[maybe_unused]] unsigned boh, [[maybe_unused]] void* arg,
@@ -32,15 +33,18 @@ namespace Http {
     }
 
     void getInternal( const Url& uri,
-                      [[maybe_unused]] const std::function<void( const Http::Result& )> callback,
+                      const std::function<void( const Http::Result& )> callback,
                       [[maybe_unused]] ResponseFlags rf ) {
 
-        argCallbackMap[arcIncCallback++] = uri.toString();
+        auto key = uri.toString();
+        argCallbackMap[key] = callback;
+        char* keyToCharCPassing = new char[key.size()];
+        strcpy( keyToCharCPassing, key.c_str() );
 
         emscripten_async_wget2_data(uri.toString().c_str(),
                                     "GET",
                                     nullptr,
-                                    reinterpret_cast<void*>(arcIncCallback-1),
+                                    reinterpret_cast<void*>(keyToCharCPassing),
                                     false,
                                     onSuccessWget,
                                     onFailWget,
