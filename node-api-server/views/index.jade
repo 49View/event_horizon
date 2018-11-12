@@ -1,23 +1,23 @@
 extends layout
 
-div emscripten_border
+//- div emscripten_border
 
-  urcadjakasl
-  canvas 
+//-   urcadjakasl
+//-   canvas 
 
-  script().
-    Module = {
-      canvas: document.getElementById('canvas')
-    }
-    function rescaleCanvas() {
-      Module.canvas.width=parseInt(window.getComputedStyle(Module.canvas).width);
-      Module.canvas.height=parseInt(window.getComputedStyle(Module.canvas).height);
-    }
-    rescaleCanvas();
-    window.addEventListener("resize", rescaleCanvas);
+//-   script().
+//-     Module = {
+//-       canvas: document.getElementById('canvas')
+//-     }
+//-     function rescaleCanvas() {
+//-       Module.canvas.width=parseInt(window.getComputedStyle(Module.canvas).width);
+//-       Module.canvas.height=parseInt(window.getComputedStyle(Module.canvas).height);
+//-     }
+//-     rescaleCanvas();
+//-     window.addEventListener("resize", rescaleCanvas);
 
-    script(type="text/javascript").
-      src="editor.js"
+//-     script(type="text/javascript").
+//-       src="editor.js"
 
 //- <div class="emscripten_border">
 //-   <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" width="1106" height="852"></canvas>
