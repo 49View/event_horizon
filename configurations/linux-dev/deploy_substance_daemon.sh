@@ -3,7 +3,7 @@ cd sat
 
 echo -e "FROM "$1"\nADD substance_daemon /\nCMD [\"./substance_daemon\" ]" | tee dockerfile
 
-curl https://49view-api.icu/fs/get/artefacts%2Fsubstance_daemon -o substance_daemon
+curl https://eventhorizon.pw/fs/get/artifacts%2Fsubstance_daemon -o substance_daemon
 sudo chmod 777 substance_daemon 
 
 sudo docker kill $(docker ps --filter "ancestor=sat" -q)

@@ -19,9 +19,10 @@ void cloudCallback( const rapidjson::Document& data ) {
     for ( const auto& [k,func] : daemonEntityCallbacks ) {
         if ( filename.find(DaemonPaths::store(k)) != std::string::npos ) {
             FM::readRemoteSimpleCallback( filename, [&](const Http::Result& _res) {
+                const auto lFilename = url_decode(_res.uri);
                 for ( const auto& [k,func] : daemonEntityCallbacks ) {
-                    if ( filename.find( DaemonPaths::store( k )) != std::string::npos ) {
-                        func( filename, zlibUtil::inflateFromMemory( _res ) );
+                    if ( lFilename.find( DaemonPaths::store( k )) != std::string::npos ) {
+                        func( _res.uri, zlibUtil::inflateFromMemory( _res ) );
                     }
                 }
             } );

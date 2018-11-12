@@ -60,7 +60,6 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 }
 
 void render( [[maybe_unused]] Scene* p ) {
-
 }
 
 std::shared_ptr<SceneLayout> fullEditor() {
