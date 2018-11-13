@@ -17,10 +17,14 @@ var options = {
   key: fs.readFileSync(path.resolve(__dirname,'server-key.pem')), 
   cert: fs.readFileSync(path.resolve(__dirname,'server-crt.pem')), 
   // ca: fs.readFileSync(path.resolve(__dirname,'ca-crt.pem')), 
-  requestCert: true,
+  requestCert: false,
   rejectUnauthorized: false
 }; 
 
+var optionsNoCert = { 
+  requestCert: false,
+  rejectUnauthorized: false
+}; 
 /**
  * Get port from environment and store in Express.
  */
@@ -32,8 +36,8 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
-// var server = https.createServer(options, app);
+// var server = http.createServer(app);
+var server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.

@@ -8,7 +8,7 @@ const socketClientHandlerFactory = () => {
         if (parsedMessage.msg==='/HouseBSData/create') {
             //{“msg”:“/HouseBSData/create”,“name”:“5b7c8ad17ddedb00043f20f5"}
             console.log("NEW PROPERTY ADDED");
-            const propertyId = parsedMessage.name;
+            // const propertyId = parsedMessage.name;
             // store.dispatch(actionCreators.updateLastPropertyLoaded(propertyId));
         }
     }

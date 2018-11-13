@@ -12,10 +12,6 @@
 
 #include "../string_util.h"
 
-#define DEFAULT_HTTP_PORT 80
-#define DEFAULT_HTTPS_PORT 443
-
-
 bool isSuccessStatusCode( int statusCode );
 
 namespace HttpFilePrefix {
@@ -54,6 +50,11 @@ namespace Socket {
 }
 
 namespace Http {
+
+    enum UsePort {
+        False = 0,
+        True = 1
+    };
 
     enum ResponseFlags {
         None = 0,
@@ -143,8 +144,12 @@ struct Url {
         uri = _uri;
     }
 
-    static std::string Host( const std::string& protocol, const std::string& host, const int portNumber ) {
-        return protocol + "://" + host + ":" + std::to_string(portNumber);
+    static std::string Host( const std::string& protocol, const std::string& host, const int portNumber,
+                             const Http::UsePort _up = Http::UsePort::False ) {
+        if ( _up == Http::UsePort::True ) {
+            return protocol + "://" + host + ":" + std::to_string(portNumber);
+        }
+        return protocol + "://" + host;
     }
 
     static std::string Service( const std::string& _service, const std::string& _path ) {
@@ -153,12 +158,15 @@ struct Url {
 
     std::string protocol = Http::CLOUD_PROTOCOL();
     std::string host = Http::CLOUD_SERVER();
-    short port = Http::CLOUD_PORT();
+    short port = Http::CLOUD_PORT_SSL();
     std::string uri = "/";
 
-    std::string toString() const {
-        short curr_port = ( Http::CLOUD_PROTOCOL() == Url::HttpsProtocol ) ? Http::CLOUD_PORT_SSL() : Http::CLOUD_PORT();
-        return Http::CLOUD_PROTOCOL() + "://" + host + ":" + std::to_string( curr_port ) + uri;
+    std::string toString( const Http::UsePort _up = Http::UsePort::False ) const {
+        if ( _up == Http::UsePort::True ) {
+            short lPort = (Http::CLOUD_PROTOCOL() == Url::HttpsProtocol) ? Http::CLOUD_PORT_SSL() : Http::CLOUD_PORT();
+            return Http::CLOUD_PROTOCOL() + "://" + host + ":" + std::to_string( lPort ) + uri;
+        }
+        return Http::CLOUD_PROTOCOL() + "://" + host + uri;
     }
 
     static std::smatch parseUrl( const std::string& _fullurl );
@@ -169,6 +177,8 @@ struct Url {
     bool isEngine( const std::string& _engine ) const {
         return startswith( uri, _engine );
     }
+
+    std::string hostOnly() const;
 
     static const std::string WsProtocol;
     static const std::string WssProtocol;

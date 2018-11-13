@@ -9,7 +9,7 @@ namespace Http {
     std::shared_ptr<restbed::Request> makeRequest( const Url& url ) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri(url.toString()));
         request->set_header( "Accept", "*/*" );
-        request->set_header( "Host", url.host );
+        request->set_header( "Host", url.hostOnly() );
         request->set_header( "Connection", "keep-alive" );
         request->set_method( "GET" );
 
@@ -20,7 +20,7 @@ namespace Http {
         auto request = std::make_shared<restbed::Request>( restbed::Uri( url.toString()) );
 
         request->set_header( "Accept", "*/*" );
-        request->set_header( "Host", url.host );
+        request->set_header( "Host", url.hostOnly() );
         switch (qt) {
             case HttpQuery::Binary:
                 request->set_header( "Content-Type", "application/octet-stream" );

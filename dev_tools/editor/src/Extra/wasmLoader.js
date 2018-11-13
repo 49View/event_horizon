@@ -13,10 +13,9 @@ export class wasmLoader {
     constructor(store)  {
         this.store = store;
 
-        if (window.location.href.startsWith("https://localhost:8000")) {
-            console.log("Load local WASM!");
-            this.wasmBinaryUrl='https://localhost:8000/editor.wasm';
-            this.wasmScriptUrl='https://localhost:8000/editor.js';
+        if (window.location.href.startsWith("https://localhost:5000")) {
+            this.wasmBinaryUrl='https://localhost:5000/editor.wasm';
+            this.wasmScriptUrl='https://localhost:5000/editor.js';
         }    
     
         this.loaderModule = {
@@ -63,8 +62,9 @@ export class wasmLoader {
             }
 
             const content = await axios(downloadConfig);
-            this.wasmScript=content.data;
+            this.wasmScript= content.data;
         } catch (ex) {
+            console.log(ex);
             this.wasmBinary=null;
             this.wasmScript=null;
         }

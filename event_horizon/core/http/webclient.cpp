@@ -7,6 +7,7 @@
 #include "../util.h"
 #include "../platform_util.h"
 #include "core/zlib_util.h"
+#include "core/string_util.h"
 
 static bool sUseLocalhost = false;
 
@@ -50,6 +51,16 @@ void Url::fromString( const std::string& _fullurl ) {
         }
         uri = "/" + base_match[4].str();
     }
+}
+
+std::string Url::hostOnly() const {
+    auto ret = host;
+    auto p = ret.find_first_of("/");
+    if ( p != std::string::npos ) {
+       ret = { ret.begin(), ret.begin()+p };
+    }
+
+    return ret;
 }
 
 std::string url_encode( const std::string& value ) {
@@ -178,26 +189,18 @@ namespace Http {
 
     const std::string CLOUD_SERVER() {
         if ( sUseLocalhost ) {
-            return "localhost";
+            return "localhost"+Config::API;
         } else {
-            return Config::HOSTNAME;
+            return Config::HOSTNAME+Config::API;
         }
     }
 
     short CLOUD_PORT() {
-        if ( sUseLocalhost ) {
-            return 3000;
-        } else{
-            return 80;
-        }
+        return 80;
     }
 
     short CLOUD_PORT_SSL() {
-        if ( sUseLocalhost ) {
-            return 3000;
-        } else{
-            return 443;
-        }
+        return 443;
     }
 
 }
