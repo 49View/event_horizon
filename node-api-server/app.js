@@ -44,14 +44,12 @@ app.use(function(req, res, next) {
 });
 
 // uncomment after placing your favicon in /public
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 // app.use(bodyParser);
 app.use(bodyParser.raw({limit: '100mb'}));
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
 app.use('/catalog', catalog);
