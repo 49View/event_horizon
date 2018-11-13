@@ -5,6 +5,8 @@ const ClientCertificateStrategy = require('passport-client-cert').Strategy;
 const globalConfig = require('../config_api.js')
 const jsonWebToken = require('jsonwebtoken');
 const userController = require('./userController');
+const routeAuthorizationModel = require('../models/route_authorization');
+
 
 
 exports.InitializeAuthentication = () => {
@@ -52,7 +54,8 @@ exports.InitializeAuthentication = () => {
             if (user===null) {
                 error = "Invalid user";
             } else {
-                user.project=project;
+                user.roles=user.roles.map(v => v.toLowerCase());
+                user.project=project.toLowerCase();
             }
         } catch (ex) {
             error = "Invalid user";
@@ -85,4 +88,64 @@ exports.getToken = async (user,project) => {
         token: jwt,
         expires: d
     };
+}
+
+exports.authorize = async (req,res,next) => {
+
+    const url = req.originalUrl;
+    const urlParts = url.split("/");
+    let authorized = false;
+
+    if (urlParts.length>0 && urlParts[0].length===0) {
+        urlParts.shift();       
+    }
+    const urlPartials = [];
+    for (let i=urlParts.length;i>0;i--) {
+        let urlPartial = "";
+        for (let j=0;j<i;j++) {
+            urlPartial=urlPartial+"/"+urlParts[j].toLowerCase();
+        }
+        urlPartials.push(urlPartial);
+    }
+
+    const query = { "$and": [ { "verb": req.method.toLowerCase()}, { "route": { "$in": urlPartials}}]};
+    try {
+        const routeAuthorizations = await routeAuthorizationModel.find(query).sort([['route','descending']]);
+        let routeAuthorization = [];
+        for (let i=0;i<urlPartials.length;i++) {
+            for (let j=0;j<routeAuthorizations.length;j++) {
+                let currentAuthorization=routeAuthorizations[j].toObject();
+                if (urlPartials[i]===currentAuthorization.route) {
+                    routeAuthorization.push(currentAuthorization);
+                }
+            }
+            if (routeAuthorization.length>0) {
+                break;
+            }
+        }
+        for (let i=0;i<routeAuthorization.length;i++) {
+            let currentAuthorization=routeAuthorization[i];
+            currentAuthorization.project=currentAuthorization.project.toLowerCase();
+            currentAuthorization.role=currentAuthorization.role.toLowerCase();
+            if ((currentAuthorization.project==="*" || currentAuthorization.project===req.user.project) &&
+                (currentAuthorization.role==="*" || req.user.roles.indexOf(currentAuthorization.role)>=0)  &&
+                (currentAuthorization.user==="*" || currentAuthorization.user===req.user._id.toString())) {      
+                    console.log("Valid authorization: ",currentAuthorization);
+                    authorized=true;
+                    break;
+            }
+        }
+    } catch (ex) {
+        console.log("ERROR IN AUTHORIZATION: "+ex);
+        authorized=false;
+    }
+
+    // console.log("PARTIAL: "+urlPartials);
+    // console.log("METHOD: ",req.method);
+
+    if (!authorized) {
+        res.sendStatus(401);
+    } else {
+        next(); 
+    }   
 }

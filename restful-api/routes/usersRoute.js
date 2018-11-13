@@ -3,7 +3,7 @@ const userController = require('../controllers/userController');
 
 const router = express.Router();
 
-router.post('/create', async (req, res, next) => {
+router.post("/create", async (req, res, next) => {
 
     console.log('User create: ', req.body);
 
@@ -22,11 +22,11 @@ router.post('/create', async (req, res, next) => {
     dbUser===null?res.sendStatus(400):res.sendStatus(201);
 });
 
-router.put('/addRolesForProject', async (req, res, next) => {
+router.put('/addRolesFor/:project', async (req, res, next) => {
 
-    console.log('User addRolesForProject: ', req.body);
+    console.log('User addRolesFor "'+req.params.project+'": ', req.body);
 
-    const project = req.body.project;
+    const project = req.params.project;
     const email = req.body.email;
     const roles = req.body.roles;
     let error = false;
