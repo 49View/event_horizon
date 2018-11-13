@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { cacheAdapterEnhancer } from 'axios-extensions';
 
-export const baseUrl = 'https://eventhorizon.pw/api';
+export const baseUrl = (window.location.href.includes("localhost")) ? 'https://localhost/api' : 'https://eventhorizon.pw/api';
 const instance=axios.create({
     baseURL: baseUrl,
     headers: {

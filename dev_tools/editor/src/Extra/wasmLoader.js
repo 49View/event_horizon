@@ -16,8 +16,14 @@ export class wasmLoader {
         if (window.location.href.startsWith("https://localhost:5000")) {
             this.wasmBinaryUrl='https://localhost:5000/editor.wasm';
             this.wasmScriptUrl='https://localhost:5000/editor.js';
+        } else if (window.location.href.startsWith("http://localhost:5000")) {
+            this.wasmBinaryUrl='http://localhost:5000/editor.wasm';
+            this.wasmScriptUrl='http://localhost:5000/editor.js';
+        } else if (window.location.href.startsWith("https://localhost:3000")) {
+            this.wasmBinaryUrl='https://localhost:3000/editor.wasm';
+            this.wasmScriptUrl='https://localhost:3000/editor.js';
         }    
-    
+
         this.loaderModule = {
             print: (text) => {
                 console.log(text);
