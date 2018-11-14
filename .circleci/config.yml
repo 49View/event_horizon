@@ -51,6 +51,8 @@ jobs:
           cd dev_tools/editor && npm run build
       - run: >
           cd dev_tools/editor && tar -zcvf editor_react.gz ./build
+      - store_artifacts:
+          path: /dev_tools/editor/editor_react.gz
       - run: >
           curl --data-binary @./dev_tools/editor/editor_react.gz -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Feditor_react.gz
 
