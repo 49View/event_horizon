@@ -51,8 +51,6 @@ jobs:
           cd dev_tools/editor && npm run build
       - run: >
           cd dev_tools/editor && tar -zcvf editor_react.gz ./build
-      - store_artifacts:
-          path: ./dev_tools/editor/editor_react.gz
       - run: >
           curl --data-binary @./dev_tools/editor/editor_react.gz -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Feditor_react.gz
 
@@ -68,7 +66,12 @@ jobs:
       - run:
           name: Deploy Editor to nginx
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://eventhorizon.pw/api/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz; sudo tar -xvzf editor_react.gz; cd build; sudo rm -rf /usr/share/nginx/html/editor; sudo mkdir /usr/share/nginx/html/editor; sudo cp -rf * /usr/share/nginx/html/editor'
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://eventhorizon.pw/api/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz;
+            sudo tar -xvzf editor_react.gz;
+            cd build;
+            sudo rm -rf /usr/share/nginx/html/editor;
+            sudo mkdir /usr/share/nginx/html/editor;
+            sudo cp -rf * /usr/share/nginx/html/editor'
 
 
   buildCPP:
