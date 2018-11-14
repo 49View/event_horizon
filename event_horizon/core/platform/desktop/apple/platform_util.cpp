@@ -24,7 +24,7 @@ namespace FileManager {
 
 std::string cacheFolder() {
     const char *homeDir = getenv( "TMPDIR" );
-    return std::string( homeDir );
+    return std::string( homeDir ) + "/";
 }
 
 const std::string userComputerName() {

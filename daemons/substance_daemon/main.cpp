@@ -122,18 +122,19 @@ void elaborateMat( const std::string& _filename ) {
 void elaborateGeom( const std::string& _filename ) {
     FM::readRemoteSimpleCallback( _filename,
         [](const Http::Result& _res) {
+            std::string dRoot = cacheFolder(); // "/" on linux
             std::string filename =  getFileName(_res.uri);
-            std::string mainFileName = "/" + filename;
-            FM::writeLocalFile( mainFileName, reinterpret_cast<const char*>(_res.buffer.get()), _res.length );
+            std::string mainFileName = dRoot + filename;
+            FM::writeLocalFile( mainFileName, reinterpret_cast<const char*>(_res.buffer.get()), _res.length, true );
 
-            std::string cmd = "FBX2glTF -b --pbr-metallic-roughness -o /" + getFileNameOnly(filename) + " " +
+            std::string cmd = "FBX2glTF -b --pbr-metallic-roughness -o " + dRoot + getFileNameOnly(filename) + " " +
                     mainFileName;
 
             std::system( cmd.c_str() );
 
             std::string filenameglb = getFileNameOnly(filename) + ".glb";
 
-            std::string finalPath = "/" + filenameglb;
+            std::string finalPath = dRoot + filenameglb;
 
             FM::writeRemoteFile( DaemonPaths::store( EntityGroup::Geom, filenameglb ),
                             zlibUtil::deflateMemory(FM::readLocalFile( finalPath )) );
@@ -144,7 +145,7 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
 //    initDeamon();
     Socket::on( "cloudStorageFileUpdate", []( const rapidjson::Document& data ) {
-        std::string filename = data["name"].GetString();
+        std::string filename = url_decode( data["name"].GetString() );
         if ( filename.find(DaemonPaths::upload(EntityGroup::Material)) != std::string::npos ){
             elaborateMat( filename );
         } else if ( filename.find(DaemonPaths::upload(EntityGroup::Geom)) != std::string::npos ){
