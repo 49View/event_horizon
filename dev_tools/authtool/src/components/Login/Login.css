@@ -1,0 +1,28 @@
+.Login {
+    background-color: rgba(0,120,235,.8);
+    width: 40rem;
+    height: 30rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin: 30px;
+    padding: 15px;
+}
+
+.Title {
+    font-size: 300%;
+    font-weight: bolder;
+    color: white;
+}
+
+.Form {
+}
+
+.Buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width:100%;
+}
+

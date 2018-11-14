@@ -86,7 +86,7 @@ exports.getToken = async (user,project) => {
     d.setUTCSeconds(jwtPayload.exp);
     return {
         token: jwt,
-        expires: d
+        expires: jwtPayload.exp
     };
 }
 

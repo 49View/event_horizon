@@ -1,15 +1,10 @@
-html {
-  background: url('./assets/images/blackhole.jpg');
-  background-size: cover;
+html, body {
   height: 100%;
   overflow: hidden;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  /* font-family: 'Boogaloo', cursive; */
   font-family: 'Libre Franklin', sans-serif;
-  min-width: 550px;
-  overflow: hidden;
+  background: #000;
+  perspective: 340px;
 }
