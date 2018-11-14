@@ -66,7 +66,7 @@ jobs:
       - run:
           name: Deploy Editor to nginx
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://eventhorizon.pw/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz; sudo tar -xvzf editor_react.gz; cd build; sudo rm -r /usr/share/nginx/html/editor; sudo mkdir /usr/share/nginx/html/editor; sudo cp -r * /usr/share/nginx/html/editor'
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://eventhorizon.pw/api/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz; sudo tar -xvzf editor_react.gz; cd build; sudo rm -r /usr/share/nginx/html/editor; sudo mkdir /usr/share/nginx/html/editor; sudo cp -r * /usr/share/nginx/html/editor'
 
 
   buildCPP:
