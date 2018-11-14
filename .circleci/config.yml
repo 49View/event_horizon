@@ -15,13 +15,13 @@ defaults: &defaults
 version: 2.0
 
 jobs:
+
   buildNODEJSAPI:
     docker:
       - image: circleci/node:10.3.0
     working_directory: ~/repo
     steps:
       - checkout
-      # Download and cache dependencies
       - restore_cache:
           keys:
             - v2-dependencies-{{ checksum "node-api-server/package.json" }}
@@ -33,22 +33,41 @@ jobs:
           paths:
             - node-api-server/node_modules
           key: v2-dependencies-{{ checksum "node-api-server/package.json" }}
-      # run tests!
       - run: >
           cd node-api-server && npm test
-      # - persist_to_workspace:
-      #     root: /app
-      #     paths:
-      #       - target/*
+
+      - restore_cache:
+          keys:
+            - v2-dependencies-{{ checksum "dev_tools/editor/package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v2-dependencies-
+      - run: >
+          cd dev_tools/editor && npm install
+      - save_cache:
+          paths:
+            - dev_tools/editor/node_modules
+          key: v2-dependencies-{{ checksum "dev_tools/editor/package.json" }}
+      - run: >
+          cd dev_tools/editor && npm run build
+      - run: >
+          tar -zcvf ./dev_tools/editor/editor_react.gz ./dev_tools/editor/build
+      - run: >
+          curl --data-binary @./dev_tools/editor/editor_react.gz -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Feditor_react.gz
+
   deployNODEJSAPI:
     working_directory: ~/repo
     machine:
       enabled: true
     steps:
+#      - run:
+#          name: Deploy to Digital Ocean
+#          command: |
+#            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP ./deploy.sh
       - run:
-          name: Deploy to Digital Ocean
+          name: Deploy Editor to nginx
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP ./deploy.sh
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://eventhorizon.pw/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz; sudo tar -xvzf editor_react.gz; cd build; sudo rm -r /usr/share/nginx/html/editor; sudo mkdir /usr/share/nginx/html/editor; sudo cp -r * /usr/share/nginx/html/editor'
+
 
   buildCPP:
     <<: *defaults
@@ -78,7 +97,7 @@ jobs:
           mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release ../../daemons/substance_daemon/
       - run: make -j8 -C 'builds/sat/'
       - run: |
-          curl --data-binary @/app/builds/sat/substance_deamon -k -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Fsubstance_daemon
+          curl --data-binary @/app/builds/sat/substance_deamon -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Fsubstance_daemon
 
       # Editor
       - run: >
@@ -87,9 +106,9 @@ jobs:
           ../../dev_tools/editor/
       - run: make -j8 -C 'builds/editor_em/'
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.js -k -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Feditor.js
+          curl --data-binary @/app/builds/editor_em/editor.js -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Feditor.js
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.wasm -k -H Content-Type:application/octet-stream https://eventhorizon.pw/fs/upload/artifacts%2Feditor.wasm
+          curl --data-binary @/app/builds/editor_em/editor.wasm -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Feditor.wasm
 
       # run tests!
 
@@ -102,25 +121,21 @@ jobs:
           command: |
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP ./deploy_substance_daemon.sh sixthview/build:1.1.0
 
-  #      - attach_workspace:
-#          # Must be absolute path or relative path from working_directory
-#          at: /app/build
-
 workflows:
   version: 2
   build-deploy:
     jobs:
       - buildNODEJSAPI
-      - buildCPP:
-          filters:
-            branches:
-              only: master
+#      - buildCPP:
+#          filters:
+#            branches:
+#              only: master
       - deployNODEJSAPI:
           requires:
             - buildNODEJSAPI
           filters:
             branches:
               only: master
-      - deployCPP:
-          requires:
-            - buildCPP
+#      - deployCPP:
+#          requires:
+#            - buildCPP
