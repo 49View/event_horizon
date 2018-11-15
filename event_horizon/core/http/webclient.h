@@ -161,13 +161,7 @@ struct Url {
     short port = Http::CLOUD_PORT_SSL();
     std::string uri = "/";
 
-    std::string toString( const Http::UsePort _up = Http::UsePort::False ) const {
-        if ( _up == Http::UsePort::True ) {
-            short lPort = (Http::CLOUD_PROTOCOL() == Url::HttpsProtocol) ? Http::CLOUD_PORT_SSL() : Http::CLOUD_PORT();
-            return Http::CLOUD_PROTOCOL() + "://" + host + ":" + std::to_string( lPort ) + uri;
-        }
-        return Http::CLOUD_PROTOCOL() + "://" + host + uri;
-    }
+    std::string toString( const Http::UsePort _up = Http::UsePort::False ) const;
 
     static std::smatch parseUrl( const std::string& _fullurl );
     static bool parsedMatchIsUrl( const std::smatch& base_match );

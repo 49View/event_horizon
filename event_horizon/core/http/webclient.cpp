@@ -63,6 +63,14 @@ std::string Url::hostOnly() const {
     return ret;
 }
 
+std::string Url::toString( const Http::UsePort _up ) const {
+    if ( _up == Http::UsePort::True || sUseLocalhost ) {
+        short lPort = (Http::CLOUD_PROTOCOL() == Url::HttpsProtocol) ? Http::CLOUD_PORT_SSL() : Http::CLOUD_PORT();
+        return Http::CLOUD_PROTOCOL() + "://" + host + ":" + std::to_string( lPort ) + uri;
+    }
+    return Http::CLOUD_PROTOCOL() + "://" + host + uri;
+}
+
 std::string url_encode( const std::string& value ) {
     std::ostringstream escaped;
     escaped.fill( '0' );
@@ -200,7 +208,11 @@ namespace Http {
     }
 
     short CLOUD_PORT_SSL() {
-        return 443;
+        if ( sUseLocalhost ) {
+            return 3000;
+        } else {
+            return 443;
+        }
     }
 
 }
