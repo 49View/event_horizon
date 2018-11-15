@@ -1,9 +1,12 @@
 var AWS = require('aws-sdk');
 const globalConfig = require('../config_api.js')
 
+// AWS.config = new AWS.Config();
+// AWS.config.accessKeyId = globalConfig.AWSConfigAccessKeyId;
+// AWS.config.secretAccessKey = globalConfig.AWSConfigSecretAccessKey;
 AWS.config = new AWS.Config();
-AWS.config.accessKeyId = globalConfig.AWSConfigAccessKeyId;
-AWS.config.secretAccessKey = globalConfig.AWSConfigSecretAccessKey;
+AWS.config.accessKeyId = "AKIAJWSLLXTAUPNWMBOA";
+AWS.config.secretAccessKey = "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";
 
 var s3 = new AWS.S3();
 
@@ -41,30 +44,30 @@ exports.list = ( key, complete ) => {
 	return listInternal( key, complete );
 }
 
-exports.upload = ( filedata, key ) => {
+exports.upload = ( filedata, key, bucket ) => {
 	var params = {
 	  Body: filedata,	
-	  Bucket: "sixthviewfs", 
+	  Bucket: bucket, 
 	  Key: key
 	 };
 
 	 return s3.putObject(params).promise();
 }
 
-exports.get = ( key ) => {
+exports.get = ( key, bucket ) => {
 
     var params = {
-        Bucket: "sixthviewfs",
+        Bucket: bucket,
         Key: key
     };
 	
     return s3.getObject(params).promise();
 }
 
-exports.delete = ( key ) => {
+exports.delete = ( key, bucket ) => {
 
     var params = {
-        Bucket: "sixthviewfs",
+        Bucket: bucket,
         Key: key
     };
 	
@@ -97,16 +100,16 @@ exports.deleteMulti = ( key ) => {
 	});	
 }
 
-exports.rename = ( source, dest ) => {
+exports.rename = ( source, dest, bucket ) => {
 
 	var paramsCopy = {
-		Bucket: "sixthviewfs",
-		CopySource: `sixthviewfs/${source}`,
+		Bucket: bucket,
+		CopySource: `${bucket}/${source}`,
         Key: dest
     };
 
 	var paramsDelete = {
-		Bucket: "sixthviewfs",
+		Bucket: bucket,
         Key: source
     };
 

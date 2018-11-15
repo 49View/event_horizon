@@ -1,26 +1,44 @@
 
 const cloudApi = require('../third_party_api/s3');
 
-exports.cloudStorageFileUpdate = (body, key) => {
-	return cloudApi.upload( body, key );
+
+exports.cloudStorageFileUpload = (body, key, bucket) => {
+	return cloudApi.upload( body, key, bucket );
 }
 
-exports.cloudStorageFileGet = (key) => {
-	return cloudApi.get( key );
+exports.cloudStorageFileGet = (key, bucket) => {
+	return cloudApi.get( key, bucket );
 }
 
-exports.cloudStorageRename = (source, dest) => {
-	return cloudApi.rename( source, dest );
+exports.cloudStorageRename = (source, dest, bucket) => {
+	return cloudApi.rename( source, dest, bucket );
 }
 
-exports.cloudStorageDelete = (key) => {
-	return cloudApi.delete( key );
+exports.cloudStorageDelete = (key, bucket) => {
+	return cloudApi.delete( key, bucket );
 }
 
-exports.cloudStorageDeleteMulti = (key) => {
-	return cloudApi.deleteMulti( key );
+// exports.cloudStorageDeleteMulti = (key) => {
+// 	return cloudApi.deleteMulti( key );
+// }
+
+// exports.cloudStorageFileList = ( key, completed ) => {
+//     return cloudApi.list( key, completed );
+// }
+
+exports.writeFile = ( res, data ) => {
+    res.writeHead(200, {
+        'Content-Type': data.ContentType,
+        'Content-Last-Modified': data.LastModified,
+        'ETag': data.ETag,
+        'Content-Length': data.ContentLength
+    });
+    res.end(data["Body"]);
 }
 
-exports.cloudStorageFileList = ( key, completed ) => {
-    return cloudApi.list( key, completed );
+exports.writeError = ( res, number, err, message ) => {
+    console.log("[ERROR-CAUGHT]");
+    console.log(err, err.stack);
+    res.status(number).send(message);
 }
+

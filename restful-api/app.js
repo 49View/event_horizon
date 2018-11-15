@@ -8,6 +8,7 @@ const indexRoute = require('./routes/indexRoute');
 const entitiesRoute = require('./routes/entitiesRoute');
 const usersRoute = require('./routes/usersRoute');
 const tokenRoute = require('./routes/tokenRoute');
+const fsRoute = require('./routes/fsRoute');
 const authController = require('./controllers/authController');
 
 const app = express();
@@ -41,13 +42,14 @@ app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 app.use('/', indexRoute);
 app.use('/', tokenRoute);
 
-app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
+// app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
 
-app.use(authController.authorize);
+// app.use(authController.authorize);
 
 
 app.use('/user', usersRoute);
-app.use('/fs', entitiesRoute);
+app.use('/fs', fsRoute);
+app.use('/entities', entitiesRoute);
 
 
 // catch 404 and forward to error handler
