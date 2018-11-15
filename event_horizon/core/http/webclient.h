@@ -125,7 +125,6 @@ namespace Http {
 
     const std::string CLOUD_PROTOCOL();
     const std::string CLOUD_SERVER();
-    const std::string CLOUD_HOST();
     short CLOUD_PORT();
     short CLOUD_PORT_SSL();
 };

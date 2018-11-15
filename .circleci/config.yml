@@ -52,7 +52,7 @@ jobs:
       - run: >
           cd dev_tools/editor && tar -zcvf editor_react.gz ./build
       - run: >
-          curl --data-binary @./dev_tools/editor/editor_react.gz -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Feditor_react.gz
+          curl --data-binary @./dev_tools/editor/editor_react.gz -k -H Content-Type:application/octet-stream https://api.eventhorizon.pw/fs/upload/artifacts%2Feditor_react.gz
 
   deployNODEJSAPI:
     working_directory: ~/repo
@@ -66,7 +66,7 @@ jobs:
       - run:
           name: Deploy Editor to nginx
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://eventhorizon.pw/api/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz;
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://api.eventhorizon.pw/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz;
             sudo tar -xvzf editor_react.gz;
             cd build;
             sudo rm -rf /usr/share/nginx/html/editor;
@@ -102,7 +102,7 @@ jobs:
           mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release ../../daemons/substance_daemon/
       - run: make -j8 -C 'builds/sat/'
       - run: |
-          curl --data-binary @/app/builds/sat/substance_deamon -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Fsubstance_daemon
+          curl --data-binary @/app/builds/sat/substance_deamon -k -H Content-Type:application/octet-stream https://api.eventhorizon.pw/fs/upload/artifacts%2Fsubstance_daemon
 
       # Editor
       - run: >
@@ -111,9 +111,9 @@ jobs:
           ../../dev_tools/editor/
       - run: make -j8 -C 'builds/editor_em/'
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.js -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Feditor.js
+          curl --data-binary @/app/builds/editor_em/editor.js -k -H Content-Type:application/octet-stream https://api.eventhorizon.pw/fs/upload/artifacts%2Feditor.js
       - run: |
-          curl --data-binary @/app/builds/editor_em/editor.wasm -k -H Content-Type:application/octet-stream https://eventhorizon.pw/api/fs/upload/artifacts%2Feditor.wasm
+          curl --data-binary @/app/builds/editor_em/editor.wasm -k -H Content-Type:application/octet-stream https://api.eventhorizon.pw/fs/upload/artifacts%2Feditor.wasm
 
       # run tests!
 
@@ -126,7 +126,7 @@ jobs:
           command: |
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo mkdir sat;
             cd sat; echo -e "FROM sixthview/build:1.1.0\nADD substance_daemon /\nCMD [\"./substance_daemon\" ]" | sudo tee dockerfile;
-            sudo curl https://eventhorizon.pw/api/fs/get/artifacts%2Fsubstance_daemon -o substance_daemon;
+            sudo curl https://api.eventhorizon.pw/fs/get/artifacts%2Fsubstance_daemon -o substance_daemon;
             sudo chmod 777 substance_daemon;
             sudo docker kill $(docker ps --filter "ancestor=sat" -q);
             sudo docker build -t sat .;

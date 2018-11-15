@@ -189,14 +189,6 @@ namespace Http {
 
     const std::string CLOUD_SERVER() {
         if ( sUseLocalhost ) {
-            return "localhost"+Config::API;
-        } else {
-            return Config::HOSTNAME+Config::API;
-        }
-    }
-
-    const std::string CLOUD_HOST() {
-        if ( sUseLocalhost ) {
             return "localhost";
         } else {
             return Config::HOSTNAME;
