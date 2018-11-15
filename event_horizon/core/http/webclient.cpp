@@ -195,6 +195,14 @@ namespace Http {
         }
     }
 
+    const std::string CLOUD_HOST() {
+        if ( sUseLocalhost ) {
+            return "localhost";
+        } else {
+            return Config::HOSTNAME;
+        }
+    }
+
     short CLOUD_PORT() {
         return 80;
     }

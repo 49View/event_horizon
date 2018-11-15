@@ -15,7 +15,7 @@ namespace Socket {
     void on( const std::string& eventName, std::function<void(const rapidjson::Document&)> f ) {
         static bool connected_first_time = false;
         if ( !connected_first_time ) {
-            const std::string host = Url::Host( Url::HttpsProtocol, Http::CLOUD_SERVER(), Http::CLOUD_PORT_SSL() );
+            const std::string host = Url::Host( Url::HttpsProtocol, Http::CLOUD_HOST(), Http::CLOUD_PORT_SSL() );
             startClient(host);
             connected_first_time = true;
         }
@@ -25,11 +25,6 @@ namespace Socket {
 
     void onMessage( const std::string& _message ) {
 
-//const char* mu = "{\"msg\":\"/HouseBSData/create\",\"name\":\"169772_103023000372_FLP_01_0000_max_1350x1350\"}";
-//const char* mu = "{\"msg\":\"/HouseBSData/create\",\"name\":\"169772_103023000372_FLP_01_0000_max_1350x1350\"}";
-//const char* mu = "{\"msg\":\"/HouseBSData/create\",\"name\":\"169772_103023000372_FLP_01_0000_max_1350x1350\"}";
-
-//        const char* mus = mu.c_str();
         LOGR( "[WEB-SOCKET-MESSAGE] %s", _message.c_str());
 
         rapidjson::Document document;

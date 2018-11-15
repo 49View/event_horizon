@@ -16,6 +16,9 @@ namespace Socket {
     std::unique_ptr<emscripten::val> socket;
 
     void onSocketEventCallback( std::string _event, std::string _json ) {
+        LOGR( "[WEB-SOCKET] Event: %s", _event.c_str() );
+        LOGR( "[WEB-SOCKET] Message: %s", _json.c_str() );
+
         if ( _event == "message" ) {
             auto jt = unescape( trim( _json, '"' ) );
             onMessage( jt );
