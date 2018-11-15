@@ -124,12 +124,13 @@ jobs:
       - run:
           name: Deploy Substance daemon
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo mkdir sat; cd sat; echo -e "FROM sixthview/build:1.1.0\nADD substance_daemon /\nCMD [\"./substance_daemon\" ]" | tee dockerfile;
-                                                                                    curl https://eventhorizon.pw/api/fs/get/artifacts%2Fsubstance_daemon -o substance_daemon;
-                                                                                    sudo chmod 777 substance_daemon;
-                                                                                    sudo docker kill $(docker ps --filter "ancestor=sat" -q);
-                                                                                    sudo docker build -t sat .;
-                                                                                    sudo docker run -d sat'
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo mkdir sat;
+            cd sat; echo -e "FROM sixthview/build:1.1.0\nADD substance_daemon /\nCMD [\"./substance_daemon\" ]" | sudo tee dockerfile;
+            sudo curl https://eventhorizon.pw/api/fs/get/artifacts%2Fsubstance_daemon -o substance_daemon;
+            sudo chmod 777 substance_daemon;
+            sudo docker kill $(docker ps --filter "ancestor=sat" -q);
+            sudo docker build -t sat .;
+            sudo docker run -d sat'
 
 workflows:
   version: 2
