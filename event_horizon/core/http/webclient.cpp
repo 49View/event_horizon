@@ -27,7 +27,7 @@ Url::Url( std::string _uri ) : uri( _uri ) {
 }
 
 std::smatch Url::parseUrl( const std::string& _fullurl ) {
-    std::regex regv = std::regex( "(https?):\\/{2}(:?\\w*)(.*?)\\/(.*)" );
+    std::regex regv = std::regex( "(https?):\\/{2}(\\w.*?)(:?\\d*)\\/(.*)" );
     std::smatch base_match;
     std::regex_search( _fullurl, base_match, regv );
 
@@ -42,12 +42,20 @@ void Url::fromString( const std::string& _fullurl ) {
 
     std::smatch base_match = parseUrl( _fullurl );
     if ( base_match.size() == 5 ) {
+        for ( const auto& m : base_match ) {
+            LOGR( m.str().c_str() );
+        }
         protocol = base_match[1].str();
         host = base_match[2].str();
         if ( !base_match[3].str().empty() ) {
             std::string strPort = base_match[3].str();
             strPort = string_trim_after( strPort, ":" );
-            port = std::stoi( strPort );
+            try {
+                port = std::stoi( strPort );
+            } catch ( const std::exception& ex ) {
+                LOGR( "[URL-FROMSTRING][ERROR] on %s, port: %s", _fullurl.c_str(), strPort.c_str() );
+                LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
+            }
         }
         uri = "/" + base_match[4].str();
     }
