@@ -7,6 +7,33 @@ const router = express.Router();
 const entityModel = require('../models/entity');
 const entityController = require('../controllers/entityController');
 
+router.get('/content/byId/:id', async (req, res, next) => {
+    try {
+
+    } catch (ex) {
+        console.log("ERROR GETTING ENTITY CONTENT BYID: ", ex);
+        res.sendStatus(400);
+    }
+});
+
+router.get('/content/byGroupKeys/:group/:keys', async (req, res, next) => {
+    try {
+
+    } catch (ex) {
+        console.log("ERROR GETTING ENTITY CONTENT BYGROUPKEYS: ", ex);
+        res.sendStatus(400);
+    }
+});
+
+router.get('/metadata/byGroupKeys/:group/:keys', async (req, res, next) => {
+    try {
+
+    } catch (ex) {
+        console.log("ERROR GETTING ENTITY METADATA BYGROUPKEYS: ", ex);
+        res.sendStatus(400);
+    }
+});
+
 router.post('/', async (req, res, next) => {
 
     try {
