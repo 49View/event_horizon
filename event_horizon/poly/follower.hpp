@@ -35,6 +35,7 @@ public:
 
 	std::shared_ptr<GeomData> operator()( std::shared_ptr<PBRMaterial> material, const std::vector<Vector3f>& verts,
 								 		  std::shared_ptr<Profile> profile,
+										  const Vector3f& _suggestedAxis,
 										  const FollowerGap& gaps = FollowerGap::Empty );
 
 	std::shared_ptr<HierGeom> extrude( const std::vector<Vector3f>& verts, std::shared_ptr<Profile> profile, const FollowerGap& gaps = FollowerGap::Empty );
@@ -73,7 +74,9 @@ public:
 private:
 	void compositePolys( std::shared_ptr<GeomData> _geom, std::vector<FollowerPoly>& polys,
 						 const CompositeWrapping cpw = CompositeWrapping::Wrap );
-	void createLineFromVerts( const std::vector<Vector3f>& _verts, const FollowerGap& gaps );
+	void createLineFromVerts( const std::vector<Vector3f>& _verts,
+							  const Vector3f& _suggestedAxis,
+							  const FollowerGap& gaps );
 	void triangulate( std::shared_ptr<GeomData> _geom );
 
 	bool skipGapAt( int t );

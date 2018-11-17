@@ -178,7 +178,7 @@ std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
     mProfile->flip( mFlipVector );
 
 	Follower f{ accuracyNone, followersFlags };
-	auto ret = f( material, mVerts, mProfile, mGaps );
+	auto ret = f( material, mVerts, mProfile, mSuggestedAxis, mGaps );
 
 	mProfile->flip( -mFlipVector );
 	mProfile->raise( -lRaise );

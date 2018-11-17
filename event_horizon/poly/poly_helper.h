@@ -133,8 +133,9 @@ public:
         VerticalNeg
     };
 
-    GeomDataFollowerBuilder( std::shared_ptr<Profile> _profile, const std::vector<Vector3f>& verts ) :
-                             mProfile( _profile ), mVerts( verts ) {}
+    GeomDataFollowerBuilder( std::shared_ptr<Profile> _profile, const std::vector<Vector3f>& verts,
+                             const Vector3f& _suggestedAxis ) :
+                             mProfile( _profile ), mVerts( verts ), mSuggestedAxis(_suggestedAxis) {}
     std::shared_ptr<GeomData> build() override;
 
     GeomDataFollowerBuilder& raise( const Vector2f& _r ) {
@@ -165,6 +166,7 @@ public:
 protected:
     std::shared_ptr<Profile> mProfile;
     std::vector<Vector3f> mVerts;
+    Vector3f mSuggestedAxis = Vector3f::ZERO;
     Vector2f mRaise = Vector2f::ZERO;
     Vector2f mFlipVector = Vector2f::ZERO;
     Raise mRaiseEnum = Raise::None;

@@ -187,14 +187,16 @@ public:
     }
 
     GeomBuilder( const ProfileSchema& _ps, const std::vector<Vector2f>& _outline,
-                 const float _z = 0.0f ) {
+                 const float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO ) {
         mProfileSchema = _ps;
         for (auto &v: _outline) profilePath.emplace_back( Vector3f{v, _z} );
         builderType = GeomBuilderType::follower;
     }
 
-    GeomBuilder( const ProfileSchema& _ps, const std::vector<Vector3f>& _outline ) {
+    GeomBuilder( const ProfileSchema& _ps, const std::vector<Vector3f>& _outline,
+                 const Vector3f& _suggestedAxis = Vector3f::ZERO ) {
         mProfileSchema = _ps;
+        mFollowerSuggestedAxis = _suggestedAxis;
         for (auto &v: _outline) profilePath.emplace_back( v );
         builderType = GeomBuilderType::follower;
     }
@@ -310,13 +312,14 @@ private:
     subdivisionAccuray subdivAccuracy = accuracyNone;
 
     ProfileSchema mProfileSchema;
+    std::vector<Vector3f> profilePath;
     FollowerGap mGaps = FollowerGap::Empty;
+    Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
 
     GeomMappingData mapping;
 
     std::vector<PolyOutLine> outlineVerts;
 
-    std::vector<Vector3f> profilePath;
     std::vector<PolyLine> polyLines;
 
     QuadVector3fNormalfList quads;

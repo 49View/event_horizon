@@ -107,7 +107,9 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
             createFromProcedural( std::make_shared<GeomDataQuadMeshBuilder>( quads ), sg );
             break;
         case GeomBuilderType::follower: {
-            auto fbg = std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( mProfileSchema.name ), profilePath );
+            auto fbg = std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( mProfileSchema.name ),
+                                                                  profilePath,
+                                                                  mFollowerSuggestedAxis );
             fbg->ff( mProfileSchema.flags );
             fbg->raise( mProfileSchema.raise);
             fbg->flip( mProfileSchema.flipVector );

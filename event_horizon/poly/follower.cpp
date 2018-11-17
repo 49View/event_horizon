@@ -106,7 +106,8 @@ Vector3f rotateFollowerPlane90( const Vector3f& vpos, const Vector3f& vn3d) {
     return vqn.vector();
 }
 
-void Follower::createLineFromVerts( const std::vector<Vector3f>& _verts, const FollowerGap& gaps ) {
+void Follower::createLineFromVerts( const std::vector<Vector3f>& _verts, const Vector3f& _suggestedAxis,
+                                    const FollowerGap& gaps ) {
     vcoords.clear();
     vtcoords.clear();
     vplanesb.clear();
@@ -165,6 +166,18 @@ void Follower::createLineFromVerts( const std::vector<Vector3f>& _verts, const F
 
     // Generated all the verts data, after the gaps calculator
     vaCount = static_cast<int32_t>( newverts.size());
+
+    Vector3f vposPlane;
+    if ( _suggestedAxis == Vector3f::ZERO ) {
+        if ( vaCount == 2 ) {
+            vposPlane = mDefaultUpAxis;
+        } else {
+            vposPlane = normalize( crossProduct( newverts[0], newverts[1], newverts[2] ));
+        }
+    } else {
+        vposPlane = _suggestedAxis;
+    }
+
     for ( int m = 0; m < vaCount; m++ ) {
         bool bWrap = ( CurrentFlags() & FollowerFlags::WrapPath );
         Vector3f vleft = getLeftVectorFromList( newverts, m, bWrap );
@@ -173,29 +186,16 @@ void Follower::createLineFromVerts( const std::vector<Vector3f>& _verts, const F
         Vector3f vn3d = normalize( vright - vpos );
         vnormals3d.push_back( vn3d );
 
-        Vector3f vposPlane;
-        Vector3f vposPlaneHandnessCheck;
         Vector3f vposPlanePerpR;
         Vector3f vposPlanePerpL;
         bool bStartEndNonWrapCases = false;
         if ( m == 0 && !bWrap ) {
             vright = getRightVectorFromList( newverts, m + 1, bWrap );
             bStartEndNonWrapCases = true;
-        } else if ( m == 0 && bWrap ) {
-            auto bs = getRightVectorFromList( newverts, m + 1, bWrap );
-            vposPlaneHandnessCheck = normalize(crossProduct(vpos, vright, bs));
         }
         if ( m == vaCount - 1 && !bWrap ) {
             vright = getLeftVectorFromList( newverts, m-1, bWrap );
             bStartEndNonWrapCases = true;
-        }
-        if ( vaCount == 2 ) {
-            vposPlane = mDefaultUpAxis;
-        } else {
-            vposPlane = normalize(crossProduct(vleft, vpos, vright));
-            if ( vposPlane.signScalar() != vposPlaneHandnessCheck.signScalar() ) {
-                vposPlane *= -1.0f;
-            }
         }
         if ( bStartEndNonWrapCases ) {
             vposPlanePerpL = crossProduct( vpos, vpos + vposPlane, vleft );
@@ -345,8 +345,8 @@ void Follower::triangulate( std::shared_ptr<GeomData> _geom ) {
         rp2 = mProfile->rotatePoints( vplanesb[t + 1], vplanest[t + 1], vcoords[t + 1] );
 
         for ( uint64_t m = 0; m < rp1.size() - wrapIndex; m++ ) {
-            int64_t mi =  static_cast<int64_t >(m);
-            int64_t rpsizei = static_cast<int64_t >(rp1.size());
+            auto mi =  static_cast<int64_t >(m);
+            auto rpsizei = static_cast<int64_t >(rp1.size());
             uint64_t mn1 = getCircularArrayIndex( mi - 1, rpsizei );
             uint64_t nextIndex = getCircularArrayIndex( mi + 1, rpsizei );
             uint64_t nextIndexp1 = getCircularArrayIndex( mi + 2, rpsizei );
@@ -355,7 +355,7 @@ void Follower::triangulate( std::shared_ptr<GeomData> _geom ) {
                                          static_cast<size_t>(nextIndex), static_cast<size_t>(nextIndexp1)}};
 
             bool bAxisExclusionIsFine = true;
-            if ( mAxisExtrudeExclusions.size() > 0 ) {
+            if ( !mAxisExtrudeExclusions.empty() ) {
                 for ( auto& av : mAxisExtrudeExclusions ) bAxisExclusionIsFine &= dot( av, fp.vn ) < 0.95f;
             }
 
@@ -406,6 +406,7 @@ std::shared_ptr<GeomData>
 Follower::operator()( std::shared_ptr<PBRMaterial> material,
                       const std::vector<Vector3f>& verts,
                       std::shared_ptr<Profile> profile,
+                      const Vector3f& _suggestedAxis,
                       const FollowerGap& gaps ) {
 
     std::shared_ptr<GeomData> geom = std::make_shared<GeomData>(material);
@@ -413,7 +414,7 @@ Follower::operator()( std::shared_ptr<PBRMaterial> material,
     mProfile = profile;
     Rect2f profilebbox( mProfile->Points() );
     mBBoxProfile.createRect( profilebbox, mProfile->PPP());
-    createLineFromVerts( verts, gaps );
+    createLineFromVerts( verts, _suggestedAxis, gaps );
     triangulate( geom );
 
     return geom;
