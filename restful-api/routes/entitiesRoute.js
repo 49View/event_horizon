@@ -1,4 +1,4 @@
-const fsc = require('../controllers/fsController');
+const fsController = require('../controllers/fsController');
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -10,14 +10,29 @@ const entityController = require('../controllers/entityController');
 router.post('/', async (req, res, next) => {
 
     try {
+        const project = req.user.project;
         const metadata = entityController.getMetadataFromBody(true, true, req);
-        const { content, group, keys, cleanMetadata } = entityController.cleanupMetadata(null, metadata);
+        const { content, group, keys, public, cleanMetadata } = entityController.cleanupMetadata(metadata);
+        const filePath=entityController.getFilePath(project, group, cleanMetadata.contentHash);
+        //Add special keys for project, group and public
+        entityController.addSpecialKeys(project, group, public, keys);
+        //Check content exists in project and group
+        const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.contentHash)
+        if (copyEntity!==null) {
+            //Delete existing entity
+            entityController.deleteEntity(copyEntity._id);
+            //Delete existing entity key relations
+            entityController.deleteEntityKeysRelations(copyEntity._id);
+        } else {
+            //Upload file to S3
+            await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities");
+        }
+        //Create entity
+        const newEntity = await entityController.createEntity(project, group, cleanMetadata);
+        //Create key with relations to entity
+        await entityController.createEntityKeysRelations(newEntity._id, keys);
 
-        console.log("CONTENT:", content);
-        console.log("GROUP:", group);
-        console.log("KEYS:", keys);
-
-        res.status(200).send(cleanMetadata);
+        res.status(200).send(newEntity);
     } catch (ex) {
         console.log("ERROR CREATING ENTITY: ", ex);
         res.sendStatus(400);
@@ -26,15 +41,43 @@ router.post('/', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
     try {
-        //Get entity from DB by id
-        const entityDB = { contentHash: "a123b456"};
-
+        const entityId = req.params.id;
+        const project = req.user.project;
+        //Check existing entity for use project
+        const currentEntity = await entityController.getEntityByIdProject(project, entityId);
+        if (currentEntity===null) {
+            throw "Invalid entity for user project";
+        }
+        const group = currentEntity.group;
         const metadata = entityController.getMetadataFromBody(false, false, req);
-        const { keys, cleanMetadata } = entityController.cleanupMetadata(entityDB.contentHash, metadata);
+        const { content, keys, public, cleanMetadata } = entityController.cleanupMetadata(metadata);
+        //Add special keys for project, group and public
+        entityController.addSpecialKeys(project, group, public, keys);
+        //If content defined
+        if (content!==null) {
+            //Check content exists in project and group
+            const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.contentHash)
+            if (copyEntity!==null && !copyEntity._id.equals(currentEntity._id)) {
+                throw "Content already defined";
+            } else if (copyEntity===null) {
+                //Remove current file from S3
+                await fsController.cloudStorageDelete(entityController.getFilePath(project, group, currentEntity.metadata.contentHash), "eventhorizonentities");
+                //Upload file to S3
+                const filePath=entityController.getFilePath(project, group, cleanMetadata.contentHash);
+                await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities");
+            }
+        } else {
+            //If content don't change use current contentHash 
+            cleanMetadata.contentHash=currentEntity.metadata.contentHash;
+        }
+        //Delete existing entity keys relations
+        await entityController.deleteEntityKeysRelations(currentEntity._id);
+        //Update entity
+        await entityController.updateEntity(currentEntity._id, project, group, cleanMetadata);
+        //Create key with relations to entity
+        await entityController.createEntityKeysRelations(currentEntity._id, keys);
 
-        console.log("KEYS:", keys);
-
-        res.status(200).send(cleanMetadata);
+        res.status(204).send();
     } catch (ex) {
         console.log("ERROR UPDATING ENTITY: ", ex);
         res.sendStatus(400);
@@ -42,6 +85,30 @@ router.put('/:id', async (req, res, next) => {
 
 });
 
+router.delete('/:id', async (req, res, next) => {
+    try {
+        const entityId = req.params.id;
+        const project = req.user.project;
+        //Check existing entity for use project
+        const currentEntity = await entityController.getEntityByIdProject(project, entityId);
+        if (currentEntity===null) {
+            throw "Invalid entity for user project";
+        }
+        const group = currentEntity.group;
+        //Remove current file from S3
+        await fsController.cloudStorageDelete(entityController.getFilePath(project, group, currentEntity.metadata.contentHash), "eventhorizonentities");
+        //Delete existing entity keys relations
+        await entityController.deleteEntityKeysRelations(currentEntity._id);
+        //Delete existing entity
+        entityController.deleteEntity(currentEntity._id);
+
+        res.status(204).send();
+    } catch (ex) {
+        console.log("ERROR UPDATING ENTITY: ", ex);
+        res.sendStatus(400);
+    }
+
+});
 
 // router.get('/entities/one/:group/:keys', async (req, res, next) => {
 

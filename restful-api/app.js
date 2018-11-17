@@ -42,7 +42,7 @@ app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 app.use('/', indexRoute);
 app.use('/', tokenRoute);
 
-// app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
+app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
 
 // app.use(authController.authorize);
 

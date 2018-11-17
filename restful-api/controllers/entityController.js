@@ -25,15 +25,17 @@ exports.getMetadataFromBody = (checkGroup, checkRaw, req) => {
     return metadata;
 }
 
-exports.cleanupMetadata = (contentHash, metadata) => {
+exports.cleanupMetadata = (metadata) => {
     const result = {};
 
-    if (contentHash===null) {
+    if (typeof(metadata.raw)!=="undefined") {
         result.content = new Buffer(metadata.raw, "base64");
         metadata.contentHash = crypto.createHash('sha256').update(metadata.raw).digest("hex");
     } else {
-        metadata.contentHash = contentHash;
+        result.content = null;
+        delete metadata.contentHash;
     }
+
     result.group = metadata.group;
     result.keys = metadata.tags;
     result.public = metadata.public || false;
@@ -45,8 +47,91 @@ exports.cleanupMetadata = (contentHash, metadata) => {
     //Add hash attribute
     result.cleanMetadata = metadata;
 
-    console.log(result);
     return result;
+}
+
+exports.addSpecialKeys = (project, group, public, keys) => {
+
+    keys.push("project_"+project);
+    keys.push("group_"+group);
+    if (public) {
+        keys.push("extra_public");
+    }
+
+}
+
+exports.getFilePath = (project, group, contentHash) => {
+    return project+"/"+group+"/"+contentHash;
+}
+
+exports.checkFileExists = async (project, group, contentHash) => {
+
+    const query = {$and: [{"metadata.contentHash":contentHash}, {"group":group}, {"project":project}]};
+    const result = await entityModel.findOne(query);
+
+    return result!==null?result.toObject():null;
+}
+
+exports.createEntity = async (project, group, metadata) => {
+    const newEntityDB = new entityModel({ project: project, group: group, metadata: metadata});
+    await newEntityDB.save();
+    return newEntityDB.toObject();
+}
+
+exports.updateEntity = async (entityId, project, group, metadata) => {
+    const query = { _id: mongoose.Types.ObjectId(entityId)};
+
+    await entityModel.updateOne(query, { project: project, group: group, metadata: metadata});
+}
+
+exports.createEntityKeysRelations = async(entityId, keys) => {
+
+    const upsertOps = [];
+    keys.forEach(key => {
+        upsertOps.push(
+            {
+                updateOne: {
+                    filter: { key: key},
+                    update: {
+                        "$addToSet": {"entities": mongoose.Types.ObjectId(entityId)},
+                        "$setOnInsert": { "key": key}
+                    },
+                    upsert: true
+                }
+            }
+        );
+    });    
+    await entityKeyModel.bulkWrite(upsertOps, {ordered: false});
+}
+
+exports.deleteEntity = async (entityId) => {
+    await entityModel.deleteOne({ _id: mongoose.Types.ObjectId(entityId)});
+}
+
+exports.deleteEntityKeysRelations = async (entityId) => {
+    const updateOps = [
+        {
+            updateMany: {
+                filter: { entities: { $elemMatch: { $eq: mongoose.Types.ObjectId(entityId) }}},
+                update: {
+                    $pull: { entities: mongoose.Types.ObjectId(entityId)}
+                }
+            }
+        },
+        {   
+            deleteMany: {
+                filter: { entities: { $size: 0 }}
+            }
+        }
+    ];
+    await entityKeyModel.bulkWrite(updateOps, {ordered: true});
+}
+
+exports.getEntityByIdProject = async (project, entityId) => {
+    const query = {$and: [{_id: mongoose.Types.ObjectId(entityId)}, {"project":project}]};
+    const result = await entityModel.findOne(query);
+
+    return result!==null?result.toObject():null;
 }
 
 // const sendFile = ( res, data ) => {
