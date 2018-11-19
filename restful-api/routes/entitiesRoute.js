@@ -113,8 +113,6 @@ router.put('/:id', async (req, res, next) => {
             //If content don't change use current contentHash 
             cleanMetadata.contentHash=currentEntity.metadata.contentHash;
         }
-        //Delete existing entity keys relations
-        await entityController.deleteEntityKeysRelations(currentEntity._id);
         //Update entity
         await entityController.updateEntity(currentEntity._id, project, group, public, cleanMetadata);
 
