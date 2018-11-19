@@ -143,7 +143,7 @@ enum FollowerFlags {
 	NoOverRide = 0,
 	WrapPath = 1,
 	NoCaps = 1 << 1,
-	SplitGeom = 1 << 2
+	UsePlanarMapping = 1 << 2
 	//	StraightAngles =			1 << 1,
 };
 

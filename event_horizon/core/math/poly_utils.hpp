@@ -69,6 +69,7 @@ std::vector<polyQuadSub> quadSubDivInv(const std::array<Vector3f, 4>& vss,
 Vector3f utilMirrorFlip( const Vector3f& v, WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );
 WindingOrderT detectWindingOrder( const Vector2f& pa, const Vector2f& pb, const Vector2f& pc );
 WindingOrderT detectWindingOrder( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3 );
+WindingOrderT detectWindingOrder( const std::vector<Vector2f>& _input );
 void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
              const Vector2f& uv1, const Vector2f& uv2, const Vector2f& uv3,
              Vector3f& tangent1, Vector3f& tangent2, Vector3f& tangent3,

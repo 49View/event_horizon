@@ -233,8 +233,8 @@ class GeomData {
 public:
     GeomData();
     virtual ~GeomData();
-    GeomData( std::shared_ptr<DeserializeBin> reader );
-    GeomData( std::shared_ptr<PBRMaterial> _material) : material(_material) {}
+    explicit GeomData( std::shared_ptr<DeserializeBin> reader );
+    explicit GeomData( std::shared_ptr<PBRMaterial> _material) : material(_material) {}
     GeomData( const ShapeType _st,
               const Vector3f& _pos, const Vector3f& _axis, const Vector3f& _scale,
               std::shared_ptr<PBRMaterial> _material,
@@ -260,6 +260,7 @@ public:
 
     std::shared_ptr<PBRMaterial> getMaterial() { return material; }
     std::shared_ptr<PBRMaterial> getMaterial() const { return material; }
+    void setMaterial( std::shared_ptr<PBRMaterial> _mat ) { material = _mat; }
     Color4f getColor() const { return getMaterial()->getColor(); }
     float getOpacity() const { return getMaterial()->getOpacity(); }
 //    void setOpacity( float _opacity )  { mOpacity = _opacity; }
@@ -414,10 +415,12 @@ public:
     void setWindingOrderFlagOnly( const WindingOrderT _wo );
     WindingOrderT getWindingOrder() const;
 
+    void resetWrapMapping( const std::vector<float>& yWrapArray );
+    void updateWrapMapping( Vector3f vs[4], Vector2f vtcs[4], uint64_t m, uint64_t size );
+    void planarMapping( const Vector3f& normal, const Vector3f vs[], Vector2f vtcs[], int numVerts );
+
     template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( "Name,BBbox", mName,mBBox3d ); }
-
-protected:
 
     // All internal add polygons are now not accessible to the outside to handle topology better
     void pushQuad( const std::array<Vector3f, 4>& vs, const std::array<Vector2f, 4>& vts, const Vector3f& vn );
@@ -444,6 +447,8 @@ protected:
                        const Vector3f& vb1 = Vector3f::ZERO, const Vector3f& vb2 = Vector3f::ZERO,
                        const Vector3f& vb3 = Vector3f::ZERO );
 
+protected:
+
     void addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector3f& _vn, const Vector3f& _vt,
                             const Vector3f& _vb );
 
@@ -456,7 +461,6 @@ protected:
     void setMappingData( const GeomMappingData& _mapping );
     void setTextureCoordsMultiplier();
     void resetMapping( uint64_t arraySize );
-    void resetWrapMapping( const std::vector<float>& yWrapArray );
     void propagateWrapMapping( const GeomData *source );
 
     void pushTriangleSubDivRec( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
@@ -464,12 +468,9 @@ protected:
                                 const Vector3f& vn1, const Vector3f& vn2, const Vector3f& vn3,
                                 int triSubDiv );
 
-    void updateWrapMapping( Vector3f vs[4], Vector2f vtcs[4], uint64_t m, uint64_t size );
-
     template<typename T>
     void updatePullMapping( const std::array<T, 4>& vs, std::array<Vector2f, 4>& vtcs );
 
-    void planarMapping( const Vector3f& normal, const Vector3f vs[], Vector2f vtcs[], int numVerts );
     void calcMirrorUVs( Vector2f *uvs );
 
 protected:

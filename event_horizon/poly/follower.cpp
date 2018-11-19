@@ -83,6 +83,160 @@ bool FollowerGap::isGap( FollowerGapSide side, uint64_t index, float& inset ) co
     return true;
 }
 
+namespace FollowerService {
+
+    std::vector<Vector3f> rotateAndIntersectData( const std::vector<Vector3f>& source, const Plane3f& lvplanes,
+                                                  const Vector3f vn ) {
+        // UVs, the "x" axis is running parallel to vcoords and it's just the length value
+        // UVs, the "y" axis is running wrapping the profile, and it's just the length value
+        // the "y"s have got 1 more entry in the array because they need to hold the total length to avoid wrapping around zero
+        std::vector<Vector3f> ret;
+        for ( auto m : source ) {
+            Vector3f vce2 = m + ( vn * 1000000.0f );
+            ret.push_back( lvplanes.intersectLineGrace( m, vce2 ));
+        }
+        return ret;
+    }
+
+    void addLineVert( const std::vector<Vector3f>& _verts, FollowerIntermediateData& _fid, size_t _m, bool _bWrap ) {
+
+        bool isLastWrap = (_bWrap && (_m == _verts.size()));
+
+        Vector3f vleft = getLeftVectorFromList( _verts, _m, _bWrap );
+        Vector3f vright = getRightVectorFromList( _verts, _m, _bWrap );
+        Vector3f vpos = _verts[_m];
+
+        // This is to add and extra vert in case the path is wrapped
+        if ( isLastWrap ) {
+            vleft = _verts[_verts.size()-1];
+            vright = _verts[0];
+            vpos = mix( vleft, vright, 0.5f);
+            _fid.vcoords.push_back( _verts.front() );
+        } else {
+            _fid.vcoords.push_back( vpos );
+        }
+
+        Vector3f vposPlanePerpL = crossProduct( vleft, vpos, vpos + _fid.vplanet );
+        Vector3f vposPlanePerpR = crossProduct( vpos + _fid.vplanet, vpos, vright );
+
+        Vector3f vn = normalize(vposPlanePerpL + vposPlanePerpR);
+        Vector3f vd = normalize(vright - vpos);
+        Vector3f vl = normalize(vpos - vleft);
+        Vector3f vdn = normalize( vd + vl );
+
+        _fid.vplanesb.push_back( vn );
+
+        if ( isLastWrap ) {
+            _fid.vdirs.push_back(normalize(_verts.front() - _verts.back()));
+            _fid.vplanesn.emplace_back(_fid.vplanesn.front() );
+        } else {
+            _fid.vplanesn.emplace_back( vdn, vpos );
+            _fid.vdirs.push_back( vd );
+        }
+
+    }
+
+    std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& _verts,
+                                       std::shared_ptr<Profile> profile,
+                                       const Vector3f& _suggestedAxis,
+                                       const FollowerFlags& ff ) {
+
+    std::shared_ptr<GeomData> geom = std::make_shared<GeomData>();
+
+    bool bWrap = checkBitWiseFlag(ff, FollowerFlags::WrapPath);
+
+    // Sanitize same points and collinear
+    std::vector<Vector3f> verts;
+    sanitizePath( _verts, verts, bWrap );
+
+    auto vaCount = verts.size();
+    if ( vaCount < 2 ) {
+        LOGR("[ERROR] Extruded geometry has less then 2 vertices, impossible to extrude." );
+        return geom;
+    }
+    if ( vaCount == 2 ) bWrap = false;
+
+    FollowerIntermediateData fid;
+
+    fid.vplanet = _suggestedAxis;
+    if ( _suggestedAxis == Vector3f::ZERO ) {
+        if ( vaCount > 2 ) {
+            fid.vplanet = normalize( crossProduct( verts[0], verts[1], verts[2] ));
+        } else {
+            fid.vplanet = normalize( crossProduct( verts[0], verts[1], verts[1] + Vector3f{unitRand()} ) );
+        }
+    } else {
+        fid.vplanet = _suggestedAxis;
+    }
+
+    for ( size_t m = 0; m < vaCount + bWrap; m++ ) {
+        addLineVert( verts, fid, m, bWrap );
+    }
+
+    // Temp data for triangulation
+    std::vector<Vector3f> rp2;
+    std::vector<Vector3f> rp1;
+    std::vector<FollowerPoly> polys;
+
+    geom->resetWrapMapping( profile->Lengths() );
+    geom->setWindingOrderFlagOnly( detectWindingOrder( profile->Points() ) );
+
+    auto vcFinalSize = fid.vcoords.size();
+    // Pre-loop setup, allocate/setup first element
+    if ( bWrap ) {
+        rp2 = profile->rotatePoints( fid.vplanesb[ vcFinalSize - 1], fid.vplanet, fid.vcoords[vcFinalSize - 2] );
+        rp1 = rotateAndIntersectData( rp2, fid.vplanesn[0], fid.vdirs[fid.vcoords.size() - 1] );
+    } else {
+        rp1 = profile->rotatePoints( fid.vplanesb[0], fid.vplanet, fid.vcoords[0] );
+    }
+
+    int wrapIndex = rp1.size() > 2 ? 0 : 1;
+
+    // This triangulate the shape by wrapping points between 2 joints
+    for ( size_t t = 0; t < vcFinalSize - 1; t++ ) {
+
+        rp2 = rotateAndIntersectData( rp1, fid.vplanesn[t+1], fid.vdirs[t] );
+
+        for ( uint64_t m = 0; m < rp1.size() - wrapIndex; m++ ) {
+            auto mi =  static_cast<int64_t >(m);
+            auto rpsizei = static_cast<int64_t >(rp1.size());
+            auto mn1 = static_cast<uint64_t>(getCircularArrayIndex( mi - 1, rpsizei ));
+            auto nextIndex = static_cast<uint64_t>(getCircularArrayIndex( mi + 1, rpsizei ));
+            auto nextIndexp1 = static_cast<uint64_t>(getCircularArrayIndex( mi + 2, rpsizei ));
+
+            FollowerPoly fp{ rp1, rp2, { static_cast<size_t>(mn1), static_cast<size_t>(m),
+                                         static_cast<size_t>(nextIndex), static_cast<size_t>(nextIndexp1)} };
+
+            if ( checkBitWiseFlag(ff, FollowerFlags::UsePlanarMapping) ) {
+                geom->planarMapping( absolute( fp.vn ), fp.vs.data(), fp.vtcs.data(), 4 );
+            } else {
+                geom->updateWrapMapping( fp.vs.data(), fp.vtcs.data(), m, rp1.size() );
+            }
+
+            polys.push_back( fp );
+        }
+
+        // Make previous next array current array
+        rp1 = rp2;
+    }
+
+    // Add all the polys
+    for ( auto& fp : polys ) {
+        geom->pushQuadSubDiv( fp.vs, fp.vtcs, fp.vncs );
+    }
+
+//    if ( !( checkBitWiseFlag(CurrentFlags(), FollowerFlags::NoCaps )) ) {
+//        _geom->addFlatPoly( mProfile->rotatePoints( vplanesb[0], vplanest[0], vcoords[0] ), mStartWindingOrder );
+//
+//        _geom->addFlatPoly( mProfile->rotatePoints( vplanesb[vcoords.size() - 1], vplanest[vcoords.size() - 1],
+//                                                    vcoords[vcoords.size() - 1]), !mStartWindingOrder );
+//    }
+
+    return geom;
+}
+
+}
+
 Follower::Follower( subdivisionAccuray subDivs /*= accuracyNone*/,
                     const FollowerFlags& ff /*= FollowerFlags::Defaults*/,
                     const std::string& _name /*= "FollowerUnnamed"*/,
@@ -92,7 +246,6 @@ Follower::Follower( subdivisionAccuray subDivs /*= accuracyNone*/,
     mGeomName = _name;
     mGeomType = 0;
     mCapsGeomType = 0;
-    mbCapStage = false;
     mbUsePlanarMapping = _bUseFlatMapping;
     mMappingDirection = _md;
 }
@@ -106,119 +259,6 @@ Vector3f rotateFollowerPlane90( const Vector3f& vpos, const Vector3f& vn3d) {
     return vqn.vector();
 }
 
-void Follower::createLineFromVerts( const std::vector<Vector3f>& _verts, const Vector3f& _suggestedAxis,
-                                    const FollowerGap& gaps ) {
-    vcoords.clear();
-    vtcoords.clear();
-    vplanesb.clear();
-    vplanest.clear();
-
-    // Sanitize same points and collinear
-    std::vector<Vector3f> verts;
-    sanitizePath( _verts, verts, checkBitWiseFlag( mCurrentFlags, FollowerFlags::WrapPath ) );
-
-    int32_t vaCount = static_cast<int32_t>( verts.size());
-
-    Vector3f v1 = Vector3f::ZERO;
-    Vector3f v2 = Vector3f::ZERO;
-
-    // This is a pre-loop to assign and tag all the new vertices generated by gaps,
-    // we are doing this here so the logic in the triangulator is trivial, otherwise it will be a massive headache to get the logic down in the triangulator.
-    std::vector<Vector3f> newverts;
-//    uint64_t startGapIndex = 0;
-//    uint64_t endGapIndex = 0;
-    int newvindex = 0;
-    float insetStart = 0.0f;
-    float insetEnd = 0.0f;
-    for ( int m = 0; m < vaCount; m++ ) {
-        bool isGapStart = gaps.isGap( FollowerGapSide::Start, m, insetStart );
-        bool isGapEnd = gaps.isGap( FollowerGapSide::End, m, insetEnd );
-
-        bool bWrap = checkBitWiseFlag( mCurrentFlags, FollowerFlags::WrapPath );// && !gaps.isGapAt( m );
-        Vector3f vleft = getLeftVectorFromList( verts, m, bWrap );
-        Vector3f vright = getRightVectorFromList( verts, m, bWrap );
-
-        Vector3f vpos = verts[m];
-
-        v1 = vleft - vpos;
-        v2 = vpos - vright;
-
-        if ( isGapStart ) {
-            vpos += ( normalize( v1 ) * insetStart );
-            newverts.push_back( vpos );
-            mGaps.pushGap( FollowerGapData( FollowerGapSide::Start, insetStart ));
-            ++newvindex;
-//            startGapIndex = newvindex;
-        }
-        newverts.push_back( verts[m] );
-        mGaps.pushGap( FollowerGapData( FollowerGapSide::NoGap ));
-        ++newvindex;
-        if ( isGapEnd ) {
-            vpos += ( normalize( v2 ) * -insetEnd );
-            newverts.push_back( vpos );
-            ++newvindex;
-//            endGapIndex = newvindex;
-            mGaps.pushGap( FollowerGapData( FollowerGapSide::End, insetEnd ));
-        }
-    }
-    // Go around and tag all the points in between start/end gap as "not visible"
-    mGaps.tagAllNotVisible();
-
-    // Generated all the verts data, after the gaps calculator
-    vaCount = static_cast<int32_t>( newverts.size());
-
-    Vector3f vposPlane;
-    if ( _suggestedAxis == Vector3f::ZERO ) {
-        if ( vaCount == 2 ) {
-            vposPlane = mDefaultUpAxis;
-        } else {
-            vposPlane = normalize( crossProduct( newverts[0], newverts[1], newverts[2] ));
-        }
-    } else {
-        vposPlane = _suggestedAxis;
-    }
-
-    for ( int m = 0; m < vaCount; m++ ) {
-        bool bWrap = ( CurrentFlags() & FollowerFlags::WrapPath );
-        Vector3f vleft = getLeftVectorFromList( newverts, m, bWrap );
-        Vector3f vright = getRightVectorFromList( newverts, m, bWrap );
-        Vector3f vpos = newverts[m];
-        Vector3f vn3d = normalize( vright - vpos );
-        vnormals3d.push_back( vn3d );
-
-        Vector3f vposPlanePerpR;
-        Vector3f vposPlanePerpL;
-        bool bStartEndNonWrapCases = false;
-        if ( m == 0 && !bWrap ) {
-            vright = getRightVectorFromList( newverts, m + 1, bWrap );
-            bStartEndNonWrapCases = true;
-        }
-        if ( m == vaCount - 1 && !bWrap ) {
-            vright = getLeftVectorFromList( newverts, m-1, bWrap );
-            bStartEndNonWrapCases = true;
-        }
-        if ( bStartEndNonWrapCases ) {
-            vposPlanePerpL = crossProduct( vpos, vpos + vposPlane, vleft );
-            vposPlanePerpR = vposPlanePerpL;
-        } else {
-            vposPlanePerpL = crossProduct( vleft , vpos, vpos + vposPlane );
-            vposPlanePerpR = crossProduct( vpos + vposPlane, vpos, vright );
-        }
-
-        Vector3f vn = normalize(vposPlanePerpL + vposPlanePerpR);
-
-        vcoords.push_back( vpos );
-        vplanesb.push_back( vn );
-        vplanest.push_back( vposPlane );
-    }
-
-    if (( CurrentFlags() & FollowerFlags::WrapPath )) {
-        vcoords.push_back( vcoords.front());
-        vplanesb.push_back( vplanesb.front());
-        vplanest.push_back( vplanest.front());
-    }
-}
-
 void Follower::reserveVBounding( uint64_t size ) {
     // Reserve space for the vBoundingContours
     for ( uint64_t vbi = 0; vbi <= size * 2 - 1; vbi++ ) {
@@ -226,39 +266,18 @@ void Follower::reserveVBounding( uint64_t size ) {
     }
 }
 
-void Follower::updateInternalTriangulationVars( std::shared_ptr<GeomData> lGeom, const Vector3f vs[], uint64_t m,
-                                                uint64_t t ) {
-    // Winding orders vars
-    if ( t == 0 && m == 0 ) {
-        mStartWindingOrder = mProfile->hasForcedWindingOrder() ? mProfile->windingOrder() : detectWindingOrder( vs[0],
-                                                                                                                vs[1],
-                                                                                                                vs[2] );
-        lGeom->mWindingOrder = mStartWindingOrder;
-    }
-
-    // add data to external vboundingContour list IE useful for skirting boards
-    if ( m == 0 ) {
-        vboundingContours[t] = vs[0];
-        vboundingContours[vcoords.size() * 2 - 1 - t] = vs[2];
-        if ( t == vcoords.size() - 2 ) {
-            vboundingContours[t + 1] = vs[1];
-            vboundingContours[vcoords.size() * 2 - 1 - t - 1] = vs[3];
-        }
-    }
-}
-
 void
 Follower::createQuadPath( std::vector<Vector2f>& fverts, float width, float height, PivotPointPosition /*alignment*/ ) {
     fverts.clear();
-    fverts.push_back( Vector2f( -width * 0.5f, -height * 0.5f ));
-    fverts.push_back( Vector2f( -width * 0.5f, height * 0.5f ));
-    fverts.push_back( Vector2f( width * 0.5f, height * 0.5f ));
-    fverts.push_back( Vector2f( width * 0.5f, -height * 0.5f ));
+    fverts.emplace_back( Vector2f( -width * 0.5f, -height * 0.5f ));
+    fverts.emplace_back( Vector2f( -width * 0.5f, height * 0.5f ));
+    fverts.emplace_back( Vector2f( width * 0.5f, height * 0.5f ));
+    fverts.emplace_back( Vector2f( width * 0.5f, -height * 0.5f ));
 }
 
-bool Follower::skipGapAt( int t ) {
-    return ( mGaps.isStartGapAt( t + 1 ) && mGaps.isVisibleAt( t + 1 ));
-}
+//bool Follower::skipGapAt( int t ) {
+//    return ( mGaps.isStartGapAt( t + 1 ) && mGaps.isVisibleAt( t + 1 ));
+//}
 
 //void averagePoly( std::vector<FollowerPoly>& polys, uint64_t pi, uint64_t i,
 //                  uint64_t i1, uint64_t i2, uint64_t i3 ) {
@@ -277,251 +296,6 @@ bool Follower::skipGapAt( int t ) {
 ////    polys[pi].vncs[i] = normalize( polys[pi].vncs[i] );
 //}
 
-void Follower::compositePolys( std::shared_ptr<GeomData> _geom, std::vector<FollowerPoly>& polys,
-                               [[maybe_unused]] const CompositeWrapping cpw ) {
-    if ( polys.empty()) return;
-
-//    auto numProfilePolys = mProfile->numVerts();
-//    int numSegments = static_cast<int>( polys.size() / numProfilePolys );
-//    int pi = 0;
-//    for ( auto q = 0; q < numSegments; q++ ) {
-//        auto pc = q == 0 ? numSegments - 1 : -1;
-//        auto nc = q == numSegments - 1 ? ( -( numSegments - 1 )) : 1;
-//        pc *= numProfilePolys;
-//        nc *= numProfilePolys;
-//        for ( auto t = 0; t < numProfilePolys; t++ ) {
-//            auto pr = t == 0 ? numProfilePolys - 1 : t - 1;
-//            auto nr = t == numProfilePolys - 1 ? 0 : t + 1;
-//
-//            // left
-//            auto bl = pi + pc + pr;
-//            auto l = pi + pc;
-//            auto tl = pi + pc + nr;
-//
-//            // center
-//            auto tc = pi + nr;
-//            auto bc = pi + pr;
-//
-//            // left
-//            auto br = pi + nc + pr;
-//            auto r = pi + nc;
-//            auto tr = pi + nc + nr;
-//
-//            // Index 0
-//            averagePoly( polys, pi, 0, tc, tl, l );
-//            averagePoly( polys, pi, 1, tc, tr, r );
-//            averagePoly( polys, pi, 2, l, bl, bc );
-//            averagePoly( polys, pi, 3, r, bc, br );
-//            ++pi;
-//        }
-//    }
-
-    for ( auto& fp : polys ) {
-        _geom->pushQuadSubDiv( fp.vs, fp.vtcs, fp.vncs );
-    }
-    polys.clear();
-}
-
-void Follower::triangulate( std::shared_ptr<GeomData> _geom ) {
-    ASSERT( vcoords.size() > 1 );
-
-    // Temp data for triangulation
-    std::vector<Vector3f> rp2;
-    std::vector<Vector3f> rp1;
-    std::vector<FollowerPoly> polys;
-
-    _geom->resetWrapMapping( mProfile->Lengths());
-
-    reserveVBounding( vcoords.size());
-
-    // Pre-loop setup, allocate/setup first element
-    rp1 = mProfile->rotatePoints( vplanesb[0], vplanest[0], vcoords[0] );
-    int wrapIndex = rp1.size() > 2 ? 0 : 1;
-
-    size_t t = 0;
-    // This triangulate the shape by wrapping points between 2 joints
-    for ( ; t < vcoords.size() - 1; t++ ) {
-
-        rp2 = mProfile->rotatePoints( vplanesb[t + 1], vplanest[t + 1], vcoords[t + 1] );
-
-        for ( uint64_t m = 0; m < rp1.size() - wrapIndex; m++ ) {
-            auto mi =  static_cast<int64_t >(m);
-            auto rpsizei = static_cast<int64_t >(rp1.size());
-            uint64_t mn1 = getCircularArrayIndex( mi - 1, rpsizei );
-            uint64_t nextIndex = getCircularArrayIndex( mi + 1, rpsizei );
-            uint64_t nextIndexp1 = getCircularArrayIndex( mi + 2, rpsizei );
-
-            FollowerPoly fp{rp1, rp2, { static_cast<size_t>(mn1), static_cast<size_t>(m),
-                                         static_cast<size_t>(nextIndex), static_cast<size_t>(nextIndexp1)}};
-
-            bool bAxisExclusionIsFine = true;
-            if ( !mAxisExtrudeExclusions.empty() ) {
-                for ( auto& av : mAxisExtrudeExclusions ) bAxisExclusionIsFine &= dot( av, fp.vn ) < 0.95f;
-            }
-
-            //if ( ( bAxisExclusionIsFine && mGaps.isVisibleAt( t ) ) ) lGeom = advanceExtrudeGeom();
-
-            updateInternalTriangulationVars( _geom, fp.vs.data(), m, t );
-            if ( UsePlanarMapping()) {
-                _geom->planarMapping( absolute( fp.vn ), fp.vs.data(), fp.vtcs.data(), 4 );
-            } else {
-                _geom->updateWrapMapping( fp.vs.data(), fp.vtcs.data(), m, rp1.size() );
-            }
-
-            if ( mGaps.isVisibleAt( t ) && bAxisExclusionIsFine ) {
-                polys.push_back( fp );
-            }
-        }
-
-        if ( skipGapAt( t ) || skipGapAt( t + 1 )) {
-            compositePolys( _geom, polys, CompositeWrapping::NoWrap );
-            // In case there are gaps we'll cover them as if they were the start/end of the path caps
-            if ( skipGapAt( t + 1 ) && ( !( CurrentFlags() & FollowerFlags::NoCaps ))) {
-                _geom->addFlatPoly( mProfile->rotatePoints( vplanesb[t+1], vplanest[t+1], vcoords[t + 1] ),
-                                                            !mStartWindingOrder );
-            }
-            if ( skipGapAt( t ) && ( !( CurrentFlags() & FollowerFlags::NoCaps ))) {
-                _geom->addFlatPoly( mProfile->rotatePoints(vplanesb[t], vplanest[t], vcoords[t]),mStartWindingOrder );
-            }
-        }
-
-        // Make previous next array current array
-        rp1 = rp2;
-    }
-
-    if ( !( CurrentFlags() & FollowerFlags::NoCaps )) {
-        compositePolys( _geom, polys, checkBitWiseFlag( mCurrentFlags,
-                                                        FollowerFlags::WrapPath ) ? CompositeWrapping::Wrap
-                                                                                  : CompositeWrapping::NoWrap );
-        mbCapStage = true;
-        _geom->addFlatPoly( mProfile->rotatePoints( vplanesb[0], vplanest[0], vcoords[0] ), mStartWindingOrder );
-
-        _geom->addFlatPoly( mProfile->rotatePoints( vplanesb[vcoords.size() - 1], vplanest[vcoords.size() - 1],
-                                                    vcoords[vcoords.size() - 1]), !mStartWindingOrder );
-        mbCapStage = false;
-    }
-}
-
-std::shared_ptr<GeomData>
-Follower::operator()( std::shared_ptr<PBRMaterial> material,
-                      const std::vector<Vector3f>& verts,
-                      std::shared_ptr<Profile> profile,
-                      const Vector3f& _suggestedAxis,
-                      const FollowerGap& gaps ) {
-
-    std::shared_ptr<GeomData> geom = std::make_shared<GeomData>(material);
-
-    mProfile = profile;
-    Rect2f profilebbox( mProfile->Points() );
-    mBBoxProfile.createRect( profilebbox, mProfile->PPP());
-    createLineFromVerts( verts, _suggestedAxis, gaps );
-    triangulate( geom );
-
-    return geom;
-}
-
-std::shared_ptr<HierGeom>
-Follower::extrude( [[maybe_unused]] const std::vector<Vector3f>& verts, [[maybe_unused]] std::shared_ptr<Profile> profile, [[maybe_unused]] const FollowerGap& gaps ) {
-//    mProfile = profile;
-//    Rect2f profilebbox( mProfile->Points());
-//    mBBoxProfile.createRect( profilebbox, mProfile->PPP());
-//    createLineFromVerts( verts, gaps );
-//    // TODO: USE GeomBuilder properly
-//    std::shared_ptr<GeomData> geom;
-//    triangulate( geom );
-//    auto hGeom = std::make_shared<HierGeom>( geom );
-//    hGeom->Name( mGeomName );
-//    hGeom->GHType( mGeomType );
-//    return hGeom;
-
-    ASSERTV(0, "DO NOT USE THIS??");
-    return nullptr;
-}
-
-std::shared_ptr<HierGeom>
-Follower::extrude( const std::vector<Vector2f>& verts, std::shared_ptr<Profile> profile, float _z,
-                   const FollowerGap& gaps ) {
-    std::vector<Vector3f> vlist;
-    for ( auto elem : verts ) {
-        vlist.push_back( Vector3f( elem, _z ));
-    }
-    return extrude( vlist, profile, gaps );
-}
-
-std::shared_ptr<HierGeom>
-Follower::extrude( const std::initializer_list<Vector3f>& verts, std::shared_ptr<Profile> profile,
-                   const FollowerGap& gaps ) {
-    std::vector<Vector3f> vlist;
-    for ( auto elem : verts ) {
-        vlist.push_back( elem );
-    }
-    return extrude( vlist, profile, gaps );
-}
-
-std::shared_ptr<HierGeom>
-Follower::pullPillow( [[maybe_unused]] const std::vector<Vector3f>& verts, [[maybe_unused]] float pullHeight,
-                      [[maybe_unused]] PillowEdges pe ) {
-    ASSERTV( "DEPRECIATED PULL PILLOW", 0 );
-    return nullptr;
-
-//	std::vector<Vector3f> raisedVerts;
-//	int vsize = static_cast<int>( verts.size() );
-//
-//	Vector3f normal = normalize( crossProduct( verts[0], verts[1], verts[2] ) );
-//	for ( auto& vs : verts ) { raisedVerts.push_back( vs + normal * pullHeight ); }
-//
-//	FollowerFlags ff = FollowerFlags::Defaults;
-//	std::vector<Vector3f> path;
-//	int topRightIndex = vsize - 1;
-//	int topLeftIndex = 2;
-//	switch ( pe ) {
-//	case PillowEdges::All:
-//	{
-//		ff = FollowerFlags::WrapPath;
-//		for ( int t = 0; t < vsize; t++ ) path.push_back( JMATH::lerp( 0.5f, verts[t], raisedVerts[t] ) );
-//	}
-//	break;
-//	case PillowEdges::SidesHorizontal:
-//	break;
-//	case PillowEdges::SidesVertical:
-//	break;
-//	case PillowEdges::Top:
-//	path.push_back( JMATH::lerp( 0.5f, verts[0], raisedVerts[0] ) );
-//	path.push_back( JMATH::lerp( 0.5f, verts[1], raisedVerts[1] ) );
-//	break;
-//	case PillowEdges::TopAndSides:
-//	path.push_back( JMATH::lerp( 0.5f, verts[topRightIndex], raisedVerts[topRightIndex] ) );
-//	path.push_back( JMATH::lerp( 0.5f, verts[0], raisedVerts[0] ) );
-//	path.push_back( JMATH::lerp( 0.5f, verts[1], raisedVerts[1] ) );
-//	path.push_back( JMATH::lerp( 0.5f, verts[topLeftIndex], raisedVerts[topLeftIndex] ) );
-//	break;
-//	case PillowEdges::Bottom:
-//	break;
-//	case PillowEdges::BottomAndSides:
-//	break;
-//	case PillowEdges::Left:
-//	break;
-//	case PillowEdges::Right:
-//	break;
-//	default:
-//	break;
-//	}
-
-    // This geometry is composed of 2 pieces at least, so it has to be exploded
-//	explodeExtrude();
-
-//	std::shared_ptr<GeomData> lGeom = initGeom();
-//
-//	lGeom->pull( verts, pullHeight, PullFlags::Tops );
-//	mGeom->addChildren( lGeom );
-//
-//	CurrentFlags( ff );
-//	Profile curvedProfile;
-//	curvedProfile.createArc( M_PI_2, M_PI, pullHeight*0.5f );
-//	curvedProfile.flip( Vector2f::X_AXIS );
-//	return extrude( path, curvedProfile );
-}
-
 std::vector<Vector2f> Follower::vboundingContours2f() const {
     std::vector<Vector2f> ret;
     for ( auto v : vboundingContours ) {
@@ -539,9 +313,9 @@ void Follower::capsType( GeomHierType _gt ) {
     mCapsGeomType |= _gt;
 }
 
-void Follower::excludeAxisFromExtrusion( const Vector3f& _axis ) {
-    mAxisExtrudeExclusions.push_back( _axis );
-}
+//void Follower::excludeAxisFromExtrusion( const Vector3f& _axis ) {
+//    mAxisExtrudeExclusions.push_back( _axis );
+//}
 
 std::string Follower::Name() const {
     return mGeomName;

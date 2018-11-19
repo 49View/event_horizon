@@ -13,13 +13,18 @@
 
 struct Plane3f {
 	Vector3f n; // normal
-	float d; // distance from origin
+	float d = 0.0f; // distance from origin
 
 	Plane3f() {} // default constructor
 
 	Plane3f( const Vector3f& _n, float _d ) {
 		n = _n;
 		d = _d;
+	}
+
+	Plane3f( const Vector3f& _n, const Vector3f& _p ) {
+		n = _n;
+		d = dot( _p, n );
 	}
 
 	Plane3f( const Vector3f& a, const Vector3f& b, const Vector3f& c ) {
@@ -63,7 +68,7 @@ struct Plane3f {
 		return p0 + v*t;
 	}
 
-	Vector3f intersectLineGrace( const Vector3f& a, const Vector3f& b ) {
+	Vector3f intersectLineGrace( const Vector3f& a, const Vector3f& b ) const {
 		Vector3f ba = b - a;
 		float nDotA = dot( n, a );
 		float nDotBA = dot( n, ba );
