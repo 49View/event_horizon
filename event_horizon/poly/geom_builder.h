@@ -164,19 +164,19 @@ public:
     GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull ) {
         std::vector<Vector3f> lverts;
         for (auto &v: arguments_list) lverts.emplace_back(v);
-        outlineVerts.push_back( { lverts, _zPull } );
+        outlineVerts.emplace_back( lverts, _zPull );
         builderType = GeomBuilderType::outline;
     }
 
     GeomBuilder( const std::vector<Vector3f>& arguments_list, float _zPull ) {
-        outlineVerts.push_back( { arguments_list, _zPull } );
+        outlineVerts.emplace_back( arguments_list, _zPull );
         builderType = GeomBuilderType::outline;
     }
 
     GeomBuilder( const std::vector<Vector2f>& arguments_list, float _zPull ) {
         std::vector<Vector3f> lverts;
         for (auto &v: arguments_list) lverts.emplace_back(v) ;
-        outlineVerts.push_back( { lverts, _zPull } );
+        outlineVerts.emplace_back( lverts, _zPull );
         builderType = GeomBuilderType::outline;
     }
 
