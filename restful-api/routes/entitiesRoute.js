@@ -63,7 +63,7 @@ router.post('/', async (req, res, next) => {
     try {
         const project = req.user.project;
         const metadata = entityController.getMetadataFromBody(true, true, req);
-        const { content, group, public, cleanMetadata } = entityController.cleanupMetadata(metadata);
+        const { content, group, public, restricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
         const filePath=entityController.getFilePath(project, group, cleanMetadata.contentHash);
         //Check content exists in project and group
         const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.contentHash)
@@ -75,7 +75,7 @@ router.post('/', async (req, res, next) => {
             await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities");
         }
         //Create entity
-        const newEntity = await entityController.createEntity(project, group, public, cleanMetadata);
+        const newEntity = await entityController.createEntity(project, group, public, restricted, cleanMetadata);
 
         res.status(200).send(newEntity);
     } catch (ex) {
@@ -95,7 +95,7 @@ router.put('/:id', async (req, res, next) => {
         }
         const group = currentEntity.group;
         const metadata = entityController.getMetadataFromBody(false, false, req);
-        const { content, public, cleanMetadata } = entityController.cleanupMetadata(metadata);
+        const { content, public, restricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
         //If content defined
         if (content!==null) {
             //Check content exists in project and group
@@ -114,7 +114,7 @@ router.put('/:id', async (req, res, next) => {
             cleanMetadata.contentHash=currentEntity.metadata.contentHash;
         }
         //Update entity
-        await entityController.updateEntity(currentEntity._id, project, group, public, cleanMetadata);
+        await entityController.updateEntity(currentEntity._id, project, group, public, restricted, cleanMetadata);
 
         res.status(204).send();
     } catch (ex) {
