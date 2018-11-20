@@ -115,15 +115,15 @@ void Profile::createRect( const Vector2f& size, PivotPointPosition ppp, const Ve
 
 	// Counterclockwise
 	if ( wo == WindingOrder::CCW ) {
-		mPoints.push_back( Vector2f( -size.x() * 0.5f, -size.y() * 0.5f ) );
-		mPoints.push_back( Vector2f( size.x() * 0.5f, -size.y() * 0.5f ) );
-		mPoints.push_back( Vector2f( size.x() * 0.5f, size.y() * 0.5f ) );
-		mPoints.push_back( Vector2f( -size.x() * 0.5f, size.y() * 0.5f ) );
+		mPoints.emplace_back( Vector2f( -size.x() * 0.5f, -size.y() * 0.5f ) );
+		mPoints.emplace_back( Vector2f( size.x() * 0.5f, -size.y() * 0.5f ) );
+		mPoints.emplace_back( Vector2f( size.x() * 0.5f, size.y() * 0.5f ) );
+		mPoints.emplace_back( Vector2f( -size.x() * 0.5f, size.y() * 0.5f ) );
 	} else {
-		mPoints.push_back( Vector2f( -size.x() * 0.5f, size.y() * 0.5f ) );
-		mPoints.push_back( Vector2f( size.x() * 0.5f, size.y() * 0.5f ) );
-		mPoints.push_back( Vector2f( size.x() * 0.5f, -size.y() * 0.5f ) );
-		mPoints.push_back( Vector2f( -size.x() * 0.5f, -size.y() * 0.5f ) );
+		mPoints.emplace_back( Vector2f( -size.x() * 0.5f, size.y() * 0.5f ) );
+		mPoints.emplace_back( Vector2f( size.x() * 0.5f, size.y() * 0.5f ) );
+		mPoints.emplace_back( Vector2f( size.x() * 0.5f, -size.y() * 0.5f ) );
+		mPoints.emplace_back( Vector2f( -size.x() * 0.5f, -size.y() * 0.5f ) );
 	}
 	// In this case the bbox is the same as the rect's size
 	mBBox = size;
@@ -157,7 +157,7 @@ void Profile::createArc( float startAngle, float angle, float radius, float numS
 		float delta = ( ( static_cast<float>( t ) / ( numSegments - 1 ) ) * angle ) + startAngle;
 		float cosa = cos( delta )*radius;
 		float sina = sin( delta )*radius;
-		mPoints.push_back( { cosa, sina } );
+		mPoints.emplace_back( cosa, sina );
 	}
 	mBBox = { radius*2.0f, radius*2.0f };
 
@@ -242,7 +242,7 @@ void Profile::centered() {
 	move( { width()*-0.5f, height()*-0.5f } );
 }
 
-std::vector<Vector3f> Profile::rotatePoints( const Vector3f& nx, const Vector3f& ny, const Vector3f& offset ) {
+std::vector<Vector3f> Profile::rotatePoints( const Vector3f& nx, const Vector3f& ny, const Vector3f& offset ) const {
 	std::vector<Vector3f> retArray;
 
 	for ( auto p : mPoints ) {

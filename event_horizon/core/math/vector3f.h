@@ -426,6 +426,10 @@ public:
 		return mX * mY * mZ;
 	}
 
+	float linearSum() const {
+		return mX + mY + mZ;
+	}
+
 	bool isTooSteep( float threshold = 1e25 ) {
 		if ( fabs( mX ) > threshold ) return true;
 		if ( fabs( mY ) > threshold ) return true;

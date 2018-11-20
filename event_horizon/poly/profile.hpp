@@ -35,7 +35,7 @@ public:
 	bool hasForcedWindingOrder() { return mbForceWindingOrder; }
 	WindingOrderT windingOrder() { return mForcedWindingOrder; }
 	std::vector<Vector3f> rotatePoints( const Vector3f& nx, const Vector3f& ny,
-										const Vector3f& offset = Vector3f::ZERO );
+										const Vector3f& offset = Vector3f::ZERO ) const;
 
 	inline int32_t numVerts() const { return static_cast<int32_t>( mPoints.size() ); }
 	inline float width() const { return mBBox.x(); }

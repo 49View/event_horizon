@@ -83,6 +83,32 @@ bool FollowerGap::isGap( FollowerGapSide side, uint64_t index, float& inset ) co
     return true;
 }
 
+Vector3f suggestedFollowerAxisCalcBestAxis(const std::vector<Vector3f>& _verts ) {
+
+    auto vaCount = _verts.size();
+    if ( vaCount > 2 ) {
+        return normalize( crossProduct( _verts[0], _verts[1], _verts[2] ));
+    } else {
+        return normalize( crossProduct( _verts[0], _verts[1], _verts[1] + Vector3f{unitRand()} ) );
+    }
+
+}
+
+Vector3f suggestedFollowerAxis( const std::vector<Vector3f>& _verts, const Vector3f& _suggestedAxis ) {
+
+    Vector3f ret = _suggestedAxis;
+    if ( _suggestedAxis == Vector3f::ZERO ) {
+        ret = suggestedFollowerAxisCalcBestAxis( _verts );
+    } else {
+        // Check that the suggested axis is not bonkers
+        Vector3f ncc = crossProduct( _verts[0], _verts[1], _verts[0] + ret  );
+        if ( !isValid(ncc.x()) || isScalarEqual( ncc.linearSum(), 0.0f ) ) {
+            ret = suggestedFollowerAxisCalcBestAxis( _verts );
+        }
+    }
+    return ret;
+}
+
 namespace FollowerService {
 
     std::vector<Vector3f> rotateAndIntersectData( const std::vector<Vector3f>& source, const Plane3f& lvplanes,
@@ -137,7 +163,7 @@ namespace FollowerService {
     }
 
     std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& _verts,
-                                       std::shared_ptr<Profile> profile,
+                                       const Profile& profile,
                                        const Vector3f& _suggestedAxis,
                                        const FollowerFlags& ff ) {
 
@@ -158,16 +184,7 @@ namespace FollowerService {
 
     FollowerIntermediateData fid;
 
-    fid.vplanet = _suggestedAxis;
-    if ( _suggestedAxis == Vector3f::ZERO ) {
-        if ( vaCount > 2 ) {
-            fid.vplanet = normalize( crossProduct( verts[0], verts[1], verts[2] ));
-        } else {
-            fid.vplanet = normalize( crossProduct( verts[0], verts[1], verts[1] + Vector3f{unitRand()} ) );
-        }
-    } else {
-        fid.vplanet = _suggestedAxis;
-    }
+    fid.vplanet = suggestedFollowerAxis( verts, _suggestedAxis );
 
     for ( size_t m = 0; m < vaCount + bWrap; m++ ) {
         addLineVert( verts, fid, m, bWrap );
@@ -178,16 +195,16 @@ namespace FollowerService {
     std::vector<Vector3f> rp1;
     std::vector<FollowerPoly> polys;
 
-    geom->resetWrapMapping( profile->Lengths() );
-    geom->setWindingOrderFlagOnly( detectWindingOrder( profile->Points() ) );
+    geom->resetWrapMapping( profile.Lengths() );
+    geom->setWindingOrderFlagOnly( detectWindingOrder( profile.Points() ) );
 
     auto vcFinalSize = fid.vcoords.size();
     // Pre-loop setup, allocate/setup first element
     if ( bWrap ) {
-        rp2 = profile->rotatePoints( fid.vplanesb[ vcFinalSize - 1], fid.vplanet, fid.vcoords[vcFinalSize - 2] );
+        rp2 = profile.rotatePoints( fid.vplanesb[ vcFinalSize - 1], fid.vplanet, fid.vcoords[vcFinalSize - 2] );
         rp1 = rotateAndIntersectData( rp2, fid.vplanesn[0], fid.vdirs[fid.vcoords.size() - 1] );
     } else {
-        rp1 = profile->rotatePoints( fid.vplanesb[0], fid.vplanet, fid.vcoords[0] );
+        rp1 = profile.rotatePoints( fid.vplanesb[0], fid.vplanet, fid.vcoords[0] );
     }
 
     int wrapIndex = rp1.size() > 2 ? 0 : 1;
@@ -226,9 +243,9 @@ namespace FollowerService {
     }
 
 //    if ( !( checkBitWiseFlag(CurrentFlags(), FollowerFlags::NoCaps )) ) {
-//        _geom->addFlatPoly( mProfile->rotatePoints( vplanesb[0], vplanest[0], vcoords[0] ), mStartWindingOrder );
+//        _geom->addFlatPoly( mprofile.rotatePoints( vplanesb[0], vplanest[0], vcoords[0] ), mStartWindingOrder );
 //
-//        _geom->addFlatPoly( mProfile->rotatePoints( vplanesb[vcoords.size() - 1], vplanest[vcoords.size() - 1],
+//        _geom->addFlatPoly( mprofile.rotatePoints( vplanesb[vcoords.size() - 1], vplanest[vcoords.size() - 1],
 //                                                    vcoords[vcoords.size() - 1]), !mStartWindingOrder );
 //    }
 

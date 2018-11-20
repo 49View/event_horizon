@@ -155,33 +155,31 @@ std::shared_ptr<GeomData> GeomDataQuadMeshBuilder::build() {
 std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
     ASSERT( !mProfile->Points().empty() );
 
+    Profile lProfile{ *mProfile.get() };
     Vector2f lRaise = mRaise;
     if ( mRaiseEnum != GeomDataFollowerBuilder::Raise::None ) {
 		switch ( mRaiseEnum ) {
 			case Raise::None:break;
 			case Raise::HorizontalPos:
-				lRaise= ( Vector2f::X_AXIS * mProfile->width() );
+				lRaise= ( Vector2f::X_AXIS * lProfile.width() );
 				break;
 			case Raise::HorizontalNeg:
-				lRaise= ( Vector2f::X_AXIS_NEG * mProfile->width());
+				lRaise= ( Vector2f::X_AXIS_NEG * lProfile.width());
 				break;
 			case Raise::VerticalPos:
-				lRaise= ( Vector2f::Y_AXIS * mProfile->height() );
+				lRaise= ( Vector2f::Y_AXIS * lProfile.height() );
 				break;
 			case Raise::VerticalNeg:
-				lRaise= ( Vector2f::Y_AXIS_NEG * mProfile->height() );
+				lRaise= ( Vector2f::Y_AXIS_NEG * lProfile.height() );
 				break;
 		};
     }
 
-    mProfile->raise( lRaise );
-    mProfile->flip( mFlipVector );
+	lProfile.raise( lRaise );
+	lProfile.flip( mFlipVector );
 
-	auto ret = FollowerService::extrude( mVerts, mProfile, mSuggestedAxis, followersFlags );
+	auto ret = FollowerService::extrude( mVerts, lProfile, mSuggestedAxis, followersFlags );
 	ret->setMaterial(material);
-
-	mProfile->flip( -mFlipVector );
-	mProfile->raise( -lRaise );
 
 	return ret;
 }
