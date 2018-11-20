@@ -33,24 +33,17 @@ exports.cleanupMetadata = (metadata) => {
     result.group = metadata.group;
     result.keys = metadata.tags;
     result.public = metadata.public || false;
+    result.restricted = metadata.restricted || false;
     //Remove service attributes
     delete metadata.raw;
     delete metadata.group;
     // delete metadata.tags;
     delete metadata.public;
+    delete metadata.restricted;
     //Add hash attribute
     result.cleanMetadata = metadata;
 
     return result;
-}
-
-exports.addSpecialKeys = (project, group, public, keys) => {
-
-    keys.push("project_"+project);
-    keys.push("group_"+group);
-    if (public) {
-        keys.push("extra_public");
-    }
 }
 
 exports.getFilePath = (project, group, contentHash) => {
@@ -65,16 +58,16 @@ exports.checkFileExists = async (project, group, contentHash) => {
     return result!==null?result.toObject():null;
 }
 
-exports.createEntity = async (project, group, public, metadata) => {
-    const newEntityDB = new entityModel({ project: project, group: group, public: public, metadata: metadata});
+exports.createEntity = async (project, group, public, restricted, metadata) => {
+    const newEntityDB = new entityModel({ project: project, group: group, public: public, restricted: restricted, metadata: metadata});
     await newEntityDB.save();
     return newEntityDB.toObject();
 }
 
-exports.updateEntity = async (entityId, project, group, public, metadata) => {
+exports.updateEntity = async (entityId, project, group, public, restricted, metadata) => {
     const query = { _id: mongoose.Types.ObjectId(entityId)};
 
-    await entityModel.updateOne(query, { project: project, group: group, public: public, metadata: metadata});
+    await entityModel.updateOne(query, { project: project, group: group, public: public, restricted: restricted, metadata: metadata});
 }
 
 exports.deleteEntity = async (entityId) => {
@@ -98,6 +91,7 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, r
         {
             $match: {
                 $and: [
+                    {"restricted": false},
                     {"group": group},
                     {
                         "$or": [
@@ -122,6 +116,7 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, r
                     "project": 0,
                     "group": 0,
                     "public": 0,
+                    "restricted": 0,
                     "metadata.contentHash": 0
                 }
             }
