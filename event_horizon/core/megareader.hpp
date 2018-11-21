@@ -441,6 +441,9 @@ public:
 			if ( (*value)[t].FindMember( MetaData::Id.c_str() ) != (*value)[t].MemberEnd() ) {
 				elem.setId( (*value)[t][MetaData::Id.c_str()].GetString() );
 			}
+            if ( (*value)[t].FindMember( MetaData::Type.c_str() ) != (*value)[t].MemberEnd() ) {
+                elem.setType( (*value)[t][MetaData::Type.c_str()].GetString() );
+            }
 			if ( (*value)[t].FindMember( metadataS ) != (*value)[t].MemberEnd() ) {
 				elem.setName(( *value )[t][metadataS][MetaData::Name.c_str()].GetString());
 				elem.setThumb(( *value )[t][metadataS][MetaData::Thumb.c_str()].GetString());

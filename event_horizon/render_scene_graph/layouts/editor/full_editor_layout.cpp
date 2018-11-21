@@ -8,20 +8,20 @@
 #include <render_scene_graph/scene_layout.h>
 #include "callbacks_layout.h"
 
-struct UIViewLayout {
-    float consoleHeight = 0.0f;
-    float rightPanelWidth = 0.0f;
-    float leftPanelHeight = 0.0f;
-    float leftPanelHeight2 = 0.0f;
-    float rightPanelHeight = 0.0f;
-    Vector2f main3dWindowSize = Vector2f::ZERO;
-    Vector2f timeLinePanelSize = Vector2f::ZERO;
-    Rect2f foxLayout;
-};
-
-UIViewLayout uivl;
-
 void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
+
+    struct UIViewLayout {
+        float consoleHeight = 0.0f;
+        float rightPanelWidth = 0.0f;
+        float leftPanelHeight = 0.0f;
+        float leftPanelHeight2 = 0.0f;
+        float rightPanelHeight = 0.0f;
+        Vector2f main3dWindowSize = Vector2f::ZERO;
+        Vector2f timeLinePanelSize = Vector2f::ZERO;
+        Rect2f foxLayout = Rect2f::ZERO;
+    };
+
+    UIViewLayout uivl;
 
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
