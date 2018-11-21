@@ -114,7 +114,6 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, r
             {   
                 $project: {
                     "project": 0,
-                    "group": 0,
                     "public": 0,
                     "restricted": 0,
                     "metadata.contentHash": 0

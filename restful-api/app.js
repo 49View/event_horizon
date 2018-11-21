@@ -43,7 +43,6 @@ app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 app.use(cryptoController.decodeRequest);
 app.use(cryptoController.checkRequest);
 app.use('/', indexRoute);
-//app.use('/', crypto);
 app.use('/', tokenRoute);
 
 app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
