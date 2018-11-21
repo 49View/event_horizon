@@ -40,8 +40,8 @@ app.use(bodyParser.raw({limit: '100mb'}));
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 
-app.use(cryptoController.decodeRequest);
-app.use(cryptoController.checkRequest);
+// app.use(cryptoController.decodeRequest);
+// app.use(cryptoController.checkRequest);
 app.use('/', indexRoute);
 app.use('/', tokenRoute);
 
