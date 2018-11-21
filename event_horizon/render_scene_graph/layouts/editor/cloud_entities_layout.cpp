@@ -31,15 +31,11 @@ void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, c
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin( _title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse );
 
-    static char buf[1024];
-    if ( ImGui::InputText( "", buf, 1024,
-                           ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|
-                           ImGuiInputTextFlags_CallbackHistory,
-                           [](ImGuiTextEditCallbackData* data) -> int {
-                               //        if ( data->EventKey == ImGuiKey_Enter) {
-                               //        }
-                               return 0;
-                           } ) ) {
+    static char buf1[1024];
+    static char buf2[1024];
+    char* buf = _title == "Cloud Geometry" ? buf1 : buf2;
+    ImGui::PushID( std::hash<std::string>{}(_title) );
+    if ( ImGui::InputText( ("##" + _title).c_str(), buf, 1024, ImGuiInputTextFlags_EnterReturnsTrue ) ) {
         Http::get( Url{ HttpFilePrefix::entities_all + _entType + "/" + std::string(buf) },
                    [&](const Http::Result&_res) {
                        remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()),
@@ -47,6 +43,7 @@ void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, c
                        Scene::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
                    } );
     };
+    ImGui::PopID();
 
     for ( auto it = cloudEntitiesTypeMap.find(_entType); it != cloudEntitiesTypeMap.end(); ++it ) {
         ImGui::BeginGroup();
@@ -57,5 +54,4 @@ void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, c
         ImGui::EndGroup();
     }
     ImGui::End();
-
 }

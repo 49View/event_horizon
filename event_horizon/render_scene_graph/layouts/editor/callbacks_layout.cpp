@@ -22,7 +22,8 @@ void cloudCallback( const rapidjson::Document& data ) {
                 const auto lFilename = url_decode(_res.uri);
                 for ( const auto& [k,func] : daemonEntityCallbacks ) {
                     if ( lFilename.find( DaemonPaths::store( k )) != std::string::npos ) {
-                        func( _res.uri, zlibUtil::inflateFromMemory( _res ) );
+                        auto fn = getFileName( url_decode(_res.uri) );
+                        func( fn, zlibUtil::inflateFromMemory( _res ) );
                     }
                 }
             } );
