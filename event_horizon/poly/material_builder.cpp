@@ -61,7 +61,7 @@ void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
 }
 
 void MaterialBuilder::publish() const {
-    Http::post( Url{ Http::restEntityPrefix( EntityGroup::Material, Name() + postFix ) }, toMetaData() );
+    Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
 }
 
 void resizeCallback(void* ctx, void*data, int size) {

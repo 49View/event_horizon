@@ -1,12 +1,9 @@
 var AWS = require('aws-sdk');
 const globalConfig = require('../config_api.js')
 
-// AWS.config = new AWS.Config();
-// AWS.config.accessKeyId = globalConfig.AWSConfigAccessKeyId;
-// AWS.config.secretAccessKey = globalConfig.AWSConfigSecretAccessKey;
 AWS.config = new AWS.Config();
-AWS.config.accessKeyId = "AKIAJWSLLXTAUPNWMBOA";
-AWS.config.secretAccessKey = "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";
+AWS.config.accessKeyId = globalConfig.AWSConfigAccessKeyId;
+AWS.config.secretAccessKey = globalConfig.AWSConfigSecretAccessKey;
 
 var s3 = new AWS.S3();
 
@@ -78,7 +75,7 @@ exports.deleteMulti = ( key ) => {
 	
 	return new Promise( (resolve, reject) => {
 		let params = {
-			Bucket: "sixthviewfs",
+			Bucket: globalConfig.S3Bucket,
 			Delete: { Objects: [] }
 		};
 	

@@ -435,14 +435,16 @@ public:
 	}
 
 	void deserialize( std::vector<CoreMetaData>& _vec ) {
+		const static char* metadataS = "metadata";
 		for ( SizeType t = 0; t < (*value).Size(); t++ ) {
 			CoreMetaData elem;
-			elem.setName( (*value)[t][MetaData::Name.c_str()].GetString() );
-			elem.setType( (*value)[t][MetaData::Type.c_str()].GetString() );
-			elem.setThumb( (*value)[t][MetaData::Thumb.c_str()].GetString() );
-//			deserialize( MetaData::Name.c_str(),  elem.Name() );
-//			deserialize( MetaData::Type.c_str(),  elem.Type() );
-//			deserialize( MetaData::Thumb.c_str(), elem.Thumb() );
+			if ( (*value)[t].FindMember( MetaData::Id.c_str() ) != (*value)[t].MemberEnd() ) {
+				elem.setId( (*value)[t][MetaData::Id.c_str()].GetString() );
+			}
+			if ( (*value)[t].FindMember( metadataS ) != (*value)[t].MemberEnd() ) {
+				elem.setName(( *value )[t][metadataS][MetaData::Name.c_str()].GetString());
+				elem.setThumb(( *value )[t][metadataS][MetaData::Thumb.c_str()].GetString());
+			}
 			_vec.push_back( elem );
 		}
 	}

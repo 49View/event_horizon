@@ -7,8 +7,9 @@
 #include <set>
 
 namespace MetaData {
+    const static std::string Id    = "_id";
     const static std::string Name  = "name";
-    const static std::string Type  = "type";
+    const static std::string Type  = "group";
     const static std::string Thumb = "thumb";
     const static std::string Raw   = "raw";
     const static std::string Tags  = "tags";
@@ -78,7 +79,16 @@ public:
         CoreMetaData::tags = tags;
     }
 
+    const std::string& getId() const {
+        return id;
+    }
+
+    void setId( const std::string& id ) {
+        CoreMetaData::id = id;
+    }
+
 private:
+    std::string id;
     std::string name;
     std::string type;
     std::string thumb;
