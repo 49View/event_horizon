@@ -10,6 +10,7 @@ const usersRoute = require('./routes/usersRoute');
 const tokenRoute = require('./routes/tokenRoute');
 const fsRoute = require('./routes/fsRoute');
 const authController = require('./controllers/authController');
+const cryptoController = require('./controllers/cryptoController');
 
 const app = express();
 
@@ -39,7 +40,10 @@ app.use(bodyParser.raw({limit: '100mb'}));
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 
+app.use(cryptoController.decodeRequest);
+app.use(cryptoController.checkRequest);
 app.use('/', indexRoute);
+//app.use('/', crypto);
 app.use('/', tokenRoute);
 
 app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
