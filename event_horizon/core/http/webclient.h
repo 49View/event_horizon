@@ -15,12 +15,11 @@
 bool isSuccessStatusCode( int statusCode );
 
 namespace HttpFilePrefix {
-    const static std::string entities = "/fs/entities/";
-    const static std::string entities_all = "/fs/entities/all/";
-    const static std::string entities_one = "/fs/entities/one/";
-    const static std::string entities_onebinary = "/fs/entities/onebinary/";
-    const static std::string get = "/fs/get/";
-    const static std::string fileupload = "/fs/upload/";
+    const static std::string entities = "/entities/";
+    const static std::string entities_all = "/entities/metadata/byGroupTags/";
+    const static std::string entities_onebinary = "/entities/content/byGroupTags/";
+    const static std::string get = "/fs/";
+    const static std::string fileupload = "/fs/";
     const static std::string catalog = "/catalog/";
     const static std::string getname = "/get/name/";
     const static std::string getnotexactname = "/get/notexact/name/";
@@ -105,8 +104,6 @@ namespace Http {
 
         bool isSuccessStatusCode() const; //all 200s
     };
-
-    const std::string restEntityPrefix( const std::string& _group, const std::string& _keyname );
 
     void get( const Url& url, const std::function<void(const Http::Result&)> callback,
               ResponseFlags rf = ResponseFlags::None );

@@ -9,13 +9,16 @@ exports.getMetadataFromBody = (checkGroup, checkRaw, req) => {
         throw "Invalid metadata for entity";
     }
     const metadata = req.body;
+    const metadataMissingMessage = "Required attributes missing in metadata:";
     //Check that body contains special attributes used for define entity
-    if ((checkGroup && typeof(metadata.group)==="undefined")
-       || (checkRaw && typeof(metadata.raw)==="undefined")
-       || typeof(metadata.tags)==="undefined"
-       || !(metadata.tags instanceof Array)
-       || metadata.tags.length===0) {
-        throw "Required attributes missing in metadata";
+    if (checkGroup && typeof(metadata.group)==="undefined") {
+        throw metadataMissingMessage + " 'Group'";
+    }
+    if (checkRaw && typeof(metadata.raw)==="undefined") {
+        throw metadataMissingMessage + " 'Raw'";
+    }
+    if ( typeof(metadata.tags)==="undefined" || !(metadata.tags instanceof Array) || metadata.tags.length===0 ) {
+        throw metadataMissingMessage + " 'tags'";
     }
     return metadata;
 }

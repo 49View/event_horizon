@@ -157,10 +157,6 @@ namespace Http {
 
     static std::unordered_set<std::string> requestCache;
 
-    const std::string restEntityPrefix( const std::string& _group, const std::string& _keyname ) {
-        return HttpFilePrefix::entities + _group + "/" + _keyname + "/";
-    }
-
     void get( const Url& url, std::function<void(const Http::Result&)> callback, ResponseFlags rf ) {
         bool bPerformLoad = false;
 

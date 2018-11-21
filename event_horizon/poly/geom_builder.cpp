@@ -203,5 +203,5 @@ void GeomBuilder::publish() const {
         mb->publish();
     }
 
-    Http::post( Url{ Http::restEntityPrefix( EntityGroup::Geom, Name() + ".geom" ) }, toMetaData() );
+    Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
 }
