@@ -24,17 +24,17 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v2-dependencies-{{ checksum "node-api-server/package.json" }}
+            - v2-dependencies-{{ checksum "restful-api/package.json" }}
             # fallback to using the latest cache if no exact match is found
             - v2-dependencies-
       - run: >
-          cd node-api-server && npm install
+          cd restful-api && npm install
       - save_cache:
           paths:
-            - node-api-server/node_modules
-          key: v2-dependencies-{{ checksum "node-api-server/package.json" }}
+            - restful-api/node_modules
+          key: v2-dependencies-{{ checksum "restful-api/package.json" }}
       - run: >
-          cd node-api-server && npm test
+          cd restful-api && npm test
 
       - restore_cache:
           keys:
@@ -62,7 +62,7 @@ jobs:
       - run:
           name: Deploy to Digital Ocean
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP '(git clone git@github.com:49View/event_horizon.git 2> /dev/null || (cd event_horizon; git pull)); sudo docker kill $(docker ps --filter "ancestor=eventhorizon-api" -q); sudo docker build -t eventhorizon-api ./event_horizon/node-api-server;sudo docker run -p:3000:3000 -d eventhorizon-api'
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP '(git clone git@github.com:49View/event_horizon.git 2> /dev/null || (cd event_horizon; git pull)); sudo docker kill $(docker ps --filter "ancestor=eventhorizon-api" -q); sudo docker build -t eventhorizon-api ./event_horizon/restful-api;sudo docker run -p:3000:3000 -d eventhorizon-api'
       - run:
           name: Deploy Editor to nginx
           command: |
