@@ -11,7 +11,7 @@ namespace Http {
         request->set_header( "Accept", "*/*" );
         request->set_header( "Host", url.hostOnly() );
         request->set_header( "Connection", "keep-alive" );
-        request->set_header( "Authorization", "Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1Ijp7ImkiOiI1YmU3MWFjN2UzZThhNDM1OTQxZTUwNDMiLCJwIjoiNDlWaWV3In0sImlhdCI6MTU0Mjc5NDY0NCwiZXhwIjoxNzA2MDA0MzQyMDI0NCwiYXVkIjoiZXZlbnRob3Jpem9uLnB3IiwiaXNzIjoiZXZlbnRob3Jpem9uLnB3In0._M5lJz168CsQV8QnMdzXGjffW-a-jkTZ7Ms2eSN18lBv4cSDaT9WTMhtequUIgpZ" );
+        request->set_header( "Authorization", "Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1Ijp7ImkiOiI1YmU3MWFjN2UzZThhNDM1OTQxZTUwNDMiLCJwIjoiNDlWaWV3In0sImlhdCI6MTU0Mjg3Nzc5NiwiZXhwIjoxNTQyODk5Mzk2LCJhdWQiOiJldmVudGhvcml6b24ucHciLCJpc3MiOiJldmVudGhvcml6b24ucHcifQ.EBJ4VKuiYPT1AEcNp5i6xSjsdcPKlMlNuWitAL68JHUDLigMsyfYl9grPnfv-Qet" );
         request->set_method( "GET" );
 
         return request;
@@ -34,7 +34,7 @@ namespace Http {
         request->set_header( "Content-Length", std::to_string( length ) );
         request->set_method( "POST" );
         request->set_header( "Connection", "keep-alive" );
-        request->set_header( "Authorization", "Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1Ijp7ImkiOiI1YmU3MWFjN2UzZThhNDM1OTQxZTUwNDMiLCJwIjoiNDlWaWV3In0sImlhdCI6MTU0Mjc5NDY0NCwiZXhwIjoxNzA2MDA0MzQyMDI0NCwiYXVkIjoiZXZlbnRob3Jpem9uLnB3IiwiaXNzIjoiZXZlbnRob3Jpem9uLnB3In0._M5lJz168CsQV8QnMdzXGjffW-a-jkTZ7Ms2eSN18lBv4cSDaT9WTMhtequUIgpZ" );
+        request->set_header( "Authorization", "Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1Ijp7ImkiOiI1YmU3MWFjN2UzZThhNDM1OTQxZTUwNDMiLCJwIjoiNDlWaWV3In0sImlhdCI6MTU0Mjg3Nzc5NiwiZXhwIjoxNTQyODk5Mzk2LCJhdWQiOiJldmVudGhvcml6b24ucHciLCJpc3MiOiJldmVudGhvcml6b24ucHcifQ.EBJ4VKuiYPT1AEcNp5i6xSjsdcPKlMlNuWitAL68JHUDLigMsyfYl9grPnfv-Qet" );
         const restbed::Bytes bodybuffer(buff, buff + length);
         request->set_body( bodybuffer );
 
