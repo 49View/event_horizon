@@ -46,7 +46,7 @@ app.use(cryptoController.checkRequest);
 app.use('/', indexRoute);
 app.use('/', tokenRoute);
 
-// app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
+app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
 // app.use(authController.authorize);
 
 app.use('/user', usersRoute);
