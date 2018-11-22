@@ -27,13 +27,14 @@ exports.cloudStorageDelete = (key, bucket) => {
 // }
 
 exports.writeFile = ( res, data ) => {
-    res.writeHead(200, {
-        'Content-Type': data.ContentType,
-        'Content-Last-Modified': data.LastModified,
-        'ETag': data.ETag,
-        'Content-Length': data.ContentLength
-    });
-    res.end(data["Body"]);
+    res.status(200).set(
+        {
+            'Content-Type': data.ContentType,
+            'Content-Last-Modified': data.LastModified,
+            'ETag': data.ETag,
+            'Content-Length': data.ContentLength
+        }
+    ).send(data["Body"]);
 }
 
 exports.writeError = ( res, number, err, message ) => {
