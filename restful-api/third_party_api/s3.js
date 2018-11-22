@@ -2,8 +2,9 @@ var AWS = require('aws-sdk');
 const globalConfig = require('../config_api.js')
 
 AWS.config = new AWS.Config();
-AWS.config.accessKeyId = globalConfig.AWSConfigAccessKeyId;
-AWS.config.secretAccessKey = globalConfig.AWSConfigSecretAccessKey;
+AWS.config.region = "us-east-1";
+AWS.config.accessKeyId = "AKIAJWSLLXTAUPNWMBOA";//globalConfig.AWSConfigAccessKeyId;
+AWS.config.secretAccessKey = "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";//;globalConfig.AWSConfigSecretAccessKey;
 
 var s3 = new AWS.S3();
 
