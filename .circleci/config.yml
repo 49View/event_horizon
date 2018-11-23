@@ -5,7 +5,7 @@ parameters:
   docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.1.0
 
 s3utils: &s3utils
-  wget S3_UPLOAD_SCRIPT;chmod u+x s3-upload.sh
+  wget $S3_UPLOAD_SCRIPT;chmod u+x s3-upload.sh
 
 defaults: &defaults
   docker:
