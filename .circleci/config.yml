@@ -4,6 +4,11 @@
 parameters:
   docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.1.0
 
+s3utils: &s3utils
+  run:
+    name: Grab s3 upload/download scripts
+    command: wget S3_UPLOAD_SCRIPT;chmod u+x s3-upload.sh
+
 defaults: &defaults
   docker:
     - image: *docker_cpp_build_version
@@ -11,15 +16,26 @@ defaults: &defaults
         username: sixthview
         password: $DOCKERHUB_PASSWORD
   working_directory: /app
+  <<: *s3utils
+
+machinedefaults: &machinedefaults
+  machine:
+    enabled: true
+  working_directory: ~/repo
+  <<: *s3utils
+
+nodejsfaults: &nodejsfaults
+  docker:
+    - image: circleci/node:10.3.0
+  working_directory: ~/repo
+  <<: *s3utils
 
 version: 2.0
 
 jobs:
 
   buildNODEJSAPI:
-    docker:
-      - image: circleci/node:10.3.0
-    working_directory: ~/repo
+    <<: *nodejsfaults
     steps:
       - checkout
       - restore_cache:
@@ -51,20 +67,20 @@ jobs:
           cd dev_tools/editor && npm run build
       - run: >
           cd dev_tools/editor && tar -zcvf editor_react.gz ./build
-      - run: >
-          curl --data-binary @./dev_tools/editor/editor_react.gz -k -H Content-Type:application/octet-stream https://api.eventhorizon.pw/fs/upload/artifacts%2Feditor_react.gz
+      - run:
+          name: Save editor_react artifact
+          command: |
+            ./s3-upload.sh ./dev_tools/editor/editor_react.gz $FSBUCKET $ARTIFACTS_FOLDER $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY
 
   deployNODEJSAPI:
-    working_directory: ~/repo
-    machine:
-      enabled: true
+    <<: *machinedefaults
     steps:
       - run:
-          name: Deploy to Digital Ocean
+          name: SSH to DigitalOcean and run api node.js server dockerized
           command: |
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP '(git clone git@github.com:49View/event_horizon.git 2> /dev/null || (cd event_horizon; git pull)); sudo docker kill $(docker ps --filter "ancestor=eventhorizon-api" -q); sudo docker build -t eventhorizon-api ./event_horizon/restful-api;sudo docker run -p:3000:3000 -d eventhorizon-api'
       - run:
-          name: Deploy Editor to nginx
+          name: Deploy Editor to nginx as static webpage
           command: |
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://api.eventhorizon.pw/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz;
             sudo tar -xvzf editor_react.gz;
@@ -137,16 +153,16 @@ workflows:
   build-deploy:
     jobs:
       - buildNODEJSAPI
-      - buildCPP:
-          filters:
-            branches:
-              only: master
-      - deployNODEJSAPI:
-          requires:
-            - buildNODEJSAPI
-          filters:
-            branches:
-              only: master
-      - deployCPP:
-          requires:
-            - buildCPP
+#      - buildCPP:
+#          filters:
+#            branches:
+#              only: master
+#      - deployNODEJSAPI:
+#          requires:
+#            - buildNODEJSAPI
+#          filters:
+#            branches:
+#              only: master
+#      - deployCPP:
+#          requires:
+#            - buildCPP
