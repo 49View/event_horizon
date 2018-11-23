@@ -5,9 +5,7 @@ parameters:
   docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.1.0
 
 s3utils: &s3utils
-  run:
-    name: Grab s3 upload/download scripts
-    command: wget S3_UPLOAD_SCRIPT;chmod u+x s3-upload.sh
+  wget S3_UPLOAD_SCRIPT;chmod u+x s3-upload.sh
 
 defaults: &defaults
   docker:
@@ -16,19 +14,16 @@ defaults: &defaults
         username: sixthview
         password: $DOCKERHUB_PASSWORD
   working_directory: /app
-  <<: *s3utils
 
 machinedefaults: &machinedefaults
   machine:
     enabled: true
   working_directory: ~/repo
-  <<: *s3utils
 
 nodejsfaults: &nodejsfaults
   docker:
     - image: circleci/node:10.3.0
   working_directory: ~/repo
-  <<: *s3utils
 
 version: 2.0
 
@@ -37,6 +32,7 @@ jobs:
   buildNODEJSAPI:
     <<: *nodejsfaults
     steps:
+      - run: *s3utils
       - checkout
       - restore_cache:
           keys:
