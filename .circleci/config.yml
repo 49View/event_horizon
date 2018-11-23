@@ -32,8 +32,8 @@ jobs:
   buildNODEJSAPI:
     <<: *nodejsfaults
     steps:
-      - run: *s3utils
       - checkout
+      - run: *s3utils
       - restore_cache:
           keys:
             - v2-dependencies-{{ checksum "restful-api/package.json" }}
