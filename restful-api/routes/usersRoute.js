@@ -3,7 +3,11 @@ const userController = require('../controllers/userController');
 
 const router = express.Router();
 
-router.post("/create", async (req, res, next) => {
+router.get("/", (req, res, next) => {
+    res.json(req.user);
+});
+
+router.post("/", async (req, res, next) => {
 
     console.log('User create: ', req.body);
 
