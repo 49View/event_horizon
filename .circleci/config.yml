@@ -133,7 +133,7 @@ jobs:
       - run:
           name: Store daemon artifact
           command: |
-            cd /app/builds/sat/ && s3-artifacts.sh PUT substance_deamon
+            cd /app/builds/sat/ && s3-artifacts.sh PUT substance_daemon
 
       # Editor
       - run: >
