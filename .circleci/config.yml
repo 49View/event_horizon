@@ -11,6 +11,11 @@ s3utils: &s3utils
              sudo apt-get install -y vim-common
              wget $S3_ARTIFACTS && chmod u+x s3-artifacts.sh && sudo mv s3-artifacts.sh /usr/local/bin
 
+s3utilsbuild: &s3utilsbuild
+  name: S3 utils non sudo for build
+  command: |
+    wget $S3_ARTIFACTS && chmod u+x s3-artifacts.sh && mv s3-artifacts.sh /usr/local/bin
+
 defaults: &defaults
   docker:
     - image: *docker_cpp_build_version
@@ -96,7 +101,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run: *s3utils
+      - run: *s3utilsbuild
       - run: mkdir builds
 
       # event_horizon_em
@@ -145,9 +150,9 @@ jobs:
       # run tests!
 
   deployCPP:
-    machine:
-      enabled: true
+    <<: *machinedefaults
     steps:
+      - run: *s3utils
       - run:
           name: Deploy Substance daemon
           command: |
