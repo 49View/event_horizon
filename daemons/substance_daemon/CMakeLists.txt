@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project(substance_deamon)
+project(substance_daemon)
 
 include(../../CMakeLists.txt NO_POLICY_SCOPE)
 
