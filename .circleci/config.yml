@@ -96,6 +96,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - run: *s3utils
       - run: mkdir builds
 
       # event_horizon_em
@@ -116,11 +117,18 @@ jobs:
       - run: make install -C 'builds/event_horizon/'
 
       # Substance daemon
-      - run: >
-          mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release ../../daemons/substance_daemon/
-      - run: make -j8 -C 'builds/sat/'
-      - run: |
-          curl --data-binary @/app/builds/sat/substance_deamon -k -H Content-Type:application/octet-stream https://api.eventhorizon.pw/fs/upload/artifacts%2Fsubstance_daemon
+      - run:
+          name: SubstanceDaemon cmake
+          command: |
+            mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release ../../daemons/substance_daemon/
+      - run:
+          name: SubstanceDaemon make
+          command: |
+            make -j8 -C 'builds/sat/'
+      - run:
+          name: Store daemon artifact
+          command: |
+            cd /app/builds/sat/ && s3-artifacts.sh PUT substance_deamon
 
       # Editor
       - run: >
@@ -128,10 +136,11 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
           ../../dev_tools/editor/
       - run: make -j8 -C 'builds/editor_em/'
-      - run: |
-          curl --data-binary @/app/builds/editor_em/editor.js -k -H Content-Type:application/octet-stream https://api.eventhorizon.pw/fs/upload/artifacts%2Feditor.js
-      - run: |
-          curl --data-binary @/app/builds/editor_em/editor.wasm -k -H Content-Type:application/octet-stream https://api.eventhorizon.pw/fs/upload/artifacts%2Feditor.wasm
+      - run:
+          name: Store Editor (js,wasm) artifacts
+          command: |
+            cd /app/builds/editor_em/ && s3-artifacts.sh PUT editor.js
+            cd /app/builds/editor_em/ && s3-artifacts.sh PUT editor.wasm
 
       # run tests!
 
@@ -142,10 +151,12 @@ jobs:
       - run:
           name: Deploy Substance daemon
           command: |
+            s3-artifacts.sh GET substance_daemon
+            scp substance_daemon $DROPLET_USER@$DROPLET_IP:/home/circleci/
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo mkdir sat;
+            sudo mv substance_daemon sat/;
             cd sat; echo -e "FROM sixthview/build:1.1.0\nADD substance_daemon /\nCMD [\"./substance_daemon\" ]" | sudo tee dockerfile;
-            sudo curl https://api.eventhorizon.pw/fs/get/artifacts%2Fsubstance_daemon -o substance_daemon;
-            sudo chmod 777 substance_daemon;
+            sudo chmod u+x substance_daemon;
             sudo docker kill $(docker ps --filter "ancestor=sat" -q);
             sudo docker build -t sat .;
             sudo docker run -d sat'
@@ -155,16 +166,16 @@ workflows:
   build-deploy:
     jobs:
       - buildNODEJSAPI
-#      - buildCPP:
-#          filters:
-#            branches:
-#              only: master
+      - buildCPP:
+          filters:
+            branches:
+              only: master
       - deployNODEJSAPI:
           requires:
             - buildNODEJSAPI
           filters:
             branches:
               only: master
-#      - deployCPP:
-#          requires:
-#            - buildCPP
+      - deployCPP:
+          requires:
+            - buildCPP
