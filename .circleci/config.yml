@@ -75,6 +75,7 @@ jobs:
   deployNODEJSAPI:
     <<: *machinedefaults
     steps:
+      - run: *s3utils
       - run:
           name: SSH to DigitalOcean and run api node.js server dockerized
           command: |
@@ -82,7 +83,8 @@ jobs:
       - run:
           name: Deploy Editor to nginx as static webpage
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'wget $S3_ARTIFACTS;chmod u+x s3-artifacts.sh;
+            scp  /usr/loca/bin/s3-artifacts.sh $DROPLET_USER@$DROPLET_IP:/home/circleci/s3-artifacts.sh &&
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'chmod u+x s3-artifacts.sh;
             ./s3-artifacts.sh GET editor_react.gz
             sudo tar -xvzf editor_react.gz;
             cd build;
