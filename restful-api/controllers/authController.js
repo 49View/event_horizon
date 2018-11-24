@@ -30,11 +30,32 @@ exports.InitializeAuthentication = () => {
         done(null, user);
     }));
 
+    
+    const cookieExtractor = function(req) {
+        console.log("COOKIE EXTRACTOR");
+        var token = null;
+        if (req && req.signedCookies)
+        {
+            token = req.signedCookies['jwt'];
+        }
+        return token;
+    };
+
+    const authHeaderExtractor = function(req) {
+        console.log("AUTH HEADER EXTRACTOR");
+        var token = null;
+        if (req && req.headers && req.headers['authorization'] && req.headers['authorization'].startsWith('Bearer '))
+        {
+            token = req.headers['authorization'].substr(7);
+        }
+        return token;
+    }
+
     //
     //Configure jwt strategy
     //
     const jwtOptions = {
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor, authHeaderExtractor]),
         secretOrKey: globalConfig.JWTSecret,
         issuer: "eventhorizon.pw",
         audience: "eventhorizon.pw",
@@ -43,9 +64,11 @@ exports.InitializeAuthentication = () => {
 
     passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
 
+        console.log("JWT PAYLOAD", jwtPayload);
         let error = null;
         let user = false;
         //Check user in payload
+
         const userId = jwtPayload.u.i;
         const project = jwtPayload.u.p;
 
@@ -65,7 +88,7 @@ exports.InitializeAuthentication = () => {
     }));
 }
 
-exports.getToken = async (user,project) => {
+exports.getToken = async (user, project, res) => {
 
     const jwtOptions = {
         expiresIn: '6h',
@@ -82,8 +105,18 @@ exports.getToken = async (user,project) => {
     }
     const jwt = await jsonWebToken.sign(payload, globalConfig.JWTSecret, jwtOptions);
     const jwtPayload = await jsonWebToken.verify(jwt, globalConfig.JWTSecret, jwtOptions);
+
     const d = new Date(0);
     d.setUTCSeconds(jwtPayload.exp);
+
+    res.cookie('jwt', jwt, {
+        httpOnly: true,
+        sameSite: true,
+        signed: true,
+        secure: true,
+        expires: d
+    });
+
     return {
         token: jwt,
         expires: jwtPayload.exp

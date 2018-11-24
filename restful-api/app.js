@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const globalConfig = require('./config_api.js')
 const indexRoute = require('./routes/indexRoute');
@@ -13,6 +14,7 @@ const authController = require('./controllers/authController');
 const cryptoController = require('./controllers/cryptoController');
 
 const app = express();
+
 
 express.static.mime.types["wasm"] = "application/wasm";
 
@@ -27,6 +29,8 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 authController.InitializeAuthentication();
+
+app.use(cookieParser(globalConfig.mJWTSecret));
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
