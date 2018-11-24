@@ -9,7 +9,7 @@ s3utils: &s3utils
            # this installs also vim-commond which has the xxd dependency that s3 utils need
            command: |
              sudo apt-get install -y vim-common
-             wget $S3_UPLOAD_SCRIPT;chmod u+x s3-upload.sh
+             wget $S3_ARTIFACTS && chmod u+x s3-artifacts.sh && sudo mv s3-artifacts.sh /usr/local/bin
 
 defaults: &defaults
   docker:
@@ -70,7 +70,7 @@ jobs:
       - run:
           name: Save editor_react artifact
           command: |
-            ./s3-upload.sh dev_tools/editor/ editor_react.gz $FSBUCKET $ARTIFACTS_FOLDER
+            cd dev_tools/editor && s3-artifacts.sh PUT editor_react.gz
 
   deployNODEJSAPI:
     <<: *machinedefaults
@@ -82,7 +82,8 @@ jobs:
       - run:
           name: Deploy Editor to nginx as static webpage
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo curl https://api.eventhorizon.pw/fs/get/artifacts%2Feditor_react.gz -o editor_react.gz;
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'wget $S3_ARTIFACTS;chmod u+x s3-artifacts.sh;
+            ./s3-artifacts.sh GET editor_react.gz
             sudo tar -xvzf editor_react.gz;
             cd build;
             sudo rm -rf /usr/share/nginx/html/editor;
@@ -157,11 +158,11 @@ workflows:
 #          filters:
 #            branches:
 #              only: master
-#      - deployNODEJSAPI:
-#          requires:
-#            - buildNODEJSAPI
-#          filters:
-#            branches:
+      - deployNODEJSAPI:
+          requires:
+            - buildNODEJSAPI
+          filters:
+            branches:
 #              only: master
 #      - deployCPP:
 #          requires:
