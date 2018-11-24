@@ -163,7 +163,7 @@ workflows:
             - buildNODEJSAPI
           filters:
             branches:
-#              only: master
+              only: master
 #      - deployCPP:
 #          requires:
 #            - buildCPP
