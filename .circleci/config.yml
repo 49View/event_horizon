@@ -83,7 +83,7 @@ jobs:
       - run:
           name: Deploy Editor to nginx as static webpage
           command: |
-            scp  /usr/loca/bin/s3-artifacts.sh $DROPLET_USER@$DROPLET_IP:/home/circleci/s3-artifacts.sh &&
+            scp  /usr/local/bin/s3-artifacts.sh $DROPLET_USER@$DROPLET_IP:/home/circleci/s3-artifacts.sh &&
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'chmod u+x s3-artifacts.sh;
             ./s3-artifacts.sh GET editor_react.gz
             sudo tar -xvzf editor_react.gz;
