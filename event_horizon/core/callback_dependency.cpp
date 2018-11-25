@@ -8,10 +8,6 @@
 
 dep_map g_deps;
 
-std::string cbToString( uint8_p&& _data ) {
-    return std::string( reinterpret_cast<const char*>(_data.first.get()), _data.second);
-}
-
 namespace DependencyHandler {
 
     dep_map& dependencies() {

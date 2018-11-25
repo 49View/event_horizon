@@ -12,26 +12,28 @@
 class EventHorizon {
 
 public:
-    EventHorizon( InitializeWindowFlagsT initFlags ) {
+    EventHorizon( InitializeWindowFlagsT initFlags, const LoginFields& _lf = LoginFields::Computer() ) {
         auto l = SceneLayout::makeDefault();
         l->setInitFlags( initFlags );
-        construct( l );
+        construct( l, _lf );
     }
 
-    EventHorizon() {
-        construct( SceneLayout::makeDefault() );
+    EventHorizon( const LoginFields& _lf = LoginFields::Computer() ) {
+        construct( SceneLayout::makeDefault(), _lf  );
     }
 
-    EventHorizon( std::shared_ptr<SceneLayout> _layout ) {
-        construct( _layout );
+    EventHorizon( std::shared_ptr<SceneLayout> _layout, const LoginFields& _lf = LoginFields::Computer() ) {
+        construct( _layout, _lf );
     }
 
 private:
-    void construct( std::shared_ptr<SceneLayout> _layout ) {
-        presenter = di::make_injector(APP_RSGINJECTOR).template create<std::shared_ptr<Scene>>();
-        presenter->Layout( _layout );
+    void construct( std::shared_ptr<SceneLayout> _layout, const LoginFields& _lf ) {
+        if ( Http::login( _lf ) ) {
+            presenter = di::make_injector(APP_RSGINJECTOR).template create<std::shared_ptr<Scene>>();
+            presenter->Layout( _layout );
 
-        mainLoop( presenter );
+            mainLoop( presenter );
+        }
     }
 
 private:

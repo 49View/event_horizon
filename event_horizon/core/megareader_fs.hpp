@@ -9,8 +9,8 @@
 #pragma once
 
 #include "megareader.hpp"
-#include "http/webclient.h"
-#include "file_manager.h"
+//#include "http/webclient.h"
+//#include "file_manager.h"
 
 //template <typename T>
 //struct JSONCallbackData : public CallbackData {
@@ -66,7 +66,7 @@
 
 template < typename T >
 void readFS( [[maybe_unused]] const std::string& _collection, const std::string& _name, [[maybe_unused]] const std::string& _key, [[maybe_unused]] T& val ) {
-	std::string nameEncoded = url_encode( _name );
+//	std::string nameEncoded = url_encode( _name );
 //	FM::readRemote( Url{ "/catalog/" + _collection + "/get/" + _key + "/" + nameEncoded },
 //					std::make_shared<JSONCallbackHandler<T>>( val ),
 //					Http::ResponseFlags::JSON );
@@ -74,7 +74,7 @@ void readFS( [[maybe_unused]] const std::string& _collection, const std::string&
 
 template < typename T >
 void readFS( [[maybe_unused]] const std::string& _collection, const std::string& _name, [[maybe_unused]] const std::string& _key, [[maybe_unused]] std::vector<T>& val ) {
-	std::string nameEncoded = url_encode( _name );
+//	std::string nameEncoded = url_encode( _name );
 //	FM::readRemote( Url{ "/catalog/" + _collection + "/get_many/" + _key + "/" + nameEncoded },
 //					std::make_shared<JSONArrayCallbackHandler<T>>( val ),
 //					Http::ResponseFlags::JSON );

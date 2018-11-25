@@ -4,4 +4,3 @@
 
 void saveImageFromClipboard(const std::string& folderName);
 bool isalnumCC(char c);
-

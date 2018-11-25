@@ -225,9 +225,19 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 #define JSONDATA(CLASSNAME,...) \
 	struct CLASSNAME { \
 	CLASSNAME() {} \
+	CLASSNAME( const std::string& _str ) { \
+		rapidjson::Document document; \
+		document.Parse<rapidjson::kParseStopWhenDoneFlag>( _str.c_str() ); \
+		MegaReader reader( document ); \
+		deserialize( reader ); } \
 	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); } \
     template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( #__VA_ARGS__,__VA_ARGS__ ); } \
+	std::string serialize() const { \
+		MegaWriter writer; \
+		serialize( &writer ); \
+		return writer.getString(); \
+	} \
 	inline void serialize( MegaWriter* visitor ) const { visitor->StartObject(); serializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); visitor->EndObject(); } \
 	inline void deserialize( const MegaReader& visitor ) { deserializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); } 
 

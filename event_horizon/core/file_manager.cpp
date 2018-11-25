@@ -91,7 +91,7 @@ namespace FileManager {
 //            Http::get( Url( HttpFilePrefix::get + filename), cacheSave );
             Url cachedUrl;
             cachedUrl.fromString( header.uri );
-            Http::get( cachedUrl.uri, cacheSave );
+            Http::get( Url{cachedUrl.uri}, cacheSave );
         }
     }
 
@@ -186,7 +186,7 @@ namespace FileManager {
 // ********************************************************************************************************************
 
     void readRemoteSimpleCallback( const std::string& filename,
-                                   std::function<void(const Http::Result&)> simpleCallback ) {
+                                   ResponseCallbackFunc simpleCallback ) {
         Http::get( Url( HttpFilePrefix::get + url_encode(filename)), simpleCallback,
                         Http::ResponseFlags::ExcludeFromCache );
     }
@@ -208,7 +208,7 @@ namespace FileManager {
     void writeRemoteFile( const std::string& _filename, const char *buff, uint64_t length,
                           HttpUrlEncode _filenameEnc ) {
         auto fn = _filenameEnc == HttpUrlEncode::Yes ? url_encode( _filename ) : _filename;
-        Http::postInternal( Url{HttpFilePrefix::fileupload + fn}, buff, length, HttpQuery::Binary );
+        Http::post( Url{HttpFilePrefix::fileupload + fn}, buff, length );
     }
 
     void writeRemoteFile( const std::string& _filename, const std::vector<unsigned char>& _data ) {
