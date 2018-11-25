@@ -51,7 +51,7 @@ namespace Http {
                                     onProgressWget);
     }
 
-    void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt ) {
+    void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback ) {
 
         LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );

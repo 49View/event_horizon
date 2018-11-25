@@ -202,7 +202,7 @@ namespace FileManager {
         readRemote( makeUrl<Q, T>(_name), makeHandler<B>( _builder ) );
     }
 
-    void readRemoteSimpleCallback( const std::string& filename, std::function<void(const Http::Result&)> simpleCallback );
+    void readRemoteSimpleCallback( const std::string& filename, ResponseCallbackFunc simpleCallback );
 
     void writeRemoteFile( const std::string& filename, const char *buff, uint64_t length,
                           HttpUrlEncode _filenameEnc = HttpUrlEncode::Yes );

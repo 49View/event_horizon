@@ -10,17 +10,17 @@
 
 #include "megawriter.hpp"
 
-#include "http/webclient.h"
+//#include "http/webclient.h"
 
 template < typename T >
 class MegaWriterFS {
 public:
 	MegaWriterFS( const std::string& _collection, const T& val ) {
-		StringBuffer s;
-		MegaWriter writer( s );
-		val.serialize( &writer );
-
-		Http::post( Url( "/catalog/" + _collection + "/create" ), s.GetString() );
+//		StringBuffer s;
+//		MegaWriter writer( s );
+//		val.serialize( &writer );
+//
+//		Http::post( Url( "/catalog/" + _collection + "/create" ), s.GetString() );
 	}
 };
 
@@ -29,12 +29,12 @@ class MegaWriterArrrayFS {
 public:
 	MegaWriterArrrayFS( const std::string& _collection, const std::vector<T>& val ) {
 
-		if ( val.empty() ) return;
-
-		StringBuffer s;
-		MegaWriter writer( s );
-		writer.serialize( nullptr, val );
-
-		Http::post( Url( "/catalog/" + _collection + "/insert_array" ), s.GetString() );
+//		if ( val.empty() ) return;
+//
+//		StringBuffer s;
+//		MegaWriter writer( s );
+//		writer.serialize( nullptr, val );
+//
+//		Http::post( Url( "/catalog/" + _collection + "/insert_array" ), s.GetString() );
 	}
 };

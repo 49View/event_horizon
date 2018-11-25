@@ -319,6 +319,10 @@ std::string string_trim_upto( const std::string& source, const std::vector<std::
 	return source;
 }
 
+std::string cbToString( uint8_p&& _data ) {
+	return std::string( reinterpret_cast<const char*>(_data.first.get()), _data.second);
+}
+
 bool nameHasImageExtension( const std::string& input ) {
 	std::string ext = getFileNameExt(input);
 	if ( ext != "" && ( ext == ".jpg" || ext == ".jpeg" || ext == ".png" ) ) {

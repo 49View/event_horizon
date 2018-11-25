@@ -260,6 +260,4 @@ protected:
     ddContainer mDeps;
 };
 
-std::string cbToString( uint8_p&& _data );
-
 #include "file_manager.h"

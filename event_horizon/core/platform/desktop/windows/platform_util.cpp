@@ -44,6 +44,30 @@ const std::string getUserDownloadFolder() {
     return "/Users/" + userName() + "/Downloads";
 }
 
+const uint64_t cpuID() {
+
+    unsigned int cpuinfo[4] = { 0, 0, 0, 0 };
+    unsigned int ax = 0;
+
+    __asm __volatile
+    (   "movl %%ebx, %%esi\n\t"
+        "cpuid\n\t"
+        "xchgl %%ebx, %%esi"
+    : "=a" (cpuinfo[0]), "=S" (cpuinfo[1]),
+    "=c" (cpuinfo[2]), "=d" (cpuinfo[3])
+    : "0" (ax)
+    );
+
+//    __get_cpuid(0, eax, ebx, ecx, edx);
+
+    unsigned short hash = 0;
+    unsigned int* ptr = (&cpuinfo[0]);
+    for ( unsigned int i = 0; i < 4; i++ )
+        hash += (ptr[i] & 0xFFFF) + ( ptr[i] >> 16 );
+
+    return hash;
+}
+
 bool checkFileNameNotACopy( const std::string& filename )  {
     std::vector<std::regex> fcPatterns = { std::regex("\\s\\\\\\(\\d\\\\\\)"), std::regex("\\s\\d\\.\\w") };
     for ( const auto& wb1 : fcPatterns ) {

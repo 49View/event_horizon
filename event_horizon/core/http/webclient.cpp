@@ -10,6 +10,8 @@
 #include "core/string_util.h"
 
 static bool sUseLocalhost = false;
+static bool sUserLoggedIn = false;
+static std::string sUserToken;
 
 const std::string Url::WsProtocol = "ws";
 const std::string Url::WssProtocol = "wss";
@@ -157,7 +159,7 @@ namespace Http {
 
     static std::unordered_set<std::string> requestCache;
 
-    void get( const Url& url, std::function<void(const Http::Result&)> callback, ResponseFlags rf ) {
+    void get( const Url& url, ResponseCallbackFunc callback, ResponseFlags rf ) {
         bool bPerformLoad = false;
 
         if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) ) {
@@ -175,28 +177,50 @@ namespace Http {
         }
     }
 
-    void post( const Url& url, const std::string& _data ) {
-        postInternal( url, _data.data(), _data.size(), HttpQuery::JSON );
+    void post( const Url& url, const std::string& _data, ResponseCallbackFunc callback ) {
+        postInternal( url, _data.data(), _data.size(), HttpQuery::JSON, callback );
     }
 
-    void post( const Url& url, const uint8_p& buffer ) {
-        postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second, HttpQuery::Binary );
+    void post( const Url& url, const uint8_p& buffer, ResponseCallbackFunc callback ) {
+        postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second, HttpQuery::Binary, callback );
     }
 
-    void post( const Url& url, const std::vector<unsigned  char>& buffer ) {
-        postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary );
+    void post( const Url& url, const char *buff, uint64_t length, ResponseCallbackFunc callback ) {
+        postInternal( url, buff, length, HttpQuery::Binary, callback );
+    }
+
+    void post( const Url& url, const std::vector<unsigned  char>& buffer, ResponseCallbackFunc callback ) {
+        postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary, callback );
     }
 
     void useLocalHost( const bool _flag ) {
         sUseLocalhost = _flag;
     }
 
+    void userLoggedIn( const bool _flag ) {
+        sUserLoggedIn = _flag;
+    }
+
+    bool hasUserLoggedIn() {
+        return sUserLoggedIn;
+    }
+
+    void userToken( std::string_view _token ) {
+        sUserToken = _token;
+    }
+
+    std::string_view userToken() {
+        return sUserToken;
+    }
+
     const std::string CLOUD_PROTOCOL() {
-        if ( sUseLocalhost ) {
-            return Url::HttpsProtocol;
-        } else{
-            return Url::HttpsProtocol;
-        }
+        return Url::HttpsProtocol;
+        // We do NOT allow anything that's not HTTPS, sorry folks!!
+//        if ( sUseLocalhost ) {
+//            return Url::HttpsProtocol;
+//        } else{
+//            return Url::HttpsProtocol;
+//        }
     }
 
     const std::string CLOUD_SERVER() {

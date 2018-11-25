@@ -26,7 +26,14 @@ router.post('/getToken', async (req, res, next) => {
         error = true;
     }
 
-    error===null?res.sendStatus(400):res.json(tokenInfo);
+    if ( error===null ) {
+        res.sendStatus(400);
+    } else if ( error ) {
+        res.sendStatus(401);
+    } else {
+        res.json(tokenInfo);
+    }
+
 });
 
 module.exports = router;

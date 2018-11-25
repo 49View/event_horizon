@@ -9,12 +9,14 @@
 #include <unordered_map>
 #include <rapidjson/document.h>
 #include <core/htypes_shared.hpp>
+#include <core/string_util.h>
+#include "login.hpp"
 
-#include "../string_util.h"
 
 bool isSuccessStatusCode( int statusCode );
 
 namespace HttpFilePrefix {
+    const static std::string gettoken = "/getToken/";
     const static std::string entities = "/entities/";
     const static std::string entities_all = "/entities/metadata/byGroupTags/";
     const static std::string entities_onebinary = "/entities/content/byGroupTags/";
@@ -38,7 +40,10 @@ enum class HttpQuery {
 
 struct Url;
 
+namespace Http { struct Result; }
+
 using SocketCallbackFunc = std::function<void( const rapidjson::Document& data )>;
+using ResponseCallbackFunc = std::function<void(const Http::Result&)>;
 
 namespace Socket {
     static std::unordered_map<std::string, SocketCallbackFunc> callbacksMap;
@@ -105,20 +110,28 @@ namespace Http {
         bool isSuccessStatusCode() const; //all 200s
     };
 
-    void get( const Url& url, const std::function<void(const Http::Result&)> callback,
+    bool login( const LoginFields& _lf );
+
+    void get( const Url& url, ResponseCallbackFunc callback,
               ResponseFlags rf = ResponseFlags::None );
-    void getInternal( const Url& url, const std::function<void(const Http::Result&)> callback,
+    void getInternal( const Url& url, ResponseCallbackFunc callback,
               ResponseFlags rf = ResponseFlags::None );
 
-    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt );
+    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback );
 
-    void post( const Url& url, const std::string& _data ); // text data
-    void post( const Url& url, const uint8_p& buffer );
-    void post( const Url& url, const std::vector<unsigned char>& buffer );
+    void post( const Url& url, const std::string& _data, ResponseCallbackFunc callback = nullptr );
+    void post( const Url& url, const uint8_p& buffer, ResponseCallbackFunc callback = nullptr );
+    void post( const Url& url, const char *buff, uint64_t length, ResponseCallbackFunc callback = nullptr);
+    void post( const Url& url, const std::vector<unsigned char>& buffer, ResponseCallbackFunc callback = nullptr );
 
     bool Ping();
 
-    void useLocalHost( const bool _flag );
+    void useLocalHost( bool _flag );
+    void userLoggedIn( bool _flag );
+    bool hasUserLoggedIn();
+
+    void userToken( std::string_view _token );
+    std::string_view userToken();
 
     const std::string CLOUD_PROTOCOL();
     const std::string CLOUD_SERVER();
@@ -132,8 +145,8 @@ namespace zlibUtil {
 }
 
 struct Url {
-    Url() {}
-    Url( std::string _uri );
+    Url() = default;
+    explicit Url( std::string _uri );
 
     Url( std::string _host, short _port, std::string _uri ) {
         host = _host;

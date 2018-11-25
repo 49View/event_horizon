@@ -3,15 +3,25 @@
 
 #include <restbed>
 #include <iomanip>
+#include <core/serialization.hpp>
+
+JSONDATA( LoginToken, token, expires )
+    std::string token;
+    uint64_t expires;
+};
 
 namespace Http {
+
+    const std::string userBearerToken() {
+        return std::string{"Bearer "} + std::string{Http::userToken()};
+    }
 
     std::shared_ptr<restbed::Request> makeRequest( const Url& url ) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri(url.toString()));
         request->set_header( "Accept", "*/*" );
         request->set_header( "Host", url.hostOnly() );
         request->set_header( "Connection", "keep-alive" );
-        request->set_header( "Authorization", "Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1Ijp7ImkiOiI1YmU3MWFjN2UzZThhNDM1OTQxZTUwNDMiLCJwIjoiNDlWaWV3In0sImlhdCI6MTU0Mjg3Nzc5NiwiZXhwIjoxNTQyODk5Mzk2LCJhdWQiOiJldmVudGhvcml6b24ucHciLCJpc3MiOiJldmVudGhvcml6b24ucHcifQ.EBJ4VKuiYPT1AEcNp5i6xSjsdcPKlMlNuWitAL68JHUDLigMsyfYl9grPnfv-Qet" );
+        request->set_header( "Authorization", Http::userBearerToken() );
         request->set_method( "GET" );
 
         return request;
@@ -34,7 +44,7 @@ namespace Http {
         request->set_header( "Content-Length", std::to_string( length ) );
         request->set_method( "POST" );
         request->set_header( "Connection", "keep-alive" );
-        request->set_header( "Authorization", "Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1Ijp7ImkiOiI1YmU3MWFjN2UzZThhNDM1OTQxZTUwNDMiLCJwIjoiNDlWaWV3In0sImlhdCI6MTU0Mjg3Nzc5NiwiZXhwIjoxNTQyODk5Mzk2LCJhdWQiOiJldmVudGhvcml6b24ucHciLCJpc3MiOiJldmVudGhvcml6b24ucHcifQ.EBJ4VKuiYPT1AEcNp5i6xSjsdcPKlMlNuWitAL68JHUDLigMsyfYl9grPnfv-Qet" );
+        request->set_header( "Authorization", Http::userBearerToken() );
         const restbed::Bytes bodybuffer(buff, buff + length);
         request->set_body( bodybuffer );
 
@@ -56,8 +66,8 @@ namespace Http {
             if ( !checkBitWiseFlag(rf, ResponseFlags::HeaderOnly) ) {
                 if ( res.length > 0 ) {
                     restbed::Http::fetch( res.length, response );
-                    if ( res.contentType == "application/json" ||
-                         res.contentType == "application/text" ) {
+                    if ( res.contentType.find("application/json") != std::string::npos ||
+                         res.contentType.find("application/text") != std::string::npos ) {
                         std::vector<unsigned char> a = response->get_body();
                         std::stringstream ss;
                         for ( size_t i = 0; i < res.length; i++ ) { ss << a[i]; }
@@ -72,7 +82,7 @@ namespace Http {
         return res;
     }
 
-    void getInternal( const Url& url, std::function<void(const Http::Result&)> callback, ResponseFlags rf ) {
+    void getInternal( const Url& url, ResponseCallbackFunc callback, ResponseFlags rf ) {
         auto request = makeRequest( url );
 //        auto ssl_settings = std::make_shared< restbed::SSLSettings >( );
 
@@ -118,7 +128,7 @@ namespace Http {
         }
     }
 
-    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt ) {
+    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback ) {
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
@@ -137,8 +147,10 @@ namespace Http {
                                       auto rcode = res->get_status_code();
                                       LOGR("[HTTP-POST] Response code %d - %s ", rcode,
                                                                                  res->get_status_message().c_str() );
-                                      if ( !isSuccessStatusCode(rcode) ) {
-                                          LOGR("Reason: %s", res->get_status_message().c_str());
+                                      if ( isSuccessStatusCode(rcode) ) {
+                                          if ( callback ) {
+                                              callback( handleResponse( res, url, ResponseFlags::None ) );
+                                          }
                                       }
                                   }, settings );
         } catch ( const std::exception& ex ) {
@@ -173,6 +185,21 @@ namespace Http {
 
     bool Result::isSuccessStatusCode() const {
         return ::isSuccessStatusCode( statusCode );
+    }
+
+    bool login( const LoginFields& _lf ) {
+        // NDDADO: if dev and desktop let's use localhost for easy debugging
+        useLocalHost(true);
+        post( Url{HttpFilePrefix::gettoken}, _lf.serialize(), [](const Http::Result& res) {
+            if( res.isSuccessStatusCode() ) {
+                LoginToken lt(res.bufferString);
+                userToken( lt.token );
+            }
+
+            userLoggedIn( res.isSuccessStatusCode() );
+        } );
+
+        return hasUserLoggedIn();
     }
 
 }
