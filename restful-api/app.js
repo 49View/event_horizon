@@ -34,6 +34,7 @@ app.use(cookieParser(globalConfig.mJWTSecret));
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
+  res.header('Access-Control-Allow-Credentials', true);
   res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control");
   next();
