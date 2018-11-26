@@ -6,7 +6,7 @@ const router = express.Router();
 router.get("/", (req, res, next) => {
     // console.log("USER GET /");
     // res.send("dado");
-    res.sendStatus(200).json(req.user);
+    res.send(req.user);
 });
 
 router.post("/", async (req, res, next) => {

@@ -33,13 +33,10 @@ exports.InitializeAuthentication = () => {
     
     const cookieExtractor = function(req) {
         console.log("COOKIE EXTRACTOR");
-        console.log(req.cookies);
-        console.log(req.signedCookies);
-
         var token = null;
-        if (req && req.signedCookies && req.signedCookies['jwt'])
+        if (req && req.signedCookies && req.signedCookies['eh_jwt'])
         {
-            token = req.signedCookies['jwt'];
+            token = req.signedCookies['eh_jwt'];
         }
         return token;
     };
@@ -60,8 +57,7 @@ exports.InitializeAuthentication = () => {
     const jwtOptions = {
         jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor, authHeaderExtractor]),
         secretOrKey: globalConfig.JWTSecret,
-        issuer: "eventhorizon.pw",
-        audience: "eventhorizon.pw",
+        issuer: "ateventhorizon.com",
         algorithm: "HS384"
     }
 
@@ -95,8 +91,7 @@ exports.getToken = async (user, project, res) => {
 
     const jwtOptions = {
         expiresIn: '6h',
-        issuer: "eventhorizon.pw",
-        audience: "eventhorizon.pw",
+        issuer: "ateventhorizon.com",
         algorithm: "HS384",
     };
 
