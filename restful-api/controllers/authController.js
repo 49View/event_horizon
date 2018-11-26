@@ -78,6 +78,7 @@ exports.InitializeAuthentication = () => {
             } else {
                 user.roles=user.roles.map(v => v.toLowerCase());
                 user.project=project.toLowerCase();
+                user.expires=jwtPayload.exp;
             }
         } catch (ex) {
             error = "Invalid user";
