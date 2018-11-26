@@ -100,7 +100,7 @@ app.use(function(req, res, next) {
 app.use('/', indexRoute);
 app.use('/', tokenRoute);
 
-app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
+app.use(passport.authenticate(['client-cert','eh_jwt'], {session:false}));
 // app.use(authController.authorize);
 
 app.use('/user', usersRoute);

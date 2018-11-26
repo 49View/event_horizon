@@ -34,13 +34,14 @@ router.post('/getToken', async (req, res, next) => {
         const d = new Date(0);
         d.setUTCSeconds(tokenInfo.expires);
     
-        res.cookie('jwt', tokenInfo.token, {
+        res.cookie('eh_jwt', tokenInfo.token, {
             httpOnly: true,
             sameSite: false,
             signed: true,
-            secure: false,
+            secure: true,
             expires: d
-        }).send(tokenInfo);       
+        }).send(tokenInfo);
+        // next();
     }
 
 });

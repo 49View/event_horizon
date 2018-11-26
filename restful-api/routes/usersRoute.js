@@ -4,7 +4,9 @@ const userController = require('../controllers/userController');
 const router = express.Router();
 
 router.get("/", (req, res, next) => {
-    res.json(req.user);
+    // console.log("USER GET /");
+    // res.send("dado");
+    res.sendStatus(200).json(req.user);
 });
 
 router.post("/", async (req, res, next) => {
