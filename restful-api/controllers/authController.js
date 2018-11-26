@@ -33,6 +33,9 @@ exports.InitializeAuthentication = () => {
     
     const cookieExtractor = function(req) {
         console.log("COOKIE EXTRACTOR");
+        console.log(req.cookies);
+        console.log(req.signedCookies);
+
         var token = null;
         if (req && req.signedCookies)
         {
@@ -111,7 +114,7 @@ exports.getToken = async (user, project, res) => {
 
     res.cookie('jwt', jwt, {
         httpOnly: true,
-        sameSite: true,
+        // sameSite: false,
         signed: true,
         secure: true,
         expires: d

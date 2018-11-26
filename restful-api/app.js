@@ -30,23 +30,62 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 authController.InitializeAuthentication();
 
-app.use(cookieParser(globalConfig.mJWTSecret));
+// app.use(cookieParser(globalConfig.mJWTSecret));
 
-app.use((req, res, next) => {
+// app.use( (req,res,next) => {
+//   if (req.method === 'OPTIONS') {
+//     console.log('!OPTIONS');
+//     var headers = {};
+//     // IE8 does not allow domains to be specified, just the *
+//     headers["Access-Control-Allow-Origin"] = req.headers.origin;
+//     // headers["Access-Control-Allow-Origin"] = "*";
+//     headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, DELETE, OPTIONS";
+//     headers["Access-Control-Allow-Credentials"] = true;
+//     headers["Access-Control-Max-Age"] = '86400'; // 24 hours
+//     headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Cache-Control";
+//     res.writeHead(200, headers);
+//     res.end();
+//   } else {
+//     next();
+//   }  
+// });
+
+// // app.use((req, res, next) => {
+// //   res.header("Access-Control-Allow-Origin", "*");
+// //   res.header('Access-Control-Allow-Credentials', true);
+// //   res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
+// //   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control");
+// //   next();
+// // });
+
+// app.use(logger('dev'));
+// app.use(bodyParser.raw({limit: '100mb'}));
+// app.use(bodyParser.json({limit: '100mb'}));
+// app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
+
+// app.use(cryptoController.decodeRequest);
+// app.use(cryptoController.checkRequest);
+
+app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header('Access-Control-Allow-Credentials', true);
   res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control");
+  if (req.method === 'OPTIONS') {
+    res.status(200).send();
+  }
   next();
-});
+ });
 
-app.use(logger('dev'));
-app.use(bodyParser.raw({limit: '100mb'}));
-app.use(bodyParser.json({limit: '100mb'}));
-app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
-
-app.use(cryptoController.decodeRequest);
-app.use(cryptoController.checkRequest);
+ 
+ // uncomment after placing your favicon in /public
+//  app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+ app.use(logger('dev'));
+ // app.use(bodyParser);
+ app.use(bodyParser.raw({limit: '100mb'}));
+ app.use(bodyParser.json({limit: '100mb'}));
+ app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
+ app.use(cookieParser(globalConfig.mJWTSecret));
+//  app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRoute);
 app.use('/', tokenRoute);
