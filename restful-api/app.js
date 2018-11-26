@@ -76,7 +76,8 @@ app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
 app.use(cookieParser(globalConfig.mJWTSecret));
 
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Set-Cookie");
   if (req.method === 'OPTIONS') {

@@ -36,9 +36,9 @@ router.post('/getToken', async (req, res, next) => {
     
         res.cookie('jwt', tokenInfo.token, {
             httpOnly: true,
-            // sameSite: false,
+            sameSite: false,
             signed: true,
-            secure: true,
+            secure: false,
             expires: d
         }).send(tokenInfo);       
     }
