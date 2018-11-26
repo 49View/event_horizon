@@ -28,7 +28,6 @@ let db = mongoose.connection;
 //Bind connection to error event (to get notification of connection errors)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-authController.InitializeAuthentication();
 
 // app.use(cookieParser(globalConfig.mJWTSecret));
 
@@ -66,27 +65,37 @@ authController.InitializeAuthentication();
 // app.use(cryptoController.decodeRequest);
 // app.use(cryptoController.checkRequest);
 
+
+authController.InitializeAuthentication();
+
+ 
+app.use(logger('dev'));
+app.use(bodyParser.raw({limit: '100mb'}));
+app.use(bodyParser.json({limit: '100mb'}));
+app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
+app.use(cookieParser(globalConfig.mJWTSecret));
+
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Set-Cookie");
   if (req.method === 'OPTIONS') {
+    console.log("REQUEST OPTIONS");
+    console.log("URL:", req.url);
+    console.log("HEADERS:", req.headers);
     res.status(200).send();
+  } else {
+    console.log("OTHER REQUEST");
+    console.log("METHOD:", req.method);
+    console.log("URL:", req.url);
+    console.log("HEADERS:", req.headers);
+    console.log("COOKIES:", req.cookies);
+    console.log("SIGNED-COOKIES:", req.signedCookies);
+    next();
   }
-  next();
  });
 
  
- // uncomment after placing your favicon in /public
-//  app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
- app.use(logger('dev'));
- // app.use(bodyParser);
- app.use(bodyParser.raw({limit: '100mb'}));
- app.use(bodyParser.json({limit: '100mb'}));
- app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
- app.use(cookieParser(globalConfig.mJWTSecret));
-//  app.use(express.static(path.join(__dirname, 'public')));
-
 app.use('/', indexRoute);
 app.use('/', tokenRoute);
 

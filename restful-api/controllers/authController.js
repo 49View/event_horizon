@@ -37,7 +37,7 @@ exports.InitializeAuthentication = () => {
         console.log(req.signedCookies);
 
         var token = null;
-        if (req && req.signedCookies)
+        if (req && req.signedCookies && req.signedCookies['jwt'])
         {
             token = req.signedCookies['jwt'];
         }
@@ -108,17 +108,6 @@ exports.getToken = async (user, project, res) => {
     }
     const jwt = await jsonWebToken.sign(payload, globalConfig.JWTSecret, jwtOptions);
     const jwtPayload = await jsonWebToken.verify(jwt, globalConfig.JWTSecret, jwtOptions);
-
-    const d = new Date(0);
-    d.setUTCSeconds(jwtPayload.exp);
-
-    res.cookie('jwt', jwt, {
-        httpOnly: true,
-        // sameSite: false,
-        signed: true,
-        secure: true,
-        expires: d
-    });
 
     return {
         token: jwt,

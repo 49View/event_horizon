@@ -31,7 +31,16 @@ router.post('/getToken', async (req, res, next) => {
     } else if ( error ) {
         res.sendStatus(401);
     } else {
-        res.json(tokenInfo);
+        const d = new Date(0);
+        d.setUTCSeconds(tokenInfo.expires);
+    
+        res.cookie('jwt', tokenInfo.token, {
+            httpOnly: true,
+            // sameSite: false,
+            signed: true,
+            secure: true,
+            expires: d
+        }).send(tokenInfo);       
     }
 
 });
