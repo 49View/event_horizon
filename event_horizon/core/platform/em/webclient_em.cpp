@@ -82,4 +82,9 @@ namespace Http {
     bool Result::isSuccessStatusCode() const {
         return ::isSuccessStatusCode( statusCode );
     }
+
+    bool login( [[maybe_unused]] const LoginFields& _lf ) {
+        return true;
+    }
+
 }

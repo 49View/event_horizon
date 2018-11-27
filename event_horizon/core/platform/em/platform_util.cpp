@@ -43,6 +43,10 @@ const std::string userComputerName() {
     return userComputerName;
 }
 
+const uint64_t cpuID() {
+    return 0x37337;
+}
+
 namespace ClipBoard {
     std::string exec(const char* cmd)
     {
