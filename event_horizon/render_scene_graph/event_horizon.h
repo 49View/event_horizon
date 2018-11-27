@@ -12,17 +12,17 @@
 class EventHorizon {
 
 public:
-    EventHorizon( InitializeWindowFlagsT initFlags, const LoginFields& _lf = LoginFields::Computer() ) {
+    explicit EventHorizon( InitializeWindowFlagsT initFlags, const LoginFields& _lf = LoginFields::Computer() ) {
         auto l = SceneLayout::makeDefault();
         l->setInitFlags( initFlags );
         construct( l, _lf );
     }
 
-    EventHorizon( const LoginFields& _lf = LoginFields::Computer() ) {
+    explicit EventHorizon( const LoginFields& _lf = LoginFields::Computer() ) {
         construct( SceneLayout::makeDefault(), _lf  );
     }
 
-    EventHorizon( std::shared_ptr<SceneLayout> _layout, const LoginFields& _lf = LoginFields::Computer() ) {
+    explicit EventHorizon( std::shared_ptr<SceneLayout> _layout, const LoginFields& _lf = LoginFields::Computer() ) {
         construct( _layout, _lf );
     }
 

@@ -84,6 +84,7 @@ namespace Http {
     }
 
     bool login( [[maybe_unused]] const LoginFields& _lf ) {
+        // We have a passpartout here are login in emscripten should be dealt within the browser cookies/certs
         return true;
     }
 

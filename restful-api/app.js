@@ -29,29 +29,30 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 authController.InitializeAuthentication();
-
-app.use(cookieParser(globalConfig.mJWTSecret));
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control");
-  next();
-});
-
+ 
 app.use(logger('dev'));
 app.use(bodyParser.raw({limit: '100mb'}));
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true }));
+app.use(cookieParser(globalConfig.mJWTSecret));
 
-app.use(cryptoController.decodeRequest);
-app.use(cryptoController.checkRequest);
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control, Set-Cookie");
+  if (req.method === 'OPTIONS') {
+    res.status(200).send();
+  } else {
+    next();
+  }
+ });
 
+ 
 app.use('/', indexRoute);
 app.use('/', tokenRoute);
 
-app.use(passport.authenticate(['client-cert','jwt'], {session:false}));
+app.use(authController.authenticate);
 // app.use(authController.authorize);
 
 app.use('/user', usersRoute);

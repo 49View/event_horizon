@@ -34,9 +34,9 @@ exports.InitializeAuthentication = () => {
     const cookieExtractor = function(req) {
         console.log("COOKIE EXTRACTOR");
         var token = null;
-        if (req && req.signedCookies)
+        if (req && req.signedCookies && req.signedCookies['eh_jwt'])
         {
-            token = req.signedCookies['jwt'];
+            token = req.signedCookies['eh_jwt'];
         }
         return token;
     };
@@ -57,8 +57,7 @@ exports.InitializeAuthentication = () => {
     const jwtOptions = {
         jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor, authHeaderExtractor]),
         secretOrKey: globalConfig.JWTSecret,
-        issuer: "eventhorizon.pw",
-        audience: "eventhorizon.pw",
+        issuer: "ateventhorizon.com",
         algorithm: "HS384"
     }
 
@@ -79,6 +78,7 @@ exports.InitializeAuthentication = () => {
             } else {
                 user.roles=user.roles.map(v => v.toLowerCase());
                 user.project=project.toLowerCase();
+                user.expires=jwtPayload.exp;
             }
         } catch (ex) {
             error = "Invalid user";
@@ -88,40 +88,30 @@ exports.InitializeAuthentication = () => {
     }));
 }
 
-exports.getToken = async (user, project, res) => {
+exports.getToken = async (userId, project) => {
 
     const jwtOptions = {
         expiresIn: '6h',
-        issuer: "eventhorizon.pw",
-        audience: "eventhorizon.pw",
+        issuer: "ateventhorizon.com",
         algorithm: "HS384",
     };
 
     const payload = {
         u: {
-            i: user._id,
+            i: userId,
             p: project
         }
     }
     const jwt = await jsonWebToken.sign(payload, globalConfig.JWTSecret, jwtOptions);
     const jwtPayload = await jsonWebToken.verify(jwt, globalConfig.JWTSecret, jwtOptions);
 
-    const d = new Date(0);
-    d.setUTCSeconds(jwtPayload.exp);
-
-    res.cookie('jwt', jwt, {
-        httpOnly: true,
-        sameSite: true,
-        signed: true,
-        secure: true,
-        expires: d
-    });
-
     return {
         token: jwt,
         expires: jwtPayload.exp
     };
 }
+
+exports.authenticate = passport.authenticate(['client-cert','jwt'], {session:false});
 
 exports.authorize = async (req,res,next) => {
 
