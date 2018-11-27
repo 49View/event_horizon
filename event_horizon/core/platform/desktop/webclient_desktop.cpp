@@ -189,7 +189,7 @@ namespace Http {
 
     bool login( const LoginFields& _lf ) {
         // NDDADO: if dev and desktop let's use localhost for easy debugging
-        useLocalHost(true);
+        if ( !_lf.isDaemon() ) useLocalHost(true);
         post( Url{HttpFilePrefix::gettoken}, _lf.serialize(), [](const Http::Result& res) {
             if( res.isSuccessStatusCode() ) {
                 LoginToken lt(res.bufferString);

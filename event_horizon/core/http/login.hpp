@@ -8,6 +8,7 @@
 
 namespace LoginSandbox {
     const static std::string Name = "eh_sandbox";
+    const static std::string Daemon = "daemon";
 }
 
 JSONDATA( LoginFields, project, email, password )
@@ -28,5 +29,18 @@ JSONDATA( LoginFields, project, email, password )
         ret.password = std::to_string(cpuID());
         return ret;
     }
+
+    static LoginFields Daemon() {
+        static LoginFields ret;
+        ret.project = LoginSandbox::Name;
+        ret.email = LoginSandbox::Daemon;
+        ret.password = "luckycarrot1803";
+        return ret;
+    }
+
+    bool isDaemon() const {
+        return email == LoginSandbox::Daemon;
+    }
+
 };
 

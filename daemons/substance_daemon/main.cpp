@@ -143,7 +143,7 @@ void elaborateGeom( const std::string& _filename ) {
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
-    Http::login(LoginFields{"daemon", "luckycarrot1803"});
+    Http::login(LoginFields::Daemon());
 
 //    initDeamon();
     Socket::on( "cloudStorageFileUpdate", []( const rapidjson::Document& data ) {
