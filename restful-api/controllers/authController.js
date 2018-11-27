@@ -88,7 +88,7 @@ exports.InitializeAuthentication = () => {
     }));
 }
 
-exports.getToken = async (user, project, res) => {
+exports.getToken = async (userId, project) => {
 
     const jwtOptions = {
         expiresIn: '6h',
@@ -98,7 +98,7 @@ exports.getToken = async (user, project, res) => {
 
     const payload = {
         u: {
-            i: user._id,
+            i: userId,
             p: project
         }
     }
