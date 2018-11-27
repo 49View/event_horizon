@@ -111,6 +111,8 @@ exports.getToken = async (userId, project) => {
     };
 }
 
+exports.authenticate = passport.authenticate(['client-cert','jwt'], {session:false});
+
 exports.authorize = async (req,res,next) => {
 
     const url = req.originalUrl;

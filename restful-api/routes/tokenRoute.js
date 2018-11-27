@@ -4,11 +4,11 @@ const authController = require('../controllers/authController');
 
 const router = express.Router();
 
-router.get('/cleanToken', async (req, res, next) => {
+router.get('/cleanToken', authController.authenticate, async (req, res, next) => {
     if (req.user===undefined || req.user===null) {
         res.status(401).send();
     } else {
-        res.clearCookie('jwt', {
+        res.clearCookie('eh_jwt', {
             httpOnly: true,
             sameSite: false,
             signed: true,
@@ -17,14 +17,14 @@ router.get('/cleanToken', async (req, res, next) => {
     }
 });
 
-router.post('/refreshToken', async (req, res, next) => {
+router.post('/refreshToken', authController.authenticate, async (req, res, next) => {
     if (req.user===undefined || req.user===null) {
         res.status(401).send();
     } else {
         let error = false;
         let tokenInfo = null;
         try {
-            tokenInfo = await authController.getToken(rq.user._id, req.user.project);
+            tokenInfo = await authController.getToken(req.user._id, req.user.project);
             tokenInfo.user = { "name": req.user.name, "email": req.user.email }
         } catch (ex) {
             console.log('Error refreshing token', ex);

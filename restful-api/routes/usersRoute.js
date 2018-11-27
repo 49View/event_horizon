@@ -6,6 +6,7 @@ const router = express.Router();
 router.get("/", (req, res, next) => {
     // console.log("USER GET /");
     // res.send("dado");
+    console.log(req.user);
     res.send({ expires: req.user.expires, user: {name: req.user.name, email: req.user.email}});
 });
 
