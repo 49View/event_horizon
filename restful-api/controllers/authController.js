@@ -63,7 +63,7 @@ exports.InitializeAuthentication = () => {
 
     passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
 
-        console.log("JWT PAYLOAD", jwtPayload);
+        //console.log("JWT PAYLOAD", jwtPayload);
         let error = null;
         let user = false;
         //Check user in payload
