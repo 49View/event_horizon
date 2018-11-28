@@ -1,77 +1,98 @@
 const userController = require('./userController');
 const authController = require('./authController');
 const projectModel = require('../models/project');
+const jsonWebToken = require('jsonwebtoken');
 const axios = require('axios');
 
 
-const InitializeProjectsRoutes = async () => {
+const getProjectInfo = async (projectName) => {
     
-    let projectsInfo = [];
+    let projectInfo = null;
 
     try {
-        let dbProjects = [];
-        dbProjects=await projectModel.find({});
-
-        projectsInfo=dbProjects.map(dbp => {
-            const p=dbp.toObject();
-            p.apiPrefix=p.apiPrefix.toLowerCase();
-            if (!p.apiPrefix.endsWith("/")) {
-                p.apiPrefix+="/";
+        const dbProject=await projectModel.findOne({ "name": { $regex: projectName, $options: "i"}});
+        if (dbProject!==null) {
+            projectInfo=dbProject.toObject();
+            projectInfo.apiPrefix=projectInfo.apiPrefix.toLowerCase();
+            if (!projectInfo.apiPrefix.endsWith("/")) {
+                projectInfo.apiPrefix+="/";
             }
-            p.apiServer=p.apiServer.toLowerCase();
-            if (!p.apiServer.endsWith("/")) {
-                p.apiServer+="/";
-            }
-            return p;
-        });
+            projectInfo.apiServer=projectInfo.apiServer.toLowerCase();
+            if (!projectInfo.apiServer.endsWith("/")) {
+                projectInfo.apiServer+="/";
+            }        
+        }
     } catch (ex) {
-        console.log("Error initializing projects routes");
-        projectsInfo = [];
+        console.log("Error initializing projects routes", ex);
+        projectInfo = null
     }
 
-    return projectsInfo;
+    return projectInfo;
 }
 
-exports.CheckProjectsRoutes = async (req,res,next) => {
+exports.checkProjectRoutes = async (req,res,next) => {
 
     try {
 
-        const projectsInfo = await InitializeProjectsRoutes();
-
-        const requestUrl=req.url.toLowerCase();
+        const currentUser = req.user;
         let projectToRoute = null;
-        projectsInfo.every( projectInfo => {
+        const projectInfo = await getProjectInfo(req.user.project);
+        if (projectInfo!==null) {
+            const requestUrl=req.url.toLowerCase();
             let apiPrefix = projectInfo.apiPrefix;    
             if (requestUrl.startsWith(apiPrefix)) {
                 projectToRoute=projectInfo;
-                return false;
             }
-            return true;
-        });
+        }
 
         if (projectToRoute!==null) {
 
             const projectApiUrl = projectToRoute.apiServer+req.url.substr(projectToRoute.apiPrefix.length);
-            console.log("ROUTE REQUEST TO PROJECT API: ", projectApiUrl)
+            console.log("ROUTE REQUEST TO PROJECT API: ", projectApiUrl);
 
-            const currentUser = req.user;
+            const jwtOptions = {
+                issuer: "ateventhorizon.com",
+                audience: projectToRoute.apiServer,
+                algorithm: "HS384",
+            };
+        
+            const payload = {
+                user: {
+                    id: currentUser._id.toString(),
+                    name: currentUser.name,
+                    email: currentUser.email,
+                    roles: currentUser.roles
+                },
+                exp: currentUser.expires
+            }
+            const projectApiJwt = await jsonWebToken.sign(payload, projectToRoute.apiSecret, jwtOptions);
+        
             const projectApiRequest = {
                 method: req.method,
                 url: projectApiUrl,
                 data: req.body,
                 headers: {
-                    "x-eventhorizon-username": currentUser.name,
-                    "x-eventhorizon-useremail": currentUser.email,
-                    "x-eventhorizon-userid": currentUser._id.toString(),
-                    "x-eventhorizon-roles": currentUser.roles.join(","),
-                    "x-eventhorizon-tokenexpires": currentUser.expires
-                }
+                    "authorization": "Bearer "+projectApiJwt,
+                    "accept": "*/*"
+                },
+                "responseType": "arraybuffer"
             }
 
             try {
-                console.log(projectApiRequest);
                 const projectApiResponse = await axios(projectApiRequest);
-                res.status(projectApiResponse.status).send(projectApiResponse.data);
+
+                let responseHeaders = {};
+                if (projectApiResponse.headers && projectApiResponse.headers["content-type"]) {
+                    responseHeaders["Content-Type"]=projectApiResponse.headers["content-type"];
+                }
+                if (projectApiResponse.headers && projectApiResponse.headers["content-length"]) {
+                    responseHeaders["Content-Length"]=projectApiResponse.headers["content-length"];
+                }
+                if (projectApiResponse.headers && projectApiResponse.headers["etag"]) {
+                    responseHeaders["Etag"]=projectApiResponse.headers["etag"];
+                }
+
+                res.status(projectApiResponse.status).set(responseHeaders).send(projectApiResponse.data);
             } catch (ex) {
                 console.log("ERROR IN REDIRECT TO PROJECT");
                 if (ex && ex.response && ex.response.status && ex.response.statusText) {

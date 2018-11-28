@@ -56,7 +56,7 @@ app.use('/', tokenRoute);
 app.use(authController.authenticate);
 // app.use(authController.authorize);
 
-app.use(projectController.CheckProjectsRoutes);
+app.use(projectController.checkProjectRoutes);
 
 app.use('/user', usersRoute);
 app.use('/fs', fsRoute);
