@@ -21,7 +21,7 @@ class App extends Component {
     }
 
     this.setState({ onConnectingSocket: true});
-    const socket = sio('https://localhost:3000', );
+    const socket = sio('https://api.ateventhorizon.com', );
     socket.on('connect', () => {
       console.log("Connected to socket");
       this.setState({socket: socket});
@@ -54,7 +54,7 @@ class App extends Component {
     try {
 
       const result = await axios.post(
-        "https://localhost:3000/getToken",
+        "https://api.ateventhorizon.com/getToken",
         {
           "project": "49view",
           "email": "guest@49view.com",
@@ -74,7 +74,7 @@ class App extends Component {
     console.log("LOGOUT");
     try {
       const result = await axios.get(
-        "https://localhost:3000/cleanToken",
+        "https://api.ateventhorizon.com/cleanToken",
         { withCredentials: true}
       );
       console.log("RESULT: ",result);
