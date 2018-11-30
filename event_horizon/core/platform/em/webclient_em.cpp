@@ -14,10 +14,12 @@ namespace Http {
     void onSuccessWget( unsigned boh, void* arg , void* data, unsigned numBytes ) {
         auto ckey = reinterpret_cast<char*>(arg);
         auto skey = std::string( ckey );
-        LOGR( "[HTTP-RESPONSE] code: 200, handle %d", boh );
-        argCallbackMap[skey]( { skey,
-                                reinterpret_cast<const char*>(data),
-                                numBytes, 200 } );
+        LOGR( "[HTTP-RESPONSE] code: 200, handle %d, numBytes: %d", boh, numBytes );
+        if ( argCallbackMap[skey] ) {
+            argCallbackMap[skey]( { skey,
+                                    reinterpret_cast<const char*>(data),
+                                    numBytes, 200 } );
+        }
         delete [] ckey;
     }
 
