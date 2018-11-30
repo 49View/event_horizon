@@ -10,6 +10,11 @@ var https = require('https');
 var http = require('http');
 var fs = require('fs'); 
 const path = require("path");
+const cookie = require('cookie');
+const cookieParser = require('cookie-parser');
+const authController = require('../controllers/authController');
+const globalConfig = require('../config_api.js')
+
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0" // Avoids DEPTH_ZERO_SELF_SIGNED_CERT error for self-signed certs
 
@@ -48,17 +53,43 @@ server.on('listening', onListening);
 var io = require('socket.io').listen(server);
 
 // When a client connects, we note it in the console
-io.sockets.on('connection', function (socket) {
-    console.log('A client is connected!');
+io.sockets.on('connection', async (socket) => {
 
-    socket.on('message', function (message) {
-      let msg = message.msg;
-      console.log('message: '+msg);
+  console.log('A client is connected!');
+    
+  let validClient = false;
+  try {
+    if (socket.handshake.headers && socket.handshake.headers.cookie) {
+      //console.log("HAS COOKIES");
+      const cookies=cookie.parse(socket.handshake.headers.cookie);
+      if (cookies["eh_jwt"]) {
+        //console.log("HAS JWT COOKIE")
+        const jwtToken=cookieParser.signedCookie(cookies["eh_jwt"], globalConfig.mJWTSecret);
+ 
+        const jwtPayload = await authController.verifyToken(jwtToken);
+        //console.log("HAS VALID JWT");
+        validClient=true;
+      }      
+    }
+  } catch (ex) {
+    validClient=false;
+  }
+  if (!validClient) {
+    //CLOSE SOCKET FROM INVALID CLIENT
+    console.log("Client unauthorized, force disconnection");
+    socket.disconnect();
+    return;
+  }
 
-      if (msg==="ping") {
-        socket.emit('message', {msg: "pong"} );
-      }
-    });
+
+  socket.on('message', function (message) {
+    let msg = message.msg;
+    console.log('message: '+msg);
+
+    if (msg==="ping") {
+      socket.emit('message', {msg: "pong"} );
+    }
+  });
 });
 
 

@@ -7,7 +7,11 @@ const jsonWebToken = require('jsonwebtoken');
 const userController = require('./userController');
 const routeAuthorizationModel = require('../models/route_authorization');
 
-
+const jwtOptions = {
+    expiresIn: '6h',
+    issuer: "ateventhorizon.com",
+    algorithm: "HS384",
+};
 
 exports.InitializeAuthentication = () => {
 
@@ -90,12 +94,6 @@ exports.InitializeAuthentication = () => {
 
 exports.getToken = async (userId, project) => {
 
-    const jwtOptions = {
-        expiresIn: '6h',
-        issuer: "ateventhorizon.com",
-        algorithm: "HS384",
-    };
-
     const payload = {
         u: {
             i: userId,
@@ -109,6 +107,11 @@ exports.getToken = async (userId, project) => {
         token: jwt,
         expires: jwtPayload.exp
     };
+}
+
+exports.verifyToken = async (jwtToken) => {
+
+    return await jsonWebToken.verify(jwtToken, globalConfig.JWTSecret, jwtOptions);
 }
 
 exports.authenticate = passport.authenticate(['client-cert','jwt'], {session:false});
