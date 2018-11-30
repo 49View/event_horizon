@@ -35,6 +35,7 @@ namespace Socket {
 
     void startClient( const std::string& _host ) {
 
+        LOGR("[WEB-SOCKET] Connecting to host: %s", _host.c_str() );
         socket = std::make_unique<emscripten::val>(emscripten::val::global("SocketClientHandler"));
 
         if (socket->as<bool>()) {
