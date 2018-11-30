@@ -44,7 +44,7 @@ const std::string userComputerName() {
 }
 
 const uint64_t cpuID() {
-    return 0;
+    return 0x37337;
 }
 
 namespace ClipBoard {

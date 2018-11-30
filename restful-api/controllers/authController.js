@@ -32,7 +32,7 @@ exports.InitializeAuthentication = () => {
 
     
     const cookieExtractor = function(req) {
-        console.log("COOKIE EXTRACTOR");
+        //console.log("COOKIE EXTRACTOR");
         var token = null;
         if (req && req.signedCookies && req.signedCookies['eh_jwt'])
         {
@@ -42,7 +42,7 @@ exports.InitializeAuthentication = () => {
     };
 
     const authHeaderExtractor = function(req) {
-        console.log("AUTH HEADER EXTRACTOR");
+        //console.log("AUTH HEADER EXTRACTOR");
         var token = null;
         if (req && req.headers && req.headers['authorization'] && req.headers['authorization'].startsWith('Bearer '))
         {
@@ -63,7 +63,7 @@ exports.InitializeAuthentication = () => {
 
     passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
 
-        console.log("JWT PAYLOAD", jwtPayload);
+        //console.log("JWT PAYLOAD", jwtPayload);
         let error = null;
         let user = false;
         //Check user in payload

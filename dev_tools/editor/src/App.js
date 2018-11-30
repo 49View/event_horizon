@@ -1,23 +1,45 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import * as actions from './store/actions/index';
 
-import Render from './Render/Render';
+import Render from './components/render/Render';
 import classes from './App.css';
-import socketClientHandlerFactory from './Extra/socketClientHandlerFactory';
-import wasmLoader from './Extra/wasmLoader';
+
+import socketClientHandlerFactory from './extra/socketClientHandlerFactory';
 
 window.SocketClientHandler = socketClientHandlerFactory();
-window.wasmLoader = new wasmLoader();
 
 class App extends Component {
 
+  onClickHandler = () => {
+    alert("CLICK");
+  }
+
+  componentDidMount() {
+    this.props.onCheckCurrentUser();
+  }
+
+
   render() {
     return (
-        <div className={classes.App}>
-        <Render />
+      <div className={classes.App}>
+        <Render/>
       </div>
     );
   }
-
 }
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    isAuthenticated: state.auth.token != null
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onCheckCurrentUser: () => dispatch(actions.checkCurrentUser())
+  }
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

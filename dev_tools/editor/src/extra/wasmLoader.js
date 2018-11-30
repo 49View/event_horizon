@@ -1,5 +1,7 @@
 /* global WebAssembly */
-import axios from "../axios/axios-api";
+import axios from "../axios/backend";
+
+const projectName = "editor";
 
 export class wasmLoader {
 
@@ -7,22 +9,21 @@ export class wasmLoader {
     loaderModule = null;
     wasmBinary = null;
     wasmScript = null;
-    wasmBinaryUrl = "/fs/get/artifacts%2Feditor.wasm";
-    wasmScriptUrl = "/fs/get/artifacts%2Feditor.js";
+    wasmBinaryUrl = `/fs/artifacts%2F${projectName}.wasm`;
+    wasmScriptUrl = `/fs/artifacts%2F${projectName}.js`;
 
     constructor(store)  {
         this.store = store;
 
         if (window.location.href.startsWith("https://localhost:5000")) {
-            this.wasmBinaryUrl='https://localhost:5000/editor.wasm';
-            this.wasmScriptUrl='https://localhost:5000/editor.js';
+            this.wasmBinaryUrl=`https://localhost:5000/${projectName}.wasm`;
+            this.wasmScriptUrl=`https://localhost:5000/${projectName}.js`;
         } else if (window.location.href.startsWith("http://localhost:5000")) {
-            this.wasmBinaryUrl='http://localhost:5000/editor.wasm';
-            this.wasmScriptUrl='http://localhost:5000/editor.js';
-        } else if (window.location.href.startsWith("https://localhost:3000")) {
-            this.wasmBinaryUrl='https://localhost:3000/editor.wasm';
-            this.wasmScriptUrl='https://localhost:3000/editor.js';
-        }    
+            this.wasmBinaryUrl=`http://localhost:5000/${projectName}.wasm`;
+            this.wasmScriptUrl=`http://localhost:5000/${projectName}.js`;
+        } 
+        
+        console.log(window.location.href);
 
         this.loaderModule = {
             print: (text) => {

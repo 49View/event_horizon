@@ -11,6 +11,7 @@ const usersRoute = require('./routes/usersRoute');
 const tokenRoute = require('./routes/tokenRoute');
 const fsRoute = require('./routes/fsRoute');
 const authController = require('./controllers/authController');
+const projectController = require('./controllers/projectController');
 const cryptoController = require('./controllers/cryptoController');
 
 const app = express();
@@ -29,7 +30,7 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 authController.InitializeAuthentication();
- 
+
 app.use(logger('dev'));
 app.use(bodyParser.raw({limit: '100mb'}));
 app.use(bodyParser.json({limit: '100mb'}));
@@ -55,6 +56,8 @@ app.use('/', tokenRoute);
 app.use(authController.authenticate);
 // app.use(authController.authorize);
 
+app.use(projectController.checkProjectRoutes);
+
 app.use('/user', usersRoute);
 app.use('/fs', fsRoute);
 app.use('/entities', entitiesRoute);
@@ -74,8 +77,7 @@ app.use((err, req, res, next) => {
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).send();
 });
 
 module.exports = app;

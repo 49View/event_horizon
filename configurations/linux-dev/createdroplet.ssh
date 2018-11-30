@@ -6,5 +6,24 @@ touch /home/circleci/.ssh/authorized_keys
 
 echo -e "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvky7JhOLkvXocx6cqW+nDFXwOieG/NRyUdd5c+CvCRYg0pJNdarY96KHUShfbBtx8L4kSJ1gbsLVAhd3PdZQOvmvyorhia+vuaNrjsN84ZlwfM/KVOhZ0prY4/Sx/00V1AfuASczl7/bkH75rEmBTLvqB1BBjsOE8Ql5S12yPcBLXDjiJJEw5gqo5WQdNU0bOomC62en8Xw9WbfV1PZXlZFOLQ3q52CGAZvy5okH7Cm2sPhhc7EOuefAFs5J9/hnv/uAPKpuzyU3quswKbUCMyEJLy4l5XSjKhGAETJcM4904i4nwGDdkOukIfk/pI9rsNDQ3aF3eRS+fZNM2TNlp Dado@Bes-iMac.home" | tee /home/circleci/.ssh/authorized_keys
 
+# This is just in case we need to install npm and node, but since we are using dockerized node.js apps we do not need them
+#sudo apt install -y npm
+#sudo apt-get -y install nodejs
+#curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+#export NVM_DIR="$HOME/.nvm"
+#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+#nvm install 10.13.0
+
+sudo apt-get -y install nginx
+sudo ufw allow 'Nginx HTTPS'
+
+sudo apt-get install bc
+sudo git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt
+cd /opt/letsencrypt
+./certbot-auto certonly --standalone
+
+systemctl start nginx
+
 # Now add the id_rsa_circleci private key to CircleCI, need to find a way to automate it!!
 

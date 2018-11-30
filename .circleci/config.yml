@@ -2,7 +2,7 @@
 #
 
 parameters:
-  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.1.0
+  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.3
 
 s3utils: &s3utils
            name: S3 utils
@@ -108,7 +108,7 @@ jobs:
       - run: >
           source /3rdpartylibs/emsdk/emsdk_env.sh && mkdir builds/event_horizon_em && cd builds/event_horizon_em/ &&
           cmake -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
+          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/incoming/cmake/Modules/Platform/Emscripten.cmake
           ../../event_horizon/
       - run: make -j8 -C 'builds/event_horizon_em/'
       - run: make install -C 'builds/event_horizon_em/'
@@ -138,7 +138,7 @@ jobs:
       # Editor
       - run: >
           mkdir builds/editor_em && cd builds/editor_em/ && cmake -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/1.38.12/cmake/Modules/Platform/Emscripten.cmake
+          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/incoming/cmake/Modules/Platform/Emscripten.cmake
           ../../dev_tools/editor/
       - run: make -j8 -C 'builds/editor_em/'
       - run:

@@ -40,7 +40,7 @@ const getUserWithRolesByEmailProject = async (email,project) => {
 const getUserWithRolesByIdProject = async (id,project) => {
     
     let dbUser = null;
-    console.log(id,project);
+    //console.log(id,project);
     const query = [];
     query.push({ $match: {"_id": ObjectId(id)}});
     query.push({ $lookup: {"from": "users_roles", "localField": "_id", "foreignField": "userId", "as": 'roles'}});

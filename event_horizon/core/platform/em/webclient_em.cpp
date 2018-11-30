@@ -14,16 +14,18 @@ namespace Http {
     void onSuccessWget( unsigned boh, void* arg , void* data, unsigned numBytes ) {
         auto ckey = reinterpret_cast<char*>(arg);
         auto skey = std::string( ckey );
-        LOGR( "[HTTP-GET] Response code: 200, handle %d", boh );
-        argCallbackMap[skey]( { skey,
-                                reinterpret_cast<const char*>(data),
-                                numBytes, 200 } );
+        LOGR( "[HTTP-RESPONSE] code: 200, handle %d, numBytes: %d", boh, numBytes );
+        if ( argCallbackMap[skey] ) {
+            argCallbackMap[skey]( { skey,
+                                    reinterpret_cast<const char*>(data),
+                                    numBytes, 200 } );
+        }
         delete [] ckey;
     }
 
     void onFailWget( [[maybe_unused]] unsigned boh, void *arg, int code, const char* why ) {
         auto ckey = reinterpret_cast<char*>(arg);
-        LOGR("[HTTP-GET-RESPONSE][ERROR] handle: %d code: %d URI: %s -- %s", boh, code, ckey, why );
+        LOGR("[HTTP-RESPONSE][ERROR] handle: %d code: %d URI: %s -- %s", boh, code, ckey, why );
         delete [] ckey;
     }
 
@@ -41,14 +43,17 @@ namespace Http {
         char* keyToCharCPassing = new char[key.size()];
         strcpy( keyToCharCPassing, key.c_str() );
 
-        emscripten_async_wget2_data(uri.toString().c_str(),
+        emscripten_async_http_request(uri.toString().c_str(),
                                     "GET",
+                                    nullptr,
+                                    0,
                                     nullptr,
                                     reinterpret_cast<void*>(keyToCharCPassing),
                                     false,
                                     onSuccessWget,
                                     onFailWget,
-                                    onProgressWget);
+                                    onProgressWget,
+                                    true );
     }
 
     void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback ) {
@@ -56,27 +61,44 @@ namespace Http {
         LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
-        emscripten::val xhr = emscripten::val::global("XMLHttpRequest").new_();
-        xhr.call<void>( "open", std::string("POST"), uri.toString() );
+        auto key = uri.toString();
+        argCallbackMap[key] = callback;
+        char* keyToCharCPassing = new char[key.size()];
+        strcpy( keyToCharCPassing, key.c_str() );
+
+        std::string contenType = "application/json; charset=utf-8";
         switch ( qt ) {
             case HttpQuery::Binary:
-                xhr.call<void>( "setRequestHeader", std::string("Content-type"), std::string("application/octet-stream") );
+                contenType = "application/octet-stream";
                 break;
-            case HttpQuery::JSON:
-            case HttpQuery::Text:
-                xhr.call<void>( "setRequestHeader", std::string("Content-type"), std::string("application/json; charset=utf-8") );
+            default:
                 break;
         }
-        // NDDado: due to security reasons *Content-length* header has been blocked on modern browsers, DO NOT USE IT
-//        xhr.call<void>( "setRequestHeader", std::string("Content-length"), (int)length );
 
-        emscripten::val buffArray = emscripten::val::global("ArrayBuffer").new_((int)length);
-        emscripten::val buffI8Array = emscripten::val::global("Int8Array").new_(buffArray);
+        emscripten_async_http_request(uri.toString().c_str(),
+                                      "POST",
+                                      buff,
+                                      static_cast<int>(length),
+                                      contenType.c_str(),
+                                      reinterpret_cast<void*>(keyToCharCPassing),
+                                      false,
+                                      onSuccessWget,
+                                      onFailWget,
+                                      onProgressWget,
+                                      true );
 
-        for (uint64_t i=0; i< length; i++) {
-            buffI8Array.call<void>( "fill", buff[i], (int)i, (int)(i+1) );
-        }
-        xhr.call<void>( "send", buffArray );
+//        emscripten::val xhr = emscripten::val::global("XMLHttpRequest").new_();
+//        xhr.call<void>( "open", std::string("POST"), uri.toString() );
+//        // NDDado: due to security reasons *Content-length* header has been blocked on modern browsers, DO NOT USE IT
+////        xhr.call<void>( "setRequestHeader", std::string("Content-length"), (int)length );
+//
+//        emscripten::val buffArray = emscripten::val::global("ArrayBuffer").new_((int)length);
+//        emscripten::val buffI8Array = emscripten::val::global("Int8Array").new_(buffArray);
+//
+//        for (uint64_t i=0; i< length; i++) {
+//            buffI8Array.call<void>( "fill", buff[i], (int)i, (int)(i+1) );
+//        }
+//        xhr.call<void>( "send", buffArray );
     }
 
     bool Result::isSuccessStatusCode() const {
@@ -84,6 +106,17 @@ namespace Http {
     }
 
     bool login( [[maybe_unused]] const LoginFields& _lf ) {
+
+#ifdef USE_LOCALHOST
+        Http::useLocalHost(true);
+#endif
+//        Url uri{"/user/"};
+//        LOGR( "[HTTP-GET] %s", uri.toString().c_str() );
+
+//        Http::get( uri, [](const Http::Result& _res ){
+//            LOGR("[LOGIN RESPONSE]: %s", _res.bufferString.c_str() );
+//        } );
+
         // We have a passpartout here are login in emscripten should be dealt within the browser cookies/certs
         return true;
     }

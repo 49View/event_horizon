@@ -977,6 +977,9 @@ macro(set_cpp_flags)
 
     add_definitions(-D_OPENGL)
     add_definitions(-DSIXTHVIEW)
+    if ( USE_LOCALHOST )
+        add_definitions(-DUSE_LOCALHOST=1)
+    endif()
 
     set_include_paths()
 
