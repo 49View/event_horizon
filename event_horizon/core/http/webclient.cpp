@@ -197,6 +197,10 @@ namespace Http {
         sUseLocalhost = _flag;
     }
 
+    bool isLocalHost() {
+        return sUseLocalhost;
+    }
+
     void userLoggedIn( const bool _flag ) {
         sUserLoggedIn = _flag;
     }

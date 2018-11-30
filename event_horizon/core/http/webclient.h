@@ -129,6 +129,7 @@ namespace Http {
     void useLocalHost( bool _flag );
     void userLoggedIn( bool _flag );
     bool hasUserLoggedIn();
+    bool isLocalHost();
 
     void userToken( std::string_view _token );
     std::string_view userToken();
