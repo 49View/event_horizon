@@ -3,7 +3,7 @@ const authController = require('./authController');
 const projectModel = require('../models/project');
 const jsonWebToken = require('jsonwebtoken');
 const axios = require('axios');
-
+var https = require('https');
 
 const getProjectInfo = async (projectName) => {
     
@@ -47,13 +47,19 @@ exports.checkProjectRoutes = async (req,res,next) => {
 
         if (projectToRoute!==null) {
 
+            let httpsAg = new https.Agent();
+
+            if (process.env.NODE_ENV === 'dev') {
+                projectToRoute.apiServer = "https://localhost:3001/";
+                httpsAg = new https.Agent({ rejectUnauthorized: false });
+            }
             const projectApiUrl = projectToRoute.apiServer+req.url.substr(projectToRoute.apiPrefix.length);
             console.log("ROUTE REQUEST TO PROJECT API: ", projectApiUrl);
 
             const jwtOptions = {
                 issuer: "ateventhorizon.com",
                 audience: projectToRoute.apiServer,
-                algorithm: "HS384",
+                algorithm: "HS384"
             };
         
             const payload = {
@@ -71,11 +77,12 @@ exports.checkProjectRoutes = async (req,res,next) => {
                 method: req.method,
                 url: projectApiUrl,
                 data: req.body,
+                httpsAgent: httpsAg,
                 headers: {
                     "authorization": "Bearer "+projectApiJwt,
                     "accept": "*/*"
                 },
-                "responseType": "arraybuffer"
+                responseType: "arraybuffer"
             }
 
             try {
@@ -95,10 +102,11 @@ exports.checkProjectRoutes = async (req,res,next) => {
                 res.status(projectApiResponse.status).set(responseHeaders).send(projectApiResponse.data);
             } catch (ex) {
                 console.log("ERROR IN REDIRECT TO PROJECT");
+                console.log(ex);
                 if (ex && ex.response && ex.response.status && ex.response.statusText) {
                     res.status(ex.response.status).send(ex.response.statusText);
                 } else {
-                    console.log(ex);
+                    // console.log(ex);
                     res.status(404).send("Bad request");
                 }
             }
