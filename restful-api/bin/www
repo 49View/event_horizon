@@ -57,30 +57,29 @@ io.sockets.on('connection', async (socket) => {
 
   console.log('A client is connected!');
     
-  let validClient = false;
-  try {
-    if (socket.handshake.headers && socket.handshake.headers.cookie) {
-      //console.log("HAS COOKIES");
-      const cookies=cookie.parse(socket.handshake.headers.cookie);
-      if (cookies["eh_jwt"]) {
-        //console.log("HAS JWT COOKIE")
-        const jwtToken=cookieParser.signedCookie(cookies["eh_jwt"], globalConfig.mJWTSecret);
+  // let validClient = false;
+  // try {
+  //   if (socket.handshake.headers && socket.handshake.headers.cookie) {
+  //     //console.log("HAS COOKIES");
+  //     const cookies=cookie.parse(socket.handshake.headers.cookie);
+  //     if (cookies["eh_jwt"]) {
+  //       //console.log("HAS JWT COOKIE")
+  //       const jwtToken=cookieParser.signedCookie(cookies["eh_jwt"], globalConfig.mJWTSecret);
  
-        const jwtPayload = await authController.verifyToken(jwtToken);
-        //console.log("HAS VALID JWT");
-        validClient=true;
-      }      
-    }
-  } catch (ex) {
-    validClient=false;
-  }
-  if (!validClient) {
-    //CLOSE SOCKET FROM INVALID CLIENT
-    console.log("Client unauthorized, force disconnection");
-    socket.disconnect();
-    return;
-  }
-
+  //       const jwtPayload = await authController.verifyToken(jwtToken);
+  //       //console.log("HAS VALID JWT");
+  //       validClient=true;
+  //     }      
+  //   }
+  // } catch (ex) {
+  //   validClient=false;
+  // }
+  // if (!validClient) {
+  //   //CLOSE SOCKET FROM INVALID CLIENT
+  //   console.log("Client unauthorized, force disconnection");
+  //   socket.disconnect();
+  //   return;
+  // }
 
   socket.on('message', function (message) {
     let msg = message.msg;
