@@ -21,12 +21,13 @@ exports.InitializeAuthentication = () => {
     //
     passport.use(new ClientCertificateStrategy(async (clientCert, done) => {
 
-        const cn = clientCert.subject.CN;
-        let user = null;
+        const commonName = clientCert.subject.CN;
+        let user = false;
         let error = null;
     
-        console.log('CLIENT CERTIFICATE AUTH: '+commonName);
-        console.log('Certificate expires: ', Date.parse(clientCert.valid_to));
+        // console.log('CLIENT CERTIFICATE AUTH: '+commonName+"");
+        // console.log('Certificate expires: ', clientCert.valid_to);
+        // console.log('Certificate expires: ', Date.parse(clientCert.valid_to)/1000);
 
         const query = {"clientCommonName": commonName};
     
@@ -39,16 +40,20 @@ exports.InitializeAuthentication = () => {
                 error = "User not found";
             } else {
                 user.roles=user.roles.map(v => v.toLowerCase());
-                user.project=project.toLowerCase();
-                user.expires=new Date.parse(clientCert.valid_to);
-                console.log("Store user: ", user);
+                user.project=clientCertificateInfo.project.toLowerCase();
+                user.expires=Date.parse(clientCert.valid_to)/1000;
+                //console.log("Store user: ", user);
             }
         } catch (ex) {
-            console.log("Unknown common name")
+            console.log("Unknown common name", ex)
             error="Invalid certificate";
         }
 
-        done(error, user);
+        if (error!==null) {
+            done(null, false, { message: error});
+        } else {
+            done(null, user);
+        }
     }));
 
     
@@ -101,12 +106,16 @@ exports.InitializeAuthentication = () => {
                 user.project=project.toLowerCase();
                 user.expires=jwtPayload.exp;
             }
-            console.log("Store user: ", user);
+            //console.log("Store user: ", user);
         } catch (ex) {
             error = "Invalid user";
         }
 
-        done(error, user);
+        if (error!==null) {
+            done(null, false, { message: error});
+        } else {
+            done(null, user);
+        }
     }));
 }
 
