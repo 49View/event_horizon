@@ -6,6 +6,7 @@ const globalConfig = require('../config_api.js')
 const jsonWebToken = require('jsonwebtoken');
 const userController = require('./userController');
 const routeAuthorizationModel = require('../models/route_authorization');
+const clientCertificateModel = require('../models/client_certificate');
 
 const jwtOptions = {
     expiresIn: '6h',
@@ -18,20 +19,36 @@ exports.InitializeAuthentication = () => {
     //
     //Configure client certificate strategy
     //
-    passport.use(new ClientCertificateStrategy((clientCert, done) => {
+    passport.use(new ClientCertificateStrategy(async (clientCert, done) => {
 
-        var cn = clientCert.subject.CN,
-        user = null;
+        const cn = clientCert.subject.CN;
+        let user = null;
+        let error = null;
     
-        console.log('CLIENT CERTIFICATE AUTH: '+cn);
+        console.log('CLIENT CERTIFICATE AUTH: '+commonName);
+        console.log('Certificate expires: ', Date.parse(clientCert.valid_to));
 
-        // The CN will typically be checked against a database
-        if (cn === 'client1') {
-            user = { name: 'Test User' };
+        const query = {"clientCommonName": commonName};
+    
+        try {
+            const clientCertificateInfoDB = await clientCertificateModel.findOne(query);
+
+            const clientCertificateInfo = clientCertificateInfoDB.toObject();
+            user = await userController.getUserByIdProject(clientCertificateInfo.userId, clientCertificateInfo.project);
+            if (user===null) {
+                error = "User not found";
+            } else {
+                user.roles=user.roles.map(v => v.toLowerCase());
+                user.project=project.toLowerCase();
+                user.expires=new Date.parse(clientCert.valid_to);
+                console.log("Store user: ", user);
+            }
+        } catch (ex) {
+            console.log("Unknown common name")
+            error="Invalid certificate";
         }
-        console.log(user);
 
-        done(null, user);
+        done(error, user);
     }));
 
     
@@ -84,6 +101,7 @@ exports.InitializeAuthentication = () => {
                 user.project=project.toLowerCase();
                 user.expires=jwtPayload.exp;
             }
+            console.log("Store user: ", user);
         } catch (ex) {
             error = "Invalid user";
         }

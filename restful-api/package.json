@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "devstart": "NODE_ENV=\"dev\" nodemon ./bin/www",
+    "devstartw": "set NODE_ENV=\"dev\" && nodemon ./bin/www",
     "test": "mocha --exit test/tests.js"
   },
   "dependencies": {
