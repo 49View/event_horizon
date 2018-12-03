@@ -33,7 +33,6 @@ router.get('/content/byGroupTags/:group/:tags', async (req, res, next) => {
         if (foundEntities!==null && foundEntities.length>0) {
             const filePath=entityController.getFilePath(foundEntities[0].project, foundEntities[0].group, foundEntities[0].metadata.contentHash);
             const fileData = await fsController.cloudStorageFileGet(filePath, "eventhorizonentities");
-            
             fsController.writeFile(res, fileData);
         } else {
             res.sendStatus(204);
@@ -51,7 +50,11 @@ router.get('/metadata/byGroupTags/:group/:tags', async (req, res, next) => {
         const project = req.user.project;
         //Check existing entity for use project (or public)
         const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, false, null);
-        res.status(200).send(foundEntities);
+        if (foundEntities!==null && foundEntities.length>0) {
+            res.status(200).send(foundEntities);
+        } else {
+            res.sendStatus(204);
+        }
     } catch (ex) {
         console.log("ERROR GETTING ENTITY METADATA BYGROUPTAGS: ", ex);
         res.sendStatus(400);
