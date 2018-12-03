@@ -10,7 +10,6 @@
 
 RawImage RawImage::BLACK_ARGB1x1{ "black_alpha", 1, 1, static_cast<uint32_t>(0xff000000) };
 RawImage RawImage::BLACK_RGBA1x1{ "black_alpha", 1, 1, static_cast<uint32_t>(0x000000ff) };
-RawImage RawImage::WHITE4x4{ "white", 4, 4, 0xffffffff };
 
 //struct RawImageCallbackData : public CallbackData {
 //    using CallbackData::CallbackData;
@@ -25,6 +24,8 @@ RawImage RawImage::WHITE4x4{ "white", 4, 4, 0xffffffff };
 //        return iData->data.second > 0;
 //    };
 //};
+
+
 
 RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint32_t _col ) {
     width = _w;
@@ -203,5 +204,9 @@ RawImage RawImage::toNormalMap() const {
     }
 
     return ret;
+}
+
+RawImage RawImage::WHITE4x4() {
+    return RawImage{ "white", 4, 4, static_cast<uint32_t>(0xffffffff) };
 }
 

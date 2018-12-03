@@ -91,10 +91,10 @@ struct RawImage {
     int width = 0;
     int height = 0;
     int channels = 0;
-	mutable std::unique_ptr<uint8_t[]> rawBtyes;
+	std::unique_ptr<uint8_t[]> rawBtyes;
 	std::string name;
 
-	static RawImage WHITE4x4;
+	static RawImage WHITE4x4();
 	static RawImage BLACK_ARGB1x1;
 	static RawImage BLACK_RGBA1x1;
 };

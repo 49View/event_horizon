@@ -110,7 +110,7 @@ void Renderer::postInit() {
     mIBLPrefilterBRDF = std::make_unique<PrefilterBRDF>(*this);
     mIBLPrefilterBRDF->init();
 
-    tm.addTextureWithData(FBNames::lightmap, RawImage::WHITE4x4, TSLOT_LIGHTMAP );
+    tm.addTextureWithData(FBNames::lightmap, RawImage::WHITE4x4(), TSLOT_LIGHTMAP );
 
     mbIsInitialized = true;
 }

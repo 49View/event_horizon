@@ -187,11 +187,7 @@ namespace Http {
         return ::isSuccessStatusCode( statusCode );
     }
 
-    bool login( const LoginFields& _lf ) {
-        // NDDADO: if dev and desktop let's use localhost for easy debugging
-#ifdef USE_LOCALHOST
-        Http::useLocalHost(true);
-#endif
+    bool loginInternal( const LoginFields& _lf ) {
         post( Url{HttpFilePrefix::gettoken}, _lf.serialize(), [](const Http::Result& res) {
             if( res.isSuccessStatusCode() ) {
                 LoginToken lt(res.bufferString);
@@ -203,5 +199,4 @@ namespace Http {
 
         return hasUserLoggedIn();
     }
-
 }

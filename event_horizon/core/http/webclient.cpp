@@ -11,6 +11,7 @@
 
 static bool sUseLocalhost = false;
 static bool sUserLoggedIn = false;
+static std::string sProject;
 static std::string sUserToken;
 
 const std::string Url::WsProtocol = "ws";
@@ -79,6 +80,10 @@ std::string Url::toString( const Http::UsePort _up ) const {
         return Http::CLOUD_PROTOCOL() + "://" + host + ":" + std::to_string( lPort ) + uri;
     }
     return Http::CLOUD_PROTOCOL() + "://" + host + uri;
+}
+
+Url Url::privateAPI( const std::string& _params ) {
+    return Url{ "/" + Http::project() + _params };
 }
 
 std::string url_encode( const std::string& value ) {
@@ -193,6 +198,14 @@ namespace Http {
         postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary, callback );
     }
 
+    void project( const std::string& _project ) {
+        sProject = _project;
+    }
+
+    std::string project() {
+        return sProject;
+    }
+
     void useLocalHost( const bool _flag ) {
         sUseLocalhost = _flag;
     }
@@ -245,6 +258,15 @@ namespace Http {
         } else {
             return 443;
         }
+    }
+
+    bool login( const LoginFields& _lf ) {
+        // NDDADO: if dev and desktop let's use localhost for easy debugging
+#ifdef USE_LOCALHOST
+        Http::useLocalHost(true);
+#endif
+        Http::project( _lf.project );
+        return loginInternal( _lf );
     }
 
 }

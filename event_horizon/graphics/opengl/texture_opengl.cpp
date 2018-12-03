@@ -9,7 +9,7 @@ std::map<std::string, std::pair<int, int>> Texture::sCubeMapIndices;
 Vector2f Texture::TexturePixelCMScale = Vector2f( 4000.0f, 4000.0f );
 Vector2f Texture::TexturePixelCMScaleInv = reciprocal( Texture::TexturePixelCMScale );
 
-void Texture::init_data_r() {
+void Texture::init_data_r( const uint8_t* _data ) {
     bool updateStorage = true;
     if ( mTarget == TEXTURE_CUBE_MAP ) {
         if ( sCubeMapIndices[cubeMapTName( mId )].second > 1 ) {
@@ -29,21 +29,20 @@ void Texture::init_data_r() {
             if ( updateStorage ) {
                 GLCALL( glTexStorage2D( glTextureTarget, num_mipmaps, glInternalFormat, mWidth, mHeight ));
             }
-            auto ptr = mData.get();
-            if ( ptr != nullptr ) {
+            if ( _data ) {
                 GLCALL( glTexSubImage2D( glTextureImageTarget, 0, 0, 0, mWidth, mHeight, glFormat, glType,
-                                         mData.get() ) );
+                                         _data ) );
             }
         } else {
             GLCALL( glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0) );
             GLCALL( glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0) );
             GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType,
-                                  mData.get()));
+                                  _data));
         }
     }
 }
 
-void Texture::init_r() {
+void Texture::init_r( const uint8_t* _data ) {
     //	ASSERT( mWrapMode == WRAP_MODE_CLAMP_TO_EDGE || (JMATH::isPowerOfTwo(mWidth) && JMATH::isPowerOfTwo(mHeight)));
     //	mWrapMode = (JMATH::isPowerOfTwo(mWidth) && JMATH::isPowerOfTwo(mHeight)) ? WRAP_MODE_REPEAT : WRAP_MODE_CLAMP_TO_EDGE;
 
@@ -81,7 +80,7 @@ void Texture::init_r() {
     LOGI( "Initialising texture %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
           mId.c_str(), mHandle );
 
-    init_data_r();
+    init_data_r( _data );
 
     if ( mGenerateMipMaps ) {
         bool bFinalizeCubeMap = true;
@@ -118,7 +117,7 @@ void Texture::init_r() {
 //	init_r();
 //}
 
-void Texture::reallocateForRenderTarget() {
+void Texture::reallocateForRenderTarget( const uint8_t* _data ) {
     GLenum glInternalFormat = pixelFormatToGlInternalFormat( mFormat );
     GLenum glFormat = pixelFormatToGlFormat( mFormat );
     GLenum glType = PIXEL_FORMAT_INVALID;
@@ -132,7 +131,7 @@ void Texture::reallocateForRenderTarget() {
 
     GLCALL( glActiveTexture( GL_TEXTURE0 ));
     GLCALL( glBindTexture( targetToGl( mTarget ), mHandle ));
-    GLCALL( glTexImage2D( GL_TEXTURE_2D, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType, mData.get() ));
+    GLCALL( glTexImage2D( GL_TEXTURE_2D, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType, _data ));
     GLCALL( glBindTexture( targetToGl( mTarget ), 0 ));
 }
 

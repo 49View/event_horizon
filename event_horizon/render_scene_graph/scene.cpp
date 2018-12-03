@@ -113,6 +113,7 @@ void Scene::activate() {
 			    std::bind(&Scene::reloadShaders, this, std::placeholders::_1 ) );
 
 	MaterialBuilder{"white"}.makeDefault(rsg.ML());
+	ImageBuilder{"white"}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
 
 	layout->activate( this );
 

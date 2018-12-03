@@ -25,7 +25,7 @@ private:
     void operator=( TextureManager const& ) = delete;
 
 public:
-    std::shared_ptr<Texture> addTextureWithData( const std::string& id, RawImage& rawImage,
+    std::shared_ptr<Texture> addTextureWithData( const std::string& id, const RawImage& rawImage,
                                                  TextureSlots _tslot = TSLOT_COLOR);
     std::shared_ptr<Texture> addTextureNoData( TextureRenderData& tb );
     std::shared_ptr<Texture> addCubemapTexture( TextureRenderData& tb );
@@ -52,7 +52,7 @@ public:
     static std::string textureName( const std::string input );
 
     std::shared_ptr<Texture> addTextureFromCallback( TextureRenderData& tb, std::unique_ptr<uint8_t []>& _data );
-    std::shared_ptr<Texture> addTextureImmediate( TextureRenderData& tb, std::unique_ptr<uint8_t []>& _data );
+    std::shared_ptr<Texture> addTextureImmediate( TextureRenderData& tb, const uint8_t* _data );
 
     TextureMapIt begin();
     TextureMapIt end();
@@ -60,7 +60,7 @@ public:
     TextureMapCIt end() const;
 private:
 
-    std::shared_ptr<Texture> createTexture( TextureRenderData& tb, std::unique_ptr<uint8_t []>& _data );
+    std::shared_ptr<Texture> createTexture( TextureRenderData& tb );
     std::shared_ptr<Texture> createTexture( const std::string& _name, unsigned int _gpuHandle,
                                             TextureSlots _gpuSecondaryHandle );
 

@@ -15,8 +15,8 @@ void TextureManager::removeTexture( const std::string& id ) {
     }
 }
 
-std::shared_ptr<Texture> TextureManager::createTexture( TextureRenderData& tb, std::unique_ptr<uint8_t []>& _data ) {
-    auto ltexture = std::make_shared<Texture>( tb, _data );
+std::shared_ptr<Texture> TextureManager::createTexture( TextureRenderData& tb ) {
+    auto ltexture = std::make_shared<Texture>( tb );
 
     mTextures[tb.Name()] = ltexture;
     if ( tb.ttm == TEXTURE_CUBE_MAP ) mTextures[cubeMapTName(tb.Name())] = ltexture;
@@ -39,14 +39,14 @@ std::shared_ptr<Texture> TextureManager::createTexture( const std::string& _name
 
 std::shared_ptr<Texture> TextureManager::addTextureFromCallback( TextureRenderData& tb,
                                                                  std::unique_ptr<uint8_t []>& _data ) {
-    auto ret = createTexture(tb, _data);
-    ret->init_r();
+    auto ret = createTexture(tb);
+    ret->init_r( _data.get() );
     return ret;
 }
 
-std::shared_ptr<Texture> TextureManager::addTextureImmediate( TextureRenderData& tb, std::unique_ptr<uint8_t []>& _data ) {
-    auto ret = createTexture(tb, _data);
-    ret->init_r();
+std::shared_ptr<Texture> TextureManager::addTextureImmediate( TextureRenderData& tb, const uint8_t* _data ) {
+    auto ret = createTexture(tb);
+    ret->init_r(_data);
     return ret;
 }
 
@@ -65,10 +65,10 @@ std::shared_ptr<Texture> TextureManager::addCubemapTexture( TextureRenderData& t
 
 std::shared_ptr<Texture> TextureManager::addTextureNoData( TextureRenderData& tb ) {
     std::unique_ptr<uint8_t []> _data;
-    return addTextureImmediate( tb, _data );
+    return addTextureImmediate( tb, _data.get() );
 }
 
-std::shared_ptr<Texture> TextureManager::addTextureWithData( const std::string& id, RawImage& rawImage,
+std::shared_ptr<Texture> TextureManager::addTextureWithData( const std::string& id, const RawImage& rawImage,
                                                              TextureSlots _tslot ) {
     auto tb = TextureRenderData{ id }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
     tb.format( channelsToFormat( rawImage.channels ) );
@@ -76,7 +76,7 @@ std::shared_ptr<Texture> TextureManager::addTextureWithData( const std::string& 
     if ( mTextures.find( id ) != mTextures.end() ) {
         removeTexture( id );
     }
-    return addTextureImmediate( tb, rawImage.rawBtyes );
+    return addTextureImmediate( tb, rawImage.rawBtyes.get() );
 }
 
 std::shared_ptr<Texture> TextureManager::addTextureWithGPUHandle( const std::string& id, unsigned int _handle,
@@ -88,7 +88,7 @@ std::shared_ptr<Texture> TextureManager::addTextureWithGPUHandle( const std::str
 
     auto ret = createTexture( id, _handle, static_cast<TextureSlots>(_secondaryHandle) );
     ret->setFilter( FILTER_NEAREST );
-    ret->init_r();
+    ret->init_r( nullptr );
     return ret;
 }
 

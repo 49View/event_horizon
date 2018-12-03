@@ -105,18 +105,7 @@ namespace Http {
         return ::isSuccessStatusCode( statusCode );
     }
 
-    bool login( [[maybe_unused]] const LoginFields& _lf ) {
-
-#ifdef USE_LOCALHOST
-        Http::useLocalHost(true);
-#endif
-//        Url uri{"/user/"};
-//        LOGR( "[HTTP-GET] %s", uri.toString().c_str() );
-
-//        Http::get( uri, [](const Http::Result& _res ){
-//            LOGR("[LOGIN RESPONSE]: %s", _res.bufferString.c_str() );
-//        } );
-
+    bool loginInternal( [[maybe_unused]] const LoginFields& _lf ) {
         // We have a passpartout here are login in emscripten should be dealt within the browser cookies/certs
         return true;
     }

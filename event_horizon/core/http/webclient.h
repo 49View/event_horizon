@@ -23,7 +23,7 @@ namespace HttpFilePrefix {
     const static std::string get = "/fs/";
     const static std::string fileupload = "/fs/";
     const static std::string catalog = "/catalog/";
-    const static std::string getname = "/get/name/";
+    const static std::string getname = "/name/";
     const static std::string getnotexactname = "/get/notexact/name/";
 };
 
@@ -111,6 +111,7 @@ namespace Http {
     };
 
     bool login( const LoginFields& _lf );
+    bool loginInternal( const LoginFields& _lf );
 
     void get( const Url& url, ResponseCallbackFunc callback,
               ResponseFlags rf = ResponseFlags::None );
@@ -130,6 +131,9 @@ namespace Http {
     void userLoggedIn( bool _flag );
     bool hasUserLoggedIn();
     bool isLocalHost();
+
+    void project( const std::string& _project );
+    std::string project();
 
     void userToken( std::string_view _token );
     std::string_view userToken();
@@ -184,6 +188,8 @@ struct Url {
     }
 
     std::string hostOnly() const;
+
+    static Url privateAPI( const std::string& _params );
 
     static const std::string WsProtocol;
     static const std::string WssProtocol;

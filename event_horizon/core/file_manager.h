@@ -175,7 +175,7 @@ namespace FileManager {
     Url makeUrl(const std::string& _name) {
         switch (Q) {
             case HttpQuery::JSON:
-                return Url{ HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) };
+                return Url::privateAPI(HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) );
                 break;
             case HttpQuery::Binary:
             case HttpQuery::Text: {

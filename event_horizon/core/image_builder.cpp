@@ -45,6 +45,9 @@ bool ImageBuilder::makeDirect( DependencyMaker& _md, const uint8_p& _data ) {
 
 bool ImageBuilder::makeDirect( DependencyMaker& _md, const RawImage& _data ) {
     mbIsRaw = true;
+    imageParams.width = _data.width;
+    imageParams.height = _data.height;
+    imageParams.channels = _data.channels;
     return makeDirect( _md, ucchar_p{_data.data(), _data.size()} );
 }
 

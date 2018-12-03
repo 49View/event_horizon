@@ -21,15 +21,10 @@ public:
     }
 
     Texture( TextureRenderData& tb ) {
-        std::unique_ptr<uint8_t[]> data;
-        ctor( tb, data );
+        ctor( tb );
     }
 
-    Texture( TextureRenderData& tb, std::unique_ptr<uint8_t[]>& data ) {
-        ctor( tb, data );
-    }
-
-    void ctor( TextureRenderData& tb, std::unique_ptr<uint8_t[]>& data ) {
+    void ctor( TextureRenderData& tb ) {
         mId = tb.Name();
         if (tb.forceGPUId != -1) {
             mHandle = static_cast<GLuint>( tb.forceGPUId );
@@ -48,7 +43,6 @@ public:
         mIsFramebufferTarget = tb.isFramebufferTarget;
         mGenerateMipMaps = tb.generateMipMaps;
         mGlTextureSlot = tb.preferredGPUSlot;
-        if ( data ) mData = std::move(data);
 
     }
     void clear() {
@@ -60,7 +54,7 @@ public:
     }
 
     // OpenGL initialisation
-    void init_r();
+    void init_r( const uint8_t* _data );
 
     void refresh( const uint8_t *data );
     void refresh( const uint8_t *data, int x, int y, int width, int height );
@@ -191,16 +185,12 @@ public:
         return -Vector2f( 0.0f, (( static_cast<float>( mWidth ) / static_cast<float>( mHeight )) * 0.5f ) - 0.5f );
     }
 
-    uint8_t *getData() const {
-        return mData.get();
-    }
-
     void setId( const std::string& id ) {
         mId = id;
     }
 
     void release();
-    void reallocateForRenderTarget();
+    void reallocateForRenderTarget( const uint8_t* _data );
 
     bool Multisample() const { return mMultisample; }
 
@@ -248,7 +238,7 @@ public:
     }
 
 private:
-    void init_data_r();
+    void init_data_r( const uint8_t* _data );
 
 private:
     GLuint mHandle = 0;
@@ -272,7 +262,6 @@ private:
     bool mHDR = false;
     bool mIsFramebufferTarget = false;
     bool mGenerateMipMaps = true;
-    std::unique_ptr<uint8_t[]> mData;
 
     static std::map<std::string, std::pair<int, int>> sCubeMapIndices;
 
