@@ -9,7 +9,10 @@
 static std::string remoteFilterString;
 static std::multimap<std::string, CoreMetaData> cloudEntitiesTypeMap;
 
-void listCloudMaterialCallback( Scene* p ) {
+void listCloudCallback( Scene* p ) {
+
+    if ( remoteFilterString.empty() ) return;
+
     std::vector<CoreMetaData> newFilteredResult;
 
     rapidjson::Document document;
@@ -40,7 +43,7 @@ void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, c
                    [&](const Http::Result&_res) {
                        remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()),
                                                          static_cast<std::string::size_type>(_res.length) };
-                       Scene::sUpdateCallbacks.emplace_back( listCloudMaterialCallback );
+                       Scene::sUpdateCallbacks.emplace_back( listCloudCallback );
                    } );
     };
     ImGui::PopID();

@@ -59,6 +59,9 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
     std::system( "rm -f files.txt" );
 
     if ( sm.loadShaders() ) {
+
+        Http::login(LoginFields::Daemon());
+
         std::string tarname = "shaders.tar";
         std::string matname = "shaders.shd";
 

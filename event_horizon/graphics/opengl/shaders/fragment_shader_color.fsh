@@ -10,4 +10,3 @@ void main()
 {
     FragColor = vec4(diffuseColor, alpha*opacity);
 }
-    
