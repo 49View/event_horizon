@@ -6,7 +6,7 @@ build_core_lib( core )
 build_core_lib( graphics )
 build_core_lib( poly )
 build_core_lib( render_scene_graph )
-build_core_lib( osm )
+#build_core_lib( osm )
 
 string(COMPARE EQUAL "${CMAKE_SYSTEM_NAME}" Emscripten isEmscripten)
 if (NOT isEmscripten)

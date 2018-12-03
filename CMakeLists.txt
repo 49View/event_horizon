@@ -723,7 +723,7 @@ function(linker PROJECT_NAME WHICH_LIBS)
     link_core_render_scene_graph()
 #    link_core_server_services()
     link_core_ocr()
-    link_core_osm()
+#    link_core_osm()
     link_core_machine_learning()
     link_core()
 
