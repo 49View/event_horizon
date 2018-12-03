@@ -2,6 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #include <core/math/vector4f.h>
+#include <core/http/basen.hpp>
 #include "util.h"
 #include "file_manager.h"
 #include "service_factory.h"
@@ -107,6 +108,12 @@ RawImage rawImageSubImage( const RawImage& _source, const JMATH::Rect2f& _area,
     }
 
     return ret;
+}
+
+RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string& _name, int forceChannels ) {
+    std::vector<unsigned char> rd;
+    bn::decode_b64( _base64.begin(), _base64.end(), std::back_inserter(rd) );
+    return rawImageDecodeFromMemory( rd.data(), rd.size(),_name, forceChannels );
 }
 
 void RawImage::copyFrom( const char *buffer ) {

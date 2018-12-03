@@ -131,6 +131,10 @@ static inline std::smatch regEx( const std::string& _regExString, const std::str
     return base_match;
 }
 
+static inline std::string jsonToString( const std::string& _field, const std::string& _value ) {
+    return "{ \"" + _field + "\" : \"" + _value + "\" }";
+}
+
 static inline std::string htmlDecode( const std::string& _htmlString ) {
 
     std::string ret = _htmlString;

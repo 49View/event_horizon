@@ -83,7 +83,8 @@ std::string Url::toString( const Http::UsePort _up ) const {
 }
 
 Url Url::privateAPI( const std::string& _params ) {
-    return Url{ "/" + Http::project() + _params };
+    auto luri = _params.at(0) == '/' ? _params : "/" + _params;
+    return Url{ "/" + Http::project() + luri };
 }
 
 std::string url_encode( const std::string& value ) {

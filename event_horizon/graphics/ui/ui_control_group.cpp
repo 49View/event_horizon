@@ -453,7 +453,7 @@ bool UiViewBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Depen
 
     if  ( _status == DependencyStatus::LoadedSuccessfully ) {
         UiControlManager& uicm = static_cast<UiControlManager&>(_md);
-        uicm.addUIView( UIView{ _data } );
+        uicm.addUIView( UIView{ std::move(_data) } );
         return true;
     }
 

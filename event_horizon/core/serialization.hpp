@@ -277,10 +277,15 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 #define JSONDATA_R(CLASSNAME,...) \
 	struct CLASSNAME { \
 	CLASSNAME() {} \
-	CLASSNAME( const std::string& _name ) { load( _name ); } \
-	CLASSNAME( uint8_p& _data ) { \
+	CLASSNAME( const std::string& _json ) { load( _json ); } \
+	CLASSNAME( uint8_p&& _data ) { load( cbToString(std::move(_data)) ); } \
+	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); bIsLoaded = true; } \
+	template<typename TV> \
+	void visit() const { traverseWithHelper<TV>( #__VA_ARGS__,__VA_ARGS__ ); } \
+	void save() const { MegaWriterFS<CLASSNAME>( #CLASSNAME, *this ); } \
+	void load( const std::string& _json ) { \
 		rapidjson::Document document; \
-		document.Parse<rapidjson::kParseStopWhenDoneFlag>( cbToString(std::move(_data)).c_str() ); \
+		document.Parse<rapidjson::kParseStopWhenDoneFlag>( _json.c_str() ); \
 		MegaReader reader( document ); \
 		if ( !reader.isEmpty() ) { \
 			if (reader.isArray() ) { \
@@ -290,12 +295,6 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 			} \
 		} \
 	} \
-	CLASSNAME( const std::string& _name, const std::string& _key ) { load( _name, _key ); } \
-	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); bIsLoaded = true; } \
-	template<typename TV> \
-	void visit() const { traverseWithHelper<TV>( #__VA_ARGS__,__VA_ARGS__ ); } \
-	void save() const { MegaWriterFS<CLASSNAME>( #CLASSNAME, *this ); } \
-	void load( const std::string& _name, const std::string& _key = "name" ) { readFS<CLASSNAME>( #CLASSNAME, _name, _key, *this ); } \
 	inline void serialize( MegaWriter* visitor ) const { visitor->StartObject(); serializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); visitor->EndObject(); } \
 	inline void deserialize( const MegaReader& visitor ) { deserializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); } \
 	bool bIsLoaded = false; \

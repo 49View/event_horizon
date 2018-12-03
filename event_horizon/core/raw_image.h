@@ -99,6 +99,7 @@ struct RawImage {
 	static RawImage BLACK_RGBA1x1;
 };
 
+RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string& _name = "", int forceChannels = 0 );
 RawImage rawImageDecodeFromMemory( const uint8_p& data, const std::string& _name = "", int forceChannels = 0 );
 RawImage rawImageDecodeFromMemory( const unsigned char* buffer, int length, const std::string& _name = "",
                                    int forceChannels = 0 );
