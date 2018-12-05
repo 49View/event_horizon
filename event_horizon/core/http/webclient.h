@@ -135,6 +135,9 @@ namespace Http {
     void project( const std::string& _project );
     std::string project();
 
+    void cacheLoginFields( const LoginFields& _lf );
+    LoginFields cachedLoginFields();
+
     void userToken( std::string_view _token );
     std::string_view userToken();
 

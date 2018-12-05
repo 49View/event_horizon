@@ -16,6 +16,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
         float leftPanelHeight = 0.0f;
         float leftPanelHeight2 = 0.0f;
         float rightPanelHeight = 0.0f;
+        float loginPanelHeight = 0.0f;
         Vector2f main3dWindowSize = Vector2f::ZERO;
         Vector2f timeLinePanelSize = Vector2f::ZERO;
         Rect2f foxLayout = Rect2f::ZERO;
@@ -25,7 +26,8 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
-    uivl.rightPanelHeight = (1.0f - uivl.consoleHeight)/2.0f;
+    uivl.loginPanelHeight = (1.0f - uivl.consoleHeight)/10.0f;
+    uivl.rightPanelHeight = ((1.0f - uivl.consoleHeight)/2.0f) - uivl.loginPanelHeight*0.5f;
     uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
     uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/6.f;
     uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
@@ -46,11 +48,14 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
                      uivl.rightPanelWidth, uivl.rightPanelWidth + uivl.timeLinePanelSize.x(),
                      timeLineY, timeLineY + uivl.timeLinePanelSize.y() );
 
+    _layout->addBox( SceneLayoutDefaultNames::Login,
+                     1.0f-uivl.rightPanelWidth, 1.0f, 0.0f, uivl.loginPanelHeight );
+
     _layout->addBox( SceneLayoutDefaultNames::CloudMaterial,
-                     1.0f-uivl.rightPanelWidth, 1.0f, 0.0f, uivl.rightPanelHeight );
+                     1.0f-uivl.rightPanelWidth, 1.0f, uivl.loginPanelHeight, uivl.loginPanelHeight + uivl.rightPanelHeight );
 
     _layout->addBox( SceneLayoutDefaultNames::CloudGeom,
-                     1.0f-uivl.rightPanelWidth, 1.0f, uivl.rightPanelHeight, uivl.rightPanelHeight*2 );
+                     1.0f-uivl.rightPanelWidth, 1.0f, uivl.loginPanelHeight + uivl.rightPanelHeight, uivl.loginPanelHeight + uivl.rightPanelHeight*2 );
 
     _layout->addBox( Name::Foxtrot,
                      topX, topX + (1.0f-uivl.rightPanelWidth*2.0f),

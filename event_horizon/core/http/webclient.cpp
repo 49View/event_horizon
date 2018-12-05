@@ -13,6 +13,7 @@ static bool sUseLocalhost = false;
 static bool sUserLoggedIn = false;
 static std::string sProject;
 static std::string sUserToken;
+static LoginFields sCachedLoginFields;
 
 const std::string Url::WsProtocol = "ws";
 const std::string Url::WssProtocol = "wss";
@@ -207,6 +208,14 @@ namespace Http {
         return sProject;
     }
 
+    void cacheLoginFields( const LoginFields& _lf ) {
+        sCachedLoginFields = _lf;
+    }
+
+    LoginFields cachedLoginFields() {
+        return sCachedLoginFields;
+    }
+
     void useLocalHost( const bool _flag ) {
         sUseLocalhost = _flag;
     }
@@ -267,6 +276,7 @@ namespace Http {
         Http::useLocalHost(true);
 #endif
         Http::project( _lf.project );
+        Http::cacheLoginFields( _lf );
         return loginInternal( _lf );
     }
 

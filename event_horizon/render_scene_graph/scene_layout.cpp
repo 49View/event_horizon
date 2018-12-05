@@ -47,6 +47,7 @@ SceneLayout::SceneLayout( InitLayoutFunction&& initLayout, RenderFunction&& _ren
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Material, ImGuiMaterials );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Image, ImGuiImages );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Camera, ImGuiCamera );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Login, ImGuiLogin );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Timeline, ImGuiTimeline );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::CloudMaterial, ImGuiCloudEntitiesMaterials );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::CloudGeom, ImGuiCloudEntitiesGeom );

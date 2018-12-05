@@ -37,12 +37,11 @@ void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, c
     static char buf1[1024];
     static char buf2[1024];
     char* buf = _title == "Cloud Geometry" ? buf1 : buf2;
-    ImGui::PushID( std::hash<std::string>{}(_title) );
+    ImGui::PushID( static_cast<int>(std::hash<std::string>{}( _title)));
     if ( ImGui::InputText( ("##" + _title).c_str(), buf, 1024, ImGuiInputTextFlags_EnterReturnsTrue ) ) {
         Http::get( Url{ HttpFilePrefix::entities_all + _entType + "/" + std::string(buf) },
                    [&](const Http::Result&_res) {
-                       remoteFilterString = std::string{ reinterpret_cast<char*>(_res.buffer.get()),
-                                                         static_cast<std::string::size_type>(_res.length) };
+                       remoteFilterString = _res.bufferString;
                        Scene::sUpdateCallbacks.emplace_back( listCloudCallback );
                    } );
     };

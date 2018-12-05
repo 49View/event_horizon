@@ -36,6 +36,7 @@ namespace SceneLayoutDefaultNames {
     const static std::string Geom = "geom";
     const static std::string CloudMaterial = "cloud_material";
     const static std::string CloudGeom = "cloud_geom";
+    const static std::string Login = "login";
     const static std::string Timeline = "timeline";
     const static std::string Image = "image";
     const static std::string Camera = "camera";
