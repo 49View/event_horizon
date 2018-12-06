@@ -20,14 +20,9 @@ void ImGuiLogin( Scene* p, const Rect2f& _r ) {
         buf = Http::project();
     }
     if ( ImGui::InputText( "Project", buf.data(), 256, ImGuiInputTextFlags_EnterReturnsTrue ) ) {
-        Http::project( buf );
-        LoginFields lf = Http::cachedLoginFields();
-        lf.project = buf;
-        Http::login( lf );
+        Http::login( LoginFields{ Http::cachedLoginFields(), buf } );
     };
     ImGui::PopID();
 
     ImGui::End();
-
-//    ImGuiCloudEntities( p, _r, "Cloud Geometry", EntityGroup::Geom );
 }

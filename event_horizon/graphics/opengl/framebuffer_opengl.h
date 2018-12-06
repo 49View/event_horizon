@@ -71,7 +71,7 @@ public:
 	std::shared_ptr<Texture> ColorAttachment1Texture() const { return mColorAttachment1Texture; }
 
 	GLenum framebufferTextureTarget( bool _multisampled );
-
+	void framebufferTexture2D( GLuint rth, const std::string& renderTargetIndex, int mipMapIndex );
 private:
 	GLuint mFramebufferHandle = 0;
 	GLuint mRenderbufferHandle = 0; // This is only used if we don't have a texture

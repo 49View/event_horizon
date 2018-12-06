@@ -39,6 +39,18 @@ GLenum Framebuffer::framebufferTextureTarget( bool _multisampled ) {
     return GL_TEXTURE_2D;
 }
 
+void Framebuffer::framebufferTexture2D( GLuint rth, const std::string& renderTargetIndex, [[maybe_unused]] int mipMapIndex ) {
+    if ( mCubeMap ) {
+        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        nameToCubeMapSide( renderTargetIndex ),
+                                        rth, 0 ));
+    } else {
+        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        framebufferTextureTarget( mMultisample ),
+                                        rth, 0 ));
+    }
+}
+
 void Framebuffer::clearDepthBuffer( const float _clearDepthValue ) {
     GLCALL( glClearDepthf( _clearDepthValue ));
     GLCALL( glClear( GL_DEPTH_BUFFER_BIT ));

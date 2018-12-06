@@ -80,8 +80,7 @@ void Framebuffer::init( TextureManager& tm ) {
                                                  mHeight) );
         GLCALL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mRenderbufferHandle
         ) );
-    } else
-    {
+    } else {
         if ( mCubeMap ) {
             mRenderToTexture = tm.addCubemapTexture( TextureRenderData{ mName }.setSize( mWidth ).format( mFormat )
                                                              .setGenerateMipMaps( mUseMipMaps )
@@ -127,22 +126,13 @@ void Framebuffer::bind( const std::string& renderTargetIndex, const int _mipMapI
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
     GLCALL( glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferHandle) );
 
-    unsigned int vWidth  = static_cast<unsigned int>( mWidth * std::pow(0.5, _mipMapIndex) );
-    unsigned int vHeight = static_cast<unsigned int>( mHeight * std::pow(0.5, _mipMapIndex) );
+    auto vWidth  = static_cast<unsigned int>( mWidth * std::pow(0.5, _mipMapIndex) );
+    auto vHeight = static_cast<unsigned int>( mHeight * std::pow(0.5, _mipMapIndex) );
 
     GLCALL( glViewport( 0, 0, vWidth, vHeight ));
     enableMultiSample( mMultisample );
     if ( !renderTargetIndex.empty()) {
-        auto rth = mRenderToTexture->getHandle();
-        if ( mCubeMap ) {
-            GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                            nameToCubeMapSide( renderTargetIndex ),
-                                            rth, _mipMapIndex ));
-        } else {
-            GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                           framebufferTextureTarget( mMultisample ),
-                                            rth, _mipMapIndex ));
-        }
+        framebufferTexture2D( mRenderToTexture->getHandle(), renderTargetIndex, _mipMapIndex );
     }
     checkFrameBufferStatus();
 }

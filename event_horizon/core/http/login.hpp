@@ -16,6 +16,12 @@ JSONDATA( LoginFields, project, email, password )
     std::string email    = "guest";
     std::string password = "guest";
 
+    explicit LoginFields( const LoginFields& _lf,  const std::string& _project ) {
+        project = _project;
+        email = _lf.email;
+        password = _lf.password;
+    }
+
     explicit LoginFields( const std::string& _username,  const std::string& _password ) {
         project = LoginSandbox::Name;
         email = _username;

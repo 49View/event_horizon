@@ -30,7 +30,7 @@ export class wasmLoader {
                 console.log(text);
             },
             printErr: (text) => {
-                console.log("ERROR: "+text);
+                console.log("[LOADER WASM ERROR]: "+text);
             },
             canvas: null,
             onRuntimeInitialized: () => {
