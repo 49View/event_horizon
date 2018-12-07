@@ -16,47 +16,11 @@
 #define NANOSVG_IMPLEMENTATION	// Expands implementation
 #include "nanosvg.h"
 
-void Profile::calculatePPP() {
-	switch ( mPPP ) {
-	case PivotPointPosition::PPP_CENTER:
-	mPivotPoint = Vector2f::ZERO;
-	break;
-	case PivotPointPosition::PPP_BOTTOM_CENTER:
-	mPivotPoint = Vector2f( 0.0f, mBBox.y()*-0.5f );
-	break;
-	case PivotPointPosition::PPP_TOP_CENTER:
-	mPivotPoint = Vector2f( 0.0f, mBBox.y()*0.5f );
-	break;
-	case PivotPointPosition::PPP_LEFT_CENTER:
-	mPivotPoint = Vector2f( -mBBox.x(), 0.0f );
-	break;
-	case PivotPointPosition::PPP_RIGHT_CENTER:
-	mPivotPoint = Vector2f( mBBox.x(), 0.0f );
-	break;
-	case PivotPointPosition::PPP_BOTTOM_RIGHT:
-	mPivotPoint = Vector2f( mBBox.x(), 0.0f );
-	break;
-	case PivotPointPosition::PPP_BOTTOM_LEFT:
-	mPivotPoint = Vector2f( -mBBox.x(), 0.0f );
-	break;
-	case PivotPointPosition::PPP_TOP_LEFT:
-	mPivotPoint = Vector2f( mBBox.x()*-0.5f, mBBox.y()*0.5f );
-	break;
-	case PivotPointPosition::PPP_TOP_RIGHT:
-	mPivotPoint = Vector2f( mBBox.x()*0.5f, mBBox.y()*0.5f );
-	break;
-	case PivotPointPosition::PPP_CUSTOM:
-	mPivotPoint = mCustomPivotPoint;
-	break;
-	default:
-	break;
-	}
-}
 
 std::vector<Vector3f> Profile::Points3d( const Vector3f & /*mainAxis*/ ) const {
 	std::vector<Vector3f> ret;
 	for ( auto& p : mPoints ) {
-		ret.push_back( Vector3f( p.x(), 0.0f, p.y() ) );
+		ret.emplace_back( p.x(), 0.0f, p.y());
 	}
 	return ret;
 }
@@ -90,12 +54,9 @@ void Profile::createWire( const float radius, int numSubDivs ) {
 	}
 
 	calculatePerimeter();
-	calculatePPP();
 }
 
-void Profile::createLine( const Vector2f& a, const Vector2f& b, PivotPointPosition ppp, const Vector2f& customPivotPoint, WindingOrderT wo ) {
-	mPPP = ppp;
-	mCustomPivotPoint = customPivotPoint;
+void Profile::createLine( const Vector2f& a, const Vector2f& b, WindingOrderT wo ) {
 
 	if ( wo == WindingOrder::CCW ) {
 		mPoints.push_back( a );
@@ -106,12 +67,9 @@ void Profile::createLine( const Vector2f& a, const Vector2f& b, PivotPointPositi
 	}
 
 	calculatePerimeter();
-	calculatePPP();
 }
 
-void Profile::createRect( const Vector2f& size, PivotPointPosition ppp, const Vector2f& customPivotPoint, WindingOrderT wo ) {
-	mPPP = ppp;
-	mCustomPivotPoint = customPivotPoint;
+void Profile::createRect( const Vector2f& size, WindingOrderT wo ) {
 
 	// Counterclockwise
 	if ( wo == WindingOrder::CCW ) {
@@ -129,13 +87,9 @@ void Profile::createRect( const Vector2f& size, PivotPointPosition ppp, const Ve
 	mBBox = size;
 
 	calculatePerimeter();
-
-	calculatePPP();
 }
 
-void Profile::createRect( const JMATH::Rect2f& _rect, PivotPointPosition ppp /*= PivotPointPosition::PPP_CENTER*/, const Vector2f& customPivotPoint /*= Vector2f::ZERO*/, WindingOrderT /*wo*/ /*= WindingOrder::CCW */ ) {
-	mPPP = ppp;
-	mCustomPivotPoint = customPivotPoint;
+void Profile::createRect( const JMATH::Rect2f& _rect ) {
 
 	mPoints.push_back( _rect.topRight() );
 	mPoints.push_back( _rect.topLeft() );
@@ -145,36 +99,27 @@ void Profile::createRect( const JMATH::Rect2f& _rect, PivotPointPosition ppp /*=
 	mBBox = _rect.size();
 
 	calculatePerimeter();
-
-	calculatePPP();
 }
 
-void Profile::createArc( float startAngle, float angle, float radius, float numSegments, PivotPointPosition ppp, const Vector2f& customPivotPoint, WindingOrderT /*wo*/ ) {
-	mPPP = ppp;
-	mCustomPivotPoint = customPivotPoint;
+void Profile::createArc( float startAngle, float angle, float radius, float numSegments ) {
 
 	for ( int t = 0; t < numSegments; t++ ) {
-		float delta = ( ( static_cast<float>( t ) / ( numSegments - 1 ) ) * angle ) + startAngle;
-		float cosa = cos( delta )*radius;
-		float sina = sin( delta )*radius;
+		float delta = (( static_cast<float>( t ) / ( numSegments - 1 )) * angle ) + startAngle;
+		float cosa = cos( delta ) * radius;
+		float sina = sin( delta ) * radius;
 		mPoints.emplace_back( cosa, sina );
 	}
-	mBBox = { radius*2.0f, radius*2.0f };
+	mBBox = { radius * 2.0f, radius * 2.0f };
 
 	calculatePerimeter();
-	calculatePPP();
 }
 
-void Profile::createArbitrary( const Vector2f& size, const std::vector<Vector2f>& points, PivotPointPosition ppp, const Vector2f& customPivotPoint ) {
-	mPPP = ppp;
-	mCustomPivotPoint = customPivotPoint;
+void Profile::createArbitrary( const std::vector<Vector2f>& points ) {
 
 	mPoints = points;
-	// In this case the bbox is the same as the rect's size
-	mBBox = size;
 
+	calcBBox();
 	calculatePerimeter();
-	calculatePPP();
 }
 
 void Profile::raise( const Vector2f& v ) {
@@ -197,7 +142,7 @@ void Profile::mirror( const Vector2f& axis ) {
 		pointsCopy.push_back( v );
 	}
 	mPoints.clear();
-	for ( std::vector<Vector2f>::reverse_iterator p = pointsCopy.rbegin(); p != pointsCopy.rend(); ++p ) {
+	for ( auto p = pointsCopy.rbegin(); p != pointsCopy.rend(); ++p ) {
 		mPoints.push_back( *p );
 	}
 }
@@ -216,18 +161,7 @@ void Profile::flip( const Vector2f& axis ) {
 		pointsCopy.push_back( v );
 	}
 	mPoints.clear();
-	for ( std::vector<Vector2f>::reverse_iterator p = pointsCopy.rbegin(); p != pointsCopy.rend(); ++p ) {
-		mPoints.push_back( *p );
-	}
-}
-
-void Profile::invertCCW() {
-	std::vector<Vector2f> pointsCopy;
-	for ( auto& v : mPoints ) {
-		pointsCopy.push_back( v );
-	}
-	mPoints.clear();
-	for ( std::vector<Vector2f>::reverse_iterator p = pointsCopy.rbegin(); p != pointsCopy.rend(); ++p ) {
+	for ( auto p = pointsCopy.rbegin(); p != pointsCopy.rend(); ++p ) {
 		mPoints.push_back( *p );
 	}
 }
@@ -261,7 +195,9 @@ Profile::Profile( [[maybe_unused]] const std::string& _name, uint8_p&& _data ) {
 		mBBox = { image->width, image->height };
 		Rect2f lbbox = Rect2f::INVALID;
 		std::vector<Vector2f> rawPoints;
-		int subDivs = 3;
+		// #### NDDADO: we fix subDivs=0 because it's dangerous to interpolate bezier paths when you need total accuracy
+		// on connecting profiles with straight elements (IE think about a flat wall)
+		int subDivs = 0;
 		for ( auto shape = image->shapes; shape != NULL; shape = shape->next ) {
 			if ( shape->next != nullptr ) continue;
 			for ( auto path = shape->paths; path != NULL; path = path->next ) {
@@ -293,12 +229,15 @@ Profile::Profile( [[maybe_unused]] const std::string& _name, uint8_p&& _data ) {
 		}
 		mBBox = { lbbox.calcWidth(), lbbox.calcHeight() };
 	}
-	mbForceWindingOrder = true;
-	mForcedWindingOrder = WindingOrder::CW;
 
 	calculatePerimeter();
-//	mPPP = pb.ppp;
-//	mCustomPivotPoint = pb.customPivotPoint;
-	calculatePPP();
+}
+
+void Profile::calcBBox() {
+	Rect2f lbbox = Rect2f::INVALID;
+	for ( const auto& p : mPoints ) {
+		lbbox.expand(p);
+	}
+	mBBox = lbbox.size();
 }
 
