@@ -22,7 +22,8 @@ public:
         construct( SceneLayout::makeDefault(), _lf  );
     }
 
-    explicit EventHorizon( std::shared_ptr<SceneLayout> _layout, const LoginFields& _lf = LoginFields::Computer() ) {
+    explicit EventHorizon( std::shared_ptr<SceneLayout> _layout, const LoginFields& _lf = LoginFields::Computer(), InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal ) {
+        _layout->setInitFlags( initFlags );
         construct( _layout, _lf );
     }
 

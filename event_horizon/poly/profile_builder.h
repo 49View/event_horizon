@@ -11,12 +11,7 @@ struct ProfileBuilder;
 
 class Profile;
 
-enum class CustomProfileType {
-    None,
-    WireFrame,
-    InnerDoorFrame,
-    WindowEdgePlaster
-};
+using profileDirectMakeFunc = std::function<std::shared_ptr<Profile>(const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs)>;
 
 class ProfileManager : public DependencyMaker {
 public:
@@ -31,8 +26,8 @@ private:
 
 struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact )
 
-    ProfileBuilder& ct( const CustomProfileType _v ) {
-        customType = _v;
+    ProfileBuilder& func( profileDirectMakeFunc _cf ) {
+        cfunc = _cf;
         return *this;
     }
 
@@ -49,16 +44,10 @@ struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact 
     bool makeDirect( DependencyMaker& _md );
 private:
     bool finalizaMake( DependencyMaker& sg, std::shared_ptr<Profile> profile );
-    std::shared_ptr<Profile> makeInnerDoorFrameProfile();
-    std::shared_ptr<Profile> makeWindowEdgePlaster();
-    std::shared_ptr<Profile> makeWireFrame();
 
 private:
-//    PivotPointPosition ppp;
-//    Vector2f customPivotPoint;
-
     // Custom profile builder params
-    CustomProfileType customType = CustomProfileType::None;
+    profileDirectMakeFunc cfunc;
     std::vector<Vector2f> vv2fs;
     std::vector<float> vfs;
 };

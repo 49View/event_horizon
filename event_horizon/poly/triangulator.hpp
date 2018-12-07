@@ -6,8 +6,7 @@
 //
 //
 
-#ifndef triangulator_hpp
-#define triangulator_hpp
+#pragma once
 
 #include <map>
 #include <memory>
@@ -17,7 +16,7 @@
 
 class Triangulator {
 public:
-	Triangulator( const vector2fList& _verts, float _accuracy = 0.001f );
+	explicit Triangulator( const vector2fList& _verts, float _accuracy = 0.001f );
 	Triangulator( const vector3fList& _verts, const Vector3f& normal, float _accuracy = 0.001f );
 	Triangulator( const Vector3f* verts, const size_t vsize, const Vector3f& normal, float _accuracy = 0.001f );
 
@@ -49,4 +48,3 @@ private:
 	std::unique_ptr<p2t::CDT> mCDT;
 };
 
-#endif /* triangulator_hpp */

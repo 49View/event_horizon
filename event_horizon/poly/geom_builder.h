@@ -99,8 +99,8 @@ protected:
 };
 
 struct ProfileSchema {
-    ProfileSchema() {}
-    ProfileSchema( const std::string& name ) : name( name ) {}
+    ProfileSchema() = default;
+    explicit ProfileSchema( const std::string& name ) : name( name ) {}
     ProfileSchema( const std::string& name, FollowerFlags flags ) : name( name ), flags( flags ) {}
     ProfileSchema( const std::string& name, uint32_t _flags ) : name( name ) {
         flags = static_cast<FollowerFlags>(_flags);
@@ -123,8 +123,8 @@ struct ProfileSchema {
 
 class GeomBuilder : public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
 public:
-    GeomBuilder() {}
-    virtual ~GeomBuilder() {}
+    GeomBuilder() = default;
+    virtual ~GeomBuilder() = default;
 protected:
     void createDependencyList( DependencyMaker& _md ) override;
 public:
