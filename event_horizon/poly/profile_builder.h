@@ -11,7 +11,7 @@ struct ProfileBuilder;
 
 class Profile;
 
-using profileDirectMakeFunc = std::function<std::shared_ptr<Profile>(const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs)>;
+using profileDirectMakeFunc = std::function<std::shared_ptr<Profile>(const std::string&, const std::vector<Vector2f>&, const std::vector<float>&)>;
 
 class ProfileManager : public DependencyMaker {
 public:
@@ -42,6 +42,7 @@ struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact 
     }
 
     bool makeDirect( DependencyMaker& _md );
+
 private:
     bool finalizaMake( DependencyMaker& sg, std::shared_ptr<Profile> profile );
 

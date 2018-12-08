@@ -241,3 +241,25 @@ void Profile::calcBBox() {
 	mBBox = lbbox.size();
 }
 
+std::shared_ptr<Profile> Profile::makeLine( const std::string& _name, const std::vector<Vector2f>& vv2fs,
+											[[maybe_unused]] const std::vector<float>& vfs) {
+
+    ASSERT(vv2fs.size() == 2);
+    std::shared_ptr<Profile> profile = std::make_shared<Profile>(_name);
+    profile->createLine( vv2fs[0], vv2fs[1] );
+
+    return profile;
+}
+
+std::shared_ptr<Profile> Profile::makeWire( const std::string& _name,
+											[[maybe_unused]] const std::vector<Vector2f>& vv2fs,
+											const std::vector<float>& vfs) {
+
+    ASSERT(vfs.size() == 1);
+    std::shared_ptr<Profile> profile = std::make_shared<Profile>(_name);
+
+    profile->createWire( vfs[0], 3 );
+
+    return profile;
+}
+

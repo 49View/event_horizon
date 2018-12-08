@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 //  profile.hpp
 //  6thViewImporter
@@ -8,6 +10,7 @@
 
 #pragma once
 #include <vector>
+#include <array>
 #include "core/callback_dependency.h"
 #include "core/htypes_shared.hpp"
 #include "core/math/vector3f.h"
@@ -18,6 +21,7 @@ class Profile {
 public:
 	Profile() = default;
 	Profile( const std::string& _name, uint8_p&& _data );
+	explicit Profile( std::string _name ) : mName( std::move( _name )) {}
 	void createWire( float radius, int numSubDivs );
 	void createLine( const Vector2f& a, const Vector2f& b, WindingOrderT wo = WindingOrder::CCW );
 	void createRect( const Vector2f& size, WindingOrderT wo = WindingOrder::CCW );
@@ -57,6 +61,9 @@ public:
 	void Name( const std::string& name ) {
 		mName = name;
 	}
+
+    static std::shared_ptr<Profile> makeLine(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
+    static std::shared_ptr<Profile> makeWire(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
 
 private:
 	void calculatePerimeter();

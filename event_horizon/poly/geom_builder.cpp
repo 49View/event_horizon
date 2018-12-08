@@ -43,6 +43,7 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
         } else {
             addDependency<MaterialBuilder>( materialName, materialType, shaderName, sg.ML());
             if ( builderType == GeomBuilderType::follower ) {
+                mProfileSchema.evaluateDirectBuild( sg.PL() );
                 addDependency<ProfileBuilder>( mProfileSchema.name, sg.PL());
             }
         }
@@ -204,4 +205,14 @@ void GeomBuilder::publish() const {
     }
 
     Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
+}
+
+ProfileSchema::ProfileSchema( const Vector2f& p1, const Vector2f& p2 ) {
+    name = "Line" + p1.toString() + p2.toString();
+    builder = std::make_shared<ProfileBuilder>(name);
+    builder->func( Profile::makeLine ).cv2( p1 ).cv2( p2 );//.makeDirect( _PL );
+}
+
+void ProfileSchema::evaluateDirectBuild( ProfileManager& _PL ) {
+    if ( builder ) builder->makeDirect( _PL );
 }

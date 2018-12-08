@@ -115,10 +115,15 @@ struct ProfileSchema {
                    const Vector2f& flipVector ) : name( name ), flags( flags ), raise( raise ),
                                                   flipVector( flipVector ) {}
 
+    ProfileSchema( const Vector2f& p1, const Vector2f& p2 );
+
+    void evaluateDirectBuild( ProfileManager& _PL);
+
     std::string name;
     FollowerFlags flags = FollowerFlags::Defaults;
     GeomDataFollowerBuilder::Raise raise = GeomDataFollowerBuilder::Raise::None;
     Vector2f flipVector = Vector2f::ZERO;
+    std::shared_ptr<ProfileBuilder> builder;
 };
 
 class GeomBuilder : public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {

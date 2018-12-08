@@ -20,7 +20,7 @@ bool ProfileBuilder::makeDirect( DependencyMaker& _md ) {
 
     if ( _md.exists( Name() ) ) return false;
 
-    return finalizaMake( _md, cfunc( vv2fs, vfs ) );
+    return finalizaMake( _md, cfunc( Name(), vv2fs, vfs ) );
 }
 
 bool ProfileManager::add( const ProfileBuilder& _pb, std::shared_ptr<Profile> _profile ) {
