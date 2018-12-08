@@ -1,9 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
 include(../../CMakeLists.txt NO_POLICY_SCOPE)
 
-project(shadertool)
+project(sandbox)
 
-compile( core graphics )
+compile( core graphics poly render_scene_graph )
 
 add_executable(${PROJECT_NAME} ${BUILD_FILES})
 

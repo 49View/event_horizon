@@ -20,6 +20,7 @@ namespace PresenterEventFunctionKey {
 }
 
 using PresenterUpdateCallbackFunc = std::function<void(Scene* p)>;
+using ScenePostActivateFunc = std::function<void(Scene*)>;
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraRig>>;
 
 class CommandScriptPresenterManager : public CommandScript {
@@ -79,7 +80,7 @@ public:
 	const std::shared_ptr<ImGuiConsole>& Console() const;
 
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
-
+	void postActivate( ScenePostActivateFunc _f ) { postActivateFunc = _f; }
 	const cameraRigsMap& getRigs() const {
 		return mRigs;
 	}
@@ -115,6 +116,7 @@ protected:
 
 private:
 	void updateCallbacks();
+	ScenePostActivateFunc postActivateFunc = nullptr;
 
 public:
 	static std::vector<PresenterUpdateCallbackFunc> sUpdateCallbacks;

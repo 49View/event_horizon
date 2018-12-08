@@ -86,6 +86,7 @@ void Scene::update( GameTime& gt ) {
 
 	if ( !activated() ) {
 		activate();
+		if ( postActivateFunc ) postActivateFunc( this );
 	}
 
 	if ( !mbActivated ) return;

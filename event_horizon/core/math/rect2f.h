@@ -468,6 +468,17 @@ public:
 		return ret;
 	}
 
+	std::vector<Vector2f> pointscw() const {
+		std::vector<Vector2f> ret;
+
+		ret.push_back( topLeft() );
+		ret.push_back( topRight() );
+		ret.push_back( bottomRight() );
+		ret.push_back( bottomLeft() );
+
+		return ret;
+	}
+
 	std::vector<Vector3f> points3d( float z ) const {
 		std::vector<Vector3f> ret;
 

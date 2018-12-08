@@ -142,11 +142,13 @@ bool GeomBuilder::validate() const {
 }
 
 GeomBuilder& GeomBuilder::addPoly( const PolyLine& _polyLine ) {
+    builderType = GeomBuilderType::poly;
     polyLines.push_back( _polyLine );
     return *this;
 }
 
 GeomBuilder& GeomBuilder::addPoly( const PolyLine2d& _polyLine2d, const float heightOffset ) {
+    builderType = GeomBuilderType::poly;
     std::vector<Vector3f> vlist;
     for ( auto& v: _polyLine2d.verts ) vlist.emplace_back( XZY::C( v, heightOffset ) );
     polyLines.push_back( { vlist, _polyLine2d.normal, _polyLine2d.reverseFlag } );
