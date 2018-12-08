@@ -351,6 +351,7 @@ private:
 };
 
 typedef std::vector<Vector2f> vector2fList;
+using Vector2fList = std::vector<Vector2f>;
 typedef std::pair<Vector2f, float> NormalDirPair;
 typedef std::tuple<Vector2f, Vector2f, Vector2f> Triangle2d;
 

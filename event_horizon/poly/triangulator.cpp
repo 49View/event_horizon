@@ -14,50 +14,53 @@ Triangulator::Triangulator( const vector2fList& _verts, float _accuracy ) {
 	init2d( lverts.data(), static_cast<int>( lverts.size() ) );
 }
 
+Triangulator::Triangulator( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float _accuracy ) {
+	vector2fList lverts = _verts;
+	m2dTriangulationHoles = _holes;
+	removeCollinear( lverts, _accuracy );
+	init2d( lverts.data(), static_cast<int>( lverts.size() ) );
+}
+
 Triangulator::Triangulator( const Vector3f* _verts, const size_t vsize, const Vector3f& normal, float _accuracy ) {
 	dominantPair = normal.dominantPair();
 
+	vector2fList l2dCollinearCheck;
 	for ( size_t t = 0; t < vsize; t++ ) {
-		m2dCollinearCheck.push_back( _verts[t].pairMapped( dominantPair ) );
-		mVHash[m2dCollinearCheck[t].hash()] = _verts[t];
+		l2dCollinearCheck.push_back( _verts[t].pairMapped( dominantPair ) );
+		mVHash[l2dCollinearCheck[t].hash()] = _verts[t];
 	}
 
-	removeCollinear( m2dCollinearCheck, _accuracy );
+	removeCollinear( l2dCollinearCheck, _accuracy );
 
-	init3d( m2dCollinearCheck.data(), static_cast<int>( m2dCollinearCheck.size() ) );
+	init3d( l2dCollinearCheck.data(), static_cast<int>( l2dCollinearCheck.size() ) );
 }
 
 Triangulator::Triangulator( const vector3fList& _verts, const Vector3f& normal, float _accuracy ) {
 	dominantPair = normal.dominantPair();
 
+	vector2fList l2dCollinearCheck;
 	for ( size_t t = 0; t < _verts.size(); t++ ) {
-		m2dCollinearCheck.push_back( _verts[t].pairMapped( dominantPair ) );
-		mVHash[m2dCollinearCheck[t].hash()] = _verts[t];
+		l2dCollinearCheck.push_back( _verts[t].pairMapped( dominantPair ) );
+		mVHash[l2dCollinearCheck[t].hash()] = _verts[t];
 	}
 
-	removeCollinear( m2dCollinearCheck, _accuracy );
+	removeCollinear( l2dCollinearCheck, _accuracy );
 
-	init3d( m2dCollinearCheck.data(), static_cast<int>( m2dCollinearCheck.size() ) );
+	init3d( l2dCollinearCheck.data(), static_cast<int>( l2dCollinearCheck.size() ) );
 }
 
 void Triangulator::init2d( const Vector2f* _verts, const int vsize ) {
 	if ( vsize >= 3 ) {
 		mCDT = std::make_unique<p2t::CDT>( _verts, vsize );
+
+		for ( const auto& h : m2dTriangulationHoles ) {
+			std::vector<p2t::Point*> hole;
+			for ( const auto& v : h ) {
+				hole.emplace_back(new p2t::Point{v.x(), v.y()});
+			}
+			mCDT->AddHole(hole);
+		}
 		mCDT->Triangulate();
-
-		// check if all corners are 90 degree
-		//bool all90 = true;
-		//for ( auto q = 0; q < vsize; q++ ) {
-		//	if ( !isScalarEqual( dot( _verts[q] - _verts[getCircularArrayIndex( q - 1, vsize )], _verts[q] - _verts[getCircularArrayIndex( q + 1, vsize )] ), 0.0f ) ) {
-		//		all90 = false;
-		//		break;
-		//	}
-		//}
-
-		//if ( all90 ) {
-		//	int a = 1;
-		//}
-
 		gather2dTriangularizationResult();
 	}
 }
@@ -143,4 +146,8 @@ std::vector<vector3fList>& Triangulator::get3dTrianglesList() {
 
 std::vector<Triangle3d>& Triangulator::get3dTrianglesTuple() {
 	return m3dTriangulationTuples;
+}
+
+Triangulator::~Triangulator() {
+
 }
