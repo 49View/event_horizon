@@ -23,6 +23,20 @@ bool ProfileBuilder::makeDirect( DependencyMaker& _md ) {
     return finalizaMake( _md, cfunc( Name(), vv2fs, vfs ) );
 }
 
+bool ProfileBuilder::evaluateDirectBuild( DependencyMaker& _md ) {
+
+    bool bMakeDirect = cfunc != nullptr;
+    if ( bMakeDirect ) {
+        makeDirect( _md );
+    }
+
+    return bMakeDirect;
+}
+
+ProfileBuilder::ProfileBuilder( const Vector2f& _v1, const Vector2f& _v2 ) {
+    func( Profile::makeLine ).cv2( _v1 ).cv2( _v2 );
+}
+
 bool ProfileManager::add( const ProfileBuilder& _pb, std::shared_ptr<Profile> _profile ) {
     profileList[_pb.Name()] = std::move( _profile );
     return true;

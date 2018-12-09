@@ -157,19 +157,19 @@ std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
 
     Profile lProfile{ *mProfile.get() };
     Vector2f lRaise = mRaise;
-    if ( mRaiseEnum != GeomDataFollowerBuilder::Raise::None ) {
+    if ( mRaiseEnum != PolyRaise::None ) {
 		switch ( mRaiseEnum ) {
-			case Raise::None:break;
-			case Raise::HorizontalPos:
+			case PolyRaise::None:break;
+			case PolyRaise::HorizontalPos:
 				lRaise= ( Vector2f::X_AXIS * lProfile.width() );
 				break;
-			case Raise::HorizontalNeg:
+			case PolyRaise::HorizontalNeg:
 				lRaise= ( Vector2f::X_AXIS_NEG * lProfile.width());
 				break;
-			case Raise::VerticalPos:
+			case PolyRaise::VerticalPos:
 				lRaise= ( Vector2f::Y_AXIS * lProfile.height() );
 				break;
-			case Raise::VerticalNeg:
+			case PolyRaise::VerticalNeg:
 				lRaise= ( Vector2f::Y_AXIS_NEG * lProfile.height() );
 				break;
 		};

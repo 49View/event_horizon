@@ -43,8 +43,7 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
         } else {
             addDependency<MaterialBuilder>( materialName, materialType, shaderName, sg.ML());
             if ( builderType == GeomBuilderType::follower ) {
-                mProfileSchema.evaluateDirectBuild( sg.PL() );
-                addDependency<ProfileBuilder>( mProfileSchema.name, sg.PL());
+                addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
             }
         }
     }
@@ -94,7 +93,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
             sg.AL().add( Name(), asset );
             createFromAsset( asset );
         }
-            break;
+        break;
         case GeomBuilderType::shape:
             createFromProcedural( std::make_shared<GeomDataShapeBuilder>( shapeType, pos, axis, scale ), sg );
             break;
@@ -108,16 +107,14 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
             createFromProcedural( std::make_shared<GeomDataQuadMeshBuilder>( quads ), sg );
             break;
         case GeomBuilderType::follower: {
-            auto fbg = std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( mProfileSchema.name ),
-                                                                  profilePath,
-                                                                  mFollowerSuggestedAxis );
-            fbg->ff( mProfileSchema.flags );
-            fbg->raise( mProfileSchema.raise);
-            fbg->flip( mProfileSchema.flipVector );
-            fbg->gaps(mGaps);
-            createFromProcedural( fbg, sg );
-            elem->Name( mProfileSchema.name );
-            elem->GHType(gt);
+            createFromProcedural( std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( mProfileBuilder.Name() ),
+                                                                             profilePath,
+                                                                             fflags,
+                                                                             fraise,
+                                                                             flipVector,
+                                                                             mGaps,
+                                                                             mFollowerSuggestedAxis ), sg );
+            elem->Name( mProfileBuilder.Name() );
         }
             break;
         case GeomBuilderType::unknown:
@@ -207,14 +204,4 @@ void GeomBuilder::publish() const {
     }
 
     Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
-}
-
-ProfileSchema::ProfileSchema( const Vector2f& p1, const Vector2f& p2 ) {
-    name = "Line" + p1.toString() + p2.toString();
-    builder = std::make_shared<ProfileBuilder>(name);
-    builder->func( Profile::makeLine ).cv2( p1 ).cv2( p2 );//.makeDirect( _PL );
-}
-
-void ProfileSchema::evaluateDirectBuild( ProfileManager& _PL ) {
-    if ( builder ) builder->makeDirect( _PL );
 }

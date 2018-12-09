@@ -116,7 +116,7 @@ protected:
 
 class GeomDataQuadMeshBuilder : public GeomDataBuilder {
 public:
-    GeomDataQuadMeshBuilder( const QuadVector3fNormalfList& _quads ) : quads( _quads ) {}
+    GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
     std::shared_ptr<GeomData> build() override;
 
 protected:
@@ -125,17 +125,15 @@ protected:
 
 class GeomDataFollowerBuilder : public GeomDataBuilder {
 public:
-    enum class Raise {
-        None,
-        HorizontalPos,
-        HorizontalNeg,
-        VerticalPos,
-        VerticalNeg
-    };
-
-    GeomDataFollowerBuilder( std::shared_ptr<Profile> _profile, const std::vector<Vector3f>& verts,
+    GeomDataFollowerBuilder( std::shared_ptr<Profile> _profile,
+                             std::vector<Vector3f> _verts,
+                             const FollowerFlags f,
+                             const PolyRaise _r,
+                             const Vector2f& _flipVector,
+                             FollowerGap _gaps,
                              const Vector3f& _suggestedAxis ) :
-                             mProfile( _profile ), mVerts( verts ), mSuggestedAxis(_suggestedAxis) {}
+                             mProfile(_profile), mVerts( std::move( _verts )), followersFlags(f), mRaiseEnum(_r),
+                             mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
     std::shared_ptr<GeomData> build() override;
 
     GeomDataFollowerBuilder& raise( const Vector2f& _r ) {
@@ -143,7 +141,7 @@ public:
         return *this;
     }
 
-    GeomDataFollowerBuilder& raise( const Raise _r ) {
+    GeomDataFollowerBuilder& raise( const PolyRaise _r ) {
         mRaiseEnum = _r;
         return *this;
     }
@@ -166,12 +164,12 @@ public:
 protected:
     std::shared_ptr<Profile> mProfile;
     std::vector<Vector3f> mVerts;
-    Vector3f mSuggestedAxis = Vector3f::ZERO;
-    Vector2f mRaise = Vector2f::ZERO;
-    Vector2f mFlipVector = Vector2f::ZERO;
-    Raise mRaiseEnum = Raise::None;
-    FollowerGap mGaps = FollowerGap::Empty;
     FollowerFlags followersFlags = FollowerFlags::Defaults;
+    Vector2f mRaise = Vector2f::ZERO;
+    PolyRaise mRaiseEnum = PolyRaise::None;
+    Vector2f mFlipVector = Vector2f::ZERO;
+    FollowerGap mGaps = FollowerGap::Empty;
+    Vector3f mSuggestedAxis = Vector3f::ZERO;
 };
 
 //std::shared_ptr<GeomData> GeomDataBuilder::build() {

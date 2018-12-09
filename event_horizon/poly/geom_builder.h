@@ -98,33 +98,33 @@ protected:
 
 };
 
-struct ProfileSchema {
-    ProfileSchema() = default;
-    explicit ProfileSchema( const std::string& name ) : name( name ) {}
-    ProfileSchema( const std::string& name, FollowerFlags flags ) : name( name ), flags( flags ) {}
-    ProfileSchema( const std::string& name, uint32_t _flags ) : name( name ) {
-        flags = static_cast<FollowerFlags>(_flags);
-    }
-    ProfileSchema( const std::string& name, GeomDataFollowerBuilder::Raise raise ) : name( name ), raise( raise ) {}
-    ProfileSchema( const std::string& name, const Vector2f& flipVector ) : name( name ), flipVector( flipVector ) {}
-    ProfileSchema( const std::string& name, FollowerFlags flags, const Vector2f& flipVector ) : name( name ),
-                                                                                                flags( flags ),
-                                                                                                flipVector(
-                                                                                                        flipVector ) {}
-    ProfileSchema( const std::string& name, FollowerFlags flags, GeomDataFollowerBuilder::Raise raise,
-                   const Vector2f& flipVector ) : name( name ), flags( flags ), raise( raise ),
-                                                  flipVector( flipVector ) {}
-
-    ProfileSchema( const Vector2f& p1, const Vector2f& p2 );
-
-    void evaluateDirectBuild( ProfileManager& _PL);
-
-    std::string name;
-    FollowerFlags flags = FollowerFlags::Defaults;
-    GeomDataFollowerBuilder::Raise raise = GeomDataFollowerBuilder::Raise::None;
-    Vector2f flipVector = Vector2f::ZERO;
-    std::shared_ptr<ProfileBuilder> builder;
-};
+//struct ProfileSchema {
+//    ProfileSchema() = default;
+//    explicit ProfileSchema( const std::string& name ) : name( name ) {}
+//    ProfileSchema( const std::string& name, FollowerFlags flags ) : name( name ), flags( flags ) {}
+//    ProfileSchema( const std::string& name, uint32_t _flags ) : name( name ) {
+//        flags = static_cast<FollowerFlags>(_flags);
+//    }
+//    ProfileSchema( const std::string& name, GeomDataFollowerBuilder::Raise raise ) : name( name ), raise( raise ) {}
+//    ProfileSchema( const std::string& name, const Vector2f& flipVector ) : name( name ), flipVector( flipVector ) {}
+//    ProfileSchema( const std::string& name, FollowerFlags flags, const Vector2f& flipVector ) : name( name ),
+//                                                                                                flags( flags ),
+//                                                                                                flipVector(
+//                                                                                                        flipVector ) {}
+//    ProfileSchema( const std::string& name, FollowerFlags flags, GeomDataFollowerBuilder::Raise raise,
+//                   const Vector2f& flipVector ) : name( name ), flags( flags ), raise( raise ),
+//                                                  flipVector( flipVector ) {}
+//
+//    ProfileSchema( const Vector2f& p1, const Vector2f& p2 );
+//
+//    void evaluateDirectBuild( ProfileManager& _PL);
+//
+//    std::string name;
+//    FollowerFlags flags = FollowerFlags::Defaults;
+//    GeomDataFollowerBuilder::Raise raise = GeomDataFollowerBuilder::Raise::None;
+//    Vector2f flipVector = Vector2f::ZERO;
+//    std::shared_ptr<ProfileBuilder> builder;
+//};
 
 class GeomBuilder : public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
 public:
@@ -191,16 +191,16 @@ public:
         builderType = GeomBuilderType::shape;
     }
 
-    GeomBuilder( const ProfileSchema& _ps, const std::vector<Vector2f>& _outline,
+    GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline,
                  const float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO ) {
-        mProfileSchema = _ps;
+        mProfileBuilder = _ps;
         for (auto &v: _outline) profilePath.emplace_back( Vector3f{v, _z} );
         builderType = GeomBuilderType::follower;
     }
 
-    GeomBuilder( const ProfileSchema& _ps, const std::vector<Vector3f>& _outline,
+    GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
                  const Vector3f& _suggestedAxis = Vector3f::ZERO ) {
-        mProfileSchema = _ps;
+        mProfileBuilder = _ps;
         mFollowerSuggestedAxis = _suggestedAxis;
         for (auto &v: _outline) profilePath.emplace_back( v );
         builderType = GeomBuilderType::follower;
@@ -243,8 +243,8 @@ public:
         return *this;
     }
 
-    GeomBuilder& pr( const GeomDataFollowerBuilder::Raise _profileRaise ) {
-        mProfileSchema.raise = _profileRaise;
+    GeomBuilder& pr( const PolyRaise _profileRaise ) {
+        fraise = _profileRaise;
         return *this;
     }
 
@@ -278,12 +278,17 @@ public:
     }
 
     GeomBuilder& ff( const FollowerFlags f ) {
-        mProfileSchema.flags |= f;
+        fflags |= f;
         return *this;
     }
 
     GeomBuilder& ff( const uint32_t f ) {
-        mProfileSchema.flags |= static_cast<FollowerFlags>(f);
+        fflags |= static_cast<FollowerFlags>(f);
+        return *this;
+    }
+
+    GeomBuilder& fflip( const Vector2f& _v ) {
+        flipVector = _v;
         return *this;
     }
 
@@ -316,8 +321,11 @@ private:
     ShapeType shapeType = ShapeType::None;
     subdivisionAccuray subdivAccuracy = accuracyNone;
 
-    ProfileSchema mProfileSchema;
+    ProfileBuilder mProfileBuilder;
     std::vector<Vector3f> profilePath;
+    FollowerFlags fflags = FollowerFlags::Defaults;
+    PolyRaise fraise = PolyRaise::None;
+    Vector2f flipVector = Vector2f::ZERO;
     FollowerGap mGaps = FollowerGap::Empty;
     Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
 

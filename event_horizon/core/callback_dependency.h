@@ -175,6 +175,10 @@ public:
         return build(_md);
     };
 
+    virtual bool evaluateDirectBuild( DependencyMaker& _md ) {
+        return false;
+    }
+
     bool make( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
         bool bSucc = makeImpl( _md, std::move(_data), _status );
         if ( bSucc && ccf ) {
@@ -243,6 +247,17 @@ protected:
         if ( depExistTest(_dname, _md) ) {
             BD{ _dname }.build( _md );
             push_dep<BD>( _dname );
+        }
+    }
+
+    template <typename BD>
+    void addDependency( BD& _builder, DependencyMaker& _md ) {
+        if ( depExistTest( _builder.Name(), _md) ) {
+
+            if ( !_builder.evaluateDirectBuild( _md ) ) {
+                _builder.build( _md );
+                push_dep<BD>( _builder.Name() );
+            }
         }
     }
 

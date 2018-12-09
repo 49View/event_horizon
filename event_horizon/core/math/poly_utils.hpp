@@ -50,6 +50,14 @@ struct GeomDeserializeDependencies {
     std::vector<std::string> materialDeps;
 };
 
+enum class PolyRaise {
+    None,
+    HorizontalPos,
+    HorizontalNeg,
+    VerticalPos,
+    VerticalNeg
+};
+
 std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
                                      const std::array<Vector2f, 4>& vtcs,
                                      const std::array<Vector3f, 4>& vns,
