@@ -48,5 +48,8 @@ private:
 	IndexPair dominantPair;
 
 	std::unique_ptr<p2t::CDT> mCDT;
+
+public:
+	static std::vector<Triangle2d> execute2d( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float _accuracy = 0.001f );
 };
 

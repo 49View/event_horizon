@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 02/01/2018.
 //
@@ -16,13 +18,19 @@ struct QuadVector3fNormal {
 };
 
 struct PolyLineBase3d {
-    PolyLineBase3d( const std::vector<Vector3f>& verts ) : verts( verts ) {}
+    explicit PolyLineBase3d( std::vector<Vector3f> verts ) : verts( std::move( verts )) {}
+    explicit PolyLineBase3d( const Triangle3d& _verts ) {
+        const auto& [v1,v2,v3] = _verts;
+        verts.emplace_back(v1);
+        verts.emplace_back(v2);
+        verts.emplace_back(v3);
+    }
 
     std::vector<Vector3f> verts;
 };
 
 struct PolyLineBase2d  {
-    PolyLineBase2d( const std::vector<Vector2f>& verts ) : verts( verts ) {}
+    explicit PolyLineBase2d( std::vector<Vector2f> verts ) : verts( std::move( verts )) {}
 
     std::vector<Vector2f> verts;
 };
@@ -36,6 +44,9 @@ struct PolyLineCommond {
 
 struct PolyLine : public PolyLineBase3d, public PolyLineCommond {
     PolyLine( const std::vector<Vector3f>& _verts, const Vector3f& _normal,
+              const ReverseFlag _reverseFlag = ReverseFlag::False ) :
+            PolyLineBase3d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
+    PolyLine( const Triangle3d& _verts, const Vector3f& _normal,
               const ReverseFlag _reverseFlag = ReverseFlag::False ) :
             PolyLineBase3d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
 };

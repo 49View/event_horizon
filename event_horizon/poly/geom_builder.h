@@ -151,9 +151,28 @@ public:
     GeomBuilder( std::shared_ptr<HierGeom>, const std::vector<std::shared_ptr<MaterialBuilder>>& );
 
     // Polygon list
-    GeomBuilder( const std::vector<Vector3f>& _vlist ) {
-        PolyLine p { _vlist, normalize( crossProduct( _vlist[0], _vlist[2], _vlist[1] )), ReverseFlag::False};
-        polyLines.emplace_back(p);
+    explicit GeomBuilder( const std::vector<Vector3f>& _vlist,
+                          const Vector3f& _normal = Vector3f::ZERO, ReverseFlag rf = ReverseFlag::False) {
+        builderType = GeomBuilderType::poly;
+        Vector3f ln = _normal;
+        if ( ln == Vector3f::ZERO ) {
+            ln = normalize( crossProduct( _vlist.at(0), _vlist.at(2), _vlist.at(1) ));
+        }
+        polyLines.emplace_back(PolyLine{ _vlist, ln, rf});
+    }
+
+    explicit GeomBuilder( const std::vector<Triangle2d>& _tris,
+                          float _z = 0.0f,
+                          const Vector3f& _normal = Vector3f::ZERO,
+                          ReverseFlag rf = ReverseFlag::False ) {
+        builderType = GeomBuilderType::poly;
+        for ( const auto& [v1,v2,v3] : _tris ) {
+            std::vector<Vector3f> plist;
+            plist.emplace_back(Vector3f{ v1, _z});
+            plist.emplace_back(Vector3f{ v2, _z});
+            plist.emplace_back(Vector3f{ v3, _z});
+            addPoly( PolyLine{ plist, _normal, rf } );
+        }
     }
 
     GeomBuilder( std::initializer_list<Vector3f>&& arguments_list ) {
@@ -344,3 +363,4 @@ private:
     ScreenShotContainerPtr thumb;
     friend class GeomData;
 };
+

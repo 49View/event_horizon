@@ -482,10 +482,21 @@ public:
 	std::vector<Vector3f> points3d( float z ) const {
 		std::vector<Vector3f> ret;
 
-		ret.push_back( Vector3f( bottomLeft(), z ) );
-		ret.push_back( Vector3f( bottomRight(), z ) );
-		ret.push_back( Vector3f( topRight(), z ) );
-		ret.push_back( Vector3f( topLeft(), z ) );
+		ret.emplace_back( bottomLeft(), z );
+		ret.emplace_back( bottomRight(), z );
+		ret.emplace_back( topRight(), z );
+		ret.emplace_back( topLeft(), z );
+
+		return ret;
+	}
+
+	std::vector<Vector3f> points3dcw( float z ) const {
+		std::vector<Vector3f> ret;
+
+		ret.emplace_back( topLeft(), z );
+		ret.emplace_back( topRight(), z );
+		ret.emplace_back( bottomRight(), z );
+		ret.emplace_back( bottomLeft(), z );
 
 		return ret;
 	}

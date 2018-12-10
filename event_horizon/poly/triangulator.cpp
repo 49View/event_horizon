@@ -151,3 +151,9 @@ std::vector<Triangle3d>& Triangulator::get3dTrianglesTuple() {
 Triangulator::~Triangulator() {
 
 }
+
+std::vector<Triangle2d>
+Triangulator::execute2d( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float _accuracy ) {
+	Triangulator tri{ _verts, _holes, _accuracy };
+	return tri.get2dTrianglesTuple();
+}
