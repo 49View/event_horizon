@@ -14,8 +14,8 @@ namespace WindowHandling {
 
     void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
 
-        double width{ 1920.0 };
-        double height{ 1080.0 };
+        double width{ 1280.0 };
+        double height{ 720.0 };
         emscripten_get_element_css_size( "display", &width, &height );
         emscripten_set_canvas_element_size("display", int(width), int(height));
         LOGR( "GetWidnowSize %f %f", width, height );
