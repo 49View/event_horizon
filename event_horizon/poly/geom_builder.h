@@ -130,100 +130,34 @@ class GeomBuilder : public DependantBuilder, public GeomBasicBuilder<GeomBuilder
 public:
     GeomBuilder() = default;
     virtual ~GeomBuilder() = default;
-protected:
-    void createDependencyList( DependencyMaker& _md ) override;
-public:
 
-    GeomBuilder( const GeomBuilderType gbt ) {
-        builderType = gbt;
-    }
-
-    GeomBuilder( const GeomBuilderType gbt, const std::string& _name ) : DependantBuilder(_name) {
-        builderType = gbt;
-    }
-
-    GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags ) {
-        builderType = gbt;
-        Name(concatenate( "_", _tags ));
-    }
+    explicit GeomBuilder( const GeomBuilderType gbt ) : builderType(gbt) {}
+    GeomBuilder( const GeomBuilderType gbt, const std::string& _name ) : DependantBuilder(_name), builderType(gbt) {}
+    GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
 
     // Impoorted object
     GeomBuilder( std::shared_ptr<HierGeom>, const std::vector<std::shared_ptr<MaterialBuilder>>& );
 
     // Polygon list
-    explicit GeomBuilder( const std::vector<Vector3f>& _vlist,
-                          const Vector3f& _normal = Vector3f::ZERO, ReverseFlag rf = ReverseFlag::False) {
-        builderType = GeomBuilderType::poly;
-        Vector3f ln = _normal;
-        if ( ln == Vector3f::ZERO ) {
-            ln = normalize( crossProduct( _vlist.at(0), _vlist.at(2), _vlist.at(1) ));
-        }
-        polyLines.emplace_back(PolyLine{ _vlist, ln, rf});
-    }
-
-    explicit GeomBuilder( const std::vector<Triangle2d>& _tris,
-                          float _z = 0.0f,
-                          const Vector3f& _normal = Vector3f::ZERO,
-                          ReverseFlag rf = ReverseFlag::False ) {
-        builderType = GeomBuilderType::poly;
-        for ( const auto& [v1,v2,v3] : _tris ) {
-            std::vector<Vector3f> plist;
-            plist.emplace_back(Vector3f{ v1, _z});
-            plist.emplace_back(Vector3f{ v2, _z});
-            plist.emplace_back(Vector3f{ v3, _z});
-            addPoly( PolyLine{ plist, _normal, rf } );
-        }
-    }
-
-    GeomBuilder( std::initializer_list<Vector3f>&& arguments_list ) {
-        std::vector<Vector3f> vlist;
-        for (auto &v: arguments_list) vlist.emplace_back(std::move(v));
-        PolyLine p { vlist, normalize( crossProduct( vlist[0], vlist[2], vlist[1] )), ReverseFlag::False};
-        polyLines.push_back( p );
-    }
+    explicit GeomBuilder( const Rect2f& _rect, float _z = 0.0f );
+    explicit GeomBuilder( const std::vector<PolyLine>& _plist );
+    explicit GeomBuilder( const std::vector<Vector3f>& _vlist );
+    explicit GeomBuilder( const std::vector<Triangle2d>& _tris, float _z = 0.0f );
 
     // Outlines
     GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull );
+    GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull );
+    GeomBuilder( const std::vector<Vector3f>& arguments_list, float _zPull );
+    GeomBuilder( const std::vector<Vector2f>& arguments_list, float _zPull );
 
-    GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull ) {
-        std::vector<Vector3f> lverts;
-        for (auto &v: arguments_list) lverts.emplace_back(v);
-        outlineVerts.emplace_back( lverts, _zPull );
-        builderType = GeomBuilderType::outline;
-    }
+    // Shapes
+    explicit GeomBuilder( ShapeType _st, const Vector3f& _size = Vector3f::ONE );
 
-    GeomBuilder( const std::vector<Vector3f>& arguments_list, float _zPull ) {
-        outlineVerts.emplace_back( arguments_list, _zPull );
-        builderType = GeomBuilderType::outline;
-    }
-
-    GeomBuilder( const std::vector<Vector2f>& arguments_list, float _zPull ) {
-        std::vector<Vector3f> lverts;
-        for (auto &v: arguments_list) lverts.emplace_back(v) ;
-        outlineVerts.emplace_back( lverts, _zPull );
-        builderType = GeomBuilderType::outline;
-    }
-
-    GeomBuilder( ShapeType _st, const Vector3f& _size = Vector3f::ONE ) {
-        shapeType = _st;
-        scale = _size;
-        builderType = GeomBuilderType::shape;
-    }
-
+    // Profile/Follwoers
     GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline,
-                 const float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO ) {
-        mProfileBuilder = _ps;
-        for (auto &v: _outline) profilePath.emplace_back( Vector3f{v, _z} );
-        builderType = GeomBuilderType::follower;
-    }
-
+                 const float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO );
     GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
-                 const Vector3f& _suggestedAxis = Vector3f::ZERO ) {
-        mProfileBuilder = _ps;
-        mFollowerSuggestedAxis = _suggestedAxis;
-        for (auto &v: _outline) profilePath.emplace_back( v );
-        builderType = GeomBuilderType::follower;
-    }
+                 const Vector3f& _suggestedAxis = Vector3f::ZERO );
 
     void publish() const;
 
@@ -322,7 +256,9 @@ public:
     ScreenShotContainerPtr& Thumb();
 
 protected:
+    void createDependencyList( DependencyMaker& _md ) override;
     bool validate() const override;
+    void preparePolyLines();
     void deserializeDependencies( DependencyMaker& _md );
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg );
     void createFromAsset( std::shared_ptr<HierGeom> asset );
@@ -352,8 +288,11 @@ private:
 
     std::vector<PolyOutLine> outlineVerts;
 
+    std::vector<Vector3f> sourcePolysVList;
     std::vector<PolyLine> polyLines;
-
+    float zFlatPolys = 0.0f;
+    Vector3f forcingNormalPoly = Vector3f::ZERO;
+    ReverseFlag rfPoly = ReverseFlag::False;
     QuadVector3fNormalfList quads;
 
     GeomBuilderType builderType = GeomBuilderType::unknown;

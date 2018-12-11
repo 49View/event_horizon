@@ -11,16 +11,84 @@ GeomBuilder::GeomBuilder( std::shared_ptr<HierGeom> _h, const std::vector<std::s
     Name( _h->Name() );
 }
 
+GeomBuilder::GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull ) {
+    std::vector<Vector3f> lverts;
+    for (auto &v: arguments_list) lverts.emplace_back(v);
+    outlineVerts.emplace_back( lverts, _zPull );
+    builderType = GeomBuilderType::outline;
+}
+
+GeomBuilder::GeomBuilder( const std::vector<Vector3f>& arguments_list, float _zPull ) {
+    outlineVerts.emplace_back( arguments_list, _zPull );
+    builderType = GeomBuilderType::outline;
+}
+
+GeomBuilder::GeomBuilder( const std::vector<Vector2f>& arguments_list, float _zPull ) {
+    std::vector<Vector3f> lverts;
+    for (auto &v: arguments_list) lverts.emplace_back(v) ;
+    outlineVerts.emplace_back( lverts, _zPull );
+    builderType = GeomBuilderType::outline;
+}
+
+GeomBuilder::GeomBuilder( ShapeType _st, const Vector3f& _size ) {
+    shapeType = _st;
+    scale = _size;
+    builderType = GeomBuilderType::shape;
+}
+
+GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline, const float _z,
+                          const Vector3f& _suggestedAxis ) {
+    mProfileBuilder = _ps;
+    for (auto &v: _outline) profilePath.emplace_back( Vector3f{v, _z} );
+    builderType = GeomBuilderType::follower;
+}
+
 GeomBuilder::GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull ) {
     std::vector<Vector3f> lverts;
-    for (auto &v: arguments_list) lverts.emplace_back(std::move(v));
-    outlineVerts.push_back( { lverts, _zPull } );
+    for (auto &v: arguments_list) lverts.emplace_back( v );
+    outlineVerts.emplace_back( lverts, _zPull );
     builderType = GeomBuilderType::outline;
+}
+
+GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
+                          const Vector3f& _suggestedAxis ) {
+    mProfileBuilder = _ps;
+    mFollowerSuggestedAxis = _suggestedAxis;
+    for (auto &v: _outline) profilePath.emplace_back( v );
+    builderType = GeomBuilderType::follower;
+}
+
+GeomBuilder::GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags ) : builderType(gbt) {
+    Name(concatenate( "_", _tags ));
+}
+
+GeomBuilder::GeomBuilder( const Rect2f& _rect, float _z ) {
+    builderType = GeomBuilderType::poly;
+    sourcePolysVList = XZY::C(_rect.points3dcw(_z));
+}
+
+GeomBuilder::GeomBuilder( const std::vector<Vector3f>& _vlist ) {
+    builderType = GeomBuilderType::poly;
+    sourcePolysVList = _vlist;
+}
+
+GeomBuilder::GeomBuilder( const std::vector<Triangle2d>& _tris, float _z ) {
+    builderType = GeomBuilderType::poly;
+    for ( const auto& [v1,v2,v3] : _tris ) {
+        std::vector<Vector3f> plist;
+        sourcePolysVList.emplace_back(Vector3f{ v1, _z});
+        sourcePolysVList.emplace_back(Vector3f{ v2, _z});
+        sourcePolysVList.emplace_back(Vector3f{ v3, _z});
+    }
+}
+
+GeomBuilder::GeomBuilder( const std::vector<PolyLine>& _plist ) {
+    polyLines = _plist;
 }
 
 void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
 
-    SceneGraph& sg = static_cast<SceneGraph&>(_md);
+    auto& sg = static_cast<SceneGraph&>(_md);
 
     auto reader = std::make_shared<DeserializeBin>(sg.AL().get( Name()));
     auto deps = gatherGeomDependencies( reader );
@@ -35,7 +103,7 @@ void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
 
 void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 
-    SceneGraph& sg = static_cast<SceneGraph&>(_md);
+    auto& sg = static_cast<SceneGraph&>(_md);
 
     if ( builderType != GeomBuilderType::import ) {
         if ( builderType == GeomBuilderType::file ) {
@@ -72,7 +140,7 @@ void GeomBuilder::createFromAsset( std::shared_ptr<HierGeom> asset ) {
 
 void GeomBuilder::assemble( DependencyMaker& _md ) {
 
-    SceneGraph& sg = static_cast<SceneGraph&>(_md);
+    auto& sg = static_cast<SceneGraph&>(_md);
     std::unique_ptr<GeomDataBuilder> gb;
 
     switch ( builderType ) {
@@ -101,6 +169,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
             createFromProcedural( std::make_shared<GeomDataOutlineBuilder>( outlineVerts ), sg );
             break;
         case GeomBuilderType::poly:
+            preparePolyLines();
             createFromProcedural( std::make_shared<GeomDataPolyBuilder>( polyLines ), sg );
             break;
         case GeomBuilderType::mesh:
@@ -149,12 +218,12 @@ GeomBuilder& GeomBuilder::addPoly( const PolyLine2d& _polyLine2d, const float he
     builderType = GeomBuilderType::poly;
     std::vector<Vector3f> vlist;
     for ( auto& v: _polyLine2d.verts ) vlist.emplace_back( XZY::C( v, heightOffset ) );
-    polyLines.push_back( { vlist, _polyLine2d.normal, _polyLine2d.reverseFlag } );
+    polyLines.emplace_back( vlist, _polyLine2d.normal, _polyLine2d.reverseFlag );
     return *this;
 }
 
 GeomBuilder& GeomBuilder::addOutline( const std::vector<Vector3f>& _polyLine, const float _raise ) {
-    outlineVerts.push_back( { _polyLine, _raise } );
+    outlineVerts.emplace_back( _polyLine, _raise );
     return *this;
 }
 
@@ -204,4 +273,12 @@ void GeomBuilder::publish() const {
     }
 
     Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
+}
+
+void GeomBuilder::preparePolyLines() {
+    Vector3f ln = forcingNormalPoly;
+    if ( ln == Vector3f::ZERO ) {
+        ln = normalize( crossProduct( sourcePolysVList.at(0), sourcePolysVList.at(2), sourcePolysVList.at(1) ));
+    }
+    polyLines.emplace_back(PolyLine{ sourcePolysVList, ln, rfPoly});
 }
