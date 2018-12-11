@@ -201,6 +201,16 @@ public:
         return *this;
     }
 
+    GeomBuilder& fnp( const Vector3f& _n ) {
+        forcingNormalPoly = _n;
+        return *this;
+    }
+
+    GeomBuilder& prf( ReverseFlag _value ) {
+        rfPoly = _value;
+        return *this;
+    }
+
     GeomBuilder& addPoly( const PolyLine& _polyLine );
     GeomBuilder& addPoly( const PolyLine2d& _polyLine2d, const float heightOffset );
     GeomBuilder& addOutline( const std::vector<Vector3f>& _polyLine, const float _raise );
@@ -290,7 +300,6 @@ private:
 
     std::vector<Vector3f> sourcePolysVList;
     std::vector<PolyLine> polyLines;
-    float zFlatPolys = 0.0f;
     Vector3f forcingNormalPoly = Vector3f::ZERO;
     ReverseFlag rfPoly = ReverseFlag::False;
     QuadVector3fNormalfList quads;
