@@ -27,6 +27,7 @@ private:
 
 struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact )
 
+    ProfileBuilder( const Vector2f& _length );
     ProfileBuilder( const Vector2f& _v1, const Vector2f& _v2 );
 
     ProfileBuilder& func( profileDirectMakeFunc _cf ) {

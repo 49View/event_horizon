@@ -43,19 +43,19 @@ GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector2f>
     builderType = GeomBuilderType::follower;
 }
 
-GeomBuilder::GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull ) {
-    std::vector<Vector3f> lverts;
-    for (auto &v: arguments_list) lverts.emplace_back( v );
-    outlineVerts.emplace_back( lverts, _zPull );
-    builderType = GeomBuilderType::outline;
-}
-
 GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
                           const Vector3f& _suggestedAxis ) {
     mProfileBuilder = _ps;
     mFollowerSuggestedAxis = _suggestedAxis;
     for (auto &v: _outline) profilePath.emplace_back( v );
     builderType = GeomBuilderType::follower;
+}
+
+GeomBuilder::GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull ) {
+    std::vector<Vector3f> lverts;
+    for (auto &v: arguments_list) lverts.emplace_back( v );
+    outlineVerts.emplace_back( lverts, _zPull );
+    builderType = GeomBuilderType::outline;
 }
 
 GeomBuilder::GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags ) : builderType(gbt) {

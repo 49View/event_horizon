@@ -88,3 +88,13 @@ std::vector<Vector3f> createQuadPoints( const Vector2f& size = Vector2f::ONE );
 GeomDeserializeDependencies gatherGeomDependencies( std::shared_ptr<DeserializeBin> reader );
 
 const std::vector<std::string>& pbrNames();
+
+template<typename T>
+std::vector<T> lineRL( const T& direction, float length ) {
+    return { direction*(length*0.5f), -direction*(length*0.5f) };
+}
+
+template<typename T>
+std::vector<T> lineLR( const T& direction, float length ) {
+    return { -direction*(length*0.5f), direction*(length*0.5f) };
+}

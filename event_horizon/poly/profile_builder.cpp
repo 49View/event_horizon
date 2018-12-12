@@ -37,6 +37,10 @@ ProfileBuilder::ProfileBuilder( const Vector2f& _v1, const Vector2f& _v2 ) {
     func( Profile::makeLine ).cv2( _v1 ).cv2( _v2 );
 }
 
+ProfileBuilder::ProfileBuilder( const Vector2f& _length ) {
+    func( Profile::makeLine ).cv2( -_length*0.5f ).cv2( _length*0.5f );
+}
+
 bool ProfileManager::add( const ProfileBuilder& _pb, std::shared_ptr<Profile> _profile ) {
     profileList[_pb.Name()] = std::move( _profile );
     return true;
