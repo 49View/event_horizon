@@ -12,7 +12,7 @@
 #include "hier_geom.hpp"
 
 FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
-                            const std::array<size_t, 4>& indices ) {
+                            const std::array<size_t, 4>& indices, WindingOrderT _wo ) {
 
     auto vsm11 = rp1[indices[0]];
     auto vsm12 = rp2[indices[0]];
@@ -28,7 +28,9 @@ FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<
     auto vnm1 = normalize( crossProduct( vsm11, vs[0], vsm12 ));
     auto vnp1 = normalize( crossProduct( vs[2], vsp11, vs[3] ));
 
-    vn = normalize( crossProduct( vs[0], vs[2], vs[1] ));
+    int i1 = _wo == WindingOrder::CCW ? 1 : 2;
+    int i2 = _wo == WindingOrder::CCW ? 2 : 1;
+    vn = normalize( crossProduct( vs[0], vs[i1], vs[i2] ));
 
     float d1 = dot( vn, vnm1 );
     float d2 = dot( vn, vnp1 );
@@ -196,7 +198,8 @@ namespace FollowerService {
     std::vector<FollowerPoly> polys;
 
     geom->resetWrapMapping( profile.Lengths() );
-    geom->setWindingOrderFlagOnly( detectWindingOrder( profile.Points() ) );
+    auto wo = detectWindingOrder( profile.Points() );
+    geom->setWindingOrderFlagOnly( wo );
 
     auto vcFinalSize = fid.vcoords.size();
     // Pre-loop setup, allocate/setup first element
@@ -222,7 +225,7 @@ namespace FollowerService {
             auto nextIndexp1 = static_cast<uint64_t>(getCircularArrayIndex( mi + 2, rpsizei ));
 
             FollowerPoly fp{ rp1, rp2, { static_cast<size_t>(mn1), static_cast<size_t>(m),
-                                         static_cast<size_t>(nextIndex), static_cast<size_t>(nextIndexp1)} };
+                                         static_cast<size_t>(nextIndex), static_cast<size_t>(nextIndexp1)}, wo };
 
             if ( checkBitWiseFlag(ff, FollowerFlags::UsePlanarMapping) ) {
                 geom->planarMapping( absolute( fp.vn ), fp.vs.data(), fp.vtcs.data(), 4 );

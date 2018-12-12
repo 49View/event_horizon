@@ -20,6 +20,7 @@ const Vector3f Vector3f::ZERO = Vector3f( 0.0f, 0.0f, 0.0f );
 const Vector3f Vector3f::X_AXIS = Vector3f( 1.0f, 0.0f, 0.0f );
 const Vector3f Vector3f::Y_AXIS = Vector3f( 0.0f, 1.0f, 0.0f );
 const Vector3f Vector3f::UP_AXIS = Vector3f( 0.0f, 1.0f, 0.0f );
+const Vector3f Vector3f::UP_AXIS_NEG = Vector3f( 0.0f, -1.0f, 0.0f );
 const Vector3f Vector3f::Z_AXIS = Vector3f( 0.0f, 0.0f, 1.0f );
 const Vector3f Vector3f::X_AXIS_NEG = Vector3f( -1.0f, 0.0f, 0.0f );
 const Vector3f Vector3f::Y_AXIS_NEG = Vector3f( 0.0f, -1.0f, 0.0f );

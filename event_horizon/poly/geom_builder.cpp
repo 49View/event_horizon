@@ -190,7 +190,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
                                                                              mFollowerSuggestedAxis ), sg );
             elem->Name( mProfileBuilder.Name() );
         }
-            break;
+        break;
         case GeomBuilderType::unknown:
             LOGE( "Unknown builder type" );
             return;

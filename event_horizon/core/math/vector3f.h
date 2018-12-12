@@ -35,6 +35,7 @@ public:
 	static const Vector3f UE4_PROFILE_AXIS;
 	static const Vector3f UE4_PROFILE_AXIS_NORM;
 	static const Vector3f UP_AXIS;
+	static const Vector3f UP_AXIS_NEG;
 	static const Vector3f ONE;
 	static const Vector3f HUGE_VALUE_POS;
 	static const Vector3f HUGE_VALUE_NEG;

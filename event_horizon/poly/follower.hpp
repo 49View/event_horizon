@@ -18,7 +18,7 @@
 
 struct FollowerPoly {
     FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
-                  const std::array<size_t,4>& indices );
+                  const std::array<size_t,4>& indices, WindingOrderT _wo );
 	std::array<Vector3f, 4> vs;
 	std::array<Vector2f, 4> vtcs;
     std::array<Vector3f, 4> vncs;
