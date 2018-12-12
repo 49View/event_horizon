@@ -64,7 +64,7 @@ GeomBuilder::GeomBuilder( const GeomBuilderType gbt, const std::initializer_list
 
 GeomBuilder::GeomBuilder( const Rect2f& _rect, float _z ) {
     builderType = GeomBuilderType::poly;
-    sourcePolysVList = XZY::C(_rect.points3dcw(_z));
+    sourcePolysVList = XZY::C(_rect.points3d(_z));
 }
 
 GeomBuilder::GeomBuilder( const std::vector<Vector3f>& _vlist ) {
@@ -75,10 +75,15 @@ GeomBuilder::GeomBuilder( const std::vector<Vector3f>& _vlist ) {
 GeomBuilder::GeomBuilder( const std::vector<Triangle2d>& _tris, float _z ) {
     builderType = GeomBuilderType::poly;
     for ( const auto& [v1,v2,v3] : _tris ) {
-        std::vector<Vector3f> plist;
-        sourcePolysVList.emplace_back(Vector3f{ v1, _z});
-        sourcePolysVList.emplace_back(Vector3f{ v2, _z});
-        sourcePolysVList.emplace_back(Vector3f{ v3, _z});
+        sourcePolysTris.emplace_back(Triangle3d( {v1, _z}, {v2, _z}, {v3, _z} ) );
+    }
+}
+
+GeomBuilder::GeomBuilder( const std::vector<PolyLine2d>& _plines, float _z ) {
+    builderType = GeomBuilderType::poly;
+
+    for ( const auto& p : _plines ) {
+        addPoly( p, _z );
     }
 }
 
@@ -218,7 +223,8 @@ GeomBuilder& GeomBuilder::addPoly( const PolyLine2d& _polyLine2d, const float he
     builderType = GeomBuilderType::poly;
     std::vector<Vector3f> vlist;
     for ( auto& v: _polyLine2d.verts ) vlist.emplace_back( XZY::C( v, heightOffset ) );
-    polyLines.emplace_back( vlist, _polyLine2d.normal, _polyLine2d.reverseFlag );
+    // Using XZY::C transformation requires a _normal invert_ as handness changes with that transportation.
+    polyLines.emplace_back( vlist, -_polyLine2d.normal, _polyLine2d.reverseFlag );
     return *this;
 }
 
@@ -275,10 +281,26 @@ void GeomBuilder::publish() const {
     Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
 }
 
-void GeomBuilder::preparePolyLines() {
-    Vector3f ln = forcingNormalPoly;
+void internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
     if ( ln == Vector3f::ZERO ) {
-        ln = normalize( crossProduct( sourcePolysVList.at(0), sourcePolysVList.at(2), sourcePolysVList.at(1) ));
+        ln = normalize( crossProduct( v1,v2,v3 ));
+        if ( rf == ReverseFlag::True ) ln*=-1.0f;
     }
-    polyLines.emplace_back(PolyLine{ sourcePolysVList, ln, rfPoly});
+}
+
+void GeomBuilder::preparePolyLines() {
+    if ( polyLines.empty() ) {
+        Vector3f ln = forcingNormalPoly;
+        if ( !sourcePolysTris.empty() ) {
+            auto [v1,v2,v3] = sourcePolysTris[0];
+            internalCheckPolyNormal( ln, v1, v2, v3, rfPoly );
+            for ( const auto& tri : sourcePolysTris ) {
+                polyLines.emplace_back(PolyLine{ tri, ln, rfPoly});
+            }
+        }
+        if ( !sourcePolysVList.empty() ) {
+            internalCheckPolyNormal( ln, sourcePolysVList.at(0), sourcePolysVList.at(1), sourcePolysVList.at(2), rfPoly );
+            polyLines.emplace_back( PolyLine{ sourcePolysVList, ln, rfPoly } );
+        }
+    }
 }

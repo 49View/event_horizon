@@ -11,6 +11,13 @@
 
 class GeomData;
 class Profile;
+class PBRMaterial;
+
+namespace ClipperLib {
+    struct IntPoint;
+    typedef std::vector< IntPoint > Path;
+    typedef std::vector< Path > Paths;
+}
 
 struct QuadVector3fNormal {
     QuadVector3f quad;
@@ -183,23 +190,7 @@ protected:
     Vector3f mSuggestedAxis = Vector3f::ZERO;
 };
 
-//std::shared_ptr<GeomData> GeomDataBuilder::build() {
-//
-//    elem = std::make_shared<GeomData>();
-//
-//    switch ( builderType ) {
-//        case file:break;
-//        case shape:
-//            elem->addShape( shapeType, Vector3f::ZERO, Vector3f::ONE, 3 );
-//            break;
-//        case outline:
-//            elem->pull( outlineVerts, zPull );
-//            break;
-//        case follower: {
-//            //FollowerBuilder{ baseGeom, profile, outlineVerts }.gaps(mGaps).ff(followersFlags).build();
-//        } break;
-//        case unknown:
-//            break;
-//    }
-//    return elem;
-//}
+void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution, const Vector3f& _normal, ReverseFlag rf = ReverseFlag::False );
+std::vector<PolyLine2d> clipperToPolylines( const ClipperLib::Paths& source, const ClipperLib::Path& clipAgainst,
+                                            const Vector3f& _normal, ReverseFlag rf = ReverseFlag::False );
+ClipperLib::Path getPerimeterPath( const std::vector<Vector2f>& _values );

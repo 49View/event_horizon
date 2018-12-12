@@ -143,6 +143,7 @@ public:
     explicit GeomBuilder( const std::vector<PolyLine>& _plist );
     explicit GeomBuilder( const std::vector<Vector3f>& _vlist );
     explicit GeomBuilder( const std::vector<Triangle2d>& _tris, float _z = 0.0f );
+    explicit GeomBuilder( const std::vector<PolyLine2d>& _plines, float _z = 0.0f );
 
     // Outlines
     GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull );
@@ -206,8 +207,8 @@ public:
         return *this;
     }
 
-    GeomBuilder& prf( ReverseFlag _value ) {
-        rfPoly = _value;
+    GeomBuilder& prf() {
+        rfPoly = ReverseFlag::True;
         return *this;
     }
 
@@ -299,6 +300,7 @@ private:
     std::vector<PolyOutLine> outlineVerts;
 
     std::vector<Vector3f> sourcePolysVList;
+    std::vector<Triangle3d> sourcePolysTris;
     std::vector<PolyLine> polyLines;
     Vector3f forcingNormalPoly = Vector3f::ZERO;
     ReverseFlag rfPoly = ReverseFlag::False;

@@ -61,7 +61,7 @@ struct Topology {
         triangles.emplace_back( a );
         triangles.emplace_back( b );
         triangles.emplace_back( c );
-        Vector3f n = normalize( crossProduct( vertices[a], vertices[c], vertices[b] ) );
+        Vector3f n = normalize( crossProduct( vertices[a], vertices[b], vertices[c] ) );
         vertexNormals.emplace_back( n );
         vertexNormals.emplace_back( n );
         vertexNormals.emplace_back( n );
