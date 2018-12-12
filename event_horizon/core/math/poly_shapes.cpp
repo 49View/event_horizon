@@ -71,12 +71,8 @@ struct Topology {
     }
 
     void addQuad( uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
-        triangles.emplace_back( a );
-        triangles.emplace_back( b );
-        triangles.emplace_back( c );
-        triangles.emplace_back( a );
-        triangles.emplace_back( c );
-        triangles.emplace_back( d );
+        addTriangle( a, b, c );
+        addTriangle( c, b, d );
     }
 
     void addQuadAlt( uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
@@ -309,6 +305,64 @@ void Cube( Topology& mesh ) {
     mesh.addTriangle( 4, 0, 2 );
 }
 
+void addPillowSide( Topology& mesh, uint32_t subdivs, uint32_t q, uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
+    mesh.addQuad( a, b, q+1, q );
+    uint32_t i =0;
+    for ( ; i < subdivs-1; i+=2 ) {
+        mesh.addQuad( i+q+1, i+q, i+q+3, i+q+2 );
+    }
+    mesh.addQuad( i+q+1, i+q, c, d );
+}
+
+void subdivPillowSide( Topology& mesh, int subdivs, float radius, const Vector3f& p1, const Vector3f& p2,
+                       const Vector3f& m1, const Vector3f& m2 ) {
+    float deltaI = (1.0f / subdivs);
+    float deltaC = 0.0f;
+    for ( int t = 1; t < subdivs; t++ ) {
+        deltaC += deltaI;
+        float delta = sin(deltaC * M_PI);
+        Vector3f n1 = p1 * Vector3f::MASK_Y_OUT + m1 * delta * radius;
+        Vector3f n2 = p2 * Vector3f::MASK_Y_OUT + m2 * delta * radius;
+        mesh.vertices.emplace_back( n1 + Vector3f::Y_AXIS*(0.5f-deltaC) );
+        mesh.vertices.emplace_back( n2 + Vector3f::Y_AXIS*(0.5f-deltaC) );
+    }
+}
+
+void Pillow( Topology& mesh, uint32_t subdivs, float radius ) {
+    // Vertices
+
+    mesh.vertices.emplace_back( Vector3f( -0.500000, 0.500000 , -0.500000 ));
+    mesh.vertices.emplace_back( Vector3f( 0.500000 , 0.500000 , -0.500000 ));
+    mesh.vertices.emplace_back( Vector3f( -0.500000, 0.500000 , 0.500000 ));
+    mesh.vertices.emplace_back( Vector3f( 0.500000 , 0.500000 , 0.500000 ));
+
+    mesh.vertices.emplace_back( Vector3f( -0.500000, -0.500000, 0.500000 ));
+    mesh.vertices.emplace_back( Vector3f( 0.500000 , -0.500000, 0.500000 ));
+    mesh.vertices.emplace_back( Vector3f( -0.500000, -0.500000, -0.500000 ));
+    mesh.vertices.emplace_back( Vector3f( 0.500000 , -0.500000, -0.500000 ));
+
+    // Vertices for the lateral bumps
+    subdivs = 4;
+    uint32_t subDivInc = (subdivs - 1) * 2;
+    subdivPillowSide( mesh, subdivs, radius, mesh.vertices[2], mesh.vertices[3], Vector3f{-1.0f, 0.0f, 1.0f}, Vector3f{1.0f, 0.0f, 1.0f} );
+    subdivPillowSide( mesh, subdivs, radius, mesh.vertices[3], mesh.vertices[1], Vector3f{1.0f, 0.0f, 1.0f}, Vector3f{1.0f, 0.0f, -1.0f} );
+    subdivPillowSide( mesh, subdivs, radius, mesh.vertices[1], mesh.vertices[0], Vector3f{1.0f, 0.0f, -1.0f}, Vector3f{-1.0f, 0.0f, -1.0f} );
+    subdivPillowSide( mesh, subdivs, radius, mesh.vertices[0], mesh.vertices[2], Vector3f{-1.0f, 0.0f, -1.0f}, Vector3f{-1.0f, 0.0f, 1.0f} );
+    // Facesradius,
+
+    // top
+    mesh.addQuad( 2, 3, 0, 1 );
+    // bottom
+    mesh.addQuad( 6, 7, 4, 5 );
+
+    // Side1
+    addPillowSide( mesh, subdivs, 8, 3, 2, 5, 4 );
+    addPillowSide( mesh, subdivs, 8+subDivInc, 1, 3, 7, 5 );
+    addPillowSide( mesh, subdivs, 8+subDivInc*2, 0, 1, 6, 7 );
+    addPillowSide( mesh, subdivs, 8+subDivInc*3, 2, 0, 4, 6 );
+
+}
+
 //void planarMapping( const Vector3f& normal, const Vector3f vs[], Vector2f vtcs[], int numVerts ) {
 //    IndexPair pairMapping = normal.dominantPair();
 //
@@ -498,10 +552,18 @@ PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, co
     return createGeom( mesh, center, Vector3f{ diameter }, GeomMapping::Spherical, subdivs );
 }
 
-PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size, [[maybe_unused]] const int subdivs ) {
+PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
 
     Topology mesh;
     Cube( mesh );
+
+    return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
+}
+
+PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
+
+    Topology mesh;
+    Pillow( mesh, subdivs, radius * size.y() );
 
     return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
 }

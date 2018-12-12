@@ -8,7 +8,7 @@
 
 void Skybox::equirectangularTextureInit( const std::vector<std::string>& params ) {
 
-    PolyStruct sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f}, 0 );
+    PolyStruct sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
@@ -37,7 +37,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
             isReadyToRender = true;
             break;
         case SkyBoxMode::CubeProcedural:
-            sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f}, 0 );
+            sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
             isReadyToRender = true;
             break;
         case SkyBoxMode::EquirectangularTexture:
@@ -96,7 +96,7 @@ Skybox::Skybox( Renderer& rr, const SkyBoxInitParams& _params ) : RenderModule( 
 void CubeEnvironmentMap::init() {
     mVPList = std::make_shared<VPList>();
 
-    auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f}, 0 );
+    auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
@@ -114,7 +114,7 @@ void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
 void PrefilterSpecularMap::init() {
     mVPList = std::make_shared<VPList>();
 
-    auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f}, 0 );
+    auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,

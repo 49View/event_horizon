@@ -320,9 +320,7 @@ void GeomData::setMappingData( const GeomMappingData& _mapping ) {
 //	return mMaterial->Constants()->getTexture( UniformNames::colorTexture );
 //}
 
-void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& size,
-						 int subDivs
-) {
+void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& size, int subDivs ) {
 	PolyStruct ps;
 
 	switch ( st ) {
@@ -330,7 +328,10 @@ void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& s
 			ps = createGeomForSphere( center, size.x(), subDivs );
 			break;
 		case ShapeType::Cube:
-			ps = createGeomForCube( center, size, subDivs );
+			ps = createGeomForCube( center, size );
+			break;
+		case ShapeType::Pillow:
+			ps = createGeomForPillow( center, size, subDivs );
 			break;
 		default:
 			ps = createGeomForSphere( center, size.x(), subDivs );

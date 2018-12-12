@@ -22,7 +22,8 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 
     _p->postActivate( [](Scene* _p) {
         _p->CM().getCamera( Name::Foxtrot)->goTo( Vector3f{0.0f, 1.0f, 3.0f}, 0.0f);
-        GeomBuilder{ Rect2f{10.0f} }.build(_p->RSG());
+//        GeomBuilder{ Rect2f{10.0f} }.build(_p->RSG());
+        GeomBuilder{ ShapeType::Pillow }.s(Vector3f{2.0f, .1f, 0.35f}).build(_p->RSG());
     } );
 }
 

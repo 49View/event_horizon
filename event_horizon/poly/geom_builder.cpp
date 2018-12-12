@@ -125,8 +125,8 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg ) {
-    std::shared_ptr<GeomData> geom =
-            gb->m( std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName ))).build();
+    auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName ));
+    std::shared_ptr<GeomData> geom = gb->m(mat).build();
     if ( elem ) {
         elem->Geom( geom );
     } else {
