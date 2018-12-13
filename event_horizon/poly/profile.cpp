@@ -263,3 +263,11 @@ std::shared_ptr<Profile> Profile::makeWire( const std::string& _name,
     return profile;
 }
 
+std::shared_ptr<Profile> Profile::fromPoints( const std::string& name,  const std::vector<Vector2f>& points ) {
+	std::shared_ptr<Profile> ret = std::make_shared<Profile>( name);
+	ret->createArbitrary( points );
+
+	return ret;
+
+}
+

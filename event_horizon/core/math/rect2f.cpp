@@ -126,3 +126,14 @@ bool Rect2f::lineIntersection( const Vector2f& p1, const Vector2f& p2 ) const {
 
 	return true;
 }
+
+Rect2f Rect2f::verticalSlice( float delta, float deltan ) const {
+	std::vector<Vector2f> vl;
+	vl.reserve(4);
+	vl.emplace_back(lerp( delta, bottomLeft(), bottomRight() ));
+	vl.emplace_back(lerp( delta, topLeft(), topRight() ));
+	vl.emplace_back(lerp( deltan, bottomLeft(), bottomRight() ));
+	vl.emplace_back(lerp( deltan, topLeft(), topRight() ));
+
+	return Rect2f( vl );
+}

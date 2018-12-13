@@ -67,12 +67,11 @@ public:
 	Vector3f quatAngle() const { return qangle->value; }
 	Vector3f centerScreenOn( const Vector2f& area, const float bMiddleIsCenter = true, const float slack = 0.0f );
 	Vector3f centerScreenOnWithinArea( Vector2f area, const Rect2f& targetArea, const float padding = 1.0f, const float slack = 0.0f );
-	void goTo( const std::string toggleName, const Vector3f& pos, float time, float delay = 0.0f, std::function<void()> callbackFunction = nullptr );
+	void goTo( const std::string& toggleName, const Vector3f& pos, float time, float delay = 0.0f, std::function<void()> callbackFunction = nullptr );
 	void goTo( const Vector2f& pos, float time, float delay = 0.0f, std::function<void()> callbackFunction = nullptr );
 	void goTo( const Vector3f& pos, float time, float delay = 0.0f, std::function<void()> callbackFunction = nullptr );
-	void goTo( const Vector3f& pos, const Vector3f& target, float time, float delay = 0.0f, std::function<void()> callbackFunction = nullptr );
-	void goTo( const Vector3f& pos, const Vector3f& target, const Vector3f& angles, float time, float delay = 0.0f, std::function<void()> callbackFunction = nullptr );
-	void interpolatePosition( const std::vector<Vector4f> cameraPath, float currCameraPathTime );
+	void goTo( const Vector3f& pos, const Vector3f& angles, float time, float delay = 0.0f, std::function<void()> callbackFunction = nullptr );
+	void interpolatePosition( const std::vector<Vector4f>& cameraPath, float currCameraPathTime );
 
 	void zoom2d( float amount );
 

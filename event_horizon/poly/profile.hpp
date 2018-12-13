@@ -65,6 +65,7 @@ public:
     static std::shared_ptr<Profile> makeLine(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
     static std::shared_ptr<Profile> makeWire(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
 
+    static std::shared_ptr<Profile> fromPoints( const std::string& name, const std::vector<Vector2f>& points );
 private:
 	void calculatePerimeter();
 	void calcBBox();

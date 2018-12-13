@@ -86,3 +86,6 @@ std::vector<T> hermiteInterpolationOnPath( const std::vector<T>& path, int subdi
 	
 	return ret;
 }
+
+void appendMirror( std::vector<Vector2f>& points, const Vector2f& mirrorAxis );
+void flipAxis( std::vector<Vector2f>& points );

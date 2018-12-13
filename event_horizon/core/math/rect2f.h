@@ -479,7 +479,7 @@ public:
 		return ret;
 	}
 
-	std::vector<Vector3f> points3d( float z ) const {
+	std::vector<Vector3f> points3d( float z = 0.0f ) const {
 		std::vector<Vector3f> ret;
 
 		ret.emplace_back( bottomLeft(), z );
@@ -490,7 +490,7 @@ public:
 		return ret;
 	}
 
-	std::vector<Vector3f> points3dcw( float z ) const {
+	std::vector<Vector3f> points3dcw( float z = 0.0f ) const {
 		std::vector<Vector3f> ret;
 
 		ret.emplace_back( topLeft(), z );
@@ -560,6 +560,9 @@ public:
 	Vector2f centreTop() const { return centre() + Vector2f( 0.0f, height()*0.5f ); }
 	Vector2f centreBottom() const { return centre() - Vector2f( 0.0f, height()*0.5f ); }
 
+	Rect2f verticalSlice( float delta, float deltan ) const;
+
+private:
 	// DO NOT Change the order of these member variables as they are needed to get proper indices for raw access (performance requirement)
 	Vector2f mTopLeft;
 	Vector2f mBottomRight;

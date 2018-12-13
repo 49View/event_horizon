@@ -70,6 +70,11 @@ public:
         return static_cast<T&>(*this);
     }
 
+    T& bboff( const Vector3f& _pos ) {
+        bboxOffset = _pos;
+        return static_cast<T&>(*this);
+    }
+
     T& at( const Vector3f& _pos, const Vector3f& _axis ) {
         pos = _pos;
         axis = _axis;
@@ -91,6 +96,7 @@ public:
 
 protected:
     Vector3f pos = Vector3f::ZERO;
+    Vector3f bboxOffset = Vector3f::ZERO;
     Vector3f axis = Vector3f::ZERO;
     Vector3f scale = Vector3f::ONE;
     MatrixAnim matrixAnim;
@@ -159,7 +165,7 @@ public:
                  const float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO );
     GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
                  const Vector3f& _suggestedAxis = Vector3f::ZERO );
-
+    GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
     void publish() const;
 
     GeomBuilder& bt( const GeomBuilderType _gbt ) {

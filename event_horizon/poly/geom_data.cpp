@@ -966,7 +966,7 @@ std::vector<Vector3f> GeomData::utilGenerateFlatBoxFromSize( float width, float 
 
 std::vector<Vector2f> GeomData::utilGenerateFlatRect( const Vector2f& size, const WindingOrderT wo, PivotPointPosition ppp, const Vector2f& /*pivot*/ ) {
 	std::vector<Vector2f> fverts;
-	fverts.clear();
+
 	if ( wo == WindingOrder::CW ) {
 		fverts.push_back( Vector2f( size.x(), 0.0f ) );
 		fverts.push_back( Vector2f( size.x(), size.y() ) );
@@ -999,7 +999,7 @@ std::vector<Vector2f> GeomData::utilGenerateFlatRect( const Vector2f& size, cons
 			v -= size * 0.5f;
 			break;
 			case PivotPointPosition::PPP_BOTTOM_LEFT:
-			v -= size * 0.5f;
+            v -= Vector2f( size.x() * 0.5f, 0.0f );
 			break;
 			case PivotPointPosition::PPP_TOP_LEFT:
 			break;

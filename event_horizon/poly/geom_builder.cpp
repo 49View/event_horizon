@@ -51,6 +51,13 @@ GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>
     builderType = GeomBuilderType::follower;
 }
 
+GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis ) {
+    mProfileBuilder = _ps;
+    mFollowerSuggestedAxis = _suggestedAxis;
+    for ( auto &v: _r.points3dcw() ) profilePath.emplace_back( v );
+    builderType = GeomBuilderType::follower;
+}
+
 GeomBuilder::GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull ) {
     std::vector<Vector3f> lverts;
     for (auto &v: arguments_list) lverts.emplace_back( v );
@@ -165,6 +172,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
             auto asset = std::make_shared<HierGeom>( sg.AL().get(Name()) );
             sg.AL().add( Name(), asset );
             createFromAsset( asset );
+            pos += elem->containingAABB().size() * bboxOffset;
         }
         break;
         case GeomBuilderType::shape:

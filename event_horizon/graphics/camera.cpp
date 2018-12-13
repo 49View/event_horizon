@@ -403,7 +403,7 @@ void Camera::setProjectionMatrix( const Matrix4f& val ) {
 	mFrustom.calculateFromMVP( mView * mProjection );
 }
 
-void Camera::interpolatePosition( const std::vector<Vector4f> cameraPath, float currCameraPathTime ) {
+void Camera::interpolatePosition( const std::vector<Vector4f>& cameraPath, float currCameraPathTime ) {
 	setPosition( traversePathHermite( cameraPath, currCameraPathTime ).xyz() );
 }
 
@@ -525,7 +525,7 @@ Vector3f Camera::centerScreenOnWithinArea( Vector2f area, const Rect2f& targetAr
 	return{ -totalWidth*0.5f + origin + area.x()*slack*0.5f / getScreenAspectRatio, targetArea.origin().y() * totalWidth + -area.y()*padding + area.y()*slack*0.5f, -mainSize / aperture };
 }
 
-void Camera::goTo( const std::string toggleName, const Vector3f& pos, float time, float delay, std::function<void()> callbackFunction ) {
+void Camera::goTo( const std::string& toggleName, const Vector3f& pos, float time, float delay, std::function<void()> callbackFunction ) {
 	if ( callbackFunction == nullptr )
 		setToggle( mPos, toggleName, mPos->value, pos, time, delay, nullptr );
 	else
@@ -546,17 +546,8 @@ void Camera::goTo( const Vector3f& pos, float time, float delay, std::function<v
 		animateTo( mPos, pos, time, delay, std::bind( callbackFunction ), nullptr, nullptr );
 }
 
-void Camera::goTo( const Vector3f& pos, const Vector3f& target, float time, float delay, std::function<void()> callbackFunction ) {
+void Camera::goTo( const Vector3f& pos, const Vector3f& angles, float time, float delay, std::function<void()> callbackFunction ) {
 	animateTo( mPos, pos, time );
-	if ( callbackFunction == nullptr )
-		animateTo( mTarget, target, time, delay, nullptr, nullptr, nullptr );
-	else
-		animateTo( mTarget, target, time, delay, std::bind( callbackFunction ), nullptr, nullptr );
-}
-
-void Camera::goTo( const Vector3f& pos, const Vector3f& target, const Vector3f& angles, float time, float delay, std::function<void()> callbackFunction ) {
-	animateTo( mPos, pos, time );
-	animateTo( mTarget, target, time );
 	if ( callbackFunction == nullptr )
 		animateTo( qangle, angles, time, delay, nullptr, nullptr, nullptr );
 	else
