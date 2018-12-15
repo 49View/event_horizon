@@ -694,7 +694,8 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<HierGeom
 
     auto mesh = model.meshes[meshIndex];
     tinygltf::Primitive primitive = mesh.primitives[primitiveIndex];
-
+    if (primitive.indices < 0 ) return;
+    
     auto material = model.materials[primitive.material];
     auto im = matMap.at(material.name);
     std::shared_ptr<GeomData> geom = std::make_shared<GeomData>( std::make_shared<PBRMaterial>(im.name) );

@@ -1,5 +1,9 @@
 #include <utility>
 
+#include <utility>
+
+#include <utility>
+
 //
 //  profile.hpp
 //  6thViewImporter
@@ -77,4 +81,30 @@ private:
 	std::vector<float>		mLengths;
 	float					mPerimeter = 0.0f;
 	Vector3f				mNormal = Vector3f::X_AXIS;
+};
+
+class ProfileMaker {
+public:
+	ProfileMaker() = default;
+	explicit ProfileMaker( std::string name ) : name( std::move( name )) {}
+
+	ProfileMaker& s( float _s );
+	ProfileMaker& sd( uint32_t _sd );
+	ProfileMaker& ay( float radius, int32_t subdivs = -1 );
+	ProfileMaker& l( const V2f& _p1 );
+	ProfileMaker& ly( float _y1 );
+	ProfileMaker& lx( float _x1 );
+
+	std::shared_ptr<Profile> make() const { return Profile::fromPoints( name, points ); }
+
+private:
+	void add( const V2f& _p );
+	int setPointerSubdivs( int _sd ) const;
+	V2f pointer() const { return points.empty() ? V2f::ZERO : points.back(); }
+
+private:
+	std::string name;
+	std::vector<V2f> points;
+	int32_t gsubdivs = 4;
+	float scale = 1.0f;
 };

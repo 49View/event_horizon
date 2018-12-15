@@ -601,3 +601,5 @@ struct XZY {
 	static std::vector<Vector3f> C( const std::vector<Vector3f>& _v );
 	static std::vector<Vector3f> C( const std::vector<Vector2f>& _v, float _z = 0.0f );
 };
+
+using V3f = Vector3f;

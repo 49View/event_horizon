@@ -271,3 +271,46 @@ std::shared_ptr<Profile> Profile::fromPoints( const std::string& name,  const st
 
 }
 
+void ProfileMaker::add( const V2f& _p ) {
+	points.emplace_back( _p * scale );
+}
+
+ProfileMaker& ProfileMaker::s( float _s ) {
+	scale = _s;
+	return *this;
+}
+
+int ProfileMaker::setPointerSubdivs( int _sd ) const {
+	return _sd == -1 ? gsubdivs : _sd;
+}
+
+ProfileMaker& ProfileMaker::ay( float radius, int32_t _subdivs ) {
+	auto subdivs = setPointerSubdivs(_subdivs);
+	V2f start = pointer();
+	for ( int t = 1; t < subdivs; t++ ) {
+		float delta = ( static_cast<float>( t ) / static_cast<float>( subdivs - 1 ));
+		float angle = JMATH::lerp( delta, M_PI_2, M_PI + M_PI_2 );
+		add( start + ( V2f{cosf(angle)*-1.0f, 1.0f-sinf(angle)} * radius ) );
+	}
+	return *this;
+}
+
+ProfileMaker& ProfileMaker::l( const V2f& _p1 ) {
+	add( _p1 + pointer() );
+	return *this;
+}
+
+ProfileMaker& ProfileMaker::ly( float _y1 ) {
+	add( V2f{ 0.0f, _y1} + pointer() );
+	return *this;
+}
+
+ProfileMaker& ProfileMaker::lx( float _x1 ) {
+	add( V2f{ _x1, 0.0f} + pointer() );
+	return *this;
+}
+
+ProfileMaker& ProfileMaker::sd( uint32_t _sd ) {
+	gsubdivs = static_cast<int32_t >(_sd);
+	return *this;
+}

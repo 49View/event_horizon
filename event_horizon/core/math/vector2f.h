@@ -549,3 +549,5 @@ bool distanceFromLineCapsule( const Vector2f& p, const Vector2f& p1, const Vecto
 bool isPointInsideLineCapsule( const Vector2f& p, const Vector2f& p1, const Vector2f& p2, float radius );
 void straightenOnMainAxis( Vector2f& a, Vector2f& b, float straightCoeff );
 void removeCollinear( vector2fList& cs, float epsilon );
+
+using V2f = Vector2f;
