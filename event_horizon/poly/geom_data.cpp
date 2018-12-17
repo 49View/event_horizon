@@ -324,6 +324,9 @@ void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& s
 	PolyStruct ps;
 
 	switch ( st ) {
+		case ShapeType::Cylinder:
+			ps = createGeomForCylinder( center, size.xy(), subDivs );
+			break;
 		case ShapeType::Sphere:
 			ps = createGeomForSphere( center, size.x(), subDivs );
 			break;

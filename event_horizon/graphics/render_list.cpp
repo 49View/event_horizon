@@ -306,7 +306,8 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
 
     mComposite = std::make_shared<CompositePBR>(rr, cameraRig->getMainCamera()->Name(), screenViewport, finalDestBlit);
     cameraRig->setFramebuffer( mComposite->getColorFB() );
-    bucketRanges.push_back( {CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd} );
+    bucketRanges.emplace_back( CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd );
+    bucketRanges.emplace_back( CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
 }
 

@@ -305,6 +305,49 @@ void Cube( Topology& mesh ) {
     mesh.addTriangle( 4, 0, 2 );
 }
 
+void Cylinder( Topology& mesh, int edges ) {
+    // Vertices
+
+    std::vector<float> angles;
+    angles.reserve( edges );
+    float inc = 360.0f / edges;
+    float angle = 0.0f;
+    for ( int t = 0; t < edges; t++ ) {
+        angles.emplace_back( angle );
+        angle+=inc;
+    }
+
+    for ( const auto a : angles ) {
+        auto a1 = degToRad(a);
+        mesh.vertices.emplace_back( V3f( cosf(a1), -0.5f, sinf(a1) ) );
+    }
+    for ( const auto a : angles ) {
+        auto a1 = degToRad(a);
+        mesh.vertices.emplace_back( V3f( cosf(a1), 0.5f, sinf(a1) ) );
+    }
+
+    // Faces
+
+    // bottom
+    for ( int t = 1; t < edges; t++ ) {
+        mesh.addTriangle( 0, t, t+1 );
+    }
+    // top
+    for ( int t = 1; t < edges; t++ ) {
+        mesh.addTriangle( edges+t, edges, edges+t+1 );
+    }
+
+    // sizes
+    auto st = static_cast<uint32_t >( angles.size() );
+    for ( uint32_t i = 0; i < st-1; i++ ) {
+        mesh.addQuad( i+1,    i+0,
+                      i+st+1, i+st+0 );
+    }
+    mesh.addQuad( 0, st-1,
+                  st, st*2-1 );
+}
+
+
 void addPillowSide( Topology& mesh, uint32_t subdivs, uint32_t q, uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
     mesh.addQuad( a, b, q+1, q );
     uint32_t i =0;
@@ -558,6 +601,15 @@ PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
     Cube( mesh );
 
     return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
+}
+
+PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const int subdivs ) {
+
+    Topology mesh;
+    int edges = subdivs * 8;
+    Cylinder( mesh, edges );
+
+    return createGeom( mesh, center, Vector3f{ size.x(), size.y(), size.x() }, GeomMapping::Cylindrical, 0 );
 }
 
 PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {

@@ -88,6 +88,7 @@ public:
 	ProfileMaker() = default;
 	explicit ProfileMaker( std::string name ) : name( std::move( name )) {}
 
+	ProfileMaker& o();
 	ProfileMaker& s( float _s );
 	ProfileMaker& sd( uint32_t _sd );
 	ProfileMaker& ay( float radius, int32_t subdivs = -1 );

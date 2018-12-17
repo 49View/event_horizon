@@ -193,7 +193,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
                 gliphSize.setX( JMATH::max( gliphSize.x(), m.verts[t].pos.x ));
                 gliphSize.setY( JMATH::max( gliphSize.y(), m.verts[t].pos.y ));
             }
-            for ( uint64_t t = 0; t < m.verts.size(); t++ ) {
+            for ( int64_t t = m.verts.size()-1; t >= 0 ; t-- ) {
                 Vector4f pos4{ m.verts[t].pos.x / gliphScaler, 1.0f-(m.verts[t].pos.y / gliphScaler), 0.0f, 1.0f };
                 pos4 = tm * pos4;
                 rect.expand( pos4.xy());

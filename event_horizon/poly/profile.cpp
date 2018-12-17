@@ -295,6 +295,11 @@ ProfileMaker& ProfileMaker::ay( float radius, int32_t _subdivs ) {
 	return *this;
 }
 
+ProfileMaker& ProfileMaker::o() {
+	add( V2f::ZERO );
+	return *this;
+}
+
 ProfileMaker& ProfileMaker::l( const V2f& _p1 ) {
 	add( _p1 + pointer() );
 	return *this;

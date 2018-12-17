@@ -103,7 +103,7 @@ Rect2f FontManager::optimalSizeForText( const Vector2f& size, const Utility::TTF
 }
 
 bool FontBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data,[[maybe_unused]]  const DependencyStatus _status ) {
-    FontManager& fm = static_cast<FontManager&>(_md);
+    auto& fm = static_cast<FontManager&>(_md);
     return fm.create( _data, Name() );
 }
 

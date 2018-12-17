@@ -329,18 +329,7 @@ public:
     VPBuilder& t( const std::string& _tex ) { matTexture = _tex; return *this; }
 	VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
 
-	void build() {
-		auto rmb = RenderMaterialBuilder{rr};
-		if ( material ) {
-			rmb.m(material);
-		} else {
-			rmb.p(matShader).c(matColor).m(matName).t(matTexture);
-		}
-		auto rmaterial = rmb.build();
-		ASSERT( !name.empty() );
-		std::shared_ptr<cpuVBIB> vbib = VertexProcessing::create_cpuVBIB( ps, rmaterial, name );
-		vpl->create( vbib, tag );
-	}
+	void build();
 
 private:
 	Renderer& rr;
@@ -355,3 +344,17 @@ private:
 	std::string matShader = S::SH;
 	std::string name;
 };
+
+template<typename V>
+void VPBuilder<V>::build() {
+	auto rmb = RenderMaterialBuilder{rr};
+	if ( material ) {
+		rmb.m(material);
+	} else {
+		rmb.p(matShader).c(matColor).m(matName).t(matTexture);
+	}
+	auto rmaterial = rmb.build();
+	ASSERT( !name.empty() );
+	std::shared_ptr<cpuVBIB> vbib = VertexProcessing::create_cpuVBIB( ps, rmaterial, name );
+	vpl->create( vbib, tag );
+}

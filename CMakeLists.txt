@@ -742,7 +742,7 @@ function(linker PROJECT_NAME WHICH_LIBS)
 
     # common libraries
     link_system_libraries_if("${APPLE}" "-llapack;-lz;-lbz2;-liconv;")
-    link_libraries_if("${APPLE}" "X11" "/usr/X11/lib/" "X11")
+#    link_libraries_if("${APPLE}" "X11" "/usr/X11/lib/" "X11")
 
     link_system_libraries_if("${WIN32}" "-lws2_32")
     link_system_libraries_if("${WIN32}" "-lwsock32")
@@ -951,7 +951,7 @@ macro(set_cpp_flags)
         set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
         set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
         add_definitions(-DOSX)
-        add_definitions(-DGL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED)
+        add_definitions(-DGL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED -DGL_SILENCE_DEPRECATION)
         add_definitions(-D__STDC_CONSTANT_MACROS)
         SET(CMAKE_CXX_FLAGS "-Wall -Werror")
     elseif (UNIX)

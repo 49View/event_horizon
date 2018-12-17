@@ -84,6 +84,16 @@ namespace WindowHandling {
     void flush() {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers( window );
+#ifdef __APPLE__
+        static bool macMoved = false;
+
+        if(!macMoved) {
+            int x, y;
+            glfwGetWindowPos(window, &x, &y);
+            glfwSetWindowPos(window, ++x, y);
+            macMoved = true;
+        }
+#endif
     }
 
     void pollEvents() {
@@ -94,7 +104,7 @@ namespace WindowHandling {
     }
 
     void enableVSync( const bool val ) {
-        glfwSwapInterval( val == true ? 1 : 0 );
+        glfwSwapInterval( val != 0 ? 1 : 0 );
     }
 
     bool isInputEnabled() {
