@@ -14,6 +14,7 @@
 #include <mutex>
 #include "graphic_constants.h"
 #include "vertex_processing.h"
+#include "skybox.h"
 
 class Framebuffer;
 class CommandBuffer;
@@ -171,7 +172,7 @@ private:
 
 class CommandBuffer {
 public:
-    CommandBuffer() {}
+    CommandBuffer() = default;
     CommandBuffer( CommandBufferFlags flags ) : flags( flags ) {}
     void push( const CommandBufferEntry& entry );
     void push( const CommandBufferCommand& entry );
@@ -179,15 +180,15 @@ public:
     void render( Renderer& rr );
     void sort();
     bool findEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _wp );
+    void                         postBlit();
 
     std::shared_ptr<Framebuffer> fb( CommandBufferFrameBufferType fbt );
     Rect2f                       destViewport();
     Rect2f                       sourceViewport();
     std::string                  renderIndex();
     int                          mipMapIndex();
-    void                         postBlit();
 
-    std::shared_ptr<RLTarget>& Target() {
+    std::shared_ptr<RLTarget>&   Target() {
         return mTarget;
     }
 private:
@@ -345,6 +346,9 @@ public:
 
     std::shared_ptr<Camera> getCamera();
     void addToCBCore( CommandBufferList& cb );
+    virtual void afterShaderSetup() {}
+    virtual void invalidateOnAdd() {}
+    virtual void changeTime( const V3f& solarTime ) {}
     virtual void addToCB( CommandBufferList& cb ) = 0;
     virtual void startCL( CommandBufferList& fbt ) = 0;
     virtual void endCL( CommandBufferList& fbt ) = 0;
@@ -454,18 +458,47 @@ protected:
 
 class RLTargetPBR : public RLTarget {
 public:
+    RLTargetPBR() = delete;
     RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& rr );
     ~RLTargetPBR() override = default;
     void addToCB( CommandBufferList& cb ) override;
-    virtual void blit(CommandBufferList& cbl) override;
+    void blit(CommandBufferList& cbl) override;
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void startCL( CommandBufferList& fbt ) override;
     void endCL( CommandBufferList& fbt ) override;
     void resize( const Rect2f& _r ) override;
+
+    bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
+    void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
+
+    std::shared_ptr<Framebuffer> getShadowMapFB();
+    void afterShaderSetup() override;
+
+    void changeTime( const V3f& _solarTime ) override;
+    void invalidateOnAdd() override;
+protected:
+    std::shared_ptr<Skybox> createSkybox();
+    void addProbes();
+    void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
+    void addShadowMaps();
+    void renderSkybox();
+    void cacheShadowMapSunPosition( const Vector3f& _smsp );
+    void invalidateShadowMaps();
+    void setShadowMapPosition( const Vector3f& _sp );
+
 protected:
     std::shared_ptr<CompositePBR> mComposite;
 
-//    static RLTarget skyboxProbe( std::shared_ptr<CameraRig> _cameraRig, const std::string& _face );
+    std::shared_ptr<Framebuffer> mShadowMapFB;
+    bool mbUseInfiniteHorizonForShadows = true;
+    Vector3f mCachedSunPosition = Vector3f::ZERO;
+    SkyBoxInitParams mSkyBoxParams;
+
+    std::shared_ptr<Skybox> mSkybox;
+    std::shared_ptr<ShadowMapManager> smm;
+    std::shared_ptr<CubeEnvironmentMap> mConvolution;
+    std::shared_ptr<PrefilterSpecularMap> mIBLPrefilterSpecular;
+    std::shared_ptr<PrefilterBRDF> mIBLPrefilterBRDF;
 };
 
 struct VSGUIDData {

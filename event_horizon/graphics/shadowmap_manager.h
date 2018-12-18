@@ -8,8 +8,7 @@ class RenderMaterial;
 
 class ShadowMapManager : public FrameInvalidator {
 public:
-	ShadowMapManager( Renderer& rr );
-	void init();
+	explicit ShadowMapManager( Renderer& rr );
 	void calculateShadowMapMatrices();
 	const Matrix4f& ShadowMapMVP() const;
 	Matrix4f& ShadowMapMVPBias( bool _useInfiniteHorizon = false );
@@ -29,9 +28,6 @@ private:
 	void updateDepthProjectionMatrix();
 	
 private:
-	// Shadows
-	Renderer& rr;
-
 	Matrix4f mBiasMatrix;
 	Matrix4f depthMVP;
 	Matrix4f depthBiasMVP;

@@ -124,11 +124,6 @@ public:
     void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 
-	std::unique_ptr<Skybox> createSkybox();
-
-	bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
-	void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
-
 	std::shared_ptr<Program> P(const std::string& _id);
 	std::shared_ptr<Texture> TD( const std::string& _id, const int tSlot = -1 );
 
@@ -140,12 +135,11 @@ public:
 	void setGlobalTextures();
 
 	std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
+    LightManager&   LM() { return lm; }
     FontManager&    FM() { return fm; }
 	TextureManager& TM() { return tm; }
 	CameraManager&  CM() { return cm; }
 	RenderImageDependencyMaker& RIDM() { return ridm; }
-
-	void setShadowMapPosition( const Vector3f& _sp );
 
 	std::shared_ptr<VPList> VPL( const int _bucket, const std::string& _key = "",
 								 std::shared_ptr<Matrix4f> m = nullptr, float alpha = 1.0f);
@@ -158,7 +152,6 @@ public:
 	std::mutex& CBTextureAddMutex() { return mCBTextureAddMutex; }
 	const std::vector<CommandBufferNewEntry>& VPToAddList() { return mVPToAdd; }
 
-	void renderSkybox();
 	void clearVPAddList();
 
 	inline CommandBufferList& CB_U() { return *mCommandBuffers.get(); }
@@ -176,30 +169,22 @@ public:
 
 	void MaterialCache( const MaterialType& mt, std::shared_ptr<RenderMaterial> _mat );
 	void MaterialMap( std::shared_ptr<RenderMaterial> _mat );
-
-	void addShadowMaps( std::shared_ptr<RLTarget> _target );
-	void addProbes();
-
+	void changeTime( const V3f& _solarTime );
 	void resetDefaultFB();
 
 	std::shared_ptr<Framebuffer> getDefaultFB() {
 		return mDefaultFB;
 	}
 
-	std::shared_ptr<Framebuffer> getShadowMapFB() {
-		return mShadowMapFB;
-	}
+	int UpdateCounter() const { return mUpdateCounter; }
+	void invalidateOnAdd();
 
 protected:
 	void postInit();
 
 	void clearCommandList();
-	void cacheShadowMapSunPosition( const Vector3f& _smsp );
-	void invalidateShadowMaps();
 
 	void renderCBList();
-
-	void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
 
 	void renderCommands( int eye );
 
@@ -214,14 +199,6 @@ protected:
 	RenderAnimationManager am;
 	RenderCameraManager rcm;
 
-	std::shared_ptr<Framebuffer> mShadowMapFB;
-	std::unique_ptr<ShadowMapManager> smm;
-	std::unique_ptr<Skybox> mSkybox;
-	SkyBoxInitParams mSkyBoxParams;
-
-    std::unique_ptr<CubeEnvironmentMap> mConvolution;
-    std::unique_ptr<PrefilterSpecularMap> mIBLPrefilterSpecular;
-    std::unique_ptr<PrefilterBRDF> mIBLPrefilterBRDF;
 	std::shared_ptr<Framebuffer> mDefaultFB;
 
 	std::unordered_map<MaterialType, std::shared_ptr<RenderMaterial>> materialCache;
@@ -230,7 +207,6 @@ protected:
 	std::shared_ptr<CommandScriptRendererManager> hcs;
 
 	int mUpdateCounter = 0;
-	Vector3f mCachedSunPosition;
 
 	constexpr static int sBufferMax = 2;
 	std::mutex mCommandBuffersMutex[sBufferMax];
@@ -243,7 +219,6 @@ protected:
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	std::map<int, CommandBufferListVector> mCommandLists;
 
-	bool mbUseInfiniteHorizonForShadows = true;
 	bool mbIsInitialized = false;
 
 	RenderStats mStats;
@@ -347,6 +322,7 @@ private:
 
 template<typename V>
 void VPBuilder<V>::build() {
+	rr.invalidateOnAdd();
 	auto rmb = RenderMaterialBuilder{rr};
 	if ( material ) {
 		rmb.m(material);

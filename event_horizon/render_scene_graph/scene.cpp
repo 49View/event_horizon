@@ -116,6 +116,7 @@ void Scene::activate() {
 	MaterialBuilder{"white"}.makeDefault(rsg.ML());
 	ImageBuilder{"white"}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
 
+	CQ().script("change time 14:00");
 	layout->activate( this );
 
 	if ( const auto& it = eventFunctions.find( PresenterEventFunctionKey::Activate); it != eventFunctions.end() ) {

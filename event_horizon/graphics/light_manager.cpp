@@ -75,7 +75,7 @@ void LightManager::toggleLightsOnOff() {
     }
 }
 
-void LightManager::setUniforms( const Vector3f& _cameraPos, const std::unique_ptr<ShadowMapManager>& smm ) {
+void LightManager::setUniforms( const Vector3f& _cameraPos, std::shared_ptr<ShadowMapManager> smm ) {
     std::sort( mPointLights.begin(), mPointLights.end(), [_cameraPos]( const auto& a, const auto& b ) -> bool {
         return distance( a.Pos(), _cameraPos ) < distance( b.Pos(), _cameraPos );
     } );

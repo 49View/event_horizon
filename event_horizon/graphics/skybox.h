@@ -14,7 +14,7 @@ class RLTarget;
 
 class RenderModule {
 public:
-	RenderModule( Renderer& rr ) : rr( rr ) {}
+	explicit RenderModule( Renderer& rr ) : rr( rr ) {}
 protected:
 	Renderer& rr;
 	std::shared_ptr<VPList> mVPList;
@@ -49,22 +49,28 @@ private:
 class CubeEnvironmentMap : public RenderModule {
 public:
 	using RenderModule::RenderModule;
-	void init();
+	explicit CubeEnvironmentMap( Renderer& rr );
 	void render( std::shared_ptr<Texture> cmt );
+private:
+	void init();
 };
 
 class PrefilterSpecularMap : public RenderModule {
 public:
 	using RenderModule::RenderModule;
-    void init();
+	explicit PrefilterSpecularMap( Renderer& rr );
     void render( std::shared_ptr<Texture> cmt, const float roughness );
+private:
+	void init();
 };
 
 class PrefilterBRDF : public RenderModule {
 public:
 	using RenderModule::RenderModule;
-	void init();
 	void render();
+	explicit PrefilterBRDF( Renderer& rr );
+private:
+	void init();
 private:
 	std::shared_ptr<Framebuffer> mBRDF;
 };

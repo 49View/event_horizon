@@ -4,21 +4,19 @@
 #include "core/suncalc/sun_builder.h"
 #include "render_material.hpp"
 
-ShadowMapManager::ShadowMapManager( Renderer& rr ) : rr( rr ) {}
-
-void ShadowMapManager::init() {
+ShadowMapManager::ShadowMapManager( Renderer& rr ) {
 	mBiasMatrix = Matrix4f(
-		0.5f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.5f, 0.0f,
-		0.5f, 0.5f, 0.5f, 1.0f
+			0.5f, 0.0f, 0.0f, 0.0f,
+			0.0f, 0.5f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.5f, 0.0f,
+			0.5f, 0.5f, 0.5f, 1.0f
 	);
 
 	float bs = 20.0f;
 
 	setFrusom( { -bs, bs}, { -bs, bs}, { 1.0f, bs} );
 
-    material = RenderMaterialBuilder{rr}.m("ShadowMapMaterial").p(S::SHADOW_MAP).build();
+	material = RenderMaterialBuilder{rr}.m("ShadowMapMaterial").p(S::SHADOW_MAP).build();
 }
 
 void ShadowMapManager::updateDepthProjectionMatrix() {

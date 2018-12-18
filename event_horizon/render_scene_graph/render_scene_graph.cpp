@@ -11,7 +11,6 @@
 RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq ) : SceneGraph(cq), rr( rr ), tl(rr.RIDM()) {
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
     ml.TL(&tl);
-    rr.cacheShadowMapSunPosition(sb.getSunPosition());
 }
 
 void RenderSceneGraph::addImpl( std::shared_ptr<HierGeom> _geom ) {
@@ -20,8 +19,7 @@ void RenderSceneGraph::addImpl( std::shared_ptr<HierGeom> _geom ) {
 }
 
 void RenderSceneGraph::changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {
-    rr.mSkybox->invalidate();
-    rr.setShadowMapPosition(sb.getSunPosition());
+    rr.changeTime( sb.getSunPosition() );
 }
 
 void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _params ) {
@@ -67,8 +65,6 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
 }
 
 void HierGeomRenderObserver::notified( std::shared_ptr<HierGeom> _source, const std::string& generator ) {
-    rr.invalidateShadowMaps();
-
     auto lNameHash = std::to_string(_source->Hash());
 
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, lNameHash, _source->getLocalHierTransform(), 1.0f );

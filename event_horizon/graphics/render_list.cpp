@@ -13,6 +13,7 @@
 #include "camera_manager.h"
 #include "framebuffer.h"
 #include "renderer.h"
+#include "shadowmap_manager.h"
 #include <stb/stb_image_write.h>
 
 void CommandBuffer::push( const CommandBufferEntry& entry ) {
@@ -259,9 +260,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::bloomTexture,
                     cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture());
-            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
-                    UniformNames::shadowMapTexture,
-                    rr.getShadowMapFB()->RenderToTexture());
+//            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+//                    UniformNames::shadowMapTexture,
+//                    rr.getShadowMapFB()->RenderToTexture());
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->render_im();
 
             cstack->postBlit();
@@ -309,6 +310,24 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     bucketRanges.emplace_back( CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd );
     bucketRanges.emplace_back( CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
+    mSkyBoxParams.mode = SkyBoxMode::CubeProcedural;
+    mShadowMapFB = FrameBufferBuilder{ rr, FBNames::shadowmap }.size(4096).GPUSlot(TSLOT_SHADOWMAP).depthOnly().build();
+
+    smm = std::make_unique<ShadowMapManager>(rr);
+
+    rr.createGrid( 1.0f, Color4f::ACQUA_T, Color4f::PASTEL_GRAYLIGHT, Vector2f( 10.0f ), 0.075f );
+
+    // Create a default skybox
+    mSkybox = createSkybox();
+
+    rr.CM().addCubeMapRig( rr, CameraCubeMapRigBuilder{FBNames::sceneprobe}.s( 512 ) );
+    rr.CM().addCubeMapRig( rr, CameraCubeMapRigBuilder{FBNames::convolution}.s(128) );
+    rr.CM().addCubeMapRig( rr, CameraCubeMapRigBuilder{FBNames::specular_prefilter}.s( 512 ).useMips() );
+
+    // Create PBR resources
+    mConvolution = std::make_unique<CubeEnvironmentMap>(rr);
+    mIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
+    mIBLPrefilterBRDF = std::make_unique<PrefilterBRDF>(rr);
 }
 
 std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBufferType fbt ) {
@@ -317,7 +336,7 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
         case CommandBufferFrameBufferType::sourceColor:
             return mComposite->getColorFB();
         case CommandBufferFrameBufferType::shadowMap:
-            return rr.getShadowMapFB();
+            return getShadowMapFB();
         case CommandBufferFrameBufferType::finalResolve:
             return mComposite->getColorFinalFB();
         case CommandBufferFrameBufferType::blurVertical:
@@ -335,6 +354,100 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
 
     return cameraRig->getFramebuffer();
 
+}
+
+std::shared_ptr<Skybox> RLTargetPBR::createSkybox() {
+    return std::make_unique<Skybox>(rr, mSkyBoxParams);
+}
+
+void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, [[maybe_unused]] const Vector3f& _at ) {
+
+    auto lSkybox = createSkybox();
+
+    for ( int t = 0; t < 6; t++ ) {
+        auto probe = std::make_shared<RLTargetProbe>( _probeCameraName, t, rr );
+        probe->startCL( rr.CB_U() );
+        lSkybox->render( 1.0f );
+    }
+    // convolution
+    for ( int t = 0; t < 6; t++ ) {
+        auto probe = std::make_shared<RLTargetProbe>( FBNames::convolution, t, rr );
+        probe->startCL( rr.CB_U() );
+        mConvolution->render( rr.TM().TD(_probeCameraName, TSLOT_CUBEMAP) );
+    }
+    // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
+    int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)512 ) ) );
+    for ( int m = 0; m < preFilterMipMaps; m++ ) {
+        for ( int t = 0; t < 6; t++ ) {
+            auto probe = std::make_shared<RLTargetProbe>( FBNames::specular_prefilter, t, rr, m );
+            probe->startCL( rr.CB_U() );
+            float roughness = (float)m / (float)(preFilterMipMaps - 1);
+            mIBLPrefilterSpecular->render( rr.TM().TD( _probeCameraName, TSLOT_CUBEMAP ), roughness );
+        }
+    }
+    mIBLPrefilterBRDF->render();
+}
+
+void RLTargetPBR::afterShaderSetup() {
+    if ( mSkybox ) mSkybox->invalidate();
+}
+
+void RLTargetPBR::addShadowMaps() {
+    if ( !smm ) return;
+
+    rr.LM().setUniforms( Vector3f::ZERO, smm );
+
+    if ( smm->needsRefresh(rr.UpdateCounter()) ) {
+        rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::shadowMapBufferBind } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::wireFrameModeFalse } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+        if ( UseInfiniteHorizonForShadows() && smm->SunPosition().y() < 0.0f ) {
+            rr.CB_U().pushCommand( { CommandBufferCommandName::shadowMapClearDepthBufferZero } );
+        } else {
+            rr.CB_U().pushCommand( { CommandBufferCommandName::shadowMapClearDepthBufferOne } );
+
+            for ( const auto& [k, vl] : rr.CL() ) {
+                if ( isKeyInRange(k) ) {
+                    rr.addToCommandBuffer( vl.mVList, smm->getMaterial() );
+                }
+            }
+        }
+        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
+    }
+}
+
+// This does NOT update and invalidate skybox and probes
+void RLTargetPBR::cacheShadowMapSunPosition( const Vector3f& _smsp ) {
+    mCachedSunPosition = _smsp;
+}
+
+// This DOES update and invalida skybox and probes
+void RLTargetPBR::setShadowMapPosition( const Vector3f& _sp ) {
+    cacheShadowMapSunPosition( _sp );
+    smm->SunPosition( _sp );
+    mSkybox->invalidate();
+}
+
+void RLTargetPBR::invalidateShadowMaps() {
+    if ( smm ) {
+        smm->invalidate();
+    }
+}
+
+void RLTargetPBR::renderSkybox() {
+    if (!mSkybox) return;
+    mSkybox->render( 1.0f );
+}
+
+void RLTargetPBR::addProbes() {
+    if ( !mSkybox ) return;
+
+    if ( mSkybox->needsRefresh(rr.UpdateCounter(), 2) ) {
+        addProbeToCB( FBNames::sceneprobe, Vector3f::ZERO );
+    }
 }
 
 void CompositePBR::bloom() {
@@ -506,8 +619,8 @@ void RLTarget::clearCB( [[maybe_unused]] CommandBufferList& cb ) {
 }
 
 void RLTargetPBR::startCL( CommandBufferList& cb ) {
-    rr.addShadowMaps( shared_from_this() );
-    rr.addProbes();
+    addShadowMaps();
+    addProbes();
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     cb.setCameraUniforms( cameraRig->getCamera() );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
@@ -542,7 +655,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     }
 
 
-    rr.renderSkybox();
+    renderSkybox();
 
     endCL( cb );
 }
@@ -550,6 +663,19 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 void RLTargetPBR::resize( const Rect2f& _r ) {
     mComposite->setup( _r );
     cameraRig->setFramebuffer( mComposite->getColorFB() );
+}
+
+std::shared_ptr<Framebuffer> RLTargetPBR::getShadowMapFB() {
+    return mShadowMapFB;
+}
+
+void RLTargetPBR::changeTime( const V3f& _solarTime ) {
+    mSkybox->invalidate();
+    setShadowMapPosition(_solarTime);
+}
+
+void RLTargetPBR::invalidateOnAdd() {
+    invalidateShadowMaps();
 }
 
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {

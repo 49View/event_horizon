@@ -307,4 +307,16 @@ std::shared_ptr<RLTarget> Renderer::getTarget( const std::string& _name ) {
     return nullptr;
 }
 
+void Renderer::changeTime( const V3f& _solar ) {
+    for ( auto& t : mTargets ) {
+        t->changeTime( _solar );
+    }
+}
+
+void Renderer::invalidateOnAdd() {
+    for ( auto& t : mTargets ) {
+        t->invalidateOnAdd();
+    }
+}
+
 
