@@ -169,6 +169,9 @@ public:
                     std::shared_ptr<RenderMaterial> _material,
                     const std::string& _vpName = "unnamed" );
 
+    static uint64_t totalCount() { return sCountInc; }
+    static std::string totalCountS() { return std::to_string(sCountInc); }
+
 public:
     static int sNumDrawCalls;
     static int sNumStateChanges;
@@ -199,7 +202,8 @@ private:
     bool dynamic = false;
     std::string mName;
 
-    static int64_t sMaterialHash;
+    static int64_t  sMaterialHash;
+    static uint64_t sCountInc;
 };
 
 template<class V>
@@ -224,5 +228,6 @@ VertexProcessing::create_cpuVBIB( std::shared_ptr<VertexStripIBVB<V>> vbib,
         ret->vElementAttrib[t].size = V::size( t );
     }
 
+    sCountInc++;
     return ret;
 }

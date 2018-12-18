@@ -330,7 +330,7 @@ void VPBuilder<V>::build() {
 		rmb.p(matShader).c(matColor).m(matName).t(matTexture);
 	}
 	auto rmaterial = rmb.build();
-	ASSERT( !name.empty() );
-	std::shared_ptr<cpuVBIB> vbib = VertexProcessing::create_cpuVBIB( ps, rmaterial, name );
+	auto sid = name.empty() ? VertexProcessing::totalCountS() : name;
+	std::shared_ptr<cpuVBIB> vbib = VertexProcessing::create_cpuVBIB( ps, rmaterial, sid );
 	vpl->create( vbib, tag );
 }

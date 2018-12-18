@@ -1,6 +1,7 @@
 #include "vertex_processing_opengl.h"
 
 unsigned int sLastHandle = 0;
+uint64_t VertexProcessing::sCountInc = 0;
 int64_t VertexProcessing::sMaterialHash;
 int VertexProcessing::sNumDrawCalls;
 int VertexProcessing::sNumStateChanges;

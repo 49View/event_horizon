@@ -43,7 +43,8 @@ public:
         defaultFontIfNecessary();
     }
 
-    UIShapeBuilder( UIShapeType _shapeType, const std::string& _ti ) : shapeType( _shapeType ) {
+    UIShapeBuilder( UIShapeType _shapeType, const std::string& _ti, float _fh = 0.0f ) : shapeType( _shapeType ) {
+        if ( _fh != 0.0f ) fh(_fh);
         ti(_ti);
         defaultFontIfNecessary();
     }
