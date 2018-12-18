@@ -329,11 +329,11 @@ void Cylinder( Topology& mesh, int edges ) {
     // Faces
 
     // bottom
-    for ( int t = 1; t < edges; t++ ) {
+    for ( int t = 1; t < edges-1; t++ ) {
         mesh.addTriangle( 0, t, t+1 );
     }
     // top
-    for ( int t = 1; t < edges; t++ ) {
+    for ( int t = 1; t < edges-1; t++ ) {
         mesh.addTriangle( edges+t, edges, edges+t+1 );
     }
 

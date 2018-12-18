@@ -546,8 +546,8 @@ public:
 	void setBottomLeft( const Vector2f& v ) { setBottom( v.y() ); setLeft( v.x() ); }
 	void setBottomRight( const Vector2f& v ) { mBottomRight = v; }
 
-	float width() const { return mBottomRight.x() - mTopLeft.x(); }
-	float height() const { return mBottomRight.y() - mTopLeft.y(); }
+	float width() const { return fabs(mBottomRight.x() - mTopLeft.x()); }
+	float height() const { return fabs(mBottomRight.y() - mTopLeft.y()); }
 	float perimeter() const { return width()*2.0f + height()*2.0f; }
 	float area() const { return width() * height(); }
 	float ratio() const { return width() / height(); }
