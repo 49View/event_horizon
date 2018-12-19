@@ -37,6 +37,26 @@ const getUserWithRolesByEmailProject = async (email,project) => {
     return dbUser;
 }
 
+const getUserWithRolesByGuestProject = async (project) => {
+    
+    let dbUser = null;
+    const query = [];
+    query.push({ $match: {"guest": true}});
+    query.push({ $lookup: {"from": "users_roles", "localField": "_id", "foreignField": "userId", "as": 'roles'}});
+    query.push({ $unwind: {"path": "$roles"}});
+    query.push({ $match: {"roles.project": { $regex: project, $options: "i"}}});  
+    query.push({ $group: {"_id": "$_id", "name": { "$first": "$name" }, "email": { "$first": "$email" }, "cipherPassword": { "$first": "$cipherPassword" }, "active": { "$first": "$active" }, "roles": { "$first": "$roles.roles" }}});
+
+    dbUser=await asyncModelOperations.aggregate(userModel,query);
+    if (dbUser.length>0) {
+        dbUser=dbUser[0];
+    } else {
+        dbUser=null;
+    }
+
+    return dbUser;
+}
+
 const getUserWithRolesByIdProject = async (id,project) => {
     
     let dbUser = null;
@@ -89,6 +109,15 @@ exports.getUserByEmailPasswordProject = async (email, project, password) => {
         if (hash!==cipherPasswordParts[1]) {
             dbUser=null;
         }
+    }
+    return dbUser;
+}
+
+exports.getUserByGuestProject = async (project) => {
+
+    let dbUser = await getUserWithRolesByGuestProject(project);
+    if (dbUser!==null) {
+        delete dbUser.cipherPassword;
     }
     return dbUser;
 }

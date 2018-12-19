@@ -7,6 +7,7 @@ const jsonWebToken = require('jsonwebtoken');
 const userController = require('./userController');
 const routeAuthorizationModel = require('../models/route_authorization');
 const clientCertificateModel = require('../models/client_certificate');
+const util = require('util');
 
 const jwtOptions = {
     expiresIn: '6h',
@@ -58,7 +59,7 @@ exports.InitializeAuthentication = () => {
 
     
     const cookieExtractor = function(req) {
-        //console.log("COOKIE EXTRACTOR");
+        console.log("COOKIE EXTRACTOR");
         var token = null;
         if (req && req.signedCookies && req.signedCookies['eh_jwt'])
         {
@@ -68,7 +69,7 @@ exports.InitializeAuthentication = () => {
     };
 
     const authHeaderExtractor = function(req) {
-        //console.log("AUTH HEADER EXTRACTOR");
+        console.log("AUTH HEADER EXTRACTOR");
         var token = null;
         if (req && req.headers && req.headers['authorization'] && req.headers['authorization'].startsWith('Bearer '))
         {
@@ -76,6 +77,39 @@ exports.InitializeAuthentication = () => {
         }
         return token;
     }
+
+    // const guestHeaderExtractorAsync = async (req) => {
+    //     console.log("GUEST HEADER EXTRACTOR");
+    //     let project = null;
+    //     let token = null;
+    //     if (req && req.headers && req.headers['x-eventhorizon-guest'])
+    //     {
+    //         project = req.headers['x-eventhorizon-guest'];
+    //         console.log("P:", project);
+    //         //Check if exists guest user for project
+    //         let dbGuestUser = await userController.getUserByGuestProject(project);
+    //         console.log("U:", dbGuestUser);
+    //         if (dbGuestUser!==null) {
+    //             //Create token for guest user on the fly
+    //             token=await createJwtToken(dbGuestUser._id, project);
+
+    //             console.log("T:",token);
+    //         }
+    //     }
+
+    //     //const token='eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1Ijp7ImkiOiI1YmY5MDQ0NTZhMjMyYTJmYzhmNjJjZGMiLCJwIjoiNDl2aWV3In0sImlhdCI6MTU0NTIxODYxNiwiZXhwIjoxNTQ1MjQwMjE2LCJpc3MiOiJhdGV2ZW50aG9yaXpvbi5jb20ifQ.RIDS4YURT9PNMNqywFU034yx7GGvm8pZgTfLCwo1YRv8jvsskHObaE9TgpPLDvCx';
+    //     console.log(token);
+    //     return token;
+    // }
+
+    // const guestHeaderExtractor = (req) => {
+    //     try {
+    //         const result  = guestHeaderExtractorAsync(req);
+    //         return result;
+    //     } catch (ex) {
+    //         return null;
+    //     }
+    // }
 
     //
     //Configure jwt strategy
@@ -117,17 +151,25 @@ exports.InitializeAuthentication = () => {
             done(null, user);
         }
     }));
+
 }
 
-exports.getToken = async (userId, project) => {
-
+const createJwtToken = async (userId, project) => {
     const payload = {
         u: {
             i: userId,
             p: project
         }
     }
+    //console.log(globalConfig.JWTSecret);
     const jwt = await jsonWebToken.sign(payload, globalConfig.JWTSecret, jwtOptions);
+
+    return jwt;
+}
+
+exports.getToken = async (userId, project) => {
+
+    const jwt = await createJwtToken(userId, project);
     const jwtPayload = await jsonWebToken.verify(jwt, globalConfig.JWTSecret, jwtOptions);
 
     return {
