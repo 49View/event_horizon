@@ -1,3 +1,11 @@
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
 #include <cstdlib>
 #include <cassert>
 #include <cstdio>
@@ -18,75 +26,169 @@
 #include <poly/profile.hpp>
 #include <graphics/ui/ui_shape_builder.h>
 
+template <typename T>
+class TimelineStream {
+public:
+    TimelineStream() = default;
+    explicit TimelineStream( std::shared_ptr<AnimType<T>> source) : source( std::move( source )) {}
 
-std::shared_ptr<Profile> makeValanceProfile( const std::string& _name, const std::vector<Vector2f>& vv2fs,
-                                             const std::vector<float>& vfs ) {
-    V2f size = vv2fs[0];
-    float bump = size.x()*0.8f;
-    float w1 = size.x()-bump;
-    float w2 = size.y()-bump*2.0f;
-
-    return ProfileMaker{_name}.sd(10).o().lx(w1).ay(bump).ly(w2).ay(bump).lx(-w1).make();
-}
-
-void drawBlinds( const Rect2f& _rect, Scene* _p ) {
-
-    // Blind constants
-    float bw = _rect.width();
-    float bh = _rect.height();
-    const V3f blindSize{ _rect.size(), 0.04f };
-
-    Vector2f slatSize{ bw*0.99f, 0.025f };
-    float slatThickness= 0.003f;
-    int numslats = static_cast<int>( bh / slatSize.y() );
-    V2f valanceSize{0.005f, 0.03f};
-    V3f valancePos{ 0.0f, bh-valanceSize.y(), (blindSize.z()*0.5f)+0.005f };
-    V3f slat3dSize{ slatSize.x(), slatThickness, slatSize.y() };
-    V3f slat3dSizeBig{ slatSize.x(), slatThickness*2.0f, slatSize.y() };
-    V3f wandSize{ 0.01f, bh*0.6f, 0.01f };
-    V3f wandPos{ bw * 0.45f, valancePos.y()-wandSize.y()*0.5f, valancePos.z() };
-    V3f headRailSize{ slat3dSize.x()*0.98f, valanceSize.y(), valanceSize.y() };
-    V3f headRailPos{ 0.0f, valancePos.y() + headRailSize.y()*0.5f, valancePos.z() - headRailSize.z()*0.5f };
-    V3f ladderStringSize{ 0.002f, bh, 0.002f };
-    float ladderStringGapLength = 0.4f;
-    int numLadderStrings = bw < 0.9f ? 2 : static_cast<int>((bw / ladderStringGapLength) + 1);
-    float ladderOff = ( bw - (numLadderStrings-1)*ladderStringGapLength ) * 0.5f;
-
-    GeomBuilder{ ProfileBuilder{}.cv2(valanceSize).func(makeValanceProfile),
-                 lineRL(V3f::X_AXIS, bw), V3f::UP_AXIS }.at(valancePos).build(_p->RSG());
-
-    GeomBuilder{ ShapeType::Cube }.s(headRailSize).at(headRailPos).build(_p->RSG());
-
-    float deltaInc = 1.0f / static_cast<float>(numslats);
-    float delta = 0.0f;
-    for ( int t = 1; t < numslats; t++ ) {
-        GeomBuilder{ ShapeType::Pillow }.s(slat3dSize).at(Vector3f::UP_AXIS*(delta*bh)).build(_p->RSG());
-        delta += deltaInc;
+    TimelineStream& k( float _timeAt, const T& _value ) {
+        keyframeTimes.emplace_back( _timeAt );
+        keyframeValues.emplace_back( _value );
+        return *this;
     }
-    GeomBuilder{ ShapeType::Pillow }.s(slat3dSizeBig).build(_p->RSG());
 
-    GeomBuilder{ ShapeType::Cylinder }.s(wandSize).at(wandPos).build(_p->RSG());
+    T valueAt( float _timeElapsed ) {
+        auto value = source->value;
+        uint64_t p1 = 0;
+        uint64_t p2 = 1;
+        switch ( velocityType ) {
+            case AnimVelocityType::Linear:
+                value = interpolate( keyframeValues[p1], keyframeValues[p2], 0.5f );
+//            case AnimVelocityType::Cosine:
+//                value = JMATH::lerp( asinf( JMATH::saturate( deltaTimeNotIncludingDelay / finalTime ) ) / M_PI_2, keyframes[0], keyframes[1] );
+//                break;
+//            case AnimVelocityType::Exp:
+//                value = JMATH::lerp( ( expf( JMATH::saturate( deltaTimeNotIncludingDelay / finalTime ) ) - 1.0f ) / ( M_E - 1.0f ), keyframes[0], keyframes[1] );
+//                break;
+//            case AnimVelocityType::Hermite:
+//			    value = traversePathHermite( cameraPath, deltaTimeNotIncludingDelay );
+//                break;
+            default:
+                break;
+        }
+        return value;
+    }
 
-    // LadderStrings
-    for ( int q = 0; q < numLadderStrings; q++ ) {
-        std::array<V3f,2> lpos{
-            V3f{ -bw * 0.5f + ( ladderOff + q * ladderStringGapLength ), bh * 0.5f, headRailPos.z() },
-            V3f{ -bw * 0.5f + ( ladderOff + q * ladderStringGapLength ), bh * 0.5f, -headRailPos.z() },
-        };
-        for ( size_t i = 0; i < lpos.size(); i++ ) {
-            GeomBuilder{ ShapeType::Cylinder }.s(ladderStringSize).at(lpos[i]).build(_p->RSG());
+    void update( float _timeElapsed ) {
+        source->value = valueAt(_timeElapsed);
+    }
+
+private:
+    std::shared_ptr<AnimType<T>> source;
+    std::vector<float> keyframeTimes;    // Times and values are strictly internal and _must_ be always CRUD-ed together
+    std::vector<T> keyframeValues;       // Times and values are strictly internal and _must_ be always CRUD-ed together
+    AnimVelocityType velocityType = AnimVelocityType::Linear;
+};
+
+//class TimelineStreamUpdater {
+//
+//    uint64_t Index() const { return currIndex; }
+//    void Index( uint64_t _i) { currIndex = _i; }
+//private:
+//    uint64_t currIndex = 0;
+//};
+
+template<typename V>
+using TimelineMap = std::unordered_map<uint64_t, TimelineStream<V>>;
+using TimelineIndex = uint64_t;
+
+class Timeline {
+    struct TimelineMapSpec {
+        TimelineMap<float>      tmapf;
+        TimelineMap<V2f>        tmapV2;
+        TimelineMap<V3f>        tmapV3;
+        TimelineMap<V4f>        tmapV4;
+        TimelineMap<Quaternion> tmapQ;
+
+        const static TimelineIndex   tiNorm  = 1000000000;
+
+        const static TimelineIndex   tiFloat = 0;
+        const static TimelineIndex   tiV2f   = tiFloat+tiNorm;
+        const static TimelineIndex   tiV3f   = tiV2f+tiNorm;
+        const static TimelineIndex   tiV4f   = tiV3f+tiNorm;
+        const static TimelineIndex   tiQuat  = tiV4f+tiNorm;
+
+        const static TimelineIndex   tiFloatIndex   = tiFloat/tiNorm;
+        const static TimelineIndex   tiV2fIndex     = tiV2f  /tiNorm;
+        const static TimelineIndex   tiV3fIndex     = tiV3f  /tiNorm;
+        const static TimelineIndex   tiV4fIndex     = tiV4f  /tiNorm;
+        const static TimelineIndex   tiQuatIndex    = tiQuat /tiNorm;
+
+        void update( TimelineIndex _k, const GameTime& _gt ) {
+            auto ki = _k / tiNorm;
+            switch (ki) {
+                case tiFloatIndex:
+                    tmapf[_k].update( _gt.mCurrTimeStamp );
+                    break;
+                case tiV2fIndex:
+                    tmapV2[_k].update( _gt.mCurrTimeStamp );
+                    break;
+                case tiV3fIndex:
+                    tmapV3[_k].update( _gt.mCurrTimeStamp );
+                    break;
+                case tiV4fIndex:
+                    tmapV4[_k].update( _gt.mCurrTimeStamp );
+                    break;
+                case tiQuatIndex:
+                    tmapQ[_k].update( _gt.mCurrTimeStamp );
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        static TimelineIndex add( const TimelineStream<float>& _stream ) {
+            TimelineIndex i = tiFloat + TimelineMapSpec::mkf++;
+            timelines.tmapf.insert( { i, _stream } );
+            return i;
+        }
+
+        static TimelineIndex add( const TimelineStream<V2f>& _stream ) {
+            TimelineIndex i = tiV2f + TimelineMapSpec::mkf++;
+            timelines.tmapV2.insert( { i, _stream } );
+            return i;
+        }
+        static TimelineIndex add( const TimelineStream<V3f>& _stream ) {
+            TimelineIndex i = tiV3f + TimelineMapSpec::mkf++;
+            timelines.tmapV3.insert( { i, _stream } );
+            return i;
+        }
+        static TimelineIndex add( const TimelineStream<V4f>& _stream ) {
+            TimelineIndex i = tiV4f + TimelineMapSpec::mkf++;
+            timelines.tmapV4.insert( { i, _stream } );
+            return i;
+        }
+        static TimelineIndex add( const TimelineStream<Quaternion>& _stream ) {
+            TimelineIndex i = tiQuat + TimelineMapSpec::mkf++;
+            timelines.tmapQ.insert( { i, _stream } );
+            return i;
+        }
+
+        static TimelineIndex mkf;
+    };
+public:
+    static void update( const GameTime& _gt ) {
+        for ( auto k : activeTimelines ) {
+            timelines.update( k, _gt );
         }
     }
-}
+
+    template <typename T>
+    static TimelineIndex add( const TimelineStream<T>& _stream ) {
+        auto ti = timelines.add( _stream );
+        activeTimelines.insert( ti );
+        return ti;
+    }
+
+private:
+    static std::unordered_set<TimelineIndex> activeTimelines;
+    static TimelineMapSpec timelines;
+};
+
+uint64_t Timeline::TimelineMapSpec::mkf = 0;
+Timeline::TimelineMapSpec Timeline::timelines;
+std::unordered_set<TimelineIndex> Timeline::activeTimelines;
 
 void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 
     _layout->addBox( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
 
     _p->postActivate( [](Scene* _p) {
-        _p->CM().getCamera( Name::Foxtrot)->goTo( Vector3f{0.0f, 1.0f, 3.0f}, 0.0f);
-        drawBlinds( Rect2f{1.0f}, _p );
-        UISB{ UIShapeType::Text3d, "Hego", 10.6f }.c(Color4f::AQUAMARINE).build(_p->RSG().RR());
+        auto c = _p->CM().getCamera( Name::Foxtrot);
+        c->goTo( Vector3f{0.0f, 1.0f, 3.0f}, 0.0f);
+        Timeline::add(TimelineStream<V3f>{c->PosAnim()}.k(0.0f, V3f::ZERO).k(2.0f, V3f::ONE*10.0f));
+        UISB{ UIShapeType::Text3d, "Hego", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RSG().RR());
     } );
 }
 

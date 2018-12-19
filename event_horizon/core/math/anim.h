@@ -6,8 +6,7 @@
 //  Copyright © 2016 JFDP Labs. All rights reserved.
 //
 
-#ifndef anim_h
-#define anim_h
+#pragma once
 
 #include <memory>
 #include <functional>
@@ -16,6 +15,8 @@
 #include "math_util.h"
 
 #include "vector4f.h"
+
+class Quaternion;
 
 enum class AnimLoopType {
 	Linear,
@@ -37,7 +38,7 @@ public:
 	static std::map<std::string, float> toggleDelayForInverseMap;
 
 	static void setToggleDelayForInverse( const std::string& name, float delay ) {
-		if ( toggleDelayForInverseMap.size() == 0 ) {
+		if ( toggleDelayForInverseMap.empty()) {
 			toggleDelayForInverseMap[name] = delay;
 			return;
 		}
@@ -460,4 +461,8 @@ void setToggle( std::shared_ptr<AnimType<T>> source_shared, const std::string& a
 	AnimUpdateTimeline::insert( source_shared );
 }
 
-#endif /* anim_h */
+using floata 		= std::shared_ptr<AnimType<float>>;
+using V2fa 			= std::shared_ptr<AnimType<Vector2f>>;
+using V3fa 			= std::shared_ptr<AnimType<Vector3f>>;
+using V4fa 			= std::shared_ptr<AnimType<Vector4f>>;
+using Quaterniona 	= std::shared_ptr<AnimType<Quaternion>>;

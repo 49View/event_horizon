@@ -178,9 +178,9 @@ public:
 		return mFov;
 	}
 
-	std::shared_ptr<AnimType<Vector3f>> PosAnim() { return mPos; }
-	std::shared_ptr<AnimType<Vector3f>> TargetAnim() { return mTarget; }
-	std::shared_ptr<AnimType<Vector3f>> QAngleAnim() { return qangle; }
+	V3fa PosAnim() { return mPos; }
+	V3fa TargetAnim() { return mTarget; }
+	V3fa QAngleAnim() { return qangle; }
 
 	void getViewporti( int* viewport ) const {
 		viewport[0] = static_cast<int>( ViewPort().topLeft()[0] );
@@ -250,9 +250,9 @@ private:
 	Matrix4f mMVP;
 	Matrix4f quatMatrix;
 
-	std::shared_ptr<AnimType<Vector3f>> mPos;
-	std::shared_ptr<AnimType<Vector3f>> mTarget;
-	std::shared_ptr<AnimType<Vector3f>> qangle; // angles of x,y,z axis to be fed into quaternion math
+	V3fa mPos;
+	V3fa mTarget;
+	V3fa qangle; // angles of x,y,z axis to be fed into quaternion math
 
 	JMATH::Rect2f mViewPort;
 

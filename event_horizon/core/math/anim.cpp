@@ -149,19 +149,19 @@ void AnimUpdateTimeline::update( float delta ) {
 	// Removes, for some reason I don't understand I cannot use remove_if, bugger
 	// ND Dado: here is the reason: http://stackoverflow.com/questions/11141651/why-cant-i-remove-a-string-from-a-stdset-with-stdremove-if
 
-	for ( std::set<std::shared_ptr<AnimType<float>>>::iterator it = timelineF.begin(); it != timelineF.end();) {
+	for ( auto it = timelineF.begin(); it != timelineF.end();) {
 		if ( ( *it )->NeedsToBeRemoved() ) { it = timelineF.erase( it ); } else { ++it; }
 	}
-	for ( std::set<std::shared_ptr<AnimType<Vector2f>>>::iterator it = timelineV2.begin(); it != timelineV2.end();) {
+	for ( auto it = timelineV2.begin(); it != timelineV2.end();) {
 		if ( ( *it )->NeedsToBeRemoved() ) { it = timelineV2.erase( it ); } else { ++it; }
 	}
-	for ( std::set<std::shared_ptr<AnimType<Vector3f>>>::iterator it = timelineV3.begin(); it != timelineV3.end();) {
+	for ( auto it = timelineV3.begin(); it != timelineV3.end();) {
 		if ( ( *it )->NeedsToBeRemoved() ) { it = timelineV3.erase( it ); } else { ++it; }
 	}
-	for ( std::set<std::shared_ptr<AnimType<Vector4f>>>::iterator it = timelineV4.begin(); it != timelineV4.end();) {
+	for ( auto it = timelineV4.begin(); it != timelineV4.end();) {
 		if ( ( *it )->NeedsToBeRemoved() ) { it = timelineV4.erase( it ); } else { ++it; }
 	}
-	for ( std::vector<std::shared_ptr<AnimTimeline>>::iterator it = timelines.begin(); it != timelines.end();) {
+	for ( auto it = timelines.begin(); it != timelines.end();) {
 		if ( ( *it )->NeedsToBeRemoved() ) { it = timelines.erase( it ); } else { ++it; }
 	}
 
