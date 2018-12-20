@@ -297,10 +297,10 @@ void MouseInput::rightArrowPressed( const float speed ) {
 	accumulateArrowTouches( speed );
 }
 
-void MouseInput::update( const GameTime& gt, UpdateSignals& _updateSignals ) {
-	mCurrTimeStamp = gt.mCurrTimeStamp;
-	mCurrTimeStep = gt.mCurrTimeStep;
-	mGestureTime += gt.mCurrTimeStep;
+void MouseInput::update( UpdateSignals& _updateSignals ) {
+	mCurrTimeStamp = GameTime::getCurrTimeStamp();
+	mCurrTimeStep = GameTime::getCurrTimeStep();
+	mGestureTime += GameTime::getCurrTimeStep();
 	accumulatedArrowVelocity *= 0.90f;
 	mGestureTapsFront = Vector2f::ZERO;
 	mGestureTapsBack = Vector2f::ZERO;

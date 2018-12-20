@@ -27,10 +27,13 @@
 #include <graphics/ui/ui_shape_builder.h>
 
 template <typename T>
+using AnimValue = std::shared_ptr<AnimType<T>>;
+
+template <typename T>
 class TimelineStream {
 public:
     TimelineStream() = default;
-    explicit TimelineStream( std::shared_ptr<AnimType<T>> source) : source( std::move( source )) {}
+    explicit TimelineStream( AnimValue<T> source) : source( std::move( source )) {}
 
     TimelineStream& k( float _timeAt, const T& _value ) {
         keyframeTimes.emplace_back( _timeAt );
@@ -38,13 +41,31 @@ public:
         return *this;
     }
 
+    bool getKeyFrameIndexAt( float _timeElapsed, uint64_t& _index, float& _delta ) {
+
+        if ( keyframeValues.size() < 2 ) return false;
+
+        for ( uint64_t t = 0; t < keyframeValues.size()-1; t++ ) {
+            if ( inRangeEx( _timeElapsed, keyframeTimes[t], keyframeTimes[t+1]) ) {
+                _delta = interpolateInverse( keyframeTimes[t], keyframeTimes[t+1], _timeElapsed );
+                _index = t;
+                return true;
+            }
+        }
+
+        return true;
+    }
+
     T valueAt( float _timeElapsed ) {
         auto value = source->value;
-        uint64_t p1 = 0;
-        uint64_t p2 = 1;
-        switch ( velocityType ) {
-            case AnimVelocityType::Linear:
-                value = interpolate( keyframeValues[p1], keyframeValues[p2], 0.5f );
+        uint64_t keyFrameIndex = 0;
+        float delta = 0.0f;
+        if ( getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta ) ) {
+            uint64_t p1 = keyFrameIndex;
+            uint64_t p2 = keyFrameIndex+1;
+            switch ( velocityType ) {
+                case AnimVelocityType::Linear:
+                    value = interpolate( keyframeValues[p1], keyframeValues[p2], delta );
 //            case AnimVelocityType::Cosine:
 //                value = JMATH::lerp( asinf( JMATH::saturate( deltaTimeNotIncludingDelay / finalTime ) ) / M_PI_2, keyframes[0], keyframes[1] );
 //                break;
@@ -54,8 +75,9 @@ public:
 //            case AnimVelocityType::Hermite:
 //			    value = traversePathHermite( cameraPath, deltaTimeNotIncludingDelay );
 //                break;
-            default:
-                break;
+                default:
+                    break;
+            }
         }
         return value;
     }
@@ -65,7 +87,7 @@ public:
     }
 
 private:
-    std::shared_ptr<AnimType<T>> source;
+    AnimValue<T> source;
     std::vector<float> keyframeTimes;    // Times and values are strictly internal and _must_ be always CRUD-ed together
     std::vector<T> keyframeValues;       // Times and values are strictly internal and _must_ be always CRUD-ed together
     AnimVelocityType velocityType = AnimVelocityType::Linear;
@@ -105,23 +127,23 @@ class Timeline {
         const static TimelineIndex   tiV4fIndex     = tiV4f  /tiNorm;
         const static TimelineIndex   tiQuatIndex    = tiQuat /tiNorm;
 
-        void update( TimelineIndex _k, const GameTime& _gt ) {
+        void update( TimelineIndex _k ) {
             auto ki = _k / tiNorm;
             switch (ki) {
                 case tiFloatIndex:
-                    tmapf[_k].update( _gt.mCurrTimeStamp );
+                    tmapf[_k].update( GameTime::getCurrTimeStamp() );
                     break;
                 case tiV2fIndex:
-                    tmapV2[_k].update( _gt.mCurrTimeStamp );
+                    tmapV2[_k].update( GameTime::getCurrTimeStamp() );
                     break;
                 case tiV3fIndex:
-                    tmapV3[_k].update( _gt.mCurrTimeStamp );
+                    tmapV3[_k].update( GameTime::getCurrTimeStamp() );
                     break;
                 case tiV4fIndex:
-                    tmapV4[_k].update( _gt.mCurrTimeStamp );
+                    tmapV4[_k].update( GameTime::getCurrTimeStamp() );
                     break;
                 case tiQuatIndex:
-                    tmapQ[_k].update( _gt.mCurrTimeStamp );
+                    tmapQ[_k].update( GameTime::getCurrTimeStamp() );
                     break;
                 default:
                     break;
@@ -158,9 +180,9 @@ class Timeline {
         static TimelineIndex mkf;
     };
 public:
-    static void update( const GameTime& _gt ) {
+    static void update() {
         for ( auto k : activeTimelines ) {
-            timelines.update( k, _gt );
+            timelines.update( k );
         }
     }
 
@@ -187,7 +209,11 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
     _p->postActivate( [](Scene* _p) {
         auto c = _p->CM().getCamera( Name::Foxtrot);
         c->goTo( Vector3f{0.0f, 1.0f, 3.0f}, 0.0f);
-        Timeline::add(TimelineStream<V3f>{c->PosAnim()}.k(0.0f, V3f::ZERO).k(2.0f, V3f::ONE*10.0f));
+//        Timeline::add(TimelineStream<V3f>{c->PosAnim()}.k(0.0f, V3f::ZERO).k(2.0f, V3f::ONE*10.0f).k(3.0f, V3f::Y_AXIS*5.0f));
+
+//        for ( int t = 0; t < 43432; t++ ) {
+//            Timeline::update();
+//        }
         UISB{ UIShapeType::Text3d, "Hego", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RSG().RR());
     } );
 }

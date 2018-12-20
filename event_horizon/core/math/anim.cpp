@@ -1,3 +1,4 @@
+#include <event_horizon/core/game_time.h>
 #include "vector4f.h"
 #include "anim.h"
 
@@ -145,10 +146,10 @@ void AnimUpdateTimeline::toggle( const std::string& name ) {
 	}
 }
 
-void AnimUpdateTimeline::update( float delta ) {
+void AnimUpdateTimeline::update() {
 	// Removes, for some reason I don't understand I cannot use remove_if, bugger
 	// ND Dado: here is the reason: http://stackoverflow.com/questions/11141651/why-cant-i-remove-a-string-from-a-stdset-with-stdremove-if
-
+	float delta = GameTime::getCurrTimeStep();
 	for ( auto it = timelineF.begin(); it != timelineF.end();) {
 		if ( ( *it )->NeedsToBeRemoved() ) { it = timelineF.erase( it ); } else { ++it; }
 	}

@@ -126,7 +126,7 @@ void Renderer::setGlobalTextures() {
     }
 }
 
-void Renderer::directRenderLoop( const GameTime& gt ) {
+void Renderer::directRenderLoop() {
 
     if ( !mbIsInitialized ) return;
 
@@ -143,7 +143,7 @@ void Renderer::directRenderLoop( const GameTime& gt ) {
     CB_U().end();
 
 //    VRM.preRender();
-    am.setTiming( gt );
+    am.setTiming();
     lm.setUniforms_r();
     am.setUniforms_r();
 
@@ -280,10 +280,9 @@ void Renderer::clearTargets() {
     }
 }
 
-void RenderAnimationManager::setTiming( const GameTime& _gt ) {
-    gt = _gt;
-    mAnimUniforms->setUBOData( UniformNames::deltaAnimTime, Vector4f{gt.mCurrTimeStep, gt.mCurrTimeStamp,
-                                                                      gt.mLastTimeStamp, 0.0f } );
+void RenderAnimationManager::setTiming() {
+    mAnimUniforms->setUBOData( UniformNames::deltaAnimTime, Vector4f{GameTime::getCurrTimeStep(), GameTime::getCurrTimeStamp(),
+                                                                     GameTime::getLastTimeStamp(), 0.0f } );
 }
 
 void RenderAnimationManager::setUniforms_r() {

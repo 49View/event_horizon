@@ -75,11 +75,10 @@ class RenderAnimationManager {
 public:
     void init();
 	void generateUBO( const ShaderManager& sm );
-    void setTiming( const GameTime& _gt );
+    void setTiming();
     void setUniforms_r();
 private:
     std::unique_ptr<ProgramUniformSet> mAnimUniforms;
-    GameTime gt;
 };
 
 class RenderCameraManager {
@@ -119,7 +118,7 @@ public:
 	std::shared_ptr<RLTarget> getTarget( const std::string& _name );
 
 	void clearTargets();
-	void directRenderLoop( const GameTime& gt );
+	void directRenderLoop();
 
     void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );

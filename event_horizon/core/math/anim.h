@@ -138,7 +138,7 @@ private:
 class AnimUpdateTimeline {
 public:
 	static void toggle( const std::string& name );
-	static void update( float delta );
+	static void update();
 	static bool isAnythingRunningFromTimeline();
 	static void removeAnim( const std::string& name );
 	static void startTimeline( std::shared_ptr<AnimTimeline> tl );

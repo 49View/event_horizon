@@ -80,7 +80,7 @@ public: // these are globals data accessed from low level functions on inputs et
 	void leftArrowPressed( const float speed = 1.0f );
 	void rightArrowPressed( const float speed = 1.0f );
 
-	void update( const GameTime& gt, UpdateSignals& _updateSignals );
+	void update( UpdateSignals& _updateSignals );
 	void enableMouseCursor( const bool val );
 
 	Vector2f getCurrPos() const;

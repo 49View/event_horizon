@@ -58,14 +58,14 @@ void RunLoopGraphics::singleThreadLoop() {
 	WH::imguiUpdateStart();
 	pm->enableInputs(WH::isInputEnabled());
 	pm->render();
-	rr.directRenderLoop( update_gt );
+	rr.directRenderLoop();
 	WH::imguiUpdateEnd();
 	WH::flush();
 //	}
 
 	// Timers
-	AnimUpdateTimeline::update( update_gt.mCurrTimeStep );
-	updateTime(update_gt);
+	AnimUpdateTimeline::update();
+	updateTime();
 
 	nRenders++;
 }
@@ -77,8 +77,8 @@ void RunLoopGraphics::elaborateAllSignals() {
 	cq.execute();
 	WH::pollEvents();
 	WH::imguiUpdate();
-	mi.update( update_gt, mUpdateSignals );
-	pm->update( update_gt );
+	mi.update( mUpdateSignals );
+	pm->update( );
 }
 
 void RunLoopGraphics::runSingleThread() {

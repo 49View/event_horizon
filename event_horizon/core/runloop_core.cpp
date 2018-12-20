@@ -16,20 +16,19 @@
 #include "command.hpp"
 #include "game_time.h"
 
-void updateTime( GameTime& gt ) {
+void RunLoop::updateTime() {
 	// Calculate time step, make sure it's never too big
-	std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - gt.mStartTimeStamp;
-	gt.mCurrTimeStamp = static_cast<float>( elapsed_seconds.count()) - gt.mPausedTimeStep;
-	gt.mCurrTimeStep = ( gt.mCurrTimeStamp - gt.mLastTimeStamp );
-	//	if ( gt.mCurrTimeStep > 0.05 ) gt.mCurrTimeStep = 0.0333f;
+	std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - GameTime::getStartTimeStamp();
+	GameTime::setCurrTimeStamp( static_cast<float>( elapsed_seconds.count()) - GameTime::getPausedTimeStep() );
+	GameTime::setCurrTimeStep( GameTime::getCurrTimeStamp() - GameTime::getLastTimeStamp() );
 
-	gt.mLastTimeStamp = gt.mCurrTimeStamp;
-	gt.mPausedTimeStep = 0.0f;
+	GameTime::setLastTimeStamp(GameTime::getCurrTimeStamp());
+	GameTime::setPausedTimeStep(0.0f);
 }
 
 template<>
 void mainLoop<CommandConsole>( [[maybe_unused]] uint64_t _flags, [[maybe_unused]] RunLoopThreading rt ) {
-    RunLoop rl = boost::di::make_injector(boost::di::bind<CommandQueue>().in(boost::di::singleton)).create<RunLoop>();
+	auto rl = boost::di::make_injector(boost::di::bind<CommandQueue>().in(boost::di::singleton)).create<RunLoop>();
     rl.runConsolePrompt();
 }
 
