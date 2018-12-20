@@ -11,6 +11,7 @@
 #include "core/app_globals.h"
 #include "core/math/plane3f.h"
 #include "core/math/quaternion.h"
+#include "core/math/anim.h"
 
 const float Camera::UI_ZOOM_SCALER = 10.0f;
 
@@ -475,7 +476,7 @@ void Camera::lookAt( const Vector3f& posAt ) {
 
 void Camera::lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay ) {
 	if ( !mbEnableInputs ) return;
-	animateTo( qangle, angleAt, _time, _delay );
+	qangle->set(angleAt);
 }
 
 void Camera::lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& up ) {
@@ -526,32 +527,39 @@ Vector3f Camera::centerScreenOnWithinArea( Vector2f area, const Rect2f& targetAr
 }
 
 void Camera::goTo( const std::string& toggleName, const Vector3f& pos, float time, float delay, std::function<void()> callbackFunction ) {
-	if ( callbackFunction == nullptr )
-		setToggle( mPos, toggleName, mPos->value, pos, time, delay, nullptr );
-	else
-		setToggle( mPos, toggleName, mPos->value, pos, time, delay, std::bind( callbackFunction ) );
+	mPos->set( pos );
+//	if ( callbackFunction == nullptr )
+//		setToggle( mPos, toggleName, mPos->value, pos, time, delay, nullptr );
+//	else
+//		setToggle( mPos, toggleName, mPos->value, pos, time, delay, std::bind( callbackFunction ) );
 }
 
 void Camera::goTo( const Vector2f& pos, float time, float delay, std::function<void()> callbackFunction ) {
-	if ( callbackFunction == nullptr )
-		animateTo( mPos, { pos, mPos->value.z()}, time, delay, nullptr, nullptr, nullptr );
-	else
-		animateTo( mPos, { pos, mPos->value.z()}, time, delay, std::bind( callbackFunction ), nullptr, nullptr );
+	mPos->set( pos );
+//
+//	if ( callbackFunction == nullptr )
+//		animateTo( mPos, { pos, mPos->value.z()}, time, delay, nullptr, nullptr, nullptr );
+//	else
+//		animateTo( mPos, { pos, mPos->value.z()}, time, delay, std::bind( callbackFunction ), nullptr, nullptr );
 }
 
 void Camera::goTo( const Vector3f& pos, float time, float delay, std::function<void()> callbackFunction ) {
-	if ( callbackFunction == nullptr )
-		animateTo( mPos, pos, time, delay, nullptr, nullptr, nullptr );
-	else
-		animateTo( mPos, pos, time, delay, std::bind( callbackFunction ), nullptr, nullptr );
+	mPos->set( pos );
+//	if ( callbackFunction == nullptr )
+//		animateTo( mPos, pos, time, delay, nullptr, nullptr, nullptr );
+//	else
+//		animateTo( mPos, pos, time, delay, std::bind( callbackFunction ), nullptr, nullptr );
 }
 
 void Camera::goTo( const Vector3f& pos, const Vector3f& angles, float time, float delay, std::function<void()> callbackFunction ) {
-	animateTo( mPos, pos, time );
-	if ( callbackFunction == nullptr )
-		animateTo( qangle, angles, time, delay, nullptr, nullptr, nullptr );
-	else
-		animateTo( qangle, angles, time, delay, std::bind( callbackFunction ), nullptr, nullptr );
+	mPos->set( pos );
+	qangle->set(angles);
+
+//	animateTo( mPos, pos, time );
+//	if ( callbackFunction == nullptr )
+//		animateTo( qangle, angles, time, delay, nullptr, nullptr, nullptr );
+//	else
+//		animateTo( qangle, angles, time, delay, std::bind( callbackFunction ), nullptr, nullptr );
 }
 
 Matrix4f& Camera::MVP( const Matrix4f& model, CameraProjectionType cpType ) {
@@ -713,3 +721,35 @@ Vector2f Camera::mousePickRayOrtho( const Vector2f& _pos ) {
 	auto vf = ( vc * v2p ) - ( v2p*0.5f ) + p.xy();
 	return vf;
 }
+
+float Camera::FoV() const {
+	return mFov->value;
+}
+
+floata Camera::FoVAnim() {
+	return mFov;
+}
+
+Vector3f Camera::getPosition() const {
+	return mPos->value;
+}
+
+Vector3f Camera::getPositionInv() const {
+	return -mPos->value;
+}
+
+Vector3f Camera::getPositionRH() const {
+	Vector3f lPos = mPos->value.xzy();
+	lPos.invZ();
+	return lPos;
+}
+
+void Camera::setQuatAngles( const Vector3f& a ) { if ( !mbEnableInputs ) return; qangle->value = a; }
+
+Vector3f Camera::quatAngle() const { return qangle->value; }
+
+V3fa Camera::PosAnim() { return mPos; }
+
+V3fa Camera::TargetAnim() { return mTarget; }
+
+V3fa Camera::QAngleAnim() { return qangle; }

@@ -46,17 +46,17 @@ void LightManager::removeAllPointLights() {
 }
 
 void LightManager::switchLightsOn( float animTime ) {
-    for ( auto& pl : mPointLights ) {
-        animateTo( pl.IntensityAnim(), 1.0f, animTime );
-    }
-    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
+//    for ( auto& pl : mPointLights ) {
+//        animateTo( pl.IntensityAnim(), 1.0f, animTime );
+//    }
+//    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
 }
 
 void LightManager::switchLightsOff( float animTime ) {
-    for ( auto& pl : mPointLights ) {
-        animateTo( pl.IntensityAnim(), 0.0f, animTime );
-    }
-    animateTo( mDirectionalLightIntensity, 0.0f, animTime );
+//    for ( auto& pl : mPointLights ) {
+//        animateTo( pl.IntensityAnim(), 0.0f, animTime );
+//    }
+//    animateTo( mDirectionalLightIntensity, 0.0f, animTime );
 }
 
 void LightManager::setLightsIntensity( float _intensity ) {

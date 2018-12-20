@@ -11,6 +11,7 @@
 
 #include "core/configuration/app_options.h"
 #include "core/callback_dependency.h"
+#include "core/math/anim.h"
 
 #include "runloop_graphics.h"
 #include "scene.hpp"
@@ -64,7 +65,7 @@ void RunLoopGraphics::singleThreadLoop() {
 //	}
 
 	// Timers
-	AnimUpdateTimeline::update();
+	Timeline::update();
 	updateTime();
 
 	nRenders++;
