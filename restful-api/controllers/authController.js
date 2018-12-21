@@ -2,6 +2,7 @@ const passport = require('passport');
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const ClientCertificateStrategy = require('passport-client-cert').Strategy;
+const RequestStrategy = require('passport-request').Strategy;
 const globalConfig = require('../config_api.js')
 const jsonWebToken = require('jsonwebtoken');
 const userController = require('./userController');
@@ -21,6 +22,7 @@ exports.InitializeAuthentication = () => {
     //Configure client certificate strategy
     //
     passport.use(new ClientCertificateStrategy(async (clientCert, done) => {
+        console.log("CLIENT CERTIFICATE STRATEGY");
 
         const commonName = clientCert.subject.CN;
         let user = false;
@@ -78,39 +80,6 @@ exports.InitializeAuthentication = () => {
         return token;
     }
 
-    // const guestHeaderExtractorAsync = async (req) => {
-    //     console.log("GUEST HEADER EXTRACTOR");
-    //     let project = null;
-    //     let token = null;
-    //     if (req && req.headers && req.headers['x-eventhorizon-guest'])
-    //     {
-    //         project = req.headers['x-eventhorizon-guest'];
-    //         console.log("P:", project);
-    //         //Check if exists guest user for project
-    //         let dbGuestUser = await userController.getUserByGuestProject(project);
-    //         console.log("U:", dbGuestUser);
-    //         if (dbGuestUser!==null) {
-    //             //Create token for guest user on the fly
-    //             token=await createJwtToken(dbGuestUser._id, project);
-
-    //             console.log("T:",token);
-    //         }
-    //     }
-
-    //     //const token='eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJ1Ijp7ImkiOiI1YmY5MDQ0NTZhMjMyYTJmYzhmNjJjZGMiLCJwIjoiNDl2aWV3In0sImlhdCI6MTU0NTIxODYxNiwiZXhwIjoxNTQ1MjQwMjE2LCJpc3MiOiJhdGV2ZW50aG9yaXpvbi5jb20ifQ.RIDS4YURT9PNMNqywFU034yx7GGvm8pZgTfLCwo1YRv8jvsskHObaE9TgpPLDvCx';
-    //     console.log(token);
-    //     return token;
-    // }
-
-    // const guestHeaderExtractor = (req) => {
-    //     try {
-    //         const result  = guestHeaderExtractorAsync(req);
-    //         return result;
-    //     } catch (ex) {
-    //         return null;
-    //     }
-    // }
-
     //
     //Configure jwt strategy
     //
@@ -121,7 +90,9 @@ exports.InitializeAuthentication = () => {
         algorithm: "HS384"
     }
 
+
     passport.use(new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
+        console.log("JWT STRATEGY");
 
         //console.log("JWT PAYLOAD", jwtPayload);
         let error = null;
@@ -145,6 +116,41 @@ exports.InitializeAuthentication = () => {
             error = "Invalid user";
         }
 
+        if (error!==null) {
+            done(null, false, { message: error});
+        } else {
+            done(null, user);
+        }
+    }));
+
+    passport.use(new RequestStrategy(async (req,done) => {
+        console.log("REQUEST STRATEGY");
+
+        let user = false;
+        let error = null;
+        try {
+            let project = null;
+            if (req && req.headers && req.headers['x-eventhorizon-guest'])
+            {
+                project = req.headers['x-eventhorizon-guest'];
+                console.log("P:", project);
+                //Check if exists guest user for project
+                user = await userController.getUserByGuestProject(project);
+                console.log("U:", user);
+                if (user!==null) {
+                    user.roles=user.roles.map(v => v.toLowerCase());
+                    user.project=project.toLowerCase();
+                    user.expires=Math.floor(new Date().getTime()/1000)+3600;
+                } else {
+                    error = "Invalid user"
+                }
+            } else {
+                error = "Invalid user";
+            }
+        } catch (ex) {
+            console.log("Error in REQUEST STRATEGY", ex);
+            error = "Invalid user";
+        }    
         if (error!==null) {
             done(null, false, { message: error});
         } else {
@@ -183,7 +189,7 @@ exports.verifyToken = async (jwtToken) => {
     return await jsonWebToken.verify(jwtToken, globalConfig.JWTSecret, jwtOptions);
 }
 
-exports.authenticate = passport.authenticate(['client-cert','jwt'], {session:false});
+exports.authenticate = passport.authenticate(['client-cert','jwt','request'], {session:false});
 
 exports.authorize = async (req,res,next) => {
 
