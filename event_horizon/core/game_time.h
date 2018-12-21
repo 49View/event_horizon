@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <chrono>
+#include <string>
 
 class GameTime {
 public:
@@ -24,6 +25,10 @@ public:
 
     static float getCurrTimeStamp() {
         return currTimeStamp;
+    }
+
+    static std::string getCurrTimeStampString() {
+        return std::to_string(currTimeStamp);
     }
 
     static float getCurrTimeStep() {

@@ -2,10 +2,11 @@
 
 #include <core/game_time.h>
 
-uint64_t Timeline::TimelineMapSpec::mkf = 0;
+uint64_t Timeline::TimelineMapSpec::mkf = 1;
 
 Timeline::TimelineMapSpec Timeline::timelines;
 std::unordered_set<TimelineIndex> Timeline::activeTimelines;
+std::unordered_map<std::string, std::vector<TimelineIndex>> Timeline::timelineGroups;
 
 //std::map<std::string, float> AnimUtil::toggleDelayForInverseMap;
 //
@@ -329,4 +330,23 @@ void Timeline::TimelineMapSpec::update( TimelineIndex _k ) {
         default:
             break;
     }
+}
+
+bool Timeline::TimelineMapSpec::isActive( TimelineIndex _k ) const {
+    auto ki = _k / tiNorm;
+    switch (ki) {
+        case tiFloatIndex:
+            return tmapf.at(_k).isActive();
+        case tiV2fIndex:
+            return tmapV2.at(_k).isActive();
+        case tiV3fIndex:
+            return tmapV3.at(_k).isActive();
+        case tiV4fIndex:
+            return tmapV4.at(_k).isActive();
+        case tiQuatIndex:
+            return tmapQ.at(_k).isActive();
+        default:
+            break;
+    }
+    return false;
 }

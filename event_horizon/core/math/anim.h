@@ -36,6 +36,10 @@ enum class AnimVelocityType {
 	Hermite
 };
 
+static const std::string AnimDefaultGroupName = "default";
+
+using TimelineIndex = uint64_t;
+
 //class AnimUtil {
 //public:
 //	static std::map<std::string, float> toggleDelayForInverseMap;
@@ -484,7 +488,7 @@ public:
             }
         }
 
-        return true;
+        return false;
     }
 
     T valueAt( float _timeElapsed ) {
@@ -518,32 +522,36 @@ public:
         source->value = valueAt(_timeElapsed);
     }
 
+    TimelineIndex getTimelineIndex() const {
+        return timelineIndex;
+    }
+
+    void setTimelineIndex( TimelineIndex timelineIndex ) {
+        TimelineStream::timelineIndex = timelineIndex;
+    }
+
+    bool isActive() const { return mbActive; };
+
+    void add( const std::string& _groupName = AnimDefaultGroupName );
+
 private:
     AnimValue<T> source;
     std::vector<float> keyframeTimes;    // Times and values are strictly internal and _must_ be always CRUD-ed together
     std::vector<T> keyframeValues;       // Times and values are strictly internal and _must_ be always CRUD-ed together
     AnimVelocityType velocityType = AnimVelocityType::Linear;
     bool mbActive = true;
+    TimelineIndex timelineIndex = 0;
 };
-
-//class TimelineStreamUpdater {
-//
-//    uint64_t Index() const { return currIndex; }
-//    void Index( uint64_t _i) { currIndex = _i; }
-//private:
-//    uint64_t currIndex = 0;
-//};
 
 template<typename V>
 using TimelineMap = std::unordered_map<uint64_t, TimelineStream<V>>;
-using TimelineIndex = uint64_t;
 
 class Timeline {
     struct TimelineMapSpec {
         TimelineMap<float>      tmapf;
-        TimelineMap<Vector2f>        tmapV2;
-        TimelineMap<Vector3f>        tmapV3;
-        TimelineMap<Vector4f>        tmapV4;
+        TimelineMap<Vector2f>   tmapV2;
+        TimelineMap<Vector3f>   tmapV3;
+        TimelineMap<Vector4f>   tmapV4;
         TimelineMap<Quaternion> tmapQ;
 
         const static TimelineIndex   tiNorm  = 1000000000;
@@ -561,32 +569,33 @@ class Timeline {
         const static TimelineIndex   tiQuatIndex    = tiQuat /tiNorm;
 
         void update( TimelineIndex _k );
+        bool isActive( TimelineIndex _k ) const;
 
-        static TimelineIndex add( const TimelineStream<float>& _stream ) {
-            TimelineIndex i = tiFloat + TimelineMapSpec::mkf++;
-            timelines.tmapf.insert( { i, _stream } );
-            return i;
+        static TimelineIndex add( TimelineStream<float>& _stream ) {
+            _stream.setTimelineIndex( tiFloat + TimelineMapSpec::mkf++ );
+            timelines.tmapf.insert( { _stream.getTimelineIndex(), _stream } );
+            return _stream.getTimelineIndex();
         }
 
-        static TimelineIndex add( const TimelineStream<Vector2f>& _stream ) {
-            TimelineIndex i = tiV2f + TimelineMapSpec::mkf++;
-            timelines.tmapV2.insert( { i, _stream } );
-            return i;
+        static TimelineIndex add( TimelineStream<Vector2f>& _stream ) {
+            _stream.setTimelineIndex( tiV2f + TimelineMapSpec::mkf++ );
+            timelines.tmapV2.insert( { _stream.getTimelineIndex(), _stream } );
+            return _stream.getTimelineIndex();
         }
-        static TimelineIndex add( const TimelineStream<Vector3f>& _stream ) {
-            TimelineIndex i = tiV3f + TimelineMapSpec::mkf++;
-            timelines.tmapV3.insert( { i, _stream } );
-            return i;
+        static TimelineIndex add( TimelineStream<Vector3f>& _stream ) {
+            _stream.setTimelineIndex( tiV3f + TimelineMapSpec::mkf++ );
+            timelines.tmapV3.insert( { _stream.getTimelineIndex(), _stream } );
+            return _stream.getTimelineIndex();
         }
-        static TimelineIndex add( const TimelineStream<Vector4f>& _stream ) {
-            TimelineIndex i = tiV4f + TimelineMapSpec::mkf++;
-            timelines.tmapV4.insert( { i, _stream } );
-            return i;
+        static TimelineIndex add( TimelineStream<Vector4f>& _stream ) {
+            _stream.setTimelineIndex( tiV4f + TimelineMapSpec::mkf++ );
+            timelines.tmapV4.insert( { _stream.getTimelineIndex(), _stream } );
+            return _stream.getTimelineIndex();
         }
-        static TimelineIndex add( const TimelineStream<Quaternion>& _stream ) {
-            TimelineIndex i = tiQuat + TimelineMapSpec::mkf++;
-            timelines.tmapQ.insert( { i, _stream } );
-            return i;
+        static TimelineIndex add( TimelineStream<Quaternion>& _stream ) {
+            _stream.setTimelineIndex( tiQuat + TimelineMapSpec::mkf++ );
+            timelines.tmapQ.insert( { _stream.getTimelineIndex(), _stream } );
+            return _stream.getTimelineIndex();
         }
 
         static TimelineIndex mkf;
@@ -596,16 +605,47 @@ public:
         for ( auto k : activeTimelines ) {
             timelines.update( k );
         }
+       	for ( auto it = activeTimelines.begin(); it != activeTimelines.end();) {
+            if ( !timelines.isActive(*it) ) { it = activeTimelines.erase( it ); } else { ++it; }
+        }
     }
 
     template <typename T>
-    static TimelineIndex add( const TimelineStream<T>& _stream ) {
-        auto ti = timelines.add( _stream );
-        activeTimelines.insert( ti );
-        return ti;
+    static void play( TimelineStream<T>& _stream ) {
+        add( _stream );
+        activeTimelines.insert( _stream.getTimelineIndex() );
+    }
+
+    static void play( const std::string & _groupName ) {
+        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+            for ( const auto& gi : it->second ) {
+                activeTimelines.insert( gi );
+            }
+        }
+    }
+
+private:
+    template <typename T>
+    static TimelineIndex add( TimelineStream<T>& _stream, const std::string& _groupName = AnimDefaultGroupName ) {
+        timelines.add( _stream );
+        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+            it->second.emplace_back( _stream.getTimelineIndex() );
+        } else {
+            timelineGroups.insert( { _groupName, { _stream.getTimelineIndex() } } );
+        }
+        return _stream.getTimelineIndex();
     }
 
 private:
     static std::unordered_set<TimelineIndex> activeTimelines;
+    static std::unordered_map<std::string, std::vector<TimelineIndex>> timelineGroups;
     static TimelineMapSpec timelines;
+
+    template <typename U>
+    friend class TimelineStream;
 };
+
+template<typename T>
+void TimelineStream<T>::add( const std::string& _groupName ) {
+    Timeline::add( *this, _groupName );
+}

@@ -24,6 +24,8 @@
 #include <sys/stat.h>
 #endif
 
+#include <core/game_time.h>
+
 static bool gError = false;
 int64_t globalHash = 1;
 
@@ -49,7 +51,10 @@ void platformLogPrint( LogPriority priority, const char* /*tag*/, const char *fm
 	}
 
 	//TODO fo linux it works just as follow
-	std::cout << buffer << std::endl;
+	std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - GameTime::getStartTimeStamp();
+	auto ts = static_cast<float>(elapsed_seconds.count());
+
+	std::cout << ts << " " << buffer << std::endl;
 	if ( logCallback ) {
 		logCallback( buffer );
 	}
