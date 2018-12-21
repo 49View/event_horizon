@@ -133,10 +133,10 @@ exports.InitializeAuthentication = () => {
             if (req && req.headers && req.headers['x-eventhorizon-guest'])
             {
                 project = req.headers['x-eventhorizon-guest'];
-                console.log("P:", project);
+                //console.log("P:", project);
                 //Check if exists guest user for project
                 user = await userController.getUserByGuestProject(project);
-                console.log("U:", user);
+                //console.log("U:", user);
                 if (user!==null) {
                     user.roles=user.roles.map(v => v.toLowerCase());
                     user.project=project.toLowerCase();

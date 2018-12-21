@@ -24,8 +24,11 @@ router.post('/refreshToken', authController.authenticate, async (req, res, next)
         let error = false;
         let tokenInfo = null;
         try {
+            if (req.user.guest===true) {
+                throw new Error("Can't refresh guest user");
+            }
             tokenInfo = await authController.getToken(req.user._id, req.user.project);
-            tokenInfo.user = { "name": req.user.name, "email": req.user.email }
+            tokenInfo.user = { "name": req.user.name, "email": req.user.email, "guest": req.user.guest }
         } catch (ex) {
             console.log('Error refreshing token', ex);
             error = true;
@@ -63,7 +66,7 @@ router.post('/getToken', async (req, res, next) => {
             error=true;
         } else {
             tokenInfo = await authController.getToken(dbUser._id, project);
-            tokenInfo.user = { "name": dbUser.name, "email": dbUser.email }
+            tokenInfo.user = { "name": dbUser.name, "email": dbUser.email, "guest": dbUser.guest }
         }
     } catch (ex) {
         console.log('Error getting user by email, password and project', ex);
