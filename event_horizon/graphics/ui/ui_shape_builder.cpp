@@ -175,10 +175,10 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
 
     std::shared_ptr<PosTex3dStrip> fs = std::make_shared<PosTex3dStrip>( numTotalPolys, PRIMITIVE_TRIANGLES,
                                                                          VFVertexAllocation::PreAllocate );
-    for ( size_t i = 0; i < title.length(); i++ ) {
-        Utility::TTF::CodePoint cp( title[i] );
+    for ( char i : title ) {
+        Utility::TTF::CodePoint cp( static_cast<Utility::TTFCore::ulong>(i) );
         const Utility::TTF::Mesh& m = f.GetTriangulation( cp );
-        int32_t numPolysInGlyph = static_cast<int32_t>( m.verts.size());
+        auto numPolysInGlyph = static_cast<int32_t>( m.verts.size());
 
         // Don't draw an empty space
         if ( numPolysInGlyph > 0 ) {
@@ -189,22 +189,22 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
                     numPolysInGlyph = static_cast<int32_t>( m.verts.size());
             }
 
-            for ( uint64_t t = 0; t < m.verts.size(); t++ ) {
-                gliphSize.setX( JMATH::max( gliphSize.x(), m.verts[t].pos.x ));
-                gliphSize.setY( JMATH::max( gliphSize.y(), m.verts[t].pos.y ));
+            for ( auto vert : m.verts ) {
+                gliphSize.setX( JMATH::max( gliphSize.x(), vert.pos.x ));
+                gliphSize.setY( JMATH::max( gliphSize.y(), vert.pos.y ));
             }
-            for ( int64_t t = m.verts.size()-1; t >= 0 ; t-- ) {
+            for ( auto t = static_cast<int64_t>(m.verts.size() - 1); t >= 0 ; t-- ) {
                 Vector4f pos4{ m.verts[t].pos.x / gliphScaler, 1.0f-(m.verts[t].pos.y / gliphScaler), 0.0f, 1.0f };
                 pos4 = tm * pos4;
                 rect.expand( pos4.xy());
-                //				pos4.setY( pos4.y() - height );
+//                pos4.setY( pos4.y() );
                 fs->addVertex( XZY::C(pos4.xyz() + orig), Vector2f{ m.verts[t].texCoord, m.verts[t].coef } );
             }
 
             numPolysRendered += numPolysInGlyph;
         }
 
-        Utility::TTFCore::vec2f kerning = f.GetKerning( Utility::TTF::CodePoint( title[i] ), cp );
+        Utility::TTFCore::vec2f kerning = f.GetKerning( Utility::TTF::CodePoint( i ), cp );
         Vector2f nextCharPos = Vector2f( kerning.x / gliphScaler, kerning.y / gliphScaler ) * ( fontHeight );
         tm.translate( nextCharPos );
     }

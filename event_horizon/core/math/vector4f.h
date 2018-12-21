@@ -460,4 +460,5 @@ inline Vector4f color4fAlpha( const float alpha ) {
 	return Vector4f( 1.0f, 1.0f, 1.0f, alpha );
 }
 
-typedef Vector4f Color4f;
+using Color4f = Vector4f;
+using V4f = Vector4f;

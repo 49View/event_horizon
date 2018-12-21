@@ -58,7 +58,7 @@ int TextInput::checkWASDPressed() {
 	return currKeyPressed;
 }
 
-void TextInput::update_render_thread( [[maybe_unused]] const GameTime& gt ) {
+void TextInput::update_render_thread() {
 	if ( GIsEnteringText ) {
 		if ( checkKeyToggleOn( GLFW_KEY_BACKSPACE, true ) ) {
 			update_pop_back();

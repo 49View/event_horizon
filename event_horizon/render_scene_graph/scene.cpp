@@ -82,7 +82,7 @@ void Scene::updateCallbacks() {
 
 }
 
-void Scene::update( GameTime& gt ) {
+void Scene::update() {
 
 	if ( !activated() ) {
 		activate();
@@ -90,8 +90,6 @@ void Scene::update( GameTime& gt ) {
 	}
 
 	if ( !mbActivated ) return;
-
-	gameTime = &gt;
 
 	inputPollUpdate();
 	updateCallbacks();
@@ -140,21 +138,22 @@ void Scene::inputPollUpdate() {
 	if ( ti.checkKeyToggleOn( GMK_1 ) ) cvtTggles |= ViewportToggles::DrawWireframe;
     if ( ti.checkKeyToggleOn( GMK_G ) ) cvtTggles |= ViewportToggles::DrawGrid;
 
-	static float camVelocity = 0.0003f;
+	static float camVelocity = 1.000f;
 	static float accumulatedVelocity = .0003f;
 	float moveForward = 0.0f;
 	float strafe = 0.0f;
 	float moveUp = 0.0f;
 
 	if ( ti.checkWASDPressed() != -1 ) {
-		camVelocity = 0.003f * gameTime->mCurrTimeStep + accumulatedVelocity;
+		float vel = 0.003f*GameTime::getCurrTimeStep();
+		camVelocity = vel + accumulatedVelocity;
 		if ( ti.checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
 		if ( ti.checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
 		if ( ti.checkKeyPressed( GMK_A ) ) strafe = camVelocity;
 		if ( ti.checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
 		if ( ti.checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
 		if ( ti.checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
-		accumulatedVelocity += gameTime->mCurrTimeStep*0.025f;
+		accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
 		if ( camVelocity > 3.50f ) camVelocity = 3.50f;
 	} else {
 		accumulatedVelocity = 0.0003f;

@@ -1,6 +1,5 @@
 #pragma  once
 
-#include "core/math/anim.h"
 #include "core/math/vector3f.h"
 
 class ProgramUniformSet;

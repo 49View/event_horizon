@@ -49,7 +49,7 @@ public:
 	virtual void onDoubleTapImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
 
 	void inputPollUpdate();
-	void update( GameTime& gt );
+	void update();
 	void render();
 	void enableInputs( bool _bEnabled );
 	void addEventFunction( const std::string& _key, std::function<void(Scene*)> _f );
@@ -96,7 +96,6 @@ protected:
 	void reloadShaders(const rapidjson::Document& _data);
 
 protected:
-	GameTime* gameTime;
 	std::shared_ptr<SceneLayout> layout;
 	CameraManager& cm;
 	Renderer& rr;

@@ -8,12 +8,8 @@
 
 #include "game_time.h"
 
-GameTime::GameTime() {
-	mCurrTimeStep = 0.0f;
-	mLastTimeStamp = 0.0f;
-	mCurrTimeStamp = 0.0f;
-	mCurrTimeStep = 0.0f;
-	mLastTimeStampTouchDown = 0.0f;
-	mPausedTimeStep = 0.0f;
-	mStartTimeStamp = std::chrono::system_clock::now();
-}
+std::chrono::time_point<std::chrono::system_clock> GameTime::startTimeStamp = std::chrono::system_clock::now();
+float GameTime::lastTimeStamp = 0.0f;
+float GameTime::currTimeStamp = 0.0f;
+float GameTime::currTimeStep = 0.0f;
+float GameTime::pausedTimeStep = 0.0f;

@@ -168,7 +168,7 @@ public: // these are globals data accessed from low level functions on inputs et
 	bool checkKeyToggleOn( int keyCode, bool overrideTextInput = false );
 	bool checkKeyPressed( int keyCode );
 	int  checkWASDPressed();
-	void update_render_thread( const GameTime& gt );
+	void update_render_thread();
 	void update_update_thread();
 
 	bool HasToggledEnter() const { return mHasToggledEnter; }

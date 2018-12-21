@@ -14,15 +14,50 @@
 
 class GameTime {
 public:
-	GameTime();
+    static const std::chrono::time_point<std::chrono::system_clock>& getStartTimeStamp() {
+        return startTimeStamp;
+    }
 
-	std::chrono::time_point<std::chrono::system_clock> mStartTimeStamp;
-	std::chrono::time_point<std::chrono::system_clock> mPausedTimeStamp;
-	float mLastTimeStamp;
-	float mCurrTimeStamp;
-	float mCurrTimeStep;
-	float mLastTimeStampTouchDown;
-	float mDemoTimeStamp;
-	float mPausedTimeStep;
+    static float getLastTimeStamp() {
+        return lastTimeStamp;
+    }
+
+    static float getCurrTimeStamp() {
+        return currTimeStamp;
+    }
+
+    static float getCurrTimeStep() {
+        return currTimeStep;
+    }
+
+    static float getPausedTimeStep() {
+        return pausedTimeStep;
+    }
+
+private:
+    static void setLastTimeStamp( float lastTimeStamp ) {
+        GameTime::lastTimeStamp = lastTimeStamp;
+    }
+
+    static void setCurrTimeStamp( float currTimeStamp ) {
+        GameTime::currTimeStamp = currTimeStamp;
+    }
+
+    static void setCurrTimeStep( float currTimeStep ) {
+        GameTime::currTimeStep = currTimeStep;
+    }
+
+    static void setPausedTimeStep( float pausedTimeStep ) {
+        GameTime::pausedTimeStep = pausedTimeStep;
+    }
+
+private:
+    static std::chrono::time_point<std::chrono::system_clock> startTimeStamp;
+	static float lastTimeStamp;
+	static float currTimeStamp;
+    static float currTimeStep;
+	static float pausedTimeStep;
+
+	friend class RunLoop;
 };
 

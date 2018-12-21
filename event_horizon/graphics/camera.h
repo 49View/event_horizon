@@ -13,8 +13,8 @@
 #include "core/math/rect2f.h"
 #include "core/math/plane3f.h"
 #include "core/math/aabb.h"
-#include "core/math/anim.h"
 #include "core/math/quaternion.h"
+#include <core/math/math_util.h>
 #include "graphic_constants.h"
 
 void MultiplyMatrices4by4OpenGL_FLOAT( float *result, float *matrix1, float *matrix2 );
@@ -63,8 +63,8 @@ public:
 	void setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar );
 	void setProjectionMatrix( const Matrix4f & val );
 
-	void setQuatAngles( const Vector3f&a ) { if ( !mbEnableInputs ) return; qangle->value = a; }
-	Vector3f quatAngle() const { return qangle->value; }
+	void setQuatAngles( const Vector3f&a );
+	Vector3f quatAngle() const;
 	Vector3f centerScreenOn( const Vector2f& area, const float bMiddleIsCenter = true, const float slack = 0.0f );
 	Vector3f centerScreenOnWithinArea( Vector2f area, const Rect2f& targetArea, const float padding = 1.0f, const float slack = 0.0f );
 	void goTo( const std::string& toggleName, const Vector3f& pos, float time, float delay = 0.0f, std::function<void()> callbackFunction = nullptr );
@@ -122,19 +122,11 @@ public:
 	void setFarClipPlaneZClampEdit2d( float _value ) { mFarClipPlaneZClampEdit2d = _value;}
 
 
-	Vector3f getPosition() const {
-		return mPos->value;
-	}
+	Vector3f getPosition() const;
 
-	Vector3f getPositionInv() const {
-		return -mPos->value;
-	}
+	Vector3f getPositionInv() const;
 
-	Vector3f getPositionRH() const {
-		Vector3f lPos = mPos->value.xzy();
-		lPos.invZ();
-		return lPos;
-	}
+	Vector3f getPositionRH() const;
 
 	Vector3f getYawVector() const {
 		return mView.getCol( 0 ).xyz();
@@ -170,17 +162,12 @@ public:
 		mAspectRatioMultiplier = val;
 	}
 
-	float FoV() const {
-		return mFov->value;
-	}
+	float FoV() const;
 
-	std::shared_ptr<AnimType<float>>& FoVAnim() {
-		return mFov;
-	}
-
-	std::shared_ptr<AnimType<Vector3f>> PosAnim() { return mPos; }
-	std::shared_ptr<AnimType<Vector3f>> TargetAnim() { return mTarget; }
-	std::shared_ptr<AnimType<Vector3f>> QAngleAnim() { return qangle; }
+	floata FoVAnim();
+	V3fa   PosAnim();
+	V3fa   TargetAnim();
+	V3fa   QAngleAnim();
 
 	void getViewporti( int* viewport ) const {
 		viewport[0] = static_cast<int>( ViewPort().topLeft()[0] );
@@ -231,7 +218,7 @@ private:
 	float mVAngle;
 	float mAspectRatioMultiplier;
 
-	std::shared_ptr<AnimType<float>> mFov;
+	floata mFov;
 	float mNearClipPlaneZ;
 	float mFarClipPlaneZ;
 	float mNearClipPlaneZClampEdit2d = 0.5f;
@@ -250,9 +237,9 @@ private:
 	Matrix4f mMVP;
 	Matrix4f quatMatrix;
 
-	std::shared_ptr<AnimType<Vector3f>> mPos;
-	std::shared_ptr<AnimType<Vector3f>> mTarget;
-	std::shared_ptr<AnimType<Vector3f>> qangle; // angles of x,y,z axis to be fed into quaternion math
+	V3fa mPos;
+	V3fa mTarget;
+	V3fa qangle; // angles of x,y,z axis to be fed into quaternion math
 
 	JMATH::Rect2f mViewPort;
 

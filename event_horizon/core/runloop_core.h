@@ -12,7 +12,6 @@
 #include "command.hpp"
 
 struct CommandConsole {};
-class GameTime;
 
 enum class RunLoopThreading {
     Sync,
@@ -33,6 +32,9 @@ public:
     CommandQueue& CQ() { return cq; }
 
 protected:
+	void updateTime();
+
+protected:
 	bool mbExitTriggered;
 	CommandQueue& cq;
 };
@@ -41,5 +43,5 @@ template< typename T > void mainLoop( uint64_t _flags = 0, RunLoopThreading rt =
 
 template <> void mainLoop<CommandConsole>( uint64_t _flags, RunLoopThreading rt );
 
-void updateTime( GameTime& gt );
+void updateTime();
 void daemonLoop( int _sleepSeconds );

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include <cstdint>
 #include <string>
@@ -714,3 +715,36 @@ void sanitizePath( const std::vector<T>& _verts, std::vector<T>& ret, bool wrapP
 		}
 	}
 }
+
+template <typename T>
+class AnimType {
+public:
+	AnimType() = default;
+	explicit AnimType( const T& v ) {
+		value = v;
+	}
+
+	void set(const T& _value) {
+		value = _value;
+	}
+
+	T operator()() const {
+		return value;
+	}
+
+	T value;
+};
+
+class Vector2f;
+class Vector3f;
+class Vector4f;
+class Quaternion;
+
+template <typename T>
+using AnimValue = std::shared_ptr<AnimType<T>>;
+
+using floata 		= AnimValue<float>;
+using V2fa 			= AnimValue<Vector2f>;
+using V3fa 			= AnimValue<Vector3f>;
+using V4fa 			= AnimValue<Vector4f>;
+using Quaterniona 	= AnimValue<Quaternion>;

@@ -45,7 +45,6 @@ protected:
 
 	int nUpdates = 0;
 	int nRenders = 0;
-	GameTime update_gt;
 	UpdateSignals mUpdateSignals;
 	std::shared_ptr<Scene> pm;
 };
