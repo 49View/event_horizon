@@ -2,11 +2,14 @@
 #include "shader_opengl.h"
 #include "core/string_util.h"
 
-bool Shader::compile() {
+GLuint Shader::compile() {
 	GLenum glShaderType = GL_VERTEX_SHADER;
 
 	glShaderType = getShaderType();
-	GLCALL( mHandle = glCreateShader( glShaderType ) );
+	if ( mHandle != 0 ) {
+		GLCALL( glDeleteShader(mHandle) );
+	}
+	GLCALLRET( mHandle, glCreateShader( glShaderType ) );
 
 	LOGI( "Compiling %s shader -- handle=%d", mId.c_str(), mHandle );
 	//LOGI("Compiling %s shader (%s) handle=%d", mType == TYPE_VERTEX_SHADER ? "vertex" : "fragment", mId.c_str(), mHandle);
@@ -27,7 +30,7 @@ bool Shader::compile() {
 			if ( length > 0 ) {
 				LOGW( "%s - %s", mId.c_str(), infoBuffer );
 			}
-            return true;
+            return mHandle;
 		} else {
 			LOGE( "Could not compile shader %s\n%s\n", mId.c_str(), infoBuffer );
 			SHADER_ERROR( "Could not compile shader", mId.c_str(), infoBuffer );
@@ -53,12 +56,12 @@ bool Shader::compile() {
 
 			mHandle = 0;
 			ASSERT( 0 );
-			return false;
+			return mHandle;
 		}
 	} else {
 		LOGE( "Cound not create shader: %s", mId.c_str() );
 		ASSERT( false );
-		return false;
+		return 0;
 	}
-	return false;
+	return 0;
 }

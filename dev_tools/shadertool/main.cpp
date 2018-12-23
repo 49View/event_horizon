@@ -9,6 +9,22 @@
 #include <core/file_manager.h>
 #include <graphics/platform_graphics.hpp>
 #include <graphics/shader_manager.h>
+#include <core/http/basen.hpp>
+
+JSONDATA(ShaderMap, msg, shaders)
+    std::string msg = "shaderchange";
+    std::vector<std::pair<std::string, std::string>> shaders;
+    std::string flattenJsonSpaced() const {
+        std::stringstream ret;
+
+        for ( const auto& p : shaders ) {
+            ret << " " << p.first << " " << p.second;
+        }
+
+        return ret.str();
+    }
+    size_t count() const { return shaders.size(); }
+};
 
 int main( int argc, [[maybe_unused]] char *argv[] ) {
 
@@ -46,37 +62,33 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
 
     if ( !ifs.is_open()) throw "Error opening file list";
 
+    std::stringstream shaderHeader;
+    ShaderMap shaderEmit;
+    shaderHeader << "static std::unordered_map<std::string, std::string> gShaderInjection{\n";
     std::string line;
-    while (std::getline(ifs, line))
-    {
+    while (std::getline(ifs, line)) {
         std::istringstream iss(line);
         if ( !line.empty() ) {
             std::string fkey = (getFileNameExt(line) == ".glsl") ? getFileNameNoExt(line) : line;
-            std::string urca = FM::readLocalTextFile( line );
-            sm.createInjection( fkey, urca );
+            std::string fileContent = FM::readLocalTextFile( line );
+            auto fileContent64 = bn::encode_b64(fileContent);
+            shaderHeader << "{ \"" << fkey << "\", \"" << fileContent64 << "\"},\n";
+            if ( sm.injectIfChanged(fkey, fileContent64) ) {
+                shaderEmit.shaders.emplace_back( fkey, fileContent64 );
+            }
         }
     }
+
+    shaderHeader << "};\n";
     std::system( "rm -f files.txt" );
 
-    if ( sm.loadShaders() ) {
+    if ( shaderEmit.count() > 0 && sm.loadShaders() ) {
+        FM::writeLocalFile("../shaders.hpp", shaderHeader );
 
+        Http::useLocalHost(true);
         Http::login(LoginFields::Daemon());
 
-        std::string tarname = "shaders.tar";
-        std::string matname = "shaders.shd";
-
-        std::string tarcmd = "export COPYFILE_DISABLE=true\n tar -cvf " + tarname + " *.*";
-
-        std::system( tarcmd.c_str() );
-
-        std::string ucompressorcmd = "ucompressoor < " + tarname + " > " +  matname;
-        std::system( ucompressorcmd.c_str() );
-
-        FM::copyLocalToRemote( matname, "shaders/" + matname );
-
-        // Remove temp files
-        std::string removeTarCmd = "rm -f " + tarname + " " + matname;
-        std::system( removeTarCmd.c_str() );
+        Socket::emit( "shaderchange" + shaderEmit.flattenJsonSpaced() );
     }
 
     glfwTerminate();

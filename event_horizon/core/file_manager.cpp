@@ -327,6 +327,26 @@ namespace FileManager {
         return false;
     }
 
+    bool writeLocalFile( const std::string& filename, const std::stringstream& ss ) {
+        std::ofstream fp(filename);
+        if ( fp.is_open()) {
+            fp << ss.rdbuf();
+            fp.close();
+            return true;
+        }
+        return false;
+    }
+
+    bool writeLocalFile( const std::string& filename, const std::string& s ) {
+        std::ofstream fp(filename);
+        if ( fp.is_open()) {
+            fp << s;
+            fp.close();
+            return true;
+        }
+        return false;
+    }
+
 // ********************************************************************************************************************
 // TRANSFERS
 // ********************************************************************************************************************
@@ -340,5 +360,6 @@ namespace FileManager {
             writeRemoteFile( dest, reinterpret_cast<const char *>(b.get()), l, _filenameEnc );
         }
     }
+
 
 }

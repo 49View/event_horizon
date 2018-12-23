@@ -138,9 +138,9 @@ public:
     const MatrixAnim& TRS() const { return mTRS; }
     void TRS( const MatrixAnim& val ) { mTRS = val; }
 
-    const AABB BBox3d() const { return bbox3d; }
-    void BBox3d( const Vector3f& bmix, const Vector3f& bmax ) { bbox3d = AABB( bmix, bmax ); }
-    AABB containingAABB() const;
+    const JMATH::AABB BBox3d() const { return bbox3d; }
+    void BBox3d( const Vector3f& bmix, const Vector3f& bmax ) { bbox3d = JMATH::AABB( bmix, bmax ); }
+    JMATH::AABB containingAABB() const;
     void calcCompleteBBox3d();
 
     bool CastShadows() const { return mCastShadows; }
@@ -177,8 +177,8 @@ protected:
     int totalChildrenRec( int& start ) const;
     int totalChildrenWithGeomRec( int& numC ) const;
     int totalChildrenOfTypeRec( GeomHierType _gt, int& numC ) const;
-    void containingAABBRec( AABB& _bbox ) const;
-    AABB calcCompleteBBox3dRec();
+    void containingAABBRec( JMATH::AABB& _bbox ) const;
+    JMATH::AABB calcCompleteBBox3dRec();
 
 protected:
     std::string mName;
@@ -194,7 +194,7 @@ protected:
 
     MatrixAnim mTRS;
 
-    AABB bbox3d = AABB::INVALID;
+    JMATH::AABB bbox3d = JMATH::AABB::INVALID;
     bool mSHReceiver = false;
     bool mCastShadows = true;
 

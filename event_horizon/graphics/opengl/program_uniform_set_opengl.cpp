@@ -16,10 +16,10 @@ void ProgramUniformSet::generateUBO( const ShaderManager& sm, const std::string&
 	mUBOHandles[uniformName] = mUBOHandle;
 
 	mUBOPoint = getUBOPoint( uniformName );
-	for ( const auto& i : sm.Programs() ) {
-		GLuint lights_index = glGetUniformBlockIndex( i->handle(), uniformName.c_str() );
+	for ( const auto& i : sm.ProgramsHandles() ) {
+		GLuint lights_index = glGetUniformBlockIndex( i, uniformName.c_str() );
 		if ( lights_index != GL_INVALID_INDEX ) {
-			glUniformBlockBinding( i->handle(), lights_index, mUBOPoint );
+			glUniformBlockBinding( i, lights_index, mUBOPoint );
 		}
 	}
 

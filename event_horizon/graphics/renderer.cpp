@@ -21,6 +21,8 @@
 #include <stb/stb_image_write.h>
 #include "core/service_factory.h"
 
+#include "di_modules.h"
+
 namespace FBNames {
     static std::unordered_set<std::string> sFBNames;
 
@@ -44,12 +46,19 @@ namespace FBNames {
 
 //#include "vr_manager.hpp"
 
+class CommandScriptRendererManager : public CommandScript {
+public:
+    CommandScriptRendererManager( Renderer& hm );
+    virtual ~CommandScriptRendererManager() {}
+};
+
 CommandScriptRendererManager::CommandScriptRendererManager( Renderer& _rr ) {
     addCommandDefinition("reload shaders", std::bind(&Renderer::cmdReloadShaders, &_rr, std::placeholders::_1 ));
 }
 
 void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>& _params ) {
-    ShaderAssetBuilder{ "shaders" }.rebuild( *this );
+    sm.loadShaders();
+    afterShaderSetup();
 }
 
 bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t[]>& _data ) {
@@ -61,34 +70,11 @@ bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uin
     return true;
 }
 
-bool ShaderAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
-    Renderer& rr = static_cast<Renderer&>(_md);
-
-    if ( _status == DependencyStatus::LoadedSuccessfully ) {
-        tarUtil::untar<ShaderBuilder>( zlibUtil::inflateFromMemory( std::move( _data )), rr.sm);
-    }
-
-    rr.sm.loadShaders();
-    rr.postInit();
-    rr.afterShaderSetup();
-
-    return true;
-}
-
 Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, FontManager& fm, TextureManager& tm, CameraManager& _cm ) :
         cq( cq ), sm( sm ), fm(fm), tm(tm), cm(_cm), ridm(tm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);
-}
-
-void Renderer::postInit() {
-
-    if ( mbIsInitialized ) return;
-
-    tm.addTextureWithData(FBNames::lightmap, RawImage::WHITE4x4(), TSLOT_LIGHTMAP );
-
-    mbIsInitialized = true;
 }
 
 void Renderer::resetDefaultFB() {
@@ -100,6 +86,13 @@ void Renderer::init() {
     rcm.init();
     am.init();
     lm.init();
+    sm.loadShaders();
+    tm.addTextureWithData(FBNames::lightmap, RawImage::WHITE4x4(), TSLOT_LIGHTMAP );
+    afterShaderSetup();
+}
+
+void Renderer::injectShader( const std::string& _key, const std::string& _content ) {
+    sm.inject( _key, _content );
 }
 
 void Renderer::afterShaderSetup() {
@@ -127,8 +120,6 @@ void Renderer::setGlobalTextures() {
 }
 
 void Renderer::directRenderLoop() {
-
-    if ( !mbIsInitialized ) return;
 
     CB_U().start();
     CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
@@ -268,10 +259,6 @@ void Renderer::MaterialMap( std::shared_ptr<RenderMaterial> _mat ) {
 
 std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot ) {
     return tm.TD( _id, tSlot );
-}
-
-bool Renderer::isInitialized() const {
-    return mbIsInitialized;
 }
 
 void Renderer::clearTargets() {

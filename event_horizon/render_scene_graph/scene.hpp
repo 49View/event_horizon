@@ -5,15 +5,32 @@
 
 #pragma once
 
-#include "di_modules.h"
+#include <unordered_map>
+#include <graphics/text_input.hpp>
+#include <graphics/renderer.h>
+#include "core/observer.h"
 #include "core/math/vector2f.h"
+#include "core/math/rect2f.h"
 #include "core/htypes_shared.hpp"
 #include "core/game_time.h"
+#include "render_scene_graph.h"
 
 class MouseInput;
 class SceneLayout;
 class Scene;
 struct ImGuiConsole;
+class CameraRig;
+class Renderer;
+class RenderSceneGraph;
+class UiControlManager;
+class TextInput;
+class CameraManager;
+class CommandQueue;
+class AABB;
+class MaterialManager;
+class TextureManager;
+class Camera;
+class CommandScriptPresenterManager;
 
 namespace PresenterEventFunctionKey {
 	const static std::string Activate = "activate";
@@ -22,12 +39,6 @@ namespace PresenterEventFunctionKey {
 using PresenterUpdateCallbackFunc = std::function<void(Scene* p)>;
 using ScenePostActivateFunc = std::function<void(Scene*)>;
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraRig>>;
-
-class CommandScriptPresenterManager : public CommandScript {
-public:
-    explicit CommandScriptPresenterManager( Scene& hm );
-    virtual ~CommandScriptPresenterManager() = default;
-};
 
 class Scene : public Observer<MouseInput> {
 public:
@@ -42,7 +53,7 @@ public:
         mRigs[lRig->Name()] = lRig;
     }
 
-    void takeScreenShot( const AABB& _box, ScreenShotContainerPtr _outdata );
+    void takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata );
 
 	virtual void onTouchUpImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
 	virtual void onSimpleTapImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
@@ -65,13 +76,13 @@ public:
 	bool activated() const { return mbActivated; }
 	static const std::string DC();
 
-	RenderSceneGraph& RSG() { return rsg; }
-    MaterialManager& ML() { return rsg.ML(); }
-    Renderer& RR() { return rr; }
-    CameraManager& CM() { return cm; }
-    TextureManager& TM() { return rr.TM(); }
-	CommandQueue& CQ() { return cq; }
-    std::shared_ptr<Camera> getCamera( const std::string& _name ) { return CM().getCamera(_name); }
+	RenderSceneGraph& RSG();
+    MaterialManager& ML();
+    Renderer& RR();
+    CameraManager& CM();
+    TextureManager& TM();
+	CommandQueue& CQ();
+    std::shared_ptr<Camera> getCamera( const std::string& _name );
 
 	void Layout( std::shared_ptr<SceneLayout> _l );
 	std::shared_ptr<SceneLayout> Layout() { return layout; }
@@ -93,7 +104,7 @@ public:
 protected:
 	void activate();
 
-	void reloadShaders(const rapidjson::Document& _data);
+	void reloadShaders(const std::string& _data);
 
 protected:
 	std::shared_ptr<SceneLayout> layout;

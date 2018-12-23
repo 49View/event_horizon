@@ -65,8 +65,6 @@ namespace WindowHandling {
         gatherMainScreenInfo();
 
         initImGUI();
-
-        ShaderAssetBuilder{"shaders"}.build(rr);
     }
 
 }

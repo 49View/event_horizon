@@ -13,13 +13,22 @@
 #include "graphics/ui/imgui_console.h"
 
 #include <render_scene_graph/scene_layout.h>
+#include <render_scene_graph/render_scene_graph.h>
 
 #include <stb/stb_image.h>
+
+#include "di_modules.h"
 
 std::vector<std::string> Scene::callbackPaths;
 Vector2i Scene::callbackResizeWindow = Vector2i(-1, -1);
 Vector2i Scene::callbackResizeFrameBuffer = Vector2i(-1, -1);
 std::vector<PresenterUpdateCallbackFunc> Scene::sUpdateCallbacks;
+
+class CommandScriptPresenterManager : public CommandScript {
+public:
+	explicit CommandScriptPresenterManager( Scene& hm );
+	virtual ~CommandScriptPresenterManager() = default;
+};
 
 CommandScriptPresenterManager::CommandScriptPresenterManager( Scene& _hm ) {
     addCommandDefinition("enable keyboard", std::bind(&Scene::cmdEnableKeyboard, &_hm, std::placeholders::_1));
@@ -100,16 +109,14 @@ void Scene::deactivate() {
 
 void Scene::activate() {
 
-	if ( !rr.isInitialized() ) return;
-
 	WH::setDropCallback( GDropCallback );
 	WH::setResizeWindowCallback( GResizeWindowCallback );
 	WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
 
     //stbi_set_flip_vertically_on_load(true);
 
-	Socket::on( "cloudStorageFileUpdate-shaders/shaders.shd",
-			    std::bind(&Scene::reloadShaders, this, std::placeholders::_1 ) );
+	Socket::on( "shaderchange",
+				std::bind(&Scene::reloadShaders, this, std::placeholders::_1 ) );
 
 	MaterialBuilder{"white"}.makeDefault(rsg.ML());
 	ImageBuilder{"white"}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
@@ -123,8 +130,15 @@ void Scene::activate() {
 	mbActivated = true;
 }
 
-void Scene::reloadShaders( [[maybe_unused]] const rapidjson::Document& _data ) {
-	cq.script( "reload shaders" );
+void Scene::reloadShaders( const std::string& _data ) {
+	auto commands = split( _data, " " );
+
+	if ( commands.size() >= 3 && commands.size() % 2 == 1 ) {
+		for ( size_t si = 1; si < commands.size(); si += 2 ) {
+			rr.injectShader( commands[si], commands[si+1] );
+		}
+		cq.script( "reload shaders" );
+	}
 }
 
 void Scene::enableInputs( bool _bEnabled ) {
@@ -223,10 +237,24 @@ const std::shared_ptr<ImGuiConsole>& Scene::Console() const {
 	return console;
 }
 
-void Scene::takeScreenShot( const AABB& _box, ScreenShotContainerPtr _outdata ) {
+void Scene::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
     addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box);
     rr.getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
+
+RenderSceneGraph& Scene::RSG() { return rsg; }
+
+MaterialManager& Scene::ML() { return rsg.ML(); }
+
+Renderer& Scene::RR() { return rr; }
+
+CameraManager& Scene::CM() { return cm; }
+
+TextureManager& Scene::TM() { return rr.TM(); }
+
+CommandQueue& Scene::CQ() { return cq; }
+
+std::shared_ptr<Camera> Scene::getCamera( const std::string& _name ) { return CM().getCamera(_name); }
 
 

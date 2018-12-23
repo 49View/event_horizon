@@ -70,20 +70,7 @@ public:
 
     bool createOrUpdate( std::shared_ptr<Shader> vertexShader, std::shared_ptr<Shader> tesselationControlShader,
                          std::shared_ptr<Shader> tesselationEvaluationShader, std::shared_ptr<Shader> geometryShader,
-                         std::shared_ptr<Shader> fragmentShader, std::shared_ptr<Shader> computeShader,
-                         const std::string& cacheFolder, const std::string& cacheLabel, CreateUpdateFlag cou );
-
-    void beginRender() const;
-
-private:
-
-    GLuint build( std::shared_ptr<Shader> vertexShader, std::shared_ptr<Shader> tesselationControlShader,
-                  std::shared_ptr<Shader> tesselationEvaluationShader, std::shared_ptr<Shader> geometryShader,
-                  std::shared_ptr<Shader> fragmentShader, std::shared_ptr<Shader> computeShader );
-    GLuint createFromCache( const std::string& cacheFolder, const std::string& cacheLabel, bool simpleVersion = false );
-    void cacheProgram( GLuint handleToCache, const std::string& cacheFolder, const std::string& cacheLabel,
-                       bool simpleVersion = false );
-    std::string getFilename( const std::string& cacheLabel ) const;
+                         std::shared_ptr<Shader> fragmentShader, std::shared_ptr<Shader> computeShader );
 
 private:
     std::string mVertexShaderId;
@@ -92,6 +79,4 @@ private:
     std::string mGeometryShaderId;
     std::string mFragmentShaderId;
     std::string mComputeShaderId;
-
-    static const int32_t CACHE_FILE_MARK;
 };

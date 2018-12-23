@@ -4,7 +4,7 @@ template <typename T>
 struct Property {
     T value;
 
-    Property() {}
+    Property() = default;
 
     Property( const T& _value ) {
         *this = _value;

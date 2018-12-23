@@ -980,6 +980,9 @@ macro(set_cpp_flags)
     if ( USE_LOCALHOST )
         add_definitions(-DUSE_LOCALHOST=1)
     endif()
+    if ( _ULTRADEBUG )
+        add_definitions(-D_ULTRADEBUG=1)
+    endif()
 
     set_include_paths()
 

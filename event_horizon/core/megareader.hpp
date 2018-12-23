@@ -346,14 +346,12 @@ public:
 		}
 	}
 
-	template<typename T>
-	void deserialize( const char* name, std::vector<std::vector<T>>& ret ) const {
+	void deserialize( const char* name, std::vector<std::pair<std::string, std::string>>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
-				std::vector<T> sv;
-				for ( SizeType q = 0; q < ( *( value ) )[name][t].Size(); q++ ) {
-					sv.push_back( T( ( *( value ) )[name][t][q] ) );
-				}
+				std::pair<std::string, std::string> sv;
+				sv.first = ( ( ( *( value ) )[name][t][0].GetString() ) );
+				sv.second = ( ( ( *( value ) )[name][t][1].GetString() ) );
 				ret.push_back( sv );
 			}
 		}

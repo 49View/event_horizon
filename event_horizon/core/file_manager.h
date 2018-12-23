@@ -221,6 +221,8 @@ namespace FileManager {
 	bool writeLocalFile( const std::string& filename, const char *buff, uint64_t length, bool isFullPath = false );
 	bool writeLocalFile( const std::string& filename, const rapidjson::StringBuffer& s, bool isFullPath = false );
     bool writeLocalFile( const std::string& filename, const std::vector<unsigned char>& s );
+    bool writeLocalFile( const std::string& filename, const std::string& s );
+    bool writeLocalFile( const std::string& filename, const std::stringstream& s );
     bool writeLocalTextFile( const std::string& filename, const std::string& s, bool isFullPath = false );
     void makeLocalDir( const std::string& dirName );
 	void copyLocalFile( const std::string& src_path, const std::string& dst_path );

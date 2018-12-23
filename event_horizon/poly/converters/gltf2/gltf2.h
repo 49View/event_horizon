@@ -6,7 +6,6 @@
 #include <core/math/vector4f.h>
 #include <core/descriptors/material.h>
 #include <core/raw_image.h>
-//#include <render_scene_graph/di_modules.h>
 
 class HierGeom;
 struct MaterialBuilder;

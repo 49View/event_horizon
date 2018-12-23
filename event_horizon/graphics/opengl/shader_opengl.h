@@ -16,10 +16,9 @@ public:
 		TYPE_COMPUTE_SHADER
 	};
 
-	Shader( Type type, const std::string& id, const char* source ) {
+	Shader( Type type, const std::string& id ) {
 		mType = type;
 		mId = id;
-		mSource = source;
 		mHandle = 0;
 	}
 
@@ -40,18 +39,17 @@ public:
 		return mHandle != 0;
 	}
 
-	void setSource( const char* source ) {
+	void setSource( const std::string& source ) {
 		mSource = source;
-		mHandle = 0;
 	}
 
-	bool compile();
+	GLuint compile();
 
 	GLenum getShaderType() const;
 
 private:
 	Type mType; // TYpe of shader, vertex or fragment
-	GLuint mHandle; // OpenGL handle for the program
+	GLuint mHandle = 0; // OpenGL handle for the program
 	std::string mId; //Human readable id
 	std::string mSource; // Source code for the shader
 };

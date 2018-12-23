@@ -1,6 +1,5 @@
 #include "program_uniform_set.h"
 #include "texture_manager.h"
-#include "shader_manager.h"
 #include "renderer.h"
 #include "core/serializebin.hpp"
 

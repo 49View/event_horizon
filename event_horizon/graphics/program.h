@@ -28,7 +28,7 @@ public:
 
 protected:
     std::string  mId; // Human readible Id
-    unsigned int mHandle; // handle for the program (might vary from implementation to implementation)
+    unsigned int mHandle = 0; // handle for the program (might vary from implementation to implementation)
     std::unordered_map<std::string, ProgramUniformDesc> uniforms;
 };
 

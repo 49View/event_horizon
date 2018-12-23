@@ -7,21 +7,20 @@
 #include "framebuffer.h"
 #include "core/math/matrix4f.h"
 #include "core/image_builder.h"
-#include "core/game_time.h"
-#include "core/callback_dependency.h"
 #include "vertex_processing.h"
-#include "skybox.h"
 #include "graphic_constants.h"
-#include "shader_manager.h"
 #include "camera_manager.h"
 #include "shadowmap_manager.h"
 #include "render_list.h"
 #include "light_manager.h"
-#include "di_modules.h"
 
 class FontManager;
 class CameraManager;
 class Renderer;
+class CommandScriptRendererManager;
+class CommandQueue;
+class ShaderManager;
+class RenderSceneGraph;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -52,17 +51,6 @@ namespace FBNames {
 }
 
 using CommandBufferLimitsT = int;
-
-class CommandScriptRendererManager : public CommandScript {
-public:
-	CommandScriptRendererManager( Renderer& hm );
-	virtual ~CommandScriptRendererManager() {}
-};
-
-struct ShaderAssetBuilder;
-
-struct RBUILDER( ShaderAssetBuilder, shaders, shd, Binary, BuilderQueryType::Exact )
-};
 
 class RenderImageDependencyMaker : public ImageDepencencyMaker {
 public:
@@ -102,7 +90,7 @@ public:
 
 	void init();
 	void afterShaderSetup();
-	bool isInitialized() const;
+	void injectShader( const std::string& _key, const std::string& content );
 
 	template<typename T>
 	std::shared_ptr<CameraRig> addTarget( const std::string& _name, const Rect2f& _viewport,
@@ -179,8 +167,6 @@ public:
 	void invalidateOnAdd();
 
 protected:
-	void postInit();
-
 	void clearCommandList();
 
 	void renderCBList();
@@ -217,8 +203,6 @@ protected:
 
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	std::map<int, CommandBufferListVector> mCommandLists;
-
-	bool mbIsInitialized = false;
 
 	RenderStats mStats;
 
@@ -282,7 +266,6 @@ public:
 	void drawRect2d( CommandListType clt, const std::string& tname, const JMATH::Rect2f& rect, int zLevel = 0,
 					 const std::string& _vname = staticvpss, const std::string& _name = "" );
 
-	friend struct ShaderAssetBuilder;
 	friend class RenderSceneGraph;
 	friend struct HierGeomRenderObserver;
 };

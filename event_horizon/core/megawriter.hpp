@@ -364,6 +364,17 @@ public:
 		writer->EndArray();
 	}
 
+	void serialize( const char* name, const std::vector<std::pair<std::string, std::string>>& value ) {
+		writer->String( name );
+		writer->StartArray();
+		for ( const auto& t : value ) {
+			writer->StartArray();
+			writer->String( t.first.c_str() );
+			writer->String( t.second.c_str() );
+			writer->EndArray();
+		}
+		writer->EndArray();
+	}
 
 	void serialize( const char* name, const std::vector<JMATH::Rect2f>& value ) {
 		writer->String( name );

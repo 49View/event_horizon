@@ -49,7 +49,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 //
 //        Timeline::play(cName);
 
-        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RSG().RR());
+//        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RSG().RR());
     } );
 }
 

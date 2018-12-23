@@ -42,7 +42,7 @@ struct Url;
 
 namespace Http { struct Result; }
 
-using SocketCallbackFunc = std::function<void( const rapidjson::Document& data )>;
+using SocketCallbackFunc = std::function<void( const std::string& message )>;
 using ResponseCallbackFunc = std::function<void(const Http::Result&)>;
 
 namespace Socket {
@@ -50,6 +50,7 @@ namespace Socket {
 
     void startClient( const std::string& _host );
     void onMessage( const std::string& _message );
+    void emit( const std::string& _message );
     void on( const std::string& eventName, SocketCallbackFunc f );
 }
 

@@ -11,50 +11,47 @@
 #include "core/property.h"
 
 
-struct ShaderBuilder {
-    ShaderBuilder( const std::string& _name ) {
+struct ShaderProgramDesc {
+    explicit ShaderProgramDesc( const std::string& _name ) {
         name = _name;
         vertexShader = _name;
         fragmentShader = _name;
     }
 
-    ShaderBuilder& vsh( const std::string& _name ) {
+    ShaderProgramDesc& vsh( const std::string& _name ) {
         vertexShader = _name;
         return *this;
     }
 
-    ShaderBuilder& fsh( const std::string& _name ) {
+    ShaderProgramDesc& fsh( const std::string& _name ) {
         fragmentShader = _name;
         return *this;
     }
 
-    ShaderBuilder& tec( const std::string& _name ) {
+    ShaderProgramDesc& tec( const std::string& _name ) {
         tessControlShader = _name;
         return *this;
     }
 
-    ShaderBuilder& tev( const std::string& _name ) {
+    ShaderProgramDesc& tev( const std::string& _name ) {
         tessEvaluationShader = _name;
         return *this;
     }
 
-    ShaderBuilder& gsh( const std::string& _name ) {
+    ShaderProgramDesc& gsh( const std::string& _name ) {
         geometryShader = _name;
         return *this;
     }
 
-    ShaderBuilder& csh( const std::string& _name ) {
+    ShaderProgramDesc& csh( const std::string& _name ) {
         computeShader = _name;
         return *this;
     }
-
-    bool makeDirect( DependencyMaker& _md, const ucchar_p& _data, const std::string&_nameWithExtension );
 
     Property<std::string> name;
 
     Property<std::string> vertexShader;
     Property<std::string> fragmentShader;
-
     Property<std::string> tessControlShader;
     Property<std::string> tessEvaluationShader;
     Property<std::string> geometryShader;
@@ -64,40 +61,42 @@ struct ShaderBuilder {
 class ShaderManager : public DependencyMaker {
 public:
     DEPENDENCY_MAKER_EXIST(mPrograms);
-    ShaderManager() {}
-    virtual ~ShaderManager() {}
+    ShaderManager();
+    virtual ~ShaderManager() = default;
 
 public:
     void addShader( const std::string& id, Shader::Type stype );
-    bool loadProgram( const ShaderBuilder& sb );
+    bool loadProgram( const ShaderProgramDesc& sb );
 
     // OpenGL init function
-    void init( const std::string& cacheFolder, const std::string& cacheLabel );
     bool loadShaders();
     std::shared_ptr<ProgramOpenGL> P( const std::string& id ) const;
 
     int getProgramCount() const;
-    void setCacheData( const std::string& cacheFolder, const std::string& cacheLabel );
-    const std::vector<std::shared_ptr<ProgramOpenGL>>& Programs() const;
+    std::vector<GLuint> ProgramsHandles() const;
 
-    void createInjection( const std::string& key, const std::string& text );
+    void inject( const std::string& key, const std::string& text );
+    bool checkShaderChanged( const std::string& key, const std::string& text ) const;
+    bool injectIfChanged( const std::string& key, const std::string& text );
     void createCCInjectionMap();
 
 private:
-    void createInjections();
-    void addUniformsInjections();
-    void addLayoutInjections();
-    void addMacroInjections();
-    void addVertexShaderInjections();
-    void addFragmentShaderInjections();
 
-    bool createProgram( std::shared_ptr<ProgramOpenGL>, const std::string& cacheFolder, const std::string& cacheLabel );
-    void addToShaderList( const std::vector<std::string>& vertexShadersFileNames, Shader::Type st );
+    void allocateProgram( const ShaderProgramDesc& _pd );
+    void allocateShader( const std::string& id, Shader::Type stype );
+    void injectShadersWithCode();
 
     std::string openFileWithIncludeParsing( const std::string& filename );
     std::string parsePreprocessorMacro( std::string& source );
     std::string injectPreprocessorMacro( std::string& source );
     std::string injectIncludes( std::string& sm );
+
+    std::shared_ptr<Shader> vshForProgram( std::shared_ptr<ProgramOpenGL> program );
+    std::shared_ptr<Shader> tchForProgram( std::shared_ptr<ProgramOpenGL> program );
+    std::shared_ptr<Shader> tehForProgram( std::shared_ptr<ProgramOpenGL> program );
+    std::shared_ptr<Shader> gshForProgram( std::shared_ptr<ProgramOpenGL> program );
+    std::shared_ptr<Shader> fshForProgram( std::shared_ptr<ProgramOpenGL> program );
+    std::shared_ptr<Shader> cshForProgram( std::shared_ptr<ProgramOpenGL> program );
 
 private:
 
@@ -113,13 +112,12 @@ private:
 
     std::unordered_map<std::string, std::string> ccShaderMap;
     std::unordered_map<std::string, std::string> mDefineMap;
-    std::unordered_map<std::string, std::string> shaderInjection;
 
-    std::vector<std::shared_ptr<ProgramOpenGL>> mProgramsIds;
+    std::unordered_map<std::string, std::string> shaderSourcesMap;
 
     ProgramMap mPrograms;
 
+    std::vector<ShaderProgramDesc> programDescs;
+
     int mNumReloads = 0;
-    std::string mCacheFolder;
-    std::string mCacheLabel;
 };

@@ -14,8 +14,7 @@
 
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
 
-void cloudCallback( const rapidjson::Document& data ) {
-    std::string filename = url_decode( data["name"].GetString() );
+void cloudCallback( const std::string& filename ) {
     for ( const auto& [k,func] : daemonEntityCallbacks ) {
         if ( filename.find(DaemonPaths::store(k)) != std::string::npos ) {
             FM::readRemoteSimpleCallback( filename, [&](const Http::Result& _res) {

@@ -33,6 +33,11 @@ namespace Socket {
         emscripten::function("onSocketEventCallback", &onSocketEventCallback);
     }
 
+    void emitImpl( [[maybe_unused]] const std::string& _message ) {
+        LOGR("[ERROR][WEB-SOCKET] Emit socket message not handled yet on emscripten");
+//        handler.socket()->emit( "message", _message );
+    }
+
     void startClient( const std::string& _host ) {
 
         LOGR("[WEB-SOCKET] Connecting to host: %s", _host.c_str() );

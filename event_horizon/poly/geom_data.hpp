@@ -386,8 +386,8 @@ public:
                                                        const Vector2f& pivot = Vector2f::ZERO );
     static std::vector<Vector3f> utilGenerateFlatBoxFromSize( float width, float height, float z );
 
-    AABB BBox3d() const { return mBBox3d; }
-    void BBox3d( const AABB& val ) { mBBox3d = val; }
+    JMATH::AABB BBox3d() const { return mBBox3d; }
+    void BBox3d( const JMATH::AABB& val ) { mBBox3d = val; }
     void Bevel( const Vector3f& bevelAmount );
     Vector3f Bevel() const;
 
@@ -495,7 +495,7 @@ protected:
     Vector2f pullMappingCoords = Vector2f::ZERO;
 
     // 3d Data
-    AABB mBBox3d = AABB::INVALID;
+    JMATH::AABB mBBox3d = JMATH::AABB::INVALID;
 
     VData mVdata;
 protected:

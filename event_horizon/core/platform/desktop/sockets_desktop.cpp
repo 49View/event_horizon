@@ -36,6 +36,12 @@ namespace Socket {
         std::cout << "sio failed " << std::endl;
     }
 
+    void emitImpl( const std::string& _message ) {
+        sio::message::ptr send_data(sio::string_message::create(_message));
+
+        handler.socket()->emit( "message", send_data );
+    }
+
     void startClient( const std::string& _host ) {
         handler.set_open_listener( std::bind( onConnected ));
         handler.set_close_listener( std::bind( onClose, std::placeholders::_1 ));

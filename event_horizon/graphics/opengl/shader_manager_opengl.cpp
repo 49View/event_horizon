@@ -1,21 +1,55 @@
 #include <regex>
 
 #include "shader_manager_opengl.h"
+#include "shaders.hpp"
 #include "../shader_list.h"
 #include "core/zlib_util.h"
 #include "core/tar_util.h"
+#include "core/http/basen.hpp"
 
-bool ShaderBuilder::makeDirect( DependencyMaker& _md, const ucchar_p& _data, const std::string& _nameWithExtension ) {
+ShaderManager::ShaderManager() {
 
-    ShaderManager& sm = static_cast<ShaderManager&>(_md);
+    for ( const auto& [k,v] : gShaderInjection ) {
+        shaderSourcesMap.insert( {k, v } );
+    }
 
-    std::string urca( reinterpret_cast<const char *>(_data.first), _data.second);
+    createCCInjectionMap();
 
-    std::string fkey = (getFileNameExt(_nameWithExtension) == ".glsl") ? name.value : _nameWithExtension;
-    sm.createInjection( fkey, urca );
+    allocateProgram( ShaderProgramDesc{ S::WIREFRAME } );
+    allocateProgram( ShaderProgramDesc{ S::SHADOW_MAP } );
+    allocateProgram( ShaderProgramDesc{ S::SKYBOX } );
+    allocateProgram( ShaderProgramDesc{ S::FONT_2D }.vsh( "vertex_shader_2d_font" ).fsh( "plain_font" ));
+    allocateProgram( ShaderProgramDesc{ S::FONT }.vsh( "vertex_shader_3d_font" ).fsh( "plain_font" ));
+    allocateProgram( ShaderProgramDesc{ S::BLUR_HORIZONTAL }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_blur_horizontal" ));
+    allocateProgram( ShaderProgramDesc{ S::BLUR_VERTICAL }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_blur_vertical" ));
+    allocateProgram( ShaderProgramDesc{ S::FINAL_COMBINE }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_final_combine" ));
+    allocateProgram( ShaderProgramDesc{ S::COLOR_2D }.vsh( "vertex_shader_2d_c" ).fsh( "fragment_shader_color" ));
+    allocateProgram( ShaderProgramDesc{ S::COLOR_3D }.vsh( "vertex_shader_3d_c" ).fsh( "fragment_shader_color" ));
+    allocateProgram( ShaderProgramDesc{ S::TEXTURE_2D }.vsh( "vertex_shader_2d_t" ).fsh( "fragment_shader_texture" ));
+    allocateProgram( ShaderProgramDesc{ S::TEXTURE_3D }.vsh( "vertex_shader_3d_t" ).fsh( "fragment_shader_texture" ));
+    allocateProgram( ShaderProgramDesc{ S::EQUIRECTANGULAR }.vsh( "equirectangular" ).fsh( "equirectangular" ));
+    allocateProgram( ShaderProgramDesc{ S::PLAIN_CUBEMAP }.vsh( "plain_cubemap" ).fsh( "plain_cubemap" ));
+    allocateProgram( ShaderProgramDesc{ S::CONVOLUTION }.vsh( "plain_cubemap" ).fsh( "irradiance_convolution" ));
+    allocateProgram( ShaderProgramDesc{ S::IBL_SPECULAR }.vsh( "plain_cubemap" ).fsh( "ibl_specular_prefilter" ));
+    allocateProgram( ShaderProgramDesc{ S::IBL_BRDF }.vsh( "vertex_shader_brdf" ).fsh( "plain_brdf" ));
+    allocateProgram( ShaderProgramDesc{ S::SH }.vsh( "vertex_shader_3d_sh" ).fsh( "plain_sh" ));
+    allocateProgram( ShaderProgramDesc{ S::SH_NOTEXTURE }.vsh( "vertex_shader_3d_sh_notexture" ).fsh( "plain_sh_notexture" ));
 
-    return true;
+
 }
+
+void ShaderManager::allocateProgram( const ShaderProgramDesc& _pd ) {
+    programDescs.emplace_back( _pd );
+
+    allocateShader( _pd.vertexShader, Shader::TYPE_VERTEX_SHADER );
+    allocateShader( _pd.tessControlShader, Shader::TYPE_TESSELATION_CONTROL_SHADER );
+    allocateShader( _pd.tessEvaluationShader, Shader::TYPE_TESSELATION_EVALUATION_SHADER );
+    allocateShader( _pd.geometryShader, Shader::TYPE_GEOMETRY_SHADER );
+    allocateShader( _pd.fragmentShader, Shader::TYPE_FRAGMENT_SHADER );
+    allocateShader( _pd.computeShader, Shader::TYPE_COMPUTE_SHADER );
+
+}
+
 
 std::string ShaderManager::injectIncludes( std::string& sm ) {
     size_t includeFind = 0;
@@ -26,7 +60,7 @@ std::string ShaderManager::injectIncludes( std::string& sm ) {
         filename = string_trim_upto( filename, "." );
 
         sm.erase( sm.begin() + includeFind, sm.begin() + fe + 1 );
-        sm.insert( includeFind, shaderInjection[filename] );
+        sm.insert( includeFind, bn::decode_b64(shaderSourcesMap[filename]) );
     }
 
     return sm;
@@ -93,54 +127,46 @@ std::string ShaderManager::injectPreprocessorMacro( std::string& sm ) {
 }
 
 std::string ShaderManager::openFileWithIncludeParsing( const std::string& filename ) {
-    std::string sb = shaderInjection[filename];
+    std::string sb = bn::decode_b64(shaderSourcesMap[filename]);
 //    FileManager::writeLocalFile( filename, sb.c_str(), sb.length(), true );
     std::string includeResolved = injectIncludes( sb );
     parsePreprocessorMacro( includeResolved );
     return injectPreprocessorMacro( includeResolved );
 }
 
-void ShaderManager::addShader( const std::string& id, Shader::Type stype ) {
+void ShaderManager::allocateShader( const std::string& id, Shader::Type stype ) {
     //LOGI("Adding vertex shader: %s", id);
-    if ( id.empty()) return;
-
-    std::string source;
+    if ( id.empty() ) return;
 
     switch ( stype ) {
         case Shader::TYPE_VERTEX_SHADER:
-            if ( mVertexShaders.find( id ) == mVertexShaders.end() || mNumReloads ) {
-                source = openFileWithIncludeParsing( id + ".vsh" );
-                mVertexShaders[id] = std::make_shared<Shader>( stype, id, source.c_str());
+            if ( mVertexShaders.find( id ) == mVertexShaders.end() ) {
+                mVertexShaders[id] = std::make_shared<Shader>( stype, id);
             }
             break;
         case Shader::TYPE_TESSELATION_CONTROL_SHADER:
-            if ( mTesselationControlShaders.find( id ) == mTesselationControlShaders.end() || mNumReloads) {
-                source = openFileWithIncludeParsing( id + ".tch" );
-                mTesselationControlShaders[id] = std::make_shared<Shader>( stype, id, source.c_str());
+            if ( mTesselationControlShaders.find( id ) == mTesselationControlShaders.end() ) {
+                mTesselationControlShaders[id] = std::make_shared<Shader>( stype, id);
             }
             break;
         case Shader::TYPE_TESSELATION_EVALUATION_SHADER:
-            if ( mTesselationEvaluationShaders.find( id ) == mTesselationEvaluationShaders.end() || mNumReloads ) {
-                source = openFileWithIncludeParsing( id + ".teh" );
-                mTesselationEvaluationShaders[id] = std::make_shared<Shader>( stype, id, source.c_str());
+            if ( mTesselationEvaluationShaders.find( id ) == mTesselationEvaluationShaders.end() ) {
+                mTesselationEvaluationShaders[id] = std::make_shared<Shader>( stype, id);
             }
             break;
         case Shader::TYPE_GEOMETRY_SHADER:
-            if ( mGeometryShaders.find( id ) == mGeometryShaders.end() || mNumReloads ) {
-                source = openFileWithIncludeParsing( id + ".gsh" );
-                mGeometryShaders[id] = std::make_shared<Shader>( stype, id, source.c_str());
+            if ( mGeometryShaders.find( id ) == mGeometryShaders.end() ) {
+                mGeometryShaders[id] = std::make_shared<Shader>( stype, id);
             }
             break;
         case Shader::TYPE_FRAGMENT_SHADER:
-            if ( mFragmentShaders.find( id ) == mFragmentShaders.end() || mNumReloads) {
-                source = openFileWithIncludeParsing( id + ".fsh" );
-                mFragmentShaders[id] = std::make_shared<Shader>( stype, id, source.c_str());
+            if ( mFragmentShaders.find( id ) == mFragmentShaders.end() ) {
+                mFragmentShaders[id] = std::make_shared<Shader>( stype, id);
             }
             break;
         case Shader::TYPE_COMPUTE_SHADER:
-            if ( mComputeShaders.find( id ) == mComputeShaders.end() || mNumReloads) {
-                source = openFileWithIncludeParsing( id + ".csh" );
-                mComputeShaders[id] = std::make_shared<Shader>( stype, id, source.c_str());
+            if ( mComputeShaders.find( id ) == mComputeShaders.end() ) {
+                mComputeShaders[id] = std::make_shared<Shader>( stype, id);
             }
             break;
         default:
@@ -148,7 +174,41 @@ void ShaderManager::addShader( const std::string& id, Shader::Type stype ) {
     }
 }
 
-bool ShaderManager::loadProgram( const ShaderBuilder& sb ) {
+void ShaderManager::addShader( const std::string& id, Shader::Type stype ) {
+    //LOGI("Adding vertex shader: %s", id);
+    if ( id.empty() ) return;
+
+    switch ( stype ) {
+        case Shader::TYPE_VERTEX_SHADER:
+            mVertexShaders[id]->setSource( openFileWithIncludeParsing( id + ".vsh" ) );
+            mVertexShaders[id]->compile();
+            break;
+        case Shader::TYPE_TESSELATION_CONTROL_SHADER:
+            mTesselationControlShaders[id]->setSource( openFileWithIncludeParsing( id + ".tch" ) );
+            mTesselationControlShaders[id]->compile();
+            break;
+        case Shader::TYPE_TESSELATION_EVALUATION_SHADER:
+            mTesselationEvaluationShaders[id]->setSource(  openFileWithIncludeParsing( id + ".teh" ) );
+            mTesselationEvaluationShaders[id]->compile();
+            break;
+        case Shader::TYPE_GEOMETRY_SHADER:
+            mGeometryShaders[id]->setSource( openFileWithIncludeParsing( id + ".gsh" ) );
+            mGeometryShaders[id]->compile();
+            break;
+        case Shader::TYPE_FRAGMENT_SHADER:
+            mFragmentShaders[id]->setSource( openFileWithIncludeParsing( id + ".fsh" ) );
+            mFragmentShaders[id]->compile();
+            break;
+        case Shader::TYPE_COMPUTE_SHADER:
+            mComputeShaders[id]->setSource( openFileWithIncludeParsing( id + ".csh" ) );
+            mComputeShaders[id]->compile();
+            break;
+        default:
+            break;
+    }
+}
+
+bool ShaderManager::loadProgram( const ShaderProgramDesc& sb ) {
 
     if ( mPrograms.find( sb.name ) == mPrograms.end() ) {
         mPrograms[sb.name] = std::make_shared<ProgramOpenGL>( sb.name,
@@ -160,76 +220,52 @@ bool ShaderManager::loadProgram( const ShaderBuilder& sb ) {
                                                               sb.computeShader );
     }
 
-    addShader( sb.vertexShader, Shader::TYPE_VERTEX_SHADER );
-    addShader( sb.tessControlShader, Shader::TYPE_TESSELATION_CONTROL_SHADER );
-    addShader( sb.tessEvaluationShader, Shader::TYPE_TESSELATION_EVALUATION_SHADER );
-    addShader( sb.geometryShader, Shader::TYPE_GEOMETRY_SHADER );
-    addShader( sb.fragmentShader, Shader::TYPE_FRAGMENT_SHADER );
-    addShader( sb.computeShader, Shader::TYPE_COMPUTE_SHADER );
+    auto program = mPrograms[sb.name];
 
-    auto ret = createProgram( mPrograms[sb.name], "", "" );
-    return ret;
+    return program->createOrUpdate(  vshForProgram(program),
+                                     tchForProgram(program),
+                                     tehForProgram(program),
+                                     gshForProgram(program),
+                                     fshForProgram(program),
+                                     cshForProgram(program) );
 }
 
-void ShaderManager::init( const std::string& cacheFolder, const std::string& cacheLabel ) {
-    // This will clear all the handles for all the shaders
-    for ( auto& s : mVertexShaders ) s.second->clear();
-    for ( auto& s : mTesselationControlShaders ) s.second->clear();
-    for ( auto& s : mTesselationEvaluationShaders ) s.second->clear();
-    for ( auto& s : mGeometryShaders ) s.second->clear();
-    for ( auto& s : mFragmentShaders ) s.second->clear();
-    for ( auto& s : mComputeShaders ) s.second->clear();
+void ShaderManager::injectShadersWithCode() {
 
-    for ( auto& s : mPrograms ) s.second->clear();
-
-    // We now need to compile the shaders
-    LOGR( "Compiling %d programs", mPrograms.size());
-    for ( ProgramMap::iterator it = mPrograms.begin(); it != mPrograms.end(); ++it ) {
-        createProgram( it->second, cacheFolder, cacheLabel );
+    for ( const auto& shader : mVertexShaders ) {
+        addShader( shader.first, Shader::TYPE_VERTEX_SHADER );
     }
-}
-
-void ShaderManager::addToShaderList( const std::vector<std::string>& shadersFileNames, Shader::Type st ) {
-    for ( auto& vsh : shadersFileNames ) {
-        size_t extPos = vsh.find_last_of( "." );
-        ASSERT( extPos != std::string::npos );
-        std::string vshName = vsh.substr( 0, extPos );
-        ShaderList::addShader( ShaderSource( vshName, vsh, st ));
+    for ( const auto& shader : mTesselationControlShaders ) {
+        addShader( shader.first, Shader::TYPE_TESSELATION_CONTROL_SHADER );
+    }
+    for ( const auto& shader : mTesselationEvaluationShaders ) {
+        addShader( shader.first, Shader::TYPE_TESSELATION_EVALUATION_SHADER );
+    }
+    for ( const auto& shader : mGeometryShaders ) {
+        addShader( shader.first, Shader::TYPE_GEOMETRY_SHADER );
+    }
+    for ( const auto& shader : mFragmentShaders ) {
+        addShader( shader.first, Shader::TYPE_FRAGMENT_SHADER );
+    }
+    for ( const auto& shader : mComputeShaders ) {
+        addShader( shader.first, Shader::TYPE_COMPUTE_SHADER );
     }
 }
 
 bool ShaderManager::loadShaders() {
 
-    createCCInjectionMap();
+    injectShadersWithCode();
 
-    if ( !loadProgram( ShaderBuilder{ S::WIREFRAME } ) ) return false;
-    if ( !loadProgram( ShaderBuilder{ S::SKYBOX } )) return false;
-    if ( !loadProgram( ShaderBuilder{ S::SHADOW_MAP } )) return false;
-    if ( !loadProgram( ShaderBuilder{ S::FONT_2D }.vsh( "vertex_shader_2d_font" ).fsh( "plain_font" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::FONT }.vsh( "vertex_shader_3d_font" ).fsh( "plain_font" ))) return false;
-    if ( !loadProgram(
-            ShaderBuilder{ S::BLUR_HORIZONTAL }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_blur_horizontal" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::BLUR_VERTICAL }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_blur_vertical" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::FINAL_COMBINE }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_final_combine" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::COLOR_2D }.vsh( "vertex_shader_2d_c" ).fsh( "fragment_shader_color" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::COLOR_3D }.vsh( "vertex_shader_3d_c" ).fsh( "fragment_shader_color" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::TEXTURE_2D }.vsh( "vertex_shader_2d_t" ).fsh( "fragment_shader_texture" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::TEXTURE_3D }.vsh( "vertex_shader_3d_t" ).fsh( "fragment_shader_texture" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::EQUIRECTANGULAR }.vsh( "equirectangular" ).fsh( "equirectangular" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::PLAIN_CUBEMAP }.vsh( "plain_cubemap" ).fsh( "plain_cubemap" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::CONVOLUTION }.vsh( "plain_cubemap" ).fsh( "irradiance_convolution" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::IBL_SPECULAR }.vsh( "plain_cubemap" ).fsh( "ibl_specular_prefilter" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::IBL_BRDF }.vsh( "vertex_shader_brdf" ).fsh( "plain_brdf" ))) return false;
-    if ( !loadProgram( ShaderBuilder{ S::SH }.vsh( "vertex_shader_3d_sh" ).fsh( "plain_sh" ))) return false;
-    if ( !loadProgram(
-            ShaderBuilder{ S::SH_NOTEXTURE }.vsh( "vertex_shader_3d_sh_notexture" ).fsh( "plain_sh_notexture" ))) return false;
+    for ( const auto& pd : programDescs ) {
+        loadProgram( pd );
+    }
 
     mNumReloads++;
     return true;
 }
 
 std::shared_ptr<ProgramOpenGL> ShaderManager::P( const std::string& id ) const {
-    ProgramMap::const_iterator it = mPrograms.find( id );
+    auto it = mPrograms.find( id );
 
     if ( it != mPrograms.end()) {
         return it->second;
@@ -239,39 +275,48 @@ std::shared_ptr<ProgramOpenGL> ShaderManager::P( const std::string& id ) const {
     return nullptr;
 }
 
-bool ShaderManager::createProgram( std::shared_ptr<ProgramOpenGL> program, const std::string& cacheFolder,
-                                   const std::string& cacheLabel ) {
+std::shared_ptr<Shader> ShaderManager::vshForProgram( std::shared_ptr<ProgramOpenGL> program ) {
     auto vsIt = mVertexShaders.find( program->getVertexShaderId());
-    auto tcsIt = mTesselationControlShaders.find( program->getTesselationControlShaderId());
-    auto tesIt = mTesselationEvaluationShaders.find( program->getTesselationEvaluationShaderId());
-    auto gsIt = mGeometryShaders.find( program->getGeometryShaderId());
-    auto fsIt = mFragmentShaders.find( program->getFragmentShaderId());
-    auto csIt = mComputeShaders.find( program->getComputeShaderId());
+    return vsIt != mVertexShaders.end() ? vsIt->second : nullptr;
+}
 
-    auto ret =
-    program->createOrUpdate( vsIt != mVertexShaders.end() ? vsIt->second : nullptr,
-                             tcsIt != mTesselationControlShaders.end() ? tcsIt->second : nullptr,
-                             tesIt != mTesselationEvaluationShaders.end() ? tesIt->second : nullptr,
-                             gsIt != mGeometryShaders.end() ? gsIt->second : nullptr,
-                             fsIt != mFragmentShaders.end() ? fsIt->second : nullptr,
-                             csIt != mComputeShaders.end() ? csIt->second : nullptr,
-                             cacheFolder, cacheLabel, CreateUpdateFlag::Create );
+std::shared_ptr<Shader> ShaderManager::tchForProgram( std::shared_ptr<ProgramOpenGL> program ) {
+    auto vsIt = mTesselationControlShaders.find( program->getTesselationControlShaderId());
+    return vsIt != mTesselationControlShaders.end() ? vsIt->second : nullptr;
+}
 
-    if ( ret ) {
-        mProgramsIds.push_back( program );
-        return true;
-    }
+std::shared_ptr<Shader> ShaderManager::tehForProgram( std::shared_ptr<ProgramOpenGL> program ) {
+    auto vsIt = mTesselationEvaluationShaders.find( program->getTesselationEvaluationShaderId());
+    return vsIt != mTesselationEvaluationShaders.end() ? vsIt->second : nullptr;
+}
 
-    return false;
+std::shared_ptr<Shader> ShaderManager::gshForProgram( std::shared_ptr<ProgramOpenGL> program ) {
+    auto vsIt = mGeometryShaders.find( program->getGeometryShaderId());
+    return vsIt != mGeometryShaders.end() ? vsIt->second : nullptr;
+}
+
+std::shared_ptr<Shader> ShaderManager::fshForProgram( std::shared_ptr<ProgramOpenGL> program ) {
+    auto vsIt = mFragmentShaders.find( program->getFragmentShaderId());
+    return vsIt != mFragmentShaders.end() ? vsIt->second : nullptr;
+}
+
+std::shared_ptr<Shader> ShaderManager::cshForProgram( std::shared_ptr<ProgramOpenGL> program ) {
+    auto vsIt = mComputeShaders.find( program->getComputeShaderId());
+    return vsIt != mComputeShaders.end() ? vsIt->second : nullptr;
 }
 
 int ShaderManager::getProgramCount() const {
     return static_cast<int>( mPrograms.size());
 }
 
-void ShaderManager::setCacheData( const std::string& cacheFolder, const std::string& cacheLabel ) {
-    mCacheFolder = cacheFolder;
-    mCacheLabel = cacheLabel;
+std::vector<GLuint> ShaderManager::ProgramsHandles() const {
+    std::vector<GLuint> ret;
+
+    for ( const auto& [k,v] : mPrograms ) {
+        ret.emplace_back(v->handle());
+    }
+
+    return ret;
 }
 
-const std::vector<std::shared_ptr<ProgramOpenGL>>& ShaderManager::Programs() const { return mProgramsIds; }
+

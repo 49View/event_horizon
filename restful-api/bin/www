@@ -82,12 +82,8 @@ io.sockets.on('connection', async (socket) => {
   // }
 
   socket.on('message', function (message) {
-    let msg = message.msg;
-    console.log('message: '+msg);
-
-    if (msg==="ping") {
-      socket.emit('message', {msg: "pong"} );
-    }
+    console.log("[WEB-SOCKET] emit message");
+    io.emit('message', message );
   });
 });
 
