@@ -65,7 +65,7 @@ public:
     virtual ~ShaderManager() = default;
 
 public:
-    void addShader( const std::string& id, Shader::Type stype );
+    bool addShader( const std::string& id, Shader::Type stype );
     bool loadProgram( const ShaderProgramDesc& sb );
 
     // OpenGL init function
@@ -82,9 +82,10 @@ public:
 
 private:
 
+    std::shared_ptr<ProgramOpenGL> initProgram( const ShaderProgramDesc& sb );
     void allocateProgram( const ShaderProgramDesc& _pd );
     void allocateShader( const std::string& id, Shader::Type stype );
-    void injectShadersWithCode();
+    bool injectShadersWithCode();
 
     std::string openFileWithIncludeParsing( const std::string& filename );
     std::string parsePreprocessorMacro( std::string& source );

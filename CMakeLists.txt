@@ -491,8 +491,11 @@ endmacro(link_efsw)
 
 macro(link_boost)
     link_libraries_if("${WIN32}" "boost" "c:/usr/local/lib/" "boost_system")
-    link_libraries_if("${APPLE}" "boost" "/usr/local/lib/" "boost_system")
+    link_libraries_if("${WIN32}" "boost" "c:/usr/local/lib/" "boost_filesystem")
+    link_libraries_if("${APPLE}" "boost" "/usr/local/lib/" "boost_system" )
+    link_libraries_if("${APPLE}" "boost" "/usr/local/lib/" "boost_filesystem" )
     link_libraries_if("${LINUX}" "boost" "/usr/local/lib/" "boost_system")
+    link_libraries_if("${LINUX}" "boost" "/usr/local/lib/" "boost_filesystem")
 endmacro(link_boost)
 
 macro(link_sockets)

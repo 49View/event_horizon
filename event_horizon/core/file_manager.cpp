@@ -248,9 +248,11 @@ namespace FileManager {
     std::string readLocalTextFile( const std::string& filename ) {
         std::ifstream ifs( filename );
 
-        if ( !ifs.is_open()) throw "Error opening local file " + filename;
-
         std::string content;
+        if ( !ifs.is_open()) {
+            LOGR("Error opening local file %s", filename.c_str());
+            return content;
+        }
 
         ifs.seekg( 0, std::ios::end );
         content.reserve( ifs.tellg());
@@ -259,6 +261,24 @@ namespace FileManager {
         content.assign(( std::istreambuf_iterator<char>( ifs )), std::istreambuf_iterator<char>());
 
         return content;
+    }
+
+    std::vector<std::string> readLocalTextFileLineByLine( const std::string& filename ) {
+        std::ifstream ifs( filename );
+
+        std::vector<std::string> ret{};
+        if ( !ifs.is_open()) {
+            LOGR("Error opening local file %s", filename.c_str());
+            return ret;
+        }
+
+        std::string line;
+        while (!ifs.eof()) {
+            std::getline( ifs, line );
+            ret.emplace_back( line );
+        }
+
+        return ret;
     }
 
     std::string readLocalTextFile( const std::wstring& filename ) {
@@ -270,7 +290,7 @@ namespace FileManager {
         std::ofstream outputFile = std::ofstream( dst_path, std::ios::out | std::ios::binary );
 
         inputFile.seekg( 0, inputFile.end );
-        size_t length = inputFile.tellg();
+        size_t length = static_cast<size_t>(inputFile.tellg());
         inputFile.seekg( 0, inputFile.beg );
 
         // read the entire file table block into memory
@@ -327,6 +347,18 @@ namespace FileManager {
         return false;
     }
 
+    bool writeLocalFile( const std::string& filename, const std::vector<std::string>& s ) {
+        std::ofstream fp(filename);
+        if ( fp.is_open()) {
+            for ( const auto& si : s ) {
+                fp << si << std::endl;
+            }
+            fp.close();
+            return true;
+        }
+        return false;
+    }
+
     bool writeLocalFile( const std::string& filename, const std::stringstream& ss ) {
         std::ofstream fp(filename);
         if ( fp.is_open()) {
@@ -360,6 +392,5 @@ namespace FileManager {
             writeRemoteFile( dest, reinterpret_cast<const char *>(b.get()), l, _filenameEnc );
         }
     }
-
 
 }

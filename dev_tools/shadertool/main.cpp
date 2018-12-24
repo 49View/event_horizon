@@ -10,21 +10,108 @@
 #include <graphics/platform_graphics.hpp>
 #include <graphics/shader_manager.h>
 #include <core/http/basen.hpp>
+#include <boost/filesystem.hpp>
 
-JSONDATA(ShaderMap, msg, shaders)
-    std::string msg = "shaderchange";
-    std::vector<std::pair<std::string, std::string>> shaders;
-    std::string flattenJsonSpaced() const {
-        std::stringstream ret;
+using namespace boost::filesystem;
 
-        for ( const auto& p : shaders ) {
-            ret << " " << p.first << " " << p.second;
-        }
+const std::string cachedFileName = ".cachedShaderMap.txt";
 
-        return ret.str();
-    }
-    size_t count() const { return shaders.size(); }
+JSONDATA(FileCheck, filename, lastWriteTime, size, hash)
+
+    FileCheck( const std::string& filename, uint64_t lastWriteTime, uint64_t size, uint64_t hash ) : filename(
+            filename ), lastWriteTime( lastWriteTime ), size( size ), hash( hash ) {}
+
+    std::string filename;
+    uint64_t lastWriteTime = 0;
+    uint64_t size = 0;
+    uint64_t hash = 0;
 };
+
+bool operator ==(const FileCheck &a, const FileCheck &b) {
+    return ( a.filename == b.filename &&
+         a.lastWriteTime == b.lastWriteTime &&
+         a.size == b.size &&
+         a.hash == b.hash );
+}
+
+bool operator !=(const FileCheck &a, const FileCheck &b) {
+    return !(a == b);
+}
+
+using CacheCheckMap = std::unordered_map<std::string, FileCheck>;
+
+struct FileCheckSort
+{
+    inline bool operator() (const FileCheck& struct1, const FileCheck& struct2)
+    {
+        return (struct1.filename < struct2.filename);
+    }
+};
+
+std::vector<FileCheck> getFilesInFolder( const std::string& _folder ) {
+
+    std::vector<FileCheck> ret;
+
+    path p (_folder);
+
+    try {
+        if (exists(p) && is_directory(p) ) {
+            for (directory_entry& x : directory_iterator(p)) {
+                auto filename = x.path().generic_string();
+
+                if ( x.status().type() == file_type::regular_file && filename.find("./.") == std::string::npos ) {
+                    ret.emplace_back(FileCheck{getFileName(filename), static_cast<uint64_t >(last_write_time(x)), file_size(x), 0 });
+                }
+            }
+        } else {
+            std::cout << p << " is not a directory\n";
+        }
+    } catch (const filesystem_error& ex) {
+        std::cout << ex.what() << '\n';
+    }
+
+    std::sort( ret.begin(), ret.end(), FileCheckSort() );
+
+    return ret;
+}
+
+void saveCachedFile( const std::vector<FileCheck>& files ) {
+    std::vector<std::string> entries;
+    for ( const auto& f : files ) {
+        entries.emplace_back( f.serialize() );
+    }
+    FM::writeLocalFile( cachedFileName, entries );
+}
+
+CacheCheckMap getCachedFile( const std::vector<FileCheck>& files ) {
+    CacheCheckMap ret{};
+
+    auto ls = FM::readLocalTextFileLineByLine(cachedFileName);
+
+    if ( ls.empty() ) {
+        for ( const auto& fc : files ) {
+            ret.insert( {fc.filename, fc} );
+        }
+    } else {
+        for ( const auto& fc : ls ) {
+            if ( fc.empty() ) continue;
+            auto fcs = FileCheck{ fc };
+            ret.insert( {fcs.filename, fcs} );
+        }
+    }
+
+    saveCachedFile( files );
+
+    return ret;
+}
+
+bool checkFileChanged( const FileCheck& _fc, const CacheCheckMap& _cache ) {
+
+    if ( const auto& entry = _cache.find(_fc.filename); entry != _cache.end() ) {
+        return entry->second != _fc;
+    }
+    return true;
+}
 
 int main( int argc, [[maybe_unused]] char *argv[] ) {
 
@@ -57,38 +144,33 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
 
     ShaderManager sm;
 
-    std::system( "ls * > files.txt" );
-    std::ifstream ifs( "files.txt" );
+    auto files = getFilesInFolder(".");
 
-    if ( !ifs.is_open()) throw "Error opening file list";
+    if ( files.empty() ) return 1; // what no files???
+
+    auto filesCached = getCachedFile(files);
 
     std::stringstream shaderHeader;
-    ShaderMap shaderEmit;
+    ShaderLiveUpdateMap shaderEmit;
     shaderHeader << "static std::unordered_map<std::string, std::string> gShaderInjection{\n";
-    std::string line;
-    while (std::getline(ifs, line)) {
-        std::istringstream iss(line);
-        if ( !line.empty() ) {
-            std::string fkey = (getFileNameExt(line) == ".glsl") ? getFileNameNoExt(line) : line;
-            std::string fileContent = FM::readLocalTextFile( line );
-            auto fileContent64 = bn::encode_b64(fileContent);
-            shaderHeader << "{ \"" << fkey << "\", \"" << fileContent64 << "\"},\n";
-            if ( sm.injectIfChanged(fkey, fileContent64) ) {
-                shaderEmit.shaders.emplace_back( fkey, fileContent64 );
-            }
+    for (const auto& fc : files ) {
+        auto line = fc.filename;
+        std::string fkey = (getFileNameExt(line) == ".glsl") ? getFileNameNoExt(line) : line;
+        std::string fileContent = FM::readLocalTextFile( line );
+        auto fileContent64 = bn::encode_b64(fileContent);
+        shaderHeader << "{ \"" << fkey << "\", \"" << fileContent64 << "\"},\n";
+        if ( checkFileChanged( fc, filesCached) ) {
+            sm.inject(fkey, fileContent64);
+            shaderEmit.shaders.emplace_back( fkey, fileContent64 );
         }
     }
 
     shaderHeader << "};\n";
-    std::system( "rm -f files.txt" );
 
     if ( shaderEmit.count() > 0 && sm.loadShaders() ) {
         FM::writeLocalFile("../shaders.hpp", shaderHeader );
-
         Http::useLocalHost(true);
-        Http::login(LoginFields::Daemon());
-
-        Socket::emit( "shaderchange" + shaderEmit.flattenJsonSpaced() );
+        Socket::emit( shaderEmit.serialize() );
     }
 
     glfwTerminate();

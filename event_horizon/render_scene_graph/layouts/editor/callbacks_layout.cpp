@@ -14,7 +14,8 @@
 
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
 
-void cloudCallback( const std::string& filename ) {
+void cloudCallback( SocketCallbackDataType data ) {
+    std::string filename = url_decode( data["name"].GetString() );
     for ( const auto& [k,func] : daemonEntityCallbacks ) {
         if ( filename.find(DaemonPaths::store(k)) != std::string::npos ) {
             FM::readRemoteSimpleCallback( filename, [&](const Http::Result& _res) {

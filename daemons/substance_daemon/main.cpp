@@ -146,7 +146,7 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
     Http::login(LoginFields::Daemon());
 
 //    initDeamon();
-    Socket::on( "cloudStorageFileUpdate", []( const rapidjson::Document& data ) {
+    Socket::on( "cloudStorageFileUpdate", []( SocketCallbackDataType data ) {
         std::string filename = url_decode( data["name"].GetString() );
         if ( filename.find(DaemonPaths::upload(EntityGroup::Material)) != std::string::npos ){
             elaborateMat( filename );

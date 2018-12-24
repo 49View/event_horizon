@@ -104,7 +104,7 @@ public:
 protected:
 	void activate();
 
-	void reloadShaders(const std::string& _data);
+	void reloadShaders( SocketCallbackDataType _data );
 
 protected:
 	std::shared_ptr<SceneLayout> layout;

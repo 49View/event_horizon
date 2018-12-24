@@ -39,29 +39,26 @@ namespace Socket {
 
         LOGR( "[WEB-SOCKET-MESSAGE] %s", _message.c_str());
 
-//        rapidjson::Document document;
-////        document.Parse( _message.c_str() );
-//        document.Parse( "{ \'msg\': \"urca\" }" );
-//
-//        if (!document.IsObject()) {
-//            LOGR( "[WEB-SOCKET] [ERROR] Document not an object" );
-//            return;
-//        }
-//        if (!document.HasMember("msg")) {
-//            LOGR( "[WEB-SOCKET] [ERROR] Document msg entry missing" );
-//            return;
-//        }
-//        if (!document["msg"].IsString()) {
-//            LOGR( "[WEB-SOCKET] [ERROR] Document msg NOT a string" );
-//            return;
-//        }
-//
-//        auto msg = document["msg"].GetString();
+        rapidjson::Document document;
+        document.Parse( _message.c_str() );
 
-        auto commands = split( _message, " " );
-        auto msg = commands[0];
-        if ( auto fi = callbacksMap.find(msg); fi != callbacksMap.end() ) {
-            fi->second( _message );
+        if (!document.IsObject()) {
+            LOGR( "[WEB-SOCKET] [ERROR] Document not an object" );
+            return;
+        }
+        if (!document.HasMember("msg")) {
+            LOGR( "[WEB-SOCKET] [ERROR] Document msg entry missing" );
+            return;
+        }
+        if (!document["msg"].IsString()) {
+            LOGR( "[WEB-SOCKET] [ERROR] Document msg NOT a string" );
+            return;
+        }
+
+        auto msg = document["msg"].GetString();
+
+        if ( auto fi = callbacksMap.find(std::string(msg)); fi != callbacksMap.end() ) {
+            fi->second( document );
         }
     }
 }

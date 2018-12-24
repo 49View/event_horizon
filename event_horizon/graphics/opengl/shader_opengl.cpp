@@ -55,13 +55,11 @@ GLuint Shader::compile() {
 			std::cout << infoBuffer << std::endl;
 
 			mHandle = 0;
-			ASSERT( 0 );
-			return mHandle;
+			return 0;
 		}
 	} else {
 		LOGE( "Cound not create shader: %s", mId.c_str() );
-		ASSERT( false );
 		return 0;
 	}
-	return 0;
+
 }

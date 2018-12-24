@@ -130,15 +130,14 @@ void Scene::activate() {
 	mbActivated = true;
 }
 
-void Scene::reloadShaders( const std::string& _data ) {
-	auto commands = split( _data, " " );
+void Scene::reloadShaders( SocketCallbackDataType _data ) {
 
-	if ( commands.size() >= 3 && commands.size() % 2 == 1 ) {
-		for ( size_t si = 1; si < commands.size(); si += 2 ) {
-			rr.injectShader( commands[si], commands[si+1] );
-		}
-		cq.script( "reload shaders" );
+	ShaderLiveUpdateMap shadersToUpdate{_data};
+
+	for ( const auto& ss : shadersToUpdate.shaders ) {
+		rr.injectShader( ss.first, ss.second );
 	}
+	cq.script( "reload shaders" );
 }
 
 void Scene::enableInputs( bool _bEnabled ) {

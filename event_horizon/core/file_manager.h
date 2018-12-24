@@ -218,9 +218,11 @@ namespace FileManager {
 											  bool addTrailingZero = false );
 	std::string readLocalTextFile( const std::string& filename );
 	std::string readLocalTextFile( const std::wstring& filename );
+    std::vector<std::string> readLocalTextFileLineByLine( const std::string& filename );
 	bool writeLocalFile( const std::string& filename, const char *buff, uint64_t length, bool isFullPath = false );
 	bool writeLocalFile( const std::string& filename, const rapidjson::StringBuffer& s, bool isFullPath = false );
     bool writeLocalFile( const std::string& filename, const std::vector<unsigned char>& s );
+    bool writeLocalFile( const std::string& filename, const std::vector<std::string>& s );
     bool writeLocalFile( const std::string& filename, const std::string& s );
     bool writeLocalFile( const std::string& filename, const std::stringstream& s );
     bool writeLocalTextFile( const std::string& filename, const std::string& s, bool isFullPath = false );

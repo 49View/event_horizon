@@ -174,42 +174,42 @@ void ShaderManager::allocateShader( const std::string& id, Shader::Type stype ) 
     }
 }
 
-void ShaderManager::addShader( const std::string& id, Shader::Type stype ) {
+bool ShaderManager::addShader( const std::string& id, Shader::Type stype ) {
     //LOGI("Adding vertex shader: %s", id);
-    if ( id.empty() ) return;
+    if ( id.empty() ) return true;
 
     switch ( stype ) {
         case Shader::TYPE_VERTEX_SHADER:
             mVertexShaders[id]->setSource( openFileWithIncludeParsing( id + ".vsh" ) );
-            mVertexShaders[id]->compile();
+            return mVertexShaders[id]->compile();
             break;
         case Shader::TYPE_TESSELATION_CONTROL_SHADER:
             mTesselationControlShaders[id]->setSource( openFileWithIncludeParsing( id + ".tch" ) );
-            mTesselationControlShaders[id]->compile();
+            return mTesselationControlShaders[id]->compile();
             break;
         case Shader::TYPE_TESSELATION_EVALUATION_SHADER:
             mTesselationEvaluationShaders[id]->setSource(  openFileWithIncludeParsing( id + ".teh" ) );
-            mTesselationEvaluationShaders[id]->compile();
+            return mTesselationEvaluationShaders[id]->compile();
             break;
         case Shader::TYPE_GEOMETRY_SHADER:
             mGeometryShaders[id]->setSource( openFileWithIncludeParsing( id + ".gsh" ) );
-            mGeometryShaders[id]->compile();
+            return mGeometryShaders[id]->compile();
             break;
         case Shader::TYPE_FRAGMENT_SHADER:
             mFragmentShaders[id]->setSource( openFileWithIncludeParsing( id + ".fsh" ) );
-            mFragmentShaders[id]->compile();
+            return mFragmentShaders[id]->compile();
             break;
         case Shader::TYPE_COMPUTE_SHADER:
             mComputeShaders[id]->setSource( openFileWithIncludeParsing( id + ".csh" ) );
-            mComputeShaders[id]->compile();
+            return mComputeShaders[id]->compile();
             break;
         default:
+            return false;
             break;
     }
 }
 
-bool ShaderManager::loadProgram( const ShaderProgramDesc& sb ) {
-
+std::shared_ptr<ProgramOpenGL> ShaderManager::initProgram( const ShaderProgramDesc& sb ) {
     if ( mPrograms.find( sb.name ) == mPrograms.end() ) {
         mPrograms[sb.name] = std::make_shared<ProgramOpenGL>( sb.name,
                                                               sb.vertexShader,
@@ -220,44 +220,60 @@ bool ShaderManager::loadProgram( const ShaderProgramDesc& sb ) {
                                                               sb.computeShader );
     }
 
-    auto program = mPrograms[sb.name];
-
-    return program->createOrUpdate(  vshForProgram(program),
-                                     tchForProgram(program),
-                                     tehForProgram(program),
-                                     gshForProgram(program),
-                                     fshForProgram(program),
-                                     cshForProgram(program) );
+    return mPrograms[sb.name];
 }
 
-void ShaderManager::injectShadersWithCode() {
+bool ShaderManager::loadProgram( const ShaderProgramDesc& sb ) {
 
+    auto program = initProgram(sb);
+
+    return program->createOrUpdate( vshForProgram(program),
+                                    tchForProgram(program),
+                                    tehForProgram(program),
+                                    gshForProgram(program),
+                                    fshForProgram(program),
+                                    cshForProgram(program) );
+}
+
+bool ShaderManager::injectShadersWithCode() {
+
+    bool successfullChain = true;
     for ( const auto& shader : mVertexShaders ) {
-        addShader( shader.first, Shader::TYPE_VERTEX_SHADER );
+        successfullChain = addShader( shader.first, Shader::TYPE_VERTEX_SHADER );
+        if ( !successfullChain ) return false;
     }
     for ( const auto& shader : mTesselationControlShaders ) {
-        addShader( shader.first, Shader::TYPE_TESSELATION_CONTROL_SHADER );
+        successfullChain = addShader( shader.first, Shader::TYPE_TESSELATION_CONTROL_SHADER );
+        if ( !successfullChain ) return false;
     }
     for ( const auto& shader : mTesselationEvaluationShaders ) {
-        addShader( shader.first, Shader::TYPE_TESSELATION_EVALUATION_SHADER );
+        successfullChain = addShader( shader.first, Shader::TYPE_TESSELATION_EVALUATION_SHADER );
+        if ( !successfullChain ) return false;
     }
     for ( const auto& shader : mGeometryShaders ) {
-        addShader( shader.first, Shader::TYPE_GEOMETRY_SHADER );
+        successfullChain = addShader( shader.first, Shader::TYPE_GEOMETRY_SHADER );
+        if ( !successfullChain ) return false;
     }
     for ( const auto& shader : mFragmentShaders ) {
-        addShader( shader.first, Shader::TYPE_FRAGMENT_SHADER );
+        successfullChain = addShader( shader.first, Shader::TYPE_FRAGMENT_SHADER );
+        if ( !successfullChain ) return false;
     }
     for ( const auto& shader : mComputeShaders ) {
-        addShader( shader.first, Shader::TYPE_COMPUTE_SHADER );
+        successfullChain = addShader( shader.first, Shader::TYPE_COMPUTE_SHADER );
+        if ( !successfullChain ) return false;
     }
+    return true;
 }
 
 bool ShaderManager::loadShaders() {
 
-    injectShadersWithCode();
+    bool compilationResult = injectShadersWithCode();
+
+    if ( !compilationResult ) return false;
 
     for ( const auto& pd : programDescs ) {
-        loadProgram( pd );
+        compilationResult = loadProgram( pd );
+        if ( !compilationResult ) return false;
     }
 
     mNumReloads++;
