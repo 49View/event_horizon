@@ -131,6 +131,7 @@ void Renderer::directRenderLoop() {
             target->addToCB( CB_U() );
         }
     }
+
     CB_U().end();
 
 //    VRM.preRender();
@@ -170,7 +171,6 @@ void Renderer::renderCommands( int eye ) {
 }
 
 std::shared_ptr<VPList> Renderer::VPL( const int _bucket,
-                                       [[maybe_unused]] const std::string& _key,
                                        std::shared_ptr<Matrix4f> m,
                                        float alpha ) {
     auto nvp = std::make_shared<VPList>(m);

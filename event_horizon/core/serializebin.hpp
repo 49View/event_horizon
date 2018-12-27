@@ -20,7 +20,7 @@ enum class SerializeVersionFormat {
 	UInt64
 };
 
-static const uint64_t SBinVersion = 2030;
+static const uint64_t SBinVersion = 2040;
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:

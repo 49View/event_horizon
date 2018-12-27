@@ -11,11 +11,9 @@
 #include "geom_builder.h"
 #include "poly/lightmap_exchange_format.h"
 
-int64_t HierGeom::globalHierHash = 1000000000;
-
 HierGeom::HierGeom() {
-    mHash = ++globalHierHash;
-    mName = std::to_string( mHash );
+    mHash = UUIDGen::make();
+    mName = "Default";
     mLocalHierTransform = std::make_shared<Matrix4f>(Vector4f( 1.0f, 0.0f, 0.0f, 0.0f ),
                                                      Vector4f( 0.0f, 1.0f, 0.0f, 0.0f ),
                                                      Vector4f( 0.0f, 0.0f, 1.0f, 0.0f ),
@@ -376,7 +374,7 @@ void HierGeom::getGeomWithName( const std::string& _name, std::vector<HierGeom *
     }
 }
 
-void HierGeom::removeChildrenWithHash( int64_t _hash ) {
+void HierGeom::removeChildrenWithHash( const UUID& _hash ) {
     children.erase( remove_if( children.begin(), children.end(),
                                [_hash]( std::shared_ptr<HierGeom> const& us ) -> bool { return us->Hash() == _hash; } ),
                     children.end());
@@ -398,7 +396,7 @@ void HierGeom::removeChildrenWithType( GeomHierType gt ) {
     }
 }
 
-void HierGeom::getGeomWithHash( int64_t _hash, HierGeom *& retG ) {
+void HierGeom::getGeomWithHash( const UUID& _hash, HierGeom *& retG ) {
     bool stopRec = false;
     if ( Hash() == _hash ) {
         retG = this;
@@ -714,7 +712,7 @@ std::shared_ptr<HierGeom> HierGeom::addChildren( const Vector3f& pos,
     return data;
 }
 
-bool HierGeom::isDescendantOf( const int64_t& ancestorHash ) {
+bool HierGeom::isDescendantOf( const UUID& ancestorHash ) {
     if ( mHash == ancestorHash ) return true;
 
     auto f = father;

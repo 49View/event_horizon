@@ -37,8 +37,7 @@ public:
     explicit HierGeom( const Vector3f& pos, const Vector3f& rot = Vector3f::ZERO, const Vector3f& scale = Vector3f::ONE );
     explicit HierGeom( std::shared_ptr<GeomData> data, HierGeom *papa = nullptr );
 
-    int64_t Hash() const { return mHash; }
-    void Hash( const int64_t _hashToSet ) { mHash = _hashToSet; }
+    UUID Hash() const { return mHash; }
     std::string Name() const { return mName; }
     void Name( std::string val ) { mName = val; }
     GeomHierType GHType() const { return mGHType; }
@@ -102,10 +101,10 @@ public:
 
     int numVerts();
 
-    void removeTypeRec( const GeomHierType gt );
+    void removeTypeRec( GeomHierType gt );
     void getGeomOfType( GeomHierType gt, std::vector<HierGeom *>& ret );
     void getGeomWithName( const std::string& _name, std::vector<HierGeom *>& ret );
-    void getGeomWithHash( int64_t _hash, HierGeom *& retG );
+    void getGeomWithHash( const UUID& _hash, HierGeom *& retG );
 
     void Father( HierGeom *val ) { father = val; }
     HierGeom *Father() { return father; }
@@ -118,7 +117,7 @@ public:
 
     Vector3f position() const;
 
-    void removeChildrenWithHash( int64_t _hash );
+    void removeChildrenWithHash( const UUID& _hash );
     void removeChildrenWithType( GeomHierType gt );
 
     void prune();
@@ -146,7 +145,7 @@ public:
     bool CastShadows() const { return mCastShadows; }
     void CastShadows( bool val ) { mCastShadows = val; }
 
-    inline bool isDescendantOf( const int64_t& ancestorHash );
+    inline bool isDescendantOf( const UUID& ancestorHash );
 
     std::vector<Vector3f> getLocatorsPos();
 
@@ -182,7 +181,7 @@ protected:
 
 protected:
     std::string mName;
-    int64_t mHash;
+    UUID mHash;
     GeomHierType mGHType = GHTypeGeneric;
 
     HierGeom *father = nullptr;
@@ -199,6 +198,4 @@ protected:
     bool mCastShadows = true;
 
     std::vector<std::shared_ptr<HierGeom>> children;
-
-    static int64_t globalHierHash;
 };

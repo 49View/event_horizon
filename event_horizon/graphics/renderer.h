@@ -128,8 +128,7 @@ public:
 	CameraManager&  CM() { return cm; }
 	RenderImageDependencyMaker& RIDM() { return ridm; }
 
-	std::shared_ptr<VPList> VPL( const int _bucket, const std::string& _key = "",
-								 std::shared_ptr<Matrix4f> m = nullptr, float alpha = 1.0f);
+	std::shared_ptr<VPList> VPL( const int _bucket, std::shared_ptr<Matrix4f> m = nullptr, float alpha = 1.0f);
 
 	bool hasTag( uint64_t _tag ) const;
 
@@ -263,9 +262,6 @@ public:
 	void drawCone( std::shared_ptr<VPList> _vpl, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
 				   float size, const std::string& _name = "" );
 
-	void drawRect2d( CommandListType clt, const std::string& tname, const JMATH::Rect2f& rect, int zLevel = 0,
-					 const std::string& _vname = staticvpss, const std::string& _name = "" );
-
 	friend class RenderSceneGraph;
 	friend struct HierGeomRenderObserver;
 };
@@ -273,9 +269,8 @@ public:
 template <typename V>
 class VPBuilder {
 public:
-	VPBuilder(Renderer& _rr) : rr(_rr) {}
+	explicit VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl ) : rr(_rr), vpl(_vpl) {};
 
-	VPBuilder& vl( std::shared_ptr<VPList> _vpl ) { vpl = _vpl; return *this; }
 	VPBuilder& c( const Color4f& _matColor ) { matColor = _matColor; return *this; }
 	VPBuilder& a( float _matAlpha ) { matAlpha = _matAlpha; return *this; }
 	VPBuilder& p( std::shared_ptr<V> _ps ) { ps = _ps; return *this; }

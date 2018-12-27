@@ -210,10 +210,12 @@ class DependantBuilder : public BaseBuilder {
     using BaseBuilder::BaseBuilder;
 public:
     virtual void assemble( [[maybe_unused]] DependencyMaker& _md ) {};
-    void build( DependencyMaker& _md ) {
+    UUID build( DependencyMaker& _md ) {
         if ( validate() ) {
             createDependencyList( _md );
+            return UID();
         }
+        return std::string{};
     }
 
     ddContainer& deps()  {

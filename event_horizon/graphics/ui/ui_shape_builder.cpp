@@ -365,7 +365,7 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
 
     rect = Rect2f{ orig, size, true };
 
-    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, vname, mTransform, color.w() );
+    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, mTransform, color.w() );
 
     std::shared_ptr<PosTex3dStrip> vs;
 
@@ -448,7 +448,7 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
         vs->translate( cr );
     }
 
-    VPBuilder<PosTex3dStrip>{rr}.vl(vpList).p(vs).s(shaderName).t(tname).c(color).n(vname).build();
+    VPBuilder<PosTex3dStrip>{rr,vpList}.p(vs).s(shaderName).t(tname).c(color).n(UID()).build();
 }
 
 bool UIShapeBuilder::validate() const {

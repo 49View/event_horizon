@@ -46,7 +46,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 //                k(15.0f, Vector3f{0.0f, -M_PI, 0.0f}).
 //                add(cName);
 //        Timeline::play(cName);
-        GB{ShapeType::Cube}.build(_p->RSG());
+//        GB{ShapeType::Cube}.build(_p->RSG());
         UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RR());
     } );
 }

@@ -7,7 +7,7 @@
 
 void SceneGraph::add( std::shared_ptr<HierGeom> _geom ) {
     addImpl(_geom);
-    geoms[std::to_string(_geom->Hash())] = _geom;
+    geoms[_geom->Hash()] = _geom;
 }
 
 void SceneGraph::add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
