@@ -35,7 +35,6 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
     _p->postActivate( [](Scene* _p) {
         auto c = _p->CM().getCamera(Name::Foxtrot);
         c->goTo( Vector3f{0.0f, 1.0f, 3.0f}, 0.0f);
-
 //        const std::string cName = "urca";
 //        TimelineStream<V3f>{c->PosAnim()}.
 //                  k(0.0f, Vector3f{0.0f, 1.0f, 3.0f}).
@@ -46,10 +45,9 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 //                k(0.0f, Vector3f{0.0f, M_PI, 0.0f}).
 //                k(15.0f, Vector3f{0.0f, -M_PI, 0.0f}).
 //                add(cName);
-//
 //        Timeline::play(cName);
-
-//        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RSG().RR());
+        GB{ShapeType::Cube}.build(_p->RSG());
+        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RR());
     } );
 }
 

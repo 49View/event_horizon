@@ -33,5 +33,6 @@ namespace S {
 	const std::string SHADOW_MAP = "shadowmap";
 
 	const std::string CUSTOM_1 = "SKETCH-UP";
+	const std::string CUSTOM_2 = "ST_CLOUDS";
 };
 

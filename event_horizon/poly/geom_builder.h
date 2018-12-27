@@ -320,3 +320,4 @@ private:
     friend class GeomData;
 };
 
+using GB = GeomBuilder;

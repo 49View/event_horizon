@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 11/01/2018.
 //
@@ -137,11 +139,14 @@ namespace DH = DependencyHandler;
 class BaseBuilder {
 public:
     BaseBuilder() = default;
-    explicit BaseBuilder( const std::string& _name ) : name( _name ) {}
+    explicit BaseBuilder( std::string _name ) : name( std::move( _name )) {}
 
     static const std::string typeName()  { return ""; }
     const std::string& Name() const { return name; }
     void Name( const std::string& _name ) { name = _name; }
+
+    const std::string& UUID() const { return uuid; }
+    void UUID( const std::string& uuid ) { BaseBuilder::uuid = uuid; }
 
     void clearTags() { tags.clear();}
     void addTag( const std::string& _tag ) { tags.emplace(_tag); }
@@ -152,15 +157,8 @@ public:
 
 private:
     std::string name;
+    std::string uuid;
     std::set<std::string> tags;
-};
-
-template <typename T>
-class ConcreteBuilder {
-public:
-    virtual std::shared_ptr<T> build() = 0;
-protected:
-    std::shared_ptr<T> elem;
 };
 
 class ResourceBuilder : public BaseBuilder {

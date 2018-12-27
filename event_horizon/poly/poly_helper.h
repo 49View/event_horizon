@@ -83,9 +83,17 @@ struct GeomMappingData {
     bool bUnitMapping = false;
 };
 
-class GeomDataBuilder : public ConcreteBuilder<GeomData> {
+template <typename T>
+class GeomDataBuilderBase {
 public:
-    virtual ~GeomDataBuilder() {}
+    virtual std::shared_ptr<T> build() = 0;
+protected:
+    std::shared_ptr<T> elem;
+};
+
+class GeomDataBuilder : public GeomDataBuilderBase<GeomData> {
+public:
+    virtual ~GeomDataBuilder() = default;
 protected:
     std::shared_ptr<PBRMaterial> material;
 

@@ -476,7 +476,7 @@ bool UIShapeBuilder::validate() const {
 
 void UIShapeBuilder::createDependencyList( DependencyMaker& _md ) {
 
-    Renderer& rr = static_cast<Renderer&>(_md);
+    auto& rr = static_cast<Renderer&>(_md);
     addDependency<ImageBuilder>( tname, rr.RIDM() );
     addDependency<FontBuilder>( fontName, rr.FM() );
 
