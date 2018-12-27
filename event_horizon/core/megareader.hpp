@@ -357,6 +357,19 @@ public:
 		}
 	}
 
+	template<typename T>
+	void deserialize( const char* name, std::vector<std::vector<T>>& ret ) const {
+		if ( value->FindMember( name ) != value->MemberEnd() ) {
+			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+				std::vector<T> sv;
+				for ( SizeType q = 0; q < ( *( value ) )[name][t].Size(); q++ ) {
+					sv.push_back( T( ( *( value ) )[name][t][q] ) );
+				}
+				ret.push_back( sv );
+			}
+		}
+	}
+
 	void deserialize( const char* name, std::vector<std::vector<double>>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
