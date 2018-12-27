@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 // Created by Dado on 11/01/2018.
 //
@@ -11,10 +9,12 @@
 #include <set>
 #include <string>
 #include <typeinfo>
+#include <utility>
 
 #include "htypes_shared.hpp"
 #include "http/webclient.h"
 #include <core/util.h>
+#include <core/uuid.hpp>
 
 
 using ddContainer = std::vector<std::string>;
@@ -139,14 +139,16 @@ namespace DH = DependencyHandler;
 class BaseBuilder {
 public:
     BaseBuilder() = default;
-    explicit BaseBuilder( std::string _name ) : name( std::move( _name )) {}
+    explicit BaseBuilder( const std::string& _name ) : name( _name ) {
+        uuid = UUIDGen::make();
+    }
+
 
     static const std::string typeName()  { return ""; }
     const std::string& Name() const { return name; }
     void Name( const std::string& _name ) { name = _name; }
 
-    const std::string& UUID() const { return uuid; }
-    void UUID( const std::string& uuid ) { BaseBuilder::uuid = uuid; }
+    const UUID UID() const { return uuid; }
 
     void clearTags() { tags.clear();}
     void addTag( const std::string& _tag ) { tags.emplace(_tag); }
@@ -157,8 +159,8 @@ public:
 
 private:
     std::string name;
-    std::string uuid;
     std::set<std::string> tags;
+    UUID uuid;
 };
 
 class ResourceBuilder : public BaseBuilder {
