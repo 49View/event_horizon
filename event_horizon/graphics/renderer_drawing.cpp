@@ -298,25 +298,4 @@ void Renderer::drawCircle2d( std::shared_ptr<VPList> _vpl, const Vector2f& cente
     VPBuilder<Pos2dStrip>{*this,_vpl}.p(ps).s(S::COLOR_2D).c(color).n(_name).build();
 }
 
-std::shared_ptr<RLTarget> Renderer::getTarget( const std::string& _name ) {
-
-    for ( auto& t : mTargets ) {
-        if ( t->cameraRig->Name() == _name ) return t;
-    }
-
-    return nullptr;
-}
-
-void Renderer::changeTime( const V3f& _solar ) {
-    for ( auto& t : mTargets ) {
-        t->changeTime( _solar );
-    }
-}
-
-void Renderer::invalidateOnAdd() {
-    for ( auto& t : mTargets ) {
-        t->invalidateOnAdd();
-    }
-}
-
 

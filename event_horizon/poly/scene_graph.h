@@ -65,7 +65,6 @@ DEPENDENCY_MAKER_EXIST(geoms);
     void add(std::shared_ptr<HierGeom> _geom);
     void add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials );
     void add(std::shared_ptr<HierGeom> _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials);
-    void cmdChangeTime( const std::vector<std::string>& _params );
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
     void cmdCreateGeometry( const std::vector<std::string>& _params );
@@ -79,6 +78,7 @@ DEPENDENCY_MAKER_EXIST(geoms);
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
     AssetManager& AL() { return al; }
+    SunBuilder& SB() { return sb; }
     void mapGeomType( const uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;
 protected:

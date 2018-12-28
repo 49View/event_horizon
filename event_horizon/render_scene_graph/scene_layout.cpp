@@ -95,7 +95,7 @@ void SceneLayout::resizeCallback( Scene* _target, const Vector2i& _resize ) {
 	for ( auto& [k,v] : boxes ) {
 		if ( v.cc == CameraControls::Fly ) {
 			auto r = v.updateAndGetRect();
-			_target->RR().getTarget( k )->resize( r );
+			_target->getTarget( k )->resize( r );
 			_target->CM().getRig(k)->setViewport( r );
 		}
 	}

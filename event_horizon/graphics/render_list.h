@@ -346,7 +346,6 @@ public:
 
     std::shared_ptr<Camera> getCamera();
     void addToCBCore( CommandBufferList& cb );
-    virtual void afterShaderSetup() {}
     virtual void invalidateOnAdd() {}
     virtual void changeTime( const V3f& solarTime ) {}
     virtual void addToCB( CommandBufferList& cb ) = 0;
@@ -356,7 +355,7 @@ public:
     virtual void blit( CommandBufferList& cbl ) = 0;
     virtual void resize( const Rect2f& _r ) = 0;
 
-    void clearCB( CommandBufferList& cb );
+    void clearCB();
 
     bool isKeyInRange( const int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
 
@@ -472,7 +471,6 @@ public:
     void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
 
     std::shared_ptr<Framebuffer> getShadowMapFB();
-    void afterShaderSetup() override;
 
     void changeTime( const V3f& _solarTime ) override;
     void invalidateOnAdd() override;

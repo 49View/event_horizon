@@ -92,21 +92,7 @@ public:
 	void afterShaderSetup();
 	void injectShader( const std::string& _key, const std::string& content );
 
-	template<typename T>
-	std::shared_ptr<CameraRig> addTarget( const std::string& _name, const Rect2f& _viewport,
-										  BlitType _bt, CameraManager& _cm ) {
-		auto rig = _cm.getRig( _name );
-		if ( !rig ) {
-			rig = _cm.addRig( _name, _viewport );
-			mTargets.push_back( std::make_shared<T>(T{ rig, _viewport, _bt, *this }) );
-		}
-		return rig;
-	}
-
-	std::shared_ptr<RLTarget> getTarget( const std::string& _name );
-
-	void clearTargets();
-	void directRenderLoop();
+	void directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _targets );
 
     void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
@@ -114,7 +100,7 @@ public:
 	std::shared_ptr<Program> P(const std::string& _id);
 	std::shared_ptr<Texture> TD( const std::string& _id, const int tSlot = -1 );
 
-	void addToCommandBuffer( const CommandBufferLimitsT _entry );
+	void addToCommandBuffer( CommandBufferLimitsT _entry );
 	void addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
 							 std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr);
 
@@ -155,7 +141,6 @@ public:
 
 	void MaterialCache( const MaterialType& mt, std::shared_ptr<RenderMaterial> _mat );
 	void MaterialMap( std::shared_ptr<RenderMaterial> _mat );
-	void changeTime( const V3f& _solarTime );
 	void resetDefaultFB();
 
 	std::shared_ptr<Framebuffer> getDefaultFB() {
@@ -199,8 +184,8 @@ protected:
 	std::mutex mCBVPAddMutex;
 	std::mutex mCBTextureAddMutex;
 	bool useMultiThreadRendering;
+	bool bInvalidated = false;
 
-	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	std::map<int, CommandBufferListVector> mCommandLists;
 
 	RenderStats mStats;
@@ -281,7 +266,7 @@ public:
     VPBuilder& t( const std::string& _tex ) { matTexture = _tex; return *this; }
 	VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
 
-	void build();
+	UUID build();
 
 private:
 	Renderer& rr;
@@ -298,7 +283,7 @@ private:
 };
 
 template<typename V>
-void VPBuilder<V>::build() {
+UUID VPBuilder<V>::build() {
 	rr.invalidateOnAdd();
 	auto rmb = RenderMaterialBuilder{rr};
 	if ( material ) {
@@ -307,7 +292,9 @@ void VPBuilder<V>::build() {
 		rmb.p(matShader).c(matColor).m(matName).t(matTexture);
 	}
 	auto rmaterial = rmb.build();
-	auto sid = name.empty() ? VertexProcessing::totalCountS() : name;
+	auto sid = name.empty() ? UUIDGen::make() : name;
 	std::shared_ptr<cpuVBIB> vbib = VertexProcessing::create_cpuVBIB( ps, rmaterial, sid );
 	vpl->create( vbib, tag );
+
+	return sid;
 }

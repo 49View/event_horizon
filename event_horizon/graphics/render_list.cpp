@@ -363,6 +363,7 @@ std::shared_ptr<Skybox> RLTargetPBR::createSkybox() {
 void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, [[maybe_unused]] const Vector3f& _at ) {
 
     auto lSkybox = createSkybox();
+    lSkybox->invalidate();
 
     for ( int t = 0; t < 6; t++ ) {
         auto probe = std::make_shared<RLTargetProbe>( _probeCameraName, t, rr );
@@ -386,10 +387,6 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, [[maybe_unu
         }
     }
     mIBLPrefilterBRDF->render();
-}
-
-void RLTargetPBR::afterShaderSetup() {
-    if ( mSkybox ) mSkybox->invalidate();
 }
 
 void RLTargetPBR::addShadowMaps() {
@@ -609,7 +606,7 @@ void RLTargetPlain::resize( const Rect2f& _r ) {
     cameraRig->setFramebuffer( mComposite->getColorFB() );
 }
 
-void RLTarget::clearCB( [[maybe_unused]] CommandBufferList& cb ) {
+void RLTarget::clearCB() {
     for ( auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange( k, RLClearFlag::DontIncludeCore ) ) {
             vl.mVListTransparent.clear();

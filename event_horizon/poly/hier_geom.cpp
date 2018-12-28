@@ -542,25 +542,24 @@ void HierGeom::commandReposition( const std::vector<std::string>& itr ) {
     }
 }
 
-void HierGeom::generateGeometryVP() {
-    if ( mData->numIndices() < 3 ) return;
-    ASSERT( mData->numIndices() > 2 );
+std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> HierGeom::generateGeometryVP() {
+    if ( mData->numIndices() < 3 ) return nullptr;
+
     std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[mData->numIndices()] );
     std::memcpy( _indices.get(), mData->Indices(), mData->numIndices() * sizeof( int32_t ));
-    mSOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( mData->numVerts(), PRIMITIVE_TRIANGLES,
+    auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( mData->numVerts(), PRIMITIVE_TRIANGLES,
                                                               VFVertexAllocation::PreAllocate, mData->numIndices(),
                                                               _indices );
     for ( int32_t t = 0; t < mData->numVerts(); t++ ) {
-        mSOAData->addVertex( mData->vertexAt( t ), mData->uvAt( t ), mData->uv2At( t ), mData->normalAt( t ),
+        SOAData->addVertex( mData->vertexAt( t ), mData->uvAt( t ), mData->uv2At( t ), mData->normalAt( t ),
                              mData->tangentAt( t ), mData->binormalAt( t ), mData->colorAt(t) );
     }
-
-    notify( shared_from_this(), "generateGeometryVP" );
+    return SOAData;
 }
 
 void HierGeom::generateSOA() {
     if ( mData ) {
-        generateGeometryVP();
+        notify( shared_from_this(), "generateGeometryVP" );
     }
 
     for ( auto& c : Children()) {
@@ -602,7 +601,7 @@ void HierGeom::gatherStats() {
 
 void HierGeom::relightSH( bool includeChildren ) {
     if ( mData != nullptr && mData->numVerts() > 0 ) {
-        generateGeometryVP();
+        notify( shared_from_this(), "generateGeometryVP" );
     }
 
     if ( includeChildren )

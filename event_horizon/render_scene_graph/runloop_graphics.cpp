@@ -59,7 +59,7 @@ void RunLoopGraphics::singleThreadLoop() {
 	WH::imguiUpdateStart();
 	pm->enableInputs(WH::isInputEnabled());
 	pm->render();
-	rr.directRenderLoop();
+	rr.directRenderLoop( pm->Targets() );
 	WH::imguiUpdateEnd();
 	WH::flush();
 //	}

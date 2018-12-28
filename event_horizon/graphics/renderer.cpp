@@ -99,10 +99,6 @@ void Renderer::afterShaderSetup() {
     lm.generateUBO( sm );
     am.generateUBO( sm );
     rcm.generateUBO( sm );
-    for ( const auto& target : mTargets ) {
-        target->afterShaderSetup();
-    }
-
 }
 
 void Renderer::setGlobalTextures() {
@@ -119,18 +115,20 @@ void Renderer::setGlobalTextures() {
     }
 }
 
-void Renderer::directRenderLoop() {
+void Renderer::directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _targets ) {
 
     CB_U().start();
     CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
     CB_U().pushCommand( { CommandBufferCommandName::clearDefaultFramebuffer } );
     CB_U().pushCommand( { CommandBufferCommandName::setGlobalTextures } );
 
-    for ( const auto& target : mTargets ) {
+    for ( const auto& target : _targets ) {
         if ( target->enabled() ) {
+            if ( bInvalidated ) target->invalidateOnAdd();
             target->addToCB( CB_U() );
         }
     }
+    bInvalidated = false;
 
     CB_U().end();
 
@@ -229,6 +227,10 @@ void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color )
     }
 }
 
+void Renderer::invalidateOnAdd() {
+    bInvalidated = true;
+}
+
 void Renderer::setRenderHook( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _hook ) {
     CB_R().getCommandBufferEntry( _key, _hook );
 }
@@ -259,12 +261,6 @@ void Renderer::MaterialMap( std::shared_ptr<RenderMaterial> _mat ) {
 
 std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot ) {
     return tm.TD( _id, tSlot );
-}
-
-void Renderer::clearTargets() {
-    for ( const auto& target : mTargets ) {
-        target->clearCB( CB_U() );
-    }
 }
 
 void RenderAnimationManager::setTiming() {

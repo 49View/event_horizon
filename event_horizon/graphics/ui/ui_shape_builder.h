@@ -36,10 +36,10 @@ enum class UIShapeType {
 class UIShapeBuilder : public Observable<UIShapeBuilder>, public DependantBuilder {
 public:
     using DependantBuilder::DependantBuilder;
-    virtual ~UIShapeBuilder() {}
+    virtual ~UIShapeBuilder() = default;
     void assemble( DependencyMaker& rr ) override;
 
-    UIShapeBuilder( UIShapeType shapeType ) : shapeType( shapeType ) {
+    explicit UIShapeBuilder( UIShapeType shapeType ) : shapeType( shapeType ) {
         defaultFontIfNecessary();
     }
 

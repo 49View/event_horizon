@@ -530,7 +530,7 @@ int RenderSceneGraph::bake(scene_t *scene)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
     free(data);
 
-    rr.clearTargets();
+//    rr.clearTargets();
     rr.TM().addTextureWithGPUHandle( FBNames::lightmap, scene->lightmap, TSLOT_LIGHTMAP );
 
     for ( const auto&[k, v] : geoms ) {

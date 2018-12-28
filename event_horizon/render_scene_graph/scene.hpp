@@ -7,7 +7,6 @@
 
 #include <unordered_map>
 #include <graphics/text_input.hpp>
-#include <graphics/renderer.h>
 #include "core/observer.h"
 #include "core/math/vector2f.h"
 #include "core/math/rect2f.h"
@@ -49,9 +48,24 @@ public:
 
     template <typename T>
     void addViewport( const std::string& _name, const Rect2f& _viewport, BlitType _bt ) {
-        auto lRig = rr.addTarget<T>( _name, _viewport, _bt, cm );
+        auto lRig = addTarget<T>( _name, _viewport, _bt, cm );
         mRigs[lRig->Name()] = lRig;
     }
+
+	template<typename T>
+	std::shared_ptr<CameraRig> addTarget( const std::string& _name, const Rect2f& _viewport,
+										  BlitType _bt, CameraManager& _cm ) {
+		auto rig = _cm.getRig( _name );
+		if ( !rig ) {
+			rig = _cm.addRig( _name, _viewport );
+			mTargets.emplace_back( std::make_shared<T>(T{ rig, _viewport, _bt, rr }) );
+		}
+		return rig;
+	}
+
+	std::shared_ptr<RLTarget> getTarget( const std::string& _name );
+
+	void clearTargets();
 
     void takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata );
 
@@ -68,6 +82,7 @@ public:
 
     void cmdEnableKeyboard( const std::vector<std::string>& params );
     void cmdDisableKeyboard( const std::vector<std::string>& params );
+    void cmdChangeTime( const std::vector<std::string>& params );
 
     void notified( MouseInput& _source, const std::string& generator ) override;
 
@@ -82,6 +97,7 @@ public:
     CameraManager& CM();
     TextureManager& TM();
 	CommandQueue& CQ();
+	std::vector<std::shared_ptr<RLTarget>>& Targets() { return mTargets; }
     std::shared_ptr<Camera> getCamera( const std::string& _name );
 
 	void Layout( std::shared_ptr<SceneLayout> _l );
@@ -89,6 +105,8 @@ public:
 	InitializeWindowFlagsT getLayoutInitFlags() const;
 
 	const std::shared_ptr<ImGuiConsole>& Console() const;
+
+	void changeTime( const V3f& _solarTime );
 
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
 	void postActivate( ScenePostActivateFunc _f ) { postActivateFunc = _f; }
@@ -116,6 +134,7 @@ protected:
     MouseInput& mi;
 	CommandQueue& cq;
 	cameraRigsMap mRigs;
+	std::vector<std::shared_ptr<RLTarget>> mTargets;
 
 protected:
 	bool mbActivated = false;

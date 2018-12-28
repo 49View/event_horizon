@@ -34,7 +34,6 @@ public:
 
 protected:
     void addImpl(std::shared_ptr<HierGeom> _geom) override;
-    void changeTimeImpl( const std::vector<std::string>& _params ) override;
     void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
     void changeMaterialColorTagImpl( const std::vector<std::string>& _params ) override;
     void cmdCreateGeometryImpl( const std::vector<std::string>& _params ) override;

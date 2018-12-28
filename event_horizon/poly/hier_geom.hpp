@@ -129,7 +129,7 @@ public:
     std::vector<unsigned char> serialize();
     bool deserialize( std::shared_ptr<DeserializeBin>& reader );
 
-    const std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>& getSOAData() const { return mSOAData; }
+//    const std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>& getSOAData() const { return mSOAData; }
 
     HierGeom *root();
 
@@ -166,7 +166,7 @@ private:
     void serializeRec( std::shared_ptr<SerializeBin> writer );
     void deserializeRec( std::shared_ptr<DeserializeBin> reader, HierGeom *_father = nullptr );
     void createLocalHierMatrix( Matrix4f cmat );
-    void generateGeometryVP();
+    std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> generateGeometryVP();
 
 protected:
 
@@ -182,20 +182,17 @@ protected:
 protected:
     std::string mName;
     UUID mHash;
-    GeomHierType mGHType = GHTypeGeneric;
-
     HierGeom *father = nullptr;
-    std::shared_ptr<GeomData> mData;
-    std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> mSOAData;
-
+    GeomHierType mGHType = GHTypeGeneric;
     Matrix4f mLocalTransform = Matrix4f::IDENTITY;
     std::shared_ptr<Matrix4f> mLocalHierTransform;
-
     MatrixAnim mTRS;
+    std::vector<std::shared_ptr<HierGeom>> children;
 
+    std::shared_ptr<GeomData> mData;
     JMATH::AABB bbox3d = JMATH::AABB::INVALID;
     bool mSHReceiver = false;
     bool mCastShadows = true;
 
-    std::vector<std::shared_ptr<HierGeom>> children;
+    friend struct HierGeomRenderObserver;
 };

@@ -33,6 +33,7 @@ public:
 CommandScriptPresenterManager::CommandScriptPresenterManager( Scene& _hm ) {
     addCommandDefinition("enable keyboard", std::bind(&Scene::cmdEnableKeyboard, &_hm, std::placeholders::_1));
     addCommandDefinition("disable keyboard", std::bind(&Scene::cmdDisableKeyboard, &_hm, std::placeholders::_1));
+	addCommandDefinition("change time", std::bind(&Scene::cmdChangeTime, &_hm, std::placeholders::_1 ));
 }
 
 void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
@@ -220,6 +221,11 @@ void Scene::cmdDisableKeyboard( const std::vector<std::string>& params ) {
     WH::disableInputCallbacks();
 }
 
+void Scene::cmdChangeTime( const std::vector<std::string>& _params ) {
+	RSG().SB().buildFromString( concatenate( " ", {_params.begin(), _params.end()}) );
+	changeTime( RSG().SB().getSunPosition() );
+}
+
 void Scene::addEventFunction( const std::string& _key, std::function<void(Scene*)> _f ) {
 	eventFunctions[_key] = _f;
 }
@@ -239,7 +245,28 @@ const std::shared_ptr<ImGuiConsole>& Scene::Console() const {
 void Scene::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
     addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box);
-    rr.getTarget(Name::Sierra)->takeScreenShot( _outdata );
+    getTarget(Name::Sierra)->takeScreenShot( _outdata );
+}
+
+void Scene::clearTargets() {
+	for ( const auto& target : mTargets ) {
+		target->clearCB();
+	}
+}
+
+std::shared_ptr<RLTarget> Scene::getTarget( const std::string& _name ) {
+
+	for ( auto& t : mTargets ) {
+		if ( t->cameraRig->Name() == _name ) return t;
+	}
+
+	return nullptr;
+}
+
+void Scene::changeTime( const V3f& _solar ) {
+	for ( auto& t : mTargets ) {
+		t->changeTime( _solar );
+	}
 }
 
 RenderSceneGraph& Scene::RSG() { return rsg; }

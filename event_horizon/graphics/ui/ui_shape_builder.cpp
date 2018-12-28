@@ -352,7 +352,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makePolygon() {
 
 void UIShapeBuilder::assemble( DependencyMaker& _md ) {
 
-    Renderer& rr = static_cast<Renderer&>( _md );
+    auto& rr = dynamic_cast<Renderer&>( _md );
 
     if ( orig == Vector2f::HUGE_VALUE_NEG ) {
         orig = rect.origin();
@@ -364,8 +364,6 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
     ASSERT(size != Vector2f::ZERO);
 
     rect = Rect2f{ orig, size, true };
-
-    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, mTransform, color.w() );
 
     std::shared_ptr<PosTex3dStrip> vs;
 
@@ -448,6 +446,7 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
         vs->translate( cr );
     }
 
+    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, mTransform, color.w() );
     VPBuilder<PosTex3dStrip>{rr,vpList}.p(vs).s(shaderName).t(tname).c(color).n(UID()).build();
 }
 

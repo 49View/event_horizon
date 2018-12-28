@@ -18,10 +18,6 @@ void RenderSceneGraph::addImpl( std::shared_ptr<HierGeom> _geom ) {
     _geom->generateSOA();
 }
 
-void RenderSceneGraph::changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {
-    rr.changeTime( sb.getSunPosition() );
-}
-
 void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _params ) {
     Vector3f pos = Vector3f::ZERO;
     Vector3f rot = Vector3f::ZERO;
@@ -67,5 +63,5 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
 void HierGeomRenderObserver::notified( std::shared_ptr<HierGeom> _source, const std::string& generator ) {
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
     VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr,lvl }
-            .p( _source->getSOAData()).m(_source->Geom()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
+            .p(_source->generateGeometryVP()).m(_source->Geom()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
 }

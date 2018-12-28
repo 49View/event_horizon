@@ -24,11 +24,6 @@ SceneGraph::add( std::shared_ptr<HierGeom> _geom, const std::vector<std::shared_
     add( _geom );
 }
 
-void SceneGraph::cmdChangeTime( const std::vector<std::string>& _params ) {
-    sb.buildFromString( concatenate( " ", {_params.begin(), _params.end()}) );
-    changeTimeImpl( _params );
-}
-
 void SceneGraph::cmdChangeMaterialTag( const std::vector<std::string>& _params ) {
     changeMaterialTagImpl( _params );
 }
@@ -114,7 +109,6 @@ AssetHierContainerCIt AssetManager::end() const {
 }
 
 CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
-    addCommandDefinition("change time", std::bind(&SceneGraph::cmdChangeTime, &_hm, std::placeholders::_1 ));
     addCommandDefinition("change material", std::bind(&SceneGraph::cmdChangeMaterialTag, &_hm, std::placeholders::_1 ));
     addCommandDefinition("paint", std::bind(&SceneGraph::cmdChangeMaterialColorTag, &_hm, std::placeholders::_1 ));
     addCommandDefinition("build", std::bind(&SceneGraph::cmdCreateGeometry, &_hm, std::placeholders::_1));
