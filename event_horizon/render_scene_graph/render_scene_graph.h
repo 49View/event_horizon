@@ -15,8 +15,8 @@ struct scene_t;
 
 struct HierGeomRenderObserver : public ObserverShared<HierGeom> {
 
-    HierGeomRenderObserver( Renderer& _rr ) : rr( _rr ) {}
-    virtual ~HierGeomRenderObserver() {}
+    explicit HierGeomRenderObserver( Renderer& _rr ) : rr( _rr ) {}
+    virtual ~HierGeomRenderObserver() = default;
 
     void notified( std::shared_ptr<HierGeom> _source, const std::string& generator ) override;
 private:
