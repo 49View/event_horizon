@@ -15,18 +15,10 @@
 #include <core/zlib_util.h>
 #include "file_manager.h"
 
-enum class SerializeVersionFormat {
-	Float,
-	UInt64
-};
-
-static const uint64_t SBinVersion = 2040;
-
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
-	SerializeBin( SerializeVersionFormat vf, const std::string& _entityType  ) {
-		entityType = _entityType;
-		open( vf );
+	SerializeBin( uint64_t vf ) {
+        write( vf );
 	}
 
 	template<typename T>
@@ -92,27 +84,17 @@ public:
 		write( str.c_str() );
 	}
 
-	void open( SerializeVersionFormat vf ) {
-		if ( vf == SerializeVersionFormat::Float ) {
-			write( 1.0f );
-		} else {
-			write( SBinVersion );
-		}
-	}
-
 	std::vector<unsigned char> buffer() const {
 		return f;
 	}
 
 private:
 	std::vector<unsigned char> f;
-	std::string entityType;
 };
 
 class DeserializeBin : public std::enable_shared_from_this<DeserializeBin> {
 public:
-	explicit DeserializeBin( const std::vector<char>& _data,
-							 SerializeVersionFormat vf = SerializeVersionFormat::UInt64 ) {
+	DeserializeBin( const std::vector<char>& _data, uint64_t vf ) {
 		fi = std::make_shared<std::istringstream>( std::string{ _data.begin(), _data.end() } );
 		readVersion( vf );
 	}
@@ -201,17 +183,12 @@ public:
 		delete[] cstr;
 	}
 
-	void readVersion( SerializeVersionFormat vf ) {
-		if ( vf == SerializeVersionFormat::Float ) {
-			float savedVersion;
-			read( savedVersion );
-		} else {
-			uint64_t savedVersion;
-			read( savedVersion );
-			if ( savedVersion < SBinVersion ) {
-				LOGE( "Old assets loaded version %d, expecting %d", savedVersion, SBinVersion );
-			}
-		}
+	void readVersion( uint64_t vf ) {
+        uint64_t savedVersion = 0;
+        read( savedVersion );
+        if ( savedVersion < vf ) {
+            LOGE( "Old assets loaded version %d, expecting %d", savedVersion, vf );
+        }
 	}
 
 private:

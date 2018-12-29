@@ -9,5 +9,5 @@
 #include <poly/hier_geom.hpp>
 
 void ImGuiCloudEntitiesGeom( Scene* p, const Rect2f& _r ) {
-    ImGuiCloudEntities( p, _r, "Cloud Geometry", EntityGroup::Geom );
+    ImGuiCloudEntities( p, _r, "Cloud Geometry", EntityGroup::Geom, GeomData::Version() );
 }

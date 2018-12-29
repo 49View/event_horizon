@@ -5,10 +5,9 @@
 #include <functional>
 #include "core/util.h"
 #include "core/callback_dependency.h"
-#include "core/image_constants.h"
+#include "poly/hier_geom.hpp"
+#include "poly/geom_data.hpp"
 
-struct GeomFileAssetBuilder;
-
-struct RBUILDER( GeomFileAssetBuilder, geom, geom, Binary, BuilderQueryType::NotExact )
+struct RBUILDER( GeomFileAssetBuilder, geom, geom, Binary, BuilderQueryType::NotExact, GeomData::Version() )
 
 };

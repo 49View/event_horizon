@@ -89,11 +89,12 @@ exports.getEntityByIdProject = async (project, entityId, returnPublic) => {
     return result!==null?result.toObject():null;
 }
 
-exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, randomElements) => {
+exports.getEntitiesByProjectGroupTags = async (project, group, tags, version, fullData, randomElements) => {
     const aggregationQueries = [
         {
             $match: {
                 $and: [
+                    {"metadata.version": Number(version)},
                     {"restricted": false},
                     {"group": group},
                     {

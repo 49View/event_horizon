@@ -104,7 +104,7 @@ void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
 
     auto& sg = static_cast<SceneGraph&>(_md);
 
-    auto reader = std::make_shared<DeserializeBin>(sg.AL().get( Name()));
+    auto reader = std::make_shared<DeserializeBin>(sg.AL().get( Name()), GeomData::Version());
     auto deps = GeomData::gatherDependencies( reader );
 
     for ( const auto& d : deps.textureDeps ) {
@@ -265,7 +265,7 @@ std::string GeomBuilder::toMetaData() const {
     MegaWriter writer;
 
     writer.StartObject();
-    writer.serialize( CoreMetaData{Name(), EntityGroup::Geom,
+    writer.serialize( CoreMetaData{Name(), EntityGroup::Geom, GeomData::Version(),
                                    generateThumbnail(), generateRawData(), generateTags()} );
     writer.serialize( "BBox3d", elem->BBox3d() );
     writer.EndObject();

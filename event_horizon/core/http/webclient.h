@@ -200,6 +200,11 @@ struct Url {
     static const std::string WssProtocol;
     static const std::string HttpProtocol;
     static const std::string HttpsProtocol;
+
+    static std::string entityURLParams( const uint64_t _version, const std::string& _key, const std::string& _name = "" );
+    static Url entityMetadata( const uint64_t _version, const std::string& _key, const std::string& _name = "" );
+    static Url entityContent( const uint64_t _version, const std::string& _key, const std::string& _name = "" );
+
 };
 
 std::string url_encode( const std::string& value );

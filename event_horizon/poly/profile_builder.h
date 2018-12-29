@@ -25,7 +25,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Profile>> profileList;
 };
 
-struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact )
+struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact, 0 )
 
     ProfileBuilder( const Vector2f& _length );
     ProfileBuilder( const Vector2f& _v1, const Vector2f& _v2 );

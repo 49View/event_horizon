@@ -37,7 +37,7 @@ private:
     std::map<std::string, ImageParams> imageParamsMap;
 };
 
-struct RBUILDER( ImageBuilder, images, , Binary, BuilderQueryType::Exact )
+struct RBUILDER( ImageBuilder, images, , Binary, BuilderQueryType::Exact, 0 )
 
     ImageParams imageParams;
     uint32_t backup_color = 0xffffffff;

@@ -32,6 +32,6 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Utility::TTFCore::Font>> fonts;
 };
 
-struct RBUILDER( FontBuilder, fonts, ttf, Binary, BuilderQueryType::Exact )
+struct RBUILDER( FontBuilder, fonts, ttf, Binary, BuilderQueryType::Exact, 0 )
 
 };

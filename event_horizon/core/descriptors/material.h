@@ -80,6 +80,7 @@ JSONDATA_R( MaterialColor, name, color, category, brand, code, application )
         return streamHalf1.str() + streamRaw.str() + streamHalf2.str();
     }
 
+    static uint64_t Version() { return 1000; }
 };
 
 JSONDATA_R( MaterialProperties, pixelTexelRatio )
@@ -214,6 +215,9 @@ protected:
     std::string textureName = "white";
     Color4f color = Color4f::WHITE;
     float opacity = 1.0f;
+
+public:
+    inline constexpr static uint64_t Version() { return 1000; }
 };
 
 class GenericMaterial : public Material {

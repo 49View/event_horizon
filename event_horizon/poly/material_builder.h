@@ -27,7 +27,7 @@ private:
     ImageDepencencyMaker* tl;
 };
 
-struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact )
+struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact, Material::Version() )
 
     MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a.Name()),
               materialType( a.materialType ), shaderName( a.shaderName ), baseSolidColor( a.baseSolidColor ),
@@ -141,5 +141,5 @@ private:
     std::unordered_map<std::string, MaterialColor> colorList;
 };
 
-struct RBUILDER( ColorBuilder, color, col, Text, BuilderQueryType::NotExact )
+struct RBUILDER( ColorBuilder, color, col, Text, BuilderQueryType::NotExact, MaterialColor::Version() )
 };

@@ -56,4 +56,6 @@ JSONDATA_R( UIView, name, rootPosition, customRootPosition, margins, arrangement
 	Vector2f	customRootPosition = Vector2f::Y_AXIS;
 	Vector4f	margins = Vector4f{ 0.0f };
 	std::vector<LayoutArrangement> arrangements;
+
+	static uint64_t Version() { return 1000; }
 };

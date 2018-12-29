@@ -1378,3 +1378,5 @@ GeomDeserializeDependencies GeomData::gatherDependencies( std::shared_ptr<Deseri
 
 	return ret;
 }
+
+uint64_t GeomData::Version() { return NodeVersion(1000); }

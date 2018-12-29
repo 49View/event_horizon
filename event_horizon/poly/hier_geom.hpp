@@ -30,6 +30,8 @@ enum UpdateTypeFlag {
     Scale = 1 << 2
 };
 
+inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { return (2040 * 1000000) + dataVersion; }
+
 template <typename D>
 class Hier : public ObservableShared<Hier<D>>, public std::enable_shared_from_this<Hier<D>>{
 public:
@@ -51,7 +53,7 @@ public:
         generateMatrixHierarchy(fatherRootTransform());
     }
     explicit Hier( std::vector<char> _data ) : Hier() {
-        std::shared_ptr<DeserializeBin> reader = std::make_shared<DeserializeBin>( _data  );
+        std::shared_ptr<DeserializeBin> reader = std::make_shared<DeserializeBin>( _data, D::Version() );
         D::gatherDependencies( reader );
         deserialize( reader );
     }
@@ -110,7 +112,7 @@ public:
     void copyTransformDataFrom( const Hier *source ) {
         copyTRSDataFrom( source );
     }
-    void commandReposition( const std::vector<std::string>& itr );
+//    void commandReposition( const std::vector<std::string>& itr );
 
     std::shared_ptr<Hier<D>> clone() {
         return std::make_shared<Hier<D>>( *this );
@@ -329,7 +331,7 @@ public:
     }
 
     std::vector<unsigned char> serialize() {
-        auto writer = std::make_shared<SerializeBin>( SerializeVersionFormat::UInt64, EntityGroup::Geom );
+        auto writer = std::make_shared<SerializeBin>( D::Version() );
 
         serializeDependencies( writer );
         serializeRec( writer );
@@ -452,7 +454,6 @@ protected:
     }
 
     void serializeRec( std::shared_ptr<SerializeBin> writer ) {
-
         writer->write( mGHType );
         writer->write( mHash );
         writer->write( mName );

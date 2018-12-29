@@ -43,7 +43,7 @@ enum PullFlags : uint32_t {
     All = 0xffffffff,
 };
 
-static const int OutputFloatPrecision = 4;
+//static const int OutputFloatPrecision = 4;
 
 //class DeepIntersectData {
 //public:
@@ -476,11 +476,9 @@ protected:
     JMATH::AABB mBBox3d = JMATH::AABB::INVALID;
 
     VData mVdata;
-protected:
-
-    //	std::vector<std::vector<bool>> vertexRayHitMap;
-//    std::vector<std::vector<DeepIntersectData>> vertexRayHitMap;
 
 public:
+    static uint64_t Version();
+
     friend class Follower;
 };

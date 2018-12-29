@@ -23,13 +23,14 @@ router.get('/content/byId/:id', async (req, res, next) => {
     }
 });
 
-router.get('/content/byGroupTags/:group/:tags', async (req, res, next) => {
+router.get('/content/byGroupTags/:version/:group/:tags', async (req, res, next) => {
     try {
         const group = req.params.group;
         const tags = req.params.tags.split(",");
         const project = req.user.project;
+        const version = req.params.version;
         //Check existing entity for use project (or public)
-        const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, true, 1);
+        const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, version, true, 1);
         if (foundEntities!==null && foundEntities.length>0) {
             const filePath=entityController.getFilePath(foundEntities[0].project, foundEntities[0].group, foundEntities[0].metadata.contentHash);
             const fileData = await fsController.cloudStorageFileGet(filePath, "eventhorizonentities");
@@ -43,13 +44,15 @@ router.get('/content/byGroupTags/:group/:tags', async (req, res, next) => {
     }
 });
 
-router.get('/metadata/byGroupTags/:group/:tags', async (req, res, next) => {
+router.get('/metadata/byGroupTags/:version/:group/:tags', async (req, res, next) => {
     try {
         const group = req.params.group;
         const tags = req.params.tags.split(",");
         const project = req.user.project;
+        const version = req.params.version;
+        console.log("Entity version: " + version);
         //Check existing entity for use project (or public)
-        const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, false, null);
+        const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, version, false, null);
         if (foundEntities!==null && foundEntities.length>0) {
             res.status(200).send(foundEntities);
         } else {

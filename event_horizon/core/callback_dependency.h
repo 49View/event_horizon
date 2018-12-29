@@ -37,12 +37,15 @@ enum class BuilderQueryType {
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
 
-#define RBUILDER( BuilderName, _pre, _post, dataType, buildQueryType ) \
+#define RBUILDER( BuilderName, _pre, _post, dataType, buildQueryType, version ) \
 BuilderName : public ResourceBuilder { \
 public: \
     using ResourceBuilder::ResourceBuilder; \
     BuilderName() {} \
     virtual ~BuilderName() {} \
+    static uint64_t Version() { \
+        return version; \
+    } \
     const std::string prefix() const override { \
         return std::string(#_pre) + "/"; \
     } \

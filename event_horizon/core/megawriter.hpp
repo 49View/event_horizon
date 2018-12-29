@@ -458,6 +458,7 @@ public:
 	void serialize( const CoreMetaData& _md ) {
 		serialize( MetaData::Name.c_str(), _md.getName() );
 		serialize( MetaData::Type.c_str(), _md.getType() );
+		serialize( MetaData::Version.c_str(), _md.getVersion() );
 		serialize( MetaData::Thumb.c_str(), _md.getThumb() );
 		serialize( MetaData::Raw.c_str(), _md.getRaw() );
 		serialize( MetaData::Tags.c_str(), _md.getTags() );

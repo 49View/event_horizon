@@ -28,7 +28,7 @@ void listCloudCallback( Scene* p ) {
     }
 }
 
-void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, const std::string& _entType ) {
+void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, const std::string& _entType, const uint64_t _version ) {
 
     ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
@@ -39,7 +39,7 @@ void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, c
     char* buf = _title == "Cloud Geometry" ? buf1 : buf2;
     ImGui::PushID( static_cast<int>(std::hash<std::string>{}( _title)));
     if ( ImGui::InputText( ("##" + _title).c_str(), buf, 1024, ImGuiInputTextFlags_EnterReturnsTrue ) ) {
-        Http::get( Url{ HttpFilePrefix::entities_all + _entType + "/" + std::string(buf) },
+        Http::get( Url::entityMetadata(_version, _entType, std::string(buf)),
                    [&](const Http::Result&_res) {
                        remoteFilterString = _res.bufferString;
                        Scene::sUpdateCallbacks.emplace_back( listCloudCallback );

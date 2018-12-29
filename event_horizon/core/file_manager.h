@@ -180,7 +180,7 @@ namespace FileManager {
             case HttpQuery::Binary:
             case HttpQuery::Text: {
                 if ( T::usesNotExactQuery() ) {
-                    return Url( HttpFilePrefix::entities_onebinary + url_encode_spacesonly(_name) );
+                    return Url::entityContent( T::Version(), _name );
                 } else {
                     return Url( HttpFilePrefix::get + url_encode( _name ) );
                 }
