@@ -3,7 +3,7 @@
 #include "gltf2.h"
 #include <iostream>
 #include <poly/geom_data.hpp>
-#include <poly/hier_geom.hpp>
+#include <core/node.hpp>
 #include <poly/material_builder.h>
 #include <core/math/quaternion.h>
 #include <core/raw_image.h>
@@ -728,7 +728,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     geom->vData().calcBinormal();
     geom->BBox3d( AABB{ geom->vData().getMin(), geom->vData().getMax() } );
 
-    father->Geom( geom );
+    father->Data( geom );
 }
 
 void GLTF2::addNodeToHier( const int nodeIndex, GeomAssetSP& hier ) {

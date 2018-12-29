@@ -13,7 +13,7 @@
 #include "geom_builder.h"
 #include "triangulator.hpp"
 
-#include "core/serializebin.hpp"
+#include <core/node.hpp>
 
 inline void hash_combine( std::size_t& /*seed*/ ) {}
 
@@ -992,7 +992,7 @@ void GeomData::checkBaricentricCoordsOn( const Vector3f& i, int32_t pIndexStart,
 //	dest = shr1 * bu + shr2 * bv + shr3 * bw;
 //}
 
-//void GeomData::calcSHBounce( const Hier* /*dad*/, GeomData* /*dest*/ ) {
+//void GeomData::calcSHBounce( const Node* /*dad*/, GeomData* /*dest*/ ) {
 	//	if (vertexRayHitMap.size() == 0) return;
 	//
 	//	//	std::vector<bool>::iterator bvi;

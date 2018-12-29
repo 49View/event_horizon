@@ -2,7 +2,7 @@
 
 #include <stack>
 #include "graphics/render_list.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 
 StructuralCollection::StructuralCollection() {
 	excludeGeoms.push_back( "Mesh8" ); //hinges

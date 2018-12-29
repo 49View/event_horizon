@@ -4,7 +4,7 @@
 
 #include "../../render_scene_graph.h"
 #include "core/image_builder.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 #include "poly/geom_builder.h"
 #include "poly/geom_builder.h"
 #define LIGHTMAPPER_IMPLEMENTATION
@@ -17,9 +17,9 @@
 scene_t _outputScene;
 
 void chartCount( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
-    if ( _g->Geom() ) {
-        inputMesh.vertex_count += _g->Geom()->vData().numVerts();
-        inputMesh.face_count += _g->Geom()->vData().numIndices()/3;
+    if ( _g->Data() ) {
+        inputMesh.vertex_count += _g->Data()->vData().numVerts();
+        inputMesh.face_count += _g->Data()->vData().numIndices()/3;
     }
 
     for ( const auto& c : _g->Children() ) {
@@ -28,8 +28,8 @@ void chartCount( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
 }
 
 void chart( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh, int& _vi, int& _fi ) {
-    if ( _g->Geom() ) {
-        auto vData = _g->Geom()->vData();
+    if ( _g->Data() ) {
+        auto vData = _g->Data()->vData();
         Matrix4f lMatfull = *(_g->getLocalHierTransform().get());
         Matrix4f lRot = lMatfull;
         lRot.make3x3NormalizedRotationMatrix();
@@ -81,8 +81,8 @@ void chartInject( GeomAssetSP _g,  scene_t& _outputScene,
                             const std::vector<Thekla::Atlas_Output_Vertex>& _va,
                             const Thekla::Atlas_Input_Vertex* _inputVerts,
                             int& _vi, int& _fi ) {
-    if ( _g->Geom() ) {
-        auto& vData = _g->Geom()->vData();
+    if ( _g->Data() ) {
+        auto& vData = _g->Data()->vData();
         for ( size_t q = 0; q < vData.numVerts(); q++ ) {
             Vector2f newUV{ _va[_vi+q].uv[0], _va[_vi+q].uv[1] };
             vData.setVUV2s( q, newUV );

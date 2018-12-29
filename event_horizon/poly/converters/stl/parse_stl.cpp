@@ -5,7 +5,7 @@
 #include <unordered_map>
 
 #include "parse_stl.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 #include "poly/geom_data.hpp"
 #include "poly/poly.hpp"
 

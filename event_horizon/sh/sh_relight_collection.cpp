@@ -1,7 +1,7 @@
 #include "sh_relight_collection.h"
 #include "core/profiler.h"
 //#include "cpp_common/core/task_utils.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 #include "ray_tracing/geometry_offset.h"
 
 void SHRelightCollection::checkAnyRelight() {

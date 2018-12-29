@@ -9,7 +9,7 @@
 #include <core/math/quaternion.h>
 #include "follower.hpp"
 
-#include "hier_geom.hpp"
+#include "core/node.hpp"
 
 FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
                             const std::array<size_t, 4>& indices, WindingOrderT _wo ) {
@@ -324,12 +324,12 @@ std::vector<Vector2f> Follower::vboundingContours2f() const {
     return ret;
 }
 
-void Follower::type( GeomHierType _gt ) {
+void Follower::type( NodeType _gt ) {
     mGeomType |= _gt;
     mCapsGeomType |= _gt;
 }
 
-void Follower::capsType( GeomHierType _gt ) {
+void Follower::capsType( NodeType _gt ) {
     mCapsGeomType |= _gt;
 }
 

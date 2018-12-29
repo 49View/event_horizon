@@ -4,7 +4,7 @@
 #include "core/profiler.h"
 #include "core/math/vector3f.h"
 #include "core/task_utils.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 #include "ray_tracing/geometry_offset.h"
 #include "ray_tracing/vertex_buffer.h"
 #include "core/util.h"

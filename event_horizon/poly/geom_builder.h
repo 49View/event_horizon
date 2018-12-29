@@ -18,7 +18,7 @@
 #include "scene_graph.h"
 #include "di_modules.h"
 
-//class HierGeom : public Hier<GeomData>, public ObservableShare<dHierGeom>, public std::enable_shared_from_this<HierGeom> {
+//class HierGeom : public Node<GeomData>, public ObservableShare<dHierGeom>, public std::enable_shared_from_this<HierGeom> {
 //public:
 //
 //    void SHReceiver( bool _isReceiver ) { mSHReceiver = _isReceiver; }

@@ -4,7 +4,7 @@
 
 #include "render_scene_graph.h"
 #include "core/image_builder.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 #include "poly/geom_builder.h"
 #include "poly/geom_builder.h"
 
@@ -80,6 +80,6 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
     VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr,lvl }
-            .p(generateGeometryVP(_source->Geom())).m(_source->Geom()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
+            .p(generateGeometryVP( _source->Data())).m( _source->Data()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
 }
 

@@ -213,10 +213,10 @@ enum class MouseCursorType {
 	VRESIZE
 };
 
-using GeomHierType = uint64_t;
-static const uint64_t GHTypeGeneric = 1;
-static const uint64_t GHTypeLocator = 1 << 23;
-static const uint64_t GHTypeAll = 0xffffffffffffffff;
+using NodeType = uint64_t;
+static const uint64_t NodeTypeGeneric = 1;
+static const uint64_t NodeTypeLocator = 1 << 23;
+static const uint64_t NodeTypeAll = 0xffffffffffffffff;
 
 namespace InitializeWindowFlags {
 	const static uint64_t Normal = 0;

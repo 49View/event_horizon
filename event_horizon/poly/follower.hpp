@@ -56,8 +56,8 @@ public:
 	void addFlag( FollowerFlags val ) { mCurrentFlags |= val; }
 //	void excludeAxisFromExtrusion( const Vector3f& _axis );
 
-	void type( GeomHierType _gt );
-	void capsType( GeomHierType _gt );
+	void type( NodeType _gt );
+	void capsType( NodeType _gt );
 
 	std::string Name() const;
 	void Name( const std::string& val );
@@ -86,8 +86,8 @@ private:
 
 	subdivisionAccuray mSubDivAcc;
 	MappingDirection mMappingDirection;
-	GeomHierType mGeomType;
-	GeomHierType mCapsGeomType;
+	NodeType mGeomType;
+	NodeType mCapsGeomType;
 	std::string mGeomName;
 	bool mbUsePlanarMapping;
 public:

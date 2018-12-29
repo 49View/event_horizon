@@ -6,7 +6,7 @@
 #include <graphics/imgui/imgui_jsonvisit.hpp>
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 #include "poly/geom_builder.h"
 #include "poly/converters/gltf2/gltf2.h"
 

@@ -2,7 +2,7 @@
 #include <stack>
 #include "core/util.h"
 #include "house/observable_collection.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 #include "ray_tracing/ray_tracer.h"
 
 HouseScene::HouseScene() {

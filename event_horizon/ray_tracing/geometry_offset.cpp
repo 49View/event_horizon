@@ -1,7 +1,7 @@
 #include "geometry_offset.h"
 #include "core/profiler.h"
 #include "core/task_utils.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 
 bool GeometryOffset::incrementDone( size_t howMany ) {
 	totalDone += howMany;

@@ -3,7 +3,7 @@
 //
 
 #include "geom_builder.h"
-#include <poly/hier_geom.hpp>
+#include <core/node.hpp>
 #include <poly/poly.hpp>
 
 GeomBuilder::GeomBuilder( GeomAssetSP _h, const std::vector<std::shared_ptr<MaterialBuilder>>& _mbs ) {
@@ -137,7 +137,7 @@ void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, Sce
     auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName ));
     std::shared_ptr<GeomData> geom = gb->m(mat).build();
     if ( elem ) {
-        elem->Geom( geom );
+        elem->Data( geom );
     } else {
         elem = std::make_shared<GeomAsset>( geom );
     }

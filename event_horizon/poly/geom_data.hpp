@@ -51,7 +51,7 @@ enum PullFlags : uint32_t {
 //    float minDist;
 //    GeomData *geom;
 //    GeomData *geomBaked;
-//    Hier *hierOfGeom;
+//    Node *hierOfGeom;
 //    int32_t indexStart;
 //    int32_t indexEnd;
 //
@@ -59,7 +59,7 @@ enum PullFlags : uint32_t {
 //        minDist = -1.0f;
 //    }
 //
-//    void set( const Vector3f& i, float md, GeomData *g, GeomData *gBaked, int32_t ps, int32_t pe, Hier *hg ) {
+//    void set( const Vector3f& i, float md, GeomData *g, GeomData *gBaked, int32_t ps, int32_t pe, Node *hg ) {
 //        intersectPoint = i;
 //        minDist = md;
 //        geom = g;
@@ -378,7 +378,7 @@ public:
     void UnitMapping( bool val ) { mapping.bUnitMapping = val; }
 
     // SH
-//    void calcSHBounce( const Hier *dad, GeomData *dest );
+//    void calcSHBounce( const Node *dad, GeomData *dest );
     subdivisionAccuray SubdivAccuracy() const { return mSubdivAccuracy; }
     void SubdivAccuracy( subdivisionAccuray val ) { mSubdivAccuracy = val; }
 

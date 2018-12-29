@@ -3,7 +3,7 @@
 //
 
 #include "scene_graph.h"
-#include "hier_geom.hpp"
+#include "core/node.hpp"
 
 void SceneGraph::add( GeomAssetSP _geom ) {
     addImpl(_geom);

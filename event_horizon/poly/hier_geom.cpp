@@ -6,11 +6,11 @@
 //
 //
 
-#include "hier_geom.hpp"
+//#include "core/node.hpp"
 
 
 //template<typename D>
-//void Hier<D>::extractHier( std::vector<std::shared_ptr<Hier>>& geoms, const char *name, ExtractFlags ef ) {
+//void Node<D>::extractHier( std::vector<std::shared_ptr<Node>>& geoms, const char *name, ExtractFlags ef ) {
 //    if ( strcmp( mName.c_str(), name ) == 0 ) {
 //        geoms.push_back( clone());
 //        if ( ef == ExtractFlags::RemoveAfterExtract ) {
@@ -25,7 +25,7 @@
 //}
 //
 //template<typename D>
-//void Hier<D>::commandReposition( const std::vector<std::string>& itr ) {
+//void Node<D>::commandReposition( const std::vector<std::string>& itr ) {
 //    std::vector<std::string> meshesToReposition;
 //
 //    auto it = itr.begin();
@@ -34,11 +34,11 @@
 //        ++it;
 //    }
 //    std::string dest = *( ++it );
-//    Hier *gd = find( dest.c_str());
+//    Node *gd = find( dest.c_str());
 //    if ( !gd ) return;
 //
 //    for ( auto mesh : meshesToReposition ) {
-//        std::vector<std::shared_ptr<Hier>> geoms;
+//        std::vector<std::shared_ptr<Node>> geoms;
 //        extractHier( geoms, mesh.c_str(), ExtractFlags::RemoveAfterExtract );
 //        for ( auto gs : geoms ) {
 //            gd->addChildren( gs );
@@ -48,7 +48,7 @@
 
 
 //template<typename D>
-//void Hier<D>::numVertsRec( int& currNumVerts ) {
+//void Node<D>::numVertsRec( int& currNumVerts ) {
 //    currNumVerts += mData ? mData->numVerts() : 0;
 //
 //    for ( auto& c : children ) {
@@ -57,7 +57,7 @@
 //}
 //
 //template<typename D>
-//int Hier<D>::numVerts() {
+//int Node<D>::numVerts() {
 //    int currNumVerts = 0;
 //
 //    numVertsRec( currNumVerts );

@@ -5,7 +5,6 @@
 #include "login_layout.h"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
-#include <poly/hier_geom.hpp>
 
 void ImGuiLogin( Scene* p, const Rect2f& _r ) {
     std::string title = "Login";

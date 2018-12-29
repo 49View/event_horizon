@@ -1,6 +1,6 @@
 #pragma once
 
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 
 class VRUIContext {
 public:

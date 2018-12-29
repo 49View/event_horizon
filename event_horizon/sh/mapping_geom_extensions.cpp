@@ -7,7 +7,7 @@
 #include "core/profiler.h"
 #include "core/service_factory.h"
 #include "sh/sh_relight_collection.h"
-#include "poly/hier_geom.hpp"
+#include "core/node.hpp"
 
 MappingGeomExtensions::MappingGeomExtensions() {
     shRelightCollection = ServiceFactory::get<SHRelightCollection>();
