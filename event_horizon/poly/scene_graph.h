@@ -17,10 +17,9 @@
 #include "profile_builder.h"
 #include "material_builder.h"
 #include "geom_file_asset_builder.h"
+#include <poly/poly.hpp>
 
-class HierGeom;
-
-typedef std::unordered_map<std::string, std::shared_ptr<HierGeom>> AssetHierContainer;
+typedef std::unordered_map<std::string, GeomAssetSP> AssetHierContainer;
 typedef AssetHierContainer::iterator AssetHierContainerIt;
 typedef AssetHierContainer::const_iterator AssetHierContainerCIt;
 
@@ -31,9 +30,9 @@ DEPENDENCY_MAKER_EXIST(assetsList);
         assetsList[gb.Name()] = _data;
         return true;
     }
-    void add( const std::string& _key, std::shared_ptr<HierGeom> _h );
+    void add( const std::string& _key, GeomAssetSP _h );
     std::vector<char> get( const std::string& _key ) { return assetsList[_key]; }
-    std::shared_ptr<HierGeom> findHier( const std::string& _key );
+    GeomAssetSP findHier( const std::string& _key );
 
     AssetHierContainerIt begin();
     AssetHierContainerIt end();
@@ -42,7 +41,7 @@ DEPENDENCY_MAKER_EXIST(assetsList);
 
 private:
     std::unordered_map<std::string, std::vector<char>> assetsList;
-    std::unordered_map<std::string, std::shared_ptr<HierGeom>> assetsHierList;
+    AssetHierContainer assetsHierList;
 };
 
 class PolySceneGraphTextureList : public ImageDepencencyMaker {
@@ -62,9 +61,9 @@ public:
     SceneGraph(CommandQueue& cq);
 
 DEPENDENCY_MAKER_EXIST(geoms);
-    void add(std::shared_ptr<HierGeom> _geom);
-    void add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials );
-    void add(std::shared_ptr<HierGeom> _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials);
+    void add( GeomAssetSP _geom);
+    void add( std::vector<std::shared_ptr<MaterialBuilder>> _materials );
+    void add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials);
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
     void cmdCreateGeometry( const std::vector<std::string>& _params );
@@ -72,7 +71,7 @@ DEPENDENCY_MAKER_EXIST(geoms);
     void cmdCalcLightmaps( const std::vector<std::string>& _params );
 
     size_t countGeoms() const;
-    std::vector<std::shared_ptr<HierGeom>> Geoms();
+    std::vector<GeomAssetSP> Geoms();
     virtual DependencyMaker& TL() = 0;
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
@@ -82,7 +81,7 @@ DEPENDENCY_MAKER_EXIST(geoms);
     void mapGeomType( const uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;
 protected:
-    virtual void addImpl(std::shared_ptr<HierGeom> _geom) = 0;
+    virtual void addImpl( GeomAssetSP _geom) = 0;
     virtual void changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
@@ -91,7 +90,7 @@ protected:
     virtual void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 
 protected:
-    std::unordered_map<std::string, std::shared_ptr<HierGeom>> geoms;
+    std::unordered_map<std::string, GeomAssetSP> geoms;
     AssetManager   al;
     ProfileManager pl;
     MaterialManager ml;
@@ -109,7 +108,7 @@ public:
 
     DependencyMaker& TL() override { return tl; }
 protected:
-    void addImpl(std::shared_ptr<HierGeom> _geom) override;
+    void addImpl( GeomAssetSP _geom) override;
 
 private:
     PolySceneGraphTextureList tl;

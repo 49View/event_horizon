@@ -13,12 +13,14 @@
 
 struct scene_t;
 
-struct HierGeomRenderObserver : public ObserverShared<HierGeom> {
+struct HierGeomRenderObserver : public ObserverShared<GeomAsset> {
 
     explicit HierGeomRenderObserver( Renderer& _rr ) : rr( _rr ) {}
     virtual ~HierGeomRenderObserver() = default;
 
-    void notified( std::shared_ptr<HierGeom> _source, const std::string& generator ) override;
+    std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> generateGeometryVP( std::shared_ptr<GeomData> _data );
+
+    void notified( GeomAssetSP _source, const std::string& generator ) override;
 private:
     Renderer& rr;
 };
@@ -33,7 +35,7 @@ public:
     Renderer& RR() { return rr; }
 
 protected:
-    void addImpl(std::shared_ptr<HierGeom> _geom) override;
+    void addImpl(GeomAssetSP _geom) override;
     void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
     void changeMaterialColorTagImpl( const std::vector<std::string>& _params ) override;
     void cmdCreateGeometryImpl( const std::vector<std::string>& _params ) override;

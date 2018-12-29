@@ -3,8 +3,10 @@
 //
 
 #include "geom_builder.h"
+#include <poly/hier_geom.hpp>
+#include <poly/poly.hpp>
 
-GeomBuilder::GeomBuilder( std::shared_ptr<HierGeom> _h, const std::vector<std::shared_ptr<MaterialBuilder>>& _mbs ) {
+GeomBuilder::GeomBuilder( GeomAssetSP _h, const std::vector<std::shared_ptr<MaterialBuilder>>& _mbs ) {
     builderType = GeomBuilderType::import;
     elem = _h;
     matBuilders = _mbs;
@@ -103,7 +105,7 @@ void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
     auto& sg = static_cast<SceneGraph&>(_md);
 
     auto reader = std::make_shared<DeserializeBin>(sg.AL().get( Name()));
-    auto deps = gatherGeomDependencies( reader );
+    auto deps = GeomData::gatherDependencies( reader );
 
     for ( const auto& d : deps.textureDeps ) {
         addDependency<ImageBuilder>( d, sg.TL());
@@ -137,12 +139,12 @@ void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, Sce
     if ( elem ) {
         elem->Geom( geom );
     } else {
-        elem = std::make_shared<HierGeom>( geom );
+        elem = std::make_shared<GeomAsset>( geom );
     }
     elem->GHType(gt);
 }
 
-void GeomBuilder::createFromAsset( std::shared_ptr<HierGeom> asset ) {
+void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
     if ( elem ) {
         elem->addChildren( asset );
     } else {
@@ -161,7 +163,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
         break;
         case GeomBuilderType::file:
             if ( auto ret = sg.AL().findHier( Name()); ret != nullptr ) {
-                createFromAsset( ret->clone());
+                createFromAsset( ret->clone() );
             } else {
                 builderType = GeomBuilderType::asset;
                 deserializeDependencies( _md );
@@ -169,10 +171,9 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
                 return;
             }
         case GeomBuilderType::asset: {
-            auto asset = std::make_shared<HierGeom>( sg.AL().get(Name()) );
+            auto asset = std::make_shared<GeomAsset>( sg.AL().get(Name()) );
             sg.AL().add( Name(), asset );
             createFromAsset( asset );
-            pos += elem->containingAABB().size() * bboxOffset;
         }
         break;
         case GeomBuilderType::shape:
@@ -196,7 +197,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
                                                                              flipVector,
                                                                              mGaps,
                                                                              mFollowerSuggestedAxis ), sg );
-            elem->Name( mProfileBuilder.Name() );
+//            elem->Name( mProfileBuilder.Name() );
         }
         break;
         case GeomBuilderType::unknown:

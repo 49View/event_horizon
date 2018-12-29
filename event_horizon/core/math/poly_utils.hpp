@@ -85,8 +85,6 @@ void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
 
 std::vector<Vector3f> createQuadPoints( const Vector2f& size = Vector2f::ONE );
 
-GeomDeserializeDependencies gatherGeomDependencies( std::shared_ptr<DeserializeBin> reader );
-
 const std::vector<std::string>& pbrNames();
 
 template<typename T>

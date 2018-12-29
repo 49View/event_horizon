@@ -15,72 +15,6 @@
 
 #include "core/serializebin.hpp"
 
-DataDumper::DataDumper() {
-	normalStream << std::setprecision( OutputFloatPrecision );
-	prodNormDirStream << std::setprecision( OutputFloatPrecision );
-	filteredProdNormDirStream << std::setprecision( OutputFloatPrecision );
-	coeffMatrixStream << std::setprecision( OutputFloatPrecision );
-}
-
-void DataDumper::writeNormal( Vector3f normal ) {
-	normalStream << '\t';
-	normal.writeTo( normalStream, '\t', '\n' );
-}
-
-void DataDumper::writeAngle( float angle ) {
-	prodNormDirStream << '\t' << angle;
-}
-
-void DataDumper::writeCoeff( Matrix3f coeffMatrix ) {
-	coeffMatrixStream << '\t';
-	for ( int i = 0; i < 3; i++ ) {
-		coeffMatrix.getRow( i ).writeTo( coeffMatrixStream, '\t', '\t' );
-	}
-}
-
-void DataDumper::newSample( float contributeMultiplier ) {
-	//hitsStream << '\t' << blocked;
-	filteredProdNormDirStream << '\t' << contributeMultiplier;
-}
-
-void DataDumper::newVertex() {
-	//hitsStream << '\n';
-	prodNormDirStream << '\n';
-	filteredProdNormDirStream << '\n';
-	coeffMatrixStream << '\n';
-}
-
-void DataDumper::dump() {
-	std::stringstream sampleDirStream;
-	std::stringstream shValStream;
-
-	sampleDirStream << std::setprecision( OutputFloatPrecision );
-	shValStream << std::setprecision( OutputFloatPrecision );
-
-	/*for (int q = 0; q < SH.NumSamples(); q++) {
-		SHSample* sample = SH.Sample(q);
-		sampleDirStream << '\t';
-		sample->direction.writeTo(sampleDirStream, '\t', '\n');
-		for (int l = 0; l < SH.NumFunctions(); ++l) {
-			shValStream << '\t' << sample->shValues[l];
-		}
-		shValStream << '\n';
-	}*/
-
-	std::string tempFolder = "c:/work/temp/";
-	std::ofstream dumpFile( tempFolder + "matrices_old.txt", std::ios::trunc );
-	dumpFile << std::setprecision( OutputFloatPrecision );
-	dumpFile << "Normals\n" << normalStream.rdbuf() << "\n";
-	dumpFile << "Sample directions\n" << sampleDirStream.rdbuf() << "\n";
-	//dumpFile << "Hits\n" << hitsStream.rdbuf() << "\n";
-	dumpFile << "SH functions values\n" << shValStream.rdbuf() << "\n";
-	dumpFile << "Normal X Directions\n" << prodNormDirStream.rdbuf() << "\n";
-	dumpFile << "SH component = Max( Normal X Directions,0) .* Hits\n" << filteredProdNormDirStream.rdbuf() << "\n";
-	dumpFile << "SH component X FunctionValues\n" << coeffMatrixStream.rdbuf() << "\n";
-
-	dumpFile.close();
-}
-
 inline void hash_combine( std::size_t& /*seed*/ ) {}
 
 template <typename T, typename... Rest>
@@ -246,8 +180,6 @@ void GeomData::reset() {
 	mBBox3d = AABB::INVALID;
 	mVdata.clear();
 	mWindingOrder = WindingOrder::CCW;
-	for ( auto& ba : vertexRayHitMap ) ba.clear();
-	vertexRayHitMap.clear();
 }
 
 void GeomData::setMappingData( const GeomMappingData& _mapping ) {
@@ -1060,7 +992,7 @@ void GeomData::checkBaricentricCoordsOn( const Vector3f& i, int32_t pIndexStart,
 //	dest = shr1 * bu + shr2 * bv + shr3 * bw;
 //}
 
-void GeomData::calcSHBounce( const HierGeom* /*dad*/, GeomData* /*dest*/ ) {
+//void GeomData::calcSHBounce( const Hier* /*dad*/, GeomData* /*dest*/ ) {
 	//	if (vertexRayHitMap.size() == 0) return;
 	//
 	//	//	std::vector<bool>::iterator bvi;
@@ -1102,7 +1034,7 @@ void GeomData::calcSHBounce( const HierGeom* /*dad*/, GeomData* /*dest*/ ) {
 	//			}
 	//		}
 	//	}
-}
+//}
 
 void GeomData::debugPrint() {
 	for ( uint64_t t = 0; t < mVdata.vcoords3d.size(); t++ ) {
@@ -1419,4 +1351,30 @@ void VData::swapIndicesWinding( Primitive _pr ) {
 		default:
 			ASSERT(0);
 	}
+}
+
+GeomDeserializeDependencies GeomData::gatherDependencies( std::shared_ptr<DeserializeBin> reader ) {
+	uint32_t numEntries = 0;
+	uint32_t dependencyTag = 0;
+	std::string dependencyName;
+	GeomDeserializeDependencies ret;
+
+	reader->read( numEntries );
+	while ( numEntries > 0 ) {
+		reader->read( dependencyTag );
+		for ( uint32_t q = 0; q < numEntries; q++ ) {
+			reader->read( dependencyName );
+			switch ( dependencyTag ) {
+				case dependecyTagTexture:
+					ret.textureDeps.emplace_back( dependencyName );
+					break;
+				case dependecyTagMaterial:
+					ret.materialDeps.emplace_back( dependencyName );
+					break;
+			}
+		}
+		reader->read( numEntries );
+	}
+
+	return ret;
 }

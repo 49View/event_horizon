@@ -13,9 +13,9 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq ) : SceneGrap
     ml.TL(&tl);
 }
 
-void RenderSceneGraph::addImpl( std::shared_ptr<HierGeom> _geom ) {
-    _geom->subscribeRec(hierRenderObserver);
-    _geom->generateSOA();
+void RenderSceneGraph::addImpl( GeomAssetSP _geom ) {
+    _geom->subscribeData(hierRenderObserver);
+    _geom->sendNotifyData("generateGeometryVP");
 }
 
 void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _params ) {
@@ -60,8 +60,26 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
     }
 }
 
-void HierGeomRenderObserver::notified( std::shared_ptr<HierGeom> _source, const std::string& generator ) {
+std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>
+HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
+    if ( !_data ) return nullptr;
+    if ( _data->numIndices() < 3 ) return nullptr;
+
+    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[_data->numIndices()] );
+    std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
+    auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( _data->numVerts(), PRIMITIVE_TRIANGLES,
+                                                                   VFVertexAllocation::PreAllocate, _data->numIndices(),
+                                                                   _indices );
+    for ( int32_t t = 0; t < _data->numVerts(); t++ ) {
+        SOAData->addVertex( _data->vertexAt( t ), _data->uvAt( t ), _data->uv2At( t ), _data->normalAt( t ),
+                            _data->tangentAt( t ), _data->binormalAt( t ), _data->colorAt(t) );
+    }
+    return SOAData;
+}
+
+void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
     VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr,lvl }
-            .p(_source->generateGeometryVP()).m(_source->Geom()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
+            .p(generateGeometryVP(_source->Geom())).m(_source->Geom()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
 }
+

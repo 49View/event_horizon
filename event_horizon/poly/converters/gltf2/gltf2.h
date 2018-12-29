@@ -6,8 +6,9 @@
 #include <core/math/vector4f.h>
 #include <core/descriptors/material.h>
 #include <core/raw_image.h>
+#include <poly/poly.hpp>
 
-class HierGeom;
+
 struct MaterialBuilder;
 
 enum class SigmoidSlope {
@@ -55,13 +56,13 @@ public:
 
     explicit GLTF2( const std::string& _path );
     explicit GLTF2( const std::vector<char>& _array, const std::string& _name );
-    std::shared_ptr<HierGeom> convert();
+    GeomAssetSP convert();
     void fixupMaterials();
     std::vector<std::shared_ptr<MaterialBuilder>> Materials();
 
 private:
-    void addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<HierGeom> father );
-    void addNodeToHier( const int nodeIndex, std::shared_ptr<HierGeom>& hier );
+    void addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father );
+    void addNodeToHier( const int nodeIndex, GeomAssetSP& hier );
     void elaborateMaterial( const tinygltf::Material& mat );
     void saveMaterial( const IntermediateMaterial& im );
     void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic );

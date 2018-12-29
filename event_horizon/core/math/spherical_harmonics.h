@@ -19,7 +19,7 @@ double SHC( int l, int m, double theta, double phi );
 //Calculate n!
 int Factorial( int n );
 
-class HierGeom;
+class Hier;
 
 class SHSample {
 public:

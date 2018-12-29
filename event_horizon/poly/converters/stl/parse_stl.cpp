@@ -2,9 +2,12 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 
 #include "parse_stl.h"
 #include "poly/hier_geom.hpp"
+#include "poly/geom_data.hpp"
+#include "poly/poly.hpp"
 
 namespace stl {
 
@@ -20,7 +23,7 @@ namespace stl {
     float parse_float( std::ifstream& s ) {
         char f_buf[sizeof( float )];
         s.read( f_buf, 4 );
-        float *fptr = (float *) f_buf;
+        auto *fptr = (float *) f_buf;
         return *fptr;
     }
 
@@ -48,7 +51,7 @@ namespace stl {
         }
         
         auto mGeom = std::make_shared<GeomData>( std::make_shared<PBRMaterial>("default_fbx", "geneva") );
-        auto geom = std::make_shared<HierGeom>(mGeom);
+        auto geom = std::make_shared<GeomAsset>(mGeom);
 
         VData& gd = mGeom->vData();
         
@@ -58,7 +61,7 @@ namespace stl {
         stl_file.read( n_triangles, 4 );
         std::string h( header_info );
         stl_data info( h );
-        unsigned int *r = (unsigned int *) n_triangles;
+        auto *r = (unsigned int *) n_triangles;
         unsigned int num_triangles = *r;
         AABB box = AABB::INVALID;
 
@@ -75,7 +78,7 @@ namespace stl {
             addNormalToDic( v1, normal, normalsDic );
             addNormalToDic( v2, normal, normalsDic );
             addNormalToDic( v3, normal, normalsDic );
-            info.triangles.push_back( triangle( normal, v1, v2, v3 ));
+            info.triangles.emplace_back( normal, v1, v2, v3 );
             char dummy[2];
             stl_file.read( dummy, 2 );
 

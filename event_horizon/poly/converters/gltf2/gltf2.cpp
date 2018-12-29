@@ -690,7 +690,7 @@ Primitive gltfToPrimitive( int mode ) {
     return PRIMITIVE_TRIANGLES;
 }
 
-void GLTF2::addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<HierGeom> father ) {
+void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
 
     auto mesh = model.meshes[meshIndex];
     tinygltf::Primitive primitive = mesh.primitives[primitiveIndex];
@@ -731,7 +731,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<HierGeom
     father->Geom( geom );
 }
 
-void GLTF2::addNodeToHier( const int nodeIndex, std::shared_ptr<HierGeom>& hier ) {
+void GLTF2::addNodeToHier( const int nodeIndex, GeomAssetSP& hier ) {
 
     auto node =  model.nodes[nodeIndex];
     Vector3f pos = Vector3f::ZERO;
@@ -890,9 +890,9 @@ void GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
     matMap[mat.name] = im;
 }
 
-std::shared_ptr<HierGeom> GLTF2::convert() {
+GeomAssetSP GLTF2::convert() {
 
-    auto hierScene = std::make_shared<HierGeom>( name );
+    auto hierScene = std::make_shared<GeomAsset>( name );
 
     for ( size_t m = 0; m < model.materials.size(); m++ ) {
         elaborateMaterial( model.materials[m] );

@@ -167,32 +167,6 @@ std::vector<Vector3f> createQuadPoints( const Vector2f& size ) {
 	return lPoints;
 }
 
-GeomDeserializeDependencies gatherGeomDependencies( std::shared_ptr<DeserializeBin> reader ) {
-    uint32_t numEntries = 0;
-    uint32_t dependencyTag = 0;
-    std::string dependencyName;
-    GeomDeserializeDependencies ret;
-
-    reader->read( numEntries );
-    while ( numEntries > 0 ) {
-        reader->read( dependencyTag );
-        for ( uint32_t q = 0; q < numEntries; q++ ) {
-            reader->read( dependencyName );
-            switch ( dependencyTag ) {
-                case dependecyTagTexture:
-					ret.textureDeps.emplace_back( dependencyName );
-                    break;
-                case dependecyTagMaterial:
-					ret.materialDeps.emplace_back( dependencyName );
-                    break;
-            }
-        }
-        reader->read( numEntries );
-    }
-
-    return ret;
-}
-
 const static std::vector<std::string> g_pbrNames{ "_basecolor","_normal","_ambient_occlusion","_roughness",
 												  "_metallic","_height" };
 

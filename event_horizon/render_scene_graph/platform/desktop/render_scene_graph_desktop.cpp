@@ -16,7 +16,7 @@
 
 scene_t _outputScene;
 
-void chartCount( const std::shared_ptr<HierGeom> _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
+void chartCount( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
     if ( _g->Geom() ) {
         inputMesh.vertex_count += _g->Geom()->vData().numVerts();
         inputMesh.face_count += _g->Geom()->vData().numIndices()/3;
@@ -27,7 +27,7 @@ void chartCount( const std::shared_ptr<HierGeom> _g, Thekla::Atlas_Input_Mesh& i
     }
 }
 
-void chart( const std::shared_ptr<HierGeom> _g, Thekla::Atlas_Input_Mesh& inputMesh, int& _vi, int& _fi ) {
+void chart( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh, int& _vi, int& _fi ) {
     if ( _g->Geom() ) {
         auto vData = _g->Geom()->vData();
         Matrix4f lMatfull = *(_g->getLocalHierTransform().get());
@@ -77,7 +77,7 @@ void chart( const std::shared_ptr<HierGeom> _g, Thekla::Atlas_Input_Mesh& inputM
     }
 }
 
-void chartInject( std::shared_ptr<HierGeom> _g,  scene_t& _outputScene,
+void chartInject( GeomAssetSP _g,  scene_t& _outputScene,
                             const std::vector<Thekla::Atlas_Output_Vertex>& _va,
                             const Thekla::Atlas_Input_Vertex* _inputVerts,
                             int& _vi, int& _fi ) {
@@ -107,7 +107,7 @@ bool aovcompare(Thekla::Atlas_Output_Vertex lhs, Thekla::Atlas_Output_Vertex rhs
     return lhs.xref < rhs.xref;
 }
 
-bool packGeometryForLightmaps( std::unordered_map<std::string, std::shared_ptr<HierGeom>>& _geoms ) {
+bool packGeometryForLightmaps( std::unordered_map<std::string, GeomAssetSP>& _geoms ) {
     Thekla::Atlas_Input_Mesh inputMesh{};
 
     inputMesh.vertex_count = 0;
@@ -534,7 +534,7 @@ int RenderSceneGraph::bake(scene_t *scene)
     rr.TM().addTextureWithGPUHandle( FBNames::lightmap, scene->lightmap, TSLOT_LIGHTMAP );
 
     for ( const auto&[k, v] : geoms ) {
-        v->generateSOA();
+        v->sendNotifyData("generateGeometryVP");
     }
 
     return 1;

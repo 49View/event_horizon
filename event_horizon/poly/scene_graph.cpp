@@ -5,7 +5,7 @@
 #include "scene_graph.h"
 #include "hier_geom.hpp"
 
-void SceneGraph::add( std::shared_ptr<HierGeom> _geom ) {
+void SceneGraph::add( GeomAssetSP _geom ) {
     addImpl(_geom);
     geoms[_geom->Hash()] = _geom;
 }
@@ -17,7 +17,7 @@ void SceneGraph::add( const std::vector<std::shared_ptr<MaterialBuilder>> _mater
 }
 
 void
-SceneGraph::add( std::shared_ptr<HierGeom> _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
+SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
     for ( const auto& m : _materials ) {
         m->makeDirect( ML() );
     }
@@ -55,8 +55,8 @@ size_t SceneGraph::countGeoms() const {
     return geoms.size();
 }
 
-std::vector<std::shared_ptr<HierGeom>> SceneGraph::Geoms() {
-    std::vector<std::shared_ptr<HierGeom>> ret;
+std::vector<GeomAssetSP> SceneGraph::Geoms() {
+    std::vector<GeomAssetSP> ret;
     for ( auto& [k,v] : geoms ) ret.emplace_back( v );
     return ret;
 }
@@ -78,14 +78,14 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
     return 0;
 }
 
-void PolySceneGraph::addImpl( [[maybe_unused]] std::shared_ptr<HierGeom> _geom ) {
+void PolySceneGraph::addImpl( [[maybe_unused]] GeomAssetSP _geom ) {
 }
 
-void AssetManager::add( [[maybe_unused]] const std::string& _key, std::shared_ptr<HierGeom> _h ) {
+void AssetManager::add( [[maybe_unused]] const std::string& _key, GeomAssetSP _h ) {
     assetsHierList[_h->Name()] = _h;
 }
 
-std::shared_ptr<HierGeom> AssetManager::findHier( const std::string& _key ) {
+GeomAssetSP AssetManager::findHier( const std::string& _key ) {
     if ( auto h = assetsHierList.find(_key); h != assetsHierList.end() ) {
         return h->second;
     }

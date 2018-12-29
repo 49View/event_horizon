@@ -33,7 +33,6 @@
 class Profile;
 class SerializeBin;
 class DeserializeBin;
-class HierGeom;
 class GeomData;
 class VertexProcessing;
 class GeomBuilder;
@@ -44,55 +43,32 @@ enum PullFlags : uint32_t {
     All = 0xffffffff,
 };
 
-typedef uint64_t GeomHierType;
-static const uint64_t GHTypeGeneric = 1;
-static const uint64_t GHTypeLocator = 1 << 23;
-static const uint64_t GHTypeAll = 0xffffffffffffffff;
-
 static const int OutputFloatPrecision = 4;
 
-class DataDumper {
-public:
-    DataDumper();
-    void writeNormal( Vector3f normal );
-    void writeAngle( float angle );
-    void writeCoeff( Matrix3f coeffMatrix );
-    void newSample( float contributeMultiplier );
-    void newVertex();
-    void dump();
-
-private:
-    //std::stringstream hitsStream;
-    std::stringstream normalStream;
-    std::stringstream prodNormDirStream;
-    std::stringstream filteredProdNormDirStream;
-    std::stringstream coeffMatrixStream;
-};
-
-class DeepIntersectData {
-public:
-    Vector3f intersectPoint;
-    float minDist;
-    GeomData *geom;
-    GeomData *geomBaked;
-    HierGeom *hierOfGeom;
-    int32_t indexStart;
-    int32_t indexEnd;
-
-    DeepIntersectData() {
-        minDist = -1.0f;
-    }
-
-    void set( const Vector3f& i, float md, GeomData *g, GeomData *gBaked, int32_t ps, int32_t pe, HierGeom *hg ) {
-        intersectPoint = i;
-        minDist = md;
-        geom = g;
-        geomBaked = gBaked;
-        indexStart = ps;
-        indexEnd = pe;
-        hierOfGeom = hg;
-    }
-};
+//class DeepIntersectData {
+//public:
+//    Vector3f intersectPoint;
+//    float minDist;
+//    GeomData *geom;
+//    GeomData *geomBaked;
+//    Hier *hierOfGeom;
+//    int32_t indexStart;
+//    int32_t indexEnd;
+//
+//    DeepIntersectData() {
+//        minDist = -1.0f;
+//    }
+//
+//    void set( const Vector3f& i, float md, GeomData *g, GeomData *gBaked, int32_t ps, int32_t pe, Hier *hg ) {
+//        intersectPoint = i;
+//        minDist = md;
+//        geom = g;
+//        geomBaked = gBaked;
+//        indexStart = ps;
+//        indexEnd = pe;
+//        hierOfGeom = hg;
+//    }
+//};
 
 struct VData {
 
@@ -248,6 +224,8 @@ public:
 
     GeomData( const QuadVector3fNormalfList& quads, std::shared_ptr<PBRMaterial> _material, const GeomMappingData& _mapping );
 
+    static GeomDeserializeDependencies gatherDependencies( std::shared_ptr<DeserializeBin> reader );
+
     void serialize( std::shared_ptr<SerializeBin> writer );
     void serializeSphericalHarmonics( std::shared_ptr<SerializeBin> writer );
     void deserialize( std::shared_ptr<DeserializeBin> reader );
@@ -400,7 +378,7 @@ public:
     void UnitMapping( bool val ) { mapping.bUnitMapping = val; }
 
     // SH
-    void calcSHBounce( const HierGeom *dad, GeomData *dest );
+//    void calcSHBounce( const Hier *dad, GeomData *dest );
     subdivisionAccuray SubdivAccuracy() const { return mSubdivAccuracy; }
     void SubdivAccuracy( subdivisionAccuray val ) { mSubdivAccuracy = val; }
 
@@ -501,7 +479,7 @@ protected:
 protected:
 
     //	std::vector<std::vector<bool>> vertexRayHitMap;
-    std::vector<std::vector<DeepIntersectData>> vertexRayHitMap;
+//    std::vector<std::vector<DeepIntersectData>> vertexRayHitMap;
 
 public:
     friend class Follower;

@@ -12,12 +12,38 @@
 #include "core/math/poly_shapes.hpp"
 #include "core/image_builder.h"
 #include "core/descriptors/material.h"
-#include "hier_geom.hpp"
 #include "profile.hpp"
 #include "follower.hpp"
 #include "poly_helper.h"
 #include "scene_graph.h"
 #include "di_modules.h"
+
+//class HierGeom : public Hier<GeomData>, public ObservableShare<dHierGeom>, public std::enable_shared_from_this<HierGeom> {
+//public:
+//
+//    void SHReceiver( bool _isReceiver ) { mSHReceiver = _isReceiver; }
+//    bool SHReceiver() const { return mSHReceiver; }
+//    bool CastShadows() const { return mCastShadows; }
+//    void CastShadows( bool val ) { mCastShadows = val; }
+//
+//void relightSH( bool includeChildren = true ) {
+//    if ( mData != nullptr && mData->numVerts() > 0 ) {
+//        notify( shared_from_this(), "generateGeometryVP" );
+//    }
+//
+//    if ( includeChildren )
+//        for ( auto&& c : Children())
+//            c->relightSH();
+//}
+//
+//
+//private:
+//
+//    bool mSHReceiver = false;
+//    bool mCastShadows = true;
+//
+//    friend struct HierGeomRenderObserver;
+//};
 
 enum class GeomBuilderType {
     shape,
@@ -35,7 +61,7 @@ enum class GeomBuilderType {
 template <typename T>
 class GeomBasicBuilder {
 public:
-    T& inj( std::shared_ptr<HierGeom> _hier ) {
+    T& inj( GeomAssetSP _hier ) {
         elem = _hier;
         return static_cast<T&>(*this);
     }
@@ -100,37 +126,8 @@ protected:
     Vector3f axis = Vector3f::ZERO;
     Vector3f scale = Vector3f::ONE;
     MatrixAnim matrixAnim;
-    std::shared_ptr<HierGeom> elem;
-
+    GeomAssetSP elem;
 };
-
-//struct ProfileSchema {
-//    ProfileSchema() = default;
-//    explicit ProfileSchema( const std::string& name ) : name( name ) {}
-//    ProfileSchema( const std::string& name, FollowerFlags flags ) : name( name ), flags( flags ) {}
-//    ProfileSchema( const std::string& name, uint32_t _flags ) : name( name ) {
-//        flags = static_cast<FollowerFlags>(_flags);
-//    }
-//    ProfileSchema( const std::string& name, GeomDataFollowerBuilder::Raise raise ) : name( name ), raise( raise ) {}
-//    ProfileSchema( const std::string& name, const Vector2f& flipVector ) : name( name ), flipVector( flipVector ) {}
-//    ProfileSchema( const std::string& name, FollowerFlags flags, const Vector2f& flipVector ) : name( name ),
-//                                                                                                flags( flags ),
-//                                                                                                flipVector(
-//                                                                                                        flipVector ) {}
-//    ProfileSchema( const std::string& name, FollowerFlags flags, GeomDataFollowerBuilder::Raise raise,
-//                   const Vector2f& flipVector ) : name( name ), flags( flags ), raise( raise ),
-//                                                  flipVector( flipVector ) {}
-//
-//    ProfileSchema( const Vector2f& p1, const Vector2f& p2 );
-//
-//    void evaluateDirectBuild( ProfileManager& _PL);
-//
-//    std::string name;
-//    FollowerFlags flags = FollowerFlags::Defaults;
-//    GeomDataFollowerBuilder::Raise raise = GeomDataFollowerBuilder::Raise::None;
-//    Vector2f flipVector = Vector2f::ZERO;
-//    std::shared_ptr<ProfileBuilder> builder;
-//};
 
 class GeomBuilder : public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
 public:
@@ -142,7 +139,7 @@ public:
     GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
 
     // Impoorted object
-    GeomBuilder( std::shared_ptr<HierGeom>, const std::vector<std::shared_ptr<MaterialBuilder>>& );
+    GeomBuilder( GeomAssetSP, const std::vector<std::shared_ptr<MaterialBuilder>>& );
 
     // Polygon list
     explicit GeomBuilder( const Rect2f& _rect, float _z = 0.0f );
@@ -278,7 +275,7 @@ protected:
     void preparePolyLines();
     void deserializeDependencies( DependencyMaker& _md );
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg );
-    void createFromAsset( std::shared_ptr<HierGeom> asset );
+    void createFromAsset( GeomAssetSP asset );
     std::string toMetaData() const;
     std::string generateThumbnail() const;
     std::string generateRawData() const;
