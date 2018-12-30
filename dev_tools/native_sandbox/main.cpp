@@ -18,6 +18,7 @@
 
 #include <core/file_manager.h>
 #include <core/math/anim.h>
+#include <core/node.hpp>
 #include <graphics/platform_graphics.hpp>
 #include <graphics/shader_manager.h>
 #include <poly/geom_builder.h>
@@ -35,19 +36,26 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
     _p->postActivate( [](Scene* _p) {
         auto c = _p->CM().getCamera(Name::Foxtrot);
         c->goTo( Vector3f{0.0f, 1.0f, 3.0f}, 0.0f);
+        GB{ShapeType::Cube}.build(_p->RSG());
+        GB{ GeomBuilderType::file, "pin" }.build(_p->RSG());
+
+//        auto v = _p->RSG().Geoms();
+//
+//        LOGR( "* %s", uid.c_str() );
+//        for ( const auto& pg: v ) {
+//            LOGR( "- %s", std::string(pg->Hash()).c_str() );
+//        }
 //        const std::string cName = "urca";
 //        TimelineStream<V3f>{c->PosAnim()}.
 //                  k(0.0f, Vector3f{0.0f, 1.0f, 3.0f}).
 //                  k(1.0f, V3f::ONE*10.0f).
 //                  k(15.0f, V3f::Y_AXIS*5.0f).
 //                  add(cName);
-//        TimelineStream<V3f>{c->QAngleAnim()}.
-//                k(0.0f, Vector3f{0.0f, M_PI, 0.0f}).
-//                k(15.0f, Vector3f{0.0f, -M_PI, 0.0f}).
-//                add(cName);
 //        Timeline::play(cName);
-//        GB{ShapeType::Cube}.build(_p->RSG());
-        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RR());
+
+
+
+//        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RR());
     } );
 }
 

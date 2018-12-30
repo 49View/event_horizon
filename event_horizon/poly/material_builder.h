@@ -4,7 +4,7 @@
 #include <string>
 #include <functional>
 #include "core/util.h"
-#include "core/callback_dependency.h"
+#include "core/builders.hpp"
 #include "core/descriptors/material.h"
 #include "core/image_constants.h"
 

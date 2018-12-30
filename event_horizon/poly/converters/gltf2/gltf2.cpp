@@ -8,6 +8,7 @@
 #include <core/math/quaternion.h>
 #include <core/raw_image.h>
 #include <core/image_util.h>
+#include <core/file_manager.h>
 //#include "substance_driver.h"
 
 unsigned int accessorTypeToNumberOfComponent( int ty ) {

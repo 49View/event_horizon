@@ -13,7 +13,6 @@
 #include <fstream>
 #include <string>
 #include <core/zlib_util.h>
-#include "file_manager.h"
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:

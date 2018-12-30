@@ -9,91 +9,7 @@
 #include "http/webclient.h"
 #include "util.h"
 
-bool callbackSuccessfulStatus( DependencyStatus dp ) {
-    if ( dp == DependencyStatus::LoadedSuccessfully ||
-         dp == DependencyStatus::LoadedSuccessfully204 ) {
-        return true;
-    }
-    return false;
-}
-
 namespace FileManager {
-
-    std::unordered_map< std::string, std::shared_ptr<FileCallbackHandler> > callbacksDataMap;
-    std::unordered_map< std::string, std::shared_ptr<FileCallbackHandler> > callbacksDataMapExecuted;
-
-    // File cache (desktop mainly, web has its own cache)
-    std::string getTimeStampCacheFileName( const std::string& cachedFileName, const std::string& etag ) {
-        return cacheFolder() + cachedFileName + ".cachetime" + etag;
-    }
-
-    std::string getCacheFileName( const std::string& sourceFileName ) {
-        return std::to_string( std::hash<std::string>{}( sourceFileName ));
-    }
-
-    void saveCacheFiles( const Http::Result& header ) {
-        auto filename = getFileName(header.uri);
-        bool statusOK = header.isSuccessStatusCode();
-        if ( statusOK ) {
-            LOGR( "[CLOUD LOAD] %s ", filename.c_str());
-            // Save to local cache
-            FM::writeLocalFile( cacheFolder() + url_encode( header.ETag ),
-                                header.buffer.get() == nullptr ?
-                                reinterpret_cast<const char *>( header.bufferString.c_str() ) :
-                                reinterpret_cast<const char *>( header.buffer.get() ),
-                                static_cast<uint64_t>( header.length ), true );
-        }
-    }
-
-    bool checkInCache( const Http::Result& header ) {
-        auto filename = getFileName(header.uri);
-        // Calculate the hash of the filename in order to use it as a key for cache, we use an hash rather than the real name to avoid
-        // storing folder structures into cache, which will be a flat list
-        std::string cachedFileName = cacheFolder() + url_encode( header.ETag );
-
-        if ( fileExistAbs( cachedFileName ) ) {
-            std::string bufferString;
-            std::unique_ptr<uint8_t[]> bufferData;
-            uint64_t bufferLength = 0;
-            if ( checkBitWiseFlag(header.flags, Http::ResponseFlags::Text) ) {
-                bufferString = readLocalTextFile(cachedFileName);
-            } else {
-                bufferData = readLocalFile( cachedFileName, bufferLength );
-            }
-            if ( bufferLength == 0 && bufferString.empty() ) {
-                LOGR( "[CACHE CORRUPTED] %s", filename.c_str());
-            } else {
-                setCallbackData( {header.uri, std::move(bufferData), bufferLength, 200} );
-                LOGR( "[CACHE LOAD] %s ", filename.c_str());
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void cacheSave( const Http::Result& header ) {
-        saveCacheFiles( header );
-        setCallbackData( header );
-    }
-
-    void cacheLoad( const Http::Result& header ) {
-#ifdef _FAST_FILE_LOAD_NO_TIMESTAMP_CHECK
-        if ( UseCacheDirect()) {
-            auto cachedFile = readLocalFile( cacheFolder + cachedFileName + fext, _length, addTrailingZero );
-            if ( _length > 0 ) {
-                LOGR( "[DIRECT CACHE LOAD] %s", filename.c_str());
-                return cachedFile;
-            }
-        }
-#endif
-        if ( !checkInCache( header ) ) {
-//            auto filename = getFileName( header.uri, EncodingStatusFlag::NotEncode );
-//            Http::get( Url( HttpFilePrefix::get + filename), cacheSave );
-            Url cachedUrl;
-            cachedUrl.fromString( header.uri );
-            Http::get( Url{cachedUrl.uri}, cacheSave );
-        }
-    }
 
     std::string filenameOnly( const std::string& input ) {
         std::string ret = input;
@@ -155,32 +71,6 @@ namespace FileManager {
         return 0;
     }
 
-    void setCallbackData( const Http::Result& header ) {
-
-        std::string key = getFileNameCallbackKey( header.uri );
-        auto it = callbacksDataMap.find( key );
-        auto& v = it->second->cbData;
-
-        if ( !header.isSuccessStatusCode() ) {
-            LOGE( "[ERROR] %s, %d, %s", key.c_str(), header.statusCode, header.uri.c_str() );
-            v->status = DependencyStatus::LoadingFailed;
-            return;
-        }
-
-        LOGR( "[LOAD OK] %s - %llu bytes", key.c_str(), header.length );
-        v->status = header.length == 0 ? DependencyStatus::LoadedSuccessfully204 : DependencyStatus::LoadedSuccessfully;
-        v->data.second = header.length;
-        if ( v->status == DependencyStatus::LoadedSuccessfully ) {
-            if ( header.flags == Http::ResponseFlags::Text  ) {
-                std::unique_ptr<uint8_t[]> buf = std::make_unique<uint8_t[]>(header.length);
-                std::memcpy( buf.get(), header.bufferString.c_str(), header.length );
-                v->data = { std::move( buf ), header.length };
-            } else {
-                v->data = { std::move( header.buffer ), header.length };
-            }
-        }
-    }
-
 // ********************************************************************************************************************
 // REMOTE FILE SYSTEM
 // ********************************************************************************************************************
@@ -189,20 +79,6 @@ namespace FileManager {
                                    ResponseCallbackFunc simpleCallback ) {
         Http::get( Url( HttpFilePrefix::get + url_encode(filename)), simpleCallback,
                         Http::ResponseFlags::ExcludeFromCache );
-    }
-
-    void readRemote( const Url& url, std::shared_ptr<FileCallbackHandler> _handler, Http::ResponseFlags rf ) {
-        auto fkey = getFileNameCallbackKey( url.toString() );
-        if ( _handler->needsReload() || callbacksDataMap.find( fkey ) == callbacksDataMap.end() ) {
-            callbacksDataMap.insert( { fkey, _handler } );
-            bool useFS = useFileSystemCachePolicy()
-                         && url.isEngine( HttpFilePrefix::get )
-                         && (!_handler->needsReload());
-            auto rfe = useFS ? Http::ResponseFlags::HeaderOnly : rf;
-            if (_handler->needsReload()) orBitWiseFlag( rfe, Http::ResponseFlags::ExcludeFromCache);
-
-            Http::get( url, useFS ? cacheLoad : setCallbackData, rfe );
-        }
     }
 
     void writeRemoteFile( const std::string& _filename, const char *buff, uint64_t length,

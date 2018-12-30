@@ -445,7 +445,7 @@ bool UiViewBuilder::build( DependencyMaker& _md ) {
     if ( uicm.exists( Name() ) ) {
         return false;
     }
-    FM::readRemote<UiViewBuilder, HttpQuery::JSON, UIView>( Name(), *this, _md );
+    readRemote<UiViewBuilder, HttpQuery::JSON, UIView>( Name(), *this, _md );
     return true;
 }
 

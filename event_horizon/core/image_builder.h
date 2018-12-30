@@ -5,7 +5,7 @@
 #include <set>
 #include <functional>
 #include "util.h"
-#include "callback_dependency.h"
+#include <core/builders.hpp>
 #include "image_constants.h"
 
 struct ImageBuilder;

@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <core/http/basen.hpp>
+#include <core/http/webclient.h>
 #include "../util.h"
 #include "../math/vector4f.h"
 #include "../serializebin.hpp"

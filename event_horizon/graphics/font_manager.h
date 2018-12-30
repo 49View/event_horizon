@@ -2,10 +2,9 @@
 
 #include <string>
 #include <unordered_map>
-#include "core/callback_dependency.h"
+#include "core/builders.hpp"
 #include "TTF.h"
 #include "core/math/rect2f.h"
-#include "core/htypes_shared.hpp"
 
 class FontManager : public DependencyMaker {
 public:

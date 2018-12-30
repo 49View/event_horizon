@@ -14,68 +14,8 @@
 #include "htypes_shared.hpp"
 #include "http/webclient.h"
 #include <core/util.h>
-#include <core/uuid.hpp>
-
-
-using ddContainer = std::vector<std::string>;
-
-enum class DependencyStatus {
-    Loading = 0,
-    LoadedSuccessfully,
-    LoadedSuccessfully204,
-    LoadingFailed,
-    CallbackSuccessfullyExectuted,
-    CallbackFailedOnExectution,
-    Complete,
-    CompleteWithErrors
-};
-
-enum class BuilderQueryType {
-    Exact,
-    NotExact
-};
-
-using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
-
-#define RBUILDER( BuilderName, _pre, _post, dataType, buildQueryType, version ) \
-BuilderName : public ResourceBuilder { \
-public: \
-    using ResourceBuilder::ResourceBuilder; \
-    BuilderName() {} \
-    virtual ~BuilderName() {} \
-    static uint64_t Version() { \
-        return version; \
-    } \
-    const std::string prefix() const override { \
-        return std::string(#_pre) + "/"; \
-    } \
-    std::string postMake( const std::string& _str ) const { \
-        if ( usesNotExactQuery() ) return ""; \
-        if ( _str.empty() ) return ""; \
-        return "."  + _str; \
-    } \
-    void defPrePosfixes() { \
-        postFix = postMake(#_post); \
-    } \
-    static bool usesNotExactQuery() { return buildQueryType == BuilderQueryType::NotExact; } \
-    BuilderName( const std::string& _name ) : \
-        ResourceBuilder( _name) { \
-        defPrePosfixes(); \
-    } \
-    BuilderName& cc( CommandResouceCallbackFunction _ccf, const std::vector<std::string>& _params ) { \
-        ccf = _ccf; \
-        params = _params; \
-        return *this; \
-    } \
-    bool makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) override; \
-    bool build( DependencyMaker& _md ) override { \
-        if ( !_md.exists(Name()) || usesNotExactQuery() ) { \
-            auto dkey = prefix() + Name() + postFix; \
-            FM::readRemote<BuilderName, HttpQuery::dataType>( dkey, *this, _md ); \
-            return true; \
-        } \
-        return false; \
-    }
+#include <core/node.hpp>
+#include <core/htypes_shared.hpp>
 
 class DependencyMaker {
 public:
@@ -125,10 +65,12 @@ private:
 };
 
 class DependantBuilder;
+class ResourceBuilder;
+class ResourceBuilderObservable;
+
 using DependencyChainMap = DependencyChain<DependantBuilder, DependencyMaker>;
 using DependencyChainMapPtr = std::shared_ptr<DependencyChainMap>;
 using dep_map = std::vector<DependencyChainMapPtr>;
-extern dep_map g_deps;
 
 namespace DependencyHandler {
     void update();
@@ -139,145 +81,156 @@ namespace DependencyHandler {
 
 namespace DH = DependencyHandler;
 
-class BaseBuilder {
-public:
-    BaseBuilder() = default;
-    explicit BaseBuilder( const std::string& _name ) : name( _name ) {
-        uuid = UUIDGen::make();
+using FileCallback = std::function<void(const uint8_p&)>;
+using FileStringCallback = std::function<void(const std::string&)>;
+
+bool callbackSuccessfulStatus( DependencyStatus dp );
+
+struct CallbackData {
+    virtual void init() {}
+    bool hasFinishedLoading() const {
+        return ( callbackSuccessfulStatus(status) ||
+                 status == DependencyStatus::LoadingFailed );
+    }
+    bool isComplete() const {
+        return ( status == DependencyStatus::CallbackSuccessfullyExectuted ||
+                 status == DependencyStatus::CallbackFailedOnExectution );
     }
 
+    std::string asString() const {
+        return std::string( reinterpret_cast<const char*>( data.first.get() ), data.second );
+    }
+    virtual bool needsReload() const = 0;
 
-    static const std::string typeName()  { return ""; }
-    const std::string& Name() const { return name; }
-    void Name( const std::string& _name ) { name = _name; }
-
-    const UUID UID() const { return uuid; }
-
-    void clearTags() { tags.clear();}
-    void addTag( const std::string& _tag ) { tags.emplace(_tag); }
-    const std::set<std::string>& Tags() const { return tags; }
-    void Tags( const std::set<std::string>& _tags ) { tags = _tags; }
-
-    std::set<std::string> generateTags() const;
-
-private:
-    std::string name;
-    std::set<std::string> tags;
-    UUID uuid;
+    DependencyStatus status = DependencyStatus::Loading;
+    uint8_p data;
 };
 
-class ResourceBuilder : public BaseBuilder {
-    using BaseBuilder::BaseBuilder;
-public:
-    virtual const std::string prefix() const = 0;
+struct CallbackDataNoReload : public CallbackData {
+    virtual ~CallbackDataNoReload() {}
 
-    const std::string NameKey() const { return prefix() + Name(); }
-    virtual bool build( DependencyMaker& _md ) = 0;
-    bool rebuild( DependencyMaker& _md ) {
-        bReloading = true;
-        return build(_md);
-    };
+    bool needsReload() const override { return false; };
+};
 
-    virtual bool evaluateDirectBuild( DependencyMaker& _md ) {
+struct CallbackDataMaker : public CallbackData {
+    CallbackDataMaker( std::shared_ptr<ResourceBuilder> _builder, DependencyMaker& _md ) : builder( _builder ), md( _md ) {}
+
+    virtual ~CallbackDataMaker() {}
+
+    std::shared_ptr<ResourceBuilder> builder;
+    DependencyMaker& md;
+    virtual bool needsReload() const override;
+};
+
+struct CallbackDataObservable : public CallbackData {
+    CallbackDataObservable( std::shared_ptr<ResourceBuilderObservable> _builder ) : builderObservable( _builder ) {}
+
+    virtual ~CallbackDataObservable() {}
+
+    std::shared_ptr<ResourceBuilderObservable> builderObservable;
+    virtual bool needsReload() const override {
         return false;
-    }
-
-    bool make( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
-        bool bSucc = makeImpl( _md, std::move(_data), _status );
-        if ( bSucc && ccf ) {
-            ccf( params );
-        }
-        return bSucc;
-    }
-
-    bool isReloading() const {
-        return bReloading;
-    }
-
-protected:
-    virtual bool makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) = 0;
-protected:
-    std::vector<std::string> params;
-    CommandResouceCallbackFunction ccf = nullptr;
-    std::string postFix;
-    bool bReloading = false;
+    };
 };
 
-class ResourceBuilderObservable : public BaseBuilder {
-    using BaseBuilder::BaseBuilder;
-public:
-    virtual bool make( uint8_p&& _data, const DependencyStatus _status ) = 0;
+struct FileCallbackHandler {
+    virtual bool executeCallback( const DependencyStatus _status ) = 0;
+
+    bool isComplete() const {
+        return cbData->isComplete();
+    }
+    bool hasCompletedSuccessfully() const {
+        return cbData->status == DependencyStatus::CallbackSuccessfullyExectuted;
+    }
+    bool needsReload() const {
+        return cbData->needsReload();
+    }
+
+    std::shared_ptr<CallbackData> cbData;
 };
 
-class DependantBuilder : public BaseBuilder {
-    using BaseBuilder::BaseBuilder;
-public:
-    virtual void assemble( [[maybe_unused]] DependencyMaker& _md ) {};
-    UUID build( DependencyMaker& _md ) {
-        if ( validate() ) {
-            createDependencyList( _md );
-            return UID();
-        }
-        return std::string{};
+struct FileCallbackHandlerSimple : FileCallbackHandler {
+    FileCallbackHandlerSimple(std::function<void(const uint8_p&)> _simpleCallback) {
+        cbData = std::make_shared<CallbackDataNoReload>();
+        simpleCallback = _simpleCallback;
     }
 
-    ddContainer& deps()  {
-        return mDeps;
+    virtual ~FileCallbackHandlerSimple() {
+
     }
 
-protected:
-    virtual bool validate() const = 0;
-
-    template< typename B, typename D>
-    void addDependencies( std::shared_ptr<B> _builder, D& _md ) {
-        if ( mDeps.empty() ) {
-            _builder->assemble( _md );
-        } else {
-            g_deps.push_back( std::make_shared<DependencyChainMap>( _builder, _md ));
+    bool executeCallback( const DependencyStatus _status ) {
+        if ( callbackSuccessfulStatus(_status) ) {
+            simpleCallback( cbData->data );
+            return true;
         }
+        return false;
     };
 
-    bool depExistTest( const std::string& _dname, DependencyMaker& _md ) {
-        return (!_dname.empty() && !_md.exists(_dname));
-    }
+    std::function<void(const uint8_p&)> simpleCallback;
+};
 
-    template <typename BD>
-    void push_dep( const std::string& _dname ) {
-        std::string preFixToAdd = BD::usesNotExactQuery() ? "" : BD{}.prefix();
-        mDeps.push_back( preFixToAdd + _dname );
-    }
+struct FileCallbackHandlerMaker : public FileCallbackHandler {
+    FileCallbackHandlerMaker( std::shared_ptr<ResourceBuilder> _builder, DependencyMaker& _md );
+    virtual ~FileCallbackHandlerMaker() = default;
 
-    template <typename BD>
-    void addDependency( const std::string& _dname, DependencyMaker& _md ) {
-        if ( depExistTest(_dname, _md) ) {
-            BD{ _dname }.build( _md );
-            push_dep<BD>( _dname );
-        }
-    }
+    bool executeCallback( const DependencyStatus _status );;
+};
 
-    template <typename BD>
-    void addDependency( BD& _builder, DependencyMaker& _md ) {
-        if ( depExistTest( _builder.Name(), _md) ) {
+struct FileCallbackHandlerObservable : public FileCallbackHandler {
+    FileCallbackHandlerObservable( std::shared_ptr<ResourceBuilderObservable> _builder );
+    virtual ~FileCallbackHandlerObservable() = default;
 
-            if ( !_builder.evaluateDirectBuild( _md ) ) {
-                _builder.build( _md );
-                push_dep<BD>( _builder.Name() );
+    bool executeCallback( const DependencyStatus _status );;
+};
+
+template< typename Builder>
+std::shared_ptr<FileCallbackHandler> makeHandler( Builder& obj, DependencyMaker& _md ) {
+    return std::make_shared<FileCallbackHandlerMaker>( std::make_shared<Builder>( obj ), _md );
+}
+
+template< typename Builder>
+std::shared_ptr<FileCallbackHandler> makeHandler( Builder& obj ) {
+    return std::make_shared<FileCallbackHandlerObservable>( std::make_shared<Builder>( obj ) );
+}
+
+template<HttpQuery Q, typename T>
+Url makeUrl(const std::string& _name) {
+    switch (Q) {
+        case HttpQuery::JSON:
+            return Url::privateAPI(HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) );
+            break;
+        case HttpQuery::Binary:
+        case HttpQuery::Text: {
+            if ( T::usesNotExactQuery() ) {
+                return Url::entityContent( T::Version(), _name );
+            } else {
+                return Url( HttpFilePrefix::get + url_encode( _name ) );
             }
         }
+            break;
+        default:
+            break;
     }
+    return Url{};
+}
 
-    template <typename BD, typename T, typename S>
-    void addDependency( const std::string& _dname, const T& _type, const S& _subtype, DependencyMaker& _md ) {
-        if ( depExistTest(_dname, _md) ) {
-            BD{ _dname, _type, _subtype }.build( _md );
-            push_dep<BD>( _dname );
-        }
-    }
+void readRemote( const Url& url, std::shared_ptr<FileCallbackHandler> _handler,
+                 Http::ResponseFlags rf = Http::ResponseFlags::None );
 
-    virtual void createDependencyList( DependencyMaker& _md ) = 0;
+template<typename B, HttpQuery Q, typename T = B>
+void readRemote( const std::string& _name, B& _builder, DependencyMaker& _md ) {
+    readRemote( makeUrl<Q, T>(_name), makeHandler<B>( _builder , _md ) );
+}
 
-protected:
-    ddContainer mDeps;
-};
+template<typename B, HttpQuery Q, typename T = B>
+void readRemote( const std::string& _name, B& _builder ) {
+    readRemote( makeUrl<Q, T>(_name), makeHandler<B>( _builder ) );
+}
 
-#include "file_manager.h"
+// Data Exchange
+void setCallbackData( const Http::Result& header );
+
+extern dep_map g_deps;
+extern std::unordered_map<std::string, std::shared_ptr<FileCallbackHandler> > callbacksDataMap;
+extern std::unordered_map<std::string, std::shared_ptr<FileCallbackHandler> > callbacksDataMapExecuted;

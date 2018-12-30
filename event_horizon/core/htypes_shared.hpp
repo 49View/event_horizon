@@ -278,3 +278,23 @@ namespace EntityGroup {
 	const static std::string Color = "color";
 	const static std::string Geom = "geom";
 }
+
+// Dependencies
+
+using ddContainer = std::vector<std::string>;
+
+enum class DependencyStatus {
+	Loading = 0,
+	LoadedSuccessfully,
+	LoadedSuccessfully204,
+	LoadingFailed,
+	CallbackSuccessfullyExectuted,
+	CallbackFailedOnExectution,
+	Complete,
+	CompleteWithErrors
+};
+
+enum class BuilderQueryType {
+	Exact,
+	NotExact
+};

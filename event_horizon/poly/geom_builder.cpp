@@ -154,7 +154,7 @@ void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
 
 void GeomBuilder::assemble( DependencyMaker& _md ) {
 
-    auto& sg = static_cast<SceneGraph&>(_md);
+    auto& sg = dynamic_cast<SceneGraph&>(_md);
     std::unique_ptr<GeomDataBuilder> gb;
 
     switch ( builderType ) {

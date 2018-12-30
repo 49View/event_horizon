@@ -447,7 +447,8 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
     }
 
     auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, mTransform, color.w() );
-    VPBuilder<PosTex3dStrip>{rr,vpList}.p(vs).s(shaderName).t(tname).c(color).n(UID()).build();
+    // ### FIXME: restore UID() on .n() call
+    VPBuilder<PosTex3dStrip>{rr,vpList}.p(vs).s(shaderName).t(tname).c(color).n("urca").build();
 }
 
 bool UIShapeBuilder::validate() const {
