@@ -109,15 +109,19 @@ protected:
 class ResourceBuilderObservable : public BaseBuilder {
     using BaseBuilder::BaseBuilder;
 public:
+
     virtual bool make( uint8_p&& _data, const DependencyStatus _status ) = 0;
 };
 
 class DependantBuilder : public BaseBuilder {
     using BaseBuilder::BaseBuilder;
 public:
+
     virtual void assemble( [[maybe_unused]] DependencyMaker& _md ) {};
+
     void build( DependencyMaker& _md ) {
         if ( validate() ) {
+            elemCreate();
             createDependencyList( _md );
         }
     }
@@ -127,6 +131,7 @@ public:
     }
 
 protected:
+    virtual void elemCreate() = 0;
     virtual bool validate() const = 0;
 
     template< typename B, typename D>

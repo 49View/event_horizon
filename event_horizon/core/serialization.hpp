@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include "megawriter_fs.hpp"
-#include "megareader_fs.hpp"
+#include "megawriter.hpp"
+#include "megareader.hpp"
 #include "string_util.h"
 
 template <typename J, typename B, typename A>
@@ -282,7 +282,6 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); bIsLoaded = true; } \
 	template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( #__VA_ARGS__,__VA_ARGS__ ); } \
-	void save() const { MegaWriterFS<CLASSNAME>( #CLASSNAME, *this ); } \
 	void load( const std::string& _json ) { \
 		rapidjson::Document document; \
 		document.Parse<rapidjson::kParseStopWhenDoneFlag>( _json.c_str() ); \

@@ -483,3 +483,7 @@ void UIShapeBuilder::createDependencyList( DependencyMaker& _md ) {
     addDependencies( std::make_shared<UIShapeBuilder>(*this), _md );
 }
 
+void UIShapeBuilder::elemCreate() {
+//    elem = std::dynamic_pointer_cast<Node<Nodeable>>(std::make_shared<GeomAssetSP>());
+}
+

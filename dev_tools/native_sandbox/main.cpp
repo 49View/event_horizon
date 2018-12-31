@@ -36,15 +36,17 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
     _p->postActivate( [](Scene* _p) {
         auto c = _p->CM().getCamera(Name::Foxtrot);
         c->goTo( Vector3f{0.0f, 1.0f, 3.0f}, 0.0f);
-        GB{ShapeType::Cube}.build(_p->RSG());
-        GB{ GeomBuilderType::file, "pin" }.build(_p->RSG());
 
-//        auto v = _p->RSG().Geoms();
-//
-//        LOGR( "* %s", uid.c_str() );
-//        for ( const auto& pg: v ) {
-//            LOGR( "- %s", std::string(pg->Hash()).c_str() );
-//        }
+        auto cube = GB{ShapeType::Cube}.buildr(_p->RSG());
+//        auto pin = GB{ GeomBuilderType::file, "pin" }.buildr(_p->RSG());
+
+        auto v = _p->RSG().Geoms();
+
+        LOGR( "* %s", cube->Hash().c_str() );
+//        LOGR( "* %s", pin->Hash().c_str() );
+        for ( const auto& pg: v ) {
+            LOGR( "- %s", std::string(pg->Hash()).c_str() );
+        }
 //        const std::string cName = "urca";
 //        TimelineStream<V3f>{c->PosAnim()}.
 //                  k(0.0f, Vector3f{0.0f, 1.0f, 3.0f}).

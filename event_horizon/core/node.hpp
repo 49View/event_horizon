@@ -16,6 +16,8 @@
 #include "core/observable.h"
 #include "core/serialization.hpp"
 #include "core/serializebin.hpp"
+#include "core/zlib_util.h"
+#include "core/http/basen.hpp"
 
 enum class ExtractFlags {
     LeaveAsItAfterExtract,
@@ -27,6 +29,13 @@ enum UpdateTypeFlag {
     Position = 1,
     Rotation = 1 << 1,
     Scale = 1 << 2
+};
+
+enum class SerializeOutputFormat {
+    Original,
+    B64,
+    GZip,
+    B64GZip
 };
 
 inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { return (2040 * 1000000) + dataVersion; }
@@ -329,13 +338,17 @@ public:
         }
     }
 
-    std::vector<unsigned char> serialize() {
+    std::string serialize() {
         auto writer = std::make_shared<SerializeBin>( D::Version() );
 
         serializeDependencies( writer );
         serializeRec( writer );
 
-        return writer->buffer();
+        auto s = writer->buffer();
+
+        auto f = zlibUtil::deflateMemory( { s.begin(), s.end() } );
+        auto rawm = bn::encode_b64( f );
+        return std::string{ rawm.begin(), rawm.end() };
     }
 
     bool deserialize( std::shared_ptr<DeserializeBin>& reader ) {

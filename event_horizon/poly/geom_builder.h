@@ -61,10 +61,6 @@ enum class GeomBuilderType {
 template <typename T>
 class GeomBasicBuilder {
 public:
-    T& inj( GeomAssetSP _hier ) {
-        elem = _hier;
-        return static_cast<T&>(*this);
-    }
 
     T& r( const Vector3f& _axis ) {
         axis = _axis;
@@ -126,7 +122,7 @@ protected:
     Vector3f axis = Vector3f::ZERO;
     Vector3f scale = Vector3f::ONE;
     MatrixAnim matrixAnim;
-    GeomAssetSP elem;
+//    GeomAssetSP elem;
 };
 
 class GeomBuilder : public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
@@ -164,6 +160,8 @@ public:
                  const Vector3f& _suggestedAxis = Vector3f::ZERO );
     GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
     void publish() const;
+
+    GeomBuilder& inj( GeomAssetSP _hier );
 
     GeomBuilder& bt( const GeomBuilderType _gbt ) {
         builderType = _gbt;
@@ -266,10 +264,18 @@ public:
 
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
+    GeomAssetSP buildr( DependencyMaker& _md) {
+        build( _md );
+        return elem;
+    }
+
     void assemble( DependencyMaker& _md ) override;
     ScreenShotContainerPtr& Thumb();
 
 protected:
+    void elemCreate() override;
+    GeomAssetSP Elem() { return elem; }
+
     void createDependencyList( DependencyMaker& _md ) override;
     bool validate() const override;
     void preparePolyLines();
@@ -312,6 +318,8 @@ private:
     GeomBuilderType builderType = GeomBuilderType::unknown;
 
     std::vector<std::shared_ptr<MaterialBuilder>> matBuilders;
+
+    GeomAssetSP elem;
 
     ScreenShotContainerPtr thumb;
     friend class GeomData;

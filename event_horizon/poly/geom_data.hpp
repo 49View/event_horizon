@@ -204,7 +204,6 @@ private:
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };
 
-
 class GeomData {
 public:
     GeomData();

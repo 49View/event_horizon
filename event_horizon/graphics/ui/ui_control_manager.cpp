@@ -100,7 +100,7 @@ void UiControlManager::addUIView( const UIView& _view ) {
 void UiControlManager::addStyles( const std::string& uri ) {
 
     std::vector<StyleSheetElement> lStyles;
-    readFS<StyleSheetElement>( "StyleSheet", uri, "layout", lStyles );
+//    readFS<StyleSheetElement>( "StyleSheet", uri, "layout", lStyles );
 
     for ( auto style : lStyles ) {
         if ( style.control != "" && style.layout == "" && style.style == "" ) mControlStyles[style.control] = style;

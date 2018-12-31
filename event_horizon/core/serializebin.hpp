@@ -12,7 +12,6 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include <core/zlib_util.h>
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:

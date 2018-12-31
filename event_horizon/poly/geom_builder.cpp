@@ -135,21 +135,12 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg ) {
     auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName ));
-    std::shared_ptr<GeomData> geom = gb->m(mat).build();
-    if ( elem ) {
-        elem->Data( geom );
-    } else {
-        elem = std::make_shared<GeomAsset>( geom );
-    }
+    elem->Data( gb->m(mat).build() );
     elem->GHType(gt);
 }
 
 void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
-    if ( elem ) {
-        elem->addChildren( asset );
-    } else {
-        elem = asset;
-    }
+    elem->addChildren( asset );
 }
 
 void GeomBuilder::assemble( DependencyMaker& _md ) {
@@ -209,7 +200,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
 
     elem->updateExistingTransform( pos, axis, scale );
 
-    sg.add( elem );
+    sg.add( std::static_pointer_cast<GeomAsset >(elem) );
 }
 
 GeomBuilder& GeomBuilder::addQuad( const QuadVector3fNormal& quad,
@@ -250,15 +241,7 @@ std::string GeomBuilder::generateThumbnail() const {
 }
 
 std::string GeomBuilder::generateRawData() const {
-
-    if ( elem ) {
-        auto s = elem->serialize();
-        auto f = zlibUtil::deflateMemory( { s.begin(), s.end() } );
-        auto rawm = bn::encode_b64( f );
-        return std::string{ rawm.begin(), rawm.end() };
-    } else {
-        return "";
-    }
+    return elem ? elem->serialize() : "";
 }
 
 std::string GeomBuilder::toMetaData() const {
@@ -312,4 +295,13 @@ void GeomBuilder::preparePolyLines() {
             polyLines.emplace_back( PolyLine{ sourcePolysVList, ln, rfPoly } );
         }
     }
+}
+
+void GeomBuilder::elemCreate() {
+    elem = std::make_shared<GeomAsset>();
+}
+
+GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
+    elem = _hier;
+    return *this;
 }

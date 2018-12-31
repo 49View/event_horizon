@@ -112,6 +112,7 @@ public:
 	}
 
 protected:
+	void elemCreate() override {}
 	bool validate() const override;
 	void createDependencyList( DependencyMaker& _md ) override;
 private:

@@ -244,6 +244,7 @@ public:
     }
 
 protected:
+    void elemCreate() override;
     bool validate() const override;
 
 protected:
