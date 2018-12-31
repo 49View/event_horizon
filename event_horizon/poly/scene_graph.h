@@ -80,6 +80,9 @@ DEPENDENCY_MAKER_EXIST(geoms);
     SunBuilder& SB() { return sb; }
     void mapGeomType( const uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;
+
+    void update();
+
 protected:
     virtual void addImpl( GeomAssetSP _geom) = 0;
     virtual void changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}

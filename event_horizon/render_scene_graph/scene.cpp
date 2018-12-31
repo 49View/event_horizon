@@ -103,6 +103,7 @@ void Scene::update() {
 
 	inputPollUpdate();
 	updateCallbacks();
+	RSG().update();
 }
 
 void Scene::deactivate() {

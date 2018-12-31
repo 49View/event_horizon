@@ -36,3 +36,7 @@ void MatrixAnim::set( const Vector3f& _pos, const Quaternion& _rot, const Vector
     rot->value = _rot;
 }
 
+bool MatrixAnim::isAnimating() const {
+    return pos->isAnimating || rot->isAnimating || scale->isAnimating;
+}
+

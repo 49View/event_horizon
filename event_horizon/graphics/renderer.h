@@ -5,6 +5,7 @@
 #include <array>
 #include <unordered_set>
 #include "framebuffer.h"
+#include "core/uuid.hpp"
 #include "core/math/matrix4f.h"
 #include "core/image_builder.h"
 #include "vertex_processing.h"

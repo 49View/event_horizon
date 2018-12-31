@@ -495,8 +495,8 @@ public:
         auto value = source->value;
         uint64_t keyFrameIndex = 0;
         float delta = 0.0f;
-        mbActive = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
-        if ( mbActive ) {
+        source->isAnimating = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
+        if ( source->isAnimating ) {
             uint64_t p1 = keyFrameIndex;
             uint64_t p2 = keyFrameIndex+1;
             switch ( velocityType ) {
@@ -530,7 +530,7 @@ public:
         TimelineStream::timelineIndex = timelineIndex;
     }
 
-    bool isActive() const { return mbActive; };
+    bool isActive() const { return source->isAnimating; };
 
     void add( const std::string& _groupName = AnimDefaultGroupName );
 
@@ -539,7 +539,6 @@ private:
     std::vector<float> keyframeTimes;    // Times and values are strictly internal and _must_ be always CRUD-ed together
     std::vector<T> keyframeValues;       // Times and values are strictly internal and _must_ be always CRUD-ed together
     AnimVelocityType velocityType = AnimVelocityType::Linear;
-    bool mbActive = true;
     TimelineIndex timelineIndex = 0;
 };
 

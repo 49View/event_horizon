@@ -733,6 +733,7 @@ public:
 	}
 
 	T value;
+	bool isAnimating = false;
 };
 
 class Vector2f;

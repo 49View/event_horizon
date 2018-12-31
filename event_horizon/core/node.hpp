@@ -207,6 +207,12 @@ public:
     void updateTransform() {
         updateTransform( Vector3f::ZERO );
     }
+    void updateAnim() {
+        if ( mTRS.isAnimating() ) {
+            mLocalTransform = Matrix4f{ mTRS };
+            generateMatrixHierarchy( fatherRootTransform());
+        }
+    }
 
     void generateLocalTransformData( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale = Vector3f::ONE ) {
         mTRS.set( pos, rot, scale );
@@ -366,6 +372,9 @@ public:
         return ret;
     }
 
+    V3fa PosAnim() {
+        return mTRS.pos;
+    }
     MatrixAnim& TRS() { return mTRS; }
     const MatrixAnim& TRS() const { return mTRS; }
     void TRS( const MatrixAnim& val ) { mTRS = val; }

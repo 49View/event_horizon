@@ -47,14 +47,13 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
         for ( const auto& pg: v ) {
             LOGR( "- %s", std::string(pg->Hash()).c_str() );
         }
-//        const std::string cName = "urca";
-//        TimelineStream<V3f>{c->PosAnim()}.
-//                  k(0.0f, Vector3f{0.0f, 1.0f, 3.0f}).
-//                  k(1.0f, V3f::ONE*10.0f).
-//                  k(15.0f, V3f::Y_AXIS*5.0f).
-//                  add(cName);
-//        Timeline::play(cName);
-
+        const std::string cName = "urca";
+        TimelineStream<V3f>{cube->PosAnim()}.
+                  k(0.0f, Vector3f{0.0f, 1.0f, 0.0f}).
+                  k(5.0f, Vector3f{3.0f, 1.0f, 3.0f}).
+                  k(15.0f, V3f::Y_AXIS*1.0f).
+                  add(cName);
+        Timeline::play(cName);
 
 
 //        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RR());

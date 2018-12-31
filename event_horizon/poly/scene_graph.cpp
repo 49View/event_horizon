@@ -24,6 +24,13 @@ SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBu
     add( _geom );
 }
 
+void SceneGraph::update() {
+    for ( auto& [k,v] : geoms ) {
+        v->updateAnim();
+    }
+}
+
+
 void SceneGraph::cmdChangeMaterialTag( const std::vector<std::string>& _params ) {
     changeMaterialTagImpl( _params );
 }

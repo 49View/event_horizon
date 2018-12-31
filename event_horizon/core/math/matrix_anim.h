@@ -22,6 +22,7 @@ public:
 	void set( const Vector3f& _pos, const Vector3f& _angleAxis, const Vector3f& _scale );
 	void set( const Vector3f& _pos, const Quaternion& _rot, const Vector3f& _scale );
 
+	bool isAnimating() const;
 public:
 	// Expanded local transform Matrices
 	AnimValue<Vector3f>   pos;
