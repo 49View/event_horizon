@@ -18,8 +18,8 @@ class SHRelightCollection;
 class MappingGeomExtensions {
 public:
     MappingGeomExtensions();
-    void initialize( std::vector<std::shared_ptr<HierGeom>>& sceneGeoms );
-    void ensureInitialized( std::vector<std::shared_ptr<HierGeom>>& sceneGeoms );
+    void initialize( std::vector<GeomAssetSP>& sceneGeoms );
+    void ensureInitialized( std::vector<GeomAssetSP>& sceneGeoms );
     void update( const FlatMatrix& vertPerFuncMatrix, const ChunkInfo& chunk, const int& numberOfSHFunctions ) const;
     void update( float *sh_buffer, int numberOfSHFunctions ) const;
     FlatMatrix getNormalsMatrixForChunck( const ChunkInfo& chunk ) const;

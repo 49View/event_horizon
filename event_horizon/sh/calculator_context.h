@@ -17,7 +17,7 @@ struct CalculatorOption {
 struct CalculatorContext {
     CalculatorContext( std::shared_ptr<MappingGeomExtensions> geomExt, const CalculatorOption& opt,
                        std::shared_ptr<RayTracer> rt, std::function<void( std::string, size_t, size_t )> progressFunc,
-                       std::shared_ptr<CancellationToken> tk,  std::vector<std::shared_ptr<HierGeom>>& sceneGeoms ) :
+                       std::shared_ptr<CancellationToken> tk,  std::vector<GeomAssetSP>& sceneGeoms ) :
             ge( geomExt ), options( opt ), rayTracer( rt ), onProgress( progressFunc ), token( tk ) {
         ge->ensureInitialized( sceneGeoms );
     }

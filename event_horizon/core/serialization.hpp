@@ -261,13 +261,9 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 		MegaReader reader( document ); \
 		if ( !reader.isEmpty() ) { deserialize( reader );} \
 	} \
-	CLASSNAME( const std::string& _name ) { load( _name ); } \
-	CLASSNAME( const std::string& _name, const std::string& _key ) { load( _name, _key ); } \
 	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); bIsLoaded = true; } \
 	template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( #__VA_ARGS__,__VA_ARGS__ ); } \
-	void save() const { MegaWriterFS<CLASSNAME>( #CLASSNAME, *this ); } \
-	void load( const std::string& _name, const std::string& _key = "name" ) { readFS<CLASSNAME>( #CLASSNAME, _name, _key, *this ); } \
 	inline void serialize( MegaWriter* visitor ) const { visitor->StartObject(); serializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); visitor->EndObject(); } \
 	inline void deserialize( const MegaReader& visitor ) { deserializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); } \
 	bool bIsLoaded = false; \

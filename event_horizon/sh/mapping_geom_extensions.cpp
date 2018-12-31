@@ -13,11 +13,11 @@ MappingGeomExtensions::MappingGeomExtensions() {
     shRelightCollection = ServiceFactory::get<SHRelightCollection>();
 }
 
-void MappingGeomExtensions::initialize( std::vector<std::shared_ptr<HierGeom>>& sceneGeoms ) {
+void MappingGeomExtensions::initialize( std::vector<GeomAssetSP>& sceneGeoms ) {
     PROFILE_BLOCK( "Initializing geom extensions" );
 
     //std::queue<std::shared_ptr< HierGeom>> q;
-    std::stack<std::tuple<int, std::shared_ptr<HierGeom>>> s;
+    std::stack<std::tuple<int, GeomAssetSP>> s;
 
     //for ( auto& g : RL.SceneGeoms() ) q.push( g.second );
     for ( auto& g : sceneGeoms ) {
@@ -292,7 +292,7 @@ void MappingGeomExtensions::createAlbedos( float k ) {
     }
 }
 
-void MappingGeomExtensions::ensureInitialized( std::vector<std::shared_ptr<HierGeom>>& sceneGeoms ) {
+void MappingGeomExtensions::ensureInitialized( std::vector<GeomAssetSP>& sceneGeoms ) {
     if ( !isInitialized ) {
         initialize( sceneGeoms );
         isInitialized = true;

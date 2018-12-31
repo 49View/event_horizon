@@ -9,7 +9,7 @@
 void HouseUploader::upload() {
 //	RL.dumpStructure( std::cout );
 //
-//	std::unordered_map<GeomHierType, std::vector<std::shared_ptr<HierGeom>>> map;
+//	std::unordered_map<GeomHierType, std::vector<GeomAssetSP>> map;
 //
 //	for ( auto item : RL.SceneGeoms() ) {
 //		map[item.second->GHType()].push_back( item.second );

@@ -319,7 +319,8 @@ private:
 
     std::vector<std::shared_ptr<MaterialBuilder>> matBuilders;
 
-    GeomAssetSP elem;
+    GeomAssetSP elem = nullptr;
+    GeomAssetSP elemInjFather = nullptr;
 
     ScreenShotContainerPtr thumb;
     friend class GeomData;

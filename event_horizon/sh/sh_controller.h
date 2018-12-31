@@ -11,7 +11,7 @@ class SHController {
 public:
     SHController();
 
-    void calculateAsync( std::vector<std::shared_ptr<HierGeom>>& sceneGeoms,
+    void calculateAsync( std::vector<GeomAssetSP>& sceneGeoms,
                          std::function<void( void )> onCompletionFunc );
 
     void setOptions( CalculatorOption calcOptions );

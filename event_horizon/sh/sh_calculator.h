@@ -14,7 +14,7 @@ public:
     SHCalculator();
     ~SHCalculator();
 
-    void calculate( std::vector<std::shared_ptr<HierGeom>>& sceneGeoms, const CalculatorOption& options,
+    void calculate( std::vector<GeomAssetSP>& sceneGeoms, const CalculatorOption& options,
                     std::shared_ptr<CancellationToken> token,
                     std::function<void( std::string, size_t, size_t )> onProgress,
                     std::function<void( void )> onCompletion );

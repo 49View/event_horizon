@@ -10,7 +10,7 @@ void foo() {
 
 }
 
-void SHController::calculateAsync( std::vector<std::shared_ptr<HierGeom>>& sceneGeoms,
+void SHController::calculateAsync( std::vector<GeomAssetSP>& sceneGeoms,
                                    std::function<void( void )> onCompletionFunc ) {
     if ( running.load()) return;
     running.store( true );

@@ -10,7 +10,7 @@ void SHRelightCollection::checkAnyRelight() {
 
     size_t count = 0;
 
-    std::vector<std::shared_ptr<HierGeom>> modifiedGeoms;
+    std::vector<GeomAssetSP> modifiedGeoms;
 
     while ( auto hgToProcess = toBeRelighted.dequeue()) {
         hgToProcess->relightSH( false );

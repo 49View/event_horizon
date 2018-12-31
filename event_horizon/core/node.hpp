@@ -126,10 +126,10 @@ public:
         return std::make_shared<Node<D>>( *this );
     }
 
-    std::shared_ptr<Node> addChildren( std::shared_ptr<D> data, const Vector3f& pos = Vector3f::ZERO,
+    std::shared_ptr<Node<D>> addChildren( std::shared_ptr<D> data, const Vector3f& pos = Vector3f::ZERO,
                                        const Vector3f& rot = Vector3f::ZERO,
                                        const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
-        std::shared_ptr<Node> geom = std::make_shared<Node<D>>( data, this );
+        auto geom = std::make_shared<Node<D>>( data, this );
         geom->updateTransform( pos, rot, scale );
         children.push_back( geom );
         return geom;

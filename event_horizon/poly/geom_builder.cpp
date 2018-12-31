@@ -198,6 +198,10 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
             break;
     }
 
+    if ( elemInjFather ) {
+        elemInjFather->addChildren(elem);
+    }
+
     elem->updateExistingTransform( pos, axis, scale );
 
     sg.add( std::static_pointer_cast<GeomAsset >(elem) );
@@ -302,6 +306,6 @@ void GeomBuilder::elemCreate() {
 }
 
 GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
-    elem = _hier;
+    elemInjFather = _hier;
     return *this;
 }
