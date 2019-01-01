@@ -11,7 +11,7 @@
 #include "runloop_graphics_em.h"
 #include <emscripten/bind.h>
 
-RunLoopGraphics rl = di::make_injector(APP_GINJECTOR).create<RunLoopGraphics>();
+RunLoopGraphics rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
 
 std::string addScriptLine( std::string _str ) {
 	rl.addScriptLine( _str );

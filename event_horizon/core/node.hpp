@@ -56,6 +56,10 @@ public:
         father = papa;
         mData = data;
     }
+    explicit Node( std::shared_ptr<D> data, std::shared_ptr<Matrix4f> _clonedLocalTransform ) : Node() {
+        mLocalHierTransform = _clonedLocalTransform;
+        mData = data;
+    }
     Node( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale ) : Node() {
         generateLocalTransformData(pos, rot, scale);
         generateMatrixHierarchy(fatherRootTransform());

@@ -253,10 +253,7 @@ public:
         return *this;
     }
 
-    UIShapeBuilder& tm( std::shared_ptr<Matrix4f> _tm ) {
-        mTransform = _tm;
-        return *this;
-    }
+    UIShapeBuilder& inj( GeomAssetSP _cloned );
 
     UIShapeBuilder& ta( const UiControlFlag& _ta ) {
         if ( checkBitWiseFlag( _ta, UiControlFlag::TextAlignRight ) ) textAlignment = UiControlFlag::TextAlignRight;
