@@ -11,6 +11,7 @@
 #include <typeinfo>
 #include "core/image_builder.h"
 #include "core/command.hpp"
+#include "core/font_manager.h"
 #include "core/serializebin.hpp"
 #include "core/suncalc/sun_builder.h"
 #include "core/callback_dependency.h"
@@ -58,12 +59,13 @@ public:
 
 class SceneGraph : public DependencyMaker {
 public:
-    SceneGraph(CommandQueue& cq);
+    explicit SceneGraph( CommandQueue& cq, FontManager& _fm );
 
 DEPENDENCY_MAKER_EXIST(geoms);
     void add( GeomAssetSP _geom);
+    void add( UIAssetSP _geom);
     void add( std::vector<std::shared_ptr<MaterialBuilder>> _materials );
-    void add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials);
+    void add( GeomAssetSP _geom, std::vector<std::shared_ptr<MaterialBuilder>> _materials);
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
     void cmdCreateGeometry( const std::vector<std::string>& _params );
@@ -72,12 +74,14 @@ DEPENDENCY_MAKER_EXIST(geoms);
 
     size_t countGeoms() const;
     std::vector<GeomAssetSP> Geoms();
+    std::vector<UIAssetSP> UIs();
     virtual DependencyMaker& TL() = 0;
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
     AssetManager& AL() { return al; }
     SunBuilder& SB() { return sb; }
+    FontManager& FM() { return fm; }
     void mapGeomType( const uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;
 
@@ -85,6 +89,7 @@ DEPENDENCY_MAKER_EXIST(geoms);
 
 protected:
     virtual void addImpl( GeomAssetSP _geom) = 0;
+    virtual void addImpl( UIAssetSP _geom) = 0;
     virtual void changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
@@ -94,24 +99,27 @@ protected:
 
 protected:
     std::unordered_map<std::string, GeomAssetSP> geoms;
+    std::unordered_map<std::string, UIAssetSP> uis;
     AssetManager   al;
     ProfileManager pl;
     MaterialManager ml;
     ColorManager cl;
     SunBuilder sb;
+    FontManager& fm;
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
 };
 
 class PolySceneGraph : public SceneGraph {
 public:
-    PolySceneGraph(CommandQueue& cq) : SceneGraph(cq) {
+    PolySceneGraph(CommandQueue& cq, FontManager& _fm) : SceneGraph(cq, _fm) {
         ml.TL(&tl);
     }
 
     DependencyMaker& TL() override { return tl; }
 protected:
     void addImpl( GeomAssetSP _geom) override;
+    void addImpl( UIAssetSP _geom) override;
 
 private:
     PolySceneGraphTextureList tl;

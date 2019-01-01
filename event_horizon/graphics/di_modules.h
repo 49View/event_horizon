@@ -2,7 +2,7 @@
 
 #include "core/di.hpp"
 #include "core/command.hpp"
-#include "font_manager.h"
+#include "core/font_manager.h"
 #include "renderer.h"
 #include "text_input.hpp"
 #include "mouse_input.hpp"

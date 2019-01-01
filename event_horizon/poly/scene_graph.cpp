@@ -10,6 +10,11 @@ void SceneGraph::add( GeomAssetSP _geom ) {
     geoms[_geom->Hash()] = _geom;
 }
 
+void SceneGraph::add( UIAssetSP _geom ) {
+    addImpl(_geom);
+    uis[_geom->Hash()] = _geom;
+}
+
 void SceneGraph::add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
     for ( const auto& m : _materials ) {
         m->makeDirect( ML() );
@@ -51,7 +56,7 @@ void SceneGraph::cmdCalcLightmaps( const std::vector<std::string>& _params ) {
     cmdCalcLightmapsImpl( _params );
 }
 
-SceneGraph::SceneGraph(CommandQueue& cq) {
+SceneGraph::SceneGraph( CommandQueue& cq, FontManager& _fm ) : fm(_fm) {
     hcs = std::make_shared<CommandScriptSceneGraph>(*this);
     cq.registerCommandScript(hcs);
     mapGeomType(0, "none");
@@ -77,7 +82,7 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
         return ret->second;
     }
     try {
-        return std::stoi( _key );
+        return static_cast<uint64_t>(std::stoi( _key ));
     }
     catch(...) {
         return 0;
@@ -86,6 +91,9 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
 }
 
 void PolySceneGraph::addImpl( [[maybe_unused]] GeomAssetSP _geom ) {
+}
+
+void PolySceneGraph::addImpl( [[maybe_unused]] UIAssetSP _geom ) {
 }
 
 void AssetManager::add( [[maybe_unused]] const std::string& _key, GeomAssetSP _h ) {

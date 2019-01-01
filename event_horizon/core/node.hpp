@@ -395,8 +395,7 @@ public:
 
     template<typename TV>
     void visit() const {
-        traverseWithHelper<TV>( "Name,GHType,Data,BBbox,Children", mName,mGHType,mData,bbox3d,
-                                children );
+        traverseWithHelper<TV>( "Name,GHType,Data,BBbox,Children", mName,mGHType,mData,bbox3d,children );
     }
 
 protected:

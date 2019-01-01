@@ -61,33 +61,6 @@ enum TextureSlots {
 	TSLOT_LIGHTMAP,
 };
 
-enum class RectCreateAnchor {
-	None,
-	Top,
-	Bottom,
-	Center,
-	Left,
-	Right,
-	LeftCenter,
-	RightCenter
-};
-
-enum class RectFillMode {
-	Scale,
-	AspectFit,
-	AspectFill,
-	AspectFitLeft,
-	AspectFitRight,
-	AspectFitTop,
-	AspectFitBottom,
-};
-
-enum UIRenderFlags {
-	NoEffects = 1 << 0,
-	DropShaodws = 1 << 1,
-	RoundedCorners = 1 << 2
-};
-
 enum class GridAxis {
 	All,
 	TopLeft,

@@ -2,9 +2,9 @@
 
 #include <string>
 #include <unordered_map>
-#include "core/builders.hpp"
-#include "TTF.h"
-#include "core/math/rect2f.h"
+#include <core/builders.hpp>
+#include <core/TTF.h>
+#include <core/math/rect2f.h>
 
 class FontManager : public DependencyMaker {
 public:

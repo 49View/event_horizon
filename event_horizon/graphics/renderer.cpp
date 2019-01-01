@@ -7,7 +7,6 @@
 #include "render_list.h"
 #include "shader_manager.h"
 #include "shadowmap_manager.h"
-#include "font_manager.h"
 #include "core/math/spherical_harmonics.h"
 #include "core/configuration/app_options.h"
 #include "core/suncalc/sun_builder.h"
@@ -70,8 +69,8 @@ bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uin
     return true;
 }
 
-Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, FontManager& fm, TextureManager& tm, CameraManager& _cm ) :
-        cq( cq ), sm( sm ), fm(fm), tm(tm), cm(_cm), ridm(tm) {
+Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, CameraManager& _cm ) :
+        cq( cq ), sm( sm ), tm(tm), cm(_cm), ridm(tm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);

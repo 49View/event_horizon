@@ -83,7 +83,7 @@ private:
 
 class Renderer : public DependencyMaker {
 public:
-	Renderer( CommandQueue& cq, ShaderManager& sm, FontManager& fm, TextureManager& tm, CameraManager& _cm );
+	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, CameraManager& _cm );
 	virtual ~Renderer() = default;
 
 	bool exists( [[maybe_unused]] const std::string& _key ) const override { return false; };
@@ -110,7 +110,6 @@ public:
 
 	std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
     LightManager&   LM() { return lm; }
-    FontManager&    FM() { return fm; }
 	TextureManager& TM() { return tm; }
 	CameraManager&  CM() { return cm; }
 	RenderImageDependencyMaker& RIDM() { return ridm; }
@@ -162,7 +161,6 @@ protected:
 	LightManager    lm;
     CommandQueue&   cq;
 	ShaderManager&  sm;
-    FontManager&    fm;
 	TextureManager& tm;
 	CameraManager&  cm;
 	RenderImageDependencyMaker ridm;
@@ -277,8 +275,8 @@ private:
 	uint64_t tag = GT_Generic;
 	std::shared_ptr<V> ps;
 	std::shared_ptr<Material> material;
-	std::string matName;
-    std::string matTexture;
+	std::string matName = "white";
+    std::string matTexture = "white";
 	std::string matShader = S::SH;
 	std::string name;
 };

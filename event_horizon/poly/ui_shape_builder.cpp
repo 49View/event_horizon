@@ -3,9 +3,12 @@
 //
 
 #include "ui_shape_builder.h"
+#include "core/node.hpp"
 #include "core/image_builder.h"
-#include "../renderer.h"
-#include "../font_manager.h"
+#include "core/app_globals.h"
+//#include "../renderer.h"
+//#include "../font_manager.h"
+#include <poly/scene_graph.h>
 
 typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 
@@ -155,11 +158,6 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
     int32_t numPolysToDraw = 0;
     Matrix4f tm = Matrix4f::IDENTITY;
 
-    if ( title.empty() ) {
-        rect = Rect2f::ZERO;
-        return std::make_shared<PosTex3dStrip>( 0, PRIMITIVE_TRIANGLES, VFVertexAllocation::PreAllocate );
-    }
-
     rect = Rect2f::INVALID;
 
     // Count total number of polygons
@@ -222,7 +220,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
     return fs;
 }
 
-std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRect(const QuadVertices2& uvm) {
+std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRect( const QuadVertices2& uvm ) {
     return std::make_shared<PosTex3dStrip>( Rect2f{ rect.origin() - Vector2f{0.0f, size.y()}, rect.size(), true },
                                             uvm, 0.0f );
 }
@@ -330,8 +328,8 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeArrow() {
 
 std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeSeparator() {
     if ( outlineVerts.empty() ) {
-        outlineVerts.push_back(rect.centreLeft());
-        outlineVerts.push_back(rect.centreRight());
+        outlineVerts.emplace_back( rect.centreLeft());
+        outlineVerts.emplace_back( rect.centreRight());
     }
     return makeLine(outlineVerts);
 }
@@ -352,7 +350,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makePolygon() {
 
 void UIShapeBuilder::assemble( DependencyMaker& _md ) {
 
-    auto& rr = dynamic_cast<Renderer&>( _md );
+    auto& sg = dynamic_cast<SceneGraph&>(_md);
 
     if ( orig == Vector2f::HUGE_VALUE_NEG ) {
         orig = rect.origin();
@@ -367,18 +365,14 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
 
     std::shared_ptr<PosTex3dStrip> vs;
 
-    auto shaderName = S::TEXTURE_2D;
     switch ( shapeType ) {
         case UIShapeType::CameraFrustom2d:
         case UIShapeType::CameraFrustom3d:
             vs = makeLine( outlineVerts );
-            shaderName = shapeType == UIShapeType::Line2d ? S::TEXTURE_2D : S::TEXTURE_3D;
             break;
-
         case UIShapeType::Rect2d:
         case UIShapeType::Rect3d: {
-            shaderName = shapeType == UIShapeType::Rect2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            auto rectUVCoords = textureQuadFillModeMapping( fillMode, rect, rr.RIDM().ip(Name()).getAspectRatio());
+            auto rectUVCoords = textureQuadFillModeMapping( fillMode, rect, 1.0f );// sg.RR().RIDM().ip(Name()).getAspectRatio());
             if ( checkBitWiseFlag( effects, UIRenderFlags::RoundedCorners )) {
                 vs = makeRoundedRect(rectUVCoords);
             } else {
@@ -389,21 +383,18 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
         case UIShapeType::Line2d:
         case UIShapeType::Line3d:
             vs = makeLine( outlineVerts );
-            shaderName = shapeType == UIShapeType::Line2d ? S::TEXTURE_2D : S::TEXTURE_3D;
             break;
         case UIShapeType::Arrow2d:
         case UIShapeType::Arrow3d:
             vs = makeArrow();
-            shaderName = shapeType == UIShapeType::Arrow2d ? S::TEXTURE_2D : S::TEXTURE_3D;
             break;
         case UIShapeType::Polygon2d:
         case UIShapeType::Polygon3d:
             vs = makePolygon();
-            shaderName = shapeType == UIShapeType::Polygon2d ? S::TEXTURE_2D : S::TEXTURE_3D;
             break;
         case UIShapeType::Text2d:
         case UIShapeType::Text3d: {
-            Rect2f textRectOffset = rr.FM().measure( title, rr.FM()[fontName], fontHeight );
+            Rect2f textRectOffset = sg.FM().measure( title, sg.FM()[fontName], fontHeight );
             orig += Vector2f( -textRectOffset.left(), -textRectOffset.top());
             if ( textAlignment == UiControlFlag::TextAlignRight && size.x() > textRectOffset.width() ) {
                 orig.setX( size.x() - textRectOffset.width() + orig.x() );
@@ -411,8 +402,7 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
             if ( textAlignment == UiControlFlag::TextAlignCenter && size.x() > textRectOffset.width() ) {
                 orig.setX( ((size.x() - textRectOffset.width()) * 0.5f) + orig.x() );
             }
-            vs = makeText( rr.FM()[fontName] );
-            shaderName = shapeType == UIShapeType::Text2d ? S::FONT_2D : S::FONT;
+            vs = makeText( sg.FM()[fontName] );
             // Force text aligment to bottom in 2d.
             if ( shapeType == UIShapeType::Text2d ) {
                 anchor = RectCreateAnchor::Bottom;
@@ -422,7 +412,6 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
         case UIShapeType::Separator2d:
         case UIShapeType::Separator3d:
             vs = makeSeparator();
-            shaderName = shapeType == UIShapeType::Separator2d ? S::TEXTURE_2D : S::TEXTURE_3D;
             break;
     };
 
@@ -446,9 +435,10 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
         vs->translate( cr );
     }
 
-    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, mTransform, color.w() );
-    // ### FIXME: restore UID() on .n() call
-    VPBuilder<PosTex3dStrip>{rr,vpList}.p(vs).s(shaderName).t(tname).c(color).n("urca").build();
+    elem->Data()->VertexList(vs);
+//    elem->updateTransform();
+
+    sg.add( elem );
 }
 
 bool UIShapeBuilder::validate() const {
@@ -476,14 +466,14 @@ bool UIShapeBuilder::validate() const {
 
 void UIShapeBuilder::createDependencyList( DependencyMaker& _md ) {
 
-    auto& rr = static_cast<Renderer&>(_md);
-    addDependency<ImageBuilder>( tname, rr.RIDM() );
-    addDependency<FontBuilder>( fontName, rr.FM() );
+    auto& sg = static_cast<SceneGraph&>(_md);
+//    addDependency<ImageBuilder>( tname, rr.RIDM() );
+    addDependency<FontBuilder>( fontName, sg.FM() );
 
     addDependencies( std::make_shared<UIShapeBuilder>(*this), _md );
 }
 
 void UIShapeBuilder::elemCreate() {
-//    elem = std::dynamic_pointer_cast<Node<Nodeable>>(std::make_shared<GeomAssetSP>());
+    elem = std::make_shared<UIAsset>( std::make_shared<UIElement>(shapeType, color, renderBucketIndex) );
 }
 

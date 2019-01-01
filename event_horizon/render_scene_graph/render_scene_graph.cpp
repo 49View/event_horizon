@@ -6,10 +6,11 @@
 #include "core/image_builder.h"
 #include "core/node.hpp"
 #include "poly/geom_builder.h"
-#include "poly/geom_builder.h"
+#include "poly/ui_shape_builder.h"
 
-RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq ) : SceneGraph(cq), rr( rr ), tl(rr.RIDM()) {
+RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm ) : SceneGraph(cq, fm), rr( rr ), tl(rr.RIDM()) {
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
+    uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
     ml.TL(&tl);
 }
 
@@ -17,6 +18,12 @@ void RenderSceneGraph::addImpl( GeomAssetSP _geom ) {
     _geom->subscribeData(hierRenderObserver);
     _geom->sendNotifyData("generateGeometryVP");
 }
+
+void RenderSceneGraph::addImpl( UIAssetSP _geom ) {
+    _geom->subscribeData(uiRenderObserver);
+    _geom->sendNotifyData("generateGeometryVP");
+}
+
 
 void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _params ) {
     Vector3f pos = Vector3f::ZERO;
@@ -83,3 +90,46 @@ void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& g
             .p(generateGeometryVP( _source->Data())).m( _source->Data()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
 }
 
+std::string UIElementRenderObserver::getShaderType( UIShapeType _st ) const {
+    auto shaderName = S::TEXTURE_2D;
+    switch ( _st ) {
+        case UIShapeType::CameraFrustom2d:
+        case UIShapeType::CameraFrustom3d:
+            break;
+        case UIShapeType::Rect2d:
+        case UIShapeType::Rect3d:
+            shaderName = _st == UIShapeType::Rect2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Line2d:
+        case UIShapeType::Line3d:
+            shaderName = _st == UIShapeType::Line2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Arrow2d:
+        case UIShapeType::Arrow3d:
+            shaderName = _st == UIShapeType::Arrow2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Polygon2d:
+        case UIShapeType::Polygon3d:
+            shaderName = _st == UIShapeType::Polygon2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Text2d:
+        case UIShapeType::Text3d:
+            shaderName = _st == UIShapeType::Text2d ? S::FONT_2D : S::FONT;
+            break;
+        case UIShapeType::Separator2d:
+        case UIShapeType::Separator3d:
+            shaderName = _st == UIShapeType::Separator2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+    }
+
+    return shaderName;
+}
+
+void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
+    auto color = _source->Data()->Color();
+    auto renderBucketIndex = _source->Data()->RenderBucketIndex();
+    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), color.w() );
+    auto shaderName = getShaderType( _source->Data()->ShapeType() );
+    auto vs = _source->Data()->VertexList();
+    VPBuilder<PosTex3dStrip>{rr,vpList}.p(vs).s(shaderName).c(color).n(_source->Hash()).build();
+}

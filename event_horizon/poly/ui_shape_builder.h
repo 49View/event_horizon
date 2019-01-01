@@ -8,29 +8,78 @@
 #include "core/observable.h"
 #include "core/builders.hpp"
 #include "core/math/rect2f.h"
+#include "core/math/aabb.h"
 #include "core/math/vector4f.h"
 #include "core/soa_utils.h"
-#include "../graphic_constants.h"
-#include "../TTF.h"
 
-class Renderer;
-class VPList;
+#include <poly/poly.hpp>
 
-enum class UIShapeType {
-    CameraFrustom2d,
-    CameraFrustom3d,
-    Line2d,
-    Line3d,
-    Arrow2d,
-    Arrow3d,
-    Polygon2d,
-    Polygon3d,
-    Rect2d,
-    Rect3d,
-    Text2d,
-    Text3d,
-    Separator2d,
-    Separator3d,
+namespace Utility { namespace TTFCore { class Font; }}
+
+class UIElement {
+public:
+    UIElement( UIShapeType shapeType, const Color4f& color, int renderBucketIndex ) : shapeType( shapeType ),
+                                                                                      color( color ), renderBucketIndex(
+                    renderBucketIndex ) {}
+
+    const Color4f& Color() const {
+        return color;
+    }
+
+    Color4f& Color() {
+        return color;
+    }
+
+    void Color( const Color4f& _c ) {
+        color = _c;
+    }
+
+    UIShapeType ShapeType() const {
+        return shapeType;
+    }
+
+    void ShapeType( UIShapeType shapeType ) {
+        UIElement::shapeType = shapeType;
+    }
+
+    const std::shared_ptr<PosTex3dStrip>& VertexList() const {
+        return vs;
+    }
+
+    std::shared_ptr<PosTex3dStrip>& VertexList() {
+        return vs;
+    }
+
+    void VertexList( const std::shared_ptr<PosTex3dStrip>& vs ) {
+        UIElement::vs = vs;
+    }
+
+    int RenderBucketIndex() const {
+        return renderBucketIndex;
+    }
+
+    void RenderBucketIndex( int renderBucketIndex ) {
+        UIElement::renderBucketIndex = renderBucketIndex;
+    }
+
+    const JMATH::AABB& BBox3d() const {
+        return bbox3d;
+    }
+
+    JMATH::AABB BBox3d() {
+        return bbox3d;
+    }
+
+    void BBox3d( const JMATH::AABB& bbox3d ) {
+        UIElement::bbox3d = bbox3d;
+    }
+
+private:
+    UIShapeType shapeType = UIShapeType::Rect2d;
+    Color4f color = Color4f::WHITE;
+    int renderBucketIndex = 0;
+    JMATH::AABB bbox3d = JMATH::AABB::ZERO;
+    std::shared_ptr<PosTex3dStrip> vs;
 };
 
 class UIShapeBuilder : public Observable<UIShapeBuilder>, public DependantBuilder {
@@ -83,16 +132,6 @@ public:
 
     UIShapeBuilder& blw( const bool _lineWrap ) {
         wrapLine = _lineWrap;
-        return *this;
-    }
-
-    UIShapeBuilder& d2() {
-        clt = CommandListType::vp2d;
-        return *this;
-    }
-
-    UIShapeBuilder& d3() {
-        clt = CommandListType::vp3d;
         return *this;
     }
 
@@ -262,11 +301,10 @@ private:
 
 private:
     UIShapeType shapeType = UIShapeType::Rect2d;
-    CommandListType clt = CommandListType::vp2d;
     std::shared_ptr<Matrix4f> mTransform;
-    JMATH::Rect2f rect = JMATH::Rect2f::IDENTITY;
     RectCreateAnchor anchor = RectCreateAnchor::None;
     RectFillMode fillMode = RectFillMode::AspectFill;
+    JMATH::Rect2f rect = Rect2f::IDENTITY;
     float bevelRadius = 0.02f;
     Vector2f orig = Vector2f::HUGE_VALUE_NEG;
     Vector2f size = Vector2f::HUGE_VALUE_NEG;
@@ -300,6 +338,8 @@ private:
     std::string tname = "white";
     std::string vname;
     std::string fontName;
+
+    UIAssetSP elem;
 
     static uint64_t sid;
 };

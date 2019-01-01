@@ -5,7 +5,6 @@
 
 #include "scene.hpp"
 
-#include "graphics/ui/ui_control_manager.hpp"
 #include "graphics/camera_manager.h"
 #include "graphics/renderer.h"
 #include "graphics/render_list.h"
@@ -53,9 +52,9 @@ void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
 	Scene::callbackResizeFrameBuffer = Vector2i{w, h};
 }
 
-Scene::Scene( Renderer& _rr, RenderSceneGraph& _rsg, UiControlManager& _uicm, TextInput& ti, MouseInput& mi,
+Scene::Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
 						  CameraManager& cm, CommandQueue& cq ) :
-		cm(cm), rr(_rr), rsg(_rsg), uicm( _uicm ), ti( ti), mi( mi ), cq( cq) {
+		cm(cm), rr(_rr), rsg(_rsg), fm( _fm ), ti( ti), mi( mi ), cq( cq) {
 	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
 	cq.registerCommandScript(hcs);
 	console = std::make_shared<ImGuiConsole>(cq);
@@ -271,16 +270,12 @@ void Scene::changeTime( const V3f& _solar ) {
 }
 
 RenderSceneGraph& Scene::RSG() { return rsg; }
-
 MaterialManager& Scene::ML() { return rsg.ML(); }
-
 Renderer& Scene::RR() { return rr; }
-
 CameraManager& Scene::CM() { return cm; }
-
 TextureManager& Scene::TM() { return rr.TM(); }
-
 CommandQueue& Scene::CQ() { return cq; }
+FontManager& Scene::FM() { return fm; }
 
 std::shared_ptr<Camera> Scene::getCamera( const std::string& _name ) { return CM().getCamera(_name); }
 

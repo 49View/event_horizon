@@ -26,7 +26,7 @@
 #include <poly/triangulator.hpp>
 #include <poly/polypartition.h>
 #include <poly/profile.hpp>
-#include <graphics/ui/ui_shape_builder.h>
+#include <poly/ui_shape_builder.h>
 
 void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 
@@ -55,8 +55,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
                   add(cName);
         Timeline::play(cName);
 
-
-//        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RR());
+        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RSG());
     } );
 }
 

@@ -21,7 +21,7 @@ struct ImGuiConsole;
 class CameraRig;
 class Renderer;
 class RenderSceneGraph;
-class UiControlManager;
+class FontManager;
 class TextInput;
 class CameraManager;
 class CommandQueue;
@@ -41,7 +41,7 @@ using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraRig>
 
 class Scene : public Observer<MouseInput> {
 public:
-	Scene( Renderer& _rr, RenderSceneGraph& _rsg, UiControlManager& _uicm,
+	Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm,
 				 TextInput& ti, MouseInput& mi, CameraManager& cm, CommandQueue& cq );
 
 	virtual ~Scene() = default;
@@ -97,6 +97,7 @@ public:
     CameraManager& CM();
     TextureManager& TM();
 	CommandQueue& CQ();
+	FontManager& FM();
 	std::vector<std::shared_ptr<RLTarget>>& Targets() { return mTargets; }
     std::shared_ptr<Camera> getCamera( const std::string& _name );
 
@@ -129,7 +130,7 @@ protected:
 	CameraManager& cm;
 	Renderer& rr;
 	RenderSceneGraph& rsg;
-	UiControlManager& uicm;
+	FontManager& fm;
     TextInput& ti;
     MouseInput& mi;
 	CommandQueue& cq;
