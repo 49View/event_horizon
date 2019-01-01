@@ -7,9 +7,9 @@
 //
 
 #include "../../runloop_graphics.h"
-#include "render_scene_graph/di_modules.h"
 #include "runloop_graphics_em.h"
 #include <emscripten/bind.h>
+#include <graphics/di_modules.h>
 
 RunLoopGraphics rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
 
