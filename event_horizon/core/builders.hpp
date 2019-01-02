@@ -29,7 +29,7 @@ public: \
         postFix = postMake(#_post); \
     } \
     static bool usesNotExactQuery() { return buildQueryType == BuilderQueryType::NotExact; } \
-    BuilderName( const std::string& _name ) : \
+    explicit BuilderName( const std::string& _name ) : \
         ResourceBuilder( _name) { \
         defPrePosfixes(); \
     } \

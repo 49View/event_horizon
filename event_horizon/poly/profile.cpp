@@ -255,10 +255,11 @@ std::shared_ptr<Profile> Profile::makeWire( const std::string& _name,
 											[[maybe_unused]] const std::vector<Vector2f>& vv2fs,
 											const std::vector<float>& vfs) {
 
-    ASSERT(vfs.size() == 1);
+    ASSERT( vfs.size() && vfs.size() < 3);
+    auto subdivs = vfs.size() == 1 ? 3 : static_cast<int>(vfs[1]);
     std::shared_ptr<Profile> profile = std::make_shared<Profile>(_name);
 
-    profile->createWire( vfs[0], 3 );
+    profile->createWire( vfs[0], subdivs );
 
     return profile;
 }

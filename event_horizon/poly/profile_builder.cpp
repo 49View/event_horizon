@@ -41,6 +41,10 @@ ProfileBuilder::ProfileBuilder( const Vector2f& _length ) {
     func( Profile::makeLine ).cv2( -_length*0.5f ).cv2( _length*0.5f );
 }
 
+ProfileBuilder::ProfileBuilder( float _radius, float _subDivs ) {
+    func( Profile::makeWire).cf(_radius).cf(_subDivs);
+}
+
 bool ProfileManager::add( const ProfileBuilder& _pb, std::shared_ptr<Profile> _profile ) {
     profileList[_pb.Name()] = std::move( _profile );
     return true;
