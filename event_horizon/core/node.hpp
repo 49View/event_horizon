@@ -379,6 +379,12 @@ public:
     V3fa PosAnim() {
         return mTRS.pos;
     }
+    Quaterniona RotAnim() {
+        return mTRS.rot;
+    }
+    V3fa ScaleAnim() {
+        return mTRS.scale;
+    }
     MatrixAnim& TRS() { return mTRS; }
     const MatrixAnim& TRS() const { return mTRS; }
     void TRS( const MatrixAnim& val ) { mTRS = val; }

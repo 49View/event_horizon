@@ -7,19 +7,12 @@
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>
 
-struct UpdateAnimVisitor {
-    void operator()( GeomAssetSP _v ) { _v->updateAnim(); }
-    void operator()( UIAssetSP _v ) { _v->updateAnim(); }
-};
-
-struct UUIDVisitor {
-    UUID operator()( GeomAssetSP _v ) { return _v->Hash(); }
-    UUID operator()( UIAssetSP _v   ) { return _v->Hash(); }
-};
+auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
+auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
 
 void SceneGraph::add( NodeVariants _geom ) {
     addImpl(_geom);
-    geoms[std::visit(UUIDVisitor{}, _geom)] = _geom;
+    geoms[std::visit(lambdaUUID, _geom)] = _geom;
 }
 
 void SceneGraph::add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
@@ -37,7 +30,7 @@ void SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<Mater
 
 void SceneGraph::update() {
     for ( auto& [k,v] : geoms ) {
-        std::visit( UpdateAnimVisitor{}, v );
+        std::visit( lambdaUpdateAnimVisitor, v );
     }
 }
 

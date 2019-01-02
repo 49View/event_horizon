@@ -56,10 +56,10 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
                   k(5.0f, Vector3f{3.0f, 1.0f, 3.0f}).
                   k(15.0f, V3f::Y_AXIS*1.0f).
                   add(cName);
-        TimelineStream<V3f>{text->PosAnim()}.
+        TimelineStream<V3f>{text->ScaleAnim()}.
                 k(0.0f, Vector3f{0.0f, 0.0f, 0.0f}).
-                k(5.0f, Vector3f{3.0f, 0.0f, 3.0f}).
-                k(15.0f, V3f::ZERO).
+                k(4.0f, Vector3f{0.0f, 0.0f, 0.0f}).
+                k(4.31f, Vector3f{1.0f, 1.0f, 1.0f}).
                 add(cName);
         Timeline::play(cName);
 
