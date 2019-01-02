@@ -18,9 +18,8 @@ namespace Utility { namespace TTFCore { class Font; }}
 
 class UIElement {
 public:
-    UIElement( UIShapeType shapeType, const Color4f& color, int renderBucketIndex ) : shapeType( shapeType ),
-                                                                                      color( color ), renderBucketIndex(
-                    renderBucketIndex ) {}
+    UIElement( const std::string& name, UIShapeType shapeType, const Color4f& color, int renderBucketIndex ) : name(
+            name ), shapeType( shapeType ), color( color ), renderBucketIndex( renderBucketIndex ) {}
 
     const Color4f& Color() const {
         return color;
@@ -74,7 +73,19 @@ public:
         UIElement::bbox3d = bbox3d;
     }
 
+    const std::string& Name() const {
+        return name;
+    }
+
+    void Name( const std::string& name ) {
+        UIElement::name = name;
+    }
+
+    template<typename TV> \
+	void visit() const { traverseWithHelper<TV>( "Name,BBbox,Color", name,bbox3d,color ); }
+
 private:
+    std::string name;
     UIShapeType shapeType = UIShapeType::Rect2d;
     Color4f color = Color4f::WHITE;
     int renderBucketIndex = 0;
@@ -273,10 +284,14 @@ public:
         return *this;
     }
 
-
     UIShapeBuilder& matchNameWithTName() {
         Name( tname );
         return *this;
+    }
+
+    UIAssetSP buildr( DependencyMaker& _md) {
+        build( _md );
+        return elem;
     }
 
 protected:
@@ -298,7 +313,7 @@ private:
 
 private:
     UIShapeType shapeType = UIShapeType::Rect2d;
-    std::shared_ptr<Matrix4f> mTransform;
+    std::shared_ptr<Matrix4f> mTransform = std::make_shared<Matrix4f>(Matrix4f::MIDENTITY());
     RectCreateAnchor anchor = RectCreateAnchor::None;
     RectFillMode fillMode = RectFillMode::AspectFill;
     JMATH::Rect2f rect = Rect2f::IDENTITY;

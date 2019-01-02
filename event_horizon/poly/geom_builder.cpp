@@ -309,3 +309,16 @@ GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
     elemInjFather = _hier;
     return *this;
 }
+
+bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
+
+    AssetManager& sg = static_cast<AssetManager&>(_md);
+
+    if ( _status == DependencyStatus::LoadedSuccessfully ) {
+        sg.add( *this, zlibUtil::inflateFromMemory( std::move(_data) ) );
+    } else {
+        return false;
+    }
+
+    return true;
+}

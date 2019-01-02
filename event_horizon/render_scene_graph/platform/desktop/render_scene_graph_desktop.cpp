@@ -533,9 +533,9 @@ int RenderSceneGraph::bake(scene_t *scene)
 //    rr.clearTargets();
     rr.TM().addTextureWithGPUHandle( FBNames::lightmap, scene->lightmap, TSLOT_LIGHTMAP );
 
-    for ( const auto&[k, v] : geoms ) {
-        v->sendNotifyData("generateGeometryVP");
-    }
+//    for ( const auto&[k, v] : geoms ) {
+//        v->sendNotifyData("generateGeometryVP");
+//    }
 
     return 1;
 }
@@ -549,8 +549,10 @@ void RenderSceneGraph::cmdCalcLightmapsImpl( const std::vector<std::string>& _pa
 //    _outputScene.h = 654;
 //    initScene( &_outputScene );
 //    bake( &_outputScene );
-    if ( packGeometryForLightmaps( geoms ) ) {
-        initScene( &_outputScene );
-        bake( &_outputScene );
-    }
+
+    // Code was running before is this:
+//    if ( packGeometryForLightmaps( geoms ) ) {
+//        initScene( &_outputScene );
+//        bake( &_outputScene );
+//    }
 }

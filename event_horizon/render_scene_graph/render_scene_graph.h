@@ -28,7 +28,6 @@ struct UIElementRenderObserver : public ObserverShared<UIAsset> {
     explicit UIElementRenderObserver( Renderer& _rr ) : rr( _rr ) {}
     virtual ~UIElementRenderObserver() = default;
 
-//    std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> generateGeometryVP( std::shared_ptr<GeomData> _data );
     void notified( UIAssetSP _source, const std::string& generator ) override;
     std::string getShaderType( UIShapeType _st ) const;
 private:
@@ -44,8 +43,7 @@ public:
     Renderer& RR() { return rr; }
 
 protected:
-    void addImpl(GeomAssetSP _geom) override;
-    void addImpl(UIAssetSP _geom) override;
+    void addImpl(NodeVariants _geom) override;
     void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
     void changeMaterialColorTagImpl( const std::vector<std::string>& _params ) override;
     void cmdCreateGeometryImpl( const std::vector<std::string>& _params ) override;

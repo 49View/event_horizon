@@ -8,10 +8,17 @@
 #include <render_scene_graph/scene.hpp>
 #include "core/node.hpp"
 #include "poly/geom_builder.h"
+#include "poly/ui_shape_builder.h"
 #include "poly/converters/gltf2/gltf2.h"
 
 std::shared_ptr<GeomBuilder> gbt;
 std::shared_ptr<GLTF2> gltf;
+
+template <typename T>
+struct NodeVisitor {
+    void operator()( GeomAssetSP _v ) { _v->visit<T>(); }
+    void operator()( UIAssetSP _v ) { _v->visit<T>(); }
+};
 
 void loadGeomInGui( Scene* p, std::shared_ptr<GLTF2> _newObject ) {
     auto hierScene = _newObject->convert();
@@ -42,9 +49,10 @@ void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin( "Geometry", nullptr, ImGuiWindowFlags_NoCollapse );
 
-    for ( const auto& it: p->RSG().Geoms() ) {
-        it->visit<ImGUIJsonNamed>();
+    for ( auto& [k,v] : p->RSG().Nodes() ) {
+        std::visit( NodeVisitor<ImGUIJsonNamed>{}, v );
     }
+
     if ( gbt ) {
         ImGui::BeginGroup();
         ImGui::Text( "Name: %s", gbt->Name().c_str());

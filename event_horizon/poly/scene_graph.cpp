@@ -4,15 +4,22 @@
 
 #include "scene_graph.h"
 #include "core/node.hpp"
+#include <poly/geom_builder.h>
+#include <poly/ui_shape_builder.h>
 
-void SceneGraph::add( GeomAssetSP _geom ) {
-    addImpl(_geom);
-    geoms[_geom->Hash()] = _geom;
-}
+struct UpdateAnimVisitor {
+    void operator()( GeomAssetSP _v ) { _v->updateAnim(); }
+    void operator()( UIAssetSP _v ) { _v->updateAnim(); }
+};
 
-void SceneGraph::add( UIAssetSP _geom ) {
+struct UUIDVisitor {
+    UUID operator()( GeomAssetSP _v ) { return _v->Hash(); }
+    UUID operator()( UIAssetSP _v   ) { return _v->Hash(); }
+};
+
+void SceneGraph::add( NodeVariants _geom ) {
     addImpl(_geom);
-    uis[_geom->Hash()] = _geom;
+    geoms[std::visit(UUIDVisitor{}, _geom)] = _geom;
 }
 
 void SceneGraph::add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
@@ -21,8 +28,7 @@ void SceneGraph::add( const std::vector<std::shared_ptr<MaterialBuilder>> _mater
     }
 }
 
-void
-SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
+void SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
     for ( const auto& m : _materials ) {
         m->makeDirect( ML() );
     }
@@ -31,10 +37,9 @@ SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBu
 
 void SceneGraph::update() {
     for ( auto& [k,v] : geoms ) {
-        v->updateAnim();
+        std::visit( UpdateAnimVisitor{}, v );
     }
 }
-
 
 void SceneGraph::cmdChangeMaterialTag( const std::vector<std::string>& _params ) {
     changeMaterialTagImpl( _params );
@@ -67,12 +72,6 @@ size_t SceneGraph::countGeoms() const {
     return geoms.size();
 }
 
-std::vector<GeomAssetSP> SceneGraph::Geoms() {
-    std::vector<GeomAssetSP> ret;
-    for ( auto& [k,v] : geoms ) ret.emplace_back( v );
-    return ret;
-}
-
 void SceneGraph::mapGeomType( const uint64_t _value, const std::string& _key ) {
     geomTypeMap[_key] = _value;
 }
@@ -90,10 +89,11 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
     return 0;
 }
 
-void PolySceneGraph::addImpl( [[maybe_unused]] GeomAssetSP _geom ) {
+NodeGraph& SceneGraph::Nodes() {
+    return geoms;
 }
 
-void PolySceneGraph::addImpl( [[maybe_unused]] UIAssetSP _geom ) {
+void PolySceneGraph::addImpl( [[maybe_unused]] NodeVariants _geom ) {
 }
 
 void AssetManager::add( [[maybe_unused]] const std::string& _key, GeomAssetSP _h ) {
@@ -121,6 +121,11 @@ AssetHierContainerCIt AssetManager::begin() const {
 
 AssetHierContainerCIt AssetManager::end() const {
     return assetsHierList.cend();
+}
+
+bool AssetManager::add( GeomFileAssetBuilder& gb, const std::vector<char>& _data ) {
+    assetsList[gb.Name()] = _data;
+    return true;
 }
 
 CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {

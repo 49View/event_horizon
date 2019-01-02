@@ -125,6 +125,10 @@ protected:
 //    GeomAssetSP elem;
 };
 
+struct RBUILDER( GeomFileAssetBuilder, geom, geom, Binary, BuilderQueryType::NotExact, GeomData::Version() )
+
+};
+
 class GeomBuilder : public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
 public:
     GeomBuilder() = default;

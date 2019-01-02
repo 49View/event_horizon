@@ -39,23 +39,30 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 
         auto cube = GB{ShapeType::Cube}.buildr(_p->RSG());
 //        auto pin = GB{ GeomBuilderType::file, "pin" }.buildr(_p->RSG());
+        auto text = UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).buildr(_p->RSG());
 
-        auto v = _p->RSG().Geoms();
+        auto v = _p->RSG().Nodes();
 
         LOGR( "* %s", cube->Hash().c_str() );
+        LOGR( "* %s", text->Hash().c_str() );
+
 //        LOGR( "* %s", pin->Hash().c_str() );
-        for ( const auto& pg: v ) {
-            LOGR( "- %s", std::string(pg->Hash()).c_str() );
-        }
+//        for ( const auto& [k,pg] : v ) {
+//            LOGR( "- %s", std::string(pg->Hash()).c_str() );
+//        }
         const std::string cName = "urca";
         TimelineStream<V3f>{cube->PosAnim()}.
                   k(0.0f, Vector3f{0.0f, 1.0f, 0.0f}).
                   k(5.0f, Vector3f{3.0f, 1.0f, 3.0f}).
                   k(15.0f, V3f::Y_AXIS*1.0f).
                   add(cName);
+        TimelineStream<V3f>{text->PosAnim()}.
+                k(0.0f, Vector3f{0.0f, 0.0f, 0.0f}).
+                k(5.0f, Vector3f{3.0f, 0.0f, 3.0f}).
+                k(15.0f, V3f::ZERO).
+                add(cName);
         Timeline::play(cName);
 
-        UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).build(_p->RSG());
     } );
 }
 

@@ -14,16 +14,16 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager&
     ml.TL(&tl);
 }
 
-void RenderSceneGraph::addImpl( GeomAssetSP _geom ) {
-    _geom->subscribeData(hierRenderObserver);
-    _geom->sendNotifyData("generateGeometryVP");
-}
+void RenderSceneGraph::addImpl( NodeVariants _geom ) {
 
-void RenderSceneGraph::addImpl( UIAssetSP _geom ) {
-    _geom->subscribeData(uiRenderObserver);
-    _geom->sendNotifyData("generateGeometryVP");
+    if ( auto as = std::get_if<GeomAssetSP>(&_geom); as != nullptr ) {
+        (*as)->subscribeData(hierRenderObserver);
+        (*as)->sendNotifyData("generateGeometryVP");
+    } else if ( auto as = std::get_if<UIAssetSP>(&_geom); as != nullptr ) {
+        (*as)->subscribeData(uiRenderObserver);
+        (*as)->sendNotifyData("generateGeometryVP");
+    }
 }
-
 
 void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _params ) {
     Vector3f pos = Vector3f::ZERO;
