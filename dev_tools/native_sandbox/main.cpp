@@ -76,8 +76,10 @@ std::string svgString = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 
 void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 
-    _layout->addBox( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 0.8f, CameraControls::Fly );
+    _layout->addBox( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 0.5f, CameraControls::Fly );
     _layout->addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-0.2f, 1.0f );
+
+    _layout->addBox( SceneLayoutDefaultNames::Timeline, 0.0f, 1.0f, 1.0f-0.5f, 1.0-0.2f );
 
     _p->postActivate( [](Scene* _p) {
 
@@ -123,18 +125,18 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 //        for ( const auto& [k,pg] : v ) {
 //            LOGR( "- %s", std::string(pg->Hash()).c_str() );
 //        }
-//        const std::string cName = "urca";
-//        TimelineStream<V3f>{pin->PosAnim()}.
-//                  k(0.0f, Vector3f{0.0f, 1.0f, 0.0f}).
-//                  k(5.0f, Vector3f{3.0f, 1.0f, 3.0f}).
-//                  k(15.0f, V3f::Y_AXIS*1.0f).
-//                  add(cName);
+        const std::string cName = "urca";
+        TimelineStream<V3f>{c->PosAnim()}.
+                  k(0.0f, Vector3f{0.0f, 1.0f, 0.0f}).
+                  k(5.0f, Vector3f{3.0f, 1.0f, 3.0f}).
+                  k(15.0f, V3f::Y_AXIS*1.0f).
+                  add(cName);
 //        TimelineStream<V3f>{text->ScaleAnim()}.
 //                k(0.0f, Vector3f{0.0f, 0.0f, 0.0f}).
 //                k(4.0f, Vector3f{.1f, 0.1f, 1.f}).
 //                k(4.31f, Vector3f{1.0f, 1.0f, 1.0f}).
 //                add(cName);
-//        Timeline::play(cName);
+        Timeline::play(cName);
 
     } );
 }

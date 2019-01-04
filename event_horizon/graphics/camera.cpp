@@ -361,11 +361,11 @@ Camera::Camera( const std::string cameraName, CameraState _state, const Rect2f& 
 	mNearClipPlaneZ = 0.01f;
 	mFarClipPlaneZ = 160.0f;
 
-	mTarget = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO );
-	qangle = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO );
-	mPos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO );
+	mTarget = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Target" );
+	qangle = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Angle" );
+	mPos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
 
-	mFov = std::make_shared<AnimType<float>>( 72.0f );
+	mFov = std::make_shared<AnimType<float>>( 72.0f, Name() + "_Fov" );
 
 	mLockAtWalkingHeight = false;
 

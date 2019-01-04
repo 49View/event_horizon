@@ -18,8 +18,8 @@ public:
 	LightBase( float wattage, float intensity, const Vector3f& attenuation ) {
 		Type( LightType::Invalid );
 		mWattage = wattage;
-		mIntensity = std::make_shared<AnimType<float>>( intensity );
-		mAttenuation = std::make_shared<AnimType<Vector3f>>( attenuation );
+		mIntensity = std::make_shared<AnimType<float>>( intensity, "lightIntensity" );
+		mAttenuation = std::make_shared<AnimType<Vector3f>>( attenuation, "lightAttenuation" );
 	}
 
 	float Intensity() const { return mIntensity->value * mWattage; }
@@ -31,6 +31,7 @@ public:
 	void Type( LightType val ) { mType = val; }
 
 protected:
+	std::string name;
 	LightType mType;
 	float mWattage;
 	std::shared_ptr<AnimType<float>> mIntensity;
@@ -41,7 +42,7 @@ class DirectionalLight : public LightBase {
 public:
 	DirectionalLight( const Vector3f& dir, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( wattage, intensity, attenuation ) {
 		Type( LightType::Point );
-		mDir = std::make_shared<AnimType<Vector3f>>( dir );
+		mDir = std::make_shared<AnimType<Vector3f>>( dir, "lightDirection" );
 	}
 
 	Vector3f Dir() const { return mDir->value; }
@@ -54,7 +55,7 @@ class PointLight : public LightBase {
 public:
 	PointLight( const Vector3f& pos, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( wattage, intensity, attenuation ) {
 		Type( LightType::Point );
-		mPos = std::make_shared<AnimType<Vector3f>>( pos );
+		mPos = std::make_shared<AnimType<Vector3f>>( pos, "lightPos" );
 	}
 
 	Vector3f Pos() const { return mPos->value; }
@@ -67,8 +68,8 @@ class SpotLight : public PointLight {
 public:
 	SpotLight( const Vector3f& pos, const Vector3f& dir, float beamAngle = 60.0f, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : PointLight( pos, wattage, intensity, attenuation ) {
 		Type( LightType::Spotlight );
-		mDir = std::make_shared<AnimType<Vector3f>>( dir );
-		mBeamAngle = std::make_shared<AnimType<float>>( beamAngle );
+		mDir = std::make_shared<AnimType<Vector3f>>( dir, "lightDirection" );
+		mBeamAngle = std::make_shared<AnimType<float>>( beamAngle, "lightBeamAngle" );
 	}
 
 	Vector3f Dir() const { return mDir->value; }

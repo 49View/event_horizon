@@ -7,7 +7,7 @@
 
 void LightManager::init() {
     mbGlobalOnOffSwitch = true;
-    mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f );
+    mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f, "LightDirectionalIntensity" );
 
     // Lights UBO
     mLigthingUniform = std::make_unique<ProgramUniformSet>();
@@ -33,7 +33,7 @@ void LightManager::generateUBO( ShaderManager& sm ) {
 }
 
 void LightManager::addPointLight( const Vector3f& pos, float intensity, const Vector3f& attenuation ) {
-    mPointLights.push_back( { pos, 50.0f, intensity, attenuation } );
+    mPointLights.emplace_back( pos, 50.0f, intensity, attenuation );
 }
 
 void LightManager::removePointLight( const size_t index ) {
@@ -93,7 +93,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos, std::shared_ptr<Shad
     for ( auto& pl : mPointLights ) {
         lpos.push_back(  pl.Pos());
         ldir.push_back( Vector3f::Y_AXIS );
-        lintensity.push_back( Vector3f{ pl.Intensity() } );
+        lintensity.emplace_back( pl.Intensity());
         lattn.push_back( pl.Attenuation());
         lbeamdir.push_back( Vector3f::Z_AXIS );
         lbeamAngle.push_back( 60.0f );

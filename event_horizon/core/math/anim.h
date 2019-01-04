@@ -534,6 +534,7 @@ public:
 
     void add( const std::string& _groupName = AnimDefaultGroupName );
 
+    const std::string& Name() const { return source->Name(); }
 private:
     AnimValue<T> source;
     std::vector<float> keyframeTimes;    // Times and values are strictly internal and _must_ be always CRUD-ed together
@@ -544,6 +545,7 @@ private:
 
 template<typename V>
 using TimelineMap = std::unordered_map<uint64_t, TimelineStream<V>>;
+using TimelineGroupMap = std::unordered_map<std::string, std::vector<TimelineIndex>>;
 
 class Timeline {
     struct TimelineMapSpec {
@@ -623,6 +625,9 @@ public:
         }
     }
 
+    static const TimelineMapSpec& Timelines() { return timelines; }
+    static const TimelineGroupMap& Groups() { return timelineGroups; }
+
 private:
     template <typename T>
     static TimelineIndex add( TimelineStream<T>& _stream, const std::string& _groupName = AnimDefaultGroupName ) {
@@ -637,7 +642,7 @@ private:
 
 private:
     static std::unordered_set<TimelineIndex> activeTimelines;
-    static std::unordered_map<std::string, std::vector<TimelineIndex>> timelineGroups;
+    static TimelineGroupMap timelineGroups;
     static TimelineMapSpec timelines;
 
     template <typename U>

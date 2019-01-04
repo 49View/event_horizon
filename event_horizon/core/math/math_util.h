@@ -1,6 +1,9 @@
+#include <utility>
+
 #pragma once
 
 #include <memory>
+#include <variant>
 #include <vector>
 #include <cstdint>
 #include <string>
@@ -716,13 +719,17 @@ void sanitizePath( const std::vector<T>& _verts, std::vector<T>& ret, bool wrapP
 	}
 }
 
+class Vector2f;
+class Vector3f;
+class Vector4f;
+class Quaternion;
+
+using AnimVariant = std::variant<float, Vector2f, Vector3f, Vector4f, Quaternion>;
+
 template <typename T>
 class AnimType {
 public:
-	AnimType() = default;
-	explicit AnimType( const T& v ) {
-		value = v;
-	}
+	explicit AnimType( const T& v, std::string _name ) : value(v), name( std::move( _name )) {}
 
 	void set(const T& _value) {
 		value = _value;
@@ -732,14 +739,13 @@ public:
 		return value;
 	}
 
+	const std::string& Name() const { return name; }
+
 	T value;
 	bool isAnimating = false;
+private:
+	std::string name;
 };
-
-class Vector2f;
-class Vector3f;
-class Vector4f;
-class Quaternion;
 
 template <typename T>
 using AnimValue = std::shared_ptr<AnimType<T>>;

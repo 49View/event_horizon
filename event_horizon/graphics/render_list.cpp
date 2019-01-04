@@ -652,7 +652,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     }
 
 
-    renderSkybox();
+//    renderSkybox();
 
     endCL( cb );
 }

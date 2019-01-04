@@ -6,9 +6,9 @@
 #include <core/math/anim.h>
 
 MatrixAnim::MatrixAnim() {
-    pos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO );
-    rot = std::make_shared<AnimType<Quaternion>>();
-    scale = std::make_shared<AnimType<Vector3f>>( Vector3f::ONE );
+    pos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, "Pos" );
+    rot = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, "Rot");
+    scale = std::make_shared<AnimType<Vector3f>>( Vector3f::ONE, "Scale" );
 }
 
 const Vector3f& MatrixAnim::Pos() const { return pos->value; }
