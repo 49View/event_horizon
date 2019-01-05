@@ -38,7 +38,7 @@ enum class AnimVelocityType {
 
 using TimelineIndex = uint64_t;
 using KeyFrameTimes_t = std::vector<float>;
-using AnimVisitCallback = std::function<void(const std::string&, const KeyFrameTimes_t&, const std::vector<float>&, TimelineIndex)>;
+using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, int)>;
 
 const static TimelineIndex   tiNorm  = 1000000000;
 
@@ -71,13 +71,20 @@ public:
     TimelineStream() = default;
     explicit TimelineStream( AnimValue<T> source ) : source( std::move( source )) {}
 
+    void sortOnTime() {
+        std::sort( keyframes.begin(), keyframes.end(),
+           []( const auto& a, const auto& b ) -> bool { return a.time < b.time; } );
+    }
+
     TimelineStream& k( const KeyFramePair<T>& _kf  ) {
         keyframes.emplace_back( _kf );
+        sortOnTime();
         return *this;
     }
 
     TimelineStream& k( float _timeAt, const T& _value ) {
         keyframes.emplace_back( _timeAt, _value );
+        sortOnTime();
         return *this;
     }
 
@@ -133,45 +140,71 @@ public:
         animationStartTime = _startTime;
     }
 
+    int strideDumpForType( TimelineIndex _valueType ) {
+        switch (_valueType) {
+            case tiIntIndex:
+                return 2;
+            case tiFloatIndex:
+                return 2;
+            case tiV2fIndex:
+                return 3;
+            case tiV3fIndex:
+                return 4;
+            case tiV4fIndex:
+                return 5;
+            case tiQuatIndex:
+                return 5;
+            default:
+                return 0;
+        }
+    }
+
     void visit( AnimVisitCallback _callback, TimelineIndex _valueType ) {
-        auto lValues = dump();
-//        _callback(Name(), keyframeTimes, lValues, _valueType );
+        _callback(Name(), dump(), _valueType, strideDumpForType(_valueType) );
     }
 
     std::vector<float> dump() const {
         std::vector<float> ret;
-//        if constexpr (std::is_same_v<T, float>) {
-//            for ( const auto& v : keyframes ) ret.emplace_back( v.value );
-//        } else if constexpr (std::is_same_v<T, V2f>) {
-//            for ( const auto& v : keyframeValues ) {
-//                ret.emplace_back( v.x());
-//                ret.emplace_back( v.y());
-//            }
-//        } else if constexpr (std::is_same_v<T, V3f>) {
-//            for ( const auto& v : keyframeValues ) {
-//                ret.emplace_back( v.x());
-//                ret.emplace_back( v.y());
-//                ret.emplace_back( v.z());
-//            }
-//        } else if constexpr (std::is_same_v<T, V4f>) {
-//            for ( const auto& v : keyframeValues ) {
-//                ret.emplace_back( v.x());
-//                ret.emplace_back( v.y());
-//                ret.emplace_back( v.z());
-//                ret.emplace_back( v.w());
-//            }
-//        } else if constexpr (std::is_same_v<T, Quaternion>) {
-//            for ( const auto& v : keyframeValues ) {
-//                ret.emplace_back( v.x());
-//                ret.emplace_back( v.y());
-//                ret.emplace_back( v.z());
-//                ret.emplace_back( v.w());
-//            }
-//        } else if constexpr (std::is_same_v<T, int>) {
-//            for ( const auto& v : keyframeValues ) {
-//                ret.emplace_back( v);
-//            }
-//        }
+        if constexpr (std::is_same_v<T, float>) {
+            for ( const auto& v : keyframes ) {
+                ret.emplace_back( v.time );
+                ret.emplace_back( v.value );
+            }
+        } else if constexpr (std::is_same_v<T, V2f>) {
+            for ( const auto& v : keyframes ) {
+                ret.emplace_back( v.time );
+                ret.emplace_back( v.value.x());
+                ret.emplace_back( v.value.y());
+            }
+        } else if constexpr (std::is_same_v<T, V3f>) {
+            for ( const auto& v : keyframes ) {
+                ret.emplace_back( v.time );
+                ret.emplace_back( v.value.x());
+                ret.emplace_back( v.value.y());
+                ret.emplace_back( v.value.z());
+            }
+        } else if constexpr (std::is_same_v<T, V4f>) {
+            for ( const auto& v : keyframes ) {
+                ret.emplace_back( v.time );
+                ret.emplace_back( v.value.x());
+                ret.emplace_back( v.value.y());
+                ret.emplace_back( v.value.z());
+                ret.emplace_back( v.value.w());
+            }
+        } else if constexpr (std::is_same_v<T, Quaternion>) {
+            for ( const auto& v : keyframes ) {
+                ret.emplace_back( v.time );
+                ret.emplace_back( v.value.x());
+                ret.emplace_back( v.value.y());
+                ret.emplace_back( v.value.z());
+                ret.emplace_back( v.value.w());
+            }
+        } else if constexpr (std::is_same_v<T, int>) {
+            for ( const auto& v : keyframes ) {
+                ret.emplace_back( v.time );
+                ret.emplace_back( static_cast<float>(v.value) );
+            }
+        }
         return ret;
     }
 
@@ -290,25 +323,10 @@ public:
     template <typename T>
     static void add( const std::string& _group, AnimValue<T> _source, const KeyFramePair<T>& _keys ) {
         auto ki = timelines.add( _source, _keys );
-        if ( const auto& it = timelineGroups.find(_group); it != timelineGroups.end() ) {
-            it->second.emplace_back( ki );
-        } else {
-            TimelineIndexVector firstElemArray{ ki };
-            timelineGroups.emplace( _group, firstElemArray );
+        if ( const auto& it = timelineGroups.find(_group); it == timelineGroups.end() ) {
+            timelineGroups.emplace( _group, TimelineIndexVector{ ki } );
         }
     }
-
-private:
-//    template <typename T>
-//    static TimelineIndex add( TimelineStream<T>& _stream, const std::string& _groupName = AnimDefaultGroupName ) {
-//        timelines.add( _stream );
-//        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-//            it->second.emplace_back( _stream.getTimelineIndex() );
-//        } else {
-//            timelineGroups.insert( { _groupName, { _stream.getTimelineIndex() } } );
-//        }
-//        return _stream.getTimelineIndex();
-//    }
 
 private:
     static std::unordered_set<TimelineIndex> activeTimelines;
