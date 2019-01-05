@@ -36,8 +36,6 @@ enum class AnimVelocityType {
 	Hermite
 };
 
-static const std::string AnimDefaultGroupName = "default";
-
 using TimelineIndex = uint64_t;
 using KeyFrameTimes_t = std::vector<float>;
 using AnimVisitCallback = std::function<void(const std::string&, const KeyFrameTimes_t&, const std::vector<float>&, TimelineIndex)>;
@@ -71,7 +69,12 @@ template <typename T>
 class TimelineStream {
 public:
     TimelineStream() = default;
-    explicit TimelineStream( AnimValue<T> source) : source( std::move( source )) {}
+    explicit TimelineStream( AnimValue<T> source ) : source( std::move( source )) {}
+
+    TimelineStream& k( const KeyFramePair<T>& _kf  ) {
+        keyframes.emplace_back( _kf );
+        return *this;
+    }
 
     TimelineStream& k( float _timeAt, const T& _value ) {
         keyframes.emplace_back( _timeAt, _value );
@@ -182,8 +185,6 @@ public:
 
     bool isActive() const { return source->isAnimating; };
 
-    void add( const std::string& _groupName = AnimDefaultGroupName );
-
     const std::string& Name() const { return source->Name(); }
 private:
     AnimValue<T> source;
@@ -197,55 +198,59 @@ using TimelineMap = std::unordered_map<uint64_t, TimelineStream<V>>;
 using TimelineIndexVector = std::vector<TimelineIndex>;
 using TimelineGroupMap = std::unordered_map<std::string, TimelineIndexVector>;
 
+struct TimelineMapSpec {
+    TimelineMap<int>        tmapi;
+    TimelineMap<float>      tmapf;
+    TimelineMap<Vector2f>   tmapV2;
+    TimelineMap<Vector3f>   tmapV3;
+    TimelineMap<Vector4f>   tmapV4;
+    TimelineMap<Quaternion> tmapQ;
+
+    void visit( TimelineIndex _k,  AnimVisitCallback _callback );
+    void update( TimelineIndex _k );
+    void reset( TimelineIndex _k );
+    bool isActive( TimelineIndex _k ) const;
+
+#define addTimeLineMapValue(tmt) auto it = tmt.find(ti); \
+    if ( it == tmt.end() ) { \
+        tmt.emplace( ti, _source ); \
+        it = tmt.begin(); \
+    } \
+    it->second.k(_values); \
+    return ti; \
+
+    TimelineIndex add( inta _source, const KeyFramePair<int>& _values ) {
+        TimelineIndex ti = tiInt + _source->UID();
+        addTimeLineMapValue(tmapi)
+    }
+
+    TimelineIndex add( floata _source, const KeyFramePair<float>& _values ) {
+        TimelineIndex ti = tiFloat + _source->UID();
+        addTimeLineMapValue(tmapf)
+    }
+
+    TimelineIndex add( V2fa _source, const KeyFramePair<Vector2f>& _values ) {
+        TimelineIndex ti = tiV2f + _source->UID();
+        addTimeLineMapValue(tmapV2)
+    }
+    TimelineIndex add( V3fa _source, const KeyFramePair<Vector3f>& _values ) {
+        TimelineIndex ti = tiV3f + _source->UID();
+        addTimeLineMapValue(tmapV3)
+    }
+    TimelineIndex add( V4fa _source, const KeyFramePair<Vector4f>& _values ) {
+        TimelineIndex ti = tiV4f + _source->UID();
+        addTimeLineMapValue(tmapV4)
+    }
+    TimelineIndex add( Quaterniona _source, const KeyFramePair<Quaternion>& _values ) {
+        TimelineIndex ti = tiQuat + _source->UID();
+        addTimeLineMapValue(tmapQ)
+    }
+
+    static TimelineIndex mkf;
+};
+
+
 class Timeline {
-    struct TimelineMapSpec {
-        TimelineMap<int>        tmapi;
-        TimelineMap<float>      tmapf;
-        TimelineMap<Vector2f>   tmapV2;
-        TimelineMap<Vector3f>   tmapV3;
-        TimelineMap<Vector4f>   tmapV4;
-        TimelineMap<Quaternion> tmapQ;
-
-        void visit( TimelineIndex _k,  AnimVisitCallback _callback );
-        void update( TimelineIndex _k );
-        void reset( TimelineIndex _k );
-        bool isActive( TimelineIndex _k ) const;
-
-        static TimelineIndex add( TimelineStream<int>& _stream ) {
-            _stream.setTimelineIndex( tiInt + TimelineMapSpec::mkf++ );
-            timelines.tmapi.insert( { _stream.getTimelineIndex(), _stream } );
-            return _stream.getTimelineIndex();
-        }
-
-        static TimelineIndex add( TimelineStream<float>& _stream ) {
-            _stream.setTimelineIndex( tiFloat + TimelineMapSpec::mkf++ );
-            timelines.tmapf.insert( { _stream.getTimelineIndex(), _stream } );
-            return _stream.getTimelineIndex();
-        }
-
-        static TimelineIndex add( TimelineStream<Vector2f>& _stream ) {
-            _stream.setTimelineIndex( tiV2f + TimelineMapSpec::mkf++ );
-            timelines.tmapV2.insert( { _stream.getTimelineIndex(), _stream } );
-            return _stream.getTimelineIndex();
-        }
-        static TimelineIndex add( TimelineStream<Vector3f>& _stream ) {
-            _stream.setTimelineIndex( tiV3f + TimelineMapSpec::mkf++ );
-            timelines.tmapV3.insert( { _stream.getTimelineIndex(), _stream } );
-            return _stream.getTimelineIndex();
-        }
-        static TimelineIndex add( TimelineStream<Vector4f>& _stream ) {
-            _stream.setTimelineIndex( tiV4f + TimelineMapSpec::mkf++ );
-            timelines.tmapV4.insert( { _stream.getTimelineIndex(), _stream } );
-            return _stream.getTimelineIndex();
-        }
-        static TimelineIndex add( TimelineStream<Quaternion>& _stream ) {
-            _stream.setTimelineIndex( tiQuat + TimelineMapSpec::mkf++ );
-            timelines.tmapQ.insert( { _stream.getTimelineIndex(), _stream } );
-            return _stream.getTimelineIndex();
-        }
-
-        static TimelineIndex mkf;
-    };
 public:
     static void update() {
         for ( auto k : activeTimelines ) {
@@ -283,21 +288,27 @@ public:
     static const TimelineGroupMap& Groups() { return timelineGroups; }
 
     template <typename T>
-    static void add( const std::string& _group, AnimValue<T> _source, std::initializer_list<KeyFramePair<T>>&& _keys ) {
-
+    static void add( const std::string& _group, AnimValue<T> _source, const KeyFramePair<T>& _keys ) {
+        auto ki = timelines.add( _source, _keys );
+        if ( const auto& it = timelineGroups.find(_group); it != timelineGroups.end() ) {
+            it->second.emplace_back( ki );
+        } else {
+            TimelineIndexVector firstElemArray{ ki };
+            timelineGroups.emplace( _group, firstElemArray );
+        }
     }
 
 private:
-    template <typename T>
-    static TimelineIndex add( TimelineStream<T>& _stream, const std::string& _groupName = AnimDefaultGroupName ) {
-        timelines.add( _stream );
-        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            it->second.emplace_back( _stream.getTimelineIndex() );
-        } else {
-            timelineGroups.insert( { _groupName, { _stream.getTimelineIndex() } } );
-        }
-        return _stream.getTimelineIndex();
-    }
+//    template <typename T>
+//    static TimelineIndex add( TimelineStream<T>& _stream, const std::string& _groupName = AnimDefaultGroupName ) {
+//        timelines.add( _stream );
+//        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+//            it->second.emplace_back( _stream.getTimelineIndex() );
+//        } else {
+//            timelineGroups.insert( { _groupName, { _stream.getTimelineIndex() } } );
+//        }
+//        return _stream.getTimelineIndex();
+//    }
 
 private:
     static std::unordered_set<TimelineIndex> activeTimelines;
@@ -308,7 +319,3 @@ private:
     friend class TimelineStream;
 };
 
-template<typename T>
-void TimelineStream<T>::add( const std::string& _groupName ) {
-    Timeline::add( *this, _groupName );
-}

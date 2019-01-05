@@ -643,12 +643,6 @@ void Camera::updateFromInputData( const CameraInputData& mi ) {
 		toggle( mCvt, mi.cvt );
 	}
 
-	if ( checkBitWiseFlag(mCvt, ViewportToggles::AddCameraKeyframe) ) {
-//		TimelineStream<V3f>{PosAnim()}.
-//				k(0.0f, Vector3f{0.0f, 1.0f, 0.0f}).
-//				add(cName);
-	}
-
 	if ( Mode() == CameraMode::Edit2d ) {
 		if ( mi.isMouseTouchedDown) {
 			pan( Vector3f( mi.moveDiff * Vector2f{-1.0f, 1.0f}, 0.0f ) );

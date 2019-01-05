@@ -726,10 +726,21 @@ class Quaternion;
 
 using AnimVariant = std::variant<float, Vector2f, Vector3f, Vector4f, Quaternion>;
 
+struct AnimTypeUID {
+protected:
+	static uint64_t suid; // Static Increment ID
+};
+
 template <typename T>
-class AnimType {
+class AnimType : private AnimTypeUID {
 public:
-	explicit AnimType( const T& v, std::string _name ) : value(v), name( std::move( _name )) {}
+	explicit AnimType( const T& v, std::string _name ) : value(v), name( std::move( _name )) {
+		uid = suid++;
+	}
+
+	uint64_t UID() const {
+		return uid;
+	}
 
 	void set(const T& _value) {
 		value = _value;
@@ -741,6 +752,7 @@ public:
 
 	const std::string& Name() const { return name; }
 
+	uint64_t uid = 0;
 	T value;
 	bool isAnimating = false;
 private:
@@ -750,7 +762,7 @@ private:
 template <typename T>
 using AnimValue = std::shared_ptr<AnimType<T>>;
 
-using intta 		= AnimValue<int>;
+using inta 		    = AnimValue<int>;
 using floata 		= AnimValue<float>;
 using V2fa 			= AnimValue<Vector2f>;
 using V3fa 			= AnimValue<Vector3f>;

@@ -5,6 +5,8 @@
 #include <iomanip>
 #include "matrix2f.h"
 
+uint64_t AnimTypeUID::suid = 0; // Static Increment ID
+
 namespace JMATH {
 
 	std::string floatToFixedDigits( const float number ) {

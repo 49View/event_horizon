@@ -126,7 +126,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 //            LOGR( "- %s", std::string(pg->Hash()).c_str() );
 //        }
         const std::string cName = "urca";
-        Timeline::add( cName,  c->PosAnim(), { {0.0f, Vector3f::Z_AXIS} } );
+        Timeline::add( cName,  c->PosAnim(), KeyFramePair{0.0f, Vector3f::Z_AXIS} );
 
 //        TimelineStream<V3f>{c->PosAnim()}.
 //                  k(0.0f, Vector3f{0.0f, 1.0f, 0.0f}).

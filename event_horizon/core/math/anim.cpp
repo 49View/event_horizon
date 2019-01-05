@@ -2,9 +2,9 @@
 
 #include <core/game_time.h>
 
-uint64_t Timeline::TimelineMapSpec::mkf = 1;
+uint64_t TimelineMapSpec::mkf = 1;
 
-Timeline::TimelineMapSpec Timeline::timelines;
+TimelineMapSpec Timeline::timelines;
 std::unordered_set<TimelineIndex> Timeline::activeTimelines;
 std::unordered_map<std::string, TimelineIndexVector> Timeline::timelineGroups;
 
@@ -309,7 +309,7 @@ std::unordered_map<std::string, TimelineIndexVector> Timeline::timelineGroups;
 //}
 
 
-void Timeline::TimelineMapSpec::update( TimelineIndex _k ) {
+void TimelineMapSpec::update( TimelineIndex _k ) {
     auto ki = _k / tiNorm;
     switch (ki) {
         case tiIntIndex:
@@ -335,7 +335,7 @@ void Timeline::TimelineMapSpec::update( TimelineIndex _k ) {
     }
 }
 
-void Timeline::TimelineMapSpec::reset( TimelineIndex _k ) {
+void TimelineMapSpec::reset( TimelineIndex _k ) {
     auto ki = _k / tiNorm;
     switch (ki) {
         case tiIntIndex:
@@ -361,7 +361,7 @@ void Timeline::TimelineMapSpec::reset( TimelineIndex _k ) {
     }
 }
 
-bool Timeline::TimelineMapSpec::isActive( TimelineIndex _k ) const {
+bool TimelineMapSpec::isActive( TimelineIndex _k ) const {
     auto ki = _k / tiNorm;
     switch (ki) {
         case tiIntIndex:
@@ -382,7 +382,7 @@ bool Timeline::TimelineMapSpec::isActive( TimelineIndex _k ) const {
     return false;
 }
 
-void Timeline::TimelineMapSpec::visit( TimelineIndex _k, AnimVisitCallback _callback ) {
+void TimelineMapSpec::visit( TimelineIndex _k, AnimVisitCallback _callback ) {
     auto ki = _k / tiNorm;
     switch (ki) {
         case tiIntIndex:
