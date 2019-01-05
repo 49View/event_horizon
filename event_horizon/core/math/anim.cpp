@@ -6,7 +6,7 @@ uint64_t Timeline::TimelineMapSpec::mkf = 1;
 
 Timeline::TimelineMapSpec Timeline::timelines;
 std::unordered_set<TimelineIndex> Timeline::activeTimelines;
-std::unordered_map<std::string, std::vector<TimelineIndex>> Timeline::timelineGroups;
+std::unordered_map<std::string, TimelineIndexVector> Timeline::timelineGroups;
 
 //std::map<std::string, float> AnimUtil::toggleDelayForInverseMap;
 //
@@ -312,6 +312,9 @@ std::unordered_map<std::string, std::vector<TimelineIndex>> Timeline::timelineGr
 void Timeline::TimelineMapSpec::update( TimelineIndex _k ) {
     auto ki = _k / tiNorm;
     switch (ki) {
+        case tiIntIndex:
+            tmapi[_k].update( GameTime::getCurrTimeStamp() );
+            break;
         case tiFloatIndex:
             tmapf[_k].update( GameTime::getCurrTimeStamp() );
             break;
@@ -332,9 +335,37 @@ void Timeline::TimelineMapSpec::update( TimelineIndex _k ) {
     }
 }
 
+void Timeline::TimelineMapSpec::reset( TimelineIndex _k ) {
+    auto ki = _k / tiNorm;
+    switch (ki) {
+        case tiIntIndex:
+            tmapi[_k].reset(GameTime::getCurrTimeStamp());
+            break;
+        case tiFloatIndex:
+            tmapf[_k].reset(GameTime::getCurrTimeStamp());
+            break;
+        case tiV2fIndex:
+            tmapV2[_k].reset(GameTime::getCurrTimeStamp());
+            break;
+        case tiV3fIndex:
+            tmapV3[_k].reset(GameTime::getCurrTimeStamp());
+            break;
+        case tiV4fIndex:
+            tmapV4[_k].reset(GameTime::getCurrTimeStamp());
+            break;
+        case tiQuatIndex:
+            tmapQ[_k].reset(GameTime::getCurrTimeStamp());
+            break;
+        default:
+            break;
+    }
+}
+
 bool Timeline::TimelineMapSpec::isActive( TimelineIndex _k ) const {
     auto ki = _k / tiNorm;
     switch (ki) {
+        case tiIntIndex:
+            return tmapi.at(_k).isActive();
         case tiFloatIndex:
             return tmapf.at(_k).isActive();
         case tiV2fIndex:
@@ -349,4 +380,30 @@ bool Timeline::TimelineMapSpec::isActive( TimelineIndex _k ) const {
             break;
     }
     return false;
+}
+
+void Timeline::TimelineMapSpec::visit( TimelineIndex _k, AnimVisitCallback _callback ) {
+    auto ki = _k / tiNorm;
+    switch (ki) {
+        case tiIntIndex:
+            tmapi.at(_k).visit(_callback, tiFloatIndex);
+            break;
+        case tiFloatIndex:
+            tmapf.at(_k).visit(_callback, tiFloatIndex);
+            break;
+        case tiV2fIndex:
+            tmapV2.at(_k).visit(_callback, tiV2fIndex);
+            break;
+        case tiV3fIndex:
+            tmapV3.at(_k).visit(_callback, tiV3fIndex);
+            break;
+        case tiV4fIndex:
+            tmapV4.at(_k).visit(_callback, tiV4fIndex);
+            break;
+        case tiQuatIndex:
+            tmapQ.at(_k).visit(_callback, tiQuatIndex);
+            break;
+        default:
+            break;
+    }
 }

@@ -120,9 +120,9 @@ enum ReservedGraphicsTags {
 };
 
 namespace ViewportToggles {
-	const static int None          = 0;
-	const static int DrawWireframe = 1 << 0;
-	const static int DrawGrid      = 1 << 1;
+	const static int None          		= 0;
+	const static int DrawWireframe 		= 1 << 0;
+	const static int DrawGrid      		= 1 << 1;
 }
 
 using ViewportTogglesT = int;

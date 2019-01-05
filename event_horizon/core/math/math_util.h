@@ -750,6 +750,7 @@ private:
 template <typename T>
 using AnimValue = std::shared_ptr<AnimType<T>>;
 
+using intta 		= AnimValue<int>;
 using floata 		= AnimValue<float>;
 using V2fa 			= AnimValue<Vector2f>;
 using V3fa 			= AnimValue<Vector3f>;
