@@ -20,6 +20,7 @@
 #include <core/math/vector4f.h>
 #include <core/math/quaternion.h>
 #include <core/math/math_util.h>
+#include <core/game_time.h>
 
 enum class AnimLoopType {
 	Linear,
@@ -108,8 +109,7 @@ public:
         auto value = source->value;
         uint64_t keyFrameIndex = 0;
         float delta = 0.0f;
-        float currTimeElapsed = _timeElapsed - animationStartTime;
-        source->isAnimating = getKeyFrameIndexAt( currTimeElapsed, keyFrameIndex, delta );
+        source->isAnimating = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
         if ( source->isAnimating ) {
             uint64_t p1 = keyFrameIndex;
             uint64_t p2 = keyFrameIndex+1;
@@ -137,12 +137,9 @@ public:
         return value;
     }
 
-    void update( float _timeElapsed ) {
+    bool update( float _timeElapsed ) {
         source->value = valueAt(_timeElapsed);
-    }
-
-    void reset( float _startTime) {
-        animationStartTime = _startTime;
+        return isActive();
     }
 
     int strideDumpForType( TimelineIndex _valueType ) {
@@ -228,13 +225,11 @@ private:
     AnimValue<T> source;
     std::vector<KeyFramePair<T>> keyframes;
     TimelineIndex timelineIndex = 0;
-    float animationStartTime = 0.0f;
 };
 
 template<typename V>
 using TimelineMap = std::unordered_map<uint64_t, TimelineStream<V>>;
 using TimelineIndexVector = std::set<TimelineIndex>;
-using TimelineGroupMap = std::unordered_map<std::string, TimelineIndexVector>;
 
 struct TimelineMapSpec {
     TimelineMap<int>        tmapi;
@@ -245,8 +240,7 @@ struct TimelineMapSpec {
     TimelineMap<Quaternion> tmapQ;
 
     void visit( TimelineIndex _k,  AnimVisitCallback _callback );
-    void update( TimelineIndex _k );
-    void reset( TimelineIndex _k );
+    bool update( TimelineIndex _k, float _timeElapsed );
     bool isActive( TimelineIndex _k ) const;
 
 #define addTimeLineMapValue(tmt) auto it = tmt.find(ti); \
@@ -290,35 +284,70 @@ struct TimelineMapSpec {
 
 class Timeline {
 public:
-    static void update() {
-        for ( auto k : activeTimelines ) {
-            timelines.update( k );
+    class TimelineGroup {
+    public:
+        void play( float _startTimeOffset = 0.0f ) {
+            animationStartTime = GameTime::getCurrTimeStamp();
+            animationInitialDelay = _startTimeOffset;
+            bIsPlaying = true;
         }
-       	for ( auto it = activeTimelines.begin(); it != activeTimelines.end();) {
-            if ( !timelines.isActive(*it) ) { it = activeTimelines.erase( it ); } else { ++it; }
-        }
-    }
 
-    template <typename T>
-    static void play( TimelineStream<T>& _stream ) {
-        add( _stream );
-        activeTimelines.insert( _stream.getTimelineIndex() );
-    }
+        void update() {
+            if ( !bIsPlaying ) return;
 
-    static void play( const std::string & _groupName ) {
-        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            for ( const auto& gi : it->second ) {
-                timelines.reset( gi );
-                activeTimelines.insert( gi );
+            timeElapsed = (GameTime::getCurrTimeStamp() - animationStartTime) + animationInitialDelay;
+            auto tl = Timeline::Timelines();
+            bIsPlaying = false;
+            for ( auto k : timelines ) {
+                bIsPlaying |= tl.update( k, timeElapsed );
             }
         }
+
+        void visit( AnimVisitCallback _callback ) {
+            auto tl = Timeline::Timelines();
+            for ( auto k : timelines ) {
+                tl.visit( k, _callback );
+            }
+        }
+
+        void addTimeline( TimelineIndex _ti ) {
+            timelines.emplace(_ti);
+        }
+
+        float animationTime() const { return bIsPlaying ? timeElapsed : -1.0f; }
+
+    private:
+        TimelineIndexVector timelines;
+        float animationStartTime = 0.0f;
+        float animationInitialDelay = 0.0f;
+        float timeElapsed = -1.0f;
+        bool bIsPlaying = false;
+    };
+
+    using TimelineGroupMap = std::unordered_map<std::string, TimelineGroup>;
+
+    static void update() {
+        for( auto& [k,g] : timelineGroups ) {
+            g.update();
+        }
+    }
+
+    static void play( const std::string & _groupName, float _startTimeOffset = 0.0f ) {
+        if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+            it->second.play( _startTimeOffset );
+        }
+    }
+
+    static float groupAnimTime( const std::string & _groupName ) {
+        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+            return it->second.animationTime();
+        }
+        return -1.0f;
     }
 
     static void visitGroup( const std::string& _groupName, AnimVisitCallback _callback ) {
         if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            for ( const auto& ti : it->second ) {
-                timelines.visit( ti, _callback );
-            }
+            it->second.visit( _callback );
         }
     }
 
@@ -329,17 +358,15 @@ public:
     static void add( const std::string& _group, AnimValue<T> _source, const KeyFramePair<T>& _keys ) {
         auto ki = timelines.add( _source, _keys );
         if ( const auto& it = timelineGroups.find(_group); it == timelineGroups.end() ) {
-            timelineGroups.emplace( _group, TimelineIndexVector{ ki } );
+            timelineGroups.emplace( _group, TimelineGroup{} );
         }
-        timelineGroups[_group].emplace(ki);
+        timelineGroups[_group].addTimeline(ki);
     }
 
 private:
-    static std::unordered_set<TimelineIndex> activeTimelines;
     static TimelineGroupMap timelineGroups;
-    static TimelineMapSpec timelines;
+    static TimelineMapSpec  timelines;
 
     template <typename U>
     friend class TimelineStream;
 };
-

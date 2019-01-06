@@ -5,60 +5,60 @@
 uint64_t TimelineMapSpec::mkf = 1;
 
 TimelineMapSpec Timeline::timelines;
-std::unordered_set<TimelineIndex> Timeline::activeTimelines;
-std::unordered_map<std::string, TimelineIndexVector> Timeline::timelineGroups;
+Timeline::TimelineGroupMap Timeline::timelineGroups;
 
-void TimelineMapSpec::update( TimelineIndex _k ) {
+bool TimelineMapSpec::update( TimelineIndex _k, float _timeElapsed ) {
     auto ki = _k / tiNorm;
     switch (ki) {
         case tiIntIndex:
-            tmapi[_k].update( GameTime::getCurrTimeStamp() );
+            return tmapi[_k].update( _timeElapsed );
             break;
         case tiFloatIndex:
-            tmapf[_k].update( GameTime::getCurrTimeStamp() );
+            return tmapf[_k].update( _timeElapsed );
             break;
         case tiV2fIndex:
-            tmapV2[_k].update( GameTime::getCurrTimeStamp() );
+            return tmapV2[_k].update( _timeElapsed );
             break;
         case tiV3fIndex:
-            tmapV3[_k].update( GameTime::getCurrTimeStamp() );
+            return tmapV3[_k].update( _timeElapsed );
             break;
         case tiV4fIndex:
-            tmapV4[_k].update( GameTime::getCurrTimeStamp() );
+            return tmapV4[_k].update( _timeElapsed );
             break;
         case tiQuatIndex:
-            tmapQ[_k].update( GameTime::getCurrTimeStamp() );
+            return tmapQ[_k].update( _timeElapsed );
             break;
         default:
             break;
     }
+    return false;
 }
 
-void TimelineMapSpec::reset( TimelineIndex _k ) {
-    auto ki = _k / tiNorm;
-    switch (ki) {
-        case tiIntIndex:
-            tmapi[_k].reset(GameTime::getCurrTimeStamp());
-            break;
-        case tiFloatIndex:
-            tmapf[_k].reset(GameTime::getCurrTimeStamp());
-            break;
-        case tiV2fIndex:
-            tmapV2[_k].reset(GameTime::getCurrTimeStamp());
-            break;
-        case tiV3fIndex:
-            tmapV3[_k].reset(GameTime::getCurrTimeStamp());
-            break;
-        case tiV4fIndex:
-            tmapV4[_k].reset(GameTime::getCurrTimeStamp());
-            break;
-        case tiQuatIndex:
-            tmapQ[_k].reset(GameTime::getCurrTimeStamp());
-            break;
-        default:
-            break;
-    }
-}
+//void TimelineMapSpec::reset( TimelineIndex _k, float _startTime ) {
+//    auto ki = _k / tiNorm;
+//    switch (ki) {
+//        case tiIntIndex:
+//            tmapi[_k].reset(_startTime);
+//            break;
+//        case tiFloatIndex:
+//            tmapf[_k].reset(_startTime);
+//            break;
+//        case tiV2fIndex:
+//            tmapV2[_k].reset(_startTime);
+//            break;
+//        case tiV3fIndex:
+//            tmapV3[_k].reset(_startTime);
+//            break;
+//        case tiV4fIndex:
+//            tmapV4[_k].reset(_startTime);
+//            break;
+//        case tiQuatIndex:
+//            tmapQ[_k].reset(_startTime);
+//            break;
+//        default:
+//            break;
+//    }
+//}
 
 bool TimelineMapSpec::isActive( TimelineIndex _k ) const {
     auto ki = _k / tiNorm;
