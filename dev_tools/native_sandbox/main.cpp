@@ -110,7 +110,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
         nsvgDelete( image );
 
         auto c = _p->CM().getCamera(Name::Foxtrot);
-        c->goTo( Vector3f{0.0f, 1.0f, 3.0f}, 0.0f);
+        c->setPosition( Vector3f{0.0f, 1.0f, 3.0f} );
 
         auto cube = GB{ ShapeType::Cube }.buildr(_p->RSG());
 //        auto pin = GB{ GeomBuilderType::file, "pin" }.buildr(_p->RSG());
@@ -125,10 +125,10 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 //        for ( const auto& [k,pg] : v ) {
 //            LOGR( "- %s", std::string(pg->Hash()).c_str() );
 //        }
-        const std::string cName = "urca";
-        Timeline::add( cName, c->PosAnim(), {0.0f, Vector3f::Z_AXIS} );
-        Timeline::add( cName, c->PosAnim(), {4.0f, Vector3f::ZERO} );
-        Timeline::add( cName, c->PosAnim(), {2.0f, Vector3f::ONE} );
+//        const std::string cName = "urca";
+//        Timeline::add( cName, c->PosAnim(), {0.0f, Vector3f::Z_AXIS} );
+//        Timeline::add( cName, c->PosAnim(), {4.0f, Vector3f::ZERO} );
+//        Timeline::add( cName, c->PosAnim(), {2.0f, Vector3f::ONE} );
 
 //        TimelineStream<V3f>{c->PosAnim()}.
 //                  k(0.0f, Vector3f{0.0f, 1.0f, 0.0f}).

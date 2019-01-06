@@ -25,18 +25,13 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin( "Timeline",  nullptr, ImGuiWindowFlags_NoCollapse );
 
-    if ( gsize == 0 ) {
-        ImGui::End();
-        return; // Early out, slight crap but inline with ImGui
-    }
-
     // let's create the sequencer
 //    static int selectedEntry = -1;
 //    static int firstFrame = 0;
 //    static bool expanded = true;
     static int currentFrame = 0;
 
-    const char* current_item = ( gsize == 1 ) ? tgroups.begin()->first.c_str() : nullptr;
+    const char* current_item = ( gsize == 1 ) ? tgroups.begin()->first.c_str() : "None";
     std::string tkey = current_item;
 
     ImGui::PushItemWidth(130);
@@ -66,7 +61,24 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     ImGui::SameLine();
     ImGui::PushItemWidth(90);
     ImGui::InputInt("Frame ", &currentFrame);
+
+    int currFrameWidth = 5; // must be dividend of 100
+    ImGui::SameLine();
+    if ( ImGui::Button( "Camera" ) ) {
+        if ( current_item ) {
+            auto cam = p->CM().getCamera(Name::Foxtrot);
+            auto lFrame = (currentFrame*currFrameWidth)/100.0f;
+            Timeline::add( current_item, cam->PosAnim(), {lFrame, cam->getPosition() } );
+            Timeline::add( current_item, cam->QAngleAnim(), { lFrame, cam->quatAngle() } );
+        }
+    }
+
     if ( currentFrame < 0 ) currentFrame = 0;
+
+    if ( gsize == 0 ) {
+        ImGui::End();
+        return; // Early out, slight crap but inline with ImGui
+    }
 
     if ( current_item ) {
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -75,9 +87,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
 
         float frameLinesHeight = 20.0f;
         float titlesWidth = 200.0f;
-        int currFrameWidth = 5; // must be dividend of 100
         ImVec2 mainTop = canvas_pos + ImVec2( 0.0f, frameLinesHeight);
-
 
         draw_list->AddRectFilled(mainTop, mainTop + ImVec2(titlesWidth, canvas_size.y), 0xFF404040, 0);
         auto topTimeline = mainTop+ ImVec2(titlesWidth, 0.0f);

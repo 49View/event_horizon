@@ -62,7 +62,7 @@ struct KeyFramePair {
 
     float time = 0.0f;
     T value;
-    AnimVelocityType velocityType = AnimVelocityType::Linear;
+    AnimVelocityType velocityType = AnimVelocityType::Hermite;
 };
 
 template <typename T>
@@ -116,15 +116,20 @@ public:
             switch ( keyframes[p2].velocityType ) {
                 case AnimVelocityType::Linear:
                     value = interpolate( keyframes[p1].value, keyframes[p2].value, delta );
-//            case AnimVelocityType::Cosine:
-//                value = JMATH::lerp( asinf( JMATH::saturate( deltaTimeNotIncludingDelay / finalTime ) ) / M_PI_2, keyframes[0], keyframes[1] );
-//                break;
-//            case AnimVelocityType::Exp:
-//                value = JMATH::lerp( ( expf( JMATH::saturate( deltaTimeNotIncludingDelay / finalTime ) ) - 1.0f ) / ( M_E - 1.0f ), keyframes[0], keyframes[1] );
-//                break;
-//            case AnimVelocityType::Hermite:
-//			    value = traversePathHermite( cameraPath, deltaTimeNotIncludingDelay );
-//                break;
+                    break;
+                case AnimVelocityType::Cosine:
+                    value = JMATH::lerp( asinf( delta ) / M_PI_2, keyframes[p1].value, keyframes[p2].value );
+                    break;
+                case AnimVelocityType::Exp:
+                    value = JMATH::lerp( static_cast<float>(( expf( delta ) - 1.0f ) / ( M_E - 1.0f )), keyframes[p1].value, keyframes[p2].value );
+                    break;
+                case AnimVelocityType::Hermite: {
+                    uint64_t p0 = p1 > 0 ? p1 - 1 : 0;
+                    uint64_t p3 = p2 < keyframes.size() - 2 ? p2 + 1 : p2;
+                    value = interpolateHermite( keyframes[p0].value, keyframes[p1].value,
+                                                keyframes[p2].value, keyframes[p3].value, delta );
+                }
+                break;
                 default:
                     break;
             }
@@ -228,7 +233,7 @@ private:
 
 template<typename V>
 using TimelineMap = std::unordered_map<uint64_t, TimelineStream<V>>;
-using TimelineIndexVector = std::vector<TimelineIndex>;
+using TimelineIndexVector = std::set<TimelineIndex>;
 using TimelineGroupMap = std::unordered_map<std::string, TimelineIndexVector>;
 
 struct TimelineMapSpec {
@@ -326,6 +331,7 @@ public:
         if ( const auto& it = timelineGroups.find(_group); it == timelineGroups.end() ) {
             timelineGroups.emplace( _group, TimelineIndexVector{ ki } );
         }
+        timelineGroups[_group].emplace(ki);
     }
 
 private:

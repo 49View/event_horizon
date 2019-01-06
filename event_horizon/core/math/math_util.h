@@ -641,8 +641,8 @@ template<typename Value>
 Value interpolateHermite( const Value& y0, const Value& y1,
 						  const Value& y2, const Value& y3,
 						  float mu,
-						  float tension,
-						  float bias ) {
+						  float tension = 0.0f,
+						  float bias= 0.0f ) {
 	float mu2 = mu * mu;
 	float mu3 = mu2 * mu;
 
