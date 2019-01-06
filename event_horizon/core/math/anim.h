@@ -118,10 +118,10 @@ public:
                     value = interpolate( keyframes[p1].value, keyframes[p2].value, delta );
                     break;
                 case AnimVelocityType::Cosine:
-                    value = JMATH::lerp( asinf( delta ) / M_PI_2, keyframes[p1].value, keyframes[p2].value );
+                    value = interpolate( keyframes[p1].value, keyframes[p2].value, asinf( delta ) / M_PI_2 );
                     break;
                 case AnimVelocityType::Exp:
-                    value = JMATH::lerp( static_cast<float>(( expf( delta ) - 1.0f ) / ( M_E - 1.0f )), keyframes[p1].value, keyframes[p2].value );
+                    value = interpolate( keyframes[p1].value, keyframes[p2].value, static_cast<float>(( expf( delta ) - 1.0f ) / ( M_E - 1.0f )) );
                     break;
                 case AnimVelocityType::Hermite: {
                     uint64_t p0 = p1 > 0 ? p1 - 1 : 0;

@@ -362,7 +362,7 @@ Camera::Camera( const std::string& cameraName, CameraState _state, const Rect2f&
 	mFarClipPlaneZ = 160.0f;
 
 	mTarget = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Target" );
-	qangle = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Angle" );
+	qangle = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, Name() + "_Angle" );
 	mPos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
 
 	mFov = std::make_shared<AnimType<float>>( 72.0f, Name() + "_Fov" );
@@ -449,7 +449,7 @@ void Camera::strafe( float amount ) {
 	translate( dir * -amount );
 }
 
-void Camera::setViewMatrix( const Vector3f&pos, Quaternion q ) {
+void Camera::setViewMatrix( const Vector3f&pos, const Quaternion& q ) {
 	if ( !mbEnableInputs ) return;
 	quatMatrix = q.rotationMatrix();// * Matrix4f( Vector3f::ZERO, M_PI_2, Vector3f::X_AXIS );
 
@@ -457,7 +457,7 @@ void Camera::setViewMatrix( const Vector3f&pos, Quaternion q ) {
 	mView = Matrix4f( pos ) * quatMatrix;
 }
 
-void Camera::setViewMatrixVR( const Vector3f&pos, Quaternion q, const Matrix4f& origRotMatrix ) {
+void Camera::setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Matrix4f& origRotMatrix ) {
 	if ( !mbEnableInputs ) return;
 	quatMatrix = q.rotationMatrix() * origRotMatrix;
 
@@ -472,7 +472,7 @@ void Camera::lookAt( const Vector3f& posAt ) {
 
 void Camera::lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay ) {
 	if ( !mbEnableInputs ) return;
-	qangle->set(angleAt);
+//	qangle->set(angleAt);
 }
 
 void Camera::lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& up ) {
@@ -495,7 +495,7 @@ void Camera::center( const AABB& _bbox ) {
 	Vector3f cp = { 0.0f, 0.0f, aperture + bdiameter };
 	mPos->value = cp + _bbox.centre();
 	mTarget->value = _bbox.centre();
-	qangle->value = Vector3f::ZERO;
+	qangle->value = Quaternion{Vector3f::ZERO};
 }
 
 void Camera::pan( const Vector3f& posDiff ) {
@@ -616,7 +616,7 @@ void Camera::updateFromInputData( const CameraInputData& mi ) {
 		strafe( mi.strafe );
 		moveUp( mi.moveUp );
 		if ( mi.moveDiffSS != Vector2f::ZERO ) {
-			setQuatAngles( quatAngle() + Vector3f( mi.moveDiffSS.yx(), 0.0f ));
+			setQuatAngles( qangleEuler + Vector3f( mi.moveDiffSS.yx(), 0.0f ));
 		}
 	}
 
@@ -643,11 +643,7 @@ void Camera::update() {
 	}
 
 	if ( Mode() == CameraMode::Doom ) {
-		Quaternion qz( qangle->value.z(), Vector3f::Z_AXIS );
-		Quaternion qy( qangle->value.y(), Vector3f::Y_AXIS );
-		Quaternion qx( qangle->value.x(), Vector3f::X_AXIS );
-		Quaternion qr = ( qx * qy * qz );
-		quatMatrix = qr.rotationMatrix();
+		quatMatrix = qangle->value.rotationMatrix();
 	}
 
 	quatMatrix.setTranslation( mPos->value );
@@ -704,15 +700,26 @@ Vector3f Camera::getPositionRH() const {
 	return lPos;
 }
 
-void Camera::setQuatAngles( const Vector3f& a ) {
-	if ( !mbEnableInputs ) return;
+void Camera::setQuat( const Quaternion& a ) {
 	qangle->value = a;
 }
 
-Vector3f Camera::quatAngle() const { return qangle->value; }
+void Camera::setQuatAngles( const Vector3f& a ) {
+	if ( !mbEnableInputs ) return;
+
+	qangleEuler = a;
+
+    Quaternion qz( qangleEuler.z(), Vector3f::Z_AXIS );
+    Quaternion qy( qangleEuler.y(), Vector3f::Y_AXIS );
+    Quaternion qx( qangleEuler.x(), Vector3f::X_AXIS );
+
+    qangle->value = ( qx * qy * qz );
+}
+
+Quaternion Camera::quatAngle() const { return qangle->value; }
 
 V3fa Camera::PosAnim() { return mPos; }
 
 V3fa Camera::TargetAnim() { return mTarget; }
 
-V3fa Camera::QAngleAnim() { return qangle; }
+Quaterniona Camera::QAngleAnim() { return qangle; }

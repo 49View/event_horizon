@@ -51,7 +51,7 @@ Vector2f CameraRig::mousePickRayOrtho( const Vector2f& _pos ) {
 
 
 void CameraManager::syncCameraMovements( const std::string& cameraSource, const std::string& cameraDest ) {
-    mSyncedRigs.push_back( std::make_pair( cameraSource, cameraDest ));
+    mSyncedRigs.emplace_back( cameraSource, cameraDest );
 }
 
 void CameraManager::desyncCameraMovements( const std::string& cameraSource, const std::string& cameraDest ) {
@@ -74,7 +74,7 @@ bool CameraManager::isDoom() const {
 void CameraManager::update() {
     for ( auto& c : mSyncedRigs ) {
         getCamera( c.second )->setPosition( getCamera( c.first )->getPosition());
-        getCamera( c.second )->setQuatAngles( getCamera( c.first )->quatAngle());
+        getCamera( c.second )->setQuat( getCamera( c.first )->quatAngle());
         getCamera( c.second )->setFoV( getCamera( c.first )->FoV());
         getCamera( c.second )->ViewPort( getCamera( c.first )->ViewPort());
     }
@@ -83,11 +83,11 @@ void CameraManager::update() {
         c.second->getMainCamera()->update();
         // Copy camera values to left and right camera for VR
         c.second->getVRLeftCamera()->setPosition( c.second->getMainCamera()->getPosition());
-        c.second->getVRLeftCamera()->setQuatAngles( c.second->getMainCamera()->quatAngle());
+        c.second->getVRLeftCamera()->setQuat( c.second->getMainCamera()->quatAngle());
         c.second->getVRLeftCamera()->setFoV( c.second->getMainCamera()->FoV());
         c.second->getVRLeftCamera()->ViewPort( c.second->getMainCamera()->ViewPort());
         c.second->getVRRightCamera()->setPosition( c.second->getMainCamera()->getPosition());
-        c.second->getVRRightCamera()->setQuatAngles( c.second->getMainCamera()->quatAngle());
+        c.second->getVRRightCamera()->setQuat( c.second->getMainCamera()->quatAngle());
         c.second->getVRRightCamera()->setFoV( c.second->getMainCamera()->FoV());
         c.second->getVRRightCamera()->ViewPort( c.second->getMainCamera()->ViewPort());
 

@@ -60,11 +60,12 @@ public:
 
 	void setFoV( float fieldOfView );
 	void setPosition( const Vector3f& pos );
+	void setQuat( const Quaternion& a );
 	void setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar );
 	void setProjectionMatrix( const Matrix4f & val );
 
 	void setQuatAngles( const Vector3f&a );
-	Vector3f quatAngle() const;
+	Quaternion quatAngle() const;
 	Vector3f centerScreenOn( const Vector2f& area, const float bMiddleIsCenter = true, const float slack = 0.0f );
 	Vector3f centerScreenOnWithinArea( Vector2f area, const Rect2f& targetArea, const float padding = 1.0f, const float slack = 0.0f );
 
@@ -73,8 +74,8 @@ public:
 	void moveUp( float amount );
 	void moveForward( float amount );
 	void strafe( float amount );
-	void setViewMatrix( const Vector3f&pos, Quaternion q );
-	void setViewMatrixVR( const Vector3f&pos, Quaternion q, const Matrix4f& origRotMatrix );
+	void setViewMatrix( const Vector3f&pos, const Quaternion& q );
+	void setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Matrix4f& origRotMatrix );
 	void lookAt( const Vector3f& pos );
 	void lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay = 0.0f );
 	void lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& up );
@@ -115,7 +116,6 @@ public:
 
 	void setNearClipPlaneZClampEdit2d( float _value ) { mNearClipPlaneZClampEdit2d = _value; }
 	void setFarClipPlaneZClampEdit2d( float _value ) { mFarClipPlaneZClampEdit2d = _value;}
-
 
 	Vector3f getPosition() const;
 
@@ -159,10 +159,10 @@ public:
 
 	float FoV() const;
 
-	floata FoVAnim();
-	V3fa   PosAnim();
-	V3fa   TargetAnim();
-	V3fa   QAngleAnim();
+	floata 		FoVAnim();
+	V3fa   		PosAnim();
+	V3fa   		TargetAnim();
+	Quaterniona QAngleAnim();
 
 	void getViewporti( int* viewport ) const {
 		viewport[0] = static_cast<int>( ViewPort().topLeft()[0] );
@@ -234,7 +234,8 @@ private:
 
 	V3fa mPos;
 	V3fa mTarget;
-	V3fa qangle; // angles of x,y,z axis to be fed into quaternion math
+	Quaterniona qangle; // angles of x,y,z axis to be fed into quaternion math
+	Vector3f qangleEuler = Vector3f::ZERO;
 
 	JMATH::Rect2f mViewPort;
 

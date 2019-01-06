@@ -69,6 +69,11 @@ public:
 	float z() const { return mData[2]; }
 	float w() const { return real(); }
 
+	friend std::ostream& operator<<( std::ostream& os, const Quaternion& quaternion ) {
+		os << quaternion.mData;
+		return os;
+	}
+
 	Vector3f complex() const { return Vector3f( mData ); }
 	void complex( const Vector3f& c ) { mData[0] = c[0]; mData[1] = c[1];  mData[2] = c[2]; }
 
@@ -414,6 +419,10 @@ public:
 	const float* row( uint32_t i ) const { return mData + i; }
 
 	float operator[]( size_t i ) const {
+		return mData[i];
+	}
+
+	float& operator[]( size_t i ) {
 		return mData[i];
 	}
 
