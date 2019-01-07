@@ -26,6 +26,8 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     const static int secondMultI = static_cast<int>(secondMult);
     int currFrameWidth = 5; // must be dividend of 100
 
+    auto currframeToTime = [&]() -> float { return (currentFrame*currFrameWidth)/secondMult; };
+
     const char* current_item = ( gsize == 1 ) ? tgroups.begin()->first.c_str() : "None";
     std::string tkey = current_item;
 
@@ -49,7 +51,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     ImGui::SameLine();
 
     if ( ImGui::Button( "->" ) ) {
-        Timeline::play(current_item, (currentFrame*currFrameWidth) / secondMult);
+        Timeline::play(current_item, currframeToTime());
     }
     ImGui::SameLine();
     if ( ImGui::Button( "|->" ) ) {
@@ -57,15 +59,21 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     }
     ImGui::SameLine();
     ImGui::PushItemWidth(90);
-    ImGui::InputInt("Frame ", &currentFrame);
+    if ( ImGui::InputInt("Frame ", &currentFrame) ) {
+        Timeline::playOneFrame(current_item, currframeToTime() );
+    } else {
+        if ( current_item ) {
+            if ( auto ct = Timeline::groupAnimTime( current_item ); ct > 0.0f ) {
+                currentFrame = static_cast<int>(ceil( ct * ( secondMult / currFrameWidth )));
+            }
+        }
+    }
 
     ImGui::SameLine();
     if ( ImGui::Button( "Camera" ) ) {
         if ( current_item ) {
             auto cam = p->CM().getCamera(Name::Foxtrot);
-            auto lFrame = (currentFrame*currFrameWidth)/secondMult;
-            Timeline::add( current_item, cam->PosAnim(), {lFrame, cam->getPosition() } );
-            Timeline::add( current_item, cam->QAngleAnim(), { lFrame, cam->quatAngle() } );
+            Timeline::addLinked( current_item, cam, currframeToTime() );
         }
     }
 
@@ -104,15 +112,12 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
         draw_list->AddRectFilled( currFrameTopLong + ImVec2(-1,0), currFrameTopLong + ImVec2(2, canvas_size.y+frameLinesHeight), col, 0);
     };
 
-    if ( auto ct = Timeline::groupAnimTime(current_item); ct > 0.0f ) {
-        currentFrame = static_cast<int>(ceil(ct * ( secondMult / currFrameWidth)));
-    }
-
     ImRect lineFramesContainer{ topLineFrame, bottomLineFrame };
     if ( lineFramesContainer.Contains(io.MousePos) ) {
         frameLineCol = 0xFFBFBF00;
         if ( ImGui::IsMouseDown(0) ) {
             currentFrame = static_cast<int>(( io.MousePos.x - topLineFrame.x) / currFrameWidth);
+            Timeline::playOneFrame(current_item, currframeToTime() );
         }
     }
     for ( int fl = 0; fl < canvas_size.x; fl+=currFrameWidth ) {

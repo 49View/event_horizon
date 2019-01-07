@@ -15,6 +15,7 @@
 #include "core/math/aabb.h"
 #include "core/math/quaternion.h"
 #include <core/math/math_util.h>
+#include <core/math/anim_type.hpp>
 #include "graphic_constants.h"
 
 void MultiplyMatrices4by4OpenGL_FLOAT( float *result, float *matrix1, float *matrix2 );
@@ -54,11 +55,12 @@ struct Frustum {
 	void calculateFromMVP( const Matrix4f& _mvp );
 };
 
-class Camera {
+class Camera : public Animable {
 public:
 	Camera( const std::string& cameraName, CameraState _state, const Rect2f& _viewport );
-
-	void setFoV( float fieldOfView );
+    virtual ~Camera() = default;
+    
+    void setFoV( float fieldOfView );
 	void setPosition( const Vector3f& pos );
 	void setQuat( const Quaternion& a );
 	void setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar );
@@ -69,7 +71,9 @@ public:
 	Vector3f centerScreenOn( const Vector2f& area, const float bMiddleIsCenter = true, const float slack = 0.0f );
 	Vector3f centerScreenOnWithinArea( Vector2f area, const Rect2f& targetArea, const float padding = 1.0f, const float slack = 0.0f );
 
-	void zoom2d( float amount );
+    TimelineSet addKeyFrame( const std::string& name, float _time ) override;
+
+    void zoom2d( float amount );
 
 	void moveUp( float amount );
 	void moveForward( float amount );
@@ -161,7 +165,6 @@ public:
 
 	floata 		FoVAnim();
 	V3fa   		PosAnim();
-	V3fa   		TargetAnim();
 	Quaterniona QAngleAnim();
 
 	void getViewporti( int* viewport ) const {
@@ -213,7 +216,6 @@ private:
 	float mVAngle;
 	float mAspectRatioMultiplier;
 
-	floata mFov;
 	float mNearClipPlaneZ;
 	float mFarClipPlaneZ;
 	float mNearClipPlaneZClampEdit2d = 0.5f;
@@ -233,8 +235,9 @@ private:
 	Matrix4f quatMatrix;
 
 	V3fa mPos;
-	V3fa mTarget;
 	Quaterniona qangle; // angles of x,y,z axis to be fed into quaternion math
+    floata mFov;
+
 	Vector3f qangleEuler = Vector3f::ZERO;
 
 	JMATH::Rect2f mViewPort;

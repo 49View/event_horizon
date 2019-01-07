@@ -1,6 +1,7 @@
 #pragma  once
 
 #include "core/math/vector3f.h"
+#include <core/math/anim_type.hpp>
 
 class ProgramUniformSet;
 class ShaderManager;

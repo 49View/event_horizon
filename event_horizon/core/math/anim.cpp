@@ -4,8 +4,9 @@
 
 uint64_t TimelineMapSpec::mkf = 1;
 
-TimelineMapSpec Timeline::timelines;
-Timeline::TimelineGroupMap Timeline::timelineGroups;
+TimelineMapSpec             Timeline::timelines;
+Timeline::TimelineGroupMap  Timeline::timelineGroups;
+TimelineLinks               Timeline::links;
 
 bool TimelineMapSpec::update( TimelineIndex _k, float _timeElapsed ) {
     auto ki = _k / tiNorm;

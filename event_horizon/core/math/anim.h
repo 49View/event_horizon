@@ -19,7 +19,7 @@
 
 #include <core/math/vector4f.h>
 #include <core/math/quaternion.h>
-#include <core/math/math_util.h>
+#include <core/math/anim_type.hpp>
 #include <core/game_time.h>
 
 enum class AnimLoopType {
@@ -37,9 +37,9 @@ enum class AnimVelocityType {
 	Hermite
 };
 
-using TimelineIndex = uint64_t;
 using KeyFrameTimes_t = std::vector<float>;
 using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, int)>;
+using TimelineLinks = std::unordered_map< TimelineIndex, TimelineSet >;
 
 const static TimelineIndex   tiNorm  = 1000000000;
 
@@ -290,6 +290,14 @@ public:
             animationStartTime = GameTime::getCurrTimeStamp();
             animationInitialDelay = _startTimeOffset;
             bIsPlaying = true;
+            bForceOneFrameOnly = false;
+        }
+
+        void playOneFrame( float _startTimeOffset = 0.0f ) {
+            animationStartTime = GameTime::getCurrTimeStamp();
+            animationInitialDelay = _startTimeOffset;
+            bIsPlaying = true;
+            bForceOneFrameOnly = true;
         }
 
         void update() {
@@ -300,6 +308,10 @@ public:
             bIsPlaying = false;
             for ( auto k : timelines ) {
                 bIsPlaying |= tl.update( k, timeElapsed );
+            }
+            if ( bForceOneFrameOnly ) {
+                bIsPlaying = false;
+                bForceOneFrameOnly = false;
             }
         }
 
@@ -322,6 +334,7 @@ public:
         float animationInitialDelay = 0.0f;
         float timeElapsed = -1.0f;
         bool bIsPlaying = false;
+        bool bForceOneFrameOnly = false;
     };
 
     using TimelineGroupMap = std::unordered_map<std::string, TimelineGroup>;
@@ -335,6 +348,12 @@ public:
     static void play( const std::string & _groupName, float _startTimeOffset = 0.0f ) {
         if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
             it->second.play( _startTimeOffset );
+        }
+    }
+
+    static void playOneFrame( const std::string & _groupName, float _startTimeOffset ) {
+        if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+            it->second.playOneFrame( _startTimeOffset );
         }
     }
 
@@ -355,17 +374,30 @@ public:
     static const TimelineGroupMap& Groups() { return timelineGroups; }
 
     template <typename T>
-    static void add( const std::string& _group, AnimValue<T> _source, const KeyFramePair<T>& _keys ) {
-        auto ki = timelines.add( _source, _keys );
+    static TimelineIndex add( const std::string& _group, AnimValue<T> _source, const KeyFramePair<T>& _keys ) {
         if ( const auto& it = timelineGroups.find(_group); it == timelineGroups.end() ) {
             timelineGroups.emplace( _group, TimelineGroup{} );
         }
+        auto ki = timelines.add( _source, _keys );
         timelineGroups[_group].addTimeline(ki);
+        return ki;
+    }
+
+    template <typename T>
+    static void addLinked( const std::string& _group, std::shared_ptr<T> _linkable, float _time ) {
+
+        auto lKeys = _linkable->addKeyFrame( _group, _time );
+        for ( const auto& k : lKeys ) {
+            for ( const auto& m : lKeys ) {
+                if ( k != m ) links[k].emplace(m);
+            }
+        }
     }
 
 private:
     static TimelineGroupMap timelineGroups;
     static TimelineMapSpec  timelines;
+    static TimelineLinks    links;
 
     template <typename U>
     friend class TimelineStream;

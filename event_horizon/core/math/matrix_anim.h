@@ -2,6 +2,7 @@
 
 #include "vector3f.h"
 #include "quaternion.h"
+#include <core/math/anim_type.hpp>
 
 class MatrixAnim {
 public:

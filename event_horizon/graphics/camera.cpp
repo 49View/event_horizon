@@ -361,7 +361,6 @@ Camera::Camera( const std::string& cameraName, CameraState _state, const Rect2f&
 	mNearClipPlaneZ = 0.01f;
 	mFarClipPlaneZ = 160.0f;
 
-	mTarget = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Target" );
 	qangle = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, Name() + "_Angle" );
 	mPos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
 
@@ -467,7 +466,7 @@ void Camera::setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Mat
 
 void Camera::lookAt( const Vector3f& posAt ) {
 	if ( !mbEnableInputs ) return;
-	mTarget->value = posAt;
+//	mTarget->value = posAt;
 }
 
 void Camera::lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay ) {
@@ -494,7 +493,6 @@ void Camera::center( const AABB& _bbox ) {
 	float bdiameter = _bbox.calcRadius();
 	Vector3f cp = { 0.0f, 0.0f, aperture + bdiameter };
 	mPos->value = cp + _bbox.centre();
-	mTarget->value = _bbox.centre();
 	qangle->value = Quaternion{Vector3f::ZERO};
 }
 
@@ -720,6 +718,13 @@ Quaternion Camera::quatAngle() const { return qangle->value; }
 
 V3fa Camera::PosAnim() { return mPos; }
 
-V3fa Camera::TargetAnim() { return mTarget; }
-
 Quaterniona Camera::QAngleAnim() { return qangle; }
+
+TimelineSet Camera::addKeyFrame( const std::string& _name, float _time ) {
+    TimelineSet ret{};
+
+    ret.emplace( Timeline::add( _name, PosAnim(),    {_time, getPosition() } ) );
+    ret.emplace( Timeline::add( _name, QAngleAnim(), {_time, quatAngle()   } ) );
+
+    return ret;
+}
