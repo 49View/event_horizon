@@ -113,13 +113,13 @@ public:
     }
 
     bool deleteKey( size_t _index ) {
-        assert( _index < keyframes.size() );
+        if ( _index >= keyframes.size() ) return false;
         keyframes.erase( keyframes.begin() + _index );
         return keyframes.empty();
     }
 
     void updateKeyTime( size_t _index, float _time ) {
-        assert( _index < keyframes.size() );
+        if ( _index >= keyframes.size() ) return;
         keyframes[_index].time = _time;
         sortOnTime();
     }

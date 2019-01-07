@@ -200,7 +200,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
                 ImGui::Begin("", nullptr, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoScrollbar);
                 ImGui::BeginChild(sname.str().c_str());
                 std::ostringstream ss{};
-                for ( size_t t = 1; t < stride; t++ ) {
+                for ( int t = 1; t < stride; t++ ) {
                     ss << " x: " << _values[kStrideIndex+t];
                 }
                 auto s = ss.str();
