@@ -59,7 +59,7 @@ class Camera : public Animable {
 public:
 	Camera( const std::string& cameraName, CameraState _state, const Rect2f& _viewport );
     virtual ~Camera() = default;
-    
+
     void setFoV( float fieldOfView );
 	void setPosition( const Vector3f& pos );
 	void setQuat( const Quaternion& a );

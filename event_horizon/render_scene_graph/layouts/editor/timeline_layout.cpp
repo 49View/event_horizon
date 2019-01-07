@@ -17,6 +17,8 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     auto tgroups = Timeline::Groups();
     auto gsize = tgroups.size();
 
+    ImGuiIO& io = ImGui::GetIO();
+
     ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin( "Timeline",  nullptr, ImGuiWindowFlags_NoCollapse );
@@ -84,8 +86,6 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
         return; // Early out, slight crap but inline with ImGui
     }
 
-    ImGuiIO& io = ImGui::GetIO();
-
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
     ImVec2 canvas_size = ImGui::GetContentRegionAvail();        // Resize canvas to what's available
@@ -105,18 +105,33 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     auto bottomLineFrame = topLineFrame + ImVec2( canvas_size.x - titlesWidth, frameLinesHeight );
     ImU32 frameLineCol = 0xFF606060;
 
+    static bool bStartCellDragging = false;
+    static uint64_t ktimelineDragging = 0;
+    static uint64_t ktimelineDraggingIndex = 0;
+
+    if ( !ImGui::IsMouseDown(0) ) bStartCellDragging = false;
+
+    auto seCurrentFrameFromMouseX = [&]() {
+        currentFrame = std::max(0, static_cast<int>(( io.MousePos.x - topLineFrame.x) / currFrameWidth));
+    };
+
     auto drawFrameLine = [&]( int currentFrame, ImU32 col ) {
         float currFrameX = canvas_pos.x + titlesWidth + currentFrame*currFrameWidth;
-        ImVec2 currFrameTop = ImVec2(currFrameX, canvas_pos.y);
         ImVec2 currFrameTopLong = ImVec2(currFrameX, canvas_pos.y);
         draw_list->AddRectFilled( currFrameTopLong + ImVec2(-1,0), currFrameTopLong + ImVec2(2, canvas_size.y+frameLinesHeight), col, 0);
+    };
+
+    auto isDragging = [&]( uint64_t _k, uint64_t _kc ) -> bool {
+        return ( ktimelineDragging == _k) &&
+                ( ktimelineDraggingIndex == _kc);
+
     };
 
     ImRect lineFramesContainer{ topLineFrame, bottomLineFrame };
     if ( lineFramesContainer.Contains(io.MousePos) ) {
         frameLineCol = 0xFFBFBF00;
         if ( ImGui::IsMouseDown(0) ) {
-            currentFrame = static_cast<int>(( io.MousePos.x - topLineFrame.x) / currFrameWidth);
+            seCurrentFrameFromMouseX();
             Timeline::playOneFrame(current_item, currframeToTime() );
         }
     }
@@ -138,13 +153,20 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     // current frame
     drawFrameLine( currentFrame, 0x7F40A0FF );
 
+    if ( bStartCellDragging && ImGui::IsMouseDown(0) ) {
+        auto lcf = currentFrame;
+        seCurrentFrameFromMouseX();
+        if ( lcf != currentFrame )
+            Timeline::updateKeyTime( current_item, ktimelineDragging, ktimelineDraggingIndex, currframeToTime() );
+    }
+
     float cellHeight = 20.0f;
     int counter = 0;
     auto cellMargin = ImVec2(1,2);
     auto textMargin = ImVec2(3,2);
     auto cellBlock = ImVec2(currFrameWidth, cellHeight) - cellMargin;
     Timeline::visitGroup( current_item, [&]( const std::string& _name, const std::vector<float>& _values,
-                                             TimelineIndex _valueType, int stride ) {
+                                             TimelineIndex _k, TimelineIndex _valueType, int stride ) {
         auto kpos = ImVec2(0.0f, counter*cellHeight);
         auto rowNameTop = mainTop + ImVec2( 0.0f, cellHeight*counter );
         auto rowNameBottom = rowNameTop + ImVec2(titlesWidth, cellHeight );
@@ -160,29 +182,43 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
         draw_list->AddLine( lineBreakTop, lineBreakTop+ImVec2(canvas_size.x, 0.0f), 0xFF909040, 1);
         size_t keyframeCount = _values.size() / stride;
         for ( size_t kc = 0; kc < keyframeCount; kc++ ) {
-            auto keyframe = _values[kc*stride];
+            auto kStrideIndex = kc*stride;
+            auto keyframe = _values[kStrideIndex];
             auto kposOff = kpos + ImVec2( keyframe * secondMult, 0.0f);
 
             auto lTop = topTimeline + kposOff + cellMargin;
-            switch (_valueType) {
-                case tiFloatIndex:
-                    draw_list->AddText( topTimeline + kposOff, 0xFF0F0FFF, "F");
+            auto lBottom = lTop + cellBlock;
+
+            ImRect frameRect{ lTop, lBottom };
+            ImU32 cellCol = 0xFF4040AF;
+            if ( frameRect.Contains(io.MousePos) ) {
+                cellCol = 0xFFFFFF00;
+                ImGui::SetNextWindowPos( lTop + ImVec2(10.0f, 0.0f) );
+                ImGui::SetNextWindowSize( ImVec2(200,cellHeight) );
+                std::ostringstream sname;
+                sname << _name << _values[kStrideIndex];
+                ImGui::Begin("", nullptr, ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoScrollbar);
+                ImGui::BeginChild(sname.str().c_str());
+                std::ostringstream ss{};
+                for ( size_t t = 1; t < stride; t++ ) {
+                    ss << " x: " << _values[kStrideIndex+t];
+                }
+                auto s = ss.str();
+                ImGui::TextColored( {1.0f, 1.0f, 1.0f, 1.0f}, "%s", s.c_str() );
+                ImGui::EndChild();
+                ImGui::End();
+                if ( ImGui::IsMouseClicked(1) ) {
+                    Timeline::deleteKey( current_item, _k, kc );
                     break;
-                case tiV2fIndex:
-                    draw_list->AddText( topTimeline + kposOff, 0xFF0F0FFF, "KK");
-                    break;
-                case tiV3fIndex:
-                    draw_list->AddRectFilled( lTop, lTop + cellBlock, 0xFF4040AF, 0);
-                break;
-                case tiV4fIndex:
-                    draw_list->AddText( topTimeline + kposOff, 0xFF0F0FFF, "KKKK");
-                    break;
-                case tiQuatIndex:
-                    draw_list->AddRectFilled( lTop, lTop + cellBlock, 0xFFA040AF, 0);
-                    break;
-                default:
-                    break;
+                }
+                if ( ImGui::IsMouseDown(0) ) {
+                    bStartCellDragging = true;
+                    ktimelineDragging = _k;
+                    ktimelineDraggingIndex = kc;
+                }
             }
+            if ( isDragging(_k, kc) )  cellCol = 0xFFFFFF00;
+            draw_list->AddRectFilled( lTop, lBottom, cellCol, 0);
         }
         counter++;
     } );

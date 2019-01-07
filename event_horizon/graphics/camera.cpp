@@ -728,3 +728,4 @@ TimelineSet Camera::addKeyFrame( const std::string& _name, float _time ) {
 
     return ret;
 }
+

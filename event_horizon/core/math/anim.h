@@ -38,7 +38,7 @@ enum class AnimVelocityType {
 };
 
 using KeyFrameTimes_t = std::vector<float>;
-using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, int)>;
+using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, TimelineIndex, int)>;
 using TimelineLinks = std::unordered_map< TimelineIndex, TimelineSet >;
 
 const static TimelineIndex   tiNorm  = 1000000000;
@@ -56,6 +56,29 @@ constexpr static TimelineIndex   tiV3fIndex     = tiV3f   / tiNorm;
 constexpr static TimelineIndex   tiV4fIndex     = tiV4f   / tiNorm;
 constexpr static TimelineIndex   tiQuatIndex    = tiQuat  / tiNorm;
 constexpr static TimelineIndex   tiIntIndex     = tiInt   / tiNorm;
+
+namespace TLU {
+
+inline static TimelineIndex getTI( inta _source ) {
+    return tiInt + _source->UID();
+}
+inline static TimelineIndex getTI( floata _source ) {
+    return tiFloat + _source->UID();
+}
+inline static TimelineIndex getTI( V2fa _source ) {
+    return tiV2f + _source->UID();
+}
+inline static TimelineIndex getTI( V3fa _source ) {
+    return tiV3f + _source->UID();
+}
+inline static TimelineIndex getTI( V4fa _source ) {
+    return tiV4f + _source->UID();
+}
+inline static TimelineIndex getTI( Quaterniona _source ) {
+    return tiQuat + _source->UID();
+}
+
+}
 
 template <typename T>
 struct KeyFramePair {
@@ -87,6 +110,18 @@ public:
         keyframes.emplace_back( _timeAt, _value );
         sortOnTime();
         return *this;
+    }
+
+    bool deleteKey( size_t _index ) {
+        assert( _index < keyframes.size() );
+        keyframes.erase( keyframes.begin() + _index );
+        return keyframes.empty();
+    }
+
+    void updateKeyTime( size_t _index, float _time ) {
+        assert( _index < keyframes.size() );
+        keyframes[_index].time = _time;
+        sortOnTime();
     }
 
     bool getKeyFrameIndexAt( float _timeElapsed, uint64_t& _index, float& _delta ) {
@@ -161,8 +196,8 @@ public:
         }
     }
 
-    void visit( AnimVisitCallback _callback, TimelineIndex _valueType ) {
-        _callback(Name(), dump(), _valueType, strideDumpForType(_valueType) );
+    void visit( AnimVisitCallback _callback, TimelineIndex _k, TimelineIndex _valueType ) {
+        _callback(Name(), dump(), _k, _valueType, strideDumpForType(_valueType) );
     }
 
     std::vector<float> dump() const {
@@ -242,6 +277,8 @@ struct TimelineMapSpec {
     void visit( TimelineIndex _k,  AnimVisitCallback _callback );
     bool update( TimelineIndex _k, float _timeElapsed );
     bool isActive( TimelineIndex _k ) const;
+    bool deleteKey( TimelineIndex _k, uint64_t _index );
+    void updateKeyTime( TimelineIndex _k, uint64_t _index, float _time );
 
 #define addTimeLineMapValue(tmt) auto it = tmt.find(ti); \
     if ( it == tmt.end() ) { \
@@ -375,17 +412,33 @@ public:
 
     template <typename T>
     static TimelineIndex add( const std::string& _group, AnimValue<T> _source, const KeyFramePair<T>& _keys ) {
-        if ( const auto& it = timelineGroups.find(_group); it == timelineGroups.end() ) {
-            timelineGroups.emplace( _group, TimelineGroup{} );
-        }
+        addGroupIfEmpty(_group);
         auto ki = timelines.add( _source, _keys );
         timelineGroups[_group].addTimeline(ki);
         return ki;
     }
 
+    static bool deleteKey( const std::string& _group, TimelineIndex _ti, uint64_t _index ) {
+        auto ki = timelines.deleteKey(_ti, _index );
+        if ( const auto& linkedKeys = links.find(_ti); linkedKeys != links.end() ) {
+            for ( const auto& lk : linkedKeys->second ) {
+                ki |= timelines.deleteKey(lk, _index );
+            }
+        }
+        return ki;
+    }
+
+    static void updateKeyTime( const std::string& _group, TimelineIndex _ti, uint64_t _index, float _time ) {
+        timelines.updateKeyTime(_ti, _index, _time );
+        if ( const auto& linkedKeys = links.find(_ti); linkedKeys != links.end() ) {
+            for ( const auto& lk : linkedKeys->second ) {
+                timelines.updateKeyTime(lk, _index, _time );
+            }
+        }
+    }
+
     template <typename T>
     static void addLinked( const std::string& _group, std::shared_ptr<T> _linkable, float _time ) {
-
         auto lKeys = _linkable->addKeyFrame( _group, _time );
         for ( const auto& k : lKeys ) {
             for ( const auto& m : lKeys ) {
@@ -394,6 +447,17 @@ public:
         }
     }
 
+    template <typename T>
+    static void deleteLinked( const std::string& _group, std::shared_ptr<T> _linkable, float _time ) {
+        _linkable->deleteKeyFrame( _group, _time );
+    }
+
+private:
+    static void addGroupIfEmpty( const std::string& _group ) {
+        if ( const auto& it = timelineGroups.find(_group); it == timelineGroups.end() ) {
+            timelineGroups.emplace( _group, TimelineGroup{} );
+        }
+    }
 private:
     static TimelineGroupMap timelineGroups;
     static TimelineMapSpec  timelines;
