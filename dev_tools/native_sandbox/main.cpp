@@ -85,13 +85,13 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
 
         NSVGimage* image = nsvgParse( const_cast<char*>(svgString.c_str()), "pc", 96 );
         Rect2f lbbox = Rect2f::INVALID;
-        std::vector<Vector2f> rawPoints;
+        std::vector<std::vector<Vector2f>> rawPoints;
         int subDivs = 4;
         for ( auto shape = image->shapes; shape != NULL; shape = shape->next ) {
             LOGR("Shape %s", shape->id );
             for ( auto path = shape->paths; path != NULL; path = path->next ) {
                 LOGR("    Path, points %d", path->npts );
-                rawPoints.clear();
+                std::vector<V2f> pathPoints;
                 for ( auto i = 0; i < path->npts - 1; i += 3 ) {
                     float *p = &path->pts[i * 2];
                     for ( int s = 0; s < subDivs + 1; s++ ) {
@@ -99,19 +99,26 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
                         Vector2f pi = interpolateBezier( Vector2f{ p[0], p[1] }, Vector2f{ p[2], p[3] },
                                                          Vector2f{ p[4], p[5] }, Vector2f{ p[6], p[7] }, t );
                         pi *= 0.10f;
-                        rawPoints.push_back( pi );
+                        pathPoints.push_back( pi );
                         lbbox.expand( pi );
                     }
                 }
-                GB{ ProfileBuilder{0.015f, 6.0f}, XZY::C(rawPoints,0.0f) }.ff(FollowerFlags::WrapPath).col(Color4f::AQUAMARINE).build(_p->RSG());
+                rawPoints.emplace_back( pathPoints );
             }
         }
-        rawPoints.pop_back();
+//        rawPoints.pop_back();
         nsvgDelete( image );
+
+        std::vector<GeomAssetSP> logoGeoms;
+        logoGeoms.reserve( rawPoints.size());
+        for ( const auto& points : rawPoints ) {
+            logoGeoms.emplace_back( GB{ ProfileBuilder{0.015f, 6.0f}, XZY::C(points,0.0f) }.ff(FollowerFlags::WrapPath).col(Color4f::FTORGB(42.0f, 144.0f, 247.0f)).buildr(_p->RSG()) );
+        }
 
         auto c = _p->CM().getCamera(Name::Foxtrot);
         c->setPosition( Vector3f{0.0f, 1.0f, 3.0f} );
 
+        Timeline::addLinked("None", logoGeoms[0], 0.0f );
 //        auto cube = GB{ ShapeType::Cube }.buildr(_p->RSG());
 //        auto pin = GB{ GeomBuilderType::file, "pin" }.buildr(_p->RSG());
 //        auto text = UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).buildr(_p->RSG());

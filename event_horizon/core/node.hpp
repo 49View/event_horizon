@@ -12,6 +12,7 @@
 #include "core/math/matrix_anim.h"
 #include "core/math/rect2f.h"
 #include "core/math/aabb.h"
+#include "core/math/anim.h"
 #include "core/uuid.hpp"
 #include "core/observable.h"
 #include "core/serialization.hpp"
@@ -41,13 +42,14 @@ enum class SerializeOutputFormat {
 inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { return (2040 * 1000000) + dataVersion; }
 
 template <typename D>
-class Node : public ObservableShared<Node<D>>, public std::enable_shared_from_this<Node<D>>{
+class Node : public Animable, public ObservableShared<Node<D>>, public std::enable_shared_from_this<Node<D>>{
 public:
     Node() {
         mHash = UUIDGen::make();
         mName = "Default";
         mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
     }
+    virtual ~Node() = default;
 
     explicit Node( const std::string& _name ) : Node() {
         mName = _name;
@@ -68,6 +70,16 @@ public:
         std::shared_ptr<DeserializeBin> reader = std::make_shared<DeserializeBin>( _data, D::Version() );
         D::gatherDependencies( reader );
         deserialize( reader );
+    }
+
+    TimelineSet addKeyFrame( const std::string& _name, float _time ) override {
+        TimelineSet ret{};
+
+        ret.emplace( Timeline::add( _name, mTRS.pos  , {_time, mTRS.Pos()} ) );
+        ret.emplace( Timeline::add( _name, mTRS.rot  , {_time, mTRS.Rot()} ) );
+        ret.emplace( Timeline::add( _name, mTRS.scale, {_time, mTRS.Scale()} ) );
+
+        return ret;
     }
 
     UUID Hash() const { return mHash; }

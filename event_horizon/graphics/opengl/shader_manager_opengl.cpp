@@ -34,7 +34,6 @@ ShaderManager::ShaderManager() {
     allocateProgram( ShaderProgramDesc{ S::IBL_BRDF }.vsh( "vertex_shader_brdf" ).fsh( "plain_brdf" ));
     allocateProgram( ShaderProgramDesc{ S::SH }.vsh( "vertex_shader_3d_sh" ).fsh( "plain_sh" ));
     allocateProgram( ShaderProgramDesc{ S::SH_NOTEXTURE }.vsh( "vertex_shader_3d_sh_notexture" ).fsh( "plain_sh_notexture" ));
-    allocateProgram( ShaderProgramDesc{ S::CUSTOM_2 }.vsh( "vertex_shader_blitcopy" ).fsh( "st_clouds" ));
 }
 
 void ShaderManager::allocateProgram( const ShaderProgramDesc& _pd ) {
@@ -46,7 +45,6 @@ void ShaderManager::allocateProgram( const ShaderProgramDesc& _pd ) {
     allocateShader( _pd.geometryShader, Shader::TYPE_GEOMETRY_SHADER );
     allocateShader( _pd.fragmentShader, Shader::TYPE_FRAGMENT_SHADER );
     allocateShader( _pd.computeShader, Shader::TYPE_COMPUTE_SHADER );
-
 }
 
 
