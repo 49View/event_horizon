@@ -130,7 +130,7 @@ void main()
         0.758                           // Mie preferred scattering direction
     );
 
-    color = 1.0 - exp(-1.0 * color*u_sunHDRMult*0.5);
+    color = vec4(1.0);// - exp(-1.0 * color*u_sunHDRMult*0.5);
     color.w = 1.0;
     return;
 }

@@ -135,7 +135,7 @@ vec4 render( in vec3 ro, in vec3 rd, in ivec2 px )
 void main()
 {
     vec2 iResolution = vec2(1280,780);
-    vec2 p = (-iResolution.xy + 2.0*v_texCoord.xy)/ iResolution.y;
+    vec2 p = vec2(-iResolution.xy + 2.0*v_texCoord.xy)/ iResolution.y;
 
     vec2 m = vec2(0.0);//iMouse.xy/iResolution.xy;
     

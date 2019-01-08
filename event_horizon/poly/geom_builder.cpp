@@ -123,7 +123,7 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
         if ( builderType == GeomBuilderType::file ) {
             addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
         } else {
-            addDependency<MaterialBuilder>( materialName, materialType, shaderName, sg.ML());
+            addDependency<MaterialBuilder>( materialName, materialType, shaderName, materialPropeties, sg.ML());
             if ( builderType == GeomBuilderType::follower ) {
                 addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
             }
@@ -134,7 +134,7 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg ) {
-    auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName ));
+    auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName, materialPropeties ));
     elem->Data( gb->m(mat).build() );
     elem->GHType(gt);
 }

@@ -9,6 +9,7 @@
 #include "core/image_constants.h"
 
 struct MaterialBuilder;
+struct MaterialProperties;
 struct ColorBuilder;
 class ImageDepencencyMaker;
 
@@ -18,7 +19,7 @@ public:
     void dump() const;
     bool virtual add( const MaterialBuilder& pb, std::shared_ptr<Material> _material );
     std::shared_ptr<Material> get( const std::string& _key );
-    std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey );
+    std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey, const MaterialProperties& _mp );
     std::vector<std::shared_ptr<Material>> list() const;
     void TL( ImageDepencencyMaker* _tl ) { tl = _tl; }
     ImageDepencencyMaker* TL() { return tl; }
@@ -38,7 +39,8 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
         }
     }
 
-    MaterialBuilder( const std::string& _name, const MaterialType _mt, const std::string& _sn = "" );
+    MaterialBuilder( const std::string& _name, MaterialType _mt, const std::string& _sn = "" );
+    MaterialBuilder( const std::string& _name, MaterialType _mt, const std::string& _sn, const MaterialProperties& _p );
     void makeDefault( DependencyMaker& _md );
     void makeDirect( DependencyMaker& _md );
     void publish() const;

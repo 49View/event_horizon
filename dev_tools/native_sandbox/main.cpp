@@ -79,7 +79,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
     _layout->addBox( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 0.5f, CameraControls::Fly );
     _layout->addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-0.2f, 1.0f );
 
-    _layout->addBox( SceneLayoutDefaultNames::Timeline, 0.0f, 1.0f, 1.0f-0.5f, 1.0-0.2f );
+    _layout->addBox( SceneLayoutDefaultNames::Timeline, 0.0f, 1.0f, 1.0f-0.5f, 1.0f-0.2f );
 
     _p->postActivate( [](Scene* _p) {
 
@@ -103,7 +103,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
                         lbbox.expand( pi );
                     }
                 }
-                GB{ ProfileBuilder{0.015f, 6.0f}, XZY::C(rawPoints,0.0f) }.ff(FollowerFlags::WrapPath).build(_p->RSG());
+                GB{ ProfileBuilder{0.015f, 6.0f}, XZY::C(rawPoints,0.0f) }.ff(FollowerFlags::WrapPath).col(Color4f::AQUAMARINE).build(_p->RSG());
             }
         }
         rawPoints.pop_back();
@@ -112,7 +112,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
         auto c = _p->CM().getCamera(Name::Foxtrot);
         c->setPosition( Vector3f{0.0f, 1.0f, 3.0f} );
 
-        auto cube = GB{ ShapeType::Cube }.buildr(_p->RSG());
+//        auto cube = GB{ ShapeType::Cube }.buildr(_p->RSG());
 //        auto pin = GB{ GeomBuilderType::file, "pin" }.buildr(_p->RSG());
 //        auto text = UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).buildr(_p->RSG());
 

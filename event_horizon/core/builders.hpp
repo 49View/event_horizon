@@ -180,6 +180,14 @@ protected:
         }
     }
 
+    template <typename BD, typename T, typename S, typename P>
+    void addDependency( const std::string& _dname, const T& _type, const S& _subtype, const P& _params, DependencyMaker& _md ) {
+        if ( depExistTest(_dname, _md) ) {
+            BD{ _dname, _type, _subtype, _params }.build( _md );
+            push_dep<BD>( _dname );
+        }
+    }
+
     virtual void createDependencyList( DependencyMaker& _md ) = 0;
 
 protected:

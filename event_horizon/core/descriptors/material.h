@@ -84,9 +84,14 @@ JSONDATA_R( MaterialColor, name, color, category, brand, code, application )
     static uint64_t Version() { return 1000; }
 };
 
-JSONDATA_R( MaterialProperties, pixelTexelRatio )
-    float pixelTexelRatio = 0.04f;
-    float cost = 1.0f;
+JSONDATA_R( MaterialProperties, pixelTexelRatio, pigment )
+    float   pixelTexelRatio = 0.04f;
+    float   cost = 1.0f;
+    Color4f pigment = Color4f::WHITE;
+
+    bool operator==( const MaterialProperties& rhs ) const {
+        return rhs.pigment == pigment && pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost;
+    }
 };
 
 class Material {
@@ -101,13 +106,12 @@ public:
     }
 
     Material( MaterialType _type, const std::string& name, const std::string& shaderName,
-    const std::string& textureName,
-    const Color4f& color, float opacity ) : type( _type ), name( name ), shaderName(
-            shaderName ),
-    textureName( textureName ), color( color ),
-    opacity( opacity ) {}
+              const std::string& textureName, const Color4f& color, float opacity ) :
+              type( _type ), name( name ), shaderName(shaderName ), textureName( textureName ), color( color ),
+              opacity( opacity ) {}
 
     virtual std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) = 0;
+    virtual std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) = 0;
 
     Material& t( const std::string& tn ) {
         textureName = tn;
@@ -186,6 +190,14 @@ public:
         opacity = _opacityValue;
     }
 
+    const MaterialProperties& getProperties() const {
+        return properties;
+    }
+
+    void setProperties( const MaterialProperties& properties ) {
+        Material::properties = properties;
+    }
+
     void serializeDependencies( std::shared_ptr<SerializeBin> writer ) {
         writer->write( 1 );
         writer->write( dependecyTagMaterial );
@@ -229,15 +241,15 @@ public:
         deserialize( reader );
     }
 
-    virtual ~GenericMaterial() {
+    virtual ~GenericMaterial() = default;
 
+    std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) override {
+        return std::make_shared<GenericMaterial>( type, name, _subkey, textureName, color, opacity );
     }
 
-    virtual std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) override {
-        auto ret = std::make_shared<GenericMaterial>( type, name, _subkey, textureName, color, opacity );
-        return ret;
+    std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) override {
+        return std::make_shared<GenericMaterial>( type, name, shaderName, textureName, _mp.pigment, opacity );
     }
-
 };
 
 class PBRMaterial : public Material {
@@ -261,7 +273,7 @@ public:
         t( _plain );
     }
 
-    virtual ~PBRMaterial() {}
+    virtual ~PBRMaterial() = default;
 
     PBRMaterial& t( const std::string& _plain ) {
         type = MaterialType::PBR;
@@ -278,9 +290,15 @@ public:
         return *this;
     }
 
-    virtual std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) override {
+    std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) override {
         auto ret = std::make_shared<PBRMaterial>( name, textureName );
         ret->setShaderName( _subkey );
+        return ret;
+    }
+
+    std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) override {
+        auto ret = std::make_shared<PBRMaterial>( name, textureName );
+        ret->setColor( _mp.pigment );
         return ret;
     }
 

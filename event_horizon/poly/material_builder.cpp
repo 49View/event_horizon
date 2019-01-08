@@ -13,6 +13,14 @@ MaterialBuilder::MaterialBuilder( const std::string& _name, const MaterialType _
     defPrePosfixes();
 }
 
+MaterialBuilder::MaterialBuilder( const std::string& _name, const MaterialType _mt,
+                                  const std::string& _sn, const MaterialProperties& _p ) : ResourceBuilder( _name) {
+    materialType = _mt;
+    shaderName = _sn;
+    properties = _p;
+    defPrePosfixes();
+}
+
 void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<PBRMaterial> mat, DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
     ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDefault( *sg.TL() );
@@ -24,7 +32,7 @@ void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<PBRMaterial> mat
 }
 
 void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
-    MaterialManager& sg = static_cast<MaterialManager&>(_md);
+    auto& sg = dynamic_cast<MaterialManager&>(_md);
     auto mat = std::make_shared<PBRMaterial>("white");
     createDefaultPBRTextures( mat, sg );
 
@@ -164,9 +172,17 @@ bool MaterialManager::add( const MaterialBuilder& _pb, std::shared_ptr<Material>
     return true;
 }
 
-std::shared_ptr<Material> MaterialManager::get( const std::string& _key, const std::string& _subkey ) {
-    if ( _subkey.empty()) {
-        return materialList[_key];
+std::shared_ptr<Material> MaterialManager::get( const std::string& _key, const std::string& _subkey,
+                                                const MaterialProperties& _mp ) {
+    if ( _subkey.empty() ) {
+        auto lMat = materialList[_key];
+
+        if ( lMat->getProperties() == _mp ) {
+            return lMat;
+        } else {
+            return lMat->cloneWithNewProperties( _mp );
+        }
+
     }
     auto m = materialList.find( _key );
 
