@@ -359,7 +359,7 @@ Camera::Camera( const std::string& cameraName, CameraState _state, const Rect2f&
 	//mNearClipPlaneZ = 0.01f;
 	//mFarClipPlaneZ = 200.0f;
 	mNearClipPlaneZ = 0.01f;
-	mFarClipPlaneZ = 160.0f;
+	mFarClipPlaneZ = 100.0f;
 
 	qangle = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, Name() + "_Angle" );
 	mPos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
@@ -618,6 +618,20 @@ void Camera::updateFromInputData( const CameraInputData& mi ) {
 		}
 	}
 
+	if ( mi.isMouseTouchedDown ) {
+	    mousePickRay( mi.mousePos, mRayNear, mRayFar );
+	    AABB box{ Vector3f::ONE*-0.5f, Vector3f::ONE*0.5f};
+	    float tn = std::numeric_limits<float>::lowest();
+	    float tf = std::numeric_limits<float>::max();
+	    bool bi = box.intersectLine( mRayNear, mRayFar, tn, tf);
+	    LOGR( "Camera Ray Near: %s", mRayNear.toString().c_str() );
+	    LOGR( "Camera Ray Far: %s", mRayFar.toString().c_str() );
+	    if ( bi ) {
+			LOGR( "Intersect: %f, %f", tn, tf );
+
+	    }
+	}
+
 }
 
 void Camera::update() {
@@ -727,5 +741,17 @@ TimelineSet Camera::addKeyFrame( const std::string& _name, float _time ) {
     ret.emplace( Timeline::add( _name, QAngleAnim(), {_time, quatAngle()   } ) );
 
     return ret;
+}
+
+void Camera::getViewporti( int *viewport ) const {
+	viewport[0] = static_cast<int>( ViewPort().topLeft()[0] );
+	viewport[1] = static_cast<int>( ViewPort().topLeft()[1] );
+	viewport[2] = static_cast<int>( ViewPort().width() );
+	viewport[3] = static_cast<int>( ViewPort().height() );
+}
+
+void Camera::ViewPort( JMATH::Rect2f val ) {
+	mViewPort = val;
+	mScreenAspectRatio.setAspectRatioMatrixScreenSpace( mViewPort.ratio() );
 }
 

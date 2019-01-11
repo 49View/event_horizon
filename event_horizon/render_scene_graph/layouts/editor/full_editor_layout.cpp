@@ -64,7 +64,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
     allCallbacksEntitySetup();
 }
 
-void render( [[maybe_unused]] Scene* p ) {
+void render( Scene* p ) {
 }
 
 std::shared_ptr<SceneLayout> fullEditor() {

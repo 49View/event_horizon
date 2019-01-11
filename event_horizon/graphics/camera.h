@@ -167,12 +167,7 @@ public:
 	V3fa   		PosAnim();
 	Quaterniona QAngleAnim();
 
-	void getViewporti( int* viewport ) const {
-		viewport[0] = static_cast<int>( ViewPort().topLeft()[0] );
-		viewport[1] = static_cast<int>( ViewPort().topLeft()[1] );
-		viewport[2] = static_cast<int>( ViewPort().bottomRight()[0] );
-		viewport[3] = static_cast<int>( ViewPort().bottomRight()[1] );
-	}
+	void getViewporti( int* viewport ) const;
 
 	void mousePickRay( const Vector2f& p1, Vector3f& rayNear, Vector3f& rayFar );
 	Vector2f mousePickRayOrtho( const Vector2f& _pos );
@@ -198,10 +193,7 @@ public:
 	void Status( CameraState val ) { mStatus = val; }
 
 	JMATH::Rect2f ViewPort() const { return mViewPort; }
-	void ViewPort( JMATH::Rect2f val ) {
-		mViewPort = val;
-		mScreenAspectRatio.setAspectRatioMatrixScreenSpace( mViewPort.ratio() );
-	}
+	void ViewPort( JMATH::Rect2f val );
 
 private:
 	void translate( const Vector3f& pos );
@@ -211,6 +203,8 @@ private:
 	CameraMode mMode;
 	CameraState mStatus;
 	Frustum mFrustom;
+    Vector3f mRayNear = Vector3f::ZERO;
+    Vector3f mRayFar = Vector3f::ZERO;
 
 	float mHAngle;
 	float mVAngle;

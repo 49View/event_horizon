@@ -4,6 +4,7 @@
 #include <array>
 #include "vector4f.h"
 #include "rect2f.h"
+#include "aabb.h"
 #include "../htypes_shared.hpp"
 
 class DeserializeBin;
@@ -32,6 +33,7 @@ public:
     std::unique_ptr<int32_t[]> indices;
     int numVerts = 0;
     int32_t numIndices = 0;
+    AABB bbox3d = AABB::INVALID;
 };
 
 struct polyQuadSub {

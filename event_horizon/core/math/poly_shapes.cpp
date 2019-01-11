@@ -482,6 +482,7 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
     int t = 0;
     for ( auto& v : mesh.vertices ) {
         ret.verts[t++] = v;
+        ret.bbox3d.expand( v );
     }
     t = 0;
     for ( auto& tr : mesh.triangles ) {
