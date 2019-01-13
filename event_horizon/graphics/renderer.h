@@ -10,13 +10,11 @@
 #include "core/image_builder.h"
 #include "vertex_processing.h"
 #include "graphic_constants.h"
-#include "camera_manager.h"
 #include "shadowmap_manager.h"
 #include "render_list.h"
 #include "light_manager.h"
 
 class FontManager;
-class CameraManager;
 class Renderer;
 class CommandScriptRendererManager;
 class CommandQueue;
@@ -83,7 +81,7 @@ private:
 
 class Renderer : public DependencyMaker {
 public:
-	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, CameraManager& _cm );
+	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm );
 	virtual ~Renderer() = default;
 
 	bool exists( [[maybe_unused]] const std::string& _key ) const override { return false; };
@@ -111,7 +109,6 @@ public:
 	std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
     LightManager&   LM() { return lm; }
 	TextureManager& TM() { return tm; }
-	CameraManager&  CM() { return cm; }
 	RenderImageDependencyMaker& RIDM() { return ridm; }
 
 	std::shared_ptr<VPList> VPL( const int _bucket, std::shared_ptr<Matrix4f> m = nullptr, float alpha = 1.0f);
@@ -162,7 +159,6 @@ protected:
     CommandQueue&   cq;
 	ShaderManager&  sm;
 	TextureManager& tm;
-	CameraManager&  cm;
 	RenderImageDependencyMaker ridm;
 	RenderAnimationManager am;
 	RenderCameraManager rcm;

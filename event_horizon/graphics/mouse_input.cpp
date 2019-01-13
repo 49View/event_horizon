@@ -6,7 +6,6 @@
 #include "mouse_input.hpp"
 #include "window_handling.hpp"
 #include "core/app_globals.h"
-#include "camera_manager.h"
 
 MouseInput::MouseInput() {
 	mGesturesTaps.reserve( 100 );
@@ -24,8 +23,6 @@ void MouseInput::onTouchDown( const Vector2f& pos, UpdateSignals& _updateSignals
 	mMoveDiff = Vector2f::ZERO;
 	mRawTouchDownPos = pos;
 	mNormTouchDownPos = pos / getScreenSizef;
-	m3dUIPlaneTouchDownPos = mousePickOnUIPlane( pos, mUIPlane );
-	m2dUIPlaneTouchDownPos = mousePickOnUIPlane( pos, mUIPlane, CameraProjectionType::Orthogonal );
     notify( *this, "OnTouchDown");
 	_updateSignals.NeedsUpdate(true);
 }
@@ -36,9 +33,9 @@ void MouseInput::onTouchMove( const Vector2f& pos, UpdateSignals& _updateSignals
 		mGesturesTaps.push_back( pos );
 	}
 	if ( pos != mGesturesTaps.back() ) {
-		Vector3f p1 = mousePickOnUIPlane( mGesturesTaps.back(), mUIPlane );
-		Vector3f p2 = mousePickOnUIPlane( pos, mUIPlane );
-		mMoveDiffMousePick = p2 - p1;
+//		Vector3f p1 = mousePickOnUIPlane( mGesturesTaps.back(), mUIPlane );
+//		Vector3f p2 = mousePickOnUIPlane( pos, mUIPlane );
+//		mMoveDiffMousePick = p2 - p1;
 
 		mMoveDiff = pos - mGesturesTaps.back();
 		mGesturesTaps.push_back( pos );
@@ -119,9 +116,9 @@ void MouseInput::clearTaps() {
 void MouseInput::updateRectInput() {
 	std::lock_guard<std::mutex> lock( mInputRectLock );
 	if ( mIsRectInput && mGesturesTaps.size() > 1 && !mInputRects.empty() ) {
-		Vector3f p1 = mousePickOnUIPlane( mGesturesTaps.back(), mUIPlane );
-		Vector3f p2 = mousePickOnUIPlane( mGesturesTaps.front(), mUIPlane );
-		mInputRects.back() = Rect2f{ {p1.xy(), p2.xy()} };
+//		Vector3f p1 = mousePickOnUIPlane( mGesturesTaps.back(), mUIPlane );
+//		Vector3f p2 = mousePickOnUIPlane( mGesturesTaps.front(), mUIPlane );
+//		mInputRects.back() = Rect2f{ {p1.xy(), p2.xy()} };
 		mCanDrawRectInput = true;
 	}
 }
@@ -246,26 +243,6 @@ Vector2f MouseInput::getCurrMoveDiffNorm( YGestureInvert yInv ) const {
 
 Vector3f MouseInput::getCurrMoveDiffMousePick() const {
 	return mMoveDiffMousePick;
-}
-
-Vector3f MouseInput::mousePickOnUIPlane( const Vector2f& mousePos ) const {
-	return mousePickOnUIPlane( mousePos, mUIPlane );
-}
-
-Vector3f MouseInput::mousePickOnUIPlane( const Vector2f& mousePos, [[maybe_unused]] const Plane3f& uiPlane,
-										 CameraProjectionType pt ) const {
-	if ( pt == CameraProjectionType::Perspective ) {
-		// TODO Reimplement mousePickOnUIPlane on perspective camera
-		return Vector3f::ZERO;
-//		Vector3f nearP;
-//		Vector3f farP;
-//		rr.CM().getCamera()->mousePickRay( mousePos, nearP, farP );
-//
-//		return uiPlane.intersectLine( nearP, farP );
-	} else {
-		Vector2f posWithAspectRatio = ( mousePos * getScreenAspectRatioVector ) / getScreenSizef;
-		return Vector3f( posWithAspectRatio, 0.0f );
-	}
 }
 
 void MouseInput::setCursorType( MouseCursorType mct ) {

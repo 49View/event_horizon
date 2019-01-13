@@ -3,6 +3,9 @@
 //
 
 #include "camera_layout.h"
+
+#include <core/camera.h>
+#include "graphics/camera_rig.hpp"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
 

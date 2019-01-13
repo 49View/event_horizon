@@ -7,12 +7,14 @@
 
 #include <unordered_map>
 #include <graphics/text_input.hpp>
+#include <graphics/camera_manager.h>
 #include "core/observer.h"
 #include "core/math/vector2f.h"
 #include "core/math/rect2f.h"
 #include "core/htypes_shared.hpp"
 #include "core/game_time.h"
 #include "render_scene_graph.h"
+#include <render_scene_graph/camera_controls.hpp>
 
 class MouseInput;
 class SceneLayout;
@@ -29,6 +31,7 @@ class AABB;
 class MaterialManager;
 class TextureManager;
 class Camera;
+class CameraControl;
 class CommandScriptPresenterManager;
 
 namespace PresenterEventFunctionKey {
@@ -37,7 +40,7 @@ namespace PresenterEventFunctionKey {
 
 using PresenterUpdateCallbackFunc = std::function<void(Scene* p)>;
 using ScenePostActivateFunc = std::function<void(Scene*)>;
-using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraRig>>;
+using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 
 class Scene : public Observer<MouseInput> {
 public:
@@ -47,9 +50,10 @@ public:
 	virtual ~Scene() = default;
 
     template <typename T>
-    void addViewport( const std::string& _name, const Rect2f& _viewport, BlitType _bt ) {
+    void addViewport( const std::string& _name, const Rect2f& _viewport, CameraControls _cc, BlitType _bt ) {
         auto lRig = addTarget<T>( _name, _viewport, _bt, cm );
-        mRigs[lRig->Name()] = lRig;
+
+        mRigs[_name] = CameraControlFactory::make( _cc, lRig );
     }
 
 	template<typename T>
@@ -111,9 +115,7 @@ public:
 
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
 	void postActivate( ScenePostActivateFunc _f ) { postActivateFunc = _f; }
-	const cameraRigsMap& getRigs() const {
-		return mRigs;
-	}
+	const cameraRigsMap& getRigs() const;
 
 public:
 	static std::vector<std::string> callbackPaths;

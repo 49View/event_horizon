@@ -13,8 +13,6 @@
 #include "core/math/quaternion.h"
 #include "core/math/anim.h"
 
-const float Camera::UI_ZOOM_SCALER = 10.0f;
-
 int glhProjectf( float objx, float objy, float objz, float *modelview, float *projection, int *viewport, float *windowCoordinate ) {
 	//Transformation vectors
 	float fTempo[8];
@@ -343,11 +341,9 @@ void Frustum::calculateFromMVP( const Matrix4f& mat ) {
 	f.d = mat[15] - mat[14];
 }
 
-Camera::Camera( const std::string& cameraName, CameraState _state, const Rect2f& _viewport ) {
-	mbInitialized = false;
-	mbEnableInputs = true;
+Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) {
+	mbLocked = true;
 	Name( cameraName );
-	Status( _state );
 
 	mMode = CameraMode::Edit2d;
 	ViewPort( _viewport);
@@ -371,7 +367,9 @@ Camera::Camera( const std::string& cameraName, CameraState _state, const Rect2f&
 	mView = Matrix4f::MIDENTITY();
 	mProjection.setPerspective( mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ );
 	mMVP = Matrix4f::MIDENTITY();
-	mOrthogonal = Matrix4f::MIDENTITY();
+
+	mOrthogonal.setOrthogonalProjection();
+	mAspectRatio.setAspectRatioMatrix( mViewPort.ratio() );
 
 	setPosition( Vector3f( 0.0f, 1.0f, 0.0f ) );
 }
@@ -384,12 +382,12 @@ void Camera::ModeInc() {
 }
 
 void Camera::setFoV( float fieldOfView ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 	mFov->value = fieldOfView;
 }
 
 void Camera::setPosition( const Vector3f& pos ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 	mPos->value = pos;
 }
 
@@ -404,14 +402,15 @@ void Camera::setProjectionMatrix( const Matrix4f& val ) {
 }
 
 void Camera::translate( const Vector3f& pos ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 	Vector3f mask = LockAtWalkingHeight() ? Vector3f::MASK_UP_OUT : Vector3f::ONE;
 	setPosition( mPos->value + ( pos * mask ) );
 }
 
 void Camera::zoom2d( float amount ) {
-	//	mFov += amount;
-	if ( !mbEnableInputs ) return;
+	constexpr float UI_ZOOM_SCALER = 10.0f;
+
+	if ( !mbLocked ) return;
 	amount /= -UI_ZOOM_SCALER;
 	if ( Mode() == CameraMode::Edit2d ) {
 		mPos->value.setY(clamp(mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d));
@@ -419,7 +418,7 @@ void Camera::zoom2d( float amount ) {
 }
 
 void Camera::moveUp( float amount ) {
-	if ( amount == 0.0f || !mbEnableInputs ) return;
+	if ( amount == 0.0f || !mbLocked ) return;
 	Matrix4f invView;
 	mView.invert( invView );
 	Vector3f dir = invView.getRow( 1 ).xyz();
@@ -431,7 +430,7 @@ void Camera::moveUp( float amount ) {
 }
 
 void Camera::moveForward( float amount ) {
-	if ( amount == 0.0f || !mbEnableInputs ) return;
+	if ( amount == 0.0f || !mbLocked ) return;
 	Matrix4f invView;
 	mView.invert( invView );
 	Vector3f dir = invView.getRow( 2 ).xyz();
@@ -440,7 +439,7 @@ void Camera::moveForward( float amount ) {
 }
 
 void Camera::strafe( float amount ) {
-	if ( amount == 0.0f || !mbEnableInputs ) return;
+	if ( amount == 0.0f || !mbLocked ) return;
 	Matrix4f invView;
 	mView.invert( invView );
 	Vector3f dir = invView.getRow( 0 ).xyz();
@@ -449,7 +448,7 @@ void Camera::strafe( float amount ) {
 }
 
 void Camera::setViewMatrix( const Vector3f&pos, const Quaternion& q ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 	quatMatrix = q.rotationMatrix();// * Matrix4f( Vector3f::ZERO, M_PI_2, Vector3f::X_AXIS );
 
 	quatMatrix.invert( quatMatrix );
@@ -457,7 +456,7 @@ void Camera::setViewMatrix( const Vector3f&pos, const Quaternion& q ) {
 }
 
 void Camera::setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Matrix4f& origRotMatrix ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 	quatMatrix = q.rotationMatrix() * origRotMatrix;
 
 	//	quatMatrix.invert(quatMatrix);
@@ -465,17 +464,17 @@ void Camera::setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Mat
 }
 
 void Camera::lookAt( const Vector3f& posAt ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 //	mTarget->value = posAt;
 }
 
 void Camera::lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 //	qangle->set(angleAt);
 }
 
 void Camera::lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& up ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 	Vector3f z = normalize( eye - at );  // Forward
 	Vector3f x = normalize( cross( up, z ) ); // Right
 	Vector3f y = cross( z, x );
@@ -487,7 +486,7 @@ void Camera::lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& 
 }
 
 void Camera::center( const AABB& _bbox ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 	float aperture = ( tanf( degToRad( 90.0f - (mFov->value) ) ) ) / mViewPort.ratio();
 
 	float bdiameter = _bbox.calcRadius();
@@ -497,7 +496,7 @@ void Camera::center( const AABB& _bbox ) {
 }
 
 void Camera::pan( const Vector3f& posDiff ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 
 	mPos->value += ( Vector3f::X_AXIS * posDiff.x() );
 	mPos->value += ( Vector3f::Z_AXIS * posDiff.y() );
@@ -593,53 +592,7 @@ void Camera::mousePickRay( const Vector2f& p1, Vector3f& rayNear, Vector3f& rayF
 	rayFar = Vector3f( farPj );
 }
 
-void Camera::updateFromInputData( const CameraInputData& mi ) {
-
-	if ( !mViewPort.contains( mi.mousePos) ) return;
-
-	if ( mi.cvt != ViewportToggles::None ) {
-		toggle( mCvt, mi.cvt );
-	}
-
-	if ( Mode() == CameraMode::Edit2d ) {
-		if ( mi.isMouseTouchedDown) {
-			pan( Vector3f( mi.moveDiff * Vector2f{-1.0f, 1.0f}, 0.0f ) );
-		}
-		zoom2d(mi.scrollValue); // It's safe to call it every frame as no gesture on wheel/magic mouse
-		// will mean zero value so unchanged
-	}
-
-	if ( Mode() == CameraMode::Doom ) {
-		moveForward( mi.moveForward );
-		strafe( mi.strafe );
-		moveUp( mi.moveUp );
-		if ( mi.moveDiffSS != Vector2f::ZERO ) {
-			setQuatAngles( qangleEuler + Vector3f( mi.moveDiffSS.yx(), 0.0f ));
-		}
-	}
-
-	if ( mi.isMouseTouchedDown ) {
-	    mousePickRay( mi.mousePos, mRayNear, mRayFar );
-	    AABB box{ Vector3f::ONE*-0.5f, Vector3f::ONE*0.5f};
-	    float tn = std::numeric_limits<float>::lowest();
-	    float tf = std::numeric_limits<float>::max();
-	    bool bi = box.intersectLine( mRayNear, mRayFar, tn, tf);
-	    LOGR( "Camera Ray Near: %s", mRayNear.toString().c_str() );
-	    LOGR( "Camera Ray Far: %s", mRayFar.toString().c_str() );
-	    if ( bi ) {
-			LOGR( "Intersect: %f, %f", tn, tf );
-
-	    }
-	}
-
-}
-
 void Camera::update() {
-	if ( !mbInitialized ) {
-		mOrthogonal.setOrthogonalProjection();
-		mAspectRatio.setAspectRatioMatrix( mViewPort.ratio() );
-		mbInitialized = true;
-	}
 
 	if ( Mode() == CameraMode::Edit2d ) {
 		Quaternion qy( M_PI_2, Vector3f::X_AXIS );
@@ -717,7 +670,7 @@ void Camera::setQuat( const Quaternion& a ) {
 }
 
 void Camera::setQuatAngles( const Vector3f& a ) {
-	if ( !mbEnableInputs ) return;
+	if ( !mbLocked ) return;
 
 	qangleEuler = a;
 
@@ -726,6 +679,10 @@ void Camera::setQuatAngles( const Vector3f& a ) {
     Quaternion qx( qangleEuler.x(), Vector3f::X_AXIS );
 
     qangle->value = ( qx * qy * qz );
+}
+
+void Camera::incrementQuatAngles( const Vector3f& a ) {
+	setQuatAngles( qangleEuler + a );
 }
 
 Quaternion Camera::quatAngle() const { return qangle->value; }
@@ -753,5 +710,47 @@ void Camera::getViewporti( int *viewport ) const {
 void Camera::ViewPort( JMATH::Rect2f val ) {
 	mViewPort = val;
 	mScreenAspectRatio.setAspectRatioMatrixScreenSpace( mViewPort.ratio() );
+}
+
+Vector3f Camera::getYawVector() const {
+	return mView.getCol( 0 ).xyz();
+}
+
+Vector3f Camera::getYawVectorInv() const {
+	return -mView.getCol( 0 ).xyz();
+}
+
+Vector3f Camera::getUpVector() const {
+	return mView.getCol( 1 ).xyz();
+}
+
+Vector3f Camera::getUpVectorInv() const {
+	return -mView.getCol( 1 ).xyz();
+}
+
+Vector3f Camera::getDirection() const {
+	return mView.getCol( 2 ).xyz();
+}
+
+Vector3f Camera::getDirectionInv() const {
+	return -mView.getCol( 2 ).xyz();
+}
+
+Vector3f Camera::getDirectionRH() const {
+	Vector3f ret = mView.getCol( 2 ).xzy();
+	ret.setX( -ret.x() );
+	return ret;
+}
+
+void Camera::AspectRatioMultiplier( float val ) {
+	mAspectRatioMultiplier = val;
+}
+
+void Camera::Mode( const CameraMode& val ) {
+	mMode = val;
+}
+
+CameraMode Camera::Mode() const {
+	return mMode;
 }
 

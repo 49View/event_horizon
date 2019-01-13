@@ -1,7 +1,6 @@
 #include "renderer.h"
 
 //#include <CImg.h>
-#include "camera_manager.h"
 #include "graphic_functions.hpp"
 #include "light_manager.h"
 #include "render_list.h"
@@ -69,8 +68,8 @@ bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uin
     return true;
 }
 
-Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, CameraManager& _cm ) :
-        cq( cq ), sm( sm ), tm(tm), cm(_cm), ridm(tm) {
+Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm ) :
+        cq( cq ), sm( sm ), tm(tm), ridm(tm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);

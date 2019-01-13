@@ -29,6 +29,7 @@ class PrefilterSpecularMap;
 class PrefilterBRDF;
 class RLTarget;
 class Camera;
+struct CameraCubeMapRigBuilder;
 
 using MVList = std::map<std::string, std::shared_ptr<VPList>>;
 
@@ -404,6 +405,10 @@ public:
     std::vector<std::pair<int, int>> bucketRanges;
 
 protected:
+    void addCubeMapRig( const CameraCubeMapRigBuilder& _builder );
+    std::shared_ptr<CameraRig> addAncillaryRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb );
+protected:
+    std::map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
     bool mbTakeScreenShot = false;
     int  mTakeScreenShotDelay = 0;
     Renderer& rr;
@@ -442,7 +447,7 @@ protected:
 
 class RLTargetProbe : public RLTarget {
 public:
-    RLTargetProbe( const std::string& _cameraRig, const int _faceIndex, Renderer& _rr, int _mipmapIndex = 0 );
+    RLTargetProbe( std::shared_ptr<CameraRig> _crig, Renderer& _rr, int _mipmapIndex = 0 );
     ~RLTargetProbe() override = default;
     void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
     virtual void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
@@ -478,6 +483,7 @@ protected:
     std::shared_ptr<Skybox> createSkybox();
     void addProbes();
     void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
+    std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName );
     void addShadowMaps();
     void renderSkybox();
     void cacheShadowMapSunPosition( const Vector3f& _smsp );

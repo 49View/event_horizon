@@ -7,7 +7,7 @@
 #include <functional>
 #include <unordered_map>
 #include <core/math/rect2f.h>
-#include <graphics/camera.h>
+#include <render_scene_graph/camera_controls.hpp>
 
 struct ImGuiConsole;
 class SceneLayout;

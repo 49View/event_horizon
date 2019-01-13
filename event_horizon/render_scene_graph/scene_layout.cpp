@@ -4,6 +4,8 @@
 
 #include "scene_layout.h"
 #include <core/app_globals.h>
+#include <core/camera.h>
+#include "graphics/camera_rig.hpp"
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/layouts/editor/includes.h>
 
@@ -81,9 +83,9 @@ void SceneLayout::activate( Scene* _target ) {
 
 	for ( auto& [k,v] : boxes ) {
 		if ( v.cc == CameraControls::Plan2d ) {
-			_target->addViewport<RLTargetPlain>( k, v.updateAndGetRect(), BlitType::OnScreen );
+			_target->addViewport<RLTargetPlain>( k, v.updateAndGetRect(), v.cc, BlitType::OnScreen );
 		} else if ( v.cc == CameraControls::Walk || v.cc == CameraControls::Fly ) {
-			_target->addViewport<RLTargetPBR>( k, v.updateAndGetRect(), BlitType::OnScreen );
+			_target->addViewport<RLTargetPBR>( k, v.updateAndGetRect(), v.cc, BlitType::OnScreen );
 			if ( v.cc == CameraControls::Walk ) {
 				_target->CM().getCamera(k)->LockAtWalkingHeight(true);
 			}

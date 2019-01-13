@@ -8,6 +8,7 @@
 #include "graphics/camera_manager.h"
 #include "graphics/renderer.h"
 #include "graphics/render_list.h"
+#include "graphics/camera_rig.hpp"
 #include "graphics/window_handling.hpp"
 #include "graphics/ui/imgui_console.h"
 
@@ -173,13 +174,18 @@ void Scene::inputPollUpdate() {
 		accumulatedVelocity = 0.0003f;
 	}
 
-	cm.updateFromInputData( { cvtTggles,
-						      mi.getCurrPos(),
-	                          mi.isTouchedDown(),
-						      mi.getScrollValue(),
-							  mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
-							  mi.getCurrMoveDiffNorm().dominant(),
-							  moveForward, strafe, moveUp} );
+	CameraInputData cid{ cvtTggles,
+			  mi.getCurrPos(),
+			  mi.isTouchedDown(),
+			  mi.getScrollValue(),
+			  mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
+			  mi.getCurrMoveDiffNorm().dominant(),
+			  moveForward, strafe, moveUp};
+
+	for ( auto& [k,v] : mRigs ) {
+		v->updateFromInputData( cid );
+	}
+
     cm.update();
 }
 
@@ -243,7 +249,8 @@ const std::shared_ptr<ImGuiConsole>& Scene::Console() const {
 }
 
 void Scene::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
-    addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
+    addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), CameraControls::Fly,
+    		                  BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box);
     getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
@@ -278,5 +285,9 @@ CommandQueue& Scene::CQ() { return cq; }
 FontManager& Scene::FM() { return fm; }
 
 std::shared_ptr<Camera> Scene::getCamera( const std::string& _name ) { return CM().getCamera(_name); }
+
+const cameraRigsMap& Scene::getRigs() const {
+	return mRigs;
+}
 
 

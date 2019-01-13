@@ -10,9 +10,9 @@
 #include <mutex>
 #include "core/math/vector3f.h"
 #include "core/math/plane3f.h"
+#include "core/math/rect2f.h"
 #include "core/htypes_shared.hpp"
 #include "core/observable.h"
-#include "camera.h"
 #include "text_input.hpp"
 
 class Renderer;
@@ -32,8 +32,6 @@ public: // these are globals data accessed from low level functions on inputs et
 	void onTouchUp( const Vector2f& pos, UpdateSignals& _updateSignals );
 	void onScroll( float amount, UpdateSignals& _updateSignals );
 	void clearTaps();
-	Vector3f mousePickOnUIPlane( const Vector2f& mousePos, const Plane3f& uiPlane, CameraProjectionType pt = CameraProjectionType::Perspective ) const;
-	Vector3f mousePickOnUIPlane( const Vector2f& mousePos ) const;
 
 	bool hasBeenTappedInRect( JMATH::Rect2f& rect );
 	bool isRectInput() const { return mIsRectInput; }
@@ -71,11 +69,6 @@ public: // these are globals data accessed from low level functions on inputs et
 
 	void setCursorType( MouseCursorType mct );
 
-	Vector3f PlaneTouchDownPos3d() const { return m3dUIPlaneTouchDownPos; }
-	void PlaneTouchDownPos3d( Vector3f val ) { m3dUIPlaneTouchDownPos = val; }
-	Vector3f PlaneTouchDownPos2d() const { return m2dUIPlaneTouchDownPos; }
-	void PlaneTouchDownPos2d( Vector3f val ) { m2dUIPlaneTouchDownPos = val; }
-
 	float arrowVelocity() const { return accumulatedArrowVelocity; }
 	void leftArrowPressed( const float speed = 1.0f );
 	void rightArrowPressed( const float speed = 1.0f );
@@ -102,8 +95,6 @@ private:
 	bool  mSingleTapEvent = false;
 	Vector2f mRawTouchDownPos = Vector2f::ZERO;
 	Vector2f mNormTouchDownPos = Vector2f::ZERO;
-	Vector3f m3dUIPlaneTouchDownPos = Vector3f::ZERO;
-	Vector3f m2dUIPlaneTouchDownPos = Vector3f::ZERO;
 	Plane3f mUIPlane{ Vector3f::Z_AXIS* 1.0f, 0.0f };
 	float accumulatedArrowVelocity = 0.0f;
 	float mCurrTimeStep = 0;
