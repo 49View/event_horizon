@@ -53,6 +53,7 @@ public: // these are globals data accessed from low level functions on inputs et
 	void setPaused( bool isPaused );
 	inline bool isPaused() { return mPaused; }
 	inline bool isTouchedDown() const { return mTouchedDown; }
+	inline bool isTouchedDownFirstTime() const { return mTouchedDownFirstTime; }
 	inline float getScrollValue() const { return mScrollValue; }
 	inline const vector2fList& getGestureTaps() const { return mGesturesTaps; }
 	Vector2f getFirstTap( YGestureInvert yInv = YGestureInvert::No ) const {
@@ -91,6 +92,7 @@ private:
 	bool  mPaused = false;
 	bool  mHasTouchedUp = false;
 	bool  mTouchedDown = false;
+	bool  mTouchedDownFirstTime = false;
 	bool  mDoubleTapEvent = false;
 	bool  mSingleTapEvent = false;
 	Vector2f mRawTouchDownPos = Vector2f::ZERO;

@@ -8,6 +8,7 @@
 
 #include "graphic_constants.h"
 #include "core/formatting_utils.h"
+#include "core/uuid.hpp"
 
 class Renderer;
 
@@ -57,6 +58,7 @@ public:
     void setMaterial( std::shared_ptr<RenderMaterial> mp );
     void setMaterialWithTag( std::shared_ptr<RenderMaterial> mp, uint64_t _tag );
     void setMaterialColorWithTag( const Color4f& _color, uint64_t _tag );
+    void setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid, Color4f& _oldColor );
 
     std::shared_ptr<Matrix4f> getTransform() const {
         return mTransform;

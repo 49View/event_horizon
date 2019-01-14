@@ -143,8 +143,6 @@ private:
 	std::string mName;
 	CameraMode mMode;
 	Frustum mFrustom;
-    Vector3f mRayNear = Vector3f::ZERO;
-    Vector3f mRayFar = Vector3f::ZERO;
 
 	float mHAngle;
 	float mVAngle;

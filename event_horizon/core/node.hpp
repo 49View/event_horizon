@@ -41,6 +41,9 @@ enum class SerializeOutputFormat {
 
 inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { return (2040 * 1000000) + dataVersion; }
 
+auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
+auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
+
 template <typename D>
 class Node : public Animable, public ObservableShared<Node<D>>, public std::enable_shared_from_this<Node<D>>{
 public:

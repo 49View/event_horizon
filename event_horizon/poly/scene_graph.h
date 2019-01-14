@@ -11,6 +11,7 @@
 #include <typeinfo>
 #include <variant>
 #include "core/image_builder.h"
+#include "core/uuid.hpp"
 #include "core/command.hpp"
 #include "core/font_manager.h"
 #include "core/serializebin.hpp"
@@ -50,6 +51,7 @@ class PolySceneGraphTextureList : public ImageDepencencyMaker {
 
 using NodeVariants = std::variant<GeomAssetSP, UIAssetSP>;
 using NodeGraph = std::unordered_map<std::string, NodeVariants>;
+using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)>;
 
 class SceneGraph;
 
@@ -73,6 +75,8 @@ DEPENDENCY_MAKER_EXIST(geoms);
     void cmdCreateGeometry( const std::vector<std::string>& _params );
     void cmdLoadObject( const std::vector<std::string>& _params );
     void cmdCalcLightmaps( const std::vector<std::string>& _params );
+
+    void rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
 
     size_t countGeoms() const;
     virtual DependencyMaker& TL() = 0;

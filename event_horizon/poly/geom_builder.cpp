@@ -124,7 +124,7 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
             addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
         } else {
             addDependency<MaterialBuilder>( materialName, materialType, shaderName, materialPropeties, sg.ML());
-            if ( builderType == GeomBuilderType::follower ) {
+            if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
                 addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
             }
         }
@@ -135,7 +135,17 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg ) {
     auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName, materialPropeties ));
-    elem->Data( gb->m(mat).build() );
+    gb->m(mat);
+    elem->Data( gb->build() );
+    elem->GHType(gt);
+}
+
+void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb, SceneGraph& sg ) {
+    auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName, materialPropeties ));
+    gb->m(mat);
+    for ( const auto& c : gb->build() ) {
+        elem->addChildren( c );
+    }
     elem->GHType(gt);
 }
 
@@ -188,9 +198,13 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
                                                                              flipVector,
                                                                              mGaps,
                                                                              mFollowerSuggestedAxis ), sg );
-//            elem->Name( mProfileBuilder.Name() );
         }
         break;
+        case GeomBuilderType::svg:
+            createFromProcedural( std::make_shared<GeomDataSVGBuilder>( asciiText,
+                                                                        sg.PL().get( mProfileBuilder.Name() ) ),
+                                                                        sg );
+            break;
         case GeomBuilderType::unknown:
             LOGE( "Unknown builder type" );
             return;
@@ -204,7 +218,9 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
 
     elem->updateExistingTransform( pos, axis, scale );
 
-    sg.add( std::static_pointer_cast<GeomAsset >(elem) );
+    if ( bAddToSceneGraph ) {
+        sg.add( std::static_pointer_cast<GeomAsset >(elem) );
+    }
 }
 
 GeomBuilder& GeomBuilder::addQuad( const QuadVector3fNormal& quad,
@@ -308,6 +324,11 @@ void GeomBuilder::elemCreate() {
 GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
     elemInjFather = _hier;
     return *this;
+}
+
+GeomAssetSP GeomBuilder::buildr( DependencyMaker& _md ) {
+    build( _md );
+    return elem;
 }
 
 bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {

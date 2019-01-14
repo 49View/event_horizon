@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 29/10/2017.
 //
@@ -18,33 +20,6 @@
 #include "scene_graph.h"
 #include "di_modules.h"
 
-//class HierGeom : public Node<GeomData>, public ObservableShare<dHierGeom>, public std::enable_shared_from_this<HierGeom> {
-//public:
-//
-//    void SHReceiver( bool _isReceiver ) { mSHReceiver = _isReceiver; }
-//    bool SHReceiver() const { return mSHReceiver; }
-//    bool CastShadows() const { return mCastShadows; }
-//    void CastShadows( bool val ) { mCastShadows = val; }
-//
-//void relightSH( bool includeChildren = true ) {
-//    if ( mData != nullptr && mData->numVerts() > 0 ) {
-//        notify( shared_from_this(), "generateGeometryVP" );
-//    }
-//
-//    if ( includeChildren )
-//        for ( auto&& c : Children())
-//            c->relightSH();
-//}
-//
-//
-//private:
-//
-//    bool mSHReceiver = false;
-//    bool mCastShadows = true;
-//
-//    friend struct HierGeomRenderObserver;
-//};
-
 enum class GeomBuilderType {
     shape,
     follower,
@@ -54,6 +29,7 @@ enum class GeomBuilderType {
     asset,
     file,
     import,
+    svg,
 
     unknown
 };
@@ -187,6 +163,16 @@ public:
         return *this;
     }
 
+    GeomBuilder& pb( const ProfileBuilder& _value ) {
+        mProfileBuilder = _value;
+        return *this;
+    }
+
+    GeomBuilder& ascii( const std::string& _value ) {
+        asciiText = _value;
+        return *this;
+    }
+
     GeomBuilder& md( const MappingDirection _md ) {
         mapping.direction = _md;
         return *this;
@@ -271,12 +257,14 @@ public:
         return *this;
     }
 
+    GeomBuilder& dontAddToSceneGraph() {
+        bAddToSceneGraph = false;
+        return *this;
+    }
+
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
-    GeomAssetSP buildr( DependencyMaker& _md) {
-        build( _md );
-        return elem;
-    }
+    GeomAssetSP buildr( DependencyMaker& _md);
 
     void assemble( DependencyMaker& _md ) override;
     ScreenShotContainerPtr& Thumb();
@@ -290,6 +278,7 @@ protected:
     void preparePolyLines();
     void deserializeDependencies( DependencyMaker& _md );
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg );
+    void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb, SceneGraph& sg );
     void createFromAsset( GeomAssetSP asset );
     std::string toMetaData() const;
     std::string generateThumbnail() const;
@@ -314,6 +303,8 @@ private:
     FollowerGap mGaps = FollowerGap::Empty;
     Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
 
+    std::string asciiText;
+
     GeomMappingData mapping;
 
     std::vector<PolyOutLine> outlineVerts;
@@ -331,6 +322,8 @@ private:
 
     GeomAssetSP elem = nullptr;
     GeomAssetSP elemInjFather = nullptr;
+
+    bool bAddToSceneGraph = true;
 
     ScreenShotContainerPtr thumb;
     friend class GeomData;

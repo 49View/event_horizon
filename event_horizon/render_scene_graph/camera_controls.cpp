@@ -4,9 +4,11 @@
 
 #include "camera_controls.hpp"
 #include <core/camera.h>
+#include <core/node.hpp>
 #include <graphics/camera_rig.hpp>
 
-CameraControl::CameraControl( const std::shared_ptr<CameraRig>& cameraRig ) : mCameraRig( cameraRig ) {}
+CameraControl::CameraControl( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg ) : mCameraRig( cameraRig ),
+                                                                                                     rsg( rsg) {}
 
 void CameraControl::updateFromInputData( const CameraInputData& mi ) {
 
@@ -38,6 +40,19 @@ std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
 }
 
+void CameraControlFly::selected( const UUID& _uuid ) {
+    auto sn = selectedNodes.find( _uuid );
+    auto selectColor = sn != selectedNodes.end() ? sn->second.oldColor : Color4f::DARK_YELLOW;
+    Color4f oldColor{Color4f::WHITE};
+
+    rsg.RR().changeMaterialColorOnUUID( _uuid, selectColor, oldColor );
+    if ( sn != selectedNodes.end() ) {
+        selectedNodes.erase(sn);
+    } else {
+        selectedNodes.emplace( _uuid, Selectable{ oldColor} );
+    }
+}
+
 void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
     _cam->moveForward( mi.moveForward );
     _cam->strafe( mi.strafe );
@@ -45,14 +60,24 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
     if ( mi.moveDiffSS != Vector2f::ZERO ) {
         _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
     }
+
+    if ( mi.isMouseTouchDownFirst ) {
+        Vector3f mRayNear = Vector3f::ZERO;
+        Vector3f mRayFar = Vector3f::ZERO;
+        _cam->mousePickRay( mi.mousePos, mRayNear, mRayFar );
+
+        rsg.rayIntersect( mRayNear, mRayFar, [&]( const NodeVariants& _geom, float _near) {
+            std::visit( SelectionRecursiveLamba{*this}, _geom );
+        } );
+    }
+
 }
 
-CameraControlFly::CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig ) : CameraControl( cameraRig ) {}
-
-std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr ) {
+std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,
+                                                           RenderSceneGraph& _rsg) {
     switch ( _cc ) {
         case CameraControls::Fly:
-            return std::make_shared<CameraControlFly>(_cr);
+            return std::make_shared<CameraControlFly>(_cr, _rsg);
         default:
             return nullptr;
     };

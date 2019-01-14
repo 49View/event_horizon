@@ -29,7 +29,7 @@ struct ImageParams {
 class ImageDepencencyMaker : public DependencyMaker {
 public:
     bool add( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data );
-    bool virtual addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data ) = 0;
+    virtual bool addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data ) = 0;
     const ImageParams& ip( const std::string& _key );
     DEPENDENCY_MAKER_EXIST(imageList);
 private:

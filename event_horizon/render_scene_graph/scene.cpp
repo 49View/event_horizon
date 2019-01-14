@@ -177,6 +177,7 @@ void Scene::inputPollUpdate() {
 	CameraInputData cid{ cvtTggles,
 			  mi.getCurrPos(),
 			  mi.isTouchedDown(),
+			  mi.isTouchedDownFirstTime(),
 			  mi.getScrollValue(),
 			  mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
 			  mi.getCurrMoveDiffNorm().dominant(),
@@ -186,7 +187,7 @@ void Scene::inputPollUpdate() {
 		v->updateFromInputData( cid );
 	}
 
-    cm.update();
+	cm.update();
 }
 
 bool Scene::checkKeyPressed( int keyCode ) {

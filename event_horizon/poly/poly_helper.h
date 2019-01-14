@@ -1,4 +1,3 @@
-#include <utility>
 
 //
 // Created by Dado on 02/01/2018.
@@ -6,6 +5,7 @@
 
 #pragma once
 
+#include <utility>
 #include "core/math/poly_shapes.hpp"
 #include "core/callback_dependency.h"
 
@@ -87,24 +87,36 @@ template <typename T>
 class GeomDataBuilderBase {
 public:
     virtual std::shared_ptr<T> build() = 0;
-protected:
-    std::shared_ptr<T> elem;
 };
 
-class GeomDataBuilder : public GeomDataBuilderBase<GeomData> {
+template <typename T>
+class GeomDataBuilderBaseList {
 public:
-    virtual ~GeomDataBuilder() = default;
-protected:
-    std::shared_ptr<PBRMaterial> material;
+    virtual std::vector<std::shared_ptr<T>> build() = 0;
+};
 
-    GeomDataBuilder& m( std::shared_ptr<PBRMaterial> _material ) {
+class GeomDataBuilderBaseMaterial {
+public:
+    GeomDataBuilderBaseMaterial& m( std::shared_ptr<PBRMaterial> _material ) {
         material = _material;
         return *this;
     }
+protected:
+    std::shared_ptr<PBRMaterial> material;
     GeomMappingData mappingData;
+};
+
+class GeomDataBuilder : public GeomDataBuilderBase<GeomData>, public GeomDataBuilderBaseMaterial {
+public:
+    virtual ~GeomDataBuilder() = default;
 
     friend class GeomBuilder;
     friend class GeomData;
+};
+
+class GeomDataBuilderList : public GeomDataBuilderBaseList<GeomData>, public GeomDataBuilderBaseMaterial {
+public:
+    virtual ~GeomDataBuilderList() = default;
 };
 
 class GeomDataShapeBuilder : public GeomDataBuilder {
@@ -153,11 +165,11 @@ class GeomDataFollowerBuilder : public GeomDataBuilder {
 public:
     GeomDataFollowerBuilder( std::shared_ptr<Profile> _profile,
                              std::vector<Vector3f> _verts,
-                             const FollowerFlags f,
-                             const PolyRaise _r,
-                             const Vector2f& _flipVector,
-                             FollowerGap _gaps,
-                             const Vector3f& _suggestedAxis ) :
+                             const FollowerFlags f = FollowerFlags::Defaults,
+                             const PolyRaise _r = PolyRaise::None,
+                             const Vector2f& _flipVector = Vector2f::ZERO,
+                             FollowerGap _gaps = FollowerGap::Empty,
+                             const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
                              mProfile(_profile), mVerts( std::move( _verts )), followersFlags(f), mRaiseEnum(_r),
                              mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
     std::shared_ptr<GeomData> build() override;
@@ -196,6 +208,17 @@ protected:
     Vector2f mFlipVector = Vector2f::ZERO;
     FollowerGap mGaps = FollowerGap::Empty;
     Vector3f mSuggestedAxis = Vector3f::ZERO;
+};
+
+using GeomDataListBuilderRetType = std::vector<std::shared_ptr<GeomData>>;
+
+class GeomDataSVGBuilder : public GeomDataBuilderList {
+public:
+    GeomDataSVGBuilder( const std::string& _svgString, const std::shared_ptr<Profile> _profile ) : svgAscii(_svgString), mProfile(_profile) {}
+    GeomDataListBuilderRetType build() override;
+protected:
+    std::string svgAscii;
+    std::shared_ptr<Profile> mProfile;
 };
 
 void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution, const Vector3f& _normal, ReverseFlag rf = ReverseFlag::False );

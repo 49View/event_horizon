@@ -19,6 +19,7 @@ void MouseInput::onTouchDown( const Vector2f& pos, UpdateSignals& _updateSignals
 	mOverridedSwipe = false;
 	mCanTriggerLongTap = true;
 	mHasTouchedUp = false;
+	mTouchedDownFirstTime = (!mTouchedDown);
 	mTouchedDown = true;
 	mMoveDiff = Vector2f::ZERO;
 	mRawTouchDownPos = pos;
@@ -29,6 +30,7 @@ void MouseInput::onTouchDown( const Vector2f& pos, UpdateSignals& _updateSignals
 
 void MouseInput::onTouchMove( const Vector2f& pos, UpdateSignals& _updateSignals ) {
 	mMouseButtonStatus = MouseButtonStatusValues::MOVING;
+	mTouchedDownFirstTime = false;
 	if ( mGesturesTaps.size() == 0 ) {
 		mGesturesTaps.push_back( pos );
 	}
@@ -66,6 +68,7 @@ void MouseInput::onTouchUp( const Vector2f& pos, UpdateSignals& _updateSignals )
 	mCanTriggerLongTap = false;
 	mHasTouchedUp = true;
 	mTouchedDown = false;
+	mTouchedDownFirstTime = false;
 	// Check if a single tap was performed
 	mSingleTapEvent = false;
 	if ( mGesturesTaps.size() > 0 && mGestureTime < SINGLE_TAP_TIME_LIMIT ) {

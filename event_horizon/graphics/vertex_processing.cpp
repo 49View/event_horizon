@@ -58,3 +58,15 @@ void VPList::setMaterialColorWithTag( const Color4f& _color, uint64_t _tag ) {
     }
 }
 
+
+void VPList::setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid, Color4f& _oldColor ) {
+    if ( mVP->Name() == _uuid ) {
+        Color3f oldC = Vector3f::ONE;
+        float oldAlpha = 1.0f;
+        mVP->getMaterialConstant(UniformNames::diffuseColor, oldC );
+        mVP->getMaterialConstant(UniformNames::alpha, oldAlpha );
+        mVP->setMaterialConstant(UniformNames::diffuseColor, _color.xyz() );
+        mVP->setMaterialConstant(UniformNames::alpha, _color.w() );
+        _oldColor = Vector4f{ oldC, oldAlpha};
+    }
+}

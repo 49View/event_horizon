@@ -44,16 +44,15 @@ using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraCont
 
 class Scene : public Observer<MouseInput> {
 public:
-	Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm,
-				 TextInput& ti, MouseInput& mi, CameraManager& cm, CommandQueue& cq );
+	Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
+		   CameraManager& cm, CommandQueue& cq );
 
 	virtual ~Scene() = default;
 
     template <typename T>
     void addViewport( const std::string& _name, const Rect2f& _viewport, CameraControls _cc, BlitType _bt ) {
         auto lRig = addTarget<T>( _name, _viewport, _bt, cm );
-
-        mRigs[_name] = CameraControlFactory::make( _cc, lRig );
+        mRigs[_name] = CameraControlFactory::make( _cc, lRig, rsg );
     }
 
 	template<typename T>

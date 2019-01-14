@@ -7,9 +7,6 @@
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>
 
-auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
-auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
-
 void SceneGraph::add( NodeVariants _geom ) {
     addImpl(_geom);
     geoms[std::visit(lambdaUUID, _geom)] = _geom;
@@ -29,20 +26,6 @@ void SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<Mater
 }
 
 void SceneGraph::update() {
-//    if ( mi.isMouseTouchedDown ) {
-//        mousePickRay( mi.mousePos, mRayNear, mRayFar );
-//        AABB box{ Vector3f::ONE*-0.5f, Vector3f::ONE*0.5f};
-//        float tn = std::numeric_limits<float>::lowest();
-//        float tf = std::numeric_limits<float>::max();
-//        bool bi = box.intersectLine( mRayNear, mRayFar, tn, tf);
-//        LOGR( "Camera Ray Near: %s", mRayNear.toString().c_str() );
-//        LOGR( "Camera Ray Far: %s", mRayFar.toString().c_str() );
-//        if ( bi ) {
-//            LOGR( "Intersect: %f, %f", tn, tf );
-//
-//        }
-//    }
-
     for ( auto& [k,v] : geoms ) {
         std::visit( lambdaUpdateAnimVisitor, v );
     }
@@ -98,6 +81,34 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
 
 NodeGraph& SceneGraph::Nodes() {
     return geoms;
+}
+
+void SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback ) {
+
+    for ( const auto& [k, n] : geoms ) {
+
+        AABB box = AABB::INVALID;
+        UUID uuid{};
+        bool bPerformeOnNode = false;
+        if ( auto as = std::get_if<GeomAssetSP>(&n); as != nullptr ) {
+            box = (*as)->BBox3d();
+            uuid = (*as)->Hash();
+            bPerformeOnNode = true;
+        } else if ( auto as = std::get_if<UIAssetSP>(&n); as != nullptr ) {
+            box = (*as)->BBox3d();
+            uuid = (*as)->Hash();
+            bPerformeOnNode = true;
+        }
+
+        if ( bPerformeOnNode ) {
+            float tn = std::numeric_limits<float>::lowest();
+            float tf = std::numeric_limits<float>::max();
+            if ( box.intersectLine( _near, _far, tn, tf) ) {
+                LOGR( "Intersect: %f, %f", tn, tf );
+                _callback( n, tn );
+            }
+        }
+    }
 }
 
 void PolySceneGraph::addImpl( [[maybe_unused]] NodeVariants _geom ) {

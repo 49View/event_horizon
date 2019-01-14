@@ -95,6 +95,7 @@ public:
 
     void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
+	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
 
 	std::shared_ptr<Program> P(const std::string& _id);
 	std::shared_ptr<Texture> TD( const std::string& _id, const int tSlot = -1 );
