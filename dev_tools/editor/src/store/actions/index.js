@@ -1,6 +1,10 @@
 export {
     auth,
     logout,
-    setAuthRedirectPath,
     checkCurrentUser
 } from './auth';
+
+export {
+    loadWasm,
+    runWasm
+} from './wasm';
