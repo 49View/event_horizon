@@ -22,8 +22,7 @@ const getUserWithRolesByEmailProject = async (email,project) => {
     let dbUser = null;
     const query = [];
     
-    query.push({ $match: {"email": { $regex: email, $options: "i"}}});     // REMOVE AFTER CLIENT HEADER GUEST INTEGRATION!!!!
-    //query.push({ $match: {"email": { $regex: email, $options: "i"}, "guest": false}});
+    query.push({ $match: {"email": { $regex: email, $options: "i"}, "guest": false}});
     
     query.push({ $lookup: {"from": "users_roles", "localField": "_id", "foreignField": "userId", "as": 'roles'}});
     query.push({ $unwind: {"path": "$roles"}});
