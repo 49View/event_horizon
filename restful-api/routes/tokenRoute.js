@@ -67,6 +67,7 @@ router.post('/getToken', async (req, res, next) => {
         } else {
             tokenInfo = await authController.getToken(dbUser._id, project);
             tokenInfo.user = { "name": dbUser.name, "email": dbUser.email, "guest": dbUser.guest }
+            tokenInfo.project = project;
         }
     } catch (ex) {
         console.log('Error getting user by email, password and project', ex);

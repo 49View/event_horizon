@@ -6,6 +6,8 @@
 #include <core/camera.h>
 #include <core/node.hpp>
 #include <graphics/camera_rig.hpp>
+#include <poly/geom_data.hpp>
+#include <poly/ui_shape_builder.h>
 
 CameraControl::CameraControl( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg ) : mCameraRig( cameraRig ),
                                                                                                      rsg( rsg) {}
@@ -40,7 +42,7 @@ std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
 }
 
-void CameraControlFly::selected( const UUID& _uuid ) {
+void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs ) {
     auto sn = selectedNodes.find( _uuid );
     auto selectColor = sn != selectedNodes.end() ? sn->second.oldColor : Color4f::DARK_YELLOW;
     Color4f oldColor{Color4f::WHITE};
@@ -49,7 +51,7 @@ void CameraControlFly::selected( const UUID& _uuid ) {
     if ( sn != selectedNodes.end() ) {
         selectedNodes.erase(sn);
     } else {
-        selectedNodes.emplace( _uuid, Selectable{ oldColor} );
+        selectedNodes.emplace( _uuid, Selectable{ oldColor, _trs } );
     }
 }
 
@@ -71,6 +73,23 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
         } );
     }
 
+    for ( const auto& [k,v] : selectedNodes ) {
+        rsg.visitNode( k, lambdaUpdateNodeTransform );
+    }
+}
+
+Matrix4f CameraControlFly::getViewMatrix() {
+    return getMainCamera()->getViewMatrix();
+}
+
+Matrix4f CameraControlFly::getProjMatrix() {
+    return getMainCamera()->getProjectionMatrix();
+}
+
+void CameraControlFly::renderControls() {
+    for ( const auto& [k,n] : selectedNodes ) {
+        showGizmo( n.trs );
+    }
 }
 
 std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,

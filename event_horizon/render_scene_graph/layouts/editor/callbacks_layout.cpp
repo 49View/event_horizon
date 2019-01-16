@@ -8,6 +8,7 @@
 #include <core/util.h>
 #include <rapidjson/document.h>
 #include <core/file_manager.h>
+#include <core/http/webclient.h>
 
 #include "geom_layout.h"
 #include "material_layout.h"

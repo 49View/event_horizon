@@ -210,6 +210,11 @@ void Scene::notified( MouseInput& _source, const std::string& generator ) {
 
 void Scene::render() {
 	layout->render( this );
+
+	for ( auto& [k,v] : mRigs ) {
+		v->renderControls();
+	}
+
 }
 
 void Scene::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {

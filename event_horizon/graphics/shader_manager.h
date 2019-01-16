@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <core/serialization.hpp>
 
 JSONDATA(ShaderLiveUpdateMap, msg, shaders)
     std::string msg = "shaderchange";

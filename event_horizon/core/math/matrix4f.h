@@ -171,6 +171,10 @@ public:
 		return reinterpret_cast<float*>( &mRows[0] );
 	}
 
+	const float* rawPtr() const {
+		return reinterpret_cast<const float*>( &mRows[0] );
+	}
+
 	void set( int row, int col, float val ) {
 		mRows[row][col] = val;
 	}

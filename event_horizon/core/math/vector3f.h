@@ -159,7 +159,15 @@ public:
 		return mZ;
 	}
 
-	void fill( float* _set ) {
+	float* rawPtr() {
+		return &mX;
+	}
+
+	const float* rawPtr() const {
+		return reinterpret_cast<const float*>( &mX );
+	}
+
+	void fill( float* _set ) const {
 		_set[0] = mX;
 		_set[1] = mY;
 		_set[2] = mZ;

@@ -26,7 +26,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
-    uivl.loginPanelHeight = (1.0f - uivl.consoleHeight)/10.0f;
+    uivl.loginPanelHeight = (1.0f - uivl.consoleHeight)/9.0f;
     uivl.rightPanelHeight = ((1.0f - uivl.consoleHeight)/2.0f) - uivl.loginPanelHeight*0.5f;
     uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
     uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/6.f;

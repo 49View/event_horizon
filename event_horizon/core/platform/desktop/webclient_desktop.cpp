@@ -5,33 +5,32 @@
 #include <iomanip>
 #include <core/serialization.hpp>
 
-JSONDATA( LoginToken, token, expires )
-    std::string token;
-    uint64_t expires;
-};
-
 namespace Http {
 
     const std::string userBearerToken() {
         return std::string{"Bearer "} + std::string{Http::userToken()};
     }
 
-    std::shared_ptr<restbed::Request> makeRequest( const Url& url ) {
+    std::shared_ptr<restbed::Request> makeRequestBase( const Url& url ) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri(url.toString()));
         request->set_header( "Accept", "*/*" );
         request->set_header( "Host", url.hostOnly() );
         request->set_header( "Connection", "keep-alive" );
         request->set_header( "Authorization", Http::userBearerToken() );
+        request->set_header( "x-eventhorizon-guest", Http::project() );
+        return request;
+    }
+
+    std::shared_ptr<restbed::Request> makeRequest( const Url& url ) {
+        auto request = makeRequestBase(url);
         request->set_method( "GET" );
 
         return request;
     }
 
     std::shared_ptr<restbed::Request> makePostRequest( const Url& url, const char *buff, uint64_t length, HttpQuery qt) {
-        auto request = std::make_shared<restbed::Request>( restbed::Uri( url.toString()) );
+        auto request = makeRequestBase(url);
 
-        request->set_header( "Accept", "*/*" );
-        request->set_header( "Host", url.hostOnly() );
         switch (qt) {
             case HttpQuery::Binary:
                 request->set_header( "Content-Type", "application/octet-stream" );
@@ -43,8 +42,6 @@ namespace Http {
         }
         request->set_header( "Content-Length", std::to_string( length ) );
         request->set_method( "POST" );
-        request->set_header( "Connection", "keep-alive" );
-        request->set_header( "Authorization", Http::userBearerToken() );
         const restbed::Bytes bodybuffer(buff, buff + length);
         request->set_body( bodybuffer );
 
@@ -171,32 +168,7 @@ namespace Http {
         restbed::Http::async( request, {} );
     }
 
-    bool Ping() {
-        auto request = std::make_shared<restbed::Request>( restbed::Uri( "http://192.168.99.100/api/ping/" ));
-        request->set_header( "Accept", "application/json" );
-        request->set_header( "Host", "192.168.99.100" );
-
-        auto response = restbed::Http::sync( request );
-
-        auto statusCode = response->get_status_code();
-
-        return statusCode == 200;
-    }
-
     bool Result::isSuccessStatusCode() const {
         return ::isSuccessStatusCode( statusCode );
-    }
-
-    bool loginInternal( const LoginFields& _lf ) {
-        post( Url{HttpFilePrefix::gettoken}, _lf.serialize(), [](const Http::Result& res) {
-            if( res.isSuccessStatusCode() ) {
-                LoginToken lt(res.bufferString);
-                userToken( lt.token );
-            }
-
-            userLoggedIn( res.isSuccessStatusCode() );
-        } );
-
-        return hasUserLoggedIn();
     }
 }

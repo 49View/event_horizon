@@ -40,3 +40,7 @@ bool MatrixAnim::isAnimating() const {
     return pos->isAnimating || rot->isAnimating || scale->isAnimating;
 }
 
+Vector3f MatrixAnim::Euler() const {
+    return rot->value.euler();
+}
+

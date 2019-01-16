@@ -279,6 +279,14 @@ namespace EntityGroup {
 	const static std::string Geom = "geom";
 }
 
+enum class HttpUrlEncode {
+	Yes,
+	No
+};
+
+namespace Http { struct Result; }
+using ResponseCallbackFunc = std::function<void(const Http::Result&)>;
+
 // Dependencies
 
 using ddContainer = std::vector<std::string>;

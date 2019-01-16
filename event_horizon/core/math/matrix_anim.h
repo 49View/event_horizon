@@ -11,6 +11,7 @@ public:
 	void Pos( const Vector3f& val );
 
 	const Quaternion Rot() const;
+	Vector3f Euler() const;
 	void Rot( const Quaternion& val );
 
 	void RotX( const float& val );

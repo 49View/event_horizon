@@ -40,6 +40,7 @@ public:
     virtual ~CameraControl() = default;
     void updateFromInputData( const CameraInputData& mi );
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) = 0;
+    virtual void renderControls() = 0;
 
     std::shared_ptr<CameraRig> rig();
     std::shared_ptr<Camera> getMainCamera();
@@ -54,7 +55,11 @@ public:
     using CameraControl::CameraControl;
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
-    void selected( const UUID& _uuid ) override;
+    void renderControls() override;
+    void selected( const UUID& _uuid, MatrixAnim& _localTransform ) override;
+    Matrix4f getViewMatrix() override;
+    Matrix4f getProjMatrix() override;
+
 };
 
 class CameraControlFactory {

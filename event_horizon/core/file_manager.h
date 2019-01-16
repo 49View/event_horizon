@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #include "htypes_shared.hpp"
-#include "http/webclient.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
@@ -19,6 +18,8 @@ struct FileInfo {
 	uint64_t    date_modified;
 	uint64_t    size;
 };
+
+struct Url;
 
 namespace FileManager {
 

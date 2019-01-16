@@ -27,11 +27,6 @@ namespace HttpFilePrefix {
     const static std::string getnotexactname = "/get/notexact/name/";
 };
 
-enum class HttpUrlEncode {
-    Yes,
-    No
-};
-
 enum class HttpQuery {
     Binary,
     JSON,
@@ -40,11 +35,8 @@ enum class HttpQuery {
 
 struct Url;
 
-namespace Http { struct Result; }
-
 using SocketCallbackDataType = const rapidjson::Document&;
 using SocketCallbackFunc = std::function<void( SocketCallbackDataType message )>;
-using ResponseCallbackFunc = std::function<void(const Http::Result&)>;
 
 namespace Socket {
     static std::unordered_map<std::string, SocketCallbackFunc> callbacksMap;
@@ -54,6 +46,12 @@ namespace Socket {
     void emit( const std::string& _message );
     void on( const std::string& eventName, SocketCallbackFunc f );
 }
+
+JSONDATA( LoginToken, token, expires, project )
+    std::string token;
+    uint64_t expires;
+    std::string project;
+};
 
 namespace Http {
 
@@ -95,8 +93,9 @@ namespace Http {
 
         void setBuffer( const char* cbuffer, uint64_t _length ) {
             length = _length;
-            buffer = std::make_unique<unsigned char[]>( length);
-            std::memcpy( buffer.get(), cbuffer, length );
+            buffer = std::make_unique<unsigned char[]>( static_cast<size_t>(length));
+            std::memcpy( buffer.get(), cbuffer, static_cast<size_t>(length));
+            bufferString = std::string{ cbuffer, static_cast<unsigned long>(length) };
         }
 
         Result( uint64_t length = 0, int statusCode = 500 ) : length( length ), statusCode( statusCode ) {}
@@ -113,7 +112,7 @@ namespace Http {
     };
 
     bool login( const LoginFields& _lf );
-    bool loginInternal( const LoginFields& _lf );
+    void xProjectHeader( const LoginFields& _lf );
 
     void get( const Url& url, ResponseCallbackFunc callback,
               ResponseFlags rf = ResponseFlags::None );
@@ -126,8 +125,6 @@ namespace Http {
     void post( const Url& url, const uint8_p& buffer, ResponseCallbackFunc callback = nullptr );
     void post( const Url& url, const char *buff, uint64_t length, ResponseCallbackFunc callback = nullptr);
     void post( const Url& url, const std::vector<unsigned char>& buffer, ResponseCallbackFunc callback = nullptr );
-
-    bool Ping();
 
     void useLocalHost( bool _flag );
     void userLoggedIn( bool _flag );

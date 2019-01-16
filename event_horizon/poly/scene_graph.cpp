@@ -104,7 +104,6 @@ void SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
             float tn = std::numeric_limits<float>::lowest();
             float tf = std::numeric_limits<float>::max();
             if ( box.intersectLine( _near, _far, tn, tf) ) {
-                LOGR( "Intersect: %f, %f", tn, tf );
                 _callback( n, tn );
             }
         }

@@ -42,6 +42,7 @@ enum class SerializeOutputFormat {
 inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { return (2040 * 1000000) + dataVersion; }
 
 auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
+auto lambdaUpdateNodeTransform = [](auto&& arg) { arg->updateTransform();};
 auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
 
 template <typename D>
@@ -224,7 +225,8 @@ public:
         generateMatrixHierarchy( fatherRootTransform());
     }
     void updateTransform() {
-        updateTransform( Vector3f::ZERO );
+        generateLocalTransformData( mTRS.Pos(), mTRS.Rot(), mTRS.Scale());
+        generateMatrixHierarchy( fatherRootTransform());
     }
     void updateAnim() {
         if ( mTRS.isAnimating() ) {
@@ -326,6 +328,7 @@ public:
         return *(father->mLocalHierTransform.get());
     }
     Matrix4f LocalTransform() const { return mLocalTransform; }
+    Matrix4f& LocalTransform() { return mLocalTransform; }
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
 
     Vector3f position() const {

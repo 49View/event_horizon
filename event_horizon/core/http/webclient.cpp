@@ -282,14 +282,29 @@ namespace Http {
         }
     }
 
-    bool login( const LoginFields& _lf ) {
+    void xProjectHeader( const LoginFields& _lf ) {
         // NDDADO: if dev and desktop let's use localhost for easy debugging
 #ifdef USE_LOCALHOST
         Http::useLocalHost(true);
 #endif
         Http::project( _lf.project );
         Http::cacheLoginFields( _lf );
-        return loginInternal( _lf );
+    }
+
+    bool login( const LoginFields& _lf ) {
+        Http::cacheLoginFields( _lf );
+
+        post( Url{HttpFilePrefix::gettoken}, _lf.serialize(), [](const Http::Result& res) {
+            if( res.isSuccessStatusCode() ) {
+                LoginToken lt(res.bufferString);
+                userToken( lt.token );
+                project( lt.project );
+            }
+
+            userLoggedIn( res.isSuccessStatusCode() );
+        } );
+
+        return hasUserLoggedIn();
     }
 
 }

@@ -92,6 +92,13 @@ DEPENDENCY_MAKER_EXIST(geoms);
     void update();
     NodeGraph& Nodes();
 
+    template <typename T>
+    void visitNode( const UUID& _uuid, T _visitor ) {
+        if ( auto it = geoms.find(_uuid); it != geoms.end() ) {
+            std::visit(_visitor, it->second);
+        }
+    }
+
 protected:
     virtual void addImpl( NodeVariants _geom) = 0;
     virtual void changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}

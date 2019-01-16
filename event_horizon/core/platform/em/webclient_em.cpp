@@ -11,14 +11,14 @@ namespace Http {
 
     std::unordered_map<std::string, std::function<void( const Http::Result& )>> argCallbackMap;
 
-    void onSuccessWget( unsigned boh, void* arg , void* data, unsigned numBytes ) {
+    void onSuccessWget( unsigned boh, void* arg, int code, void* data, unsigned numBytes ) {
         auto ckey = reinterpret_cast<char*>(arg);
         auto skey = std::string( ckey );
-        LOGR( "[HTTP-RESPONSE] code: 200, handle %d, numBytes: %d", boh, numBytes );
+        LOGR( "[HTTP-RESPONSE] code: %d, handle %d, numBytes: %d", code, boh, numBytes );
         if ( argCallbackMap[skey] ) {
             argCallbackMap[skey]( { skey,
                                     reinterpret_cast<const char*>(data),
-                                    numBytes, 200 } );
+                                    numBytes, code } );
         }
         delete [] ckey;
     }
@@ -34,6 +34,17 @@ namespace Http {
 
     }
 
+    std::string makeHeaders() {
+        std::stringstream ss;
+
+//        ss << "Accept" << " " << "*/*" << " ";
+//        ss << "Connection" << " " << "keep-alive" << " ";
+//        ss << "Authorization" << " " <<  Http::userBearerToken() );
+        ss << "x-eventhorizon-guest" << " " << Http::project();
+
+        return ss.str();
+    }
+
     void getInternal( const Url& uri,
                       const std::function<void( const Http::Result& )> callback,
                       [[maybe_unused]] ResponseFlags rf ) {
@@ -45,6 +56,7 @@ namespace Http {
 
         emscripten_async_http_request(uri.toString().c_str(),
                                     "GET",
+                                    makeHeaders().c_str(),
                                     nullptr,
                                     0,
                                     nullptr,
@@ -66,48 +78,24 @@ namespace Http {
         char* keyToCharCPassing = new char[key.size()];
         strcpy( keyToCharCPassing, key.c_str() );
 
-        std::string contenType = "application/json; charset=utf-8";
-        switch ( qt ) {
-            case HttpQuery::Binary:
-                contenType = "application/octet-stream";
-                break;
-            default:
-                break;
-        }
+        std::string contenType = qt==HttpQuery::Binary ? "application/octet-stream" : "application/json; charset=utf-8";
 
-        emscripten_async_http_request(uri.toString().c_str(),
-                                      "POST",
-                                      buff,
-                                      static_cast<int>(length),
-                                      contenType.c_str(),
-                                      reinterpret_cast<void*>(keyToCharCPassing),
-                                      false,
-                                      onSuccessWget,
-                                      onFailWget,
-                                      onProgressWget,
-                                      true );
-
-//        emscripten::val xhr = emscripten::val::global("XMLHttpRequest").new_();
-//        xhr.call<void>( "open", std::string("POST"), uri.toString() );
-//        // NDDado: due to security reasons *Content-length* header has been blocked on modern browsers, DO NOT USE IT
-////        xhr.call<void>( "setRequestHeader", std::string("Content-length"), (int)length );
-//
-//        emscripten::val buffArray = emscripten::val::global("ArrayBuffer").new_((int)length);
-//        emscripten::val buffI8Array = emscripten::val::global("Int8Array").new_(buffArray);
-//
-//        for (uint64_t i=0; i< length; i++) {
-//            buffI8Array.call<void>( "fill", buff[i], (int)i, (int)(i+1) );
-//        }
-//        xhr.call<void>( "send", buffArray );
+        emscripten_async_http_request( uri.toString().c_str(),
+                                       "POST",
+                                       makeHeaders().c_str(),
+                                       buff,
+                                       static_cast<int>(length),
+                                       contenType.c_str(),
+                                       reinterpret_cast<void*>(keyToCharCPassing),
+                                       false,
+                                       onSuccessWget,
+                                       onFailWget,
+                                       onProgressWget,
+                                       true );
     }
 
     bool Result::isSuccessStatusCode() const {
         return ::isSuccessStatusCode( statusCode );
-    }
-
-    bool loginInternal( [[maybe_unused]] const LoginFields& _lf ) {
-        // We have a passpartout here are login in emscripten should be dealt within the browser cookies/certs
-        return true;
     }
 
 }
