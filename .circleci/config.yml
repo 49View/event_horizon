@@ -89,8 +89,12 @@ jobs:
           name: Deploy Editor to nginx as static webpage
           command: |
             s3-artifacts.sh GET editor_react.gz
+            s3-artifacts.sh GET editor.js
+            s3-artifacts.sh GET editor.wasm
             scp editor_react.gz $DROPLET_USER@$DROPLET_IP:/home/circleci/
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo tar -xvzf editor_react.gz;
+            scp editor.js $DROPLET_USER@$DROPLET_IP:/home/circleci/build/
+            scp editor.wasm $DROPLET_USER@$DROPLET_IP:/home/circleci/build/
             cd build;
             sudo rm -rf /usr/share/nginx/html/editor;
             sudo mkdir /usr/share/nginx/html/editor;
