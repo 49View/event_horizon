@@ -98,8 +98,8 @@ jobs:
             cd build;
             sudo rm -rf /usr/share/nginx/html/editor;
             sudo mkdir /usr/share/nginx/html/editor;
-            sudo cp -rf * /usr/share/nginx/html/editor'
-            sudo cp ../editor.js /usr/share/nginx/html/editor'
+            sudo cp -rf * /usr/share/nginx/html/editor;
+            sudo cp ../editor.js /usr/share/nginx/html/editor;
             sudo cp ../editor.wasm /usr/share/nginx/html/editor'
 
 
