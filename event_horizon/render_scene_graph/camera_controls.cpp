@@ -5,6 +5,7 @@
 #include "camera_controls.hpp"
 #include <core/camera.h>
 #include <core/node.hpp>
+#include <graphics/text_input.hpp>
 #include <graphics/camera_rig.hpp>
 #include <poly/geom_data.hpp>
 #include <poly/ui_shape_builder.h>
@@ -17,10 +18,6 @@ void CameraControl::updateFromInputData( const CameraInputData& mi ) {
     auto camera = mCameraRig->getMainCamera();
 
     if ( !camera->ViewPort().contains( mi.mousePos) ) return;
-
-    if ( mi.cvt != ViewportToggles::None ) {
-        toggle( mCameraRig->Cvt(), mi.cvt );
-    }
 
     updateFromInputDataImpl( camera, mi );
 
@@ -55,22 +52,63 @@ void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs ) {
     }
 }
 
+void CameraControlFly::unselect( const UUID& _uuid, const Selectable& _node ) {
+    Color4f oldColor{Color4f::WHITE};
+    rsg.RR().changeMaterialColorOnUUID( _uuid, _node.oldColor, oldColor );
+}
+
 void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
-    _cam->moveForward( mi.moveForward );
-    _cam->strafe( mi.strafe );
-    _cam->moveUp( mi.moveUp );
-    if ( mi.moveDiffSS != Vector2f::ZERO ) {
-        _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
-    }
 
-    if ( mi.isMouseTouchDownFirst ) {
-        Vector3f mRayNear = Vector3f::ZERO;
-        Vector3f mRayFar = Vector3f::ZERO;
-        _cam->mousePickRay( mi.mousePos, mRayNear, mRayFar );
+    if ( !inputIsBlockedOnSelection() ) {
+        ViewportTogglesT cvtTggles = ViewportToggles::None;
+        // Keyboards
+        if ( mi.ti.checkKeyToggleOn( GMK_1 ) ) cvtTggles |= ViewportToggles::DrawWireframe;
+        if ( mi.ti.checkKeyToggleOn( GMK_G ) ) cvtTggles |= ViewportToggles::DrawGrid;
 
-        rsg.rayIntersect( mRayNear, mRayFar, [&]( const NodeVariants& _geom, float _near) {
-            std::visit( SelectionRecursiveLamba{*this}, _geom );
-        } );
+        static float camVelocity = 1.000f;
+        static float accumulatedVelocity = .0003f;
+        float moveForward = 0.0f;
+        float strafe = 0.0f;
+        float moveUp = 0.0f;
+
+        if ( mi.ti.checkWASDPressed() != -1 ) {
+            float vel = 0.003f*GameTime::getCurrTimeStep();
+            camVelocity = vel + accumulatedVelocity;
+            if ( mi.ti.checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
+            if ( mi.ti.checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
+            if ( mi.ti.checkKeyPressed( GMK_A ) ) strafe = camVelocity;
+            if ( mi.ti.checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
+            if ( mi.ti.checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
+            if ( mi.ti.checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
+            accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
+            if ( camVelocity > 3.50f ) camVelocity = 3.50f;
+        } else {
+            accumulatedVelocity = 0.0003f;
+        }
+
+        if ( cvtTggles != ViewportToggles::None ) {
+            toggle( rig()->Cvt(), cvtTggles );
+        }
+
+        _cam->moveForward( moveForward );
+        _cam->strafe( strafe );
+        _cam->moveUp( moveUp );
+        if ( mi.moveDiffSS != Vector2f::ZERO ) {
+            _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
+        }
+
+        if ( mi.isMouseTouchDownFirst ) {
+            Vector3f mRayNear = Vector3f::ZERO;
+            Vector3f mRayFar = Vector3f::ZERO;
+            _cam->mousePickRay( mi.mousePos, mRayNear, mRayFar );
+
+            bool bHit = rsg.rayIntersect( mRayNear, mRayFar, [&]( const NodeVariants& _geom, float _near) {
+                std::visit( SelectionRecursiveLamba{*this}, _geom );
+            } );
+            if ( !bHit ) {
+                unselectAll();
+            }
+        }
     }
 
     for ( const auto& [k,v] : selectedNodes ) {
@@ -78,18 +116,15 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
     }
 }
 
-Matrix4f CameraControlFly::getViewMatrix() {
-    return getMainCamera()->getViewMatrix();
-}
-
-Matrix4f CameraControlFly::getProjMatrix() {
-    return getMainCamera()->getProjectionMatrix();
-}
-
 void CameraControlFly::renderControls() {
-    for ( const auto& [k,n] : selectedNodes ) {
-        showGizmo( n.trs );
+    for ( auto& [k,n] : selectedNodes ) {
+        showGizmo( n.trs, getMainCamera()->getViewMatrix(), getMainCamera()->getProjectionMatrix(),
+                   getMainCamera()->ViewPort() );
     }
+}
+
+bool CameraControlFly::inputIsBlockedOnSelection() const {
+    return IsAlreadyInUse() || isImGuiBusy();
 }
 
 std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,

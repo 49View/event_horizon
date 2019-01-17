@@ -76,7 +76,7 @@ DEPENDENCY_MAKER_EXIST(geoms);
     void cmdLoadObject( const std::vector<std::string>& _params );
     void cmdCalcLightmaps( const std::vector<std::string>& _params );
 
-    void rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
+    bool rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
 
     size_t countGeoms() const;
     virtual DependencyMaker& TL() = 0;

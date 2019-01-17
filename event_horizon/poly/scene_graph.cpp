@@ -83,7 +83,9 @@ NodeGraph& SceneGraph::Nodes() {
     return geoms;
 }
 
-void SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback ) {
+bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback ) {
+
+    bool ret = false;
 
     for ( const auto& [k, n] : geoms ) {
 
@@ -105,9 +107,13 @@ void SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
             float tf = std::numeric_limits<float>::max();
             if ( box.intersectLine( _near, _far, tn, tf) ) {
                 _callback( n, tn );
+                ret = true;
+                break;
             }
         }
     }
+
+    return ret;
 }
 
 void PolySceneGraph::addImpl( [[maybe_unused]] NodeVariants _geom ) {

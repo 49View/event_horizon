@@ -6,8 +6,7 @@
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/ImGuizmo.h>
 
-void showTransformGizmo(const float *cameraView, const float *cameraProjection, MatrixAnim& _trs )
-{
+void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport ) {
     static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
     static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
     static bool useSnap = false;
@@ -18,9 +17,13 @@ void showTransformGizmo(const float *cameraView, const float *cameraProjection, 
     static bool boundSizingSnap = false;
 
     ImGui::Begin("TransformGizmo");
+
     ImGuizmo::BeginFrame();
 
-    if (ImGui::IsKeyPressed(90))
+    bIsOver = ImGuizmo::IsOver();
+    bIsSelected = ImGuizmo::IsUsing();
+
+    if (ImGui::IsKeyPressed(87))
         mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
     if (ImGui::IsKeyPressed(69))
         mCurrentGizmoOperation = ImGuizmo::ROTATE;
@@ -38,6 +41,9 @@ void showTransformGizmo(const float *cameraView, const float *cameraProjection, 
     float matrixTranslation[3];
     float matrixRotation[3];
     float matrixScale[3];
+
+//    ImGuizmo::DecomposeMatrixToComponents( matrix, matrixTranslation, matrixRotation, matrixScale );
+
     _trs.Pos().fill( matrixTranslation );
     _trs.Euler().fill( matrixRotation );
     _trs.Scale().fill( matrixScale );
@@ -46,9 +52,12 @@ void showTransformGizmo(const float *cameraView, const float *cameraProjection, 
     ImGui::InputFloat3("Rt", matrixRotation, 3);
     ImGui::InputFloat3("Sc", matrixScale, 3);
 
-    _trs.set( V3f{matrixTranslation},  V3f{matrixRotation},  V3f{matrixScale} );
-    Matrix4f localTransform = Matrix4f{ _trs };
-    float* matrix = localTransform.rawPtr();
+    V3f mtt = V3f{matrixTranslation};
+    V3f mtr = V3f{matrixRotation};
+    V3f mts = V3f{matrixScale};
+    _trs.set( mtt, mtr, mts );
+
+//    ImGuizmo::RecomposeMatrixFromComponents( matrixTranslation, matrixRotation, matrixScale, matrix );
 
     if (mCurrentGizmoOperation != ImGuizmo::SCALE)
     {
@@ -87,15 +96,85 @@ void showTransformGizmo(const float *cameraView, const float *cameraProjection, 
         ImGui::PopID();
     }
 
-    ImGuiIO& io = ImGui::GetIO();
-    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-    ImGuizmo::Manipulate( cameraView, cameraProjection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL,
+    static float matrix2[16];
+    static V3f oldScaleDelta{1.0f};
+    Matrix4f localTransform = Matrix4f{ _trs };
+    float* matrix = localTransform.rawPtr();
+
+    Rect2f lViewport = _viewport * 0.5f;
+    ImGuizmo::SetRect( lViewport.origin().x(), lViewport.origin().y() - lViewport.size().y(),
+                       lViewport.size().x(), lViewport.size().y() );
+
+    ImGuizmo::Manipulate( _view.rawPtr(), _proj.rawPtr(), mCurrentGizmoOperation, mCurrentGizmoMode, matrix, matrix2,
                           useSnap ? &snap[0] : NULL, boundSizing?bounds:NULL, boundSizingSnap?boundsSnap:NULL);
-    _trs.set( localTransform.getPosition3(),  V3f{matrixRotation},  V3f{matrixScale} );
+
+    float matrixTranslationDelta[3]{0.0f, 0.0f, 0.0f};
+    float matrixRotationDelta[3]{0.0f, 0.0f, 0.0f};
+    float matrixScaleDelta[3]{0.0f, 0.0f, 0.0f};
+
+    ImGuizmo::DecomposeMatrixToComponents( matrix2, matrixTranslationDelta, matrixRotationDelta, matrixScaleDelta );
+    ImGuizmo::DecomposeMatrixToComponents( matrix, matrixTranslation, matrixRotation, matrixScaleDelta );
+
+    switch (mCurrentGizmoOperation)
+    {
+        case ImGuizmo::TRANSLATE:
+            _trs.set( mtt + V3f{matrixTranslationDelta}, mtr, mts );
+            break;
+        case ImGuizmo::ROTATE:
+            _trs.set( mtt, mtr+V3f{matrixRotationDelta}*-1.0f, mts );
+            break;
+        case ImGuizmo::SCALE: {
+//            if ( ImGuizmo::IsUsing() ) {
+//                LOGR("MTS-OLD : %s", _trs.Scale().toString().c_str() );
+                V3f newScaleDelta = V3f{ matrixScaleDelta };
+//            _trs.set( mtt, mtr, max( mts + ( newScaleDelta - oldScaleDelta ), V3f{0.0001f} ) );
+                auto mtsdelta = mts + ( newScaleDelta - oldScaleDelta );
+//                LOGR("NewScale : %s, OldScale: %s", newScaleDelta.toString().c_str(), oldScaleDelta.toString().c_str() );
+//                LOGR("MTS-FROM-INPUT : %s", mts.toString().c_str() );
+//                LOGR("MTS-DELTA : %s", mtsdelta.toString().c_str() );
+                _trs.set( mtt, mtr, max( mtsdelta, Vector3f{0.0001f} ) );
+                oldScaleDelta = newScaleDelta;
+//                LOGR("MTS : %s", _trs.Scale().toString().c_str() );
+//            }
+        }
+            break;
+        default:
+            break;
+    }
 
     ImGui::End();
 }
 
-void Selection::showTransform( MatrixAnim& _trs, const Matrix4f& _view, const Matrix4f& _proj ) {
-    showTransformGizmo( _view.rawPtr(), _proj.rawPtr(), _trs );
+bool Selection::IsSelected() const {
+    return bIsSelected;
+}
+
+void Selection::IsSelected( bool bIsSelected ) {
+    Selection::bIsSelected = bIsSelected;
+}
+
+bool Selection::IsOver() const {
+    return bIsOver;
+}
+
+void Selection::IsOver( bool bIsOver ) {
+    Selection::bIsOver = bIsOver;
+}
+
+bool Selection::IsAlreadyInUse() const {
+    return IsOver() || IsSelected();
+}
+
+void Selection::unselectAll() {
+    for ( const auto& [k,v] : selectedNodes ) {
+        unselect( k, v );
+    }
+
+    selectedNodes.clear();
+
+}
+
+bool Selection::isImGuiBusy() const {
+    ImGuiIO& io = ImGui::GetIO();
+    return io.WantCaptureKeyboard || io.WantCaptureMouse;
 }

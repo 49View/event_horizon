@@ -359,6 +359,9 @@ public:
 		return Vector3f( -mX, -mY, -mZ );
 	}
 
+	void fmod( float _value );
+	Vector3f fmod( float _value ) const;
+
 	Vector3f dominant() const {
 		if ( fabs( x() ) >= fabs( y() ) && fabs( x() ) >= fabs( z() ) ) {
 			return Vector3f( mX, 0.0f, 0.0f );

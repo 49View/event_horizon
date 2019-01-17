@@ -126,6 +126,17 @@ void renderSandbox( [[maybe_unused]] Scene* p ) {
 
 int main( int argc, [[maybe_unused]] char *argv[] ) {
 
+//    Quaternion u[3];
+//    u[0].euler( V3f{M_PI_2, 0.0f, 0.0f});
+//    u[1].euler( V3f{0.0f, M_PI, 0.0f});
+//    u[2].euler( V3f{0.0f, 0.0f, M_PI_2});
+//
+//    V3f uc[3];
+//    for ( auto i = 0; i < 3; i ++ ) {
+//        uc[i]= u[i].euler2();
+//        LOGR( "%s", uc[i].toString().c_str() );
+//    }
+
     EventHorizon ev{ std::make_shared<SceneLayout>(f1, renderSandbox, nullptr), LoginFields::Daemon(), InitializeWindowFlags::HalfSize };
 
     return 0;

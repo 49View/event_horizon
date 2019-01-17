@@ -18,29 +18,45 @@ struct Selectable {
     MatrixAnim& trs;
 };
 
+namespace SelectionTraverseFlag {
+    static const uint64_t None = 0;
+    static const uint64_t Recursive = 1 << 0;
+};
+
+using SelectionTraverseFlagT = uint64_t;
+
 class Selection {
 public:
     virtual void selected( const UUID& _uuid, MatrixAnim& _trs ) = 0;
-    virtual Matrix4f getViewMatrix() = 0;
-    virtual Matrix4f getProjMatrix() = 0;
+    void unselectAll();
 
     template <typename T>
     void selected( T _geom ) {
         selected( _geom->Hash(), _geom->TRS() );
-        for ( auto& c : _geom->Children() ) {
-            selected( c );
+        if ( checkBitWiseFlag(traverseFlag, SelectionTraverseFlag::Recursive) ) {
+            for ( auto& c : _geom->Children() ) {
+                selected( c );
+            }
         }
     }
 
-    void showGizmo( MatrixAnim& _localTransform ) {
-        showTransform( _localTransform, getViewMatrix(), getProjMatrix() );
-    }
+    void showGizmo(MatrixAnim& _localTransform, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport);
+
+    bool IsSelected() const;
+    void IsSelected( bool bIsSelected );
+    bool IsOver() const;
+    void IsOver( bool bIsOver );
+    bool IsAlreadyInUse() const;
+    bool isImGuiBusy() const;
 
 protected:
-    void showTransform( MatrixAnim& _mat, const Matrix4f& _view, const Matrix4f& _proj );
+    virtual void unselect( const UUID& _uuid, const Selectable& _node ) = 0;
 
 protected:
     std::unordered_map<UUID, Selectable> selectedNodes;
+    bool bIsSelected = false;
+    bool bIsOver = false;
+    SelectionTraverseFlagT traverseFlag = SelectionTraverseFlag::None;
 };
 
 struct SelectionRecursiveLamba {

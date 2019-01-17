@@ -27,7 +27,7 @@ void MatrixAnim::Scale( const Vector3f& val ) { scale->value = val; }
 void MatrixAnim::set( const Vector3f& _pos, const Vector3f& _angleAxis, const Vector3f& _scale ) {
     pos->value = _pos;
     scale->value = _scale;
-    rot->value.euler( _angleAxis );
+    rot->value.euler2( _angleAxis );
 }
 
 void MatrixAnim::set( const Vector3f& _pos, const Quaternion& _rot, const Vector3f& _scale ) {
@@ -41,6 +41,6 @@ bool MatrixAnim::isAnimating() const {
 }
 
 Vector3f MatrixAnim::Euler() const {
-    return rot->value.euler();
+    return rot->value.euler2();
 }
 
