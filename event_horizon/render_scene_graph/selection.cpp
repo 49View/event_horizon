@@ -16,7 +16,7 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
     static bool boundSizing = false;
     static bool boundSizingSnap = false;
 
-    ImGui::Begin("TransformGizmo");
+    ImGui::Begin("Transform");
 
     ImGuizmo::BeginFrame();
 
@@ -40,19 +40,22 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
 
     float matrixTranslation[3];
     float matrixRotation[3];
+    float matrixRotationDeg[3];
     float matrixScale[3];
 
 //    ImGuizmo::DecomposeMatrixToComponents( matrix, matrixTranslation, matrixRotation, matrixScale );
 
     _trs.Pos().fill( matrixTranslation );
     _trs.Euler().fill( matrixRotation );
+    for ( auto q = 0; q < 3; q++ ) matrixRotationDeg[q] = radToDeg(matrixRotation[q]);
     _trs.Scale().fill( matrixScale );
 
     ImGui::InputFloat3("Tr", matrixTranslation, 3);
-    ImGui::InputFloat3("Rt", matrixRotation, 3);
+    ImGui::InputFloat3("Rt", matrixRotationDeg, 3);
     ImGui::InputFloat3("Sc", matrixScale, 3);
 
     V3f mtt = V3f{matrixTranslation};
+    for ( auto q = 0; q < 3; q++ ) matrixRotation[q] = degToRad(matrixRotationDeg[q]);
     V3f mtr = V3f{matrixRotation};
     V3f mts = V3f{matrixScale};
     _trs.set( mtt, mtr, mts );
@@ -98,6 +101,7 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
 
     static float matrix2[16];
     static V3f oldScaleDelta{1.0f};
+    static float oldRotationAngle = 0.0f;
     Matrix4f localTransform = Matrix4f{ _trs };
     float* matrix = localTransform.rawPtr();
 
@@ -120,22 +124,35 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
         case ImGuizmo::TRANSLATE:
             _trs.set( mtt + V3f{matrixTranslationDelta}, mtr, mts );
             break;
-        case ImGuizmo::ROTATE:
-            _trs.set( mtt, mtr+V3f{matrixRotationDelta}*-1.0f, mts );
+        case ImGuizmo::ROTATE: {
+            if ( ImGuizmo::IsUsing() ) {
+                auto rt = ImGuizmo::getRotationType();
+                auto ra = ( ImGuizmo::getRotationAngle() - oldRotationAngle );
+                V3f rot{};
+                switch (rt) {
+                    case ImGuizmo::MOVETYPE::ROTATE_X:
+                        rot = V3f::X_AXIS * ra;
+                        break;
+                    case ImGuizmo::MOVETYPE::ROTATE_Y:
+                        rot = V3f::Y_AXIS * ra;
+                        break;
+                    case ImGuizmo::MOVETYPE::ROTATE_Z:
+                        rot = V3f::Z_AXIS * ra;
+                        break;
+                    default:
+                        rot = Vector3f::ZERO;
+                        break;
+                }
+                _trs.set( mtt, mtr + rot*-1.0f, mts );
+                oldRotationAngle = ImGuizmo::getRotationAngle();
+            }
+        }
             break;
         case ImGuizmo::SCALE: {
-//            if ( ImGuizmo::IsUsing() ) {
-//                LOGR("MTS-OLD : %s", _trs.Scale().toString().c_str() );
-                V3f newScaleDelta = V3f{ matrixScaleDelta };
-//            _trs.set( mtt, mtr, max( mts + ( newScaleDelta - oldScaleDelta ), V3f{0.0001f} ) );
-                auto mtsdelta = mts + ( newScaleDelta - oldScaleDelta );
-//                LOGR("NewScale : %s, OldScale: %s", newScaleDelta.toString().c_str(), oldScaleDelta.toString().c_str() );
-//                LOGR("MTS-FROM-INPUT : %s", mts.toString().c_str() );
-//                LOGR("MTS-DELTA : %s", mtsdelta.toString().c_str() );
-                _trs.set( mtt, mtr, max( mtsdelta, Vector3f{0.0001f} ) );
-                oldScaleDelta = newScaleDelta;
-//                LOGR("MTS : %s", _trs.Scale().toString().c_str() );
-//            }
+            V3f newScaleDelta = V3f{ matrixScaleDelta };
+            auto mtsdelta = mts + ( newScaleDelta - oldScaleDelta );
+            _trs.set( mtt, mtr, max( mtsdelta, Vector3f{0.0001f} ) );
+            oldScaleDelta = newScaleDelta;
         }
             break;
         default:

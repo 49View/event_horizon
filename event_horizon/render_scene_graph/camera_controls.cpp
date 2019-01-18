@@ -59,11 +59,16 @@ void CameraControlFly::unselect( const UUID& _uuid, const Selectable& _node ) {
 
 void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
 
-    if ( !inputIsBlockedOnSelection() ) {
-        ViewportTogglesT cvtTggles = ViewportToggles::None;
-        // Keyboards
-        if ( mi.ti.checkKeyToggleOn( GMK_1 ) ) cvtTggles |= ViewportToggles::DrawWireframe;
-        if ( mi.ti.checkKeyToggleOn( GMK_G ) ) cvtTggles |= ViewportToggles::DrawGrid;
+    if ( !IsAlreadyInUse() || isWASDActive ) {
+        if ( !inputIsBlockedOnSelection() ) {
+            ViewportTogglesT cvtTggles = ViewportToggles::None;
+            // Keyboards
+            if ( mi.ti.checkKeyToggleOn( GMK_1 )) cvtTggles |= ViewportToggles::DrawWireframe;
+            if ( mi.ti.checkKeyToggleOn( GMK_G )) cvtTggles |= ViewportToggles::DrawGrid;
+            if ( cvtTggles != ViewportToggles::None ) {
+                toggle( rig()->Cvt(), cvtTggles );
+            }
+        }
 
         static float camVelocity = 1.000f;
         static float accumulatedVelocity = .0003f;
@@ -71,7 +76,8 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
         float strafe = 0.0f;
         float moveUp = 0.0f;
 
-        if ( mi.ti.checkWASDPressed() != -1 ) {
+        isWASDActive = mi.ti.checkWASDPressed() != -1;
+        if ( isWASDActive ) {
             float vel = 0.003f*GameTime::getCurrTimeStep();
             camVelocity = vel + accumulatedVelocity;
             if ( mi.ti.checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
@@ -86,10 +92,6 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
             accumulatedVelocity = 0.0003f;
         }
 
-        if ( cvtTggles != ViewportToggles::None ) {
-            toggle( rig()->Cvt(), cvtTggles );
-        }
-
         _cam->moveForward( moveForward );
         _cam->strafe( strafe );
         _cam->moveUp( moveUp );
@@ -97,7 +99,7 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
             _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
         }
 
-        if ( mi.isMouseTouchDownFirst ) {
+        if ( !inputIsBlockedOnSelection() && mi.isMouseSingleTap ) {
             Vector3f mRayNear = Vector3f::ZERO;
             Vector3f mRayFar = Vector3f::ZERO;
             _cam->mousePickRay( mi.mousePos, mRayNear, mRayFar );

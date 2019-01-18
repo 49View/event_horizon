@@ -146,12 +146,17 @@ void Scene::enableInputs( bool _bEnabled ) {
 	ti.setEnabled( _bEnabled );
 }
 
+void Scene::resetSingleEventNotifications() {
+    notifications.singleMouseTapEvent = false;
+}
+
 void Scene::inputPollUpdate() {
 
 	CameraInputData cid{ ti,
 			  mi.getCurrPos(),
 			  mi.isTouchedDown(),
 			  mi.isTouchedDownFirstTime(),
+			  notifications.singleMouseTapEvent,
 			  mi.getScrollValue(),
 			  mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
 			  mi.getCurrMoveDiffNorm().dominant() };
@@ -161,6 +166,8 @@ void Scene::inputPollUpdate() {
 	}
 
 	cm.update();
+
+	resetSingleEventNotifications();
 }
 
 bool Scene::checkKeyPressed( int keyCode ) {
@@ -170,13 +177,11 @@ bool Scene::checkKeyPressed( int keyCode ) {
 void Scene::notified( MouseInput& _source, const std::string& generator ) {
 
 	if ( generator == "onTouchUp" ) {
-		onTouchUpImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
-	} else
-	if ( generator == "onSingleTap" ) {
-		onSimpleTapImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
-	} else
-	if ( generator == "onDoubleTap" ) {
-		onDoubleTapImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
+//		onTouchUpImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
+	} else if ( generator == "onSingleTap" ) {
+		notifications.singleMouseTapEvent = true;
+	} else if ( generator == "onDoubleTap" ) {
+//		onDoubleTapImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
 	}
 	//LOGR( generator.c_str() );
 }

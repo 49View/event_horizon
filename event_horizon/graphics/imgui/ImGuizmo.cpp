@@ -477,26 +477,6 @@ namespace ImGuizmo
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    //
 
-   enum MOVETYPE
-   {
-      NONE,
-      MOVE_X,
-      MOVE_Y,
-      MOVE_Z,
-      MOVE_YZ,
-      MOVE_ZX,
-      MOVE_XY,
-      MOVE_SCREEN,
-      ROTATE_X,
-      ROTATE_Y,
-      ROTATE_Z,
-      ROTATE_SCREEN,
-      SCALE_X,
-      SCALE_Y,
-      SCALE_Z,
-      SCALE_XYZ
-   };
-
    struct Context
    {
       Context() : mbUsing(false), mbEnable(true), mbUsingBounds(false)
@@ -543,6 +523,7 @@ namespace ImGuizmo
       vec_t mRotationVectorSource;
       float mRotationAngle;
       float mRotationAngleOrigin;
+      int rotationType = NONE;
       //vec_t mWorldToLocalAxis;
 
       // scale
@@ -733,6 +714,14 @@ namespace ImGuizmo
    void SetDrawlist()
    {
       gContext.mDrawList = ImGui::GetWindowDrawList();
+   }
+
+   int getRotationType() {
+      return gContext.rotationType;
+   }
+
+   float getRotationAngle() {
+      return gContext.mRotationAngle;
    }
 
    void BeginFrame()
@@ -1463,6 +1452,8 @@ namespace ImGuizmo
 
    static int GetRotateType()
    {
+      if ( IsUsing() ) return gContext.rotationType;
+
       ImGuiIO& io = ImGui::GetIO();
       int type = NONE;
 
@@ -1495,6 +1486,7 @@ namespace ImGuizmo
             type = ROTATE_X + i;
       }
 
+      gContext.rotationType = type;
       return type;
    }
 

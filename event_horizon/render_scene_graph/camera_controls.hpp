@@ -26,6 +26,7 @@ struct CameraInputData {
     Vector2f mousePos = Vector2f::ZERO;
     bool isMouseTouchedDown = false;
     bool isMouseTouchDownFirst = false;
+    bool isMouseSingleTap = false;
     float scrollValue = 0.0f;
     Vector2f moveDiff = Vector2f::ZERO;
     Vector2f moveDiffSS = Vector2f::ZERO;
@@ -59,6 +60,9 @@ public:
 
 protected:
     void unselect( const UUID& _uuid, const Selectable& _node ) override;
+
+protected:
+    bool isWASDActive = false;
 };
 
 class CameraControlFactory {

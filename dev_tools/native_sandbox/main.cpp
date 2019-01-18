@@ -83,13 +83,13 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
     _p->postActivate( [](Scene* _p) {
 
 //        ProfileBuilder pb{0.015f, 6.0f};
-        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).col(Color4f::AQUAMARINE).buildr(_p->RSG());
+//        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).col(Color4f::AQUAMARINE).buildr(_p->RSG());
 
         auto c = _p->CM().getCamera(Name::Foxtrot);
         c->setPosition( Vector3f{0.0f, 1.0f, 3.0f} );
 
-//        Timeline::addLinked("None", logoGeoms[0], 0.0f );
         auto cube = GB{ ShapeType::Cube }.col(Color4f::RED).at({1.66f, 0.0f, 0.0f}).buildr(_p->RSG());
+
 //        auto pin = GB{ GeomBuilderType::file, "pin" }.buildr(_p->RSG());
 //        auto text = UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).buildr(_p->RSG());
 
@@ -125,17 +125,6 @@ void renderSandbox( [[maybe_unused]] Scene* p ) {
 }
 
 int main( int argc, [[maybe_unused]] char *argv[] ) {
-
-//    Quaternion u[3];
-//    u[0].euler( V3f{M_PI_2, 0.0f, 0.0f});
-//    u[1].euler( V3f{0.0f, M_PI, 0.0f});
-//    u[2].euler( V3f{0.0f, 0.0f, M_PI_2});
-//
-//    V3f uc[3];
-//    for ( auto i = 0; i < 3; i ++ ) {
-//        uc[i]= u[i].euler2();
-//        LOGR( "%s", uc[i].toString().c_str() );
-//    }
 
     EventHorizon ev{ std::make_shared<SceneLayout>(f1, renderSandbox, nullptr), LoginFields::Daemon(), InitializeWindowFlags::HalfSize };
 

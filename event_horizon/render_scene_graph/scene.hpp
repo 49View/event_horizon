@@ -42,6 +42,10 @@ using PresenterUpdateCallbackFunc = std::function<void(Scene* p)>;
 using ScenePostActivateFunc = std::function<void(Scene*)>;
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 
+struct SceneEventNotifications {
+	bool singleMouseTapEvent = false;
+};
+
 class Scene : public Observer<MouseInput> {
 public:
 	Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
@@ -71,10 +75,6 @@ public:
 	void clearTargets();
 
     void takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata );
-
-	virtual void onTouchUpImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
-	virtual void onSimpleTapImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
-	virtual void onDoubleTapImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
 
 	void inputPollUpdate();
 	void update();
@@ -122,8 +122,8 @@ public:
 	static Vector2i callbackResizeFrameBuffer;
 
 protected:
+	void resetSingleEventNotifications();
 	void activate();
-
 	void reloadShaders( SocketCallbackDataType _data );
 
 protected:
@@ -137,13 +137,11 @@ protected:
 	CommandQueue& cq;
 	cameraRigsMap mRigs;
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
-
-protected:
 	bool mbActivated = false;
     std::shared_ptr<CommandScriptPresenterManager> hcs;
-
     std::unordered_map<std::string, std::function<void(Scene*)> > eventFunctions;
 	std::shared_ptr<ImGuiConsole> console;
+	SceneEventNotifications notifications;
 
 private:
 	void updateCallbacks();
