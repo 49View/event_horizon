@@ -52,6 +52,7 @@ protected:
 class CameraControlFly : public CameraControl, public Selection {
 public:
     using CameraControl::CameraControl;
+    CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
     void renderControls() override;

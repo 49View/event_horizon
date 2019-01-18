@@ -72,19 +72,11 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     }
 
     ImGui::SameLine();
-    if ( ImGui::Button( "Camera" ) ) {
-        if ( current_item ) {
-            auto cam = p->CM().getCamera(Name::Foxtrot);
-            Timeline::addLinked( current_item, cam, currframeToTime() );
-        }
+    if ( ImGui::Button( "Camera" ) && current_item ) {
+        Timeline::addLinked( current_item, p->CM().getCamera(Name::Foxtrot), currframeToTime() );
     }
 
     if ( currentFrame < 0 ) currentFrame = 0;
-
-    if ( gsize == 0 ) {
-        ImGui::End();
-        return; // Early out, slight crap but inline with ImGui
-    }
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
@@ -118,7 +110,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     auto drawFrameLine = [&]( int currentFrame, ImU32 col ) {
         float currFrameX = canvas_pos.x + titlesWidth + currentFrame*currFrameWidth;
         ImVec2 currFrameTopLong = ImVec2(currFrameX, canvas_pos.y);
-        draw_list->AddRectFilled( currFrameTopLong + ImVec2(-1,0), currFrameTopLong + ImVec2(2, canvas_size.y+frameLinesHeight), col, 0);
+        draw_list->AddRectFilled( currFrameTopLong, currFrameTopLong + ImVec2(currFrameWidth, canvas_size.y+frameLinesHeight), col, 0);
     };
 
     auto isDragging = [&]( uint64_t _k, uint64_t _kc ) -> bool {

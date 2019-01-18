@@ -3,6 +3,7 @@
 //
 
 #include "selection.hpp"
+#include <core/app_globals.h>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/ImGuizmo.h>
 
@@ -16,6 +17,11 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
     static bool boundSizing = false;
     static bool boundSizingSnap = false;
 
+    float retinaMadness = AG.pixelDensity();
+    Rect2f lViewport = _viewport;
+
+    ImGui::SetNextWindowPos( ImVec2{ lViewport.origin().x() * retinaMadness, (lViewport.origin().y() - lViewport.height())  * retinaMadness } );
+//    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin("Transform");
 
     ImGuizmo::BeginFrame();
@@ -105,9 +111,10 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
     Matrix4f localTransform = Matrix4f{ _trs };
     float* matrix = localTransform.rawPtr();
 
-    Rect2f lViewport = _viewport * 0.5f;
-    ImGuizmo::SetRect( lViewport.origin().x(), lViewport.origin().y() - lViewport.size().y(),
-                       lViewport.size().x(), lViewport.size().y() );
+    float rtop = AG.getScreenSizefUI.y() - ( (lViewport.top() + lViewport.height()) * retinaMadness);
+    Vector2f rorign{lViewport.origin().x() * retinaMadness, rtop };
+    Vector2f rsize{lViewport.size().x() * retinaMadness, lViewport.size().y() * retinaMadness};
+    ImGuizmo::SetRect( rorign.x(), rorign.y(), rsize.x(), rsize.y() );
 
     ImGuizmo::Manipulate( _view.rawPtr(), _proj.rawPtr(), mCurrentGizmoOperation, mCurrentGizmoMode, matrix, matrix2,
                           useSnap ? &snap[0] : NULL, boundSizing?bounds:NULL, boundSizingSnap?boundsSnap:NULL);

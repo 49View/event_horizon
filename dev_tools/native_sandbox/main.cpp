@@ -88,7 +88,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
         auto c = _p->CM().getCamera(Name::Foxtrot);
         c->setPosition( Vector3f{0.0f, 1.0f, 3.0f} );
 
-        auto cube = GB{ ShapeType::Cube }.col(Color4f::RED).at({1.66f, 0.0f, 0.0f}).buildr(_p->RSG());
+        auto cube = GB{ ShapeType::Cube }.col(Color4f::RED).at({0.0f, 0.0f, 0.0f}).buildr(_p->RSG());
 
 //        auto pin = GB{ GeomBuilderType::file, "pin" }.buildr(_p->RSG());
 //        auto text = UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).buildr(_p->RSG());

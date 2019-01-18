@@ -129,6 +129,11 @@ bool CameraControlFly::inputIsBlockedOnSelection() const {
     return IsAlreadyInUse() || isImGuiBusy();
 }
 
+CameraControlFly::CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg )
+        : CameraControl( cameraRig, rsg ) {
+    toggle( rig()->Cvt(), ViewportToggles::DrawGrid );
+}
+
 std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,
                                                            RenderSceneGraph& _rsg) {
     switch ( _cc ) {

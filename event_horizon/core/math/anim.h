@@ -101,15 +101,28 @@ public:
     }
 
     TimelineStream& k( const KeyFramePair<T>& _kf  ) {
-        keyframes.emplace_back( _kf );
-        sortOnTime();
+        addKey(_kf);
         return *this;
     }
 
     TimelineStream& k( float _timeAt, const T& _value ) {
-        keyframes.emplace_back( _timeAt, _value );
-        sortOnTime();
+        addKey({_timeAt, _value});
         return *this;
+    }
+
+    void addKey( const KeyFramePair<T>& _kf ) {
+        bool bUpdateOnly = false;
+        for ( auto& kf : keyframes ) {
+            if ( kf.time == _kf.time ) {
+                kf.value = _kf.value;
+                bUpdateOnly = true;
+                break;
+            }
+        }
+        if ( !bUpdateOnly ) {
+            keyframes.emplace_back( _kf );
+            sortOnTime();
+        }
     }
 
     bool deleteKey( size_t _index ) {
