@@ -49,7 +49,6 @@ class PolySceneGraphTextureList : public ImageDepencencyMaker {
     bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
 };
 
-using NodeVariants = std::variant<GeomAssetSP, UIAssetSP>;
 using NodeGraph = std::unordered_map<std::string, NodeVariants>;
 using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)>;
 

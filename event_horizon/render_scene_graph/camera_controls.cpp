@@ -39,7 +39,7 @@ std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
 }
 
-void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs ) {
+void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node ) {
     auto sn = selectedNodes.find( _uuid );
     auto selectColor = sn != selectedNodes.end() ? sn->second.oldColor : Color4f::DARK_YELLOW;
     Color4f oldColor{Color4f::WHITE};
@@ -48,7 +48,7 @@ void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs ) {
     if ( sn != selectedNodes.end() ) {
         selectedNodes.erase(sn);
     } else {
-        selectedNodes.emplace( _uuid, Selectable{ oldColor, _trs } );
+        selectedNodes.emplace( _uuid, Selectable{ oldColor, _trs, _node } );
     }
 }
 
@@ -120,7 +120,7 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
 
 void CameraControlFly::renderControls() {
     for ( auto& [k,n] : selectedNodes ) {
-        showGizmo( n.trs, getMainCamera()->getViewMatrix(), getMainCamera()->getProjectionMatrix(),
+        showGizmo( n, getMainCamera()->getViewMatrix(), getMainCamera()->getProjectionMatrix(),
                    getMainCamera()->ViewPort() );
     }
 }

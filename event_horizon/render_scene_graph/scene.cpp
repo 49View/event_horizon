@@ -192,7 +192,6 @@ void Scene::render() {
 	for ( auto& [k,v] : mRigs ) {
 		v->renderControls();
 	}
-
 }
 
 void Scene::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {

@@ -7,7 +7,7 @@
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/ImGuizmo.h>
 
-void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport ) {
+void Selection::showGizmo( Selectable& _node, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport ) {
     static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
     static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
     static bool useSnap = false;
@@ -19,10 +19,11 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
 
     float retinaMadness = AG.pixelDensity();
     Rect2f lViewport = _viewport;
+    MatrixAnim& _trs = _node.trs;
 
     float rtop = AG.getScreenSizefUI.y() - ( (lViewport.top() + lViewport.height()) * retinaMadness);
     ImGui::SetNextWindowPos( ImVec2{ lViewport.origin().x() * retinaMadness, rtop } );
-//    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
+    ImGui::SetNextWindowSize( ImVec2{ 200.0f, 230.0f } );
     ImGui::Begin("Transform");
 
     ImGuizmo::BeginFrame();
@@ -36,13 +37,13 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
         mCurrentGizmoOperation = ImGuizmo::ROTATE;
     if (ImGui::IsKeyPressed(82)) // r Key
         mCurrentGizmoOperation = ImGuizmo::SCALE;
-    if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+    if (ImGui::RadioButton("Tr", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
         mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
     ImGui::SameLine();
-    if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+    if (ImGui::RadioButton("Rt", mCurrentGizmoOperation == ImGuizmo::ROTATE))
         mCurrentGizmoOperation = ImGuizmo::ROTATE;
     ImGui::SameLine();
-    if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+    if (ImGui::RadioButton("Sc", mCurrentGizmoOperation == ImGuizmo::SCALE))
         mCurrentGizmoOperation = ImGuizmo::SCALE;
 
     float matrixTranslation[3];
@@ -104,6 +105,10 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
         ImGui::SameLine();
         ImGui::InputFloat3("Snap", boundsSnap);
         ImGui::PopID();
+    }
+
+    if ( ImGui::Button("Set Key") ) {
+
     }
 
     static float matrix2[16];

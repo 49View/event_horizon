@@ -11,11 +11,14 @@
 #include <poly/poly.hpp>
 
 struct Selectable {
-    Selectable( const Color4f& oldColor, MatrixAnim& localTransform ) : oldColor( oldColor ),
-                                                                        trs( localTransform ) {}
+    Selectable( const Color4f& oldColor, MatrixAnim& localTransform, NodeVariants _node ) :
+        oldColor( oldColor ),
+        trs( localTransform ),
+        node( _node ) {}
 
     Color4f oldColor;
     MatrixAnim& trs;
+    NodeVariants node;
 };
 
 namespace SelectionTraverseFlag {
@@ -27,12 +30,12 @@ using SelectionTraverseFlagT = uint64_t;
 
 class Selection {
 public:
-    virtual void selected( const UUID& _uuid, MatrixAnim& _trs ) = 0;
+    virtual void selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node ) = 0;
     void unselectAll();
 
     template <typename T>
     void selected( T _geom ) {
-        selected( _geom->Hash(), _geom->TRS() );
+        selected( _geom->Hash(), _geom->TRS(), _geom );
         if ( checkBitWiseFlag(traverseFlag, SelectionTraverseFlag::Recursive) ) {
             for ( auto& c : _geom->Children() ) {
                 selected( c );
@@ -40,7 +43,7 @@ public:
         }
     }
 
-    void showGizmo(MatrixAnim& _localTransform, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport);
+    void showGizmo(Selectable& _node, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport);
 
     bool IsSelected() const;
     void IsSelected( bool bIsSelected );
@@ -71,4 +74,19 @@ struct SelectionRecursiveLamba {
 
 private:
     Selection& mSel;
+};
+
+struct SelectionAddToKeyFrame {
+    SelectionAddToKeyFrame( std::string& timelineName, float time ) : timelineName( timelineName ), time( time ) {}
+
+    void operator()(GeomAssetSP arg) const {
+        arg->addKeyFrame( timelineName, time );
+    }
+    void operator()(UIAssetSP arg) const {
+        arg->addKeyFrame( timelineName, time );
+    }
+
+private:
+    std::string& timelineName;
+    float time;
 };

@@ -142,9 +142,7 @@ void elaborateGeom( const std::string& _filename ) {
 }
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
-
-    Http::login(LoginFields::Daemon());
-
+    
 //    initDeamon();
     Socket::on( "cloudStorageFileUpdate", []( SocketCallbackDataType data ) {
         std::string filename = url_decode( data["name"].GetString() );

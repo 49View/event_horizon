@@ -56,7 +56,7 @@ public:
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
     void renderControls() override;
-    void selected( const UUID& _uuid, MatrixAnim& _localTransform ) override;
+    void selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariants _node ) override;
     bool inputIsBlockedOnSelection() const override;
 
 protected:
