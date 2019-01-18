@@ -20,7 +20,8 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
     float retinaMadness = AG.pixelDensity();
     Rect2f lViewport = _viewport;
 
-    ImGui::SetNextWindowPos( ImVec2{ lViewport.origin().x() * retinaMadness, (lViewport.origin().y() - lViewport.height())  * retinaMadness } );
+    float rtop = AG.getScreenSizefUI.y() - ( (lViewport.top() + lViewport.height()) * retinaMadness);
+    ImGui::SetNextWindowPos( ImVec2{ lViewport.origin().x() * retinaMadness, rtop } );
 //    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin("Transform");
 
@@ -111,7 +112,6 @@ void Selection::showGizmo( MatrixAnim& _trs, const Matrix4f& _view, const Matrix
     Matrix4f localTransform = Matrix4f{ _trs };
     float* matrix = localTransform.rawPtr();
 
-    float rtop = AG.getScreenSizefUI.y() - ( (lViewport.top() + lViewport.height()) * retinaMadness);
     Vector2f rorign{lViewport.origin().x() * retinaMadness, rtop };
     Vector2f rsize{lViewport.size().x() * retinaMadness, lViewport.size().y() * retinaMadness};
     ImGuizmo::SetRect( rorign.x(), rorign.y(), rsize.x(), rsize.y() );
