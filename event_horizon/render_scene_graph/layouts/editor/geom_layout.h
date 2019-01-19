@@ -9,6 +9,7 @@ class Scene;
 
 void callbackGeom( const std::string& _filename, const std::vector<char>& _data );
 void callbackGeomGLTF( const std::string& _filename );
+void callbackGeomSVG( const std::string& svgString );
 
 void ImGuiGeoms( Scene* p, const Rect2f& _r );
 

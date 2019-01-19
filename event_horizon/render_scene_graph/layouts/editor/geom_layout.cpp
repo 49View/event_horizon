@@ -13,6 +13,7 @@
 
 std::shared_ptr<GeomBuilder> gbt;
 std::shared_ptr<GLTF2> gltf;
+std::string svgString;
 
 template <typename T>
 struct NodeVisitor {
@@ -42,6 +43,14 @@ void callbackGeom( const std::string& _filename, const std::vector<char>& _data 
 void callbackGeomGLTF( const std::string& _filename ) {
     gltf = std::make_shared<GLTF2>( _filename );
     addGeomToScene();
+}
+
+void callbackGeomSVG( const std::string& _svgString ) {
+    svgString = _svgString;
+    Scene::sUpdateCallbacks.emplace_back( [&]( Scene* p ) {
+        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).col(Color4f::AQUAMARINE).buildr(p->RSG());
+    } );
+
 }
 
 void ImGuiGeoms( Scene* p, const Rect2f& _r ) {

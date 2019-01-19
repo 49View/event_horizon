@@ -9,7 +9,7 @@ namespace LayoutMediator {
 
 namespace Timeline {
     std::string TimeLineName() {
-        return GuiTimeline::TimeLineName();
+        return  GuiTimeline::TimeLineName();
     }
 
     float CurrentTime() {

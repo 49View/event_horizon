@@ -83,7 +83,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
     _p->postActivate( [](Scene* _p) {
 
 //        ProfileBuilder pb{0.015f, 6.0f};
-//        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).col(Color4f::AQUAMARINE).buildr(_p->RSG());
+        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).col(Color4f::AQUAMARINE).buildr(_p->RSG());
 
         auto c = _p->CM().getCamera(Name::Foxtrot);
         c->setPosition( Vector3f{0.0f, 1.0f, 3.0f} );

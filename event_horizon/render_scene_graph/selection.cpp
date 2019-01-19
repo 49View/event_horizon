@@ -32,11 +32,11 @@ void Selection::showGizmo( Selectable& _node, const Matrix4f& _view, const Matri
     bIsOver = ImGuizmo::IsOver();
     bIsSelected = ImGuizmo::IsUsing();
 
-    if (ImGui::IsKeyPressed(87))
+    if (ImGui::IsKeyPressed(90))
         mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-    if (ImGui::IsKeyPressed(69))
+    if (ImGui::IsKeyPressed(88))
         mCurrentGizmoOperation = ImGuizmo::ROTATE;
-    if (ImGui::IsKeyPressed(82)) // r Key
+    if (ImGui::IsKeyPressed(67)) // r Key
         mCurrentGizmoOperation = ImGuizmo::SCALE;
     if (ImGui::RadioButton("Tr", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
         mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -79,7 +79,7 @@ void Selection::showGizmo( Selectable& _node, const Matrix4f& _view, const Matri
         if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
             mCurrentGizmoMode = ImGuizmo::WORLD;
     }
-    if (ImGui::IsKeyPressed(83))
+    if (ImGui::IsKeyPressed(86))
         useSnap = !useSnap;
     ImGui::Checkbox("", &useSnap);
     ImGui::SameLine();
