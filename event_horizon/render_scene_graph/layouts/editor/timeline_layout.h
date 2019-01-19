@@ -9,3 +9,8 @@
 class Scene;
 
 void ImGuiTimeline( Scene* p, const Rect2f& _r );
+
+namespace GuiTimeline {
+    std::string TimeLineName();
+    float CurrentTime();
+}

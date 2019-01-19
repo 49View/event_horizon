@@ -77,7 +77,7 @@ private:
 };
 
 struct SelectionAddToKeyFrame {
-    SelectionAddToKeyFrame( std::string& timelineName, float time ) : timelineName( timelineName ), time( time ) {}
+    SelectionAddToKeyFrame( const std::string& timelineName, float time ) : timelineName( timelineName ), time( time ) {}
 
     void operator()(GeomAssetSP arg) const {
         arg->addKeyFrame( timelineName, time );
@@ -87,6 +87,6 @@ struct SelectionAddToKeyFrame {
     }
 
 private:
-    std::string& timelineName;
+    std::string timelineName;
     float time;
 };

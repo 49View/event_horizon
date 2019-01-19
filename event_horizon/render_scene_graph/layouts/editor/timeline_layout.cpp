@@ -8,9 +8,27 @@
 #include <core/math/anim.h>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/imgui_internal.h>
-//#include <graphics/imgui/ImSequencer.h>
-//#include <graphics/imgui/ImCurveEdit.h>
 #include <render_scene_graph/scene.hpp>
+
+static int currentFrame = 0;
+const static float secondMult = 100.0f;
+const static int secondMultI = static_cast<int>(secondMult);
+int currFrameWidth = 5; // must be dividend of 100
+
+auto currframeToTime = []() -> float { return (currentFrame*currFrameWidth)/secondMult; };
+
+static std::string currTimelineName = "None";
+
+namespace GuiTimeline {
+
+    std::string TimeLineName() {
+        return currTimelineName;
+    }
+    float CurrentTime() {
+        return currframeToTime();
+    }
+
+};
 
 void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
 
@@ -23,28 +41,21 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin( "Timeline",  nullptr, ImGuiWindowFlags_NoCollapse );
 
-    static int currentFrame = 0;
-    const static float secondMult = 100.0f;
-    const static int secondMultI = static_cast<int>(secondMult);
-    int currFrameWidth = 5; // must be dividend of 100
-
-    auto currframeToTime = [&]() -> float { return (currentFrame*currFrameWidth)/secondMult; };
-
-    const char* current_item = ( gsize == 1 ) ? tgroups.begin()->first.c_str() : "None";
-    std::string tkey = current_item;
+    const char* timelineNameCStr = ( gsize == 1 ) ? tgroups.begin()->first.c_str() : "None";
+    currTimelineName = std::string(timelineNameCStr);
 
     ImGui::PushItemWidth(130);
 
-    if (ImGui::BeginCombo("##combo", current_item)) // The second parameter is the label previewed before opening the combo.
+    if (ImGui::BeginCombo("##combo", timelineNameCStr)) // The second parameter is the label previewed before opening the combo.
     {
         for ( const auto& [k,v] : Timeline::Groups() )
         {
             auto item = k.c_str();
-            bool is_selected = (current_item == item); // You can store your selection however you want, outside or inside your objects
+            bool is_selected = (timelineNameCStr == item); // You can store your selection however you want, outside or inside your objects
             if (ImGui::Selectable(item, is_selected))
-                current_item = item;
+                timelineNameCStr = item;
             if (is_selected) {
-                tkey = current_item;
+                currTimelineName = timelineNameCStr;
                 ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
             }
         }
@@ -53,27 +64,27 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     ImGui::SameLine();
 
     if ( ImGui::Button( "->" ) ) {
-        Timeline::play(current_item, currframeToTime());
+        Timeline::play(timelineNameCStr, currframeToTime());
     }
     ImGui::SameLine();
     if ( ImGui::Button( "|->" ) ) {
-        Timeline::play(current_item, 0.0f);
+        Timeline::play(timelineNameCStr, 0.0f);
     }
     ImGui::SameLine();
     ImGui::PushItemWidth(90);
     if ( ImGui::InputInt("Frame ", &currentFrame) ) {
-        Timeline::playOneFrame(current_item, currframeToTime() );
+        Timeline::playOneFrame(timelineNameCStr, currframeToTime() );
     } else {
-        if ( current_item ) {
-            if ( auto ct = Timeline::groupAnimTime( current_item ); ct > 0.0f ) {
+        if ( timelineNameCStr ) {
+            if ( auto ct = Timeline::groupAnimTime( timelineNameCStr ); ct > 0.0f ) {
                 currentFrame = static_cast<int>(ceil( ct * ( secondMult / currFrameWidth )));
             }
         }
     }
 
     ImGui::SameLine();
-    if ( ImGui::Button( "Camera" ) && current_item ) {
-        Timeline::addLinked( current_item, p->CM().getCamera(Name::Foxtrot), currframeToTime() );
+    if ( ImGui::Button( "Camera" ) && timelineNameCStr ) {
+        Timeline::addLinked( timelineNameCStr, p->CM().getCamera(Name::Foxtrot), currframeToTime() );
     }
 
     if ( currentFrame < 0 ) currentFrame = 0;
@@ -124,7 +135,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
         frameLineCol = 0xFFBFBF00;
         if ( ImGui::IsMouseDown(0) ) {
             seCurrentFrameFromMouseX();
-            Timeline::playOneFrame(current_item, currframeToTime() );
+            Timeline::playOneFrame(timelineNameCStr, currframeToTime() );
         }
     }
     for ( int fl = 0; fl < canvas_size.x; fl+=currFrameWidth ) {
@@ -149,7 +160,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
         auto lcf = currentFrame;
         seCurrentFrameFromMouseX();
         if ( lcf != currentFrame )
-            Timeline::updateKeyTime( current_item, ktimelineDragging, ktimelineDraggingIndex, currframeToTime() );
+            Timeline::updateKeyTime( timelineNameCStr, ktimelineDragging, ktimelineDraggingIndex, currframeToTime() );
     }
 
     float cellHeight = 20.0f;
@@ -157,7 +168,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
     auto cellMargin = ImVec2(1,2);
     auto textMargin = ImVec2(3,2);
     auto cellBlock = ImVec2(currFrameWidth, cellHeight) - cellMargin;
-    Timeline::visitGroup( current_item, [&]( const std::string& _name, const std::vector<float>& _values,
+    Timeline::visitGroup( timelineNameCStr, [&]( const std::string& _name, const std::vector<float>& _values,
                                              TimelineIndex _k, TimelineIndex _valueType, int stride ) {
         auto kpos = ImVec2(0.0f, counter*cellHeight);
         auto rowNameTop = mainTop + ImVec2( 0.0f, cellHeight*counter );
@@ -200,7 +211,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
                 ImGui::EndChild();
                 ImGui::End();
                 if ( ImGui::IsMouseClicked(1) ) {
-                    Timeline::deleteKey( current_item, _k, kc );
+                    Timeline::deleteKey( timelineNameCStr, _k, kc );
                     break;
                 }
                 if ( ImGui::IsMouseDown(0) ) {

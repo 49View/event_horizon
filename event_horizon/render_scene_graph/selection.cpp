@@ -6,6 +6,7 @@
 #include <core/app_globals.h>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/ImGuizmo.h>
+#include <render_scene_graph/layouts/layout_mediator.hpp>
 
 void Selection::showGizmo( Selectable& _node, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport ) {
     static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
@@ -108,7 +109,8 @@ void Selection::showGizmo( Selectable& _node, const Matrix4f& _view, const Matri
     }
 
     if ( ImGui::Button("Set Key") ) {
-
+        std::visit( SelectionAddToKeyFrame{ LayoutMediator::Timeline::TimeLineName(),
+                                            LayoutMediator::Timeline::CurrentTime() }, _node.node );
     }
 
     static float matrix2[16];

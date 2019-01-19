@@ -35,6 +35,7 @@ void mainLoop<CommandConsole>( [[maybe_unused]] uint64_t _flags, [[maybe_unused]
 
 void daemonLoop( int _sleepSeconds ) {
 
+    Http::xProjectHeader(LoginFields::Daemon());
 	Http::login(LoginFields::Daemon());
 
 	auto st = std::chrono::system_clock::now();
