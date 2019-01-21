@@ -318,7 +318,7 @@ void GeomBuilder::preparePolyLines() {
 }
 
 void GeomBuilder::elemCreate() {
-    elem = std::make_shared<GeomAsset>();
+    if ( !elem) elem = std::make_shared<GeomAsset>();
 }
 
 GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {

@@ -6,10 +6,15 @@
 
 #include <vector>
 #include <string>
-#include <core/math/vector2f.h>
+#include <core/math/vector4f.h>
+
+struct SVGPath {
+    Color4f strokeColor;
+    std::vector<Vector2f> path;
+};
 
 namespace SVGC {
-    std::vector<std::vector<Vector2f>> SVGToPoly( const std::string& _sourceString );
+    std::vector<SVGPath> SVGToPoly( const std::string& _sourceString );
 }
 
 

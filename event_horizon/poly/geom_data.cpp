@@ -126,13 +126,12 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
 	logoGeoms.reserve( rawPoints.size() );
 	for ( const auto& points : rawPoints ) {
 		auto fb = std::make_shared<GeomDataFollowerBuilder>( mProfile,
-															 XZY::C(points,0.0f),
+															 XZY::C(points.path,0.0f),
 															 FollowerFlags::WrapPath );
+		material->setColor( points.strokeColor );
 		fb->m(material);
 		auto g = fb->build();
 		logoGeoms.emplace_back(g);
-//		logoGeoms.emplace_back( GB{ pb, XZY::C(points,0.0f) }.ff(FollowerFlags::WrapPath).
-//				col(Color4f::FTORGB(42.0f, 144.0f, 247.0f)).inj(root).dontAddToSceneGraph().buildr(_p->RSG()) );
 	}
 	return logoGeoms;
 }

@@ -3,7 +3,55 @@
 #include <core/util.h>
 #include <core/streaming_mediator.hpp>
 
-int AudioVideoStream::decode_packet( int *got_frame, int /*cached*/ ) {
+#ifndef __STDC_CONSTANT_MACROS
+#define __STDC_CONSTANT_MACROS
+#endif
+
+extern "C" {
+#include <libavutil/common.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/samplefmt.h>
+#include <libavutil/timestamp.h>
+#include <libavformat/avformat.h>
+}
+
+class AudioVideoStream::AudioVideoStreamImpl {
+public:
+	AudioVideoStreamImpl( StreamingMediator& mediator ) : mediator( mediator ) {}
+	int main_decode( const std::string& tname );
+	void advanceFrame();
+	const std::string& Name() const { return name; }
+
+protected:
+	std::string name;
+	AVFormatContext *fmt_ctx = NULL;
+	AVCodecContext *video_dec_ctx = NULL, *audio_dec_ctx;
+	int width, height;
+	enum AVPixelFormat pix_fmt;
+	AVStream *video_stream = NULL, *audio_stream = NULL;
+
+	uint8_t *video_dst_data[4] = { NULL };
+	int      video_dst_linesize[4];
+
+	int video_stream_idx = -1, audio_stream_idx = -1;
+	AVFrame *frame = NULL;
+	AVPacket pkt;
+
+	/* Enable or disable frame reference counting. You are not supposed to support
+	* both paths in your application but pick the one most appropriate to your
+	* needs. Look for the use of refcount in this example to see what are the
+	* differences of API usage between them. */
+	int refcount = 0;
+	bool loaded = false;
+
+	StreamingMediator& mediator;
+
+protected:
+	int decode_packet( int *got_frame, int cached );
+	int open_codec_context( int *stream_idx, AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx, enum AVMediaType type );
+};
+
+int AudioVideoStream::AudioVideoStreamImpl::decode_packet( int *got_frame, int /*cached*/ ) {
 	int ret = 0;
 	int decoded = pkt.size;
 
@@ -52,9 +100,9 @@ int AudioVideoStream::decode_packet( int *got_frame, int /*cached*/ ) {
 			av_image_copy( video_dst_data, video_dst_linesize,
 				(const uint8_t **)( frame->data ), frame->linesize,
 						   pix_fmt, width, height );
-			mediator.push( Name() + "_y", (const uint8_t *)video_dst_data[0]);
-			mediator.push( Name() + "_u", (const uint8_t *)video_dst_data[1]);
-			mediator.push( Name() + "_v", (const uint8_t *)video_dst_data[2]);
+			mediator.push( name + "_y", (const uint8_t *)video_dst_data[0]);
+			mediator.push( name + "_u", (const uint8_t *)video_dst_data[1]);
+			mediator.push( name + "_v", (const uint8_t *)video_dst_data[2]);
 
 			/* write to rawvideo file */
 //			fwrite(video_dst_data[0], 1, video_dst_bufsize, video_dst_file);
@@ -100,7 +148,7 @@ int AudioVideoStream::decode_packet( int *got_frame, int /*cached*/ ) {
 	return decoded;
 }
 
-int AudioVideoStream::open_codec_context( int *stream_idx,
+int AudioVideoStream::AudioVideoStreamImpl::open_codec_context( int *stream_idx,
 									  AVCodecContext **dec_ctx, AVFormatContext * _fmt_ctx, enum AVMediaType type ) {
 	int ret, stream_index;
 	AVStream *st;
@@ -149,7 +197,8 @@ int AudioVideoStream::open_codec_context( int *stream_idx,
 	return 0;
 }
 
-void AudioVideoStream::advanceFrame() {
+void AudioVideoStream::AudioVideoStreamImpl::advanceFrame() {
+
     if ( !loaded ) return;
 
 	int ret = 0, got_frame;
@@ -185,7 +234,7 @@ void AudioVideoStream::advanceFrame() {
 //	av_free(video_dst_data[0]);
 }
 
-int AudioVideoStream::main_decode( const std::string& tname ) {
+int AudioVideoStream::AudioVideoStreamImpl::main_decode( const std::string& tname ) {
 	int ret = 0;
 
 //	setId( tname );
@@ -251,8 +300,18 @@ int AudioVideoStream::main_decode( const std::string& tname ) {
 	return ret < 0;
 }
 
-AudioVideoStream::AudioVideoStream( StreamingMediator& mediator ) : mediator( mediator ) {}
+AudioVideoStream::AudioVideoStream( StreamingMediator& mediator ) {
+	pimpl = std::make_unique<AudioVideoStream::AudioVideoStreamImpl>(mediator);
+}
 
 const std::string& AudioVideoStream::Name() const {
-    return name;
+    return pimpl->Name();
+}
+
+int AudioVideoStream::main_decode( const std::string& tname ) {
+	return pimpl->main_decode( tname );
+}
+
+void AudioVideoStream::advanceFrame() {
+	pimpl->advanceFrame();
 }

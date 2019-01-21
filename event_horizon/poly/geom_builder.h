@@ -193,6 +193,11 @@ public:
         return *this;
     }
 
+    GeomBuilder& col( const std::string& _hexcolor ) {
+        materialPropeties.pigment = Vector4f::XTORGBA( _hexcolor );
+        return *this;
+    }
+
     GeomBuilder& col( const Color4f& _col ) {
         materialPropeties.pigment = _col;
         return *this;

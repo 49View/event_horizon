@@ -34,8 +34,11 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
     uivl.rightPanelHeight = ((1.0f - uivl.consoleHeight)/2.0f) - uivl.loginPanelHeight*0.5f;
     uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
     uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/6.f;
-    uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.20f };
+    uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.30f };
     float topX = uivl.rightPanelWidth;
+    float cameraWidth = (1.0f-uivl.rightPanelWidth*2.0f);
+    float cameraAspectRatio = (720.0f / 1280.0f);
+    float cameraHeight = cameraWidth*(cameraAspectRatio*(1280.0f/720.0f));
 
     _layout->addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f );
     _layout->addBox( SceneLayoutDefaultNames::Geom, 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight );
@@ -62,8 +65,8 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
                      1.0f-uivl.rightPanelWidth, 1.0f, uivl.loginPanelHeight + uivl.rightPanelHeight, uivl.loginPanelHeight + uivl.rightPanelHeight*2 );
 
     _layout->addBox( Name::Foxtrot,
-                     topX, topX + (1.0f-uivl.rightPanelWidth*2.0f),
-                     0.0f, (1.0f-(uivl.consoleHeight + uivl.timeLinePanelSize.y())), CameraControls::Fly );
+                     topX, topX + cameraWidth,
+                     0.0f, cameraHeight, CameraControls::Fly );
 
     allCallbacksEntitySetup();
 

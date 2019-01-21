@@ -48,7 +48,7 @@ void callbackGeomGLTF( const std::string& _filename ) {
 void callbackGeomSVG( const std::string& _svgString ) {
     svgString = _svgString;
     Scene::sUpdateCallbacks.emplace_back( [&]( Scene* p ) {
-        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).col(Color4f::AQUAMARINE).buildr(p->RSG());
+        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).buildr(p->RSG());
     } );
 
 }
