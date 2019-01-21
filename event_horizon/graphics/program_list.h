@@ -10,8 +10,8 @@ namespace S {
 	const std::string COLOR_3D = "PN_3D_COLOR";
 	const std::string TEXTURE_3D = "PN_3D_TEXTURE";
 
-	const std::string VIDEO_2D = "PN_VIDEO_2D";
-	const std::string VIDEO_2D_GREENSCREEN = "PN_VIDEO_2D_GREENSCREEN";
+	const std::string YUV = "PN_YUV";
+	const std::string YUV_GREENSCREEN = "PN_YUV_GREENSCREEN";
 
 	const std::string PLAIN_CUBEMAP = "PN_PLAIN_CUBEMAP";
 	const std::string EQUIRECTANGULAR = "PN_EQUIRECTANGULAR";

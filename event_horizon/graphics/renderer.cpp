@@ -1,17 +1,18 @@
 #include "renderer.h"
 
 //#include <CImg.h>
-#include "graphic_functions.hpp"
-#include "light_manager.h"
-#include "render_list.h"
-#include "shader_manager.h"
-#include "shadowmap_manager.h"
+#include "graphics/graphic_functions.hpp"
+#include "graphics/light_manager.h"
+#include "graphics/render_list.h"
+#include "graphics/shader_manager.h"
+#include "graphics/shadowmap_manager.h"
 #include "core/math/spherical_harmonics.h"
 #include "core/configuration/app_options.h"
 #include "core/suncalc/sun_builder.h"
 #include "core/zlib_util.h"
 #include "core/tar_util.h"
 #include "core/profiler.h"
+#include "core/streaming_mediator.hpp"
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -68,11 +69,15 @@ bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uin
     return true;
 }
 
-Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm ) :
-        cq( cq ), sm( sm ), tm(tm), ridm(tm) {
+Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm ) :
+        cq( cq ), sm( sm ), tm(tm), ridm(tm), ssm(_ssm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);
+}
+
+StreamingMediator& Renderer::SSM() {
+    return ssm;
 }
 
 void Renderer::resetDefaultFB() {
@@ -123,6 +128,7 @@ void Renderer::directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _target
     for ( const auto& target : _targets ) {
         if ( target->enabled() ) {
             if ( bInvalidated ) target->invalidateOnAdd();
+            target->updateStreams();
             target->addToCB( CB_U() );
         }
     }

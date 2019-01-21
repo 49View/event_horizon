@@ -20,6 +20,7 @@ class CommandScriptRendererManager;
 class CommandQueue;
 class ShaderManager;
 class RenderSceneGraph;
+class StreamingMediator;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -81,7 +82,7 @@ private:
 
 class Renderer : public DependencyMaker {
 public:
-	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm );
+	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm );
 	virtual ~Renderer() = default;
 
 	bool exists( [[maybe_unused]] const std::string& _key ) const override { return false; };
@@ -111,6 +112,7 @@ public:
     LightManager&   LM() { return lm; }
 	TextureManager& TM() { return tm; }
 	RenderImageDependencyMaker& RIDM() { return ridm; }
+	StreamingMediator& SSM();
 
 	std::shared_ptr<VPList> VPL( const int _bucket, std::shared_ptr<Matrix4f> m = nullptr, float alpha = 1.0f);
 
@@ -161,6 +163,7 @@ protected:
 	ShaderManager&  sm;
 	TextureManager& tm;
 	RenderImageDependencyMaker ridm;
+	StreamingMediator& ssm;
 	RenderAnimationManager am;
 	RenderCameraManager rcm;
 

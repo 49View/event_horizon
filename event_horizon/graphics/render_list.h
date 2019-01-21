@@ -347,6 +347,7 @@ public:
 
     std::shared_ptr<Camera> getCamera();
     void addToCBCore( CommandBufferList& cb );
+    void updateStreams();
     virtual void invalidateOnAdd() {}
     virtual void changeTime( const V3f& solarTime ) {}
     virtual void addToCB( CommandBufferList& cb ) = 0;

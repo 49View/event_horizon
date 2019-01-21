@@ -175,7 +175,7 @@ JMATH::Rect2f Framebuffer::getCurrentViewport() {
 }
 
 void Framebuffer::clearColorBuffer() {
-    GLCALL( glClearColor( 0.15f, 0.15f, 0.15f, 1.0f ));
+    GLCALL( glClearColor( 1.f, 1.f, 1.f, 1.0f ));
     GLCALL( glClear( GL_COLOR_BUFFER_BIT ));
 }
 

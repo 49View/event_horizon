@@ -32,6 +32,7 @@ public:
     std::shared_ptr<Texture> addTextureWithGPUHandle( const std::string& id, unsigned int _handle,
                                                       unsigned int _secondaryHandle = 0 );
     void updateTexture( const std::string& id, const uint8_t *data );
+    void updateTexture( const std::string& id, const uint8_t *data, int width, int height );
     void updateTexture( const std::string& id, uint8_t *data, int width, int height, PixelFormat inFormat,
                         PixelFormat outFormat );
     void removeTexture( const std::string& id );

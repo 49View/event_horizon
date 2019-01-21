@@ -770,7 +770,7 @@ public:
     }
 
     VertexStripIBVB( const JMATH::Rect2f& rect, const QuadVertices2& tcoords, float z ) {
-        std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[4]{ 0, 1, 2, 3 } );
+        std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[6]{ 1, 0, 2, 1, 2, 3 } );
         std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
 
         _verts[0].pos = Vector3f( rect.bottomRight(), z );
@@ -782,7 +782,7 @@ public:
         _verts[3].pos = Vector3f( rect.topLeft(), z );
         _verts[3].a1 = tcoords[3];//Vector2f(0.0f, 1.0f);
 
-        init( 4, PRIMITIVE_TRIANGLE_STRIP, 4, _verts, _indices );
+        init( 4, PRIMITIVE_TRIANGLES, 6, _verts, _indices );
     }
 
     VertexStripIBVB( const JMATH::Rect2f& rect, const QuadVertices2& tcoords ) {

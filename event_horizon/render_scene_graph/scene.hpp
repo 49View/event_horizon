@@ -27,12 +27,12 @@ class FontManager;
 class TextInput;
 class CameraManager;
 class CommandQueue;
-class AABB;
 class MaterialManager;
 class TextureManager;
 class Camera;
 class CameraControl;
 class CommandScriptPresenterManager;
+class StreamingMediator;
 
 namespace PresenterEventFunctionKey {
 	const static std::string Activate = "activate";
@@ -49,7 +49,7 @@ struct SceneEventNotifications {
 class Scene : public Observer<MouseInput> {
 public:
 	Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
-		   CameraManager& cm, CommandQueue& cq );
+		   CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm );
 
 	virtual ~Scene() = default;
 
@@ -101,6 +101,7 @@ public:
     TextureManager& TM();
 	CommandQueue& CQ();
 	FontManager& FM();
+	StreamingMediator& SSM();
 	std::vector<std::shared_ptr<RLTarget>>& Targets() { return mTargets; }
     std::shared_ptr<Camera> getCamera( const std::string& _name );
 
@@ -135,6 +136,7 @@ protected:
     TextInput& ti;
     MouseInput& mi;
 	CommandQueue& cq;
+	StreamingMediator& ssm;
 	cameraRigsMap mRigs;
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	bool mbActivated = false;
@@ -142,6 +144,7 @@ protected:
     std::unordered_map<std::string, std::function<void(Scene*)> > eventFunctions;
 	std::shared_ptr<ImGuiConsole> console;
 	SceneEventNotifications notifications;
+
 
 private:
 	void updateCallbacks();

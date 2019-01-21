@@ -221,8 +221,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
 }
 
 std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRect( const QuadVertices2& uvm ) {
-    return std::make_shared<PosTex3dStrip>( Rect2f{ rect.origin() - Vector2f{0.0f, size.y()}, rect.size(), true },
-                                            uvm, 0.0f );
+    return std::make_shared<PosTex3dStrip>( rect, uvm, 0.0f );
 }
 
 std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRoundedRect( [[maybe_unused]] const QuadVertices2& uvm ) {
@@ -237,34 +236,34 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRoundedRect( [[maybe_unused]]
     pts = std::make_shared<PosTex3dStrip>( numVerts, PRIMITIVE_TRIANGLE_FAN, VFVertexAllocation::PreAllocate );
 
     Vector3f pos = Vector3f( bevelRadius, 0.0f, 0.0f );
-    pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+    pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     for ( uint32_t t = 0; t < numSubDivs; t++ ) {
         float delta = static_cast<float>( t ) / static_cast<float>( numSubDivs - 1 );
         float angle = JMATH::lerp( delta, 0.0f, static_cast<float>( M_PI_2 ));
         pos = Vector3f( size.x() - bevelRadius, 0.0f, 0.0f ) +
               Vector3f( sinf( angle ), cosf( angle ) - 1.0f, 0.0f ) * bevelRadius;
-        pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+        pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     }
     for ( uint32_t t = 0; t < numSubDivs; t++ ) {
         float delta = static_cast<float>( t ) / static_cast<float>( numSubDivs - 1 );
         float angle = JMATH::lerp( delta, static_cast<float>( M_PI_2 ), static_cast<float>( M_PI ));
         pos = Vector3f( size.x(), -size.y() + bevelRadius, 0.0f ) +
               Vector3f( sinf( angle ) - 1.0f, cosf( angle ), 0.0f ) * bevelRadius;
-        pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+        pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     }
     for ( uint32_t t = 0; t < numSubDivs; t++ ) {
         float delta = static_cast<float>( t ) / static_cast<float>( numSubDivs - 1 );
         float angle = JMATH::lerp( delta, static_cast<float>( M_PI ), static_cast<float>( M_PI + M_PI_2 ));
         pos = Vector3f( bevelRadius, -size.y(), 0.0f ) +
               Vector3f( sinf( angle ), cosf( angle ) + 1.0f, 0.0f ) * bevelRadius;
-        pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+        pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     }
     for ( uint32_t t = 0; t < numSubDivs; t++ ) {
         float delta = static_cast<float>( t ) / static_cast<float>( numSubDivs - 1 );
         float angle = JMATH::lerp( delta, static_cast<float>( M_PI + M_PI_2 ), TWO_PI );
         pos = Vector3f( 0.0f, -bevelRadius, 0.0f ) +
               Vector3f( sinf( angle ) + 1.0f, cosf( angle ), 0.0f ) * bevelRadius;
-        pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+        pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     }
 
     return pts;

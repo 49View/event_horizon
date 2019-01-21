@@ -11,6 +11,7 @@
 #include <stb/stb_image_write.h>
 #include <core/math/spherical_harmonics.h>
 #include <core/camera.h>
+#include <core/streaming_mediator.hpp>
 #include <graphics/graphic_functions.hpp>
 #include <graphics/framebuffer.h>
 #include <graphics/renderer.h>
@@ -818,4 +819,19 @@ bool RLTarget::isKeyInRange( const int _key, RLClearFlag _clearFlags ) const {
 
 std::shared_ptr<Camera> RLTarget::getCamera() {
     return cameraRig->getMainCamera();
+}
+
+void RLTarget::updateStreams() {
+//    uint8_t rt[4*4*4];
+//    for ( int t = 0; t < 4*4*4; t+=4 ) {
+//        rt[t+0] = static_cast<uint8_t>(unitRand() * 255.0f);
+//        rt[t+1] = static_cast<uint8_t>(unitRand() * 255.0f);
+//        rt[t+2] = static_cast<uint8_t>(unitRand() * 255.0f);
+//        rt[t+3] = 255;
+//    }
+
+//    auto packet = rr.SSM().pop( "http://192.168.1.123:8080/video_y" );
+//    if ( packet ) {
+//        rr.TM().updateTexture( "white_basecolor", packet );
+//    }
 }

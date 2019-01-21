@@ -26,6 +26,7 @@ namespace imageUtil {
                                                  int& bpp, bool _isRaw = false );
     std::unique_ptr<uint8_t[]> decodeFromMemory( uint8_p&& _data, int& width, int& height, int& channels, int& bpp,
                                                  bool _isRaw = false );
+    std::unique_ptr<uint8_t[]> memsetImage( uint32_t color, int& width, int& height, int& channels );
     std::unique_ptr<uint8_t[]> zeroImage( uint32_t color, int& width, int& height, int& channels );
     std::unique_ptr<uint8_t[]> zeroImage3( uint32_t color, int& width, int& height, int& channels );
     std::unique_ptr<uint8_t[]> zeroImage3( uint32_t color, int width, int height );

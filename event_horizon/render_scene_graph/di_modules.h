@@ -3,6 +3,7 @@
 #include "core/di.hpp"
 #include "core/command.hpp"
 #include "core/font_manager.h"
+#include "core/streaming_mediator.hpp"
 #include "graphics/renderer.h"
 #include "graphics/text_input.hpp"
 #include "graphics/mouse_input.hpp"
@@ -19,4 +20,5 @@ namespace di = boost::di;
                           di::bind<Renderer>().in(di::singleton), \
                           di::bind<TextInput>().in(di::singleton), di::bind<MouseInput>().in(di::singleton), \
                           di::bind<TextureManager>().in(di::singleton), \
+                          di::bind<StreamingMediator>().in(di::singleton), \
                           di::bind<ShaderManager>().in(di::singleton), di::bind<CameraManager>().in(di::singleton))

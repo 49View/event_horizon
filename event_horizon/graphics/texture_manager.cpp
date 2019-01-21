@@ -131,6 +131,15 @@ void TextureManager::updateTexture( const std::string& id, const uint8_t *data )
     toBeUpdated->refresh( data, 0, 0, toBeUpdated->getWidth(), toBeUpdated->getHeight());
 }
 
+void TextureManager::updateTexture( const std::string& id, const uint8_t *data, int width, int height ) {
+    TextureMap::iterator it = mTextures.find( id );
+    if ( mTextures.find( id ) == mTextures.end()) {
+        ASSERT( false );
+    }
+    Texture * toBeUpdated = it->second.get();
+    toBeUpdated->refresh( data, 0, 0, width, height );
+}
+
 void TextureManager::updateTexture( const std::string& id, uint8_t *data, int width, int height, PixelFormat inFormat,
                                     PixelFormat outFormat ) {
     TextureMap::iterator it = mTextures.find( id );

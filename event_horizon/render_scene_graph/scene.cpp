@@ -54,8 +54,8 @@ void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
 }
 
 Scene::Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
-						  CameraManager& cm, CommandQueue& cq ) :
-		cm(cm), rr(_rr), rsg(_rsg), fm( _fm ), ti( ti), mi( mi ), cq( cq) {
+						  CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm ) :
+		cm(cm), rr(_rr), rsg(_rsg), fm( _fm ), ti( ti), mi( mi ), cq( cq), ssm(_ssm) {
 	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
 	cq.registerCommandScript(hcs);
 	console = std::make_shared<ImGuiConsole>(cq);
@@ -122,6 +122,7 @@ void Scene::activate() {
 
 	MaterialBuilder{"white"}.makeDefault(rsg.ML());
 	ImageBuilder{"white"}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
+	ImageBuilder{"debug_uv"}.makeDirect( rsg.TL(), RawImage::DEBUG_UV() );
 
 	CQ().script("change time 14:00");
 	layout->activate( this );
@@ -266,11 +267,13 @@ CameraManager& Scene::CM() { return cm; }
 TextureManager& Scene::TM() { return rr.TM(); }
 CommandQueue& Scene::CQ() { return cq; }
 FontManager& Scene::FM() { return fm; }
+StreamingMediator& Scene::SSM() { return ssm; }
 
 std::shared_ptr<Camera> Scene::getCamera( const std::string& _name ) { return CM().getCamera(_name); }
 
 const cameraRigsMap& Scene::getRigs() const {
 	return mRigs;
 }
+
 
 

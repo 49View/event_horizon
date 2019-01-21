@@ -95,6 +95,7 @@ struct RawImage {
 	std::string name;
 
 	static RawImage WHITE4x4();
+	static RawImage DEBUG_UV();
 	static RawImage BLACK_ARGB1x1;
 	static RawImage BLACK_RGBA1x1;
 };
