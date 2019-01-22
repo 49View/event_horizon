@@ -423,7 +423,7 @@ public:
 
     template<typename TV>
     void visit() const {
-        traverseWithHelper<TV>( "Name,GHType,Data,BBbox,Children", mName,mGHType,mData,bbox3d,children );
+        traverseWithHelper<TV>( "Name,BBbox,Data,Children", mName,bbox3d,mData,children );
     }
 
 protected:
@@ -609,6 +609,7 @@ protected:
         return ret;
     }
     void calcCompleteBBox3d() {
+        bbox3d = AABB::INVALID;
         bbox3d = calcCompleteBBox3dRec();
     }
 

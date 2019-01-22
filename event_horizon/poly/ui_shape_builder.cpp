@@ -406,6 +406,7 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
             if ( shapeType == UIShapeType::Text2d ) {
                 anchor = RectCreateAnchor::Bottom;
             }
+            elem->Name( title );
         }
             break;
         case UIShapeType::Separator2d:

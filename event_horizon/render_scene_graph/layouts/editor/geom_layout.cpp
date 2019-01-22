@@ -58,9 +58,17 @@ void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin( "Geometry", nullptr, ImGuiWindowFlags_NoCollapse );
 
+//    ImGui::BeginChild("scrolling_region", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
+
     for ( auto& [k,v] : p->RSG().Nodes() ) {
+        ImGui::PushID(std::visit(lambdaUUID, v).c_str());
+        ImGui::BeginGroup();
         std::visit( NodeVisitor<ImGUIJsonNamed>{}, v );
+        ImGui::EndGroup();
+        ImGui::PopID();
     }
+
+//    ImGui::EndChild();
 
     if ( gbt ) {
         ImGui::BeginGroup();
