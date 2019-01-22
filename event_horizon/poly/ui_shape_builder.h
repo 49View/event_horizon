@@ -51,6 +51,7 @@ public:
 
     void VertexList( const std::shared_ptr<PosTex3dStrip>& vs ) {
         UIElement::vs = vs;
+        bbox3d = vs->BBox3d();
     }
 
     int RenderBucketIndex() const {

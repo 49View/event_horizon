@@ -63,8 +63,13 @@ void RenderSceneGraph::changeMaterialColorTagImpl( const std::vector<std::string
 
 void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _params ) {
     if ( toLower(_params[0]) == "cube" ) {
-        GeomBuilder{ ShapeType::Cube }.m( "white" ).build( *this );
+        GeomBuilder{ ShapeType::Cube }.build( *this );
+    } else if ( toLower(_params[0]) == "sphere" ) {
+        GeomBuilder{ ShapeType::Sphere }.build( *this );
+    } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
+        UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(Color4f::BLACK).buildr(*this);
     }
+
 }
 
 std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>

@@ -34,7 +34,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
     uivl.rightPanelHeight = ((1.0f - uivl.consoleHeight)/2.0f) - uivl.loginPanelHeight*0.5f;
     uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
     uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/6.f;
-    uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.30f };
+    uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.35f };
     float topX = uivl.rightPanelWidth;
     float cameraWidth = (1.0f-uivl.rightPanelWidth*2.0f);
     float cameraAspectRatio = (720.0f / 1280.0f);

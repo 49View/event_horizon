@@ -2700,7 +2700,7 @@ static void nsvg__content(void* ud, const char* s)
 	if (p->styleFlag) {
 
 		int state = 0;
-		const char* start;
+		const char* start = nullptr;
 		while (*s) {
 			char c = *s;
 			if (nsvg__isspace(c) || c == '{') {

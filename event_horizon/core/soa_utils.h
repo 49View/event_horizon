@@ -814,6 +814,12 @@ public:
         return ret.calcCentre();
     }
 
+    AABB BBox3d() const {
+        AABB ret{AABB::INVALID};
+        for ( int32_t t = 0; t < numVerts; t++ ) ret.expand( verts[t].pos );
+        return ret;
+    }
+
     void translate( const Vector3f& pos ) {
         for ( int32_t t = 0; t < numVerts; t++ ) verts[t].pos += pos;
     }

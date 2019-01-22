@@ -201,15 +201,15 @@ void AudioVideoStream::AudioVideoStreamImpl::advanceFrame() {
 
     if ( !loaded ) return;
 
-	int ret = 0, got_frame;
+	int got_frame = 0;
 	int endOfFileOrError = 0;
 	/* read frames from the file */
 //	do {
 		endOfFileOrError = av_read_frame( fmt_ctx, &pkt );
-//		if ( endOfFileOrError >= 0 ) {
+		if ( endOfFileOrError >= 0 ) {
 			//AVPacket orig_pkt = pkt;
 //			do {
-                ret = decode_packet( &got_frame, 0 );
+                decode_packet( &got_frame, 0 );
 //                if ( ret >= 0 ) {
 //                    pkt.data += ret;
 //                    pkt.size -= ret;
@@ -217,7 +217,7 @@ void AudioVideoStream::AudioVideoStreamImpl::advanceFrame() {
 //			} while (pkt.size > 0);
 			//av_packet_unref(&orig_pkt);
 //			LOGR("Packet Size %d", pkt.size );
-//		}
+		}
 //	} while ( pkt.stream_index == audio_stream_idx && ( endOfFileOrError >= 0 ) );
 
 	/* flush cached frames */

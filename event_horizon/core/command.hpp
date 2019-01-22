@@ -56,14 +56,7 @@ public:
     void addCommandDefinition( const std::string& _cmdString,
                                std::function<void(const std::vector<std::string>&)> _fptr );
 
-    void execute() {
-        if ( script.empty() ) return;
-
-        for ( const auto& cs : script ) {
-            executeCommand( split(cs) );
-        }
-        script.clear();
-    }
+    void execute();
 
 protected:
     std::vector<std::string> script;

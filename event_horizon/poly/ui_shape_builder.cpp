@@ -435,7 +435,8 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
     }
 
     elem->Data()->VertexList(vs);
-//    elem->updateTransform();
+
+    elem->updateTransform();
 
     sg.add( elem );
 }
