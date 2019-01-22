@@ -9,6 +9,9 @@
 #include <render_scene_graph/layouts/layout_mediator.hpp>
 
 void Selection::showGizmo( Selectable& _node, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport ) {
+
+    if ( !checkBitWiseFlag(_node.flags, SelectableFlag::Selected) ) return;
+
     static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
     static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
     static bool useSnap = false;

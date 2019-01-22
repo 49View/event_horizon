@@ -241,7 +241,7 @@ int AudioVideoStream::AudioVideoStreamImpl::main_decode( const std::string& tnam
 	name = tname;
 
 	/* register all formats and codecs */
-	av_register_all();
+//	av_register_all();
 
     avformat_network_init();
 

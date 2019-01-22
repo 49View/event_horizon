@@ -39,16 +39,18 @@ std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
 }
 
-void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node ) {
+void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node, SelectableFlagT _flags ) {
     auto sn = selectedNodes.find( _uuid );
     auto selectColor = sn != selectedNodes.end() ? sn->second.oldColor : Color4f::DARK_YELLOW;
     Color4f oldColor{Color4f::WHITE};
 
-    rsg.RR().changeMaterialColorOnUUID( _uuid, selectColor, oldColor );
+    if ( checkBitWiseFlag( _flags, SelectableFlag::Highlighted ) ) {
+        rsg.RR().changeMaterialColorOnUUID( _uuid, selectColor, oldColor );
+    }
     if ( sn != selectedNodes.end() ) {
         selectedNodes.erase(sn);
     } else {
-        selectedNodes.emplace( _uuid, Selectable{ oldColor, _trs, _node } );
+        selectedNodes.emplace( _uuid, Selectable{ oldColor, _trs, _node, _flags } );
     }
 }
 

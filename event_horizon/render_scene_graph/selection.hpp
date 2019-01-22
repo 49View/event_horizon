@@ -10,15 +10,25 @@
 #include <core/math/vector4f.h>
 #include <poly/poly.hpp>
 
+namespace SelectableFlag {
+    static const uint64_t None = 0;
+    static const uint64_t Selected = 1 << 0;
+    static const uint64_t Highlighted = 1 << 1;
+};
+
+using SelectableFlagT = uint64_t;
+
 struct Selectable {
-    Selectable( const Color4f& oldColor, MatrixAnim& localTransform, NodeVariants _node ) :
+    Selectable( const Color4f& oldColor, MatrixAnim& localTransform, NodeVariants _node, SelectableFlagT _flags ) :
         oldColor( oldColor ),
         trs( localTransform ),
-        node( _node ) {}
+        node( _node ),
+        flags( _flags ) {}
 
     Color4f oldColor;
     MatrixAnim& trs;
     NodeVariants node;
+    SelectableFlagT flags = SelectableFlag::None;
 };
 
 namespace SelectionTraverseFlag {
@@ -28,18 +38,26 @@ namespace SelectionTraverseFlag {
 
 using SelectionTraverseFlagT = uint64_t;
 
+template <typename Tint, typename T>
+void xandBitWiseFlag( Tint& source, T flag ) {
+    int dest = source ^ flag;
+    source = static_cast<Tint>(dest);
+}
+
 class Selection {
 public:
-    virtual void selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node ) = 0;
+    virtual void selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node, SelectableFlagT _flags ) = 0;
     void unselectAll();
 
     template <typename T>
-    void selected( T _geom ) {
-        selected( _geom->Hash(), _geom->TRS(), _geom );
-        if ( checkBitWiseFlag(traverseFlag, SelectionTraverseFlag::Recursive) ) {
-            for ( auto& c : _geom->Children() ) {
-                selected( c );
+    void selected( T _geom, SelectableFlagT _flags = SelectableFlag::Selected|SelectableFlag::Highlighted ) {
+        selected( _geom->Hash(), _geom->TRS(), _geom, _flags );
+        for ( auto& c : _geom->Children() ) {
+            SelectableFlagT recFlags = _flags;
+            if ( !checkBitWiseFlag(traverseFlag, SelectionTraverseFlag::Recursive) ) {
+                xandBitWiseFlag(recFlags, SelectableFlag::Selected);
             }
+            selected( c, recFlags );
         }
     }
 

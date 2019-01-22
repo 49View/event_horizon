@@ -67,7 +67,8 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
     } else if ( toLower(_params[0]) == "sphere" ) {
         GeomBuilder{ ShapeType::Sphere }.build( *this );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
-        UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(Color4f::BLACK).buildr(*this);
+        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
+        UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr(*this);
     }
 
 }
