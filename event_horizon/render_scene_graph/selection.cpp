@@ -4,11 +4,17 @@
 
 #include "selection.hpp"
 #include <core/app_globals.h>
+#include <core/camera.h>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/ImGuizmo.h>
 #include <render_scene_graph/layouts/layout_mediator.hpp>
+#include <render_scene_graph/scene.hpp>
 
-void Selection::showGizmo( Selectable& _node, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport ) {
+void Selection::showGizmo( Selectable& _node, std::shared_ptr<Camera> _cam, Scene* _p ) {
+
+    const Matrix4f& _view = _cam->getViewMatrix();
+    const Matrix4f& _proj = _cam->getProjectionMatrix();
+    const Rect2f& _viewport = _cam->ViewPort();
 
     if ( !checkBitWiseFlag(_node.flags, SelectableFlag::Selected) ) return;
 
@@ -115,6 +121,7 @@ void Selection::showGizmo( Selectable& _node, const Matrix4f& _view, const Matri
         std::visit( SelectionAddToKeyFrame{ LayoutMediator::Timeline::TimeLineName(),
                                             LayoutMediator::Timeline::CurrentTime() }, _node.node );
     }
+    ImGui::SameLine();
 
     static float matrix2[16];
     static V3f oldScaleDelta{1.0f};
@@ -200,15 +207,19 @@ bool Selection::IsAlreadyInUse() const {
 }
 
 void Selection::unselectAll() {
-    for ( const auto& [k,v] : selectedNodes ) {
-        unselect( k, v );
+    for ( auto& [k,v] : selectedNodes ) {
+        unselectImpl( k, v );
     }
 
     selectedNodes.clear();
-
 }
 
 bool Selection::isImGuiBusy() const {
     ImGuiIO& io = ImGui::GetIO();
     return io.WantCaptureKeyboard || io.WantCaptureMouse;
+}
+
+void Selection::unselect( const UUID& _uuid, Selectable& _node ) {
+    unselectImpl( _uuid, _node );
+    erase_if_it( selectedNodes, _uuid );
 }

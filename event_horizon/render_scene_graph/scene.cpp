@@ -191,7 +191,7 @@ void Scene::render() {
 	layout->render( this );
 
 	for ( auto& [k,v] : mRigs ) {
-		v->renderControls();
+		v->renderControls(this);
 	}
 }
 
@@ -273,6 +273,10 @@ std::shared_ptr<Camera> Scene::getCamera( const std::string& _name ) { return CM
 
 const cameraRigsMap& Scene::getRigs() const {
 	return mRigs;
+}
+
+void Scene::script( const std::string& _commandLine ) {
+	CQ().script( _commandLine );
 }
 
 

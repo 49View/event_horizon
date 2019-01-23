@@ -94,6 +94,8 @@ public:
 
 	void directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _targets );
 
+	void removeFromCL( const UUID& _uuid );
+
     void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );

@@ -54,7 +54,7 @@ void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVarian
     }
 }
 
-void CameraControlFly::unselect( const UUID& _uuid, const Selectable& _node ) {
+void CameraControlFly::unselectImpl( const UUID& _uuid, Selectable& _node ) {
     Color4f oldColor{Color4f::WHITE};
     rsg.RR().changeMaterialColorOnUUID( _uuid, _node.oldColor, oldColor );
 }
@@ -105,7 +105,6 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
             Vector3f mRayNear = Vector3f::ZERO;
             Vector3f mRayFar = Vector3f::ZERO;
             _cam->mousePickRay( mi.mousePos, mRayNear, mRayFar );
-
             bool bHit = rsg.rayIntersect( mRayNear, mRayFar, [&]( const NodeVariants& _geom, float _near) {
                 std::visit( SelectionRecursiveLamba{*this}, _geom );
             } );
@@ -113,6 +112,18 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
                 unselectAll();
             }
         }
+
+        if ( mi.ti.checkKeyToggleOn( GMK_DELETE )) {
+            std::vector<UUID> uuids;
+            for ( const auto& [k,v] : selectedNodes ) {
+                uuids.emplace_back(k);
+            }
+            for ( const auto& ui : uuids ) {
+                rsg.remove( ui );
+                erase_if_it( selectedNodes, ui );
+            }
+        }
+
     }
 
     for ( const auto& [k,v] : selectedNodes ) {
@@ -120,10 +131,9 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
     }
 }
 
-void CameraControlFly::renderControls() {
+void CameraControlFly::renderControls( Scene* _p ) {
     for ( auto& [k,n] : selectedNodes ) {
-        showGizmo( n, getMainCamera()->getViewMatrix(), getMainCamera()->getProjectionMatrix(),
-                   getMainCamera()->ViewPort() );
+        showGizmo( n, getMainCamera(), _p );
     }
 }
 

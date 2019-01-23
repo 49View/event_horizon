@@ -160,5 +160,6 @@ private:
     InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal;
 
     std::unordered_map<std::string, RenderLayoutFunction> boxFunctionMapping;
+    Scene* owner = nullptr;
     friend class Scene;
 };

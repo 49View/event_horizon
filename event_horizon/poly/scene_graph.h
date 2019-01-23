@@ -67,11 +67,14 @@ public:
 DEPENDENCY_MAKER_EXIST(geoms);
     void add( NodeVariants _geom);
     void add( GeomAssetSP _geom, std::vector<std::shared_ptr<MaterialBuilder>> _materials);
-
     void add( std::vector<std::shared_ptr<MaterialBuilder>> _materials );
+
+    void remove( const UUID& _uuid );
+
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
     void cmdCreateGeometry( const std::vector<std::string>& _params );
+    void cmdRemoveGeometry( const std::vector<std::string>& _params );
     void cmdLoadObject( const std::vector<std::string>& _params );
     void cmdCalcLightmaps( const std::vector<std::string>& _params );
 
@@ -99,10 +102,12 @@ DEPENDENCY_MAKER_EXIST(geoms);
     }
 
 protected:
-    virtual void addImpl( NodeVariants _geom) = 0;
+    virtual void addImpl( NodeVariants _geom) {};
+    virtual void removeImpl( const UUID& _uuid ) {};
     virtual void changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+    virtual void cmdRemoveGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void changeMaterialTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void changeMaterialColorTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
@@ -126,9 +131,6 @@ public:
     }
 
     DependencyMaker& TL() override { return tl; }
-protected:
-    void addImpl( NodeVariants _geom) override;
-
 private:
     PolySceneGraphTextureList tl;
 };

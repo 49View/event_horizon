@@ -234,14 +234,21 @@ void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color )
 void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor ) {
     // NDDado: we only use RGB, not Alpha, in here
     for ( const auto& [k, vl] : CL() ) {
-//        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
             for ( const auto& v : vl.mVList ) {
                 v->setMaterialColorWithUUID(_color, _tag, _oldColor);
             }
             for ( const auto& v : vl.mVListTransparent ) {
                 v->setMaterialColorWithUUID(_color, _tag, _oldColor);
             }
-//        }
+    }
+}
+
+void Renderer::removeFromCL( const UUID& _uuid ) {
+    auto removeUUID = [_uuid]( const auto & us ) -> bool { return us->Name() == _uuid; };
+
+    for ( auto& [k, vl] : CL() ) {
+        erase_if( vl.mVList, removeUUID );
+        erase_if( vl.mVListTransparent, removeUUID );
     }
 }
 

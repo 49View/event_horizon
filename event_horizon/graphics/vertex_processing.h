@@ -70,6 +70,8 @@ public:
 
     bool hasTag( const uint64_t _tag) const;
 
+    std::string Name() const { return mVP->Name(); }
+
 private:
     std::shared_ptr<VertexProcessing> mVP;
     std::shared_ptr<Matrix4f> mTransform;

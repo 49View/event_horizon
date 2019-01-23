@@ -83,6 +83,7 @@ public:
 	void addEventFunction( const std::string& _key, std::function<void(Scene*)> _f );
 	void deactivate();
 
+	void script( const std::string& _commandLine );
     void cmdEnableKeyboard( const std::vector<std::string>& params );
     void cmdDisableKeyboard( const std::vector<std::string>& params );
     void cmdChangeTime( const std::vector<std::string>& params );
@@ -144,7 +145,6 @@ protected:
     std::unordered_map<std::string, std::function<void(Scene*)> > eventFunctions;
 	std::shared_ptr<ImGuiConsole> console;
 	SceneEventNotifications notifications;
-
 
 private:
 	void updateCallbacks();

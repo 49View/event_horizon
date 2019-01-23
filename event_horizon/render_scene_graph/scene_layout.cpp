@@ -79,6 +79,8 @@ void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t
 
 void SceneLayout::activate( Scene* _target ) {
 
+	owner = _target;
+
 	initLayout( this, _target );
 
 	for ( auto& [k,v] : boxes ) {

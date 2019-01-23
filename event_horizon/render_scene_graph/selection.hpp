@@ -10,6 +10,9 @@
 #include <core/math/vector4f.h>
 #include <poly/poly.hpp>
 
+class Camera;
+class Scene;
+
 namespace SelectableFlag {
     static const uint64_t None = 0;
     static const uint64_t Selected = 1 << 0;
@@ -47,6 +50,7 @@ void xandBitWiseFlag( Tint& source, T flag ) {
 class Selection {
 public:
     virtual void selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node, SelectableFlagT _flags ) = 0;
+    void unselect( const UUID& _uuid, Selectable& _node );
     void unselectAll();
 
     template <typename T>
@@ -61,7 +65,7 @@ public:
         }
     }
 
-    void showGizmo(Selectable& _node, const Matrix4f& _view, const Matrix4f& _proj, const Rect2f& _viewport);
+    void showGizmo(Selectable& _node, std::shared_ptr<Camera> _cam, Scene* _p );
 
     bool IsSelected() const;
     void IsSelected( bool bIsSelected );
@@ -71,7 +75,7 @@ public:
     bool isImGuiBusy() const;
 
 protected:
-    virtual void unselect( const UUID& _uuid, const Selectable& _node ) = 0;
+    virtual void unselectImpl( const UUID& _uuid, Selectable& _node ) = 0;
 
 protected:
     std::unordered_map<UUID, Selectable> selectedNodes;
