@@ -9,6 +9,7 @@
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/imgui_internal.h>
 #include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
 static int currentFrame = 0;
 const static float secondMult = 100.0f;
@@ -37,9 +38,7 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
 
     ImGuiIO& io = ImGui::GetIO();
 
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Timeline",  nullptr, ImGuiWindowFlags_NoCollapse );
+    LAYOUT_IMGUI_WINDOW_POSSIZE( Timeline, _r);
 
     const char* timelineNameCStr = ( gsize == 1 ) ? tgroups.begin()->first.c_str() : "None";
     currTimelineName = std::string(timelineNameCStr);

@@ -16,7 +16,7 @@ class Scene;
 using DragAndDropFunction = std::function<void(Scene* p, const std::string&)>;
 using InitLayoutFunction = std::function<void(SceneLayout* _layout, Scene*_target)>;
 using RenderFunction = std::function<void( Scene* )>;
-using RenderLayoutFunction = std::function<void( Scene* _target, const Rect2f&  )>;
+using RenderLayoutFunction = std::function<void( Scene* _target, Rect2f&  )>;
 
 using PresenterArrangeFunction = std::function<float( float )>;
 
@@ -31,6 +31,7 @@ float sPresenterArrangerTopFunction3d( float _value );
 float sPresenterArrangerBottomFunction3d( float _value );
 
 namespace SceneLayoutDefaultNames {
+    const static std::string Taskbar = "taskbar";
     const static std::string Console = "console";
     const static std::string Material = "material";
     const static std::string Geom = "geom";
@@ -70,6 +71,10 @@ public:
         return rect;
     }
 
+    Rect2f& getRect() {
+        return rect;
+    }
+
     void setRect( const Rect2f& rect ) {
         SceneRectArranger::rect = rect;
     }
@@ -96,7 +101,7 @@ public:
                           InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal );
 
     struct Boxes {
-        Rect2f updateAndGetRect() {
+        Rect2f& updateAndGetRect() {
             rectArranger.set();
             return rectArranger.getRect();
         }
@@ -120,11 +125,12 @@ public:
         return Boxes::INVALID;
     }
 
-    Rect2f BoxUpdateAndGet( const std::string& _key ) {
-        if ( const auto& it = boxes.find(_key); it != boxes.end() ) {
+    Rect2f& BoxUpdateAndGet( const std::string& _key ) {
+        if ( auto it = boxes.find(_key); it != boxes.end() ) {
             return it->second.updateAndGetRect();
         }
-        return Rect2f::INVALID;
+        static Rect2f invalid{Rect2f::INVALID};
+        return invalid;
     }
 
     InitializeWindowFlagsT getInitFlags() const {
@@ -140,7 +146,7 @@ public:
     void resizeCallback( Scene* _target, const Vector2i& _resize );
 
     void render( Scene* _target ) {
-        for ( const auto& [k,v] : boxes ) {
+        for ( auto& [k,v] : boxes ) {
             if ( v.renderFunction ) {
                 v.renderFunction( _target, BoxUpdateAndGet(k) );
             }

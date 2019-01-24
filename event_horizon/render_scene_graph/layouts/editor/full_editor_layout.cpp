@@ -21,6 +21,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
         float leftPanelHeight2 = 0.0f;
         float rightPanelHeight = 0.0f;
         float loginPanelHeight = 0.0f;
+        float taskbarHeight = 0.05f;
         Vector2f main3dWindowSize = Vector2f::ZERO;
         Vector2f timeLinePanelSize = Vector2f::ZERO;
         Rect2f foxLayout = Rect2f::ZERO;
@@ -30,33 +31,35 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
     uivl.consoleHeight = 0.15f;
     uivl.rightPanelWidth = 0.25f;
-    uivl.loginPanelHeight = (1.0f - uivl.consoleHeight)/9.0f;
+    uivl.loginPanelHeight = 0.18f;
     uivl.rightPanelHeight = ((1.0f - uivl.consoleHeight)/2.0f) - uivl.loginPanelHeight*0.5f;
     uivl.leftPanelHeight = (1.0f - uivl.consoleHeight)/3.0f;
-    uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/6.f;
+    uivl.leftPanelHeight2 = (1.0f - uivl.consoleHeight)/5.f;
     uivl.timeLinePanelSize = { 1.0f - (uivl.rightPanelWidth*2), 0.35f };
     float topX = uivl.rightPanelWidth;
     float cameraWidth = (1.0f-uivl.rightPanelWidth*2.0f);
     float cameraAspectRatio = (720.0f / 1280.0f);
     float cameraHeight = cameraWidth*(cameraAspectRatio*(1280.0f/720.0f));
+    float timeLineY = 1.0f-(uivl.consoleHeight+uivl.timeLinePanelSize.y());
+
+#define CENTER(xc,yc) 0.5f-xc*0.5f, 0.5f+xc*0.5f, 0.5f-yc*0.5f, 0.5f+yc*0.5f
+
+    _layout->addBox( SceneLayoutDefaultNames::Taskbar, 0.0f, 1.0f, 0.0f, uivl.taskbarHeight );
+
+    _layout->addBox( SceneLayoutDefaultNames::Login, CENTER(uivl.rightPanelWidth, uivl.loginPanelHeight));
 
     _layout->addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f );
-    _layout->addBox( SceneLayoutDefaultNames::Geom, 0.0f, uivl.rightPanelWidth, 0.0f, uivl.leftPanelHeight );
-    _layout->addBox( SceneLayoutDefaultNames::Material,
-                     0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f );
+    _layout->addBox( SceneLayoutDefaultNames::Geom, 0.0f, uivl.rightPanelWidth, uivl.taskbarHeight, timeLineY + uivl.taskbarHeight );
+    _layout->addBox( SceneLayoutDefaultNames::Material, 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f - uivl.taskbarHeight );
 
-    float imageTY = uivl.leftPanelHeight*2.0f + uivl.leftPanelHeight2;
-    _layout->addBox( SceneLayoutDefaultNames::Image, 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight*2.0f, imageTY );
+    _layout->addBox( SceneLayoutDefaultNames::Image, CENTER(uivl.rightPanelWidth, uivl.leftPanelHeight2*5.0f) );
+    _layout->addBox( SceneLayoutDefaultNames::Camera, 1.0f-uivl.rightPanelWidth, 1.0f,
+                     timeLineY - uivl.leftPanelHeight2 + uivl.taskbarHeight,
+                     timeLineY+ uivl.taskbarHeight);
 
-    _layout->addBox( SceneLayoutDefaultNames::Camera, 0.0f, uivl.rightPanelWidth, imageTY, imageTY + uivl.leftPanelHeight2 );
-
-    float timeLineY = 1.0f-(uivl.consoleHeight+uivl.timeLinePanelSize.y());
     _layout->addBox( SceneLayoutDefaultNames::Timeline,
-                     uivl.rightPanelWidth, uivl.rightPanelWidth + uivl.timeLinePanelSize.x(),
-                     timeLineY, timeLineY + uivl.timeLinePanelSize.y() );
-
-    _layout->addBox( SceneLayoutDefaultNames::Login,
-                     1.0f-uivl.rightPanelWidth, 1.0f, 0.0f, uivl.loginPanelHeight );
+                     0.0f, 1.0f,
+                     timeLineY +uivl.taskbarHeight, timeLineY + uivl.timeLinePanelSize.y() );
 
     _layout->addBox( SceneLayoutDefaultNames::CloudMaterial,
                      1.0f-uivl.rightPanelWidth, 1.0f, uivl.loginPanelHeight, uivl.loginPanelHeight + uivl.rightPanelHeight );
@@ -66,7 +69,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
     _layout->addBox( Name::Foxtrot,
                      topX, topX + cameraWidth,
-                     0.0f, cameraHeight, CameraControls::Fly );
+                     uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Fly );
 
     allCallbacksEntitySetup();
 

@@ -7,6 +7,7 @@
 #include <render_scene_graph/scene.hpp>
 #include <poly/geom_builder.h>
 #include <core/tar_util.h>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
 std::shared_ptr<MaterialBuilder> mb;
 
@@ -30,9 +31,7 @@ void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 si
 
 void ImGuiMaterials( Scene* p, const Rect2f& _r ) {
 
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Materials",  nullptr, ImGuiWindowFlags_NoCollapse );
+    LAYOUT_IMGUI_WINDOW_POSSIZE( Material, _r);
 
     float ts = 64.0f;
     ImVec2 textureSize{ ts, ts };

@@ -5,11 +5,10 @@
 #include "image_layout.h"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
 void ImGuiImages( Scene* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Images",  nullptr, ImGuiWindowFlags_NoCollapse );
+    LAYOUT_IMGUI_WINDOW_POSSIZE( Image, _r);
     int ic = 0;
     for ( const auto& it: p->TM() ) {
         std::string tname = it.first;

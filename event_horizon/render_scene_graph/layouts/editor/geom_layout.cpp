@@ -6,6 +6,7 @@
 #include <graphics/imgui/imgui_jsonvisit.hpp>
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 #include "core/node.hpp"
 #include "poly/geom_builder.h"
 #include "poly/ui_shape_builder.h"
@@ -54,9 +55,7 @@ void callbackGeomSVG( const std::string& _svgString ) {
 }
 
 void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Geometry", nullptr, ImGuiWindowFlags_NoCollapse );
+    LAYOUT_IMGUI_WINDOW_POSSIZE( SceneGraph, _r);
 
 //    ImGui::BeginChild("scrolling_region", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
 

@@ -8,11 +8,10 @@
 #include "graphics/camera_rig.hpp"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
 void ImGuiCamera( Scene* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Cameras",  nullptr, ImGuiWindowFlags_NoCollapse );
+    LAYOUT_IMGUI_WINDOW_POSSIZE( Camera, _r);
 
     for ( const auto& [k,v] : p->getRigs() ) {
         auto cam = v->getMainCamera();

@@ -32,8 +32,9 @@ void Selection::showGizmo( Selectable& _node, std::shared_ptr<Camera> _cam, Scen
     MatrixAnim& _trs = _node.trs;
 
     float rtop = AG.getScreenSizefUI.y() - ( (lViewport.top() + lViewport.height()) * retinaMadness);
-    ImGui::SetNextWindowPos( ImVec2{ lViewport.origin().x() * retinaMadness, rtop } );
-    ImGui::SetNextWindowSize( ImVec2{ 200.0f, 230.0f } );
+    float rleft = (lViewport.origin().x() + lViewport.size().x()) * retinaMadness;
+    ImGui::SetNextWindowPos( ImVec2{ rleft, rtop } );
+    ImGui::SetNextWindowSize( ImVec2{ std::max(350.0f, AG.getScreenSizefUI.y()-rleft), 230.0f } );
     ImGui::Begin("Transform");
 
     ImGuizmo::BeginFrame();

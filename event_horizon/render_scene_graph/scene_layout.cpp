@@ -44,6 +44,7 @@ float sPresenterArrangerBottomFunction3d( float _value ) {
 SceneLayout::SceneLayout( InitLayoutFunction&& initLayout, RenderFunction&& _renderFunction, DragAndDropFunction&& _dd,
 						  InitializeWindowFlagsT initFlags ) :
 		initLayout( initLayout ), renderFunction(_renderFunction), dragAndDropFunc(_dd), initFlags( initFlags ) {
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Taskbar, ImGuiTaskbar );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Console, ImGuiConsoleLayout );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Geom, ImGuiGeoms );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Material, ImGuiMaterials );
