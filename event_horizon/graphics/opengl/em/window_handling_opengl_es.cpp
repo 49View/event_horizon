@@ -16,8 +16,8 @@ namespace WindowHandling {
 
         double width{ 1280.0 };
         double height{ 720.0 };
-//        emscripten_get_element_css_size( "root", &width, &height );
-//        emscripten_set_canvas_element_size( nullptr, int(width), int(height));
+        emscripten_get_element_css_size( "root", &width, &height );
+        emscripten_set_canvas_element_size( nullptr, int(width), int(height));
         LOGR( "GetWidnowSize %f %f", width, height );
 
         LOGR( "--- Initialising Graphics ---" );
