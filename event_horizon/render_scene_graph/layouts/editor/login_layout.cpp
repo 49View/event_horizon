@@ -7,9 +7,7 @@
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiLogin( Scene* p, const Rect2f& _r ) {
-    LAYOUT_IMGUI_WINDOW_POSSIZE( Login, _r);
-
+void ImGuiLogin::renderImpl( Scene* p, Rect2f& _r ) {
     static char projectInputChar[256];
     static char emailInputChar[256];
     static char passwordInputChar[256];
@@ -50,6 +48,4 @@ void ImGuiLogin( Scene* p, const Rect2f& _r ) {
     if ( ImGui::Button( "Login" ) ) {
         Http::login( lf );
     }
-
-    ImGui::End();
 }

@@ -65,6 +65,10 @@ public:
 		return Rect2f{ Vector2f::ZERO, mScreenSizef };
 	}
 
+	Rect2f getScreenRectUI() const {
+		return Rect2f{ Vector2f::ZERO, mScreenSizefUI };
+	}
+
 	Vector2f getAspectRatio2dFromUnnormalizedScreenPos( const Vector2f& _pos ) const {
 		Vector2f ret = _pos / getScreenSizef();
 		ret.set( ret.x() * getScreenAspectRatio(), ret.y() );
@@ -93,3 +97,4 @@ private:
 #define getScreenAspectRatioVector AppGlobals::getInstance().getScreenAspectRatioVector()
 #define getScreenAspectRatioVectorY AppGlobals::getInstance().getScreenAspectRatioVectorY()
 #define getScreenRect AppGlobals::getInstance().getScreenRect()
+#define getScreenRectUI AppGlobals::getInstance().getScreenRectUI()

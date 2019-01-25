@@ -7,8 +7,7 @@
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiImages( Scene* p, const Rect2f& _r ) {
-    LAYOUT_IMGUI_WINDOW_POSSIZE( Image, _r);
+void ImGuiImages::renderImpl( Scene* p, Rect2f& _r ) {
     int ic = 0;
     for ( const auto& it: p->TM() ) {
         std::string tname = it.first;
@@ -20,5 +19,4 @@ void ImGuiImages( Scene* p, const Rect2f& _r ) {
             if ( ++ic % 6 != 0 ) { ImGui::SameLine(); }
         }
     }
-    ImGui::End();
 }

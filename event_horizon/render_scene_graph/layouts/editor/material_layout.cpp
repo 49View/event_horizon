@@ -29,10 +29,7 @@ void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 si
     }
 }
 
-void ImGuiMaterials( Scene* p, const Rect2f& _r ) {
-
-    LAYOUT_IMGUI_WINDOW_POSSIZE( Material, _r);
-
+void ImGuiMaterials::renderImpl( Scene* p, Rect2f& _r ) {
     float ts = 64.0f;
     ImVec2 textureSize{ ts, ts };
 
@@ -59,8 +56,6 @@ void ImGuiMaterials( Scene* p, const Rect2f& _r ) {
         ImGui::EndGroup();
         ImGui::Separator();
     }
-
-    ImGui::End();
 }
 
 void callbackMaterial( const std::string& _filename, const std::vector<char>& _data ) {

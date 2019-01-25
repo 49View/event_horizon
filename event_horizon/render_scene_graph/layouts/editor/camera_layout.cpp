@@ -10,9 +10,7 @@
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiCamera( Scene* p, const Rect2f& _r ) {
-    LAYOUT_IMGUI_WINDOW_POSSIZE( Camera, _r);
-
+void ImGuiCamera::renderImpl( Scene* p, JMATH::Rect2f& f ) {
     for ( const auto& [k,v] : p->getRigs() ) {
         auto cam = v->getMainCamera();
         ImGui::BeginGroup();
@@ -24,5 +22,4 @@ void ImGuiCamera( Scene* p, const Rect2f& _r ) {
         ImGui::Separator();
         ImGui::Separator();
     }
-    ImGui::End();
 }

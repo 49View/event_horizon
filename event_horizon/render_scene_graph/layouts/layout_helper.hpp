@@ -4,30 +4,34 @@
 
 #pragma once
 
-struct LayoutImGuiShowAndHide {
-    static bool bShowCamera;
-    static bool bShowCloudGeom;
-    static bool bShowCloudMaterial;
-    static bool bShowConsole;
-    static bool bShowSceneGraph;
-    static bool bShowImage;
-    static bool bShowLogin;
-    static bool bShowMaterial;
-    static bool bShowTimeline;
+#include <cstdint>
+#include <string>
+#include <core/math/rect2f.h>
+
+class Scene;
+
+namespace BoxFlags {
+    const static uint64_t None      = 0;
+    const static uint64_t Resize    = 1 << 0;
+    const static uint64_t Rearrange = 1 << 1;
+    const static uint64_t Visible   = 1 << 2;
+}
+
+using BoxFlagsT = uint64_t;
+
+class LayoutBoxRenderer {
+public:
+    explicit LayoutBoxRenderer( const std::string& name, bool _visible = true );
+    void render( Scene* , JMATH::Rect2f&, BoxFlagsT );
+    void toggleVisible();
+    void setVisible( bool _bVis );
+protected:
+    bool startRender(JMATH::Rect2f& _r, BoxFlagsT _flags);
+    void endRender(JMATH::Rect2f& _r);
+    virtual void renderImpl( Scene* ,JMATH::Rect2f&  ) = 0;
+protected:
+    std::string name;
+    bool bVisible = true;
+    JMATH::Rect2f rect;
 };
 
-#define LAYOUT_IMGUI_WINDOW_POSSIZE( flag , _r) \
-    static bool firstShow = true; \
-    if ( LayoutImGuiShowAndHide::bShow##flag && firstShow ) { \
-        ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } ); \
-        ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } ); \
-        firstShow = false; \
-    } \
-    if ( LayoutImGuiShowAndHide::bShow##flag ) { \
-        if ( !ImGui::Begin( #flag, &LayoutImGuiShowAndHide::bShow##flag )) { \
-            ImGui::End(); \
-            return; \
-        } \
-    } else { \
-        return; \
-    }

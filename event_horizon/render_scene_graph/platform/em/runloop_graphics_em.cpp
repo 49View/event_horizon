@@ -42,11 +42,22 @@ EMSCRIPTEN_BINDINGS(my_module) {
 	emscripten::function("resumeMainLoop", &resumeMainLoop);
 }
 
+int em_resize_callback(int eventType, const EmscriptenUiEvent *uiEvent, void *userData) {
+//    LOGR("Resize callback");
+    return true;
+}
+
 void main_loop_em() {
 	rl.singleThreadLoop();
 }
 
 void mainLoop( std::shared_ptr<Scene> p ) {
+
+    emscripten_set_resize_callback("#window", nullptr, true, em_resize_callback );
 	rl.initWindow( p );
+
+//	auto canvas = emscripten::val::global(“window”);
+//	canbas.set(“resize”, js::bind(…));
+
 	emscripten_set_main_loop( main_loop_em, 0, 0 );
 }

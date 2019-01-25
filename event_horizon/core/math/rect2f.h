@@ -541,6 +541,7 @@ public:
 	void setBottom( float f ) { mBottomRight.setY( f ); }
 
 	void setOrigin( const Vector2f& v ) { mTopLeft = v; }
+	void setSize( const Vector2f& v ) { mBottomRight =  mTopLeft + v; }
 	void setTopLeft( const Vector2f& v ) { mTopLeft = v; }
 	void setTopRight( const Vector2f& v ) { setTop( v.y() ); setRight( v.x() ); }
 	void setBottomLeft( const Vector2f& v ) { setBottom( v.y() ); setLeft( v.x() ); }
@@ -562,6 +563,8 @@ public:
 
 	Rect2f verticalSlice( float delta, float deltan ) const;
 
+	void percentage( const Rect2f _percRect, const Vector2f& _scale );
+	static Rect2f percentage( const Rect2f& r1, const Rect2f& r2 );
 private:
 	// DO NOT Change the order of these member variables as they are needed to get proper indices for raw access (performance requirement)
 	Vector2f mTopLeft;

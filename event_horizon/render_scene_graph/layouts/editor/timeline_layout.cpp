@@ -31,14 +31,12 @@ namespace GuiTimeline {
 
 };
 
-void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
+void ImGuiTimeline::renderImpl( [[maybe_unused]] Scene* p, Rect2f& _r ) {
 
     auto tgroups = Timeline::Groups();
     auto gsize = tgroups.size();
 
     ImGuiIO& io = ImGui::GetIO();
-
-    LAYOUT_IMGUI_WINDOW_POSSIZE( Timeline, _r);
 
     const char* timelineNameCStr = ( gsize == 1 ) ? tgroups.begin()->first.c_str() : "None";
     currTimelineName = std::string(timelineNameCStr);
@@ -224,7 +222,4 @@ void ImGuiTimeline( [[maybe_unused]] Scene* p, const Rect2f& _r ) {
         }
         counter++;
     } );
-
-    ImGui::End();
-
 }

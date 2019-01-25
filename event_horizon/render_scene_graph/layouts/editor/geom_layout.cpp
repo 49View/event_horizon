@@ -54,11 +54,7 @@ void callbackGeomSVG( const std::string& _svgString ) {
 
 }
 
-void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
-    LAYOUT_IMGUI_WINDOW_POSSIZE( SceneGraph, _r);
-
-//    ImGui::BeginChild("scrolling_region", ImVec2(0, 0), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
-
+void ImGuiGeoms::renderImpl( Scene* p, Rect2f& _r ) {
     for ( auto& [k,v] : p->RSG().Nodes() ) {
         ImGui::PushID(std::visit(lambdaUUID, v).c_str());
         ImGui::BeginGroup();
@@ -77,5 +73,4 @@ void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
         }
         ImGui::EndGroup();
     }
-    ImGui::End();
 }

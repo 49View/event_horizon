@@ -28,7 +28,7 @@ void listCloudCallback( Scene* p ) {
     }
 }
 
-void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, const std::string& _entType,
+void ImGuiCloudEntities( Scene* p, Rect2f& _r, const std::string _title, const std::string& _entType,
                          const uint64_t _version ) {
 
     static char buf1[1024];
@@ -52,5 +52,4 @@ void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, c
         ImGui::Image( reinterpret_cast<void *>(tex->getHandle()), ImVec2{ 100, 100 } );
         ImGui::EndGroup();
     }
-    ImGui::End();
 }

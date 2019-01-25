@@ -137,3 +137,19 @@ Rect2f Rect2f::verticalSlice( float delta, float deltan ) const {
 
 	return Rect2f( vl );
 }
+
+Rect2f Rect2f::percentage( const Rect2f& r1, const Rect2f& r2 ) {
+    Rect2f ret{};
+    ret.setLeft( r1.left() / r2.size().x() );
+    ret.setRight( r1.right() / r2.size().x() );
+    ret.setTop( r1.top() / r2.size().y() );
+    ret.setBottom( r1.bottom() / r2.size().y() );
+    return ret;
+}
+
+void Rect2f::percentage( const Rect2f _percRect, const Vector2f& _scale ) {
+	setLeft( _percRect.left() * _scale.x() );
+	setRight( _percRect.right() * _scale.x() );
+	setTop( _percRect.top() * _scale.y() );
+	setBottom( _percRect.bottom() * _scale.y() );
+}

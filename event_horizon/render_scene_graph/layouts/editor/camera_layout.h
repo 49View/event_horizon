@@ -3,7 +3,13 @@
 //
 
 #pragma once
-#include <core/math/rect2f.h>
-class Scene;
 
-void ImGuiCamera( Scene* p, const Rect2f& _r );
+#include <render_scene_graph/layouts/layout_helper.hpp>
+
+class ImGuiCamera : public LayoutBoxRenderer {
+public:
+    virtual ~ImGuiCamera() = default;
+    using LayoutBoxRenderer::LayoutBoxRenderer;
+protected:
+    void renderImpl( Scene *scene, JMATH::Rect2f& f ) override;
+};

@@ -6,8 +6,9 @@
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
+#include <event_horizon/render_scene_graph/scene_layout.h>
 
-void ImGuiTaskbar( Scene* p, const Rect2f& _r ) {
+void ImGuiTaskbar::renderImpl( Scene* p, Rect2f& _r ) {
 
     std::string title = "Taskbar";
     ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
@@ -15,35 +16,35 @@ void ImGuiTaskbar( Scene* p, const Rect2f& _r ) {
     ImGui::Begin( title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize );
 
     if ( ImGui::Button( "Timeline" ) ) {
-        LayoutImGuiShowAndHide::bShowTimeline = !LayoutImGuiShowAndHide::bShowTimeline;
+        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Timeline);
     }
     ImGui::SameLine();
     if ( ImGui::Button( "SceneGraph" ) ) {
-        LayoutImGuiShowAndHide::bShowSceneGraph = !LayoutImGuiShowAndHide::bShowSceneGraph;
+        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Geom);
     }
     ImGui::SameLine();
     if ( ImGui::Button( "Camera" ) ) {
-        LayoutImGuiShowAndHide::bShowCamera = !LayoutImGuiShowAndHide::bShowCamera;
+        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Camera);
     }
     ImGui::SameLine();
     if ( ImGui::Button( "Materials" ) ) {
-        LayoutImGuiShowAndHide::bShowMaterial = !LayoutImGuiShowAndHide::bShowMaterial;
+        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Material);
     }
     ImGui::SameLine();
     if ( ImGui::Button( "Cloud Geom" ) ) {
-        LayoutImGuiShowAndHide::bShowCloudGeom = !LayoutImGuiShowAndHide::bShowCloudGeom;
+        p->Layout()->toggleVisible(SceneLayoutDefaultNames::CloudGeom);
     }
     ImGui::SameLine();
     if ( ImGui::Button( "Cloud Mat" ) ) {
-        LayoutImGuiShowAndHide::bShowCloudMaterial = !LayoutImGuiShowAndHide::bShowCloudMaterial;
+        p->Layout()->toggleVisible(SceneLayoutDefaultNames::CloudMaterial);
     }
     ImGui::SameLine();
     if ( ImGui::Button( "Images" ) ) {
-        LayoutImGuiShowAndHide::bShowImage = !LayoutImGuiShowAndHide::bShowImage;
+        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Image);
     }
     ImGui::SameLine();
     if ( ImGui::Button( "Login" ) ) {
-        LayoutImGuiShowAndHide::bShowLogin = !LayoutImGuiShowAndHide::bShowLogin;
+        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Login);
     }
 
     ImGui::End();
