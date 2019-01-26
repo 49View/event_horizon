@@ -125,3 +125,36 @@ void initDefaultLayout( SceneLayout* _layout, Scene* _target ) {
 std::shared_ptr<SceneLayout> SceneLayout::makeDefault() {
     return std::make_shared<SceneLayout>(initDefaultLayout);
 }
+
+Rect2f& SceneLayout::Boxes::updateAndGetRect() {
+    if ( checkBitWiseFlag( flags, BoxFlags::Rearrange ) ) {
+        rectArranger.set();
+        xandBitWiseFlag( flags, BoxFlags::Rearrange );
+    }
+    if ( checkBitWiseFlag( flags, BoxFlags::Resize ) ) {
+        rectArranger.resize();
+        xandBitWiseFlag( flags, BoxFlags::Resize );
+    }
+//    rectArranger.updateScreenPerc();
+    return rectArranger.getRect();
+}
+
+Rect2f SceneLayout::Boxes::getRect() const {
+    return rectArranger.getRect();
+}
+
+void SceneLayout::Boxes::render( Scene *_target, Rect2f& _rect ) {
+    if ( renderer ) {
+        renderer->render( _target, _rect, flags );
+    }
+}
+
+void SceneLayout::Boxes::toggleVisible() {
+    toggle(flags, BoxFlags::Visible);
+    if ( renderer ) renderer->toggleVisible();
+}
+
+void SceneLayout::Boxes::setVisible( bool _bVis ) {
+    orBitWiseFlag( flags, BoxFlags::Visible );
+    if ( renderer ) renderer->setVisible(_bVis);
+}

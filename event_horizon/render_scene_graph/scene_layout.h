@@ -113,38 +113,11 @@ public:
                           InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal );
 
     struct Boxes {
-        Rect2f& updateAndGetRect() {
-            if ( checkBitWiseFlag( flags, BoxFlags::Rearrange ) ) {
-                rectArranger.set();
-                xandBitWiseFlag( flags, BoxFlags::Rearrange );
-            }
-            if ( checkBitWiseFlag( flags, BoxFlags::Resize ) ) {
-                rectArranger.resize();
-                xandBitWiseFlag( flags, BoxFlags::Resize );
-            }
-            rectArranger.updateScreenPerc();
-            return rectArranger.getRect();
-        }
-
-        Rect2f getRect() const {
-            return rectArranger.getRect();
-        }
-
-        void render( Scene* _target, Rect2f& _rect ) {
-            if ( renderer ) {
-                renderer->render( _target, _rect, flags );
-            }
-        }
-
-        void toggleVisible() {
-            toggle(flags, BoxFlags::Visible);
-            if ( renderer ) renderer->toggleVisible();
-        }
-
-        void setVisible( bool _bVis ) {
-            orBitWiseFlag( flags, BoxFlags::Visible );
-            if ( renderer ) renderer->setVisible(_bVis);
-        }
+        Rect2f& updateAndGetRect();
+        Rect2f getRect() const;
+        void render( Scene* _target, Rect2f& _rect );
+        void toggleVisible();
+        void setVisible( bool _bVis );
 
         SceneRectArranger rectArranger;
         CameraControls cc = CameraControls::Fly;
