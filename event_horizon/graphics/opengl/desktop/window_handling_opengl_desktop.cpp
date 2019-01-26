@@ -10,6 +10,12 @@
 
 namespace WindowHandling {
 
+    void resizeWindow( const Vector2i& _newSize ) {
+        // we do not need to call this as we have the callback active in native/desktop.
+        // (we do it in emscripten because it's weird!) :/
+//        glfwSetWindowSize( window, _newSize.x(), _newSize.y() );
+    }
+
     void initializeWindow( uint64_t flags, Renderer& rr ) {
         LOGR( "--- Initialising Graphics ---" );
 
@@ -59,8 +65,6 @@ namespace WindowHandling {
         checkGlError( "GlewInit", __LINE__, __FILE__ );
         glEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
         setTextureAligment( 1 );
-        GLCALL( glClearColor( 0.0f, 0.0f, 0.0f, 1.0f ));
-        GLCALL( glClear( GL_COLOR_BUFFER_BIT ));
 
         // get version info
         const GLubyte *renderer = glGetString( GL_RENDERER ); // get renderer string

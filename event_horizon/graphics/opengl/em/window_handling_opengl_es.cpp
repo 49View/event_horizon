@@ -12,6 +12,18 @@ namespace WindowHandling {
         fprintf( stderr, "GLFW Error: %s\n", msg );
     }
 
+    void resizeWindow( const Vector2i& _newSize ) {
+        reinitializeWindowWithSize( _newSize.x(), _newSize.y() );
+    }
+
+    void reinitializeWindowWithSize( int width, int height ) {
+        glfwSetWindowSize( window, width, height );
+
+//        glfwDestroyWindow( window );
+//        window = glfwCreateWindow( width, height, "Sixthview", NULL, NULL );
+//        glfwMakeContextCurrent( window );
+    }
+
     void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
 
         double width{ 1280.0 };
@@ -34,6 +46,7 @@ namespace WindowHandling {
         glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
         glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
         glfwWindowHint(GLFW_FOCUSED, 1);
+        glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
         LOGR( "glfwInit" );
 

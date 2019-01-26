@@ -13,6 +13,7 @@ class Renderer;
 
 namespace WindowHandling {
 	void initializeWindow( uint64_t flags, Renderer& rr );
+	void reinitializeWindowWithSize( int width, int height );
 	bool shouldWindowBeClosed();
 	void flush();
 	void pollEvents();

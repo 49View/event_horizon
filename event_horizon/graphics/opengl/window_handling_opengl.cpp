@@ -4,9 +4,11 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <graphics/window_handling.hpp>
+
 namespace WindowHandling {
 
-    GLFWwindow* window;
+    GLFWwindow* window = nullptr;
     bool bUseGLFWPoll = true;
 
     void setDropCallback( GLFWdropfun fn ) {
@@ -22,13 +24,12 @@ namespace WindowHandling {
     }
 
     void gatherMainScreenInfo() {
-        GLint dfb;
-        GLCALL ( glGetIntegerv( GL_FRAMEBUFFER_BINDING, &dfb ));
-        JMATH::Rect2f r = Framebuffer::getCurrentViewport();
-        Vector2i sizei{ static_cast<int>( r.width()), static_cast<int>( r.height()) };
-        AppGlobals::getInstance().setScreenSizef( r.size());
+        int w,h;
+        glfwGetFramebufferSize( window, &w, &h );
+        Vector2i sizei{ w, h };
+        AppGlobals::getInstance().setScreenSizef( Vector2f{w,h});
         AppGlobals::getInstance().setScreenSizei( sizei );
-        LOGR( "Default framebuffer index: [%d] - size: [%d, %d]", dfb, sizei.x(), sizei.y() );
+        LOGR( "Default framebuffer index: - size: [%d, %d]", sizei.x(), sizei.y() );
     }
 
     bool shouldWindowBeClosed() {

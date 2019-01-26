@@ -10,6 +10,7 @@
 #include "runloop_graphics_em.h"
 #include <emscripten/bind.h>
 #include <graphics/di_modules.h>
+#include <render_scene_graph/scene.hpp>
 
 RunLoopGraphics rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
 
@@ -43,7 +44,10 @@ EMSCRIPTEN_BINDINGS(my_module) {
 }
 
 int em_resize_callback(int eventType, const EmscriptenUiEvent *uiEvent, void *userData) {
-//    LOGR("Resize callback");
+	Scene::callbackResizeFrameBuffer = Vector2i{ uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight };
+//	LOGR("documentBodyClient size %d, %d: ", uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight );
+//	LOGR("windowInner size %d, %d: ", uiEvent->windowInnerWidth, uiEvent->windowInnerHeight );
+//	LOGR("windowOuter size %d, %d: ", uiEvent->windowOuterWidth, uiEvent->windowOuterHeight );
     return true;
 }
 
@@ -53,7 +57,7 @@ void main_loop_em() {
 
 void mainLoop( std::shared_ptr<Scene> p ) {
 
-    emscripten_set_resize_callback("#window", nullptr, true, em_resize_callback );
+    emscripten_set_resize_callback(nullptr, nullptr, true, em_resize_callback );
 	rl.initWindow( p );
 
 //	auto canvas = emscripten::val::global(“window”);

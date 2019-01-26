@@ -83,6 +83,7 @@ void Scene::updateCallbacks() {
 	}
 
 	if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
+		WH::resizeWindow( callbackResizeFrameBuffer );
 		WH::gatherMainScreenInfo();
 		RR().resetDefaultFB();
 		layout->resizeCallback( this, callbackResizeFrameBuffer );
