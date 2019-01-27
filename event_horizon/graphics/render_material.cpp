@@ -92,11 +92,12 @@ void MaterialUniformRenderSetup::operator()( std::shared_ptr<Program> program,
                                              std::shared_ptr<ProgramUniformSet>& pus,
                                              PUTB& tub ) const {
 
-    pus->assign( program, UniformNames::opacity, 1.0f );
+    pus->assign( program, UniformNames::opacity, material->getOpacity() );
     pus->assign( program, UniformNames::alpha, material->getColor().w());
     pus->assign( program, UniformNames::diffuseColor, material->getColor().xyz());
 
     pus->assign( tub.u( UniformNames::colorTexture ).t( material->getTextureName()).s( TSLOT_COLOR ));
+//    pus->assign( tub.u( UniformNames::yTexture ).t("http://192.168.1.123:8080/video_y").s( TSLOT_COLOR ));
 }
 
 void
@@ -106,7 +107,7 @@ MaterialPBRUniformRenderSetup::operator()( std::shared_ptr<Program> program, std
 
     std::shared_ptr<PBRMaterial> pmat = std::dynamic_pointer_cast<PBRMaterial>( material );
 
-    pus->assign( program, UniformNames::opacity, 1.0f );
+    pus->assign( program, UniformNames::opacity, material->getOpacity() );
     pus->assign( program, UniformNames::alpha, pmat->getColor().w());
     pus->assign( program, UniformNames::diffuseColor, pmat->getColor().xyz());
 

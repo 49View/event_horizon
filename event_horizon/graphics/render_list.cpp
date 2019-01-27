@@ -830,8 +830,13 @@ void RLTarget::updateStreams() {
 //        rt[t+3] = 255;
 //    }
 
-//    auto packet = rr.SSM().pop( "http://192.168.1.123:8080/video_y" );
-//    if ( packet ) {
-//        rr.TM().updateTexture( "white_basecolor", packet );
+//    auto yStream = "http://192.168.1.123:8080/video_y";
+//    auto uStream = "http://192.168.1.123:8080/video_u";
+//    auto vStream = "http://192.168.1.123:8080/video_v";
+
+//    auto packet = rr.SSM().pop( yStream );
+//    if ( packet.data ) {
+//        RawImage p{ packet.width, packet.height, 1, reinterpret_cast<const char* >(packet.data), yStream };
+//        rr.TM().updateTexture( p );
 //    }
 }

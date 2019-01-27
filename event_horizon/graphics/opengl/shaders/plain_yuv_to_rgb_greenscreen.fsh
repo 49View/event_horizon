@@ -7,6 +7,7 @@ uniform sampler2D uTexture;
 uniform sampler2D vTexture;
 uniform float opacity;
 uniform float alpha;
+uniform vec3 diffuseColor;
 
 out vec4 FragColor;
 
@@ -29,6 +30,7 @@ void main()
 	
 	float opacity = 1.0;
 	if (colorRGB.g > 0.9 && colorRGB.r < 0.5 && colorRGB.b < 0.5) opacity = 0.0;
-    FragColor = vec4(colorRGB, opacity * alpha);
+    // FragColor = vec4(colorRGB, opacity * alpha);
+    FragColor = vec4(y, y, y, opacity * alpha);
 }
 																													

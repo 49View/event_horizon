@@ -122,13 +122,21 @@ std::string TextureManager::textureName( const std::string input ) {
 //    }
 //}
 
-void TextureManager::updateTexture( const std::string& id, const uint8_t *data ) {
-    TextureMap::iterator it = mTextures.find( id );
-    if ( mTextures.find( id ) == mTextures.end()) {
-        ASSERT( false );
+void TextureManager::updateTexture( const RawImage& _image ) {
+    if ( auto it = mTextures.find( _image.name ); it != mTextures.end()) {
+        Texture * toBeUpdated = it->second.get();
+        toBeUpdated->refresh( _image.data(), 0, 0, toBeUpdated->getWidth(), toBeUpdated->getHeight());
+    } else {
+        addTextureWithData( _image.name, _image );
     }
-    Texture * toBeUpdated = it->second.get();
-    toBeUpdated->refresh( data, 0, 0, toBeUpdated->getWidth(), toBeUpdated->getHeight());
+
+}
+
+void TextureManager::updateTexture( const std::string& id, const uint8_t *data ) {
+    if ( auto it = mTextures.find( id ); it != mTextures.end()) {
+        Texture * toBeUpdated = it->second.get();
+        toBeUpdated->refresh( data, 0, 0, toBeUpdated->getWidth(), toBeUpdated->getHeight());
+    }
 }
 
 void TextureManager::updateTexture( const std::string& id, const uint8_t *data, int width, int height ) {
@@ -276,9 +284,12 @@ bool TextureManager::isTexture( const std::string& id ) const {
 
 std::shared_ptr<Texture> TextureManager::TD( const std::string& tname, const int tSlot ) {
 
-    if ( mTextures.find( tname ) == mTextures.end() ) return nullptr;
+    std::string safeName = tname;
+    if ( mTextures.find( safeName ) == mTextures.end() ) {
+        safeName = "white";
+    }
 
-    auto ret = mTextures[tname];
+    auto ret = mTextures[safeName];
     if ( tSlot >= 0 ) {
         ret->textureSlot( tSlot );
     }

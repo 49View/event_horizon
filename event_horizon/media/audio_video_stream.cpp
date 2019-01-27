@@ -97,13 +97,11 @@ int AudioVideoStream::AudioVideoStreamImpl::decode_packet( int *got_frame, int /
 
 			/* copy decoded frame to destination buffer:
 			* this is required since rawvideo expects non aligned data */
-			av_image_copy( video_dst_data, video_dst_linesize,
-				(const uint8_t **)( frame->data ), frame->linesize,
-						   pix_fmt, width, height );
-			mediator.push( name + "_y", (const uint8_t *)video_dst_data[0]);
-			mediator.push( name + "_u", (const uint8_t *)video_dst_data[1]);
-			mediator.push( name + "_v", (const uint8_t *)video_dst_data[2]);
-
+			av_image_copy( video_dst_data, video_dst_linesize, (const uint8_t **)( frame->data ),
+					       frame->linesize, pix_fmt, width, height );
+			mediator.push( name + "_y", { width, height, (const uint8_t *)video_dst_data[0] } );
+			mediator.push( name + "_u", { width, height, (const uint8_t *)video_dst_data[1] } );
+			mediator.push( name + "_v", { width, height, (const uint8_t *)video_dst_data[2] } );
 			/* write to rawvideo file */
 //			fwrite(video_dst_data[0], 1, video_dst_bufsize, video_dst_file);
 		}
@@ -241,11 +239,12 @@ int AudioVideoStream::AudioVideoStreamImpl::main_decode( const std::string& tnam
 	name = tname;
 
 	/* register all formats and codecs */
-//	av_register_all();
+	//av_register_all();
 
     avformat_network_init();
 
 	/* open input file, and allocate format context */
+//	AVInputFormat *ifmt=av_find_input_format("video4linux2");
 	if ( avformat_open_input( &fmt_ctx, name.c_str(), NULL, NULL ) < 0 ) {
 		LOGE( "Could not open source file %s\n", name.c_str() );
 		return -1;
@@ -315,3 +314,5 @@ int AudioVideoStream::main_decode( const std::string& tname ) {
 void AudioVideoStream::advanceFrame() {
 	pimpl->advanceFrame();
 }
+
+AudioVideoStream::~AudioVideoStream() = default;

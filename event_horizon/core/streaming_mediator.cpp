@@ -4,15 +4,16 @@
 
 #include "streaming_mediator.hpp"
 
-void StreamingMediator::push( const std::string& _name, const uint8_t *_packet ) {
+void StreamingMediator::push( const std::string& _name, const StreamingPacket& _packet ) {
     packets.emplace( _name, _packet );
 }
 
-const uint8_t* StreamingMediator::pop( const std::string& _name ) {
-    const uint8_t* ret = nullptr;
+StreamingPacket StreamingMediator::pop( const std::string& _name ) {
+
     if ( auto it = packets.find(_name); it != packets.end() ) {
-        ret = it->second;
+        StreamingPacket ret = it->second;
         packets.erase(it);
+        return ret;
     }
-    return ret;
+    return StreamingPacket{};
 }

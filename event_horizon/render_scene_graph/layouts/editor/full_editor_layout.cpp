@@ -6,11 +6,11 @@
 
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/scene_layout.h>
-//#include <media/audio_video_stream.hpp>
-//#include <poly/ui_shape_builder.h>
+#include <media/audio_video_stream.hpp>
+#include <poly/ui_shape_builder.h>
 #include "callbacks_layout.h"
 
-//std::unique_ptr<AudioVideoStream> avt;
+std::unique_ptr<AudioVideoStream> avt;
 
 void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
@@ -75,7 +75,8 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
 //    avt = std::make_unique<AudioVideoStream>(p->SSM());
 //    avt->main_decode("http://192.168.1.123:8080/video");
-//    UISB{ UIShapeType::Rect3d }.r(Rect2f{Vector2f::ZERO, Vector2f::ONE, true}).c(Color4f::WHITE).buildr(p->RSG());
+//
+//    UISB{ UIShapeType::Rect3d }.r(Rect2f{Vector2f::ZERO, Vector2f::ONE, true}).c(Color4f::DARK_GREEN).buildr(p->RSG());
 //    UISB{ UIShapeType::Line3d }.v( {V3f::ZERO, V3f::X_AXIS}).lw(1.0f).c(Color4f::BLACK).buildr(p->RSG());
 
 //    UISB{ UIShapeType::Arrow3d }.v( { XZY::C({ V2f::ZERO, 0.0f }),
