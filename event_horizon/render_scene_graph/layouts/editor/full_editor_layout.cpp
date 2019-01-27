@@ -8,6 +8,7 @@
 #include <render_scene_graph/scene_layout.h>
 #include <media/audio_video_stream.hpp>
 #include <poly/ui_shape_builder.h>
+#include <poly/geom_builder.h>
 #include "callbacks_layout.h"
 
 std::unique_ptr<AudioVideoStream> avt;
@@ -73,6 +74,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
     allCallbacksEntitySetup();
 
+//    GB{ShapeType::Cube}.m("wood").build(p->RSG());
 //    avt = std::make_unique<AudioVideoStream>(p->SSM());
 //    avt->main_decode("http://192.168.1.123:8080/video");
 //

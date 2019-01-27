@@ -52,8 +52,14 @@ void ImGuiMaterials::renderImpl( Scene* p, Rect2f& _r ) {
                            matPBR->getAoValue());
             ImGuiMatImage( "Height", ImColor{32, 200, 32}, textureSize, p->TM().TD( matPBR->getHeight()) );
         }
-        ImGui::BeginGroup();
-        ImGui::EndGroup();
+        if ( mb ) {
+            ImGui::BeginGroup();
+            if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+                mb->publish();
+            }
+            ImGui::EndGroup();
+        }
+
         ImGui::Separator();
     }
 }

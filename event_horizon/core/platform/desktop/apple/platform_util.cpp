@@ -24,7 +24,11 @@ namespace FileManager {
 
 std::string cacheFolder() {
     const char *homeDir = getenv( "TMPDIR" );
-    return std::string( homeDir ) + "/";
+    return std::string( homeDir );
+}
+
+std::string getDaemonRoot() {
+    return cacheFolder();
 }
 
 const std::string userComputerName() {

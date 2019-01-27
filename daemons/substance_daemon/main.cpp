@@ -63,10 +63,11 @@ void initDeamon() {
 void elaborateMat( const std::string& _filename ) {
     FM::readRemoteSimpleCallback( _filename,
     [](const Http::Result& _res) {
+        auto fileRoot = getDaemonRoot();
         std::string filename =  getFileName(_res.uri);
-        FM::writeLocalFile( filename, reinterpret_cast<const char*>(_res.buffer.get()), _res.length );
+        FM::writeLocalFile( fileRoot + filename, reinterpret_cast<const char*>(_res.buffer.get()), _res.length, true );
         int size = 512;
-        std::string layerName = "";
+        std::string layerName;
         if ( auto p = filename.find(MQSettings::Low); p != std::string::npos ) {
           size = 128;
           layerName = MQSettings::Low;
@@ -79,7 +80,7 @@ void elaborateMat( const std::string& _filename ) {
           size = 4096;
           layerName = MQSettings::UltraHi;
         }
-        std::string mainFileName = "/" + filename;
+        std::string mainFileName = fileRoot + filename;
         std::string fn = getFileNameOnly( mainFileName );
         std::string fext = ".png";
 
@@ -91,7 +92,7 @@ void elaborateMat( const std::string& _filename ) {
                              "--input-graph-output basecolor "
                              "--input-graph-output metallic --input-graph-output ambient_occlusion "
                              "--input-graph-output roughness --input-graph-output height --input-graph-output normal "
-                             "--output-path /";
+                             "--output-path " + fileRoot;
 
         std::system(sbRender.c_str());
 
@@ -106,12 +107,12 @@ void elaborateMat( const std::string& _filename ) {
         std::string filen = fn + "_" + MPBRTextures::normalString + fext;
         std::string filea = fn + "_" + MPBRTextures::ambientOcclusionString + fext;
 
-        tar.putFile( ( "/" + fileb).c_str(), fileb.c_str() );
-        tar.putFile( ( "/" + fileh).c_str(), fileh.c_str() );
-        tar.putFile( ( "/" + filem).c_str(), filem.c_str() );
-        tar.putFile( ( "/" + filer).c_str(), filer.c_str() );
-        tar.putFile( ( "/" + filen).c_str(), filen.c_str() );
-        tar.putFile( ( "/" + filea).c_str(), filea.c_str() );
+        tar.putFile( ( fileRoot + fileb).c_str(), fileb.c_str() );
+        tar.putFile( ( fileRoot + fileh).c_str(), fileh.c_str() );
+        tar.putFile( ( fileRoot + filem).c_str(), filem.c_str() );
+        tar.putFile( ( fileRoot + filer).c_str(), filer.c_str() );
+        tar.putFile( ( fileRoot + filen).c_str(), filen.c_str() );
+        tar.putFile( ( fileRoot + filea).c_str(), filea.c_str() );
         tar.finish();
 
         FM::writeRemoteFile( DaemonPaths::store( EntityGroup::Material, tarname ),
