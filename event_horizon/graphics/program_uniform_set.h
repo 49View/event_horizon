@@ -3,9 +3,10 @@
 #include <string>
 #include <cstring>
 #include <map>
-#include "core/math/vector4f.h"
-#include "core/math/matrix4f.h"
-#include "core/math/matrix2f.h"
+#include <core/math/vector4f.h>
+#include <core/math/matrix4f.h>
+#include <core/math/matrix2f.h>
+#include <core/heterogeneous_map.hpp>
 #include "program.h"
 #include "uniform_names.h"
 
@@ -14,7 +15,30 @@ class Program;
 class Renderer;
 class ShaderManager;
 
-class ProgramUniformSet {
+class GPUUniformVisitor {
+public:
+	explicit GPUUniformVisitor( unsigned int handle ) : handle( handle ) {}
+
+	void visit( const char* name, const TextureIndex& value ) const;
+	void visit( const char* name, int value ) const;
+	void visit( const char* name, float value ) const;
+	void visit( const char* name, float x, float y ) const;
+	void visit( const char* name, float x, float y, float z ) const;
+	void visit( const char* name, float x, float y, float z, float w ) const;
+	void visit( const char* name, const Vector2f& v ) const;
+	void visit( const char* name, const Vector3f& v ) const;
+	void visit( const char* name, const std::vector<Vector3f>& v ) const;
+	void visit( const char* name, const Vector4f& v ) const;
+	void visit( const char* name, const Matrix2f& matrix ) const;
+	void visit( const char* name, const Matrix3f& matrix ) const;
+	void visit( const char* name, const Matrix4f& matrix ) const;
+
+protected:
+	int hasUniform( const char* name ) const;
+	unsigned int handle;
+};
+
+class ProgramUniformSet : public HeterogeneousMap {
 public:
 
 	void generateUBO( const ShaderManager& sm, const std::string& uniformName );
@@ -44,103 +68,16 @@ public:
 	void setUBOData( const std::string& uniformName, const Matrix4f& matrix );
 
 	int getUBOSize() const { return mUBOSize; }
-	void assign( const ProgramUniformSet* source );
 
 	template <typename T>
-	void assign( std::shared_ptr<Program> _program, const std::string _uniformName, const T& _value ) {
+	void setOnGPU( std::shared_ptr<Program> _program, const std::string _uniformName, const T& _value ) {
 		if ( _program->hasUniform(_uniformName) ) assign( _uniformName, _value );
 	}
 
-	void assign( const std::string& uniformName, int data );
-	void assign( const std::string& uniformName, float data );
-	void assign( const std::string& uniformName, double data );
-	void assign( const std::string& uniformName, const TextureIndex& data );
-	void assign( const std::string& uniformName, const Vector2f& data );
-	void assign( const std::string& uniformName, const Vector3f& data );
-	void assign( const std::string& uniformName, const Vector4f& data );
-	void assign( const std::string& uniformName, const Matrix4f& data );
-	void assign( const std::string& uniformName, const Matrix3f& data );
-	void assign( const std::string& uniformName, const std::vector<Vector3f>& data );
-
-	void assignGlobal( const std::string& uniformName, int data );
-	void assignGlobal( const std::string& uniformName, float data );
-	void assignGlobal( const std::string& uniformName, double data );
-	void assignGlobal( const std::string& uniformName, TextureIndex data );
-	void assignGlobal( const std::string& uniformName, const Vector2f& data );
-	void assignGlobal( const std::string& uniformName, const Vector3f& data );
-	void assignGlobal( const std::string& uniformName, const Vector4f& data );
-	void assignGlobal( const std::string& uniformName, const Matrix4f& data );
-	void assignGlobal( const std::string& uniformName, const Matrix3f& data );
-	void assignGlobal( const std::string& uniformName, const std::vector<Vector3f>& data );
-
-	void clearTextures();
-	TextureIndex getTexture( const std::string& uniformName ) const;
-	float getInt( const std::string & uniformName ) const;
-	float getFloatWithDefault( const std::string& uniformName, const float def ) const;
-	float getFloat( const std::string & uniformName ) const;
-	Vector2f getVector2f( const std::string & uniformName ) const;
-	Vector3f getVector3f( const std::string & uniformName ) const;
-	Vector4f getVector4f( const std::string & uniformName ) const;
-	Matrix4f getMatrix4f( const std::string & uniformName ) const;
-	Matrix3f getMatrix3f( const std::string & uniformName ) const;
-	void get( const std::string& uniformName, TextureIndex ret ) const;
-	void get( const std::string& uniformName, int& ret ) const;
-	void get( const std::string& uniformName, float& ret ) const;
-	void get( const std::string& uniformName, Vector2f& ret ) const;
-	void get( const std::string& uniformName, Vector3f& ret ) const;
-	void get( const std::string& uniformName, Vector4f& ret ) const;
-	void get( const std::string& uniformName, Matrix3f& ret ) const;
-	void get( const std::string& uniformName, Matrix4f& ret ) const;
-
-	bool hasTexture( const std::string& uniformName ) const;
-	bool hasInt( const std::string& uniformName ) const;
-	bool hasFloat( const std::string& uniformName ) const;
-	bool hasVector2f( const std::string& uniformName ) const;
-	bool hasVector3f( const std::string& uniformName ) const;
-	bool hasVector4f( const std::string& uniformName ) const;
-	bool hasMatrix4f( const std::string& uniformName ) const;
-	bool hasMatrix3f( const std::string& uniformName ) const;
-
 	void setOn( unsigned int handle );
 
-	int NumUniforms() const { return mNumUniforms; }
-
-	std::shared_ptr<ProgramUniformSet> clone();
-
-	int64_t Hash() const { return mHash; }
 private:
-	int hasUniform( unsigned int handle, const char* name ) const;
-	void setUniform( const char* name, const TextureIndex& value, unsigned int handle ) const;
-	void setUniform( const char* name, int value, unsigned int handle ) const;
-	void setUniform( const char* name, float value, unsigned int handle ) const;
-	void setUniform( const char* name, float x, float y, unsigned int handle ) const;
-	void setUniform( const char* name, float x, float y, float z, unsigned int handle ) const;
-
-	void setUniform( const char* name, float x, float y, float z, float w, unsigned int handle ) const;
-	void setUniform( const char* name, const Vector2f& v, unsigned int handle ) const;
-	void setUniform( const char* name, const Vector3f& v, unsigned int handle ) const;
-	void setUniform( const char* name, const std::vector<Vector3f>& v, unsigned int handle ) const;
-	void setUniform( const char* name, const Vector4f& v, unsigned int handle ) const;
-	void setUniform( const char* name, const Matrix2f& matrix, unsigned int handle ) const;
-	void setUniform( const char* name, const Matrix3f& matrix, unsigned int handle ) const;
-	void setUniform( const char* name, const Matrix4f& matrix, unsigned int handle ) const;
-
 	int  getUBOPoint( const std::string& ubo_name );
-
-	void calcTotalNumUniforms();
-	void calcHash();
-
-private:
-	std::map<std::string, TextureIndex> mTextures;
-	std::map<std::string, int> mInts;
-	std::map<std::string, float> mFloats;
-	std::map<std::string, Vector2f> mV2fs;
-	std::map<std::string, Vector3f> mV3fs;
-	std::map<std::string, std::vector<Vector3f>> mV3fvs;
-	std::map<std::string, Vector4f> mV4fs;
-	std::map<std::string, Matrix3f> mM3fs;
-	std::map<std::string, Matrix4f> mM4fs;
-	int mNumUniforms = 0;
 
 	// Uniform Buffer Objects
 	unsigned int mUBOHandle = 0;
@@ -152,7 +89,6 @@ private:
 	static std::map<std::string, int> mUBONames;
 	static std::map<std::string, unsigned int> mUBOHandles;
 
-	int64_t mHash = 0;
 public:
 	template <typename T>
 	static void mapUBOData( std::shared_ptr<ProgramUniformSet> UBOSchema,

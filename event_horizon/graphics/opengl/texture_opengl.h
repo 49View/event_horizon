@@ -9,6 +9,7 @@
 #include "gl_headers.hpp"
 #include "core/math/vector2f.h"
 #include "core/util.h"
+#include "core/htypes_shared.hpp"
 #include "../graphic_constants.h"
 
 //====================================
@@ -76,8 +77,8 @@ public:
         return mHandle;
     }
 
-    TextureIndex TDI() const {
-        return { mHandle, mGlTextureSlot, mTarget };
+    TextureUniformDesc TDI( unsigned int _slot ) const {
+        return { mHandle, _slot, mTarget };
     };
 
     TextureTargetMode getTarget() const {

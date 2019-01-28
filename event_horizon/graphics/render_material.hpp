@@ -36,19 +36,19 @@ public:
     void removeAllTextures();
 
     template<typename T>
-    void setConstant( const std::string& _name, T value ) {
+    void setConstant( const std::string& _name, const T& value ) {
         uniforms->assign( _name, value );
         calcHash();
     }
 
     template<typename T>
     void setGlobalConstant( const std::string& _name, T value ) {
-        globalUniforms->assignGlobal( _name, value );
+        globalUniforms->assign( _name, value );
     }
 
     template<typename T>
     void setGlobalConstant( const std::string& _name, std::shared_ptr<T> value ) {
-        if ( value ) globalUniforms->assignGlobal( _name, *value.get());
+        if ( value ) globalUniforms->assign( _name, *value.get());
     }
 
     template<typename T>

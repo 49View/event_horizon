@@ -306,3 +306,9 @@ enum class BuilderQueryType {
 	Exact,
 	NotExact
 };
+
+struct TextureUniformDesc {
+	unsigned int handle;
+	unsigned int slot;
+	int 		 target;
+};

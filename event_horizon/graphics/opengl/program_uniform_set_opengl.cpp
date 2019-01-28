@@ -38,91 +38,87 @@ void ProgramUniformSet::submitUBOData( void* data ) {
 
 ////// Naked Uniforms
 
-GLint ProgramUniformSet::hasUniform( GLuint handle, const char* name ) const {
+GLint GPUUniformVisitor::hasUniform( const char* name ) const {
 	return glGetUniformLocation( handle, name );
 }
 
-void setTexture( GLuint textureUnit, GLenum target, GLuint handle ) {
-	GLCALL( glActiveTexture( GL_TEXTURE0 + textureUnit ));
-	GLCALL( glBindTexture( targetToGl( static_cast<TextureTargetMode>(target)), handle ));
-}
-
-void ProgramUniformSet::setUniform( const char* name, const TextureIndex& value, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, const TextureIndex& value ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
-	setTexture( value.slot, value.target, value.handle );
-	setUniform( name, static_cast<int>(value.slot), handle );
+	GLCALL( glActiveTexture( GL_TEXTURE0 + value.slot ));
+	GLCALL( glBindTexture( targetToGl( static_cast<TextureTargetMode>(value.target) ), value.handle ) );
+    GLCALL( glUniform1i( location, value.slot ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, int value, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, int value ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glUniform1i( location, value ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, float value, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, float value ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glUniform1f( location, value ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, float x, float y, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, float x, float y ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glUniform2f( location, x, y ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, float x, float y, float z, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, float x, float y, float z ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glUniform3f( location, x, y, z ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, float x, float y, float z, float w, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, float x, float y, float z, float w ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glUniform4f( location, x, y, z, w ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, const Vector2f& v, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, const Vector2f& v ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	glUniform2f( location, v.x(), v.y() );
 }
 
-void ProgramUniformSet::setUniform( const char* name, const Vector3f& v, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, const Vector3f& v ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	glUniform3f( location, v.x(), v.y(), v.z() );
 }
 
-void ProgramUniformSet::setUniform( const char* name, const std::vector<Vector3f>& v, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, const std::vector<Vector3f>& v ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	unsigned int numv = static_cast<unsigned int>( v.size() );
 	glUniform3fv( location, numv, reinterpret_cast<const float*>( v.data() ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, const Vector4f& v, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, const Vector4f& v ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	glUniform4f( location, v.x(), v.y(), v.z(), v.w() );
 }
 
-void ProgramUniformSet::setUniform( const char* name, const Matrix2f& matrix, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, const Matrix2f& matrix ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glUniformMatrix2fv( location, 1, false, reinterpret_cast<const float*>( &matrix ) ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, const Matrix3f& matrix, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, const Matrix3f& matrix ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glUniformMatrix3fv( location, 1, false, reinterpret_cast<const float*>( &matrix ) ) );
 }
 
-void ProgramUniformSet::setUniform( const char* name, const Matrix4f& matrix, GLuint handle ) const {
-	GLint location = hasUniform( handle, name );
+void GPUUniformVisitor::visit( const char* name, const Matrix4f& matrix ) const {
+	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glUniformMatrix4fv( location, 1, false, reinterpret_cast<const float*>( &matrix ) ) );
 }
