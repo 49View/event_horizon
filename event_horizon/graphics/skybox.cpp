@@ -106,7 +106,7 @@ void CubeEnvironmentMap::init() {
 
 void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
     rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
-    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt );
+    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI() );
     mVPList->addToCommandBuffer( rr );
 }
 
@@ -129,7 +129,7 @@ void PrefilterSpecularMap::init() {
 void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float roughness ) {
     rr.CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
     rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
-    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt );
+    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI() );
     mVPList->setMaterialConstant( UniformNames::roughness, roughness );
     mVPList->addToCommandBuffer( rr );
 }

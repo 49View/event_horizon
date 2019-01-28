@@ -288,6 +288,11 @@ std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot )
     return tm.TD( _id, tSlot );
 }
 
+TextureIndex Renderer::TDI( const std::string& _id, unsigned int tSlot ) {
+    auto t = TD( _id, tSlot );
+    return { t->getHandle(), tSlot, t->getTarget() };
+}
+
 void RenderAnimationManager::setTiming() {
     mAnimUniforms->setUBOData( UniformNames::deltaAnimTime, Vector4f{GameTime::getCurrTimeStep(), GameTime::getCurrTimeStamp(),
                                                                      GameTime::getLastTimeStamp(), 0.0f } );

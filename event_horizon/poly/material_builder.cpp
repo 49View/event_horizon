@@ -6,6 +6,13 @@
 #include <core/image_util.h>
 #include <stb/stb_image_write.h>
 
+const static std::vector<std::string> g_pbrNames{ "_basecolor","_normal","_ambient_occlusion","_roughness",
+                                                  "_metallic","_height" };
+
+const std::vector<std::string>& pbrNames() {
+    return g_pbrNames;
+}
+
 MaterialBuilder::MaterialBuilder( const std::string& _name, const MaterialType _mt, const std::string& _sn ) : ResourceBuilder(
         _name) {
     materialType = _mt;
@@ -156,7 +163,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
 }
 
 void MaterialBuilder::handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName ) {
-    auto& sg = static_cast<MaterialManager&>(_md);
+    auto& sg = dynamic_cast<MaterialManager&>(_md);
 
     if ( materialType == MaterialType::PBR ) {
         for ( const auto& td : PBRMaterial::textureDependencies( _keyTextureName ))

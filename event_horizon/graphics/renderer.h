@@ -102,6 +102,7 @@ public:
 
 	std::shared_ptr<Program> P(const std::string& _id);
 	std::shared_ptr<Texture> TD( const std::string& _id, const int tSlot = -1 );
+	TextureIndex TDI( const std::string& _id, unsigned int tSlot );
 
 	void addToCommandBuffer( CommandBufferLimitsT _entry );
 	void addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,

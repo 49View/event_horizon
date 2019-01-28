@@ -76,6 +76,14 @@ public:
         return mHandle;
     }
 
+    TextureIndex TDI() const {
+        return { mHandle, mGlTextureSlot, mTarget };
+    };
+
+    TextureTargetMode getTarget() const {
+        return mTarget;
+    }
+
     void setHandle( GLuint h ) {
         mHandle = h;
     }

@@ -258,10 +258,10 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
 
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::colorFBTexture,
-                    cstack->fb(CommandBufferFrameBufferType::finalResolve)->RenderToTexture());
+                    cstack->fb(CommandBufferFrameBufferType::finalResolve)->RenderToTexture()->TDI());
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::bloomTexture,
-                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture());
+                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture()->TDI());
 //            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
 //                    UniformNames::shadowMapTexture,
 //                    rr.getShadowMapFB()->RenderToTexture());
@@ -527,17 +527,17 @@ void CompositePBR::bloom() {
     Framebuffer::blit( mColorFB, mColorFinalFB, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT0 );
 
     mBlurVerticalFB->bind();
-    mBlurVerticalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mColorFinalFB->RenderToTexture());
+    mBlurVerticalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mColorFinalFB->RenderToTexture()->TDI());
     mBlurVerticalFB->VP()->render_im();
     //--
 
     for ( int i = 0; i < amount; i++ ) {
         mBlurHorizontalFB->bind();
-        mBlurHorizontalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mBlurVerticalFB->RenderToTexture());
+        mBlurHorizontalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mBlurVerticalFB->RenderToTexture()->TDI());
         mBlurHorizontalFB->VP()->render_im();
 
         mBlurVerticalFB->bind();
-        mBlurVerticalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mBlurHorizontalFB->RenderToTexture());
+        mBlurVerticalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mBlurHorizontalFB->RenderToTexture()->TDI());
         mBlurVerticalFB->VP()->render_im();
     }
 }

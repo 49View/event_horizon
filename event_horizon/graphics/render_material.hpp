@@ -56,9 +56,6 @@ public:
         bufferUniforms[ubo_name]->setUBOData( _name, value );
     }
 
-    void serialize( std::shared_ptr<SerializeBin> writer );
-    void deserialize( std::shared_ptr<DeserializeBin> reader );
-
     inline int64_t Hash() const { return mHash; }
     float TransparencyValue() const { return mTransparencyValue; }
     void TransparencyValue( float val ) { mTransparencyValue = val; }
@@ -85,7 +82,7 @@ class Renderer;
 
 class MaterialUniformRenderBaseSetup {
 public:
-    virtual void operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus, PUTB& tub )
+    virtual void operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus, Renderer& tub )
     const = 0;
 };
 
@@ -96,7 +93,7 @@ public:
     }
 
     virtual void operator()( std::shared_ptr<Program> program,
-                             std::shared_ptr<ProgramUniformSet>& pus, PUTB& tub ) const;
+                             std::shared_ptr<ProgramUniformSet>& pus, Renderer& tub ) const;
 protected:
     std::shared_ptr<GenericMaterial> material;
 };
@@ -108,7 +105,7 @@ public:
     }
 
     void operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus,
-                     PUTB& tub ) const;
+                     Renderer& tub ) const;
 protected:
     std::shared_ptr<PBRMaterial> material;
 };

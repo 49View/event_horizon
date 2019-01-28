@@ -87,8 +87,6 @@ void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
 
 std::vector<Vector3f> createQuadPoints( const Vector2f& size = Vector2f::ONE );
 
-const std::vector<std::string>& pbrNames();
-
 template<typename T>
 std::vector<T> lineRL( const T& direction, float length ) {
     return { direction*(length*0.5f), -direction*(length*0.5f) };

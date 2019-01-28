@@ -129,3 +129,11 @@ using ViewportTogglesT = int;
 
 std::string cubeMapFace( const std::string& filename, CubemapFaces cf );
 std::string cubeMapTName( const std::string& filename );
+
+struct TextureUniformDesc {
+	unsigned int handle;
+	unsigned int slot;
+	int 		 target;
+};
+
+using TextureIndex = TextureUniformDesc;

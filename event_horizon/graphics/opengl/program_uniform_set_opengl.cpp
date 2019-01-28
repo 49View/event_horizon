@@ -42,6 +42,18 @@ GLint ProgramUniformSet::hasUniform( GLuint handle, const char* name ) const {
 	return glGetUniformLocation( handle, name );
 }
 
+void setTexture( GLuint textureUnit, GLenum target, GLuint handle ) {
+	GLCALL( glActiveTexture( GL_TEXTURE0 + textureUnit ));
+	GLCALL( glBindTexture( targetToGl( static_cast<TextureTargetMode>(target)), handle ));
+}
+
+void ProgramUniformSet::setUniform( const char* name, const TextureIndex& value, GLuint handle ) const {
+	GLint location = hasUniform( handle, name );
+	if ( location == -1 )  return;
+	setTexture( value.slot, value.target, value.handle );
+	setUniform( name, static_cast<int>(value.slot), handle );
+}
+
 void ProgramUniformSet::setUniform( const char* name, int value, GLuint handle ) const {
 	GLint location = hasUniform( handle, name );
 	if ( location == -1 )  return;

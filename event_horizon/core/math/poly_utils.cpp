@@ -1,6 +1,5 @@
 #include "poly_utils.hpp"
 #include "../serializebin.hpp"
-#include "../descriptors/material.h"
 
 std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
 									 const std::array<Vector2f, 4>& vtcs,
@@ -9,7 +8,7 @@ std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
  									 FlipSubdiv subDivDir ) {
 	std::vector<polyQuadSub> ret;
 	std::array<Vector3f, 4> vs;
-	std::array<Vector2f, 4> vtcsi;
+	std::array<Vector2f, 4> vtcsi{};
 	std::array<Vector3f, 4> vncsi;
 
 	int i2 = ( subDivDir == FlipSubdiv::True ) ? 3 : 2;
@@ -159,19 +158,12 @@ std::vector<Vector3f> createQuadPoints( const Vector2f& size ) {
 
 	std::vector<Vector3f> lPoints;
 
-	lPoints.push_back( Vector2f( -size.x() * 0.5f, size.y() * 0.5f ) );
-	lPoints.push_back( Vector2f( size.x() * 0.5f, size.y() * 0.5f ) );
-	lPoints.push_back( Vector2f( size.x() * 0.5f, -size.y() * 0.5f ) );
-	lPoints.push_back( Vector2f( -size.x() * 0.5f, -size.y() * 0.5f ) );
+	lPoints.emplace_back( Vector2f( -size.x() * 0.5f, size.y() * 0.5f ) );
+	lPoints.emplace_back( Vector2f( size.x() * 0.5f, size.y() * 0.5f ) );
+	lPoints.emplace_back( Vector2f( size.x() * 0.5f, -size.y() * 0.5f ) );
+	lPoints.emplace_back( Vector2f( -size.x() * 0.5f, -size.y() * 0.5f ) );
 
 	return lPoints;
-}
-
-const static std::vector<std::string> g_pbrNames{ "_basecolor","_normal","_ambient_occlusion","_roughness",
-												  "_metallic","_height" };
-
-const std::vector<std::string>& pbrNames() {
-	return g_pbrNames;
 }
 
 WindingOrderT detectWindingOrder( const std::vector<Vector2f>& _input ) {

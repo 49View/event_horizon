@@ -7,253 +7,6 @@ std::map<std::string, int> ProgramUniformSet::mUBONames;
 std::map<std::string, int> ProgramUniformSet::mUBOOffsetMap;
 std::map<std::string, unsigned int> ProgramUniformSet::mUBOHandles;
 
-//ProgramUniformSet& ProgramUniformSet::globalStaticUniform() {
-//    static ProgramUniformSet globalSU( PUSType::Global );
-//    return globalSU;
-//}
-
-//ProgramUniformSet::ProgramUniformSet( const ProgramUniformSet *source ) {
-//    mTextures = source->mTextures;
-//    mInts = source->mInts;
-//    mFloats = source->mFloats;
-//    mV2fs = source->mV2fs;
-//    mV3fs = source->mV3fs;
-//    mV3fvs = source->mV3fvs;
-//    mV4fs = source->mV4fs;
-//    mM3fs = source->mM3fs;
-//    mM4fs = source->mM4fs;
-//    mNumUniforms = source->NumUniforms();
-//}
-
-//ProgramUniformSet::ProgramUniformSet( PUSType pt ) {
-//    switch ( pt ) {
-//        case PUSType::Color:
-//        case PUSType::UI_3d:
-//            assign( UniformNames::diffuseColor, Color4f::WHITE.xyz());
-//            break;
-//        case PUSType::Alpha:
-//            break;
-//        case PUSType::Color_alpha:
-//            assign( UniformNames::diffuseColor, Color4f::WHITE.xyz());
-//            break;
-//        case PUSType::UI:
-//            assign( UniformNames::diffuseColor, Vector3f::ONE );
-//            assign( UniformNames::ui_z, 1.0f );
-//            break;
-//        case PUSType::Full_3d:
-//        case PUSType::Full_3d_NoTexture: {
-//            assign( UniformNames::ambient, Vector3f( 0.05f ));
-//            assign( UniformNames::diffuseColor, Vector3f::ONE );
-//            assign( UniformNames::diffuse, 1.0f );
-//            assign( UniformNames::incandescenceColor, Color3f::ZERO );
-//            assign( UniformNames::incandescenceFactor, 1.0f );
-//            assign( UniformNames::opacity, 1.0f );
-//            assign( UniformNames::alpha, 1.0f );
-//            assign( UniformNames::reflectivity, 0.0f );
-//            assign( UniformNames::specularColor, Vector3f::ZERO );
-//            assign( UniformNames::cosinePower, 20.0f );
-//            assign( UniformNames::metallic, 0.0f );
-//            assign( UniformNames::roughness, 0.5f );
-//            assign( UniformNames::ao, 0.000001f );
-//            if ( pt == PUSType::Full_3d ) {
-//                assign( UniformNames::colorTexture, TM.T( "white.png" ));
-//                assign( UniformNames::normalTexture, TM.T( "white_n.png" ));
-//            }
-//        }
-//            break;
-//        case PUSType::Font:
-//            assign( UniformNames::diffuseColor, Color4f::PASTEL_GRAY.xyz());
-//            break;
-//        case PUSType::Global:
-//            break;
-//        default:
-//            break;
-//    }
-//    if ( pt != PUSType::Global ) {
-//        assign( UniformNames::opacity, 1.0f );
-//        assign( UniformNames::alpha, 1.0f );
-//    }
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const std::string& name ) {
-//    assign( UniformNames::colorTexture, TM.T( name ));
-//    assign( UniformNames::diffuseColor, Color4f::WHITE.xyz());
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Texture> tex ) {
-//    assign( UniformNames::colorTexture, tex );
-//    assign( UniformNames::diffuseColor, Color4f::WHITE.xyz());
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Texture> tex, const float opacity ) {
-//    assign( UniformNames::colorTexture, tex );
-//    assign( UniformNames::diffuseColor, Color3f::ONE );
-//    assign( UniformNames::opacity, opacity );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Texture> tex, const Color3f& color ) {
-//    assign( UniformNames::colorTexture, tex );
-//    assign( UniformNames::diffuseColor, color );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Texture> tex, const Color3f& color, const float opacity ) {
-//    assign( UniformNames::colorTexture, tex );
-//    assign( UniformNames::diffuseColor, color );
-//    assign( UniformNames::opacity, opacity );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const float opacity ) {
-//    assign( UniformNames::opacity, opacity );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const Vector3f& color, ColorMatType cmt ) {
-//    if ( cmt == ColorMatType::Color ) {
-//        assign( UniformNames::colorTexture, TM.T( "white.png" ));
-//        assign( UniformNames::diffuseColor, color );
-//    }
-//    if ( cmt == ColorMatType::Diffuse ) {
-//        assign( UniformNames::diffuseColor, color );
-//    }
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const Vector3f& color, const float opacity, ColorMatType cmt ) {
-//    if ( cmt == ColorMatType::Color ) {
-//        assign( UniformNames::colorTexture, TM.T( "white.png" ));
-//        assign( UniformNames::diffuseColor, color );
-//    }
-//    if ( cmt == ColorMatType::Diffuse ) {
-//        assign( UniformNames::diffuseColor, color );
-//    }
-//    assign( UniformNames::opacity, opacity );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const Vector4f& color, ColorMatType cmt ) {
-//    if ( cmt == ColorMatType::Color ) {
-//        assign( UniformNames::colorTexture, TM.T( "white.png" ));
-//        assign( UniformNames::diffuseColor, color.xyz());
-//    }
-//    if ( cmt == ColorMatType::Diffuse ) {
-//        assign( UniformNames::diffuseColor, color.xyz());
-//    }
-//    assign( UniformNames::opacity, color.w());
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const std::string& name, const Vector3f& color ) {
-//    assign( UniformNames::colorTexture, TM.T( name ));
-//    assign( UniformNames::diffuseColor, color );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const std::string& name, const TextureSetFlags tfs, const Vector3f& color ) {
-//    assign( UniformNames::colorTexture, TM.T( name ));
-//    if ( tfs & TextureSetFlags::TSF_Normal ) assign( UniformNames::normalTexture, TM.T( name + "_n" ));
-//    assign( UniformNames::diffuseColor, color );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const std::string& name, const float opacity ) {
-//    assign( UniformNames::colorTexture, TM.T( name ));
-//    assign( UniformNames::diffuseColor, Color3f::ONE );
-//    assign( UniformNames::opacity, opacity );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const std::string& name, const Vector4f& color ) {
-//    assign( UniformNames::colorTexture, TM.T( name ));
-//    assign( UniformNames::diffuseColor, color );
-//    assign( UniformNames::opacity, color.w());
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const Vector4f& color, const float metallic, const float roughness,
-//                                      const float ao ) {
-//
-////    assign( UniformNames::aoTexture, TM.TD( "white.png", TSLOT_AO ));
-////    assign( UniformNames::roughnessTexture, TM.TD( "black.png", TSLOT_ROUGHNESS ));
-////    assign( UniformNames::metallicTexture, TM.TD( "black.png", TSLOT_METALLIC ));
-//
-//    assign( UniformNames::ibl_irradianceMap, TM.TD( FBNames::convolution, TSLOT_IBL_IRRADIANCE ));
-//    assign( UniformNames::ibl_specularMap, TM.TD( FBNames::specular_prefilter, TSLOT_IBL_PREFILTER ));
-//    assign( UniformNames::ibl_brdfLUTMap, TM.TD( FBNames::ibl_brdf, TSLOT_IBL_BRDFLUT ));
-//
-//    assign( UniformNames::diffuseColor, color.xyz());
-//    assign( UniformNames::metallic, metallic );
-//    assign( UniformNames::roughness, roughness );
-//    assign( UniformNames::ao, ao );
-//}
-//
-//ProgramUniformSet::ProgramUniformSet( const std::string& name, const Vector4f& color, [[maybe_unused]] float metallic,
-//                                       [[maybe_unused]] float roughness, [[maybe_unused]] float ao ) {
-//    std::string base = getFileNameNoExt( name );
-//    std::string ext = getFileNameExt( name );
-//
-//    assign( UniformNames::colorTexture, TM.T( ImageBuilder{ base + "_basecolor" + ext }.GPUSlot( TSLOT_COLOR )
-//                                                      .backup( "white.png" ) ));
-//    assign( UniformNames::normalTexture, TM.T( ImageBuilder{ base + "_normal" + ext }.GPUSlot( TSLOT_NORMAL )
-//                                                       .backup( "white_n.png" )));
-//    assign( UniformNames::aoTexture,
-//            TM.T( ImageBuilder{ base + "_ambient_occlusion" + ext }.GPUSlot( TSLOT_AO ).backup( "white.png" )));
-//    assign( UniformNames::roughnessTexture, TM.T( ImageBuilder{ base + "_roughness" + ext }.GPUSlot(
-//            TSLOT_ROUGHNESS ).backup( "white.png" )));
-//    assign( UniformNames::metallicTexture,
-//            TM.T( ImageBuilder{ base + "_metallic" + ext }.GPUSlot( TSLOT_METALLIC ).backup( "black.png" )
-//            ));
-//    assign( UniformNames::heightTexture,
-//            TM.T( ImageBuilder{ base + "_height" + ext }.GPUSlot( TSLOT_HEIGHT ).backup( "black.png" )
-//            ));
-//
-//    assign( UniformNames::ibl_irradianceMap, TM.TD( FBNames::convolution, TSLOT_IBL_IRRADIANCE ));
-//    assign( UniformNames::ibl_specularMap, TM.TD( FBNames::specular_prefilter, TSLOT_IBL_PREFILTER ));
-//    assign( UniformNames::ibl_brdfLUTMap, TM.TD( FBNames::ibl_brdf, TSLOT_IBL_BRDFLUT ));
-//
-//    assign( UniformNames::diffuseColor, color.xyz());
-//    assign( UniformNames::metallic, 1.0f );
-//    assign( UniformNames::roughness, 1.0f );
-//    assign( UniformNames::ao, 1.0f );
-//}
-
-void ProgramUniformSet::serialize( std::shared_ptr<SerializeBin> writer ) {
-    writer->write( mNumUniforms );
-
-    // We cannot serialize pointers so we create a temp map with texture names instead
-//    std::map<std::string, std::string> textureNames;
-//    for ( auto& u : mTextures ) {
-//        if ( u.first == UniformNames::colorTexture || u.first == UniformNames::normalTexture ) {
-//            textureNames.insert( std::make_pair( u.first, u.second->FullName()));
-//        }
-//    }
-//    writer->write( textureNames );
-
-    writer->write( mFloats );
-    writer->write( mInts );
-    writer->write( mV2fs );
-    writer->write( mV3fs );
-    writer->write( mV3fvs );
-    writer->write( mV4fs );
-    writer->write( mM3fs );
-    writer->write( mM4fs );
-}
-
-void ProgramUniformSet::deserialize( std::shared_ptr<DeserializeBin> reader ) {
-    reader->read( mNumUniforms );
-
-    // We cannot deserialize pointers so we create a temp map with texture names instead
-    std::map<std::string, std::string> textureNames;
-    reader->read( textureNames );
-    // TODO: How do we deal with this de-serialization? Needs the extra function to complete the loading after
-    // deserialization has finished
-//    for ( auto& u : textureNames ) {
-//        assign( u.first, TM.T( u.second ));
-//    }
-
-    reader->read( mFloats );
-    reader->read( mInts );
-    reader->read( mV2fs );
-    reader->read( mV3fs );
-    reader->read( mV3fvs );
-    reader->read( mV4fs );
-    reader->read( mM3fs );
-    reader->read( mM4fs );
-
-    calcHash();
-}
-
 int ProgramUniformSet::getUBOPoint( const std::string& ubo_name ) {
     auto n = mUBONames.find( ubo_name );
     if ( n == mUBONames.end()) {
@@ -284,7 +37,7 @@ void ProgramUniformSet::calcTotalNumUniforms() {
 void ProgramUniformSet::calcHash() {
     mHash = mNumUniforms;
 
-    for ( auto& i : mTextures ) mHash += std::hash<std::string>{}( i.second->getId());
+    for ( auto& i : mTextures ) mHash += std::hash<std::string>{}(i.first);
     for ( auto& i : mInts ) mHash += i.second;
     for ( auto& i : mFloats ) mHash += static_cast<int64_t>( i.second * 1000.0f );
     for ( auto& i : mV2fs ) mHash += i.second.hash();
@@ -365,7 +118,7 @@ void ProgramUniformSet::assign( const std::string& uniformName, int data ) {
     calcTotalNumUniforms();
 }
 
-void ProgramUniformSet::assign( const std::string& uniformName, std::shared_ptr<Texture> data ) {
+void ProgramUniformSet::assign( const std::string& uniformName, const TextureIndex& data ) {
     mTextures[uniformName] = data;
     calcTotalNumUniforms();
 }
@@ -415,7 +168,7 @@ void ProgramUniformSet::assignGlobal( const std::string& uniformName, int data )
     mNumUniforms = 1;
 }
 
-void ProgramUniformSet::assignGlobal( const std::string& uniformName, std::shared_ptr<Texture> data ) {
+void ProgramUniformSet::assignGlobal( const std::string& uniformName, TextureIndex data ) {
     mTextures[uniformName] = data;
     mNumUniforms = 1;
 }
@@ -460,97 +213,12 @@ void ProgramUniformSet::assignGlobal( const std::string& uniformName, const Matr
     mNumUniforms = 1;
 }
 
-//void ProgramUniformSet::setStatic( const std::string& uniformName, std::shared_ptr<Texture> data, const Program *_p ) {
-//    //mTextures[uniformName] = data;
-//    //calcTotalNumUniforms();
-//    if ( _p != nullptr ) {
-//        _p->beginRender();
-//        setUniform( uniformName.c_str(), static_cast<int>( data->textureSlot()), _p->handle());
-//        data->bind( data->textureSlot());
-//    } else {
-//        for ( const auto& i : SM.Programs()) {
-//            i->beginRender();
-//            setUniform( uniformName.c_str(), static_cast<int>( data->textureSlot()), i->handle());
-//            data->bind( data->textureSlot());
-//        }
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, int data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), data, i->handle());
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, float data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), data, i->handle());
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, double data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), static_cast<float>( data ), i->handle());
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, const Vector2f& data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), data, i->handle());
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, const Vector3f& data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), data, i->handle());
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, const std::vector<Vector3f>& data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), data, i->handle());
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, const Vector4f& data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), data, i->handle());
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, const Matrix4f& data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), data, i->handle());
-//    }
-//}
-//
-//void ProgramUniformSet::setStatic( const std::string& uniformName, const Matrix3f& data ) {
-//    for ( const auto& i : SM.Programs()) {
-//        i->beginRender();
-//        setUniform( uniformName.c_str(), data, i->handle());
-//    }
-//}
-
-void ProgramUniformSet::assign( ProgramUniformTextureBuilder& pub ) {
-    if ( pub.program->hasUniform( pub.uniformName) ) {
-        assign( pub.uniformName, pub.rr.TD( pub.textureName, pub.tslot ) );
-    }
-}
-
 void ProgramUniformSet::clearTextures() {
     mTextures.clear();
     calcTotalNumUniforms();
 }
 
-std::shared_ptr<Texture> ProgramUniformSet::getTexture( const std::string& uniformName ) const {
+TextureIndex ProgramUniformSet::getTexture( const std::string& uniformName ) const {
     ASSERT( mTextures.find( uniformName ) != mTextures.end());
     return mTextures.at( uniformName );
 }
@@ -629,7 +297,7 @@ bool ProgramUniformSet::hasMatrix3f( const std::string& uniformName ) const {
     return ( mM3fs.find( uniformName ) != mM3fs.end());
 }
 
-void ProgramUniformSet::get( const std::string& uniformName, std::shared_ptr<Texture> ret ) const {
+void ProgramUniformSet::get( const std::string& uniformName, TextureIndex ret ) const {
     ASSERT( mTextures.find( uniformName ) != mTextures.end());
     ret = mTextures.at( uniformName );
 }
@@ -673,19 +341,15 @@ void ProgramUniformSet::setOn( unsigned int handle ) {
     if ( mNumUniforms == 0 ) return;
 
     // Textures
-    for ( auto& u : mTextures ) {
-        u.second->bind( u.second->textureSlot());
-        setUniform( u.first.c_str(), static_cast<int>( u.second->textureSlot()), handle );
-    }
-    // Normal uniforms
-    for ( auto& u : mFloats ) { setUniform( u.first.c_str(), u.second, handle ); }
-    for ( auto& u : mInts ) { setUniform( u.first.c_str(), u.second, handle ); }
-    for ( auto& u : mV2fs ) { setUniform( u.first.c_str(), u.second, handle ); }
-    for ( auto& u : mV3fs ) { setUniform( u.first.c_str(), u.second, handle ); }
-    for ( auto& u : mV4fs ) { setUniform( u.first.c_str(), u.second, handle ); }
-    for ( auto& u : mM3fs ) { setUniform( u.first.c_str(), u.second, handle ); }
-    for ( auto& u : mM4fs ) { setUniform( u.first.c_str(), u.second, handle ); }
-    for ( auto& u : mV3fvs ) { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mTextures ) { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mFloats )   { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mInts )     { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mV2fs )     { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mV3fs )     { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mV4fs )     { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mM3fs )     { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mM4fs )     { setUniform( u.first.c_str(), u.second, handle ); }
+    for ( auto& u : mV3fvs )    { setUniform( u.first.c_str(), u.second, handle ); }
 }
 
 std::shared_ptr<ProgramUniformSet> ProgramUniformSet::clone() {
