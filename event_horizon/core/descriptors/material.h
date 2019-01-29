@@ -7,6 +7,7 @@
 #include <iostream>
 #include <core/http/basen.hpp>
 #include <core/http/webclient.h>
+#include <core/heterogeneous_map.hpp>
 #include "../util.h"
 #include "../math/vector4f.h"
 #include "../serializebin.hpp"
@@ -41,11 +42,6 @@ namespace MPBRTextures {
         return "";
     }
 }
-
-enum class MaterialType {
-    Generic,
-    PBR
-};
 
 JSONDATA_R( MaterialColor, name, color, category, brand, code, application )
     Vector4f color = Vector4f::WHITE;
@@ -94,21 +90,19 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, pigment )
     }
 };
 
-class Material {
+class Material : public HeterogeneousMap {
 public:
-    Material() {
-        type = MaterialType::Generic;
-    }
+    Material() = default;
 
-    Material( const std::string& tn  ) {
-        type = MaterialType::Generic;
-        name = tn;
-    }
+//    Material( const std::string& tn  ) {
+//        name = tn;
+//    }
 
-    Material( MaterialType _type, const std::string& name, const std::string& shaderName,
+    Material( const std::string& _name, const std::string& shaderName,
               const std::string& textureName, const Color4f& color, float opacity ) :
-              type( _type ), name( name ), shaderName(shaderName ), textureName( textureName ), color( color ),
-              opacity( opacity ) {}
+              shaderName(shaderName ), textureName( textureName ), color( color ), opacity( opacity ) {
+        Name( _name );
+    }
 
     virtual std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) = 0;
     virtual std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) = 0;
@@ -121,25 +115,6 @@ public:
     Material& c( const Color4f& col ) {
         color = col;
         return *this;
-    }
-
-    MaterialType getType() const {
-        return type;
-    }
-
-    std::string getTypeAsString() const {
-        switch (type) {
-            case MaterialType::Generic:
-                return "Generic";
-            case MaterialType::PBR:
-                return "PBR";
-            default:
-                return "Unknown";
-        }
-    }
-
-    const std::string& getName() const {
-        return name;
     }
 
     const std::string& getShaderName() const {
@@ -160,14 +135,6 @@ public:
 
     static const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key ) {
         return {{ _key, 0xffffffff }};
-    }
-
-    void setType( MaterialType _type ) {
-        type = _type;
-    }
-
-    void setName( const std::string& _name ) {
-        name = _name;
     }
 
     void setShaderName( const std::string& _value ) {
@@ -205,25 +172,19 @@ public:
     }
 
     virtual void serialize( std::shared_ptr<SerializeBin> writer ) {
-        writer->write( type );
-        writer->write( name );
         writer->write( textureName );
         writer->write( color );
         writer->write( opacity );
     }
 
     virtual void deserialize( std::shared_ptr<DeserializeBin> reader ) {
-        reader->read( type );
-        reader->read( name );
         reader->read( textureName );
         reader->read( color );
         reader->read( opacity );
     }
 
 protected:
-    MaterialType type = MaterialType::Generic;
     MaterialProperties properties;
-    std::string name;
     std::string shaderName;
     std::string textureName = "white";
     Color4f color = Color4f::WHITE;
@@ -244,39 +205,26 @@ public:
     virtual ~GenericMaterial() = default;
 
     std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) override {
-        return std::make_shared<GenericMaterial>( type, name, _subkey, textureName, color, opacity );
+        return std::make_shared<GenericMaterial>( Name(), _subkey, textureName, color, opacity );
     }
 
     std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) override {
-        return std::make_shared<GenericMaterial>( type, name, shaderName, textureName, _mp.pigment, opacity );
+        return std::make_shared<GenericMaterial>( Name(), shaderName, textureName, _mp.pigment, opacity );
     }
 };
 
 class PBRMaterial : public Material {
 public:
 
-    PBRMaterial() {
-        type = MaterialType::PBR;
-    }
+    PBRMaterial() = default;
 
     PBRMaterial( std::shared_ptr<DeserializeBin> reader ) {
         deserialize( reader );
     }
 
-    PBRMaterial( const std::string& _name, const std::string& tn ) : Material( _name ) {
-        type = MaterialType::PBR;
-        t( tn );
-    }
-
-    PBRMaterial( const std::string& _plain ) : Material( _plain ) {
-        type = MaterialType::PBR;
-        t( _plain );
-    }
-
     virtual ~PBRMaterial() = default;
 
     PBRMaterial& t( const std::string& _plain ) {
-        type = MaterialType::PBR;
         std::string base = getFileNameNoExt( _plain );
         std::string ext = getFileNameExt( _plain );
 
@@ -291,20 +239,20 @@ public:
     }
 
     std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) override {
-        auto ret = std::make_shared<PBRMaterial>( name, textureName );
+        auto ret = std::make_shared<PBRMaterial>();
         ret->setShaderName( _subkey );
         return ret;
     }
 
     std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) override {
-        auto ret = std::make_shared<PBRMaterial>( name, textureName );
+        auto ret = std::make_shared<PBRMaterial>();
         ret->setColor( _mp.pigment );
         return ret;
     }
 
     static const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key ) {
         std::vector<TextureDependencyBuilderPair> ret;
-        PBRMaterial tm{ "temp", _key };
+        PBRMaterial tm;//{ _key };
         ret.push_back( { tm.baseColor, 0xffffffff } );
         ret.push_back( { tm.normal, 0x00ff7f7f } );
         ret.push_back( { tm.ambientOcclusion, 0xffffffff } );
@@ -437,15 +385,7 @@ private:
 };
 
 namespace MaterialDependency {
-    inline const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key,
-                                                                                const MaterialType mt ) {
-        switch ( mt ) {
-            case MaterialType::Generic:
-                return Material::textureDependencies( _key );
-            case MaterialType::PBR:
-                return PBRMaterial::textureDependencies( _key );
-            default:
-                return {};
-        }
+    inline const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key ) {
+        return Material::textureDependencies( _key );
     }
 }

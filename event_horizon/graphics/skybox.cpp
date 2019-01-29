@@ -12,7 +12,7 @@ void Skybox::equirectangularTextureInit( const std::vector<std::string>& params 
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList}.p(colorStrip).s(S::EQUIRECTANGULAR).t(params[0]).n("skybox")
+    VPBuilder<Pos3dStrip>{rr,mVPList,S::EQUIRECTANGULAR}.p(colorStrip).t(params[0]).n("skybox")
     .build();
 
     isReadyToRender = true;
@@ -51,7 +51,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
         std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
         std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                                sp.numIndices, vpos3d, sp.indices );
-        VPBuilder<Pos3dStrip>{rr,mVPList}.p(colorStrip).s(S::SKYBOX).n("skybox").build();
+        VPBuilder<Pos3dStrip>{rr,mVPList,S::SKYBOX}.p(colorStrip).n("skybox").build();
     }
 
 }
@@ -101,7 +101,7 @@ void CubeEnvironmentMap::init() {
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList}.p(colorStrip).s(S::CONVOLUTION).n("cubeEnvMap").build();
+    VPBuilder<Pos3dStrip>{rr,mVPList,S::CONVOLUTION}.p(colorStrip).n("cubeEnvMap").build();
 }
 
 void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
@@ -123,7 +123,7 @@ void PrefilterSpecularMap::init() {
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList}.p(colorStrip).s(S::IBL_SPECULAR).n("iblSpecularEnvMap").build();
+    VPBuilder<Pos3dStrip>{rr,mVPList,S::IBL_SPECULAR}.p(colorStrip).n("iblSpecularEnvMap").build();
 }
 
 void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float roughness ) {

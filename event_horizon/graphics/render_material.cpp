@@ -14,9 +14,10 @@ void RenderMaterial::removeAllTextures() {
 //    calcHash();
 }
 
-RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program, std::shared_ptr<ProgramUniformSet> _uniforms ) {
+RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program, const HeterogeneousMap& _material ) {
+
     BoundProgram( _program );
-    Uniforms( _uniforms );
+    Uniforms( std::make_shared<ProgramUniformSet>(_material) );
 
     globalUniforms = std::make_shared<ProgramUniformSet>();
 
@@ -24,15 +25,10 @@ RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program, std::shared_p
 }
 
 void RenderMaterial::calcHash() {
-    mHash = static_cast<int64_t>(mType);
-    mHash += Uniforms()->Hash();
+    mHash = Uniforms()->Hash();
 
     TransparencyValue( Uniforms()->getFloatWithDefault( UniformNames::alpha, 1.0f ) *
                        Uniforms()->getFloatWithDefault( UniformNames::opacity, 1.0f ));
-}
-
-std::string RenderMaterial::typeAsString() {
-    return std::to_string( static_cast<int64_t >(mType));
 }
 
 void RenderMaterial::submitBufferUniforms() {
@@ -45,44 +41,27 @@ void RenderMaterial::BoundProgram( std::shared_ptr<Program> val ) {
     //Type( val->getId() );
 }
 
-MaterialType RenderMaterial::Type() const
-{
-    return mType;
-}
-
-std::shared_ptr<RenderMaterial> RenderMaterialBuilder::build() {
-    std::shared_ptr<Program> program;
-
-    auto pus = std::make_shared<ProgramUniformSet>();
-
-    switch ( material->getType()) {
-        case MaterialType::Generic:
-            program = rr.P( shaderName );
-            MaterialUniformRenderSetup{ std::dynamic_pointer_cast<GenericMaterial>( material ) }( program, pus, rr );
-            break;
-        case MaterialType::PBR:
-            program = rr.P( shaderName );
-            MaterialPBRUniformRenderSetup{ std::dynamic_pointer_cast<PBRMaterial>( material ) }
-                    ( program, pus, rr);
-            break;
-    }
-
-    auto m = std::make_shared<RenderMaterial>( program, pus );
-    rr.MaterialMap( m );
-    //LOGI( "New RenderMaterial created %s", m->typeAsString().c_str());
-
-    return m;
-}
-
-void MaterialUniformRenderSetup::operator()( std::shared_ptr<Program> program,
-                                             std::shared_ptr<ProgramUniformSet>& pus,
-                                             Renderer& rr ) const {
-
-    pus->setOnGPU( program, UniformNames::opacity,      material->getOpacity() );
-    pus->setOnGPU( program, UniformNames::alpha,        material->getColor().w());
-    pus->setOnGPU( program, UniformNames::diffuseColor, material->getColor().xyz());
-    pus->setOnGPU( program, UniformNames::colorTexture, rr.TDI( material->getTextureName(), TSLOT_COLOR ) );
-}
+//std::shared_ptr<RenderMaterial> RenderMaterialBuilder::build() {
+//    std::shared_ptr<Program> program;
+//
+//    program = rr.P( shaderName );
+//
+//    auto pus = std::make_shared<ProgramUniformSet>(material);
+//
+//    switch ( material->getType()) {
+//        case MaterialType::Generic:
+////            MaterialUniformRenderSetup{ std::dynamic_pointer_cast<GenericMaterial>( material ) }( program, pus, rr );
+//            break;
+//        case MaterialType::PBR:
+//            MaterialPBRUniformRenderSetup{ std::dynamic_pointer_cast<PBRMaterial>( material ) }( program, pus, rr);
+//            break;
+//    }
+//
+//    auto m = std::make_shared<RenderMaterial>( program, pus );
+//    rr.MaterialMap( m );
+//
+//    return m;
+//}
 
 void
 MaterialPBRUniformRenderSetup::operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus,
@@ -109,3 +88,4 @@ MaterialPBRUniformRenderSetup::operator()( std::shared_ptr<Program> program, std
     pus->setOnGPU( program, UniformNames::roughness, pmat->getRoughnessValue());
     pus->setOnGPU( program, UniformNames::ao, pmat->getAoValue());
 }
+

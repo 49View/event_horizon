@@ -16,7 +16,8 @@ ShadowMapManager::ShadowMapManager( Renderer& rr ) {
 
 	setFrusom( { -bs, bs}, { -bs, bs}, { 1.0f, bs} );
 
-	material = RenderMaterialBuilder{rr}.m("ShadowMapMaterial").p(S::SHADOW_MAP).build();
+	material = rr.addMaterial(S::SHADOW_MAP);
+//	material = RenderMaterialBuilder{rr}.m("ShadowMapMaterial").p(S::SHADOW_MAP).build();
 }
 
 void ShadowMapManager::updateDepthProjectionMatrix() {

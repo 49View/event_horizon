@@ -32,21 +32,25 @@ void HeterogeneousMap::calcHash() {
     for ( auto& i : mV4fs ) mHash += i.second.hash();
 }
 
-void HeterogeneousMap::assign( const HeterogeneousMap *source ) {
-    for ( auto& pu : source->mTextures ) assign( pu.first, pu.second );
-    for ( auto& pu : source->mInts ) assign( pu.first, pu.second );
-    for ( auto& pu : source->mFloats ) assign( pu.first, pu.second );
-    for ( auto& pu : source->mV2fs ) assign( pu.first, pu.second );
-    for ( auto& pu : source->mV3fs ) assign( pu.first, pu.second );
-    for ( auto& pu : source->mV3fvs ) assign( pu.first, pu.second );
-    for ( auto& pu : source->mV4fs ) assign( pu.first, pu.second );
-    for ( auto& pu : source->mM3fs ) assign( pu.first, pu.second );
-    for ( auto& pu : source->mM4fs ) assign( pu.first, pu.second );
+void HeterogeneousMap::assign( const HeterogeneousMap& source ) {
+    for ( auto& pu : source.mTextures ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mInts ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mFloats ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mV2fs ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mV3fs ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mV3fvs ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mV4fs ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mM3fs ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mM4fs ) assign( pu.first, pu.second );
 }
 
 void HeterogeneousMap::assign( const std::string& uniformName, int data ) {
     mInts[uniformName] = data;
     calcTotalNumUniforms();
+}
+
+void HeterogeneousMap::assign( const std::string& uniformName, const std::string& data ) {
+    mTexturesNames[uniformName] = data;
 }
 
 void HeterogeneousMap::assign( const std::string& uniformName, const TextureIndex& data ) {
@@ -216,17 +220,24 @@ void HeterogeneousMap::get( const std::string& uniformName, Matrix3f& ret ) cons
 std::shared_ptr<HeterogeneousMap> HeterogeneousMap::clone() {
     std::shared_ptr<HeterogeneousMap> ret = std::make_shared<HeterogeneousMap>();
 
-    ret->mTextures = mTextures;
-    ret->mFloats = mFloats;
-    ret->mInts = mInts;
-    ret->mV2fs = mV2fs;
-    ret->mV3fs = mV3fs;
-    ret->mV4fs = mV4fs;
-    ret->mM3fs = mM3fs;
-    ret->mM4fs = mM4fs;
-    ret->mV3fvs = mV3fvs;
-    ret->mNumUniforms = mNumUniforms;
-    ret->mHash = mHash;
+    ret->clone( *this );
 
     return ret;
+}
+
+void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
+
+    Name( _source.Name() );
+    mTextures    = _source.mTextures;
+    mFloats      = _source.mFloats;
+    mInts        = _source.mInts;
+    mV2fs        = _source.mV2fs;
+    mV3fs        = _source.mV3fs;
+    mV4fs        = _source.mV4fs;
+    mM3fs        = _source.mM3fs;
+    mM4fs        = _source.mM4fs;
+    mV3fvs       = _source.mV3fvs;
+    mNumUniforms = _source.mNumUniforms;
+    mHash        = _source.mHash;
+
 }

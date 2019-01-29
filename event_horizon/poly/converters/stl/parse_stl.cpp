@@ -50,7 +50,7 @@ namespace stl {
             assert( false );
         }
         
-        auto mGeom = std::make_shared<GeomData>( std::make_shared<PBRMaterial>("default_fbx", "geneva") );
+        auto mGeom = std::make_shared<GeomData>();
         auto geom = std::make_shared<GeomAsset>(mGeom);
 
         VData& gd = mGeom->vData();

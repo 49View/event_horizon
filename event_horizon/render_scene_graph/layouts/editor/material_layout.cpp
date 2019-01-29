@@ -35,23 +35,23 @@ void ImGuiMaterials::renderImpl( Scene* p, Rect2f& _r ) {
 
     for ( const auto& mat : p->ML().list()) {
         if ( !mat ) continue;
-        ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", mat->getName().c_str() );
+        ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", mat->Name().c_str() );
         float dc[3] = { mat->getColor().x(), mat->getColor().y(), mat->getColor().z() };
-        ImGui::PushID( (mat->getName() + "dc").c_str() );
+        ImGui::PushID( (mat->Name() + "dc").c_str() );
         ImGui::ColorEdit3( "Diffuse", dc );
         ImGui::PopID();
-        if ( mat->getType() == MaterialType::PBR ) {
-            std::shared_ptr<PBRMaterial> matPBR = std::dynamic_pointer_cast<PBRMaterial>( mat );
-            ImGuiMatImage( "Base", ImColor{200, 200, 200}, textureSize, p->TM().TD(matPBR->getBaseColor()) );
-            ImGuiMatImage( "Normal", ImColor{100, 100, 250}, textureSize, p->TM().TD( matPBR->getNormal()) );
-            ImGuiMatImage( "Roughness", ImColor{250, 250, 100}, textureSize, p->TM().TD( matPBR->getRoughness()),
-                           matPBR->getRoughnessValue() );
-            ImGuiMatImage( "Metallic", ImColor{240, 240, 240}, textureSize, p->TM().TD( matPBR->getMetallic()),
-                           matPBR->getMetallicValue() );
-            ImGuiMatImage( "AO", ImColor{100, 100, 100}, textureSize, p->TM().TD( matPBR->getAmbientOcclusion()),
-                           matPBR->getAoValue());
-            ImGuiMatImage( "Height", ImColor{32, 200, 32}, textureSize, p->TM().TD( matPBR->getHeight()) );
-        }
+//        if ( mat->getType() == MaterialType::PBR ) {
+//            std::shared_ptr<PBRMaterial> matPBR = std::dynamic_pointer_cast<PBRMaterial>( mat );
+//            ImGuiMatImage( "Base", ImColor{200, 200, 200}, textureSize, p->TM().TD(matPBR->getBaseColor()) );
+//            ImGuiMatImage( "Normal", ImColor{100, 100, 250}, textureSize, p->TM().TD( matPBR->getNormal()) );
+//            ImGuiMatImage( "Roughness", ImColor{250, 250, 100}, textureSize, p->TM().TD( matPBR->getRoughness()),
+//                           matPBR->getRoughnessValue() );
+//            ImGuiMatImage( "Metallic", ImColor{240, 240, 240}, textureSize, p->TM().TD( matPBR->getMetallic()),
+//                           matPBR->getMetallicValue() );
+//            ImGuiMatImage( "AO", ImColor{100, 100, 100}, textureSize, p->TM().TD( matPBR->getAmbientOcclusion()),
+//                           matPBR->getAoValue());
+//            ImGuiMatImage( "Height", ImColor{32, 200, 32}, textureSize, p->TM().TD( matPBR->getHeight()) );
+//        }
         if ( mb ) {
             ImGui::BeginGroup();
             if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {

@@ -1,9 +1,59 @@
 #include <fstream>
 
 #include "program_opengl.h"
-
 #include "shader_opengl.h"
+#include <core/heterogeneous_map.hpp>
+
 //#include <unistd.h>
+
+void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
+
+    switch ( uf ) {
+        case GL_FLOAT:
+            uniformDefaults.assign( _name, 1.0f );
+            break;
+        case GL_BOOL:
+            uniformDefaults.assign( _name, false );
+            break;
+        case GL_INT:
+            uniformDefaults.assign( _name, 0 );
+            break;
+        case GL_FLOAT_VEC2:
+            uniformDefaults.assign( _name, V2f{1.0f} );
+            break;
+        case GL_FLOAT_VEC3:
+            uniformDefaults.assign( _name, V3f{1.0f} );
+            break;
+        case GL_FLOAT_VEC4:
+            uniformDefaults.assign( _name, V4f{1.0f} );
+            break;
+        case GL_INT_VEC2:
+        case GL_INT_VEC3:
+        case GL_INT_VEC4:
+        case GL_BOOL_VEC2:
+        case GL_BOOL_VEC3:
+        case GL_BOOL_VEC4:
+            ASSERTV(0, "Implement VecI(nterger) mapping from shaders");
+            break;
+        case GL_FLOAT_MAT2:
+            ASSERTV(0, "Implement Mat2 mapping from shaders");
+            break;
+        case GL_FLOAT_MAT3:
+            uniformDefaults.assign( _name, Matrix3f::IDENTITY );
+            break;
+        case GL_FLOAT_MAT4:
+            uniformDefaults.assign( _name, Matrix4f::IDENTITY );
+            break;
+        case GL_SAMPLER_2D:
+        case GL_SAMPLER_CUBE:
+        case GL_SAMPLER_2D_SHADOW:
+            uniformDefaults.assign( _name, TextureUniformDesc{0} );
+            break;
+        default:
+            ASSERTV(0, "Unknown uniform mapping %d", uf );
+            break;
+    };
+}
 
 bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
                                     std::shared_ptr<Shader> tesselationControlShader,
@@ -24,6 +74,7 @@ bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
     }
     GLCALLRET(mHandle, glCreateProgram() );
     if ( mHandle > 0 ) {
+        uniformDefaults.Name(mId);
         //	LOGI("Creating new program: (%d), handle=%d (%s, %s)\n", mId, handle, vertexShader->getId(), fragmentShader->getId());
 
         // Check if we need to compile the shaders
@@ -57,8 +108,10 @@ bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
                                 &name_len, &num, &type, name );
             name[name_len] = 0;
             GLuint location = static_cast<GLuint>(glGetUniformLocation( mHandle, name ));
-            uniforms[name] = {name, GLToUniformFormat(type), location};
-            //LOGI( "uniform %s on location %d with type %d", name, location, type);
+            auto utype = GLToUniformFormat(type);
+            uniforms[name] = {name, utype, location};
+            setDefaultUniforms( name, type);
+            LOGI( "uniform %s on location %d with type %d", name, location, type);
         }
     } else {
         LOGI( "Cound not create program: %s", mId.c_str());

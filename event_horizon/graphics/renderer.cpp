@@ -202,19 +202,39 @@ bool Renderer::hasTag( uint64_t _tag ) const {
     return false;
 }
 
-void Renderer::changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat ) {
-    auto rmaterial = RenderMaterialBuilder{*this}.m(_mat).build();
-
-    for ( const auto& [k, vl] : CL() ) {
-        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
-            for ( const auto& v : vl.mVList ) {
-                v->setMaterialWithTag(rmaterial, _tag);
-            }
-            for ( const auto& v : vl.mVListTransparent ) {
-                v->setMaterialWithTag(rmaterial, _tag);
-            }
-        }
+std::shared_ptr<RenderMaterial> Renderer::addMaterial( const std::string& _shaderName ) {
+    auto program = P( _shaderName );
+    if ( program ) {
+        return addMaterial( program->getDefaultUniforms() );
     }
+    return nullptr;
+}
+
+std::shared_ptr<RenderMaterial> Renderer::addMaterial( const HeterogeneousMap& _material,
+                                                       std::shared_ptr<Program> _program ) {
+    auto program = _program ? _program : P( _material.Name() );
+    if ( program ) {
+        auto rmaterial = std::make_shared<RenderMaterial>( program, _material );
+        MaterialMap( rmaterial );
+        return rmaterial;
+    }
+    return nullptr;
+}
+
+void Renderer::changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat ) {
+    // -###- FIXME, reenable this
+//    auto rmaterial = RenderMaterialBuilder{*this}.m(_mat).build();
+//
+//    for ( const auto& [k, vl] : CL() ) {
+//        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
+//            for ( const auto& v : vl.mVList ) {
+//                v->setMaterialWithTag(rmaterial, _tag);
+//            }
+//            for ( const auto& v : vl.mVListTransparent ) {
+//                v->setMaterialWithTag(rmaterial, _tag);
+//            }
+//        }
+//    }
 }
 
 void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color ) {
@@ -276,7 +296,7 @@ std::shared_ptr<Program> Renderer::P( const std::string& _id ) {
     return sm.P(_id);
 }
 
-void Renderer::MaterialCache( const MaterialType& mt, std::shared_ptr<RenderMaterial> _mat ) {
+void Renderer::MaterialCache( uint64_t mt, std::shared_ptr<RenderMaterial> _mat ) {
     materialCache[mt] = _mat;
 }
 

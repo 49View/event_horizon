@@ -293,7 +293,6 @@ private:
     uint64_t mId = 0;
     uint64_t gt = 1; // This is the generic geom ID, as we reserve 0 as null
     std::string  materialName = "white";
-    MaterialType materialType = MaterialType::PBR;
     MaterialProperties materialPropeties;
     std::string  shaderName;
 

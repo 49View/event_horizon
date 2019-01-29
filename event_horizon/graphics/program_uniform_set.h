@@ -40,6 +40,10 @@ protected:
 
 class ProgramUniformSet : public HeterogeneousMap {
 public:
+	ProgramUniformSet() = default;
+	explicit ProgramUniformSet( const HeterogeneousMap& _map ) {
+		clone( _map );
+	}
 
 	void generateUBO( const ShaderManager& sm, const std::string& uniformName );
 	void submitUBOData();
@@ -70,7 +74,7 @@ public:
 	int getUBOSize() const { return mUBOSize; }
 
 	template <typename T>
-	void setOnGPU( std::shared_ptr<Program> _program, const std::string _uniformName, const T& _value ) {
+	void setOnGPU( const std::shared_ptr<Program>& _program, const std::string _uniformName, const T& _value ) {
 		if ( _program->hasUniform(_uniformName) ) assign( _uniformName, _value );
 	}
 
@@ -96,7 +100,6 @@ public:
 		std::memcpy( to_buffer + UBOSchema->mUBOOffsetMap[uniformName], &value, sizeof(T) );
 	}
 
-//	static ProgramUniformSet& globalStaticUniform();
 };
 
 using UBO = ProgramUniformSet;

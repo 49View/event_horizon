@@ -13,16 +13,14 @@ const std::vector<std::string>& pbrNames() {
     return g_pbrNames;
 }
 
-MaterialBuilder::MaterialBuilder( const std::string& _name, const MaterialType _mt, const std::string& _sn ) : ResourceBuilder(
-        _name) {
-    materialType = _mt;
-    shaderName = _sn;
-    defPrePosfixes();
-}
+//MaterialBuilder::MaterialBuilder( const std::string& _name, const std::string& _sn ) : ResourceBuilder(
+//        _name) {
+//    shaderName = _sn;
+//    defPrePosfixes();
+//}
 
-MaterialBuilder::MaterialBuilder( const std::string& _name, const MaterialType _mt,
+MaterialBuilder::MaterialBuilder( const std::string& _name,
                                   const std::string& _sn, const MaterialProperties& _p ) : ResourceBuilder( _name) {
-    materialType = _mt;
     shaderName = _sn;
     properties = _p;
     defPrePosfixes();
@@ -40,7 +38,7 @@ void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<PBRMaterial> mat
 
 void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    auto mat = std::make_shared<PBRMaterial>("white");
+    auto mat = std::make_shared<PBRMaterial>();
     createDefaultPBRTextures( mat, sg );
 
     mat->setShaderName( shaderName );
@@ -49,7 +47,7 @@ void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
 
 void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    auto mat = std::make_shared<PBRMaterial>(Name());
+    auto mat = std::make_shared<PBRMaterial>();
 
     if ( const auto& it = buffers.find(mat->getBaseColor()); it != buffers.end() ) {
         ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
@@ -155,7 +153,8 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     }
     handleUninitializedDefaults( _md, downloadedMatName );
 
-    auto mat = std::make_shared<PBRMaterial>(downloadedMatName);
+//    auto mat = std::make_shared<PBRMaterial>(downloadedMatName);
+    auto mat = std::make_shared<PBRMaterial>();
     mat->setShaderName( shaderName );
     sg.add( *this, mat );
 
@@ -165,12 +164,10 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
 void MaterialBuilder::handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
 
-    if ( materialType == MaterialType::PBR ) {
-        for ( const auto& td : PBRMaterial::textureDependencies( _keyTextureName ))
-            if ( !sg.TL()->exists( td.first )) {
-                ImageBuilder{ td.first }.setSize( 4 ).backup( td.second ).makeDefault( *sg.TL());
-            }
-    }
+    for ( const auto& td : PBRMaterial::textureDependencies( _keyTextureName ))
+        if ( !sg.TL()->exists( td.first )) {
+            ImageBuilder{ td.first }.setSize( 4 ).backup( td.second ).makeDefault( *sg.TL());
+        }
 }
 
 bool MaterialManager::add( const MaterialBuilder& _pb, std::shared_ptr<Material> _material ) {

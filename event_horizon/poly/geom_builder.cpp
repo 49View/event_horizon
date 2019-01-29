@@ -111,7 +111,7 @@ void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
         addDependency<ImageBuilder>( d, sg.TL());
     }
     for ( const auto& d : deps.materialDeps ) {
-        addDependency<MaterialBuilder>( d, sg.ML());
+        addDependency<MaterialBuilder>( d, sg.ML() );
     }
 }
 
@@ -123,7 +123,7 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
         if ( builderType == GeomBuilderType::file ) {
             addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
         } else {
-            addDependency<MaterialBuilder>( materialName, materialType, shaderName, materialPropeties, sg.ML());
+            addDependency<MaterialBuilder>( materialName, shaderName, materialPropeties, sg.ML());
             if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
                 addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
             }

@@ -8,17 +8,19 @@
 #include <vector>
 #include <string>
 #include <core/htypes_shared.hpp>
+#include <core/name_policy.hpp>
 #include <core/math/vector4f.h>
 #include <core/math/matrix4f.h>
 
 using TextureIndex = TextureUniformDesc;
 
-class HeterogeneousMap {
+class HeterogeneousMap : public NamePolicy, public std::enable_shared_from_this<HeterogeneousMap> {
 public:
-    void assign( const HeterogeneousMap* source );
+    void assign( const HeterogeneousMap& source );
     void assign( const std::string& uniformName, int data );
     void assign( const std::string& uniformName, float data );
     void assign( const std::string& uniformName, double data );
+    void assign( const std::string& uniformName, const std::string& data );
     void assign( const std::string& uniformName, const TextureIndex& data );
     void assign( const std::string& uniformName, const Vector2f& data );
     void assign( const std::string& uniformName, const Vector3f& data );
@@ -58,6 +60,7 @@ public:
     bool hasMatrix3f( const std::string& uniformName ) const;
 
     std::shared_ptr<HeterogeneousMap> clone();
+    void clone( const HeterogeneousMap& _map );
 
     template <typename T>
     void visit( const T& _visitor ) {
@@ -80,6 +83,7 @@ private:
     void calcHash();
 
 private:
+    std::unordered_map<std::string, std::string> mTexturesNames;
     std::unordered_map<std::string, TextureIndex> mTextures;
     std::unordered_map<std::string, int> mInts;
     std::unordered_map<std::string, float> mFloats;

@@ -68,11 +68,20 @@ void RenderSceneGraph::changeMaterialColorTagImpl( const std::vector<std::string
                                                           _params), _params).rebuild(CL());
 }
 
+ShapeType shapeTypeFromString( const std::string& value ) {
+
+    if ( toLower(value) == "cube" ) return ShapeType::Cube;
+    if ( toLower(value) == "sphere" ) return ShapeType::Sphere;
+
+    return ShapeType::None;
+};
+
 void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _params ) {
-    if ( toLower(_params[0]) == "cube" ) {
-        GeomBuilder{ ShapeType::Cube }.build( *this );
-    } else if ( toLower(_params[0]) == "sphere" ) {
-        GeomBuilder{ ShapeType::Sphere }.build( *this );
+
+    auto st = shapeTypeFromString( _params[0] );
+    if ( st != ShapeType::None) {
+        auto mat = ( _params.size() > 1 ) ? _params[1] : "white";
+        GeomBuilder{ st }.m(mat).build( *this );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
         Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
         UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr(*this);
@@ -103,8 +112,10 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
-    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr,lvl }
-            .p(generateGeometryVP( _source->Data())).m( _source->Data()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
+    // -###- FIXME, assign PBR material
+    // m( _source->Data()->getMaterial())
+    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr,lvl,S::SH }
+            .p(generateGeometryVP( _source->Data())).n(_source->Hash()).g(_source->GHType()).build();
 }
 
 std::string UIElementRenderObserver::getShaderType( UIShapeType _st ) const {
@@ -148,5 +159,5 @@ void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& ge
     auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), color.w() );
     auto shaderName = getShaderType( _source->Data()->ShapeType() );
     auto vs = _source->Data()->VertexList();
-    VPBuilder<PosTex3dStrip>{rr,vpList}.p(vs).s(shaderName).c(color).n(_source->Hash()).build();
+    VPBuilder<PosTex3dStrip>{rr,vpList,shaderName}.p(vs).c(color).n(_source->Hash()).build();
 }

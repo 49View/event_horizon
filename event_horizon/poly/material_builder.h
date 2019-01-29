@@ -33,7 +33,7 @@ private:
 struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact, Material::Version() )
 
     MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a.Name()),
-              materialType( a.materialType ), shaderName( a.shaderName ), baseSolidColor( a.baseSolidColor ),
+              shaderName( a.shaderName ), baseSolidColor( a.baseSolidColor ),
               metallicValue( a.metallicValue ), roughnessValue( a.roughnessValue ), aoValue( a.aoValue ),
               imageExt( a.imageExt ) {
         for ( auto&& [k,v] : a.buffers ) {
@@ -41,8 +41,8 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
         }
     }
 
-    MaterialBuilder( const std::string& _name, MaterialType _mt, const std::string& _sn = "" );
-    MaterialBuilder( const std::string& _name, MaterialType _mt, const std::string& _sn, const MaterialProperties& _p );
+//    MaterialBuilder( const std::string& _name, const std::string& _sn = "" );
+    MaterialBuilder( const std::string& _name, const std::string& _sn, const MaterialProperties& _p );
     void makeDefault( DependencyMaker& _md );
     void makeDirect( DependencyMaker& _md );
     void publish() const;
@@ -56,11 +56,6 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
 
     MaterialBuilder& buffer( const std::string& _bname, const ucchar_p& _data ) {
         return buffer( _bname, ucchar_pTouint8_p(_data) );
-    }
-
-    MaterialBuilder& mt( const MaterialType _value ) {
-        materialType = _value;
-        return *this;
     }
 
     MaterialBuilder& mp( const MaterialProperties& _value ) {
@@ -117,7 +112,6 @@ protected:
     std::string toMetaData() const;
 
 private:
-    MaterialType            materialType = MaterialType::PBR;
     MaterialProperties      properties;
     std::string             shaderName;
     Color4f                 color = Color4f::WHITE;
