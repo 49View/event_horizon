@@ -9,7 +9,7 @@
 struct ProgramUniformDesc {
     std::string   name;
     UniformFormat type;
-    unsigned int  location;
+    int  location;
 };
 
 class Program {

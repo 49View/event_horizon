@@ -1,3 +1,5 @@
+#include <utility>
+
 
 #pragma once
 
@@ -259,10 +261,11 @@ public:
 template <typename V>
 class VPBuilder {
 public:
-	explicit VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl, std::string _shader ) : rr(_rr), vpl(_vpl) {
+	explicit VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl, std::string _shader ) : rr(_rr), vpl(
+			std::move( _vpl )) {
 		name = UUIDGen::make();
-		material = std::make_shared<Material>();
-		material->setShaderName( _shader );
+		ASSERT( rr.P( _shader ) != nullptr );
+		material = std::make_shared<Material>( rr.P( _shader )->getDefaultUniforms() );
     };
 
 	VPBuilder& c( const Color4f& _matColor ) {

@@ -107,11 +107,13 @@ bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
             char name[400];
             glGetActiveUniform( mHandle, GLuint(i), 399, &name_len, &num, &type, name );
             name[name_len] = 0;
-            GLuint location = static_cast<GLuint>(glGetUniformLocation( mHandle, name ));
+            auto location = static_cast<GLint>(glGetUniformLocation( mHandle, name ));
             auto utype = GLToUniformFormat(type);
             uniforms[name] = {name, utype, location};
-            setDefaultUniforms( name, type);
-            LOGI( "Shader %s uniform %s on location %d with type %d", mId.c_str(), name, location, type);
+            if ( location >= 0 && !( name[0] == 'u' && name[1] == '_')) {
+                setDefaultUniforms( name, type);
+                LOGI( "Shader %s uniform %s on location %d with type %d", mId.c_str(), name, location, type);
+            }
         }
     } else {
         LOGI( "Cound not create program: %s", mId.c_str());

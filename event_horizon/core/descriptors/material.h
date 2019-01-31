@@ -93,10 +93,12 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, pigment )
 
 class Material : public HeterogeneousMap {
 public:
-    Material() {
-        // We assign here some "global" constants might move it on in few minutes or leave here forever
-        assign( UniformNames::opacity, 1.0f );
-        assign( UniformNames::alpha, 1.0f );
+    Material() = default;
+    explicit Material( const Material& _mat ) {
+        clone(_mat);
+    }
+    explicit Material( std::shared_ptr<Material> _mat ) {
+        clone(*_mat.get());
     }
     virtual ~Material() = default;
 
@@ -108,12 +110,12 @@ public:
 
     std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) {
 //        return std::make_shared<Material>( Name(), _subkey, textureName, color, opacity );
-        return std::make_shared<Material>();
+        return std::make_shared<Material>(*this);
     }
 
     std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) {
 //        return std::make_shared<Material>( Name(), shaderName, textureName, _mp.pigment, opacity );
-        return std::make_shared<Material>();
+        return std::make_shared<Material>(*this);
     }
 //    std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) override {
 //        auto ret = std::make_shared<PBRMaterial>();
@@ -294,10 +296,10 @@ public:
 //        reader->read( opacity );
     }
 
-    void clone( std::shared_ptr<Material> _source ) {
-        HeterogeneousMap::clone( *(_source.get()) );
-        properties = _source->properties;
-        shaderName = _source->shaderName;
+    void clone( const Material& _source ) {
+        HeterogeneousMap::clone( _source );
+        properties = _source.properties;
+        shaderName = _source.shaderName;
     }
 
 protected:
@@ -307,58 +309,6 @@ protected:
 public:
     inline constexpr static uint64_t Version() { return 1000; }
 };
-
-//class PBRMaterial : public Material {
-//public:
-//
-//    PBRMaterial() = default;
-//
-//    PBRMaterial( std::shared_ptr<DeserializeBin> reader ) {
-//        deserialize( reader );
-//    }
-//
-//    virtual ~PBRMaterial() = default;
-//
-//    PBRMaterial& t( const std::string& _plain ) {
-//        std::string base = getFileNameNoExt( _plain );
-//        std::string ext = getFileNameExt( _plain );
-//
-////        textureName = _plain;
-//        baseColor = base + "_basecolor";
-//        normal = base + "_normal";
-//        ambientOcclusion = base + "_ambient_occlusion";
-//        roughness = base + "_roughness";
-//        metallic = base + "_metallic";
-//        height = base + "_height";
-//        return *this;
-//    }
-//
-//    static const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key ) {
-//        std::vector<TextureDependencyBuilderPair> ret;
-//        PBRMaterial tm;//{ _key };
-//        ret.push_back( { tm.baseColor, 0xffffffff } );
-//        ret.push_back( { tm.normal, 0x00ff7f7f } );
-//        ret.push_back( { tm.ambientOcclusion, 0xffffffff } );
-//        ret.push_back( { tm.roughness, 0xffffffff } );
-//        ret.push_back( { tm.metallic, 0x00000000 } );
-//        ret.push_back( { tm.height, 0x00000000 } );
-//        return ret;
-//    }
-//
-//
-//private:
-//    std::string baseColor;
-//    std::string normal;
-//    std::string ambientOcclusion;
-//    std::string roughness;
-//    std::string metallic;
-//    std::string height;
-//
-//    Vector3f baseSolidColor = Vector3f::ONE;
-//    float metallicValue = 1.0f;
-//    float roughnessValue = 1.0f;
-//    float aoValue = 1.0f;
-//};
 
 namespace MaterialDependency {
     inline const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key ) {

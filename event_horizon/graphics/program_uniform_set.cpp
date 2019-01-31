@@ -78,7 +78,7 @@ void ProgramUniformSet::setOn( unsigned int handle ) {
 }
 
 ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Material> _map, Renderer& _rr ) {
-    clone( _map );
+    clone( *_map.get() );
 
     visitTextures( [&]( TextureUniformDesc& u, unsigned int counter ){
         u.handle = _rr.TD( u.name )->getHandle();

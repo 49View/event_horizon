@@ -78,7 +78,9 @@ void Scene::updateCallbacks() {
 	}
 
 	if ( callbackResizeWindow.x() > 0 && callbackResizeWindow.y() > 0 ) {
-		LOGR("Resized window: [%d, %d]", callbackResizeWindow.x(), callbackResizeWindow.y() );
+		// For now we do everything in the callbackResizeFrameBuffer so this is redundant for now, just a nop
+		// to be re-enabled in the future if we need it
+//		LOGR("Resized window: [%d, %d]", callbackResizeWindow.x(), callbackResizeWindow.y() );
 		callbackResizeWindow = Vector2i{-1, -1};
 	}
 
@@ -87,7 +89,6 @@ void Scene::updateCallbacks() {
 		WH::gatherMainScreenInfo();
 		RR().resetDefaultFB(callbackResizeFrameBuffer);
 		layout->resizeCallback( this, callbackResizeFrameBuffer );
-		LOGR("Resized framebuffer: [%d, %d]", callbackResizeFrameBuffer.x(), callbackResizeFrameBuffer.y() );
 		callbackResizeFrameBuffer = Vector2i{-1, -1};
 	}
 

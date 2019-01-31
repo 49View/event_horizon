@@ -237,9 +237,7 @@ void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
     mM4fs        = _source.mM4fs;
     mV3fvs       = _source.mV3fvs;
 
-    mNumUniforms = _source.mNumUniforms;
-    mHash        = _source.mHash;
-
+    calcTotalNumUniforms();
 }
 
 std::vector<std::string> HeterogeneousMap::getTextureNames() const {
