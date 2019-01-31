@@ -78,7 +78,7 @@ public:
     }
 
     TextureUniformDesc TDI( unsigned int _slot ) const {
-        return { mHandle, _slot, mTarget };
+        return { mId, mHandle, _slot, mTarget };
     };
 
     TextureTargetMode getTarget() const {

@@ -26,7 +26,7 @@ MaterialBuilder::MaterialBuilder( const std::string& _name,
     defPrePosfixes();
 }
 
-void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<PBRMaterial> mat, DependencyMaker& _md ) {
+void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<Material> mat, DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
     ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDefault( *sg.TL() );
     ImageBuilder{ mat->getNormal()           }.backup(0x00007f7f).makeDefault( *sg.TL() );
@@ -38,7 +38,7 @@ void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<PBRMaterial> mat
 
 void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    auto mat = std::make_shared<PBRMaterial>();
+    auto mat = std::make_shared<Material>();
     createDefaultPBRTextures( mat, sg );
 
     mat->setShaderName( shaderName );
@@ -47,7 +47,7 @@ void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
 
 void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    auto mat = std::make_shared<PBRMaterial>();
+    auto mat = std::make_shared<Material>();
 
     if ( const auto& it = buffers.find(mat->getBaseColor()); it != buffers.end() ) {
         ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
@@ -153,8 +153,8 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     }
     handleUninitializedDefaults( _md, downloadedMatName );
 
-//    auto mat = std::make_shared<PBRMaterial>(downloadedMatName);
-    auto mat = std::make_shared<PBRMaterial>();
+//    auto mat = std::make_shared<Material>(downloadedMatName);
+    auto mat = std::make_shared<Material>();
     mat->setShaderName( shaderName );
     sg.add( *this, mat );
 
@@ -164,7 +164,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
 void MaterialBuilder::handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
 
-    for ( const auto& td : PBRMaterial::textureDependencies( _keyTextureName ))
+    for ( const auto& td : Material::textureDependencies( _keyTextureName ))
         if ( !sg.TL()->exists( td.first )) {
             ImageBuilder{ td.first }.setSize( 4 ).backup( td.second ).makeDefault( *sg.TL());
         }

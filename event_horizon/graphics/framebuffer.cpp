@@ -13,10 +13,16 @@ std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
         GLint dfb;
         GLCALL ( glGetIntegerv( GL_FRAMEBUFFER_BINDING, &dfb ));
         ret->mFramebufferHandle = static_cast<GLuint >(dfb);
-        LOGI( "Default framebuffer: %d", ret->mFramebufferHandle );
-        JMATH::Rect2f r = Framebuffer::getCurrentViewport();
-        ret->mWidth = static_cast<int>( r.width());
-        ret->mHeight = static_cast<int>( r.height());
+        if ( mWidth <= 0 || mHeight <= 0 ) {
+            GLCALL( glBindFramebuffer( GL_DRAW_FRAMEBUFFER, dfb ));
+            JMATH::Rect2f r = Framebuffer::getCurrentViewport();
+            ret->mWidth = static_cast<int>( r.width());
+            ret->mHeight = static_cast<int>( r.height());
+        } else {
+            ret->mWidth = mWidth;
+            ret->mHeight = mHeight;
+        }
+        LOGR( "Default framebuffer: %d [%d,%d]", ret->mFramebufferHandle, ret->mWidth, ret->mHeight );
         return ret;
     }
 

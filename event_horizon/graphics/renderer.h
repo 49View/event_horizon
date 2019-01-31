@@ -96,10 +96,10 @@ public:
 
 	void removeFromCL( const UUID& _uuid );
 
-	std::shared_ptr<RenderMaterial> addMaterial( const HeterogeneousMap& _material,
+	std::shared_ptr<RenderMaterial> addMaterial( std::shared_ptr<Material> _material,
 												 std::shared_ptr<Program> _program = nullptr );
 	std::shared_ptr<RenderMaterial> addMaterial( const std::string& _shaderName );
-    void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat );
+    void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<Material> _mat );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
 
@@ -147,7 +147,7 @@ public:
 
 	void MaterialCache( uint64_t, std::shared_ptr<RenderMaterial> _mat );
 	void MaterialMap( std::shared_ptr<RenderMaterial> _mat );
-	void resetDefaultFB();
+	void resetDefaultFB( const Vector2i& forceSize = Vector2i{-1});
 
 	std::shared_ptr<Framebuffer> getDefaultFB() {
 		return mDefaultFB;
@@ -261,21 +261,19 @@ class VPBuilder {
 public:
 	explicit VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl, std::string _shader ) : rr(_rr), vpl(_vpl) {
 		name = UUIDGen::make();
-		material.Name( _shader );
-        material.assign( UniformNames::opacity, 1.0f );
-        material.assign( UniformNames::alpha, 1.0f );
+		material = std::make_shared<Material>();
+		material->setShaderName( _shader );
     };
 
 	VPBuilder& c( const Color4f& _matColor ) {
-        material.assign( UniformNames::opacity, _matColor.w() );
-        material.assign( UniformNames::diffuseColor, _matColor.xyz() );
+        material->assign( UniformNames::opacity, _matColor.w() );
+        material->assign( UniformNames::diffuseColor, _matColor.xyz() );
         return *this;
 	}
 	VPBuilder& p( std::shared_ptr<V> _ps ) { ps = _ps; return *this; }
 	VPBuilder& n( const std::string& _name ) { name = _name; return *this; }
-//	VPBuilder& m( std::shared_ptr<Material> _material ) { material = _material; return *this; }
     VPBuilder& t( const std::string& _tex ) {
-        material.assign( UniformNames::colorTexture, rr.TDI( _tex, TSLOT_COLOR ) );
+        material->assign( UniformNames::colorTexture, _tex );
 	    return *this;
 	}
 	VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
@@ -287,21 +285,13 @@ private:
 	std::shared_ptr<VPList> vpl;
 	uint64_t tag = GT_Generic;
 	std::shared_ptr<V> ps;
-	HeterogeneousMap material;
+	std::shared_ptr<Material> material;
 	std::string name;
 };
 
 template<typename V>
 UUID VPBuilder<V>::build() {
 	rr.invalidateOnAdd();
-
-//	switch ( material->getType()) {
-//		case MaterialType::PBR:
-//			MaterialPBRUniformRenderSetup{ std::dynamic_pointer_cast<PBRMaterial>( material ) }( program, pus, rr);
-//			break;
-//		default:
-//			break;
-//	}
 
 	vpl->create( VertexProcessing::create_cpuVBIB( ps, rr.addMaterial( material ), name ), tag );
 

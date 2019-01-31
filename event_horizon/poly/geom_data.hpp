@@ -209,19 +209,19 @@ public:
     GeomData();
     virtual ~GeomData();
     explicit GeomData( std::shared_ptr<DeserializeBin> reader );
-    explicit GeomData( std::shared_ptr<PBRMaterial> _material) : material(_material) {}
+    explicit GeomData( std::shared_ptr<Material> _material) : material(_material) {}
     GeomData( const ShapeType _st,
               const Vector3f& _pos, const Vector3f& _axis, const Vector3f& _scale,
-              std::shared_ptr<PBRMaterial> _material,
+              std::shared_ptr<Material> _material,
               const GeomMappingData& _mapping );
 
-    GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<PBRMaterial> _material,
+    GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<Material> _material,
               const GeomMappingData& _mapping, PullFlags pullFlags = PullFlags::All );
 
-    GeomData( const std::vector<PolyLine>& _polyLine, std::shared_ptr<PBRMaterial> _material,
+    GeomData( const std::vector<PolyLine>& _polyLine, std::shared_ptr<Material> _material,
               const GeomMappingData& _mapping );
 
-    GeomData( const QuadVector3fNormalfList& quads, std::shared_ptr<PBRMaterial> _material, const GeomMappingData& _mapping );
+    GeomData( const QuadVector3fNormalfList& quads, std::shared_ptr<Material> _material, const GeomMappingData& _mapping );
 
     static GeomDeserializeDependencies gatherDependencies( std::shared_ptr<DeserializeBin> reader );
 
@@ -235,11 +235,11 @@ public:
     std::string Name() const { return mName; }
     void Name( const std::string& val ) { mName = val; }
 
-    std::shared_ptr<PBRMaterial> getMaterial() { return material; }
-    std::shared_ptr<PBRMaterial> getMaterial() const { return material; }
-    void setMaterial( std::shared_ptr<PBRMaterial> _mat ) { material = _mat; }
-    Color4f getColor() const { return getMaterial()->getColor(); }
-    float getOpacity() const { return getMaterial()->getOpacity(); }
+    std::shared_ptr<Material> getMaterial() { return material; }
+    std::shared_ptr<Material> getMaterial() const { return material; }
+    void setMaterial( std::shared_ptr<Material> _mat ) { material = _mat; }
+//    Color4f getColor() const { return getMaterial()->getColor(); }
+//    float getOpacity() const { return getMaterial()->getOpacity(); }
 //    void setOpacity( float _opacity )  { mOpacity = _opacity; }
 //    void setMaterial( const std::string& matName, float _opacity = 1.0f );
 //    void setMaterial( const std::string& matName, const Color4f& col, float _opacity = 1.0f );
@@ -452,7 +452,7 @@ protected:
 
 protected:
     std::string mName = "DefaultGeomName";
-    std::shared_ptr<PBRMaterial> material;
+    std::shared_ptr<Material> material;
 
     float mOpacity = 1.0f;
     subdivisionAccuray mSubdivAccuracy = accuracyNone;

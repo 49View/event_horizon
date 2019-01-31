@@ -308,6 +308,7 @@ enum class BuilderQueryType {
 };
 
 struct TextureUniformDesc {
+	std::string  name;
 	unsigned int handle;
 	unsigned int slot;
 	int 		 target;

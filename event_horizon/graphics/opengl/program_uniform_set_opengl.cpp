@@ -1,5 +1,4 @@
 #include "../program_uniform_set.h"
-#include "../uniform_names.h"
 #include "../shader_manager.h"
 #include "gl_util.h"
 
@@ -15,7 +14,7 @@ void ProgramUniformSet::generateUBO( const ShaderManager& sm, const std::string&
 
 	mUBOHandles[uniformName] = mUBOHandle;
 
-	mUBOPoint = getUBOPoint( uniformName );
+	mUBOPoint = static_cast<unsigned int>(getUBOPoint( uniformName ));
 	for ( const auto& i : sm.ProgramsHandles() ) {
 		GLuint lights_index = glGetUniformBlockIndex( i, uniformName.c_str() );
 		if ( lights_index != GL_INVALID_INDEX ) {
@@ -95,7 +94,7 @@ void GPUUniformVisitor::visit( const char* name, const Vector3f& v ) const {
 void GPUUniformVisitor::visit( const char* name, const std::vector<Vector3f>& v ) const {
 	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
-	unsigned int numv = static_cast<unsigned int>( v.size() );
+	auto numv = static_cast<unsigned int>( v.size() );
 	glUniform3fv( location, numv, reinterpret_cast<const float*>( v.data() ) );
 }
 

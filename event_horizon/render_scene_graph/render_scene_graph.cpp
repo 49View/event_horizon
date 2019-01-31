@@ -47,7 +47,7 @@ void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _param
 }
 
 void RenderSceneGraph::changeMaterialTagCallback( const std::vector<std::string>& _params ) {
-    std::shared_ptr<PBRMaterial> mat = std::dynamic_pointer_cast<PBRMaterial>(ML().get(concatParams(_params, 1)));
+    std::shared_ptr<Material> mat = std::dynamic_pointer_cast<Material>(ML().get(concatParams(_params, 1)));
     rr.changeMaterialOnTags( getGeomType( _params[0] ), mat );
 }
 
@@ -115,7 +115,7 @@ void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& g
     // -###- FIXME, assign PBR material
     // m( _source->Data()->getMaterial())
     VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr,lvl,S::SH }
-            .p(generateGeometryVP( _source->Data())).n(_source->Hash()).g(_source->GHType()).build();
+            .p(generateGeometryVP(_source->Data())).n(_source->Hash()).g(_source->GHType()).build();
 }
 
 std::string UIElementRenderObserver::getShaderType( UIShapeType _st ) const {

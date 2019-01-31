@@ -106,7 +106,7 @@ protected:
         return getFileNameNoExt( Name() ) + "_";
     }
     void handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName );
-    void createDefaultPBRTextures( std::shared_ptr<PBRMaterial> mat, DependencyMaker& _md );
+    void createDefaultPBRTextures( std::shared_ptr<Material> mat, DependencyMaker& _md );
     std::string generateThumbnail() const;
     std::string generateRawData() const;
     std::string toMetaData() const;

@@ -599,7 +599,6 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
 
 CompositePBR::CompositePBR( Renderer& _rr, [[maybe_unused]] const std::string& _name, const Rect2f& _destViewport,
                             BlitType _bt ) : Composite( _rr ) {
-
     mCompositeFinalDest = _bt;
     setup(_destViewport);
 }

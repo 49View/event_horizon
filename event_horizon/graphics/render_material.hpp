@@ -58,7 +58,7 @@ public:
     void TransparencyValue( float val ) { mTransparencyValue = val; }
 
 public:
-    RenderMaterial( std::shared_ptr<Program> _program, const HeterogeneousMap& _material );
+    RenderMaterial( std::shared_ptr<Program> _program, std::shared_ptr<Material> _material, Renderer& _rr );
 
 private:
     void calcHash();
@@ -70,29 +70,30 @@ private:
     std::unordered_map<std::string, std::shared_ptr<ProgramUniformSet>> bufferUniforms;
     int64_t mHash;
 
+    Renderer& rr;
     // These are calculated on the fly do not serialize
     float mTransparencyValue;
 };
 
-class Renderer;
-
-class MaterialUniformRenderBaseSetup {
-public:
-    virtual void operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus, Renderer& tub )
-    const = 0;
-};
-
-class MaterialPBRUniformRenderSetup : public MaterialUniformRenderBaseSetup {
-public:
-    MaterialPBRUniformRenderSetup( std::shared_ptr<PBRMaterial> _material ) {
-        material = _material;
-    }
-
-    void operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus,
-                     Renderer& tub ) const;
-protected:
-    std::shared_ptr<PBRMaterial> material;
-};
+//class Renderer;
+//
+//class MaterialUniformRenderBaseSetup {
+//public:
+//    virtual void operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus, Renderer& tub )
+//    const = 0;
+//};
+//
+//class MaterialPBRUniformRenderSetup : public MaterialUniformRenderBaseSetup {
+//public:
+//    MaterialPBRUniformRenderSetup( std::shared_ptr<PBRMaterial> _material ) {
+//        material = _material;
+//    }
+//
+//    void operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus,
+//                     Renderer& tub ) const;
+//protected:
+//    std::shared_ptr<PBRMaterial> material;
+//};
 
 //class RenderMaterialBuilder {
 //public:

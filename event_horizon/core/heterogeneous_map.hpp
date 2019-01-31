@@ -21,7 +21,7 @@ public:
     void assign( const std::string& uniformName, float data );
     void assign( const std::string& uniformName, double data );
     void assign( const std::string& uniformName, const std::string& data );
-    void assign( const std::string& uniformName, const TextureIndex& data );
+    void assign( const std::string& uniformName, const TextureUniformDesc& data );
     void assign( const std::string& uniformName, const Vector2f& data );
     void assign( const std::string& uniformName, const Vector3f& data );
     void assign( const std::string& uniformName, const Vector4f& data );
@@ -32,7 +32,8 @@ public:
     int NumUniforms() const { return mNumUniforms; }
     int64_t Hash() const { return mHash; }
 
-    TextureIndex getTexture( const std::string& uniformName ) const;
+    std::vector<std::string> getTextureNames() const;
+    std::string getTexture( const std::string& uniformName ) const;
     float getInt( const std::string & uniformName ) const;
     float getFloatWithDefault( const std::string& uniformName, const float def ) const;
     float getFloat( const std::string & uniformName ) const;
@@ -41,7 +42,7 @@ public:
     Vector4f getVector4f( const std::string & uniformName ) const;
     Matrix4f getMatrix4f( const std::string & uniformName ) const;
     Matrix3f getMatrix3f( const std::string & uniformName ) const;
-    void get( const std::string& uniformName, TextureIndex ret ) const;
+    void get( const std::string& uniformName, std::string& ret ) const;
     void get( const std::string& uniformName, int& ret ) const;
     void get( const std::string& uniformName, float& ret ) const;
     void get( const std::string& uniformName, Vector2f& ret ) const;
@@ -77,13 +78,19 @@ public:
         for ( auto& u : mV3fvs )    { _visitor.visit( u.first.c_str(), u.second ); }
     }
 
-
+    template <typename T>
+    void visitTextures( T _func ) {
+        unsigned int i = 0;
+        for ( auto& [k,u] : mTextures ) {
+            _func( u, i );
+            ++i;
+        }
+    }
 private:
     void calcTotalNumUniforms();
     void calcHash();
 
 private:
-    std::unordered_map<std::string, std::string> mTexturesNames;
     std::unordered_map<std::string, TextureIndex> mTextures;
     std::unordered_map<std::string, int> mInts;
     std::unordered_map<std::string, float> mFloats;

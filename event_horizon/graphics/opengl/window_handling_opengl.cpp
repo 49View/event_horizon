@@ -29,7 +29,7 @@ namespace WindowHandling {
         Vector2i sizei{ w, h };
         AppGlobals::getInstance().setScreenSizef( Vector2f{w,h});
         AppGlobals::getInstance().setScreenSizei( sizei );
-        LOGR( "Default framebuffer index: - size: [%d, %d]", sizei.x(), sizei.y() );
+        LOGR( "Gather Screen Info, Default framebuffer index: - size: [%d, %d]", sizei.x(), sizei.y() );
     }
 
     bool shouldWindowBeClosed() {

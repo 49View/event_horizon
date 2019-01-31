@@ -6,9 +6,8 @@
 #include <core/math/vector4f.h>
 #include <core/math/matrix4f.h>
 #include <core/math/matrix2f.h>
-#include <core/heterogeneous_map.hpp>
+#include <core/descriptors/material.h>
 #include "program.h"
-#include "uniform_names.h"
 
 class Texture;
 class Program;
@@ -38,12 +37,10 @@ protected:
 	unsigned int handle;
 };
 
-class ProgramUniformSet : public HeterogeneousMap {
+class ProgramUniformSet : public Material {
 public:
 	ProgramUniformSet() = default;
-	explicit ProgramUniformSet( const HeterogeneousMap& _map ) {
-		clone( _map );
-	}
+	explicit ProgramUniformSet( std::shared_ptr<Material> _map, Renderer& _rr );
 
 	void generateUBO( const ShaderManager& sm, const std::string& uniformName );
 	void submitUBOData();

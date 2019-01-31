@@ -49,13 +49,12 @@ void HeterogeneousMap::assign( const std::string& uniformName, int data ) {
     calcTotalNumUniforms();
 }
 
-void HeterogeneousMap::assign( const std::string& uniformName, const std::string& data ) {
-    mTexturesNames[uniformName] = data;
+void HeterogeneousMap::assign( const std::string& uniformName, const TextureUniformDesc& data ) {
+    mTextures[uniformName] = data;
 }
 
-void HeterogeneousMap::assign( const std::string& uniformName, const TextureIndex& data ) {
-    mTextures[uniformName] = data;
-    calcTotalNumUniforms();
+void HeterogeneousMap::assign( const std::string& uniformName, const std::string& data ) {
+    mTextures[uniformName] = { data, 0, 0 };
 }
 
 void HeterogeneousMap::assign( const std::string& uniformName, float data ) {
@@ -98,9 +97,9 @@ void HeterogeneousMap::assign( const std::string& uniformName, const Matrix3f& d
     calcTotalNumUniforms();
 }
 
-TextureIndex HeterogeneousMap::getTexture( const std::string& uniformName ) const {
+std::string HeterogeneousMap::getTexture( const std::string& uniformName ) const {
     ASSERT( mTextures.find( uniformName ) != mTextures.end());
-    return mTextures.at( uniformName );
+    return mTextures.at( uniformName ).name;
 }
 
 float HeterogeneousMap::getInt( const std::string& uniformName ) const {
@@ -177,9 +176,9 @@ bool HeterogeneousMap::hasMatrix3f( const std::string& uniformName ) const {
     return ( mM3fs.find( uniformName ) != mM3fs.end());
 }
 
-void HeterogeneousMap::get( const std::string& uniformName, TextureIndex ret ) const {
+void HeterogeneousMap::get( const std::string& uniformName, std::string& ret ) const {
     ASSERT( mTextures.find( uniformName ) != mTextures.end());
-    ret = mTextures.at( uniformName );
+    ret = mTextures.at( uniformName ).name;
 }
 
 void HeterogeneousMap::get( const std::string& uniformName, int& ret ) const {
@@ -237,7 +236,17 @@ void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
     mM3fs        = _source.mM3fs;
     mM4fs        = _source.mM4fs;
     mV3fvs       = _source.mV3fvs;
+
     mNumUniforms = _source.mNumUniforms;
     mHash        = _source.mHash;
 
+}
+
+std::vector<std::string> HeterogeneousMap::getTextureNames() const {
+    std::vector<std::string> ret;
+
+    for ( const auto& [t, v] : mTextures ) {
+        ret.emplace_back( v.name );
+    }
+    return ret;
 }

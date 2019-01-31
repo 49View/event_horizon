@@ -85,7 +85,7 @@ void Scene::updateCallbacks() {
 	if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
 		WH::resizeWindow( callbackResizeFrameBuffer );
 		WH::gatherMainScreenInfo();
-		RR().resetDefaultFB();
+		RR().resetDefaultFB(callbackResizeFrameBuffer);
 		layout->resizeCallback( this, callbackResizeFrameBuffer );
 		LOGR("Resized framebuffer: [%d, %d]", callbackResizeFrameBuffer.x(), callbackResizeFrameBuffer.y() );
 		callbackResizeFrameBuffer = Vector2i{-1, -1};

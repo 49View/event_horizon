@@ -76,3 +76,14 @@ void ProgramUniformSet::setUBOData( const std::string& uniformName, const Matrix
 void ProgramUniformSet::setOn( unsigned int handle ) {
     visit( GPUUniformVisitor{handle} );
 }
+
+ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Material> _map, Renderer& _rr ) {
+    clone( _map );
+
+    visitTextures( [&]( TextureUniformDesc& u, unsigned int counter ){
+        u.handle = _rr.TD( u.name )->getHandle();
+        u.target = _rr.TD( u.name )->getTarget();
+        u.slot = counter;
+    });
+
+}

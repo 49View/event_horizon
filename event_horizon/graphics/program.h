@@ -1,8 +1,9 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <unordered_map>
-#include <core/heterogeneous_map.hpp>
+#include <core/descriptors/material.h>
 #include "graphic_constants.h"
 
 struct ProgramUniformDesc {
@@ -27,12 +28,12 @@ public:
         return uniforms.find(_name) != uniforms.end();
     }
 
-    const HeterogeneousMap& getDefaultUniforms() const { return uniformDefaults; }
+    std::shared_ptr<Material> getDefaultUniforms() const { return uniformDefaults; }
 protected:
     std::string  mId; // Human readible Id
     unsigned int mHandle = 0; // handle for the program (might vary from implementation to implementation)
     std::unordered_map<std::string, ProgramUniformDesc> uniforms;
-    HeterogeneousMap uniformDefaults;
+    std::shared_ptr<Material> uniformDefaults;
 };
 
 #ifdef _OPENGL

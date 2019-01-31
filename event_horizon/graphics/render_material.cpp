@@ -14,10 +14,11 @@ void RenderMaterial::removeAllTextures() {
 //    calcHash();
 }
 
-RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program, const HeterogeneousMap& _material ) {
+RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program,
+                                std::shared_ptr<Material> _material, Renderer& _rr ) : rr(_rr) {
 
     BoundProgram( _program );
-    Uniforms( std::make_shared<ProgramUniformSet>(_material) );
+    Uniforms( std::make_shared<ProgramUniformSet>(_material, rr) );
 
     globalUniforms = std::make_shared<ProgramUniformSet>();
 
@@ -63,29 +64,29 @@ void RenderMaterial::BoundProgram( std::shared_ptr<Program> val ) {
 //    return m;
 //}
 
-void
-MaterialPBRUniformRenderSetup::operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus,
-                                           Renderer& rr ) const {
-
-    std::shared_ptr<PBRMaterial> pmat = std::dynamic_pointer_cast<PBRMaterial>( material );
-
-    pus->setOnGPU( program, UniformNames::opacity, material->getOpacity() );
-    pus->setOnGPU( program, UniformNames::alpha, pmat->getColor().w());
-    pus->setOnGPU( program, UniformNames::diffuseColor, pmat->getColor().xyz());
-
-    pus->setOnGPU( program, UniformNames::diffuseTexture, rr.TDI( pmat->getBaseColor(), TSLOT_COLOR ));
-    pus->setOnGPU( program, UniformNames::normalTexture, rr.TDI( pmat->getNormal(), TSLOT_NORMAL ));
-    pus->setOnGPU( program, UniformNames::aoTexture, rr.TDI( pmat->getAmbientOcclusion(), TSLOT_AO ));
-    pus->setOnGPU( program, UniformNames::roughnessTexture, rr.TDI( pmat->getRoughness(), TSLOT_ROUGHNESS ));
-    pus->setOnGPU( program, UniformNames::metallicTexture, rr.TDI( pmat->getMetallic(), TSLOT_METALLIC ));
-    pus->setOnGPU( program, UniformNames::heightTexture, rr.TDI( pmat->getHeight(), TSLOT_HEIGHT ));
-
-    pus->setOnGPU( program, UniformNames::ibl_irradianceMap, rr.TDI( FBNames::convolution , TSLOT_IBL_IRRADIANCE ));
-    pus->setOnGPU( program, UniformNames::ibl_specularMap, rr.TDI( FBNames::specular_prefilter , TSLOT_IBL_PREFILTER ));
-    pus->setOnGPU( program, UniformNames::ibl_brdfLUTMap, rr.TDI( FBNames::ibl_brdf , TSLOT_IBL_BRDFLUT ));
-
-    pus->setOnGPU( program, UniformNames::metallic, pmat->getMetallicValue());
-    pus->setOnGPU( program, UniformNames::roughness, pmat->getRoughnessValue());
-    pus->setOnGPU( program, UniformNames::ao, pmat->getAoValue());
-}
+//void
+//MaterialPBRUniformRenderSetup::operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus,
+//                                           Renderer& rr ) const {
+//
+//    std::shared_ptr<PBRMaterial> pmat = std::dynamic_pointer_cast<PBRMaterial>( material );
+//
+//    pus->setOnGPU( program, UniformNames::opacity, material->getOpacity() );
+//    pus->setOnGPU( program, UniformNames::alpha, pmat->getColor().w());
+//    pus->setOnGPU( program, UniformNames::diffuseColor, pmat->getColor().xyz());
+//
+//    pus->setOnGPU( program, UniformNames::diffuseTexture, rr.TDI( pmat->getBaseColor(), TSLOT_COLOR ));
+//    pus->setOnGPU( program, UniformNames::normalTexture, rr.TDI( pmat->getNormal(), TSLOT_NORMAL ));
+//    pus->setOnGPU( program, UniformNames::aoTexture, rr.TDI( pmat->getAmbientOcclusion(), TSLOT_AO ));
+//    pus->setOnGPU( program, UniformNames::roughnessTexture, rr.TDI( pmat->getRoughness(), TSLOT_ROUGHNESS ));
+//    pus->setOnGPU( program, UniformNames::metallicTexture, rr.TDI( pmat->getMetallic(), TSLOT_METALLIC ));
+//    pus->setOnGPU( program, UniformNames::heightTexture, rr.TDI( pmat->getHeight(), TSLOT_HEIGHT ));
+//
+//    pus->setOnGPU( program, UniformNames::ibl_irradianceMap, rr.TDI( FBNames::convolution , TSLOT_IBL_IRRADIANCE ));
+//    pus->setOnGPU( program, UniformNames::ibl_specularMap, rr.TDI( FBNames::specular_prefilter , TSLOT_IBL_PREFILTER ));
+//    pus->setOnGPU( program, UniformNames::ibl_brdfLUTMap, rr.TDI( FBNames::ibl_brdf , TSLOT_IBL_BRDFLUT ));
+//
+//    pus->setOnGPU( program, UniformNames::metallic, pmat->getMetallicValue());
+//    pus->setOnGPU( program, UniformNames::roughness, pmat->getRoughnessValue());
+//    pus->setOnGPU( program, UniformNames::ao, pmat->getAoValue());
+//}
 

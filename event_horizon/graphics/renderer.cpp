@@ -80,8 +80,8 @@ StreamingMediator& Renderer::SSM() {
     return ssm;
 }
 
-void Renderer::resetDefaultFB() {
-    mDefaultFB = FrameBufferBuilder{ *this, "default" }.build();
+void Renderer::resetDefaultFB( const Vector2i& forceSize ) {
+    mDefaultFB = FrameBufferBuilder{ *this, "default" }.size(forceSize).build();
 }
 
 void Renderer::init() {
@@ -205,23 +205,23 @@ bool Renderer::hasTag( uint64_t _tag ) const {
 std::shared_ptr<RenderMaterial> Renderer::addMaterial( const std::string& _shaderName ) {
     auto program = P( _shaderName );
     if ( program ) {
-        return addMaterial( program->getDefaultUniforms() );
+        return addMaterial( program->getDefaultUniforms(), program );
     }
     return nullptr;
 }
 
-std::shared_ptr<RenderMaterial> Renderer::addMaterial( const HeterogeneousMap& _material,
+std::shared_ptr<RenderMaterial> Renderer::addMaterial( std::shared_ptr<Material> _material,
                                                        std::shared_ptr<Program> _program ) {
-    auto program = _program ? _program : P( _material.Name() );
+    auto program = _program ? _program : P( _material->getShaderName() );
     if ( program ) {
-        auto rmaterial = std::make_shared<RenderMaterial>( program, _material );
+        auto rmaterial = std::make_shared<RenderMaterial>( program, _material, *this );
         MaterialMap( rmaterial );
         return rmaterial;
     }
     return nullptr;
 }
 
-void Renderer::changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat ) {
+void Renderer::changeMaterialOnTags( uint64_t _tag, std::shared_ptr<Material> _mat ) {
     // -###- FIXME, reenable this
 //    auto rmaterial = RenderMaterialBuilder{*this}.m(_mat).build();
 //
@@ -310,7 +310,7 @@ std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot )
 
 TextureIndex Renderer::TDI( const std::string& _id, unsigned int tSlot ) {
     auto t = TD( _id, tSlot );
-    return { t->getHandle(), tSlot, t->getTarget() };
+    return { t->name(),  t->getHandle(), tSlot, t->getTarget() };
 }
 
 void RenderAnimationManager::setTiming() {

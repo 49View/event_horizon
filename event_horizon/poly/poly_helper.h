@@ -11,7 +11,7 @@
 
 class GeomData;
 class Profile;
-class PBRMaterial;
+class Material;
 
 namespace ClipperLib {
     struct IntPoint;
@@ -97,12 +97,12 @@ public:
 
 class GeomDataBuilderBaseMaterial {
 public:
-    GeomDataBuilderBaseMaterial& m( std::shared_ptr<PBRMaterial> _material ) {
+    GeomDataBuilderBaseMaterial& m( std::shared_ptr<Material> _material ) {
         material = _material;
         return *this;
     }
 protected:
-    std::shared_ptr<PBRMaterial> material;
+    std::shared_ptr<Material> material;
     GeomMappingData mappingData;
 };
 

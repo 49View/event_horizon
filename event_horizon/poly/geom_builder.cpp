@@ -134,14 +134,14 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg ) {
-    auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName, materialPropeties ));
+    auto mat = std::dynamic_pointer_cast<Material>(sg.ML().get( materialName, shaderName, materialPropeties ));
     gb->m(mat);
     elem->Data( gb->build() );
     elem->GHType(gt);
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb, SceneGraph& sg ) {
-    auto mat = std::dynamic_pointer_cast<PBRMaterial>(sg.ML().get( materialName, shaderName, materialPropeties ));
+    auto mat = std::dynamic_pointer_cast<Material>(sg.ML().get( materialName, shaderName, materialPropeties ));
     gb->m(mat);
     for ( const auto& c : gb->build() ) {
         elem->addChildren( c );

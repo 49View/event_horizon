@@ -26,7 +26,7 @@ inline void hash_combine( std::size_t& seed, const T& v, Rest... rest ) {
 }
 
 GeomData::GeomData() {
-	material = std::make_shared<PBRMaterial>();
+	material = std::make_shared<Material>();
 }
 
 GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {
@@ -35,14 +35,14 @@ GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {
 
 GeomData::GeomData( const ShapeType _st,
 					const Vector3f& _pos, [[maybe_unused]] const Vector3f& _axis, const Vector3f& _scale,
-					std::shared_ptr<PBRMaterial> _material,
+					std::shared_ptr<Material> _material,
 					const GeomMappingData& _mapping ) {
 	material = _material;
 	setMappingData( _mapping );
 	addShape( _st, _pos, _scale, 3 );
 }
 
-GeomData::GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<PBRMaterial> _material,
+GeomData::GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<Material> _material,
 					const GeomMappingData& _mapping, PullFlags pullFlags ) {
 	material = _material;
 	setMappingData( _mapping );
@@ -51,7 +51,7 @@ GeomData::GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<PBRMa
 	}
 }
 
-GeomData::GeomData( const std::vector<PolyLine>& _polyLines, std::shared_ptr<PBRMaterial> _material,
+GeomData::GeomData( const std::vector<PolyLine>& _polyLines, std::shared_ptr<Material> _material,
                     const GeomMappingData& _mapping ) {
 	material = _material;
 	setMappingData( _mapping );
@@ -62,7 +62,7 @@ GeomData::GeomData( const std::vector<PolyLine>& _polyLines, std::shared_ptr<PBR
     }
 }
 
-GeomData::GeomData( const QuadVector3fNormalfList& _quads, std::shared_ptr<PBRMaterial> _material,
+GeomData::GeomData( const QuadVector3fNormalfList& _quads, std::shared_ptr<Material> _material,
 					const GeomMappingData& _mapping ) {
 	material = _material;
 	setMappingData( _mapping );
@@ -128,7 +128,7 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
 		auto fb = std::make_shared<GeomDataFollowerBuilder>( mProfile,
 															 XZY::C(points.path,0.0f),
 															 FollowerFlags::WrapPath );
-		material->setColor( points.strokeColor );
+		material->c( points.strokeColor );
 		fb->m(material);
 		auto g = fb->build();
 		logoGeoms.emplace_back(g);
@@ -162,7 +162,8 @@ void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<Ser
 
 void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mName );
-	material = std::make_shared<PBRMaterial>( reader );
+	// -###- FIXME, reintroduce material readers
+	material = std::make_shared<Material>();//( reader );
 	reader->read( mBBox3d.mMinPoint );
 	reader->read( mBBox3d.mMaxPoint );
 	reader->read( mapping.direction );

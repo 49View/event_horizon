@@ -36,7 +36,7 @@ void ImGuiMaterials::renderImpl( Scene* p, Rect2f& _r ) {
     for ( const auto& mat : p->ML().list()) {
         if ( !mat ) continue;
         ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", mat->Name().c_str() );
-        float dc[3] = { mat->getColor().x(), mat->getColor().y(), mat->getColor().z() };
+        float dc[3] = {1.0f, 1.0f, 1.0f};// { mat->getColor().x(), mat->getColor().y(), mat->getColor().z() };
         ImGui::PushID( (mat->Name() + "dc").c_str() );
         ImGui::ColorEdit3( "Diffuse", dc );
         ImGui::PopID();
@@ -77,6 +77,6 @@ void callbackMaterial( const std::string& _filename, const std::vector<char>& _d
         if ( !p->RR().hasTag(9300) ) {
             GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).build( p->RSG() );
         }
-        p->RR().changeMaterialOnTags( 9300, std::dynamic_pointer_cast<PBRMaterial>(p->ML().get(mb->Name())) );
+        p->RR().changeMaterialOnTags( 9300, std::dynamic_pointer_cast<Material>(p->ML().get(mb->Name())) );
     } );
 }

@@ -281,12 +281,12 @@
         // vec3 ambient = (kD );
 
         // vec3 finalColor = (Lo * visibility) + ambient;
-        vec3 finalColor = ambient;//pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
+        vec3 finalColor = vec3(1.0,0.0,0.0);// ambient;//pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
 
         finalColor = finalColor / ( finalColor + vec3(1.0));
         // finalColor = pow(finalColor, vec3(2.2/1.0)); 
 
-        FragColor = vec4( finalColor, opacity * alpha );
+        FragColor = vec4( finalColor, opacity * alpha ); 
 
         //	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
         BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );
