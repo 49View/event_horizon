@@ -774,7 +774,7 @@ function(linker PROJECT_NAME WHICH_LIBS)
     link_system_libraries_if("${WIN32}" "-lwsock32")
 
     # apple frameworks
-    link_frameworks("OpenCL;AudioToolbox;Accelerate;AudioUnit;Cocoa;CoreAudio;CoreMedia;CoreFoundation;CoreGraphics;CoreServices;CoreVideo;Foundation;IOKit;Security;VideoToolbox;VideoDecodeAcceleration")
+    link_frameworks("OpenCL;OpenAL;AudioToolbox;Accelerate;AudioUnit;Cocoa;CoreAudio;CoreMedia;CoreFoundation;CoreGraphics;CoreServices;CoreVideo;Foundation;IOKit;Security;VideoToolbox;VideoDecodeAcceleration")
 
 endfunction(linker)
 

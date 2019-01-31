@@ -384,8 +384,8 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     mSkybox = createSkybox();
 
     addCubeMapRig( CameraCubeMapRigBuilder{FBNames::sceneprobe}.s( 512 ) );
-    addCubeMapRig( CameraCubeMapRigBuilder{FBNames::convolution}.s(128) );
-    addCubeMapRig( CameraCubeMapRigBuilder{FBNames::specular_prefilter}.s( 512 ).useMips() );
+    addCubeMapRig( CameraCubeMapRigBuilder{MPBRTextures::convolution}.s(128) );
+    addCubeMapRig( CameraCubeMapRigBuilder{MPBRTextures::specular_prefilter}.s( 512 ).useMips() );
 
     // Create PBR resources
     mConvolution = std::make_unique<CubeEnvironmentMap>(rr);
@@ -441,7 +441,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, [[maybe_unu
     }
     // convolution
     for ( int t = 0; t < 6; t++ ) {
-        auto probe = std::make_shared<RLTargetProbe>( getProbeRig(t, FBNames::convolution), rr );
+        auto probe = std::make_shared<RLTargetProbe>( getProbeRig(t, MPBRTextures::convolution), rr );
         probe->startCL( rr.CB_U() );
         mConvolution->render( rr.TM().TD(_probeCameraName, TSLOT_CUBEMAP) );
     }
@@ -449,7 +449,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, [[maybe_unu
     int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)512 ) ) );
     for ( int m = 0; m < preFilterMipMaps; m++ ) {
         for ( int t = 0; t < 6; t++ ) {
-            auto probe = std::make_shared<RLTargetProbe>( getProbeRig(t, FBNames::specular_prefilter), rr, m );
+            auto probe = std::make_shared<RLTargetProbe>( getProbeRig(t, MPBRTextures::specular_prefilter), rr, m );
             probe->startCL( rr.CB_U() );
             float roughness = (float)m / (float)(preFilterMipMaps - 1);
             mIBLPrefilterSpecular->render( rr.TM().TD( _probeCameraName, TSLOT_CUBEMAP ), roughness );

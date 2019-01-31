@@ -16,7 +16,7 @@ using TextureIndex = TextureUniformDesc;
 
 class HeterogeneousMap : public NamePolicy, public std::enable_shared_from_this<HeterogeneousMap> {
 public:
-    void assign( const HeterogeneousMap& source );
+    void inject( const HeterogeneousMap& source );
     void assign( const std::string& uniformName, int data );
     void assign( const std::string& uniformName, float data );
     void assign( const std::string& uniformName, double data );

@@ -4,6 +4,7 @@
 #include "program_list.h"
 #include "framebuffer.h"
 #include "renderer.h"
+#include <graphics/vp_builder.hpp>
 
 void Skybox::equirectangularTextureInit( const std::vector<std::string>& params ) {
 
@@ -139,7 +140,7 @@ PrefilterSpecularMap::PrefilterSpecularMap( Renderer& rr ) : RenderModule( rr ) 
 }
 
 void PrefilterBRDF::init() {
-    mBRDF = FrameBufferBuilder{ rr, FBNames::ibl_brdf }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
+    mBRDF = FrameBufferBuilder{ rr, MPBRTextures::ibl_brdf }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
             PIXEL_FORMAT_HDR_RG_16 ). IM(S::IBL_BRDF).noDepth().build();
 }
 

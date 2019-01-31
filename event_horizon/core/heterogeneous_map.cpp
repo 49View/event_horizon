@@ -32,7 +32,7 @@ void HeterogeneousMap::calcHash() {
     for ( auto& i : mV4fs ) mHash += i.second.hash();
 }
 
-void HeterogeneousMap::assign( const HeterogeneousMap& source ) {
+void HeterogeneousMap::inject( const HeterogeneousMap& source ) {
     for ( auto& pu : source.mTextures ) assign( pu.first, pu.second );
     for ( auto& pu : source.mInts ) assign( pu.first, pu.second );
     for ( auto& pu : source.mFloats ) assign( pu.first, pu.second );
@@ -42,6 +42,8 @@ void HeterogeneousMap::assign( const HeterogeneousMap& source ) {
     for ( auto& pu : source.mV4fs ) assign( pu.first, pu.second );
     for ( auto& pu : source.mM3fs ) assign( pu.first, pu.second );
     for ( auto& pu : source.mM4fs ) assign( pu.first, pu.second );
+
+    calcTotalNumUniforms();
 }
 
 void HeterogeneousMap::assign( const std::string& uniformName, int data ) {

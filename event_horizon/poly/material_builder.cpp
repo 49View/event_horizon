@@ -6,13 +6,6 @@
 #include <core/image_util.h>
 #include <stb/stb_image_write.h>
 
-const static std::vector<std::string> g_pbrNames{ "_basecolor","_normal","_ambient_occlusion","_roughness",
-                                                  "_metallic","_height" };
-
-const std::vector<std::string>& pbrNames() {
-    return g_pbrNames;
-}
-
 //MaterialBuilder::MaterialBuilder( const std::string& _name, const std::string& _sn ) : ResourceBuilder(
 //        _name) {
 //    shaderName = _sn;
@@ -39,9 +32,20 @@ void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<Material> mat, D
 void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
     auto mat = std::make_shared<Material>();
-    createDefaultPBRTextures( mat, sg );
-
+    mat->Name( Name() );
     mat->setShaderName( shaderName );
+
+    createDefaultPBRTextures( mat, sg );
+    mat->assign( UniformNames::diffuseTexture, mat->getBaseColor() );
+    mat->assign( UniformNames::normalTexture, mat->getNormal() );
+    mat->assign( UniformNames::aoTexture, mat->getAmbientOcclusion() );
+    mat->assign( UniformNames::roughnessTexture, mat->getRoughness() );
+    mat->assign( UniformNames::metallicTexture, mat->getMetallic() );
+    mat->assign( UniformNames::heightTexture, mat->getHeight() );
+    mat->assign( UniformNames::ibl_irradianceMap, MPBRTextures::convolution);
+    mat->assign( UniformNames::ibl_specularMap, MPBRTextures::specular_prefilter);
+    mat->assign( UniformNames::ibl_brdfLUTMap, MPBRTextures::ibl_brdf);
+
     sg.add( *this, mat );
 }
 
@@ -144,7 +148,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
         auto files = tarUtil::untar( inflatedData );
         for ( const auto& fi  : files ) {
             auto fn = getFileNameNoExt( fi.name );
-            downloadedMatName = string_trim_upto( fn, pbrNames() );
+            downloadedMatName = string_trim_upto( fn, MPBRTextures::Names() );
             auto ext = getFileNameExt( fi.name );
             if ( isFileExtAnImage( ext ) ) {
                 ImageBuilder{ fn }.makeDirect( *sg.TL(), fi.dataPtr );

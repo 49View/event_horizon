@@ -26,12 +26,24 @@ namespace MQSettings {
 };
 
 namespace MPBRTextures {
+
+    const static std::string convolution = "convolution";
+    const static std::string specular_prefilter = "specular_prefilter";
+    const static std::string ibl_brdf = "ibl_brdf";
+
     static const std::string basecolorString = "basecolor";
     static const std::string heightString = "height";
     static const std::string metallicString = "metallic";
     static const std::string roughnessString = "roughness";
     static const std::string normalString = "normal";
     static const std::string ambientOcclusionString = "ambient_occlusion";
+
+    const static std::vector<std::string> g_pbrNames{ "_basecolor","_normal","_ambient_occlusion","_roughness",
+                                                      "_metallic","_height" };
+
+    static inline const std::vector<std::string>& Names() {
+        return g_pbrNames;
+    }
 
     static inline const std::string findTextureInString( const std::string& _value ) {
         if ( _value.find( basecolorString ) != std::string::npos ) return basecolorString;
@@ -102,12 +114,6 @@ public:
     }
     virtual ~Material() = default;
 
-//    Material( const std::string& _name, const std::string& shaderName,
-//              const std::string& textureName, const Color4f& color, float opacity ) :
-//              shaderName(shaderName ), textureName( textureName ), color( color ), opacity( opacity ) {
-//        Name( _name );
-//    }
-
     std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) {
 //        return std::make_shared<Material>( Name(), _subkey, textureName, color, opacity );
         return std::make_shared<Material>(*this);
@@ -117,17 +123,6 @@ public:
 //        return std::make_shared<Material>( Name(), shaderName, textureName, _mp.pigment, opacity );
         return std::make_shared<Material>(*this);
     }
-//    std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) override {
-//        auto ret = std::make_shared<PBRMaterial>();
-//        ret->setShaderName( _subkey );
-//        return ret;
-//    }
-//
-//    std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) override {
-//        auto ret = std::make_shared<PBRMaterial>();
-//        ret->setColor( _mp.pigment );
-//        return ret;
-//    }
 
     Material& t( const std::string& _tn ) {
         assign( UniformNames::colorTexture, _tn );

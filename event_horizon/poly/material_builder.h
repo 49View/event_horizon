@@ -13,8 +13,6 @@ struct MaterialProperties;
 struct ColorBuilder;
 class ImageDepencencyMaker;
 
-const std::vector<std::string>& pbrNames();
-
 class MaterialManager : public DependencyMaker {
 public:
     DEPENDENCY_MAKER_EXIST(materialList);

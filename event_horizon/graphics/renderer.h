@@ -39,9 +39,6 @@ namespace FBNames {
 	const static std::string shadowmap = "shadowMap_d";
 	const static std::string lightmap = "lightMap_t";
 	const static std::string sceneprobe = "sceneprobe";
-	const static std::string convolution = "convolution";
-	const static std::string specular_prefilter = "specular_prefilter";
-	const static std::string ibl_brdf = "ibl_brdf";
 	const static std::string blur_horizontal = "blur_horizontal_b";
 	const static std::string blur_vertical = "blur_vertical_b";
 	const static std::string colorFinalFrameBuffer = "colorFinalFrameBuffer";
@@ -257,46 +254,3 @@ public:
 	friend class RenderSceneGraph;
 	friend struct HierGeomRenderObserver;
 };
-
-template <typename V>
-class VPBuilder {
-public:
-	explicit VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl, std::string _shader ) : rr(_rr), vpl(
-			std::move( _vpl )) {
-		name = UUIDGen::make();
-		ASSERT( rr.P( _shader ) != nullptr );
-		material = std::make_shared<Material>( rr.P( _shader )->getDefaultUniforms() );
-    };
-
-	VPBuilder& c( const Color4f& _matColor ) {
-        material->assign( UniformNames::opacity, _matColor.w() );
-        material->assign( UniformNames::diffuseColor, _matColor.xyz() );
-        return *this;
-	}
-	VPBuilder& p( std::shared_ptr<V> _ps ) { ps = _ps; return *this; }
-	VPBuilder& n( const std::string& _name ) { name = _name; return *this; }
-    VPBuilder& t( const std::string& _tex ) {
-        material->assign( UniformNames::colorTexture, _tex );
-	    return *this;
-	}
-	VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
-
-	UUID build();
-
-private:
-	Renderer& rr;
-	std::shared_ptr<VPList> vpl;
-	uint64_t tag = GT_Generic;
-	std::shared_ptr<V> ps;
-	std::shared_ptr<Material> material;
-	std::string name;
-};
-
-template<typename V>
-UUID VPBuilder<V>::build() {
-	rr.invalidateOnAdd();
-
-	vpl->create( VertexProcessing::create_cpuVBIB( ps, rr.addMaterial( material ), name ), tag );
-
-	return name;
-}

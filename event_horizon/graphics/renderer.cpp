@@ -30,9 +30,9 @@ namespace FBNames {
             sFBNames.insert( shadowmap );
             sFBNames.insert( lightmap );
             sFBNames.insert( sceneprobe );
-            sFBNames.insert( convolution );
-            sFBNames.insert( specular_prefilter );
-            sFBNames.insert( ibl_brdf );
+            sFBNames.insert( MPBRTextures::convolution );
+            sFBNames.insert( MPBRTextures::specular_prefilter );
+            sFBNames.insert( MPBRTextures::ibl_brdf );
             sFBNames.insert( blur_horizontal );
             sFBNames.insert( blur_vertical );
             sFBNames.insert( colorFinalFrameBuffer );

@@ -4,6 +4,7 @@
 
 #include "renderer.h"
 #include <core/font_manager.h>
+#include <graphics/vp_builder.hpp>
 
 void Renderer::drawIncGridLines( int numGridLines, float deltaInc, float gridLinesWidth,
                        const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
