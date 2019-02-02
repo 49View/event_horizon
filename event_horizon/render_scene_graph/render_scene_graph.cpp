@@ -117,46 +117,10 @@ void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& g
             .p(generateGeometryVP(_source->Data())).m( _source->Data()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
 }
 
-std::string UIElementRenderObserver::getShaderType( UIShapeType _st ) const {
-    auto shaderName = S::TEXTURE_2D;
-    switch ( _st ) {
-        case UIShapeType::CameraFrustom2d:
-        case UIShapeType::CameraFrustom3d:
-            break;
-        case UIShapeType::Rect2d:
-        case UIShapeType::Rect3d:
-            shaderName = _st == UIShapeType::Rect2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-        case UIShapeType::Line2d:
-        case UIShapeType::Line3d:
-            shaderName = _st == UIShapeType::Line2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-        case UIShapeType::Arrow2d:
-        case UIShapeType::Arrow3d:
-            shaderName = _st == UIShapeType::Arrow2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-        case UIShapeType::Polygon2d:
-        case UIShapeType::Polygon3d:
-            shaderName = _st == UIShapeType::Polygon2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-        case UIShapeType::Text2d:
-        case UIShapeType::Text3d:
-            shaderName = _st == UIShapeType::Text2d ? S::FONT_2D : S::FONT;
-            break;
-        case UIShapeType::Separator2d:
-        case UIShapeType::Separator3d:
-            shaderName = _st == UIShapeType::Separator2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-    }
-
-    return shaderName;
-}
-
 void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
-    auto color = _source->Data()->Color();
+    auto mat = _source->Data()->getMaterial();
     auto renderBucketIndex = _source->Data()->RenderBucketIndex();
-    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), color.w() );
-    auto shaderName = getShaderType( _source->Data()->ShapeType() );
+    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), mat->getOpacity() );
     auto vs = _source->Data()->VertexList();
-    VPBuilder<PosTex3dStrip>{rr,vpList,shaderName}.p(vs).c(color).n(_source->Hash()).build();
+    VPBuilder<PosTex3dStrip>{rr,vpList,mat}.p(vs).n(_source->Hash()).build();
 }

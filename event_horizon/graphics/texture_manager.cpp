@@ -92,6 +92,17 @@ std::shared_ptr<Texture> TextureManager::addTextureWithGPUHandle( const std::str
     return ret;
 }
 
+void TextureManager::preparingStremingTexture( const std::string& _streamName, const V2i& sd ) {
+    V2i sd2 = sd / 2;
+    TextureRenderData sdty { _streamName + "_y", sd.x(), sd.y(),   1, 8 };
+    TextureRenderData sdtu { _streamName + "_u", sd2.x(), sd2.y(), 1, 8 };
+    TextureRenderData sdtv { _streamName + "_v", sd2.x(), sd2.y(), 1, 8 };
+
+    addTextureNoData( sdty );
+    addTextureNoData( sdtu );
+    addTextureNoData( sdtv );
+}
+
 std::string TextureManager::textureName( const std::string input ) {
     return FM::filenameOnlyNoExtension( input );
 }

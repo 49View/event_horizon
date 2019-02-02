@@ -140,12 +140,8 @@ void Texture::refresh( const uint8_t *data ) {
 }
 
 void Texture::refresh( const uint8_t *data, int x, int y, int width, int height ) {
-    GLenum glFormat = pixelFormatToGlFormat( mFormat );
-    GLenum glType = pixelFormatToGlType( mFormat );
-    GLCALL( glActiveTexture( GL_TEXTURE0 ));
-    GLCALL( glBindTexture( targetToGl( mTarget ), mHandle ));
-    GLCALL( glTexSubImage2D( GL_TEXTURE_2D, 0, x, y, width, height, glFormat, glType, data ));
-    GLCALL( glBindTexture( targetToGl( mTarget ), 0 ));
+    GLCALL( glBindTexture( glTextureImageTarget, mHandle ));
+    GLCALL( glTexSubImage2D( glTextureImageTarget, 0, x, y, width, height, glFormat, glType, data ));
 }
 
 void Texture::refreshFromFramebuffer( int width, int height ) {

@@ -12,7 +12,6 @@
 #include <unordered_map>
 #include "core/descriptors/material.h"
 #include "program_uniform_set.h"
-#include "program_list.h"
 
 class Program;
 

@@ -1,15 +1,17 @@
 #include <string>
 #include <memory>
+#include <functional>
+#include <core/math/vector2i.h>
+#include <core/streaming_mediator.hpp>
 
-class StreamingMediator;
-
-class AudioVideoStream {
+class AudioVideoStreamFFmpeg : public AudioVideoStream {
 public:
-	explicit AudioVideoStream( StreamingMediator& mediator );
-	virtual ~AudioVideoStream();
-	int main_decode( const std::string& tname );
-	void advanceFrame();
-	const std::string& Name() const;
+	explicit AudioVideoStreamFFmpeg( const std::string& tname, StreamingMediator& mediator, AVInitCallback avc );
+	virtual ~AudioVideoStreamFFmpeg();
+
+	void advanceFrame() override;
+	V2i streamDim() const override;
+	const std::string& Name() const override;
 
 private:
 	class AudioVideoStreamImpl;

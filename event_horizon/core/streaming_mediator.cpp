@@ -17,3 +17,10 @@ StreamingPacket StreamingMediator::pop( const std::string& _name ) {
     }
     return StreamingPacket{};
 }
+
+void StreamingMediator::update() {
+    for ( auto& [k,v] : streams ) {
+        v->advanceFrame();
+    }
+
+}

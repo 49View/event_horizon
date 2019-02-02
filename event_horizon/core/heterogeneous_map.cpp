@@ -188,9 +188,13 @@ void HeterogeneousMap::get( const std::string& uniformName, int& ret ) const {
     ret = mInts.at( uniformName );
 }
 
-void HeterogeneousMap::get( const std::string& uniformName, float& ret ) const {
-    ASSERT( mFloats.find( uniformName ) != mFloats.end());
-    ret = mFloats.at( uniformName );
+bool HeterogeneousMap::get( const std::string& uniformName, float& ret ) const {
+    if ( const auto& it = mFloats.find( uniformName ); it != mFloats.end()) {
+        ret = it->second;
+        return true;
+    }
+    ret = 1.0f;
+    return false;
 }
 
 void HeterogeneousMap::get( const std::string& uniformName, Vector2f& ret ) const {

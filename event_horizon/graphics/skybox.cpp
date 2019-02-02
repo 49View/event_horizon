@@ -1,7 +1,7 @@
 #include "skybox.h"
 #include "core/math/poly_shapes.hpp"
+#include <core/descriptors/material.h>
 #include "vertex_processing.h"
-#include "program_list.h"
 #include "framebuffer.h"
 #include "renderer.h"
 #include <graphics/vp_builder.hpp>

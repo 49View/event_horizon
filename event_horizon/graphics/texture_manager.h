@@ -17,6 +17,8 @@ typedef std::map<std::string, std::shared_ptr<Texture>> TextureMap;
 typedef TextureMap::iterator TextureMapIt;
 typedef TextureMap::const_iterator TextureMapCIt;
 
+#define avcbTM (std::bind(&TextureManager::preparingStremingTexture, &p->TM(), std::placeholders::_1, std::placeholders::_2))
+
 class TextureManager {
 public:
     TextureManager() = default;
@@ -31,6 +33,7 @@ public:
     std::shared_ptr<Texture> addCubemapTexture( TextureRenderData& tb );
     std::shared_ptr<Texture> addTextureWithGPUHandle( const std::string& id, unsigned int _handle,
                                                       unsigned int _secondaryHandle = 0 );
+    void preparingStremingTexture( const std::string& _streamName, const V2i& sd );
     void updateTexture( const std::string& id, const uint8_t *data );
     void updateTexture( const RawImage& _image );
     void updateTexture( const std::string& id, const uint8_t *data, int width, int height );

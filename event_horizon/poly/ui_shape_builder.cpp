@@ -465,17 +465,51 @@ bool UIShapeBuilder::validate() const {
     return true;
 }
 
+std::string UIShapeBuilder::getShaderType( UIShapeType _st ) const {
+    auto shaderName = S::TEXTURE_2D;
+    switch ( _st ) {
+        case UIShapeType::CameraFrustom2d:
+        case UIShapeType::CameraFrustom3d:
+            break;
+        case UIShapeType::Rect2d:
+        case UIShapeType::Rect3d:
+            shaderName = _st == UIShapeType::Rect2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Line2d:
+        case UIShapeType::Line3d:
+            shaderName = _st == UIShapeType::Line2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Arrow2d:
+        case UIShapeType::Arrow3d:
+            shaderName = _st == UIShapeType::Arrow2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Polygon2d:
+        case UIShapeType::Polygon3d:
+            shaderName = _st == UIShapeType::Polygon2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Text2d:
+        case UIShapeType::Text3d:
+            shaderName = _st == UIShapeType::Text2d ? S::FONT_2D : S::FONT;
+            break;
+        case UIShapeType::Separator2d:
+        case UIShapeType::Separator3d:
+            shaderName = _st == UIShapeType::Separator2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+    }
+
+    return shaderName;
+}
+
 void UIShapeBuilder::createDependencyList( DependencyMaker& _md ) {
 
     auto& sg = static_cast<SceneGraph&>(_md);
 //    addDependency<ImageBuilder>( tname, rr.RIDM() );
     addDependency<FontBuilder>( fontName, sg.FM() );
-
     addDependencies( std::make_shared<UIShapeBuilder>(*this), _md );
 }
 
 void UIShapeBuilder::elemCreate() {
-    elem = std::make_shared<UIAsset>( std::make_shared<UIElement>(Name(), shapeType, color, renderBucketIndex), mTransform );
+    elem = std::make_shared<UIAsset>( std::make_shared<UIElement>(Name(), shapeType, material, renderBucketIndex), mTransform );
 }
 
 UIShapeBuilder& UIShapeBuilder::inj( GeomAssetSP _cloned ) {

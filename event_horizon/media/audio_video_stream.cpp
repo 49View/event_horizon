@@ -15,12 +15,20 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
-class AudioVideoStream::AudioVideoStreamImpl {
+class AudioVideoStreamFFmpeg::AudioVideoStreamImpl {
 public:
 	AudioVideoStreamImpl( StreamingMediator& mediator ) : mediator( mediator ) {}
 	int main_decode( const std::string& tname );
 	void advanceFrame();
 	const std::string& Name() const { return name; }
+
+	int getWidth() const {
+		return width;
+	}
+
+	int getHeight() const {
+		return height;
+	}
 
 protected:
 	std::string name;
@@ -51,7 +59,7 @@ protected:
 	int open_codec_context( int *stream_idx, AVCodecContext **dec_ctx, AVFormatContext *fmt_ctx, enum AVMediaType type );
 };
 
-int AudioVideoStream::AudioVideoStreamImpl::decode_packet( int *got_frame, int /*cached*/ ) {
+int AudioVideoStreamFFmpeg::AudioVideoStreamImpl::decode_packet( int *got_frame, int /*cached*/ ) {
 	int ret = 0;
 	int decoded = pkt.size;
 
@@ -146,7 +154,7 @@ int AudioVideoStream::AudioVideoStreamImpl::decode_packet( int *got_frame, int /
 	return decoded;
 }
 
-int AudioVideoStream::AudioVideoStreamImpl::open_codec_context( int *stream_idx,
+int AudioVideoStreamFFmpeg::AudioVideoStreamImpl::open_codec_context( int *stream_idx,
 									  AVCodecContext **dec_ctx, AVFormatContext * _fmt_ctx, enum AVMediaType type ) {
 	int ret, stream_index;
 	AVStream *st;
@@ -195,7 +203,7 @@ int AudioVideoStream::AudioVideoStreamImpl::open_codec_context( int *stream_idx,
 	return 0;
 }
 
-void AudioVideoStream::AudioVideoStreamImpl::advanceFrame() {
+void AudioVideoStreamFFmpeg::AudioVideoStreamImpl::advanceFrame() {
 
     if ( !loaded ) return;
 
@@ -232,14 +240,18 @@ void AudioVideoStream::AudioVideoStreamImpl::advanceFrame() {
 //	av_free(video_dst_data[0]);
 }
 
-int AudioVideoStream::AudioVideoStreamImpl::main_decode( const std::string& tname ) {
+int AudioVideoStreamFFmpeg::AudioVideoStreamImpl::main_decode( const std::string& tname ) {
 	int ret = 0;
 
 //	setId( tname );
 	name = tname;
 
 	/* register all formats and codecs */
-	//av_register_all();
+//	### right so we need to understand how this works, for now, working on mac I'll enable only on mac
+// bacase they build would fail on a depreciated API
+#ifdef OSX
+	av_register_all();
+#endif
 
     avformat_network_init();
 
@@ -299,20 +311,22 @@ int AudioVideoStream::AudioVideoStreamImpl::main_decode( const std::string& tnam
 	return ret < 0;
 }
 
-AudioVideoStream::AudioVideoStream( StreamingMediator& mediator ) {
-	pimpl = std::make_unique<AudioVideoStream::AudioVideoStreamImpl>(mediator);
+AudioVideoStreamFFmpeg::AudioVideoStreamFFmpeg( const std::string& tname, StreamingMediator& mediator, AVInitCallback avc ) {
+	pimpl = std::make_unique<AudioVideoStreamFFmpeg::AudioVideoStreamImpl>(mediator);
+	pimpl->main_decode( tname );
+	avc( tname, streamDim() );
 }
 
-const std::string& AudioVideoStream::Name() const {
+const std::string& AudioVideoStreamFFmpeg::Name() const {
     return pimpl->Name();
 }
 
-int AudioVideoStream::main_decode( const std::string& tname ) {
-	return pimpl->main_decode( tname );
+V2i AudioVideoStreamFFmpeg::streamDim() const {
+	return V2i{ pimpl->getWidth(), pimpl->getHeight() };
 }
 
-void AudioVideoStream::advanceFrame() {
+void AudioVideoStreamFFmpeg::advanceFrame() {
 	pimpl->advanceFrame();
 }
 
-AudioVideoStream::~AudioVideoStream() = default;
+AudioVideoStreamFFmpeg::~AudioVideoStreamFFmpeg() = default;

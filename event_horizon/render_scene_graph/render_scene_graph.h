@@ -29,7 +29,6 @@ struct UIElementRenderObserver : public ObserverShared<UIAsset> {
     virtual ~UIElementRenderObserver() = default;
 
     void notified( UIAssetSP _source, const std::string& generator ) override;
-    std::string getShaderType( UIShapeType _st ) const;
 private:
     Renderer& rr;
 };

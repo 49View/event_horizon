@@ -4,13 +4,14 @@
 
 #pragma once
 
-#include "core/formatting_utils.h"
-#include "core/observable.h"
-#include "core/builders.hpp"
-#include "core/math/rect2f.h"
-#include "core/math/aabb.h"
-#include "core/math/vector4f.h"
-#include "core/soa_utils.h"
+#include <core/formatting_utils.h>
+#include <core/observable.h>
+#include <core/builders.hpp>
+#include <core/math/rect2f.h>
+#include <core/math/aabb.h>
+#include <core/math/vector4f.h>
+#include <core/soa_utils.h>
+#include <core/descriptors/material.h>
 
 #include <poly/poly.hpp>
 
@@ -18,19 +19,15 @@ namespace Utility { namespace TTFCore { class Font; }}
 
 class UIElement {
 public:
-    UIElement( const std::string& name, UIShapeType shapeType, const Color4f& color, int renderBucketIndex ) : name(
-            name ), shapeType( shapeType ), color( color ), renderBucketIndex( renderBucketIndex ) {}
+    UIElement( const std::string& name, UIShapeType shapeType, std::shared_ptr<Material> _mat, int renderBucketIndex ) : name(
+            name ), shapeType( shapeType ), material( _mat ), renderBucketIndex( renderBucketIndex ) {}
 
-    const Color4f& Color() const {
-        return color;
+    const std::shared_ptr<Material>& getMaterial() const {
+        return material;
     }
 
-    Color4f& Color() {
-        return color;
-    }
-
-    void Color( const Color4f& _c ) {
-        color = _c;
+    void setMaterial( const std::shared_ptr<Material>& material ) {
+        UIElement::material = material;
     }
 
     UIShapeType ShapeType() const {
@@ -83,12 +80,12 @@ public:
     }
 
     template<typename TV> \
-	void visit() const { traverseWithHelper<TV>( "Name,BBbox,Color", name,bbox3d,color ); }
+	void visit() const { traverseWithHelper<TV>( "Name,BBbox", name,bbox3d ); }
 
 private:
     std::string name;
     UIShapeType shapeType = UIShapeType::Rect2d;
-    Color4f color = Color4f::WHITE;
+    std::shared_ptr<Material> material;
     int renderBucketIndex = 0;
     JMATH::AABB bbox3d = JMATH::AABB::ZERO;
     std::shared_ptr<PosTex3dStrip> vs;
@@ -100,14 +97,20 @@ public:
     virtual ~UIShapeBuilder() = default;
     void assemble( DependencyMaker& rr ) override;
 
-    explicit UIShapeBuilder( UIShapeType shapeType ) : shapeType( shapeType ) {
+    void init() {
+        material = std::make_shared<Material>();
+        material->setShaderName( getShaderType( shapeType ) );
         defaultFontIfNecessary();
     }
 
+    explicit UIShapeBuilder( UIShapeType shapeType ) : shapeType( shapeType ) {
+        init();
+    }
+
     UIShapeBuilder( UIShapeType _shapeType, const std::string& _ti, float _fh = 0.0f ) : shapeType( _shapeType ) {
+        init();
         if ( _fh != 0.0f ) fh(_fh);
         ti(_ti);
-        defaultFontIfNecessary();
     }
 
     void defaultFontIfNecessary() {
@@ -115,6 +118,8 @@ public:
             fontName = defaultFontName;
         }
     }
+
+    std::string getShaderType( UIShapeType _st ) const;
 
     bool Centred() const {
         return isCentred;
@@ -129,6 +134,18 @@ public:
 
     UIShapeBuilder& v( const std::vector<Vector3f>& vlist ) {
         outlineVerts = vlist;
+        return *this;
+    }
+
+    UIShapeBuilder& m( const std::string& _shader, const std::string& _matName = "" ) {
+        material->Name( _matName );
+        material->setShaderName( _shader );
+        return *this;
+    }
+
+    template <typename T>
+    UIShapeBuilder& mc( const std::string& _name, T _value ) {
+        material->assign( _name, _value);
         return *this;
     }
 
@@ -173,7 +190,7 @@ public:
     }
 
     UIShapeBuilder& c( const Vector4f& _color ) {
-        color = _color;
+        material->c( _color );
         return *this;
     }
 
@@ -315,6 +332,7 @@ private:
 private:
     UIShapeType shapeType = UIShapeType::Rect2d;
     std::shared_ptr<Matrix4f> mTransform = std::make_shared<Matrix4f>(Matrix4f::MIDENTITY());
+    std::shared_ptr<Material> material;
     RectCreateAnchor anchor = RectCreateAnchor::None;
     RectFillMode fillMode = RectFillMode::AspectFill;
     JMATH::Rect2f rect = Rect2f::IDENTITY;
@@ -322,7 +340,6 @@ private:
     Vector2f orig = Vector2f::HUGE_VALUE_NEG;
     Vector2f size = Vector2f::HUGE_VALUE_NEG;
     float mRot = 0.0f;
-    Color4f  color = Color4f::WHITE;
     Color4f  backgroundColor = Vector4f::ZERO;
     float zLevel = 0.0f;
     int renderBucketIndex = 0;

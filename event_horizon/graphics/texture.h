@@ -25,6 +25,16 @@ struct TextureRenderData {
     bool isFramebufferTarget = false;
     bool generateMipMaps = true;
 
+    TextureRenderData( const std::string& name ) : name( name ) {}
+
+    TextureRenderData( const std::string& name, int width, int height, int channels, int bpp ) : name( name ),
+                                                                                                 width( width ),
+                                                                                                 height( height ),
+                                                                                                 channels( channels ),
+                                                                                                 bpp( bpp ) {
+        setFormatFromBpp();
+    }
+
     const std::string& Name() const {
         return name;
     };

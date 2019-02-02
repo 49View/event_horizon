@@ -44,7 +44,7 @@ public:
     Matrix3f getMatrix3f( const std::string & uniformName ) const;
     void get( const std::string& uniformName, std::string& ret ) const;
     void get( const std::string& uniformName, int& ret ) const;
-    void get( const std::string& uniformName, float& ret ) const;
+    bool get( const std::string& uniformName, float& ret ) const;
     void get( const std::string& uniformName, Vector2f& ret ) const;
     void get( const std::string& uniformName, Vector3f& ret ) const;
     void get( const std::string& uniformName, Vector4f& ret ) const;

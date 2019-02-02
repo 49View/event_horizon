@@ -7,11 +7,15 @@
 template <typename V>
 class VPBuilder {
 public:
-    explicit VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl, std::string _shader ) : rr(_rr), vpl(
+    VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl, const std::string& _shader ) : rr(_rr), vpl(
             std::move( _vpl )) {
-        name = UUIDGen::make();
-        ASSERT( rr.P( _shader ) != nullptr );
-        material = std::make_shared<Material>( rr.P( _shader )->getDefaultUniforms() );
+        init(_shader);
+    };
+
+    VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl, std::shared_ptr<Material> _mat ) : rr(_rr), vpl(
+            std::move( _vpl )) {
+        init(_mat->getShaderName());
+        material->inject( *_mat.get() );
     };
 
     VPBuilder& c( const Color4f& _matColor ) {
@@ -37,6 +41,13 @@ public:
         vpl->create( VertexProcessing::create_cpuVBIB( ps, rr.addMaterial( material ), name ), tag );
 
         return name;
+    }
+
+private:
+    void init( const std::string _shader) {
+        name = UUIDGen::make();
+        ASSERT( rr.P( _shader ) != nullptr );
+        material = std::make_shared<Material>( rr.P( _shader )->getDefaultUniforms() );
     }
 
 private:

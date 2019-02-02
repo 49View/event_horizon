@@ -1,8 +1,6 @@
 #version #opengl_version
 
-uniform float alpha;
-uniform float opacity;
-uniform vec3  diffuseColor;
+#include "color_uniforms.glsl"
 
 out vec4 FragColor;
 

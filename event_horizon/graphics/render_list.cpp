@@ -820,22 +820,18 @@ std::shared_ptr<Camera> RLTarget::getCamera() {
     return cameraRig->getMainCamera();
 }
 
+void RLTarget::updateStreamPacket( const std::string& _streamName ) {
+    auto packet = rr.SSM().pop( _streamName );
+    if ( packet.data ) {
+        RawImage p{ packet.width, packet.height, 1, reinterpret_cast<const char* >(packet.data), _streamName };
+        rr.TM().updateTexture( p );
+    }
+}
+
 void RLTarget::updateStreams() {
-//    uint8_t rt[4*4*4];
-//    for ( int t = 0; t < 4*4*4; t+=4 ) {
-//        rt[t+0] = static_cast<uint8_t>(unitRand() * 255.0f);
-//        rt[t+1] = static_cast<uint8_t>(unitRand() * 255.0f);
-//        rt[t+2] = static_cast<uint8_t>(unitRand() * 255.0f);
-//        rt[t+3] = 255;
-//    }
+    rr.SSM().update();
 
-//    auto yStream = "http://192.168.1.123:8080/video_y";
-//    auto uStream = "http://192.168.1.123:8080/video_u";
-//    auto vStream = "http://192.168.1.123:8080/video_v";
-
-//    auto packet = rr.SSM().pop( yStream );
-//    if ( packet.data ) {
-//        RawImage p{ packet.width, packet.height, 1, reinterpret_cast<const char* >(packet.data), yStream };
-//        rr.TM().updateTexture( p );
-//    }
+    updateStreamPacket("http://192.168.1.123:8080/video_y");
+    updateStreamPacket("http://192.168.1.123:8080/video_u");
+    updateStreamPacket("http://192.168.1.123:8080/video_v");
 }

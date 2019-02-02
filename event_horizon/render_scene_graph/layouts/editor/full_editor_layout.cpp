@@ -11,8 +11,6 @@
 #include <poly/geom_builder.h>
 #include "callbacks_layout.h"
 
-std::unique_ptr<AudioVideoStream> avt;
-
 void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
     struct UIViewLayout {
@@ -74,11 +72,18 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 
     allCallbacksEntitySetup();
 
-//    GB{ShapeType::Cube}.m("wood").build(p->RSG());
-//    avt = std::make_unique<AudioVideoStream>(p->SSM());
-//    avt->main_decode("http://192.168.1.123:8080/video");
+//    std::string streamName = "http://192.168.1.123:8080/video";
+//    p->SSM().addStream<AudioVideoStreamFFmpeg>( streamName, avcbTM );
 //
-//    UISB{ UIShapeType::Rect3d }.r(Rect2f{Vector2f::ZERO, Vector2f::ONE, true}).c(Color4f::DARK_GREEN).buildr(p->RSG());
+//    UISB{ UIShapeType::Rect3d }.r(Rect2f::IDENTITY)
+//                               .m(S::YUV_GREENSCREEN,streamName)
+//                               .mc(UniformNames::yTexture, streamName + "_y")
+//                               .mc(UniformNames::uTexture, streamName + "_u")
+//                               .mc(UniformNames::vTexture, streamName + "_v")
+//                               .buildr(p->RSG());
+
+//    GB{ShapeType::Cube}.col(Color4f::LIGHT_CORAL).build(p->RSG());
+
 //    UISB{ UIShapeType::Line3d }.v( {V3f::ZERO, V3f::X_AXIS}).lw(1.0f).c(Color4f::BLACK).buildr(p->RSG());
 
 //    UISB{ UIShapeType::Arrow3d }.v( { XZY::C({ V2f::ZERO, 0.0f }),
@@ -89,7 +94,6 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 }
 
 void render( Scene* p ) {
-//    if ( avt) avt->advanceFrame();
 }
 
 std::shared_ptr<SceneLayout> fullEditor() {

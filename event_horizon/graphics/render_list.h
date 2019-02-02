@@ -406,6 +406,7 @@ public:
     std::vector<std::pair<int, int>> bucketRanges;
 
 protected:
+    void updateStreamPacket( const std::string& _streamName );
     void addCubeMapRig( const CameraCubeMapRigBuilder& _builder );
     std::shared_ptr<CameraRig> addAncillaryRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb );
 protected:
