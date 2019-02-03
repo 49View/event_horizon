@@ -86,23 +86,17 @@ struct GeomMappingData {
 template <typename T>
 class GeomDataBuilderBase {
 public:
-    virtual std::shared_ptr<T> build() = 0;
+    virtual std::shared_ptr<T> build( std::shared_ptr<Material> _mat ) = 0;
 };
 
 template <typename T>
 class GeomDataBuilderBaseList {
 public:
-    virtual std::vector<std::shared_ptr<T>> build() = 0;
+    virtual std::vector<std::shared_ptr<T>> build( std::shared_ptr<Material> _mat ) = 0;
 };
 
 class GeomDataBuilderBaseMaterial {
-public:
-    GeomDataBuilderBaseMaterial& m( std::shared_ptr<Material> _material ) {
-        material = _material;
-        return *this;
-    }
 protected:
-    std::shared_ptr<Material> material;
     GeomMappingData mappingData;
 };
 
@@ -124,7 +118,7 @@ public:
     GeomDataShapeBuilder( ShapeType shapeType, const Vector3f& pos, const Vector3f& axis, const Vector3f& scale )
             : shapeType( shapeType ), pos( pos ), axis( axis ), scale( scale ) {}
 
-    std::shared_ptr<GeomData> build() override;
+    std::shared_ptr<GeomData> build(std::shared_ptr<Material> _mat) override;
 
 protected:
     ShapeType shapeType;
@@ -137,7 +131,7 @@ class GeomDataOutlineBuilder : public GeomDataBuilder {
 public:
     GeomDataOutlineBuilder( const std::vector<PolyOutLine>& outlineVerts ) : outlineVerts( outlineVerts ) {}
 
-    std::shared_ptr<GeomData> build() override;
+    std::shared_ptr<GeomData> build(std::shared_ptr<Material> _mat) override;
 
 protected:
     std::vector<PolyOutLine> outlineVerts;
@@ -146,7 +140,7 @@ protected:
 class GeomDataPolyBuilder : public GeomDataBuilder {
 public:
     GeomDataPolyBuilder( const std::vector<PolyLine>& _polyLine ) : polyLine( _polyLine ) {}
-    std::shared_ptr<GeomData> build() override;
+    std::shared_ptr<GeomData> build(std::shared_ptr<Material> _mat) override;
 
 protected:
     std::vector<PolyLine> polyLine;
@@ -155,7 +149,7 @@ protected:
 class GeomDataQuadMeshBuilder : public GeomDataBuilder {
 public:
     GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
-    std::shared_ptr<GeomData> build() override;
+    std::shared_ptr<GeomData> build(std::shared_ptr<Material> _mat) override;
 
 protected:
     QuadVector3fNormalfList quads;
@@ -172,7 +166,7 @@ public:
                              const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
                              mProfile(_profile), mVerts( std::move( _verts )), followersFlags(f), mRaiseEnum(_r),
                              mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
-    std::shared_ptr<GeomData> build() override;
+    std::shared_ptr<GeomData> build(std::shared_ptr<Material> _mat) override;
 
     GeomDataFollowerBuilder& raise( const Vector2f& _r ) {
         mRaise = _r;
@@ -215,7 +209,7 @@ using GeomDataListBuilderRetType = std::vector<std::shared_ptr<GeomData>>;
 class GeomDataSVGBuilder : public GeomDataBuilderList {
 public:
     GeomDataSVGBuilder( const std::string& _svgString, const std::shared_ptr<Profile> _profile ) : svgAscii(_svgString), mProfile(_profile) {}
-    GeomDataListBuilderRetType build() override;
+    GeomDataListBuilderRetType build(std::shared_ptr<Material> _mat) override;
 protected:
     std::string svgAscii;
     std::shared_ptr<Profile> mProfile;

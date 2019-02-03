@@ -182,6 +182,36 @@ public:
 //        return color;
 //    }
 
+    void resolveDynamicConstants() {
+        visitTextures( [&]( TextureUniformDesc& u, unsigned int counter ) {
+            if ( u.name == UniformNames::diffuseTexture) {
+                u.name = Name() + MPBRTextures::g_pbrNames[0];
+            } else if ( u.name == UniformNames::normalTexture) {
+                u.name = Name() + MPBRTextures::g_pbrNames[1];
+            } else if ( u.name == UniformNames::aoTexture) {
+                u.name = Name() + MPBRTextures::g_pbrNames[2];
+            } else if ( u.name == UniformNames::roughness) {
+                u.name = Name() + MPBRTextures::g_pbrNames[3];
+            } else if ( u.name == UniformNames::metallic) {
+                u.name = Name() + MPBRTextures::g_pbrNames[4];
+            } else if ( u.name == UniformNames::heightTexture) {
+                u.name = Name() + MPBRTextures::g_pbrNames[5];
+            } else if ( u.name == UniformNames::ibl_irradianceMap) {
+                u.name = MPBRTextures::convolution;
+            }else if ( u.name == UniformNames::ibl_specularMap) {
+                u.name = MPBRTextures::specular_prefilter;
+            }else if ( u.name == UniformNames::ibl_brdfLUTMap) {
+                u.name = MPBRTextures::ibl_brdf;
+            }else if ( u.name == UniformNames::yTexture) {
+                u.name = Name() + "_y";
+            } else if ( u.name == UniformNames::uTexture) {
+                u.name = Name() + "_u";
+            } else if ( u.name == UniformNames::vTexture) {
+                u.name = Name() + "_v";
+            }
+        });
+    }
+
     const std::vector<std::string> textureDependencies() const {
         return getTextureNames();
     }

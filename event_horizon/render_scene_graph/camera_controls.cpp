@@ -102,15 +102,16 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
         }
 
         if ( !inputIsBlockedOnSelection() && mi.isMouseSingleTap ) {
+            unselectAll();
             Vector3f mRayNear = Vector3f::ZERO;
             Vector3f mRayFar = Vector3f::ZERO;
             _cam->mousePickRay( mi.mousePos, mRayNear, mRayFar );
-            bool bHit = rsg.rayIntersect( mRayNear, mRayFar, [&]( const NodeVariants& _geom, float _near) {
+//            bool bHit =
+            rsg.rayIntersect( mRayNear, mRayFar, [&]( const NodeVariants& _geom, float _near) {
                 std::visit( SelectionRecursiveLamba{*this}, _geom );
             } );
-            if ( !bHit ) {
-                unselectAll();
-            }
+//            if ( !bHit ) {
+//            }
         }
 
         if ( mi.ti.checkKeyToggleOn( GMK_DELETE )) {

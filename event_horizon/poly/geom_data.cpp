@@ -71,23 +71,23 @@ GeomData::GeomData( const QuadVector3fNormalfList& _quads, std::shared_ptr<Mater
 	}
 }
 
-std::shared_ptr<GeomData> GeomDataShapeBuilder::build() {
-    return std::make_shared<GeomData>( shapeType, pos, axis, scale, material, mappingData );
+std::shared_ptr<GeomData> GeomDataShapeBuilder::build(std::shared_ptr<Material> _mat) {
+    return std::make_shared<GeomData>( shapeType, pos, axis, scale, _mat, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataOutlineBuilder::build() {
-	return std::make_shared<GeomData>( outlineVerts, material, mappingData );
+std::shared_ptr<GeomData> GeomDataOutlineBuilder::build(std::shared_ptr<Material> _mat) {
+	return std::make_shared<GeomData>( outlineVerts, _mat, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataPolyBuilder::build() {
-	return std::make_shared<GeomData>( polyLine, material, mappingData );
+std::shared_ptr<GeomData> GeomDataPolyBuilder::build(std::shared_ptr<Material> _mat) {
+	return std::make_shared<GeomData>( polyLine, _mat, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataQuadMeshBuilder::build() {
-	return std::make_shared<GeomData>( quads, material, mappingData );
+std::shared_ptr<GeomData> GeomDataQuadMeshBuilder::build(std::shared_ptr<Material> _mat) {
+	return std::make_shared<GeomData>( quads, _mat, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
+std::shared_ptr<GeomData> GeomDataFollowerBuilder::build(std::shared_ptr<Material> _mat) {
     ASSERT( !mProfile->Points().empty() );
 
     Profile lProfile{ *mProfile.get() };
@@ -114,12 +114,12 @@ std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
 	lProfile.flip( mFlipVector );
 
 	auto ret = FollowerService::extrude( mVerts, lProfile, mSuggestedAxis, followersFlags );
-	ret->setMaterial(material);
+	ret->setMaterial(_mat);
 
 	return ret;
 }
 
-GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
+GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _mat) {
 	auto rawPoints = SVGC::SVGToPoly( svgAscii );
 
 	GeomDataListBuilderRetType logoGeoms{};
@@ -128,10 +128,8 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
 		auto fb = std::make_shared<GeomDataFollowerBuilder>( mProfile,
 															 XZY::C(points.path,0.0f),
 															 FollowerFlags::WrapPath );
-		material->c( points.strokeColor );
-		fb->m(material);
-		auto g = fb->build();
-		logoGeoms.emplace_back(g);
+        _mat->c( points.strokeColor );
+		logoGeoms.emplace_back(fb->build(_mat));
 	}
 	return logoGeoms;
 }

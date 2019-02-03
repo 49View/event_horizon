@@ -252,7 +252,7 @@ public:
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
 // MaterialBuildable policies
-    GeomBuilder& m( const std::string& _shader, const std::string& _matName = "" ) {
+    GeomBuilder& m( const std::string& _shader, const std::string& _matName ) {
         materialSet(_shader, _matName);
         return *this;
     }

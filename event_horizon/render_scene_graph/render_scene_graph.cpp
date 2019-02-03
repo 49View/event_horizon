@@ -82,7 +82,8 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
     auto st = shapeTypeFromString( _params[0] );
     if ( st != ShapeType::None) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : "white";
-        GeomBuilder{ st }.m(mat).build( *this );
+        auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
+        GeomBuilder{ st }.m(shd,mat).build( *this );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
         Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
         UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr(*this);
@@ -113,8 +114,8 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
-    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr,lvl,S::SH }
-            .p(generateGeometryVP(_source->Data())).m( _source->Data()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
+    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, _source->Data()->getMaterial() }
+            .p(generateGeometryVP(_source->Data())).n(_source->Hash()).g(_source->GHType()).build();
 }
 
 void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
