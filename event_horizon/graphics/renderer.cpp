@@ -323,7 +323,7 @@ void RenderAnimationManager::setUniforms_r() {
 }
 
 void RenderAnimationManager::init() {
-    mAnimUniforms = std::make_unique<ProgramUniformSet>();
+    mAnimUniforms = std::make_unique<ProgramUniformSet>("anim", "ubo");
     mAnimUniforms->setUBOStructure( UniformNames::pointLightPos, 16 );
 }
 
@@ -332,7 +332,7 @@ void RenderAnimationManager::generateUBO( const ShaderManager& sm ) {
 }
 
 void RenderCameraManager::init() {
-    mCameraUBO = std::make_shared<ProgramUniformSet>();
+    mCameraUBO = std::make_shared<ProgramUniformSet>("camera", "ubo");
     mCameraUBO->setUBOStructure( UniformNames::mvpMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::viewMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::projMatrix, 64 );

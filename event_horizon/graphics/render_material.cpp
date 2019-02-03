@@ -20,7 +20,7 @@ RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program,
     BoundProgram( _program );
     Uniforms( std::make_shared<ProgramUniformSet>(_material, rr) );
 
-    globalUniforms = std::make_shared<ProgramUniformSet>();
+    globalUniforms = std::make_shared<ProgramUniformSet>("g", "g");
 
     calcHash();
 }

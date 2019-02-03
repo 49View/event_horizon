@@ -39,8 +39,7 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
         }
     }
 
-//    MaterialBuilder( const std::string& _name, const std::string& _sn = "" );
-    MaterialBuilder( const std::string& _name, const std::string& _sn, const MaterialProperties& _p );
+    MaterialBuilder( const std::string& _name, const std::string& _sn );
     void makeDefault( DependencyMaker& _md );
     void makeDirect( DependencyMaker& _md );
     void publish() const;
@@ -111,7 +110,7 @@ protected:
 
 private:
     MaterialProperties      properties;
-    std::string             shaderName;
+    std::string             shaderName = S::SH;
     Color4f                 color = Color4f::WHITE;
     Vector3f                baseSolidColor = Vector3f::ONE;
     float                   metallicValue = 1.0f;

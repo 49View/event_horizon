@@ -74,8 +74,7 @@ bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
     }
     GLCALLRET(mHandle, glCreateProgram() );
     if ( mHandle > 0 ) {
-        uniformDefaults = std::make_shared<Material>();
-        uniformDefaults->setShaderName(mId);
+        uniformDefaults = std::make_shared<Material>(mId, mId);
         //	LOGI("Creating new program: (%d), handle=%d (%s, %s)\n", mId, handle, vertexShader->getId(), fragmentShader->getId());
 
         // Check if we need to compile the shaders

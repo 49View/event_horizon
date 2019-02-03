@@ -5,6 +5,8 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
+#include <memory>
 #include <unordered_map>
 #include <string>
 #include <core/math/vector2i.h>

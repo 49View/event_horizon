@@ -91,23 +91,24 @@ private:
     std::shared_ptr<PosTex3dStrip> vs;
 };
 
-class UIShapeBuilder : public Observable<UIShapeBuilder>, public DependantBuilder {
+class UIShapeBuilder : public MaterialBuildable, public Observable<UIShapeBuilder>, public DependantBuilder {
 public:
     using DependantBuilder::DependantBuilder;
+    using MaterialBuildable::MaterialBuildable;
+
     virtual ~UIShapeBuilder() = default;
     void assemble( DependencyMaker& rr ) override;
 
     void init() {
-        material = std::make_shared<Material>();
         material->setShaderName( getShaderType( shapeType ) );
         defaultFontIfNecessary();
     }
 
-    explicit UIShapeBuilder( UIShapeType shapeType ) : shapeType( shapeType ) {
+    explicit UIShapeBuilder( UIShapeType shapeType ) : MaterialBuildable(S::TEXTURE_3D, S::WHITE), shapeType( shapeType ) {
         init();
     }
 
-    UIShapeBuilder( UIShapeType _shapeType, const std::string& _ti, float _fh = 0.0f ) : shapeType( _shapeType ) {
+    UIShapeBuilder( UIShapeType _shapeType, const std::string& _ti, float _fh = 0.0f ) : MaterialBuildable(S::TEXTURE_3D, S::WHITE),shapeType( _shapeType ) {
         init();
         if ( _fh != 0.0f ) fh(_fh);
         ti(_ti);
@@ -134,18 +135,6 @@ public:
 
     UIShapeBuilder& v( const std::vector<Vector3f>& vlist ) {
         outlineVerts = vlist;
-        return *this;
-    }
-
-    UIShapeBuilder& m( const std::string& _shader, const std::string& _matName = "" ) {
-        material->Name( _matName );
-        material->setShaderName( _shader );
-        return *this;
-    }
-
-    template <typename T>
-    UIShapeBuilder& mc( const std::string& _name, T _value ) {
-        material->assign( _name, _value);
         return *this;
     }
 
@@ -186,11 +175,6 @@ public:
 
     UIShapeBuilder& s( const Vector2f& _size ) {
         size = _size;
-        return *this;
-    }
-
-    UIShapeBuilder& c( const Vector4f& _color ) {
-        material->c( _color );
         return *this;
     }
 
@@ -307,6 +291,29 @@ public:
         return *this;
     }
 
+// MaterialBuildable policies
+    UIShapeBuilder& m( const std::string& _shader, const std::string& _matName = "" ) {
+        materialSet(_shader, _matName);
+        return *this;
+    }
+
+    template <typename T>
+    UIShapeBuilder& mc( const std::string& _name, T _value ) {
+        materialConstant( _name, _value);
+        return *this;
+    }
+
+    UIShapeBuilder& c( const Color4f & _color ) {
+        materialColor( _color );
+        return *this;
+    }
+
+    UIShapeBuilder& c( const std::string& _hexcolor ) {
+        materialColor( Vector4f::XTORGBA( _hexcolor ) );
+        return *this;
+    }
+
+
     UIAssetSP buildr( DependencyMaker& _md) {
         build( _md );
         return elem;
@@ -332,7 +339,6 @@ private:
 private:
     UIShapeType shapeType = UIShapeType::Rect2d;
     std::shared_ptr<Matrix4f> mTransform = std::make_shared<Matrix4f>(Matrix4f::MIDENTITY());
-    std::shared_ptr<Material> material;
     RectCreateAnchor anchor = RectCreateAnchor::None;
     RectFillMode fillMode = RectFillMode::AspectFill;
     JMATH::Rect2f rect = Rect2f::IDENTITY;

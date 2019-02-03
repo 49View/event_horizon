@@ -43,6 +43,8 @@ namespace S {
     const std::string BLUR_VERTICAL = "PN_BLUR_VERTICAL";
     const std::string FINAL_COMBINE = "PN_FINAL_COMBINE";
     const std::string SHADOW_MAP = "shadowmap";
+
+    const std::string WHITE = "white";
 };
 
 
@@ -125,24 +127,25 @@ JSONDATA_R( MaterialColor, name, color, category, brand, code, application )
     static uint64_t Version() { return 1000; }
 };
 
-JSONDATA_R( MaterialProperties, pixelTexelRatio, pigment )
+JSONDATA_R( MaterialProperties, pixelTexelRatio, cost )
     float   pixelTexelRatio = 0.04f;
     float   cost = 1.0f;
-    Color4f pigment = Color4f::WHITE;
 
     bool operator==( const MaterialProperties& rhs ) const {
-        return rhs.pigment == pigment && pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost;
+        return pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost;
     }
 };
 
 class Material : public HeterogeneousMap {
 public:
-    Material() = default;
     explicit Material( const Material& _mat ) {
         clone(_mat);
     }
     explicit Material( std::shared_ptr<Material> _mat ) {
         clone(*_mat.get());
+    }
+    explicit Material(  const std::string& _name, const std::string& _sn ) : shaderName(_sn) {
+        Name(_name);
     }
     virtual ~Material() = default;
 
@@ -337,6 +340,34 @@ protected:
 
 public:
     inline constexpr static uint64_t Version() { return 1000; }
+};
+
+class MaterialBuildable {
+public:
+    explicit MaterialBuildable( const std::string& _shader, const std::string& _matName = "" ) {
+        material = std::make_shared<Material>( _matName, _shader );
+    }
+
+    void materialSet( const std::string& _shader, const std::string& _matName = "" ) {
+        material->Name(_matName);
+        material->setShaderName(_shader);
+    }
+
+    template <typename T>
+    void materialConstant( const std::string& _name, T _value ) {
+        material->assign( _name, _value);
+    }
+
+    void materialColor( const Color4f & _color ) {
+        material->c( _color );
+    }
+
+    void materialColor( const std::string& _hexcolor ) {
+        material->c( Vector4f::XTORGBA( _hexcolor ) );
+    }
+
+protected:
+    std::shared_ptr<Material> material;
 };
 
 namespace MaterialDependency {

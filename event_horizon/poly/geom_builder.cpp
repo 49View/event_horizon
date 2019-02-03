@@ -6,89 +6,89 @@
 #include <core/node.hpp>
 #include <poly/poly.hpp>
 
-GeomBuilder::GeomBuilder( GeomAssetSP _h, const std::vector<std::shared_ptr<MaterialBuilder>>& _mbs ) {
+GeomBuilder::GeomBuilder( GeomAssetSP _h, const std::vector<std::shared_ptr<MaterialBuilder>>& _mbs ) : MaterialBuildable(S::SH, S::WHITE){
     builderType = GeomBuilderType::import;
     elem = _h;
     matBuilders = _mbs;
     Name( _h->Name() );
 }
 
-GeomBuilder::GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull ) {
+GeomBuilder::GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull ) : MaterialBuildable(S::SH, S::WHITE){
     std::vector<Vector3f> lverts;
     for (auto &v: arguments_list) lverts.emplace_back(v);
     outlineVerts.emplace_back( lverts, _zPull );
     builderType = GeomBuilderType::outline;
 }
 
-GeomBuilder::GeomBuilder( const std::vector<Vector3f>& arguments_list, float _zPull ) {
+GeomBuilder::GeomBuilder( const std::vector<Vector3f>& arguments_list, float _zPull ) : MaterialBuildable(S::SH, S::WHITE){
     outlineVerts.emplace_back( arguments_list, _zPull );
     builderType = GeomBuilderType::outline;
 }
 
-GeomBuilder::GeomBuilder( const std::vector<Vector2f>& arguments_list, float _zPull ) {
+GeomBuilder::GeomBuilder( const std::vector<Vector2f>& arguments_list, float _zPull ) : MaterialBuildable(S::SH, S::WHITE){
     std::vector<Vector3f> lverts;
     for (auto &v: arguments_list) lverts.emplace_back(v) ;
     outlineVerts.emplace_back( lverts, _zPull );
     builderType = GeomBuilderType::outline;
 }
 
-GeomBuilder::GeomBuilder( ShapeType _st, const Vector3f& _size ) {
+GeomBuilder::GeomBuilder( ShapeType _st, const Vector3f& _size ) : MaterialBuildable(S::SH, S::WHITE){
     shapeType = _st;
     scale = _size;
     builderType = GeomBuilderType::shape;
 }
 
 GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline, const float _z,
-                          const Vector3f& _suggestedAxis ) {
+                          const Vector3f& _suggestedAxis ) : MaterialBuildable(S::SH, S::WHITE){
     mProfileBuilder = _ps;
     for (auto &v: _outline) profilePath.emplace_back( Vector3f{v, _z} );
     builderType = GeomBuilderType::follower;
 }
 
 GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
-                          const Vector3f& _suggestedAxis ) {
+                          const Vector3f& _suggestedAxis ) : MaterialBuildable(S::SH, S::WHITE) {
     mProfileBuilder = _ps;
     mFollowerSuggestedAxis = _suggestedAxis;
     for (auto &v: _outline) profilePath.emplace_back( v );
     builderType = GeomBuilderType::follower;
 }
 
-GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis ) {
+GeomBuilder::GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis ) : MaterialBuildable(S::SH, S::WHITE) {
     mProfileBuilder = _ps;
     mFollowerSuggestedAxis = _suggestedAxis;
     for ( auto &v: _r.points3dcw() ) profilePath.emplace_back( v );
     builderType = GeomBuilderType::follower;
 }
 
-GeomBuilder::GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull ) {
+GeomBuilder::GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull ) : MaterialBuildable(S::SH, S::WHITE) {
     std::vector<Vector3f> lverts;
     for (auto &v: arguments_list) lverts.emplace_back( v );
     outlineVerts.emplace_back( lverts, _zPull );
     builderType = GeomBuilderType::outline;
 }
 
-GeomBuilder::GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags ) : builderType(gbt) {
+GeomBuilder::GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags ) : MaterialBuildable(S::SH, S::WHITE), builderType(gbt) {
     Name(concatenate( "_", _tags ));
 }
 
-GeomBuilder::GeomBuilder( const Rect2f& _rect, float _z ) {
+GeomBuilder::GeomBuilder( const Rect2f& _rect, float _z ) : MaterialBuildable(S::SH, S::WHITE) {
     builderType = GeomBuilderType::poly;
     sourcePolysVList = XZY::C(_rect.points3d(_z));
 }
 
-GeomBuilder::GeomBuilder( const std::vector<Vector3f>& _vlist ) {
+GeomBuilder::GeomBuilder( const std::vector<Vector3f>& _vlist ) : MaterialBuildable(S::SH, S::WHITE) {
     builderType = GeomBuilderType::poly;
     sourcePolysVList = _vlist;
 }
 
-GeomBuilder::GeomBuilder( const std::vector<Triangle2d>& _tris, float _z ) {
+GeomBuilder::GeomBuilder( const std::vector<Triangle2d>& _tris, float _z ) : MaterialBuildable(S::SH, S::WHITE){
     builderType = GeomBuilderType::poly;
     for ( const auto& [v1,v2,v3] : _tris ) {
         sourcePolysTris.emplace_back(Triangle3d( {v1, _z}, {v2, _z}, {v3, _z} ) );
     }
 }
 
-GeomBuilder::GeomBuilder( const std::vector<PolyLine2d>& _plines, float _z ) {
+GeomBuilder::GeomBuilder( const std::vector<PolyLine2d>& _plines, float _z ) : MaterialBuildable(S::SH, S::WHITE){
     builderType = GeomBuilderType::poly;
 
     for ( const auto& p : _plines ) {
@@ -96,7 +96,7 @@ GeomBuilder::GeomBuilder( const std::vector<PolyLine2d>& _plines, float _z ) {
     }
 }
 
-GeomBuilder::GeomBuilder( const std::vector<PolyLine>& _plist ) {
+GeomBuilder::GeomBuilder( const std::vector<PolyLine>& _plist ) : MaterialBuildable(S::SH, S::WHITE){
     polyLines = _plist;
 }
 
@@ -123,7 +123,7 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
         if ( builderType == GeomBuilderType::file ) {
             addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
         } else {
-            addDependency<MaterialBuilder>( materialName, shaderName, materialPropeties, sg.ML());
+            addDependency<MaterialBuilder>( material->Name(), sg.ML());
             if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
                 addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
             }
@@ -134,14 +134,14 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg ) {
-    auto mat = std::dynamic_pointer_cast<Material>(sg.ML().get( materialName, shaderName, materialPropeties ));
+    auto mat = std::dynamic_pointer_cast<Material>(sg.ML().get( material->Name() ));
     gb->m(mat);
     elem->Data( gb->build() );
     elem->GHType(gt);
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb, SceneGraph& sg ) {
-    auto mat = std::dynamic_pointer_cast<Material>(sg.ML().get( materialName, shaderName, materialPropeties ));
+    auto mat = std::dynamic_pointer_cast<Material>(sg.ML().get( material->Name() ));
     gb->m(mat);
     for ( const auto& c : gb->build() ) {
         elem->addChildren( c );

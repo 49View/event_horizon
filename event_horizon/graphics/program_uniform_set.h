@@ -39,7 +39,7 @@ protected:
 
 class ProgramUniformSet : public Material {
 public:
-	ProgramUniformSet() = default;
+	using Material::Material;
 	explicit ProgramUniformSet( std::shared_ptr<Material> _map, Renderer& _rr );
 
 	void generateUBO( const ShaderManager& sm, const std::string& uniformName );

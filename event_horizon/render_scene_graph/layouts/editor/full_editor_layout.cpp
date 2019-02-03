@@ -82,7 +82,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 //                               .mc(UniformNames::vTexture, streamName + "_v")
 //                               .buildr(p->RSG());
 
-//    GB{ShapeType::Cube}.col(Color4f::LIGHT_CORAL).build(p->RSG());
+//    GB{ShapeType::Cube}.c(Color4f::LIGHT_CORAL).build(p->RSG());
 
 //    UISB{ UIShapeType::Line3d }.v( {V3f::ZERO, V3f::X_AXIS}).lw(1.0f).c(Color4f::BLACK).buildr(p->RSG());
 
@@ -94,6 +94,11 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 }
 
 void render( Scene* p ) {
+//    static bool bS = true;
+//    if ( bS ) {
+//        GB{ShapeType::Cube}.c(Color4f::LIGHT_CORAL).build(p->RSG());
+//        bS = false;
+//    }
 }
 
 std::shared_ptr<SceneLayout> fullEditor() {

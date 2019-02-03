@@ -209,7 +209,6 @@ public:
     GeomData();
     virtual ~GeomData();
     explicit GeomData( std::shared_ptr<DeserializeBin> reader );
-    explicit GeomData( std::shared_ptr<Material> _material) : material(_material) {}
     GeomData( const ShapeType _st,
               const Vector3f& _pos, const Vector3f& _axis, const Vector3f& _scale,
               std::shared_ptr<Material> _material,

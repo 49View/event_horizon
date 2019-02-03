@@ -26,7 +26,7 @@ inline void hash_combine( std::size_t& seed, const T& v, Rest... rest ) {
 }
 
 GeomData::GeomData() {
-	material = std::make_shared<Material>();
+	material = std::make_shared<Material>(S::SH, S::WHITE);
 }
 
 GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {
@@ -163,7 +163,7 @@ void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<Ser
 void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mName );
 	// -###- FIXME, reintroduce material readers
-	material = std::make_shared<Material>();//( reader );
+	material = std::make_shared<Material>(S::SH, S::WHITE);//( reader );
 	reader->read( mBBox3d.mMinPoint );
 	reader->read( mBBox3d.mMaxPoint );
 	reader->read( mapping.direction );

@@ -6,16 +6,9 @@
 #include <core/image_util.h>
 #include <stb/stb_image_write.h>
 
-//MaterialBuilder::MaterialBuilder( const std::string& _name, const std::string& _sn ) : ResourceBuilder(
-//        _name) {
-//    shaderName = _sn;
-//    defPrePosfixes();
-//}
-
-MaterialBuilder::MaterialBuilder( const std::string& _name,
-                                  const std::string& _sn, const MaterialProperties& _p ) : ResourceBuilder( _name) {
+MaterialBuilder::MaterialBuilder( const std::string& _name, const std::string& _sn ) : ResourceBuilder(
+        _name) {
     shaderName = _sn;
-    properties = _p;
     defPrePosfixes();
 }
 
@@ -31,9 +24,7 @@ void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<Material> mat, D
 
 void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    auto mat = std::make_shared<Material>();
-    mat->Name( Name() );
-    mat->setShaderName( shaderName );
+    auto mat = std::make_shared<Material>( Name(), shaderName );
 
     createDefaultPBRTextures( mat, sg );
     mat->assign( UniformNames::diffuseTexture, mat->getBaseColor() );
@@ -51,7 +42,7 @@ void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
 
 void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    auto mat = std::make_shared<Material>();
+    auto mat = std::make_shared<Material>( Name(), shaderName );
 
     if ( const auto& it = buffers.find(mat->getBaseColor()); it != buffers.end() ) {
         ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
@@ -158,8 +149,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     handleUninitializedDefaults( _md, downloadedMatName );
 
 //    auto mat = std::make_shared<Material>(downloadedMatName);
-    auto mat = std::make_shared<Material>();
-    mat->setShaderName( shaderName );
+    auto mat = std::make_shared<Material>(Name(), shaderName );
     sg.add( *this, mat );
 
     return true;
