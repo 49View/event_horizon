@@ -135,7 +135,7 @@ void main()
     // color = - exp(-1.0 * color*u_sunHDRMult*0.5);
     // color.w = 1.0;
 
-    color = vec4(1.0);
+    color = vec4(.8);
 
     return;
 }

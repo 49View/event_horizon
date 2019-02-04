@@ -12,30 +12,19 @@ MaterialBuilder::MaterialBuilder( const std::string& _name, const std::string& _
     defPrePosfixes();
 }
 
-void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<Material> mat, DependencyMaker& _md ) {
-    auto& sg = dynamic_cast<MaterialManager&>(_md);
-    ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getNormal()           }.backup(0x00007f7f).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getAmbientOcclusion() }.backup(0xffffffff).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getRoughness()        }.backup(0xffffffff).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getMetallic()         }.backup(0x00000000).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getHeight()           }.backup(0x00000000).makeDefault( *sg.TL() );
-}
+//void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<Material> mat, DependencyMaker& _md ) {
+//    auto& sg = dynamic_cast<MaterialManager&>(_md);
+//    ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDefault( *sg.TL() );
+//    ImageBuilder{ mat->getNormal()           }.backup(0x00007f7f).makeDefault( *sg.TL() );
+//    ImageBuilder{ mat->getAmbientOcclusion() }.backup(0xffffffff).makeDefault( *sg.TL() );
+//    ImageBuilder{ mat->getRoughness()        }.backup(0xffffffff).makeDefault( *sg.TL() );
+//    ImageBuilder{ mat->getMetallic()         }.backup(0x00000000).makeDefault( *sg.TL() );
+//    ImageBuilder{ mat->getHeight()           }.backup(0x00000000).makeDefault( *sg.TL() );
+//}
 
 void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
     auto mat = std::make_shared<Material>( Name(), shaderName );
-
-    createDefaultPBRTextures( mat, sg );
-    mat->assign( UniformNames::diffuseTexture, mat->getBaseColor() );
-    mat->assign( UniformNames::normalTexture, mat->getNormal() );
-    mat->assign( UniformNames::aoTexture, mat->getAmbientOcclusion() );
-    mat->assign( UniformNames::roughnessTexture, mat->getRoughness() );
-    mat->assign( UniformNames::metallicTexture, mat->getMetallic() );
-    mat->assign( UniformNames::heightTexture, mat->getHeight() );
-    mat->assign( UniformNames::ibl_irradianceMap, MPBRTextures::convolution);
-    mat->assign( UniformNames::ibl_specularMap, MPBRTextures::specular_prefilter);
-    mat->assign( UniformNames::ibl_brdfLUTMap, MPBRTextures::ibl_brdf);
 
     sg.add( *this, mat );
 }
@@ -62,7 +51,7 @@ void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     if ( const auto& it = buffers.find(mat->getHeight()); it != buffers.end() ) {
         ImageBuilder{ mat->getHeight()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
     }
-    createDefaultPBRTextures( mat, sg );
+//    createDefaultPBRTextures( mat, sg );
 
     mat->setShaderName( shaderName );
     sg.add( *this, mat );
@@ -86,11 +75,12 @@ std::string MaterialBuilder::generateThumbnail() const {
     int thumbSize = 64;
     int oc = 3;
     int obpp = 8;
+    // -###- Reintroduce this, probably will need to incorporate std::shared_ptr<Material> somewhere
     if ( const auto& it = buffers.find(pbrPrefix() + MPBRTextures::basecolorString ); it != buffers.end() ) {
         lthumb = imageUtil::resize( it->second.first.get(), it->second.second, thumbSize, thumbSize, oc, obpp );
-    } else {
-        lthumb = imageUtil::zeroImage3( Vector4f{baseSolidColor}.RGBATOI(), 1, 1 );
-    }
+    } //else {
+//        lthumb = imageUtil::zeroImage3( Vector4f{baseSolidColor}.RGBATOI(), 1, 1 );
+//    }
     stbi_write_png_to_func( resizeCallback, reinterpret_cast<void*>(thumb.get()),
                             thumbSize, thumbSize, oc, lthumb.get(), thumbSize*oc*(obpp/8) );
 
@@ -118,10 +108,6 @@ std::string MaterialBuilder::toMetaData() const {
     writer.StartObject();
     writer.serialize( CoreMetaData{Name(), EntityGroup::Material, Material::Version(),
                                    generateThumbnail(), generateRawData(), generateTags()} );
-    writer.serialize( "color", baseSolidColor );
-    writer.serialize( "metallicValue", metallicValue );
-    writer.serialize( "roughnessValue", roughnessValue );
-    writer.serialize( "aoValue", aoValue );
     writer.EndObject();
 
     return writer.getString();
@@ -148,7 +134,6 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     }
     handleUninitializedDefaults( _md, downloadedMatName );
 
-//    auto mat = std::make_shared<Material>(downloadedMatName);
     auto mat = std::make_shared<Material>(downloadedMatName, shaderName );
     sg.add( *this, mat );
 

@@ -9,8 +9,9 @@
 #include "math/rect2f.h"
 
 
-RawImage RawImage::BLACK_ARGB1x1{ "black_alpha", 1, 1, static_cast<uint32_t>(0xff000000) };
-RawImage RawImage::BLACK_RGBA1x1{ "black_alpha", 1, 1, static_cast<uint32_t>(0x000000ff) };
+RawImage RawImage::BLACK_ARGB4x4{ "black_alpha", 4, 4, static_cast<uint32_t>(0xff000000) };
+RawImage RawImage::BLACK_RGBA4x4{ "black_alpha", 4, 4, static_cast<uint32_t>(0x000000ff) };
+RawImage RawImage::NORMAL4x4    { "normal"     , 4, 4, static_cast<uint32_t>(0x00007f7f) };
 
 //struct RawImageCallbackData : public CallbackData {
 //    using CallbackData::CallbackData;

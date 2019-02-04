@@ -3,10 +3,11 @@
 //
 #pragma once
 
+#include <core/names.hpp>
 #include "graphic_constants.h"
 
 struct TextureRenderData {
-    std::string name = "white";
+    std::string name = S::WHITE;
     int width = 0;
     int height = 0;
     int channels = 3;

@@ -26,7 +26,7 @@ inline void hash_combine( std::size_t& seed, const T& v, Rest... rest ) {
 }
 
 GeomData::GeomData() {
-	material = std::make_shared<Material>(S::SH, S::WHITE);
+	material = std::make_shared<Material>(S::WHITE, S::SH);
 }
 
 GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {

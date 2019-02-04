@@ -297,7 +297,7 @@ std::shared_ptr<Texture> TextureManager::TD( const std::string& tname, const int
 
     std::string safeName = tname;
     if ( mTextures.find( safeName ) == mTextures.end() ) {
-        safeName = "white";
+        safeName = S::WHITE;
     }
 
     auto ret = mTextures[safeName];

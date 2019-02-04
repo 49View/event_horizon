@@ -10,7 +10,13 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
 
     switch ( uf ) {
         case GL_FLOAT:
-            uniformDefaults->assign( _name, 1.0f );
+            if ( _name == UniformNames::roughness ) {
+                uniformDefaults->assign( _name, 1.0f );
+            } else if ( _name == UniformNames::metallic ) {
+                uniformDefaults->assign( _name, 0.0f );
+            } else {
+                uniformDefaults->assign( _name, 1.0f );
+            }
             break;
         case GL_BOOL:
             uniformDefaults->assign( _name, false );
@@ -47,7 +53,27 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
         case GL_SAMPLER_2D:
         case GL_SAMPLER_CUBE:
         case GL_SAMPLER_2D_SHADOW:
-            uniformDefaults->assign( _name, TextureUniformDesc{_name, 0, 0, 0} );
+            if ( _name == UniformNames::diffuseTexture ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{S::WHITE, 0, 0, 0} );
+            } else if ( _name == UniformNames::normalTexture ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{S::NORMAL, 0, 0, 0} );
+            } else if ( _name == UniformNames::aoTexture ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{S::WHITE, 0, 0, 0} );
+            } else if ( _name == UniformNames::roughnessTexture ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{S::WHITE, 0, 0, 0} );
+            } else if ( _name == UniformNames::metallicTexture ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{S::WHITE, 0, 0, 0} );
+            } else if ( _name == UniformNames::heightTexture ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{S::BLACK, 0, 0, 0} );
+            } else if ( _name == UniformNames::ibl_irradianceMap ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{MPBRTextures::convolution, 0, 0, 0} );
+            } else if ( _name == UniformNames::ibl_specularMap ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{MPBRTextures::specular_prefilter, 0, 0, 0} );
+            } else if ( _name == UniformNames::ibl_brdfLUTMap ) {
+                uniformDefaults->assign( _name, TextureUniformDesc{MPBRTextures::ibl_brdf, 0, 0, 0} );
+            }else {
+                uniformDefaults->assign( _name, TextureUniformDesc{S::WHITE, 0, 0, 0} );
+            }
             break;
         default:
             ASSERTV(0, "Unknown uniform mapping %d", uf );
@@ -111,7 +137,7 @@ bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
             uniforms[name] = {name, utype, location};
             if ( location >= 0 && !( name[0] == 'u' && name[1] == '_')) {
                 setDefaultUniforms( name, type);
-                LOGI( "Shader %s uniform %s on location %d with type %d", mId.c_str(), name, location, type);
+//                LOGI( "Shader %s uniform %s on location %d with type %d", mId.c_str(), name, location, type);
             }
         }
     } else {

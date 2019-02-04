@@ -122,9 +122,12 @@ void Scene::activate() {
 	Socket::on( "shaderchange",
 				std::bind(&Scene::reloadShaders, this, std::placeholders::_1 ) );
 
-	MaterialBuilder{"white"}.makeDefault(rsg.ML());
-	ImageBuilder{"white"}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
-	ImageBuilder{"debug_uv"}.makeDirect( rsg.TL(), RawImage::DEBUG_UV() );
+	ImageBuilder{S::WHITE}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
+	ImageBuilder{S::BLACK}.makeDirect( rsg.TL(), RawImage::BLACK_RGBA4x4 );
+	ImageBuilder{S::NORMAL}.makeDirect( rsg.TL(), RawImage::NORMAL4x4 );
+	ImageBuilder{S::DEBUG_UV}.makeDirect( rsg.TL(), RawImage::DEBUG_UV() );
+
+	MaterialBuilder{"white", S::SH}.makeDefault(rsg.ML());
 
 	CQ().script("change time 14:00");
 	layout->activate( this );

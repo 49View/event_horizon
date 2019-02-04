@@ -30,10 +30,7 @@ private:
 
 struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact, Material::Version() )
 
-    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a.Name()),
-              shaderName( a.shaderName ), baseSolidColor( a.baseSolidColor ),
-              metallicValue( a.metallicValue ), roughnessValue( a.roughnessValue ), aoValue( a.aoValue ),
-              imageExt( a.imageExt ) {
+    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a.Name()),shaderName( a.shaderName ), imageExt( a.imageExt ) {
         for ( auto&& [k,v] : a.buffers ) {
             buffers.emplace( std::make_pair( k, std::move( v ) ) );
         }
@@ -65,45 +62,11 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
         return *this;
     }
 
-    MaterialBuilder& bc( const Vector3f& _value ) {
-        baseSolidColor = _value;
-        return *this;
-    }
-
-    MaterialBuilder& c( const Color4f& _value ) {
-        color = _value;
-        return *this;
-    }
-
-    MaterialBuilder& mv( const float _value ) {
-        metallicValue = _value;
-        return *this;
-    }
-    MaterialBuilder& rv( const float _value ) {
-        roughnessValue = _value;
-        return *this;
-    }
-    MaterialBuilder& aov( const float _value ) {
-        aoValue = _value;
-        return *this;
-    }
-
-    MaterialBuilder& tn( const std::string& _value ) {
-        textureName = _value;
-        return *this;
-    }
-
-    MaterialBuilder& o( const float _value ) {
-        opacity = _value;
-        return *this;
-    }
-
 protected:
     const std::string pbrPrefix() const {
         return getFileNameNoExt( Name() ) + "_";
     }
     void handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName );
-    void createDefaultPBRTextures( std::shared_ptr<Material> mat, DependencyMaker& _md );
     std::string generateThumbnail() const;
     std::string generateRawData() const;
     std::string toMetaData() const;
@@ -111,14 +74,6 @@ protected:
 private:
     MaterialProperties      properties;
     std::string             shaderName = S::SH;
-    Color4f                 color = Color4f::WHITE;
-    Vector3f                baseSolidColor = Vector3f::ONE;
-    float                   metallicValue = 1.0f;
-    float                   roughnessValue = 1.0f;
-    float                   aoValue = 1.0f;
-
-    std::string             textureName = "white";
-    float                   opacity = 1.0f;
 
     std::map<std::string, uint8_p> buffers;
     std::string imageExt = ".png";

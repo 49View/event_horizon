@@ -882,7 +882,11 @@ void GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
             im.roughness.value = Vector4f{ lv, lv, lv, 1.0f };
         } else if ( k == "roughnessTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.roughness.texture );
-        } else if ( k == "normalTexture" ) {
+        }
+    }
+
+    for ( const auto& [k,v] : mat.additionalValues ) {
+        if ( k == "normalTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.normal.texture );
         }
     }
