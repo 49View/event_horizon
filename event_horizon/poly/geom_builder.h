@@ -297,6 +297,7 @@ private:
     uint64_t mId = 0;
     uint64_t gt = 1; // This is the generic geom ID, as we reserve 0 as null
 
+    bool bMaterialDep = false;
     ShapeType shapeType = ShapeType::None;
     subdivisionAccuray subdivAccuracy = accuracyNone;
 

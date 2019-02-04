@@ -700,7 +700,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     auto material = model.materials[primitive.material];
     auto im = matMap.at(material.name);
     // -###- FIXME re add the material into account
-    std::shared_ptr<GeomData> geom = std::make_shared<GeomData>(); // std::make_shared<PBRMaterial>(im.name)
+    auto geom = std::make_shared<GeomData>(); // std::make_shared<PBRMaterial>(im.name)
 
     geom->vData().fillIndices( fillData<int>( model, primitive.indices ) );
 

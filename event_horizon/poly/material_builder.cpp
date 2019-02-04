@@ -149,7 +149,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     handleUninitializedDefaults( _md, downloadedMatName );
 
 //    auto mat = std::make_shared<Material>(downloadedMatName);
-    auto mat = std::make_shared<Material>(Name(), shaderName );
+    auto mat = std::make_shared<Material>(downloadedMatName, shaderName );
     sg.add( *this, mat );
 
     return true;

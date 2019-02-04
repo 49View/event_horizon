@@ -123,7 +123,7 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
         if ( builderType == GeomBuilderType::file ) {
             addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
         } else {
-            addDependency<MaterialBuilder>( material->Name(), sg.ML());
+            bMaterialDep = addDependency<MaterialBuilder>( material->Name(), sg.ML());
             if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
                 addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
             }
@@ -153,6 +153,10 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
 
     auto& sg = dynamic_cast<SceneGraph&>(_md);
     std::unique_ptr<GeomDataBuilder> gb;
+
+    if ( bMaterialDep ) {
+        material->clone( *sg.ML().get(material->Name()).get() );
+    }
 
     switch ( builderType ) {
         case GeomBuilderType::import:
