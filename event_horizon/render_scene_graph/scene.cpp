@@ -127,7 +127,7 @@ void Scene::activate() {
 	ImageBuilder{S::NORMAL}.makeDirect( rsg.TL(), RawImage::NORMAL4x4 );
 	ImageBuilder{S::DEBUG_UV}.makeDirect( rsg.TL(), RawImage::DEBUG_UV() );
 
-	MaterialBuilder{"white", S::SH}.makeDefault(rsg.ML());
+	MaterialBuilder{S::WHITE_PBR, S::SH}.makeDefault(rsg.ML());
 
 	CQ().script("change time 14:00");
 	layout->activate( this );

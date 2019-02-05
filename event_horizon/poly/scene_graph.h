@@ -66,8 +66,7 @@ public:
 
 DEPENDENCY_MAKER_EXIST(geoms);
     void add( NodeVariants _geom);
-    void add( GeomAssetSP _geom, std::vector<std::shared_ptr<MaterialBuilder>> _materials);
-    void add( std::vector<std::shared_ptr<MaterialBuilder>> _materials );
+    void add( std::vector<std::shared_ptr<Material>> _materials );
 
     void remove( const UUID& _uuid );
 

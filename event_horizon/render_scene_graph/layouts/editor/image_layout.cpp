@@ -9,9 +9,11 @@
 
 void ImGuiImages::renderImpl( Scene* p, Rect2f& _r ) {
     int ic = 0;
+    static bool lShowSystem = false;
+    ImGui::Checkbox("Show System", &lShowSystem);
     for ( const auto& it: p->TM() ) {
         std::string tname = it.first;
-        if ( !FBNames::isPartOf( cubeMapTName(tname) ) ) {
+        if ( lShowSystem || !FBNames::isPartOf( cubeMapTName(tname) ) ) {
             ImGui::BeginGroup();
             ImGui::TextColored( ImVec4{0.0f,1.0f,1.0f,1.0f}, "%s", tname.c_str());
             ImGui::Image( reinterpret_cast<void *>(it.second->getHandle()), ImVec2{ 100, 100 } );

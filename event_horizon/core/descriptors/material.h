@@ -18,6 +18,7 @@
 const static uint32_t dependecyTagTexture = 1;
 const static uint32_t dependecyTagMaterial = 2;
 using TextureDependencyBuilderPair = std::pair<std::string, uint32_t>;
+using MaterialImageBuffers = std::unordered_map<std::string, uint8_p>;
 
 namespace MQSettings {
     const static std::string Low = "_lowqDD256";
@@ -141,14 +142,6 @@ public:
         return shaderName;
     }
 
-//    const std::string& getTextureName() const {
-//        return textureName;
-//    }
-//
-//    const Color4f& getColor() const {
-//        return color;
-//    }
-
     void resolveDynamicConstants() {
         visitTextures( [&]( TextureUniformDesc& u, unsigned int counter ) {
             if ( u.name == UniformNames::yTexture) {
@@ -255,22 +248,6 @@ public:
         assign( UniformNames::ao, _aoValue );
     }
 
-//    const Vector3f& getBaseSolidColor() const {
-//        return baseSolidColor;
-//    }
-//
-//    void setBaseSolidColor( const Vector3f& baseSolidColor ) {
-//        PBRMaterial::baseSolidColor = baseSolidColor;
-//    }
-
-//    void setTextureName( const std::string& _textureName ) {
-//        textureName = _textureName;
-//    }
-//
-//    void setColor( const Color4f& _color ) {
-//        color = _color;
-//    }
-
     float getOpacity() const {
         float ret;
         get( UniformNames::opacity, ret );
@@ -313,7 +290,24 @@ public:
         shaderName = _source.shaderName;
     }
 
+    Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName ) {
+        if ( _data.second > 0 ) {
+            buffers.emplace( std::make_pair(_bname, std::move(_data)) );
+            assign( _uniformName, { _bname, 0,0,0 } );
+        }
+        return *this;
+    }
+
+    Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName ) {
+        return buffer( _bname, ucchar_pTouint8_p(_data), _uniformName );
+    }
+
+    const MaterialImageBuffers& Buffers() const {
+        return buffers;
+    }
+
 protected:
+    MaterialImageBuffers buffers;
     MaterialProperties properties;
     std::string shaderName;
 

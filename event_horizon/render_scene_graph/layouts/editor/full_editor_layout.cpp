@@ -96,7 +96,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
 void render( Scene* p ) {
 //    static bool bS = true;
 //    if ( bS ) {
-//        GB{ShapeType::Cube}.c(Color4f::BLUE_SHADOW).build(p->RSG());
+//        GB{ShapeType::Sphere}.build(p->RSG());
 //        bS = false;
 //    }
 }

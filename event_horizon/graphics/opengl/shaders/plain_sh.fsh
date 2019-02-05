@@ -26,6 +26,7 @@ void main() {
    metallic = (texture( metallicTexture, texCoords ).x * metallicV);
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
    albedo = pow(albedo, vec3(2.2/1.0));
+//    albedo *= diffuseColor;
    //roughness = pow(roughness, 1.0/2.2);
 
    vec3 N = getNormalFromMap(texCoords);

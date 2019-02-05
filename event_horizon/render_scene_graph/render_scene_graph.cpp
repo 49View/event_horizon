@@ -81,7 +81,7 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
 
     auto st = shapeTypeFromString( _params[0] );
     if ( st != ShapeType::None) {
-        auto mat = ( _params.size() > 1 ) ? _params[1] : "white";
+        auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
         auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
         GeomBuilder{ st }.m(shd,mat).build( *this );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {

@@ -14,10 +14,10 @@ std::shared_ptr<MaterialBuilder> mb;
 void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 size, std::shared_ptr<Texture> t,
                     float backup = -1.0f ) {
 
-    if ( t && (t->getWidth() > 4 || backup >= 0.0f) ) {
-        if ( t->getWidth() > 4 && name != "Base" ) ImGui::SameLine();
+    if ( t && (t->getWidth() > 0|| backup >= 0.0f) ) {
+//        if ( t->getWidth() > 4 && name != "Base" ) ImGui::SameLine();
         ImGui::BeginGroup();
-        if ( t->getWidth() > 4 ) {
+        if ( t->getWidth() > 0 ) {
             ImGui::TextColored( col.Value, "%s", name.c_str() );
             ImGui::Image( reinterpret_cast<void *>(t->getHandle()), size );
         } else {
@@ -40,6 +40,9 @@ void ImGuiMaterials::renderImpl( Scene* p, Rect2f& _r ) {
         ImGui::PushID( (mat->Name() + "dc").c_str() );
         ImGui::ColorEdit3( "Diffuse", dc );
         ImGui::PopID();
+        for ( const auto& mt : mat->getTextureNames() ) {
+            ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->TM().TD(mt) );
+        }
 //        if ( mat->getType() == MaterialType::PBR ) {
 //            std::shared_ptr<PBRMaterial> matPBR = std::dynamic_pointer_cast<PBRMaterial>( mat );
 //            ImGuiMatImage( "Base", ImColor{200, 200, 200}, textureSize, p->TM().TD(matPBR->getBaseColor()) );
@@ -52,13 +55,13 @@ void ImGuiMaterials::renderImpl( Scene* p, Rect2f& _r ) {
 //                           matPBR->getAoValue());
 //            ImGuiMatImage( "Height", ImColor{32, 200, 32}, textureSize, p->TM().TD( matPBR->getHeight()) );
 //        }
-        if ( mb ) {
-            ImGui::BeginGroup();
-            if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-                mb->publish();
-            }
-            ImGui::EndGroup();
-        }
+//        if ( mb ) {
+//            ImGui::BeginGroup();
+//            if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+//                mb->publish();
+//            }
+//            ImGui::EndGroup();
+//        }
 
         ImGui::Separator();
     }

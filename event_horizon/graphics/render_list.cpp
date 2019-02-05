@@ -288,8 +288,17 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
 
 std::shared_ptr<CameraRig> RLTarget::addAncillaryRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
     auto c = std::make_shared<CameraRig>( _name, _fb );
-    mAncillaryCameraRigs[_name] = c;
+    mAncillaryCameraRigs.emplace( _name, c);
     return c;
+}
+
+namespace CameraRigAngles {
+    Vector3f Top   { M_PI_2,  0.0f,    0.0f };
+    Vector3f Bottom{ -M_PI_2, 0.0f,    0.0f };
+    Vector3f Left  { 0.0f,    -M_PI_2, 0.0f };
+    Vector3f Right { 0.0f,    M_PI_2,  0.0f };
+    Vector3f Front { 0.0f,    0.0f,    0.0f };
+    Vector3f Back  { 0.0f,    M_PI,    0.0f };
 }
 
 void RLTarget::addCubeMapRig( const CameraCubeMapRigBuilder& _builder ) {
@@ -302,50 +311,70 @@ void RLTarget::addCubeMapRig( const CameraCubeMapRigBuilder& _builder ) {
     auto ctop = addAncillaryRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Top), cbfb );
     ctop->getCamera()->setFoV( cubeMapFOV );
     ctop->getCamera()->setPosition( _builder.pos );
-    ctop->getCamera()->setQuatAngles( Vector3f{ M_PI_2, 0.0f, 0.0f } );
+    ctop->getCamera()->setQuatAngles( CameraRigAngles::Top );
     ctop->getCamera()->Mode( CameraMode::Doom );
     ctop->getCamera()->ViewPort( cubemapViewport );
-    ctop->getCamera()->enableInputs(false);
+    ctop->getCamera()->update();
 
     auto cbottom = addAncillaryRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Bottom), cbfb );
     cbottom->getCamera()->setFoV( cubeMapFOV );
     cbottom->getCamera()->setPosition( _builder.pos );
-    cbottom->getCamera()->setQuatAngles( Vector3f{ -M_PI_2, 0.0f, 0.0f } );
+    cbottom->getCamera()->setQuatAngles( CameraRigAngles::Bottom );
     cbottom->getCamera()->Mode( CameraMode::Doom );
     cbottom->getCamera()->ViewPort( cubemapViewport );
-    cbottom->getCamera()->enableInputs(false);
+    cbottom->getCamera()->update();
 
     auto cleft = addAncillaryRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Left), cbfb );
     cleft->getCamera()->setFoV( cubeMapFOV );
     cleft->getCamera()->setPosition( _builder.pos );
-    cleft->getCamera()->setQuatAngles( Vector3f{ 0.0f, -M_PI_2, 0.0f } );
+    cleft->getCamera()->setQuatAngles( CameraRigAngles::Left );
     cleft->getCamera()->Mode( CameraMode::Doom );
     cleft->getCamera()->ViewPort( cubemapViewport );
-    cleft->getCamera()->enableInputs(false);
+    cleft->getCamera()->update();
 
     auto cright = addAncillaryRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Right), cbfb );
     cright->getCamera()->setFoV( cubeMapFOV );
     cright->getCamera()->setPosition( _builder.pos );
-    cright->getCamera()->setQuatAngles( Vector3f{ 0.0f, M_PI_2, 0.0f } );
+    cright->getCamera()->setQuatAngles( CameraRigAngles::Right );
     cright->getCamera()->Mode( CameraMode::Doom );
     cright->getCamera()->ViewPort( cubemapViewport );
-    cright->getCamera()->enableInputs(false);
+    cright->getCamera()->update();
 
     auto cfront = addAncillaryRig( _builder.name + "_" + cubemapFaceToString(CubemapFaces::Front), cbfb );
     cfront->getCamera()->setFoV( cubeMapFOV );
     cfront->getCamera()->setPosition( _builder.pos );
-    cfront->getCamera()->setQuatAngles( Vector3f{ 0.0f } );
+    cfront->getCamera()->setQuatAngles( CameraRigAngles::Front );
     cfront->getCamera()->Mode( CameraMode::Doom );
     cfront->getCamera()->ViewPort( cubemapViewport );
-    cfront->getCamera()->enableInputs(false);
+    cfront->getCamera()->update();
 
     auto cback = addAncillaryRig(  _builder.name + "_" + cubemapFaceToString(CubemapFaces::Back), cbfb );
     cback->getCamera()->setFoV( cubeMapFOV );
     cback->getCamera()->setPosition( _builder.pos );
-    cback->getCamera()->setQuatAngles( Vector3f{ 0.0f, M_PI, 0.0f } );
+    cback->getCamera()->setQuatAngles( CameraRigAngles::Back );
     cback->getCamera()->Mode( CameraMode::Doom );
     cback->getCamera()->ViewPort( cubemapViewport );
-    cback->getCamera()->enableInputs(false);
+    cback->getCamera()->update();
+}
+
+void RLTarget::updateCubeMapRig( const CameraCubeMapRigBuilder& _builder ) {
+    auto ctop = mAncillaryCameraRigs[_builder.name + "_" + cubemapFaceToString(CubemapFaces::Top)];
+    ctop->getCamera()->setQuatAngles( CameraRigAngles::Top );
+
+    auto cbottom = mAncillaryCameraRigs[ _builder.name + "_" + cubemapFaceToString(CubemapFaces::Bottom)];
+    cbottom->getCamera()->setQuatAngles( CameraRigAngles::Bottom );
+
+    auto cleft = mAncillaryCameraRigs[ _builder.name + "_" + cubemapFaceToString(CubemapFaces::Left)];
+    cleft->getCamera()->setQuatAngles( CameraRigAngles::Left );
+
+    auto cright = mAncillaryCameraRigs[ _builder.name + "_" + cubemapFaceToString(CubemapFaces::Right)];
+    cright->getCamera()->setQuatAngles( CameraRigAngles::Right );
+
+    auto cfront = mAncillaryCameraRigs[_builder.name + "_" + cubemapFaceToString(CubemapFaces::Front)];
+    cfront->getCamera()->setQuatAngles( CameraRigAngles::Front );
+
+    auto cback = mAncillaryCameraRigs[ _builder.name + "_" + cubemapFaceToString(CubemapFaces::Back)];
+    cback->getCamera()->setQuatAngles( CameraRigAngles::Back );
 }
 
 std::shared_ptr<Framebuffer> RLTargetPlain::getFrameBuffer( CommandBufferFrameBufferType fbt ) {
@@ -430,6 +459,10 @@ std::shared_ptr<CameraRig> RLTargetPBR::getProbeRig( int t, const std::string& _
 }
 
 void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, [[maybe_unused]] const Vector3f& _at ) {
+
+//    updateCubeMapRig( CameraCubeMapRigBuilder{FBNames::sceneprobe}.s( 512 ) );
+//    updateCubeMapRig( CameraCubeMapRigBuilder{MPBRTextures::convolution}.s(128) );
+//    updateCubeMapRig( CameraCubeMapRigBuilder{MPBRTextures::specular_prefilter}.s( 512 ).useMips() );
 
     auto lSkybox = createSkybox();
     lSkybox->invalidate();

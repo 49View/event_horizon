@@ -124,6 +124,7 @@ bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
             ASSERT( false );
             return false;
         }
+        LOGR( "%s handle=%d", mId.c_str(), mHandle );
         int total = -1;
         glGetProgramiv( mHandle, GL_ACTIVE_UNIFORMS, &total );
         for(int i=0; i<total; ++i)  {

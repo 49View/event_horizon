@@ -18,6 +18,7 @@ public:
     DEPENDENCY_MAKER_EXIST(materialList);
     void dump() const;
     bool virtual add( const MaterialBuilder& pb, std::shared_ptr<Material> _material );
+    bool add( std::shared_ptr<Material> _material );
     std::shared_ptr<Material> get( const std::string& _key );
     std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey, const MaterialProperties& _mp );
     std::vector<std::shared_ptr<Material>> list() const;

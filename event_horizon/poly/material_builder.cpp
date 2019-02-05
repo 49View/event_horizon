@@ -12,16 +12,6 @@ MaterialBuilder::MaterialBuilder( const std::string& _name, const std::string& _
     defPrePosfixes();
 }
 
-//void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<Material> mat, DependencyMaker& _md ) {
-//    auto& sg = dynamic_cast<MaterialManager&>(_md);
-//    ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDefault( *sg.TL() );
-//    ImageBuilder{ mat->getNormal()           }.backup(0x00007f7f).makeDefault( *sg.TL() );
-//    ImageBuilder{ mat->getAmbientOcclusion() }.backup(0xffffffff).makeDefault( *sg.TL() );
-//    ImageBuilder{ mat->getRoughness()        }.backup(0xffffffff).makeDefault( *sg.TL() );
-//    ImageBuilder{ mat->getMetallic()         }.backup(0x00000000).makeDefault( *sg.TL() );
-//    ImageBuilder{ mat->getHeight()           }.backup(0x00000000).makeDefault( *sg.TL() );
-//}
-
 void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
     auto mat = std::make_shared<Material>( Name(), shaderName );
@@ -152,6 +142,11 @@ void MaterialBuilder::handleUninitializedDefaults( DependencyMaker& _md, const s
 bool MaterialManager::add( const MaterialBuilder& _pb, std::shared_ptr<Material> _material ) {
     auto lKey = _pb.Name();
     materialList[lKey] = _material;
+    return true;
+}
+
+bool MaterialManager::add( std::shared_ptr<Material> _material ) {
+    materialList[_material->Name()] = _material;
     return true;
 }
 

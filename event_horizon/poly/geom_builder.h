@@ -111,12 +111,12 @@ public:
     GeomBuilder() = default;
     virtual ~GeomBuilder() = default;
 
-    explicit GeomBuilder( const GeomBuilderType gbt ) : MaterialBuildable(S::SH, S::WHITE), builderType(gbt) {}
-    GeomBuilder( const GeomBuilderType gbt, const std::string& _name ) : MaterialBuildable(S::SH, S::WHITE), DependantBuilder(_name), builderType(gbt) {}
+    explicit GeomBuilder( const GeomBuilderType gbt ) : MaterialBuildable(S::SH, S::WHITE_PBR), builderType(gbt) {}
+    GeomBuilder( const GeomBuilderType gbt, const std::string& _name ) : MaterialBuildable(S::SH, S::WHITE_PBR), DependantBuilder(_name), builderType(gbt) {}
     GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
 
     // Impoorted object
-    GeomBuilder( GeomAssetSP, const std::vector<std::shared_ptr<MaterialBuilder>>& );
+    GeomBuilder( GeomAssetSP );
 
     // Polygon list
     explicit GeomBuilder( const Rect2f& _rect, float _z = 0.0f );

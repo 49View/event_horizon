@@ -20,17 +20,13 @@ void SceneGraph::remove( const UUID& _uuid ) {
     }
 }
 
-void SceneGraph::add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
+void SceneGraph::add( const std::vector<std::shared_ptr<Material>> _materials ) {
     for ( const auto& m : _materials ) {
-        m->makeDirect( ML() );
+        for ( const auto& [k,v] : m->Buffers() ) {
+            ImageBuilder{ k }.makeDirect( TL(), v );
+        }
+        ML().add( m );
     }
-}
-
-void SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
-    for ( const auto& m : _materials ) {
-        m->makeDirect( ML() );
-    }
-    add( _geom );
 }
 
 void SceneGraph::update() {

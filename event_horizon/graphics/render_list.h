@@ -408,9 +408,10 @@ public:
 protected:
     void updateStreamPacket( const std::string& _streamName );
     void addCubeMapRig( const CameraCubeMapRigBuilder& _builder );
+    void updateCubeMapRig( const CameraCubeMapRigBuilder& _builder );
     std::shared_ptr<CameraRig> addAncillaryRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb );
 protected:
-    std::map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
+    std::unordered_map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
     bool mbTakeScreenShot = false;
     int  mTakeScreenShotDelay = 0;
     Renderer& rr;

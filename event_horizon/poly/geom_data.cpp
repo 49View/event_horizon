@@ -26,7 +26,11 @@ inline void hash_combine( std::size_t& seed, const T& v, Rest... rest ) {
 }
 
 GeomData::GeomData() {
-	material = std::make_shared<Material>(S::WHITE, S::SH);
+	material = std::make_shared<Material>(S::WHITE_PBR, S::SH);
+}
+
+GeomData::GeomData(std::shared_ptr<Material> _material) : material(_material) {
+
 }
 
 GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {
@@ -161,7 +165,7 @@ void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<Ser
 void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mName );
 	// -###- FIXME, reintroduce material readers
-	material = std::make_shared<Material>(S::SH, S::WHITE);//( reader );
+	material = std::make_shared<Material>(S::WHITE_PBR, S::SH);//( reader );
 	reader->read( mBBox3d.mMinPoint );
 	reader->read( mBBox3d.mMaxPoint );
 	reader->read( mapping.direction );
@@ -1147,16 +1151,25 @@ void VData::fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index ) {
 	}
 }
 
-void VData::fillNormals( const std::vector<Vector3f>& _normals ) {
+void VData::fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert ) {
 	vnormals3d = _normals;
+	if ( _bInvert ) {
+		for ( auto& v : vnormals3d ) v*=-1.0f;
+	}
 }
 
-void VData::fillTangets( const std::vector<Vector3f>& _tangents ) {
+void VData::fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert ) {
 	vtangents3d = _tangents;
+	if ( _bInvert ) {
+		for ( auto& v : vtangents3d ) v*=-1.0f;
+	}
 }
 
-void VData::fillBinormal( const std::vector<Vector3f>& _binormals ) {
+void VData::fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert ) {
 	vbinormals3d = _binormals;
+	if ( _bInvert ) {
+		for ( auto& v : vbinormals3d ) v*=-1.0f;
+	}
 }
 
 void VData::fillColors( const std::vector<Vector4f>& _colors ) {

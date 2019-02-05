@@ -197,10 +197,10 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, float rad
     vec3 F0 = vec3( 0.04 );
     F0 = mix( F0, albedo.xyz, metallic );
 
-    // vec3 Lo = vec3( 0.0 );
+    vec3 Lo = vec3( 0.0 );
 
-    // vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
-    // Lo += rendering_equation( albedo, L_Sun, V, N, F0, 3.0 );
+    vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, 30.0 );
 
 // for ( int i = 0; i < u_numPointLights; i++ ) {
 //     vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;
@@ -240,13 +240,13 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, float rad
 #end_code
 
 #define_code shadow_code
-float visibility = 1.0;
-    if ( dot( N, normalize( u_sunPosition - Position_worldspace ) ) > 0.25 )  {
+float visibility = 0.0;
+    // if ( dot( N, normalize( u_sunPosition - Position_worldspace ) ) > 0.25 )  {
     for ( int i = 0; i < 4; i++ ) {
         int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;
         visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3.xy + poissonDisk[index] / 4096.0, v_shadowmap_coord3.z ) ) * 0.25;// * u_timeOfTheDay;
     }
-    }
+    // }
 #end_code
 
 #define_code final_combine
@@ -260,30 +260,30 @@ vec3 kD = 1.0 - kS;
 kD *= 1.0 - metallic;
 
 vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
-float gr = irradiance.r * 0.3 + irradiance.g * 0.59 + irradiance.b * 0.11;
-irradiance.rgb = vec3(gr);
+// float gr = irradiance.r * 0.3 + irradiance.g * 0.59 + irradiance.b * 0.11;
+// irradiance.rgb = vec3(gr);
 vec3 aoLightmapColor = texture(lightmapTexture, v_texCoord2).rgb;
-vec3 diffuseV = (irradiance * albedo );
+vec3 diffuseV = Lo + (irradiance * albedo );
 
 // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
 const float MAX_REFLECTION_LOD = 6.0;
 vec3 R = reflect(-V, N);
 vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness * MAX_REFLECTION_LOD).rgb;
-gr = prefilteredColor.r * 0.3 + prefilteredColor.g * 0.59 + prefilteredColor.b * 0.11;
-prefilteredColor.rgb = vec3(gr);
+// gr = prefilteredColor.r * 0.3 + prefilteredColor.g * 0.59 + prefilteredColor.b * 0.11;
+// prefilteredColor.rgb = vec3(gr);
 vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
-// specular = pow(specular, vec3(2.2/1.0)); 
+specular = pow(specular, vec3(2.2/1.0)); 
 
-vec3 ambient = (kD * diffuseV + specular) * visibility * ao;// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
+vec3 ambient = (kD * diffuseV + specular) * visibility* ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
 // vec3 ambient = (kD );
 
 // vec3 finalColor = (Lo * visibility) + ambient; 
 vec3 finalColor = ambient;//pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
 
-// finalColor = finalColor / ( finalColor + vec3(0.001));
-finalColor = vec3(1.0) - exp(-finalColor * 1.8);
-// finalColor = pow(finalColor, vec3(2.2/1.0)); 
+// finalColor = finalColor / ( finalColor + vec3(1.00));
+finalColor = vec3(1.0) - exp(-finalColor * 1.0);
+//finalColor = pow(finalColor, vec3(2.2/1.0)); 
 
 FragColor = vec4( finalColor, opacity * alpha ); 
 

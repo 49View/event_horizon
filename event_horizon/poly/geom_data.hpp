@@ -88,9 +88,9 @@ struct VData {
     void fillIndices( const std::vector<int>& _indices );
     void fillCoors3d( const std::vector<Vector3f>& _verts );
     void fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index = 0 );
-    void fillNormals( const std::vector<Vector3f>& _normals );
-    void fillTangets( const std::vector<Vector3f>& _tangents );
-    void fillBinormal( const std::vector<Vector3f>& _binormals );
+    void fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert = false );
+    void fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert = false );
+    void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
     void fillColors( const std::vector<Vector4f>& _colors );
     void allocateSpaceForVertices( const int _numVerts );
     void changeWindingOrder();
@@ -207,6 +207,7 @@ private:
 class GeomData {
 public:
     GeomData();
+    GeomData(std::shared_ptr<Material> _material);
     virtual ~GeomData();
     explicit GeomData( std::shared_ptr<DeserializeBin> reader );
     GeomData( const ShapeType _st,
