@@ -86,9 +86,6 @@ void SceneLayout::activate( Scene* _target ) {
 			_target->addViewport<RLTargetPlain>( k, v.updateAndGetRect(), v.cc, BlitType::OnScreen );
 		} else if ( v.cc == CameraControls::Walk || v.cc == CameraControls::Fly ) {
 			_target->addViewport<RLTargetPBR>( k, v.updateAndGetRect(), v.cc, BlitType::OnScreen );
-			if ( v.cc == CameraControls::Walk ) {
-				_target->CM().getCamera(k)->LockAtWalkingHeight(true);
-			}
 		}
 	}
 }

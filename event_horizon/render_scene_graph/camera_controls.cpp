@@ -92,12 +92,25 @@ void CameraControlFly::renderControls() {
     }
 }
 
+void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
+    _cam->LockAtWalkingHeight(true);
+    _cam->moveForward( mi.moveForward );
+    _cam->strafe( mi.strafe );
+    _cam->moveUp( mi.moveUp );
+    if ( mi.moveDiffSS != Vector2f::ZERO ) {
+        _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
+    }
+}
+
 std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,
                                                            RenderSceneGraph& _rsg) {
     switch ( _cc ) {
         case CameraControls::Fly:
             return std::make_shared<CameraControlFly>(_cr, _rsg);
+        case CameraControls::Walk:
+            return std::make_shared<CameraControlWalk>(_cr, _rsg);
         default:
             return nullptr;
     };
 }
+

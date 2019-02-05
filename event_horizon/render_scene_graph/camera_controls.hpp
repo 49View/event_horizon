@@ -62,6 +62,14 @@ public:
 
 };
 
+class CameraControlWalk : public CameraControl {
+public:
+    using CameraControl::CameraControl;
+    ~CameraControlWalk() override = default;
+    void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
+    void renderControls() override {}
+};
+
 class CameraControlFactory {
 public:
     static std::shared_ptr<CameraControl> make( CameraControls _cc, std::shared_ptr<CameraRig> _cr, RenderSceneGraph& _rsg );
