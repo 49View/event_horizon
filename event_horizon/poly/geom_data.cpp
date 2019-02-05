@@ -26,7 +26,11 @@ inline void hash_combine( std::size_t& seed, const T& v, Rest... rest ) {
 }
 
 GeomData::GeomData() {
-	material = std::make_shared<PBRMaterial>();
+	material = std::make_shared<Material>(S::WHITE_PBR, S::SH);
+}
+
+GeomData::GeomData(std::shared_ptr<Material> _material) : material(_material) {
+
 }
 
 GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {
@@ -35,14 +39,14 @@ GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {
 
 GeomData::GeomData( const ShapeType _st,
 					const Vector3f& _pos, [[maybe_unused]] const Vector3f& _axis, const Vector3f& _scale,
-					std::shared_ptr<PBRMaterial> _material,
+					std::shared_ptr<Material> _material,
 					const GeomMappingData& _mapping ) {
 	material = _material;
 	setMappingData( _mapping );
 	addShape( _st, _pos, _scale, 3 );
 }
 
-GeomData::GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<PBRMaterial> _material,
+GeomData::GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<Material> _material,
 					const GeomMappingData& _mapping, PullFlags pullFlags ) {
 	material = _material;
 	setMappingData( _mapping );
@@ -51,7 +55,7 @@ GeomData::GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<PBRMa
 	}
 }
 
-GeomData::GeomData( const std::vector<PolyLine>& _polyLines, std::shared_ptr<PBRMaterial> _material,
+GeomData::GeomData( const std::vector<PolyLine>& _polyLines, std::shared_ptr<Material> _material,
                     const GeomMappingData& _mapping ) {
 	material = _material;
 	setMappingData( _mapping );
@@ -62,7 +66,7 @@ GeomData::GeomData( const std::vector<PolyLine>& _polyLines, std::shared_ptr<PBR
     }
 }
 
-GeomData::GeomData( const QuadVector3fNormalfList& _quads, std::shared_ptr<PBRMaterial> _material,
+GeomData::GeomData( const QuadVector3fNormalfList& _quads, std::shared_ptr<Material> _material,
 					const GeomMappingData& _mapping ) {
 	material = _material;
 	setMappingData( _mapping );
@@ -71,23 +75,23 @@ GeomData::GeomData( const QuadVector3fNormalfList& _quads, std::shared_ptr<PBRMa
 	}
 }
 
-std::shared_ptr<GeomData> GeomDataShapeBuilder::build() {
-    return std::make_shared<GeomData>( shapeType, pos, axis, scale, material, mappingData );
+std::shared_ptr<GeomData> GeomDataShapeBuilder::build(std::shared_ptr<Material> _mat) {
+    return std::make_shared<GeomData>( shapeType, pos, axis, scale, _mat, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataOutlineBuilder::build() {
-	return std::make_shared<GeomData>( outlineVerts, material, mappingData );
+std::shared_ptr<GeomData> GeomDataOutlineBuilder::build(std::shared_ptr<Material> _mat) {
+	return std::make_shared<GeomData>( outlineVerts, _mat, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataPolyBuilder::build() {
-	return std::make_shared<GeomData>( polyLine, material, mappingData );
+std::shared_ptr<GeomData> GeomDataPolyBuilder::build(std::shared_ptr<Material> _mat) {
+	return std::make_shared<GeomData>( polyLine, _mat, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataQuadMeshBuilder::build() {
-	return std::make_shared<GeomData>( quads, material, mappingData );
+std::shared_ptr<GeomData> GeomDataQuadMeshBuilder::build(std::shared_ptr<Material> _mat) {
+	return std::make_shared<GeomData>( quads, _mat, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
+std::shared_ptr<GeomData> GeomDataFollowerBuilder::build(std::shared_ptr<Material> _mat) {
     ASSERT( !mProfile->Points().empty() );
 
     Profile lProfile{ *mProfile.get() };
@@ -114,25 +118,22 @@ std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
 	lProfile.flip( mFlipVector );
 
 	auto ret = FollowerService::extrude( mVerts, lProfile, mSuggestedAxis, followersFlags );
-	ret->setMaterial(material);
+	ret->setMaterial(_mat);
 
 	return ret;
 }
 
-GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
+GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _mat) {
 	auto rawPoints = SVGC::SVGToPoly( svgAscii );
 
 	GeomDataListBuilderRetType logoGeoms{};
 	logoGeoms.reserve( rawPoints.size() );
 	for ( const auto& points : rawPoints ) {
 		auto fb = std::make_shared<GeomDataFollowerBuilder>( mProfile,
-															 XZY::C(points,0.0f),
+															 XZY::C(points.path,0.0f),
 															 FollowerFlags::WrapPath );
-		fb->m(material);
-		auto g = fb->build();
-		logoGeoms.emplace_back(g);
-//		logoGeoms.emplace_back( GB{ pb, XZY::C(points,0.0f) }.ff(FollowerFlags::WrapPath).
-//				col(Color4f::FTORGB(42.0f, 144.0f, 247.0f)).inj(root).dontAddToSceneGraph().buildr(_p->RSG()) );
+        _mat->c( points.strokeColor );
+		logoGeoms.emplace_back(fb->build(_mat));
 	}
 	return logoGeoms;
 }
@@ -163,7 +164,8 @@ void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<Ser
 
 void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mName );
-	material = std::make_shared<PBRMaterial>( reader );
+	// -###- FIXME, reintroduce material readers
+	material = std::make_shared<Material>(S::WHITE_PBR, S::SH);//( reader );
 	reader->read( mBBox3d.mMinPoint );
 	reader->read( mBBox3d.mMaxPoint );
 	reader->read( mapping.direction );
@@ -1149,16 +1151,25 @@ void VData::fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index ) {
 	}
 }
 
-void VData::fillNormals( const std::vector<Vector3f>& _normals ) {
+void VData::fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert ) {
 	vnormals3d = _normals;
+	if ( _bInvert ) {
+		for ( auto& v : vnormals3d ) v*=-1.0f;
+	}
 }
 
-void VData::fillTangets( const std::vector<Vector3f>& _tangents ) {
+void VData::fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert ) {
 	vtangents3d = _tangents;
+	if ( _bInvert ) {
+		for ( auto& v : vtangents3d ) v*=-1.0f;
+	}
 }
 
-void VData::fillBinormal( const std::vector<Vector3f>& _binormals ) {
+void VData::fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert ) {
 	vbinormals3d = _binormals;
+	if ( _bInvert ) {
+		for ( auto& v : vbinormals3d ) v*=-1.0f;
+	}
 }
 
 void VData::fillColors( const std::vector<Vector4f>& _colors ) {

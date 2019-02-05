@@ -1,6 +1,7 @@
 #include "../../../platform_util.h"
 
 #include <regex>
+#include <cpuid.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdint.h>
@@ -24,7 +25,11 @@ namespace FileManager {
 
 std::string cacheFolder() {
     const char *homeDir = getenv( "TMPDIR" );
-    return std::string( homeDir ) + "/";
+    return std::string( homeDir );
+}
+
+std::string getDaemonRoot() {
+    return cacheFolder();
 }
 
 const std::string userComputerName() {
@@ -46,16 +51,7 @@ const uint64_t cpuID() {
     unsigned int cpuinfo[4] = { 0, 0, 0, 0 };
     unsigned int ax = 0;
 
-    __asm __volatile
-    (   "movl %%ebx, %%esi\n\t"
-        "cpuid\n\t"
-        "xchgl %%ebx, %%esi"
-    : "=a" (cpuinfo[0]), "=S" (cpuinfo[1]),
-    "=c" (cpuinfo[2]), "=d" (cpuinfo[3])
-    : "0" (ax)
-    );
-
-//    __get_cpuid(0, eax, ebx, ecx, edx);
+    __get_cpuid(ax, &cpuinfo[0], &cpuinfo[1], &cpuinfo[2], &cpuinfo[3]);
 
     unsigned short hash = 0;
     unsigned int* ptr = (&cpuinfo[0]);

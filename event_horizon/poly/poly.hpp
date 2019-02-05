@@ -17,6 +17,8 @@ class UIElement;
 using UIAsset = Node<UIElement>;
 using UIAssetSP = std::shared_ptr<UIAsset>;
 
+using NodeVariants = std::variant<GeomAssetSP, UIAssetSP>;
+
 enum class UIShapeType {
     CameraFrustom2d,
     CameraFrustom3d,

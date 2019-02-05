@@ -75,8 +75,10 @@ public:
     }
 
     FrameBufferBuilder& size( const Vector2i& size ) {
-        mWidth = size.x();
-        mHeight = size.y();
+        if ( size.x() > 0 && size.y() > 0 ) {
+            mWidth = size.x();
+            mHeight = size.y();
+        }
         return *this;
     }
 

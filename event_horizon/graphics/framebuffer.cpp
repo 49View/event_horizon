@@ -5,6 +5,7 @@
 #include "framebuffer.h"
 #include "core/service_factory.h"
 #include "renderer.h"
+#include <graphics/vp_builder.hpp>
 
 std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
     auto ret = ServiceFactory::create<Framebuffer>();
@@ -13,10 +14,16 @@ std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
         GLint dfb;
         GLCALL ( glGetIntegerv( GL_FRAMEBUFFER_BINDING, &dfb ));
         ret->mFramebufferHandle = static_cast<GLuint >(dfb);
-        LOGI( "Default framebuffer: %d", ret->mFramebufferHandle );
-        JMATH::Rect2f r = Framebuffer::getCurrentViewport();
-        ret->mWidth = static_cast<int>( r.width());
-        ret->mHeight = static_cast<int>( r.height());
+        if ( mWidth <= 0 || mHeight <= 0 ) {
+            GLCALL( glBindFramebuffer( GL_DRAW_FRAMEBUFFER, dfb ));
+            JMATH::Rect2f r = Framebuffer::getCurrentViewport();
+            ret->mWidth = static_cast<int>( r.width());
+            ret->mHeight = static_cast<int>( r.height());
+        } else {
+            ret->mWidth = mWidth;
+            ret->mHeight = mHeight;
+        }
+        LOGR( "Default framebuffer: %d [%d,%d]", ret->mFramebufferHandle, ret->mWidth, ret->mHeight );
         return ret;
     }
 
@@ -45,9 +52,9 @@ std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
     if ( !mIMShaderName.empty()) {
         ret->mVPListIM = ServiceFactory::create<VPList>();
         std::string vn = mName + std::to_string(mDestViewport.size().x()) + std::to_string(mDestViewport.size().y());
-        VPBuilder<PosTex2dStrip>{ rr, ret->mVPListIM }.
+        VPBuilder<PosTex2dStrip>{ rr, ret->mVPListIM, mIMShaderName }.
                       p(std::make_shared<PosTex2dStrip>( mDestViewport.ss(),
-                        QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS )).s(mIMShaderName).n(vn).build();
+                        QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS )).n(vn).build();
     }
 
     return ret;

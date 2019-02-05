@@ -1,9 +1,10 @@
 #include "skybox.h"
 #include "core/math/poly_shapes.hpp"
+#include <core/descriptors/material.h>
 #include "vertex_processing.h"
-#include "program_list.h"
 #include "framebuffer.h"
 #include "renderer.h"
+#include <graphics/vp_builder.hpp>
 
 void Skybox::equirectangularTextureInit( const std::vector<std::string>& params ) {
 
@@ -12,7 +13,7 @@ void Skybox::equirectangularTextureInit( const std::vector<std::string>& params 
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList}.p(colorStrip).s(S::EQUIRECTANGULAR).t(params[0]).n("skybox")
+    VPBuilder<Pos3dStrip>{rr,mVPList,S::EQUIRECTANGULAR}.p(colorStrip).t(params[0]).n("skybox")
     .build();
 
     isReadyToRender = true;
@@ -51,7 +52,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
         std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
         std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                                sp.numIndices, vpos3d, sp.indices );
-        VPBuilder<Pos3dStrip>{rr,mVPList}.p(colorStrip).s(S::SKYBOX).n("skybox").build();
+        VPBuilder<Pos3dStrip>{rr,mVPList,S::SKYBOX}.p(colorStrip).n("skybox").build();
     }
 
 }
@@ -101,12 +102,12 @@ void CubeEnvironmentMap::init() {
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList}.p(colorStrip).s(S::CONVOLUTION).n("cubeEnvMap").build();
+    VPBuilder<Pos3dStrip>{rr,mVPList,S::CONVOLUTION}.p(colorStrip).n("cubeEnvMap").build();
 }
 
 void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
     rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
-    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt );
+    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
     mVPList->addToCommandBuffer( rr );
 }
 
@@ -123,13 +124,13 @@ void PrefilterSpecularMap::init() {
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList}.p(colorStrip).s(S::IBL_SPECULAR).n("iblSpecularEnvMap").build();
+    VPBuilder<Pos3dStrip>{rr,mVPList,S::IBL_SPECULAR}.p(colorStrip).n("iblSpecularEnvMap").build();
 }
 
 void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float roughness ) {
     rr.CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
     rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
-    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt );
+    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
     mVPList->setMaterialConstant( UniformNames::roughness, roughness );
     mVPList->addToCommandBuffer( rr );
 }
@@ -139,7 +140,7 @@ PrefilterSpecularMap::PrefilterSpecularMap( Renderer& rr ) : RenderModule( rr ) 
 }
 
 void PrefilterBRDF::init() {
-    mBRDF = FrameBufferBuilder{ rr, FBNames::ibl_brdf }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
+    mBRDF = FrameBufferBuilder{ rr, MPBRTextures::ibl_brdf }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
             PIXEL_FORMAT_HDR_RG_16 ). IM(S::IBL_BRDF).noDepth().build();
 }
 

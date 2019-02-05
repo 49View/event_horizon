@@ -14,3 +14,4 @@
 #include <render_scene_graph/layouts/editor/image_layout.h>
 #include <render_scene_graph/layouts/editor/timeline_layout.h>
 #include <render_scene_graph/layouts/editor/login_layout.h>
+#include <render_scene_graph/layouts/editor/taskbar_layout.hpp>

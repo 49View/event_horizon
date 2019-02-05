@@ -46,9 +46,6 @@ void Url::fromString( const std::string& _fullurl ) {
 
     std::smatch base_match = parseUrl( _fullurl );
     if ( base_match.size() == 5 ) {
-        for ( const auto& m : base_match ) {
-            LOGR( m.str().c_str() );
-        }
         protocol = base_match[1].str();
         host = base_match[2].str();
         if ( !base_match[3].str().empty() ) {

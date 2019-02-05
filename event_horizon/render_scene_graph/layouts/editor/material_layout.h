@@ -3,8 +3,14 @@
 //
 
 #pragma once
-#include <core/math/rect2f.h>
-class Scene;
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiMaterials( Scene* p, const Rect2f& _r );
+class ImGuiMaterials : public LayoutBoxRenderer {
+public:
+    virtual ~ImGuiMaterials() = default;
+    using LayoutBoxRenderer::LayoutBoxRenderer;
+protected:
+    void renderImpl( Scene *scene, JMATH::Rect2f& f ) override;
+};
+
 void callbackMaterial( const std::string& _filename, const std::vector<char>& _data );

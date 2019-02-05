@@ -699,7 +699,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     
     auto material = model.materials[primitive.material];
     auto im = matMap.at(material.name);
-    std::shared_ptr<GeomData> geom = std::make_shared<GeomData>( std::make_shared<PBRMaterial>(im.name) );
+    auto geom = std::make_shared<GeomData>( im.mb ); // std::make_shared<PBRMaterial>(im.name)
 
     geom->vData().fillIndices( fillData<int>( model, primitive.indices ) );
 
@@ -711,10 +711,10 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
             geom->vData().setMin( ead.min );
         }
         else if ( k == "NORMAL" ) {
-            geom->vData().fillNormals( fillData<Vector3f>( model, v ) );
+            geom->vData().fillNormals( fillData<Vector3f>( model, v ), true );
         }
         else if ( k == "TANGENT" ) {
-            geom->vData().fillTangets( fillData<Vector3f>( model, v ) );
+            geom->vData().fillTangets( fillData<Vector3f>( model, v ), true );
         }
         else if ( k == "TEXCOORD_0" ) {
             geom->vData().fillUV( fillData<Vector2f>( model, v ), 0 );
@@ -790,98 +790,104 @@ void sigmoidMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::Intermediat
         _value = static_cast<uint8_t >(vn*255.0f);
     } );
 
-    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory( greyValue ) );
+//    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory( greyValue ) );
 }
 
 void valueToColorMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
     auto vc = RawImage{ ic.baseName, 1, 1, ic.value.RGBATOI()};
     vc.grayScale();
-    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(vc) );
+//    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(vc) );
 }
 
 void grayscaleToNormalMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
     RawImage normalMap = _im.grayScaleBaseColor.toNormalMap();
-    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(normalMap) );
+//    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(normalMap) );
 }
 
 void colorToBasecolorMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
     _im.grayScaleBaseColor = RawImage{ "grayBase", 1, 1, ic.value.RGBATOI()};
 
-    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(_im.grayScaleBaseColor) );
+//    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(_im.grayScaleBaseColor) );
 
     _im.grayScaleBaseColor.grayScale();
 }
 
-void GLTF2::saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic ) {
-    auto baseFileName = std::string{basePath + _im.name + ic.baseName + ".png" };
+void GLTF2::saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic, const std::string& _uniformName ) {
+    auto baseFileName = std::string{_im.name + "_" + ic.baseName};
     if ( ic.texture.first == -1 ) {
-        switch ( ic.textureReconstructionMode ) {
-            case InternalPBRTextureReconstructionMode::GrayScaleCreate:
-                colorToBasecolorMap( ic, _im );
-                break;
-            case InternalPBRTextureReconstructionMode::SigmoidFloor:
-                sigmoidMap( ic, _im, SigmoidSlope::Negative );
-//                valueToColorMap( ic, _im );
-                break;
-            case InternalPBRTextureReconstructionMode::SigmoidCeiling:
-                sigmoidMap( ic, _im, SigmoidSlope::Positive );
-//                valueToColorMap( ic, _im );
-                break;
-            case InternalPBRTextureReconstructionMode::NormalMap:
-                grayscaleToNormalMap( ic, _im );
-                break;
-            default:
-                break;
-        }
+//        switch ( ic.textureReconstructionMode ) {
+//            case InternalPBRTextureReconstructionMode::GrayScaleCreate:
+//                colorToBasecolorMap( ic, _im );
+//                break;
+//            case InternalPBRTextureReconstructionMode::SigmoidFloor:
+//                sigmoidMap( ic, _im, SigmoidSlope::Negative );
+////                valueToColorMap( ic, _im );
+//                break;
+//            case InternalPBRTextureReconstructionMode::SigmoidCeiling:
+//                sigmoidMap( ic, _im, SigmoidSlope::Positive );
+////                valueToColorMap( ic, _im );
+//                break;
+//            case InternalPBRTextureReconstructionMode::NormalMap:
+//                grayscaleToNormalMap( ic, _im );
+//                break;
+//            default:
+//                break;
+//        }
     } else {
         auto texture = model.textures[ic.texture.first];
         auto image = model.images[texture.source];
         uint8_p imgBuffer;
         if ( !image.uri.empty() ) {
             auto ext = getFileNameExt( image.name );
-            baseFileName = basePath + _im.name + ic.baseName + ext;
             imgBuffer = FM::readLocalFile(basePath + image.name);
         } else {
             imgBuffer = imageUtil::bufferToPngMemory(image.width, image.height, image.component, image.image.data());
         }
-        if ( ic.textureReconstructionMode == InternalPBRTextureReconstructionMode::GrayScaleCreate ) {
-            _im.grayScaleBaseColor = rawImageDecodeFromMemory(imgBuffer);
-            _im.grayScaleBaseColor.grayScale();
-            _im.grayScaleBaseColor.brightnessContrast( 2.2f, 100 );
-        }
-        _im.mb->buffer( ic.baseName, std::move(imgBuffer) );
+//        if ( ic.textureReconstructionMode == InternalPBRTextureReconstructionMode::GrayScaleCreate ) {
+//            _im.grayScaleBaseColor = rawImageDecodeFromMemory(imgBuffer);
+//            _im.grayScaleBaseColor.grayScale();
+//            _im.grayScaleBaseColor.brightnessContrast( 2.2f, 100 );
+//        }
+        _im.mb->buffer( baseFileName, std::move(imgBuffer), _uniformName );
     }
 }
 
 void GLTF2::saveMaterial( const IntermediateMaterial& im ) {
-    im.mb = std::make_shared<MaterialBuilder>(im.name);
-    saveInternalPBRComponent( im, im.baseColor );
-    saveInternalPBRComponent( im, im.metallic);
-    saveInternalPBRComponent( im, im.roughness );
-    saveInternalPBRComponent( im, im.normal );
+    saveInternalPBRComponent( im, im.baseColor, UniformNames::diffuseTexture  );
+    saveInternalPBRComponent( im, im.metallic,  UniformNames::metallicTexture );
+    saveInternalPBRComponent( im, im.roughness, UniformNames::roughnessTexture );
+    saveInternalPBRComponent( im, im.normal,    UniformNames::normalTexture );
 }
 
-void GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
+std::shared_ptr<Material> GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
     IntermediateMaterial im;
     im.name = toLower(mat.name);
     removeNonAlphaCharFromString( im.name );
+    im.mb = std::make_shared<Material>(im.name, S::SH);
 
     for ( const auto& [k,v] : mat.values ) {
         if ( k == "baseColorFactor" ) {
             im.baseColor.value = v.number_array;
+            im.mb->c( im.baseColor.value );
         } else if ( k == "baseColorTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.baseColor.texture );
         } else if ( k == "metallicFactor" ) {
             float lv = static_cast<float>(v.number_value);
             im.metallic.value = Vector4f{ lv, lv, lv, 1.0f };
+            im.mb->assign( UniformNames::metallic, lv );
         } else if ( k == "metallicTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.metallic.texture );
         } else if ( k == "roughnessFactor" ) {
             float lv = static_cast<float>(v.number_value);
+            im.mb->assign( UniformNames::roughness, lv );
             im.roughness.value = Vector4f{ lv, lv, lv, 1.0f };
         } else if ( k == "roughnessTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.roughness.texture );
-        } else if ( k == "normalTexture" ) {
+        }
+    }
+
+    for ( const auto& [k,v] : mat.additionalValues ) {
+        if ( k == "normalTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.normal.texture );
         }
     }
@@ -889,14 +895,17 @@ void GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
     saveMaterial(im);
 
     matMap[mat.name] = im;
+
+    return im.mb;
 }
 
-GeomAssetSP GLTF2::convert() {
+ImportGeomArtifacts GLTF2::convert() {
 
+    ImportGeomArtifacts ret;
     auto hierScene = std::make_shared<GeomAsset>( name );
 
     for ( size_t m = 0; m < model.materials.size(); m++ ) {
-        elaborateMaterial( model.materials[m] );
+        ret.addMaterial( elaborateMaterial( model.materials[m] ) );
     }
     for ( size_t s = 0; s < model.scenes.size(); s++ ) {
         auto scene = model.scenes[s];
@@ -909,11 +918,10 @@ GeomAssetSP GLTF2::convert() {
 
     hierScene->prune();
     hierScene->generateMatrixHierarchy();
-    return hierScene;
-}
 
-void GLTF2::fixupMaterials() {
+    ret.setScene( hierScene );
 
+    return ret;
 }
 
 GLTF2::GLTF2( const std::vector<char>& _array, const std::string& _name ) {
@@ -985,13 +993,3 @@ GLTF2::GLTF2( const std::string& _path ) {
 
 //    Dump( model );
 }
-
-std::vector<std::shared_ptr<MaterialBuilder>> GLTF2::Materials() {
-    std::vector<std::shared_ptr<MaterialBuilder>> ret;
-
-    for ( const auto& [k,v] : matMap ) {
-        ret.emplace_back( v.mb );
-    }
-    return ret;
-}
-

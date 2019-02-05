@@ -221,8 +221,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
 }
 
 std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRect( const QuadVertices2& uvm ) {
-    return std::make_shared<PosTex3dStrip>( Rect2f{ rect.origin() - Vector2f{0.0f, size.y()}, rect.size(), true },
-                                            uvm, 0.0f );
+    return std::make_shared<PosTex3dStrip>( rect, uvm, 0.0f );
 }
 
 std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRoundedRect( [[maybe_unused]] const QuadVertices2& uvm ) {
@@ -237,34 +236,34 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeRoundedRect( [[maybe_unused]]
     pts = std::make_shared<PosTex3dStrip>( numVerts, PRIMITIVE_TRIANGLE_FAN, VFVertexAllocation::PreAllocate );
 
     Vector3f pos = Vector3f( bevelRadius, 0.0f, 0.0f );
-    pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+    pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     for ( uint32_t t = 0; t < numSubDivs; t++ ) {
         float delta = static_cast<float>( t ) / static_cast<float>( numSubDivs - 1 );
         float angle = JMATH::lerp( delta, 0.0f, static_cast<float>( M_PI_2 ));
         pos = Vector3f( size.x() - bevelRadius, 0.0f, 0.0f ) +
               Vector3f( sinf( angle ), cosf( angle ) - 1.0f, 0.0f ) * bevelRadius;
-        pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+        pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     }
     for ( uint32_t t = 0; t < numSubDivs; t++ ) {
         float delta = static_cast<float>( t ) / static_cast<float>( numSubDivs - 1 );
         float angle = JMATH::lerp( delta, static_cast<float>( M_PI_2 ), static_cast<float>( M_PI ));
         pos = Vector3f( size.x(), -size.y() + bevelRadius, 0.0f ) +
               Vector3f( sinf( angle ) - 1.0f, cosf( angle ), 0.0f ) * bevelRadius;
-        pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+        pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     }
     for ( uint32_t t = 0; t < numSubDivs; t++ ) {
         float delta = static_cast<float>( t ) / static_cast<float>( numSubDivs - 1 );
         float angle = JMATH::lerp( delta, static_cast<float>( M_PI ), static_cast<float>( M_PI + M_PI_2 ));
         pos = Vector3f( bevelRadius, -size.y(), 0.0f ) +
               Vector3f( sinf( angle ), cosf( angle ) + 1.0f, 0.0f ) * bevelRadius;
-        pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+        pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     }
     for ( uint32_t t = 0; t < numSubDivs; t++ ) {
         float delta = static_cast<float>( t ) / static_cast<float>( numSubDivs - 1 );
         float angle = JMATH::lerp( delta, static_cast<float>( M_PI + M_PI_2 ), TWO_PI );
         pos = Vector3f( 0.0f, -bevelRadius, 0.0f ) +
               Vector3f( sinf( angle ) + 1.0f, cosf( angle ), 0.0f ) * bevelRadius;
-        pts->addVertex( pos + orig, textureFillModeMapping( rect, pos.xy(), tmf ));
+        pts->addVertex( XZY::C(pos + orig), textureFillModeMapping( rect, pos.xy(), tmf ));
     }
 
     return pts;
@@ -407,6 +406,7 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
             if ( shapeType == UIShapeType::Text2d ) {
                 anchor = RectCreateAnchor::Bottom;
             }
+            elem->Name( title );
         }
             break;
         case UIShapeType::Separator2d:
@@ -436,7 +436,8 @@ void UIShapeBuilder::assemble( DependencyMaker& _md ) {
     }
 
     elem->Data()->VertexList(vs);
-//    elem->updateTransform();
+
+    elem->updateTransform();
 
     sg.add( elem );
 }
@@ -464,17 +465,51 @@ bool UIShapeBuilder::validate() const {
     return true;
 }
 
+std::string UIShapeBuilder::getShaderType( UIShapeType _st ) const {
+    auto shaderName = S::TEXTURE_2D;
+    switch ( _st ) {
+        case UIShapeType::CameraFrustom2d:
+        case UIShapeType::CameraFrustom3d:
+            break;
+        case UIShapeType::Rect2d:
+        case UIShapeType::Rect3d:
+            shaderName = _st == UIShapeType::Rect2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Line2d:
+        case UIShapeType::Line3d:
+            shaderName = _st == UIShapeType::Line2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Arrow2d:
+        case UIShapeType::Arrow3d:
+            shaderName = _st == UIShapeType::Arrow2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Polygon2d:
+        case UIShapeType::Polygon3d:
+            shaderName = _st == UIShapeType::Polygon2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+        case UIShapeType::Text2d:
+        case UIShapeType::Text3d:
+            shaderName = _st == UIShapeType::Text2d ? S::FONT_2D : S::FONT;
+            break;
+        case UIShapeType::Separator2d:
+        case UIShapeType::Separator3d:
+            shaderName = _st == UIShapeType::Separator2d ? S::TEXTURE_2D : S::TEXTURE_3D;
+            break;
+    }
+
+    return shaderName;
+}
+
 void UIShapeBuilder::createDependencyList( DependencyMaker& _md ) {
 
     auto& sg = static_cast<SceneGraph&>(_md);
 //    addDependency<ImageBuilder>( tname, rr.RIDM() );
     addDependency<FontBuilder>( fontName, sg.FM() );
-
     addDependencies( std::make_shared<UIShapeBuilder>(*this), _md );
 }
 
 void UIShapeBuilder::elemCreate() {
-    elem = std::make_shared<UIAsset>( std::make_shared<UIElement>(Name(), shapeType, color, renderBucketIndex), mTransform );
+    elem = std::make_shared<UIAsset>( std::make_shared<UIElement>(Name(), shapeType, material, renderBucketIndex), mTransform );
 }
 
 UIShapeBuilder& UIShapeBuilder::inj( GeomAssetSP _cloned ) {

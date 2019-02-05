@@ -154,11 +154,13 @@ protected:
     }
 
     template <typename BD>
-    void addDependency( const std::string& _dname, DependencyMaker& _md ) {
+    bool addDependency( const std::string& _dname, DependencyMaker& _md ) {
         if ( depExistTest(_dname, _md) ) {
             BD{ _dname }.build( _md );
             push_dep<BD>( _dname );
+            return true;
         }
+        return false;
     }
 
     template <typename BD>

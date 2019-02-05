@@ -4,6 +4,7 @@ class Shader;
 class Texture;
 class SerializeBin;
 class DeserializeBin;
+class HeterogeneousMap;
 
 #include <map>
 #include <string>
@@ -72,6 +73,8 @@ public:
                          std::shared_ptr<Shader> tesselationEvaluationShader, std::shared_ptr<Shader> geometryShader,
                          std::shared_ptr<Shader> fragmentShader, std::shared_ptr<Shader> computeShader );
 
+protected:
+    void setDefaultUniforms( const std::string& _name, GLenum uf );
 private:
     std::string mVertexShaderId;
     std::string mTesselationControlShaderId;

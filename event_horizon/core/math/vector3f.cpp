@@ -40,6 +40,22 @@ const Vector3f Vector3f::ONE = Vector3f( 1.0f, 1.0f, 1.0f );
 const Vector3f Vector3f::HUGE_VALUE_POS = Vector3f( std::numeric_limits<float>::max() );
 const Vector3f Vector3f::HUGE_VALUE_NEG = Vector3f( std::numeric_limits<float>::lowest() );
 
+float fmodAntiGimbal( float _a, float _value ) {
+	float c = fmodf( _a, _value );
+	return c == 0.0f && _a > 0.0f ? _value : c;
+}
+
+void Vector3f::fmod( float _value ) {
+    mX = fmodAntiGimbal( mX, _value );
+    mY = fmodAntiGimbal( mY, _value );
+    mZ = fmodAntiGimbal( mZ, _value );
+}
+
+Vector3f Vector3f::fmod( float _value ) const {
+
+	return {fmodAntiGimbal( mX, _value ), fmodAntiGimbal( mY, _value ), fmodAntiGimbal( mZ, _value )};
+}
+
 void removeCollinear( std::vector<Vector3f>& cs ) {
 	int csize = static_cast<int>( cs.size() );
 	if ( csize < 3 ) return;

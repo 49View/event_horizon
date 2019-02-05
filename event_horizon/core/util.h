@@ -76,6 +76,7 @@ const uint64_t cpuID();
 const std::string getUserDownloadFolder( const std::string forcedUserName = "" );
 bool checkFileNameNotACopy( const std::string& filename );
 std::string cacheFolder();
+std::string getDaemonRoot();
 
 std::string distaneToString( float _distance );
 std::string priceMaker( uint64_t price );
@@ -272,6 +273,32 @@ void platform_sleep( long long milliseconds );
 std::string UTCMillisToString();
 int convertStringToHour( const std::string& _str );
 int convertStringToMinuteOrSecond( const std::string& _str );
+
+
+template <typename C, typename L>
+void erase_if( C& container, L lambda ) {
+	container.erase( remove_if( container.begin(), container.end(), lambda ), container.end());
+}
+
+template <typename C, typename L>
+void erase_if_it( C& container, L _key ) {
+	if ( auto it = container.find( _key ); it != container.end()) {
+		container.erase( it );
+	}
+}
+
+template <typename C, typename L, typename U>
+void erase_if_iter( C& container, L lambda, const U& _value  ) {
+	for ( auto it = container.begin(); it != container.end(); ) {
+		if ( lambda( it, _value )) {
+			container.erase( it );  // Returns the new iterator to continue from.
+			return;
+		} else {
+			++it;
+		}
+	}
+}
+
 
 // Reverse iterators
 

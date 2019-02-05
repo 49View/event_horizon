@@ -371,7 +371,7 @@ Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) {
 	mOrthogonal.setOrthogonalProjection();
 	mAspectRatio.setAspectRatioMatrix( mViewPort.ratio() );
 
-	setPosition( Vector3f( 0.0f, 1.0f, 0.0f ) );
+	setPosition( Vector3f( 0.0f, 1.0f, 3.0f ) );
 }
 
 void Camera::ModeInc() {

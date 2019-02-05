@@ -55,7 +55,7 @@ bool ImageBuilder::makeDefault( DependencyMaker& _md ) {
 
     if ( _md.exists( Name() ) ) return false;
 
-    auto decodedData = imageUtil::zeroImage( backup_color, imageParams.width, imageParams.height, imageParams.channels);
+    auto decodedData = imageUtil::memsetImage( backup_color, imageParams.width, imageParams.height, imageParams.channels);
 
     return finalizaMake( static_cast<ImageDepencencyMaker&>(_md), std::move( decodedData ) );
 }

@@ -5,13 +5,9 @@
 #include "login_layout.h"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiLogin( Scene* p, const Rect2f& _r ) {
-    std::string title = "Login";
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse );
-
+void ImGuiLogin::renderImpl( Scene* p, Rect2f& _r ) {
     static char projectInputChar[256];
     static char emailInputChar[256];
     static char passwordInputChar[256];
@@ -52,6 +48,4 @@ void ImGuiLogin( Scene* p, const Rect2f& _r ) {
     if ( ImGui::Button( "Login" ) ) {
         Http::login( lf );
     }
-
-    ImGui::End();
 }

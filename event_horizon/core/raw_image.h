@@ -95,8 +95,10 @@ struct RawImage {
 	std::string name;
 
 	static RawImage WHITE4x4();
-	static RawImage BLACK_ARGB1x1;
-	static RawImage BLACK_RGBA1x1;
+	static RawImage DEBUG_UV();
+	static RawImage BLACK_ARGB4x4;
+	static RawImage BLACK_RGBA4x4;
+	static RawImage NORMAL4x4;
 };
 
 RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string& _name = "", int forceChannels = 0 );

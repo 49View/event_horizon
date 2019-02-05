@@ -105,17 +105,18 @@ struct RBUILDER( GeomFileAssetBuilder, geom, geom, Binary, BuilderQueryType::Not
 
 };
 
-class GeomBuilder : public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
+class GeomBuilder : public MaterialBuildable, public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
 public:
+    using MaterialBuildable::MaterialBuildable;
     GeomBuilder() = default;
     virtual ~GeomBuilder() = default;
 
-    explicit GeomBuilder( const GeomBuilderType gbt ) : builderType(gbt) {}
-    GeomBuilder( const GeomBuilderType gbt, const std::string& _name ) : DependantBuilder(_name), builderType(gbt) {}
+    explicit GeomBuilder( const GeomBuilderType gbt ) : MaterialBuildable(S::SH, S::WHITE_PBR), builderType(gbt) {}
+    GeomBuilder( const GeomBuilderType gbt, const std::string& _name ) : MaterialBuildable(S::SH, S::WHITE_PBR), DependantBuilder(_name), builderType(gbt) {}
     GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
 
     // Impoorted object
-    GeomBuilder( GeomAssetSP, const std::vector<std::shared_ptr<MaterialBuilder>>& );
+    GeomBuilder( GeomAssetSP );
 
     // Polygon list
     explicit GeomBuilder( const Rect2f& _rect, float _z = 0.0f );
@@ -135,10 +136,11 @@ public:
 
     // Profile/Follwoers
     GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline,
-                 const float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO );
+                 float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO );
     GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
                  const Vector3f& _suggestedAxis = Vector3f::ZERO );
     GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
+
     void publish() const;
 
     GeomBuilder& inj( GeomAssetSP _hier );
@@ -150,16 +152,6 @@ public:
 
     GeomBuilder& id( const uint64_t _id ) {
         mId = _id;
-        return *this;
-    }
-
-    GeomBuilder& m( const std::string& _mat ) {
-        materialName = _mat;
-        return *this;
-    }
-
-    GeomBuilder& sh( const std::string& _value ) {
-        shaderName = _value;
         return *this;
     }
 
@@ -193,11 +185,6 @@ public:
         return *this;
     }
 
-    GeomBuilder& col( const Color4f& _col ) {
-        materialPropeties.pigment = _col;
-        return *this;
-    }
-
     GeomBuilder& fnp( const Vector3f& _n ) {
         forcingNormalPoly = _n;
         return *this;
@@ -209,8 +196,8 @@ public:
     }
 
     GeomBuilder& addPoly( const PolyLine& _polyLine );
-    GeomBuilder& addPoly( const PolyLine2d& _polyLine2d, const float heightOffset );
-    GeomBuilder& addOutline( const std::vector<Vector3f>& _polyLine, const float _raise );
+    GeomBuilder& addPoly( const PolyLine2d& _polyLine2d, float heightOffset );
+    GeomBuilder& addOutline( const std::vector<Vector3f>& _polyLine, float _raise );
 
     GeomBuilder& accuracy( const subdivisionAccuray _val ) {
         subdivAccuracy = _val;
@@ -264,6 +251,28 @@ public:
 
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
+// MaterialBuildable policies
+    GeomBuilder& m( const std::string& _shader, const std::string& _matName ) {
+        materialSet(_shader, _matName);
+        return *this;
+    }
+
+    template <typename T>
+    GeomBuilder& mc( const std::string& _name, T _value ) {
+        materialConstant( _name, _value);
+        return *this;
+    }
+
+    GeomBuilder& c( const Color4f & _color ) {
+        materialColor( _color );
+        return *this;
+    }
+
+    GeomBuilder& c( const std::string& _hexcolor ) {
+        materialColor( Vector4f::XTORGBA( _hexcolor ) );
+        return *this;
+    }
+
     GeomAssetSP buildr( DependencyMaker& _md);
 
     void assemble( DependencyMaker& _md ) override;
@@ -287,11 +296,8 @@ protected:
 private:
     uint64_t mId = 0;
     uint64_t gt = 1; // This is the generic geom ID, as we reserve 0 as null
-    std::string  materialName = "white";
-    MaterialType materialType = MaterialType::PBR;
-    MaterialProperties materialPropeties;
-    std::string  shaderName;
 
+    bool bMaterialDep = false;
     ShapeType shapeType = ShapeType::None;
     subdivisionAccuray subdivAccuracy = accuracyNone;
 

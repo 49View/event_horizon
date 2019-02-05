@@ -154,6 +154,15 @@ macro(register_poly_module)
 
 endmacro(register_poly_module)
 
+macro(register_media_module)
+
+    if (NOT BUILD_FROM_SOURCE)
+        add_lib( media )
+    endif()
+    add_lib( media_libs )
+
+endmacro(register_media_module)
+
 macro(register_render_scene_graph_module)
 
     register_module("ui")
@@ -303,6 +312,8 @@ macro(compile)
             register_core_module()
         elseif (${module} STREQUAL "graphics")
             register_graphics_module()
+        elseif (${module} STREQUAL "media")
+            register_media_module()
         elseif (${module} STREQUAL "poly")
             register_poly_module()
         elseif (${module} STREQUAL "render_scene_graph")
@@ -399,6 +410,16 @@ macro(link_core_graphics)
     endif ()
 
 endmacro(link_core_graphics)
+
+macro(link_core_media)
+    if ("media" IN_LIST WHICH_LIBS)
+        link_libraries_multi("49viewmedia" "49viewmedia" "49viewmedia" "49viewmedia" "49viewmedia")
+    endif ()
+    if ("media" IN_LIST WHICH_LIBS OR "media_libs" IN_LIST WHICH_LIBS)
+        link_ffmpeg()
+    endif ()
+
+endmacro(link_core_media)
 
 macro(link_embree)
     # embree
@@ -504,13 +525,13 @@ endmacro(link_sockets)
 
 macro(link_ffmpeg)
     # ffmpeg
-    if ("ffmpeg" IN_LIST WHICH_LIBS)
-        include_directories(../../libs/ffmpeg/include)
+    if (NOT EMSCRIPTEN)
         SET(FFMPEG_LIBS swscale avdevice avformat avcodec avutil avfilter swresample)
-        SET(FFMPEG_LIBS_LINUX swscale avdevice avformat avcodec avutil postproc swresample fdk-aac mp3lame vorbisenc vorbis ogg vpx x264 x265)
+#        SET(FFMPEG_LIBS_LINUX swscale avdevice avformat avcodec avutil postproc swresample fdk-aac mp3lame vorbisenc vorbis ogg vpx x264 x265)
+        SET(FFMPEG_LIBS_LINUX swscale avdevice avformat avcodec avutil swresample )
         SET(FFMPEG_WIN_DLL avcodec-57 avdevice-57 avfilter-6 avformat-57 avutil-55 postproc-54 swresample-2 swscale-4)
         link_libraries("ffmpeg" "${FFMPEG_LIBS}" OFF "${FFMPEG_LIBS}" "${FFMPEG_LIBS_LINUX}" "${FFMPEG_LIBS_LINUX}" "${FFMPEG_WIN_DLL}")
-    endif ()
+    endif()
 endmacro(link_ffmpeg)
 
 macro(link_graphics)
@@ -537,6 +558,7 @@ macro(link_graphics)
 #        if (APPLE)
 #            link_frameworks("OpenVR")
 #        endif()
+
     endif ()
 
 endmacro(link_graphics)
@@ -723,6 +745,7 @@ function(linker PROJECT_NAME WHICH_LIBS)
 
     link_core_poly()
     link_core_graphics()
+    link_core_media()
     link_core_render_scene_graph()
 #    link_core_server_services()
     link_core_ocr()
@@ -751,7 +774,7 @@ function(linker PROJECT_NAME WHICH_LIBS)
     link_system_libraries_if("${WIN32}" "-lwsock32")
 
     # apple frameworks
-    link_frameworks("OpenCL;AudioToolbox;Accelerate;AudioUnit;Cocoa;CoreAudio;CoreMedia;CoreFoundation;CoreGraphics;CoreServices;CoreVideo;Foundation;IOKit;Security;VideoToolbox;VideoDecodeAcceleration")
+    link_frameworks("OpenCL;OpenAL;AudioToolbox;Accelerate;AudioUnit;Cocoa;CoreAudio;CoreMedia;CoreFoundation;CoreGraphics;CoreServices;CoreVideo;Foundation;IOKit;Security;VideoToolbox;VideoDecodeAcceleration")
 
 endfunction(linker)
 

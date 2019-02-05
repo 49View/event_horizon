@@ -18,6 +18,7 @@ namespace WindowHandling {
 	void imguiUpdate();
 	void imguiUpdateStart();
 	void imguiUpdateEnd();
+	void resizeWindow( const Vector2i& _newSize );
 	void gatherMainScreenInfo();
 	void setDropCallback( GLFWdropfun fn );
 	void setResizeWindowCallback( GLFWwindowsizefun fn );

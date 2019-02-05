@@ -4,12 +4,18 @@
 
 #pragma once
 
-#include <core/math/rect2f.h>
-class Scene;
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
 void callbackGeom( const std::string& _filename, const std::vector<char>& _data );
 void callbackGeomGLTF( const std::string& _filename );
+void callbackGeomSVG( const std::string& svgString );
 
-void ImGuiGeoms( Scene* p, const Rect2f& _r );
+class ImGuiGeoms : public LayoutBoxRenderer {
+public:
+    virtual ~ImGuiGeoms() = default;
+    using LayoutBoxRenderer::LayoutBoxRenderer;
+protected:
+    void renderImpl( Scene *scene, JMATH::Rect2f& f ) override;
+};
 
 

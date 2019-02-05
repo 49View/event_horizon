@@ -8,12 +8,23 @@
 #include "graphics/camera_rig.hpp"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiCamera( Scene* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Cameras",  nullptr, ImGuiWindowFlags_NoCollapse );
+//namespace CameraRigAngles {
+//    extern Vector3f Top   ;
+//    extern Vector3f Bottom;
+//    extern Vector3f Left  ;
+//    extern Vector3f Right ;
+//    extern Vector3f Front ;
+//    extern Vector3f Back  ;
+//}
 
+void ImGuiCamera::renderImpl( Scene* p, JMATH::Rect2f& f ) {
+//    float lTop[3] = { CameraRigAngles::Top.x(), CameraRigAngles::Top.y(), CameraRigAngles::Top.z()};
+//    ImGui::BeginGroup();
+//        ImGui::InputFloat3("Top", lTop);
+//        CameraRigAngles::Top = V3f{lTop};
+//    ImGui::EndGroup();
     for ( const auto& [k,v] : p->getRigs() ) {
         auto cam = v->getMainCamera();
         ImGui::BeginGroup();
@@ -25,5 +36,4 @@ void ImGuiCamera( Scene* p, const Rect2f& _r ) {
         ImGui::Separator();
         ImGui::Separator();
     }
-    ImGui::End();
 }

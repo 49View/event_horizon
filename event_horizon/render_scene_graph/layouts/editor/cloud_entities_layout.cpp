@@ -28,12 +28,8 @@ void listCloudCallback( Scene* p ) {
     }
 }
 
-void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, const std::string& _entType,
+void ImGuiCloudEntities( Scene* p, Rect2f& _r, const std::string _title, const std::string& _entType,
                          const uint64_t _version ) {
-
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( _title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse );
 
     static char buf1[1024];
     static char buf2[1024];
@@ -56,5 +52,4 @@ void ImGuiCloudEntities( Scene* p, const Rect2f& _r, const std::string _title, c
         ImGui::Image( reinterpret_cast<void *>(tex->getHandle()), ImVec2{ 100, 100 } );
         ImGui::EndGroup();
     }
-    ImGui::End();
 }

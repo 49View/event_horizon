@@ -67,12 +67,20 @@ static inline void split( const std::string& s, char delim, Out result ) {
     }
 }
 
-static inline std::vector<std::string> split( const std::string& input, const std::string& regex = "\\s+") {
+static inline std::vector<std::string> split( const std::string& input, const std::string& regex = "\\S+") {
     std::regex re( regex );
-    std::sregex_token_iterator
-            first{ input.begin(), input.end(), re, -1 },
-            last;
-    return { first, last };
+    std::smatch sm;
+
+    std::vector<std::string> ret{};
+
+    std::string input_cp = input;
+    while(regex_search(input_cp, sm, re))
+    {
+        ret.emplace_back( sm.str() );
+        input_cp = sm.suffix();
+    }
+
+    return ret;
 }
 
 static inline std::vector<std::string> split( const std::string& s, char delim ) {

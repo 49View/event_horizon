@@ -2,8 +2,6 @@ import axios from '../../axios/backend';
 import * as actionTypes from './actionsTypes';
 
 
-const guestUserEmail = "guest@49view.com";
-
 export const authStart = () => {
     return {
         type: actionTypes.AUTH_START
@@ -12,8 +10,12 @@ export const authStart = () => {
 
 export const authSuccess = (userInfo) => {
     let isGuest=false;
-    if (userInfo.user.email===guestUserEmail) {
+    let user=null;
+    if (userInfo.user.guest===true) {
         isGuest=true;
+    } else {
+        isGuest=false;
+        user=userInfo.user;
     }
     let msToExpiration = userInfo.expires*1000-new Date().getTime();
     console.log("Token expires in: "+msToExpiration+" ms");
@@ -21,7 +23,7 @@ export const authSuccess = (userInfo) => {
     return {
         type: actionTypes.AUTH_SUCCESS,
         isGuest: isGuest,
-        user: userInfo.user
+        user: user
     }
 }
 
@@ -69,13 +71,6 @@ export const auth = (email, password, project) => {
     }
 }
 
-export const setAuthRedirectPath = (path) => {
-    return {
-        type: actionTypes.SET_AUTH_REDIRECT_PATH,
-        path: path
-    }
-}
-
 export const checkCurrentUser = () => {
     return dispatch => {
         console.log("CHECK CURRENT USER");
@@ -87,7 +82,7 @@ export const checkCurrentUser = () => {
             })
             .catch(err =>{
                 console.log("CHECK CURRENT USER FAILED");
-                dispatch(auth(guestUserEmail,'guest','49View'));
+                dispatch(authFail("Error getting user information"));
             })
     }
 }

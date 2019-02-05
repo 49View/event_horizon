@@ -29,7 +29,6 @@ struct UIElementRenderObserver : public ObserverShared<UIAsset> {
     virtual ~UIElementRenderObserver() = default;
 
     void notified( UIAssetSP _source, const std::string& generator ) override;
-    std::string getShaderType( UIShapeType _st ) const;
 private:
     Renderer& rr;
 };
@@ -44,9 +43,11 @@ public:
 
 protected:
     void addImpl(NodeVariants _geom) override;
+    void removeImpl( const UUID& _uuid ) override;
     void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
     void changeMaterialColorTagImpl( const std::vector<std::string>& _params ) override;
     void cmdCreateGeometryImpl( const std::vector<std::string>& _params ) override;
+    void cmdRemoveGeometryImpl( const std::vector<std::string>& _params ) override;
     void cmdloadObjectImpl( const std::vector<std::string>& _params ) override;
     void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) override;
 

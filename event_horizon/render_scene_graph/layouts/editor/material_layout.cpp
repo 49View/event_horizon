@@ -7,16 +7,17 @@
 #include <render_scene_graph/scene.hpp>
 #include <poly/geom_builder.h>
 #include <core/tar_util.h>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
 std::shared_ptr<MaterialBuilder> mb;
 
 void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 size, std::shared_ptr<Texture> t,
                     float backup = -1.0f ) {
 
-    if ( t && (t->getWidth() > 4 || backup >= 0.0f) ) {
-        if ( t->getWidth() > 4 && name != "Base" ) ImGui::SameLine();
+    if ( t && (t->getWidth() > 0|| backup >= 0.0f) ) {
+//        if ( t->getWidth() > 4 && name != "Base" ) ImGui::SameLine();
         ImGui::BeginGroup();
-        if ( t->getWidth() > 4 ) {
+        if ( t->getWidth() > 0 ) {
             ImGui::TextColored( col.Value, "%s", name.c_str() );
             ImGui::Image( reinterpret_cast<void *>(t->getHandle()), size );
         } else {
@@ -28,40 +29,42 @@ void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 si
     }
 }
 
-void ImGuiMaterials( Scene* p, const Rect2f& _r ) {
-
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Materials",  nullptr, ImGuiWindowFlags_NoCollapse );
-
+void ImGuiMaterials::renderImpl( Scene* p, Rect2f& _r ) {
     float ts = 64.0f;
     ImVec2 textureSize{ ts, ts };
 
     for ( const auto& mat : p->ML().list()) {
         if ( !mat ) continue;
-        ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", mat->getName().c_str() );
-        float dc[3] = { mat->getColor().x(), mat->getColor().y(), mat->getColor().z() };
-        ImGui::PushID( (mat->getName() + "dc").c_str() );
+        ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", mat->Name().c_str() );
+        float dc[3] = {1.0f, 1.0f, 1.0f};// { mat->getColor().x(), mat->getColor().y(), mat->getColor().z() };
+        ImGui::PushID( (mat->Name() + "dc").c_str() );
         ImGui::ColorEdit3( "Diffuse", dc );
         ImGui::PopID();
-        if ( mat->getType() == MaterialType::PBR ) {
-            std::shared_ptr<PBRMaterial> matPBR = std::dynamic_pointer_cast<PBRMaterial>( mat );
-            ImGuiMatImage( "Base", ImColor{200, 200, 200}, textureSize, p->TM().TD(matPBR->getBaseColor()) );
-            ImGuiMatImage( "Normal", ImColor{100, 100, 250}, textureSize, p->TM().TD( matPBR->getNormal()) );
-            ImGuiMatImage( "Roughness", ImColor{250, 250, 100}, textureSize, p->TM().TD( matPBR->getRoughness()),
-                           matPBR->getRoughnessValue() );
-            ImGuiMatImage( "Metallic", ImColor{240, 240, 240}, textureSize, p->TM().TD( matPBR->getMetallic()),
-                           matPBR->getMetallicValue() );
-            ImGuiMatImage( "AO", ImColor{100, 100, 100}, textureSize, p->TM().TD( matPBR->getAmbientOcclusion()),
-                           matPBR->getAoValue());
-            ImGuiMatImage( "Height", ImColor{32, 200, 32}, textureSize, p->TM().TD( matPBR->getHeight()) );
+        for ( const auto& mt : mat->getTextureNames() ) {
+            ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->TM().TD(mt) );
         }
-        ImGui::BeginGroup();
-        ImGui::EndGroup();
+//        if ( mat->getType() == MaterialType::PBR ) {
+//            std::shared_ptr<PBRMaterial> matPBR = std::dynamic_pointer_cast<PBRMaterial>( mat );
+//            ImGuiMatImage( "Base", ImColor{200, 200, 200}, textureSize, p->TM().TD(matPBR->getBaseColor()) );
+//            ImGuiMatImage( "Normal", ImColor{100, 100, 250}, textureSize, p->TM().TD( matPBR->getNormal()) );
+//            ImGuiMatImage( "Roughness", ImColor{250, 250, 100}, textureSize, p->TM().TD( matPBR->getRoughness()),
+//                           matPBR->getRoughnessValue() );
+//            ImGuiMatImage( "Metallic", ImColor{240, 240, 240}, textureSize, p->TM().TD( matPBR->getMetallic()),
+//                           matPBR->getMetallicValue() );
+//            ImGuiMatImage( "AO", ImColor{100, 100, 100}, textureSize, p->TM().TD( matPBR->getAmbientOcclusion()),
+//                           matPBR->getAoValue());
+//            ImGuiMatImage( "Height", ImColor{32, 200, 32}, textureSize, p->TM().TD( matPBR->getHeight()) );
+//        }
+//        if ( mb ) {
+//            ImGui::BeginGroup();
+//            if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+//                mb->publish();
+//            }
+//            ImGui::EndGroup();
+//        }
+
         ImGui::Separator();
     }
-
-    ImGui::End();
 }
 
 void callbackMaterial( const std::string& _filename, const std::vector<char>& _data ) {
@@ -77,6 +80,6 @@ void callbackMaterial( const std::string& _filename, const std::vector<char>& _d
         if ( !p->RR().hasTag(9300) ) {
             GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).build( p->RSG() );
         }
-        p->RR().changeMaterialOnTags( 9300, std::dynamic_pointer_cast<PBRMaterial>(p->ML().get(mb->Name())) );
+        p->RR().changeMaterialOnTags( 9300, std::dynamic_pointer_cast<Material>(p->ML().get(mb->Name())) );
     } );
 }

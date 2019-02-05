@@ -44,15 +44,26 @@ float sPresenterArrangerBottomFunction3d( float _value ) {
 SceneLayout::SceneLayout( InitLayoutFunction&& initLayout, RenderFunction&& _renderFunction, DragAndDropFunction&& _dd,
 						  InitializeWindowFlagsT initFlags ) :
 		initLayout( initLayout ), renderFunction(_renderFunction), dragAndDropFunc(_dd), initFlags( initFlags ) {
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Console, ImGuiConsoleLayout );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Geom, ImGuiGeoms );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Material, ImGuiMaterials );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Image, ImGuiImages );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Camera, ImGuiCamera );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Login, ImGuiLogin );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Timeline, ImGuiTimeline );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::CloudMaterial, ImGuiCloudEntitiesMaterials );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::CloudGeom, ImGuiCloudEntitiesGeom );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Taskbar,
+			std::make_shared<ImGuiTaskbar>(SceneLayoutDefaultNames::Taskbar) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Console,
+			std::make_shared<ImGuiConsoleLayout>(SceneLayoutDefaultNames::Console) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Geom,
+			std::make_shared<ImGuiGeoms>(SceneLayoutDefaultNames::Geom) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Material,
+			std::make_shared<ImGuiMaterials>(SceneLayoutDefaultNames::Material) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Image,
+			std::make_shared<ImGuiImages>(SceneLayoutDefaultNames::Image) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Camera,
+			std::make_shared<ImGuiCamera>(SceneLayoutDefaultNames::Camera) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Login,
+			std::make_shared<ImGuiLogin>(SceneLayoutDefaultNames::Login) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Timeline,
+			std::make_shared<ImGuiTimeline>(SceneLayoutDefaultNames::Timeline) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::CloudMaterial,
+			std::make_shared<ImGuiCloudEntitiesMaterials>(SceneLayoutDefaultNames::CloudMaterial) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::CloudGeom,
+			std::make_shared<ImGuiCloudEntitiesGeom>(SceneLayoutDefaultNames::CloudGeom) );
 }
 
 void SceneLayout::setDragAndDropFunction( DragAndDropFunction dd ) {
@@ -60,8 +71,8 @@ void SceneLayout::setDragAndDropFunction( DragAndDropFunction dd ) {
 }
 
 void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t, float _b,
-						  RenderLayoutFunction&& rlf ) {
-	boxes[_name] = { { _l, _r, _t, _b}, CameraControls::Edit2d, rlf };
+						  std::shared_ptr<LayoutBoxRenderer> _lbr ) {
+	boxes[_name] = { { _l, _r, _t, _b}, CameraControls::Edit2d, _lbr };
 }
 
 void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc ) {
@@ -71,13 +82,16 @@ void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t
 					   sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, _cc, nullptr };
 }
 
-void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t, float _b ) {
+void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible ) {
 	if ( auto rlf = boxFunctionMapping.find( _name ); rlf != boxFunctionMapping.end() ) {
 		boxes[_name] = { { _l, _r, _t, _b}, CameraControls::Edit2d, rlf->second };
+		boxes[_name].setVisible( _bVisible );
 	}
 }
 
 void SceneLayout::activate( Scene* _target ) {
+
+	owner = _target;
 
 	initLayout( this, _target );
 
@@ -92,6 +106,7 @@ void SceneLayout::activate( Scene* _target ) {
 
 void SceneLayout::resizeCallback( Scene* _target, const Vector2i& _resize ) {
 	for ( auto& [k,v] : boxes ) {
+		orBitWiseFlag( v.flags, BoxFlags::Resize );
 		if ( v.cc == CameraControls::Fly ) {
 			auto r = v.updateAndGetRect();
 			_target->getTarget( k )->resize( r );
@@ -106,4 +121,37 @@ void initDefaultLayout( SceneLayout* _layout, Scene* _target ) {
 
 std::shared_ptr<SceneLayout> SceneLayout::makeDefault() {
     return std::make_shared<SceneLayout>(initDefaultLayout);
+}
+
+Rect2f& SceneLayout::Boxes::updateAndGetRect() {
+    if ( checkBitWiseFlag( flags, BoxFlags::Rearrange ) ) {
+        rectArranger.set();
+        xandBitWiseFlag( flags, BoxFlags::Rearrange );
+    }
+    if ( checkBitWiseFlag( flags, BoxFlags::Resize ) ) {
+        rectArranger.resize();
+        xandBitWiseFlag( flags, BoxFlags::Resize );
+    }
+//    rectArranger.updateScreenPerc();
+    return rectArranger.getRect();
+}
+
+Rect2f SceneLayout::Boxes::getRect() const {
+    return rectArranger.getRect();
+}
+
+void SceneLayout::Boxes::render( Scene *_target, Rect2f& _rect ) {
+    if ( renderer ) {
+        renderer->render( _target, _rect, flags );
+    }
+}
+
+void SceneLayout::Boxes::toggleVisible() {
+    toggle(flags, BoxFlags::Visible);
+    if ( renderer ) renderer->toggleVisible();
+}
+
+void SceneLayout::Boxes::setVisible( bool _bVis ) {
+    orBitWiseFlag( flags, BoxFlags::Visible );
+    if ( renderer ) renderer->setVisible(_bVis);
 }

@@ -1,4 +1,5 @@
 #include "command.hpp"
+#include <core/string_util.h>
 
 void CommandQueue::script( const std::string& cmd, CommandCase cc ) {
 
@@ -9,14 +10,13 @@ void CommandQueue::script( const std::string& cmd, CommandCase cc ) {
 
 bool CommandScript::enqueueIfCmdBelongs( const std::string& _cmdString, CommandCase cc ) {
 
-    std::string cmdLower = cc == CommandCase::Insensitive ? toLower(_cmdString) : _cmdString;
-    auto cs = split(cmdLower);
+    auto cs = split(_cmdString);
 
     std::string agg = "";
-    for ( size_t q = 0; q < cs.size(); q++ ) {
-        agg += cs[q];
+    for ( const auto& c : cs ) {
+        agg += cc == CommandCase::Insensitive ? toLower(c) : c;
         if ( commandDefinitions.find( agg ) != commandDefinitions.end() ) {
-            script.push_back( cmdLower );
+            script.push_back( _cmdString );
             return true;
         }
         agg += " ";
@@ -35,13 +35,25 @@ void CommandScript::executeCommand( const std::vector<std::string>& commandLineS
 
     for ( size_t ct = 1; ct <= commandLineString.size(); ct++ ) {
         auto itEnd = ct == commandLineString.size() ? commandLineString.end() : commandLineString.begin() + ct;
-        auto cmd = concatenate( " ", {commandLineString.begin(), itEnd} );
+        auto cmd = toLower(concatenate( " ", {commandLineString.begin(), itEnd} ));
         auto cmdExe = commandDefinitions.find(cmd);
         if ( cmdExe != commandDefinitions.end() ){
             LOGR(cmdExe->first.c_str());
             cmdExe->second( {itEnd, commandLineString.end()} );
         }
     }
+}
+
+void CommandScript::execute() {
+    if ( script.empty() ) return;
+
+    static const std::string regExpAggregatingDoubleQuotesPair = "(\"[^\"]+\")|\\S+";
+    for ( const auto& cs : script ) {
+        auto cmds = split(cs, regExpAggregatingDoubleQuotesPair);
+        for ( auto& token : cmds ) token = trim( token, '"' );
+        executeCommand( cmds );
+    }
+    script.clear();
 }
 
 void CommandSubMapping::addSubCommand( const std::string& _cmd,

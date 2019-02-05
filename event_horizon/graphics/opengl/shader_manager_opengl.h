@@ -5,11 +5,11 @@
 
 #include "shader_opengl.h"
 #include "program_opengl.h"
-#include "../program_list.h"
 #include "core/file_manager.h"
+#include <core/descriptors/material.h>
 #include "core/callback_dependency.h"
 #include "core/property.h"
-
+#include "core/heterogeneous_map.hpp"
 
 struct ShaderProgramDesc {
     explicit ShaderProgramDesc( const std::string& _name ) {
@@ -98,6 +98,8 @@ private:
     std::shared_ptr<Shader> gshForProgram( std::shared_ptr<ProgramOpenGL> program );
     std::shared_ptr<Shader> fshForProgram( std::shared_ptr<ProgramOpenGL> program );
     std::shared_ptr<Shader> cshForProgram( std::shared_ptr<ProgramOpenGL> program );
+
+    std::unordered_map<std::string, HeterogeneousMap> uniformsMap;
 
 private:
 

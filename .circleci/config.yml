@@ -2,7 +2,7 @@
 #
 
 parameters:
-  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.4
+  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.5
 
 s3utils: &s3utils
            name: S3 utils
@@ -89,12 +89,18 @@ jobs:
           name: Deploy Editor to nginx as static webpage
           command: |
             s3-artifacts.sh GET editor_react.gz
+            s3-artifacts.sh GET editor.js
+            s3-artifacts.sh GET editor.wasm
             scp editor_react.gz $DROPLET_USER@$DROPLET_IP:/home/circleci/
+            scp editor.js $DROPLET_USER@$DROPLET_IP:/home/circleci/
+            scp editor.wasm $DROPLET_USER@$DROPLET_IP:/home/circleci/
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo tar -xvzf editor_react.gz;
             cd build;
             sudo rm -rf /usr/share/nginx/html/editor;
             sudo mkdir /usr/share/nginx/html/editor;
-            sudo cp -rf * /usr/share/nginx/html/editor'
+            sudo cp -rf * /usr/share/nginx/html/editor;
+            sudo cp ../editor.js /usr/share/nginx/html/editor;
+            sudo cp ../editor.wasm /usr/share/nginx/html/editor'
 
 
   buildCPP:

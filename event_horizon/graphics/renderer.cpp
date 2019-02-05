@@ -1,17 +1,18 @@
 #include "renderer.h"
 
 //#include <CImg.h>
-#include "graphic_functions.hpp"
-#include "light_manager.h"
-#include "render_list.h"
-#include "shader_manager.h"
-#include "shadowmap_manager.h"
+#include "graphics/graphic_functions.hpp"
+#include "graphics/light_manager.h"
+#include "graphics/render_list.h"
+#include "graphics/shader_manager.h"
+#include "graphics/shadowmap_manager.h"
 #include "core/math/spherical_harmonics.h"
 #include "core/configuration/app_options.h"
 #include "core/suncalc/sun_builder.h"
 #include "core/zlib_util.h"
 #include "core/tar_util.h"
 #include "core/profiler.h"
+#include "core/streaming_mediator.hpp"
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -29,9 +30,9 @@ namespace FBNames {
             sFBNames.insert( shadowmap );
             sFBNames.insert( lightmap );
             sFBNames.insert( sceneprobe );
-            sFBNames.insert( convolution );
-            sFBNames.insert( specular_prefilter );
-            sFBNames.insert( ibl_brdf );
+            sFBNames.insert( MPBRTextures::convolution );
+            sFBNames.insert( MPBRTextures::specular_prefilter );
+            sFBNames.insert( MPBRTextures::ibl_brdf );
             sFBNames.insert( blur_horizontal );
             sFBNames.insert( blur_vertical );
             sFBNames.insert( colorFinalFrameBuffer );
@@ -68,15 +69,19 @@ bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uin
     return true;
 }
 
-Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm ) :
-        cq( cq ), sm( sm ), tm(tm), ridm(tm) {
+Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm ) :
+        cq( cq ), sm( sm ), tm(tm), ridm(tm), ssm(_ssm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);
 }
 
-void Renderer::resetDefaultFB() {
-    mDefaultFB = FrameBufferBuilder{ *this, "default" }.build();
+StreamingMediator& Renderer::SSM() {
+    return ssm;
+}
+
+void Renderer::resetDefaultFB( const Vector2i& forceSize ) {
+    mDefaultFB = FrameBufferBuilder{ *this, "default" }.size(forceSize).build();
 }
 
 void Renderer::init() {
@@ -123,6 +128,7 @@ void Renderer::directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _target
     for ( const auto& target : _targets ) {
         if ( target->enabled() ) {
             if ( bInvalidated ) target->invalidateOnAdd();
+            target->updateStreams();
             target->addToCB( CB_U() );
         }
     }
@@ -196,19 +202,39 @@ bool Renderer::hasTag( uint64_t _tag ) const {
     return false;
 }
 
-void Renderer::changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat ) {
-    auto rmaterial = RenderMaterialBuilder{*this}.m(_mat).build();
-
-    for ( const auto& [k, vl] : CL() ) {
-        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
-            for ( const auto& v : vl.mVList ) {
-                v->setMaterialWithTag(rmaterial, _tag);
-            }
-            for ( const auto& v : vl.mVListTransparent ) {
-                v->setMaterialWithTag(rmaterial, _tag);
-            }
-        }
+std::shared_ptr<RenderMaterial> Renderer::addMaterial( const std::string& _shaderName ) {
+    auto program = P( _shaderName );
+    if ( program ) {
+        return addMaterial( program->getDefaultUniforms(), program );
     }
+    return nullptr;
+}
+
+std::shared_ptr<RenderMaterial> Renderer::addMaterial( std::shared_ptr<Material> _material,
+                                                       std::shared_ptr<Program> _program ) {
+    auto program = _program ? _program : P( _material->getShaderName() );
+    if ( program ) {
+        auto rmaterial = std::make_shared<RenderMaterial>( program, _material, *this );
+        MaterialMap( rmaterial );
+        return rmaterial;
+    }
+    return nullptr;
+}
+
+void Renderer::changeMaterialOnTags( uint64_t _tag, std::shared_ptr<Material> _mat ) {
+    // -###- FIXME, reenable this
+//    auto rmaterial = RenderMaterialBuilder{*this}.m(_mat).build();
+//
+//    for ( const auto& [k, vl] : CL() ) {
+//        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
+//            for ( const auto& v : vl.mVList ) {
+//                v->setMaterialWithTag(rmaterial, _tag);
+//            }
+//            for ( const auto& v : vl.mVListTransparent ) {
+//                v->setMaterialWithTag(rmaterial, _tag);
+//            }
+//        }
+//    }
 }
 
 void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color ) {
@@ -228,14 +254,21 @@ void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color )
 void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor ) {
     // NDDado: we only use RGB, not Alpha, in here
     for ( const auto& [k, vl] : CL() ) {
-        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
             for ( const auto& v : vl.mVList ) {
                 v->setMaterialColorWithUUID(_color, _tag, _oldColor);
             }
             for ( const auto& v : vl.mVListTransparent ) {
                 v->setMaterialColorWithUUID(_color, _tag, _oldColor);
             }
-        }
+    }
+}
+
+void Renderer::removeFromCL( const UUID& _uuid ) {
+    auto removeUUID = [_uuid]( const auto & us ) -> bool { return us->Name() == _uuid; };
+
+    for ( auto& [k, vl] : CL() ) {
+        erase_if( vl.mVList, removeUUID );
+        erase_if( vl.mVListTransparent, removeUUID );
     }
 }
 
@@ -263,7 +296,7 @@ std::shared_ptr<Program> Renderer::P( const std::string& _id ) {
     return sm.P(_id);
 }
 
-void Renderer::MaterialCache( const MaterialType& mt, std::shared_ptr<RenderMaterial> _mat ) {
+void Renderer::MaterialCache( uint64_t mt, std::shared_ptr<RenderMaterial> _mat ) {
     materialCache[mt] = _mat;
 }
 
@@ -273,6 +306,11 @@ void Renderer::MaterialMap( std::shared_ptr<RenderMaterial> _mat ) {
 
 std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot ) {
     return tm.TD( _id, tSlot );
+}
+
+TextureIndex Renderer::TDI( const std::string& _id, unsigned int tSlot ) {
+    auto t = TD( _id, tSlot );
+    return { t->name(),  t->getHandle(), tSlot, t->getTarget() };
 }
 
 void RenderAnimationManager::setTiming() {
@@ -285,7 +323,7 @@ void RenderAnimationManager::setUniforms_r() {
 }
 
 void RenderAnimationManager::init() {
-    mAnimUniforms = std::make_unique<ProgramUniformSet>();
+    mAnimUniforms = std::make_unique<ProgramUniformSet>("anim", "ubo");
     mAnimUniforms->setUBOStructure( UniformNames::pointLightPos, 16 );
 }
 
@@ -294,7 +332,7 @@ void RenderAnimationManager::generateUBO( const ShaderManager& sm ) {
 }
 
 void RenderCameraManager::init() {
-    mCameraUBO = std::make_shared<ProgramUniformSet>();
+    mCameraUBO = std::make_shared<ProgramUniformSet>("camera", "ubo");
     mCameraUBO->setUBOStructure( UniformNames::mvpMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::viewMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::projMatrix, 64 );

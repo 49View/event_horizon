@@ -9,8 +9,9 @@
 #include "math/rect2f.h"
 
 
-RawImage RawImage::BLACK_ARGB1x1{ "black_alpha", 1, 1, static_cast<uint32_t>(0xff000000) };
-RawImage RawImage::BLACK_RGBA1x1{ "black_alpha", 1, 1, static_cast<uint32_t>(0x000000ff) };
+RawImage RawImage::BLACK_ARGB4x4{ "black_alpha", 4, 4, static_cast<uint32_t>(0xff000000) };
+RawImage RawImage::BLACK_RGBA4x4{ "black_alpha", 4, 4, static_cast<uint32_t>(0x000000ff) };
+RawImage RawImage::NORMAL4x4    { "normal"     , 4, 4, static_cast<uint32_t>(0x00007f7f) };
 
 //struct RawImageCallbackData : public CallbackData {
 //    using CallbackData::CallbackData;
@@ -217,3 +218,23 @@ RawImage RawImage::WHITE4x4() {
     return RawImage{ "white", 4, 4, static_cast<uint32_t>(0xffffffff) };
 }
 
+RawImage RawImage::DEBUG_UV() {
+    const int is = 16;
+    unsigned char buff[is*is*3];
+
+#define bcol(t,m,r,g,b) \
+    { buff[(t*is*3)+(m*3+0)] = r; \
+      buff[(t*is*3)+(m*3+1)] = g; \
+      buff[(t*is*3)+(m*3+2)] = b; }
+
+
+    for ( size_t t = 0; t < is; t++ ) {
+        for ( size_t m = 0; m < is; m++ ) {
+            if ( t < is / 2  && m <  is / 2 ) bcol(t,m,255,0,0);
+            if ( t >= is / 2 && m <  is / 2 ) bcol(t,m,255,0,255);
+            if ( t < is / 2  && m >= is / 2 ) bcol(t,m,0,255,0);
+            if ( t >= is / 2 && m >= is / 2 ) bcol(t,m,0,0,255);
+        }
+    }
+    return RawImage{ is, is, 3, reinterpret_cast<const char*>(buff), "debug_uv" };
+}

@@ -56,6 +56,9 @@ void allConversionsDragAndDropCallback( [[maybe_unused]] Scene* p, const std::st
 //    } else if ( extl == ".stl" ) {
 //        stl::parse_stl(pathSanitized);
 //    }
+    else if ( extl == ".svg" ) {
+        callbackGeomSVG( FM::readLocalTextFile( pathSanitized ) );
+    }
     else if ( extl == ".sbsar" ) {
         FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(EntityGroup::Material)+ getFileName(pathSanitized));
     } else if ( extl == ".gltf" || extl == ".glb" ) {

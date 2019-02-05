@@ -1,34 +1,32 @@
 import React, {Component} from 'react';
+import { connect } from 'react-redux';
+import * as actions from '../../store/actions/index';
 
 import classes from './Render.css';
 
-window.Module = {};
-window.wasmBinary = null;
-
 class Render extends Component {
-
-    state = {
-        isVisible: true,
-    }
 
     canvas = null;
 
     componentDidMount() {
-        window.wasmLoader.instantiateWasm(this.canvas);
+        this.props.onRunWasm(this.canvas);
     }
 
     render() {
 
-        const canvasClasses = [classes.Canvas];
-        if (this.props.visible!==true) {
-            canvasClasses.push(classes.Hidden);
-        }
-
         return (
-            <canvas ref={e => this.canvas=e } className={canvasClasses.join(' ')}>
+            <canvas ref={e => this.canvas=e } className={classes.Canvas}>
             </canvas>
         );
     }
 }
 
-export default Render;
+
+const mapDispatchToProps = dispatch => {
+    return {
+      onRunWasm: (canvas) => dispatch(actions.runWasm(canvas))
+    }
+}
+  
+  export default connect(null, mapDispatchToProps)(Render);
+  

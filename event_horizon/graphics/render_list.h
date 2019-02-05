@@ -347,6 +347,7 @@ public:
 
     std::shared_ptr<Camera> getCamera();
     void addToCBCore( CommandBufferList& cb );
+    void updateStreams();
     virtual void invalidateOnAdd() {}
     virtual void changeTime( const V3f& solarTime ) {}
     virtual void addToCB( CommandBufferList& cb ) = 0;
@@ -405,10 +406,12 @@ public:
     std::vector<std::pair<int, int>> bucketRanges;
 
 protected:
+    void updateStreamPacket( const std::string& _streamName );
     void addCubeMapRig( const CameraCubeMapRigBuilder& _builder );
+    void updateCubeMapRig( const CameraCubeMapRigBuilder& _builder );
     std::shared_ptr<CameraRig> addAncillaryRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb );
 protected:
-    std::map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
+    std::unordered_map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
     bool mbTakeScreenShot = false;
     int  mTakeScreenShotDelay = 0;
     Renderer& rr;

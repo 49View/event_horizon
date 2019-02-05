@@ -10,7 +10,7 @@ void LightManager::init() {
     mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f, "LightDirectionalIntensity" );
 
     // Lights UBO
-    mLigthingUniform = std::make_unique<ProgramUniformSet>();
+    mLigthingUniform = std::make_unique<ProgramUniformSet>("light", "ubo");
 
     mLigthingUniform->setUBOStructure( UniformNames::pointLightPos, ( 16 * mMaxLights ) );
     mLigthingUniform->setUBOStructure( UniformNames::pointLightDir, ( 16 * mMaxLights ) );

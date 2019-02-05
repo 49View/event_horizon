@@ -112,6 +112,26 @@ void EditTransform(const Camera& camera, matrix_t& matrix)
 
 namespace ImGuizmo
 {
+	enum MOVETYPE
+	{
+		NONE,
+		MOVE_X,
+		MOVE_Y,
+		MOVE_Z,
+		MOVE_YZ,
+		MOVE_ZX,
+		MOVE_XY,
+		MOVE_SCREEN,
+		ROTATE_X,
+		ROTATE_Y,
+		ROTATE_Z,
+		ROTATE_SCREEN,
+		SCALE_X,
+		SCALE_Y,
+		SCALE_Z,
+		SCALE_XYZ
+	};
+
 	// call inside your own window and before Manipulate() in order to draw gizmo to that window.
 	IMGUI_API void SetDrawlist();
 
@@ -146,6 +166,9 @@ namespace ImGuizmo
 	IMGUI_API void SetRect(float x, float y, float width, float height);
 	// default is false
 	IMGUI_API void SetOrthographic(bool isOrthographic);
+
+	IMGUI_API int getRotationType();
+	IMGUI_API float getRotationAngle();
 
 	// Render a cube with face color corresponding to face normal. Usefull for debug/tests
 	IMGUI_API void DrawCube(const float *view, const float *projection, const float *matrix);

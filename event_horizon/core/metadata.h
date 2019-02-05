@@ -20,12 +20,13 @@ class CoreMetaData {
 public:
     CoreMetaData() = default;
     CoreMetaData( const std::string& name, const std::string& type, uint64_t version,
-                  const std::string& thumb, const std::string& raw, const std::set<std::string>& tags ) : name( name ),
-                                                                                                          type( type ),
-                                                                                                          version( version ),
-                                                                                                          thumb( thumb ),
-                                                                                                          raw( raw ),
-                                                                                                          tags( tags ) {}
+                  const std::string& thumb, const std::string& raw, const std::set<std::string>& tags ) :
+                      name( name ),
+                      type( type ),
+                      version( version ),
+                      thumb( thumb ),
+                      raw( raw ),
+                      tags( tags ) {}
 
     std::string& Name() {
         return name;

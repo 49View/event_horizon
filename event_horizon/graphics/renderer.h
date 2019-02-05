@@ -1,3 +1,5 @@
+#include <utility>
+
 
 #pragma once
 
@@ -20,6 +22,7 @@ class CommandScriptRendererManager;
 class CommandQueue;
 class ShaderManager;
 class RenderSceneGraph;
+class StreamingMediator;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -36,9 +39,6 @@ namespace FBNames {
 	const static std::string shadowmap = "shadowMap_d";
 	const static std::string lightmap = "lightMap_t";
 	const static std::string sceneprobe = "sceneprobe";
-	const static std::string convolution = "convolution";
-	const static std::string specular_prefilter = "specular_prefilter";
-	const static std::string ibl_brdf = "ibl_brdf";
 	const static std::string blur_horizontal = "blur_horizontal_b";
 	const static std::string blur_vertical = "blur_vertical_b";
 	const static std::string colorFinalFrameBuffer = "colorFinalFrameBuffer";
@@ -81,7 +81,7 @@ private:
 
 class Renderer : public DependencyMaker {
 public:
-	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm );
+	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm );
 	virtual ~Renderer() = default;
 
 	bool exists( [[maybe_unused]] const std::string& _key ) const override { return false; };
@@ -93,12 +93,18 @@ public:
 
 	void directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _targets );
 
-    void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<PBRMaterial> _mat );
+	void removeFromCL( const UUID& _uuid );
+
+	std::shared_ptr<RenderMaterial> addMaterial( std::shared_ptr<Material> _material,
+												 std::shared_ptr<Program> _program = nullptr );
+	std::shared_ptr<RenderMaterial> addMaterial( const std::string& _shaderName );
+    void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<Material> _mat );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
 
 	std::shared_ptr<Program> P(const std::string& _id);
 	std::shared_ptr<Texture> TD( const std::string& _id, const int tSlot = -1 );
+	TextureIndex TDI( const std::string& _id, unsigned int tSlot );
 
 	void addToCommandBuffer( CommandBufferLimitsT _entry );
 	void addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
@@ -111,6 +117,7 @@ public:
     LightManager&   LM() { return lm; }
 	TextureManager& TM() { return tm; }
 	RenderImageDependencyMaker& RIDM() { return ridm; }
+	StreamingMediator& SSM();
 
 	std::shared_ptr<VPList> VPL( const int _bucket, std::shared_ptr<Matrix4f> m = nullptr, float alpha = 1.0f);
 
@@ -137,9 +144,9 @@ public:
 		useMultiThreadRendering = _useMultiThreadRendering;
 	}
 
-	void MaterialCache( const MaterialType& mt, std::shared_ptr<RenderMaterial> _mat );
+	void MaterialCache( uint64_t, std::shared_ptr<RenderMaterial> _mat );
 	void MaterialMap( std::shared_ptr<RenderMaterial> _mat );
-	void resetDefaultFB();
+	void resetDefaultFB( const Vector2i& forceSize = Vector2i{-1});
 
 	std::shared_ptr<Framebuffer> getDefaultFB() {
 		return mDefaultFB;
@@ -161,12 +168,13 @@ protected:
 	ShaderManager&  sm;
 	TextureManager& tm;
 	RenderImageDependencyMaker ridm;
+	StreamingMediator& ssm;
 	RenderAnimationManager am;
 	RenderCameraManager rcm;
 
 	std::shared_ptr<Framebuffer> mDefaultFB;
 
-	std::unordered_map<MaterialType, std::shared_ptr<RenderMaterial>> materialCache;
+	std::unordered_map<uint64_t, std::shared_ptr<RenderMaterial>> materialCache;
 	std::unordered_map<int64_t, std::shared_ptr<RenderMaterial>> materialMap;
 
 	std::shared_ptr<CommandScriptRendererManager> hcs;
@@ -246,51 +254,3 @@ public:
 	friend class RenderSceneGraph;
 	friend struct HierGeomRenderObserver;
 };
-
-template <typename V>
-class VPBuilder {
-public:
-	explicit VPBuilder( Renderer& _rr, std::shared_ptr<VPList> _vpl ) : rr(_rr), vpl(_vpl) {};
-
-	VPBuilder& c( const Color4f& _matColor ) { matColor = _matColor; return *this; }
-	VPBuilder& a( float _matAlpha ) { matAlpha = _matAlpha; return *this; }
-	VPBuilder& p( std::shared_ptr<V> _ps ) { ps = _ps; return *this; }
-	VPBuilder& n( const std::string& _name ) { name = _name; return *this; }
-	VPBuilder& s( const std::string& _shader ) { matShader = _shader; return *this; }
-	VPBuilder& m( const std::string& _material ) { matName = _material; return *this; }
-	VPBuilder& m( std::shared_ptr<Material> _material ) { material = _material; return *this; }
-    VPBuilder& t( const std::string& _tex ) { matTexture = _tex; return *this; }
-	VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
-
-	UUID build();
-
-private:
-	Renderer& rr;
-	std::shared_ptr<VPList> vpl;
-	Color4f matColor = Color4f::WHITE;
-	float   matAlpha = -1.0f;
-	uint64_t tag = GT_Generic;
-	std::shared_ptr<V> ps;
-	std::shared_ptr<Material> material;
-	std::string matName = "white";
-    std::string matTexture = "white";
-	std::string matShader = S::SH;
-	std::string name;
-};
-
-template<typename V>
-UUID VPBuilder<V>::build() {
-	rr.invalidateOnAdd();
-	auto rmb = RenderMaterialBuilder{rr};
-	if ( material ) {
-		rmb.m(material);
-	} else {
-		rmb.p(matShader).c(matColor).m(matName).t(matTexture);
-	}
-	auto rmaterial = rmb.build();
-	auto sid = name.empty() ? UUIDGen::make() : name;
-	std::shared_ptr<cpuVBIB> vbib = VertexProcessing::create_cpuVBIB( ps, rmaterial, sid );
-	vpl->create( vbib, tag );
-
-	return sid;
-}

@@ -31,6 +31,10 @@ std::string cacheFolder() {
     return std::string( homeDir ) + "/";
 }
 
+std::string getDaemonRoot() {
+    return "/";
+}
+
 const std::string userComputerName() {
     static const char* defUser = "Unknown";
     static const char* defHost = "Unknown";

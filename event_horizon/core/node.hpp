@@ -44,6 +44,7 @@ inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { ret
 auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
 auto lambdaUpdateNodeTransform = [](auto&& arg) { arg->updateTransform();};
 auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
+auto lambdaBBox = [](auto&& arg) -> JMATH::AABB { return arg->BBox3d();};
 
 template <typename D>
 class Node : public Animable, public ObservableShared<Node<D>>, public std::enable_shared_from_this<Node<D>>{
@@ -93,6 +94,14 @@ public:
     void GHType( NodeType val ) { mGHType |= val; }
     bool hasType( NodeType val ) const { return ( mGHType & val ) > 0; }
     void removeType( NodeType val ) { mGHType = mGHType & ~val; }
+
+    template<typename F>
+    void visitHashRecF( F _func ) {
+        _func( Hash() );
+        for ( auto& c : Children()) {
+            c->visitHashRecF( _func );
+        }
+    }
 
     void sendNotifyData( const std::string& _event ) {
         if ( mData ) {
@@ -345,6 +354,7 @@ public:
             c->removeChildrenWithHash( _hash );
         }
     }
+
     void removeChildrenWithType( NodeType gt ) {
         children.erase( remove_if( children.begin(), children.end(), [gt]( std::shared_ptr<Node> const& us ) -> bool {
             return checkBitWiseFlag( us->GHType(), gt );
@@ -423,7 +433,7 @@ public:
 
     template<typename TV>
     void visit() const {
-        traverseWithHelper<TV>( "Name,GHType,Data,BBbox,Children", mName,mGHType,mData,bbox3d,children );
+        traverseWithHelper<TV>( "Name,BBbox,Data,Children", mName,bbox3d,mData,children );
     }
 
 protected:
@@ -609,6 +619,7 @@ protected:
         return ret;
     }
     void calcCompleteBBox3d() {
+        bbox3d = AABB::INVALID;
         bbox3d = calcCompleteBBox3dRec();
     }
 

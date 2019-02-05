@@ -116,26 +116,27 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
 
 void main()
 {
-    // vec3 light_pos = normalize( -u_sunDirection ).xyz;
+    vec3 light_pos = normalize( -u_sunDirection ).xyz;
 
-    // color.xyz = atmosphere(
-    //     normalize(v_texCoord),          // normalized ray direction
-    //     vec3(0,6372e3,0),               // ray origin
-    //     -light_pos,                     // position of the sun
-    //     89.0,                           // intensity of the sun
-    //     6371e3,                         // radius of the planet in meters
-    //     6471e3,                         // radius of the atmosphere in meters
-    //     vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
-    //     51e-6,                          // Mie scattering coefficient
-    //     8e3,                            // Rayleigh scale height
-    //     1.2e3,                          // Mie scale height
-    //     0.758                           // Mie preferred scattering direction
-    // );
+    color.xyz = atmosphere(
+        normalize(v_texCoord),          // normalized ray direction
+        vec3(0,6372e3,0),               // ray origin
+        -light_pos,                     // position of the sun
+        89.0,                           // intensity of the sun
+        6371e3,                         // radius of the planet in meters
+        6471e3,                         // radius of the atmosphere in meters
+        vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
+        51e-6,                          // Mie scattering coefficient
+        8e3,                            // Rayleigh scale height
+        1.2e3,                          // Mie scale height
+        0.758                           // Mie preferred scattering direction
+    );
 
-    // color = - exp(-1.0 * color*u_sunHDRMult*0.5);
-    // color.w = 1.0;
-
-    color = vec4(1.0);
+    color = vec4(1.0) - exp(-1.0 * color*u_sunHDRMult*0.5);
+    color.w = 1.0;
+    
+    // color.rgb = v_texCoord * 0.5 + 0.5;
+    // color = vec4(.8);
 
     return;
 }

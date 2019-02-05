@@ -92,7 +92,10 @@ public:
 	static const Vector4f HONEYDEW;
 	static const Vector4f LIGHT_GREY;
 
+	static Vector4f XTORGBA( const std::string& _hexstring );
+	static Vector4f ITORGBA( uint32_t number, int32_t numbits = 32 );
 	static Vector3f ITORGB( const unsigned int r, const unsigned int g, const unsigned int b );
+	static Vector4f ITORGBA( const unsigned int r, const unsigned int g, const unsigned int b, const unsigned int a );
 	static Vector3f FTORGB( const float r, const float g, const float b );
 	static Vector4f FTORGBA( const float r, const float g, const float b, const float a );
 	static Vector4f FTORGBA( const Vector4f& _val );
@@ -446,14 +449,8 @@ inline Vector4f fma( const Vector4f& a, const Vector4f& b, const Vector4f& c ) {
 }
 
 inline Vector4f convertStringHexColorInVector4( const std::string& color, int32_t numbits = 32 ) {
-	int32_t number = (int32_t)strtol( color.c_str(), NULL, 0 );
-	int32_t blue = ( number & 0x00ff0000 ) >> 16;
-	int32_t green = ( number & 0x0000ff00 ) >> 8;
-	int32_t red = number & 0x000000ff;
-	int32_t alpha = 0xff;
-	if ( numbits == 32 ) alpha = ( number & 0xff000000 ) >> 24;
-
-	return Vector4f( static_cast<float>( red ) / 255.0f, static_cast<float>( green ) / 255.0f, static_cast<float>( blue ) / 255.0f, static_cast<float>( alpha ) / 255.0f );
+	uint32_t number = (uint32_t)strtol( color.c_str(), nullptr, 0 );
+	return Vector4f::ITORGBA( number, numbits );
 }
 
 inline Vector4f color4fAlpha( const float alpha ) {

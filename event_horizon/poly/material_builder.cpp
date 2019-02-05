@@ -6,43 +6,22 @@
 #include <core/image_util.h>
 #include <stb/stb_image_write.h>
 
-MaterialBuilder::MaterialBuilder( const std::string& _name, const MaterialType _mt, const std::string& _sn ) : ResourceBuilder(
+MaterialBuilder::MaterialBuilder( const std::string& _name, const std::string& _sn ) : ResourceBuilder(
         _name) {
-    materialType = _mt;
     shaderName = _sn;
     defPrePosfixes();
-}
-
-MaterialBuilder::MaterialBuilder( const std::string& _name, const MaterialType _mt,
-                                  const std::string& _sn, const MaterialProperties& _p ) : ResourceBuilder( _name) {
-    materialType = _mt;
-    shaderName = _sn;
-    properties = _p;
-    defPrePosfixes();
-}
-
-void MaterialBuilder::createDefaultPBRTextures( std::shared_ptr<PBRMaterial> mat, DependencyMaker& _md ) {
-    auto& sg = dynamic_cast<MaterialManager&>(_md);
-    ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getNormal()           }.backup(0x00007f7f).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getAmbientOcclusion() }.backup(0xffffffff).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getRoughness()        }.backup(0xffffffff).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getMetallic()         }.backup(0x00000000).makeDefault( *sg.TL() );
-    ImageBuilder{ mat->getHeight()           }.backup(0x00000000).makeDefault( *sg.TL() );
 }
 
 void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    auto mat = std::make_shared<PBRMaterial>("white");
-    createDefaultPBRTextures( mat, sg );
+    auto mat = std::make_shared<Material>( Name(), shaderName );
 
-    mat->setShaderName( shaderName );
     sg.add( *this, mat );
 }
 
 void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    auto mat = std::make_shared<PBRMaterial>(Name());
+    auto mat = std::make_shared<Material>( Name(), shaderName );
 
     if ( const auto& it = buffers.find(mat->getBaseColor()); it != buffers.end() ) {
         ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
@@ -62,7 +41,7 @@ void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     if ( const auto& it = buffers.find(mat->getHeight()); it != buffers.end() ) {
         ImageBuilder{ mat->getHeight()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
     }
-    createDefaultPBRTextures( mat, sg );
+//    createDefaultPBRTextures( mat, sg );
 
     mat->setShaderName( shaderName );
     sg.add( *this, mat );
@@ -86,11 +65,12 @@ std::string MaterialBuilder::generateThumbnail() const {
     int thumbSize = 64;
     int oc = 3;
     int obpp = 8;
+    // -###- Reintroduce this, probably will need to incorporate std::shared_ptr<Material> somewhere
     if ( const auto& it = buffers.find(pbrPrefix() + MPBRTextures::basecolorString ); it != buffers.end() ) {
         lthumb = imageUtil::resize( it->second.first.get(), it->second.second, thumbSize, thumbSize, oc, obpp );
-    } else {
-        lthumb = imageUtil::zeroImage3( Vector4f{baseSolidColor}.RGBATOI(), 1, 1 );
-    }
+    } //else {
+//        lthumb = imageUtil::zeroImage3( Vector4f{baseSolidColor}.RGBATOI(), 1, 1 );
+//    }
     stbi_write_png_to_func( resizeCallback, reinterpret_cast<void*>(thumb.get()),
                             thumbSize, thumbSize, oc, lthumb.get(), thumbSize*oc*(obpp/8) );
 
@@ -118,10 +98,6 @@ std::string MaterialBuilder::toMetaData() const {
     writer.StartObject();
     writer.serialize( CoreMetaData{Name(), EntityGroup::Material, Material::Version(),
                                    generateThumbnail(), generateRawData(), generateTags()} );
-    writer.serialize( "color", baseSolidColor );
-    writer.serialize( "metallicValue", metallicValue );
-    writer.serialize( "roughnessValue", roughnessValue );
-    writer.serialize( "aoValue", aoValue );
     writer.EndObject();
 
     return writer.getString();
@@ -139,7 +115,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
         auto files = tarUtil::untar( inflatedData );
         for ( const auto& fi  : files ) {
             auto fn = getFileNameNoExt( fi.name );
-            downloadedMatName = string_trim_upto( fn, pbrNames() );
+            downloadedMatName = string_trim_upto( fn, MPBRTextures::Names() );
             auto ext = getFileNameExt( fi.name );
             if ( isFileExtAnImage( ext ) ) {
                 ImageBuilder{ fn }.makeDirect( *sg.TL(), fi.dataPtr );
@@ -148,27 +124,29 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     }
     handleUninitializedDefaults( _md, downloadedMatName );
 
-    auto mat = std::make_shared<PBRMaterial>(downloadedMatName);
-    mat->setShaderName( shaderName );
+    auto mat = std::make_shared<Material>(downloadedMatName, shaderName );
     sg.add( *this, mat );
 
     return true;
 }
 
 void MaterialBuilder::handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName ) {
-    auto& sg = static_cast<MaterialManager&>(_md);
+    auto& sg = dynamic_cast<MaterialManager&>(_md);
 
-    if ( materialType == MaterialType::PBR ) {
-        for ( const auto& td : PBRMaterial::textureDependencies( _keyTextureName ))
-            if ( !sg.TL()->exists( td.first )) {
-                ImageBuilder{ td.first }.setSize( 4 ).backup( td.second ).makeDefault( *sg.TL());
-            }
-    }
+    for ( const auto& td : Material::textureDependencies( _keyTextureName ))
+        if ( !sg.TL()->exists( td.first )) {
+            ImageBuilder{ td.first }.setSize( 4 ).backup( td.second ).makeDefault( *sg.TL());
+        }
 }
 
 bool MaterialManager::add( const MaterialBuilder& _pb, std::shared_ptr<Material> _material ) {
     auto lKey = _pb.Name();
     materialList[lKey] = _material;
+    return true;
+}
+
+bool MaterialManager::add( std::shared_ptr<Material> _material ) {
+    materialList[_material->Name()] = _material;
     return true;
 }
 

@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <core/math/rect2f.h>
 #include <render_scene_graph/camera_controls.hpp>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
 struct ImGuiConsole;
 class SceneLayout;
@@ -16,7 +17,7 @@ class Scene;
 using DragAndDropFunction = std::function<void(Scene* p, const std::string&)>;
 using InitLayoutFunction = std::function<void(SceneLayout* _layout, Scene*_target)>;
 using RenderFunction = std::function<void( Scene* )>;
-using RenderLayoutFunction = std::function<void( Scene* _target, const Rect2f&  )>;
+using RenderLayoutFunction = std::function<void( Scene* _target, Rect2f& )>;
 
 using PresenterArrangeFunction = std::function<float( float )>;
 
@@ -31,6 +32,7 @@ float sPresenterArrangerTopFunction3d( float _value );
 float sPresenterArrangerBottomFunction3d( float _value );
 
 namespace SceneLayoutDefaultNames {
+    const static std::string Taskbar = "taskbar";
     const static std::string Console = "console";
     const static std::string Material = "material";
     const static std::string Geom = "geom";
@@ -64,9 +66,23 @@ public:
         rect.setBottom( bottomFunc(bottomValue) );
         rect.setRight(rightFunc(rightValue));
         rect.setTop( topFunc(topValue) );
+        updateScreenPerc();
+    }
+
+    void resize() {
+        rect.percentage( sizeScreenPerc, getScreenSizefUI );
+//        updateScreenPerc();
+    }
+
+    void updateScreenPerc() {
+        sizeScreenPerc = Rect2f::percentage( rect, getScreenRectUI );
     }
 
     const Rect2f& getRect() const {
+        return rect;
+    }
+
+    Rect2f& getRect() {
         return rect;
     }
 
@@ -86,6 +102,7 @@ private:
     float bottomValue = 1.0f;
 
     Rect2f rect = Rect2f::INVALID;
+    Rect2f sizeScreenPerc = Rect2f::INVALID;
 };
 
 class SceneLayout {
@@ -96,22 +113,22 @@ public:
                           InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal );
 
     struct Boxes {
-        Rect2f updateAndGetRect() {
-            rectArranger.set();
-            return rectArranger.getRect();
-        }
-        Rect2f getRect() const {
-            return rectArranger.getRect();
-        }
+        Rect2f& updateAndGetRect();
+        Rect2f getRect() const;
+        void render( Scene* _target, Rect2f& _rect );
+        void toggleVisible();
+        void setVisible( bool _bVis );
+
         SceneRectArranger rectArranger;
         CameraControls cc = CameraControls::Fly;
-        RenderLayoutFunction renderFunction = nullptr;
+        std::shared_ptr<LayoutBoxRenderer> renderer;
+        BoxFlagsT flags = BoxFlags::Rearrange|BoxFlags::Visible;
         static const Boxes INVALID;
     };
 
-    void addBox( const std::string& _name, float _l, float _r, float _t, float _b, RenderLayoutFunction&& rlf );
+    void addBox( const std::string& _name, float _l, float _r, float _t, float _b, std::shared_ptr<LayoutBoxRenderer> _lbr );
     void addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc  );
-    void addBox( const std::string& _name, float _l, float _r, float _t, float _b );
+    void addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible = true );
 
     const Boxes& Box( const std::string& _key ) const {
         if ( const auto& it = boxes.find(_key); it != boxes.end() ) {
@@ -120,11 +137,18 @@ public:
         return Boxes::INVALID;
     }
 
-    Rect2f BoxUpdateAndGet( const std::string& _key ) {
-        if ( const auto& it = boxes.find(_key); it != boxes.end() ) {
+    Rect2f& BoxUpdateAndGet( const std::string& _key ) {
+        if ( auto it = boxes.find(_key); it != boxes.end() ) {
             return it->second.updateAndGetRect();
         }
-        return Rect2f::INVALID;
+        static Rect2f invalid{Rect2f::INVALID};
+        return invalid;
+    }
+
+    void toggleVisible( const std::string& _key ) {
+        if ( auto it = boxes.find(_key); it != boxes.end() ) {
+            it->second.toggleVisible();
+        }
     }
 
     InitializeWindowFlagsT getInitFlags() const {
@@ -140,10 +164,8 @@ public:
     void resizeCallback( Scene* _target, const Vector2i& _resize );
 
     void render( Scene* _target ) {
-        for ( const auto& [k,v] : boxes ) {
-            if ( v.renderFunction ) {
-                v.renderFunction( _target, BoxUpdateAndGet(k) );
-            }
+        for ( auto& [k,v] : boxes ) {
+            v.render( _target, BoxUpdateAndGet(k) );
         }
         if ( renderFunction ) renderFunction( _target );
     }
@@ -159,6 +181,7 @@ private:
     DragAndDropFunction dragAndDropFunc;
     InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal;
 
-    std::unordered_map<std::string, RenderLayoutFunction> boxFunctionMapping;
+    std::unordered_map<std::string, std::shared_ptr<LayoutBoxRenderer>> boxFunctionMapping;
+    Scene* owner = nullptr;
     friend class Scene;
 };

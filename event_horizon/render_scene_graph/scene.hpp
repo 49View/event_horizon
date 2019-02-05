@@ -27,12 +27,12 @@ class FontManager;
 class TextInput;
 class CameraManager;
 class CommandQueue;
-class AABB;
 class MaterialManager;
 class TextureManager;
 class Camera;
 class CameraControl;
 class CommandScriptPresenterManager;
+class StreamingMediator;
 
 namespace PresenterEventFunctionKey {
 	const static std::string Activate = "activate";
@@ -42,10 +42,14 @@ using PresenterUpdateCallbackFunc = std::function<void(Scene* p)>;
 using ScenePostActivateFunc = std::function<void(Scene*)>;
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 
+struct SceneEventNotifications {
+	bool singleMouseTapEvent = false;
+};
+
 class Scene : public Observer<MouseInput> {
 public:
 	Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
-		   CameraManager& cm, CommandQueue& cq );
+		   CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm );
 
 	virtual ~Scene() = default;
 
@@ -72,10 +76,6 @@ public:
 
     void takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata );
 
-	virtual void onTouchUpImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
-	virtual void onSimpleTapImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
-	virtual void onDoubleTapImpl( [[maybe_unused]] const Vector2f& pos, [[maybe_unused]] ModifiersKey mod = GMK_MOD_NONE ) {}
-
 	void inputPollUpdate();
 	void update();
 	void render();
@@ -83,6 +83,7 @@ public:
 	void addEventFunction( const std::string& _key, std::function<void(Scene*)> _f );
 	void deactivate();
 
+	void script( const std::string& _commandLine );
     void cmdEnableKeyboard( const std::vector<std::string>& params );
     void cmdDisableKeyboard( const std::vector<std::string>& params );
     void cmdChangeTime( const std::vector<std::string>& params );
@@ -101,6 +102,7 @@ public:
     TextureManager& TM();
 	CommandQueue& CQ();
 	FontManager& FM();
+	StreamingMediator& SSM();
 	std::vector<std::shared_ptr<RLTarget>>& Targets() { return mTargets; }
     std::shared_ptr<Camera> getCamera( const std::string& _name );
 
@@ -122,8 +124,8 @@ public:
 	static Vector2i callbackResizeFrameBuffer;
 
 protected:
+	void resetSingleEventNotifications();
 	void activate();
-
 	void reloadShaders( SocketCallbackDataType _data );
 
 protected:
@@ -135,15 +137,14 @@ protected:
     TextInput& ti;
     MouseInput& mi;
 	CommandQueue& cq;
+	StreamingMediator& ssm;
 	cameraRigsMap mRigs;
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
-
-protected:
 	bool mbActivated = false;
     std::shared_ptr<CommandScriptPresenterManager> hcs;
-
     std::unordered_map<std::string, std::function<void(Scene*)> > eventFunctions;
 	std::shared_ptr<ImGuiConsole> console;
+	SceneEventNotifications notifications;
 
 private:
 	void updateCallbacks();

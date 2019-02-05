@@ -63,6 +63,25 @@ namespace imageUtil {
                                  _isRaw );
     }
 
+    std::unique_ptr<uint8_t[]> memsetImage( uint32_t color, int& width, int& height, int& channels ) {
+        width = width == 0 ? 4 : width;
+        height = height == 0 ? 4 : height;
+        std::unique_ptr<uint8_t[]> decodedData = std::make_unique<uint8_t[]>( width * height * channels );
+        for ( auto w = 0; w < width * height * channels; w+=channels ) {
+            decodedData[w+0] = static_cast<uint8_t >(color & 0x000000ff);
+            if (channels > 1 ) {
+                decodedData[w+1] = static_cast<uint8_t >((color & 0x0000ff00) >> 8);
+                if ( channels > 2 ) {
+                    decodedData[w+2] = static_cast<uint8_t >((color & 0x00ff0000) >> 16);
+                    if ( channels > 3 ) {
+                        decodedData[w+3] = static_cast<uint8_t >((color & 0xff000000) >> 24);
+                    }
+                }
+            }
+        }
+        return decodedData;
+    }
+
     std::unique_ptr<uint8_t[]> zeroImage( uint32_t color, int& width, int& height, int& channels ) {
         channels = 4;
         width = 4;

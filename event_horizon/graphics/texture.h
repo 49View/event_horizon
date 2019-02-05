@@ -3,10 +3,11 @@
 //
 #pragma once
 
+#include <core/names.hpp>
 #include "graphic_constants.h"
 
 struct TextureRenderData {
-    std::string name = "white";
+    std::string name = S::WHITE;
     int width = 0;
     int height = 0;
     int channels = 3;
@@ -24,6 +25,16 @@ struct TextureRenderData {
     bool forceHDRTarget16bit = true;
     bool isFramebufferTarget = false;
     bool generateMipMaps = true;
+
+    TextureRenderData( const std::string& name ) : name( name ) {}
+
+    TextureRenderData( const std::string& name, int width, int height, int channels, int bpp ) : name( name ),
+                                                                                                 width( width ),
+                                                                                                 height( height ),
+                                                                                                 channels( channels ),
+                                                                                                 bpp( bpp ) {
+        setFormatFromBpp();
+    }
 
     const std::string& Name() const {
         return name;

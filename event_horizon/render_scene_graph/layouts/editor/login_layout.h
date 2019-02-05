@@ -3,7 +3,12 @@
 //
 
 #pragma once
-#include <core/math/rect2f.h>
-class Scene;
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiLogin( Scene* p, const Rect2f& _r );
+class ImGuiLogin : public LayoutBoxRenderer {
+public:
+    virtual ~ImGuiLogin() = default;
+    using LayoutBoxRenderer::LayoutBoxRenderer;
+protected:
+    void renderImpl( Scene *scene, JMATH::Rect2f& f ) override;
+};

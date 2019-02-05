@@ -4,8 +4,17 @@
 
 #pragma once
 
-#include <core/math/rect2f.h>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 
-class Scene;
+class ImGuiTimeline : public LayoutBoxRenderer {
+public:
+    virtual ~ImGuiTimeline() = default;
+    using LayoutBoxRenderer::LayoutBoxRenderer;
+protected:
+    void renderImpl( Scene *scene, JMATH::Rect2f& f ) override;
+};
 
-void ImGuiTimeline( Scene* p, const Rect2f& _r );
+namespace GuiTimeline {
+    std::string TimeLineName();
+    float CurrentTime();
+}

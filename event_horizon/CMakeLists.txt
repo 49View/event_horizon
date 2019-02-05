@@ -10,6 +10,7 @@ build_core_lib( render_scene_graph )
 
 string(COMPARE EQUAL "${CMAKE_SYSTEM_NAME}" Emscripten isEmscripten)
 if (NOT isEmscripten)
+    build_core_lib( media )
     build_core_lib( opencvutils )
     build_core_lib( machine_learning )
     build_core_lib( ocr )

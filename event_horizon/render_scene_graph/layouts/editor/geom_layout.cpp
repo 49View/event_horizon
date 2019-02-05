@@ -6,13 +6,17 @@
 #include <graphics/imgui/imgui_jsonvisit.hpp>
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/layouts/layout_helper.hpp>
 #include "core/node.hpp"
 #include "poly/geom_builder.h"
 #include "poly/ui_shape_builder.h"
 #include "poly/converters/gltf2/gltf2.h"
 
-std::shared_ptr<GeomBuilder> gbt;
+//std::shared_ptr<GeomBuilder> gbt;
 std::shared_ptr<GLTF2> gltf;
+std::string svgString;
+std::string glftString;
+std::vector<char> gltfBufferData;
 
 template <typename T>
 struct NodeVisitor {
@@ -21,45 +25,66 @@ struct NodeVisitor {
 };
 
 void loadGeomInGui( Scene* p, std::shared_ptr<GLTF2> _newObject ) {
-    auto hierScene = _newObject->convert();
+    auto imported = _newObject->convert();
+    auto hierScene = imported.getScene();
     p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
-    gbt = std::make_shared<GeomBuilder>( hierScene, _newObject->Materials() );
+
+    p->RSG().add( imported.getMaterials() );
+
+    auto gbt = std::make_shared<GeomBuilder>( hierScene );
     gbt->build(p->RSG());
-    p->takeScreenShot( hierScene->BBox3d(), gbt->Thumb() );
+
+//    p->takeScreenShot( hierScene->BBox3d(), gbt->Thumb() );
 }
 
 void addGeomToScene() {
     Scene::sUpdateCallbacks.emplace_back( []( Scene* p ) {
-        loadGeomInGui( p, gltf );
+        loadGeomInGui( p, std::make_shared<GLTF2>( glftString ) );
+    } );
+}
+
+void addGeomToSceneData() {
+    Scene::sUpdateCallbacks.emplace_back( []( Scene* p ) {
+        loadGeomInGui( p, std::make_shared<GLTF2>( gltfBufferData, glftString ) );
     } );
 }
 
 void callbackGeom( const std::string& _filename, const std::vector<char>& _data ) {
-    gltf = std::make_shared<GLTF2>( _data, _filename );
-    addGeomToScene();
+    glftString = _filename;
+    gltfBufferData = _data;
+    addGeomToSceneData();
 }
 
 void callbackGeomGLTF( const std::string& _filename ) {
-    gltf = std::make_shared<GLTF2>( _filename );
+    glftString = _filename;
     addGeomToScene();
 }
 
-void ImGuiGeoms( Scene* p, const Rect2f& _r ) {
-    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-    ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
-    ImGui::Begin( "Geometry", nullptr, ImGuiWindowFlags_NoCollapse );
+void callbackGeomSVG( const std::string& _svgString ) {
+    svgString = _svgString;
+    Scene::sUpdateCallbacks.emplace_back( [&]( Scene* p ) {
+        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).buildr(p->RSG());
+    } );
 
+}
+
+void ImGuiGeoms::renderImpl( Scene* p, Rect2f& _r ) {
     for ( auto& [k,v] : p->RSG().Nodes() ) {
+        ImGui::PushID(std::visit(lambdaUUID, v).c_str());
+        ImGui::BeginGroup();
         std::visit( NodeVisitor<ImGUIJsonNamed>{}, v );
+        ImGui::EndGroup();
+        ImGui::PopID();
     }
 
-    if ( gbt ) {
-        ImGui::BeginGroup();
-        ImGui::Text( "Name: %s", gbt->Name().c_str());
-        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-            gbt->publish();
-        }
-        ImGui::EndGroup();
-    }
-    ImGui::End();
+//    ImGui::EndChild();
+
+//    if ( gbt ) {
+//        ImGui::BeginGroup();
+//        ImGui::Text( "Name: %s", gbt->Name().c_str());
+//        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+//            gbt->publish();
+//        }
+//        ImGui::EndGroup();
+//    }
 }

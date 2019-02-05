@@ -21,6 +21,10 @@ std::string cacheFolder() {
 	return std::string( homeDir ) + "/";
 }
 
+std::string getDaemonRoot() {
+    return cacheFolder();
+}
+
 const std::string userComputerName() {
     const char* cname = getenv( "COMPUTERNAME" );
     const char* uname = getenv( "USERNAME" );

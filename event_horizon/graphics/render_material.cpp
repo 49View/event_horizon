@@ -10,40 +10,26 @@
 #include "renderer.h"
 
 void RenderMaterial::removeAllTextures() {
-    Uniforms()->clearTextures();
-    calcHash();
+//    Uniforms()->clearTextures();
+//    calcHash();
 }
 
-void RenderMaterial::serialize( std::shared_ptr<SerializeBin> writer ) {
-    writer->write( mType );
-    uniforms->serialize( writer );
-}
+RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program,
+                                std::shared_ptr<Material> _material, Renderer& _rr ) : rr(_rr) {
 
-void RenderMaterial::deserialize( std::shared_ptr<DeserializeBin> reader ) {
-    // This is asymmetric wrt serialize because we need to read the material type apriori in order to allocate the right type
-    uniforms->deserialize( reader );
-    calcHash();
-}
-
-RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program, std::shared_ptr<ProgramUniformSet> _uniforms ) {
     BoundProgram( _program );
-    Uniforms( _uniforms );
+    Uniforms( std::make_shared<ProgramUniformSet>(_material, rr) );
 
-    globalUniforms = std::make_shared<ProgramUniformSet>();
+    globalUniforms = std::make_shared<ProgramUniformSet>("g", "g");
 
     calcHash();
 }
 
 void RenderMaterial::calcHash() {
-    mHash = static_cast<int64_t>(mType);
-    mHash += Uniforms()->Hash();
+    mHash = Uniforms()->Hash();
 
     TransparencyValue( Uniforms()->getFloatWithDefault( UniformNames::alpha, 1.0f ) *
                        Uniforms()->getFloatWithDefault( UniformNames::opacity, 1.0f ));
-}
-
-std::string RenderMaterial::typeAsString() {
-    return std::to_string( static_cast<int64_t >(mType));
 }
 
 void RenderMaterial::submitBufferUniforms() {
@@ -56,74 +42,51 @@ void RenderMaterial::BoundProgram( std::shared_ptr<Program> val ) {
     //Type( val->getId() );
 }
 
-MaterialType RenderMaterial::Type() const
-{
-    return mType;
-}
+//std::shared_ptr<RenderMaterial> RenderMaterialBuilder::build() {
+//    std::shared_ptr<Program> program;
+//
+//    program = rr.P( shaderName );
+//
+//    auto pus = std::make_shared<ProgramUniformSet>(material);
+//
+//    switch ( material->getType()) {
+//        case MaterialType::Generic:
+////            MaterialUniformRenderSetup{ std::dynamic_pointer_cast<GenericMaterial>( material ) }( program, pus, rr );
+//            break;
+//        case MaterialType::PBR:
+//            MaterialPBRUniformRenderSetup{ std::dynamic_pointer_cast<PBRMaterial>( material ) }( program, pus, rr);
+//            break;
+//    }
+//
+//    auto m = std::make_shared<RenderMaterial>( program, pus );
+//    rr.MaterialMap( m );
+//
+//    return m;
+//}
 
-std::shared_ptr<RenderMaterial> RenderMaterialBuilder::build() {
-    std::shared_ptr<Program> program;
+//void
+//MaterialPBRUniformRenderSetup::operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus,
+//                                           Renderer& rr ) const {
+//
+//    std::shared_ptr<PBRMaterial> pmat = std::dynamic_pointer_cast<PBRMaterial>( material );
+//
+//    pus->setOnGPU( program, UniformNames::opacity, material->getOpacity() );
+//    pus->setOnGPU( program, UniformNames::alpha, pmat->getColor().w());
+//    pus->setOnGPU( program, UniformNames::diffuseColor, pmat->getColor().xyz());
+//
+//    pus->setOnGPU( program, UniformNames::diffuseTexture, rr.TDI( pmat->getBaseColor(), TSLOT_COLOR ));
+//    pus->setOnGPU( program, UniformNames::normalTexture, rr.TDI( pmat->getNormal(), TSLOT_NORMAL ));
+//    pus->setOnGPU( program, UniformNames::aoTexture, rr.TDI( pmat->getAmbientOcclusion(), TSLOT_AO ));
+//    pus->setOnGPU( program, UniformNames::roughnessTexture, rr.TDI( pmat->getRoughness(), TSLOT_ROUGHNESS ));
+//    pus->setOnGPU( program, UniformNames::metallicTexture, rr.TDI( pmat->getMetallic(), TSLOT_METALLIC ));
+//    pus->setOnGPU( program, UniformNames::heightTexture, rr.TDI( pmat->getHeight(), TSLOT_HEIGHT ));
+//
+//    pus->setOnGPU( program, UniformNames::ibl_irradianceMap, rr.TDI( FBNames::convolution , TSLOT_IBL_IRRADIANCE ));
+//    pus->setOnGPU( program, UniformNames::ibl_specularMap, rr.TDI( FBNames::specular_prefilter , TSLOT_IBL_PREFILTER ));
+//    pus->setOnGPU( program, UniformNames::ibl_brdfLUTMap, rr.TDI( FBNames::ibl_brdf , TSLOT_IBL_BRDFLUT ));
+//
+//    pus->setOnGPU( program, UniformNames::metallic, pmat->getMetallicValue());
+//    pus->setOnGPU( program, UniformNames::roughness, pmat->getRoughnessValue());
+//    pus->setOnGPU( program, UniformNames::ao, pmat->getAoValue());
+//}
 
-    auto pus = std::make_shared<ProgramUniformSet>();
-    PUTB tub{ rr };
-
-    switch ( material->getType()) {
-        case MaterialType::Generic:
-            program = rr.P( shaderName );
-            MaterialUniformRenderSetup{ std::dynamic_pointer_cast<GenericMaterial>( material ) }( program, pus, tub.p
-                    ( program ));
-            break;
-        case MaterialType::PBR:
-            program = rr.P( shaderName );
-            MaterialPBRUniformRenderSetup{ std::dynamic_pointer_cast<PBRMaterial>( material ) }
-                    ( program, pus, tub.p( program ));
-            break;
-    }
-
-    auto m = std::make_shared<RenderMaterial>( program, pus );
-
-    //LOGI( "New RenderMaterial created %s", m->typeAsString().c_str());
-    rr.MaterialMap( m );
-
-    return m;
-}
-
-void MaterialUniformRenderSetup::operator()( std::shared_ptr<Program> program,
-                                             std::shared_ptr<ProgramUniformSet>& pus,
-                                             PUTB& tub ) const {
-
-    pus->assign( program, UniformNames::opacity, 1.0f );
-    pus->assign( program, UniformNames::alpha, material->getColor().w());
-    pus->assign( program, UniformNames::diffuseColor, material->getColor().xyz());
-
-    pus->assign( tub.u( UniformNames::colorTexture ).t( material->getTextureName()).s( TSLOT_COLOR ));
-}
-
-void
-MaterialPBRUniformRenderSetup::operator()( std::shared_ptr<Program> program, std::shared_ptr<ProgramUniformSet>& pus,
-                                           PUTB& tub ) const {
-//    MaterialUniformRenderSetup::operator()( program, pus, tub );
-
-    std::shared_ptr<PBRMaterial> pmat = std::dynamic_pointer_cast<PBRMaterial>( material );
-
-    pus->assign( program, UniformNames::opacity, 1.0f );
-    pus->assign( program, UniformNames::alpha, pmat->getColor().w());
-    pus->assign( program, UniformNames::diffuseColor, pmat->getColor().xyz());
-
-    pus->assign( tub.u( UniformNames::diffuseTexture ).t( pmat->getBaseColor()).s( TSLOT_COLOR ));
-    pus->assign( tub.u( UniformNames::normalTexture ).t( pmat->getNormal()).s( TSLOT_NORMAL ));
-    pus->assign( tub.u( UniformNames::aoTexture ).t( pmat->getAmbientOcclusion()).s( TSLOT_AO ));
-    pus->assign( tub.u( UniformNames::roughnessTexture ).t( pmat->getRoughness()).s( TSLOT_ROUGHNESS ));
-    pus->assign( tub.u( UniformNames::metallicTexture ).t( pmat->getMetallic()).s( TSLOT_METALLIC ));
-    pus->assign( tub.u( UniformNames::heightTexture ).t( pmat->getHeight()).s( TSLOT_HEIGHT ));
-
-//    pus->assign( tub.u( UniformNames::shadowMapTexture ).t( FBNames::shadowmap ).s( TSLOT_SHADOWMAP ));
-//    pus->assign( tub.u( UniformNames::lightmapTexture ).t( FBNames::lightmap ).s( TSLOT_LIGHTMAP ));
-    pus->assign( tub.u( UniformNames::ibl_irradianceMap ).t( FBNames::convolution ).s( TSLOT_IBL_IRRADIANCE ));
-    pus->assign( tub.u( UniformNames::ibl_specularMap ).t( FBNames::specular_prefilter ).s( TSLOT_IBL_PREFILTER ));
-    pus->assign( tub.u( UniformNames::ibl_brdfLUTMap ).t( FBNames::ibl_brdf ).s( TSLOT_IBL_BRDFLUT ));
-
-    pus->assign( program, UniformNames::metallic, pmat->getMetallicValue());
-    pus->assign( program, UniformNames::roughness, pmat->getRoughnessValue());
-    pus->assign( program, UniformNames::ao, pmat->getAoValue());
-}

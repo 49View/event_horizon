@@ -54,8 +54,8 @@ void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
 }
 
 Scene::Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
-						  CameraManager& cm, CommandQueue& cq ) :
-		cm(cm), rr(_rr), rsg(_rsg), fm( _fm ), ti( ti), mi( mi ), cq( cq) {
+						  CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm ) :
+		cm(cm), rr(_rr), rsg(_rsg), fm( _fm ), ti( ti), mi( mi ), cq( cq), ssm(_ssm) {
 	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
 	cq.registerCommandScript(hcs);
 	console = std::make_shared<ImGuiConsole>(cq);
@@ -78,15 +78,17 @@ void Scene::updateCallbacks() {
 	}
 
 	if ( callbackResizeWindow.x() > 0 && callbackResizeWindow.y() > 0 ) {
-		LOGR("Resized window: [%d, %d]", callbackResizeWindow.x(), callbackResizeWindow.y() );
+		// For now we do everything in the callbackResizeFrameBuffer so this is redundant for now, just a nop
+		// to be re-enabled in the future if we need it
+//		LOGR("Resized window: [%d, %d]", callbackResizeWindow.x(), callbackResizeWindow.y() );
 		callbackResizeWindow = Vector2i{-1, -1};
 	}
 
 	if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
+		WH::resizeWindow( callbackResizeFrameBuffer );
 		WH::gatherMainScreenInfo();
-		RR().resetDefaultFB();
+		RR().resetDefaultFB(callbackResizeFrameBuffer);
 		layout->resizeCallback( this, callbackResizeFrameBuffer );
-		LOGR("Resized framebuffer: [%d, %d]", callbackResizeFrameBuffer.x(), callbackResizeFrameBuffer.y() );
 		callbackResizeFrameBuffer = Vector2i{-1, -1};
 	}
 
@@ -120,8 +122,12 @@ void Scene::activate() {
 	Socket::on( "shaderchange",
 				std::bind(&Scene::reloadShaders, this, std::placeholders::_1 ) );
 
-	MaterialBuilder{"white"}.makeDefault(rsg.ML());
-	ImageBuilder{"white"}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
+	ImageBuilder{S::WHITE}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
+	ImageBuilder{S::BLACK}.makeDirect( rsg.TL(), RawImage::BLACK_RGBA4x4 );
+	ImageBuilder{S::NORMAL}.makeDirect( rsg.TL(), RawImage::NORMAL4x4 );
+	ImageBuilder{S::DEBUG_UV}.makeDirect( rsg.TL(), RawImage::DEBUG_UV() );
+
+	MaterialBuilder{S::WHITE_PBR, S::SH}.makeDefault(rsg.ML());
 
 	CQ().script("change time 14:00");
 	layout->activate( this );
@@ -146,48 +152,28 @@ void Scene::enableInputs( bool _bEnabled ) {
 	ti.setEnabled( _bEnabled );
 }
 
+void Scene::resetSingleEventNotifications() {
+    notifications.singleMouseTapEvent = false;
+}
+
 void Scene::inputPollUpdate() {
 
-	ViewportTogglesT cvtTggles = ViewportToggles::None;
-	// Keyboards
-	if ( ti.checkKeyToggleOn( GMK_1 ) ) cvtTggles |= ViewportToggles::DrawWireframe;
-    if ( ti.checkKeyToggleOn( GMK_G ) ) cvtTggles |= ViewportToggles::DrawGrid;
-
-	static float camVelocity = 1.000f;
-	static float accumulatedVelocity = .0003f;
-	float moveForward = 0.0f;
-	float strafe = 0.0f;
-	float moveUp = 0.0f;
-
-	if ( ti.checkWASDPressed() != -1 ) {
-		float vel = 0.003f*GameTime::getCurrTimeStep();
-		camVelocity = vel + accumulatedVelocity;
-		if ( ti.checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
-		if ( ti.checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
-		if ( ti.checkKeyPressed( GMK_A ) ) strafe = camVelocity;
-		if ( ti.checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
-		if ( ti.checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
-		if ( ti.checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
-		accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
-		if ( camVelocity > 3.50f ) camVelocity = 3.50f;
-	} else {
-		accumulatedVelocity = 0.0003f;
-	}
-
-	CameraInputData cid{ cvtTggles,
+	CameraInputData cid{ ti,
 			  mi.getCurrPos(),
 			  mi.isTouchedDown(),
 			  mi.isTouchedDownFirstTime(),
+			  notifications.singleMouseTapEvent,
 			  mi.getScrollValue(),
 			  mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
-			  mi.getCurrMoveDiffNorm().dominant(),
-			  moveForward, strafe, moveUp};
+			  mi.getCurrMoveDiffNorm().dominant() };
 
 	for ( auto& [k,v] : mRigs ) {
 		v->updateFromInputData( cid );
 	}
 
 	cm.update();
+
+	resetSingleEventNotifications();
 }
 
 bool Scene::checkKeyPressed( int keyCode ) {
@@ -197,13 +183,11 @@ bool Scene::checkKeyPressed( int keyCode ) {
 void Scene::notified( MouseInput& _source, const std::string& generator ) {
 
 	if ( generator == "onTouchUp" ) {
-		onTouchUpImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
-	} else
-	if ( generator == "onSingleTap" ) {
-		onSimpleTapImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
-	} else
-	if ( generator == "onDoubleTap" ) {
-		onDoubleTapImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
+//		onTouchUpImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
+	} else if ( generator == "onSingleTap" ) {
+		notifications.singleMouseTapEvent = true;
+	} else if ( generator == "onDoubleTap" ) {
+//		onDoubleTapImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
 	}
 	//LOGR( generator.c_str() );
 }
@@ -212,9 +196,8 @@ void Scene::render() {
 	layout->render( this );
 
 	for ( auto& [k,v] : mRigs ) {
-		v->renderControls();
+		v->renderControls(this);
 	}
-
 }
 
 void Scene::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
@@ -289,11 +272,17 @@ CameraManager& Scene::CM() { return cm; }
 TextureManager& Scene::TM() { return rr.TM(); }
 CommandQueue& Scene::CQ() { return cq; }
 FontManager& Scene::FM() { return fm; }
+StreamingMediator& Scene::SSM() { return ssm; }
 
 std::shared_ptr<Camera> Scene::getCamera( const std::string& _name ) { return CM().getCamera(_name); }
 
 const cameraRigsMap& Scene::getRigs() const {
 	return mRigs;
 }
+
+void Scene::script( const std::string& _commandLine ) {
+	CQ().script( _commandLine );
+}
+
 
 

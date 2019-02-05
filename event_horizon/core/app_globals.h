@@ -11,6 +11,15 @@ public:
 		return mFootageFrameRateNormal;
 	}
 
+	// Stupid retina screen madness, still to be sorted FFS
+	float pixelDensity() {
+#ifdef OSX
+		return 0.5f;
+#else
+		return 1.0f;
+#endif
+	}
+
 	void setScreenSizef( const Vector2f& s ) {
 		mScreenSizef = s;
 #ifdef OSX
@@ -56,6 +65,10 @@ public:
 		return Rect2f{ Vector2f::ZERO, mScreenSizef };
 	}
 
+	Rect2f getScreenRectUI() const {
+		return Rect2f{ Vector2f::ZERO, mScreenSizefUI };
+	}
+
 	Vector2f getAspectRatio2dFromUnnormalizedScreenPos( const Vector2f& _pos ) const {
 		Vector2f ret = _pos / getScreenSizef();
 		ret.set( ret.x() * getScreenAspectRatio(), ret.y() );
@@ -84,3 +97,4 @@ private:
 #define getScreenAspectRatioVector AppGlobals::getInstance().getScreenAspectRatioVector()
 #define getScreenAspectRatioVectorY AppGlobals::getInstance().getScreenAspectRatioVectorY()
 #define getScreenRect AppGlobals::getInstance().getScreenRect()
+#define getScreenRectUI AppGlobals::getInstance().getScreenRectUI()

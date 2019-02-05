@@ -4,6 +4,7 @@
 
 #include "renderer.h"
 #include <core/font_manager.h>
+#include <graphics/vp_builder.hpp>
 
 void Renderer::drawIncGridLines( int numGridLines, float deltaInc, float gridLinesWidth,
                        const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
@@ -98,7 +99,7 @@ void Renderer::drawLine( std::shared_ptr<VPList> _vpl, const std::vector<Vector3
 
     colorStrip->generateStripsFromVerts( extrudePointsWithWidth( verts, width, wrapIt, rotAngle, percToBeDrawn ), wrapIt );
 
-    VPBuilder<Pos3dStrip>{*this,_vpl}.p(colorStrip).s(S::COLOR_3D).c(color).n(_name).build();
+    VPBuilder<Pos3dStrip>{*this,_vpl, S::COLOR_3D}.p(colorStrip).c(color).n(_name).build();
 }
 
 void Renderer::drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
@@ -109,7 +110,7 @@ void Renderer::drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vec
     colorStrip->addStripVertex( Vector3f{ verts[0], _z } );
     colorStrip->addStripVertex( Vector3f{ verts[1], _z } );
     colorStrip->addStripVertex( Vector3f{ verts[2], _z } );
-    VPBuilder<Pos3dStrip>{*this,_vpl}.p(colorStrip).s(S::COLOR_3D).c(color).n(_name).build();
+    VPBuilder<Pos3dStrip>{*this,_vpl, S::COLOR_3D}.p(colorStrip).c(color).n(_name).build();
 }
 
 void Renderer::drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const Vector4f& color,
@@ -120,7 +121,7 @@ void Renderer::drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vec
     colorStrip->addStripVertex( verts[0] );
     colorStrip->addStripVertex( verts[1] );
     colorStrip->addStripVertex( verts[2] );
-    VPBuilder<Pos3dStrip>{*this,_vpl}.p(colorStrip).s(S::COLOR_3D).c(color).n(_name).build();
+    VPBuilder<Pos3dStrip>{*this,_vpl, S::COLOR_3D}.p(colorStrip).c(color).n(_name).build();
 }
 
 void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const Vector4f& color
@@ -134,7 +135,7 @@ void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vec
     for (auto &v : verts) {
         colorStrip->addStripVertex(v);
     }
-    VPBuilder<Pos3dStrip>{*this,_vpl}.p(colorStrip).s(S::COLOR_3D).c(color).n(_name).build();
+    VPBuilder<Pos3dStrip>{*this,_vpl,S::COLOR_3D}.p(colorStrip).c(color).n(_name).build();
 }
 
 void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
@@ -156,7 +157,7 @@ void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vec
         colorStrip->addVertex(v);
     }
 
-    VPBuilder<Pos3dStrip>{*this,_vpl}.p(colorStrip).s(S::COLOR_3D).c(color).n(_name).build();
+    VPBuilder<Pos3dStrip>{*this,_vpl,S::COLOR_3D}.p(colorStrip).c(color).n(_name).build();
 }
 
 void Renderer::drawCylinder( std::shared_ptr<VPList> _vpl, const Vector3f& pos, const Vector3f& dir, const Vector4f&
@@ -225,7 +226,7 @@ void Renderer::drawArcFilled( std::shared_ptr<VPList> _vpl, const Vector3f& cent
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
-    VPBuilder<Pos3dStrip>{*this,_vpl}.p(ps).s(S::COLOR_3D).c(color).n(_name).build();
+    VPBuilder<Pos3dStrip>{*this,_vpl,S::COLOR_3D}.p(ps).c(color).n(_name).build();
 }
 
 void Renderer::drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center, float radius, const Color4f& color, int32_t subdivs,
@@ -247,7 +248,7 @@ void Renderer::drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center,
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
-    VPBuilder<Pos3dStrip>{*this,_vpl}.p(ps).s(S::COLOR_3D).c(color).n(_name).build();
+    VPBuilder<Pos3dStrip>{*this,_vpl,S::COLOR_3D}.p(ps).c(color).n(_name).build();
 }
 
 void Renderer::drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center, const Vector3f& normal, float radius,
@@ -272,7 +273,7 @@ void Renderer::drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center,
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
-    VPBuilder<Pos3dStrip>{*this,_vpl}.p(ps).s(S::COLOR_3D).c(color).n(_name).build();
+    VPBuilder<Pos3dStrip>{*this,_vpl,S::COLOR_3D}.p(ps).c(color).n(_name).build();
 }
 
 void Renderer::drawCircle2d( std::shared_ptr<VPList> _vpl, const Vector2f& center, float radius, const Color4f& color, int32_t subdivs,
@@ -295,7 +296,7 @@ void Renderer::drawCircle2d( std::shared_ptr<VPList> _vpl, const Vector2f& cente
     std::shared_ptr<Pos2dStrip> ps = std::make_shared<Pos2dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
-    VPBuilder<Pos2dStrip>{*this,_vpl}.p(ps).s(S::COLOR_2D).c(color).n(_name).build();
+    VPBuilder<Pos2dStrip>{*this,_vpl,S::COLOR_2D}.p(ps).c(color).n(_name).build();
 }
 
 

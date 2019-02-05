@@ -27,6 +27,7 @@ ShaderManager::ShaderManager() {
     allocateProgram( ShaderProgramDesc{ S::COLOR_3D }.vsh( "vertex_shader_3d_c" ).fsh( "fragment_shader_color" ));
     allocateProgram( ShaderProgramDesc{ S::TEXTURE_2D }.vsh( "vertex_shader_2d_t" ).fsh( "fragment_shader_texture" ));
     allocateProgram( ShaderProgramDesc{ S::TEXTURE_3D }.vsh( "vertex_shader_3d_t" ).fsh( "fragment_shader_texture" ));
+    allocateProgram( ShaderProgramDesc{ S::YUV_GREENSCREEN }.vsh( "vertex_shader_3d_t" ).fsh( "plain_yuv_to_rgb_greenscreen" ));
     allocateProgram( ShaderProgramDesc{ S::EQUIRECTANGULAR }.vsh( "equirectangular" ).fsh( "equirectangular" ));
     allocateProgram( ShaderProgramDesc{ S::PLAIN_CUBEMAP }.vsh( "plain_cubemap" ).fsh( "plain_cubemap" ));
     allocateProgram( ShaderProgramDesc{ S::CONVOLUTION }.vsh( "plain_cubemap" ).fsh( "irradiance_convolution" ));

@@ -23,8 +23,39 @@ std::string Vector4f::toStringJSONArray() const {
 		   floatToFixedDigits( mW ) + "]";
 }
 
+Vector4f Vector4f:: ITORGBA( uint32_t number, int32_t numbits ) {
+	int32_t blue = ( number & 0x00ff0000 ) >> 16;
+	int32_t green = ( number & 0x0000ff00 ) >> 8;
+	int32_t red = number & 0x000000ff;
+	int32_t alpha = 0xff;
+	if ( numbits == 32 ) alpha = ( number & 0xff000000 ) >> 24;
+
+	return Vector4f( static_cast<float>( red ) / 255.0f, static_cast<float>( green ) / 255.0f, static_cast<float>( blue ) / 255.0f, static_cast<float>( alpha ) / 255.0f );
+}
+
+Vector4f Vector4f::XTORGBA( const std::string& _hexstring ) {
+	if ( _hexstring.empty() ) return Vector4f::BLACK;
+	std::string sanitized = string_trim_after(_hexstring, "#");
+	if ( sanitized.size() != 6 && sanitized.size() != 8 ) return Vector4f::BLACK;
+	std::string red    = "0x" + sanitized.substr(0, 2);
+	std::string green  = "0x" + sanitized.substr(2, 2);
+	std::string blue   = "0x" + sanitized.substr(4, 2);
+	std::string alpha  = "0x" + (sanitized.size() == 8 ? sanitized.substr(6, 2) : "ff");
+
+	int redi   = (int)strtol(red.c_str(), nullptr, 0);
+	int greeni = (int)strtol(green.c_str(), nullptr, 0);
+	int bluei  = (int)strtol(blue.c_str(), nullptr, 0);
+	int alphai = (int)strtol(alpha.c_str(), nullptr, 0);
+
+	return Vector4f::ITORGBA( redi, greeni, bluei, alphai );
+}
+
 Vector3f Vector4f::ITORGB( const unsigned int r, const unsigned int g, const unsigned int b ) {
 	return Vector3f( (r * 1.0f) / 255.0f, (g * 1.0f) / 255.0f, (b * 1.0f) / 255.0f );
+}
+
+Vector4f Vector4f::ITORGBA( const unsigned int r, const unsigned int g, const unsigned int b, const unsigned int a ) {
+	return Vector4f( (r * 1.0f) / 255.0f, (g * 1.0f) / 255.0f, (b * 1.0f) / 255.0f, (a * 1.0f) / 255.0f );
 }
 
 Vector3f Vector4f::FTORGB( const float r, const float g, const float b ) {

@@ -12,17 +12,21 @@ void SceneGraph::add( NodeVariants _geom ) {
     geoms[std::visit(lambdaUUID, _geom)] = _geom;
 }
 
-void SceneGraph::add( const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
-    for ( const auto& m : _materials ) {
-        m->makeDirect( ML() );
+void SceneGraph::remove( const UUID& _uuid ) {
+    if ( auto it = geoms.find(_uuid); it != geoms.end() ) {
+        // Remove all child
+        removeImpl(_uuid);
+        geoms.erase( it );
     }
 }
 
-void SceneGraph::add( GeomAssetSP _geom, const std::vector<std::shared_ptr<MaterialBuilder>> _materials ) {
+void SceneGraph::add( const std::vector<std::shared_ptr<Material>> _materials ) {
     for ( const auto& m : _materials ) {
-        m->makeDirect( ML() );
+        for ( const auto& [k,v] : m->Buffers() ) {
+            ImageBuilder{ k }.makeDirect( TL(), v );
+        }
+        ML().add( m );
     }
-    add( _geom );
 }
 
 void SceneGraph::update() {
@@ -41,6 +45,10 @@ void SceneGraph::cmdChangeMaterialColorTag( const std::vector<std::string>& _par
 
 void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
     cmdCreateGeometryImpl( _params );
+}
+
+void SceneGraph::cmdRemoveGeometry( const std::vector<std::string>& _params ) {
+    cmdRemoveGeometryImpl( _params );
 }
 
 void SceneGraph::cmdLoadObject( const std::vector<std::string>& _params ) {
@@ -83,7 +91,9 @@ NodeGraph& SceneGraph::Nodes() {
     return geoms;
 }
 
-void SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback ) {
+bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback ) {
+
+    bool ret = false;
 
     for ( const auto& [k, n] : geoms ) {
 
@@ -101,16 +111,18 @@ void SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
         }
 
         if ( bPerformeOnNode ) {
-            float tn = std::numeric_limits<float>::lowest();
+            float tn = 0.0f;
             float tf = std::numeric_limits<float>::max();
-            if ( box.intersectLine( _near, _far, tn, tf) ) {
+            auto ldir = normalize( _far - _near );
+            if ( box.intersectLine( _near, ldir, tn, tf) ) {
                 _callback( n, tn );
+                ret = true;
+                break;
             }
         }
     }
-}
 
-void PolySceneGraph::addImpl( [[maybe_unused]] NodeVariants _geom ) {
+    return ret;
 }
 
 void AssetManager::add( [[maybe_unused]] const std::string& _key, GeomAssetSP _h ) {
@@ -148,7 +160,8 @@ bool AssetManager::add( GeomFileAssetBuilder& gb, const std::vector<char>& _data
 CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
     addCommandDefinition("change material", std::bind(&SceneGraph::cmdChangeMaterialTag, &_hm, std::placeholders::_1 ));
     addCommandDefinition("paint", std::bind(&SceneGraph::cmdChangeMaterialColorTag, &_hm, std::placeholders::_1 ));
-    addCommandDefinition("build", std::bind(&SceneGraph::cmdCreateGeometry, &_hm, std::placeholders::_1));
+    addCommandDefinition("add", std::bind(&SceneGraph::cmdCreateGeometry, &_hm, std::placeholders::_1));
+    addCommandDefinition("remove", std::bind(&SceneGraph::cmdRemoveGeometry, &_hm, std::placeholders::_1));
     addCommandDefinition("load object", std::bind(&SceneGraph::cmdLoadObject, &_hm, std::placeholders::_1));
     addCommandDefinition("lightmaps", std::bind(&SceneGraph::cmdCalcLightmaps, &_hm, std::placeholders::_1));
 }

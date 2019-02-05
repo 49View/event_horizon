@@ -168,9 +168,10 @@ GLenum pixelFormatToGlInternalFormat( PixelFormat pixelFormat ) {
             return GL_R32F;
         case PIXEL_FORMAT_LUMINANCE:
 #if OPENGLES
-            return GL_LUMINANCE;
+//            return GL_LUMINANCE;
+            return GL_R8;
 #else
-            return GL_RED;
+            return GL_R8;
 #endif
         case PIXEL_FORMAT_LUMINANCE_ALPHA:
 #if OPENGLES

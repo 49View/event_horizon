@@ -8,8 +8,33 @@
 #include <core/raw_image.h>
 #include <poly/poly.hpp>
 
+using ImportMaterialMap = std::vector<std::shared_ptr<Material>>;
 
-struct MaterialBuilder;
+class ImportGeomArtifacts {
+public:
+    const GeomAssetSP& getScene() const {
+        return scene;
+    }
+
+    void setScene( const GeomAssetSP& scene ) {
+        ImportGeomArtifacts::scene = scene;
+    }
+
+    const ImportMaterialMap& getMaterials() const {
+        return materials;
+    }
+
+    void setMaterials( const ImportMaterialMap& materials ) {
+        ImportGeomArtifacts::materials = materials;
+    }
+
+    void addMaterial( std::shared_ptr<Material> _mat ) {
+        materials.emplace_back(_mat);
+    }
+private:
+    GeomAssetSP scene;
+    ImportMaterialMap materials;
+};
 
 enum class SigmoidSlope {
     Positive,
@@ -40,7 +65,7 @@ public:
 
     struct IntermediateMaterial {
         std::string name;
-        mutable std::shared_ptr<MaterialBuilder> mb;
+        mutable std::shared_ptr<Material> mb;
         mutable RawImage grayScaleBaseColor;
         InternalPBRComponent baseColor{MPBRTextures::basecolorString,
         InternalPBRTextureReconstructionMode::GrayScaleCreate };
@@ -56,16 +81,14 @@ public:
 
     explicit GLTF2( const std::string& _path );
     explicit GLTF2( const std::vector<char>& _array, const std::string& _name );
-    GeomAssetSP convert();
-    void fixupMaterials();
-    std::vector<std::shared_ptr<MaterialBuilder>> Materials();
+    ImportGeomArtifacts convert();
 
 private:
     void addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father );
     void addNodeToHier( const int nodeIndex, GeomAssetSP& hier );
-    void elaborateMaterial( const tinygltf::Material& mat );
+    std::shared_ptr<Material> elaborateMaterial( const tinygltf::Material& mat );
     void saveMaterial( const IntermediateMaterial& im );
-    void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic );
+    void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic, const std::string& _uniformName );
 private:
     MaterialMap matMap;
     std::string basePath;

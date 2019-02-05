@@ -21,6 +21,7 @@
 
 namespace ImGUIJsonColors {
 	const static ImVec4 Key = ImVec4(0.7f, 0.95f, 0.7f, 1.0f);
+	const static ImVec4 String  = ImVec4(0.55f, 0.6f, 0.7f, 1.0f);
 	const static ImVec4 Int = ImVec4(0.2f, 0.7f, 0.7f, 1.0f);
 	const static ImVec4 Float = ImVec4(0.3f, 0.5f, 0.5f, 1.0f);
 	const static ImVec4 Float2 = ImVec4(0.9f, 0.6f, 0.2f, 1.0f);
@@ -29,6 +30,11 @@ namespace ImGUIJsonColors {
 	const static ImVec4 SquareBracket = ImVec4(0.1f, 0.7f, 0.8f, 1.0f);
 	const static ImVec4 CurlyBracket  = ImVec4(0.95f, 0.7f, 0.8f, 1.0f);
 	const static ImVec4 Danger  = ImVec4(0.95f, 0.0f, 0.0f, 1.0f);
+}
+
+static void drawNodeRootBox( const char* value ) {
+	ImGui::Begin( value, nullptr, ImGuiWindowFlags_NoCollapse );
+	ImGui::End();
 }
 
 static void drawKey( const char* _name ) {
@@ -129,13 +135,14 @@ static void drawInt( const char* _name, const T& value ) {
 
 static void drawString( const char* value ) {
 	ImGui::SameLine();
-    static char buf[1024];
-    std::strcpy( buf, value );
-    if ( ImGui::InputText( "", buf, 1024, ImGuiInputTextFlags_EnterReturnsTrue ) ) {
-        LOGR( buf );
-        // Inser code here
-    };
-//	ImGui::InputText( "%s", value );
+	ImGui::TextColored( ImGUIJsonColors::String, "%s", value );
+
+//	static char buf[1024];
+//    std::strcpy( buf, value );
+//    if ( ImGui::InputText( "", buf, 1024, ImGuiInputTextFlags_EnterReturnsTrue ) ) {
+//        LOGR( buf );
+//        // Inser code here
+//    };
 }
 
 static void drawString( const char* _name, const char* value ) {
@@ -245,11 +252,19 @@ static std::string arrayName( const char* _name, const std::vector<T>& array ) {
 	return ret;
 }
 
+static inline void drawStringRoot( const char* _name, const char* value ) {
+	if ( strcmp(_name, "Name") == 0 ) {
+		drawNodeRootBox( value );
+	} else {
+		drawString( _name, value );
+	}
+}
+
 class ImGuiStandardJson {
 public:
 
 	static void visit( const char* _name, const char* value ) {
-		drawString( _name, value );
+		drawString(_name, value);
 	}
 
 	static void visit( const char* _name, const std::string& value ) {

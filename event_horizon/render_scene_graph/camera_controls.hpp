@@ -12,6 +12,7 @@
 class CameraRig;
 class Camera;
 class RenderSceneGraph;
+class TextInput;
 
 enum class CameraControls {
     Edit2d,
@@ -21,17 +22,14 @@ enum class CameraControls {
 };
 
 struct CameraInputData {
-    ViewportTogglesT cvt = ViewportToggles::None;
+    TextInput& ti;
     Vector2f mousePos = Vector2f::ZERO;
     bool isMouseTouchedDown = false;
     bool isMouseTouchDownFirst = false;
+    bool isMouseSingleTap = false;
     float scrollValue = 0.0f;
     Vector2f moveDiff = Vector2f::ZERO;
     Vector2f moveDiffSS = Vector2f::ZERO;
-
-    float moveForward = 0.0f;
-    float strafe = 0.0f;
-    float moveUp = 0.0f;
 };
 
 class CameraControl {
@@ -40,7 +38,8 @@ public:
     virtual ~CameraControl() = default;
     void updateFromInputData( const CameraInputData& mi );
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) = 0;
-    virtual void renderControls() = 0;
+    virtual void renderControls( Scene* _p ) = 0;
+    virtual bool inputIsBlockedOnSelection() const { return false; }
 
     std::shared_ptr<CameraRig> rig();
     std::shared_ptr<Camera> getMainCamera();
@@ -53,13 +52,18 @@ protected:
 class CameraControlFly : public CameraControl, public Selection {
 public:
     using CameraControl::CameraControl;
+    CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
-    void renderControls() override;
-    void selected( const UUID& _uuid, MatrixAnim& _localTransform ) override;
-    Matrix4f getViewMatrix() override;
-    Matrix4f getProjMatrix() override;
+    void renderControls( Scene* _p ) override;
+    void selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariants _node, SelectableFlagT _flags ) override;
+    bool inputIsBlockedOnSelection() const override;
 
+protected:
+    void unselectImpl( const UUID& _uuid, Selectable& _node ) override;
+
+protected:
+    bool isWASDActive = false;
 };
 
 class CameraControlWalk : public CameraControl {

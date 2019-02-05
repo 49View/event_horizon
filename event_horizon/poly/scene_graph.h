@@ -49,7 +49,6 @@ class PolySceneGraphTextureList : public ImageDepencencyMaker {
     bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
 };
 
-using NodeVariants = std::variant<GeomAssetSP, UIAssetSP>;
 using NodeGraph = std::unordered_map<std::string, NodeVariants>;
 using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)>;
 
@@ -67,16 +66,18 @@ public:
 
 DEPENDENCY_MAKER_EXIST(geoms);
     void add( NodeVariants _geom);
-    void add( GeomAssetSP _geom, std::vector<std::shared_ptr<MaterialBuilder>> _materials);
+    void add( std::vector<std::shared_ptr<Material>> _materials );
 
-    void add( std::vector<std::shared_ptr<MaterialBuilder>> _materials );
+    void remove( const UUID& _uuid );
+
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
     void cmdCreateGeometry( const std::vector<std::string>& _params );
+    void cmdRemoveGeometry( const std::vector<std::string>& _params );
     void cmdLoadObject( const std::vector<std::string>& _params );
     void cmdCalcLightmaps( const std::vector<std::string>& _params );
 
-    void rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
+    bool rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
 
     size_t countGeoms() const;
     virtual DependencyMaker& TL() = 0;
@@ -100,10 +101,12 @@ DEPENDENCY_MAKER_EXIST(geoms);
     }
 
 protected:
-    virtual void addImpl( NodeVariants _geom) = 0;
+    virtual void addImpl( NodeVariants _geom) {};
+    virtual void removeImpl( const UUID& _uuid ) {};
     virtual void changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+    virtual void cmdRemoveGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void changeMaterialTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void changeMaterialColorTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
@@ -127,9 +130,6 @@ public:
     }
 
     DependencyMaker& TL() override { return tl; }
-protected:
-    void addImpl( NodeVariants _geom) override;
-
 private:
     PolySceneGraphTextureList tl;
 };

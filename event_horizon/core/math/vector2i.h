@@ -1,8 +1,4 @@
-#ifndef D_MATH_VECTOR2I_H
-#define D_MATH_VECTOR2I_H
-
-
-
+#pragma once
 #include <math.h>
 
 class Vector2i {
@@ -11,7 +7,11 @@ public:
 	static const Vector2i ZERO;
 	static const Vector2i ONE;
 
-	Vector2i() {
+	Vector2i() = default;
+
+	explicit Vector2i( int x ) {
+		mX = x;
+		mY = x;
 	}
 
 	Vector2i( int x, int y ) {
@@ -96,6 +96,4 @@ inline float aspect( const Vector2i& v ) {
 	return static_cast<float>( v.x() ) / v.y();
 }
 
-
-
-#endif // D_vector2_H
+using V2i = Vector2i;

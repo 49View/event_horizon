@@ -33,9 +33,9 @@
 namespace ImGuizmo
 {
    static const float ZPI = 3.14159265358979323846f;
-   static const float RAD2DEG = (180.f / ZPI);
+//   static const float RAD2DEG = (180.f / ZPI);
    static const float DEG2RAD = (ZPI / 180.f);
-   static const float gGizmoSizeClipSpace = 0.1f;
+   static const float gGizmoSizeClipSpace = 0.2f;
    const float screenRotateSize = 0.06f;
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -477,26 +477,6 @@ namespace ImGuizmo
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    //
 
-   enum MOVETYPE
-   {
-      NONE,
-      MOVE_X,
-      MOVE_Y,
-      MOVE_Z,
-      MOVE_YZ,
-      MOVE_ZX,
-      MOVE_XY,
-      MOVE_SCREEN,
-      ROTATE_X,
-      ROTATE_Y,
-      ROTATE_Z,
-      ROTATE_SCREEN,
-      SCALE_X,
-      SCALE_Y,
-      SCALE_Z,
-      SCALE_XYZ
-   };
-
    struct Context
    {
       Context() : mbUsing(false), mbEnable(true), mbUsingBounds(false)
@@ -543,6 +523,7 @@ namespace ImGuizmo
       vec_t mRotationVectorSource;
       float mRotationAngle;
       float mRotationAngleOrigin;
+      int rotationType = NONE;
       //vec_t mWorldToLocalAxis;
 
       // scale
@@ -735,6 +716,14 @@ namespace ImGuizmo
       gContext.mDrawList = ImGui::GetWindowDrawList();
    }
 
+   int getRotationType() {
+      return gContext.rotationType;
+   }
+
+   float getRotationAngle() {
+      return gContext.mRotationAngle;
+   }
+
    void BeginFrame()
    {
       ImGuiIO& io = ImGui::GetIO();
@@ -787,6 +776,7 @@ namespace ImGuizmo
       gContext.mViewMat = *(matrix_t*)view;
       gContext.mProjectionMat = *(matrix_t*)projection;
 
+      gContext.mModel = *(matrix_t*)matrix;
       if (mode == LOCAL)
       {
          gContext.mModel = *(matrix_t*)matrix;
@@ -1462,6 +1452,8 @@ namespace ImGuizmo
 
    static int GetRotateType()
    {
+      if ( IsUsing() ) return gContext.rotationType;
+
       ImGuiIO& io = ImGui::GetIO();
       int type = NONE;
 
@@ -1494,6 +1486,7 @@ namespace ImGuizmo
             type = ROTATE_X + i;
       }
 
+      gContext.rotationType = type;
       return type;
    }
 
@@ -1825,9 +1818,9 @@ namespace ImGuizmo
 
       mat.OrthoNormalize();
 
-      rotation[0] = RAD2DEG * atan2f(mat.m[1][2], mat.m[2][2]);
-      rotation[1] = RAD2DEG * atan2f(-mat.m[0][2], sqrtf(mat.m[1][2] * mat.m[1][2] + mat.m[2][2]* mat.m[2][2]));
-      rotation[2] = RAD2DEG * atan2f(mat.m[0][1], mat.m[0][0]);
+      rotation[0] = atan2f(mat.m[1][2], mat.m[2][2]);
+      rotation[1] = atan2f(-mat.m[0][2], sqrtf(mat.m[1][2] * mat.m[1][2] + mat.m[2][2]* mat.m[2][2]));
+      rotation[2] = atan2f(mat.m[0][1], mat.m[0][0]);
 
       translation[0] = mat.v.position.x;
       translation[1] = mat.v.position.y;

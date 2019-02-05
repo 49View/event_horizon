@@ -179,16 +179,7 @@ public:
 
 private:
     void programStart( std::shared_ptr<RenderMaterial> _material ) const;
-
-    inline void programDraw() const {
-        GLCALL( glBindVertexArray( vao ) );
-        if ( ibo == 0 ) {
-            GLCALL( glDrawArrays( primitiveToGl( primitveType ), 0, numIndices ) );
-        } else {
-            GLCALL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo ) );
-            GLCALL( glDrawElements( primitiveToGl( primitveType ), numIndices, GL_UNSIGNED_INT, (void *) 0 ) );
-        }
-    }
+    void programDraw() const;
 
 private:
     GLuint vao = 0;

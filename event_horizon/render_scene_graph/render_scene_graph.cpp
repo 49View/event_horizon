@@ -7,6 +7,7 @@
 #include "core/node.hpp"
 #include "poly/geom_builder.h"
 #include "poly/ui_shape_builder.h"
+#include <graphics/vp_builder.hpp>
 
 RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm ) : SceneGraph(cq, fm), rr( rr ), tl(rr.RIDM()) {
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
@@ -25,6 +26,13 @@ void RenderSceneGraph::addImpl( NodeVariants _geom ) {
     }
 }
 
+void RenderSceneGraph::removeImpl( const UUID& _uuid ) {
+    auto removeF = [&](const UUID& _uuid) { rr.removeFromCL(_uuid ); };
+    if ( auto it = geoms.find(_uuid); it != geoms.end() ) {
+        std::visit( [&](auto&& arg) { arg->visitHashRecF(removeF);}, it->second );
+    }
+}
+
 void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _params ) {
     Vector3f pos = Vector3f::ZERO;
     Vector3f rot = Vector3f::ZERO;
@@ -40,7 +48,7 @@ void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _param
 }
 
 void RenderSceneGraph::changeMaterialTagCallback( const std::vector<std::string>& _params ) {
-    std::shared_ptr<PBRMaterial> mat = std::dynamic_pointer_cast<PBRMaterial>(ML().get(concatParams(_params, 1)));
+    std::shared_ptr<Material> mat = std::dynamic_pointer_cast<Material>(ML().get(concatParams(_params, 1)));
     rr.changeMaterialOnTags( getGeomType( _params[0] ), mat );
 }
 
@@ -61,10 +69,30 @@ void RenderSceneGraph::changeMaterialColorTagImpl( const std::vector<std::string
                                                           _params), _params).rebuild(CL());
 }
 
+ShapeType shapeTypeFromString( const std::string& value ) {
+
+    if ( toLower(value) == "cube" ) return ShapeType::Cube;
+    if ( toLower(value) == "sphere" ) return ShapeType::Sphere;
+
+    return ShapeType::None;
+};
+
 void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _params ) {
-    if ( toLower(_params[0]) == "cube" ) {
-        GeomBuilder{ ShapeType::Cube }.m( "white" ).build( *this );
+
+    auto st = shapeTypeFromString( _params[0] );
+    if ( st != ShapeType::None) {
+        auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
+        auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
+        GeomBuilder{ st }.m(shd,mat).build( *this );
+    } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
+        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
+        UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr(*this);
     }
+
+}
+
+void RenderSceneGraph::cmdRemoveGeometryImpl( const std::vector<std::string>& _params ) {
+    remove( _params[0] );
 }
 
 std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>
@@ -86,50 +114,14 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
-    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr,lvl }
-            .p(generateGeometryVP( _source->Data())).m( _source->Data()->getMaterial()).n(_source->Hash()).g(_source->GHType()).build();
-}
-
-std::string UIElementRenderObserver::getShaderType( UIShapeType _st ) const {
-    auto shaderName = S::TEXTURE_2D;
-    switch ( _st ) {
-        case UIShapeType::CameraFrustom2d:
-        case UIShapeType::CameraFrustom3d:
-            break;
-        case UIShapeType::Rect2d:
-        case UIShapeType::Rect3d:
-            shaderName = _st == UIShapeType::Rect2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-        case UIShapeType::Line2d:
-        case UIShapeType::Line3d:
-            shaderName = _st == UIShapeType::Line2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-        case UIShapeType::Arrow2d:
-        case UIShapeType::Arrow3d:
-            shaderName = _st == UIShapeType::Arrow2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-        case UIShapeType::Polygon2d:
-        case UIShapeType::Polygon3d:
-            shaderName = _st == UIShapeType::Polygon2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-        case UIShapeType::Text2d:
-        case UIShapeType::Text3d:
-            shaderName = _st == UIShapeType::Text2d ? S::FONT_2D : S::FONT;
-            break;
-        case UIShapeType::Separator2d:
-        case UIShapeType::Separator3d:
-            shaderName = _st == UIShapeType::Separator2d ? S::TEXTURE_2D : S::TEXTURE_3D;
-            break;
-    }
-
-    return shaderName;
+    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, _source->Data()->getMaterial() }
+            .p(generateGeometryVP(_source->Data())).n(_source->Hash()).g(_source->GHType()).build();
 }
 
 void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
-    auto color = _source->Data()->Color();
+    auto mat = _source->Data()->getMaterial();
     auto renderBucketIndex = _source->Data()->RenderBucketIndex();
-    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), color.w() );
-    auto shaderName = getShaderType( _source->Data()->ShapeType() );
+    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), mat->getOpacity() );
     auto vs = _source->Data()->VertexList();
-    VPBuilder<PosTex3dStrip>{rr,vpList}.p(vs).s(shaderName).c(color).n(_source->Hash()).build();
+    VPBuilder<PosTex3dStrip>{rr,vpList,mat}.p(vs).n(_source->Hash()).build();
 }
