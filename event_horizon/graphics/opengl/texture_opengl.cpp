@@ -34,8 +34,10 @@ void Texture::init_data_r( const uint8_t* _data ) {
                                          _data ) );
             }
         } else {
+#ifdef _FORCE_GL_TEXTURE_BASE_MAX_LEVELS
             GLCALL( glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0) );
             GLCALL( glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0) );
+#endif
             GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType,
                                   _data));
         }
