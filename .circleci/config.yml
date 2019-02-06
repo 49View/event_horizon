@@ -2,7 +2,7 @@
 #
 
 parameters:
-  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.5
+  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.6
 
 s3utils: &s3utils
            name: S3 utils

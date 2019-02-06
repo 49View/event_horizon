@@ -12,6 +12,7 @@
 #include "graphics/renderer.h"
 
 struct scene_t;
+class AudioManager;
 
 struct HierGeomRenderObserver : public ObserverShared<GeomAsset> {
 
@@ -42,6 +43,7 @@ public:
     Renderer& RR() { return rr; }
 
 protected:
+    void updateImpl() override;
     void addImpl(NodeVariants _geom) override;
     void removeImpl( const UUID& _uuid ) override;
     void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
@@ -58,6 +60,7 @@ protected:
 
 private:
     Renderer& rr;
+    std::shared_ptr<AudioManager> am;
     RenderImageDependencyMaker& tl;
     std::shared_ptr<HierGeomRenderObserver> hierRenderObserver;
     std::shared_ptr<UIElementRenderObserver> uiRenderObserver;

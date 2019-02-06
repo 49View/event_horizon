@@ -3,16 +3,18 @@
 //
 
 #include "render_scene_graph.h"
-#include "core/image_builder.h"
-#include "core/node.hpp"
-#include "poly/geom_builder.h"
-#include "poly/ui_shape_builder.h"
+#include <core/image_builder.h>
+#include <core/node.hpp>
+#include <poly/geom_builder.h>
+#include <poly/ui_shape_builder.h>
 #include <graphics/vp_builder.hpp>
+#include <graphics/audio/audio_manager_openal.hpp>
 
 RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm ) : SceneGraph(cq, fm), rr( rr ), tl(rr.RIDM()) {
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
     uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
     ml.TL(&tl);
+    am = std::make_shared<AudioManagerOpenAL>();
 }
 
 void RenderSceneGraph::addImpl( NodeVariants _geom ) {
@@ -93,6 +95,10 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
 
 void RenderSceneGraph::cmdRemoveGeometryImpl( const std::vector<std::string>& _params ) {
     remove( _params[0] );
+}
+
+void RenderSceneGraph::updateImpl() {
+    am->update();
 }
 
 std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>

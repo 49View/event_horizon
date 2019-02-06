@@ -33,6 +33,7 @@ void SceneGraph::update() {
     for ( auto& [k,v] : geoms ) {
         std::visit( lambdaUpdateAnimVisitor, v );
     }
+    updateImpl();
 }
 
 void SceneGraph::cmdChangeMaterialTag( const std::vector<std::string>& _params ) {

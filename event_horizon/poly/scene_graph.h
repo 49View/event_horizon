@@ -101,6 +101,7 @@ DEPENDENCY_MAKER_EXIST(geoms);
     }
 
 protected:
+    virtual void updateImpl() {};
     virtual void addImpl( NodeVariants _geom) {};
     virtual void removeImpl( const UUID& _uuid ) {};
     virtual void changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}

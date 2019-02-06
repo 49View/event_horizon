@@ -119,6 +119,7 @@ macro(register_graphics_module)
 
     register_module("ui")
     register_module("imgui")
+    register_module("audio")
     include_directories(${MODULE_ROOT_COMP}imgui)
 
     register_platform_module_files("opengl")
@@ -542,7 +543,7 @@ macro(link_graphics)
         link_libraries_multi("glfw" "glfw3" "glfw3" "glfw3" "glfw3")
 #        add_postbuild_copy_command("glfw" "glfw3")
         # libraries for glfw on linux; if not found then need to install with apt-get (see dockerfile script)
-        link_system_libraries_if("${LINUX}" "-lXrender;-ldrm;-lXdamage;-lXext;-lX11;-pthread;-lXi;-lXrandr;-lXxf86vm;-lXinerama;-lXcursor;-lGLEW")
+        link_system_libraries_if("${LINUX}" "-lXrender;-ldrm;-lXdamage;-lXext;-lX11;-pthread;-lXi;-lXrandr;-lXxf86vm;-lXinerama;-lXcursor;-lGLEW;-lopenal")
 
         # openGL
         link_package("OpenGL")

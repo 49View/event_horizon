@@ -1,15 +1,15 @@
 #pragma once
 
-#include "core/di.hpp"
-#include "core/command.hpp"
-#include "core/font_manager.h"
-#include "core/streaming_mediator.hpp"
-#include "graphics/renderer.h"
-#include "graphics/text_input.hpp"
-#include "graphics/mouse_input.hpp"
-#include "graphics/shader_manager.h"
-#include "graphics/camera_manager.h"
-#include "graphics/texture_manager.h"
+#include <core/di.hpp>
+#include <core/command.hpp>
+#include <core/font_manager.h>
+#include <core/streaming_mediator.hpp>
+#include <graphics/renderer.h>
+#include <graphics/text_input.hpp>
+#include <graphics/mouse_input.hpp>
+#include <graphics/shader_manager.h>
+#include <graphics/camera_manager.h>
+#include <graphics/texture_manager.h>
 #include "render_scene_graph.h"
 
 namespace di = boost::di;
