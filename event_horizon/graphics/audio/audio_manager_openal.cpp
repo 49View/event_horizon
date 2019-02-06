@@ -5,6 +5,7 @@
 #include "audio_manager_openal.hpp"
 
 #include <unordered_map>
+#include <cstring>
 #include <core/util.h>
 #include <graphics/audio/audio_file.h>
 
@@ -97,7 +98,7 @@ public:
 
         while (device && *device != '\0' && next && *next != '\0') {
             edevices += std::string(device) + " ";
-            len = strlen(device);
+            len = std::strlen(device);
             device += (len + 1);
             next += (len + 2);
         }
@@ -140,7 +141,7 @@ public:
         auto sr = audioFile.getSampleRate();
         auto sr2 = sr / 2;
         for ( size_t i = 0; i < audioFile.samples[0].size(); i++ ) {
-            for ( size_t c = 0; c < audioFile.getNumChannels(); c++ ) {
+            for ( int c = 0; c < audioFile.getNumChannels(); c++ ) {
                 auto s = audioFile.samples[c][i];
                 auto ss = ((( s * sr2 - sr2 ) / sr2 ) * 128.0f );
                 eib.emplace_back( static_cast<int8_t>(ss));
