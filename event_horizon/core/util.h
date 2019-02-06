@@ -73,7 +73,7 @@ const std::string userComputerName();
 const std::string userName();
 const std::string computerName();
 const uint64_t cpuID();
-const std::string getUserDownloadFolder( const std::string forcedUserName = "" );
+const std::string getUserDownloadFolder( std::string forcedUserName = "" );
 bool checkFileNameNotACopy( const std::string& filename );
 std::string cacheFolder();
 std::string getDaemonRoot();

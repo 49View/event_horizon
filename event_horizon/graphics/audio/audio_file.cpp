@@ -144,7 +144,7 @@ bool AudioFile<T>::setAudioBuffer (AudioBuffer& newBuffer)
     
     for (int k = 0; k < getNumChannels(); k++)
     {
-        assert (newBuffer[k].size() == numSamples);
+        assert (newBuffer[k].size() == static_cast<size_t>(numSamples));
         
         samples[k].resize (numSamples);
         
@@ -401,7 +401,7 @@ bool AudioFile<T>::decodeAiffFile (std::vector<uint8_t>& fileData)
     sampleRate = getAiffSampleRate (fileData, p + 16);
     
     // check the sample rate was properly decoded
-    if (sampleRate == -1)
+    if (sampleRate == 0xffffffff)
     {
         std::cout << "ERROR: this AIFF file has an unsupported sample rate" << std::endl;
         return false;
@@ -435,7 +435,7 @@ bool AudioFile<T>::decodeAiffFile (std::vector<uint8_t>& fileData)
     int samplesStartIndex = s + 16 + (int)offset;
         
     // sanity check the data
-    if ((soundDataChunkSize - 8) != totalNumAudioSampleBytes || totalNumAudioSampleBytes > (fileData.size() - samplesStartIndex))
+    if ((soundDataChunkSize - 8) != totalNumAudioSampleBytes || static_cast<size_t>(totalNumAudioSampleBytes) > (fileData.size() - samplesStartIndex))
     {
         std::cout << "ERROR: the metadatafor this file doesn't seem right" << std::endl;
         return false;
@@ -612,7 +612,7 @@ bool AudioFile<T>::saveToWaveFile (std::string filePath)
     }
     
     // check that the various sizes we put in the metadata are correct
-    if (fileSizeInBytes != (fileData.size() - 8) || dataChunkSize != (getNumSamplesPerChannel() * getNumChannels() * (bitDepth / 8)))
+    if (static_cast<size_t>(fileSizeInBytes) != (fileData.size() - 8) || dataChunkSize != (getNumSamplesPerChannel() * getNumChannels() * (bitDepth / 8)))
     {
         std::cout << "ERROR: couldn't save file to " << filePath << std::endl;
         return false;
@@ -696,7 +696,7 @@ bool AudioFile<T>::saveToAiffFile (std::string filePath)
     }
     
     // check that the various sizes we put in the metadata are correct
-    if (fileSizeInBytes != (fileData.size() - 8) || soundDataChunkSize != getNumSamplesPerChannel() *  numBytesPerFrame + 8)
+    if (static_cast<size_t>(fileSizeInBytes) != (fileData.size() - 8) || soundDataChunkSize != getNumSamplesPerChannel() *  numBytesPerFrame + 8)
     {
         std::cout << "ERROR: couldn't save file to " << filePath << std::endl;
         return false;
@@ -714,7 +714,7 @@ bool AudioFile<T>::writeDataToFile (std::vector<uint8_t>& fileData, std::string 
     
     if (outputFile.is_open())
     {
-        for (int i = 0; i < fileData.size(); i++)
+        for (size_t i = 0; i < fileData.size(); i++)
         {
             char value = (char) fileData[i];
             outputFile.write (&value, sizeof (char));
@@ -732,7 +732,7 @@ bool AudioFile<T>::writeDataToFile (std::vector<uint8_t>& fileData, std::string 
 template <class T>
 void AudioFile<T>::addStringToFileData (std::vector<uint8_t>& fileData, std::string s)
 {
-    for (int i = 0; i < s.length();i++)
+    for (size_t i = 0; i < s.length();i++)
         fileData.push_back ((uint8_t) s[i]);
 }
 
@@ -786,7 +786,7 @@ void AudioFile<T>::addInt16ToFileData (std::vector<uint8_t>& fileData, int16_t i
 template <class T>
 void AudioFile<T>::clearAudioBuffer()
 {
-    for (int i = 0; i < samples.size();i++)
+    for (size_t i = 0; i < samples.size();i++)
     {
         samples[i].clear();
     }
@@ -843,7 +843,7 @@ int AudioFile<T>::getIndexOfString (std::vector<uint8_t>& source, std::string st
     int index = -1;
     int stringLength = (int)stringToSearchFor.length();
     
-    for (int i = 0; i < source.size() - stringLength;i++)
+    for (size_t i = 0; i < source.size() - stringLength;i++)
     {
         std::string section (source.begin() + i, source.begin() + i + stringLength);
         

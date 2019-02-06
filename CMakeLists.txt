@@ -980,7 +980,7 @@ macro(set_cpp_flags)
         add_definitions(-DOSX)
         add_definitions(-DGL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED -DGL_SILENCE_DEPRECATION)
         add_definitions(-D__STDC_CONSTANT_MACROS)
-        SET(CMAKE_CXX_FLAGS "-Wall -Werror")
+        SET(CMAKE_CXX_FLAGS "-Wall -Werror") # add -Wextra if you want errors as gcc build... hmmm
     elseif (UNIX)
         if (EMSCRIPTEN)
             set(CMAKE_CXX_STANDARD 17) # C++17...

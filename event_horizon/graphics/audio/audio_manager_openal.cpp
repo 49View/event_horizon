@@ -4,6 +4,7 @@
 
 #include "audio_manager_openal.hpp"
 
+#include <unordered_map>
 #include <core/util.h>
 #include <graphics/audio/audio_file.h>
 
