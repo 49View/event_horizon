@@ -40,7 +40,7 @@ exports.InitializeAuthentication = () => {
             const clientCertificateInfo = clientCertificateInfoDB.toObject();
             user = await userController.getUserByIdProject(clientCertificateInfo.userId, clientCertificateInfo.project);
             if (user===null) {
-                error = "User not found";
+                error = "User not found!!!!";
             } else {
                 user.roles=user.roles.map(v => v.toLowerCase());
                 user.project=clientCertificateInfo.project.toLowerCase();

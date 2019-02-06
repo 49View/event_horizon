@@ -52,7 +52,7 @@ router.post('/refreshToken', authController.authenticate, async (req, res, next)
 
 router.post('/getToken', async (req, res, next) => {
 
-    console.log('getToken');
+    console.log('getToken IP', req.ip);
 
     const project = req.body.project;
     const email = req.body.email;
