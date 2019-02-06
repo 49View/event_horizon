@@ -29,7 +29,7 @@ const getUserWithRolesByEmailProject = async (email,project) => {
     query.push({ $match: {"roles.project": { $regex: project, $options: "i"}}});  
     query.push({ $group: {"_id": "$_id", "name": { "$first": "$name" }, "guest": { "$first": "$guest"}, "email": { "$first": "$email" }, "cipherPassword": { "$first": "$cipherPassword" }, "active": { "$first": "$active" }, "roles": { "$first": "$roles.roles" }}});
 
-    console.log(query);
+    //console.log(query);
     dbUser=await asyncModelOperations.aggregate(userModel,query);
     if (dbUser.length>0) {
         dbUser=dbUser[0];

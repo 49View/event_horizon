@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "devstart": "NODE_ENV=\"dev\" nodemon ./bin/www",
-    "devstartw": "set NODE_ENV=\"dev\" && nodemon ./bin/www",
+    "devstart": "NODE_ENV=\"dev\" forever -w ./bin/www",
+    "devstartw": "set NODE_ENV=\"dev\" && forever -w ./bin/www",
     "test": "mocha --exit test/tests.js"
   },
   "dependencies": {
@@ -20,7 +20,6 @@
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.3.10",
     "morgan": "^1.9.1",
-    "nodemon": "^1.18.6",
     "object-hash": "^1.3.0",
     "passport": "^0.4.0",
     "passport-client-cert": "^2.1.0",
