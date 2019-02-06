@@ -149,12 +149,42 @@ CameraControlFly::CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig,
 
 void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
     _cam->LockAtWalkingHeight(true);
-    _cam->moveForward( mi.moveForward );
-    _cam->strafe( mi.strafe );
-    _cam->moveUp( mi.moveUp );
+
+    static float camVelocity = 1.000f;
+    static float accumulatedVelocity = .0003f;
+    float moveForward = 0.0f;
+    float strafe = 0.0f;
+    float moveUp = 0.0f;
+
+    isWASDActive = mi.ti.checkWASDPressed() != -1;
+    if ( isWASDActive ) {
+        float vel = 0.003f*GameTime::getCurrTimeStep();
+        camVelocity = vel + accumulatedVelocity;
+        if ( mi.ti.checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
+        if ( mi.ti.checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
+        if ( mi.ti.checkKeyPressed( GMK_A ) ) strafe = camVelocity;
+        if ( mi.ti.checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
+        if ( mi.ti.checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
+        if ( mi.ti.checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
+        accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
+        if ( camVelocity > 3.50f ) camVelocity = 3.50f;
+    } else {
+        accumulatedVelocity = 0.0003f;
+    }
+
+    _cam->moveForward( moveForward );
+    _cam->strafe( strafe );
+    _cam->moveUp( moveUp );
     if ( mi.moveDiffSS != Vector2f::ZERO ) {
         _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
     }
+
+//    _cam->moveForward( mi.moveForward );
+//    _cam->strafe( mi.strafe );
+//    _cam->moveUp( mi.moveUp );
+//    if ( mi.moveDiffSS != Vector2f::ZERO ) {
+//        _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
+//    }
 }
 
 std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,

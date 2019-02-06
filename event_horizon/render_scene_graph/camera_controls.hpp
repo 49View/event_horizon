@@ -71,7 +71,9 @@ public:
     using CameraControl::CameraControl;
     ~CameraControlWalk() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
-    void renderControls() override {}
+    void renderControls( Scene* _p ) override {}
+protected:
+    bool isWASDActive = false;
 };
 
 class CameraControlFactory {
