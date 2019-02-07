@@ -20,8 +20,8 @@ router.post('/:key', async (req, res, next) => {
         const data = await fsc.cloudStorageFileUpload(req.body, req.params.key, "eventhorizonfs");
 		let json = { msg : 'cloudStorageFileUpdate', name : req.params.key };
 		let jsonParticular = { msg : 'cloudStorageFileUpdate-'+req.params.key };
-		server.sio.emit( 'message', JSON.stringify(json) );
-		server.sio.emit( 'message', JSON.stringify(jsonParticular) );
+		server.ws_send( JSON.stringify(json) );
+		server.ws_send( JSON.stringify(jsonParticular) );
     	if ( res ) {
 			res.status(201).json({ 'ETag': data.ETag });
 			res.end();		  	    		

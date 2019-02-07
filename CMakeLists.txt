@@ -105,7 +105,6 @@ macro(register_core_module)
     register_module("suncalc")
 
     register_boost_module()
-    register_socket_module()
     register_curl_module()
 
     if (NOT BUILD_FROM_SOURCE)
@@ -216,10 +215,6 @@ macro(register_boost_module)
     list(APPEND LIBS "boost" "${ARGN}")
 
 endmacro(register_boost_module)
-
-macro(register_socket_module)
-    list(APPEND LIBS "boost" "socket.io-client-cpp" "${ARGN}")
-endmacro(register_socket_module)
 
 macro(register_machine_learning_module)
     if (NOT BUILD_FROM_SOURCE)
@@ -390,7 +385,6 @@ macro(link_core)
     endif ()
     if ("core" IN_LIST WHICH_LIBS OR "core_libs" IN_LIST WHICH_LIBS)
         link_restbed()
-        link_sockets()
         link_curl()
         link_boost()
         if ( WIN32 )
@@ -519,10 +513,6 @@ macro(link_boost)
     link_libraries_if("${LINUX}" "boost" "/usr/local/lib/" "boost_system")
     link_libraries_if("${LINUX}" "boost" "/usr/local/lib/" "boost_filesystem")
 endmacro(link_boost)
-
-macro(link_sockets)
-    link_libraries_multi("socket.io-client-cpp" "sioclient_tls" "sioclient_tls" "sioclient_tls" OFF)
-endmacro(link_sockets)
 
 macro(link_ffmpeg)
     # ffmpeg

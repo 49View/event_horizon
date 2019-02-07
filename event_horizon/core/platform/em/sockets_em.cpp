@@ -26,5 +26,5 @@ namespace Socket {
         emscripten_ws_init( _host.c_str(), onSocketMessageCallback );
     }
 
-    void removeClient() {}
+    void close() {}
 }

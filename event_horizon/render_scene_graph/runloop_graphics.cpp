@@ -90,6 +90,8 @@ void RunLoopGraphics::runSingleThread() {
 	while ( !WH::shouldWindowBeClosed() ) {
 		singleThreadLoop();
 	}
+	Http::shutDown();
+
 }
 
 void RunLoopGraphics::updateLoop() {

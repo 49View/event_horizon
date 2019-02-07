@@ -98,3 +98,4 @@ typings/
 .next
 package-lock.json
 
+dev_tools/editor/public/*

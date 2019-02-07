@@ -45,6 +45,7 @@ namespace Socket {
     void onMessage( const std::string& _message );
     void emit( const std::string& _message );
     void on( const std::string& eventName, SocketCallbackFunc f );
+    void close();
 }
 
 JSONDATA( LoginToken, token, expires, project )
@@ -130,6 +131,7 @@ namespace Http {
     void userLoggedIn( bool _flag );
     bool hasUserLoggedIn();
     bool isLocalHost();
+    void shutDown();
 
     void project( const std::string& _project );
     std::string project();

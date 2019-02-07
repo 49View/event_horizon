@@ -304,8 +304,7 @@ namespace Http {
         return hasUserLoggedIn();
     }
 
-}
-
-namespace Socket {
-
+    void shutDown() {
+        Socket::close();
+    }
 }

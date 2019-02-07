@@ -13,10 +13,7 @@
 #include <iterator>
 #include <algorithm>
 
-#define  LOG_TAG    "SixthView-cpp"
-
-// Current scale of objects
-const static float CMScale = 100.0f;
+#define  LOG_TAG    "EventHorizon-cpp"
 
 typedef std::pair<int32_t, int32_t> IndexPair;
 
@@ -349,6 +346,7 @@ extern int64_t globalHash;
 #define LOGE(...) logPrint(LOG_PRIORITY_ERROR,LOG_TAG, __VA_ARGS__)
 #define LOGW(...)  logPrint(LOG_PRIORITY_WARN,LOG_TAG, __VA_ARGS__)
 #define LOGN()  logPrint(LOG_PRIOTITY_INFO,LOG_TAG, "" __FILE__ ":%d", __LINE__)
+#define LOGRS( X ) { std::ostringstream _ss; _ss << X; LOGR(_ss.str().c_str()); }
 #endif
 
 #define CONDLOG(X) LOGI("*** " #X " // %s", X ? "True" : "False");
