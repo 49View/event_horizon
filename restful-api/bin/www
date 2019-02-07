@@ -54,32 +54,22 @@ let wsServer = new webSocketServer({
   autoAcceptConnections: false
 });
 
-var wsClients = [];
-
 wsServer.on('request', function(request) {
-  // console.log("WEBSOCKET REQUEST",request.socket);  
+  console.log("WEBSOCKET REQUEST",request.socket);  
   var connection = request.accept(null, request.origin);
-  wsClients.push(connection);
   console.log((new Date()) + ' Connection accepted.');
-  console.log(wsClients.length + ' client(s) connected');
   connection.on('message', function(message) {
       if (message.type === 'utf8') {
           console.log('Received Message: ' + message.utf8Data);
-          wsClients.forEach( function(client) {
-            client.sendUTF(message.utf8Data);
-          });
+          connection.sendUTF(message.utf8Data);
       }
       else if (message.type === 'binary') {
           console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-          wsClients.forEach( function(client) {
-            client.sendBytes(message.binaryData);
-          });
+          connection.sendBytes(message.binaryData);
       }
   });
   connection.on('close', function(reasonCode, description) {
       console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-      wsClients.pop(connection);
-      console.log(wsClients.length + ' client(s) connected');
   });
 });
 

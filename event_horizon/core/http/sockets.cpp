@@ -17,7 +17,7 @@ namespace Socket {
     void createConnectionIfNotConnected() {
         if ( !Socket::connected_first_time ) {
             Http::UsePort up = Http::isLocalHost() ? Http::UsePort::True : Http::UsePort::False;
-            const std::string host = Url::Host( Url::WssProtocol, Http::CLOUD_SERVER(), Http::CLOUD_PORT_SSL(), up );
+            const std::string host = Url::Host( Url::HttpsProtocol, Http::CLOUD_SERVER(), Http::CLOUD_PORT_SSL(), up );
             startClient(host);
             Socket::connected_first_time = true;
         }
