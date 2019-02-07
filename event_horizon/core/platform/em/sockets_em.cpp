@@ -13,46 +13,18 @@
 
 namespace Socket {
 
-    std::unique_ptr<emscripten::val> socket;
-
-    void onSocketEventCallback( std::string _event, std::string _json ) {
-        LOGR( "[WEB-SOCKET] Event: %s", _event.c_str() );
-        LOGR( "[WEB-SOCKET] Message: %s", _json.c_str() );
-
-        if ( _event == "message" ) {
-            auto jt = unescape( trim( _json, '"' ) );
-            onMessage( jt );
-        }
-
-        if ( _event == "connect" ) {
-            LOGR( "[WEB-SOCKET] Client connected to Socket server" );
-        }
+    void onSocketMessageCallback( const char* _json ) {
+        std::string jsons{_json};
+        onMessage( unescape( trim( jsons, '"' ) ) );
     }
 
-    EMSCRIPTEN_BINDINGS(my_module) {
-        emscripten::function("onSocketEventCallback", &onSocketEventCallback);
-    }
-
-    void emitImpl( [[maybe_unused]] const std::string& _message ) {
-        LOGR("[ERROR][WEB-SOCKET] Emit socket message not handled yet on emscripten");
-//        handler.socket()->emit( "message", _message );
+    void emitImpl( const std::string& _message ) {
+        emscripten_ws_send( _message.c_str() );
     }
 
     void startClient( const std::string& _host ) {
-
-        LOGR("[WEB-SOCKET] Connecting to host: %s", _host.c_str() );
-        socket = std::make_unique<emscripten::val>(emscripten::val::global("SocketClientHandler"));
-
-        if (socket->as<bool>()) {
-            LOGR("[WEB-SOCKET] OK - Init");
-            socket->call<void>( "connect", _host );
-            LOGR("[WEB-SOCKET] Host: %s", _host.c_str());
-        } else {
-            LOGR("[WEB-SOCKET] Cannot Initialise");
-            return;
-        }
+        emscripten_ws_init( _host.c_str(), onSocketMessageCallback );
     }
 
-    void removeClient() {
-    }
+    void removeClient() {}
 }
