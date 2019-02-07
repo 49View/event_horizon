@@ -373,6 +373,7 @@ extern int64_t globalHash;
 #define LOGR(...) logPrint(LOG_PRIOTITY_INFO,LOG_TAG,__VA_ARGS__)
 #define LOGE(...) logPrint(LOG_PRIORITY_ERROR,LOG_TAG,__VA_ARGS__)
 #define LOGW(...)  logPrint(LOG_PRIORITY_WARN,LOG_TAG,__VA_ARGS__)
+#define LOGRS( X ) { std::ostringstream _ss; _ss << X; LOGR(_ss.str().c_str()); }
 #endif
 
 typedef std::map<uint64_t, FollowerGapData> gapMap;
