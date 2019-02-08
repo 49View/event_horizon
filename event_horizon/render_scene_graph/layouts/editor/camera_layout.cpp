@@ -19,7 +19,7 @@
 //    extern Vector3f Back  ;
 //}
 
-void ImGuiCamera::renderImpl( Scene* p, JMATH::Rect2f& f ) {
+void ImGuiCamera::renderImpl( SceneOrchestrator* p, JMATH::Rect2f& f ) {
 //    float lTop[3] = { CameraRigAngles::Top.x(), CameraRigAngles::Top.y(), CameraRigAngles::Top.z()};
 //    ImGui::BeginGroup();
 //        ImGui::InputFloat3("Top", lTop);

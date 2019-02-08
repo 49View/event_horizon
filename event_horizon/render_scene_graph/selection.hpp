@@ -11,7 +11,7 @@
 #include <poly/poly.hpp>
 
 class Camera;
-class Scene;
+class SceneOrchestrator;
 
 namespace SelectableFlag {
     static const uint64_t None = 0;
@@ -65,7 +65,7 @@ public:
         }
     }
 
-    void showGizmo(Selectable& _node, std::shared_ptr<Camera> _cam, Scene* _p );
+    void showGizmo(Selectable& _node, std::shared_ptr<Camera> _cam, SceneOrchestrator* _p );
 
     bool IsSelected() const;
     void IsSelected( bool bIsSelected );

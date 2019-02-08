@@ -35,7 +35,7 @@ void LayoutBoxRenderer::endRender(JMATH::Rect2f& _r) {
     ImGui::End();
 }
 
-void LayoutBoxRenderer::render( Scene* _p, JMATH::Rect2f& _r, BoxFlagsT _flags ) {
+void LayoutBoxRenderer::render( SceneOrchestrator* _p, JMATH::Rect2f& _r, BoxFlagsT _flags ) {
 
     if ( startRender( _r, _flags) ) {
         renderImpl( _p, _r );

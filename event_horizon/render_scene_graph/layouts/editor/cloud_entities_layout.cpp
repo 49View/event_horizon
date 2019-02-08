@@ -9,7 +9,7 @@
 static std::string remoteFilterString;
 static std::multimap<std::string, CoreMetaData> cloudEntitiesTypeMap;
 
-void listCloudCallback( Scene* p ) {
+void listCloudCallback( SceneOrchestrator* p ) {
 
     if ( remoteFilterString.empty() ) return;
 
@@ -28,7 +28,7 @@ void listCloudCallback( Scene* p ) {
     }
 }
 
-void ImGuiCloudEntities( Scene* p, Rect2f& _r, const std::string _title, const std::string& _entType,
+void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string _title, const std::string& _entType,
                          const uint64_t _version ) {
 
     static char buf1[1024];
@@ -39,7 +39,7 @@ void ImGuiCloudEntities( Scene* p, Rect2f& _r, const std::string _title, const s
         Http::get( Url::entityMetadata(_version, _entType, std::string(buf)),
                    [&](const Http::Result&_res) {
                        remoteFilterString = _res.bufferString;
-                       Scene::sUpdateCallbacks.emplace_back( listCloudCallback );
+                       SceneOrchestrator::sUpdateCallbacks.emplace_back( listCloudCallback );
                    } );
     };
     ImGui::PopID();

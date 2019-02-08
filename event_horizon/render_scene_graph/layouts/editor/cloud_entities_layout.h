@@ -6,7 +6,7 @@
 
 #include <string>
 #include <core/math/rect2f.h>
-class Scene;
+class SceneOrchestrator;
 
-void ImGuiCloudEntities( Scene* p, Rect2f& _r, const std::string _title, const std::string& _entType, const uint64_t _version );
+void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string _title, const std::string& _entType, const uint64_t _version );
 

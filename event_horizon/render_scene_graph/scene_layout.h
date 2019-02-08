@@ -12,12 +12,12 @@
 
 struct ImGuiConsole;
 class SceneLayout;
-class Scene;
+class SceneOrchestrator;
 
-using DragAndDropFunction = std::function<void(Scene* p, const std::string&)>;
-using InitLayoutFunction = std::function<void(SceneLayout* _layout, Scene*_target)>;
-using RenderFunction = std::function<void( Scene* )>;
-using RenderLayoutFunction = std::function<void( Scene* _target, Rect2f& )>;
+using DragAndDropFunction = std::function<void(SceneOrchestrator* p, const std::string&)>;
+using InitLayoutFunction = std::function<void(SceneLayout* _layout, SceneOrchestrator*_target)>;
+using RenderFunction = std::function<void( SceneOrchestrator* )>;
+using RenderLayoutFunction = std::function<void( SceneOrchestrator* _target, Rect2f& )>;
 
 using PresenterArrangeFunction = std::function<float( float )>;
 
@@ -115,7 +115,7 @@ public:
     struct Boxes {
         Rect2f& updateAndGetRect();
         Rect2f getRect() const;
-        void render( Scene* _target, Rect2f& _rect );
+        void render( SceneOrchestrator* _target, Rect2f& _rect );
         void toggleVisible();
         void setVisible( bool _bVis );
 
@@ -161,9 +161,9 @@ public:
 
     static std::shared_ptr<SceneLayout> makeDefault();
 
-    void resizeCallback( Scene* _target, const Vector2i& _resize );
+    void resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize );
 
-    void render( Scene* _target ) {
+    void render( SceneOrchestrator* _target ) {
         for ( auto& [k,v] : boxes ) {
             v.render( _target, BoxUpdateAndGet(k) );
         }
@@ -173,7 +173,7 @@ public:
     void setDragAndDropFunction( DragAndDropFunction dd );
 
 private:
-    void activate( Scene* _target );
+    void activate( SceneOrchestrator* _target );
 
     std::unordered_map<std::string, Boxes> boxes;
     InitLayoutFunction initLayout;
@@ -182,6 +182,6 @@ private:
     InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal;
 
     std::unordered_map<std::string, std::shared_ptr<LayoutBoxRenderer>> boxFunctionMapping;
-    Scene* owner = nullptr;
-    friend class Scene;
+    SceneOrchestrator* owner = nullptr;
+    friend class SceneOrchestrator;
 };

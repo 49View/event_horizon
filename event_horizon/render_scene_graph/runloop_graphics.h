@@ -11,7 +11,7 @@
 #include "core/runloop_core.h"
 #include "di_modules.h"
 
-class Scene;
+class SceneOrchestrator;
 
 class RunLoopGraphics : public RunLoop {
 public:
@@ -29,7 +29,7 @@ public:
     TextInput& TI() { return ti; }
 	MouseInput& MI() { return mi; }
 
-	void initWindow( std::shared_ptr<Scene> _presenter );
+	void initWindow( std::shared_ptr<SceneOrchestrator> _presenter );
 
 protected:
 	void elaborateAllSignals();
@@ -46,7 +46,7 @@ protected:
 	int nUpdates = 0;
 	int nRenders = 0;
 	UpdateSignals mUpdateSignals;
-	std::shared_ptr<Scene> pm;
+	std::shared_ptr<SceneOrchestrator> pm;
 };
 
-void mainLoop( std::shared_ptr<Scene> p );
+void mainLoop( std::shared_ptr<SceneOrchestrator> p );

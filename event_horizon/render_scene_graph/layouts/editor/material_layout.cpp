@@ -29,7 +29,7 @@ void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 si
     }
 }
 
-void ImGuiMaterials::renderImpl( Scene* p, Rect2f& _r ) {
+void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     float ts = 64.0f;
     ImVec2 textureSize{ ts, ts };
 
@@ -75,7 +75,7 @@ void callbackMaterial( const std::string& _filename, const std::vector<char>& _d
             mb->buffer( r, fi.dataPtr );
         }
     }
-    Scene::sUpdateCallbacks.emplace_back( []( Scene* p ) {
+    SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
         mb->makeDirect( p->ML() );
         if ( !p->RR().hasTag(9300) ) {
             GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).build( p->RSG() );

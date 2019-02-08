@@ -6,7 +6,7 @@
 #include "render_scene_graph/scene.hpp"
 #include <graphics/di_modules.h>
 
-void mainLoop( std::shared_ptr<Scene> p ) {
+void mainLoop( std::shared_ptr<SceneOrchestrator> p ) {
     auto rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
     rl.initWindow( p );
     rl.runSingleThread();

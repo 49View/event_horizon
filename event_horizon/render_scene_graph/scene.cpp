@@ -1,5 +1,5 @@
 //
-//  Scene
+//  SceneOrchestrator
 //
 //
 
@@ -19,41 +19,41 @@
 
 #include "di_modules.h"
 
-std::vector<std::string> Scene::callbackPaths;
-Vector2i Scene::callbackResizeWindow = Vector2i(-1, -1);
-Vector2i Scene::callbackResizeFrameBuffer = Vector2i(-1, -1);
-std::vector<PresenterUpdateCallbackFunc> Scene::sUpdateCallbacks;
+std::vector<std::string> SceneOrchestrator::callbackPaths;
+Vector2i SceneOrchestrator::callbackResizeWindow = Vector2i(-1, -1);
+Vector2i SceneOrchestrator::callbackResizeFrameBuffer = Vector2i(-1, -1);
+std::vector<PresenterUpdateCallbackFunc> SceneOrchestrator::sUpdateCallbacks;
 
 class CommandScriptPresenterManager : public CommandScript {
 public:
-	explicit CommandScriptPresenterManager( Scene& hm );
+	explicit CommandScriptPresenterManager( SceneOrchestrator& hm );
 	virtual ~CommandScriptPresenterManager() = default;
 };
 
-CommandScriptPresenterManager::CommandScriptPresenterManager( Scene& _hm ) {
-    addCommandDefinition("enable keyboard", std::bind(&Scene::cmdEnableKeyboard, &_hm, std::placeholders::_1));
-    addCommandDefinition("disable keyboard", std::bind(&Scene::cmdDisableKeyboard, &_hm, std::placeholders::_1));
-	addCommandDefinition("change time", std::bind(&Scene::cmdChangeTime, &_hm, std::placeholders::_1 ));
+CommandScriptPresenterManager::CommandScriptPresenterManager( SceneOrchestrator& _hm ) {
+    addCommandDefinition("enable keyboard", std::bind(&SceneOrchestrator::cmdEnableKeyboard, &_hm, std::placeholders::_1));
+    addCommandDefinition("disable keyboard", std::bind(&SceneOrchestrator::cmdDisableKeyboard, &_hm, std::placeholders::_1));
+	addCommandDefinition("change time", std::bind(&SceneOrchestrator::cmdChangeTime, &_hm, std::placeholders::_1 ));
 }
 
 void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
 	ASSERT( count > 0 );
 
-	Scene::callbackPaths.clear();
+	SceneOrchestrator::callbackPaths.clear();
 	for ( auto i = 0; i < count; i++ ) {
-		Scene::callbackPaths.emplace_back( std::string(paths[i]) );
+		SceneOrchestrator::callbackPaths.emplace_back( std::string(paths[i]) );
 	}
 }
 
 void GResizeWindowCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
-	Scene::callbackResizeWindow = Vector2i{w, h};
+	SceneOrchestrator::callbackResizeWindow = Vector2i{w, h};
 }
 
 void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
-	Scene::callbackResizeFrameBuffer = Vector2i{w, h};
+	SceneOrchestrator::callbackResizeFrameBuffer = Vector2i{w, h};
 }
 
-Scene::Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
+SceneOrchestrator::SceneOrchestrator( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
 						  CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm ) :
 		cm(cm), rr(_rr), rsg(_rsg), fm( _fm ), ti( ti), mi( mi ), cq( cq), ssm(_ssm) {
 	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
@@ -61,7 +61,7 @@ Scene::Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput
 	console = std::make_shared<ImGuiConsole>(cq);
 }
 
-void Scene::updateCallbacks() {
+void SceneOrchestrator::updateCallbacks() {
 
 	if ( !sUpdateCallbacks.empty() ) {
 		for ( auto& c : sUpdateCallbacks ) {
@@ -94,7 +94,7 @@ void Scene::updateCallbacks() {
 
 }
 
-void Scene::update() {
+void SceneOrchestrator::update() {
 
 	if ( !activated() ) {
 		activate();
@@ -108,10 +108,10 @@ void Scene::update() {
 	RSG().update();
 }
 
-void Scene::deactivate() {
+void SceneOrchestrator::deactivate() {
 }
 
-void Scene::activate() {
+void SceneOrchestrator::activate() {
 
 	WH::setDropCallback( GDropCallback );
 	WH::setResizeWindowCallback( GResizeWindowCallback );
@@ -120,7 +120,7 @@ void Scene::activate() {
     //stbi_set_flip_vertically_on_load(true);
 
 	Socket::on( "shaderchange",
-				std::bind(&Scene::reloadShaders, this, std::placeholders::_1 ) );
+				std::bind(&SceneOrchestrator::reloadShaders, this, std::placeholders::_1 ) );
 
 	ImageBuilder{S::WHITE}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
 	ImageBuilder{S::BLACK}.makeDirect( rsg.TL(), RawImage::BLACK_RGBA4x4 );
@@ -138,7 +138,7 @@ void Scene::activate() {
 	mbActivated = true;
 }
 
-void Scene::reloadShaders( SocketCallbackDataType _data ) {
+void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {
 
 	ShaderLiveUpdateMap shadersToUpdate{_data};
 
@@ -148,15 +148,15 @@ void Scene::reloadShaders( SocketCallbackDataType _data ) {
 	cq.script( "reload shaders" );
 }
 
-void Scene::enableInputs( bool _bEnabled ) {
+void SceneOrchestrator::enableInputs( bool _bEnabled ) {
 	ti.setEnabled( _bEnabled );
 }
 
-void Scene::resetSingleEventNotifications() {
+void SceneOrchestrator::resetSingleEventNotifications() {
     notifications.singleMouseTapEvent = false;
 }
 
-void Scene::inputPollUpdate() {
+void SceneOrchestrator::inputPollUpdate() {
 
 	CameraInputData cid{ ti,
 			  mi.getCurrPos(),
@@ -176,11 +176,11 @@ void Scene::inputPollUpdate() {
 	resetSingleEventNotifications();
 }
 
-bool Scene::checkKeyPressed( int keyCode ) {
+bool SceneOrchestrator::checkKeyPressed( int keyCode ) {
 	return ti.checkKeyPressed( keyCode );
 }
 
-void Scene::notified( MouseInput& _source, const std::string& generator ) {
+void SceneOrchestrator::notified( MouseInput& _source, const std::string& generator ) {
 
 	if ( generator == "onTouchUp" ) {
 //		onTouchUpImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
@@ -192,7 +192,7 @@ void Scene::notified( MouseInput& _source, const std::string& generator ) {
 	//LOGR( generator.c_str() );
 }
 
-void Scene::render() {
+void SceneOrchestrator::render() {
 	layout->render( this );
 
 	for ( auto& [k,v] : mRigs ) {
@@ -200,57 +200,57 @@ void Scene::render() {
 	}
 }
 
-void Scene::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
+void SceneOrchestrator::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
 	sUpdateCallbacks.push_back( uc );
 }
 
-const std::string Scene::DC() {
+const std::string SceneOrchestrator::DC() {
 	return Name::Foxtrot;
 }
 
-void Scene::cmdEnableKeyboard( const std::vector<std::string>& params ) {
+void SceneOrchestrator::cmdEnableKeyboard( const std::vector<std::string>& params ) {
     WH::enableInputCallbacks();
 }
 
-void Scene::cmdDisableKeyboard( const std::vector<std::string>& params ) {
+void SceneOrchestrator::cmdDisableKeyboard( const std::vector<std::string>& params ) {
     WH::disableInputCallbacks();
 }
 
-void Scene::cmdChangeTime( const std::vector<std::string>& _params ) {
+void SceneOrchestrator::cmdChangeTime( const std::vector<std::string>& _params ) {
 	RSG().SB().buildFromString( concatenate( " ", {_params.begin(), _params.end()}) );
 	changeTime( RSG().SB().getSunPosition() );
 }
 
-void Scene::addEventFunction( const std::string& _key, std::function<void(Scene*)> _f ) {
+void SceneOrchestrator::addEventFunction( const std::string& _key, std::function<void(SceneOrchestrator*)> _f ) {
 	eventFunctions[_key] = _f;
 }
 
-void Scene::Layout( std::shared_ptr<SceneLayout> _l ) {
+void SceneOrchestrator::Layout( std::shared_ptr<SceneLayout> _l ) {
 	layout = _l;
 }
 
-InitializeWindowFlagsT Scene::getLayoutInitFlags() const {
+InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
 	return layout->getInitFlags();
 }
 
-const std::shared_ptr<ImGuiConsole>& Scene::Console() const {
+const std::shared_ptr<ImGuiConsole>& SceneOrchestrator::Console() const {
 	return console;
 }
 
-void Scene::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
+void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
     addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), CameraControls::Fly,
     		                  BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box);
     getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
 
-void Scene::clearTargets() {
+void SceneOrchestrator::clearTargets() {
 	for ( const auto& target : mTargets ) {
 		target->clearCB();
 	}
 }
 
-std::shared_ptr<RLTarget> Scene::getTarget( const std::string& _name ) {
+std::shared_ptr<RLTarget> SceneOrchestrator::getTarget( const std::string& _name ) {
 
 	for ( auto& t : mTargets ) {
 		if ( t->cameraRig->Name() == _name ) return t;
@@ -259,28 +259,28 @@ std::shared_ptr<RLTarget> Scene::getTarget( const std::string& _name ) {
 	return nullptr;
 }
 
-void Scene::changeTime( const V3f& _solar ) {
+void SceneOrchestrator::changeTime( const V3f& _solar ) {
 	for ( auto& t : mTargets ) {
 		t->changeTime( _solar );
 	}
 }
 
-RenderSceneGraph& Scene::RSG() { return rsg; }
-MaterialManager& Scene::ML() { return rsg.ML(); }
-Renderer& Scene::RR() { return rr; }
-CameraManager& Scene::CM() { return cm; }
-TextureManager& Scene::TM() { return rr.TM(); }
-CommandQueue& Scene::CQ() { return cq; }
-FontManager& Scene::FM() { return fm; }
-StreamingMediator& Scene::SSM() { return ssm; }
+RenderSceneGraph& SceneOrchestrator::RSG() { return rsg; }
+MaterialManager& SceneOrchestrator::ML() { return rsg.ML(); }
+Renderer& SceneOrchestrator::RR() { return rr; }
+CameraManager& SceneOrchestrator::CM() { return cm; }
+TextureManager& SceneOrchestrator::TM() { return rr.TM(); }
+CommandQueue& SceneOrchestrator::CQ() { return cq; }
+FontManager& SceneOrchestrator::FM() { return fm; }
+StreamingMediator& SceneOrchestrator::SSM() { return ssm; }
 
-std::shared_ptr<Camera> Scene::getCamera( const std::string& _name ) { return CM().getCamera(_name); }
+std::shared_ptr<Camera> SceneOrchestrator::getCamera( const std::string& _name ) { return CM().getCamera(_name); }
 
-const cameraRigsMap& Scene::getRigs() const {
+const cameraRigsMap& SceneOrchestrator::getRigs() const {
 	return mRigs;
 }
 
-void Scene::script( const std::string& _commandLine ) {
+void SceneOrchestrator::script( const std::string& _commandLine ) {
 	CQ().script( _commandLine );
 }
 

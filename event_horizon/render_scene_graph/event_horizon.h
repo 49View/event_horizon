@@ -30,11 +30,11 @@ public:
 private:
     void construct( std::shared_ptr<SceneLayout> _layout, const LoginFields& _lf ) {
         Http::xProjectHeader( _lf );
-        presenter = di::make_injector(APP_RSGINJECTOR).template create<std::shared_ptr<Scene>>();
+        presenter = di::make_injector(APP_RSGINJECTOR).template create<std::shared_ptr<SceneOrchestrator>>();
         presenter->Layout( _layout );
         mainLoop( presenter );
     }
 
 private:
-    std::shared_ptr<Scene> presenter;
+    std::shared_ptr<SceneOrchestrator> presenter;
 };

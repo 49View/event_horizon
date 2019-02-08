@@ -44,7 +44,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
 }
 
 int em_resize_callback(int eventType, const EmscriptenUiEvent *uiEvent, void *userData) {
-	Scene::callbackResizeFrameBuffer = Vector2i{ uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight };
+	SceneOrchestrator::callbackResizeFrameBuffer = Vector2i{ uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight };
 //	LOGR("documentBodyClient size %d, %d: ", uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight );
 //	LOGR("windowInner size %d, %d: ", uiEvent->windowInnerWidth, uiEvent->windowInnerHeight );
 //	LOGR("windowOuter size %d, %d: ", uiEvent->windowOuterWidth, uiEvent->windowOuterHeight );
@@ -55,7 +55,7 @@ void main_loop_em() {
 	rl.singleThreadLoop();
 }
 
-void mainLoop( std::shared_ptr<Scene> p ) {
+void mainLoop( std::shared_ptr<SceneOrchestrator> p ) {
 
     emscripten_set_resize_callback(nullptr, nullptr, true, em_resize_callback );
 	rl.initWindow( p );

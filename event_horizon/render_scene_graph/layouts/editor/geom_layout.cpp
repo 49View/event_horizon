@@ -24,7 +24,7 @@ struct NodeVisitor {
     void operator()( UIAssetSP _v ) { _v->visit<T>(); }
 };
 
-void loadGeomInGui( Scene* p, std::shared_ptr<GLTF2> _newObject ) {
+void loadGeomInGui( SceneOrchestrator* p, std::shared_ptr<GLTF2> _newObject ) {
     auto imported = _newObject->convert();
     auto hierScene = imported.getScene();
     p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
@@ -38,13 +38,13 @@ void loadGeomInGui( Scene* p, std::shared_ptr<GLTF2> _newObject ) {
 }
 
 void addGeomToScene() {
-    Scene::sUpdateCallbacks.emplace_back( []( Scene* p ) {
+    SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
         loadGeomInGui( p, std::make_shared<GLTF2>( glftString ) );
     } );
 }
 
 void addGeomToSceneData() {
-    Scene::sUpdateCallbacks.emplace_back( []( Scene* p ) {
+    SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
         loadGeomInGui( p, std::make_shared<GLTF2>( gltfBufferData, glftString ) );
     } );
 }
@@ -62,13 +62,13 @@ void callbackGeomGLTF( const std::string& _filename ) {
 
 void callbackGeomSVG( const std::string& _svgString ) {
     svgString = _svgString;
-    Scene::sUpdateCallbacks.emplace_back( [&]( Scene* p ) {
+    SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
         GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).buildr(p->RSG());
     } );
 
 }
 
-void ImGuiGeoms::renderImpl( Scene* p, Rect2f& _r ) {
+void ImGuiGeoms::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     for ( auto& [k,v] : p->RSG().Nodes() ) {
         ImGui::PushID(std::visit(lambdaUUID, v).c_str());
         ImGui::BeginGroup();

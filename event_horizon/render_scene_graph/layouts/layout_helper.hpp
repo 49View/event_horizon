@@ -8,7 +8,7 @@
 #include <string>
 #include <core/math/rect2f.h>
 
-class Scene;
+class SceneOrchestrator;
 
 namespace BoxFlags {
     const static uint64_t None      = 0;
@@ -22,13 +22,13 @@ using BoxFlagsT = uint64_t;
 class LayoutBoxRenderer {
 public:
     explicit LayoutBoxRenderer( const std::string& name, bool _visible = true );
-    void render( Scene* , JMATH::Rect2f&, BoxFlagsT );
+    void render( SceneOrchestrator* , JMATH::Rect2f&, BoxFlagsT );
     void toggleVisible();
     void setVisible( bool _bVis );
 protected:
     bool startRender(JMATH::Rect2f& _r, BoxFlagsT _flags);
     void endRender(JMATH::Rect2f& _r);
-    virtual void renderImpl( Scene* ,JMATH::Rect2f&  ) = 0;
+    virtual void renderImpl( SceneOrchestrator* ,JMATH::Rect2f&  ) = 0;
 protected:
     std::string name;
     bool bVisible = true;

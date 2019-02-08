@@ -7,6 +7,6 @@
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiConsoleLayout::renderImpl( Scene* p, Rect2f& _r ) {
+void ImGuiConsoleLayout::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     p->Console()->Draw( _r );
 };

@@ -1,5 +1,5 @@
 //
-//  Scene
+//  SceneOrchestrator
 //
 //
 
@@ -19,7 +19,7 @@
 
 class MouseInput;
 class SceneLayout;
-class Scene;
+class SceneOrchestrator;
 struct ImGuiConsole;
 class CameraRig;
 class Renderer;
@@ -39,20 +39,20 @@ namespace PresenterEventFunctionKey {
 	const static std::string Activate = "activate";
 }
 
-using PresenterUpdateCallbackFunc = std::function<void(Scene* p)>;
-using ScenePostActivateFunc = std::function<void(Scene*)>;
+using PresenterUpdateCallbackFunc = std::function<void(SceneOrchestrator* p)>;
+using ScenePostActivateFunc = std::function<void(SceneOrchestrator*)>;
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 
 struct SceneEventNotifications {
 	bool singleMouseTapEvent = false;
 };
 
-class Scene : public Observer<MouseInput> {
+class SceneOrchestrator : public Observer<MouseInput> {
 public:
-	Scene( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
+	SceneOrchestrator( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
 		   CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm );
 
-	virtual ~Scene() = default;
+	virtual ~SceneOrchestrator() = default;
 
     template <typename T>
     void addViewport( const std::string& _name, const Rect2f& _viewport, CameraControls _cc, BlitType _bt ) {
@@ -81,7 +81,7 @@ public:
 	void update();
 	void render();
 	void enableInputs( bool _bEnabled );
-	void addEventFunction( const std::string& _key, std::function<void(Scene*)> _f );
+	void addEventFunction( const std::string& _key, std::function<void(SceneOrchestrator*)> _f );
 	void deactivate();
 
 	void script( const std::string& _commandLine );
@@ -148,7 +148,7 @@ protected:
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	bool mbActivated = false;
     std::shared_ptr<CommandScriptPresenterManager> hcs;
-    std::unordered_map<std::string, std::function<void(Scene*)> > eventFunctions;
+    std::unordered_map<std::string, std::function<void(SceneOrchestrator*)> > eventFunctions;
 	std::shared_ptr<ImGuiConsole> console;
 	SceneEventNotifications notifications;
 

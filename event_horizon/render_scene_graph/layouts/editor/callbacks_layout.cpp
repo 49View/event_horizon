@@ -38,7 +38,7 @@ void allCallbacksEntitySetup() {
     Socket::on( "cloudStorageFileUpdate", cloudCallback );
 }
 
-void allConversionsDragAndDropCallback( [[maybe_unused]] Scene* p, const std::string& _path ) {
+void allConversionsDragAndDropCallback( [[maybe_unused]] SceneOrchestrator* p, const std::string& _path ) {
     std::string pathSanitized = url_encode_spacesonly(_path);
     std::string ext = getFileNameExt( pathSanitized );
     std::string extl = toLower(ext);

@@ -10,7 +10,7 @@ public:
     virtual ~ImGuiCloudEntitiesMaterials() = default;
     using LayoutBoxRenderer::LayoutBoxRenderer;
 protected:
-    void renderImpl( Scene *scene, JMATH::Rect2f& f ) override;
+    void renderImpl( SceneOrchestrator *scene, JMATH::Rect2f& f ) override;
 };
 
 

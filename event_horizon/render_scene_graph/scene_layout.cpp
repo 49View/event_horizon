@@ -89,7 +89,7 @@ void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t
 	}
 }
 
-void SceneLayout::activate( Scene* _target ) {
+void SceneLayout::activate( SceneOrchestrator* _target ) {
 
 	owner = _target;
 
@@ -104,7 +104,7 @@ void SceneLayout::activate( Scene* _target ) {
 	}
 }
 
-void SceneLayout::resizeCallback( Scene* _target, const Vector2i& _resize ) {
+void SceneLayout::resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize ) {
 	for ( auto& [k,v] : boxes ) {
 		orBitWiseFlag( v.flags, BoxFlags::Resize );
 		if ( v.cc == CameraControls::Fly ) {
@@ -115,8 +115,8 @@ void SceneLayout::resizeCallback( Scene* _target, const Vector2i& _resize ) {
 	}
 }
 
-void initDefaultLayout( SceneLayout* _layout, Scene* _target ) {
-    _layout->addBox(Scene::DC(), 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
+void initDefaultLayout( SceneLayout* _layout, SceneOrchestrator* _target ) {
+    _layout->addBox(SceneOrchestrator::DC(), 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
 }
 
 std::shared_ptr<SceneLayout> SceneLayout::makeDefault() {
@@ -140,7 +140,7 @@ Rect2f SceneLayout::Boxes::getRect() const {
     return rectArranger.getRect();
 }
 
-void SceneLayout::Boxes::render( Scene *_target, Rect2f& _rect ) {
+void SceneLayout::Boxes::render( SceneOrchestrator *_target, Rect2f& _rect ) {
     if ( renderer ) {
         renderer->render( _target, _rect, flags );
     }

@@ -8,7 +8,7 @@
 #include <render_scene_graph/layouts/layout_helper.hpp>
 #include <event_horizon/render_scene_graph/scene_layout.h>
 
-void ImGuiTaskbar::renderImpl( Scene* p, Rect2f& _r ) {
+void ImGuiTaskbar::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
 
     std::string title = "Taskbar";
     ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );

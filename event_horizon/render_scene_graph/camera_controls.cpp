@@ -132,7 +132,7 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
     }
 }
 
-void CameraControlFly::renderControls( Scene* _p ) {
+void CameraControlFly::renderControls( SceneOrchestrator* _p ) {
     for ( auto& [k,n] : selectedNodes ) {
         showGizmo( n, getMainCamera(), _p );
     }

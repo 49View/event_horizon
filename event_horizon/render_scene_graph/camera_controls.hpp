@@ -38,7 +38,7 @@ public:
     virtual ~CameraControl() = default;
     void updateFromInputData( const CameraInputData& mi );
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) = 0;
-    virtual void renderControls( Scene* _p ) = 0;
+    virtual void renderControls( SceneOrchestrator* _p ) = 0;
     virtual bool inputIsBlockedOnSelection() const { return false; }
 
     std::shared_ptr<CameraRig> rig();
@@ -55,7 +55,7 @@ public:
     CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
-    void renderControls( Scene* _p ) override;
+    void renderControls( SceneOrchestrator* _p ) override;
     void selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariants _node, SelectableFlagT _flags ) override;
     bool inputIsBlockedOnSelection() const override;
 
@@ -71,7 +71,7 @@ public:
     using CameraControl::CameraControl;
     ~CameraControlWalk() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
-    void renderControls( Scene* _p ) override {}
+    void renderControls( SceneOrchestrator* _p ) override {}
 protected:
     bool isWASDActive = false;
 };

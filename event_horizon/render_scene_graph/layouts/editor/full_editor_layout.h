@@ -7,7 +7,7 @@
 #include <memory>
 
 class SceneLayout;
-class Scene;
+class SceneOrchestrator;
 
 std::shared_ptr<SceneLayout> fullEditor();
-void allConversionsdragAndDropCallback( Scene* p, const std::string& _path );
+void allConversionsdragAndDropCallback( SceneOrchestrator* p, const std::string& _path );

@@ -6,10 +6,10 @@
 
 #include <string>
 #include <vector>
-class Scene;
+class SceneOrchestrator;
 
 using entityDaemonCallbackFunction = void( const std::string&, const std::vector<char>& );
 
 void allCallbacksEntitySetup();
-void allConversionsDragAndDropCallback( Scene* p, const std::string& _path );
+void allConversionsDragAndDropCallback( SceneOrchestrator* p, const std::string& _path );
 

@@ -7,7 +7,7 @@
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiImages::renderImpl( Scene* p, Rect2f& _r ) {
+void ImGuiImages::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     int ic = 0;
     static bool lShowSystem = false;
     ImGui::Checkbox("Show System", &lShowSystem);

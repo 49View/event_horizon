@@ -11,7 +11,7 @@
                             #include <media/audio_video_stream.hpp>
 #include "callbacks_layout.h"
 
-void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
+void initLayout( SceneLayout* _layout, [[maybe_unused]] SceneOrchestrator* p ) {
 
     struct UIViewLayout {
         float consoleHeight = 0.0f;
@@ -73,7 +73,7 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
     allCallbacksEntitySetup();
 }
 
-void render( Scene* p ) {
+void render( SceneOrchestrator* p ) {
 //    static bool bS = true;
 //    if ( bS ) {
 //        auto streamName = "http://192.168.1.123:8080/video";

@@ -6,6 +6,6 @@
 #include "cloud_entities_layout.h"
 #include <render_scene_graph/scene.hpp>
 
-void ImGuiCloudEntitiesMaterials::renderImpl( Scene* p, Rect2f& _r ) {
+void ImGuiCloudEntitiesMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     ImGuiCloudEntities( p, _r, "Cloud Materials", EntityGroup::Material, Material::Version() );
 }

@@ -31,7 +31,7 @@ namespace GuiTimeline {
 
 };
 
-void ImGuiTimeline::renderImpl( [[maybe_unused]] Scene* p, Rect2f& _r ) {
+void ImGuiTimeline::renderImpl( [[maybe_unused]] SceneOrchestrator* p, Rect2f& _r ) {
 
     auto tgroups = Timeline::Groups();
     auto gsize = tgroups.size();
