@@ -8,10 +8,11 @@ const jsonWebToken = require('jsonwebtoken');
 const userController = require('./userController');
 const routeAuthorizationModel = require('../models/route_authorization');
 const clientCertificateModel = require('../models/client_certificate');
-const util = require('util');
+const sessionController = require('../controllers/sessionController');
+
+const JWT_EXPIRES_AFTER_HOURS = 6;
 
 const jwtOptions = {
-    expiresIn: '6h',
     issuer: "ateventhorizon.com",
     algorithm: "HS384",
 };
@@ -38,14 +39,18 @@ exports.InitializeAuthentication = () => {
             const clientCertificateInfoDB = await clientCertificateModel.findOne(query);
 
             const clientCertificateInfo = clientCertificateInfoDB.toObject();
-            user = await userController.getUserByIdProject(clientCertificateInfo.userId, clientCertificateInfo.project);
-            if (user===null) {
-                error = "User not found!!!!";
-            } else {
-                user.roles=user.roles.map(v => v.toLowerCase());
-                user.project=clientCertificateInfo.project.toLowerCase();
-                user.expires=Date.parse(clientCert.valid_to)/1000;
-                //console.log("Store user: ", user);
+            session = await sessionController.getValidSessionById(clientCertificateInfo.sessionId);
+            if (session!==null) {
+                user = await userController.getUserByIdProject(session.userId, session.project);
+                if (user===null) {
+                    error = "User not found!!!!";
+                } else {
+                    user.roles=user.roles.map(v => v.toLowerCase());
+                    user.project=session.project.toLowerCase();
+                    user.expires=session.expiresAt;
+                    user.sessionId = clientCertificateInfo.sessionId;
+                    //console.log("Store user: ", user);
+                }
             }
         } catch (ex) {
             console.log("Unknown common name", ex)
@@ -97,19 +102,25 @@ exports.InitializeAuthentication = () => {
         //console.log("JWT PAYLOAD", jwtPayload);
         let error = null;
         let user = false;
+        let session = null;
         //Check user in payload
 
-        const userId = jwtPayload.u.i;
-        const project = jwtPayload.u.p;
+        const sessionId = jwtPayload.sub;
 
         try {
-            user = await userController.getUserByIdProject(userId, project);
-            if (user===null) {
-                error = "Invalid user";
-            } else {
-                user.roles=user.roles.map(v => v.toLowerCase());
-                user.project=project.toLowerCase();
-                user.expires=jwtPayload.exp;
+            session = await sessionController.getValidSessionById(sessionId);
+            console.log("Session:",session);
+            if (session!==null) {
+                user = await userController.getUserByIdProject(session.userId, session.project);
+                if (user===null) {
+                    error = "Invalid user";
+                } else {
+                    user.roles=user.roles.map(v => v.toLowerCase());
+                    user.project=session.project.toLowerCase();
+                    user.sessionId=sessionId;
+                    user.expires=jwtPayload.exp;
+                    user.hasToken=true;
+                }
             }
             //console.log("Store user: ", user);
         } catch (ex) {
@@ -141,6 +152,7 @@ exports.InitializeAuthentication = () => {
                     user.roles=user.roles.map(v => v.toLowerCase());
                     user.project=project.toLowerCase();
                     user.expires=Math.floor(new Date().getTime()/1000)+3600;
+                    user.sessionId=null;
                 } else {
                     error = "Invalid user"
                 }
@@ -160,12 +172,11 @@ exports.InitializeAuthentication = () => {
 
 }
 
-const createJwtToken = async (userId, project) => {
+const createJwtToken = async (sessionId, issuedAt, expiresAt) => {
     const payload = {
-        u: {
-            i: userId,
-            p: project
-        }
+        iat: issuedAt,
+        exp: expiresAt,
+        sub: sessionId
     }
     //console.log(globalConfig.JWTSecret);
     const jwt = await jsonWebToken.sign(payload, globalConfig.JWTSecret, jwtOptions);
@@ -173,14 +184,17 @@ const createJwtToken = async (userId, project) => {
     return jwt;
 }
 
-exports.getToken = async (userId, project) => {
+exports.getToken = async (userId, project, ipAddress, userAgent) => {
 
-    const jwt = await createJwtToken(userId, project);
-    const jwtPayload = await jsonWebToken.verify(jwt, globalConfig.JWTSecret, jwtOptions);
+    const issuedAt = Math.floor(Date.now()/1000);
+    const expiresAt = issuedAt + 60*60*JWT_EXPIRES_AFTER_HOURS;
+
+    const session = await sessionController.createSession(userId, project, ipAddress, userAgent, issuedAt, expiresAt);
+    const jwt = await createJwtToken(session._id, issuedAt, expiresAt);
 
     return {
         token: jwt,
-        expires: jwtPayload.exp
+        expires: expiresAt,
     };
 }
 
