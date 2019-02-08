@@ -8,12 +8,13 @@
 #include <unordered_map>
 #include <graphics/text_input.hpp>
 #include <graphics/camera_manager.h>
-#include "core/observer.h"
-#include "core/math/vector2f.h"
-#include "core/math/rect2f.h"
-#include "core/htypes_shared.hpp"
-#include "core/game_time.h"
-#include "render_scene_graph.h"
+#include <core/observer.h>
+#include <core/math/vector2f.h>
+#include <core/math/rect2f.h>
+#include <core/htypes_shared.hpp>
+#include <core/game_time.h>
+#include <core/streaming_mediator.hpp>
+#include <render_scene_graph/render_scene_graph.h>
 #include <render_scene_graph/camera_controls.hpp>
 
 class MouseInput;
@@ -105,6 +106,11 @@ public:
 	StreamingMediator& SSM();
 	std::vector<std::shared_ptr<RLTarget>>& Targets() { return mTargets; }
     std::shared_ptr<Camera> getCamera( const std::string& _name );
+
+	template <typename T>
+	void addHttpStream( const std::string& _streamName ) {
+		SSM().addStream<T>( _streamName, avcbTM );
+	}
 
 	void Layout( std::shared_ptr<SceneLayout> _l );
 	std::shared_ptr<SceneLayout> Layout() { return layout; }

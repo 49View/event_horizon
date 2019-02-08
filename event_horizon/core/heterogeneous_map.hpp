@@ -86,6 +86,14 @@ public:
             ++i;
         }
     }
+
+    template <typename T>
+    void visitTexturesWithKey( T _func ) {
+        for ( auto& [k,u] : mTextures ) {
+            _func( u, k );
+        }
+    }
+
 private:
     void calcTotalNumUniforms();
     void calcHash();

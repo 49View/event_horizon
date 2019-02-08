@@ -122,7 +122,9 @@ void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
         if ( builderType == GeomBuilderType::file ) {
             addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
         } else {
-            bMaterialDep = addDependency<MaterialBuilder>( material->Name(), sg.ML());
+            if ( !material->isStreammable() ) { // is material is streammable do not try to load the entity resouce from server
+                bMaterialDep = addDependency<MaterialBuilder>( material->Name(), sg.ML());
+            }
             if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
                 addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
             }

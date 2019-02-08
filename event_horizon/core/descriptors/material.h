@@ -104,6 +104,10 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, cost )
     }
 };
 
+static inline bool isShaderStreammable( const std::string& _sn ) {
+    return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
+}
+
 class Material : public HeterogeneousMap {
 public:
     explicit Material( const Material& _mat ) {
@@ -112,8 +116,9 @@ public:
     explicit Material( std::shared_ptr<Material> _mat ) {
         clone(*_mat.get());
     }
-    explicit Material(  const std::string& _name, const std::string& _sn ) : shaderName(_sn) {
+    explicit Material(  const std::string& _name, const std::string& _sn ) {
         Name(_name);
+        setShaderName(_sn);
     }
     virtual ~Material() = default;
 
@@ -143,12 +148,12 @@ public:
     }
 
     void resolveDynamicConstants() {
-        visitTextures( [&]( TextureUniformDesc& u, unsigned int counter ) {
-            if ( u.name == UniformNames::yTexture) {
+        visitTexturesWithKey( [&]( TextureUniformDesc& u, const std::string& _key ) {
+            if ( _key == UniformNames::yTexture) {
                 u.name = Name() + "_y";
-            } else if ( u.name == UniformNames::uTexture) {
+            } else if ( _key == UniformNames::uTexture) {
                 u.name = Name() + "_u";
-            } else if ( u.name == UniformNames::vTexture) {
+            } else if ( _key == UniformNames::vTexture) {
                 u.name = Name() + "_v";
             }
         });
@@ -164,6 +169,7 @@ public:
 
     void setShaderName( const std::string& _value ) {
         shaderName = _value;
+        mbIsStreaming = isShaderStreammable( shaderName );
     }
 
     std::string PBRName( const std::string& _type ) const {
@@ -306,9 +312,14 @@ public:
         return buffers;
     }
 
+    bool isStreammable() const {
+        return mbIsStreaming;
+    }
+
 protected:
     MaterialImageBuffers buffers;
     MaterialProperties properties;
+    bool mbIsStreaming = false;
     std::string shaderName;
 
 public:

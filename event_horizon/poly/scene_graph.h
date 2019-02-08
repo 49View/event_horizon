@@ -21,6 +21,8 @@
 #include "material_builder.h"
 #include <poly/poly.hpp>
 
+class StreamingMediator;
+
 typedef std::unordered_map<std::string, GeomAssetSP> AssetHierContainer;
 typedef AssetHierContainer::iterator AssetHierContainerIt;
 typedef AssetHierContainer::const_iterator AssetHierContainerCIt;
@@ -87,6 +89,8 @@ DEPENDENCY_MAKER_EXIST(geoms);
     AssetManager& AL() { return al; }
     SunBuilder& SB() { return sb; }
     FontManager& FM() { return fm; }
+    StreamingMediator& SSM();
+
     void mapGeomType( uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;
 
@@ -120,6 +124,7 @@ protected:
     ColorManager cl;
     SunBuilder sb;
     FontManager& fm;
+
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
 };

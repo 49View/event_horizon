@@ -42,6 +42,7 @@ namespace Socket {
     websocketpp::connection_hdl connectionHandle;
     websocketpp::lib::shared_ptr<websocketpp::lib::thread> m_thread;
     websocketpp::lib::shared_ptr<websocketpp::lib::thread> m_reconnectThread;
+    websocketpp::lib::shared_ptr<websocketpp::lib::thread> m_emitThread;
 
     std::chrono::high_resolution_clock::time_point m_start;
     std::chrono::high_resolution_clock::time_point m_socket_init;
@@ -149,13 +150,21 @@ namespace Socket {
         }
     }
 
-    void emitImpl( const std::string& _message ) {
+    void emitImplThreaded( const std::string& _message ) {
+        while ( !g_isConnected ) {
+
+        }
         websocketpp::lib::error_code ec;
 
         m_endpoint->send( connectionHandle, _message, websocketpp::frame::opcode::text, ec);
         if (ec) {
             LOGRS("Echo failed because: " << ec.message());
         }
+    }
+
+    void emitImpl( const std::string& _message ) {
+        m_emitThread = std::make_shared<websocketpp::lib::thread>( emitImplThreaded, _message );
+        m_emitThread->join();
     }
 
     void startClient( const std::string& _host ) {

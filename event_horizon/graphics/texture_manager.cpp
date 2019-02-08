@@ -98,6 +98,10 @@ void TextureManager::preparingStremingTexture( const std::string& _streamName, c
     TextureRenderData sdtu { _streamName + "_u", sd2.x(), sd2.y(), 1, 8 };
     TextureRenderData sdtv { _streamName + "_v", sd2.x(), sd2.y(), 1, 8 };
 
+    sdty.generateMipMaps = false;
+    sdtu.generateMipMaps = false;
+    sdtv.generateMipMaps = false;
+
     addTextureNoData( sdty );
     addTextureNoData( sdtu );
     addTextureNoData( sdtv );

@@ -17,7 +17,7 @@ typedef std::map<std::string, std::shared_ptr<Texture>> TextureMap;
 typedef TextureMap::iterator TextureMapIt;
 typedef TextureMap::const_iterator TextureMapCIt;
 
-#define avcbTM (std::bind(&TextureManager::preparingStremingTexture, &p->TM(), std::placeholders::_1, std::placeholders::_2))
+#define avcbTM (std::bind(&TextureManager::preparingStremingTexture, &TM(), std::placeholders::_1, std::placeholders::_2))
 
 class TextureManager {
 public:

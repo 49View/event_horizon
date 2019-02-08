@@ -6,9 +6,9 @@
 
 #include <render_scene_graph/scene.hpp>
 #include <render_scene_graph/scene_layout.h>
-#include <media/audio_video_stream.hpp>
 #include <poly/ui_shape_builder.h>
 #include <poly/geom_builder.h>
+                            #include <media/audio_video_stream.hpp>
 #include "callbacks_layout.h"
 
 void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
@@ -71,32 +71,14 @@ void initLayout( SceneLayout* _layout, [[maybe_unused]] Scene* p ) {
                      uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Fly );
 
     allCallbacksEntitySetup();
-
-//    std::string streamName = "http://192.168.1.123:8080/video";
-//    p->SSM().addStream<AudioVideoStreamFFmpeg>( streamName, avcbTM );
-//
-//    UISB{ UIShapeType::Rect3d }.r(Rect2f::IDENTITY)
-//                               .m(S::YUV_GREENSCREEN,streamName)
-//                               .mc(UniformNames::yTexture, streamName + "_y")
-//                               .mc(UniformNames::uTexture, streamName + "_u")
-//                               .mc(UniformNames::vTexture, streamName + "_v")
-//                               .buildr(p->RSG());
-
-//    GB{ShapeType::Cube}.c(Color4f::LIGHT_CORAL).build(p->RSG());
-
-//    UISB{ UIShapeType::Line3d }.v( {V3f::ZERO, V3f::X_AXIS}).lw(1.0f).c(Color4f::BLACK).buildr(p->RSG());
-
-//    UISB{ UIShapeType::Arrow3d }.v( { XZY::C({ V2f::ZERO, 0.0f }),
-//                                      XZY::C({ V2f::ONE, 0.0f }) } ).
-//            lw( 0.1f ).c( Color4f::AQUAMARINE ).build(p->RSG());
-
-//    UISB{ UIShapeType::Text3d, "Hello", 0.6f }.c(Color4f::AQUAMARINE).buildr(p->RSG());
 }
 
 void render( Scene* p ) {
 //    static bool bS = true;
 //    if ( bS ) {
-//        GB{ShapeType::Sphere}.build(p->RSG());
+//        auto streamName = "http://192.168.1.123:8080/video";
+//        p->addHttpStream<AudioVideoStreamFFmpeg>(streamName);
+//        GB{ShapeType::Cube}.m(S::YUV_GREENSCREEN,streamName).build(p->RSG());
 //        bS = false;
 //    }
 }
