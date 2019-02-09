@@ -2,6 +2,7 @@ const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
 const sessionController = require('../controllers/sessionController');
+const socketController = require('../controllers/socketController');
 
 const router = express.Router();
 
@@ -10,7 +11,10 @@ router.get('/cleanToken', authController.authenticate, async (req, res, next) =>
         res.status(401).send();
     } else {
         if (req.user.hasToken===true) {
-            await sessionController.invalidateSessionById(req.user.sessionId);
+            const sessionId = req.user.sessionId;
+
+            await sessionController.invalidateSessionById(sessionId);
+            socketController.closeClientsWithSessionId(sessionId);
             res.clearCookie('eh_jwt', {
                 httpOnly: true,
                 sameSite: false,
@@ -24,7 +28,7 @@ router.get('/cleanToken', authController.authenticate, async (req, res, next) =>
 });
 
 router.post('/refreshToken', authController.authenticate, async (req, res, next) => {
-    console.log(req.user);
+    // console.log(req.user);
     if (req.user===undefined || req.user===null) {
         res.status(401).send();
     } else {
@@ -35,8 +39,11 @@ router.post('/refreshToken', authController.authenticate, async (req, res, next)
     
         try {
             if (req.user.hasToken===true) {
-                await sessionController.invalidateSessionById(req.user.sessionId);
+                const sessionId = req.user.sessionId;
+
+                await sessionController.invalidateSessionById(sessionId);
                 tokenInfo = await authController.getToken(req.user._id, req.user.project, ipAddress, userAgent);
+                await socketController.replaceClientsSession(sessionId, tokenInfo.session);
                 tokenInfo.user = { "name": req.user.name, "email": req.user.email, "guest": req.user.guest }
             } else {
                 throw new Error("Can't refresh token");

@@ -1,7 +1,7 @@
 var fsc = require('../controllers/fsController');
-var server = require('../bin/www');
 var express = require('express');
 var router = express.Router();
+const socketController = require('../controllers/socketController');
 
 router.get('/:key', async (req, res, next) => {
 
@@ -20,8 +20,10 @@ router.post('/:key', async (req, res, next) => {
         const data = await fsc.cloudStorageFileUpload(req.body, req.params.key, "eventhorizonfs");
 		let json = { msg : 'cloudStorageFileUpdate', name : req.params.key };
 		let jsonParticular = { msg : 'cloudStorageFileUpdate-'+req.params.key };
-		server.ws_send( JSON.stringify(json) );
-		server.ws_send( JSON.stringify(jsonParticular) );
+        // server.ws_send( JSON.stringify(json) );
+		// server.ws_send( JSON.stringify(jsonParticular) );
+        socketController.sendMessageToAllClients(JSON.stringify(json));
+        socketController.sendMessageToAllClients(JSON.stringify(jsonParticular));
     	if ( res ) {
 			res.status(201).json({ 'ETag': data.ETag });
 			res.end();		  	    		

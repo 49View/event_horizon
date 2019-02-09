@@ -69,28 +69,28 @@ const onSocketClientHeartBeat = (client) => {
 
 const onSocketClientMessage = async(client, message) => {
 
-    console.log((new Date())+" - Message received from: ",client.session._id);
-    console.log("Message: "+message);
-    try {
-        let messageObject=JSON.parse(message);
-        if (messageObject!==null) {
-            if (messageObject.type==="refresh") {
-                let s = messageObject.s;
-                console.log(s);
-                let session = await checkSessionById(s, null, null);
-                console.log("S:",session);
-                if (session!==null) {
-                    console.log((new Date())+' - Session refreshed: ',session);
-                    client.session=session;
-                } else {
-                    console.log((new Date())+' - Invalid Session - Client disconnected');
-                    client.terminate();
-                }
-            }
-        }
-    } catch (err) {
-        console.log("Invalid message", err);
-    }
+    // console.log((new Date())+" - Message received from: ",client.session._id);
+    // console.log("Message: "+message);
+    // try {
+    //     let messageObject=JSON.parse(message);
+    //     if (messageObject!==null) {
+    //         if (messageObject.type==="refresh") {
+    //             let s = messageObject.s;
+    //             console.log(s);
+    //             let session = await checkSessionById(s, null, null);
+    //             console.log("S:",session);
+    //             if (session!==null) {
+    //                 console.log((new Date())+' - Session refreshed: ',session);
+    //                 client.session=session;
+    //             } else {
+    //                 console.log((new Date())+' - Invalid Session - Client disconnected');
+    //                 client.terminate();
+    //             }
+    //         }
+    //     }
+    // } catch (err) {
+    //     console.log("Invalid message", err);
+    // }
 }
 
 exports.createSocketServer = (server) => {
@@ -122,12 +122,43 @@ exports.sendMessageToSessionWithRole = (role, message) => {
 exports.sendMessageToSessionWithUserId = (userId, message) => {
     console.log((new Date())+" - Send message to client with session userId "+userId);
     this.wsServer.clients.forEach( client => {
-        if (client.session.user._id==userId) {
+        if (client.session.userId==userId) {
             client.send(message);
         }
     });
 }
   
+exports.sendMessageToSessionWithUserIdProject = (userId, project, message) => {
+    console.log((new Date())+" - Send message to client with session userId/project "+userId+"/"+project);
+    this.wsServer.clients.forEach( client => {
+        if (client.session.userId===userId && client.session.project===project) {
+            client.send(message);
+        }
+    });
+}
+
+exports.replaceClientsSession = async (previousSessionId, currentSessionId) => {
+    let session = await checkSessionById(currentSessionId, null, null);
+    if (session!==null) {
+        this.wsServer.clients.forEach( client => {
+            if (client.session._id.toString()===previousSessionId.toString()) {
+                console.log((new Date())+" - Replace session "+previousSessionId+" with session "+currentSessionId);
+                client.session=session;
+            }
+        });
+    }
+}
+
+exports.closeClientsWithSessionId = (sessionId) => {
+    this.wsServer.clients.forEach( client => {
+        if (client.session._id.toString()===sessionId.toString()) {
+            console.log((new Date())+" - Close session "+sessionId);
+            client.terminate();
+        }
+    })
+}
+
+
 // const ws_send = ( _message ) => {
 //     wsClients.forEach( function(client) {
 //         client.sendUTF(_message);
