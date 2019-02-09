@@ -170,11 +170,12 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
     if ( shaderEmit.count() > 0 && sm.loadShaders() ) {
         FM::writeLocalFile("../shaders.hpp", shaderHeader );
         Http::useLocalHost(true);
-        Socket::emit( shaderEmit.serialize() );
+        Http::login(LoginFields::Daemon());
+        Http::post( Url{HttpFilePrefix::broadcast}, shaderEmit.serialize() );
     }
 
     glfwTerminate();
     Http::shutDown();
-    
+
     return ret;
 }

@@ -29,7 +29,7 @@ void main()
 	float lopacity = 1.0;
 	bool bCoords = false; //v_texCoord.x < 0.1 || v_texCoord.x > 0.8;
 	if ( bCoords || (greenMod > 0.59 && colorRGB.r < 0.3 && colorRGB.b < 0.7 ) ) { // 
-		lopacity = 0.0;
+		lopacity = 0.0; 
 	}
     // FragColor = vec4(colorRGB, opacity * alpha);
     FragColor = vec4(colorRGB, lopacity * opacity * alpha);

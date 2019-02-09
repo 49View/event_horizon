@@ -25,6 +25,7 @@ namespace HttpFilePrefix {
     const static std::string catalog = "/catalog/";
     const static std::string getname = "/name/";
     const static std::string getnotexactname = "/get/notexact/name/";
+    const static std::string broadcast = "/broadcast/";
 };
 
 enum class HttpQuery {
@@ -48,7 +49,8 @@ namespace Socket {
     void close();
 }
 
-JSONDATA( LoginToken, token, expires, project )
+JSONDATA( LoginToken, session, token, expires, project )
+    std::string session;
     std::string token;
     uint64_t expires;
     std::string project;
@@ -140,7 +142,9 @@ namespace Http {
     LoginFields cachedLoginFields();
 
     void userToken( std::string_view _token );
+    void sessionId( std::string_view _sid );
     std::string_view userToken();
+    std::string_view sessionId();
 
     const std::string CLOUD_PROTOCOL();
     const std::string CLOUD_SERVER();

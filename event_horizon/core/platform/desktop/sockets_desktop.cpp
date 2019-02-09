@@ -175,14 +175,16 @@ namespace Socket {
     }
 
     void close() {
-        websocketpp::lib::error_code ec;
-        m_endpoint->close(connectionHandle, websocketpp::close::status::going_away, "", ec);
-        if (ec) {
-            std::cout << "> Error closing connection " << ec.message() << std::endl;
+        if ( g_isConnected || g_isConnecting ) {
+            websocketpp::lib::error_code ec;
+            m_endpoint->close(connectionHandle, websocketpp::close::status::going_away, "", ec);
+            if (ec) {
+                std::cout << "> Error closing connection " << ec.message() << std::endl;
+            }
+            m_endpoint->stop_perpetual();
+            m_endpoint->stop();
+            m_thread->join();
         }
-        m_endpoint->stop_perpetual();
-        m_endpoint->stop();
-        m_thread->join();
     }
 
 }

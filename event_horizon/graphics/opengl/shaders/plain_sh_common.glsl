@@ -283,7 +283,7 @@ vec3 finalColor = ambient;//pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texC
 
 // finalColor = finalColor / ( finalColor + vec3(1.00));
 finalColor = vec3(1.0) - exp(-finalColor * 1.0);
-//finalColor = pow(finalColor, vec3(2.2/1.0)); 
+//finalColor = pow(finalColor, vec3(2.2/1.0));
 
 FragColor = vec4( finalColor, opacity * alpha ); 
 

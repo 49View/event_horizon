@@ -13,6 +13,7 @@ static bool sUseLocalhost = false;
 static bool sUserLoggedIn = false;
 static std::string sProject;
 static std::string sUserToken;
+static std::string sUserSessionId;
 static LoginFields sCachedLoginFields;
 
 const std::string Url::WsProtocol = "ws";
@@ -249,6 +250,14 @@ namespace Http {
         return sUserToken;
     }
 
+    void sessionId( std::string_view _sid ) {
+        sUserSessionId = _sid;
+    }
+
+    std::string_view sessionId() {
+        return sUserSessionId;
+    }
+
     const std::string CLOUD_PROTOCOL() {
         return Url::HttpsProtocol;
         // We do NOT allow anything that's not HTTPS, sorry folks!!
@@ -295,6 +304,7 @@ namespace Http {
             if( res.isSuccessStatusCode() ) {
                 LoginToken lt(res.bufferString);
                 userToken( lt.token );
+                sessionId( lt.session );
                 project( lt.project );
             }
 

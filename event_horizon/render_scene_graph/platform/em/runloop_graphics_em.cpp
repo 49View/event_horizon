@@ -60,8 +60,6 @@ void mainLoop( std::shared_ptr<SceneOrchestrator> p ) {
     emscripten_set_resize_callback(nullptr, nullptr, true, em_resize_callback );
 	rl.initWindow( p );
 
-//	auto canvas = emscripten::val::global(“window”);
-//	canbas.set(“resize”, js::bind(…));
-
+	p->activate();
 	emscripten_set_main_loop( main_loop_em, 0, 0 );
 }

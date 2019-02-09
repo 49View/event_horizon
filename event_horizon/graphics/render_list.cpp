@@ -19,11 +19,11 @@
 #include <graphics/camera_rig.hpp>
 
 void CommandBuffer::push( const CommandBufferEntry& entry ) {
-    mCommandList.push_back( entry );
+    mCommandList.emplace_back( entry );
 }
 
 void CommandBuffer::push( const CommandBufferCommand& entry ) {
-    mCommandList.push_back( entry );
+    mCommandList.emplace_back( entry );
 }
 
 void CommandBuffer::clear() {
@@ -735,6 +735,8 @@ void RLTargetPBR::endCL( CommandBufferList& cb ) {
 void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     startCL( cb );
 
+    renderSkybox();
+
     cb.pushCommand( { CommandBufferCommandName::depthWriteFalse } );
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k) ) {
@@ -748,8 +750,6 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
             rr.addToCommandBuffer( vl.mVList );
         }
     }
-
-    renderSkybox();
 
     endCL( cb );
 }

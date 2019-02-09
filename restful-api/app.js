@@ -7,6 +7,7 @@ const passport = require('passport');
 const globalConfig = require('./config_api.js')
 const indexRoute = require('./routes/indexRoute');
 const entitiesRoute = require('./routes/entitiesRoute');
+const broadcastRoute = require('./routes/broadcastRoute');
 const usersRoute = require('./routes/usersRoute');
 const tokenRoute = require('./routes/tokenRoute');
 const fsRoute = require('./routes/fsRoute');
@@ -61,6 +62,7 @@ app.use(projectController.checkProjectRoutes);
 app.use('/user', usersRoute);
 app.use('/fs', fsRoute);
 app.use('/entities', entitiesRoute);
+app.use('/broadcast', broadcastRoute);
 
 
 // catch 404 and forward to error handler

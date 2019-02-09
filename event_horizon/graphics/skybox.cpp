@@ -64,6 +64,7 @@ void Skybox::render( float _sunHDRMult ) {
         mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
         mVPList->addToCommandBuffer( rr );
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
     }
 }
 

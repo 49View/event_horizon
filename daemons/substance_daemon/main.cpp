@@ -144,7 +144,7 @@ void elaborateGeom( const std::string& _filename ) {
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
-    Http::xProjectHeader(LoginFields::Daemon());
+    Http::login(LoginFields::Daemon());
 
 //    initDeamon();
     Socket::on( "cloudStorageFileUpdate", []( SocketCallbackDataType data ) {
