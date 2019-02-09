@@ -11,11 +11,10 @@
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
 struct ImGuiConsole;
-class SceneLayout;
+class SceneStateMachine;
 class SceneOrchestrator;
 
-using DragAndDropFunction = std::function<void(SceneOrchestrator* p, const std::string&)>;
-using InitLayoutFunction = std::function<void(SceneLayout* _layout, SceneOrchestrator*_target)>;
+using InitLayoutFunction = std::function<void(SceneStateMachine* _layout, SceneOrchestrator*_target)>;
 using RenderFunction = std::function<void( SceneOrchestrator* )>;
 using RenderLayoutFunction = std::function<void( SceneOrchestrator* _target, Rect2f& )>;
 
@@ -105,12 +104,12 @@ private:
     Rect2f sizeScreenPerc = Rect2f::INVALID;
 };
 
-class SceneLayout {
+class SceneStateMachine {
 public:
-    explicit SceneLayout( InitLayoutFunction&& initLayout,
-                          RenderFunction&& _renderFunction = nullptr,
-                          DragAndDropFunction&& _dd = nullptr,
-                          InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal );
+    explicit SceneStateMachine( SceneOrchestrator* _p );
+
+    virtual void activateImpl() = 0;
+    virtual void run() = 0;
 
     struct Boxes {
         Rect2f& updateAndGetRect();
@@ -150,16 +149,8 @@ public:
             it->second.toggleVisible();
         }
     }
-
-    InitializeWindowFlagsT getInitFlags() const {
-        return initFlags;
-    }
-
-    void setInitFlags( InitializeWindowFlagsT initFlags ) {
-        SceneLayout::initFlags = initFlags;
-    }
-
-    static std::shared_ptr<SceneLayout> makeDefault();
+//
+//    static std::shared_ptr<SceneStateMachine> makeDefault();
 
     void resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize );
 
@@ -167,21 +158,25 @@ public:
         for ( auto& [k,v] : boxes ) {
             v.render( _target, BoxUpdateAndGet(k) );
         }
-        if ( renderFunction ) renderFunction( _target );
+//        if ( renderFunction ) renderFunction( _target );
     }
 
-    void setDragAndDropFunction( DragAndDropFunction dd );
+    InitializeWindowFlagsT getLayoutInitFlags() const {
+        return initFlags;
+    }
+
+protected:
+    SceneOrchestrator* o() const {
+        return orchestrator;
+    }
 
 private:
     void activate( SceneOrchestrator* _target );
 
+private:
     std::unordered_map<std::string, Boxes> boxes;
-    InitLayoutFunction initLayout;
-    RenderFunction renderFunction;
-    DragAndDropFunction dragAndDropFunc;
-    InitializeWindowFlagsT initFlags = InitializeWindowFlags::Normal;
-
+    InitializeWindowFlagsT initFlags = InitializeWindowFlags::HalfSize;
+    SceneOrchestrator* orchestrator = nullptr;
     std::unordered_map<std::string, std::shared_ptr<LayoutBoxRenderer>> boxFunctionMapping;
-    SceneOrchestrator* owner = nullptr;
     friend class SceneOrchestrator;
 };

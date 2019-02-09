@@ -57,18 +57,10 @@ namespace WindowHandling {
         ImGui::StyleColorsDark();
     }
 
-    void imguiUpdate() {
+    void preUpdate() {
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
-    }
-
-    void imguiUpdateStart() {
-        ImGui::NewFrame();
-    }
-
-    void imguiUpdateEnd() {
-        ImGui::Render();
     }
 
     void enableInputCallbacks() {

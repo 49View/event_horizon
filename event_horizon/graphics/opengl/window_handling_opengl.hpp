@@ -15,9 +15,7 @@ typedef void (* GLFWdropfun)(GLFWwindow*,int,const char**);
 namespace WindowHandling {
 
 	void initImGUI();
-	void imguiUpdate();
-	void imguiUpdateStart();
-	void imguiUpdateEnd();
+	void preUpdate();
 	void resizeWindow( const Vector2i& _newSize );
 	void gatherMainScreenInfo();
 	void setDropCallback( GLFWdropfun fn );

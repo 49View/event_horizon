@@ -4,7 +4,7 @@
 
 #include "material_layout.h"
 #include <graphics/imgui/imgui.h>
-#include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/scene_orchestrator.hpp>
 #include <poly/geom_builder.h>
 #include <core/tar_util.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>

@@ -14,7 +14,7 @@
 #include "core/math/anim.h"
 
 #include "runloop_graphics.h"
-#include "scene.hpp"
+#include "scene_orchestrator.hpp"
 #include "graphics/window_handling.hpp"
 
 bool profileUpdateRenderer = false;
@@ -30,87 +30,45 @@ void RunLoopGraphics::initWindow( std::shared_ptr<SceneOrchestrator> _presenter 
 }
 
 void RunLoopGraphics::run() {
+	// This will be use for multithreading rendering
+	// to be supported properly within wasm, atm out of the scope of current understanding :D
+}
 
-	rr.setUseMultiThreadRendering(true);
+void RunLoopGraphics::update() {
 
-	std::thread updateThread( &RunLoopGraphics::update, this );
+	updateTime();
+	WH::preUpdate();
+	mUpdateSignals.NeedsUpdate(false);
+	Timeline::update();
+	DH::update();
+	cq.execute();
+	pm->enableInputs(WH::isInputEnabled());
+	WH::pollEvents();
+	mi.update( mUpdateSignals );
+	pm->update();
+}
 
-	// main loop
-	while ( !WH::shouldWindowBeClosed() ) {
-//		rr.CBConsumerLock();
-//		{
-			renderLoop();
-//		}
-//		rr.CBConsumerUnlock();
-		nRenders++;
-	}
-
-	mIsClosingFlag = true;
-
-	if ( updateThread.joinable() )
-		updateThread.join();
+void RunLoopGraphics::render() {
+	pm->render();
+	WH::flush();
 }
 
 void RunLoopGraphics::singleThreadLoop() {
 
-	elaborateAllSignals();
+	update();
+	render();
 
-//	if ( mUpdateSignals.NeedsUpdate() ) {
-	WH::imguiUpdateStart();
-	pm->enableInputs(WH::isInputEnabled());
-	pm->render();
-	rr.directRenderLoop( pm->Targets() );
-	WH::imguiUpdateEnd();
-	WH::flush();
-//	}
-
-	// Timers
-	Timeline::update();
-	updateTime();
-
-	nRenders++;
-}
-
-void RunLoopGraphics::elaborateAllSignals() {
-
-	mUpdateSignals.NeedsUpdate(false);
-	DH::update();
-	cq.execute();
-	WH::pollEvents();
-	WH::imguiUpdate();
-	mi.update( mUpdateSignals );
-	pm->update( );
+	nTicks++;
 }
 
 void RunLoopGraphics::runSingleThread() {
 
-	rr.setUseMultiThreadRendering(false);
-
-	// main loop
+	pm->activate();
 	while ( !WH::shouldWindowBeClosed() ) {
 		singleThreadLoop();
 	}
 	Http::shutDown();
 
-}
-
-void RunLoopGraphics::updateLoop() {
-
-}
-
-void RunLoopGraphics::update() {
-
-	while ( !mIsClosingFlag.load() ) {
-//		rr.CBProducerLock();
-//		{
-			updateLoop();
-//		}
-		nUpdates++;
-//		rr.CBProducerUnlock();
-	}
-}
-
-void RunLoopGraphics::renderLoop() {
 }
 
 void RunLoopGraphics::addScriptLine( const std::string& _cmd ) {
