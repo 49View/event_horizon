@@ -3,7 +3,7 @@
 //
 
 #include "runloop_graphics_desktop.h"
-#include "render_scene_graph/scene.hpp"
+#include "render_scene_graph/scene_orchestrator.hpp"
 #include <graphics/di_modules.h>
 
 void mainLoop( std::shared_ptr<SceneOrchestrator> p ) {

@@ -2,11 +2,11 @@
 // Created by Dado on 2018-10-29.
 //
 
-#include "scene_layout.h"
+#include "scene_state_machine.h"
 #include <core/app_globals.h>
 #include <core/camera.h>
 #include "graphics/camera_rig.hpp"
-#include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/editor/includes.h>
 
 float sPresenterArrangerLeftFunction( float _value ) {
@@ -41,9 +41,7 @@ float sPresenterArrangerBottomFunction3d( float _value ) {
     return getScreenSizef.y() - ( getScreenSizef.y() * ( _value ) );
 }
 
-SceneLayout::SceneLayout( InitLayoutFunction&& initLayout, RenderFunction&& _renderFunction, DragAndDropFunction&& _dd,
-						  InitializeWindowFlagsT initFlags ) :
-		initLayout( initLayout ), renderFunction(_renderFunction), dragAndDropFunc(_dd), initFlags( initFlags ) {
+SceneStateMachine::SceneStateMachine( SceneOrchestrator* _p ) : orchestrator(_p) {
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Taskbar,
 			std::make_shared<ImGuiTaskbar>(SceneLayoutDefaultNames::Taskbar) );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Console,
@@ -66,34 +64,28 @@ SceneLayout::SceneLayout( InitLayoutFunction&& initLayout, RenderFunction&& _ren
 			std::make_shared<ImGuiCloudEntitiesGeom>(SceneLayoutDefaultNames::CloudGeom) );
 }
 
-void SceneLayout::setDragAndDropFunction( DragAndDropFunction dd ) {
-	dragAndDropFunc = dd;
-}
-
-void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t, float _b,
+void SceneStateMachine::addBox( const std::string& _name, float _l, float _r, float _t, float _b,
 						  std::shared_ptr<LayoutBoxRenderer> _lbr ) {
 	boxes[_name] = { { _l, _r, _t, _b}, CameraControls::Edit2d, _lbr };
 }
 
-void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc ) {
+void SceneStateMachine::addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc ) {
 	boxes[_name] = { { sPresenterArrangerLeftFunction3d,
 					   sPresenterArrangerRightFunction3d,
 					   sPresenterArrangerTopFunction3d,
 					   sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, _cc, nullptr };
 }
 
-void SceneLayout::addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible ) {
+void SceneStateMachine::addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible ) {
 	if ( auto rlf = boxFunctionMapping.find( _name ); rlf != boxFunctionMapping.end() ) {
 		boxes[_name] = { { _l, _r, _t, _b}, CameraControls::Edit2d, rlf->second };
 		boxes[_name].setVisible( _bVisible );
 	}
 }
 
-void SceneLayout::activate( SceneOrchestrator* _target ) {
+void SceneStateMachine::activate( SceneOrchestrator* _target ) {
 
-	owner = _target;
-
-	initLayout( this, _target );
+	activateImpl();
 
 	for ( auto& [k,v] : boxes ) {
 		if ( v.cc == CameraControls::Plan2d ) {
@@ -104,7 +96,7 @@ void SceneLayout::activate( SceneOrchestrator* _target ) {
 	}
 }
 
-void SceneLayout::resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize ) {
+void SceneStateMachine::resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize ) {
 	for ( auto& [k,v] : boxes ) {
 		orBitWiseFlag( v.flags, BoxFlags::Resize );
 		if ( v.cc == CameraControls::Fly ) {
@@ -115,15 +107,15 @@ void SceneLayout::resizeCallback( SceneOrchestrator* _target, const Vector2i& _r
 	}
 }
 
-void initDefaultLayout( SceneLayout* _layout, SceneOrchestrator* _target ) {
-    _layout->addBox(SceneOrchestrator::DC(), 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
-}
+//void initDefaultLayout( SceneStateMachine* _layout, SceneOrchestrator* _target ) {
+//    _layout->addBox(SceneOrchestrator::DC(), 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
+//}
+//
+//std::shared_ptr<SceneStateMachine> SceneStateMachine::makeDefault() {
+//    return std::make_shared<SceneStateMachine>(initDefaultLayout);
+//}
 
-std::shared_ptr<SceneLayout> SceneLayout::makeDefault() {
-    return std::make_shared<SceneLayout>(initDefaultLayout);
-}
-
-Rect2f& SceneLayout::Boxes::updateAndGetRect() {
+Rect2f& SceneStateMachine::Boxes::updateAndGetRect() {
     if ( checkBitWiseFlag( flags, BoxFlags::Rearrange ) ) {
         rectArranger.set();
         xandBitWiseFlag( flags, BoxFlags::Rearrange );
@@ -136,22 +128,22 @@ Rect2f& SceneLayout::Boxes::updateAndGetRect() {
     return rectArranger.getRect();
 }
 
-Rect2f SceneLayout::Boxes::getRect() const {
+Rect2f SceneStateMachine::Boxes::getRect() const {
     return rectArranger.getRect();
 }
 
-void SceneLayout::Boxes::render( SceneOrchestrator *_target, Rect2f& _rect ) {
+void SceneStateMachine::Boxes::render( SceneOrchestrator *_target, Rect2f& _rect ) {
     if ( renderer ) {
         renderer->render( _target, _rect, flags );
     }
 }
 
-void SceneLayout::Boxes::toggleVisible() {
+void SceneStateMachine::Boxes::toggleVisible() {
     toggle(flags, BoxFlags::Visible);
     if ( renderer ) renderer->toggleVisible();
 }
 
-void SceneLayout::Boxes::setVisible( bool _bVis ) {
+void SceneStateMachine::Boxes::setVisible( bool _bVis ) {
     orBitWiseFlag( flags, BoxFlags::Visible );
     if ( renderer ) renderer->setVisible(_bVis);
 }

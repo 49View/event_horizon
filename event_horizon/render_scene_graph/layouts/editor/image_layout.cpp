@@ -4,7 +4,7 @@
 
 #include "image_layout.h"
 #include <graphics/imgui/imgui.h>
-#include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
 void ImGuiImages::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {

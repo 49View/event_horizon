@@ -5,7 +5,7 @@
 #include "geom_layout.h"
 #include <graphics/imgui/imgui_jsonvisit.hpp>
 #include <graphics/imgui/imgui.h>
-#include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 #include "core/node.hpp"
 #include "poly/geom_builder.h"

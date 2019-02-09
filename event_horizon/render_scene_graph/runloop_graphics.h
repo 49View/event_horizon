@@ -19,10 +19,10 @@ public:
                    : RunLoop( _cq ), rr( rr ), ti( ti), mi( mi) {}
 
 	void run();
-	void runSingleThread();
+	void runSingleThread() override;
 	void singleThreadLoop();
 
-	virtual ~RunLoopGraphics() {}
+	virtual ~RunLoopGraphics() = default;
 
 	void addScriptLine( const std::string& _cmd );
     Renderer& RR() { return rr; }
@@ -32,11 +32,8 @@ public:
 	void initWindow( std::shared_ptr<SceneOrchestrator> _presenter );
 
 protected:
-	void elaborateAllSignals();
 	void update();
-
-	void updateLoop();
-	void renderLoop();
+	void render();
 
 protected:
     Renderer& rr;
@@ -45,6 +42,7 @@ protected:
 
 	int nUpdates = 0;
 	int nRenders = 0;
+	int nTicks = 0;
 	UpdateSignals mUpdateSignals;
 	std::shared_ptr<SceneOrchestrator> pm;
 };

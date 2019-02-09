@@ -3,7 +3,7 @@
 //
 //
 
-#include "scene.hpp"
+#include "scene_orchestrator.hpp"
 
 #include "graphics/camera_manager.h"
 #include "graphics/renderer.h"
@@ -12,7 +12,7 @@
 #include "graphics/window_handling.hpp"
 #include "graphics/ui/imgui_console.h"
 
-#include <render_scene_graph/scene_layout.h>
+#include <render_scene_graph/scene_state_machine.h>
 #include <render_scene_graph/render_scene_graph.h>
 
 #include <stb/stb_image.h>
@@ -53,12 +53,15 @@ void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
 	SceneOrchestrator::callbackResizeFrameBuffer = Vector2i{w, h};
 }
 
-SceneOrchestrator::SceneOrchestrator( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi,
-						  CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm ) :
+SceneOrchestrator::SceneOrchestrator( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi, CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm ) :
 		cm(cm), rr(_rr), rsg(_rsg), fm( _fm ), ti( ti), mi( mi ), cq( cq), ssm(_ssm) {
 	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
 	cq.registerCommandScript(hcs);
 	console = std::make_shared<ImGuiConsole>(cq);
+}
+
+void SceneOrchestrator::setDragAndDropFunction( DragAndDropFunction dd ) {
+	dragAndDropFunc = dd;
 }
 
 void SceneOrchestrator::updateCallbacks() {
@@ -72,7 +75,7 @@ void SceneOrchestrator::updateCallbacks() {
 
 	if ( !callbackPaths.empty() ) {
 		for ( auto& path : callbackPaths ) {
-			if ( layout->dragAndDropFunc ) layout->dragAndDropFunc( this, path );
+			if ( dragAndDropFunc ) dragAndDropFunc( this, path );
 		}
 		callbackPaths.clear();
 	}
@@ -88,21 +91,14 @@ void SceneOrchestrator::updateCallbacks() {
 		WH::resizeWindow( callbackResizeFrameBuffer );
 		WH::gatherMainScreenInfo();
 		RR().resetDefaultFB(callbackResizeFrameBuffer);
-		layout->resizeCallback( this, callbackResizeFrameBuffer );
+		stateMachine->resizeCallback( this, callbackResizeFrameBuffer );
 		callbackResizeFrameBuffer = Vector2i{-1, -1};
 	}
 
 }
 
 void SceneOrchestrator::update() {
-
-	if ( !activated() ) {
-		activate();
-		if ( postActivateFunc ) postActivateFunc( this );
-	}
-
-	if ( !mbActivated ) return;
-
+	stateMachine->run();
 	inputPollUpdate();
 	updateCallbacks();
 	RSG().update();
@@ -119,8 +115,10 @@ void SceneOrchestrator::activate() {
 
     //stbi_set_flip_vertically_on_load(true);
 
+#ifndef _PRODUCTION_
 	Socket::on( "shaderchange",
 				std::bind(&SceneOrchestrator::reloadShaders, this, std::placeholders::_1 ) );
+#endif
 
 	ImageBuilder{S::WHITE}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
 	ImageBuilder{S::BLACK}.makeDirect( rsg.TL(), RawImage::BLACK_RGBA4x4 );
@@ -129,13 +127,7 @@ void SceneOrchestrator::activate() {
 
 	MaterialBuilder{S::WHITE_PBR, S::SH}.makeDefault(rsg.ML());
 
-	CQ().script("change time 14:00");
-	layout->activate( this );
-
-	if ( const auto& it = eventFunctions.find( PresenterEventFunctionKey::Activate); it != eventFunctions.end() ) {
-		it->second(this);
-	}
-	mbActivated = true;
+	stateMachine->activate( this );
 }
 
 void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {
@@ -193,11 +185,17 @@ void SceneOrchestrator::notified( MouseInput& _source, const std::string& genera
 }
 
 void SceneOrchestrator::render() {
-	layout->render( this );
+	ImGui::NewFrame();
+
+	stateMachine->render( this );
 
 	for ( auto& [k,v] : mRigs ) {
 		v->renderControls(this);
 	}
+
+	rr.directRenderLoop( Targets() );
+
+	ImGui::Render();
 }
 
 void SceneOrchestrator::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
@@ -221,16 +219,8 @@ void SceneOrchestrator::cmdChangeTime( const std::vector<std::string>& _params )
 	changeTime( RSG().SB().getSunPosition() );
 }
 
-void SceneOrchestrator::addEventFunction( const std::string& _key, std::function<void(SceneOrchestrator*)> _f ) {
-	eventFunctions[_key] = _f;
-}
-
-void SceneOrchestrator::Layout( std::shared_ptr<SceneLayout> _l ) {
-	layout = _l;
-}
-
-InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
-	return layout->getInitFlags();
+void SceneOrchestrator::StateMachine( std::shared_ptr<SceneStateMachine> _l ) {
+	stateMachine = _l;
 }
 
 const std::shared_ptr<ImGuiConsole>& SceneOrchestrator::Console() const {
@@ -282,6 +272,10 @@ const cameraRigsMap& SceneOrchestrator::getRigs() const {
 
 void SceneOrchestrator::script( const std::string& _commandLine ) {
 	CQ().script( _commandLine );
+}
+
+InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
+	return stateMachine->getLayoutInitFlags();
 }
 
 

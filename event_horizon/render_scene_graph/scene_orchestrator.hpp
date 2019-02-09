@@ -18,7 +18,7 @@
 #include <render_scene_graph/camera_controls.hpp>
 
 class MouseInput;
-class SceneLayout;
+class SceneStateMachine;
 class SceneOrchestrator;
 struct ImGuiConsole;
 class CameraRig;
@@ -40,8 +40,8 @@ namespace PresenterEventFunctionKey {
 }
 
 using PresenterUpdateCallbackFunc = std::function<void(SceneOrchestrator* p)>;
-using ScenePostActivateFunc = std::function<void(SceneOrchestrator*)>;
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
+using DragAndDropFunction = std::function<void(SceneOrchestrator* p, const std::string&)>;
 
 struct SceneEventNotifications {
 	bool singleMouseTapEvent = false;
@@ -54,7 +54,9 @@ public:
 
 	virtual ~SceneOrchestrator() = default;
 
-    template <typename T>
+	void activate();
+
+	template <typename T>
     void addViewport( const std::string& _name, const Rect2f& _viewport, CameraControls _cc, BlitType _bt ) {
         auto lRig = addTarget<T>( _name, _viewport, _bt, cm );
         mRigs[_name] = CameraControlFactory::make( _cc, lRig, rsg );
@@ -81,7 +83,6 @@ public:
 	void update();
 	void render();
 	void enableInputs( bool _bEnabled );
-	void addEventFunction( const std::string& _key, std::function<void(SceneOrchestrator*)> _f );
 	void deactivate();
 
 	void script( const std::string& _commandLine );
@@ -112,8 +113,7 @@ public:
 		SSM().addStream<T>( _streamName, avcbTM );
 	}
 
-	void Layout( std::shared_ptr<SceneLayout> _l );
-	std::shared_ptr<SceneLayout> Layout() { return layout; }
+	void StateMachine( std::shared_ptr<SceneStateMachine> _l );
 	InitializeWindowFlagsT getLayoutInitFlags() const;
 
 	const std::shared_ptr<ImGuiConsole>& Console() const;
@@ -121,8 +121,9 @@ public:
 	void changeTime( const V3f& _solarTime );
 
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
-	void postActivate( ScenePostActivateFunc _f ) { postActivateFunc = _f; }
 	const cameraRigsMap& getRigs() const;
+
+	void setDragAndDropFunction( DragAndDropFunction dd );
 
 public:
 	static std::vector<std::string> callbackPaths;
@@ -131,11 +132,10 @@ public:
 
 protected:
 	void resetSingleEventNotifications();
-	void activate();
 	void reloadShaders( SocketCallbackDataType _data );
 
 protected:
-	std::shared_ptr<SceneLayout> layout;
+	std::shared_ptr<SceneStateMachine> stateMachine;
 	CameraManager& cm;
 	Renderer& rr;
 	RenderSceneGraph& rsg;
@@ -148,13 +148,12 @@ protected:
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	bool mbActivated = false;
     std::shared_ptr<CommandScriptPresenterManager> hcs;
-    std::unordered_map<std::string, std::function<void(SceneOrchestrator*)> > eventFunctions;
 	std::shared_ptr<ImGuiConsole> console;
 	SceneEventNotifications notifications;
+	DragAndDropFunction dragAndDropFunc = nullptr;
 
 private:
 	void updateCallbacks();
-	ScenePostActivateFunc postActivateFunc = nullptr;
 
 public:
 	static std::vector<PresenterUpdateCallbackFunc> sUpdateCallbacks;

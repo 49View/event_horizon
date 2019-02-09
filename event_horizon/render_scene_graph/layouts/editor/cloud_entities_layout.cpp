@@ -4,7 +4,7 @@
 
 #include "cloud_entities_layout.h"
 #include <graphics/imgui/imgui.h>
-#include <render_scene_graph/scene.hpp>
+#include <render_scene_graph/scene_orchestrator.hpp>
 
 static std::string remoteFilterString;
 static std::multimap<std::string, CoreMetaData> cloudEntitiesTypeMap;

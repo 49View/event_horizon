@@ -4,10 +4,13 @@
 
 #pragma once
 
-#include <memory>
+#include <render_scene_graph/scene_state_machine.h>
 
-class SceneLayout;
-class SceneOrchestrator;
+class FullEditor : public SceneStateMachine {
+public:
+    using SceneStateMachine::SceneStateMachine;
+    virtual ~FullEditor() = default;
 
-std::shared_ptr<SceneLayout> fullEditor();
-void allConversionsdragAndDropCallback( SceneOrchestrator* p, const std::string& _path );
+    void activateImpl() override;
+    void run() override;
+};
