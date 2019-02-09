@@ -193,6 +193,7 @@ exports.getToken = async (userId, project, ipAddress, userAgent) => {
     const jwt = await createJwtToken(session._id, issuedAt, expiresAt);
 
     return {
+        session: session._id,
         token: jwt,
         expires: expiresAt,
     };

@@ -28,9 +28,9 @@ exports.getValidSessionById = async (sessionId) => {
         {issuedAt: {$lte: currentDate }},
         {expiresAt: {$gte: currentDate}}
     ]};
-    console.log(query);
-    console.log(query["$and"]);
-    console.log(query["$and"]);
+    // console.log(query);
+    // console.log(query["$and"]);
+    // console.log(query["$and"]);
     dbSession = await sessionModel.findOne(query);
     if (dbSession!==null) {
         dbSession=dbSession.toObject();

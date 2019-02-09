@@ -14,8 +14,7 @@ const cookie = require('cookie');
 const cookieParser = require('cookie-parser');
 const authController = require('../controllers/authController');
 const globalConfig = require('../config_api.js')
-const webSocketServer = require('websocket').server;
-
+const socketController = require('../controllers/socketController');
 
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0" // Avoids DEPTH_ZERO_SELF_SIGNED_CERT error for self-signed certs
 
@@ -49,47 +48,49 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-let wsServer = new webSocketServer({
-  httpServer: server,
-  autoAcceptConnections: false
-});
+socketController.createSocketServer(server);
 
-var wsClients = [];
+// let wsServer = new webSocketServer({
+//   httpServer: server,
+//   autoAcceptConnections: false
+// });
 
-wsServer.on('request', function(request) {
-  // console.log("WEBSOCKET REQUEST",request.socket);  
-  var connection = request.accept(null, request.origin);
-  wsClients.push(connection);
-  console.log((new Date()) + ' Connection accepted.');
-  console.log(wsClients.length + ' client(s) connected');
-  connection.on('message', function(message) {
-      if (message.type === 'utf8') {
-          console.log('Received Message: ' + message.utf8Data);
-          wsClients.forEach( function(client) {
-            client.sendUTF(message.utf8Data);
-          });
-      }
-      else if (message.type === 'binary') {
-          console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-          wsClients.forEach( function(client) {
-            client.sendBytes(message.binaryData);
-          });
-      }
-  });
-  connection.on('close', function(reasonCode, description) {
-      console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-      wsClients.pop(connection);
-      console.log(wsClients.length + ' client(s) connected');
-  });
-});
+// var wsClients = [];
 
-exports.ws_send = function( _message ) {
-  wsClients.forEach( function(client) {
-    client.sendUTF(_message);
-  });
-}
+// wsServer.on('request', function(request) {
+//   // console.log("WEBSOCKET REQUEST",request.socket);  
+//   var connection = request.accept(null, request.origin);
+//   wsClients.push(connection);
+//   console.log((new Date()) + ' Connection accepted.');
+//   console.log(wsClients.length + ' client(s) connected');
+//   connection.on('message', function(message) {
+//       if (message.type === 'utf8') {
+//           console.log('Received Message: ' + message.utf8Data);
+//           wsClients.forEach( function(client) {
+//             client.sendUTF(message.utf8Data);
+//           });
+//       }
+//       else if (message.type === 'binary') {
+//           console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
+//           wsClients.forEach( function(client) {
+//             client.sendBytes(message.binaryData);
+//           });
+//       }
+//   });
+//   connection.on('close', function(reasonCode, description) {
+//       console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+//       wsClients.pop(connection);
+//       console.log(wsClients.length + ' client(s) connected');
+//   });
+// });
 
-exports.ws = wsServer;
+// exports.ws_send = function( _message ) {
+//   wsClients.forEach( function(client) {
+//     client.sendUTF(_message);
+//   });
+// }
+
+// exports.ws = wsServer;
 
 // // Loading the index file . html displayed to the client
 // var io = require('socket.io').listen(server);
