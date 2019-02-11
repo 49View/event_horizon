@@ -336,3 +336,21 @@ private:
 };
 
 using GB = GeomBuilder;
+
+class GeomBuilderComposer {
+public:
+    GeomBuilderComposer();
+
+    void add( GeomBuilder _gb );
+    void build( DependencyMaker& _md );
+
+    GeomAssetSP Elem();
+private:
+    GeomAssetSP elem = nullptr;
+    std::vector<GeomBuilder> builders;
+};
+
+using GBC = GeomBuilderComposer;
+
+#define bld() build(o()->RSG())
+#define bldr() buildr(o()->RSG())

@@ -127,7 +127,7 @@ void SceneOrchestrator::activate() {
 
 	MaterialBuilder{S::WHITE_PBR, S::SH}.makeDefault(rsg.ML());
 
-	stateMachine->activate( this );
+	stateMachine->activate();
 }
 
 void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {
@@ -219,7 +219,7 @@ void SceneOrchestrator::cmdChangeTime( const std::vector<std::string>& _params )
 	changeTime( RSG().SB().getSunPosition() );
 }
 
-void SceneOrchestrator::StateMachine( std::shared_ptr<SceneStateMachine> _l ) {
+void SceneOrchestrator::StateMachine( std::shared_ptr<SceneStateMachineBackEnd> _l ) {
 	stateMachine = _l;
 }
 

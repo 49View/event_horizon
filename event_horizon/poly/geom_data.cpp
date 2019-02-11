@@ -289,6 +289,9 @@ void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& s
 		case ShapeType::Pillow:
 			ps = createGeomForPillow( center, size, subDivs );
 			break;
+		case ShapeType::RoundedCube:
+			ps = createGeomForRoundedCube( center, size, subDivs );
+			break;
 		default:
 			ps = createGeomForSphere( center, size.x(), subDivs );
 	}

@@ -22,11 +22,11 @@ bool profileUpdateRenderer = false;
 std::atomic_bool mIsClosingFlag;
 
 void RunLoopGraphics::initWindow( std::shared_ptr<SceneOrchestrator> _presenter ) {
-	WH::initializeWindow( _presenter->getLayoutInitFlags(), rr );
+    pm = _presenter;
+	WH::initializeWindow( pm->getLayoutInitFlags(), rr );
 
 	rr.init();
-	mi.subscribe( _presenter );
-	pm = _presenter;
+	mi.subscribe( pm );
 }
 
 void RunLoopGraphics::run() {

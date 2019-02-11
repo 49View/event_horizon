@@ -344,3 +344,21 @@ bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, cons
 
     return true;
 }
+
+GeomBuilderComposer::GeomBuilderComposer() {
+    elem = std::make_shared<GeomAsset>();
+}
+
+void GeomBuilderComposer::add( GeomBuilder _gb ) {
+    builders.emplace_back( std::move(_gb.inj(elem)) );
+}
+
+void GeomBuilderComposer::build( DependencyMaker& _md ) {
+    for ( auto& b : builders ) {
+        b.build(_md);
+    }
+}
+
+GeomAssetSP GeomBuilderComposer::Elem() {
+    return elem;
+}

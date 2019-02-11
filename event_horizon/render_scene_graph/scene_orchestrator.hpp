@@ -18,7 +18,7 @@
 #include <render_scene_graph/camera_controls.hpp>
 
 class MouseInput;
-class SceneStateMachine;
+class SceneStateMachineBackEnd;
 class SceneOrchestrator;
 struct ImGuiConsole;
 class CameraRig;
@@ -113,7 +113,7 @@ public:
 		SSM().addStream<T>( _streamName, avcbTM );
 	}
 
-	void StateMachine( std::shared_ptr<SceneStateMachine> _l );
+	void StateMachine( std::shared_ptr<SceneStateMachineBackEnd> _l );
 	InitializeWindowFlagsT getLayoutInitFlags() const;
 
 	const std::shared_ptr<ImGuiConsole>& Console() const;
@@ -135,7 +135,7 @@ protected:
 	void reloadShaders( SocketCallbackDataType _data );
 
 protected:
-	std::shared_ptr<SceneStateMachine> stateMachine;
+	std::shared_ptr<SceneStateMachineBackEnd> stateMachine;
 	CameraManager& cm;
 	Renderer& rr;
 	RenderSceneGraph& rsg;

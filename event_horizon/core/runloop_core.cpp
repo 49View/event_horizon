@@ -33,6 +33,8 @@ void mainLoop<CommandConsole>( [[maybe_unused]] uint64_t _flags, [[maybe_unused]
     rl.runConsolePrompt();
 }
 
+std::atomic_bool deamonBreaker = false;
+
 void daemonLoop( int _sleepSeconds ) {
 
     Http::xProjectHeader(LoginFields::Daemon());
@@ -40,7 +42,7 @@ void daemonLoop( int _sleepSeconds ) {
 
 	auto st = std::chrono::system_clock::now();
 
-	while ( 1 ) {
+	while ( !deamonBreaker ) {
 		sleep( _sleepSeconds );
 		auto tn = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed = tn - st;

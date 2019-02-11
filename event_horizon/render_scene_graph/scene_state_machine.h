@@ -10,11 +10,23 @@
 #include <render_scene_graph/camera_controls.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#include <boost/msm/back/state_machine.hpp>
+#pragma GCC diagnostic pop
+
+#include <boost/msm/front/state_machine_def.hpp>
+#include <boost/msm/front/functor_row.hpp>
+
+namespace msm = boost::msm;
+namespace mpl = boost::mpl;
+using namespace msm::front;
+
 struct ImGuiConsole;
-class SceneStateMachine;
+class SceneStateMachineBackEnd;
 class SceneOrchestrator;
 
-using InitLayoutFunction = std::function<void(SceneStateMachine* _layout, SceneOrchestrator*_target)>;
+using InitLayoutFunction = std::function<void(SceneStateMachineBackEnd* _layout, SceneOrchestrator*_target)>;
 using RenderFunction = std::function<void( SceneOrchestrator* )>;
 using RenderLayoutFunction = std::function<void( SceneOrchestrator* _target, Rect2f& )>;
 
@@ -104,11 +116,35 @@ private:
     Rect2f sizeScreenPerc = Rect2f::INVALID;
 };
 
-class SceneStateMachine {
-public:
-    explicit SceneStateMachine( SceneOrchestrator* _p );
+class SceneStateMachineBackEnd;
 
-    virtual void activateImpl() = 0;
+struct SceneStateMachine : msm::front::state_machine_def<SceneStateMachine> {
+    explicit SceneStateMachine( SceneStateMachineBackEnd *owner ) : owner( owner ) {}
+
+    struct OnActivate{};
+
+    struct Activate : state<> {};
+    struct Run : state<> {};
+
+    void activate( OnActivate const& );
+
+    struct transition_table : mpl::vector<
+        a_row<Activate, OnActivate, Run, &SceneStateMachine::activate>
+    > {};
+
+    typedef Activate initial_state;
+
+    template <class FSM, class Event> void no_transition(Event const& e, FSM&, int state) {}
+private:
+    SceneStateMachineBackEnd* owner;
+};
+
+class SceneStateMachineBackEnd {
+public:
+    explicit SceneStateMachineBackEnd( SceneOrchestrator* _p );
+
+    void activate();
+    virtual void init() = 0;
     virtual void run() = 0;
 
     struct Boxes {
@@ -150,7 +186,7 @@ public:
         }
     }
 //
-//    static std::shared_ptr<SceneStateMachine> makeDefault();
+//    static std::shared_ptr<SceneStateMachineBackEnd> makeDefault();
 
     void resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize );
 
@@ -158,7 +194,6 @@ public:
         for ( auto& [k,v] : boxes ) {
             v.render( _target, BoxUpdateAndGet(k) );
         }
-//        if ( renderFunction ) renderFunction( _target );
     }
 
     InitializeWindowFlagsT getLayoutInitFlags() const {
@@ -166,17 +201,17 @@ public:
     }
 
 protected:
+    void addBoxToViewport( const std::string& _nane, const Boxes& _box );
+
     SceneOrchestrator* o() const {
         return orchestrator;
     }
 
 private:
-    void activate( SceneOrchestrator* _target );
-
-private:
     std::unordered_map<std::string, Boxes> boxes;
     InitializeWindowFlagsT initFlags = InitializeWindowFlags::HalfSize;
     SceneOrchestrator* orchestrator = nullptr;
+    std::unique_ptr<msm::back::state_machine<SceneStateMachine>> stateMachine;
     std::unordered_map<std::string, std::shared_ptr<LayoutBoxRenderer>> boxFunctionMapping;
     friend class SceneOrchestrator;
 };

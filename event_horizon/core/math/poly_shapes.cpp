@@ -403,6 +403,91 @@ void Pillow( Topology& mesh, uint32_t subdivs, float radius ) {
     addPillowSide( mesh, subdivs, 8+subDivInc, 1, 3, 7, 5 );
     addPillowSide( mesh, subdivs, 8+subDivInc*2, 0, 1, 6, 7 );
     addPillowSide( mesh, subdivs, 8+subDivInc*3, 2, 0, 4, 6 );
+}
+
+void addTopQuad( Topology& mesh, const V3f& sz ) {
+    mesh.vertices.emplace_back( -sz.x(),  sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back(  sz.x() , sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back( -sz.x(),  sz.y() ,  sz.z()  );
+    mesh.vertices.emplace_back(  sz.x() , sz.y() ,  sz.z()  );
+}
+
+void addBottomQuad( Topology& mesh, const V3f& sz ) {
+    mesh.vertices.emplace_back( -sz.x(),  -sz.y() , sz.z()  );
+    mesh.vertices.emplace_back(  sz.x() , -sz.y() , sz.z()  );
+    mesh.vertices.emplace_back( -sz.x(),  -sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back(  sz.x() , -sz.y() , -sz.z()  );
+}
+
+void addLeftQuad( Topology& mesh, const V3f& sz ) {
+    mesh.vertices.emplace_back( -sz.x(),  -sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back( -sz.x() ,  sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back( -sz.x(),  -sz.y() ,  sz.z()  );
+    mesh.vertices.emplace_back( -sz.x() ,  sz.y() ,  sz.z()  );
+}
+
+void addRightQuad( Topology& mesh, const V3f& sz ) {
+    mesh.vertices.emplace_back( sz.x(),  -sz.y() ,  sz.z()  );
+    mesh.vertices.emplace_back( sz.x() ,  sz.y() ,  sz.z()  );
+    mesh.vertices.emplace_back( sz.x(),  -sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back( sz.x() ,  sz.y() , -sz.z()  );
+}
+
+void addFrontQuad( Topology& mesh, const V3f& sz ) {
+    mesh.vertices.emplace_back( -sz.x(),  -sz.y() , sz.z()  );
+    mesh.vertices.emplace_back( -sz.x() ,  sz.y() , sz.z()  );
+    mesh.vertices.emplace_back(  sz.x(),  -sz.y() , sz.z()  );
+    mesh.vertices.emplace_back(  sz.x() ,  sz.y() , sz.z()  );
+}
+
+void addBackQuad( Topology& mesh, const V3f& sz ) {
+    mesh.vertices.emplace_back(  sz.x(),  -sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back(  sz.x() ,  sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back( -sz.x(),  -sz.y() , -sz.z()  );
+    mesh.vertices.emplace_back( -sz.x() ,  sz.y() , -sz.z()  );
+}
+
+void RoundedCube( Topology& mesh, uint32_t subdivs, float radius ) {
+    // Vertices
+
+    float quadLength = 0.5f * (1.0f - radius);
+    addTopQuad( mesh, V3f{quadLength, 0.5f, quadLength} );
+    addBottomQuad( mesh, V3f{quadLength, 0.5f, quadLength} );
+
+    addLeftQuad( mesh, V3f{0.5f, quadLength, quadLength} );
+    addRightQuad( mesh, V3f{0.5f, quadLength, quadLength} );
+
+    addFrontQuad( mesh, V3f{quadLength, quadLength, 0.5f} );
+    addBackQuad( mesh, V3f{quadLength, quadLength, 0.5f} );
+
+    // Vertices for the lateral bumps
+//    subdivs = 4;
+//    uint32_t subDivInc = (subdivs - 1) * 2;
+//    subdivPillowSide( mesh, subdivs, radius, mesh.vertices[2], mesh.vertices[3], Vector3f{-1.0f, 0.0f, 1.0f}, Vector3f{1.0f, 0.0f, 1.0f} );
+//    subdivPillowSide( mesh, subdivs, radius, mesh.vertices[3], mesh.vertices[1], Vector3f{1.0f, 0.0f, 1.0f}, Vector3f{1.0f, 0.0f, -1.0f} );
+//    subdivPillowSide( mesh, subdivs, radius, mesh.vertices[1], mesh.vertices[0], Vector3f{1.0f, 0.0f, -1.0f}, Vector3f{-1.0f, 0.0f, -1.0f} );
+//    subdivPillowSide( mesh, subdivs, radius, mesh.vertices[0], mesh.vertices[2], Vector3f{-1.0f, 0.0f, -1.0f}, Vector3f{-1.0f, 0.0f, 1.0f} );
+//    // Facesradius,
+//
+    // top
+    mesh.addQuad( 2, 3, 0, 1 );
+    // bottom
+    mesh.addQuad( 6, 7, 4, 5 );
+    // left
+    mesh.addQuad( 10, 11, 8, 9 );
+    // right
+    mesh.addQuad( 14, 15, 12, 13 );
+    // front
+    mesh.addQuad( 18, 19, 16, 17 );
+    // back
+    mesh.addQuad( 22, 23, 20, 21 );
+
+//
+//    // Side1
+//    addPillowSide( mesh, subdivs, 8, 3, 2, 5, 4 );
+//    addPillowSide( mesh, subdivs, 8+subDivInc, 1, 3, 7, 5 );
+//    addPillowSide( mesh, subdivs, 8+subDivInc*2, 0, 1, 6, 7 );
+//    addPillowSide( mesh, subdivs, 8+subDivInc*3, 2, 0, 4, 6 );
 
 }
 
@@ -525,6 +610,8 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
                 case 2:
                     ret.uvs[q] = ( n[2] > 0.0f ? v.xy() : -v.xy() ) * size.xy();
                     break;
+                default:
+                    break;
             }
         }
     }
@@ -617,6 +704,14 @@ PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, co
 
     Topology mesh;
     Pillow( mesh, subdivs, radius * size.y() );
+
+    return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
+}
+
+PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
+
+    Topology mesh;
+    RoundedCube( mesh, subdivs, radius * size.y() );
 
     return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
 }

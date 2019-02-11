@@ -41,7 +41,10 @@ float sPresenterArrangerBottomFunction3d( float _value ) {
     return getScreenSizef.y() - ( getScreenSizef.y() * ( _value ) );
 }
 
-SceneStateMachine::SceneStateMachine( SceneOrchestrator* _p ) : orchestrator(_p) {
+SceneStateMachineBackEnd::SceneStateMachineBackEnd( SceneOrchestrator* _p ) : orchestrator(_p) {
+
+    stateMachine = std::make_unique<msm::back::state_machine<SceneStateMachine>>(this);
+
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Taskbar,
 			std::make_shared<ImGuiTaskbar>(SceneLayoutDefaultNames::Taskbar) );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Console,
@@ -64,39 +67,36 @@ SceneStateMachine::SceneStateMachine( SceneOrchestrator* _p ) : orchestrator(_p)
 			std::make_shared<ImGuiCloudEntitiesGeom>(SceneLayoutDefaultNames::CloudGeom) );
 }
 
-void SceneStateMachine::addBox( const std::string& _name, float _l, float _r, float _t, float _b,
-						  std::shared_ptr<LayoutBoxRenderer> _lbr ) {
-	boxes[_name] = { { _l, _r, _t, _b}, CameraControls::Edit2d, _lbr };
+void SceneStateMachineBackEnd::addBoxToViewport( const std::string& _name, const Boxes& _box ) {
+	boxes[_name] = _box;
+
+	if ( boxes[_name].cc == CameraControls::Plan2d ) {
+		o()->addViewport<RLTargetPlain>( _name, boxes[_name].updateAndGetRect(), boxes[_name].cc, BlitType::OnScreen );
+	} else if ( boxes[_name].cc == CameraControls::Walk || boxes[_name].cc == CameraControls::Fly ) {
+		o()->addViewport<RLTargetPBR>( _name, boxes[_name].updateAndGetRect(), boxes[_name].cc, BlitType::OnScreen );
+	}
 }
 
-void SceneStateMachine::addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc ) {
-	boxes[_name] = { { sPresenterArrangerLeftFunction3d,
+void SceneStateMachineBackEnd::addBox( const std::string& _name, float _l, float _r, float _t, float _b,
+						  std::shared_ptr<LayoutBoxRenderer> _lbr ) {
+	addBoxToViewport( _name, { { _l, _r, _t, _b}, CameraControls::Edit2d, _lbr } );
+}
+
+void SceneStateMachineBackEnd::addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc ) {
+	addBoxToViewport( _name,{ { sPresenterArrangerLeftFunction3d,
 					   sPresenterArrangerRightFunction3d,
 					   sPresenterArrangerTopFunction3d,
-					   sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, _cc, nullptr };
+					   sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, _cc, nullptr } );
 }
 
-void SceneStateMachine::addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible ) {
+void SceneStateMachineBackEnd::addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible ) {
 	if ( auto rlf = boxFunctionMapping.find( _name ); rlf != boxFunctionMapping.end() ) {
-		boxes[_name] = { { _l, _r, _t, _b}, CameraControls::Edit2d, rlf->second };
+		addBoxToViewport( _name,{ { _l, _r, _t, _b}, CameraControls::Edit2d, rlf->second } );
 		boxes[_name].setVisible( _bVisible );
 	}
 }
 
-void SceneStateMachine::activate( SceneOrchestrator* _target ) {
-
-	activateImpl();
-
-	for ( auto& [k,v] : boxes ) {
-		if ( v.cc == CameraControls::Plan2d ) {
-			_target->addViewport<RLTargetPlain>( k, v.updateAndGetRect(), v.cc, BlitType::OnScreen );
-		} else if ( v.cc == CameraControls::Walk || v.cc == CameraControls::Fly ) {
-			_target->addViewport<RLTargetPBR>( k, v.updateAndGetRect(), v.cc, BlitType::OnScreen );
-		}
-	}
-}
-
-void SceneStateMachine::resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize ) {
+void SceneStateMachineBackEnd::resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize ) {
 	for ( auto& [k,v] : boxes ) {
 		orBitWiseFlag( v.flags, BoxFlags::Resize );
 		if ( v.cc == CameraControls::Fly ) {
@@ -107,15 +107,19 @@ void SceneStateMachine::resizeCallback( SceneOrchestrator* _target, const Vector
 	}
 }
 
-//void initDefaultLayout( SceneStateMachine* _layout, SceneOrchestrator* _target ) {
+void SceneStateMachineBackEnd::activate() {
+    stateMachine->process_event( SceneStateMachine::OnActivate() );
+}
+
+//void initDefaultLayout( SceneStateMachineBackEnd* _layout, SceneOrchestrator* _target ) {
 //    _layout->addBox(SceneOrchestrator::DC(), 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
 //}
 //
-//std::shared_ptr<SceneStateMachine> SceneStateMachine::makeDefault() {
-//    return std::make_shared<SceneStateMachine>(initDefaultLayout);
+//std::shared_ptr<SceneStateMachineBackEnd> SceneStateMachineBackEnd::makeDefault() {
+//    return std::make_shared<SceneStateMachineBackEnd>(initDefaultLayout);
 //}
 
-Rect2f& SceneStateMachine::Boxes::updateAndGetRect() {
+Rect2f& SceneStateMachineBackEnd::Boxes::updateAndGetRect() {
     if ( checkBitWiseFlag( flags, BoxFlags::Rearrange ) ) {
         rectArranger.set();
         xandBitWiseFlag( flags, BoxFlags::Rearrange );
@@ -128,22 +132,26 @@ Rect2f& SceneStateMachine::Boxes::updateAndGetRect() {
     return rectArranger.getRect();
 }
 
-Rect2f SceneStateMachine::Boxes::getRect() const {
+Rect2f SceneStateMachineBackEnd::Boxes::getRect() const {
     return rectArranger.getRect();
 }
 
-void SceneStateMachine::Boxes::render( SceneOrchestrator *_target, Rect2f& _rect ) {
+void SceneStateMachineBackEnd::Boxes::render( SceneOrchestrator *_target, Rect2f& _rect ) {
     if ( renderer ) {
         renderer->render( _target, _rect, flags );
     }
 }
 
-void SceneStateMachine::Boxes::toggleVisible() {
+void SceneStateMachineBackEnd::Boxes::toggleVisible() {
     toggle(flags, BoxFlags::Visible);
     if ( renderer ) renderer->toggleVisible();
 }
 
-void SceneStateMachine::Boxes::setVisible( bool _bVis ) {
+void SceneStateMachineBackEnd::Boxes::setVisible( bool _bVis ) {
     orBitWiseFlag( flags, BoxFlags::Visible );
     if ( renderer ) renderer->setVisible(_bVis);
+}
+
+void SceneStateMachine::activate( [[maybe_unused]] const SceneStateMachine::OnActivate& ) {
+    owner->init();
 }

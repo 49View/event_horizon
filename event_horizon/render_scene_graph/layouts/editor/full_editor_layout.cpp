@@ -11,7 +11,7 @@
 #include <media/audio_video_stream.hpp>
 #include "callbacks_layout.h"
 
-void FullEditor::activateImpl() {
+void FullEditor::init() {
 
     struct UIViewLayout {
         float consoleHeight = 0.0f;
