@@ -11,11 +11,14 @@
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
 #pragma GCC diagnostic push
+#pragma clang diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
+#pragma clang diagnostic ignored "-Wall"
 #include <boost/msm/back/state_machine.hpp>
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/front/functor_row.hpp>
 #pragma GCC diagnostic pop
+#pragma clang diagnostic pop
 
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
