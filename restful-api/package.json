@@ -27,6 +27,8 @@
     "passport-request": "^1.0.0",
     "query-string": "^6.2.0",
     "serve-favicon": "~2.4.2",
+    "sha256": "^0.2.0",
+    "uniqid": "^5.0.3",
     "uuid": "^3.3.2",
     "ws": "^6.1.3"
   },
