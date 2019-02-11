@@ -11,16 +11,19 @@
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma clang diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma clang diagnostic ignored "-Wall"
 #include <boost/msm/back/state_machine.hpp>
-#pragma GCC diagnostic pop
-
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/front/functor_row.hpp>
+#pragma GCC diagnostic pop
+#pragma clang diagnostic pop
 
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 using namespace msm::front;
+#define sm_not template <class FSM, class Event> void no_transition(Event const& e, FSM&, int state) {}
 
 struct ImGuiConsole;
 class SceneStateMachineBackEnd;
@@ -134,12 +137,24 @@ struct SceneStateMachine : msm::front::state_machine_def<SceneStateMachine> {
 
     typedef Activate initial_state;
 
-    template <class FSM, class Event> void no_transition(Event const& e, FSM&, int state) {}
+    sm_not
+
 private:
     SceneStateMachineBackEnd* owner;
 };
 
-class SceneStateMachineBackEnd {
+class SceneOrchestratorDependency {
+public:
+    SceneOrchestratorDependency( SceneOrchestrator *orchestrator ) : orchestrator( orchestrator ) {}
+protected:
+    SceneOrchestrator* o() const {
+        return orchestrator;
+    }
+private:
+    SceneOrchestrator* orchestrator = nullptr;
+};
+
+class SceneStateMachineBackEnd : public SceneOrchestratorDependency {
 public:
     explicit SceneStateMachineBackEnd( SceneOrchestrator* _p );
 
@@ -203,14 +218,9 @@ public:
 protected:
     void addBoxToViewport( const std::string& _nane, const Boxes& _box );
 
-    SceneOrchestrator* o() const {
-        return orchestrator;
-    }
-
 private:
     std::unordered_map<std::string, Boxes> boxes;
     InitializeWindowFlagsT initFlags = InitializeWindowFlags::HalfSize;
-    SceneOrchestrator* orchestrator = nullptr;
     std::unique_ptr<msm::back::state_machine<SceneStateMachine>> stateMachine;
     std::unordered_map<std::string, std::shared_ptr<LayoutBoxRenderer>> boxFunctionMapping;
     friend class SceneOrchestrator;

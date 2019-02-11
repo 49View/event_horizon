@@ -41,7 +41,7 @@ float sPresenterArrangerBottomFunction3d( float _value ) {
     return getScreenSizef.y() - ( getScreenSizef.y() * ( _value ) );
 }
 
-SceneStateMachineBackEnd::SceneStateMachineBackEnd( SceneOrchestrator* _p ) : orchestrator(_p) {
+SceneStateMachineBackEnd::SceneStateMachineBackEnd( SceneOrchestrator* _p ) : SceneOrchestratorDependency(_p) {
 
     stateMachine = std::make_unique<msm::back::state_machine<SceneStateMachine>>(this);
 
