@@ -11,11 +11,11 @@
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wall"
 #include <boost/msm/back/state_machine.hpp>
-#pragma GCC diagnostic pop
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/front/functor_row.hpp>
+#pragma GCC diagnostic pop
 
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
