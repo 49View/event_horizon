@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const sessionModel = require('../models/session');
-//const ObjectId = mongoose.Types.ObjectId;
+const ObjectId = mongoose.Types.ObjectId;
 
 exports.createSession = async (userId, project, ipAddress, userAgent, issuedAt, expiresAt) => {
 
@@ -27,8 +27,7 @@ exports.getValidSessionById = async (sessionId) => {
 
     const currentDate = Math.floor(new Date() / 1000);
     const query = { "$and": [ 
-        // {_id: ObjectId(sessionId)},
-        {_id: sessionId},
+        {_id: ObjectId(sessionId)},
         {issuedAt: {$lte: currentDate }},
         {expiresAt: {$gte: currentDate}}
     ]};
@@ -39,14 +38,14 @@ exports.getValidSessionById = async (sessionId) => {
     if (dbSession!==null) {
         dbSession=dbSession.toObject();
     }
+    console.log("CURRENT SESSION:",dbSession);
     return dbSession;
 }
 
 exports.invalidateSessionById = async (sessionId) => {
 
     const expiresAtDate = new Date((new Date())-10000);
-    // const query = { _id: ObjectId(sessionId)};
-    const query = { _id: sessionId};
+    const query = { _id: ObjectId(sessionId)};
     const updated = { expiresAtDate: expiresAtDate};
     await sessionModel.updateOne(query, updated);
 }
