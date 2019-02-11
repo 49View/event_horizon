@@ -1,13 +1,17 @@
 const mongoose = require('mongoose');
+const sha256 = require('sha256');
+const uniqid = require('uniqid');
 const sessionModel = require('../models/session');
-//const ObjectId = mongoose.Types.ObjectId;
+const ObjectId = mongoose.Types.ObjectId;
 
 exports.createSession = async (userId, project, ipAddress, userAgent, issuedAt, expiresAt) => {
 
 
     const expiresAtDate = new Date(expiresAt*1000);
+    const id = sha256(uniqid("A")+"-"+uniqid("B")+"-"+uniqid("C")+"-"+uniqid("D"));
 
     const session = {
+        _id: id,
         userId: userId,
         project: project,
         ipAddress: ipAddress,
@@ -25,12 +29,14 @@ exports.createSession = async (userId, project, ipAddress, userAgent, issuedAt, 
 
 exports.getValidSessionById = async (sessionId) => {
 
-    const currentDate = Math.floor(new Date() / 1000);
+    const currentDate = new Date();
+    const currentEpoch = Math.floor(currentDate / 1000);
     const query = { "$and": [ 
         // {_id: ObjectId(sessionId)},
         {_id: sessionId},
-        {issuedAt: {$lte: currentDate }},
-        {expiresAt: {$gte: currentDate}}
+        {issuedAt: {$lte: currentEpoch }},
+        {expiresAt: {$gte: currentEpoch}},
+        {expiresAtDate: {$gte: currentDate}}
     ]};
     // console.log(query);
     // console.log(query["$and"]);
@@ -39,6 +45,7 @@ exports.getValidSessionById = async (sessionId) => {
     if (dbSession!==null) {
         dbSession=dbSession.toObject();
     }
+    console.log("CURRENT SESSION:",dbSession);
     return dbSession;
 }
 

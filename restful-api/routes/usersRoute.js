@@ -8,7 +8,7 @@ router.get("/", (req, res, next) => {
     // res.send("dado");
     //console.log(req.user);
     const result = { expires: req.user.expires, user: {name: req.user.name, email: req.user.email, guest: req.user.guest}, project: req.user.project};
-    if (req.user.hasToken===true) {
+    if (req.user.hasSession===true) {
         result.session=req.user.sessionId;
     }
     res.send(result);

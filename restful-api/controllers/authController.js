@@ -49,6 +49,7 @@ exports.InitializeAuthentication = () => {
                     user.project=session.project.toLowerCase();
                     user.expires=session.expiresAt;
                     user.sessionId = clientCertificateInfo.sessionId;
+                    user.hasSession = true;
                     //console.log("Store user: ", user);
                 }
             }
@@ -120,6 +121,7 @@ exports.InitializeAuthentication = () => {
                     user.sessionId=sessionId;
                     user.expires=jwtPayload.exp;
                     user.hasToken=true;
+                    user.hasSession=true;
                 }
             }
             //console.log("Store user: ", user);
