@@ -8,6 +8,7 @@
 
 #include <string>
 #include <thread>
+#include <atomic>
 #include <unistd.h>
 
 #include "runloop_core.h"
@@ -33,7 +34,7 @@ void mainLoop<CommandConsole>( [[maybe_unused]] uint64_t _flags, [[maybe_unused]
     rl.runConsolePrompt();
 }
 
-std::atomic_bool deamonBreaker = false;
+std::atomic<bool> deamonBreaker = false;
 
 void daemonLoop( int _sleepSeconds ) {
 
