@@ -361,6 +361,8 @@ endmacro(compile_module)
 
 macro(compile_local module)
 
+    set(MODULES_ROOT "../../")
+    set(MODULE_ROOT_COMP "")
     message(STATUS "adding folder ${module} to compiler")
     register_module(${module})
 
@@ -1017,7 +1019,7 @@ macro(set_linker_flags)
         endif ()
     elseif (APPLE)
     elseif (EMSCRIPTEN)
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_ZLIB=1 -s LINKABLE=1 -s SOCKET_DEBUG=1")
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_ZLIB=1 -s LINKABLE=1 -s SOCKET_DEBUG=1 -lopenal")
     elseif (UNIX)
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "--whole-file")
     endif ()

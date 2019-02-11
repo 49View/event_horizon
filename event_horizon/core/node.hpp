@@ -233,6 +233,11 @@ public:
         generateLocalTransformData( pos, mTRS.Rot(), mTRS.Scale());
         generateMatrixHierarchy( fatherRootTransform());
     }
+    void move( const Vector3f& pos ) {
+        generateLocalTransformData( mTRS.Pos() + pos, mTRS.Rot(), mTRS.Scale());
+        generateMatrixHierarchy( fatherRootTransform());
+    }
+
     void updateTransform() {
         generateLocalTransformData( mTRS.Pos(), mTRS.Rot(), mTRS.Scale());
         generateMatrixHierarchy( fatherRootTransform());
