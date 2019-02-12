@@ -7,6 +7,7 @@ const ObjectId = mongoose.Types.ObjectId;
 exports.createSession = async (userId, project, ipAddress, userAgent, issuedAt, expiresAt) => {
 
 
+    const issuedAtDate = new Date(issuedAt*1000);
     const expiresAtDate = new Date(expiresAt*1000);
     const id = sha256(uniqid("A")+"-"+uniqid("B")+"-"+uniqid("C")+"-"+uniqid("D"));
 
@@ -16,8 +17,9 @@ exports.createSession = async (userId, project, ipAddress, userAgent, issuedAt, 
         project: project,
         ipAddress: ipAddress,
         userAgent: userAgent,
-        issuedAt: issuedAt,
-        expiresAt: expiresAt,
+        // issuedAt: issuedAt,
+        // expiresAt: expiresAt,
+        issuedAtDate: issuedAtDate,
         expiresAtDate: expiresAtDate
     };
 
@@ -34,8 +36,9 @@ exports.getValidSessionById = async (sessionId) => {
     const query = { "$and": [ 
         // {_id: ObjectId(sessionId)},
         {_id: sessionId},
-        {issuedAt: {$lte: currentEpoch }},
-        {expiresAt: {$gte: currentEpoch}},
+        // {issuedAt: {$lte: currentEpoch }},
+        // {expiresAt: {$gte: currentEpoch}},
+        {issuedAtDate: {$lte: currentDate }},
         {expiresAtDate: {$gte: currentDate}}
     ]};
     // console.log(query);
