@@ -6,6 +6,7 @@
 #include "../util.h"
 #include "math_util.h"
 #include "vector2f.h"
+#include "vector2i.h"
 
 // SHARED CLASS: Any changes to this, should be integrated to /svn/shared, and a mail should be sent to everyone
 
@@ -130,6 +131,12 @@ public:
 	Vector3f( const Vector4f& v4 );
 
 	Vector3f( const Vector2f& v2, float z ) {
+		mX = v2.x();
+		mY = v2.y();
+		mZ = z;
+	}
+
+	explicit Vector3f( const Vector2i& v2, float z = 0.0f ) {
 		mX = v2.x();
 		mY = v2.y();
 		mZ = z;

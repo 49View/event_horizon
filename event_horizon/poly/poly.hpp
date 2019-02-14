@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <variant>
 
 template <typename> class Node;
 class GeomData;

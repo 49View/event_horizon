@@ -431,6 +431,10 @@ inline float unitRand( float scale = 1.0f ) {
 	return randomFraction * scale;
 }
 
+inline int unitRandI( int scale ) {
+	return static_cast<int>(unitRand(scale));
+}
+
 inline float signedUnitRand( float scale = 1.0f ) {
 	return normalisedUnsignedToSigned( unitRand() ) * scale;
 }

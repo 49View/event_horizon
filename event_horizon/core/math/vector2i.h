@@ -87,10 +87,44 @@ public:
 		mY *= rhs;
 	}
 
+	void operator+=( const Vector2i& rhs ) {
+		mX += rhs.x();
+		mY += rhs.y();
+	}
+
+	void operator-=( const Vector2i& rhs) {
+		mX -= rhs.x();
+		mY -= rhs.y();
+	}
+
+	void operator*=( const Vector2i& rhs ) {
+		mX *= rhs.x();
+		mY *= rhs.y();
+	}
+
+	Vector2i rotate90() const {
+		return Vector2i( y(), -x() );
+	}
+
+	void rotate90() {
+		*this = Vector2i( y(), -x() );
+	}
+
+	void rotate90Around( const Vector2i& v ) {
+		*this -= v;
+		rotate90();
+		*this += v;
+	}
+
 private:
 	int mX;
 	int mY;
 };
+
+inline Vector2i rotate90Around( const Vector2i& source, const Vector2i& v ) {
+	const auto center = source - v;
+	return center.rotate90();
+}
 
 inline float aspect( const Vector2i& v ) {
 	return static_cast<float>( v.x() ) / v.y();

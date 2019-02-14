@@ -12,11 +12,15 @@ struct Observable {
     std::vector< Observer<T>* > observersCref;
 
     void notify( T& _source, const std::string& _name ) {
-        for ( auto& o : observers ) {
-            o->notified( _source, _name );
+        if ( !observers.empty() ) {
+            for ( auto& o : observers ) {
+                o->notified( _source, _name );
+            }
         }
-        for ( auto& o : observersCref ) {
-            o->notified( _source, _name );
+        if ( !observersCref.empty() ) {
+            for ( auto& o : observersCref ) {
+                o->notified( _source, _name );
+            }
         }
     }
 

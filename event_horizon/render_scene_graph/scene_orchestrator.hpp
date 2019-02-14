@@ -93,6 +93,7 @@ public:
     void notified( MouseInput& _source, const std::string& generator ) override;
 
 	bool checkKeyPressed( int keyCode );
+	bool checkKeyToggled( int keyCode );
 
 	bool activated() const { return mbActivated; }
 	static const std::string DC();

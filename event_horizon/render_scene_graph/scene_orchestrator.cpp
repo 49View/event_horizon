@@ -172,6 +172,10 @@ bool SceneOrchestrator::checkKeyPressed( int keyCode ) {
 	return ti.checkKeyPressed( keyCode );
 }
 
+bool SceneOrchestrator::checkKeyToggled( int keyCode ) {
+	return ti.checkKeyToggleOn( keyCode );
+}
+
 void SceneOrchestrator::notified( MouseInput& _source, const std::string& generator ) {
 
 	if ( generator == "onTouchUp" ) {
