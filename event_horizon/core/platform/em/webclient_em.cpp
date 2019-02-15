@@ -11,6 +11,10 @@ namespace Http {
 
     std::unordered_map<std::string, std::function<void( const Http::Result& )>> argCallbackMap;
 
+    bool login() {
+        return true;
+    }
+
     void onSuccessWget( unsigned boh, void* arg, int code, void* data, unsigned numBytes ) {
         auto ckey = reinterpret_cast<char*>(arg);
         auto skey = std::string( ckey );

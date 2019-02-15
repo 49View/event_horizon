@@ -13,7 +13,6 @@ template<typename T>
 class EventHorizon {
 public:
     explicit EventHorizon() {
-        Http::xProjectHeader( LoginFields::Computer() );
         presenter = di::make_injector(APP_RSGINJECTOR).template create<std::shared_ptr<SceneOrchestrator>>();
         presenter->StateMachine( std::make_shared<T>(presenter.get()) );
         mainLoop( presenter );

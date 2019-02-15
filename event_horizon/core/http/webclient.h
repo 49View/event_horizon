@@ -114,7 +114,8 @@ namespace Http {
         bool isSuccessStatusCode() const; //all 200s
     };
 
-    bool login( const LoginFields& _lf );
+    bool login();
+    bool login( const LoginFields& lf );
     void xProjectHeader( const LoginFields& _lf );
 
     void get( const Url& url, ResponseCallbackFunc callback,
@@ -139,6 +140,7 @@ namespace Http {
     std::string project();
 
     void cacheLoginFields( const LoginFields& _lf );
+    LoginFields gatherCachedLogin();
     LoginFields cachedLoginFields();
 
     void userToken( std::string_view _token );

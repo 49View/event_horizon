@@ -11,6 +11,22 @@ namespace Http {
         return std::string{"Bearer "} + std::string{Http::userToken()};
     }
 
+    bool login() {
+        return login ( Http::gatherCachedLogin() );
+    }
+
+    void loginCheck() {
+        if ( !Http::hasUserLoggedIn() ) {
+            Http::login();
+        }
+    }
+
+    void loginCheckPost( const Url& url ) {
+        if ( !Http::hasUserLoggedIn() && url.uri != HttpFilePrefix::gettoken ) {
+            Http::login();
+        }
+    }
+
     std::shared_ptr<restbed::Request> makeRequestBase( const Url& url ) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri(url.toString()));
         request->set_header( "Accept", "*/*" );
@@ -80,6 +96,7 @@ namespace Http {
     }
 
     void getInternal( const Url& url, ResponseCallbackFunc callback, ResponseFlags rf ) {
+        loginCheck();
         auto request = makeRequest( url );
 //        auto ssl_settings = std::make_shared< restbed::SSLSettings >( );
 
@@ -126,6 +143,7 @@ namespace Http {
     }
 
     void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback ) {
+        loginCheckPost( url );
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 

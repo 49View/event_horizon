@@ -115,6 +115,7 @@ public:
 	}
 
 	void StateMachine( std::shared_ptr<SceneStateMachineBackEnd> _l );
+	std::shared_ptr<SceneStateMachineBackEnd> StateMachine();
 	InitializeWindowFlagsT getLayoutInitFlags() const;
 
 	const std::shared_ptr<ImGuiConsole>& Console() const;

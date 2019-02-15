@@ -282,6 +282,10 @@ InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
 	return stateMachine->getLayoutInitFlags();
 }
 
+std::shared_ptr<SceneStateMachineBackEnd> SceneOrchestrator::StateMachine()  {
+    return stateMachine;
+}
+
 
 
 

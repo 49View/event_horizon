@@ -8,6 +8,7 @@
 #include "../platform_util.h"
 #include "core/zlib_util.h"
 #include "core/string_util.h"
+#include "core/file_manager.h"
 
 static bool sUseLocalhost = false;
 static bool sUserLoggedIn = false;
@@ -220,10 +221,20 @@ namespace Http {
 
     void cacheLoginFields( const LoginFields& _lf ) {
         sCachedLoginFields = _lf;
+        FM::writeLocalTextFile( cacheFolder() + "lf", _lf.serialize() );
     }
 
     LoginFields cachedLoginFields() {
         return sCachedLoginFields;
+    }
+
+    LoginFields gatherCachedLogin() {
+        auto lf = FM::readLocalTextFile( cacheFolder() + "lf" );
+        if ( !lf.empty() ) {
+            LoginFields ret{lf};
+            return ret;
+        }
+        return LoginFields{}; // this is guest / guest
     }
 
     void useLocalHost( const bool _flag ) {
@@ -289,23 +300,21 @@ namespace Http {
     }
 
     void xProjectHeader( const LoginFields& _lf ) {
-        // NDDADO: if dev and desktop let's use localhost for easy debugging
+        Http::project( _lf.project );
+//        Http::cacheLoginFields( _lf );
+    }
+
+    bool login( const LoginFields& lf ) {
 #ifdef USE_LOCALHOST
         Http::useLocalHost(true);
 #endif
-        Http::project( _lf.project );
-        Http::cacheLoginFields( _lf );
-    }
-
-    bool login( const LoginFields& _lf ) {
-        Http::cacheLoginFields( _lf );
-
-        post( Url{HttpFilePrefix::gettoken}, _lf.serialize(), [](const Http::Result& res) {
+        post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf](const Http::Result& res) {
             if( res.isSuccessStatusCode() ) {
                 LoginToken lt(res.bufferString);
                 userToken( lt.token );
                 sessionId( lt.session );
                 project( lt.project );
+                Http::cacheLoginFields( lf );
             }
 
             userLoggedIn( res.isSuccessStatusCode() );

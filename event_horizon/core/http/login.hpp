@@ -28,14 +28,6 @@ JSONDATA( LoginFields, project, email, password )
         password = _password;
     }
 
-    static LoginFields Computer( const std::string& _projectName = LoginSandbox::Name ) {
-        static LoginFields ret;
-        ret.project = _projectName;
-        ret.email = userComputerName();
-        ret.password = std::to_string(cpuID());
-        return ret;
-    }
-
     static LoginFields Daemon() {
         static LoginFields ret;
         ret.project = LoginSandbox::Name;
