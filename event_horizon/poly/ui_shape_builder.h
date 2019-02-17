@@ -319,9 +319,12 @@ public:
         return elem;
     }
 
+    void createMetaData() const;
+
 protected:
     void elemCreate() override;
     bool validate() const override;
+    std::string toMetaData() const;
 
 protected:
     void createDependencyList( DependencyMaker& _md ) override;

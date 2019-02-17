@@ -19,112 +19,33 @@ void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     sg.add( *this, mat );
 }
 
-void MaterialBuilder::makeDirect( DependencyMaker& _md ) {
+void MaterialBuilder::imageBuilderInjection( DependencyMaker& _md, const std::string& _finame, ucchar_p _dataPtr ) {
+    ImageBuilder{ _finame }.makeDirect( _md, _dataPtr );
+}
+
+std::shared_ptr<Material> MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
     auto mat = std::make_shared<Material>( Name(), shaderName );
-
-    if ( const auto& it = buffers.find(mat->getBaseColor()); it != buffers.end() ) {
-        ImageBuilder{ mat->getBaseColor()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
-    }
-    if ( const auto& it = buffers.find(mat->getNormal()); it != buffers.end() ) {
-        ImageBuilder{ mat->getNormal()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
-    }
-    if ( const auto& it = buffers.find(mat->getAmbientOcclusion()); it != buffers.end() ) {
-        ImageBuilder{ mat->getAmbientOcclusion()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
-    }
-    if ( const auto& it = buffers.find(mat->getRoughness()); it != buffers.end() ) {
-        ImageBuilder{ mat->getRoughness()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
-    }
-    if ( const auto& it = buffers.find(mat->getMetallic()); it != buffers.end() ) {
-        ImageBuilder{ mat->getMetallic()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
-    }
-    if ( const auto& it = buffers.find(mat->getHeight()); it != buffers.end() ) {
-        ImageBuilder{ mat->getHeight()        }.backup(0xffffffff).makeDirect( *sg.TL(), it->second );
-    }
-//    createDefaultPBRTextures( mat, sg );
-
-    mat->setShaderName( shaderName );
+    mat->tarBuffers( bufferTarFiles, [&]( const std::string& _finame, ucchar_p _dataPtr ) {
+        ImageBuilder{ _finame }.makeDirect( *sg.TL(), _dataPtr );
+    } );
     sg.add( *this, mat );
-}
 
-void MaterialBuilder::publish() const {
-    Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
-}
-
-void resizeCallback(void* ctx, void*data, int size) {
-    auto* rawThumbl = reinterpret_cast<std::string*>(ctx);
-    std::string img{ reinterpret_cast<const char*>(data), static_cast<size_t>(size) };
-    auto p = bn::encode_b64( img );
-    *rawThumbl = { p.begin(), p.end() };
-}
-
-std::string MaterialBuilder::generateThumbnail() const {
-    auto thumb = std::make_unique<std::string>();
-
-    std::unique_ptr<uint8_t[]> lthumb;
-    int thumbSize = 64;
-    int oc = 3;
-    int obpp = 8;
-    // -###- Reintroduce this, probably will need to incorporate std::shared_ptr<Material> somewhere
-    if ( const auto& it = buffers.find(pbrPrefix() + MPBRTextures::basecolorString ); it != buffers.end() ) {
-        lthumb = imageUtil::resize( it->second.first.get(), it->second.second, thumbSize, thumbSize, oc, obpp );
-    } //else {
-//        lthumb = imageUtil::zeroImage3( Vector4f{baseSolidColor}.RGBATOI(), 1, 1 );
-//    }
-    stbi_write_png_to_func( resizeCallback, reinterpret_cast<void*>(thumb.get()),
-                            thumbSize, thumbSize, oc, lthumb.get(), thumbSize*oc*(obpp/8) );
-
-    return std::string{ thumb->data(), thumb->size() };
-}
-
-std::string MaterialBuilder::generateRawData() const {
-    std::stringstream tagStream;
-    tarUtil::TarWrite tar{ tagStream };
-
-    for ( const auto& [k,v] : buffers ) {
-        tar.put( (k + imageExt).c_str(), reinterpret_cast<const char*>(v.first.get()), v.second );
-    }
-    tar.finish();
-
-    auto f = zlibUtil::deflateMemory( tagStream.str() );
-    auto rawm = bn::encode_b64( f );
-    return std::string{ rawm.begin(), rawm.end() };
-}
-
-std::string MaterialBuilder::toMetaData() const {
-
-    MegaWriter writer;
-
-    writer.StartObject();
-    writer.serialize( CoreMetaData{Name(), EntityGroup::Material, Material::Version(),
-                                   generateThumbnail(), generateRawData(), generateTags()} );
-    writer.EndObject();
-
-    return writer.getString();
+    return mat;
 }
 
 bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
 
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-
     std::string downloadedMatName = Name();
-
-    if ( _status == DependencyStatus::LoadedSuccessfully ) {
-        auto inflatedData = zlibUtil::inflateFromMemory( std::move( _data ));
-
-        auto files = tarUtil::untar( inflatedData );
-        for ( const auto& fi  : files ) {
-            auto fn = getFileNameNoExt( fi.name );
-            downloadedMatName = string_trim_upto( fn, MPBRTextures::Names() );
-            auto ext = getFileNameExt( fi.name );
-            if ( isFileExtAnImage( ext ) ) {
-                ImageBuilder{ fn }.makeDirect( *sg.TL(), fi.dataPtr );
-            }
-        }
-    }
-    handleUninitializedDefaults( _md, downloadedMatName );
-
     auto mat = std::make_shared<Material>(downloadedMatName, shaderName );
+    if ( _status == DependencyStatus::LoadedSuccessfully ) {
+        mat->tarBuffers( zlibUtil::inflateFromMemory( std::move( _data )),
+                         [&]( const std::string& _finame, ucchar_p _dataPtr ) {
+                            ImageBuilder{ _finame }.makeDirect( *sg.TL(), _dataPtr );
+                         } );
+    }
+
     sg.add( *this, mat );
 
     return true;
@@ -137,6 +58,11 @@ void MaterialBuilder::handleUninitializedDefaults( DependencyMaker& _md, const s
         if ( !sg.TL()->exists( td.first )) {
             ImageBuilder{ td.first }.setSize( 4 ).backup( td.second ).makeDefault( *sg.TL());
         }
+}
+
+MaterialBuilder::MaterialBuilder( const std::string& _name, const std::vector<char>& _data ) {
+    Name(_name);
+    bufferTarFiles = _data;
 }
 
 bool MaterialManager::add( const MaterialBuilder& _pb, std::shared_ptr<Material> _material ) {

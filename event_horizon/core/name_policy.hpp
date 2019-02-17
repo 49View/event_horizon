@@ -11,9 +11,15 @@ public:
     inline const std::string& Name() const {
         return name;
     }
+
+    inline std::string& NameRef() {
+        return name;
+    }
+
     inline std::string Name() {
         return name;
     }
+
     inline void Name( const std::string& _name ){
         name = _name;
     }

@@ -9,7 +9,15 @@
 #include <core/tar_util.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
-std::shared_ptr<MaterialBuilder> mb;
+struct CallbackMaterialData {
+    CallbackMaterialData( const std::string& filename, const std::vector<char>& data ) : filename( filename ),
+                                                                                         data( data ) {}
+
+    std::string filename;
+    std::vector<char> data;
+};
+
+std::vector<CallbackMaterialData> cmd;
 
 void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 size, std::shared_ptr<Texture> t,
                     float backup = -1.0f ) {
@@ -57,9 +65,9 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
 //        }
 //        if ( mb ) {
 //            ImGui::BeginGroup();
-//            if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-//                mb->publish();
-//            }
+            if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+                mat->publish();
+            }
 //            ImGui::EndGroup();
 //        }
 
@@ -68,18 +76,14 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
 }
 
 void callbackMaterial( const std::string& _filename, const std::vector<char>& _data ) {
-    mb = std::make_shared<MaterialBuilder>(getFileNameOnly(_filename));
-    auto files = tarUtil::untar( _data );
-    for ( const auto& fi  : files ) {
-        if ( const auto r = MPBRTextures::findTextureInString(fi.name); !r.empty() ) {
-            mb->buffer( r, fi.dataPtr );
-        }
-    }
+
+    cmd.emplace_back( _filename, _data );
+
     SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
-        mb->makeDirect( p->ML() );
-        if ( !p->RR().hasTag(9300) ) {
-            GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).build( p->RSG() );
+        for ( const auto& elem : cmd ) {
+            auto mb = std::make_shared<MaterialBuilder>(getFileNameOnly(elem.filename), elem.data);
+            GeomBuilder{ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->ML() )).build( p->RSG() );
         }
-        p->RR().changeMaterialOnTags( 9300, std::dynamic_pointer_cast<Material>(p->ML().get(mb->Name())) );
+        cmd.clear();
     } );
 }

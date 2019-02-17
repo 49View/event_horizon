@@ -15,6 +15,7 @@
 //std::shared_ptr<GeomBuilder> gbt;
 std::shared_ptr<GLTF2> gltf;
 std::string svgString;
+std::string svgName;
 std::string glftString;
 std::vector<char> gltfBufferData;
 
@@ -60,10 +61,11 @@ void callbackGeomGLTF( const std::string& _filename ) {
     addGeomToScene();
 }
 
-void callbackGeomSVG( const std::string& _svgString ) {
+void callbackGeomSVG( const std::string& _filename, const std::string& _svgString ) {
     svgString = _svgString;
+    svgName = getFileNameOnly(_filename);
     SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
-        GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).buildr(p->RSG());
+        GB{GeomBuilderType::svg}.n(svgName).ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).buildr(p->RSG());
     } );
 
 }
@@ -73,6 +75,9 @@ void ImGuiGeoms::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
         ImGui::PushID(std::visit(lambdaUUID, v).c_str());
         ImGui::BeginGroup();
         std::visit( NodeVisitor<ImGUIJsonNamed>{}, v );
+        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+            std::visit( lambdaPublish, v );
+        }
         ImGui::EndGroup();
         ImGui::PopID();
     }
@@ -82,9 +87,6 @@ void ImGuiGeoms::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
 //    if ( gbt ) {
 //        ImGui::BeginGroup();
 //        ImGui::Text( "Name: %s", gbt->Name().c_str());
-//        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-//            gbt->publish();
-//        }
 //        ImGui::EndGroup();
 //    }
 }

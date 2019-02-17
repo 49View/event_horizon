@@ -19,6 +19,7 @@
 #include "core/serializebin.hpp"
 #include "core/zlib_util.h"
 #include "core/http/basen.hpp"
+#include "core/http/webclient.h"
 
 enum class ExtractFlags {
     LeaveAsItAfterExtract,
@@ -45,6 +46,7 @@ auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
 auto lambdaUpdateNodeTransform = [](auto&& arg) { arg->updateTransform();};
 auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
 auto lambdaBBox = [](auto&& arg) -> JMATH::AABB { return arg->BBox3d();};
+auto lambdaPublish = [](auto&& arg) { return arg->publish();};
 
 template <typename D>
 class Node : public Animable, public ObservableShared<Node<D>>, public std::enable_shared_from_this<Node<D>>{
@@ -441,6 +443,17 @@ public:
         traverseWithHelper<TV>( "Name,BBbox,Data,Children", mName,bbox3d,mData,children );
     }
 
+    void publish() {
+        Http::post( Url{ HttpFilePrefix::entities }, metaData );
+    }
+
+    const std::string& MetaData() const {
+        return metaData;
+    }
+
+    void MetaData( const std::string& metaData ) {
+        Node::metaData = metaData;
+    }
 protected:
 
     void getLocatorsPosRec( std::vector<Vector3f>& _locators ) {
@@ -639,6 +652,8 @@ protected:
     JMATH::AABB bbox3d = JMATH::AABB::INVALID;
 
     std::shared_ptr<D> mData;
+
+    std::string metaData;
 
     std::vector<std::shared_ptr<Node>> children;
 };

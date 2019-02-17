@@ -284,14 +284,14 @@ ScreenShotContainerPtr& GeomBuilder::Thumb() {
     return thumb;
 }
 
-void GeomBuilder::publish() const {
+void GeomBuilder::createMetaData() const {
     // Publish all materials first
 
-    for ( const auto& mb : matBuilders ) {
-        mb->publish();
-    }
+//    for ( const auto& mb : matBuilders ) {
+//        mb->publish();
+//    }
 
-    Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
+    elem->MetaData( toMetaData() );
 }
 
 void internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
@@ -319,7 +319,7 @@ void GeomBuilder::preparePolyLines() {
 }
 
 void GeomBuilder::elemCreate() {
-    if ( !elem) elem = std::make_shared<GeomAsset>();
+    if ( !elem) elem = std::make_shared<GeomAsset>(Name());
 }
 
 GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {

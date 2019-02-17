@@ -9,9 +9,17 @@
 #include <stb/stb_image_resize.h>
 #include <stb/stb_image_write.h>
 #include <core/raw_image.h>
+#include <core/http/basen.hpp>
 
 
 namespace imageUtil {
+
+    void resizeCallbackb64(void* ctx, void*data, int size) {
+        auto* rawThumbl = reinterpret_cast<std::string*>(ctx);
+        std::string img{ reinterpret_cast<const char*>(data), static_cast<size_t>(size) };
+        auto p = bn::encode_b64( img );
+        *rawThumbl = { p.begin(), p.end() };
+    }
 
     std::unique_ptr<uint8_t[]> resize( const unsigned char* _data, int length, int width, int height,
                                        int& channels, int& bpp ) {

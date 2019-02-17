@@ -70,7 +70,7 @@ namespace Http {
 
         res.uri = url.toString();
         res.statusCode = response->get_status_code();
-        res.length = response->get_header( "Content-Length", 0 );
+        res.length = static_cast<uint64_t>(response->get_header( "Content-Length", 0 ));
         res.contentType = response->get_header( "Content-Type", "application/json" );
         res.ETag = response->get_header( "ETag", "" );
         res.lastModified = response->get_header( "Content-Last-Modified", "" );

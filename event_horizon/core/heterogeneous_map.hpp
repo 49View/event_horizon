@@ -13,9 +13,12 @@
 #include <core/math/matrix4f.h>
 
 using TextureIndex = TextureUniformDesc;
+class SerializeBin;
+class DeserializeBin;
 
-class HeterogeneousMap : public NamePolicy, public std::enable_shared_from_this<HeterogeneousMap> {
+class HeterogeneousMap : public virtual NamePolicy, public std::enable_shared_from_this<HeterogeneousMap> {
 public:
+    virtual ~HeterogeneousMap() = default;
     void inject( const HeterogeneousMap& source );
     void assign( const std::string& uniformName, int data );
     void assign( const std::string& uniformName, float data );
@@ -94,6 +97,9 @@ public:
         }
     }
 
+    virtual void serialize( std::shared_ptr<SerializeBin> writer ) const;
+    virtual void deserialize( std::shared_ptr<DeserializeBin> reader );
+
 private:
     void calcTotalNumUniforms();
     void calcHash();
@@ -111,6 +117,3 @@ private:
     int mNumUniforms = 0;
     int64_t mHash = 0;
 };
-
-
-

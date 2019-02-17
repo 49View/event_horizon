@@ -141,7 +141,7 @@ public:
                  const Vector3f& _suggestedAxis = Vector3f::ZERO );
     GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
 
-    void publish() const;
+    void createMetaData() const;
 
     GeomBuilder& inj( GeomAssetSP _hier );
 
@@ -252,6 +252,11 @@ public:
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
 // MaterialBuildable policies
+    GeomBuilder& m( std::shared_ptr<Material> _value ) {
+        materialSet(_value);
+        return *this;
+    }
+
     GeomBuilder& m( const std::string& _shader, const std::string& _matName ) {
         materialSet(_shader, _matName);
         return *this;

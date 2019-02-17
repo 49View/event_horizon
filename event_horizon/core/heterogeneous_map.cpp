@@ -3,6 +3,7 @@
 //
 
 #include "heterogeneous_map.hpp"
+#include <core/serializebin.hpp>
 
 void HeterogeneousMap::calcTotalNumUniforms() {
     size_t lNumUniforms = 0;
@@ -232,7 +233,7 @@ std::shared_ptr<HeterogeneousMap> HeterogeneousMap::clone() {
 
 void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
 
-    Name( _source.Name() );
+    NamePolicy::Name( _source.Name() );
     mTextures    = _source.mTextures;
     mFloats      = _source.mFloats;
     mInts        = _source.mInts;
@@ -253,4 +254,34 @@ std::vector<std::string> HeterogeneousMap::getTextureNames() const {
         ret.emplace_back( v.name );
     }
     return ret;
+}
+
+void HeterogeneousMap::serialize( std::shared_ptr<SerializeBin> writer ) const {
+    writer->write( Name() );
+    writer->write( mNumUniforms );
+    writer->write( mHash );
+    writer->write( mTextures );
+    writer->write( mInts );
+    writer->write( mFloats );
+    writer->write( mV2fs );
+    writer->write( mV3fs );
+    writer->write( mV3fvs );
+    writer->write( mV4fs );
+    writer->write( mM3fs );
+    writer->write( mM4fs );
+}
+
+void HeterogeneousMap::deserialize( std::shared_ptr<DeserializeBin> reader ) {
+    reader->read( NameRef() );
+    reader->read( mNumUniforms );
+    reader->read( mHash );
+    reader->read( mTextures );
+    reader->read( mInts );
+    reader->read( mFloats );
+    reader->read( mV2fs );
+    reader->read( mV3fs );
+    reader->read( mV3fvs );
+    reader->read( mV4fs );
+    reader->read( mM3fs );
+    reader->read( mM4fs );
 }

@@ -5,20 +5,29 @@
 #pragma once
 
 #include <iostream>
+#include <stb/stb_image_resize.h>
+#include <stb/stb_image_write.h>
+
 #include <core/http/basen.hpp>
 #include <core/http/webclient.h>
 #include <core/names.hpp>
+#include <core/publisher.hpp>
+#include <core/tar_util.h>
+#include <core/zlib_util.h>
 #include <core/heterogeneous_map.hpp>
 #include <core/descriptors/uniform_names.h>
-#include "../util.h"
-#include "../math/vector4f.h"
-#include "../serializebin.hpp"
-#include "../serialization.hpp"
+#include <core/image_util.h>
+#include <core/util.h>
+#include <core/math/vector4f.h>
+#include <core/serializebin.hpp>
+#include <core/serialization.hpp>
 
 const static uint32_t dependecyTagTexture = 1;
 const static uint32_t dependecyTagMaterial = 2;
 using TextureDependencyBuilderPair = std::pair<std::string, uint32_t>;
 using MaterialImageBuffers = std::unordered_map<std::string, uint8_p>;
+using KnownBufferMap = std::unordered_map<std::string, std::string>;
+using MaterialImageCallback = std::function<void( const std::string&, ucchar_p )>;
 
 namespace MQSettings {
     const static std::string Low = "_lowqDD256";
@@ -95,260 +104,111 @@ JSONDATA_R( MaterialColor, name, color, category, brand, code, application )
     static uint64_t Version() { return 1000; }
 };
 
-JSONDATA_R( MaterialProperties, pixelTexelRatio, cost )
+JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
     float   pixelTexelRatio = 0.04f;
     float   cost = 1.0f;
+    bool    isStreaming = false;
 
     bool operator==( const MaterialProperties& rhs ) const {
-        return pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost;
-    }
-};
-
-static inline bool isShaderStreammable( const std::string& _sn ) {
-    return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
-}
-
-class Material : public HeterogeneousMap {
-public:
-    explicit Material( const Material& _mat ) {
-        clone(_mat);
-    }
-    explicit Material( std::shared_ptr<Material> _mat ) {
-        clone(*_mat.get());
-    }
-    explicit Material(  const std::string& _name, const std::string& _sn ) {
-        Name(_name);
-        setShaderName(_sn);
-    }
-    virtual ~Material() = default;
-
-    std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey ) {
-//        return std::make_shared<Material>( Name(), _subkey, textureName, color, opacity );
-        return std::make_shared<Material>(*this);
+        return pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost && isStreaming == rhs.isStreaming;
     }
 
-    std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp ) {
-//        return std::make_shared<Material>( Name(), shaderName, textureName, _mp.pigment, opacity );
-        return std::make_shared<Material>(*this);
-    }
-
-    Material& t( const std::string& _tn ) {
-        assign( UniformNames::colorTexture, _tn );
-        return *this;
-    }
-
-    Material& c( const Color4f& _col ) {
-        assign( UniformNames::opacity, _col.w() );
-        assign( UniformNames::diffuseColor, _col.xyz() );
-        return *this;
-    }
-
-    const std::string& getShaderName() const {
-        return shaderName;
-    }
-
-    void resolveDynamicConstants() {
-        visitTexturesWithKey( [&]( TextureUniformDesc& u, const std::string& _key ) {
-            if ( _key == UniformNames::yTexture) {
-                u.name = Name() + "_y";
-            } else if ( _key == UniformNames::uTexture) {
-                u.name = Name() + "_u";
-            } else if ( _key == UniformNames::vTexture) {
-                u.name = Name() + "_v";
-            }
-        });
-    }
-
-    const std::vector<std::string> textureDependencies() const {
-        return getTextureNames();
-    }
-
-    static const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key ) {
-        return {{ _key, 0xffffffff }};
-    }
-
-    void setShaderName( const std::string& _value ) {
-        shaderName = _value;
-        mbIsStreaming = isShaderStreammable( shaderName );
-    }
-
-    std::string PBRName( const std::string& _type ) const {
-        return Name() + "_" + _type;
-    }
-
-    const std::string getBaseColor() const {
-        return PBRName(MPBRTextures::basecolorString);
-    }
-
-    void setBaseColor( const std::string& _baseColor ) {
-//        baseColor = _baseColor;
-    }
-
-    const std::string getNormal() const {
-        return PBRName(MPBRTextures::normalString);
-    }
-
-    void setNormal( const std::string& _normal ) {
-//        normal = _normal;
-    }
-
-    const std::string getAmbientOcclusion() const {
-        return PBRName(MPBRTextures::ambientOcclusionString);
-    }
-
-    void setAmbientOcclusion( const std::string& _ambientOcclusion ) {
-//        ambientOcclusion = _ambientOcclusion;
-    }
-
-    const std::string getRoughness() const {
-        return PBRName(MPBRTextures::roughnessString);
-    }
-
-    void setRoughness( const std::string& _roughness ) {
-//        roughness = _roughness;
-    }
-
-    const std::string getMetallic() const {
-        return PBRName(MPBRTextures::metallicString);
-    }
-
-    void setMetallic( const std::string& _metallic ) {
-//        metallic = _metallic;
-    }
-
-    const std::string getHeight() const {
-        return PBRName(MPBRTextures::heightString);
-    }
-
-    void setHeight( const std::string& _height ) {
-//        height = _height;
-    }
-
-    float getMetallicValue() const {
-        float ret;
-        get( UniformNames::metallic, ret );
-        return ret;
-    }
-
-    void setMetallicValue( float _metallicValue ) {
-        assign( UniformNames::metallic, _metallicValue );
-    }
-
-    float getRoughnessValue() const {
-        float ret;
-        get( UniformNames::roughness, ret );
-        return ret;
-    }
-
-    void setRoughnessValue( float _roughnessValue ) {
-        assign( UniformNames::roughness, _roughnessValue );
-    }
-
-    float getAoValue() const {
-        float ret;
-        get( UniformNames::ao, ret );
-        return ret;
-    }
-
-    void setAoValue( float _aoValue ) {
-        assign( UniformNames::ao, _aoValue );
-    }
-
-    float getOpacity() const {
-        float ret;
-        get( UniformNames::opacity, ret );
-        return ret;
-    }
-
-    void setOpacity( float _opacityValue ) {
-        assign( UniformNames::opacity, _opacityValue );
-    }
-
-    const MaterialProperties& getProperties() const {
-        return properties;
-    }
-
-    void setProperties( const MaterialProperties& properties ) {
-        Material::properties = properties;
-    }
-
-    void serializeDependencies( std::shared_ptr<SerializeBin> writer ) {
-//        writer->write( 1 );
-//        writer->write( dependecyTagMaterial );
-//        writer->write( textureName );
-    }
-
-    void serialize( std::shared_ptr<SerializeBin> writer ) {
-//        writer->write( textureName );
-//        writer->write( color );
-//        writer->write( opacity );
+    void serialize( std::shared_ptr<SerializeBin> writer ) const {
+        writer->write(pixelTexelRatio);
+        writer->write(cost);
+        writer->write(isStreaming);
     }
 
     void deserialize( std::shared_ptr<DeserializeBin> reader ) {
-//        reader->read( textureName );
-//        reader->read( color );
-//        reader->read( opacity );
+        reader->read(pixelTexelRatio);
+        reader->read(cost);
+        reader->read(isStreaming);
     }
+};
 
-    void clone( const Material& _source ) {
-        HeterogeneousMap::clone( _source );
-        properties = _source.properties;
-        shaderName = _source.shaderName;
-    }
+class Material : public HeterogeneousMap, public Publisher<Material> {
+public:
+    explicit Material( const Material& _mat );
+    explicit Material( std::shared_ptr<Material> _mat );
+    explicit Material(  const std::string& _name, const std::string& _sn );
+    virtual ~Material() = default;
 
-    Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName ) {
-        if ( _data.second > 0 ) {
-            buffers.emplace( std::make_pair(_bname, std::move(_data)) );
-            assign( _uniformName, { _bname, 0,0,0 } );
-        }
-        return *this;
-    }
+    std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey );
 
-    Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName ) {
-        return buffer( _bname, ucchar_pTouint8_p(_data), _uniformName );
-    }
+    std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp );
 
-    const MaterialImageBuffers& Buffers() const {
-        return buffers;
-    }
+    Material& t( const std::string& _tn );
 
-    bool isStreammable() const {
-        return mbIsStreaming;
-    }
+    Material& c( const Color4f& _col );
+
+    const std::string& getShaderName() const;
+
+    void resolveDynamicConstants();
+
+    const std::vector<std::string> textureDependencies() const;
+
+    static const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key );
+
+    void setShaderName( const std::string& _value );
+
+    std::string PBRName( const std::string& _type ) const;
+    const std::string getBaseColor() const;
+    const std::string getNormal() const;
+    const std::string getAmbientOcclusion() const;
+    const std::string getRoughness() const;
+    const std::string getMetallic() const;
+    const std::string getHeight() const;
+    float getMetallicValue() const;
+    void setMetallicValue( float _metallicValue );
+    float getRoughnessValue() const;
+    void setRoughnessValue( float _roughnessValue );
+    float getAoValue() const;
+    void setAoValue( float _aoValue );
+    float getOpacity() const;
+    void setOpacity( float _opacityValue );
+
+    const MaterialProperties& getProperties() const;
+    void setProperties( const MaterialProperties& properties );
+
+    void serializeDependencies( std::shared_ptr<SerializeBin> writer );
+    void serialize( std::shared_ptr<SerializeBin> writer ) const override;
+    void deserialize( std::shared_ptr<DeserializeBin> reader ) override;
+
+    void clone( const Material& _source );
+
+    Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName );
+    Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName );
+    const MaterialImageBuffers& Buffers() const;
+    void tarBuffers( const std::vector<char>& _bufferTarFiles, MaterialImageCallback imageCallback );
+
+    bool isStreammable() const;
+
+protected:
+    KnownBufferMap knownBuffers() const;
+    std::string generateThumbnail() const override;
+    std::set<std::string> generateTags() const override;
+    std::string generateRawData() const override;
 
 protected:
     MaterialImageBuffers buffers;
     MaterialProperties properties;
-    bool mbIsStreaming = false;
     std::string shaderName;
 
 public:
     inline constexpr static uint64_t Version() { return 1000; }
+    inline const static std::string EntityGroup() { return EntityGroup::Material; }
 };
 
 class MaterialBuildable {
 public:
-    explicit MaterialBuildable( const std::string& _shader, const std::string& _matName = "" ) {
-        material = std::make_shared<Material>( _matName, _shader );
-    }
-
-    void materialSet( const std::string& _shader, const std::string& _matName = "" ) {
-        material->Name(_matName);
-        material->setShaderName(_shader);
-    }
+    explicit MaterialBuildable( const std::string& _shader, const std::string& _matName = "" );
+    void materialSet( std::shared_ptr<Material> _value );
+    void materialSet( const std::string& _shader, const std::string& _matName = "" );
 
     template <typename T>
-    void materialConstant( const std::string& _name, T _value ) {
-        material->assign( _name, _value);
-    }
-
-    void materialColor( const Color4f & _color ) {
-        material->c( _color );
-    }
-
-    void materialColor( const std::string& _hexcolor ) {
-        material->c( Vector4f::XTORGBA( _hexcolor ) );
-    }
+    void materialConstant( const std::string& _name, T _value );
+    void materialColor( const Color4f & _color );
+    void materialColor( const std::string& _hexcolor );
 
 protected:
     std::shared_ptr<Material> material;

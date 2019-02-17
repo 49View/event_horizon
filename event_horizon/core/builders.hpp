@@ -133,11 +133,16 @@ public:
 protected:
     virtual void elemCreate() = 0;
     virtual bool validate() const = 0;
+    template< typename B, typename D>
+    void assembleNV( std::shared_ptr<B> _builder, D& _md ) {
+        _builder->assemble( _md );
+        _builder->createMetaData();
+    }
 
     template< typename B, typename D>
     void addDependencies( std::shared_ptr<B> _builder, D& _md ) {
         if ( mDeps.empty() ) {
-            _builder->assemble( _md );
+            assembleNV( _builder, _md );
         } else {
             g_deps.push_back( std::make_shared<DependencyChainMap>( _builder, _md ));
         }

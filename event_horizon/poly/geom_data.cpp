@@ -140,10 +140,9 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _
 
 void GeomData::serialize( std::shared_ptr<SerializeBin> f ) {
 	f->write( mName );
-	material->serialize( f );
+	f->write( material->Hash() ); //material->serialize( f );
 	f->write( mBBox3d.mMinPoint );
 	f->write( mBBox3d.mMaxPoint );
-	f->write( mapping.direction );
 	f->write( mVdata.vIndices );
 	f->write( mVdata.vcoords3d );
 	f->write( mVdata.vnormals3d );
@@ -152,8 +151,6 @@ void GeomData::serialize( std::shared_ptr<SerializeBin> f ) {
 	f->write( mVdata.vUVs );
     f->write( mVdata.vUV2s );
 	f->write( mVdata.vColor );
-	f->write( wrapMappingCoords );
-	f->write( mWindingOrder );
 }
 
 void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<SerializeBin> writer ) {
@@ -164,11 +161,12 @@ void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<Ser
 
 void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mName );
+	int64_t lmatHash = 0;
+	reader->read( lmatHash );
 	// -###- FIXME, reintroduce material readers
 	material = std::make_shared<Material>(S::WHITE_PBR, S::SH);//( reader );
 	reader->read( mBBox3d.mMinPoint );
 	reader->read( mBBox3d.mMaxPoint );
-	reader->read( mapping.direction );
 	reader->read( mVdata.vIndices );
 	reader->read( mVdata.vcoords3d );
 	reader->read( mVdata.vnormals3d );
@@ -177,8 +175,6 @@ void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mVdata.vUVs );
 	reader->read( mVdata.vUV2s );
 	reader->read( mVdata.vColor );
-	reader->read( wrapMappingCoords );
-	reader->read( mWindingOrder );
 
 //	mVdata.allocateEmptySHData();
 }
@@ -1413,4 +1409,4 @@ GeomDeserializeDependencies GeomData::gatherDependencies( std::shared_ptr<Deseri
 	return ret;
 }
 
-uint64_t GeomData::Version() { return NodeVersion(1000); }
+uint64_t GeomData::Version() { return NodeVersion(1100); }
