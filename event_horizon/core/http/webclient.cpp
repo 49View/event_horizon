@@ -221,7 +221,9 @@ namespace Http {
 
     void cacheLoginFields( const LoginFields& _lf ) {
         sCachedLoginFields = _lf;
-        FM::writeLocalTextFile( cacheFolder() + "lf", _lf.serialize() );
+        if ( !_lf.isDaemon() ) {
+            FM::writeLocalTextFile( cacheFolder() + "lf", _lf.serialize() );
+        }
     }
 
     LoginFields cachedLoginFields() {

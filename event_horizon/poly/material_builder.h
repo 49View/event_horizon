@@ -55,10 +55,6 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
     }
 
 protected:
-    const std::string pbrPrefix() const {
-        return getFileNameNoExt( Name() ) + "_";
-    }
-    void handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName );
     void imageBuilderInjection( DependencyMaker& _md, const std::string& _finame, ucchar_p _dataPtr );
 private:
     MaterialProperties      properties;

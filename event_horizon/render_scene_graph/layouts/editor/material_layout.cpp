@@ -26,7 +26,7 @@ void ImGuiMatImage( const std::string& name, const ImColor& col, const ImVec2 si
 //        if ( t->getWidth() > 4 && name != "Base" ) ImGui::SameLine();
         ImGui::BeginGroup();
         if ( t->getWidth() > 0 ) {
-            ImGui::TextColored( col.Value, "%s", name.c_str() );
+//            ImGui::TextColored( col.Value, "%s", name.c_str() );
             ImGui::Image( reinterpret_cast<void *>(t->getHandle()), size );
         } else {
             ImGui::PushID( t->getHandle() );
@@ -43,35 +43,35 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
 
     for ( const auto& mat : p->ML().list()) {
         if ( !mat ) continue;
-        ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", mat->Name().c_str() );
-        float dc[3] = {1.0f, 1.0f, 1.0f};// { mat->getColor().x(), mat->getColor().y(), mat->getColor().z() };
-        ImGui::PushID( (mat->Name() + "dc").c_str() );
-        ImGui::ColorEdit3( "Diffuse", dc );
-        ImGui::PopID();
-        for ( const auto& mt : mat->getTextureNames() ) {
-            ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->TM().TD(mt) );
-        }
-//        if ( mat->getType() == MaterialType::PBR ) {
-//            std::shared_ptr<PBRMaterial> matPBR = std::dynamic_pointer_cast<PBRMaterial>( mat );
-//            ImGuiMatImage( "Base", ImColor{200, 200, 200}, textureSize, p->TM().TD(matPBR->getBaseColor()) );
-//            ImGuiMatImage( "Normal", ImColor{100, 100, 250}, textureSize, p->TM().TD( matPBR->getNormal()) );
-//            ImGuiMatImage( "Roughness", ImColor{250, 250, 100}, textureSize, p->TM().TD( matPBR->getRoughness()),
-//                           matPBR->getRoughnessValue() );
-//            ImGuiMatImage( "Metallic", ImColor{240, 240, 240}, textureSize, p->TM().TD( matPBR->getMetallic()),
-//                           matPBR->getMetallicValue() );
-//            ImGuiMatImage( "AO", ImColor{100, 100, 100}, textureSize, p->TM().TD( matPBR->getAmbientOcclusion()),
-//                           matPBR->getAoValue());
-//            ImGuiMatImage( "Height", ImColor{32, 200, 32}, textureSize, p->TM().TD( matPBR->getHeight()) );
-//        }
-//        if ( mb ) {
-//            ImGui::BeginGroup();
-            if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-                mat->publish();
+        ImGui::BeginGroup();
+        auto matName = mat->Name().substr(0, 10);
+        ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", matName.c_str() );
+        bool bHasTexture = false;
+        for ( const auto& [k, mt] : mat->getTextureNameMap() ) {
+            if ( k == UniformNames::diffuseTexture || k == UniformNames::colorTexture ) {
+                ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->TM().TD(mt) );
+                bHasTexture = true;
+                break;
             }
-//            ImGui::EndGroup();
-//        }
-
-        ImGui::Separator();
+        }
+        if (!bHasTexture) {
+            V3f cv3 = Vector3f::ONE;
+            if ( mat->hasVector3f(UniformNames::diffuseColor) ) {
+                mat->get( UniformNames::diffuseColor, cv3 );
+            }
+            ImGui::PushID( (mat->Name() + "dc").c_str() );
+            if ( ImGui::ColorEdit3( "Diffuse", cv3.rawPtr(), ImGuiColorEditFlags_NoInputs ) ) {
+                mat->assign( UniformNames::diffuseColor, cv3 );
+            }
+            ImGui::PopID();
+        }
+        ImGui::PushID( (mat->Name() + "save_button").c_str() );
+        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+            mat->publish();
+        }
+        ImGui::PopID();
+        ImGui::EndGroup();
+        ImGui::SameLine();
     }
 }
 

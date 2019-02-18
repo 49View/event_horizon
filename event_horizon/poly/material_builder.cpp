@@ -51,15 +51,6 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     return true;
 }
 
-void MaterialBuilder::handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName ) {
-    auto& sg = dynamic_cast<MaterialManager&>(_md);
-
-    for ( const auto& td : Material::textureDependencies( _keyTextureName ))
-        if ( !sg.TL()->exists( td.first )) {
-            ImageBuilder{ td.first }.setSize( 4 ).backup( td.second ).makeDefault( *sg.TL());
-        }
-}
-
 MaterialBuilder::MaterialBuilder( const std::string& _name, const std::vector<char>& _data ) {
     Name(_name);
     bufferTarFiles = _data;

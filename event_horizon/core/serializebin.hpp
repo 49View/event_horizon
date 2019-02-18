@@ -16,13 +16,13 @@
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
-	SerializeBin( uint64_t vf ) {
+    explicit SerializeBin( uint64_t vf ) {
         write( vf );
 	}
 
 	template<typename T>
 	void write( const std::vector<T>& v ) {
-		int32_t nameLength = static_cast<int32_t>( v.size() );
+        auto nameLength = static_cast<int32_t>( v.size() );
 		write( nameLength );
 		for ( const auto& d : v ) write( d );
 	}
@@ -132,7 +132,7 @@ public:
 
 	DeserializeBin( uint8_p&& _data, uint64_t vf ) {
 		fi = std::make_shared<std::istringstream>( std::string{ reinterpret_cast<char*>(_data.first.get()),
-														        _data.second } );
+																static_cast<size_t>(_data.second) } );
 		readVersion( vf );
 	}
 
@@ -153,7 +153,7 @@ public:
 	void read( std::unique_ptr<T[]>& v, int32_t& numIndices ) {
 
 		fi->read( reinterpret_cast<char*>( &numIndices ), sizeof( int32_t ) );
-		v = std::unique_ptr<T[]>( new T[numIndices] );
+		v = std::unique_ptr<T[]>(numIndices);
 		T value;
 		for ( int t = 0; t < numIndices; t++ ) {
 			fi->read( reinterpret_cast<char*>( &value ), sizeof( T ) );
@@ -230,23 +230,14 @@ public:
 		fi->read( reinterpret_cast<char*>( &v ), sizeof( T ) );
 	}
 
-	void read( char** str ) {
-		int32_t nameLength;
-		fi->read( reinterpret_cast<char*>( &nameLength ), sizeof( int32_t ) );
-		*str = new char[nameLength + 1];
-		fi->read( *str, nameLength );
-		( *str )[nameLength] = '\0';
-	}
-
 	void read( std::string& str ) {
 
 		int32_t nameLength;
 		fi->read( reinterpret_cast<char*>( &nameLength ), sizeof( int32_t ) );
-		char* cstr = new char[nameLength + 1];
-		fi->read( cstr, nameLength );
-		( cstr )[nameLength] = '\0';
-		str = cstr;
-		delete[] cstr;
+		auto cstr = std::make_unique<char[]>( static_cast<size_t>(nameLength + 1));
+		fi->read( cstr.get(), nameLength );
+		cstr[nameLength] = '\0';
+		str = std::string{ cstr.get() };
 	}
 
 	void readVersion( uint64_t vf ) {
