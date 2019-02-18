@@ -36,6 +36,7 @@ public:
     int64_t Hash() const { return mHash; }
 
     std::vector<std::string> getTextureNames() const;
+    std::unordered_map<std::string, std::string> getTextureNameMap() const;
     std::string getTexture( const std::string& uniformName ) const;
     float getInt( const std::string & uniformName ) const;
     float getFloatWithDefault( const std::string& uniformName, const float def ) const;
@@ -100,9 +101,11 @@ public:
     virtual void serialize( std::shared_ptr<SerializeBin> writer ) const;
     virtual void deserialize( std::shared_ptr<DeserializeBin> reader );
 
+protected:
+    virtual void calcHash( int64_t _base = 0 );
+
 private:
     void calcTotalNumUniforms();
-    void calcHash();
 
 private:
     std::unordered_map<std::string, TextureIndex> mTextures;

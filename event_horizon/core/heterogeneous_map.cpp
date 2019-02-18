@@ -22,15 +22,17 @@ void HeterogeneousMap::calcTotalNumUniforms() {
     calcHash();
 }
 
-void HeterogeneousMap::calcHash() {
+void HeterogeneousMap::calcHash( int64_t _base ) {
     mHash = mNumUniforms;
 
+    mHash += std::hash<std::string>()(Name());
     for ( auto& i : mTextures ) mHash += std::hash<std::string>{}(i.first);
     for ( auto& i : mInts ) mHash += i.second;
     for ( auto& i : mFloats ) mHash += static_cast<int64_t>( i.second * 1000.0f );
     for ( auto& i : mV2fs ) mHash += i.second.hash();
     for ( auto& i : mV3fs ) mHash += i.second.hash();
     for ( auto& i : mV4fs ) mHash += i.second.hash();
+    mHash += _base;
 }
 
 void HeterogeneousMap::inject( const HeterogeneousMap& source ) {
@@ -250,8 +252,17 @@ void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
 std::vector<std::string> HeterogeneousMap::getTextureNames() const {
     std::vector<std::string> ret;
 
-    for ( const auto& [t, v] : mTextures ) {
+    for ( const auto& [k, v] : mTextures ) {
         ret.emplace_back( v.name );
+    }
+    return ret;
+}
+
+std::unordered_map<std::string, std::string> HeterogeneousMap::getTextureNameMap() const {
+    std::unordered_map<std::string, std::string> ret;
+
+    for ( const auto& [k, v] : mTextures ) {
+        ret.emplace( k, v.name );
     }
     return ret;
 }
@@ -260,7 +271,7 @@ void HeterogeneousMap::serialize( std::shared_ptr<SerializeBin> writer ) const {
     writer->write( Name() );
     writer->write( mNumUniforms );
     writer->write( mHash );
-    writer->write( mTextures );
+    writer->write( getTextureNameMap() ); //mTextures
     writer->write( mInts );
     writer->write( mFloats );
     writer->write( mV2fs );
@@ -275,7 +286,9 @@ void HeterogeneousMap::deserialize( std::shared_ptr<DeserializeBin> reader ) {
     reader->read( NameRef() );
     reader->read( mNumUniforms );
     reader->read( mHash );
-    reader->read( mTextures );
+    std::unordered_map<std::string, std::string> tns;
+    reader->read( tns );
+    for ( const auto& [k,v] : tns ) mTextures.emplace( k, TextureIndex{v, 0, 0, 0} );
     reader->read( mInts );
     reader->read( mFloats );
     reader->read( mV2fs );

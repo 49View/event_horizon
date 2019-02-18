@@ -37,16 +37,16 @@ std::shared_ptr<Material> MaterialBuilder::makeDirect( DependencyMaker& _md ) {
 bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
 
     auto& sg = dynamic_cast<MaterialManager&>(_md);
-    std::string downloadedMatName = Name();
-    auto mat = std::make_shared<Material>(downloadedMatName, shaderName );
-    if ( _status == DependencyStatus::LoadedSuccessfully ) {
-        mat->tarBuffers( zlibUtil::inflateFromMemory( std::move( _data )),
-                         [&]( const std::string& _finame, ucchar_p _dataPtr ) {
-                            ImageBuilder{ _finame }.makeDirect( *sg.TL(), _dataPtr );
-                         } );
-    }
 
-    sg.add( *this, mat );
+    if ( _status == DependencyStatus::LoadedSuccessfully ) {
+        auto mat = std::make_shared<Material>( zlibUtil::inflateFromMemory( std::move( _data )));
+        mat->Buffers([&]( const std::string& _finame, ucchar_p _dataPtr ) {
+            ImageBuilder{ _finame }.makeDirect( *sg.TL(), _dataPtr );
+        });
+        sg.add( *this, mat );
+    } else {
+        makeDefault( _md );
+    }
 
     return true;
 }

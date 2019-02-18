@@ -59,7 +59,6 @@ protected:
         return getFileNameNoExt( Name() ) + "_";
     }
     void handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName );
-    KnownBufferMap knownBuffers( std::shared_ptr<Material> _mat ) const;
     void imageBuilderInjection( DependencyMaker& _md, const std::string& _finame, ucchar_p _dataPtr );
 private:
     MaterialProperties      properties;

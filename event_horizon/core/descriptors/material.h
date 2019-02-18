@@ -128,13 +128,14 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
 
 class Material : public HeterogeneousMap, public Publisher<Material> {
 public:
-    explicit Material( const Material& _mat );
+    Material( const Material& _mat );
     explicit Material( std::shared_ptr<Material> _mat );
-    explicit Material(  const std::string& _name, const std::string& _sn );
-    virtual ~Material() = default;
+    explicit Material( const std::vector<char>& _data );
+    explicit Material( const std::string& _name, const std::string& _sn );
+    ~Material() override = default;
 
+    void calcHash( int64_t _base = 0 ) override;
     std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey );
-
     std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp );
 
     Material& t( const std::string& _tn );
@@ -180,6 +181,7 @@ public:
     Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName );
     const MaterialImageBuffers& Buffers() const;
     void tarBuffers( const std::vector<char>& _bufferTarFiles, MaterialImageCallback imageCallback );
+    void Buffers( MaterialImageCallback imageCallback );
 
     bool isStreammable() const;
 

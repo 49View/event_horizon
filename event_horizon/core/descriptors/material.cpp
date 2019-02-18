@@ -16,9 +16,18 @@ Material::Material( std::shared_ptr<Material> _mat ) {
     clone(*_mat.get());
 }
 
+Material::Material( const std::vector<char>& _data ) {
+    deserialize( std::make_shared<DeserializeBin>(_data, Version() ) );
+}
+
 Material::Material( const std::string& _name, const std::string& _sn ) {
     Name(_name);
     setShaderName(_sn);
+    Material::calcHash();
+}
+
+void Material::calcHash( int64_t _base ) {
+    HeterogeneousMap::calcHash( std::hash<std::string>()(getShaderName()) );
 }
 
 std::shared_ptr<Material> Material::cloneWithNewShader( const std::string& _subkey ) {
@@ -155,12 +164,14 @@ void Material::serializeDependencies( std::shared_ptr<SerializeBin> writer ) {
 
 void Material::serialize( std::shared_ptr<SerializeBin> writer ) const {
     HeterogeneousMap::serialize(writer);
+    writer->write( buffers );
     properties.serialize(writer);
     writer->write(shaderName);
 }
 
 void Material::deserialize( std::shared_ptr<DeserializeBin> reader ) {
     HeterogeneousMap::deserialize(reader);
+    reader->read( buffers );
     properties.deserialize(reader);
     reader->read(shaderName);
 }
@@ -213,6 +224,15 @@ void Material::tarBuffers( const std::vector<char>& _bufferTarFiles, MaterialIma
     }
 }
 
+void Material::Buffers( MaterialImageCallback imageCallback ) {
+    if ( !buffers.empty() ) {
+        auto kbs = knownBuffers();
+        for ( const auto& [k,v] : buffers ) {
+            imageCallback( k, { v.first.get(), v.second } );
+        }
+    }
+}
+
 const MaterialImageBuffers& Material::Buffers() const {
     return buffers;
 }
@@ -251,20 +271,20 @@ std::set<std::string> Material::generateTags() const {
 }
 
 std::string Material::generateRawData() const {
-    std::stringstream tagStream;
-    tarUtil::TarWrite tar{ tagStream };
+//    std::stringstream tagStream;
+//    tarUtil::TarWrite tar{ tagStream };
 
     auto writer = std::make_shared<SerializeBin>(Version());
     serialize( writer );
     auto matFile = writer->buffer();
 
-    tar.put( Name().c_str(), std::string{ matFile.begin(), matFile.end() } );
-    for ( const auto& [k,v] : buffers ) {
-        tar.put( k.c_str(), reinterpret_cast<const char*>(v.first.get()), v.second );
-    }
-    tar.finish();
+//    tar.put( Name().c_str(), std::string{ matFile.begin(), matFile.end() } );
+//    for ( const auto& [k,v] : buffers ) {
+//        tar.put( k.c_str(), reinterpret_cast<const char*>(v.first.get()), v.second );
+//    }
+//    tar.finish();
 
-    auto f = zlibUtil::deflateMemory( tagStream.str() );
+    auto f = zlibUtil::deflateMemory( std::string{ matFile.begin(), matFile.end() } );
     auto rawm = bn::encode_b64( f );
     return std::string{ rawm.begin(), rawm.end() };
 }

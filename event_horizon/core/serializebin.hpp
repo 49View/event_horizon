@@ -9,6 +9,7 @@
 #pragma once
 
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <fstream>
 #include <string>
@@ -32,27 +33,59 @@ public:
 		for ( int t = 0; t < numIndices; t++ ) write( v[t] );
 	}
 
+#define writeMapInternal \
+	int32_t nameLength = static_cast<int32_t>( v.size() ); \
+	write( nameLength ); \
+	for ( auto& d : v ) { \
+		write( d.first ); \
+		write( d.second ); \
+	}
+
 	template<typename T, typename M>
 	void write( const std::map<T, M>& v ) {
+		writeMapInternal
+	}
+
+	template<typename T, typename M>
+	void write( const std::unordered_map<T, M>& v ) {
+		writeMapInternal
+	}
+
+	template<typename T>
+	void write( const std::unordered_map<T, uint8_p>& v ) {
 		int32_t nameLength = static_cast<int32_t>( v.size() );
 		write( nameLength );
-		for ( auto& d : v ) {
-			write( d.first );
-			write( d.second );
+		for ( auto&& [name, uptr] : v ) {
+			write( name );
+			write( uptr.second );
+			if ( uptr.second > 0 ) {
+				for ( uint64_t q = 0; q < uptr.second; q++ ) {
+					unsigned char byte = uptr.first[q];
+					f.emplace_back( byte );
+				}
+			}
 		}
+	}
+
+#define writeMapVectorInternal \
+	int32_t nameLength = static_cast<int32_t>( v.size() ); \
+	write( nameLength ); \
+	for ( auto& d : v ) { \
+		write( d.first ); \
+		write( static_cast<int32_t>( d.second.size() ) ); \
+		for ( auto& vv : d.second ) { \
+			write( vv ); \
+		} \
 	}
 
 	template<typename T, typename M>
 	void write( const std::map<T, std::vector<M>>& v ) {
-		int32_t nameLength = static_cast<int32_t>( v.size() );
-		write( nameLength );
-		for ( auto& d : v ) {
-			write( d.first );
-			write( static_cast<int32_t>( d.second.size() ) );
-			for ( auto& vv : d.second ) {
-				write( vv );
-			}
-		}
+		writeMapVectorInternal
+	}
+
+	template<typename T, typename M>
+	void write( const std::unordered_map<T, std::vector<M>>& v ) {
+		writeMapVectorInternal
 	}
 
 	template<typename T>
@@ -97,7 +130,13 @@ public:
 		readVersion( vf );
 	}
 
-    template<typename T>
+	DeserializeBin( uint8_p&& _data, uint64_t vf ) {
+		fi = std::make_shared<std::istringstream>( std::string{ reinterpret_cast<char*>(_data.first.get()),
+														        _data.second } );
+		readVersion( vf );
+	}
+
+	template<typename T>
 	void read( std::vector<T>& v ) {
 
 		int32_t vectorSize = 0;
@@ -122,38 +161,68 @@ public:
 		}
 	}
 
-	template<typename T, typename M>
-	void read( std::map<T, M>& v ) {
-
-		int32_t vectorSize = 0;
-		fi->read( reinterpret_cast<char*>( &vectorSize ), sizeof( int32_t ) );
-		T valueT;
-		M valueM;
-		for ( int t = 0; t < vectorSize; t++ ) {
-			read( valueT );
-			read( valueM );
-			v[valueT] = valueM;
-		}
+#define readMapInternal \
+	int32_t vectorSize = 0; \
+	fi->read( reinterpret_cast<char*>( &vectorSize ), sizeof( int32_t ) ); \
+	T valueT; \
+	M valueM; \
+	for ( int t = 0; t < vectorSize; t++ ) { \
+		read( valueT ); \
+		read( valueM ); \
+		v[valueT] = valueM; \
 	}
 
 	template<typename T, typename M>
-	void read( std::map<T, std::vector<M>>& /*v*/ ) {
+	void read( std::map<T, M>& v ) {
+		readMapInternal
+	}
 
+	template<typename T, typename M>
+	void read( std::unordered_map<T, M>& v ) {
+		readMapInternal
+	}
+
+	template<typename T>
+	void read( std::unordered_map<T, uint8_p>& v ) {
 		int32_t vectorSize = 0;
 		fi->read( reinterpret_cast<char*>( &vectorSize ), sizeof( int32_t ) );
 		T valueT;
-		M valueM;
-		std::vector<M> vectorM;
-
 		for ( int t = 0; t < vectorSize; t++ ) {
 			read( valueT );
-			int32_t v2size = 0;
-			fi->read( reinterpret_cast<char*>( &v2size ), sizeof( int32_t ) );
-			for ( auto vs = 0; vs < v2size; vs++ ) {
-				read( valueM );
-				vectorM.push_back( valueM );
-			}
+
+			uint8_p uptr;
+			fi->read( reinterpret_cast<char*>( &uptr.second ), sizeof( uint64_t ) );
+			uptr.first = std::make_unique<uint8_t[]>(uptr.second);
+			fi->read( reinterpret_cast<char*>(uptr.first.get()), uptr.second );
+
+			v[valueT] = std::move(uptr);
 		}
+	}
+
+#define readMapVectorInternal \
+	int32_t vectorSize = 0; \
+	fi->read( reinterpret_cast<char*>( &vectorSize ), sizeof( int32_t ) ); \
+	T valueT; \
+	M valueM; \
+	std::vector<M> vectorM; \
+	for ( int t = 0; t < vectorSize; t++ ) { \
+		read( valueT ); \
+		int32_t v2size = 0; \
+		fi->read( reinterpret_cast<char*>( &v2size ), sizeof( int32_t ) ); \
+		for ( auto vs = 0; vs < v2size; vs++ ) { \
+			read( valueM ); \
+			vectorM.push_back( valueM ); \
+		} \
+		v[valueT] = vectorM; \
+	}
+
+	template<typename T, typename M>
+	void read( std::map<T, std::vector<M>>& v ) {
+		readMapVectorInternal
+	}
+	template<typename T, typename M>
+	void read( std::unordered_map<T, std::vector<M>>& v ) {
+		readMapVectorInternal
 	}
 
 	template<typename T>
@@ -162,7 +231,6 @@ public:
 	}
 
 	void read( char** str ) {
-
 		int32_t nameLength;
 		fi->read( reinterpret_cast<char*>( &nameLength ), sizeof( int32_t ) );
 		*str = new char[nameLength + 1];
