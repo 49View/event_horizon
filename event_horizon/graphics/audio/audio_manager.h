@@ -4,7 +4,7 @@
 #include <memory>
 #include <core/name_policy.hpp>
 
-class AudioStream : public NamePolicy {
+class AudioStream : public NamePolicy<> {
 
 };
 

@@ -517,20 +517,3 @@ UIShapeBuilder& UIShapeBuilder::inj( GeomAssetSP _cloned ) {
     mTransform = _cloned->getLocalHierTransform();
     return *this;
 }
-
-std::string UIShapeBuilder::toMetaData() const {
-    MegaWriter writer;
-
-    writer.StartObject();
-//    writer.serialize( CoreMetaData{Name(), EntityGroup::Geom, GeomData::Version(),
-//                                   generateThumbnail(), generateRawData(), generateTags()} );
-    writer.serialize( "BBox3d", elem->BBox3d() );
-    writer.EndObject();
-
-    return writer.getString();
-}
-
-void UIShapeBuilder::createMetaData() const {
-    elem->MetaData( toMetaData() );
-}
-

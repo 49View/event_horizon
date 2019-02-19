@@ -126,7 +126,7 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
     }
 };
 
-class Material : public HeterogeneousMap, public Publisher<Material> {
+class Material : public HeterogeneousMap, public Publisher<Material, EmptyBox> {
 public:
     Material( const Material& _mat );
     explicit Material( std::shared_ptr<Material> _mat );
@@ -134,7 +134,7 @@ public:
     explicit Material( const std::string& _name, const std::string& _sn );
     ~Material() override = default;
 
-    void calcHash( int64_t _base = 0 ) override;
+    void calcHash( int64_t _base ) override;
     std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey );
     std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp );
 
@@ -189,7 +189,6 @@ protected:
     KnownBufferMap knownBuffers() const;
     std::string generateThumbnail() const override;
     std::set<std::string> generateTags() const override;
-    std::string generateRawData() const override;
 
 protected:
     MaterialImageBuffers buffers;

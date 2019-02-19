@@ -82,6 +82,10 @@ public:
     template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( "Name,BBbox", name,bbox3d ); }
 
+//    std::string generateThumbnail() const override { return std::string{}; }
+//    std::set<std::string> generateTags() const override { std::set<std::string> ret{}; return ret; }
+//    std::string generateRawData() const override { return std::string{}; }
+
 private:
     std::string name;
     UIShapeType shapeType = UIShapeType::Rect2d;
@@ -89,6 +93,11 @@ private:
     int renderBucketIndex = 0;
     JMATH::AABB bbox3d = JMATH::AABB::ZERO;
     std::shared_ptr<PosTex3dStrip> vs;
+
+public:
+    static uint64_t Version() { return 1000; }
+    inline const static std::string EntityGroup() { return EntityGroup::UI; }
+
 };
 
 class UIShapeBuilder : public MaterialBuildable, public Observable<UIShapeBuilder>, public DependantBuilder {
@@ -319,12 +328,9 @@ public:
         return elem;
     }
 
-    void createMetaData() const;
-
 protected:
     void elemCreate() override;
     bool validate() const override;
-    std::string toMetaData() const;
 
 protected:
     void createDependencyList( DependencyMaker& _md ) override;

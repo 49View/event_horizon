@@ -17,17 +17,17 @@ Material::Material( std::shared_ptr<Material> _mat ) {
 }
 
 Material::Material( const std::vector<char>& _data ) {
-    deserialize( std::make_shared<DeserializeBin>(_data, Version() ) );
+    Publisher::Serializable::deserialize( _data );
 }
 
 Material::Material( const std::string& _name, const std::string& _sn ) {
     Name(_name);
     setShaderName(_sn);
-    Material::calcHash();
+    Material::calcHash(std::hash<std::string>()(getShaderName()));
 }
 
 void Material::calcHash( int64_t _base ) {
-    HeterogeneousMap::calcHash( std::hash<std::string>()(getShaderName()) );
+    HeterogeneousMap::calcHash( _base );
 }
 
 std::shared_ptr<Material> Material::cloneWithNewShader( const std::string& _subkey ) {
@@ -268,25 +268,6 @@ std::set<std::string> Material::generateTags() const {
     nameSplit( ret );
     ret.emplace(std::to_string(Hash()));
     return ret;
-}
-
-std::string Material::generateRawData() const {
-//    std::stringstream tagStream;
-//    tarUtil::TarWrite tar{ tagStream };
-
-    auto writer = std::make_shared<SerializeBin>(Version());
-    serialize( writer );
-    auto matFile = writer->buffer();
-
-//    tar.put( Name().c_str(), std::string{ matFile.begin(), matFile.end() } );
-//    for ( const auto& [k,v] : buffers ) {
-//        tar.put( k.c_str(), reinterpret_cast<const char*>(v.first.get()), v.second );
-//    }
-//    tar.finish();
-
-    auto f = zlibUtil::deflateMemory( std::string{ matFile.begin(), matFile.end() } );
-    auto rawm = bn::encode_b64( f );
-    return std::string{ rawm.begin(), rawm.end() };
 }
 
 // *********************************************************************************************************

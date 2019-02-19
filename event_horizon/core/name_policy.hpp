@@ -6,26 +6,27 @@
 
 #include <string>
 
+template <typename T = std::string>
 class NamePolicy {
 public:
-    inline const std::string& Name() const {
-        return name;
+    inline const T& Name() const {
+        return mName;
     }
 
-    inline std::string& NameRef() {
-        return name;
+    inline T& NameRef() {
+        return mName;
     }
 
-    inline std::string Name() {
-        return name;
+    inline T Name() {
+        return mName;
     }
 
-    inline void Name( const std::string& _name ){
-        name = _name;
+    inline void Name( const T& _name ){
+        mName = _name;
     }
 
 private:
-    std::string name;
+    T mName;
 };
 
 

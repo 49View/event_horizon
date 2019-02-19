@@ -66,7 +66,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
             ImGui::PopID();
         }
         ImGui::PushID( (mat->Name() + "save_button").c_str() );
-        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+        if ( ImGui::Button( "Save", ImVec2( 80, 20 )) ) {
             mat->publish();
         }
         ImGui::PopID();

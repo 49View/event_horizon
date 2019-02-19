@@ -16,16 +16,17 @@
 #include <iostream>
 #include <string>
 
-#include "core/descriptors/material.h"
-#include "core/htypes_shared.hpp"
-#include "core/math/poly_utils.hpp"
-#include "core/math/poly_shapes.hpp"
-#include "core/math/matrix4f.h"
-#include "core/math/rect2f.h"
-#include "core/math/plane3f.h"
-#include "core/math/aabb.h"
-#include "core/math/quad_vertices.h"
-#include "core/soa_utils.h"
+#include <core/descriptors/material.h>
+#include <core/htypes_shared.hpp>
+#include <core/math/poly_utils.hpp>
+#include <core/math/poly_shapes.hpp>
+#include <core/math/matrix4f.h>
+#include <core/math/rect2f.h>
+#include <core/math/plane3f.h>
+#include <core/math/aabb.h>
+#include <core/math/quad_vertices.h>
+#include <core/soa_utils.h>
+#include <core/boxable.hpp>
 
 #include "polypartition.h"
 #include "poly_helper.h"
@@ -43,36 +44,8 @@ enum PullFlags : uint32_t {
     All = 0xffffffff,
 };
 
-//static const int OutputFloatPrecision = 4;
+struct VData : public Boxable<JMATH::AABB> {
 
-//class DeepIntersectData {
-//public:
-//    Vector3f intersectPoint;
-//    float minDist;
-//    GeomData *geom;
-//    GeomData *geomBaked;
-//    Node *hierOfGeom;
-//    int32_t indexStart;
-//    int32_t indexEnd;
-//
-//    DeepIntersectData() {
-//        minDist = -1.0f;
-//    }
-//
-//    void set( const Vector3f& i, float md, GeomData *g, GeomData *gBaked, int32_t ps, int32_t pe, Node *hg ) {
-//        intersectPoint = i;
-//        minDist = md;
-//        geom = g;
-//        geomBaked = gBaked;
-//        indexStart = ps;
-//        indexEnd = pe;
-//        hierOfGeom = hg;
-//    }
-//};
-
-struct VData {
-
-//    void allocateEmptySHData();
     void clear();
 
     size_t numIndices() const { return vIndices.size(); }
@@ -169,23 +142,22 @@ struct VData {
     }
 
     const Vector3f& getMin() const {
-        return min;
+        return BBox3d().minPoint();
     }
 
     void setMin( const Vector3f& min ) {
-        VData::min = min;
+        BBox3d().setMinPoint(min);
     }
 
     const Vector3f& getMax() const {
-        return max;
+        return BBox3d().maxPoint();
     }
 
     void setMax( const Vector3f& max ) {
-        VData::max = max;
+        BBox3d().setMaxPoint(max);
     }
 
     friend class GeomData;
-    friend class HierGeom;
 
 private:
     std::vector<int32_t>  vIndices;
@@ -195,22 +167,17 @@ private:
     std::vector<Vector3f> vbinormals3d;
     std::vector<Vector2f> vUVs;
     std::vector<Vector2f> vUV2s;
-//    std::vector<Matrix3f> vSHCoeffsR;
-//    std::vector<Matrix3f> vSHCoeffsG;
-//    std::vector<Matrix3f> vSHCoeffsB;
     std::vector<Vector4f> vColor;
-    Vector3f min = Vector3f::ZERO;
-    Vector3f max = Vector3f::ZERO;
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };
 
 class GeomData {
 public:
     GeomData();
-    GeomData(std::shared_ptr<Material> _material);
+    explicit GeomData(std::shared_ptr<Material> _material);
     virtual ~GeomData();
     explicit GeomData( std::shared_ptr<DeserializeBin> reader );
-    GeomData( const ShapeType _st,
+    GeomData( ShapeType _st,
               const Vector3f& _pos, const Vector3f& _axis, const Vector3f& _scale,
               std::shared_ptr<Material> _material,
               const GeomMappingData& _mapping );
@@ -231,9 +198,6 @@ public:
     void deserializeSphericalHarmonics( std::shared_ptr<DeserializeBin> reader );
     void serializeDependencies( std::shared_ptr<SerializeBin> writer );
     void deserializeDependencies( std::shared_ptr<SerializeBin> reader );
-
-    std::string Name() const { return mName; }
-    void Name( const std::string& val ) { mName = val; }
 
     std::shared_ptr<Material> getMaterial() { return material; }
     std::shared_ptr<Material> getMaterial() const { return material; }
@@ -274,59 +238,20 @@ public:
     inline Vector3f normalAt( int32_t i ) const { return mVdata.vnormals3d[i]; }
     inline Vector3f tangentAt( int32_t i ) const { return mVdata.vtangents3d[i]; }
     inline Vector3f binormalAt( int32_t i ) const { return mVdata.vbinormals3d[i]; }
-//    inline const Matrix3f& shCoeffRAt( int32_t i ) const { return mVdata.vSHCoeffsR[i]; }
-//    inline const Matrix3f& shCoeffGAt( int32_t i ) const { return mVdata.vSHCoeffsG[i]; }
-//    inline const Matrix3f& shCoeffBAt( int32_t i ) const { return mVdata.vSHCoeffsB[i]; }
-//    inline Matrix3f& shCoeffRAt( int32_t i ) { return mVdata.vSHCoeffsR[i]; }
-//    inline Matrix3f& shCoeffGAt( int32_t i ) { return mVdata.vSHCoeffsG[i]; }
-//    inline Matrix3f& shCoeffBAt( int32_t i ) { return mVdata.vSHCoeffsB[i]; }
     inline Vector4f colorAt( int32_t i ) const { return mVdata.vColor[i]; }
-
-//    inline void shCoeffRAt( int32_t i, const Matrix3f& val ) {
-//        ASSERT( i < numVerts());
-//        mVdata.vSHCoeffsR[i] = val;
-//    }
-//
-//    inline void shCoeffGAt( int32_t i, const Matrix3f& val ) {
-//        ASSERT( i < numVerts());
-//        mVdata.vSHCoeffsG[i] = val;
-//    }
-//
-//    inline void shCoeffBAt( int32_t i, const Matrix3f& val ) {
-//        ASSERT( i < numVerts());
-//        mVdata.vSHCoeffsB[i] = val;
-//    }
-//
-//    inline void shIncCoeffRAt( int32_t i, const Matrix3f& val ) {
-//        ASSERT( i < numVerts());
-//        mVdata.vSHCoeffsR[i] += val;
-//    }
-//
-//    inline void shIncCoeffGAt( int32_t i, const Matrix3f& val ) {
-//        ASSERT( i < numVerts());
-//        mVdata.vSHCoeffsG[i] += val;
-//    }
-//
-//    inline void shIncCoeffBAt( int32_t i, const Matrix3f& val ) {
-//        ASSERT( i < numVerts());
-//        mVdata.vSHCoeffsB[i] += val;
-//    }
-//
-//    void shCoeffBaricentricRedAt( Matrix3f& dest, int index, float bu, float bv );
-//    void shCoeffBaricentricGreenAt( Matrix3f& dest, int index, float bu, float bv );
-//    void shCoeffBaricentricBlueAt( Matrix3f& dest, int index, float bu, float bv );
 
     inline std::vector<Vector3f>& Coords3d() { return mVdata.vcoords3d; };
     inline std::vector<Vector3f>& Normals3d() { return mVdata.vnormals3d; };
-//    inline bool hasSHCoeffsR() const { return mVdata.vSHCoeffsR.size() > 0; };
-//    inline bool hasSHCoeffsG() const { return mVdata.vSHCoeffsG.size() > 0; };
-//    inline bool hasSHCoeffsB() const { return mVdata.vSHCoeffsB.size() > 0; };
 
-    void reset();
+    std::string generateThumbnail() const;
+    std::string generateRawData() const;
 
-    //	const ProgramUniformSet* MatProperties() const { return matProperties; }
-    //	ProgramUniformSet* MatProperties() { return matProperties; }
-    //	void MatProperties(ProgramUniformSet* val) { matProperties = val; }
+//    ScreenShotContainerPtr& GeomBuilder::Thumb() {
+//        if ( !thumb ) {
+//            thumb = std::make_shared<ScreenShotContainer>();
+//        }
+//        return thumb;
+//    }
 
     void addFlatPoly( size_t vsize, const Vector3f *verts, const Vector3f& normal, bool reverseIfTriangulated = false );
     void addFlatPoly( size_t vsize, const std::vector<Vector2f>& verts, float z, const Vector3f& normal,
@@ -363,8 +288,8 @@ public:
                                                        const Vector2f& pivot = Vector2f::ZERO );
     static std::vector<Vector3f> utilGenerateFlatBoxFromSize( float width, float height, float z );
 
-    JMATH::AABB BBox3d() const { return mBBox3d; }
-    void BBox3d( const JMATH::AABB& val ) { mBBox3d = val; }
+    JMATH::AABB BBox3d() const { return mVdata.BBox3d(); }
+    void BBox3d( const JMATH::AABB& val ) { mVdata.BBox3d(val); }
     void Bevel( const Vector3f& bevelAmount );
     Vector3f Bevel() const;
 
@@ -389,7 +314,7 @@ public:
     virtual void debugPrint();
     const std::vector<Vector2f>& WrapMappingCoords() const { return wrapMappingCoords; }
     void WrapMappingCoords( const std::vector<Vector2f>& val ) { wrapMappingCoords = val; }
-    void setWindingOrderFlagOnly( const WindingOrderT _wo );
+    void setWindingOrderFlagOnly( WindingOrderT _wo );
     WindingOrderT getWindingOrder() const;
 
     void resetWrapMapping( const std::vector<float>& yWrapArray );
@@ -397,7 +322,7 @@ public:
     void planarMapping( const Vector3f& normal, const Vector3f vs[], Vector2f vtcs[], int numVerts );
 
     template<typename TV> \
-	void visit() const { traverseWithHelper<TV>( "Name,BBbox", mName,mBBox3d ); }
+	void visit() const { traverseWithHelper<TV>( "BBbox", mVdata.BBox3d() ); }
 
     // All internal add polygons are now not accessible to the outside to handle topology better
     void pushQuad( const std::array<Vector3f, 4>& vs, const std::array<Vector2f, 4>& vts, const Vector3f& vn );
@@ -426,9 +351,6 @@ public:
 
 protected:
 
-    void addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector3f& _vn, const Vector3f& _vt,
-                            const Vector3f& _vb );
-
     void
     pushTriangle( const std::vector<Vector3f>& vs, const std::vector<Vector2f>& vuv, const std::vector<Vector3f>& vn );
 
@@ -436,7 +358,6 @@ protected:
 
     // Mapping
     void setMappingData( const GeomMappingData& _mapping );
-    void setTextureCoordsMultiplier();
     void resetMapping( uint64_t arraySize );
     void propagateWrapMapping( const GeomData *source );
 
@@ -451,10 +372,8 @@ protected:
     void calcMirrorUVs( Vector2f *uvs );
 
 protected:
-    std::string mName = "DefaultGeomName";
     std::shared_ptr<Material> material;
 
-    float mOpacity = 1.0f;
     subdivisionAccuray mSubdivAccuracy = accuracyNone;
     WindingOrderT mWindingOrder = WindingOrder::CCW;
 
@@ -471,13 +390,9 @@ protected:
     std::vector<Vector2f> wrapMappingCoords;
     Vector2f pullMappingCoords = Vector2f::ZERO;
 
-    // 3d Data
-    JMATH::AABB mBBox3d = JMATH::AABB::INVALID;
-
     VData mVdata;
 
 public:
-    static uint64_t Version();
-
-    friend class Follower;
+    static uint64_t Version() { return 1100; }
+    inline const static std::string EntityGroup() { return EntityGroup::Geom; }
 };

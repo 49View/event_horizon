@@ -141,8 +141,6 @@ public:
                  const Vector3f& _suggestedAxis = Vector3f::ZERO );
     GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
 
-    void createMetaData() const;
-
     GeomBuilder& inj( GeomAssetSP _hier );
 
     GeomBuilder& bt( const GeomBuilderType _gbt ) {

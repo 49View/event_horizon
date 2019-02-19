@@ -254,46 +254,6 @@ GeomBuilder& GeomBuilder::addOutline( const std::vector<Vector3f>& _polyLine, co
     return *this;
 }
 
-std::string GeomBuilder::generateThumbnail() const {
-    if ( thumb ) {
-        return { thumb->begin(), thumb->end() };
-    }
-    return std::string();
-}
-
-std::string GeomBuilder::generateRawData() const {
-    return elem ? elem->serialize() : "";
-}
-
-std::string GeomBuilder::toMetaData() const {
-    MegaWriter writer;
-
-    writer.StartObject();
-    writer.serialize( CoreMetaData{Name(), EntityGroup::Geom, GeomData::Version(),
-                                   generateThumbnail(), generateRawData(), generateTags()} );
-    writer.serialize( "BBox3d", elem->BBox3d() );
-    writer.EndObject();
-
-    return writer.getString();
-}
-
-ScreenShotContainerPtr& GeomBuilder::Thumb() {
-    if ( !thumb ) {
-        thumb = std::make_shared<ScreenShotContainer>();
-    }
-    return thumb;
-}
-
-void GeomBuilder::createMetaData() const {
-    // Publish all materials first
-
-//    for ( const auto& mb : matBuilders ) {
-//        mb->publish();
-//    }
-
-    elem->MetaData( toMetaData() );
-}
-
 void internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
     if ( ln == Vector3f::ZERO ) {
         ln = normalize( crossProduct( v1,v2,v3 ));
@@ -334,7 +294,7 @@ GeomAssetSP GeomBuilder::buildr( DependencyMaker& _md ) {
 
 bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
 
-    AssetManager& sg = static_cast<AssetManager&>(_md);
+    auto& sg = static_cast<AssetManager&>(_md);
 
     if ( _status == DependencyStatus::LoadedSuccessfully ) {
         sg.add( *this, zlibUtil::inflateFromMemory( std::move(_data) ) );

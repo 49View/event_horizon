@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 2018-12-30.
 //
@@ -5,6 +7,7 @@
 #pragma once
 
 #include <core/callback_dependency.h>
+#include <core/name_policy.hpp>
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
 
@@ -48,14 +51,14 @@ public: \
         return false; \
     }
 
-class BaseBuilder {
+class BaseBuilder : public virtual NamePolicy<> {
 public:
     BaseBuilder() = default;
-    explicit BaseBuilder( const std::string& _name ) : name( _name ) {}
+    explicit BaseBuilder( std::string _name ) {
+        NamePolicy::Name( std::move( _name ) );
+    }
 
     static const std::string typeName()  { return ""; }
-    const std::string& Name() const { return name; }
-    void Name( const std::string& _name ) { name = _name; }
 
     void clearTags() { tags.clear();}
     void addTag( const std::string& _tag ) { tags.emplace(_tag); }
@@ -65,7 +68,6 @@ public:
     std::set<std::string> generateTags() const;
 
 private:
-    std::string name;
     std::set<std::string> tags;
 };
 
@@ -136,7 +138,7 @@ protected:
     template< typename B, typename D>
     void assembleNV( std::shared_ptr<B> _builder, D& _md ) {
         _builder->assemble( _md );
-        _builder->createMetaData();
+        // We leave room for injecting code that needs to run pre/after assembly
     }
 
     template< typename B, typename D>

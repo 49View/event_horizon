@@ -7,19 +7,22 @@
 
 #pragma once
 
-#include "core/math/quaternion.h"
-#include "core/observable.h"
-#include "core/math/matrix_anim.h"
-#include "core/math/rect2f.h"
-#include "core/math/aabb.h"
-#include "core/math/anim.h"
-#include "core/uuid.hpp"
-#include "core/observable.h"
-#include "core/serialization.hpp"
-#include "core/serializebin.hpp"
-#include "core/zlib_util.h"
-#include "core/http/basen.hpp"
-#include "core/http/webclient.h"
+#include <core/math/quaternion.h>
+#include <core/observable.h>
+#include <core/math/matrix_anim.h>
+#include <core/math/rect2f.h>
+#include <core/math/aabb.h>
+#include <core/math/anim.h>
+#include <core/uuid.hpp>
+#include <core/boxable.hpp>
+#include <core/name_policy.hpp>
+#include <core/publisher.hpp>
+#include <core/observable.h>
+#include <core/serialization.hpp>
+#include <core/serializebin.hpp>
+#include <core/zlib_util.h>
+#include <core/http/basen.hpp>
+#include <core/http/webclient.h>
 
 enum class ExtractFlags {
     LeaveAsItAfterExtract,
@@ -44,22 +47,125 @@ inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { ret
 
 auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
 auto lambdaUpdateNodeTransform = [](auto&& arg) { arg->updateTransform();};
+
+#define VisitLambda(X,Y) std::visit( [](auto&& arg) { arg-> X(); }, Y );
+
 auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
 auto lambdaBBox = [](auto&& arg) -> JMATH::AABB { return arg->BBox3d();};
-auto lambdaPublish = [](auto&& arg) { return arg->publish();};
 
 template <typename D>
-class Node : public Animable, public ObservableShared<Node<D>>, public std::enable_shared_from_this<Node<D>>{
+class NodePublisher : public virtual Publisher<D> {
+public:
+
+protected:
+    void serializeDependenciesRec() {
+
+//        if ( mData ) {
+//            mData->serializeDependencies();
+//        }
+//
+//        for ( const auto& c : Children()) {
+//            c->serializeDependenciesRec();
+//        }
+    }
+
+    std::string serializeDependencies() const {
+
+        std::vector<std::string> deps;
+
+//        serializeDependenciesRec( deps );
+
+        return std::string{};
+        // End tag so we know there are no more dependencies
+//        writer->write( uint32_t(0) );
+    }
+
+//    void serializeRec( std::shared_ptr<SerializeBin> writer ) {
+//        writer->write( mGHType );
+//        writer->write( mHash );
+//        writer->write( NamePolicy::Name() );
+//        writer->write( mLocalTransform );
+//        writer->write( Boxable::bbox3d );
+//        int32_t hasData = mData ? 1 : 0;
+//        writer->write( hasData );
+//        if ( hasData == 1 ) mData->serialize( writer );
+//
+//        auto numChildren = static_cast<int32_t>( Children().size());
+//        writer->write( numChildren );
+//        for ( auto&& c : Children()) {
+//            c->serializeRec( writer );
+//        }
+//    }
+//
+//    void deserializeRec( std::shared_ptr<DeserializeBin> reader, Node<D> *_father = nullptr ) {
+//        father = _father;
+//        reader->read( mGHType );
+//        reader->read( mHash );
+//        reader->read( NameRef() );
+//        reader->read( mLocalTransform );
+//        reader->read( bbox3d );
+//
+//        int32_t hasData = 0;
+//        reader->read( hasData );
+//        if ( hasData == 1 ) {
+//            mData = std::make_shared<D>(reader);
+//        }
+//
+//        int32_t numChildren = 0;
+//        reader->read( numChildren );
+//
+//        for ( int32_t t = 0; t < numChildren; t++ ) {
+//            std::shared_ptr<Node> gg = std::make_shared<Node>();
+//            addChildren( gg );
+//            gg->deserializeRec( reader, this );
+//        }
+//    }
+
+    std::string generateThumbnail() const override {
+        return std::string{};
+    }
+    std::set<std::string> generateTags() const override {
+        return std::set<std::string>{};
+    }
+
+//    std::string generateRawData() const override {
+//        std::string stream{};
+//        stream += serializeDependencies();
+////        stream += serializeRec();
+//        return stream;
+//    }
+    void serialize( std::shared_ptr<SerializeBin> writer ) const override {
+
+    }
+
+    void deserialize( std::shared_ptr<DeserializeBin> reader ) override {
+
+    }
+
+//    bool deserialize( const std::vector<char>& _data ) {
+//        auto reader = std::make_shared<DeserializeBin>( _data, D::Version() );
+//        D::gatherDependencies( reader );
+////        deserializeRec( reader );
+//        return true;
+//    }
+};
+
+template <typename D>
+class Node : public Animable,
+             public ObservableShared<Node<D>>,
+             public virtual NamePolicy<>,
+             public virtual Boxable<JMATH::AABB>,
+             public NodePublisher<D>,
+             public std::enable_shared_from_this<Node<D>> {
 public:
     Node() {
         mHash = UUIDGen::make();
-        mName = "Default";
         mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
     }
     virtual ~Node() = default;
 
     explicit Node( const std::string& _name ) : Node() {
-        mName = _name;
+        NamePolicy::Name(_name);
     }
     explicit Node( std::shared_ptr<D> data, Node *papa = nullptr ) : Node() {
         father = papa;
@@ -73,10 +179,9 @@ public:
         generateLocalTransformData(pos, rot, scale);
         generateMatrixHierarchy(fatherRootTransform());
     }
-    explicit Node( std::vector<char> _data ) : Node() {
-        std::shared_ptr<DeserializeBin> reader = std::make_shared<DeserializeBin>( _data, D::Version() );
-        D::gatherDependencies( reader );
-        deserialize( reader );
+
+    explicit Node( const std::vector<char>& _data ) {
+        NodePublisher<D>::Serializable::deserialize( _data );
     }
 
     TimelineSet addKeyFrame( const std::string& _name, float _time ) override {
@@ -90,8 +195,6 @@ public:
     }
 
     UUID Hash() const { return mHash; }
-    std::string Name() const { return mName; }
-    void Name( std::string val ) { mName = val; }
     NodeType GHType() const { return mGHType; }
     void GHType( NodeType val ) { mGHType |= val; }
     bool hasType( NodeType val ) const { return ( mGHType & val ) > 0; }
@@ -304,7 +407,7 @@ public:
         }
     }
     void getGeomWithName( const std::string& _name, std::vector<Node *>& ret ) {
-        if ( Name() == _name ) {
+        if ( NamePolicy::Name() == _name ) {
             ret.push_back( this );
         }
 
@@ -383,24 +486,6 @@ public:
         }
     }
 
-    std::string serialize() {
-        auto writer = std::make_shared<SerializeBin>( D::Version() );
-
-        serializeDependencies( writer );
-        serializeRec( writer );
-
-        auto s = writer->buffer();
-
-        auto f = zlibUtil::deflateMemory( { s.begin(), s.end() } );
-        auto rawm = bn::encode_b64( f );
-        return std::string{ rawm.begin(), rawm.end() };
-    }
-
-    bool deserialize( std::shared_ptr<DeserializeBin>& reader ) {
-        deserializeRec( reader );
-        return true;
-    }
-
     Node* root() {
         Node<D> *ret = this;
 
@@ -424,8 +509,6 @@ public:
     const MatrixAnim& TRS() const { return mTRS; }
     void TRS( const MatrixAnim& val ) { mTRS = val; }
 
-    const JMATH::AABB BBox3d() const { return bbox3d; }
-
     inline bool isDescendantOf( const UUID& ancestorHash ) {
         if ( mHash == ancestorHash ) return true;
 
@@ -440,19 +523,7 @@ public:
 
     template<typename TV>
     void visit() const {
-        traverseWithHelper<TV>( "Name,BBbox,Data,Children", mName,bbox3d,mData,children );
-    }
-
-    void publish() {
-        Http::post( Url{ HttpFilePrefix::entities }, metaData );
-    }
-
-    const std::string& MetaData() const {
-        return metaData;
-    }
-
-    void MetaData( const std::string& metaData ) {
-        Node::metaData = metaData;
+        traverseWithHelper<TV>( "Name,BBbox,Data,Children", NamePolicy::Name(), Boxable::BBox3d(),mData,children );
     }
 protected:
 
@@ -500,7 +571,7 @@ protected:
 
     void updateTransformRec( const std::string& nodeName, const Vector3f& pos, const Vector3f& rot, const Vector3f& scale,
                              UpdateTypeFlag whatToUpdate ) {
-        if ( nodeName.compare( mName ) == 0 ) {
+        if ( nodeName.compare( NamePolicy::Name() ) == 0 ) {
             generateLocalTransformData( whatToUpdate & UpdateTypeFlag::Position ? pos : mTRS.Pos(),
                                         whatToUpdate & UpdateTypeFlag::Rotation ? Quaternion{rot} : mTRS.Rot(),
                                         whatToUpdate & UpdateTypeFlag::Scale ? scale : mTRS.Scale());
@@ -508,65 +579,6 @@ protected:
 
         for ( auto& c : children ) {
             c->updateTransformRec( nodeName, pos, rot, scale, whatToUpdate );
-        }
-    }
-
-    void serializeDependenciesRec( std::shared_ptr<SerializeBin> writer ) {
-
-        if ( mData ) {
-            mData->serializeDependencies( writer );
-        }
-
-        for ( const auto& c : Children()) {
-            c->serializeDependenciesRec( writer );
-        }
-    }
-
-    void serializeDependencies( std::shared_ptr<SerializeBin> writer ) {
-
-        serializeDependenciesRec( writer );
-        // End tag so we know there are no more dependencies
-        writer->write( uint32_t(0) );
-    }
-
-    void serializeRec( std::shared_ptr<SerializeBin> writer ) {
-        writer->write( mGHType );
-        writer->write( mHash );
-        writer->write( mName );
-        writer->write( mLocalTransform );
-        writer->write( bbox3d );
-        int32_t hasData = mData ? 1 : 0;
-        writer->write( hasData );
-        if ( hasData == 1 ) mData->serialize( writer );
-
-        auto numChildren = static_cast<int32_t>( Children().size());
-        writer->write( numChildren );
-        for ( auto&& c : Children()) {
-            c->serializeRec( writer );
-        }
-    }
-
-    void deserializeRec( std::shared_ptr<DeserializeBin> reader, Node<D> *_father = nullptr ) {
-        father = _father;
-        reader->read( mGHType );
-        reader->read( mHash );
-        reader->read( mName );
-        reader->read( mLocalTransform );
-        reader->read( bbox3d );
-
-        int32_t hasData = 0;
-        reader->read( hasData );
-        if ( hasData == 1 ) {
-            mData = std::make_shared<D>(reader);
-        }
-
-        int32_t numChildren = 0;
-        reader->read( numChildren );
-
-        for ( int32_t t = 0; t < numChildren; t++ ) {
-            std::shared_ptr<Node> gg = std::make_shared<Node>();
-            addChildren( gg );
-            gg->deserializeRec( reader, this );
         }
     }
 
@@ -597,7 +609,7 @@ protected:
         }
     }
     void findRecursive( const char *name, Node *& foundObj ) {
-        if ( strcmp( mName.c_str(), name ) == 0 ) {
+        if ( strcmp( NamePolicy::Name().c_str(), name ) == 0 ) {
             foundObj = this;
             return;
         }
@@ -609,7 +621,7 @@ protected:
     }
     void containingAABBRec( JMATH::AABB& _bbox ) const {
         if ( mData ) {
-            auto cr = BBox3d();
+            auto cr = Boxable::BBox3d();
             _bbox.merge( cr );
         }
 
@@ -617,43 +629,40 @@ protected:
             c->containingAABBRec( _bbox );
         }
     }
+
     JMATH::AABB calcCompleteBBox3dRec() {
         if ( mData ) {
             JMATH::AABB lBBox = mData->BBox3d();
             lBBox.transform( *mLocalHierTransform );
-            bbox3d = lBBox;
+            Boxable::bbox3d = lBBox;
         }
 
         for ( auto& c : children ) {
-            bbox3d.merge( c->calcCompleteBBox3dRec() );
+            Boxable::bbox3d.merge( c->calcCompleteBBox3dRec() );
         }
 
-        return bbox3d;
+        return Boxable::bbox3d;
     }
-    void BBox3d( const Vector3f& bmix, const Vector3f& bmax ) { bbox3d = JMATH::AABB( bmix, bmax ); }
+
     JMATH::AABB containingAABB() const {
-        JMATH::AABB ret = BBox3d();
+        JMATH::AABB ret = Boxable::BBox3d();
         containingAABBRec( ret );
         return ret;
     }
+
     void calcCompleteBBox3d() {
-        bbox3d = AABB::INVALID;
-        bbox3d = calcCompleteBBox3dRec();
+        Boxable::bbox3d = AABB::INVALID;
+        Boxable::bbox3d = calcCompleteBBox3dRec();
     }
 
 protected:
-    std::string mName;
     UUID mHash;
     Node *father = nullptr;
     NodeType mGHType = NodeTypeGeneric;
     Matrix4f mLocalTransform = Matrix4f::IDENTITY;
     std::shared_ptr<Matrix4f> mLocalHierTransform;
     MatrixAnim mTRS;
-    JMATH::AABB bbox3d = JMATH::AABB::INVALID;
 
     std::shared_ptr<D> mData;
-
-    std::string metaData;
-
     std::vector<std::shared_ptr<Node>> children;
 };

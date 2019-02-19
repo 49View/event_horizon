@@ -11,12 +11,13 @@
 #include <core/name_policy.hpp>
 #include <core/math/vector4f.h>
 #include <core/math/matrix4f.h>
+#include <core/serializable.hpp>
 
 using TextureIndex = TextureUniformDesc;
 class SerializeBin;
 class DeserializeBin;
 
-class HeterogeneousMap : public virtual NamePolicy, public std::enable_shared_from_this<HeterogeneousMap> {
+class HeterogeneousMap : public virtual NamePolicy<>, public virtual Serializable<HeterogeneousMap>, public std::enable_shared_from_this<HeterogeneousMap> {
 public:
     virtual ~HeterogeneousMap() = default;
     void inject( const HeterogeneousMap& source );
@@ -98,8 +99,8 @@ public:
         }
     }
 
-    virtual void serialize( std::shared_ptr<SerializeBin> writer ) const;
-    virtual void deserialize( std::shared_ptr<DeserializeBin> reader );
+    void serialize( std::shared_ptr<SerializeBin> writer ) const override;
+    void deserialize( std::shared_ptr<DeserializeBin> reader ) override;
 
 protected:
     virtual void calcHash( int64_t _base = 0 );
