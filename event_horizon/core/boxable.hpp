@@ -10,7 +10,6 @@ struct EmptyBox {
     static constexpr bool IsSerializable() { return false; }
 
     EmptyBox() = default;
-    EmptyBox( [[maybe_unused]] const Vector3f& bmix, [[maybe_unused]] const Vector3f& bmax ) {}
     static EmptyBox MINVALID() { return EmptyBox{}; };
 };
 

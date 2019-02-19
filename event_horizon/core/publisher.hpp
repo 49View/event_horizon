@@ -13,7 +13,7 @@
 #include <core/serializable.hpp>
 
 template <typename T, typename B = JMATH::AABB, typename W = SerializeBin, typename R = DeserializeBin>
-class Publisher : public virtual NamePolicy<>, public virtual Boxable<B>, public virtual Serializable<T, W, R> {
+class Publisher : public virtual NamePolicy<std::string>, public virtual Boxable<B>, public virtual Serializable<T, W, R> {
 protected:
     virtual std::string generateThumbnail() const = 0;
     virtual std::set<std::string> generateTags() const = 0;

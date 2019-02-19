@@ -51,7 +51,7 @@ public: \
         return false; \
     }
 
-class BaseBuilder : public virtual NamePolicy<> {
+class BaseBuilder : public virtual NamePolicy<std::string> {
 public:
     BaseBuilder() = default;
     explicit BaseBuilder( std::string _name ) {

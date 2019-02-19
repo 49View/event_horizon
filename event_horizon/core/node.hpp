@@ -153,7 +153,7 @@ protected:
 template <typename D>
 class Node : public Animable,
              public ObservableShared<Node<D>>,
-             public virtual NamePolicy<>,
+             public virtual NamePolicy<std::string>,
              public virtual Boxable<JMATH::AABB>,
              public NodePublisher<D>,
              public std::enable_shared_from_this<Node<D>> {
