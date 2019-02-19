@@ -54,8 +54,8 @@ public: \
 class BaseBuilder : public virtual NamePolicy<std::string> {
 public:
     BaseBuilder() = default;
-    explicit BaseBuilder( std::string _name ) {
-        NamePolicy::Name( std::move( _name ) );
+    explicit BaseBuilder( const std::string& _name ) {
+        this->Name( _name );
     }
 
     static const std::string typeName()  { return ""; }
