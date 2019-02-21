@@ -16,9 +16,14 @@
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
-    explicit SerializeBin( uint64_t vf ) {
-        write( vf );
+    explicit SerializeBin( uint64_t vf, const std::string& _typename ) {
+        writeHeader( vf, _typename );
 	}
+
+	void writeHeader( uint64_t vf, const std::string& _typename ) {
+        write( vf );
+        write( _typename );
+    }
 
 	template<typename T>
 	void write( const std::vector<T>& v ) {
@@ -127,18 +132,17 @@ class DeserializeBin : public std::enable_shared_from_this<DeserializeBin> {
 public:
 	DeserializeBin( const std::vector<char>& _data, uint64_t vf ) {
 		fi = std::make_shared<std::istringstream>( std::string{ _data.begin(), _data.end() } );
-		readVersion( vf );
+		readHeader( vf );
 	}
 
 	DeserializeBin( uint8_p&& _data, uint64_t vf ) {
 		fi = std::make_shared<std::istringstream>( std::string{ reinterpret_cast<char*>(_data.first.get()),
 																static_cast<size_t>(_data.second) } );
-		readVersion( vf );
+		readHeader( vf );
 	}
 
 	template<typename T>
 	void read( std::vector<T>& v ) {
-
 		int32_t vectorSize = 0;
 		fi->read( reinterpret_cast<char*>( &vectorSize ), sizeof( int32_t ) );
 		v.clear();
@@ -240,14 +244,20 @@ public:
 		str = std::string{ cstr.get() };
 	}
 
-	void readVersion( uint64_t vf ) {
+	void readHeader( uint64_t vf ) {
         uint64_t savedVersion = 0;
         read( savedVersion );
         if ( savedVersion < vf ) {
             LOGE( "Old assets loaded version %d, expecting %d", savedVersion, vf );
         }
-	}
+        read(entityType);
+    }
+
+    const std::string& getEntityType() const {
+        return entityType;
+    }
 
 private:
 	std::shared_ptr<std::istringstream> fi;
+	std::string entityType;
 };

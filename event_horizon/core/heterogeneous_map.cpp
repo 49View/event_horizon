@@ -19,13 +19,12 @@ void HeterogeneousMap::calcTotalNumUniforms() {
 
     mNumUniforms = static_cast<int>( lNumUniforms );
 
-    calcHash();
+    calcHash(0);
 }
 
 void HeterogeneousMap::calcHash( int64_t _base ) {
     mHash = mNumUniforms;
 
-    mHash += std::hash<std::string>()(Name());
     for ( auto& i : mTextures ) mHash += std::hash<std::string>{}(i.first);
     for ( auto& i : mInts ) mHash += i.second;
     for ( auto& i : mFloats ) mHash += static_cast<int64_t>( i.second * 1000.0f );
@@ -235,7 +234,6 @@ std::shared_ptr<HeterogeneousMap> HeterogeneousMap::clone() {
 
 void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
 
-    NamePolicy::Name( _source.Name() );
     mTextures    = _source.mTextures;
     mFloats      = _source.mFloats;
     mInts        = _source.mInts;
@@ -268,7 +266,6 @@ std::unordered_map<std::string, std::string> HeterogeneousMap::getTextureNameMap
 }
 
 void HeterogeneousMap::serialize( std::shared_ptr<SerializeBin> writer ) const {
-    writer->write( Name() );
     writer->write( mNumUniforms );
     writer->write( mHash );
     writer->write( getTextureNameMap() ); //mTextures
@@ -283,7 +280,6 @@ void HeterogeneousMap::serialize( std::shared_ptr<SerializeBin> writer ) const {
 }
 
 void HeterogeneousMap::deserialize( std::shared_ptr<DeserializeBin> reader ) {
-    reader->read( NameRef() );
     reader->read( mNumUniforms );
     reader->read( mHash );
     std::unordered_map<std::string, std::string> tns;

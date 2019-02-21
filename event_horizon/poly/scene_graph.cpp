@@ -126,38 +126,6 @@ bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
     return ret;
 }
 
-void AssetManager::add( [[maybe_unused]] const std::string& _key, GeomAssetSP _h ) {
-    assetsHierList[_h->Name()] = _h;
-}
-
-GeomAssetSP AssetManager::findHier( const std::string& _key ) {
-    if ( auto h = assetsHierList.find(_key); h != assetsHierList.end() ) {
-        return h->second;
-    }
-    return nullptr;
-}
-
-AssetHierContainerIt AssetManager::begin() {
-    return assetsHierList.begin();
-}
-
-AssetHierContainerIt AssetManager::end() {
-    return assetsHierList.end();
-}
-
-AssetHierContainerCIt AssetManager::begin() const {
-    return assetsHierList.cbegin();
-}
-
-AssetHierContainerCIt AssetManager::end() const {
-    return assetsHierList.cend();
-}
-
-bool AssetManager::add( GeomFileAssetBuilder& gb, const std::vector<char>& _data ) {
-    assetsList[gb.Name()] = _data;
-    return true;
-}
-
 CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
     addCommandDefinition("change material", std::bind(&SceneGraph::cmdChangeMaterialTag, &_hm, std::placeholders::_1 ));
     addCommandDefinition("paint", std::bind(&SceneGraph::cmdChangeMaterialColorTag, &_hm, std::placeholders::_1 ));

@@ -7,8 +7,16 @@
 #include <memory>
 #include <variant>
 
+class  Material;
+struct RawImage;
+struct VData;
+
+using MaterialSP = std::shared_ptr<Material>;
+using RawImageSP = std::shared_ptr<RawImage>;
+using VDataSP = std::shared_ptr<VData>;
+
 template <typename> class Node;
-class GeomData;
+class  GeomData;
 
 using GeomAsset = Node<GeomData>;
 using GeomAssetSP = std::shared_ptr<GeomAsset>;
@@ -19,6 +27,8 @@ using UIAsset = Node<UIElement>;
 using UIAssetSP = std::shared_ptr<UIAsset>;
 
 using NodeVariants = std::variant<GeomAssetSP, UIAssetSP>;
+
+using SceneGraphDependencyVariants = std::variant<MaterialSP,RawImageSP,VDataSP>;
 
 enum class UIShapeType {
     CameraFrustom2d,

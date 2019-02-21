@@ -23,30 +23,6 @@
 
 class StreamingMediator;
 
-typedef std::unordered_map<std::string, GeomAssetSP> AssetHierContainer;
-typedef AssetHierContainer::iterator AssetHierContainerIt;
-typedef AssetHierContainer::const_iterator AssetHierContainerCIt;
-
-struct GeomFileAssetBuilder;
-
-class AssetManager : public DependencyMaker {
-public:
-DEPENDENCY_MAKER_EXIST(assetsList);
-    bool add( GeomFileAssetBuilder& gb, const std::vector<char>& _data );
-    void add( const std::string& _key, GeomAssetSP _h );
-    std::vector<char> get( const std::string& _key ) { return assetsList[_key]; }
-    GeomAssetSP findHier( const std::string& _key );
-
-    AssetHierContainerIt begin();
-    AssetHierContainerIt end();
-    AssetHierContainerCIt begin() const;
-    AssetHierContainerCIt end() const;
-
-private:
-    std::unordered_map<std::string, std::vector<char>> assetsList;
-    AssetHierContainer assetsHierList;
-};
-
 class PolySceneGraphTextureList : public ImageDepencencyMaker {
     bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
 };
@@ -86,7 +62,6 @@ DEPENDENCY_MAKER_EXIST(geoms);
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
-    AssetManager& AL() { return al; }
     SunBuilder& SB() { return sb; }
     FontManager& FM() { return fm; }
     StreamingMediator& SSM();
@@ -118,7 +93,6 @@ protected:
 
 protected:
     NodeGraph geoms;
-    AssetManager   al;
     ProfileManager pl;
     MaterialManager ml;
     ColorManager cl;

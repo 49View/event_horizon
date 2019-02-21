@@ -27,6 +27,7 @@
 #include <core/math/quad_vertices.h>
 #include <core/soa_utils.h>
 #include <core/boxable.hpp>
+#include <core/serializable.hpp>
 
 #include "polypartition.h"
 #include "poly_helper.h"
@@ -171,7 +172,7 @@ private:
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };
 
-class GeomData {
+class GeomData : public Serializable<GeomData, SerializeBin, DeserializeBin> {
 public:
     GeomData();
     explicit GeomData(std::shared_ptr<Material> _material);
@@ -190,36 +191,16 @@ public:
 
     GeomData( const QuadVector3fNormalfList& quads, std::shared_ptr<Material> _material, const GeomMappingData& _mapping );
 
-    static GeomDeserializeDependencies gatherDependencies( std::shared_ptr<DeserializeBin> reader );
+    static void gatherDependencies( std::shared_ptr<DeserializeBin> reader );
 
-    void serialize( std::shared_ptr<SerializeBin> writer );
-    void serializeSphericalHarmonics( std::shared_ptr<SerializeBin> writer );
-    void deserialize( std::shared_ptr<DeserializeBin> reader );
-    void deserializeSphericalHarmonics( std::shared_ptr<DeserializeBin> reader );
-    void serializeDependencies( std::shared_ptr<SerializeBin> writer );
+    void serialize( std::shared_ptr<SerializeBin> writer ) const override;
+    void deserialize( std::shared_ptr<DeserializeBin> reader ) override;
+    void serializeDependencies( SerializationDependencyMap& _deps ) const;
     void deserializeDependencies( std::shared_ptr<SerializeBin> reader );
 
     std::shared_ptr<Material> getMaterial() { return material; }
     std::shared_ptr<Material> getMaterial() const { return material; }
     void setMaterial( std::shared_ptr<Material> _mat ) { material = _mat; }
-//    Color4f getColor() const { return getMaterial()->getColor(); }
-//    float getOpacity() const { return getMaterial()->getOpacity(); }
-//    void setOpacity( float _opacity )  { mOpacity = _opacity; }
-//    void setMaterial( const std::string& matName, float _opacity = 1.0f );
-//    void setMaterial( const std::string& matName, const Color4f& col, float _opacity = 1.0f );
-
-//    void set( const std::string& uniformName, float data );
-//    void set( const std::string& uniformName, std::shared_ptr<Texture> data );
-//    void setTextureSet( const std::string& baseTextureName );
-//    void set( const std::string& uniformName, const Vector2f& data );
-//    void set( const std::string& uniformName, const Vector3f& data );
-//    void set( const std::string& uniformName, const Vector4f& data );
-//    void set( const std::string& uniformName, const Matrix4f& data );
-//    void set( const std::string& uniformName, const Matrix3f& data );
-//
-//    Vector3f getColor() const;
-//    float getOpacity() const;
-//    std::shared_ptr<Texture> getColorTexture() const;
 
     void addShape( ShapeType st, const Vector3f& center, const Vector3f& size, int subDivs = 0 );
 
@@ -244,7 +225,6 @@ public:
     inline std::vector<Vector3f>& Normals3d() { return mVdata.vnormals3d; };
 
     std::string generateThumbnail() const;
-    std::string generateRawData() const;
 
 //    ScreenShotContainerPtr& GeomBuilder::Thumb() {
 //        if ( !thumb ) {
@@ -373,6 +353,7 @@ protected:
 
 protected:
     std::shared_ptr<Material> material;
+    VData mVdata;
 
     subdivisionAccuray mSubdivAccuracy = accuracyNone;
     WindingOrderT mWindingOrder = WindingOrder::CCW;
@@ -390,9 +371,7 @@ protected:
     std::vector<Vector2f> wrapMappingCoords;
     Vector2f pullMappingCoords = Vector2f::ZERO;
 
-    VData mVdata;
-
 public:
-    static uint64_t Version() { return 1100; }
+    static uint64_t Version() { return 2000; }
     inline const static std::string EntityGroup() { return EntityGroup::Geom; }
 };

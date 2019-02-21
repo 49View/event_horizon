@@ -47,11 +47,6 @@ enum class FlipSubdiv {
     False,
 };
 
-struct GeomDeserializeDependencies {
-    std::vector<std::string> textureDeps;
-    std::vector<std::string> materialDeps;
-};
-
 enum class PolyRaise {
     None,
     HorizontalPos,

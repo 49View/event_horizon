@@ -18,6 +18,7 @@ class Boxable {
 public:
     inline const T& BBox3d() const { return bbox3d; }
     inline T& BBox3d() { return bbox3d; }
+    inline T  BBox3dCopy() const { return bbox3d; }
     inline void BBox3d( const Vector3f& bmix, const Vector3f& bmax ) { bbox3d = T{ bmix, bmax }; }
     inline void BBox3d( const T& _value ) { bbox3d = _value; }
 

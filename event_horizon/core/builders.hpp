@@ -59,16 +59,6 @@ public:
     }
 
     static const std::string typeName()  { return ""; }
-
-    void clearTags() { tags.clear();}
-    void addTag( const std::string& _tag ) { tags.emplace(_tag); }
-    const std::set<std::string>& Tags() const { return tags; }
-    void Tags( const std::set<std::string>& _tags ) { tags = _tags; }
-
-    std::set<std::string> generateTags() const;
-
-private:
-    std::set<std::string> tags;
 };
 
 class ResourceBuilder : public BaseBuilder {

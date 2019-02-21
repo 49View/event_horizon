@@ -9,19 +9,19 @@
 template <typename T = std::string>
 class NamePolicy {
 public:
-    inline const T& Name() const {
+    virtual const T& Name() const {
         return mName;
     }
 
-    inline T& NameRef() {
+    virtual T& NameRef() {
         return mName;
     }
 
-    inline T Name() {
+    virtual T NameCopy() const {
         return mName;
     }
 
-    inline void Name( const T& _name ){
+    virtual void Name( const T& _name ) {
         mName = _name;
     }
 

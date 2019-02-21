@@ -54,6 +54,8 @@ static constexpr ALuint numMaxSources = 16;
 
 class AudioStreamOpenAL : public AudioStream {
 public:
+    virtual ~AudioStreamOpenAL() = default;
+
     AudioStreamOpenAL( ALuint bufferId, const std::string& _name ) : bufferId( bufferId ) {
         Name(_name);
     }

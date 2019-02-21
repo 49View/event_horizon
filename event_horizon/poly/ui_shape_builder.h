@@ -22,6 +22,8 @@ public:
     UIElement( const std::string& name, UIShapeType shapeType, std::shared_ptr<Material> _mat, int renderBucketIndex ) : name(
             name ), shapeType( shapeType ), material( _mat ), renderBucketIndex( renderBucketIndex ) {}
 
+    explicit UIElement( std::shared_ptr<DeserializeBin> reader ) {}
+
     const std::shared_ptr<Material>& getMaterial() const {
         return material;
     }
@@ -82,9 +84,15 @@ public:
     template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( "Name,BBbox", name,bbox3d ); }
 
-//    std::string generateThumbnail() const override { return std::string{}; }
-//    std::set<std::string> generateTags() const override { std::set<std::string> ret{}; return ret; }
-//    std::string generateRawData() const override { return std::string{}; }
+    void serializeDependencies( SerializationDependencyMap& _deps ) const {}
+    void serialize( std::shared_ptr<SerializeBin> writer ) const  {
+    }
+
+    static void gatherDependencies( std::shared_ptr<DeserializeBin> reader ) {}
+    void deserialize( std::shared_ptr<DeserializeBin> reader )  {
+    }
+
+    std::string generateThumbnail() const  { return std::string{}; }
 
 private:
     std::string name;

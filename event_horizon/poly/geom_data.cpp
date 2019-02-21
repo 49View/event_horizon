@@ -138,7 +138,7 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _
 	return logoGeoms;
 }
 
-void GeomData::serialize( std::shared_ptr<SerializeBin> f ) {
+void GeomData::serialize( std::shared_ptr<SerializeBin> f ) const {
 	f->write( material->Hash() ); //material->serialize( f );
 	f->write( mVdata.BBox3d() );
 	f->write( mVdata.vIndices );
@@ -149,12 +149,6 @@ void GeomData::serialize( std::shared_ptr<SerializeBin> f ) {
 	f->write( mVdata.vUVs );
     f->write( mVdata.vUV2s );
 	f->write( mVdata.vColor );
-}
-
-void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<SerializeBin> writer ) {
-//	writer->write( mVdata.vSHCoeffsR );
-//	writer->write( mVdata.vSHCoeffsG );
-//	writer->write( mVdata.vSHCoeffsB );
 }
 
 void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
@@ -171,18 +165,28 @@ void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mVdata.vUVs );
 	reader->read( mVdata.vUV2s );
 	reader->read( mVdata.vColor );
-
-//	mVdata.allocateEmptySHData();
 }
 
-void GeomData::deserializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<DeserializeBin> reader ) {
-//	reader->read( mVdata.vSHCoeffsR );
-//	reader->read( mVdata.vSHCoeffsG );
-//	reader->read( mVdata.vSHCoeffsB );
+void GeomData::serializeDependencies( SerializationDependencyMap& _deps ) const {
+	if ( _deps.find( material->Hash() ) == _deps.end() ) {
+		_deps.emplace( material->Hash(), SerializeDependencyContainer{ Material::Version(), Material::EntityGroup(),
+									     std::dynamic_pointer_cast<Serialize<SerializeBin>>(material) } );
+	}
 }
 
-void GeomData::serializeDependencies( std::shared_ptr<SerializeBin> writer ) {
-	material->serializeDependencies( writer );
+void GeomData::gatherDependencies( std::shared_ptr<DeserializeBin> reader ) {
+	uint64_t numEntries = 0;
+	uint64_t dependencyHash = 0;
+	std::string dependencyEntity;
+
+	reader->read( numEntries );
+	while ( numEntries > 0 ) {
+		reader->readHeader( dependencyHash );
+		if ( reader->getEntityType() == Material::EntityGroup() ) {
+			auto mat = std::make_shared<Material>(reader);
+		}
+		--numEntries;
+	}
 }
 
 void GeomData::deserializeDependencies( [[maybe_unused]] std::shared_ptr<SerializeBin> reader ) {
@@ -1306,33 +1310,6 @@ void VData::swapIndicesWinding( Primitive _pr ) {
 			ASSERT(0);
 	}
 }
-
-GeomDeserializeDependencies GeomData::gatherDependencies( std::shared_ptr<DeserializeBin> reader ) {
-	uint32_t numEntries = 0;
-	uint32_t dependencyTag = 0;
-	std::string dependencyName;
-	GeomDeserializeDependencies ret;
-
-	reader->read( numEntries );
-	while ( numEntries > 0 ) {
-		reader->read( dependencyTag );
-		for ( uint32_t q = 0; q < numEntries; q++ ) {
-			reader->read( dependencyName );
-			switch ( dependencyTag ) {
-				case dependecyTagTexture:
-					ret.textureDeps.emplace_back( dependencyName );
-					break;
-				case dependecyTagMaterial:
-					ret.materialDeps.emplace_back( dependencyName );
-					break;
-			}
-		}
-		reader->read( numEntries );
-	}
-
-	return ret;
-}
-
 
 std::string GeomData::generateThumbnail() const {
 //        if ( thumb ) {

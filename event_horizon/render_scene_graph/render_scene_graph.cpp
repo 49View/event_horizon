@@ -45,8 +45,7 @@ void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _param
     if ( _params.size() == 7 ) {
         rot = { std::stof(_params[4]), std::stof(_params[5]), std::stof(_params[6]) };
     }
-    GeomBuilder{GeomBuilderType::file, _params[0] }.at(pos).r(rot).build(*this);
-//    GeomBuilder{GeomBuilderType::file, concatParams( _params, 0 ) }.at(pos).r(rot).build(*this);
+    GF{_params[0] }.build(*this);
 }
 
 void RenderSceneGraph::changeMaterialTagCallback( const std::vector<std::string>& _params ) {

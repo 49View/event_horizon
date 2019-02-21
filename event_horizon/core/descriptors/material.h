@@ -131,6 +131,7 @@ public:
     Material( const Material& _mat );
     explicit Material( std::shared_ptr<Material> _mat );
     explicit Material( const std::vector<char>& _data );
+    explicit Material( std::shared_ptr<DeserializeBin> reader );
     explicit Material( const std::string& _name, const std::string& _sn );
     ~Material() override = default;
 
@@ -188,7 +189,6 @@ public:
 protected:
     KnownBufferMap knownBuffers() const;
     std::string generateThumbnail() const override;
-    std::set<std::string> generateTags() const override;
 
 protected:
     MaterialImageBuffers buffers;

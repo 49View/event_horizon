@@ -58,89 +58,6 @@ class NodePublisher : public virtual Publisher<D> {
 public:
 
 protected:
-    void serializeDependenciesRec() {
-
-//        if ( mData ) {
-//            mData->serializeDependencies();
-//        }
-//
-//        for ( const auto& c : Children()) {
-//            c->serializeDependenciesRec();
-//        }
-    }
-
-    std::string serializeDependencies() const {
-
-        std::vector<std::string> deps;
-
-//        serializeDependenciesRec( deps );
-
-        return std::string{};
-        // End tag so we know there are no more dependencies
-//        writer->write( uint32_t(0) );
-    }
-
-//    void serializeRec( std::shared_ptr<SerializeBin> writer ) {
-//        writer->write( mGHType );
-//        writer->write( mHash );
-//        writer->write( NamePolicy::Name() );
-//        writer->write( mLocalTransform );
-//        writer->write( Boxable::bbox3d );
-//        int32_t hasData = mData ? 1 : 0;
-//        writer->write( hasData );
-//        if ( hasData == 1 ) mData->serialize( writer );
-//
-//        auto numChildren = static_cast<int32_t>( Children().size());
-//        writer->write( numChildren );
-//        for ( auto&& c : Children()) {
-//            c->serializeRec( writer );
-//        }
-//    }
-//
-//    void deserializeRec( std::shared_ptr<DeserializeBin> reader, Node<D> *_father = nullptr ) {
-//        father = _father;
-//        reader->read( mGHType );
-//        reader->read( mHash );
-//        reader->read( NameRef() );
-//        reader->read( mLocalTransform );
-//        reader->read( bbox3d );
-//
-//        int32_t hasData = 0;
-//        reader->read( hasData );
-//        if ( hasData == 1 ) {
-//            mData = std::make_shared<D>(reader);
-//        }
-//
-//        int32_t numChildren = 0;
-//        reader->read( numChildren );
-//
-//        for ( int32_t t = 0; t < numChildren; t++ ) {
-//            std::shared_ptr<Node> gg = std::make_shared<Node>();
-//            addChildren( gg );
-//            gg->deserializeRec( reader, this );
-//        }
-//    }
-
-    std::string generateThumbnail() const override {
-        return std::string{};
-    }
-    std::set<std::string> generateTags() const override {
-        return std::set<std::string>{};
-    }
-
-//    std::string generateRawData() const override {
-//        std::string stream{};
-//        stream += serializeDependencies();
-////        stream += serializeRec();
-//        return stream;
-//    }
-    void serialize( std::shared_ptr<SerializeBin> writer ) const override {
-
-    }
-
-    void deserialize( std::shared_ptr<DeserializeBin> reader ) override {
-
-    }
 
 //    bool deserialize( const std::vector<char>& _data ) {
 //        auto reader = std::make_shared<DeserializeBin>( _data, D::Version() );
@@ -153,9 +70,8 @@ protected:
 template <typename D>
 class Node : public Animable,
              public ObservableShared<Node<D>>,
-             public virtual NamePolicy<std::string>,
              public virtual Boxable<JMATH::AABB>,
-             public NodePublisher<D>,
+             public virtual Publisher<D>,
              public std::enable_shared_from_this<Node<D>> {
 public:
     Node() {
@@ -165,7 +81,7 @@ public:
     virtual ~Node() = default;
 
     explicit Node( const std::string& _name ) : Node() {
-        NamePolicy::Name(_name);
+        this->Name(_name);
     }
     explicit Node( std::shared_ptr<D> data, Node *papa = nullptr ) : Node() {
         father = papa;
@@ -181,7 +97,8 @@ public:
     }
 
     explicit Node( const std::vector<char>& _data ) {
-        NodePublisher<D>::Serializable::deserialize( _data );
+        auto reader = std::make_shared<DeserializeBin>( _data, D::Version() );
+        deserialize( reader );
     }
 
     TimelineSet addKeyFrame( const std::string& _name, float _time ) override {
@@ -407,7 +324,7 @@ public:
         }
     }
     void getGeomWithName( const std::string& _name, std::vector<Node *>& ret ) {
-        if ( NamePolicy::Name() == _name ) {
+        if ( this->Name() == _name ) {
             ret.push_back( this );
         }
 
@@ -523,7 +440,7 @@ public:
 
     template<typename TV>
     void visit() const {
-        traverseWithHelper<TV>( "Name,BBbox,Data,Children", NamePolicy::Name(), Boxable::BBox3d(),mData,children );
+        traverseWithHelper<TV>( "Name,BBbox,Data,Children", this->Name(), Boxable::BBox3d(),mData,children );
     }
 protected:
 
@@ -571,7 +488,7 @@ protected:
 
     void updateTransformRec( const std::string& nodeName, const Vector3f& pos, const Vector3f& rot, const Vector3f& scale,
                              UpdateTypeFlag whatToUpdate ) {
-        if ( nodeName.compare( NamePolicy::Name() ) == 0 ) {
+        if ( nodeName.compare( this->Name() ) == 0 ) {
             generateLocalTransformData( whatToUpdate & UpdateTypeFlag::Position ? pos : mTRS.Pos(),
                                         whatToUpdate & UpdateTypeFlag::Rotation ? Quaternion{rot} : mTRS.Rot(),
                                         whatToUpdate & UpdateTypeFlag::Scale ? scale : mTRS.Scale());
@@ -609,7 +526,7 @@ protected:
         }
     }
     void findRecursive( const char *name, Node *& foundObj ) {
-        if ( strcmp( NamePolicy::Name().c_str(), name ) == 0 ) {
+        if ( strcmp( this->Name().c_str(), name ) == 0 ) {
             foundObj = this;
             return;
         }
@@ -653,6 +570,96 @@ protected:
     void calcCompleteBBox3d() {
         Boxable::bbox3d = AABB::INVALID;
         Boxable::bbox3d = calcCompleteBBox3dRec();
+    }
+
+    std::string generateThumbnail() const override {
+        return std::string{};
+    }
+
+    void serializeDependenciesRec( SerializationDependencyMap& _deps ) const {
+        if ( mData ) {
+            mData->serializeDependencies( _deps );
+        }
+
+        for ( const auto& c : Children()) {
+            c->serializeDependenciesRec( _deps );
+        }
+    }
+
+    void serializeDependenciesFinal( std::shared_ptr<SerializeBin> writer, SerializationDependencyMap& _deps ) const {
+        writer->write( uint64_t(_deps.size()) );
+        for ( const auto& [k,v] : _deps ) {
+            writer->writeHeader( v.version, v.entityGroup );
+            v.resource->serialize( writer );
+        }
+    }
+
+    void serializeDependencies( std::shared_ptr<SerializeBin> writer ) const {
+        SerializationDependencyMap deps;
+        serializeDependenciesRec( deps );
+        serializeDependenciesFinal( writer, deps );
+    }
+
+    void serialize( std::shared_ptr<SerializeBin> writer ) const override {
+        serializeDependencies( writer );
+        serializeRec( writer );
+    }
+
+    void deserializeDependencies( std::shared_ptr<DeserializeBin> reader ) const {
+        int64_t numDependencies = 0;
+        reader->read( numDependencies );
+
+        for ( int64_t i = 0; i < numDependencies; i++ ) {
+
+        }
+    }
+
+    void deserialize( std::shared_ptr<DeserializeBin> reader ) override {
+        D::gatherDependencies( reader );
+        deserializeRec( reader );
+    }
+
+private:
+    void deserializeRec( std::shared_ptr<DeserializeBin> reader, Node<D> *_father = nullptr ) {
+        father = _father;
+        reader->read( mGHType );
+        reader->read( mHash );
+        reader->read( this->NameRef() );
+        mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
+        reader->read( mLocalTransform );
+        reader->read( BBox3d() );
+
+        int32_t hasData = 0;
+        reader->read( hasData );
+        if ( hasData == 1 ) {
+            mData = std::make_shared<D>(reader);
+        }
+
+        int32_t numChildren = 0;
+        reader->read( numChildren );
+
+        for ( int32_t t = 0; t < numChildren; t++ ) {
+            std::shared_ptr<Node> gg = std::make_shared<Node>();
+            addChildren( gg );
+            gg->deserializeRec( reader, this );
+        }
+    }
+
+    void serializeRec( std::shared_ptr<SerializeBin> writer ) const {
+        writer->write( mGHType );
+        writer->write( mHash );
+        writer->write( this->Name() );
+        writer->write( mLocalTransform );
+        writer->write( Boxable::BBox3d() );
+        int32_t hasData = mData ? 1 : 0;
+        writer->write( hasData );
+        if ( hasData == 1 ) mData->serialize( writer );
+
+        auto numChildren = static_cast<int32_t>( Children().size());
+        writer->write( numChildren );
+        for ( auto&& c : Children()) {
+            c->serializeRec( writer );
+        }
     }
 
 protected:

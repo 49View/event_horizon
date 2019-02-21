@@ -31,9 +31,10 @@ void loadGeomInGui( SceneOrchestrator* p, std::shared_ptr<GLTF2> _newObject ) {
     p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
 
     p->RSG().add( imported.getMaterials() );
+    p->RSG().add( hierScene );
 
-    auto gbt = std::make_shared<GeomBuilder>( hierScene );
-    gbt->build(p->RSG());
+//    auto gbt = std::make_shared<GeomBuilder>( hierScene );
+//    gbt->build(p->RSG());
 
 //    p->takeScreenShot( hierScene->BBox3d(), gbt->Thumb() );
 }
