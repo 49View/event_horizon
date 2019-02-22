@@ -175,7 +175,7 @@ protected:
 	std::shared_ptr<Framebuffer> mDefaultFB;
 
 	std::unordered_map<uint64_t, std::shared_ptr<RenderMaterial>> materialCache;
-	std::unordered_map<int64_t, std::shared_ptr<RenderMaterial>> materialMap;
+	std::unordered_map<std::string, std::shared_ptr<RenderMaterial>> materialMap;
 
 	std::shared_ptr<CommandScriptRendererManager> hcs;
 

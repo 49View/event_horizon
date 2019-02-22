@@ -88,7 +88,6 @@ public:
     void serialize( std::shared_ptr<SerializeBin> writer ) const  {
     }
 
-    static void gatherDependencies( std::shared_ptr<DeserializeBin> reader ) {}
     void deserialize( std::shared_ptr<DeserializeBin> reader )  {
     }
 

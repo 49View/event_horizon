@@ -131,7 +131,7 @@ public:
 
 class CommandBufferEntry {
 public:
-    int64_t mHash = -1;
+    std::string mHash;
     VertexProcessing mVPList;
     std::shared_ptr<RenderMaterial> mMaterial;
     std::shared_ptr<Matrix4f> mModelMatrix;

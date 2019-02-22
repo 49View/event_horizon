@@ -280,14 +280,11 @@ GeomAssetSP GeomBuilder::buildr( DependencyMaker& _md ) {
 bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
 
     if ( _status == DependencyStatus::LoadedSuccessfully ) {
-        auto as = std::make_shared<GeomAsset>(zlibUtil::inflateFromMemory( std::move(_data) ));
-        as->updateTransform();
         auto& sg = dynamic_cast<SceneGraph&>(_md);
-        sg.add( as );
+        sg.add( std::make_shared<GeomAsset>(zlibUtil::inflateFromMemory( std::move(_data) )) );
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 GeomBuilderComposer::GeomBuilderComposer() {

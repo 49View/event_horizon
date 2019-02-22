@@ -12,12 +12,15 @@
 #include <core/math/vector4f.h>
 #include <core/math/matrix4f.h>
 #include <core/serializable.hpp>
+#include <core/hashable.hpp>
 
 using TextureIndex = TextureUniformDesc;
 class SerializeBin;
 class DeserializeBin;
 
-class HeterogeneousMap : public virtual Serializable<HeterogeneousMap>, public std::enable_shared_from_this<HeterogeneousMap> {
+class HeterogeneousMap : public virtual Serializable<HeterogeneousMap>,
+                         public virtual Hashable,
+                         public std::enable_shared_from_this<HeterogeneousMap> {
 public:
     virtual ~HeterogeneousMap() = default;
     void inject( const HeterogeneousMap& source );
@@ -34,7 +37,6 @@ public:
     void assign( const std::string& uniformName, const std::vector<Vector3f>& data );
 
     int NumUniforms() const { return mNumUniforms; }
-    int64_t Hash() const { return mHash; }
 
     std::vector<std::string> getTextureNames() const;
     std::unordered_map<std::string, std::string> getTextureNameMap() const;
@@ -103,7 +105,7 @@ public:
     void deserialize( std::shared_ptr<DeserializeBin> reader ) override;
 
 protected:
-    virtual void calcHash( int64_t _base );
+    std::string calcHash() override;
 
 private:
     void calcTotalNumUniforms();
@@ -119,5 +121,4 @@ private:
     std::unordered_map<std::string, Matrix3f> mM3fs;
     std::unordered_map<std::string, Matrix4f> mM4fs;
     int mNumUniforms = 0;
-    int64_t mHash = 0;
 };

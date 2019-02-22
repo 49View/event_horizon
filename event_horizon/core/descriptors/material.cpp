@@ -27,15 +27,21 @@ Material::Material( std::shared_ptr<DeserializeBin> reader ) {
 Material::Material( const std::string& _name, const std::string& _sn ) {
     Name(_name);
     setShaderName(_sn);
-    Material::calcHash(0);
+    Material::calcHash();
 }
 
-void Material::calcHash( int64_t _base ) {
-    removeTag( std::to_string(Hash()) );
-    _base += std::hash<std::string>()(this->NameCopy());
-    _base += static_cast<int64_t>(std::hash<std::string>()( getShaderName()));
-    HeterogeneousMap::calcHash( _base );
-    addTag( std::to_string(Hash()) );
+std::string Material::calcHash() {
+    removeTag( HashRef() );
+
+    std::stringstream hashInput( HeterogeneousMap::HashRef());
+    hashInput << getShaderName();
+    hashInput << this->NameCopy();
+
+    Hash( md5(hashInput.str()) );
+
+    addTag( HashRef() );
+
+    return HashCopy();
 }
 
 std::shared_ptr<Material> Material::cloneWithNewShader( const std::string& _subkey ) {
@@ -166,6 +172,7 @@ void Material::setProperties( const MaterialProperties& properties ) {
 
 void Material::serialize( std::shared_ptr<SerializeBin> writer ) const {
     writer->write( Name() );
+    writer->write( Hash() );
     HeterogeneousMap::serialize(writer);
     writer->write( buffers );
     properties.serialize(writer);
@@ -174,6 +181,7 @@ void Material::serialize( std::shared_ptr<SerializeBin> writer ) const {
 
 void Material::deserialize( std::shared_ptr<DeserializeBin> reader ) {
     reader->read( NameRef() );
+    reader->read( HashRef() );
     HeterogeneousMap::deserialize(reader);
     reader->read( buffers );
     properties.deserialize(reader);
@@ -182,6 +190,7 @@ void Material::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 
 void Material::clone( const Material& _source ) {
     HeterogeneousMap::clone( _source );
+    Hash( _source.Hash() );
     properties = _source.properties;
     shaderName = _source.shaderName;
 }

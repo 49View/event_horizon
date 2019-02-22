@@ -152,10 +152,9 @@ void GeomData::serialize( std::shared_ptr<SerializeBin> f ) const {
 }
 
 void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
-	int64_t lmatHash = 0;
+	std::string lmatHash;
 	reader->read( lmatHash );
-	// -###- FIXME, reintroduce material readers
-	material = std::make_shared<Material>(S::WHITE_PBR, S::SH);//( reader );
+	material = std::make_shared<Material>(reader->dep(lmatHash));
 	reader->read( mVdata.BBox3d() );
 	reader->read( mVdata.vIndices );
 	reader->read( mVdata.vcoords3d );
@@ -169,23 +168,10 @@ void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 
 void GeomData::serializeDependencies( SerializationDependencyMap& _deps ) const {
 	if ( _deps.find( material->Hash() ) == _deps.end() ) {
-		_deps.emplace( material->Hash(), SerializeDependencyContainer{ Material::Version(), Material::EntityGroup(),
-									     std::dynamic_pointer_cast<Serialize<SerializeBin>>(material) } );
-	}
-}
-
-void GeomData::gatherDependencies( std::shared_ptr<DeserializeBin> reader ) {
-	uint64_t numEntries = 0;
-	uint64_t dependencyHash = 0;
-	std::string dependencyEntity;
-
-	reader->read( numEntries );
-	while ( numEntries > 0 ) {
-		reader->readHeader( dependencyHash );
-		if ( reader->getEntityType() == Material::EntityGroup() ) {
-			auto mat = std::make_shared<Material>(reader);
-		}
-		--numEntries;
+		auto writer = std::make_shared<SerializeBin>(
+				      SerializeHeader{material->Hash(), Material::Version(), Material::EntityGroup() } );
+		material->serialize(writer);
+		_deps.emplace( material->Hash(), writer->buffer() );
 	}
 }
 

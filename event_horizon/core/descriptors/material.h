@@ -135,7 +135,7 @@ public:
     explicit Material( const std::string& _name, const std::string& _sn );
     ~Material() override = default;
 
-    void calcHash( int64_t _base ) override;
+    std::string calcHash() override;
     std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey );
     std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp );
 

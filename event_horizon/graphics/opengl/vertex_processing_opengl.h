@@ -78,7 +78,7 @@ public:
         return GL_FLOAT;
     }
 
-    inline int64_t hash() const {
+    inline std::string hash() const {
         return material->Hash();
     }
 
@@ -193,7 +193,7 @@ private:
     bool dynamic = false;
     std::string mName;
 
-    static int64_t  sMaterialHash;
+    static std::string  sMaterialHash;
     static uint64_t sCountInc;
 };
 

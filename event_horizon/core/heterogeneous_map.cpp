@@ -19,19 +19,23 @@ void HeterogeneousMap::calcTotalNumUniforms() {
 
     mNumUniforms = static_cast<int>( lNumUniforms );
 
-    calcHash(0);
+    HeterogeneousMap::calcHash();
 }
 
-void HeterogeneousMap::calcHash( int64_t _base ) {
-    mHash = mNumUniforms;
+std::string HeterogeneousMap::calcHash() {
+    std::stringstream hashInput;
+    hashInput << mNumUniforms;
 
-    for ( auto& i : mTextures ) mHash += std::hash<std::string>{}(i.first);
-    for ( auto& i : mInts ) mHash += i.second;
-    for ( auto& i : mFloats ) mHash += static_cast<int64_t>( i.second * 1000.0f );
-    for ( auto& i : mV2fs ) mHash += i.second.hash();
-    for ( auto& i : mV3fs ) mHash += i.second.hash();
-    for ( auto& i : mV4fs ) mHash += i.second.hash();
-    mHash += _base;
+    for ( auto& i : mTextures ) hashInput << i.first;
+    for ( auto& i : mInts ) hashInput << i.second;
+    for ( auto& i : mFloats ) hashInput << i.second;
+    for ( auto& i : mV2fs ) hashInput << i.second.hash();
+    for ( auto& i : mV3fs ) hashInput << i.second.hash();
+    for ( auto& i : mV4fs ) hashInput << i.second.hash();
+
+    Hash( md5(hashInput.str()) );
+
+    return HashCopy();
 }
 
 void HeterogeneousMap::inject( const HeterogeneousMap& source ) {
@@ -267,7 +271,6 @@ std::unordered_map<std::string, std::string> HeterogeneousMap::getTextureNameMap
 
 void HeterogeneousMap::serialize( std::shared_ptr<SerializeBin> writer ) const {
     writer->write( mNumUniforms );
-    writer->write( mHash );
     writer->write( getTextureNameMap() ); //mTextures
     writer->write( mInts );
     writer->write( mFloats );
@@ -281,7 +284,6 @@ void HeterogeneousMap::serialize( std::shared_ptr<SerializeBin> writer ) const {
 
 void HeterogeneousMap::deserialize( std::shared_ptr<DeserializeBin> reader ) {
     reader->read( mNumUniforms );
-    reader->read( mHash );
     std::unordered_map<std::string, std::string> tns;
     reader->read( tns );
     for ( const auto& [k,v] : tns ) mTextures.emplace( k, TextureIndex{v, 0, 0, 0} );

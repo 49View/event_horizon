@@ -13,16 +13,21 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <core/serialize_types.hpp>
+#include <core/hashable.hpp>
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
-    explicit SerializeBin( uint64_t vf, const std::string& _typename ) {
-        writeHeader( vf, _typename );
+    explicit SerializeBin( const SerializeHeader& _header ) {
+        writeHeader( _header );
 	}
 
-	void writeHeader( uint64_t vf, const std::string& _typename ) {
-        write( vf );
-        write( _typename );
+	void writeHeader( const SerializeHeader& _header ) {
+		write( _header.hash );
+        write( _header.version );
+        write( _header.entityGroup );
+        headerSizeSeek = f.size();
+        write( _header.size );
     }
 
 	template<typename T>
@@ -103,6 +108,17 @@ public:
 		}
 	}
 
+	template<typename T>
+	void writeAt( size_t _pos, const T& v ) {
+		size_t size = sizeof( T );
+		auto b = std::make_unique<unsigned char[]>(size);
+		memcpy( b.get(), reinterpret_cast<const void*>( &v ), size );
+		for ( size_t q = 0; q < size; q++ ) {
+			ASSERT( _pos + q < f.size() );
+			f[_pos+q] = b[q];
+		}
+	}
+
 	void write( const char* str ) {
 		int32_t nameLength = 0;
 		if ( str == nullptr ) {
@@ -120,25 +136,39 @@ public:
 		write( str.c_str() );
 	}
 
-	std::vector<unsigned char> buffer() const {
+	SerializeBinContainer buffer() {
+		writeHeaderSizeInjected();
 		return f;
 	}
 
 private:
-	std::vector<unsigned char> f;
+	void writeHeaderSizeInjected() {
+		writeAt( headerSizeSeek, f.size() - headerSizeSeek );
+	}
+
+private:
+	SerializeBinContainer f;
+	size_t headerSizeSeek = 0;
 };
 
 class DeserializeBin : public std::enable_shared_from_this<DeserializeBin> {
 public:
 	DeserializeBin( const std::vector<char>& _data, uint64_t vf ) {
 		fi = std::make_shared<std::istringstream>( std::string{ _data.begin(), _data.end() } );
-		readHeader( vf );
+		readAndCheckHeader( vf );
 	}
 
 	DeserializeBin( uint8_p&& _data, uint64_t vf ) {
 		fi = std::make_shared<std::istringstream>( std::string{ reinterpret_cast<char*>(_data.first.get()),
 																static_cast<size_t>(_data.second) } );
-		readHeader( vf );
+		readAndCheckHeader( vf );
+	}
+
+	void readAndCheckHeader( uint64_t vf ) {
+		readHeader( header );
+		if ( header.version < vf ) {
+			LOGE( "Old assets loaded version %d, expecting %d", header.version, vf );
+		}
 	}
 
 	template<typename T>
@@ -235,7 +265,6 @@ public:
 	}
 
 	void read( std::string& str ) {
-
 		int32_t nameLength;
 		fi->read( reinterpret_cast<char*>( &nameLength ), sizeof( int32_t ) );
 		auto cstr = std::make_unique<char[]>( static_cast<size_t>(nameLength + 1));
@@ -244,20 +273,28 @@ public:
 		str = std::string{ cstr.get() };
 	}
 
-	void readHeader( uint64_t vf ) {
-        uint64_t savedVersion = 0;
-        read( savedVersion );
-        if ( savedVersion < vf ) {
-            LOGE( "Old assets loaded version %d, expecting %d", savedVersion, vf );
-        }
-        read(entityType);
+	void readHeader( SerializeHeader& _header ) {
+		read( _header.hash);
+        read( _header.version );
+        read( _header.entityGroup);
+        read( _header.size);
     }
 
-    const std::string& getEntityType() const {
-        return entityType;
-    }
+	void readDependency() {
+		SerializeBinContainer bc;
+		read( bc );
+		static constexpr uint64_t vectorHeader = 4;
+		std::string hash{ bc.begin()+vectorHeader, bc.begin()+vectorHeader+Hashable::HASH_LENGTH };
+		deps.emplace( hash, bc );
+	}
+
+	SerializeBinContainer dep( const SerializeDependencyHash& _hash ) {
+		ASSERT( deps.find(_hash) != deps.end() );
+		return deps[_hash];
+	}
 
 private:
 	std::shared_ptr<std::istringstream> fi;
-	std::string entityType;
+    SerializeHeader header;
+	SerializationDependencyMap deps;
 };

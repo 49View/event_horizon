@@ -2,7 +2,7 @@
 
 unsigned int sLastHandle = 0;
 uint64_t VertexProcessing::sCountInc = 0;
-int64_t VertexProcessing::sMaterialHash;
+std::string VertexProcessing::sMaterialHash;
 int VertexProcessing::sNumDrawCalls;
 int VertexProcessing::sNumStateChanges;
 std::set<int64_t> VertexProcessing::sMatHash;

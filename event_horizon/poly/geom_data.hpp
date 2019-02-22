@@ -191,8 +191,6 @@ public:
 
     GeomData( const QuadVector3fNormalfList& quads, std::shared_ptr<Material> _material, const GeomMappingData& _mapping );
 
-    static void gatherDependencies( std::shared_ptr<DeserializeBin> reader );
-
     void serialize( std::shared_ptr<SerializeBin> writer ) const override;
     void deserialize( std::shared_ptr<DeserializeBin> reader ) override;
     void serializeDependencies( SerializationDependencyMap& _deps ) const;

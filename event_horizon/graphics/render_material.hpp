@@ -54,7 +54,7 @@ public:
         bufferUniforms[ubo_name]->setUBOData( _name, value );
     }
 
-    inline int64_t Hash() const { return mHash; }
+    inline std::string Hash() const { return mHash; }
     float TransparencyValue() const { return mTransparencyValue; }
     void TransparencyValue( float val ) { mTransparencyValue = val; }
 
@@ -67,7 +67,7 @@ private:
     std::shared_ptr<ProgramUniformSet> uniforms;
     std::shared_ptr<ProgramUniformSet> globalUniforms;
     std::unordered_map<std::string, std::shared_ptr<ProgramUniformSet>> bufferUniforms;
-    int64_t mHash;
+    std::string mHash;
 
     Renderer& rr;
     // These are calculated on the fly do not serialize

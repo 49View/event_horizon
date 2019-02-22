@@ -54,20 +54,6 @@ auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
 auto lambdaBBox = [](auto&& arg) -> JMATH::AABB { return arg->BBox3d();};
 
 template <typename D>
-class NodePublisher : public virtual Publisher<D> {
-public:
-
-protected:
-
-//    bool deserialize( const std::vector<char>& _data ) {
-//        auto reader = std::make_shared<DeserializeBin>( _data, D::Version() );
-//        D::gatherDependencies( reader );
-////        deserializeRec( reader );
-//        return true;
-//    }
-};
-
-template <typename D>
 class Node : public Animable,
              public ObservableShared<Node<D>>,
              public virtual Boxable<JMATH::AABB>,
@@ -111,7 +97,7 @@ public:
         return ret;
     }
 
-    UUID Hash() const { return mHash; }
+    UUID UUiD() const { return mHash; }
     NodeType GHType() const { return mGHType; }
     void GHType( NodeType val ) { mGHType |= val; }
     bool hasType( NodeType val ) const { return ( mGHType & val ) > 0; }
@@ -119,7 +105,7 @@ public:
 
     template<typename F>
     void visitHashRecF( F _func ) {
-        _func( Hash() );
+        _func( UUiD() );
         for ( auto& c : Children()) {
             c->visitHashRecF( _func );
         }
@@ -335,7 +321,7 @@ public:
     }
     void getGeomWithHash( const UUID& _hash, Node *& retG ) {
         bool stopRec = false;
-        if ( Hash() == _hash ) {
+        if ( UUiD() == _hash ) {
             retG = this;
             stopRec = true;
         }
@@ -443,6 +429,11 @@ public:
         traverseWithHelper<TV>( "Name,BBbox,Data,Children", this->Name(), Boxable::BBox3d(),mData,children );
     }
 protected:
+
+    std::string calcHash() override {
+        // -###- FIXME: calculate hash for node!!
+        return std::string();
+    }
 
     void getLocatorsPosRec( std::vector<Vector3f>& _locators ) {
 
@@ -589,8 +580,7 @@ protected:
     void serializeDependenciesFinal( std::shared_ptr<SerializeBin> writer, SerializationDependencyMap& _deps ) const {
         writer->write( uint64_t(_deps.size()) );
         for ( const auto& [k,v] : _deps ) {
-            writer->writeHeader( v.version, v.entityGroup );
-            v.resource->serialize( writer );
+            writer->write( v );
         }
     }
 
@@ -615,7 +605,7 @@ protected:
     }
 
     void deserialize( std::shared_ptr<DeserializeBin> reader ) override {
-        D::gatherDependencies( reader );
+        this->gatherDependencies( reader );
         deserializeRec( reader );
     }
 
