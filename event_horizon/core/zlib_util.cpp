@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <vector>
 #include <cstring>
 #include "zlib_util.h"
 
@@ -12,8 +13,8 @@ namespace zlibUtil {
    invalid or incomplete, Z_VERSION_ERROR if the version of zlib.h and
    the version of the library linked do not match, or Z_ERRNO if there
    is an error reading or writing the files. */
-    std::vector<char> inflateFromMemory( uint8_p&& fin ) {
-        std::vector<char> inflatedVector;
+    SerializableContainer inflateFromMemory( uint8_p&& fin ) {
+        SerializableContainer inflatedVector;
         int ret;
         unsigned have;
         z_stream strm;
@@ -76,9 +77,9 @@ namespace zlibUtil {
    level is supplied, Z_VERSION_ERROR if the version of zlib.h and the
    version of the library linked do not match, or Z_ERRNO if there is
    an error reading or writing the files. */
-    std::vector<unsigned char> deflateMemory( const uint8_p&& source, int level )
+    SerializableContainer deflateMemory( const uint8_p&& source, int level )
     {
-        std::vector<unsigned char> deflatedMemory;
+        SerializableContainer deflatedMemory;
         int ret, flush;
         unsigned have;
         z_stream strm;
@@ -138,9 +139,9 @@ namespace zlibUtil {
         return deflatedMemory;
     }
 
-    std::vector<unsigned char> deflateMemory( const std::string& source, int level )
+    SerializableContainer deflateMemory( const std::string& source, int level )
     {
-        std::vector<unsigned char> deflatedMemory;
+        SerializableContainer deflatedMemory;
         int ret, flush;
         unsigned have;
         z_stream strm;

@@ -4,6 +4,7 @@
 #include "core/image_builder.h"
 #include "core/math/poly_utils.hpp"
 #include <core/image_util.h>
+#include <core/entity_factory.hpp>
 #include <stb/stb_image_write.h>
 
 MaterialBuilder::MaterialBuilder( const std::string& _name, const std::string& _sn ) : ResourceBuilder(
@@ -39,7 +40,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     auto& sg = dynamic_cast<MaterialManager&>(_md);
 
     if ( _status == DependencyStatus::LoadedSuccessfully ) {
-        auto mat = std::make_shared<Material>( zlibUtil::inflateFromMemory( std::move( _data )));
+        auto mat = EF::create<Material>( std::move( _data ) );
         mat->Buffers([&]( const std::string& _finame, ucchar_p _dataPtr ) {
             ImageBuilder{ _finame }.makeDirect( *sg.TL(), _dataPtr );
         });
@@ -51,7 +52,7 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
     return true;
 }
 
-MaterialBuilder::MaterialBuilder( const std::string& _name, const std::vector<char>& _data ) {
+MaterialBuilder::MaterialBuilder( const std::string& _name, const SerializableContainer& _data ) {
     Name(_name);
     bufferTarFiles = _data;
 }
@@ -75,21 +76,21 @@ std::shared_ptr<Material> MaterialManager::get( const std::string& _key, const s
         if ( lMat->getProperties() == _mp ) {
             return lMat;
         } else {
-            return lMat->cloneWithNewProperties( _mp );
+//            return lMat->cloneWithNewProperties( _mp );
         }
 
     }
     auto m = materialList.find( _key );
 
-    if ( m->second->getShaderName() != _subkey ) {
-        auto secondKey = _key + _subkey;
-        if ( auto sc = materialList.find( secondKey ); sc != materialList.end()) {
-            return sc->second;
-        }
-        auto mc = m->second->cloneWithNewShader( _subkey );
-        materialList[secondKey] = mc;
-        return mc;
-    }
+//    if ( m->second->getShaderName() != _subkey ) {
+//        auto secondKey = _key + _subkey;
+//        if ( auto sc = materialList.find( secondKey ); sc != materialList.end()) {
+//            return sc->second;
+//        }
+//        auto mc = m->second->cloneWithNewShader( _subkey );
+//        materialList[secondKey] = mc;
+//        return mc;
+//    }
     return m->second;
 }
 

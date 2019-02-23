@@ -33,10 +33,6 @@ GeomData::GeomData(std::shared_ptr<Material> _material) : material(_material) {
 
 }
 
-GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {
-	deserialize( reader );
-}
-
 GeomData::GeomData( const ShapeType _st,
 					const Vector3f& _pos, [[maybe_unused]] const Vector3f& _axis, const Vector3f& _scale,
 					std::shared_ptr<Material> _material,
@@ -138,8 +134,8 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _
 	return logoGeoms;
 }
 
-void GeomData::serialize( std::shared_ptr<SerializeBin> f ) const {
-	f->write( material->Hash() ); //material->serialize( f );
+void GeomData::serializeImpl( std::shared_ptr<SerializeBin> f ) const {
+	f->write( material );
 	f->write( mVdata.BBox3d() );
 	f->write( mVdata.vIndices );
 	f->write( mVdata.vcoords3d );
@@ -151,10 +147,8 @@ void GeomData::serialize( std::shared_ptr<SerializeBin> f ) const {
 	f->write( mVdata.vColor );
 }
 
-void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
-	std::string lmatHash;
-	reader->read( lmatHash );
-	material = std::make_shared<Material>(reader->dep(lmatHash));
+void GeomData::deserializeImpl( std::shared_ptr<DeserializeBin> reader ) {
+	reader->read( material );
 	reader->read( mVdata.BBox3d() );
 	reader->read( mVdata.vIndices );
 	reader->read( mVdata.vcoords3d );
@@ -166,17 +160,8 @@ void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mVdata.vColor );
 }
 
-void GeomData::serializeDependencies( SerializationDependencyMap& _deps ) const {
-	if ( _deps.find( material->Hash() ) == _deps.end() ) {
-		auto writer = std::make_shared<SerializeBin>(
-				      SerializeHeader{material->Hash(), Material::Version(), Material::EntityGroup() } );
-		material->serialize(writer);
-		_deps.emplace( material->Hash(), writer->buffer() );
-	}
-}
-
-void GeomData::deserializeDependencies( [[maybe_unused]] std::shared_ptr<SerializeBin> reader ) {
-
+void GeomData::serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const {
+	writer->writeDep(material);
 }
 
 void GeomData::setMappingData( const GeomMappingData& _mapping ) {
@@ -1301,5 +1286,10 @@ std::string GeomData::generateThumbnail() const {
 //        if ( thumb ) {
 //            return { thumb->begin(), thumb->end() };
 //        }
+	return std::string{};
+}
+
+std::string GeomData::calcHashImpl() {
+	// -###- FIXME: calculate hash for node!!
 	return std::string{};
 }

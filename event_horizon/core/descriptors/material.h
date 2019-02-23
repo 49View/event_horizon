@@ -128,31 +128,20 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
 
 class Material : public HeterogeneousMap, public Publisher<Material, EmptyBox> {
 public:
-    Material( const Material& _mat );
-    explicit Material( std::shared_ptr<Material> _mat );
-    explicit Material( const std::vector<char>& _data );
-    explicit Material( std::shared_ptr<DeserializeBin> reader );
+    Material() = default;
     explicit Material( const std::string& _name, const std::string& _sn );
     ~Material() override = default;
 
-    std::string calcHash() override;
-    std::shared_ptr<Material> cloneWithNewShader( const std::string& _subkey );
-    std::shared_ptr<Material> cloneWithNewProperties( const MaterialProperties& _mp );
-
     Material& t( const std::string& _tn );
-
     Material& c( const Color4f& _col );
 
     const std::string& getShaderName() const;
-
     void resolveDynamicConstants();
 
     const std::vector<std::string> textureDependencies() const;
-
     static const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key );
 
     void setShaderName( const std::string& _value );
-
     std::string PBRName( const std::string& _type ) const;
     const std::string getBaseColor() const;
     const std::string getNormal() const;
@@ -172,21 +161,22 @@ public:
     const MaterialProperties& getProperties() const;
     void setProperties( const MaterialProperties& properties );
 
-    void serializeDependencies( std::shared_ptr<SerializeBin> writer );
-    void serialize( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserialize( std::shared_ptr<DeserializeBin> reader ) override;
+    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override;
 
     void clone( const Material& _source );
 
     Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName );
     Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName );
     const MaterialImageBuffers& Buffers() const;
-    void tarBuffers( const std::vector<char>& _bufferTarFiles, MaterialImageCallback imageCallback );
+    void tarBuffers( const SerializableContainer& _bufferTarFiles, MaterialImageCallback imageCallback );
     void Buffers( MaterialImageCallback imageCallback );
 
     bool isStreammable() const;
 
 protected:
+    std::string calcHashImpl() override;
+    void deserializeImpl(std::shared_ptr<DeserializeBin> reader) override;
+
     KnownBufferMap knownBuffers() const;
     std::string generateThumbnail() const override;
 
@@ -198,6 +188,8 @@ protected:
 public:
     inline constexpr static uint64_t Version() { return 1000; }
     inline const static std::string EntityGroup() { return EntityGroup::Material; }
+
+    friend class EntityFactory;
 };
 
 class MaterialBuildable {

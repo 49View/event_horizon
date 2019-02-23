@@ -77,8 +77,9 @@ void ProgramUniformSet::setOn( unsigned int handle ) {
     visit( GPUUniformVisitor{handle} );
 }
 
-ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Material> _mat, Renderer& _rr ) : Material(_mat) {
+ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Material> _mat, Renderer& _rr ) {
 
+    clone(*_mat.get());
     visitTextures( [&]( TextureUniformDesc& u, unsigned int counter ){
         u.handle = _rr.TD( u.name )->getHandle();
         u.target = _rr.TD( u.name )->getTarget();

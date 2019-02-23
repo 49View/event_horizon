@@ -510,7 +510,8 @@ void UIShapeBuilder::createDependencyList( DependencyMaker& _md ) {
 }
 
 void UIShapeBuilder::elemCreate() {
-    elem = std::make_shared<UIAsset>( std::make_shared<UIElement>(Name(), shapeType, material, renderBucketIndex), mTransform );
+    auto sp = std::make_shared<UIElement>( Name(), shapeType, material, renderBucketIndex );
+    elem = std::make_shared<UIAsset>( sp, mTransform );
 }
 
 UIShapeBuilder& UIShapeBuilder::inj( GeomAssetSP _cloned ) {

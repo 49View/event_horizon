@@ -39,7 +39,7 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
     }
 
     MaterialBuilder( const std::string& _name, const std::string& _sn );
-    MaterialBuilder( const std::string& _name, const std::vector<char>& _data );
+    MaterialBuilder( const std::string& _name, const SerializableContainer& _data );
 
     void makeDefault( DependencyMaker& _md );
     std::shared_ptr<Material> makeDirect( DependencyMaker& _md );
@@ -60,7 +60,7 @@ private:
     MaterialProperties      properties;
     std::string             shaderName = S::SH;
 
-    std::vector<char>       bufferTarFiles;
+    SerializableContainer   bufferTarFiles;
     std::string imageExt = ".png";
 };
 

@@ -156,7 +156,7 @@ namespace Http {
 
 namespace zlibUtil {
     // Decompress
-    std::vector<char> inflateFromMemory( const Http::Result& fin );
+    SerializableContainer inflateFromMemory( const Http::Result& fin );
 }
 
 struct Url {

@@ -4,6 +4,7 @@
 
 #include "geom_builder.h"
 #include <core/node.hpp>
+#include <core/entity_factory.hpp>
 #include <poly/poly.hpp>
 
 GeomBuilder::GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull ) : MaterialBuildable(S::SH, S::WHITE_PBR){
@@ -281,7 +282,9 @@ bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, cons
 
     if ( _status == DependencyStatus::LoadedSuccessfully ) {
         auto& sg = dynamic_cast<SceneGraph&>(_md);
-        sg.add( std::make_shared<GeomAsset>(zlibUtil::inflateFromMemory( std::move(_data) )) );
+        auto asset = EF::create<GeomAsset>( std::move(_data) );
+        asset->updateTransform();
+        sg.add( asset );
         return true;
     }
     return false;

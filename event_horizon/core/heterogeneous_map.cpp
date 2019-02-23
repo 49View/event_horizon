@@ -22,7 +22,8 @@ void HeterogeneousMap::calcTotalNumUniforms() {
     HeterogeneousMap::calcHash();
 }
 
-std::string HeterogeneousMap::calcHash() {
+std::string HeterogeneousMap::calcHashImpl() {
+    // -###- FIXME: calculate hash for node!!
     std::stringstream hashInput;
     hashInput << mNumUniforms;
 
@@ -269,7 +270,7 @@ std::unordered_map<std::string, std::string> HeterogeneousMap::getTextureNameMap
     return ret;
 }
 
-void HeterogeneousMap::serialize( std::shared_ptr<SerializeBin> writer ) const {
+void HeterogeneousMap::serializeImpl( std::shared_ptr<SerializeBin> writer ) const {
     writer->write( mNumUniforms );
     writer->write( getTextureNameMap() ); //mTextures
     writer->write( mInts );
@@ -282,7 +283,7 @@ void HeterogeneousMap::serialize( std::shared_ptr<SerializeBin> writer ) const {
     writer->write( mM4fs );
 }
 
-void HeterogeneousMap::deserialize( std::shared_ptr<DeserializeBin> reader ) {
+void HeterogeneousMap::deserializeImpl( std::shared_ptr<DeserializeBin> reader ) {
     reader->read( mNumUniforms );
     std::unordered_map<std::string, std::string> tns;
     reader->read( tns );

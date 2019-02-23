@@ -13,4 +13,4 @@ protected:
     void renderImpl( SceneOrchestrator *scene, JMATH::Rect2f& f ) override;
 };
 
-void callbackMaterial( const std::string& _filename, const std::vector<char>& _data );
+void callbackMaterial( const std::string& _filename, const SerializableContainer& _data );

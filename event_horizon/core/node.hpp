@@ -61,7 +61,7 @@ class Node : public Animable,
              public std::enable_shared_from_this<Node<D>> {
 public:
     Node() {
-        mHash = UUIDGen::make();
+        mUUID = UUIDGen::make();
         mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
     }
     virtual ~Node() = default;
@@ -82,9 +82,9 @@ public:
         generateMatrixHierarchy(fatherRootTransform());
     }
 
-    explicit Node( const std::vector<char>& _data ) {
+    explicit Node( const SerializableContainer& _data ) {
         auto reader = std::make_shared<DeserializeBin>( _data, D::Version() );
-        deserialize( reader );
+        deserializeImpl();
     }
 
     TimelineSet addKeyFrame( const std::string& _name, float _time ) override {
@@ -97,7 +97,7 @@ public:
         return ret;
     }
 
-    UUID UUiD() const { return mHash; }
+    UUID UUiD() const { return mUUID; }
     NodeType GHType() const { return mGHType; }
     void GHType( NodeType val ) { mGHType |= val; }
     bool hasType( NodeType val ) const { return ( mGHType & val ) > 0; }
@@ -413,11 +413,11 @@ public:
     void TRS( const MatrixAnim& val ) { mTRS = val; }
 
     inline bool isDescendantOf( const UUID& ancestorHash ) {
-        if ( mHash == ancestorHash ) return true;
+        if ( mUUID == ancestorHash ) return true;
 
         auto f = father;
         while ( f ) {
-            if ( f->mHash == ancestorHash ) return true;
+            if ( f->mUUID == ancestorHash ) return true;
             f = f->father;
         }
 
@@ -430,7 +430,7 @@ public:
     }
 protected:
 
-    std::string calcHash() override {
+    std::string calcHashImpl() override {
         // -###- FIXME: calculate hash for node!!
         return std::string();
     }
@@ -567,45 +567,18 @@ protected:
         return std::string{};
     }
 
-    void serializeDependenciesRec( SerializationDependencyMap& _deps ) const {
+    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {
         if ( mData ) {
-            mData->serializeDependencies( _deps );
+            mData->serializeDependenciesImpl( writer );
         }
+        writer->writeDep( mData );
 
         for ( const auto& c : Children()) {
-            c->serializeDependenciesRec( _deps );
+            c->serializeDependenciesImpl( writer );
         }
     }
 
-    void serializeDependenciesFinal( std::shared_ptr<SerializeBin> writer, SerializationDependencyMap& _deps ) const {
-        writer->write( uint64_t(_deps.size()) );
-        for ( const auto& [k,v] : _deps ) {
-            writer->write( v );
-        }
-    }
-
-    void serializeDependencies( std::shared_ptr<SerializeBin> writer ) const {
-        SerializationDependencyMap deps;
-        serializeDependenciesRec( deps );
-        serializeDependenciesFinal( writer, deps );
-    }
-
-    void serialize( std::shared_ptr<SerializeBin> writer ) const override {
-        serializeDependencies( writer );
-        serializeRec( writer );
-    }
-
-    void deserializeDependencies( std::shared_ptr<DeserializeBin> reader ) const {
-        int64_t numDependencies = 0;
-        reader->read( numDependencies );
-
-        for ( int64_t i = 0; i < numDependencies; i++ ) {
-
-        }
-    }
-
-    void deserialize( std::shared_ptr<DeserializeBin> reader ) override {
-        this->gatherDependencies( reader );
+    void deserializeImpl(std::shared_ptr<DeserializeBin> reader) override {
         deserializeRec( reader );
     }
 
@@ -613,17 +586,18 @@ private:
     void deserializeRec( std::shared_ptr<DeserializeBin> reader, Node<D> *_father = nullptr ) {
         father = _father;
         reader->read( mGHType );
-        reader->read( mHash );
+        reader->read( mUUID );
         reader->read( this->NameRef() );
         mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
         reader->read( mLocalTransform );
         reader->read( BBox3d() );
 
-        int32_t hasData = 0;
-        reader->read( hasData );
-        if ( hasData == 1 ) {
-            mData = std::make_shared<D>(reader);
-        }
+        reader->read( mData );
+//        int32_t hasData = 0;
+//        reader->read( hasData );
+//        if ( hasData == 1 ) {
+//            mData = std::make_shared<D>(reader);
+//        }
 
         int32_t numChildren = 0;
         reader->read( numChildren );
@@ -635,25 +609,27 @@ private:
         }
     }
 
-    void serializeRec( std::shared_ptr<SerializeBin> writer ) const {
+    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override {
         writer->write( mGHType );
-        writer->write( mHash );
+        writer->write( mUUID );
         writer->write( this->Name() );
         writer->write( mLocalTransform );
         writer->write( Boxable::BBox3d() );
-        int32_t hasData = mData ? 1 : 0;
-        writer->write( hasData );
-        if ( hasData == 1 ) mData->serialize( writer );
 
-        auto numChildren = static_cast<int32_t>( Children().size());
+        writer->write( mData );
+//        int32_t hasData = mData ? 1 : 0;
+//        writer->write( hasData );
+//        if ( hasData == 1 ) mData->serializeImpl( writer );
+
+        auto numChildren = static_cast<int32_t>( Children().size() );
         writer->write( numChildren );
         for ( auto&& c : Children()) {
-            c->serializeRec( writer );
+            c->serializeImpl( writer );
         }
     }
 
 protected:
-    UUID mHash;
+    UUID mUUID;
     Node *father = nullptr;
     NodeType mGHType = NodeTypeGeneric;
     Matrix4f mLocalTransform = Matrix4f::IDENTITY;

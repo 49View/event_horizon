@@ -26,7 +26,10 @@ public:
     }
 
 protected:
-    virtual std::string calcHash() = 0;
+    void calcHash() {
+        mHash = calcHashImpl();
+    }
+    virtual std::string calcHashImpl() = 0;
 private:
     std::string mHash;
 

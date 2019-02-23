@@ -10,11 +10,11 @@
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
 struct CallbackMaterialData {
-    CallbackMaterialData( const std::string& filename, const std::vector<char>& data ) : filename( filename ),
+    CallbackMaterialData( const std::string& filename, const SerializableContainer& data ) : filename( filename ),
                                                                                          data( data ) {}
 
     std::string filename;
-    std::vector<char> data;
+    SerializableContainer data;
 };
 
 std::vector<CallbackMaterialData> cmd;
@@ -75,7 +75,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     }
 }
 
-void callbackMaterial( const std::string& _filename, const std::vector<char>& _data ) {
+void callbackMaterial( const std::string& _filename, const SerializableContainer& _data ) {
 
     cmd.emplace_back( _filename, _data );
 

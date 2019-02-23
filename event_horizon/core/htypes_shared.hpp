@@ -15,8 +15,9 @@
 #include <functional>
 #include <vector>
 
-using CommandArgumentsT = std::vector< std::string >;
-using CommandCallbackFunction = std::function<void(const CommandArgumentsT& )>;
+using CommandArgumentsT 		= std::vector< std::string >;
+using CommandCallbackFunction 	= std::function<void(const CommandArgumentsT& )>;
+using SerializableContainer     = std::vector<unsigned char>;
 
 typedef std::pair<void*, uint64_t> void_p;
 typedef std::pair<char*, uint64_t> char_p;

@@ -924,7 +924,7 @@ ImportGeomArtifacts GLTF2::convert() {
     return ret;
 }
 
-GLTF2::GLTF2( const std::vector<char>& _array, const std::string& _name ) {
+GLTF2::GLTF2( const SerializableContainer& _array, const std::string& _name ) {
     tinygltf::TinyGLTF gltf_ctx;
     std::string err;
     std::string warn;

@@ -8,29 +8,13 @@ static inline bool isShaderStreammable( const std::string& _sn ) {
     return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
 }
 
-Material::Material( const Material& _mat ) {
-    clone(_mat);
-}
-
-Material::Material( std::shared_ptr<Material> _mat ) {
-    clone(*_mat.get());
-}
-
-Material::Material( const std::vector<char>& _data ) {
-    Publisher::Serializable::deserialize( _data );
-}
-
-Material::Material( std::shared_ptr<DeserializeBin> reader ) {
-    deserialize( reader );
-}
-
 Material::Material( const std::string& _name, const std::string& _sn ) {
     Name(_name);
     setShaderName(_sn);
     Material::calcHash();
 }
 
-std::string Material::calcHash() {
+std::string Material::calcHashImpl() {
     removeTag( HashRef() );
 
     std::stringstream hashInput( HeterogeneousMap::HashRef());
@@ -42,16 +26,6 @@ std::string Material::calcHash() {
     addTag( HashRef() );
 
     return HashCopy();
-}
-
-std::shared_ptr<Material> Material::cloneWithNewShader( const std::string& _subkey ) {
-//        return std::make_shared<Material>( Name(), _subkey, textureName, color, opacity );
-    return std::make_shared<Material>(*this);
-}
-
-std::shared_ptr<Material> Material::cloneWithNewProperties( const MaterialProperties& _mp ) {
-//        return std::make_shared<Material>( Name(), shaderName, textureName, _mp.pigment, opacity );
-    return std::make_shared<Material>(*this);
 }
 
 Material& Material::t( const std::string& _tn ) {
@@ -170,19 +144,19 @@ void Material::setProperties( const MaterialProperties& properties ) {
     Material::properties = properties;
 }
 
-void Material::serialize( std::shared_ptr<SerializeBin> writer ) const {
+void Material::serializeImpl( std::shared_ptr<SerializeBin> writer ) const {
     writer->write( Name() );
     writer->write( Hash() );
-    HeterogeneousMap::serialize(writer);
+    HeterogeneousMap::serializeImpl(writer);
     writer->write( buffers );
     properties.serialize(writer);
     writer->write(shaderName);
 }
 
-void Material::deserialize( std::shared_ptr<DeserializeBin> reader ) {
+void Material::deserializeImpl(std::shared_ptr<DeserializeBin> reader) {
     reader->read( NameRef() );
     reader->read( HashRef() );
-    HeterogeneousMap::deserialize(reader);
+    HeterogeneousMap::deserializeImpl(reader);
     reader->read( buffers );
     properties.deserialize(reader);
     reader->read(shaderName);
@@ -220,7 +194,7 @@ KnownBufferMap Material::knownBuffers() const {
     return ret;
 }
 
-void Material::tarBuffers( const std::vector<char>& _bufferTarFiles, MaterialImageCallback imageCallback ) {
+void Material::tarBuffers( const SerializableContainer& _bufferTarFiles, MaterialImageCallback imageCallback ) {
     if ( !_bufferTarFiles.empty() ) {
         auto kbs = knownBuffers();
         auto files = tarUtil::untar( _bufferTarFiles );

@@ -9,7 +9,6 @@
 #include <vector>
 
 using SerializeDependencyHash      = std::string;
-using SerializeBinContainer        = std::vector<char>;
 
 struct SerializeHeader {
     SerializeDependencyHash hash;
@@ -18,4 +17,4 @@ struct SerializeHeader {
     uint64_t                size = 0;
 };
 
-using SerializationDependencyMap   = std::map<SerializeDependencyHash, SerializeBinContainer>;
+using SerializationDependencyMap   = std::map<SerializeDependencyHash, SerializableContainer>;

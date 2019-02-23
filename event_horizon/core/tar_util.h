@@ -144,14 +144,14 @@ namespace tarUtil {
     };
 
     template<typename DI>
-    void untar( const std::vector<char>& fin, DependencyMaker& _md ) {
+    void untar( const SerializableContainer& fin, DependencyMaker& _md ) {
         //Initialize a zero-filled block we can compare against (zero-filled header block --> end of TAR archive)
         char zeroBlock[512];
         memset( zeroBlock, 0, 512 );
         //Start reading
         bool nextEntryHasLongName = false;
         //size_t bytesRead = 0;
-        const char *rawBytes = fin.data();
+        const unsigned char *rawBytes = fin.data();
 
         static const int TAR_HEADER_SIZE = 512;
         while ( true ) { //Stop if end of file has been reached or any error occured
@@ -222,7 +222,7 @@ namespace tarUtil {
         }
     }
 
-    std::vector<FileDesc> untar( const std::vector<char>& fin );
+    std::vector<FileDesc> untar( const SerializableContainer& fin );
 
     class TarWrite {
     private:

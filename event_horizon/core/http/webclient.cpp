@@ -24,7 +24,7 @@ const std::string Url::HttpsProtocol = "https";
 
 namespace zlibUtil {
     // Decompress
-    std::vector<char> inflateFromMemory( const Http::Result& _fin ) {
+    SerializableContainer inflateFromMemory( const Http::Result& _fin ) {
         return inflateFromMemory( uint8_p{std::move(_fin.buffer), _fin.length} );
     }
 }

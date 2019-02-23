@@ -15,6 +15,7 @@
 #include <string>
 #include <core/serialize_types.hpp>
 #include <core/hashable.hpp>
+#include <core/entity_factory.hpp>
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
@@ -136,7 +137,33 @@ public:
 		write( str.c_str() );
 	}
 
-	SerializeBinContainer buffer() {
+	// A shared_ptr means a dependencym so it has to be hashable
+	template<typename T>
+	void write( std::shared_ptr<T> v ) {
+		write( v->Hash() );
+	}
+
+	template<typename T>
+	void writeDep( std::shared_ptr<T> v ) {
+		if ( !v ) {
+			deps.emplace( "0", SerializableContainer{} );
+		}
+		if ( deps.find( v->Hash() ) == deps.end() ) {
+			auto writer = std::make_shared<SerializeBin>(
+					SerializeHeader{v->Hash(), T::Version(), T::EntityGroup() } );
+			v->serialize(writer);
+			deps.emplace( v->Hash(), writer->buffer() );
+		}
+	}
+
+	void finalizeDeps() {
+		write( uint64_t(deps.size()) );
+		for ( const auto& [k,v] : deps ) {
+			write( v );
+		}
+	}
+
+	SerializableContainer buffer() {
 		writeHeaderSizeInjected();
 		return f;
 	}
@@ -147,13 +174,14 @@ private:
 	}
 
 private:
-	SerializeBinContainer f;
+	SerializableContainer f;
+	SerializationDependencyMap deps;
 	size_t headerSizeSeek = 0;
 };
 
 class DeserializeBin : public std::enable_shared_from_this<DeserializeBin> {
 public:
-	DeserializeBin( const std::vector<char>& _data, uint64_t vf ) {
+	DeserializeBin( const SerializableContainer& _data, uint64_t vf ) {
 		fi = std::make_shared<std::istringstream>( std::string{ _data.begin(), _data.end() } );
 		readAndCheckHeader( vf );
 	}
@@ -273,6 +301,15 @@ public:
 		str = std::string{ cstr.get() };
 	}
 
+	template<typename T>
+	void read( std::shared_ptr<T>& v ) {
+		SerializeDependencyHash dh;
+		read(dh);
+		if ( dh != "0" ) {
+			v = EF::create<T>(dep(dh));
+		}
+	}
+
 	void readHeader( SerializeHeader& _header ) {
 		read( _header.hash);
         read( _header.version );
@@ -281,14 +318,14 @@ public:
     }
 
 	void readDependency() {
-		SerializeBinContainer bc;
+		SerializableContainer bc;
 		read( bc );
 		static constexpr uint64_t vectorHeader = 4;
 		std::string hash{ bc.begin()+vectorHeader, bc.begin()+vectorHeader+Hashable::HASH_LENGTH };
 		deps.emplace( hash, bc );
 	}
 
-	SerializeBinContainer dep( const SerializeDependencyHash& _hash ) {
+	SerializableContainer dep( const SerializeDependencyHash& _hash ) {
 		ASSERT( deps.find(_hash) != deps.end() );
 		return deps[_hash];
 	}

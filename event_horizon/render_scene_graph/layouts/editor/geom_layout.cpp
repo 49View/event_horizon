@@ -17,7 +17,7 @@ std::shared_ptr<GLTF2> gltf;
 std::string svgString;
 std::string svgName;
 std::string glftString;
-std::vector<char> gltfBufferData;
+SerializableContainer gltfBufferData;
 
 template <typename T>
 struct NodeVisitor {
@@ -51,7 +51,7 @@ void addGeomToSceneData() {
     } );
 }
 
-void callbackGeom( const std::string& _filename, const std::vector<char>& _data ) {
+void callbackGeom( const std::string& _filename, const SerializableContainer& _data ) {
     glftString = _filename;
     gltfBufferData = _data;
     addGeomToSceneData();

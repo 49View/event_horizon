@@ -53,7 +53,7 @@ public:
     using MaterialMap = std::unordered_map<std::string, IntermediateMaterial>;
 
     explicit GLTF2( const std::string& _path );
-    explicit GLTF2( const std::vector<char>& _array, const std::string& _name );
+    explicit GLTF2( const SerializableContainer& _array, const std::string& _name );
     ImportGeomArtifacts convert();
 
 private:

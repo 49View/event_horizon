@@ -18,8 +18,7 @@ using TextureIndex = TextureUniformDesc;
 class SerializeBin;
 class DeserializeBin;
 
-class HeterogeneousMap : public virtual Serializable<HeterogeneousMap>,
-                         public virtual Hashable,
+class HeterogeneousMap : public virtual Hashable,
                          public std::enable_shared_from_this<HeterogeneousMap> {
 public:
     virtual ~HeterogeneousMap() = default;
@@ -101,11 +100,11 @@ public:
         }
     }
 
-    void serialize( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserialize( std::shared_ptr<DeserializeBin> reader ) override;
+    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const;
+    void deserializeImpl( std::shared_ptr<DeserializeBin> reader );
 
 protected:
-    std::string calcHash() override;
+    std::string calcHashImpl() override;
 
 private:
     void calcTotalNumUniforms();

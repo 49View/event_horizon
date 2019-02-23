@@ -158,6 +158,14 @@ struct VData : public Boxable<JMATH::AABB> {
         BBox3d().setMaxPoint(max);
     }
 
+    Primitive getPrimitive() const {
+        return primitive;
+    }
+
+    void setPrimitive( Primitive primitive ) {
+        VData::primitive = primitive;
+    }
+
     friend class GeomData;
 
 private:
@@ -172,12 +180,11 @@ private:
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };
 
-class GeomData : public Serializable<GeomData, SerializeBin, DeserializeBin> {
+class GeomData : public Publisher<GeomData> {
 public:
     GeomData();
     explicit GeomData(std::shared_ptr<Material> _material);
     virtual ~GeomData();
-    explicit GeomData( std::shared_ptr<DeserializeBin> reader );
     GeomData( ShapeType _st,
               const Vector3f& _pos, const Vector3f& _axis, const Vector3f& _scale,
               std::shared_ptr<Material> _material,
@@ -191,11 +198,8 @@ public:
 
     GeomData( const QuadVector3fNormalfList& quads, std::shared_ptr<Material> _material, const GeomMappingData& _mapping );
 
-    void serialize( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserialize( std::shared_ptr<DeserializeBin> reader ) override;
-    void serializeDependencies( SerializationDependencyMap& _deps ) const;
-    void deserializeDependencies( std::shared_ptr<SerializeBin> reader );
-
+    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override;
+public:
     std::shared_ptr<Material> getMaterial() { return material; }
     std::shared_ptr<Material> getMaterial() const { return material; }
     void setMaterial( std::shared_ptr<Material> _mat ) { material = _mat; }
@@ -222,7 +226,7 @@ public:
     inline std::vector<Vector3f>& Coords3d() { return mVdata.vcoords3d; };
     inline std::vector<Vector3f>& Normals3d() { return mVdata.vnormals3d; };
 
-    std::string generateThumbnail() const;
+    std::string generateThumbnail() const override;
 
 //    ScreenShotContainerPtr& GeomBuilder::Thumb() {
 //        if ( !thumb ) {
@@ -327,7 +331,12 @@ public:
                        const Vector3f& vb1 = Vector3f::ZERO, const Vector3f& vb2 = Vector3f::ZERO,
                        const Vector3f& vb3 = Vector3f::ZERO );
 
+    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override;
+
 protected:
+    std::string calcHashImpl() override;
+
+    void deserializeImpl( std::shared_ptr<DeserializeBin> reader ) override;
 
     void
     pushTriangle( const std::vector<Vector3f>& vs, const std::vector<Vector2f>& vuv, const std::vector<Vector3f>& vn );

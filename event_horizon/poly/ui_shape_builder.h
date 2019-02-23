@@ -17,12 +17,16 @@
 
 namespace Utility { namespace TTFCore { class Font; }}
 
-class UIElement {
+class UIElement : public Publisher<UIElement> {
 public:
-    UIElement( const std::string& name, UIShapeType shapeType, std::shared_ptr<Material> _mat, int renderBucketIndex ) : name(
-            name ), shapeType( shapeType ), material( _mat ), renderBucketIndex( renderBucketIndex ) {}
+    UIElement() = default;
 
-    explicit UIElement( std::shared_ptr<DeserializeBin> reader ) {}
+    UIElement( const std::string& name, UIShapeType shapeType, std::shared_ptr<Material> _mat, int renderBucketIndex ) :
+               shapeType( shapeType ), material( _mat ), renderBucketIndex( renderBucketIndex ) {
+        Name( name );
+    }
+
+    virtual ~UIElement() = default;
 
     const std::shared_ptr<Material>& getMaterial() const {
         return material;
@@ -61,44 +65,25 @@ public:
         UIElement::renderBucketIndex = renderBucketIndex;
     }
 
-    const JMATH::AABB& BBox3d() const {
-        return bbox3d;
-    }
-
-    JMATH::AABB BBox3d() {
-        return bbox3d;
-    }
-
-    void BBox3d( const JMATH::AABB& bbox3d ) {
-        UIElement::bbox3d = bbox3d;
-    }
-
-    const std::string& Name() const {
-        return name;
-    }
-
-    void Name( const std::string& name ) {
-        UIElement::name = name;
-    }
-
     template<typename TV> \
-	void visit() const { traverseWithHelper<TV>( "Name,BBbox", name,bbox3d ); }
+	void visit() const { traverseWithHelper<TV>( "Name,BBbox", this->Name(),bbox3d ); }
 
-    void serializeDependencies( SerializationDependencyMap& _deps ) const {}
-    void serialize( std::shared_ptr<SerializeBin> writer ) const  {
+    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {}
+    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override {}
+    void deserializeImpl( std::shared_ptr<DeserializeBin> reader ) override {}
+
+    std::string generateThumbnail() const override { return std::string{}; }
+
+protected:
+    std::string calcHashImpl() override {
+//        -###- Fixme implement hash function
+        return std::string();
     }
-
-    void deserialize( std::shared_ptr<DeserializeBin> reader )  {
-    }
-
-    std::string generateThumbnail() const  { return std::string{}; }
 
 private:
-    std::string name;
     UIShapeType shapeType = UIShapeType::Rect2d;
     std::shared_ptr<Material> material;
     int renderBucketIndex = 0;
-    JMATH::AABB bbox3d = JMATH::AABB::ZERO;
     std::shared_ptr<PosTex3dStrip> vs;
 
 public:
