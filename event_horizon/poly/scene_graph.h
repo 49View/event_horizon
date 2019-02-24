@@ -44,7 +44,6 @@ public:
 
 DEPENDENCY_MAKER_EXIST(geoms);
     void add( NodeVariants _geom);
-    void add( std::vector<std::shared_ptr<Material>> _materials );
 
     void remove( const UUID& _uuid );
 
@@ -64,7 +63,6 @@ DEPENDENCY_MAKER_EXIST(geoms);
     ColorManager& CL() { return cl; }
     SunBuilder& SB() { return sb; }
     FontManager& FM() { return fm; }
-    StreamingMediator& SSM();
 
     void mapGeomType( uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;

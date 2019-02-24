@@ -111,6 +111,14 @@ public:
         }
     }
 
+    template<typename F>
+    void visitFixUp( F _func ) {
+        _func( mData );
+        for ( auto& c : Children()) {
+            c->visitFixUp( _func );
+        }
+    }
+
     void sendNotifyData( const std::string& _event ) {
         if ( mData ) {
             this->notify( this->shared_from_this(), _event );

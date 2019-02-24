@@ -188,7 +188,7 @@ KnownBufferMap Material::knownBuffers() const {
     return ret;
 }
 
-void Material::tarBuffers( const SerializableContainer& _bufferTarFiles, MaterialImageCallback imageCallback ) {
+void Material::tarBuffers( const SerializableContainer& _bufferTarFiles ) {
     if ( !_bufferTarFiles.empty() ) {
         auto kbs = knownBuffers();
         auto files = tarUtil::untar( _bufferTarFiles );
@@ -200,7 +200,6 @@ void Material::tarBuffers( const SerializableContainer& _bufferTarFiles, Materia
             }
             buffer( finame, fi.dataPtr, lUniformName );
             assign(lUniformName, finame );
-            imageCallback( finame, fi.dataPtr );
         }
     }
 }

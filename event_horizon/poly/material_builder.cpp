@@ -20,16 +20,10 @@ void MaterialBuilder::makeDefault( DependencyMaker& _md ) {
     sg.add( *this, mat );
 }
 
-void MaterialBuilder::imageBuilderInjection( DependencyMaker& _md, const std::string& _finame, ucchar_p _dataPtr ) {
-    ImageBuilder{ _finame }.makeDirect( _md, _dataPtr );
-}
-
 std::shared_ptr<Material> MaterialBuilder::makeDirect( DependencyMaker& _md ) {
     auto& sg = dynamic_cast<MaterialManager&>(_md);
     auto mat = std::make_shared<Material>( Name(), shaderName );
-    mat->tarBuffers( bufferTarFiles, [&]( const std::string& _finame, ucchar_p _dataPtr ) {
-        ImageBuilder{ _finame }.makeDirect( *sg.TL(), _dataPtr );
-    } );
+    mat->tarBuffers( bufferTarFiles );
     sg.add( *this, mat );
 
     return mat;
@@ -41,9 +35,6 @@ bool MaterialBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const Dep
 
     if ( _status == DependencyStatus::LoadedSuccessfully ) {
         auto mat = EF::create<Material>( std::move( _data ) );
-        mat->Buffers([&]( const std::string& _finame, ucchar_p _dataPtr ) {
-            ImageBuilder{ _finame }.makeDirect( *sg.TL(), _dataPtr );
-        });
         sg.add( *this, mat );
     } else {
         makeDefault( _md );
@@ -58,13 +49,18 @@ MaterialBuilder::MaterialBuilder( const std::string& _name, const SerializableCo
 }
 
 bool MaterialManager::add( const MaterialBuilder& _pb, std::shared_ptr<Material> _material ) {
-    auto lKey = _pb.Name();
-    materialList[lKey] = _material;
-    return true;
+    return add( _pb.Name(), _material );
 }
 
 bool MaterialManager::add( std::shared_ptr<Material> _material ) {
-    materialList[_material->Name()] = _material;
+    return add( _material->Name(), _material );
+}
+
+bool MaterialManager::add( const std::string& _key, std::shared_ptr<Material> _material ) {
+    _material->Buffers([&]( const std::string& _finame, ucchar_p _dataPtr ) {
+        ImageBuilder{ _finame }.makeDirect( *TL(), _dataPtr );
+    });
+    materialList[_key] = _material;
     return true;
 }
 
@@ -114,7 +110,7 @@ std::vector<std::shared_ptr<Material>> MaterialManager::list() const {
 
 bool ColorBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, [[maybe_unused]] const DependencyStatus _status ) {
 
-    auto& sg = static_cast<ColorManager&>(_md);
+    auto& sg = dynamic_cast<ColorManager&>(_md);
     MaterialColor col{ std::move(_data) };
     sg.add( *this, col );
 

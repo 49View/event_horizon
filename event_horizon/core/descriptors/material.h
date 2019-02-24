@@ -166,7 +166,7 @@ public:
     Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName );
     Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName );
     const MaterialImageBuffers& Buffers() const;
-    void tarBuffers( const SerializableContainer& _bufferTarFiles, MaterialImageCallback imageCallback );
+    void tarBuffers( const SerializableContainer& _bufferTarFiles );
     void Buffers( MaterialImageCallback imageCallback );
 
     bool isStreammable() const;

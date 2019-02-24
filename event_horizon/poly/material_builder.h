@@ -22,6 +22,7 @@ public:
     void dump() const;
     bool virtual add( const MaterialBuilder& pb, std::shared_ptr<Material> _material );
     bool add( std::shared_ptr<Material> _material );
+    bool add( const std::string& _key, std::shared_ptr<Material> _material );
     std::shared_ptr<Material> get( const std::string& _key );
     std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey, const MaterialProperties& _mp );
     std::vector<std::shared_ptr<Material>> list() const;
@@ -54,8 +55,6 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
         return *this;
     }
 
-protected:
-    void imageBuilderInjection( DependencyMaker& _md, const std::string& _finame, ucchar_p _dataPtr );
 private:
     MaterialProperties      properties;
     std::string             shaderName = S::SH;

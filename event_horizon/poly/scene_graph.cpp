@@ -8,6 +8,7 @@
 #include <poly/ui_shape_builder.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
+    geoms[std::visit(lambdaUUID, _geom)] = _geom;
     addImpl(_geom);
     geoms[std::visit(lambdaUUID, _geom)] = _geom;
 }
@@ -17,15 +18,6 @@ void SceneGraph::remove( const UUID& _uuid ) {
         // Remove all child
         removeImpl(_uuid);
         geoms.erase( it );
-    }
-}
-
-void SceneGraph::add( const std::vector<std::shared_ptr<Material>> _materials ) {
-    for ( const auto& m : _materials ) {
-        for ( const auto& [k,v] : m->Buffers() ) {
-            ImageBuilder{ k }.makeDirect( TL(), v );
-        }
-        ML().add( m );
     }
 }
 

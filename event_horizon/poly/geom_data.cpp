@@ -755,14 +755,14 @@ void GeomData::transform( const Matrix4f& m ) {
 	}
 }
 
-void GeomData::bake( const Matrix4f& m, std::shared_ptr<GeomData>& ret ) {
-	if ( ret ) {
-		*ret = *this;
-	} else {
-		ret = std::shared_ptr<GeomData>( new GeomData( *this ) );
-	}
-
-	ret->transform( m );
+void GeomData::bake( [[maybe_unused]] const Matrix4f& m, [[maybe_unused]] std::shared_ptr<GeomData>& ret ) {
+//	if ( ret ) {
+//		*ret = *this;
+//	} else {
+//		ret = std::shared_ptr<GeomData>( new GeomData( *this ) );
+//	}
+//
+//	ret->transform( m );
 }
 
 void GeomData::scale( float /*factor*/ ) {

@@ -14,12 +14,12 @@ void VertexProcessing::programStart( std::shared_ptr<RenderMaterial> _material )
         sLastHandle = _material->BoundProgram()->handle();
     }
     _material->GlobalUniforms()->setOn( _material->BoundProgram()->handle());
-    if ( _material->Hash() != sMaterialHash ) {
+//    if ( _material->Hash() != sMaterialHash ) {
         sNumStateChanges++;
         //		sMatHash.insert( _material->Hash() );
         _material->Uniforms()->setOn( _material->BoundProgram()->handle());
         sMaterialHash = _material->Hash();
-    }
+//    }
 }
 
 void VertexProcessing::programDraw() const {

@@ -20,6 +20,11 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager&
 void RenderSceneGraph::addImpl( NodeVariants _geom ) {
 
     if ( auto as = std::get_if<GeomAssetSP>(&_geom); as != nullptr ) {
+        (*as)->visitFixUp( [&]( std::shared_ptr<GeomData> g ) {
+            if ( g ) {
+                ML().add( g->getMaterial() );
+            }
+        });
         (*as)->subscribeData(hierRenderObserver);
         (*as)->sendNotifyData("generateGeometryVP");
     } else if ( auto as = std::get_if<UIAssetSP>(&_geom); as != nullptr ) {
