@@ -134,7 +134,16 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _
 	return logoGeoms;
 }
 
+std::string GeomData::calcHashImpl() {
+	std::stringstream ss;
+	ss << material->Hash();
+	ss << mVdata.numIndices();
+	ss << mVdata.vcoords3d[0];
+	return ss.str();
+}
+
 void GeomData::serializeImpl( std::shared_ptr<SerializeBin> f ) const {
+	Publisher::serializeImpl(f);
 	f->write( material );
 	f->write( mVdata.BBox3d() );
 	f->write( mVdata.vIndices );
@@ -148,6 +157,7 @@ void GeomData::serializeImpl( std::shared_ptr<SerializeBin> f ) const {
 }
 
 void GeomData::deserializeImpl( std::shared_ptr<DeserializeBin> reader ) {
+	Publisher::deserializeImpl(reader);
 	reader->read( material );
 	reader->read( mVdata.BBox3d() );
 	reader->read( mVdata.vIndices );
@@ -1286,10 +1296,5 @@ std::string GeomData::generateThumbnail() const {
 //        if ( thumb ) {
 //            return { thumb->begin(), thumb->end() };
 //        }
-	return std::string{};
-}
-
-std::string GeomData::calcHashImpl() {
-	// -###- FIXME: calculate hash for node!!
 	return std::string{};
 }

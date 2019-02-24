@@ -25,9 +25,13 @@ public:
         mHash = _name;
     }
 
+    virtual void calcHash() {
+        hashFn(calcHashImpl());
+    }
+
 protected:
-    void calcHash() {
-        mHash = calcHashImpl();
+    void hashFn( const std::string& _str ) {
+        mHash = md5(_str);
     }
     virtual std::string calcHashImpl() = 0;
 private:
@@ -36,3 +40,5 @@ private:
 public:
     const static uint64_t HASH_LENGTH = 32;
 };
+
+#define NULL_HASH "00000000000000000000000000000000"

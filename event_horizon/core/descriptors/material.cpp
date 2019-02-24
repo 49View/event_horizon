@@ -11,21 +11,17 @@ static inline bool isShaderStreammable( const std::string& _sn ) {
 Material::Material( const std::string& _name, const std::string& _sn ) {
     Name(_name);
     setShaderName(_sn);
-    Material::calcHash();
+    HashTaggable::calcHash();
 }
 
 std::string Material::calcHashImpl() {
-    removeTag( HashRef() );
 
-    std::stringstream hashInput( HeterogeneousMap::HashRef());
+    std::stringstream hashInput( HeterogeneousMap::HashRef() );
     hashInput << getShaderName();
     hashInput << this->NameCopy();
 
-    Hash( md5(hashInput.str()) );
+    return hashInput.str();
 
-    addTag( HashRef() );
-
-    return HashCopy();
 }
 
 Material& Material::t( const std::string& _tn ) {
@@ -145,8 +141,7 @@ void Material::setProperties( const MaterialProperties& properties ) {
 }
 
 void Material::serializeImpl( std::shared_ptr<SerializeBin> writer ) const {
-    writer->write( Name() );
-    writer->write( Hash() );
+    Publisher::serializeImpl(writer);
     HeterogeneousMap::serializeImpl(writer);
     writer->write( buffers );
     properties.serialize(writer);
@@ -154,8 +149,7 @@ void Material::serializeImpl( std::shared_ptr<SerializeBin> writer ) const {
 }
 
 void Material::deserializeImpl(std::shared_ptr<DeserializeBin> reader) {
-    reader->read( NameRef() );
-    reader->read( HashRef() );
+    Publisher::deserializeImpl(reader);
     HeterogeneousMap::deserializeImpl(reader);
     reader->read( buffers );
     properties.deserialize(reader);
@@ -164,7 +158,7 @@ void Material::deserializeImpl(std::shared_ptr<DeserializeBin> reader) {
 
 void Material::clone( const Material& _source ) {
     HeterogeneousMap::clone( _source );
-    Hash( _source.Hash() );
+    HashTaggable::Hash( _source.Hash() );
     properties = _source.properties;
     shaderName = _source.shaderName;
 }

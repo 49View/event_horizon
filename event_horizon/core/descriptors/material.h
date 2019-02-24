@@ -161,8 +161,6 @@ public:
     const MaterialProperties& getProperties() const;
     void setProperties( const MaterialProperties& properties );
 
-    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override;
-
     void clone( const Material& _source );
 
     Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName );
@@ -175,6 +173,7 @@ public:
 
 protected:
     std::string calcHashImpl() override;
+    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override;
     void deserializeImpl(std::shared_ptr<DeserializeBin> reader) override;
 
     KnownBufferMap knownBuffers() const;

@@ -23,7 +23,6 @@ void HeterogeneousMap::calcTotalNumUniforms() {
 }
 
 std::string HeterogeneousMap::calcHashImpl() {
-    // -###- FIXME: calculate hash for node!!
     std::stringstream hashInput;
     hashInput << mNumUniforms;
 
@@ -34,9 +33,7 @@ std::string HeterogeneousMap::calcHashImpl() {
     for ( auto& i : mV3fs ) hashInput << i.second.hash();
     for ( auto& i : mV4fs ) hashInput << i.second.hash();
 
-    Hash( md5(hashInput.str()) );
-
-    return HashCopy();
+    return hashInput.str();
 }
 
 void HeterogeneousMap::inject( const HeterogeneousMap& source ) {

@@ -430,11 +430,6 @@ public:
     }
 protected:
 
-    std::string calcHashImpl() override {
-        // -###- FIXME: calculate hash for node!!
-        return std::string();
-    }
-
     void getLocatorsPosRec( std::vector<Vector3f>& _locators ) {
 
         if ( checkBitWiseFlag( GHType(), NodeTypeLocator )) {
@@ -567,6 +562,12 @@ protected:
         return std::string{};
     }
 
+    std::string calcHashImpl() override {
+        std::stringstream ss;
+        ss << UUiD();
+        return ss.str();
+    }
+
     void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {
         if ( mData ) {
             mData->serializeDependenciesImpl( writer );
@@ -593,11 +594,6 @@ private:
         reader->read( BBox3d() );
 
         reader->read( mData );
-//        int32_t hasData = 0;
-//        reader->read( hasData );
-//        if ( hasData == 1 ) {
-//            mData = std::make_shared<D>(reader);
-//        }
 
         int32_t numChildren = 0;
         reader->read( numChildren );
@@ -617,9 +613,6 @@ private:
         writer->write( Boxable::BBox3d() );
 
         writer->write( mData );
-//        int32_t hasData = mData ? 1 : 0;
-//        writer->write( hasData );
-//        if ( hasData == 1 ) mData->serializeImpl( writer );
 
         auto numChildren = static_cast<int32_t>( Children().size() );
         writer->write( numChildren );

@@ -140,19 +140,22 @@ public:
 	// A shared_ptr means a dependencym so it has to be hashable
 	template<typename T>
 	void write( std::shared_ptr<T> v ) {
-		write( v->Hash() );
+		 v ? write( v->Hash() ) : write(NULL_HASH);
 	}
 
 	template<typename T>
 	void writeDep( std::shared_ptr<T> v ) {
 		if ( !v ) {
-			deps.emplace( "0", SerializableContainer{} );
-		}
-		if ( deps.find( v->Hash() ) == deps.end() ) {
-			auto writer = std::make_shared<SerializeBin>(
-					SerializeHeader{v->Hash(), T::Version(), T::EntityGroup() } );
-			v->serialize(writer);
-			deps.emplace( v->Hash(), writer->buffer() );
+			static SerializableContainer nullDep{'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
+			deps.emplace( NULL_HASH, nullDep );
+		} else {
+			v->calcHash();
+			if ( deps.find( v->Hash() ) == deps.end() ) {
+				auto writer = std::make_shared<SerializeBin>(
+						SerializeHeader{v->Hash(), T::Version(), T::EntityGroup() } );
+				v->serialize(writer);
+				deps.emplace( v->Hash(), writer->buffer() );
+			}
 		}
 	}
 
@@ -305,7 +308,7 @@ public:
 	void read( std::shared_ptr<T>& v ) {
 		SerializeDependencyHash dh;
 		read(dh);
-		if ( dh != "0" ) {
+		if ( dh != NULL_HASH ) {
 			v = EF::create<T>(dep(dh));
 		}
 	}

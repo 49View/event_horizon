@@ -39,7 +39,7 @@ protected:
     }
 
     void removeTag( const T& _tag ) { tags.erase(_tag); }
-    void addTag( const std::string& _tag ) { tags.emplace(_tag); }
+    void addTag( const T& _tag ) { tags.emplace(_tag); }
 
     const taggableContainer& Tags() const { return tags; }
     void Tags( const taggableContainer& _tags ) { tags = _tags; }
