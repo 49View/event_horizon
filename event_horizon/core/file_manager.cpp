@@ -184,7 +184,7 @@ namespace FileManager {
 
     bool
     writeLocalFile( const std::string& filename, const char *buff, uint64_t length, bool isFullPath ) {
-        std::ofstream ffile( isFullPath ? filename : ( "/" + filename ), std::ios::out );
+        std::ofstream ffile( isFullPath ? filename : ( "/" + filename ) );
         if ( ffile.is_open()) {
             ffile.write( buff, length );
             ffile.close();
