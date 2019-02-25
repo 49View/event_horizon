@@ -163,11 +163,14 @@ jobs:
           name: Deploy Substance daemon
           command: |
             s3-artifacts.sh GET substance_daemon
+            s3-artifacts.sh GET FBX2glTF
             scp substance_daemon $DROPLET_USER@$DROPLET_IP:/home/circleci/
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo mkdir sat;
             sudo mv substance_daemon sat/;
-            cd sat; echo -e "FROM sixthview/build:1.1.0\nADD substance_daemon /\nCMD [\"./substance_daemon\" ]" | sudo tee dockerfile;
+            sudo mv FBX2glTF sat/;
+            cd sat; echo -e "FROM sixthview/build:1.2.9\nADD substance_daemon /\nADD FBX2glTF /\nCMD [\"./substance_daemon\" ] " | sudo tee dockerfile;
             sudo chmod u+x substance_daemon;
+            sudo chmod u+x FBX2glTF;
             sudo docker kill $(docker ps --filter "ancestor=sat" -q);
             sudo docker build -t sat .;
             sudo docker run -d sat'
