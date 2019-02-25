@@ -108,7 +108,7 @@ namespace FileManager {
 
         std::ifstream file( filename, std::ios::in | std::ios::binary | std::ios::ate );
         if ( file.is_open()) {
-            _length = file.tellg();
+            _length = static_cast<uint64_t>(file.tellg());
             memblock = std::make_unique<uint8_t[]>( _length + addTrailingZero );
             file.seekg( 0, std::ios::beg );
             file.read( reinterpret_cast<char *>( memblock.get()), _length );
@@ -198,7 +198,10 @@ namespace FileManager {
         if ( fp.is_open()) {
             fp << s;
             fp.close();
+            persistanceSync();
             return true;
+        } else {
+            LOGRS("Cannot open " << filename << " on writeLocalTextFile");
         }
         return false;
     }

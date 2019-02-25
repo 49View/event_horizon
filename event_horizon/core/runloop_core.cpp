@@ -39,7 +39,6 @@ std::atomic<bool> deamonBreaker = false;
 void daemonLoop( int _sleepSeconds ) {
 
     Http::xProjectHeader(LoginFields::Daemon());
-	Http::login(LoginFields::Daemon());
 
 	auto st = std::chrono::system_clock::now();
 

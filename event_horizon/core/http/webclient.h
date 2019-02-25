@@ -16,6 +16,7 @@
 bool isSuccessStatusCode( int statusCode );
 
 namespace HttpFilePrefix {
+    const static std::string user = "/user/";
     const static std::string gettoken = "/getToken/";
     const static std::string entities = "/entities/";
     const static std::string entities_all = "/entities/metadata/byGroupTags/";
@@ -42,12 +43,27 @@ using SocketCallbackFunc = std::function<void( SocketCallbackDataType message )>
 namespace Socket {
     static std::unordered_map<std::string, SocketCallbackFunc> callbacksMap;
 
+    // Create connection has to be called after login
+    void createConnection();
     void startClient( const std::string& _host );
     void onMessage( const std::string& _message );
     void emit( const std::string& _message );
     void on( const std::string& eventName, SocketCallbackFunc f );
     void close();
 }
+
+JSONDATA( UserLoginToken, name, email, guest )
+    std::string     name;
+    std::string     email;
+    bool            guest;
+};
+
+JSONDATA( UserLogin, expires, user, project, session )
+    uint64_t        expires;
+    UserLoginToken  user;
+    std::string     project;
+    std::string     session;
+};
 
 JSONDATA( LoginToken, session, token, expires, project )
     std::string session;
@@ -114,8 +130,12 @@ namespace Http {
         bool isSuccessStatusCode() const; //all 200s
     };
 
-    bool login();
-    bool login( const LoginFields& lf );
+    void init();
+    void initDaemon();
+
+    void login();
+    void login( const LoginFields& lf );
+    void loginSession();
     void xProjectHeader( const LoginFields& _lf );
 
     void get( const Url& url, ResponseCallbackFunc callback,

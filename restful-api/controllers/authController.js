@@ -10,7 +10,7 @@ const routeAuthorizationModel = require('../models/route_authorization');
 const clientCertificateModel = require('../models/client_certificate');
 const sessionController = require('../controllers/sessionController');
 
-const JWT_EXPIRES_AFTER_HOURS = 6;
+const JWT_EXPIRES_AFTER_HOURS = 24*7;
 
 const jwtOptions = {
     issuer: "ateventhorizon.com",

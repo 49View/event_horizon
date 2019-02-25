@@ -30,6 +30,11 @@ namespace FileManager {
 	std::string filenameOnly( const std::string& input );
 	std::string filenameOnlyNoExtension( const std::string& input );
 
+	// Persistent storages, mainly for web-browsers/emscripten types
+	void initPersistent();
+	bool isPersistentInitialized();
+	void persistanceSync();
+
 	// Remote file access
 	void readRemoteFileInternal( const Url& uri );
 

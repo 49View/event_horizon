@@ -11,22 +11,6 @@ namespace Http {
         return std::string{"Bearer "} + std::string{Http::userToken()};
     }
 
-    bool login() {
-        return login ( Http::gatherCachedLogin() );
-    }
-
-    void loginCheck() {
-        if ( !Http::hasUserLoggedIn() ) {
-            Http::login();
-        }
-    }
-
-    void loginCheckPost( const Url& url ) {
-        if ( !Http::hasUserLoggedIn() && url.uri != HttpFilePrefix::gettoken ) {
-            Http::login();
-        }
-    }
-
     std::shared_ptr<restbed::Request> makeRequestBase( const Url& url ) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri(url.toString()));
         request->set_header( "Accept", "*/*" );
@@ -96,7 +80,6 @@ namespace Http {
     }
 
     void getInternal( const Url& url, ResponseCallbackFunc callback, ResponseFlags rf ) {
-        loginCheck();
         auto request = makeRequest( url );
 //        auto ssl_settings = std::make_shared< restbed::SSLSettings >( );
 
@@ -126,14 +109,11 @@ namespace Http {
         std::shared_ptr< restbed::Response > res;
         try {
             restbed::Http::async(
-                    request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
-                                 std::shared_ptr< restbed::Response > res) {
-                        LOGR( "[HTTP-GET] Response code: %d - %s",
-                              res->get_status_code(), res->get_status_message().c_str() );
-                        if ( isSuccessStatusCode( res->get_status_code()) ) {
-                            callback( handleResponse( res, url, rf ) );
-                        }
-                    }, settings );
+                request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
+                              std::shared_ptr< restbed::Response > res) {
+                LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
+                callback( handleResponse( res, url, rf ) );
+            }, settings );
         } catch ( const std::exception& ex ) {
             LOGR( "[HTTP-GET-RESPONSE][ERROR] on %s", url.toString().c_str());
             LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
@@ -143,7 +123,6 @@ namespace Http {
     }
 
     void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback ) {
-        loginCheckPost( url );
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
@@ -162,10 +141,8 @@ namespace Http {
                                       auto rcode = res->get_status_code();
                                       LOGR("[HTTP-POST] Response code %d - %s ", rcode,
                                                                                  res->get_status_message().c_str() );
-                                      if ( isSuccessStatusCode(rcode) ) {
-                                          if ( callback ) {
-                                              callback( handleResponse( res, url, ResponseFlags::None ) );
-                                          }
+                                      if ( callback ) {
+                                          callback( handleResponse( res, url, ResponseFlags::None ) );
                                       }
                                   }, settings );
         } catch ( const std::exception& ex ) {

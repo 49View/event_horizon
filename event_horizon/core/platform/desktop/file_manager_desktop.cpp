@@ -13,6 +13,10 @@
 
 namespace FileManager {
 
+    void initPersistent() {}
+    bool isPersistentInitialized() { return true; }
+    void persistanceSync() {}
+
     bool useFileSystemCachePolicy() {
         return true;
     }

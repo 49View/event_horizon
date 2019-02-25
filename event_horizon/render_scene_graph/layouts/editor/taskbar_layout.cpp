@@ -42,8 +42,18 @@ void ImGuiTaskbar::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     if ( ImGui::Button( "Images" ) ) {
         p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Image);
     }
-    ImGui::SameLine();
-    if ( ImGui::Button( "Login" ) ) {
+
+    static bool bFirstGather = true;
+    if ( bFirstGather && FM::isPersistentInitialized() ) {
+        Http::gatherCachedLogin();
+        bFirstGather = false;
+    }
+    float loginItemWidth = 180.0f;
+    float spacing = 10.0f;
+    ImVec2 bsize{loginItemWidth, 20.0f};
+    ImGui::SameLine(ImGui::GetWindowWidth() - (loginItemWidth + spacing));
+    auto loginString = Http::cachedLoginFields().email + " | " + Http::project();
+    if ( ImGui::Button( loginString.c_str(), bsize ) ) {
         p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Login);
     }
 

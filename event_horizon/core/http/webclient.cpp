@@ -234,6 +234,7 @@ namespace Http {
         auto lf = FM::readLocalTextFile( cacheFolder() + "lf" );
         if ( !lf.empty() ) {
             LoginFields ret{lf};
+            cacheLoginFields( ret );
             return ret;
         }
         return LoginFields{}; // this is guest / guest
@@ -306,10 +307,43 @@ namespace Http {
 //        Http::cacheLoginFields( _lf );
     }
 
-    bool login( const LoginFields& lf ) {
+    void initBase() {
 #ifdef USE_LOCALHOST
         Http::useLocalHost(true);
 #endif
+        FM::initPersistent();
+    }
+    void init() {
+        initBase();
+        Http::login();
+    }
+
+    void initDaemon() {
+        initBase();
+        Http::login(LoginFields::Daemon());
+    }
+
+    void login() {
+        loginSession();
+    }
+
+    void loginSession() {
+        get( Url{HttpFilePrefix::user}, [](const Http::Result& res) {
+            if( res.isSuccessStatusCode() ) {
+                UserLogin ul{ res.bufferString };
+                sessionId( ul.session );
+                project( ul.project );
+                Socket::createConnection();
+            }
+            userLoggedIn( res.isSuccessStatusCode() );
+            if ( !hasUserLoggedIn() ) {
+                LOGRS( "[HTTP-RETRY] login ");
+                login ( Http::gatherCachedLogin() );
+            }
+        } );
+    }
+
+    void login( const LoginFields& lf ) {
         post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf](const Http::Result& res) {
             if( res.isSuccessStatusCode() ) {
                 LoginToken lt(res.bufferString);
@@ -317,12 +351,11 @@ namespace Http {
                 sessionId( lt.session );
                 project( lt.project );
                 Http::cacheLoginFields( lf );
+                Socket::createConnection();
             }
 
             userLoggedIn( res.isSuccessStatusCode() );
         } );
-
-        return hasUserLoggedIn();
     }
 
     void shutDown() {

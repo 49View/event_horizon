@@ -7,7 +7,7 @@ void saveImageFromClipboard(const std::string& folderName) {
 }
 
 std::string cacheFolder() {
-    return "/tmp/";
+    return "/persistent_data/";
 }
 
 //void FileManager::makeDir(const std::string& dirName) {

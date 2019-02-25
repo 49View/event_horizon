@@ -30,7 +30,6 @@ void loadGeomInGui( SceneOrchestrator* p, std::shared_ptr<GLTF2> _newObject ) {
     auto hierScene = imported.getScene();
     p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
     p->RSG().add( hierScene );
-
 }
 
 void addGeomToScene() {
