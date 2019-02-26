@@ -2,7 +2,7 @@
 #
 
 parameters:
-  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.9
+  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.10
 
 s3utils: &s3utils
            name: S3 utils
@@ -168,7 +168,7 @@ jobs:
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo mkdir sat;
             sudo mv substance_daemon sat/;
             sudo mv FBX2glTF sat/;
-            cd sat; echo -e "FROM sixthview/build:1.2.9\nADD substance_daemon /\nADD FBX2glTF /\nCMD [\"./substance_daemon\" ] " | sudo tee dockerfile;
+            cd sat; echo -e "FROM sixthview/build:1.2.10\nADD substance_daemon /\nADD FBX2glTF /\nCMD [\"./substance_daemon\" ] " | sudo tee dockerfile;
             sudo chmod u+x substance_daemon;
             sudo chmod u+x FBX2glTF;
             sudo docker kill $(docker ps --filter "ancestor=sat" -q);

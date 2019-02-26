@@ -78,7 +78,6 @@ namespace Http {
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
         std::string contenType = qt==HttpQuery::Binary ? "application/octet-stream" : "application/json; charset=utf-8";
-
         emscripten_async_http_request( uri.toString().c_str(),
                                        "POST",
                                        makeHeaders().c_str(),
