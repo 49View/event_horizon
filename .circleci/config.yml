@@ -57,25 +57,12 @@ jobs:
       - run: >
           cd restful-api && npm test
 
-      - restore_cache:
-          keys:
-            - v2-dependencies-{{ checksum "dev_tools/editor/package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v2-dependencies-
       - run: >
-          cd dev_tools/editor && npm install
-      - save_cache:
-          paths:
-            - dev_tools/editor/node_modules
-          key: v2-dependencies-{{ checksum "dev_tools/editor/package.json" }}
-      - run: >
-          cd dev_tools/editor && npm run build
-      - run: >
-          cd dev_tools/editor && tar -zcvf editor_react.gz ./build
+          cd dev_tools/editor && tar -zcvf editor_static.gz ./public
       - run:
-          name: Save editor_react artifact
+          name: Save editor_static artifact
           command: |
-            cd dev_tools/editor && s3-artifacts.sh PUT editor_react.gz
+            cd dev_tools/editor && s3-artifacts.sh PUT editor_static.gz
 
   deployNODEJSAPI:
     <<: *machinedefaults
@@ -88,13 +75,13 @@ jobs:
       - run:
           name: Deploy Editor to nginx as static webpage
           command: |
-            s3-artifacts.sh GET editor_react.gz
+            s3-artifacts.sh GET editor_static.gz
             s3-artifacts.sh GET editor.js
             s3-artifacts.sh GET editor.wasm
-            scp editor_react.gz $DROPLET_USER@$DROPLET_IP:/home/circleci/
+            scp editor_static.gz $DROPLET_USER@$DROPLET_IP:/home/circleci/
             scp editor.js $DROPLET_USER@$DROPLET_IP:/home/circleci/
             scp editor.wasm $DROPLET_USER@$DROPLET_IP:/home/circleci/
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo tar -xvzf editor_react.gz;
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo tar -xvzf editor_static.gz;
             cd build;
             sudo rm -rf /usr/share/nginx/html/editor;
             sudo mkdir /usr/share/nginx/html/editor;
@@ -180,16 +167,16 @@ workflows:
   build-deploy:
     jobs:
       - buildNODEJSAPI
-      - buildCPP:
-          filters:
-            branches:
-              only: master
+#      - buildCPP:
+#          filters:
+#            branches:
+#              only: master
       - deployNODEJSAPI:
           requires:
             - buildNODEJSAPI
           filters:
             branches:
               only: master
-      - deployCPP:
-          requires:
-            - buildCPP
+#      - deployCPP:
+#          requires:
+#            - buildCPP
