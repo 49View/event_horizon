@@ -98,7 +98,6 @@ typings/
 .next
 package-lock.json
 
-dev_tools/editor/public/*
 event_horizon/graphics/opengl/shaders/.cachedShaderMap.txt
 restful-api/bin/localhost.crt
 restful-api/bin/localhost.key
