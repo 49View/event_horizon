@@ -80,7 +80,7 @@ void FullEditor::init() {
 //        auto streamName = "http://192.168.1.123:8080/video";
 //        o()->addHttpStream<AudioVideoStreamFFmpeg>(streamName);
 //        GB{ShapeType::Cube}.m(S::YUV_GREENSCREEN,streamName).build(o()->RSG());
-//        GB{ShapeType::Sphere}.m(S::SH, "tiles").build(o()->RSG());
+//        GB{ShapeType::Sphere}.m(S::SH, "rustic").build(o()->RSG());
 
 }
 

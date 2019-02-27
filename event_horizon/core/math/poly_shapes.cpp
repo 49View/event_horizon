@@ -270,7 +270,7 @@ void Icosahedron( Topology& mesh ) {
 void UVSphere( Topology& mesh ) {
 
     uint32_t meridians = 40;
-    uint32_t parallels = 40 / 2;
+    uint32_t parallels = 40;
 
     mesh.vertices.emplace_back(0.0f, 1.0f, 0.0f);
     for (uint32_t j = 0; j < parallels - 1; ++j)
@@ -710,7 +710,7 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
 
     if ( mt == GeomMapping::SphericalUV ) {
         Vector2f uvSphericalNorm{ 3.0f, 1.5f };
-        for ( int q = 1; q < ret.numIndices-1; q++ ) {
+        for ( int q = 0; q < ret.numIndices; q++ ) {
             Vector3f p = ret.verts[ret.indices[q]];
             Vector3f uv = cartasianToSpherical(XZY::C(p)) * Vector3f{1.0f/M_PI, 1.0f/M_PI_2, 1.0f};
             ret.uvs[q] = uv.xy();// * Vector2f(2.0f, 1.0f);
@@ -736,13 +736,14 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
                  fabs(uv3.x() - uv2.x()) > areaDiv ) {
 
                 if ( uv1.x() == uv3.x() ) {
-                    uv2.setX( ( uv1.x() < areaDiv ) ? 0.0f : uv1.x()- uv2.x() );
+                    uv2.setX( ( uv1.x() < areaDiv ) ? 0.0f : uv1.x() + uv2.x() );
                 } else if ( uv2.x() == uv3.x() ) {
-                    uv1.setX( ( uv2.x() < areaDiv ) ? 0.0f : uv2.x()- uv1.x() );
+                    uv1.setX( ( uv2.x() < areaDiv ) ? 0.0f : uv2.x() + uv1.x() );
                 } else if ( uv2.x() == uv1.x() ) {
-                    uv3.setX( ( uv2.x() < areaDiv ) ? 0.0f : uv2.x()- uv3.x() );
+                    uv3.setX( ( uv2.x() < areaDiv ) ? 0.0f : uv2.x() + uv3.x() );
+                } else {
+                    uv2.setX( ( uv3.x() < areaDiv ) ? 0.0f : uv2.x() + uv3.x() );
                 }
-
                 ++fixeupCount;
             }
         }
