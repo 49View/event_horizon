@@ -179,7 +179,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float G = GeometrySmith( N, V, L, roughness );
 
     vec3 nominator = NDF * G * F;
-    float denominator = ( (1.0/radiance.r)*40 * max( dot( N, V ), 0.0 ) * NdotL) + 0.000001;
+    float denominator = ( (1.0/radiance.r)*40.0 * max( dot( N, V ), 0.0 ) * NdotL) + 0.000001;
     vec3 specular = nominator / denominator;
 
     vec3 kS = F;
