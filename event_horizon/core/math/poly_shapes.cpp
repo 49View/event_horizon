@@ -61,7 +61,7 @@ struct Topology {
         triangles.emplace_back( a );
         triangles.emplace_back( b );
         triangles.emplace_back( c );
-        Vector3f n = normalize( crossProduct( vertices[a], vertices[b], vertices[c] ) );
+        Vector3f n = normalize( crossProduct( vertices[a], vertices[c], vertices[b] ) );
         vertexNormals.emplace_back( n );
         vertexNormals.emplace_back( n );
         vertexNormals.emplace_back( n );
@@ -76,12 +76,8 @@ struct Topology {
     }
 
     void addQuadAlt( uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
-        triangles.emplace_back( a );
-        triangles.emplace_back( b );
-        triangles.emplace_back( d );
-        triangles.emplace_back( b );
-        triangles.emplace_back( c );
-        triangles.emplace_back( d );
+        addTriangle( a, b, d );
+        addTriangle( b, c, d );
     }
 
     void clear() {
@@ -269,6 +265,60 @@ void Icosahedron( Topology& mesh ) {
     mesh.addTriangle( 6, 2, 10 );
     mesh.addTriangle( 8, 6, 7 );
     mesh.addTriangle( 9, 8, 1 );
+}
+
+void UVSphere( Topology& mesh ) {
+
+    uint32_t meridians = 40;
+    uint32_t parallels = 40 / 2;
+
+    mesh.vertices.emplace_back(0.0f, 1.0f, 0.0f);
+    for (uint32_t j = 0; j < parallels - 1; ++j)
+    {
+        double const polar = M_PI * double(j+1) / double(parallels);
+        double const sp = std::sin(polar);
+        double const cp = std::cos(polar);
+        for (uint32_t i = 0; i < meridians; ++i)
+        {
+            double const azimuth = 2.0 * M_PI * double(i) / double(meridians);
+            double const sa = std::sin(azimuth);
+            double const ca = std::cos(azimuth);
+            double const x = sp * ca;
+            double const y = cp;
+            double const z = sp * sa;
+            mesh.vertices.emplace_back(x, y, z);
+        }
+    }
+    mesh.vertices.emplace_back(0.0f, -1.0f, 0.0f);
+
+    for (uint32_t i = 0; i < meridians; ++i)
+    {
+        uint32_t const a = i + 1;
+        uint32_t const b = (i + 1) % meridians + 1;
+        mesh.addTriangle(0, b, a);
+    }
+
+    for (uint32_t j = 0; j < parallels - 2; ++j)
+    {
+        uint32_t aStart = j * meridians + 1;
+        uint32_t bStart = (j + 1) * meridians + 1;
+        for (uint32_t i = 0; i < meridians; ++i)
+        {
+            const uint32_t a = aStart + i;
+            const uint32_t a1 = aStart + (i + 1) % meridians;
+            const uint32_t b = bStart + i;
+            const uint32_t b1 = bStart + (i + 1) % meridians;
+            mesh.addQuadAlt(a, a1, b1, b);
+        }
+    }
+
+    for (uint32_t i = 0; i < meridians; ++i)
+    {
+        uint32_t const a = i + meridians * (parallels - 2) + 1;
+        uint32_t const b = (i + 1) % meridians + meridians * (parallels - 2) + 1;
+        mesh.addTriangle(mesh.vertices.size() - 1, a, b);
+    }
+
 }
 
 void Cube( Topology& mesh ) {
@@ -628,7 +678,6 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
                 ret.uvs[q] += Vector2f{M_PI, 0.0f};
                 ret.uvs[q] /= Vector2f{TWO_PI, M_PI_2};
             }
-//            ret.uvs[q] *= M_PI_2 * size.x();
         }
 
         auto uvCorrection = std::make_unique<Vector2f[]>( ret.numIndices );
@@ -659,6 +708,46 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
         }
     }
 
+    if ( mt == GeomMapping::SphericalUV ) {
+        Vector2f uvSphericalNorm{ 3.0f, 1.5f };
+        for ( int q = 1; q < ret.numIndices-1; q++ ) {
+            Vector3f p = ret.verts[ret.indices[q]];
+            Vector3f uv = cartasianToSpherical(XZY::C(p)) * Vector3f{1.0f/M_PI, 1.0f/M_PI_2, 1.0f};
+            ret.uvs[q] = uv.xy();// * Vector2f(2.0f, 1.0f);
+            ret.uvs[q] += V2f{1.0f, 0.0f};
+            ret.uvs[q] *= uvSphericalNorm;
+        }
+
+        int fixeupCount = 0;
+        auto uvCorrection = std::make_unique<Vector2f[]>( ret.numIndices );
+        for ( int q = 0; q < ret.numIndices; q+=3 ) {
+            auto vi1 = q;
+            auto vi2 = q+1;
+            auto vi3 = q+2;
+            uvCorrection[vi1] = Vector2f::ZERO;
+            uvCorrection[vi2] = Vector2f::ZERO;
+            uvCorrection[vi3] = Vector2f::ZERO;
+            auto& uv1 = ret.uvs[vi1];
+            auto& uv2 = ret.uvs[vi2];
+            auto& uv3 = ret.uvs[vi3];
+            float areaDiv = uvSphericalNorm.x();
+            if ( fabs(uv2.x() - uv1.x()) > areaDiv ||
+                 fabs(uv3.x() - uv1.x()) > areaDiv ||
+                 fabs(uv3.x() - uv2.x()) > areaDiv ) {
+
+                if ( uv1.x() == uv3.x() ) {
+                    uv2.setX( ( uv1.x() < areaDiv ) ? 0.0f : uv1.x()- uv2.x() );
+                } else if ( uv2.x() == uv3.x() ) {
+                    uv1.setX( ( uv2.x() < areaDiv ) ? 0.0f : uv2.x()- uv1.x() );
+                } else if ( uv2.x() == uv1.x() ) {
+                    uv3.setX( ( uv2.x() < areaDiv ) ? 0.0f : uv2.x()- uv3.x() );
+                }
+
+                ++fixeupCount;
+            }
+        }
+    }
+
     for ( int q = 0; q < ret.numIndices; q+=3 ) {
         auto i1 = ret.indices[q];
         auto i2 = ret.indices[q+1];
@@ -678,9 +767,10 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
 PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, const int subdivs ) {
 
     Topology mesh;
-    Icosahedron( mesh );
-
-    return createGeom( mesh, center, Vector3f{ diameter }, GeomMapping::Spherical, subdivs );
+//    Icosahedron( mesh );
+//    return createGeom( mesh, center, Vector3f{ diameter }, GeomMapping::Spherical, subdivs );
+    UVSphere( mesh );
+    return createGeom( mesh, center, Vector3f{ diameter }, GeomMapping::SphericalUV, 0 );
 }
 
 PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {

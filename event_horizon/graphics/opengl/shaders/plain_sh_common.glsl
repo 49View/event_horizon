@@ -200,7 +200,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, float rad
     vec3 Lo = vec3( 0.0 );
 
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
-    Lo += rendering_equation( albedo, L_Sun, V, -N, F0, 9.0 );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, 9.0 );
 
 // for ( int i = 0; i < u_numPointLights; i++ ) {
 //     vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;
@@ -279,6 +279,7 @@ vec3 ambient = (kD * diffuseV + specular) * visibility* ao;//* visibility// * po
 // vec3 ambient = (kD );
 
 // vec3 finalColor = (Lo * visibility) + ambient; 
+
 vec3 finalColor = ambient;//pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
 
 // finalColor = finalColor / ( finalColor + vec3(1.00));
