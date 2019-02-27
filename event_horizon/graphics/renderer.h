@@ -81,7 +81,7 @@ private:
 
 class Renderer : public DependencyMaker {
 public:
-	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm );
+	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm );
 	virtual ~Renderer() = default;
 
 	bool exists( [[maybe_unused]] const std::string& _key ) const override { return false; };
@@ -163,12 +163,12 @@ protected:
 	void renderCommands( int eye );
 
 protected:
-	LightManager    lm;
     CommandQueue&   cq;
 	ShaderManager&  sm;
 	TextureManager& tm;
 	RenderImageDependencyMaker ridm;
 	StreamingMediator& ssm;
+	LightManager&   lm;
 	RenderAnimationManager am;
 	RenderCameraManager rcm;
 

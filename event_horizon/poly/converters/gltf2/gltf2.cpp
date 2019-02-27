@@ -711,10 +711,10 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
             geom->vData().setMin( ead.min );
         }
         else if ( k == "NORMAL" ) {
-            geom->vData().fillNormals( fillData<Vector3f>( model, v ), true );
+            geom->vData().fillNormals( fillData<Vector3f>( model, v ) );
         }
         else if ( k == "TANGENT" ) {
-            geom->vData().fillTangets( fillData<Vector3f>( model, v ), true );
+            geom->vData().fillTangets( fillData<Vector3f>( model, v ) );
         }
         else if ( k == "TEXCOORD_0" ) {
             geom->vData().fillUV( fillData<Vector2f>( model, v ), 0 );

@@ -69,8 +69,8 @@ bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uin
     return true;
 }
 
-Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm ) :
-        cq( cq ), sm( sm ), tm(tm), ridm(tm), ssm(_ssm) {
+Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm ) :
+        cq( cq ), sm( sm ), tm(tm), ridm(tm), ssm(_ssm), lm(_lm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);

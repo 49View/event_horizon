@@ -40,7 +40,7 @@ public:
 
 class SceneGraph : public DependencyMaker {
 public:
-    explicit SceneGraph( CommandQueue& cq, FontManager& _fm );
+    explicit SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb );
 
 DEPENDENCY_MAKER_EXIST(geoms);
     void add( NodeVariants _geom);
@@ -61,8 +61,8 @@ DEPENDENCY_MAKER_EXIST(geoms);
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
-    SunBuilder& SB() { return sb; }
     FontManager& FM() { return fm; }
+    SunBuilder& SB() { return sb; }
 
     void mapGeomType( uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;
@@ -94,8 +94,8 @@ protected:
     ProfileManager pl;
     MaterialManager ml;
     ColorManager cl;
-    SunBuilder sb;
     FontManager& fm;
+    SunBuilder& sb;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
@@ -103,7 +103,7 @@ protected:
 
 class PolySceneGraph : public SceneGraph {
 public:
-    PolySceneGraph(CommandQueue& cq, FontManager& _fm) : SceneGraph(cq, _fm) {
+    PolySceneGraph(CommandQueue& cq, FontManager& _fm, SunBuilder& _sb) : SceneGraph(cq, _fm, _sb) {
         ml.TL(&tl);
     }
 

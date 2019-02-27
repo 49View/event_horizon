@@ -169,7 +169,7 @@ float GeometrySmith( vec3 N, vec3 V, vec3 L, float roughness ) {
     return ggx1 * ggx2;
 }
 
-vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, float radiance ) {
+vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radiance ) {
     vec3 H = normalize( L + V );
     float NdotL = max( dot( N, L ), 0.0 );
 
@@ -179,7 +179,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, float rad
     float G = GeometrySmith( N, V, L, roughness );
 
     vec3 nominator = NDF * G * F;
-    float denominator = (4.0 * max( dot( N, V ), 0.0 ) * NdotL) + 0.000001;
+    float denominator = ( (1.0/radiance.r)*40 * max( dot( N, V ), 0.0 ) * NdotL) + 0.000001;
     vec3 specular = nominator / denominator;
 
     vec3 kS = F;
@@ -200,7 +200,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, float rad
     vec3 Lo = vec3( 0.0 );
 
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, 9.0 );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance );
 
 // for ( int i = 0; i < u_numPointLights; i++ ) {
 //     vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;

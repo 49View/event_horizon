@@ -10,7 +10,8 @@
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
 
-RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm ) : SceneGraph(cq, fm), rr( rr ), tl(rr.RIDM()) {
+RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm, SunBuilder& _sb ) :
+                                    SceneGraph(cq, fm, _sb), rr( rr ), tl(rr.RIDM()) {
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
     uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
     ml.TL(&tl);

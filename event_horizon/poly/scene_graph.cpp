@@ -52,7 +52,7 @@ void SceneGraph::cmdCalcLightmaps( const std::vector<std::string>& _params ) {
     cmdCalcLightmapsImpl( _params );
 }
 
-SceneGraph::SceneGraph( CommandQueue& cq, FontManager& _fm ) : fm(_fm) {
+SceneGraph::SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb ) : fm(_fm), sb(_sb) {
     hcs = std::make_shared<CommandScriptSceneGraph>(*this);
     cq.registerCommandScript(hcs);
     mapGeomType(0, "none");
