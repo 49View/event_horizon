@@ -8,7 +8,6 @@
 #include <poly/ui_shape_builder.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
-    geoms[std::visit(lambdaUUID, _geom)] = _geom;
     addImpl(_geom);
     geoms[std::visit(lambdaUUID, _geom)] = _geom;
 }

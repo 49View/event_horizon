@@ -126,7 +126,7 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
     VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, _source->Data()->getMaterial() }
-            .p(generateGeometryVP(_source->Data())).n(_source->Hash()).g(_source->GHType()).build();
+            .p(generateGeometryVP(_source->Data())).n(_source->UUiD()).g(_source->GHType()).build();
 }
 
 void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
@@ -134,5 +134,5 @@ void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& ge
     auto renderBucketIndex = _source->Data()->RenderBucketIndex();
     auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), mat->getOpacity() );
     auto vs = _source->Data()->VertexList();
-    VPBuilder<PosTex3dStrip>{rr,vpList,mat}.p(vs).n(_source->Hash()).build();
+    VPBuilder<PosTex3dStrip>{rr,vpList,mat}.p(vs).n(_source->UUiD()).build();
 }

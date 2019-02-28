@@ -50,7 +50,7 @@ auto lambdaUpdateNodeTransform = [](auto&& arg) { arg->updateTransform();};
 
 #define VisitLambda(X,Y) std::visit( [](auto&& arg) { arg-> X(); }, Y );
 
-auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
+auto lambdaUUID = [](auto&& arg) -> UUID { return arg->UUiD();};
 auto lambdaBBox = [](auto&& arg) -> JMATH::AABB { return arg->BBox3d();};
 
 template <typename D>

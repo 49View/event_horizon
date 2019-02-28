@@ -219,7 +219,7 @@ V3f SunBuilder::GoldenHourColor() const {
 	ASSERT( GoldenHour() >= 0.0f && GoldenHour() <= 1.0f );
 	const float sunK = 10.0f;
 	float sunPower = mSunPosition.altitudeRad > 0.0f ? ((mSunPosition.altitudeRad+0.1f) / M_PI_2) * sunK : 1.0f;
-	size_t gdl = static_cast<size_t>(goldenHourGradient.width - 1);
+    auto gdl = static_cast<size_t>(goldenHourGradient.width - 1);
 	auto index = gdl - static_cast<size_t>(GoldenHour() * gdl);
 	auto col = goldenHourGradient.at<uint32_t>( static_cast<unsigned int>(index), 0);
 	auto ret = Vector4f::ITORGBA(col) * GoldenHour() * sunPower;
