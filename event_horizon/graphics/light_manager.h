@@ -6,6 +6,7 @@
 class ProgramUniformSet;
 class ShaderManager;
 class ShadowMapManager;
+class SunBuilder;
 
 enum class LightType {
 	Invalid = 0,
@@ -86,7 +87,9 @@ private:
 
 class LightManager {
 public:
-	void init();
+    LightManager( SunBuilder& sb );
+
+    void init();
 	void addPointLight( const Vector3f& pos, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
 	void removePointLight( const size_t index );
 	void removeAllPointLights();
@@ -111,6 +114,7 @@ private:
 
 	int mMaxLights = 16;
 
+	SunBuilder& sb;
 	//	DataVisualizerWindow* dvWindow;
 };
 

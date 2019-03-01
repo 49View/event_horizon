@@ -79,11 +79,11 @@ UCharFiller accessorFiller( const tinygltf::Model& model, int _index, GLTF2::Ext
     if ( !acc.maxValues.empty() && _ead ) _ead->max = acc.maxValues;
 
     auto bvi = model.bufferViews[acc.bufferView];
-    auto bufferContent = model.buffers[bvi.buffer];
+    auto& bufferContent = model.buffers[bvi.buffer];
     auto bs = componentTypeToByteSize( acc.componentType, acc.type );
 
     ucf.data = bufferContent.data.data() + acc.byteOffset + bvi.byteOffset;
-    ucf.size = acc.count * bs;
+    ucf.size = acc.count;
     ucf.stride = bs;
 
     return ucf;
@@ -93,9 +93,9 @@ template <typename RT>
 std::vector<RT> fillData( const tinygltf::Model& model, int _index, GLTF2::ExtraAccessorData* _ead = nullptr ) {
     auto ucf = accessorFiller( model, _index, _ead );
     std::vector<RT> ret;
-    for ( size_t q = 0; q < ucf.size; q+=ucf.stride ) {
+    for ( size_t q = 0; q < ucf.size; q++ ) {
         RT elem{0};
-        memcpy( &elem, ucf.data + q, ucf.stride );
+        memcpy( &elem, ucf.data + q*ucf.stride, ucf.stride );
         ret.push_back( elem );
     }
     return ret;
@@ -701,7 +701,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     auto im = matMap.at(material.name);
     auto geom = std::make_shared<GeomData>( im.mb ); // std::make_shared<PBRMaterial>(im.name)
 
-    geom->vData().fillIndices( fillData<int>( model, primitive.indices ) );
+    geom->vData().fillIndices( fillData<int32_t>( model, primitive.indices ) );
 
     for ( const auto& [k,v] : primitive.attributes ) {
         if ( k == "POSITION" ) {
@@ -711,10 +711,10 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
             geom->vData().setMin( ead.min );
         }
         else if ( k == "NORMAL" ) {
-            geom->vData().fillNormals( fillData<Vector3f>( model, v ), true );
+            geom->vData().fillNormals( fillData<Vector3f>( model, v ) );
         }
         else if ( k == "TANGENT" ) {
-            geom->vData().fillTangets( fillData<Vector3f>( model, v ), true );
+            geom->vData().fillTangets( fillData<Vector3f>( model, v ) );
         }
         else if ( k == "TEXCOORD_0" ) {
             geom->vData().fillUV( fillData<Vector2f>( model, v ), 0 );
@@ -758,7 +758,7 @@ void GLTF2::addNodeToHier( const int nodeIndex, GeomAssetSP& hier ) {
 
     if ( node.mesh >= 0 ) {
         for ( size_t k = 0; k < model.meshes[node.mesh].primitives.size(); k++ ) {
-            addGeom( node.mesh, k , hier );
+            addGeom( node.mesh, k , hier->addChildren() );
         }
     }
     for ( const auto& ci : node.children ) {
@@ -912,7 +912,8 @@ ImportGeomArtifacts GLTF2::convert() {
         if ( scene.nodes.empty() ) continue;
         // NDDADO: Hardcoding zero "0" seems weird here but it's guaranteed by the standard to be the root node.
         auto ci = scene.nodes[0];
-        auto c =  hierScene->addChildren( model.nodes[ci].name );
+        auto c =  hierScene; //apparently the node0 is always "RootNode", so we do not really have to add a children
+                             // which would always be redundant, ie c = hierScene->addChildren( model.nodes[ci].name );
         addNodeToHier( ci, c );
     }
 

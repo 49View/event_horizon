@@ -55,7 +55,7 @@ public:
 
     template <typename T>
     void selected( T _geom, SelectableFlagT _flags = SelectableFlag::Selected|SelectableFlag::Highlighted ) {
-        selected( _geom->Hash(), _geom->TRS(), _geom, _flags );
+        selected( _geom->UUiD(), _geom->TRS(), _geom, _flags );
         for ( auto& c : _geom->Children() ) {
             SelectableFlagT recFlags = _flags;
             if ( !checkBitWiseFlag(traverseFlag, SelectionTraverseFlag::Recursive) ) {

@@ -35,7 +35,7 @@ private:
 
 struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact, Material::Version() )
 
-    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a.Name()),shaderName( a.shaderName ), imageExt( a.imageExt ) {
+    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a),shaderName( a.shaderName ), imageExt( a.imageExt ) {
         bufferTarFiles = a.bufferTarFiles;
     }
 

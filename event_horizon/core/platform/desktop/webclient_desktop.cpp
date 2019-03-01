@@ -42,8 +42,10 @@ namespace Http {
         }
         request->set_header( "Content-Length", std::to_string( length ) );
         request->set_method( "POST" );
-        const restbed::Bytes bodybuffer(buff, buff + length);
-        request->set_body( bodybuffer );
+        if ( length > 0 ) {
+            const restbed::Bytes bodybuffer(buff, buff + length);
+            request->set_body( bodybuffer );
+        }
 
         return request;
     }

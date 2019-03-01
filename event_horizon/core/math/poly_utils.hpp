@@ -11,6 +11,7 @@ class DeserializeBin;
 
 enum class GeomMapping {
     Spherical,
+    SphericalUV,
     Cube,
     Planar,
     Cylindrical

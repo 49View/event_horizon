@@ -69,8 +69,8 @@ bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uin
     return true;
 }
 
-Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm ) :
-        cq( cq ), sm( sm ), tm(tm), ridm(tm), ssm(_ssm) {
+Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm ) :
+        cq( cq ), sm( sm ), tm(tm), ridm(tm), ssm(_ssm), lm(_lm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);
@@ -132,6 +132,7 @@ void Renderer::directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _target
             target->addToCB( CB_U() );
         }
     }
+
     bInvalidated = false;
 
     CB_U().end();
@@ -140,6 +141,11 @@ void Renderer::directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _target
     am.setTiming();
     lm.setUniforms_r();
     am.setUniforms_r();
+
+    for ( auto& mcc : mChangeMaterialCallbacks ) {
+        changeMaterialOnTags( mcc );
+    }
+    mChangeMaterialCallbacks.clear();
 
     renderCBList();
 
@@ -221,20 +227,29 @@ std::shared_ptr<RenderMaterial> Renderer::addMaterial( std::shared_ptr<Material>
     return nullptr;
 }
 
-void Renderer::changeMaterialOnTags( uint64_t _tag, std::shared_ptr<Material> _mat ) {
-    // -###- FIXME, reenable this
-//    auto rmaterial = RenderMaterialBuilder{*this}.m(_mat).build();
-//
-//    for ( const auto& [k, vl] : CL() ) {
-//        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
-//            for ( const auto& v : vl.mVList ) {
-//                v->setMaterialWithTag(rmaterial, _tag);
-//            }
-//            for ( const auto& v : vl.mVListTransparent ) {
-//                v->setMaterialWithTag(rmaterial, _tag);
-//            }
-//        }
-//    }
+void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt ) {
+    mChangeMaterialCallbacks.emplace_back( _cmt );
+}
+
+void Renderer::changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt ) {
+    _cmt.mat->injectIfNotPresent(*P( _cmt.mat->getShaderName() )->getDefaultUniforms().get());
+    _cmt.mat->resolveDynamicConstants();
+
+    auto rmaterial = addMaterial(_cmt.mat);
+
+
+    if ( !rmaterial ) return;
+
+    for ( const auto& [k, vl] : CL() ) {
+        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
+            for ( auto& v : vl.mVList ) {
+                v->setMaterialWithTag(rmaterial, _cmt.tag);
+            }
+            for ( auto& v : vl.mVListTransparent ) {
+                v->setMaterialWithTag(rmaterial, _cmt.tag);
+            }
+        }
+    }
 }
 
 void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color ) {

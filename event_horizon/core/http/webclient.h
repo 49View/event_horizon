@@ -18,6 +18,7 @@ bool isSuccessStatusCode( int statusCode );
 namespace HttpFilePrefix {
     const static std::string user = "/user/";
     const static std::string gettoken = "/getToken/";
+    const static std::string refreshtoken = "/refreshToken/";
     const static std::string entities = "/entities/";
     const static std::string entities_all = "/entities/metadata/byGroupTags/";
     const static std::string entities_onebinary = "/entities/content/byGroupTags/";
@@ -70,6 +71,12 @@ JSONDATA( LoginToken, session, token, expires, project )
     std::string token;
     uint64_t expires;
     std::string project;
+};
+
+JSONDATA( RefreshToken, session, token, expires )
+    std::string session;
+    std::string token;
+    uint64_t expires;
 };
 
 namespace Http {
@@ -136,6 +143,7 @@ namespace Http {
     void login();
     void login( const LoginFields& lf );
     void loginSession();
+    void refreshToken();
     void xProjectHeader( const LoginFields& _lf );
 
     void get( const Url& url, ResponseCallbackFunc callback,
@@ -149,6 +157,7 @@ namespace Http {
     void post( const Url& url, const uint8_p& buffer, ResponseCallbackFunc callback = nullptr );
     void post( const Url& url, const char *buff, uint64_t length, ResponseCallbackFunc callback = nullptr);
     void post( const Url& url, const std::vector<unsigned char>& buffer, ResponseCallbackFunc callback = nullptr );
+    void post( const Url& url, ResponseCallbackFunc callback );
 
     void useLocalHost( bool _flag );
     void userLoggedIn( bool _flag );

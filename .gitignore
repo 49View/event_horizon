@@ -6,6 +6,7 @@
 *.lo
 *.o
 *.obj
+*.cbp
 
 # Precompiled Headers
 *.gch
@@ -34,6 +35,9 @@
 # Editors
 *.idea
 cmake-build*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
 
 # Logs
 logs
@@ -101,5 +105,6 @@ package-lock.json
 event_horizon/graphics/opengl/shaders/.cachedShaderMap.txt
 restful-api/bin/localhost.crt
 restful-api/bin/localhost.key
+Makefile
 dev_tools/wasmloader/editor.js
 dev_tools/wasmloader/editor.wasm

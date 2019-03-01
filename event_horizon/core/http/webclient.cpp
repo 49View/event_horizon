@@ -211,6 +211,10 @@ namespace Http {
         postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary, callback );
     }
 
+    void post( const Url& url, ResponseCallbackFunc callback ) {
+        postInternal( url, nullptr, 0, HttpQuery::Binary, callback );
+    }
+
     void project( const std::string& _project ) {
         sProject = _project;
     }
@@ -325,6 +329,16 @@ namespace Http {
 
     void login() {
         loginSession();
+    }
+
+    void refreshToken() {
+        post( Url{HttpFilePrefix::refreshtoken}, [](const Http::Result& res) {
+            if( res.isSuccessStatusCode() ) {
+                RefreshToken rt( res.bufferString );
+                userToken( rt.token );
+                sessionId( rt.session );
+            }
+        } );
     }
 
     void loginSession() {

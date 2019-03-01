@@ -13,7 +13,6 @@
 #include "poly/converters/gltf2/gltf2.h"
 
 //std::shared_ptr<GeomBuilder> gbt;
-std::shared_ptr<GLTF2> gltf;
 std::string svgString;
 std::string svgName;
 std::string glftString;
@@ -41,6 +40,8 @@ void addGeomToScene() {
 void addGeomToSceneData() {
     SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
         loadGeomInGui( p, std::make_shared<GLTF2>( gltfBufferData, glftString ) );
+        gltfBufferData.clear();
+        glftString = "";
     } );
 }
 

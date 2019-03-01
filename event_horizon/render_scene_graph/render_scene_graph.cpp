@@ -10,7 +10,8 @@
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
 
-RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm ) : SceneGraph(cq, fm), rr( rr ), tl(rr.RIDM()) {
+RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm, SunBuilder& _sb ) :
+                                    SceneGraph(cq, fm, _sb), rr( rr ), tl(rr.RIDM()) {
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
     uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
     ml.TL(&tl);
@@ -55,7 +56,7 @@ void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _param
 
 void RenderSceneGraph::changeMaterialTagCallback( const std::vector<std::string>& _params ) {
     std::shared_ptr<Material> mat = std::dynamic_pointer_cast<Material>(ML().get(concatParams(_params, 1)));
-    rr.changeMaterialOnTags( getGeomType( _params[0] ), mat );
+    rr.changeMaterialOnTagsCallback( { getGeomType( _params[0] ), mat } );
 }
 
 void RenderSceneGraph::changeMaterialTagImpl( const std::vector<std::string>& _params ) {
@@ -89,7 +90,7 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
     if ( st != ShapeType::None) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
         auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
-        GeomBuilder{ st }.n("ucarcamagnu").m(shd,mat).build( *this );
+        GeomBuilder{ st }.n("ucarcamagnu").g(9200).m(shd,mat).build( *this );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
         Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
         UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr(*this);
@@ -125,7 +126,7 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
     VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, _source->Data()->getMaterial() }
-            .p(generateGeometryVP(_source->Data())).n(_source->Hash()).g(_source->GHType()).build();
+            .p(generateGeometryVP(_source->Data())).n(_source->UUiD()).g(_source->GHType()).build();
 }
 
 void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
@@ -133,5 +134,5 @@ void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& ge
     auto renderBucketIndex = _source->Data()->RenderBucketIndex();
     auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), mat->getOpacity() );
     auto vs = _source->Data()->VertexList();
-    VPBuilder<PosTex3dStrip>{rr,vpList,mat}.p(vs).n(_source->Hash()).build();
+    VPBuilder<PosTex3dStrip>{rr,vpList,mat}.p(vs).n(_source->UUiD()).build();
 }

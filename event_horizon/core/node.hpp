@@ -50,7 +50,7 @@ auto lambdaUpdateNodeTransform = [](auto&& arg) { arg->updateTransform();};
 
 #define VisitLambda(X,Y) std::visit( [](auto&& arg) { arg-> X(); }, Y );
 
-auto lambdaUUID = [](auto&& arg) -> UUID { return arg->Hash();};
+auto lambdaUUID = [](auto&& arg) -> UUID { return arg->UUiD();};
 auto lambdaBBox = [](auto&& arg) -> JMATH::AABB { return arg->BBox3d();};
 
 template <typename D>
@@ -388,8 +388,9 @@ public:
     }
 
     void prune() {
-        pruneRec();
+        pruneRec( this->shared_from_this() );
     }
+
     void finalize() {
         createLocalHierMatrix(fatherRootTransform());
         for ( auto& c : Children()) {
@@ -502,16 +503,17 @@ protected:
 //    }
     }
 
-    void pruneRec() {
-        for ( auto it = children.begin(); it != children.end(); ) {
-            if ( (*it)->Children().empty() && !((*it)->Data()) ) {
-                it = children.erase( it );
+    bool pruneRec( std::shared_ptr<Node> it ) {
+        for ( auto it2 = it->Children().begin(); it2 != it->Children().end(); ) {
+            if ( it->pruneRec( *it2 ) ) {
+                it2 = it->Children().erase( it2 );
             } else {
-                (*it)->pruneRec();
-                ++it;
+                ++it2;
             }
         }
+        return it->Children().empty() && !it->Data();
     }
+
     void generateMatrixHierarchyRec( Matrix4f cmat ) {
         createLocalHierMatrix( cmat );
 
@@ -519,6 +521,7 @@ protected:
             c->generateMatrixHierarchyRec( *mLocalHierTransform );
         }
     }
+
     void findRecursive( const char *name, Node *& foundObj ) {
         if ( strcmp( this->Name().c_str(), name ) == 0 ) {
             foundObj = this;

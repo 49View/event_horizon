@@ -5,6 +5,8 @@
 #include "shadowmap_manager.h"
 #include "program_uniform_set.h"
 
+LightManager::LightManager( SunBuilder& sb ) : sb( sb ) {}
+
 void LightManager::init() {
     mbGlobalOnOffSwitch = true;
     mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f, "LightDirectionalIntensity" );
@@ -21,6 +23,7 @@ void LightManager::init() {
     mLigthingUniform->setUBOStructure( UniformNames::lightType, ( 16 * mMaxLights ) );
     mLigthingUniform->setUBOStructure( UniformNames::sunDirection, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::sunPosition, 16 );
+    mLigthingUniform->setUBOStructure( UniformNames::sunRadiance, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::mvpShadowMap, 64 );
     mLigthingUniform->setUBOStructure( UniformNames::mvpMatrixDepthBias, 64 );
     mLigthingUniform->setUBOStructure( UniformNames::timeOfTheDay, 16 );
@@ -116,6 +119,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos, std::shared_ptr<Shad
     mLigthingUniform->setUBOData( UniformNames::timeOfTheDay, 1.0f ); //SB.GoldenHour()
     mLigthingUniform->setUBOData( UniformNames::sunDirection,  uSunDirection);// );
     mLigthingUniform->setUBOData( UniformNames::sunPosition, uSunDirection * 100000.0f );// );
+    mLigthingUniform->setUBOData( UniformNames::sunRadiance, sb.GoldenHourColor() );// );
     mLigthingUniform->setUBOData( UniformNames::mvpMatrixDepthBias, smm->ShadowMapMVPBias( true ));
     mLigthingUniform->setUBOData( UniformNames::mvpShadowMap, smm->ShadowMapMVP() );
     mLigthingUniform->setUBOData( UniformNames::shLightCoeffs, Matrix3f( SSH.LightCoeffs()) );
