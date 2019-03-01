@@ -56,7 +56,7 @@ void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _param
 
 void RenderSceneGraph::changeMaterialTagCallback( const std::vector<std::string>& _params ) {
     std::shared_ptr<Material> mat = std::dynamic_pointer_cast<Material>(ML().get(concatParams(_params, 1)));
-    rr.changeMaterialOnTags( getGeomType( _params[0] ), mat );
+    rr.changeMaterialOnTagsCallback( { getGeomType( _params[0] ), mat } );
 }
 
 void RenderSceneGraph::changeMaterialTagImpl( const std::vector<std::string>& _params ) {
@@ -90,7 +90,7 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
     if ( st != ShapeType::None) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
         auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
-        GeomBuilder{ st }.n("ucarcamagnu").m(shd,mat).build( *this );
+        GeomBuilder{ st }.n("ucarcamagnu").g(9200).m(shd,mat).build( *this );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
         Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
         UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr(*this);

@@ -23,6 +23,7 @@ class HeterogeneousMap : public virtual Hashable,
 public:
     virtual ~HeterogeneousMap() = default;
     void inject( const HeterogeneousMap& source );
+    void injectIfNotPresent( const HeterogeneousMap& source );
     void assign( const std::string& uniformName, int data );
     void assign( const std::string& uniformName, float data );
     void assign( const std::string& uniformName, double data );
@@ -34,6 +35,18 @@ public:
     void assign( const std::string& uniformName, const Matrix4f& data );
     void assign( const std::string& uniformName, const Matrix3f& data );
     void assign( const std::string& uniformName, const std::vector<Vector3f>& data );
+
+    void assignIfNotPresent( const std::string& uniformName, int data );
+    void assignIfNotPresent( const std::string& uniformName, float data );
+    void assignIfNotPresent( const std::string& uniformName, double data );
+    void assignIfNotPresent( const std::string& uniformName, const std::string& data );
+    void assignIfNotPresent( const std::string& uniformName, const TextureUniformDesc& data );
+    void assignIfNotPresent( const std::string& uniformName, const Vector2f& data );
+    void assignIfNotPresent( const std::string& uniformName, const Vector3f& data );
+    void assignIfNotPresent( const std::string& uniformName, const Vector4f& data );
+    void assignIfNotPresent( const std::string& uniformName, const Matrix4f& data );
+    void assignIfNotPresent( const std::string& uniformName, const Matrix3f& data );
+    void assignIfNotPresent( const std::string& uniformName, const std::vector<Vector3f>& data );
 
     int NumUniforms() const { return mNumUniforms; }
 
@@ -65,6 +78,7 @@ public:
     bool hasVector4f( const std::string& uniformName ) const;
     bool hasMatrix4f( const std::string& uniformName ) const;
     bool hasMatrix3f( const std::string& uniformName ) const;
+    bool hasVectorOfVector3f( const std::string& uniformName ) const;
 
     std::shared_ptr<HeterogeneousMap> clone();
     void clone( const HeterogeneousMap& _map );

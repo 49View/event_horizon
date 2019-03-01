@@ -64,6 +64,7 @@ public:
 class ResourceBuilder : public BaseBuilder {
     using BaseBuilder::BaseBuilder;
 public:
+
     virtual const std::string prefix() const = 0;
 
     const std::string NameKey() const { return prefix() + Name(); }

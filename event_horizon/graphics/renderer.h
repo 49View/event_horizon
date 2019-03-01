@@ -78,6 +78,10 @@ private:
 	std::shared_ptr<ProgramUniformSet> mCameraUBO;
 };
 
+struct ChangeMaterialOnTagContainer {
+	uint64_t tag;
+	std::shared_ptr<Material> mat;
+};
 
 class Renderer : public DependencyMaker {
 public:
@@ -98,7 +102,7 @@ public:
 	std::shared_ptr<RenderMaterial> addMaterial( std::shared_ptr<Material> _material,
 												 std::shared_ptr<Program> _program = nullptr );
 	std::shared_ptr<RenderMaterial> addMaterial( const std::string& _shaderName );
-    void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<Material> _mat );
+	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
 
@@ -156,6 +160,8 @@ public:
 	void invalidateOnAdd();
 
 protected:
+	void changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt );
+
 	void clearCommandList();
 
 	void renderCBList();
@@ -191,6 +197,8 @@ protected:
 	bool bInvalidated = false;
 
 	std::map<int, CommandBufferListVector> mCommandLists;
+
+	std::vector<ChangeMaterialOnTagContainer> mChangeMaterialCallbacks;
 
 	RenderStats mStats;
 

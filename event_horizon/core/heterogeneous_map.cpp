@@ -50,6 +50,20 @@ void HeterogeneousMap::inject( const HeterogeneousMap& source ) {
     calcTotalNumUniforms();
 }
 
+void HeterogeneousMap::injectIfNotPresent( const HeterogeneousMap& source ) {
+    for ( auto& pu : source.mTextures ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mInts     ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mFloats   ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mV2fs     ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mV3fs     ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mV3fvs    ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mV4fs     ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mM3fs     ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mM4fs     ) assignIfNotPresent( pu.first, pu.second );
+
+    calcTotalNumUniforms();
+}
+
 void HeterogeneousMap::assign( const std::string& uniformName, int data ) {
     mInts[uniformName] = data;
     calcTotalNumUniforms();
@@ -101,6 +115,72 @@ void HeterogeneousMap::assign( const std::string& uniformName, const Matrix4f& d
 void HeterogeneousMap::assign( const std::string& uniformName, const Matrix3f& data ) {
     mM3fs[uniformName] = data;
     calcTotalNumUniforms();
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, int data ) {
+    if ( !hasInt(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const TextureUniformDesc& data ) {
+    if ( !hasTexture(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const std::string& data ) {
+    if ( !hasTexture(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, float data ) {
+    if ( !hasFloat(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, double data ) {
+    if ( !hasFloat(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const Vector2f& data ) {
+    if ( !hasVector2f(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const Vector3f& data ) {
+    if ( !hasVector3f(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const std::vector<Vector3f>& data ) {
+    if ( !hasVectorOfVector3f(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const Vector4f& data ) {
+    if ( !hasVector4f(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const Matrix4f& data ) {
+    if ( !hasMatrix4f(uniformName) ) {
+        assign( uniformName, data );
+    }
+}
+
+void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const Matrix3f& data ) {
+    if ( !hasMatrix3f(uniformName) ) {
+        assign( uniformName, data );
+    }
 }
 
 std::string HeterogeneousMap::getTexture( const std::string& uniformName ) const {
@@ -180,6 +260,10 @@ bool HeterogeneousMap::hasMatrix4f( const std::string& uniformName ) const {
 
 bool HeterogeneousMap::hasMatrix3f( const std::string& uniformName ) const {
     return ( mM3fs.find( uniformName ) != mM3fs.end());
+}
+
+bool HeterogeneousMap::hasVectorOfVector3f( const std::string& uniformName ) const {
+    return ( mV3fvs.find( uniformName ) != mV3fvs.end());
 }
 
 void HeterogeneousMap::get( const std::string& uniformName, std::string& ret ) const {
