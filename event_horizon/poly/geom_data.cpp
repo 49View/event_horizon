@@ -1028,7 +1028,7 @@ void VData::fill( const PolyStruct& ps ) {
 	}
 }
 
-void VData::fillIndices( const std::vector<int>& _indices ) {
+void VData::fillIndices( const std::vector<int32_t>& _indices ) {
 	vIndices = _indices;
 //	for ( int q = 0; q < _indices.size(); q+=3 ) {
 //		vIndices[q+0] = _indices[q+1];

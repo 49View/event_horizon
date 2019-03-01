@@ -59,7 +59,7 @@ struct VData : public Boxable<JMATH::AABB> {
                           const Vector3f& _b,
                           const Vector4f& _c );
     void fill( const PolyStruct& ps );
-    void fillIndices( const std::vector<int>& _indices );
+    void fillIndices( const std::vector<int32_t>& _indices );
     void fillCoors3d( const std::vector<Vector3f>& _verts );
     void fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index = 0 );
     void fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert = false );
