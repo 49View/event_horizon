@@ -1,0 +1,9 @@
+.ItemsContainer {
+    width: 250px;
+}
+
+.Title {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #c0c0c0 !important;
+}
