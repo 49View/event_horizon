@@ -1,0 +1,14 @@
+.Container {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.Item {
+    padding: 15px;
+    margin: auto !important;
+    background-color: white;
+    border-radius: 10px;
+    flex-grow: 1;
+}
+.Button {
+    margin-left: 10px;
+}
