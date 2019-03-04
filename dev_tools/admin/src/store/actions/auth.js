@@ -29,11 +29,9 @@ const refreshStart = () => {
 }
 
 const refreshComplete = (userInfo) => {
-    let isGuest=false;
     let user=userInfo.user;
     return {
         type: actionTypes.AUTH_REFRESH_COMPLETE,
-        isGuest: isGuest,
         user: user
     }
 }
@@ -45,13 +43,14 @@ const refreshFail = (error) => {
     }
 }
 
-export const login = (email, password) => {
+export const login = (email, password, project) => {
     return dispatch => {
         console.log("LOGIN");
         dispatch(loginStart());
         const authData = {
             email: email,
             password: password,
+            project: project
         };
         let url = '/getToken';
         axios.post(url, authData)
@@ -79,18 +78,17 @@ const loginStart = () => {
 }
 
 const loginComplete = (userInfo) => {
-    let isGuest=false;
     let user=null;
-    if (userInfo.user.guest===true) {
-        isGuest=true;
-    } else {
-        isGuest=false;
+    let project=null;
+    console.log("USERINFO: "+userInfo);
+    if (userInfo.user!==null) {
         user=userInfo.user;
+        project=userInfo.project;
     }
     return {
         type: actionTypes.AUTH_LOGIN_COMPLETE,
-        isGuest: isGuest,
-        user: user
+        user: user,
+        project: project
     }
 }
 
@@ -169,18 +167,14 @@ export const checkCurrentUser = () => {
         let url = '/user';
         axios.get(url)
             .then(response => {
-                console.log("CHECK CURRENT USER SUCCESS", response.data);
+                console.log("USER IS LOGGED IN", response.data);
                 dispatch(loginComplete(response.data));
-                if (response.data.user.guest===false) {
-                    console.log("REGISTERED USER");
-                    dispatch(setRefreshTimer(response.data.expires));
-                } else {
-                    console.log("GUEST USER");
-                }
+                console.log("REGISTERED USER");
+                dispatch(setRefreshTimer(response.data.expires));
             })
             .catch(err =>{
-                console.log("CHECK CURRENT USER FAILED");
-                dispatch(loginFail("Error getting user information"));
+                console.log("USER ISN'T LOGGED IN");
+                dispatch(logoutComplete());
             })
     }
 }

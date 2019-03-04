@@ -3,9 +3,9 @@ import { updateObject} from '../utility';
 
 const initialState = {
     error: null,
-    loading: false,
-    isGuest: false,
-    user: null
+    loading: true,
+    user: null,
+    project: null
 }
 
 const refreshStart = (state,action) => {
@@ -21,7 +21,6 @@ const refreshComplete = (state,action) => {
         state, {
             error: null,
             loading: false,
-            isGuest: false,
             user: action.user            
         });
 }
@@ -47,8 +46,8 @@ const loginComplete = (state,action) => {
         state, {
             error: null,
             loading: false,
-            isGuest: action.isGuest,
-            user: action.user            
+            user: action.user,
+            project: action.project          
         });
 }
 
@@ -71,9 +70,10 @@ const logoutStart = (state,action) => {
 const logoutComplete = (state,action) => {
     return updateObject(
         state, {
+            error: null,
             loading: false,
             user: null,
-            isGuest: true
+            project: null
         }
     )
 }

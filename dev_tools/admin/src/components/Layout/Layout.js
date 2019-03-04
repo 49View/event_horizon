@@ -25,41 +25,37 @@ class Layout extends Component {
         {
             text: "Login",
             link: "Login",
-            guest: true
+            logged: false
         },
         {
             text: "Logout",
-            user: true,
-            link: "Logout"
+            link: "Logout",
+            logged: true
         }
     ]
     
     render() {
 
         let menuItems = [];
-        let menuButton = null;
-        if (this.props.isAuthenticated || this.props.isGuest) {
-            menuButton = (
+        let menuButton = (
                 <IconButton className={classes.MenuButton} color="inherit" aria-label="Menu" onClick={() => this.sideDrawerToggleHandler(true)}>
                     <MenuIcon/>
                 </IconButton>
             );
-
-            if (this.props.isAuthenticated) {
-                menuItems=this.globalMenuItems.filter(mi => mi.user===true);
-            } else if (this.props.isGuest) {
-                menuItems=this.globalMenuItems.filter(mi => mi.guest===true);
-            }           
-
+        if (this.props.isAuthenticated) {
+                menuItems=this.globalMenuItems.filter(mi => mi.logged===true);
+        } else {
+            menuItems=this.globalMenuItems.filter(mi => mi.logged===false);
         }
+
         let userName=null;
         let userArea=null;
         if (this.props.user!==null) {
-            userName=this.props.user.name;
+            userName=this.props.user.name+" at "+this.props.project;
             userArea=(
                 <Aux>
                     <div className={classes.Grow} />
-                    <Tooltip disableFocusListener disableTouchListener title={this.props.user.name.toUpperCase()} placement="left">
+                    <Tooltip disableFocusListener disableTouchListener title={userName.toUpperCase()} placement="left">
                         <AccountCircle />
                     </Tooltip>                    
                 </Aux>

@@ -10,7 +10,7 @@ const getProjectInfo = async (projectName) => {
     let projectInfo = null;
 
     try {
-        const dbProject=await projectModel.findOne({ "name": { $regex: projectName, $options: "i"}});
+        const dbProject=await projectModel.findOne({ "name": { $regex: projectName+"$", $options: "i"}});
         if (dbProject!==null) {
             projectInfo=dbProject.toObject();
             projectInfo.apiPrefix=projectInfo.apiPrefix.toLowerCase();

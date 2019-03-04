@@ -13,6 +13,7 @@ import Aux from './hoc/Auxiliary/Auxiliary';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import classes from './App.module.css';
 
+
 class App extends Component {
 
   componentDidMount() {
@@ -64,7 +65,7 @@ class App extends Component {
               <CircularProgress color="primary" className={classes.Progress}></CircularProgress>
           </DialogContent>
         </Dialog>
-        <Layout isAuthenticated={this.props.loggedUser!==null} isGuest={this.props.isGuest} user={this.props.loggedUser}>
+        <Layout isAuthenticated={this.props.loggedUser!==null} user={this.props.loggedUser} project={this.props.loggedProject}>
           {routes}
         </Layout>
       </Aux>
@@ -74,8 +75,8 @@ class App extends Component {
 
 const mapStateToProps = state => {
   return {
-      isGuest: state.auth.isGuest,
       loggedUser: state.auth.user,
+      loggedProject: state.auth.project,
       authLoading: state.auth.loading,
   }
 }

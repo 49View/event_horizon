@@ -28,7 +28,7 @@ const sideDrawer = (props) => {
     const title = (
         <ListSubheader color="default" className={classes.Title}>
             <Typography variant="h6">
-                FASTLANE
+                EVENT HORIZON
             </Typography>
             {subTitle}
         </ListSubheader>
