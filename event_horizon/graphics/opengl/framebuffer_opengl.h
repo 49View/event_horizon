@@ -42,12 +42,13 @@ public:
 	// Init the framebuffer with a texture
 	void init( TextureManager& tm );
 	void initDepth( TextureManager& tm );
+	void initCubeMap( std::shared_ptr<Texture> cubemapTarget, uint32_t cubemapFaceIndex, uint32_t mipIndex = 0 );
 	void attachDepthBuffer();
 	void attachColorBuffer( unsigned int index );
 
-	void bind( const std::string& renderTargetIndex = "", const int _mipMapIndex = 0 );
-	void bindAndClear( const std::string& renderTargetIndex = "", const int _mipMapIndex = 0  );
-	void bindAndClearWithColor( const Color4f& clearColor, const std::string& renderTargetIndex = "", const int _mipMapIndex = 0  );
+	void bind( const std::string& renderTargetIndex = "" );
+	void bindAndClear( const std::string& renderTargetIndex = "" );
+	void bindAndClearWithColor( const Color4f& clearColor, const std::string& renderTargetIndex = "" );
 
 	Vector4f ClearColor() const { return mClearColor; }
 	void ClearColor( const Vector4f& val ) { mClearColor = val; }
@@ -84,6 +85,9 @@ private:
 	bool mHDR = false;
 	bool mCubeMap = false;
 	bool mUseMipMaps = false;
+	uint32_t  mTargetType = 0;
+	uint32_t  mTargetHandle = 0;
+	uint32_t  mTargetMipmap = 0;
 	TextureSlots mTextureGPUSlot = TextureSlots::TSLOT_NORMAL;
 	Vector4f mClearColor = Vector4f::BLACK;
 	std::shared_ptr<Texture> mRenderToTexture;

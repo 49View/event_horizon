@@ -78,9 +78,9 @@ public:
         return GL_FLOAT;
     }
 
-    inline std::string hash() const {
-        return material->Hash();
-    }
+//    inline std::string hash() const {
+//        return material->Hash();
+//    }
 
     inline std::shared_ptr<RenderMaterial> getMaterial() const {
         return material;

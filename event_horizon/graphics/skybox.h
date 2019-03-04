@@ -27,7 +27,7 @@ enum class SkyBoxMode {
 };
 
 struct SkyBoxInitParams {
-	SkyBoxMode mode = SkyBoxMode::CubeProcedural;
+	SkyBoxMode mode = SkyBoxMode::SphereProcedural;
 	std::string assetString = "barcelona_rooftop_env";
 };
 

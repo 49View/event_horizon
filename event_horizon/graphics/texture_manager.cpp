@@ -52,15 +52,11 @@ std::shared_ptr<Texture> TextureManager::addTextureImmediate( TextureRenderData&
 
 std::shared_ptr<Texture> TextureManager::addCubemapTexture( TextureRenderData& tb ) {
     tb.target(TEXTURE_CUBE_MAP);
-    std::string tname = tb.Name();
-    auto px =     addTextureNoData( tb.setId( tname + "_posx" ) );
-    /*auto nx = */addTextureNoData( tb.setId( tname + "_negx" ) );
-    /*auto py = */addTextureNoData( tb.setId( tname + "_posy" ) );
-    /*auto ny = */addTextureNoData( tb.setId( tname + "_negy" ) );
-    /*auto pz = */addTextureNoData( tb.setId( tname + "_posz" ) );
-    /*auto nz = */addTextureNoData( tb.setId( tname + "_negz" ) );
 
-    return px;
+    auto ret = createTexture(tb);
+    ret->init_cubemap_r();
+
+    return ret;
 }
 
 std::shared_ptr<Texture> TextureManager::addTextureNoData( TextureRenderData& tb ) {

@@ -3,7 +3,7 @@ out vec4 FragColor;
 in vec3 v_texCoord;
 
 uniform samplerCube cubeMapTexture;
-uniform float roughness;
+uniform float roughnessV;
 
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ void main()
     // make the simplyfying assumption that V equals R equals the normal
     vec3 R = N;
     vec3 V = R;
-
+ 
     const uint SAMPLE_COUNT = 1024u;
     vec3 prefilteredColor = vec3(0.0);
     float totalWeight = 0.0;
@@ -77,14 +77,14 @@ void main()
     {
         // generates a sample vector that's biased towards the preferred alignment direction (importance sampling).
         vec2 Xi = Hammersley(i, SAMPLE_COUNT);
-        vec3 H = ImportanceSampleGGX(Xi, N, roughness);
+        vec3 H = ImportanceSampleGGX(Xi, N, roughnessV);
         vec3 L  = normalize(2.0 * dot(V, H) * H - V);
 
         float NdotL = max(dot(N, L), 0.0);
         if(NdotL > 0.0)
         {
             // sample from the environment's mip level based on roughness/pdf
-            float D   = DistributionGGX(N, H, roughness);
+            float D   = DistributionGGX(N, H, roughnessV);
             float NdotH = max(dot(N, H), 0.0);
             float HdotV = max(dot(H, V), 0.0);
             float pdf = D * NdotH / (4.0 * HdotV) + 0.0001;
@@ -93,7 +93,7 @@ void main()
             float saTexel  = 4.0 * PI / (6.0 * resolution * resolution);
             float saSample = 1.0 / (float(SAMPLE_COUNT) * pdf + 0.0001);
 
-            float mipLevel = roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
+            float mipLevel = roughnessV == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
 
             prefilteredColor += textureLod(cubeMapTexture, L, mipLevel).rgb * NdotL;
             totalWeight      += NdotL;
@@ -101,6 +101,23 @@ void main()
     }
 
     prefilteredColor = prefilteredColor / totalWeight;
+    // if ( roughnessV < 1.0 ) {
+    //     prefilteredColor = vec3(1.0, 0.0, 0.0);
+    // } else if ( roughnessV < 2.0 ) {
+    //     prefilteredColor = vec3(1.0, 1.0, 0.0);
+    // } else if ( roughnessV < 3.0 ) {
+    //     prefilteredColor = vec3(1.0, 0.0, 1.0);
+    // } else if ( roughnessV < 4.0 ) {
+    //     prefilteredColor = vec3(0.0, 1.0, 0.0);
+    // } else if ( roughnessV < 5.0 ) {
+    //     prefilteredColor = vec3(0.0, 1.0, 1.0);
+    // } else if ( roughnessV < 6.0 ) {
+    //     prefilteredColor = vec3(0.0, 0.0, 1.0);
+    // } else if ( roughnessV < 7.0 ) {
+    //     prefilteredColor = vec3(0.5, 1.0, 0.5);
+    // } else {
+    //     prefilteredColor = vec3(1.0, 1.0, 1.0);
+    // }
 
     FragColor = vec4(prefilteredColor, 1.0);
 }

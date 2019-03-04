@@ -69,7 +69,7 @@ void Skybox::render( float _sunHDRMult ) {
 }
 
 Skybox::Skybox( Renderer& rr, const SkyBoxInitParams& _params ) : RenderModule( rr ) {
-    init( _params.mode, _params.assetString );
+    init( _params.mode, _params.assetString + ".hdr" );
 }
 
 //bool Skybox::needsReprobing( int _renderCounter ) {

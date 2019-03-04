@@ -43,11 +43,11 @@ void Framebuffer::framebufferTexture2D( GLuint rth, const std::string& renderTar
     if ( mCubeMap ) {
         GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                         nameToCubeMapSide( renderTargetIndex ),
-                                        rth, 0 ));
+                                        rth, mipMapIndex ));
     } else {
         GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                         framebufferTextureTarget( mMultisample ),
-                                        rth, 0 ));
+                                        rth, mipMapIndex ));
     }
 }
 

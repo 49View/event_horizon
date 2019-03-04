@@ -81,31 +81,51 @@ void Framebuffer::init( TextureManager& tm ) {
         GLCALL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mRenderbufferHandle
         ) );
     } else {
-        if ( mCubeMap ) {
-            mRenderToTexture = tm.addCubemapTexture( TextureRenderData{ mName }.setSize( mWidth ).format( mFormat )
-                                                             .setGenerateMipMaps( mUseMipMaps )
-                                                             .setIsFramebufferTarget( true )
-                                                             .wm( WRAP_MODE_CLAMP_TO_EDGE )
-                                                             .GPUSlot( mTextureGPUSlot ));
-        } else {
-            mRenderToTexture = tm.addTextureNoData( TextureRenderData{ mName }.size( mWidth, mHeight )
-                                                              .wm( WRAP_MODE_CLAMP_TO_EDGE ).format( mFormat )
-                                                              .setIsFramebufferTarget( true )
-                                                              .GPUSlot( mTextureGPUSlot )
-                                                              .setGenerateMipMaps( mUseMipMaps )
-                                                              .setMultisample( mMultisample ));
-        }
+        mRenderToTexture = tm.addTextureNoData( TextureRenderData{ mName }.size( mWidth, mHeight )
+                                                          .wm( WRAP_MODE_CLAMP_TO_EDGE ).format( mFormat )
+                                                          .setIsFramebufferTarget( true )
+                                                          .GPUSlot( mTextureGPUSlot )
+                                                          .setGenerateMipMaps( mUseMipMaps )
+                                                          .setMultisample( mMultisample ));
 
         LOGR( "Allocating FRAMEBUFFER %s on target %d", mName.c_str(), mRenderToTexture->getGlTextureImageTarget());
 
-        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                        mRenderToTexture->getGlTextureImageTarget(),
-                                        mRenderToTexture->getHandle(), 0 ));
+        mTargetType = mRenderToTexture->getGlTextureImageTarget();
+        mTargetHandle = mRenderToTexture->getHandle();
+        mTargetMipmap = 0;
+
+//        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+//                                        mTargetType, mTargetHandle, mTargetMipmap ));
 
     }
-    GLenum attch = GL_COLOR_ATTACHMENT0;
-    GLCALL( glDrawBuffers( 1, &attch ));
+//    GLenum attch = GL_COLOR_ATTACHMENT0;
+//    GLCALL( glDrawBuffers( 1, &attch ));
+//    checkFrameBufferStatus();
+}
+
+void Framebuffer::initCubeMap( std::shared_ptr<Texture> cubemapTarget, uint32_t cubemapFaceIndex, uint32_t mipIndex ) {
+    GLCALL( glGenFramebuffers( 1, &mFramebufferHandle ));
+    GLCALL( glGenRenderbuffers(1, &mRenderbufferHandle) );
+    GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
+    GLCALL( glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferHandle) );
+
+    mRenderToTexture = cubemapTarget;
+    mWidth  = static_cast<unsigned int>( mWidth  * std::pow(0.5, mipIndex) );
+    mHeight = static_cast<unsigned int>( mHeight * std::pow(0.5, mipIndex) );
+
+    GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight ) );
+    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRenderbufferHandle) );
+
+    mTargetType = GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubemapFaceIndex;
+    mTargetHandle = cubemapTarget->getHandle();
+    mTargetMipmap = mipIndex;
+
+//    GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+//                                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubemapFaceIndex,
+//                                    cubemapTarget->getHandle(), mipIndex ));
     checkFrameBufferStatus();
+
+    LOGR( "Allocating FRAMEBUFFER CubeMap %s on target %d at mipmap %d", mName.c_str(), cubemapFaceIndex, mipIndex );
 }
 
 void Framebuffer::release() {
@@ -122,31 +142,28 @@ void Framebuffer::release() {
     }
 }
 
-void Framebuffer::bind( const std::string& renderTargetIndex, const int _mipMapIndex ) {
+void Framebuffer::bind( const std::string& renderTargetIndex ) {
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
-    GLCALL( glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferHandle) );
-
-    auto vWidth  = static_cast<unsigned int>( mWidth * std::pow(0.5, _mipMapIndex) );
-    auto vHeight = static_cast<unsigned int>( mHeight * std::pow(0.5, _mipMapIndex) );
-
-    GLCALL( glViewport( 0, 0, vWidth, vHeight ));
-    enableMultiSample( mMultisample );
-    if ( !renderTargetIndex.empty()) {
-        framebufferTexture2D( mRenderToTexture->getHandle(), renderTargetIndex, _mipMapIndex );
+    GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, mRenderbufferHandle) );
+    if ( mFramebufferHandle && !mMultisample ) {
+        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        mTargetType, mTargetHandle, mTargetMipmap ));
     }
+    GLCALL( glViewport( 0, 0, mWidth, mHeight ));
+    enableMultiSample( mMultisample );
     checkFrameBufferStatus();
 }
 
-void Framebuffer::bindAndClear( const std::string& renderTargetIndex, const int _mipMapIndex ) {
-    bind( renderTargetIndex, _mipMapIndex );
+void Framebuffer::bindAndClear( const std::string& renderTargetIndex ) {
+    bind( renderTargetIndex );
     clearColorBuffer();
-    if ( depthTexture ) clearDepthBuffer();
+    clearDepthBuffer(); // ### reintroduce clear only if it has depth... if ( depthTexture )
 }
 
-void Framebuffer::bindAndClearWithColor( const Color4f& clearColor, const std::string& renderTargetIndex, const int _mipMapIndex ) {
-    bind( renderTargetIndex, _mipMapIndex );
+void Framebuffer::bindAndClearWithColor( const Color4f& clearColor, const std::string& renderTargetIndex ) {
+    bind( renderTargetIndex );
     clearColorBufferWithColor( clearColor );
-    if ( depthTexture ) clearDepthBuffer();
+    clearDepthBuffer(); // ### reintroduce clear only if it has depth... if ( depthTexture )
 }
 
 void Framebuffer::setViewport( int x, int y, int width, int height ) {
@@ -198,6 +215,12 @@ void Framebuffer::blit( std::shared_ptr<Framebuffer> source, std::shared_ptr<Fra
     GLCALL( glReadBuffer( atthSource ));
 
     GLCALL( glBindFramebuffer( GL_DRAW_FRAMEBUFFER, dest->Handle()));
+    if ( dest->RenderToTexture() ) {
+        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        dest->RenderToTexture()->getGlTextureImageTarget(),
+                                        dest->RenderToTexture()->getHandle(), 0 ));
+    }
+
     if ( dest->Handle() != 0 ) { // ### NDDado: If we are blitting to the default frame buffer without this if will
                                  // generate a log warning, to be checked
         GLCALL( glDrawBuffers(1, &atthDest ));

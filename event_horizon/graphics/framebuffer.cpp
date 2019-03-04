@@ -49,7 +49,7 @@ std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
         ret->attachColorBuffer( index );
     }
 
-    if ( !mIMShaderName.empty()) {
+    if ( !mIMShaderName.empty() ) {
         ret->mVPListIM = ServiceFactory::create<VPList>();
         std::string vn = mName + std::to_string(mDestViewport.size().x()) + std::to_string(mDestViewport.size().y());
         VPBuilder<PosTex2dStrip>{ rr, ret->mVPListIM, mIMShaderName }.
@@ -58,6 +58,46 @@ std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
     }
 
     return ret;
+}
+
+cubeMapFrameBuffers FrameBufferBuilder::buildCube() {
+
+    cubeMapFrameBuffers retContainer;
+
+    // Create the whole cubemap texture, once
+    auto mRenderToTexture = rr.TM().addCubemapTexture( TextureRenderData{ mName }
+                                                               .setSize( mWidth ).format( mFormat )
+                                                               .setGenerateMipMaps( mUseMipMaps )
+                                                               .setIsFramebufferTarget( true )
+                                                               .wm( WRAP_MODE_CLAMP_TO_EDGE )
+                                                               .GPUSlot( mTextureGPUSlot ));
+
+    GLuint mips = mUseMipMaps ? 1 + static_cast<GLuint>( floor( log( (float)max( mWidth, mHeight ) ) ) ) : 1;
+
+    for ( uint32_t m = 0; m < mips; m++ ) {
+        for ( uint32_t t = 0; t < 6; t++ ) {
+            auto ret = ServiceFactory::create<Framebuffer>();
+
+            ret->mName = mName;
+            ret->mFormat = mFormat;
+            ret->mUseMipMaps = mUseMipMaps;
+            ret->mMultisample = mIsMultisampled;// && canUseMultiSample();
+            ret->mHDR = mIsHDR;
+            ret->mCubeMap = mIsCubemap;
+            ret->mWidth = mWidth;
+            ret->mHeight = mHeight;
+            ret->mTextureGPUSlot = mTextureGPUSlot;
+
+            ret->initCubeMap( mRenderToTexture, t, m );
+
+            for ( const auto&[cbname, index] : mColorBufferAttachments ) {
+                ret->attachColorBuffer( index );
+            }
+            retContainer.emplace_back( ret );
+        }
+    }
+
+    return retContainer;
 }
 
 FrameBufferBuilder& FrameBufferBuilder::dv( const Rect2f& _destViewport, BlitType _bt ) {

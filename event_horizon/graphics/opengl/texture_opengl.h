@@ -56,6 +56,7 @@ public:
 
     // OpenGL initialisation
     void init_r( const uint8_t* _data );
+    void init_cubemap_r();
 
     void refresh( const uint8_t *data );
     void refresh( const uint8_t *data, int x, int y, int width, int height );
@@ -271,8 +272,6 @@ private:
     bool mHDR = false;
     bool mIsFramebufferTarget = false;
     bool mGenerateMipMaps = true;
-
-    static std::map<std::string, std::pair<int, int>> sCubeMapIndices;
 
 public:
     static Vector2f TexturePixelCMScale;

@@ -131,7 +131,6 @@ public:
 
 class CommandBufferEntry {
 public:
-    std::string mHash;
     VertexProcessing mVPList;
     std::shared_ptr<RenderMaterial> mMaterial;
     std::shared_ptr<Matrix4f> mModelMatrix;
@@ -187,7 +186,6 @@ public:
     Rect2f                       destViewport();
     Rect2f                       sourceViewport();
     std::string                  renderIndex();
-    int                          mipMapIndex();
 
     std::shared_ptr<RLTarget>&   Target() {
         return mTarget;
@@ -395,21 +393,27 @@ public:
     void enable() { bEnabled = true; }
     void disable() { bEnabled = false; }
 
+    static std::string cubeRigName( int t, const std::string& _probeName, int mipmap = 0 );
+
 public:
     std::shared_ptr<CameraRig> cameraRig;
     Rect2f screenViewport = Rect2f::INVALID;
     std::string renderIndex;
-    int mipMapIndex = 0;
     bool bEnabled = true;
     BlitType finalDestBlit = BlitType::OnScreen;
     ScreenShotContainerPtr screenShotContainer;
     std::vector<std::pair<int, int>> bucketRanges;
 
 protected:
+    std::shared_ptr<CameraRig> addCubeAncillaryRig( const std::string& _name,
+                                                    int _faceIndex,
+                                                    int _mipIndex,
+                                                    int _mips,
+                                                    const Vector3f& _pos,
+                                                    const Rect2f& _viewPort,
+                                                    const cubeMapFrameBuffers& _fb );
     void updateStreamPacket( const std::string& _streamName );
     void addCubeMapRig( const CameraCubeMapRigBuilder& _builder );
-    void updateCubeMapRig( const CameraCubeMapRigBuilder& _builder );
-    std::shared_ptr<CameraRig> addAncillaryRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb );
 protected:
     std::unordered_map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
     bool mbTakeScreenShot = false;
@@ -450,7 +454,7 @@ protected:
 
 class RLTargetProbe : public RLTarget {
 public:
-    RLTargetProbe( std::shared_ptr<CameraRig> _crig, Renderer& _rr, int _mipmapIndex = 0 );
+    RLTargetProbe( std::shared_ptr<CameraRig> _crig, Renderer& _rr );
     ~RLTargetProbe() override = default;
     void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
     virtual void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
@@ -486,7 +490,7 @@ protected:
     std::shared_ptr<Skybox> createSkybox();
     void addProbes();
     void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
-    std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName );
+    std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName, int mipmap );
     void addShadowMaps();
     void renderSkybox();
     void cacheShadowMapSunPosition( const Vector3f& _smsp );
