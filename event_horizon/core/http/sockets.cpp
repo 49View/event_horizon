@@ -12,30 +12,21 @@
 
 namespace Socket {
 
-    static bool connected_first_time = false;
-
-    void createConnectionIfNotConnected() {
-        if ( !Socket::connected_first_time ) {
-            Http::UsePort up = Http::isLocalHost() ? Http::UsePort::True : Http::UsePort::False;
-            if ( !Http::hasUserLoggedIn() ) {
-                Http::login( LoginFields::Computer() );
-            }
-            std::string host = Url::Host( Url::WssProtocol, Http::CLOUD_SERVER(), Http::CLOUD_PORT_SSL(), up );
-            host += "/?s=" + std::string{Http::sessionId()};
-            startClient(host);
-            Socket::connected_first_time = true;
-        }
-
+    void createConnection() {
+        // First thing close if any existing connections are present
+        close();
+        Http::UsePort up = Http::isLocalHost() ? Http::UsePort::True : Http::UsePort::False;
+        std::string host = Url::Host( Url::WssProtocol, Http::CLOUD_SERVER(), Http::CLOUD_PORT_SSL(), up );
+        host += "/?s=" + std::string{Http::sessionId()};
+        startClient(host);
     }
 
     void on( const std::string& eventName, SocketCallbackFunc f ) {
-        createConnectionIfNotConnected();
         callbacksMap[eventName] = f;
     }
 
     void emitImpl( const std::string& _message );
     void emit( const std::string& _message ) {
-        createConnectionIfNotConnected();
         emitImpl(_message);
     }
 

@@ -11,6 +11,7 @@ class DeserializeBin;
 
 enum class GeomMapping {
     Spherical,
+    SphericalUV,
     Cube,
     Planar,
     Cylindrical
@@ -45,11 +46,6 @@ struct polyQuadSub {
 enum class FlipSubdiv {
     True,
     False,
-};
-
-struct GeomDeserializeDependencies {
-    std::vector<std::string> textureDeps;
-    std::vector<std::string> materialDeps;
 };
 
 enum class PolyRaise {

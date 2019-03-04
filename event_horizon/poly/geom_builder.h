@@ -26,9 +26,9 @@ enum class GeomBuilderType {
     outline,
     poly,
     mesh,
+    gltf2,
     asset,
     file,
-    import,
     svg,
 
     unknown
@@ -105,18 +105,17 @@ struct RBUILDER( GeomFileAssetBuilder, geom, geom, Binary, BuilderQueryType::Not
 
 };
 
+using GF = GeomFileAssetBuilder;
+
 class GeomBuilder : public MaterialBuildable, public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
-public:
     using MaterialBuildable::MaterialBuildable;
+public:
     GeomBuilder() = default;
     virtual ~GeomBuilder() = default;
 
     explicit GeomBuilder( const GeomBuilderType gbt ) : MaterialBuildable(S::SH, S::WHITE_PBR), builderType(gbt) {}
     GeomBuilder( const GeomBuilderType gbt, const std::string& _name ) : MaterialBuildable(S::SH, S::WHITE_PBR), DependantBuilder(_name), builderType(gbt) {}
-    GeomBuilder( const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
-
-    // Impoorted object
-    GeomBuilder( GeomAssetSP );
+    GeomBuilder( GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
 
     // Polygon list
     explicit GeomBuilder( const Rect2f& _rect, float _z = 0.0f );
@@ -140,8 +139,6 @@ public:
     GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
                  const Vector3f& _suggestedAxis = Vector3f::ZERO );
     GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
-
-    void publish() const;
 
     GeomBuilder& inj( GeomAssetSP _hier );
 
@@ -252,6 +249,11 @@ public:
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
 // MaterialBuildable policies
+    GeomBuilder& m( std::shared_ptr<Material> _value ) {
+        materialSet(_value);
+        return *this;
+    }
+
     GeomBuilder& m( const std::string& _shader, const std::string& _matName ) {
         materialSet(_shader, _matName);
         return *this;
@@ -276,7 +278,6 @@ public:
     GeomAssetSP buildr( DependencyMaker& _md);
 
     void assemble( DependencyMaker& _md ) override;
-    ScreenShotContainerPtr& Thumb();
 
 protected:
     void elemCreate() override;
@@ -285,13 +286,9 @@ protected:
     void createDependencyList( DependencyMaker& _md ) override;
     bool validate() const override;
     void preparePolyLines();
-    void deserializeDependencies( DependencyMaker& _md );
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg );
     void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb, SceneGraph& sg );
     void createFromAsset( GeomAssetSP asset );
-    std::string toMetaData() const;
-    std::string generateThumbnail() const;
-    std::string generateRawData() const;
 
 private:
     uint64_t mId = 0;

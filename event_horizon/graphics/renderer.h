@@ -78,10 +78,14 @@ private:
 	std::shared_ptr<ProgramUniformSet> mCameraUBO;
 };
 
+struct ChangeMaterialOnTagContainer {
+	uint64_t tag;
+	std::shared_ptr<Material> mat;
+};
 
 class Renderer : public DependencyMaker {
 public:
-	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm );
+	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm );
 	virtual ~Renderer() = default;
 
 	bool exists( [[maybe_unused]] const std::string& _key ) const override { return false; };
@@ -98,7 +102,7 @@ public:
 	std::shared_ptr<RenderMaterial> addMaterial( std::shared_ptr<Material> _material,
 												 std::shared_ptr<Program> _program = nullptr );
 	std::shared_ptr<RenderMaterial> addMaterial( const std::string& _shaderName );
-    void changeMaterialOnTags( uint64_t _tag, std::shared_ptr<Material> _mat );
+	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
 
@@ -156,6 +160,8 @@ public:
 	void invalidateOnAdd();
 
 protected:
+	void changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt );
+
 	void clearCommandList();
 
 	void renderCBList();
@@ -163,19 +169,19 @@ protected:
 	void renderCommands( int eye );
 
 protected:
-	LightManager    lm;
     CommandQueue&   cq;
 	ShaderManager&  sm;
 	TextureManager& tm;
 	RenderImageDependencyMaker ridm;
 	StreamingMediator& ssm;
+	LightManager&   lm;
 	RenderAnimationManager am;
 	RenderCameraManager rcm;
 
 	std::shared_ptr<Framebuffer> mDefaultFB;
 
 	std::unordered_map<uint64_t, std::shared_ptr<RenderMaterial>> materialCache;
-	std::unordered_map<int64_t, std::shared_ptr<RenderMaterial>> materialMap;
+	std::unordered_map<std::string, std::shared_ptr<RenderMaterial>> materialMap;
 
 	std::shared_ptr<CommandScriptRendererManager> hcs;
 
@@ -191,6 +197,8 @@ protected:
 	bool bInvalidated = false;
 
 	std::map<int, CommandBufferListVector> mCommandLists;
+
+	std::vector<ChangeMaterialOnTagContainer> mChangeMaterialCallbacks;
 
 	RenderStats mStats;
 

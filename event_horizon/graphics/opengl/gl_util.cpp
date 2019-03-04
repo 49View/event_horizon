@@ -469,6 +469,20 @@ GLenum nameToCubeMapSide( const std::string& name ) {
     return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 }
 
+GLuint nameToCubeMapLayer( const std::string& name ) {
+    std::string cubeSide = name.substr( name.find_last_of( '_' ) + 1,
+                                        name.find_last_of( '.' ) - name.find_last_of( '_' ) - 1 );
+    if ( cubeSide == "posx" || cubeSide == "right" ) return 0;
+    if ( cubeSide == "negx" || cubeSide == "left" ) return 1;
+    if ( cubeSide == "posz" || cubeSide == "front" ) return 4;
+    if ( cubeSide == "negz" || cubeSide == "back" ) return 5;
+    if ( cubeSide == "posy" || cubeSide == "top" ) return 2;
+    if ( cubeSide == "negy" || cubeSide == "bottom" ) return 3;
+
+    return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+}
+
+
 UniformFormat GLToUniformFormat( GLenum uf ) {
     switch ( uf ) {
        case GL_FLOAT:

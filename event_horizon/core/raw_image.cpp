@@ -8,10 +8,10 @@
 #include "service_factory.h"
 #include "math/rect2f.h"
 
-
+                                                                             //AABBGGRR
 RawImage RawImage::BLACK_ARGB4x4{ "black_alpha", 4, 4, static_cast<uint32_t>(0xff000000) };
 RawImage RawImage::BLACK_RGBA4x4{ "black_alpha", 4, 4, static_cast<uint32_t>(0x000000ff) };
-RawImage RawImage::NORMAL4x4    { "normal"     , 4, 4, static_cast<uint32_t>(0x00007f7f) };
+RawImage RawImage::NORMAL4x4    { "normal"     , 4, 4, static_cast<uint32_t>(0xffff7f7f) };
 
 //struct RawImageCallbackData : public CallbackData {
 //    using CallbackData::CallbackData;

@@ -74,35 +74,15 @@ void FullEditor::init() {
     o()->setDragAndDropFunction(allConversionsDragAndDropCallback);
 
     o()->script("change time 14:00");
-}
+    o()->getCamera(Name::Foxtrot)->setPosition( Vector3f( 0.0f, .5f, -2.0f ) );
+    o()->getCamera(Name::Foxtrot)->setQuatAngles( Vector3f( 0.2f, M_PI, 0.0f ) );
 
-//enum class EditorState {
-//    OnLoad,
-//    OnLoop
-//};
-
-
-void FullEditor::run() {
-
-//    static EditorState state;
-//
-//    switch (state) {
-//        case EditorState::OnLoad:
-//            initLayout( p );
-//            break;
-//        case EditorState::OnLoop:
-//            break;
-//        default:
-//            break;
-//    }
-    static bool bS = true;
-    if ( bS ) {
-        GB{ShapeType::Cube}.build(o()->RSG());
 //        auto streamName = "http://192.168.1.123:8080/video";
 //        o()->addHttpStream<AudioVideoStreamFFmpeg>(streamName);
 //        GB{ShapeType::Cube}.m(S::YUV_GREENSCREEN,streamName).build(o()->RSG());
-        bS = false;
-    }
+//        GB{ShapeType::Sphere}.m(S::SH, "rustic").build(o()->RSG());
+
 }
 
-//FullEditor::FullEditor( SceneOrchestrator *p ) : p( p ) {}
+void FullEditor::run() {
+}

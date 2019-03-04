@@ -3,6 +3,7 @@
 //
 
 #include <graphics/renderer.h>
+#include <core/entity_factory.hpp>
 
 template <typename V>
 class VPBuilder {
@@ -43,7 +44,7 @@ private:
     void init( const std::string& _shader, const std::string& _name ) {
         name = UUIDGen::make();
         ASSERT( rr.P( _shader ) != nullptr );
-        material = std::make_shared<Material>( rr.P( _shader )->getDefaultUniforms() );
+        material = EF::clone<Material>( rr.P( _shader )->getDefaultUniforms() );
         material->Name(_name);
         material->resolveDynamicConstants();
     }

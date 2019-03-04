@@ -3,7 +3,6 @@
 #include "gl_util.h"
 
 
-std::map<std::string, std::pair<int, int>> Texture::sCubeMapIndices;
 // These are default values for mapping, they can be changed by the client app
 // Defaults are 4 pixels per millimeter (4000)
 Vector2f Texture::TexturePixelCMScale = Vector2f( 4000.0f, 4000.0f );
@@ -11,12 +10,6 @@ Vector2f Texture::TexturePixelCMScaleInv = reciprocal( Texture::TexturePixelCMSc
 
 void Texture::init_data_r( const uint8_t* _data ) {
     bool updateStorage = true;
-    if ( mTarget == TEXTURE_CUBE_MAP ) {
-        if ( sCubeMapIndices[cubeMapTName( mId )].second > 1 ) {
-            updateStorage = false;
-        }
-        glTextureImageTarget = nameToCubeMapSide(mId);
-    }
 
     if ( mMultisample ) {
         texImage2DMultisample(4, glInternalFormat, mWidth, mHeight );
@@ -34,10 +27,6 @@ void Texture::init_data_r( const uint8_t* _data ) {
                                          _data ) );
             }
         } else {
-#ifdef _FORCE_GL_TEXTURE_BASE_MAX_LEVELS
-            GLCALL( glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0) );
-            GLCALL( glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0) );
-#endif
             GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType,
                                   _data));
         }
@@ -59,18 +48,7 @@ void Texture::init_r( const uint8_t* _data ) {
     glTextureImageTarget = imageTargetToGl( mTarget, mMultisample );
 
     // Make sure we are not recreating the handle every time
-    if ( mTarget != TEXTURE_CUBE_MAP ) {
-        GLCALL( glGenTextures( 1, &mHandle ));
-    } else {
-        std::string cubemapName = cubeMapTName( mId );
-        if ( auto it = sCubeMapIndices.find(cubemapName); it == sCubeMapIndices.end() ) {
-            GLCALL( glGenTextures( 1, &mHandle ));
-            sCubeMapIndices[cubemapName] = {mHandle, 1};
-        } else {
-            mHandle = it->second.first;
-            sCubeMapIndices[cubemapName] = {it->second.first, it->second.second+1};
-        }
-    }
+    GLCALL( glGenTextures( 1, &mHandle ));
     GLCALL( glBindTexture( glTextureImageTarget, mHandle ));
 
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_R, glWrapMode ));
@@ -85,17 +63,47 @@ void Texture::init_r( const uint8_t* _data ) {
     init_data_r( _data );
 
     if ( mGenerateMipMaps ) {
-        bool bFinalizeCubeMap = true;
-        if ( mTarget == TEXTURE_CUBE_MAP ) {
-           if ( sCubeMapIndices[cubeMapTName( mId )].second != 6 ) {
-               bFinalizeCubeMap = false;
-           }
-        }
-        if ( bFinalizeCubeMap ) {
+        if ( _data ) {
             GLCALL( glGenerateMipmap( glTextureTarget ));
-        }  //Generate num_mipmaps number of
-        // mipmaps here.
+        }
     }
+}
+
+void Texture::init_cubemap_r() {
+    if ( mHandle != 0) return; // This texture has already been initialized
+
+    glInternalFormat     = pixelFormatToGlInternalFormat( mFormat );
+    glFormat             = pixelFormatToGlFormat( mFormat );
+    glType               = pixelFormatToGlType( mFormat );
+    glFilter             = filterToGl( mFilter );
+    glWrapMode           = wrapModeToGl( mWrapMode );
+    glTextureTarget      = targetToGl( mTarget );
+    glTextureImageTarget = imageTargetToGl( mTarget, mMultisample );
+
+    // Make sure we are not recreating the handle every time
+    GLCALL( glGenTextures( 1, &mHandle ));
+    GLCALL( glBindTexture( glTextureImageTarget, mHandle ));
+
+    GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_R, glWrapMode ));
+    GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_S, glWrapMode ));
+    GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_T, glWrapMode ));
+    GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MAG_FILTER, glFilter ));
+
+    auto minFilter = mGenerateMipMaps ? GL_LINEAR_MIPMAP_LINEAR : glFilter;
+    GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MIN_FILTER, minFilter ));
+
+//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_BASE_LEVEL, 2) );
+//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_MAX_LEVEL, 3) );
+
+    GLuint mips = mGenerateMipMaps ? 1 + static_cast<GLuint>( floor( log( (float)max( mWidth, mHeight ) ) ) ) : 1;
+    GLCALL( glTexStorage2D( glTextureTarget, mips, glInternalFormat, mWidth, mHeight ));
+
+//    if ( mGenerateMipMaps ) {
+//        GLCALL( glGenerateMipmap( glTextureTarget ));
+//    }
+
+    LOGI( "Initialising texture %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
+          mId.c_str(), mHandle );
 }
 
 //void Texture::init( int width, int height, PixelFormat format, Filter filter, WrapMode wrapMode ) {

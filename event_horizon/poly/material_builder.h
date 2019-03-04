@@ -2,6 +2,9 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
+#include <tuple>
 #include <functional>
 #include "core/util.h"
 #include "core/builders.hpp"
@@ -19,6 +22,7 @@ public:
     void dump() const;
     bool virtual add( const MaterialBuilder& pb, std::shared_ptr<Material> _material );
     bool add( std::shared_ptr<Material> _material );
+    bool add( const std::string& _key, std::shared_ptr<Material> _material );
     std::shared_ptr<Material> get( const std::string& _key );
     std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey, const MaterialProperties& _mp );
     std::vector<std::shared_ptr<Material>> list() const;
@@ -31,27 +35,15 @@ private:
 
 struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact, Material::Version() )
 
-    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a.Name()),shaderName( a.shaderName ), imageExt( a.imageExt ) {
-        for ( auto&& [k,v] : a.buffers ) {
-            buffers.emplace( std::make_pair( k, std::move( v ) ) );
-        }
+    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a),shaderName( a.shaderName ), imageExt( a.imageExt ) {
+        bufferTarFiles = a.bufferTarFiles;
     }
 
     MaterialBuilder( const std::string& _name, const std::string& _sn );
+    MaterialBuilder( const std::string& _name, const SerializableContainer& _data );
+
     void makeDefault( DependencyMaker& _md );
-    void makeDirect( DependencyMaker& _md );
-    void publish() const;
-
-    MaterialBuilder& buffer( const std::string& _bname, uint8_p&& _data ) {
-        if ( _data.second > 0 ) {
-            buffers.emplace( std::make_pair(pbrPrefix() + _bname, std::move(_data)) );
-        }
-        return *this;
-    }
-
-    MaterialBuilder& buffer( const std::string& _bname, const ucchar_p& _data ) {
-        return buffer( _bname, ucchar_pTouint8_p(_data) );
-    }
+    std::shared_ptr<Material> makeDirect( DependencyMaker& _md );
 
     MaterialBuilder& mp( const MaterialProperties& _value ) {
         properties = _value;
@@ -63,20 +55,11 @@ struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotEx
         return *this;
     }
 
-protected:
-    const std::string pbrPrefix() const {
-        return getFileNameNoExt( Name() ) + "_";
-    }
-    void handleUninitializedDefaults( DependencyMaker& _md, const std::string& _keyTextureName );
-    std::string generateThumbnail() const;
-    std::string generateRawData() const;
-    std::string toMetaData() const;
-
 private:
     MaterialProperties      properties;
     std::string             shaderName = S::SH;
 
-    std::map<std::string, uint8_p> buffers;
+    SerializableContainer   bufferTarFiles;
     std::string imageExt = ".png";
 };
 

@@ -39,7 +39,6 @@ std::atomic<bool> deamonBreaker = false;
 void daemonLoop( int _sleepSeconds ) {
 
     Http::xProjectHeader(LoginFields::Daemon());
-	Http::login(LoginFields::Daemon());
 
 	auto st = std::chrono::system_clock::now();
 
@@ -47,8 +46,9 @@ void daemonLoop( int _sleepSeconds ) {
 		sleep( _sleepSeconds );
 		auto tn = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed = tn - st;
-		if ( elapsed.count() > 60*60*5.9 ) {
-			Http::login(LoginFields::Daemon());
+		if ( elapsed.count() > 60*60*24*6.9 ) { // // refresh every week
+			LOGR("Refresh token");
+			Http::refreshToken();
 			st = tn;
 		}
 	}

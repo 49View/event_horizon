@@ -2,10 +2,12 @@
 #include "sun_builder.h"
 
 #include "datetime.h"
+#include "golden_color.hpp"
 #include "../math/spherical_harmonics.h"
 #include "../math/math_util.h"
 #include "../service_factory.h"
 #include "../configuration/app_options.h"
+#include <core/raw_image.h>
 
 SunBuilder::SunBuilder() {
 	dateParts["spring"] = std::make_tuple( 20, 3 );
@@ -60,6 +62,8 @@ SunBuilder::SunBuilder() {
 	setCurrentLocation( "Kingston" );
 
 	buildFromString( "spring noon" );
+
+	goldenHourGradient = rawImageDecodeFromMemory(golden_color_png, golden_color_png_len, "golden_gradient");
 }
 
 void SunBuilder::changeDefaultYear( int year ) {
@@ -209,4 +213,15 @@ void SunBuilder::update( [[maybe_unused]] float timeStamp ) {
 
 void SunBuilder::setCurrentLocation( std::string locationHint ) {
 	mCurrentGeoPos = locationProvider.getPosition( locationHint );
+}
+
+V3f SunBuilder::GoldenHourColor() const {
+	ASSERT( GoldenHour() >= 0.0f && GoldenHour() <= 1.0f );
+	const float sunK = 10.0f;
+	float sunPower = mSunPosition.altitudeRad > 0.0f ? ((mSunPosition.altitudeRad+0.1f) / M_PI_2) * sunK : 1.0f;
+    auto gdl = static_cast<size_t>(goldenHourGradient.width - 1);
+	auto index = gdl - static_cast<size_t>(GoldenHour() * gdl);
+	auto col = goldenHourGradient.at<uint32_t>( static_cast<unsigned int>(index), 0);
+	auto ret = Vector4f::ITORGBA(col) * GoldenHour() * sunPower;
+	return ret.xyz();
 }

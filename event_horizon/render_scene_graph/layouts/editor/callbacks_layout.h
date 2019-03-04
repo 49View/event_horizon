@@ -6,9 +6,11 @@
 
 #include <string>
 #include <vector>
+#include <core/htypes_shared.hpp>
+
 class SceneOrchestrator;
 
-using entityDaemonCallbackFunction = void( const std::string&, const std::vector<char>& );
+using entityDaemonCallbackFunction = void( const std::string&, const SerializableContainer& );
 
 void allCallbacksEntitySetup();
 void allConversionsDragAndDropCallback( SceneOrchestrator* p, const std::string& _path );

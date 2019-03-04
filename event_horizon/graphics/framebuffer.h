@@ -169,7 +169,7 @@ public:
     }
 
     std::shared_ptr<Framebuffer> build();
-
+    cubeMapFrameBuffers buildCube();
 private:
     Renderer& rr;
 };

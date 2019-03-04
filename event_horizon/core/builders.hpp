@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 2018-12-30.
 //
@@ -5,6 +7,7 @@
 #pragma once
 
 #include <core/callback_dependency.h>
+#include <core/name_policy.hpp>
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
 
@@ -48,30 +51,20 @@ public: \
         return false; \
     }
 
-class BaseBuilder {
+class BaseBuilder : public NamePolicy<std::string> {
 public:
     BaseBuilder() = default;
-    explicit BaseBuilder( const std::string& _name ) : name( _name ) {}
+    explicit BaseBuilder( const std::string& _name ) {
+        this->Name( _name );
+    }
 
     static const std::string typeName()  { return ""; }
-    const std::string& Name() const { return name; }
-    void Name( const std::string& _name ) { name = _name; }
-
-    void clearTags() { tags.clear();}
-    void addTag( const std::string& _tag ) { tags.emplace(_tag); }
-    const std::set<std::string>& Tags() const { return tags; }
-    void Tags( const std::set<std::string>& _tags ) { tags = _tags; }
-
-    std::set<std::string> generateTags() const;
-
-private:
-    std::string name;
-    std::set<std::string> tags;
 };
 
 class ResourceBuilder : public BaseBuilder {
     using BaseBuilder::BaseBuilder;
 public:
+
     virtual const std::string prefix() const = 0;
 
     const std::string NameKey() const { return prefix() + Name(); }
@@ -133,11 +126,16 @@ public:
 protected:
     virtual void elemCreate() = 0;
     virtual bool validate() const = 0;
+    template< typename B, typename D>
+    void assembleNV( std::shared_ptr<B> _builder, D& _md ) {
+        _builder->assemble( _md );
+        // We leave room for injecting code that needs to run pre/after assembly
+    }
 
     template< typename B, typename D>
     void addDependencies( std::shared_ptr<B> _builder, D& _md ) {
         if ( mDeps.empty() ) {
-            _builder->assemble( _md );
+            assembleNV( _builder, _md );
         } else {
             g_deps.push_back( std::make_shared<DependencyChainMap>( _builder, _md ));
         }

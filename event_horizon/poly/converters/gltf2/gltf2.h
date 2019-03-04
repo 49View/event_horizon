@@ -7,34 +7,7 @@
 #include <core/descriptors/material.h>
 #include <core/raw_image.h>
 #include <poly/poly.hpp>
-
-using ImportMaterialMap = std::vector<std::shared_ptr<Material>>;
-
-class ImportGeomArtifacts {
-public:
-    const GeomAssetSP& getScene() const {
-        return scene;
-    }
-
-    void setScene( const GeomAssetSP& scene ) {
-        ImportGeomArtifacts::scene = scene;
-    }
-
-    const ImportMaterialMap& getMaterials() const {
-        return materials;
-    }
-
-    void setMaterials( const ImportMaterialMap& materials ) {
-        ImportGeomArtifacts::materials = materials;
-    }
-
-    void addMaterial( std::shared_ptr<Material> _mat ) {
-        materials.emplace_back(_mat);
-    }
-private:
-    GeomAssetSP scene;
-    ImportMaterialMap materials;
-};
+#include <poly/import_artifacts.hpp>
 
 enum class SigmoidSlope {
     Positive,
@@ -80,7 +53,7 @@ public:
     using MaterialMap = std::unordered_map<std::string, IntermediateMaterial>;
 
     explicit GLTF2( const std::string& _path );
-    explicit GLTF2( const std::vector<char>& _array, const std::string& _name );
+    explicit GLTF2( const SerializableContainer& _array, const std::string& _name );
     ImportGeomArtifacts convert();
 
 private:

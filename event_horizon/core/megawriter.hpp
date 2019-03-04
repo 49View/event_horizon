@@ -11,13 +11,14 @@
 #include <array>
 #include <set>
 
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-#include "htypes_shared.hpp"
-#include "math/rect2f.h"
-#include "math/aabb.h"
-#include "math/vector4f.h"
-#include "metadata.h"
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+#include <core/htypes_shared.hpp>
+#include <core/math/rect2f.h>
+#include <core/math/aabb.h>
+#include <core/math/vector4f.h>
+#include <core/metadata.h>
+#include <core/boxable.hpp>
 
 using namespace rapidjson;
 
@@ -55,7 +56,7 @@ public:
 
 	template<typename T>
 	void serialize( const char* _name, const T& value ) {
-		if ( _name != nullptr ) writer->String( _name );		
+		if ( _name != nullptr ) writer->String( _name );
 		value.serialize( this );
 	}
 
@@ -201,6 +202,9 @@ public:
 		writer->Double( finalRect.right() );
 		writer->Double( finalRect.bottom() );
 		writer->EndArray();
+	}
+
+	void serialize( const char* name, const EmptyBox& rect ) {
 	}
 
 	void serialize( const char* name, const JMATH::AABB& rect ) {

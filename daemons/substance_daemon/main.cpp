@@ -2,7 +2,6 @@
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #endif
-#include <stb/stb_image_write.h>
 
 #include <core/http/webclient.h>
 #include <core/util.h>
@@ -144,7 +143,7 @@ void elaborateGeom( const std::string& _filename ) {
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
-    Http::login(LoginFields::Daemon());
+    Http::initDaemon();
 
 //    initDeamon();
     Socket::on( "cloudStorageFileUpdate", []( SocketCallbackDataType data ) {

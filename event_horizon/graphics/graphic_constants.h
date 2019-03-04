@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include <vector>
 #include "core/image_constants.h"
 
 enum UniformFormat {
@@ -129,3 +131,6 @@ using ViewportTogglesT = int;
 
 std::string cubeMapFace( const std::string& filename, CubemapFaces cf );
 std::string cubeMapTName( const std::string& filename );
+
+class Framebuffer;
+using cubeMapFrameBuffers = std::vector<std::shared_ptr<Framebuffer>>;

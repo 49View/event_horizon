@@ -2,7 +2,7 @@
 
 unsigned int sLastHandle = 0;
 uint64_t VertexProcessing::sCountInc = 0;
-int64_t VertexProcessing::sMaterialHash;
+std::string VertexProcessing::sMaterialHash;
 int VertexProcessing::sNumDrawCalls;
 int VertexProcessing::sNumStateChanges;
 std::set<int64_t> VertexProcessing::sMatHash;
@@ -14,12 +14,12 @@ void VertexProcessing::programStart( std::shared_ptr<RenderMaterial> _material )
         sLastHandle = _material->BoundProgram()->handle();
     }
     _material->GlobalUniforms()->setOn( _material->BoundProgram()->handle());
-    if ( _material->Hash() != sMaterialHash ) {
+//    if ( _material->Hash() != sMaterialHash ) {
         sNumStateChanges++;
         //		sMatHash.insert( _material->Hash() );
         _material->Uniforms()->setOn( _material->BoundProgram()->handle());
         sMaterialHash = _material->Hash();
-    }
+//    }
 }
 
 void VertexProcessing::programDraw() const {

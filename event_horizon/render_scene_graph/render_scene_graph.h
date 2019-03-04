@@ -36,7 +36,7 @@ private:
 
 class RenderSceneGraph : public SceneGraph {
 public:
-    RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm );
+    RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm, SunBuilder& _sb );
     virtual ~RenderSceneGraph() = default;
 
     DependencyMaker& TL() override { return tl; }

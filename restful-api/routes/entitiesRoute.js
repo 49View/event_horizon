@@ -137,17 +137,33 @@ router.delete('/:id', async (req, res, next) => {
         //Check existing entity for use project
         const currentEntity = await entityController.getEntityByIdProject(project, entityId, false);
         if (currentEntity===null) {
-            throw "Invalid entity for user project";
+            console.log( "[INFO] Deletion of " + entityId + " not found, no operations performed" );
+            res.status(204).send();
+        } else {
+            await entityController.deleteEntityComplete( project, currentEntity);
+            res.status(201).send();
         }
-        const group = currentEntity.group;
-        //Remove current file from S3
-        await fsController.cloudStorageDelete(entityController.getFilePath(project, group, currentEntity.metadata.contentHash), "eventhorizonentities");
-        //Delete existing entity
-        await entityController.deleteEntity(currentEntity._id);
-
-        res.status(204).send();
     } catch (ex) {
         console.log("ERROR UPDATING ENTITY: ", ex);
+        res.sendStatus(400);
+    }
+
+});
+
+router.delete('/', async (req, res, next) => {
+    try {
+        const project = req.user.project;
+        const entities =await entityController.getEntitiesOfProject( project );
+        if (entities===null) {
+            res.status(204).send();
+        } else {
+            for ( const entity of entities ) {
+                await entityController.deleteEntityComplete( project, entity );
+            }
+            res.status(201).send();
+        }
+    } catch (ex) {
+        console.log("ERROR UPDATING ENTITIES: ", ex);
         res.sendStatus(400);
     }
 

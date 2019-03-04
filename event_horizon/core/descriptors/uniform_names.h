@@ -14,6 +14,7 @@ namespace UniformNames {
 	const std::string projMatrix = "u_projMatrix";
 	const std::string sunDirection = "u_sunDirection";
 	const std::string sunPosition = "u_sunPosition";
+	const std::string sunRadiance = "u_sunRadiance";
 
 	const std::string pointLightPos = "u_pointLightPos";
 	const std::string pointLightDir = "u_pointLightDir";

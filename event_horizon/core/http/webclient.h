@@ -16,7 +16,9 @@
 bool isSuccessStatusCode( int statusCode );
 
 namespace HttpFilePrefix {
+    const static std::string user = "/user/";
     const static std::string gettoken = "/getToken/";
+    const static std::string refreshtoken = "/refreshToken/";
     const static std::string entities = "/entities/";
     const static std::string entities_all = "/entities/metadata/byGroupTags/";
     const static std::string entities_onebinary = "/entities/content/byGroupTags/";
@@ -42,6 +44,8 @@ using SocketCallbackFunc = std::function<void( SocketCallbackDataType message )>
 namespace Socket {
     static std::unordered_map<std::string, SocketCallbackFunc> callbacksMap;
 
+    // Create connection has to be called after login
+    void createConnection();
     void startClient( const std::string& _host );
     void onMessage( const std::string& _message );
     void emit( const std::string& _message );
@@ -49,11 +53,30 @@ namespace Socket {
     void close();
 }
 
+JSONDATA( UserLoginToken, name, email, guest )
+    std::string     name;
+    std::string     email;
+    bool            guest;
+};
+
+JSONDATA( UserLogin, expires, user, project, session )
+    uint64_t        expires;
+    UserLoginToken  user;
+    std::string     project;
+    std::string     session;
+};
+
 JSONDATA( LoginToken, session, token, expires, project )
     std::string session;
     std::string token;
     uint64_t expires;
     std::string project;
+};
+
+JSONDATA( RefreshToken, session, token, expires )
+    std::string session;
+    std::string token;
+    uint64_t expires;
 };
 
 namespace Http {
@@ -114,7 +137,13 @@ namespace Http {
         bool isSuccessStatusCode() const; //all 200s
     };
 
-    bool login( const LoginFields& _lf );
+    void init();
+    void initDaemon();
+
+    void login();
+    void login( const LoginFields& lf );
+    void loginSession();
+    void refreshToken();
     void xProjectHeader( const LoginFields& _lf );
 
     void get( const Url& url, ResponseCallbackFunc callback,
@@ -128,6 +157,7 @@ namespace Http {
     void post( const Url& url, const uint8_p& buffer, ResponseCallbackFunc callback = nullptr );
     void post( const Url& url, const char *buff, uint64_t length, ResponseCallbackFunc callback = nullptr);
     void post( const Url& url, const std::vector<unsigned char>& buffer, ResponseCallbackFunc callback = nullptr );
+    void post( const Url& url, ResponseCallbackFunc callback );
 
     void useLocalHost( bool _flag );
     void userLoggedIn( bool _flag );
@@ -139,6 +169,7 @@ namespace Http {
     std::string project();
 
     void cacheLoginFields( const LoginFields& _lf );
+    LoginFields gatherCachedLogin();
     LoginFields cachedLoginFields();
 
     void userToken( std::string_view _token );
@@ -154,7 +185,7 @@ namespace Http {
 
 namespace zlibUtil {
     // Decompress
-    std::vector<char> inflateFromMemory( const Http::Result& fin );
+    SerializableContainer inflateFromMemory( const Http::Result& fin );
 }
 
 struct Url {

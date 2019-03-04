@@ -57,7 +57,7 @@ void allConversionsDragAndDropCallback( [[maybe_unused]] SceneOrchestrator* p, c
 //        stl::parse_stl(pathSanitized);
 //    }
     else if ( extl == ".svg" ) {
-        callbackGeomSVG( FM::readLocalTextFile( pathSanitized ) );
+        callbackGeomSVG( pathSanitized, FM::readLocalTextFile( pathSanitized ) );
     }
     else if ( extl == ".sbsar" ) {
         FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(EntityGroup::Material)+ getFileName(pathSanitized));

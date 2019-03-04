@@ -7,7 +7,8 @@
 #include <unordered_set>
 #include "suncalc.h"
 #include "location_provider.h"
-#include "../math/vector3f.h"
+#include <core/math/vector3f.h>
+#include <core/raw_image.h>
 
 class SunBuilder {
 public:
@@ -21,6 +22,7 @@ public:
     Vector3f getSunPosition() const;
 
     float GoldenHour() const { return mGoldenHour; }
+    V3f GoldenHourColor() const;
     void GoldenHour( float val ) { mGoldenHour = val; }
     int getHour() const;
 
@@ -41,6 +43,7 @@ private:
     int defaultYear = 2018;
     bool mbDirtyTime = false;
 
+    RawImage goldenHourGradient;
     std::unordered_map<std::string, std::tuple<int, int>> dateParts;
     std::unordered_set<std::string> timeParts;
 };

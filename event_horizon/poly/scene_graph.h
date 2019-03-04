@@ -23,30 +23,6 @@
 
 class StreamingMediator;
 
-typedef std::unordered_map<std::string, GeomAssetSP> AssetHierContainer;
-typedef AssetHierContainer::iterator AssetHierContainerIt;
-typedef AssetHierContainer::const_iterator AssetHierContainerCIt;
-
-struct GeomFileAssetBuilder;
-
-class AssetManager : public DependencyMaker {
-public:
-DEPENDENCY_MAKER_EXIST(assetsList);
-    bool add( GeomFileAssetBuilder& gb, const std::vector<char>& _data );
-    void add( const std::string& _key, GeomAssetSP _h );
-    std::vector<char> get( const std::string& _key ) { return assetsList[_key]; }
-    GeomAssetSP findHier( const std::string& _key );
-
-    AssetHierContainerIt begin();
-    AssetHierContainerIt end();
-    AssetHierContainerCIt begin() const;
-    AssetHierContainerCIt end() const;
-
-private:
-    std::unordered_map<std::string, std::vector<char>> assetsList;
-    AssetHierContainer assetsHierList;
-};
-
 class PolySceneGraphTextureList : public ImageDepencencyMaker {
     bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
 };
@@ -64,11 +40,10 @@ public:
 
 class SceneGraph : public DependencyMaker {
 public:
-    explicit SceneGraph( CommandQueue& cq, FontManager& _fm );
+    explicit SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb );
 
 DEPENDENCY_MAKER_EXIST(geoms);
     void add( NodeVariants _geom);
-    void add( std::vector<std::shared_ptr<Material>> _materials );
 
     void remove( const UUID& _uuid );
 
@@ -86,10 +61,8 @@ DEPENDENCY_MAKER_EXIST(geoms);
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
-    AssetManager& AL() { return al; }
-    SunBuilder& SB() { return sb; }
     FontManager& FM() { return fm; }
-    StreamingMediator& SSM();
+    SunBuilder& SB() { return sb; }
 
     void mapGeomType( uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;
@@ -118,12 +91,11 @@ protected:
 
 protected:
     NodeGraph geoms;
-    AssetManager   al;
     ProfileManager pl;
     MaterialManager ml;
     ColorManager cl;
-    SunBuilder sb;
     FontManager& fm;
+    SunBuilder& sb;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
@@ -131,7 +103,7 @@ protected:
 
 class PolySceneGraph : public SceneGraph {
 public:
-    PolySceneGraph(CommandQueue& cq, FontManager& _fm) : SceneGraph(cq, _fm) {
+    PolySceneGraph(CommandQueue& cq, FontManager& _fm, SunBuilder& _sb) : SceneGraph(cq, _fm, _sb) {
         ml.TL(&tl);
     }
 

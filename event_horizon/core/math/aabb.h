@@ -20,11 +20,16 @@ public:
 	static const AABB INVALID;
 	static const AABB ZERO;
 
-	static AABB& MIDENTITY()  // return reference.
-	{
+	static AABB& MIDENTITY() {
 		static AABB a( Vector3f( 0.0f ), Vector3f( 1.0f ) );
 		return a;
 	}
+
+	static AABB MINVALID() {
+		return AABB::INVALID;
+	}
+
+	static constexpr bool IsSerializable() { return true; }
 
 	AABB() {
 	}
@@ -254,8 +259,11 @@ public:
 	//	return ret;
 	//}
 
-	inline Vector3f minPoint() const { return mMinPoint; }
-	inline Vector3f maxPoint() const { return mMaxPoint; }
+	inline Vector3f minPoint() { return mMinPoint; }
+	inline Vector3f maxPoint() { return mMaxPoint; }
+
+    inline const Vector3f& minPoint() const { return mMinPoint; }
+    inline const Vector3f& maxPoint() const { return mMaxPoint; }
 
 	inline void setMinPoint( const Vector3f& val ) { mMinPoint = val; }
 	inline void setMaxPoint( const Vector3f& val ) { mMaxPoint = val; }

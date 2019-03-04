@@ -42,8 +42,10 @@ namespace Http {
         }
         request->set_header( "Content-Length", std::to_string( length ) );
         request->set_method( "POST" );
-        const restbed::Bytes bodybuffer(buff, buff + length);
-        request->set_body( bodybuffer );
+        if ( length > 0 ) {
+            const restbed::Bytes bodybuffer(buff, buff + length);
+            request->set_body( bodybuffer );
+        }
 
         return request;
     }
@@ -54,7 +56,7 @@ namespace Http {
 
         res.uri = url.toString();
         res.statusCode = response->get_status_code();
-        res.length = response->get_header( "Content-Length", 0 );
+        res.length = static_cast<uint64_t>(response->get_header( "Content-Length", 0 ));
         res.contentType = response->get_header( "Content-Type", "application/json" );
         res.ETag = response->get_header( "ETag", "" );
         res.lastModified = response->get_header( "Content-Last-Modified", "" );
@@ -109,14 +111,11 @@ namespace Http {
         std::shared_ptr< restbed::Response > res;
         try {
             restbed::Http::async(
-                    request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
-                                 std::shared_ptr< restbed::Response > res) {
-                        LOGR( "[HTTP-GET] Response code: %d - %s",
-                              res->get_status_code(), res->get_status_message().c_str() );
-                        if ( isSuccessStatusCode( res->get_status_code()) ) {
-                            callback( handleResponse( res, url, rf ) );
-                        }
-                    }, settings );
+                request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
+                              std::shared_ptr< restbed::Response > res) {
+                LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
+                callback( handleResponse( res, url, rf ) );
+            }, settings );
         } catch ( const std::exception& ex ) {
             LOGR( "[HTTP-GET-RESPONSE][ERROR] on %s", url.toString().c_str());
             LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
@@ -144,10 +143,8 @@ namespace Http {
                                       auto rcode = res->get_status_code();
                                       LOGR("[HTTP-POST] Response code %d - %s ", rcode,
                                                                                  res->get_status_message().c_str() );
-                                      if ( isSuccessStatusCode(rcode) ) {
-                                          if ( callback ) {
-                                              callback( handleResponse( res, url, ResponseFlags::None ) );
-                                          }
+                                      if ( callback ) {
+                                          callback( handleResponse( res, url, ResponseFlags::None ) );
                                       }
                                   }, settings );
         } catch ( const std::exception& ex ) {

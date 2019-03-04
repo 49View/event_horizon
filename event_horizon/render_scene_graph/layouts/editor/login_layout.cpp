@@ -14,9 +14,13 @@ void ImGuiLogin::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     static std::string projectBuf;
     static std::string emailBuf;
     static std::string passwordBuf;
+
     projectBuf.reserve(256);
-    if ( Http::project().size() < 256 && projectBuf.empty() ) {
-        projectBuf = Http::project();
+    emailBuf.reserve(256);
+    passwordBuf.reserve(256);
+
+    if ( Http::cachedLoginFields().project.size() < 256 && projectBuf.empty() ) {
+        projectBuf = Http::cachedLoginFields().project;
         strcpy( projectInputChar, projectBuf.data() );
     }
 

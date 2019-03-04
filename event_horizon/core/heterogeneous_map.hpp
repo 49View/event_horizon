@@ -11,12 +11,19 @@
 #include <core/name_policy.hpp>
 #include <core/math/vector4f.h>
 #include <core/math/matrix4f.h>
+#include <core/serializable.hpp>
+#include <core/hashable.hpp>
 
 using TextureIndex = TextureUniformDesc;
+class SerializeBin;
+class DeserializeBin;
 
-class HeterogeneousMap : public NamePolicy, public std::enable_shared_from_this<HeterogeneousMap> {
+class HeterogeneousMap : public virtual Hashable,
+                         public std::enable_shared_from_this<HeterogeneousMap> {
 public:
+    virtual ~HeterogeneousMap() = default;
     void inject( const HeterogeneousMap& source );
+    void injectIfNotPresent( const HeterogeneousMap& source );
     void assign( const std::string& uniformName, int data );
     void assign( const std::string& uniformName, float data );
     void assign( const std::string& uniformName, double data );
@@ -29,10 +36,22 @@ public:
     void assign( const std::string& uniformName, const Matrix3f& data );
     void assign( const std::string& uniformName, const std::vector<Vector3f>& data );
 
+    void assignIfNotPresent( const std::string& uniformName, int data );
+    void assignIfNotPresent( const std::string& uniformName, float data );
+    void assignIfNotPresent( const std::string& uniformName, double data );
+    void assignIfNotPresent( const std::string& uniformName, const std::string& data );
+    void assignIfNotPresent( const std::string& uniformName, const TextureUniformDesc& data );
+    void assignIfNotPresent( const std::string& uniformName, const Vector2f& data );
+    void assignIfNotPresent( const std::string& uniformName, const Vector3f& data );
+    void assignIfNotPresent( const std::string& uniformName, const Vector4f& data );
+    void assignIfNotPresent( const std::string& uniformName, const Matrix4f& data );
+    void assignIfNotPresent( const std::string& uniformName, const Matrix3f& data );
+    void assignIfNotPresent( const std::string& uniformName, const std::vector<Vector3f>& data );
+
     int NumUniforms() const { return mNumUniforms; }
-    int64_t Hash() const { return mHash; }
 
     std::vector<std::string> getTextureNames() const;
+    std::unordered_map<std::string, std::string> getTextureNameMap() const;
     std::string getTexture( const std::string& uniformName ) const;
     float getInt( const std::string & uniformName ) const;
     float getFloatWithDefault( const std::string& uniformName, const float def ) const;
@@ -59,6 +78,7 @@ public:
     bool hasVector4f( const std::string& uniformName ) const;
     bool hasMatrix4f( const std::string& uniformName ) const;
     bool hasMatrix3f( const std::string& uniformName ) const;
+    bool hasVectorOfVector3f( const std::string& uniformName ) const;
 
     std::shared_ptr<HeterogeneousMap> clone();
     void clone( const HeterogeneousMap& _map );
@@ -94,9 +114,14 @@ public:
         }
     }
 
+    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const;
+    void deserializeImpl( std::shared_ptr<DeserializeBin> reader );
+
+protected:
+    std::string calcHashImpl() override;
+
 private:
     void calcTotalNumUniforms();
-    void calcHash();
 
 private:
     std::unordered_map<std::string, TextureIndex> mTextures;
@@ -109,8 +134,4 @@ private:
     std::unordered_map<std::string, Matrix3f> mM3fs;
     std::unordered_map<std::string, Matrix4f> mM4fs;
     int mNumUniforms = 0;
-    int64_t mHash = 0;
 };
-
-
-

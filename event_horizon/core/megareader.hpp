@@ -15,6 +15,7 @@
 #include "math/rect2f.h"
 #include "math/aabb.h"
 #include "metadata.h"
+#include <core/boxable.hpp>
 
 using namespace rapidjson;
 
@@ -146,6 +147,8 @@ public:
 		}
 	}
 
+	void deserialize( const char* name, EmptyBox& rect ) const {
+	}
 
 	void deserialize( const char* name, JMATH::AABB& rect ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {

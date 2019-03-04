@@ -20,15 +20,6 @@ void SceneGraph::remove( const UUID& _uuid ) {
     }
 }
 
-void SceneGraph::add( const std::vector<std::shared_ptr<Material>> _materials ) {
-    for ( const auto& m : _materials ) {
-        for ( const auto& [k,v] : m->Buffers() ) {
-            ImageBuilder{ k }.makeDirect( TL(), v );
-        }
-        ML().add( m );
-    }
-}
-
 void SceneGraph::update() {
     for ( auto& [k,v] : geoms ) {
         std::visit( lambdaUpdateAnimVisitor, v );
@@ -60,7 +51,7 @@ void SceneGraph::cmdCalcLightmaps( const std::vector<std::string>& _params ) {
     cmdCalcLightmapsImpl( _params );
 }
 
-SceneGraph::SceneGraph( CommandQueue& cq, FontManager& _fm ) : fm(_fm) {
+SceneGraph::SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb ) : fm(_fm), sb(_sb) {
     hcs = std::make_shared<CommandScriptSceneGraph>(*this);
     cq.registerCommandScript(hcs);
     mapGeomType(0, "none");
@@ -124,38 +115,6 @@ bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
     }
 
     return ret;
-}
-
-void AssetManager::add( [[maybe_unused]] const std::string& _key, GeomAssetSP _h ) {
-    assetsHierList[_h->Name()] = _h;
-}
-
-GeomAssetSP AssetManager::findHier( const std::string& _key ) {
-    if ( auto h = assetsHierList.find(_key); h != assetsHierList.end() ) {
-        return h->second;
-    }
-    return nullptr;
-}
-
-AssetHierContainerIt AssetManager::begin() {
-    return assetsHierList.begin();
-}
-
-AssetHierContainerIt AssetManager::end() {
-    return assetsHierList.end();
-}
-
-AssetHierContainerCIt AssetManager::begin() const {
-    return assetsHierList.cbegin();
-}
-
-AssetHierContainerCIt AssetManager::end() const {
-    return assetsHierList.cend();
-}
-
-bool AssetManager::add( GeomFileAssetBuilder& gb, const std::vector<char>& _data ) {
-    assetsList[gb.Name()] = _data;
-    return true;
 }
 
 CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {

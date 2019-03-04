@@ -86,7 +86,7 @@ void f1( SceneLayout* _layout, [[maybe_unused]] Scene* _p ) {
         GB{GeomBuilderType::svg}.ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).col(Color4f::AQUAMARINE).buildr(_p->RSG());
 
         auto c = _p->CM().getCamera(Name::Foxtrot);
-        c->setPosition( Vector3f{0.0f, 1.0f, 3.0f} );
+        c->setPosition( Vector3f{0.0f, 1.0f, -3.0f} );
 
         auto cube = GB{ ShapeType::Cube }.col(Color4f::RED).at({0.0f, 0.0f, 0.0f}).buildr(_p->RSG());
 

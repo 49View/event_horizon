@@ -33,10 +33,6 @@ GeomData::GeomData(std::shared_ptr<Material> _material) : material(_material) {
 
 }
 
-GeomData::GeomData( std::shared_ptr<DeserializeBin> reader ) {
-	deserialize( reader );
-}
-
 GeomData::GeomData( const ShapeType _st,
 					const Vector3f& _pos, [[maybe_unused]] const Vector3f& _axis, const Vector3f& _scale,
 					std::shared_ptr<Material> _material,
@@ -138,12 +134,18 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _
 	return logoGeoms;
 }
 
-void GeomData::serialize( std::shared_ptr<SerializeBin> f ) {
-	f->write( mName );
-	material->serialize( f );
-	f->write( mBBox3d.mMinPoint );
-	f->write( mBBox3d.mMaxPoint );
-	f->write( mapping.direction );
+std::string GeomData::calcHashImpl() {
+	std::stringstream ss;
+	ss << material->Hash();
+	ss << mVdata.numIndices();
+	ss << mVdata.vcoords3d[0];
+	return ss.str();
+}
+
+void GeomData::serializeImpl( std::shared_ptr<SerializeBin> f ) const {
+	Publisher::serializeImpl(f);
+	f->write( material );
+	f->write( mVdata.BBox3d() );
 	f->write( mVdata.vIndices );
 	f->write( mVdata.vcoords3d );
 	f->write( mVdata.vnormals3d );
@@ -152,23 +154,12 @@ void GeomData::serialize( std::shared_ptr<SerializeBin> f ) {
 	f->write( mVdata.vUVs );
     f->write( mVdata.vUV2s );
 	f->write( mVdata.vColor );
-	f->write( wrapMappingCoords );
-	f->write( mWindingOrder );
 }
 
-void GeomData::serializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<SerializeBin> writer ) {
-//	writer->write( mVdata.vSHCoeffsR );
-//	writer->write( mVdata.vSHCoeffsG );
-//	writer->write( mVdata.vSHCoeffsB );
-}
-
-void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
-	reader->read( mName );
-	// -###- FIXME, reintroduce material readers
-	material = std::make_shared<Material>(S::WHITE_PBR, S::SH);//( reader );
-	reader->read( mBBox3d.mMinPoint );
-	reader->read( mBBox3d.mMaxPoint );
-	reader->read( mapping.direction );
+void GeomData::deserializeImpl( std::shared_ptr<DeserializeBin> reader ) {
+	Publisher::deserializeImpl(reader);
+	reader->read( material );
+	reader->read( mVdata.BBox3d() );
 	reader->read( mVdata.vIndices );
 	reader->read( mVdata.vcoords3d );
 	reader->read( mVdata.vnormals3d );
@@ -177,30 +168,10 @@ void GeomData::deserialize( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( mVdata.vUVs );
 	reader->read( mVdata.vUV2s );
 	reader->read( mVdata.vColor );
-	reader->read( wrapMappingCoords );
-	reader->read( mWindingOrder );
-
-//	mVdata.allocateEmptySHData();
 }
 
-void GeomData::deserializeSphericalHarmonics( [[maybe_unused]] std::shared_ptr<DeserializeBin> reader ) {
-//	reader->read( mVdata.vSHCoeffsR );
-//	reader->read( mVdata.vSHCoeffsG );
-//	reader->read( mVdata.vSHCoeffsB );
-}
-
-void GeomData::serializeDependencies( std::shared_ptr<SerializeBin> writer ) {
-	material->serializeDependencies( writer );
-}
-
-void GeomData::deserializeDependencies( [[maybe_unused]] std::shared_ptr<SerializeBin> reader ) {
-
-}
-
-void GeomData::reset() {
-	mBBox3d = AABB::INVALID;
-	mVdata.clear();
-	mWindingOrder = WindingOrder::CCW;
+void GeomData::serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const {
+	writer->writeDep(material);
 }
 
 void GeomData::setMappingData( const GeomMappingData& _mapping ) {
@@ -208,70 +179,6 @@ void GeomData::setMappingData( const GeomMappingData& _mapping ) {
 
 	if ( mapping.bDoNotScaleMapping ) doNotScaleMapping();
 }
-
-//void GeomData::set( const std::string& uniformName, float data ) {
-//	mMaterial->setConstant( uniformName, data );
-//}
-//
-//void GeomData::set( const std::string& uniformName, std::shared_ptr<Texture> data ) {
-//	mMaterial->setConstant( uniformName, data );
-//	if ( uniformName == UniformNames::colorTexture ) {
-//		setTextureCoordsMultiplier();
-//	}
-//}
-//
-//void GeomData::setTextureSet( const std::string& baseTextureName ) {
-//	std::shared_ptr<Texture> data = TM.T( baseTextureName + ".png" );
-//	mMaterial->setConstant( UniformNames::colorTexture, data );
-//	setTextureCoordsMultiplier();
-//	std::string normalMapName = baseTextureName + "_n.png";
-//	mMaterial->setConstant( UniformNames::normalTexture, TM.T( normalMapName ) );
-//}
-//
-//void GeomData::set( const std::string& uniformName, const Vector2f& data ) {
-//	mMaterial->setConstant( uniformName, data );
-//}
-//
-//void GeomData::set( const std::string& uniformName, const Vector3f& data ) {
-//	mMaterial->setConstant( uniformName, data );
-//}
-//
-//void GeomData::set( const std::string& uniformName, const Vector4f& data ) {
-//	mMaterial->setConstant( uniformName, data );
-//}
-//
-//void GeomData::set( const std::string& uniformName, const Matrix4f& data ) {
-//	mMaterial->setConstant( uniformName, data );
-//}
-//
-//void GeomData::set( const std::string& uniformName, const Matrix3f& data ) {
-//	mMaterial->setConstant( uniformName, data );
-//}
-//
-//void GeomData::setTextureCoordsMultiplier() {
-//	if ( bDoNotScaleMapping ) return;
-//
-//	std::shared_ptr<Texture> colorTexture = ( mMaterial->Constants()->hasTexture( UniformNames::colorTexture ) ) ? getColorTexture() : TM.T( "white.png" );
-//
-//	float fuvScaleCM = 2048.0f;
-//	Vector2f normUVScale = { fuvScaleCM / colorTexture->getHeightf(), fuvScaleCM / colorTexture->getWidthf() };
-//	uvScale = { normUVScale.x(), -normUVScale.y() };
-//	uvScaleInv = reciprocal( uvScale );
-//}
-//
-//Vector3f GeomData::getColor() const {
-//	return mMaterial->Constants()->getVector3f( UniformNames::diffuseColor );
-//}
-//
-//float GeomData::getOpacity() const {
-//	float opactity;
-//	mMaterial->Constants()->get( UniformNames::opacity, opactity );
-//	return opactity;
-//}
-//
-//std::shared_ptr<Texture> GeomData::getColorTexture() const {
-//	return mMaterial->Constants()->getTexture( UniformNames::colorTexture );
-//}
 
 void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& size, int subDivs ) {
 	PolyStruct ps;
@@ -297,7 +204,7 @@ void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& s
 	}
 
 	mVdata.fill(ps);
-	mBBox3d = ps.bbox3d;
+	mVdata.BBox3d(ps.bbox3d);
 }
 
 Vector3f GeomData::normalFromPoints( const Vector3f* vs ) {
@@ -430,9 +337,9 @@ void GeomData::pushTriangle( const Vector3f& v1, const Vector3f& v2, const Vecto
 							 const Vector3f& vb1, const Vector3f& vb2, const Vector3f& vb3 ) {
 	//	ASSERT(!isCollinear(v1, v2, v3));
 
-	mBBox3d.expand( v1 );
-	mBBox3d.expand( v2 );
-	mBBox3d.expand( v3 );
+	BBox3d().expand( v1 );
+	BBox3d().expand( v2 );
+	BBox3d().expand( v3 );
 
 	Vector3f tangent1 = vt1;
 	Vector3f tangent2 = vt2;
@@ -848,14 +755,14 @@ void GeomData::transform( const Matrix4f& m ) {
 	}
 }
 
-void GeomData::bake( const Matrix4f& m, std::shared_ptr<GeomData>& ret ) {
-	if ( ret ) {
-		*ret = *this;
-	} else {
-		ret = std::shared_ptr<GeomData>( new GeomData( *this ) );
-	}
-
-	ret->transform( m );
+void GeomData::bake( [[maybe_unused]] const Matrix4f& m, [[maybe_unused]] std::shared_ptr<GeomData>& ret ) {
+//	if ( ret ) {
+//		*ret = *this;
+//	} else {
+//		ret = std::shared_ptr<GeomData>( new GeomData( *this ) );
+//	}
+//
+//	ret->transform( m );
 }
 
 void GeomData::scale( float /*factor*/ ) {
@@ -1075,9 +982,7 @@ WindingOrderT GeomData::getWindingOrder() const {
 	return mWindingOrder;
 }
 
-GeomData::~GeomData() {
-
-}
+GeomData::~GeomData() = default;
 
 //void VData::allocateEmptySHData() {
 //	vSHCoeffsR = std::vector<Matrix3f>( vcoords3d.size() );
@@ -1123,7 +1028,7 @@ void VData::fill( const PolyStruct& ps ) {
 	}
 }
 
-void VData::fillIndices( const std::vector<int>& _indices ) {
+void VData::fillIndices( const std::vector<int32_t>& _indices ) {
 	vIndices = _indices;
 //	for ( int q = 0; q < _indices.size(); q+=3 ) {
 //		vIndices[q+0] = _indices[q+1];
@@ -1387,30 +1292,9 @@ void VData::swapIndicesWinding( Primitive _pr ) {
 	}
 }
 
-GeomDeserializeDependencies GeomData::gatherDependencies( std::shared_ptr<DeserializeBin> reader ) {
-	uint32_t numEntries = 0;
-	uint32_t dependencyTag = 0;
-	std::string dependencyName;
-	GeomDeserializeDependencies ret;
-
-	reader->read( numEntries );
-	while ( numEntries > 0 ) {
-		reader->read( dependencyTag );
-		for ( uint32_t q = 0; q < numEntries; q++ ) {
-			reader->read( dependencyName );
-			switch ( dependencyTag ) {
-				case dependecyTagTexture:
-					ret.textureDeps.emplace_back( dependencyName );
-					break;
-				case dependecyTagMaterial:
-					ret.materialDeps.emplace_back( dependencyName );
-					break;
-			}
-		}
-		reader->read( numEntries );
-	}
-
-	return ret;
+std::string GeomData::generateThumbnail() const {
+//        if ( thumb ) {
+//            return { thumb->begin(), thumb->end() };
+//        }
+	return std::string{};
 }
-
-uint64_t GeomData::Version() { return NodeVersion(1000); }

@@ -33,6 +33,7 @@ GLenum depthFunctionToGl( DepthFunction mode );
 GLenum targetToGl( TextureTargetMode mode );
 GLenum imageTargetToGl( TextureTargetMode mode, bool multiSampled );
 GLenum nameToCubeMapSide( const std::string& name);
+GLuint nameToCubeMapLayer( const std::string& name );
 
 UniformFormat GLToUniformFormat( GLenum uf );
 

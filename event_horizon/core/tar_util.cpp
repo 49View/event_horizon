@@ -21,7 +21,7 @@
 
 namespace tarUtil {
 
-    std::vector<FileDesc> untar( const std::vector<char>& fin ) {
+    std::vector<FileDesc> untar( const SerializableContainer& fin ) {
         std::vector<FileDesc> fileDescs;
         //Initialize a zero-filled block we can compare against (zero-filled header block --> end of TAR archive)
         char zeroBlock[512];
@@ -29,7 +29,7 @@ namespace tarUtil {
         //Start reading
         bool nextEntryHasLongName = false;
         //size_t bytesRead = 0;
-        const char *rawBytes = fin.data();
+        const unsigned char *rawBytes = fin.data();
 
         static const int TAR_HEADER_SIZE = 512;
         while ( true ) { //Stop if end of file has been reached or any error occured

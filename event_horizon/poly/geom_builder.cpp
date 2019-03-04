@@ -4,13 +4,8 @@
 
 #include "geom_builder.h"
 #include <core/node.hpp>
+#include <core/entity_factory.hpp>
 #include <poly/poly.hpp>
-
-GeomBuilder::GeomBuilder( GeomAssetSP _h ) : MaterialBuildable(S::SH, S::WHITE_PBR) {
-    builderType = GeomBuilderType::import;
-    elem = _h;
-    Name( _h->Name() );
-}
 
 GeomBuilder::GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull ) : MaterialBuildable(S::SH, S::WHITE_PBR){
     std::vector<Vector3f> lverts;
@@ -99,36 +94,30 @@ GeomBuilder::GeomBuilder( const std::vector<PolyLine>& _plist ) : MaterialBuilda
     polyLines = _plist;
 }
 
-void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
-
-    auto& sg = static_cast<SceneGraph&>(_md);
-
-    auto reader = std::make_shared<DeserializeBin>(sg.AL().get( Name()), GeomData::Version());
-    auto deps = GeomData::gatherDependencies( reader );
-
-    for ( const auto& d : deps.textureDeps ) {
-        addDependency<ImageBuilder>( d, sg.TL());
-    }
-    for ( const auto& d : deps.materialDeps ) {
-        addDependency<MaterialBuilder>( d, sg.ML() );
-    }
-}
+//void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
+//
+//    auto& sg = static_cast<SceneGraph&>(_md);
+//
+//    auto reader = std::make_shared<DeserializeBin>(sg.AL().get( Name()), GeomData::Version());
+//    auto deps = GeomData::gatherDependencies( reader );
+//
+//    for ( const auto& d : deps.textureDeps ) {
+//        addDependency<ImageBuilder>( d, sg.TL());
+//    }
+//    for ( const auto& d : deps.materialDeps ) {
+//        addDependency<MaterialBuilder>( d, sg.ML() );
+//    }
+//}
 
 void GeomBuilder::createDependencyList( DependencyMaker& _md ) {
 
     auto& sg = static_cast<SceneGraph&>(_md);
 
-    if ( builderType != GeomBuilderType::import ) {
-        if ( builderType == GeomBuilderType::file ) {
-            addDependency<GeomFileAssetBuilder>( Name(), sg.AL());
-        } else {
-            if ( !material->isStreammable() ) { // is material is streammable do not try to load the entity resouce from server
-                bMaterialDep = addDependency<MaterialBuilder>( material->Name(), sg.ML());
-            }
-            if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
-                addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
-            }
-        }
+    if ( !material->isStreammable() ) { // is material is streammable do not try to load the entity resouce from server
+        bMaterialDep = addDependency<MaterialBuilder>( material->Name(), sg.ML());
+    }
+    if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
+        addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
     }
 
     addDependencies( std::make_shared<GeomBuilder>( *this ), _md );
@@ -160,24 +149,21 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
     }
 
     switch ( builderType ) {
-        case GeomBuilderType::import:
-//            sg.add( matBuilders );
-        break;
-        case GeomBuilderType::file:
-            if ( auto ret = sg.AL().findHier( Name()); ret != nullptr ) {
-                createFromAsset( ret->clone() );
-            } else {
-                builderType = GeomBuilderType::asset;
-                deserializeDependencies( _md );
-                addDependencies( std::make_shared<GeomBuilder>( *this ), _md );
-                return;
-            }
-        case GeomBuilderType::asset: {
-            auto asset = std::make_shared<GeomAsset>( sg.AL().get(Name()) );
-            sg.AL().add( Name(), asset );
-            createFromAsset( asset );
-        }
-        break;
+//        case GeomBuilderType::file:
+//            if ( auto ret = sg.AL().findHier( Name()); ret != nullptr ) {
+//                createFromAsset( ret->clone() );
+//            } else {
+//                builderType = GeomBuilderType::asset;
+//                deserializeDependencies( _md );
+//                addDependencies( std::make_shared<GeomBuilder>( *this ), _md );
+//                return;
+//            }
+//        case GeomBuilderType::asset: {
+//            auto asset = std::make_shared<GeomAsset>( sg.AL().get(Name()) );
+//            sg.AL().add( Name(), asset );
+//            createFromAsset( asset );
+//        }
+//        break;
         case GeomBuilderType::shape:
             createFromProcedural( std::make_shared<GeomDataShapeBuilder>( shapeType, pos, axis, scale ), sg );
             break;
@@ -220,7 +206,7 @@ void GeomBuilder::assemble( DependencyMaker& _md ) {
     elem->updateExistingTransform( pos, axis, scale );
 
     if ( bAddToSceneGraph ) {
-        sg.add( std::static_pointer_cast<GeomAsset>(elem) );
+        sg.add( elem );
     }
 }
 
@@ -254,46 +240,6 @@ GeomBuilder& GeomBuilder::addOutline( const std::vector<Vector3f>& _polyLine, co
     return *this;
 }
 
-std::string GeomBuilder::generateThumbnail() const {
-    if ( thumb ) {
-        return { thumb->begin(), thumb->end() };
-    }
-    return std::string();
-}
-
-std::string GeomBuilder::generateRawData() const {
-    return elem ? elem->serialize() : "";
-}
-
-std::string GeomBuilder::toMetaData() const {
-    MegaWriter writer;
-
-    writer.StartObject();
-    writer.serialize( CoreMetaData{Name(), EntityGroup::Geom, GeomData::Version(),
-                                   generateThumbnail(), generateRawData(), generateTags()} );
-    writer.serialize( "BBox3d", elem->BBox3d() );
-    writer.EndObject();
-
-    return writer.getString();
-}
-
-ScreenShotContainerPtr& GeomBuilder::Thumb() {
-    if ( !thumb ) {
-        thumb = std::make_shared<ScreenShotContainer>();
-    }
-    return thumb;
-}
-
-void GeomBuilder::publish() const {
-    // Publish all materials first
-
-    for ( const auto& mb : matBuilders ) {
-        mb->publish();
-    }
-
-    Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
-}
-
 void internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
     if ( ln == Vector3f::ZERO ) {
         ln = normalize( crossProduct( v1,v2,v3 ));
@@ -319,7 +265,7 @@ void GeomBuilder::preparePolyLines() {
 }
 
 void GeomBuilder::elemCreate() {
-    if ( !elem) elem = std::make_shared<GeomAsset>();
+    if ( !elem) elem = std::make_shared<GeomAsset>(Name());
 }
 
 GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
@@ -334,15 +280,14 @@ GeomAssetSP GeomBuilder::buildr( DependencyMaker& _md ) {
 
 bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
 
-    AssetManager& sg = static_cast<AssetManager&>(_md);
-
     if ( _status == DependencyStatus::LoadedSuccessfully ) {
-        sg.add( *this, zlibUtil::inflateFromMemory( std::move(_data) ) );
-    } else {
-        return false;
+        auto& sg = dynamic_cast<SceneGraph&>(_md);
+        auto asset = EF::create<GeomAsset>( std::move(_data) );
+        asset->updateTransform();
+        sg.add( asset );
+        return true;
     }
-
-    return true;
+    return false;
 }
 
 GeomBuilderComposer::GeomBuilderComposer() {

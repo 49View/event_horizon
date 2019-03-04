@@ -19,6 +19,8 @@ namespace imageUtil {
     std::unique_ptr<uint8_t[]> resize( const unsigned char* _data, int length, int width, int height,
                                        int& channels, int& bpp );
 
+    void resizeCallbackb64(void* ctx, void*data, int size);
+
     std::unique_ptr<uint8_t[]> decodeFromMemoryStream( const unsigned char* _data, int length  );
     std::unique_ptr<uint8_t[]> decodeFromMemory( const unsigned char* _data,  int length, int& width, int& height,
                                                  int& channels, int& bpp, bool _isRaw = false );

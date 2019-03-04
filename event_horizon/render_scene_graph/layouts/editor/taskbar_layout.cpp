@@ -15,37 +15,47 @@ void ImGuiTaskbar::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     ImGui::Begin( title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize );
 
-//    if ( ImGui::Button( "Timeline" ) ) {
-//        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Timeline);
-//    }
-//    ImGui::SameLine();
-//    if ( ImGui::Button( "SceneGraph" ) ) {
-//        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Geom);
-//    }
-//    ImGui::SameLine();
-//    if ( ImGui::Button( "Camera" ) ) {
-//        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Camera);
-//    }
-//    ImGui::SameLine();
-//    if ( ImGui::Button( "Materials" ) ) {
-//        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Material);
-//    }
-//    ImGui::SameLine();
-//    if ( ImGui::Button( "Cloud Geom" ) ) {
-//        p->Layout()->toggleVisible(SceneLayoutDefaultNames::CloudGeom);
-//    }
-//    ImGui::SameLine();
-//    if ( ImGui::Button( "Cloud Mat" ) ) {
-//        p->Layout()->toggleVisible(SceneLayoutDefaultNames::CloudMaterial);
-//    }
-//    ImGui::SameLine();
-//    if ( ImGui::Button( "Images" ) ) {
-//        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Image);
-//    }
-//    ImGui::SameLine();
-//    if ( ImGui::Button( "Login" ) ) {
-//        p->Layout()->toggleVisible(SceneLayoutDefaultNames::Login);
-//    }
+    if ( ImGui::Button( "Timeline" ) ) {
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Timeline);
+    }
+    ImGui::SameLine();
+    if ( ImGui::Button( "SceneGraph" ) ) {
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Geom);
+    }
+    ImGui::SameLine();
+    if ( ImGui::Button( "Camera" ) ) {
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Camera);
+    }
+    ImGui::SameLine();
+    if ( ImGui::Button( "Materials" ) ) {
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Material);
+    }
+    ImGui::SameLine();
+    if ( ImGui::Button( "Cloud Geom" ) ) {
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::CloudGeom);
+    }
+    ImGui::SameLine();
+    if ( ImGui::Button( "Cloud Mat" ) ) {
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::CloudMaterial);
+    }
+    ImGui::SameLine();
+    if ( ImGui::Button( "Images" ) ) {
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Image);
+    }
+
+    static bool bFirstGather = true;
+    if ( bFirstGather && FM::isPersistentInitialized() ) {
+        Http::gatherCachedLogin();
+        bFirstGather = false;
+    }
+    float loginItemWidth = 180.0f;
+    float spacing = 10.0f;
+    ImVec2 bsize{loginItemWidth, 20.0f};
+    ImGui::SameLine(ImGui::GetWindowWidth() - (loginItemWidth + spacing));
+    auto loginString = Http::cachedLoginFields().email + " | " + Http::project();
+    if ( ImGui::Button( loginString.c_str(), bsize ) ) {
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Login);
+    }
 
     ImGui::End();
 

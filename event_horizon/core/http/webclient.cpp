@@ -8,6 +8,7 @@
 #include "../platform_util.h"
 #include "core/zlib_util.h"
 #include "core/string_util.h"
+#include "core/file_manager.h"
 
 static bool sUseLocalhost = false;
 static bool sUserLoggedIn = false;
@@ -23,7 +24,7 @@ const std::string Url::HttpsProtocol = "https";
 
 namespace zlibUtil {
     // Decompress
-    std::vector<char> inflateFromMemory( const Http::Result& _fin ) {
+    SerializableContainer inflateFromMemory( const Http::Result& _fin ) {
         return inflateFromMemory( uint8_p{std::move(_fin.buffer), _fin.length} );
     }
 }
@@ -210,6 +211,10 @@ namespace Http {
         postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary, callback );
     }
 
+    void post( const Url& url, ResponseCallbackFunc callback ) {
+        postInternal( url, nullptr, 0, HttpQuery::Binary, callback );
+    }
+
     void project( const std::string& _project ) {
         sProject = _project;
     }
@@ -220,10 +225,23 @@ namespace Http {
 
     void cacheLoginFields( const LoginFields& _lf ) {
         sCachedLoginFields = _lf;
+        if ( !_lf.isDaemon() ) {
+            FM::writeLocalTextFile( cacheFolder() + "lf", _lf.serialize() );
+        }
     }
 
     LoginFields cachedLoginFields() {
         return sCachedLoginFields;
+    }
+
+    LoginFields gatherCachedLogin() {
+        auto lf = FM::readLocalTextFile( cacheFolder() + "lf" );
+        if ( !lf.empty() ) {
+            LoginFields ret{lf};
+            cacheLoginFields( ret );
+            return ret;
+        }
+        return LoginFields{}; // this is guest / guest
     }
 
     void useLocalHost( const bool _flag ) {
@@ -289,29 +307,69 @@ namespace Http {
     }
 
     void xProjectHeader( const LoginFields& _lf ) {
-        // NDDADO: if dev and desktop let's use localhost for easy debugging
+        Http::project( _lf.project );
+//        Http::cacheLoginFields( _lf );
+    }
+
+    void initBase() {
 #ifdef USE_LOCALHOST
         Http::useLocalHost(true);
 #endif
-        Http::project( _lf.project );
-        Http::cacheLoginFields( _lf );
+        FM::initPersistent();
+    }
+    void init() {
+        initBase();
+        Http::login();
     }
 
-    bool login( const LoginFields& _lf ) {
-        Http::cacheLoginFields( _lf );
+    void initDaemon() {
+        initBase();
+        Http::login(LoginFields::Daemon());
+    }
 
-        post( Url{HttpFilePrefix::gettoken}, _lf.serialize(), [](const Http::Result& res) {
+    void login() {
+        loginSession();
+    }
+
+    void refreshToken() {
+        post( Url{HttpFilePrefix::refreshtoken}, [](const Http::Result& res) {
+            if( res.isSuccessStatusCode() ) {
+                RefreshToken rt( res.bufferString );
+                userToken( rt.token );
+                sessionId( rt.session );
+            }
+        } );
+    }
+
+    void loginSession() {
+        get( Url{HttpFilePrefix::user}, [](const Http::Result& res) {
+            if( res.isSuccessStatusCode() ) {
+                UserLogin ul{ res.bufferString };
+                sessionId( ul.session );
+                project( ul.project );
+                Socket::createConnection();
+            }
+            userLoggedIn( res.isSuccessStatusCode() );
+            if ( !hasUserLoggedIn() ) {
+                LOGRS( "[HTTP-RETRY] login ");
+                login ( Http::gatherCachedLogin() );
+            }
+        } );
+    }
+
+    void login( const LoginFields& lf ) {
+        post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf](const Http::Result& res) {
             if( res.isSuccessStatusCode() ) {
                 LoginToken lt(res.bufferString);
                 userToken( lt.token );
                 sessionId( lt.session );
                 project( lt.project );
+                Http::cacheLoginFields( lf );
+                Socket::createConnection();
             }
 
             userLoggedIn( res.isSuccessStatusCode() );
         } );
-
-        return hasUserLoggedIn();
     }
 
     void shutDown() {

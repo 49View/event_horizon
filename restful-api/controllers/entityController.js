@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const entityModel = require('../models/entity');
 const asyncModelOperations = require('../assistants/asyncModelOperations');
-
+const fsController = require('../controllers/fsController');
 
 exports.getMetadataFromBody = (checkGroup, checkRaw, req) => {
     if (req.body===null || !(req.body instanceof Object)) {
@@ -77,6 +77,16 @@ exports.deleteEntity = async (entityId) => {
     await entityModel.deleteOne({ _id: mongoose.Types.ObjectId(entityId)});
 }
 
+exports.deleteEntityComplete = async (project, entity) => {
+    currentEntity = entity.toObject();
+    console.log("[INFO] deleting entity " + currentEntity.metadata.contentHash);
+    const group = currentEntity.group;
+    //Remove current file from S3
+    await fsController.cloudStorageDelete( module.exports.getFilePath(project, group, currentEntity.metadata.contentHash), "eventhorizonentities");
+    //Delete existing entity
+    await module.exports.deleteEntity(currentEntity._id);
+}
+
 exports.getEntityByIdProject = async (project, entityId, returnPublic) => {
     let query;
     if (returnPublic) {
@@ -87,6 +97,18 @@ exports.getEntityByIdProject = async (project, entityId, returnPublic) => {
     const result = await entityModel.findOne(query);
 
     return result!==null?result.toObject():null;
+}
+
+exports.getEntitiesOfProject = async (project, entityId, returnPublic) => {
+    let query;
+    if (returnPublic) {
+        query = [ {"project":project}, {"public": true} ];
+    } else {
+        query = {"project":project};
+    }
+    const result = await entityModel.find(query);
+
+    return result!==null?result:null;
 }
 
 exports.getEntitiesByProjectGroupTags = async (project, group, tags, version, fullData, randomElements) => {

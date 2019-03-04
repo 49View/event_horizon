@@ -78,9 +78,9 @@ public:
         return GL_FLOAT;
     }
 
-    inline int64_t hash() const {
-        return material->Hash();
-    }
+//    inline std::string hash() const {
+//        return material->Hash();
+//    }
 
     inline std::shared_ptr<RenderMaterial> getMaterial() const {
         return material;
@@ -193,7 +193,7 @@ private:
     bool dynamic = false;
     std::string mName;
 
-    static int64_t  sMaterialHash;
+    static std::string  sMaterialHash;
     static uint64_t sCountInc;
 };
 
