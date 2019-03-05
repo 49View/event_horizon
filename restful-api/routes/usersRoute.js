@@ -3,6 +3,18 @@ const userController = require('../controllers/userController');
 
 const router = express.Router();
 
+router.get("/myProject", async (req,res,next) => {
+
+    let dbUsers = null;
+    try {
+        dbUsers = await userController.getUsersByProject(req.user.project);
+    } catch (ex) {
+        console.log("Error getting users for project "+req.user.project);
+        dbUsers=null;
+    }
+    dbUsers===null?res.sendStatus(400):res.json(dbUsers);
+});
+
 router.get("/", (req, res, next) => {
     // console.log("USER GET /");
     // res.send("dado");

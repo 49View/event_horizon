@@ -6,6 +6,40 @@ const asyncModelOperations = require('../assistants/asyncModelOperations');
 
 const ObjectId = mongoose.Types.ObjectId;
 
+
+const getUsersByProject = async (project) => {
+
+    const query = [
+        {
+            '$match': {
+                'project': { "$regex": project + "$", "$options": "i" }
+            }
+        }, {
+            '$lookup': {
+                'from': 'users', 
+                'localField': 'userId', 
+                'foreignField': '_id', 
+                'as': 'user'
+            }
+        }, {
+            '$unwind': {
+                'path': '$user'
+            }
+        }, {
+            '$project': {
+                '_id': '$user._id', 
+                'name': '$user.name', 
+                'email': '$user.email', 
+                'guest': '$user.guest', 
+                'project': '$project', 
+                'roles': '$roles'
+            }
+        }
+    ];
+    
+    return await asyncModelOperations.aggregate(userRoleModel,query);
+}
+
 const getUserByEmail = async (email) => {
     
     let dbUser = null;
@@ -151,4 +185,8 @@ exports.removeRolesForProject = async (project, email, roles) => {
     const update = { $pull: { roles: {$in:roles}}};
     const options = {};
     await userRoleModel.updateOne(query, update, options);
+}
+
+exports.getUsersByProject = async (project) => {
+    return await getUsersByProject(project);
 }

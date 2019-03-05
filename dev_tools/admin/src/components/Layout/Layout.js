@@ -28,9 +28,22 @@ class Layout extends Component {
             logged: false
         },
         {
+            text: "Users",
+            link: "Users",
+            logged: true,
+            role: "admin"
+        },
+        {
+            text: "Users",
+            link: "Users",
+            logged: true,
+            role: "admin"
+        },
+        {
             text: "Logout",
             link: "Logout",
-            logged: true
+            logged: true,
+            role: null
         }
     ]
     
