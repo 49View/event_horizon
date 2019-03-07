@@ -366,7 +366,7 @@ public:
     bool isKeyInRange( const int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
 
     bool isTakingScreenShot() {
-        return mbTakeScreenShot && ++mTakeScreenShotDelay > 2 || false;
+        return mbTakeScreenShot && ++mTakeScreenShotDelay > 2;
     }
 
     void takeScreenShot( bool _value = true ) {
