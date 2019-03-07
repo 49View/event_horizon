@@ -14,6 +14,7 @@ enum class GeomMapping {
     SphericalUV,
     Cube,
     Planar,
+    PlanarNoTile,
     Cylindrical
 };
 

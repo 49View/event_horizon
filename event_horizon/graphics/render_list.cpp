@@ -415,7 +415,6 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
     }
 
     return framebuffer;
-
 }
 
 std::shared_ptr<Skybox> RLTargetPBR::createSkybox() {
@@ -712,19 +711,21 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     mSkybox->render();
 
+    for ( const auto& [k, vl] : rr.CL() ) {
+        if ( isKeyInRange(k) ) {
+            rr.addToCommandBuffer( vl.mVList );
+        }
+    }
+
     cb.pushCommand( { CommandBufferCommandName::depthWriteFalse } );
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k) ) {
             rr.addToCommandBuffer( vl.mVListTransparent );
         }
     }
-
     cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
-    for ( const auto& [k, vl] : rr.CL() ) {
-        if ( isKeyInRange(k) ) {
-            rr.addToCommandBuffer( vl.mVList );
-        }
-    }
+    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
+
 
     endCL( cb );
 }

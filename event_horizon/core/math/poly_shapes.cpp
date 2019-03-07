@@ -355,6 +355,18 @@ void Cube( Topology& mesh ) {
     mesh.addTriangle( 4, 0, 2 );
 }
 
+void Panel( Topology& mesh ) {
+    // Vertices
+
+    mesh.vertices.emplace_back( Vector3f( -0.500000, -0.500000, 0.000000 ));
+    mesh.vertices.emplace_back( Vector3f( 0.500000 , -0.500000, 0.000000 ));
+    mesh.vertices.emplace_back( Vector3f( -0.500000, 0.500000 , 0.000000 ));
+    mesh.vertices.emplace_back( Vector3f( 0.500000 , 0.500000 , 0.000000 ));
+
+    // Faces
+    mesh.addQuad(1, 0, 3, 2);
+}
+
 void Cylinder( Topology& mesh, int edges ) {
     // Vertices
 
@@ -655,7 +667,28 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
                     ret.uvs[q] = ( n[0] > 0.0f ? v.yz() : -v.yz() ) * size.yz();
                     break;
                 case 1:
-                    ret.uvs[q] = (( n[1] > 0.0f ? v.zx() : -v.zx() ) + size.zx()*0.0f ) * size.zx();
+                    ret.uvs[q] = ( n[1] > 0.0f ? v.zx() : -v.zx() ) * size.zx();
+                    break;
+                case 2:
+                    ret.uvs[q] = ( n[2] > 0.0f ? v.xy() : -v.xy() ) * size.xy();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    if ( mt == GeomMapping::PlanarNoTile ) {
+        const Vector3f off = ret.bbox3d.size() * 0.5f;
+        for ( int q = 0; q < ret.numIndices; q++ ) {
+            Vector3f v = ret.verts[ret.indices[q]] + off;
+            Vector3f n = ret.normals[q];
+            switch ( n.dominantElement() ) {
+                case 0:
+                    ret.uvs[q] = ( n[0] > 0.0f ? v.yz() : -v.yz() ) * size.yz();
+                    break;
+                case 1:
+                    ret.uvs[q] = ( n[1] > 0.0f ? v.zx() : -v.zx() ) * size.zx();
                     break;
                 case 2:
                     ret.uvs[q] = ( n[2] > 0.0f ? v.xy() : -v.xy() ) * size.xy();
@@ -780,6 +813,14 @@ PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
     Cube( mesh );
 
     return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
+}
+
+PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
+
+    Topology mesh;
+    Panel( mesh );
+
+    return createGeom( mesh, center, size, GeomMapping::PlanarNoTile, 0 );
 }
 
 PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const int subdivs ) {

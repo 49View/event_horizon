@@ -243,6 +243,11 @@ std::string Material::generateThumbnail() const {
     return std::string{ thumb->data(), thumb->size() };
 }
 
+float Material::translucency() const {
+    if ( shaderName == S::YUV_GREENSCREEN ) return 0.5f;
+    return getOpacity();
+}
+
 // *********************************************************************************************************
 // Material Buildable
 // *********************************************************************************************************

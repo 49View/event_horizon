@@ -170,6 +170,7 @@ public:
     void Buffers( MaterialImageCallback imageCallback );
 
     bool isStreammable() const;
+    float translucency() const;
 
 protected:
     std::string calcHashImpl() override;

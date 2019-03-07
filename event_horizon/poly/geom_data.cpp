@@ -193,6 +193,9 @@ void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& s
 		case ShapeType::Cube:
 			ps = createGeomForCube( center, size );
 			break;
+		case ShapeType::Panel:
+			ps = createGeomForPanel( center, size );
+			break;
 		case ShapeType::Pillow:
 			ps = createGeomForPillow( center, size, subDivs );
 			break;
@@ -205,6 +208,7 @@ void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& s
 
 	mVdata.fill(ps);
 	mVdata.BBox3d(ps.bbox3d);
+	BBox3d( ps.bbox3d );
 }
 
 Vector3f GeomData::normalFromPoints( const Vector3f* vs ) {

@@ -269,12 +269,12 @@ vec3 diffuseV = Lo + (irradiance * albedo );
 const float MAX_REFLECTION_LOD = 9.0;
 vec3 R = reflect(-V, N);
 // vec3 prefilteredColor = textureLod(ibl_specularMap, R, 0.0 + (0.5 * MAX_REFLECTION_LOD)).rgb;
-vec3 prefilteredColor = texture(ibl_specularMap, R, 1*MAX_REFLECTION_LOD).rgb;
+vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness*MAX_REFLECTION_LOD).rgb;
 // gr = prefilteredColor.r * 0.3 + prefilteredColor.g * 0.59 + prefilteredColor.b * 0.11;
 // prefilteredColor.rgb = vec3(gr);
 vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
-specular = pow(specular, vec3(2.2/1.0)); 
+specular = pow(specular, vec3(4.2/1.0)); 
 
 vec3 ambient = (kD * diffuseV + specular) * visibility* ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
 // vec3 ambient = (kD );

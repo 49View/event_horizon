@@ -124,8 +124,9 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 }
 
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
-    auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f );
-    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, _source->Data()->getMaterial() }
+    auto mat = _source->Data()->getMaterial();
+    auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), mat->translucency() );
+    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, mat }
             .p(generateGeometryVP(_source->Data())).n(_source->UUiD()).g(_source->GHType()).build();
 }
 
