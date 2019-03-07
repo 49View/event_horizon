@@ -270,8 +270,6 @@ public:
                                                        const Vector2f& pivot = Vector2f::ZERO );
     static std::vector<Vector3f> utilGenerateFlatBoxFromSize( float width, float height, float z );
 
-    JMATH::AABB BBox3d() const { return mVdata.BBox3d(); }
-    void BBox3d( const JMATH::AABB& val ) { mVdata.BBox3d(val); }
     void Bevel( const Vector3f& bevelAmount );
     Vector3f Bevel() const;
 

@@ -22,6 +22,7 @@ struct FollowerPoly {
 	std::array<Vector3f, 4> vs;
 	std::array<Vector2f, 4> vtcs;
     std::array<Vector3f, 4> vncs;
+	std::array<size_t,   4> vindices;
 	Vector3f vn;
 };
 

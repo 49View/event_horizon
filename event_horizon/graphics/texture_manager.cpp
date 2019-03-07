@@ -19,7 +19,6 @@ std::shared_ptr<Texture> TextureManager::createTexture( TextureRenderData& tb ) 
     auto ltexture = std::make_shared<Texture>( tb );
 
     mTextures[tb.Name()] = ltexture;
-    if ( tb.ttm == TEXTURE_CUBE_MAP ) mTextures[cubeMapTName(tb.Name())] = ltexture;
 
     return ltexture;
 }
@@ -32,7 +31,6 @@ std::shared_ptr<Texture> TextureManager::createTexture( const std::string& _name
     auto ltexture = std::make_shared<Texture>( tb );
 
     mTextures[tb.Name()] = ltexture;
-    if ( tb.ttm == TEXTURE_CUBE_MAP ) mTextures[cubeMapTName(tb.Name())] = ltexture;
 
     return ltexture;
 }

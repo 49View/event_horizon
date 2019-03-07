@@ -17,6 +17,7 @@ namespace S {
     const std::string YUV_GREENSCREEN = "PN_YUV_GREENSCREEN";
 
     const std::string PLAIN_CUBEMAP = "PN_PLAIN_CUBEMAP";
+    const std::string SKYBOX_CUBEMAP = "SKYBOX_CUBEMAP";
     const std::string EQUIRECTANGULAR = "PN_EQUIRECTANGULAR";
     const std::string CONVOLUTION = "PN_PLAIN_CONVOLUTION";
     const std::string IBL_SPECULAR = "IBL_SPECULAR";

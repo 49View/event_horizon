@@ -175,7 +175,7 @@ void Renderer::clearCommandList() {
 
 void Renderer::renderCommands( int eye ) {
     //PROFILE_BLOCK("Total Render render");
-    CB_R().render( eye );
+    CB_U().render( eye );
 }
 
 std::shared_ptr<VPList> Renderer::VPL( const int _bucket,
@@ -188,10 +188,6 @@ std::shared_ptr<VPList> Renderer::VPL( const int _bucket,
         mCommandLists[_bucket].mVList.push_back(nvp);
     }
     return nvp;
-}
-
-void Renderer::clearVPAddList() {
-    mVPToAdd.clear();
 }
 
 bool Renderer::hasTag( uint64_t _tag ) const {
@@ -292,7 +288,7 @@ void Renderer::invalidateOnAdd() {
 }
 
 void Renderer::setRenderHook( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _hook ) {
-    CB_R().getCommandBufferEntry( _key, _hook );
+    CB_U().getCommandBufferEntry( _key, _hook );
 }
 
 void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {

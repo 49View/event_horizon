@@ -10,7 +10,6 @@ struct CameraCubeMapRigBuilder;
 class CameraManager {
 public:
     std::shared_ptr<CameraRig> addRig( const std::string &_name, const Rect2f& _viewport );
-    std::shared_ptr<CameraRig> addRig( const std::string &_name, std::shared_ptr<Framebuffer> _fb );
     std::shared_ptr<CameraRig>& getRig( const std::string &_name );
 
     std::shared_ptr<Camera> getCamera( const std::string &_name = "Main" );
@@ -26,7 +25,7 @@ public:
     void syncCameraMovements( const std::string &camera1, const std::string &camera2 );
     void desyncCameraMovements( const std::string &camera1, const std::string &camera2 );
 
-    void enableInputs( const bool _bEnable );
+    void enableInputs( bool _bEnable );
     bool isDoom() const;
 
     void update();

@@ -27,8 +27,30 @@ enum class SkyBoxMode {
 };
 
 struct SkyBoxInitParams {
-	SkyBoxMode mode = SkyBoxMode::SphereProcedural;
+	SkyBoxMode mode = SkyBoxMode::CubeProcedural;
 	std::string assetString = "barcelona_rooftop_env";
+};
+
+class CubeEnvironmentMap : public RenderModule {
+public:
+	enum class InifinititeSkyBox {
+		True,
+		False
+	};
+	using RenderModule::RenderModule;
+	explicit CubeEnvironmentMap( Renderer& rr, InifinititeSkyBox mbInfiniteSkyboxMode = InifinititeSkyBox::False );
+
+	void render( std::shared_ptr<Texture> cmt );
+	bool InfiniteSkyboxMode() const {
+		return mbInfiniteSkyboxMode == InifinititeSkyBox::True;
+	}
+	void InfiniteSkyboxMode( bool _infiniteSkyboxMode ) {
+		mbInfiniteSkyboxMode = _infiniteSkyboxMode ? InifinititeSkyBox::True : InifinititeSkyBox::False;
+	}
+
+private:
+	void init();
+	InifinititeSkyBox mbInfiniteSkyboxMode = InifinititeSkyBox::False;
 };
 
 class Skybox : public RenderModule, public FrameInvalidator {
@@ -37,19 +59,25 @@ public:
 
 	Skybox( Renderer& rr, const SkyBoxInitParams& mode );
 
-	void render(float _sunHDRMult);
+	void render();
+    bool precalc(float _sunHDRMult);
+
+    std::shared_ptr<Texture> getSkyboxTexture() { return mSkyboxTexture; }
+
 private:
-	void init( const SkyBoxMode _sbm, const std::string& _textureName = "" );
-    void equirectangularTextureInit( const std::vector<std::string>& params );
+	void init( SkyBoxMode _sbm, const std::string& _textureName = "" );
+	void equirectangularTextureInit( const std::vector<std::string>& params );
 private:
 	SkyBoxMode mode = SkyBoxMode::CubeProcedural;
-	bool isReadyToRender = false;
+	std::unique_ptr<CubeEnvironmentMap> mCubeMapRender;
+	std::shared_ptr<Texture> mSkyboxTexture;
+
 };
 
-class CubeEnvironmentMap : public RenderModule {
+class ConvolutionEnvironmentMap : public RenderModule {
 public:
 	using RenderModule::RenderModule;
-	explicit CubeEnvironmentMap( Renderer& rr );
+	explicit ConvolutionEnvironmentMap( Renderer& rr );
 	void render( std::shared_ptr<Texture> cmt );
 private:
 	void init();

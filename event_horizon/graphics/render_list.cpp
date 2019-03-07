@@ -18,6 +18,68 @@
 #include <graphics/shadowmap_manager.h>
 #include <graphics/camera_rig.hpp>
 
+std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
+    switch (cname) {
+        case CommandBufferCommandName::nop:
+            return "nop";
+        case CommandBufferCommandName::depthWriteTrue:
+            return "depthWriteTrue";
+        case CommandBufferCommandName::depthWriteFalse:
+            return "depthWriteFalse";
+        case CommandBufferCommandName::depthTestFalse:
+            return "depthTestFalse";
+        case CommandBufferCommandName::depthTestTrue:
+            return "depthTestTrue";
+        case CommandBufferCommandName::depthTestLEqual:
+            return "depthTestLEqual";
+        case CommandBufferCommandName::depthTestLess:
+            return "depthTestLess";
+        case CommandBufferCommandName::cullModeNone:
+            return "cullModeNone";
+        case CommandBufferCommandName::cullModeFront:
+            return "cullModeFront";
+        case CommandBufferCommandName::cullModeBack:
+            return "cullModeBack";
+        case CommandBufferCommandName::alphaBlendingTrue:
+            return "alphaBlendingTrue";
+        case CommandBufferCommandName::alphaBlendingFalse:
+            return "alphaBlendingFalse";
+        case CommandBufferCommandName::wireFrameModeTrue:
+            return "wireFrameModeTrue";
+        case CommandBufferCommandName::wireFrameModeFalse:
+            return "wireFrameModeFalse";
+        case CommandBufferCommandName::colorBufferBind:
+            return "colorBufferBind";
+        case CommandBufferCommandName::colorBufferBindAndClear:
+            return "colorBufferBindAndClear";
+        case CommandBufferCommandName::colorBufferClear:
+            return "colorBufferClear";
+        case CommandBufferCommandName::clearDefaultFramebuffer:
+            return "clearDefaultFramebuffer";
+        case CommandBufferCommandName::setCameraUniforms:
+            return "setCameraUniforms";
+        case CommandBufferCommandName::setGlobalTextures:
+            return "setGlobalTextures";
+        case CommandBufferCommandName::shadowMapBufferBind:
+            return "shadowMapBufferBind";
+        case CommandBufferCommandName::shadowMapClearDepthBufferZero:
+            return "shadowMapClearDepthBufferZero";
+        case CommandBufferCommandName::shadowMapClearDepthBufferOne:
+            return "shadowMapClearDepthBufferOne";
+        case CommandBufferCommandName::blitToScreen:
+            return "blitToScreen";
+        case CommandBufferCommandName::blitPRB:
+            return "blitPRB";
+        case CommandBufferCommandName::takeScreenShot:
+            return "takeScreenShot";
+        case CommandBufferCommandName::targetVP:
+            return "targetVP";
+        default:
+            ASSERT(0);
+            return "COMMAND NOT TRANSLATED TO HUMAN READABLE FORMAT";
+    }
+}
+
 void CommandBuffer::push( const CommandBufferEntry& entry ) {
     mCommandList.emplace_back( entry );
 }
@@ -37,17 +99,23 @@ void CommandBuffer::sort() {
 
 void CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer* cb ) const {
     if ( Type() == CommandBufferEntryCommandType::Comamnd ) {
+//        LOGRS("        Command: " << commandToNmeHumanReadable(mCommand.name) );
         mCommand.issue( rr, cb );
     } else {
+//        LOGRS("        Render geom: " << mVP->mVPList.Name() );
         mVP->mMaterial->setGlobalConstant( UniformNames::modelMatrix, mVP->mModelMatrix );
         mVP->mVPList.renderProgramWith( mVP->mMaterial );
     }
 }
 
 void CommandBuffer::render( Renderer& rr ) {
+//    LOGR("CommandList RENDER START %d", mCommandList.size() );
+//    LOGR("****************************************************************************");
     for ( const auto& i : mCommandList ) {
         i.run( rr, this );
     }
+//    LOGR("****************************************************************************");
+//    LOGR("CommandList RENDER END");
 }
 
 std::shared_ptr<Framebuffer> CommandBuffer::fb( CommandBufferFrameBufferType fbt ) {
@@ -60,10 +128,6 @@ Rect2f CommandBuffer::destViewport() {
 
 Rect2f CommandBuffer::sourceViewport() {
     return mTarget->cameraRig->getViewport();
-}
-
-std::string CommandBuffer::renderIndex() {
-    return mTarget->renderIndex;
 }
 
 bool CommandBuffer::findEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _wp ) {
@@ -159,6 +223,11 @@ void CommandBufferList::getCommandBufferEntry( const std::string& _key, std::wea
     }
 }
 
+
+void CommandBufferList::setFramebufferTexture( const FrameBufferTextureValues& values ) {
+    mCurrent->frameBufferTextureValues = std::make_unique<FrameBufferTextureValues>(values);
+}
+
 void CommandBufferList::setCameraUniforms( std::shared_ptr<Camera> c0 ) {
     mCurrent->UBOCameraBuffer = std::make_unique<char[]>( rr.CameraUBO()->getUBOSize() );
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::mvpMatrix, c0->MVP(), mCurrent->UBOCameraBuffer.get());
@@ -221,10 +290,10 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             rr.CameraUBO()->submitUBOData( cstack->UBOCameraBuffer.get() ); //
             break;
         case CommandBufferCommandName::colorBufferBind:
-            cstack->fb(CommandBufferFrameBufferType::sourceColor)->bind( cstack->renderIndex() );
+            cstack->fb(CommandBufferFrameBufferType::sourceColor)->bind(cstack->frameBufferTextureValues.get());
             break;
         case CommandBufferCommandName::colorBufferBindAndClear:
-            cstack->fb(CommandBufferFrameBufferType::sourceColor)->bindAndClear( cstack->renderIndex() );
+            cstack->fb(CommandBufferFrameBufferType::sourceColor)->bindAndClear(cstack->frameBufferTextureValues.get());
             break;
         case CommandBufferCommandName::colorBufferClear:
             cstack->fb(CommandBufferFrameBufferType::sourceColor)->clearColorBuffer();
@@ -282,56 +351,6 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
 ////    return ret;
 //}
 
-namespace CameraRigAngles {
-    Vector3f Top   { M_PI_2,  0.0f,    0.0f };
-    Vector3f Bottom{ -M_PI_2, 0.0f,    0.0f };
-    Vector3f Left  { 0.0f,    -M_PI_2, 0.0f };
-    Vector3f Right { 0.0f,    M_PI_2,  0.0f };
-    Vector3f Front { 0.0f,    0.0f,    0.0f };
-    Vector3f Back  { 0.0f,    M_PI,    0.0f };
-}
-
-std::shared_ptr<CameraRig> RLTarget::addCubeAncillaryRig( const std::string& _name,
-                                                          int _faceIndex,
-                                                          int _mipIndex,
-                                                          int _mipCounter,
-                                                          const Vector3f& _pos,
-                                                          const Rect2f& _viewPort,
-                                                          const cubeMapFrameBuffers& _fb ) {
-    static std::vector<Vector3f> camAngles { CameraRigAngles::Right, CameraRigAngles::Left,
-                                             CameraRigAngles::Top, CameraRigAngles::Bottom,
-                                             CameraRigAngles::Front, CameraRigAngles::Back };
-    float cubeMapFOV = 90.0f;
-    auto rigName = cubeRigName( _faceIndex, _name, _mipIndex );
-    auto c = std::make_shared<CameraRig>( rigName, _fb[_mipCounter] );
-    c->getCamera()->setFoV( cubeMapFOV );
-    c->getCamera()->setPosition( _pos );
-    c->getCamera()->setQuatAngles( camAngles[_faceIndex] );
-    c->getCamera()->Mode( CameraMode::Doom );
-    c->getCamera()->ViewPort( _viewPort );
-    c->getCamera()->update();
-
-    mAncillaryCameraRigs.emplace( rigName, c);
-
-    return c;
-}
-
-void RLTarget::addCubeMapRig( const CameraCubeMapRigBuilder& _builder ) {
-
-    auto cbfb = FrameBufferBuilder{ rr, _builder.name}.format(_builder.format).size(_builder.size)
-                                                      .cubemap().mipMaps(_builder.useMipMaps).buildCube();
-
-    int mips = static_cast<int>(cbfb.size() / 6);
-    int mipCounter = 0;
-    for ( int mip = 0; mip < mips; mip++ ) {
-        for ( int t = 0; t < 6; t++ ) {
-            auto size = static_cast<unsigned int>( _builder.size * std::pow(0.5, mip) );
-            const Rect2f cubemapViewport{ Vector2f::ZERO, V2f{size*1.0f, size*1.0f} };
-            addCubeAncillaryRig( _builder.name, t, mip, mipCounter++, _builder.pos, cubemapViewport, cbfb );
-        }
-    }
-}
-
 std::shared_ptr<Framebuffer> RLTargetPlain::getFrameBuffer( CommandBufferFrameBufferType fbt ) {
 
     switch ( fbt ) {
@@ -345,7 +364,7 @@ std::shared_ptr<Framebuffer> RLTargetPlain::getFrameBuffer( CommandBufferFrameBu
         default:
             ASSERT(0);
     }
-    return cameraRig->getFramebuffer();
+    return framebuffer;
 }
 
 RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport,
@@ -353,7 +372,7 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
                         : RLTarget( cameraRig, screenViewport, _bt, rr ) {
 
     mComposite = std::make_shared<CompositePBR>(rr, cameraRig->getMainCamera()->Name(), screenViewport, finalDestBlit);
-    cameraRig->setFramebuffer( mComposite->getColorFB() );
+    framebuffer = mComposite->getColorFB();
     bucketRanges.emplace_back( CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd );
     bucketRanges.emplace_back( CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
@@ -367,12 +386,8 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     // Create a default skybox
     mSkybox = createSkybox();
 
-    addCubeMapRig( CameraCubeMapRigBuilder{FBNames::sceneprobe}.s( 512 ) );
-    addCubeMapRig( CameraCubeMapRigBuilder{MPBRTextures::convolution}.s(128) );
-    addCubeMapRig( CameraCubeMapRigBuilder{MPBRTextures::specular_prefilter}.s( 512 ).useMips() );
-
     // Create PBR resources
-    mConvolution = std::make_unique<CubeEnvironmentMap>(rr);
+    mConvolution = std::make_unique<ConvolutionEnvironmentMap>(rr);
     mIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
     mIBLPrefilterBRDF = std::make_unique<PrefilterBRDF>(rr);
 }
@@ -399,50 +414,62 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
             ASSERT(0);
     }
 
-    return cameraRig->getFramebuffer();
+    return framebuffer;
 
 }
 
 std::shared_ptr<Skybox> RLTargetPBR::createSkybox() {
+    mSkyBoxParams.mode = SkyBoxMode::CubeProcedural;
     return std::make_unique<Skybox>(rr, mSkyBoxParams);
 }
 
-std::string RLTarget::cubeRigName( int t, const std::string& _probeName, int mipmap ) {
-    auto cri = cubemapFaceToString( static_cast<CubemapFaces>(t) );
-    return _probeName + "_" + cri + "_" + std::to_string(mipmap);
-}
-
 std::shared_ptr<CameraRig> RLTargetPBR::getProbeRig( int t, const std::string& _probeName, int mipmap ) {
-    auto camName = cubeRigName(t, _probeName, mipmap);
+    auto camName = cubeRigName(t, _probeName);
     return mAncillaryCameraRigs[camName];
 }
 
-void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, [[maybe_unused]] const Vector3f& _at ) {
+void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at ) {
 
-    auto lSkybox = createSkybox();
-    lSkybox->invalidate();
+    auto cbfb = FrameBufferBuilder{rr, "ProbeFB"}.size(512).buildSimple();
 
-    for ( int t = 0; t < 6; t++ ) {
-        auto probe = std::make_shared<RLTargetProbe>( getProbeRig(t, _probeCameraName, 0), rr );
-        probe->startCL( rr.CB_U() );
-        lSkybox->render( 1.0f );
-    }
+    auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{512}, true) );
+
+    auto convolutionRT = rr.TM().addCubemapTexture( TextureRenderData{ MPBRTextures::convolution }
+                                .setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
+                                .setGenerateMipMaps( false )
+                                .setIsFramebufferTarget( true )
+                                .wm( WRAP_MODE_CLAMP_TO_EDGE ) );
+
+    auto preFilterSpecularRT = rr.TM().addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter }
+                                                            .setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
+                                                            .setGenerateMipMaps( true )
+                                                            .setIsFramebufferTarget( true )
+                                                            .wm( WRAP_MODE_CLAMP_TO_EDGE ) );
+
     // convolution
-    for ( int t = 0; t < 6; t++ ) {
-        auto probe = std::make_shared<RLTargetProbe>( getProbeRig(t, MPBRTextures::convolution, 0), rr );
-        probe->startCL( rr.CB_U() );
-        mConvolution->render( rr.TM().TD(_probeCameraName, TSLOT_CUBEMAP) );
-    }
+    auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
+    convolutionProbe->render( convolutionRT, 128, 0, [&]() {
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+        mConvolution->render( mSkybox->getSkyboxTexture() );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
+    });
+
     // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
     int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)512 ) ) );
+//    int preFilterMipMaps = log2((float)512 );
     for ( int m = 0; m < preFilterMipMaps; m++ ) {
-        for ( int t = 0; t < 6; t++ ) {
+        convolutionProbe->render( preFilterSpecularRT, 512>>m, m, [&]() {
+            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
             float roughness = (float)m / (float)(preFilterMipMaps - 1);
-            auto probe = std::make_shared<RLTargetProbe>( getProbeRig(t, MPBRTextures::specular_prefilter, m), rr );
-            probe->startCL( rr.CB_U() );
-            mIBLPrefilterSpecular->render( rr.TM().TD( _probeCameraName, TSLOT_CUBEMAP ), 1.0-roughness );
-        }
-    }
+            mIBLPrefilterSpecular->render( mSkybox->getSkyboxTexture(), roughness );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
+        });
+    };
+
     mIBLPrefilterBRDF->render();
 }
 
@@ -491,17 +518,8 @@ void RLTargetPBR::invalidateShadowMaps() {
     }
 }
 
-void RLTargetPBR::renderSkybox() {
-    if (!mSkybox) return;
-    mSkybox->render( 1.0f );
-}
-
 void RLTargetPBR::addProbes() {
-    if ( !mSkybox ) return;
-
-    if ( mSkybox->needsRefresh(rr.UpdateCounter(), 2) ) {
-        addProbeToCB( FBNames::sceneprobe, Vector3f::ZERO );
-    }
+    addProbeToCB( FBNames::sceneprobe, Vector3f::ZERO );
 }
 
 void CompositePBR::bloom() {
@@ -612,7 +630,7 @@ RLTargetPlain::RLTargetPlain( std::shared_ptr<CameraRig> cameraRig, const Rect2f
                               BlitType _bt, Renderer& rr )
         : RLTarget( cameraRig, screenViewport, _bt, rr ) {
     mComposite = std::make_shared<CompositePlain>( rr, cameraRig->getMainCamera()->Name(), screenViewport );
-    cameraRig->setFramebuffer( mComposite->getColorFB());
+    framebuffer = mComposite->getColorFB();
     bucketRanges.push_back( {CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd} );
 }
 
@@ -656,7 +674,7 @@ void RLTargetPlain::addToCB( CommandBufferList& cb ) {
 
 void RLTargetPlain::resize( const Rect2f& _r ) {
     mComposite->setup( _r );
-    cameraRig->setFramebuffer( mComposite->getColorFB() );
+    framebuffer = mComposite->getColorFB();
 }
 
 void RLTarget::clearCB() {
@@ -669,8 +687,10 @@ void RLTarget::clearCB() {
 }
 
 void RLTargetPBR::startCL( CommandBufferList& cb ) {
+    if ( mSkybox->precalc( 1.0f ) ) {
+        addProbes();
+    }
     addShadowMaps();
-    addProbes();
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     cb.setCameraUniforms( cameraRig->getCamera() );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
@@ -680,7 +700,6 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
 
 void RLTargetPBR::endCL( CommandBufferList& cb ) {
     cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
-    cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
     cb.pushCommand( { CommandBufferCommandName::wireFrameModeFalse } );
 
@@ -688,9 +707,10 @@ void RLTargetPBR::endCL( CommandBufferList& cb ) {
 }
 
 void RLTargetPBR::addToCB( CommandBufferList& cb ) {
+
     startCL( cb );
 
-    renderSkybox();
+    mSkybox->render();
 
     cb.pushCommand( { CommandBufferCommandName::depthWriteFalse } );
     for ( const auto& [k, vl] : rr.CL() ) {
@@ -711,7 +731,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
 void RLTargetPBR::resize( const Rect2f& _r ) {
     mComposite->setup( _r );
-    cameraRig->setFramebuffer( mComposite->getColorFB() );
+    framebuffer = mComposite->getColorFB();
 }
 
 std::shared_ptr<Framebuffer> RLTargetPBR::getShadowMapFB() {
@@ -740,11 +760,10 @@ void RLTargetFB::resize( [[maybe_unused]] const Rect2f& _r ) {
 
 RLTargetProbe::RLTargetProbe( std::shared_ptr<CameraRig> _crig, Renderer& _rr ) : RLTarget( _rr ) {
     cameraRig = _crig;
-    renderIndex = cameraRig->Name().substr( cameraRig->Name().find('_') + 1 );
 }
 
 std::shared_ptr<Framebuffer> RLTargetProbe::getFrameBuffer( [[maybe_unused]] CommandBufferFrameBufferType fbt ) {
-    return cameraRig->getFramebuffer();
+    return framebuffer;
 }
 
 void RLTargetProbe::startCL( CommandBufferList& cb ) {
@@ -821,4 +840,33 @@ void RLTarget::updateStreams() {
     updateStreamPacket("http://192.168.1.123:8080/video_y");
     updateStreamPacket("http://192.168.1.123:8080/video_u");
     updateStreamPacket("http://192.168.1.123:8080/video_v");
+}
+
+RLTargetCubeMap::RLTargetCubeMap( const CubeMapRigContainer& _rig, std::shared_ptr<Framebuffer> _fb,
+                                  Renderer& _rr ) : RLTarget( _rr ) {
+    cameraRig = _rig;
+    framebuffer = _fb;
+}
+
+void RLTargetCubeMap::startCL( CommandBufferList& cb ) {
+    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+//    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
+//    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
+//    cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+}
+
+void RLTargetCubeMap::render( std::shared_ptr<Texture> _renderToTexture, int cmsize, int mip, CubeMapRenderFunction rcb ) {
+    Rect2f lViewport(V2f::ZERO, V2f{cmsize}, true);
+    for ( uint32_t t = 0; t < 6; t++ ) {
+        startCL( rr.CB_U() );
+        rr.CB_U().setFramebufferTexture(
+                FrameBufferTextureValues{ indexToFBT(t),
+                                          _renderToTexture->getHandle(),
+                                          static_cast<uint32_t>(mip),
+                                          cmsize, cmsize } );
+        cameraRig[t]->setViewport( lViewport );
+        rr.CB_U().setCameraUniforms( cameraRig[t]->getCamera() );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
+        rcb();
+    }
 }

@@ -47,3 +47,32 @@ enum TextureTargetMode {
     TEXTURE_3D,
     TEXTURE_CUBE_MAP,
 };
+
+enum FrameBufferTextureTarget2d {
+    FBT_TEXTURE_2D = 0,
+    FBT_TEXTURE_CUBE_MAP_POS_X,
+    FBT_TEXTURE_CUBE_MAP_NEG_X,
+    FBT_TEXTURE_CUBE_MAP_POS_Y,
+    FBT_TEXTURE_CUBE_MAP_NEG_Y,
+    FBT_TEXTURE_CUBE_MAP_POS_Z,
+    FBT_TEXTURE_CUBE_MAP_NEG_Z,
+};
+
+inline FrameBufferTextureTarget2d indexToFBT( const int index ) {
+    switch (index) {
+        case 0:
+            return FBT_TEXTURE_CUBE_MAP_POS_X;
+        case 1:
+            return FBT_TEXTURE_CUBE_MAP_NEG_X;
+        case 2:
+            return FBT_TEXTURE_CUBE_MAP_POS_Y;
+        case 3:
+            return FBT_TEXTURE_CUBE_MAP_NEG_Y;
+        case 4:
+            return FBT_TEXTURE_CUBE_MAP_POS_Z;
+        case 5:
+            return FBT_TEXTURE_CUBE_MAP_NEG_Z;
+        default:
+            return FBT_TEXTURE_CUBE_MAP_POS_X;
+    }
+}

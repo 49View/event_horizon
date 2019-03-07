@@ -59,11 +59,11 @@ std::shared_ptr<CameraRig> CameraManager::addRig( const std::string& _name, cons
     return c;
 }
 
-std::shared_ptr<CameraRig> CameraManager::addRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
-    auto c = std::make_shared<CameraRig>( _name, _fb );
-    mCameraRigs[_name] = c;
-    return c;
-}
+//std::shared_ptr<CameraRig> CameraManager::addRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
+//    auto c = std::make_shared<CameraRig>( _name, _fb );
+//    mCameraRigs[_name] = c;
+//    return c;
+//}
 
 std::shared_ptr<CameraRig>& CameraManager::getRig( const std::string& _name ) {
     return mCameraRigs[_name];

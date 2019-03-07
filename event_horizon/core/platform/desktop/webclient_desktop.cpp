@@ -95,7 +95,7 @@ namespace Http {
 //
 
         auto settings = std::make_shared< restbed::Settings >( );
-        settings->set_connection_limit( 0 );
+        settings->set_connection_limit( 5 );
 //        settings->set_ssl_settings( ssl_settings );
 
 //        try {

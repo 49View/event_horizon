@@ -15,6 +15,7 @@
 #include "graphic_constants.h"
 #include "vertex_processing.h"
 #include "skybox.h"
+#include <core/camera_utils.hpp>
 
 class Framebuffer;
 class CommandBuffer;
@@ -30,8 +31,10 @@ class PrefilterBRDF;
 class RLTarget;
 class Camera;
 struct CameraCubeMapRigBuilder;
+struct FrameBufferTextureValues;
 
 using MVList = std::map<std::string, std::shared_ptr<VPList>>;
+using CubeMapRenderFunction = std::function<void()>;
 
 class RenderStats {
 public:
@@ -120,6 +123,8 @@ enum class CommandBufferCommandName {
     targetVP,
 };
 
+std::string commandToNmeHumanReadable( CommandBufferCommandName cname );
+
 class CommandBufferCommand {
 public:
     CommandBufferCommand( CommandBufferCommandName name = CommandBufferCommandName::nop ) : name( name ) {}
@@ -185,7 +190,6 @@ public:
     std::shared_ptr<Framebuffer> fb( CommandBufferFrameBufferType fbt );
     Rect2f                       destViewport();
     Rect2f                       sourceViewport();
-    std::string                  renderIndex();
 
     std::shared_ptr<RLTarget>&   Target() {
         return mTarget;
@@ -197,6 +201,7 @@ public:
     // Stack
     std::shared_ptr<RLTarget> mTarget;
     std::unique_ptr<char[]> UBOCameraBuffer;
+    std::unique_ptr<FrameBufferTextureValues> frameBufferTextureValues;
     CommandBufferFlags flags = CommandBufferFlags::CBF_None;
 };
 
@@ -224,6 +229,7 @@ public:
     void startList( std::shared_ptr<RLTarget> _target, CommandBufferFlags flags = CommandBufferFlags::CBF_None );
     void render( int eye );
     void setCameraUniforms( std::shared_ptr<Camera> c0 );
+    void setFramebufferTexture( const FrameBufferTextureValues& values );
     void getCommandBufferEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& wp );
 
 private:
@@ -351,7 +357,7 @@ public:
     virtual void addToCB( CommandBufferList& cb ) = 0;
     virtual void startCL( CommandBufferList& fbt ) = 0;
     virtual void endCL( CommandBufferList& fbt ) = 0;
-    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) = 0;
+    virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) { return framebuffer; }
     virtual void blit( CommandBufferList& cbl ) = 0;
     virtual void resize( const Rect2f& _r ) = 0;
 
@@ -360,8 +366,7 @@ public:
     bool isKeyInRange( const int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
 
     bool isTakingScreenShot() {
-        if ( mbTakeScreenShot && ++mTakeScreenShotDelay > 2 ) return true;
-        return false;
+        return mbTakeScreenShot && ++mTakeScreenShotDelay > 2 || false;
     }
 
     void takeScreenShot( bool _value = true ) {
@@ -393,27 +398,17 @@ public:
     void enable() { bEnabled = true; }
     void disable() { bEnabled = false; }
 
-    static std::string cubeRigName( int t, const std::string& _probeName, int mipmap = 0 );
-
 public:
-    std::shared_ptr<CameraRig> cameraRig;
+    std::shared_ptr<CameraRig> cameraRig = nullptr;
+    std::shared_ptr<Framebuffer> framebuffer = nullptr;
     Rect2f screenViewport = Rect2f::INVALID;
-    std::string renderIndex;
     bool bEnabled = true;
     BlitType finalDestBlit = BlitType::OnScreen;
     ScreenShotContainerPtr screenShotContainer;
     std::vector<std::pair<int, int>> bucketRanges;
 
 protected:
-    std::shared_ptr<CameraRig> addCubeAncillaryRig( const std::string& _name,
-                                                    int _faceIndex,
-                                                    int _mipIndex,
-                                                    int _mips,
-                                                    const Vector3f& _pos,
-                                                    const Rect2f& _viewPort,
-                                                    const cubeMapFrameBuffers& _fb );
     void updateStreamPacket( const std::string& _streamName );
-    void addCubeMapRig( const CameraCubeMapRigBuilder& _builder );
 protected:
     std::unordered_map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
     bool mbTakeScreenShot = false;
@@ -447,9 +442,21 @@ public:
     void startCL( [[maybe_unused]] CommandBufferList& fbt ) override {};
     void endCL( [[maybe_unused]] CommandBufferList& fbt ) override {}
     void resize( const Rect2f& _r ) override;
+};
+
+class RLTargetCubeMap : public RLTarget {
+public:
+    RLTargetCubeMap( const CubeMapRigContainer& _rig, std::shared_ptr<Framebuffer> _fb, Renderer& _rr );
+    ~RLTargetCubeMap() override = default;
+    void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
+    virtual void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
+    void startCL( CommandBufferList& fbt ) override;
+    void render( std::shared_ptr<Texture> _renderToTexture, int cmsize, int mip, CubeMapRenderFunction rcb );
+    void endCL( [[maybe_unused]] CommandBufferList& fbt ) override {}
+    void resize( [[maybe_unused]] const Rect2f& _r ) override {}
 
 protected:
-    std::shared_ptr<Framebuffer> framebuffer;
+    CubeMapRigContainer cameraRig;
 };
 
 class RLTargetProbe : public RLTarget {
@@ -492,7 +499,6 @@ protected:
     void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
     std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName, int mipmap );
     void addShadowMaps();
-    void renderSkybox();
     void cacheShadowMapSunPosition( const Vector3f& _smsp );
     void invalidateShadowMaps();
     void setShadowMapPosition( const Vector3f& _sp );
@@ -507,7 +513,7 @@ protected:
 
     std::shared_ptr<Skybox> mSkybox;
     std::shared_ptr<ShadowMapManager> smm;
-    std::shared_ptr<CubeEnvironmentMap> mConvolution;
+    std::shared_ptr<ConvolutionEnvironmentMap> mConvolution;
     std::shared_ptr<PrefilterSpecularMap> mIBLPrefilterSpecular;
     std::shared_ptr<PrefilterBRDF> mIBLPrefilterBRDF;
 };
@@ -534,7 +540,7 @@ public:
     }
 
 private:
-    VPSGUID() {}
+    VPSGUID() = default;
     VPSGUID( VPSGUID const& ) = delete;
     void operator=( VPSGUID const& ) = delete;
 public:

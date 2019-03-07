@@ -18,8 +18,7 @@
 
 class Texture {
 public:
-    Texture() {
-    }
+    Texture() = default;
 
     Texture( TextureRenderData& tb ) {
         ctor( tb );

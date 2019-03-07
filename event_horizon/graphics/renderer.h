@@ -129,24 +129,10 @@ public:
 
 	RenderStats& Stats() { return mStats; }
 	void Stats( RenderStats val ) { mStats = val; }
-	std::mutex& CBVPAddMutex() { return mCBVPAddMutex; }
-	std::mutex& CBTextureAddMutex() { return mCBTextureAddMutex; }
-	const std::vector<CommandBufferNewEntry>& VPToAddList() { return mVPToAdd; }
-
-	void clearVPAddList();
 
 	inline CommandBufferList& CB_U() { return *mCommandBuffers.get(); }
-	inline CommandBufferList& CB_R() { return *mCommandBuffers.get(); }
 	inline std::map<int, CommandBufferListVector>& CL() { return mCommandLists; }
     inline const std::map<int, CommandBufferListVector>& CL() const { return mCommandLists; }
-
-	bool isUseMultiThreadRendering() const {
-		return useMultiThreadRendering;
-	}
-
-	void setUseMultiThreadRendering( bool _useMultiThreadRendering ) {
-		useMultiThreadRendering = _useMultiThreadRendering;
-	}
 
 	void MaterialCache( uint64_t, std::shared_ptr<RenderMaterial> _mat );
 	void MaterialMap( std::shared_ptr<RenderMaterial> _mat );
@@ -186,16 +172,9 @@ protected:
 	std::shared_ptr<CommandScriptRendererManager> hcs;
 
 	int mUpdateCounter = 0;
-
-	constexpr static int sBufferMax = 2;
-	std::mutex mCommandBuffersMutex[sBufferMax];
-	std::shared_ptr<CommandBufferList> mCommandBuffers;
-	std::vector<CommandBufferNewEntry> mVPToAdd;
-	std::mutex mCBVPAddMutex;
-	std::mutex mCBTextureAddMutex;
-	bool useMultiThreadRendering;
 	bool bInvalidated = false;
 
+	std::shared_ptr<CommandBufferList> mCommandBuffers;
 	std::map<int, CommandBufferListVector> mCommandLists;
 
 	std::vector<ChangeMaterialOnTagContainer> mChangeMaterialCallbacks;

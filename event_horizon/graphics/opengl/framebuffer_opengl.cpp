@@ -1,4 +1,5 @@
 #include "framebuffer_opengl.h"
+#include "../framebuffer.h"
 
 #include "../texture_manager.h"
 #include "../graphic_functions.hpp"
@@ -90,17 +91,33 @@ void Framebuffer::init( TextureManager& tm ) {
 
         LOGR( "Allocating FRAMEBUFFER %s on target %d", mName.c_str(), mRenderToTexture->getGlTextureImageTarget());
 
-        mTargetType = mRenderToTexture->getGlTextureImageTarget();
-        mTargetHandle = mRenderToTexture->getHandle();
-        mTargetMipmap = 0;
+//        mTargetType = mRenderToTexture->getGlTextureImageTarget();
+//        mTargetHandle = mRenderToTexture->getHandle();
+//        mTargetMipmap = 0;
 
-//        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-//                                        mTargetType, mTargetHandle, mTargetMipmap ));
+        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        mRenderToTexture->getGlTextureImageTarget(),
+                                        mRenderToTexture->getHandle(), 0 ));
 
     }
 //    GLenum attch = GL_COLOR_ATTACHMENT0;
 //    GLCALL( glDrawBuffers( 1, &attch ));
 //    checkFrameBufferStatus();
+}
+
+void Framebuffer::initSimple() {
+    GLCALL( glGenFramebuffers ( 1, &mFramebufferHandle ));
+    GLCALL( glGenRenderbuffers( 1, &mRenderbufferHandle) );
+    GLCALL( glBindFramebuffer ( GL_FRAMEBUFFER, mFramebufferHandle ));
+    GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, mRenderbufferHandle) );
+
+    GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight ) );
+    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRenderbufferHandle) );
+
+//    checkFrameBufferStatus();
+
+    LOGR( "Allocating FRAMEBUFFER %s, [%d,%d], handle %d, renderHandle %d",
+            mName.c_str(), mWidth, mHeight, mFramebufferHandle, mRenderbufferHandle );
 }
 
 void Framebuffer::initCubeMap( std::shared_ptr<Texture> cubemapTarget, uint32_t cubemapFaceIndex, uint32_t mipIndex ) {
@@ -116,9 +133,9 @@ void Framebuffer::initCubeMap( std::shared_ptr<Texture> cubemapTarget, uint32_t 
     GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight ) );
     GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRenderbufferHandle) );
 
-    mTargetType = GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubemapFaceIndex;
-    mTargetHandle = cubemapTarget->getHandle();
-    mTargetMipmap = mipIndex;
+//    mTargetType = GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubemapFaceIndex;
+//    mTargetHandle = cubemapTarget->getHandle();
+//    mTargetMipmap = mipIndex;
 
 //    GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 //                                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubemapFaceIndex,
@@ -142,26 +159,29 @@ void Framebuffer::release() {
     }
 }
 
-void Framebuffer::bind( const std::string& renderTargetIndex ) {
+void Framebuffer::bind( const FrameBufferTextureValues* _values ) {
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
     GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, mRenderbufferHandle) );
-    if ( mFramebufferHandle && !mMultisample ) {
+    if ( _values ) {
         GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                        mTargetType, mTargetHandle, mTargetMipmap ));
+                                        frameBufferTargetToGl(_values->targetType),
+                                        _values->targetHandle, _values->targetMipmap ));
+        GLCALL( glViewport( 0, 0, _values->width, _values->height ));
+    } else {
+        GLCALL( glViewport( 0, 0, mWidth, mHeight ));
     }
-    GLCALL( glViewport( 0, 0, mWidth, mHeight ));
     enableMultiSample( mMultisample );
     checkFrameBufferStatus();
 }
 
-void Framebuffer::bindAndClear( const std::string& renderTargetIndex ) {
-    bind( renderTargetIndex );
+void Framebuffer::bindAndClear( const FrameBufferTextureValues* _values ) {
+    bind( _values );
     clearColorBuffer();
-    clearDepthBuffer(); // ### reintroduce clear only if it has depth... if ( depthTexture )
+    if ( depthTexture ) clearDepthBuffer(); // ### reintroduce clear only if it has depth... if ( depthTexture )
 }
 
-void Framebuffer::bindAndClearWithColor( const Color4f& clearColor, const std::string& renderTargetIndex ) {
-    bind( renderTargetIndex );
+void Framebuffer::bindAndClearWithColor( const Color4f& clearColor, const FrameBufferTextureValues* _values ) {
+    bind( _values );
     clearColorBufferWithColor( clearColor );
     clearDepthBuffer(); // ### reintroduce clear only if it has depth... if ( depthTexture )
 }

@@ -1248,6 +1248,7 @@ void VData::checkBaricentricCoordsOn( const Vector3f& i, int32_t pIndexStart, in
 void VData::addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector2f& _uv2, const Vector3f& _vn,
 							   const Vector3f& _vt, const Vector3f& _vb, const Vector3f& _v8 ) {
 
+	BBox3d().expand(_vc);
 	vcoords3d.push_back( _vc );
 	vUVs.push_back( _uv );
 	vUV2s.push_back( _uv2 );
@@ -1257,12 +1258,13 @@ void VData::addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const V
 //	vSHCoeffsR.push_back( Matrix3f::ONE );
 //	vSHCoeffsG.push_back( Matrix3f::ONE );
 //	vSHCoeffsB.push_back( Matrix3f::ONE );
-    vColor.push_back( _v8 );
+    vColor.emplace_back( _v8 );
 	vIndices.push_back( vIndices.size() );
 }
 
 void VData::add( int32_t _i, const Vector3f& _v, const Vector3f& _n, const Vector2f& _uv, const Vector2f& _uv2,
 				 const Vector3f& _t, const Vector3f& _b, const Vector4f& _c ) {
+	BBox3d().expand(_v);
 	vcoords3d.push_back( _v );
 	vIndices.push_back( _i );
 	vUVs.push_back( _uv );

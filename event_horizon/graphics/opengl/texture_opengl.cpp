@@ -92,17 +92,17 @@ void Texture::init_cubemap_r() {
     auto minFilter = mGenerateMipMaps ? GL_LINEAR_MIPMAP_LINEAR : glFilter;
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MIN_FILTER, minFilter ));
 
-//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_BASE_LEVEL, 2) );
-//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_MAX_LEVEL, 3) );
+//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_BASE_LEVEL, 0) );
+//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_MAX_LEVEL, 7) );
 
     GLuint mips = mGenerateMipMaps ? 1 + static_cast<GLuint>( floor( log( (float)max( mWidth, mHeight ) ) ) ) : 1;
     GLCALL( glTexStorage2D( glTextureTarget, mips, glInternalFormat, mWidth, mHeight ));
 
-//    if ( mGenerateMipMaps ) {
-//        GLCALL( glGenerateMipmap( glTextureTarget ));
-//    }
+    if ( mGenerateMipMaps ) {
+        GLCALL( glGenerateMipmap( glTextureTarget ));
+    }
 
-    LOGI( "Initialising texture %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
+    LOGI( "Initialising texture cubemap %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
           mId.c_str(), mHandle );
 }
 

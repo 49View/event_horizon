@@ -5,6 +5,7 @@
 #include "framebuffer.h"
 #include "renderer.h"
 #include <graphics/vp_builder.hpp>
+#include <core/camera_utils.hpp>
 
 void Skybox::equirectangularTextureInit( const std::vector<std::string>& params ) {
 
@@ -15,8 +16,6 @@ void Skybox::equirectangularTextureInit( const std::vector<std::string>& params 
 
     VPBuilder<Pos3dStrip>{rr,mVPList,S::EQUIRECTANGULAR}.p(colorStrip).t(params[0]).n("skybox")
     .build();
-
-    isReadyToRender = true;
 }
 
 void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
@@ -26,6 +25,8 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     bool bBuildVP = true;
     static bool skyBoxEquilateral = false;
 
+    mCubeMapRender = std::make_unique<CubeEnvironmentMap>(rr, CubeEnvironmentMap::InifinititeSkyBox::True);
+
     if ( skyBoxEquilateral ) {
         equirectangularTextureInit( {_textureName} );
         return;
@@ -34,11 +35,9 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     switch ( mode ) {
         case SkyBoxMode::SphereProcedural:
             sp = createGeomForSphere( Vector3f::ZERO, 1.0f, 3 );
-            isReadyToRender = true;
             break;
         case SkyBoxMode::CubeProcedural:
             sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
-            isReadyToRender = true;
             break;
         case SkyBoxMode::EquirectangularTexture:
             ImageBuilder{_textureName}
@@ -54,47 +53,77 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
                                                                                sp.numIndices, vpos3d, sp.indices );
         VPBuilder<Pos3dStrip>{rr,mVPList,S::SKYBOX}.p(colorStrip).n("skybox").build();
     }
-
 }
 
-void Skybox::render( float _sunHDRMult ) {
-    if ( isReadyToRender ) {
-        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
-        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
-        mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
-        mVPList->addToCommandBuffer( rr );
-        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
-        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
+bool Skybox::precalc( float _sunHDRMult ) {
+    if ( needsRefresh() ) {
+
+        mSkyboxTexture = rr.TM().addCubemapTexture( TextureRenderData{ "skybox" }
+                                                                .setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
+                                                                .setGenerateMipMaps( false )
+                                                                .setIsFramebufferTarget( true )
+                                                                .wm( WRAP_MODE_CLAMP_TO_EDGE ) );
+
+        auto cbfb = FrameBufferBuilder{rr, "ProbeFB"}.size(512).buildSimple();
+        auto cubeMapRig = addCubeMapRig( "cubemapRig", Vector3f::ZERO, Rect2f(V2f{512}) );
+        auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
+        probe->render( mSkyboxTexture, 512, 0, [&]() {
+            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+            mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
+            mVPList->addToCommandBuffer( rr );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
+        });
+
+        validated();
+        return true;
     }
+    return false;
+}
+
+void Skybox::render() {
+    mCubeMapRender->render( mSkyboxTexture );
 }
 
 Skybox::Skybox( Renderer& rr, const SkyBoxInitParams& _params ) : RenderModule( rr ) {
     init( _params.mode, _params.assetString + ".hdr" );
 }
 
-//bool Skybox::needsReprobing( int _renderCounter ) {
-//    if ( mode == SkyBoxMode::CubeProcedural || mode == SkyBoxMode::SphereProcedural ) {
-//        if ( !isReadyToRender && _renderCounter == renderIndexExtraFrameToAvoidGlitch+1 ) {
-//            isReadyToRender = true;
-//            return true;
-//        }
-//        renderIndexExtraFrameToAvoidGlitch = _renderCounter;
-//    }
-//    if ( mode == SkyBoxMode::EquirectangularTexture ) {
-//        if ( bTriggerReprobing ) {
-//            if ( _renderCounter == renderIndexExtraFrameToAvoidGlitch + 2 ) {
-//                bTriggerReprobing = false;
-//                isReadyToRender = true;
-//                return true;
-//            }
-//        } else {
-//            renderIndexExtraFrameToAvoidGlitch = _renderCounter;
-//        }
-//    }
-//    return false;
-//}
-
 void CubeEnvironmentMap::init() {
+    mVPList = std::make_shared<VPList>();
+
+    auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
+
+    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
+    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
+                                                                           sp.numIndices, vpos3d, sp.indices );
+
+    auto shaderName = InfiniteSkyboxMode() ? S::SKYBOX_CUBEMAP : S::PLAIN_CUBEMAP;
+    VPBuilder<Pos3dStrip>{rr,mVPList,shaderName}.p(colorStrip).n("cubeEnvMap-"+shaderName).build();
+}
+
+CubeEnvironmentMap::CubeEnvironmentMap( Renderer& rr, CubeEnvironmentMap::InifinititeSkyBox mbInfiniteSkyboxMode ) :
+        RenderModule( rr ), mbInfiniteSkyboxMode( mbInfiniteSkyboxMode ) {
+    init();
+}
+
+void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
+    if ( InfiniteSkyboxMode() ) {
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+    }
+    mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
+    mVPList->addToCommandBuffer( rr );
+    if ( InfiniteSkyboxMode() ) {
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
+    }
+}
+
+void ConvolutionEnvironmentMap::init() {
     mVPList = std::make_shared<VPList>();
 
     auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
@@ -106,13 +135,13 @@ void CubeEnvironmentMap::init() {
     VPBuilder<Pos3dStrip>{rr,mVPList,S::CONVOLUTION}.p(colorStrip).n("cubeEnvMap").build();
 }
 
-void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
+void ConvolutionEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
     rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
     mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
     mVPList->addToCommandBuffer( rr );
 }
 
-CubeEnvironmentMap::CubeEnvironmentMap( Renderer& rr ) : RenderModule( rr ) {
+ConvolutionEnvironmentMap::ConvolutionEnvironmentMap( Renderer& rr ) : RenderModule( rr ) {
     init();
 }
 

@@ -7,6 +7,16 @@
 #include "renderer.h"
 #include <graphics/vp_builder.hpp>
 
+std::shared_ptr<Framebuffer> FrameBufferBuilder::buildSimple() {
+    auto ret = ServiceFactory::create<Framebuffer>();
+    ret->mName = mName;
+    ret->mWidth = mWidth;
+    ret->mHeight = mHeight;
+    ret->initSimple();
+
+    return ret;
+}
+
 std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
     auto ret = ServiceFactory::create<Framebuffer>();
 

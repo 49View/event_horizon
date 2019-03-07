@@ -30,6 +30,7 @@ ShaderManager::ShaderManager() {
     allocateProgram( ShaderProgramDesc{ S::YUV_GREENSCREEN }.vsh( "vertex_shader_3d_t" ).fsh( "plain_yuv_to_rgb_greenscreen" ));
     allocateProgram( ShaderProgramDesc{ S::EQUIRECTANGULAR }.vsh( "equirectangular" ).fsh( "equirectangular" ));
     allocateProgram( ShaderProgramDesc{ S::PLAIN_CUBEMAP }.vsh( "plain_cubemap" ).fsh( "plain_cubemap" ));
+    allocateProgram( ShaderProgramDesc{ S::SKYBOX_CUBEMAP }.vsh( "skybox_cubemap" ).fsh( "plain_cubemap" ));
     allocateProgram( ShaderProgramDesc{ S::CONVOLUTION }.vsh( "plain_cubemap" ).fsh( "irradiance_convolution" ));
     allocateProgram( ShaderProgramDesc{ S::IBL_SPECULAR }.vsh( "plain_cubemap" ).fsh( "ibl_specular_prefilter" ));
     allocateProgram( ShaderProgramDesc{ S::IBL_BRDF }.vsh( "vertex_shader_brdf" ).fsh( "plain_brdf" ));

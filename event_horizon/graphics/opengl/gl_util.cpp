@@ -311,6 +311,27 @@ GLenum targetToGl( TextureTargetMode mode ) {
     return 0;
 }
 
+GLenum frameBufferTargetToGl( FrameBufferTextureTarget2d mode ) {
+    switch ( mode ) {
+        case FBT_TEXTURE_2D:
+            return GL_TEXTURE_2D;
+        case FBT_TEXTURE_CUBE_MAP_POS_X:
+            return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+        case FBT_TEXTURE_CUBE_MAP_NEG_X:
+            return GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+        case FBT_TEXTURE_CUBE_MAP_POS_Y:
+            return GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+        case FBT_TEXTURE_CUBE_MAP_NEG_Y:
+            return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+        case FBT_TEXTURE_CUBE_MAP_POS_Z:
+            return GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+        case FBT_TEXTURE_CUBE_MAP_NEG_Z:
+            return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+    }
+    ASSERT( false );
+    return GL_TEXTURE_2D;
+}
+
 GLenum cullModeToGl( CullMode mode ) {
     switch ( mode ) {
         case CULL_BACK:

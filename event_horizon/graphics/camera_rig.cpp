@@ -4,7 +4,46 @@
 
 #include "camera_rig.hpp"
 #include <core/camera.h>
-#include <graphics/framebuffer.h>
+#include <core/camera_utils.hpp>
+
+namespace CameraRigAngles {
+    Vector3f Top   { M_PI_2,  0.0f,    0.0f };
+    Vector3f Bottom{ -M_PI_2, 0.0f,    0.0f };
+    Vector3f Left  { 0.0f,    -M_PI_2, 0.0f };
+    Vector3f Right { 0.0f,    M_PI_2,  0.0f };
+    Vector3f Front { 0.0f,    0.0f,    0.0f };
+    Vector3f Back  { 0.0f,    M_PI,    0.0f };
+}
+
+std::string cubeRigName( int t, const std::string& _probeName ) {
+    return _probeName + "_" + std::to_string(t);////cubemapFaceToString( static_cast<CubemapFaces>(t) );
+}
+
+CubeMapRigContainer addCubeMapRig( const std::string& _name,
+                                   const Vector3f& _pos,
+                                   const Rect2f& _viewPort) {
+
+    static std::vector<Vector3f> camAngles { CameraRigAngles::Right, CameraRigAngles::Left,
+                                             CameraRigAngles::Top, CameraRigAngles::Bottom,
+                                             CameraRigAngles::Front, CameraRigAngles::Back };
+
+    std::array<std::shared_ptr<CameraRig>, 6> ret;
+
+    float cubeMapFOV = 90.0f;
+    for ( int faceIndex = 0; faceIndex < 6; faceIndex++ ) {
+        auto rigName = cubeRigName( faceIndex, _name );
+        auto c = std::make_shared<CameraRig>( rigName, _viewPort );
+        c->getCamera()->setFoV( cubeMapFOV );
+        c->getCamera()->setPosition( _pos );
+        c->getCamera()->setQuatAngles( camAngles[faceIndex] );
+        c->getCamera()->Mode( CameraMode::Doom );
+        c->getCamera()->update();
+
+        ret[faceIndex] = c;
+    }
+
+    return ret;
+}
 
 CameraRig::CameraRig( const std::string& _name, const Rect2f& _viewport ) {
     mName = _name;
@@ -15,25 +54,21 @@ CameraRig::CameraRig( const std::string& _name, const Rect2f& _viewport ) {
     mViewport = _viewport;
 }
 
-CameraRig::CameraRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
-    ASSERT(_fb != nullptr);
-    mName = _name;
-    mViewport = Rect2f{ Vector2f::ZERO, {_fb->getWidth(), _fb->getHeight()} };
-    mFramebuffer = _fb;
+//CameraRig::CameraRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
+//    ASSERT(_fb != nullptr);
+//    mName = _name;
+//    mViewport = Rect2f{ Vector2f::ZERO, {_fb->getWidth(), _fb->getHeight()} };
+//    mFramebuffer = _fb;
+//
+//    mCamera = std::make_shared<Camera>( _name, mViewport );
+//    mCameraVRLeftEye = std::make_shared<Camera>( _name + "LeftEye", mViewport );
+//    mCameraVRRightEye = std::make_shared<Camera>( _name + "RightEye", mViewport );
+//}
 
-    mCamera = std::make_shared<Camera>( _name, mViewport );
-    mCameraVRLeftEye = std::make_shared<Camera>( _name + "LeftEye", mViewport );
-    mCameraVRRightEye = std::make_shared<Camera>( _name + "RightEye", mViewport );
-}
-
-void CameraRig::setFramebuffer( std::shared_ptr<Framebuffer> framebuffer ) {
-    mViewport = Rect2f{ Vector2f::ZERO, {framebuffer->getWidth(), framebuffer->getHeight()} };
-    mFramebuffer = framebuffer;
-
-//    mCamera->ViewPort( mViewport );
-//    mCameraVRLeftEye->ViewPort( mViewport );
-//    mCameraVRRightEye->ViewPort( mViewport );
-}
+//void CameraRig::setFramebuffer( std::shared_ptr<Framebuffer> framebuffer ) {
+//    mViewport = Rect2f{ Vector2f::ZERO, {framebuffer->getWidth(), framebuffer->getHeight()} };
+//    mFramebuffer = framebuffer;
+//}
 
 std::shared_ptr<Camera> CameraRig::getCamera() {
 //    if ( VRM.IsOn()) {

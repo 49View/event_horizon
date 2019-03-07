@@ -9,6 +9,14 @@
 class Framebuffer;
 class Renderer;
 
+struct FrameBufferTextureValues {
+    FrameBufferTextureTarget2d  targetType = FBT_TEXTURE_2D;
+    uint32_t  targetHandle = 0;
+    uint32_t  targetMipmap = 0;
+    int       width  = 0;
+    int       height = 0;
+};
+
 class FrameBufferBuilder {
     std::string mName;
     int  mWidth = 0;
@@ -169,6 +177,7 @@ public:
     }
 
     std::shared_ptr<Framebuffer> build();
+    std::shared_ptr<Framebuffer> buildSimple();
     cubeMapFrameBuffers buildCube();
 private:
     Renderer& rr;

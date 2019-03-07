@@ -14,6 +14,8 @@
 FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
                             const std::array<size_t, 4>& indices, WindingOrderT _wo ) {
 
+    vindices = indices;
+
     auto vsm11 = rp1[indices[0]];
     auto vsm12 = rp2[indices[0]];
 
@@ -113,61 +115,61 @@ Vector3f suggestedFollowerAxis( const std::vector<Vector3f>& _verts, const Vecto
 
 namespace FollowerService {
 
-    std::vector<Vector3f> rotateAndIntersectData( const std::vector<Vector3f>& source, const Plane3f& lvplanes,
-                                                  const Vector3f vn ) {
-        // UVs, the "x" axis is running parallel to vcoords and it's just the length value
-        // UVs, the "y" axis is running wrapping the profile, and it's just the length value
-        // the "y"s have got 1 more entry in the array because they need to hold the total length to avoid wrapping around zero
-        std::vector<Vector3f> ret;
-        for ( auto m : source ) {
-            Vector3f vce2 = m + ( vn * 1000000.0f );
-            ret.push_back( lvplanes.intersectLineGrace( m, vce2 ));
-        }
-        return ret;
+std::vector<Vector3f> rotateAndIntersectData( const std::vector<Vector3f>& source, const Plane3f& lvplanes,
+                                              const Vector3f vn ) {
+    // UVs, the "x" axis is running parallel to vcoords and it's just the length value
+    // UVs, the "y" axis is running wrapping the profile, and it's just the length value
+    // the "y"s have got 1 more entry in the array because they need to hold the total length to avoid wrapping around zero
+    std::vector<Vector3f> ret;
+    for ( auto m : source ) {
+        Vector3f vce2 = m + ( vn * 1000000.0f );
+        ret.push_back( lvplanes.intersectLineGrace( m, vce2 ));
+    }
+    return ret;
+}
+
+void addLineVert( const std::vector<Vector3f>& _verts, FollowerIntermediateData& _fid, size_t _m, bool _bWrap ) {
+
+    bool isLastWrap = (_bWrap && (_m == _verts.size()));
+
+    Vector3f vleft = getLeftVectorFromList( _verts, _m, _bWrap );
+    Vector3f vright = getRightVectorFromList( _verts, _m, _bWrap );
+    Vector3f vpos = _verts[_m];
+
+    // This is to add and extra vert in case the path is wrapped
+    if ( isLastWrap ) {
+        vleft = _verts[_verts.size()-1];
+        vright = _verts[0];
+        vpos = mix( vleft, vright, 0.5f);
+        _fid.vcoords.push_back( _verts.front() );
+    } else {
+        _fid.vcoords.push_back( vpos );
     }
 
-    void addLineVert( const std::vector<Vector3f>& _verts, FollowerIntermediateData& _fid, size_t _m, bool _bWrap ) {
+    Vector3f vposPlanePerpL = crossProduct( vleft, vpos, vpos + _fid.vplanet );
+    Vector3f vposPlanePerpR = crossProduct( vpos + _fid.vplanet, vpos, vright );
 
-        bool isLastWrap = (_bWrap && (_m == _verts.size()));
+    Vector3f vn = normalize(vposPlanePerpL + vposPlanePerpR);
+    Vector3f vd = normalize(vright - vpos);
+    Vector3f vl = normalize(vpos - vleft);
+    Vector3f vdn = normalize( vd + vl );
 
-        Vector3f vleft = getLeftVectorFromList( _verts, _m, _bWrap );
-        Vector3f vright = getRightVectorFromList( _verts, _m, _bWrap );
-        Vector3f vpos = _verts[_m];
+    _fid.vplanesb.push_back( vn );
 
-        // This is to add and extra vert in case the path is wrapped
-        if ( isLastWrap ) {
-            vleft = _verts[_verts.size()-1];
-            vright = _verts[0];
-            vpos = mix( vleft, vright, 0.5f);
-            _fid.vcoords.push_back( _verts.front() );
-        } else {
-            _fid.vcoords.push_back( vpos );
-        }
-
-        Vector3f vposPlanePerpL = crossProduct( vleft, vpos, vpos + _fid.vplanet );
-        Vector3f vposPlanePerpR = crossProduct( vpos + _fid.vplanet, vpos, vright );
-
-        Vector3f vn = normalize(vposPlanePerpL + vposPlanePerpR);
-        Vector3f vd = normalize(vright - vpos);
-        Vector3f vl = normalize(vpos - vleft);
-        Vector3f vdn = normalize( vd + vl );
-
-        _fid.vplanesb.push_back( vn );
-
-        if ( isLastWrap ) {
-            _fid.vdirs.push_back(normalize(_verts.front() - _verts.back()));
-            _fid.vplanesn.emplace_back(_fid.vplanesn.front() );
-        } else {
-            _fid.vplanesn.emplace_back( vdn, vpos );
-            _fid.vdirs.push_back( vd );
-        }
-
+    if ( isLastWrap ) {
+        _fid.vdirs.push_back(normalize(_verts.front() - _verts.back()));
+        _fid.vplanesn.emplace_back(_fid.vplanesn.front() );
+    } else {
+        _fid.vplanesn.emplace_back( vdn, vpos );
+        _fid.vdirs.push_back( vd );
     }
 
-    std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& _verts,
-                                       const Profile& profile,
-                                       const Vector3f& _suggestedAxis,
-                                       const FollowerFlags& ff ) {
+}
+
+std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& _verts,
+                                   const Profile& profile,
+                                   const Vector3f& _suggestedAxis,
+                                   const FollowerFlags& ff ) {
 
     std::shared_ptr<GeomData> geom = std::make_shared<GeomData>();
 
@@ -244,13 +246,6 @@ namespace FollowerService {
     for ( auto& fp : polys ) {
         geom->pushQuadSubDiv( fp.vs, fp.vtcs, fp.vncs );
     }
-
-//    if ( !( checkBitWiseFlag(CurrentFlags(), FollowerFlags::NoCaps )) ) {
-//        _geom->addFlatPoly( mprofile.rotatePoints( vplanesb[0], vplanest[0], vcoords[0] ), mStartWindingOrder );
-//
-//        _geom->addFlatPoly( mprofile.rotatePoints( vplanesb[vcoords.size() - 1], vplanest[vcoords.size() - 1],
-//                                                    vcoords[vcoords.size() - 1]), !mStartWindingOrder );
-//    }
 
     return geom;
 }

@@ -38,6 +38,11 @@ public:
 
 	Rect2f() = default;
 
+	explicit Rect2f( const int _square ) {
+		mTopLeft = Vector2f{-_square*0.5f, -_square*0.5f};
+		mBottomRight = Vector2f{_square*0.5f, _square*0.5f};
+	}
+
 	explicit Rect2f( const float _square ) {
 		mTopLeft = Vector2f{-_square*0.5f, -_square*0.5f};
 		mBottomRight = Vector2f{_square*0.5f, _square*0.5f};
