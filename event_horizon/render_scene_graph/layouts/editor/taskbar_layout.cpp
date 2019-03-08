@@ -20,7 +20,7 @@ void ImGuiTaskbar::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     }
     ImGui::SameLine();
     if ( ImGui::Button( "SceneGraph" ) ) {
-        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Geom);
+        p->StateMachine()->toggleVisible(SceneLayoutDefaultNames::Scene);
     }
     ImGui::SameLine();
     if ( ImGui::Button( "Camera" ) ) {

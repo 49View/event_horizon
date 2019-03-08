@@ -6,11 +6,6 @@
 
 #include <render_scene_graph/scene_state_machine.h>
 
-class FullEditor : public SceneStateMachineBackEnd {
-public:
-    using SceneStateMachineBackEnd::SceneStateMachineBackEnd;
-    virtual ~FullEditor() = default;
+SceneSMBackEndClient(FullEditor)
 
-    void init() override;
-    void run() override;
 };

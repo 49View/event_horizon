@@ -20,6 +20,14 @@
 #include <boost/msm/front/functor_row.hpp>
 #pragma GCC diagnostic pop
 
+#define SceneSMBackEndClient(ClassName) \
+class ClassName : public SceneStateMachineBackEnd { \
+public: \
+    using SceneStateMachineBackEnd::SceneStateMachineBackEnd; \
+    virtual ~ClassName() = default; \
+    void init() override; \
+    void run() override;
+
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 using namespace msm::front;
@@ -49,7 +57,7 @@ namespace SceneLayoutDefaultNames {
     const static std::string Taskbar = "taskbar";
     const static std::string Console = "console";
     const static std::string Material = "material";
-    const static std::string Geom = "geom";
+    const static std::string Scene = "scene";
     const static std::string CloudMaterial = "cloud_material";
     const static std::string CloudGeom = "cloud_geom";
     const static std::string Login = "login";

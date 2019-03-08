@@ -48,7 +48,7 @@ void FullEditor::init() {
     addBox( SceneLayoutDefaultNames::Login, CENTER(uivl.rightPanelWidth, uivl.loginPanelHeight), false);
 
     addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f );
-    addBox( SceneLayoutDefaultNames::Geom, 0.0f, uivl.rightPanelWidth, uivl.taskbarHeight, timeLineY + uivl.taskbarHeight );
+    addBox( SceneLayoutDefaultNames::Scene, 0.0f, uivl.rightPanelWidth, uivl.taskbarHeight, timeLineY + uivl.taskbarHeight );
     addBox( SceneLayoutDefaultNames::Material, 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f - uivl.taskbarHeight, false );
 
     addBox( SceneLayoutDefaultNames::Image, CENTER(uivl.rightPanelWidth, uivl.leftPanelHeight2*5.0f), false );
@@ -67,8 +67,8 @@ void FullEditor::init() {
                      1.0f-uivl.rightPanelWidth, 1.0f, uivl.loginPanelHeight + uivl.rightPanelHeight, uivl.loginPanelHeight + uivl.rightPanelHeight*2, false );
 
     addBox( Name::Foxtrot,
-                     topX, topX + cameraWidth,
-                     uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Fly );
+            topX, topX + cameraWidth,
+            uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Fly );
 
     allCallbacksEntitySetup();
     o()->setDragAndDropFunction(allConversionsDragAndDropCallback);

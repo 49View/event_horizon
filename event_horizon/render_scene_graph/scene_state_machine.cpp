@@ -49,8 +49,8 @@ SceneStateMachineBackEnd::SceneStateMachineBackEnd( SceneOrchestrator* _p ) : Sc
 			std::make_shared<ImGuiTaskbar>(SceneLayoutDefaultNames::Taskbar) );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Console,
 			std::make_shared<ImGuiConsoleLayout>(SceneLayoutDefaultNames::Console) );
-	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Geom,
-			std::make_shared<ImGuiGeoms>(SceneLayoutDefaultNames::Geom) );
+	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Scene,
+			std::make_shared<ImGuiGeoms>(SceneLayoutDefaultNames::Scene) );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Material,
 			std::make_shared<ImGuiMaterials>(SceneLayoutDefaultNames::Material) );
 	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Image,
