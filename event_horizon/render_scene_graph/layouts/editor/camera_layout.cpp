@@ -5,7 +5,7 @@
 #include "camera_layout.h"
 
 #include <core/camera.h>
-#include "graphics/camera_rig.hpp"
+#include "core/camera_rig.hpp"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>

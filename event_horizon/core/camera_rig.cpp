@@ -16,7 +16,7 @@ namespace CameraRigAngles {
 }
 
 std::string cubeRigName( int t, const std::string& _probeName ) {
-    return _probeName + "_" + std::to_string(t);////cubemapFaceToString( static_cast<CubemapFaces>(t) );
+    return _probeName + "_" + cubemapFaceToString( static_cast<CubemapFaces>(t) );
 }
 
 CubeMapRigContainer addCubeMapRig( const std::string& _name,

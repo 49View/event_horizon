@@ -2,9 +2,7 @@
 
 #include "core/service_factory.h"
 #include "core/app_globals.h"
-#include "graphics/graphic_functions.hpp"
-#include "graphics/framebuffer.h"
-#include "graphics/camera_rig.hpp"
+#include "core/camera_rig.hpp"
 //#include "vr_manager.hpp"
 
 void CameraManager::syncCameraMovements( const std::string& cameraSource, const std::string& cameraDest ) {

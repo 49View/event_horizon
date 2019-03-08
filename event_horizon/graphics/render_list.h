@@ -30,7 +30,6 @@ class PrefilterSpecularMap;
 class PrefilterBRDF;
 class RLTarget;
 class Camera;
-struct CameraCubeMapRigBuilder;
 struct FrameBufferTextureValues;
 
 using MVList = std::map<std::string, std::shared_ptr<VPList>>;

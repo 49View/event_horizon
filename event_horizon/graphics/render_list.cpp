@@ -16,7 +16,7 @@
 #include <graphics/framebuffer.h>
 #include <graphics/renderer.h>
 #include <graphics/shadowmap_manager.h>
-#include <graphics/camera_rig.hpp>
+#include <core/camera_rig.hpp>
 
 std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
     switch (cname) {

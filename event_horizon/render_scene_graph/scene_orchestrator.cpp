@@ -5,10 +5,10 @@
 
 #include "scene_orchestrator.hpp"
 
-#include "graphics/camera_manager.h"
+#include "core/camera_manager.h"
 #include "graphics/renderer.h"
 #include "graphics/render_list.h"
-#include "graphics/camera_rig.hpp"
+#include "core/camera_rig.hpp"
 #include "graphics/window_handling.hpp"
 #include "graphics/ui/imgui_console.h"
 

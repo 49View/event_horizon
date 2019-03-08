@@ -8,7 +8,7 @@
 #include <graphics/text_input.hpp>
 #include <graphics/mouse_input.hpp>
 #include <graphics/shader_manager.h>
-#include <graphics/camera_manager.h>
+#include <core/camera_manager.h>
 #include <graphics/texture_manager.h>
 #include "render_scene_graph.h"
 

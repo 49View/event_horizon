@@ -1,5 +1,5 @@
 #include "floor_navigator.h"
-#include "graphics/camera_manager.h"
+#include "core/camera_manager.h"
 #include "graphics/render_list.h"
 #include "vr/vr_ui_context.h"
 #include "vr_manager.hpp"

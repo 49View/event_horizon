@@ -5,7 +5,7 @@
 #include "scene_state_machine.h"
 #include <core/app_globals.h>
 #include <core/camera.h>
-#include "graphics/camera_rig.hpp"
+#include "core/camera_rig.hpp"
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/editor/includes.h>
 

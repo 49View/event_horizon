@@ -44,24 +44,6 @@ void setDepthFunction( DepthFunction dp ) {
 	GLCALL( glDepthFunc( depthFunctionToGl( dp ) ) );
 }
 
-std::string cubemapFaceToString( const CubemapFaces cmf ) {
-    switch ( cmf ) {
-		case CubemapFaces::Top:
-			return "top";
-		case CubemapFaces::Bottom:
-			return "bottom";
-		case CubemapFaces::Front:
-			return "front";
-		case CubemapFaces::Back:
-			return "back";
-		case CubemapFaces::Left:
-			return "left";
-		case CubemapFaces::Right:
-			return "right";
-	}
-	return "";
-}
-
 void grabScreen( int x, int y, int w, int h, void* buffer ) {
 	for ( auto q = h+y-1, c=0; q >= y; q--, c++ ) {
 		GLCALL( glReadPixels( x, q, w, 1, GL_RGBA, GL_UNSIGNED_BYTE, (void*)((char*)buffer + (c*w*4))) );

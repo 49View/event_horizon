@@ -3,11 +3,11 @@
 #include "core/di.hpp"
 #include "core/command.hpp"
 #include "core/font_manager.h"
+#include "core/camera_manager.h"
 #include "renderer.h"
 #include "text_input.hpp"
 #include "mouse_input.hpp"
 #include "shader_manager.h"
-#include "camera_manager.h"
 #include "texture_manager.h"
 #include "ui/ui_control_manager.hpp"
 

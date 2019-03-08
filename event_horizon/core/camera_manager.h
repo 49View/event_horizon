@@ -3,9 +3,7 @@
 #include <core/camera.h>
 
 class CameraRig;
-class Framebuffer;
 class Renderer;
-struct CameraCubeMapRigBuilder;
 
 class CameraManager {
 public:

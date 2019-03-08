@@ -435,7 +435,7 @@ public:
 
     template<typename TV>
     void visit() const {
-        traverseWithHelper<TV>( "Name,BBbox,Data,Children", this->Name(), Boxable::BBox3d(),mData,children );
+        traverseWithHelper<TV>( "Name,Hash,BBbox,Data,Children", this->Name(), this->Hash(), Boxable::BBox3d(),mData,children );
     }
 protected:
 

@@ -7,7 +7,7 @@
 #include <string>
 #include <core/math/vector3f.h>
 #include <core/math/rect2f.h>
-#include <graphics/graphic_constants.h>
+#include <core/camera_utils.hpp>
 
 class Framebuffer;
 class Camera;
@@ -15,39 +15,6 @@ class Camera;
 enum class CameraRigType {
     Flat,
     Probe360
-};
-
-struct CameraCubeMapRigBuilder {
-
-    CameraCubeMapRigBuilder( const std::string& _name ) {
-        name = _name;
-    }
-
-    CameraCubeMapRigBuilder& s( int _size ) {
-        size = _size;
-        return *this;
-    }
-
-    CameraCubeMapRigBuilder& at( const Vector3f& _pos ) {
-        pos = _pos;
-        return *this;
-    }
-
-    CameraCubeMapRigBuilder& f( PixelFormat _format ) {
-        format = _format;
-        return *this;
-    }
-
-    CameraCubeMapRigBuilder& useMips() {
-        useMipMaps = true;
-        return *this;
-    }
-
-    std::string name;
-    int size = 128;
-    Vector3f pos = Vector3f::ZERO;
-    PixelFormat format = PIXEL_FORMAT_HDR_RGBA_16;
-    bool useMipMaps = false;
 };
 
 class CameraRig {

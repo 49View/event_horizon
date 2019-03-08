@@ -16,7 +16,7 @@
 #include <core/math/quaternion.h>
 #include <core/math/math_util.h>
 #include <core/math/anim_type.hpp>
-#include <graphics/graphic_constants.h>
+#include <core/camera_utils.hpp>
 
 void MultiplyMatrices4by4OpenGL_FLOAT( float *result, float *matrix1, float *matrix2 );
 void MultiplyMatrixByVector4by4OpenGL_FLOAT( float *resultvector, const float *matrix, const float *pvector );

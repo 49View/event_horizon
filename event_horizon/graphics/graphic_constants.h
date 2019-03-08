@@ -87,31 +87,6 @@ enum CommandListType {
 	vp3dShadowMap
 };
 
-enum class CameraProjectionType {
-	Perspective,
-	Orthogonal
-};
-
-enum CameraMode {
-	Edit2d = 0,
-	Doom,
-	CameraMode_max
-};
-
-enum CameraState {
-	Active,
-	InActive
-};
-
-enum CubemapFaces {
-	Front = 0,
-	Back,
-	Left,
-	Right,
-	Top,
-	Bottom
-};
-
 enum ReservedGraphicsTags {
 	GT_None = 0,
 	GT_Generic = 1,
@@ -120,17 +95,6 @@ enum ReservedGraphicsTags {
     GT_PrefilterBRDF,
 	GT_Grid,
 };
-
-namespace ViewportToggles {
-	const static int None          		= 0;
-	const static int DrawWireframe 		= 1 << 0;
-	const static int DrawGrid      		= 1 << 1;
-}
-
-using ViewportTogglesT = int;
-
-std::string cubeMapFace( const std::string& filename, CubemapFaces cf );
-std::string cubeMapTName( const std::string& filename );
 
 class Framebuffer;
 using cubeMapFrameBuffers = std::vector<std::shared_ptr<Framebuffer>>;
