@@ -10,8 +10,8 @@
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
 
-RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm, SunBuilder& _sb ) :
-                                    SceneGraph(cq, fm, _sb), rr( rr ), tl(rr.RIDM()) {
+RenderSceneGraph::RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm, SunBuilder& _sb, CameraManager& _cm ) :
+                                    SceneGraph(cq, fm, _sb, _cm), rr( rr ), tl(rr.RIDM()) {
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
     uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
     ml.TL(&tl);
@@ -39,6 +39,11 @@ void RenderSceneGraph::removeImpl( const UUID& _uuid ) {
     if ( auto it = geoms.find(_uuid); it != geoms.end() ) {
         std::visit( [&](auto&& arg) { arg->visitHashRecF(removeF);}, it->second );
     }
+}
+
+void RenderSceneGraph::cmdChangeTimeImpl( const std::vector<std::string>& _params ) {
+    SB().buildFromString( concatenate( " ", {_params.begin(), _params.end()}) );
+    RR().changeTime( SB().getSunPosition() );
 }
 
 void RenderSceneGraph::cmdloadObjectImpl( const std::vector<std::string>& _params ) {

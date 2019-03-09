@@ -23,6 +23,7 @@ class CommandQueue;
 class ShaderManager;
 class RenderSceneGraph;
 class StreamingMediator;
+class RLTarget;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -95,7 +96,7 @@ public:
 	void afterShaderSetup();
 	void injectShader( const std::string& _key, const std::string& content );
 
-	void directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _targets );
+	void directRenderLoop();
 
 	void removeFromCL( const UUID& _uuid );
 
@@ -138,12 +139,18 @@ public:
 	void MaterialMap( std::shared_ptr<RenderMaterial> _mat );
 	void resetDefaultFB( const Vector2i& forceSize = Vector2i{-1});
 
+	void addTarget( std::shared_ptr<RLTarget> _target );
+	std::shared_ptr<RLTarget> getTarget( const std::string& _name );
+	void clearTargets();
+
 	std::shared_ptr<Framebuffer> getDefaultFB() {
 		return mDefaultFB;
 	}
 
 	int UpdateCounter() const { return mUpdateCounter; }
 	void invalidateOnAdd();
+
+	void changeTime( const V3f& _solarTime );
 
 protected:
 	void changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt );
@@ -174,6 +181,7 @@ protected:
 	int mUpdateCounter = 0;
 	bool bInvalidated = false;
 
+	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	std::shared_ptr<CommandBufferList> mCommandBuffers;
 	std::map<int, CommandBufferListVector> mCommandLists;
 

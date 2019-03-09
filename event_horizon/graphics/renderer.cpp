@@ -1,18 +1,19 @@
 #include "renderer.h"
 
-//#include <CImg.h>
-#include "graphics/graphic_functions.hpp"
-#include "graphics/light_manager.h"
-#include "graphics/render_list.h"
-#include "graphics/shader_manager.h"
-#include "graphics/shadowmap_manager.h"
-#include "core/math/spherical_harmonics.h"
-#include "core/configuration/app_options.h"
-#include "core/suncalc/sun_builder.h"
-#include "core/zlib_util.h"
-#include "core/tar_util.h"
-#include "core/profiler.h"
-#include "core/streaming_mediator.hpp"
+#include <core/math/spherical_harmonics.h>
+#include <core/configuration/app_options.h>
+#include <core/suncalc/sun_builder.h>
+#include <core/zlib_util.h>
+#include <core/camera_rig.hpp>
+#include <core/tar_util.h>
+#include <core/profiler.h>
+#include <core/streaming_mediator.hpp>
+#include <graphics/graphic_functions.hpp>
+#include <graphics/light_manager.h>
+#include <graphics/render_list.h>
+#include <graphics/render_targets.hpp>
+#include <graphics/shader_manager.h>
+#include <graphics/shadowmap_manager.h>
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -76,6 +77,29 @@ Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, Str
     cq.registerCommandScript(hcs);
 }
 
+std::shared_ptr<RLTarget> Renderer::getTarget( const std::string& _name ) {
+    for ( auto& t : mTargets ) {
+        if ( t->cameraRig->Name() == _name ) return t;
+    }
+    return nullptr;
+}
+
+void Renderer::addTarget( std::shared_ptr<RLTarget> _target ) {
+    mTargets.emplace_back(_target);
+}
+
+void Renderer::clearTargets() {
+    for ( const auto& target : mTargets ) {
+        target->clearCB();
+    }
+}
+
+void Renderer::changeTime( const V3f& _solar ) {
+    for ( auto& t : mTargets ) {
+        t->changeTime( _solar );
+    }
+}
+
 StreamingMediator& Renderer::SSM() {
     return ssm;
 }
@@ -118,14 +142,14 @@ void Renderer::setGlobalTextures() {
     }
 }
 
-void Renderer::directRenderLoop( std::vector<std::shared_ptr<RLTarget>>& _targets ) {
+void Renderer::directRenderLoop() {
 
     CB_U().start();
     CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
     CB_U().pushCommand( { CommandBufferCommandName::clearDefaultFramebuffer } );
     CB_U().pushCommand( { CommandBufferCommandName::setGlobalTextures } );
 
-    for ( const auto& target : _targets ) {
+    for ( const auto& target : mTargets ) {
         if ( target->enabled() ) {
             if ( bInvalidated ) target->invalidateOnAdd();
             target->updateStreams();

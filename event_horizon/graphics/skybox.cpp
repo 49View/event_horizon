@@ -1,11 +1,13 @@
 #include "skybox.h"
-#include "core/math/poly_shapes.hpp"
-#include <core/descriptors/material.h>
-#include "vertex_processing.h"
-#include "framebuffer.h"
-#include "renderer.h"
-#include <graphics/vp_builder.hpp>
+
+#include <core/math/poly_shapes.hpp>
 #include <core/camera_utils.hpp>
+#include <core/descriptors/material.h>
+#include <graphics/vertex_processing.h>
+#include <graphics/framebuffer.h>
+#include <graphics/renderer.h>
+#include <graphics/vp_builder.hpp>
+#include <graphics/render_targets.hpp>
 
 void Skybox::equirectangularTextureInit( const std::vector<std::string>& params ) {
 

@@ -10,13 +10,10 @@
 #include <render_scene_graph/scene_orchestrator.hpp>
 
 bool LayoutBoxRenderer::startRender(JMATH::Rect2f& _r, BoxFlagsT _flags) {
-//    if ( checkBitWiseFlag( _flags, BoxFlags::Rearrange ) ) {
-//    if ( _r.origin() != rect.origin() ) {
-        ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
-//    }
+    ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );
     ImGui::SetNextWindowSize( ImVec2{ _r.size().x(), _r.size().y() } );
     if ( bVisible ) {
-        if ( !ImGui::Begin( name.c_str(), &bVisible )) {
+        if ( !ImGui::Begin( name.c_str(), &bVisible, ImGuiWindowFlags_NoResize )) {
             ImGui::End();
             return false;
         }

@@ -22,6 +22,7 @@
 #include <poly/poly.hpp>
 
 class StreamingMediator;
+class CameraManager;
 
 class PolySceneGraphTextureList : public ImageDepencencyMaker {
     bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
@@ -40,11 +41,10 @@ public:
 
 class SceneGraph : public DependencyMaker {
 public:
-    explicit SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb );
+    explicit SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm );
 
 DEPENDENCY_MAKER_EXIST(geoms);
     void add( NodeVariants _geom);
-
     void remove( const UUID& _uuid );
 
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
@@ -53,6 +53,7 @@ DEPENDENCY_MAKER_EXIST(geoms);
     void cmdRemoveGeometry( const std::vector<std::string>& _params );
     void cmdLoadObject( const std::vector<std::string>& _params );
     void cmdCalcLightmaps( const std::vector<std::string>& _params );
+    void cmdChangeTime( const std::vector<std::string>& params );
 
     bool rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
 
@@ -61,6 +62,7 @@ DEPENDENCY_MAKER_EXIST(geoms);
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
+    CameraManager& CM();
     FontManager& FM() { return fm; }
     SunBuilder& SB() { return sb; }
 
@@ -81,7 +83,7 @@ protected:
     virtual void updateImpl() {};
     virtual void addImpl( NodeVariants _geom) {};
     virtual void removeImpl( const UUID& _uuid ) {};
-    virtual void changeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
     virtual void cmdRemoveGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
@@ -96,6 +98,7 @@ protected:
     ColorManager cl;
     FontManager& fm;
     SunBuilder& sb;
+    CameraManager& cm;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
@@ -103,7 +106,7 @@ protected:
 
 class PolySceneGraph : public SceneGraph {
 public:
-    PolySceneGraph(CommandQueue& cq, FontManager& _fm, SunBuilder& _sb) : SceneGraph(cq, _fm, _sb) {
+    PolySceneGraph(CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm) : SceneGraph(cq, _fm, _sb, _cm) {
         ml.TL(&tl);
     }
 

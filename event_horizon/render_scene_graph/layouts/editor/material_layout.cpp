@@ -41,7 +41,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     float ts = 64.0f;
     ImVec2 textureSize{ ts, ts };
 
-    for ( const auto& mat : p->ML().list()) {
+    for ( const auto& mat : p->RSG().ML().list()) {
         if ( !mat ) continue;
         ImGui::BeginGroup();
         auto matName = mat->Name().substr(0, 10);
@@ -49,7 +49,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
         bool bHasTexture = false;
         for ( const auto& [k, mt] : mat->getTextureNameMap() ) {
             if ( k == UniformNames::diffuseTexture || k == UniformNames::colorTexture ) {
-                ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->TM().TD(mt) );
+                ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->RSG().RR().TM().TD(mt) );
                 bHasTexture = true;
                 break;
             }
@@ -82,7 +82,7 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
     SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
         for ( const auto& elem : cmd ) {
             auto mb = std::make_shared<MaterialBuilder>(getFileNameOnly(elem.filename), elem.data);
-            GB{ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->ML() )).build( p->RSG() );
+            GB{ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->RSG().ML() )).build( p->RSG() );
         }
         cmd.clear();
     } );

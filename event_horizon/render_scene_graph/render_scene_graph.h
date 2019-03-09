@@ -36,7 +36,7 @@ private:
 
 class RenderSceneGraph : public SceneGraph {
 public:
-    RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm, SunBuilder& _sb );
+    RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm, SunBuilder& _sb, CameraManager& _cm );
     virtual ~RenderSceneGraph() = default;
 
     DependencyMaker& TL() override { return tl; }
@@ -46,6 +46,7 @@ protected:
     void updateImpl() override;
     void addImpl(NodeVariants _geom) override;
     void removeImpl( const UUID& _uuid ) override;
+    void cmdChangeTimeImpl( const std::vector<std::string>& _params ) override;
     void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
     void changeMaterialColorTagImpl( const std::vector<std::string>& _params ) override;
     void cmdCreateGeometryImpl( const std::vector<std::string>& _params ) override;
@@ -65,4 +66,5 @@ private:
     std::shared_ptr<HierGeomRenderObserver> hierRenderObserver;
     std::shared_ptr<UIElementRenderObserver> uiRenderObserver;
 };
+
 

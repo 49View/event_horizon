@@ -5,12 +5,13 @@
 
 #include "scene_orchestrator.hpp"
 
-#include "core/camera_manager.h"
-#include "graphics/renderer.h"
-#include "graphics/render_list.h"
-#include "core/camera_rig.hpp"
-#include "graphics/window_handling.hpp"
-#include "graphics/ui/imgui_console.h"
+#include <core/camera_manager.h>
+#include <core/camera_rig.hpp>
+#include <graphics/renderer.h>
+#include <graphics/render_list.h>
+#include <graphics/window_handling.hpp>
+#include <graphics/ui/imgui_console.h>
+#include <graphics/render_targets.hpp>
 
 #include <render_scene_graph/scene_state_machine.h>
 #include <render_scene_graph/render_scene_graph.h>
@@ -31,9 +32,8 @@ public:
 };
 
 CommandScriptPresenterManager::CommandScriptPresenterManager( SceneOrchestrator& _hm ) {
-    addCommandDefinition("enable keyboard", std::bind(&SceneOrchestrator::cmdEnableKeyboard, &_hm, std::placeholders::_1));
-    addCommandDefinition("disable keyboard", std::bind(&SceneOrchestrator::cmdDisableKeyboard, &_hm, std::placeholders::_1));
-	addCommandDefinition("change time", std::bind(&SceneOrchestrator::cmdChangeTime, &_hm, std::placeholders::_1 ));
+//    addCommandDefinition("enable keyboard", std::bind(&SceneOrchestrator::cmdEnableKeyboard, &_hm, std::placeholders::_1));
+//    addCommandDefinition("disable keyboard", std::bind(&SceneOrchestrator::cmdDisableKeyboard, &_hm, std::placeholders::_1));
 }
 
 void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
@@ -53,8 +53,11 @@ void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
 	SceneOrchestrator::callbackResizeFrameBuffer = Vector2i{w, h};
 }
 
-SceneOrchestrator::SceneOrchestrator( Renderer& _rr, RenderSceneGraph& _rsg, FontManager& _fm, TextInput& ti, MouseInput& mi, CameraManager& cm, CommandQueue& cq, StreamingMediator& _ssm ) :
-		cm(cm), rr(_rr), rsg(_rsg), fm( _fm ), ti( ti), mi( mi ), cq( cq), ssm(_ssm) {
+SceneOrchestrator::SceneOrchestrator( RenderSceneGraph& _rsg,
+									  TextInput& ti,
+									  MouseInput& mi,
+									  CommandQueue& cq ) :
+									  rsg(_rsg), ti( ti), mi( mi ), cq( cq) {
 	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
 	cq.registerCommandScript(hcs);
 	console = std::make_shared<ImGuiConsole>(cq);
@@ -90,7 +93,7 @@ void SceneOrchestrator::updateCallbacks() {
 	if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
 		WH::resizeWindow( callbackResizeFrameBuffer );
 		WH::gatherMainScreenInfo();
-		RR().resetDefaultFB(callbackResizeFrameBuffer);
+		RSG().RR().resetDefaultFB(callbackResizeFrameBuffer);
 		stateMachine->resizeCallback( this, callbackResizeFrameBuffer );
 		callbackResizeFrameBuffer = Vector2i{-1, -1};
 	}
@@ -135,7 +138,7 @@ void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {
 	ShaderLiveUpdateMap shadersToUpdate{_data};
 
 	for ( const auto& ss : shadersToUpdate.shaders ) {
-		rr.injectShader( ss.first, ss.second );
+		RSG().RR().injectShader( ss.first, ss.second );
 	}
 	cq.script( "reload shaders" );
 }
@@ -163,7 +166,7 @@ void SceneOrchestrator::inputPollUpdate() {
 		v->updateFromInputData( cid );
 	}
 
-	cm.update();
+	RSG().CM().update();
 
 	resetSingleEventNotifications();
 }
@@ -197,7 +200,7 @@ void SceneOrchestrator::render() {
 		v->renderControls(this);
 	}
 
-	rr.directRenderLoop( Targets() );
+	RSG().RR().directRenderLoop();
 
 	ImGui::Render();
 }
@@ -218,11 +221,6 @@ void SceneOrchestrator::cmdDisableKeyboard( const std::vector<std::string>& para
     WH::disableInputCallbacks();
 }
 
-void SceneOrchestrator::cmdChangeTime( const std::vector<std::string>& _params ) {
-	RSG().SB().buildFromString( concatenate( " ", {_params.begin(), _params.end()}) );
-	changeTime( RSG().SB().getSunPosition() );
-}
-
 void SceneOrchestrator::StateMachine( std::shared_ptr<SceneStateMachineBackEnd> _l ) {
 	stateMachine = _l;
 }
@@ -232,50 +230,20 @@ const std::shared_ptr<ImGuiConsole>& SceneOrchestrator::Console() const {
 }
 
 void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
-    addViewport<RLTargetPBR>( Name::Sierra, Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), CameraControls::Fly,
-    		                  BlitType::OffScreen );
+    addViewport( RenderTargetType::PBR, RSG().CM().getRig(Name::Sierra),
+    		     Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), CameraControls::Fly, BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box);
-    getTarget(Name::Sierra)->takeScreenShot( _outdata );
-}
-
-void SceneOrchestrator::clearTargets() {
-	for ( const auto& target : mTargets ) {
-		target->clearCB();
-	}
-}
-
-std::shared_ptr<RLTarget> SceneOrchestrator::getTarget( const std::string& _name ) {
-
-	for ( auto& t : mTargets ) {
-		if ( t->cameraRig->Name() == _name ) return t;
-	}
-
-	return nullptr;
-}
-
-void SceneOrchestrator::changeTime( const V3f& _solar ) {
-	for ( auto& t : mTargets ) {
-		t->changeTime( _solar );
-	}
+    RSG().RR().getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
 
 RenderSceneGraph& SceneOrchestrator::RSG() { return rsg; }
-MaterialManager& SceneOrchestrator::ML() { return rsg.ML(); }
-Renderer& SceneOrchestrator::RR() { return rr; }
-CameraManager& SceneOrchestrator::CM() { return cm; }
-TextureManager& SceneOrchestrator::TM() { return rr.TM(); }
-CommandQueue& SceneOrchestrator::CQ() { return cq; }
-FontManager& SceneOrchestrator::FM() { return fm; }
-StreamingMediator& SceneOrchestrator::SSM() { return ssm; }
 
-std::shared_ptr<Camera> SceneOrchestrator::getCamera( const std::string& _name ) { return CM().getCamera(_name); }
+std::shared_ptr<Camera> SceneOrchestrator::getCamera( const std::string& _name ) {
+	return RSG().CM().getCamera(_name);
+}
 
 const cameraRigsMap& SceneOrchestrator::getRigs() const {
 	return mRigs;
-}
-
-void SceneOrchestrator::script( const std::string& _commandLine ) {
-	CQ().script( _commandLine );
 }
 
 InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
@@ -286,6 +254,12 @@ std::shared_ptr<SceneStateMachineBackEnd> SceneOrchestrator::StateMachine()  {
     return stateMachine;
 }
 
+void SceneOrchestrator::script( const std::string& _line ) {
+	cq.script(_line);
+}
 
-
-
+void SceneOrchestrator::addViewport( RenderTargetType _rtt, std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport,
+									 CameraControls _cc, BlitType _bt ) {
+	RenderTargetFactory::make( _rtt, _rig, _viewport, _bt, RSG().RR() );
+	mRigs[_rig->Name()] = CameraControlFactory::make( _cc, _rig, rsg );
+}

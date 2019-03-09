@@ -184,7 +184,6 @@ public:
         static const Boxes INVALID;
     };
 
-    void addBox( const std::string& _name, float _l, float _r, float _t, float _b, std::shared_ptr<LayoutBoxRenderer> _lbr );
     void addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc  );
     void addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible = true );
 

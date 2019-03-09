@@ -5,7 +5,8 @@
 #include "scene_state_machine.h"
 #include <core/app_globals.h>
 #include <core/camera.h>
-#include "core/camera_rig.hpp"
+#include <core/camera_rig.hpp>
+#include <graphics/render_targets.hpp>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/editor/includes.h>
 
@@ -70,16 +71,20 @@ SceneStateMachineBackEnd::SceneStateMachineBackEnd( SceneOrchestrator* _p ) : Sc
 void SceneStateMachineBackEnd::addBoxToViewport( const std::string& _name, const Boxes& _box ) {
 	boxes[_name] = _box;
 
-	if ( boxes[_name].cc == CameraControls::Plan2d ) {
-		o()->addViewport<RLTargetPlain>( _name, boxes[_name].updateAndGetRect(), boxes[_name].cc, BlitType::OnScreen );
-	} else if ( boxes[_name].cc == CameraControls::Walk || boxes[_name].cc == CameraControls::Fly ) {
-		o()->addViewport<RLTargetPBR>( _name, boxes[_name].updateAndGetRect(), boxes[_name].cc, BlitType::OnScreen );
-	}
-}
+	if ( _box.cc != CameraControls::Edit2d ) {
+		auto lViewport = boxes[_name].updateAndGetRect();
 
-void SceneStateMachineBackEnd::addBox( const std::string& _name, float _l, float _r, float _t, float _b,
-						  std::shared_ptr<LayoutBoxRenderer> _lbr ) {
-	addBoxToViewport( _name, { { _l, _r, _t, _b}, CameraControls::Edit2d, _lbr } );
+		auto rig = o()->RSG().CM().getRig( _name );
+		if ( !rig ) {
+			rig = o()->RSG().CM().addRig( _name, lViewport );
+		}
+
+		RenderTargetType rtt = RenderTargetType::PBR;
+		if ( boxes[_name].cc == CameraControls::Plan2d ) {
+			rtt = RenderTargetType::Plain;
+		}
+		o()->addViewport( rtt, rig, lViewport, boxes[_name].cc, BlitType::OnScreen );
+	}
 }
 
 void SceneStateMachineBackEnd::addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc ) {
@@ -101,8 +106,8 @@ void SceneStateMachineBackEnd::resizeCallback( SceneOrchestrator* _target, const
 		orBitWiseFlag( v.flags, BoxFlags::Resize );
 		if ( v.cc == CameraControls::Fly ) {
 			auto r = v.updateAndGetRect();
-			_target->getTarget( k )->resize( r );
-			_target->CM().getRig(k)->setViewport( r );
+			_target->RSG().RR().getTarget( k )->resize( r );
+			_target->RSG().CM().getRig(k)->setViewport( r );
 		}
 	}
 }

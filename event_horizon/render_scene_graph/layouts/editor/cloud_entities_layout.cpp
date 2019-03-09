@@ -48,7 +48,7 @@ void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string _ti
         ImGui::BeginGroup();
         auto& elem = it->second;
         ImGui::Text( "Name: %s", elem.getName().c_str());
-        auto tex = p->TM().TD( elem.getName() );
+        auto tex = p->RSG().RR().TM().TD( elem.getName() );
         ImGui::Image( reinterpret_cast<void *>(tex->getHandle()), ImVec2{ 100, 100 } );
         ImGui::EndGroup();
     }

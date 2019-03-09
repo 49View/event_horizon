@@ -51,7 +51,11 @@ void SceneGraph::cmdCalcLightmaps( const std::vector<std::string>& _params ) {
     cmdCalcLightmapsImpl( _params );
 }
 
-SceneGraph::SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb ) : fm(_fm), sb(_sb) {
+void SceneGraph::cmdChangeTime( const std::vector<std::string>& _params ) {
+    cmdChangeTimeImpl( _params );
+}
+
+SceneGraph::SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm ) : fm(_fm), sb(_sb), cm(_cm) {
     hcs = std::make_shared<CommandScriptSceneGraph>(*this);
     cq.registerCommandScript(hcs);
     mapGeomType(0, "none");
@@ -124,4 +128,7 @@ CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
     addCommandDefinition("remove", std::bind(&SceneGraph::cmdRemoveGeometry, &_hm, std::placeholders::_1));
     addCommandDefinition("load object", std::bind(&SceneGraph::cmdLoadObject, &_hm, std::placeholders::_1));
     addCommandDefinition("lightmaps", std::bind(&SceneGraph::cmdCalcLightmaps, &_hm, std::placeholders::_1));
+    addCommandDefinition("change time", std::bind(&SceneGraph::cmdChangeTime, &_hm, std::placeholders::_1 ));
 }
+
+CameraManager& SceneGraph::CM() { return cm; }
