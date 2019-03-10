@@ -116,21 +116,21 @@ void SceneOrchestrator::activate() {
 	WH::setResizeWindowCallback( GResizeWindowCallback );
 	WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
 
-    //stbi_set_flip_vertically_on_load(true);
-
 #ifndef _PRODUCTION_
 	Socket::on( "shaderchange",
 				std::bind(&SceneOrchestrator::reloadShaders, this, std::placeholders::_1 ) );
 #endif
 
+	stateMachine->activate();
+}
+
+void SceneOrchestrator::defaults() {
 	ImageBuilder{S::WHITE}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
 	ImageBuilder{S::BLACK}.makeDirect( rsg.TL(), RawImage::BLACK_RGBA4x4 );
 	ImageBuilder{S::NORMAL}.makeDirect( rsg.TL(), RawImage::NORMAL4x4 );
 	ImageBuilder{S::DEBUG_UV}.makeDirect( rsg.TL(), RawImage::DEBUG_UV() );
-
 	MaterialBuilder{S::WHITE_PBR, S::SH}.makeDefault(rsg.ML());
-
-	stateMachine->activate();
+	CameraBuilder{Name::Foxtrot}.makeDefault( Rect2f::MIDENTITY(), rsg.CM() );
 }
 
 void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {
@@ -230,7 +230,7 @@ const std::shared_ptr<ImGuiConsole>& SceneOrchestrator::Console() const {
 }
 
 void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
-    addViewport( RenderTargetType::PBR, RSG().CM().getRig(Name::Sierra),
+    addViewport( RenderTargetType::PBR, RSG().CM().get(Name::Sierra),
     		     Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), CameraControls::Fly, BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box);
     RSG().RR().getTarget(Name::Sierra)->takeScreenShot( _outdata );
@@ -260,6 +260,11 @@ void SceneOrchestrator::script( const std::string& _line ) {
 
 void SceneOrchestrator::addViewport( RenderTargetType _rtt, std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport,
 									 CameraControls _cc, BlitType _bt ) {
-	RenderTargetFactory::make( _rtt, _rig, _viewport, _bt, RSG().RR() );
-	mRigs[_rig->Name()] = CameraControlFactory::make( _cc, _rig, rsg );
+	if ( mRigs.find(_rig->Name()) == mRigs.end() ) {
+		RenderTargetFactory::make( _rtt, _rig, _viewport, _bt, RSG().RR() );
+		mRigs[_rig->Name()] = CameraControlFactory::make( _cc, _rig, rsg );
+	} else {
+
+		RSG().RR().getTarget(_rig->Name())->getRig()->setViewport(_viewport);
+	}
 }

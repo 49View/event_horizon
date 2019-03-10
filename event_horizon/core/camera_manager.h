@@ -1,15 +1,42 @@
 #pragma once
 
+#include <unordered_map>
 #include <core/camera.h>
+#include <core/name_policy.hpp>
 
 class CameraRig;
 class Renderer;
+class DependencyMaker;
 
-class CameraManager {
+template<typename T, typename C = std::unordered_map<std::string,std::shared_ptr<T>> >
+class DependencyMakerPolicy {
 public:
-    std::shared_ptr<CameraRig> addRig( const std::string &_name, const Rect2f& _viewport );
-    std::shared_ptr<CameraRig>& getRig( const std::string &_name );
+    bool exists( const std::string& _key ) const {
+        return resources.find( _key) != resources.end();
+    };
 
+    void add( std::shared_ptr<T> _elem ) {
+        resources[_elem->Name()] = _elem;
+    }
+
+    std::shared_ptr<T> get( const std::string& _key ) {
+        return resources[_key];
+    }
+
+protected:
+    C& Resources() {
+        return resources;
+    }
+    const C& Resources() const {
+        return resources;
+    }
+private:
+    C resources;
+};
+
+
+class CameraManager : public DependencyMakerPolicy<CameraRig> {
+public:
     std::shared_ptr<Camera> getCamera( const std::string &_name = "Main" );
     std::shared_ptr<Camera> getVRLeftEyeCamera( const std::string &_name = "Main" );
     std::shared_ptr<Camera> getVRRightEyeCamera( const std::string &_name = "Main" );
@@ -28,6 +55,11 @@ public:
 
     void update();
 private:
-    std::map<std::string, std::shared_ptr<CameraRig>> mCameraRigs;
     std::vector<std::pair<std::string, std::string>> mSyncedRigs;
+};
+
+class CameraBuilder : public NamePolicy<> {
+public:
+    using NamePolicy::NamePolicy;
+    std::shared_ptr<CameraRig> makeDefault( const Rect2f& _viewport, CameraManager& _md );
 };

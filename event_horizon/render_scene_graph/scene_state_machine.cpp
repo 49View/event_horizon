@@ -69,15 +69,15 @@ SceneStateMachineBackEnd::SceneStateMachineBackEnd( SceneOrchestrator* _p ) : Sc
 }
 
 void SceneStateMachineBackEnd::addBoxToViewport( const std::string& _name, const Boxes& _box ) {
+    if ( boxes.find(_name) != boxes.end() ) return;
+
 	boxes[_name] = _box;
 
 	if ( _box.cc != CameraControls::Edit2d ) {
 		auto lViewport = boxes[_name].updateAndGetRect();
 
-		auto rig = o()->RSG().CM().getRig( _name );
-		if ( !rig ) {
-			rig = o()->RSG().CM().addRig( _name, lViewport );
-		}
+		auto rig = CameraBuilder{_name}.makeDefault(lViewport, o()->RSG().CM());
+        rig->setViewport(lViewport);
 
 		RenderTargetType rtt = RenderTargetType::PBR;
 		if ( boxes[_name].cc == CameraControls::Plan2d ) {
@@ -107,7 +107,7 @@ void SceneStateMachineBackEnd::resizeCallback( SceneOrchestrator* _target, const
 		if ( v.cc == CameraControls::Fly ) {
 			auto r = v.updateAndGetRect();
 			_target->RSG().RR().getTarget( k )->resize( r );
-			_target->RSG().CM().getRig(k)->setViewport( r );
+			_target->RSG().CM().get(k)->setViewport( r );
 		}
 	}
 }
@@ -157,6 +157,21 @@ void SceneStateMachineBackEnd::Boxes::setVisible( bool _bVis ) {
     if ( renderer ) renderer->setVisible(_bVis);
 }
 
+void SceneStateMachineBackEnd::postDefaults() {
+    // These are the defaults what will be set in case they haven't been set already in init() virtual
+
+    // Set a fullscreen camera in case there's none
+    addBox( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
+}
+
+void SceneStateMachineBackEnd::initNV() {
+	o()->defaults();
+
+	init();
+
+	postDefaults();
+}
+
 void SceneStateMachine::activate( [[maybe_unused]] const SceneStateMachine::OnActivate& ) {
-    owner->init();
+    owner->initNV();
 }

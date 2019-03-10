@@ -93,6 +93,9 @@ struct SelectionRecursiveLamba {
     void operator()(UIAssetSP arg) const {
         mSel.selected( arg );
     }
+    void operator()(CameraAssetSP arg) const {
+        mSel.selected( arg );
+    }
 
 private:
     Selection& mSel;
@@ -105,6 +108,9 @@ struct SelectionAddToKeyFrame {
         arg->addKeyFrame( timelineName, time );
     }
     void operator()(UIAssetSP arg) const {
+        arg->addKeyFrame( timelineName, time );
+    }
+    void operator()(CameraAssetSP arg) const {
         arg->addKeyFrame( timelineName, time );
     }
 

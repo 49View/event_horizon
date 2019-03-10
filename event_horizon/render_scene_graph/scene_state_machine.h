@@ -167,6 +167,7 @@ public:
     explicit SceneStateMachineBackEnd( SceneOrchestrator* _p );
 
     void activate();
+    void initNV();
     virtual void init() = 0;
     virtual void run() = 0;
 
@@ -223,6 +224,7 @@ public:
     }
 
 protected:
+    void postDefaults();
     void addBoxToViewport( const std::string& _nane, const Boxes& _box );
 
 private:

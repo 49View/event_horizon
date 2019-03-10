@@ -12,6 +12,7 @@
 #include <variant>
 #include "core/image_builder.h"
 #include "core/uuid.hpp"
+#include "core/camera_rig.hpp"
 #include "core/command.hpp"
 #include "core/font_manager.h"
 #include "core/serializebin.hpp"

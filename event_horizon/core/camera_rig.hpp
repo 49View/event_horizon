@@ -7,7 +7,10 @@
 #include <string>
 #include <core/math/vector3f.h>
 #include <core/math/rect2f.h>
+#include <core/serialization.hpp>
 #include <core/camera_utils.hpp>
+#include <core/boxable.hpp>
+#include <core/name_policy.hpp>
 
 class Framebuffer;
 class Camera;
@@ -17,10 +20,14 @@ enum class CameraRigType {
     Probe360
 };
 
-class CameraRig {
+class CameraRig : public NamePolicy<>, public Boxable<> {
 public:
     CameraRig( const std::string &_name, const Rect2f& _viewport );
+    virtual ~CameraRig() = default;
 //    CameraRig( const std::string &_name, std::shared_ptr<Framebuffer> _fb );
+
+    template<typename TV> \
+	void visit() const { traverseWithHelper<TV>( "Name", this->Name() ); }
 
     std::shared_ptr<Camera> getCamera();
     std::shared_ptr<Camera> getMainCamera() { return mCamera; }
@@ -40,7 +47,6 @@ public:
     void CurrEye( int val ) { mCurrEye = val; }
 
     CameraMode getMainCameraMode() const;
-    std::string Name() const { return mName; }
 
     ViewportTogglesT getCvt() const { return mCvt; }
     ViewportTogglesT& Cvt() { return mCvt; }
@@ -49,7 +55,6 @@ public:
     void Status( CameraState val ) { mStatus = val; }
 
 protected:
-    std::string mName;
     std::shared_ptr<Camera> mCamera;
     std::shared_ptr<Camera> mCameraVRLeftEye;
     std::shared_ptr<Camera> mCameraVRRightEye;

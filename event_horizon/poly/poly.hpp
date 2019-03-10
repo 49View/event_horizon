@@ -30,7 +30,7 @@ class CameraRig;
 using CameraAsset = Node<CameraRig>;
 using CameraAssetSP = std::shared_ptr<CameraAsset>;
 
-using NodeVariants = std::variant<GeomAssetSP, UIAssetSP>;
+using NodeVariants = std::variant<GeomAssetSP, UIAssetSP, CameraAssetSP>;
 
 using SceneGraphDependencyVariants = std::variant<MaterialSP,RawImageSP,VDataSP>;
 

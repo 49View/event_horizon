@@ -61,6 +61,7 @@ public:
 	void inputPollUpdate();
 	void update();
 	void render();
+	void defaults();
 	void enableInputs( bool _bEnabled );
 	void deactivate();
 

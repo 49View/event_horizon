@@ -546,7 +546,7 @@ protected:
 
     JMATH::AABB calcCompleteBBox3dRec() {
         if ( mData ) {
-            JMATH::AABB lBBox = mData->BBox3d();
+            auto lBBox = mData->BBox3d();
             lBBox.transform( *mLocalHierTransform );
             Boxable::bbox3d = lBBox;
         }

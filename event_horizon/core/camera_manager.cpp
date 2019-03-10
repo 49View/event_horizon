@@ -1,5 +1,6 @@
 #include "camera_manager.h"
 
+#include "core/callback_dependency.h"
 #include "core/service_factory.h"
 #include "core/app_globals.h"
 #include "core/camera_rig.hpp"
@@ -17,7 +18,7 @@ void CameraManager::desyncCameraMovements( const std::string& cameraSource, cons
 }
 
 void CameraManager::enableInputs( const bool _bEnable ) {
-    for ( auto& c : mCameraRigs ) {
+    for ( auto& c : Resources() ) {
         c.second->getMainCamera()->enableInputs( _bEnable );
     }
 }
@@ -34,7 +35,7 @@ void CameraManager::update() {
         getCamera( c.second )->ViewPort( getCamera( c.first )->ViewPort());
     }
 
-    for ( auto& c : mCameraRigs ) {
+    for ( auto& c : Resources() ) {
         c.second->getMainCamera()->update();
         // Copy camera values to left and right camera for VR
         c.second->getVRLeftCamera()->setPosition( c.second->getMainCamera()->getPosition());
@@ -51,37 +52,48 @@ void CameraManager::update() {
     }
 }
 
-std::shared_ptr<CameraRig> CameraManager::addRig( const std::string& _name, const Rect2f& _viewport) {
-    auto c = std::make_shared<CameraRig>( _name, _viewport );
-    mCameraRigs[_name] = c;
-    return c;
+std::shared_ptr<Camera> CameraManager::getCamera( const std::string& _name ) {
+    return Resources()[_name]->getCamera();
 }
 
-//std::shared_ptr<CameraRig> CameraManager::addRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
-//    auto c = std::make_shared<CameraRig>( _name, _fb );
-//    mCameraRigs[_name] = c;
-//    return c;
-//}
-
-std::shared_ptr<CameraRig>& CameraManager::getRig( const std::string& _name ) {
-    return mCameraRigs[_name];
+std::shared_ptr<Camera> CameraManager::getVRLeftEyeCamera( const std::string& _name ) {
+    return Resources()[_name]->getVRLeftCamera();
 }
 
-std::shared_ptr<Camera> CameraManager::getCamera( const std::string& _name ) { return mCameraRigs[_name]->getCamera(); }
+std::shared_ptr<Camera> CameraManager::getVRRightEyeCamera( const std::string& _name ) {
+    return Resources()[_name]->getVRRightCamera();
+}
 
-std::shared_ptr<Camera> CameraManager::getVRLeftEyeCamera( const std::string& _name ) { return mCameraRigs[_name]->getVRLeftCamera(); }
+std::shared_ptr<Camera> CameraManager::getMainCameraRig( const std::string& _name ) {
+    return Resources()[_name]->getMainCamera();
+}
 
-std::shared_ptr<Camera> CameraManager::getVRRightEyeCamera( const std::string& _name ) { return mCameraRigs[_name]->getVRRightCamera(); }
+std::shared_ptr<Camera> CameraManager::getMainCamera() {
+    return Resources()["Main"]->getMainCamera();
+}
 
-std::shared_ptr<Camera> CameraManager::getMainCameraRig( const std::string& _name ) { return mCameraRigs[_name]->getMainCamera(); }
+CameraMode CameraManager::getMainCameraMode() const {
+    return Resources().find("Main")->second->getMainCameraMode();
+}
 
-std::shared_ptr<Camera> CameraManager::getMainCamera() { return mCameraRigs["Main"]->getMainCamera(); }
+std::string CameraManager::getMainCameraName() {
+    return "Main";
+}
 
-CameraMode CameraManager::getMainCameraMode() const { return mCameraRigs.find("Main")->second->getMainCameraMode(); }
+int CameraManager::CurrEye( const std::string& _name ) {
+    return Resources()[_name]->CurrEye();
+}
 
-std::string CameraManager::getMainCameraName() { return "Main"; }
+void CameraManager::CurrEye( int val, const std::string& _name ) {
+    Resources()[_name]->CurrEye( val );
+}
 
-int CameraManager::CurrEye( const std::string& _name ) { return mCameraRigs[_name]->CurrEye(); }
+std::shared_ptr<CameraRig> CameraBuilder::makeDefault( const Rect2f& _viewport, CameraManager& _md ) {
+    if ( _md.exists(Name()) ) {
+        return _md.get(Name());
+    }
+    auto cam = std::make_shared<CameraRig>( Name(), _viewport );
+    _md.add( cam );
 
-void CameraManager::CurrEye( int val, const std::string& _name ) { mCameraRigs[_name]->CurrEye( val ); }
-
+    return cam;
+}

@@ -476,6 +476,10 @@ std::shared_ptr<Camera> RLTarget::getCamera() {
     return cameraRig->getMainCamera();
 }
 
+std::shared_ptr<CameraRig> RLTarget::getRig() {
+    return cameraRig;
+}
+
 void RLTarget::updateStreamPacket( const std::string& _streamName ) {
     auto packet = rr.SSM().pop( _streamName );
     if ( packet.data ) {

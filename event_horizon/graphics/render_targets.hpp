@@ -134,6 +134,7 @@ public:
     virtual ~RLTarget() = default;
 
     std::shared_ptr<Camera> getCamera();
+    std::shared_ptr<CameraRig> getRig();
     void addToCBCore( CommandBufferList& cb );
     void updateStreams();
     virtual void invalidateOnAdd() {}

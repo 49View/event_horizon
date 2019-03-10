@@ -46,7 +46,7 @@ CubeMapRigContainer addCubeMapRig( const std::string& _name,
 }
 
 CameraRig::CameraRig( const std::string& _name, const Rect2f& _viewport ) {
-    mName = _name;
+    Name(_name);
     mCamera = std::make_shared<Camera>( _name, _viewport );
     mCameraVRLeftEye = std::make_shared<Camera>( _name + "LeftEye", _viewport );
     mCameraVRRightEye = std::make_shared<Camera>( _name + "RightEye", _viewport );
