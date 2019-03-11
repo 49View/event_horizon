@@ -76,6 +76,7 @@ public:
 	static const std::string DC();
 
 	RenderSceneGraph& RSG();
+	CommandQueue& CQ();
     std::shared_ptr<Camera> getCamera( const std::string& _name );
 
 	template <typename T>

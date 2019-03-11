@@ -268,3 +268,7 @@ void SceneOrchestrator::addViewport( RenderTargetType _rtt, std::shared_ptr<Came
 		RSG().RR().getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 	}
 }
+
+CommandQueue& SceneOrchestrator::CQ() {
+    return cq;
+}
