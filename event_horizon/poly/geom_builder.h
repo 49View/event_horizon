@@ -14,11 +14,11 @@
 #include "core/math/poly_shapes.hpp"
 #include "core/image_builder.h"
 #include "core/descriptors/material.h"
-#include "profile.hpp"
-#include "follower.hpp"
-#include "poly_helper.h"
-#include "scene_graph.h"
-#include "di_modules.h"
+#include <poly/profile.hpp>
+#include <poly/follower.hpp>
+#include <poly/poly_helper.h>
+#include <poly/scene_graph.h>
+#include <poly/scene_graph_geom_builder_base.hpp>
 
 enum class GeomBuilderType {
     shape,
@@ -107,38 +107,37 @@ struct RBUILDER( GeomFileAssetBuilder, geom, geom, Binary, BuilderQueryType::Not
 
 using GF = GeomFileAssetBuilder;
 
-class GeomBuilder : public MaterialBuildable, public DependantBuilder, public GeomBasicBuilder<GeomBuilder> {
-    using MaterialBuildable::MaterialBuildable;
+class GeomBuilder : public SceneGraphGeomBaseBuilder, public GeomBasicBuilder<GeomBuilder> {
 public:
-    GeomBuilder() = default;
+    explicit GeomBuilder( SceneGraph& _sg );
     virtual ~GeomBuilder() = default;
 
-    explicit GeomBuilder( const GeomBuilderType gbt ) : MaterialBuildable(S::SH, S::WHITE_PBR), builderType(gbt) {}
-    GeomBuilder( const GeomBuilderType gbt, const std::string& _name ) : MaterialBuildable(S::SH, S::WHITE_PBR), DependantBuilder(_name), builderType(gbt) {}
-    GeomBuilder( GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
+    explicit GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt );
+    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _name );
+    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
 
     // Polygon list
-    explicit GeomBuilder( const Rect2f& _rect, float _z = 0.0f );
-    explicit GeomBuilder( const std::vector<PolyLine>& _plist );
-    explicit GeomBuilder( const std::vector<Vector3f>& _vlist );
-    explicit GeomBuilder( const std::vector<Triangle2d>& _tris, float _z = 0.0f );
-    explicit GeomBuilder( const std::vector<PolyLine2d>& _plines, float _z = 0.0f );
+    explicit GeomBuilder( SceneGraph& _sg, const Rect2f& _rect, float _z = 0.0f );
+    explicit GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist );
+    explicit GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& _vlist );
+    explicit GeomBuilder( SceneGraph& _sg, const std::vector<Triangle2d>& _tris, float _z = 0.0f );
+    explicit GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine2d>& _plines, float _z = 0.0f );
 
     // Outlines
-    GeomBuilder( std::initializer_list<Vector3f>&& arguments_list, float _zPull );
-    GeomBuilder( std::initializer_list<Vector2f>&& arguments_list, float _zPull );
-    GeomBuilder( const std::vector<Vector3f>& arguments_list, float _zPull );
-    GeomBuilder( const std::vector<Vector2f>& arguments_list, float _zPull );
+    GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector3f>&& arguments_list, float _zPull );
+    GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector2f>&& arguments_list, float _zPull );
+    GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& arguments_list, float _zPull );
+    GeomBuilder( SceneGraph& _sg, const std::vector<Vector2f>& arguments_list, float _zPull );
 
     // Shapes
-    explicit GeomBuilder( ShapeType _st, const Vector3f& _size = Vector3f::ONE );
+    explicit GeomBuilder( SceneGraph& _sg, ShapeType _st, const Vector3f& _size = Vector3f::ONE );
 
     // Profile/Follwoers
-    GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline,
+    GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline,
                  float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO );
-    GeomBuilder( const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
+    GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
                  const Vector3f& _suggestedAxis = Vector3f::ZERO );
-    GeomBuilder( const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
+    GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
 
     GeomBuilder& inj( GeomAssetSP _hier );
 
@@ -275,19 +274,19 @@ public:
         return *this;
     }
 
-    GeomAssetSP buildr( DependencyMaker& _md);
+    GeomAssetSP buildr();
 
-    void assemble( DependencyMaker& _md ) override;
+    void assemble() override;
 
 protected:
     void elemCreate() override;
     GeomAssetSP Elem() { return elem; }
 
-    void createDependencyList( DependencyMaker& _md ) override;
+    void createDependencyList() override;
     bool validate() const override;
     void preparePolyLines();
-    void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, SceneGraph& sg );
-    void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb, SceneGraph& sg );
+    void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb );
+    void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb );
     void createFromAsset( GeomAssetSP asset );
 
 private:
@@ -339,7 +338,7 @@ public:
     GeomBuilderComposer();
 
     void add( GeomBuilder _gb );
-    void build( DependencyMaker& _md );
+    void build();
 
     GeomAssetSP Elem();
 private:

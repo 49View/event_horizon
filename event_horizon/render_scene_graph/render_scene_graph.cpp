@@ -98,10 +98,10 @@ void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _p
     if ( st != ShapeType::None) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
         auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
-        GeomBuilder{ st }.n("ucarcamagnu").g(9200).m(shd,mat).build( *this );
+        GB{*this, st }.n("ucarcamagnu").g(9200).m(shd,mat).build();
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
         Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
-        UISB{ UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr(*this);
+        UISB{*this, UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr();
     }
 
 }

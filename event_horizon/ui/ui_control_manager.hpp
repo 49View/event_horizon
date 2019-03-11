@@ -104,7 +104,7 @@ public:
 
 	virtual ~UiControlGroupBuilder() {}
 public:
-	void assemble( DependencyMaker& _md ) override;
+	void assemble() override;
 
 	UiControlGroupBuilder& f( const UiControlFlag _flags ) {
 		orBitWiseFlag( flags, _flags );
@@ -114,7 +114,7 @@ public:
 protected:
 	void elemCreate() override {}
 	bool validate() const override;
-	void createDependencyList( DependencyMaker& _md ) override;
+	void createDependencyList() override;
 private:
 	UiControlFlag flags = UiControlFlag::UseScreenSpace;
 	KVFMapping    kvmapping;

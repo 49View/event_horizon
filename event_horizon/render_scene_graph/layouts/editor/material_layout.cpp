@@ -82,7 +82,7 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
     SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
         for ( const auto& elem : cmd ) {
             auto mb = std::make_shared<MaterialBuilder>(getFileNameOnly(elem.filename), elem.data);
-            GB{ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->RSG().ML() )).build( p->RSG() );
+            GB{p->RSG(), ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->RSG().ML() )).build();
         }
         cmd.clear();
     } );

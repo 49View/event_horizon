@@ -61,7 +61,7 @@ void callbackGeomSVG( const std::string& _filename, const std::string& _svgStrin
     svgString = _svgString;
     svgName = getFileNameOnly(_filename);
     SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
-        GB{GeomBuilderType::svg}.n(svgName).ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).buildr(p->RSG());
+        GB{p->RSG(),GeomBuilderType::svg}.n(svgName).ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).buildr();
     } );
 
 }

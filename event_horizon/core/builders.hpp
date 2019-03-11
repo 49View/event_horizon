@@ -110,12 +110,12 @@ class DependantBuilder : public BaseBuilder {
     using BaseBuilder::BaseBuilder;
 public:
 
-    virtual void assemble( [[maybe_unused]] DependencyMaker& _md ) {};
+    virtual void assemble() {};
 
-    void build( DependencyMaker& _md ) {
+    void build() {
         if ( validate() ) {
             elemCreate();
-            createDependencyList( _md );
+            createDependencyList();
         }
     }
 
@@ -126,18 +126,18 @@ public:
 protected:
     virtual void elemCreate() = 0;
     virtual bool validate() const = 0;
-    template< typename B, typename D>
-    void assembleNV( std::shared_ptr<B> _builder, D& _md ) {
-        _builder->assemble( _md );
+    template< typename B>
+    void assembleNV( std::shared_ptr<B> _builder ) {
+        _builder->assemble();
         // We leave room for injecting code that needs to run pre/after assembly
     }
 
-    template< typename B, typename D>
-    void addDependencies( std::shared_ptr<B> _builder, D& _md ) {
+    template< typename B>
+    void addDependencies( std::shared_ptr<B> _builder ) {
         if ( mDeps.empty() ) {
-            assembleNV( _builder, _md );
+            assembleNV( _builder );
         } else {
-            g_deps.push_back( std::make_shared<DependencyChainMap>( _builder, _md ));
+            g_deps.push_back( std::make_shared<DependencyChainMap>( _builder ));
         }
     };
 
@@ -188,7 +188,7 @@ protected:
         }
     }
 
-    virtual void createDependencyList( DependencyMaker& _md ) = 0;
+    virtual void createDependencyList() = 0;
 
 protected:
     ddContainer mDeps;

@@ -11,16 +11,16 @@
 #include <core/math/aabb.h>
 #include <core/math/vector4f.h>
 #include <core/soa_utils.h>
-#include <core/descriptors/material.h>
 
 #include <poly/poly.hpp>
+#include <poly/scene_graph.h>
+#include <poly/scene_graph_geom_builder_base.hpp>
 
-namespace Utility { namespace TTFCore { class Font; }}
+namespace Utility::TTFCore { class Font; }
 
 class UIElement : public Publisher<UIElement> {
 public:
     UIElement() = default;
-
     UIElement( const std::string& name, UIShapeType shapeType, std::shared_ptr<Material> _mat, int renderBucketIndex ) :
                shapeType( shapeType ), material( _mat ), renderBucketIndex( renderBucketIndex ) {
         Name( name );
@@ -32,16 +32,16 @@ public:
         return material;
     }
 
-    void setMaterial( const std::shared_ptr<Material>& material ) {
-        UIElement::material = material;
+    void setMaterial( const std::shared_ptr<Material>& _material ) {
+        UIElement::material = _material;
     }
 
     UIShapeType ShapeType() const {
         return shapeType;
     }
 
-    void ShapeType( UIShapeType shapeType ) {
-        UIElement::shapeType = shapeType;
+    void ShapeType( UIShapeType _shapeType ) {
+        UIElement::shapeType = _shapeType;
     }
 
     const std::shared_ptr<PosTex3dStrip>& VertexList() const {
@@ -92,27 +92,18 @@ public:
 
 };
 
-class UIShapeBuilder : public MaterialBuildable, public Observable<UIShapeBuilder>, public DependantBuilder {
+class UIShapeBuilder : public SceneGraphGeomBaseBuilder, public Observable<UIShapeBuilder> {
 public:
-    using DependantBuilder::DependantBuilder;
-    using MaterialBuildable::MaterialBuildable;
-
     virtual ~UIShapeBuilder() = default;
-    void assemble( DependencyMaker& rr ) override;
+
+    UIShapeBuilder( SceneGraph& _sg, UIShapeType shapeType );
+    UIShapeBuilder( SceneGraph& _sg, UIShapeType _shapeType, const std::string& _ti, float _fh = 0.0f );
+
+    void assemble() override;
 
     void init() {
         material->setShaderName( getShaderType( shapeType ) );
         defaultFontIfNecessary();
-    }
-
-    explicit UIShapeBuilder( UIShapeType shapeType ) : MaterialBuildable(S::TEXTURE_3D, S::WHITE), shapeType( shapeType ) {
-        init();
-    }
-
-    UIShapeBuilder( UIShapeType _shapeType, const std::string& _ti, float _fh = 0.0f ) : MaterialBuildable(S::TEXTURE_3D, S::WHITE),shapeType( _shapeType ) {
-        init();
-        if ( _fh != 0.0f ) fh(_fh);
-        ti(_ti);
     }
 
     void defaultFontIfNecessary() {
@@ -315,8 +306,8 @@ public:
     }
 
 
-    UIAssetSP buildr( DependencyMaker& _md) {
-        build( _md );
+    UIAssetSP buildr() {
+        build();
         return elem;
     }
 
@@ -325,7 +316,7 @@ protected:
     bool validate() const override;
 
 protected:
-    void createDependencyList( DependencyMaker& _md ) override;
+    void createDependencyList() override;
 
 private:
     std::shared_ptr<PosTex3dStrip> makeRoundedRect( const QuadVertices2& uvm );

@@ -53,10 +53,10 @@ public: \
     return _list.find( _key) != _list.end(); \
     };
 
-template< typename B, typename D>
+template< typename B>
 class DependencyChain {
 public:
-    DependencyChain( std::shared_ptr<B> _builder, D& makerDI ) : makerDI( makerDI ) {
+    DependencyChain( std::shared_ptr<B> _builder ) {
         builder = _builder;
         mDeps = builder->deps();
     }
@@ -78,7 +78,7 @@ public:
     void execute( bool allDependenciesLoadedSuccessfully ) {
         completed( allDependenciesLoadedSuccessfully );
         if ( allDependenciesLoadedSuccessfully ) {
-            builder->assemble( makerDI );
+            builder->assemble();
         }
     };
 
@@ -86,14 +86,13 @@ private:
     ddContainer mDeps;
     DependencyStatus ddstatus = DependencyStatus::Loading;
     std::shared_ptr<B> builder;
-    D& makerDI;
 };
 
 class DependantBuilder;
 class ResourceBuilder;
 class ResourceBuilderObservable;
 
-using DependencyChainMap = DependencyChain<DependantBuilder, DependencyMaker>;
+using DependencyChainMap = DependencyChain<DependantBuilder>;
 using DependencyChainMapPtr = std::shared_ptr<DependencyChainMap>;
 using dep_map = std::vector<DependencyChainMapPtr>;
 

@@ -6,13 +6,24 @@
 #include "core/node.hpp"
 #include "core/image_builder.h"
 #include "core/app_globals.h"
-//#include "../renderer.h"
-//#include "../font_manager.h"
-#include <poly/scene_graph.h>
 
 typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 
 uint64_t UIShapeBuilder::sid = 0;
+
+UIShapeBuilder::UIShapeBuilder( SceneGraph& _sg, UIShapeType shapeType ) :
+    SceneGraphGeomBaseBuilder( _sg, S::TEXTURE_3D, S::WHITE ), shapeType( shapeType ) {
+
+    init();
+}
+
+UIShapeBuilder::UIShapeBuilder( SceneGraph& _sg, UIShapeType _shapeType, const std::string& _ti, float _fh ) :
+    SceneGraphGeomBaseBuilder( _sg, S::TEXTURE_3D, S::WHITE ), shapeType( _shapeType ) {
+
+    init();
+    if ( _fh != 0.0f ) fh(_fh);
+    ti(_ti);
+}
 
 TextureFillModeScalers
 getTextureFillModeScalers( const RectFillMode fm, const Vector2f& size, float _aspectRation ) {
@@ -348,9 +359,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makePolygon() {
     return pts;
 }
 
-void UIShapeBuilder::assemble( DependencyMaker& _md ) {
-
-    auto& sg = dynamic_cast<SceneGraph&>(_md);
+void UIShapeBuilder::assemble() {
 
     if ( orig == Vector2f::HUGE_VALUE_NEG ) {
         orig = rect.origin();
@@ -501,12 +510,9 @@ std::string UIShapeBuilder::getShaderType( UIShapeType _st ) const {
     return shaderName;
 }
 
-void UIShapeBuilder::createDependencyList( DependencyMaker& _md ) {
-
-    auto& sg = static_cast<SceneGraph&>(_md);
-//    addDependency<ImageBuilder>( tname, rr.RIDM() );
+void UIShapeBuilder::createDependencyList() {
     addDependency<FontBuilder>( fontName, sg.FM() );
-    addDependencies( std::make_shared<UIShapeBuilder>(*this), _md );
+    addDependencies( std::make_shared<UIShapeBuilder>(*this) );
 }
 
 void UIShapeBuilder::elemCreate() {
