@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 #include <graphics/text_input.hpp>
-#include <core/camera_manager.h>
+#include <poly/camera_manager.h>
 #include <core/camera_rig.hpp>
 #include <core/observer.h>
 #include <core/math/vector2f.h>

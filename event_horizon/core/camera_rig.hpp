@@ -9,8 +9,7 @@
 #include <core/math/rect2f.h>
 #include <core/serialization.hpp>
 #include <core/camera_utils.hpp>
-#include <core/boxable.hpp>
-#include <core/name_policy.hpp>
+#include <core/publisher.hpp>
 
 class Framebuffer;
 class Camera;
@@ -20,22 +19,34 @@ enum class CameraRigType {
     Probe360
 };
 
-class CameraRig : public NamePolicy<>, public Boxable<> {
+class CameraRig : public Publisher<CameraRig> {
 public:
+    CameraRig() = default;
     CameraRig( const std::string &_name, const Rect2f& _viewport );
     virtual ~CameraRig() = default;
-//    CameraRig( const std::string &_name, std::shared_ptr<Framebuffer> _fb );
+protected:
 
+    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override {}
+    void deserializeImpl( std::shared_ptr<DeserializeBin> reader ) override {}
+
+    std::string calcHashImpl() override {
+        return "Camera_" + Name();
+    }
+
+    std::string generateThumbnail() const override {
+        return std::string();
+    }
+
+public:
     template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( "Name", this->Name() ); }
+    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {}
 
     std::shared_ptr<Camera> getCamera();
     std::shared_ptr<Camera> getMainCamera() { return mCamera; }
     std::shared_ptr<Camera> getVRLeftCamera() { return mCameraVRLeftEye; }
     std::shared_ptr<Camera> getVRRightCamera() { return mCameraVRRightEye; }
 
-//    std::shared_ptr<Framebuffer> getFramebuffer() { return mFramebuffer; };
-//    void setFramebuffer( std::shared_ptr<Framebuffer> framebuffer );
     const Rect2f& getViewport() const;
     void setViewport( const Rect2f& viewport );
 
@@ -59,11 +70,14 @@ protected:
     std::shared_ptr<Camera> mCameraVRLeftEye;
     std::shared_ptr<Camera> mCameraVRRightEye;
 
-    Rect2f mViewport;
-//    std::shared_ptr<Framebuffer> mFramebuffer;
+    Rect2f mViewport = Rect2f::MIDENTITY();
 
     ViewportTogglesT mCvt = ViewportToggles::None;
     CameraState mStatus = CameraState::Active;
 
     int mCurrEye = 0;
+
+public:
+    static uint64_t Version() { return 1000; }
+    inline const static std::string EntityGroup() { return EntityGroup::CameraRig; }
 };

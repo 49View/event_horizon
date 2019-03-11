@@ -3,37 +3,11 @@
 #include <unordered_map>
 #include <core/camera.h>
 #include <core/name_policy.hpp>
+#include <core/callback_dependency.h>
 
 class CameraRig;
 class Renderer;
-class DependencyMaker;
-
-template<typename T, typename C = std::unordered_map<std::string,std::shared_ptr<T>> >
-class DependencyMakerPolicy {
-public:
-    bool exists( const std::string& _key ) const {
-        return resources.find( _key) != resources.end();
-    };
-
-    void add( std::shared_ptr<T> _elem ) {
-        resources[_elem->Name()] = _elem;
-    }
-
-    std::shared_ptr<T> get( const std::string& _key ) {
-        return resources[_key];
-    }
-
-protected:
-    C& Resources() {
-        return resources;
-    }
-    const C& Resources() const {
-        return resources;
-    }
-private:
-    C resources;
-};
-
+class SceneGraph;
 
 class CameraManager : public DependencyMakerPolicy<CameraRig> {
 public:
@@ -61,5 +35,5 @@ private:
 class CameraBuilder : public NamePolicy<> {
 public:
     using NamePolicy::NamePolicy;
-    std::shared_ptr<CameraRig> makeDefault( const Rect2f& _viewport, CameraManager& _md );
+    std::shared_ptr<CameraRig> makeDefault( const Rect2f& _viewport, SceneGraph& _md );
 };

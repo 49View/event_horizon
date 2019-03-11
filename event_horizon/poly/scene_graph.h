@@ -45,7 +45,7 @@ public:
     explicit SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm );
 
 DEPENDENCY_MAKER_EXIST(geoms);
-    void add( NodeVariants _geom);
+    void add( NodeVariants _geom );
     void remove( const UUID& _uuid );
 
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );

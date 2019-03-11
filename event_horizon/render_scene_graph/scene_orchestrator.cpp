@@ -5,7 +5,7 @@
 
 #include "scene_orchestrator.hpp"
 
-#include <core/camera_manager.h>
+#include <poly/camera_manager.h>
 #include <core/camera_rig.hpp>
 #include <graphics/renderer.h>
 #include <graphics/render_list.h>
@@ -130,7 +130,7 @@ void SceneOrchestrator::defaults() {
 	ImageBuilder{S::NORMAL}.makeDirect( rsg.TL(), RawImage::NORMAL4x4 );
 	ImageBuilder{S::DEBUG_UV}.makeDirect( rsg.TL(), RawImage::DEBUG_UV() );
 	MaterialBuilder{S::WHITE_PBR, S::SH}.makeDefault(rsg.ML());
-	CameraBuilder{Name::Foxtrot}.makeDefault( Rect2f::MIDENTITY(), rsg.CM() );
+	CameraBuilder{Name::Foxtrot}.makeDefault( Rect2f::MIDENTITY(), rsg );
 }
 
 void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {

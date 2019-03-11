@@ -16,6 +16,32 @@
 #include <core/util.h>
 #include <core/htypes_shared.hpp>
 
+template<typename T, typename C = std::unordered_map<std::string,std::shared_ptr<T>> >
+class DependencyMakerPolicy {
+public:
+    bool exists( const std::string& _key ) const {
+        return resources.find( _key) != resources.end();
+    };
+
+    void add( std::shared_ptr<T> _elem ) {
+        resources[_elem->Name()] = _elem;
+    }
+
+    std::shared_ptr<T> get( const std::string& _key ) {
+        return resources[_key];
+    }
+
+protected:
+    C& Resources() {
+        return resources;
+    }
+    const C& Resources() const {
+        return resources;
+    }
+private:
+    C resources;
+};
+
 class DependencyMaker {
 public:
     virtual bool exists( const std::string& _key ) const = 0;

@@ -4,6 +4,7 @@
 
 #include "render_scene_graph.h"
 #include <core/image_builder.h>
+#include <poly/camera_manager.h>
 #include <core/node.hpp>
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>
@@ -31,6 +32,8 @@ void RenderSceneGraph::addImpl( NodeVariants _geom ) {
     } else if ( auto as = std::get_if<UIAssetSP>(&_geom); as != nullptr ) {
         (*as)->subscribeData(uiRenderObserver);
         (*as)->sendNotifyData("generateGeometryVP");
+    } else if ( auto as = std::get_if<CameraAssetSP>(&_geom); as != nullptr ) {
+        CM().add( (*as)->Data() );
     }
 }
 

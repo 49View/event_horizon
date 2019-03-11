@@ -71,9 +71,9 @@ void ImGuiGeoms::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
         ImGui::PushID(std::visit(lambdaUUID, v).c_str());
         ImGui::BeginGroup();
         std::visit( NodeVisitor<ImGUIJson>{}, v );
-//        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
-//            VisitLambda( publish, v );
-//        }
+        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
+            VisitLambda( publish, v );
+        }
         ImGui::EndGroup();
         ImGui::PopID();
     }

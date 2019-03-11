@@ -76,7 +76,7 @@ void SceneStateMachineBackEnd::addBoxToViewport( const std::string& _name, const
 	if ( _box.cc != CameraControls::Edit2d ) {
 		auto lViewport = boxes[_name].updateAndGetRect();
 
-		auto rig = CameraBuilder{_name}.makeDefault(lViewport, o()->RSG().CM());
+		auto rig = CameraBuilder{_name}.makeDefault(lViewport, o()->RSG());
         rig->setViewport(lViewport);
 
 		RenderTargetType rtt = RenderTargetType::PBR;

@@ -3,7 +3,10 @@
 #include "core/callback_dependency.h"
 #include "core/service_factory.h"
 #include "core/app_globals.h"
+#include "core/node.hpp"
 #include "core/camera_rig.hpp"
+#include "poly/poly.hpp"
+#include "poly/scene_graph.h"
 //#include "vr_manager.hpp"
 
 void CameraManager::syncCameraMovements( const std::string& cameraSource, const std::string& cameraDest ) {
@@ -88,12 +91,13 @@ void CameraManager::CurrEye( int val, const std::string& _name ) {
     Resources()[_name]->CurrEye( val );
 }
 
-std::shared_ptr<CameraRig> CameraBuilder::makeDefault( const Rect2f& _viewport, CameraManager& _md ) {
-    if ( _md.exists(Name()) ) {
-        return _md.get(Name());
+std::shared_ptr<CameraRig> CameraBuilder::makeDefault( const Rect2f& _viewport, SceneGraph& _sg ) {
+    if ( _sg.CM().exists(Name()) ) {
+        return _sg.CM().get(Name());
     }
     auto cam = std::make_shared<CameraRig>( Name(), _viewport );
-    _md.add( cam );
+    auto node = std::make_shared<CameraAsset>(cam);
+    _sg.add( node );
 
-    return cam;
+    return node->Data();
 }

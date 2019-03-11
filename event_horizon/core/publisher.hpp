@@ -11,6 +11,7 @@
 #include <core/http/basen.hpp>
 #include <core/zlib_util.h>
 #include <core/serializable.hpp>
+#include <core/serializebin.hpp>
 
 template < typename T,
            typename B = JMATH::AABB,

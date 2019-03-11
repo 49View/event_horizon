@@ -70,6 +70,7 @@ public:
         this->Name(_name);
     }
     explicit Node( std::shared_ptr<D> data, Node *papa = nullptr ) : Node() {
+        this->Name( data->Name() );
         father = papa;
         mData = data;
     }
