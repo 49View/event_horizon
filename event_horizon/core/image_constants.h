@@ -76,3 +76,23 @@ inline FrameBufferTextureTarget2d indexToFBT( const int index ) {
             return FBT_TEXTURE_CUBE_MAP_POS_X;
     }
 }
+
+struct ImageParams {
+    int width = 0;
+    int height = 0;
+    int channels = 3;
+    int bpp = 8;
+    PixelFormat outFormat = PIXEL_FORMAT_RGB;
+    TextureTargetMode ttm = TEXTURE_2D;
+    WrapMode wrapMode = WRAP_MODE_REPEAT;
+    Filter filterMode = FILTER_LINEAR;
+
+    float getAspectRatio() const {
+        return static_cast<float>(width) / static_cast<float>(height);
+    }
+
+    ImageParams() = default;
+    ImageParams( int width, int height, int channels ) : width( width ), height( height ), channels( channels ) {}
+    ImageParams( int width, int height, int channels, int bpp ) : width( width ), height( height ),
+                                                                  channels( channels ), bpp( bpp ) {}
+};

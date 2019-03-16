@@ -52,10 +52,10 @@ namespace FBNames {
 
 using CommandBufferLimitsT = int;
 
-class RenderImageDependencyMaker : public ImageDepencencyMaker {
+class RenderImageDependencyMaker : public ImageManager {
 public:
 	RenderImageDependencyMaker( TextureManager& tm ) : tm( tm ) {}
-	bool addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data ) override;
+	bool addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data );
 	TextureManager& tm;
 };
 
@@ -84,12 +84,11 @@ struct ChangeMaterialOnTagContainer {
 	std::shared_ptr<Material> mat;
 };
 
-class Renderer : public DependencyMaker {
+class Renderer {
 public:
 	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm );
 	virtual ~Renderer() = default;
 
-	bool exists( [[maybe_unused]] const std::string& _key ) const override { return false; };
     void cmdReloadShaders( const std::vector<std::string>& _params );
 
 	void init();
@@ -165,9 +164,10 @@ protected:
     CommandQueue&   cq;
 	ShaderManager&  sm;
 	TextureManager& tm;
+    StreamingMediator& ssm;
+    LightManager&   lm;
+
 	RenderImageDependencyMaker ridm;
-	StreamingMediator& ssm;
-	LightManager&   lm;
 	RenderAnimationManager am;
 	RenderCameraManager rcm;
 

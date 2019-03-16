@@ -11,24 +11,51 @@
 #include <typeinfo>
 #include <utility>
 
+#include <boost/signals2.hpp>
+
 #include "htypes_shared.hpp"
 #include "http/webclient.h"
 #include <core/util.h>
 #include <core/htypes_shared.hpp>
 
+//class DependencyMaker {
+//};
+
+class HashableMultimap {
+
+private:
+};
+
 template<typename T, typename C = std::unordered_map<std::string,std::shared_ptr<T>> >
 class DependencyMakerPolicy {
 public:
     bool exists( const std::string& _key ) const {
-        return resources.find( _key) != resources.end();
+        return resourcesMapper.find( _key) != resourcesMapper.end();
     };
 
-    void add( std::shared_ptr<T> _elem ) {
-        resources[_elem->Name()] = _elem;
+    void add( std::shared_ptr<T> _elem, const std::string& _aliasKey = "" ) {
+        auto lHash = _elem->Hash();
+        resources[lHash] = _elem;
+        resourcesMapper[_elem->Name()] = lHash;
+        if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = lHash;
+        sig( _elem );
     }
 
     std::shared_ptr<T> get( const std::string& _key ) {
-        return resources[_key];
+        if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
+            return resources[res->second];
+        } else {
+            if ( !resources.empty() ) {
+                LOGRS("Resource " << _key << " unmapped returning default");
+                return resources.begin()->second;
+            }
+        }
+        LOGRS("Resource " << _key << " unmapped and mamanger empty, returning null");
+        return nullptr;
+    }
+
+    void connect( std::function<void (std::shared_ptr<T>)> _slot ) {
+        sig.connect( _slot );
     }
 
 protected:
@@ -40,18 +67,10 @@ protected:
     }
 private:
     C resources;
-};
+    std::unordered_map<std::string, std::string> resourcesMapper;
 
-class DependencyMaker {
-public:
-    virtual bool exists( const std::string& _key ) const = 0;
+    boost::signals2::signal<void(std::shared_ptr<T>)> sig;
 };
-
-#define DEPENDENCY_MAKER_EXIST( _list ) \
-public: \
-    bool exists( const std::string& _key ) const override { \
-    return _list.find( _key) != _list.end(); \
-    };
 
 template< typename B>
 class DependencyChain {
@@ -89,7 +108,7 @@ private:
 };
 
 class DependantBuilder;
-class ResourceBuilder;
+class ResourceBuilderBase;
 class ResourceBuilderObservable;
 
 using DependencyChainMap = DependencyChain<DependantBuilder>;
@@ -137,12 +156,11 @@ struct CallbackDataNoReload : public CallbackData {
 };
 
 struct CallbackDataMaker : public CallbackData {
-    CallbackDataMaker( std::shared_ptr<ResourceBuilder> _builder, DependencyMaker& _md ) : builder( _builder ), md( _md ) {}
+    CallbackDataMaker( std::shared_ptr<ResourceBuilderBase> _builder ) : builder( _builder ) {}
 
-    virtual ~CallbackDataMaker() {}
+    virtual ~CallbackDataMaker() = default;
 
-    std::shared_ptr<ResourceBuilder> builder;
-    DependencyMaker& md;
+    std::shared_ptr<ResourceBuilderBase> builder;
     virtual bool needsReload() const override;
 };
 
@@ -158,7 +176,7 @@ struct CallbackDataObservable : public CallbackData {
 };
 
 struct FileCallbackHandler {
-    virtual bool executeCallback( const DependencyStatus _status ) = 0;
+    virtual bool executeCallback( const std::string& _key, DependencyStatus _status ) = 0;
 
     bool isComplete() const {
         return cbData->isComplete();
@@ -183,7 +201,7 @@ struct FileCallbackHandlerSimple : FileCallbackHandler {
 
     }
 
-    bool executeCallback( const DependencyStatus _status ) {
+    bool executeCallback( const std::string& _key, const DependencyStatus _status ) {
         if ( callbackSuccessfulStatus(_status) ) {
             simpleCallback( cbData->data );
             return true;
@@ -195,35 +213,36 @@ struct FileCallbackHandlerSimple : FileCallbackHandler {
 };
 
 struct FileCallbackHandlerMaker : public FileCallbackHandler {
-    FileCallbackHandlerMaker( std::shared_ptr<ResourceBuilder> _builder, DependencyMaker& _md );
+    explicit FileCallbackHandlerMaker( std::shared_ptr<ResourceBuilderBase> _builder );
     virtual ~FileCallbackHandlerMaker() = default;
 
-    bool executeCallback( const DependencyStatus _status );;
+    bool executeCallback( const std::string& _key, DependencyStatus _status ) override ;
 };
 
 struct FileCallbackHandlerObservable : public FileCallbackHandler {
     FileCallbackHandlerObservable( std::shared_ptr<ResourceBuilderObservable> _builder );
     virtual ~FileCallbackHandlerObservable() = default;
 
-    bool executeCallback( const DependencyStatus _status );;
+    bool executeCallback( const std::string& _key, DependencyStatus _status ) override;
 };
 
 template< typename Builder>
-std::shared_ptr<FileCallbackHandler> makeHandler( Builder& obj, DependencyMaker& _md ) {
-    return std::make_shared<FileCallbackHandlerMaker>( std::make_shared<Builder>( obj ), _md );
+std::shared_ptr<FileCallbackHandler> makeHandler( Builder& obj ) {
+    return std::make_shared<FileCallbackHandlerMaker>( std::make_shared<Builder>( obj ) );
 }
 
-template< typename Builder>
-std::shared_ptr<FileCallbackHandler> makeHandler( Builder& obj ) {
-    return std::make_shared<FileCallbackHandlerObservable>( std::make_shared<Builder>( obj ) );
-}
+//template< typename Builder>
+//std::shared_ptr<FileCallbackHandler> makeHandler( Builder& obj ) {
+//    return std::make_shared<FileCallbackHandlerObservable>( std::make_shared<Builder>( obj ) );
+//}
 
 template<HttpQuery Q, typename T>
 Url makeUrl(const std::string& _name) {
     switch (Q) {
         case HttpQuery::JSON:
-            return Url::privateAPI(HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) );
-            break;
+            // ### restore T::typeName() for private api calls, might need to re-route in a different way
+            return Url::privateAPI(HttpFilePrefix::catalog + T::Prefix() + HttpFilePrefix::getname + url_encode( _name ) );
+//            return Url::privateAPI(HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) );
         case HttpQuery::Binary:
         case HttpQuery::Text: {
             if ( T::usesNotExactQuery() ) {
@@ -232,7 +251,6 @@ Url makeUrl(const std::string& _name) {
                 return Url( HttpFilePrefix::get + url_encode( _name ) );
             }
         }
-            break;
         default:
             break;
     }
@@ -242,14 +260,9 @@ Url makeUrl(const std::string& _name) {
 void readRemote( const Url& url, std::shared_ptr<FileCallbackHandler> _handler,
                  Http::ResponseFlags rf = Http::ResponseFlags::None );
 
-template<typename B, HttpQuery Q, typename T = B>
-void readRemote( const std::string& _name, B& _builder, DependencyMaker& _md ) {
-    readRemote( makeUrl<Q, T>(_name), makeHandler<B>( _builder , _md ) );
-}
-
-template<typename B, HttpQuery Q, typename T = B>
+template<typename R, typename B, HttpQuery Q>
 void readRemote( const std::string& _name, B& _builder ) {
-    readRemote( makeUrl<Q, T>(_name), makeHandler<B>( _builder ) );
+    readRemote( makeUrl<Q, R>(_name), makeHandler<B>( _builder ) );
 }
 
 // Data Exchange

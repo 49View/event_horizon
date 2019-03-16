@@ -28,6 +28,11 @@ RawImage RawImage::NORMAL4x4    { "normal"     , 4, 4, static_cast<uint32_t>(0xf
 //};
 
 
+RawImage::RawImage( const std::string& _name, const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData ) :
+                    NamePolicy(_name) {
+    ImageParams::operator=(_ip);
+    rawBtyes = std::move(decodedData);
+}
 
 RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint32_t _col ) {
     width = _w;
@@ -39,7 +44,7 @@ RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, 
             std::memcpy( rawBtyes.get() + ((t * width * channels) + q*channels), &_col, channels );
         }
     }
-    name = _name;
+    Name(_name);
 }
 
 RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint8_t _col ) {
@@ -48,7 +53,7 @@ RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, 
     channels = 1;
     rawBtyes = std::make_unique<uint8_t[]>( width * height );
     std::memset( rawBtyes.get(), width * height, _col);
-    name = _name;
+    Name(_name);
 }
 
 RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const float _col ) {
@@ -58,7 +63,7 @@ RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, 
     auto _colval = static_cast<uint8_t >(clamp( _col * 255.0f, 0.0f, 255.0f) );
     rawBtyes = std::make_unique<uint8_t[]>( width * height );
     std::memset( rawBtyes.get(), width * height, _colval);
-    name = _name;
+    Name(_name);
 }
 
 RawImage rawImageDecodeFromMemory( const uint8_p& data, const std::string& _name, int forceChannels ) {
@@ -76,7 +81,7 @@ RawImage rawImageDecodeFromMemory( const unsigned char* buffer, int length, cons
     std::memcpy( ret.rawBtyes.get(), ddata, ret.width * ret.height * ret.channels );
     stbi_image_free(ddata);
 
-    ret.name = _name;
+    ret.Name(_name);
     return ret;
 }
 
@@ -127,15 +132,13 @@ RawImage::RawImage( int width,
                     int height,
                     int channels,
                     const char *buffer,
-                    const std::string& name ) : width( width ),
-                                           height( height ),
-                                           channels( channels ),
-                                           name(name) {
+                    const std::string& _name ) : NamePolicy(_name), ImageParams( width, height, channels ) {
     copyFrom( buffer );
 }
 
-RawImage::RawImage( int width, int height, int channels, const std::string& name ) : width( width ), height( height ),
-                                                                                     channels( channels ),name(name) {
+RawImage::RawImage( int width, int height, int channels, const std::string& _name ) :
+                    NamePolicy(_name),
+                    ImageParams( width, height, channels ) {
 
     auto bsize = width * height * channels;
     rawBtyes = std::make_unique<uint8_t[]>( bsize );
@@ -237,4 +240,12 @@ RawImage RawImage::DEBUG_UV() {
         }
     }
     return RawImage{ is, is, 3, reinterpret_cast<const char*>(buff), "debug_uv" };
+}
+
+std::string RawImage::calcHashImpl() {
+    return std::string();
+}
+
+std::string RawImage::generateThumbnail() const {
+    return std::string();
 }

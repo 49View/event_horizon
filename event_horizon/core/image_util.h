@@ -5,7 +5,7 @@
 #include "stb/stb_image.h"
 #include "htypes_shared.hpp"
 
-struct RawImage;
+class RawImage;
 
 namespace imageUtil {
     template<typename T>

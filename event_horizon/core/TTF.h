@@ -1,6 +1,9 @@
 // **********************************************************************************************
 //    TTF.h
 //
+//    [Changes to Event Horizon by Davide Dado Pirola, might encapsulate them down as a derived class in the future]
+//    [** March 2019**]
+//
 //        True type (*.ttf) and OpenType (*.otf) font loading/triangulation.
 //        Font is the main class that handles true type and open type fonts.  Simply create a Font object, and use
 //            GetTriangulation to get a glyph's mesh.
@@ -58,6 +61,7 @@
 #include <map>
 #include <string>
 #include <mutex>
+#include <core/publisher.hpp>
 
 // ---------------------------------------------------------------------------------------------------------------------------
 //    Utility namespace
@@ -436,8 +440,9 @@ struct MapFromData {
 };
 
 // ----- Font -----
-class Font {
+class Font : public Publisher<Font> {
 private:
+
 	// internal types
 	typedef std::map<ulong, TableEntry> TableMap;           // table mapping type
 	typedef std::map<ushort, Mesh> MeshCache;               // glyph cache data
@@ -536,12 +541,17 @@ private:
 	Mesh GetComplexMesh( FItr ) const;            // gets the complex glyph's mesh
 
 public:
+    Font() = default;
 	Font( std::string flnm );                   // construct from file
 	Font( const void* rawData, MapFromData );   // map from raw data (no copy made, data must exist for the duration of the Font object)
 	Font( const void* rawData, size_t length ); // copy from raw data
-	~Font();
+	virtual ~Font();
 
-	// font info
+protected:
+    std::string calcHashImpl() override;
+    std::string generateThumbnail() const override;
+public:
+    // font info
 	vec4f GetMasterRect() const;                     // returns a vec4f in font units that encloses every glyph, format is (xMin,yMin,xMax,yMax)
 	vec4f GetGlyphRect( CodePoint ) const;             // returns a vec4f in font units that encloses the glyph, format is (xMin,yMin,xMax,yMax)
 	FontMetrics GetFontMetrics() const;              // returns the horizontal font metrics

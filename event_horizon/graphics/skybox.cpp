@@ -23,6 +23,7 @@ void Skybox::equirectangularTextureInit( const std::vector<std::string>& params 
 void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     mVPList = std::make_shared<VPList>();
     mode = _sbm;
+    invalidate();
     PolyStruct sp;
     bool bBuildVP = true;
     static bool skyBoxEquilateral = false;
@@ -42,9 +43,9 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
             sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
             break;
         case SkyBoxMode::EquirectangularTexture:
-            ImageBuilder{_textureName}
-                    .cc(std::bind(&Skybox::equirectangularTextureInit, this, std::placeholders::_1), {_textureName})
-                    .build(rr.RIDM());
+//            ImageBuilder{_textureName}
+//                    .cc(std::bind(&Skybox::equirectangularTextureInit, this, std::placeholders::_1), {_textureName})
+//                    .build(rr.RIDM());
             bBuildVP = false;
             skyBoxEquilateral = true;
     }

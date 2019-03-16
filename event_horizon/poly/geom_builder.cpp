@@ -13,7 +13,6 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg ) : SceneGraphGeomBaseBuilder(_sg) {
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt ) :
     SceneGraphGeomBaseBuilder(_sg), builderType(gbt) {
-
 }
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _name ) :
@@ -45,29 +44,30 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, ShapeType _st, const Vector3f& _size 
     builderType = GeomBuilderType::shape;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline, const float _z,
-                          const Vector3f& _suggestedAxis ) : SceneGraphGeomBaseBuilder(_sg){
-    mProfileBuilder = _ps;
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _resourceName,
+                          const std::vector<Vector2f>& _outline,
+                          const float _z, const Vector3f& _suggestedAxis ) : SceneGraphGeomBaseBuilder(_sg) {
+    builderType = gbt;
     for (auto &v: _outline) profilePath.emplace_back( Vector3f{v, _z} );
-    builderType = GeomBuilderType::follower;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _resourceName,
+                          const std::vector<Vector3f>& _outline,
                           const Vector3f& _suggestedAxis ) : SceneGraphGeomBaseBuilder(_sg) {
-    mProfileBuilder = _ps;
+    builderType = gbt;
     mFollowerSuggestedAxis = _suggestedAxis;
     for (auto &v: _outline) profilePath.emplace_back( v );
-    builderType = GeomBuilderType::follower;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis ) : SceneGraphGeomBaseBuilder(_sg) {
-    mProfileBuilder = _ps;
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _resourceName,
+                          const Rect2f& _r, const Vector3f& _suggestedAxis ) : SceneGraphGeomBaseBuilder(_sg) {
+    builderType = gbt;
     mFollowerSuggestedAxis = _suggestedAxis;
     for ( auto &v: _r.points3dcw() ) profilePath.emplace_back( v );
-    builderType = GeomBuilderType::follower;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector3f>&& arguments_list, float _zPull ) : SceneGraphGeomBaseBuilder(_sg) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector3f>&& arguments_list, float _zPull )
+                        : SceneGraphGeomBaseBuilder(_sg) {
     std::vector<Vector3f> lverts;
     for (auto &v: arguments_list) lverts.emplace_back( v );
     outlineVerts.emplace_back( lverts, _zPull );
@@ -107,29 +107,15 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist )
     polyLines = _plist;
 }
 
-//void GeomBuilder::deserializeDependencies( DependencyMaker& _md ) {
-//
-//    auto& sg = static_cast<SceneGraph&>(_md);
-//
-//    auto reader = std::make_shared<DeserializeBin>(sg.AL().get( Name()), GeomData::Version());
-//    auto deps = GeomData::gatherDependencies( reader );
-//
-//    for ( const auto& d : deps.textureDeps ) {
-//        addDependency<ImageBuilder>( d, sg.TL());
-//    }
-//    for ( const auto& d : deps.materialDeps ) {
-//        addDependency<MaterialBuilder>( d, sg.ML() );
-//    }
-//}
-
 void GeomBuilder::createDependencyList() {
 
     if ( !material->isStreammable() ) { // is material is streammable do not try to load the entity resouce from server
-        bMaterialDep = addDependency<MaterialBuilder>( material->Name(), sg.ML());
+        bMaterialDep = addDependency<Material, MaterialBuilder>( material->Name(), sg.ML() );
     }
-    if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
-        addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
-    }
+//    ### reintroduce profiles
+//    if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
+//        addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
+//    }
 
     addDependencies( std::make_shared<GeomBuilder>( *this ) );
 }
@@ -157,21 +143,6 @@ void GeomBuilder::assemble() {
     }
 
     switch ( builderType ) {
-//        case GeomBuilderType::file:
-//            if ( auto ret = sg.AL().findHier( Name()); ret != nullptr ) {
-//                createFromAsset( ret->clone() );
-//            } else {
-//                builderType = GeomBuilderType::asset;
-//                deserializeDependencies( _md );
-//                addDependencies( std::make_shared<GeomBuilder>( *this ), _md );
-//                return;
-//            }
-//        case GeomBuilderType::asset: {
-//            auto asset = std::make_shared<GeomAsset>( sg.AL().get(Name()) );
-//            sg.AL().add( Name(), asset );
-//            createFromAsset( asset );
-//        }
-//        break;
         case GeomBuilderType::shape:
             createFromProcedural( std::make_shared<GeomDataShapeBuilder>( shapeType, pos, axis, scale ) );
             break;
@@ -186,7 +157,7 @@ void GeomBuilder::assemble() {
             createFromProcedural( std::make_shared<GeomDataQuadMeshBuilder>( quads ) );
             break;
         case GeomBuilderType::follower: {
-            createFromProcedural( std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( mProfileBuilder.Name() ),
+            createFromProcedural( std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( "###" ),
                                                                              profilePath,
                                                                              fflags,
                                                                              fraise,
@@ -197,7 +168,7 @@ void GeomBuilder::assemble() {
         break;
         case GeomBuilderType::svg:
             createFromProcedural( std::make_shared<GeomDataSVGBuilder>( asciiText,
-                                                                        sg.PL().get( mProfileBuilder.Name() ) ) );
+                                                                        sg.PL().get( "###" ) ) );
             break;
         case GeomBuilderType::unknown:
             LOGE( "Unknown builder type" );
@@ -285,17 +256,16 @@ GeomAssetSP GeomBuilder::buildr() {
     return elem;
 }
 
-bool GeomFileAssetBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
-
-    if ( _status == DependencyStatus::LoadedSuccessfully ) {
-        auto& sg = dynamic_cast<SceneGraph&>(_md);
-        auto asset = EF::create<GeomAsset>( std::move(_data) );
-        asset->updateTransform();
-        sg.add( asset );
-        return true;
-    }
-    return false;
-}
+//bool GeomFileAssetBuilder::makeImpl( uint8_p&& _data, const DependencyStatus _status ) {
+//
+//    if ( _status == DependencyStatus::LoadedSuccessfully ) {
+//        auto asset = EF::create<GeomAsset>( std::move(_data) );
+//        asset->updateTransform();
+//        mm.add( asset );
+//        return true;
+//    }
+//    return false;
+//}
 
 GeomBuilderComposer::GeomBuilderComposer() {
     elem = std::make_shared<GeomAsset>();

@@ -8,28 +8,29 @@
 #include "core/image_constants.h"
 #include <core/math/poly_utils.hpp>
 
-struct ProfileBuilder;
+class ProfileBuilder;
 
 class Profile;
 
 using profileDirectMakeFunc = std::function<std::shared_ptr<Profile>(const std::string&, const std::vector<Vector2f>&, const std::vector<float>&)>;
 
-class ProfileManager : public DependencyMaker {
+class ProfileManager : public DependencyMakerPolicy<Profile> {
 public:
-DEPENDENCY_MAKER_EXIST( profileList );
-    bool add( const ProfileBuilder& _pb, std::shared_ptr<Profile> _profile );
+    virtual ~ProfileManager() = default;
 
-    std::shared_ptr<Profile> get( const std::string& _key ) { return profileList[_key]; }
-
-private:
-    std::unordered_map<std::string, std::shared_ptr<Profile>> profileList;
+//    bool add( const ProfileBuilder& _pb, std::shared_ptr<Profile> _profile );
 };
 
-struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact, 0 )
+//    struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact, 0 )
 
-    explicit ProfileBuilder( float _radius, float _subDivs = 3 ); // This will create a circular profile
-    explicit ProfileBuilder( const Vector2f& _length );
-    ProfileBuilder( const Vector2f& _v1, const Vector2f& _v2 );
+class ProfileBuilder : public ResourceBuilder<Profile, ProfileManager> {
+public:
+    using ResourceBuilder::ResourceBuilder;
+
+    // This will create a circular profile
+    explicit ProfileBuilder( ProfileManager& _pm, float _radius, float _subDivs = 3 );
+    explicit ProfileBuilder( ProfileManager& _pm, const Vector2f& _length );
+             ProfileBuilder( ProfileManager& _pm, const Vector2f& _v1, const Vector2f& _v2 );
 
     ProfileBuilder& func( profileDirectMakeFunc _cf ) {
         cfunc = _cf;
@@ -48,10 +49,10 @@ struct RBUILDER( ProfileBuilder, profiles, svg, Binary, BuilderQueryType::Exact,
         return *this;
     }
 
-    bool evaluateDirectBuild( DependencyMaker& _md ) override;
-    bool makeDirect( DependencyMaker& _md );
-private:
-    bool finalizaMake( DependencyMaker& sg, std::shared_ptr<Profile> profile );
+    bool evaluateDirectBuild() override;
+    bool makeDirect();
+protected:
+    bool finalizaMake( std::shared_ptr<Profile> profile );
 
 private:
     profileDirectMakeFunc cfunc = nullptr;

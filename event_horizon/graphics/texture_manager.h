@@ -5,8 +5,6 @@
 #include <core/service_factory.h>
 
 #include "core/util.h"
-#include "core/raw_image.h"
-#include "core/file_manager.h"
 #include "texture.h"
 
 //====================================
@@ -16,6 +14,8 @@
 typedef std::map<std::string, std::shared_ptr<Texture>> TextureMap;
 typedef TextureMap::iterator TextureMapIt;
 typedef TextureMap::const_iterator TextureMapCIt;
+
+class RawImage;
 
 #define avcbTM (std::bind(&TextureManager::preparingStremingTexture, &RSG().RR().TM(), std::placeholders::_1, std::placeholders::_2))
 
@@ -27,8 +27,7 @@ private:
     void operator=( TextureManager const& ) = delete;
 
 public:
-    std::shared_ptr<Texture> addTextureWithData( const std::string& id, const RawImage& rawImage,
-                                                 TextureSlots _tslot = TSLOT_COLOR);
+    std::shared_ptr<Texture> addTextureWithData( const RawImage& rawImage, TextureSlots _tslot = TSLOT_COLOR);
     std::shared_ptr<Texture> addTextureNoData( TextureRenderData& tb );
     std::shared_ptr<Texture> addCubemapTexture( TextureRenderData& tb );
     std::shared_ptr<Texture> addTextureWithGPUHandle( const std::string& id, unsigned int _handle,
@@ -53,8 +52,6 @@ public:
     /// \param tSlot
     /// \return
     std::shared_ptr<Texture> TD( const std::string& tname, const int tSlot = -1 );
-
-    static std::string textureName( const std::string input );
 
     std::shared_ptr<Texture> addTextureFromCallback( TextureRenderData& tb, std::unique_ptr<uint8_t []>& _data );
     std::shared_ptr<Texture> addTextureImmediate( TextureRenderData& tb, const uint8_t* _data );

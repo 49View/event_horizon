@@ -81,7 +81,7 @@ void ImGuiTimeline::renderImpl( [[maybe_unused]] SceneOrchestrator* p, Rect2f& _
 
     ImGui::SameLine();
     if ( ImGui::Button( "Camera" ) && timelineNameCStr ) {
-        Timeline::addLinked( timelineNameCStr, p->RSG().CM().getCamera(Name::Foxtrot), currframeToTime() );
+        Timeline::addLinked( timelineNameCStr, p->SG().CM().getCamera(Name::Foxtrot), currframeToTime() );
     }
 
     if ( currentFrame < 0 ) currentFrame = 0;

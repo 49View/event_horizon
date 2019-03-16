@@ -2,6 +2,8 @@
 
 #include <stb/stb_image.h>
 
+#include <core/raw_image.h>
+
 #include "texture_converter.h"
 #include "renderer.h"
 #include "graphic_functions.hpp"
@@ -62,13 +64,12 @@ std::shared_ptr<Texture> TextureManager::addTextureNoData( TextureRenderData& tb
     return addTextureImmediate( tb, _data.get() );
 }
 
-std::shared_ptr<Texture> TextureManager::addTextureWithData( const std::string& id, const RawImage& rawImage,
-                                                             TextureSlots _tslot ) {
-    auto tb = TextureRenderData{ id }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
+std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage, TextureSlots _tslot ) {
+    auto tb = TextureRenderData{ rawImage.Name() }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
     tb.format( channelsToFormat( rawImage.channels ) );
 
-    if ( mTextures.find( id ) != mTextures.end() ) {
-        removeTexture( id );
+    if ( mTextures.find( rawImage.Name() ) != mTextures.end() ) {
+        removeTexture( rawImage.Name() );
     }
     return addTextureImmediate( tb, rawImage.rawBtyes.get() );
 }
@@ -101,10 +102,6 @@ void TextureManager::preparingStremingTexture( const std::string& _streamName, c
     addTextureNoData( sdtv );
 }
 
-std::string TextureManager::textureName( const std::string input ) {
-    return FM::filenameOnlyNoExtension( input );
-}
-
 //void TextureManager::addFileTextureInternal( TextureRenderData& tb, Renderer& rr ) {
 //    static const std::string imgPrefix = "images/";
 //    auto dkey = tb.useImagePrefix ? ( imgPrefix + tb.Name() ) : tb.Name();
@@ -132,11 +129,11 @@ std::string TextureManager::textureName( const std::string input ) {
 //}
 
 void TextureManager::updateTexture( const RawImage& _image ) {
-    if ( auto it = mTextures.find( _image.name ); it != mTextures.end()) {
+    if ( auto it = mTextures.find( _image.Name() ); it != mTextures.end()) {
         Texture * toBeUpdated = it->second.get();
         toBeUpdated->refresh( _image.data(), 0, 0, toBeUpdated->getWidth(), toBeUpdated->getHeight());
     } else {
-        addTextureWithData( _image.name, _image );
+        addTextureWithData( _image );
     }
 
 }

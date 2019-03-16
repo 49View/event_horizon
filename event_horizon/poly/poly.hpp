@@ -8,7 +8,7 @@
 #include <variant>
 
 class  Material;
-struct RawImage;
+class  RawImage;
 struct VData;
 
 using MaterialSP = std::shared_ptr<Material>;

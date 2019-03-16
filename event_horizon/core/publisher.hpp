@@ -12,20 +12,62 @@
 #include <core/zlib_util.h>
 #include <core/serializable.hpp>
 #include <core/serializebin.hpp>
+#include <core/versionable.hpp>
+#include <core/query_policy.hpp>
+
+class Material;
+class GeomData;
+class Profile;
+class Image;
+class CameraRig;
+namespace Utility::TTFCore { class Font; }
+class MaterialColor;
+
+template <typename R>
+class ResourceVersioning {
+public:
+    inline static constexpr bool usesNotExactQuery() {
+        if ( std::is_same<R, Material>::value )        return true;
+        if ( std::is_same<R, GeomData>::value )        return true;
+        if ( std::is_same<R, MaterialColor>::value  )  return true;
+        return false;
+    }
+
+    inline static size_t Version() {
+        if ( std::is_same<R, Material>::value ) return 1000;
+        if ( std::is_same<R, GeomData>::value ) return 2000;
+        if ( std::is_same<R, Profile>::value  ) return 1000;
+        if ( std::is_same<R, MaterialColor>::value  ) return 1000;
+        return 0;
+    }
+
+    inline static std::string Prefix() {
+        if ( std::is_same<R, Material>::value ) return "material";
+        if ( std::is_same<R, GeomData>::value ) return "geom";
+        if ( std::is_same<R, MaterialColor>::value  )   return "color";
+
+        if ( std::is_same<R, CameraRig>::value )   return "cameras";
+        if ( std::is_same<R, Profile>::value  ) return "profiles";
+        if ( std::is_same<R, Image>::value  )   return "images";
+        if ( std::is_same<R, Utility::TTFCore::Font>::value  )    return "fonts";
+        return "unknown";
+    }
+};
 
 template < typename T,
            typename B = JMATH::AABB,
            typename W = SerializeBin,
            typename R = DeserializeBin,
            typename N = std::string >
-class Publisher : public virtual Boxable<B>,
+class Publisher : public ResourceVersioning<T>,
+                  public virtual Boxable<B>,
                   public virtual Serializable<T, W, R>,
                   public virtual HashTaggable<N> {
 protected:
     virtual std::string generateThumbnail() const = 0;
 
     std::string generateRawData() const {
-        auto writer = std::make_shared<W>( SerializeHeader{ Hashable::Hash(), T::Version(), T::EntityGroup() } );
+        auto writer = std::make_shared<W>( SerializeHeader{ Hashable::Hash(), T::Version(), T::Prefix() } );
         this->serialize( writer );
         auto matFile = writer->buffer();
 
@@ -39,7 +81,7 @@ protected:
         MegaWriter writer;
 
         writer.StartObject();
-        writer.serialize( CoreMetaData{ this->Name(), T::EntityGroup(), T::Version(),
+        writer.serialize( CoreMetaData{ this->Name(), T::Prefix(), T::Version(),
                                         generateThumbnail(), generateRawData(), this->Tags() } );
         if ( B::IsSerializable() ) {
             writer.serialize( "BBox3d", Boxable<B>::BBox3d() );

@@ -6,17 +6,8 @@
 #include <core/TTF.h>
 #include <core/math/rect2f.h>
 
-class FontManager : public DependencyMaker {
+class FontManager : public DependencyMakerPolicy<Utility::TTFCore::Font> {
 public:
-    FontManager() {}
-    virtual ~FontManager() {}
-
-    FontManager( FontManager const& ) = delete;
-    void operator=( FontManager const& ) = delete;
-
-    DEPENDENCY_MAKER_EXIST(fonts);
-
-    bool create( const uint8_p& ret, const std::string& _indexName );
     const Utility::TTFCore::Font& operator()();
     const Utility::TTFCore::Font& operator[]( const std::string& _fontName );
 
@@ -26,11 +17,11 @@ public:
 
 protected:
     void preCacheFont();
-
-private:
-    std::unordered_map<std::string, std::shared_ptr<Utility::TTFCore::Font>> fonts;
 };
 
-struct RBUILDER( FontBuilder, fonts, ttf, Binary, BuilderQueryType::Exact, 0 )
-
+class FontBuilder : public ResourceBuilder<Utility::TTFCore::Font, FontManager> {
+public:
+    explicit FontBuilder( FontManager& _mm ) : ResourceBuilder(_mm) {}
 };
+
+//struct RBUILDER( FontBuilder, fonts, ttf, Binary, BuilderQueryType::Exact, 0 )};

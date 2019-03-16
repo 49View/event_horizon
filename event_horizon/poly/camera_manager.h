@@ -2,8 +2,7 @@
 
 #include <unordered_map>
 #include <core/camera.h>
-#include <core/name_policy.hpp>
-#include <core/callback_dependency.h>
+#include <core/builders.hpp>
 
 class CameraRig;
 class Renderer;
@@ -32,8 +31,8 @@ private:
     std::vector<std::pair<std::string, std::string>> mSyncedRigs;
 };
 
-class CameraBuilder : public NamePolicy<> {
+class CameraBuilder : public ResourceBuilder<CameraRig, CameraManager> {
+    using ResourceBuilder::ResourceBuilder;
 public:
-    using NamePolicy::NamePolicy;
-    std::shared_ptr<CameraRig> makeDefault( const Rect2f& _viewport, SceneGraph& _md );
+    void makeDefault() override;
 };

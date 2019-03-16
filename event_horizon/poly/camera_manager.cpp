@@ -91,13 +91,13 @@ void CameraManager::CurrEye( int val, const std::string& _name ) {
     Resources()[_name]->CurrEye( val );
 }
 
-std::shared_ptr<CameraRig> CameraBuilder::makeDefault( const Rect2f& _viewport, SceneGraph& _sg ) {
-    if ( _sg.CM().exists(Name()) ) {
-        return _sg.CM().get(Name());
-    }
-    auto cam = std::make_shared<CameraRig>( Name(), _viewport );
-    auto node = std::make_shared<CameraAsset>(cam);
-    _sg.add( node );
+void CameraBuilder::makeDefault() {
+    Name( Name::Foxtrot );
 
-    return node->Data();
+    if ( mm.exists(Name()) ) return;
+
+    auto cam = EF::create<CameraRig>( Name() );
+    cam->setViewport( Rect2f::MIDENTITY() );
+//    auto node = std::make_shared<CameraAsset>(cam);
+    mm.add( cam );
 }

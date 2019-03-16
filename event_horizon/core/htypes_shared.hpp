@@ -305,9 +305,9 @@ enum class DependencyStatus {
 	CompleteWithErrors
 };
 
-enum class BuilderQueryType {
-	Exact,
-	NotExact
+namespace BuilderQueryType {
+	class Exact {};
+    class NotExact{};
 };
 
 struct TextureUniformDesc {

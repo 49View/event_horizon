@@ -185,6 +185,14 @@ struct Topology {
     }
 };
 
+ShapeType shapeTypeFromString( const std::string& value ) {
+
+    if ( toLower(value) == "cube" ) return ShapeType::Cube;
+    if ( toLower(value) == "sphere" ) return ShapeType::Sphere;
+
+    return ShapeType::None;
+};
+
 uint32_t subdivideEdge( uint32_t f0, uint32_t f1, const Vector3f& v0, const Vector3f& v1, Topology& io_mesh,
                         std::map<Edge, uint32_t>& io_divisions ) {
     const Edge edge( f0, f1 );

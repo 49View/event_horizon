@@ -272,6 +272,14 @@ std::shared_ptr<Profile> Profile::fromPoints( const std::string& name,  const st
 
 }
 
+std::string Profile::calcHashImpl() {
+    return std::string();
+}
+
+std::string Profile::generateThumbnail() const {
+    return std::string();
+}
+
 void ProfileMaker::add( const V2f& _p ) {
 	points.emplace_back( _p * scale );
 }

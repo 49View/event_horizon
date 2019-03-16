@@ -10,6 +10,12 @@
 class EntityFactory {
 public:
     template <typename T>
+    static std::shared_ptr<T> create( const std::string& _name ) {
+        auto ret = std::make_shared<T>(_name);
+        return ret;
+    }
+
+    template <typename T>
     static std::shared_ptr<T> create( uint8_p&& _data ) {
         auto ret = std::make_shared<T>();
         ret->deserialize(zlibUtil::inflateFromMemory( std::move(_data) ));

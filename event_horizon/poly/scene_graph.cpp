@@ -8,14 +8,15 @@
 #include <poly/ui_shape_builder.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
-    addImpl(_geom);
+//    addImpl(_geom);
+    nodeAddSignal(_geom);
     geoms[std::visit(lambdaUUID, _geom)] = _geom;
 }
 
 void SceneGraph::remove( const UUID& _uuid ) {
     if ( auto it = geoms.find(_uuid); it != geoms.end() ) {
         // Remove all child
-        removeImpl(_uuid);
+//        removeImpl(_uuid);
         geoms.erase( it );
     }
 }
@@ -24,38 +25,53 @@ void SceneGraph::update() {
     for ( auto& [k,v] : geoms ) {
         std::visit( lambdaUpdateAnimVisitor, v );
     }
-    updateImpl();
 }
 
 void SceneGraph::cmdChangeMaterialTag( const std::vector<std::string>& _params ) {
-    changeMaterialTagImpl( _params );
+//    changeMaterialTagImpl( _params );
 }
 
 void SceneGraph::cmdChangeMaterialColorTag( const std::vector<std::string>& _params ) {
-    changeMaterialColorTagImpl( _params );
+//    changeMaterialColorTagImpl( _params );
 }
 
 void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
-    cmdCreateGeometryImpl( _params );
+    auto st = shapeTypeFromString( _params[0] );
+    if ( st != ShapeType::None) {
+        auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
+        auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
+        GB{*this, st }.n("ucarcamagnu").g(9200).m(shd,mat).build();
+    } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
+        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
+        UISB{*this, UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr();
+    }
 }
 
 void SceneGraph::cmdRemoveGeometry( const std::vector<std::string>& _params ) {
-    cmdRemoveGeometryImpl( _params );
+//    cmdRemoveGeometryImpl( _params );
 }
 
 void SceneGraph::cmdLoadObject( const std::vector<std::string>& _params ) {
-    cmdloadObjectImpl( _params );
+//    cmdloadObjectImpl( _params );
 }
 
 void SceneGraph::cmdCalcLightmaps( const std::vector<std::string>& _params ) {
-    cmdCalcLightmapsImpl( _params );
+//    cmdCalcLightmapsImpl( _params );
 }
 
 void SceneGraph::cmdChangeTime( const std::vector<std::string>& _params ) {
-    cmdChangeTimeImpl( _params );
+//    cmdChangeTimeImpl( _params );
 }
 
-SceneGraph::SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm ) : fm(_fm), sb(_sb), cm(_cm) {
+SceneGraph::SceneGraph( CommandQueue& cq,
+                        ImageManager& _tl,
+                        ProfileManager& _pl,
+                        MaterialManager& _ml,
+                        ColorManager& _cl,
+                        FontManager& _fm,
+                        CameraManager& _cm,
+                        SunBuilder& _sb ) : tl(_tl), pl(_pl), ml(_ml), cl(_cl), fm(_fm), cm(_cm), sb(_sb) {
+
     hcs = std::make_shared<CommandScriptSceneGraph>(*this);
     cq.registerCommandScript(hcs);
     mapGeomType(0, "none");
@@ -132,3 +148,7 @@ CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
 }
 
 CameraManager& SceneGraph::CM() { return cm; }
+
+void SceneGraph::nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot ) {
+    nodeAddSignal.connect( _slot );
+}

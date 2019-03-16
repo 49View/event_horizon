@@ -2559,3 +2559,11 @@ void Font::PreCache( ulong codeStart, ulong codeEnd, ushort platformId, ushort e
 void Font::PreCacheBasicLatin() {
 	PreCache( 0x20, 0x7f, 3, 1, 0 );
 }
+
+std::string Font::calcHashImpl() {
+    return std::string();
+}
+
+std::string Font::generateThumbnail() const {
+    return std::string();
+}

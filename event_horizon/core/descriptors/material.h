@@ -67,7 +67,10 @@ namespace MPBRTextures {
     }
 }
 
-JSONDATA_R( MaterialColor, name, color, category, brand, code, application )
+class MaterialColor : public Publisher<MaterialColor> {
+public:
+    virtual ~MaterialColor() = default;
+
     Vector4f color = Vector4f::WHITE;
     std::string name = "perfect white";
     std::string category = "white";
@@ -101,7 +104,15 @@ JSONDATA_R( MaterialColor, name, color, category, brand, code, application )
         return streamHalf1.str() + streamRaw.str() + streamHalf2.str();
     }
 
-    static uint64_t Version() { return 1000; }
+protected:
+    std::string calcHashImpl() override {
+        return std::string();
+    }
+
+    std::string generateThumbnail() const override {
+        return std::string();
+    }
+
 };
 
 JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
@@ -185,10 +196,6 @@ protected:
     MaterialProperties properties;
     std::string shaderName;
 
-public:
-    inline constexpr static uint64_t Version() { return 1000; }
-    inline const static std::string EntityGroup() { return EntityGroup::Material; }
-
     friend class EntityFactory;
 };
 
@@ -206,9 +213,3 @@ public:
 protected:
     std::shared_ptr<Material> material;
 };
-
-namespace MaterialDependency {
-    inline const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key ) {
-        return Material::textureDependencies( _key );
-    }
-}

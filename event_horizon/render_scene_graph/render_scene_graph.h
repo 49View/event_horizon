@@ -34,26 +34,25 @@ private:
     Renderer& rr;
 };
 
-class RenderSceneGraph : public SceneGraph {
+class RenderSceneGraph {
 public:
-    RenderSceneGraph( Renderer& rr, CommandQueue& cq, FontManager& fm, SunBuilder& _sb, CameraManager& _cm );
+    RenderSceneGraph( Renderer& rr, SceneGraph& _sg );
     virtual ~RenderSceneGraph() = default;
 
-    DependencyMaker& TL() override { return tl; }
     Renderer& RR() { return rr; }
-
+    SceneGraph& SG() { return sg; }
 protected:
-    void updateImpl() override;
-    void addImpl(NodeVariants _geom) override;
-    void removeImpl( const UUID& _uuid ) override;
-    void cmdChangeTimeImpl( const std::vector<std::string>& _params ) override;
-    void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
-    void changeMaterialColorTagImpl( const std::vector<std::string>& _params ) override;
-    void cmdCreateGeometryImpl( const std::vector<std::string>& _params ) override;
-    void cmdRemoveGeometryImpl( const std::vector<std::string>& _params ) override;
-    void cmdloadObjectImpl( const std::vector<std::string>& _params ) override;
-    void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) override;
-
+//    void updateImpl() override;
+//    void addImpl(NodeVariants _geom) override;
+//    void removeImpl( const UUID& _uuid ) override;
+//    void cmdChangeTimeImpl( const std::vector<std::string>& _params ) override;
+//    void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
+//    void changeMaterialColorTagImpl( const std::vector<std::string>& _params ) override;
+//    void cmdCreateGeometryImpl( const std::vector<std::string>& _params ) override;
+//    void cmdRemoveGeometryImpl( const std::vector<std::string>& _params ) override;
+//    void cmdloadObjectImpl( const std::vector<std::string>& _params ) override;
+//    void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) override;
+//
     void changeMaterialTagCallback( const std::vector<std::string>& _params );
     void changeMaterialColorCallback( const std::vector<std::string>& _params );
 
@@ -61,8 +60,8 @@ protected:
 
 private:
     Renderer& rr;
+    SceneGraph& sg;
     std::shared_ptr<AudioManager> am;
-    RenderImageDependencyMaker& tl;
     std::shared_ptr<HierGeomRenderObserver> hierRenderObserver;
     std::shared_ptr<UIElementRenderObserver> uiRenderObserver;
 };

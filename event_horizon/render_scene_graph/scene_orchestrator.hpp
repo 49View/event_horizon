@@ -47,7 +47,7 @@ struct SceneEventNotifications {
 
 class SceneOrchestrator : public Observer<MouseInput> {
 public:
-	SceneOrchestrator( RenderSceneGraph& _rsg, TextInput& ti, MouseInput& mi, CommandQueue& cq );
+	SceneOrchestrator( SceneGraph& _sg, RenderSceneGraph& _rsg, TextInput& ti, MouseInput& mi, CommandQueue& cq );
 
 	virtual ~SceneOrchestrator() = default;
 
@@ -76,6 +76,7 @@ public:
 	static const std::string DC();
 
 	RenderSceneGraph& RSG();
+	SceneGraph& SG();
 	CommandQueue& CQ();
     std::shared_ptr<Camera> getCamera( const std::string& _name );
 
@@ -107,6 +108,7 @@ protected:
 
 protected:
 	std::shared_ptr<SceneStateMachineBackEnd> stateMachine;
+	SceneGraph& sg;
 	RenderSceneGraph& rsg;
     TextInput& ti;
     MouseInput& mi;

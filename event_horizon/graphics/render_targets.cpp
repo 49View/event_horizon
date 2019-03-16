@@ -6,6 +6,7 @@
 
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
+#include <core/raw_image.h>
 #include <core/streaming_mediator.hpp>
 #include <graphics/renderer.h>
 

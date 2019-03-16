@@ -21,9 +21,9 @@ enum class RunLoopThreading {
 class RunLoop {
 public:
     RunLoop( CommandQueue& _cq ) : cq( _cq ) {}
-	virtual ~RunLoop() {}
+	virtual ~RunLoop() = default;
 
-	void coreLoop();
+    void coreLoop();
 	void coreFunctions();
 	virtual void consolePrompt();
 	virtual void runConsolePrompt();
@@ -35,7 +35,7 @@ protected:
 	void updateTime();
 
 protected:
-	bool mbExitTriggered;
+	bool mbExitTriggered = false;
 	CommandQueue& cq;
 };
 

@@ -41,7 +41,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     float ts = 64.0f;
     ImVec2 textureSize{ ts, ts };
 
-    for ( const auto& mat : p->RSG().ML().list()) {
+    for ( const auto& mat : p->SG().ML().list()) {
         if ( !mat ) continue;
         ImGui::BeginGroup();
         auto matName = mat->Name().substr(0, 10);
@@ -80,10 +80,11 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
     cmd.emplace_back( _filename, _data );
 
     SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
-        for ( const auto& elem : cmd ) {
-            auto mb = std::make_shared<MaterialBuilder>(getFileNameOnly(elem.filename), elem.data);
-            GB{p->RSG(), ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->RSG().ML() )).build();
-        }
+//        ### re-enable create mesh from material imported
+//        for ( const auto& elem : cmd ) {
+//            auto mb = std::make_shared<MaterialBuilder>(getFileNameOnly(elem.filename), elem.data);
+//            GB{p->RSG(), ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->RSG().ML() )).build();
+//        }
         cmd.clear();
     } );
 }

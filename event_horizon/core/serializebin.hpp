@@ -152,7 +152,7 @@ public:
 			v->calcHash();
 			if ( deps.find( v->Hash() ) == deps.end() ) {
 				auto writer = std::make_shared<SerializeBin>(
-						SerializeHeader{v->Hash(), T::Version(), T::EntityGroup() } );
+						SerializeHeader{v->Hash(), T::Version(), T::Prefix() } );
 				v->serialize(writer);
 				deps.emplace( v->Hash(), writer->buffer() );
 			}

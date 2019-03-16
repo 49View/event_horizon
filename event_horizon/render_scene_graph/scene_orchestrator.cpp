@@ -9,6 +9,7 @@
 #include <core/camera_rig.hpp>
 #include <graphics/renderer.h>
 #include <graphics/render_list.h>
+#include <graphics/shader_manager.h>
 #include <graphics/window_handling.hpp>
 #include <graphics/ui/imgui_console.h>
 #include <graphics/render_targets.hpp>
@@ -17,8 +18,6 @@
 #include <render_scene_graph/render_scene_graph.h>
 
 #include <stb/stb_image.h>
-
-#include "di_modules.h"
 
 std::vector<std::string> SceneOrchestrator::callbackPaths;
 Vector2i SceneOrchestrator::callbackResizeWindow = Vector2i(-1, -1);
@@ -53,11 +52,12 @@ void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
 	SceneOrchestrator::callbackResizeFrameBuffer = Vector2i{w, h};
 }
 
-SceneOrchestrator::SceneOrchestrator( RenderSceneGraph& _rsg,
+SceneOrchestrator::SceneOrchestrator( SceneGraph& _sg,
+                                      RenderSceneGraph& _rsg,
 									  TextInput& ti,
 									  MouseInput& mi,
 									  CommandQueue& cq ) :
-									  rsg(_rsg), ti( ti), mi( mi ), cq( cq) {
+									  sg(_sg), rsg(_rsg), ti( ti), mi( mi ), cq( cq) {
 	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
 	cq.registerCommandScript(hcs);
 	console = std::make_shared<ImGuiConsole>(cq);
@@ -104,7 +104,7 @@ void SceneOrchestrator::update() {
 	stateMachine->run();
 	inputPollUpdate();
 	updateCallbacks();
-	RSG().update();
+	SG().update();
 }
 
 void SceneOrchestrator::deactivate() {
@@ -125,12 +125,12 @@ void SceneOrchestrator::activate() {
 }
 
 void SceneOrchestrator::defaults() {
-	ImageBuilder{S::WHITE}.makeDirect( rsg.TL(), RawImage::WHITE4x4() );
-	ImageBuilder{S::BLACK}.makeDirect( rsg.TL(), RawImage::BLACK_RGBA4x4 );
-	ImageBuilder{S::NORMAL}.makeDirect( rsg.TL(), RawImage::NORMAL4x4 );
-	ImageBuilder{S::DEBUG_UV}.makeDirect( rsg.TL(), RawImage::DEBUG_UV() );
-	MaterialBuilder{S::WHITE_PBR, S::SH}.makeDefault(rsg.ML());
-	CameraBuilder{Name::Foxtrot}.makeDefault( Rect2f::MIDENTITY(), rsg );
+	ImageBuilder{SG().TL(), S::WHITE}.makeDirect( RawImage::WHITE4x4() );
+	ImageBuilder{SG().TL(), S::BLACK}.makeDirect( RawImage::BLACK_RGBA4x4 );
+	ImageBuilder{SG().TL(), S::NORMAL}.makeDirect( RawImage::NORMAL4x4 );
+	ImageBuilder{SG().TL(), S::DEBUG_UV}.makeDirect( RawImage::DEBUG_UV() );
+	MaterialBuilder{SG().ML(), S::WHITE_PBR, S::SH}.makeDefault();
+	CameraBuilder{SG().CM()}.makeDefault();
 }
 
 void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {
@@ -166,7 +166,7 @@ void SceneOrchestrator::inputPollUpdate() {
 		v->updateFromInputData( cid );
 	}
 
-	RSG().CM().update();
+	SG().CM().update();
 
 	resetSingleEventNotifications();
 }
@@ -230,7 +230,7 @@ const std::shared_ptr<ImGuiConsole>& SceneOrchestrator::Console() const {
 }
 
 void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
-    addViewport( RenderTargetType::PBR, RSG().CM().get(Name::Sierra),
+    addViewport( RenderTargetType::PBR, SG().CM().get(Name::Sierra),
     		     Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), CameraControls::Fly, BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box);
     RSG().RR().getTarget(Name::Sierra)->takeScreenShot( _outdata );
@@ -239,7 +239,7 @@ void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotConta
 RenderSceneGraph& SceneOrchestrator::RSG() { return rsg; }
 
 std::shared_ptr<Camera> SceneOrchestrator::getCamera( const std::string& _name ) {
-	return RSG().CM().getCamera(_name);
+	return SG().CM().getCamera(_name);
 }
 
 const cameraRigsMap& SceneOrchestrator::getRigs() const {
@@ -271,4 +271,8 @@ void SceneOrchestrator::addViewport( RenderTargetType _rtt, std::shared_ptr<Came
 
 CommandQueue& SceneOrchestrator::CQ() {
     return cq;
+}
+
+SceneGraph& SceneOrchestrator::SG() {
+    return sg;
 }

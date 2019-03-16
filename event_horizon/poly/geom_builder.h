@@ -12,7 +12,6 @@
 #include "core/math/matrix_anim.h"
 #include "core/service_factory.h"
 #include "core/math/poly_shapes.hpp"
-#include "core/image_builder.h"
 #include "core/descriptors/material.h"
 #include <poly/profile.hpp>
 #include <poly/follower.hpp>
@@ -101,8 +100,8 @@ protected:
 //    GeomAssetSP elem;
 };
 
-struct RBUILDER( GeomFileAssetBuilder, geom, geom, Binary, BuilderQueryType::NotExact, GeomData::Version() )
-
+class GeomFileAssetBuilder : public ResourceBuilder<GeomData, SceneGraph> {
+    using ResourceBuilder::ResourceBuilder;
 };
 
 using GF = GeomFileAssetBuilder;
@@ -133,11 +132,14 @@ public:
     explicit GeomBuilder( SceneGraph& _sg, ShapeType _st, const Vector3f& _size = Vector3f::ONE );
 
     // Profile/Follwoers
-    GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const std::vector<Vector2f>& _outline,
+    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
+                 const std::vector<Vector2f>& _outline,
                  float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO );
-    GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const std::vector<Vector3f>& _outline,
+    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
+                 const std::vector<Vector3f>& _outline,
                  const Vector3f& _suggestedAxis = Vector3f::ZERO );
-    GeomBuilder( SceneGraph& _sg, const ProfileBuilder& _ps, const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
+    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
+                 const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
 
     GeomBuilder& inj( GeomAssetSP _hier );
 
@@ -151,8 +153,8 @@ public:
         return *this;
     }
 
-    GeomBuilder& pb( const ProfileBuilder& _value ) {
-        mProfileBuilder = _value;
+    GeomBuilder& pb( const float _a, const float _b ) {
+        ProfileBuilder{ sg.PL(), _a, _b }.build();
         return *this;
     }
 
@@ -297,7 +299,6 @@ private:
     ShapeType shapeType = ShapeType::None;
     subdivisionAccuray subdivAccuracy = accuracyNone;
 
-    ProfileBuilder mProfileBuilder;
     std::vector<Vector3f> profilePath;
     FollowerFlags fflags = FollowerFlags::Defaults;
     PolyRaise fraise = PolyRaise::None;

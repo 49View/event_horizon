@@ -45,11 +45,24 @@ CubeMapRigContainer addCubeMapRig( const std::string& _name,
     return ret;
 }
 
+CameraRig::CameraRig() {
+    Name( Name::Foxtrot );
+    init( Rect2f::MIDENTITY() );
+}
+
+CameraRig::CameraRig( const std::string& _name ) : NamePolicy(_name) {
+    init( Rect2f::MIDENTITY() );
+}
+
 CameraRig::CameraRig( const std::string& _name, const Rect2f& _viewport ) {
-    Name(_name);
-    mCamera = std::make_shared<Camera>( _name, _viewport );
-    mCameraVRLeftEye = std::make_shared<Camera>( _name + "LeftEye", _viewport );
-    mCameraVRRightEye = std::make_shared<Camera>( _name + "RightEye", _viewport );
+    Name( _name );
+    init( _viewport );
+}
+
+void CameraRig::init( const Rect2f& _viewport ) {
+    mCamera = std::make_shared<Camera>( Name(), _viewport );
+    mCameraVRLeftEye = std::make_shared<Camera>( Name() + "LeftEye", _viewport );
+    mCameraVRRightEye = std::make_shared<Camera>( Name() + "RightEye", _viewport );
 
     mViewport = _viewport;
 }

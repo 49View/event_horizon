@@ -4,19 +4,12 @@
 #pragma once
 
 #include <core/names.hpp>
+#include <core/name_policy.hpp>
+#include <core/image_constants.h>
 #include "graphic_constants.h"
 
-struct TextureRenderData {
-    std::string name = S::WHITE;
-    int width = 0;
-    int height = 0;
-    int channels = 3;
-    int bpp = 8;
-
-    PixelFormat outFormat = PIXEL_FORMAT_RGB;
-    TextureTargetMode ttm = TEXTURE_2D;
-    WrapMode wrapMode = WRAP_MODE_REPEAT;
-    Filter filterMode = FILTER_LINEAR;
+struct TextureRenderData : public NamePolicy<>, public ImageParams {
+    using NamePolicy::NamePolicy;
 
     TextureSlots preferredGPUSlot = TSLOT_COLOR;
     int forceGPUId = -1;
@@ -26,22 +19,14 @@ struct TextureRenderData {
     bool isFramebufferTarget = false;
     bool generateMipMaps = true;
 
-    TextureRenderData( const std::string& name ) : name( name ) {}
-
-    TextureRenderData( const std::string& name, int width, int height, int channels, int bpp ) : name( name ),
-                                                                                                 width( width ),
-                                                                                                 height( height ),
-                                                                                                 channels( channels ),
-                                                                                                 bpp( bpp ) {
+    TextureRenderData( const std::string& name, int width, int height, int channels, int bpp ) :
+                       NamePolicy( name ),
+                       ImageParams( width, height, channels, bpp ) {
         setFormatFromBpp();
     }
 
-    const std::string& Name() const {
-        return name;
-    };
-
     TextureRenderData& setId( const std::string& _id ) {
-        name = _id;
+        Name(_id);
         return *this;
     }
 

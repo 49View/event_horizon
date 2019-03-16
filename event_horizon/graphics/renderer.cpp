@@ -1,6 +1,8 @@
 #include "renderer.h"
 
 #include <core/math/spherical_harmonics.h>
+#include <core/command.hpp>
+#include <core/game_time.h>
 #include <core/configuration/app_options.h>
 #include <core/suncalc/sun_builder.h>
 #include <core/zlib_util.h>
@@ -20,8 +22,6 @@
 #endif
 #include <stb/stb_image_write.h>
 #include "core/service_factory.h"
-
-#include "di_modules.h"
 
 namespace FBNames {
     static std::unordered_set<std::string> sFBNames;
@@ -71,7 +71,7 @@ bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uin
 }
 
 Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm ) :
-        cq( cq ), sm( sm ), tm(tm), ridm(tm), ssm(_ssm), lm(_lm) {
+        cq( cq ), sm( sm ), tm(tm), ssm(_ssm), lm(_lm), ridm(tm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);
@@ -114,7 +114,9 @@ void Renderer::init() {
     am.init();
     lm.init();
     sm.loadShaders();
-    tm.addTextureWithData(FBNames::lightmap, RawImage::WHITE4x4(), TSLOT_LIGHTMAP );
+    auto lmImage = RawImage::WHITE4x4();
+    lmImage.Name(FBNames::lightmap);
+    tm.addTextureWithData(lmImage, TSLOT_LIGHTMAP );
     afterShaderSetup();
 }
 

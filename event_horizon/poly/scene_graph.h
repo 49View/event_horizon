@@ -10,27 +10,30 @@
 #include <cstdint>
 #include <typeinfo>
 #include <variant>
-#include "core/image_builder.h"
-#include "core/uuid.hpp"
-#include "core/camera_rig.hpp"
-#include "core/command.hpp"
-#include "core/font_manager.h"
-#include "core/serializebin.hpp"
-#include "core/suncalc/sun_builder.h"
-#include "core/callback_dependency.h"
-#include "profile_builder.h"
-#include "material_builder.h"
+#include <core/image_builder.h>
+#include <core/uuid.hpp>
+#include <core/camera_rig.hpp>
+#include <core/command.hpp>
+#include <core/font_manager.h>
+#include <core/serializebin.hpp>
+#include <core/suncalc/sun_builder.h>
+#include <core/callback_dependency.h>
+#include <poly/profile_builder.h>
+#include <poly/material_builder.h>
 #include <poly/poly.hpp>
 
 class StreamingMediator;
 class CameraManager;
 
-class PolySceneGraphTextureList : public ImageDepencencyMaker {
-    bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
-};
+//class PolySceneGraphTextureList : public ImageDepencencyMaker {
+//    bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
+//};
 
 using NodeGraph = std::unordered_map<std::string, NodeVariants>;
 using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)>;
+
+using NodeGraphConnectParamsSig = NodeVariants&;
+using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
 
 class SceneGraph;
 
@@ -40,13 +43,21 @@ public:
     virtual ~CommandScriptSceneGraph() = default;
 };
 
-class SceneGraph : public DependencyMaker {
+class SceneGraph {
 public:
-    explicit SceneGraph( CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm );
+    explicit SceneGraph( CommandQueue& cq,
+                         ImageManager& _tl,
+                         ProfileManager& _pm,
+                         MaterialManager& _ml,
+                         ColorManager& _cl,
+                         FontManager& _fm,
+                         CameraManager& _cm,
+                         SunBuilder& _sb );
 
-DEPENDENCY_MAKER_EXIST(geoms);
     void add( NodeVariants _geom );
     void remove( const UUID& _uuid );
+
+    void nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot );
 
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
@@ -59,12 +70,14 @@ DEPENDENCY_MAKER_EXIST(geoms);
     bool rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
 
     size_t countGeoms() const;
-    virtual DependencyMaker& TL() = 0;
+
+    ImageManager& TL() { return tl; }
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
     CameraManager& CM();
     FontManager& FM() { return fm; }
+    ColorManager& MC() { return cl; }
     SunBuilder& SB() { return sb; }
 
     void mapGeomType( uint64_t _value, const std::string& _key );
@@ -81,37 +94,41 @@ DEPENDENCY_MAKER_EXIST(geoms);
     }
 
 protected:
-    virtual void updateImpl() {};
-    virtual void addImpl( NodeVariants _geom) {};
-    virtual void removeImpl( const UUID& _uuid ) {};
-    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-    virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-    virtual void cmdRemoveGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-    virtual void changeMaterialTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-    virtual void changeMaterialColorTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-    virtual void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+//    virtual void addImpl( NodeVariants _geom) {};
+//    virtual void removeImpl( const UUID& _uuid ) {};
+//    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+//    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+//    virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+//    virtual void cmdRemoveGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+//    virtual void changeMaterialTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+//    virtual void changeMaterialColorTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
+//    virtual void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 
 protected:
     NodeGraph geoms;
-    ProfileManager pl;
-    MaterialManager ml;
-    ColorManager cl;
+
+    ImageManager& tl;
+    ProfileManager& pl;
+    MaterialManager& ml;
+    ColorManager& cl;
     FontManager& fm;
-    SunBuilder& sb;
     CameraManager& cm;
+
+    SunBuilder& sb;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
+
+    boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
 };
 
-class PolySceneGraph : public SceneGraph {
-public:
-    PolySceneGraph(CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm) : SceneGraph(cq, _fm, _sb, _cm) {
-        ml.TL(&tl);
-    }
-
-    DependencyMaker& TL() override { return tl; }
-private:
-    PolySceneGraphTextureList tl;
-};
+//class PolySceneGraph : public SceneGraph {
+//public:
+//    PolySceneGraph(CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm) : SceneGraph(cq, _fm, _sb, _cm) {
+//        ml.TL(&tl);
+//    }
+//
+//    DependencyMaker& TL() override { return tl; }
+//private:
+//    PolySceneGraphTextureList tl;
+//};

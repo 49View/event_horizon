@@ -1,20 +1,22 @@
 #pragma once
 
-#include "core/di.hpp"
-#include "core/command.hpp"
-#include "core/font_manager.h"
-#include "renderer.h"
-#include "text_input.hpp"
-#include "mouse_input.hpp"
-#include "shader_manager.h"
-#include "texture_manager.h"
-#include "ui/ui_control_manager.hpp"
+#include <core/di.hpp>
+#include <core/command.hpp>
+#include <core/streaming_mediator.hpp>
+#include <graphics/renderer.h>
+#include <graphics/text_input.hpp>
+#include <graphics/mouse_input.hpp>
+#include <graphics/shadowmap_manager.h>
+#include <graphics/texture_manager.h>
+#include <graphics/light_manager.h>
 
 namespace di = boost::di;
 
-#define APP_GINJECTOR ( di::bind<CommandQueue>().in(di::singleton), di::bind<UiControlManager>().in(di::singleton), \
-                        di::bind<FontManager>().in(di::singleton), \
+#define APP_GINJECTOR ( di::bind<CommandQueue>().in(di::singleton), \
                         di::bind<Renderer>().in(di::singleton), \
-                        di::bind<TextInput>().in(di::singleton), di::bind<MouseInput>().in(di::singleton), \
+                        di::bind<ShaderManager>().in(di::singleton), \
                         di::bind<TextureManager>().in(di::singleton), \
-                        di::bind<ShaderManager>().in(di::singleton) )
+                        di::bind<LightManager>().in(di::singleton), \
+                        di::bind<Renderer>().in(di::singleton), \
+                        di::bind<TextInput>().in(di::singleton), \
+                        di::bind<MouseInput>().in(di::singleton) )

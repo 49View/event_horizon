@@ -12,7 +12,8 @@
 #include <graphics/di_modules.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
-RunLoopGraphics rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
+//RunLoopGraphics rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
+RunLoopGraphics rl = di::make_injector().create<RunLoopGraphics>();
 
 std::string addScriptLine( std::string _str ) {
 	rl.addScriptLine( _str );

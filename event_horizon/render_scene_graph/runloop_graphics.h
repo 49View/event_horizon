@@ -17,7 +17,7 @@ class RunLoopGraphics : public RunLoop {
 public:
 	RunLoopGraphics( CommandQueue& _cq, Renderer& rr, TextInput& ti, MouseInput& mi )
                    : RunLoop( _cq ), rr( rr ), ti( ti), mi( mi) {}
-    virtual ~RunLoopGraphics() = default;
+    ~RunLoopGraphics() override = default;
 
 	void run();
 	void runSingleThread() override;

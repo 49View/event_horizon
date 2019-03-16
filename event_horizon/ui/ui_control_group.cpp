@@ -449,16 +449,16 @@ bool UiViewBuilder::build( DependencyMaker& _md ) {
     return true;
 }
 
-bool UiViewBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
-
-    if  ( _status == DependencyStatus::LoadedSuccessfully ) {
-        UiControlManager& uicm = static_cast<UiControlManager&>(_md);
-        uicm.addUIView( UIView{ std::move(_data) } );
-        return true;
-    }
-
-    return false;
-}
+//bool UiViewBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
+//
+//    if  ( _status == DependencyStatus::LoadedSuccessfully ) {
+//        UiControlManager& uicm = static_cast<UiControlManager&>(_md);
+//        uicm.addUIView( UIView{ std::move(_data) } );
+//        return true;
+//    }
+//
+//    return false;
+//}
 
 UiViewBuilder::~UiViewBuilder() {
 

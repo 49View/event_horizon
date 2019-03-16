@@ -8,37 +8,22 @@
 #include <core/builders.hpp>
 #include "image_constants.h"
 
-struct ImageBuilder;
-struct RawImage;
+class ImageBuilder;
+class RawImage;
 
-struct ImageParams {
-    int width = 0;
-    int height = 0;
-    int channels = 3;
-    int bpp = 8;
-    PixelFormat outFormat = PIXEL_FORMAT_RGB;
-    TextureTargetMode ttm = TEXTURE_2D;
-    WrapMode wrapMode = WRAP_MODE_REPEAT;
-    Filter filterMode = FILTER_LINEAR;
-
-    float getAspectRatio() const {
-        return static_cast<float>(width) / static_cast<float>(height);
-    }
-};
-
-class ImageDepencencyMaker : public DependencyMaker {
+class ImageManager : public DependencyMakerPolicy<RawImage> {
 public:
-    bool add( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data );
-    virtual bool addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data ) = 0;
+    virtual ~ImageManager() = default;
+//    bool add( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data );
+//    virtual bool addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data ) = 0;
     const ImageParams& ip( const std::string& _key );
-    DEPENDENCY_MAKER_EXIST(imageList);
 private:
-    std::set<std::string> imageList;
     std::map<std::string, ImageParams> imageParamsMap;
 };
 
-struct RBUILDER( ImageBuilder, images, , Binary, BuilderQueryType::Exact, 0 )
-
+class ImageBuilder : public ResourceBuilder<RawImage, ImageManager> {
+public:
+    using ResourceBuilder::ResourceBuilder;
     ImageParams imageParams;
     uint32_t backup_color = 0xffffffff;
     bool bForceHDR16BitTarget = true;
@@ -148,11 +133,10 @@ struct RBUILDER( ImageBuilder, images, , Binary, BuilderQueryType::Exact, 0 )
     }
 
 public:
-    bool makeDirect( DependencyMaker& _md, const ucchar_p& _data );
-    bool makeDirect( DependencyMaker& _md, const uint8_p& _data );
-    bool makeDirect( DependencyMaker& _md, const RawImage& _data );
-    bool makeDefault( DependencyMaker& _md );
-
+    bool makeDirect( const ucchar_p& _data );
+    bool makeDirect( const uint8_p& _data );
+    bool makeDirect( const RawImage& _data );
+    void makeDefault() override;
 private:
-    bool finalizaMake( ImageDepencencyMaker& sg, std::unique_ptr<uint8_t[]>&& decodedData );
+    bool finalizaMake( std::unique_ptr<uint8_t[]>&& decodedData );
 };

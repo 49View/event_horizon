@@ -3,15 +3,20 @@
 #include <memory>
 #include <cstring>
 #include <string>
-#include "math/vector2i.h"
-#include "htypes_shared.hpp"
+#include <core/math/vector2i.h>
+#include <core/htypes_shared.hpp>
+#include <core/image_constants.h>
+#include <core/publisher.hpp>
 
 namespace JMATH { class Rect2f; }
 
-struct RawImage {
+class RawImage : public ImageParams, public Publisher<RawImage, EmptyBox> {
+public:
     RawImage() = default;
+    virtual ~RawImage() = default;
     RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint32_t _col);
     RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint8_t _col );
+    RawImage( const std::string& _name, const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData );
     // A single float number equals a grayscale (1 channel) image
     RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const float _col );
     RawImage( int width, int height, int channels, const char* rawBtyes, const std::string& name = "" );
@@ -24,7 +29,7 @@ struct RawImage {
         height = _val.height;
         channels = _val.channels;
         rawBtyes = std::move(_val.rawBtyes);
-        name = _val.name;
+        Name(_val.Name());
     }
 
     RawImage(const RawImage& _val) {
@@ -32,7 +37,7 @@ struct RawImage {
         height = _val.height;
         channels = _val.channels;
         copyFrom( reinterpret_cast<const char *>(_val.data()) );
-        name = _val.name;
+        Name(_val.Name());
     }
 
     RawImage& operator=(const RawImage& _val) {
@@ -40,7 +45,7 @@ struct RawImage {
         height = _val.height;
         channels = _val.channels;
         copyFrom( reinterpret_cast<const char *>(_val.data()) );
-        name = _val.name;
+        Name(_val.Name());
         return *this;
     }
 
@@ -88,12 +93,13 @@ struct RawImage {
         return width * height * channels;
     }
 
-    int width = 0;
-    int height = 0;
-    int channels = 0;
 	std::unique_ptr<uint8_t[]> rawBtyes;
-	std::string name;
 
+protected:
+    std::string calcHashImpl() override;
+    std::string generateThumbnail() const override;
+
+public:
 	static RawImage WHITE4x4();
 	static RawImage DEBUG_UV();
 	static RawImage BLACK_ARGB4x4;

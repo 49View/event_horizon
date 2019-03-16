@@ -541,7 +541,7 @@ int RenderSceneGraph::bake(scene_t *scene)
 }
 
 
-void RenderSceneGraph::cmdCalcLightmapsImpl( const std::vector<std::string>& _params ) {
+//void RenderSceneGraph::cmdCalcLightmapsImpl( const std::vector<std::string>& _params ) {
 
 //    loadSimpleObjFile("/Users/Dado/Documents/49View/external/thekla_atlas_b/gazebo.obj",
 //                      &_outputScene.vertices, &_outputScene.vertexCount, &_outputScene.indices, &_outputScene.indexCount);
@@ -555,4 +555,4 @@ void RenderSceneGraph::cmdCalcLightmapsImpl( const std::vector<std::string>& _pa
 //        initScene( &_outputScene );
 //        bake( &_outputScene );
 //    }
-}
+//}

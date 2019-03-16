@@ -511,7 +511,7 @@ std::string UIShapeBuilder::getShaderType( UIShapeType _st ) const {
 }
 
 void UIShapeBuilder::createDependencyList() {
-    addDependency<FontBuilder>( fontName, sg.FM() );
+    addDependency<Utility::TTFCore::Font, FontBuilder>( fontName, sg.FM() );
     addDependencies( std::make_shared<UIShapeBuilder>(*this) );
 }
 

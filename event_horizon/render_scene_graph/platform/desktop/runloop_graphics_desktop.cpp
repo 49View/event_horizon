@@ -7,7 +7,8 @@
 #include <graphics/di_modules.h>
 
 void mainLoop( std::shared_ptr<SceneOrchestrator> p ) {
-    auto rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
+//    auto rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
+    auto rl = di::make_injector().create<RunLoopGraphics>();
     rl.initWindow( p );
     rl.runSingleThread();
 }

@@ -21,11 +21,13 @@ enum class CameraRigType {
 
 class CameraRig : public Publisher<CameraRig> {
 public:
-    CameraRig() = default;
+    CameraRig();
+    CameraRig( const std::string &_name);
     CameraRig( const std::string &_name, const Rect2f& _viewport );
     virtual ~CameraRig() = default;
 protected:
 
+    void init( const Rect2f& _viewport );
     void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override {}
     void deserializeImpl( std::shared_ptr<DeserializeBin> reader ) override {}
 

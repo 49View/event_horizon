@@ -11,40 +11,38 @@
 #include "core/descriptors/material.h"
 #include "core/image_constants.h"
 
-struct MaterialBuilder;
+class MaterialBuilder;
 struct MaterialProperties;
-struct ColorBuilder;
+class ColorBuilder;
 class ImageDepencencyMaker;
 
-class MaterialManager : public DependencyMaker {
+class MaterialManager : public DependencyMakerPolicy<Material> {
 public:
-    DEPENDENCY_MAKER_EXIST(materialList);
+    virtual ~MaterialManager() = default;
     void dump() const;
-    bool virtual add( const MaterialBuilder& pb, std::shared_ptr<Material> _material );
-    bool add( std::shared_ptr<Material> _material );
-    bool add( const std::string& _key, std::shared_ptr<Material> _material );
-    std::shared_ptr<Material> get( const std::string& _key );
-    std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey, const MaterialProperties& _mp );
+//    bool virtual add( const MaterialBuilder& pb, std::shared_ptr<Material> _material );
+//    bool add( const std::string& _key, std::shared_ptr<Material> _material );
+//    std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey, const MaterialProperties& _mp );
     std::vector<std::shared_ptr<Material>> list() const;
     void TL( ImageDepencencyMaker* _tl ) { tl = _tl; }
     ImageDepencencyMaker* TL() { return tl; }
 private:
-    std::unordered_map<std::string, std::shared_ptr<Material>> materialList;
-    ImageDepencencyMaker* tl;
+    ImageDepencencyMaker* tl = nullptr;
 };
 
-struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact, Material::Version() )
+//struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact,  )
 
-    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a),shaderName( a.shaderName ), imageExt( a.imageExt ) {
-        bufferTarFiles = a.bufferTarFiles;
-    }
+class MaterialBuilder : public ResourceBuilder< Material, MaterialManager > {
+    using ResourceBuilder::ResourceBuilder;
+public:
+//    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a) {}
+    explicit MaterialBuilder( MaterialManager& _mm ) : ResourceBuilder(_mm) {}
+    MaterialBuilder( MaterialManager& _mm, const std::string& _name, const std::string& _sn );
+    MaterialBuilder( MaterialManager& _mm, const std::string& _name, const SerializableContainer& _data );
 
-    MaterialBuilder( const std::string& _name, const std::string& _sn );
-    MaterialBuilder( const std::string& _name, const SerializableContainer& _data );
-
-    void makeDefault( DependencyMaker& _md );
-    std::shared_ptr<Material> makeDirect( DependencyMaker& _md );
-
+    void makeDefault() override;
+    std::shared_ptr<Material> makeDirect();
+private:
     MaterialBuilder& mp( const MaterialProperties& _value ) {
         properties = _value;
         return *this;
@@ -63,17 +61,18 @@ private:
     std::string imageExt = ".png";
 };
 
+using MB = MaterialBuilder;
+
 // Color management!
 
-class ColorManager : public DependencyMaker {
+class ColorManager : public DependencyMakerPolicy<MaterialColor> {
 public:
-DEPENDENCY_MAKER_EXIST(colorList);
-    bool virtual add( const ColorBuilder& pb, const MaterialColor& _color );
-    Color4f getColor( const std::string& _key );
-
-private:
-    std::unordered_map<std::string, MaterialColor> colorList;
+    virtual ~ColorManager() = default;
 };
 
-struct RBUILDER( ColorBuilder, color, col, Text, BuilderQueryType::NotExact, MaterialColor::Version() )
+class ColorBuilder : public ResourceBuilder<MaterialColor, ColorManager> {
+    using ResourceBuilder::ResourceBuilder;
 };
+
+//struct RBUILDER( ColorBuilder, color, col, Text, BuilderQueryType::NotExact, MaterialColor::Version() )
+//};

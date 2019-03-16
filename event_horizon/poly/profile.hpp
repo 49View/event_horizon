@@ -1,9 +1,3 @@
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
 //
 //  profile.hpp
 //  6thViewImporter
@@ -13,20 +7,25 @@
 //
 
 #pragma once
+#include <utility>
 #include <vector>
 #include <array>
-#include "core/callback_dependency.h"
-#include "core/htypes_shared.hpp"
-#include "core/math/vector3f.h"
+#include <core/callback_dependency.h>
+#include <core/htypes_shared.hpp>
+#include <core/math/vector3f.h>
+#include <core/publisher.hpp>
 
-namespace JMATH { class Rect2f; };
+namespace JMATH { class Rect2f; }
 
-class Profile {
+class Profile : public Publisher<Profile> {
 public:
+    using Publisher::Publisher;
 	Profile() = default;
+	explicit Profile( const std::string& _name ) : NamePolicy(_name) {}
 	Profile( const std::string& _name, uint8_p&& _data );
-	explicit Profile( std::string _name ) : mName( std::move( _name )) {}
-	void createWire( float radius, int numSubDivs );
+    virtual ~Profile() = default;
+
+    void createWire( float radius, int numSubDivs );
 	void createLine( const Vector2f& a, const Vector2f& b, WindingOrderT wo = WindingOrder::CCW );
 	void createRect( const Vector2f& size, WindingOrderT wo = WindingOrder::CCW );
 	void createRect( const JMATH::Rect2f& _rect );
@@ -58,19 +57,13 @@ public:
 	Vector3f Normal() const { return mNormal; }
 	void Normal( Vector3f val ) { mNormal = val; }
 
-	const std::string& Name() const {
-		return mName;
-	}
-
-	void Name( const std::string& name ) {
-		mName = name;
-	}
-
     static std::shared_ptr<Profile> makeLine(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
     static std::shared_ptr<Profile> makeWire(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
 
     static std::shared_ptr<Profile> fromPoints( const std::string& name, const std::vector<Vector2f>& points );
 private:
+    std::string calcHashImpl() override;
+    std::string generateThumbnail() const override;
 	void calculatePerimeter();
 	void calcBBox();
 

@@ -1,4 +1,3 @@
-#include <utility>
 
 //
 // Created by Dado on 2018-12-30.
@@ -6,50 +5,13 @@
 
 #pragma once
 
+#include <utility>
 #include <core/callback_dependency.h>
 #include <core/name_policy.hpp>
+#include <core/versionable.hpp>
+#include <core/entity_factory.hpp>
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
-
-#define RBUILDER( BuilderName, _pre, _post, dataType, buildQueryType, version ) \
-BuilderName : public ResourceBuilder { \
-public: \
-    using ResourceBuilder::ResourceBuilder; \
-    BuilderName() {} \
-    virtual ~BuilderName() {} \
-    static uint64_t Version() { \
-        return version; \
-    } \
-    const std::string prefix() const override { \
-        return std::string(#_pre) + "/"; \
-    } \
-    std::string postMake( const std::string& _str ) const { \
-        if ( usesNotExactQuery() ) return ""; \
-        if ( _str.empty() ) return ""; \
-        return "."  + _str; \
-    } \
-    void defPrePosfixes() { \
-        postFix = postMake(#_post); \
-    } \
-    static bool usesNotExactQuery() { return buildQueryType == BuilderQueryType::NotExact; } \
-    explicit BuilderName( const std::string& _name ) : \
-        ResourceBuilder( _name) { \
-        defPrePosfixes(); \
-    } \
-    BuilderName& cc( CommandResouceCallbackFunction _ccf, const std::vector<std::string>& _params ) { \
-        ccf = _ccf; \
-        params = _params; \
-        return *this; \
-    } \
-    bool makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) override; \
-    bool build( DependencyMaker& _md ) override { \
-        if ( !_md.exists(Name()) || usesNotExactQuery() ) { \
-            auto dkey = prefix() + Name() + postFix; \
-            readRemote<BuilderName, HttpQuery::dataType>( dkey, *this, _md ); \
-            return true; \
-        } \
-        return false; \
-    }
 
 class BaseBuilder : public NamePolicy<std::string> {
 public:
@@ -57,33 +19,12 @@ public:
     explicit BaseBuilder( const std::string& _name ) {
         this->Name( _name );
     }
-
-    static const std::string typeName()  { return ""; }
 };
 
-class ResourceBuilder : public BaseBuilder {
-    using BaseBuilder::BaseBuilder;
+class ResourceBuilderBase {
 public:
-
-    virtual const std::string prefix() const = 0;
-
-    const std::string NameKey() const { return prefix() + Name(); }
-    virtual bool build( DependencyMaker& _md ) = 0;
-    bool rebuild( DependencyMaker& _md ) {
-        bReloading = true;
-        return build(_md);
-    };
-
-    virtual bool evaluateDirectBuild( DependencyMaker& _md ) {
-        return false;
-    }
-
-    bool make( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) {
-        bool bSucc = makeImpl( _md, std::move(_data), _status );
-        if ( bSucc && ccf ) {
-            ccf( params );
-        }
-        return bSucc;
+    bool make( const std::string& _key, uint8_p&& _data, const DependencyStatus _status ) {
+        return makeImpl( _key, std::move(_data), _status );
     }
 
     bool isReloading() const {
@@ -91,19 +32,81 @@ public:
     }
 
 protected:
-    virtual bool makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) = 0;
+    virtual bool makeImpl( const std::string& _key, uint8_p&& _data, DependencyStatus _status ) = 0;
+
 protected:
     std::vector<std::string> params;
     CommandResouceCallbackFunction ccf = nullptr;
-    std::string postFix;
     bool bReloading = false;
+};
+
+template < typename R, typename M >
+class ResourceBuilder : public ResourceBuilderBase,
+                        public NamePolicy<std::string> {
+public:
+    using NamePolicy::NamePolicy;
+
+    explicit ResourceBuilder( M& mm ) : NamePolicy(), mm( mm ) {}
+    ResourceBuilder( M& _mm, const std::string& _name ) : NamePolicy(_name), mm( _mm ) {}
+    virtual ~ResourceBuilder() = default;
+
+    ResourceBuilder& n( const std::string& _name ) {
+        Name(_name);
+        return *this;
+    }
+
+    const std::string NameKey() const {
+        return R::Prefix() + "/" + Name();
+    }
+
+    bool rebuild() {
+        bReloading = true;
+        return build();
+    };
+
+    virtual bool evaluateDirectBuild() {
+        return false;
+    }
+
+    void load( CommandResouceCallbackFunction _ccf = nullptr, const std::vector<std::string>& _params = {} ) {
+        ccf = _ccf;
+        params = _params;
+        build();
+    }
+
+    bool build() {
+        if ( !mm.exists(Name()) || R::usesNotExactQuery() ) {
+            readRemote<R, ResourceBuilder, HttpQuery::Binary>( NameKey(), *this );
+            return true;
+        }
+        return false;
+    }
+
+    virtual void makeDefault() {}
+
+protected:
+    bool makeImpl( const std::string& _key, uint8_p&& _data, const DependencyStatus _status ) override {
+
+        if ( _status == DependencyStatus::LoadedSuccessfully ) {
+            auto res = EF::create<R>( std::move( _data ) );
+            mm.add( res, _key );
+            if ( ccf ) ccf(params);
+        } else {
+            makeDefault();
+        }
+
+        return true;
+    }
+
+protected:
+    M& mm;
 };
 
 class ResourceBuilderObservable : public BaseBuilder {
     using BaseBuilder::BaseBuilder;
 public:
 
-    virtual bool make( uint8_p&& _data, const DependencyStatus _status ) = 0;
+    virtual bool make( uint8_p&& _data, DependencyStatus _status ) = 0;
 };
 
 class DependantBuilder : public BaseBuilder {
@@ -141,50 +144,29 @@ protected:
         }
     };
 
-    bool depExistTest( const std::string& _dname, DependencyMaker& _md ) {
-        return (!_dname.empty() && !_md.exists(_dname));
-    }
-
     template <typename BD>
     void push_dep( const std::string& _dname ) {
-        std::string preFixToAdd = BD::usesNotExactQuery() ? "" : BD{}.prefix();
+        std::string preFixToAdd = BD::usesNotExactQuery() ? "" : BD::Prefix();
         mDeps.push_back( preFixToAdd + _dname );
     }
 
-    template <typename BD>
-    bool addDependency( const std::string& _dname, DependencyMaker& _md ) {
-        if ( depExistTest(_dname, _md) ) {
-            BD{ _dname }.build( _md );
-            push_dep<BD>( _dname );
+    template <typename R, typename BD, typename M>
+    bool addDependency( const std::string& _dname, M& _md ) {
+        if ( !_md.exists(_dname) ) {
+            BD{_md}.n(_dname).build();
+            push_dep<R>( _dname );
             return true;
         }
         return false;
     }
 
-    template <typename BD>
-    void addDependency( BD& _builder, DependencyMaker& _md ) {
-        if ( depExistTest( _builder.Name(), _md) ) {
-
-            if ( !_builder.evaluateDirectBuild( _md ) ) {
+    template <typename R, typename BD, typename M>
+    void addDependency( BD& _builder, M& _md ) {
+        if ( !_md.exists(_builder.Name()) ) {
+            if ( !_builder.evaluateDirectBuild() ) {
                 _builder.build( _md );
-                push_dep<BD>( _builder.Name() );
+                push_dep<R>( _builder.Name() );
             }
-        }
-    }
-
-    template <typename BD, typename T, typename S>
-    void addDependency( const std::string& _dname, const T& _type, const S& _subtype, DependencyMaker& _md ) {
-        if ( depExistTest(_dname, _md) ) {
-            BD{ _dname, _type, _subtype }.build( _md );
-            push_dep<BD>( _dname );
-        }
-    }
-
-    template <typename BD, typename T, typename S, typename P>
-    void addDependency( const std::string& _dname, const T& _type, const S& _subtype, const P& _params, DependencyMaker& _md ) {
-        if ( depExistTest(_dname, _md) ) {
-            BD{ _dname, _type, _subtype, _params }.build( _md );
-            push_dep<BD>( _dname );
         }
     }
 

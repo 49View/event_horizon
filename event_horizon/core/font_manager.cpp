@@ -8,12 +8,12 @@ void FontManager::preCacheFont() {
 }
 
 const Utility::TTFCore::Font& FontManager::operator[]( const std::string& _fontName ) {
-    if ( auto ret = fonts.find( _fontName ); ret != fonts.end()) {
+    if ( auto ret = Resources().find( _fontName ); ret != Resources().end()) {
         return *ret->second.get();
     }
 
     // didn't find the font, rollback to defualt
-    auto ret = fonts.find( defaultFontName );
+    auto ret = Resources().find( defaultFontName );
     return *ret->second.get();
     // ok default it's not loaded, load it
     //return addFont( FontManager::defaultFont, FontManager::defaultFontName );
@@ -21,14 +21,6 @@ const Utility::TTFCore::Font& FontManager::operator[]( const std::string& _fontN
 
 const Utility::TTFCore::Font& FontManager::operator()() {
     return operator[]( defaultFontName );
-}
-
-bool FontManager::create( const uint8_p& ret, const std::string& _indexName ) {
-    if ( ret.second > 0 ) {
-        fonts[_indexName] = std::make_shared<Utility::TTF::Font>( ret.first.get(), ret.second );
-        return true;
-    }
-    return false;
 }
 
 Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Font& f, float height ) {
@@ -43,8 +35,8 @@ Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Fon
     }
 
     // Count total number of polygons
-    for ( size_t i = 0; i < msg.length(); i++ ) {
-        Utility::TTF::CodePoint cp( msg[i] );
+    for ( char i : msg ) {
+        Utility::TTF::CodePoint cp( i );
         numTotalPolys += static_cast<int32_t>( f.GetTriCount( cp ));
     }
 
@@ -53,8 +45,8 @@ Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Fon
 
     tm.scale( Vector3f( height, height, 1.0f ));
 
-    for ( size_t i = 0; i < msg.length(); i++ ) {
-        Utility::TTF::CodePoint cp( msg[i] );
+    for ( char i : msg ) {
+        Utility::TTF::CodePoint cp( i );
         const Utility::TTF::Mesh& m = f.GetTriangulation( cp );
         int32_t numPolysInGlyph = static_cast<int32_t>( m.verts.size());
 
@@ -80,7 +72,7 @@ Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Fon
             numPolysRendered += numPolysInGlyph;
         }
 
-        Utility::TTFCore::vec2f kerning = f.GetKerning( Utility::TTF::CodePoint( msg[i] ), cp );
+        Utility::TTFCore::vec2f kerning = f.GetKerning( Utility::TTF::CodePoint( i ), cp );
         Vector2f nextCharPos = Vector2f( kerning.x / gliphScaler, kerning.y / gliphScaler ) * ( height );
         tm.translate( nextCharPos );
     }
@@ -102,8 +94,11 @@ Rect2f FontManager::optimalSizeForText( const Vector2f& size, const Utility::TTF
     return lTextRect;
 }
 
-bool FontBuilder::makeImpl( DependencyMaker& _md, uint8_p&& _data,[[maybe_unused]]  const DependencyStatus _status ) {
-    auto& fm = static_cast<FontManager&>(_md);
-    return fm.create( _data, Name() );
-}
+//bool FontBuilder::makeImpl( uint8_p&& _data, const DependencyStatus _status ) {
+//    if ( _status == DependencyStatus::LoadedSuccessfully ) {
+//        mm.add( std::make_shared<Utility::TTF::Font>( _data.first.get(), _data.second ) );
+//        return true;
+//    }
+//    return false;
+//}
 

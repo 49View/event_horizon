@@ -17,6 +17,7 @@
 #include <core/math/math_util.h>
 #include <core/math/anim_type.hpp>
 #include <core/camera_utils.hpp>
+#include <core/name_policy.hpp>
 
 void MultiplyMatrices4by4OpenGL_FLOAT( float *result, float *matrix1, float *matrix2 );
 void MultiplyMatrixByVector4by4OpenGL_FLOAT( float *resultvector, const float *matrix, const float *pvector );
@@ -35,7 +36,7 @@ struct Frustum {
 	void calculateFromMVP( const Matrix4f& _mvp );
 };
 
-class Camera : public Animable {
+class Camera : public Animable, public NamePolicy<> {
 public:
 	Camera( const std::string& cameraName, const Rect2f& _viewport );
     virtual ~Camera() = default;
@@ -124,9 +125,6 @@ public:
 	void ModeInc();
 	void Mode( const CameraMode& val );
 	CameraMode Mode() const;
-
-	std::string Name() const { return mName; }
-	void Name( std::string val ) { mName = val; }
 
 	bool LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
 	void LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }

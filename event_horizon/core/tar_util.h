@@ -144,7 +144,7 @@ namespace tarUtil {
     };
 
     template<typename DI>
-    void untar( const SerializableContainer& fin, DependencyMaker& _md ) {
+    void untar( const SerializableContainer& fin ) {
         //Initialize a zero-filled block we can compare against (zero-filled header block --> end of TAR archive)
         char zeroBlock[512];
         memset( zeroBlock, 0, 512 );
@@ -199,9 +199,12 @@ namespace tarUtil {
 //                cout << "Found file '" << filename << "' (" << size << " bytes)\n";
                 //Read the file into memory
                 //  This won't work for very large files -- use streaming methods there!
-                DI{ getFileNameNoExt( filename ) }.
-                        makeDirect( _md, ucchar_p{ reinterpret_cast<const unsigned char *>(rawBytes), size },
-                                    filename );
+
+                // ### Needs a new callback to handle file loading!!
+//                DI{ getFileNameNoExt( filename ) }.
+//                        makeDirect( _md, ucchar_p{ reinterpret_cast<const unsigned char *>(rawBytes), size },
+//                                    filename );
+
                 rawBytes += size;
                 //In the tar archive, entire 512-byte-blocks are used for each file
                 //Therefore we now have to skip the padded bytes.

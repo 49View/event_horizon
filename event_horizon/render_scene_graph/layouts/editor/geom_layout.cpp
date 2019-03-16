@@ -29,7 +29,7 @@ void loadGeomInGui( SceneOrchestrator* p, std::shared_ptr<GLTF2> _newObject ) {
     auto imported = _newObject->convert();
     auto hierScene = imported.getScene();
     p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
-    p->RSG().add( hierScene );
+    p->SG().add( hierScene );
 }
 
 void addGeomToScene() {
@@ -61,13 +61,13 @@ void callbackGeomSVG( const std::string& _filename, const std::string& _svgStrin
     svgString = _svgString;
     svgName = getFileNameOnly(_filename);
     SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
-        GB{p->RSG(),GeomBuilderType::svg}.n(svgName).ascii(svgString).pb(ProfileBuilder{0.015f, 6.0f}).buildr();
+        GB{p->SG(),GeomBuilderType::svg}.n(svgName).ascii(svgString).pb(0.015f, 6.0f).buildr();
     } );
 
 }
 
 void ImGuiGeoms::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
-    for ( auto& [k,v] : p->RSG().Nodes() ) {
+    for ( auto& [k,v] : p->SG().Nodes() ) {
         ImGui::PushID(std::visit(lambdaUUID, v).c_str());
         ImGui::BeginGroup();
         std::visit( NodeVisitor<ImGUIJson>{}, v );

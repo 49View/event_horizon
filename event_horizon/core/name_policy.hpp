@@ -10,7 +10,7 @@ template <typename T = std::string>
 class NamePolicy {
 public:
     NamePolicy() = default;
-    NamePolicy( T name ) : mName( std::move(name) ) {}
+    explicit NamePolicy( T name ) : mName( std::move(name) ) {}
 
     virtual const T& Name() const {
         return mName;

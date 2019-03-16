@@ -42,7 +42,7 @@ namespace DependencyHandler {
             if ( !q.second->isComplete()) {
                 // Now if the file has been loaded correctly then execute the file callback related to that file
                 if ( qd->hasFinishedLoading() ) {
-                    bool cbStatus = q.second->executeCallback(qd->status);
+                    bool cbStatus = q.second->executeCallback(q.first, qd->status);
                     // Also tag the status as "it has passed the loading stage, was it successful or not? in the
                     // callback ?
                     qd->status = cbStatus ? DependencyStatus::CallbackSuccessfullyExectuted
@@ -97,20 +97,19 @@ bool CallbackDataMaker::needsReload() const {
     return builder->isReloading();
 }
 
-FileCallbackHandlerMaker::FileCallbackHandlerMaker( std::shared_ptr<ResourceBuilder> _builder, DependencyMaker& _md ) {
-    cbData = std::make_shared<CallbackDataMaker>( _builder, _md );
+FileCallbackHandlerMaker::FileCallbackHandlerMaker( std::shared_ptr<ResourceBuilderBase> _builder ) {
+    cbData = std::make_shared<CallbackDataMaker>( _builder );
 }
 
-bool FileCallbackHandlerMaker::executeCallback( const DependencyStatus _status ) {
-    return std::dynamic_pointer_cast<CallbackDataMaker>(cbData)->builder->make(
-            std::dynamic_pointer_cast<CallbackDataMaker>(cbData)->md, std::move( cbData->data ), _status );
+bool FileCallbackHandlerMaker::executeCallback( const std::string& _key, const DependencyStatus _status ) {
+    return std::dynamic_pointer_cast<CallbackDataMaker>(cbData)->builder->make( _key, std::move( cbData->data ), _status );
 }
 
 FileCallbackHandlerObservable::FileCallbackHandlerObservable( std::shared_ptr<ResourceBuilderObservable> _builder ) {
     cbData = std::make_shared<CallbackDataObservable>( _builder );
 }
 
-bool FileCallbackHandlerObservable::executeCallback( const DependencyStatus _status ) {
+bool FileCallbackHandlerObservable::executeCallback( const std::string& _key, const DependencyStatus _status ) {
     return std::dynamic_pointer_cast<CallbackDataObservable>(cbData)->builderObservable->make( std::move( cbData->data ),
                                                                                                _status );
 }

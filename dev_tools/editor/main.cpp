@@ -3,7 +3,7 @@
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char *argv[] ) {
 
-    EventHorizon<FullEditor> ev{};//{ fullEditor(), LoginFields::Computer(), InitializeWindowFlags::HalfSize };
+    EventHorizon<FullEditor> ev{};
 
     return 0;
 }

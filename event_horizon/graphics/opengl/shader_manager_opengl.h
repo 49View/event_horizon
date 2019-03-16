@@ -58,9 +58,8 @@ struct ShaderProgramDesc {
     Property<std::string> computeShader;
 };
 
-class ShaderManager : public DependencyMaker {
+class ShaderManager {
 public:
-    DEPENDENCY_MAKER_EXIST(mPrograms);
     ShaderManager();
     virtual ~ShaderManager() = default;
 

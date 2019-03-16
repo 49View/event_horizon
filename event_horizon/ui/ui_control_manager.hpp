@@ -38,8 +38,6 @@ public:
     virtual ~UiControlManager() = default;
 	UiControlManager( Renderer& rr, TextInput& ti ) : rr( rr ), ti( ti) {}
 
-	DEPENDENCY_MAKER_EXIST(mViews);
-
 	void update( float timeStep );
 
     void cmdLoadUi( const std::vector<std::string>& _params );

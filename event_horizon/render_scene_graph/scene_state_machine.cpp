@@ -76,7 +76,7 @@ void SceneStateMachineBackEnd::addBoxToViewport( const std::string& _name, const
 	if ( _box.cc != CameraControls::Edit2d ) {
 		auto lViewport = boxes[_name].updateAndGetRect();
 
-		auto rig = CameraBuilder{_name}.makeDefault(lViewport, o()->RSG());
+		auto rig = o()->SG().CM().get(Name::Foxtrot);
         rig->setViewport(lViewport);
 
 		RenderTargetType rtt = RenderTargetType::PBR;
@@ -107,7 +107,7 @@ void SceneStateMachineBackEnd::resizeCallback( SceneOrchestrator* _target, const
 		if ( v.cc == CameraControls::Fly ) {
 			auto r = v.updateAndGetRect();
 			_target->RSG().RR().getTarget( k )->resize( r );
-			_target->RSG().CM().get(k)->setViewport( r );
+			_target->SG().CM().get(k)->setViewport( r );
 		}
 	}
 }

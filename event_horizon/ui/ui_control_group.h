@@ -197,6 +197,5 @@ public:
 
     const std::string prefix() const override { return ""; }
     bool build( DependencyMaker& _md ) override;
-    bool makeImpl( DependencyMaker& _md, uint8_p&& _data, const DependencyStatus _status ) override;
     static bool usesNotExactQuery() { return false; };
 };
