@@ -29,7 +29,7 @@ RawImage RawImage::NORMAL4x4    { "normal"     , 4, 4, static_cast<uint32_t>(0xf
 
 
 RawImage::RawImage( const std::string& _name, const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData ) :
-                    NamePolicy(_name) {
+                    Taggable(_name) {
     ImageParams::operator=(_ip);
     rawBtyes = std::move(decodedData);
 }
@@ -132,12 +132,12 @@ RawImage::RawImage( int width,
                     int height,
                     int channels,
                     const char *buffer,
-                    const std::string& _name ) : NamePolicy(_name), ImageParams( width, height, channels ) {
+                    const std::string& _name ) : Taggable(_name), ImageParams( width, height, channels ) {
     copyFrom( buffer );
 }
 
 RawImage::RawImage( int width, int height, int channels, const std::string& _name ) :
-                    NamePolicy(_name),
+                    Taggable(_name),
                     ImageParams( width, height, channels ) {
 
     auto bsize = width * height * channels;

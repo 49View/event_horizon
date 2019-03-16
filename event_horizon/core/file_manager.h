@@ -50,7 +50,8 @@ namespace FileManager {
 
 	// Local file access
     uint8_p readLocalFile( const std::string& filename );
-	std::unique_ptr<uint8_t[]> readLocalFile( const std::string& filename, uint64_t& _length,
+    void readLocalFile( const std::string& filename, SerializableContainer& _ret );
+    std::unique_ptr<uint8_t[]> readLocalFile( const std::string& filename, uint64_t& _length,
 											  bool addTrailingZero = false );
 	std::string readLocalTextFile( const std::string& filename );
 	std::string readLocalTextFile( const std::wstring& filename );

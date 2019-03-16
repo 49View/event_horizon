@@ -18,7 +18,7 @@
 class Material;
 class GeomData;
 class Profile;
-class Image;
+class RawImage;
 class CameraRig;
 namespace Utility::TTFCore { class Font; }
 class MaterialColor;
@@ -34,22 +34,22 @@ public:
     }
 
     inline static size_t Version() {
-        if ( std::is_same<R, Material>::value ) return 1000;
-        if ( std::is_same<R, GeomData>::value ) return 2000;
-        if ( std::is_same<R, Profile>::value  ) return 1000;
+        if ( std::is_same<R, Material>::value )       return 1000;
+        if ( std::is_same<R, GeomData>::value )       return 2000;
+        if ( std::is_same<R, Profile>::value  )       return 1000;
         if ( std::is_same<R, MaterialColor>::value  ) return 1000;
         return 0;
     }
 
     inline static std::string Prefix() {
-        if ( std::is_same<R, Material>::value ) return "material";
-        if ( std::is_same<R, GeomData>::value ) return "geom";
-        if ( std::is_same<R, MaterialColor>::value  )   return "color";
+        if ( std::is_same<R, Material>::value )                return "material";
+        if ( std::is_same<R, GeomData>::value )                return "geom";
+        if ( std::is_same<R, MaterialColor>::value  )          return "color";
 
-        if ( std::is_same<R, CameraRig>::value )   return "cameras";
-        if ( std::is_same<R, Profile>::value  ) return "profiles";
-        if ( std::is_same<R, Image>::value  )   return "images";
-        if ( std::is_same<R, Utility::TTFCore::Font>::value  )    return "fonts";
+        if ( std::is_same<R, CameraRig>::value )               return "cameras";
+        if ( std::is_same<R, Profile>::value  )                return "profiles";
+        if ( std::is_same<R, RawImage>::value  )               return "images";
+        if ( std::is_same<R, Utility::TTFCore::Font>::value  ) return "fonts";
         return "unknown";
     }
 };

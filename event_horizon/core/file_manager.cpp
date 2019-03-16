@@ -95,6 +95,17 @@ namespace FileManager {
 // LOCAL FILE SYSTEM
 // ********************************************************************************************************************
 
+    void readLocalFile( const std::string& filename, SerializableContainer& _ret ) {
+        std::ifstream file( filename, std::ios::in | std::ios::binary | std::ios::ate );
+        if ( file.is_open()) {
+            auto length = static_cast<uint64_t>(file.tellg());
+            _ret.resize( length );
+            file.seekg( 0, std::ios::beg );
+            file.read( reinterpret_cast<char *>(_ret.data()), length );
+            file.close();
+        }
+    }
+
     uint8_p readLocalFile( const std::string& filename ) {
         uint8_p ret;
         ret.second = 0;

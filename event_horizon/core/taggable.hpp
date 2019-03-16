@@ -5,12 +5,18 @@
 #pragma once
 
 #include <set>
+#include <string>
 #include <core/name_policy.hpp>
 
-template <typename T>
+template <typename T = std::string>
 class Taggable : public virtual NamePolicy<T> {
     using taggableContainer = std::set<T>;
 public:
+    Taggable() = default;
+    explicit Taggable( T _name ) {
+        Name( std::move(_name) );
+    }
+
     const T& Name() const override {
         return NamePolicy<T>::Name();
     }

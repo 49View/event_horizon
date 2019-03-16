@@ -63,7 +63,6 @@ void callbackGeomSVG( const std::string& _filename, const std::string& _svgStrin
     SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
         GB{p->SG(),GeomBuilderType::svg}.n(svgName).ascii(svgString).pb(0.015f, 6.0f).buildr();
     } );
-
 }
 
 void ImGuiGeoms::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {

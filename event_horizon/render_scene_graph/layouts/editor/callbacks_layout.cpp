@@ -11,6 +11,7 @@
 #include <core/http/webclient.h>
 
 #include "geom_layout.h"
+#include "image_layout.h"
 #include "material_layout.h"
 
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
@@ -56,6 +57,11 @@ void allConversionsDragAndDropCallback( [[maybe_unused]] SceneOrchestrator* p, c
 //    } else if ( extl == ".stl" ) {
 //        stl::parse_stl(pathSanitized);
 //    }
+    else if ( extl == ".jpg" || extl == ".jepg" || extl == ".png" ) {
+        SerializableContainer fileContent;
+        FM::readLocalFile( pathSanitized, fileContent );
+        callbackImage( pathSanitized, fileContent );
+    }
     else if ( extl == ".svg" ) {
         callbackGeomSVG( pathSanitized, FM::readLocalTextFile( pathSanitized ) );
     }

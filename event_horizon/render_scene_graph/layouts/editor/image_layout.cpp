@@ -7,6 +7,19 @@
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
+std::string imageName;
+SerializableContainer imageBufferData;
+
+void callbackImage( const std::string& _filename, const SerializableContainer& _fileContent ) {
+    imageBufferData = _fileContent;
+    imageName = getFileNameOnly(_filename);
+    SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
+        ImageBuilder{p->SG().TL(),imageName}.makeDirect( imageBufferData );
+        auto jl = p->SG().TL().get( imageName );
+        jl->publish();
+    } );
+}
+
 void ImGuiImages::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     int ic = 0;
     static bool lShowSystem = false;

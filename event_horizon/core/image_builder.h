@@ -133,6 +133,7 @@ public:
     }
 
 public:
+    bool makeDirect( const SerializableContainer& _data );
     bool makeDirect( const ucchar_p& _data );
     bool makeDirect( const uint8_p& _data );
     bool makeDirect( const RawImage& _data );

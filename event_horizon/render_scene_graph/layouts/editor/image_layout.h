@@ -5,6 +5,8 @@
 #pragma once
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
+void callbackImage( const std::string& _filename, const SerializableContainer& _fileContent );
+
 class ImGuiImages : public LayoutBoxRenderer {
 public:
     virtual ~ImGuiImages() = default;
