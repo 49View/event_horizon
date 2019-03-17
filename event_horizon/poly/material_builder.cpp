@@ -23,9 +23,7 @@ MaterialBuilder::MaterialBuilder( MaterialManager& _mm,
 }
 
 void MaterialBuilder::makeDefault() {
-    auto mat = std::make_shared<Material>( Name(), shaderName );
-
-    mm.add( mat );
+    mm.add( std::make_shared<Material>( Name(), shaderName ) );
 }
 
 std::shared_ptr<Material> MaterialBuilder::makeDirect() {

@@ -280,6 +280,14 @@ std::string Profile::generateThumbnail() const {
     return std::string();
 }
 
+void Profile::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
+
+}
+
+void Profile::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
+
+}
+
 void ProfileMaker::add( const V2f& _p ) {
 	points.emplace_back( _p * scale );
 }

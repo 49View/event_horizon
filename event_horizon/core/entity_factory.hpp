@@ -35,6 +35,12 @@ public:
         ret->clone( *_elem.get() );
         return ret;
     }
+
+    template <typename T>
+    static std::shared_ptr<T> clone( const T& _elem ) {
+        return std::make_shared<T>(_elem);
+    }
+
 };
 
 using EF = EntityFactory;

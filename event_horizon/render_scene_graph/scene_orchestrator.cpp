@@ -124,15 +124,6 @@ void SceneOrchestrator::activate() {
 	stateMachine->activate();
 }
 
-void SceneOrchestrator::defaults() {
-	ImageBuilder{SG().TL(), S::WHITE}.makeDirect( RawImage::WHITE4x4() );
-	ImageBuilder{SG().TL(), S::BLACK}.makeDirect( RawImage::BLACK_RGBA4x4 );
-	ImageBuilder{SG().TL(), S::NORMAL}.makeDirect( RawImage::NORMAL4x4 );
-	ImageBuilder{SG().TL(), S::DEBUG_UV}.makeDirect( RawImage::DEBUG_UV() );
-	MaterialBuilder{SG().ML(), S::WHITE_PBR, S::SH}.makeDefault();
-	CameraBuilder{SG().CM()}.makeDefault();
-}
-
 void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {
 
 	ShaderLiveUpdateMap shadersToUpdate{_data};
@@ -275,4 +266,8 @@ CommandQueue& SceneOrchestrator::CQ() {
 
 SceneGraph& SceneOrchestrator::SG() {
     return sg;
+}
+
+void SceneOrchestrator::init() {
+    sg.init();
 }

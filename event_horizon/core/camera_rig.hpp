@@ -28,8 +28,8 @@ public:
 protected:
 
     void init( const Rect2f& _viewport );
-    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override {}
-    void deserializeImpl( std::shared_ptr<DeserializeBin> reader ) override {}
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {}
+    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override {}
 
     std::string calcHashImpl() override {
         return "Camera_" + Name();

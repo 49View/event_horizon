@@ -21,9 +21,9 @@ void listCloudCallback( SceneOrchestrator* p ) {
     reader.deserialize( newFilteredResult );
 
     for ( const auto& elem : newFilteredResult ) {
-        std::vector<unsigned char> rd;
+        SerializableContainer rd;
         bn::decode_b64( elem.getThumb().begin(), elem.getThumb().end(), std::back_inserter(rd) );
-        ImageBuilder{ p->SG().TL(), elem.getName() }.makeDirect( ucchar_p{ rd.data(), rd.size()} );
+        ImageBuilder{ p->SG().TL(), elem.getName() }.makeDirect( rd );
         cloudEntitiesTypeMap.insert( {elem.getType(), elem} );
     }
 }

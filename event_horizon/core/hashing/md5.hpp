@@ -54,6 +54,8 @@ public:
 
     MD5();
     MD5(const std::string& text);
+    // NDDado: added a generic buffer interface
+    MD5(const unsigned char* _data, size_t _length);
     void update(const unsigned char *buf, size_type length);
     void update(const char *buf, size_type length);
     MD5& finalize();
@@ -89,5 +91,6 @@ private:
 };
 
 std::string md5(const std::string str);
+std::string md5(const unsigned char* _data, size_t _length);
 
 #endif

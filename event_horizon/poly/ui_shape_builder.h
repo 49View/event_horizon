@@ -69,8 +69,8 @@ public:
 	void visit() const { traverseWithHelper<TV>( "Name,BBbox", this->Name(),bbox3d ); }
 
     void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {}
-    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override {}
-    void deserializeImpl( std::shared_ptr<DeserializeBin> reader ) override {}
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {}
+    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override {}
 
     std::string generateThumbnail() const override { return std::string{}; }
 

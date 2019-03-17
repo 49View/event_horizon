@@ -120,6 +120,13 @@ MD5::MD5(const std::string &text)
     finalize();
 }
 
+MD5::MD5(const unsigned char* _data, size_t _length)
+{
+    init();
+    update(_data, _length);
+    finalize();
+}
+
 //////////////////////////////
 
 void MD5::init()
@@ -362,6 +369,13 @@ std::ostream& operator<<(std::ostream& out, MD5 md5)
 std::string md5(const std::string str)
 {
     MD5 md5 = MD5(str);
+
+    return md5.hexdigest();
+}
+
+std::string md5(const unsigned char* _data, size_t _length)
+{
+    MD5 md5 = MD5(_data, _length);
 
     return md5.hexdigest();
 }

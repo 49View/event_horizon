@@ -165,10 +165,8 @@ void SceneStateMachineBackEnd::postDefaults() {
 }
 
 void SceneStateMachineBackEnd::initNV() {
-	o()->defaults();
-
+	o()->init();
 	init();
-
 	postDefaults();
 }
 

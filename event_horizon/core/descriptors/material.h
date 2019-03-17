@@ -185,8 +185,8 @@ public:
 
 protected:
     std::string calcHashImpl() override;
-    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserializeImpl(std::shared_ptr<DeserializeBin> reader) override;
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
+    void deserializeInternal(std::shared_ptr<DeserializeBin> reader) override;
 
     KnownBufferMap knownBuffers() const;
     std::string generateThumbnail() const override;

@@ -198,7 +198,7 @@ public:
 
     GeomData( const QuadVector3fNormalfList& quads, std::shared_ptr<Material> _material, const GeomMappingData& _mapping );
 
-    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override;
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
 public:
     std::shared_ptr<Material> getMaterial() { return material; }
     std::shared_ptr<Material> getMaterial() const { return material; }
@@ -334,7 +334,7 @@ public:
 protected:
     std::string calcHashImpl() override;
 
-    void deserializeImpl( std::shared_ptr<DeserializeBin> reader ) override;
+    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 
     void
     pushTriangle( const std::vector<Vector3f>& vs, const std::vector<Vector2f>& vuv, const std::vector<Vector3f>& vn );

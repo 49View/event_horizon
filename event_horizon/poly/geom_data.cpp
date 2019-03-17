@@ -142,8 +142,7 @@ std::string GeomData::calcHashImpl() {
 	return ss.str();
 }
 
-void GeomData::serializeImpl( std::shared_ptr<SerializeBin> f ) const {
-	Publisher::serializeImpl(f);
+void GeomData::serializeInternal( std::shared_ptr<SerializeBin> f ) const {
 	f->write( material );
 	f->write( mVdata.BBox3d() );
 	f->write( mVdata.vIndices );
@@ -156,8 +155,7 @@ void GeomData::serializeImpl( std::shared_ptr<SerializeBin> f ) const {
 	f->write( mVdata.vColor );
 }
 
-void GeomData::deserializeImpl( std::shared_ptr<DeserializeBin> reader ) {
-	Publisher::deserializeImpl(reader);
+void GeomData::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
 	reader->read( material );
 	reader->read( mVdata.BBox3d() );
 	reader->read( mVdata.vIndices );

@@ -85,7 +85,7 @@ public:
 
     explicit Node( const SerializableContainer& _data ) {
         auto reader = std::make_shared<DeserializeBin>( _data, D::Version() );
-        deserializeImpl();
+        deserializeInternal();
     }
 
     TimelineSet addKeyFrame( const std::string& _name, float _time ) override {
@@ -591,7 +591,7 @@ protected:
         }
     }
 
-    void deserializeImpl(std::shared_ptr<DeserializeBin> reader) override {
+    void deserializeInternal(std::shared_ptr<DeserializeBin> reader) override {
         deserializeRec( reader );
     }
 
@@ -617,7 +617,7 @@ private:
         }
     }
 
-    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const override {
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {
         writer->write( mGHType );
         writer->write( mUUID );
         writer->write( this->Name() );
@@ -629,7 +629,7 @@ private:
         auto numChildren = static_cast<int32_t>( Children().size() );
         writer->write( numChildren );
         for ( auto&& c : Children()) {
-            c->serializeImpl( writer );
+            c->serializeInternal( writer );
         }
     }
 

@@ -61,6 +61,11 @@ public:
     static std::shared_ptr<Profile> makeWire(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
 
     static std::shared_ptr<Profile> fromPoints( const std::string& name, const std::vector<Vector2f>& points );
+
+protected:
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
+    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
+
 private:
     std::string calcHashImpl() override;
     std::string generateThumbnail() const override;

@@ -144,7 +144,7 @@ router.delete('/:id', async (req, res, next) => {
             res.status(201).send();
         }
     } catch (ex) {
-        console.log("ERROR UPDATING ENTITY: ", ex);
+        console.log("ERROR DELETING ENTITY: ", ex);
         res.sendStatus(400);
     }
 
@@ -163,7 +163,7 @@ router.delete('/', async (req, res, next) => {
             res.status(201).send();
         }
     } catch (ex) {
-        console.log("ERROR UPDATING ENTITIES: ", ex);
+        console.log("ERROR DELETING ENTITIES: ", ex);
         res.sendStatus(400);
     }
 

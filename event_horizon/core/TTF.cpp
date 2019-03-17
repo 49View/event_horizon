@@ -2567,3 +2567,11 @@ std::string Font::calcHashImpl() {
 std::string Font::generateThumbnail() const {
     return std::string();
 }
+
+void Font::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
+
+}
+
+void Font::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
+
+}

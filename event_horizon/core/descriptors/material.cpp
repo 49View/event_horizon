@@ -11,7 +11,6 @@ static inline bool isShaderStreammable( const std::string& _sn ) {
 Material::Material( const std::string& _name, const std::string& _sn ) {
     Name(_name);
     setShaderName(_sn);
-    HashTaggable::calcHash();
 }
 
 std::string Material::calcHashImpl() {
@@ -140,16 +139,14 @@ void Material::setProperties( const MaterialProperties& properties ) {
     Material::properties = properties;
 }
 
-void Material::serializeImpl( std::shared_ptr<SerializeBin> writer ) const {
-    Publisher::serializeImpl(writer);
+void Material::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
     HeterogeneousMap::serializeImpl(writer);
     writer->write( buffers );
     properties.serialize(writer);
     writer->write(shaderName);
 }
 
-void Material::deserializeImpl(std::shared_ptr<DeserializeBin> reader) {
-    Publisher::deserializeImpl(reader);
+void Material::deserializeInternal(std::shared_ptr<DeserializeBin> reader) {
     HeterogeneousMap::deserializeImpl(reader);
     reader->read( buffers );
     properties.deserialize(reader);

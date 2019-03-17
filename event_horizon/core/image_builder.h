@@ -14,8 +14,6 @@ class RawImage;
 class ImageManager : public DependencyMakerPolicy<RawImage> {
 public:
     virtual ~ImageManager() = default;
-//    bool add( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data );
-//    virtual bool addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data ) = 0;
     const ImageParams& ip( const std::string& _key );
 private:
     std::map<std::string, ImageParams> imageParamsMap;
@@ -134,10 +132,9 @@ public:
 
 public:
     bool makeDirect( const SerializableContainer& _data );
-    bool makeDirect( const ucchar_p& _data );
     bool makeDirect( const uint8_p& _data );
-    bool makeDirect( const RawImage& _data );
     void makeDefault() override;
 private:
+    bool makeDirectImpl( const ucchar_p& _data );
     bool finalizaMake( std::unique_ptr<uint8_t[]>&& decodedData );
 };

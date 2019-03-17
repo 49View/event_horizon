@@ -6,6 +6,7 @@
 #include "core/node.hpp"
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>
+#include <poly/camera_manager.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
 //    addImpl(_geom);
@@ -151,4 +152,14 @@ CameraManager& SceneGraph::CM() { return cm; }
 
 void SceneGraph::nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot ) {
     nodeAddSignal.connect( _slot );
+}
+
+void SceneGraph::init() {
+    TL().add( EF::clone( RawImage::WHITE4x4()) );
+    TL().add( EF::clone( RawImage::BLACK_RGBA4x4() ) );
+    TL().add( EF::clone( RawImage::NORMAL4x4() ) );
+    TL().add( EF::clone( RawImage::DEBUG_UV() ) );
+
+    MaterialBuilder{ML(), S::WHITE_PBR, S::SH}.makeDefault();
+    CameraBuilder{CM()}.makeDefault();
 }

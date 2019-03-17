@@ -26,7 +26,6 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
         for ( const auto& b : _elem->Buffers() ) {
             ImageBuilder{sg.TL(), b.first}.makeDirect(b.second);
         }
-//        this->RR().tm.addTextureWithData( *_elem.get() );
     });
 
     sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {

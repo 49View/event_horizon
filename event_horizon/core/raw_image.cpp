@@ -8,26 +8,6 @@
 #include "service_factory.h"
 #include "math/rect2f.h"
 
-                                                                             //AABBGGRR
-RawImage RawImage::BLACK_ARGB4x4{ "black_alpha", 4, 4, static_cast<uint32_t>(0xff000000) };
-RawImage RawImage::BLACK_RGBA4x4{ "black_alpha", 4, 4, static_cast<uint32_t>(0x000000ff) };
-RawImage RawImage::NORMAL4x4    { "normal"     , 4, 4, static_cast<uint32_t>(0xffff7f7f) };
-
-//struct RawImageCallbackData : public CallbackData {
-//    using CallbackData::CallbackData;
-//    RawImage img;
-//};
-//
-//struct RawImageCallbackHandler : public FileCallbackHandler {
-//    using FileCallbackHandler::FileCallbackHandler;
-//    virtual bool executeCallback() {
-//        auto iData = std::dynamic_pointer_cast<RawImageCallbackData>(cbData);
-//        iData->img = rawImageDecodeFromMemory( iData->data.first.get(), iData->data.second );
-//        return iData->data.second > 0;
-//    };
-//};
-
-
 RawImage::RawImage( const std::string& _name, const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData ) :
                     Taggable(_name) {
     ImageParams::operator=(_ip);
@@ -139,18 +119,8 @@ RawImage::RawImage( int width,
 RawImage::RawImage( int width, int height, int channels, const std::string& _name ) :
                     Taggable(_name),
                     ImageParams( width, height, channels ) {
-
     auto bsize = width * height * channels;
     rawBtyes = std::make_unique<uint8_t[]>( bsize );
-
-//    for ( int i = 0; i < height; i++ ) {
-//        for ( int j = 0; j < width; j++ ) {
-//            rawBtyes[j*width*channels+i*channels] = buffer[step * j + i];
-//            rawBtyes[j*width*channels+i*channels+1] = buffer[step * j + i + 1];
-//            rawBtyes[j*width*channels+i*channels+2] = buffer[step * j + i + 2];
-//        }
-//    }
-
 }
 
 void RawImage::grayScale() {
@@ -242,10 +212,31 @@ RawImage RawImage::DEBUG_UV() {
     return RawImage{ is, is, 3, reinterpret_cast<const char*>(buff), "debug_uv" };
 }
 
+
+RawImage RawImage::BLACK_ARGB4x4() {                           //AABBGGRR
+    return RawImage{"black_alpha", 4, 4, static_cast<uint32_t>(0xff000000) };
+}
+
+RawImage RawImage::BLACK_RGBA4x4() {                            //AABBGGRR
+    return RawImage{ "black_alpha", 4, 4, static_cast<uint32_t>(0x000000ff) };
+}
+
+RawImage RawImage::NORMAL4x4() {                           //AABBGGRR
+    return RawImage{ "normal", 4, 4, static_cast<uint32_t>(0xffff7f7f) };
+}
+
 std::string RawImage::calcHashImpl() {
-    return std::string();
+    return md5( rawBtyes.get(), size() );
 }
 
 std::string RawImage::generateThumbnail() const {
     return std::string();
+}
+
+void RawImage::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
+
+}
+
+void RawImage::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
+
 }

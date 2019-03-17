@@ -100,6 +100,7 @@ protected:
 
 protected:
     M& mm;
+    SerializableContainer source;
 };
 
 class ResourceBuilderObservable : public BaseBuilder {

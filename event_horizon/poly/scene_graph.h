@@ -54,6 +54,7 @@ public:
                          CameraManager& _cm,
                          SunBuilder& _sb );
 
+    void init();
     void add( NodeVariants _geom );
     void remove( const UUID& _uuid );
 

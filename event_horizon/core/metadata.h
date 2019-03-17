@@ -1,3 +1,9 @@
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
 //
 // Created by Dado on 2018-10-23.
 //
@@ -10,6 +16,7 @@ namespace MetaData {
     const static std::string Id      = "_id";
     const static std::string Name    = "name";
     const static std::string Type    = "group";
+    const static std::string SubType = "dataType";
     const static std::string Thumb   = "thumb";
     const static std::string Version = "version";
     const static std::string Raw     = "raw";
@@ -19,14 +26,15 @@ namespace MetaData {
 class CoreMetaData {
 public:
     CoreMetaData() = default;
-    CoreMetaData( const std::string& name, const std::string& type, uint64_t version,
-                  const std::string& thumb, const std::string& raw, const std::set<std::string>& tags ) :
-                      name( name ),
-                      type( type ),
+    CoreMetaData( std::string name, std::string type, std::string subType, uint64_t version,
+                  std::string thumb, std::string raw, std::set<std::string> tags ) :
+                      name( std::move( name )),
+                      type( std::move( type )),
+                      subType( std::move( subType )),
                       version( version ),
-                      thumb( thumb ),
-                      raw( raw ),
-                      tags( tags ) {}
+                      thumb( std::move( thumb )),
+                      raw( std::move( raw )),
+                      tags( std::move( tags )) {}
 
     std::string& Name() {
         return name;
@@ -35,12 +43,19 @@ public:
     std::string& Type() {
         return type;
     }
+
+    std::string& SuType() {
+        return subType;
+    }
+
     std::string& Thumb() {
         return thumb;
     }
+
     std::string& Raw() {
         return raw;
     }
+
     std::set<std::string>& Tags() {
         return tags;
     }
@@ -57,8 +72,12 @@ public:
         return type;
     }
 
-    void setType( const std::string& type ) {
-        CoreMetaData::type = type;
+    void setType( const std::string& _type ) {
+        CoreMetaData::type = _type;
+    }
+
+    void setSubType( const std::string& _subType ) {
+        CoreMetaData::subType = _subType;
     }
 
     uint64_t getVersion() const {
@@ -105,7 +124,8 @@ private:
     std::string id;
     std::string name;
     std::string type;
-    uint64_t    version;
+    std::string subType;
+    uint64_t    version = 0;
     std::string thumb;
     std::string raw;
     std::set<std::string> tags;

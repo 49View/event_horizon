@@ -17,6 +17,7 @@ public:
     RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint32_t _col);
     RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint8_t _col );
     RawImage( const std::string& _name, const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData );
+
     // A single float number equals a grayscale (1 channel) image
     RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const float _col );
     RawImage( int width, int height, int channels, const char* rawBtyes, const std::string& name = "" );
@@ -98,13 +99,14 @@ public:
 protected:
     std::string calcHashImpl() override;
     std::string generateThumbnail() const override;
-
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
+    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 public:
 	static RawImage WHITE4x4();
 	static RawImage DEBUG_UV();
-	static RawImage BLACK_ARGB4x4;
-	static RawImage BLACK_RGBA4x4;
-	static RawImage NORMAL4x4;
+	static RawImage BLACK_ARGB4x4();
+	static RawImage BLACK_RGBA4x4();
+	static RawImage NORMAL4x4();
 };
 
 RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string& _name = "", int forceChannels = 0 );

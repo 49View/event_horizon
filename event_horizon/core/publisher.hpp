@@ -44,8 +44,8 @@ public:
     inline static std::string Prefix() {
         if ( std::is_same<R, Material>::value )                return "material";
         if ( std::is_same<R, GeomData>::value )                return "geom";
-        if ( std::is_same<R, MaterialColor>::value  )          return "color";
 
+        if ( std::is_same<R, MaterialColor>::value  )          return "color";
         if ( std::is_same<R, CameraRig>::value )               return "cameras";
         if ( std::is_same<R, Profile>::value  )                return "profiles";
         if ( std::is_same<R, RawImage>::value  )               return "images";
@@ -65,6 +65,8 @@ class Publisher : public ResourceVersioning<T>,
                   public virtual HashTaggable<N> {
 protected:
     virtual std::string generateThumbnail() const = 0;
+    virtual void serializeInternal( std::shared_ptr<W> writer ) const = 0;
+    virtual void deserializeInternal( std::shared_ptr<R> reader ) = 0;
 
     std::string generateRawData() const {
         auto writer = std::make_shared<W>( SerializeHeader{ Hashable::Hash(), T::Version(), T::Prefix() } );
@@ -77,11 +79,9 @@ protected:
     }
 
     std::string toMetaData() const {
-
         MegaWriter writer;
-
         writer.StartObject();
-        writer.serialize( CoreMetaData{ this->Name(), T::Prefix(), T::Version(),
+        writer.serialize( CoreMetaData{ this->Name(), T::Prefix(), this->SourceType(), T::Version(),
                                         generateThumbnail(), generateRawData(), this->Tags() } );
         if ( B::IsSerializable() ) {
             writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
@@ -97,6 +97,7 @@ protected:
         if ( B::IsSerializable() ) {
             writer->write( Boxable<B>::BBox3d() );
         }
+        serializeInternal( writer );
     }
 
     void deserializeImpl( std::shared_ptr<R> reader ) override {
@@ -105,10 +106,23 @@ protected:
         if ( B::IsSerializable() ) {
             reader->read( Boxable<B>::BBox3d() );
         }
+        deserializeInternal( reader );
     }
 
 public:
-    void publish() const {
+    void setSourceType( const std::string& _sourceType ) {
+        sourceType = _sourceType;
+    }
+
+    std::string SourceType() const {
+        return sourceType;
+    }
+
+    void publish() {
+        this->calcHash();
         Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
     }
+
+protected:
+    std::string sourceType;
 };

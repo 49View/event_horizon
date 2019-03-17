@@ -458,6 +458,9 @@ public:
             if ( (*value)[t].FindMember( MetaData::Type.c_str() ) != (*value)[t].MemberEnd() ) {
                 elem.setType( (*value)[t][MetaData::Type.c_str()].GetString() );
             }
+            if ( (*value)[t].FindMember( MetaData::SubType.c_str() ) != (*value)[t].MemberEnd() ) {
+                elem.setSubType( (*value)[t][MetaData::SubType.c_str()].GetString() );
+            }
 			if ( (*value)[t].FindMember( MetaData::Version.c_str() ) != (*value)[t].MemberEnd() ) {
 				elem.setVersion( (*value)[t][MetaData::Version.c_str()].GetInt64() );
 			}

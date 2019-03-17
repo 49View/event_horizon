@@ -441,6 +441,9 @@ struct MapFromData {
 
 // ----- Font -----
 class Font : public Publisher<Font> {
+protected:
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
+    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 private:
 
 	// internal types

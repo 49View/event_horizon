@@ -78,7 +78,7 @@ exports.deleteEntity = async (entityId) => {
 }
 
 exports.deleteEntityComplete = async (project, entity) => {
-    currentEntity = entity.toObject();
+    currentEntity = entity;
     console.log("[INFO] deleting entity " + currentEntity.metadata.contentHash);
     const group = currentEntity.group;
     //Remove current file from S3
