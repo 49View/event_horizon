@@ -272,10 +272,6 @@ std::shared_ptr<Profile> Profile::fromPoints( const std::string& name,  const st
 
 }
 
-std::string Profile::calcHashImpl() {
-    return std::string();
-}
-
 std::string Profile::generateThumbnail() const {
     return std::string();
 }

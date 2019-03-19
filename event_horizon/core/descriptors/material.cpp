@@ -13,15 +13,15 @@ Material::Material( const std::string& _name, const std::string& _sn ) {
     setShaderName(_sn);
 }
 
-std::string Material::calcHashImpl() {
-
-    std::stringstream hashInput( HeterogeneousMap::HashRef() );
-    hashInput << getShaderName();
-    hashInput << this->NameCopy();
-
-    return hashInput.str();
-
-}
+//std::string Material::calcHashImpl() {
+//
+//    std::stringstream hashInput( HeterogeneousMap::HashRef() );
+//    hashInput << getShaderName();
+//    hashInput << this->NameCopy();
+//
+//    return hashInput.str();
+//
+//}
 
 Material& Material::t( const std::string& _tn ) {
     assign( UniformNames::colorTexture, _tn );

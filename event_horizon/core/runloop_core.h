@@ -8,10 +8,10 @@
 
 #pragma once
 
-#include "di.hpp"
-#include "command.hpp"
+#include <cstdint>
 
 struct CommandConsole {};
+class CommandQueue;
 
 enum class RunLoopThreading {
     Sync,
@@ -29,7 +29,7 @@ public:
 	virtual void runConsolePrompt();
     virtual void runSingleThread() {}
 
-    CommandQueue& CQ() { return cq; }
+    CommandQueue& CQ();
 
 protected:
 	void updateTime();

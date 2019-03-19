@@ -9,11 +9,11 @@
 #include <core/taggable.hpp>
 
 template <typename T = std::string>
-class HashTaggable : public virtual Taggable<T>, public virtual Hashable {
+class HashTaggable : public virtual Taggable<T>, public virtual Hashable<> {
 public:
-    void calcHash() override {
+    void calcHash( const SerializableContainer& _data ) override {
         this->removeTag( Hash() );
-        hashFn(calcHashImpl());
+        Hashable::calcHash(_data);
         this->addTag( Hash() );
     }
 };

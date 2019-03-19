@@ -74,12 +74,6 @@ public:
 
     std::string generateThumbnail() const override { return std::string{}; }
 
-protected:
-    std::string calcHashImpl() override {
-//        -###- Fixme implement hash function
-        return std::string();
-    }
-
 private:
     UIShapeType shapeType = UIShapeType::Rect2d;
     std::shared_ptr<Material> material;

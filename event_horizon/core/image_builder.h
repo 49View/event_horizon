@@ -4,34 +4,82 @@
 #include <string>
 #include <set>
 #include <functional>
-#include "util.h"
 #include <core/builders.hpp>
-#include "image_constants.h"
+#include <core/image_constants.h>
+#include <core/publisher.hpp>
 
 class ImageBuilder;
 class RawImage;
 
-class ImageManager : public DependencyMakerPolicy<RawImage> {
-public:
-    virtual ~ImageManager() = default;
-    const ImageParams& ip( const std::string& _key );
-private:
-    std::map<std::string, ImageParams> imageParamsMap;
+enum class ResourcePublishFlag {
+    False,
+    True
 };
 
-class ImageBuilder : public ResourceBuilder<RawImage, ImageManager> {
+template < typename B, typename R >
+class ResourceBuilder2 : public ResourceBuilderBase,
+                         public Publisher<B, EmptyBox> {
 public:
-    using ResourceBuilder::ResourceBuilder;
+    explicit ResourceBuilder2( ResourceManager<R>& mm ) : mm( mm ) {}
+    ResourceBuilder2( ResourceManager<R>& _mm, const std::string& _name ) : mm( _mm ) {
+        this->Name(_name);
+    }
+    virtual ~ResourceBuilder2() = default;
+
+    void load( CommandResouceCallbackFunction _ccf = nullptr, const std::vector<std::string>& _params = {} ) {
+        ccf = _ccf;
+        params = _params;
+        build();
+    }
+
+    bool build() {
+        if ( !mm.exists(this->Name()) || R::usesNotExactQuery() ) {
+            readRemote<R, B, HttpQuery::Binary>( R::Prefix() + "/" + this->Name(), *this );
+            return true;
+        }
+        return false;
+    }
+
+    std::shared_ptr<R> make( const SerializableContainer& _data,
+                             ResourcePublishFlag _rpf = ResourcePublishFlag::False ) {
+        if ( mm.exists( this->Name() ) ) {
+            return mm.get( this->Name() );
+        } else {
+            this->calcHash( _data );
+            if ( _rpf == ResourcePublishFlag::True ) {
+                this->publish2( this->Name(), _data );
+            }
+            return makeInternal( _data );
+        }
+    }
+
+protected:
+    virtual std::shared_ptr<R> makeInternal( const SerializableContainer& _data ) = 0;
+
+    bool makeImpl( const std::string& _key, uint8_p&& _data, const DependencyStatus _status ) override {
+
+        if ( _status == DependencyStatus::LoadedSuccessfully ) {
+            auto res = std::make_shared<R>(std::move( _data ), _key);// EF::create<R>( std::move( _data ) );
+            mm.add( res, _key );
+            if ( ccf ) ccf(params);
+            return true;
+        }
+
+        return false;
+    }
+
+protected:
+    ResourceManager<R>& mm;
+};
+
+class ImageBuilder : public ResourceBuilder2<ImageBuilder, RawImage> {
+public:
+    using ResourceBuilder2::ResourceBuilder2;
     ImageParams imageParams;
     uint32_t backup_color = 0xffffffff;
     bool bForceHDR16BitTarget = true;
     bool useImagePrefix = true;
     bool mbIsRaw = false;
-
-    ImageBuilder& setId( const std::string& _id ) {
-        Name( _id );
-        return *this;
-    }
 
     ImageBuilder& backup( const uint32_t _bc ) {
         backup_color = _bc;
@@ -130,11 +178,10 @@ public:
         return *this;
     }
 
-public:
-    bool makeDirect( const SerializableContainer& _data );
-    bool makeDirect( const uint8_p& _data );
-    void makeDefault() override;
-private:
-    bool makeDirectImpl( const ucchar_p& _data );
-    bool finalizaMake( std::unique_ptr<uint8_t[]>&& decodedData );
+protected:
+    std::string generateThumbnail() const override;
+    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
+    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
+
+    std::shared_ptr<RawImage> makeInternal( const SerializableContainer& _data ) override;
 };

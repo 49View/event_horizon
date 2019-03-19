@@ -9,7 +9,6 @@
 #include "framebuffer.h"
 #include "core/uuid.hpp"
 #include "core/math/matrix4f.h"
-#include "core/image_builder.h"
 #include "vertex_processing.h"
 #include "graphic_constants.h"
 #include "shadowmap_manager.h"
@@ -51,13 +50,6 @@ namespace FBNames {
 }
 
 using CommandBufferLimitsT = int;
-
-class RenderImageDependencyMaker : public ImageManager {
-public:
-	RenderImageDependencyMaker( TextureManager& tm ) : tm( tm ) {}
-	bool addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t []>& _data );
-	TextureManager& tm;
-};
 
 class RenderAnimationManager {
 public:
@@ -120,7 +112,6 @@ public:
 	std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
     LightManager&   LM() { return lm; }
 	TextureManager& TM() { return tm; }
-	RenderImageDependencyMaker& RIDM() { return ridm; }
 	StreamingMediator& SSM();
 
 	std::shared_ptr<VPList> VPL( const int _bucket, std::shared_ptr<Matrix4f> m = nullptr, float alpha = 1.0f);
@@ -167,7 +158,6 @@ protected:
     StreamingMediator& ssm;
     LightManager&   lm;
 
-	RenderImageDependencyMaker ridm;
 	RenderAnimationManager am;
 	RenderCameraManager rcm;
 

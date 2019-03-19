@@ -3,6 +3,8 @@
 //
 
 #include "image_layout.h"
+#include <core/raw_image.h>
+#include <core/image_builder.h>
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
@@ -12,11 +14,9 @@ SerializableContainer imageBufferData;
 
 void callbackImage( const std::string& _filename, const SerializableContainer& _fileContent ) {
     imageBufferData = _fileContent;
-    imageName = getFileNameOnly(_filename);
+    imageName = getFileName(_filename);
     SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
-        ImageBuilder{p->SG().TL(),imageName}.makeDirect( imageBufferData );
-        auto jl = p->SG().TL().get( imageName );
-        jl->publish();
+        ImageBuilder{p->SG().TL(), imageName}.make( imageBufferData, ResourcePublishFlag::True );
     } );
 }
 

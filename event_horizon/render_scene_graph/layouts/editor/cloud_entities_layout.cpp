@@ -3,6 +3,8 @@
 //
 
 #include "cloud_entities_layout.h"
+#include <core/raw_image.h>
+#include <core/image_builder.h>
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
@@ -23,7 +25,7 @@ void listCloudCallback( SceneOrchestrator* p ) {
     for ( const auto& elem : newFilteredResult ) {
         SerializableContainer rd;
         bn::decode_b64( elem.getThumb().begin(), elem.getThumb().end(), std::back_inserter(rd) );
-        ImageBuilder{ p->SG().TL(), elem.getName() }.makeDirect( rd );
+        ImageBuilder{ p->SG().TL(), elem.getName() }.make( rd );
         cloudEntitiesTypeMap.insert( {elem.getType(), elem} );
     }
 }

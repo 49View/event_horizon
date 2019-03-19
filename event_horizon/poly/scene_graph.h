@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <typeinfo>
 #include <variant>
-#include <core/image_builder.h>
 #include <core/uuid.hpp>
 #include <core/camera_rig.hpp>
 #include <core/command.hpp>
@@ -24,6 +23,7 @@
 
 class StreamingMediator;
 class CameraManager;
+class RawImage;
 
 //class PolySceneGraphTextureList : public ImageDepencencyMaker {
 //    bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
@@ -46,7 +46,7 @@ public:
 class SceneGraph {
 public:
     explicit SceneGraph( CommandQueue& cq,
-                         ImageManager& _tl,
+                         ResourceManager<RawImage>& _tl,
                          ProfileManager& _pm,
                          MaterialManager& _ml,
                          ColorManager& _cl,
@@ -72,7 +72,7 @@ public:
 
     size_t countGeoms() const;
 
-    ImageManager& TL() { return tl; }
+    ResourceManager<RawImage>& TL() { return tl; }
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
@@ -108,7 +108,7 @@ protected:
 protected:
     NodeGraph geoms;
 
-    ImageManager& tl;
+    ResourceManager<RawImage>& tl;
     ProfileManager& pl;
     MaterialManager& ml;
     ColorManager& cl;

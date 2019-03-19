@@ -574,12 +574,6 @@ protected:
         return std::string{};
     }
 
-    std::string calcHashImpl() override {
-        std::stringstream ss;
-        ss << UUiD();
-        return ss.str();
-    }
-
     void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {
         if ( mData ) {
             mData->serializeDependenciesImpl( writer );

@@ -14,7 +14,7 @@ class Profile;
 
 using profileDirectMakeFunc = std::function<std::shared_ptr<Profile>(const std::string&, const std::vector<Vector2f>&, const std::vector<float>&)>;
 
-class ProfileManager : public DependencyMakerPolicy<Profile> {
+class ProfileManager : public ResourceManager<Profile> {
 public:
     virtual ~ProfileManager() = default;
 

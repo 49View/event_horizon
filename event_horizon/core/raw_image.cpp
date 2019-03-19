@@ -9,7 +9,7 @@
 #include "math/rect2f.h"
 
 RawImage::RawImage( const std::string& _name, const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData ) :
-                    Taggable(_name) {
+                    NamePolicy(_name) {
     ImageParams::operator=(_ip);
     rawBtyes = std::move(decodedData);
 }
@@ -46,6 +46,16 @@ RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, 
     Name(_name);
 }
 
+RawImage::RawImage( uint8_p&& data, const std::string& _name ) {
+    unsigned char *ddata = stbi_load_from_memory(data.first.get(), data.second, &width, &height, &channels, false );
+    ASSERT(ddata);
+    rawBtyes = std::make_unique<uint8_t[]>( width * height * channels );
+    std::memcpy( rawBtyes.get(), ddata, width * height * channels );
+    stbi_image_free(ddata);
+
+    this->Name(_name);
+}
+
 RawImage rawImageDecodeFromMemory( const uint8_p& data, const std::string& _name, int forceChannels ) {
     return rawImageDecodeFromMemory( reinterpret_cast<const unsigned char *>(data.first.get()), data.second, _name,
             forceChannels );
@@ -65,14 +75,6 @@ RawImage rawImageDecodeFromMemory( const unsigned char* buffer, int length, cons
     return ret;
 }
 
-void openImageAsRaw( const std::string& _filename, bool bUseImagePrefix ) {
-    RawImage imageRet;
-    static const std::string imgPrefix = "images/";
-    auto filename = bUseImagePrefix ? ( imgPrefix + _filename ) : _filename;
-
-//    FM::readRemoteFile( filename, ServiceFactory::handler<RawImageCallbackHandler>() );
-}
-
 RawImage rawImageSubImage( const RawImage& _source, const JMATH::Rect2f& _area,
                            const Vector2i& _extraPadding, const uint8_t& _paddingGradient ) {
     RawImage ret;
@@ -83,7 +85,7 @@ RawImage rawImageSubImage( const RawImage& _source, const JMATH::Rect2f& _area,
     auto bsize = ret.width * ret.height * _source.channels;
     ret.rawBtyes = std::make_unique<uint8_t[]>( bsize );
     std::memset( ret.rawBtyes.get(), _paddingGradient, bsize );
-    uint64_t left = static_cast<uint64_t>( _area.left());
+    auto left = static_cast<uint64_t>( _area.left());
     uint64_t top = _source.height - static_cast<uint64_t>( _area.top());
     uint64_t bottom = _source.height - static_cast<uint64_t>( _area.bottom());
     for ( uint64_t y = bottom, y1 = _extraPadding.y(); y < top; y++, y1++ ) {
@@ -112,13 +114,13 @@ RawImage::RawImage( int width,
                     int height,
                     int channels,
                     const char *buffer,
-                    const std::string& _name ) : Taggable(_name), ImageParams( width, height, channels ) {
+                    const std::string& _name ) : ImageParams( width, height, channels ), NamePolicy(_name) {
     copyFrom( buffer );
 }
 
 RawImage::RawImage( int width, int height, int channels, const std::string& _name ) :
-                    Taggable(_name),
-                    ImageParams( width, height, channels ) {
+                    ImageParams( width, height, channels ),
+                    NamePolicy(_name) {
     auto bsize = width * height * channels;
     rawBtyes = std::make_unique<uint8_t[]>( bsize );
 }
@@ -223,20 +225,4 @@ RawImage RawImage::BLACK_RGBA4x4() {                            //AABBGGRR
 
 RawImage RawImage::NORMAL4x4() {                           //AABBGGRR
     return RawImage{ "normal", 4, 4, static_cast<uint32_t>(0xffff7f7f) };
-}
-
-std::string RawImage::calcHashImpl() {
-    return md5( rawBtyes.get(), size() );
-}
-
-std::string RawImage::generateThumbnail() const {
-    return std::string();
-}
-
-void RawImage::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
-
-}
-
-void RawImage::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
-
 }

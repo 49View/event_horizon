@@ -3,7 +3,9 @@
 //
 
 #include "scene_graph.h"
-#include "core/node.hpp"
+#include <core/node.hpp>
+#include <core/raw_image.h>
+#include <core/image_builder.h>
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>
 #include <poly/camera_manager.h>
@@ -65,7 +67,7 @@ void SceneGraph::cmdChangeTime( const std::vector<std::string>& _params ) {
 }
 
 SceneGraph::SceneGraph( CommandQueue& cq,
-                        ImageManager& _tl,
+                        ResourceManager<RawImage>& _tl,
                         ProfileManager& _pl,
                         MaterialManager& _ml,
                         ColorManager& _cl,

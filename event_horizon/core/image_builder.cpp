@@ -4,40 +4,26 @@
 #include <core/raw_image.h>
 #include <core/entity_factory.hpp>
 
-const ImageParams& ImageManager::ip( const std::string& _key ) {
-    return imageParamsMap[_key];
-}
+std::shared_ptr<RawImage> ImageBuilder::makeInternal( const SerializableContainer& _data ) {
 
-bool ImageBuilder::finalizaMake( std::unique_ptr<uint8_t[]>&& decodedData ) {
+    auto decodedData = imageUtil::decodeFromMemory(  ucchar_p{ _data.data(), _data.size()},
+            imageParams.width, imageParams.height, imageParams.channels, imageParams.bpp, mbIsRaw );
+
     setFormatFromChannels(imageParams.channels);
-    mm.add( std::make_shared<RawImage>(Name(), imageParams, std::move(decodedData)) );
-    return true;
+    auto res = std::make_shared<RawImage>(Name(), imageParams, std::move(decodedData));
+    mm.add( res, Name(), Hash() );
+
+    return res;
 }
 
-bool ImageBuilder::makeDirect( const uint8_p& _data ) {
-    return makeDirectImpl( ucchar_p{ _data.first.get(), _data.second} );
+std::string ImageBuilder::generateThumbnail() const {
+    return std::string();
 }
 
-bool ImageBuilder::makeDirect( const SerializableContainer& _data ) {
-    return makeDirectImpl( ucchar_p{ _data.data(), _data.size()} );
+void ImageBuilder::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
+
 }
 
-bool ImageBuilder::makeDirectImpl( const ucchar_p& _data ) {
+void ImageBuilder::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
 
-    if ( mm.exists( Name() ) ) return false;
-
-    std::unique_ptr<uint8_t[]> decodedData = imageUtil::decodeFromMemory( _data, imageParams.width, imageParams
-            .height, imageParams.channels, imageParams.bpp, mbIsRaw );
-
-    return finalizaMake( std::move( decodedData ) );
-}
-
-void ImageBuilder::makeDefault() {
-
-    auto decodedData = imageUtil::memsetImage( backup_color,
-                                               imageParams.width,
-                                               imageParams.height,
-                                               imageParams.channels );
-
-    finalizaMake( std::move( decodedData ) );
 }

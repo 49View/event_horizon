@@ -67,7 +67,6 @@ protected:
     void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 
 private:
-    std::string calcHashImpl() override;
     std::string generateThumbnail() const override;
 	void calculatePerimeter();
 	void calcBBox();

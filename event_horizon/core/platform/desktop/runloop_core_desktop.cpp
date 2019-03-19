@@ -1,6 +1,7 @@
 #include <string>
 #include <thread>
 #include <iostream>
+#include <core/command.hpp>
 #include "../../runloop_core.h"
 #include "../../command.hpp"
 #include "../../callback_dependency.h"
@@ -32,6 +33,8 @@ void RunLoop::coreFunctions() {
     DH::update();
     cq.execute();
 }
+
+CommandQueue& RunLoop::CQ() { return cq; }
 
 void RunLoop::runConsolePrompt() {
     std::thread promptThread( &RunLoop::consolePrompt, this );

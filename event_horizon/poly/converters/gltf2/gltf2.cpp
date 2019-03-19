@@ -2,14 +2,14 @@
 
 #include "gltf2.h"
 #include <iostream>
-#include <poly/geom_data.hpp>
 #include <core/node.hpp>
-#include <poly/material_builder.h>
+#include <core/raw_image.h>
 #include <core/math/quaternion.h>
 #include <core/raw_image.h>
 #include <core/image_util.h>
 #include <core/file_manager.h>
-//#include "substance_driver.h"
+#include <poly/geom_data.hpp>
+#include <poly/material_builder.h>
 
 unsigned int accessorTypeToNumberOfComponent( int ty ) {
     if ( ty == TINYGLTF_TYPE_SCALAR) {
@@ -780,11 +780,11 @@ void readParameterJsonDoubleValue( const tinygltf::Parameter v,
 
 void sigmoidMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im, SigmoidSlope _sg ) {
 
-    RawImage greyValue = _im.grayScaleBaseColor;
+    std::shared_ptr<RawImage> greyValue = EF::clone(*_im.grayScaleBaseColor.get());
 
     float lFloor = (_sg == SigmoidSlope::Positive ? 1.0f - ic.value.x() : ic.value.x() ) * 0.5f;
 
-    greyValue.transform<uint8_t >( [&]( uint8_t& _value ) {
+    greyValue->transform<uint8_t >( [&]( uint8_t& _value ) {
         float v = (static_cast<float>(_value) -127.0f) / 127.0f;
         float vn = std::clamp( ic.value.x() + (v * lFloor), 0.0f, 1.0f );
         _value = static_cast<uint8_t >(vn*255.0f);
@@ -800,16 +800,16 @@ void valueToColorMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::Interm
 }
 
 void grayscaleToNormalMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
-    RawImage normalMap = _im.grayScaleBaseColor.toNormalMap();
+    RawImage normalMap = _im.grayScaleBaseColor->toNormalMap();
 //    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(normalMap) );
 }
 
 void colorToBasecolorMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
-    _im.grayScaleBaseColor = RawImage{ "grayBase", 1, 1, ic.value.RGBATOI()};
+    _im.grayScaleBaseColor = std::make_shared<RawImage>( RawImage{ "grayBase", 1, 1, ic.value.RGBATOI()} );
 
 //    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(_im.grayScaleBaseColor) );
 
-    _im.grayScaleBaseColor.grayScale();
+    _im.grayScaleBaseColor->grayScale();
 }
 
 void GLTF2::saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic, const std::string& _uniformName ) {

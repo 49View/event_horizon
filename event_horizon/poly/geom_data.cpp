@@ -134,13 +134,13 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _
 	return logoGeoms;
 }
 
-std::string GeomData::calcHashImpl() {
-	std::stringstream ss;
-	ss << material->Hash();
-	ss << mVdata.numIndices();
-	ss << mVdata.vcoords3d[0];
-	return ss.str();
-}
+//std::string GeomData::calcHashImpl() {
+//	std::stringstream ss;
+//	ss << material->Hash();
+//	ss << mVdata.numIndices();
+//	ss << mVdata.vcoords3d[0];
+//	return ss.str();
+//}
 
 void GeomData::serializeInternal( std::shared_ptr<SerializeBin> f ) const {
 	f->write( material );

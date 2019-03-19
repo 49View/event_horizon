@@ -8,10 +8,13 @@
 
 #pragma once
 
-#include "core/runloop_core.h"
-#include "di_modules.h"
+#include <core/runloop_core.h>
+#include <core/util.h>
 
 class SceneOrchestrator;
+class Renderer;
+class TextInput;
+class MouseInput;
 
 class RunLoopGraphics : public RunLoop {
 public:

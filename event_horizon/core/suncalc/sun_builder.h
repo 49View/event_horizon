@@ -8,7 +8,8 @@
 #include "suncalc.h"
 #include "location_provider.h"
 #include <core/math/vector3f.h>
-#include <core/raw_image.h>
+
+class RawImage;
 
 class SunBuilder {
 public:
@@ -43,7 +44,7 @@ private:
     int defaultYear = 2018;
     bool mbDirtyTime = false;
 
-    RawImage goldenHourGradient;
+    std::shared_ptr<RawImage> goldenHourGradient;
     std::unordered_map<std::string, std::tuple<int, int>> dateParts;
     std::unordered_set<std::string> timeParts;
 };

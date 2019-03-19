@@ -105,10 +105,6 @@ public:
     }
 
 protected:
-    std::string calcHashImpl() override {
-        return std::string();
-    }
-
     std::string generateThumbnail() const override {
         return std::string();
     }
@@ -184,7 +180,6 @@ public:
     float translucency() const;
 
 protected:
-    std::string calcHashImpl() override;
     void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
     void deserializeInternal(std::shared_ptr<DeserializeBin> reader) override;
 

@@ -13,10 +13,11 @@
 
 #include "runloop_core.h"
 
-#include "profiler.h"
-#include "command.hpp"
-#include "game_time.h"
-#include "http/webclient.h"
+#include <core/di.hpp>
+#include <core/profiler.h>
+#include <core/command.hpp>
+#include <core/game_time.h>
+#include <core/http/webclient.h>
 
 void RunLoop::updateTime() {
 	// Calculate time step, make sure it's never too big

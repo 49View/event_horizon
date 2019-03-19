@@ -3,6 +3,7 @@
 #include <core/di.hpp>
 #include <core/command.hpp>
 #include <core/font_manager.h>
+#include <core/image_builder.h>
 #include <core/streaming_mediator.hpp>
 #include <graphics/renderer.h>
 #include <graphics/text_input.hpp>

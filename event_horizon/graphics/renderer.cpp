@@ -2,6 +2,7 @@
 
 #include <core/math/spherical_harmonics.h>
 #include <core/command.hpp>
+#include <core/raw_image.h>
 #include <core/game_time.h>
 #include <core/configuration/app_options.h>
 #include <core/suncalc/sun_builder.h>
@@ -61,17 +62,8 @@ void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>
     afterShaderSetup();
 }
 
-bool RenderImageDependencyMaker::addImpl( ImageBuilder& tbd, std::unique_ptr<uint8_t[]>& _data ) {
-
-    tm.addTextureFromCallback(TextureRenderData{ tbd.Name() }.size(tbd.imageParams.width, tbd.imageParams.height).ch(tbd.imageParams.channels)
-                                                 .setBpp(tbd.imageParams.bpp)
-                                                 .setFormatFromBpp().target(tbd.imageParams.ttm).wm(tbd.imageParams.wrapMode)
-                                                 .fm(tbd.imageParams.filterMode), _data );
-    return true;
-}
-
 Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm ) :
-        cq( cq ), sm( sm ), tm(tm), ssm(_ssm), lm(_lm), ridm(tm) {
+        cq( cq ), sm( sm ), tm(tm), ssm(_ssm), lm(_lm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
     hcs = std::make_shared<CommandScriptRendererManager>(*this);
     cq.registerCommandScript(hcs);

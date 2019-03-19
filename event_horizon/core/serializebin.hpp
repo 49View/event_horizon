@@ -149,7 +149,7 @@ public:
 			static SerializableContainer nullDep{'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
 			deps.emplace( NULL_HASH, nullDep );
 		} else {
-			v->calcHash();
+//			v->calcHash();
 			if ( deps.find( v->Hash() ) == deps.end() ) {
 				auto writer = std::make_shared<SerializeBin>(
 						SerializeHeader{v->Hash(), T::Version(), T::Prefix() } );
@@ -324,7 +324,7 @@ public:
 		SerializableContainer bc;
 		read( bc );
 		static constexpr uint64_t vectorHeader = 4;
-		std::string hash{ bc.begin()+vectorHeader, bc.begin()+vectorHeader+Hashable::HASH_LENGTH };
+		std::string hash{ bc.begin()+vectorHeader, bc.begin()+vectorHeader+HashableDefaults::HASH_LENGTH };
 		deps.emplace( hash, bc );
 	}
 

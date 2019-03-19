@@ -21,11 +21,12 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
         this->RR().tm.addTextureWithData( *_elem.get() );
     });
 
-    sg.ML().connect( [this](std::shared_ptr<Material> _elem ) {
+    sg.ML().connect( [](std::shared_ptr<Material> _elem ) {
         LOGRS( "Adding Material " << _elem->Name() );
-        for ( const auto& b : _elem->Buffers() ) {
-            ImageBuilder{sg.TL(), b.first}.makeDirect(b.second);
-        }
+        // ### TODO: SUSTITUTE Buffers with image hashes for materials!!!
+//        for ( const auto& b : _elem->Buffers() ) {
+//            ImageBuilder{sg.TL(), b.first}.makeDirect(b.second);
+//        }
     });
 
     sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {

@@ -18,7 +18,7 @@
 class Material;
 class GeomData;
 class Profile;
-class RawImage;
+class ImageBuilder;
 class CameraRig;
 namespace Utility::TTFCore { class Font; }
 class MaterialColor;
@@ -47,8 +47,9 @@ public:
 
         if ( std::is_same<R, MaterialColor>::value  )          return "color";
         if ( std::is_same<R, CameraRig>::value )               return "cameras";
+
         if ( std::is_same<R, Profile>::value  )                return "profiles";
-        if ( std::is_same<R, RawImage>::value  )               return "images";
+        if ( std::is_same<R, ImageBuilder>::value  )           return "image";
         if ( std::is_same<R, Utility::TTFCore::Font>::value  ) return "fonts";
         return "unknown";
     }
@@ -68,21 +69,44 @@ protected:
     virtual void serializeInternal( std::shared_ptr<W> writer ) const = 0;
     virtual void deserializeInternal( std::shared_ptr<R> reader ) = 0;
 
+    std::string rawb64gzip( const SerializableContainer& _raw ) const {
+        auto f = zlibUtil::deflateMemory( std::string{ _raw.begin(), _raw.end() } );
+        auto rawm = bn::encode_b64( f );
+        return std::string{ rawm.begin(), rawm.end() };
+    }
+
     std::string generateRawData() const {
-        auto writer = std::make_shared<W>( SerializeHeader{ Hashable::Hash(), T::Version(), T::Prefix() } );
+        auto writer = std::make_shared<W>( SerializeHeader{ this->Hash(), T::Version(), T::Prefix() } );
         this->serialize( writer );
         auto matFile = writer->buffer();
 
-        auto f = zlibUtil::deflateMemory( std::string{ matFile.begin(), matFile.end() } );
-        auto rawm = bn::encode_b64( f );
-        return std::string{ rawm.begin(), rawm.end() };
+        return rawb64gzip(matFile);
     }
 
     std::string toMetaData() const {
         MegaWriter writer;
         writer.StartObject();
-        writer.serialize( CoreMetaData{ this->Name(), T::Prefix(), this->SourceType(), T::Version(),
+        writer.serialize( CoreMetaData{ this->Name(), "", T::Prefix(), this->ContentId(), T::Version(),
                                         generateThumbnail(), generateRawData(), this->Tags() } );
+        if ( B::IsSerializable() ) {
+            writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
+        }
+        writer.EndObject();
+
+        return writer.getString();
+    }
+
+    std::string toMetaData( const SerializableContainer& _raw ) const {
+        MegaWriter writer;
+        writer.StartObject();
+        writer.serialize( CoreMetaData{ this->Name(),
+                                        this->Hash(),
+                                        T::Prefix(),
+                                        this->ContentId(),
+                                        T::Version(),
+                                        generateThumbnail(),
+                                        rawb64gzip(_raw),
+                                        this->Tags() } );
         if ( B::IsSerializable() ) {
             writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
         }
@@ -109,20 +133,24 @@ protected:
         deserializeInternal( reader );
     }
 
+    void publish2( const std::string& _rawName, const SerializableContainer& _raw ) {
+        contentId = _rawName;
+        Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw) );
+    }
+
 public:
-    void setSourceType( const std::string& _sourceType ) {
-        sourceType = _sourceType;
+    void setContentId( const std::string& _contentId ) {
+        contentId = _contentId;
     }
 
-    std::string SourceType() const {
-        return sourceType;
+    std::string ContentId() const {
+        return contentId;
     }
 
-    void publish() {
-        this->calcHash();
+    void publish() const {
         Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
     }
 
 protected:
-    std::string sourceType;
+    std::string contentId;
 };

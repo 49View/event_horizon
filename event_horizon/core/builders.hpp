@@ -13,6 +13,9 @@
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
 
+class ResourceHasSource {};
+class ResourceHasNotSource {};
+
 class BaseBuilder : public NamePolicy<std::string> {
 public:
     BaseBuilder() = default;
@@ -100,8 +103,23 @@ protected:
 
 protected:
     M& mm;
-    SerializableContainer source;
 };
+
+//template < typename R, typename M >
+//class ResourceSourceBuilder : public ResourceBuilder< R, M > {
+//public:
+//    const SerializableContainer& getSource() const {
+//        return source;
+//    }
+//
+//    void setSource( const SerializableContainer& _source ) {
+//        source = _source;
+//    }
+//
+//    void makeFromSource( const std::string& _name, const SerializableContainer& _data ) = 0;
+//protected:
+//    SerializableContainer source;
+//};
 
 class ResourceBuilderObservable : public BaseBuilder {
     using BaseBuilder::BaseBuilder;

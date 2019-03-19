@@ -14,6 +14,9 @@ exports.getMetadataFromBody = (checkGroup, checkRaw, req) => {
     if (checkGroup && typeof(metadata.group)==="undefined") {
         throw metadataMissingMessage + " 'Group'";
     }
+    if (typeof(metadata.hash)==="undefined") {
+        throw metadataMissingMessage + " 'Hash'";
+    }
     if (checkRaw && typeof(metadata.raw)==="undefined") {
         throw metadataMissingMessage + " 'Raw'";
     }
@@ -28,10 +31,10 @@ exports.cleanupMetadata = (metadata) => {
 
     if (typeof(metadata.raw)!=="undefined") {
         result.content = new Buffer(metadata.raw, "base64");
-        metadata.contentHash = crypto.createHash('sha256').update(metadata.raw).digest("hex");
+        // metadata.content_id = crypto.createHash('sha256').update(metadata.raw).digest("hex");
     } else {
         result.content = null;
-        delete metadata.contentHash;
+        delete metadata.content_id;
     }
     result.group = metadata.group;
     result.keys = metadata.tags;
@@ -49,13 +52,13 @@ exports.cleanupMetadata = (metadata) => {
     return result;
 }
 
-exports.getFilePath = (project, group, contentHash) => {
-    return project+"/"+group+"/"+contentHash;
+exports.getFilePath = (project, group, content_id) => {
+    return project+"/"+group+"/"+content_id;
 }
 
-exports.checkFileExists = async (project, group, contentHash) => {
+exports.checkFileExists = async (project, group, content_id) => {
 
-    const query = {$and: [{"metadata.contentHash":contentHash}, {"group":group}, {"project":project}]};
+    const query = {$and: [{"metadata.content_id":content_id}, {"group":group}, {"project":project}]};
     const result = await entityModel.findOne(query);
 
     return result!==null?result.toObject():null;
@@ -79,10 +82,10 @@ exports.deleteEntity = async (entityId) => {
 
 exports.deleteEntityComplete = async (project, entity) => {
     currentEntity = entity;
-    console.log("[INFO] deleting entity " + currentEntity.metadata.contentHash);
+    console.log("[INFO] deleting entity " + currentEntity.metadata.content_id);
     const group = currentEntity.group;
     //Remove current file from S3
-    await fsController.cloudStorageDelete( module.exports.getFilePath(project, group, currentEntity.metadata.contentHash), "eventhorizonentities");
+    await fsController.cloudStorageDelete( module.exports.getFilePath(project, group, currentEntity.metadata.content_id), "eventhorizonentities");
     //Delete existing entity
     await module.exports.deleteEntity(currentEntity._id);
 }
@@ -142,7 +145,7 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, version, fu
                     "project": 0,
                     "public": 0,
                     "restricted": 0,
-                    "metadata.contentHash": 0
+                    "metadata.content_id": 0
                 }
             }
         );

@@ -63,7 +63,7 @@ SunBuilder::SunBuilder() {
 
 	buildFromString( "spring noon" );
 
-	goldenHourGradient = rawImageDecodeFromMemory(golden_color_png, golden_color_png_len, "golden_gradient");
+	goldenHourGradient = std::make_shared<RawImage>(rawImageDecodeFromMemory(golden_color_png, golden_color_png_len, "golden_gradient"));
 }
 
 void SunBuilder::changeDefaultYear( int year ) {
@@ -219,9 +219,9 @@ V3f SunBuilder::GoldenHourColor() const {
 	ASSERT( GoldenHour() >= 0.0f && GoldenHour() <= 1.0f );
 	const float sunK = 10.0f;
 	float sunPower = mSunPosition.altitudeRad > 0.0f ? ((mSunPosition.altitudeRad+0.1f) / M_PI_2) * sunK : 1.0f;
-    auto gdl = static_cast<size_t>(goldenHourGradient.width - 1);
+    auto gdl = static_cast<size_t>(goldenHourGradient->width - 1);
 	auto index = gdl - static_cast<size_t>(GoldenHour() * gdl);
-	auto col = goldenHourGradient.at<uint32_t>( static_cast<unsigned int>(index), 0);
+	auto col = goldenHourGradient->at<uint32_t>( static_cast<unsigned int>(index), 0);
 	auto ret = Vector4f::ITORGBA(col) * GoldenHour() * sunPower;
 	return ret.xyz();
 }

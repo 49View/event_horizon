@@ -551,7 +551,6 @@ public:
 	virtual ~Font();
 
 protected:
-    std::string calcHashImpl() override;
     std::string generateThumbnail() const override;
 public:
     // font info

@@ -16,7 +16,7 @@ struct MaterialProperties;
 class ColorBuilder;
 class ImageDepencencyMaker;
 
-class MaterialManager : public DependencyMakerPolicy<Material> {
+class MaterialManager : public ResourceManager<Material> {
 public:
     virtual ~MaterialManager() = default;
     void dump() const;
@@ -65,7 +65,7 @@ using MB = MaterialBuilder;
 
 // Color management!
 
-class ColorManager : public DependencyMakerPolicy<MaterialColor> {
+class ColorManager : public ResourceManager<MaterialColor> {
 public:
     virtual ~ColorManager() = default;
 };

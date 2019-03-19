@@ -8,7 +8,7 @@ class CameraRig;
 class Renderer;
 class SceneGraph;
 
-class CameraManager : public DependencyMakerPolicy<CameraRig> {
+class CameraManager : public ResourceManager<CameraRig> {
 public:
     std::shared_ptr<Camera> getCamera( const std::string &_name = "Main" );
     std::shared_ptr<Camera> getVRLeftEyeCamera( const std::string &_name = "Main" );

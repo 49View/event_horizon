@@ -6,7 +6,7 @@
 #include <core/TTF.h>
 #include <core/math/rect2f.h>
 
-class FontManager : public DependencyMakerPolicy<Utility::TTFCore::Font> {
+class FontManager : public ResourceManager<Utility::TTFCore::Font> {
 public:
     const Utility::TTFCore::Font& operator()();
     const Utility::TTFCore::Font& operator[]( const std::string& _fontName );

@@ -5,9 +5,16 @@
 #pragma once
 
 #include <memory>
-#include "render_scene_graph/runloop_graphics.h"
-#include "render_scene_graph/scene_orchestrator.hpp"
-#include "render_scene_graph/scene_state_machine.h"
+#include <core/di.hpp>
+#include <core/image_builder.h>
+#include <graphics/shader_manager.h>
+#include <graphics/mouse_input.hpp>
+#include <graphics/text_input.hpp>
+#include <render_scene_graph/runloop_graphics.h>
+#include <render_scene_graph/scene_orchestrator.hpp>
+#include <render_scene_graph/scene_state_machine.h>
+
+namespace di = boost::di;
 
 template<typename T>
 class EventHorizon {

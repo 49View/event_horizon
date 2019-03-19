@@ -12,7 +12,7 @@ router.get('/content/byId/:id', async (req, res, next) => {
         if (currentEntity===null) {
             throw "Invalid entity for user project";
         }
-        const filePath=entityController.getFilePath(currentEntity.project, currentEntity.group, currentEntity.metadata.contentHash);
+        const filePath=entityController.getFilePath(currentEntity.project, currentEntity.group, currentEntity.metadata.content_id);
         const fileData = await fsController.cloudStorageFileGet(filePath, "eventhorizonentities");
         
         fsController.writeFile(res, fileData);
@@ -32,7 +32,7 @@ router.get('/content/byGroupTags/:version/:group/:tags', async (req, res, next) 
         //Check existing entity for use project (or public)
         const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, version, true, 1);
         if (foundEntities!==null && foundEntities.length>0) {
-            const filePath=entityController.getFilePath(foundEntities[0].project, foundEntities[0].group, foundEntities[0].metadata.contentHash);
+            const filePath=entityController.getFilePath(foundEntities[0].project, foundEntities[0].group, foundEntities[0].metadata.content_id);
             const fileData = await fsController.cloudStorageFileGet(filePath, "eventhorizonentities");
             fsController.writeFile(res, fileData);
         } else {
@@ -70,9 +70,9 @@ router.post('/', async (req, res, next) => {
         const project = req.user.project;
         const metadata = entityController.getMetadataFromBody(true, true, req);
         const { content, group, public, restricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
-        const filePath=entityController.getFilePath(project, group, cleanMetadata.contentHash);
+        const filePath=entityController.getFilePath(project, group, cleanMetadata.content_id);
         //Check content exists in project and group
-        const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.contentHash)
+        const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.content_id)
         if (copyEntity!==null) {
             //Delete existing entity
             entityController.deleteEntity(copyEntity._id);
@@ -105,19 +105,19 @@ router.put('/:id', async (req, res, next) => {
         //If content defined
         if (content!==null) {
             //Check content exists in project and group
-            const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.contentHash)
+            const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.content_id)
             if (copyEntity!==null && !copyEntity._id.equals(currentEntity._id)) {
                 throw "Content already defined";
             } else if (copyEntity===null) {
                 //Remove current file from S3
-                await fsController.cloudStorageDelete(entityController.getFilePath(project, group, currentEntity.metadata.contentHash), "eventhorizonentities");
+                await fsController.cloudStorageDelete(entityController.getFilePath(project, group, currentEntity.metadata.content_id), "eventhorizonentities");
                 //Upload file to S3
-                const filePath=entityController.getFilePath(project, group, cleanMetadata.contentHash);
+                const filePath=entityController.getFilePath(project, group, cleanMetadata.content_id);
                 await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities");
             }
         } else {
-            //If content don't change use current contentHash 
-            cleanMetadata.contentHash=currentEntity.metadata.contentHash;
+            //If content don't change use current content_id 
+            cleanMetadata.content_id=currentEntity.metadata.content_id;
         }
         //Update entity
         await entityController.updateEntity(currentEntity._id, project, group, public, restricted, cleanMetadata);

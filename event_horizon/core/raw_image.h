@@ -6,20 +6,23 @@
 #include <core/math/vector2i.h>
 #include <core/htypes_shared.hpp>
 #include <core/image_constants.h>
-#include <core/publisher.hpp>
+#include <core/name_policy.hpp>
 
 namespace JMATH { class Rect2f; }
 
-class RawImage : public ImageParams, public Publisher<RawImage, EmptyBox> {
+class RawImage : public ImageParams, public NamePolicy<> {
 public:
+    using NamePolicy::NamePolicy;
     RawImage() = default;
     virtual ~RawImage() = default;
-    RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint32_t _col);
-    RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint8_t _col );
+    RawImage( uint8_p&& data, const std::string& _name );
+
+    RawImage( const std::string& _name, unsigned int _w, unsigned int _h, uint32_t _col);
+    RawImage( const std::string& _name, unsigned int _w, unsigned int _h, uint8_t _col );
     RawImage( const std::string& _name, const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData );
 
     // A single float number equals a grayscale (1 channel) image
-    RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const float _col );
+    RawImage( const std::string& _name, unsigned int _w, unsigned int _h, float _col );
     RawImage( int width, int height, int channels, const char* rawBtyes, const std::string& name = "" );
     RawImage( int width, int height, int channels, const std::string& name = "" );
 
@@ -96,11 +99,6 @@ public:
 
 	std::unique_ptr<uint8_t[]> rawBtyes;
 
-protected:
-    std::string calcHashImpl() override;
-    std::string generateThumbnail() const override;
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 public:
 	static RawImage WHITE4x4();
 	static RawImage DEBUG_UV();
@@ -113,7 +111,6 @@ RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string
 RawImage rawImageDecodeFromMemory( const uint8_p& data, const std::string& _name = "", int forceChannels = 0 );
 RawImage rawImageDecodeFromMemory( const unsigned char* buffer, int length, const std::string& _name = "",
                                    int forceChannels = 0 );
-void openImageAsRaw( const std::string& _filename, bool bUseImagePrefix = false );
 
 RawImage rawImageSubImage( const RawImage& _source, const JMATH::Rect2f& _area,
                            const Vector2i& _extraPadding = Vector2i::ZERO,

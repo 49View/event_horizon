@@ -5,9 +5,10 @@
 #include "tiny_gltf.h"
 #include <core/math/vector4f.h>
 #include <core/descriptors/material.h>
-#include <core/raw_image.h>
 #include <poly/poly.hpp>
 #include <poly/import_artifacts.hpp>
+
+class RawImage;
 
 enum class SigmoidSlope {
     Positive,
@@ -39,7 +40,7 @@ public:
     struct IntermediateMaterial {
         std::string name;
         mutable std::shared_ptr<Material> mb;
-        mutable RawImage grayScaleBaseColor;
+        mutable std::shared_ptr<RawImage> grayScaleBaseColor;
         InternalPBRComponent baseColor{MPBRTextures::basecolorString,
         InternalPBRTextureReconstructionMode::GrayScaleCreate };
         InternalPBRComponent metallic{MPBRTextures::metallicString,

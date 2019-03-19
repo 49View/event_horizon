@@ -13,24 +13,26 @@
 #include <set>
 
 namespace MetaData {
-    const static std::string Id      = "_id";
-    const static std::string Name    = "name";
-    const static std::string Type    = "group";
-    const static std::string SubType = "dataType";
-    const static std::string Thumb   = "thumb";
-    const static std::string Version = "version";
-    const static std::string Raw     = "raw";
-    const static std::string Tags    = "tags";
+    const static std::string Id         = "_id";
+    const static std::string Name       = "name";
+    const static std::string Hash       = "hash";
+    const static std::string Type       = "group";
+    const static std::string ContentId  = "content_id";
+    const static std::string Thumb      = "thumb";
+    const static std::string Version    = "version";
+    const static std::string Raw        = "raw";
+    const static std::string Tags       = "tags";
 }
 
 class CoreMetaData {
 public:
     CoreMetaData() = default;
-    CoreMetaData( std::string name, std::string type, std::string subType, uint64_t version,
+    CoreMetaData( std::string name, std::string _hash, std::string type, std::string _contentId, uint64_t version,
                   std::string thumb, std::string raw, std::set<std::string> tags ) :
                       name( std::move( name )),
+                      hash( std::move( _hash )),
                       type( std::move( type )),
-                      subType( std::move( subType )),
+                      contentId( std::move( _contentId )),
                       version( version ),
                       thumb( std::move( thumb )),
                       raw( std::move( raw )),
@@ -42,10 +44,6 @@ public:
 
     std::string& Type() {
         return type;
-    }
-
-    std::string& SuType() {
-        return subType;
     }
 
     std::string& Thumb() {
@@ -64,8 +62,12 @@ public:
         return name;
     }
 
-    void setName( const std::string& name ) {
-        CoreMetaData::name = name;
+    std::string getHash() const {
+        return hash;
+    }
+
+    void setName( const std::string& _name ) {
+        CoreMetaData::name = _name;
     }
 
     const std::string& getType() const {
@@ -76,16 +78,20 @@ public:
         CoreMetaData::type = _type;
     }
 
-    void setSubType( const std::string& _subType ) {
-        CoreMetaData::subType = _subType;
+    void setContentId( const std::string& _cid ) {
+        contentId = _cid;
     }
 
     uint64_t getVersion() const {
         return version;
     }
 
-    void setVersion( uint64_t version ) {
-        CoreMetaData::version = version;
+    void setVersion( uint64_t _version ) {
+        CoreMetaData::version = _version;
+    }
+
+    std::string getContentId() const {
+        return contentId;
     }
 
     const std::string& getThumb() const {
@@ -120,11 +126,16 @@ public:
         CoreMetaData::id = id;
     }
 
+    void setHash( const std::string& _hash ) {
+        hash = _hash;
+    }
+
 private:
     std::string id;
     std::string name;
+    std::string hash;
     std::string type;
-    std::string subType;
+    std::string contentId;
     uint64_t    version = 0;
     std::string thumb;
     std::string raw;

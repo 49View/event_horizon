@@ -19,22 +19,22 @@ void HeterogeneousMap::calcTotalNumUniforms() {
 
     mNumUniforms = static_cast<int>( lNumUniforms );
 
-    HeterogeneousMap::calcHash();
+//    HeterogeneousMap::calcHash();
 }
 
-std::string HeterogeneousMap::calcHashImpl() {
-    std::stringstream hashInput;
-    hashInput << mNumUniforms;
-
-    for ( auto& i : mTextures ) hashInput << i.first;
-    for ( auto& i : mInts ) hashInput << i.second;
-    for ( auto& i : mFloats ) hashInput << i.second;
-    for ( auto& i : mV2fs ) hashInput << i.second.hash();
-    for ( auto& i : mV3fs ) hashInput << i.second.hash();
-    for ( auto& i : mV4fs ) hashInput << i.second.hash();
-
-    return hashInput.str();
-}
+//std::string HeterogeneousMap::calcHashImpl() {
+//    std::stringstream hashInput;
+//    hashInput << mNumUniforms;
+//
+//    for ( auto& i : mTextures ) hashInput << i.first;
+//    for ( auto& i : mInts ) hashInput << i.second;
+//    for ( auto& i : mFloats ) hashInput << i.second;
+//    for ( auto& i : mV2fs ) hashInput << i.second.hash();
+//    for ( auto& i : mV3fs ) hashInput << i.second.hash();
+//    for ( auto& i : mV4fs ) hashInput << i.second.hash();
+//
+//    return hashInput.str();
+//}
 
 void HeterogeneousMap::inject( const HeterogeneousMap& source ) {
     for ( auto& pu : source.mTextures ) assign( pu.first, pu.second );

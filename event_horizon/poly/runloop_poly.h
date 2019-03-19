@@ -9,7 +9,6 @@
 #pragma once
 
 #include "core/runloop_core.h"
-#include "di_modules.h"
 #include "scene_graph.h"
 
 class RunLoopPoly : public Daemon {

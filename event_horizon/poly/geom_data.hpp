@@ -332,8 +332,6 @@ public:
     void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override;
 
 protected:
-    std::string calcHashImpl() override;
-
     void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 
     void
