@@ -16,7 +16,7 @@ void callbackImage( const std::string& _filename, const SerializableContainer& _
     imageBufferData = _fileContent;
     imageName = getFileName(_filename);
     SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
-        ImageBuilder{p->SG().TL(), imageName}.make( imageBufferData, ResourcePublishFlag::True );
+        ImageBuilder{p->SG().TL(), imageName}.create( imageBufferData );
     } );
 }
 

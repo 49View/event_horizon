@@ -18,35 +18,59 @@
 #include <core/util.h>
 #include <core/htypes_shared.hpp>
 
-//class DependencyMaker {
-//};
-
-class HashableMultimap {
-
-private:
-};
 
 template<typename T, typename C = std::unordered_map<std::string,std::shared_ptr<T>> >
 class ResourceManager {
 public:
-    bool exists( const std::string& _key ) const {
-        return resourcesMapper.find( _key) != resourcesMapper.end();
+    using SignalsDeferredContainer = std::set<std::shared_ptr<T>>;
+
+    std::shared_ptr<T> exists( const std::string& _key ) const {
+        if ( auto res = resourcesMapper.find( _key ); res != resourcesMapper.end() ) {
+            return resources.at(res->second);
+        }
+        return nullptr;
     };
+
+    std::shared_ptr<T> hashExists( const std::string& _hash ) const {
+        if ( auto res = resources.find( _hash ); res != resources.end() ) {
+            return res->second;
+        }
+        return nullptr;
+    };
+
+    void update() {
+        for ( const auto& s : signalAddElements ) {
+            addSignal(s);
+        }
+        signalAddElements.clear();
+    }
+
+    void addToSignal( SignalsDeferredContainer& _container, std::shared_ptr<T> _elem ) {
+        _container.emplace(_elem);
+    }
 
     void add( std::shared_ptr<T> _elem, const std::string& _aliasKey = "" ) {
         auto lHash = _elem->Name();
         resources[lHash] = _elem;
         resourcesMapper[_elem->Name()] = lHash;
         if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = lHash;
-        sig( _elem );
+        addSignal( _elem );
     }
 
-    void add( std::shared_ptr<T> _elem, const std::string& _name,
+    void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
+                      const std::string& _hash, const std::string& _aliasKey = "" ) {
+        add( _elem, _name, _hash, _aliasKey );
+        addSignal( _elem );
+    }
+
+    void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
               const std::string& _hash, const std::string& _aliasKey = "" ) {
-        resources[_hash] = _elem;
-        resourcesMapper[_name] = _hash;
-        if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = _hash;
-        sig( _elem );
+        add( _elem, _name, _hash, _aliasKey );
+        addToSignal( signalAddElements, _elem );
+    }
+
+    std::shared_ptr<T> getFromHash( const std::string& _hash ) {
+        return resources[_hash];
     }
 
     std::shared_ptr<T> get( const std::string& _key ) {
@@ -63,10 +87,17 @@ public:
     }
 
     void connect( std::function<void (std::shared_ptr<T>)> _slot ) {
-        sig.connect( _slot );
+        addSignal.connect( _slot );
     }
 
 protected:
+    void add( std::shared_ptr<T> _elem, const std::string& _name,
+              const std::string& _hash, const std::string& _aliasKey = "" ) {
+        resources[_hash] = _elem;
+        resourcesMapper[_name] = _hash;
+        if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = _hash;
+    }
+
     C& Resources() {
         return resources;
     }
@@ -77,7 +108,8 @@ private:
     C resources;
     std::unordered_map<std::string, std::string> resourcesMapper;
 
-    boost::signals2::signal<void(std::shared_ptr<T>)> sig;
+    SignalsDeferredContainer signalAddElements;
+    boost::signals2::signal<void(std::shared_ptr<T>)> addSignal;
 };
 
 template< typename B>
@@ -253,11 +285,11 @@ Url makeUrl(const std::string& _name) {
 //            return Url::privateAPI(HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) );
         case HttpQuery::Binary:
         case HttpQuery::Text: {
-            if ( T::usesNotExactQuery() ) {
-                return Url::entityContent( T::Version(), _name );
-            } else {
+//            if ( T::usesNotExactQuery() ) {
+//                return Url::entityContent( _name );
+//            } else {
                 return Url( HttpFilePrefix::get + url_encode( _name ) );
-            }
+//            }
         }
         default:
             break;

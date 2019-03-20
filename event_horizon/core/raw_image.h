@@ -15,7 +15,8 @@ public:
     using NamePolicy::NamePolicy;
     RawImage() = default;
     virtual ~RawImage() = default;
-    RawImage( uint8_p&& data, const std::string& _name );
+    explicit RawImage( uint8_p&& data );
+    explicit RawImage( const SerializableContainer& _data );
 
     RawImage( const std::string& _name, unsigned int _w, unsigned int _h, uint32_t _col);
     RawImage( const std::string& _name, unsigned int _w, unsigned int _h, uint8_t _col );
@@ -28,7 +29,7 @@ public:
 
     void copyFrom( const char* buffer );
 
-    RawImage(RawImage&& _val) {
+    RawImage(RawImage&& _val) noexcept {
         width = _val.width;
         height = _val.height;
         channels = _val.channels;

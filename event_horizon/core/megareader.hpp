@@ -458,11 +458,8 @@ public:
             if ( (*value)[t].FindMember( MetaData::Type.c_str() ) != (*value)[t].MemberEnd() ) {
                 elem.setType( (*value)[t][MetaData::Type.c_str()].GetString() );
             }
-			if ( (*value)[t].FindMember( MetaData::Version.c_str() ) != (*value)[t].MemberEnd() ) {
-				elem.setVersion( (*value)[t][MetaData::Version.c_str()].GetInt64() );
-			}
 			if ( (*value)[t].FindMember( metadataS ) != (*value)[t].MemberEnd() ) {
-				elem.setName(( *value )[t][metadataS][MetaData::Name.c_str()].GetString());
+//				elem.setName(( *value )[t][metadataS][MetaData::Name.c_str()].GetString());
 				elem.setThumb(( *value )[t][metadataS][MetaData::Thumb.c_str()].GetString());
 			}
 			_vec.push_back( elem );

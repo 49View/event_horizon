@@ -4,16 +4,10 @@
 #include <core/raw_image.h>
 #include <core/entity_factory.hpp>
 
-std::shared_ptr<RawImage> ImageBuilder::makeInternal( const SerializableContainer& _data ) {
-
-    auto decodedData = imageUtil::decodeFromMemory(  ucchar_p{ _data.data(), _data.size()},
-            imageParams.width, imageParams.height, imageParams.channels, imageParams.bpp, mbIsRaw );
-
-    setFormatFromChannels(imageParams.channels);
-    auto res = std::make_shared<RawImage>(Name(), imageParams, std::move(decodedData));
-    mm.add( res, Name(), Hash() );
-
-    return res;
+void ImageBuilder::finalise( std::shared_ptr<RawImage> _elem ) {
+    _elem->ttm = imageParams.ttm;
+    _elem->wrapMode = imageParams.wrapMode;
+    _elem->filterMode = imageParams.filterMode;
 }
 
 std::string ImageBuilder::generateThumbnail() const {

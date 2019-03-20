@@ -226,6 +226,6 @@ void readRemote( const Url& url, std::shared_ptr<FileCallbackHandler> _handler, 
         auto rfe = useFS ? Http::ResponseFlags::HeaderOnly : rf;
         if (_handler->needsReload()) orBitWiseFlag( rfe, Http::ResponseFlags::ExcludeFromCache);
 
-        Http::get( url, useFS ? cacheLoad : setCallbackData, rfe );
+        Http::get( url, useFS ? cacheLoad : setCallbackData, nullptr, rfe );
     }
 }

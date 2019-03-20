@@ -1,17 +1,24 @@
 #include "raw_image.h"
+#include <core/image_util.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #include <core/math/vector4f.h>
+#include <core/math/rect2f.h>
 #include <core/http/basen.hpp>
-#include "util.h"
-#include "file_manager.h"
-#include "service_factory.h"
-#include "math/rect2f.h"
+#include <core/util.h>
+#include <core/file_manager.h>
 
 RawImage::RawImage( const std::string& _name, const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData ) :
                     NamePolicy(_name) {
     ImageParams::operator=(_ip);
+    setFormatFromChannels();
     rawBtyes = std::move(decodedData);
+}
+
+RawImage::RawImage( const SerializableContainer& _data ) {
+    rawBtyes = imageUtil::decodeFromMemory( ucchar_p{_data.data(), _data.size()},
+                                            width, height, channels, bpp, false );
+    setFormatFromChannels();
 }
 
 RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, const uint32_t _col ) {
@@ -46,14 +53,12 @@ RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, 
     Name(_name);
 }
 
-RawImage::RawImage( uint8_p&& data, const std::string& _name ) {
+RawImage::RawImage( uint8_p&& data ) {
     unsigned char *ddata = stbi_load_from_memory(data.first.get(), data.second, &width, &height, &channels, false );
     ASSERT(ddata);
     rawBtyes = std::make_unique<uint8_t[]>( width * height * channels );
     std::memcpy( rawBtyes.get(), ddata, width * height * channels );
     stbi_image_free(ddata);
-
-    this->Name(_name);
 }
 
 RawImage rawImageDecodeFromMemory( const uint8_p& data, const std::string& _name, int forceChannels ) {
