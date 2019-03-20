@@ -1,6 +1,5 @@
 
 const crypto = require('crypto')
-const rsa = require('js-crypto-rsa');
 
 let keyPair = null;
 let privateKey, publicKey;
