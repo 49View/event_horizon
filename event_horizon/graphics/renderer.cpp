@@ -106,9 +106,7 @@ void Renderer::init() {
     am.init();
     lm.init();
     sm.loadShaders();
-    auto lmImage = RawImage::WHITE4x4();
-    lmImage.Name(FBNames::lightmap);
-    tm.addTextureWithData(lmImage, TSLOT_LIGHTMAP );
+    tm.addTextureWithData(RawImage::WHITE4x4(), FBNames::lightmap, TSLOT_LIGHTMAP );
     afterShaderSetup();
 }
 

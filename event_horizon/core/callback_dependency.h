@@ -18,11 +18,13 @@
 #include <core/util.h>
 #include <core/htypes_shared.hpp>
 
+template <typename T>
+using SignalsAddSignature = std::tuple<std::shared_ptr<T>, std::string>;
 
 template<typename T, typename C = std::unordered_map<std::string,std::shared_ptr<T>> >
 class ResourceManager {
 public:
-    using SignalsDeferredContainer = std::set<std::shared_ptr<T>>;
+    using SignalsDeferredContainer = std::set<SignalsAddSignature<T>>;
 
     std::shared_ptr<T> exists( const std::string& _key ) const {
         if ( auto res = resourcesMapper.find( _key ); res != resourcesMapper.end() ) {
@@ -45,28 +47,28 @@ public:
         signalAddElements.clear();
     }
 
-    void addToSignal( SignalsDeferredContainer& _container, std::shared_ptr<T> _elem ) {
+    void addToSignal( SignalsDeferredContainer& _container, const SignalsAddSignature<T>& _elem ) {
         _container.emplace(_elem);
     }
 
     void add( std::shared_ptr<T> _elem, const std::string& _aliasKey = "" ) {
-        auto lHash = _elem->Name();
+        auto lHash = _elem->Hash();
         resources[lHash] = _elem;
-        resourcesMapper[_elem->Name()] = lHash;
+        resourcesMapper[_elem->Hash()] = lHash;
         if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = lHash;
-        addSignal( _elem );
+        addSignal( { _elem, lHash } );
     }
 
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                       const std::string& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addSignal( _elem );
+        addSignal( { _elem, _name } );
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
               const std::string& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addToSignal( signalAddElements, _elem );
+        addToSignal( signalAddElements, { _elem, _name } );
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {
@@ -86,7 +88,7 @@ public:
         return nullptr;
     }
 
-    void connect( std::function<void (std::shared_ptr<T>)> _slot ) {
+    void connect( std::function<void (const SignalsAddSignature<T>&)> _slot ) {
         addSignal.connect( _slot );
     }
 
@@ -109,7 +111,7 @@ private:
     std::unordered_map<std::string, std::string> resourcesMapper;
 
     SignalsDeferredContainer signalAddElements;
-    boost::signals2::signal<void(std::shared_ptr<T>)> addSignal;
+    boost::signals2::signal<void(const SignalsAddSignature<T>&)> addSignal;
 };
 
 template< typename B>

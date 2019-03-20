@@ -11,13 +11,14 @@
 class ImageBuilder;
 class RawImage;
 
+enum class AddResourcePolicy {
+    Immediate,
+    Deferred
+};
+
 template < typename B, typename R >
 class ResourceBuilder2 : public Publisher<B, EmptyBox> {
 public:
-    enum class AddResourcePolicy {
-        Immediate,
-        Deferred
-    };
     explicit ResourceBuilder2( ResourceManager<R>& mm ) : mm( mm ) {}
     ResourceBuilder2( ResourceManager<R>& _mm, const std::string& _name ) : mm( _mm ) {
         this->Name(_name);
@@ -33,6 +34,10 @@ public:
                                     AddResourcePolicy::Deferred );
                        if ( ccf ) ccf(params);
                    } );
+    }
+
+    void add( std::shared_ptr<R> _res, AddResourcePolicy _arp ) {
+        addInternal( _res, _arp );
     }
 
     std::shared_ptr<R> make( const SerializableContainer& _data ) {
@@ -61,12 +66,17 @@ protected:
     std::shared_ptr<R> addResource( const SerializableContainer& _data, AddResourcePolicy _arp ) {
         auto ret = EF::create<R>(_data);
         finalise(ret);
-        if ( _arp == AddResourcePolicy::Deferred ) {
-            mm.addDeferred( ret, this->Name(), this->Hash() );
-        } else {
-            mm.addImmediate( ret, this->Name(), this->Hash() );
-        }
+        addInternal( ret, _arp );
         return ret;
+    }
+
+    void addInternal( std::shared_ptr<R> _res, AddResourcePolicy _arp ) {
+        if ( _arp == AddResourcePolicy::Deferred ) {
+            mm.addDeferred( _res, this->Name(), this->Hash() );
+        } else {
+            mm.addImmediate( _res, this->Name(), this->Hash() );
+        }
+
     }
 
     virtual void finalise( std::shared_ptr<RawImage> _elem ) = 0;

@@ -485,7 +485,7 @@ void RLTarget::updateStreamPacket( const std::string& _streamName ) {
     auto packet = rr.SSM().pop( _streamName );
     if ( packet.data ) {
         RawImage p{ packet.width, packet.height, 1, reinterpret_cast<const char* >(packet.data), _streamName };
-        rr.TM().updateTexture( p );
+        rr.TM().updateTexture( p, _streamName );
     }
 }
 

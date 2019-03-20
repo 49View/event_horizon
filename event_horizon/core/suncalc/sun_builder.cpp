@@ -63,7 +63,7 @@ SunBuilder::SunBuilder() {
 
 	buildFromString( "spring noon" );
 
-	goldenHourGradient = std::make_shared<RawImage>(rawImageDecodeFromMemory(golden_color_png, golden_color_png_len, "golden_gradient"));
+	goldenHourGradient = std::make_shared<RawImage>(golden_color_png, golden_color_png_len);
 }
 
 void SunBuilder::changeDefaultYear( int year ) {

@@ -794,7 +794,7 @@ void sigmoidMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::Intermediat
 }
 
 void valueToColorMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
-    auto vc = RawImage{ ic.baseName, 1, 1, ic.value.RGBATOI()};
+    auto vc = RawImage{ 1, 1, 3, ic.value.RGBATOI()};
     vc.grayScale();
 //    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(vc) );
 }
@@ -805,7 +805,7 @@ void grayscaleToNormalMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::I
 }
 
 void colorToBasecolorMap( const GLTF2::InternalPBRComponent& ic, const GLTF2::IntermediateMaterial& _im ) {
-    _im.grayScaleBaseColor = std::make_shared<RawImage>( RawImage{ "grayBase", 1, 1, ic.value.RGBATOI()} );
+    _im.grayScaleBaseColor = std::make_shared<RawImage>( 1, 1, 3, ic.value.RGBATOI() );
 
 //    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(_im.grayScaleBaseColor) );
 

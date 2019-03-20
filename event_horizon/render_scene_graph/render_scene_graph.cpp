@@ -17,12 +17,12 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
     uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
 
-    sg.TL().connect( [this](std::shared_ptr<RawImage> _elem ) {
-        this->RR().tm.addTextureWithData( *_elem.get() );
+    sg.TL().connect( [this](const SignalsAddSignature<RawImage>& _val ) {
+        this->RR().tm.addTextureWithData( *std::get<0>(_val).get(), std::get<1>(_val) );
     });
 
-    sg.ML().connect( [](std::shared_ptr<Material> _elem ) {
-        LOGRS( "Adding Material " << _elem->Name() );
+    sg.ML().connect( [](const SignalsAddSignature<Material>& _val ) {
+        LOGRS( "Adding Material " << std::get<1>(_val) );
         // ### TODO: SUSTITUTE Buffers with image hashes for materials!!!
 //        for ( const auto& b : _elem->Buffers() ) {
 //            ImageBuilder{sg.TL(), b.first}.makeDirect(b.second);

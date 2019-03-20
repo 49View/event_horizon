@@ -137,8 +137,8 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, r
                 $project: {
                     "project": 0,
                     "public": 0,
-                    "restricted": 0,
-                    "metadata.name": 0
+                    "restricted": 0
+                    // "metadata.name": 0
                 }
             }
         );

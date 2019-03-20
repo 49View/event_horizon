@@ -27,14 +27,16 @@ private:
     void operator=( TextureManager const& ) = delete;
 
 public:
-    std::shared_ptr<Texture> addTextureWithData( const RawImage& rawImage, TextureSlots _tslot = TSLOT_COLOR);
+    std::shared_ptr<Texture> addTextureWithData( const RawImage& rawImage,
+                                                 const std::string& _name,
+                                                 TextureSlots _tslot = TSLOT_COLOR);
     std::shared_ptr<Texture> addTextureNoData( TextureRenderData& tb );
     std::shared_ptr<Texture> addCubemapTexture( TextureRenderData& tb );
     std::shared_ptr<Texture> addTextureWithGPUHandle( const std::string& id, unsigned int _handle,
                                                       unsigned int _secondaryHandle = 0 );
     void preparingStremingTexture( const std::string& _streamName, const V2i& sd );
     void updateTexture( const std::string& id, const uint8_t *data );
-    void updateTexture( const RawImage& _image );
+    void updateTexture( const RawImage& _image, const std::string& _name );
     void updateTexture( const std::string& id, const uint8_t *data, int width, int height );
     void updateTexture( const std::string& id, uint8_t *data, int width, int height, PixelFormat inFormat,
                         PixelFormat outFormat );

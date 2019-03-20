@@ -64,12 +64,14 @@ std::shared_ptr<Texture> TextureManager::addTextureNoData( TextureRenderData& tb
     return addTextureImmediate( tb, _data.get() );
 }
 
-std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage, TextureSlots _tslot ) {
-    auto tb = TextureRenderData{ rawImage.Name() }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
+std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage,
+                                                             const std::string& _name,
+                                                             TextureSlots _tslot ) {
+    auto tb = TextureRenderData{ _name }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
     tb.format( channelsToFormat( rawImage.channels ) );
 
-    if ( mTextures.find( rawImage.Name() ) != mTextures.end() ) {
-        removeTexture( rawImage.Name() );
+    if ( mTextures.find( _name ) != mTextures.end() ) {
+        removeTexture( _name );
     }
     return addTextureImmediate( tb, rawImage.rawBtyes.get() );
 }
@@ -102,38 +104,12 @@ void TextureManager::preparingStremingTexture( const std::string& _streamName, c
     addTextureNoData( sdtv );
 }
 
-//void TextureManager::addFileTextureInternal( TextureRenderData& tb, Renderer& rr ) {
-//    static const std::string imgPrefix = "images/";
-//    auto dkey = tb.useImagePrefix ? ( imgPrefix + tb.Name() ) : tb.Name();
-//    FM::readRemote<ImageBuilder, HttpQuery::Binary>( dkey, tb, rr );
-//}
-//
-//void TextureManager::addFileTexture( TextureRenderData& tb, Renderer& rr ) {
-//    std::string filename = tb.Name();
-//    tb.setExt( getFileNameExt( tb.Name() ) );
-//
-//    switch ( tb.ttm ) {
-//        case TEXTURE_2D:
-//        case TEXTURE_3D:
-//            addFileTextureInternal( tb, rr );
-//            return;
-//        case TEXTURE_CUBE_MAP:
-//            addFileTextureInternal( tb.setId(cubeMapFace(filename, CubemapFaces::Left)   + tb.extension), rr );
-//            addFileTextureInternal( tb.setId(cubeMapFace(filename, CubemapFaces::Right)  + tb.extension), rr );
-//            addFileTextureInternal( tb.setId(cubeMapFace(filename, CubemapFaces::Front)  + tb.extension), rr );
-//            addFileTextureInternal( tb.setId(cubeMapFace(filename, CubemapFaces::Back)   + tb.extension), rr );
-//            addFileTextureInternal( tb.setId(cubeMapFace(filename, CubemapFaces::Top)    + tb.extension), rr );
-//            addFileTextureInternal( tb.setId(cubeMapFace(filename, CubemapFaces::Bottom) + tb.extension), rr );
-//            return;
-//    }
-//}
-
-void TextureManager::updateTexture( const RawImage& _image ) {
-    if ( auto it = mTextures.find( _image.Name() ); it != mTextures.end()) {
+void TextureManager::updateTexture( const RawImage& _image, const std::string& _name ) {
+    if ( auto it = mTextures.find( _name ); it != mTextures.end()) {
         Texture * toBeUpdated = it->second.get();
         toBeUpdated->refresh( _image.data(), 0, 0, toBeUpdated->getWidth(), toBeUpdated->getHeight());
     } else {
-        addTextureWithData( _image );
+        addTextureWithData( _image, _name );
     }
 
 }
