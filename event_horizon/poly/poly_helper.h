@@ -7,7 +7,6 @@
 
 #include <utility>
 #include "core/math/poly_shapes.hpp"
-#include "core/callback_dependency.h"
 
 class GeomData;
 class Profile;

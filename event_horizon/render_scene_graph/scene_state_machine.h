@@ -91,14 +91,8 @@ public:
         updateScreenPerc();
     }
 
-    void resize() {
-        rect.percentage( sizeScreenPerc, getScreenSizefUI );
-//        updateScreenPerc();
-    }
-
-    void updateScreenPerc() {
-        sizeScreenPerc = Rect2f::percentage( rect, getScreenRectUI );
-    }
+    void resize();
+    void updateScreenPerc();
 
     const Rect2f& getRect() const {
         return rect;

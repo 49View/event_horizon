@@ -10,7 +10,6 @@
 #include <utility>
 #include <vector>
 #include <array>
-#include <core/callback_dependency.h>
 #include <core/htypes_shared.hpp>
 #include <core/math/vector3f.h>
 #include <core/publisher.hpp>

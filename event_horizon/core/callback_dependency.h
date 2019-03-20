@@ -7,25 +7,20 @@
 #include <memory>
 #include <vector>
 #include <set>
+#include <unordered_map>
 #include <string>
 #include <typeinfo>
 #include <utility>
 
 #include <boost/signals2.hpp>
 
-#include "htypes_shared.hpp"
-#include "http/webclient.h"
 #include <core/util.h>
 #include <core/htypes_shared.hpp>
+#include <core/resource_utils.hpp>
 
-template <typename T>
-using SignalsAddSignature = std::tuple<std::shared_ptr<T>, std::string>;
-
-template<typename T, typename C = std::unordered_map<std::string,std::shared_ptr<T>> >
+template<typename T, typename C = ResourceManagerContainer<T>>
 class ResourceManager {
 public:
-    using SignalsDeferredContainer = std::set<SignalsAddSignature<T>>;
-
     std::shared_ptr<T> exists( const std::string& _key ) const {
         if ( auto res = resourcesMapper.find( _key ); res != resourcesMapper.end() ) {
             return resources.at(res->second);
@@ -47,7 +42,7 @@ public:
         signalAddElements.clear();
     }
 
-    void addToSignal( SignalsDeferredContainer& _container, const SignalsAddSignature<T>& _elem ) {
+    void addToSignal( SignalsDeferredContainer<T>& _container, const ResourceSignalsAddSignature<T>& _elem ) {
         _container.emplace(_elem);
     }
 
@@ -88,7 +83,7 @@ public:
         return nullptr;
     }
 
-    void connect( std::function<void (const SignalsAddSignature<T>&)> _slot ) {
+    void connect( std::function<void (const ResourceSignalsAddSignature<T>&)> _slot ) {
         addSignal.connect( _slot );
     }
 
@@ -110,8 +105,8 @@ private:
     C resources;
     std::unordered_map<std::string, std::string> resourcesMapper;
 
-    SignalsDeferredContainer signalAddElements;
-    boost::signals2::signal<void(const SignalsAddSignature<T>&)> addSignal;
+    SignalsDeferredContainer<T> signalAddElements;
+    boost::signals2::signal<void(const ResourceSignalsAddSignature<T>&)> addSignal;
 };
 
 template< typename B>
@@ -239,11 +234,9 @@ struct FileCallbackHandlerSimple : FileCallbackHandler {
         simpleCallback = _simpleCallback;
     }
 
-    virtual ~FileCallbackHandlerSimple() {
+    virtual ~FileCallbackHandlerSimple() = default;
 
-    }
-
-    bool executeCallback( const std::string& _key, const DependencyStatus _status ) {
+    bool executeCallback( const std::string& _key, const DependencyStatus _status ) override {
         if ( callbackSuccessfulStatus(_status) ) {
             simpleCallback( cbData->data );
             return true;
@@ -262,7 +255,7 @@ struct FileCallbackHandlerMaker : public FileCallbackHandler {
 };
 
 struct FileCallbackHandlerObservable : public FileCallbackHandler {
-    FileCallbackHandlerObservable( std::shared_ptr<ResourceBuilderObservable> _builder );
+    explicit FileCallbackHandlerObservable( std::shared_ptr<ResourceBuilderObservable> _builder );
     virtual ~FileCallbackHandlerObservable() = default;
 
     bool executeCallback( const std::string& _key, DependencyStatus _status ) override;
@@ -271,40 +264,6 @@ struct FileCallbackHandlerObservable : public FileCallbackHandler {
 template< typename Builder>
 std::shared_ptr<FileCallbackHandler> makeHandler( Builder& obj ) {
     return std::make_shared<FileCallbackHandlerMaker>( std::make_shared<Builder>( obj ) );
-}
-
-//template< typename Builder>
-//std::shared_ptr<FileCallbackHandler> makeHandler( Builder& obj ) {
-//    return std::make_shared<FileCallbackHandlerObservable>( std::make_shared<Builder>( obj ) );
-//}
-
-template<HttpQuery Q, typename T>
-Url makeUrl(const std::string& _name) {
-    switch (Q) {
-        case HttpQuery::JSON:
-            // ### restore T::typeName() for private api calls, might need to re-route in a different way
-            return Url::privateAPI(HttpFilePrefix::catalog + T::Prefix() + HttpFilePrefix::getname + url_encode( _name ) );
-//            return Url::privateAPI(HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) );
-        case HttpQuery::Binary:
-        case HttpQuery::Text: {
-//            if ( T::usesNotExactQuery() ) {
-//                return Url::entityContent( _name );
-//            } else {
-                return Url( HttpFilePrefix::get + url_encode( _name ) );
-//            }
-        }
-        default:
-            break;
-    }
-    return Url{};
-}
-
-void readRemote( const Url& url, std::shared_ptr<FileCallbackHandler> _handler,
-                 Http::ResponseFlags rf = Http::ResponseFlags::None );
-
-template<typename R, typename B, HttpQuery Q>
-void readRemote( const std::string& _name, B& _builder ) {
-    readRemote( makeUrl<Q, R>(_name), makeHandler<B>( _builder ) );
 }
 
 // Data Exchange

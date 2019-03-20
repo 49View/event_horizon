@@ -10,15 +10,13 @@
 #include <cstdint>
 #include <typeinfo>
 #include <variant>
+
+#include <boost/signals2.hpp>
+
 #include <core/uuid.hpp>
-#include <core/camera_rig.hpp>
 #include <core/command.hpp>
-#include <core/font_manager.h>
-#include <core/serializebin.hpp>
+#include <core/resource_utils.hpp>
 #include <core/suncalc/sun_builder.h>
-#include <core/callback_dependency.h>
-#include <poly/profile_builder.h>
-#include <poly/material_builder.h>
 #include <poly/poly.hpp>
 
 class StreamingMediator;
@@ -36,6 +34,14 @@ using NodeGraphConnectParamsSig = NodeVariants&;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
 
 class SceneGraph;
+class ProfileManager;
+template<typename T, typename C> class ResourceManager;
+class MaterialManager;
+class ColorManager;
+class FontManager;
+class CameraManager;
+
+using ImageManager = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
 
 class CommandScriptSceneGraph : public CommandScript {
 public:
@@ -46,7 +52,7 @@ public:
 class SceneGraph {
 public:
     explicit SceneGraph( CommandQueue& cq,
-                         ResourceManager<RawImage>& _tl,
+                         ImageManager& _tl,
                          ProfileManager& _pm,
                          MaterialManager& _ml,
                          ColorManager& _cl,
@@ -72,7 +78,7 @@ public:
 
     size_t countGeoms() const;
 
-    ResourceManager<RawImage>& TL() { return tl; }
+    ImageManager& TL() { return tl; }
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
@@ -108,7 +114,7 @@ protected:
 protected:
     NodeGraph geoms;
 
-    ResourceManager<RawImage>& tl;
+    ImageManager& tl;
     ProfileManager& pl;
     MaterialManager& ml;
     ColorManager& cl;

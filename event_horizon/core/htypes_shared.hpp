@@ -317,3 +317,4 @@ struct TextureUniformDesc {
 	unsigned int slot;
 	int 		 target;
 };
+

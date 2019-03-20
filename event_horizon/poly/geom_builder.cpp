@@ -5,6 +5,8 @@
 #include "geom_builder.h"
 #include <core/node.hpp>
 #include <core/entity_factory.hpp>
+#include <poly/material_builder.h>
+#include <poly/profile_builder.h>
 #include <poly/poly.hpp>
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg ) : SceneGraphGeomBaseBuilder(_sg) {
@@ -254,6 +256,11 @@ GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
 GeomAssetSP GeomBuilder::buildr() {
     build();
     return elem;
+}
+
+GeomBuilder& GeomBuilder::pb( const float _a, const float _b ) {
+    ProfileBuilder{ sg.PL(), _a, _b }.build();
+    return *this;
 }
 
 //bool GeomFileAssetBuilder::makeImpl( uint8_p&& _data, const DependencyStatus _status ) {

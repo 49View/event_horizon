@@ -6,17 +6,17 @@
 
 #include <map>
 #include <string>
-#include "core/callback_dependency.h"
-#include "core/observer.h"
-#include "poly/scene_graph.h"
-#include "graphics/renderer.h"
+#include <core/observer.h>
+#include <core/soa_utils.h>
+#include <poly/scene_graph.h>
 
 struct scene_t;
 class AudioManager;
+class Renderer;
 
 struct HierGeomRenderObserver : public ObserverShared<GeomAsset> {
 
-    explicit HierGeomRenderObserver( Renderer& _rr ) : rr( _rr ) {}
+    explicit HierGeomRenderObserver( Renderer& _rr );
     virtual ~HierGeomRenderObserver() = default;
 
     std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> generateGeometryVP( std::shared_ptr<GeomData> _data );
@@ -26,7 +26,7 @@ private:
 };
 
 struct UIElementRenderObserver : public ObserverShared<UIAsset> {
-    explicit UIElementRenderObserver( Renderer& _rr ) : rr( _rr ) {}
+    explicit UIElementRenderObserver( Renderer& _rr );
     virtual ~UIElementRenderObserver() = default;
 
     void notified( UIAssetSP _source, const std::string& generator ) override;
@@ -39,7 +39,7 @@ public:
     RenderSceneGraph( Renderer& rr, SceneGraph& _sg );
     virtual ~RenderSceneGraph() = default;
 
-    Renderer& RR() { return rr; }
+    Renderer& RR();
     SceneGraph& SG() { return sg; }
 protected:
 //    void updateImpl() override;

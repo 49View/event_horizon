@@ -7,10 +7,12 @@
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
-#include "core/node.hpp"
-#include "poly/geom_builder.h"
-#include "poly/ui_shape_builder.h"
-#include "poly/converters/gltf2/gltf2.h"
+#include <core/node.hpp>
+#include <core/camera.h>
+#include <core/camera_rig.hpp>
+#include <poly/geom_builder.h>
+#include <poly/ui_shape_builder.h>
+#include <poly/converters/gltf2/gltf2.h>
 
 //std::shared_ptr<GeomBuilder> gbt;
 std::string svgString;

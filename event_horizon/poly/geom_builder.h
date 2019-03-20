@@ -19,6 +19,8 @@
 #include <poly/scene_graph.h>
 #include <poly/scene_graph_geom_builder_base.hpp>
 
+class MaterialBuilder;
+
 enum class GeomBuilderType {
     shape,
     follower,
@@ -153,10 +155,7 @@ public:
         return *this;
     }
 
-    GeomBuilder& pb( const float _a, const float _b ) {
-        ProfileBuilder{ sg.PL(), _a, _b }.build();
-        return *this;
-    }
+    GeomBuilder& pb( const float _a, const float _b );
 
     GeomBuilder& ascii( const std::string& _value ) {
         asciiText = _value;

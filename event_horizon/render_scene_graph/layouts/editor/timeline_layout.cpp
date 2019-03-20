@@ -6,6 +6,7 @@
 
 #include "timeline_layout.h"
 #include <core/math/anim.h>
+#include <poly/camera_manager.h>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/imgui_internal.h>
 #include <render_scene_graph/scene_orchestrator.hpp>

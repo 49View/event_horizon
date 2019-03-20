@@ -3,11 +3,12 @@
 //
 
 #include "material_layout.h"
-#include <graphics/imgui/imgui.h>
-#include <render_scene_graph/scene_orchestrator.hpp>
-#include <poly/geom_builder.h>
 #include <core/tar_util.h>
+#include <poly/geom_builder.h>
+#include <poly/material_builder.h>
+#include <graphics/imgui/imgui.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>
+#include <render_scene_graph/scene_orchestrator.hpp>
 
 struct CallbackMaterialData {
     CallbackMaterialData( const std::string& filename, const SerializableContainer& data ) : filename( filename ),

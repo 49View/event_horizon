@@ -7,9 +7,39 @@
 
 #include <utility>
 #include <core/callback_dependency.h>
+#include <core/http/webclient.h>
 #include <core/name_policy.hpp>
 #include <core/versionable.hpp>
 #include <core/entity_factory.hpp>
+
+template<HttpQuery Q, typename T>
+Url makeUrl(const std::string& _name) {
+    switch (Q) {
+        case HttpQuery::JSON:
+            // ### restore T::typeName() for private api calls, might need to re-route in a different way
+            return Url::privateAPI(HttpFilePrefix::catalog + T::Prefix() + HttpFilePrefix::getname + url_encode( _name ) );
+//            return Url::privateAPI(HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) );
+        case HttpQuery::Binary:
+        case HttpQuery::Text: {
+//            if ( T::usesNotExactQuery() ) {
+//                return Url::entityContent( _name );
+//            } else {
+            return Url( HttpFilePrefix::get + url_encode( _name ) );
+//            }
+        }
+        default:
+            break;
+    }
+    return Url{};
+}
+
+void readRemote( const Url& url, std::shared_ptr<FileCallbackHandler> _handler,
+                 Http::ResponseFlags rf = Http::ResponseFlags::None );
+
+template<typename R, typename B, HttpQuery Q>
+void readRemote( const std::string& _name, B& _builder ) {
+    readRemote( makeUrl<Q, R>(_name), makeHandler<B>( _builder ) );
+}
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
 

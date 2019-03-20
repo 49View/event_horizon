@@ -3,12 +3,15 @@
 //
 
 #include "render_scene_graph.h"
+#include <core/resource_utils.hpp>
 #include <core/image_builder.h>
 #include <core/raw_image.h>
-#include <poly/camera_manager.h>
 #include <core/node.hpp>
+#include <poly/camera_manager.h>
+#include <poly/material_builder.h>
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>
+#include <graphics/renderer.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
 
@@ -17,11 +20,11 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
     uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
 
-    sg.TL().connect( [this](const SignalsAddSignature<RawImage>& _val ) {
+    sg.TL().connect( [this](const ResourceSignalsAddSignature<RawImage>& _val ) {
         this->RR().tm.addTextureWithData( *std::get<0>(_val).get(), std::get<1>(_val) );
     });
 
-    sg.ML().connect( [](const SignalsAddSignature<Material>& _val ) {
+    sg.ML().connect( [](const ResourceSignalsAddSignature<Material>& _val ) {
         LOGRS( "Adding Material " << std::get<1>(_val) );
         // ### TODO: SUSTITUTE Buffers with image hashes for materials!!!
 //        for ( const auto& b : _elem->Buffers() ) {
@@ -94,6 +97,8 @@ void RenderSceneGraph::changeMaterialColorCallback( const std::vector<std::strin
     rr.changeMaterialColorOnTags( sg.getGeomType( _params[0] ), sg.CL().get(concatParams(_params, 1))->color );
 }
 
+Renderer& RenderSceneGraph::RR() { return rr; }
+
 //void RenderSceneGraph::changeMaterialColorTagImpl( const std::vector<std::string>& _params ) {
 //    ColorBuilder{cl, concatParams(_params, 1)}.load(std::bind( &RenderSceneGraph::changeMaterialColorCallback,
 //                                                               this,
@@ -146,6 +151,8 @@ void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& g
             .p(generateGeometryVP(_source->Data())).n(_source->UUiD()).g(_source->GHType()).build();
 }
 
+HierGeomRenderObserver::HierGeomRenderObserver( Renderer& _rr ) : rr( _rr ) {}
+
 void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
     auto mat = _source->Data()->getMaterial();
     auto renderBucketIndex = _source->Data()->RenderBucketIndex();
@@ -153,3 +160,5 @@ void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& ge
     auto vs = _source->Data()->VertexList();
     VPBuilder<PosTex3dStrip>{rr,vpList,mat}.p(vs).n(_source->UUiD()).build();
 }
+
+UIElementRenderObserver::UIElementRenderObserver( Renderer& _rr ) : rr( _rr ) {}

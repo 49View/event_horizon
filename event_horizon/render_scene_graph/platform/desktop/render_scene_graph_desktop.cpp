@@ -10,8 +10,10 @@
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
 
-#include "graphics/opengl/lightmapper_opengl.h"
-#include "poly/lightmap_exchange_format.h"
+#include <graphics/opengl/gl_util.h>
+#include <graphics/opengl/lightmapper_opengl.h>
+#include <graphics/renderer.h>
+#include <poly/lightmap_exchange_format.h>
 #include <thekla/thekla_atlas.h>
 
 scene_t _outputScene;

@@ -3,12 +3,17 @@
 //
 
 #include "scene_graph.h"
+#include <core/resource_utils.hpp>
 #include <core/node.hpp>
 #include <core/raw_image.h>
 #include <core/image_builder.h>
+#include <core/camera_rig.hpp>
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>
 #include <poly/camera_manager.h>
+#include <core/font_manager.h>
+#include <poly/profile_builder.h>
+#include <poly/material_builder.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
 //    addImpl(_geom);

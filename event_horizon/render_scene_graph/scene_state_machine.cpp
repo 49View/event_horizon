@@ -6,6 +6,8 @@
 #include <core/app_globals.h>
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
+#include <core/app_globals.h>
+#include <poly/camera_manager.h>
 #include <graphics/render_targets.hpp>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/editor/includes.h>
@@ -172,4 +174,13 @@ void SceneStateMachineBackEnd::initNV() {
 
 void SceneStateMachine::activate( [[maybe_unused]] const SceneStateMachine::OnActivate& ) {
     owner->initNV();
+}
+
+void SceneRectArranger::resize() {
+    rect.percentage( sizeScreenPerc, getScreenSizefUI );
+//        updateScreenPerc();
+}
+
+void SceneRectArranger::updateScreenPerc() {
+    sizeScreenPerc = Rect2f::percentage( rect, getScreenRectUI );
 }

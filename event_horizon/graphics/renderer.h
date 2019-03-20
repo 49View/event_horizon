@@ -1,9 +1,7 @@
-#include <utility>
-
-
 #pragma once
 
 #include <vector>
+#include <utility>
 #include <array>
 #include <unordered_set>
 #include "framebuffer.h"

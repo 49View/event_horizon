@@ -7,7 +7,6 @@
 
 #include <unordered_map>
 #include <graphics/text_input.hpp>
-#include <poly/camera_manager.h>
 #include <core/camera_rig.hpp>
 #include <core/observer.h>
 #include <core/math/vector2f.h>
@@ -17,6 +16,7 @@
 #include <core/streaming_mediator.hpp>
 #include <render_scene_graph/render_scene_graph.h>
 #include <render_scene_graph/camera_controls.hpp>
+#include <graphics/renderer.h>
 
 class MouseInput;
 class SceneStateMachineBackEnd;

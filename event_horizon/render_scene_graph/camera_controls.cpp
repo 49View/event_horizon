@@ -6,6 +6,7 @@
 #include <core/camera.h>
 #include <core/node.hpp>
 #include <graphics/text_input.hpp>
+#include <graphics/renderer.h>
 #include <core/camera_rig.hpp>
 #include <poly/geom_data.hpp>
 #include <poly/ui_shape_builder.h>
