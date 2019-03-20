@@ -285,11 +285,11 @@ Url makeUrl(const std::string& _name) {
 //            return Url::privateAPI(HttpFilePrefix::catalog + T::typeName() + HttpFilePrefix::getname + url_encode( _name ) );
         case HttpQuery::Binary:
         case HttpQuery::Text: {
-            if ( T::usesNotExactQuery() ) {
-                return Url::entityContent( T::Version(), _name );
-            } else {
+//            if ( T::usesNotExactQuery() ) {
+//                return Url::entityContent( _name );
+//            } else {
                 return Url( HttpFilePrefix::get + url_encode( _name ) );
-            }
+//            }
         }
         default:
             break;

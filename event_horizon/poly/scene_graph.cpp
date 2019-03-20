@@ -172,6 +172,4 @@ void SceneGraph::init() {
 
     MaterialBuilder{ML(), S::WHITE_PBR, S::SH}.makeDefault();
     CameraBuilder{CM()}.makeDefault();
-
-    ImageBuilder{TL(), "02.png"}.load();
 }

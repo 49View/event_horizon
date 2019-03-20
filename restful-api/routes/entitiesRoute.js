@@ -43,15 +43,13 @@ router.get('/:group/:tags', async (req, res, next) => {
     }
 });
 
-router.get('/metadata/byGroupTags/:version/:group/:tags', async (req, res, next) => {
+router.get('/metadata/byGroupTags/:group/:tags', async (req, res, next) => {
     try {
         const group = req.params.group;
         const tags = req.params.tags.split(",");
         const project = req.user.project;
-        const version = req.params.version;
-        console.log("Entity version: " + version);
         //Check existing entity for use project (or public)
-        const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, version, false, null);
+        const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, false, null);
         if (foundEntities!==null && foundEntities.length>0) {
             res.status(200).send(foundEntities);
         } else {

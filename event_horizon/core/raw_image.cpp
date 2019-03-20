@@ -53,14 +53,12 @@ RawImage::RawImage( const std::string& _name, unsigned int _w, unsigned int _h, 
     Name(_name);
 }
 
-RawImage::RawImage( uint8_p&& data, const std::string& _name ) {
+RawImage::RawImage( uint8_p&& data ) {
     unsigned char *ddata = stbi_load_from_memory(data.first.get(), data.second, &width, &height, &channels, false );
     ASSERT(ddata);
     rawBtyes = std::make_unique<uint8_t[]>( width * height * channels );
     std::memcpy( rawBtyes.get(), ddata, width * height * channels );
     stbi_image_free(ddata);
-
-    this->Name(_name);
 }
 
 RawImage rawImageDecodeFromMemory( const uint8_p& data, const std::string& _name, int forceChannels ) {

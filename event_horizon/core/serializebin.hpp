@@ -309,7 +309,8 @@ public:
 		SerializeDependencyHash dh;
 		read(dh);
 		if ( dh != NULL_HASH ) {
-			v = EF::create<T>(dep(dh));
+//		    ### Reenable this factory
+//			v = EF::create<T>(dep(dh));
 		}
 	}
 

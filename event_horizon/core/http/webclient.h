@@ -247,9 +247,9 @@ struct Url {
     static const std::string HttpProtocol;
     static const std::string HttpsProtocol;
 
-    static std::string entityURLParams( const uint64_t _version, const std::string& _key, const std::string& _name = "" );
-    static Url entityMetadata( const uint64_t _version, const std::string& _key, const std::string& _name = "" );
-    static Url entityContent( const uint64_t _version, const std::string& _key, const std::string& _name = "" );
+    static std::string entityURLParams( const std::string& _key, const std::string& _name = "" );
+    static Url entityMetadata(const std::string& _key, const std::string& _name = "" );
+    static Url entityContent( const std::string& _key, const std::string& _name = "" );
 
 };
 

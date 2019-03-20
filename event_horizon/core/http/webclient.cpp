@@ -87,16 +87,16 @@ Url Url::privateAPI( const std::string& _params ) {
     return Url{ "/" + Http::project() + luri };
 }
 
-std::string Url::entityURLParams( const uint64_t _version, const std::string& _key, const std::string& _name ) {
-    return url_encode_spacesonly( std::to_string(_version) + "/" + ( _name.empty() ? _key : ( _key + "/"+_name) ) );
+std::string Url::entityURLParams( const std::string& _key, const std::string& _name ) {
+    return url_encode_spacesonly( ( _name.empty() ? _key : ( _key + "/"+_name) ) );
 }
 
-Url Url::entityMetadata( const uint64_t _version, const std::string& _key, const std::string& _name ) {
-    return Url( HttpFilePrefix::entities_all + entityURLParams( _version, _key, _name) );
+Url Url::entityMetadata( const std::string& _key, const std::string& _name ) {
+    return Url( HttpFilePrefix::entities_all + entityURLParams( _key, _name) );
 }
 
-Url Url::entityContent( const uint64_t _version, const std::string& _key, const std::string& _name ) {
-    return Url( HttpFilePrefix::entities_onebinary + entityURLParams( _version, _key, _name) );
+Url Url::entityContent( const std::string& _key, const std::string& _name ) {
+    return Url( HttpFilePrefix::entities_onebinary + entityURLParams( _key, _name) );
 }
 
 std::string url_encode( const std::string& value ) {

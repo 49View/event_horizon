@@ -14,6 +14,10 @@ class RawImage;
 template < typename B, typename R >
 class ResourceBuilder2 : public Publisher<B, EmptyBox> {
 public:
+    enum class AddResourcePolicy {
+        Immediate,
+        Deferred
+    };
     explicit ResourceBuilder2( ResourceManager<R>& mm ) : mm( mm ) {}
     ResourceBuilder2( ResourceManager<R>& _mm, const std::string& _name ) : mm( _mm ) {
         this->Name(_name);
@@ -25,18 +29,15 @@ public:
         params = _params;
         Http::get( Url( HttpFilePrefix::entities + B::Prefix() + "/" + url_encode( this->Name() ) ),
                    [&](HttpResponeParams _res) {
-                       // EF::create<R>( std::move( _data ) );
-                       auto ret = std::make_shared<R>( uint8_p{std::move(_res.buffer), _res.length}, this->Name());
-                       mm.addDeferred( ret, this->Name(), this->Hash() );
+                       addResource( SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length},
+                                    AddResourcePolicy::Deferred );
                        if ( ccf ) ccf(params);
                    } );
     }
 
     std::shared_ptr<R> make( const SerializableContainer& _data ) {
         if ( auto ret = prepAndCheck(_data ); ret ) return ret;
-        auto res = makeInternal( _data );
-        mm.addImmediate( res, this->Name(), this->Hash() );
-        return res;
+        return addResource(_data, AddResourcePolicy::Immediate);
     }
 
     void create( const SerializableContainer& _data ) {
@@ -44,7 +45,7 @@ public:
 
         if ( B::Version() != 0 ) this->addTag( this->hashFn(B::Version()) );
         this->publish2( _data, [&](HttpResponeParams res) {
-            mm.addDeferred( makeInternal( _data ), this->Name(), this->Hash() );
+            addResource(_data, AddResourcePolicy::Deferred);
         } );
     }
 
@@ -57,7 +58,18 @@ protected:
         return nullptr;
     }
 
-    virtual std::shared_ptr<R> makeInternal( const SerializableContainer& _data ) = 0;
+    std::shared_ptr<R> addResource( const SerializableContainer& _data, AddResourcePolicy _arp ) {
+        auto ret = EF::create<R>(_data);
+        finalise(ret);
+        if ( _arp == AddResourcePolicy::Deferred ) {
+            mm.addDeferred( ret, this->Name(), this->Hash() );
+        } else {
+            mm.addImmediate( ret, this->Name(), this->Hash() );
+        }
+        return ret;
+    }
+
+    virtual void finalise( std::shared_ptr<RawImage> _elem ) = 0;
 
 protected:
     ResourceManager<R>& mm;
@@ -151,5 +163,5 @@ protected:
     void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
     void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 
-    std::shared_ptr<RawImage> makeInternal( const SerializableContainer& _data ) override;
+    void finalise( std::shared_ptr<RawImage> _elem ) override;
 };

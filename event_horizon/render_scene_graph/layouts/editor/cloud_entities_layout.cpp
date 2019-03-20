@@ -38,7 +38,7 @@ void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string _ti
     char* buf = _title == "Cloud Geometry" ? buf1 : buf2;
     ImGui::PushID( static_cast<int>(std::hash<std::string>{}( _title)));
     if ( ImGui::InputText( ("##" + _title).c_str(), buf, 1024, ImGuiInputTextFlags_EnterReturnsTrue ) ) {
-        Http::get( Url::entityMetadata(_version, _entType, std::string(buf)),
+        Http::get( Url::entityMetadata( _entType, std::string(buf)),
                    [&](const Http::Result&_res) {
                        remoteFilterString = _res.bufferString;
                        SceneOrchestrator::sUpdateCallbacks.emplace_back( listCloudCallback );
