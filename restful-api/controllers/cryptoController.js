@@ -1,12 +1,55 @@
 
+const crypto = require('crypto')
+const rsa = require('js-crypto-rsa');
+
+let keyPair = null;
+let privateKey, publicKey;
+const passphrase = "m(73f=fn2wxccv325rs1%$%&Szz2sdjnkl549huuq324u9g1q23";
+
+
+exports.generateKey = async () => {
+    try {
+        //crypto.getCiphers().forEach(e => { console.log(e)});
+        const keyPair = crypto.generateKeyPairSync('rsa', {
+            modulusLength: 4096,
+            publicKeyEncoding: {
+              type: 'spki',
+              format: 'pem'
+            },
+            privateKeyEncoding: {
+              type: 'pkcs8',
+              format: 'pem',
+              cipher: 'aes-256-cbc',
+              passphrase: passphrase
+            }
+          });
+          privateKey=keyPair.privateKey;
+          publicKey=keyPair.publicKey;
+          console.log("Private: ", privateKey);
+          console.log("Public: ", publicKey);
+          const baseText="Questo è un testo di prova criptato";
+          console.log("Text ["+baseText.length+"]: *"+baseText+"*");
+          const cipherText = crypto.publicEncrypt({ key:publicKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING} , Buffer.from(baseText));
+          console.log("Ciphered ["+cipherText.length+"]: ", cipherText);
+
+          const cleanText = crypto.privateDecrypt({ key:privateKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING, passphrase: passphrase}, cipherText);
+          console.log("Deciphered ["+cleanText.length+"]: "+ cleanText + " *"+ cleanText+"*");
+    } catch (ex) {
+        console.log("ERROR", ex);
+    }
+}
+
 exports.decodeRequest = (req,res,next) => {
     console.log("DECODE REQUEST", req.url);
     try {
+        if (req.url.startsWith("/FFFA")) {
+            //Return server public key
+        }
         if (req.url.startsWith("/FFFE")) {
-            //Register CIPHER KEY FOR CLIENT e return CLIENT ID
+            //Save client key, assign id to key (and client), encrypt id with client key and send to client
         }
         if (req.url.startsWith("/FFFF")) {
-            // //Register DECODE URL AND BODY WITH CIPHER KEY FOR CLIENT [CLIENT ID]
+            //Get client key from client id, decrypt message with key, route messane then encrypt response and send to client
 
             const uncipherRequest = Buffer.from(req.url.substr(5), "base64").toString();
             //console.log("UNCIPHER REQUEST: ",uncipherRequest);
