@@ -81,32 +81,14 @@ namespace Http {
         return res;
     }
 
-    void getInternal( const Url& url, ResponseCallbackFunc callback, ResponseFlags rf ) {
+    void getInternal( const Url& url,
+                      ResponseCallbackFunc callback,
+                      ResponseCallbackFunc callbackFailed,
+                      ResponseFlags rf ) {
         auto request = makeRequest( url );
-//        auto ssl_settings = std::make_shared< restbed::SSLSettings >( );
-
-//        settings->set_client_authentication_enabled( true );
-//        ssl_settings->set_private_key( restbed::Uri( "file:///Users/Dado/Documents/49View/event_horizon/configurations/certificates/client1-key.pem" ));
-//        ssl_settings->set_certificate( restbed::Uri( "file:///Users/Dado/Documents/49View/event_horizon/configurations/certificates/client1-crt.pem" ) );
-//        ssl_settings->set_certificate_authority_pool( restbed::Uri( "file:///Users/Dado/Documents/49View/event_horizon/configurations/certificates/ca-crt.pem" ) );
-
-//        auto settings = make_shared< Settings >( );
-//        settings->set_ssl_settings( ssl_settings );
-//
 
         auto settings = std::make_shared< restbed::Settings >( );
         settings->set_connection_limit( 5 );
-//        settings->set_ssl_settings( ssl_settings );
-
-//        try {
-//            auto lres = restbed::Http::sync( request, settings );
-//            LOGR( "%d", lres->get_status_code() );
-//        } catch ( const std::exception& ex ) {
-//            LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
-//            LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
-//        } catch ( ... ) {
-//            LOGR( "HTTP SYNC FAILED on %s", url.toString().c_str());
-//        }
 
         std::shared_ptr< restbed::Response > res;
         try {
@@ -114,7 +96,12 @@ namespace Http {
                 request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
                               std::shared_ptr< restbed::Response > res) {
                 LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
-                callback( handleResponse( res, url, rf ) );
+                auto lRes = handleResponse( res, url, rf );
+                if ( lRes.isSuccessStatusCode() ) {
+                    if ( callback ) callback( lRes );
+                } else {
+                    if ( callbackFailed ) callbackFailed( lRes );
+                }
             }, settings );
         } catch ( const std::exception& ex ) {
             LOGR( "[HTTP-GET-RESPONSE][ERROR] on %s", url.toString().c_str());
@@ -124,7 +111,8 @@ namespace Http {
         }
     }
 
-    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback ) {
+    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt,
+                       ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
@@ -143,8 +131,11 @@ namespace Http {
                                       auto rcode = res->get_status_code();
                                       LOGR("[HTTP-POST] Response code %d - %s ", rcode,
                                                                                  res->get_status_message().c_str() );
-                                      if ( callback ) {
-                                          callback( handleResponse( res, url, ResponseFlags::None ) );
+                                      auto lRes = handleResponse( res, url, ResponseFlags::None );
+                                      if ( lRes.isSuccessStatusCode() ) {
+                                          if ( callback ) callback( lRes );
+                                      } else {
+                                          if ( callbackFailed ) callbackFailed( lRes );
                                       }
                                   }, settings );
         } catch ( const std::exception& ex ) {

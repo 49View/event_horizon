@@ -147,17 +147,29 @@ namespace Http {
     void xProjectHeader( const LoginFields& _lf );
 
     void get( const Url& url, ResponseCallbackFunc callback,
+              ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None );
-    void getInternal( const Url& url, ResponseCallbackFunc callback,
+    void getInternal( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
               ResponseFlags rf = ResponseFlags::None );
 
-    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback );
+    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt,
+                       ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed );
 
-    void post( const Url& url, const std::string& _data, ResponseCallbackFunc callback = nullptr );
-    void post( const Url& url, const uint8_p& buffer, ResponseCallbackFunc callback = nullptr );
-    void post( const Url& url, const char *buff, uint64_t length, ResponseCallbackFunc callback = nullptr);
-    void post( const Url& url, const std::vector<unsigned char>& buffer, ResponseCallbackFunc callback = nullptr );
-    void post( const Url& url, ResponseCallbackFunc callback );
+    void post( const Url& url, const std::string& _data,
+               ResponseCallbackFunc callback = nullptr,
+               ResponseCallbackFunc callbackFailed = nullptr );
+    void post( const Url& url, const uint8_p& buffer,
+               ResponseCallbackFunc callback = nullptr,
+               ResponseCallbackFunc callbackFailed = nullptr );
+    void post( const Url& url, const char *buff, uint64_t length,
+               ResponseCallbackFunc callback = nullptr,
+               ResponseCallbackFunc callbackFailed = nullptr );
+    void post( const Url& url, const std::vector<unsigned char>& buffer,
+               ResponseCallbackFunc callback = nullptr,
+               ResponseCallbackFunc callbackFailed = nullptr );
+    void post( const Url& url,
+               ResponseCallbackFunc callback,
+               ResponseCallbackFunc callbackFailed = nullptr  );
 
     void useLocalHost( bool _flag );
     void userLoggedIn( bool _flag );

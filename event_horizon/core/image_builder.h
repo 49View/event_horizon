@@ -11,14 +11,8 @@
 class ImageBuilder;
 class RawImage;
 
-enum class ResourcePublishFlag {
-    False,
-    True
-};
-
 template < typename B, typename R >
-class ResourceBuilder2 : public ResourceBuilderBase,
-                         public Publisher<B, EmptyBox> {
+class ResourceBuilder2 : public Publisher<B, EmptyBox> {
 public:
     explicit ResourceBuilder2( ResourceManager<R>& mm ) : mm( mm ) {}
     ResourceBuilder2( ResourceManager<R>& _mm, const std::string& _name ) : mm( _mm ) {
@@ -29,47 +23,46 @@ public:
     void load( CommandResouceCallbackFunction _ccf = nullptr, const std::vector<std::string>& _params = {} ) {
         ccf = _ccf;
         params = _params;
-        build();
+        Http::get( Url( HttpFilePrefix::entities + B::Prefix() + "/" + url_encode( this->Name() ) ),
+                   [&](HttpResponeParams _res) {
+                       // EF::create<R>( std::move( _data ) );
+                       auto ret = std::make_shared<R>( uint8_p{std::move(_res.buffer), _res.length}, this->Name());
+                       mm.addDeferred( ret, this->Name(), this->Hash() );
+                       if ( ccf ) ccf(params);
+                   } );
     }
 
-    bool build() {
-        if ( !mm.exists(this->Name()) || R::usesNotExactQuery() ) {
-            readRemote<R, B, HttpQuery::Binary>( R::Prefix() + "/" + this->Name(), *this );
-            return true;
-        }
-        return false;
+    std::shared_ptr<R> make( const SerializableContainer& _data ) {
+        if ( auto ret = prepAndCheck(_data ); ret ) return ret;
+        auto res = makeInternal( _data );
+        mm.addImmediate( res, this->Name(), this->Hash() );
+        return res;
     }
 
-    std::shared_ptr<R> make( const SerializableContainer& _data,
-                             ResourcePublishFlag _rpf = ResourcePublishFlag::False ) {
-        if ( mm.exists( this->Name() ) ) {
-            return mm.get( this->Name() );
-        } else {
-            this->calcHash( _data );
-            if ( _rpf == ResourcePublishFlag::True ) {
-                this->publish2( this->Name(), _data );
-            }
-            return makeInternal( _data );
-        }
+    void create( const SerializableContainer& _data ) {
+        if ( prepAndCheck(_data ) ) return;
+
+        if ( B::Version() != 0 ) this->addTag( this->hashFn(B::Version()) );
+        this->publish2( _data, [&](HttpResponeParams res) {
+            mm.addDeferred( makeInternal( _data ), this->Name(), this->Hash() );
+        } );
     }
 
 protected:
-    virtual std::shared_ptr<R> makeInternal( const SerializableContainer& _data ) = 0;
-
-    bool makeImpl( const std::string& _key, uint8_p&& _data, const DependencyStatus _status ) override {
-
-        if ( _status == DependencyStatus::LoadedSuccessfully ) {
-            auto res = std::make_shared<R>(std::move( _data ), _key);// EF::create<R>( std::move( _data ) );
-            mm.add( res, _key );
-            if ( ccf ) ccf(params);
-            return true;
+    std::shared_ptr<R> prepAndCheck( const SerializableContainer& _data ) {
+        this->calcHash( _data );
+        if ( auto ret = mm.hashExists( this->Hash() ); ret!= nullptr ) {
+            return ret;
         }
-
-        return false;
+        return nullptr;
     }
+
+    virtual std::shared_ptr<R> makeInternal( const SerializableContainer& _data ) = 0;
 
 protected:
     ResourceManager<R>& mm;
+    std::vector<std::string> params;
+    CommandResouceCallbackFunction ccf = nullptr;
 };
 
 class ImageBuilder : public ResourceBuilder2<ImageBuilder, RawImage> {
@@ -88,7 +81,6 @@ public:
 
     ImageBuilder& setImageParams( const ImageParams& _ip ) {
         imageParams = _ip;
-        setFormatFromChannels( imageParams.channels );
         return *this;
     }
 
@@ -121,30 +113,6 @@ public:
 
     ImageBuilder& setChannels( int _channels ) {
         imageParams.channels = _channels;
-        return *this;
-    }
-
-    ImageBuilder& setFormatFromChannels( const int _channels ) {
-        imageParams.channels = _channels;
-
-        if ( imageParams.bpp == 8 ) {
-            if ( imageParams.channels==1 ) imageParams.outFormat = PIXEL_FORMAT_R;
-            if ( imageParams.channels==2 ) imageParams.outFormat = PIXEL_FORMAT_RG;
-            if ( imageParams.channels==3 ) imageParams.outFormat = PIXEL_FORMAT_RGB;
-            if ( imageParams.channels==4 ) imageParams.outFormat = PIXEL_FORMAT_RGBA;
-        }
-        if ( imageParams.bpp == 16 ) {
-            if ( imageParams.channels==1 ) imageParams.outFormat = PIXEL_FORMAT_HDR_R16;
-            if ( imageParams.channels==2 ) imageParams.outFormat = PIXEL_FORMAT_HDR_RG_16;
-            if ( imageParams.channels==3 ) imageParams.outFormat = PIXEL_FORMAT_HDR_RGB_16;
-            if ( imageParams.channels==4 ) imageParams.outFormat = PIXEL_FORMAT_HDR_RGBA_16;
-        }
-        if ( imageParams.bpp == 32 ) {
-            if ( imageParams.channels==1 ) imageParams.outFormat = PIXEL_FORMAT_HDR_R32;
-            if ( imageParams.channels==2 ) imageParams.outFormat = PIXEL_FORMAT_HDR_RG32;
-            if ( imageParams.channels==3 ) imageParams.outFormat = PIXEL_FORMAT_HDR_RGB_32;
-            if ( imageParams.channels==4 ) imageParams.outFormat = PIXEL_FORMAT_HDR_RGBA_32;
-        }
         return *this;
     }
 

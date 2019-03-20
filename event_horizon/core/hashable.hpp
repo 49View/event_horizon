@@ -29,6 +29,14 @@ public:
         mHash = _name;
     }
 
+    std::string hashFn( const size_t _number ) const {
+        return hashFn( std::to_string(_number) );
+    }
+
+    std::string hashFn( const std::string& _str ) const {
+        return CryptoUtils<H>::hash( _str.data(), _str.size() );
+    }
+
 protected:
     virtual void calcHash( const std::string& _str ) {
         mHash = CryptoUtils<H>::hash( _str.data(), _str.size() );

@@ -288,7 +288,8 @@ enum class HttpUrlEncode {
 };
 
 namespace Http { struct Result; }
-using ResponseCallbackFunc = std::function<void(const Http::Result&)>;
+using HttpResponeParams = const Http::Result&;
+using ResponseCallbackFunc = std::function<void(HttpResponeParams)>;
 
 // Dependencies
 

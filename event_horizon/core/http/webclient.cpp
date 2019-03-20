@@ -177,7 +177,7 @@ namespace Http {
 
     static std::unordered_set<std::string> requestCache;
 
-    void get( const Url& url, ResponseCallbackFunc callback, ResponseFlags rf ) {
+    void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf ) {
         bool bPerformLoad = false;
 
         if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) ) {
@@ -191,28 +191,34 @@ namespace Http {
         }
         if ( bPerformLoad ) {
             LOGR("[HTTP-GET] %s", url.toString().c_str() );
-            getInternal( url, callback, rf );
+            getInternal( url, callback, callbackFailed, rf );
         }
     }
 
-    void post( const Url& url, const std::string& _data, ResponseCallbackFunc callback ) {
-        postInternal( url, _data.data(), _data.size(), HttpQuery::JSON, callback );
+    void post( const Url& url, const std::string& _data,
+               ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
+        postInternal( url, _data.data(), _data.size(), HttpQuery::JSON, callback, callbackFailed );
     }
 
-    void post( const Url& url, const uint8_p& buffer, ResponseCallbackFunc callback ) {
-        postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second, HttpQuery::Binary, callback );
+    void post( const Url& url, const uint8_p& buffer,
+               ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
+        postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second, HttpQuery::Binary,
+                      callback, callbackFailed );
     }
 
-    void post( const Url& url, const char *buff, uint64_t length, ResponseCallbackFunc callback ) {
-        postInternal( url, buff, length, HttpQuery::Binary, callback );
+    void post( const Url& url, const char *buff, uint64_t length,
+               ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
+        postInternal( url, buff, length, HttpQuery::Binary, callback, callbackFailed );
     }
 
-    void post( const Url& url, const std::vector<unsigned  char>& buffer, ResponseCallbackFunc callback ) {
-        postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary, callback );
+    void post( const Url& url, const std::vector<unsigned  char>& buffer,
+               ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
+        postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary,
+                      callback, callbackFailed );
     }
 
-    void post( const Url& url, ResponseCallbackFunc callback ) {
-        postInternal( url, nullptr, 0, HttpQuery::Binary, callback );
+    void post( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
+        postInternal( url, nullptr, 0, HttpQuery::Binary, callback, callbackFailed );
     }
 
     void project( const std::string& _project ) {
@@ -332,43 +338,36 @@ namespace Http {
     }
 
     void refreshToken() {
-        post( Url{HttpFilePrefix::refreshtoken}, [](const Http::Result& res) {
-            if( res.isSuccessStatusCode() ) {
-                RefreshToken rt( res.bufferString );
-                userToken( rt.token );
-                sessionId( rt.session );
-            }
+        post( Url{HttpFilePrefix::refreshtoken}, [](HttpResponeParams res) {
+            RefreshToken rt( res.bufferString );
+            userToken( rt.token );
+            sessionId( rt.session );
         } );
     }
 
     void loginSession() {
-        get( Url{HttpFilePrefix::user}, [](const Http::Result& res) {
-            if( res.isSuccessStatusCode() ) {
+        get( Url{HttpFilePrefix::user}, [](HttpResponeParams res) {
                 UserLogin ul{ res.bufferString };
                 sessionId( ul.session );
                 project( ul.project );
                 Socket::createConnection();
-            }
-            userLoggedIn( res.isSuccessStatusCode() );
-            if ( !hasUserLoggedIn() ) {
+                userLoggedIn( true );
+            }, [](HttpResponeParams res) {
                 LOGRS( "[HTTP-RETRY] login ");
                 login ( Http::gatherCachedLogin() );
             }
-        } );
+        );
     }
 
     void login( const LoginFields& lf ) {
-        post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf](const Http::Result& res) {
-            if( res.isSuccessStatusCode() ) {
+        post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf](HttpResponeParams res) {
                 LoginToken lt(res.bufferString);
                 userToken( lt.token );
                 sessionId( lt.session );
                 project( lt.project );
                 Http::cacheLoginFields( lf );
                 Socket::createConnection();
-            }
-
-            userLoggedIn( res.isSuccessStatusCode() );
+                userLoggedIn( true );
         } );
     }
 

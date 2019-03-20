@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const crypto = require('crypto');
+const zlib = require('zlib');
 const entityModel = require('../models/entity');
 const asyncModelOperations = require('../assistants/asyncModelOperations');
 const fsController = require('../controllers/fsController');
@@ -14,9 +14,6 @@ exports.getMetadataFromBody = (checkGroup, checkRaw, req) => {
     if (checkGroup && typeof(metadata.group)==="undefined") {
         throw metadataMissingMessage + " 'Group'";
     }
-    if (typeof(metadata.hash)==="undefined") {
-        throw metadataMissingMessage + " 'Hash'";
-    }
     if (checkRaw && typeof(metadata.raw)==="undefined") {
         throw metadataMissingMessage + " 'Raw'";
     }
@@ -30,11 +27,9 @@ exports.cleanupMetadata = (metadata) => {
     const result = {};
 
     if (typeof(metadata.raw)!=="undefined") {
-        result.content = new Buffer(metadata.raw, "base64");
-        // metadata.content_id = crypto.createHash('sha256').update(metadata.raw).digest("hex");
+        result.content = zlib.inflateSync(new Buffer(metadata.raw, "base64"));
     } else {
         result.content = null;
-        delete metadata.content_id;
     }
     result.group = metadata.group;
     result.keys = metadata.tags;
@@ -43,7 +38,6 @@ exports.cleanupMetadata = (metadata) => {
     //Remove service attributes
     delete metadata.raw;
     delete metadata.group;
-    // delete metadata.tags;
     delete metadata.public;
     delete metadata.restricted;
     //Add hash attribute
@@ -52,13 +46,13 @@ exports.cleanupMetadata = (metadata) => {
     return result;
 }
 
-exports.getFilePath = (project, group, content_id) => {
-    return project+"/"+group+"/"+content_id;
+exports.getFilePath = (project, group, name) => {
+    return project+"/"+group+"/"+name;
 }
 
-exports.checkFileExists = async (project, group, content_id) => {
+exports.checkFileExists = async (project, group, tags) => {
 
-    const query = {$and: [{"metadata.content_id":content_id}, {"group":group}, {"project":project}]};
+    const query = {$and: [{"metadata.tags":tags}, {"group":group}, {"project":project}]};
     const result = await entityModel.findOne(query);
 
     return result!==null?result.toObject():null;
@@ -82,10 +76,10 @@ exports.deleteEntity = async (entityId) => {
 
 exports.deleteEntityComplete = async (project, entity) => {
     currentEntity = entity;
-    console.log("[INFO] deleting entity " + currentEntity.metadata.content_id);
+    console.log("[INFO] deleting entity " + currentEntity.metadata.name);
     const group = currentEntity.group;
     //Remove current file from S3
-    await fsController.cloudStorageDelete( module.exports.getFilePath(project, group, currentEntity.metadata.content_id), "eventhorizonentities");
+    await fsController.cloudStorageDelete( module.exports.getFilePath(project, group, currentEntity.metadata.name), "eventhorizonentities");
     //Delete existing entity
     await module.exports.deleteEntity(currentEntity._id);
 }
@@ -114,12 +108,11 @@ exports.getEntitiesOfProject = async (project, entityId, returnPublic) => {
     return result!==null?result:null;
 }
 
-exports.getEntitiesByProjectGroupTags = async (project, group, tags, version, fullData, randomElements) => {
+exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, randomElements) => {
     const aggregationQueries = [
         {
             $match: {
                 $and: [
-                    {"metadata.version": Number(version)},
                     {"restricted": false},
                     {"group": group},
                     {
@@ -145,7 +138,7 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, version, fu
                     "project": 0,
                     "public": 0,
                     "restricted": 0,
-                    "metadata.content_id": 0
+                    "metadata.name": 0
                 }
             }
         );

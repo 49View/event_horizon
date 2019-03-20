@@ -86,7 +86,7 @@ protected:
     std::string toMetaData() const {
         MegaWriter writer;
         writer.StartObject();
-        writer.serialize( CoreMetaData{ this->Name(), "", T::Prefix(), this->ContentId(), T::Version(),
+        writer.serialize( CoreMetaData{ this->Name(), T::Prefix(),
                                         generateThumbnail(), generateRawData(), this->Tags() } );
         if ( B::IsSerializable() ) {
             writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
@@ -100,10 +100,7 @@ protected:
         MegaWriter writer;
         writer.StartObject();
         writer.serialize( CoreMetaData{ this->Name(),
-                                        this->Hash(),
                                         T::Prefix(),
-                                        this->ContentId(),
-                                        T::Version(),
                                         generateThumbnail(),
                                         rawb64gzip(_raw),
                                         this->Tags() } );
@@ -133,24 +130,12 @@ protected:
         deserializeInternal( reader );
     }
 
-    void publish2( const std::string& _rawName, const SerializableContainer& _raw ) {
-        contentId = _rawName;
-        Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw) );
+    void publish2( const SerializableContainer& _raw, ResponseCallbackFunc callback  ) const {
+        Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw), callback );
     }
 
 public:
-    void setContentId( const std::string& _contentId ) {
-        contentId = _contentId;
-    }
-
-    std::string ContentId() const {
-        return contentId;
-    }
-
     void publish() const {
         Http::post( Url{ HttpFilePrefix::entities }, toMetaData() );
     }
-
-protected:
-    std::string contentId;
 };

@@ -91,6 +91,27 @@ struct ImageParams {
         return static_cast<float>(width) / static_cast<float>(height);
     }
 
+    void setFormatFromChannels() {
+        if ( bpp == 8 ) {
+            if ( channels==1 ) outFormat = PIXEL_FORMAT_R;
+            if ( channels==2 ) outFormat = PIXEL_FORMAT_RG;
+            if ( channels==3 ) outFormat = PIXEL_FORMAT_RGB;
+            if ( channels==4 ) outFormat = PIXEL_FORMAT_RGBA;
+        }
+        if ( bpp == 16 ) {
+            if ( channels==1 ) outFormat = PIXEL_FORMAT_HDR_R16;
+            if ( channels==2 ) outFormat = PIXEL_FORMAT_HDR_RG_16;
+            if ( channels==3 ) outFormat = PIXEL_FORMAT_HDR_RGB_16;
+            if ( channels==4 ) outFormat = PIXEL_FORMAT_HDR_RGBA_16;
+        }
+        if ( bpp == 32 ) {
+            if ( channels==1 ) outFormat = PIXEL_FORMAT_HDR_R32;
+            if ( channels==2 ) outFormat = PIXEL_FORMAT_HDR_RG32;
+            if ( channels==3 ) outFormat = PIXEL_FORMAT_HDR_RGB_32;
+            if ( channels==4 ) outFormat = PIXEL_FORMAT_HDR_RGBA_32;
+        }
+    }
+
     ImageParams() = default;
     ImageParams( int width, int height, int channels ) : width( width ), height( height ), channels( channels ) {}
     ImageParams( int width, int height, int channels, int bpp ) : width( width ), height( height ),

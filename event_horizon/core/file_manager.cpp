@@ -77,7 +77,7 @@ namespace FileManager {
 
     void readRemoteSimpleCallback( const std::string& filename,
                                    ResponseCallbackFunc simpleCallback ) {
-        Http::get( Url( HttpFilePrefix::get + url_encode(filename)), simpleCallback,
+        Http::get( Url( HttpFilePrefix::get + url_encode(filename)), simpleCallback, nullptr,
                         Http::ResponseFlags::ExcludeFromCache );
     }
 

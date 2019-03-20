@@ -25,6 +25,14 @@ void SceneGraph::remove( const UUID& _uuid ) {
 }
 
 void SceneGraph::update() {
+    TL().update();
+    PL().update();
+    ML().update();
+    CL().update();
+    CM().update();
+    FM().update();
+    MC().update();
+
     for ( auto& [k,v] : geoms ) {
         std::visit( lambdaUpdateAnimVisitor, v );
     }
@@ -164,4 +172,6 @@ void SceneGraph::init() {
 
     MaterialBuilder{ML(), S::WHITE_PBR, S::SH}.makeDefault();
     CameraBuilder{CM()}.makeDefault();
+
+    ImageBuilder{TL(), "02.png"}.load();
 }
