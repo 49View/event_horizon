@@ -16,7 +16,7 @@
 #include <core/uuid.hpp>
 #include <core/boxable.hpp>
 #include <core/name_policy.hpp>
-#include <core/publisher.hpp>
+#include <poly/resources/publisher.hpp>
 #include <core/observable.h>
 #include <core/serialization.hpp>
 #include <core/serializebin.hpp>
@@ -568,10 +568,6 @@ protected:
     void calcCompleteBBox3d() {
         Boxable::bbox3d = AABB::INVALID;
         Boxable::bbox3d = calcCompleteBBox3dRec();
-    }
-
-    std::string generateThumbnail() const override {
-        return std::string{};
     }
 
     void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {

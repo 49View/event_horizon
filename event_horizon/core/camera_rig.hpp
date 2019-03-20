@@ -9,7 +9,7 @@
 #include <core/math/rect2f.h>
 #include <core/serialization.hpp>
 #include <core/camera_utils.hpp>
-#include <core/publisher.hpp>
+#include <poly/resources/publisher.hpp>
 
 class Framebuffer;
 class Camera;
@@ -30,10 +30,6 @@ protected:
     void init( const Rect2f& _viewport );
     void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {}
     void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override {}
-
-    std::string generateThumbnail() const override {
-        return std::string();
-    }
 
 public:
     template<typename TV> \

@@ -218,27 +218,27 @@ bool Material::isStreammable() const {
     return properties.isStreaming;
 }
 
-std::string Material::generateThumbnail() const {
-    auto thumb = std::make_unique<std::string>();
-
-    std::unique_ptr<uint8_t[]> lthumb;
-    int thumbSize = 64;
-    int oc = 3;
-    int obpp = 8;
-    if ( const auto& it = buffers.find(getBaseColor()); it != buffers.end() ) {
-        lthumb = imageUtil::resize( it->second.first.get(), it->second.second, thumbSize, thumbSize, oc, obpp );
-    } else {
-        V3f defColor = Color3f::ONE;
-        if ( hasVector3f(UniformNames::diffuseColor) ) {
-            get(UniformNames::diffuseColor, defColor);
-        }
-        lthumb = imageUtil::zeroImage3( Vector4f{defColor}.RGBATOI(), 1, 1 );
-    }
-    stbi_write_png_to_func( imageUtil::resizeCallbackb64, reinterpret_cast<void*>(thumb.get()),
-                            thumbSize, thumbSize, oc, lthumb.get(), thumbSize*oc*(obpp/8) );
-
-    return std::string{ thumb->data(), thumb->size() };
-}
+//std::string Material::generateThumbnail() const {
+//    auto thumb = std::make_unique<std::string>();
+//
+//    std::unique_ptr<uint8_t[]> lthumb;
+//    int thumbSize = 64;
+//    int oc = 3;
+//    int obpp = 8;
+//    if ( const auto& it = buffers.find(getBaseColor()); it != buffers.end() ) {
+//        lthumb = imageUtil::resize( it->second.first.get(), it->second.second, thumbSize, thumbSize, oc, obpp );
+//    } else {
+//        V3f defColor = Color3f::ONE;
+//        if ( hasVector3f(UniformNames::diffuseColor) ) {
+//            get(UniformNames::diffuseColor, defColor);
+//        }
+//        lthumb = imageUtil::zeroImage3( Vector4f{defColor}.RGBATOI(), 1, 1 );
+//    }
+//    stbi_write_png_to_func( imageUtil::resizeCallbackb64, reinterpret_cast<void*>(thumb.get()),
+//                            thumbSize, thumbSize, oc, lthumb.get(), thumbSize*oc*(obpp/8) );
+//
+//    return std::string{ thumb->data(), thumb->size() };
+//}
 
 float Material::translucency() const {
     if ( shaderName == S::YUV_GREENSCREEN ) return 0.5f;

@@ -61,7 +61,7 @@
 #include <map>
 #include <string>
 #include <mutex>
-#include <core/publisher.hpp>
+#include <poly/resources/publisher.hpp>
 
 // ---------------------------------------------------------------------------------------------------------------------------
 //    Utility namespace
@@ -550,8 +550,6 @@ public:
 	Font( const void* rawData, size_t length ); // copy from raw data
 	virtual ~Font();
 
-protected:
-    std::string generateThumbnail() const override;
 public:
     // font info
 	vec4f GetMasterRect() const;                     // returns a vec4f in font units that encloses every glyph, format is (xMin,yMin,xMax,yMax)

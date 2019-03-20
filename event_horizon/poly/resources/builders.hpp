@@ -10,7 +10,8 @@
 #include <core/http/webclient.h>
 #include <core/name_policy.hpp>
 #include <core/versionable.hpp>
-#include <core/entity_factory.hpp>
+#include <poly/resources/entity_factory.hpp>
+#include <poly/resources/resource_manager.hpp>
 
 template<HttpQuery Q, typename T>
 Url makeUrl(const std::string& _name) {
@@ -42,9 +43,6 @@ void readRemote( const std::string& _name, B& _builder ) {
 }
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
-
-class ResourceHasSource {};
-class ResourceHasNotSource {};
 
 class BaseBuilder : public NamePolicy<std::string> {
 public:
@@ -133,29 +131,6 @@ protected:
 
 protected:
     M& mm;
-};
-
-//template < typename R, typename M >
-//class ResourceSourceBuilder : public ResourceBuilder< R, M > {
-//public:
-//    const SerializableContainer& getSource() const {
-//        return source;
-//    }
-//
-//    void setSource( const SerializableContainer& _source ) {
-//        source = _source;
-//    }
-//
-//    void makeFromSource( const std::string& _name, const SerializableContainer& _data ) = 0;
-//protected:
-//    SerializableContainer source;
-//};
-
-class ResourceBuilderObservable : public BaseBuilder {
-    using BaseBuilder::BaseBuilder;
-public:
-
-    virtual bool make( uint8_p&& _data, DependencyStatus _status ) = 0;
 };
 
 class DependantBuilder : public BaseBuilder {

@@ -2560,10 +2560,6 @@ void Font::PreCacheBasicLatin() {
 	PreCache( 0x20, 0x7f, 3, 1, 0 );
 }
 
-std::string Font::generateThumbnail() const {
-    return std::string();
-}
-
 void Font::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
 
 }

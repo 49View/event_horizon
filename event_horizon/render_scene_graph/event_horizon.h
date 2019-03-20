@@ -6,11 +6,11 @@
 
 #include <memory>
 #include <core/di.hpp>
-#include <core/image_builder.h>
+#include <poly/resources/image_builder.h>
+#include <poly/resources/font_manager.h>
 #include <poly/camera_manager.h>
 #include <poly/profile_builder.h>
 #include <poly/material_builder.h>
-#include <core/font_manager.h>
 #include <graphics/shader_manager.h>
 #include <graphics/mouse_input.hpp>
 #include <graphics/text_input.hpp>

@@ -1295,10 +1295,3 @@ void VData::swapIndicesWinding( Primitive _pr ) {
 			ASSERT(0);
 	}
 }
-
-std::string GeomData::generateThumbnail() const {
-//        if ( thumb ) {
-//            return { thumb->begin(), thumb->end() };
-//        }
-	return std::string{};
-}

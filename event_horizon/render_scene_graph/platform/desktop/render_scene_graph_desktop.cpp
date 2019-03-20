@@ -3,7 +3,7 @@
 //
 
 #include "../../render_scene_graph.h"
-#include "core/image_builder.h"
+#include "poly/resources/image_builder.h"
 #include "core/node.hpp"
 #include "poly/geom_builder.h"
 #include "poly/geom_builder.h"

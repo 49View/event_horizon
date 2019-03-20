@@ -1,10 +1,10 @@
 #include "material_builder.h"
 #include "core/zlib_util.h"
 #include "core/tar_util.h"
-#include "core/image_builder.h"
+#include "poly/resources/image_builder.h"
 #include "core/math/poly_utils.hpp"
 #include <core/image_util.h>
-#include <core/entity_factory.hpp>
+#include <poly/resources/entity_factory.hpp>
 #include <stb/stb_image_write.h>
 
 MaterialBuilder::MaterialBuilder( MaterialManager& _mm,

@@ -6,7 +6,7 @@
 
 #include <core/formatting_utils.h>
 #include <core/observable.h>
-#include <core/builders.hpp>
+#include <poly/resources/builders.hpp>
 #include <core/math/rect2f.h>
 #include <core/math/aabb.h>
 #include <core/math/vector4f.h>
@@ -71,8 +71,6 @@ public:
     void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {}
     void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {}
     void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override {}
-
-    std::string generateThumbnail() const override { return std::string{}; }
 
 private:
     UIShapeType shapeType = UIShapeType::Rect2d;

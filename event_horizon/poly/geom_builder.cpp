@@ -4,7 +4,7 @@
 
 #include "geom_builder.h"
 #include <core/node.hpp>
-#include <core/entity_factory.hpp>
+#include <poly/resources/entity_factory.hpp>
 #include <poly/material_builder.h>
 #include <poly/profile_builder.h>
 #include <poly/poly.hpp>

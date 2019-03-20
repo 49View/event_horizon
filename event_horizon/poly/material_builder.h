@@ -7,7 +7,7 @@
 #include <tuple>
 #include <functional>
 #include "core/util.h"
-#include "core/builders.hpp"
+#include "poly/resources/builders.hpp"
 #include "core/descriptors/material.h"
 #include "core/image_constants.h"
 

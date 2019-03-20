@@ -53,6 +53,20 @@ public:
         if ( std::is_same<R, Utility::TTFCore::Font>::value  ) return "fonts";
         return "unknown";
     }
+
+    inline static std::string GenerateThumbnail( const R& _res ) {
+        if ( std::is_same<R, Material>::value )                return "material";
+        if ( std::is_same<R, GeomData>::value )                return "geom";
+
+        if ( std::is_same<R, MaterialColor>::value  )          return "color";
+        if ( std::is_same<R, CameraRig>::value )               return "cameras";
+
+        if ( std::is_same<R, Profile>::value  )                return "profiles";
+        if ( std::is_same<R, ImageBuilder>::value  )           return "image";
+        if ( std::is_same<R, Utility::TTFCore::Font>::value  ) return "fonts";
+        return "unknown";
+    }
+
 };
 
 template < typename T,
@@ -65,7 +79,6 @@ class Publisher : public ResourceVersioning<T>,
                   public virtual Serializable<T, W, R>,
                   public virtual HashTaggable<N> {
 protected:
-    virtual std::string generateThumbnail() const = 0;
     virtual void serializeInternal( std::shared_ptr<W> writer ) const = 0;
     virtual void deserializeInternal( std::shared_ptr<R> reader ) = 0;
 
@@ -87,7 +100,7 @@ protected:
         MegaWriter writer;
         writer.StartObject();
         writer.serialize( CoreMetaData{ this->Name(), T::Prefix(),
-                                        generateThumbnail(), generateRawData(), this->Tags() } );
+                                        T::GenerateThumbnail((T&)*this), generateRawData(), this->Tags() } );
         if ( B::IsSerializable() ) {
             writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
         }
@@ -101,7 +114,7 @@ protected:
         writer.StartObject();
         writer.serialize( CoreMetaData{ this->Name(),
                                         T::Prefix(),
-                                        generateThumbnail(),
+                                        T::GenerateThumbnail((T&)*this),
                                         rawb64gzip(_raw),
                                         this->Tags() } );
         if ( B::IsSerializable() ) {

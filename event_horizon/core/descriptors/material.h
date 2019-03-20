@@ -11,7 +11,7 @@
 #include <core/http/basen.hpp>
 #include <core/http/webclient.h>
 #include <core/names.hpp>
-#include <core/publisher.hpp>
+#include <poly/resources/publisher.hpp>
 #include <core/tar_util.h>
 #include <core/zlib_util.h>
 #include <core/heterogeneous_map.hpp>
@@ -103,12 +103,6 @@ public:
         streamRaw <<   "\"raw\":\"" << raw << "\",";
         return streamHalf1.str() + streamRaw.str() + streamHalf2.str();
     }
-
-protected:
-    std::string generateThumbnail() const override {
-        return std::string();
-    }
-
 };
 
 JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
@@ -184,7 +178,6 @@ protected:
     void deserializeInternal(std::shared_ptr<DeserializeBin> reader) override;
 
     KnownBufferMap knownBuffers() const;
-    std::string generateThumbnail() const override;
 
 protected:
     MaterialImageBuffers buffers;

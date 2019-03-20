@@ -226,8 +226,6 @@ public:
     inline std::vector<Vector3f>& Coords3d() { return mVdata.vcoords3d; };
     inline std::vector<Vector3f>& Normals3d() { return mVdata.vnormals3d; };
 
-    std::string generateThumbnail() const override;
-
 //    ScreenShotContainerPtr& GeomBuilder::Thumb() {
 //        if ( !thumb ) {
 //            thumb = std::make_shared<ScreenShotContainer>();

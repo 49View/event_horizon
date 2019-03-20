@@ -5,7 +5,7 @@
 #pragma once
 
 #include <core/descriptors/material.h>
-#include <core/builders.hpp>
+#include <poly/resources/builders.hpp>
 #include <poly/scene_graph_builder.hpp>
 
 class SceneGraphGeomBaseBuilder : public SceneGraphBuilder, public MaterialBuildable, public DependantBuilder {

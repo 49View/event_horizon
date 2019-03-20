@@ -15,7 +15,7 @@
 
 #include <core/uuid.hpp>
 #include <core/command.hpp>
-#include <core/resource_utils.hpp>
+#include <poly/resources/resource_utils.hpp>
 #include <core/suncalc/sun_builder.h>
 #include <poly/poly.hpp>
 

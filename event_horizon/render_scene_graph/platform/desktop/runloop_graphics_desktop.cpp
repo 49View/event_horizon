@@ -6,7 +6,7 @@
 
 #include "runloop_graphics_desktop.h"
 #include <core/di.hpp>
-#include <core/image_builder.h>
+#include <poly/resources/image_builder.h>
 #include <graphics/shader_manager.h>
 #include <graphics/renderer.h>
 #include <graphics/text_input.hpp>

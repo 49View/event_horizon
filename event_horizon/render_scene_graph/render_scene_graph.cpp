@@ -3,8 +3,8 @@
 //
 
 #include "render_scene_graph.h"
-#include <core/resource_utils.hpp>
-#include <core/image_builder.h>
+#include <poly/resources/resource_utils.hpp>
+#include <poly/resources/image_builder.h>
 #include <core/raw_image.h>
 #include <core/node.hpp>
 #include <poly/camera_manager.h>

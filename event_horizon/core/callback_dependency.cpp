@@ -5,7 +5,7 @@
 #include "callback_dependency.h"
 #include "core/util.h"
 #include "core/file_manager.h"
-#include "core/builders.hpp"
+#include "poly/resources/builders.hpp"
 
 dep_map g_deps;
 std::unordered_map< std::string, std::shared_ptr<FileCallbackHandler> > callbacksDataMap;
@@ -103,15 +103,6 @@ FileCallbackHandlerMaker::FileCallbackHandlerMaker( std::shared_ptr<ResourceBuil
 
 bool FileCallbackHandlerMaker::executeCallback( const std::string& _key, const DependencyStatus _status ) {
     return std::dynamic_pointer_cast<CallbackDataMaker>(cbData)->builder->make( _key, std::move( cbData->data ), _status );
-}
-
-FileCallbackHandlerObservable::FileCallbackHandlerObservable( std::shared_ptr<ResourceBuilderObservable> _builder ) {
-    cbData = std::make_shared<CallbackDataObservable>( _builder );
-}
-
-bool FileCallbackHandlerObservable::executeCallback( const std::string& _key, const DependencyStatus _status ) {
-    return std::dynamic_pointer_cast<CallbackDataObservable>(cbData)->builderObservable->make( std::move( cbData->data ),
-                                                                                               _status );
 }
 
 void setCallbackData( const Http::Result& header ) {
@@ -229,3 +220,11 @@ void readRemote( const Url& url, std::shared_ptr<FileCallbackHandler> _handler, 
         Http::get( url, useFS ? cacheLoad : setCallbackData, nullptr, rfe );
     }
 }
+//FileCallbackHandlerObservable::FileCallbackHandlerObservable( std::shared_ptr<ResourceBuilderObservable> _builder ) {
+//    cbData = std::make_shared<CallbackDataObservable>( _builder );
+//}
+//
+//bool FileCallbackHandlerObservable::executeCallback( const std::string& _key, const DependencyStatus _status ) {
+//    return std::dynamic_pointer_cast<CallbackDataObservable>(cbData)->builderObservable->make( std::move( cbData->data ),
+//                                                                                               _status );
+//}

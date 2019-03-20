@@ -12,7 +12,7 @@
 #include <array>
 #include <core/htypes_shared.hpp>
 #include <core/math/vector3f.h>
-#include <core/publisher.hpp>
+#include <poly/resources/publisher.hpp>
 
 namespace JMATH { class Rect2f; }
 
@@ -66,7 +66,6 @@ protected:
     void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 
 private:
-    std::string generateThumbnail() const override;
 	void calculatePerimeter();
 	void calcBBox();
 

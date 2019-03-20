@@ -3,7 +3,7 @@
 //
 
 #include <graphics/renderer.h>
-#include <core/entity_factory.hpp>
+#include <poly/resources/entity_factory.hpp>
 
 template <typename V>
 class VPBuilder {

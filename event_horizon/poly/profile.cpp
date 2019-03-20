@@ -272,10 +272,6 @@ std::shared_ptr<Profile> Profile::fromPoints( const std::string& name,  const st
 
 }
 
-std::string Profile::generateThumbnail() const {
-    return std::string();
-}
-
 void Profile::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
 
 }

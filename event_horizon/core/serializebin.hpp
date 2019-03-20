@@ -15,7 +15,7 @@
 #include <string>
 #include <core/serialize_types.hpp>
 #include <core/hashable.hpp>
-#include <core/entity_factory.hpp>
+#include <poly/resources/entity_factory.hpp>
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
