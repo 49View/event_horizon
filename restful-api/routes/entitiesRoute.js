@@ -67,7 +67,7 @@ router.post('/', async (req, res, next) => {
         const project = req.user.project;
         const metadata = entityController.getMetadataFromBody(true, true, req);
         const { content, group, public, restricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
-        const filePath=entityController.getFilePath(project, group, cleanMetadata.name);
+        let filePath=entityController.getFilePath(project, group, cleanMetadata.name);
         //Check content exists in project and group
         const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.tags)
         if (copyEntity!==null) {
@@ -75,7 +75,14 @@ router.post('/', async (req, res, next) => {
             entityController.deleteEntity(copyEntity._id);
         } else {
             //Upload file to S3
-            await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities");
+            let savedFilename = {"changed":false, "name": filePath};
+            await fsController.cloudStorageGetFilenameAndDuplicateIfExists( filePath, "eventhorizonentities", savedFilename );
+            if ( savedFilename['changed'] == true ) {
+                const nn = savedFilename["name"];
+                cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
+            }
+            filePath = savedFilename["name"];
+            await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities" );
         }
         //Create entity
         const newEntity = await entityController.createEntity(project, group, public, restricted, cleanMetadata);
@@ -142,6 +149,25 @@ router.delete('/:id', async (req, res, next) => {
         }
     } catch (ex) {
         console.log("ERROR DELETING ENTITY: ", ex);
+        res.sendStatus(400);
+    }
+
+});
+
+router.delete('/group/:groupId', async (req, res, next) => {
+    try {
+        const project = req.user.project;
+        const entities =await entityController.getEntitiesOfProjectWithGroup( project, req.params.groupId );
+        if (entities===null) {
+            res.status(204).send();
+        } else {
+            for ( const entity of entities ) {
+                await entityController.deleteEntityComplete( project, entity.toObject() );
+            }
+            res.status(201).send();
+        }
+    } catch (ex) {
+        console.log("ERROR DELETING ENTITIES: ", ex);
         res.sendStatus(400);
     }
 

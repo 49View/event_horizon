@@ -42,14 +42,27 @@ exports.list = ( key, complete ) => {
 	return listInternal( key, complete );
 }
 
+exports.checkObjectExists = async ( key, bucket ) => {
+	let params = {
+		Bucket: bucket, 
+		Key: key
+	   };
+	  try {
+		await s3.headObject(params).promise();
+		return true;
+	} catch (err) {
+		return false;
+	}
+}
+
 exports.upload = ( filedata, key, bucket ) => {
-	var params = {
+	const params = {
 	  Body: filedata,	
 	  Bucket: bucket, 
 	  Key: key
 	 };
 
-	 return s3.putObject(params).promise();
+	return s3.putObject(params).promise();
 }
 
 exports.get = ( key, bucket ) => {

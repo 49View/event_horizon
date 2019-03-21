@@ -96,12 +96,24 @@ exports.getEntityByIdProject = async (project, entityId, returnPublic) => {
     return result!==null?result.toObject():null;
 }
 
-exports.getEntitiesOfProject = async (project, entityId, returnPublic) => {
+exports.getEntitiesOfProject = async (project, returnPublic) => {
     let query;
     if (returnPublic) {
         query = [ {"project":project}, {"public": true} ];
     } else {
         query = {"project":project};
+    }
+    const result = await entityModel.find(query);
+
+    return result!==null?result:null;
+}
+
+exports.getEntitiesOfProjectWithGroup = async (project, groupID, returnPublic) => {
+    let query;
+    if (returnPublic) {
+        query = { "project":project, "group":groupID, "public": true};
+    } else {
+        query = { "project":project, "group":groupID };
     }
     const result = await entityModel.find(query);
 
@@ -138,7 +150,6 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, r
                     "project": 0,
                     "public": 0,
                     "restricted": 0
-                    // "metadata.name": 0
                 }
             }
         );

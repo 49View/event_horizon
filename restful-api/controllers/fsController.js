@@ -3,7 +3,7 @@ const cloudApi = require('../third_party_api/s3');
 
 
 exports.cloudStorageFileUpload = (body, key, bucket) => {
-	return cloudApi.upload( body, key, bucket );
+	return cloudApi.upload( body, key, bucket);
 }
 
 exports.cloudStorageFileGet = (key, bucket) => {
@@ -16,6 +16,28 @@ exports.cloudStorageRename = (source, dest, bucket) => {
 
 exports.cloudStorageDelete = (key, bucket) => {
 	return cloudApi.delete( key, bucket );
+}
+
+exports.cloudStorageCheckExists = async ( key, bucket ) => {
+    return await cloudApi.checkObjectExists(key,bucket);
+}
+
+exports.cloudStorageGetFilenameAndDuplicateIfExists = async ( key, bucket, filename ) => {    
+    let finalName = key;
+    const result = await cloudApi.checkObjectExists(key, bucket);
+    console.log( "Result of duplicate check " + result );
+    if ( result == true ) {
+        // Now the file has been found so add the classic ugly orrible _N appendix
+        const str = key;
+        const n = str.lastIndexOf(".");
+        if ( n == -1 ) n = str.length;
+        const d = new Date(); 
+        finalName = str.substring(0, n) + "_" + d.getTime() + str.substring(n, str.length);
+        filename['changed'] = true;
+    } else {
+        filename['changed'] = false;
+    }
+    filename['name'] = finalName;
 }
 
 // exports.cloudStorageDeleteMulti = (key) => {
