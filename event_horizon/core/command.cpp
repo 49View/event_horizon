@@ -49,7 +49,7 @@ void CommandScript::execute() {
 
     static const std::string regExpAggregatingDoubleQuotesPair = "(\"[^\"]+\")|\\S+";
     for ( const auto& cs : script ) {
-        auto cmds = split(cs, regExpAggregatingDoubleQuotesPair);
+        auto cmds = split_regexp(cs, regExpAggregatingDoubleQuotesPair);
         for ( auto& token : cmds ) token = trim( token, '"' );
         executeCommand( cmds );
     }

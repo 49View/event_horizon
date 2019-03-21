@@ -7,7 +7,8 @@
 #include <poly/resources/image_builder.h>
 #include <core/app_globals.h>
 #include <core/TTF.h>
-#include <poly/resources/font_manager.h>
+#include <core/font_utils.hpp>
+#include <poly/resources/font_builder.h>
 
 typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 
@@ -165,7 +166,7 @@ textureQuadFillModeMapping( const RectFillMode fm, const Rect2f& rect, float _im
 //                               const Utility::TTFCore::Font& f, float height, const Vector4f& color,
 //                               const std::string& _vpname, bool bMeasureOnly, bool centered ) {
 
-std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore::Font& f ) {
+std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( std::shared_ptr<Utility::TTFCore::Font> f ) {
     int32_t numPolysRendered = 0;
     int32_t numTotalPolys = 0;
     int32_t numPolysToDraw = 0;
@@ -176,7 +177,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
     // Count total number of polygons
     for ( size_t i = 0; i < title.length(); i++ ) {
         Utility::TTF::CodePoint cp( title[i] );
-        numTotalPolys += static_cast<int32_t>( f.GetTriCount( cp ));
+        numTotalPolys += static_cast<int32_t>( f->GetTriCount( cp ));
     }
 
     float gliphScaler = 1000.0f; // It looks like glyphs are stored in a box [1000,1000], so we normalise it to [1,1]
@@ -188,7 +189,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
                                                                          VFVertexAllocation::PreAllocate );
     for ( char i : title ) {
         Utility::TTF::CodePoint cp( static_cast<Utility::TTFCore::ulong>(i) );
-        const Utility::TTF::Mesh& m = f.GetTriangulation( cp );
+        const Utility::TTF::Mesh& m = f->GetTriangulation( cp );
         auto numPolysInGlyph = static_cast<int32_t>( m.verts.size());
 
         // Don't draw an empty space
@@ -216,7 +217,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( const Utility::TTFCore:
             numPolysRendered += numPolysInGlyph;
         }
 
-        Utility::TTFCore::vec2f kerning = f.GetKerning( Utility::TTF::CodePoint( i ), cp );
+        Utility::TTFCore::vec2f kerning = f->GetKerning( Utility::TTF::CodePoint( i ), cp );
         Vector2f nextCharPos = Vector2f( kerning.x / gliphScaler, kerning.y / gliphScaler ) * ( fontHeight );
         tm.translate( nextCharPos );
     }
@@ -405,7 +406,7 @@ void UIShapeBuilder::assemble() {
             break;
         case UIShapeType::Text2d:
         case UIShapeType::Text3d: {
-            Rect2f textRectOffset = sg.FM().measure( title, sg.FM()[fontName], fontHeight );
+            Rect2f textRectOffset = FontUtils::measure( title, sg.FM().get(fontName), fontHeight );
             orig += Vector2f( -textRectOffset.left(), -textRectOffset.top());
             if ( textAlignment == UiControlFlag::TextAlignRight && size.x() > textRectOffset.width() ) {
                 orig.setX( size.x() - textRectOffset.width() + orig.x() );
@@ -413,7 +414,7 @@ void UIShapeBuilder::assemble() {
             if ( textAlignment == UiControlFlag::TextAlignCenter && size.x() > textRectOffset.width() ) {
                 orig.setX( ((size.x() - textRectOffset.width()) * 0.5f) + orig.x() );
             }
-            vs = makeText( sg.FM()[fontName] );
+            vs = makeText( sg.FM().get(fontName) );
             // Force text aligment to bottom in 2d.
             if ( shapeType == UIShapeType::Text2d ) {
                 anchor = RectCreateAnchor::Bottom;
@@ -513,7 +514,8 @@ std::string UIShapeBuilder::getShaderType( UIShapeType _st ) const {
 }
 
 void UIShapeBuilder::createDependencyList() {
-    addDependency<Utility::TTFCore::Font, FontBuilder>( fontName, sg.FM() );
+//    ### Re-add dependency on Font (and everything else)
+//    addDependency<Utility::TTFCore::Font, FontBuilder>( fontName, sg.FM() );
     addDependencies( std::make_shared<UIShapeBuilder>(*this) );
 }
 

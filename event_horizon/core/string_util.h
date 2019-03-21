@@ -57,17 +57,7 @@ static inline std::string unescape(const std::string& str) {
     return ret;
 }
 
-template<typename Out>
-static inline void split( const std::string& s, char delim, Out result ) {
-    std::stringstream ss;
-    ss.str( s );
-    std::string item;
-    while ( std::getline( ss, item, delim )) {
-        *( result++ ) = trim( item );
-    }
-}
-
-static inline std::vector<std::string> split( const std::string& input, const std::string& regex = "\\S+") {
+static inline std::vector<std::string> split_regexp( const std::string& input, const std::string& regex = "\\s") {
     std::regex re( regex );
     std::smatch sm;
 
@@ -76,11 +66,32 @@ static inline std::vector<std::string> split( const std::string& input, const st
     std::string input_cp = input;
     while(regex_search(input_cp, sm, re))
     {
-        ret.emplace_back( sm.str() );
+        auto m = sm.prefix().str();
+        if ( !m.empty() ) ret.emplace_back(m);
         input_cp = sm.suffix();
     }
+    // we append the last bit of the string left if there's any
+    if ( !input_cp.empty() ) ret.emplace_back( input_cp );
 
     return ret;
+}
+
+static inline std::vector<std::string> split( const std::string& input ) {
+    return split_regexp( input, "\\s" );
+}
+
+static inline std::vector<std::string> split_words( const std::string& input ) {
+    return split_regexp( input, "\\W" );
+}
+
+template<typename Out>
+static inline void split( const std::string& s, char delim, Out result ) {
+    std::stringstream ss;
+    ss.str( s );
+    std::string item;
+    while ( std::getline( ss, item, delim )) {
+        *( result++ ) = trim( item );
+    }
 }
 
 static inline std::vector<std::string> split( const std::string& s, char delim ) {

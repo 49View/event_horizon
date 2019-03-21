@@ -22,6 +22,7 @@
 class StreamingMediator;
 class CameraManager;
 class RawImage;
+namespace Utility::TTFCore { class Font; }
 
 //class PolySceneGraphTextureList : public ImageDepencencyMaker {
 //    bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
@@ -38,10 +39,10 @@ class ProfileManager;
 template<typename T, typename C> class ResourceManager;
 class MaterialManager;
 class ColorManager;
-class FontManager;
 class CameraManager;
 
 using ImageManager = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
+using FontManager = ResourceManager<Utility::TTFCore::Font, ResourceManagerContainer<Utility::TTFCore::Font>>;
 
 class CommandScriptSceneGraph : public CommandScript {
 public:

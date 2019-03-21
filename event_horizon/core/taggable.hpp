@@ -38,7 +38,7 @@ protected:
 
     void nameSplit() {
         auto lcname = toLower( NamePolicy<T>::Name() );
-        auto ltags = split( lcname, '_' );
+        auto ltags = split_words( lcname );
         for ( const auto& v : ltags ) {
             tags.emplace( v );
         }

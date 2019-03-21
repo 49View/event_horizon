@@ -13,15 +13,6 @@ class ImageBuilder : public ResourceBuilder2<ImageBuilder, RawImage> {
 public:
     using ResourceBuilder2::ResourceBuilder2;
     ImageParams imageParams;
-    uint32_t backup_color = 0xffffffff;
-    bool bForceHDR16BitTarget = true;
-    bool useImagePrefix = true;
-    bool mbIsRaw = false;
-
-    ImageBuilder& backup( const uint32_t _bc ) {
-        backup_color = _bc;
-        return *this;
-    }
 
     ImageBuilder& setImageParams( const ImageParams& _ip ) {
         imageParams = _ip;
@@ -77,16 +68,6 @@ public:
 
     ImageBuilder& setFilterMode( Filter _filterMode ) {
         imageParams.filterMode = _filterMode;
-        return *this;
-    }
-
-    ImageBuilder& noImagePrefix() {
-        useImagePrefix = false;
-        return *this;
-    }
-
-    ImageBuilder& raw( const bool _value ) {
-        mbIsRaw = _value;
         return *this;
     }
 

@@ -3,7 +3,7 @@
 //
 
 #include "renderer.h"
-#include <poly/resources/font_manager.h>
+#include <poly/resources/font_builder.h>
 #include <graphics/vp_builder.hpp>
 
 void Renderer::drawIncGridLines( int numGridLines, float deltaInc, float gridLinesWidth,

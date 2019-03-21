@@ -11,7 +11,7 @@
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>
 #include <poly/camera_manager.h>
-#include <poly/resources/font_manager.h>
+#include <poly/resources/font_builder.h>
 #include <poly/profile_builder.h>
 #include <poly/material_builder.h>
 

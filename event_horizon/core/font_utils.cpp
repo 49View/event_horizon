@@ -1,29 +1,17 @@
-#include "font_manager.h"
+//
+// Created by Dado on 2019-03-21.
+//
 
-#include "core/math/matrix4f.h"
-#include "core/file_manager.h"
+#include "font_utils.hpp"
 
-void FontManager::preCacheFont() {
-//	font->PreCacheBasicLatin();
-}
+#include <cstdint>
+#include <core/math/rect2f.h>
+#include <core/math/matrix4f.h>
+#include <core/TTF.h>
 
-const Utility::TTFCore::Font& FontManager::operator[]( const std::string& _fontName ) {
-    if ( auto ret = Resources().find( _fontName ); ret != Resources().end()) {
-        return *ret->second.get();
-    }
+namespace FontUtils {
 
-    // didn't find the font, rollback to defualt
-    auto ret = Resources().find( defaultFontName );
-    return *ret->second.get();
-    // ok default it's not loaded, load it
-    //return addFont( FontManager::defaultFont, FontManager::defaultFontName );
-}
-
-const Utility::TTFCore::Font& FontManager::operator()() {
-    return operator[]( defaultFontName );
-}
-
-Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Font& f, float height ) {
+Rect2f measure( const std::string& msg, std::shared_ptr<Utility::TTFCore::Font> f, float height ) {
     int32_t numPolysRendered = 0;
     int32_t numTotalPolys = 0;
     int32_t numPolysToDraw = 0;
@@ -37,7 +25,7 @@ Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Fon
     // Count total number of polygons
     for ( char i : msg ) {
         Utility::TTF::CodePoint cp( i );
-        numTotalPolys += static_cast<int32_t>( f.GetTriCount( cp ));
+        numTotalPolys += static_cast<int32_t>( f->GetTriCount( cp ));
     }
 
     float gliphScaler = 1000.0f; // It looks like glyphs are stored in a box [1000,1000], so we normalise it to [1,1]
@@ -47,7 +35,7 @@ Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Fon
 
     for ( char i : msg ) {
         Utility::TTF::CodePoint cp( i );
-        const Utility::TTF::Mesh& m = f.GetTriangulation( cp );
+        const Utility::TTF::Mesh& m = f->GetTriangulation( cp );
         int32_t numPolysInGlyph = static_cast<int32_t>( m.verts.size());
 
         // Don't draw an empty space
@@ -72,7 +60,7 @@ Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Fon
             numPolysRendered += numPolysInGlyph;
         }
 
-        Utility::TTFCore::vec2f kerning = f.GetKerning( Utility::TTF::CodePoint( i ), cp );
+        Utility::TTFCore::vec2f kerning = f->GetKerning( Utility::TTF::CodePoint( i ), cp );
         Vector2f nextCharPos = Vector2f( kerning.x / gliphScaler, kerning.y / gliphScaler ) * ( height );
         tm.translate( nextCharPos );
     }
@@ -80,25 +68,21 @@ Rect2f FontManager::measure( const std::string& msg, const Utility::TTFCore::Fon
     return ret;
 }
 
-Rect2f FontManager::optimalSizeForText( const Vector2f& size, const Utility::TTFCore::Font& f,
-                                        const std::string& text, float& outputHeight ) {
+Rect2f optimalSizeForText( const Vector2f& size,
+                           std::shared_ptr<Utility::TTFCore::Font> f,
+                           const std::string& text,
+                           float& outputHeight ) {
+
     outputHeight = size.y();
-    Rect2f lTextRect = FontManager::measure( text.c_str(), f, outputHeight );
+    Rect2f lTextRect = measure( text.c_str(), f, outputHeight );
     float ratioX = fabs( lTextRect.width() / size.x());
     float ratioY = fabs( lTextRect.height() / size.y());
     if ( ratioX > 1.0f || ratioY > 1.0f ) {
         float ratio = max( ratioX, ratioY );
         outputHeight = size.y() / ratio;
-        lTextRect = FontManager::measure( text.c_str(), f, outputHeight );
+        lTextRect = measure( text.c_str(), f, outputHeight );
     }
     return lTextRect;
 }
 
-//bool FontBuilder::makeImpl( uint8_p&& _data, const DependencyStatus _status ) {
-//    if ( _status == DependencyStatus::LoadedSuccessfully ) {
-//        mm.add( std::make_shared<Utility::TTF::Font>( _data.first.get(), _data.second ) );
-//        return true;
-//    }
-//    return false;
-//}
-
+}

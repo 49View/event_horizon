@@ -862,20 +862,28 @@ Font::Font( const void* rawData, MapFromData ) {
 }
 
 Font::Font( const void* rawData, size_t length ) {
-	// sanity check
-	if ( length == 0 ) {
-		throw FileLengthError();
-	}
+    initFromBuffer( rawData, length );
+}
 
-	// 'load' font data
-	bufferCache.assign( reinterpret_cast<const char*>( rawData ), reinterpret_cast<const char*>( rawData ) + length );
-	buffer = &bufferCache.front();
+Font::Font( const SerializableContainer& _data ) {
+    initFromBuffer( reinterpret_cast<const void*>(_data.data()), _data.size() );
+}
 
-	// parse font
-	CreateTableMap();
-	VerifyTableCheckSums();
-	VerifyRequiredTables();
-	VerifyTrueTypeTables();
+void Font::initFromBuffer( const void* rawData, size_t length ) {
+    // sanity check
+    if ( length == 0 ) {
+        throw FileLengthError();
+    }
+
+    // 'load' font data
+    bufferCache.assign( reinterpret_cast<const char*>( rawData ), reinterpret_cast<const char*>( rawData ) + length );
+    buffer = &bufferCache.front();
+
+    // parse font
+    CreateTableMap();
+    VerifyTableCheckSums();
+    VerifyRequiredTables();
+    VerifyTrueTypeTables();
 }
 
 Font::~Font() {}
@@ -2560,10 +2568,3 @@ void Font::PreCacheBasicLatin() {
 	PreCache( 0x20, 0x7f, 3, 1, 0 );
 }
 
-void Font::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
-
-}
-
-void Font::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
-
-}

@@ -61,7 +61,7 @@
 #include <map>
 #include <string>
 #include <mutex>
-#include <poly/resources/publisher.hpp>
+#include <core/htypes_shared.hpp>
 
 // ---------------------------------------------------------------------------------------------------------------------------
 //    Utility namespace
@@ -440,10 +440,7 @@ struct MapFromData {
 };
 
 // ----- Font -----
-class Font : public Publisher<Font> {
-protected:
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
+class Font {
 private:
 
 	// internal types
@@ -543,11 +540,14 @@ private:
 	Mesh GetSimpleMesh( FItr ) const;             // gets the simple glyph's mesh
 	Mesh GetComplexMesh( FItr ) const;            // gets the complex glyph's mesh
 
+    void initFromBuffer( const void* rawData, size_t length );
+
 public:
     Font() = default;
 	Font( std::string flnm );                   // construct from file
 	Font( const void* rawData, MapFromData );   // map from raw data (no copy made, data must exist for the duration of the Font object)
 	Font( const void* rawData, size_t length ); // copy from raw data
+    explicit Font( const SerializableContainer & _data); // copy from raw data
 	virtual ~Font();
 
 public:

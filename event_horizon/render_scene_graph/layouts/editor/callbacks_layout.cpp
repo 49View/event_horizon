@@ -9,6 +9,10 @@
 #include <rapidjson/document.h>
 #include <core/file_manager.h>
 #include <core/http/webclient.h>
+#include <core/TTF.h>
+
+#include <poly/resources/font_builder.h>
+#include <render_scene_graph/scene_orchestrator.hpp>
 
 #include "geom_layout.h"
 #include "image_layout.h"
@@ -61,6 +65,15 @@ void allConversionsDragAndDropCallback( [[maybe_unused]] SceneOrchestrator* p, c
         SerializableContainer fileContent;
         FM::readLocalFile( pathSanitized, fileContent );
         callbackImage( pathSanitized, fileContent );
+    }
+    else if ( extl == ".ttf" ) {
+        SerializableContainer fileContent;
+        FM::readLocalFile( pathSanitized, fileContent );
+        static SerializableContainer fontBufferData = fileContent;
+        static std::string fontName = getFileName(pathSanitized);
+        SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
+            FontBuilder{p->SG().FM(), fontName}.create( fontBufferData );
+        } );
     }
     else if ( extl == ".svg" ) {
         callbackGeomSVG( pathSanitized, FM::readLocalTextFile( pathSanitized ) );

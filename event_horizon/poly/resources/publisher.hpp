@@ -19,8 +19,8 @@ class Material;
 class GeomData;
 class Profile;
 class ImageBuilder;
+class FontBuilder;
 class CameraRig;
-namespace Utility::TTFCore { class Font; }
 class MaterialColor;
 
 template <typename R>
@@ -50,7 +50,7 @@ public:
 
         if ( std::is_same<R, Profile>::value  )                return "profiles";
         if ( std::is_same<R, ImageBuilder>::value  )           return "image";
-        if ( std::is_same<R, Utility::TTFCore::Font>::value  ) return "fonts";
+        if ( std::is_same<R, FontBuilder>::value  )            return "font";
         return "unknown";
     }
 
@@ -63,7 +63,7 @@ public:
 
         if ( std::is_same<R, Profile>::value  )                return "profiles";
         if ( std::is_same<R, ImageBuilder>::value  )           return "image";
-        if ( std::is_same<R, Utility::TTFCore::Font>::value  ) return "fonts";
+        if ( std::is_same<R, FontBuilder>::value  )            return "font";
         return "unknown";
     }
 

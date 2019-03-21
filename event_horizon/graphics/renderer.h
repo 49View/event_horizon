@@ -13,7 +13,6 @@
 #include "render_list.h"
 #include "light_manager.h"
 
-class FontManager;
 class Renderer;
 class CommandScriptRendererManager;
 class CommandQueue;

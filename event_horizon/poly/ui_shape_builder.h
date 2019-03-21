@@ -313,7 +313,7 @@ protected:
 private:
     std::shared_ptr<PosTex3dStrip> makeRoundedRect( const QuadVertices2& uvm );
     std::shared_ptr<PosTex3dStrip> makeRect( const QuadVertices2& uvm );
-    std::shared_ptr<PosTex3dStrip> makeText( const Utility::TTFCore::Font& f );
+    std::shared_ptr<PosTex3dStrip> makeText( std::shared_ptr<Utility::TTFCore::Font> f );
     std::shared_ptr<PosTex3dStrip> makePolygon();
     std::shared_ptr<PosTex3dStrip> makeLine( const std::vector<Vector3f>& _vlist );
     std::shared_ptr<PosTex3dStrip> makeLines( const std::vector<std::vector<Vector3f>>& _vlists );
