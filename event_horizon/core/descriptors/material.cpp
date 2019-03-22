@@ -155,7 +155,7 @@ void Material::deserializeInternal(std::shared_ptr<DeserializeBin> reader) {
 
 void Material::clone( const Material& _source ) {
     HeterogeneousMap::clone( _source );
-    HashTaggable::Hash( _source.Hash() );
+    Hash( _source.Hash() );
     properties = _source.properties;
     shaderName = _source.shaderName;
 }

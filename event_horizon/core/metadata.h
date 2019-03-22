@@ -16,6 +16,7 @@ namespace MetaData {
     const static std::string Id         = "_id";
     const static std::string Name       = "name";
     const static std::string Type       = "group";
+    const static std::string Hash       = "hash";
     const static std::string Thumb      = "thumb";
     const static std::string Raw        = "raw";
     const static std::string Tags       = "tags";
@@ -24,9 +25,11 @@ namespace MetaData {
 class CoreMetaData {
 public:
     CoreMetaData() = default;
-    CoreMetaData( std::string name, std::string type, std::string thumb, std::string raw, std::set<std::string> tags ) :
+    CoreMetaData( std::string name, std::string type, std::string _hash,
+                  std::string thumb, std::string raw, std::set<std::string> tags ) :
                       name( std::move( name )),
                       type( std::move( type )),
+                      hash( std::move( _hash )),
                       thumb( std::move( thumb )),
                       raw( std::move( raw )),
                       tags( std::move( tags )) {}
@@ -37,6 +40,10 @@ public:
 
     std::string& Type() {
         return type;
+    }
+
+    std::string& Hash() {
+        return hash;
     }
 
     std::string& Thumb() {
@@ -95,14 +102,23 @@ public:
         return id;
     }
 
-    void setId( const std::string& id ) {
-        CoreMetaData::id = id;
+    void setId( const std::string& _id ) {
+        CoreMetaData::id = _id;
+    }
+
+    const std::string& getHash() const {
+        return hash;
+    }
+
+    void setHash( const std::string& _hash ) {
+        CoreMetaData::hash = _hash;
     }
 
 private:
     std::string id;
     std::string name;
     std::string type;
+    std::string hash;
     std::string thumb;
     std::string raw;
     std::set<std::string> tags;

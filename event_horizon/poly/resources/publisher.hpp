@@ -7,7 +7,8 @@
 #include <core/serialization.hpp>
 #include <core/http/webclient.h>
 #include <core/boxable.hpp>
-#include <core/hashtaggable.hpp>
+#include <core/hashable.hpp>
+#include <core/taggable.hpp>
 #include <core/http/basen.hpp>
 #include <core/zlib_util.h>
 #include <core/serializable.hpp>
@@ -77,7 +78,8 @@ template < typename T,
 class Publisher : public ResourceVersioning<T>,
                   public virtual Boxable<B>,
                   public virtual Serializable<T, W, R>,
-                  public virtual HashTaggable<N> {
+                  public virtual Taggable<N>,
+                  public virtual Hashable<> {
 protected:
     virtual void serializeInternal( std::shared_ptr<W> writer ) const = 0;
     virtual void deserializeInternal( std::shared_ptr<R> reader ) = 0;
@@ -99,7 +101,7 @@ protected:
     std::string toMetaData() const {
         MegaWriter writer;
         writer.StartObject();
-        writer.serialize( CoreMetaData{ this->Name(), T::Prefix(),
+        writer.serialize( CoreMetaData{ this->Name(), T::Prefix(), this->Hash(),
                                         T::GenerateThumbnail((T&)*this), generateRawData(), this->Tags() } );
         if ( B::IsSerializable() ) {
             writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
@@ -114,6 +116,7 @@ protected:
         writer.StartObject();
         writer.serialize( CoreMetaData{ this->Name(),
                                         T::Prefix(),
+                                        this->Hash(),
                                         T::GenerateThumbnail((T&)*this),
                                         rawb64gzip(_raw),
                                         this->Tags() } );
@@ -126,8 +129,8 @@ protected:
     }
 
     void serializeImpl( std::shared_ptr<W> writer ) const override {
-        writer->write( HashTaggable<N>::Name() );
-        writer->write( HashTaggable<N>::Hash() );
+        writer->write( Taggable<N>::Name() );
+        writer->write( Hashable<>::Hash() );
         if ( B::IsSerializable() ) {
             writer->write( Boxable<B>::BBox3d() );
         }
@@ -135,8 +138,8 @@ protected:
     }
 
     void deserializeImpl( std::shared_ptr<R> reader ) override {
-        reader->read( HashTaggable<N>::NameRef() );
-        reader->read( HashTaggable<N>::HashRef() );
+        reader->read( Taggable<N>::NameRef() );
+        reader->read( Hashable<>::HashRef() );
         if ( B::IsSerializable() ) {
             reader->read( Boxable<B>::BBox3d() );
         }

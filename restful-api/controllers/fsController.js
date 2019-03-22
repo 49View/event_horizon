@@ -25,7 +25,6 @@ exports.cloudStorageCheckExists = async ( key, bucket ) => {
 exports.cloudStorageGetFilenameAndDuplicateIfExists = async ( key, bucket, filename ) => {    
     let finalName = key;
     const result = await cloudApi.checkObjectExists(key, bucket);
-    console.log( "Result of duplicate check " + result );
     if ( result == true ) {
         // Now the file has been found so add the classic ugly orrible _N appendix
         const str = key;

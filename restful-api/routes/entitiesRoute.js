@@ -66,14 +66,14 @@ router.post('/', async (req, res, next) => {
     try {
         const project = req.user.project;
         const metadata = entityController.getMetadataFromBody(true, true, req);
-        const { content, group, public, restricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
+        const { content, group, isPublic, isRestricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
         let filePath=entityController.getFilePath(project, group, cleanMetadata.name);
         //Check content exists in project and group
-        const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.tags)
-        if (copyEntity!==null) {
+        const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.hash)
+        if (copyEntity===null) {
             //Delete existing entity
-            entityController.deleteEntity(copyEntity._id);
-        } else {
+            // entityController.deleteEntity(copyEntity._id);
+        // } else {
             //Upload file to S3
             let savedFilename = {"changed":false, "name": filePath};
             await fsController.cloudStorageGetFilenameAndDuplicateIfExists( filePath, "eventhorizonentities", savedFilename );
@@ -85,7 +85,7 @@ router.post('/', async (req, res, next) => {
             await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities" );
         }
         //Create entity
-        const newEntity = await entityController.createEntity(project, group, public, restricted, cleanMetadata);
+        const newEntity = await entityController.createEntity(project, group, isPublic, isRestricted, cleanMetadata);
 
         res.status(200).send(newEntity);
     } catch (ex) {

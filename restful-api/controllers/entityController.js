@@ -50,9 +50,9 @@ exports.getFilePath = (project, group, name) => {
     return project+"/"+group+"/"+name;
 }
 
-exports.checkFileExists = async (project, group, tags) => {
+exports.checkFileExists = async (project, group, hash) => {
 
-    const query = {$and: [{"metadata.tags":tags}, {"group":group}, {"project":project}]};
+    const query = {$and: [{"metadata.hash":hash}, {"group":group}, {"project":project}]};
     const result = await entityModel.findOne(query);
 
     return result!==null?result.toObject():null;

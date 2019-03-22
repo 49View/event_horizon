@@ -14,6 +14,22 @@ enum class AddResourcePolicy {
     Deferred
 };
 
+JSONDATA( ResourceMetadata, name, hash, BBox3d, tags )
+    std::string name;
+    std::string hash;
+    std::vector<float> BBox3d;
+    std::vector<std::string> tags;
+};
+
+JSONDATA( JSONResourceResponse, _id, project, group, isPublic, isRestricted, metadata )
+    std::string _id;
+    std::string project;
+    std::string group;
+    bool isPublic = false;
+    bool isRestricted = false;
+    ResourceMetadata metadata;
+};
+
 template < typename B, typename R >
 class ResourceBuilder2 : public Publisher<B, EmptyBox> {
 public:
@@ -47,7 +63,11 @@ public:
         if ( prepAndCheck(_data ) ) return;
 
         if ( B::Version() != 0 ) this->addTag( this->hashFn(B::Version()) );
-        this->publish2( _data, [&](HttpResponeParams res) {
+        this->publish2( _data, [&](HttpResponeParams _res) {
+            JSONResourceResponse resJson(_res.bufferString);
+            // We make sure that in case server side has to change name in case
+            // of duplicates we reflect it here client side
+            this->Name( resJson.metadata.name );
             addResource(_data, AddResourcePolicy::Deferred);
         } );
     }

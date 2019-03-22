@@ -81,7 +81,7 @@ static inline std::vector<std::string> split( const std::string& input ) {
 }
 
 static inline std::vector<std::string> split_words( const std::string& input ) {
-    return split_regexp( input, "\\W" );
+    return split_regexp( input, "[\\W_]" );
 }
 
 template<typename Out>
