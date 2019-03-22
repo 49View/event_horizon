@@ -46,6 +46,7 @@ private:
         ASSERT( rr.P( _shader ) != nullptr );
         material = EF::clone<Material>( rr.P( _shader )->getDefaultUniforms() );
         material->Name(_name);
+        material->setShaderName( _shader );
         material->resolveDynamicConstants();
     }
 

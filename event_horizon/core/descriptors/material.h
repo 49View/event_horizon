@@ -125,10 +125,9 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
 
 class Material : public NamePolicy<>, public HeterogeneousMap {
 public:
-    Material() = default;
     explicit Material( uint8_p&& _data ) {}
     explicit Material( const SerializableContainer& _data ) {}
-    Material(const Material& _val) : NamePolicy( _val.Name() ), HeterogeneousMap( _val ) {}
+    Material(const Material& _val);
 
     ~Material() override = default;
 

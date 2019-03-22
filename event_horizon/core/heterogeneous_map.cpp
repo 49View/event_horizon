@@ -378,3 +378,16 @@ void HeterogeneousMap::deserializeImpl( std::shared_ptr<DeserializeBin> reader )
     reader->read( mM3fs );
     reader->read( mM4fs );
 }
+
+HeterogeneousMap::HeterogeneousMap( const HeterogeneousMap& _source ) {
+    mTextures    = _source.mTextures;
+    mFloats      = _source.mFloats;
+    mInts        = _source.mInts;
+    mV2fs        = _source.mV2fs;
+    mV3fs        = _source.mV3fs;
+    mV4fs        = _source.mV4fs;
+    mM3fs        = _source.mM3fs;
+    mM4fs        = _source.mM4fs;
+    mV3fvs       = _source.mV3fvs;
+    mNumUniforms = _source.mNumUniforms;
+}

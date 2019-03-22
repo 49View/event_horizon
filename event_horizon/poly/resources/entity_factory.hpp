@@ -32,8 +32,7 @@ public:
 
     template <typename T>
     static std::shared_ptr<T> clone( const std::shared_ptr<T> _elem ) {
-        auto ret = std::make_shared<T>();
-        ret->clone( *_elem.get() );
+        auto ret = std::make_shared<T>(*_elem.get());
         return ret;
     }
 

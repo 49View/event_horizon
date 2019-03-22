@@ -21,7 +21,9 @@ class DeserializeBin;
 class HeterogeneousMap : public virtual Hashable<>,
                          public std::enable_shared_from_this<HeterogeneousMap> {
 public:
+    HeterogeneousMap() = default;
     virtual ~HeterogeneousMap() = default;
+    HeterogeneousMap( const HeterogeneousMap& _source );
     void inject( const HeterogeneousMap& source );
     void injectIfNotPresent( const HeterogeneousMap& source );
     void assign( const std::string& uniformName, int data );

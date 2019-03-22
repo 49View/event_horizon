@@ -13,6 +13,13 @@ Material::Material( const std::string& _name, const std::string& _sn ) {
     setShaderName(_sn);
 }
 
+Material::Material( const Material& _source ) : NamePolicy( _source ), HeterogeneousMap( _source ) {
+    HeterogeneousMap::clone( _source );
+    Hash( _source.Hash() );
+    properties = _source.properties;
+    shaderName = _source.shaderName;
+}
+
 //std::string Material::calcHashImpl() {
 //
 //    std::stringstream hashInput( HeterogeneousMap::HashRef() );
