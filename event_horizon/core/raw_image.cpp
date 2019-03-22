@@ -1,4 +1,5 @@
 #include "raw_image.h"
+
 #include <core/image_util.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -6,26 +7,6 @@
 #include <core/math/rect2f.h>
 #include <core/http/basen.hpp>
 #include <core/util.h>
-#include <core/file_manager.h>
-
-RawImage::RawImage( const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData ) {
-    ImageParams::operator=(_ip);
-    setFormatFromChannels();
-    rawBtyes = std::move(decodedData);
-    calcHash( rawBtyes.get(), size() );
-}
-
-RawImage::RawImage( const unsigned char* _buffer, size_t _length, RawImageMemory _mt ) {
-    bufferDecode( _buffer, _length, _mt );
-}
-
-RawImage::RawImage( const SerializableContainer& _data, RawImageMemory _mt ) {
-    bufferDecode( _data.data(), _data.size(), _mt );
-}
-
-RawImage::RawImage( uint8_p&& data, RawImageMemory _mt ) {
-    bufferDecode( data.first.get(), data.second, _mt );
-}
 
 RawImage::RawImage( unsigned int _w, unsigned int _h, int _channels, const uint32_t _col ) {
     width = _w;
@@ -37,7 +18,6 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, int _channels, const uint3
             std::memcpy( rawBtyes.get() + ((t * width * channels) + q*channels), &_col, channels );
         }
     }
-    calcHash( rawBtyes.get(), size() );
 }
 
 RawImage::RawImage( unsigned int _w, unsigned int _h, const uint8_t _col ) {
@@ -46,7 +26,6 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, const uint8_t _col ) {
     channels = 1;
     rawBtyes = std::make_unique<uint8_t[]>( width * height );
     std::memset( rawBtyes.get(), width * height, _col);
-    calcHash( rawBtyes.get(), size() );
 }
 
 RawImage::RawImage( unsigned int _w, unsigned int _h, const float _col ) {
@@ -56,7 +35,6 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, const float _col ) {
     auto _colval = static_cast<uint8_t >(clamp( _col * 255.0f, 0.0f, 255.0f) );
     rawBtyes = std::make_unique<uint8_t[]>( width * height );
     std::memset( rawBtyes.get(), width * height, _colval);
-    calcHash( rawBtyes.get(), size() );
 }
 
 RawImage::RawImage( int width,
@@ -64,32 +42,12 @@ RawImage::RawImage( int width,
                     int channels,
                     const char *buffer) : ImageParams( width, height, channels ) {
     copyFrom( buffer );
-    calcHash( rawBtyes.get(), size() );
 }
 
 RawImage::RawImage( int width, int height, int channels, const char *_buffer, const std::string& _forcedhash )
                     : ImageParams( width, height, channels ) {
     copyFrom( _buffer );
-    Hash( _forcedhash );
 }
-
-//RawImage rawImageDecodeFromMemory( const uint8_p& data, const std::string& _name, int forceChannels ) {
-//    return rawImageDecodeFromMemory( reinterpret_cast<const unsigned char *>(data.first.get()), data.second, _name,
-//            forceChannels );
-//}
-//
-//RawImage rawImageDecodeFromMemory( const unsigned char* buffer, int length, int forceChannels ) {
-//    RawImage ret;
-//
-//    unsigned char *ddata = stbi_load_from_memory(buffer, length, &ret.width, &ret.height, &ret.channels, forceChannels);
-//    if ( forceChannels != 0 ) ret.channels = forceChannels;
-//    ASSERT(ddata);
-//    ret.rawBtyes = std::make_unique<uint8_t[]>( ret.width * ret.height * ret.channels );
-//    std::memcpy( ret.rawBtyes.get(), ddata, ret.width * ret.height * ret.channels );
-//    stbi_image_free(ddata);
-//
-//    return ret;
-//}
 
 RawImage rawImageSubImage( const RawImage& _source, const JMATH::Rect2f& _area,
                            const Vector2i& _extraPadding, const uint8_t& _paddingGradient ) {
@@ -113,23 +71,11 @@ RawImage rawImageSubImage( const RawImage& _source, const JMATH::Rect2f& _area,
     return RawImage( rwidth, rheight, rchannels,  reinterpret_cast<const char*>(buffer.get()) );
 }
 
-//RawImage rawImageDecodeFromMemory( const std::string& _base64, int forceChannels ) {
-//    std::vector<unsigned char> rd;
-//    bn::decode_b64( _base64.begin(), _base64.end(), std::back_inserter(rd) );
-//    return RawImage( rd.data(), rd.size() );
-//}
-
 void RawImage::copyFrom( const char *buffer ) {
     auto bsize = width * height * channels;
     rawBtyes = std::make_unique<uint8_t[]>( bsize );
     std::memcpy( rawBtyes.get(), buffer, bsize );
 }
-
-//RawImage::RawImage( int width, int height, int channels ) :
-//                    ImageParams( width, height, channels ) {
-//    auto bsize = width * height * channels;
-//    rawBtyes = std::make_unique<uint8_t[]>( bsize );
-//}
 
 void RawImage::grayScale() {
     if ( channels < 3 ) return;
@@ -234,9 +180,10 @@ RawImage RawImage::NORMAL4x4() {                           //AABBGGRR
     return RawImage{ 4, 4, 3, static_cast<uint32_t>(0xffff7f7f) };
 }
 
-void RawImage::bufferDecode( const unsigned char* _buffer, size_t _length, RawImageMemory _mt ) {
+void RawImage::bufferDecode( const unsigned char* _buffer, size_t _length ) {
+    // ### fix this!!
+    auto _mt = RawImageMemory::Compressed;
     rawBtyes = imageUtil::decodeFromMemory( ucchar_p{_buffer, _length},
                                             width, height, channels, bpp, _mt == RawImageMemory::Raw );
     setFormatFromChannels();
-    calcHash( rawBtyes.get(), size() );
 }

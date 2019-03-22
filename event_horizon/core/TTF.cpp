@@ -861,15 +861,7 @@ Font::Font( const void* rawData, MapFromData ) {
 	VerifyTrueTypeTables();
 }
 
-Font::Font( const void* rawData, size_t length ) {
-    initFromBuffer( rawData, length );
-}
-
-Font::Font( const SerializableContainer& _data ) {
-    initFromBuffer( reinterpret_cast<const void*>(_data.data()), _data.size() );
-}
-
-void Font::initFromBuffer( const void* rawData, size_t length ) {
+void Font::bufferDecode( const unsigned char* rawData, size_t length ) {
     // sanity check
     if ( length == 0 ) {
         throw FileLengthError();

@@ -76,7 +76,6 @@ private:
 private:
 	// 2d Followers data
 	std::shared_ptr<Profile> mProfile;
-	Profile					 mBBoxProfile;
 	FollowerFlags			 mCurrentFlags;
 
 	// Exported data

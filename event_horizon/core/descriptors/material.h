@@ -125,13 +125,11 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
 
 class Material : public NamePolicy<>, public HeterogeneousMap {
 public:
-    explicit Material( uint8_p&& _data ) {}
-    explicit Material( const SerializableContainer& _data ) {}
+    RESOURCE_CTORS(Material);
     Material(const Material& _val);
-
-    ~Material() override = default;
-
     explicit Material( const std::string& _name, const std::string& _sn );
+    ~Material() override = default;
+    void bufferDecode( const unsigned char* _buffer, size_t _length ) {}
 
     Material& t( const std::string& _tn );
     Material& c( const Color4f& _col );

@@ -318,3 +318,13 @@ struct TextureUniformDesc {
 	int 		 target;
 };
 
+#define RESOURCE_CTORS(N) \
+    explicit N( uint8_p&& data ) { \
+        bufferDecode( data.first.get(), data.second ); \
+    } \
+    explicit N( const SerializableContainer& _data ) { \
+        bufferDecode( _data.data(), _data.size() ); \
+    } \
+    explicit N( const unsigned char* _buffer, size_t _length ) { \
+        bufferDecode( _buffer, _length ); \
+    } \

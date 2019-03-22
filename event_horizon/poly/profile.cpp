@@ -16,17 +16,8 @@
 #define NANOSVG_IMPLEMENTATION	// Expands implementation
 #include "nanosvg.h"
 
-
-Profile::Profile( uint8_p&& _data ) {
-    readSVGfromMemory( reinterpret_cast<const char*>(_data.first.get()), _data.second );
-}
-
-Profile::Profile( const SerializableContainer& _data ) {
-    readSVGfromMemory( reinterpret_cast<const char*>(_data.data()), _data.size() );
-}
-
-void Profile::readSVGfromMemory( const char* _buffer, size_t _length ) {
-    std::string svgString( _buffer, _length );
+void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
+    std::string svgString( reinterpret_cast<const char*>(_buffer), _length );
     if ( !svgString.empty() ) {
         auto prof = std::make_unique<char[]>( svgString.length() );
         std::memcpy( prof.get(), svgString.c_str(), svgString.length() );

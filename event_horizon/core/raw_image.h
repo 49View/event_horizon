@@ -6,7 +6,6 @@
 #include <core/math/vector2i.h>
 #include <core/htypes_shared.hpp>
 #include <core/image_constants.h>
-#include <core/hashable.hpp>
 
 namespace JMATH { class Rect2f; }
 
@@ -15,13 +14,9 @@ enum class RawImageMemory {
     Compressed
 };
 
-class RawImage : public ImageParams, public Hashable<> {
+class RawImage : public ImageParams {
 public:
-    virtual ~RawImage() = default;
-    explicit RawImage( uint8_p&& data, RawImageMemory _mt = RawImageMemory::Compressed);
-    explicit RawImage( const SerializableContainer& _data, RawImageMemory _mt = RawImageMemory::Compressed );
-    explicit RawImage( const unsigned char* _buffer, size_t _length, RawImageMemory _mt = RawImageMemory::Compressed );
-    RawImage( const ImageParams& _ip, std::unique_ptr<uint8_t[]>&& decodedData );
+    RESOURCE_CTORS(RawImage);
 
     RawImage( unsigned int _w, unsigned int _h, int channels, uint32_t _col);
     RawImage( unsigned int _w, unsigned int _h, uint8_t _col );
@@ -38,17 +33,15 @@ public:
         height = _val.height;
         channels = _val.channels;
         rawBtyes = std::move(_val.rawBtyes);
-        Hash( _val.Hash() );
     }
 
-    RawImage(const RawImage& _val) : ImageParams( _val ), Hashable( _val ) {
+    RawImage(const RawImage& _val) : ImageParams( _val ) {
         copyFrom( reinterpret_cast<const char *>(_val.data()) );
     }
 
     RawImage& operator=(const RawImage& _val) {
         ImageParams::operator=(_val);
         copyFrom( reinterpret_cast<const char *>(_val.data()) );
-        Hash( _val.Hash() );
         return *this;
     }
 
@@ -106,7 +99,7 @@ public:
 	static RawImage NORMAL4x4();
 
 private:
-    void bufferDecode( const unsigned char* _buffer, size_t _length, RawImageMemory _mt );
+    void bufferDecode( const unsigned char* _buffer, size_t _length );
 };
 
 //RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string& _name = "", int forceChannels = 0 );

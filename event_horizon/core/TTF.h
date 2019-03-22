@@ -540,14 +540,12 @@ private:
 	Mesh GetSimpleMesh( FItr ) const;             // gets the simple glyph's mesh
 	Mesh GetComplexMesh( FItr ) const;            // gets the complex glyph's mesh
 
-    void initFromBuffer( const void* rawData, size_t length );
+    void bufferDecode( const unsigned char* rawData, size_t length );
 
 public:
-    Font() = default;
 	Font( std::string flnm );                   // construct from file
 	Font( const void* rawData, MapFromData );   // map from raw data (no copy made, data must exist for the duration of the Font object)
-	Font( const void* rawData, size_t length ); // copy from raw data
-    explicit Font( const SerializableContainer & _data); // copy from raw data
+    RESOURCE_CTORS(Font);
 	virtual ~Font();
 
 public:
