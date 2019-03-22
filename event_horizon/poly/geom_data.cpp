@@ -14,6 +14,7 @@
 #include "triangulator.hpp"
 
 #include <core/node.hpp>
+#include <core/descriptors/material.h>
 #include <poly/converters/svg/svgtopoly.hpp>
 
 inline void hash_combine( std::size_t& /*seed*/ ) {}
@@ -142,34 +143,36 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _
 //	return ss.str();
 //}
 
+
+// ### FIx all those serialization with new resource system!!
 void GeomData::serializeInternal( std::shared_ptr<SerializeBin> f ) const {
-	f->write( material );
-	f->write( mVdata.BBox3d() );
-	f->write( mVdata.vIndices );
-	f->write( mVdata.vcoords3d );
-	f->write( mVdata.vnormals3d );
-	f->write( mVdata.vtangents3d );
-	f->write( mVdata.vbinormals3d );
-	f->write( mVdata.vUVs );
-    f->write( mVdata.vUV2s );
-	f->write( mVdata.vColor );
+//	f->write( material );
+//	f->write( mVdata.BBox3d() );
+//	f->write( mVdata.vIndices );
+//	f->write( mVdata.vcoords3d );
+//	f->write( mVdata.vnormals3d );
+//	f->write( mVdata.vtangents3d );
+//	f->write( mVdata.vbinormals3d );
+//	f->write( mVdata.vUVs );
+//    f->write( mVdata.vUV2s );
+//	f->write( mVdata.vColor );
 }
 
 void GeomData::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
-	reader->read( material );
-	reader->read( mVdata.BBox3d() );
-	reader->read( mVdata.vIndices );
-	reader->read( mVdata.vcoords3d );
-	reader->read( mVdata.vnormals3d );
-	reader->read( mVdata.vtangents3d );
-	reader->read( mVdata.vbinormals3d );
-	reader->read( mVdata.vUVs );
-	reader->read( mVdata.vUV2s );
-	reader->read( mVdata.vColor );
+//	reader->read( material );
+//	reader->read( mVdata.BBox3d() );
+//	reader->read( mVdata.vIndices );
+//	reader->read( mVdata.vcoords3d );
+//	reader->read( mVdata.vnormals3d );
+//	reader->read( mVdata.vtangents3d );
+//	reader->read( mVdata.vbinormals3d );
+//	reader->read( mVdata.vUVs );
+//	reader->read( mVdata.vUV2s );
+//	reader->read( mVdata.vColor );
 }
 
 void GeomData::serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const {
-	writer->writeDep(material);
+//	writer->writeDep(material);
 }
 
 void GeomData::setMappingData( const GeomMappingData& _mapping ) {
@@ -983,6 +986,12 @@ void GeomData::setWindingOrderFlagOnly( const WindingOrderT _wo ) {
 WindingOrderT GeomData::getWindingOrder() const {
 	return mWindingOrder;
 }
+
+std::shared_ptr<Material> GeomData::getMaterial() { return material; }
+
+std::shared_ptr<Material> GeomData::getMaterial() const { return material; }
+
+void GeomData::setMaterial( std::shared_ptr<Material> _mat ) { material = _mat; }
 
 GeomData::~GeomData() = default;
 

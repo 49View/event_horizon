@@ -50,6 +50,12 @@ public:
                    } );
     }
 
+    void addIM( std::shared_ptr<R> _res ) {
+        addInternal( _res, AddResourcePolicy::Immediate );
+    }
+    void addDF( std::shared_ptr<R> _res ) {
+        addInternal( _res, AddResourcePolicy::Deferred );
+    }
     void add( std::shared_ptr<R> _res, AddResourcePolicy _arp ) {
         addInternal( _res, _arp );
     }

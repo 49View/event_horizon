@@ -16,7 +16,6 @@
 #include <iostream>
 #include <string>
 
-#include <core/descriptors/material.h>
 #include <core/htypes_shared.hpp>
 #include <core/math/poly_utils.hpp>
 #include <core/math/poly_shapes.hpp>
@@ -27,10 +26,10 @@
 #include <core/math/quad_vertices.h>
 #include <core/soa_utils.h>
 #include <core/boxable.hpp>
-#include <core/serializable.hpp>
+#include <poly/resources/publisher.hpp>
 
-#include "polypartition.h"
-#include "poly_helper.h"
+#include <poly/polypartition.h>
+#include <poly/poly_helper.h>
 
 class Profile;
 class SerializeBin;
@@ -38,6 +37,7 @@ class DeserializeBin;
 class GeomData;
 class VertexProcessing;
 class GeomBuilder;
+class Material;
 
 enum PullFlags : uint32_t {
     Sides = 1 << 0,
@@ -200,9 +200,9 @@ public:
 
     void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
 public:
-    std::shared_ptr<Material> getMaterial() { return material; }
-    std::shared_ptr<Material> getMaterial() const { return material; }
-    void setMaterial( std::shared_ptr<Material> _mat ) { material = _mat; }
+    std::shared_ptr<Material> getMaterial();
+    std::shared_ptr<Material> getMaterial() const;
+    void setMaterial( std::shared_ptr<Material> _mat );
 
     void addShape( ShapeType st, const Vector3f& center, const Vector3f& size, int subDivs = 0 );
 

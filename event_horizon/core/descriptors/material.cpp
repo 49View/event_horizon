@@ -139,19 +139,19 @@ void Material::setProperties( const MaterialProperties& properties ) {
     Material::properties = properties;
 }
 
-void Material::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
-    HeterogeneousMap::serializeImpl(writer);
-    writer->write( buffers );
-    properties.serialize(writer);
-    writer->write(shaderName);
-}
-
-void Material::deserializeInternal(std::shared_ptr<DeserializeBin> reader) {
-    HeterogeneousMap::deserializeImpl(reader);
-    reader->read( buffers );
-    properties.deserialize(reader);
-    reader->read(shaderName);
-}
+//void Material::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
+//    HeterogeneousMap::serializeImpl(writer);
+//    writer->write( buffers );
+//    properties.serialize(writer);
+//    writer->write(shaderName);
+//}
+//
+//void Material::deserializeInternal(std::shared_ptr<DeserializeBin> reader) {
+//    HeterogeneousMap::deserializeImpl(reader);
+//    reader->read( buffers );
+//    properties.deserialize(reader);
+//    reader->read(shaderName);
+//}
 
 void Material::clone( const Material& _source ) {
     HeterogeneousMap::clone( _source );
@@ -243,6 +243,10 @@ bool Material::isStreammable() const {
 float Material::translucency() const {
     if ( shaderName == S::YUV_GREENSCREEN ) return 0.5f;
     return getOpacity();
+}
+
+Material Material::WHITE_PBR() {
+    return Material{ S::WHITE_PBR, S::SH };
 }
 
 // *********************************************************************************************************

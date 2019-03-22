@@ -112,7 +112,8 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist )
 void GeomBuilder::createDependencyList() {
 
     if ( !material->isStreammable() ) { // is material is streammable do not try to load the entity resouce from server
-        bMaterialDep = addDependency<Material, MaterialBuilder>( material->Name(), sg.ML() );
+        //    ### reintroduce material dependency
+//        bMaterialDep = addDependency<Material, MaterialBuilder>( material->Name(), sg.ML() );
     }
 //    ### reintroduce profiles
 //    if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
@@ -141,7 +142,8 @@ void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
 void GeomBuilder::assemble() {
 
     if ( bMaterialDep ) {
-        material->clone( *sg.ML().get(material->Name()).get() );
+//        ### Get the right dependency with new system, not this mess!!
+//        material->clone( *sg.ML().get(material->Name()).get() );
     }
 
     switch ( builderType ) {

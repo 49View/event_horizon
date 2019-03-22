@@ -72,8 +72,7 @@ public:
     }
 
 protected:
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
-
     void finalise( std::shared_ptr<RawImage> _elem ) override;
 };
+
+using IB = ImageBuilder;

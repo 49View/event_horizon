@@ -7,12 +7,12 @@
 //
 
 #pragma once
+
 #include <utility>
 #include <vector>
 #include <array>
 #include <core/htypes_shared.hpp>
 #include <core/math/vector3f.h>
-#include <poly/resources/publisher.hpp>
 
 namespace JMATH { class Rect2f; }
 

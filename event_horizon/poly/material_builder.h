@@ -7,41 +7,36 @@
 #include <tuple>
 #include <functional>
 #include "core/util.h"
-#include "poly/resources/builders.hpp"
+#include "poly/resources/resource_builder.hpp"
 #include "core/descriptors/material.h"
-#include "core/image_constants.h"
+//#include "core/image_constants.h"
 
-class MaterialBuilder;
-struct MaterialProperties;
-class ColorBuilder;
-class ImageDepencencyMaker;
+class Material;
 
-class MaterialManager : public ResourceManager<Material> {
-public:
-    virtual ~MaterialManager() = default;
-    void dump() const;
-//    bool virtual add( const MaterialBuilder& pb, std::shared_ptr<Material> _material );
-//    bool add( const std::string& _key, std::shared_ptr<Material> _material );
-//    std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey, const MaterialProperties& _mp );
-    std::vector<std::shared_ptr<Material>> list() const;
-    void TL( ImageDepencencyMaker* _tl ) { tl = _tl; }
-    ImageDepencencyMaker* TL() { return tl; }
-private:
-    ImageDepencencyMaker* tl = nullptr;
-};
+//class MaterialManager : public ResourceManager<Material> {
+//public:
+//    virtual ~MaterialManager() = default;
+//    void dump() const;
+////    bool virtual add( const MaterialBuilder& pb, std::shared_ptr<Material> _material );
+////    bool add( const std::string& _key, std::shared_ptr<Material> _material );
+////    std::shared_ptr<Material> get( const std::string& _key, const std::string& _subkey, const MaterialProperties& _mp );
+//    std::vector<std::shared_ptr<Material>> list() const;
+//    void TL( ImageDepencencyMaker* _tl ) { tl = _tl; }
+//    ImageDepencencyMaker* TL() { return tl; }
+//private:
+//    ImageDepencencyMaker* tl = nullptr;
+//};
 
 //struct RBUILDER( MaterialBuilder, material, mat, Binary, BuilderQueryType::NotExact,  )
 
-class MaterialBuilder : public ResourceBuilder< Material, MaterialManager > {
-    using ResourceBuilder::ResourceBuilder;
+class MaterialBuilder : public ResourceBuilder2< MaterialBuilder, Material > {
 public:
+    using ResourceBuilder2::ResourceBuilder2;
 //    MaterialBuilder( MaterialBuilder& a ) : ResourceBuilder(a) {}
-    explicit MaterialBuilder( MaterialManager& _mm ) : ResourceBuilder(_mm) {}
-    MaterialBuilder( MaterialManager& _mm, const std::string& _name, const std::string& _sn );
-    MaterialBuilder( MaterialManager& _mm, const std::string& _name, const SerializableContainer& _data );
+//    explicit MaterialBuilder( MaterialManager& _mm ) : ResourceBuilder(_mm) {}
+//    MaterialBuilder( const std::string& _sn );
+//    MaterialBuilder( const SerializableContainer& _data );
 
-    void makeDefault() override;
-    std::shared_ptr<Material> makeDirect();
 private:
     MaterialBuilder& mp( const MaterialProperties& _value ) {
         properties = _value;
@@ -52,6 +47,9 @@ private:
         shaderName = _value;
         return *this;
     }
+
+protected:
+    void finalise( std::shared_ptr<Material> _elem ) override;
 
 private:
     MaterialProperties      properties;
@@ -64,15 +62,6 @@ private:
 using MB = MaterialBuilder;
 
 // Color management!
-
-class ColorManager : public ResourceManager<MaterialColor> {
-public:
-    virtual ~ColorManager() = default;
+class ColorBuilder : public ResourceBuilder2<ColorBuilder, MaterialColor> {
+    using ResourceBuilder2::ResourceBuilder2;
 };
-
-class ColorBuilder : public ResourceBuilder<MaterialColor, ColorManager> {
-    using ResourceBuilder::ResourceBuilder;
-};
-
-//struct RBUILDER( ColorBuilder, color, col, Text, BuilderQueryType::NotExact, MaterialColor::Version() )
-//};

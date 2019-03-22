@@ -7,11 +7,3 @@ void ImageBuilder::finalise( std::shared_ptr<RawImage> _elem ) {
     _elem->wrapMode = imageParams.wrapMode;
     _elem->filterMode = imageParams.filterMode;
 }
-
-void ImageBuilder::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
-
-}
-
-void ImageBuilder::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
-
-}

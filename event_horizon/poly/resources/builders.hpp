@@ -170,14 +170,13 @@ protected:
 
     template <typename BD>
     void push_dep( const std::string& _dname ) {
-        std::string preFixToAdd = BD::usesNotExactQuery() ? "" : BD::Prefix();
-        mDeps.push_back( preFixToAdd + _dname );
+        mDeps.push_back( BD::Prefix() + _dname );
     }
 
     template <typename R, typename BD, typename M>
     bool addDependency( const std::string& _dname, M& _md ) {
         if ( !_md.exists(_dname) ) {
-            BD{_md}.n(_dname).build();
+            BD{_md, _dname}.load();
             push_dep<R>( _dname );
             return true;
         }

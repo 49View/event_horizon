@@ -14,6 +14,7 @@
 
 #include <poly/poly.hpp>
 #include <poly/scene_graph.h>
+#include <poly/resources/publisher.hpp>
 #include <poly/scene_graph_geom_builder_base.hpp>
 
 namespace Utility::TTFCore { class Font; }

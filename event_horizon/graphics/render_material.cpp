@@ -7,7 +7,9 @@
 //
 
 #include "render_material.hpp"
-#include "renderer.h"
+
+#include "core/descriptors/material.h"
+#include <graphics/renderer.h>
 
 void RenderMaterial::removeAllTextures() {
 //    Uniforms()->clearTextures();

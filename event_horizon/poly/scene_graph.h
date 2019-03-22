@@ -23,6 +23,9 @@ class StreamingMediator;
 class CameraManager;
 class RawImage;
 class Profile;
+class Material;
+class MaterialColor;
+
 namespace Utility::TTFCore { class Font; }
 
 //class PolySceneGraphTextureList : public ImageDepencencyMaker {
@@ -37,13 +40,13 @@ using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
 
 class SceneGraph;
 template<typename T, typename C> class ResourceManager;
-class MaterialManager;
-class ColorManager;
 class CameraManager;
 
-using ImageManager = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
-using FontManager = ResourceManager<Utility::TTFCore::Font, ResourceManagerContainer<Utility::TTFCore::Font>>;
-using ProfileManager = ResourceManager<Profile, ResourceManagerContainer<Profile>>;
+using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
+using FontManager       = ResourceManager<Utility::TTFCore::Font, ResourceManagerContainer<Utility::TTFCore::Font>>;
+using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Profile>>;
+using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Material>>;
+using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>>;
 
 class CommandScriptSceneGraph : public CommandScript {
 public:

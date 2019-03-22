@@ -170,11 +170,12 @@ void SceneGraph::nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot ) 
 }
 
 void SceneGraph::init() {
-    ImageBuilder{ TL(), "white"    }.add( EF::clone(RawImage::WHITE4x4()      ), AddResourcePolicy::Immediate );
-    ImageBuilder{ TL(), "black"    }.add( EF::clone(RawImage::BLACK_RGBA4x4() ), AddResourcePolicy::Immediate );
-    ImageBuilder{ TL(), "normal"   }.add( EF::clone(RawImage::NORMAL4x4()     ), AddResourcePolicy::Immediate );
-    ImageBuilder{ TL(), "debug_uv" }.add( EF::clone(RawImage::DEBUG_UV()      ), AddResourcePolicy::Immediate );
+    IB{ TL(), S::WHITE     }.addIM( EF::clone(RawImage::WHITE4x4()      ) );
+    IB{ TL(), S::BLACK     }.addIM( EF::clone(RawImage::BLACK_RGBA4x4() ) );
+    IB{ TL(), S::NORMAL    }.addIM( EF::clone(RawImage::NORMAL4x4()     ) );
+    IB{ TL(), S::DEBUG_UV  }.addIM( EF::clone(RawImage::DEBUG_UV()      ) );
 
-    MaterialBuilder{ML(), S::WHITE_PBR, S::SH}.makeDefault();
+    MB{ ML(), S::WHITE_PBR }.addIM( EF::clone(Material::WHITE_PBR()     ) );
+//    , S::WHITE_PBR, S::SH}.makeDefault();
     CameraBuilder{CM()}.makeDefault();
 }

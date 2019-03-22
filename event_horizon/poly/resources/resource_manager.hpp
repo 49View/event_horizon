@@ -79,6 +79,14 @@ public:
         addSignal.connect( _slot );
     }
 
+    std::vector<std::shared_ptr<T>> list() const {
+        std::vector<std::shared_ptr<T>> ret;
+        for ( const auto& [k, v] : Resources() ) {
+            ret.push_back(v);
+        }
+        return ret;
+    }
+
 protected:
     void add( std::shared_ptr<T> _elem, const std::string& _name,
               const std::string& _hash, const std::string& _aliasKey = "" ) {

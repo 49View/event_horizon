@@ -11,7 +11,7 @@
 #include <core/http/basen.hpp>
 #include <core/http/webclient.h>
 #include <core/names.hpp>
-#include <poly/resources/publisher.hpp>
+#include <core/name_policy.hpp>
 #include <core/tar_util.h>
 #include <core/zlib_util.h>
 #include <core/heterogeneous_map.hpp>
@@ -19,8 +19,6 @@
 #include <core/image_util.h>
 #include <core/util.h>
 #include <core/math/vector4f.h>
-#include <core/serializebin.hpp>
-#include <core/serialization.hpp>
 
 const static uint32_t dependecyTagTexture = 1;
 const static uint32_t dependecyTagMaterial = 2;
@@ -67,10 +65,8 @@ namespace MPBRTextures {
     }
 }
 
-class MaterialColor : public Publisher<MaterialColor> {
+class MaterialColor {
 public:
-    virtual ~MaterialColor() = default;
-
     Vector4f color = Vector4f::WHITE;
     std::string name = "perfect white";
     std::string category = "white";
@@ -114,24 +110,29 @@ JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
         return pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost && isStreaming == rhs.isStreaming;
     }
 
-    void serialize( std::shared_ptr<SerializeBin> writer ) const {
-        writer->write(pixelTexelRatio);
-        writer->write(cost);
-        writer->write(isStreaming);
-    }
-
-    void deserialize( std::shared_ptr<DeserializeBin> reader ) {
-        reader->read(pixelTexelRatio);
-        reader->read(cost);
-        reader->read(isStreaming);
-    }
+//    void serialize( std::shared_ptr<SerializeBin> writer ) const {
+//        writer->write(pixelTexelRatio);
+//        writer->write(cost);
+//        writer->write(isStreaming);
+//    }
+//
+//    void deserialize( std::shared_ptr<DeserializeBin> reader ) {
+//        reader->read(pixelTexelRatio);
+//        reader->read(cost);
+//        reader->read(isStreaming);
+//    }
 };
 
-class Material : public HeterogeneousMap, public Publisher<Material, EmptyBox> {
+class Material : public NamePolicy<>, public HeterogeneousMap {
 public:
     Material() = default;
-    explicit Material( const std::string& _name, const std::string& _sn );
+    explicit Material( uint8_p&& _data ) {}
+    explicit Material( const SerializableContainer& _data ) {}
+    Material(const Material& _val) : NamePolicy( _val.Name() ), HeterogeneousMap( _val ) {}
+
     ~Material() override = default;
+
+    explicit Material( const std::string& _name, const std::string& _sn );
 
     Material& t( const std::string& _tn );
     Material& c( const Color4f& _col );
@@ -173,10 +174,6 @@ public:
     bool isStreammable() const;
     float translucency() const;
 
-protected:
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserializeInternal(std::shared_ptr<DeserializeBin> reader) override;
-
     KnownBufferMap knownBuffers() const;
 
 protected:
@@ -185,6 +182,9 @@ protected:
     std::string shaderName;
 
     friend class EntityFactory;
+
+public:
+    static Material WHITE_PBR();
 };
 
 class MaterialBuildable {

@@ -7,32 +7,32 @@
 #include <poly/resources/entity_factory.hpp>
 #include <stb/stb_image_write.h>
 
-MaterialBuilder::MaterialBuilder( MaterialManager& _mm,
-                                  const std::string& _name,
-                                  const std::string& _sn ) : ResourceBuilder( _mm ) {
-    Name(_name);
-    shaderName = _sn;
-//    defPrePosfixes();
-}
-
-MaterialBuilder::MaterialBuilder( MaterialManager& _mm,
-                                  const std::string& _name,
-                                  const SerializableContainer& _data ) : ResourceBuilder( _mm ) {
-    Name(_name);
-    bufferTarFiles = _data;
-}
-
-void MaterialBuilder::makeDefault() {
-    mm.add( std::make_shared<Material>( Name(), shaderName ) );
-}
-
-std::shared_ptr<Material> MaterialBuilder::makeDirect() {
-    auto mat = std::make_shared<Material>( Name(), shaderName );
-    mat->tarBuffers( bufferTarFiles );
-    mm.add( mat );
-
-    return mat;
-}
+//MaterialBuilder::MaterialBuilder( MaterialManager& _mm,
+//                                  const std::string& _name,
+//                                  const std::string& _sn ) : ResourceBuilder( _mm ) {
+//    Name(_name);
+//    shaderName = _sn;
+////    defPrePosfixes();
+//}
+//
+//MaterialBuilder::MaterialBuilder( MaterialManager& _mm,
+//                                  const std::string& _name,
+//                                  const SerializableContainer& _data ) : ResourceBuilder( _mm ) {
+//    Name(_name);
+//    bufferTarFiles = _data;
+//}
+//
+//void MaterialBuilder::makeDefault() {
+//    mm.add( std::make_shared<Material>( Name(), shaderName ) );
+//}
+//
+//std::shared_ptr<Material> MaterialBuilder::makeDirect() {
+//    auto mat = std::make_shared<Material>( Name(), shaderName );
+//    mat->tarBuffers( bufferTarFiles );
+//    mm.add( mat );
+//
+//    return mat;
+//}
 
 //bool MaterialBuilder::makeImpl( uint8_p&& _data, const DependencyStatus _status ) {
 //
@@ -83,19 +83,12 @@ std::shared_ptr<Material> MaterialBuilder::makeDirect() {
 //    return materialList[_key];
 //}
 
-void MaterialManager::dump() const  {
-    for ( const auto& [k, v] : Resources() ) {
-        LOGR("Material: %s", k.c_str());
-    }
-}
-
-std::vector<std::shared_ptr<Material>> MaterialManager::list() const {
-    std::vector<std::shared_ptr<Material>> ret;
-    for ( const auto& [k, v] : Resources() ) {
-        ret.push_back(v);
-    }
-    return ret;
-}
+//void MaterialManager::dump() const  {
+//    for ( const auto& [k, v] : Resources() ) {
+//        LOGR("Material: %s", k.c_str());
+//    }
+//}
+//
 
 //bool ColorBuilder::makeImpl( uint8_p&& _data, const DependencyStatus _status ) {
 //
@@ -119,3 +112,6 @@ std::vector<std::shared_ptr<Material>> MaterialManager::list() const {
 //    }
 //    return Color4f::WHITE;
 //}
+void MaterialBuilder::finalise( std::shared_ptr<Material> _elem ) {
+
+}

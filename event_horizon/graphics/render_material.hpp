@@ -10,11 +10,10 @@
 
 #include <string>
 #include <unordered_map>
-#include "core/descriptors/material.h"
 #include "program_uniform_set.h"
 
 class Program;
-
+class Material;
 class ProgramUniformSet;
 
 class ShaderManager;
