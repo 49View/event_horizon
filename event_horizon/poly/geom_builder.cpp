@@ -6,7 +6,7 @@
 #include <core/node.hpp>
 #include <poly/resources/entity_factory.hpp>
 #include <poly/material_builder.h>
-#include <poly/profile_builder.h>
+#include <poly/resources/profile_builder.h>
 #include <poly/poly.hpp>
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg ) : SceneGraphGeomBaseBuilder(_sg) {
@@ -259,7 +259,7 @@ GeomAssetSP GeomBuilder::buildr() {
 }
 
 GeomBuilder& GeomBuilder::pb( const float _a, const float _b ) {
-    ProfileBuilder{ sg.PL(), _a, _b }.build();
+//    ProfileBuilder{ sg.PL(), _a, _b }.build();
     return *this;
 }
 

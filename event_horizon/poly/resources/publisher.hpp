@@ -18,7 +18,7 @@
 
 class Material;
 class GeomData;
-class Profile;
+class ProfileBuilder;
 class ImageBuilder;
 class FontBuilder;
 class CameraRig;
@@ -35,10 +35,10 @@ public:
     }
 
     inline static size_t Version() {
-        if ( std::is_same<R, Material>::value )       return 1000;
-        if ( std::is_same<R, GeomData>::value )       return 2000;
-        if ( std::is_same<R, Profile>::value  )       return 1000;
-        if ( std::is_same<R, MaterialColor>::value  ) return 1000;
+        if ( std::is_same<R, Material>::value )        return 1000;
+        if ( std::is_same<R, GeomData>::value )        return 2000;
+        if ( std::is_same<R, ProfileBuilder>::value  ) return 1000;
+        if ( std::is_same<R, MaterialColor>::value  )  return 1000;
         return 0;
     }
 
@@ -49,7 +49,7 @@ public:
         if ( std::is_same<R, MaterialColor>::value  )          return "color";
         if ( std::is_same<R, CameraRig>::value )               return "cameras";
 
-        if ( std::is_same<R, Profile>::value  )                return "profiles";
+        if ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
         if ( std::is_same<R, ImageBuilder>::value  )           return "image";
         if ( std::is_same<R, FontBuilder>::value  )            return "font";
         return "unknown";
@@ -62,7 +62,7 @@ public:
         if ( std::is_same<R, MaterialColor>::value  )          return "color";
         if ( std::is_same<R, CameraRig>::value )               return "cameras";
 
-        if ( std::is_same<R, Profile>::value  )                return "profiles";
+        if ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
         if ( std::is_same<R, ImageBuilder>::value  )           return "image";
         if ( std::is_same<R, FontBuilder>::value  )            return "font";
         return "unknown";
@@ -81,8 +81,8 @@ class Publisher : public ResourceVersioning<T>,
                   public virtual Taggable<N>,
                   public virtual Hashable<> {
 protected:
-    virtual void serializeInternal( std::shared_ptr<W> writer ) const = 0;
-    virtual void deserializeInternal( std::shared_ptr<R> reader ) = 0;
+    virtual void serializeInternal( std::shared_ptr<W> writer ) const {}
+    virtual void deserializeInternal( std::shared_ptr<R> reader ) {}
 
     std::string rawb64gzip( const SerializableContainer& _raw ) const {
         auto f = zlibUtil::deflateMemory( std::string{ _raw.begin(), _raw.end() } );

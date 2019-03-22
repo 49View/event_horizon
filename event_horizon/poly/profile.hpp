@@ -16,13 +16,11 @@
 
 namespace JMATH { class Rect2f; }
 
-class Profile : public Publisher<Profile> {
+class Profile {
 public:
-    using Publisher::Publisher;
 	Profile() = default;
-	explicit Profile( const std::string& _name ) : NamePolicy(_name) {}
-	Profile( const std::string& _name, uint8_p&& _data );
-    virtual ~Profile() = default;
+	explicit Profile( uint8_p&& _data );
+    explicit Profile( const SerializableContainer& _data );
 
     void createWire( float radius, int numSubDivs );
 	void createLine( const Vector2f& a, const Vector2f& b, WindingOrderT wo = WindingOrder::CCW );
@@ -61,11 +59,8 @@ public:
 
     static std::shared_ptr<Profile> fromPoints( const std::string& name, const std::vector<Vector2f>& points );
 
-protected:
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
-
 private:
+    void readSVGfromMemory( const char* _buffer, size_t _length );
 	void calculatePerimeter();
 	void calcBBox();
 

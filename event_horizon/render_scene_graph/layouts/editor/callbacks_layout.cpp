@@ -4,14 +4,20 @@
 
 #include "callbacks_layout.h"
 
+#include <tuple>
 #include <unordered_map>
 #include <core/util.h>
 #include <rapidjson/document.h>
 #include <core/file_manager.h>
 #include <core/http/webclient.h>
 #include <core/TTF.h>
+#include <core/raw_image.h>
+
+#include <poly/profile.hpp>
 
 #include <poly/resources/font_builder.h>
+#include <poly/resources/image_builder.h>
+#include <poly/resources/profile_builder.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
 #include "geom_layout.h"
@@ -19,6 +25,8 @@
 #include "material_layout.h"
 
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
+
+std::unordered_map<std::string, std::tuple<std::string, SerializableContainer>> sceneEntityFilesCallbacks;
 
 void cloudCallback( SocketCallbackDataType data ) {
     std::string filename = url_decode( data["name"].GetString() );
@@ -43,6 +51,17 @@ void allCallbacksEntitySetup() {
     Socket::on( "cloudStorageFileUpdate", cloudCallback );
 }
 
+template <typename T, typename M>
+void addFileCallback( const std::string& _path, M& mm ) {
+    SerializableContainer fileContent;
+    FM::readLocalFile( _path, fileContent );
+    sceneEntityFilesCallbacks[T::Prefix()] = { getFileName(_path), fileContent};
+    SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
+        auto tr = sceneEntityFilesCallbacks[T::Prefix()];
+        T{mm, std::get<0>(tr)}.create( std::get<1>(tr) );
+    } );
+}
+
 void allConversionsDragAndDropCallback( [[maybe_unused]] SceneOrchestrator* p, const std::string& _path ) {
     std::string pathSanitized = url_encode_spacesonly(_path);
     std::string ext = getFileNameExt( pathSanitized );
@@ -62,21 +81,13 @@ void allConversionsDragAndDropCallback( [[maybe_unused]] SceneOrchestrator* p, c
 //        stl::parse_stl(pathSanitized);
 //    }
     else if ( extl == ".jpg" || extl == ".jepg" || extl == ".png" ) {
-        SerializableContainer fileContent;
-        FM::readLocalFile( pathSanitized, fileContent );
-        callbackImage( pathSanitized, fileContent );
+        addFileCallback<ImageBuilder, ImageManager>( pathSanitized, p->SG().TL() );
     }
     else if ( extl == ".ttf" ) {
-        SerializableContainer fileContent;
-        FM::readLocalFile( pathSanitized, fileContent );
-        static SerializableContainer fontBufferData = fileContent;
-        static std::string fontName = getFileName(pathSanitized);
-        SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
-            FontBuilder{p->SG().FM(), fontName}.create( fontBufferData );
-        } );
+        addFileCallback<FontBuilder, FontManager>( pathSanitized, p->SG().FM() );
     }
     else if ( extl == ".svg" ) {
-        callbackGeomSVG( pathSanitized, FM::readLocalTextFile( pathSanitized ) );
+        addFileCallback<ProfileBuilder, ProfileManager>( pathSanitized, p->SG().PL() );
     }
     else if ( extl == ".sbsar" ) {
         FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(EntityGroup::Material)+ getFileName(pathSanitized));

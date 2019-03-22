@@ -17,6 +17,61 @@
 #include "nanosvg.h"
 
 
+Profile::Profile( uint8_p&& _data ) {
+    readSVGfromMemory( reinterpret_cast<const char*>(_data.first.get()), _data.second );
+}
+
+Profile::Profile( const SerializableContainer& _data ) {
+    readSVGfromMemory( reinterpret_cast<const char*>(_data.data()), _data.size() );
+}
+
+void Profile::readSVGfromMemory( const char* _buffer, size_t _length ) {
+    std::string svgString( _buffer, _length );
+    if ( !svgString.empty() ) {
+        auto prof = std::make_unique<char[]>( svgString.length() );
+        std::memcpy( prof.get(), svgString.c_str(), svgString.length() );
+        NSVGimage* image = nsvgParse( reinterpret_cast<char *>(prof.get()), "pc", 96 );
+        mBBox = { image->width, image->height };
+        Rect2f lbbox = Rect2f::INVALID;
+        std::vector<Vector2f> rawPoints;
+        // #### NDDADO: we fix subDivs=0 because it's dangerous to interpolate bezier paths when you need total accuracy
+        // on connecting profiles with straight elements (IE think about a flat wall)
+        int subDivs = 0;
+        for ( auto shape = image->shapes; shape != NULL; shape = shape->next ) {
+            if ( shape->next != nullptr ) continue;
+            for ( auto path = shape->paths; path != NULL; path = path->next ) {
+                for ( auto i = 0; i < path->npts - 1; i += 3 ) {
+                    float *p = &path->pts[i * 2];
+                    for ( int s = 0; s < subDivs + 1; s++ ) {
+                        float t = s / static_cast<float>(subDivs + 1);
+                        Vector2f pi = interpolateBezier( Vector2f{ p[0], p[1] }, Vector2f{ p[2], p[3] },
+                                                         Vector2f{ p[4], p[5] }, Vector2f{ p[6], p[7] }, t );
+                        pi -= Vector2f{ path->bounds[0], path->bounds[1] };
+                        pi *= 0.01f;
+                        rawPoints.push_back( pi );
+                        lbbox.expand( pi );
+                    }
+                }
+            }
+        }
+        rawPoints.pop_back();
+        nsvgDelete( image );
+
+        sanitizePath( rawPoints, mPoints, true, 0.0001f * 0.0001f );
+        ASSERT( mPoints.size() > 2 );
+        auto wo = detectWindingOrder( mPoints[0], mPoints[1], mPoints[2] );
+        if ( wo == WindingOrder::CCW ) {
+            std::reverse( std::begin(mPoints), std::end(mPoints) );
+        }
+        for ( auto& p : mPoints ) {
+            p.setY( lbbox.height() - p.y());
+        }
+        mBBox = { lbbox.calcWidth(), lbbox.calcHeight() };
+    }
+
+    calculatePerimeter();
+}
+
 std::vector<Vector3f> Profile::Points3d( const Vector3f & /*mainAxis*/ ) const {
 	std::vector<Vector3f> ret;
 	for ( auto& p : mPoints ) {
@@ -186,53 +241,6 @@ std::vector<Vector3f> Profile::rotatePoints( const Vector3f& nx, const Vector3f&
 	return retArray;
 }
 
-Profile::Profile( [[maybe_unused]] const std::string& _name, uint8_p&& _data ) {
-	std::string svgString( reinterpret_cast<const char*>(_data.first.get()), _data.second );
-	if ( !svgString.empty() ) {
-		auto prof = std::make_unique<char[]>( svgString.length() );
-		std::memcpy( prof.get(), svgString.c_str(), svgString.length() );
-		NSVGimage* image = nsvgParse( reinterpret_cast<char *>(prof.get()), "pc", 96 );
-		mBBox = { image->width, image->height };
-		Rect2f lbbox = Rect2f::INVALID;
-		std::vector<Vector2f> rawPoints;
-		// #### NDDADO: we fix subDivs=0 because it's dangerous to interpolate bezier paths when you need total accuracy
-		// on connecting profiles with straight elements (IE think about a flat wall)
-		int subDivs = 0;
-		for ( auto shape = image->shapes; shape != NULL; shape = shape->next ) {
-			if ( shape->next != nullptr ) continue;
-			for ( auto path = shape->paths; path != NULL; path = path->next ) {
-				for ( auto i = 0; i < path->npts - 1; i += 3 ) {
-					float *p = &path->pts[i * 2];
-					for ( int s = 0; s < subDivs + 1; s++ ) {
-						float t = s / static_cast<float>(subDivs + 1);
-						Vector2f pi = interpolateBezier( Vector2f{ p[0], p[1] }, Vector2f{ p[2], p[3] },
-														 Vector2f{ p[4], p[5] }, Vector2f{ p[6], p[7] }, t );
-						pi -= Vector2f{ path->bounds[0], path->bounds[1] };
-						pi *= 0.01f;
-						rawPoints.push_back( pi );
-						lbbox.expand( pi );
-					}
-				}
-			}
-		}
-		rawPoints.pop_back();
-		nsvgDelete( image );
-
-		sanitizePath( rawPoints, mPoints, true, 0.0001f * 0.0001f );
-		ASSERT( mPoints.size() > 2 );
-		auto wo = detectWindingOrder( mPoints[0], mPoints[1], mPoints[2] );
-		if ( wo == WindingOrder::CCW ) {
-			std::reverse( std::begin(mPoints), std::end(mPoints) );
-		}
-		for ( auto& p : mPoints ) {
-			p.setY( lbbox.height() - p.y());
-		}
-		mBBox = { lbbox.calcWidth(), lbbox.calcHeight() };
-	}
-
-	calculatePerimeter();
-}
-
 void Profile::calcBBox() {
 	Rect2f lbbox = Rect2f::INVALID;
 	for ( const auto& p : mPoints ) {
@@ -245,7 +253,7 @@ std::shared_ptr<Profile> Profile::makeLine( const std::string& _name, const std:
 											[[maybe_unused]] const std::vector<float>& vfs) {
 
     ASSERT(vv2fs.size() == 2);
-    std::shared_ptr<Profile> profile = std::make_shared<Profile>(_name);
+    std::shared_ptr<Profile> profile = std::make_shared<Profile>();
     profile->createLine( vv2fs[0], vv2fs[1] );
 
     return profile;
@@ -257,7 +265,7 @@ std::shared_ptr<Profile> Profile::makeWire( const std::string& _name,
 
     ASSERT( vfs.size() && vfs.size() < 3);
     auto subdivs = vfs.size() == 1 ? 3 : static_cast<int>(vfs[1]);
-    std::shared_ptr<Profile> profile = std::make_shared<Profile>(_name);
+    std::shared_ptr<Profile> profile = std::make_shared<Profile>();
 
     profile->createWire( vfs[0], subdivs );
 
@@ -265,18 +273,10 @@ std::shared_ptr<Profile> Profile::makeWire( const std::string& _name,
 }
 
 std::shared_ptr<Profile> Profile::fromPoints( const std::string& name,  const std::vector<Vector2f>& points ) {
-	std::shared_ptr<Profile> ret = std::make_shared<Profile>( name);
+	std::shared_ptr<Profile> ret = std::make_shared<Profile>();
 	ret->createArbitrary( points );
 
 	return ret;
-
-}
-
-void Profile::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
-
-}
-
-void Profile::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
 
 }
 
