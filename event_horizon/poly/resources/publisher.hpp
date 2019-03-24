@@ -14,28 +14,21 @@
 #include <core/serializable.hpp>
 #include <core/serializebin.hpp>
 #include <core/versionable.hpp>
-#include <core/query_policy.hpp>
 
-class Material;
+class MaterialBuilder;
 class GeomData;
 class ProfileBuilder;
 class ImageBuilder;
 class FontBuilder;
-class CameraRig;
+class CameraBuilder;
 class MaterialColor;
 
 template <typename R>
 class ResourceVersioning {
 public:
-    inline static constexpr bool usesNotExactQuery() {
-        if ( std::is_same<R, Material>::value )        return true;
-        if ( std::is_same<R, GeomData>::value )        return true;
-        if ( std::is_same<R, MaterialColor>::value  )  return true;
-        return false;
-    }
 
     inline static size_t Version() {
-        if ( std::is_same<R, Material>::value )        return 1000;
+        if ( std::is_same<R, MaterialBuilder>::value ) return 1000;
         if ( std::is_same<R, GeomData>::value )        return 2000;
         if ( std::is_same<R, ProfileBuilder>::value  ) return 1000;
         if ( std::is_same<R, MaterialColor>::value  )  return 1000;
@@ -43,11 +36,11 @@ public:
     }
 
     inline static std::string Prefix() {
-        if ( std::is_same<R, Material>::value )                return "material";
+        if ( std::is_same<R, MaterialBuilder>::value )         return "material";
         if ( std::is_same<R, GeomData>::value )                return "geom";
 
         if ( std::is_same<R, MaterialColor>::value  )          return "color";
-        if ( std::is_same<R, CameraRig>::value )               return "cameras";
+        if ( std::is_same<R, CameraBuilder>::value )           return "camera";
 
         if ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
         if ( std::is_same<R, ImageBuilder>::value  )           return "image";
@@ -56,11 +49,11 @@ public:
     }
 
     inline static std::string GenerateThumbnail( const R& _res ) {
-        if ( std::is_same<R, Material>::value )                return "material";
+        if ( std::is_same<R, MaterialBuilder>::value )         return "material";
         if ( std::is_same<R, GeomData>::value )                return "geom";
 
         if ( std::is_same<R, MaterialColor>::value  )          return "color";
-        if ( std::is_same<R, CameraRig>::value )               return "cameras";
+        if ( std::is_same<R, CameraBuilder>::value )           return "camera";
 
         if ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
         if ( std::is_same<R, ImageBuilder>::value  )           return "image";

@@ -176,6 +176,7 @@ void SceneGraph::init() {
     IB{ TL(), S::DEBUG_UV  }.addIM( EF::clone(RawImage::DEBUG_UV()      ) );
 
     MB{ ML(), S::WHITE_PBR }.addIM( EF::clone(Material::WHITE_PBR()     ) );
-//    , S::WHITE_PBR, S::SH}.makeDefault();
-    CameraBuilder{CM()}.makeDefault();
+//    MB{ ML(), "wood" }.load();
+
+   CameraBuilder{CM()}.makeDefault();
 }

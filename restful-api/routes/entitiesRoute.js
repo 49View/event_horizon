@@ -32,6 +32,7 @@ router.get('/:group/:tags', async (req, res, next) => {
         const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, true, 1);
         if (foundEntities!==null && foundEntities.length>0) {
             const filePath=entityController.getFilePath(foundEntities[0].project, foundEntities[0].group, foundEntities[0].metadata.name);
+            console.log( filePath );
             const fileData = await fsController.cloudStorageFileGet(filePath, "eventhorizonentities");
             fsController.writeFile(res, fileData);
         } else {
@@ -39,7 +40,7 @@ router.get('/:group/:tags', async (req, res, next) => {
         }
     } catch (ex) {
         console.log("ERROR GETTING ENTITY CONTENT BYGROUPTAGS: ", ex);
-        res.sendStatus(400);
+        res.status(400).send(ex);
     }
 });
 

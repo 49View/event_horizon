@@ -162,8 +162,8 @@ struct VData : public Boxable<JMATH::AABB> {
         return primitive;
     }
 
-    void setPrimitive( Primitive primitive ) {
-        VData::primitive = primitive;
+    void setPrimitive( Primitive _primitive ) {
+        VData::primitive = _primitive;
     }
 
     friend class GeomData;

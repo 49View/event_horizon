@@ -111,10 +111,10 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist )
 
 void GeomBuilder::createDependencyList() {
 
-    if ( !material->isStreammable() ) { // is material is streammable do not try to load the entity resouce from server
+//    if ( !material->isStreammable() ) { // is material is streammable do not try to load the entity resouce from server
         //    ### reintroduce material dependency
 //        bMaterialDep = addDependency<Material, MaterialBuilder>( material->Name(), sg.ML() );
-    }
+//    }
 //    ### reintroduce profiles
 //    if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
 //        addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());

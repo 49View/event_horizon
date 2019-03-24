@@ -4,9 +4,9 @@
 
 #include "material.h"
 
-static inline bool isShaderStreammable( const std::string& _sn ) {
-    return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
-}
+//static inline bool isShaderStreammable( const std::string& _sn ) {
+//    return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
+//}
 
 Material::Material( const std::string& _name, const std::string& _sn ) {
     Name(_name);
@@ -16,7 +16,7 @@ Material::Material( const std::string& _name, const std::string& _sn ) {
 Material::Material( const Material& _source ) : NamePolicy( _source ), HeterogeneousMap( _source ) {
     HeterogeneousMap::clone( _source );
     Hash( _source.Hash() );
-    properties = _source.properties;
+//    properties = _source.properties;
     shaderName = _source.shaderName;
 }
 
@@ -67,7 +67,7 @@ const std::vector<TextureDependencyBuilderPair> Material::textureDependencies( c
 
 void Material::setShaderName( const std::string& _value ) {
     shaderName = _value;
-    properties.isStreaming = isShaderStreammable( shaderName );
+//    properties.isStreaming = isShaderStreammable( shaderName );
 }
 
 std::string Material::PBRName( const std::string& _type ) const {
@@ -138,13 +138,13 @@ void Material::setOpacity( float _opacityValue ) {
     assign( UniformNames::opacity, _opacityValue );
 }
 
-const MaterialProperties& Material::getProperties() const {
-    return properties;
-}
-
-void Material::setProperties( const MaterialProperties& properties ) {
-    Material::properties = properties;
-}
+//const MaterialProperties& Material::getProperties() const {
+//    return properties;
+//}
+//
+//void Material::setProperties( const MaterialProperties& properties ) {
+//    Material::properties = properties;
+//}
 
 //void Material::serializeInternal( std::shared_ptr<SerializeBin> writer ) const {
 //    HeterogeneousMap::serializeImpl(writer);
@@ -163,7 +163,7 @@ void Material::setProperties( const MaterialProperties& properties ) {
 void Material::clone( const Material& _source ) {
     HeterogeneousMap::clone( _source );
     Hash( _source.Hash() );
-    properties = _source.properties;
+//    properties = _source.properties;
     shaderName = _source.shaderName;
 }
 
@@ -192,21 +192,21 @@ KnownBufferMap Material::knownBuffers() const {
     return ret;
 }
 
-void Material::tarBuffers( const SerializableContainer& _bufferTarFiles ) {
-    if ( !_bufferTarFiles.empty() ) {
-        auto kbs = knownBuffers();
-        auto files = tarUtil::untar( _bufferTarFiles );
-        for ( const auto& fi  : files ) {
-            auto finame = getFileNameOnly(fi.name);
-            auto lUniformName = finame;
-            if ( auto unk = kbs.find( finame ); unk != kbs.end() ) {
-                lUniformName = unk->second;
-            }
-            buffer( finame, fi.dataPtr, lUniformName );
-            assign(lUniformName, finame );
-        }
-    }
-}
+//void Material::tarBuffers( const SerializableContainer& _bufferTarFiles ) {
+//    if ( !_bufferTarFiles.empty() ) {
+//        auto kbs = knownBuffers();
+//        auto files = tarUtil::untar( _bufferTarFiles );
+//        for ( const auto& fi  : files ) {
+//            auto finame = getFileNameOnly(fi.name);
+//            auto lUniformName = finame;
+//            if ( auto unk = kbs.find( finame ); unk != kbs.end() ) {
+//                lUniformName = unk->second;
+//            }
+//            buffer( finame, fi.dataPtr, lUniformName );
+//            assign(lUniformName, finame );
+//        }
+//    }
+//}
 
 void Material::Buffers( MaterialImageCallback imageCallback ) {
     if ( !buffers.empty() ) {
@@ -221,9 +221,9 @@ const MaterialImageBuffers& Material::Buffers() const {
     return buffers;
 }
 
-bool Material::isStreammable() const {
-    return properties.isStreaming;
-}
+//bool Material::isStreammable() const {
+//    return properties.isStreaming;
+//}
 
 //std::string Material::generateThumbnail() const {
 //    auto thumb = std::make_unique<std::string>();
@@ -253,7 +253,7 @@ float Material::translucency() const {
 }
 
 Material Material::WHITE_PBR() {
-    return Material{ S::WHITE_PBR, S::SH };
+    return Material{ S::WHITE_PBR, S::SH }.c(Vector4f::RED);
 }
 
 // *********************************************************************************************************

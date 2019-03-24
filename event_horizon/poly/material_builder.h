@@ -38,10 +38,10 @@ public:
 //    MaterialBuilder( const SerializableContainer& _data );
 
 private:
-    MaterialBuilder& mp( const MaterialProperties& _value ) {
-        properties = _value;
-        return *this;
-    }
+//    MaterialBuilder& mp( const MaterialProperties& _value ) {
+//        properties = _value;
+//        return *this;
+//    }
 
     MaterialBuilder& sh( const std::string& _value ) {
         shaderName = _value;
@@ -52,7 +52,7 @@ protected:
     void finalise( std::shared_ptr<Material> _elem ) override;
 
 private:
-    MaterialProperties      properties;
+//    MaterialProperties      properties;
     std::string             shaderName = S::SH;
 
     SerializableContainer   bufferTarFiles;

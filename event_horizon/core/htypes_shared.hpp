@@ -306,11 +306,6 @@ enum class DependencyStatus {
 	CompleteWithErrors
 };
 
-namespace BuilderQueryType {
-	class Exact {};
-    class NotExact{};
-};
-
 struct TextureUniformDesc {
 	std::string  name;
 	unsigned int handle;

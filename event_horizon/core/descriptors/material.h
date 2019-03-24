@@ -5,6 +5,8 @@
 #pragma once
 
 #include <iostream>
+#include <unordered_set>
+
 #include <stb/stb_image_resize.h>
 #include <stb/stb_image_write.h>
 
@@ -101,29 +103,34 @@ public:
     }
 };
 
-JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
-    float   pixelTexelRatio = 0.04f;
-    float   cost = 1.0f;
-    bool    isStreaming = false;
-
-    bool operator==( const MaterialProperties& rhs ) const {
-        return pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost && isStreaming == rhs.isStreaming;
-    }
-
-//    void serialize( std::shared_ptr<SerializeBin> writer ) const {
-//        writer->write(pixelTexelRatio);
-//        writer->write(cost);
-//        writer->write(isStreaming);
+//JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
+//    float   pixelTexelRatio = 0.04f;
+//    float   cost = 1.0f;
+//    bool    isStreaming = false;
+//
+//    bool operator==( const MaterialProperties& rhs ) const {
+//        return pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost && isStreaming == rhs.isStreaming;
 //    }
 //
-//    void deserialize( std::shared_ptr<DeserializeBin> reader ) {
-//        reader->read(pixelTexelRatio);
-//        reader->read(cost);
-//        reader->read(isStreaming);
-//    }
+////    void serialize( std::shared_ptr<SerializeBin> writer ) const {
+////        writer->write(pixelTexelRatio);
+////        writer->write(cost);
+////        writer->write(isStreaming);
+////    }
+////
+////    void deserialize( std::shared_ptr<DeserializeBin> reader ) {
+////        reader->read(pixelTexelRatio);
+////        reader->read(cost);
+////        reader->read(isStreaming);
+////    }
+//};
+
+class ResourceDependencies {
+protected:
+    std::unordered_set<std::string> dependencies;
 };
 
-class Material : public NamePolicy<>, public HeterogeneousMap {
+class Material : public ResourceDependencies, public NamePolicy<>, public HeterogeneousMap {
 public:
     RESOURCE_CTORS(Material);
     Material(const Material& _val);
@@ -157,28 +164,26 @@ public:
     float getOpacity() const;
     void setOpacity( float _opacityValue );
 
-    const MaterialProperties& getProperties() const;
-    void setProperties( const MaterialProperties& properties );
+//    const MaterialProperties& getProperties() const;
+//    void setProperties( const MaterialProperties& properties );
 
     void clone( const Material& _source );
 
     Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName );
     Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName );
     const MaterialImageBuffers& Buffers() const;
-    void tarBuffers( const SerializableContainer& _bufferTarFiles );
+//    void tarBuffers( const SerializableContainer& _bufferTarFiles );
     void Buffers( MaterialImageCallback imageCallback );
 
-    bool isStreammable() const;
+//    bool isStreammable() const;
     float translucency() const;
 
     KnownBufferMap knownBuffers() const;
 
 protected:
     MaterialImageBuffers buffers;
-    MaterialProperties properties;
+//    MaterialProperties properties;
     std::string shaderName;
-
-    friend class EntityFactory;
 
 public:
     static Material WHITE_PBR();
