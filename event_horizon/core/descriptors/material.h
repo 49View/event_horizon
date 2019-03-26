@@ -29,44 +29,6 @@ using MaterialImageBuffers = std::unordered_map<std::string, uint8_p>;
 using KnownBufferMap = std::unordered_map<std::string, std::string>;
 using MaterialImageCallback = std::function<void( const std::string&, ucchar_p )>;
 
-namespace MQSettings {
-    const static std::string Low = "_lowqDD256";
-    const static std::string Medium = "";
-    const static std::string Hi = "_hiqDD2048";
-    const static std::string UltraHi = "_ultrahiDD4k";
-};
-
-namespace MPBRTextures {
-
-    const static std::string convolution = "convolution";
-    const static std::string specular_prefilter = "specular_prefilter";
-    const static std::string ibl_brdf = "ibl_brdf";
-
-    static const std::string basecolorString = "basecolor";
-    static const std::string heightString = "height";
-    static const std::string metallicString = "metallic";
-    static const std::string roughnessString = "roughness";
-    static const std::string normalString = "normal";
-    static const std::string ambientOcclusionString = "ambient_occlusion";
-
-    const static std::vector<std::string> g_pbrNames{ "_basecolor","_normal","_ambient_occlusion","_roughness",
-                                                      "_metallic","_height" };
-
-    static inline const std::vector<std::string>& Names() {
-        return g_pbrNames;
-    }
-
-    static inline const std::string findTextureInString( const std::string& _value ) {
-        if ( _value.find( basecolorString ) != std::string::npos ) return basecolorString;
-        if ( _value.find( heightString  ) != std::string::npos ) return heightString;
-        if ( _value.find( metallicString  ) != std::string::npos ) return metallicString;
-        if ( _value.find( roughnessString  ) != std::string::npos ) return roughnessString;
-        if ( _value.find( normalString ) != std::string::npos ) return normalString;
-        if ( _value.find( ambientOcclusionString ) != std::string::npos ) return ambientOcclusionString;
-        return "";
-    }
-}
-
 class MaterialColor {
 public:
     Vector4f color = Vector4f::WHITE;
@@ -125,17 +87,12 @@ public:
 ////    }
 //};
 
-class ResourceDependencies {
-protected:
-    std::unordered_set<std::string> dependencies;
-};
-
-class Material : public ResourceDependencies, public NamePolicy<>, public HeterogeneousMap {
+class Material : public NamePolicy<> {
 public:
     RESOURCE_CTORS(Material);
+    virtual ~Material() = default;
     Material(const Material& _val);
     explicit Material( const std::string& _name, const std::string& _sn );
-    ~Material() override = default;
     void bufferDecode( const unsigned char* _buffer, size_t _length ) {}
 
     Material& t( const std::string& _tn );
@@ -180,10 +137,22 @@ public:
 
     KnownBufferMap knownBuffers() const;
 
+    const std::shared_ptr<HeterogeneousMap> Values() const {
+        return values;
+    }
+
+    std::shared_ptr<HeterogeneousMap> Values() {
+        return values;
+    }
+
+    void Values( std::shared_ptr<HeterogeneousMap> _values ) {
+        Material::values = _values;
+    }
+
 protected:
-    MaterialImageBuffers buffers;
-//    MaterialProperties properties;
-    std::string shaderName;
+    std::shared_ptr<HeterogeneousMap>     values;
+    MaterialImageBuffers                  buffers;
+    std::string                           shaderName;
 
 public:
     static Material WHITE_PBR();
@@ -195,8 +164,6 @@ public:
     void materialSet( std::shared_ptr<Material> _value );
     void materialSet( const std::string& _shader, const std::string& _matName = "" );
 
-    template <typename T>
-    void materialConstant( const std::string& _name, T _value );
     void materialColor( const Color4f & _color );
     void materialColor( const std::string& _hexcolor );
 

@@ -6,6 +6,7 @@
 #include <core/raw_image.h>
 #include <poly/resources/image_builder.h>
 #include <graphics/imgui/imgui.h>
+#include <graphics/texture_manager.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
 static std::string remoteFilterString;

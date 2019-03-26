@@ -1,9 +1,10 @@
 #include "light_manager.h"
 
-#include "core/math/spherical_harmonics.h"
-#include "core/suncalc/sun_builder.h"
-#include "shadowmap_manager.h"
-#include "program_uniform_set.h"
+#include <core/math/spherical_harmonics.h>
+#include <core/descriptors/uniform_names.h>
+#include <core/suncalc/sun_builder.h>
+#include <graphics/shadowmap_manager.h>
+#include <graphics/program_uniform_set.h>
 
 LightManager::LightManager( SunBuilder& sb ) : sb( sb ) {}
 
@@ -12,7 +13,7 @@ void LightManager::init() {
     mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f, "LightDirectionalIntensity" );
 
     // Lights UBO
-    mLigthingUniform = std::make_unique<ProgramUniformSet>("light", "ubo");
+    mLigthingUniform = std::make_unique<ProgramUniformSet>();
 
     mLigthingUniform->setUBOStructure( UniformNames::pointLightPos, ( 16 * mMaxLights ) );
     mLigthingUniform->setUBOStructure( UniformNames::pointLightDir, ( 16 * mMaxLights ) );

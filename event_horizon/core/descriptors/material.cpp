@@ -9,14 +9,15 @@
 //}
 
 Material::Material( const std::string& _name, const std::string& _sn ) {
+    values = std::make_shared<HeterogeneousMap>();
     Name(_name);
     setShaderName(_sn);
 }
 
-Material::Material( const Material& _source ) : NamePolicy( _source ), HeterogeneousMap( _source ) {
-    HeterogeneousMap::clone( _source );
-    Hash( _source.Hash() );
-//    properties = _source.properties;
+Material::Material( const Material& _source ) : NamePolicy( _source ) {
+    values = std::make_shared<HeterogeneousMap>();
+    values->clone( *_source.values.get() );
+//    Hash( _source.Hash() );
     shaderName = _source.shaderName;
 }
 
@@ -31,13 +32,13 @@ Material::Material( const Material& _source ) : NamePolicy( _source ), Heterogen
 //}
 
 Material& Material::t( const std::string& _tn ) {
-    assign( UniformNames::colorTexture, _tn );
+    values->assign( UniformNames::colorTexture, _tn );
     return *this;
 }
 
 Material& Material::c( const Color4f& _col ) {
-    assign( UniformNames::opacity, _col.w() );
-    assign( UniformNames::diffuseColor, _col.xyz() );
+    values->assign( UniformNames::opacity, _col.w() );
+    values->assign( UniformNames::diffuseColor, _col.xyz() );
     return *this;
 }
 
@@ -46,19 +47,20 @@ const std::string& Material::getShaderName() const {
 }
 
 void Material::resolveDynamicConstants() {
-    visitTexturesWithKey( [&]( TextureUniformDesc& u, const std::string& _key ) {
-        if ( _key == UniformNames::yTexture) {
-            u.name = Name() + "_y";
-        } else if ( _key == UniformNames::uTexture) {
-            u.name = Name() + "_u";
-        } else if ( _key == UniformNames::vTexture) {
-            u.name = Name() + "_v";
-        }
-    });
+//    ### MAT Fix up this
+//    values->visitTexturesWithKey( [&]( std::string& u, const std::string& _key ) {
+//        if ( _key == UniformNames::yTexture) {
+//            u = Name() + "_y";
+//        } else if ( _key == UniformNames::uTexture) {
+//            u = Name() + "_u";
+//        } else if ( _key == UniformNames::vTexture) {
+//            u = Name() + "_v";
+//        }
+//    });
 }
 
 const std::vector<std::string> Material::textureDependencies() const {
-    return getTextureNames();
+    return values->getTextureNames();
 }
 
 const std::vector<TextureDependencyBuilderPair> Material::textureDependencies( const std::string& _key ) {
@@ -100,42 +102,42 @@ const std::string Material::getHeight() const {
 
 float Material::getMetallicValue() const {
     float ret;
-    get( UniformNames::metallic, ret );
+    values->get( UniformNames::metallic, ret );
     return ret;
 }
 
 void Material::setMetallicValue( float _metallicValue ) {
-    assign( UniformNames::metallic, _metallicValue );
+    values->assign( UniformNames::metallic, _metallicValue );
 }
 
 float Material::getRoughnessValue() const {
     float ret;
-    get( UniformNames::roughness, ret );
+    values->get( UniformNames::roughness, ret );
     return ret;
 }
 
 void Material::setRoughnessValue( float _roughnessValue ) {
-    assign( UniformNames::roughness, _roughnessValue );
+    values->assign( UniformNames::roughness, _roughnessValue );
 }
 
 float Material::getAoValue() const {
     float ret;
-    get( UniformNames::ao, ret );
+    values->get( UniformNames::ao, ret );
     return ret;
 }
 
 void Material::setAoValue( float _aoValue ) {
-    assign( UniformNames::ao, _aoValue );
+    values->assign( UniformNames::ao, _aoValue );
 }
 
 float Material::getOpacity() const {
     float ret;
-    get( UniformNames::opacity, ret );
+    values->get( UniformNames::opacity, ret );
     return ret;
 }
 
 void Material::setOpacity( float _opacityValue ) {
-    assign( UniformNames::opacity, _opacityValue );
+    values->assign( UniformNames::opacity, _opacityValue );
 }
 
 //const MaterialProperties& Material::getProperties() const {
@@ -160,17 +162,16 @@ void Material::setOpacity( float _opacityValue ) {
 //    reader->read(shaderName);
 //}
 
+// ### MAT REMOVE CLONE, it's shit
 void Material::clone( const Material& _source ) {
-    HeterogeneousMap::clone( _source );
-    Hash( _source.Hash() );
-//    properties = _source.properties;
+    values->clone( *_source.values.get() );
     shaderName = _source.shaderName;
 }
 
 Material& Material::buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName ) {
     if ( _data.second > 0 ) {
         buffers.emplace( std::make_pair(_bname, std::move(_data)) );
-        assign( _uniformName, { _bname, 0,0,0 } );
+        values->assign( _uniformName, _bname );
     }
     return *this;
 }
@@ -271,11 +272,6 @@ void MaterialBuildable::materialSet( std::shared_ptr<Material> _value ) {
 void MaterialBuildable::materialSet( const std::string& _shader, const std::string& _matName ) {
     material->Name(_matName);
     material->setShaderName(_shader);
-}
-
-template<typename T>
-void MaterialBuildable::materialConstant( const std::string& _name, T _value ) {
-    material->assign( _name, _value);
 }
 
 void MaterialBuildable::materialColor( const Color4f& _color ) {

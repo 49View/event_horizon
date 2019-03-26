@@ -77,3 +77,41 @@ namespace UniformNames {
 	const std::string roughness = "roughnessV";
 	const std::string ao = "aoV";
 };
+
+namespace MQSettings {
+    const static std::string Low = "_lowqDD256";
+    const static std::string Medium = "";
+    const static std::string Hi = "_hiqDD2048";
+    const static std::string UltraHi = "_ultrahiDD4k";
+};
+
+namespace MPBRTextures {
+
+    const static std::string convolution = "convolution";
+    const static std::string specular_prefilter = "specular_prefilter";
+    const static std::string ibl_brdf = "ibl_brdf";
+
+    static const std::string basecolorString = "basecolor";
+    static const std::string heightString = "height";
+    static const std::string metallicString = "metallic";
+    static const std::string roughnessString = "roughness";
+    static const std::string normalString = "normal";
+    static const std::string ambientOcclusionString = "ambient_occlusion";
+
+    const static std::vector<std::string> g_pbrNames{ "_basecolor","_normal","_ambient_occlusion","_roughness",
+                                                      "_metallic","_height" };
+
+    static inline const std::vector<std::string>& Names() {
+        return g_pbrNames;
+    }
+
+    static inline const std::string findTextureInString( const std::string& _value ) {
+        if ( _value.find( basecolorString ) != std::string::npos ) return basecolorString;
+        if ( _value.find( heightString  ) != std::string::npos ) return heightString;
+        if ( _value.find( metallicString  ) != std::string::npos ) return metallicString;
+        if ( _value.find( roughnessString  ) != std::string::npos ) return roughnessString;
+        if ( _value.find( normalString ) != std::string::npos ) return normalString;
+        if ( _value.find( ambientOcclusionString ) != std::string::npos ) return ambientOcclusionString;
+        return "";
+    }
+}

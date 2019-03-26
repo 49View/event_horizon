@@ -1,3 +1,5 @@
+#include <utility>
+
 #pragma once
 
 #include <string>
@@ -6,7 +8,7 @@
 #include <core/math/vector4f.h>
 #include <core/math/matrix4f.h>
 #include <core/math/matrix2f.h>
-#include <core/descriptors/material.h>
+#include <core/heterogeneous_map.hpp>
 #include "program.h"
 
 class Texture;
@@ -18,7 +20,8 @@ class GPUUniformVisitor {
 public:
 	explicit GPUUniformVisitor( unsigned int handle ) : handle( handle ) {}
 
-	void visit( const char* name, const TextureIndex& value ) const;
+	void visit( const char* name, const TextureUniformDesc& value ) const;
+    void visit( const char* name, const std::string& _value ) const {};
 	void visit( const char* name, int value ) const;
 	void visit( const char* name, float value ) const;
 	void visit( const char* name, float x, float y ) const;
@@ -37,10 +40,29 @@ protected:
 	unsigned int handle;
 };
 
-class ProgramUniformSet : public Material {
+class GPUHeterogeneousMap {
 public:
-	using Material::Material;
-	explicit ProgramUniformSet( std::shared_ptr<Material> _map, Renderer& _rr );
+    explicit GPUHeterogeneousMap();
+    explicit GPUHeterogeneousMap( std::shared_ptr<HeterogeneousMap> _values, Renderer& _rr );
+
+    template <typename T>
+    void visit( const T& _visitor ) {
+        for ( auto& u : mTextureMappings )  { _visitor.visit( u.first.c_str(), u.second ); }
+        values->visit( _visitor );
+    }
+
+    std::shared_ptr<HeterogeneousMap> Values();
+    void textureAssign( const std::string& _key, const TextureUniformDesc& _value );
+
+protected:
+    std::shared_ptr<HeterogeneousMap> values;
+    std::unordered_map<std::string, TextureUniformDesc> mTextureMappings;
+};
+
+class ProgramUniformSet {
+public:
+    ProgramUniformSet();
+	explicit ProgramUniformSet( std::shared_ptr<HeterogeneousMap> _map, Renderer& _rr );
 
 	void generateUBO( const ShaderManager& sm, const std::string& uniformName );
 	void submitUBOData();
@@ -70,12 +92,14 @@ public:
 
 	int getUBOSize() const { return mUBOSize; }
 
-	template <typename T>
-	void setOnGPU( const std::shared_ptr<Program>& _program, const std::string _uniformName, const T& _value ) {
-		if ( _program->hasUniform(_uniformName) ) assign( _uniformName, _value );
-	}
-
 	void setOn( unsigned int handle );
+
+    std::shared_ptr<HeterogeneousMap> Values() {
+        return values->Values();
+    }
+    std::shared_ptr<GPUHeterogeneousMap> GValues() {
+        return values;
+    }
 
 private:
 	int  getUBOPoint( const std::string& ubo_name );
@@ -97,6 +121,8 @@ public:
 		std::memcpy( to_buffer + UBOSchema->mUBOOffsetMap[uniformName], &value, sizeof(T) );
 	}
 
+private:
+    std::shared_ptr<GPUHeterogeneousMap> values;
 };
 
 using UBO = ProgramUniformSet;

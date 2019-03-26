@@ -83,7 +83,7 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
 
 void RenderSceneGraph::changeMaterialTagCallback( const std::vector<std::string>& _params ) {
     std::shared_ptr<Material> mat = std::dynamic_pointer_cast<Material>(sg.ML().get(concatParams(_params, 1)));
-    rr.changeMaterialOnTagsCallback( { sg.getGeomType( _params[0] ), mat } );
+    rr.changeMaterialOnTagsCallback( { sg.getGeomType( _params[0] ), mat->Name() } );
 }
 
 //void RenderSceneGraph::changeMaterialTagImpl( const std::vector<std::string>& _params ) {
@@ -147,7 +147,7 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
     auto mat = _source->Data()->getMaterial();
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), mat->translucency() );
-    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, mat }
+    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, mat->getShaderName(), mat->Values() }
             .p(generateGeometryVP(_source->Data())).n(_source->UUiD()).g(_source->GHType()).build();
 }
 
@@ -158,7 +158,7 @@ void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& ge
     auto renderBucketIndex = _source->Data()->RenderBucketIndex();
     auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), mat->getOpacity() );
     auto vs = _source->Data()->VertexList();
-    VPBuilder<PosTex3dStrip>{rr,vpList,mat}.p(vs).n(_source->UUiD()).build();
+    VPBuilder<PosTex3dStrip>{rr,vpList, mat->getShaderName(),mat->Values()}.p(vs).n(_source->UUiD()).build();
 }
 
 UIElementRenderObserver::UIElementRenderObserver( Renderer& _rr ) : rr( _rr ) {}

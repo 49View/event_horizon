@@ -1,9 +1,10 @@
 #include "vertex_processing.h"
 
-#include "core/app_globals.h"
-#include "core/math/poly_shapes.hpp"
+#include <core/app_globals.h>
+#include <core/math/poly_shapes.hpp>
 #include <core/descriptors/material.h>
-#include "renderer.h"
+#include <graphics/render_list.h>
+#include <graphics/renderer.h>
 
 void VPList::render_im() {
     mVP->renderProgram();

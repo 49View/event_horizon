@@ -271,3 +271,10 @@ SceneGraph& SceneOrchestrator::SG() {
 void SceneOrchestrator::init() {
     sg.init();
 }
+
+AVInitCallback SceneOrchestrator::avcbTM() {
+    return std::bind(&TextureManager::preparingStremingTexture,
+                     &RSG().RR().TM(),
+                     std::placeholders::_1,
+                     std::placeholders::_2);
+}

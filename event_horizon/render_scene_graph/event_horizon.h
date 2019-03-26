@@ -12,8 +12,11 @@
 #include <poly/camera_manager.h>
 #include <poly/material_builder.h>
 #include <graphics/shader_manager.h>
+#include <graphics/light_manager.h>
+#include <graphics/program_uniform_set.h>
 #include <graphics/mouse_input.hpp>
 #include <graphics/text_input.hpp>
+#include <graphics/render_list.h>
 #include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/scene_state_machine.h>

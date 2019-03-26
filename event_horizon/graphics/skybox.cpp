@@ -16,8 +16,9 @@ void Skybox::equirectangularTextureInit( const std::vector<std::string>& params 
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList,S::EQUIRECTANGULAR}.p(colorStrip).t(params[0]).n("skybox")
-    .build();
+    auto mat = std::make_shared<HeterogeneousMap>();
+    mat->assign( UniformNames::colorTexture, params[0] );
+    VPBuilder<Pos3dStrip>{rr,mVPList,S::EQUIRECTANGULAR, mat}.p(colorStrip).n("skybox").build();
 }
 
 void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {

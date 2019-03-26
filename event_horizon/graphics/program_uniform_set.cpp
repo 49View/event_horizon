@@ -74,15 +74,39 @@ void ProgramUniformSet::setUBOData( const std::string& uniformName, const Matrix
 }
 
 void ProgramUniformSet::setOn( unsigned int handle ) {
-    visit( GPUUniformVisitor{handle} );
+    values->visit( GPUUniformVisitor{handle} );
 }
 
-ProgramUniformSet::ProgramUniformSet( std::shared_ptr<Material> _mat, Renderer& _rr ) : Material(*_mat.get()) {
+ProgramUniformSet::ProgramUniformSet( std::shared_ptr<HeterogeneousMap> _mat, Renderer& _rr )  {
+    values = std::make_shared<GPUHeterogeneousMap>(_mat, _rr);
+}
 
-    visitTextures( [&]( TextureUniformDesc& u, unsigned int counter ){
-        u.handle = _rr.TD( u.name )->getHandle();
-        u.target = _rr.TD( u.name )->getTarget();
-        u.slot = counter;
-    });
+ProgramUniformSet::ProgramUniformSet() {
+    values = std::make_shared<GPUHeterogeneousMap>();
+}
 
+GPUHeterogeneousMap::GPUHeterogeneousMap() {
+    values = std::make_shared<HeterogeneousMap>();
+}
+
+GPUHeterogeneousMap::GPUHeterogeneousMap( std::shared_ptr<HeterogeneousMap> _values, Renderer& _rr ) :
+                                          values( std::move( _values )) {
+
+    int counter = 0;
+    for( const auto& [k,n] : values->getTextureNameMap() ) {
+        TextureUniformDesc u{};
+        u.handle = _rr.TD( n )->getHandle();
+        u.target = _rr.TD( n )->getTarget();
+        u.slot = counter++;
+        mTextureMappings.emplace( k, u );
+    };
+
+}
+
+std::shared_ptr<HeterogeneousMap> GPUHeterogeneousMap::Values() {
+    return values;
+}
+
+void GPUHeterogeneousMap::textureAssign( const std::string& _key, const TextureUniformDesc& _value ) {
+    mTextureMappings[_key] = _value;
 }

@@ -82,7 +82,7 @@ public:
 
 	template <typename T>
 	void addHttpStream( const std::string& _streamName ) {
-		RSG().RR().SSM().addStream<T>( _streamName, avcbTM );
+		RSG().RR().SSM().addStream<T>( _streamName, avcbTM() );
 	}
 
 	void StateMachine( std::shared_ptr<SceneStateMachineBackEnd> _l );
@@ -103,6 +103,7 @@ public:
 	static Vector2i callbackResizeFrameBuffer;
 
 protected:
+    AVInitCallback avcbTM();
 	void resetSingleEventNotifications();
 	void reloadShaders( SocketCallbackDataType _data );
 

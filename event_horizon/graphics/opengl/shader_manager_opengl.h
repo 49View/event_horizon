@@ -6,7 +6,6 @@
 #include "shader_opengl.h"
 #include "program_opengl.h"
 #include "core/file_manager.h"
-#include <core/descriptors/material.h>
 #include "core/property.h"
 #include "core/heterogeneous_map.hpp"
 

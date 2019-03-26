@@ -3,16 +3,16 @@
 //
 
 #include "../../render_scene_graph.h"
-#include "poly/resources/image_builder.h"
-#include "core/node.hpp"
-#include "poly/geom_builder.h"
-#include "poly/geom_builder.h"
+#include <core/node.hpp>
+#include <poly/resources/image_builder.h>
+#include <poly/geom_builder.h>
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
 
 #include <graphics/opengl/gl_util.h>
 #include <graphics/opengl/lightmapper_opengl.h>
 #include <graphics/renderer.h>
+#include <graphics/texture_manager.h>
 #include <poly/lightmap_exchange_format.h>
 #include <thekla/thekla_atlas.h>
 

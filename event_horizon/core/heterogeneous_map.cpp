@@ -7,7 +7,7 @@
 
 void HeterogeneousMap::calcTotalNumUniforms() {
     size_t lNumUniforms = 0;
-    lNumUniforms += mTextures.size();
+    lNumUniforms += mStrings.size();
     lNumUniforms += mInts.size();
     lNumUniforms += mFloats.size();
     lNumUniforms += mV2fs.size();
@@ -26,7 +26,7 @@ void HeterogeneousMap::calcTotalNumUniforms() {
 //    std::stringstream hashInput;
 //    hashInput << mNumUniforms;
 //
-//    for ( auto& i : mTextures ) hashInput << i.first;
+//    for ( auto& i : mStrings ) hashInput << i.first;
 //    for ( auto& i : mInts ) hashInput << i.second;
 //    for ( auto& i : mFloats ) hashInput << i.second;
 //    for ( auto& i : mV2fs ) hashInput << i.second.hash();
@@ -37,21 +37,21 @@ void HeterogeneousMap::calcTotalNumUniforms() {
 //}
 
 void HeterogeneousMap::inject( const HeterogeneousMap& source ) {
-    for ( auto& pu : source.mTextures ) assign( pu.first, pu.second );
-    for ( auto& pu : source.mInts ) assign( pu.first, pu.second );
-    for ( auto& pu : source.mFloats ) assign( pu.first, pu.second );
-    for ( auto& pu : source.mV2fs ) assign( pu.first, pu.second );
-    for ( auto& pu : source.mV3fs ) assign( pu.first, pu.second );
-    for ( auto& pu : source.mV3fvs ) assign( pu.first, pu.second );
-    for ( auto& pu : source.mV4fs ) assign( pu.first, pu.second );
-    for ( auto& pu : source.mM3fs ) assign( pu.first, pu.second );
-    for ( auto& pu : source.mM4fs ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mStrings ) assign( pu.first, pu.second );
+    for ( auto& pu : source.mInts )    assign( pu.first, pu.second );
+    for ( auto& pu : source.mFloats )  assign( pu.first, pu.second );
+    for ( auto& pu : source.mV2fs )    assign( pu.first, pu.second );
+    for ( auto& pu : source.mV3fs )    assign( pu.first, pu.second );
+    for ( auto& pu : source.mV3fvs )   assign( pu.first, pu.second );
+    for ( auto& pu : source.mV4fs )    assign( pu.first, pu.second );
+    for ( auto& pu : source.mM3fs )    assign( pu.first, pu.second );
+    for ( auto& pu : source.mM4fs )    assign( pu.first, pu.second );
 
     calcTotalNumUniforms();
 }
 
 void HeterogeneousMap::injectIfNotPresent( const HeterogeneousMap& source ) {
-    for ( auto& pu : source.mTextures ) assignIfNotPresent( pu.first, pu.second );
+    for ( auto& pu : source.mStrings  ) assignIfNotPresent( pu.first, pu.second );
     for ( auto& pu : source.mInts     ) assignIfNotPresent( pu.first, pu.second );
     for ( auto& pu : source.mFloats   ) assignIfNotPresent( pu.first, pu.second );
     for ( auto& pu : source.mV2fs     ) assignIfNotPresent( pu.first, pu.second );
@@ -69,12 +69,8 @@ void HeterogeneousMap::assign( const std::string& uniformName, int data ) {
     calcTotalNumUniforms();
 }
 
-void HeterogeneousMap::assign( const std::string& uniformName, const TextureUniformDesc& data ) {
-    mTextures[uniformName] = data;
-}
-
-void HeterogeneousMap::assign( const std::string& uniformName, const std::string& data ) {
-    mTextures[uniformName] = { data, 0, 0 };
+void HeterogeneousMap::assign( const std::string& uniformName, const std::string& _data ) {
+    mStrings[uniformName] = _data;
 }
 
 void HeterogeneousMap::assign( const std::string& uniformName, float data ) {
@@ -119,12 +115,6 @@ void HeterogeneousMap::assign( const std::string& uniformName, const Matrix3f& d
 
 void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, int data ) {
     if ( !hasInt(uniformName) ) {
-        assign( uniformName, data );
-    }
-}
-
-void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const TextureUniformDesc& data ) {
-    if ( !hasTexture(uniformName) ) {
         assign( uniformName, data );
     }
 }
@@ -184,8 +174,8 @@ void HeterogeneousMap::assignIfNotPresent( const std::string& uniformName, const
 }
 
 std::string HeterogeneousMap::getTexture( const std::string& uniformName ) const {
-    ASSERT( mTextures.find( uniformName ) != mTextures.end());
-    return mTextures.at( uniformName ).name;
+    ASSERT( mStrings.find( uniformName ) != mStrings.end());
+    return mStrings.at( uniformName );
 }
 
 float HeterogeneousMap::getInt( const std::string& uniformName ) const {
@@ -231,7 +221,7 @@ Matrix3f HeterogeneousMap::getMatrix3f( const std::string& uniformName ) const {
 }
 
 bool HeterogeneousMap::hasTexture( const std::string& uniformName ) const {
-    return ( mTextures.find( uniformName ) != mTextures.end());
+    return ( mStrings.find( uniformName ) != mStrings.end());
 }
 
 bool HeterogeneousMap::hasInt( const std::string& uniformName ) const {
@@ -267,8 +257,8 @@ bool HeterogeneousMap::hasVectorOfVector3f( const std::string& uniformName ) con
 }
 
 void HeterogeneousMap::get( const std::string& uniformName, std::string& ret ) const {
-    ASSERT( mTextures.find( uniformName ) != mTextures.end());
-    ret = mTextures.at( uniformName ).name;
+    ASSERT( mStrings.find( uniformName ) != mStrings.end());
+    ret = mStrings.at( uniformName );
 }
 
 void HeterogeneousMap::get( const std::string& uniformName, int& ret ) const {
@@ -320,7 +310,7 @@ std::shared_ptr<HeterogeneousMap> HeterogeneousMap::clone() {
 
 void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
 
-    mTextures    = _source.mTextures;
+    mStrings    = _source.mStrings;
     mFloats      = _source.mFloats;
     mInts        = _source.mInts;
     mV2fs        = _source.mV2fs;
@@ -336,8 +326,8 @@ void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
 std::vector<std::string> HeterogeneousMap::getTextureNames() const {
     std::vector<std::string> ret;
 
-    for ( const auto& [k, v] : mTextures ) {
-        ret.emplace_back( v.name );
+    for ( const auto& [k, v] : mStrings ) {
+        ret.emplace_back( v );
     }
     return ret;
 }
@@ -345,15 +335,15 @@ std::vector<std::string> HeterogeneousMap::getTextureNames() const {
 std::unordered_map<std::string, std::string> HeterogeneousMap::getTextureNameMap() const {
     std::unordered_map<std::string, std::string> ret;
 
-    for ( const auto& [k, v] : mTextures ) {
-        ret.emplace( k, v.name );
+    for ( const auto& [k, v] : mStrings ) {
+        ret.emplace( k, v );
     }
     return ret;
 }
 
 void HeterogeneousMap::serializeImpl( std::shared_ptr<SerializeBin> writer ) const {
     writer->write( mNumUniforms );
-    writer->write( getTextureNameMap() ); //mTextures
+    writer->write( mStrings );
     writer->write( mInts );
     writer->write( mFloats );
     writer->write( mV2fs );
@@ -366,9 +356,7 @@ void HeterogeneousMap::serializeImpl( std::shared_ptr<SerializeBin> writer ) con
 
 void HeterogeneousMap::deserializeImpl( std::shared_ptr<DeserializeBin> reader ) {
     reader->read( mNumUniforms );
-    std::unordered_map<std::string, std::string> tns;
-    reader->read( tns );
-    for ( const auto& [k,v] : tns ) mTextures.emplace( k, TextureIndex{v, 0, 0, 0} );
+    reader->read( mStrings );
     reader->read( mInts );
     reader->read( mFloats );
     reader->read( mV2fs );
@@ -380,7 +368,7 @@ void HeterogeneousMap::deserializeImpl( std::shared_ptr<DeserializeBin> reader )
 }
 
 HeterogeneousMap::HeterogeneousMap( const HeterogeneousMap& _source ) {
-    mTextures    = _source.mTextures;
+    mStrings     = _source.mStrings;
     mFloats      = _source.mFloats;
     mInts        = _source.mInts;
     mV2fs        = _source.mV2fs;

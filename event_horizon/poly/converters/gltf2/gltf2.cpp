@@ -874,12 +874,12 @@ std::shared_ptr<Material> GLTF2::elaborateMaterial( const tinygltf::Material& ma
         } else if ( k == "metallicFactor" ) {
             float lv = static_cast<float>(v.number_value);
             im.metallic.value = Vector4f{ lv, lv, lv, 1.0f };
-            im.mb->assign( UniformNames::metallic, lv );
+            im.mb->Values()->assign( UniformNames::metallic, lv );
         } else if ( k == "metallicTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.metallic.texture );
         } else if ( k == "roughnessFactor" ) {
             float lv = static_cast<float>(v.number_value);
-            im.mb->assign( UniformNames::roughness, lv );
+            im.mb->Values()->assign( UniformNames::roughness, lv );
             im.roughness.value = Vector4f{ lv, lv, lv, 1.0f };
         } else if ( k == "roughnessTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.roughness.texture );

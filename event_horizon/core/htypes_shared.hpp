@@ -306,13 +306,6 @@ enum class DependencyStatus {
 	CompleteWithErrors
 };
 
-struct TextureUniformDesc {
-	std::string  name;
-	unsigned int handle;
-	unsigned int slot;
-	int 		 target;
-};
-
 #define RESOURCE_CTORS(N) \
     explicit N( uint8_p&& data ) { \
         bufferDecode( data.first.get(), data.second ); \

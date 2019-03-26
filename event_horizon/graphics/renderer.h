@@ -4,22 +4,26 @@
 #include <utility>
 #include <array>
 #include <unordered_set>
-#include "framebuffer.h"
-#include "core/uuid.hpp"
-#include "core/math/matrix4f.h"
-#include "vertex_processing.h"
-#include "graphic_constants.h"
-#include "shadowmap_manager.h"
-#include "render_list.h"
-#include "light_manager.h"
+#include <core/uuid.hpp>
+#include <core/math/matrix4f.h>
+#include <core/heterogeneous_map.hpp>
+#include <graphics/framebuffer.h>
+#include <graphics/graphic_constants.h>
+#include <graphics/shadowmap_manager.h>
 
 class Renderer;
 class CommandScriptRendererManager;
 class CommandQueue;
 class ShaderManager;
+class LightManager;
 class RenderSceneGraph;
 class StreamingMediator;
 class RLTarget;
+class ProgramUniformSet;
+class Program;
+class CommandBufferEntry;
+class CommandBufferList;
+struct CommandBufferListVector;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -70,7 +74,7 @@ private:
 
 struct ChangeMaterialOnTagContainer {
 	uint64_t tag;
-	std::shared_ptr<Material> mat;
+	std::string matHash;
 };
 
 class Renderer {
@@ -88,19 +92,18 @@ public:
 
 	void removeFromCL( const UUID& _uuid );
 
-	std::shared_ptr<RenderMaterial> addMaterial( std::shared_ptr<Material> _material,
-												 std::shared_ptr<Program> _program = nullptr );
-	std::shared_ptr<RenderMaterial> addMaterial( const std::string& _shaderName );
+	std::shared_ptr<RenderMaterial> addMaterial( const std::string& _shaderName,
+                                                 std::shared_ptr<HeterogeneousMap> _material = nullptr );
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
 
 	std::shared_ptr<Program> P(const std::string& _id);
 	std::shared_ptr<Texture> TD( const std::string& _id, const int tSlot = -1 );
-	TextureIndex TDI( const std::string& _id, unsigned int tSlot );
+    TextureUniformDesc TDI( const std::string& _id, unsigned int tSlot );
 
 	void addToCommandBuffer( CommandBufferLimitsT _entry );
-	void addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
+	void addToCommandBuffer( std::vector<std::shared_ptr<VPList>> _map,
 							 std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr);
 
 	void setRenderHook( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _hook );
@@ -115,8 +118,8 @@ public:
 
 	bool hasTag( uint64_t _tag ) const;
 
-	RenderStats& Stats() { return mStats; }
-	void Stats( RenderStats val ) { mStats = val; }
+//	RenderStats& Stats() { return mStats; }
+//	void Stats( RenderStats val ) { mStats = val; }
 
 	inline CommandBufferList& CB_U() { return *mCommandBuffers.get(); }
 	inline std::map<int, CommandBufferListVector>& CL() { return mCommandLists; }
@@ -174,7 +177,7 @@ protected:
 
 	std::vector<ChangeMaterialOnTagContainer> mChangeMaterialCallbacks;
 
-	RenderStats mStats;
+//	RenderStats mStats;
 
 	template <typename V> friend class VPBuilder;
 

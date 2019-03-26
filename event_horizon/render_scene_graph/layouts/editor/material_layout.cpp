@@ -7,6 +7,7 @@
 #include <poly/geom_builder.h>
 #include <poly/material_builder.h>
 #include <graphics/imgui/imgui.h>
+#include <graphics/texture_manager.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
@@ -48,7 +49,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
         auto matName = mat->Name().substr(0, 10);
         ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", matName.c_str() );
         bool bHasTexture = false;
-        for ( const auto& [k, mt] : mat->getTextureNameMap() ) {
+        for ( const auto& [k, mt] : mat->Values()->getTextureNameMap() ) {
             if ( k == UniformNames::diffuseTexture || k == UniformNames::colorTexture ) {
                 ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->RSG().RR().TM().TD(mt) );
                 bHasTexture = true;
@@ -57,12 +58,12 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
         }
         if (!bHasTexture) {
             V3f cv3 = Vector3f::ONE;
-            if ( mat->hasVector3f(UniformNames::diffuseColor) ) {
-                mat->get( UniformNames::diffuseColor, cv3 );
+            if ( mat->Values()->hasVector3f(UniformNames::diffuseColor) ) {
+                mat->Values()->get( UniformNames::diffuseColor, cv3 );
             }
             ImGui::PushID( (mat->Name() + "dc").c_str() );
             if ( ImGui::ColorEdit3( "Diffuse", cv3.rawPtr(), ImGuiColorEditFlags_NoInputs ) ) {
-                mat->assign( UniformNames::diffuseColor, cv3 );
+                mat->Values()->assign( UniformNames::diffuseColor, cv3 );
             }
             ImGui::PopID();
         }

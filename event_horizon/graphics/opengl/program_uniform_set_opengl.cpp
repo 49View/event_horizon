@@ -40,7 +40,7 @@ GLint GPUUniformVisitor::hasUniform( const char* name ) const {
 	return glGetUniformLocation( handle, name );
 }
 
-void GPUUniformVisitor::visit( const char* name, const TextureIndex& value ) const {
+void GPUUniformVisitor::visit( const char* name, const TextureUniformDesc& value ) const {
 	GLint location = hasUniform( name );
 	if ( location == -1 )  return;
 	GLCALL( glActiveTexture( GL_TEXTURE0 + value.slot ));

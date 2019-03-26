@@ -9,6 +9,7 @@
 #include <core/raw_image.h>
 #include <core/streaming_mediator.hpp>
 #include <graphics/renderer.h>
+#include <graphics/light_manager.h>
 
 std::shared_ptr<RLTarget>
 RenderTargetFactory::make( RenderTargetType rtt, std::shared_ptr<CameraRig> _rig, const Rect2f& screenViewport,

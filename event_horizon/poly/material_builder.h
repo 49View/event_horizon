@@ -8,7 +8,7 @@
 #include <functional>
 #include "core/util.h"
 #include "poly/resources/resource_builder.hpp"
-#include "core/descriptors/material.h"
+//#include "core/descriptors/material.h"
 //#include "core/image_constants.h"
 
 class Material;
@@ -53,7 +53,7 @@ protected:
 
 private:
 //    MaterialProperties      properties;
-    std::string             shaderName = S::SH;
+    std::string             shaderName;
 
     SerializableContainer   bufferTarFiles;
     std::string imageExt = ".png";

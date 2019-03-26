@@ -98,3 +98,9 @@ enum ReservedGraphicsTags {
 
 class Framebuffer;
 using cubeMapFrameBuffers = std::vector<std::shared_ptr<Framebuffer>>;
+
+struct TextureUniformDesc {
+    unsigned int handle;
+    unsigned int slot;
+    int 		 target;
+};

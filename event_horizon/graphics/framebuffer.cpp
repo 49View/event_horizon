@@ -5,6 +5,7 @@
 #include "framebuffer.h"
 #include "core/service_factory.h"
 #include "renderer.h"
+#include <graphics/vertex_processing.h>
 #include <graphics/vp_builder.hpp>
 
 std::shared_ptr<Framebuffer> FrameBufferBuilder::buildSimple() {

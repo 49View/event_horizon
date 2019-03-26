@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <set>
 
-#include "core/math/matrix4f.h"
-#include "core/soa_utils.h"
+#include <core/math/matrix4f.h>
+#include <core/soa_utils.h>
+#include <core/descriptors/uniform_names.h>
 
 #include "../render_material.hpp"
-#include "../program_uniform_set.h"
 #include "../texture_manager.h"
 #include "program_opengl.h"
 
@@ -107,7 +107,7 @@ public:
 
     template<typename T>
     inline T getMaterialConstant( const std::string& name, T& value ) {
-        material->Uniforms()->get( name, value );
+        material->Uniforms()->Values()->get( name, value );
         return value;
     }
 

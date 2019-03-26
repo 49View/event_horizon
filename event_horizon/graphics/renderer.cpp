@@ -220,23 +220,18 @@ bool Renderer::hasTag( uint64_t _tag ) const {
     return false;
 }
 
-std::shared_ptr<RenderMaterial> Renderer::addMaterial( const std::string& _shaderName ) {
+std::shared_ptr<RenderMaterial> Renderer::addMaterial( const std::string& _shaderName,
+                                                       std::shared_ptr<HeterogeneousMap> _material ) {
     auto program = P( _shaderName );
-    if ( program ) {
-        return addMaterial( program->getDefaultUniforms(), program );
+    ASSERT(program != nullptr);
+    auto lMaterial = _material;
+    if ( !lMaterial ){
+        lMaterial = std::make_shared<HeterogeneousMap>();
+        lMaterial->inject( *program->getDefaultUniforms().get() );
     }
-    return nullptr;
-}
-
-std::shared_ptr<RenderMaterial> Renderer::addMaterial( std::shared_ptr<Material> _material,
-                                                       std::shared_ptr<Program> _program ) {
-    auto program = _program ? _program : P( _material->getShaderName() );
-    if ( program ) {
-        auto rmaterial = std::make_shared<RenderMaterial>( program, _material, *this );
-        MaterialMap( rmaterial );
-        return rmaterial;
-    }
-    return nullptr;
+    auto rmaterial = std::make_shared<RenderMaterial>( program, lMaterial, *this );
+    MaterialMap( rmaterial );
+    return rmaterial;
 }
 
 void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt ) {
@@ -244,13 +239,16 @@ void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer&
 }
 
 void Renderer::changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt ) {
-    _cmt.mat->injectIfNotPresent(*P( _cmt.mat->getShaderName() )->getDefaultUniforms().get());
-    _cmt.mat->resolveDynamicConstants();
+//    auto program = P( _cmt.mat->getShaderName() );
+//    _cmt.mat->Values()->injectIfNotPresent(*program->getDefaultUniforms().get() );
+//    _cmt.mat->resolveDynamicConstants();
+//
+//    auto rmaterial = addMaterial(_cmt.mat->Values(), program);
+//
+//    if ( !rmaterial ) return;
 
-    auto rmaterial = addMaterial(_cmt.mat);
-
-
-    if ( !rmaterial ) return;
+    // ### MAT This will need to be handled differently, I reckon
+    auto rmaterial = materialMap[_cmt.matHash];
 
     for ( const auto& [k, vl] : CL() ) {
         if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
@@ -335,9 +333,9 @@ std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot )
     return tm.TD( _id, tSlot );
 }
 
-TextureIndex Renderer::TDI( const std::string& _id, unsigned int tSlot ) {
+TextureUniformDesc Renderer::TDI( const std::string& _id, unsigned int tSlot ) {
     auto t = TD( _id, tSlot );
-    return { t->name(),  t->getHandle(), tSlot, t->getTarget() };
+    return { t->getHandle(), tSlot, t->getTarget() };
 }
 
 void RenderAnimationManager::setTiming() {
@@ -350,7 +348,7 @@ void RenderAnimationManager::setUniforms_r() {
 }
 
 void RenderAnimationManager::init() {
-    mAnimUniforms = std::make_unique<ProgramUniformSet>("anim", "ubo");
+    mAnimUniforms = std::make_unique<ProgramUniformSet>();
     mAnimUniforms->setUBOStructure( UniformNames::pointLightPos, 16 );
 }
 
@@ -359,7 +357,7 @@ void RenderAnimationManager::generateUBO( const ShaderManager& sm ) {
 }
 
 void RenderCameraManager::init() {
-    mCameraUBO = std::make_shared<ProgramUniformSet>("camera", "ubo");
+    mCameraUBO = std::make_shared<ProgramUniformSet>();
     mCameraUBO->setUBOStructure( UniformNames::mvpMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::viewMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::projMatrix, 64 );

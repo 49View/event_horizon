@@ -17,22 +17,21 @@ void RenderMaterial::removeAllTextures() {
 }
 
 RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program,
-                                std::shared_ptr<Material> _material, Renderer& _rr ) : rr(_rr) {
+                                std::shared_ptr<HeterogeneousMap> _map, Renderer& _rr ) : rr(_rr) {
 
-    sourceMaterial = _material;
     BoundProgram( _program );
-    Uniforms( std::make_shared<ProgramUniformSet>(_material, rr) );
 
-    globalUniforms = std::make_shared<ProgramUniformSet>("g", "g");
+    Uniforms( std::make_shared<ProgramUniformSet>(_map, rr) );
+    globalUniforms = std::make_shared<ProgramUniformSet>();
 
     calcHash();
 }
 
 void RenderMaterial::calcHash() {
-    mHash = Uniforms()->Hash();
+    mHash = Uniforms()->Values()->Hash();
 
-    TransparencyValue( Uniforms()->getFloatWithDefault( UniformNames::alpha, 1.0f ) *
-                       Uniforms()->getFloatWithDefault( UniformNames::opacity, 1.0f ));
+    TransparencyValue( Uniforms()->Values()->getFloatWithDefault( UniformNames::alpha, 1.0f ) *
+                       Uniforms()->Values()->getFloatWithDefault( UniformNames::opacity, 1.0f ));
 }
 
 void RenderMaterial::submitBufferUniforms() {

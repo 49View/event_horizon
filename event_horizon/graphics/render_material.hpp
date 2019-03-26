@@ -10,8 +10,11 @@
 
 #include <string>
 #include <unordered_map>
-#include "program_uniform_set.h"
+#include <core/heterogeneous_map.hpp>
+#include <core/htypes_shared.hpp>
+#include <graphics/program_uniform_set.h>
 
+class Renderer;
 class Program;
 class Material;
 class ProgramUniformSet;
@@ -20,7 +23,7 @@ class ShaderManager;
 
 class RenderMaterial {
 public:
-    RenderMaterial( std::shared_ptr<Program> _program, std::shared_ptr<Material> _material, Renderer& _rr );
+    explicit RenderMaterial( std::shared_ptr<Program> _program, std::shared_ptr<HeterogeneousMap> _map, Renderer& _rr );
 
     std::shared_ptr<Program> BoundProgram() const { return boundProgram; }
     void BoundProgram( std::shared_ptr<Program> val );
@@ -34,18 +37,23 @@ public:
 
     template<typename T>
     void setConstant( const std::string& _name, const T& value ) {
-        uniforms->assign( _name, value );
-        calcHash();
+        uniforms->Values()->assign( _name, value );
+//        calcHash();
+    }
+
+    void setConstant( const std::string& _name, const TextureUniformDesc& value ) {
+        uniforms->GValues()->textureAssign( _name, value );
+//        calcHash();
     }
 
     template<typename T>
     void setGlobalConstant( const std::string& _name, T value ) {
-        globalUniforms->assign( _name, value );
+        globalUniforms->Values()->assign( _name, value );
     }
 
     template<typename T>
     void setGlobalConstant( const std::string& _name, std::shared_ptr<T> value ) {
-        if ( value ) globalUniforms->assign( _name, *value.get());
+        if ( value ) globalUniforms->Values()->assign( _name, *value.get());
     }
 
     template<typename T>
@@ -61,7 +69,6 @@ private:
     void calcHash();
 
 private:
-    std::shared_ptr<Material> sourceMaterial;
     std::shared_ptr<Program> boundProgram;
     std::shared_ptr<ProgramUniformSet> uniforms;
     std::shared_ptr<ProgramUniformSet> globalUniforms;
@@ -70,5 +77,5 @@ private:
 
     Renderer& rr;
     // These are calculated on the fly do not serialize
-    float mTransparencyValue;
+    float mTransparencyValue = 1.0f;
 };

@@ -17,8 +17,6 @@ typedef TextureMap::const_iterator TextureMapCIt;
 
 class RawImage;
 
-#define avcbTM (std::bind(&TextureManager::preparingStremingTexture, &RSG().RR().TM(), std::placeholders::_1, std::placeholders::_2))
-
 class TextureManager {
 public:
     TextureManager() = default;
