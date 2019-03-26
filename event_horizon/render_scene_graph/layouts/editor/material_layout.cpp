@@ -43,10 +43,10 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     float ts = 64.0f;
     ImVec2 textureSize{ ts, ts };
 
-    for ( const auto& mat : p->SG().ML().list()) {
-        if ( !mat ) continue;
+    for ( const auto& mate : p->SG().ML().listResources()) {
         ImGui::BeginGroup();
-        auto matName = mat->Name().substr(0, 10);
+        auto mat = mate.second;
+        auto matName = mate.first.substr(0, 10);
         ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", matName.c_str() );
         bool bHasTexture = false;
         for ( const auto& [k, mt] : mat->Values()->getTextureNameMap() ) {
@@ -61,7 +61,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
             if ( mat->Values()->hasVector3f(UniformNames::diffuseColor) ) {
                 mat->Values()->get( UniformNames::diffuseColor, cv3 );
             }
-            ImGui::PushID( (mat->Name() + "dc").c_str() );
+            ImGui::PushID( (mate.first + "dc").c_str() );
             if ( ImGui::ColorEdit3( "Diffuse", cv3.rawPtr(), ImGuiColorEditFlags_NoInputs ) ) {
                 mat->Values()->assign( UniformNames::diffuseColor, cv3 );
             }

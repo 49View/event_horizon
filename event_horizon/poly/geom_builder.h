@@ -8,11 +8,11 @@
 
 #include <memory>
 #include <string>
-#include "core/math/vector3f.h"
-#include "core/math/matrix_anim.h"
-#include "core/service_factory.h"
-#include "core/math/poly_shapes.hpp"
-#include "core/descriptors/material.h"
+#include <core/math/vector3f.h>
+#include <core/math/matrix_anim.h>
+#include <core/service_factory.h>
+#include <core/math/poly_shapes.hpp>
+#include <poly/material.h>
 #include <poly/profile.hpp>
 #include <poly/follower.hpp>
 #include <poly/poly_helper.h>
@@ -249,31 +249,31 @@ public:
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
 // MaterialBuildable policies
-    GeomBuilder& m( std::shared_ptr<Material> _value ) {
-        materialSet(_value);
-        return *this;
-    }
-
-    GeomBuilder& m( const std::string& _shader, const std::string& _matName ) {
-        materialSet(_shader, _matName);
-        return *this;
-    }
-
-    template <typename T>
-    GeomBuilder& mc( const std::string& _name, T _value ) {
-        materialConstant( _name, _value);
-        return *this;
-    }
-
-    GeomBuilder& c( const Color4f & _color ) {
-        materialColor( _color );
-        return *this;
-    }
-
-    GeomBuilder& c( const std::string& _hexcolor ) {
-        materialColor( Vector4f::XTORGBA( _hexcolor ) );
-        return *this;
-    }
+//    GeomBuilder& m( std::shared_ptr<Material> _value ) {
+//        materialSet(_value);
+//        return *this;
+//    }
+//
+//    GeomBuilder& m( const std::string& _shader, const std::string& _matName ) {
+//        materialSet(_shader, _matName);
+//        return *this;
+//    }
+//
+//    template <typename T>
+//    GeomBuilder& mc( const std::string& _name, T _value ) {
+//        materialConstant( _name, _value);
+//        return *this;
+//    }
+//
+//    GeomBuilder& c( const Color4f & _color ) {
+//        materialColor( _color );
+//        return *this;
+//    }
+//
+//    GeomBuilder& c( const std::string& _hexcolor ) {
+//        materialColor( Vector4f::XTORGBA( _hexcolor ) );
+//        return *this;
+//    }
 
     GeomAssetSP buildr();
 
@@ -347,6 +347,3 @@ private:
 };
 
 using GBC = GeomBuilderComposer;
-
-#define bld() build(o()->RSG())
-#define bldr() buildr(o()->RSG())

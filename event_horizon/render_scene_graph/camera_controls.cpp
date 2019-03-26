@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 2019-01-11.
 //
@@ -11,8 +13,8 @@
 #include <poly/geom_data.hpp>
 #include <poly/ui_shape_builder.h>
 
-CameraControl::CameraControl( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg ) : mCameraRig( cameraRig ),
-                                                                                                     rsg( rsg) {}
+CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg ) :
+                              mCameraRig(std::move( cameraRig )), rsg( rsg) {}
 
 void CameraControl::updateFromInputData( const CameraInputData& mi ) {
 

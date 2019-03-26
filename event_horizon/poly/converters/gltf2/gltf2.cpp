@@ -699,7 +699,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     
     auto material = model.materials[primitive.material];
     auto im = matMap.at(material.name);
-    auto geom = std::make_shared<GeomData>( im.mb ); // std::make_shared<PBRMaterial>(im.name)
+    auto geom = std::make_shared<GeomData>(); // im.mb
 
     geom->vData().fillIndices( fillData<int32_t>( model, primitive.indices ) );
 
@@ -863,7 +863,8 @@ std::shared_ptr<Material> GLTF2::elaborateMaterial( const tinygltf::Material& ma
     IntermediateMaterial im;
     im.name = toLower(mat.name);
     removeNonAlphaCharFromString( im.name );
-    im.mb = std::make_shared<Material>(im.name, S::SH);
+//    ### MAT, remove default ctor from material and reinstate S:SH coming from here
+    im.mb = std::make_shared<Material>(); //im.name, S::SH
 
     for ( const auto& [k,v] : mat.values ) {
         if ( k == "baseColorFactor" ) {

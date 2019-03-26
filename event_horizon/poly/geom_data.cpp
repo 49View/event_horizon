@@ -14,7 +14,6 @@
 #include "triangulator.hpp"
 
 #include <core/node.hpp>
-#include <core/descriptors/material.h>
 #include <poly/converters/svg/svgtopoly.hpp>
 
 inline void hash_combine( std::size_t& /*seed*/ ) {}
@@ -27,34 +26,25 @@ inline void hash_combine( std::size_t& seed, const T& v, Rest... rest ) {
 }
 
 GeomData::GeomData() {
-	material = std::make_shared<Material>(S::WHITE_PBR, S::SH);
-}
-
-GeomData::GeomData(std::shared_ptr<Material> _material) : material(_material) {
-
 }
 
 GeomData::GeomData( const ShapeType _st,
 					const Vector3f& _pos, [[maybe_unused]] const Vector3f& _axis, const Vector3f& _scale,
-					std::shared_ptr<Material> _material,
 					const GeomMappingData& _mapping ) {
-	material = _material;
 	setMappingData( _mapping );
 	addShape( _st, _pos, _scale, 3 );
 }
 
-GeomData::GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<Material> _material,
+GeomData::GeomData( const std::vector<PolyOutLine>& verts,
 					const GeomMappingData& _mapping, PullFlags pullFlags ) {
-	material = _material;
 	setMappingData( _mapping );
 	for ( const auto& ot : verts ) {
 		pull( ot.verts, ot.zPull, pullFlags );
 	}
 }
 
-GeomData::GeomData( const std::vector<PolyLine>& _polyLines, std::shared_ptr<Material> _material,
+GeomData::GeomData( const std::vector<PolyLine>& _polyLines,
                     const GeomMappingData& _mapping ) {
-	material = _material;
 	setMappingData( _mapping );
 
     for ( const auto& poly : _polyLines ) {
@@ -63,32 +53,30 @@ GeomData::GeomData( const std::vector<PolyLine>& _polyLines, std::shared_ptr<Mat
     }
 }
 
-GeomData::GeomData( const QuadVector3fNormalfList& _quads, std::shared_ptr<Material> _material,
-					const GeomMappingData& _mapping ) {
-	material = _material;
+GeomData::GeomData( const QuadVector3fNormalfList& _quads, const GeomMappingData& _mapping ) {
 	setMappingData( _mapping );
 	for ( const auto& q : _quads ) {
 		addFlatPoly( q.quad, q.normal );
 	}
 }
 
-std::shared_ptr<GeomData> GeomDataShapeBuilder::build(std::shared_ptr<Material> _mat) {
-    return std::make_shared<GeomData>( shapeType, pos, axis, scale, _mat, mappingData );
+std::shared_ptr<GeomData> GeomDataShapeBuilder::build() {
+    return std::make_shared<GeomData>( shapeType, pos, axis, scale, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataOutlineBuilder::build(std::shared_ptr<Material> _mat) {
-	return std::make_shared<GeomData>( outlineVerts, _mat, mappingData );
+std::shared_ptr<GeomData> GeomDataOutlineBuilder::build() {
+	return std::make_shared<GeomData>( outlineVerts, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataPolyBuilder::build(std::shared_ptr<Material> _mat) {
-	return std::make_shared<GeomData>( polyLine, _mat, mappingData );
+std::shared_ptr<GeomData> GeomDataPolyBuilder::build() {
+	return std::make_shared<GeomData>( polyLine, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataQuadMeshBuilder::build(std::shared_ptr<Material> _mat) {
-	return std::make_shared<GeomData>( quads, _mat, mappingData );
+std::shared_ptr<GeomData> GeomDataQuadMeshBuilder::build() {
+	return std::make_shared<GeomData>( quads, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataFollowerBuilder::build(std::shared_ptr<Material> _mat) {
+std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
     ASSERT( !mProfile->Points().empty() );
 
     Profile lProfile{ *mProfile.get() };
@@ -115,12 +103,11 @@ std::shared_ptr<GeomData> GeomDataFollowerBuilder::build(std::shared_ptr<Materia
 	lProfile.flip( mFlipVector );
 
 	auto ret = FollowerService::extrude( mVerts, lProfile, mSuggestedAxis, followersFlags );
-	ret->setMaterial(_mat);
 
 	return ret;
 }
 
-GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _mat) {
+GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
 	auto rawPoints = SVGC::SVGToPoly( svgAscii );
 
 	GeomDataListBuilderRetType logoGeoms{};
@@ -129,8 +116,8 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build(std::shared_ptr<Material> _
 		auto fb = std::make_shared<GeomDataFollowerBuilder>( mProfile,
 															 XZY::C(points.path,0.0f),
 															 FollowerFlags::WrapPath );
-        _mat->c( points.strokeColor );
-		logoGeoms.emplace_back(fb->build(_mat));
+//        _mat->c( points.strokeColor );
+		logoGeoms.emplace_back(fb->build());
 	}
 	return logoGeoms;
 }
@@ -986,12 +973,6 @@ void GeomData::setWindingOrderFlagOnly( const WindingOrderT _wo ) {
 WindingOrderT GeomData::getWindingOrder() const {
 	return mWindingOrder;
 }
-
-std::shared_ptr<Material> GeomData::getMaterial() { return material; }
-
-std::shared_ptr<Material> GeomData::getMaterial() const { return material; }
-
-void GeomData::setMaterial( std::shared_ptr<Material> _mat ) { material = _mat; }
 
 GeomData::~GeomData() = default;
 

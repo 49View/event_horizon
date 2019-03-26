@@ -19,7 +19,7 @@
 #include <core/runloop_core.h>
 #include <core/tar_util.h>
 #include <core/zlib_util.h>
-#include <core/descriptors/material.h>
+#include <poly/material.h>
 
 void initDeamon() {
     /* Our process ID and Session ID */

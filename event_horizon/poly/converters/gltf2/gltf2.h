@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include "tiny_gltf.h"
 #include <core/math/vector4f.h>
-#include <core/descriptors/material.h>
+#include <poly/material.h>
 #include <poly/poly.hpp>
 #include <poly/import_artifacts.hpp>
 

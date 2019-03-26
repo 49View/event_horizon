@@ -520,7 +520,7 @@ void UIShapeBuilder::createDependencyList() {
 }
 
 void UIShapeBuilder::elemCreate() {
-    auto sp = std::make_shared<UIElement>( Name(), shapeType, material, renderBucketIndex );
+    auto sp = std::make_shared<UIElement>( Name(), shapeType, renderBucketIndex );
     elem = std::make_shared<UIAsset>( sp, mTransform );
 }
 

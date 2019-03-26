@@ -22,9 +22,6 @@
 #include <core/util.h>
 #include <core/math/vector4f.h>
 
-const static uint32_t dependecyTagTexture = 1;
-const static uint32_t dependecyTagMaterial = 2;
-using TextureDependencyBuilderPair = std::pair<std::string, uint32_t>;
 using MaterialImageBuffers = std::unordered_map<std::string, uint8_p>;
 using KnownBufferMap = std::unordered_map<std::string, std::string>;
 using MaterialImageCallback = std::function<void( const std::string&, ucchar_p )>;
@@ -87,31 +84,25 @@ public:
 ////    }
 //};
 
-class Material : public NamePolicy<> {
+class Material {
 public:
+    Material();
     RESOURCE_CTORS(Material);
-    virtual ~Material() = default;
     Material(const Material& _val);
-    explicit Material( const std::string& _name, const std::string& _sn );
     void bufferDecode( const unsigned char* _buffer, size_t _length ) {}
 
     Material& t( const std::string& _tn );
     Material& c( const Color4f& _col );
 
-    const std::string& getShaderName() const;
     void resolveDynamicConstants();
 
-    const std::vector<std::string> textureDependencies() const;
-    static const std::vector<TextureDependencyBuilderPair> textureDependencies( const std::string& _key );
-
-    void setShaderName( const std::string& _value );
-    std::string PBRName( const std::string& _type ) const;
-    const std::string getBaseColor() const;
-    const std::string getNormal() const;
-    const std::string getAmbientOcclusion() const;
-    const std::string getRoughness() const;
-    const std::string getMetallic() const;
-    const std::string getHeight() const;
+//    std::string PBRName( const std::string& _type ) const;
+//    const std::string getBaseColor() const;
+//    const std::string getNormal() const;
+//    const std::string getAmbientOcclusion() const;
+//    const std::string getRoughness() const;
+//    const std::string getMetallic() const;
+//    const std::string getHeight() const;
     float getMetallicValue() const;
     void setMetallicValue( float _metallicValue );
     float getRoughnessValue() const;
@@ -152,21 +143,8 @@ public:
 protected:
     std::shared_ptr<HeterogeneousMap>     values;
     MaterialImageBuffers                  buffers;
-    std::string                           shaderName;
 
 public:
     static Material WHITE_PBR();
 };
 
-class MaterialBuildable {
-public:
-    explicit MaterialBuildable( const std::string& _shader, const std::string& _matName = "" );
-    void materialSet( std::shared_ptr<Material> _value );
-    void materialSet( const std::string& _shader, const std::string& _matName = "" );
-
-    void materialColor( const Color4f & _color );
-    void materialColor( const std::string& _hexcolor );
-
-protected:
-    std::shared_ptr<Material> material;
-};

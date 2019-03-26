@@ -8,28 +8,13 @@
 //    return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
 //}
 
-Material::Material( const std::string& _name, const std::string& _sn ) {
+Material::Material() {
     values = std::make_shared<HeterogeneousMap>();
-    Name(_name);
-    setShaderName(_sn);
 }
 
-Material::Material( const Material& _source ) : NamePolicy( _source ) {
-    values = std::make_shared<HeterogeneousMap>();
-    values->clone( *_source.values.get() );
-//    Hash( _source.Hash() );
-    shaderName = _source.shaderName;
+Material::Material( const Material& _source ) {
+    values = std::make_shared<HeterogeneousMap>(_source.Values());
 }
-
-//std::string Material::calcHashImpl() {
-//
-//    std::stringstream hashInput( HeterogeneousMap::HashRef() );
-//    hashInput << getShaderName();
-//    hashInput << this->NameCopy();
-//
-//    return hashInput.str();
-//
-//}
 
 Material& Material::t( const std::string& _tn ) {
     values->assign( UniformNames::colorTexture, _tn );
@@ -40,10 +25,6 @@ Material& Material::c( const Color4f& _col ) {
     values->assign( UniformNames::opacity, _col.w() );
     values->assign( UniformNames::diffuseColor, _col.xyz() );
     return *this;
-}
-
-const std::string& Material::getShaderName() const {
-    return shaderName;
 }
 
 void Material::resolveDynamicConstants() {
@@ -59,46 +40,33 @@ void Material::resolveDynamicConstants() {
 //    });
 }
 
-const std::vector<std::string> Material::textureDependencies() const {
-    return values->getTextureNames();
-}
-
-const std::vector<TextureDependencyBuilderPair> Material::textureDependencies( const std::string& _key ) {
-    return {{ _key, 0xffffffff }};
-}
-
-void Material::setShaderName( const std::string& _value ) {
-    shaderName = _value;
-//    properties.isStreaming = isShaderStreammable( shaderName );
-}
-
-std::string Material::PBRName( const std::string& _type ) const {
-    return Name() + "_" + _type;
-}
-
-const std::string Material::getBaseColor() const {
-    return PBRName(MPBRTextures::basecolorString);
-}
-
-const std::string Material::getNormal() const {
-    return PBRName(MPBRTextures::normalString);
-}
-
-const std::string Material::getAmbientOcclusion() const {
-    return PBRName(MPBRTextures::ambientOcclusionString);
-}
-
-const std::string Material::getRoughness() const {
-    return PBRName(MPBRTextures::roughnessString);
-}
-
-const std::string Material::getMetallic() const {
-    return PBRName(MPBRTextures::metallicString);
-}
-
-const std::string Material::getHeight() const {
-    return PBRName(MPBRTextures::heightString);
-}
+//std::string Material::PBRName( const std::string& _type ) const {
+//    return Name() + "_" + _type;
+//}
+//
+//const std::string Material::getBaseColor() const {
+//    return PBRName(MPBRTextures::basecolorString);
+//}
+//
+//const std::string Material::getNormal() const {
+//    return PBRName(MPBRTextures::normalString);
+//}
+//
+//const std::string Material::getAmbientOcclusion() const {
+//    return PBRName(MPBRTextures::ambientOcclusionString);
+//}
+//
+//const std::string Material::getRoughness() const {
+//    return PBRName(MPBRTextures::roughnessString);
+//}
+//
+//const std::string Material::getMetallic() const {
+//    return PBRName(MPBRTextures::metallicString);
+//}
+//
+//const std::string Material::getHeight() const {
+//    return PBRName(MPBRTextures::heightString);
+//}
 
 float Material::getMetallicValue() const {
     float ret;
@@ -165,7 +133,6 @@ void Material::setOpacity( float _opacityValue ) {
 // ### MAT REMOVE CLONE, it's shit
 void Material::clone( const Material& _source ) {
     values->clone( *_source.values.get() );
-    shaderName = _source.shaderName;
 }
 
 Material& Material::buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName ) {
@@ -183,12 +150,12 @@ Material& Material::buffer( const std::string& _bname, const ucchar_p& _data, co
 KnownBufferMap Material::knownBuffers() const {
     KnownBufferMap ret;
 
-    ret.emplace( getBaseColor(), UniformNames::diffuseTexture );
-    ret.emplace( getNormal(), UniformNames::normalTexture );
-    ret.emplace( getAmbientOcclusion(), UniformNames::aoTexture );
-    ret.emplace( getRoughness(), UniformNames::roughnessTexture );
-    ret.emplace( getMetallic(), UniformNames::metallicTexture );
-    ret.emplace( getHeight(), UniformNames::heightTexture );
+//    ret.emplace( getBaseColor(), UniformNames::diffuseTexture );
+//    ret.emplace( getNormal(), UniformNames::normalTexture );
+//    ret.emplace( getAmbientOcclusion(), UniformNames::aoTexture );
+//    ret.emplace( getRoughness(), UniformNames::roughnessTexture );
+//    ret.emplace( getMetallic(), UniformNames::metallicTexture );
+//    ret.emplace( getHeight(), UniformNames::heightTexture );
 
     return ret;
 }
@@ -249,35 +216,11 @@ const MaterialImageBuffers& Material::Buffers() const {
 //}
 
 float Material::translucency() const {
-    if ( shaderName == S::YUV_GREENSCREEN ) return 0.5f;
+//    if ( shaderName == S::YUV_GREENSCREEN ) return 0.5f;
     return getOpacity();
 }
 
 Material Material::WHITE_PBR() {
-    return Material{ S::WHITE_PBR, S::SH }.c(Vector4f::RED);
+    return Material{};
 }
 
-// *********************************************************************************************************
-// Material Buildable
-// *********************************************************************************************************
-
-MaterialBuildable::MaterialBuildable( const std::string& _shader, const std::string& _matName ) {
-    material = std::make_shared<Material>( _matName, _shader );
-}
-
-void MaterialBuildable::materialSet( std::shared_ptr<Material> _value ) {
-    material = _value;
-}
-
-void MaterialBuildable::materialSet( const std::string& _shader, const std::string& _matName ) {
-    material->Name(_matName);
-    material->setShaderName(_shader);
-}
-
-void MaterialBuildable::materialColor( const Color4f& _color ) {
-    material->c( _color );
-}
-
-void MaterialBuildable::materialColor( const std::string& _hexcolor ) {
-    material->c( Vector4f::XTORGBA( _hexcolor ) );
-}

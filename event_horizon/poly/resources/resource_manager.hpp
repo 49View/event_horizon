@@ -89,6 +89,10 @@ public:
         return ret;
     }
 
+    const C& listResources() const {
+        return Resources();
+    }
+
 protected:
     void add( std::shared_ptr<T> _elem, const std::string& _name,
               const std::string& _hash, const std::string& _aliasKey = "" ) {

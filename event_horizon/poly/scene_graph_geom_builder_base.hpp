@@ -4,22 +4,20 @@
 
 #pragma once
 
-#include <core/descriptors/material.h>
+#include <poly/material.h>
 #include <poly/resources/builders.hpp>
 #include <poly/scene_graph_builder.hpp>
 
-class SceneGraphGeomBaseBuilder : public SceneGraphBuilder, public MaterialBuildable, public DependantBuilder {
+class SceneGraphGeomBaseBuilder : public SceneGraphBuilder, public DependantBuilder {
 public:
-    using MaterialBuildable::MaterialBuildable;
 
     explicit SceneGraphGeomBaseBuilder( SceneGraph& _sg,
                                         const std::string& _shaderName = S::SH,
                                         const std::string& _matName    = S::WHITE_PBR ) :
-        SceneGraphBuilder( _sg ),
-        MaterialBuildable( _shaderName, _matName ) {}
+        SceneGraphBuilder( _sg ) {}
 
     SceneGraphGeomBaseBuilder( SceneGraph& _sg, const std::string& _name,
                                const std::string& _shaderName,
                                const std::string& _matName ) :
-        SceneGraphBuilder(_sg), MaterialBuildable(_shaderName, _matName), DependantBuilder(_name) {}
+        SceneGraphBuilder(_sg), DependantBuilder(_name) {}
 };

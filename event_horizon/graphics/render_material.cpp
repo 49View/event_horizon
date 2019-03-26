@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 //  material.cpp
 //  6thViewImporter
@@ -8,7 +10,7 @@
 
 #include "render_material.hpp"
 
-#include "core/descriptors/material.h"
+#include <core/descriptors/uniform_names.h>
 #include <graphics/renderer.h>
 
 void RenderMaterial::removeAllTextures() {
@@ -19,7 +21,7 @@ void RenderMaterial::removeAllTextures() {
 RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program,
                                 std::shared_ptr<HeterogeneousMap> _map, Renderer& _rr ) : rr(_rr) {
 
-    BoundProgram( _program );
+    BoundProgram( std::move( _program ));
 
     Uniforms( std::make_shared<ProgramUniformSet>(_map, rr) );
     globalUniforms = std::make_shared<ProgramUniformSet>();

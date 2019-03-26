@@ -34,7 +34,7 @@ struct CameraInputData {
 
 class CameraControl {
 public:
-    explicit CameraControl( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
+    explicit CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
     virtual ~CameraControl() = default;
     void updateFromInputData( const CameraInputData& mi );
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) = 0;

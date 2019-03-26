@@ -2,7 +2,6 @@
 
 #include <core/math/poly_shapes.hpp>
 #include <core/camera_utils.hpp>
-#include <core/descriptors/material.h>
 #include <graphics/vertex_processing.h>
 #include <graphics/framebuffer.h>
 #include <graphics/renderer.h>

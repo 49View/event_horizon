@@ -8,7 +8,7 @@
 #include <functional>
 #include "core/util.h"
 #include "poly/resources/resource_builder.hpp"
-//#include "core/descriptors/material.h"
+//#include "poly/material.h"
 //#include "core/image_constants.h"
 
 class Material;

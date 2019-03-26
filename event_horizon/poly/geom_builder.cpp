@@ -124,12 +124,12 @@ void GeomBuilder::createDependencyList() {
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb ) {
-    elem->Data( gb->build(material) );
+    elem->Data( gb->build() );
     elem->GHType(gt);
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb ) {
-    for ( const auto& c : gb->build(material) ) {
+    for ( const auto& c : gb->build() ) {
         elem->addChildren( c );
     }
     elem->GHType(gt);

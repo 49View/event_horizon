@@ -9,7 +9,7 @@
 #include <functional>
 
 #include <core/http/curl_utils.h>
-#include <core/descriptors/material.h>
+#include <poly/material.h>
 
 template < typename T >
 void findDataEnclosed( const std::string& _curlString, size_t& ps, const std::string& startDelimeter,

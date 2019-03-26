@@ -2,7 +2,6 @@
 
 #include <core/app_globals.h>
 #include <core/math/poly_shapes.hpp>
-#include <core/descriptors/material.h>
 #include <graphics/render_list.h>
 #include <graphics/renderer.h>
 

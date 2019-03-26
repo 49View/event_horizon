@@ -35,9 +35,10 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
     sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {
         if ( auto as = std::get_if<GeomAssetSP>(&_geom); as != nullptr ) {
             (*as)->visitFixUp( [&]( std::shared_ptr<GeomData> g ) {
-                if ( g ) {
-                    SG().ML().add( g->getMaterial() );
-                }
+//                ### MAT Check another way of "fixing up", probably we won't need it at the end! :O
+//                if ( g ) {
+//                    SG().ML().add( g->getMaterial() );
+//                }
             });
             (*as)->subscribeData(hierRenderObserver);
             (*as)->sendNotifyData("generateGeometryVP");
@@ -82,8 +83,8 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
 //}
 
 void RenderSceneGraph::changeMaterialTagCallback( const std::vector<std::string>& _params ) {
-    std::shared_ptr<Material> mat = std::dynamic_pointer_cast<Material>(sg.ML().get(concatParams(_params, 1)));
-    rr.changeMaterialOnTagsCallback( { sg.getGeomType( _params[0] ), mat->Name() } );
+//    std::shared_ptr<Material> mat = std::dynamic_pointer_cast<Material>(sg.ML().get(concatParams(_params, 1)));
+//    rr.changeMaterialOnTagsCallback( { sg.getGeomType( _params[0] ), mat->Name() } );
 }
 
 //void RenderSceneGraph::changeMaterialTagImpl( const std::vector<std::string>& _params ) {
@@ -145,20 +146,23 @@ HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
 }
 
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
-    auto mat = _source->Data()->getMaterial();
-    auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), mat->translucency() );
-    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, ShaderMaterial{mat->getShaderName(), mat->Values()} }
+//    auto mat = _source->Data()->getMaterial();
+//  ### MAT reinstate materials
+    auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f ); // mat->translucency()
+    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, ShaderMaterial{S::SH} } //mat->getShaderName(), mat->Values()
             .p(generateGeometryVP(_source->Data())).n(_source->UUiD()).g(_source->GHType()).build();
 }
 
 HierGeomRenderObserver::HierGeomRenderObserver( Renderer& _rr ) : rr( _rr ) {}
 
 void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
-    auto mat = _source->Data()->getMaterial();
+//    auto mat = _source->Data()->getMaterial();
+//  ### MAT reinstate materials
     auto renderBucketIndex = _source->Data()->RenderBucketIndex();
-    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), mat->getOpacity() );
+    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), 1.0f );
+    //mat->getOpacity()
     auto vs = _source->Data()->VertexList();
-    VPBuilder<PosTex3dStrip>{rr,vpList, ShaderMaterial{mat->getShaderName(),mat->Values()}}.
+    VPBuilder<PosTex3dStrip>{rr,vpList, ShaderMaterial{S::SH}}. //mat->getShaderName(),mat->Values()
     p(vs).n(_source->UUiD()).build();
 }
 

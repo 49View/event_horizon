@@ -37,7 +37,6 @@ class DeserializeBin;
 class GeomData;
 class VertexProcessing;
 class GeomBuilder;
-class Material;
 
 enum PullFlags : uint32_t {
     Sides = 1 << 0,
@@ -183,27 +182,21 @@ private:
 class GeomData : public Publisher<GeomData> {
 public:
     GeomData();
-    explicit GeomData(std::shared_ptr<Material> _material);
     virtual ~GeomData();
     GeomData( ShapeType _st,
               const Vector3f& _pos, const Vector3f& _axis, const Vector3f& _scale,
-              std::shared_ptr<Material> _material,
               const GeomMappingData& _mapping );
 
-    GeomData( const std::vector<PolyOutLine>& verts, std::shared_ptr<Material> _material,
+    GeomData( const std::vector<PolyOutLine>& verts,
               const GeomMappingData& _mapping, PullFlags pullFlags = PullFlags::All );
 
-    GeomData( const std::vector<PolyLine>& _polyLine, std::shared_ptr<Material> _material,
+    GeomData( const std::vector<PolyLine>& _polyLine,
               const GeomMappingData& _mapping );
 
-    GeomData( const QuadVector3fNormalfList& quads, std::shared_ptr<Material> _material, const GeomMappingData& _mapping );
+    GeomData( const QuadVector3fNormalfList& quads, const GeomMappingData& _mapping );
 
     void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
 public:
-    std::shared_ptr<Material> getMaterial();
-    std::shared_ptr<Material> getMaterial() const;
-    void setMaterial( std::shared_ptr<Material> _mat );
-
     void addShape( ShapeType st, const Vector3f& center, const Vector3f& size, int subDivs = 0 );
 
     MappingDirection getMappingDirection() const { return mapping.direction; }
@@ -353,7 +346,6 @@ protected:
     void calcMirrorUVs( Vector2f *uvs );
 
 protected:
-    std::shared_ptr<Material> material;
     VData mVdata;
 
     subdivisionAccuray mSubdivAccuracy = accuracyNone;

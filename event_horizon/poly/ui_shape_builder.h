@@ -22,20 +22,12 @@ namespace Utility::TTFCore { class Font; }
 class UIElement : public Publisher<UIElement> {
 public:
     UIElement() = default;
-    UIElement( const std::string& name, UIShapeType shapeType, std::shared_ptr<Material> _mat, int renderBucketIndex ) :
-               shapeType( shapeType ), material( _mat ), renderBucketIndex( renderBucketIndex ) {
+    UIElement( const std::string& name, UIShapeType shapeType, int renderBucketIndex ) :
+               shapeType( shapeType ), renderBucketIndex( renderBucketIndex ) {
         Name( name );
     }
 
     virtual ~UIElement() = default;
-
-    const std::shared_ptr<Material>& getMaterial() const {
-        return material;
-    }
-
-    void setMaterial( const std::shared_ptr<Material>& _material ) {
-        UIElement::material = _material;
-    }
 
     UIShapeType ShapeType() const {
         return shapeType;
@@ -53,8 +45,8 @@ public:
         return vs;
     }
 
-    void VertexList( const std::shared_ptr<PosTex3dStrip>& vs ) {
-        UIElement::vs = vs;
+    void VertexList( const std::shared_ptr<PosTex3dStrip>& _vs ) {
+        UIElement::vs = _vs;
         bbox3d = vs->BBox3d();
     }
 
@@ -62,8 +54,8 @@ public:
         return renderBucketIndex;
     }
 
-    void RenderBucketIndex( int renderBucketIndex ) {
-        UIElement::renderBucketIndex = renderBucketIndex;
+    void RenderBucketIndex( int _renderBucketIndex ) {
+        UIElement::renderBucketIndex = _renderBucketIndex;
     }
 
     template<typename TV> \
@@ -75,7 +67,6 @@ public:
 
 private:
     UIShapeType shapeType = UIShapeType::Rect2d;
-    std::shared_ptr<Material> material;
     int renderBucketIndex = 0;
     std::shared_ptr<PosTex3dStrip> vs;
 
@@ -95,7 +86,6 @@ public:
     void assemble() override;
 
     void init() {
-        material->setShaderName( getShaderType( shapeType ) );
         defaultFontIfNecessary();
     }
 
@@ -277,26 +267,26 @@ public:
     }
 
 // MaterialBuildable policies
-    UIShapeBuilder& m( const std::string& _shader, const std::string& _matName = "" ) {
-        materialSet(_shader, _matName);
-        return *this;
-    }
-
-    template <typename T>
-    UIShapeBuilder& mc( const std::string& _name, T _value ) {
-        materialConstant( _name, _value);
-        return *this;
-    }
-
-    UIShapeBuilder& c( const Color4f & _color ) {
-        materialColor( _color );
-        return *this;
-    }
-
-    UIShapeBuilder& c( const std::string& _hexcolor ) {
-        materialColor( Vector4f::XTORGBA( _hexcolor ) );
-        return *this;
-    }
+//    UIShapeBuilder& m( const std::string& _shader, const std::string& _matName = "" ) {
+//        materialSet(_shader, _matName);
+//        return *this;
+//    }
+//
+//    template <typename T>
+//    UIShapeBuilder& mc( const std::string& _name, T _value ) {
+//        materialConstant( _name, _value);
+//        return *this;
+//    }
+//
+//    UIShapeBuilder& c( const Color4f & _color ) {
+//        materialColor( _color );
+//        return *this;
+//    }
+//
+//    UIShapeBuilder& c( const std::string& _hexcolor ) {
+//        materialColor( Vector4f::XTORGBA( _hexcolor ) );
+//        return *this;
+//    }
 
 
     UIAssetSP buildr() {
