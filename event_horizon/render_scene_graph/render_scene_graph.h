@@ -9,6 +9,8 @@
 #include <core/observer.h>
 #include <core/soa_utils.h>
 #include <poly/scene_graph.h>
+#include <event_horizon/graphics/renderer.h>
+
 
 struct scene_t;
 class AudioManager;

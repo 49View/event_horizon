@@ -18,7 +18,7 @@ void Skybox::equirectangularTextureInit( const std::vector<std::string>& params 
 
     auto mat = std::make_shared<HeterogeneousMap>();
     mat->assign( UniformNames::colorTexture, params[0] );
-    VPBuilder<Pos3dStrip>{rr,mVPList,S::EQUIRECTANGULAR, mat}.p(colorStrip).n("skybox").build();
+    VPBuilder<Pos3dStrip>{rr,mVPList, ShaderMaterial{S::EQUIRECTANGULAR, mat} }.p(colorStrip).n("skybox").build();
 }
 
 void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
@@ -55,7 +55,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
         std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
         std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                                sp.numIndices, vpos3d, sp.indices );
-        VPBuilder<Pos3dStrip>{rr,mVPList,S::SKYBOX}.p(colorStrip).n("skybox").build();
+        VPBuilder<Pos3dStrip>{rr,mVPList, ShaderMaterial{S::SKYBOX}}.p(colorStrip).n("skybox").build();
     }
 }
 
@@ -106,7 +106,7 @@ void CubeEnvironmentMap::init() {
                                                                            sp.numIndices, vpos3d, sp.indices );
 
     auto shaderName = InfiniteSkyboxMode() ? S::SKYBOX_CUBEMAP : S::PLAIN_CUBEMAP;
-    VPBuilder<Pos3dStrip>{rr,mVPList,shaderName}.p(colorStrip).n("cubeEnvMap-"+shaderName).build();
+    VPBuilder<Pos3dStrip>{rr,mVPList,ShaderMaterial{shaderName}}.p(colorStrip).n("cubeEnvMap-"+shaderName).build();
 }
 
 CubeEnvironmentMap::CubeEnvironmentMap( Renderer& rr, CubeEnvironmentMap::InifinititeSkyBox mbInfiniteSkyboxMode ) :
@@ -136,7 +136,7 @@ void ConvolutionEnvironmentMap::init() {
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList,S::CONVOLUTION}.p(colorStrip).n("cubeEnvMap").build();
+    VPBuilder<Pos3dStrip>{rr,mVPList,ShaderMaterial{S::CONVOLUTION}}.p(colorStrip).n("cubeEnvMap").build();
 }
 
 void ConvolutionEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
@@ -158,7 +158,7 @@ void PrefilterSpecularMap::init() {
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList,S::IBL_SPECULAR}.p(colorStrip).n("iblSpecularEnvMap").build();
+    VPBuilder<Pos3dStrip>{rr,mVPList,ShaderMaterial{S::IBL_SPECULAR}}.p(colorStrip).n("iblSpecularEnvMap").build();
 }
 
 void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float roughness ) {

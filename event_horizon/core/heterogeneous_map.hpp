@@ -21,6 +21,7 @@ public:
     HeterogeneousMap() = default;
     virtual ~HeterogeneousMap() = default;
     HeterogeneousMap( const HeterogeneousMap& _source );
+    explicit HeterogeneousMap( std::shared_ptr<HeterogeneousMap> _source );
     void inject( const HeterogeneousMap& source );
     void injectIfNotPresent( const HeterogeneousMap& source );
     void assign( const std::string& uniformName, int data );

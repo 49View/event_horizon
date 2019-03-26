@@ -17,6 +17,7 @@
 #include <graphics/render_targets.hpp>
 #include <graphics/shader_manager.h>
 #include <graphics/shadowmap_manager.h>
+#include <graphics/shader_material.hpp>
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -107,6 +108,7 @@ void Renderer::init() {
     lm.init();
     sm.loadShaders();
     tm.addTextureWithData(RawImage::WHITE4x4(), FBNames::lightmap, TSLOT_LIGHTMAP );
+    addMaterial(ShaderMaterial{S::SHADOW_MAP, *this});
     afterShaderSetup();
 }
 
@@ -220,18 +222,14 @@ bool Renderer::hasTag( uint64_t _tag ) const {
     return false;
 }
 
-std::shared_ptr<RenderMaterial> Renderer::addMaterial( const std::string& _shaderName,
-                                                       std::shared_ptr<HeterogeneousMap> _material ) {
-    auto program = P( _shaderName );
-    ASSERT(program != nullptr);
-    auto lMaterial = _material;
-    if ( !lMaterial ){
-        lMaterial = std::make_shared<HeterogeneousMap>();
-        lMaterial->inject( *program->getDefaultUniforms().get() );
-    }
-    auto rmaterial = std::make_shared<RenderMaterial>( program, lMaterial, *this );
+std::shared_ptr<RenderMaterial> Renderer::addMaterial( const ShaderMaterial& _sm ) {
+    auto rmaterial = std::make_shared<RenderMaterial>( _sm.P(), _sm.Values(), *this );
     MaterialMap( rmaterial );
     return rmaterial;
+}
+
+std::shared_ptr<RenderMaterial> Renderer::getMaterial( const std::string& _key ) {
+    return materialMap[_key];
 }
 
 void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt ) {

@@ -8,6 +8,7 @@ float edgeFactorTri() {
 }
 
 void main() {
+
 //   mat3 itbn;
 //   itbn[0] = normalize( v_tan );
 //   itbn[1] = normalize( v_bitan );

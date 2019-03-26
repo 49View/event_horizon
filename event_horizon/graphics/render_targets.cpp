@@ -59,7 +59,7 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
 
     mShadowMapFB = FrameBufferBuilder{ rr, FBNames::shadowmap }.size(4096).GPUSlot(TSLOT_SHADOWMAP).depthOnly().build();
 
-    smm = std::make_unique<ShadowMapManager>(rr);
+    smm = std::make_unique<ShadowMapManager>();
 
     rr.createGrid( 1.0f, Color4f::ACQUA_T, Color4f::PASTEL_GRAYLIGHT, Vector2f( 10.0f ), 0.075f );
 
@@ -171,7 +171,7 @@ void RLTargetPBR::addShadowMaps() {
 
             for ( const auto& [k, vl] : rr.CL() ) {
                 if ( isKeyInRange(k) ) {
-                    rr.addToCommandBuffer( vl.mVList, smm->getMaterial() );
+                    rr.addToCommandBuffer( vl.mVList, rr.getMaterial(S::SHADOW_MAP) );
                 }
             }
         }

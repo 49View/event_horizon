@@ -12,6 +12,7 @@
 #include <graphics/shadowmap_manager.h>
 
 class Renderer;
+class RenderMaterial;
 class CommandScriptRendererManager;
 class CommandQueue;
 class ShaderManager;
@@ -24,6 +25,7 @@ class Program;
 class CommandBufferEntry;
 class CommandBufferList;
 struct CommandBufferListVector;
+class ShaderMaterial;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -92,8 +94,8 @@ public:
 
 	void removeFromCL( const UUID& _uuid );
 
-	std::shared_ptr<RenderMaterial> addMaterial( const std::string& _shaderName,
-                                                 std::shared_ptr<HeterogeneousMap> _material = nullptr );
+	std::shared_ptr<RenderMaterial> addMaterial( const ShaderMaterial& _material );
+	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );

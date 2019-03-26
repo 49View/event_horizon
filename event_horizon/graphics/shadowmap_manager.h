@@ -3,12 +3,10 @@
 #include "core/math/matrix4f.h"
 #include "core/math/rect2f.h"
 
-class Renderer;
-class RenderMaterial;
 
 class ShadowMapManager : public FrameInvalidator {
 public:
-	explicit ShadowMapManager( Renderer& rr );
+	ShadowMapManager();
 	void calculateShadowMapMatrices();
 	const Matrix4f& ShadowMapMVP() const;
 	Matrix4f& ShadowMapMVPBias( bool _useInfiniteHorizon = false );
@@ -22,8 +20,6 @@ public:
 	void setFrusomY( const Vector2f& val );
 	void setFrusomZ( const Vector2f& val );
 
-	const std::shared_ptr<RenderMaterial>& getMaterial() const;
-
 private:
 	void updateDepthProjectionMatrix();
 	
@@ -35,10 +31,9 @@ private:
 	Matrix4f depthViewMatrix;
 	Vector3f mShadowMapLightSourcePos;
 	Vector3f mShadowMapSunLightDir = Vector3f::Z_AXIS_NEG;
-	Vector2f mXFrustom;
-	Vector2f mYFrustom;
-	Vector2f mZFrustom;
-	std::shared_ptr<RenderMaterial> material;
+	Vector2f mXFrustom = Vector2f::ZERO;
+	Vector2f mYFrustom = Vector2f::ZERO;
+	Vector2f mZFrustom = Vector2f::ZERO;
 };
 
 //#define SMM ShadowMapManager::getInstance()

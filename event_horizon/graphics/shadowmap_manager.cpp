@@ -1,10 +1,8 @@
 #include "shadowmap_manager.h"
-#include "renderer.h"
-#include "core/math/quaternion.h"
-#include "core/suncalc/sun_builder.h"
-#include "render_material.hpp"
+#include <core/math/quaternion.h>
+#include <core/suncalc/sun_builder.h>
 
-ShadowMapManager::ShadowMapManager( Renderer& rr ) {
+ShadowMapManager::ShadowMapManager() {
 	mBiasMatrix = Matrix4f(
 			0.5f, 0.0f, 0.0f, 0.0f,
 			0.0f, 0.5f, 0.0f, 0.0f,
@@ -15,9 +13,6 @@ ShadowMapManager::ShadowMapManager( Renderer& rr ) {
 	float bs = 20.0f;
 
 	setFrusom( { -bs, bs}, { -bs, bs}, { 1.0f, bs} );
-
-	material = rr.addMaterial(S::SHADOW_MAP);
-//	material = RenderMaterialBuilder{rr}.m("ShadowMapMaterial").p(S::SHADOW_MAP).build();
 }
 
 void ShadowMapManager::updateDepthProjectionMatrix() {
@@ -82,8 +77,4 @@ Matrix4f & ShadowMapManager::ShadowMapMVPBias( bool _useInfiniteHorizon ) {
 
 Vector3f ShadowMapManager::SunDirection() const {
 	return mShadowMapSunLightDir;
-}
-
-const std::shared_ptr<RenderMaterial>& ShadowMapManager::getMaterial() const {
-	return material;
 }
