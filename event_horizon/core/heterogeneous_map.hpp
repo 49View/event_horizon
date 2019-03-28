@@ -12,9 +12,11 @@
 #include <core/math/matrix4f.h>
 #include <core/serializable.hpp>
 #include <core/hashable.hpp>
+#include <core/serialization.hpp>
 
 class SerializeBin;
 class DeserializeBin;
+class MegaWriter;
 
 class HeterogeneousMap : public virtual Hashable<> {
 public:
@@ -83,6 +85,8 @@ public:
 
     void serializeImpl( std::shared_ptr<SerializeBin> writer ) const;
     void deserializeImpl( std::shared_ptr<DeserializeBin> reader );
+
+    JSONSERIAL( HeterogeneousMap, mNumUniforms, mStrings, mInts, mFloats, mV2fs, mV3fs, mV3fvs, mV4fs, mM3fs, mM4fs );
 
     template <typename T>
     void visit( const T& _visitor ) {

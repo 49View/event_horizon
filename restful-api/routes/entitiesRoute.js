@@ -72,9 +72,6 @@ router.post('/', async (req, res, next) => {
         //Check content exists in project and group
         const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.hash)
         if (copyEntity===null) {
-            //Delete existing entity
-            // entityController.deleteEntity(copyEntity._id);
-        // } else {
             //Upload file to S3
             let savedFilename = {"changed":false, "name": filePath};
             await fsController.cloudStorageGetFilenameAndDuplicateIfExists( filePath, "eventhorizonentities", savedFilename );
@@ -106,7 +103,7 @@ router.put('/:id', async (req, res, next) => {
         }
         const group = currentEntity.group;
         const metadata = entityController.getMetadataFromBody(false, false, req);
-        const { content, public, restricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
+        const { content, isPublic, isRestricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
         //If content defined
         if (content!==null) {
             //Check content exists in project and group
@@ -125,7 +122,7 @@ router.put('/:id', async (req, res, next) => {
             cleanMetadata.name=currentEntity.metadata.name;
         }
         //Update entity
-        await entityController.updateEntity(currentEntity._id, project, group, public, restricted, cleanMetadata);
+        await entityController.updateEntity(currentEntity._id, project, group, isPublic, isRestricted, cleanMetadata);
 
         res.status(204).send();
     } catch (ex) {

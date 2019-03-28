@@ -28,7 +28,7 @@ exports.cloudStorageGetFilenameAndDuplicateIfExists = async ( key, bucket, filen
     if ( result == true ) {
         // Now the file has been found so add the classic ugly orrible _N appendix
         const str = key;
-        const n = str.lastIndexOf(".");
+        let n = str.lastIndexOf(".");
         if ( n == -1 ) n = str.length;
         const d = new Date(); 
         finalName = str.substring(0, n) + "_" + d.getTime() + str.substring(n, str.length);

@@ -3,7 +3,6 @@
 //
 
 #include "heterogeneous_map.hpp"
-#include <core/serializebin.hpp>
 
 void HeterogeneousMap::calcTotalNumUniforms() {
     size_t lNumUniforms = 0;
@@ -339,32 +338,6 @@ std::unordered_map<std::string, std::string> HeterogeneousMap::getTextureNameMap
         ret.emplace( k, v );
     }
     return ret;
-}
-
-void HeterogeneousMap::serializeImpl( std::shared_ptr<SerializeBin> writer ) const {
-    writer->write( mNumUniforms );
-    writer->write( mStrings );
-    writer->write( mInts );
-    writer->write( mFloats );
-    writer->write( mV2fs );
-    writer->write( mV3fs );
-    writer->write( mV3fvs );
-    writer->write( mV4fs );
-    writer->write( mM3fs );
-    writer->write( mM4fs );
-}
-
-void HeterogeneousMap::deserializeImpl( std::shared_ptr<DeserializeBin> reader ) {
-    reader->read( mNumUniforms );
-    reader->read( mStrings );
-    reader->read( mInts );
-    reader->read( mFloats );
-    reader->read( mV2fs );
-    reader->read( mV3fs );
-    reader->read( mV3fvs );
-    reader->read( mV4fs );
-    reader->read( mM3fs );
-    reader->read( mM4fs );
 }
 
 HeterogeneousMap::HeterogeneousMap( const HeterogeneousMap& _source ) {

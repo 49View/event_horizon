@@ -4,11 +4,15 @@
 
 #pragma once
 
+#include <unordered_set>
 #include <boost/signals2.hpp>
 #include <core/util.h>
 #include <poly/resources/resource_utils.hpp>
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
+using ResourceMapperDict = std::unordered_map<std::string, ResourceRef>;
+using DependencyDict = std::unordered_map<std::string, std::unordered_map<std::string, bool>>;
+using ResourceDependencyMap = std::unordered_map<std::string, std::string>;
 
 template<typename T, typename C = ResourceManagerContainer<T>>
 class ResourceManager {
@@ -18,6 +22,13 @@ public:
             return resources.at(res->second);
         }
         return nullptr;
+    };
+
+    ResourceRef hash( const std::string& _key ) const {
+        if ( auto res = resourcesMapper.find( _key ); res != resourcesMapper.end() ) {
+            return res->second;
+        }
+        return "";
     };
 
     std::shared_ptr<T> hashExists( const std::string& _hash ) const {
@@ -55,7 +66,7 @@ public:
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
-                      const std::string& _hash, const std::string& _aliasKey = "" ) {
+                      const ResourceRef& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
         addToSignal( signalAddElements, { _elem, _name } );
     }
@@ -93,10 +104,34 @@ public:
         return Resources();
     }
 
+    void addDependencyHook( const std::string& _k, const std::string& _v ) {
+        dependencyDict[_k].emplace(_v, false);
+    }
+
+    void tagDependencyLoaded( const std::string& _k, const std::string& _v ) {
+        if ( auto it = dependencyDict.find(_k); it != dependencyDict.end() ) {
+            it->second[_v] = true;
+        }
+    }
+
+    bool checkDependencyCompleted( const std::string& _k, ResourceDependencyMap& _ret ) {
+        if ( auto it = dependencyDict.find(_k); it != dependencyDict.end() ) {
+            for ( const auto& [k,v] : it->second ) {
+                if ( !v ) return false;
+                _ret.emplace( k, hash(k) );
+            }
+            // returns true, after deleting the entry
+            dependencyDict.erase(_k);
+            return true;
+        }
+        return false;
+    }
+
 protected:
     void add( std::shared_ptr<T> _elem, const std::string& _name,
               const std::string& _hash, const std::string& _aliasKey = "" ) {
         resources[_hash] = _elem;
+        resourcesMapper[_hash] = _hash;
         resourcesMapper[_name] = _hash;
         if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = _hash;
     }
@@ -109,7 +144,8 @@ protected:
     }
 private:
     C resources;
-    std::unordered_map<std::string, std::string> resourcesMapper;
+    ResourceMapperDict resourcesMapper;
+    DependencyDict dependencyDict;
 
     SignalsDeferredContainer<T> signalAddElements;
     boost::signals2::signal<void(const ResourceSignalsAddSignature<T>&)> addSignal;

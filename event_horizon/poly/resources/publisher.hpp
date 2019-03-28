@@ -28,7 +28,7 @@ class ResourceVersioning {
 public:
 
     inline static size_t Version() {
-        if ( std::is_same<R, MaterialBuilder>::value ) return 1000;
+        if ( std::is_same<R, MaterialBuilder>::value ) return 2500;
         if ( std::is_same<R, GeomData>::value )        return 2000;
         if ( std::is_same<R, ProfileBuilder>::value  ) return 1000;
         if ( std::is_same<R, MaterialColor>::value  )  return 1000;

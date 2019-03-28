@@ -21,9 +21,9 @@
 
 namespace tarUtil {
 
-    std::vector<FileDesc> untar( const SerializableContainer& fin ) {
-        std::vector<FileDesc> fileDescs;
+    SerializableContainerDict untar( const SerializableContainer& fin ) {
         //Initialize a zero-filled block we can compare against (zero-filled header block --> end of TAR archive)
+        SerializableContainerDict ret;
         char zeroBlock[512];
         memset( zeroBlock, 0, 512 );
         //Start reading
@@ -33,7 +33,7 @@ namespace tarUtil {
 
         static const int TAR_HEADER_SIZE = 512;
         while ( true ) { //Stop if end of file has been reached or any error occured
-            TARFileHeader currentFileHeader;
+            TARFileHeader currentFileHeader{};
             //Read the file header.
             std::memcpy((char *) &currentFileHeader, rawBytes, TAR_HEADER_SIZE );
             rawBytes += TAR_HEADER_SIZE;
@@ -77,7 +77,12 @@ namespace tarUtil {
 //                cout << "Found file '" << filename << "' (" << size << " bytes)\n";
                 //Read the file into memory
                 //  This won't work for very large files -- use streaming methods there!
-                fileDescs.push_back( { ucchar_p{ reinterpret_cast<const unsigned char*>(rawBytes), size }, filename });
+
+                // ### Needs a new callback to handle file loading!!
+
+                auto* b = reinterpret_cast<const unsigned char *>(rawBytes);
+                ret.emplace( filename, SerializableContainer{ b, b+size } );
+
                 rawBytes += size;
                 //In the tar archive, entire 512-byte-blocks are used for each file
                 //Therefore we now have to skip the padded bytes.
@@ -96,7 +101,7 @@ namespace tarUtil {
                 std::cout << "Found unhandled TAR Entry type " << currentFileHeader.typeFlag << "\n";
             }
         }
-        return fileDescs;
+        return ret;
     }
 
 #define TARHEADER static_cast<PosixTarHeader*>(header)
@@ -203,14 +208,14 @@ namespace tarUtil {
         _endRecord(len);
     }
 
-    void TarWrite::putFile(const char* filename,const char* nameInArchive)
+    bool TarWrite::putFile(const char* filename,const char* nameInArchive)
     {
         char buff[BUFSIZ];
         std::FILE* in=std::fopen(filename,"rb");
         if(in==NULL)
         {
             LOGR("Cannot open  %s", filename );
-            return;
+            return false;
         }
         std::fseek(in, 0L, SEEK_END);
         long int len= std::ftell(in);
@@ -233,6 +238,7 @@ namespace tarUtil {
         std::fclose(in);
 
         _endRecord(len);
+        return true;
     }
 
 }

@@ -21,5 +21,9 @@ void ImportGeomArtifacts::setMaterials( const std::vector<std::shared_ptr<Materi
 }
 
 void ImportGeomArtifacts::addMaterial( std::shared_ptr<Material> _mat ) {
+//    std::string name;
+//    std::unordered_map<std::string, RawImage> mb;
+//    HeterogeneousMap values;
+
     materials.emplace_back(_mat);
 }

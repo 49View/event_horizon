@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "megareader.hpp"
+//#include "megareader.hpp"
 //#include "http/webclient.h"
 //#include "file_manager.h"
 

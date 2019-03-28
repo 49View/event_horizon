@@ -10,6 +10,7 @@
 
 #include <array>
 #include <set>
+#include <unordered_map>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
@@ -35,6 +36,10 @@ public:
 	std::string getString() const {
 		return std::string(internalOS.GetString());
 	}
+    SerializableContainer getSerializableContainer() const {
+	    auto s = std::string(internalOS.GetString());
+        return SerializableContainer{ s.data(), s.data() + s.size() };
+    }
 
 	void StartObject() {
 		writer->StartObject();
@@ -60,7 +65,13 @@ public:
 		value.serialize( this );
 	}
 
-	template<typename T, std::size_t N>
+    template<typename T>
+    void serialize( const char* _name, const std::shared_ptr<T>& value ) {
+        if ( _name != nullptr ) writer->String( _name );
+        value->serialize( this );
+    }
+
+    template<typename T, std::size_t N>
 	void serialize( const char* _name, const std::array<T, N>& array ) {
 		if ( _name != nullptr ) writer->String( _name );
 		writer->StartArray();
@@ -89,7 +100,17 @@ public:
 		writer->EndArray();
 	}
 
-	template<typename T>
+    template<typename T>
+    void serialize( const char* _name, const std::unordered_map<std::string, T>& _map ) {
+        if ( _name != nullptr ) writer->String( _name );
+        writer->StartArray();
+        for ( const auto& [k,v] : _map ) {
+            serialize( nullptr, std::make_pair( k, v) );
+        }
+        writer->EndArray();
+    }
+
+    template<typename T>
 	void serialize( const char* _name, const std::vector<std::shared_ptr<T>>& array ) {
 		if ( _name != nullptr ) writer->String( _name );
 		writer->StartArray();
@@ -114,47 +135,47 @@ public:
 	}
 
 	void serialize( const char* name, const char* value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->String( value );
 	}
 
 	void serialize( const char* name, const double& value ) {
-		writer->String( name );
+        if ( name != nullptr )writer->String( name );
 		writer->Double( value );
 	}
 
 	void serialize( const char* name, const float& value ) {
-		writer->String( name );
+        if ( name != nullptr )writer->String( name );
 		writer->Double( value );
 	}
 
 	void serialize( const char* name, const bool& value ) {
-		writer->String( name );
+        if ( name != nullptr )writer->String( name );
 		writer->Bool( value );
 	}
 
 	void serialize( const char* name, const int32_t& value ) {
-		writer->String( name );
+        if ( name != nullptr )writer->String( name );
 		writer->Int( value );
 	}
 
 	void serialize( const char* name, const uint32_t& value ) {
-		writer->String( name );
+        if ( name != nullptr )writer->String( name );
 		writer->Uint( value );
 	}
 
 	void serialize( const char* name, const int64_t& value ) {
-		writer->String( name );
+        if ( name != nullptr )writer->String( name );
 		writer->Int64( value );
 	}
 
 	void serialize( const char* name, const uint64_t& value ) {
-		writer->String( name );
+        if ( name != nullptr )writer->String( name );
 		writer->Uint64( value );
 	}
 
 	void serialize( const char* name, const std::string& value ) {
-		writer->String( name );
+		if ( name ) writer->String( name );
 		writer->String( value.c_str() );
 	}
 
@@ -186,15 +207,26 @@ public:
 	}
 
 	void serialize( const char* name, const std::pair<int, int>& value ) {
-		writer->String( name );
+        if ( name != nullptr )writer->String( name );
 		writer->StartArray();
 		writer->Int( static_cast<int32_t>( value.first ) );
 		writer->Int( static_cast<int32_t>( value.second ) );
 		writer->EndArray();
 	}
 
-	void serialize( const char* name, const JMATH::Rect2f& rect ) {
-		writer->String( name );
+	template <typename  T>
+    void serialize( const char* name, const std::pair<std::string, T>& value ) {
+        if ( name ) writer->String( name );
+        writer->StartObject();
+        writer->String( "Key" );
+        writer->String( value.first.c_str() );
+        writer->String( "Value" );
+        serialize( nullptr, value.second );
+        writer->EndObject();
+    }
+
+    void serialize( const char* name, const JMATH::Rect2f& rect ) {
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		JMATH::Rect2f finalRect = rect;
 		writer->Double( finalRect.left() );
@@ -208,7 +240,7 @@ public:
 	}
 
 	void serialize( const char* name, const JMATH::AABB& rect ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		writer->Double( rect.minPoint().x() );
 		writer->Double( rect.minPoint().y() );
@@ -291,7 +323,25 @@ public:
 		writer->EndArray();
 	}
 
-	template<std::size_t N>
+    void serialize( const char* _name, const Matrix3f& mat ) {
+        if ( _name != nullptr ) writer->String( _name );
+        writer->StartArray();
+        serialize( "Row0", mat.getRow(0) );
+        serialize( "Row1", mat.getRow(1) );
+        serialize( "Row2", mat.getRow(2) );
+        writer->EndArray();
+    }
+
+    void serialize( const char* _name, const Matrix4f& mat ) {
+        if ( _name != nullptr ) writer->String( _name );
+        writer->StartArray();
+        for ( int t = 0; t < 16; t++ ) {
+            writer->Double( mat[t] );
+        }
+        writer->EndArray();
+    }
+
+    template<std::size_t N>
 	void serialize( const char* _name, const std::array<int32_t, N>& array ) {
 		if ( _name != nullptr ) writer->String( _name );
 		writer->StartArray();
@@ -302,7 +352,7 @@ public:
 	}
 
 	void serialize( const char* name, const std::vector<uint32_t>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( uint64_t t = 0; t < value.size(); t++ ) {
 			writer->Uint( value[t] );
@@ -312,7 +362,7 @@ public:
 
 
 	void serialize( const char* name, const std::vector<int32_t>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( uint64_t t = 0; t < value.size(); t++ ) {
 			writer->Int( value[t] );
@@ -322,7 +372,7 @@ public:
 
 
 	void serialize( const char* name, const std::vector<uint64_t>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( uint64_t t = 0; t < value.size(); t++ ) {
 			writer->Uint64( value[t] );
@@ -332,7 +382,7 @@ public:
 
 
 	void serialize( const char* name, const std::vector<int64_t>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( uint64_t t = 0; t < value.size(); t++ ) {
 			writer->Int64( value[t] );
@@ -342,7 +392,7 @@ public:
 
 
 	void serialize( const char* name, const std::vector<float>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( uint64_t t = 0; t < value.size(); t++ ) {
 			writer->Double( value[t] );
@@ -351,7 +401,7 @@ public:
 	}
 
 	void serialize( const char* name, const std::vector<double>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( uint64_t t = 0; t < value.size(); t++ ) {
 			writer->Double( value[t] );
@@ -360,7 +410,7 @@ public:
 	}
 
 	void serialize( const char* name, const std::vector<std::string>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( uint64_t t = 0; t < value.size(); t++ ) {
 			writer->String( value[t].c_str() );
@@ -369,7 +419,7 @@ public:
 	}
 
 	void serialize( const char* name, const std::vector<std::pair<std::string, std::string>>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( const auto& t : value ) {
 			writer->StartArray();
@@ -381,7 +431,7 @@ public:
 	}
 
 	void serialize( const char* name, const std::vector<JMATH::Rect2f>& value ) {
-		writer->String( name );
+        if ( name != nullptr ) writer->String( name );
 		writer->StartArray();
 		for ( uint64_t t = 0; t < value.size(); t++ ) {
 			serialize( name, value[t] );

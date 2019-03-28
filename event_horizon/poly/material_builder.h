@@ -12,6 +12,7 @@
 //#include "core/image_constants.h"
 
 class Material;
+class RawImage;
 
 //class MaterialManager : public ResourceManager<Material> {
 //public:

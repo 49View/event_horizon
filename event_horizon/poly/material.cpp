@@ -1,8 +1,11 @@
+#include <utility>
+
 //
 // Created by Dado on 2019-02-16.
 //
 
 #include "material.h"
+#include <core/megawriter.hpp>
 
 //static inline bool isShaderStreammable( const std::string& _sn ) {
 //    return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
@@ -12,20 +15,43 @@ Material::Material() {
     values = std::make_shared<HeterogeneousMap>();
 }
 
-Material::Material( const Material& _source ) {
-    values = std::make_shared<HeterogeneousMap>(_source.Values());
+Material::Material( std::string type, std::vector<ResourceRef> _images,
+                    std::shared_ptr<HeterogeneousMap> values ) :
+                    type( std::move( type )), images( std::move( _images )), values( std::move( values )) {}
+
+void Material::bufferDecode( const unsigned char *_buffer, size_t _length ) {
+    std::string strBuff{ _buffer, _buffer + _length};
+    rapidjson::Document document;
+    document.Parse<rapidjson::kParseStopWhenDoneFlag>( strBuff.c_str() );
+    MegaReader reader( document );
+    values = std::make_shared<HeterogeneousMap>();
+    deserialize( reader );
+//    reader.deserialize( "Type", type );
+//    reader.deserialize( "Images", images );
+//    values->deserialize( reader );
+
+//    auto reader = std::make_shared<DeserializeBin>(_buffer, _length);
+//
+//    reader->read(type);
+//    reader->read(images);
+//    values = std::make_shared<HeterogeneousMap>();
+//    values->deserializeImpl( reader );
 }
 
-Material& Material::t( const std::string& _tn ) {
-    values->assign( UniformNames::colorTexture, _tn );
-    return *this;
-}
+//Material::Material( const Material& _source ) {
+//    values = std::make_shared<HeterogeneousMap>(_source.Values());
+//}
 
-Material& Material::c( const Color4f& _col ) {
-    values->assign( UniformNames::opacity, _col.w() );
-    values->assign( UniformNames::diffuseColor, _col.xyz() );
-    return *this;
-}
+//Material& Material::t( const std::string& _tn ) {
+//    values->assign( UniformNames::colorTexture, _tn );
+//    return *this;
+//}
+//
+//Material& Material::c( const Color4f& _col ) {
+//    values->assign( UniformNames::opacity, _col.w() );
+//    values->assign( UniformNames::diffuseColor, _col.xyz() );
+//    return *this;
+//}
 
 void Material::resolveDynamicConstants() {
 //    ### MAT Fix up this
@@ -135,30 +161,30 @@ void Material::clone( const Material& _source ) {
     values->clone( *_source.values.get() );
 }
 
-Material& Material::buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName ) {
-    if ( _data.second > 0 ) {
-        buffers.emplace( std::make_pair(_bname, std::move(_data)) );
-        values->assign( _uniformName, _bname );
-    }
-    return *this;
-}
+//Material& Material::buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName ) {
+//    if ( _data.second > 0 ) {
+//        buffers.emplace( std::make_pair(_bname, std::move(_data)) );
+//        values->assign( _uniformName, _bname );
+//    }
+//    return *this;
+//}
+//
+//Material& Material::buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName ) {
+//    return buffer( _bname, ucchar_pTouint8_p(_data), _uniformName );
+//}
 
-Material& Material::buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName ) {
-    return buffer( _bname, ucchar_pTouint8_p(_data), _uniformName );
-}
-
-KnownBufferMap Material::knownBuffers() const {
-    KnownBufferMap ret;
-
+//KnownBufferMap Material::knownBuffers() const {
+//    KnownBufferMap ret;
+//
 //    ret.emplace( getBaseColor(), UniformNames::diffuseTexture );
 //    ret.emplace( getNormal(), UniformNames::normalTexture );
 //    ret.emplace( getAmbientOcclusion(), UniformNames::aoTexture );
 //    ret.emplace( getRoughness(), UniformNames::roughnessTexture );
 //    ret.emplace( getMetallic(), UniformNames::metallicTexture );
 //    ret.emplace( getHeight(), UniformNames::heightTexture );
-
-    return ret;
-}
+//
+//    return ret;
+//}
 
 //void Material::tarBuffers( const SerializableContainer& _bufferTarFiles ) {
 //    if ( !_bufferTarFiles.empty() ) {
@@ -176,18 +202,18 @@ KnownBufferMap Material::knownBuffers() const {
 //    }
 //}
 
-void Material::Buffers( MaterialImageCallback imageCallback ) {
-    if ( !buffers.empty() ) {
-        auto kbs = knownBuffers();
-        for ( const auto& [k,v] : buffers ) {
-            imageCallback( k, { v.first.get(), v.second } );
-        }
-    }
-}
-
-const MaterialImageBuffers& Material::Buffers() const {
-    return buffers;
-}
+//void Material::Buffers( MaterialImageCallback imageCallback ) {
+//    if ( !buffers.empty() ) {
+//        auto kbs = knownBuffers();
+//        for ( const auto& [k,v] : buffers ) {
+//            imageCallback( k, { v.first.get(), v.second } );
+//        }
+//    }
+//}
+//
+//const MaterialImageBuffers& Material::Buffers() const {
+//    return buffers;
+//}
 
 //bool Material::isStreammable() const {
 //    return properties.isStreaming;

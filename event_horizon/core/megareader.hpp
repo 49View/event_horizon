@@ -80,6 +80,12 @@ public:
 		}
 	}
 
+    template<typename T>
+    void deserialize( const char* name, std::shared_ptr<T>& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            ret = std::make_shared<T>(T{ ( *( value ) )[name] });
+        }
+    }
 
 	void deserialize( const char* name, float& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
@@ -192,7 +198,42 @@ public:
 		}
 	}
 
-	template<typename T>
+    template<typename T>
+    void deserialize( const char* name, std::unordered_map<std::string,T>& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+                auto tname = std::string( (*(value))[name][t]["Key"].GetString());
+                if ( (*(value))[name][t].FindMember( "Value" ) != (*(value))[name][t].MemberEnd() ) {
+                    T mvalue;
+                    if constexpr ( std::is_same<T, std::string>::value ) mvalue = std::string((*(value))[name][t]["Value"].GetString());
+                    if constexpr ( std::is_integral<T>::value ) mvalue = (*(value))[name][t]["Value"].GetInt();
+                    if constexpr ( std::is_floating_point<T>::value ) mvalue = (*(value))[name][t]["Value"].GetFloat();
+                    if constexpr ( std::is_same<T, Vector2f>::value ||
+                         std::is_same<T, Vector3f>::value ||
+                         std::is_same<T, Vector4f>::value ||
+                         std::is_same<T, Matrix4f>::value ||
+                         std::is_same<T, Matrix3f>::value ) {
+                        for ( int q = 0; q < mvalue.size(); q++ ) {
+                            mvalue[q] =(*(value))[name][t]["Value"][q].GetFloat();
+                        }
+                    }
+                    if constexpr ( std::is_same<T, std::vector<Vector3f>>::value ) {
+                        auto asize = ( *( value ) )[name][t]["Value"].Size();
+                        mvalue.resize(asize);
+                        for ( SizeType m = 0; m < asize; m++ ) {
+                            for ( int q = 0; q < mvalue.size(); q++ ) {
+                                mvalue[m][q] = ( *( value ))[name][t]["Value"][m][q].GetFloat();
+                            }
+                        }
+                    }
+
+                    ret.emplace(tname, mvalue);
+                }
+            }
+        }
+    }
+
+    template<typename T>
 	void deserialize( const char* name, std::set<T>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
@@ -278,8 +319,29 @@ public:
 		}
 	}
 
+    void deserialize( const char* name, Matrix3f& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+                Vector3f v1;
+                for ( SizeType m = 0; m < ( *( value ) )[name][t].Size(); m++ ) {
+                    v1[m] = ( ( *( value ) )[name][t][m].GetFloat() );
+                }
+                ret.setRow( t, v1 );
+            }
+        }
+    }
 
-	void deserialize( const char* name, std::vector<std::string>& ret ) const {
+    void deserialize( const char* name, Matrix4f& ret ) const {
+        for ( SizeType t = 0; t < ( *( value ) )[name]["Row0"].Size(); t++ ) {
+            Vector4f v1;
+            for ( SizeType m = 0; m < ( *( value ) )[name][t].Size(); m++ ) {
+                v1[m] = ( ( *( value ) )[name][t][m].GetFloat() );
+            }
+            ret.setRow( t, v1 );
+        }
+    }
+
+    void deserialize( const char* name, std::vector<std::string>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
 				ret.push_back( ( *( value ) )[name][t].GetString() );

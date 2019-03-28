@@ -1,10 +1,6 @@
-//
-// Created by Dado on 10/02/2018.
-//
-
 #pragma once
 
-#include <iostream>
+#include <utility>
 #include <unordered_set>
 
 #include <stb/stb_image_resize.h>
@@ -14,13 +10,12 @@
 #include <core/http/webclient.h>
 #include <core/names.hpp>
 #include <core/name_policy.hpp>
-#include <core/tar_util.h>
-#include <core/zlib_util.h>
 #include <core/heterogeneous_map.hpp>
 #include <core/descriptors/uniform_names.h>
 #include <core/image_util.h>
 #include <core/util.h>
 #include <core/math/vector4f.h>
+#include <poly/resources/resource_utils.hpp>
 
 using MaterialImageBuffers = std::unordered_map<std::string, uint8_p>;
 using KnownBufferMap = std::unordered_map<std::string, std::string>;
@@ -88,11 +83,13 @@ class Material {
 public:
     Material();
     RESOURCE_CTORS(Material);
-    Material(const Material& _val);
-    void bufferDecode( const unsigned char* _buffer, size_t _length ) {}
+    JSONSERIAL( Material, type, images, values );
+    Material( std::string type, std::vector<ResourceRef> images, std::shared_ptr<HeterogeneousMap> values );
+    //    Material(const Material& _val);
+    void bufferDecode( const unsigned char* _buffer, size_t _length );
 
-    Material& t( const std::string& _tn );
-    Material& c( const Color4f& _col );
+//    Material& t( const std::string& _tn );
+//    Material& c( const Color4f& _col );
 
     void resolveDynamicConstants();
 
@@ -117,16 +114,16 @@ public:
 
     void clone( const Material& _source );
 
-    Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName );
-    Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName );
-    const MaterialImageBuffers& Buffers() const;
+//    Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName );
+//    Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName );
+//    const MaterialImageBuffers& Buffers() const;
 //    void tarBuffers( const SerializableContainer& _bufferTarFiles );
-    void Buffers( MaterialImageCallback imageCallback );
+//    void Buffers( MaterialImageCallback imageCallback );
 
 //    bool isStreammable() const;
     float translucency() const;
 
-    KnownBufferMap knownBuffers() const;
+//    KnownBufferMap knownBuffers() const;
 
     const std::shared_ptr<HeterogeneousMap> Values() const {
         return values;
@@ -137,12 +134,13 @@ public:
     }
 
     void Values( std::shared_ptr<HeterogeneousMap> _values ) {
-        Material::values = _values;
+        Material::values = std::move( _values );
     }
 
 protected:
+    std::string                           type;
+    std::vector<ResourceRef>              images;
     std::shared_ptr<HeterogeneousMap>     values;
-    MaterialImageBuffers                  buffers;
 
 public:
     static Material WHITE_PBR();

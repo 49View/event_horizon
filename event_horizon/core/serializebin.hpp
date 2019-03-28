@@ -19,6 +19,8 @@
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
+    SerializeBin() = default;
+
     explicit SerializeBin( const SerializeHeader& _header ) {
         writeHeader( _header );
 	}
@@ -171,6 +173,10 @@ public:
 		return f;
 	}
 
+    SerializableContainer serialize() const {
+        return f;
+    }
+
 private:
 	void writeHeaderSizeInjected() {
 		writeAt( headerSizeSeek, f.size() - headerSizeSeek );
@@ -195,7 +201,11 @@ public:
 		readAndCheckHeader( vf );
 	}
 
-	void readAndCheckHeader( uint64_t vf ) {
+    DeserializeBin( const unsigned char* _buffer, size_t _length ) {
+        fi = std::make_shared<std::istringstream>( std::string{ reinterpret_cast<const char*>(_buffer),_length } );
+    }
+
+    void readAndCheckHeader( uint64_t vf ) {
 		readHeader( header );
 		if ( header.version < vf ) {
 			LOGE( "Old assets loaded version %d, expecting %d", header.version, vf );

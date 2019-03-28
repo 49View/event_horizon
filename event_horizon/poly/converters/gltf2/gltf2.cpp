@@ -9,7 +9,6 @@
 #include <core/image_util.h>
 #include <core/file_manager.h>
 #include <poly/geom_data.hpp>
-#include <poly/material_builder.h>
 
 unsigned int accessorTypeToNumberOfComponent( int ty ) {
     if ( ty == TINYGLTF_TYPE_SCALAR) {
@@ -848,7 +847,7 @@ void GLTF2::saveInternalPBRComponent( const IntermediateMaterial& _im, const Int
 //            _im.grayScaleBaseColor.grayScale();
 //            _im.grayScaleBaseColor.brightnessContrast( 2.2f, 100 );
 //        }
-        _im.mb->buffer( baseFileName, std::move(imgBuffer), _uniformName );
+        _im.mb.emplace( baseFileName, RawImage{std::move(imgBuffer)} ); //, _uniformName
     }
 }
 
@@ -859,28 +858,26 @@ void GLTF2::saveMaterial( const IntermediateMaterial& im ) {
     saveInternalPBRComponent( im, im.normal,    UniformNames::normalTexture );
 }
 
-std::shared_ptr<Material> GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
+GLTF2::IntermediateMaterial GLTF2::elaborateMaterial( const tinygltf::Material& mat ) {
     IntermediateMaterial im;
     im.name = toLower(mat.name);
     removeNonAlphaCharFromString( im.name );
-//    ### MAT, remove default ctor from material and reinstate S:SH coming from here
-    im.mb = std::make_shared<Material>(); //im.name, S::SH
 
     for ( const auto& [k,v] : mat.values ) {
         if ( k == "baseColorFactor" ) {
             im.baseColor.value = v.number_array;
-            im.mb->c( im.baseColor.value );
+            im.values.assign(UniformNames::diffuseColor, im.baseColor.value.xyz() );
         } else if ( k == "baseColorTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.baseColor.texture );
         } else if ( k == "metallicFactor" ) {
             float lv = static_cast<float>(v.number_value);
             im.metallic.value = Vector4f{ lv, lv, lv, 1.0f };
-            im.mb->Values()->assign( UniformNames::metallic, lv );
+            im.values.assign( UniformNames::metallic, lv );
         } else if ( k == "metallicTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.metallic.texture );
         } else if ( k == "roughnessFactor" ) {
             float lv = static_cast<float>(v.number_value);
-            im.mb->Values()->assign( UniformNames::roughness, lv );
+            im.values.assign( UniformNames::roughness, lv );
             im.roughness.value = Vector4f{ lv, lv, lv, 1.0f };
         } else if ( k == "roughnessTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.roughness.texture );
@@ -897,7 +894,7 @@ std::shared_ptr<Material> GLTF2::elaborateMaterial( const tinygltf::Material& ma
 
     matMap[mat.name] = im;
 
-    return im.mb;
+    return im;
 }
 
 ImportGeomArtifacts GLTF2::convert() {
@@ -906,7 +903,9 @@ ImportGeomArtifacts GLTF2::convert() {
     auto hierScene = std::make_shared<GeomAsset>( name );
 
     for ( size_t m = 0; m < model.materials.size(); m++ ) {
-        ret.addMaterial( elaborateMaterial( model.materials[m] ) );
+        /*auto im = */elaborateMaterial( model.materials[m] );
+//        ### MAT Reintroduce adding materials to artifacts
+//        ret.addMaterial(...);
     }
     for ( size_t s = 0; s < model.scenes.size(); s++ ) {
         auto scene = model.scenes[s];

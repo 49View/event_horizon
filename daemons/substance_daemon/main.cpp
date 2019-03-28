@@ -114,6 +114,7 @@ void elaborateMat( const std::string& _filename ) {
         tar.putFile( ( fileRoot + filea).c_str(), filea.c_str() );
         tar.finish();
 
+
         FM::writeRemoteFile( DaemonPaths::store( EntityGroup::Material, tarname ),
                         zlibUtil::deflateMemory(tagStream.str() ) );
     } );

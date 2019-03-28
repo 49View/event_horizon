@@ -9,6 +9,7 @@
 #include <render_scene_graph/layouts/layout_helper.hpp>
 #include <core/node.hpp>
 #include <core/camera.h>
+#include <core/raw_image.h>
 #include <core/camera_rig.hpp>
 #include <poly/geom_builder.h>
 #include <poly/ui_shape_builder.h>

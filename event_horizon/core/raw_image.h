@@ -57,11 +57,10 @@ public:
         return ret;
     }
 
-    template <typename T>
-    T& at( unsigned int x, unsigned int y ) {
-        uint8_t* p = rawBtyes.get() + (y*width*channels + (x*channels));
-        return reinterpret_cast<T&>(p);
-    }
+//    template <typename T>
+//    T& at( unsigned int x, unsigned int y ) {
+//        return reinterpret_cast<T&>((uint8_t*)(rawBtyes.get() + (y*width*channels + (x*channels))));
+//    }
 
     template <typename T>
     void set( unsigned int x, unsigned int y, T _val ) {

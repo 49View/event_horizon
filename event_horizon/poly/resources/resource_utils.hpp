@@ -6,8 +6,11 @@
 
 #include <memory>
 #include <string>
+#include <set>
 #include <tuple>
 #include <unordered_map>
+
+using ResourceRef = std::string;
 
 template <typename T>
 using ResourceSignalsAddSignature = std::tuple<std::shared_ptr<T>, std::string>;

@@ -4,7 +4,8 @@
 #include <unordered_map>
 #include "tiny_gltf.h"
 #include <core/math/vector4f.h>
-#include <poly/material.h>
+#include <core/descriptors/uniform_names.h>
+#include <core/heterogeneous_map.hpp>
 #include <poly/poly.hpp>
 #include <poly/import_artifacts.hpp>
 
@@ -39,7 +40,8 @@ public:
 
     struct IntermediateMaterial {
         std::string name;
-        mutable std::shared_ptr<Material> mb;
+        mutable std::unordered_map<std::string, RawImage> mb;
+        HeterogeneousMap values;
         mutable std::shared_ptr<RawImage> grayScaleBaseColor;
         InternalPBRComponent baseColor{MPBRTextures::basecolorString,
         InternalPBRTextureReconstructionMode::GrayScaleCreate };
@@ -60,7 +62,7 @@ public:
 private:
     void addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father );
     void addNodeToHier( const int nodeIndex, GeomAssetSP& hier );
-    std::shared_ptr<Material> elaborateMaterial( const tinygltf::Material& mat );
+    GLTF2::IntermediateMaterial elaborateMaterial( const tinygltf::Material& mat );
     void saveMaterial( const IntermediateMaterial& im );
     void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic, const std::string& _uniformName );
 private:

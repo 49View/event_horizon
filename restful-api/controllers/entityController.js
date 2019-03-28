@@ -33,13 +33,13 @@ exports.cleanupMetadata = (metadata) => {
     }
     result.group = metadata.group;
     result.keys = metadata.tags;
-    result.public = metadata.public || false;
-    result.restricted = metadata.restricted || false;
+    result.isPublic = metadata.isPublic || false;
+    result.isRestricted = metadata.isRestricted || false;
     //Remove service attributes
     delete metadata.raw;
     delete metadata.group;
-    delete metadata.public;
-    delete metadata.restricted;
+    delete metadata.isPublic;
+    delete metadata.isRestricted;
     //Add hash attribute
     result.cleanMetadata = metadata;
 
@@ -58,16 +58,16 @@ exports.checkFileExists = async (project, group, hash) => {
     return result!==null?result.toObject():null;
 }
 
-exports.createEntity = async (project, group, public, restricted, metadata) => {
-    const newEntityDB = new entityModel({ project: project, group: group, public: public, restricted: restricted, metadata: metadata});
+exports.createEntity = async (project, group, isPublic, isRestricted, metadata) => {
+    const newEntityDB = new entityModel({ project: project, group: group, isPublic: isPublic, isRestricted: isRestricted, metadata: metadata});
     await newEntityDB.save();
     return newEntityDB.toObject();
 }
 
-exports.updateEntity = async (entityId, project, group, public, restricted, metadata) => {
+exports.updateEntity = async (entityId, project, group, isPublic, isRestricted, metadata) => {
     const query = { _id: mongoose.Types.ObjectId(entityId)};
 
-    await entityModel.updateOne(query, { project: project, group: group, public: public, restricted: restricted, metadata: metadata});
+    await entityModel.updateOne(query, { project: project, group: group, isPublic: isPublic, isRestricted: isRestricted, metadata: metadata});
 }
 
 exports.deleteEntity = async (entityId) => {
@@ -87,7 +87,7 @@ exports.deleteEntityComplete = async (project, entity) => {
 exports.getEntityByIdProject = async (project, entityId, returnPublic) => {
     let query;
     if (returnPublic) {
-        query = {$and: [{_id: mongoose.Types.ObjectId(entityId)}, {"$or": [{"project":project}, {"public": true}]}]};
+        query = {$and: [{_id: mongoose.Types.ObjectId(entityId)}, {"$or": [{"project":project}, {"isPublic": true}]}]};
     } else {
         query = {$and: [{_id: mongoose.Types.ObjectId(entityId)}, {"project":project}]};
     }
@@ -99,7 +99,7 @@ exports.getEntityByIdProject = async (project, entityId, returnPublic) => {
 exports.getEntitiesOfProject = async (project, returnPublic) => {
     let query;
     if (returnPublic) {
-        query = [ {"project":project}, {"public": true} ];
+        query = [ {"project":project}, {"isPublic": true} ];
     } else {
         query = {"project":project};
     }
@@ -111,7 +111,7 @@ exports.getEntitiesOfProject = async (project, returnPublic) => {
 exports.getEntitiesOfProjectWithGroup = async (project, groupID, returnPublic) => {
     let query;
     if (returnPublic) {
-        query = { "project":project, "group":groupID, "public": true};
+        query = { "project":project, "group":groupID, "isPublic": true};
     } else {
         query = { "project":project, "group":groupID };
     }
@@ -125,12 +125,12 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, r
         {
             $match: {
                 $and: [
-                    {"restricted": false},
+                    {"isRestricted": false},
                     {"group": group},
                     {
                         "$or": [
                             {"project":project}, 
-                            {"public": true}
+                            {"isPublic": true}
                         ]
                     },
                     {
@@ -148,8 +148,8 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, r
             {   
                 $project: {
                     "project": 0,
-                    "public": 0,
-                    "restricted": 0
+                    "isPublic": 0,
+                    "isRestricted": 0
                 }
             }
         );

@@ -7,7 +7,6 @@
 #include <string>
 #include <core/math/vector3f.h>
 #include <core/math/rect2f.h>
-#include <core/serialization.hpp>
 #include <core/camera_utils.hpp>
 #include <poly/resources/publisher.hpp>
 

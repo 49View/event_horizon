@@ -114,4 +114,15 @@ namespace MPBRTextures {
         if ( _value.find( ambientOcclusionString ) != std::string::npos ) return ambientOcclusionString;
         return "";
     }
+
+    static inline const std::string mapToTextureUniform( const std::string& _value ) {
+        if ( _value.find( basecolorString ) != std::string::npos ) return UniformNames::diffuseTexture;
+        if ( _value.find( heightString  ) != std::string::npos ) return UniformNames::heightTexture;
+        if ( _value.find( metallicString  ) != std::string::npos ) return UniformNames::metallicTexture;
+        if ( _value.find( roughnessString  ) != std::string::npos ) return UniformNames::roughnessTexture;
+        if ( _value.find( normalString ) != std::string::npos ) return UniformNames::normalTexture;
+        if ( _value.find( ambientOcclusionString ) != std::string::npos ) return UniformNames::aoTexture;
+        return "";
+    }
+
 }

@@ -44,6 +44,7 @@ public:
         params = _params;
         Http::get( Url( HttpFilePrefix::entities + B::Prefix() + "/" + url_encode( this->Name() ) ),
                    [&](HttpResponeParams _res) {
+                       if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
                        addResource( SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length},
                                     AddResourcePolicy::Deferred );
                        if ( ccf ) ccf(params);
@@ -65,11 +66,15 @@ public:
         return addResource(_data, AddResourcePolicy::Immediate);
     }
 
+    void create( const R& _data ) {
+        create( _data.serialize() );
+    }
+
     void create( const SerializableContainer& _data ) {
         if ( prepAndCheck(_data ) ) return;
-
         if ( B::Version() != 0 ) this->addTag( this->hashFn(B::Version()) );
-        this->publish2( _data, [&](HttpResponeParams _res) {
+
+        this->publish2( _data, [&]( HttpResponeParams _res ) {
             JSONResourceResponse resJson(_res.bufferString);
             // We make sure that in case server side has to change name in case
             // of duplicates we reflect it here client side
@@ -107,6 +112,7 @@ protected:
 
 protected:
     ResourceManager<R>& mm;
+//    std::tuple<ResourceManager<RA...>&> hmm;
     std::vector<std::string> params;
     CommandResouceCallbackFunction ccf = nullptr;
 };
