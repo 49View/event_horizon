@@ -4,7 +4,7 @@
 //
 //
 
-#include <poly/ui_shape_builder.h>
+#include <event_horizon/poly/resources/ui_shape_builder.h>
 #include "osm_service.hpp"
 
 CommandScriptOSMManager::CommandScriptOSMManager( OSMManager& _hm ) {

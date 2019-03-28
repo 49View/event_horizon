@@ -15,20 +15,22 @@
 #include <core/serializebin.hpp>
 #include <core/versionable.hpp>
 
-class MaterialBuilder;
+class Material;
+class RawImage;
 class GeomData;
 class ProfileBuilder;
-class ImageBuilder;
 class FontBuilder;
 class CameraBuilder;
 class MaterialColor;
+class UIElement;
+class CameraRig;
 
 template <typename R>
 class ResourceVersioning {
 public:
 
     inline static size_t Version() {
-        if ( std::is_same<R, MaterialBuilder>::value ) return 2500;
+        if ( std::is_same<R, Material>::value ) return 2500;
         if ( std::is_same<R, GeomData>::value )        return 2000;
         if ( std::is_same<R, ProfileBuilder>::value  ) return 1000;
         if ( std::is_same<R, MaterialColor>::value  )  return 1000;
@@ -36,27 +38,26 @@ public:
     }
 
     inline static std::string Prefix() {
-        if ( std::is_same<R, MaterialBuilder>::value )         return "material";
-        if ( std::is_same<R, GeomData>::value )                return "geom";
-
-        if ( std::is_same<R, MaterialColor>::value  )          return "color";
-        if ( std::is_same<R, CameraBuilder>::value )           return "camera";
-
-        if ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
-        if ( std::is_same<R, ImageBuilder>::value  )           return "image";
-        if ( std::is_same<R, FontBuilder>::value  )            return "font";
-        return "unknown";
+        if constexpr ( std::is_same<R, Material>::value )                return "material";
+        if constexpr ( std::is_same<R, GeomData>::value )                return "geom";
+        if constexpr ( std::is_same<R, MaterialColor>::value  )          return "color";
+        if constexpr ( std::is_same<R, CameraBuilder>::value )           return "camera";
+        if constexpr ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
+        if constexpr ( std::is_same<R, RawImage>::value  )           return "image";
+        if constexpr ( std::is_same<R, FontBuilder>::value  )            return "font";
+        if constexpr ( std::is_same<R, UIElement>::value  )              return "ui_elem";
+        if constexpr ( std::is_same<R, CameraRig>::value  )              return "camera";
     }
 
     inline static std::string GenerateThumbnail( const R& _res ) {
-        if ( std::is_same<R, MaterialBuilder>::value )         return "material";
+        if ( std::is_same<R, Material>::value )         return "material";
         if ( std::is_same<R, GeomData>::value )                return "geom";
 
         if ( std::is_same<R, MaterialColor>::value  )          return "color";
         if ( std::is_same<R, CameraBuilder>::value )           return "camera";
 
         if ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
-        if ( std::is_same<R, ImageBuilder>::value  )           return "image";
+        if ( std::is_same<R, RawImage>::value  )           return "image";
         if ( std::is_same<R, FontBuilder>::value  )            return "font";
         return "unknown";
     }
@@ -108,9 +109,27 @@ protected:
         MegaWriter writer;
         writer.StartObject();
         writer.serialize( CoreMetaData{ this->Name(),
-                                        T::Prefix(),
+                                        ResourceVersioning<T>::Prefix(),
                                         this->Hash(),
-                                        T::GenerateThumbnail((T&)*this),
+                                        "",//T::GenerateThumbnail((T&)*this),
+                                        rawb64gzip(_raw),
+                                        this->Tags() } );
+        if ( B::IsSerializable() ) {
+            writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
+        }
+        writer.EndObject();
+
+        return writer.getString();
+    }
+
+    std::string toMetaData( const SerializableContainer& _raw,
+                            const ResourceDependencyDict& _deps ) const {
+        MegaWriter writer;
+        writer.StartObject();
+        writer.serialize( CoreMetaData{ this->Name(),
+                                        ResourceVersioning<T>::Prefix(),
+                                        this->Hash(),
+                                        "",//T::GenerateThumbnail((T&)*this),
                                         rawb64gzip(_raw),
                                         this->Tags() } );
         if ( B::IsSerializable() ) {

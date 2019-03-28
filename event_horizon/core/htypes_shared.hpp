@@ -20,6 +20,7 @@ using CommandArgumentsT 		= std::vector< std::string >;
 using CommandCallbackFunction 	= std::function<void(const CommandArgumentsT& )>;
 using SerializableContainer     = std::vector<unsigned char>;
 using SerializableContainerDict = std::unordered_map<std::string, SerializableContainer>;
+using ResourceDependencyDict    = std::unordered_map<std::string, std::vector<std::string>>;
 
 typedef std::pair<void*, uint64_t> void_p;
 typedef std::pair<char*, uint64_t> char_p;

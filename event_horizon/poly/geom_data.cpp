@@ -10,7 +10,7 @@
 
 #include <iomanip>
 
-#include "geom_builder.h"
+#include "event_horizon/poly/resources/geom_builder.h"
 #include "triangulator.hpp"
 
 #include <core/node.hpp>

@@ -10,7 +10,7 @@
 #include <poly/resources/font_builder.h>
 #include <poly/resources/profile_builder.h>
 #include <poly/camera_manager.h>
-#include <poly/material_builder.h>
+#include <event_horizon/poly/resources/material_builder.h>
 #include <graphics/shader_manager.h>
 #include <graphics/light_manager.h>
 #include <graphics/program_uniform_set.h>

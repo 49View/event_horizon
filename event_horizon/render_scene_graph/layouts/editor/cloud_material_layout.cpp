@@ -5,8 +5,8 @@
 #include "cloud_material_layout.h"
 #include "cloud_entities_layout.h"
 #include <render_scene_graph/scene_orchestrator.hpp>
-#include <poly/material_builder.h>
+#include <event_horizon/poly/resources/material_builder.h>
 
 void ImGuiCloudEntitiesMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
-    ImGuiCloudEntities( p, _r, "Cloud Materials", EntityGroup::Material, MaterialBuilder::Version() );
+    ImGuiCloudEntities( p, _r, "Cloud Materials", EntityGroup::Material );
 }

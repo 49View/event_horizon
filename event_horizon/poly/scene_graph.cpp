@@ -8,12 +8,12 @@
 #include <core/raw_image.h>
 #include <poly/resources/image_builder.h>
 #include <core/camera_rig.hpp>
-#include <poly/geom_builder.h>
-#include <poly/ui_shape_builder.h>
+#include <event_horizon/poly/resources/geom_builder.h>
+#include <event_horizon/poly/resources/ui_shape_builder.h>
 #include <poly/camera_manager.h>
 #include <poly/resources/font_builder.h>
 #include <poly/resources/profile_builder.h>
-#include <poly/material_builder.h>
+#include <event_horizon/poly/resources/material_builder.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
 //    addImpl(_geom);
@@ -172,13 +172,13 @@ void SceneGraph::nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot ) 
 }
 
 void SceneGraph::init() {
-    IB{ TL(), S::WHITE     }.addIM( EF::clone(RawImage::WHITE4x4()      ) );
-    IB{ TL(), S::BLACK     }.addIM( EF::clone(RawImage::BLACK_RGBA4x4() ) );
-    IB{ TL(), S::NORMAL    }.addIM( EF::clone(RawImage::NORMAL4x4()     ) );
-    IB{ TL(), S::DEBUG_UV  }.addIM( EF::clone(RawImage::DEBUG_UV()      ) );
+    B<IB>( S::WHITE    ).addIM( RawImage::WHITE4x4()      );
+    B<IB>( S::BLACK    ).addIM( RawImage::BLACK_RGBA4x4() );
+    B<IB>( S::NORMAL   ).addIM( RawImage::NORMAL4x4()     );
+    B<IB>( S::DEBUG_UV ).addIM( RawImage::DEBUG_UV()      );
 
-    MB{ ML(), S::WHITE_PBR }.addIM( EF::clone(Material::WHITE_PBR()     ) );
-//    MB{ ML(), "tomato" }.load();
+    B<MB>(S::WHITE_PBR).addIM( Material::WHITE_PBR() );
+//    B<MB>("tomato").load();
 
    CameraBuilder{CM()}.makeDefault();
 }

@@ -58,7 +58,7 @@ void addFileCallback( const std::string& _path, M& mm ) {
     sceneEntityFilesCallbacks[T::Prefix()] = { getFileName(_path), fileContent};
     SceneOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
         auto tr = sceneEntityFilesCallbacks[T::Prefix()];
-        T{mm, std::get<0>(tr)}.create( std::get<1>(tr) );
+        p->SG().B<T>(std::get<0>(tr)).create( std::get<1>(tr) );
     } );
 }
 

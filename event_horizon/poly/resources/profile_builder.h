@@ -13,10 +13,9 @@ class Profile;
 
 using profileDirectMakeFunc = std::function<std::shared_ptr<Profile>(const std::string&, const std::vector<Vector2f>&, const std::vector<float>&)>;
 
-class ProfileBuilder : public ResourceBuilder2<ProfileBuilder, Profile> {
+class ProfileBuilder : public ResourceBuilder3<ProfileBuilder, Profile> {
 public:
-    using ResourceBuilder2::ResourceBuilder2;
-    ~ProfileBuilder() override = default;
+    using ResourceBuilder3::ResourceBuilder3;
     // This will create a circular profile
 //    explicit ProfileBuilder( ProfileManager& _pm, float _radius, float _subDivs = 3 );
 //    explicit ProfileBuilder( ProfileManager& _pm, const Vector2f& _length );
@@ -38,9 +37,6 @@ public:
         vfs.emplace_back( _v );
         return *this;
     }
-
-protected:
-    void finalise( std::shared_ptr<Profile> _elem ) override;
 
 private:
     profileDirectMakeFunc cfunc = nullptr;

@@ -8,9 +8,9 @@
 #include <core/raw_image.h>
 #include <core/node.hpp>
 #include <poly/camera_manager.h>
-#include <poly/material_builder.h>
-#include <poly/geom_builder.h>
-#include <poly/ui_shape_builder.h>
+#include <event_horizon/poly/resources/material_builder.h>
+#include <event_horizon/poly/resources/geom_builder.h>
+#include <event_horizon/poly/resources/ui_shape_builder.h>
 #include <graphics/renderer.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>

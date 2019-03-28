@@ -92,6 +92,20 @@ public:
     ColorManager& MC() { return cl; }
     SunBuilder& SB() { return sb; }
 
+    template <typename R>
+    auto& M() {
+        if constexpr ( std::is_same<R, RawImage>::value )               return TL();
+        if constexpr ( std::is_same<R, Material>::value )               return ML();
+        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return FM();
+        if constexpr ( std::is_same<R, Profile>::value )                return PL();
+        if constexpr ( std::is_same<R, MaterialColor>::value )          return MC();
+    }
+
+    template <typename T>
+    T B( const std::string& _name ) {
+        return T{ *this, _name };
+    }
+
     void mapGeomType( uint64_t _value, const std::string& _key );
     uint64_t getGeomType( const std::string& _key ) const;
 
@@ -133,14 +147,3 @@ protected:
 
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
 };
-
-//class PolySceneGraph : public SceneGraph {
-//public:
-//    PolySceneGraph(CommandQueue& cq, FontManager& _fm, SunBuilder& _sb, CameraManager& _cm) : SceneGraph(cq, _fm, _sb, _cm) {
-//        ml.TL(&tl);
-//    }
-//
-//    DependencyMaker& TL() override { return tl; }
-//private:
-//    PolySceneGraphTextureList tl;
-//};

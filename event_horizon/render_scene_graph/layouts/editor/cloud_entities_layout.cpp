@@ -26,13 +26,12 @@ void listCloudCallback( SceneOrchestrator* p ) {
     for ( const auto& elem : newFilteredResult ) {
         SerializableContainer rd;
         bn::decode_b64( elem.getThumb().begin(), elem.getThumb().end(), std::back_inserter(rd) );
-        ImageBuilder{ p->SG().TL(), elem.getName() }.make( rd );
+        IB{ p->SG(), elem.getName() }.make( rd );
         cloudEntitiesTypeMap.insert( {elem.getType(), elem} );
     }
 }
 
-void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string _title, const std::string& _entType,
-                         const uint64_t _version ) {
+void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string& _title, const std::string& _entType ) {
 
     static char buf1[1024];
     static char buf2[1024];

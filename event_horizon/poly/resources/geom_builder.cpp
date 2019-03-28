@@ -5,7 +5,7 @@
 #include "geom_builder.h"
 #include <core/node.hpp>
 #include <poly/resources/entity_factory.hpp>
-#include <poly/material_builder.h>
+#include <event_horizon/poly/resources/material_builder.h>
 #include <poly/resources/profile_builder.h>
 #include <poly/poly.hpp>
 

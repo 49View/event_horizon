@@ -6,8 +6,8 @@
 
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/scene_state_machine.h>
-#include <poly/ui_shape_builder.h>
-#include <poly/geom_builder.h>
+#include <event_horizon/poly/resources/ui_shape_builder.h>
+#include <event_horizon/poly/resources/geom_builder.h>
 #include <media/audio_video_stream.hpp>
 #include "callbacks_layout.h"
 

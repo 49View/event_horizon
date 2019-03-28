@@ -20,10 +20,6 @@
 //    return finalizaMake( cfunc( Name(), vv2fs, vfs ) );
 //}
 
-void ProfileBuilder::finalise( std::shared_ptr<Profile> _elem ) {
-
-}
-
 //bool ProfileBuilder::evaluateDirectBuild() {
 //
 //    bool bMakeDirect = cfunc != nullptr;

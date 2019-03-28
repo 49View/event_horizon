@@ -5,8 +5,8 @@
 #include "material_layout.h"
 #include <core/tar_util.h>
 #include <core/raw_image.h>
-#include <poly/geom_builder.h>
-#include <poly/material_builder.h>
+#include <event_horizon/poly/resources/geom_builder.h>
+#include <event_horizon/poly/resources/material_builder.h>
 #include <poly/resources/image_builder.h>
 #include <poly/resources/material_file.hpp>
 #include <graphics/imgui/imgui.h>
@@ -105,7 +105,7 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
                                 values->assign( pbrStr, v );
                             }
                         }
-                        MB{ p->SG().ML(), k }.create( { S::SH, imageRefs, values } );
+                        p->SG().B<MB>(k).create( { S::SH, imageRefs, values } );
 
                         cmdKeys.erase(std::remove(cmdKeys.begin(), cmdKeys.end(), k), cmdKeys.end());
                     }
@@ -113,7 +113,7 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
             });
 
             for ( const auto& [k,v] : files ) {
-                IB{ p->SG().TL(), k }.create( v );
+                IB{ p->SG(), k }.create( v );
             }
 //            auto mb = std::make_shared<MaterialBuilder>(getFileNameOnly(elem.filename), elem.data);
 //            GB{p->RSG(), ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->RSG().ML() )).build();

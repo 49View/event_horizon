@@ -21,13 +21,13 @@
 #include <core/node.hpp>
 #include <graphics/platform_graphics.hpp>
 #include <graphics/shader_manager.h>
-#include <poly/geom_builder.h>
+#include <event_horizon/poly/resources/geom_builder.h>
 #include <poly/polyclipping/clipper.hpp>
 #include <poly/triangulator.hpp>
 #include <poly/polypartition.h>
 #include <poly/profile.hpp>
 #include <poly/resources/profile_builder.h>
-#include <poly/ui_shape_builder.h>
+#include <event_horizon/poly/resources/ui_shape_builder.h>
 #include <poly/converters/svg/svgtopoly.hpp>
 
 std::string svgString = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"

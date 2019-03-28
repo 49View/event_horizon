@@ -4,11 +4,7 @@
 
 namespace Utility::TTFCore { class Font; }
 
-class FontBuilder : public ResourceBuilder2<FontBuilder, Utility::TTFCore::Font> {
+class FontBuilder : public ResourceBuilder3<FontBuilder, Utility::TTFCore::Font> {
 public:
-    using ResourceBuilder2::ResourceBuilder2;
-protected:
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
-    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
-    void finalise( std::shared_ptr<Utility::TTFCore::Font> _elem ) override;
+    using ResourceBuilder3::ResourceBuilder3;
 };
