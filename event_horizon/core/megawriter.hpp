@@ -18,7 +18,6 @@
 #include <core/math/rect2f.h>
 #include <core/math/aabb.h>
 #include <core/math/vector4f.h>
-#include <core/metadata.h>
 #include <core/boxable.hpp>
 
 using namespace rapidjson;
@@ -218,9 +217,9 @@ public:
     void serialize( const char* name, const std::pair<std::string, T>& value ) {
         if ( name ) writer->String( name );
         writer->StartObject();
-        writer->String( "Key" );
+        writer->String( "key" );
         writer->String( value.first.c_str() );
-        writer->String( "Value" );
+        writer->String( "value" );
         serialize( nullptr, value.second );
         writer->EndObject();
     }
@@ -509,14 +508,14 @@ public:
 		}
 	}
 
-	void serialize( const CoreMetaData& _md ) {
-		serialize( MetaData::Name.c_str(), _md.getName() );
-		serialize( MetaData::Type.c_str(), _md.getType() );
-		serialize( MetaData::Hash.c_str(), _md.getHash() );
-		serialize( MetaData::Thumb.c_str(), _md.getThumb() );
-		serialize( MetaData::Raw.c_str(), _md.getRaw() );
-		serialize( MetaData::Tags.c_str(), _md.getTags() );
-	}
+//	void serialize( const CoreMetaData& _md ) {
+//		serialize( MetaData::Name.c_str(), _md.getName() );
+//		serialize( MetaData::Type.c_str(), _md.getType() );
+//		serialize( MetaData::Hash.c_str(), _md.getHash() );
+//		serialize( MetaData::Thumb.c_str(), _md.getThumb() );
+//		serialize( MetaData::Raw.c_str(), _md.getRaw() );
+//		serialize( MetaData::Tags.c_str(), _md.getTags() );
+//	}
 
 private:
 	std::unique_ptr<Writer<StringBuffer>> writer;

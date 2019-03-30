@@ -6,6 +6,7 @@
 
 #include <boost/signals2.hpp>
 
+#include <core/tar_util.h>
 #include <poly/resources/resource_manager.hpp>
 #include <poly/resources/publisher.hpp>
 #include <poly/scene_graph.h>
@@ -300,6 +301,12 @@ protected:
     CommandResouceCallbackFunction ccf = nullptr;
 };
 
+JSONDATA( ResourceTarDict, group, filename, hash )
+    std::string group;
+    std::string filename;
+    std::string hash;
+};
+
 template <typename R>
 class ResourceBuilder5 : public Publisher<R, EmptyBox> {
 public:
@@ -315,8 +322,25 @@ public:
         Http::get( Url( HttpFilePrefix::entities + ResourceVersioning<R>::Prefix() + "/" + url_encode( this->Name() ) ),
                    [&](HttpResponeParams _res) {
                        if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
-                       addResource( SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length},
-                                    AddResourcePolicy::Deferred );
+                       auto buff = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
+                       if ( tarUtil::isTar(buff) ) {
+                           auto fs = tarUtil::untar(buff);
+                           ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
+                           std::vector<ResourceTarDict> dict;
+                           std::string dictString( std::string{fs[ResourceCatalog::Key].begin(), fs[ResourceCatalog::Key].end()} );
+                           rapidjson::Document document;
+                           document.Parse<rapidjson::kParseStopWhenDoneFlag>( dictString.c_str() );
+                           MegaReader reader( document );
+                           reader.deserialize( dict );
+
+                           for ( const auto& rd : dict ) {
+                               if ( rd.group == ResourceGroup::Image ) {
+                                   addDependency<RawImage>( rd, fs[rd.filename], AddResourcePolicy::Deferred );
+                               }
+                           }
+                       } else {
+                           addResource( buff, AddResourcePolicy::Deferred );
+                       }
                        if ( ccf ) ccf(params);
                    } );
     }
@@ -342,15 +366,11 @@ public:
         return addResource(_data, AddResourcePolicy::Immediate);
     }
 
-    void create( const R& _data ) {
-        create( _data.serialize() );
-    }
-
-    void create( const SerializableContainer& _data ) {
+    void create( const SerializableContainer& _data, const ResourceDependencyDict& _res ) {
         if ( prepAndCheck(_data ) ) return;
 //        if ( B::Version() != 0 ) this->addTag( this->hashFn(B::Version()) );
 
-        this->publish2( _data, [&]( HttpResponeParams _res ) {
+        this->publish3( _data, _res, [&]( HttpResponeParams _res ) {
             JSONResourceResponse resJson(_res.bufferString);
             // We make sure that in case server side has to change name in case
             // of duplicates we reflect it here client side
@@ -366,6 +386,15 @@ protected:
             return ret;
         }
         return nullptr;
+    }
+
+    template <typename DEP>
+    std::shared_ptr<DEP> addDependency( const ResourceTarDict& _rd,
+                                        const SerializableContainer& _data,
+                                        AddResourcePolicy _arp ) {
+        auto ret = EF::create<DEP>(_data);
+        sg.M<DEP>().addDeferred( ret, _rd.filename, _rd.hash );
+        return ret;
     }
 
     std::shared_ptr<R> addResource( const SerializableContainer& _data, AddResourcePolicy _arp ) {

@@ -223,10 +223,19 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 }
 
 #define JSONSERIAL(CLASSNAME,...) \
-	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); } \
+    RESOURCE_CTORS(CLASSNAME); \
+	explicit CLASSNAME( const MegaReader& reader ) { deserialize( reader ); } \
 	inline void serialize( MegaWriter* visitor ) const { visitor->StartObject(); serializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); visitor->EndObject(); } \
 	inline SerializableContainer serialize() const { MegaWriter mw; serialize(&mw); return mw.getSerializableContainer();} \
-	inline void deserialize( const MegaReader& visitor ) { deserializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); }
+	inline void deserialize( const MegaReader& visitor ) { deserializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); } \
+	void bufferDecode( const unsigned char *_buffer, size_t _length ) { \
+        std::string strBuff{ _buffer, _buffer + _length}; \
+        rapidjson::Document document; \
+        document.Parse<rapidjson::kParseStopWhenDoneFlag>( strBuff.c_str() ); \
+        MegaReader reader( document ); \
+        deserialize( reader ); \
+    }
+
 
 #define JSONDATA(CLASSNAME,...) \
 	struct CLASSNAME { \

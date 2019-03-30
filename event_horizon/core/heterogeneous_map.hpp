@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 2019-01-28.
 //
@@ -24,6 +26,10 @@ public:
     virtual ~HeterogeneousMap() = default;
     HeterogeneousMap( const HeterogeneousMap& _source );
     explicit HeterogeneousMap( std::shared_ptr<HeterogeneousMap> _source );
+    explicit HeterogeneousMap( std::string _type ) : mType( std::move( _type )) {}
+
+    JSONSERIAL( HeterogeneousMap, mType, mNumUniforms, mStrings, mInts, mFloats, mV2fs, mV3fs, mV3fvs, mV4fs, mM3fs, mM4fs );
+
     void inject( const HeterogeneousMap& source );
     void injectIfNotPresent( const HeterogeneousMap& source );
     void assign( const std::string& uniformName, int data );
@@ -83,11 +89,6 @@ public:
     std::shared_ptr<HeterogeneousMap> clone();
     void clone( const HeterogeneousMap& _map );
 
-    void serializeImpl( std::shared_ptr<SerializeBin> writer ) const;
-    void deserializeImpl( std::shared_ptr<DeserializeBin> reader );
-
-    JSONSERIAL( HeterogeneousMap, mNumUniforms, mStrings, mInts, mFloats, mV2fs, mV3fs, mV3fvs, mV4fs, mM3fs, mM4fs );
-
     template <typename T>
     void visit( const T& _visitor ) {
         if ( mNumUniforms == 0 ) return;
@@ -107,6 +108,7 @@ private:
     void calcTotalNumUniforms();
 
 private:
+    std::string mType;
     std::unordered_map<std::string, std::string>           mStrings;
     std::unordered_map<std::string, int>                   mInts;
     std::unordered_map<std::string, float>                 mFloats;

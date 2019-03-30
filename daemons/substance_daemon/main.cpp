@@ -115,7 +115,7 @@ void elaborateMat( const std::string& _filename ) {
         tar.finish();
 
 
-        FM::writeRemoteFile( DaemonPaths::store( EntityGroup::Material, tarname ),
+        FM::writeRemoteFile( DaemonPaths::store( ResourceGroup::Material, tarname ),
                         zlibUtil::deflateMemory(tagStream.str() ) );
     } );
 }
@@ -137,7 +137,7 @@ void elaborateGeom( const std::string& _filename ) {
 
             std::string finalPath = dRoot + filenameglb;
 
-            FM::writeRemoteFile( DaemonPaths::store( EntityGroup::Geom, filenameglb ),
+            FM::writeRemoteFile( DaemonPaths::store( ResourceGroup::Geom, filenameglb ),
                             zlibUtil::deflateMemory(FM::readLocalFile( finalPath )) );
     } );
 }
@@ -149,9 +149,9 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 //    initDeamon();
     Socket::on( "cloudStorageFileUpdate", []( SocketCallbackDataType data ) {
         std::string filename = url_decode( data["name"].GetString() );
-        if ( filename.find(DaemonPaths::upload(EntityGroup::Material)) != std::string::npos ){
+        if ( filename.find(DaemonPaths::upload(ResourceGroup::Material)) != std::string::npos ){
             elaborateMat( filename );
-        } else if ( filename.find(DaemonPaths::upload(EntityGroup::Geom)) != std::string::npos ){
+        } else if ( filename.find(DaemonPaths::upload(ResourceGroup::Geom)) != std::string::npos ){
             elaborateGeom( filename );
         }
     } );

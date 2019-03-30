@@ -4,6 +4,14 @@
 
 #include "heterogeneous_map.hpp"
 
+HeterogeneousMap::HeterogeneousMap( const HeterogeneousMap& _source ) {
+    inject( _source );
+}
+
+HeterogeneousMap::HeterogeneousMap( std::shared_ptr<HeterogeneousMap> _source ) {
+    inject( *_source.get() );
+}
+
 void HeterogeneousMap::calcTotalNumUniforms() {
     size_t lNumUniforms = 0;
     lNumUniforms += mStrings.size();
@@ -17,25 +25,10 @@ void HeterogeneousMap::calcTotalNumUniforms() {
     lNumUniforms += mM4fs.size();
 
     mNumUniforms = static_cast<int>( lNumUniforms );
-
-//    HeterogeneousMap::calcHash();
 }
 
-//std::string HeterogeneousMap::calcHashImpl() {
-//    std::stringstream hashInput;
-//    hashInput << mNumUniforms;
-//
-//    for ( auto& i : mStrings ) hashInput << i.first;
-//    for ( auto& i : mInts ) hashInput << i.second;
-//    for ( auto& i : mFloats ) hashInput << i.second;
-//    for ( auto& i : mV2fs ) hashInput << i.second.hash();
-//    for ( auto& i : mV3fs ) hashInput << i.second.hash();
-//    for ( auto& i : mV4fs ) hashInput << i.second.hash();
-//
-//    return hashInput.str();
-//}
-
 void HeterogeneousMap::inject( const HeterogeneousMap& source ) {
+    mType = source.mType;
     for ( auto& pu : source.mStrings ) assign( pu.first, pu.second );
     for ( auto& pu : source.mInts )    assign( pu.first, pu.second );
     for ( auto& pu : source.mFloats )  assign( pu.first, pu.second );
@@ -309,7 +302,8 @@ std::shared_ptr<HeterogeneousMap> HeterogeneousMap::clone() {
 
 void HeterogeneousMap::clone( const HeterogeneousMap& _source ) {
 
-    mStrings    = _source.mStrings;
+    mType        = _source.mType;
+    mStrings     = _source.mStrings;
     mFloats      = _source.mFloats;
     mInts        = _source.mInts;
     mV2fs        = _source.mV2fs;
@@ -338,12 +332,4 @@ std::unordered_map<std::string, std::string> HeterogeneousMap::getTextureNameMap
         ret.emplace( k, v );
     }
     return ret;
-}
-
-HeterogeneousMap::HeterogeneousMap( const HeterogeneousMap& _source ) {
-    inject( _source );
-}
-
-HeterogeneousMap::HeterogeneousMap( std::shared_ptr<HeterogeneousMap> _source ) {
-    inject( *_source.get() );
 }

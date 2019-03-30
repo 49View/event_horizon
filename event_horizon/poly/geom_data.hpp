@@ -366,5 +366,5 @@ protected:
 
 public:
     static uint64_t Version() { return 2000; }
-    inline const static std::string EntityGroup() { return EntityGroup::Geom; }
+    inline const static std::string EntityGroup() { return ResourceGroup::Geom; }
 };

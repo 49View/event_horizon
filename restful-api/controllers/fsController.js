@@ -10,6 +10,10 @@ exports.cloudStorageFileGet = (key, bucket) => {
 	return cloudApi.get( key, bucket );
 }
 
+exports.cloudStorageEntityGet = (key) => {
+	return cloudApi.get( key, "eventhorizonentities" );
+}
+
 exports.cloudStorageRename = (source, dest, bucket) => {
 	return cloudApi.rename( source, dest, bucket );
 }

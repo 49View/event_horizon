@@ -72,5 +72,5 @@ protected:
 
 public:
     static uint64_t Version() { return 1000; }
-    inline const static std::string EntityGroup() { return EntityGroup::CameraRig; }
+    inline const static std::string EntityGroup() { return ResourceGroup::CameraRig; }
 };

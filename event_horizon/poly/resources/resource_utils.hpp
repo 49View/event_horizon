@@ -5,12 +5,11 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <string>
 #include <set>
 #include <tuple>
 #include <unordered_map>
-
-using ResourceRef = std::string;
 
 template <typename T>
 using ResourceSignalsAddSignature = std::tuple<std::shared_ptr<T>, std::string>;
@@ -20,3 +19,4 @@ using ResourceManagerContainer = std::unordered_map<std::string,std::shared_ptr<
 
 template <typename T>
 using SignalsDeferredContainer = std::set<ResourceSignalsAddSignature<T>>;
+

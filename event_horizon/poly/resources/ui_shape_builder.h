@@ -72,7 +72,7 @@ private:
 
 public:
     static uint64_t Version() { return 1000; }
-    inline const static std::string EntityGroup() { return EntityGroup::UI; }
+    inline const static std::string EntityGroup() { return ResourceGroup::UI; }
 
 };
 

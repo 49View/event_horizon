@@ -169,3 +169,29 @@ exports.getEntitiesByProjectGroupTags = async (project, group, tags, fullData, r
 
     return result;
 }
+
+exports.getEntityDeps = async (project, group, deps) => {
+    const aggregationQueries = [
+        {
+            $match: {
+                $and: [
+                    {"isRestricted": false},
+                    {"group": group},
+                    {
+                        "$or": [
+                            {"project":project}, 
+                            {"isPublic": true}
+                        ]
+                    },
+                    {
+                        "metadata.hash":  deps
+                    }
+                ]
+            }
+        }
+    ];
+
+    const result = await asyncModelOperations.aggregate(entityModel, aggregationQueries);
+
+    return result;
+}

@@ -95,17 +95,18 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
                     ResourceDependencyMap retDM;
                     if ( p->SG().TL().checkDependencyCompleted(k, retDM) ) {
                         LOGRS( "ALL IMAGES PUBLISHED ");
-                        auto values = std::make_shared<HeterogeneousMap>();
-                        std::vector<ResourceRef> imageRefs;
+                        auto values = std::make_shared<HeterogeneousMap>(S::SH);
+                        ResourceDependencyDict imageRefs;
                         for ( const auto& [k2,v] : retDM ) {
                             LOGRS( "Key: " << k2 << " Name: " << v );
-                            imageRefs.emplace_back( v );
+                            imageRefs[ResourceVersioning<RawImage>::Prefix()].emplace_back( v );
                             auto pbrStr = MPBRTextures::mapToTextureUniform( k2 );
                             if ( !pbrStr.empty() ) {
                                 values->assign( pbrStr, v );
                             }
                         }
-                        p->SG().B<MB>(k).create( { S::SH, imageRefs, values } );
+                        // imageRefs,
+                        p->SG().B<MB>(k).create( values->serialize(), imageRefs );
 
                         cmdKeys.erase(std::remove(cmdKeys.begin(), cmdKeys.end(), k), cmdKeys.end());
                     }

@@ -32,6 +32,8 @@
 
 namespace tarUtil {
 
+    bool isTar( const SerializableContainer& fin );
+
 //Check file extensions
 #define ASCII_TO_NUMBER( num ) ((num)-48) //Converts an ascii digit to the corresponding number (assuming it is an ASCII digit)
 

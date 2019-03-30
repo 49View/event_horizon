@@ -11,35 +11,27 @@
 #pragma once
 
 #include <set>
-
-namespace MetaData {
-    const static std::string Id         = "_id";
-    const static std::string Name       = "name";
-    const static std::string Type       = "group";
-    const static std::string Hash       = "hash";
-    const static std::string Thumb      = "thumb";
-    const static std::string Raw        = "raw";
-    const static std::string Tags       = "tags";
-}
+#include <core/serialization.hpp>
 
 class CoreMetaData {
 public:
     CoreMetaData() = default;
-    CoreMetaData( std::string name, std::string type, std::string _hash,
-                  std::string thumb, std::string raw, std::set<std::string> tags ) :
-                      name( std::move( name )),
-                      type( std::move( type )),
+    CoreMetaData( std::string _name, std::string _group, std::string _hash,
+                  std::string _thumb, std::string _raw, std::set<std::string> _tags, ResourceDependencyDict _deps = {} ) :
+                      name( std::move( _name )),
+                      group( std::move( _group )),
                       hash( std::move( _hash )),
-                      thumb( std::move( thumb )),
-                      raw( std::move( raw )),
-                      tags( std::move( tags )) {}
+                      thumb( std::move( _thumb )),
+                      raw( std::move( _raw )),
+                      tags( std::move( _tags )),
+                      deps( std::move( _deps )) {}
 
     std::string& Name() {
         return name;
     }
 
-    std::string& Type() {
-        return type;
+    std::string& Group() {
+        return group;
     }
 
     std::string& Hash() {
@@ -58,6 +50,10 @@ public:
         return tags;
     }
 
+    ResourceDependencyDict& Deps() {
+        return deps;
+    }
+
     const std::string& getName() const {
         return name;
     }
@@ -66,12 +62,12 @@ public:
         CoreMetaData::name = _name;
     }
 
-    const std::string& getType() const {
-        return type;
+    const std::string& getGroup() const {
+        return group;
     }
 
-    void setType( const std::string& _type ) {
-        CoreMetaData::type = _type;
+    void setGroup( const std::string& _group ) {
+        CoreMetaData::group = _group;
     }
 
     const std::string& getThumb() const {
@@ -98,14 +94,6 @@ public:
         CoreMetaData::tags = _tags;
     }
 
-    const std::string& getId() const {
-        return id;
-    }
-
-    void setId( const std::string& _id ) {
-        CoreMetaData::id = _id;
-    }
-
     const std::string& getHash() const {
         return hash;
     }
@@ -114,12 +102,21 @@ public:
         CoreMetaData::hash = _hash;
     }
 
+    const ResourceDependencyDict& getDeps() const {
+        return deps;
+    }
+
+    void setDeps( const ResourceDependencyDict& _deps ) {
+        CoreMetaData::deps = _deps;
+    }
+
+    JSONSERIAL( CoreMetaData, name, group, hash, thumb, raw, tags, deps );
 private:
-    std::string id;
     std::string name;
-    std::string type;
+    std::string group;
     std::string hash;
     std::string thumb;
     std::string raw;
     std::set<std::string> tags;
+    ResourceDependencyDict deps;
 };

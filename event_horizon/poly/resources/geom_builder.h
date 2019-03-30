@@ -19,8 +19,6 @@
 #include <poly/scene_graph.h>
 #include <poly/scene_graph_geom_builder_base.hpp>
 
-class MaterialBuilder;
-
 enum class GeomBuilderType {
     shape,
     follower,
@@ -320,7 +318,7 @@ private:
 
     GeomBuilderType builderType = GeomBuilderType::unknown;
 
-    std::vector<std::shared_ptr<MaterialBuilder>> matBuilders;
+//    std::vector<std::shared_ptr<MaterialBuilder>> matBuilders;
 
     GeomAssetSP elem = nullptr;
     GeomAssetSP elemInjFather = nullptr;

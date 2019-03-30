@@ -48,7 +48,7 @@ exports.getValidSessionById = async (sessionId) => {
     if (dbSession!==null) {
         dbSession=dbSession.toObject();
     }
-    console.log("CURRENT SESSION:",dbSession);
+    // console.log("CURRENT SESSION:",dbSession);
     return dbSession;
 }
 

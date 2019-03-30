@@ -16,7 +16,6 @@
 #include <core/uuid.hpp>
 #include <core/boxable.hpp>
 #include <core/name_policy.hpp>
-#include <poly/resources/publisher.hpp>
 #include <core/observable.h>
 #include <core/serialization.hpp>
 #include <core/serializebin.hpp>
@@ -57,7 +56,8 @@ template <typename D>
 class Node : public Animable,
              public ObservableShared<Node<D>>,
              public virtual Boxable<JMATH::AABB>,
-             public virtual Publisher<D>,
+             public virtual Hashable<>,
+             public virtual NamePolicy<>,
              public std::enable_shared_from_this<Node<D>> {
 public:
     Node() {
@@ -84,8 +84,8 @@ public:
     }
 
     explicit Node( const SerializableContainer& _data ) {
-        auto reader = std::make_shared<DeserializeBin>( _data, D::Version() );
-        deserializeInternal();
+//        auto reader = std::make_shared<DeserializeBin>( _data, D::Version() );
+//        deserializeInternal();
     }
 
     TimelineSet addKeyFrame( const std::string& _name, float _time ) override {
@@ -570,20 +570,20 @@ protected:
         Boxable::bbox3d = calcCompleteBBox3dRec();
     }
 
-    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {
-        if ( mData ) {
-            mData->serializeDependenciesImpl( writer );
-        }
-        writer->writeDep( mData );
+//    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {
+//        if ( mData ) {
+//            mData->serializeDependenciesImpl( writer );
+//        }
+//        writer->writeDep( mData );
+//
+//        for ( const auto& c : Children()) {
+//            c->serializeDependenciesImpl( writer );
+//        }
+//    }
 
-        for ( const auto& c : Children()) {
-            c->serializeDependenciesImpl( writer );
-        }
-    }
-
-    void deserializeInternal(std::shared_ptr<DeserializeBin> reader) override {
-        deserializeRec( reader );
-    }
+//    void deserializeInternal(std::shared_ptr<DeserializeBin> reader) override {
+//        deserializeRec( reader );
+//    }
 
 private:
     void deserializeRec( std::shared_ptr<DeserializeBin> reader, Node<D> *_father = nullptr ) {
@@ -607,21 +607,21 @@ private:
         }
     }
 
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {
-        writer->write( mGHType );
-        writer->write( mUUID );
-        writer->write( this->Name() );
-        writer->write( mLocalTransform );
-        writer->write( Boxable::BBox3d() );
-
-        writer->write( mData );
-
-        auto numChildren = static_cast<int32_t>( Children().size() );
-        writer->write( numChildren );
-        for ( auto&& c : Children()) {
-            c->serializeInternal( writer );
-        }
-    }
+//    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {
+//        writer->write( mGHType );
+//        writer->write( mUUID );
+//        writer->write( this->Name() );
+//        writer->write( mLocalTransform );
+//        writer->write( Boxable::BBox3d() );
+//
+//        writer->write( mData );
+//
+//        auto numChildren = static_cast<int32_t>( Children().size() );
+//        writer->write( numChildren );
+//        for ( auto&& c : Children()) {
+//            c->serializeInternal( writer );
+//        }
+//    }
 
 protected:
     UUID mUUID;

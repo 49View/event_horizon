@@ -20,7 +20,6 @@ using CommandArgumentsT 		= std::vector< std::string >;
 using CommandCallbackFunction 	= std::function<void(const CommandArgumentsT& )>;
 using SerializableContainer     = std::vector<unsigned char>;
 using SerializableContainerDict = std::unordered_map<std::string, SerializableContainer>;
-using ResourceDependencyDict    = std::unordered_map<std::string, std::vector<std::string>>;
 
 typedef std::pair<void*, uint64_t> void_p;
 typedef std::pair<char*, uint64_t> char_p;
@@ -277,12 +276,19 @@ namespace Name {
 	const static std::string Zulu	  = "Zulu	 ";
 }
 
-namespace EntityGroup {
+namespace ResourceGroup {
 	const static std::string Material  = "material";
 	const static std::string Color     = "color";
 	const static std::string Geom      = "geom";
+    const static std::string Image     = "image";
+    const static std::string Profile   = "profile";
+    const static std::string Font      = "font";
 	const static std::string UI        = "ui";
 	const static std::string CameraRig = "camera_rig";
+}
+
+namespace ResourceCatalog {
+    const static std::string Key       = "catalog";
 }
 
 enum class HttpUrlEncode {
@@ -319,3 +325,6 @@ enum class DependencyStatus {
     explicit N( const unsigned char* _buffer, size_t _length ) { \
         bufferDecode( _buffer, _length ); \
     } \
+
+using ResourceRef = std::string;
+using ResourceDependencyDict    = std::unordered_map<std::string, std::vector<ResourceRef>>;

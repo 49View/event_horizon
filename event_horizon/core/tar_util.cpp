@@ -21,6 +21,21 @@
 
 namespace tarUtil {
 
+    static const int TAR_HEADER_SIZE = 512;
+
+    bool isTar( const SerializableContainer& fin ) {
+
+        if ( fin.size() < TAR_HEADER_SIZE ) return false;
+
+        char zeroBlock[512];
+        memset( zeroBlock, 0, 512 );
+        const unsigned char *rawBytes = fin.data();
+        TARFileHeader currentFileHeader{};
+        std::memcpy((char *) &currentFileHeader, rawBytes, TAR_HEADER_SIZE );
+
+        return currentFileHeader.checkChecksum();
+    }
+
     SerializableContainerDict untar( const SerializableContainer& fin ) {
         //Initialize a zero-filled block we can compare against (zero-filled header block --> end of TAR archive)
         SerializableContainerDict ret;
@@ -31,7 +46,6 @@ namespace tarUtil {
         //size_t bytesRead = 0;
         const unsigned char *rawBytes = fin.data();
 
-        static const int TAR_HEADER_SIZE = 512;
         while ( true ) { //Stop if end of file has been reached or any error occured
             TARFileHeader currentFileHeader{};
             //Read the file header.

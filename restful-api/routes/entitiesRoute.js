@@ -2,6 +2,8 @@ const fsController = require('../controllers/fsController');
 const express = require('express');
 const router = express.Router();
 const entityController = require('../controllers/entityController');
+const tar = require('tar-stream');
+const streams = require('memory-streams');
 
 router.get('/content/byId/:id', async (req, res, next) => {
     try {
@@ -13,7 +15,7 @@ router.get('/content/byId/:id', async (req, res, next) => {
             throw "Invalid entity for user project";
         }
         const filePath=entityController.getFilePath(currentEntity.project, currentEntity.group, currentEntity.metadata.name);
-        const fileData = await fsController.cloudStorageFileGet(filePath, "eventhorizonentities");
+        const fileData = await fsController.cloudStorageEntityGet(filePath);
         
         fsController.writeFile(res, fileData);
 
@@ -31,10 +33,42 @@ router.get('/:group/:tags', async (req, res, next) => {
         //Check existing entity for use project (or public)
         const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, true, 1);
         if (foundEntities!==null && foundEntities.length>0) {
-            const filePath=entityController.getFilePath(foundEntities[0].project, foundEntities[0].group, foundEntities[0].metadata.name);
-            console.log( filePath );
-            const fileData = await fsController.cloudStorageFileGet(filePath, "eventhorizonentities");
-            fsController.writeFile(res, fileData);
+            const entity = foundEntities[0];            
+            const filePath=entityController.getFilePath(entity.project, entity.group, entity.metadata.name);
+            const fileData = await fsController.cloudStorageEntityGet(filePath);
+
+            // If no deps it's a base resouce, just save the file as it is
+            if ( entity.metadata.deps === null || entity.metadata.deps.length == 0 ) {
+                fsController.writeFile(res, fileData);
+            } else {
+                let tarPack = tar.pack();
+                let tarDict = [];
+                // tarDict.push( { group: entity.group, filename: entity.metadata.name } );
+                tarPack.entry( {name: entity.metadata.name}, fileData["Body"] );    
+                for (const elementGroup of entity.metadata.deps) {
+                    for (const element of elementGroup.value ) {
+                        const depArray = await entityController.getEntityDeps(entity.project, elementGroup.key, element);
+                        if ( depArray !== null && depArray.length > 0 ) {
+                            const dep = depArray[0];
+                            const depFilePath=entityController.getFilePath(entity.project, elementGroup.key, dep.metadata.name);
+                            const depData = await fsController.cloudStorageEntityGet(depFilePath);
+                            console.log( dep.metadata.name, depData.ContentLength);
+                            tarPack.entry( {name: dep.metadata.name, size: depData.ContentLength}, depData["Body"] );
+                            tarDict.push( { group: elementGroup.key, filename: dep.metadata.name, hash: dep.metadata.hash } );
+                        }
+                    }
+                };
+                console.log( JSON.stringify(tarDict) );
+                tarPack.entry( {name: "catalog"}, JSON.stringify(tarDict) );    
+                
+                tarPack.finalize();
+                var writer = new streams.WritableStream();
+                tarPack.pipe( writer );                
+                tarPack.on('end', () => {
+                    let buff = writer.toBuffer();
+                    res.status(200).set({ 'Content-Length': Buffer.byteLength(buff) }).send(buff);
+                });    
+            }
         } else {
             res.sendStatus(204);
         }

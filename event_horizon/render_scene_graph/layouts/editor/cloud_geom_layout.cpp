@@ -7,5 +7,5 @@
 #include <poly/geom_data.hpp>
 
 void ImGuiCloudEntitiesGeom::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
-    ImGuiCloudEntities( p, _r, "Cloud Geometry", EntityGroup::Geom );
+    ImGuiCloudEntities( p, _r, "Cloud Geometry", ResourceGroup::Geom );
 }

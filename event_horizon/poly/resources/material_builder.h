@@ -5,4 +5,5 @@
 
 class Material;
 
-using MB = ResourceBuilder4<Material>;
+using MaterialBuilder = ResourceBuilder5<Material>;
+using MB = MaterialBuilder;

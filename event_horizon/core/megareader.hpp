@@ -14,7 +14,6 @@
 #include "rapidjson/document.h"
 #include "math/rect2f.h"
 #include "math/aabb.h"
-#include "metadata.h"
 #include <core/boxable.hpp>
 
 using namespace rapidjson;
@@ -199,30 +198,37 @@ public:
 	}
 
     template<typename T>
+    void deserialize( std::vector<T>& ret ) const {
+        for ( SizeType t = 0; t < ( *( value ) ).Size(); t++ ) {
+            ret.push_back( T( ( *( value ) )[t] ) );
+        }
+    }
+
+    template<typename T>
     void deserialize( const char* name, std::unordered_map<std::string,T>& ret ) const {
         if ( value->FindMember( name ) != value->MemberEnd() ) {
             for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
-                auto tname = std::string( (*(value))[name][t]["Key"].GetString());
-                if ( (*(value))[name][t].FindMember( "Value" ) != (*(value))[name][t].MemberEnd() ) {
+                auto tname = std::string( (*(value))[name][t]["key"].GetString());
+                if ( (*(value))[name][t].FindMember( "value" ) != (*(value))[name][t].MemberEnd() ) {
                     T mvalue;
-                    if constexpr ( std::is_same<T, std::string>::value ) mvalue = std::string((*(value))[name][t]["Value"].GetString());
-                    if constexpr ( std::is_integral<T>::value ) mvalue = (*(value))[name][t]["Value"].GetInt();
-                    if constexpr ( std::is_floating_point<T>::value ) mvalue = (*(value))[name][t]["Value"].GetFloat();
+                    if constexpr ( std::is_same<T, std::string>::value ) mvalue = std::string((*(value))[name][t]["value"].GetString());
+                    if constexpr ( std::is_integral<T>::value ) mvalue = (*(value))[name][t]["value"].GetInt();
+                    if constexpr ( std::is_floating_point<T>::value ) mvalue = (*(value))[name][t]["value"].GetFloat();
                     if constexpr ( std::is_same<T, Vector2f>::value ||
                          std::is_same<T, Vector3f>::value ||
                          std::is_same<T, Vector4f>::value ||
                          std::is_same<T, Matrix4f>::value ||
                          std::is_same<T, Matrix3f>::value ) {
                         for ( int q = 0; q < mvalue.size(); q++ ) {
-                            mvalue[q] =(*(value))[name][t]["Value"][q].GetFloat();
+                            mvalue[q] =(*(value))[name][t]["value"][q].GetFloat();
                         }
                     }
                     if constexpr ( std::is_same<T, std::vector<Vector3f>>::value ) {
-                        auto asize = ( *( value ) )[name][t]["Value"].Size();
+                        auto asize = ( *( value ) )[name][t]["value"].Size();
                         mvalue.resize(asize);
                         for ( SizeType m = 0; m < asize; m++ ) {
                             for ( int q = 0; q < mvalue.size(); q++ ) {
-                                mvalue[m][q] = ( *( value ))[name][t]["Value"][m][q].GetFloat();
+                                mvalue[m][q] = ( *( value ))[name][t]["value"][m][q].GetFloat();
                             }
                         }
                     }
@@ -242,7 +248,15 @@ public:
 		}
 	}
 
-	template<typename T>
+    void deserialize( const char* name, std::set<std::string>& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+                ret.emplace( std::string( ( *( value ) )[name][t].GetString()) );
+            }
+        }
+    }
+
+    template<typename T>
 	void deserialize( const char* name, std::vector<std::shared_ptr<T>>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
@@ -510,25 +524,25 @@ public:
 		}
 	}
 
-	void deserialize( std::vector<CoreMetaData>& _vec ) {
-		const static char* metadataS = "metadata";
-		for ( SizeType t = 0; t < (*value).Size(); t++ ) {
-			CoreMetaData elem;
-			if ( (*value)[t].FindMember( MetaData::Id.c_str() ) != (*value)[t].MemberEnd() ) {
-				elem.setId( (*value)[t][MetaData::Id.c_str()].GetString() );
-			}
-            if ( (*value)[t].FindMember( MetaData::Type.c_str() ) != (*value)[t].MemberEnd() ) {
-                elem.setType( (*value)[t][MetaData::Type.c_str()].GetString() );
-            }
-            if ( (*value)[t].FindMember( MetaData::Hash.c_str() ) != (*value)[t].MemberEnd() ) {
-                elem.setHash( (*value)[t][MetaData::Hash.c_str()].GetString() );
-            }
-			if ( (*value)[t].FindMember( metadataS ) != (*value)[t].MemberEnd() ) {
-				elem.setName(( *value )[t][metadataS][MetaData::Name.c_str()].GetString());
-				elem.setThumb(( *value )[t][metadataS][MetaData::Thumb.c_str()].GetString());
-			}
-			_vec.push_back( elem );
-		}
-	}
+//	void deserialize( std::vector<CoreMetaData>& _vec ) {
+//		const static char* metadataS = "metadata";
+//		for ( SizeType t = 0; t < (*value).Size(); t++ ) {
+//			CoreMetaData elem;
+//			if ( (*value)[t].FindMember( MetaData::Id.c_str() ) != (*value)[t].MemberEnd() ) {
+//				elem.setId( (*value)[t][MetaData::Id.c_str()].GetString() );
+//			}
+//            if ( (*value)[t].FindMember( MetaData::Type.c_str() ) != (*value)[t].MemberEnd() ) {
+//                elem.setType( (*value)[t][MetaData::Type.c_str()].GetString() );
+//            }
+//            if ( (*value)[t].FindMember( MetaData::Hash.c_str() ) != (*value)[t].MemberEnd() ) {
+//                elem.setHash( (*value)[t][MetaData::Hash.c_str()].GetString() );
+//            }
+//			if ( (*value)[t].FindMember( metadataS ) != (*value)[t].MemberEnd() ) {
+//				elem.setName(( *value )[t][metadataS][MetaData::Name.c_str()].GetString());
+//				elem.setThumb(( *value )[t][metadataS][MetaData::Thumb.c_str()].GetString());
+//			}
+//			_vec.push_back( elem );
+//		}
+//	}
 
 };

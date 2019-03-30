@@ -27,7 +27,7 @@ void listCloudCallback( SceneOrchestrator* p ) {
         SerializableContainer rd;
         bn::decode_b64( elem.getThumb().begin(), elem.getThumb().end(), std::back_inserter(rd) );
         IB{ p->SG(), elem.getName() }.make( rd );
-        cloudEntitiesTypeMap.insert( {elem.getType(), elem} );
+        cloudEntitiesTypeMap.insert( {elem.getGroup(), elem} );
     }
 }
 

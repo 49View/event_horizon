@@ -57,49 +57,13 @@ public:
     }
 };
 
-//JSONDATA_R( MaterialProperties, pixelTexelRatio, cost, isStreaming )
-//    float   pixelTexelRatio = 0.04f;
-//    float   cost = 1.0f;
-//    bool    isStreaming = false;
-//
-//    bool operator==( const MaterialProperties& rhs ) const {
-//        return pixelTexelRatio == rhs.pixelTexelRatio && cost == rhs.cost && isStreaming == rhs.isStreaming;
-//    }
-//
-////    void serialize( std::shared_ptr<SerializeBin> writer ) const {
-////        writer->write(pixelTexelRatio);
-////        writer->write(cost);
-////        writer->write(isStreaming);
-////    }
-////
-////    void deserialize( std::shared_ptr<DeserializeBin> reader ) {
-////        reader->read(pixelTexelRatio);
-////        reader->read(cost);
-////        reader->read(isStreaming);
-////    }
-//};
-
 class Material {
 public:
-    Material();
-    RESOURCE_CTORS(Material);
-    JSONSERIAL( Material, type, images, values );
-    Material( std::string type, std::vector<ResourceRef> images, std::shared_ptr<HeterogeneousMap> values );
-    //    Material(const Material& _val);
-    void bufferDecode( const unsigned char* _buffer, size_t _length );
-
-//    Material& t( const std::string& _tn );
-//    Material& c( const Color4f& _col );
+    JSONSERIAL( Material, values );
+    explicit Material( const std::string& _type );
 
     void resolveDynamicConstants();
 
-//    std::string PBRName( const std::string& _type ) const;
-//    const std::string getBaseColor() const;
-//    const std::string getNormal() const;
-//    const std::string getAmbientOcclusion() const;
-//    const std::string getRoughness() const;
-//    const std::string getMetallic() const;
-//    const std::string getHeight() const;
     float getMetallicValue() const;
     void setMetallicValue( float _metallicValue );
     float getRoughnessValue() const;
@@ -109,40 +73,14 @@ public:
     float getOpacity() const;
     void setOpacity( float _opacityValue );
 
-//    const MaterialProperties& getProperties() const;
-//    void setProperties( const MaterialProperties& properties );
-
-    void clone( const Material& _source );
-
-//    Material& buffer( const std::string& _bname, uint8_p&& _data, const std::string& _uniformName );
-//    Material& buffer( const std::string& _bname, const ucchar_p& _data, const std::string& _uniformName );
-//    const MaterialImageBuffers& Buffers() const;
-//    void tarBuffers( const SerializableContainer& _bufferTarFiles );
-//    void Buffers( MaterialImageCallback imageCallback );
-
 //    bool isStreammable() const;
     float translucency() const;
 
-//    KnownBufferMap knownBuffers() const;
-
-    const std::shared_ptr<HeterogeneousMap> Values() const {
-        return values;
-    }
-
-    std::shared_ptr<HeterogeneousMap> Values() {
-        return values;
-    }
-
-    void Values( std::shared_ptr<HeterogeneousMap> _values ) {
-        Material::values = std::move( _values );
-    }
+    const std::shared_ptr<HeterogeneousMap> Values() const;
+    std::shared_ptr<HeterogeneousMap> Values();
+    void Values( std::shared_ptr<HeterogeneousMap> _values );
 
 protected:
-    std::string                           type;
-    std::vector<ResourceRef>              images;
     std::shared_ptr<HeterogeneousMap>     values;
-
-public:
-    static Material WHITE_PBR();
 };
 

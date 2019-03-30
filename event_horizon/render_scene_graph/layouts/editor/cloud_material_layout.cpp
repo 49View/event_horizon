@@ -8,5 +8,5 @@
 #include <event_horizon/poly/resources/material_builder.h>
 
 void ImGuiCloudEntitiesMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
-    ImGuiCloudEntities( p, _r, "Cloud Materials", EntityGroup::Material );
+    ImGuiCloudEntities( p, _r, "Cloud Materials", ResourceGroup::Material );
 }

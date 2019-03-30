@@ -11,9 +11,11 @@
 #include <core/taggable.hpp>
 #include <core/http/basen.hpp>
 #include <core/zlib_util.h>
+#include <core/metadata.h>
 #include <core/serializable.hpp>
 #include <core/serializebin.hpp>
 #include <core/versionable.hpp>
+#include <poly/resources/resource_utils.hpp>
 
 class Material;
 class RawImage;
@@ -38,15 +40,15 @@ public:
     }
 
     inline static std::string Prefix() {
-        if constexpr ( std::is_same<R, Material>::value )                return "material";
-        if constexpr ( std::is_same<R, GeomData>::value )                return "geom";
-        if constexpr ( std::is_same<R, MaterialColor>::value  )          return "color";
-        if constexpr ( std::is_same<R, CameraBuilder>::value )           return "camera";
-        if constexpr ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
-        if constexpr ( std::is_same<R, RawImage>::value  )           return "image";
-        if constexpr ( std::is_same<R, FontBuilder>::value  )            return "font";
-        if constexpr ( std::is_same<R, UIElement>::value  )              return "ui_elem";
-        if constexpr ( std::is_same<R, CameraRig>::value  )              return "camera";
+        if constexpr ( std::is_same<R, Material>::value ) return ResourceGroup::Material;
+        if constexpr ( std::is_same<R, GeomData>::value ) return ResourceGroup::Geom;
+        if constexpr ( std::is_same<R, MaterialColor>::value ) return ResourceGroup::Color;
+        if constexpr ( std::is_same<R, CameraBuilder>::value ) return ResourceGroup::CameraRig;
+        if constexpr ( std::is_same<R, ProfileBuilder>::value ) return ResourceGroup::Profile;
+        if constexpr ( std::is_same<R, RawImage>::value ) return ResourceGroup::Image;
+        if constexpr ( std::is_same<R, FontBuilder>::value ) return ResourceGroup::Font;
+        if constexpr ( std::is_same<R, UIElement>::value ) return ResourceGroup::UI;
+        if constexpr ( std::is_same<R, CameraRig>::value ) return ResourceGroup::CameraRig;
     }
 
     inline static std::string GenerateThumbnail( const R& _res ) {
@@ -94,49 +96,39 @@ protected:
 
     std::string toMetaData() const {
         MegaWriter writer;
-        writer.StartObject();
-        writer.serialize( CoreMetaData{ this->Name(), T::Prefix(), this->Hash(),
-                                        T::GenerateThumbnail((T&)*this), generateRawData(), this->Tags() } );
-        if ( B::IsSerializable() ) {
-            writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
-        }
-        writer.EndObject();
+        CoreMetaData cmd{ this->Name(), T::Prefix(), this->Hash(),
+                      T::GenerateThumbnail((T&)*this), generateRawData(), this->Tags() };
+        cmd.serialize(&writer);
+//        if ( B::IsSerializable() ) {
+//            writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
+//        }
 
         return writer.getString();
     }
 
     std::string toMetaData( const SerializableContainer& _raw ) const {
         MegaWriter writer;
-        writer.StartObject();
-        writer.serialize( CoreMetaData{ this->Name(),
+        CoreMetaData cmd{ this->Name(),
                                         ResourceVersioning<T>::Prefix(),
                                         this->Hash(),
                                         "",//T::GenerateThumbnail((T&)*this),
                                         rawb64gzip(_raw),
-                                        this->Tags() } );
-        if ( B::IsSerializable() ) {
-            writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
-        }
-        writer.EndObject();
-
+                                        this->Tags() };
+        cmd.serialize(&writer);
         return writer.getString();
     }
 
     std::string toMetaData( const SerializableContainer& _raw,
                             const ResourceDependencyDict& _deps ) const {
         MegaWriter writer;
-        writer.StartObject();
-        writer.serialize( CoreMetaData{ this->Name(),
-                                        ResourceVersioning<T>::Prefix(),
-                                        this->Hash(),
-                                        "",//T::GenerateThumbnail((T&)*this),
-                                        rawb64gzip(_raw),
-                                        this->Tags() } );
-        if ( B::IsSerializable() ) {
-            writer.serialize( "BBox3d", Boxable<B>::BBox3d() );
-        }
-        writer.EndObject();
-
+        CoreMetaData cmd{ this->Name(),
+                          ResourceVersioning<T>::Prefix(),
+                          this->Hash(),
+                          "",//T::GenerateThumbnail((T&)*this),
+                          rawb64gzip(_raw),
+                          this->Tags(),
+                          _deps };
+        cmd.serialize(&writer);
         return writer.getString();
     }
 
@@ -160,6 +152,10 @@ protected:
 
     void publish2( const SerializableContainer& _raw, ResponseCallbackFunc callback  ) const {
         Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw), callback );
+    }
+
+    void publish3( const SerializableContainer& _raw, const ResourceDependencyDict& _deps, ResponseCallbackFunc callback  ) const {
+        Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw, _deps), callback );
     }
 
 public:

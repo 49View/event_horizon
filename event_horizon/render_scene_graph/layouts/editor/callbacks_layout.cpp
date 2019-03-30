@@ -46,8 +46,8 @@ void cloudCallback( SocketCallbackDataType data ) {
 }
 
 void allCallbacksEntitySetup() {
-    daemonEntityCallbacks[EntityGroup::Geom] = callbackGeom;
-    daemonEntityCallbacks[EntityGroup::Material] = callbackMaterial;
+    daemonEntityCallbacks[ResourceGroup::Geom] = callbackGeom;
+    daemonEntityCallbacks[ResourceGroup::Material] = callbackMaterial;
     Socket::on( "cloudStorageFileUpdate", cloudCallback );
 }
 
@@ -69,7 +69,7 @@ void allConversionsDragAndDropCallback( [[maybe_unused]] SceneOrchestrator* p, c
     std::string finalPath = pathSanitized;
 
     if ( extl == ".fbx" ) {
-        FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(EntityGroup::Geom) + getFileName(pathSanitized) );
+        FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(ResourceGroup::Geom) + getFileName(pathSanitized) );
     }
 //    else if ( extl == ".obj" ) {
 //        // Convert to GLTF
@@ -90,7 +90,7 @@ void allConversionsDragAndDropCallback( [[maybe_unused]] SceneOrchestrator* p, c
         addFileCallback<ProfileBuilder, ProfileManager>( pathSanitized, p->SG().PL() );
     }
     else if ( extl == ".sbsar" ) {
-        FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(EntityGroup::Material)+ getFileName(pathSanitized));
+        FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(ResourceGroup::Material)+ getFileName(pathSanitized));
     } else if ( extl == ".gltf" || extl == ".glb" ) {
         callbackGeomGLTF( finalPath );
     }

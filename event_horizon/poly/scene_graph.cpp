@@ -172,13 +172,13 @@ void SceneGraph::nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot ) 
 }
 
 void SceneGraph::init() {
-    B<IB>( S::WHITE    ).addIM( RawImage::WHITE4x4()      );
-    B<IB>( S::BLACK    ).addIM( RawImage::BLACK_RGBA4x4() );
-    B<IB>( S::NORMAL   ).addIM( RawImage::NORMAL4x4()     );
-    B<IB>( S::DEBUG_UV ).addIM( RawImage::DEBUG_UV()      );
+    B<IB>( S::WHITE     ).addIM( RawImage::WHITE4x4()      );
+    B<IB>( S::BLACK     ).addIM( RawImage::BLACK_RGBA4x4() );
+    B<IB>( S::NORMAL    ).addIM( RawImage::NORMAL4x4()     );
+    B<IB>( S::DEBUG_UV  ).addIM( RawImage::DEBUG_UV()      );
 
-    B<MB>(S::WHITE_PBR).addIM( Material::WHITE_PBR() );
-//    B<MB>("tomato").load();
+    B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
+    B<MB>( "tomato" ).load();
 
-   CameraBuilder{CM()}.makeDefault();
+    CameraBuilder{CM()}.makeDefault();
 }
