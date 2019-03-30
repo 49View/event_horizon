@@ -1,25 +1,6 @@
 #pragma once
 
-#include <utility>
-#include <unordered_set>
-
-#include <stb/stb_image_resize.h>
-#include <stb/stb_image_write.h>
-
-#include <core/http/basen.hpp>
-#include <core/http/webclient.h>
-#include <core/names.hpp>
-#include <core/name_policy.hpp>
 #include <core/heterogeneous_map.hpp>
-#include <core/descriptors/uniform_names.h>
-#include <core/image_util.h>
-#include <core/util.h>
-#include <core/math/vector4f.h>
-#include <poly/resources/resource_utils.hpp>
-
-using MaterialImageBuffers = std::unordered_map<std::string, uint8_p>;
-using KnownBufferMap = std::unordered_map<std::string, std::string>;
-using MaterialImageCallback = std::function<void( const std::string&, ucchar_p )>;
 
 class MaterialColor {
 public:

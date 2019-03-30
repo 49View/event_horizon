@@ -1,6 +1,8 @@
 
 #include "material.h"
 
+#include <core/descriptors/uniform_names.h>
+
 Material::Material( const std::string& _type ) {
     values = std::make_shared<HeterogeneousMap>(_type);
 }

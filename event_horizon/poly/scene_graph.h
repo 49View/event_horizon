@@ -21,7 +21,6 @@
 
 class StreamingMediator;
 class CameraManager;
-class MaterialColor;
 
 //class PolySceneGraphTextureList : public ImageDepencencyMaker {
 //    bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
@@ -50,6 +49,10 @@ using FB = FontBuilder;
 class Material;
 using MaterialBuilder = ResourceBuilder5<Material>;
 using MB = MaterialBuilder;
+
+class MaterialColor;
+using MaterialColorBuilder = ResourceBuilder5<MaterialColor>;
+using MCB = MaterialColorBuilder;
 
 class SceneGraph;
 template<typename T, typename C> class ResourceManager;

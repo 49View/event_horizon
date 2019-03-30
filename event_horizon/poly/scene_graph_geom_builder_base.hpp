@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <poly/material.h>
+#include <core/names.hpp>
 #include <poly/resources/builders.hpp>
 #include <poly/scene_graph_builder.hpp>
 

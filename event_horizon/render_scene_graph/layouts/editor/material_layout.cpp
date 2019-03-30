@@ -5,6 +5,7 @@
 #include "material_layout.h"
 #include <core/tar_util.h>
 #include <core/raw_image.h>
+#include <core/descriptors/uniform_names.h>
 #include <event_horizon/poly/resources/geom_builder.h>
 #include <poly/resources/resource_builder.hpp>
 #include <graphics/imgui/imgui.h>
