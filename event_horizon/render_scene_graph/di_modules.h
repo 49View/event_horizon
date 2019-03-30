@@ -8,7 +8,6 @@
 #include <graphics/mouse_input.hpp>
 #include <graphics/shader_manager.h>
 #include <graphics/texture_manager.h>
-#include <poly/camera_manager.h>
 #include "render_scene_graph.h"
 
 namespace di = boost::di;

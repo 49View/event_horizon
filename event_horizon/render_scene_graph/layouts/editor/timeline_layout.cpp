@@ -6,11 +6,12 @@
 
 #include "timeline_layout.h"
 #include <core/math/anim.h>
-#include <poly/camera_manager.h>
+#include <core/camera.h>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/imgui_internal.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
+#include <poly/resources/resource_manager.hpp>
 
 static int currentFrame = 0;
 const static float secondMult = 100.0f;
@@ -82,7 +83,7 @@ void ImGuiTimeline::renderImpl( [[maybe_unused]] SceneOrchestrator* p, Rect2f& _
 
     ImGui::SameLine();
     if ( ImGui::Button( "Camera" ) && timelineNameCStr ) {
-        Timeline::addLinked( timelineNameCStr, p->SG().CM().getCamera(Name::Foxtrot), currframeToTime() );
+        Timeline::addLinked( timelineNameCStr, p->SG().CM().get(Name::Foxtrot)->getMainCamera(), currframeToTime() );
     }
 
     if ( currentFrame < 0 ) currentFrame = 0;

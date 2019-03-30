@@ -26,7 +26,6 @@ class CameraRig;
 class Renderer;
 class RenderSceneGraph;
 class TextInput;
-class CameraManager;
 class CommandQueue;
 class CameraControl;
 class CommandScriptPresenterManager;

@@ -5,7 +5,7 @@
 
 #include "scene_orchestrator.hpp"
 
-#include <poly/camera_manager.h>
+#include <core/camera.h>
 #include <core/camera_rig.hpp>
 #include <graphics/renderer.h>
 #include <graphics/render_list.h>
@@ -16,6 +16,8 @@
 
 #include <render_scene_graph/scene_state_machine.h>
 #include <render_scene_graph/render_scene_graph.h>
+
+#include <poly/resources/resource_manager.hpp>
 
 #include <stb/stb_image.h>
 
@@ -157,8 +159,6 @@ void SceneOrchestrator::inputPollUpdate() {
 		v->updateFromInputData( cid );
 	}
 
-	SG().CM().update();
-
 	resetSingleEventNotifications();
 }
 
@@ -230,7 +230,7 @@ void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotConta
 RenderSceneGraph& SceneOrchestrator::RSG() { return rsg; }
 
 std::shared_ptr<Camera> SceneOrchestrator::getCamera( const std::string& _name ) {
-	return SG().CM().getCamera(_name);
+	return SG().CM().get(_name)->getMainCamera();
 }
 
 const cameraRigsMap& SceneOrchestrator::getRigs() const {

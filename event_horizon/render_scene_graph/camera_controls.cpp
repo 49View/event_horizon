@@ -24,6 +24,8 @@ void CameraControl::updateFromInputData( const CameraInputData& mi ) {
 
     updateFromInputDataImpl( camera, mi );
 
+    camera->update();
+
 //    if ( Mode() == CameraMode::Edit2d ) {
 //        if ( mi.isMouseTouchedDown) {
 //            pan( Vector3f( mi.moveDiff * Vector2f{-1.0f, 1.0f}, 0.0f ) );

@@ -20,11 +20,6 @@
 #include <poly/resources/resource_utils.hpp>
 
 class StreamingMediator;
-class CameraManager;
-
-//class PolySceneGraphTextureList : public ImageDepencencyMaker {
-//    bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
-//};
 
 using NodeGraph = std::unordered_map<std::string, NodeVariants>;
 using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)>;
@@ -42,27 +37,32 @@ class Profile;
 using ProfileBuilder = ResourceBuilder5<Profile>;
 using PB = ProfileBuilder;
 
+class CameraRig;
+using CameraBuilder = ResourceBuilder5<CameraRig>;
+using CB = CameraBuilder;
+
 namespace Utility::TTFCore { class Font; }
 using FontBuilder = ResourceBuilder5<Utility::TTFCore::Font>;
 using FB = FontBuilder;
-
-class Material;
-using MaterialBuilder = ResourceBuilder5<Material>;
-using MB = MaterialBuilder;
 
 class MaterialColor;
 using MaterialColorBuilder = ResourceBuilder5<MaterialColor>;
 using MCB = MaterialColorBuilder;
 
+class Material;
+using MaterialBuilder = ResourceBuilder5<Material>;
+using MB = MaterialBuilder;
+
+
 class SceneGraph;
 template<typename T, typename C> class ResourceManager;
-class CameraManager;
 
 using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
 using FontManager       = ResourceManager<Utility::TTFCore::Font, ResourceManagerContainer<Utility::TTFCore::Font>>;
 using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Profile>>;
 using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Material>>;
 using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>>;
+using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>>;
 
 class CommandScriptSceneGraph : public CommandScript {
 public:
@@ -103,7 +103,7 @@ public:
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
-    CameraManager& CM();
+    CameraManager& CM() { return cm; }
     FontManager& FM() { return fm; }
     ColorManager& MC() { return cl; }
     SunBuilder& SB() { return sb; }
@@ -115,6 +115,7 @@ public:
         if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return FM();
         if constexpr ( std::is_same<R, Profile>::value )                return PL();
         if constexpr ( std::is_same<R, MaterialColor>::value )          return MC();
+        if constexpr ( std::is_same<R, CameraRig>::value )              return CM();
     }
 
     template <typename T>

@@ -6,7 +6,6 @@
 #include <poly/resources/resource_utils.hpp>
 #include <core/raw_image.h>
 #include <core/node.hpp>
-#include <poly/camera_manager.h>
 #include <event_horizon/poly/resources/geom_builder.h>
 #include <event_horizon/poly/resources/ui_shape_builder.h>
 #include <graphics/renderer.h>

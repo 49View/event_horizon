@@ -10,7 +10,6 @@
 #include <poly/resources/resource_builder.hpp>
 #include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
-#include <poly/camera_manager.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
 //    addImpl(_geom);
@@ -162,8 +161,6 @@ CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
     addCommandDefinition("change time", std::bind(&SceneGraph::cmdChangeTime, &_hm, std::placeholders::_1 ));
 }
 
-CameraManager& SceneGraph::CM() { return cm; }
-
 void SceneGraph::nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot ) {
     nodeAddSignal.connect( _slot );
 }
@@ -177,5 +174,5 @@ void SceneGraph::init() {
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
 //    B<MB>( "tomato" ).load();
 
-    CameraBuilder{CM()}.makeDefault();
+    B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }

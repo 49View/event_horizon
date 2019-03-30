@@ -6,7 +6,6 @@
 
 #include <memory>
 #include <core/di.hpp>
-#include <poly/camera_manager.h>
 #include <graphics/shader_manager.h>
 #include <graphics/light_manager.h>
 #include <graphics/program_uniform_set.h>
@@ -16,6 +15,7 @@
 #include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/scene_state_machine.h>
+#include <poly/resources/resource_manager.hpp>
 
 namespace di = boost::di;
 
