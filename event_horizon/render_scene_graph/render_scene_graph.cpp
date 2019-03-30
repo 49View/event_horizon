@@ -4,11 +4,9 @@
 
 #include "render_scene_graph.h"
 #include <poly/resources/resource_utils.hpp>
-#include <poly/resources/image_builder.h>
 #include <core/raw_image.h>
 #include <core/node.hpp>
 #include <poly/camera_manager.h>
-#include <event_horizon/poly/resources/material_builder.h>
 #include <event_horizon/poly/resources/geom_builder.h>
 #include <event_horizon/poly/resources/ui_shape_builder.h>
 #include <graphics/renderer.h>
@@ -26,20 +24,10 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
 
     sg.ML().connect( [](const ResourceSignalsAddSignature<Material>& _val ) {
         LOGRS( "Adding Material " << std::get<1>(_val) );
-        // ### TODO: SUSTITUTE Buffers with image hashes for materials!!!
-//        for ( const auto& b : _elem->Buffers() ) {
-//            ImageBuilder{sg.TL(), b.first}.makeDirect(b.second);
-//        }
     });
 
     sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {
         if ( auto as = std::get_if<GeomAssetSP>(&_geom); as != nullptr ) {
-            (*as)->visitFixUp( [&]( std::shared_ptr<GeomData> g ) {
-//                ### MAT Check another way of "fixing up", probably we won't need it at the end! :O
-//                if ( g ) {
-//                    SG().ML().add( g->getMaterial() );
-//                }
-            });
             (*as)->subscribeData(hierRenderObserver);
             (*as)->sendNotifyData("generateGeometryVP");
         } else if ( auto as = std::get_if<UIAssetSP>(&_geom); as != nullptr ) {

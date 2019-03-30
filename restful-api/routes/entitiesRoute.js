@@ -45,6 +45,7 @@ router.get('/:group/:tags', async (req, res, next) => {
                 let tarDict = [];
                 // tarDict.push( { group: entity.group, filename: entity.metadata.name } );
                 tarPack.entry( {name: entity.metadata.name}, fileData["Body"] );    
+                tarDict.push( { group: entity.group, filename: entity.metadata.name, hash: entity.metadata.hash } );
                 for (const elementGroup of entity.metadata.deps) {
                     for (const element of elementGroup.value ) {
                         const depArray = await entityController.getEntityDeps(entity.project, elementGroup.key, element);

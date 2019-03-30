@@ -3,7 +3,7 @@
 //
 
 #include "renderer.h"
-#include <poly/resources/font_builder.h>
+#include <core/TTF.h>
 #include <graphics/vp_builder.hpp>
 
 static std::shared_ptr<HeterogeneousMap> mapColor( const Color4f& _matColor ) {

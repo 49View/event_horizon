@@ -15,18 +15,14 @@
 
 #include <core/uuid.hpp>
 #include <core/command.hpp>
-#include <poly/resources/resource_utils.hpp>
 #include <core/suncalc/sun_builder.h>
 #include <poly/poly.hpp>
+#include <poly/resources/resource_utils.hpp>
 
 class StreamingMediator;
 class CameraManager;
-class RawImage;
 class Profile;
-class Material;
 class MaterialColor;
-
-namespace Utility::TTFCore { class Font; }
 
 //class PolySceneGraphTextureList : public ImageDepencencyMaker {
 //    bool addImpl( [[maybe_unused]] ImageBuilder& tbd, [[maybe_unused]] std::unique_ptr<uint8_t []>& _data ) override { return true; };
@@ -37,6 +33,20 @@ using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)
 
 using NodeGraphConnectParamsSig = NodeVariants&;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
+
+template<typename R> class ResourceBuilder5;
+
+class RawImage;
+using ImageBuilder = ResourceBuilder5<RawImage>;
+using IB = ImageBuilder;
+
+class Material;
+using MaterialBuilder = ResourceBuilder5<Material>;
+using MB = MaterialBuilder;
+
+namespace Utility::TTFCore { class Font; }
+using FontBuilder = ResourceBuilder5<Utility::TTFCore::Font>;
+using FB = FontBuilder;
 
 class SceneGraph;
 template<typename T, typename C> class ResourceManager;

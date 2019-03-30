@@ -19,9 +19,9 @@
 
 class Material;
 class RawImage;
+namespace Utility::TTFCore { class Font; }
 class GeomData;
 class ProfileBuilder;
-class FontBuilder;
 class CameraBuilder;
 class MaterialColor;
 class UIElement;
@@ -34,7 +34,6 @@ public:
     inline static size_t Version() {
         if ( std::is_same<R, Material>::value ) return 2500;
         if ( std::is_same<R, GeomData>::value )        return 2000;
-        if ( std::is_same<R, ProfileBuilder>::value  ) return 1000;
         if ( std::is_same<R, MaterialColor>::value  )  return 1000;
         return 0;
     }
@@ -46,7 +45,7 @@ public:
         if constexpr ( std::is_same<R, CameraBuilder>::value ) return ResourceGroup::CameraRig;
         if constexpr ( std::is_same<R, ProfileBuilder>::value ) return ResourceGroup::Profile;
         if constexpr ( std::is_same<R, RawImage>::value ) return ResourceGroup::Image;
-        if constexpr ( std::is_same<R, FontBuilder>::value ) return ResourceGroup::Font;
+        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return ResourceGroup::Font;
         if constexpr ( std::is_same<R, UIElement>::value ) return ResourceGroup::UI;
         if constexpr ( std::is_same<R, CameraRig>::value ) return ResourceGroup::CameraRig;
     }
@@ -60,7 +59,7 @@ public:
 
         if ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
         if ( std::is_same<R, RawImage>::value  )           return "image";
-        if ( std::is_same<R, FontBuilder>::value  )            return "font";
+        if ( std::is_same<R, Utility::TTFCore::Font>::value  )            return "font";
         return "unknown";
     }
 

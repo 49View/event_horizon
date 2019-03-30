@@ -6,9 +6,7 @@
 #include <core/tar_util.h>
 #include <core/raw_image.h>
 #include <event_horizon/poly/resources/geom_builder.h>
-#include <event_horizon/poly/resources/material_builder.h>
-#include <poly/resources/image_builder.h>
-#include <poly/resources/material_file.hpp>
+#include <poly/resources/resource_builder.hpp>
 #include <graphics/imgui/imgui.h>
 #include <graphics/texture_manager.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>

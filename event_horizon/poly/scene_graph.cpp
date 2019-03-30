@@ -3,17 +3,15 @@
 //
 
 #include "scene_graph.h"
-#include <poly/resources/resource_utils.hpp>
 #include <core/node.hpp>
 #include <core/raw_image.h>
-#include <poly/resources/image_builder.h>
 #include <core/camera_rig.hpp>
-#include <event_horizon/poly/resources/geom_builder.h>
-#include <event_horizon/poly/resources/ui_shape_builder.h>
+#include <core/TTF.h>
+#include <poly/resources/resource_builder.hpp>
+#include <poly/resources/geom_builder.h>
+#include <poly/resources/ui_shape_builder.h>
 #include <poly/camera_manager.h>
-#include <poly/resources/font_builder.h>
 #include <poly/resources/profile_builder.h>
-#include <event_horizon/poly/resources/material_builder.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
 //    addImpl(_geom);
@@ -178,7 +176,7 @@ void SceneGraph::init() {
     B<IB>( S::DEBUG_UV  ).addIM( RawImage::DEBUG_UV()      );
 
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
-    B<MB>( "tomato" ).load();
+//    B<MB>( "tomato" ).load();
 
     CameraBuilder{CM()}.makeDefault();
 }

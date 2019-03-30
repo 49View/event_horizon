@@ -333,40 +333,55 @@ public:
                            MegaReader reader( document );
                            reader.deserialize( dict );
 
+                           std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
+                               return resourcePriority( a.group ) < resourcePriority( b.group );
+                           } );
+
                            for ( const auto& rd : dict ) {
                                if ( rd.group == ResourceGroup::Image ) {
-                                   addDependency<RawImage>( rd, fs[rd.filename], AddResourcePolicy::Deferred );
+                                   addResource<RawImage>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                               } else if ( rd.group == ResourceGroup::Font ) {
+                                   addResource<Utility::TTFCore::Font>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                               } else if ( rd.group == ResourceGroup::Profile ) {
+                                   addResource<Profile>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                               } else if ( rd.group == ResourceGroup::Color ) {
+                                   addResource<MaterialColor>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                               } else if ( rd.group == ResourceGroup::Material ) {
+                                   addResource<Material>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                               } else {
+                                   LOGRS("{" << rd.group << "} Rescoude not supported yet in GET callback");
+                                   ASSERT(0);
                                }
                            }
                        } else {
-                           addResource( buff, AddResourcePolicy::Deferred );
+                           addResource<R>( buff, this->Name(), this->Hash(),AddResourcePolicy::Deferred );
                        }
                        if ( ccf ) ccf(params);
                    } );
     }
 
     void addIM( const R& _res ) {
-        addInternal( EF::clone(_res), AddResourcePolicy::Immediate );
+        addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }
     void addDF( const R& _res ) {
-        addInternal( EF::clone(_res), AddResourcePolicy::Deferred );
+        addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Deferred );
     }
     void addIM( std::shared_ptr<R> _res ) {
-        addInternal( _res, AddResourcePolicy::Immediate );
+        addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }
     void addDF( std::shared_ptr<R> _res ) {
-        addInternal( _res, AddResourcePolicy::Deferred );
+        addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
     }
     void add( std::shared_ptr<R> _res, AddResourcePolicy _arp ) {
-        addInternal( _res, _arp );
+        addInternal<R>( _res, this->Name(), this->Hash(), _arp );
     }
 
     std::shared_ptr<R> make( const SerializableContainer& _data ) {
         if ( auto ret = prepAndCheck(_data ); ret ) return ret;
-        return addResource(_data, AddResourcePolicy::Immediate);
+        return addResource<R>(_data, this->Name(), this->Hash(), AddResourcePolicy::Immediate);
     }
 
-    void create( const SerializableContainer& _data, const ResourceDependencyDict& _res ) {
+    void create( const SerializableContainer& _data, const ResourceDependencyDict& _res = {} ) {
         if ( prepAndCheck(_data ) ) return;
 //        if ( B::Version() != 0 ) this->addTag( this->hashFn(B::Version()) );
 
@@ -375,7 +390,7 @@ public:
             // We make sure that in case server side has to change name in case
             // of duplicates we reflect it here client side
             this->Name( resJson.metadata.name );
-            addResource(_data, AddResourcePolicy::Deferred);
+            addResource<R>(_data, this->Name(), this->Hash(), AddResourcePolicy::Deferred);
         } );
     }
 
@@ -388,27 +403,35 @@ protected:
         return nullptr;
     }
 
+//    template <typename DEP>
+//    std::shared_ptr<DEP> addDependency( const ResourceTarDict& _rd,
+//                                        const SerializableContainer& _data,
+//                                        AddResourcePolicy _arp ) {
+//        auto ret = EF::create<DEP>(_data);
+//        sg.M<DEP>().addDeferred( ret, _rd.filename, _rd.hash );
+//        return ret;
+//    }
+
     template <typename DEP>
-    std::shared_ptr<DEP> addDependency( const ResourceTarDict& _rd,
-                                        const SerializableContainer& _data,
-                                        AddResourcePolicy _arp ) {
+    std::shared_ptr<DEP> addResource( const SerializableContainer& _data,
+                                    const std::string& _name,
+                                    const ResourceRef& _hash,
+                                    AddResourcePolicy _arp ) {
         auto ret = EF::create<DEP>(_data);
-        sg.M<DEP>().addDeferred( ret, _rd.filename, _rd.hash );
+        addInternal<DEP>( ret, _name, _hash, _arp );
         return ret;
     }
 
-    std::shared_ptr<R> addResource( const SerializableContainer& _data, AddResourcePolicy _arp ) {
-        auto ret = EF::create<R>(_data);
-        addInternal( ret, _arp );
-        return ret;
-    }
-
-    void addInternal( std::shared_ptr<R> _res, AddResourcePolicy _arp ) {
+    template <typename DEP>
+    void addInternal( std::shared_ptr<DEP> _res,
+                      const std::string& _name,
+                      const ResourceRef& _hash,
+                      AddResourcePolicy _arp ) {
 
         if ( _arp == AddResourcePolicy::Deferred ) {
-            sg.M<R>().addDeferred( _res, this->Name(), this->Hash() );
+            sg.M<DEP>().addDeferred( _res, _name, _hash );
         } else {
-            sg.M<R>().addImmediate( _res, this->Name(), this->Hash() );
+            sg.M<DEP>().addImmediate( _res, _name, _hash );
         }
 
     }

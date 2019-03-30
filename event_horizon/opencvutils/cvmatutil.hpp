@@ -12,7 +12,6 @@
 #include <algorithm>
 #include "opencv2/imgproc.hpp"
 #include <opencv2/highgui.hpp>
-#include "poly/resources/image_builder.h"
 #include "core/math/vector2f.h"
 
 namespace cv { class Mat; }

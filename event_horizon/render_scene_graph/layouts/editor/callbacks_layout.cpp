@@ -15,8 +15,6 @@
 
 #include <poly/profile.hpp>
 
-#include <poly/resources/font_builder.h>
-#include <poly/resources/image_builder.h>
 #include <poly/resources/profile_builder.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 

@@ -4,11 +4,9 @@
 
 #include "ui_shape_builder.h"
 #include <core/node.hpp>
-#include <poly/resources/image_builder.h>
 #include <core/app_globals.h>
 #include <core/TTF.h>
 #include <core/font_utils.hpp>
-#include <poly/resources/font_builder.h>
 
 typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 

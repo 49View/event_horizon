@@ -2,8 +2,6 @@
 
 #include <core/di.hpp>
 #include <core/command.hpp>
-#include <poly/resources/font_builder.h>
-#include <poly/resources/image_builder.h>
 #include <core/streaming_mediator.hpp>
 #include <graphics/renderer.h>
 #include <graphics/text_input.hpp>

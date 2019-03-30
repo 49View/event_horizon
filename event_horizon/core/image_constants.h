@@ -116,4 +116,57 @@ struct ImageParams {
     ImageParams( int width, int height, int channels ) : width( width ), height( height ), channels( channels ) {}
     ImageParams( int width, int height, int channels, int bpp ) : width( width ), height( height ),
                                                                   channels( channels ), bpp( bpp ) {}
+
+    ImageParams& setSize( int s ) {
+        width = s;
+        height = s;
+        return *this;
+    }
+
+    ImageParams& setBpp( int s ) {
+        bpp = s;
+        return *this;
+    }
+
+    ImageParams& size( int _width, int _height ) {
+        width = _width;
+        height = _height;
+        return *this;
+    }
+
+    ImageParams& setWidth( int _width ) {
+        width = _width;
+        return *this;
+    }
+
+    ImageParams& setHeight( int _height ) {
+        height = _height;
+        return *this;
+    }
+
+    ImageParams& setChannels( int _channels ) {
+        channels = _channels;
+        return *this;
+    }
+
+    ImageParams& format( PixelFormat _outFormat ) {
+        outFormat = _outFormat;
+        return *this;
+    }
+
+    ImageParams& target( TextureTargetMode _ttm ) {
+        ttm = _ttm;
+        return *this;
+    }
+
+    ImageParams& setWrapMode( WrapMode _wrapMode ) {
+        wrapMode = _wrapMode;
+        return *this;
+    }
+
+    ImageParams& setFilterMode( Filter _filterMode ) {
+        filterMode = _filterMode;
+        return *this;
+    }
+                                                                      
 };

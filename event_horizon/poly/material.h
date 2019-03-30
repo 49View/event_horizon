@@ -23,6 +23,8 @@ using MaterialImageCallback = std::function<void( const std::string&, ucchar_p )
 
 class MaterialColor {
 public:
+    JSONSERIAL( MaterialColor, color, name, category, brand, code, application );
+
     Vector4f color = Vector4f::WHITE;
     std::string name = "perfect white";
     std::string category = "white";
@@ -33,27 +35,6 @@ public:
     std::string toString() {
         return name + "\n" + color.toString() + "\n" + category + "\n" + brand + "\n" +
         code + "\n" + application + "\n";
-    }
-
-    std::string toURLPathEncoded() const {
-        return ::toLower(application + "_" + brand + "_" + category + "_" + code + "_" + url_encode(name)) + ".col";
-    }
-
-    std::string toMetaData() const {
-        std::ostringstream streamHalf1;
-        std::ostringstream streamHalf2;
-        std::ostringstream streamRaw;
-        streamHalf1 << "{\"name\":\"" << name << "\",";
-        streamHalf2 <<   "\"color\":" << color.toStringJSONArray() << "," <<
-                         "\"category\":\"" << category << "\"," <<
-                         "\"brand\":\"" << brand << "\"," <<
-                         "\"code\":\"" << code << "\"," <<
-                         "\"application\":\"" << application <<
-                         "\"} ";
-        std::string str = streamHalf1.str() + streamHalf2.str();
-        std::string raw = bn::encode_b64( str );
-        streamRaw <<   "\"raw\":\"" << raw << "\",";
-        return streamHalf1.str() + streamRaw.str() + streamHalf2.str();
     }
 };
 
