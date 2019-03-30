@@ -14,8 +14,8 @@
 #include <core/raw_image.h>
 
 #include <poly/profile.hpp>
+#include <poly/resources/resource_builder.hpp>
 
-#include <poly/resources/profile_builder.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
 #include "geom_layout.h"

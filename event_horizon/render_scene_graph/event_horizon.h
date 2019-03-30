@@ -6,7 +6,6 @@
 
 #include <memory>
 #include <core/di.hpp>
-#include <poly/resources/profile_builder.h>
 #include <poly/camera_manager.h>
 #include <graphics/shader_manager.h>
 #include <graphics/light_manager.h>

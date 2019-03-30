@@ -11,7 +11,6 @@
 #include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
 #include <poly/camera_manager.h>
-#include <poly/resources/profile_builder.h>
 
 void SceneGraph::add( NodeVariants _geom ) {
 //    addImpl(_geom);

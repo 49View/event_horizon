@@ -21,7 +21,6 @@
 
 class StreamingMediator;
 class CameraManager;
-class Profile;
 class MaterialColor;
 
 //class PolySceneGraphTextureList : public ImageDepencencyMaker {
@@ -40,13 +39,17 @@ class RawImage;
 using ImageBuilder = ResourceBuilder5<RawImage>;
 using IB = ImageBuilder;
 
-class Material;
-using MaterialBuilder = ResourceBuilder5<Material>;
-using MB = MaterialBuilder;
+class Profile;
+using ProfileBuilder = ResourceBuilder5<Profile>;
+using PB = ProfileBuilder;
 
 namespace Utility::TTFCore { class Font; }
 using FontBuilder = ResourceBuilder5<Utility::TTFCore::Font>;
 using FB = FontBuilder;
+
+class Material;
+using MaterialBuilder = ResourceBuilder5<Material>;
+using MB = MaterialBuilder;
 
 class SceneGraph;
 template<typename T, typename C> class ResourceManager;

@@ -21,7 +21,7 @@ class Material;
 class RawImage;
 namespace Utility::TTFCore { class Font; }
 class GeomData;
-class ProfileBuilder;
+class Profile;
 class CameraBuilder;
 class MaterialColor;
 class UIElement;
@@ -43,7 +43,7 @@ public:
         if constexpr ( std::is_same<R, GeomData>::value ) return ResourceGroup::Geom;
         if constexpr ( std::is_same<R, MaterialColor>::value ) return ResourceGroup::Color;
         if constexpr ( std::is_same<R, CameraBuilder>::value ) return ResourceGroup::CameraRig;
-        if constexpr ( std::is_same<R, ProfileBuilder>::value ) return ResourceGroup::Profile;
+        if constexpr ( std::is_same<R, Profile>::value ) return ResourceGroup::Profile;
         if constexpr ( std::is_same<R, RawImage>::value ) return ResourceGroup::Image;
         if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return ResourceGroup::Font;
         if constexpr ( std::is_same<R, UIElement>::value ) return ResourceGroup::UI;
@@ -57,7 +57,7 @@ public:
         if ( std::is_same<R, MaterialColor>::value  )          return "color";
         if ( std::is_same<R, CameraBuilder>::value )           return "camera";
 
-        if ( std::is_same<R, ProfileBuilder>::value  )         return "profile";
+        if ( std::is_same<R, Profile>::value  )         return "profile";
         if ( std::is_same<R, RawImage>::value  )           return "image";
         if ( std::is_same<R, Utility::TTFCore::Font>::value  )            return "font";
         return "unknown";

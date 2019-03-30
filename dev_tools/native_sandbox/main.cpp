@@ -26,7 +26,6 @@
 #include <poly/triangulator.hpp>
 #include <poly/polypartition.h>
 #include <poly/profile.hpp>
-#include <poly/resources/profile_builder.h>
 #include <event_horizon/poly/resources/ui_shape_builder.h>
 #include <poly/converters/svg/svgtopoly.hpp>
 

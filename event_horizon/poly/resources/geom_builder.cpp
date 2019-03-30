@@ -5,7 +5,6 @@
 #include "geom_builder.h"
 #include <core/node.hpp>
 #include <poly/resources/entity_factory.hpp>
-#include <poly/resources/profile_builder.h>
 #include <poly/poly.hpp>
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg ) : SceneGraphGeomBaseBuilder(_sg) {
