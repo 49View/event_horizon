@@ -17,52 +17,6 @@
 #include <core/versionable.hpp>
 #include <poly/resources/resource_utils.hpp>
 
-class Material;
-class RawImage;
-namespace Utility::TTFCore { class Font; }
-class GeomData;
-class Profile;
-class MaterialColor;
-class UIElement;
-class CameraRig;
-
-template <typename R>
-class ResourceVersioning {
-public:
-
-    inline static size_t Version() {
-        if ( std::is_same<R, Material>::value ) return 2500;
-        if ( std::is_same<R, GeomData>::value )        return 2000;
-        if ( std::is_same<R, MaterialColor>::value  )  return 1000;
-        return 0;
-    }
-
-    inline static std::string Prefix() {
-        if constexpr ( std::is_same<R, Material>::value ) return ResourceGroup::Material;
-        if constexpr ( std::is_same<R, GeomData>::value ) return ResourceGroup::Geom;
-        if constexpr ( std::is_same<R, MaterialColor>::value ) return ResourceGroup::Color;
-        if constexpr ( std::is_same<R, Profile>::value ) return ResourceGroup::Profile;
-        if constexpr ( std::is_same<R, RawImage>::value ) return ResourceGroup::Image;
-        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return ResourceGroup::Font;
-        if constexpr ( std::is_same<R, UIElement>::value ) return ResourceGroup::UI;
-        if constexpr ( std::is_same<R, CameraRig>::value ) return ResourceGroup::CameraRig;
-    }
-
-    inline static std::string GenerateThumbnail( const R& _res ) {
-        if ( std::is_same<R, Material>::value )         return "material";
-        if ( std::is_same<R, GeomData>::value )                return "geom";
-
-        if ( std::is_same<R, MaterialColor>::value  )          return "color";
-        if ( std::is_same<R, CameraRig>::value )           return "camera";
-
-        if ( std::is_same<R, Profile>::value  )         return "profile";
-        if ( std::is_same<R, RawImage>::value  )           return "image";
-        if ( std::is_same<R, Utility::TTFCore::Font>::value  )            return "font";
-        return "unknown";
-    }
-
-};
-
 template < typename T,
            typename B = JMATH::AABB,
            typename W = SerializeBin,

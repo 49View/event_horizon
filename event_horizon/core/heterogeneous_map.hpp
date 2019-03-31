@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 // Created by Dado on 2019-01-28.
 //
@@ -12,13 +10,8 @@
 #include <core/htypes_shared.hpp>
 #include <core/math/vector4f.h>
 #include <core/math/matrix4f.h>
-#include <core/serializable.hpp>
 #include <core/hashable.hpp>
 #include <core/serialization.hpp>
-
-class SerializeBin;
-class DeserializeBin;
-class MegaWriter;
 
 class HeterogeneousMap : public virtual Hashable<> {
 public:

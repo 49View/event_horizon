@@ -26,14 +26,13 @@
 #include <core/math/quad_vertices.h>
 #include <core/soa_utils.h>
 #include <core/boxable.hpp>
-#include <poly/resources/publisher.hpp>
+#include <core/name_policy.hpp>
+#include <core/serialization.hpp>
 
 #include <poly/polypartition.h>
 #include <poly/poly_helper.h>
 
 class Profile;
-class SerializeBin;
-class DeserializeBin;
 class GeomData;
 class VertexProcessing;
 class GeomBuilder;
@@ -179,7 +178,7 @@ private:
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };
 
-class GeomData : public Publisher<GeomData> {
+class GeomData : public Boxable<JMATH::AABB>, public NamePolicy<> {
 public:
     GeomData();
     virtual ~GeomData();
@@ -194,8 +193,6 @@ public:
               const GeomMappingData& _mapping );
 
     GeomData( const QuadVector3fNormalfList& quads, const GeomMappingData& _mapping );
-
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override;
 public:
     void addShape( ShapeType st, const Vector3f& center, const Vector3f& size, int subDivs = 0 );
 
@@ -218,13 +215,6 @@ public:
 
     inline std::vector<Vector3f>& Coords3d() { return mVdata.vcoords3d; };
     inline std::vector<Vector3f>& Normals3d() { return mVdata.vnormals3d; };
-
-//    ScreenShotContainerPtr& GeomBuilder::Thumb() {
-//        if ( !thumb ) {
-//            thumb = std::make_shared<ScreenShotContainer>();
-//        }
-//        return thumb;
-//    }
 
     void addFlatPoly( size_t vsize, const Vector3f *verts, const Vector3f& normal, bool reverseIfTriangulated = false );
     void addFlatPoly( size_t vsize, const std::vector<Vector2f>& verts, float z, const Vector3f& normal,
@@ -320,10 +310,7 @@ public:
                        const Vector3f& vb1 = Vector3f::ZERO, const Vector3f& vb2 = Vector3f::ZERO,
                        const Vector3f& vb3 = Vector3f::ZERO );
 
-    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override;
-
 protected:
-    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override;
 
     void
     pushTriangle( const std::vector<Vector3f>& vs, const std::vector<Vector2f>& vuv, const std::vector<Vector3f>& vn );
@@ -363,8 +350,4 @@ protected:
     Vector2f uvScaleInv = Vector2f::ONE;
     std::vector<Vector2f> wrapMappingCoords;
     Vector2f pullMappingCoords = Vector2f::ZERO;
-
-public:
-    static uint64_t Version() { return 2000; }
-    inline const static std::string EntityGroup() { return ResourceGroup::Geom; }
 };

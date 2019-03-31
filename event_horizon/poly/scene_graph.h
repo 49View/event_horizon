@@ -27,42 +27,7 @@ using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)
 using NodeGraphConnectParamsSig = NodeVariants&;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
 
-template<typename R> class ResourceBuilder5;
-
-class RawImage;
-using ImageBuilder = ResourceBuilder5<RawImage>;
-using IB = ImageBuilder;
-
-class Profile;
-using ProfileBuilder = ResourceBuilder5<Profile>;
-using PB = ProfileBuilder;
-
-class CameraRig;
-using CameraBuilder = ResourceBuilder5<CameraRig>;
-using CB = CameraBuilder;
-
-namespace Utility::TTFCore { class Font; }
-using FontBuilder = ResourceBuilder5<Utility::TTFCore::Font>;
-using FB = FontBuilder;
-
-class MaterialColor;
-using MaterialColorBuilder = ResourceBuilder5<MaterialColor>;
-using MCB = MaterialColorBuilder;
-
-class Material;
-using MaterialBuilder = ResourceBuilder5<Material>;
-using MB = MaterialBuilder;
-
-
 class SceneGraph;
-template<typename T, typename C> class ResourceManager;
-
-using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
-using FontManager       = ResourceManager<Utility::TTFCore::Font, ResourceManagerContainer<Utility::TTFCore::Font>>;
-using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Profile>>;
-using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Material>>;
-using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>>;
-using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>>;
 
 class CommandScriptSceneGraph : public CommandScript {
 public:

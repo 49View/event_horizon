@@ -49,16 +49,6 @@ public:
         _container.emplace(_elem);
     }
 
-//  ### KILL THIS ADD
-    void add( std::shared_ptr<T> _elem, const std::string& _aliasKey = "" ) {
-//        auto lHash = _elem->Hash();
-        auto lHash = _elem->Name();
-        resources[lHash] = _elem;
-        resourcesMapper[_elem->Name()] = lHash;
-        if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = lHash;
-        addSignal( { _elem, lHash } );
-    }
-
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );

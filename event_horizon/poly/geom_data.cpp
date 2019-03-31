@@ -122,46 +122,6 @@ GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
 	return logoGeoms;
 }
 
-//std::string GeomData::calcHashImpl() {
-//	std::stringstream ss;
-//	ss << material->Hash();
-//	ss << mVdata.numIndices();
-//	ss << mVdata.vcoords3d[0];
-//	return ss.str();
-//}
-
-
-// ### FIx all those serialization with new resource system!!
-void GeomData::serializeInternal( std::shared_ptr<SerializeBin> f ) const {
-//	f->write( material );
-//	f->write( mVdata.BBox3d() );
-//	f->write( mVdata.vIndices );
-//	f->write( mVdata.vcoords3d );
-//	f->write( mVdata.vnormals3d );
-//	f->write( mVdata.vtangents3d );
-//	f->write( mVdata.vbinormals3d );
-//	f->write( mVdata.vUVs );
-//    f->write( mVdata.vUV2s );
-//	f->write( mVdata.vColor );
-}
-
-void GeomData::deserializeInternal( std::shared_ptr<DeserializeBin> reader ) {
-//	reader->read( material );
-//	reader->read( mVdata.BBox3d() );
-//	reader->read( mVdata.vIndices );
-//	reader->read( mVdata.vcoords3d );
-//	reader->read( mVdata.vnormals3d );
-//	reader->read( mVdata.vtangents3d );
-//	reader->read( mVdata.vbinormals3d );
-//	reader->read( mVdata.vUVs );
-//	reader->read( mVdata.vUV2s );
-//	reader->read( mVdata.vColor );
-}
-
-void GeomData::serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const {
-//	writer->writeDep(material);
-}
-
 void GeomData::setMappingData( const GeomMappingData& _mapping ) {
 	mapping = _mapping;
 
