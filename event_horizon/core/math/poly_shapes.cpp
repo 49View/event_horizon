@@ -7,8 +7,8 @@
 //
 
 #include "poly_shapes.hpp"
-
 #include <unordered_map>
+#include <core/soa_utils.h>
 
 struct Edge {
     uint32_t v0;

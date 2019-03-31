@@ -126,34 +126,6 @@ WindingOrderT detectWindingOrder( const Vector3f& v1, const Vector3f& v2, const 
 	return ( w3.sideOfLine( w1, w2 ) > 0.0f ) ? WindingOrder::CCW : WindingOrder::CW;
 }
 
-void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
-			 const Vector2f& uv1, const Vector2f& uv2, const Vector2f& uv3,
-			 Vector3f& tangent1, Vector3f& tangent2, Vector3f& tangent3,
-			 Vector3f& bitangent1, Vector3f& bitangent2, Vector3f& bitangent3 ) {
-
-	// Edges of the triangle : position delta
-	Vector3f edge1 = v2 - v1;
-	Vector3f edge2 = v3 - v1;
-
-	// UV delta
-	Vector2f deltaUV1 = uv2 - uv1;
-	Vector2f deltaUV2 = uv3 - uv1;
-
-	float den = ( deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x() );
-	float r = isScalarEqual( den, 0.0f ) ? 1.0f : 1.0f / den;
-
-	Vector3f deltaPosT = ( edge1 * deltaUV2.y() - edge2 * deltaUV1.y() );
-	Vector3f deltaPosB = ( edge1 * -deltaUV2.x() + edge2 * deltaUV1.x() );
-
-	tangent1 = normalize( deltaPosT * r );
-	tangent2 = tangent1;
-	tangent3 = tangent1;
-
-	bitangent1 = normalize( deltaPosB * r );
-	bitangent2 = bitangent1;
-	bitangent3 = bitangent1;
-}
-
 std::vector<Vector3f> createQuadPoints( const Vector2f& size ) {
 
 	std::vector<Vector3f> lPoints;

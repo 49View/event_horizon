@@ -23,21 +23,6 @@ enum ReservedPolyTags {
     GT_Mesh,
 };
 
-struct PolyStruct {
-public:
-    std::unique_ptr<Vector3f[]> verts;
-    std::unique_ptr<Vector2f[]> uvs;
-    std::unique_ptr<Vector2f[]> uv2s;
-    std::unique_ptr<Vector3f[]> normals;
-    std::unique_ptr<Vector3f[]> tangents;
-    std::unique_ptr<Vector3f[]> binormals;
-    std::unique_ptr<Vector4f[]> colors;
-    std::unique_ptr<int32_t[]> indices;
-    int numVerts = 0;
-    int32_t numIndices = 0;
-    AABB bbox3d = AABB::INVALID;
-};
-
 struct polyQuadSub {
     std::array<Vector3f, 4> vcoords;
     std::array<Vector2f, 4> uvs;
@@ -77,10 +62,6 @@ Vector3f utilMirrorFlip( const Vector3f& v, WindingOrderT wow, WindingOrderT woh
 WindingOrderT detectWindingOrder( const Vector2f& pa, const Vector2f& pb, const Vector2f& pc );
 WindingOrderT detectWindingOrder( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3 );
 WindingOrderT detectWindingOrder( const std::vector<Vector2f>& _input );
-void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
-             const Vector2f& uv1, const Vector2f& uv2, const Vector2f& uv3,
-             Vector3f& tangent1, Vector3f& tangent2, Vector3f& tangent3,
-             Vector3f& bitangent1, Vector3f& bitangent2, Vector3f& bitangent3 );
 
 std::vector<Vector3f> createQuadPoints( const Vector2f& size = Vector2f::ONE );
 

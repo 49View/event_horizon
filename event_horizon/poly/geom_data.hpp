@@ -28,6 +28,7 @@
 #include <core/boxable.hpp>
 #include <core/name_policy.hpp>
 #include <core/serialization.hpp>
+#include <core/v_data.hpp>
 
 #include <poly/polypartition.h>
 #include <poly/poly_helper.h>
@@ -41,139 +42,6 @@ enum PullFlags : uint32_t {
     Sides = 1 << 0,
     Tops = 1 << 1,
     All = 0xffffffff,
-};
-
-class VData : public Boxable<JMATH::AABB> {
-public:
-    size_t numIndices() const { return vIndices.size(); }
-    size_t numVerts() const { return vcoords3d.size(); }
-    void add( int32_t _i, const Vector3f& _v,
-                          const Vector3f& _n,
-                          const Vector2f& _uv,
-                          const Vector2f& _uv2,
-                          const Vector3f& _t,
-                          const Vector3f& _b,
-                          const Vector4f& _c );
-    void fill( const PolyStruct& ps );
-    void fillIndices( const std::vector<int32_t>& _indices );
-    void fillCoors3d( const std::vector<Vector3f>& _verts );
-    void fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index = 0 );
-    void fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert = false );
-    void fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert = false );
-    void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
-    void fillColors( const std::vector<Vector4f>& _colors );
-    void allocateSpaceForVertices( const int _numVerts );
-    void changeWindingOrder();
-    void sanitizeUVMap();
-    void calcBinormal();
-    void changeHandness();
-    void mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );
-    void checkBaricentricCoordsOn( const Vector3f& i, int32_t pIndexStart, int32_t pIndexEnd,
-                                   int32_t& pIndex, float& u, float& v );
-    void addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector2f& _uv2, const Vector3f& _vn,
-                            const Vector3f& _vt, const Vector3f& _vb, const Vector3f& _v8 );
-    void swapIndicesWinding( Primitive _pr );
-
-    const std::vector<int32_t>& getVIndices() const {
-        return vIndices;
-    }
-
-    const std::vector<Vector3f>& getVcoords3d() const {
-        return vcoords3d;
-    }
-
-    const std::vector<Vector3f>& getVnormals3d() const {
-        return vnormals3d;
-    }
-
-    const std::vector<Vector3f>& getVtangents3d() const {
-        return vtangents3d;
-    }
-
-    const std::vector<Vector3f>& getVbinormals3d() const {
-        return vbinormals3d;
-    }
-
-    const std::vector<Vector2f>& getVUVs() const {
-        return vUVs;
-    }
-
-    const std::vector<Vector2f>& getVUV2s() const {
-        return vUV2s;
-    }
-
-    const std::vector<Vector4f>& getVColor() const {
-        return vColor;
-    }
-
-    void setVIndices( const size_t _index, const int32_t& _value ) {
-        vIndices[_index] = _value;
-    }
-
-    void setVcoords3d( const size_t _index, const Vector3f& _value ) {
-        vcoords3d[_index] = _value;
-    }
-
-    void setVnormals3d( const size_t _index, const Vector3f& _value ) {
-        vnormals3d[_index] = _value;
-    }
-
-    void setVtangents3d( const size_t _index, const Vector3f& _value ) {
-        vtangents3d[_index] = _value;
-    }
-
-    void setVbinormals3d( const size_t _index, const Vector3f& _value ) {
-        vbinormals3d[_index] = _value;
-    }
-
-    void setVUVs( const size_t _index, const Vector2f& _value ) {
-        vUVs[_index] = _value;
-    }
-
-    void setVUV2s( const size_t _index, const Vector2f& _value ) {
-        vUV2s[_index] = _value;
-    }
-
-    void setVColor( const size_t _index, const Vector4f& _value ) {
-        vColor[_index] = _value;
-    }
-
-    const Vector3f& getMin() const {
-        return BBox3d().minPoint();
-    }
-
-    void setMin( const Vector3f& min ) {
-        BBox3d().setMinPoint(min);
-    }
-
-    const Vector3f& getMax() const {
-        return BBox3d().maxPoint();
-    }
-
-    void setMax( const Vector3f& max ) {
-        BBox3d().setMaxPoint(max);
-    }
-
-    Primitive getPrimitive() const {
-        return primitive;
-    }
-
-    void setPrimitive( Primitive _primitive ) {
-        VData::primitive = _primitive;
-    }
-
-    friend class GeomData;
-
-private:
-    std::vector<int32_t>  vIndices;
-    std::vector<Vector3f> vcoords3d;
-    std::vector<Vector3f> vnormals3d;
-    std::vector<Vector3f> vtangents3d;
-    std::vector<Vector3f> vbinormals3d;
-    std::vector<Vector2f> vUVs;
-    std::vector<Vector2f> vUV2s;
-    std::vector<Vector4f> vColor;
-    Primitive primitive = PRIMITIVE_TRIANGLES;
 };
 
 class GeomData : public Boxable<JMATH::AABB>, public NamePolicy<> {

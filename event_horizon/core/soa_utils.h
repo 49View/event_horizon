@@ -11,15 +11,26 @@
 #include <vector>
 #include <map>
 
-#include "math/vector2f.h"
-#include "math/vector3f.h"
-#include "math/vector4f.h"
-#include "math/rect2f.h"
-#include "math/quad_vertices.h"
-
-#include "htypes_shared.hpp"
+#include <core/math/vector4f.h>
+#include <core/math/rect2f.h>
+#include <core/math/quad_vertices.h>
 
 typedef std::pair<std::vector<Vector2f>, Vector3f> vertexListVec2RGB;
+
+struct PolyStruct {
+public:
+    std::unique_ptr<Vector3f[]> verts;
+    std::unique_ptr<Vector2f[]> uvs;
+    std::unique_ptr<Vector2f[]> uv2s;
+    std::unique_ptr<Vector3f[]> normals;
+    std::unique_ptr<Vector3f[]> tangents;
+    std::unique_ptr<Vector3f[]> binormals;
+    std::unique_ptr<Vector4f[]> colors;
+    std::unique_ptr<int32_t[]> indices;
+    int numVerts = 0;
+    int32_t numIndices = 0;
+    AABB bbox3d = AABB::INVALID;
+};
 
 enum Primitive {
     PRIMITIVE_TRIANGLES = 0,

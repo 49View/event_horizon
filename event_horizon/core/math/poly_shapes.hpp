@@ -7,7 +7,10 @@
 //
 
 #pragma once
+
 #include "poly_utils.hpp"
+
+struct PolyStruct;
 
 enum class ShapeType {
 	None,
