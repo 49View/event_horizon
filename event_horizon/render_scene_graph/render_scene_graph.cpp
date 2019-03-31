@@ -4,6 +4,7 @@
 
 #include "render_scene_graph.h"
 #include <poly/resources/resource_utils.hpp>
+#include <poly/resources/resource_manager.hpp>
 #include <core/raw_image.h>
 #include <core/node.hpp>
 #include <event_horizon/poly/resources/geom_builder.h>

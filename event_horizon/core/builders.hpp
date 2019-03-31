@@ -9,9 +9,6 @@
 #include <core/callback_dependency.h>
 #include <core/http/webclient.h>
 #include <core/name_policy.hpp>
-#include <core/versionable.hpp>
-#include <poly/resources/entity_factory.hpp>
-#include <poly/resources/resource_manager.hpp>
 
 template<HttpQuery Q, typename T>
 Url makeUrl(const std::string& _name) {
@@ -71,67 +68,67 @@ protected:
     bool bReloading = false;
 };
 
-template < typename R, typename M >
-class ResourceBuilder : public ResourceBuilderBase,
-                        public NamePolicy<std::string> {
-public:
-    using NamePolicy::NamePolicy;
-
-    explicit ResourceBuilder( M& mm ) : NamePolicy(), mm( mm ) {}
-    ResourceBuilder( M& _mm, const std::string& _name ) : NamePolicy(_name), mm( _mm ) {}
-    virtual ~ResourceBuilder() = default;
-
-    ResourceBuilder& n( const std::string& _name ) {
-        Name(_name);
-        return *this;
-    }
-
-    const std::string NameKey() const {
-        return R::Prefix() + "/" + Name();
-    }
-
-    bool rebuild() {
-        bReloading = true;
-        return build();
-    };
-
-    virtual bool evaluateDirectBuild() {
-        return false;
-    }
-
-    void load( CommandResouceCallbackFunction _ccf = nullptr, const std::vector<std::string>& _params = {} ) {
-        ccf = _ccf;
-        params = _params;
-        build();
-    }
-
-    bool build() {
-        if ( !mm.exists(Name()) || R::usesNotExactQuery() ) {
-            readRemote<R, ResourceBuilder, HttpQuery::Binary>( NameKey(), *this );
-            return true;
-        }
-        return false;
-    }
-
-    virtual void makeDefault() {}
-
-protected:
-    bool makeImpl( const std::string& _key, uint8_p&& _data, const DependencyStatus _status ) override {
-
-        if ( _status == DependencyStatus::LoadedSuccessfully ) {
-            auto res = EF::create<R>( std::move( _data ) );
-            mm.add( res, _key );
-            if ( ccf ) ccf(params);
-        } else {
-            makeDefault();
-        }
-
-        return true;
-    }
-
-protected:
-    M& mm;
-};
+//template < typename R, typename M >
+//class ResourceBuilder : public ResourceBuilderBase,
+//                        public NamePolicy<std::string> {
+//public:
+//    using NamePolicy::NamePolicy;
+//
+//    explicit ResourceBuilder( M& mm ) : NamePolicy(), mm( mm ) {}
+//    ResourceBuilder( M& _mm, const std::string& _name ) : NamePolicy(_name), mm( _mm ) {}
+//    virtual ~ResourceBuilder() = default;
+//
+//    ResourceBuilder& n( const std::string& _name ) {
+//        Name(_name);
+//        return *this;
+//    }
+//
+//    const std::string NameKey() const {
+//        return R::Prefix() + "/" + Name();
+//    }
+//
+//    bool rebuild() {
+//        bReloading = true;
+//        return build();
+//    };
+//
+//    virtual bool evaluateDirectBuild() {
+//        return false;
+//    }
+//
+//    void load( CommandResouceCallbackFunction _ccf = nullptr, const std::vector<std::string>& _params = {} ) {
+//        ccf = _ccf;
+//        params = _params;
+//        build();
+//    }
+//
+//    bool build() {
+//        if ( !mm.exists(Name()) || R::usesNotExactQuery() ) {
+//            readRemote<R, ResourceBuilder, HttpQuery::Binary>( NameKey(), *this );
+//            return true;
+//        }
+//        return false;
+//    }
+//
+//    virtual void makeDefault() {}
+//
+//protected:
+//    bool makeImpl( const std::string& _key, uint8_p&& _data, const DependencyStatus _status ) override {
+//
+//        if ( _status == DependencyStatus::LoadedSuccessfully ) {
+//            auto res = EF::create<R>( std::move( _data ) );
+//            mm.add( res, _key );
+//            if ( ccf ) ccf(params);
+//        } else {
+//            makeDefault();
+//        }
+//
+//        return true;
+//    }
+//
+//protected:
+//    M& mm;
+//};
 
 class DependantBuilder : public BaseBuilder {
     using BaseBuilder::BaseBuilder;

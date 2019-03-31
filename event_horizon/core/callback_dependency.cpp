@@ -3,10 +3,9 @@
 //
 
 #include "callback_dependency.h"
-#include "core/util.h"
-#include "core/file_manager.h"
-// ### ************************ REMOVE poly ref from here!! ************************
-#include "poly/resources/builders.hpp"
+#include <core/util.h>
+#include <core/file_manager.h>
+#include <core/builders.hpp>
 
 dep_map g_deps;
 std::unordered_map< std::string, std::shared_ptr<FileCallbackHandler> > callbacksDataMap;

@@ -15,7 +15,6 @@
 #include <string>
 #include <core/serialize_types.hpp>
 #include <core/hashable.hpp>
-#include <poly/resources/entity_factory.hpp>
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
@@ -318,10 +317,6 @@ public:
 	void read( std::shared_ptr<T>& v ) {
 		SerializeDependencyHash dh;
 		read(dh);
-		if ( dh != NULL_HASH ) {
-//		    ### Reenable this factory
-//			v = EF::create<T>(dep(dh));
-		}
 	}
 
 	void readHeader( SerializeHeader& _header ) {

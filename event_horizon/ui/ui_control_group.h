@@ -190,8 +190,7 @@ private:
 //
 //};
 
-class UiViewBuilder : public ResourceBuilder {
-    using ResourceBuilder::ResourceBuilder;
+class UiViewBuilder {
 public:
     virtual ~UiViewBuilder();
 

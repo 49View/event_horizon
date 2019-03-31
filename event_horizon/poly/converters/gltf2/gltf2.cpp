@@ -9,6 +9,7 @@
 #include <core/image_util.h>
 #include <core/file_manager.h>
 #include <poly/geom_data.hpp>
+#include <poly/resources/entity_factory.hpp>
 
 unsigned int accessorTypeToNumberOfComponent( int ty ) {
     if ( ty == TINYGLTF_TYPE_SCALAR) {

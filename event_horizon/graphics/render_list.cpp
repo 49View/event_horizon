@@ -9,6 +9,7 @@
 #include "render_list.h"
 
 #include <stb/stb_image_write.h>
+#include <core/http/basen.hpp>
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
 #include <graphics/renderer.h>

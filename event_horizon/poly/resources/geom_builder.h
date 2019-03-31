@@ -100,12 +100,6 @@ protected:
 //    GeomAssetSP elem;
 };
 
-class GeomFileAssetBuilder : public ResourceBuilder<GeomData, SceneGraph> {
-    using ResourceBuilder::ResourceBuilder;
-};
-
-using GF = GeomFileAssetBuilder;
-
 class GeomBuilder : public SceneGraphGeomBaseBuilder, public GeomBasicBuilder<GeomBuilder> {
 public:
     explicit GeomBuilder( SceneGraph& _sg );

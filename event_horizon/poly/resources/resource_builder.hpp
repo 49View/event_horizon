@@ -9,6 +9,7 @@
 #include <core/tar_util.h>
 #include <poly/resources/resource_manager.hpp>
 #include <poly/resources/publisher.hpp>
+#include <poly/resources/entity_factory.hpp>
 #include <poly/scene_graph.h>
 
 enum class AddResourcePolicy {

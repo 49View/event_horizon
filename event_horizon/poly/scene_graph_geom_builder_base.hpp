@@ -5,8 +5,10 @@
 #pragma once
 
 #include <core/names.hpp>
-#include <poly/resources/builders.hpp>
+#include <core/builders.hpp>
 #include <poly/scene_graph_builder.hpp>
+
+// ### GEOM Remove this class altoghter
 
 class SceneGraphGeomBaseBuilder : public SceneGraphBuilder, public DependantBuilder {
 public:

@@ -6,20 +6,19 @@
 
 #include <core/formatting_utils.h>
 #include <core/observable.h>
-#include <poly/resources/builders.hpp>
 #include <core/math/rect2f.h>
 #include <core/math/aabb.h>
 #include <core/math/vector4f.h>
 #include <core/soa_utils.h>
+#include <core/soa_utils.h>
 
 #include <poly/poly.hpp>
 #include <poly/scene_graph.h>
-#include <poly/resources/publisher.hpp>
 #include <poly/scene_graph_geom_builder_base.hpp>
 
 namespace Utility::TTFCore { class Font; }
 
-class UIElement : public Publisher<UIElement> {
+class UIElement : public NamePolicy<>, public Boxable<> {
 public:
     UIElement() = default;
     UIElement( const std::string& name, UIShapeType shapeType, int renderBucketIndex ) :
@@ -61,18 +60,10 @@ public:
     template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( "Name,BBbox", this->Name(),bbox3d ); }
 
-    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {}
-    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {}
-    void deserializeInternal( std::shared_ptr<DeserializeBin> reader ) override {}
-
 private:
     UIShapeType shapeType = UIShapeType::Rect2d;
     int renderBucketIndex = 0;
     std::shared_ptr<PosTex3dStrip> vs;
-
-public:
-    static uint64_t Version() { return 1000; }
-    inline const static std::string EntityGroup() { return ResourceGroup::UI; }
 
 };
 
