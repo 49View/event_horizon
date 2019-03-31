@@ -43,10 +43,8 @@ enum PullFlags : uint32_t {
     All = 0xffffffff,
 };
 
-struct VData : public Boxable<JMATH::AABB> {
-
-    void clear();
-
+class VData : public Boxable<JMATH::AABB> {
+public:
     size_t numIndices() const { return vIndices.size(); }
     size_t numVerts() const { return vcoords3d.size(); }
     void add( int32_t _i, const Vector3f& _v,

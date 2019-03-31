@@ -38,6 +38,7 @@ public:
 class SceneGraph {
 public:
     explicit SceneGraph( CommandQueue& cq,
+                         VDataManager& _vl,
                          ImageManager& _tl,
                          ProfileManager& _pm,
                          MaterialManager& _ml,
@@ -65,6 +66,7 @@ public:
     size_t countGeoms() const;
 
     ImageManager& TL() { return tl; }
+    VDataManager& VL() { return vl; }
     ProfileManager& PL() { return pl; }
     MaterialManager& ML() { return ml; }
     ColorManager& CL() { return cl; }
@@ -75,6 +77,7 @@ public:
 
     template <typename R>
     auto& M() {
+        if constexpr ( std::is_same<R, VData>::value )                  return VL();
         if constexpr ( std::is_same<R, RawImage>::value )               return TL();
         if constexpr ( std::is_same<R, Material>::value )               return ML();
         if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return FM();
@@ -115,6 +118,7 @@ protected:
 protected:
     NodeGraph geoms;
 
+    VDataManager& vl;
     ImageManager& tl;
     ProfileManager& pl;
     MaterialManager& ml;

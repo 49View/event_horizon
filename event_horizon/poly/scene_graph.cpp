@@ -26,6 +26,7 @@ void SceneGraph::remove( const UUID& _uuid ) {
 }
 
 void SceneGraph::update() {
+    VL().update();
     TL().update();
     PL().update();
     ML().update();
@@ -78,13 +79,14 @@ void SceneGraph::cmdChangeTime( const std::vector<std::string>& _params ) {
 }
 
 SceneGraph::SceneGraph( CommandQueue& cq,
-                        ResourceManager<RawImage>& _tl,
+                        VDataManager& _vl,
+                        ImageManager& _tl,
                         ProfileManager& _pl,
                         MaterialManager& _ml,
                         ColorManager& _cl,
                         FontManager& _fm,
                         CameraManager& _cm,
-                        SunBuilder& _sb ) : tl(_tl), pl(_pl), ml(_ml), cl(_cl), fm(_fm), cm(_cm), sb(_sb) {
+                        SunBuilder& _sb ) : vl(_vl), tl(_tl), pl(_pl), ml(_ml), cl(_cl), fm(_fm), cm(_cm), sb(_sb) {
 
     hcs = std::make_shared<CommandScriptSceneGraph>(*this);
     cq.registerCommandScript(hcs);
@@ -172,7 +174,7 @@ void SceneGraph::init() {
     B<IB>( S::DEBUG_UV  ).addIM( RawImage::DEBUG_UV()      );
 
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
-//    B<MB>( "tomato" ).load();
+    B<MB>( "tomato" ).load();
 
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }

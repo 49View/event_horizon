@@ -767,20 +767,20 @@ void GeomData::flipNormals() {
 
 std::vector<Vector3f> GeomData::utilGenerateFlatBoxFromRect( const JMATH::Rect2f& bbox, float z ) {
 	std::vector<Vector3f> bboxPoints;
-	bboxPoints.push_back( Vector3f( bbox.bottomLeft(), z ) );
-	bboxPoints.push_back( Vector3f( bbox.bottomRight(), z ) );
-	bboxPoints.push_back( Vector3f( bbox.topRight(), z ) );
-	bboxPoints.push_back( Vector3f( bbox.topLeft(), z ) );
+	bboxPoints.emplace_back( bbox.bottomLeft(), z );
+	bboxPoints.emplace_back( bbox.bottomRight(), z );
+	bboxPoints.emplace_back( bbox.topRight(), z );
+	bboxPoints.emplace_back( bbox.topLeft(), z );
 	return bboxPoints;
 }
 
 std::vector<Vector3f> GeomData::utilGenerateFlatBoxFromSize( float width, float height, float z ) {
 	std::vector<Vector3f> bboxPoints;
 	// Clockwise
-	bboxPoints.push_back( Vector3f( -width*0.5f, -height*0.5f, z ) );
-	bboxPoints.push_back( Vector3f( -width*0.5f, height*0.5f, z ) );
-	bboxPoints.push_back( Vector3f( width*0.5f, height*0.5f, z ) );
-	bboxPoints.push_back( Vector3f( width*0.5f, -height*0.5f, z ) );
+	bboxPoints.emplace_back( -width*0.5f, -height*0.5f, z );
+	bboxPoints.emplace_back( -width*0.5f, height*0.5f, z );
+	bboxPoints.emplace_back( width*0.5f, height*0.5f, z );
+	bboxPoints.emplace_back( width*0.5f, -height*0.5f, z );
 	return bboxPoints;
 }
 
@@ -788,15 +788,15 @@ std::vector<Vector2f> GeomData::utilGenerateFlatRect( const Vector2f& size, cons
 	std::vector<Vector2f> fverts;
 
 	if ( wo == WindingOrder::CW ) {
-		fverts.push_back( Vector2f( size.x(), 0.0f ) );
-		fverts.push_back( Vector2f( size.x(), size.y() ) );
-		fverts.push_back( Vector2f( 0.0f, size.y() ) );
+		fverts.emplace_back( size.x(), 0.0f );
+		fverts.emplace_back( size.x(), size.y());
+		fverts.emplace_back( 0.0f, size.y());
 		fverts.push_back( Vector2f::ZERO );
 	} else {
 		fverts.push_back( Vector2f::ZERO );
-		fverts.push_back( Vector2f( 0.0f, size.y() ) );
-		fverts.push_back( Vector2f( size.x(), size.y() ) );
-		fverts.push_back( Vector2f( size.x(), 0.0f ) );
+		fverts.emplace_back( 0.0f, size.y());
+		fverts.emplace_back( size.x(), size.y());
+		fverts.emplace_back( size.x(), 0.0f );
 	}
 	for ( auto& v : fverts ) {
 		switch ( ppp ) {
@@ -936,32 +936,6 @@ WindingOrderT GeomData::getWindingOrder() const {
 }
 
 GeomData::~GeomData() = default;
-
-//void VData::allocateEmptySHData() {
-//	vSHCoeffsR = std::vector<Matrix3f>( vcoords3d.size() );
-//	vSHCoeffsG = std::vector<Matrix3f>( vcoords3d.size() );
-//	vSHCoeffsB = std::vector<Matrix3f>( vcoords3d.size() );
-//
-//	for ( size_t i = 0; i < vcoords3d.size(); i++ ) {
-//		vSHCoeffsR[i] = Matrix3f::ONE;
-//		vSHCoeffsG[i] = Matrix3f::ONE;
-//		vSHCoeffsB[i] = Matrix3f::ONE;
-//	}
-//}
-
-void VData::clear() {
-	vcoords3d.clear();
-	vnormals3d.clear();
-	vtangents3d.clear();
-	vbinormals3d.clear();
-	vIndices.clear();
-	vUVs.clear();
-	vUV2s.clear();
-//	vSHCoeffsR.clear();
-//	vSHCoeffsG.clear();
-//	vSHCoeffsB.clear();
-	vColor.clear();
-}
 
 void VData::fill( const PolyStruct& ps ) {
 

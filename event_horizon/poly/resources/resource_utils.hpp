@@ -11,6 +11,7 @@
 #include <tuple>
 #include <unordered_map>
 
+class VData;
 class Material;
 class RawImage;
 namespace Utility::TTFCore { class Font; }
@@ -31,6 +32,7 @@ using SignalsDeferredContainer = std::set<ResourceSignalsAddSignature<T>>;
 
 inline static size_t resourcePriority( const ResourceRef& ref ) {
     if ( ref == ResourceGroup::Image ||
+         ref == ResourceGroup::VData ||
          ref == ResourceGroup::Font ||
          ref == ResourceGroup::Color ||
          ref == ResourceGroup::CameraRig ||
@@ -48,13 +50,15 @@ class ResourceVersioning {
 public:
 
     inline static size_t Version() {
-        if ( std::is_same<R, Material>::value ) return 2500;
-        if ( std::is_same<R, GeomData>::value )        return 2000;
-        if ( std::is_same<R, MaterialColor>::value  )  return 1000;
+        if ( std::is_same<R, Material>::value )         return 2500;
+        if ( std::is_same<R, GeomData>::value )         return 2000;
+        if ( std::is_same<R, VData>::value )            return 1000;
+        if ( std::is_same<R, MaterialColor>::value  )   return 1000;
         return 0;
     }
 
     inline static std::string Prefix() {
+        if constexpr ( std::is_same<R, VData>::value ) return ResourceGroup::VData;
         if constexpr ( std::is_same<R, Material>::value ) return ResourceGroup::Material;
         if constexpr ( std::is_same<R, GeomData>::value ) return ResourceGroup::Geom;
         if constexpr ( std::is_same<R, MaterialColor>::value ) return ResourceGroup::Color;
@@ -66,21 +70,25 @@ public:
     }
 
     inline static std::string GenerateThumbnail( const R& _res ) {
-        if ( std::is_same<R, Material>::value )         return "material";
-        if ( std::is_same<R, GeomData>::value )                return "geom";
+        if ( std::is_same<R, VData>::value    )                 return "vdata";
+        if ( std::is_same<R, Material>::value )                 return "material";
+        if ( std::is_same<R, GeomData>::value )                 return "geom";
 
-        if ( std::is_same<R, MaterialColor>::value  )          return "color";
-        if ( std::is_same<R, CameraRig>::value )           return "camera";
+        if ( std::is_same<R, MaterialColor>::value  )           return "color";
+        if ( std::is_same<R, CameraRig>::value )                return "camera";
 
-        if ( std::is_same<R, Profile>::value  )         return "profile";
-        if ( std::is_same<R, RawImage>::value  )           return "image";
-        if ( std::is_same<R, Utility::TTFCore::Font>::value  )            return "font";
+        if ( std::is_same<R, Profile>::value  )                 return "profile";
+        if ( std::is_same<R, RawImage>::value  )                return "image";
+        if ( std::is_same<R, Utility::TTFCore::Font>::value  )  return "font";
         return "unknown";
     }
 
 };
 
 template<typename R> class ResourceBuilder5;
+
+using VDataBuilder = ResourceBuilder5<VData>;
+using VB = VDataBuilder;
 
 using ImageBuilder = ResourceBuilder5<RawImage>;
 using IB = ImageBuilder;
@@ -102,6 +110,7 @@ using MB = MaterialBuilder;
 
 template<typename T, typename C> class ResourceManager;
 
+using VDataManager      = ResourceManager<VData, ResourceManagerContainer<VData>>;
 using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
 using FontManager       = ResourceManager<Utility::TTFCore::Font, ResourceManagerContainer<Utility::TTFCore::Font>>;
 using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Profile>>;
