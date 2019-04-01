@@ -58,7 +58,7 @@ void Texture::init_r( const uint8_t* _data ) {
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MIN_FILTER, glFilter ));
 
     LOGI( "Initialising texture %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
-          mId.c_str(), mHandle );
+          Name().c_str(), mHandle );
 
     init_data_r( _data );
 
@@ -103,7 +103,7 @@ void Texture::init_cubemap_r() {
     }
 
     LOGI( "Initialising texture cubemap %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
-          mId.c_str(), mHandle );
+          Name().c_str(), mHandle );
 }
 
 //void Texture::init( int width, int height, PixelFormat format, Filter filter, WrapMode wrapMode ) {

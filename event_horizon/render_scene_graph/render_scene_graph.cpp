@@ -13,6 +13,22 @@
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
 
+std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>
+RenderSceneGraph::generateGeometryVP( std::shared_ptr<VData> _data ) {
+    if ( _data->numIndices() < 3 ) return nullptr;
+
+    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[_data->numIndices()] );
+    std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
+    auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( _data->numVerts(), PRIMITIVE_TRIANGLES,
+                                                                   VFVertexAllocation::PreAllocate, _data->numIndices(),
+                                                                   _indices );
+    for ( int32_t t = 0; t < _data->numVerts(); t++ ) {
+        SOAData->addVertex( _data->vertexAt( t ), _data->uvAt( t ), _data->uv2At( t ), _data->normalAt( t ),
+                            _data->tangentAt( t ), _data->binormalAt( t ), _data->colorAt(t) );
+    }
+    return SOAData;
+}
+
 RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
                                     rr( rr ), sg(_sg) {
     hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
@@ -23,7 +39,16 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
     });
 
     sg.ML().connect( [](const ResourceSignalsAddSignature<Material>& _val ) {
-        LOGRS( "Adding Material " << std::get<1>(_val) );
+        LOGRS( "Adding Material " << std::get<1>(_val)[0] );
+    });
+
+    sg.VL().connect( [this](const ResourceSignalsAddSignature<VData>& _val ) {
+        LOGRS( "Adding VData " << std::get<1>(_val)[0] );
+        auto lvl = this->RR().VPL( CommandBufferLimits::PBRStart, nullptr, 1.0f ); // mat->translucency()
+        auto mat = this->SG().ML().get("tomato");
+        VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), lvl, ShaderMaterial{S::SH, mat->Values()} }
+                .p(this->generateGeometryVP(std::get<0>(_val))).n("_source->UUiD()").g(9200).build();
+
     });
 
     sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {
@@ -117,8 +142,8 @@ Renderer& RenderSceneGraph::RR() { return rr; }
 //}
 
 std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>
-HierGeomRenderObserver::generateGeometryVP( std::shared_ptr<GeomData> _data ) {
-    if ( !_data ) return nullptr;
+HierGeomRenderObserver::generateGeometryVP( const VData& __data ) {
+    const VData* _data = &__data;
     if ( _data->numIndices() < 3 ) return nullptr;
 
     std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[_data->numIndices()] );
@@ -138,7 +163,7 @@ void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& g
 //  ### MAT reinstate materials
     auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f ); // mat->translucency()
     VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, ShaderMaterial{S::SH} } //mat->getShaderName(), mat->Values()
-            .p(generateGeometryVP(_source->Data())).n(_source->UUiD()).g(_source->GHType()).build();
+            .p(generateGeometryVP(_source->Data()->vData())).n(_source->UUiD()).g(_source->GHType()).build();
 }
 
 HierGeomRenderObserver::HierGeomRenderObserver( Renderer& _rr ) : rr( _rr ) {}

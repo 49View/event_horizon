@@ -5,27 +5,30 @@
 #include <cstdint>
 #include <memory>
 
+#include <core/math/vector2f.h>
+#include <core/util.h>
+#include <core/htypes_shared.hpp>
+#include <core/name_policy.hpp>
+
 #include "../texture.h"
 #include "gl_headers.hpp"
-#include "core/math/vector2f.h"
-#include "core/util.h"
-#include "core/htypes_shared.hpp"
 #include "../graphic_constants.h"
 
 //====================================
 // Texture
 //====================================
 
-class Texture {
+class Texture : public NamePolicy<> {
 public:
     Texture() = default;
+    virtual ~Texture() = default;
 
     Texture( TextureRenderData& tb ) {
         ctor( tb );
     }
 
     void ctor( TextureRenderData& tb ) {
-        mId = tb.Name();
+        Name( tb.names[0] );
         if (tb.forceGPUId != -1) {
             mHandle = static_cast<GLuint>( tb.forceGPUId );
         }
@@ -64,14 +67,6 @@ public:
     void bind( int textureUnit, unsigned int _handle, const char* _name ) const;
 
     static int getMaxSize();
-
-    const std::string getId() const {
-        return mId;
-    }
-
-    std::string name() const {
-        return mId;
-    }
 
     GLuint getHandle() const {
         return mHandle;
@@ -194,10 +189,6 @@ public:
         return -Vector2f( 0.0f, (( static_cast<float>( mWidth ) / static_cast<float>( mHeight )) * 0.5f ) - 0.5f );
     }
 
-    void setId( const std::string& id ) {
-        mId = id;
-    }
-
     void release();
     void reallocateForRenderTarget( const uint8_t* _data );
 
@@ -260,7 +251,6 @@ private:
     GLenum glTextureImageTarget = GL_TEXTURE_2D;
     GLuint mGlTextureSlot = 0;
 
-    std::string mId = "undefined";
     PixelFormat mFormat = PIXEL_FORMAT_RGB;
     Filter mFilter = FILTER_LINEAR;
     WrapMode mWrapMode = WRAP_MODE_REPEAT;

@@ -27,7 +27,10 @@ private:
 public:
     std::shared_ptr<Texture> addTextureWithData( const RawImage& rawImage,
                                                  const std::string& _name,
-                                                 TextureSlots _tslot = TSLOT_COLOR);
+                                                 TextureSlots _tslot = TSLOT_COLOR );
+    std::shared_ptr<Texture> addTextureWithData( const RawImage& rawImage,
+                                                 const std::vector<std::string>& _names,
+                                                 TextureSlots _tslot = TSLOT_COLOR );
     std::shared_ptr<Texture> addTextureNoData( TextureRenderData& tb );
     std::shared_ptr<Texture> addCubemapTexture( TextureRenderData& tb );
     std::shared_ptr<Texture> addTextureWithGPUHandle( const std::string& id, unsigned int _handle,

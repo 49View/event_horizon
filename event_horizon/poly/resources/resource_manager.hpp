@@ -52,13 +52,13 @@ public:
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addSignal( { _elem, _name } );
+        addSignal( { _elem, {_name, _hash, _aliasKey} } );
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
                       const ResourceRef& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addToSignal( signalAddElements, { _elem, _name } );
+        addToSignal( signalAddElements, { _elem, {_name, _hash, _aliasKey} } );
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {
@@ -122,7 +122,7 @@ protected:
               const std::string& _hash, const std::string& _aliasKey = "" ) {
         resources[_hash] = _elem;
         resourcesMapper[_hash] = _hash;
-        resourcesMapper[_name] = _hash;
+        if ( !_name.empty() ) resourcesMapper[_name] = _hash;
         if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = _hash;
     }
 

@@ -88,7 +88,7 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
                 p->SG().TL().addDependencyHook( elem.filename, k);
             }
             p->SG().TL().connect( [&](const ResourceSignalsAddSignature<RawImage>& _val ) {
-                const std::string& resName = std::get<1>(_val);
+                const std::string& resName = std::get<1>(_val)[0];
                 for ( const auto& k : cmdKeys ) {
                     p->SG().TL().tagDependencyLoaded( k, resName );
                     ResourceDependencyMap retDM;
@@ -105,7 +105,8 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
                             }
                         }
                         // imageRefs,
-                        p->SG().B<MB>(k).create( values->serialize(), imageRefs );
+                        Material mat{values};
+                        p->SG().B<MB>(k).create( mat.serialize(), imageRefs );
 
                         cmdKeys.erase(std::remove(cmdKeys.begin(), cmdKeys.end(), k), cmdKeys.end());
                     }

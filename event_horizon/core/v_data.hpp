@@ -41,7 +41,7 @@ public:
                             const Vector3f& _vt, const Vector3f& _vb, const Vector3f& _v8 );
     void swapIndicesWinding( Primitive _pr );
 
-    const std::vector<int32_t>& getVIndices() const;
+    const std::vector<int32_t>&  getVIndices() const;
     const std::vector<Vector3f>& getVcoords3d() const;
     const std::vector<Vector3f>& getVnormals3d() const;
     const std::vector<Vector3f>& getVtangents3d() const;
@@ -49,21 +49,31 @@ public:
     const std::vector<Vector2f>& getVUVs() const;
     const std::vector<Vector2f>& getVUV2s() const;
     const std::vector<Vector4f>& getVColor() const;
-
-    void setVIndices( const size_t _index, const int32_t& _value );
-    void setVcoords3d( const size_t _index, const Vector3f& _value );
-    void setVnormals3d( const size_t _index, const Vector3f& _value );
-    void setVtangents3d( const size_t _index, const Vector3f& _value );
-    void setVbinormals3d( const size_t _index, const Vector3f& _value );
-    void setVUVs( const size_t _index, const Vector2f& _value );
-    void setVUV2s( const size_t _index, const Vector2f& _value );
-    void setVColor( const size_t _index, const Vector4f& _value );
     const Vector3f& getMin() const;
-    void setMin( const Vector3f& min );
     const Vector3f& getMax() const;
-    void setMax( const Vector3f& max );
     Primitive getPrimitive() const;
+
+    void setVIndices( size_t _index, const int32_t& _value );
+    void setVcoords3d( size_t _index, const Vector3f& _value );
+    void setVnormals3d( size_t _index, const Vector3f& _value );
+    void setVtangents3d( size_t _index, const Vector3f& _value );
+    void setVbinormals3d( size_t _index, const Vector3f& _value );
+    void setVUVs( size_t _index, const Vector2f& _value );
+    void setVUV2s( size_t _index, const Vector2f& _value );
+    void setVColor( size_t _index, const Vector4f& _value );
+    void setMin( const Vector3f& min );
+    void setMax( const Vector3f& max );
     void setPrimitive( Primitive _primitive );
+
+    inline const int32_t *Indices() const { return vIndices.data(); }
+    inline int32_t vindexAt( int32_t i ) const { return vIndices[i]; }
+    inline Vector3f vertexAt( int32_t i ) const { return vcoords3d[i]; }
+    inline Vector2f uvAt( int32_t i ) const { return vUVs[i]; }
+    inline Vector2f uv2At( int32_t i ) const { return vUV2s[i]; }
+    inline Vector3f normalAt( int32_t i ) const { return vnormals3d[i]; }
+    inline Vector3f tangentAt( int32_t i ) const { return vtangents3d[i]; }
+    inline Vector3f binormalAt( int32_t i ) const { return vbinormals3d[i]; }
+    inline Vector4f colorAt( int32_t i ) const { return vColor[i]; }
 
     friend class GeomData;
 
@@ -78,6 +88,3 @@ private:
     std::vector<Vector4f> vColor;
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };
-
-
-

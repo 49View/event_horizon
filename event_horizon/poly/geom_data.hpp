@@ -66,21 +66,6 @@ public:
     void setMappingDirection( MappingDirection val ) { mapping.direction = val; }
 
     inline VData&  vData() { return mVdata; }
-    inline int32_t numVerts() const { return static_cast<int32_t>( mVdata.vcoords3d.size()); }
-    inline int32_t numIndices() const { return static_cast<int32_t>( mVdata.vIndices.size()); }
-    inline int32_t numNormals() const { return static_cast<int32_t>( mVdata.vnormals3d.size()); }
-    inline const int32_t *Indices() const { return mVdata.vIndices.data(); }
-    inline int32_t vindexAt( int32_t i ) const { return mVdata.vIndices[i]; }
-    inline Vector3f vertexAt( int32_t i ) const { return mVdata.vcoords3d[i]; }
-    inline Vector2f uvAt( int32_t i ) const { return mVdata.vUVs[i]; }
-    inline Vector2f uv2At( int32_t i ) const { return mVdata.vUV2s[i]; }
-    inline Vector3f normalAt( int32_t i ) const { return mVdata.vnormals3d[i]; }
-    inline Vector3f tangentAt( int32_t i ) const { return mVdata.vtangents3d[i]; }
-    inline Vector3f binormalAt( int32_t i ) const { return mVdata.vbinormals3d[i]; }
-    inline Vector4f colorAt( int32_t i ) const { return mVdata.vColor[i]; }
-
-    inline std::vector<Vector3f>& Coords3d() { return mVdata.vcoords3d; };
-    inline std::vector<Vector3f>& Normals3d() { return mVdata.vnormals3d; };
 
     void addFlatPoly( size_t vsize, const Vector3f *verts, const Vector3f& normal, bool reverseIfTriangulated = false );
     void addFlatPoly( size_t vsize, const std::vector<Vector2f>& verts, float z, const Vector3f& normal,

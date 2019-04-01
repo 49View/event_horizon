@@ -54,7 +54,9 @@ void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
         auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
         // ### MAT reintroduce material for geoms .m(shd,mat)
-        GB{*this, st }.n("ucarcamagnu").g(9200).build();
+        GeomData gdata{ st, Vector3f::ZERO, V3f::ZERO, V3f::ONE, GeomMappingData{} };
+        B<VB>( "ucarcamagnu" ).addIM( gdata.getVData() );
+//        GB{*this, st }.n("ucarcamagnu").g(9200).build();
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
 //        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
         // ### MAT reintroduce material/colors for geoms .c(col)

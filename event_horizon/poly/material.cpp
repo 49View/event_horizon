@@ -1,3 +1,5 @@
+#include <utility>
+
 
 #include "material.h"
 
@@ -5,6 +7,10 @@
 
 Material::Material( const std::string& _type ) {
     values = std::make_shared<HeterogeneousMap>(_type);
+}
+
+Material::Material( std::shared_ptr<HeterogeneousMap> _values ) {
+    values = std::move( _values );
 }
 
 //static inline bool isShaderStreammable( const std::string& _sn ) {

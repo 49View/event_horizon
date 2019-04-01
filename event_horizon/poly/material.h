@@ -23,6 +23,7 @@ class Material {
 public:
     JSONSERIAL( Material, values );
     explicit Material( const std::string& _type );
+    explicit Material( std::shared_ptr<HeterogeneousMap> _values );
 
     void resolveDynamicConstants();
 

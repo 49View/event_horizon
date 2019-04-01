@@ -8,9 +8,9 @@
 #include <core/image_constants.h>
 #include "graphic_constants.h"
 
-struct TextureRenderData : public NamePolicy<>, public ImageParams {
-    using NamePolicy::NamePolicy;
+struct TextureRenderData : public ImageParams {
 
+    std::vector<std::string> names;
     TextureSlots preferredGPUSlot = TSLOT_COLOR;
     int forceGPUId = -1;
     bool multisample = false;
@@ -19,15 +19,23 @@ struct TextureRenderData : public NamePolicy<>, public ImageParams {
     bool isFramebufferTarget = false;
     bool generateMipMaps = true;
 
-    TextureRenderData( const std::string& name, int width, int height, int channels, int bpp ) :
-                       NamePolicy( name ),
-                       ImageParams( width, height, channels, bpp ) {
+    TextureRenderData( const std::string& _name ) {
+        names.emplace_back(_name);
+    }
+
+    TextureRenderData( const std::vector<std::string>& _names ) : names( _names ) {
+    }
+
+    TextureRenderData(  const std::string& _name, int width, int height, int channels, int bpp ) :
+            ImageParams( width, height, channels, bpp ) {
+        names.emplace_back(_name);
         setFormatFromBpp();
     }
 
-    TextureRenderData& setId( const std::string& _id ) {
-        Name(_id);
-        return *this;
+    TextureRenderData( const std::vector<std::string>& _names, int width, int height, int channels, int bpp ) :
+                       ImageParams( width, height, channels, bpp ),
+                       names( _names ) {
+        setFormatFromBpp();
     }
 
     TextureRenderData& GPUId(const int _id) {

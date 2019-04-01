@@ -20,21 +20,18 @@ void TextureManager::removeTexture( const std::string& id ) {
 std::shared_ptr<Texture> TextureManager::createTexture( TextureRenderData& tb ) {
     auto ltexture = std::make_shared<Texture>( tb );
 
-    mTextures[tb.Name()] = ltexture;
+    for ( const auto& lName : tb.names )
+        if ( !lName.empty() ) mTextures[lName] = ltexture;
 
     return ltexture;
 }
 
 std::shared_ptr<Texture> TextureManager::createTexture( const std::string& _name, unsigned int _gpuHandle,
                                                         TextureSlots _gpuSecondaryHandle ) {
-    TextureRenderData tb{ _name };
+    TextureRenderData tb{ {_name} };
     tb.GPUId( _gpuHandle );
     tb.GPUSlot( _gpuSecondaryHandle );
-    auto ltexture = std::make_shared<Texture>( tb );
-
-    mTextures[tb.Name()] = ltexture;
-
-    return ltexture;
+    return createTexture( tb );
 }
 
 std::shared_ptr<Texture> TextureManager::addTextureFromCallback( TextureRenderData& tb,
@@ -67,11 +64,21 @@ std::shared_ptr<Texture> TextureManager::addTextureNoData( TextureRenderData& tb
 std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage,
                                                              const std::string& _name,
                                                              TextureSlots _tslot ) {
-    auto tb = TextureRenderData{ _name }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
+    std::vector<std::string> names;
+    names.emplace_back(_name);
+    return addTextureWithData( rawImage, names, _tslot );
+}
+
+std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage,
+                                                             const std::vector<std::string>& _names,
+                                                             TextureSlots _tslot ) {
+    auto tb = TextureRenderData{ _names }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
     tb.format( channelsToFormat( rawImage.channels ) );
 
-    if ( mTextures.find( _name ) != mTextures.end() ) {
-        removeTexture( _name );
+    for ( const auto& _name : _names ) {
+        if ( mTextures.find( _name ) != mTextures.end() ) {
+            removeTexture( _name );
+        }
     }
     return addTextureImmediate( tb, rawImage.rawBtyes.get() );
 }

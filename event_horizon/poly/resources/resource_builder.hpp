@@ -152,9 +152,9 @@ protected:
                       AddResourcePolicy _arp ) {
 
         if ( _arp == AddResourcePolicy::Deferred ) {
-            sg.M<DEP>().addDeferred( _res, _name, _hash );
+            sg.M<DEP>().addDeferred( _res, _name, _hash, this->Name() );
         } else {
-            sg.M<DEP>().addImmediate( _res, _name, _hash );
+            sg.M<DEP>().addImmediate( _res, _name, _hash, this->Name() );
         }
 
     }
