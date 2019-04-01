@@ -17,7 +17,7 @@
 #include <render_scene_graph/scene_state_machine.h>
 #include <render_scene_graph/render_scene_graph.h>
 
-#include <poly/resources/resource_manager.hpp>
+#include <core/resources/resource_manager.hpp>
 
 #include <stb/stb_image.h>
 

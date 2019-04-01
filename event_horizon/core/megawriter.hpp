@@ -521,3 +521,10 @@ private:
 	std::unique_ptr<Writer<StringBuffer>> writer;
 	StringBuffer internalOS;
 };
+
+template <typename T>
+inline std::string serializeArray( const std::vector<T>& _array ) {
+    MegaWriter writer;
+    writer.serialize( nullptr, _array);
+    return writer.getString();
+}

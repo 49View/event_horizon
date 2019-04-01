@@ -7,7 +7,7 @@
 #include <core/raw_image.h>
 #include <core/camera_rig.hpp>
 #include <core/TTF.h>
-#include <poly/resources/resource_builder.hpp>
+#include <core/resources/resource_builder.hpp>
 #include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
 

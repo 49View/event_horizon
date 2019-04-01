@@ -14,7 +14,7 @@
 #include "core/math/poly_utils.hpp"
 #include "core/service_factory.h"
 #define NANOSVG_IMPLEMENTATION	// Expands implementation
-#include "nanosvg.h"
+#include "poly/nanosvg.h"
 
 void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
     std::string svgString( reinterpret_cast<const char*>(_buffer), _length );

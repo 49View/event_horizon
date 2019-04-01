@@ -7,7 +7,7 @@
 #include <graphics/imgui/imgui.h>
 #include <graphics/texture_manager.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
-#include <poly/resources/resource_builder.hpp>
+#include <core/resources/resource_builder.hpp>
 
 static std::string remoteFilterString;
 static std::multimap<std::string, CoreMetaData> cloudEntitiesTypeMap;

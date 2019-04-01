@@ -14,7 +14,7 @@
 
 #include <core/node.hpp>
 #include <poly/converters/svg/svgtopoly.hpp>
-#include <poly/profile.hpp>
+#include <core/resources/profile.hpp>
 #include <poly/follower.hpp>
 
 inline void hash_combine( std::size_t& /*seed*/ ) {}

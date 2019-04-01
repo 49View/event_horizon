@@ -7,7 +7,7 @@
 #include <core/app_globals.h>
 #include <core/TTF.h>
 #include <core/font_utils.hpp>
-#include <poly/resources/resource_manager.hpp>
+#include <core/resources/resource_manager.hpp>
 
 typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 

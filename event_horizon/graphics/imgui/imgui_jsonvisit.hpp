@@ -9,7 +9,7 @@
 #pragma once
 
 #include <array>
-#include <event_horizon/core/math/matrix_anim.h>
+#include <core/math/matrix_anim.h>
 
 #include "core/htypes_shared.hpp"
 #include "core/math/rect2f.h"

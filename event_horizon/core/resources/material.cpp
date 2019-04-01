@@ -1,8 +1,4 @@
-#include <utility>
-
-
 #include "material.h"
-
 #include <core/descriptors/uniform_names.h>
 
 Material::Material( const std::string& _type ) {

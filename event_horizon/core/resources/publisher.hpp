@@ -12,7 +12,7 @@
 #include <core/http/basen.hpp>
 #include <core/zlib_util.h>
 #include <core/metadata.h>
-#include <poly/resources/resource_utils.hpp>
+#include <core/resources/resource_utils.hpp>
 
 template < typename T,
            typename B = JMATH::AABB,

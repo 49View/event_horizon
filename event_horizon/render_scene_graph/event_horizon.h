@@ -15,7 +15,7 @@
 #include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/scene_state_machine.h>
-#include <poly/resources/resource_manager.hpp>
+#include <core/resources/resource_manager.hpp>
 
 namespace di = boost::di;
 

@@ -26,9 +26,8 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
-#include "htypes_shared.hpp"
-#include "util.h"
-#include "serializable.hpp"
+#include <core/htypes_shared.hpp>
+#include <core/util.h>
 
 namespace tarUtil {
 
@@ -162,5 +161,6 @@ namespace tarUtil {
         void put(const char* filename,const char* content);
         void put(const char* filename,const char* content,std::size_t len);
         bool putFile(const char* filename,const char* nameInArchive);
+        std::string putFileHashing( const char *filename, const char *nameInArchive );
     };
 }

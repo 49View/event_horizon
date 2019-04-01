@@ -13,8 +13,8 @@
 #include <core/TTF.h>
 #include <core/raw_image.h>
 
-#include <poly/profile.hpp>
-#include <poly/resources/resource_builder.hpp>
+#include <core/resources/profile.hpp>
+#include <core/resources/resource_builder.hpp>
 
 #include <render_scene_graph/scene_orchestrator.hpp>
 

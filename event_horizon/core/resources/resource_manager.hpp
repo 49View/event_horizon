@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <boost/signals2.hpp>
 #include <core/util.h>
-#include <poly/resources/resource_utils.hpp>
+#include <core/resources/resource_utils.hpp>
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
 using ResourceMapperDict = std::unordered_map<std::string, ResourceRef>;

@@ -98,6 +98,7 @@ macro(register_core_module)
 
     register_platform_module_files("platform")
     register_module("descriptors")
+    register_module("resources")
     register_module("configuration")
     register_module("http")
     register_module("hashing")

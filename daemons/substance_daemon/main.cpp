@@ -2,6 +2,7 @@
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #endif
+#include <stb/stb_image_write.h>
 
 #include <core/http/webclient.h>
 #include <core/util.h>
@@ -19,7 +20,10 @@
 #include <core/runloop_core.h>
 #include <core/tar_util.h>
 #include <core/zlib_util.h>
-#include <poly/material.h>
+#include <core/resources/material.h>
+#include <core/resources/resource_utils.hpp>
+#include <core/descriptors/uniform_names.h>
+#include <event_horizon/core/resources/resource_builder.hpp>
 
 void initDeamon() {
     /* Our process ID and Session ID */
@@ -95,6 +99,7 @@ void elaborateMat( const std::string& _filename ) {
 
         std::system(sbRender.c_str());
 
+        std::vector<ResourceTarDict> catalog;
         std::stringstream tagStream;
         tarUtil::TarWrite tar{ tagStream };
 
@@ -106,14 +111,21 @@ void elaborateMat( const std::string& _filename ) {
         std::string filen = fn + "_" + MPBRTextures::normalString + fext;
         std::string filea = fn + "_" + MPBRTextures::ambientOcclusionString + fext;
 
-        tar.putFile( ( fileRoot + fileb).c_str(), fileb.c_str() );
-        tar.putFile( ( fileRoot + fileh).c_str(), fileh.c_str() );
-        tar.putFile( ( fileRoot + filem).c_str(), filem.c_str() );
-        tar.putFile( ( fileRoot + filer).c_str(), filer.c_str() );
-        tar.putFile( ( fileRoot + filen).c_str(), filen.c_str() );
-        tar.putFile( ( fileRoot + filea).c_str(), filea.c_str() );
-        tar.finish();
+        catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), fileb,
+                              tar.putFileHashing( ( fileRoot + fileb).c_str(), fileb.c_str() ) );
+        catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), fileh,
+                              tar.putFileHashing( ( fileRoot + fileh).c_str(), fileh.c_str() ) );
+        catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), filem,
+                              tar.putFileHashing( ( fileRoot + filem).c_str(), filem.c_str() ) );
+        catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), filer,
+                              tar.putFileHashing( ( fileRoot + filer).c_str(), filer.c_str() ) );
+        catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), filen,
+                              tar.putFileHashing( ( fileRoot + filen).c_str(), filen.c_str() ) );
+        catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), filea,
+                              tar.putFileHashing( ( fileRoot + filea).c_str(), filea.c_str() ) );
 
+        tar.put( ResourceCatalog::Key.c_str(), serializeArray(catalog) );
+        tar.finish();
 
         FM::writeRemoteFile( DaemonPaths::store( ResourceGroup::Material, tarname ),
                         zlibUtil::deflateMemory(tagStream.str() ) );

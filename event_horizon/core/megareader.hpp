@@ -546,3 +546,15 @@ public:
 //	}
 
 };
+
+template <typename T>
+std::vector<T> deserializeArray( const SerializableContainer& _data ) {
+    std::vector<T> ret;
+    std::string dictString( std::string{_data.begin(), _data.end()} );
+    rapidjson::Document document;
+    document.Parse<rapidjson::kParseStopWhenDoneFlag>( dictString.c_str() );
+    MegaReader reader( document );
+    reader.deserialize( ret );
+
+    return ret;
+}

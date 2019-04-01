@@ -11,7 +11,7 @@
 #include <graphics/renderer.h>
 #include <core/camera_rig.hpp>
 #include <poly/geom_data.hpp>
-#include <event_horizon/poly/resources/ui_shape_builder.h>
+#include <poly/resources/ui_shape_builder.h>
 
 CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg ) :
                               mCameraRig(std::move( cameraRig )), rsg( rsg) {}

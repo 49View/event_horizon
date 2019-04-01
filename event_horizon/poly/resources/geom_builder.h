@@ -12,8 +12,8 @@
 #include <core/math/matrix_anim.h>
 #include <core/service_factory.h>
 #include <core/math/poly_shapes.hpp>
-#include <poly/material.h>
-#include <poly/profile.hpp>
+#include <core/resources/material.h>
+#include <core/resources/profile.hpp>
 #include <poly/follower.hpp>
 #include <poly/poly_helper.h>
 #include <poly/scene_graph.h>

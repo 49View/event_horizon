@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <core/util.h>
 
 namespace UniformNames {
 
@@ -122,6 +123,7 @@ namespace MPBRTextures {
         if ( _value.find( roughnessString  ) != std::string::npos ) return UniformNames::roughnessTexture;
         if ( _value.find( normalString ) != std::string::npos ) return UniformNames::normalTexture;
         if ( _value.find( ambientOcclusionString ) != std::string::npos ) return UniformNames::aoTexture;
+        ASSERTV(0, "Couldn't map PBR texture %s", _value.c_str() );
         return "";
     }
 

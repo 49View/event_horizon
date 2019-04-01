@@ -11,8 +11,8 @@
 #include <core/camera.h>
 #include <core/raw_image.h>
 #include <core/camera_rig.hpp>
-#include <event_horizon/poly/resources/geom_builder.h>
-#include <event_horizon/poly/resources/ui_shape_builder.h>
+#include <poly/resources/geom_builder.h>
+#include <poly/resources/ui_shape_builder.h>
 #include <poly/converters/gltf2/gltf2.h>
 
 //std::shared_ptr<GeomBuilder> gbt;

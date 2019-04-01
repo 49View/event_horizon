@@ -4,7 +4,7 @@
 
 #include "../../render_scene_graph.h"
 #include <core/node.hpp>
-#include <event_horizon/poly/resources/geom_builder.h>
+#include <poly/resources/geom_builder.h>
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
 

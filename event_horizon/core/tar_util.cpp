@@ -18,6 +18,8 @@
 #include <unistd.h>
 
 #include "tar_util.h"
+#include <core/file_manager.h>
+#include <core/hashable.hpp>
 
 namespace tarUtil {
 
@@ -94,8 +96,8 @@ namespace tarUtil {
 
                 // ### Needs a new callback to handle file loading!!
 
-                auto* b = reinterpret_cast<const unsigned char *>(rawBytes);
-                ret.emplace( filename, SerializableContainer{ b, b+size } );
+                auto *b = reinterpret_cast<const unsigned char *>(rawBytes);
+                ret.emplace( filename, SerializableContainer{ b, b + size } );
 
                 rawBytes += size;
                 //In the tar archive, entire 512-byte-blocks are used for each file
@@ -120,106 +122,103 @@ namespace tarUtil {
 
 #define TARHEADER static_cast<PosixTarHeader*>(header)
 
-    void TarWrite::_init(void* header)
-    {
-        std::memset(header,0,sizeof(PosixTarHeader));
-        std::strcpy(TARHEADER->magic,"ustar");
-        std::strcpy(TARHEADER->version, " ");
-        std::sprintf(TARHEADER->mtime,"%011lo",time(NULL));
-        std::sprintf(TARHEADER->mode,"%07o",0644);
-        const char * s = userComputerName().c_str();
-        if(s!=NULL)  std::snprintf( reinterpret_cast<char*>(TARHEADER),32,"%s",s);
-        std::sprintf(TARHEADER->gname,"%s","users");
+    void TarWrite::_init( void *header ) {
+        std::memset( header, 0, sizeof( PosixTarHeader ));
+        std::strcpy( TARHEADER->magic, "ustar" );
+        std::strcpy( TARHEADER->version, " " );
+        std::sprintf( TARHEADER->mtime, "%011lo", time( NULL ));
+        std::sprintf( TARHEADER->mode, "%07o", 0644 );
+        const char *s = userComputerName().c_str();
+        if ( s != NULL ) std::snprintf( reinterpret_cast<char *>(TARHEADER), 32, "%s", s );
+        std::sprintf( TARHEADER->gname, "%s", "users" );
     }
 
-    void TarWrite::_checksum(void* header)
-    {
+    void TarWrite::_checksum( void *header ) {
         unsigned int sum = 0;
         char *p = (char *) header;
-        char *q = p + sizeof(PosixTarHeader);
-        while (p < TARHEADER->checksum) sum += *p++ & 0xff;
-        for (int i = 0; i < 8; ++i)  {
+        char *q = p + sizeof( PosixTarHeader );
+        while ( p < TARHEADER->checksum ) sum += *p++ & 0xff;
+        for ( int i = 0; i < 8; ++i ) {
             sum += ' ';
             ++p;
         }
-        while (p < q) sum += *p++ & 0xff;
+        while ( p < q ) sum += *p++ & 0xff;
 
-        std::sprintf(TARHEADER->checksum,"%06o",sum);
+        std::sprintf( TARHEADER->checksum, "%06o", sum );
     }
 
-    void TarWrite::_size(void* header,unsigned long fileSize)
-    {
-        std::sprintf(TARHEADER->size,"%011llo",(long long unsigned int)fileSize);
+    void TarWrite::_size( void *header, unsigned long fileSize ) {
+        std::sprintf( TARHEADER->size, "%011llo", (long long unsigned int) fileSize );
     }
 
-    void TarWrite::_filename(void* header,const char* filename)
-    {
-        if(filename==NULL || filename[0]==0 || std::strlen(filename)>=100)
-        {
-            LOGR("invalid archive name %s", filename );
+    void TarWrite::_filename( void *header, const char *filename ) {
+        if ( filename == NULL || filename[0] == 0 || std::strlen( filename ) >= 100 ) {
+            LOGR( "invalid archive name %s", filename );
         }
-        std::snprintf(TARHEADER->name,100,"%s",filename);
+        std::snprintf( TARHEADER->name, 100, "%s", filename );
     }
 
-    void TarWrite::_endRecord(std::size_t len)
-    {
-        char c='\0';
-        while((len%sizeof(PosixTarHeader))!=0)
-        {
-            out.write(&c,sizeof(char));
+    void TarWrite::_endRecord( std::size_t len ) {
+        char c = '\0';
+        while (( len % sizeof( PosixTarHeader )) != 0 ) {
+            out.write( &c, sizeof( char ));
             ++len;
         }
     }
 
 
-    TarWrite::TarWrite(std::ostream& out):_finished(false),out(out)
-    {
-        if(sizeof(PosixTarHeader)!=512)
-        {
-            throw(sizeof(PosixTarHeader));
+    TarWrite::TarWrite( std::ostream& out ) : _finished( false ), out( out ) {
+        if ( sizeof( PosixTarHeader ) != 512 ) {
+            throw ( sizeof( PosixTarHeader ));
         }
     }
 
-    TarWrite::~TarWrite()
-    {
-        if(!_finished)
-        {
+    TarWrite::~TarWrite() {
+        if ( !_finished ) {
 //            cerr << "[warning]tar file was not finished."<< endl;
         }
     }
 
 /** writes 2 empty blocks. Should be always called before closing the Tar file */
-    void TarWrite::finish()
-    {
-        _finished=true;
+    void TarWrite::finish() {
+        _finished = true;
         //The end of the archive is indicated by two blocks filled with binary zeros
         PosixTarHeader header;
-        std::memset((void*)&header,0,sizeof(PosixTarHeader));
-        out.write((const char*)&header,sizeof(PosixTarHeader));
-        out.write((const char*)&header,sizeof(PosixTarHeader));
+        std::memset((void *) &header, 0, sizeof( PosixTarHeader ));
+        out.write((const char *) &header, sizeof( PosixTarHeader ));
+        out.write((const char *) &header, sizeof( PosixTarHeader ));
         out.flush();
     }
 
-    void TarWrite::put(const char* filename,const std::string& s)
-    {
-        put(filename,s.c_str(),s.size());
-    }
-    void TarWrite::put(const char* filename,const char* content)
-    {
-        put(filename,content,std::strlen(content));
+    void TarWrite::put( const char *filename, const std::string& s ) {
+        put( filename, s.c_str(), s.size());
     }
 
-    void TarWrite::put(const char* filename,const char* content,std::size_t len)
-    {
+    void TarWrite::put( const char *filename, const char *content ) {
+        put( filename, content, std::strlen( content ));
+    }
+
+    void TarWrite::put( const char *filename, const char *content, std::size_t len ) {
         PosixTarHeader header;
-        _init((void*)&header);
-        _filename((void*)&header,filename);
-        header.typeflag[0]=0;
-        _size((void*)&header,len);
-        _checksum((void*)&header);
-        out.write((const char*)&header,sizeof(PosixTarHeader));
-        out.write(content,len);
-        _endRecord(len);
+        _init((void *) &header );
+        _filename((void *) &header, filename );
+        header.typeflag[0] = 0;
+        _size((void *) &header, len );
+        _checksum((void *) &header );
+        out.write((const char *) &header, sizeof( PosixTarHeader ));
+        out.write( content, len );
+        _endRecord( len );
+    }
+
+    std::string TarWrite::putFileHashing( const char *filename, const char *nameInArchive ) {
+        auto buff = FM::readLocalFile(filename);
+        if ( buff.second ) {
+            put( nameInArchive, reinterpret_cast<const char *>(buff.first.get()), buff.second );
+            return Hashable<>::hashOf( buff );
+        } else {
+            LOGR("Cannot open  %s", filename );
+            return "";
+        }
     }
 
     bool TarWrite::putFile(const char* filename,const char* nameInArchive)
@@ -242,7 +241,6 @@ namespace tarUtil {
         _size((void*)&header,len);
         _checksum((void*)&header);
         out.write((const char*)&header,sizeof(PosixTarHeader));
-
 
         std::size_t nRead=0;
         while((nRead=std::fread(buff,sizeof(char),BUFSIZ,in))>0)

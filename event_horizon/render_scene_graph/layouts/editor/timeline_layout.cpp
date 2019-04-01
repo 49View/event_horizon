@@ -11,7 +11,7 @@
 #include <graphics/imgui/imgui_internal.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
-#include <poly/resources/resource_manager.hpp>
+#include <core/resources/resource_manager.hpp>
 
 static int currentFrame = 0;
 const static float secondMult = 100.0f;

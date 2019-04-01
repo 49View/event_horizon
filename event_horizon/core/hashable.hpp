@@ -47,11 +47,22 @@ protected:
     virtual void calcHash( const ucchar_p& _data ) {
         mHash = CryptoUtils<H>::hash( _data.first, _data.second );
     }
+    virtual void calcHash( const uint8_p& _data ) {
+        mHash = CryptoUtils<H>::hash( _data.first.get(), _data.second );
+    }
     virtual void calcHash( const SerializableContainer & _data ) {
         mHash = CryptoUtils<H>::hash( _data.data(), _data.size() );
     }
 private:
     std::string mHash;
+
+public:
+    static std::string hashOf(const SerializableContainer & _data) {
+        return CryptoUtils<H>::hash( _data.data(), _data.size() );
+    }
+    static std::string hashOf( const uint8_p& _data ) {
+        return CryptoUtils<H>::hash( _data.first.get(), _data.second );
+    }
 
 };
 

@@ -13,7 +13,7 @@
 #include "core/util.h"
 #include "core/math/vector4f.h"
 #include "core/math/plane3f.h"
-#include "profile.hpp"
+#include "core/resources/profile.hpp"
 #include "geom_data.hpp"
 
 struct FollowerPoly {

@@ -17,9 +17,7 @@
 #include <core/command.hpp>
 #include <core/suncalc/sun_builder.h>
 #include <poly/poly.hpp>
-#include <poly/resources/resource_utils.hpp>
-
-class StreamingMediator;
+#include <core/resources/resource_utils.hpp>
 
 using NodeGraph = std::unordered_map<std::string, NodeVariants>;
 using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)>;

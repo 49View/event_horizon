@@ -4,7 +4,7 @@
 
 #include "geom_builder.h"
 #include <core/node.hpp>
-#include <poly/resources/resource_manager.hpp>
+#include <core/resources/resource_manager.hpp>
 #include <poly/poly.hpp>
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg ) : SceneGraphGeomBaseBuilder(_sg) {

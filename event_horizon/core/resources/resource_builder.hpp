@@ -7,9 +7,9 @@
 #include <boost/signals2.hpp>
 
 #include <core/tar_util.h>
-#include <poly/resources/resource_manager.hpp>
-#include <poly/resources/publisher.hpp>
-#include <poly/resources/entity_factory.hpp>
+#include <core/resources/resource_manager.hpp>
+#include <core/resources/publisher.hpp>
+#include <core/resources/entity_factory.hpp>
 #include <poly/scene_graph.h>
 
 enum class AddResourcePolicy {
@@ -34,6 +34,10 @@ JSONDATA( JSONResourceResponse, _id, project, group, isPublic, isRestricted, met
 };
 
 JSONDATA( ResourceTarDict, group, filename, hash )
+
+    ResourceTarDict( const std::string& group, const std::string& filename, const std::string& hash ) :
+                     group( group ), filename( filename ), hash( hash ) {}
+
     std::string group;
     std::string filename;
     std::string hash;
@@ -55,39 +59,7 @@ public:
                    [&](HttpResponeParams _res) {
                        if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
                        auto buff = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
-                       if ( tarUtil::isTar(buff) ) {
-                           auto fs = tarUtil::untar(buff);
-                           ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
-                           std::vector<ResourceTarDict> dict;
-                           std::string dictString( std::string{fs[ResourceCatalog::Key].begin(), fs[ResourceCatalog::Key].end()} );
-                           rapidjson::Document document;
-                           document.Parse<rapidjson::kParseStopWhenDoneFlag>( dictString.c_str() );
-                           MegaReader reader( document );
-                           reader.deserialize( dict );
-
-                           std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
-                               return resourcePriority( a.group ) < resourcePriority( b.group );
-                           } );
-
-                           for ( const auto& rd : dict ) {
-                               if ( rd.group == ResourceGroup::Image ) {
-                                   addResource<RawImage>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                               } else if ( rd.group == ResourceGroup::Font ) {
-                                   addResource<Utility::TTFCore::Font>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                               } else if ( rd.group == ResourceGroup::Profile ) {
-                                   addResource<Profile>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                               } else if ( rd.group == ResourceGroup::Color ) {
-                                   addResource<MaterialColor>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                               } else if ( rd.group == ResourceGroup::Material ) {
-                                   addResource<Material>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                               } else {
-                                   LOGRS("{" << rd.group << "} Rescoude not supported yet in GET callback");
-                                   ASSERT(0);
-                               }
-                           }
-                       } else {
-                           addResource<R>( buff, this->Name(), this->Hash(),AddResourcePolicy::Deferred );
-                       }
+                       this->makeFromTar( buff );
                        if ( ccf ) ccf(params);
                    } );
     }
@@ -108,9 +80,46 @@ public:
         addInternal<R>( _res, this->Name(), this->Hash(), _arp );
     }
 
-    std::shared_ptr<R> make( const SerializableContainer& _data ) {
-        if ( auto ret = prepAndCheck(_data ); ret ) return ret;
+    std::shared_ptr<R> make( const SerializableContainer& _data, const ResourceRef& _hash = {} ) {
+        auto ret = prepAndCheck(_data, _hash );
+        if ( ret ) return ret;
         return addResource<R>(_data, this->Name(), this->Hash(), AddResourcePolicy::Immediate);
+    }
+
+    ResourceDependencyMap makeFromTar( const SerializableContainer& _data ) {
+        ResourceDependencyMap resHashes;
+
+        if ( tarUtil::isTar(_data) ) {
+            auto fs = tarUtil::untar(_data);
+            ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
+            auto dict = deserializeArray<ResourceTarDict>( fs[ResourceCatalog::Key] );
+
+            std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
+                return resourcePriority( a.group ) < resourcePriority( b.group );
+            } );
+
+            for ( const auto& rd : dict ) {
+                resHashes[rd.filename] = rd.hash;
+                if ( rd.group == ResourceGroup::Image ) {
+                    addResource<RawImage>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                } else if ( rd.group == ResourceGroup::Font ) {
+                    addResource<Utility::TTFCore::Font>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                } else if ( rd.group == ResourceGroup::Profile ) {
+                    addResource<Profile>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                } else if ( rd.group == ResourceGroup::Color ) {
+                    addResource<MaterialColor>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                } else if ( rd.group == ResourceGroup::Material ) {
+                    addResource<Material>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                } else {
+                    LOGRS("{" << rd.group << "} Resource not supported yet in dependency unpacking");
+                    ASSERT(0);
+                }
+            }
+        } else {
+            addResource<R>( _data, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
+            resHashes[this->Name()] = this->Hash();
+        }
+        return resHashes;
     }
 
     void create( const SerializableContainer& _data, const ResourceDependencyDict& _res = {} ) {
@@ -127,8 +136,12 @@ public:
     }
 
 protected:
-    std::shared_ptr<R> prepAndCheck( const SerializableContainer& _data ) {
-        this->calcHash( _data );
+    std::shared_ptr<R> prepAndCheck( const SerializableContainer& _data, const ResourceRef& _hash = {} ) {
+        if ( _hash.empty() ) {
+            this->calcHash( _data );
+        } else {
+            this->Hash(_hash);
+        }
         if ( auto ret = sg.M<R>().hashExists( this->Hash() ); ret!= nullptr ) {
             return ret;
         }
