@@ -110,9 +110,28 @@ void elaborateMatFile( const std::string& mainFileName, const std::string& layer
     tar.put( ResourceCatalog::Key.c_str(), serializeArray(catalog) );
     tar.finish();
 
-    Publisher<Material, EmptyBox> mpub;
+//    tar.put( "urca", "dado" );
+//    tar.put( "vacca", "porlrof" );
+//    tar.finish();
 
-    //            ResourceDependencyDict imageRefs;
+    Publisher<RawImage, EmptyBox> mpub;
+
+//    mpub.publish( fileb, FM::readLocalFileC(fileRoot + fileb) );
+
+    Http::post( Url{ HttpFilePrefix::entities + "multi" }, zlibUtil::deflateMemory(tagStream.str()), nullptr );
+
+//    mpub.pipe( fileb, FM::readLocalFileC(fileRoot + fileb) );
+//    mpub.pipe( fileh, FM::readLocalFileC(fileRoot + fileh) );
+//    mpub.pipe( filem, FM::readLocalFileC(fileRoot + filem) );
+//    mpub.pipe( filer, FM::readLocalFileC(fileRoot + filer) );
+//    mpub.pipe( filen, FM::readLocalFileC(fileRoot + filen) );
+//    mpub.pipe( filea, FM::readLocalFileC(fileRoot + filea) );
+//
+//    Http::post( Url{ HttpFilePrefix::entities }, "dumb", [&]( HttpResponeParams _res ) {
+//
+//    } );
+
+//            ResourceDependencyDict imageRefs;
 //            for ( const auto& [k,v] : files ) {
 //                auto lHash = Hashable<>::hashOf( v );
 //                resHashes[k] = lHash;
@@ -131,8 +150,8 @@ void elaborateMatFile( const std::string& mainFileName, const std::string& layer
 //            p->SG().B<MB>("tomato").addIM( mat );
 //            p->SG().B<MB>("tomato").publish( mat, imageRefs );
 
-    Material mat{"urca"};
-    mpub.publish( mat.serialize(), {}, [&]( HttpResponeParams _res ){} );
+//    Material mat{"urca"};
+//    mpub.publish( mat.serialize(), {}, [&]( HttpResponeParams _res ){} );
 //    FM::writeRemoteFile( DaemonPaths::store( ResourceGroup::Material, tarname ),
 //                         zlibUtil::deflateMemory(tagStream.str() ) );
 }

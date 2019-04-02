@@ -14,7 +14,7 @@ class Renderer;
 
 class VPList {
 public:
-    VPList( std::shared_ptr<Matrix4f> _transform = nullptr ) {
+    explicit VPList( std::shared_ptr<Matrix4f> _transform = nullptr ) {
         if ( _transform == nullptr ) {
             mTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
         } else {
@@ -25,7 +25,7 @@ public:
     void render_im();
     void assign( const std::string& name, const Matrix4f& data );
 
-    void create( std::shared_ptr<cpuVBIB> value, const uint64_t _tag );
+    void create( std::shared_ptr<cpuVBIB> value, uint64_t _tag );
 
     void addToCommandBuffer( Renderer& rr,
                              std::shared_ptr<Matrix4f> _transform = nullptr,
@@ -68,7 +68,7 @@ public:
         if ( lTransform ) VPList::mTransform = lTransform;
     }
 
-    bool hasTag( const uint64_t _tag) const;
+    bool hasTag( uint64_t _tag) const;
 
     std::string Name() const { return mVP->Name(); }
 

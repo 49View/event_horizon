@@ -133,7 +133,9 @@ namespace Http {
                                                                                  res->get_status_message().c_str() );
                                       auto lRes = handleResponse( res, url, ResponseFlags::None );
                                       if ( lRes.isSuccessStatusCode() ) {
-                                          if ( callback ) callback( lRes );
+                                          if ( callback ) {
+                                              callback( lRes );
+                                          }
                                       } else {
                                           if ( callbackFailed ) callbackFailed( lRes );
                                       }
