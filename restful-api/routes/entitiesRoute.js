@@ -4,6 +4,7 @@ const router = express.Router();
 const entityController = require('../controllers/entityController');
 const tar = require('tar-stream');
 const streams = require('memory-streams');
+const zlib = require('zlib');
 
 router.get('/content/byId/:id', async (req, res, next) => {
     try {
@@ -98,32 +99,65 @@ router.get('/metadata/byGroupTags/:group/:tags', async (req, res, next) => {
 });
 
 router.post('/', async (req, res, next) => {
-
     try {
         const project = req.user.project;
         const metadata = entityController.getMetadataFromBody(true, true, req);
-        const { content, group, isPublic, isRestricted, cleanMetadata } = entityController.cleanupMetadata(metadata);
-        let filePath=entityController.getFilePath(project, group, cleanMetadata.name);
-        //Check content exists in project and group
-        const copyEntity = await entityController.checkFileExists(project, group, cleanMetadata.hash)
-        if (copyEntity===null) {
-            //Upload file to S3
-            let savedFilename = {"changed":false, "name": filePath};
-            await fsController.cloudStorageGetFilenameAndDuplicateIfExists( filePath, "eventhorizonentities", savedFilename );
-            if ( savedFilename['changed'] == true ) {
-                const nn = savedFilename["name"];
-                cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
-            }
-            filePath = savedFilename["name"];
-            await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities" );
-        }
-        //Create entity
-        const newEntity = await entityController.createEntity(project, group, isPublic, isRestricted, cleanMetadata);
-
-        res.status(200).send(newEntity);
+        const newEntity = await entityController.createEntityFromMetadata(project, metadata);
+        const status = newEntity === null ? 204 : 200;
+        res.status(status).send(newEntity);
     } catch (ex) {
         console.log("ERROR CREATING ENTITY: ", ex);
         res.sendStatus(400);
+    }
+});
+
+router.post('/multi', async (req, res, next) => {
+
+    try {
+        const project = req.user.project;
+        // const entities = await entityController.createEntitiesFromContainer(project, req.body);
+        const containerBody = req.body;
+
+
+        let container = tar.extract();
+        const metadatas = [];
+        const entities = [];
+    
+        container.on('entry', function(header, stream, next) {
+            console.log( header.name );
+            console.log( "Header :", header );
+            var writer = new streams.WritableStream();
+            stream.pipe(writer);   
+            stream.on('end', function() {
+                console.log( "Content: ", writer.toString() );
+                metadatas.push(writer.toString());
+                next(); // ready for next entry
+            });
+            stream.resume(); // just auto drain the stream
+        });
+
+        const deflatedBody = zlib.inflateSync(new Buffer.from(containerBody));
+      
+        var reader = new streams.ReadableStream(deflatedBody);
+
+        container.on('close', () => {
+            console.log( "############### ");
+            // all entries read
+            res.status(200).send(null);
+        });
+
+        reader.pipe(container);
+        console.log( "**************");
+    
+        metadatas.forEach(element => {
+            console.log( "############### ");
+          // const newEntity = await createEntityFromMetadata( project, element );
+          // if ( newEntity !== null ) entities.push(newEntity);            
+        });        
+        // res.status(200).send(entities);
+    } catch (ex) {
+        console.log("ERROR CREATING ENTITY: ", ex);
+        res.status(400).send(ex);
     }
 });
 
