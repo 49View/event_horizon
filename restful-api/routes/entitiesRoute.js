@@ -119,6 +119,7 @@ router.post('/multi', async (req, res, next) => {
         const containerBody = req.body;
 
 
+
         let container = tar.extract();
         const metadatas = [];
         const entities = [];
@@ -127,26 +128,37 @@ router.post('/multi', async (req, res, next) => {
             console.log( header.name );
             console.log( "Header :", header );
             var writer = new streams.WritableStream();
-            stream.pipe(writer);   
             stream.on('end', function() {
-                console.log( "Content: ", writer.toString() );
-                metadatas.push(writer.toString());
-                next(); // ready for next entry
+                //console.log( "Content: ", writer.toString() );
+                console.log("End stream");
+                //metadatas.push(writer.toString());
+                next();
+                container.end();
+                console.log("Exit end "+ header.name);
             });
-            stream.resume(); // just auto drain the stream
+            stream.pipe(writer);   
+            stream.resume();
+            
+            // just auto drain the stream
         });
 
-        const deflatedBody = zlib.inflateSync(new Buffer.from(containerBody));
-      
-        var reader = new streams.ReadableStream(deflatedBody);
+        container.on('error', (error) => {
+            console.log("Stream ERROR");
+        });
 
-        container.on('close', () => {
+        container.on('finish', () => {
             console.log( "############### ");
             // all entries read
             res.status(200).send(null);
         });
 
-        reader.pipe(container);
+        //const deflatedBody = zlib.inflateSync(new Buffer.from(containerBody));
+        const deflatedBody = containerBody;
+      
+        var reader = new streams.ReadableStream(deflatedBody);
+
+
+        reader.pipe(container, { end: true});
         console.log( "**************");
     
         metadatas.forEach(element => {
