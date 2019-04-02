@@ -22,10 +22,18 @@ class Publisher : public ResourceVersioning<T>,
                   public virtual Taggable<N>,
                   public virtual Hashable<> {
 public:
-    void publish( const SerializableContainer& _raw,
-                  const ResourceDependencyDict& _deps,
-                  ResponseCallbackFunc callback ) const {
-        Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw, _deps), callback );
+    void publish( const std::string& _name,
+                  const SerializableContainer& _raw,
+                  const ResourceDependencyDict& _deps = {},
+                  ResponseCallbackFunc callback = nullptr ) {
+        this->Name(_name);
+        this->calcHash( _raw );
+        publish( _raw, _deps, callback );
+    }
+
+    void pipe( const std::string& _name,
+               const SerializableContainer& _raw ) {
+        pipes[_name] = _raw;
     }
 protected:
     std::string rawb64gzip( const SerializableContainer& _raw ) const {
@@ -47,4 +55,13 @@ protected:
         cmd.serialize(&writer);
         return writer.getString();
     }
+
+    void publish( const SerializableContainer& _raw,
+                  const ResourceDependencyDict& _deps,
+                  ResponseCallbackFunc callback ) const {
+        Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw, _deps), callback );
+    }
+
+private:
+    SerializableContainerDict pipes;
 };

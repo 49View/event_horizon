@@ -49,6 +49,7 @@ namespace FileManager {
 //	void makeRemoteDir( const std::string& dirname );
 
 	// Local file access
+    SerializableContainer readLocalFileC( const std::string& filename );
     uint8_p readLocalFile( const std::string& filename );
     void readLocalFile( const std::string& filename, SerializableContainer& _ret );
     std::unique_ptr<uint8_t[]> readLocalFile( const std::string& filename, uint64_t& _length,

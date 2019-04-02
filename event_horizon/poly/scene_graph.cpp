@@ -52,7 +52,6 @@ void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
     auto st = shapeTypeFromString( _params[0] );
     if ( st != ShapeType::None) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
-        auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
         // ### MAT reintroduce material for geoms .m(shd,mat)
         GeomData gdata{ st, Vector3f::ZERO, V3f::ZERO, V3f::ONE, GeomMappingData{} };
         B<VB>( "ucarcamagnu" ).addIM( gdata.getVData() );
@@ -176,7 +175,7 @@ void SceneGraph::init() {
     B<IB>( S::DEBUG_UV  ).addIM( RawImage::DEBUG_UV()      );
 
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
-    B<MB>( "tomato" ).load();
+//    B<MB>( "tomato" ).load();
 
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }
