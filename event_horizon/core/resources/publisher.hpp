@@ -21,6 +21,12 @@ class Publisher : public ResourceVersioning<T>,
                   public virtual Boxable<B>,
                   public virtual Taggable<N>,
                   public virtual Hashable<> {
+public:
+    void publish( const SerializableContainer& _raw,
+                  const ResourceDependencyDict& _deps,
+                  ResponseCallbackFunc callback ) const {
+        Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw, _deps), callback );
+    }
 protected:
     std::string rawb64gzip( const SerializableContainer& _raw ) const {
         auto f = zlibUtil::deflateMemory( std::string{ _raw.begin(), _raw.end() } );
@@ -40,11 +46,5 @@ protected:
                           _deps };
         cmd.serialize(&writer);
         return writer.getString();
-    }
-
-    void publish3( const SerializableContainer& _raw,
-                   const ResourceDependencyDict& _deps,
-                   ResponseCallbackFunc callback  ) const {
-        Http::post( Url{ HttpFilePrefix::entities }, toMetaData(_raw, _deps), callback );
     }
 };

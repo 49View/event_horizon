@@ -83,7 +83,7 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
 //    cmdKeys.emplace_back( fk );
 
     SceneOrchestrator::sUpdateCallbacks.emplace_back( []( SceneOrchestrator* p ) {
-        for ( const auto& elem : cmd ) {
+//        for ( const auto& elem : cmd ) {
 //            auto files = tarUtil::untar( elem.data );
 //            for ( const auto& [k,v] : files ) {
 //                p->SG().TL().addDependencyHook( elem.filename, k);
@@ -114,7 +114,7 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
 //                }
 //            });
 
-              p->SG().B<MB>(elem.filename).makeFromTar(elem.data);
+//            p->SG().B<IB>(elem.filename).addResources(elem.data, AddResourcePolicy::Immediate);
 //            ResourceDependencyMap resHashes;
 //            ResourceDependencyDict imageRefs;
 //            for ( const auto& [k,v] : files ) {
@@ -131,11 +131,13 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
 //            for ( const auto& [k,v] : files ) {
 //                IB{ p->SG(), k }.make( v );
 //            }
-//            p->SG().B<MB>(elem.filename).addDF( Material{values} );
+//            auto mat = std::make_shared<Material>(values);
+//            p->SG().B<MB>("tomato").addIM( mat );
+//            p->SG().B<MB>("tomato").publish( mat, imageRefs );
 
 //            auto mb = std::make_shared<MaterialBuilder>(getFileNameOnly(elem.filename), elem.data);
 //            GB{p->RSG(), ShapeType::Sphere, Vector3f::ONE}.g(9300).m(mb->makeDirect( p->RSG().ML() )).build();
-        }
+//        }
         cmd.clear();
     } );
 }

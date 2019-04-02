@@ -49,6 +49,15 @@ public:
         _container.emplace(_elem);
     }
 
+    void add( std::shared_ptr<T> _elem, const std::string& _name,
+                       const std::string& _hash, AddResourcePolicy _arp, const std::string& _aliasKey = "" ) {
+        if ( _arp == AddResourcePolicy::Deferred ) {
+            addDeferred( _elem, _name, _hash, _aliasKey );
+        } else {
+            addImmediate( _elem, _name, _hash, _aliasKey );
+        }
+    }
+
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );

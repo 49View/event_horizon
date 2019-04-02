@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 2019-03-20.
 //
@@ -11,11 +13,6 @@
 #include <core/resources/publisher.hpp>
 #include <core/resources/entity_factory.hpp>
 #include <poly/scene_graph.h>
-
-enum class AddResourcePolicy {
-    Immediate,
-    Deferred
-};
 
 JSONDATA( ResourceMetadata, name, hash, BBox3d, tags )
     std::string name;
@@ -35,8 +32,8 @@ JSONDATA( JSONResourceResponse, _id, project, group, isPublic, isRestricted, met
 
 JSONDATA( ResourceTarDict, group, filename, hash )
 
-    ResourceTarDict( const std::string& group, const std::string& filename, const std::string& hash ) :
-                     group( group ), filename( filename ), hash( hash ) {}
+    ResourceTarDict( std::string group, const std::string& filename, const std::string& hash ) :
+                     group( std::move( group )), filename( filename ), hash( hash ) {}
 
     std::string group;
     std::string filename;
@@ -59,10 +56,17 @@ public:
                    [&](HttpResponeParams _res) {
                        if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
                        auto buff = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
-                       this->makeFromTar( buff );
+                       if ( tarUtil::isTar(buff) ) {
+                           addResources( buff, AddResourcePolicy::Deferred );
+                       } else {
+                           add<R>( buff, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
+                       }
                        if ( ccf ) ccf(params);
                    } );
     }
+
+    // add*: this->Hash() will be empty "" if it comes from a procedural resource (IE not loaded from a file)
+    // this way we do not serialize anything with an empty hash. win-win. I think. It smells a bit though, just.
 
     void addIM( const R& _res ) {
         addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Immediate );
@@ -80,58 +84,49 @@ public:
         addInternal<R>( _res, this->Name(), this->Hash(), _arp );
     }
 
+    void addResources( const SerializableContainer& _data, AddResourcePolicy _arp ) {
+
+        auto fs = tarUtil::untar(_data);
+        ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
+        auto dict = deserializeArray<ResourceTarDict>( fs[ResourceCatalog::Key] );
+
+        std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
+            return resourcePriority( a.group ) < resourcePriority( b.group );
+        } );
+
+        for ( const auto& rd : dict ) {
+            if ( rd.group == ResourceGroup::Image ) {
+                add<RawImage>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+            } else if ( rd.group == ResourceGroup::Font ) {
+                add<Utility::TTFCore::Font>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+            } else if ( rd.group == ResourceGroup::Profile ) {
+                add<Profile>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+            } else if ( rd.group == ResourceGroup::Color ) {
+                add<MaterialColor>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+            } else if ( rd.group == ResourceGroup::Material ) {
+                add<Material>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+            } else {
+                LOGRS("{" << rd.group << "} Resource not supported yet in dependency unpacking");
+                ASSERT(0);
+            }
+        }
+    }
+
     std::shared_ptr<R> make( const SerializableContainer& _data, const ResourceRef& _hash = {} ) {
         auto ret = prepAndCheck(_data, _hash );
         if ( ret ) return ret;
-        return addResource<R>(_data, this->Name(), this->Hash(), AddResourcePolicy::Immediate);
+        return add<R>(_data, this->Name(), this->Hash(), AddResourcePolicy::Immediate);
     }
 
-    ResourceDependencyMap makeFromTar( const SerializableContainer& _data ) {
-        ResourceDependencyMap resHashes;
-
-        if ( tarUtil::isTar(_data) ) {
-            auto fs = tarUtil::untar(_data);
-            ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
-            auto dict = deserializeArray<ResourceTarDict>( fs[ResourceCatalog::Key] );
-
-            std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
-                return resourcePriority( a.group ) < resourcePriority( b.group );
-            } );
-
-            for ( const auto& rd : dict ) {
-                resHashes[rd.filename] = rd.hash;
-                if ( rd.group == ResourceGroup::Image ) {
-                    addResource<RawImage>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                } else if ( rd.group == ResourceGroup::Font ) {
-                    addResource<Utility::TTFCore::Font>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                } else if ( rd.group == ResourceGroup::Profile ) {
-                    addResource<Profile>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                } else if ( rd.group == ResourceGroup::Color ) {
-                    addResource<MaterialColor>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                } else if ( rd.group == ResourceGroup::Material ) {
-                    addResource<Material>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-                } else {
-                    LOGRS("{" << rd.group << "} Resource not supported yet in dependency unpacking");
-                    ASSERT(0);
-                }
-            }
-        } else {
-            addResource<R>( _data, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
-            resHashes[this->Name()] = this->Hash();
-        }
-        return resHashes;
-    }
-
-    void create( const SerializableContainer& _data, const ResourceDependencyDict& _res = {} ) {
+    void publishAndAdd( const SerializableContainer& _data, const ResourceDependencyDict& _res = {} ) {
         if ( prepAndCheck(_data ) ) return;
-//        if ( B::Version() != 0 ) this->addTag( this->hashFn(B::Version()) );
 
-        this->publish3( _data, _res, [&]( HttpResponeParams _res ) {
-            JSONResourceResponse resJson(_res.bufferString);
+        this->publish( _data, _res, [&]( HttpResponeParams _res ) {
+            JSONResourceResponse resJson( _res.bufferString );
             // We make sure that in case server side has to change name in case
             // of duplicates we reflect it here client side
             this->Name( resJson.metadata.name );
-            addResource<R>(_data, this->Name(), this->Hash(), AddResourcePolicy::Deferred);
+            add < R > ( _data, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
         } );
     }
 
@@ -149,10 +144,10 @@ protected:
     }
 
     template <typename DEP>
-    std::shared_ptr<DEP> addResource( const SerializableContainer& _data,
-                                    const std::string& _name,
-                                    const ResourceRef& _hash,
-                                    AddResourcePolicy _arp ) {
+    std::shared_ptr<DEP> add( const SerializableContainer& _data,
+                              const std::string& _name,
+                              const ResourceRef& _hash,
+                              AddResourcePolicy _arp ) {
         auto ret = EF::create<DEP>(_data);
         addInternal<DEP>( ret, _name, _hash, _arp );
         return ret;
@@ -163,13 +158,7 @@ protected:
                       const std::string& _name,
                       const ResourceRef& _hash,
                       AddResourcePolicy _arp ) {
-
-        if ( _arp == AddResourcePolicy::Deferred ) {
-            sg.M<DEP>().addDeferred( _res, _name, _hash, this->Name() );
-        } else {
-            sg.M<DEP>().addImmediate( _res, _name, _hash, this->Name() );
-        }
-
+        sg.M<DEP>().add( _res, _name, _hash, _arp, this->Name() );
     }
 
 protected:
@@ -178,4 +167,3 @@ protected:
     std::vector<std::string> params;
     CommandResouceCallbackFunction ccf = nullptr;
 };
-

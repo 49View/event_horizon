@@ -21,6 +21,11 @@ class MaterialColor;
 class UIElement;
 class CameraRig;
 
+enum class AddResourcePolicy {
+    Immediate,
+    Deferred
+};
+
 template <typename T>
 using ResourceSignalsAddSignature = std::tuple<std::shared_ptr<T>, std::vector<std::string> >;
 
