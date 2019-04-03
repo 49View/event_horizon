@@ -38,8 +38,10 @@ enum class HttpQuery {
 
 struct Url;
 
-using SocketCallbackDataType = const rapidjson::Document&;
-using SocketCallbackFunc = std::function<void( SocketCallbackDataType message )>;
+using SocketCallbackDataType = rapidjson::Document;
+using SocketCallbackDataTypeConstRef = const SocketCallbackDataType&;
+using SocketCallbackFunc = std::function<void( SocketCallbackDataTypeConstRef message )>;
+using LoginCallback = std::function<void()>;
 
 namespace Socket {
     static std::unordered_map<std::string, SocketCallbackFunc> callbacksMap;
@@ -141,7 +143,7 @@ namespace Http {
     void initDaemon();
 
     void login();
-    void login( const LoginFields& lf );
+    void login( const LoginFields& lf, const LoginCallback& loginCallback = nullptr);
     void loginSession();
     void refreshToken();
     void xProjectHeader( const LoginFields& _lf );

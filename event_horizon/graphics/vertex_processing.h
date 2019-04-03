@@ -25,7 +25,7 @@ public:
     void render_im();
     void assign( const std::string& name, const Matrix4f& data );
 
-    void create( std::shared_ptr<cpuVBIB> value, uint64_t _tag );
+    void create( std::shared_ptr<cpuVBIB> value, std::shared_ptr<RenderMaterial> _mat, uint64_t _tag );
 
     void addToCommandBuffer( Renderer& rr,
                              std::shared_ptr<Matrix4f> _transform = nullptr,

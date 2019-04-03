@@ -18,7 +18,7 @@ router.post('/:key', async (req, res, next) => {
 
     try {
         const data = await fsc.cloudStorageFileUpload(req.body, req.params.key, "eventhorizonfs");
-		let json = { msg : 'cloudStorageFileUpdate', name : req.params.key };
+		let json = { msg : 'cloudStorageFileUpdate', name : req.params.key, project : req.user.project };
 		let jsonParticular = { msg : 'cloudStorageFileUpdate-'+req.params.key };
         // server.ws_send( JSON.stringify(json) );
 		// server.ws_send( JSON.stringify(jsonParticular) );

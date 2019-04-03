@@ -1,5 +1,7 @@
 #include <utility>
 
+#include <utility>
+
 //
 // Created by Dado on 2019-03-20.
 //
@@ -28,16 +30,6 @@ JSONDATA( JSONResourceResponse, _id, project, group, isPublic, isRestricted, met
     bool isPublic = false;
     bool isRestricted = false;
     ResourceMetadata metadata;
-};
-
-JSONDATA( ResourceTarDict, group, filename, hash )
-
-    ResourceTarDict( std::string group, const std::string& filename, const std::string& hash ) :
-                     group( std::move( group )), filename( filename ), hash( hash ) {}
-
-    std::string group;
-    std::string filename;
-    std::string hash;
 };
 
 template <typename R>

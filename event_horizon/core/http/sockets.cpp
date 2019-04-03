@@ -14,7 +14,7 @@ namespace Socket {
 
     void createConnection() {
         // First thing close if any existing connections are present
-        close();
+//        close();
         Http::UsePort up = Http::isLocalHost() ? Http::UsePort::True : Http::UsePort::False;
         std::string host = Url::Host( Url::WssProtocol, Http::CLOUD_SERVER(), Http::CLOUD_PORT_SSL(), up );
         host += "/?s=" + std::string{Http::sessionId()};

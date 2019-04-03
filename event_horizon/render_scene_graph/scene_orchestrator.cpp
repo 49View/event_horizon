@@ -126,7 +126,7 @@ void SceneOrchestrator::activate() {
 	stateMachine->activate();
 }
 
-void SceneOrchestrator::reloadShaders( SocketCallbackDataType _data ) {
+void SceneOrchestrator::reloadShaders( SocketCallbackDataTypeConstRef _data ) {
 
 	ShaderLiveUpdateMap shadersToUpdate{_data};
 

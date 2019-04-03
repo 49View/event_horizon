@@ -239,13 +239,13 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 
 #define JSONDATA(CLASSNAME,...) \
 	struct CLASSNAME { \
-	CLASSNAME() {} \
-	CLASSNAME( const std::string& _str ) { \
+	CLASSNAME() = default; \
+	explicit CLASSNAME( const std::string& _str ) { \
 		rapidjson::Document document; \
 		document.Parse<rapidjson::kParseStopWhenDoneFlag>( _str.c_str() ); \
 		MegaReader reader( document ); \
 		deserialize( reader ); } \
-	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); } \
+	explicit CLASSNAME( const MegaReader& reader ) { deserialize( reader ); } \
     template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( #__VA_ARGS__,__VA_ARGS__ ); } \
 	std::string serialize() const { \

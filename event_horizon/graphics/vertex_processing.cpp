@@ -33,8 +33,8 @@ void VPList::addToCommandBuffer( Renderer& rr, std::shared_ptr<Matrix4f> _transf
 //	return ret;
 //}
 
-void VPList::create( std::shared_ptr<cpuVBIB> value, const uint64_t _tag ) {
-    mVP = std::make_shared<VertexProcessing>( value->name, _tag, value->material );
+void VPList::create( std::shared_ptr<cpuVBIB> value, std::shared_ptr<RenderMaterial> _mat, const uint64_t _tag ) {
+    mVP = std::make_shared<VertexProcessing>( value->name, _tag, _mat );
     mVP->create( value );
 }
 

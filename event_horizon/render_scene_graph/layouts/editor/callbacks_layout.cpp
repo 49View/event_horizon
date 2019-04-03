@@ -26,7 +26,7 @@ std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> dae
 
 std::unordered_map<std::string, std::tuple<std::string, SerializableContainer>> sceneEntityFilesCallbacks;
 
-void cloudCallback( SocketCallbackDataType data ) {
+void cloudCallback( SocketCallbackDataTypeConstRef data ) {
     std::string filename = url_decode( data["name"].GetString() );
     for ( const auto& [k,func] : daemonEntityCallbacks ) {
         if ( filename.find(DaemonPaths::store(k)) != std::string::npos ) {

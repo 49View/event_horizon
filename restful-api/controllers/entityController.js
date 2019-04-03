@@ -26,12 +26,15 @@ const getMetadataFromBody = (checkGroup, checkRaw, req) => {
 }
 
 const createEntityFromMetadata = async (project, metadata) => {
+    // console.log( metadata );
+    // console.log( "Project: ", project, " Group: ", metadata.group, " Name:", metadata.name );
     const { content, group, isPublic, isRestricted, cleanMetadata } = cleanupMetadata(metadata);
     let filePath=getFilePath(project, group, cleanMetadata.name);
     //Check content exists in project and group
     const copyEntity = await checkFileExists(project, group, cleanMetadata.hash)
     if (copyEntity===null) {
         //Upload file to S3
+        // console.log( "Adding: ", filePath );
         let savedFilename = {"changed":false, "name": filePath};
         await fsController.cloudStorageGetFilenameAndDuplicateIfExists( filePath, "eventhorizonentities", savedFilename );
         if ( savedFilename['changed'] == true ) {
@@ -113,10 +116,8 @@ const getFilePath = (project, group, name) => {
 }
 
 const checkFileExists = async (project, group, hash) => {
-
     const query = {$and: [{"metadata.hash":hash}, {"group":group}, {"project":project}]};
     const result = await entityModel.findOne(query);
-
     return result!==null?result.toObject():null;
 }
 

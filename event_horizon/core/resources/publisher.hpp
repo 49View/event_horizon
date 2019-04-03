@@ -18,23 +18,17 @@ template < typename T,
            typename B = JMATH::AABB,
            typename N = std::string >
 class Publisher : public ResourceVersioning<T>,
-                  public virtual Boxable<B>,
                   public virtual Taggable<N>,
                   public virtual Hashable<> {
 public:
-    void publish( const std::string& _name,
-                  const SerializableContainer& _raw,
-                  const ResourceDependencyDict& _deps = {},
-                  ResponseCallbackFunc callback = nullptr ) {
+    ResourcePipeElement pipe( const std::string& _name,
+                              const SerializableContainer& _raw,
+                              const ResourceDependencyDict& _deps = {} ) {
         this->Name(_name);
         this->calcHash( _raw );
-        publish( _raw, _deps, callback );
+        return { this->Name(), this->Hash(), toMetaData( _raw, _deps ) };
     }
 
-    void pipe( const std::string& _name,
-               const SerializableContainer& _raw ) {
-        pipes[_name] = _raw;
-    }
 protected:
     std::string rawb64gzip( const SerializableContainer& _raw ) const {
         auto f = zlibUtil::deflateMemory( std::string{ _raw.begin(), _raw.end() } );
@@ -65,3 +59,4 @@ protected:
 private:
     SerializableContainerDict pipes;
 };
+

@@ -20,11 +20,14 @@
 #include <core/runloop_core.h>
 #include <core/tar_util.h>
 #include <core/zlib_util.h>
+#include <core/names.hpp>
 #include <core/resources/publisher.hpp>
 #include <core/resources/material.h>
 #include <core/resources/resource_utils.hpp>
 #include <core/descriptors/uniform_names.h>
-#include <event_horizon/core/resources/resource_builder.hpp>
+#include <core/resources/resource_builder.hpp>
+#include <core/resources/resource_pipe.hpp>
+#include <core/resources/publisher.hpp>
 
 void initDeamon() {
     /* Our process ID and Session ID */
@@ -82,76 +85,24 @@ void elaborateMatFile( const std::string& mainFileName, const std::string& layer
 
     std::system(sbRender.c_str());
 
-    std::vector<ResourceTarDict> catalog;
-    std::stringstream tagStream;
-    tarUtil::TarWrite tar{ tagStream };
+    ResourcePipe rpipe;
 
-    std::string tarname = fn + layerName + ".tar";
-    std::string fileb = fn + "_" + MPBRTextures::basecolorString + fext;
-    std::string fileh = fn + "_" + MPBRTextures::heightString + fext;
-    std::string filem = fn + "_" + MPBRTextures::metallicString + fext;
-    std::string filer = fn + "_" + MPBRTextures::roughnessString + fext;
-    std::string filen = fn + "_" + MPBRTextures::normalString + fext;
-    std::string filea = fn + "_" + MPBRTextures::ambientOcclusionString + fext;
+    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::basecolorString        + fext );
+    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::heightString           + fext );
+    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::metallicString         + fext );
+    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::roughnessString        + fext );
+    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::normalString           + fext );
+    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::ambientOcclusionString + fext );
 
-    catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), fileb,
-                          tar.putFileHashing( ( fileRoot + fileb).c_str(), fileb.c_str() ) );
-    catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), fileh,
-                          tar.putFileHashing( ( fileRoot + fileh).c_str(), fileh.c_str() ) );
-    catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), filem,
-                          tar.putFileHashing( ( fileRoot + filem).c_str(), filem.c_str() ) );
-    catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), filer,
-                          tar.putFileHashing( ( fileRoot + filer).c_str(), filer.c_str() ) );
-    catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), filen,
-                          tar.putFileHashing( ( fileRoot + filen).c_str(), filen.c_str() ) );
-    catalog.emplace_back( ResourceVersioning<RawImage>::Prefix(), filea,
-                          tar.putFileHashing( ( fileRoot + filea).c_str(), filea.c_str() ) );
+    auto values = std::make_shared<HeterogeneousMap>(S::SH);
+    for ( const auto& entry : rpipe.getCatalog() ) {
+        values->assign( MPBRTextures::mapToTextureUniform( entry.filename ), entry.hash );
+    }
 
-    tar.put( ResourceCatalog::Key.c_str(), serializeArray(catalog) );
-    tar.finish();
+    rpipe.pipe<Material>( fn + layerName, Material{values}.serialize() );
 
-//    tar.put( "urca", "dado" );
-//    tar.put( "vacca", "porlrof" );
-//    tar.finish();
+    rpipe.publish();
 
-    Publisher<RawImage, EmptyBox> mpub;
-
-//    mpub.publish( fileb, FM::readLocalFileC(fileRoot + fileb) );
-
-    Http::post( Url{ HttpFilePrefix::entities + "multi" }, zlibUtil::deflateMemory(tagStream.str()), nullptr );
-
-//    mpub.pipe( fileb, FM::readLocalFileC(fileRoot + fileb) );
-//    mpub.pipe( fileh, FM::readLocalFileC(fileRoot + fileh) );
-//    mpub.pipe( filem, FM::readLocalFileC(fileRoot + filem) );
-//    mpub.pipe( filer, FM::readLocalFileC(fileRoot + filer) );
-//    mpub.pipe( filen, FM::readLocalFileC(fileRoot + filen) );
-//    mpub.pipe( filea, FM::readLocalFileC(fileRoot + filea) );
-//
-//    Http::post( Url{ HttpFilePrefix::entities }, "dumb", [&]( HttpResponeParams _res ) {
-//
-//    } );
-
-//            ResourceDependencyDict imageRefs;
-//            for ( const auto& [k,v] : files ) {
-//                auto lHash = Hashable<>::hashOf( v );
-//                resHashes[k] = lHash;
-//                imageRefs[ResourceVersioning<RawImage>::Prefix()].emplace_back( lHash );
-//            }
-//
-//            auto values = std::make_shared<HeterogeneousMap>(S::SH);
-//            for ( const auto& [k,v] : resHashes ) {
-//                values->assign( MPBRTextures::mapToTextureUniform( k ), v );
-//            }
-//
-//            for ( const auto& [k,v] : files ) {
-//                IB{ p->SG(), k }.make( v );
-//            }
-//            auto mat = std::make_shared<Material>(values);
-//            p->SG().B<MB>("tomato").addIM( mat );
-//            p->SG().B<MB>("tomato").publish( mat, imageRefs );
-
-//    Material mat{"urca"};
-//    mpub.publish( mat.serialize(), {}, [&]( HttpResponeParams _res ){} );
 //    FM::writeRemoteFile( DaemonPaths::store( ResourceGroup::Material, tarname ),
 //                         zlibUtil::deflateMemory(tagStream.str() ) );
 }
@@ -212,16 +163,27 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
         elaborateMatFile( filename );
         return 0;
     } else {
-        Socket::on( "cloudStorageFileUpdate", []( SocketCallbackDataType data ) {
-            std::string filename = url_decode( data["name"].GetString() );
-            if ( filename.find(DaemonPaths::upload(ResourceGroup::Material)) != std::string::npos ){
-                elaborateMat( filename );
-            } else if ( filename.find(DaemonPaths::upload(ResourceGroup::Geom)) != std::string::npos ){
-                elaborateGeom( filename );
-            }
-        } );
+        bool bAwaking = false;
+        std::string reqProject;
+        std::string reqFilename;
 
-        daemonLoop(1);
+        Socket::on( "cloudStorageFileUpdate", [&]( SocketCallbackDataTypeConstRef _data ) {
+            reqFilename = _data["name"].GetString();
+            reqProject = _data["project"].GetString();
+            bAwaking = true;
+        });
+
+        daemonLoop(1, bAwaking, [&]() {
+            bAwaking = false;
+            std::string filename = url_decode( reqFilename );
+            Http::login( LoginFields::Daemon(reqProject), [filename]() {
+                if ( filename.find(DaemonPaths::upload(ResourceGroup::Material)) != std::string::npos ){
+                    elaborateMat( filename );
+                } else if ( filename.find(DaemonPaths::upload(ResourceGroup::Geom)) != std::string::npos ){
+                    elaborateGeom( filename );
+                }
+            });
+        });
     }
 
     return 0;

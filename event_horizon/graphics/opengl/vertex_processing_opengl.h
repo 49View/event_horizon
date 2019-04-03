@@ -35,7 +35,6 @@ struct cpuVBIB {
     int numIndices;
     Primitive primiteType;
     int elenentSize;
-    std::shared_ptr<RenderMaterial> material;
     std::string name;
 
     cpuVertexDescriptor vElementAttrib[9];
@@ -165,9 +164,7 @@ public:
 
     template<class V>
     static std::shared_ptr<cpuVBIB>
-    create_cpuVBIB( std::shared_ptr<VertexStripIBVB<V>> vbib,
-                    std::shared_ptr<RenderMaterial> _material,
-                    const std::string& _vpName = "unnamed" );
+    create_cpuVBIB( std::shared_ptr<VertexStripIBVB<V>> vbib, const std::string& _vpName = "unnamed" );
 
     static uint64_t totalCount() { return sCountInc; }
     static std::string totalCountS() { return std::to_string(sCountInc); }
@@ -199,16 +196,13 @@ private:
 
 template<class V>
 std::shared_ptr<cpuVBIB>
-VertexProcessing::create_cpuVBIB( std::shared_ptr<VertexStripIBVB<V>> vbib,
-                                  std::shared_ptr<RenderMaterial> _material,
-                                  const std::string& _vpName ) {
+VertexProcessing::create_cpuVBIB( std::shared_ptr<VertexStripIBVB<V>> vbib, const std::string& _vpName ) {
     std::shared_ptr<cpuVBIB> ret = std::make_shared<cpuVBIB>();
 
     ret->elenentSize = sizeof( V );
     ret->bufferVerts = std::make_unique<char[]>( ret->elenentSize * vbib->numVerts );
     std::memcpy( ret->bufferVerts.get(), vbib->verts.get(), ret->elenentSize * vbib->numVerts );
     ret->bufferIndices = std::move( vbib->indices );
-    ret->material = _material;
     ret->numIndices = vbib->numIndices;
     ret->numVerts = vbib->numVerts;
     ret->primiteType = vbib->primiteType;

@@ -32,7 +32,9 @@ router.get('/:group/:tags', async (req, res, next) => {
         const tags = req.params.tags.split(",");
         const project = req.user.project;
         //Check existing entity for use project (or public)
+        console.log( group, tags, project );
         const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, true, 1);
+        console.log( foundEntities );
         if (foundEntities!==null && foundEntities.length>0) {
             const entity = foundEntities[0];            
             const filePath=entityController.getFilePath(entity.project, entity.group, entity.metadata.name);
@@ -117,56 +119,39 @@ router.post('/multi', async (req, res, next) => {
         const project = req.user.project;
         // const entities = await entityController.createEntitiesFromContainer(project, req.body);
         const containerBody = req.body;
-
-
-
         let container = tar.extract();
         const metadatas = [];
         const entities = [];
     
         container.on('entry', function(header, stream, next) {
-            console.log( header.name );
-            console.log( "Header :", header );
+            // console.log( "Header :", header );
             var writer = new streams.WritableStream();
             stream.on('end', function() {
-                //console.log( "Content: ", writer.toString() );
-                console.log("End stream");
-                //metadatas.push(writer.toString());
+                metadatas.push(writer.toString());
                 next();
                 container.end();
-                console.log("Exit end "+ header.name);
             });
             stream.pipe(writer);   
             stream.resume();
-            
-            // just auto drain the stream
         });
 
         container.on('error', (error) => {
             console.log("Stream ERROR");
         });
 
-        container.on('finish', () => {
-            console.log( "############### ");
+        container.on('finish', async () => {
             // all entries read
-            res.status(200).send(null);
+            for ( metadata of metadatas ) {
+                metadata = JSON.parse(metadata);
+                const newEntity = await entityController.createEntityFromMetadata(project, metadata);
+                entities.push( newEntity );
+            };        
+            res.status(200).send(JSON.toString(entities));
         });
 
-        //const deflatedBody = zlib.inflateSync(new Buffer.from(containerBody));
-        const deflatedBody = containerBody;
-      
+        const deflatedBody = zlib.inflateSync(new Buffer.from(containerBody));      
         var reader = new streams.ReadableStream(deflatedBody);
-
-
-        reader.pipe(container, { end: true});
-        console.log( "**************");
-    
-        metadatas.forEach(element => {
-            console.log( "############### ");
-          // const newEntity = await createEntityFromMetadata( project, element );
-          // if ( newEntity !== null ) entities.push(newEntity);            
-        });        
-        // res.status(200).send(entities);
+        reader.pipe(container);    
     } catch (ex) {
         console.log("ERROR CREATING ENTITY: ", ex);
         res.status(400).send(ex);

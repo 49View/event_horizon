@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 2019-03-20.
 //
@@ -10,6 +12,8 @@
 #include <set>
 #include <tuple>
 #include <unordered_map>
+
+#include <core/serialization.hpp>
 
 class VData;
 class Material;
@@ -24,6 +28,21 @@ class CameraRig;
 enum class AddResourcePolicy {
     Immediate,
     Deferred
+};
+
+JSONDATA( ResourceTarDict, group, filename, hash )
+    ResourceTarDict( std::string group, std::string filename, std::string hash ) :
+            group( std::move( group )), filename( std::move( filename )), hash( std::move( hash )) {}
+
+    std::string group;
+    std::string filename;
+    std::string hash;
+};
+
+struct ResourcePipeElement {
+    std::string name;
+    std::string hash;
+    std::string metadata;
 };
 
 template <typename T>
@@ -60,6 +79,18 @@ public:
         if ( std::is_same<R, VData>::value )            return 1000;
         if ( std::is_same<R, MaterialColor>::value  )   return 1000;
         return 0;
+    }
+
+    inline static bool HasDeps() {
+        if constexpr ( std::is_same<R, VData>::value )                  return false;
+        if constexpr ( std::is_same<R, Material>::value )               return true ;
+        if constexpr ( std::is_same<R, GeomData>::value )               return true ;
+        if constexpr ( std::is_same<R, MaterialColor>::value )          return false;
+        if constexpr ( std::is_same<R, Profile>::value )                return false;
+        if constexpr ( std::is_same<R, RawImage>::value )               return false;
+        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return false;
+        if constexpr ( std::is_same<R, UIElement>::value )              return true ;
+        if constexpr ( std::is_same<R, CameraRig>::value )              return false;
     }
 
     inline static std::string Prefix() {

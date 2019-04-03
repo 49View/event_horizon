@@ -359,8 +359,8 @@ namespace Http {
         );
     }
 
-    void login( const LoginFields& lf ) {
-        post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf](HttpResponeParams res) {
+    void login( const LoginFields& lf, const LoginCallback& loginCallback ) {
+        post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf, loginCallback](HttpResponeParams res) {
                 LoginToken lt(res.bufferString);
                 userToken( lt.token );
                 sessionId( lt.session );
@@ -368,6 +368,7 @@ namespace Http {
                 Http::cacheLoginFields( lf );
                 Socket::createConnection();
                 userLoggedIn( true );
+                if (loginCallback) loginCallback();
         } );
     }
 

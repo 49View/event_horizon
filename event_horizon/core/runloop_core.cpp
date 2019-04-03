@@ -37,14 +37,15 @@ void mainLoop<CommandConsole>( [[maybe_unused]] uint64_t _flags, [[maybe_unused]
 
 std::atomic<bool> deamonBreaker = false;
 
-void daemonLoop( int _sleepSeconds ) {
-
-    Http::xProjectHeader(LoginFields::Daemon());
+void daemonLoop( int _sleepSeconds, bool& _awake, std::function<void()> _elaborateFunc ) {
 
 	auto st = std::chrono::system_clock::now();
 
 	while ( !deamonBreaker ) {
 		sleep( _sleepSeconds );
+		if ( _awake ) {
+		    _elaborateFunc();
+		}
 		auto tn = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed = tn - st;
 		if ( elapsed.count() > 60*60*24*6.9 ) { // // refresh every week

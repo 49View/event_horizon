@@ -9,6 +9,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 
 struct CommandConsole {};
 class CommandQueue;
@@ -44,4 +45,4 @@ template< typename T > void mainLoop( uint64_t _flags = 0, RunLoopThreading rt =
 template <> void mainLoop<CommandConsole>( uint64_t _flags, RunLoopThreading rt );
 
 void updateTime();
-void daemonLoop( int _sleepSeconds );
+void daemonLoop( int _sleepSeconds, bool& _awake, std::function<void()> _elaborateFunc );

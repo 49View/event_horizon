@@ -183,7 +183,7 @@ namespace tarUtil {
     void TarWrite::finish() {
         _finished = true;
         //The end of the archive is indicated by two blocks filled with binary zeros
-        PosixTarHeader header;
+        PosixTarHeader header{};
         std::memset((void *) &header, 0, sizeof( PosixTarHeader ));
         out.write((const char *) &header, sizeof( PosixTarHeader ));
         out.write((const char *) &header, sizeof( PosixTarHeader ));
@@ -198,8 +198,12 @@ namespace tarUtil {
         put( filename, content, std::strlen( content ));
     }
 
+    void TarWrite::put( const std::string& filename, const SerializableContainer& _data ) {
+        put( filename.c_str(), reinterpret_cast<const char *>(_data.data()), _data.size() );
+    }
+
     void TarWrite::put( const char *filename, const char *content, std::size_t len ) {
-        PosixTarHeader header;
+        PosixTarHeader header{};
         _init((void *) &header );
         _filename((void *) &header, filename );
         header.typeflag[0] = 0;

@@ -153,13 +153,14 @@ namespace tarUtil {
         void _filename(void* header,const char* filename);
         void _endRecord(std::size_t len);
     public:
-        TarWrite(std::ostream& out);
+        explicit TarWrite(std::ostream& out);
         virtual ~TarWrite();
         /** writes 2 empty blocks. Should be always called before closing the Tar file */
         void finish();
         void put(const char* filename,const std::string& s);
         void put(const char* filename,const char* content);
         void put(const char* filename,const char* content,std::size_t len);
+        void put( const std::string& filename, const SerializableContainer& _data );
         bool putFile(const char* filename,const char* nameInArchive);
         std::string putFileHashing( const char *filename, const char *nameInArchive );
     };

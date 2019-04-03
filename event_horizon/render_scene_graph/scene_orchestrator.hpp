@@ -104,7 +104,7 @@ public:
 protected:
     AVInitCallback avcbTM();
 	void resetSingleEventNotifications();
-	void reloadShaders( SocketCallbackDataType _data );
+	void reloadShaders( SocketCallbackDataTypeConstRef _data );
 
 protected:
 	std::shared_ptr<SceneStateMachineBackEnd> stateMachine;

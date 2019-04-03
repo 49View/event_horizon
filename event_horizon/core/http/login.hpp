@@ -28,9 +28,9 @@ JSONDATA( LoginFields, project, email, password )
         password = _password;
     }
 
-    static LoginFields Daemon() {
+    static LoginFields Daemon( const std::string& _project = "" ) {
         static LoginFields ret;
-        ret.project = LoginSandbox::Name;
+        ret.project = _project.empty() ? LoginSandbox::Name : _project;
         ret.email = LoginSandbox::Daemon;
         ret.password = "luckycarrot1803";
         return ret;

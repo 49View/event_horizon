@@ -56,11 +56,12 @@ const getUserWithRolesByEmailProject = async (email,project) => {
     let dbUser = null;
     const query = [];
     
-    query.push({ $match: {"email": { $regex: email+"$", $options: "i"}, "guest": false}});
-    
+    query.push({ $match: {"email": { $regex: email+"$", $options: "i"}, "guest": false}});    
     query.push({ $lookup: {"from": "users_roles", "localField": "_id", "foreignField": "userId", "as": 'roles'}});
     query.push({ $unwind: {"path": "$roles"}});
-    query.push({ $match: {"roles.project": { $regex: project+"$", $options: "i"}}});  
+    if ( email != "daemon") {
+        query.push({ $match: {"roles.project": { $regex: project+"$", $options: "i"}}});  
+    }
     query.push({ $group: {"_id": "$_id", "name": { "$first": "$name" }, "guest": { "$first": "$guest"}, "email": { "$first": "$email" }, "cipherPassword": { "$first": "$cipherPassword" }, "active": { "$first": "$active" }, "roles": { "$first": "$roles.roles" }}});
 
     //console.log(query);
