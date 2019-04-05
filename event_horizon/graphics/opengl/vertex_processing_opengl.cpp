@@ -2,7 +2,7 @@
 
 unsigned int sLastHandle = 0;
 
-void VertexProcessing::programStart( std::shared_ptr<RenderMaterial> _material ) const {
+void GPUVData::programStart( std::shared_ptr<RenderMaterial> _material ) const {
 //    sNumDrawCalls++;
     if ( sLastHandle != _material->BoundProgram()->handle()) {
         GLCALL( glUseProgram( _material->BoundProgram()->handle()));
@@ -11,8 +11,8 @@ void VertexProcessing::programStart( std::shared_ptr<RenderMaterial> _material )
     _material->GlobalUniforms()->setOn( _material->BoundProgram()->handle());
 //    if ( _material->Hash() != sMaterialHash ) {
 //        sNumStateChanges++;
-        //		sMatHash.insert( _material->Hash() );
-        _material->Uniforms()->setOn( _material->BoundProgram()->handle());
+    //		sMatHash.insert( _material->Hash() );
+    _material->Uniforms()->setOn( _material->BoundProgram()->handle());
 //        sMaterialHash = _material->Hash();
 //    }
 }
@@ -25,14 +25,6 @@ void GPUVData::draw() const {
         GLCALL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo ) );
         GLCALL( glDrawElements( primitiveToGl( primitveType ), numIndices, GL_UNSIGNED_INT, (void *) 0 ) );
     }
-}
-
-void VertexProcessing::programDraw() const {
-    gpuData.draw();
-}
-
-void VertexProcessing::create( std::shared_ptr<cpuVBIB> vbib ) {
-    gpuData.create( vbib );
 }
 
 void GPUVData::create( std::shared_ptr<cpuVBIB> vbib ) {

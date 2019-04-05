@@ -135,8 +135,7 @@ public:
 
 class CommandBufferEntry {
 public:
-    VertexProcessing mVPList;
-    std::shared_ptr<RenderMaterial> mMaterial;
+    std::shared_ptr<VPList>   mVPList;
     std::shared_ptr<Matrix4f> mModelMatrix;
 };
 
@@ -220,9 +219,9 @@ public:
 
     void startTarget( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr );
 
-    void pushVP( std::shared_ptr<VertexProcessing> _vp,
-                 std::shared_ptr<RenderMaterial> _mat,
-                 std::shared_ptr<Matrix4f> _modelMatrix );
+    void pushVP( std::shared_ptr<VPList> _vp,
+                 std::shared_ptr<RenderMaterial> _mat = nullptr,
+                 std::shared_ptr<Matrix4f> _modelMatrix = nullptr );
     void pushCommand( const CommandBufferCommand& _cmd );
 
     void startList( std::shared_ptr<RLTarget> _target, CommandBufferFlags flags = CommandBufferFlags::CBF_None );

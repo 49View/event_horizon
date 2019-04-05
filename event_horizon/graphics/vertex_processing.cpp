@@ -5,57 +5,39 @@
 #include <graphics/render_list.h>
 #include <graphics/renderer.h>
 
-void VPList::render_im() {
-    mVP->renderProgram();
-}
-
-void VPList::assign( const std::string& name, const Matrix4f& data ) {
-    mVP->setMaterialConstant( name, data );
-}
-
-void VPList::addToCommandBuffer( Renderer& rr, std::shared_ptr<Matrix4f> _transform,
-                                 std::shared_ptr<RenderMaterial> _mat,
-                                 float alpha_threashold ) const {
-//    if ( RL.isUseMultiThreadRendering() ) std::lock_guard<std::mutex> lock( RL.CBVPAddMutex());
-    if ( mVP->transparencyValue() > alpha_threashold ) {
-        rr.CB_U().pushVP( mVP, _mat ? _mat : mVP->getMaterial(), _transform );
+VPList::VPList( std::shared_ptr<cpuVBIB> value,
+                std::shared_ptr<RenderMaterial> _mat,
+                std::shared_ptr<Matrix4f> _transform,
+                const uint64_t _tag ) {
+    gpuData.create( value );
+    if ( _transform == nullptr ) {
+        mTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
+    } else {
+        mTransform = _transform;
     }
-}
-
-//std::map<std::string, std::shared_ptr<VertexProcessing>> VPList::withNames( const std::string& _name ) {
-//	std::map<std::string, std::shared_ptr<VertexProcessing>> ret;
-//
-//	for ( auto& i : mVPList ) {
-//		if ( i.second->Name() == _name ) ret[_name] = i.second;
-//	}
-//	return ret;
-//}
-
-void VPList::create( std::shared_ptr<cpuVBIB> value, std::shared_ptr<RenderMaterial> _mat, const uint64_t _tag ) {
-    mVP = std::make_shared<VertexProcessing>( _tag, _mat );
-    mVP->create( value );
+    material = _mat;
+    mTag = _tag;
 }
 
 void VPList::setMaterial( std::shared_ptr<RenderMaterial> mp ) {
-    mVP->setMaterial( mp );
+    material = mp;
 }
 
 bool VPList::hasTag( const uint64_t _tag) const {
-    return checkBitWiseFlag( mVP->tag(), _tag );
+    return checkBitWiseFlag( tag(), _tag );
 }
 
 void VPList::setMaterialWithTag( std::shared_ptr<RenderMaterial> mp, uint64_t _tag ) {
-    if ( checkBitWiseFlag( mVP->tag(), _tag ) ) {
-        mVP->setMaterial( mp );
+    if ( checkBitWiseFlag( tag(), _tag ) ) {
+        setMaterial( mp );
     }
 }
 
 void VPList::setMaterialColorWithTag( const Color4f& _color, uint64_t _tag ) {
-    if ( checkBitWiseFlag( mVP->tag(), _tag ) ) {
-        mVP->setMaterialConstant(UniformNames::diffuseColor, _color.xyz() );
+    if ( checkBitWiseFlag( tag(), _tag ) ) {
+        setMaterialConstant(UniformNames::diffuseColor, _color.xyz() );
     }
 }
-
 
 void VPList::setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid, Color4f& _oldColor ) {
 //    ### REF put UUID in place for VPList
@@ -68,4 +50,18 @@ void VPList::setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid,
 //        mVP->setMaterialConstant(UniformNames::alpha, _color.w() );
 //        _oldColor = Vector4f{ oldC, oldAlpha};
 //    }
+}
+
+void VPList::draw() {
+    if ( gpuData.isEmpty()) return;
+    setMaterialGlobalConstant( UniformNames::modelMatrix, *getTransform().get() );
+    gpuData.programStart( material );
+    gpuData.draw();
+}
+
+void VPList::drawWith( std::shared_ptr<RenderMaterial> _material ) {
+    if ( gpuData.isEmpty()) return;
+    setMaterialGlobalConstant( UniformNames::modelMatrix, *getTransform() );
+    gpuData.programStart( std::move( _material ));
+    gpuData.draw();
 }

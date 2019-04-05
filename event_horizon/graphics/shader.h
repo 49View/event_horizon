@@ -2,4 +2,4 @@
 
 #include "opengl/shader_opengl.h"
 
-#endif // VertexProcessing
+#endif // RenderChunk

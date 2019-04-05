@@ -17,11 +17,10 @@ void Skybox::equirectangularTextureInit( const std::vector<std::string>& params 
 
     auto mat = std::make_shared<HeterogeneousMap>();
     mat->assign( UniformNames::colorTexture, params[0] );
-    VPBuilder<Pos3dStrip>{rr,mVPList, ShaderMaterial{S::EQUIRECTANGULAR, mat} }.p(colorStrip).n("skybox").build();
+    mVPList = VPBuilder<Pos3dStrip>{rr, ShaderMaterial{S::EQUIRECTANGULAR, mat} }.p(colorStrip).n("skybox").build();
 }
 
 void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
-    mVPList = std::make_shared<VPList>();
     mode = _sbm;
     invalidate();
     PolyStruct sp;
@@ -54,7 +53,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
         std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
         std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                                sp.numIndices, vpos3d, sp.indices );
-        VPBuilder<Pos3dStrip>{rr,mVPList, ShaderMaterial{S::SKYBOX}}.p(colorStrip).n("skybox").build();
+        mVPList = VPBuilder<Pos3dStrip>{rr,ShaderMaterial{S::SKYBOX}}.p(colorStrip).n("skybox").build();
     }
 }
 
@@ -71,11 +70,12 @@ bool Skybox::precalc( float _sunHDRMult ) {
         auto cubeMapRig = addCubeMapRig( "cubemapRig", Vector3f::ZERO, Rect2f(V2f{512}) );
         auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
         probe->render( mSkyboxTexture, 512, 0, [&]() {
+            mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
+
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
-            mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
-            mVPList->addToCommandBuffer( rr );
+            rr.CB_U().pushVP( mVPList );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
@@ -96,8 +96,6 @@ Skybox::Skybox( Renderer& rr, const SkyBoxInitParams& _params ) : RenderModule( 
 }
 
 void CubeEnvironmentMap::init() {
-    mVPList = std::make_shared<VPList>();
-
     auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
@@ -105,7 +103,7 @@ void CubeEnvironmentMap::init() {
                                                                            sp.numIndices, vpos3d, sp.indices );
 
     auto shaderName = InfiniteSkyboxMode() ? S::SKYBOX_CUBEMAP : S::PLAIN_CUBEMAP;
-    VPBuilder<Pos3dStrip>{rr,mVPList,ShaderMaterial{shaderName}}.p(colorStrip).n("cubeEnvMap-"+shaderName).build();
+    mVPList = VPBuilder<Pos3dStrip>{rr,ShaderMaterial{shaderName}}.p(colorStrip).n("cubeEnvMap-"+shaderName).build();
 }
 
 CubeEnvironmentMap::CubeEnvironmentMap( Renderer& rr, CubeEnvironmentMap::InifinititeSkyBox mbInfiniteSkyboxMode ) :
@@ -119,7 +117,7 @@ void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
     }
     mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
-    mVPList->addToCommandBuffer( rr );
+    rr.CB_U().pushVP( mVPList );
     if ( InfiniteSkyboxMode() ) {
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
@@ -127,21 +125,19 @@ void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
 }
 
 void ConvolutionEnvironmentMap::init() {
-    mVPList = std::make_shared<VPList>();
-
     auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList,ShaderMaterial{S::CONVOLUTION}}.p(colorStrip).n("cubeEnvMap").build();
+    mVPList = VPBuilder<Pos3dStrip>{rr,ShaderMaterial{S::CONVOLUTION}}.p(colorStrip).n("cubeEnvMap").build();
 }
 
 void ConvolutionEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
     rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
     mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
-    mVPList->addToCommandBuffer( rr );
+    rr.CB_U().pushVP( mVPList );
 }
 
 ConvolutionEnvironmentMap::ConvolutionEnvironmentMap( Renderer& rr ) : RenderModule( rr ) {
@@ -149,15 +145,13 @@ ConvolutionEnvironmentMap::ConvolutionEnvironmentMap( Renderer& rr ) : RenderMod
 }
 
 void PrefilterSpecularMap::init() {
-    mVPList = std::make_shared<VPList>();
-
     auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
                                                                            sp.numIndices, vpos3d, sp.indices );
 
-    VPBuilder<Pos3dStrip>{rr,mVPList,ShaderMaterial{S::IBL_SPECULAR}}.p(colorStrip).n("iblSpecularEnvMap").build();
+    mVPList = VPBuilder<Pos3dStrip>{rr,ShaderMaterial{S::IBL_SPECULAR}}.p(colorStrip).n("iblSpecularEnvMap").build();
 }
 
 void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float roughness ) {
@@ -165,7 +159,7 @@ void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float rou
     rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
     mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
     mVPList->setMaterialConstant( UniformNames::roughness, roughness );
-    mVPList->addToCommandBuffer( rr );
+    rr.CB_U().pushVP( mVPList );
 }
 
 PrefilterSpecularMap::PrefilterSpecularMap( Renderer& rr ) : RenderModule( rr ) {
@@ -179,7 +173,7 @@ void PrefilterBRDF::init() {
 
 void PrefilterBRDF::render( ) {
     rr.CB_U().startTarget( mBRDF, rr );
-    mBRDF->VP()->addToCommandBuffer( rr );
+    rr.CB_U().pushVP( mBRDF->VP() );
 }
 
 PrefilterBRDF::PrefilterBRDF( Renderer& rr ) : RenderModule( rr ) {

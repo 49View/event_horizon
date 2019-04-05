@@ -103,8 +103,7 @@ void CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer* cb ) const {
         mCommand.issue( rr, cb );
     } else {
 //        LOGRS("        Render geom: " << mVP->mVPList.Name() );
-        mVP->mMaterial->setGlobalConstant( UniformNames::modelMatrix, mVP->mModelMatrix );
-        mVP->mVPList.renderProgramWith( mVP->mMaterial );
+        mVP->mVPList->draw();
     }
 }
 
@@ -176,10 +175,13 @@ void CommandBufferList::end() {
     }
 }
 
-void CommandBufferList::pushVP( std::shared_ptr<VertexProcessing> _vp,
+void CommandBufferList::pushVP( std::shared_ptr<VPList> _vp,
                                 std::shared_ptr<RenderMaterial> _mat,
                                 std::shared_ptr<Matrix4f> _modelMatrix ) {
-    mCurrent->push( { VertexProcessing(*_vp.get()), _mat, _modelMatrix } );
+    const static float alpha_threashold = 0.0f;
+    if ( _vp->transparencyValue() > alpha_threashold ) {
+        mCurrent->push( { _vp, _modelMatrix } );
+    }
 }
 
 void CommandBufferList::pushCommand( const CommandBufferCommand& cmd ) {
@@ -319,7 +321,7 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
 //            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
 //                    UniformNames::shadowMapTexture,
 //                    rr.getShadowMapFB()->RenderToTexture());
-            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->render_im();
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->draw();
 
             cstack->postBlit();
 

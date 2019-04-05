@@ -132,12 +132,9 @@ public:
 	TextureManager& TM() { return tm; }
 	StreamingMediator& SSM();
 
-	std::shared_ptr<VPList> VPL( const int _bucket, std::shared_ptr<Matrix4f> m = nullptr, float alpha = 1.0f);
+    void VPL( int _bucket, std::shared_ptr<VPList> nvp, float alpha = 1.0f );
 
 	bool hasTag( uint64_t _tag ) const;
-
-//	RenderStats& Stats() { return mStats; }
-//	void Stats( RenderStats val ) { mStats = val; }
 
 	inline CommandBufferList& CB_U() { return *mCommandBuffers.get(); }
 	inline std::map<int, CommandBufferListVector>& CL() { return mCommandLists; }
@@ -201,54 +198,54 @@ public:
 	void drawIncGridLines( int numGridLines, float deltaInc, float gridLinesWidth,
 						   const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
 						   const float zoffset, const std::string& _name = "" );
-	void drawArcFilled( std::shared_ptr<VPList> _vpl, const Vector3f& center, float radius, float fromAngle, float toAngle,
+	void drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
 						const Vector4f& color, float width, int32_t subdivs, const std::string& _name = "" );
 
 	void createGrid( float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
 					 const Vector2f& limits, const float axisSize, const float zoffset = 0.0f, bool _monochrome = false,
 					 const std::string& _name = "" );
 	void
-	drawArrow( std::shared_ptr<VPList> _vpl, const Vector2f& p1, const Vector2f& p2, const Vector4f& color, float width,
+	drawArrow( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color, float width,
 			   float angle, float arrowlength, float _z, float percToBeDrawn, const std::string& _name1,
 			   const std::string& _name2 );
 
-	void drawLine( std::shared_ptr<VPList> _vpl, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
+	void drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
 				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
 				   const std::string& _name = "" );
 	void
-	drawLine( std::shared_ptr<VPList> _vpl, const std::vector<Vector2f>& verts, float z, const Vector4f& color, float width,
+	drawLine( int bucketIndex, const std::vector<Vector2f>& verts, float z, const Vector4f& color, float width,
 			  bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f, const std::string& _name = "" );
-	void drawLine( std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
+	void drawLine( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
 				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
 				   const std::string& _name = "" );
-	void drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
+	void drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
 					   const std::string& _name = "" );
-	void drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const Vector4f& color,
+	void drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
 					   const std::string& _name = "" );
-	void drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const Vector4f& color,
+	void drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
 					   const std::string& _name="");
-	void drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
+	void drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
 					   const Vector4f& color, const std::string& _name="");
 	void
-	draw3dVector( std::shared_ptr<VPList> _vpl, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
+	draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
 				  const std::string& _name = "" );
-	void drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center, float radius, const Color4f& color,
+	void drawCircle( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
 					 int32_t subdivs = 10, const std::string& _name = "" );
-	void drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center, const Vector3f& normal, float radius,
+	void drawCircle( int bucketIndex, const Vector3f& center, const Vector3f& normal, float radius,
 					 const Color4f& color, int32_t subdivs, const std::string& _name = "" );
-	void drawCircle2d( std::shared_ptr<VPList> _vpl, const Vector2f& center, float radius, const Color4f& color,
+	void drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color,
 					   int32_t subdivs = 10, const std::string& _name = "" );
-	void drawArc( std::shared_ptr<VPList> _vpl, const Vector3f& center, float radius, float fromAngle, float toAngle,
+	void drawArc( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
 				  const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
 				  const std::string& _name = "" );
-	void drawArc( std::shared_ptr<VPList> _vpl, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
+	void drawArc( int bucketIndex, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
 				  const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
 				  const std::string& _name = "" );
 	void
-	drawCylinder( std::shared_ptr<VPList> _vpl, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
+	drawCylinder( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
 				  const std::string& _name = "" );
 
-	void drawCone( std::shared_ptr<VPList> _vpl, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
+	void drawCone( int bucketIndex, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
 				   float size, const std::string& _name = "" );
 
 	friend class RenderSceneGraph;

@@ -19,22 +19,18 @@ class VData;
 
 struct HierGeomRenderObserver : public ObserverShared<GeomAsset> {
 
-    explicit HierGeomRenderObserver( Renderer& _rr );
+    explicit HierGeomRenderObserver() = default;
     virtual ~HierGeomRenderObserver() = default;
 
     std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> generateGeometryVP( const VData& _data );
     void notified( GeomAssetSP _source, const std::string& generator ) override;
-private:
-    Renderer& rr;
 };
 
 struct UIElementRenderObserver : public ObserverShared<UIAsset> {
-    explicit UIElementRenderObserver( Renderer& _rr );
+    explicit UIElementRenderObserver() = default;
     virtual ~UIElementRenderObserver() = default;
 
     void notified( UIAssetSP _source, const std::string& generator ) override;
-private:
-    Renderer& rr;
 };
 
 class RenderSceneGraph {

@@ -213,17 +213,17 @@ void CompositePBR::bloom() {
 
     mBlurVerticalFB->bind();
     mBlurVerticalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mColorFinalFB->RenderToTexture()->TDI(0));
-    mBlurVerticalFB->VP()->render_im();
+    mBlurVerticalFB->VP()->draw();
     //--
 
     for ( int i = 0; i < amount; i++ ) {
         mBlurHorizontalFB->bind();
         mBlurHorizontalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mBlurVerticalFB->RenderToTexture()->TDI(0));
-        mBlurHorizontalFB->VP()->render_im();
+        mBlurHorizontalFB->VP()->draw();
 
         mBlurVerticalFB->bind();
         mBlurVerticalFB->VP()->setMaterialConstant( UniformNames::colorFBTexture, mBlurHorizontalFB->RenderToTexture()->TDI(0));
-        mBlurVerticalFB->VP()->render_im();
+        mBlurVerticalFB->VP()->draw();
     }
 }
 

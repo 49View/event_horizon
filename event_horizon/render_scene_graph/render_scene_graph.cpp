@@ -16,8 +16,8 @@
 RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
                                     rr( rr ), sg(_sg) {
 
-    hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
-    uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
+//    hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
+//    uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
 
     sg.TL().connect( [this](const ResourceTransfer<RawImage>& _val ) {
         LOGRS( "Adding " << ResourceVersioning<RawImage>::Prefix() << ": "  << _val.name );
@@ -150,22 +150,18 @@ HierGeomRenderObserver::generateGeometryVP( const VData& __data ) {
 void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
 //    auto mat = _source->Data()->getMaterial();
 //  ### MAT reinstate materials
-    auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f ); // mat->translucency()
-    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, ShaderMaterial{S::SH} } //mat->getShaderName(), mat->Values()
-            .p(generateGeometryVP(_source->Data()->vData())).n(_source->UUiD()).g(_source->GHType()).build();
+//    auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f ); // mat->translucency()
+//    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, ShaderMaterial{S::SH} } //mat->getShaderName(), mat->Values()
+//            .p(generateGeometryVP(_source->Data()->vData())).n(_source->UUiD()).g(_source->GHType()).build();
 }
-
-HierGeomRenderObserver::HierGeomRenderObserver( Renderer& _rr ) : rr( _rr ) {}
 
 void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
 //    auto mat = _source->Data()->getMaterial();
 //  ### MAT reinstate materials
-    auto renderBucketIndex = _source->Data()->RenderBucketIndex();
-    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), 1.0f );
-    //mat->getOpacity()
-    auto vs = _source->Data()->VertexList();
-    VPBuilder<PosTex3dStrip>{rr,vpList, ShaderMaterial{S::SH}}. //mat->getShaderName(),mat->Values()
-    p(vs).n(_source->UUiD()).build();
+//    auto renderBucketIndex = _source->Data()->RenderBucketIndex();
+//    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), 1.0f );
+//    //mat->getOpacity()
+//    auto vs = _source->Data()->VertexList();
+//    VPBuilder<PosTex3dStrip>{rr,vpList, ShaderMaterial{S::SH}}. //mat->getShaderName(),mat->Values()
+//    p(vs).n(_source->UUiD()).build();
 }
-
-UIElementRenderObserver::UIElementRenderObserver( Renderer& _rr ) : rr( _rr ) {}

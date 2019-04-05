@@ -13,8 +13,7 @@ template <typename V>
 class VPBuilder {
 public:
     VPBuilder( Renderer& _rr,
-               std::shared_ptr<VPList> _vpl,
-               ShaderMaterial _sm ) : rr(_rr), vpl(std::move( _vpl )), shaderMaterial( std::move( _sm )) {
+               ShaderMaterial _sm ) : rr(_rr), shaderMaterial( std::move( _sm )) {
         name = UUIDGen::make();
         shaderMaterial.activate(rr);
     };
@@ -23,15 +22,16 @@ public:
     VPBuilder& n( const std::string& _name ) { name = _name; return *this; }
     VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
 
-    UUID build() {
-        rr.invalidateOnAdd();
-        vpl->create( VertexProcessing::create_cpuVBIB( ps ), rr.addMaterial( shaderMaterial ), tag );
-        return name;
+    auto build() {
+        return std::make_shared<VPList>(
+                RenderChunk::create_cpuVBIB( ps ),
+                rr.addMaterial( shaderMaterial ),
+                nullptr,
+                tag );
     }
 
 private:
     Renderer& rr;
-    std::shared_ptr<VPList> vpl;
     uint64_t tag = GT_Generic;
     std::shared_ptr<V> ps;
     ShaderMaterial shaderMaterial;

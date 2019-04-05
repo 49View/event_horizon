@@ -23,13 +23,13 @@ void Renderer::drawIncGridLines( int numGridLines, float deltaInc, float gridLin
                                        constAxis0.dominantElement() == 2 ? constAxis0.z() : delta );
         Vector3f lerpRightX = Vector3f( constAxis1.dominantElement() == 0 ? constAxis1.x() : delta, zoffset,
                                         constAxis1.dominantElement() == 2 ? constAxis1.z() : delta );
-        drawLine( VPL(CommandBufferLimits::CoreGrid), lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+        drawLine( CommandBufferLimits::CoreGrid, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
                   _name + std::to_string( t ) + "+" );
         lerpLeftX = Vector3f( constAxis0.dominantElement() == 0 ? constAxis0.x() : -delta, zoffset,
                               constAxis0.dominantElement() == 2 ? constAxis0.z() : -delta );
         lerpRightX = Vector3f( constAxis1.dominantElement() == 0 ? constAxis1.x() : -delta, zoffset,
                                constAxis1.dominantElement() == 2 ? constAxis1.z() : -delta );
-        drawLine( VPL(CommandBufferLimits::CoreGrid), lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+        drawLine( CommandBufferLimits::CoreGrid, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
                   _name + std::to_string( t ) + "-" );
         delta += deltaInc;
     }
@@ -62,13 +62,13 @@ void Renderer::createGrid( float unit, const Color4f& /*mainAxisColor*/,
     Color4f yAxisColorNeg = _monochrome ? mc : Color4f::PASTEL_CYAN * 1.25f;
 
     Vector3f base = { 0.0f, zoffset, 0.0f  };
-    drawLine( VPL(CommandBufferLimits::CoreGrid), leftXAxis, base, xAxisColorPos, mainAxisWidth, false, 0.0f, 1.0f, _name + "xNeg" );
-    drawLine( VPL(CommandBufferLimits::CoreGrid), base, rightXAxis, xAxisColorNeg, mainAxisWidth, false, 0.0f, 1.0f, _name + "xPos" );
-    drawLine( VPL(CommandBufferLimits::CoreGrid), topYAxis, base, yAxisColorPos, mainAxisWidth, false, 0.0f, 1.0f, _name + "yNeg" );
-    drawLine( VPL(CommandBufferLimits::CoreGrid), base, bottomYAxis, yAxisColorNeg, mainAxisWidth, false, 0.0f, 1.0f, _name + "yPos" );
+    drawLine( CommandBufferLimits::CoreGrid, leftXAxis, base, xAxisColorPos, mainAxisWidth, false, 0.0f, 1.0f, _name + "xNeg" );
+    drawLine( CommandBufferLimits::CoreGrid, base, rightXAxis, xAxisColorNeg, mainAxisWidth, false, 0.0f, 1.0f, _name + "xPos" );
+    drawLine( CommandBufferLimits::CoreGrid, topYAxis, base, yAxisColorPos, mainAxisWidth, false, 0.0f, 1.0f, _name + "yNeg" );
+    drawLine( CommandBufferLimits::CoreGrid, base, bottomYAxis, yAxisColorNeg, mainAxisWidth, false, 0.0f, 1.0f, _name + "yPos" );
 }
 
-void Renderer::drawArrow( std::shared_ptr<VPList> _vpl, const Vector2f& p1, const Vector2f& p2, const Vector4f& color,
+void Renderer::drawArrow( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color,
                           float width, float angle, float arrowlength, float _z, float percToBeDrawn,
                           const std::string& _name1, const std::string& _name2 ) {
     std::vector<Vector3f> vlist;
@@ -78,38 +78,39 @@ void Renderer::drawArrow( std::shared_ptr<VPList> _vpl, const Vector2f& p1, cons
     vlist.push_back( { p1 + pn1 * arrowlength, _z } );
     vlist.push_back( { p1, _z } );
     vlist.push_back( { p1 + pn2 * arrowlength, _z } );
-    drawLine( _vpl, vlist, color, width, false, 0.0f, percToBeDrawn, _name1 );
-    drawLine( _vpl, p1, p2, color, width * 0.75f, false, 0.0f, percToBeDrawn, _name2 );
+    drawLine( bucketIndex, vlist, color, width, false, 0.0f, percToBeDrawn, _name1 );
+    drawLine( bucketIndex, p1, p2, color, width * 0.75f, false, 0.0f, percToBeDrawn, _name2 );
 }
 
-void Renderer::drawLine( std::shared_ptr<VPList> _vpl, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
+void Renderer::drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
                bool wrapIt, float rotAngle, float percToBeDrawn, const std::string& _name ) {
     std::vector<Vector3f> vlist;
 
     vlist.push_back( p1 );
     vlist.push_back( p2 );
 
-    drawLine( _vpl, vlist, color, width, wrapIt, rotAngle, percToBeDrawn, _name );
+    drawLine( bucketIndex, vlist, color, width, wrapIt, rotAngle, percToBeDrawn, _name );
 }
 
-void Renderer::drawLine( std::shared_ptr<VPList> _vpl, const std::vector<Vector2f>& verts, float z, const Vector4f& color, float width,
+void Renderer::drawLine( int bucketIndex, const std::vector<Vector2f>& verts, float z, const Vector4f& color, float width,
           bool wrapIt, float rotAngle, float percToBeDrawn, const std::string& _name ) {
     std::vector<Vector3f> vlist;
     for ( auto& v : verts ) vlist.push_back( { v, z } );
-    drawLine( _vpl, vlist, color, width, wrapIt, rotAngle, percToBeDrawn, _name );
+    drawLine( bucketIndex, vlist, color, width, wrapIt, rotAngle, percToBeDrawn, _name );
 }
 
-void Renderer::drawLine( std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
+void Renderer::drawLine( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
                bool wrapIt, float rotAngle, float percToBeDrawn, const std::string& _name ) {
     if ( verts.size() < 2 ) return;
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
 
     colorStrip->generateStripsFromVerts( extrudePointsWithWidth( verts, width, wrapIt, rotAngle, percToBeDrawn ), wrapIt );
 
-    VPBuilder<Pos3dStrip>{*this,_vpl, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
-void Renderer::drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
+void Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
                    const std::string& _name ) {
     if ( verts.size() != 3 ) return;
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( 3, 3, PRIMITIVE_TRIANGLE_STRIP,
@@ -117,10 +118,11 @@ void Renderer::drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vec
     colorStrip->addStripVertex( Vector3f{ verts[0], _z } );
     colorStrip->addStripVertex( Vector3f{ verts[1], _z } );
     colorStrip->addStripVertex( Vector3f{ verts[2], _z } );
-    VPBuilder<Pos3dStrip>{*this,_vpl, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
-void Renderer::drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const Vector4f& color,
+void Renderer::drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
                    const std::string& _name ) {
     if ( verts.size() != 3 ) return;
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( 3, 3, PRIMITIVE_TRIANGLE_STRIP,
@@ -128,10 +130,11 @@ void Renderer::drawTriangle( std::shared_ptr<VPList> _vpl, const std::vector<Vec
     colorStrip->addStripVertex( verts[0] );
     colorStrip->addStripVertex( verts[1] );
     colorStrip->addStripVertex( verts[2] );
-    VPBuilder<Pos3dStrip>{*this,_vpl, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
-void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const Vector4f& color
+void Renderer::drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color
         ,	const std::string& _name) {
     //Multiple of 3
     if (verts.size()==0 || verts.size()%3 != 0) return;
@@ -142,10 +145,11 @@ void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vec
     for (auto &v : verts) {
         colorStrip->addStripVertex(v);
     }
-    VPBuilder<Pos3dStrip>{*this,_vpl,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
-void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
+void Renderer::drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
                    const Vector4f& color, const std::string& _name) {
     //Multiple of 3.d
     if (verts.size()==0 || indices.size()==0 || indices.size() % 3 != 0) return;
@@ -164,27 +168,28 @@ void Renderer::drawTriangles(std::shared_ptr<VPList> _vpl, const std::vector<Vec
         colorStrip->addVertex(v);
     }
 
-    VPBuilder<Pos3dStrip>{*this,_vpl,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
-void Renderer::drawCylinder( std::shared_ptr<VPList> _vpl, const Vector3f& pos, const Vector3f& dir, const Vector4f&
+void Renderer::drawCylinder( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f&
 color, float size,
               const std::string& _name ) {
-    drawLine( _vpl, pos, dir, color, size, false, 0.0f, 1.0f, _name );
-    drawLine( _vpl, pos, dir, color, size, false, M_PI_2, 1.0f, _name );
+    drawLine( bucketIndex, pos, dir, color, size, false, 0.0f, 1.0f, _name );
+    drawLine( bucketIndex, pos, dir, color, size, false, M_PI_2, 1.0f, _name );
 }
 
-void Renderer::drawCone( std::shared_ptr<VPList> /*_vpl*/, const Vector3f& /*posBase*/, const Vector3f& /*posTop*/,
+void Renderer::drawCone( int bucketIndex, const Vector3f& /*posBase*/, const Vector3f& /*posTop*/,
                const Vector4f& /*color*/, float /*size*/, const std::string& /*_name*/ ) {
 }
 
-void Renderer::draw3dVector( std::shared_ptr<VPList> _vpl, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
+void Renderer::draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
               const std::string& _name ) {
-//    draw3dPoint( _vpl, pos, color, size * 1.25f, _name );
-    drawCylinder( _vpl, pos, pos + dir, color, size, _name );
+//    draw3dPoint( bucketIndex, pos, color, size * 1.25f, _name );
+    drawCylinder( bucketIndex, pos, pos + dir, color, size, _name );
 }
 
-void Renderer::drawArc( std::shared_ptr<VPList> _vpl, const Vector3f& center, float radius, float fromAngle, float toAngle,
+void Renderer::drawArc( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
               const Vector4f& color, float width, int32_t subdivs, float percToBeDrawn, const std::string& _name ) {
     std::vector<Vector3f> points;
     for ( int t = 0; t < subdivs; t++ ) {
@@ -193,10 +198,10 @@ void Renderer::drawArc( std::shared_ptr<VPList> _vpl, const Vector3f& center, fl
         points.push_back( Vector3f( center.xy() + Vector2f( sinf( angle ), cosf( angle )) * radius, center.z()));
     }
 
-    drawLine( _vpl, points, color, width, false, 0.0f, percToBeDrawn, _name );
+    drawLine( bucketIndex, points, color, width, false, 0.0f, percToBeDrawn, _name );
 }
 
-void Renderer::drawArc( std::shared_ptr<VPList> _vpl, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
+void Renderer::drawArc( int bucketIndex, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
               const Vector4f& color, float width, int32_t subdivs, float percToBeDrawn, const std::string& _name ) {
     std::vector<Vector3f> points;
 
@@ -210,10 +215,10 @@ void Renderer::drawArc( std::shared_ptr<VPList> _vpl, const Vector3f& center, co
         points.push_back( pm );
     }
 
-    drawLine( _vpl, points, color, width, false, 0.0f, percToBeDrawn, _name );
+    drawLine( bucketIndex, points, color, width, false, 0.0f, percToBeDrawn, _name );
 }
 
-void Renderer::drawArcFilled( std::shared_ptr<VPList> _vpl, const Vector3f& center, float radius, float fromAngle, float toAngle,
+void Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
                     const Vector4f& color, float /*width*/, int32_t subdivs, const std::string& _name ) {
     int32_t numIndices = subdivs + 1;
     if ( numIndices < 3 ) return;
@@ -233,10 +238,11 @@ void Renderer::drawArcFilled( std::shared_ptr<VPList> _vpl, const Vector3f& cent
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
-    VPBuilder<Pos3dStrip>{*this,_vpl,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
-void Renderer::drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center, float radius, const Color4f& color, int32_t subdivs,
+void Renderer::drawCircle( int bucketIndex, const Vector3f& center, float radius, const Color4f& color, int32_t subdivs,
             const std::string& _name ) {
     int32_t numIndices = subdivs + 1;
     if ( numIndices < 3 ) return;
@@ -255,10 +261,11 @@ void Renderer::drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center,
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
-    VPBuilder<Pos3dStrip>{*this,_vpl,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
-void Renderer::drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center, const Vector3f& normal, float radius,
+void Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Vector3f& normal, float radius,
                  const Color4f& color, int32_t subdivs, const std::string& _name ) {
     int32_t numIndices = subdivs + 1;
     if ( numIndices < 3 ) return;
@@ -280,10 +287,11 @@ void Renderer::drawCircle( std::shared_ptr<VPList> _vpl, const Vector3f& center,
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
-    VPBuilder<Pos3dStrip>{*this,_vpl,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
-void Renderer::drawCircle2d( std::shared_ptr<VPList> _vpl, const Vector2f& center, float radius, const Color4f& color, int32_t subdivs,
+void Renderer::drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color, int32_t subdivs,
               const std::string& _name ) {
     int32_t numIndices = subdivs + 1;
     if ( numIndices < 3 ) return;
@@ -303,7 +311,8 @@ void Renderer::drawCircle2d( std::shared_ptr<VPList> _vpl, const Vector2f& cente
     std::shared_ptr<Pos2dStrip> ps = std::make_shared<Pos2dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
-    VPBuilder<Pos2dStrip>{*this,_vpl,ShaderMaterial{S::COLOR_2D, mapColor(color)}}.p(ps).n(_name).build();
+    auto vp = VPBuilder<Pos2dStrip>{*this,ShaderMaterial{S::COLOR_2D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
 

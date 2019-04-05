@@ -35,7 +35,7 @@
 
 class Profile;
 class GeomData;
-class VertexProcessing;
+class RenderChunk;
 class GeomBuilder;
 
 enum PullFlags : uint32_t {

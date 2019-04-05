@@ -189,4 +189,4 @@ bool canUseMultiSample();
 
 #include "opengl/framebuffer_opengl.h"
 
-#endif // VertexProcessing
+#endif // RenderChunk

@@ -201,16 +201,12 @@ void Renderer::renderCommands( int eye ) {
     CB_U().render( eye );
 }
 
-std::shared_ptr<VPList> Renderer::VPL( const int _bucket,
-                                       std::shared_ptr<Matrix4f> m,
-                                       float alpha ) {
-    auto nvp = std::make_shared<VPList>(m);
+void Renderer::VPL( const int _bucket, std::shared_ptr<VPList> nvp, float alpha ) {
     if ( alpha < 1.0f ) {
         mCommandLists[_bucket].mVListTransparent.push_back(nvp);
     } else {
         mCommandLists[_bucket].mVList.push_back(nvp);
     }
-    return nvp;
 }
 
 bool Renderer::hasTag( uint64_t _tag ) const {
@@ -238,7 +234,7 @@ void Renderer::addMaterialResource( const ResourceTransfer<Material>& _val ) {
 }
 
 void Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
-    auto vbib = VertexProcessing::create_cpuVBIB( generateGeometryVP(_val.elem) );
+    auto vbib = RenderChunk::create_cpuVBIB( generateGeometryVP(_val.elem) );
 }
 
 std::shared_ptr<RenderMaterial> Renderer::addMaterial( const ShaderMaterial& _sm ) {
@@ -331,7 +327,8 @@ void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {
 void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
                                    std::shared_ptr<RenderMaterial> _forcedMaterial ) {
     for ( const auto& vp : _map ) {
-        vp->addToCommandBuffer( *this, vp->getTransform(), _forcedMaterial );
+        CB_U().pushVP( vp );
+//        vp->addToCommandBuffer( *this, vp->getTransform(), _forcedMaterial );
     }
 }
 
