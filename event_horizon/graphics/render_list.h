@@ -213,7 +213,7 @@ public:
 
 class CommandBufferList {
 public:
-    CommandBufferList( Renderer& rr ) : rr( rr ) {}
+    explicit CommandBufferList( Renderer& rr ) : rr( rr ) {}
 
     void start();
     void end();

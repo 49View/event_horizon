@@ -10,7 +10,10 @@
 #include <core/camera_rig.hpp>
 #include <core/tar_util.h>
 #include <core/profiler.h>
+#include <core/v_data.hpp>
+#include <core/resources/material.h>
 #include <core/streaming_mediator.hpp>
+#include <core/resources/resource_utils.hpp>
 #include <graphics/graphic_functions.hpp>
 #include <graphics/light_manager.h>
 #include <graphics/render_list.h>
@@ -46,16 +49,20 @@ namespace FBNames {
 
 }
 
-//#include "vr_manager.hpp"
+std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>
+generateGeometryVP( std::shared_ptr<VData> _data ) {
+    if ( _data->numIndices() < 3 ) return nullptr;
 
-class CommandScriptRendererManager : public CommandScript {
-public:
-    CommandScriptRendererManager( Renderer& hm );
-    virtual ~CommandScriptRendererManager() {}
-};
-
-CommandScriptRendererManager::CommandScriptRendererManager( Renderer& _rr ) {
-    addCommandDefinition("reload shaders", std::bind(&Renderer::cmdReloadShaders, &_rr, std::placeholders::_1 ));
+    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[_data->numIndices()] );
+    std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
+    auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( _data->numVerts(), PRIMITIVE_TRIANGLES,
+                                                                   VFVertexAllocation::PreAllocate, _data->numIndices(),
+                                                                   _indices );
+    for ( int32_t t = 0; t < _data->numVerts(); t++ ) {
+        SOAData->addVertex( _data->vertexAt( t ), _data->uvAt( t ), _data->uv2At( t ), _data->normalAt( t ),
+                            _data->tangentAt( t ), _data->binormalAt( t ), _data->colorAt(t) );
+    }
+    return SOAData;
 }
 
 void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>& _params ) {
@@ -63,11 +70,9 @@ void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>
     afterShaderSetup();
 }
 
-Renderer::Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm ) :
-        cq( cq ), sm( sm ), tm(tm), ssm(_ssm), lm(_lm) {
+Renderer::Renderer( ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm ) :
+        sm( sm ), tm(tm), ssm(_ssm), lm(_lm) {
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
-    hcs = std::make_shared<CommandScriptRendererManager>(*this);
-    cq.registerCommandScript(hcs);
 }
 
 std::shared_ptr<RLTarget> Renderer::getTarget( const std::string& _name ) {
@@ -222,6 +227,20 @@ bool Renderer::hasTag( uint64_t _tag ) const {
     return false;
 }
 
+void Renderer::addTextureResource( const ResourceTransfer<RawImage>& _val ) {
+    tm.addTextureWithData( *_val.elem, _val.name );
+}
+
+void Renderer::addMaterialResource( const ResourceTransfer<Material>& _val ) {
+    ShaderMaterial shaderMaterial{_val.elem->Values()->Type(), _val.elem->Values() };
+    shaderMaterial.activate(*this);
+    addMaterial( shaderMaterial );
+}
+
+void Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
+    auto vbib = VertexProcessing::create_cpuVBIB( generateGeometryVP(_val.elem) );
+}
+
 std::shared_ptr<RenderMaterial> Renderer::addMaterial( const ShaderMaterial& _sm ) {
     auto rmaterial = std::make_shared<RenderMaterial>( _sm.P(), _sm.Values(), *this );
     MaterialMap( rmaterial );
@@ -287,12 +306,13 @@ void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _colo
 }
 
 void Renderer::removeFromCL( const UUID& _uuid ) {
-    auto removeUUID = [_uuid]( const auto & us ) -> bool { return us->Name() == _uuid; };
-
-    for ( auto& [k, vl] : CL() ) {
-        erase_if( vl.mVList, removeUUID );
-        erase_if( vl.mVListTransparent, removeUUID );
-    }
+//    ### REF re-think this!!!
+//    auto removeUUID = [_uuid]( const auto & us ) -> bool { return us->Name() == _uuid; };
+//
+//    for ( auto& [k, vl] : CL() ) {
+//        erase_if( vl.mVList, removeUUID );
+//        erase_if( vl.mVListTransparent, removeUUID );
+//    }
 }
 
 void Renderer::invalidateOnAdd() {
@@ -317,10 +337,6 @@ void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _m
 
 std::shared_ptr<Program> Renderer::P( const std::string& _id ) {
     return sm.P(_id);
-}
-
-void Renderer::MaterialCache( uint64_t mt, std::shared_ptr<RenderMaterial> _mat ) {
-    materialCache[mt] = _mat;
 }
 
 void Renderer::MaterialMap( std::shared_ptr<RenderMaterial> _mat ) {

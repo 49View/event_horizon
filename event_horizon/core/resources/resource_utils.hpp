@@ -46,13 +46,23 @@ struct ResourcePipeElement {
 };
 
 template <typename T>
-using ResourceSignalsAddSignature = std::tuple<std::shared_ptr<T>, std::vector<std::string> >;
+struct ResourceTransfer {
+    std::shared_ptr<T> elem;
+    std::string name;
+    std::string hash;
+    std::vector<std::string> aliases;
+
+    // operator < is needed for boost signal sorting
+    bool operator <(const ResourceTransfer &b) const {
+        return hash < b.hash;
+    }
+};
 
 template <typename C>
 using ResourceManagerContainer = std::unordered_map<std::string,std::shared_ptr<C>>;
 
 template <typename T>
-using SignalsDeferredContainer = std::set<ResourceSignalsAddSignature<T>>;
+using SignalsDeferredContainer = std::set<ResourceTransfer<T>>;
 
 inline static size_t resourcePriority( const ResourceRef& ref ) {
     if ( ref == ResourceGroup::Image ||

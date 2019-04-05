@@ -17,10 +17,8 @@ void VPList::addToCommandBuffer( Renderer& rr, std::shared_ptr<Matrix4f> _transf
                                  std::shared_ptr<RenderMaterial> _mat,
                                  float alpha_threashold ) const {
 //    if ( RL.isUseMultiThreadRendering() ) std::lock_guard<std::mutex> lock( RL.CBVPAddMutex());
-    if ( mVP->hasData()) {
-        if ( mVP->transparencyValue() > alpha_threashold ) {
-            rr.CB_U().pushVP( mVP, _mat ? _mat : mVP->getMaterial(), _transform );
-        }
+    if ( mVP->transparencyValue() > alpha_threashold ) {
+        rr.CB_U().pushVP( mVP, _mat ? _mat : mVP->getMaterial(), _transform );
     }
 }
 
@@ -34,7 +32,7 @@ void VPList::addToCommandBuffer( Renderer& rr, std::shared_ptr<Matrix4f> _transf
 //}
 
 void VPList::create( std::shared_ptr<cpuVBIB> value, std::shared_ptr<RenderMaterial> _mat, const uint64_t _tag ) {
-    mVP = std::make_shared<VertexProcessing>( value->name, _tag, _mat );
+    mVP = std::make_shared<VertexProcessing>( _tag, _mat );
     mVP->create( value );
 }
 
@@ -60,13 +58,14 @@ void VPList::setMaterialColorWithTag( const Color4f& _color, uint64_t _tag ) {
 
 
 void VPList::setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid, Color4f& _oldColor ) {
-    if ( mVP->Name() == _uuid ) {
-        Color3f oldC = Vector3f::ONE;
-        float oldAlpha = 1.0f;
-        mVP->getMaterialConstant(UniformNames::diffuseColor, oldC );
-        mVP->getMaterialConstant(UniformNames::alpha, oldAlpha );
-        mVP->setMaterialConstant(UniformNames::diffuseColor, _color.xyz() );
-        mVP->setMaterialConstant(UniformNames::alpha, _color.w() );
-        _oldColor = Vector4f{ oldC, oldAlpha};
-    }
+//    ### REF put UUID in place for VPList
+//    if ( mVP->Name() == _uuid ) {
+//        Color3f oldC = Vector3f::ONE;
+//        float oldAlpha = 1.0f;
+//        mVP->getMaterialConstant(UniformNames::diffuseColor, oldC );
+//        mVP->getMaterialConstant(UniformNames::alpha, oldAlpha );
+//        mVP->setMaterialConstant(UniformNames::diffuseColor, _color.xyz() );
+//        mVP->setMaterialConstant(UniformNames::alpha, _color.w() );
+//        _oldColor = Vector4f{ oldC, oldAlpha};
+//    }
 }

@@ -25,12 +25,8 @@ public:
 
     UUID build() {
         rr.invalidateOnAdd();
-        vpl->create( VertexProcessing::create_cpuVBIB( ps, name ), rr.addMaterial( shaderMaterial ), tag );
+        vpl->create( VertexProcessing::create_cpuVBIB( ps ), rr.addMaterial( shaderMaterial ), tag );
         return name;
-    }
-
-private:
-    void init( const std::string& _shader, const std::string& _name ) {
     }
 
 private:

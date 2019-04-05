@@ -50,9 +50,9 @@ public:
 
     template<typename T>
     inline void setMaterialConstantOn( const std::string& vp_name, const std::string& name, const T& val ) {
-        if ( mVP->Name() == vp_name ) {
+//        if ( mVP->Name() == vp_name ) {
             mVP->setMaterialConstant( name, val );
-        }
+//        }
     }
 
     void setMaterial( std::shared_ptr<RenderMaterial> mp );
@@ -70,7 +70,7 @@ public:
 
     bool hasTag( uint64_t _tag) const;
 
-    std::string Name() const { return mVP->Name(); }
+//    std::string Name() const { return mVP->Name(); }
 
 private:
     std::shared_ptr<VertexProcessing> mVP;

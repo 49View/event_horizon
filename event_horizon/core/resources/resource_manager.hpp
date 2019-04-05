@@ -45,7 +45,7 @@ public:
         signalAddElements.clear();
     }
 
-    void addToSignal( SignalsDeferredContainer<T>& _container, const ResourceSignalsAddSignature<T>& _elem ) {
+    void addToSignal( SignalsDeferredContainer<T>& _container, const ResourceTransfer<T>& _elem ) {
         _container.emplace(_elem);
     }
 
@@ -61,13 +61,13 @@ public:
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addSignal( { _elem, {_name, _hash, _aliasKey} } );
+        addSignal( { _elem, _name, _hash, {_aliasKey} } );
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
                       const ResourceRef& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addToSignal( signalAddElements, { _elem, {_name, _hash, _aliasKey} } );
+        addToSignal( signalAddElements, { _elem, _name, _hash, {_aliasKey} } );
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {
@@ -87,7 +87,7 @@ public:
         return nullptr;
     }
 
-    void connect( std::function<void (const ResourceSignalsAddSignature<T>&)> _slot ) {
+    void connect( std::function<void (const ResourceTransfer<T>&)> _slot ) {
         addSignal.connect( _slot );
     }
 
@@ -147,5 +147,5 @@ private:
     DependencyDict dependencyDict;
 
     SignalsDeferredContainer<T> signalAddElements;
-    boost::signals2::signal<void(const ResourceSignalsAddSignature<T>&)> addSignal;
+    boost::signals2::signal<void(const ResourceTransfer<T>&)> addSignal;
 };

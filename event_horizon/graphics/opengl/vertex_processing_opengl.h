@@ -35,51 +35,46 @@ struct cpuVBIB {
     int numIndices;
     Primitive primiteType;
     int elenentSize;
-    std::string name;
 
     cpuVertexDescriptor vElementAttrib[9];
     int vElementAttribSize;
+};
+
+class GPUVData {
+public:
+    void draw() const;
+    void create( std::shared_ptr<cpuVBIB> vbib );
+
+    bool Dynamic() const { return dynamic; }
+    void Dynamic( bool val ) { dynamic = val; }
+
+    void deleteBuffers() {
+        glDeleteBuffers( 1, &vbo );
+        glDeleteBuffers( 1, &ibo );
+        glDeleteVertexArrays( 1, &vao );
+    }
+
+    inline bool isEmpty() const {
+        return numIndices == 0 || vao == 0;
+    }
+
+private:
+    GLuint vao = 0;
+    GLuint vbo = 0;
+    GLuint ibo = 0;
+    GLuint numIndices = 0;
+    Primitive primitveType = PRIMITIVE_TRIANGLE_STRIP;
+    bool dynamic = false;
 };
 
 class VertexProcessing {
 public:
     VertexProcessing() = default;
 
-    VertexProcessing( const std::string& _name, const uint64_t _tag, std::shared_ptr<RenderMaterial> _mat ) {
-        Name( _name );
+    VertexProcessing( const uint64_t _tag, std::shared_ptr<RenderMaterial> _mat ) {
         mTag = _tag;
         material = _mat;
     }
-
-    bool hasData() const {
-        return vao != 0;
-    }
-
-    GLenum VFAttribTypeToGL( VFAttribTypes source ) {
-        switch ( source ) {
-            case VFAttribTypes::Byte:
-                return GL_BYTE;
-            case VFAttribTypes::UnsignedByte:
-                return GL_UNSIGNED_BYTE;
-            case VFAttribTypes::Short:
-                return GL_SHORT;
-            case VFAttribTypes::UnsignedShort:
-                return GL_UNSIGNED_SHORT;
-            case VFAttribTypes::Int:
-                return GL_INT;
-            case VFAttribTypes::UnsignedInt:
-                return GL_UNSIGNED_INT;
-            case VFAttribTypes::Float:
-                return GL_FLOAT;
-            default:
-                return GL_FLOAT;
-        }
-        return GL_FLOAT;
-    }
-
-//    inline std::string hash() const {
-//        return material->Hash();
-//    }
 
     inline std::shared_ptr<RenderMaterial> getMaterial() const {
         return material;
@@ -122,35 +117,17 @@ public:
         material->setConstant( UniformNames::opacity, alpha );
     }
 
-    bool isEmpty() const {
-        return numIndices == 0 || vao == 0;
-    }
-
     void renderProgram() {
-        if ( isEmpty()) return;
+        if ( gpuData.isEmpty()) return;
         programStart( material );
         programDraw();
     }
 
     void renderProgramWith( std::shared_ptr<RenderMaterial> _material ) const {
-        if ( isEmpty()) return;
+        if ( gpuData.isEmpty()) return;
         programStart( _material );
         programDraw();
     }
-
-    void deleteBuffers() {
-        glDeleteBuffers( 1, &vbo );
-        glDeleteBuffers( 1, &ibo );
-        glDeleteVertexArrays( 1, &vao );
-    }
-
-    bool Dynamic() const { return dynamic; }
-
-    void Dynamic( bool val ) { dynamic = val; }
-
-    std::string Name() const { return mName; }
-
-    void Name( std::string val ) { mName = val; }
 
     void create( std::shared_ptr<cpuVBIB> vbib );
 
@@ -164,55 +141,30 @@ public:
 
     template<class V>
     static std::shared_ptr<cpuVBIB>
-    create_cpuVBIB( std::shared_ptr<VertexStripIBVB<V>> vbib, const std::string& _vpName = "unnamed" );
+    create_cpuVBIB( std::shared_ptr<VertexStripIBVB<V>> vbib ) {
+        std::shared_ptr<cpuVBIB> ret = std::make_shared<cpuVBIB>();
 
-    static uint64_t totalCount() { return sCountInc; }
-    static std::string totalCountS() { return std::to_string(sCountInc); }
-
-public:
-    static int sNumDrawCalls;
-    static int sNumStateChanges;
-    static std::set<int64_t> sMatHash;
+        ret->elenentSize = sizeof( V );
+        ret->bufferVerts = std::make_unique<char[]>( ret->elenentSize * vbib->numVerts );
+        std::memcpy( ret->bufferVerts.get(), vbib->verts.get(), ret->elenentSize * vbib->numVerts );
+        ret->bufferIndices = std::move( vbib->indices );
+        ret->numIndices = vbib->numIndices;
+        ret->numVerts = vbib->numVerts;
+        ret->primiteType = vbib->primiteType;
+        ret->vElementAttribSize = V::numElements();
+        for ( int32_t t = 0; t < V::numElements(); t++ ) {
+            ret->vElementAttrib[t].offset = V::offset( t );
+            ret->vElementAttrib[t].size = V::size( t );
+        }
+        return ret;
+    }
 
 private:
     void programStart( std::shared_ptr<RenderMaterial> _material ) const;
     void programDraw() const;
 
 private:
-    GLuint vao = 0;
-    GLuint vbo = 0;
-    GLuint ibo = 0;
-    GLuint numIndices = 0;
-    Primitive primitveType = PRIMITIVE_TRIANGLE_STRIP;
+    GPUVData gpuData;
     std::shared_ptr<RenderMaterial> material;
     uint64_t mTag = GT_Generic;
-
-    bool dynamic = false;
-    std::string mName;
-
-    static std::string  sMaterialHash;
-    static uint64_t sCountInc;
 };
-
-template<class V>
-std::shared_ptr<cpuVBIB>
-VertexProcessing::create_cpuVBIB( std::shared_ptr<VertexStripIBVB<V>> vbib, const std::string& _vpName ) {
-    std::shared_ptr<cpuVBIB> ret = std::make_shared<cpuVBIB>();
-
-    ret->elenentSize = sizeof( V );
-    ret->bufferVerts = std::make_unique<char[]>( ret->elenentSize * vbib->numVerts );
-    std::memcpy( ret->bufferVerts.get(), vbib->verts.get(), ret->elenentSize * vbib->numVerts );
-    ret->bufferIndices = std::move( vbib->indices );
-    ret->numIndices = vbib->numIndices;
-    ret->numVerts = vbib->numVerts;
-    ret->primiteType = vbib->primiteType;
-    ret->name = _vpName;
-    ret->vElementAttribSize = V::numElements();
-    for ( int32_t t = 0; t < V::numElements(); t++ ) {
-        ret->vElementAttrib[t].offset = V::offset( t );
-        ret->vElementAttrib[t].size = V::size( t );
-    }
-
-    sCountInc++;
-    return ret;
-}

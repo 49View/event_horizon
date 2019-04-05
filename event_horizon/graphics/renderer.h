@@ -10,6 +10,7 @@
 #include <graphics/framebuffer.h>
 #include <graphics/graphic_constants.h>
 #include <graphics/shadowmap_manager.h>
+#include <event_horizon/core/resources/resource_utils.hpp>
 
 class Renderer;
 class RenderMaterial;
@@ -81,7 +82,7 @@ struct ChangeMaterialOnTagContainer {
 
 class Renderer {
 public:
-	Renderer( CommandQueue& cq, ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm );
+	Renderer( ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm );
 	virtual ~Renderer() = default;
 
     void cmdReloadShaders( const std::vector<std::string>& _params );
@@ -94,6 +95,21 @@ public:
 
 	void removeFromCL( const UUID& _uuid );
 
+	template <typename R>
+	void addResource( const ResourceTransfer<R>& _val ) {
+        if constexpr ( std::is_same<R, RawImage>::value ) {
+            addTextureResource( _val );
+        }
+        if constexpr ( std::is_same<R, Material>::value ) {
+        }
+        if constexpr ( std::is_same<R, VData>::value ) {
+        }
+    }
+
+    void addTextureResource( const ResourceTransfer<RawImage>& _val );
+    void addMaterialResource( const ResourceTransfer<Material>& _val );
+    void addVDataResource( const ResourceTransfer<VData>& _val );
+
 	std::shared_ptr<RenderMaterial> addMaterial( const ShaderMaterial& _material );
 	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
@@ -101,7 +117,7 @@ public:
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
 
 	std::shared_ptr<Program> P(const std::string& _id);
-	std::shared_ptr<Texture> TD( const std::string& _id, const int tSlot = -1 );
+	std::shared_ptr<Texture> TD( const std::string& _id, int tSlot = -1 );
     TextureUniformDesc TDI( const std::string& _id, unsigned int tSlot );
 
 	void addToCommandBuffer( CommandBufferLimitsT _entry );
@@ -127,7 +143,6 @@ public:
 	inline std::map<int, CommandBufferListVector>& CL() { return mCommandLists; }
     inline const std::map<int, CommandBufferListVector>& CL() const { return mCommandLists; }
 
-	void MaterialCache( uint64_t, std::shared_ptr<RenderMaterial> _mat );
 	void MaterialMap( std::shared_ptr<RenderMaterial> _mat );
 	void resetDefaultFB( const Vector2i& forceSize = Vector2i{-1});
 
@@ -154,7 +169,6 @@ protected:
 	void renderCommands( int eye );
 
 protected:
-    CommandQueue&   cq;
 	ShaderManager&  sm;
 	TextureManager& tm;
     StreamingMediator& ssm;
@@ -165,7 +179,6 @@ protected:
 
 	std::shared_ptr<Framebuffer> mDefaultFB;
 
-	std::unordered_map<uint64_t, std::shared_ptr<RenderMaterial>> materialCache;
 	std::unordered_map<std::string, std::shared_ptr<RenderMaterial>> materialMap;
 
 	std::shared_ptr<CommandScriptRendererManager> hcs;

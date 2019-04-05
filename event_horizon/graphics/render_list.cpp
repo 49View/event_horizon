@@ -198,20 +198,9 @@ void CommandBufferList::startList( std::shared_ptr<RLTarget> _target, CommandBuf
 }
 
 void CommandBufferList::render( [[maybe_unused]] int eye ) {
-    if ( mCommandBuffers.size() == 0 ) return;
-
-    // Might remove this ones once debugging and profiles state changes is over
-    VertexProcessing::sNumDrawCalls = 0;
-    VertexProcessing::sNumStateChanges = 0;
-    VertexProcessing::sMatHash.clear();
-
     for ( auto& cb : mCommandBuffers ) {
         cb.render( rr );
     }
-
-//    LOGR( "Draw  Calls:   %d", VertexProcessing::sNumDrawCalls );
-//    LOGR( "State Changes: %d", VertexProcessing::sNumStateChanges );
-//    LOGR( "Num Materials: %d", VertexProcessing::sMatHash.size() );
 }
 
 void CommandBufferList::getCommandBufferEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& wp ) {
@@ -363,9 +352,10 @@ void CommandBufferEntryCommand::Type( CommandBufferEntryCommandType type ) {
 }
 
 std::string CommandBufferEntryCommand::entryName() const {
-    if ( Type() == CommandBufferEntryCommandType::VP ) {
-       return mVP->mVPList.Name();
-    }
+//    ### REF this entryName is dodgy anyway, as it's used only by RenderHook which is going to be killed soon
+//    if ( Type() == CommandBufferEntryCommandType::VP ) {
+//       return mVP->mVPList.Name();
+//    }
     return "";
 }
 

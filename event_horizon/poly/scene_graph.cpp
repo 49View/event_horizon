@@ -79,6 +79,10 @@ void SceneGraph::cmdChangeTime( const std::vector<std::string>& _params ) {
 //    cmdChangeTimeImpl( _params );
 }
 
+void SceneGraph::cmdReloadShaders( const std::vector<std::string>& _params ) {
+//    cmdChangeTimeImpl( _params );
+}
+
 SceneGraph::SceneGraph( CommandQueue& cq,
                         VDataManager& _vl,
                         ImageManager& _tl,
@@ -162,6 +166,7 @@ CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
     addCommandDefinition("load object", std::bind(&SceneGraph::cmdLoadObject, &_hm, std::placeholders::_1));
     addCommandDefinition("lightmaps", std::bind(&SceneGraph::cmdCalcLightmaps, &_hm, std::placeholders::_1));
     addCommandDefinition("change time", std::bind(&SceneGraph::cmdChangeTime, &_hm, std::placeholders::_1 ));
+    addCommandDefinition("reload shaders", std::bind(&SceneGraph::cmdReloadShaders, &_hm, std::placeholders::_1 ));
 }
 
 void SceneGraph::nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot ) {

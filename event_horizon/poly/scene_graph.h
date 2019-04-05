@@ -58,6 +58,7 @@ public:
     void cmdLoadObject( const std::vector<std::string>& _params );
     void cmdCalcLightmaps( const std::vector<std::string>& _params );
     void cmdChangeTime( const std::vector<std::string>& params );
+    void cmdReloadShaders( const std::vector<std::string>& _params );
 
     bool rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
 

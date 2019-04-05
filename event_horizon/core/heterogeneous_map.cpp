@@ -333,3 +333,11 @@ std::unordered_map<std::string, std::string> HeterogeneousMap::getTextureNameMap
     }
     return ret;
 }
+
+const std::string& HeterogeneousMap::Type() const {
+    return mType;
+}
+
+void HeterogeneousMap::Type( const std::string& _type ) {
+    HeterogeneousMap::mType = _type;
+}

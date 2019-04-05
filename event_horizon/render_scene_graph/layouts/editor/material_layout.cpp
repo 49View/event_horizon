@@ -88,7 +88,7 @@ void callbackMaterial( const std::string& _filename, const SerializableContainer
 //            for ( const auto& [k,v] : files ) {
 //                p->SG().TL().addDependencyHook( elem.filename, k);
 //            }
-//            p->SG().TL().connect( [&](const ResourceSignalsAddSignature<RawImage>& _val ) {
+//            p->SG().TL().connect( [&](const ResourceTransfer<RawImage>& _val ) {
 //                const std::string& resName = std::get<1>(_val)[0];
 //                for ( const auto& k : cmdKeys ) {
 //                    p->SG().TL().tagDependencyLoaded( k, resName );

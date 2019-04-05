@@ -20,6 +20,8 @@ public:
     HeterogeneousMap( const HeterogeneousMap& _source );
     explicit HeterogeneousMap( std::shared_ptr<HeterogeneousMap> _source );
     explicit HeterogeneousMap( std::string _type ) : mType( std::move( _type )) {}
+    const std::string& Type() const;
+    void Type( const std::string& _type );
 
     JSONSERIAL( HeterogeneousMap, mType, mNumUniforms, mStrings, mInts, mFloats, mV2fs, mV3fs, mV3fvs, mV4fs, mM3fs, mM4fs );
 
