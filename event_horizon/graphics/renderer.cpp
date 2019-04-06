@@ -13,6 +13,7 @@
 #include <core/v_data.hpp>
 #include <core/resources/material.h>
 #include <core/streaming_mediator.hpp>
+#include <core/descriptors/uniform_names.h>
 #include <core/resources/resource_utils.hpp>
 #include <graphics/graphic_functions.hpp>
 #include <graphics/light_manager.h>
@@ -234,7 +235,7 @@ void Renderer::addMaterialResource( const ResourceTransfer<Material>& _val ) {
 }
 
 void Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
-    auto vbib = RenderChunk::create_cpuVBIB( generateGeometryVP(_val.elem) );
+    auto vbib = std::make_shared<cpuVBIB>( generateGeometryVP(_val.elem) );
 }
 
 std::shared_ptr<RenderMaterial> Renderer::addMaterial( const ShaderMaterial& _sm ) {

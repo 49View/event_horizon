@@ -24,7 +24,7 @@ public:
 
     auto build() {
         return std::make_shared<VPList>(
-                RenderChunk::create_cpuVBIB( ps ),
+                std::make_shared<cpuVBIB>( ps ),
                 rr.addMaterial( shaderMaterial ),
                 nullptr,
                 tag );

@@ -186,7 +186,5 @@ private:
 bool canUseMultiSample();
 
 #ifdef _OPENGL
-
 #include "opengl/framebuffer_opengl.h"
-
-#endif // RenderChunk
+#endif

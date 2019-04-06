@@ -1,5 +1,8 @@
 #include "vertex_processing.h"
 
+#include <core/math/matrix4f.h>
+#include <core/descriptors/uniform_names.h>
+
 #include <core/app_globals.h>
 #include <core/math/poly_shapes.hpp>
 #include <graphics/render_list.h>
@@ -64,4 +67,20 @@ void VPList::drawWith( std::shared_ptr<RenderMaterial> _material ) {
     setMaterialGlobalConstant( UniformNames::modelMatrix, *getTransform() );
     gpuData.programStart( std::move( _material ));
     gpuData.draw();
+}
+
+void VPList::setMaterialConstantAlpha( float alpha ) {
+    material->setConstant( UniformNames::alpha, alpha );
+}
+
+void VPList::setMaterialConstantOpacity( float alpha ) {
+    material->setConstant( UniformNames::opacity, alpha );
+}
+
+std::shared_ptr<Matrix4f> VPList::getTransform() const {
+    return mTransform;
+}
+
+void VPList::setTransform( std::shared_ptr<Matrix4f> lTransform ) {
+    if ( lTransform ) VPList::mTransform = lTransform;
 }

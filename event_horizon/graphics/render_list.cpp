@@ -12,6 +12,7 @@
 #include <core/http/basen.hpp>
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
+#include <core/descriptors/uniform_names.h>
 #include <graphics/renderer.h>
 #include <graphics/graphic_functions.hpp>
 #include <graphics/framebuffer.h>

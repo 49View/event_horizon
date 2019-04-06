@@ -1,4 +1,6 @@
 #include "vertex_processing_opengl.h"
+#include <graphics/render_material.hpp>
+#include <graphics/vertex_processing.h>
 
 unsigned int sLastHandle = 0;
 
@@ -20,10 +22,10 @@ void GPUVData::programStart( std::shared_ptr<RenderMaterial> _material ) const {
 void GPUVData::draw() const {
     GLCALL( glBindVertexArray( vao ) );
     if ( ibo == 0 ) {
-        GLCALL( glDrawArrays( primitiveToGl( primitveType ), 0, numIndices ) );
+        GLCALL( glDrawArrays( primitveType, 0, numIndices ) );
     } else {
         GLCALL( glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo ) );
-        GLCALL( glDrawElements( primitiveToGl( primitveType ), numIndices, GL_UNSIGNED_INT, (void *) 0 ) );
+        GLCALL( glDrawElements( primitveType, numIndices, GL_UNSIGNED_INT, (void *) 0 ) );
     }
 }
 
@@ -83,5 +85,15 @@ void GPUVData::create( std::shared_ptr<cpuVBIB> vbib ) {
     }
 
     numIndices = static_cast<GLuint>(vbib->numIndices == 0 ? vbib->numVerts : vbib->numIndices);
-    primitveType = vbib->primiteType;
+    primitveType = primitiveToGl( vbib->primiteType );
+}
+
+void GPUVData::deleteBuffers() {
+    GLCALL(glDeleteBuffers( 1, &vbo ));
+    GLCALL(glDeleteBuffers( 1, &ibo ));
+    GLCALL(glDeleteVertexArrays( 1, &vao ));
+}
+
+bool GPUVData::isEmpty() const {
+    return numIndices == 0 || vao == 0;
 }

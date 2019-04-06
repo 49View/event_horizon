@@ -8,6 +8,7 @@
 #include <core/camera_rig.hpp>
 #include <core/raw_image.h>
 #include <core/streaming_mediator.hpp>
+#include <core/descriptors/uniform_names.h>
 #include <graphics/renderer.h>
 #include <graphics/light_manager.h>
 
