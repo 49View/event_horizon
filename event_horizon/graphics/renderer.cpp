@@ -22,6 +22,7 @@
 #include <graphics/shader_manager.h>
 #include <graphics/shadowmap_manager.h>
 #include <graphics/shader_material.hpp>
+#include <graphics/render_material_manager.hpp>
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -67,12 +68,15 @@ generateGeometryVP( std::shared_ptr<VData> _data ) {
 }
 
 void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>& _params ) {
-    sm.loadShaders();
+    sm->loadShaders();
     afterShaderSetup();
 }
 
-Renderer::Renderer( ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm ) :
-        sm( sm ), tm(tm), ssm(_ssm), lm(_lm) {
+Renderer::Renderer( StreamingMediator& _ssm) : ssm(_ssm) {
+    sm = std::make_shared<ShaderManager>();
+    tm = std::make_shared<TextureManager>();
+    lm = std::make_shared<LightManager>();
+    rmm = std::make_shared<RenderMaterialManager>(*this);
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
 }
 
@@ -111,32 +115,31 @@ void Renderer::init() {
     resetDefaultFB();
     rcm.init();
     am.init();
-    lm.init();
-    sm.loadShaders();
-    tm.addTextureWithData(RawImage::WHITE4x4(), FBNames::lightmap, TSLOT_LIGHTMAP );
-    addMaterial(ShaderMaterial{S::SHADOW_MAP, *this});
+    sm->loadShaders();
+    tm->addTextureWithData(RawImage::WHITE4x4(), FBNames::lightmap, TSLOT_LIGHTMAP );
+    rmm->addRenderMaterial( S::SHADOW_MAP );
     afterShaderSetup();
 }
 
 void Renderer::injectShader( const std::string& _key, const std::string& _content ) {
-    sm.inject( _key, _content );
+    sm->inject( _key, _content );
 }
 
 void Renderer::afterShaderSetup() {
-    lm.generateUBO( sm );
+    lm->generateUBO( sm );
     am.generateUBO( sm );
     rcm.generateUBO( sm );
 }
 
 void Renderer::setGlobalTextures() {
-    auto p = sm.P(S::SH);
+    auto p = sm->P(S::SH);
 
-    auto lmt = tm.TD(FBNames::lightmap);
+    auto lmt = tm->TD(FBNames::lightmap);
     if ( lmt ) {
         lmt->bind( lmt->textureSlot(), p->handle(), UniformNames::lightmapTexture.c_str() );
     }
 
-    auto smt = tm.TD(FBNames::shadowmap);
+    auto smt = tm->TD(FBNames::shadowmap);
     if ( smt ) {
         smt->bind( smt->textureSlot(), p->handle(), UniformNames::shadowMapTexture.c_str() );
     }
@@ -163,7 +166,7 @@ void Renderer::directRenderLoop() {
 
 //    VRM.preRender();
     am.setTiming();
-    lm.setUniforms_r();
+    lm->setUniforms_r();
     am.setUniforms_r();
 
     for ( auto& mcc : mChangeMaterialCallbacks ) {
@@ -225,27 +228,23 @@ bool Renderer::hasTag( uint64_t _tag ) const {
 }
 
 void Renderer::addTextureResource( const ResourceTransfer<RawImage>& _val ) {
-    tm.addTextureWithData( *_val.elem, _val.name );
+    tm->addTextureWithData( *_val.elem, _val.names );
 }
 
-void Renderer::addMaterialResource( const ResourceTransfer<Material>& _val ) {
-    ShaderMaterial shaderMaterial{_val.elem->Values()->Type(), _val.elem->Values() };
-    shaderMaterial.activate(*this);
-    addMaterial( shaderMaterial );
+std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ShaderMaterial& _val, const std::string& _name ) {
+    return rmm->addRenderMaterial( _val.SN(), _val.Values(), {_name} );
+}
+
+std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ResourceTransfer<Material>& _val ) {
+    return rmm->addRenderMaterial( _val.elem->Values()->Type(), _val.elem->Values(), _val.names );
 }
 
 void Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
     auto vbib = std::make_shared<cpuVBIB>( generateGeometryVP(_val.elem) );
 }
 
-std::shared_ptr<RenderMaterial> Renderer::addMaterial( const ShaderMaterial& _sm ) {
-    auto rmaterial = std::make_shared<RenderMaterial>( _sm.P(), _sm.Values(), *this );
-    MaterialMap( rmaterial );
-    return rmaterial;
-}
-
 std::shared_ptr<RenderMaterial> Renderer::getMaterial( const std::string& _key ) {
-    return materialMap[_key];
+    return rmm->get(_key);
 }
 
 void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt ) {
@@ -253,16 +252,8 @@ void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer&
 }
 
 void Renderer::changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt ) {
-//    auto program = P( _cmt.mat->getShaderName() );
-//    _cmt.mat->Values()->injectIfNotPresent(*program->getDefaultUniforms().get() );
-//    _cmt.mat->resolveDynamicConstants();
-//
-//    auto rmaterial = addMaterial(_cmt.mat->Values(), program);
-//
-//    if ( !rmaterial ) return;
-
     // ### MAT This will need to be handled differently, I reckon
-    auto rmaterial = materialMap[_cmt.matHash];
+    auto rmaterial = rmm->getFromHash(_cmt.matHash);
 
     for ( const auto& [k, vl] : CL() ) {
         if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
@@ -334,15 +325,11 @@ void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _m
 }
 
 std::shared_ptr<Program> Renderer::P( const std::string& _id ) {
-    return sm.P(_id);
-}
-
-void Renderer::MaterialMap( std::shared_ptr<RenderMaterial> _mat ) {
-    materialMap[_mat->Hash()] = _mat;
+    return sm->P(_id);
 }
 
 std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot ) {
-    return tm.TD( _id, tSlot );
+    return tm->TD( _id, tSlot );
 }
 
 TextureUniformDesc Renderer::TDI( const std::string& _id, unsigned int tSlot ) {
@@ -364,7 +351,7 @@ void RenderAnimationManager::init() {
     mAnimUniforms->setUBOStructure( UniformNames::pointLightPos, 16 );
 }
 
-void RenderAnimationManager::generateUBO( const ShaderManager& sm ) {
+void RenderAnimationManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
     mAnimUniforms->generateUBO( sm, "AnimationUniforms" );// u_deltaAnimTime );
 }
 
@@ -377,7 +364,7 @@ void RenderCameraManager::init() {
     mCameraUBO->setUBOStructure( UniformNames::eyePos, 16 );
 }
 
-void RenderCameraManager::generateUBO( const ShaderManager& sm ) {
+void RenderCameraManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
     mCameraUBO->generateUBO( sm, "CameraUniforms" );
 }
 

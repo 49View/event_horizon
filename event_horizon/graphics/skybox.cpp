@@ -60,7 +60,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
 bool Skybox::precalc( float _sunHDRMult ) {
     if ( needsRefresh() ) {
 
-        mSkyboxTexture = rr.TM().addCubemapTexture( TextureRenderData{ "skybox" }
+        mSkyboxTexture = rr.TM()->addCubemapTexture( TextureRenderData{ "skybox" }
                                                                 .setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
                                                                 .setGenerateMipMaps( false )
                                                                 .setIsFramebufferTarget( true )

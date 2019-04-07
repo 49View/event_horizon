@@ -18,7 +18,6 @@ class Renderer;
 class Program;
 class Material;
 class ProgramUniformSet;
-
 class ShaderManager;
 
 class RenderMaterial {

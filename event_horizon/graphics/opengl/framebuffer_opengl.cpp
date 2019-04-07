@@ -53,11 +53,11 @@ void Framebuffer::attachColorBuffer( unsigned int index ) {
     GLCALL( glDrawBuffers( index + 1, attachments.get()) );
 }
 
-void Framebuffer::initDepth( TextureManager& tm ) {
+void Framebuffer::initDepth( std::shared_ptr<TextureManager> tm ) {
     GLCALL( glGenFramebuffers( 1, &mFramebufferHandle ));
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 
-    mRenderToTexture = tm.addTextureNoData( TextureRenderData{ mName }.size( mWidth, mHeight )
+    mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName }.size( mWidth, mHeight )
                                                       .wm( WRAP_MODE_REPEAT )
                                                       .fm( FILTER_LINEAR )
                                                       .format( PIXEL_FORMAT_DEPTH_32 ).setIsFramebufferTarget( true )
@@ -70,7 +70,7 @@ void Framebuffer::initDepth( TextureManager& tm ) {
     checkFrameBufferStatus();
 }
 
-void Framebuffer::init( TextureManager& tm ) {
+void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
     GLCALL( glGenFramebuffers( 1, &mFramebufferHandle ));
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 
@@ -82,7 +82,7 @@ void Framebuffer::init( TextureManager& tm ) {
         GLCALL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mRenderbufferHandle
         ) );
     } else {
-        mRenderToTexture = tm.addTextureNoData( TextureRenderData{ mName }.size( mWidth, mHeight )
+        mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName }.size( mWidth, mHeight )
                                                           .wm( WRAP_MODE_CLAMP_TO_EDGE ).format( mFormat )
                                                           .setIsFramebufferTarget( true )
                                                           .GPUSlot( mTextureGPUSlot )

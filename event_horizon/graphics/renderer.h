@@ -14,7 +14,6 @@
 
 class Renderer;
 class RenderMaterial;
-class CommandScriptRendererManager;
 class CommandQueue;
 class ShaderManager;
 class LightManager;
@@ -27,6 +26,7 @@ class CommandBufferEntry;
 class CommandBufferList;
 struct CommandBufferListVector;
 class ShaderMaterial;
+class RenderMaterialManager;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -58,7 +58,7 @@ using CommandBufferLimitsT = int;
 class RenderAnimationManager {
 public:
     void init();
-	void generateUBO( const ShaderManager& sm );
+	void generateUBO( std::shared_ptr<ShaderManager> sm );
     void setTiming();
     void setUniforms_r();
 private:
@@ -68,7 +68,7 @@ private:
 class RenderCameraManager {
 public:
 	void init();
-	void generateUBO( const ShaderManager& sm );
+	void generateUBO( std::shared_ptr<ShaderManager> sm );
 	void setUniforms_r();
 	std::shared_ptr<ProgramUniformSet>& UBO();
 private:
@@ -82,7 +82,7 @@ struct ChangeMaterialOnTagContainer {
 
 class Renderer {
 public:
-	Renderer( ShaderManager& sm, TextureManager& tm, StreamingMediator& _ssm, LightManager& _lm );
+    explicit Renderer( StreamingMediator& _ssm );
 	virtual ~Renderer() = default;
 
     void cmdReloadShaders( const std::vector<std::string>& _params );
@@ -95,22 +95,11 @@ public:
 
 	void removeFromCL( const UUID& _uuid );
 
-	template <typename R>
-	void addResource( const ResourceTransfer<R>& _val ) {
-        if constexpr ( std::is_same<R, RawImage>::value ) {
-            addTextureResource( _val );
-        }
-        if constexpr ( std::is_same<R, Material>::value ) {
-        }
-        if constexpr ( std::is_same<R, VData>::value ) {
-        }
-    }
-
     void addTextureResource( const ResourceTransfer<RawImage>& _val );
-    void addMaterialResource( const ResourceTransfer<Material>& _val );
+    std::shared_ptr<RenderMaterial> addMaterialResource( const ResourceTransfer<Material>& _val );
+    std::shared_ptr<RenderMaterial> addMaterialResource( const ShaderMaterial& _val, const std::string& _name );
     void addVDataResource( const ResourceTransfer<VData>& _val );
 
-	std::shared_ptr<RenderMaterial> addMaterial( const ShaderMaterial& _material );
 	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
@@ -128,8 +117,9 @@ public:
 	void setGlobalTextures();
 
 	std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
-    LightManager&   LM() { return lm; }
-	TextureManager& TM() { return tm; }
+    std::shared_ptr<LightManager>   LM() { return lm; }
+	std::shared_ptr<TextureManager> TM() { return tm; }
+	std::shared_ptr<ShaderManager>  SM() { return sm; }
 	StreamingMediator& SSM();
 
     void VPL( int _bucket, std::shared_ptr<VPList> nvp, float alpha = 1.0f );
@@ -140,7 +130,6 @@ public:
 	inline std::map<int, CommandBufferListVector>& CL() { return mCommandLists; }
     inline const std::map<int, CommandBufferListVector>& CL() const { return mCommandLists; }
 
-	void MaterialMap( std::shared_ptr<RenderMaterial> _mat );
 	void resetDefaultFB( const Vector2i& forceSize = Vector2i{-1});
 
 	void addTarget( std::shared_ptr<RLTarget> _target );
@@ -158,27 +147,21 @@ public:
 
 protected:
 	void changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt );
-
 	void clearCommandList();
-
 	void renderCBList();
-
 	void renderCommands( int eye );
 
 protected:
-	ShaderManager&  sm;
-	TextureManager& tm;
+	std::shared_ptr<ShaderManager>          sm;
+	std::shared_ptr<TextureManager>         tm;
+	std::shared_ptr<RenderMaterialManager>  rmm;
+    std::shared_ptr<LightManager>           lm;
     StreamingMediator& ssm;
-    LightManager&   lm;
 
 	RenderAnimationManager am;
 	RenderCameraManager rcm;
 
 	std::shared_ptr<Framebuffer> mDefaultFB;
-
-	std::unordered_map<std::string, std::shared_ptr<RenderMaterial>> materialMap;
-
-	std::shared_ptr<CommandScriptRendererManager> hcs;
 
 	int mUpdateCounter = 0;
 	bool bInvalidated = false;
@@ -188,8 +171,6 @@ protected:
 	std::map<int, CommandBufferListVector> mCommandLists;
 
 	std::vector<ChangeMaterialOnTagContainer> mChangeMaterialCallbacks;
-
-//	RenderStats mStats;
 
 	template <typename V> friend class VPBuilder;
 

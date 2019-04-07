@@ -15,7 +15,6 @@
 
 #include <core/uuid.hpp>
 #include <core/command.hpp>
-#include <core/suncalc/sun_builder.h>
 #include <poly/poly.hpp>
 #include <core/resources/resource_utils.hpp>
 
@@ -42,8 +41,7 @@ public:
                          MaterialManager& _ml,
                          ColorManager& _cl,
                          FontManager& _fm,
-                         CameraManager& _cm,
-                         SunBuilder& _sb );
+                         CameraManager& _cm );
 
     void init();
     void add( NodeVariants _geom );
@@ -72,7 +70,6 @@ public:
     CameraManager& CM() { return cm; }
     FontManager& FM() { return fm; }
     ColorManager& MC() { return cl; }
-    SunBuilder& SB() { return sb; }
 
     template <typename R>
     auto& M() {
@@ -124,8 +121,6 @@ protected:
     ColorManager& cl;
     FontManager& fm;
     CameraManager& cm;
-
-    SunBuilder& sb;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     std::unordered_map<std::string, uint64_t> geomTypeMap;

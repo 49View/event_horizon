@@ -55,7 +55,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
         bool bHasTexture = false;
         for ( const auto& [k, mt] : mat->Values()->getTextureNameMap() ) {
             if ( k == UniformNames::diffuseTexture || k == UniformNames::colorTexture ) {
-                ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->RSG().RR().TM().TD(mt) );
+                ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->RSG().RR().TM()->TD(mt) );
                 bHasTexture = true;
                 break;
             }

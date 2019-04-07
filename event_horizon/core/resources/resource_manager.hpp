@@ -61,13 +61,13 @@ public:
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addSignal( { _elem, _name, _hash, {_aliasKey} } );
+        addSignal( { _elem, _hash, {_name, _aliasKey} } );
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
                       const ResourceRef& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addToSignal( signalAddElements, { _elem, _name, _hash, {_aliasKey} } );
+        addToSignal( signalAddElements, { _elem, _hash, {_name, _aliasKey} } );
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {

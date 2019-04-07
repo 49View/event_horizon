@@ -90,8 +90,7 @@ SceneGraph::SceneGraph( CommandQueue& cq,
                         MaterialManager& _ml,
                         ColorManager& _cl,
                         FontManager& _fm,
-                        CameraManager& _cm,
-                        SunBuilder& _sb ) : vl(_vl), tl(_tl), pl(_pl), ml(_ml), cl(_cl), fm(_fm), cm(_cm), sb(_sb) {
+                        CameraManager& _cm ) : vl(_vl), tl(_tl), pl(_pl), ml(_ml), cl(_cl), fm(_fm), cm(_cm) {
 
     hcs = std::make_shared<CommandScriptSceneGraph>(*this);
     cq.registerCommandScript(hcs);

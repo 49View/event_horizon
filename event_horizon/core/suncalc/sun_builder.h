@@ -15,7 +15,7 @@ class SunBuilder {
 public:
     SunBuilder();
     SunPosition buildFromString( const std::string& _naturalTime );
-    void buildFromHour( const double _hours );
+    void buildFromHour( double _hours );
     void setCurrentTimeUniforms();
     void setCurrentLocation( std::string locationHint );
     void update( float timeStamp );
@@ -41,7 +41,7 @@ private:
     SunPosition mSunPosition;
 
     float mGoldenHour = 0.0f;
-    int defaultYear = 2018;
+    int defaultYear = 2019;
     bool mbDirtyTime = false;
 
     std::shared_ptr<RawImage> goldenHourGradient;

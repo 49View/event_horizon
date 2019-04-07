@@ -28,7 +28,7 @@ public:
     }
 
     void ctor( TextureRenderData& tb ) {
-        Name( tb.names[0] );
+        Name( *tb.names.begin() );
         if (tb.forceGPUId != -1) {
             mHandle = static_cast<GLuint>( tb.forceGPUId );
         }

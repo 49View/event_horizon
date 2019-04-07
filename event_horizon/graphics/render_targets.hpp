@@ -19,6 +19,7 @@ class PrefilterSpecularMap;
 class PrefilterBRDF;
 class RLTarget;
 class Camera;
+class SunBuilder;
 struct FrameBufferTextureValues;
 
 enum class RenderTargetType {
@@ -296,6 +297,7 @@ protected:
     Vector3f mCachedSunPosition = Vector3f::ZERO;
     SkyBoxInitParams mSkyBoxParams;
 
+    std::shared_ptr<SunBuilder> mSunBuilder;
     std::shared_ptr<Skybox> mSkybox;
     std::shared_ptr<ShadowMapManager> smm;
     std::shared_ptr<ConvolutionEnvironmentMap> mConvolution;

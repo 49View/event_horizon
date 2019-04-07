@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <core/service_factory.h>
+#include <core/hash_shared_map.hpp>
 
 #include "core/util.h"
 #include "texture.h"
@@ -11,17 +12,12 @@
 // TextureManager
 //====================================
 
-typedef std::map<std::string, std::shared_ptr<Texture>> TextureMap;
-typedef TextureMap::iterator TextureMapIt;
-typedef TextureMap::const_iterator TextureMapCIt;
-
 class RawImage;
 
-class TextureManager {
+class TextureManager : public HashSharedMap<Texture> {
 public:
     TextureManager() = default;
     TextureManager( TextureManager const& ) = delete;
-private:
     void operator=( TextureManager const& ) = delete;
 
 public:
@@ -29,7 +25,7 @@ public:
                                                  const std::string& _name,
                                                  TextureSlots _tslot = TSLOT_COLOR );
     std::shared_ptr<Texture> addTextureWithData( const RawImage& rawImage,
-                                                 const std::vector<std::string>& _names,
+                                                 const StringUniqueCollection& _names,
                                                  TextureSlots _tslot = TSLOT_COLOR );
     std::shared_ptr<Texture> addTextureNoData( TextureRenderData& tb );
     std::shared_ptr<Texture> addCubemapTexture( TextureRenderData& tb );
@@ -43,11 +39,7 @@ public:
                         PixelFormat outFormat );
     void removeTexture( const std::string& id );
 
-    int getTextureCount() const { return static_cast<int>( mTextures.size()); }
-
     bool isTexture( const std::string& id ) const;
-
-//    void T( TextureRenderData& tb );
 
     /// Query texture direct without going through creation of new texture if name is not present
     /// MUST have texture present
@@ -59,10 +51,6 @@ public:
     std::shared_ptr<Texture> addTextureFromCallback( TextureRenderData& tb, std::unique_ptr<uint8_t []>& _data );
     std::shared_ptr<Texture> addTextureImmediate( TextureRenderData& tb, const uint8_t* _data );
 
-    TextureMapIt begin();
-    TextureMapIt end();
-    TextureMapCIt begin() const;
-    TextureMapCIt end() const;
 private:
 
     std::shared_ptr<Texture> createTexture( TextureRenderData& tb );
@@ -74,6 +62,4 @@ private:
                                         PixelFormat outFormat );
     static void convertPixelFormat( uint8_t *data, uint8_t *outData, int width, int height, PixelFormat inFormat,
                                     PixelFormat outFormat );
-
-    TextureMap mTextures;
 };

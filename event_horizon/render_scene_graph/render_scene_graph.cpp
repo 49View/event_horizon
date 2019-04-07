@@ -20,18 +20,17 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
 //    uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
 
     sg.TL().connect( [this](const ResourceTransfer<RawImage>& _val ) {
-        LOGRS( "Adding " << ResourceVersioning<RawImage>::Prefix() << ": "  << _val.name );
+        LOGRS( "Adding " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addTextureResource(_val);
     });
 
     sg.ML().connect( [this](const ResourceTransfer<Material>& _val ) {
-        LOGRS( "Adding " << ResourceVersioning<Material>::Prefix() << ": "  << _val.name );
+        LOGRS( "Adding " << ResourceVersioning<Material>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addMaterialResource(_val);
-//        this->RR().addResource(_val);
     });
 
     sg.VL().connect( [this](const ResourceTransfer<VData>& _val ) {
-        LOGRS( "Adding " << ResourceVersioning<VData>::Prefix() << ": "  << _val.name );
+        LOGRS( "Adding " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addVDataResource(_val);
 //        auto lvl = this->RR().VPL( CommandBufferLimits::PBRStart, nullptr, 1.0f ); // mat->translucency()
 //        auto mat = this->SG().ML().get("tomato");

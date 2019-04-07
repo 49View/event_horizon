@@ -9,19 +9,18 @@
 #include "graphic_functions.hpp"
 
 void TextureManager::removeTexture( const std::string& id ) {
-    TextureMap::iterator it = mTextures.find( id );
-    if ( it != mTextures.end()) {
+    auto it = mData.find( id );
+    if ( it != mData.end()) {
         //		GLuint tid = ( it->second->getHandle() );
         //		GLCALL( glDeleteTextures( 1, &tid ) );
-        mTextures.erase( it );
+        mData.erase( it );
     }
 }
 
 std::shared_ptr<Texture> TextureManager::createTexture( TextureRenderData& tb ) {
     auto ltexture = std::make_shared<Texture>( tb );
 
-    for ( const auto& lName : tb.names )
-        if ( !lName.empty() ) mTextures[lName] = ltexture;
+    add( tb.names, ltexture );
 
     return ltexture;
 }
@@ -64,19 +63,17 @@ std::shared_ptr<Texture> TextureManager::addTextureNoData( TextureRenderData& tb
 std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage,
                                                              const std::string& _name,
                                                              TextureSlots _tslot ) {
-    std::vector<std::string> names;
-    names.emplace_back(_name);
-    return addTextureWithData( rawImage, names, _tslot );
+    return addTextureWithData( rawImage, StringUniqueCollection{ _name }, _tslot );
 }
 
 std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage,
-                                                             const std::vector<std::string>& _names,
+                                                             const StringUniqueCollection& _names,
                                                              TextureSlots _tslot ) {
     auto tb = TextureRenderData{ _names }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
     tb.format( channelsToFormat( rawImage.channels ) );
 
     for ( const auto& _name : _names ) {
-        if ( mTextures.find( _name ) != mTextures.end() ) {
+        if ( mData.find( _name ) != mData.end() ) {
             removeTexture( _name );
         }
     }
@@ -86,7 +83,7 @@ std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& raw
 std::shared_ptr<Texture> TextureManager::addTextureWithGPUHandle( const std::string& id, unsigned int _handle,
                                                                   unsigned int _secondaryHandle ) {
 
-    if ( mTextures.find( id ) != mTextures.end() ) {
+    if ( mData.find( id ) != mData.end() ) {
         removeTexture( id );
     }
 
@@ -112,7 +109,7 @@ void TextureManager::preparingStremingTexture( const std::string& _streamName, c
 }
 
 void TextureManager::updateTexture( const RawImage& _image, const std::string& _name ) {
-    if ( auto it = mTextures.find( _name ); it != mTextures.end()) {
+    if ( auto it = mData.find( _name ); it != mData.end()) {
         Texture * toBeUpdated = it->second.get();
         toBeUpdated->refresh( _image.data(), 0, 0, toBeUpdated->getWidth(), toBeUpdated->getHeight());
     } else {
@@ -122,15 +119,15 @@ void TextureManager::updateTexture( const RawImage& _image, const std::string& _
 }
 
 void TextureManager::updateTexture( const std::string& id, const uint8_t *data ) {
-    if ( auto it = mTextures.find( id ); it != mTextures.end()) {
+    if ( auto it = mData.find( id ); it != mData.end()) {
         Texture * toBeUpdated = it->second.get();
         toBeUpdated->refresh( data, 0, 0, toBeUpdated->getWidth(), toBeUpdated->getHeight());
     }
 }
 
 void TextureManager::updateTexture( const std::string& id, const uint8_t *data, int width, int height ) {
-    TextureMap::iterator it = mTextures.find( id );
-    if ( mTextures.find( id ) == mTextures.end()) {
+    auto it = mData.find( id );
+    if ( mData.find( id ) == mData.end()) {
         ASSERT( false );
     }
     Texture * toBeUpdated = it->second.get();
@@ -139,8 +136,8 @@ void TextureManager::updateTexture( const std::string& id, const uint8_t *data, 
 
 void TextureManager::updateTexture( const std::string& id, uint8_t *data, int width, int height, PixelFormat inFormat,
                                     PixelFormat outFormat ) {
-    TextureMap::iterator it = mTextures.find( id );
-    if ( mTextures.find( id ) == mTextures.end()) {
+    auto it = mData.find( id );
+    if ( mData.find( id ) == mData.end()) {
         LOGE( "Texture not in the manager, skipping it: %s", id.c_str());
         return;
     }
@@ -268,37 +265,20 @@ void TextureManager::convertPixelFormat( uint8_t *data, uint8_t *outData, int wi
 }
 
 bool TextureManager::isTexture( const std::string& id ) const {
-    return mTextures.find( id ) != mTextures.end();
+    return mData.find( id ) != mData.end();
 }
 
 std::shared_ptr<Texture> TextureManager::TD( const std::string& tname, const int tSlot ) {
 
     std::string safeName = tname;
-    if ( mTextures.find( safeName ) == mTextures.end() ) {
+    if ( mData.find( safeName ) == mData.end() ) {
         safeName = S::WHITE;
     }
 
-    auto ret = mTextures[safeName];
+    auto ret = mData[safeName];
     if ( tSlot >= 0 ) {
         ret->textureSlot( tSlot );
     }
 
     return ret;
 }
-
-TextureMapIt TextureManager::begin() {
-    return mTextures.begin();
-}
-
-TextureMapIt TextureManager::end() {
-    return mTextures.end();
-}
-
-TextureMapCIt TextureManager::begin() const {
-    return mTextures.cbegin();
-}
-
-TextureMapCIt TextureManager::end() const {
-    return mTextures.cend();
-}
-

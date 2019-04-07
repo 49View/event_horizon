@@ -75,7 +75,7 @@ cubeMapFrameBuffers FrameBufferBuilder::buildCube() {
     cubeMapFrameBuffers retContainer;
 
     // Create the whole cubemap texture, once
-    auto mRenderToTexture = rr.TM().addCubemapTexture( TextureRenderData{ mName }
+    auto mRenderToTexture = rr.TM()->addCubemapTexture( TextureRenderData{ mName }
                                                                .setSize( mWidth ).format( mFormat )
                                                                .setGenerateMipMaps( mUseMipMaps )
                                                                .setIsFramebufferTarget( true )

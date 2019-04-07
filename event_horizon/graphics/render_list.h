@@ -50,10 +50,6 @@ public:
     void NumNormals( int val ) { mNumNormals = val; }
     int& NumNormals() { return mNumNormals; }
 
-    //void addMaterial( std::shared_ptr<RenderMaterial> _mat ) { mMaterialSet.insert( _mat ); }
-    //int NumMaterials() const { return mNumMaterials; }
-    //void NumMaterials( int val ) { mNumMaterials = val; }
-    //int& NumMaterials() { return mNumMaterials; }
 
     int NumGeoms() const { return mNumGeoms; }
     void NumGeoms( int val ) { mNumGeoms = val; }

@@ -6,11 +6,12 @@
 #include <core/names.hpp>
 #include <core/name_policy.hpp>
 #include <core/image_constants.h>
+#include <core/htypes_shared.hpp>
 #include "graphic_constants.h"
 
 struct TextureRenderData : public ImageParams {
 
-    std::vector<std::string> names;
+    StringUniqueCollection names;
     TextureSlots preferredGPUSlot = TSLOT_COLOR;
     int forceGPUId = -1;
     bool multisample = false;
@@ -20,19 +21,19 @@ struct TextureRenderData : public ImageParams {
     bool generateMipMaps = true;
 
     TextureRenderData( const std::string& _name ) {
-        names.emplace_back(_name);
+        names.emplace(_name);
     }
 
-    TextureRenderData( const std::vector<std::string>& _names ) : names( _names ) {
+    TextureRenderData( const StringUniqueCollection& _names ) : names( _names ) {
     }
 
     TextureRenderData(  const std::string& _name, int width, int height, int channels, int bpp ) :
             ImageParams( width, height, channels, bpp ) {
-        names.emplace_back(_name);
+        names.emplace(_name);
         setFormatFromBpp();
     }
 
-    TextureRenderData( const std::vector<std::string>& _names, int width, int height, int channels, int bpp ) :
+    TextureRenderData( const StringUniqueCollection& _names, int width, int height, int channels, int bpp ) :
                        ImageParams( width, height, channels, bpp ),
                        names( _names ) {
         setFormatFromBpp();

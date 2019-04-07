@@ -2,13 +2,10 @@
 
 #include <core/math/spherical_harmonics.h>
 #include <core/descriptors/uniform_names.h>
-#include <core/suncalc/sun_builder.h>
 #include <graphics/shadowmap_manager.h>
 #include <graphics/program_uniform_set.h>
 
-LightManager::LightManager( SunBuilder& sb ) : sb( sb ) {}
-
-void LightManager::init() {
+LightManager::LightManager() {
     mbGlobalOnOffSwitch = true;
     mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f, "LightDirectionalIntensity" );
 
@@ -32,7 +29,7 @@ void LightManager::init() {
     mLigthingUniform->setUBOStructure( UniformNames::shLightCoeffs, 48 );
 }
 
-void LightManager::generateUBO( ShaderManager& sm ) {
+void LightManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
     mLigthingUniform->generateUBO( sm, "LightingUniforms");
 }
 
@@ -79,7 +76,9 @@ void LightManager::toggleLightsOnOff() {
     }
 }
 
-void LightManager::setUniforms( const Vector3f& _cameraPos, std::shared_ptr<ShadowMapManager> smm ) {
+void LightManager::setUniforms( const Vector3f& _cameraPos,
+                                std::shared_ptr<ShadowMapManager> smm,
+                                const V3f& _sunRadiance ) {
     std::sort( mPointLights.begin(), mPointLights.end(), [_cameraPos]( const auto& a, const auto& b ) -> bool {
         return distance( a.Pos(), _cameraPos ) < distance( b.Pos(), _cameraPos );
     } );
@@ -120,7 +119,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos, std::shared_ptr<Shad
     mLigthingUniform->setUBOData( UniformNames::timeOfTheDay, 1.0f ); //SB.GoldenHour()
     mLigthingUniform->setUBOData( UniformNames::sunDirection,  uSunDirection);// );
     mLigthingUniform->setUBOData( UniformNames::sunPosition, uSunDirection * 100000.0f );// );
-    mLigthingUniform->setUBOData( UniformNames::sunRadiance, sb.GoldenHourColor() );// );
+    mLigthingUniform->setUBOData( UniformNames::sunRadiance, _sunRadiance );// );
     mLigthingUniform->setUBOData( UniformNames::mvpMatrixDepthBias, smm->ShadowMapMVPBias( true ));
     mLigthingUniform->setUBOData( UniformNames::mvpShadowMap, smm->ShadowMapMVP() );
     mLigthingUniform->setUBOData( UniformNames::shLightCoeffs, Matrix3f( SSH.LightCoeffs()) );

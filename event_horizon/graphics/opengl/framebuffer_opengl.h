@@ -41,9 +41,9 @@ public:
 
 	std::shared_ptr<VPList> VP() { return mVPListIM; };
 	// Init the framebuffer with a texture
-	void init( TextureManager& tm );
+	void init( std::shared_ptr<TextureManager> tm );
 	void initSimple();
-	void initDepth( TextureManager& tm );
+	void initDepth( std::shared_ptr<TextureManager> tm );
 	void initCubeMap( std::shared_ptr<Texture> cubemapTarget, uint32_t cubemapFaceIndex, uint32_t mipIndex = 0 );
 	void attachDepthBuffer();
 	void attachColorBuffer( unsigned int index );

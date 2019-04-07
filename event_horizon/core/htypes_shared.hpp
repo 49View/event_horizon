@@ -15,6 +15,7 @@
 #include <functional>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 using CommandArgumentsT 		= std::vector< std::string >;
 using CommandCallbackFunction 	= std::function<void(const CommandArgumentsT& )>;
@@ -26,6 +27,8 @@ typedef std::pair<char*, uint64_t> char_p;
 typedef std::pair<unsigned char*, uint64_t> uchar_p;
 typedef std::pair<const unsigned char*, uint64_t> ucchar_p;
 typedef std::pair<std::unique_ptr<uint8_t[]>, uint64_t> uint8_p;
+
+using StringUniqueCollection = std::unordered_set<std::string>;
 
 enum class TextFormatting {
 	Left,

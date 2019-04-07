@@ -6,7 +6,6 @@
 class ProgramUniformSet;
 class ShaderManager;
 class ShadowMapManager;
-class SunBuilder;
 
 enum class LightType {
 	Invalid = 0,
@@ -87,11 +86,10 @@ private:
 
 class LightManager {
 public:
-    LightManager( SunBuilder& sb );
+    LightManager();
 
-    void init();
 	void addPointLight( const Vector3f& pos, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
-	void removePointLight( const size_t index );
+	void removePointLight( size_t index );
 	void removeAllPointLights();
 	void toggleLightsOnOff();
 	void switchLightsOn( float animTime = 2.0f );
@@ -99,9 +97,9 @@ public:
 
 	void setLightsIntensity( float _intensity );
 
-	void setUniforms( const Vector3f& _cameraPos, std::shared_ptr<ShadowMapManager> smm );
+	void setUniforms( const Vector3f& _cameraPos, std::shared_ptr<ShadowMapManager> smm, const V3f& _sunRadiance );
 	void setUniforms_r();
-	void generateUBO( ShaderManager& sm );
+	void generateUBO( std::shared_ptr<ShaderManager> sm );
 	void update( float timeStamp );
 private:
 	bool mbGlobalOnOffSwitch;
@@ -114,7 +112,6 @@ private:
 
 	int mMaxLights = 16;
 
-	SunBuilder& sb;
 	//	DataVisualizerWindow* dvWindow;
 };
 

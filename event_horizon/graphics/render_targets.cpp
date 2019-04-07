@@ -7,6 +7,7 @@
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
 #include <core/raw_image.h>
+#include <core/suncalc/sun_builder.h>
 #include <core/streaming_mediator.hpp>
 #include <core/descriptors/uniform_names.h>
 #include <graphics/renderer.h>
@@ -67,6 +68,9 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     // Create a default skybox
     mSkybox = createSkybox();
 
+    // Create the SunBuilder to for PBR scenes
+    mSunBuilder = std::make_shared<SunBuilder>();
+
     // Create PBR resources
     mConvolution = std::make_unique<ConvolutionEnvironmentMap>(rr);
     mIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
@@ -114,13 +118,13 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
 
     auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{512}, true) );
 
-    auto convolutionRT = rr.TM().addCubemapTexture( TextureRenderData{ MPBRTextures::convolution }
+    auto convolutionRT = rr.TM()->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution }
                                                             .setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
                                                             .setGenerateMipMaps( false )
                                                             .setIsFramebufferTarget( true )
                                                             .wm( WRAP_MODE_CLAMP_TO_EDGE ) );
 
-    auto preFilterSpecularRT = rr.TM().addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter }
+    auto preFilterSpecularRT = rr.TM()->addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter }
                                                                   .setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
                                                                   .setGenerateMipMaps( true )
                                                                   .setIsFramebufferTarget( true )
@@ -156,7 +160,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
 void RLTargetPBR::addShadowMaps() {
     if ( !smm ) return;
 
-    rr.LM().setUniforms( Vector3f::ZERO, smm );
+    rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor() );
 
     if ( smm->needsRefresh(rr.UpdateCounter()) ) {
         rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
@@ -487,7 +491,7 @@ void RLTarget::updateStreamPacket( const std::string& _streamName ) {
     auto packet = rr.SSM().pop( _streamName );
     if ( packet.data ) {
         RawImage p{ packet.width, packet.height, 1, reinterpret_cast<const char* >(packet.data), _streamName };
-        rr.TM().updateTexture( p, _streamName );
+        rr.TM()->updateTexture( p, _streamName );
     }
 }
 

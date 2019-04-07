@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 // Created by Dado on 2019-03-20.
 //
@@ -25,6 +23,7 @@ class MaterialColor;
 class UIElement;
 class CameraRig;
 
+
 enum class AddResourcePolicy {
     Immediate,
     Deferred
@@ -47,10 +46,9 @@ struct ResourcePipeElement {
 
 template <typename T>
 struct ResourceTransfer {
-    std::shared_ptr<T> elem;
-    std::string name;
-    std::string hash;
-    std::vector<std::string> aliases;
+    std::shared_ptr<T>      elem;
+    std::string             hash;
+    StringUniqueCollection  names;
 
     // operator < is needed for boost signal sorting
     bool operator <(const ResourceTransfer &b) const {

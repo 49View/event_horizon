@@ -274,7 +274,7 @@ void SceneOrchestrator::init() {
 
 AVInitCallback SceneOrchestrator::avcbTM() {
     return std::bind(&TextureManager::preparingStremingTexture,
-                     &RSG().RR().TM(),
+                     RSG().RR().TM().get(),
                      std::placeholders::_1,
                      std::placeholders::_2);
 }

@@ -64,7 +64,7 @@ public:
     ProgramUniformSet();
 	explicit ProgramUniformSet( std::shared_ptr<HeterogeneousMap> _map, Renderer& _rr );
 
-	void generateUBO( const ShaderManager& sm, const std::string& uniformName );
+	void generateUBO( std::shared_ptr<ShaderManager> sm, const std::string& uniformName );
 	void submitUBOData();
 	void submitUBOData( void* data );
 

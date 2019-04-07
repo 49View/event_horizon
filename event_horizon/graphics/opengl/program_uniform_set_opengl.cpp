@@ -4,7 +4,7 @@
 
 // Uniform Buffer Objects
 
-void ProgramUniformSet::generateUBO( const ShaderManager& sm, const std::string& uniformName ) {
+void ProgramUniformSet::generateUBO( std::shared_ptr<ShaderManager> sm, const std::string& uniformName ) {
 
 	mUBOBuffer = std::make_unique<char[]>( mUBOSize );
 	glGenBuffers( 1, &mUBOHandle );
@@ -14,7 +14,7 @@ void ProgramUniformSet::generateUBO( const ShaderManager& sm, const std::string&
 	mUBOHandles[uniformName] = mUBOHandle;
 
 	mUBOPoint = static_cast<unsigned int>(getUBOPoint( uniformName ));
-	for ( const auto& i : sm.ProgramsHandles() ) {
+	for ( const auto& i : sm->ProgramsHandles() ) {
 		GLuint lights_index = glGetUniformBlockIndex( i, uniformName.c_str() );
 		if ( lights_index != GL_INVALID_INDEX ) {
 			glUniformBlockBinding( i, lights_index, mUBOPoint );

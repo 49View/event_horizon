@@ -13,7 +13,7 @@ void ImGuiImages::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     int ic = 0;
     static bool lShowSystem = false;
     ImGui::Checkbox("Show System", &lShowSystem);
-    for ( const auto& it: p->RSG().RR().TM() ) {
+    for ( const auto& it: *p->RSG().RR().TM() ) {
         std::string tname = it.first;
         if ( lShowSystem || !FBNames::isPartOf( cubeMapTName(tname) ) ) {
             ImGui::BeginGroup();

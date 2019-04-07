@@ -15,7 +15,6 @@ public:
     VPBuilder( Renderer& _rr,
                ShaderMaterial _sm ) : rr(_rr), shaderMaterial( std::move( _sm )) {
         name = UUIDGen::make();
-        shaderMaterial.activate(rr);
     };
 
     VPBuilder& p( std::shared_ptr<V> _ps ) { ps = _ps; return *this; }
@@ -25,7 +24,7 @@ public:
     auto build() {
         return std::make_shared<VPList>(
                 std::make_shared<cpuVBIB>( ps ),
-                rr.addMaterial( shaderMaterial ),
+                rr.addMaterialResource( shaderMaterial, shaderMaterial.SN()+name ),
                 nullptr,
                 tag );
     }
