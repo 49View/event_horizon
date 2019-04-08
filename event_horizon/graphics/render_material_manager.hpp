@@ -5,7 +5,7 @@
 #pragma once
 
 #include <core/hash_shared_map.hpp>
-#include <event_horizon/core/htypes_shared.hpp>
+#include <core/htypes_shared.hpp>
 
 class Renderer;
 class RenderMaterial;

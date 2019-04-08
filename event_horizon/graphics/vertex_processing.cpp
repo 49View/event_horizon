@@ -8,11 +8,15 @@
 #include <graphics/render_list.h>
 #include <graphics/renderer.h>
 
-VPList::VPList( std::shared_ptr<cpuVBIB> value,
+#ifdef _OPENGL
+#include <graphics/opengl/gpuv_data.h>
+#endif
+
+VPList::VPList( std::shared_ptr<cpuVBIB> cpuVP,
                 std::shared_ptr<RenderMaterial> _mat,
                 std::shared_ptr<Matrix4f> _transform,
                 const uint64_t _tag ) {
-    gpuData.create( value );
+    gpuData = std::make_shared<GPUVData>( cpuVP );
     if ( _transform == nullptr ) {
         mTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
     } else {
@@ -56,17 +60,17 @@ void VPList::setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid,
 }
 
 void VPList::draw() {
-    if ( gpuData.isEmpty()) return;
+    if ( gpuData->isEmpty()) return;
     setMaterialGlobalConstant( UniformNames::modelMatrix, *getTransform().get() );
-    gpuData.programStart( material );
-    gpuData.draw();
+    gpuData->programStart( material );
+    gpuData->draw();
 }
 
 void VPList::drawWith( std::shared_ptr<RenderMaterial> _material ) {
-    if ( gpuData.isEmpty()) return;
+    if ( gpuData->isEmpty()) return;
     setMaterialGlobalConstant( UniformNames::modelMatrix, *getTransform() );
-    gpuData.programStart( std::move( _material ));
-    gpuData.draw();
+    gpuData->programStart( std::move( _material ));
+    gpuData->draw();
 }
 
 void VPList::setMaterialConstantAlpha( float alpha ) {

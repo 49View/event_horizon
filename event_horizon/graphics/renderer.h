@@ -10,7 +10,7 @@
 #include <graphics/framebuffer.h>
 #include <graphics/graphic_constants.h>
 #include <graphics/shadowmap_manager.h>
-#include <event_horizon/core/resources/resource_utils.hpp>
+#include <core/resources/resource_utils.hpp>
 
 class Renderer;
 class RenderMaterial;
@@ -27,6 +27,8 @@ class CommandBufferList;
 struct CommandBufferListVector;
 class ShaderMaterial;
 class RenderMaterialManager;
+class GPUVData;
+class GPUVDataManager;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -95,10 +97,10 @@ public:
 
 	void removeFromCL( const UUID& _uuid );
 
-    void addTextureResource( const ResourceTransfer<RawImage>& _val );
+    std::shared_ptr<Texture> addTextureResource( const ResourceTransfer<RawImage>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ResourceTransfer<Material>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ShaderMaterial& _val, const std::string& _name );
-    void addVDataResource( const ResourceTransfer<VData>& _val );
+    std::shared_ptr<GPUVData> addVDataResource( const ResourceTransfer<VData>& _val );
 
 	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
@@ -156,6 +158,7 @@ protected:
 	std::shared_ptr<TextureManager>         tm;
 	std::shared_ptr<RenderMaterialManager>  rmm;
     std::shared_ptr<LightManager>           lm;
+    std::shared_ptr<GPUVDataManager>        gm;
     StreamingMediator& ssm;
 
 	RenderAnimationManager am;

@@ -23,6 +23,7 @@
 #include <graphics/shadowmap_manager.h>
 #include <graphics/shader_material.hpp>
 #include <graphics/render_material_manager.hpp>
+#include <graphics/gpuv_data_manager.hpp>
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -76,6 +77,7 @@ Renderer::Renderer( StreamingMediator& _ssm) : ssm(_ssm) {
     sm = std::make_shared<ShaderManager>();
     tm = std::make_shared<TextureManager>();
     lm = std::make_shared<LightManager>();
+    gm = std::make_shared<GPUVDataManager>();
     rmm = std::make_shared<RenderMaterialManager>(*this);
     mCommandBuffers = std::make_shared<CommandBufferList>(*this);
 }
@@ -227,8 +229,8 @@ bool Renderer::hasTag( uint64_t _tag ) const {
     return false;
 }
 
-void Renderer::addTextureResource( const ResourceTransfer<RawImage>& _val ) {
-    tm->addTextureWithData( *_val.elem, _val.names );
+std::shared_ptr<Texture> Renderer::addTextureResource( const ResourceTransfer<RawImage>& _val ) {
+    return tm->addTextureWithData( *_val.elem, _val.names );
 }
 
 std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ShaderMaterial& _val, const std::string& _name ) {
@@ -239,8 +241,10 @@ std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ResourceTra
     return rmm->addRenderMaterial( _val.elem->Values()->Type(), _val.elem->Values(), _val.names );
 }
 
-void Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
-    auto vbib = std::make_shared<cpuVBIB>( generateGeometryVP(_val.elem) );
+std::shared_ptr<GPUVData> Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
+    return nullptr;
+//    return rmm->addRenderMaterial( _val.elem->Values()->Type(), _val.elem->Values(), _val.names );
+//    auto vbib = std::make_shared<cpuVBIB>( generateGeometryVP(_val.elem) );
 }
 
 std::shared_ptr<RenderMaterial> Renderer::getMaterial( const std::string& _key ) {

@@ -6,23 +6,11 @@
 class RenderMaterial;
 struct cpuVBIB;
 
-enum class RenderPass {
-    ShadowMap,
-    Reflection,
-    Scene
-};
-
-enum class DisplayListType {
-    DL_2D,
-    DL_3D,
-    DL_DV // Data visualization
-};
-
 class GPUVData {
 public:
+    GPUVData( std::shared_ptr<cpuVBIB> vbib );
     void draw() const;
     void programStart( std::shared_ptr<RenderMaterial> _material ) const;
-    void create( std::shared_ptr<cpuVBIB> vbib );
 
     bool Dynamic() const { return dynamic; }
     void Dynamic( bool val ) { dynamic = val; }

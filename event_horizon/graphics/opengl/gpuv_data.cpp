@@ -1,4 +1,4 @@
-#include "vertex_processing_opengl.h"
+#include "gpuv_data.h"
 #include <graphics/render_material.hpp>
 #include <graphics/vertex_processing.h>
 
@@ -29,7 +29,7 @@ void GPUVData::draw() const {
     }
 }
 
-void GPUVData::create( std::shared_ptr<cpuVBIB> vbib ) {
+GPUVData::GPUVData( std::shared_ptr<cpuVBIB> vbib ) {
     bool bCreate = vao == 0;
     if ( bCreate ) GLCALL(glGenVertexArrays( 1, &vao ));
     GLCALL(glBindVertexArray( vao ));

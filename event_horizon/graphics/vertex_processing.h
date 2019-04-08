@@ -7,6 +7,7 @@
 
 class Renderer;
 class Matrix4f;
+class GPUVData;
 
 struct cpuVertexDescriptor {
     int size = 0;
@@ -40,10 +41,6 @@ struct cpuVBIB {
     cpuVertexDescriptor vElementAttrib[9];
     int vElementAttribSize;
 };
-
-#ifdef _OPENGL
-#include "opengl/vertex_processing_opengl.h"
-#endif
 
 class VPList {
 public:
@@ -103,7 +100,7 @@ public:
     void drawWith( std::shared_ptr<RenderMaterial> _material );
 
 private:
-    GPUVData gpuData;
+    std::shared_ptr<GPUVData> gpuData;
     std::shared_ptr<RenderMaterial> material;
     uint64_t mTag = GT_Generic;
     std::shared_ptr<Matrix4f> mTransform;
