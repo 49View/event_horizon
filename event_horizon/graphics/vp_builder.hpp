@@ -23,10 +23,10 @@ public:
 
     auto build() {
         return std::make_shared<VPList>(
-                std::make_shared<cpuVBIB>( ps ),
-                rr.addMaterialResource( shaderMaterial, shaderMaterial.SN()+name ),
-                nullptr,
-                tag );
+               rr.addVDataResource( cpuVBIB{ ps }, name ),
+               rr.addMaterialResource( shaderMaterial, name ),
+               nullptr,
+               tag );
     }
 
 private:

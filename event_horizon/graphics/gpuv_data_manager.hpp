@@ -5,11 +5,14 @@
 #pragma once
 
 #include <core/hash_shared_map.hpp>
+#include <core/htypes_shared.hpp>
 
-class GPUVData;
+class  GPUVData;
+struct cpuVBIB;
 
 class GPUVDataManager : public HashSharedMap<GPUVData> {
-
+public:
+    std::shared_ptr<GPUVData> addGPUVData( const cpuVBIB& _val, const StringUniqueCollection& _names );
 };
 
 

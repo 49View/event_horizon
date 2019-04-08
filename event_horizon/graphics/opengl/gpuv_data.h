@@ -8,7 +8,7 @@ struct cpuVBIB;
 
 class GPUVData {
 public:
-    GPUVData( std::shared_ptr<cpuVBIB> vbib );
+    explicit GPUVData( const cpuVBIB& _vbib );
     void draw() const;
     void programStart( std::shared_ptr<RenderMaterial> _material ) const;
 

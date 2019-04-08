@@ -27,6 +27,7 @@ class CommandBufferList;
 struct CommandBufferListVector;
 class ShaderMaterial;
 class RenderMaterialManager;
+struct cpuVBIB;
 class GPUVData;
 class GPUVDataManager;
 
@@ -101,6 +102,7 @@ public:
     std::shared_ptr<RenderMaterial> addMaterialResource( const ResourceTransfer<Material>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ShaderMaterial& _val, const std::string& _name );
     std::shared_ptr<GPUVData> addVDataResource( const ResourceTransfer<VData>& _val );
+    std::shared_ptr<GPUVData> addVDataResource( const cpuVBIB& _val, const std::string& _name );
 
 	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );

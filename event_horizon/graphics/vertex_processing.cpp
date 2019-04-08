@@ -12,11 +12,11 @@
 #include <graphics/opengl/gpuv_data.h>
 #endif
 
-VPList::VPList( std::shared_ptr<cpuVBIB> cpuVP,
+VPList::VPList( std::shared_ptr<GPUVData> _gpuData,
                 std::shared_ptr<RenderMaterial> _mat,
                 std::shared_ptr<Matrix4f> _transform,
                 const uint64_t _tag ) {
-    gpuData = std::make_shared<GPUVData>( cpuVP );
+    gpuData = _gpuData;
     if ( _transform == nullptr ) {
         mTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
     } else {

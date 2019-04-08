@@ -44,7 +44,7 @@ struct cpuVBIB {
 
 class VPList {
 public:
-    VPList( std::shared_ptr<cpuVBIB> value,
+    VPList( std::shared_ptr<GPUVData> value,
             std::shared_ptr<RenderMaterial> _mat,
             std::shared_ptr<Matrix4f> _transform,
             uint64_t _tag );

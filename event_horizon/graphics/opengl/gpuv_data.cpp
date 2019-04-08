@@ -29,22 +29,22 @@ void GPUVData::draw() const {
     }
 }
 
-GPUVData::GPUVData( std::shared_ptr<cpuVBIB> vbib ) {
+GPUVData::GPUVData( const cpuVBIB& _vbib ) {
     bool bCreate = vao == 0;
     if ( bCreate ) GLCALL(glGenVertexArrays( 1, &vao ));
     GLCALL(glBindVertexArray( vao ));
 
     if ( bCreate ) glGenBuffers( 1, &vbo );
     GLCALL(glBindBuffer( GL_ARRAY_BUFFER, vbo ));
-    GLCALL(glBufferData( GL_ARRAY_BUFFER, vbib->numVerts * vbib->elenentSize, vbib->bufferVerts.get(), GL_STATIC_DRAW ));
+    GLCALL(glBufferData( GL_ARRAY_BUFFER, _vbib.numVerts * _vbib.elenentSize, _vbib.bufferVerts.get(), GL_STATIC_DRAW ));
 
     if ( bCreate ) {
-        int stride = vbib->elenentSize;
+        int stride = _vbib.elenentSize;
         GLint attIndex = 0;
-        for ( int32_t t = 0; t < vbib->vElementAttribSize; t++ ) {
+        for ( int32_t t = 0; t < _vbib.vElementAttribSize; t++ ) {
             GLCALL(glEnableVertexAttribArray( attIndex ));
-            int size = vbib->vElementAttrib[t].size;
-            uintptr_t offset = vbib->vElementAttrib[t].offset;
+            int size = _vbib.vElementAttrib[t].size;
+            uintptr_t offset = _vbib.vElementAttrib[t].offset;
             if ( size <= 4 ) {
                 GLCALL(glVertexAttribPointer( attIndex, size, GL_FLOAT, GL_FALSE, stride,
                                        reinterpret_cast<GLvoid *>( offset )));
@@ -77,15 +77,15 @@ GPUVData::GPUVData( std::shared_ptr<cpuVBIB> vbib ) {
             }
         }
     }
-    if ( vbib->numIndices > 0 ) {
+    if ( _vbib.numIndices > 0 ) {
         if ( bCreate ) GLCALL(glGenBuffers( 1, &ibo ));
         GLCALL(glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo ));
-        GLCALL(glBufferData( GL_ELEMENT_ARRAY_BUFFER, vbib->numIndices * sizeof( int32_t ), vbib->bufferIndices.get(),
+        GLCALL(glBufferData( GL_ELEMENT_ARRAY_BUFFER, _vbib.numIndices * sizeof( int32_t ), _vbib.bufferIndices.get(),
                       GL_STATIC_DRAW ));
     }
 
-    numIndices = static_cast<GLuint>(vbib->numIndices == 0 ? vbib->numVerts : vbib->numIndices);
-    primitveType = primitiveToGl( vbib->primiteType );
+    numIndices = static_cast<GLuint>(_vbib.numIndices == 0 ? _vbib.numVerts : _vbib.numIndices);
+    primitveType = primitiveToGl( _vbib.primiteType );
 }
 
 void GPUVData::deleteBuffers() {
