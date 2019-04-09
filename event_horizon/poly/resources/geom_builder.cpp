@@ -182,10 +182,9 @@ void GeomBuilder::assemble() {
         elemInjFather->addChildren(elem);
     }
 
-//    ### ref This needs to be here
-//    elem->updateExistingTransform( pos, axis, scale );
+    elem->updateExistingTransform( pos, axis, scale );
 
-    sg.add( elem );
+    sg.B<GRB>(Name()).addIM( elem );
 }
 
 GeomBuilder& GeomBuilder::addQuad( const QuadVector3fNormal& quad,

@@ -32,12 +32,16 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
     sg.VL().connect( [this](const ResourceTransfer<VData>& _val ) {
         LOGRS( "Adding " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addVDataResource(_val);
+    });
+
+    sg.GM().connect( [](const ResourceTransfer<Geom>& _val ) {
+        LOGRS( "Adding " << ResourceVersioning<Geom>::Prefix() << ": "  << *_val.names.begin() );
+//        this->RR().addGeomResource(_val);
 //        auto lvl = this->RR().VPL( CommandBufferLimits::PBRStart, nullptr, 1.0f ); // mat->translucency()
 //        auto mat = this->SG().ML().get("tomato");
 //        VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), lvl, ShaderMaterial{S::SH, mat->Values()} }
 //                .p().g(9200).build();
     });
-
 
 //    sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {
 //        if ( auto as = std::get_if<GeomAssetSP>(&_geom); as != nullptr ) {

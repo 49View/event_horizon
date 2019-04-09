@@ -17,7 +17,7 @@ class VData;
 class Material;
 class RawImage;
 namespace Utility::TTFCore { class Font; }
-class GeomData;
+class Geom;
 class Profile;
 class MaterialColor;
 class UIElement;
@@ -83,7 +83,7 @@ public:
 
     inline static size_t Version() {
         if ( std::is_same<R, Material>::value )         return 2500;
-        if ( std::is_same<R, GeomData>::value )         return 2000;
+        if ( std::is_same<R, Geom>::value )         return 2000;
         if ( std::is_same<R, VData>::value )            return 1000;
         if ( std::is_same<R, MaterialColor>::value  )   return 1000;
         return 0;
@@ -92,7 +92,7 @@ public:
     inline static bool HasDeps() {
         if constexpr ( std::is_same<R, VData>::value )                  return false;
         if constexpr ( std::is_same<R, Material>::value )               return true ;
-        if constexpr ( std::is_same<R, GeomData>::value )               return true ;
+        if constexpr ( std::is_same<R, Geom>::value )               return true ;
         if constexpr ( std::is_same<R, MaterialColor>::value )          return false;
         if constexpr ( std::is_same<R, Profile>::value )                return false;
         if constexpr ( std::is_same<R, RawImage>::value )               return false;
@@ -104,7 +104,7 @@ public:
     inline static std::string Prefix() {
         if constexpr ( std::is_same<R, VData>::value ) return ResourceGroup::VData;
         if constexpr ( std::is_same<R, Material>::value ) return ResourceGroup::Material;
-        if constexpr ( std::is_same<R, GeomData>::value ) return ResourceGroup::Geom;
+        if constexpr ( std::is_same<R, Geom>::value ) return ResourceGroup::Geom;
         if constexpr ( std::is_same<R, MaterialColor>::value ) return ResourceGroup::Color;
         if constexpr ( std::is_same<R, Profile>::value ) return ResourceGroup::Profile;
         if constexpr ( std::is_same<R, RawImage>::value ) return ResourceGroup::Image;
@@ -116,7 +116,7 @@ public:
     inline static std::string GenerateThumbnail( const R& _res ) {
         if ( std::is_same<R, VData>::value    )                 return "vdata";
         if ( std::is_same<R, Material>::value )                 return "material";
-        if ( std::is_same<R, GeomData>::value )                 return "geom";
+        if ( std::is_same<R, Geom>::value )                 return "geom";
 
         if ( std::is_same<R, MaterialColor>::value  )           return "color";
         if ( std::is_same<R, CameraRig>::value )                return "camera";
@@ -129,31 +129,31 @@ public:
 
 };
 
-template<typename R> class ResourceBuilder5;
+template<typename R> class ResourceBuilder;
 
-using VDataBuilder = ResourceBuilder5<VData>;
+using VDataBuilder = ResourceBuilder<VData>;
 using VB = VDataBuilder;
 
-using ImageBuilder = ResourceBuilder5<RawImage>;
+using ImageBuilder = ResourceBuilder<RawImage>;
 using IB = ImageBuilder;
 
-using ProfileBuilder = ResourceBuilder5<Profile>;
+using ProfileBuilder = ResourceBuilder<Profile>;
 using PB = ProfileBuilder;
 
-using CameraBuilder = ResourceBuilder5<CameraRig>;
+using CameraBuilder = ResourceBuilder<CameraRig>;
 using CB = CameraBuilder;
 
-using FontBuilder = ResourceBuilder5<Utility::TTFCore::Font>;
+using FontBuilder = ResourceBuilder<Utility::TTFCore::Font>;
 using FB = FontBuilder;
 
-using MaterialColorBuilder = ResourceBuilder5<MaterialColor>;
+using MaterialColorBuilder = ResourceBuilder<MaterialColor>;
 using MCB = MaterialColorBuilder;
 
-using MaterialBuilder = ResourceBuilder5<Material>;
+using MaterialBuilder = ResourceBuilder<Material>;
 using MB = MaterialBuilder;
 
-//using GeomBuilder = ResourceBuilder5<GeomData>;
-//using GDB = GeomBuilder;
+using GeomRBuilder = ResourceBuilder<Geom>;
+using GRB = GeomRBuilder;
 
 template<typename T, typename C> class ResourceManager;
 
@@ -164,4 +164,4 @@ using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Prof
 using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Material>>;
 using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>>;
 using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>>;
-using GeomManager       = ResourceManager<GeomData, ResourceManagerContainer<GeomData>>;
+using GeomManager       = ResourceManager<Geom, ResourceManagerContainer<Geom>>;

@@ -33,13 +33,13 @@ JSONDATA( JSONResourceResponse, _id, project, group, isPublic, isRestricted, met
 };
 
 template <typename R>
-class ResourceBuilder5 : public Publisher<R, EmptyBox> {
+class ResourceBuilder : public Publisher<R, EmptyBox> {
 public:
-    explicit ResourceBuilder5( SceneGraph& _sg ) : sg( _sg ) {}
-    ResourceBuilder5( SceneGraph& _sg, const std::string& _name ) : sg( _sg ) {
+    explicit ResourceBuilder( SceneGraph& _sg ) : sg( _sg ) {}
+    ResourceBuilder( SceneGraph& _sg, const std::string& _name ) : sg( _sg ) {
         this->Name(_name);
     }
-    virtual ~ResourceBuilder5() = default;
+    virtual ~ResourceBuilder() = default;
 
     void load( CommandResouceCallbackFunction _ccf = nullptr, const std::vector<std::string>& _params = {} ) {
         ccf = _ccf;

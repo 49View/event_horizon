@@ -82,6 +82,7 @@ public:
         if constexpr ( std::is_same<R, Profile>::value )                return PL();
         if constexpr ( std::is_same<R, MaterialColor>::value )          return MC();
         if constexpr ( std::is_same<R, CameraRig>::value )              return CM();
+        if constexpr ( std::is_same<R, Geom>::value )                   return GM();
     }
 
     template <typename T>
