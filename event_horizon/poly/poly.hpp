@@ -8,10 +8,10 @@
 #include <variant>
 
 template <typename> class Node;
-class  GeomData;
+class  Geom;
 
-using GeomAsset = Node<GeomData>;
-using GeomAssetSP = std::shared_ptr<GeomAsset>;
+//using GeomAsset = Node<GeomData>;
+using GeomAssetSP = std::shared_ptr<Geom>;
 
 class UIElement;
 

@@ -13,7 +13,6 @@
 #include <core/math/rect2f.h>
 #include <core/math/aabb.h>
 #include <core/math/anim.h>
-#include <core/uuid.hpp>
 #include <core/boxable.hpp>
 #include <core/name_policy.hpp>
 #include <core/observable.h>
@@ -22,17 +21,11 @@
 #include <core/zlib_util.h>
 #include <core/http/basen.hpp>
 #include <core/http/webclient.h>
+#include <core/uuidable.hpp>
 
 enum class ExtractFlags {
     LeaveAsItAfterExtract,
     RemoveAfterExtract,
-};
-
-enum UpdateTypeFlag {
-    Nothing = 0,
-    Position = 1,
-    Rotation = 1 << 1,
-    Scale = 1 << 2
 };
 
 enum class SerializeOutputFormat {
@@ -44,24 +37,22 @@ enum class SerializeOutputFormat {
 
 inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { return (2040 * 1000000) + dataVersion; }
 
-auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
-auto lambdaUpdateNodeTransform = [](auto&& arg) { arg->updateTransform();};
+//auto lambdaUpdateAnimVisitor = [](auto&& arg) { return arg->updateAnim();};
+//auto lambdaUpdateNodeTransform = [](auto&& arg) { arg->updateTransform();};
 
 #define VisitLambda(X,Y) std::visit( [](auto&& arg) { arg-> X(); }, Y );
 
-auto lambdaUUID = [](auto&& arg) -> UUID { return arg->UUiD();};
-auto lambdaBBox = [](auto&& arg) -> JMATH::AABB { return arg->BBox3d();};
+//auto lambdaUUID = [](auto&& arg) -> UUID { return arg->UUiD();};
+//auto lambdaBBox = [](auto&& arg) -> JMATH::AABB { return arg->BBox3d();};
 
 template <typename D>
 class Node : public Animable,
-             public ObservableShared<Node<D>>,
              public virtual Boxable<JMATH::AABB>,
-             public virtual Hashable<>,
+             public virtual UUIDable,
              public virtual NamePolicy<>,
              public std::enable_shared_from_this<Node<D>> {
 public:
     Node() {
-        mUUID = UUIDGen::make();
         mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
     }
     virtual ~Node() = default;
@@ -77,10 +68,6 @@ public:
     explicit Node( std::shared_ptr<D> data, std::shared_ptr<Matrix4f> _clonedLocalTransform ) : Node() {
         mLocalHierTransform = _clonedLocalTransform;
         mData = data;
-    }
-    Node( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale ) : Node() {
-        generateLocalTransformData(pos, rot, scale);
-        generateMatrixHierarchy(fatherRootTransform());
     }
 
     explicit Node( const SerializableContainer& _data ) {
@@ -98,7 +85,6 @@ public:
         return ret;
     }
 
-    UUID UUiD() const { return mUUID; }
     NodeType GHType() const { return mGHType; }
     void GHType( NodeType val ) { mGHType |= val; }
     bool hasType( NodeType val ) const { return ( mGHType & val ) > 0; }
@@ -172,109 +158,6 @@ public:
         return std::make_shared<Node<D>>( *this );
     }
 
-    std::shared_ptr<Node<D>> addChildren( std::shared_ptr<D> data, const Vector3f& pos = Vector3f::ZERO,
-                                       const Vector3f& rot = Vector3f::ZERO,
-                                       const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
-        auto geom = std::make_shared<Node<D>>( data, this );
-        geom->updateTransform( pos, rot, scale );
-        children.push_back( geom );
-        return geom;
-    }
-
-    void addChildren( std::shared_ptr<D> data, std::shared_ptr<Node<D>> _child, const Vector3f& pos = Vector3f::ZERO,
-                      const Vector3f& rot = Vector3f::ZERO, const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
-        _child = std::make_shared<Node<D>>( data, this );
-        _child->updateTransform( pos, rot, scale );
-        children.push_back( _child );
-    }
-
-    std::shared_ptr<Node<D>> addChildren( std::shared_ptr<Node<D>> data ) {
-        data->Father( this );
-        data->updateTransform();
-        children.push_back( data );
-        return data;
-    }
-    std::shared_ptr<Node<D>> addChildren( const std::string& name ) {
-        std::shared_ptr<Node<D>> data = std::make_shared<Node<D>>();
-        data->Father( this );
-        data->Name( name );
-        data->updateTransform();
-        children.push_back( data );
-        return data;
-    }
-    std::shared_ptr<Node<D>> addChildren( const Vector3f& pos = Vector3f::ZERO,
-                                          const Vector3f& rot = Vector3f::ZERO,
-                                          const Vector3f& scale = Vector3f::ONE ) {
-        std::shared_ptr<Node<D>> data = std::make_shared<Node<D>>(pos, rot, scale);
-        data->Father( this );
-        data->updateTransform( pos, rot, scale );
-        children.push_back( data );
-        return data;
-    }
-
-
-    void generateMatrixHierarchy( Matrix4f cmat = Matrix4f::IDENTITY ) {
-        generateMatrixHierarchyRec( cmat );
-        calcCompleteBBox3d();
-    }
-    void updateTransform( const std::string& nodeName, const Vector3f& pos, const Vector3f& rot, const Vector3f& scale,
-                          UpdateTypeFlag whatToUpdate ) {
-        if ( whatToUpdate == UpdateTypeFlag::Nothing ) return;
-        updateTransformRec( nodeName, pos, rot, scale, whatToUpdate );
-        generateMatrixHierarchy( fatherRootTransform());
-    }
-
-    void updateTransform( const std::string& nodeName, const Vector3f& pos, const Vector3f& rot ) {
-        updateTransform( nodeName, pos, rot, mTRS.Scale(),
-                         static_cast<UpdateTypeFlag>( UpdateTypeFlag::Position | UpdateTypeFlag::Rotation ));
-    }
-    void updateTransform( const std::string& nodeName, const Vector3f& val, UpdateTypeFlag whatToUpdate ) {
-        updateTransform( nodeName, whatToUpdate == UpdateTypeFlag::Position ? val : mTRS.Pos(),
-                         whatToUpdate == UpdateTypeFlag::Rotation ? val : mTRS.Rot().euler(),
-                         whatToUpdate == UpdateTypeFlag::Scale ? val : mTRS.Scale(), whatToUpdate );
-    }
-
-    void updateTransform( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale ) {
-        generateLocalTransformData( pos, rot, scale );
-        generateMatrixHierarchy( fatherRootTransform() );
-    }
-    void updateTransform( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale ) {
-        generateLocalTransformData( pos, rot, scale );
-        generateMatrixHierarchy( fatherRootTransform() );
-    }
-    void updateTransform( const Vector3f& pos, const Vector3f& rot ) {
-        generateLocalTransformData( pos, rot, mTRS.Scale());
-        generateMatrixHierarchy( fatherRootTransform());
-    }
-    void updateTransform( const Vector3f& pos ) {
-        generateLocalTransformData( pos, mTRS.Rot(), mTRS.Scale());
-        generateMatrixHierarchy( fatherRootTransform());
-    }
-    void move( const Vector3f& pos ) {
-        generateLocalTransformData( mTRS.Pos() + pos, mTRS.Rot(), mTRS.Scale());
-        generateMatrixHierarchy( fatherRootTransform());
-    }
-
-    void updateTransform() {
-        generateLocalTransformData( mTRS.Pos(), mTRS.Rot(), mTRS.Scale());
-        generateMatrixHierarchy( fatherRootTransform());
-    }
-    void updateAnim() {
-        if ( mTRS.isAnimating() ) {
-            mLocalTransform = Matrix4f{ mTRS };
-            generateMatrixHierarchy( fatherRootTransform());
-        }
-    }
-
-    void generateLocalTransformData( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale = Vector3f::ONE ) {
-        mTRS.set( pos, rot, scale );
-        mLocalTransform = Matrix4f{ mTRS };
-    }
-    void generateLocalTransformData( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale=Vector3f::ONE ) {
-        mTRS.set( pos, rot, scale );
-        mLocalTransform = Matrix4f{ mTRS };
-    }
-
     Node* find( const char *name ) {
         Node *foundObj = nullptr;
         findRecursive( name, foundObj );
@@ -343,21 +226,7 @@ public:
         }
     }
 
-    void Father( Node *val ) { father = val; }
-    Node *Father() { return father; }
-    Node *Father() const { return father; }
     std::shared_ptr<Matrix4f> getLocalHierTransform() { return mLocalHierTransform; }
-    void updateExistingTransform( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale ) {
-        mTRS.set( pos, rot, scale );
-        auto mm = Matrix4f{ mTRS };
-        mLocalTransform = mLocalTransform * mm;
-
-        generateMatrixHierarchy( fatherRootTransform() );
-    }
-    Matrix4f fatherRootTransform() const {
-        if ( father == nullptr ) return Matrix4f::IDENTITY;
-        return *(father->mLocalHierTransform.get());
-    }
     Matrix4f LocalTransform() const { return mLocalTransform; }
     Matrix4f& LocalTransform() { return mLocalTransform; }
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
@@ -368,7 +237,7 @@ public:
 
     void removeChildrenWithHash( const UUID& _hash ) {
         children.erase( remove_if( children.begin(), children.end(),
-                                   [_hash]( std::shared_ptr<Node> const& us ) -> bool { return us->Hash() == _hash; } ),
+                                   [_hash]( std::shared_ptr<Node> const& us ) -> bool { return us->UUiD() == _hash; } ),
                         children.end());
 
         // Traverse tree
@@ -388,16 +257,12 @@ public:
         }
     }
 
-    void prune() {
-        pruneRec( this->shared_from_this() );
-    }
-
-    void finalize() {
-        createLocalHierMatrix(fatherRootTransform());
-        for ( auto& c : Children()) {
-            c->finalize();
-        }
-    }
+//    void finalize() {
+//        createLocalHierMatrix(fatherRootTransform());
+//        for ( auto& c : Children()) {
+//            c->finalize();
+//        }
+//    }
 
     Node* root() {
         Node<D> *ret = this;
@@ -423,11 +288,11 @@ public:
     void TRS( const MatrixAnim& val ) { mTRS = val; }
 
     inline bool isDescendantOf( const UUID& ancestorHash ) {
-        if ( mUUID == ancestorHash ) return true;
+        if ( UUiD() == ancestorHash ) return true;
 
         auto f = father;
         while ( f ) {
-            if ( f->mUUID == ancestorHash ) return true;
+            if ( f->UUiD() == ancestorHash ) return true;
             f = f->father;
         }
 
@@ -436,7 +301,7 @@ public:
 
     template<typename TV>
     void visit() const {
-        traverseWithHelper<TV>( "Name,Hash,BBbox,Data,Children", this->Name(), this->Hash(), Boxable::BBox3d(),mData,children );
+        traverseWithHelper<TV>( "Name,Hash,BBbox,Data,Children", this->Name(), this->UUiD(), Boxable::BBox3d(),mData,children );
     }
 protected:
 
@@ -482,47 +347,6 @@ protected:
         return numC;
     }
 
-    void updateTransformRec( const std::string& nodeName, const Vector3f& pos, const Vector3f& rot, const Vector3f& scale,
-                             UpdateTypeFlag whatToUpdate ) {
-        if ( nodeName.compare( this->Name() ) == 0 ) {
-            generateLocalTransformData( whatToUpdate & UpdateTypeFlag::Position ? pos : mTRS.Pos(),
-                                        whatToUpdate & UpdateTypeFlag::Rotation ? Quaternion{rot} : mTRS.Rot(),
-                                        whatToUpdate & UpdateTypeFlag::Scale ? scale : mTRS.Scale());
-        }
-
-        for ( auto& c : children ) {
-            c->updateTransformRec( nodeName, pos, rot, scale, whatToUpdate );
-        }
-    }
-
-    void createLocalHierMatrix( Matrix4f cmat ) {
-        Matrix4f& lLHT = *mLocalHierTransform;
-        lLHT = mLocalTransform * cmat;
-//    if ( mData ) {
-//        bbox3d = mData->BBox3d();
-//        bbox3d.transform( lLHT );
-//    }
-    }
-
-    bool pruneRec( std::shared_ptr<Node> it ) {
-        for ( auto it2 = it->Children().begin(); it2 != it->Children().end(); ) {
-            if ( it->pruneRec( *it2 ) ) {
-                it2 = it->Children().erase( it2 );
-            } else {
-                ++it2;
-            }
-        }
-        return it->Children().empty() && !it->Data();
-    }
-
-    void generateMatrixHierarchyRec( Matrix4f cmat ) {
-        createLocalHierMatrix( cmat );
-
-        for ( auto& c : children ) {
-            c->generateMatrixHierarchyRec( *mLocalHierTransform );
-        }
-    }
-
     void findRecursive( const char *name, Node *& foundObj ) {
         if ( strcmp( this->Name().c_str(), name ) == 0 ) {
             foundObj = this;
@@ -533,41 +357,6 @@ protected:
             c->findRecursive( name, foundObj );
             if ( foundObj != nullptr ) break;
         }
-    }
-    void containingAABBRec( JMATH::AABB& _bbox ) const {
-        if ( mData ) {
-            auto cr = Boxable::BBox3d();
-            _bbox.merge( cr );
-        }
-
-        for ( auto& c : children ) {
-            c->containingAABBRec( _bbox );
-        }
-    }
-
-    JMATH::AABB calcCompleteBBox3dRec() {
-        if ( mData ) {
-            auto lBBox = mData->BBox3d();
-            lBBox.transform( *mLocalHierTransform );
-            Boxable::bbox3d = lBBox;
-        }
-
-        for ( auto& c : children ) {
-            Boxable::bbox3d.merge( c->calcCompleteBBox3dRec() );
-        }
-
-        return Boxable::bbox3d;
-    }
-
-    JMATH::AABB containingAABB() const {
-        JMATH::AABB ret = Boxable::BBox3d();
-        containingAABBRec( ret );
-        return ret;
-    }
-
-    void calcCompleteBBox3d() {
-        Boxable::bbox3d = AABB::INVALID;
-        Boxable::bbox3d = calcCompleteBBox3dRec();
     }
 
 //    void serializeDependenciesImpl( std::shared_ptr<SerializeBin> writer ) const override {
@@ -587,24 +376,24 @@ protected:
 
 private:
     void deserializeRec( std::shared_ptr<DeserializeBin> reader, Node<D> *_father = nullptr ) {
-        father = _father;
-        reader->read( mGHType );
-        reader->read( mUUID );
-        reader->read( this->NameRef() );
-        mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
-        reader->read( mLocalTransform );
-        reader->read( BBox3d() );
-
-        reader->read( mData );
-
-        int32_t numChildren = 0;
-        reader->read( numChildren );
-
-        for ( int32_t t = 0; t < numChildren; t++ ) {
-            std::shared_ptr<Node> gg = std::make_shared<Node>();
-            addChildren( gg );
-            gg->deserializeRec( reader, this );
-        }
+//        father = _father;
+//        reader->read( mGHType );
+//        reader->read( mUUID );
+//        reader->read( this->NameRef() );
+//        mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
+//        reader->read( mLocalTransform );
+//        reader->read( BBox3d() );
+//
+//        reader->read( mData );
+//
+//        int32_t numChildren = 0;
+//        reader->read( numChildren );
+//
+//        for ( int32_t t = 0; t < numChildren; t++ ) {
+//            std::shared_ptr<Node> gg = std::make_shared<Node>();
+//            addChildren( gg );
+//            gg->deserializeRec( reader, this );
+//        }
     }
 
 //    void serializeInternal( std::shared_ptr<SerializeBin> writer ) const override {
@@ -624,7 +413,6 @@ private:
 //    }
 
 protected:
-    UUID mUUID;
     Node *father = nullptr;
     NodeType mGHType = NodeTypeGeneric;
     Matrix4f mLocalTransform = Matrix4f::IDENTITY;

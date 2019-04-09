@@ -7,6 +7,7 @@
 #include <core/raw_image.h>
 #include <core/camera_rig.hpp>
 #include <core/TTF.h>
+#include <core/geom.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
@@ -14,7 +15,7 @@
 void SceneGraph::add( NodeVariants _geom ) {
 //    addImpl(_geom);
     nodeAddSignal(_geom);
-    geoms[std::visit(lambdaUUID, _geom)] = _geom;
+//    geoms[std::visit(lambdaUUID, _geom)] = _geom;
 }
 
 void SceneGraph::remove( const UUID& _uuid ) {
@@ -34,10 +35,12 @@ void SceneGraph::update() {
     CM().update();
     FM().update();
     MC().update();
+    GM().update();
 
-    for ( auto& [k,v] : geoms ) {
-        std::visit( lambdaUpdateAnimVisitor, v );
-    }
+    // ### Reintroduce anims for scene graph
+//    for ( auto& [k,v] : geoms ) {
+//        std::visit( lambdaUpdateAnimVisitor, v );
+//    }
 }
 
 void SceneGraph::cmdChangeMaterialTag( const std::vector<std::string>& _params ) {
@@ -52,10 +55,7 @@ void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
     auto st = shapeTypeFromString( _params[0] );
     if ( st != ShapeType::None) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
-        // ### MAT reintroduce material for geoms .m(shd,mat)
-        GeomData gdata{ st, Vector3f::ZERO, V3f::ZERO, V3f::ONE, GeomMappingData{} };
-        B<VB>( "ucarcamagnu" ).addIM( gdata.getVData() );
-//        GB{*this, st }.n("ucarcamagnu").g(9200).build();
+        GB{ *this, st }.m(mat).n("ucarcamagnu").g(9200).build();
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
 //        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
         // ### MAT reintroduce material/colors for geoms .c(col)
@@ -90,7 +90,8 @@ SceneGraph::SceneGraph( CommandQueue& cq,
                         MaterialManager& _ml,
                         ColorManager& _cl,
                         FontManager& _fm,
-                        CameraManager& _cm ) : vl(_vl), tl(_tl), pl(_pl), ml(_ml), cl(_cl), fm(_fm), cm(_cm) {
+                        CameraManager& _cm,
+                        GeomManager& _gm ) : vl(_vl), tl(_tl), pl(_pl), ml(_ml), cl(_cl), fm(_fm), cm(_cm), gm(_gm) {
 
     hcs = std::make_shared<CommandScriptSceneGraph>(*this);
     cq.registerCommandScript(hcs);
@@ -128,19 +129,18 @@ bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
     bool ret = false;
 
     for ( const auto& [k, n] : geoms ) {
-
         AABB box = AABB::INVALID;
         UUID uuid{};
         bool bPerformeOnNode = false;
         if ( auto as = std::get_if<GeomAssetSP>(&n); as != nullptr ) {
             box = (*as)->BBox3d();
-            uuid = (*as)->Hash();
+//            uuid = (*as)->UUiD();
             bPerformeOnNode = true;
-        } else if ( auto as = std::get_if<UIAssetSP>(&n); as != nullptr ) {
-            box = (*as)->BBox3d();
-            uuid = (*as)->Hash();
-            bPerformeOnNode = true;
-        }
+        } //else if ( auto as = std::get_if<UIAssetSP>(&n); as != nullptr ) {
+//            box = (*as)->BBox3d();
+//            uuid = (*as)->UUiD();
+//            bPerformeOnNode = true;
+//        }
 
         if ( bPerformeOnNode ) {
             float tn = 0.0f;

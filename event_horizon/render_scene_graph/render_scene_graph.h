@@ -17,22 +17,6 @@ class AudioManager;
 class Renderer;
 class VData;
 
-struct HierGeomRenderObserver : public ObserverShared<GeomAsset> {
-
-    explicit HierGeomRenderObserver() = default;
-    virtual ~HierGeomRenderObserver() = default;
-
-    std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> generateGeometryVP( const VData& _data );
-    void notified( GeomAssetSP _source, const std::string& generator ) override;
-};
-
-struct UIElementRenderObserver : public ObserverShared<UIAsset> {
-    explicit UIElementRenderObserver() = default;
-    virtual ~UIElementRenderObserver() = default;
-
-    void notified( UIAssetSP _source, const std::string& generator ) override;
-};
-
 class RenderSceneGraph {
 public:
     RenderSceneGraph( Renderer& rr, SceneGraph& _sg );
@@ -57,14 +41,10 @@ protected:
 
     int bake(scene_t *scene);
 
-protected:
-    std::shared_ptr<PosTexNorTanBinUV2Col3dStrip> generateGeometryVP( std::shared_ptr<VData> _data );
 private:
     Renderer& rr;
     SceneGraph& sg;
     std::shared_ptr<AudioManager> am;
-    std::shared_ptr<HierGeomRenderObserver> hierRenderObserver;
-    std::shared_ptr<UIElementRenderObserver> uiRenderObserver;
 };
 
 

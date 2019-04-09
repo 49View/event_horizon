@@ -29,6 +29,7 @@
 #include <core/name_policy.hpp>
 #include <core/serialization.hpp>
 #include <core/v_data.hpp>
+#include <core/recursive_transformation.hpp>
 
 #include <poly/polypartition.h>
 #include <poly/poly_helper.h>
@@ -42,6 +43,7 @@ enum PullFlags : uint32_t {
     Tops = 1 << 1,
     All = 0xffffffff,
 };
+
 
 class GeomData : public Boxable<JMATH::AABB>, public NamePolicy<> {
 public:
@@ -117,10 +119,7 @@ public:
     subdivisionAccuray SubdivAccuracy() const { return mSubdivAccuracy; }
     void SubdivAccuracy( subdivisionAccuray val ) { mSubdivAccuracy = val; }
 
-    // Debug
-    const VData& getVData() const {
-        return mVdata;
-    }
+    const VData& getVData() const;
 
     virtual void debugPrint();
     const std::vector<Vector2f>& WrapMappingCoords() const { return wrapMappingCoords; }

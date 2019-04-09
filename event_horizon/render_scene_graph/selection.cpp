@@ -5,6 +5,7 @@
 #include "selection.hpp"
 #include <core/app_globals.h>
 #include <core/camera.h>
+#include <core/geom.hpp>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/ImGuizmo.h>
 #include <render_scene_graph/layouts/layout_mediator.hpp>
@@ -223,4 +224,9 @@ bool Selection::isImGuiBusy() const {
 void Selection::unselect( const UUID& _uuid, Selectable& _node ) {
     unselectImpl( _uuid, _node );
     erase_if_it( selectedNodes, _uuid );
+}
+
+void SelectionAddToKeyFrame::operator()( GeomAssetSP arg ) const {
+//        ### REF selected needs to be worked out with new assets graphs (UUID)
+//    arg->addKeyFrame( timelineName, time );
 }

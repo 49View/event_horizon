@@ -5,6 +5,8 @@
 #include "geom_builder.h"
 #include <core/node.hpp>
 #include <core/resources/resource_manager.hpp>
+#include <core/resources/resource_builder.hpp>
+#include <core/geom.hpp>
 #include <poly/poly.hpp>
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg ) : SceneGraphGeomBaseBuilder(_sg) {
@@ -122,15 +124,17 @@ void GeomBuilder::createDependencyList() {
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb ) {
-    elem->Data( gb->build() );
-    elem->GHType(gt);
+    sg.B<VB>( "urca" ).addIM( gb->build()->getVData() );
+//    ### REF re-implement this
+//    elem->Data( gb->build() );
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb ) {
     for ( const auto& c : gb->build() ) {
-        elem->addChildren( c );
+        sg.B<VB>( "urca" ).addIM( c->getVData() );
+//    ### REF re-implement this
+//        elem->addChildren( c );
     }
-    elem->GHType(gt);
 }
 
 void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
@@ -138,11 +142,6 @@ void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
 }
 
 void GeomBuilder::assemble() {
-
-    if ( bMaterialDep ) {
-//        ### Get the right dependency with new system, not this mess!!
-//        material->clone( *sg.ML().get(material->Name()).get() );
-    }
 
     switch ( builderType ) {
         case GeomBuilderType::shape:
@@ -183,11 +182,10 @@ void GeomBuilder::assemble() {
         elemInjFather->addChildren(elem);
     }
 
-    elem->updateExistingTransform( pos, axis, scale );
+//    ### ref This needs to be here
+//    elem->updateExistingTransform( pos, axis, scale );
 
-    if ( bAddToSceneGraph ) {
-        sg.add( elem );
-    }
+    sg.add( elem );
 }
 
 GeomBuilder& GeomBuilder::addQuad( const QuadVector3fNormal& quad,
@@ -245,7 +243,7 @@ void GeomBuilder::preparePolyLines() {
 }
 
 void GeomBuilder::elemCreate() {
-    if ( !elem) elem = std::make_shared<GeomAsset>(Name());
+    if ( !elem) elem = std::make_shared<Geom>(Name());
 }
 
 GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
@@ -275,7 +273,7 @@ GeomBuilder& GeomBuilder::pb( const float _a, const float _b ) {
 //}
 
 GeomBuilderComposer::GeomBuilderComposer() {
-    elem = std::make_shared<GeomAsset>();
+    elem = std::make_shared<Geom>();
 }
 
 void GeomBuilderComposer::add( GeomBuilder _gb ) {

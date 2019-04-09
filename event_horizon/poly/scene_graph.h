@@ -41,7 +41,8 @@ public:
                          MaterialManager& _ml,
                          ColorManager& _cl,
                          FontManager& _fm,
-                         CameraManager& _cm );
+                         CameraManager& _cm,
+                         GeomManager& _gm);
 
     void init();
     void add( NodeVariants _geom );
@@ -70,6 +71,7 @@ public:
     CameraManager& CM() { return cm; }
     FontManager& FM() { return fm; }
     ColorManager& MC() { return cl; }
+    GeomManager& GM() { return gm; }
 
     template <typename R>
     auto& M() {
@@ -121,6 +123,7 @@ protected:
     ColorManager& cl;
     FontManager& fm;
     CameraManager& cm;
+    GeomManager& gm;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     std::unordered_map<std::string, uint64_t> geomTypeMap;

@@ -10,6 +10,7 @@
 #include <core/node.hpp>
 #include <core/camera.h>
 #include <core/raw_image.h>
+#include <core/geom.hpp>
 #include <core/camera_rig.hpp>
 #include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
@@ -23,9 +24,9 @@ SerializableContainer gltfBufferData;
 
 template <typename T>
 struct NodeVisitor {
-    void operator()( GeomAssetSP _v ) { _v->visit<T>(); }
-    void operator()( UIAssetSP _v ) { _v->visit<T>(); }
-    void operator()( CameraAssetSP _v ) { _v->visit<T>(); }
+//    void operator()( GeomAssetSP _v ) { _v->visit<T>(); }
+//    void operator()( UIAssetSP _v ) { _v->visit<T>(); }
+//    void operator()( CameraAssetSP _v ) { _v->visit<T>(); }
 };
 
 void loadGeomInGui( SceneOrchestrator* p, std::shared_ptr<GLTF2> _newObject ) {
@@ -69,16 +70,16 @@ void callbackGeomSVG( const std::string& _filename, const std::string& _svgStrin
 }
 
 void ImGuiGeoms::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
-    for ( auto& [k,v] : p->SG().Nodes() ) {
-        ImGui::PushID(std::visit(lambdaUUID, v).c_str());
-        ImGui::BeginGroup();
-        std::visit( NodeVisitor<ImGUIJson>{}, v );
+//    for ( auto& [k,v] : p->SG().Nodes() ) {
+//        ImGui::PushID(std::visit(lambdaUUID, v).c_str());
+//        ImGui::BeginGroup();
+//        std::visit( NodeVisitor<ImGUIJson>{}, v );
 //        if ( ImGui::Button( "Save", ImVec2( 80, 20 ))) {
 //            VisitLambda( publish, v );
 //        }
-        ImGui::EndGroup();
-        ImGui::PopID();
-    }
+//        ImGui::EndGroup();
+//        ImGui::PopID();
+//    }
 
 //    ImGui::EndChild();
 

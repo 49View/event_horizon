@@ -7,6 +7,7 @@
 #include <core/math/quaternion.h>
 #include <core/raw_image.h>
 #include <core/image_util.h>
+#include <core/geom.hpp>
 #include <core/file_manager.h>
 #include <poly/geom_data.hpp>
 #include <core/resources/entity_factory.hpp>
@@ -729,7 +730,8 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     geom->vData().calcBinormal();
     geom->BBox3d( AABB{ geom->vData().getMin(), geom->vData().getMax() } );
 
-    father->Data( geom );
+//    ### REF, what is this???
+//    father->Data( geom );
 }
 
 void GLTF2::addNodeToHier( const int nodeIndex, GeomAssetSP& hier ) {
@@ -901,7 +903,7 @@ GLTF2::IntermediateMaterial GLTF2::elaborateMaterial( const tinygltf::Material& 
 ImportGeomArtifacts GLTF2::convert() {
 
     ImportGeomArtifacts ret;
-    auto hierScene = std::make_shared<GeomAsset>( name );
+    auto hierScene = std::make_shared<Geom>( name );
 
     for ( size_t m = 0; m < model.materials.size(); m++ ) {
         /*auto im = */elaborateMaterial( model.materials[m] );

@@ -152,6 +152,9 @@ using MCB = MaterialColorBuilder;
 using MaterialBuilder = ResourceBuilder5<Material>;
 using MB = MaterialBuilder;
 
+//using GeomBuilder = ResourceBuilder5<GeomData>;
+//using GDB = GeomBuilder;
+
 template<typename T, typename C> class ResourceManager;
 
 using VDataManager      = ResourceManager<VData, ResourceManagerContainer<VData>>;
@@ -161,3 +164,4 @@ using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Prof
 using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Material>>;
 using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>>;
 using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>>;
+using GeomManager       = ResourceManager<GeomData, ResourceManagerContainer<GeomData>>;

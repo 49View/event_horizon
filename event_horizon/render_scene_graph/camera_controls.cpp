@@ -132,9 +132,10 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
 
     }
 
-    for ( const auto& [k,v] : selectedNodes ) {
-        rsg.SG().visitNode( k, lambdaUpdateNodeTransform );
-    }
+//        ### REF selected needs to be worked out with new assets graphs
+//    for ( const auto& [k,v] : selectedNodes ) {
+//        rsg.SG().visitNode( k, lambdaUpdateNodeTransform );
+//    }
 }
 
 void CameraControlFly::renderControls( SceneOrchestrator* _p ) {

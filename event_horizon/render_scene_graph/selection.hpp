@@ -55,14 +55,15 @@ public:
 
     template <typename T>
     void selected( T _geom, SelectableFlagT _flags = SelectableFlag::Selected|SelectableFlag::Highlighted ) {
-        selected( _geom->UUiD(), _geom->TRS(), _geom, _flags );
-        for ( auto& c : _geom->Children() ) {
-            SelectableFlagT recFlags = _flags;
-            if ( !checkBitWiseFlag(traverseFlag, SelectionTraverseFlag::Recursive) ) {
-                xandBitWiseFlag(recFlags, SelectableFlag::Selected);
-            }
-            selected( c, recFlags );
-        }
+//        ### REF selected needs to be worked out with new assets graphs (UUID)
+//        selected( _geom->UUiD(), _geom->TRS(), _geom, _flags );
+//        for ( auto& c : _geom->Children() ) {
+//            SelectableFlagT recFlags = _flags;
+//            if ( !checkBitWiseFlag(traverseFlag, SelectionTraverseFlag::Recursive) ) {
+//                xandBitWiseFlag(recFlags, SelectableFlag::Selected);
+//            }
+//            selected( c, recFlags );
+//        }
     }
 
     void showGizmo(Selectable& _node, std::shared_ptr<Camera> _cam, SceneOrchestrator* _p );
@@ -101,9 +102,7 @@ private:
 struct SelectionAddToKeyFrame {
     SelectionAddToKeyFrame( const std::string& timelineName, float time ) : timelineName( timelineName ), time( time ) {}
 
-    void operator()(GeomAssetSP arg) const {
-        arg->addKeyFrame( timelineName, time );
-    }
+    void operator()(GeomAssetSP arg) const;
     void operator()(UIAssetSP arg) const {
         arg->addKeyFrame( timelineName, time );
     }

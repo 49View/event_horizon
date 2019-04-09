@@ -51,7 +51,7 @@ namespace stl {
         }
         
         auto mGeom = std::make_shared<GeomData>();
-        auto geom = std::make_shared<GeomAsset>(mGeom);
+//        auto geom = std::make_shared<Geom>(mGeom);
 
         VData& gd = mGeom->vData();
         

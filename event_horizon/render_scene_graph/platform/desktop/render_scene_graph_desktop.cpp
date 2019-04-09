@@ -4,6 +4,7 @@
 
 #include "../../render_scene_graph.h"
 #include <core/node.hpp>
+#include <core/geom.hpp>
 #include <poly/resources/geom_builder.h>
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
@@ -18,9 +19,9 @@
 scene_t _outputScene;
 
 void chartCount( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
-    if ( _g->Data() ) {
-        inputMesh.vertex_count += _g->Data()->vData().numVerts();
-        inputMesh.face_count += _g->Data()->vData().numIndices()/3;
+    if ( !_g->empty() ) {
+//        inputMesh.vertex_count += _g->Data()->vData().numVerts();
+//        inputMesh.face_count += _g->Data()->vData().numIndices()/3;
     }
 
     for ( const auto& c : _g->Children() ) {
@@ -29,48 +30,48 @@ void chartCount( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
 }
 
 void chart( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh, int& _vi, int& _fi ) {
-    if ( _g->Data() ) {
-        auto vData = _g->Data()->vData();
-        Matrix4f lMatfull = *(_g->getLocalHierTransform().get());
-        Matrix4f lRot = lMatfull;
-        lRot.make3x3NormalizedRotationMatrix();
-
-        for ( size_t q = 0; q < vData.numVerts(); q++ ) {
-            Vector3f posTrasformed = lMatfull * vData.getVcoords3d()[q];
-            Vector3f norTrasformed = lRot * vData.getVnormals3d()[q];
-            norTrasformed = normalize( norTrasformed );
-
-            inputMesh.vertex_array[_vi+q].position[0] = posTrasformed[0];
-            inputMesh.vertex_array[_vi+q].position[1] = posTrasformed[1];
-            inputMesh.vertex_array[_vi+q].position[2] = posTrasformed[2];
-            inputMesh.vertex_array[_vi+q].normal[0] = norTrasformed[0];
-            inputMesh.vertex_array[_vi+q].normal[1] = norTrasformed[1];
-            inputMesh.vertex_array[_vi+q].normal[2] = norTrasformed[2];
-            inputMesh.vertex_array[_vi+q].uv[0] = vData.getVUVs()[q][0];
-            inputMesh.vertex_array[_vi+q].uv[1] = vData.getVUVs()[q][1];
-            inputMesh.vertex_array[_vi+q].first_colocal = _vi+q;
-
-            // Link colocals. You probably want to do this more efficiently! Sort by one axis or use a hash or grid.
-//            for (int vv = 0; vv < q; vv++) {
-//                if (inputMesh.vertex_array[_vi+q].position[0] == inputMesh.vertex_array[_vi+vv].position[0] &&
-//                    inputMesh.vertex_array[_vi+q].position[1] == inputMesh.vertex_array[_vi+vv].position[1] &&
-//                    inputMesh.vertex_array[_vi+q].position[2] == inputMesh.vertex_array[_vi+vv].position[2]) {
-//                    inputMesh.vertex_array[_vi+q].first_colocal = _vi+vv;
-//                }
-//            }
-
-        }
-
-        size_t numFaceCount = vData.numIndices() / 3;
-        for (size_t f = 0; f < numFaceCount; f++) {
-            inputMesh.face_array[_fi+f].material_index = 0;
-            inputMesh.face_array[_fi+f].vertex_index[0]= _vi + vData.getVIndices()[f*3+0];
-            inputMesh.face_array[_fi+f].vertex_index[1]= _vi + vData.getVIndices()[f*3+1];
-            inputMesh.face_array[_fi+f].vertex_index[2]= _vi + vData.getVIndices()[f*3+2];
-        }
-
-        _vi += vData.numVerts();
-        _fi += numFaceCount;
+    if ( !_g->empty() ) {
+//        auto vData = _g->Data()->vData();
+//        Matrix4f lMatfull = *(_g->getLocalHierTransform().get());
+//        Matrix4f lRot = lMatfull;
+//        lRot.make3x3NormalizedRotationMatrix();
+//
+//        for ( size_t q = 0; q < vData.numVerts(); q++ ) {
+//            Vector3f posTrasformed = lMatfull * vData.getVcoords3d()[q];
+//            Vector3f norTrasformed = lRot * vData.getVnormals3d()[q];
+//            norTrasformed = normalize( norTrasformed );
+//
+//            inputMesh.vertex_array[_vi+q].position[0] = posTrasformed[0];
+//            inputMesh.vertex_array[_vi+q].position[1] = posTrasformed[1];
+//            inputMesh.vertex_array[_vi+q].position[2] = posTrasformed[2];
+//            inputMesh.vertex_array[_vi+q].normal[0] = norTrasformed[0];
+//            inputMesh.vertex_array[_vi+q].normal[1] = norTrasformed[1];
+//            inputMesh.vertex_array[_vi+q].normal[2] = norTrasformed[2];
+//            inputMesh.vertex_array[_vi+q].uv[0] = vData.getVUVs()[q][0];
+//            inputMesh.vertex_array[_vi+q].uv[1] = vData.getVUVs()[q][1];
+//            inputMesh.vertex_array[_vi+q].first_colocal = _vi+q;
+//
+//            // Link colocals. You probably want to do this more efficiently! Sort by one axis or use a hash or grid.
+////            for (int vv = 0; vv < q; vv++) {
+////                if (inputMesh.vertex_array[_vi+q].position[0] == inputMesh.vertex_array[_vi+vv].position[0] &&
+////                    inputMesh.vertex_array[_vi+q].position[1] == inputMesh.vertex_array[_vi+vv].position[1] &&
+////                    inputMesh.vertex_array[_vi+q].position[2] == inputMesh.vertex_array[_vi+vv].position[2]) {
+////                    inputMesh.vertex_array[_vi+q].first_colocal = _vi+vv;
+////                }
+////            }
+//
+//        }
+//
+//        size_t numFaceCount = vData.numIndices() / 3;
+//        for (size_t f = 0; f < numFaceCount; f++) {
+//            inputMesh.face_array[_fi+f].material_index = 0;
+//            inputMesh.face_array[_fi+f].vertex_index[0]= _vi + vData.getVIndices()[f*3+0];
+//            inputMesh.face_array[_fi+f].vertex_index[1]= _vi + vData.getVIndices()[f*3+1];
+//            inputMesh.face_array[_fi+f].vertex_index[2]= _vi + vData.getVIndices()[f*3+2];
+//        }
+//
+//        _vi += vData.numVerts();
+//        _fi += numFaceCount;
     }
 
     for ( const auto& c : _g->Children() ) {
@@ -82,21 +83,21 @@ void chartInject( GeomAssetSP _g,  scene_t& _outputScene,
                             const std::vector<Thekla::Atlas_Output_Vertex>& _va,
                             const Thekla::Atlas_Input_Vertex* _inputVerts,
                             int& _vi, int& _fi ) {
-    if ( _g->Data() ) {
-        auto& vData = _g->Data()->vData();
-        for ( size_t q = 0; q < vData.numVerts(); q++ ) {
-            Vector2f newUV{ _va[_vi+q].uv[0], _va[_vi+q].uv[1] };
-            vData.setVUV2s( q, newUV );
-            for ( auto i = 0; i < 3; i++ ) _outputScene.vertices[_vi+q].p[i] = _inputVerts[_vi+q].position[i];
-            newUV.fill( _outputScene.vertices[_vi+q].t );
-        }
-        for ( size_t q = 0; q < vData.numIndices(); q+=3 ) {
-            _outputScene.indices[_fi + q]   = static_cast<unsigned short>(_vi + vData.getVIndices()[q]);
-            _outputScene.indices[_fi + q+1] = static_cast<unsigned short>(_vi + vData.getVIndices()[q+1]);
-            _outputScene.indices[_fi + q+2] = static_cast<unsigned short>(_vi + vData.getVIndices()[q+2]);
-        }
-        _vi += vData.numVerts();
-        _fi += vData.numIndices();
+    if ( !_g->empty() ) {
+//        auto& vData = _g->Data()->vData();
+//        for ( size_t q = 0; q < vData.numVerts(); q++ ) {
+//            Vector2f newUV{ _va[_vi+q].uv[0], _va[_vi+q].uv[1] };
+//            vData.setVUV2s( q, newUV );
+//            for ( auto i = 0; i < 3; i++ ) _outputScene.vertices[_vi+q].p[i] = _inputVerts[_vi+q].position[i];
+//            newUV.fill( _outputScene.vertices[_vi+q].t );
+//        }
+//        for ( size_t q = 0; q < vData.numIndices(); q+=3 ) {
+//            _outputScene.indices[_fi + q]   = static_cast<unsigned short>(_vi + vData.getVIndices()[q]);
+//            _outputScene.indices[_fi + q+1] = static_cast<unsigned short>(_vi + vData.getVIndices()[q+1]);
+//            _outputScene.indices[_fi + q+2] = static_cast<unsigned short>(_vi + vData.getVIndices()[q+2]);
+//        }
+//        _vi += vData.numVerts();
+//        _fi += vData.numIndices();
     }
 
     for ( const auto& c : _g->Children() ) {

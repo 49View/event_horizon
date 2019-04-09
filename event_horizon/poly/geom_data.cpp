@@ -935,4 +935,8 @@ WindingOrderT GeomData::getWindingOrder() const {
 	return mWindingOrder;
 }
 
+const VData& GeomData::getVData() const {
+    return mVdata;
+}
+
 GeomData::~GeomData() = default;

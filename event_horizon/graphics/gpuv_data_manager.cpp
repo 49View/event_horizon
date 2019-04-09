@@ -10,8 +10,6 @@
 
 std::shared_ptr<GPUVData> GPUVDataManager::addGPUVData( const cpuVBIB& _val, const StringUniqueCollection& _names ) {
     auto gpuv = std::make_shared<GPUVData>( _val );
-
     add( _names, gpuv );
-
     return gpuv;
 }

@@ -8,6 +8,7 @@
 #include <core/TTF.h>
 #include <core/font_utils.hpp>
 #include <core/resources/resource_manager.hpp>
+#include <core/geom.hpp>
 
 typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 
@@ -448,8 +449,8 @@ void UIShapeBuilder::assemble() {
     }
 
     elem->Data()->VertexList(vs);
-
-    elem->updateTransform();
+//    ### ref This needs to be here
+//    elem->updateTransform();
 
     sg.add( elem );
 }
@@ -524,6 +525,6 @@ void UIShapeBuilder::elemCreate() {
 }
 
 UIShapeBuilder& UIShapeBuilder::inj( GeomAssetSP _cloned ) {
-    mTransform = _cloned->getLocalHierTransform();
+//    mTransform = _cloned->getLocalHierTransform();
     return *this;
 }

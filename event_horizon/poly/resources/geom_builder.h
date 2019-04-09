@@ -233,11 +233,6 @@ public:
         return *this;
     }
 
-    GeomBuilder& dontAddToSceneGraph() {
-        bAddToSceneGraph = false;
-        return *this;
-    }
-
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
 // MaterialBuildable policies
@@ -246,10 +241,10 @@ public:
 //        return *this;
 //    }
 //
-//    GeomBuilder& m( const std::string& _shader, const std::string& _matName ) {
-//        materialSet(_shader, _matName);
-//        return *this;
-//    }
+    GeomBuilder& m( const ResourceRef& _mat ) {
+        matRef = _mat;
+        return *this;
+    }
 //
 //    template <typename T>
 //    GeomBuilder& mc( const std::string& _name, T _value ) {
@@ -286,7 +281,9 @@ private:
     uint64_t mId = 0;
     uint64_t gt = 1; // This is the generic geom ID, as we reserve 0 as null
 
-    bool bMaterialDep = false;
+    ResourceRef matRef;
+    ResourceRef vdataRef;
+
     ShapeType shapeType = ShapeType::None;
     subdivisionAccuray subdivAccuracy = accuracyNone;
 
@@ -316,8 +313,6 @@ private:
 
     GeomAssetSP elem = nullptr;
     GeomAssetSP elemInjFather = nullptr;
-
-    bool bAddToSceneGraph = true;
 
     ScreenShotContainerPtr thumb;
     friend class GeomData;
