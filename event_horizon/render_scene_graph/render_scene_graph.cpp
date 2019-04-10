@@ -7,6 +7,7 @@
 #include <core/resources/resource_manager.hpp>
 #include <core/raw_image.h>
 #include <core/node.hpp>
+#include <core/geom.hpp>
 #include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
 #include <graphics/renderer.h>
@@ -34,13 +35,15 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
         this->RR().addVDataResource(_val);
     });
 
-    sg.GM().connect( [](const ResourceTransfer<Geom>& _val ) {
+    sg.GM().connect( [this](const ResourceTransfer<Geom>& _val ) {
         LOGRS( "Adding " << ResourceVersioning<Geom>::Prefix() << ": "  << *_val.names.begin() );
+//        auto mat = this->SG().ML().get(_val.elem->MaterialRef());
 //        this->RR().addGeomResource(_val);
 //        auto lvl = this->RR().VPL( CommandBufferLimits::PBRStart, nullptr, 1.0f ); // mat->translucency()
 //        auto mat = this->SG().ML().get("tomato");
-//        VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), lvl, ShaderMaterial{S::SH, mat->Values()} }
-//                .p().g(9200).build();
+        auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), _val.elem->MaterialRef(), _val.elem->VDataRef()}.
+        g(9200).build();
+        this->RR().VPL( CommandBufferLimits::PBRStart, vp);
     });
 
 //    sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {

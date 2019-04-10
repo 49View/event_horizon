@@ -241,6 +241,10 @@ std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ResourceTra
     return rmm->addRenderMaterial( _val.elem->Values()->Type(), _val.elem->Values(), _val.names );
 }
 
+std::shared_ptr<RenderMaterial> Renderer::getMaterial( const std::string& _key ) {
+    return rmm->get(_key);
+}
+
 std::shared_ptr<GPUVData> Renderer::addVDataResource( const cpuVBIB& _val, const std::string& _name ) {
     return gm->addGPUVData(_val, {_name} );
 }
@@ -249,9 +253,10 @@ std::shared_ptr<GPUVData> Renderer::addVDataResource( const ResourceTransfer<VDa
     return gm->addGPUVData( cpuVBIB{ generateGeometryVP(_val.elem) }, _val.names );
 }
 
-std::shared_ptr<RenderMaterial> Renderer::getMaterial( const std::string& _key ) {
-    return rmm->get(_key);
+std::shared_ptr<GPUVData> Renderer::getGPUVData( const std::string& _key ) {
+    return gm->get(_key);
 }
+
 
 void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt ) {
     mChangeMaterialCallbacks.emplace_back( _cmt );

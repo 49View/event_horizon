@@ -60,20 +60,20 @@ public:
     // add*: this->Hash() will be empty "" if it comes from a procedural resource (IE not loaded from a file)
     // this way we do not serialize anything with an empty hash. win-win. I think. It smells a bit though, just.
 
-    void addIM( const R& _res ) {
-        addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Immediate );
+    ResourceRef addIM( const R& _res ) {
+        return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }
-    void addDF( const R& _res ) {
-        addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Deferred );
+    ResourceRef addDF( const R& _res ) {
+        return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Deferred );
     }
-    void addIM( std::shared_ptr<R> _res ) {
-        addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Immediate );
+    ResourceRef addIM( std::shared_ptr<R> _res ) {
+        return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }
-    void addDF( std::shared_ptr<R> _res ) {
-        addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
+    ResourceRef addDF( std::shared_ptr<R> _res ) {
+        return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
     }
-    void add( std::shared_ptr<R> _res, AddResourcePolicy _arp ) {
-        addInternal<R>( _res, this->Name(), this->Hash(), _arp );
+    ResourceRef add( std::shared_ptr<R> _res, AddResourcePolicy _arp ) {
+        return addInternal<R>( _res, this->Name(), this->Hash(), _arp );
     }
 
     void addResources( const SerializableContainer& _data, AddResourcePolicy _arp ) {
@@ -146,11 +146,22 @@ protected:
     }
 
     template <typename DEP>
-    void addInternal( std::shared_ptr<DEP> _res,
+    ResourceRef addInternal( std::shared_ptr<DEP> _res,
                       const std::string& _name,
                       const ResourceRef& _hash,
                       AddResourcePolicy _arp ) {
-        sg.M<DEP>().add( _res, _name, _hash, _arp, this->Name() );
+        // NDDADO: This could be very slow, might need to find a flyweight to calculate the whole hash
+        ResourceRef resolvedHash = _hash;
+        if constexpr ( std::is_same<R, DEP>::value ) {
+            if ( resolvedHash.empty() ) {
+                this->calcHash( ResourceVersioning<DEP>::HashResolver(_res) );
+                resolvedHash = this->Hash();
+            }
+        }
+        ASSERT( !resolvedHash.empty() );
+
+        sg.M<DEP>().add( _res, _name, resolvedHash, _arp, this->Name() );
+        return resolvedHash;
     }
 
 protected:

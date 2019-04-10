@@ -90,6 +90,10 @@ public:
 
 	std::unique_ptr<uint8_t[]> rawBtyes;
 
+    // NDDADO: unfortunately unique_ptr<[]> cannot be serialized with macros as it needs 2 variables, shame
+    // So we have to get a quick custom one here instead, very sad :/
+    SerializableContainer serialize() const;
+
 public:
 	static RawImage WHITE4x4();
 	static RawImage DEBUG_UV();

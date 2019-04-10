@@ -124,9 +124,7 @@ void GeomBuilder::createDependencyList() {
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb ) {
-    sg.B<VB>( "urca" ).addIM( gb->build()->getVData() );
-//    ### REF re-implement this
-//    elem->Data( gb->build() );
+    elem->VDataRef( sg.B<VB>( "urca" ).addIM( gb->build()->getVData() ) );
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb ) {
@@ -183,6 +181,7 @@ void GeomBuilder::assemble() {
     }
 
     elem->updateExistingTransform( pos, axis, scale );
+    elem->MaterialRef( sg.ML().getHash(matRef) );
 
     sg.B<GRB>(Name()).addIM( elem );
 }

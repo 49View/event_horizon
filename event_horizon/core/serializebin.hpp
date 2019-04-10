@@ -15,6 +15,7 @@
 #include <string>
 #include <core/serialize_types.hpp>
 #include <core/hashable.hpp>
+#include <core/util.h>
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:
@@ -40,7 +41,7 @@ public:
 	}
 
 	template<typename T>
-	void write( std::unique_ptr<T[]>& v, int32_t numIndices ) {
+	void write( const std::unique_ptr<T[]>& v, int32_t numIndices ) {
 		write( numIndices );
 		for ( int t = 0; t < numIndices; t++ ) write( v[t] );
 	}

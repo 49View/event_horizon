@@ -7,6 +7,7 @@
 #include <core/math/rect2f.h>
 #include <core/http/basen.hpp>
 #include <core/util.h>
+#include <core/serializebin.hpp>
 
 RawImage::RawImage( unsigned int _w, unsigned int _h, int _channels, const uint32_t _col ) {
     width = _w;
@@ -187,3 +188,13 @@ void RawImage::bufferDecode( const unsigned char* _buffer, size_t _length ) {
                                             width, height, channels, bpp, _mt == RawImageMemory::Raw );
     setFormatFromChannels();
 }
+
+SerializableContainer RawImage::serialize() const {
+    SerializeBin mw;
+    mw.write( width );
+    mw.write( height );
+    mw.write( rawBtyes, static_cast<int32_t >(size()) );
+
+    return mw.serialize();
+}
+

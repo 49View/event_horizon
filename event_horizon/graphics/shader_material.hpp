@@ -12,6 +12,7 @@ class Program;
 
 class ShaderMaterial {
 public:
+    ShaderMaterial() = default;
     explicit ShaderMaterial( std::string _sn );
     ShaderMaterial( std::string shaderName, Renderer& _rr );
     ShaderMaterial( std::string shaderName, std::shared_ptr<HeterogeneousMap> values );

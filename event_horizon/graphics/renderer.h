@@ -105,6 +105,8 @@ public:
     std::shared_ptr<GPUVData> addVDataResource( const cpuVBIB& _val, const std::string& _name );
 
 	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
+    std::shared_ptr<GPUVData>       getGPUVData( const std::string& _key );
+
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );

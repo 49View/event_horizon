@@ -61,17 +61,30 @@ public:
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addSignal( { _elem, _hash, {_name, _aliasKey} } );
+        addSignal( { _elem, _hash, {_hash, _name, _aliasKey} } );
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
                       const ResourceRef& _hash, const std::string& _aliasKey = "" ) {
         add( _elem, _name, _hash, _aliasKey );
-        addToSignal( signalAddElements, { _elem, _hash, {_name, _aliasKey} } );
+        addToSignal( signalAddElements, { _elem, _hash, {_hash, _name, _aliasKey} } );
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {
         return resources[_hash];
+    }
+
+    ResourceRef getHash( const std::string& _key ) {
+        if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
+            return res->second;
+        } else {
+            if ( !resources.empty() ) {
+                LOGRS("Resource " << _key << " unmapped returning default");
+                return resourcesMapper.begin()->second;
+            }
+        }
+        LOGRS("Resource " << _key << " unmapped and mamanger empty, returning null");
+        return "";
     }
 
     std::shared_ptr<T> get( const std::string& _key ) {

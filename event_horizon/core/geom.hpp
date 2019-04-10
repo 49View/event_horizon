@@ -17,6 +17,11 @@ public:
 
     bool empty() const override;
 
+    const ResourceRef& MaterialRef() const;
+    const ResourceRef& VDataRef() const;
+    void MaterialRef( const ResourceRef& material );
+    void VDataRef( const ResourceRef& vData );
+
 private:
     ResourceRef material;
     ResourceRef vData;

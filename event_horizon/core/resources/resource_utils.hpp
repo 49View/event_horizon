@@ -92,13 +92,25 @@ public:
     inline static bool HasDeps() {
         if constexpr ( std::is_same<R, VData>::value )                  return false;
         if constexpr ( std::is_same<R, Material>::value )               return true ;
-        if constexpr ( std::is_same<R, Geom>::value )               return true ;
+        if constexpr ( std::is_same<R, Geom>::value )                   return true ;
         if constexpr ( std::is_same<R, MaterialColor>::value )          return false;
         if constexpr ( std::is_same<R, Profile>::value )                return false;
         if constexpr ( std::is_same<R, RawImage>::value )               return false;
         if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return false;
         if constexpr ( std::is_same<R, UIElement>::value )              return true ;
         if constexpr ( std::is_same<R, CameraRig>::value )              return false;
+    }
+
+    inline static SerializableContainer HashResolver( std::shared_ptr<R> _val ) {
+        if constexpr ( std::is_same<R, VData>::value )                  return _val->serialize();
+        if constexpr ( std::is_same<R, Material>::value )               return _val->serialize();
+        if constexpr ( std::is_same<R, Geom>::value )                   return {};
+        if constexpr ( std::is_same<R, MaterialColor>::value )          return {};
+        if constexpr ( std::is_same<R, Profile>::value )                return {};
+        if constexpr ( std::is_same<R, RawImage>::value )               return _val->serialize();
+        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return {};
+        if constexpr ( std::is_same<R, UIElement>::value )              return {};
+        if constexpr ( std::is_same<R, CameraRig>::value )              return {};
     }
 
     inline static std::string Prefix() {
