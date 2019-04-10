@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 //  RunLoop.cpp
 //  SixthView
@@ -22,7 +24,7 @@ bool profileUpdateRenderer = false;
 std::atomic_bool mIsClosingFlag;
 
 void RunLoopGraphics::initWindow( std::shared_ptr<SceneOrchestrator> _presenter ) {
-    pm = _presenter;
+    pm = std::move( _presenter );
 	WH::initializeWindow( pm->getLayoutInitFlags(), rr );
 
 	rr.init();

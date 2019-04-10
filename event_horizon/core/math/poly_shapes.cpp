@@ -193,6 +193,32 @@ ShapeType shapeTypeFromString( const std::string& value ) {
     return ShapeType::None;
 };
 
+std::string shapeTypeToString( const ShapeType value ) {
+
+    switch (value) {
+        case ShapeType::None:
+            return "None";
+        case ShapeType::Sphere:
+            return "Sphere";
+        case ShapeType::Cylinder:
+            return "Cylinder";
+        case ShapeType::Pyramid:
+            return "Pyramid";
+        case ShapeType::Cube:
+            return "Cube";
+        case ShapeType::RoundedCube:
+            return "RoundedCube";
+        case ShapeType::Panel:
+            return "Panel";
+        case ShapeType::Pillow:
+            return "Pillow";
+        case ShapeType::Arrow:
+            return "Arrow";
+    }
+
+    return {};
+};
+
 uint32_t subdivideEdge( uint32_t f0, uint32_t f1, const Vector3f& v0, const Vector3f& v1, Topology& io_mesh,
                         std::map<Edge, uint32_t>& io_divisions ) {
     const Edge edge( f0, f1 );

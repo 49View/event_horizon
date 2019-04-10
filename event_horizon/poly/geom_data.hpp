@@ -49,9 +49,6 @@ class GeomData : public Boxable<JMATH::AABB>, public NamePolicy<> {
 public:
     GeomData();
     virtual ~GeomData();
-    GeomData( ShapeType _st,
-              const Vector3f& _pos, const Vector3f& _axis, const Vector3f& _scale,
-              const GeomMappingData& _mapping );
 
     GeomData( const std::vector<PolyOutLine>& verts,
               const GeomMappingData& _mapping, PullFlags pullFlags = PullFlags::All );
@@ -61,7 +58,6 @@ public:
 
     GeomData( const QuadVector3fNormalfList& quads, const GeomMappingData& _mapping );
 public:
-    void addShape( ShapeType st, const Vector3f& center, const Vector3f& size, int subDivs = 0 );
 
     MappingDirection getMappingDirection() const { return mapping.direction; }
     void setMappingDirection( MappingDirection val ) { mapping.direction = val; }

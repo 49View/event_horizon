@@ -14,10 +14,10 @@
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/material.h>
 #include <core/resources/profile.hpp>
+#include <core/name_policy.hpp>
 #include <poly/follower.hpp>
 #include <poly/poly_helper.h>
 #include <poly/scene_graph.h>
-#include <poly/scene_graph_geom_builder_base.hpp>
 
 enum class GeomBuilderType {
     shape,
@@ -100,7 +100,7 @@ protected:
 //    GeomAssetSP elem;
 };
 
-class GeomBuilder : public SceneGraphGeomBaseBuilder, public GeomBasicBuilder<GeomBuilder> {
+class GeomBuilder : public GeomBasicBuilder<GeomBuilder>, public NamePolicy<> {
 public:
     explicit GeomBuilder( SceneGraph& _sg );
     virtual ~GeomBuilder() = default;
@@ -264,14 +264,14 @@ public:
 
     GeomAssetSP buildr();
 
-    void assemble() override;
+    void assemble();
 
 protected:
-    void elemCreate() override;
+    void elemCreate();
     GeomAssetSP Elem() { return elem; }
 
-    void createDependencyList() override;
-    bool validate() const override;
+    void createDependencyList();
+    bool validate() const;
     void preparePolyLines();
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb );
     void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb );
@@ -315,6 +315,8 @@ private:
     GeomAssetSP elemInjFather = nullptr;
 
     ScreenShotContainerPtr thumb;
+
+    SceneGraph& sg;
     friend class GeomData;
 };
 

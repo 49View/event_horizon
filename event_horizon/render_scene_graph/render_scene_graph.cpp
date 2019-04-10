@@ -37,10 +37,6 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
 
     sg.GM().connect( [this](const ResourceTransfer<Geom>& _val ) {
         LOGRS( "Adding " << ResourceVersioning<Geom>::Prefix() << ": "  << *_val.names.begin() );
-//        auto mat = this->SG().ML().get(_val.elem->MaterialRef());
-//        this->RR().addGeomResource(_val);
-//        auto lvl = this->RR().VPL( CommandBufferLimits::PBRStart, nullptr, 1.0f ); // mat->translucency()
-//        auto mat = this->SG().ML().get("tomato");
         auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), _val.elem->MaterialRef(), _val.elem->VDataRef()}.
         g(9200).build();
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);

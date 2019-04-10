@@ -10,11 +10,10 @@
 #include <core/math/aabb.h>
 #include <core/math/vector4f.h>
 #include <core/soa_utils.h>
-#include <core/soa_utils.h>
+#include <core/name_policy.hpp>
 
 #include <poly/poly.hpp>
 #include <poly/scene_graph.h>
-#include <poly/scene_graph_geom_builder_base.hpp>
 
 namespace Utility::TTFCore { class Font; }
 
@@ -67,14 +66,14 @@ private:
 
 };
 
-class UIShapeBuilder : public SceneGraphGeomBaseBuilder, public Observable<UIShapeBuilder> {
+class UIShapeBuilder : public Observable<UIShapeBuilder>, public NamePolicy<> {
 public:
     virtual ~UIShapeBuilder() = default;
 
     UIShapeBuilder( SceneGraph& _sg, UIShapeType shapeType );
     UIShapeBuilder( SceneGraph& _sg, UIShapeType _shapeType, const std::string& _ti, float _fh = 0.0f );
 
-    void assemble() override;
+    void assemble();
 
     void init() {
         defaultFontIfNecessary();
@@ -252,11 +251,6 @@ public:
         return *this;
     }
 
-    UIShapeBuilder& matchNameWithTName() {
-        Name( tname );
-        return *this;
-    }
-
 // MaterialBuildable policies
 //    UIShapeBuilder& m( const std::string& _shader, const std::string& _matName = "" ) {
 //        materialSet(_shader, _matName);
@@ -281,16 +275,15 @@ public:
 
 
     UIAssetSP buildr() {
-        build();
         return elem;
     }
 
 protected:
-    void elemCreate() override;
-    bool validate() const override;
+    void elemCreate() ;
+    bool validate() const;
 
 protected:
-    void createDependencyList() override;
+    void createDependencyList();
 
 private:
     std::shared_ptr<PosTex3dStrip> makeRoundedRect( const QuadVertices2& uvm );
@@ -342,6 +335,7 @@ private:
     std::string fontName;
 
     UIAssetSP elem;
+    SceneGraph& sg;
 
     static uint64_t sid;
 };

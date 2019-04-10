@@ -223,7 +223,7 @@ protected:
 
 private:
     std::unordered_map<std::string, Boxes> boxes;
-    InitializeWindowFlagsT initFlags = InitializeWindowFlags::HalfSize;
+    InitializeWindowFlagsT initFlags = InitializeWindowFlags::Maximize;
     std::unique_ptr<msm::back::state_machine<SceneStateMachine>> stateMachine;
     std::unordered_map<std::string, std::shared_ptr<LayoutBoxRenderer>> boxFunctionMapping;
     friend class SceneOrchestrator;

@@ -9,38 +9,36 @@
 #include <core/geom.hpp>
 #include <poly/poly.hpp>
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg ) : SceneGraphGeomBaseBuilder(_sg) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg ) : sg(_sg) {
 
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt ) :
-    SceneGraphGeomBaseBuilder(_sg), builderType(gbt) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt ) : builderType(gbt), sg(_sg) {
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _name ) :
-    SceneGraphGeomBaseBuilder(_sg, _name, S::SH, S::WHITE_PBR), builderType(gbt) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _name ) : builderType(gbt),sg(_sg) {
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector2f>&& arguments_list, float _zPull ) : SceneGraphGeomBaseBuilder(_sg){
+GeomBuilder::GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector2f>&& arguments_list, float _zPull ) : sg(_sg) {
     std::vector<Vector3f> lverts;
     for (auto &v: arguments_list) lverts.emplace_back(v);
     outlineVerts.emplace_back( lverts, _zPull );
     builderType = GeomBuilderType::outline;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& arguments_list, float _zPull ) : SceneGraphGeomBaseBuilder(_sg){
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& arguments_list, float _zPull ) : sg(_sg) {
     outlineVerts.emplace_back( arguments_list, _zPull );
     builderType = GeomBuilderType::outline;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Vector2f>& arguments_list, float _zPull ) : SceneGraphGeomBaseBuilder(_sg){
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Vector2f>& arguments_list, float _zPull ) : sg(_sg) {
     std::vector<Vector3f> lverts;
     for (auto &v: arguments_list) lverts.emplace_back(v) ;
     outlineVerts.emplace_back( lverts, _zPull );
     builderType = GeomBuilderType::outline;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, ShapeType _st, const Vector3f& _size ) : SceneGraphGeomBaseBuilder(_sg){
+GeomBuilder::GeomBuilder( SceneGraph& _sg, ShapeType _st, const Vector3f& _size ) : sg(_sg){
     shapeType = _st;
     scale = _size;
     builderType = GeomBuilderType::shape;
@@ -48,56 +46,56 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, ShapeType _st, const Vector3f& _size 
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _resourceName,
                           const std::vector<Vector2f>& _outline,
-                          const float _z, const Vector3f& _suggestedAxis ) : SceneGraphGeomBaseBuilder(_sg) {
+                          const float _z, const Vector3f& _suggestedAxis ) : sg(_sg) {
     builderType = gbt;
     for (auto &v: _outline) profilePath.emplace_back( Vector3f{v, _z} );
 }
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _resourceName,
                           const std::vector<Vector3f>& _outline,
-                          const Vector3f& _suggestedAxis ) : SceneGraphGeomBaseBuilder(_sg) {
+                          const Vector3f& _suggestedAxis ) : sg(_sg) {
     builderType = gbt;
     mFollowerSuggestedAxis = _suggestedAxis;
     for (auto &v: _outline) profilePath.emplace_back( v );
 }
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _resourceName,
-                          const Rect2f& _r, const Vector3f& _suggestedAxis ) : SceneGraphGeomBaseBuilder(_sg) {
+                          const Rect2f& _r, const Vector3f& _suggestedAxis ) : sg(_sg) {
     builderType = gbt;
     mFollowerSuggestedAxis = _suggestedAxis;
     for ( auto &v: _r.points3dcw() ) profilePath.emplace_back( v );
 }
 
 GeomBuilder::GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector3f>&& arguments_list, float _zPull )
-                        : SceneGraphGeomBaseBuilder(_sg) {
+                        : sg(_sg) {
     std::vector<Vector3f> lverts;
     for (auto &v: arguments_list) lverts.emplace_back( v );
     outlineVerts.emplace_back( lverts, _zPull );
     builderType = GeomBuilderType::outline;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags ) : SceneGraphGeomBaseBuilder(_sg), builderType(gbt) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::initializer_list<std::string>& _tags ) : builderType(gbt), sg(_sg) {
     Name(concatenate( "_", _tags ));
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const Rect2f& _rect, float _z ) : SceneGraphGeomBaseBuilder(_sg) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const Rect2f& _rect, float _z ) : sg(_sg) {
     builderType = GeomBuilderType::poly;
     sourcePolysVList = XZY::C(_rect.points3d(_z));
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& _vlist ) : SceneGraphGeomBaseBuilder(_sg) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& _vlist ) : sg(_sg) {
     builderType = GeomBuilderType::poly;
     sourcePolysVList = _vlist;
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Triangle2d>& _tris, float _z ) : SceneGraphGeomBaseBuilder(_sg) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Triangle2d>& _tris, float _z ) : sg(_sg) {
     builderType = GeomBuilderType::poly;
     for ( const auto& [v1,v2,v3] : _tris ) {
         sourcePolysTris.emplace_back(Triangle3d( {v1, _z}, {v2, _z}, {v3, _z} ) );
     }
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine2d>& _plines, float _z ) : SceneGraphGeomBaseBuilder(_sg) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine2d>& _plines, float _z ) : sg(_sg) {
     builderType = GeomBuilderType::poly;
 
     for ( const auto& p : _plines ) {
@@ -105,7 +103,7 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine2d>& _pline
     }
 }
 
-GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist ) : SceneGraphGeomBaseBuilder(_sg) {
+GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist ) : sg(_sg) {
     polyLines = _plist;
 }
 
@@ -120,16 +118,16 @@ void GeomBuilder::createDependencyList() {
 //        addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
 //    }
 
-    addDependencies( std::make_shared<GeomBuilder>( *this ) );
+//    addDependencies( std::make_shared<GeomBuilder>( *this ) );
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb ) {
-    elem->VDataRef( sg.B<VB>( "urca" ).addIM( gb->build()->getVData() ) );
+    elem->VDataRef( sg.B<VB>( gb->refName() ).addIM( gb->build() ) );
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb ) {
     for ( const auto& c : gb->build() ) {
-        sg.B<VB>( "urca" ).addIM( c->getVData() );
+        sg.B<VB>( "urca" ).addIM( c );
 //    ### REF re-implement this
 //        elem->addChildren( c );
     }
@@ -140,10 +138,11 @@ void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
 }
 
 void GeomBuilder::assemble() {
+    elemCreate();
 
     switch ( builderType ) {
         case GeomBuilderType::shape:
-            createFromProcedural( std::make_shared<GeomDataShapeBuilder>( shapeType, pos, axis, scale ) );
+            createFromProcedural( std::make_shared<GeomDataShapeBuilder>( shapeType ) );
             break;
         case GeomBuilderType::outline:
             createFromProcedural( std::make_shared<GeomDataOutlineBuilder>( outlineVerts ) );
@@ -250,7 +249,7 @@ GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
 }
 
 GeomAssetSP GeomBuilder::buildr() {
-    build();
+    assemble();
     return elem;
 }
 
@@ -280,7 +279,7 @@ void GeomBuilderComposer::add( GeomBuilder _gb ) {
 
 void GeomBuilderComposer::build() {
     for ( auto& b : builders ) {
-        b.build();
+        b.assemble();
     }
 }
 

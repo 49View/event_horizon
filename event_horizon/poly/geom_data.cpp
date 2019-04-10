@@ -26,15 +26,7 @@ inline void hash_combine( std::size_t& seed, const T& v, Rest... rest ) {
 	hash_combine( seed, rest... );
 }
 
-GeomData::GeomData() {
-}
-
-GeomData::GeomData( const ShapeType _st,
-					const Vector3f& _pos, [[maybe_unused]] const Vector3f& _axis, const Vector3f& _scale,
-					const GeomMappingData& _mapping ) {
-	setMappingData( _mapping );
-	addShape( _st, _pos, _scale, 3 );
-}
+GeomData::GeomData() = default;
 
 GeomData::GeomData( const std::vector<PolyOutLine>& verts,
 					const GeomMappingData& _mapping, PullFlags pullFlags ) {
@@ -61,23 +53,67 @@ GeomData::GeomData( const QuadVector3fNormalfList& _quads, const GeomMappingData
 	}
 }
 
-std::shared_ptr<GeomData> GeomDataShapeBuilder::build() {
-    return std::make_shared<GeomData>( shapeType, pos, axis, scale, mappingData );
+
+std::string GeomDataShapeBuilder::refName() const {
+    return shapeTypeToString( shapeType );
 }
 
-std::shared_ptr<GeomData> GeomDataOutlineBuilder::build() {
-	return std::make_shared<GeomData>( outlineVerts, mappingData );
+std::shared_ptr<VData> GeomDataShapeBuilder::build() {
+//    setMappingData( _mapping );
+    auto ret = std::make_shared<VData>();
+    V3f center = V3f::ZERO;
+    V3f size = V3f::ONE;
+    int subDivs = 3;
+    PolyStruct ps;
+
+    switch ( shapeType ) {
+        case ShapeType::Cylinder:
+            ps = createGeomForCylinder( center, size.xy(), subDivs );
+            break;
+        case ShapeType::Sphere:
+            ps = createGeomForSphere( center, size.x(), subDivs );
+            break;
+        case ShapeType::Cube:
+            ps = createGeomForCube( center, size );
+            break;
+        case ShapeType::Panel:
+            ps = createGeomForPanel( center, size );
+            break;
+        case ShapeType::Pillow:
+            ps = createGeomForPillow( center, size, subDivs );
+            break;
+        case ShapeType::RoundedCube:
+            ps = createGeomForRoundedCube( center, size, subDivs );
+            break;
+        default:
+            ps = createGeomForSphere( center, size.x(), subDivs );
+    }
+
+    ret->fill(ps);
+    ret->BBox3d(ps.bbox3d);
+
+    return ret;
 }
 
-std::shared_ptr<GeomData> GeomDataPolyBuilder::build() {
-	return std::make_shared<GeomData>( polyLine, mappingData );
+std::shared_ptr<VData> GeomDataOutlineBuilder::build() {
+    ASSERT(0);
+    return nullptr;
+//	return std::make_shared<GeomData>( outlineVerts, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataQuadMeshBuilder::build() {
-	return std::make_shared<GeomData>( quads, mappingData );
+std::shared_ptr<VData> GeomDataPolyBuilder::build() {
+    ASSERT(0);
+    return nullptr;
+//	return std::make_shared<GeomData>( polyLine, mappingData );
 }
 
-std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
+std::shared_ptr<VData> GeomDataQuadMeshBuilder::build() {
+    ASSERT(0);
+    return nullptr;
+//	return std::make_shared<GeomData>( quads, mappingData );
+}
+
+std::shared_ptr<VData> GeomDataFollowerBuilder::build() {
     ASSERT( !mProfile->Points().empty() );
 
     Profile lProfile{ *mProfile.get() };
@@ -105,7 +141,8 @@ std::shared_ptr<GeomData> GeomDataFollowerBuilder::build() {
 
 	auto ret = FollowerService::extrude( mVerts, lProfile, mSuggestedAxis, followersFlags );
 
-	return ret;
+    ASSERT(0);
+    return nullptr;
 }
 
 GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
@@ -127,37 +164,6 @@ void GeomData::setMappingData( const GeomMappingData& _mapping ) {
 	mapping = _mapping;
 
 	if ( mapping.bDoNotScaleMapping ) doNotScaleMapping();
-}
-
-void GeomData::addShape( ShapeType st, const Vector3f& center, const Vector3f& size, int subDivs ) {
-	PolyStruct ps;
-
-	switch ( st ) {
-		case ShapeType::Cylinder:
-			ps = createGeomForCylinder( center, size.xy(), subDivs );
-			break;
-		case ShapeType::Sphere:
-			ps = createGeomForSphere( center, size.x(), subDivs );
-			break;
-		case ShapeType::Cube:
-			ps = createGeomForCube( center, size );
-			break;
-		case ShapeType::Panel:
-			ps = createGeomForPanel( center, size );
-			break;
-		case ShapeType::Pillow:
-			ps = createGeomForPillow( center, size, subDivs );
-			break;
-		case ShapeType::RoundedCube:
-			ps = createGeomForRoundedCube( center, size, subDivs );
-			break;
-		default:
-			ps = createGeomForSphere( center, size.x(), subDivs );
-	}
-
-	mVdata.fill(ps);
-	mVdata.BBox3d(ps.bbox3d);
-	BBox3d( ps.bbox3d );
 }
 
 Vector3f GeomData::normalFromPoints( const Vector3f* vs ) {

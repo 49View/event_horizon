@@ -58,8 +58,7 @@ public:
     }
 
     // add*: this->Hash() will be empty "" if it comes from a procedural resource (IE not loaded from a file)
-    // this way we do not serialize anything with an empty hash. win-win. I think. It smells a bit though, just.
-
+    // it will then be calculated in addInternal because every resource has to have an hash
     ResourceRef addIM( const R& _res ) {
         return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }

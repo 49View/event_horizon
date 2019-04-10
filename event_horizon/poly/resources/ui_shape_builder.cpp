@@ -9,19 +9,18 @@
 #include <core/font_utils.hpp>
 #include <core/resources/resource_manager.hpp>
 #include <core/geom.hpp>
+#include <core/names.hpp>
 
 typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 
 uint64_t UIShapeBuilder::sid = 0;
 
-UIShapeBuilder::UIShapeBuilder( SceneGraph& _sg, UIShapeType shapeType ) :
-    SceneGraphGeomBaseBuilder( _sg, S::TEXTURE_3D, S::WHITE ), shapeType( shapeType ) {
+UIShapeBuilder::UIShapeBuilder( SceneGraph& _sg, UIShapeType shapeType ) : shapeType( shapeType ), sg(_sg) {
 
     init();
 }
 
-UIShapeBuilder::UIShapeBuilder( SceneGraph& _sg, UIShapeType _shapeType, const std::string& _ti, float _fh ) :
-    SceneGraphGeomBaseBuilder( _sg, S::TEXTURE_3D, S::WHITE ), shapeType( _shapeType ) {
+UIShapeBuilder::UIShapeBuilder( SceneGraph& _sg, UIShapeType _shapeType, const std::string& _ti, float _fh ) : shapeType( _shapeType ), sg(_sg) {
 
     init();
     if ( _fh != 0.0f ) fh(_fh);
@@ -516,7 +515,7 @@ std::string UIShapeBuilder::getShaderType( UIShapeType _st ) const {
 void UIShapeBuilder::createDependencyList() {
 //    ### Re-add dependency on Font (and everything else)
 //    addDependency<Utility::TTFCore::Font, FontBuilder>( fontName, sg.FM() );
-    addDependencies( std::make_shared<UIShapeBuilder>(*this) );
+//    addDependencies( std::make_shared<UIShapeBuilder>(*this) );
 }
 
 void UIShapeBuilder::elemCreate() {

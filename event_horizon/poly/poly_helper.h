@@ -6,10 +6,13 @@
 #pragma once
 
 #include <utility>
-#include "core/math/poly_shapes.hpp"
+#include <core/v_data.hpp>
+#include <core/math/poly_shapes.hpp>
 
 class GeomData;
 class Profile;
+
+using GeomDataListBuilderRetType = std::vector<std::shared_ptr<VData>>;
 
 namespace ClipperLib {
     struct IntPoint;
@@ -85,6 +88,7 @@ template <typename T>
 class GeomDataBuilderBase {
 public:
     virtual std::shared_ptr<T> build() = 0;
+    virtual std::string refName() const = 0;
 };
 
 template <typename T>
@@ -98,7 +102,7 @@ protected:
     GeomMappingData mappingData;
 };
 
-class GeomDataBuilder : public GeomDataBuilderBase<GeomData>, public GeomDataBuilderBaseMaterial {
+class GeomDataBuilder : public GeomDataBuilderBase<VData>, public GeomDataBuilderBaseMaterial {
 public:
     virtual ~GeomDataBuilder() = default;
 
@@ -106,30 +110,28 @@ public:
     friend class GeomData;
 };
 
-class GeomDataBuilderList : public GeomDataBuilderBaseList<GeomData>, public GeomDataBuilderBaseMaterial {
+class GeomDataBuilderList : public GeomDataBuilderBaseList<VData>, public GeomDataBuilderBaseMaterial {
 public:
     virtual ~GeomDataBuilderList() = default;
 };
 
 class GeomDataShapeBuilder : public GeomDataBuilder {
 public:
-    GeomDataShapeBuilder( ShapeType shapeType, const Vector3f& pos, const Vector3f& axis, const Vector3f& scale )
-            : shapeType( shapeType ), pos( pos ), axis( axis ), scale( scale ) {}
+    explicit GeomDataShapeBuilder( ShapeType shapeType ) : shapeType( shapeType ) {}
 
-    std::shared_ptr<GeomData> build() override;
+    std::shared_ptr<VData> build() override;
+    std::string refName() const override;
 
 protected:
     ShapeType shapeType;
-    Vector3f  pos;
-    Vector3f  axis;
-    Vector3f  scale;
 };
 
 class GeomDataOutlineBuilder : public GeomDataBuilder {
 public:
-    GeomDataOutlineBuilder( const std::vector<PolyOutLine>& outlineVerts ) : outlineVerts( outlineVerts ) {}
+    explicit GeomDataOutlineBuilder( const std::vector<PolyOutLine>& outlineVerts ) : outlineVerts( outlineVerts ) {}
 
-    std::shared_ptr<GeomData> build() override;
+    std::shared_ptr<VData> build() override;
+    std::string refName() const override { return {}; };
 
 protected:
     std::vector<PolyOutLine> outlineVerts;
@@ -137,8 +139,9 @@ protected:
 
 class GeomDataPolyBuilder : public GeomDataBuilder {
 public:
-    GeomDataPolyBuilder( const std::vector<PolyLine>& _polyLine ) : polyLine( _polyLine ) {}
-    std::shared_ptr<GeomData> build() override;
+    explicit GeomDataPolyBuilder( const std::vector<PolyLine>& _polyLine ) : polyLine( _polyLine ) {}
+    std::shared_ptr<VData> build() override;
+    std::string refName() const override { return {}; };
 
 protected:
     std::vector<PolyLine> polyLine;
@@ -146,8 +149,9 @@ protected:
 
 class GeomDataQuadMeshBuilder : public GeomDataBuilder {
 public:
-    GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
-    std::shared_ptr<GeomData> build() override;
+    explicit GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
+    std::shared_ptr<VData> build() override;
+    std::string refName() const override { return {}; };
 
 protected:
     QuadVector3fNormalfList quads;
@@ -164,7 +168,8 @@ public:
                              const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
                              mProfile(_profile), mVerts( std::move( _verts )), followersFlags(f), mRaiseEnum(_r),
                              mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
-    std::shared_ptr<GeomData> build() override;
+    std::shared_ptr<VData> build() override;
+    std::string refName() const override { return {}; };
 
     GeomDataFollowerBuilder& raise( const Vector2f& _r ) {
         mRaise = _r;
@@ -201,8 +206,6 @@ protected:
     FollowerGap mGaps = FollowerGap::Empty;
     Vector3f mSuggestedAxis = Vector3f::ZERO;
 };
-
-using GeomDataListBuilderRetType = std::vector<std::shared_ptr<GeomData>>;
 
 class GeomDataSVGBuilder : public GeomDataBuilderList {
 public:
