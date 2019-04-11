@@ -6,10 +6,11 @@
 //
 //
 
-#include <core/math/quaternion.h>
 #include "follower.hpp"
-
-#include "core/node.hpp"
+#include "poly_services.hpp"
+#include <core/math/quaternion.h>
+#include <poly/poly_helper.h>
+#include <poly/poly_services.hpp>
 
 FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
                             const std::array<size_t, 4>& indices, WindingOrderT _wo ) {
@@ -166,12 +167,13 @@ void addLineVert( const std::vector<Vector3f>& _verts, FollowerIntermediateData&
 
 }
 
-std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& _verts,
-                                   const Profile& profile,
-                                   const Vector3f& _suggestedAxis,
-                                   const FollowerFlags& ff ) {
+std::shared_ptr<VData> extrude( const std::vector<Vector3f>& _verts,
+                                const Profile& profile,
+                                const Vector3f& _suggestedAxis,
+                                const FollowerFlags& ff ) {
 
-    std::shared_ptr<GeomData> geom = std::make_shared<GeomData>();
+    auto geom = std::make_shared<VData>();
+    GeomMappingData mapping;
 
     bool bWrap = checkBitWiseFlag(ff, FollowerFlags::WrapPath);
 
@@ -199,9 +201,9 @@ std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& _verts,
     std::vector<Vector3f> rp1;
     std::vector<FollowerPoly> polys;
 
-    geom->resetWrapMapping( profile.Lengths() );
+    MappingServices::resetWrapMapping( mapping, profile.Lengths() );
     auto wo = detectWindingOrder( profile.Points() );
-    geom->setWindingOrderFlagOnly( wo );
+    mapping.windingOrder = wo;
 
     auto vcFinalSize = fid.vcoords.size();
     // Pre-loop setup, allocate/setup first element
@@ -230,9 +232,9 @@ std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& _verts,
                                          static_cast<size_t>(nextIndex), static_cast<size_t>(nextIndexp1)}, wo };
 
             if ( checkBitWiseFlag(ff, FollowerFlags::UsePlanarMapping) ) {
-                geom->planarMapping( absolute( fp.vn ), fp.vs.data(), fp.vtcs.data(), 4 );
+                MappingServices::planarMapping( mapping, absolute( fp.vn ), fp.vs.data(), fp.vtcs.data(), 4 );
             } else {
-                geom->updateWrapMapping( fp.vs.data(), fp.vtcs.data(), m, rp1.size() );
+                MappingServices::updateWrapMapping( mapping, fp.vs.data(), fp.vtcs.data(), m, rp1.size() );
             }
 
             polys.push_back( fp );
@@ -244,7 +246,7 @@ std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& _verts,
 
     // Add all the polys
     for ( auto& fp : polys ) {
-        geom->pushQuadSubDiv( fp.vs, fp.vtcs, fp.vncs );
+        PolyServices::addQuad( geom, fp.vs, fp.vtcs, fp.vncs, mapping );
     }
 
     return geom;

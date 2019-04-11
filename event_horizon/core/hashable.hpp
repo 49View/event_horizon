@@ -10,6 +10,15 @@
 // Defaults to MD5, which is more than enough, for now!
 #include <core/hashing/md5.hpp>
 
+// Little hashing function if you do not want to get taken too seriously.
+inline void hash_combine( std::size_t& /*seed*/ ) {}
+template <typename T, typename... Rest>
+inline void hash_combine( std::size_t& seed, const T& v, Rest... rest ) {
+    std::hash<T> hasher;
+    seed ^= hasher( v ) + 0x9e3779b9 + ( seed << 6 ) + ( seed >> 2 );
+    hash_combine( seed, rest... );
+}
+
 template <typename H = MD5>
 class Hashable {
 public:

@@ -38,7 +38,7 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
     sg.GM().connect( [this](const ResourceTransfer<Geom>& _val ) {
         LOGRS( "Adding " << ResourceVersioning<Geom>::Prefix() << ": "  << *_val.names.begin() );
         auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), _val.elem->MaterialRef(), _val.elem->VDataRef()}.
-        g(9200).build();
+        g(9200).n(_val.hash).build();
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);
     });
 

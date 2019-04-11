@@ -12,14 +12,14 @@ const ResourceRef& Geom::MaterialRef() const {
     return material;
 }
 
-void Geom::MaterialRef( const ResourceRef& material ) {
-    Geom::material = material;
+void Geom::MaterialRef( const ResourceRef& _material ) {
+    Geom::material = _material;
 }
 
 const ResourceRef& Geom::VDataRef() const {
     return vData;
 }
 
-void Geom::VDataRef( const ResourceRef& vData ) {
-    Geom::vData = vData;
+void Geom::VDataRef( const ResourceRef& _vData ) {
+    Geom::vData = _vData;
 }

@@ -264,13 +264,12 @@ public:
 
     GeomAssetSP buildr();
 
-    void assemble();
+    void build();
 
 protected:
     void elemCreate();
     GeomAssetSP Elem() { return elem; }
 
-    void createDependencyList();
     bool validate() const;
     void preparePolyLines();
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb );

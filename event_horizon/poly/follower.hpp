@@ -11,10 +11,10 @@
 #include <vector>
 #include <map>
 #include "core/util.h"
+#include "core/v_data.hpp"
 #include "core/math/vector4f.h"
 #include "core/math/plane3f.h"
 #include "core/resources/profile.hpp"
-#include "geom_data.hpp"
 
 struct FollowerPoly {
     FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
@@ -36,10 +36,10 @@ struct FollowerIntermediateData {
 };
 
 namespace FollowerService {
-	std::shared_ptr<GeomData> extrude( const std::vector<Vector3f>& verts,
-									   const Profile& profile,
-									   const Vector3f& suggestedAxis = Vector3f::ZERO,
-									   const FollowerFlags& ff = FollowerFlags::Defaults );
+	std::shared_ptr<VData> extrude( const std::vector<Vector3f>& verts,
+                                    const Profile& profile,
+                                    const Vector3f& suggestedAxis = Vector3f::ZERO,
+                                    const FollowerFlags& ff = FollowerFlags::Defaults );
 }
 
 class Follower {
@@ -47,7 +47,7 @@ public:
 	explicit Follower( subdivisionAccuray subDivs = accuracyNone,
 			  const FollowerFlags& ff = FollowerFlags::Defaults,
 			  const std::string& _name = "FollowerUnnamed",
-			  const MappingDirection _md = MappingDirection::X_POS,
+              MappingDirection _md = MappingDirection::X_POS,
 			  bool _bUseFlatMapping = false );
 
 	std::vector<Vector2f> vboundingContours2f() const;

@@ -700,35 +700,34 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     
     auto material = model.materials[primitive.material];
     auto im = matMap.at(material.name);
-    auto geom = std::make_shared<GeomData>(); // im.mb
+    auto geom = std::make_shared<VData>(); // im.mb
 
-    geom->vData().fillIndices( fillData<int32_t>( model, primitive.indices ) );
+    geom->fillIndices( fillData<int32_t>( model, primitive.indices ) );
 
     for ( const auto& [k,v] : primitive.attributes ) {
         if ( k == "POSITION" ) {
             GLTF2::ExtraAccessorData ead;
-            geom->vData().fillCoors3d( fillData<Vector3f>( model, v, &ead ) );
-            geom->vData().setMax( ead.max );
-            geom->vData().setMin( ead.min );
+            geom->fillCoors3d( fillData<Vector3f>( model, v, &ead ) );
+            geom->setMax( ead.max );
+            geom->setMin( ead.min );
         }
         else if ( k == "NORMAL" ) {
-            geom->vData().fillNormals( fillData<Vector3f>( model, v ) );
+            geom->fillNormals( fillData<Vector3f>( model, v ) );
         }
         else if ( k == "TANGENT" ) {
-            geom->vData().fillTangets( fillData<Vector3f>( model, v ) );
+            geom->fillTangets( fillData<Vector3f>( model, v ) );
         }
         else if ( k == "TEXCOORD_0" ) {
-            geom->vData().fillUV( fillData<Vector2f>( model, v ), 0 );
-            geom->vData().fillUV( fillData<Vector2f>( model, v ), 1 ); // By default fill second uvs anyway
+            geom->fillUV( fillData<Vector2f>( model, v ), 0 );
+            geom->fillUV( fillData<Vector2f>( model, v ), 1 ); // By default fill second uvs anyway
         }
         else if ( k == "TEXCOORD_1" ) {
-            geom->vData().fillUV( fillData<Vector2f>( model, v ), 1 );
+            geom->fillUV( fillData<Vector2f>( model, v ), 1 );
         }
     }
 
-    geom->vData().sanitizeUVMap();
-    geom->vData().calcBinormal();
-    geom->BBox3d( AABB{ geom->vData().getMin(), geom->vData().getMax() } );
+    geom->sanitizeUVMap();
+    geom->calcBinormal();
 
 //    ### REF, what is this???
 //    father->Data( geom );

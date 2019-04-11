@@ -1,3 +1,4 @@
+#include <utility>
 
 //
 // Created by Dado on 02/01/2018.
@@ -8,6 +9,7 @@
 #include <utility>
 #include <core/v_data.hpp>
 #include <core/math/poly_shapes.hpp>
+#include <poly/poly_services.hpp>
 
 class GeomData;
 class Profile;
@@ -77,18 +79,50 @@ struct PolyLine2d : public PolyLineBase2d, public PolyLineCommond {
 using QuadVector3fNormalfList = std::vector<QuadVector3fNormal>;
 
 struct GeomMappingData {
+//    MappingDirection getMappingDirection() const { return mapping.direction; }
+//    void setMappingDirection( MappingDirection val ) { mapping.direction = val; }
+//    Vector2f MappingOffset() const { return mapping.offset; }
+//    void MappingOffset( const Vector2f& val ) { mapping.offset = val; }
+//    MappingMirrorE MappingMirror() const { return mapping.mirroring; }
+//    void MappingMirror( MappingMirrorE val ) { mapping.mirroring = val; }
+//    bool UnitMapping() const { return mapping.bUnitMapping; }
+//    void UnitMapping( bool val ) { mapping.bUnitMapping = val; }
+//    subdivisionAccuray SubdivAccuracy() const { return mSubdivAccuracy; }
+//    void SubdivAccuracy( subdivisionAccuray val ) { mSubdivAccuracy = val; }
+//    const std::vector<Vector2f>& WrapMappingCoords() const { return wrapMappingCoords; }
+//    void WrapMappingCoords( const std::vector<Vector2f>& val ) { wrapMappingCoords = val; }
+
+    // Mapping constants
     MappingDirection direction = MappingDirection::X_POS;
     bool bDoNotScaleMapping = false;
     Vector2f offset = Vector2f::ZERO;
     MappingMirrorE mirroring = MappingMirrorE::None;
     bool bUnitMapping = false;
+    subdivisionAccuray subdivAccuracy = accuracyNone;
+    WindingOrderT windingOrder = WindingOrder::CCW;
+
+    // Mappping computed
+    float fuvScale = 1.0f;
+    Vector2f uvScale = Vector2f::ONE;
+    Vector2f uvScaleInv = Vector2f::ONE;
+    std::vector<Vector2f> wrapMappingCoords;
+    Vector2f pullMappingCoords = Vector2f::ZERO;
+
 };
 
-template <typename T>
-class GeomDataBuilderBase {
+class GeomDataBuilder {
 public:
-    virtual std::shared_ptr<T> build() = 0;
-    virtual std::string refName() const = 0;
+    std::shared_ptr<VData> build() {
+        auto ret = std::make_shared<VData>();
+        if ( mappingData.bDoNotScaleMapping ) MappingServices::doNotScaleMapping(mappingData);
+        buildInternal(ret);
+        return ret;
+    }
+    virtual void buildInternal( std::shared_ptr<VData> _ret ) = 0;
+    std::string refName() const { return mRefName; };
+protected:
+    std::string mRefName;
+    GeomMappingData mappingData;
 };
 
 template <typename T>
@@ -97,30 +131,16 @@ public:
     virtual std::vector<std::shared_ptr<T>> build() = 0;
 };
 
-class GeomDataBuilderBaseMaterial {
-protected:
-    GeomMappingData mappingData;
-};
-
-class GeomDataBuilder : public GeomDataBuilderBase<VData>, public GeomDataBuilderBaseMaterial {
-public:
-    virtual ~GeomDataBuilder() = default;
-
-    friend class GeomBuilder;
-    friend class GeomData;
-};
-
-class GeomDataBuilderList : public GeomDataBuilderBaseList<VData>, public GeomDataBuilderBaseMaterial {
+class GeomDataBuilderList : public GeomDataBuilderBaseList<VData> {
 public:
     virtual ~GeomDataBuilderList() = default;
 };
 
 class GeomDataShapeBuilder : public GeomDataBuilder {
 public:
-    explicit GeomDataShapeBuilder( ShapeType shapeType ) : shapeType( shapeType ) {}
-
-    std::shared_ptr<VData> build() override;
-    std::string refName() const override;
+    explicit GeomDataShapeBuilder( ShapeType shapeType );
+    virtual ~GeomDataShapeBuilder() = default;
+    void buildInternal( std::shared_ptr<VData> _ret ) override;
 
 protected:
     ShapeType shapeType;
@@ -128,10 +148,9 @@ protected:
 
 class GeomDataOutlineBuilder : public GeomDataBuilder {
 public:
-    explicit GeomDataOutlineBuilder( const std::vector<PolyOutLine>& outlineVerts ) : outlineVerts( outlineVerts ) {}
-
-    std::shared_ptr<VData> build() override;
-    std::string refName() const override { return {}; };
+    explicit GeomDataOutlineBuilder( std::vector<PolyOutLine> outlineVerts ) : outlineVerts( std::move( outlineVerts )) {}
+    virtual ~GeomDataOutlineBuilder() = default;
+    void buildInternal( std::shared_ptr<VData> _ret ) override;
 
 protected:
     std::vector<PolyOutLine> outlineVerts;
@@ -139,9 +158,9 @@ protected:
 
 class GeomDataPolyBuilder : public GeomDataBuilder {
 public:
-    explicit GeomDataPolyBuilder( const std::vector<PolyLine>& _polyLine ) : polyLine( _polyLine ) {}
-    std::shared_ptr<VData> build() override;
-    std::string refName() const override { return {}; };
+    explicit GeomDataPolyBuilder( std::vector<PolyLine> _polyLine ) : polyLine( std::move( _polyLine )) {}
+    virtual ~GeomDataPolyBuilder() = default;
+    void buildInternal( std::shared_ptr<VData> _ret ) override;
 
 protected:
     std::vector<PolyLine> polyLine;
@@ -150,8 +169,8 @@ protected:
 class GeomDataQuadMeshBuilder : public GeomDataBuilder {
 public:
     explicit GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
-    std::shared_ptr<VData> build() override;
-    std::string refName() const override { return {}; };
+    virtual ~GeomDataQuadMeshBuilder() = default;
+    void buildInternal( std::shared_ptr<VData> _ret ) override;
 
 protected:
     QuadVector3fNormalfList quads;
@@ -166,10 +185,10 @@ public:
                              const Vector2f& _flipVector = Vector2f::ZERO,
                              FollowerGap _gaps = FollowerGap::Empty,
                              const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
-                             mProfile(_profile), mVerts( std::move( _verts )), followersFlags(f), mRaiseEnum(_r),
+                             mProfile( std::move( _profile )), mVerts( std::move( _verts )), followersFlags(f), mRaiseEnum(_r),
                              mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
-    std::shared_ptr<VData> build() override;
-    std::string refName() const override { return {}; };
+    virtual ~GeomDataFollowerBuilder() = default;
+    void buildInternal( std::shared_ptr<VData> _ret ) override;
 
     GeomDataFollowerBuilder& raise( const Vector2f& _r ) {
         mRaise = _r;
@@ -209,14 +228,16 @@ protected:
 
 class GeomDataSVGBuilder : public GeomDataBuilderList {
 public:
-    GeomDataSVGBuilder( const std::string& _svgString, const std::shared_ptr<Profile> _profile ) : svgAscii(_svgString), mProfile(_profile) {}
+    GeomDataSVGBuilder( std::string _svgString, std::shared_ptr<Profile> _profile ) :
+                        svgAscii(std::move( _svgString )), mProfile(std::move(_profile)) {}
     GeomDataListBuilderRetType build() override;
 protected:
     std::string svgAscii;
     std::shared_ptr<Profile> mProfile;
 };
 
-void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution, const Vector3f& _normal, ReverseFlag rf = ReverseFlag::False );
+void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution, const Vector3f& _normal,
+                         ReverseFlag rf = ReverseFlag::False );
 std::vector<PolyLine2d> clipperToPolylines( const ClipperLib::Paths& source, const ClipperLib::Path& clipAgainst,
                                             const Vector3f& _normal, ReverseFlag rf = ReverseFlag::False );
 ClipperLib::Path getPerimeterPath( const std::vector<Vector2f>& _values );

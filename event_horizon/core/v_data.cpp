@@ -291,6 +291,12 @@ void VData::swapIndicesWinding( Primitive _pr ) {
     }
 }
 
+void VData::flipNormals() {
+    for ( auto& v : vnormals3d ) {
+        v *= -1.0f;
+    }
+}
+
 size_t VData::numIndices() const { return vIndices.size(); }
 
 size_t VData::numVerts() const { return vcoords3d.size(); }

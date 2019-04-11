@@ -107,22 +107,9 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist )
     polyLines = _plist;
 }
 
-void GeomBuilder::createDependencyList() {
-
-//    if ( !material->isStreammable() ) { // is material is streammable do not try to load the entity resouce from server
-        //    ### reintroduce material dependency
-//        bMaterialDep = addDependency<Material, MaterialBuilder>( material->Name(), sg.ML() );
-//    }
-//    ### reintroduce profiles
-//    if ( builderType == GeomBuilderType::follower || builderType == GeomBuilderType::svg ) {
-//        addDependency<ProfileBuilder>( mProfileBuilder, sg.PL());
-//    }
-
-//    addDependencies( std::make_shared<GeomBuilder>( *this ) );
-}
-
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb ) {
-    elem->VDataRef( sg.B<VB>( gb->refName() ).addIM( gb->build() ) );
+    auto rna = sg.VL().getHash( gb->refName() );
+    elem->VDataRef( rna.empty() ? sg.B<VB>( gb->refName() ).addIM( gb->build() ) : rna );
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb ) {
@@ -137,8 +124,10 @@ void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
     elem->addChildren( asset );
 }
 
-void GeomBuilder::assemble() {
+void GeomBuilder::build() {
     elemCreate();
+
+    elem->MaterialRef( sg.ML().getHash(matRef) );
 
     switch ( builderType ) {
         case GeomBuilderType::shape:
@@ -165,8 +154,7 @@ void GeomBuilder::assemble() {
         }
         break;
         case GeomBuilderType::svg:
-            createFromProcedural( std::make_shared<GeomDataSVGBuilder>( asciiText,
-                                                                        sg.PL().get( "###" ) ) );
+            createFromProcedural( std::make_shared<GeomDataSVGBuilder>( asciiText, sg.PL().get( "###" ) ) );
             break;
         case GeomBuilderType::unknown:
             LOGE( "Unknown builder type" );
@@ -180,7 +168,6 @@ void GeomBuilder::assemble() {
     }
 
     elem->updateExistingTransform( pos, axis, scale );
-    elem->MaterialRef( sg.ML().getHash(matRef) );
 
     sg.B<GRB>(Name()).addIM( elem );
 }
@@ -249,7 +236,7 @@ GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
 }
 
 GeomAssetSP GeomBuilder::buildr() {
-    assemble();
+    build();
     return elem;
 }
 
@@ -279,7 +266,7 @@ void GeomBuilderComposer::add( GeomBuilder _gb ) {
 
 void GeomBuilderComposer::build() {
     for ( auto& b : builders ) {
-        b.assemble();
+        b.build();
     }
 }
 

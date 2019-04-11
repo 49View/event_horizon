@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <cstdint>
 #include <core/boxable.hpp>
 #include <core/math/vector4f.h>
@@ -36,6 +37,7 @@ public:
     void sanitizeUVMap();
     void calcBinormal();
     void changeHandness();
+    void flipNormals();
     void mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );
     void checkBaricentricCoordsOn( const Vector3f& i, int32_t pIndexStart, int32_t pIndexEnd,
                                    int32_t& pIndex, float& u, float& v );

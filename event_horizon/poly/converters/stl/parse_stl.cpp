@@ -50,10 +50,10 @@ namespace stl {
             assert( false );
         }
         
-        auto mGeom = std::make_shared<GeomData>();
+        auto mGeom = std::make_shared<VData>();
 //        auto geom = std::make_shared<Geom>(mGeom);
 
-        VData& gd = mGeom->vData();
+        VData& gd = *mGeom;
         
         char header_info[80] = "";
         char n_triangles[4];
