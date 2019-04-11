@@ -5,9 +5,9 @@
 #include <unordered_map>
 
 #include "parse_stl.h"
-#include "core/node.hpp"
-#include "poly/geom_data.hpp"
-#include "poly/poly.hpp"
+#include <core/node.hpp>
+#include <core/v_data.hpp>
+#include <poly/poly.hpp>
 
 namespace stl {
 

@@ -7,6 +7,7 @@
 #include <poly/polyclipping/clipper.hpp>
 #include <poly/poly_services.hpp>
 #include <poly/follower.hpp>
+#include <poly/converters/svg/svgtopoly.hpp>
 
 void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution,
                                             const Vector3f& _normal, ReverseFlag rf ) {
@@ -174,4 +175,27 @@ void GeomDataFollowerBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
     lProfile.flip( mFlipVector );
 
     _ret = FollowerService::extrude( mVerts, lProfile, mSuggestedAxis, followersFlags );
+}
+
+// ********************************************************************************************************************
+// ********************************************************************************************************************
+//
+// ___ FOLLOWER BUILDER ___
+//
+// ********************************************************************************************************************
+// ********************************************************************************************************************
+
+GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
+    auto rawPoints = SVGC::SVGToPoly( svgAscii );
+
+    GeomDataListBuilderRetType logoGeoms{};
+    logoGeoms.reserve( rawPoints.size() );
+    for ( const auto& points : rawPoints ) {
+        auto fb = std::make_shared<GeomDataFollowerBuilder>( mProfile,
+                                                             XZY::C(points.path,0.0f),
+                                                             FollowerFlags::WrapPath );
+//        _mat->c( points.strokeColor );
+        logoGeoms.emplace_back(fb->build());
+    }
+    return logoGeoms;
 }

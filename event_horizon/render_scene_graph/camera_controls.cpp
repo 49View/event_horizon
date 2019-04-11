@@ -10,7 +10,7 @@
 #include <graphics/text_input.hpp>
 #include <graphics/renderer.h>
 #include <core/camera_rig.hpp>
-#include <poly/geom_data.hpp>
+#include <core/v_data.hpp>
 #include <poly/resources/ui_shape_builder.h>
 
 CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg ) :

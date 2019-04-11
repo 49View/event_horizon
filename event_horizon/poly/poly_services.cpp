@@ -50,6 +50,79 @@ Vector3f normalFromPoints( const Vector3f* vs, GeomMappingData& m ) {
     return normal;
 }
 
+std::vector<Vector3f> utilGenerateFlatBoxFromRect( const JMATH::Rect2f& bbox, float z ) {
+    std::vector<Vector3f> bboxPoints;
+    bboxPoints.emplace_back( bbox.bottomLeft(), z );
+    bboxPoints.emplace_back( bbox.bottomRight(), z );
+    bboxPoints.emplace_back( bbox.topRight(), z );
+    bboxPoints.emplace_back( bbox.topLeft(), z );
+    return bboxPoints;
+}
+
+std::vector<Vector3f> utilGenerateFlatBoxFromSize( float width, float height, float z ) {
+    std::vector<Vector3f> bboxPoints;
+    // Clockwise
+    bboxPoints.emplace_back( -width*0.5f, -height*0.5f, z );
+    bboxPoints.emplace_back( -width*0.5f, height*0.5f, z );
+    bboxPoints.emplace_back( width*0.5f, height*0.5f, z );
+    bboxPoints.emplace_back( width*0.5f, -height*0.5f, z );
+    return bboxPoints;
+}
+
+std::vector<Vector2f> utilGenerateFlatRect( const Vector2f& size, const WindingOrderT wo,
+                                            PivotPointPosition ppp, const Vector2f& /*pivot*/ ) {
+    std::vector<Vector2f> fverts;
+
+    if ( wo == WindingOrder::CW ) {
+        fverts.emplace_back( size.x(), 0.0f );
+        fverts.emplace_back( size.x(), size.y());
+        fverts.emplace_back( 0.0f, size.y());
+        fverts.push_back( Vector2f::ZERO );
+    } else {
+        fverts.push_back( Vector2f::ZERO );
+        fverts.emplace_back( 0.0f, size.y());
+        fverts.emplace_back( size.x(), size.y());
+        fverts.emplace_back( size.x(), 0.0f );
+    }
+    for ( auto& v : fverts ) {
+        switch ( ppp ) {
+            case PivotPointPosition::PPP_CENTER:
+                v -= size * 0.5f;
+                break;
+            case PivotPointPosition::PPP_BOTTOM_CENTER:
+                v -= Vector2f( size.x() * 0.5f, 0.0f );
+                break;
+            case PivotPointPosition::PPP_TOP_CENTER:
+                v -= size * 0.5f;
+                break;
+            case PivotPointPosition::PPP_LEFT_CENTER:
+                v -= size * 0.5f;
+                break;
+            case PivotPointPosition::PPP_RIGHT_CENTER:
+                v -= Vector2f( size.x() * 0.5f, 0.0f );
+                break;
+            case PivotPointPosition::PPP_BOTTOM_RIGHT:
+                v -= size * 0.5f;
+                break;
+            case PivotPointPosition::PPP_BOTTOM_LEFT:
+                v -= Vector2f( size.x() * 0.5f, 0.0f );
+                break;
+            case PivotPointPosition::PPP_TOP_LEFT:
+                break;
+            case PivotPointPosition::PPP_TOP_RIGHT:
+                v -= size * 0.5f;
+                break;
+            case PivotPointPosition::PPP_CUSTOM:
+                v -= size * 0.5f;
+                break;
+            default:
+                break;
+        }
+    }
+
+    return fverts;
+}
+
 auto pullWindingOrderCheck( const std::vector<Vector2f>& verts, float zOffset ) {
     std::vector<Vector3f> v3f;
     int w = winding( verts );

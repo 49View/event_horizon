@@ -4,7 +4,7 @@
 
 #include "cloud_geom_layout.h"
 #include "cloud_entities_layout.h"
-#include <poly/geom_data.hpp>
+#include <core/v_data.hpp>
 
 void ImGuiCloudEntitiesGeom::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
     ImGuiCloudEntities( p, _r, "Cloud Geometry", ResourceGroup::Geom );

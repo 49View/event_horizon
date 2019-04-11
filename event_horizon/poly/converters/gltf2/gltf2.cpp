@@ -9,7 +9,7 @@
 #include <core/image_util.h>
 #include <core/geom.hpp>
 #include <core/file_manager.h>
-#include <poly/geom_data.hpp>
+#include <core/v_data.hpp>
 #include <core/resources/entity_factory.hpp>
 
 unsigned int accessorTypeToNumberOfComponent( int ty ) {
