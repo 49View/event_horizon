@@ -62,8 +62,7 @@ generateGeometryVP( std::shared_ptr<VData> _data ) {
                                                                    VFVertexAllocation::PreAllocate, _data->numIndices(),
                                                                    _indices );
     for ( int32_t t = 0; t < _data->numVerts(); t++ ) {
-        SOAData->addVertex( _data->vertexAt( t ), _data->uvAt( t ), _data->uv2At( t ), _data->normalAt( t ),
-                            _data->tangentAt( t ), _data->binormalAt( t ), _data->colorAt(t) );
+        SOAData->addVertex( _data->soaAt(t) );
     }
     return SOAData;
 }

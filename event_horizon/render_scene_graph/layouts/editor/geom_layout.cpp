@@ -8,6 +8,7 @@
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 #include <core/node.hpp>
+#include <core/geom.hpp>
 #include <core/camera.h>
 #include <core/raw_image.h>
 #include <core/geom.hpp>
@@ -32,8 +33,9 @@ struct NodeVisitor {
 void loadGeomInGui( SceneOrchestrator* p, std::shared_ptr<GLTF2> _newObject ) {
     auto imported = _newObject->convert();
     auto hierScene = imported.getScene();
-    p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
-    p->SG().add( hierScene );
+//    p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
+//    p->SG().B<GRB>(_newObject->Name()).addIM( hierScene );
+//    p->SG().add( hierScene );
 }
 
 void addGeomToScene() {

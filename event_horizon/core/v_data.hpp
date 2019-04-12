@@ -32,7 +32,6 @@ public:
     void fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert = false );
     void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
     void fillColors( const std::vector<Vector4f>& _colors );
-    void allocateSpaceForVertices( int _numVerts );
     void changeWindingOrder();
     void sanitizeUVMap();
     void calcBinormal();
@@ -46,50 +45,43 @@ public:
     void swapIndicesWinding( Primitive _pr );
 
     const std::vector<int32_t>&  getVIndices() const;
-    const std::vector<Vector3f>& getVcoords3d() const;
-    const std::vector<Vector3f>& getVnormals3d() const;
-    const std::vector<Vector3f>& getVtangents3d() const;
-    const std::vector<Vector3f>& getVbinormals3d() const;
-    const std::vector<Vector2f>& getVUVs() const;
-    const std::vector<Vector2f>& getVUV2s() const;
-    const std::vector<Vector4f>& getVColor() const;
+//    const std::vector<Vector3f>& getVcoords3d() const;
+//    const std::vector<Vector3f>& getVnormals3d() const;
+//    const std::vector<Vector3f>& getVtangents3d() const;
+//    const std::vector<Vector3f>& getVbinormals3d() const;
+//    const std::vector<Vector2f>& getVUVs() const;
+//    const std::vector<Vector2f>& getVUV2s() const;
+//    const std::vector<Vector4f>& getVColor() const;
     const Vector3f& getMin() const;
     const Vector3f& getMax() const;
     Primitive getPrimitive() const;
 
     void setVIndices( size_t _index, const int32_t& _value );
-    void setVcoords3d( size_t _index, const Vector3f& _value );
-    void setVnormals3d( size_t _index, const Vector3f& _value );
-    void setVtangents3d( size_t _index, const Vector3f& _value );
-    void setVbinormals3d( size_t _index, const Vector3f& _value );
-    void setVUVs( size_t _index, const Vector2f& _value );
-    void setVUV2s( size_t _index, const Vector2f& _value );
-    void setVColor( size_t _index, const Vector4f& _value );
+//    void setVcoords3d( size_t _index, const Vector3f& _value );
+//    void setVnormals3d( size_t _index, const Vector3f& _value );
+//    void setVtangents3d( size_t _index, const Vector3f& _value );
+//    void setVbinormals3d( size_t _index, const Vector3f& _value );
+//    void setVUVs( size_t _index, const Vector2f& _value );
+//    void setVUV2s( size_t _index, const Vector2f& _value );
+//    void setVColor( size_t _index, const Vector4f& _value );
     void setMin( const Vector3f& min );
     void setMax( const Vector3f& max );
     void setPrimitive( Primitive _primitive );
 
     inline const int32_t *Indices() const { return vIndices.data(); }
     inline int32_t vindexAt( int32_t i ) const { return vIndices[i]; }
-    inline Vector3f vertexAt( int32_t i ) const { return vcoords3d[i]; }
-    inline Vector2f uvAt( int32_t i ) const { return vUVs[i]; }
-    inline Vector2f uv2At( int32_t i ) const { return vUV2s[i]; }
-    inline Vector3f normalAt( int32_t i ) const { return vnormals3d[i]; }
-    inline Vector3f tangentAt( int32_t i ) const { return vtangents3d[i]; }
-    inline Vector3f binormalAt( int32_t i ) const { return vbinormals3d[i]; }
-    inline Vector4f colorAt( int32_t i ) const { return vColor[i]; }
+    inline PUUNTBC soaAt( int32_t i ) const { return vSoaData[i]; }
+    inline Vector3f vertexAt( int32_t i ) const { return vSoaData[i].pos; }
+    inline Vector2f uvAt( int32_t i ) const { return vSoaData[i].a1; }
+    inline Vector2f uv2At( int32_t i ) const { return vSoaData[i].a2; }
+    inline Vector3f normalAt( int32_t i ) const { return vSoaData[i].a3; }
+    inline Vector3f tangentAt( int32_t i ) const { return vSoaData[i].a4; }
+    inline Vector3f binormalAt( int32_t i ) const { return vSoaData[i].a5; }
+    inline Vector4f colorAt( int32_t i ) const { return vSoaData[i].a6; }
 
-    friend class GeomData;
-
-    JSONRESOURCECLASSSERIALBIN( VData, vIndices, vcoords3d, vnormals3d, vtangents3d, vbinormals3d, vUVs, vUV2s, vColor, primitive, bbox3d)
+    JSONRESOURCECLASSSERIALBIN( VData, vIndices, vSoaData, primitive, bbox3d)
 private:
     std::vector<int32_t>  vIndices;
-    std::vector<Vector3f> vcoords3d;
-    std::vector<Vector3f> vnormals3d;
-    std::vector<Vector3f> vtangents3d;
-    std::vector<Vector3f> vbinormals3d;
-    std::vector<Vector2f> vUVs;
-    std::vector<Vector2f> vUV2s;
-    std::vector<Vector4f> vColor;
+    std::vector<PUUNTBC>  vSoaData;
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };

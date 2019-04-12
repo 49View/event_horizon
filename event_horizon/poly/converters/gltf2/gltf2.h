@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include "tiny_gltf.h"
 #include <core/math/vector4f.h>
+#include <core/name_policy.hpp>
 #include <core/descriptors/uniform_names.h>
 #include <core/heterogeneous_map.hpp>
 #include <poly/poly.hpp>
@@ -16,8 +17,9 @@ enum class SigmoidSlope {
     Negative
 };
 
-class GLTF2 {
+class GLTF2 : public NamePolicy<> {
 public:
+    virtual ~GLTF2() = default;
     struct ExtraAccessorData {
         Vector3f min = Vector3f::ZERO;
         Vector3f max = Vector3f::ZERO;
@@ -61,13 +63,12 @@ public:
 
 private:
     void addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father );
-    void addNodeToHier( const int nodeIndex, GeomAssetSP& hier );
+    void addNodeToHier( int nodeIndex, GeomAssetSP& hier );
     GLTF2::IntermediateMaterial elaborateMaterial( const tinygltf::Material& mat );
     void saveMaterial( const IntermediateMaterial& im );
     void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic, const std::string& _uniformName );
 private:
     MaterialMap matMap;
     std::string basePath;
-    std::string name;
     tinygltf::Model model;
 };

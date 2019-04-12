@@ -579,7 +579,7 @@ struct VFA8 {
     A7 a7;
     A8 a8;
 
-    VFA8() {}
+    VFA8() = default;
 
     VFA8( const P& _p, const A1& _t, const A2& _t2, const A3& _t3, const A4& _t4, const A5& _t5, const A6& _t6,
           const A7& _t7, const A8& _t8) {
@@ -890,6 +890,14 @@ public:
         wind = !wind;
     }
 
+    int32_t addVertex( const V& p ) {
+        ASSERT( verts != nullptr );
+        if ( verts == nullptr ) return 0;
+        verts[numVerts] = p;
+        ++numVerts;
+        return numVerts;
+    }
+
     template<typename P>
     int32_t addVertex( const P& p ) {
         ASSERT( verts != nullptr );
@@ -1126,5 +1134,7 @@ typedef VertexStripIBVB<VFPosTexNorTanBinCol3d> PosTexNorTanBinCol3dStrip;
 typedef VertexStripIBVB<VFPosTexNorTanBinSH3d> PosTexNorTanBinSH3dStrip;
 typedef VertexStripIBVB<PosTexNorTanBinSHCol3d> PosTexNorTanBinSHCol3dStrip;
 typedef VertexStripIBVB<PosTexNorTanBinUV2Col3d> PosTexNorTanBinUV2Col3dStrip;
+
+using PUUNTBC = PosTexNorTanBinUV2Col3d;
 
 typedef VertexStripIBVB<VFFont> FontStrip;

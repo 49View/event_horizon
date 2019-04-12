@@ -580,8 +580,8 @@ void Dump( const tinygltf::Model& model ) {
             std::cout << Indent( 1 ) << "values(items=" << material.values.size() << ")"
                       << std::endl;
 
-            tinygltf::ParameterMap::const_iterator p( material.values.begin());
-            tinygltf::ParameterMap::const_iterator pEnd( material.values.end());
+            auto p( material.values.begin());
+            auto pEnd( material.values.end());
             for ( ; p != pEnd; p++ ) {
                 std::cout << Indent( 2 ) << p->first << ": "
                           << PrintParameterValue( p->second ) << std::endl;
@@ -726,7 +726,7 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
         }
     }
 
-    geom->sanitizeUVMap();
+//    geom->sanitizeUVMap();
     geom->calcBinormal();
 
 //    ### REF, what is this???
@@ -902,7 +902,7 @@ GLTF2::IntermediateMaterial GLTF2::elaborateMaterial( const tinygltf::Material& 
 ImportGeomArtifacts GLTF2::convert() {
 
     ImportGeomArtifacts ret;
-    auto hierScene = std::make_shared<Geom>( name );
+    auto hierScene = std::make_shared<Geom>( Name() );
 
     for ( size_t m = 0; m < model.materials.size(); m++ ) {
         /*auto im = */elaborateMaterial( model.materials[m] );
@@ -932,7 +932,7 @@ GLTF2::GLTF2( const SerializableContainer& _array, const std::string& _name ) {
     std::string err;
     std::string warn;
     std::string ext = GetFilePathExtension( _name );
-    name = getFileNameOnly( _name );
+    Name( getFileNameOnly( _name ) );
 
     bool ret = false;
     if ( ext.compare( "glb" ) == 0 ) {
@@ -968,7 +968,7 @@ GLTF2::GLTF2( const std::string& _path ) {
     std::string warn;
     std::string ext = GetFilePathExtension( _path );
     basePath = getFileNamePath( _path ) + "/";
-    name = getFileNameOnly(_path);
+    Name( getFileNameOnly(_path) );
 
     bool ret = false;
     if ( ext.compare( "glb" ) == 0 ) {

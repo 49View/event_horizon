@@ -38,7 +38,7 @@ void SceneGraph::update() {
     MC().update();
     GM().update();
 
-    // ### Reintroduce anims for scene graph
+// ### Reintroduce anims for scene graph
 //    for ( auto& [k,v] : geoms ) {
 //        std::visit( lambdaUpdateAnimVisitor, v );
 //    }
