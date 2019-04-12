@@ -101,13 +101,13 @@ struct GeomMappingData {
     subdivisionAccuray subdivAccuracy = accuracyNone;
     WindingOrderT windingOrder = WindingOrder::CCW;
 
+    JSONSERIALBIN( direction, bDoNotScaleMapping, offset, mirroring, bUnitMapping, subdivAccuracy, windingOrder)
     // Mappping computed
     float fuvScale = 1.0f;
     Vector2f uvScale = Vector2f::ONE;
     Vector2f uvScaleInv = Vector2f::ONE;
     std::vector<Vector2f> wrapMappingCoords;
     Vector2f pullMappingCoords = Vector2f::ZERO;
-
 };
 
 class GeomDataBuilder {
@@ -118,30 +118,24 @@ public:
         buildInternal(ret);
         return ret;
     }
-    virtual void buildInternal( std::shared_ptr<VData> _ret ) = 0;
     std::string refName() const { return mRefName; };
+    virtual void setupRefName() = 0;
+
+protected:
+    virtual void buildInternal( std::shared_ptr<VData> _ret ) = 0;
+
 protected:
     std::string mRefName;
     GeomMappingData mappingData;
-};
-
-template <typename T>
-class GeomDataBuilderBaseList {
-public:
-    virtual std::vector<std::shared_ptr<T>> build() = 0;
-};
-
-class GeomDataBuilderList : public GeomDataBuilderBaseList<VData> {
-public:
-    virtual ~GeomDataBuilderList() = default;
 };
 
 class GeomDataShapeBuilder : public GeomDataBuilder {
 public:
     explicit GeomDataShapeBuilder( ShapeType shapeType );
     virtual ~GeomDataShapeBuilder() = default;
+    void setupRefName() override;
+protected:
     void buildInternal( std::shared_ptr<VData> _ret ) override;
-
 protected:
     ShapeType shapeType;
 };
@@ -150,8 +144,9 @@ class GeomDataOutlineBuilder : public GeomDataBuilder {
 public:
     explicit GeomDataOutlineBuilder( std::vector<PolyOutLine> outlineVerts ) : outlineVerts( std::move( outlineVerts )) {}
     virtual ~GeomDataOutlineBuilder() = default;
+    void setupRefName() override;
+protected:
     void buildInternal( std::shared_ptr<VData> _ret ) override;
-
 protected:
     std::vector<PolyOutLine> outlineVerts;
 };
@@ -160,8 +155,9 @@ class GeomDataPolyBuilder : public GeomDataBuilder {
 public:
     explicit GeomDataPolyBuilder( std::vector<PolyLine> _polyLine ) : polyLine( std::move( _polyLine )) {}
     virtual ~GeomDataPolyBuilder() = default;
+    void setupRefName() override;
+protected:
     void buildInternal( std::shared_ptr<VData> _ret ) override;
-
 protected:
     std::vector<PolyLine> polyLine;
 };
@@ -170,8 +166,9 @@ class GeomDataQuadMeshBuilder : public GeomDataBuilder {
 public:
     explicit GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
     virtual ~GeomDataQuadMeshBuilder() = default;
+    void setupRefName() override;
+protected:
     void buildInternal( std::shared_ptr<VData> _ret ) override;
-
 protected:
     QuadVector3fNormalfList quads;
 };
@@ -185,36 +182,13 @@ public:
                              const Vector2f& _flipVector = Vector2f::ZERO,
                              FollowerGap _gaps = FollowerGap::Empty,
                              const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
-                             mProfile( std::move( _profile )), mVerts( std::move( _verts )), followersFlags(f), mRaiseEnum(_r),
+                             mProfile( std::move( _profile )), mVerts( std::move( _verts )),
+                             followersFlags(f), mRaiseEnum(_r),
                              mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
     virtual ~GeomDataFollowerBuilder() = default;
+    void setupRefName() override;
+protected:
     void buildInternal( std::shared_ptr<VData> _ret ) override;
-
-    GeomDataFollowerBuilder& raise( const Vector2f& _r ) {
-        mRaise = _r;
-        return *this;
-    }
-
-    GeomDataFollowerBuilder& raise( const PolyRaise _r ) {
-        mRaiseEnum = _r;
-        return *this;
-    }
-
-    GeomDataFollowerBuilder& flip( const Vector2f& _flipVector ) {
-        mFlipVector = _flipVector;
-        return *this;
-    }
-
-    GeomDataFollowerBuilder& gaps( const FollowerGap& _gaps ) {
-        mGaps = _gaps;
-        return *this;
-    }
-
-    GeomDataFollowerBuilder& ff( const FollowerFlags f ) {
-        followersFlags |= f;
-        return *this;
-    }
-
 protected:
     std::shared_ptr<Profile> mProfile;
     std::vector<Vector3f> mVerts;
@@ -224,6 +198,17 @@ protected:
     Vector2f mFlipVector = Vector2f::ZERO;
     FollowerGap mGaps = FollowerGap::Empty;
     Vector3f mSuggestedAxis = Vector3f::ZERO;
+};
+
+template <typename T>
+class GeomDataBuilderBaseList {
+public:
+    virtual std::vector<std::shared_ptr<T>> build() = 0;
+};
+
+class GeomDataBuilderList : public GeomDataBuilderBaseList<VData> {
+public:
+    virtual ~GeomDataBuilderList() = default;
 };
 
 class GeomDataSVGBuilder : public GeomDataBuilderList {

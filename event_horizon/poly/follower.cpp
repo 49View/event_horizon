@@ -167,12 +167,12 @@ void addLineVert( const std::vector<Vector3f>& _verts, FollowerIntermediateData&
 
 }
 
-std::shared_ptr<VData> extrude( const std::vector<Vector3f>& _verts,
+void extrude( std::shared_ptr<VData> geom,
+                                const std::vector<Vector3f>& _verts,
                                 const Profile& profile,
                                 const Vector3f& _suggestedAxis,
                                 const FollowerFlags& ff ) {
 
-    auto geom = std::make_shared<VData>();
     GeomMappingData mapping;
 
     bool bWrap = checkBitWiseFlag(ff, FollowerFlags::WrapPath);
@@ -184,7 +184,7 @@ std::shared_ptr<VData> extrude( const std::vector<Vector3f>& _verts,
     auto vaCount = verts.size();
     if ( vaCount < 2 ) {
         LOGR("[ERROR] Extruded geometry has less then 2 vertices, impossible to extrude." );
-        return geom;
+        return;
     }
     if ( vaCount == 2 ) bWrap = false;
 
@@ -248,8 +248,6 @@ std::shared_ptr<VData> extrude( const std::vector<Vector3f>& _verts,
     for ( auto& fp : polys ) {
         PolyServices::addQuad( geom, fp.vs, fp.vtcs, fp.vncs, mapping );
     }
-
-    return geom;
 }
 
 }

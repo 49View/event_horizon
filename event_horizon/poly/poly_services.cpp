@@ -44,7 +44,7 @@ void pushTriangleSubDivRec( VDataSP vdata,
 
 
 Vector3f normalFromPoints( const Vector3f* vs, GeomMappingData& m ) {
-    Vector3f normal = m.windingOrder == WindingOrder::CCW ? crossProduct( vs[0], vs[1], vs[2] ) :
+    Vector3f normal = m.windingOrder == WindingOrder::CW ? crossProduct( vs[0], vs[1], vs[2] ) :
                                                            crossProduct( vs[0], vs[2], vs[1] );
     normal = normalize( normal );
     return normal;
@@ -664,5 +664,4 @@ namespace PolyServices {
             addFlatPoly( vdata, nvertsSane.size(), topvertsSane.get(), normal, m );
         }
     }
-
 }

@@ -3,7 +3,7 @@
 //
 
 #include "geom_builder.h"
-#include <core/node.hpp>
+#include <core/names.hpp>
 #include <core/resources/resource_manager.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <core/geom.hpp>
@@ -48,6 +48,7 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std:
                           const std::vector<Vector2f>& _outline,
                           const float _z, const Vector3f& _suggestedAxis ) : sg(_sg) {
     builderType = gbt;
+    mDepResourceName = _resourceName;
     for (auto &v: _outline) profilePath.emplace_back( Vector3f{v, _z} );
 }
 
@@ -55,6 +56,7 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std:
                           const std::vector<Vector3f>& _outline,
                           const Vector3f& _suggestedAxis ) : sg(_sg) {
     builderType = gbt;
+    mDepResourceName = _resourceName;
     mFollowerSuggestedAxis = _suggestedAxis;
     for (auto &v: _outline) profilePath.emplace_back( v );
 }
@@ -62,6 +64,7 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std:
 GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt, const std::string& _resourceName,
                           const Rect2f& _r, const Vector3f& _suggestedAxis ) : sg(_sg) {
     builderType = gbt;
+    mDepResourceName = _resourceName;
     mFollowerSuggestedAxis = _suggestedAxis;
     for ( auto &v: _r.points3dcw() ) profilePath.emplace_back( v );
 }
@@ -108,6 +111,7 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist )
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb ) {
+    gb->setupRefName();
     auto rna = sg.VL().getHash( gb->refName() );
     elem->VDataRef( rna.empty() ? sg.B<VB>( gb->refName() ).addIM( gb->build() ) : rna );
 }
@@ -125,8 +129,13 @@ void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
 }
 
 void GeomBuilder::build() {
+    if ( Name().empty() ) {
+        Name( UUIDGen::make() );
+    }
+
     elemCreate();
 
+    if ( matRef.empty() ) matRef = S::WHITE_PBR;
     elem->MaterialRef( sg.ML().getHash(matRef) );
 
     switch ( builderType ) {
@@ -144,7 +153,7 @@ void GeomBuilder::build() {
             createFromProcedural( std::make_shared<GeomDataQuadMeshBuilder>( quads ) );
             break;
         case GeomBuilderType::follower: {
-            createFromProcedural( std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( "###" ),
+            createFromProcedural( std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( mDepResourceName ),
                                                                              profilePath,
                                                                              fflags,
                                                                              fraise,
@@ -154,7 +163,7 @@ void GeomBuilder::build() {
         }
         break;
         case GeomBuilderType::svg:
-            createFromProcedural( std::make_shared<GeomDataSVGBuilder>( asciiText, sg.PL().get( "###" ) ) );
+            createFromProcedural( std::make_shared<GeomDataSVGBuilder>( asciiText, sg.PL().get( mDepResourceName ) ) );
             break;
         case GeomBuilderType::unknown:
             LOGE( "Unknown builder type" );

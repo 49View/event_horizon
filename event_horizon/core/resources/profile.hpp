@@ -12,13 +12,15 @@
 #include <vector>
 #include <array>
 #include <core/htypes_shared.hpp>
+#include <core/name_policy.hpp>
 #include <core/math/vector3f.h>
 
 namespace JMATH { class Rect2f; }
 
-class Profile {
+class Profile : public NamePolicy<> {
 public:
     Profile() = default;
+    virtual ~Profile() = default;
     RESOURCE_CTORS(Profile);
     void bufferDecode( const unsigned char* _buffer, size_t _length );
 
@@ -64,7 +66,6 @@ private:
 	void calcBBox();
 
 private:
-	std::string				mName;
 	Vector2f				mBBox = Vector2f::ZERO;
 	std::vector<Vector2f>	mPoints;
 	std::vector<float>		mLengths;

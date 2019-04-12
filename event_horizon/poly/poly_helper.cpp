@@ -59,9 +59,7 @@ ClipperLib::Path getPerimeterPath( const std::vector<Vector2f>& _values ) {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-GeomDataShapeBuilder::GeomDataShapeBuilder( ShapeType shapeType ) : shapeType( shapeType ) {
-    mRefName = shapeTypeToString( shapeType );
-}
+GeomDataShapeBuilder::GeomDataShapeBuilder( ShapeType shapeType ) : shapeType( shapeType ) {}
 
 void GeomDataShapeBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
     V3f center = V3f::ZERO;
@@ -96,6 +94,10 @@ void GeomDataShapeBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
     _ret->BBox3d(ps.bbox3d);
 }
 
+void GeomDataShapeBuilder::setupRefName() {
+    mRefName = shapeTypeToString( shapeType );
+}
+
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 //
@@ -108,6 +110,19 @@ void GeomDataOutlineBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
     for ( const auto& ot : outlineVerts ) {
         PolyServices::pull( _ret, ot.verts, ot.zPull, mappingData ); //pullFlags
     }
+}
+
+void GeomDataOutlineBuilder::setupRefName() {
+    std::stringstream oss;
+    for ( const auto& ot : outlineVerts ) {
+        for ( const auto& v : ot.verts ) {
+            oss << v.toString();
+        }
+        oss << ot.zPull;
+    }
+    auto c = mappingData.serialize();
+    c.insert(std::end(c), std::begin(oss.str()), std::end(oss.str()));
+    mRefName = "Outline--" + Hashable<>::hashOf(c);
 }
 
 // ********************************************************************************************************************
@@ -125,6 +140,20 @@ void GeomDataPolyBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
     }
 }
 
+void GeomDataPolyBuilder::setupRefName() {
+    std::stringstream oss;
+    for ( const auto& poly : polyLine ) {
+        for ( const auto& v : poly.verts ) {
+            oss << v.toString();
+        }
+        oss << poly.normal.toString();
+        oss << static_cast<uint64_t>(poly.reverseFlag);
+    }
+    auto c = mappingData.serialize();
+    c.insert(std::end(c), std::begin(oss.str()), std::end(oss.str()));
+    mRefName = "Poly--" + Hashable<>::hashOf(c);
+}
+
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 //
@@ -137,7 +166,17 @@ void GeomDataQuadMeshBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
     for ( const auto& q : quads ) {
         PolyServices::addFlatPoly( _ret, q.quad, q.normal, mappingData );
     }
+}
 
+void GeomDataQuadMeshBuilder::setupRefName() {
+    std::stringstream oss;
+    for ( const auto& q : quads ) {
+        oss << q.normal.toString();
+        for ( const auto& v : q.quad ) {
+            oss << v.toString();
+        }
+    }
+    mRefName = "Poly--" + Hashable<>::hashOf(oss.str());
 }
 
 // ********************************************************************************************************************
@@ -174,7 +213,25 @@ void GeomDataFollowerBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
     lProfile.raise( lRaise );
     lProfile.flip( mFlipVector );
 
-    _ret = FollowerService::extrude( mVerts, lProfile, mSuggestedAxis, followersFlags );
+    FollowerService::extrude( _ret, mVerts, lProfile, mSuggestedAxis, followersFlags );
+}
+
+void GeomDataFollowerBuilder::setupRefName() {
+    std::stringstream oss;
+    oss << mProfile->Name();
+    for ( const auto& v : mVerts ) {
+        oss << v.toString();
+    }
+    oss << followersFlags;
+    oss << mRaise.toString();
+    oss << static_cast<uint64_t>(mRaiseEnum);
+    oss << mFlipVector.toString();
+    // ### Implement this for gaps
+//    for ( const auto& v : mGaps ) {
+//        oss << static_cast<uint64_t>(v);
+//    }
+    oss << mSuggestedAxis.toString();
+    mRefName = "Follower--" + Hashable<>::hashOf(oss.str());
 }
 
 // ********************************************************************************************************************

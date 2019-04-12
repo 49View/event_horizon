@@ -325,8 +325,8 @@ static std::string PrintValue( const std::string& name,
 
     if ( value.IsObject()) {
         const tinygltf::Value::Object& o = value.Get<tinygltf::Value::Object>();
-        tinygltf::Value::Object::const_iterator it( o.begin());
-        tinygltf::Value::Object::const_iterator itEnd( o.end());
+        auto it( o.begin());
+        auto itEnd( o.end());
         for ( ; it != itEnd; it++ ) {
             ss << PrintValue( it->first, it->second, indent + 1 ) << std::endl;
         }

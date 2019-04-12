@@ -36,10 +36,11 @@ struct FollowerIntermediateData {
 };
 
 namespace FollowerService {
-	std::shared_ptr<VData> extrude( const std::vector<Vector3f>& verts,
-                                    const Profile& profile,
-                                    const Vector3f& suggestedAxis = Vector3f::ZERO,
-                                    const FollowerFlags& ff = FollowerFlags::Defaults );
+	void extrude( std::shared_ptr<VData> geom,
+                  const std::vector<Vector3f>& verts,
+                  const Profile& profile,
+                  const Vector3f& suggestedAxis = Vector3f::ZERO,
+                  const FollowerFlags& ff = FollowerFlags::Defaults );
 }
 
 class Follower {

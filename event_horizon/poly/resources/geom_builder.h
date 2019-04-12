@@ -286,6 +286,7 @@ private:
     ShapeType shapeType = ShapeType::None;
     subdivisionAccuray subdivAccuracy = accuracyNone;
 
+    std::string mDepResourceName;
     std::vector<Vector3f> profilePath;
     FollowerFlags fflags = FollowerFlags::Defaults;
     PolyRaise fraise = PolyRaise::None;

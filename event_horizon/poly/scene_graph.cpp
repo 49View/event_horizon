@@ -56,8 +56,15 @@ void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
     auto st = shapeTypeFromString( _params[0] );
     if ( st != ShapeType::None) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
-        GB{ *this, st }.m(mat).n("ucarcamagnu").g(9200).build();
+//        GB{ *this, st }.m(mat).n("ucarcamagnu").g(9200).build();
 //        GB{ *this, Rect2f::IDENTITY, 0.0f }.build();
+        std::vector<V3f> vlist { V3f::ZERO, V3f{0.8f, 0.0f, 0.0f}, V3f{0.2f, 0.0f, 0.9f } };
+//        GB{ *this, vlist, 0.2f }.build();
+        auto pr = std::make_shared<Profile>();
+        pr->createWire(0.1f, 6);
+        auto prId = B<PB>("ProfileWire").addIM(pr);
+        GB{ *this, GeomBuilderType::follower, prId, vlist }.m(mat).build();
+
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
 //        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
         // ### MAT reintroduce material/colors for geoms .c(col)
@@ -181,6 +188,7 @@ void SceneGraph::init() {
     B<IB>( S::DEBUG_UV  ).addIM( RawImage::DEBUG_UV()      );
 
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
+//    B<MB>( "tomato" ).load();
 
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }

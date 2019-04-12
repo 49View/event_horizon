@@ -72,6 +72,9 @@ public:
     static std::string hashOf( const uint8_p& _data ) {
         return CryptoUtils<H>::hash( _data.first.get(), _data.second );
     }
+    static std::string hashOf( const std::string& _str ) {
+        return CryptoUtils<H>::hash( _str.data(), _str.size() );
+    }
 
 };
 
