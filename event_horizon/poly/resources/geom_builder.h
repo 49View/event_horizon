@@ -97,7 +97,6 @@ protected:
     Vector3f axis = Vector3f::ZERO;
     Vector3f scale = Vector3f::ONE;
     MatrixAnim matrixAnim;
-//    GeomAssetSP elem;
 };
 
 class GeomBuilder : public GeomBasicBuilder<GeomBuilder>, public NamePolicy<> {
@@ -135,7 +134,7 @@ public:
     GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
                  const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
 
-    GeomBuilder& inj( GeomAssetSP _hier );
+    GeomBuilder& inj( GeomSP _hier );
 
     GeomBuilder& bt( const GeomBuilderType _gbt ) {
         builderType = _gbt;
@@ -262,20 +261,20 @@ public:
 //        return *this;
 //    }
 
-    GeomAssetSP buildr();
+    GeomSP buildr();
 
     void build();
 
 protected:
     void elemCreate();
-    GeomAssetSP Elem() { return elem; }
+    GeomSP Elem() { return elem; }
 
     bool validate() const;
     void elaborateMaterial();
     void preparePolyLines();
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb );
     void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb );
-    void createFromAsset( GeomAssetSP asset );
+    void createFromAsset( GeomSP asset );
 
 private:
     uint64_t mId = 0;
@@ -312,8 +311,8 @@ private:
 
 //    std::vector<std::shared_ptr<MaterialBuilder>> matBuilders;
 
-    GeomAssetSP elem = nullptr;
-    GeomAssetSP elemInjFather = nullptr;
+    GeomSP elem = nullptr;
+    GeomSP elemInjFather = nullptr;
 
     ScreenShotContainerPtr thumb;
 
@@ -329,9 +328,9 @@ public:
     void add( GeomBuilder _gb );
     void build();
 
-    GeomAssetSP Elem();
+    GeomSP Elem();
 private:
-    GeomAssetSP elem = nullptr;
+    GeomSP elem = nullptr;
     std::vector<GeomBuilder> builders;
 };
 

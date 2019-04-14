@@ -231,7 +231,7 @@ public:
         return *this;
     }
 
-    UIShapeBuilder& inj( GeomAssetSP _cloned );
+    UIShapeBuilder& inj( GeomSP _cloned );
 
     UIShapeBuilder& ta( const UiControlFlag& _ta ) {
         if ( checkBitWiseFlag( _ta, UiControlFlag::TextAlignRight ) ) textAlignment = UiControlFlag::TextAlignRight;
@@ -274,7 +274,7 @@ public:
 //    }
 
 
-    UIAssetSP buildr() {
+    GeomSP buildr() {
         return elem;
     }
 
@@ -334,7 +334,7 @@ private:
     std::string vname;
     std::string fontName;
 
-    UIAssetSP elem;
+    GeomSP elem;
     SceneGraph& sg;
 
     static uint64_t sid;

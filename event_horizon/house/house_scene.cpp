@@ -31,7 +31,7 @@ void HouseScene::collectionChanged( std::shared_ptr<ChangeInfo> e ) {
 
 	for ( auto ancestorGeom : e->addedObjects ) {
 		//add
-		std::stack<GeomAssetSP> stack;
+		std::stack<GeomSP> stack;
 		std::vector<unsigned> meshIDs;
 		stack.push( ancestorGeom );
 

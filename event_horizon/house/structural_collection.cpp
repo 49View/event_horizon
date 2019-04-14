@@ -11,7 +11,7 @@ StructuralCollection::StructuralCollection() {
 	excludeGeoms.push_back( "Maxlight_ES_200811_plafon_FORM:Sphere001" ); //spotlights
 }
 
-bool StructuralCollection::includeGeom(GeomAssetSP g) {
+bool StructuralCollection::includeGeom(GeomSP g) {
 	if (!g->hasDataBacked()) return false;
 
 	for ( auto s : excludeGeoms ) {
@@ -26,11 +26,11 @@ bool StructuralCollection::includeGeom(GeomAssetSP g) {
 	return true;
 }
 
-std::vector<GeomAssetSP> StructuralCollection::getAllObjects() const {
+std::vector<GeomSP> StructuralCollection::getAllObjects() const {
 	return geoms;
 }
 
-void StructuralCollection::push_back( GeomAssetSP _g ) {
+void StructuralCollection::push_back( GeomSP _g ) {
 
 	geoms.push_back( _g );
 	auto ev = std::make_shared<ChangeInfo>();

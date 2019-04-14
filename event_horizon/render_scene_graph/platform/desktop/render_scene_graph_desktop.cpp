@@ -18,7 +18,7 @@
 
 scene_t _outputScene;
 
-void chartCount( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
+void chartCount( const GeomSP _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
     if ( !_g->empty() ) {
 //        inputMesh.vertex_count += _g->Data()->vData().numVerts();
 //        inputMesh.face_count += _g->Data()->vData().numIndices()/3;
@@ -29,7 +29,7 @@ void chartCount( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh ) {
     }
 }
 
-void chart( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh, int& _vi, int& _fi ) {
+void chart( const GeomSP _g, Thekla::Atlas_Input_Mesh& inputMesh, int& _vi, int& _fi ) {
     if ( !_g->empty() ) {
 //        auto vData = _g->Data()->vData();
 //        Matrix4f lMatfull = *(_g->getLocalHierTransform().get());
@@ -79,7 +79,7 @@ void chart( const GeomAssetSP _g, Thekla::Atlas_Input_Mesh& inputMesh, int& _vi,
     }
 }
 
-void chartInject( GeomAssetSP _g,  scene_t& _outputScene,
+void chartInject( GeomSP _g,  scene_t& _outputScene,
                             const std::vector<Thekla::Atlas_Output_Vertex>& _va,
                             const Thekla::Atlas_Input_Vertex* _inputVerts,
                             int& _vi, int& _fi ) {
@@ -109,7 +109,7 @@ bool aovcompare(Thekla::Atlas_Output_Vertex lhs, Thekla::Atlas_Output_Vertex rhs
     return lhs.xref < rhs.xref;
 }
 
-bool packGeometryForLightmaps( std::unordered_map<std::string, GeomAssetSP>& _geoms ) {
+bool packGeometryForLightmaps( std::unordered_map<std::string, GeomSP>& _geoms ) {
     Thekla::Atlas_Input_Mesh inputMesh{};
 
     inputMesh.vertex_count = 0;

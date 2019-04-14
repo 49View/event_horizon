@@ -48,7 +48,7 @@ SHCalculator::SHCalculator() {
 SHCalculator::~SHCalculator() {
 }
 
-void SHCalculator::calculate( std::vector<GeomAssetSP>& sceneGeoms, const CalculatorOption& options,
+void SHCalculator::calculate( std::vector<GeomSP>& sceneGeoms, const CalculatorOption& options,
                               std::shared_ptr<CancellationToken> token,
                               std::function<void( std::string, size_t, size_t )> onProgress,
                               std::function<void( void )> onCompletion ) {

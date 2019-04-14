@@ -112,8 +112,9 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
             Vector3f mRayFar = Vector3f::ZERO;
             _cam->mousePickRay( mi.mousePos, mRayNear, mRayFar );
 //            bool bHit =
-            rsg.SG().rayIntersect( mRayNear, mRayFar, [&]( const NodeVariants& _geom, float _near) {
-                std::visit( SelectionRecursiveLamba{*this}, _geom );
+            rsg.SG().rayIntersect( mRayNear, mRayFar, [&]( NodeVariantsSP _geom, float _near) {
+//                ### REF reimplement selection
+//                std::visit( SelectionRecursiveLamba{*this}, _geom );
             } );
 //            if ( !bHit ) {
 //            }

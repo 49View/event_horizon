@@ -120,8 +120,9 @@ void Selection::showGizmo( Selectable& _node, std::shared_ptr<Camera> _cam, Scen
     }
 
     if ( ImGui::Button("Set Key") ) {
-        std::visit( SelectionAddToKeyFrame{ LayoutMediator::Timeline::TimeLineName(),
-                                            LayoutMediator::Timeline::CurrentTime() }, _node.node );
+//        ### REF re-enable set key callback
+//        std::visit( SelectionAddToKeyFrame{ LayoutMediator::Timeline::TimeLineName(),
+//                                            LayoutMediator::Timeline::CurrentTime() }, _node.node );
     }
     ImGui::SameLine();
 
@@ -226,7 +227,9 @@ void Selection::unselect( const UUID& _uuid, Selectable& _node ) {
     erase_if_it( selectedNodes, _uuid );
 }
 
-void SelectionAddToKeyFrame::operator()( GeomAssetSP arg ) const {
+void SelectionAddToKeyFrame::operator()( GeomSP arg ) const {
 //        ### REF selected needs to be worked out with new assets graphs (UUID)
+// ### DUMMY REMOVE THIS LINE LOGRS(time);
+LOGRS(time);
 //    arg->addKeyFrame( timelineName, time );
 }

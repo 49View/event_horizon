@@ -137,29 +137,19 @@ bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
 
     bool ret = false;
 
-    for ( const auto& [k, n] : geoms ) {
+    for ( const auto& [k, v] : geoms ) {
         AABB box = AABB::INVALID;
         UUID uuid{};
-        bool bPerformeOnNode = false;
-        if ( auto as = std::get_if<GeomAssetSP>(&n); as != nullptr ) {
-            box = (*as)->BBox3d();
-//            uuid = (*as)->UUiD();
-            bPerformeOnNode = true;
-        } //else if ( auto as = std::get_if<UIAssetSP>(&n); as != nullptr ) {
-//            box = (*as)->BBox3d();
-//            uuid = (*as)->UUiD();
-//            bPerformeOnNode = true;
-//        }
-
-        if ( bPerformeOnNode ) {
-            float tn = 0.0f;
-            float tf = std::numeric_limits<float>::max();
-            auto ldir = normalize( _far - _near );
-            if ( box.intersectLine( _near, ldir, tn, tf) ) {
-                _callback( n, tn );
-                ret = true;
-                break;
-            }
+//        ### REF reimplement box and UUID
+//        box = v->BBox3d();
+//        uuid = (*as)->UUiD();
+        float tn = 0.0f;
+        float tf = std::numeric_limits<float>::max();
+        auto ldir = normalize( _far - _near );
+        if ( box.intersectLine( _near, ldir, tn, tf) ) {
+            _callback( v, tn );
+            ret = true;
+            break;
         }
     }
 

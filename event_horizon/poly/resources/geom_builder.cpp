@@ -128,7 +128,7 @@ void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb 
     }
 }
 
-void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
+void GeomBuilder::createFromAsset( GeomSP asset ) {
     elem->addChildren( std::move(asset) );
 }
 
@@ -247,12 +247,12 @@ void GeomBuilder::elemCreate() {
     if ( !elem) elem = std::make_shared<Geom>(Name());
 }
 
-GeomBuilder& GeomBuilder::inj( GeomAssetSP _hier ) {
+GeomBuilder& GeomBuilder::inj( GeomSP _hier ) {
     elemInjFather = _hier;
     return *this;
 }
 
-GeomAssetSP GeomBuilder::buildr() {
+GeomSP GeomBuilder::buildr() {
     build();
     return elem;
 }
@@ -287,6 +287,6 @@ void GeomBuilderComposer::build() {
     }
 }
 
-GeomAssetSP GeomBuilderComposer::Elem() {
+GeomSP GeomBuilderComposer::Elem() {
     return elem;
 }

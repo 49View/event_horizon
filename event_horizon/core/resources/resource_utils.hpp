@@ -21,6 +21,7 @@ class RawImage;
 namespace Utility::TTFCore { class Font; }
 struct GeomData;
 using Geom = RecursiveTransformation<GeomData>;
+using GeomSP = std::shared_ptr<Geom>;
 class Profile;
 class MaterialColor;
 class UIElement;

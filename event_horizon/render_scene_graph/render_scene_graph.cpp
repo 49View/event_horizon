@@ -44,7 +44,7 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
     });
 
 //    sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {
-//        if ( auto as = std::get_if<GeomAssetSP>(&_geom); as != nullptr ) {
+//        if ( auto as = std::get_if<GeomSP>(&_geom); as != nullptr ) {
 //            (*as)->subscribeData(hierRenderObserver);
 //            (*as)->sendNotifyData("generateGeometryVP");
 //        } else if ( auto as = std::get_if<UIAssetSP>(&_geom); as != nullptr ) {
@@ -150,7 +150,7 @@ Renderer& RenderSceneGraph::RR() { return rr; }
 //    return SOAData;
 //}
 
-//void HierGeomRenderObserver::notified( GeomAssetSP _source, const std::string& generator ) {
+//void HierGeomRenderObserver::notified( GeomSP _source, const std::string& generator ) {
 ////    auto mat = _source->Data()->getMaterial();
 ////  ### MAT reinstate materials
 ////    auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f ); // mat->translucency()

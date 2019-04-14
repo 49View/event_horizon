@@ -18,8 +18,13 @@
 #include <poly/poly.hpp>
 #include <core/resources/resource_utils.hpp>
 
-using NodeGraph = std::unordered_map<std::string, NodeVariants>;
-using SceneRayIntersectCallback = std::function<void(const NodeVariants&, float)>;
+class NodeAsset {};
+
+using NodeVariants = NodeAsset;
+using NodeVariantsSP = std::shared_ptr<NodeAsset>;
+
+using NodeGraph = std::unordered_map<std::string, NodeVariantsSP>;
+using SceneRayIntersectCallback = std::function<void(NodeVariantsSP, float)>;
 
 using NodeGraphConnectParamsSig = NodeVariants&;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);

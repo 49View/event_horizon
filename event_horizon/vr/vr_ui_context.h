@@ -12,8 +12,8 @@ public:
 	std::string CameraRigaName() const { return cameraRigaName; }
 	void CameraRigaName( std::string val ) { cameraRigaName = val; }
 
-	std::vector<GeomAssetSP> WalkableGeoms() const { return walkableGeoms; }
-	void WalkableGeoms( std::vector<GeomAssetSP> val ) { walkableGeoms = val; }
+	std::vector<GeomSP> WalkableGeoms() const { return walkableGeoms; }
+	void WalkableGeoms( std::vector<GeomSP> val ) { walkableGeoms = val; }
 private:
 	VRUIContext() {
 		cameraRigaName = "Main";
@@ -25,7 +25,7 @@ private:
 
 private:
 	std::string cameraRigaName;
-	std::vector<GeomAssetSP> walkableGeoms;
+	std::vector<GeomSP> walkableGeoms;
 };
 
 #define CurrentVrContext VRUIContext::getInstance()

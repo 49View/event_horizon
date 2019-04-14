@@ -770,7 +770,7 @@ void GLTF2::addMeshNode( const tinygltf::Node& node, std::shared_ptr<GeomSceneAr
 
     if ( node.mesh >= 0 ) {
         for ( size_t k = 0; k < model.meshes[node.mesh].primitives.size(); k++ ) {
-            addGeom( node.mesh, k, hier->addChildren(node.name) );
+            addGeom( node.mesh, k, hier );
         }
     }
 

@@ -10,11 +10,11 @@ class HierGeom;
 class ChangeInfo {
 public:
 	ChangeInfo() {}
-	ChangeInfo( const std::vector<GeomAssetSP>& newObjects, const std::vector<int64_t>& removedObjects ) : addedObjects( newObjects ), removedHashes( removedObjects ) {}
+	ChangeInfo( const std::vector<GeomSP>& newObjects, const std::vector<int64_t>& removedObjects ) : addedObjects( newObjects ), removedHashes( removedObjects ) {}
 	std::shared_ptr<ObservableCollection> collection;
-	std::vector<GeomAssetSP> addedObjects;
+	std::vector<GeomSP> addedObjects;
 	std::vector<int64_t> removedHashes;
-	std::vector<GeomAssetSP> modifiedObjects;
+	std::vector<GeomSP> modifiedObjects;
 };
 
 class ObservableCollection : public std::enable_shared_from_this<ObservableCollection> {

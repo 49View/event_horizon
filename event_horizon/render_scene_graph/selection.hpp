@@ -8,7 +8,9 @@
 #include <core/uuid.hpp>
 #include <core/node.hpp>
 #include <core/math/vector4f.h>
+#include <core/resources/resource_utils.hpp>
 #include <poly/poly.hpp>
+#include <poly/scene_graph.h>
 
 class Camera;
 class SceneOrchestrator;
@@ -88,10 +90,7 @@ protected:
 struct SelectionRecursiveLamba {
     explicit SelectionRecursiveLamba( Selection& sel ) : mSel( sel ) {}
 
-    void operator()(GeomAssetSP arg) const {
-        mSel.selected( arg );
-    }
-    void operator()(UIAssetSP arg) const {
+    void operator()(GeomSP arg) const {
         mSel.selected( arg );
     }
 
@@ -102,10 +101,10 @@ private:
 struct SelectionAddToKeyFrame {
     SelectionAddToKeyFrame( const std::string& timelineName, float time ) : timelineName( timelineName ), time( time ) {}
 
-    void operator()(GeomAssetSP arg) const;
-    void operator()(UIAssetSP arg) const {
-        arg->addKeyFrame( timelineName, time );
-    }
+    void operator()(GeomSP arg) const;
+//    void operator()(UIAssetSP arg) const {
+//        arg->addKeyFrame( timelineName, time );
+//    }
 
 private:
     std::string timelineName;

@@ -8,13 +8,13 @@ class HierGeom;
 
 class  GeometryOffset {
 public:
-	GeometryOffset( GeomAssetSP g, size_t os, size_t l ) :geometry{ g }, offset{ os }, length{ l }, totalDone{ 0 } {}
+	GeometryOffset( GeomSP g, size_t os, size_t l ) :geometry{ g }, offset{ os }, length{ l }, totalDone{ 0 } {}
 
 	bool incrementDone( size_t howMany );
 	bool ensureScheduledForRelighting();
 
 public:
-	GeomAssetSP geometry;
+	GeomSP geometry;
 	size_t offset;
 	size_t length;
 

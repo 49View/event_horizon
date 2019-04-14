@@ -25,13 +25,17 @@ SerializableContainer gltfBufferData;
 
 template <typename T>
 struct NodeVisitor {
-//    void operator()( GeomAssetSP _v ) { _v->visit<T>(); }
+//    void operator()( GeomSP _v ) { _v->visit<T>(); }
 //    void operator()( UIAssetSP _v ) { _v->visit<T>(); }
 //    void operator()( CameraAssetSP _v ) { _v->visit<T>(); }
 };
 
 void loadGeomInGui( SceneOrchestrator* p, std::shared_ptr<GLTF2> _newObject ) {
-    auto imported = _newObject->convert();
+
+    // convert returns a vector of scenes read from GLTF file
+    for ( const auto& scene : _newObject->convert() ) {
+        auto geom = std::make_shared<Geom>(scene->Name());
+    }
 //    auto hierScene = imported.getScene();
 //    p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
 //    p->SG().B<GRB>(_newObject->Name()).addIM( hierScene );

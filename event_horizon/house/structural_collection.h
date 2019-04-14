@@ -10,13 +10,13 @@ class HierGeom;
 class StructuralCollection : public ObservableCollection {
 public:
 	StructuralCollection();
-	std::vector<GeomAssetSP> getAllObjects() const;
+	std::vector<GeomSP> getAllObjects() const;
 
-	void push_back( GeomAssetSP _g );
+	void push_back( GeomSP _g );
 	void clear();
 
 private:
-	bool includeGeom( GeomAssetSP g );
-	std::vector<GeomAssetSP> geoms;
+	bool includeGeom( GeomSP g );
+	std::vector<GeomSP> geoms;
 	std::vector<std::string> excludeGeoms;
 };

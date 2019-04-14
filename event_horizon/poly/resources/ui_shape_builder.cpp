@@ -447,11 +447,11 @@ void UIShapeBuilder::assemble() {
         vs->translate( cr );
     }
 
-    elem->Data()->VertexList(vs);
 //    ### ref This needs to be here
+//    elem->Data()->VertexList(vs);
 //    elem->updateTransform();
 
-    sg.add( elem );
+//    sg.add( elem );
 }
 
 bool UIShapeBuilder::validate() const {
@@ -520,10 +520,10 @@ void UIShapeBuilder::createDependencyList() {
 
 void UIShapeBuilder::elemCreate() {
     auto sp = std::make_shared<UIElement>( Name(), shapeType, renderBucketIndex );
-    elem = std::make_shared<UIAsset>( sp, mTransform );
+//    elem = std::make_shared<UIAsset>( sp, mTransform );
 }
 
-UIShapeBuilder& UIShapeBuilder::inj( GeomAssetSP _cloned ) {
+UIShapeBuilder& UIShapeBuilder::inj( GeomSP _cloned ) {
 //    mTransform = _cloned->getLocalHierTransform();
     return *this;
 }
