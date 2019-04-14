@@ -10,25 +10,45 @@
 #include <core/boxable.hpp>
 
 enum UpdateTypeFlag {
-    Nothing = 0,
+    Nothing =  0,
     Position = 1,
     Rotation = 1 << 1,
-    Scale = 1 << 2
+    Scale =    1 << 2
 };
 
 template <typename T>
 class RecursiveTransformation : public Boxable<JMATH::AABB>,
                                 public NamePolicy<>,
-                                public std::enable_shared_from_this<T> {
+                                public std::enable_shared_from_this<RecursiveTransformation<T>> {
 public:
+
+    using ChildrenSP = std::shared_ptr<RecursiveTransformation<T>>;
+
     RecursiveTransformation() = default;
+    virtual ~RecursiveTransformation() = default;
     explicit RecursiveTransformation( const std::string& _name ) : NamePolicy(_name) {}
-    RecursiveTransformation( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale ) {
+    template <typename R>
+    RecursiveTransformation( const Vector3f& pos, const R& rot, const Vector3f& scale ) {
+        static_assert( std::is_same<R, Vector3f>::value || std::is_same<R, Quaternion>::value );
         generateLocalTransformData(pos, rot, scale);
         generateMatrixHierarchy(fatherRootTransform());
     }
 
-    virtual bool empty() const = 0;
+    bool empty() const {
+        return data.empty();
+    }
+
+    const T& Data( size_t _index = 0 ) const {
+        return data[_index];
+    }
+
+    T& DataRef( size_t _index = 0 ) {
+        return data[_index];
+    }
+
+    void pushData( const T& _data ) {
+        data.emplace_back( _data );
+    }
 
     void updateAnim() {
         if ( mTRS.isAnimating() ) {
@@ -37,9 +57,9 @@ public:
         }
     }
 
-    void Father( std::shared_ptr<T> val ) { father = val; }
-    std::shared_ptr<T> Father() { return father; }
-    std::shared_ptr<T> Father() const { return father; }
+    void Father( std::shared_ptr<RecursiveTransformation<T>> val ) { father = val; }
+    std::shared_ptr<RecursiveTransformation<T>> Father() { return father; }
+    std::shared_ptr<RecursiveTransformation<T>> Father() const { return father; }
     Matrix4f fatherRootTransform() const {
         if ( father == nullptr ) return Matrix4f::IDENTITY;
         return father->mLocalHierTransform;
@@ -87,7 +107,6 @@ public:
 
     void generateMatrixHierarchyRec( Matrix4f cmat ) {
         createLocalHierMatrix( cmat );
-
         for ( auto& c : children ) {
             c->generateMatrixHierarchyRec( mLocalHierTransform );
         }
@@ -180,10 +199,10 @@ public:
         generateMatrixHierarchy( fatherRootTransform());
     }
 
-    std::shared_ptr<T> addChildren( std::shared_ptr<T> data, const Vector3f& pos = Vector3f::ZERO,
-                                          const Vector3f& rot = Vector3f::ZERO,
-                                          const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
-        auto geom = data;
+    ChildrenSP addChildren( ChildrenSP _node, const Vector3f& pos = Vector3f::ZERO,
+                            const Vector3f& rot = Vector3f::ZERO,
+                            const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
+        auto geom = _node;
         geom->Father( this->shared_from_this() );
         geom->updateTransform( pos, rot, scale );
         children.push_back( geom );
@@ -197,34 +216,36 @@ public:
 //        children.push_back( _child );
 //    }
 
-//    std::shared_ptr<T> addChildren( std::shared_ptr<T> data ) {
+//    ChildrenSP addChildren( ChildrenSP data ) {
 //        data->Father( this );
 //        data->updateTransform();
 //        children.push_back( data );
 //        return data;
 //    }
 
-    std::shared_ptr<T> addChildren( const std::string& name ) {
-        std::shared_ptr<T> data = std::make_shared<T>();
-        data->Father( this->shared_from_this() );
-        data->Name( name );
-        data->updateTransform();
-        children.push_back( data );
-        return data;
+    ChildrenSP addChildren( const std::string& _name ) {
+        ChildrenSP node = std::make_shared<RecursiveTransformation<T>>();
+        node->Father( this->shared_from_this() );
+        node->Name( _name );
+        node->updateTransform();
+        children.push_back( node );
+        return node;
     }
 
-    std::shared_ptr<T> addChildren( const Vector3f& pos = Vector3f::ZERO,
-                                    const Vector3f& rot = Vector3f::ZERO,
-                                    const Vector3f& scale = Vector3f::ONE ) {
-        std::shared_ptr<T> data = std::make_shared<T>(pos, rot, scale);
-        data->Father( this->shared_from_this() );
-        data->updateTransform( pos, rot, scale );
-        children.push_back( data );
-        return data;
+    template <typename R>
+    ChildrenSP addChildren( const Vector3f& pos = Vector3f::ZERO,
+                            const R& rot = R::ZERO,
+                            const Vector3f& scale = Vector3f::ONE ) {
+        static_assert( std::is_same<R, Vector3f>::value || std::is_same<R, Quaternion>::value );
+        ChildrenSP node = std::make_shared<RecursiveTransformation<T>>(pos, rot, scale);
+        node->Father( this->shared_from_this() );
+        node->updateTransform( pos, rot, scale );
+        children.push_back( node );
+        return node;
     }
 
-    std::vector<std::shared_ptr<T>> Children() const { return children; }
-    std::vector<std::shared_ptr<T>>& Children() { return children; }
+    std::vector<ChildrenSP>  Children() const { return children; }
+    std::vector<ChildrenSP>& Children() { return children; }
 
     Matrix4f RootTransform() const { return mLocalTransform; }
     void RootTransform( const Matrix4f& val ) { mLocalTransform = val; }
@@ -234,7 +255,7 @@ public:
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
 
 private:
-    bool pruneRec( std::shared_ptr<T> it ) {
+    bool pruneRec( ChildrenSP it ) {
         for ( auto it2 = it->Children().begin(); it2 != it->Children().end(); ) {
             if ( it->pruneRec( *it2 ) ) {
                 it2 = it->Children().erase( it2 );
@@ -246,9 +267,10 @@ private:
     }
 
 protected:
-    std::shared_ptr<T> father;
+    ChildrenSP father;
     MatrixAnim mTRS;
     Matrix4f mLocalTransform = Matrix4f::IDENTITY;
     Matrix4f mLocalHierTransform;
-    std::vector<std::shared_ptr<T>> children;
+    std::vector<T> data;
+    std::vector<ChildrenSP> children;
 };

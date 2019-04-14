@@ -8,20 +8,22 @@
 #include <variant>
 
 template <typename> class Node;
-class  Geom;
 
 //using GeomAsset = Node<GeomData>;
+template <typename T> class RecursiveTransformation;
+struct GeomData;
+using Geom = RecursiveTransformation<GeomData>;
 using GeomAssetSP = std::shared_ptr<Geom>;
 
 class UIElement;
 
 using UIAsset = Node<UIElement>;
 using UIAssetSP = std::shared_ptr<UIAsset>;
-
-class CameraRig;
-using CameraAsset = Node<CameraRig>;
-using CameraAssetSP = std::shared_ptr<CameraAsset>;
-
+//
+//class CameraRig;
+//using CameraAsset = Node<CameraRig>;
+//using CameraAssetSP = std::shared_ptr<CameraAsset>;
+//
 using NodeVariants = std::variant<GeomAssetSP, UIAssetSP>;
 
 enum class UIShapeType {

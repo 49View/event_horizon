@@ -11,7 +11,6 @@
 #include <core/math/poly_shapes.hpp>
 #include <poly/poly_services.hpp>
 
-class GeomData;
 class Profile;
 
 using GeomDataListBuilderRetType = std::vector<std::shared_ptr<VData>>;

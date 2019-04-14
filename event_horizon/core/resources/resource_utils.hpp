@@ -13,11 +13,14 @@
 
 #include <core/serialization.hpp>
 
+template <typename T> class RecursiveTransformation;
+
 class VData;
 class Material;
 class RawImage;
 namespace Utility::TTFCore { class Font; }
-class Geom;
+struct GeomData;
+using Geom = RecursiveTransformation<GeomData>;
 class Profile;
 class MaterialColor;
 class UIElement;

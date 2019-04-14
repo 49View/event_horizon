@@ -674,11 +674,11 @@ PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, 
     }
 
     ret.normals = std::make_unique<Vector3f[]>( ret.numIndices );
-    ret.tangents = std::make_unique<Vector3f[]>( ret.numIndices );
+    ret.tangents = std::make_unique<Vector4f[]>( ret.numIndices );
     ret.binormals = std::make_unique<Vector3f[]>( ret.numIndices );
 
     for ( int q = 0; q < ret.numIndices; q++ ) {
-        ret.tangents[q] = Vector3f::ONE;
+        ret.tangents[q] = Vector4f::ONE;
         ret.binormals[q] = Vector3f::ONE;
     }
     ret.uvs = std::make_unique<Vector2f[]>( ret.numIndices );

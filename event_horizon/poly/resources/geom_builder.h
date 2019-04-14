@@ -271,6 +271,7 @@ protected:
     GeomAssetSP Elem() { return elem; }
 
     bool validate() const;
+    void elaborateMaterial();
     void preparePolyLines();
     void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb );
     void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb );
@@ -317,7 +318,6 @@ private:
     ScreenShotContainerPtr thumb;
 
     SceneGraph& sg;
-    friend class GeomData;
 };
 
 using GB = GeomBuilder;

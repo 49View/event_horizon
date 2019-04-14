@@ -87,7 +87,7 @@ void removeCollinear( std::vector<Vector3f>& cs ) {
 
 void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
              const Vector2f& uv1, const Vector2f& uv2, const Vector2f& uv3,
-             Vector3f& tangent1, Vector3f& tangent2, Vector3f& tangent3,
+             Vector4f& tangent1, Vector4f& tangent2, Vector4f& tangent3,
              Vector3f& bitangent1, Vector3f& bitangent2, Vector3f& bitangent3 ) {
 
     // Edges of the triangle : position delta

@@ -4,22 +4,24 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-#include <poly/poly.hpp>
+//#include <core/recursive_transformation.hpp>
+//#include <core/name_policy.hpp>
+//
+//class Material;
+//class VData;
+//
+//class GeomSceneArtifactData {
+//    std::shared_ptr<VData>    vdataSP;
+//    std::shared_ptr<Material> materialSP;
+//};
+//
+//using GeomSceneArtifact = RecursiveTransformation<GeomSceneArtifactData>;
 
-class Material;
-using ImportMaterialMap = std::vector<std::shared_ptr<Material>>;
-
-class ImportGeomArtifacts {
-public:
-    const GeomAssetSP& getScene() const;
-    void setScene( const GeomAssetSP& scene );
-
-    const ImportMaterialMap& getMaterials() const;
-    void setMaterials( const ImportMaterialMap& materials );
-    void addMaterial( std::shared_ptr<Material> _mat );
-private:
-    GeomAssetSP scene;
-    ImportMaterialMap materials;
-};
+//struct GeomSceneArtifact : public RecursiveTransformation<GeomSceneArtifact> {
+//    using RecursiveTransformation::RecursiveTransformation;
+//    virtual ~GeomSceneArtifact() = default;
+//
+//    bool empty() const override;
+//
+//    std::vector<GeomSceneArtifactData> data;
+//};

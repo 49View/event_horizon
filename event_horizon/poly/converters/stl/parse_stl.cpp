@@ -92,7 +92,7 @@ namespace stl {
         int i = 0;
         Vector2f bs{ box.calcWidth(), -box.calcHeight() };
         for ( const auto& t : info.triangles ) {
-            Vector3f tangent[3];
+            Vector4f tangent[3];
             Vector3f bitangent[3];
             Vector2f uv1 = t.v1.xy() / bs;
             Vector2f uv2 = t.v2.xy() / bs;

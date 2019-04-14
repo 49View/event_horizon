@@ -7,10 +7,18 @@
 #include <core/math/quaternion.h>
 #include <core/raw_image.h>
 #include <core/image_util.h>
+#include <core/names.hpp>
+#include <core/heterogeneous_map.hpp>
+#include <core/resources/material.h>
 #include <core/geom.hpp>
 #include <core/file_manager.h>
 #include <core/v_data.hpp>
 #include <core/resources/entity_factory.hpp>
+#include <poly/import_artifacts.hpp>
+
+GLTF2::IntermediateMaterial::IntermediateMaterial() {
+    values = std::make_shared<HeterogeneousMap>(S::SH);
+}
 
 unsigned int accessorTypeToNumberOfComponent( int ty ) {
     if ( ty == TINYGLTF_TYPE_SCALAR) {
@@ -692,7 +700,7 @@ Primitive gltfToPrimitive( int mode ) {
     return PRIMITIVE_TRIANGLES;
 }
 
-void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
+void GLTF2::addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<GeomSceneArtifact> gnode ) {
 
     auto mesh = model.meshes[meshIndex];
     tinygltf::Primitive primitive = mesh.primitives[primitiveIndex];
@@ -700,10 +708,13 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     
     auto material = model.materials[primitive.material];
     auto im = matMap.at(material.name);
+
+    auto materialSP = std::make_shared<Material>(im.values);
     auto geom = std::make_shared<VData>(); // im.mb
 
     geom->fillIndices( fillData<int32_t>( model, primitive.indices ) );
 
+    uint64_t NTBFill = 0;
     for ( const auto& [k,v] : primitive.attributes ) {
         if ( k == "POSITION" ) {
             GLTF2::ExtraAccessorData ead;
@@ -712,10 +723,12 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
             geom->setMin( ead.min );
         }
         else if ( k == "NORMAL" ) {
+            NTBFill |= 1;
             geom->fillNormals( fillData<Vector3f>( model, v ) );
         }
         else if ( k == "TANGENT" ) {
-            geom->fillTangets( fillData<Vector3f>( model, v ) );
+            NTBFill |= 2;
+            geom->fillTangets( fillData<Vector4f>( model, v ) );
         }
         else if ( k == "TEXCOORD_0" ) {
             geom->fillUV( fillData<Vector2f>( model, v ), 0 );
@@ -727,15 +740,17 @@ void GLTF2::addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father ) {
     }
 
 //    geom->sanitizeUVMap();
-    geom->calcBinormal();
+    if ( NTBFill < 2 ) {
+        geom->calcBinormal();
+    } else {
+        geom->calcBinormalFromNormAndTang();
+    }
 
-//    ### REF, what is this???
-//    father->Data( geom );
+    gnode->pushData( GeomSceneArtifactData{ geom, materialSP } );
 }
 
-void GLTF2::addNodeToHier( const int nodeIndex, GeomAssetSP& hier ) {
+void GLTF2::addMeshNode( const tinygltf::Node& node, std::shared_ptr<GeomSceneArtifact> hier ) {
 
-    auto node =  model.nodes[nodeIndex];
     Vector3f pos = Vector3f::ZERO;
     Quaternion rot;
     Vector3f scale = Vector3f::ONE;
@@ -745,26 +760,26 @@ void GLTF2::addNodeToHier( const int nodeIndex, GeomAssetSP& hier ) {
     }
     if ( !node.rotation.empty() ) {
         rot = Quaternion{ -node.rotation[0], -node.rotation[1], -node.rotation[2], node.rotation[3] };
-//        Vector3f erot = rot.euler();// * -1.0f;
-//        rot.euler( erot );
     }
 
     if ( !node.scale.empty() ) {
         scale = { node.scale[0], node.scale[1], node.scale[2] };
     }
 
-//    if ( node.name == "RootNode" || node.mesh >= 0 ) {
-        hier->generateLocalTransformData( pos, rot, scale );
-//    }
+    hier->generateLocalTransformData( pos, rot, scale );
 
     if ( node.mesh >= 0 ) {
         for ( size_t k = 0; k < model.meshes[node.mesh].primitives.size(); k++ ) {
-            addGeom( node.mesh, k , hier->addChildren() );
+            addGeom( node.mesh, k, hier->addChildren(node.name) );
         }
     }
+
     for ( const auto& ci : node.children ) {
-        auto c = hier->addChildren( model.nodes[ci].name );
-        addNodeToHier( ci, c );
+        auto nextNode = model.nodes[ci];
+        if ( nextNode.mesh >= 0 ) {
+            auto c = hier->addChildren( nextNode.name );
+            addMeshNode( nextNode, c );
+        }
     }
 }
 
@@ -868,18 +883,18 @@ GLTF2::IntermediateMaterial GLTF2::elaborateMaterial( const tinygltf::Material& 
     for ( const auto& [k,v] : mat.values ) {
         if ( k == "baseColorFactor" ) {
             im.baseColor.value = v.number_array;
-            im.values.assign(UniformNames::diffuseColor, im.baseColor.value.xyz() );
+            im.values->assign(UniformNames::diffuseColor, im.baseColor.value.xyz() );
         } else if ( k == "baseColorTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.baseColor.texture );
         } else if ( k == "metallicFactor" ) {
             float lv = static_cast<float>(v.number_value);
             im.metallic.value = Vector4f{ lv, lv, lv, 1.0f };
-            im.values.assign( UniformNames::metallic, lv );
+            im.values->assign( UniformNames::metallic, lv );
         } else if ( k == "metallicTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.metallic.texture );
         } else if ( k == "roughnessFactor" ) {
             float lv = static_cast<float>(v.number_value);
-            im.values.assign( UniformNames::roughness, lv );
+            im.values->assign( UniformNames::roughness, lv );
             im.roughness.value = Vector4f{ lv, lv, lv, 1.0f };
         } else if ( k == "roughnessTexture" ) {
             readParameterJsonDoubleValue( v, "index", "texCoord", im.roughness.texture );
@@ -899,32 +914,25 @@ GLTF2::IntermediateMaterial GLTF2::elaborateMaterial( const tinygltf::Material& 
     return im;
 }
 
-ImportGeomArtifacts GLTF2::convert() {
+GeomSceneArtifactVector GLTF2::convert() {
 
-    ImportGeomArtifacts ret;
-    auto hierScene = std::make_shared<Geom>( Name() );
+    GeomSceneArtifactVector scenes;
 
-    for ( size_t m = 0; m < model.materials.size(); m++ ) {
-        /*auto im = */elaborateMaterial( model.materials[m] );
-//        ### MAT Reintroduce adding materials to artifacts
-//        ret.addMaterial(...);
+    for (const auto & material : model.materials) {
+        elaborateMaterial( material );
     }
-    for ( size_t s = 0; s < model.scenes.size(); s++ ) {
-        auto scene = model.scenes[s];
-        if ( scene.nodes.empty() ) continue;
-        // NDDADO: Hardcoding zero "0" seems weird here but it's guaranteed by the standard to be the root node.
-        auto ci = scene.nodes[0];
-        auto c =  hierScene; //apparently the node0 is always "RootNode", so we do not really have to add a children
-                             // which would always be redundant, ie c = hierScene->addChildren( model.nodes[ci].name );
-        addNodeToHier( ci, c );
+    for ( const auto& scene : model.scenes ) {
+        for ( auto nodeIndex = 0; nodeIndex < scene.nodes.size(); nodeIndex++ ) {
+            auto node = model.nodes[nodeIndex];
+            auto cscene = std::make_shared<GeomSceneArtifact>( node.name );
+            addMeshNode( node, cscene );
+            cscene->prune();
+            cscene->generateMatrixHierarchy();
+            scenes.emplace_back( cscene );
+        }
     }
 
-    hierScene->prune();
-    hierScene->generateMatrixHierarchy();
-
-    ret.setScene( hierScene );
-
-    return ret;
+    return scenes;
 }
 
 GLTF2::GLTF2( const SerializableContainer& _array, const std::string& _name ) {

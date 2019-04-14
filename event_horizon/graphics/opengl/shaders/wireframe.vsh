@@ -4,7 +4,7 @@ void main() {
        mat3 modelMatrix3x3 = shVertexData();
 
        v_norm = normalize( modelMatrix3x3 * a_t2 );
-       v_tan = normalize( modelMatrix3x3 * a_t3 );
+       v_tan = normalize( modelMatrix3x3 * a_t3.xyz );
        v_bitan = normalize( modelMatrix3x3 * a_t4 );
        v_t8 = a_t8;
 

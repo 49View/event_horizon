@@ -21,7 +21,7 @@ public:
               const Vector3f& _n,
               const Vector2f& _uv,
               const Vector2f& _uv2,
-              const Vector3f& _t,
+              const Vector4f& _t,
               const Vector3f& _b,
               const Vector4f& _c );
     void fill( const PolyStruct& ps );
@@ -30,18 +30,20 @@ public:
     void fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index = 0 );
     void fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert = false );
     void fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert = false );
+    void fillTangets( const std::vector<Vector4f>& _tangents, bool _bInvert = false );
     void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
     void fillColors( const std::vector<Vector4f>& _colors );
     void changeWindingOrder();
     void sanitizeUVMap();
     void calcBinormal();
+    void calcBinormalFromNormAndTang();
     void changeHandness();
     void flipNormals();
     void mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );
     void checkBaricentricCoordsOn( const Vector3f& i, int32_t pIndexStart, int32_t pIndexEnd,
                                    int32_t& pIndex, float& u, float& v );
     void addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector2f& _uv2, const Vector3f& _vn,
-                            const Vector3f& _vt, const Vector3f& _vb, const Vector3f& _v8 );
+                            const Vector4f& _vt, const Vector3f& _vb, const Vector3f& _v8 );
     void swapIndicesWinding( Primitive _pr );
 
     const std::vector<int32_t>&  getVIndices() const;
@@ -75,7 +77,7 @@ public:
     inline Vector2f uvAt( int32_t i ) const { return vSoaData[i].a1; }
     inline Vector2f uv2At( int32_t i ) const { return vSoaData[i].a2; }
     inline Vector3f normalAt( int32_t i ) const { return vSoaData[i].a3; }
-    inline Vector3f tangentAt( int32_t i ) const { return vSoaData[i].a4; }
+    inline Vector4f tangentAt( int32_t i ) const { return vSoaData[i].a4; }
     inline Vector3f binormalAt( int32_t i ) const { return vSoaData[i].a5; }
     inline Vector4f colorAt( int32_t i ) const { return vSoaData[i].a6; }
 

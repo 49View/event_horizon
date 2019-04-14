@@ -302,6 +302,14 @@ public:
 		mW *= f;
 	}
 
+    Vector4f operator*=( const Vector4f& rhs ) {
+        mX *= rhs.mX;
+        mY *= rhs.mY;
+        mZ *= rhs.mZ;
+        mW *= rhs.mW;
+        return *this;
+    }
+
 	void operator -=( float f ) {
 		mX -= f;
 		mY -= f;

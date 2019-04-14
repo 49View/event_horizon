@@ -380,9 +380,9 @@ void pushTriangle( VDataSP vdata,
                    const Vector3f& vb1, const Vector3f& vb2, const Vector3f& vb3 ) {
     //	ASSERT(!isCollinear(v1, v2, v3));
 
-    Vector3f tangent1 = vt1;
-    Vector3f tangent2 = vt2;
-    Vector3f tangent3 = vt3;
+    Vector4f tangent1 = vt1;
+    Vector4f tangent2 = vt2;
+    Vector4f tangent3 = vt3;
 
     Vector3f bitangent1 = vb1;
     Vector3f bitangent2 = vb2;

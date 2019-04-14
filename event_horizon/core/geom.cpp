@@ -4,22 +4,18 @@
 
 #include "geom.hpp"
 
-bool Geom::empty() const {
-    return vData.empty();
-}
-
-const ResourceRef& Geom::MaterialRef() const {
-    return material;
-}
-
-void Geom::MaterialRef( const ResourceRef& _material ) {
-    Geom::material = _material;
-}
-
-const ResourceRef& Geom::VDataRef() const {
-    return vData;
-}
-
-void Geom::VDataRef( const ResourceRef& _vData ) {
-    Geom::vData = _vData;
-}
+//const ResourceRef& Geom::MaterialRef( size_t _index ) const {
+//    return data[_index].material;
+//}
+//
+//const ResourceRef& Geom::VDataRef( size_t _index ) const {
+//    return data[_index].vData;
+//}
+//
+//const GeomData& Geom::GeomDataRef( size_t _index ) const {
+//    return data[_index];
+//}
+//
+//void Geom::pushData( const ResourceRef& _vData, const ResourceRef& _material ) {
+//    data.emplace_back( GeomData{ _vData, _material } );
+//}

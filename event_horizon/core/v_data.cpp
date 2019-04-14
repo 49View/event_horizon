@@ -49,7 +49,15 @@ void VData::fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert )
     vSoaData.resize( _tangents.size() );
     float bi = _bInvert ? -1.0f : 1.0f;
     for ( size_t t = 0; t < _tangents.size(); t++ ) {
-        vSoaData[t].a4 = _tangents[t] * bi;
+        vSoaData[t].a4 = Vector4f{_tangents[t], 1.0f} * bi;
+    }
+}
+
+void VData::fillTangets( const std::vector<Vector4f>& _tangents, bool _bInvert ) {
+    vSoaData.resize( _tangents.size() );
+    float bi = _bInvert ? -1.0f : 1.0f;
+    for ( size_t t = 0; t < _tangents.size(); t++ ) {
+        vSoaData[t].a4 = _tangents[t].xyz() * bi;
     }
 }
 
@@ -81,6 +89,12 @@ void VData::sanitizeUVMap() {
     for ( auto& v : vSoaData ) {
         v.a1 = v.pos.dominantVector2();
         v.a2 = v.a1;
+    }
+}
+
+void VData::calcBinormalFromNormAndTang() {
+    for ( size_t i = 0; i < vSoaData.size(); i+=3 ) {
+        vSoaData[i].a5 = cross( vSoaData[i].a3, vSoaData[i].a4.xyz() ) * vSoaData[i].a4.w();
     }
 }
 
@@ -119,13 +133,13 @@ void VData::mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox
         if ( wow == WindingOrder::CW ) {
             index.pos.setX( bbox.width() - index.pos[0] );
             index.a3 *= flipXNormal;
-            index.a4 *= flipXNormal;
+            index.a4 *= V4f{flipXNormal, 1.0f};
             index.a5 *= flipXNormal;
         }
         if ( woh == WindingOrder::CW ) {
             index.pos.setY( bbox.height() - index.pos[1] );
             index.a3 *= flipYNormal;
-            index.a4 *= flipYNormal;
+            index.a4 *= V4f{flipYNormal, 1.0f};
             index.a5 *= flipYNormal;
         }
     }
@@ -205,7 +219,7 @@ void VData::checkBaricentricCoordsOn( const Vector3f& i, int32_t pIndexStart, in
 }
 
 void VData::addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector2f& _uv2, const Vector3f& _vn,
-                               const Vector3f& _vt, const Vector3f& _vb, const Vector3f& _v8 ) {
+                               const Vector4f& _vt, const Vector3f& _vb, const Vector3f& _v8 ) {
 
     BBox3d().expand(_vc);
     vSoaData.emplace_back( _vc, _uv, _uv2, _vn, _vt, _vb, _v8 );
@@ -213,7 +227,7 @@ void VData::addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const V
 }
 
 void VData::add( int32_t _i, const Vector3f& _v, const Vector3f& _n, const Vector2f& _uv, const Vector2f& _uv2,
-                 const Vector3f& _t, const Vector3f& _b, const Vector4f& _c ) {
+                 const Vector4f& _t, const Vector3f& _b, const Vector4f& _c ) {
     BBox3d().expand(_v);
     vIndices.push_back( _i );
     vSoaData.emplace_back( _v, _uv, _uv2, _n, _t, _b, _c );

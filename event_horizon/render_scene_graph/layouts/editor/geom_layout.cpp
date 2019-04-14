@@ -32,7 +32,7 @@ struct NodeVisitor {
 
 void loadGeomInGui( SceneOrchestrator* p, std::shared_ptr<GLTF2> _newObject ) {
     auto imported = _newObject->convert();
-    auto hierScene = imported.getScene();
+//    auto hierScene = imported.getScene();
 //    p->getCamera(Name::Foxtrot)->center(hierScene->BBox3d());
 //    p->SG().B<GRB>(_newObject->Name()).addIM( hierScene );
 //    p->SG().add( hierScene );

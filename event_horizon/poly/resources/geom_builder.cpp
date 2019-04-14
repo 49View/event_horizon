@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Dado on 29/10/2017.
 //
@@ -113,7 +115,9 @@ GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist )
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb ) {
     gb->setupRefName();
     auto rna = sg.VL().getHash( gb->refName() );
-    elem->VDataRef( rna.empty() ? sg.B<VB>( gb->refName() ).addIM( gb->build() ) : rna );
+    vdataRef = rna.empty() ? sg.B<VB>( gb->refName() ).addIM( gb->build() ) : rna;
+
+    elem->pushData( GeomData{vdataRef, matRef} );
 }
 
 void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb ) {
@@ -125,7 +129,12 @@ void GeomBuilder::createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb 
 }
 
 void GeomBuilder::createFromAsset( GeomAssetSP asset ) {
-    elem->addChildren( asset );
+    elem->addChildren( std::move(asset) );
+}
+
+void GeomBuilder::elaborateMaterial() {
+    if ( matRef.empty() ) matRef = S::WHITE_PBR;
+    matRef = sg.ML().getHash(matRef);
 }
 
 void GeomBuilder::build() {
@@ -135,8 +144,7 @@ void GeomBuilder::build() {
 
     elemCreate();
 
-    if ( matRef.empty() ) matRef = S::WHITE_PBR;
-    elem->MaterialRef( sg.ML().getHash(matRef) );
+    elaborateMaterial();
 
     switch ( builderType ) {
         case GeomBuilderType::shape:

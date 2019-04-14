@@ -6,11 +6,21 @@
 #include <core/math/vector4f.h>
 #include <core/name_policy.hpp>
 #include <core/descriptors/uniform_names.h>
-#include <core/heterogeneous_map.hpp>
 #include <poly/poly.hpp>
-#include <poly/import_artifacts.hpp>
 
 class RawImage;
+class HeterogeneousMap;
+class Material;
+class VData;
+template <typename T> class RecursiveTransformation;
+
+struct GeomSceneArtifactData {
+    std::shared_ptr<VData>    vdataSP;
+    std::shared_ptr<Material> materialSP;
+};
+
+using GeomSceneArtifact = RecursiveTransformation<GeomSceneArtifactData>;
+using GeomSceneArtifactVector = std::vector<std::shared_ptr<GeomSceneArtifact>>;
 
 enum class SigmoidSlope {
     Positive,
@@ -41,9 +51,10 @@ public:
     };
 
     struct IntermediateMaterial {
+        IntermediateMaterial();
         std::string name;
         mutable std::unordered_map<std::string, RawImage> mb;
-        HeterogeneousMap values;
+        std::shared_ptr<HeterogeneousMap> values;
         mutable std::shared_ptr<RawImage> grayScaleBaseColor;
         InternalPBRComponent baseColor{MPBRTextures::basecolorString,
         InternalPBRTextureReconstructionMode::GrayScaleCreate };
@@ -59,11 +70,11 @@ public:
 
     explicit GLTF2( const std::string& _path );
     explicit GLTF2( const SerializableContainer& _array, const std::string& _name );
-    ImportGeomArtifacts convert();
+    GeomSceneArtifactVector convert();
 
 private:
-    void addGeom( int meshIndex, int primitiveIndex, GeomAssetSP father );
-    void addNodeToHier( int nodeIndex, GeomAssetSP& hier );
+    void addGeom( int meshIndex, int primitiveIndex, std::shared_ptr<GeomSceneArtifact> gnode );
+    void addMeshNode( const tinygltf::Node& node, std::shared_ptr<GeomSceneArtifact> hier );
     GLTF2::IntermediateMaterial elaborateMaterial( const tinygltf::Material& mat );
     void saveMaterial( const IntermediateMaterial& im );
     void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic, const std::string& _uniformName );
