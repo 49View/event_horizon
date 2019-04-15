@@ -13,17 +13,17 @@
 #include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
 
-void SceneGraph::add( NodeVariants _geom ) {
-//    addImpl(_geom);
-    nodeAddSignal(_geom);
-//    geoms[std::visit(lambdaUUID, _geom)] = _geom;
+UUID SceneGraph::addNode( const ResourceRef& _hash ) {
+    auto cloned = GM().clone( _hash );
+    nodeAddSignal(cloned);
+    return cloned->UUiD();
 }
 
-void SceneGraph::remove( const UUID& _uuid ) {
-    if ( auto it = geoms.find(_uuid); it != geoms.end() ) {
+void SceneGraph::removeNode( const UUID& _uuid ) {
+    if ( auto it = nodes.find(_uuid); it != nodes.end() ) {
         // Remove all child
 //        removeImpl(_uuid);
-        geoms.erase( it );
+        nodes.erase( it );
     }
 }
 
@@ -39,7 +39,7 @@ void SceneGraph::update() {
     GM().update();
 
 // ### Reintroduce anims for scene graph
-//    for ( auto& [k,v] : geoms ) {
+//    for ( auto& [k,v] : nodes ) {
 //        std::visit( lambdaUpdateAnimVisitor, v );
 //    }
 }
@@ -63,11 +63,10 @@ void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
         auto pr = std::make_shared<Profile>();
         pr->createWire(0.1f, 6);
         auto prId = B<PB>("ProfileWire").addIM(pr);
-        GB{ *this, GeomBuilderType::follower, prId, vlist }.m(mat).build();
-
+        auto gref = GB{ *this, GeomBuilderType::follower, prId, vlist }.m(mat).build();
+        addNode( gref );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
 //        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
-        // ### MAT reintroduce material/colors for geoms .c(col)
         UISB{*this, UIShapeType::Text3d, _params[1], 0.6f }.buildr();
     }
 }
@@ -109,7 +108,7 @@ SceneGraph::SceneGraph( CommandQueue& cq,
 }
 
 size_t SceneGraph::countGeoms() const {
-    return geoms.size();
+    return nodes.size();
 }
 
 void SceneGraph::mapGeomType( const uint64_t _value, const std::string& _key ) {
@@ -129,15 +128,15 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
     return 0;
 }
 
-NodeGraph& SceneGraph::Nodes() {
-    return geoms;
+NodeGraphContainer& SceneGraph::Nodes() {
+    return nodes;
 }
 
 bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback ) {
 
     bool ret = false;
 
-    for ( const auto& [k, v] : geoms ) {
+    for ( const auto& [k, v] : nodes ) {
         AABB box = AABB::INVALID;
         UUID uuid{};
 //        ### REF reimplement box and UUID
@@ -165,10 +164,6 @@ CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
     addCommandDefinition("lightmaps", std::bind(&SceneGraph::cmdCalcLightmaps, &_hm, std::placeholders::_1));
     addCommandDefinition("change time", std::bind(&SceneGraph::cmdChangeTime, &_hm, std::placeholders::_1 ));
     addCommandDefinition("reload shaders", std::bind(&SceneGraph::cmdReloadShaders, &_hm, std::placeholders::_1 ));
-}
-
-void SceneGraph::nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot ) {
-    nodeAddSignal.connect( _slot );
 }
 
 void SceneGraph::init() {

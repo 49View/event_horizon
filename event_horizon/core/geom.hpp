@@ -14,13 +14,3 @@ struct GeomData {
 
 using Geom = RecursiveTransformation<GeomData>;
 
-//class Geom : public RecursiveTransformation<GeomData> {
-//public:
-//    using RecursiveTransformation::RecursiveTransformation;
-//    Geom() = default;
-//    virtual ~Geom() = default;
-//    explicit Geom( const std::string& _name ) : RecursiveTransformation( _name ) {}
-//
-//    const ResourceRef& MaterialRef( size_t _index = 0 ) const;
-//    const ResourceRef& VDataRef( size_t _index = 0 ) const;
-//};

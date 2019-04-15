@@ -9,7 +9,7 @@
 class UUIDable {
 public:
     UUIDable() {
-        mUUID = UUIDGen::make();
+        makeUUID();
     }
 
     const UUID& UUiD() const {
@@ -20,6 +20,14 @@ public:
         return mUUID;
     }
 
+    void assingNewUUID() {
+        makeUUID();
+    }
+
+private:
+    void makeUUID() {
+        mUUID = UUIDGen::make();
+    }
 private:
     UUID mUUID;
 };

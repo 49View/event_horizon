@@ -8,6 +8,7 @@
 #include <boost/signals2.hpp>
 #include <core/util.h>
 #include <core/resources/resource_utils.hpp>
+#include <core/resources/entity_factory.hpp>
 
 using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
 using ResourceMapperDict = std::unordered_map<std::string, ResourceRef>;
@@ -37,6 +38,13 @@ public:
         }
         return nullptr;
     };
+
+    std::shared_ptr<T> clone( const std::string& _hash ) const {
+        if ( auto res = resources.find( _hash ); res != resources.end() ) {
+            return EF::clone( res->second );
+        }
+        return nullptr;
+    }
 
     void update() {
         for ( const auto& s : signalAddElements ) {

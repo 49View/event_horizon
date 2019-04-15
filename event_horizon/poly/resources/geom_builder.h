@@ -263,7 +263,7 @@ public:
 
     GeomSP buildr();
 
-    void build();
+    ResourceRef build();
 
 protected:
     void elemCreate();

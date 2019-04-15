@@ -44,7 +44,7 @@ std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
 }
 
-void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node, SelectableFlagT _flags ) {
+void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariantsSP _node, SelectableFlagT _flags ) {
     auto sn = selectedNodes.find( _uuid );
     auto selectColor = sn != selectedNodes.end() ? sn->second.oldColor : Color4f::DARK_YELLOW;
     Color4f oldColor{Color4f::WHITE};
@@ -126,7 +126,7 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
                 uuids.emplace_back(k);
             }
             for ( const auto& ui : uuids ) {
-                rsg.SG().remove( ui );
+                rsg.SG().removeNode( ui );
                 erase_if_it( selectedNodes, ui );
             }
         }

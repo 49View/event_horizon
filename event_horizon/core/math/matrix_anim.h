@@ -24,6 +24,8 @@ public:
 	void set( const Vector3f& _pos, const Vector3f& _angleAxis, const Vector3f& _scale );
 	void set( const Vector3f& _pos, const Quaternion& _rot, const Vector3f& _scale );
 
+    MatrixAnim clone( const MatrixAnim& _source);
+
 	bool isAnimating() const;
 public:
 	// Expanded local transform Matrices

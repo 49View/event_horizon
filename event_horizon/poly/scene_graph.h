@@ -11,23 +11,11 @@
 #include <typeinfo>
 #include <variant>
 
-#include <boost/signals2.hpp>
-
 #include <core/uuid.hpp>
 #include <core/command.hpp>
-#include <poly/poly.hpp>
 #include <core/resources/resource_utils.hpp>
-
-class NodeAsset {};
-
-using NodeVariants = NodeAsset;
-using NodeVariantsSP = std::shared_ptr<NodeAsset>;
-
-using NodeGraph = std::unordered_map<std::string, NodeVariantsSP>;
-using SceneRayIntersectCallback = std::function<void(NodeVariantsSP, float)>;
-
-using NodeGraphConnectParamsSig = NodeVariants&;
-using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
+#include <poly/poly.hpp>
+#include <poly/node_graph.hpp>
 
 class SceneGraph;
 
@@ -37,7 +25,7 @@ public:
     virtual ~CommandScriptSceneGraph() = default;
 };
 
-class SceneGraph {
+class SceneGraph : public NodeGraph {
 public:
     explicit SceneGraph( CommandQueue& cq,
                          VDataManager& _vl,
@@ -50,10 +38,8 @@ public:
                          GeomManager& _gm);
 
     void init();
-    void add( NodeVariants _geom );
-    void remove( const UUID& _uuid );
-
-    void nodeAddConnect( std::function<NodeGraphConnectFuncSig> _slot );
+    UUID addNode( const ResourceRef& _hash );
+    void removeNode( const UUID& _uuid );
 
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
@@ -99,11 +85,11 @@ public:
     uint64_t getGeomType( const std::string& _key ) const;
 
     void update();
-    NodeGraph& Nodes();
+    NodeGraphContainer& Nodes();
 
     template <typename T>
     void visitNode( const UUID& _uuid, T _visitor ) {
-        if ( auto it = geoms.find(_uuid); it != geoms.end() ) {
+        if ( auto it = nodes.find(_uuid); it != nodes.end() ) {
             std::visit(_visitor, it->second);
         }
     }
@@ -120,8 +106,6 @@ protected:
 //    virtual void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 
 protected:
-    NodeGraph geoms;
-
     VDataManager& vl;
     ImageManager& tl;
     ProfileManager& pl;
@@ -132,7 +116,4 @@ protected:
     GeomManager& gm;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
-    std::unordered_map<std::string, uint64_t> geomTypeMap;
-
-    boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
 };

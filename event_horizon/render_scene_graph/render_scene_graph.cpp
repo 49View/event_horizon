@@ -14,46 +14,33 @@
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
 
-RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) :
-                                    rr( rr ), sg(_sg) {
+RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg) {
 
 //    hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
 //    uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
 
     sg.TL().connect( [this](const ResourceTransfer<RawImage>& _val ) {
-        LOGRS( "Adding " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
+        LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addTextureResource(_val);
     });
 
     sg.ML().connect( [this](const ResourceTransfer<Material>& _val ) {
-        LOGRS( "Adding " << ResourceVersioning<Material>::Prefix() << ": "  << *_val.names.begin() );
+        LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<Material>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addMaterialResource(_val);
     });
 
     sg.VL().connect( [this](const ResourceTransfer<VData>& _val ) {
-        LOGRS( "Adding " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
+        LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addVDataResource(_val);
     });
 
-    sg.GM().connect( [this](const ResourceTransfer<Geom>& _val ) {
-        LOGRS( "Adding " << ResourceVersioning<Geom>::Prefix() << ": "  << *_val.names.begin() );
-        auto dataRef = _val.elem->DataRef(0);
+    sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {
+        LOGRS( "[SG-Node] Add " << _geom->Name() );
+        auto dataRef = _geom->DataRef(0);
         auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.
-        g(9200).n(_val.hash).build();
+        g(9200).n(_geom->UUiD()).build();
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);
     });
-
-//    sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {
-//        if ( auto as = std::get_if<GeomSP>(&_geom); as != nullptr ) {
-//            (*as)->subscribeData(hierRenderObserver);
-//            (*as)->sendNotifyData("generateGeometryVP");
-//        } else if ( auto as = std::get_if<UIAssetSP>(&_geom); as != nullptr ) {
-//            (*as)->subscribeData(uiRenderObserver);
-//            (*as)->sendNotifyData("generateGeometryVP");
-//        } // else if ( auto as = std::get_if<CameraAssetSP>(&_geom); as != nullptr ) {
-////        SG().CM().add( (*as)->Data() );
-////    }
-//    });
 
     am = std::make_shared<AudioManagerOpenAL>();
 }

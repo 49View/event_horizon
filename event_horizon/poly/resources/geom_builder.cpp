@@ -137,7 +137,7 @@ void GeomBuilder::elaborateMaterial() {
     matRef = sg.ML().getHash(matRef);
 }
 
-void GeomBuilder::build() {
+ResourceRef GeomBuilder::build() {
     if ( Name().empty() ) {
         Name( UUIDGen::make() );
     }
@@ -175,7 +175,7 @@ void GeomBuilder::build() {
             break;
         case GeomBuilderType::unknown:
             LOGE( "Unknown builder type" );
-            return;
+            return {};
         default:
             break;
     }
@@ -186,7 +186,7 @@ void GeomBuilder::build() {
 
     elem->updateExistingTransform( pos, axis, scale );
 
-    sg.B<GRB>(Name()).addIM( elem );
+    return sg.B<GRB>(Name()).addIM( elem );
 }
 
 GeomBuilder& GeomBuilder::addQuad( const QuadVector3fNormal& quad,

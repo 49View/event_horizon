@@ -8,6 +8,7 @@
 #include <core/name_policy.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/boxable.hpp>
+#include <core/uuidable.hpp>
 
 enum UpdateTypeFlag {
     Nothing =  0,
@@ -16,16 +17,29 @@ enum UpdateTypeFlag {
     Scale =    1 << 2
 };
 
+class TransformNodeData {
+protected:
+    MatrixAnim mTRS;
+    Matrix4f mLocalTransform = Matrix4f::IDENTITY;
+    Matrix4f mLocalHierTransform;
+};
+
 template <typename T>
 class RecursiveTransformation : public Boxable<JMATH::AABB>,
                                 public NamePolicy<>,
+                                public UUIDable,
+                                public TransformNodeData,
                                 public std::enable_shared_from_this<RecursiveTransformation<T>> {
 public:
 
-    using ChildrenSP = std::shared_ptr<RecursiveTransformation<T>>;
+    using NodeSP = std::shared_ptr<RecursiveTransformation<T>>;
 
     RecursiveTransformation() = default;
     virtual ~RecursiveTransformation() = default;
+    // This ctor is effectively a "clone"
+    explicit RecursiveTransformation( NodeSP _source ) {
+        addNodeRec( _source, nullptr );
+    }
     explicit RecursiveTransformation( const std::string& _name ) : NamePolicy(_name) {}
     template <typename R>
     RecursiveTransformation( const Vector3f& pos, const R& rot, const Vector3f& scale ) {
@@ -199,7 +213,7 @@ public:
         generateMatrixHierarchy( fatherRootTransform());
     }
 
-    ChildrenSP addChildren( ChildrenSP _node, const Vector3f& pos = Vector3f::ZERO,
+    NodeSP addChildren( NodeSP _node, const Vector3f& pos = Vector3f::ZERO,
                             const Vector3f& rot = Vector3f::ZERO,
                             const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
         auto geom = _node;
@@ -209,22 +223,8 @@ public:
         return geom;
     }
 
-//    void addChildren( std::shared_ptr<D> data, std::shared_ptr<Node<D>> _child, const Vector3f& pos = Vector3f::ZERO,
-//                      const Vector3f& rot = Vector3f::ZERO, const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
-//        _child = std::make_shared<Node<D>>( data, this );
-//        _child->updateTransform( pos, rot, scale );
-//        children.push_back( _child );
-//    }
-
-//    ChildrenSP addChildren( ChildrenSP data ) {
-//        data->Father( this );
-//        data->updateTransform();
-//        children.push_back( data );
-//        return data;
-//    }
-
-    ChildrenSP addChildren( const std::string& _name ) {
-        ChildrenSP node = std::make_shared<RecursiveTransformation<T>>();
+    NodeSP addChildren( const std::string& _name ) {
+        NodeSP node = std::make_shared<RecursiveTransformation<T>>();
         node->Father( this->shared_from_this() );
         node->Name( _name );
         node->updateTransform();
@@ -233,19 +233,19 @@ public:
     }
 
     template <typename R>
-    ChildrenSP addChildren( const Vector3f& pos = Vector3f::ZERO,
+    NodeSP addChildren( const Vector3f& pos = Vector3f::ZERO,
                             const R& rot = R::ZERO,
                             const Vector3f& scale = Vector3f::ONE ) {
         static_assert( std::is_same<R, Vector3f>::value || std::is_same<R, Quaternion>::value );
-        ChildrenSP node = std::make_shared<RecursiveTransformation<T>>(pos, rot, scale);
+        NodeSP node = std::make_shared<RecursiveTransformation<T>>(pos, rot, scale);
         node->Father( this->shared_from_this() );
         node->updateTransform( pos, rot, scale );
         children.push_back( node );
         return node;
     }
 
-    std::vector<ChildrenSP>  Children() const { return children; }
-    std::vector<ChildrenSP>& Children() { return children; }
+    std::vector<NodeSP>  Children() const { return children; }
+    std::vector<NodeSP>& Children() { return children; }
 
     Matrix4f RootTransform() const { return mLocalTransform; }
     void RootTransform( const Matrix4f& val ) { mLocalTransform = val; }
@@ -255,7 +255,28 @@ public:
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
 
 private:
-    bool pruneRec( ChildrenSP it ) {
+    NodeSP addNodeRec( NodeSP _node, NodeSP _father ) {
+        cloneData( _node, _father );
+        for ( const auto& c : _node->Children() ) {
+            children.emplace_back( addNodeRec( c, this->shared_from_this() ) );
+        }
+    }
+
+    void cloneData( NodeSP _source, NodeSP _father ) {
+        if ( _father ) {
+            father = _father;
+        } else {
+            assingNewUUID();
+        }
+        Name( _source->Name() );
+        BBox3d( _source->BBox3d() );
+        data = _source->data;
+        mTRS = _source->clone();
+        mLocalTransform = _source->mLocalTransform;
+        mLocalHierTransform = _source->mLocalHierTransform;
+    }
+
+    bool pruneRec( NodeSP it ) {
         for ( auto it2 = it->Children().begin(); it2 != it->Children().end(); ) {
             if ( it->pruneRec( *it2 ) ) {
                 it2 = it->Children().erase( it2 );
@@ -267,10 +288,7 @@ private:
     }
 
 protected:
-    ChildrenSP father;
-    MatrixAnim mTRS;
-    Matrix4f mLocalTransform = Matrix4f::IDENTITY;
-    Matrix4f mLocalHierTransform;
+    NodeSP father;
     std::vector<T> data;
-    std::vector<ChildrenSP> children;
+    std::vector<NodeSP> children;
 };

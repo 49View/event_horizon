@@ -24,7 +24,7 @@ namespace SelectableFlag {
 using SelectableFlagT = uint64_t;
 
 struct Selectable {
-    Selectable( const Color4f& oldColor, MatrixAnim& localTransform, NodeVariants _node, SelectableFlagT _flags ) :
+    Selectable( const Color4f& oldColor, MatrixAnim& localTransform, NodeVariantsSP _node, SelectableFlagT _flags ) :
         oldColor( oldColor ),
         trs( localTransform ),
         node( _node ),
@@ -32,7 +32,7 @@ struct Selectable {
 
     Color4f oldColor;
     MatrixAnim& trs;
-    NodeVariants node;
+    NodeVariantsSP node;
     SelectableFlagT flags = SelectableFlag::None;
 };
 
@@ -51,7 +51,7 @@ void xandBitWiseFlag( Tint& source, T flag ) {
 
 class Selection {
 public:
-    virtual void selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariants _node, SelectableFlagT _flags ) = 0;
+    virtual void selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariantsSP _node, SelectableFlagT _flags ) = 0;
     void unselect( const UUID& _uuid, Selectable& _node );
     void unselectAll();
 
