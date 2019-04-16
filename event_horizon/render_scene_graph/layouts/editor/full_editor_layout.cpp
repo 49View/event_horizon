@@ -4,6 +4,9 @@
 
 #include "full_editor_layout.h"
 
+#include <core/resources/resource_utils.hpp>
+#include <core/camera_rig.hpp>
+#include <core/camera.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/scene_state_machine.h>
 #include <poly/resources/ui_shape_builder.h>
@@ -68,8 +71,10 @@ void FullEditor::init() {
     float cameraHeight = cameraWidth*(cameraAspectRatio*(1280.0f/720.0f));
     addBox( Name::Foxtrot,
             topX, topX + cameraWidth,
-            uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Fly );
+            uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Plan2d );
 
+    o()->getCamera(Name::Foxtrot)->setPosition(V3f::ONE);
+    o()->getCamera(Name::Foxtrot)->setQuatAngles(V3f{M_PI_2, 0.0f, 0.0f});
     allCallbacksEntitySetup();
     o()->setDragAndDropFunction(allConversionsDragAndDropCallback);
 
