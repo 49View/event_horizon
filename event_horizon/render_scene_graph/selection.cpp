@@ -227,6 +227,10 @@ void Selection::unselect( const UUID& _uuid, Selectable& _node ) {
     erase_if_it( selectedNodes, _uuid );
 }
 
+bool Selection::inputIsBlockedOnSelection() const {
+    return IsAlreadyInUse() || isImGuiBusy();
+}
+
 void SelectionAddToKeyFrame::operator()( GeomSP arg ) const {
 //        ### REF selected needs to be worked out with new assets graphs (UUID)
 // ### DUMMY REMOVE THIS LINE LOGRS(time);

@@ -39,7 +39,6 @@ public:
     void updateFromInputData( const CameraInputData& mi );
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) = 0;
     virtual void renderControls( SceneOrchestrator* _p ) = 0;
-    virtual bool inputIsBlockedOnSelection() const { return false; }
 
     std::shared_ptr<CameraRig> rig();
     std::shared_ptr<Camera> getMainCamera();
@@ -49,15 +48,20 @@ protected:
     RenderSceneGraph& rsg;
 };
 
-class CameraControlFly : public CameraControl, public Selection {
-public:
+class CameraControlEditable : public CameraControl, public Selection {
+protected:
     using CameraControl::CameraControl;
+    void togglesUpdate( const CameraInputData& mi );
+};
+
+class CameraControlFly : public CameraControlEditable {
+public:
+    using CameraControlEditable::CameraControlEditable;
     CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
     void renderControls( SceneOrchestrator* _p ) override;
     void selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariantsSP _node, SelectableFlagT _flags ) override;
-    bool inputIsBlockedOnSelection() const override;
 
 protected:
     void unselectImpl( const UUID& _uuid, Selectable& _node ) override;
@@ -74,6 +78,19 @@ public:
     void renderControls( SceneOrchestrator* _p ) override {}
 protected:
     bool isWASDActive = false;
+};
+
+class CameraControl2d : public CameraControlEditable {
+public:
+    using CameraControlEditable::CameraControlEditable;
+    CameraControl2d( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
+    ~CameraControl2d() override = default;
+    void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
+    void renderControls( SceneOrchestrator* _p ) override;
+    void selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariantsSP _node, SelectableFlagT _flags ) override;
+
+protected:
+    void unselectImpl( const UUID& _uuid, Selectable& _node ) override;
 };
 
 class CameraControlFactory {

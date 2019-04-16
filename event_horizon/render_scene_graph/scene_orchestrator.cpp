@@ -255,7 +255,6 @@ void SceneOrchestrator::addViewport( RenderTargetType _rtt, std::shared_ptr<Came
 		RenderTargetFactory::make( _rtt, _rig, _viewport, _bt, RSG().RR() );
 		mRigs[_rig->Name()] = CameraControlFactory::make( _cc, _rig, rsg );
 	} else {
-
 		RSG().RR().getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 	}
 }

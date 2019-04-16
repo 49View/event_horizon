@@ -82,9 +82,6 @@ void SceneStateMachineBackEnd::addBoxToViewport( const std::string& _name, const
         rig->setViewport(lViewport);
 
 		RenderTargetType rtt = RenderTargetType::PBR;
-		if ( boxes[_name].cc == CameraControls::Plan2d ) {
-			rtt = RenderTargetType::Plain;
-		}
 		o()->addViewport( rtt, rig, lViewport, boxes[_name].cc, BlitType::OnScreen );
 	}
 }

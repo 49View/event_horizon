@@ -13,27 +13,31 @@
 #include <core/v_data.hpp>
 #include <poly/resources/ui_shape_builder.h>
 
+std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,
+                                                           RenderSceneGraph& _rsg) {
+    switch ( _cc ) {
+        case CameraControls::Fly:
+            return std::make_shared<CameraControlFly>(_cr, _rsg);
+        case CameraControls::Walk:
+            return std::make_shared<CameraControlWalk>(_cr, _rsg);
+        case CameraControls::Plan2d:
+            return std::make_shared<CameraControl2d>(_cr, _rsg);
+        default:
+            return nullptr;
+    };
+}
+
 CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg ) :
                               mCameraRig(std::move( cameraRig )), rsg( rsg) {}
 
 void CameraControl::updateFromInputData( const CameraInputData& mi ) {
 
     auto camera = mCameraRig->getMainCamera();
-
     if ( !camera->ViewPort().contains( mi.mousePos) ) return;
 
     updateFromInputDataImpl( camera, mi );
-
     camera->update();
 
-//    if ( Mode() == CameraMode::Edit2d ) {
-//        if ( mi.isMouseTouchedDown) {
-//            pan( Vector3f( mi.moveDiff * Vector2f{-1.0f, 1.0f}, 0.0f ) );
-//        }
-//        zoom2d(mi.scrollValue); // It's safe to call it every frame as no gesture on wheel/magic mouse
-//        // will mean zero value so unchanged
-//    }
-//
 }
 
 std::shared_ptr<CameraRig> CameraControl::rig() {
@@ -42,6 +46,18 @@ std::shared_ptr<CameraRig> CameraControl::rig() {
 
 std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
+}
+
+void CameraControlEditable::togglesUpdate( const CameraInputData& mi ) {
+    if ( !inputIsBlockedOnSelection() ) {
+        ViewportTogglesT cvtTggles = ViewportToggles::None;
+        // Keyboards
+        if ( mi.ti.checkKeyToggleOn( GMK_1 )) cvtTggles |= ViewportToggles::DrawWireframe;
+        if ( mi.ti.checkKeyToggleOn( GMK_G )) cvtTggles |= ViewportToggles::DrawGrid;
+        if ( cvtTggles != ViewportToggles::None ) {
+            toggle( rig()->Cvt(), cvtTggles );
+        }
+    }
 }
 
 void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariantsSP _node, SelectableFlagT _flags ) {
@@ -67,15 +83,7 @@ void CameraControlFly::unselectImpl( const UUID& _uuid, Selectable& _node ) {
 void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
 
     if ( !IsAlreadyInUse() || isWASDActive ) {
-        if ( !inputIsBlockedOnSelection() ) {
-            ViewportTogglesT cvtTggles = ViewportToggles::None;
-            // Keyboards
-            if ( mi.ti.checkKeyToggleOn( GMK_1 )) cvtTggles |= ViewportToggles::DrawWireframe;
-            if ( mi.ti.checkKeyToggleOn( GMK_G )) cvtTggles |= ViewportToggles::DrawGrid;
-            if ( cvtTggles != ViewportToggles::None ) {
-                toggle( rig()->Cvt(), cvtTggles );
-            }
-        }
+        togglesUpdate( mi );
 
         static float camVelocity = 1.000f;
         static float accumulatedVelocity = .0003f;
@@ -145,12 +153,8 @@ void CameraControlFly::renderControls( SceneOrchestrator* _p ) {
     }
 }
 
-bool CameraControlFly::inputIsBlockedOnSelection() const {
-    return IsAlreadyInUse() || isImGuiBusy();
-}
-
 CameraControlFly::CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg )
-        : CameraControl( cameraRig, rsg ) {
+        : CameraControlEditable( cameraRig, rsg ) {
     toggle( rig()->Cvt(), ViewportToggles::DrawGrid );
 }
 
@@ -185,24 +189,63 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     if ( mi.moveDiffSS != Vector2f::ZERO ) {
         _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
     }
+}
 
-//    _cam->moveForward( mi.moveForward );
-//    _cam->strafe( mi.strafe );
-//    _cam->moveUp( mi.moveUp );
+
+void CameraControl2d::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariantsSP _node, SelectableFlagT _flags ) {
+    auto sn = selectedNodes.find( _uuid );
+    auto selectColor = sn != selectedNodes.end() ? sn->second.oldColor : Color4f::DARK_YELLOW;
+    Color4f oldColor{Color4f::WHITE};
+
+    if ( checkBitWiseFlag( _flags, SelectableFlag::Highlighted ) ) {
+        rsg.RR().changeMaterialColorOnUUID( _uuid, selectColor, oldColor );
+    }
+    if ( sn != selectedNodes.end() ) {
+        selectedNodes.erase(sn);
+    } else {
+        selectedNodes.emplace( _uuid, Selectable{ oldColor, _trs, _node, _flags } );
+    }
+}
+
+void CameraControl2d::unselectImpl( const UUID& _uuid, Selectable& _node ) {
+    Color4f oldColor{Color4f::WHITE};
+    rsg.RR().changeMaterialColorOnUUID( _uuid, _node.oldColor, oldColor );
+}
+
+void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
+
+    if ( IsAlreadyInUse() ) return;
+
+    togglesUpdate( mi );
+
+    float moveForward = 0.0f;
+    float strafe = 0.0f;
+    float moveUp = 0.0f;
+
+    if ( mi.isMouseTouchedDown) {
+        moveForward = mi.moveDiff.y();
+        strafe = mi.moveDiff.x();
+    }
+    moveUp = mi.scrollValue; // It's safe to call it every frame as no gesture on wheel/magic mouse
+
+    _cam->moveForward( moveForward );
+    _cam->strafe( strafe );
+    _cam->moveUp( moveUp );
 //    if ( mi.moveDiffSS != Vector2f::ZERO ) {
 //        _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
 //    }
+
 }
 
-std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,
-                                                           RenderSceneGraph& _rsg) {
-    switch ( _cc ) {
-        case CameraControls::Fly:
-            return std::make_shared<CameraControlFly>(_cr, _rsg);
-        case CameraControls::Walk:
-            return std::make_shared<CameraControlWalk>(_cr, _rsg);
-        default:
-            return nullptr;
-    };
+void CameraControl2d::renderControls( SceneOrchestrator* _p ) {
+    for ( auto& [k,n] : selectedNodes ) {
+        showGizmo( n, getMainCamera(), _p );
+    }
 }
+
+CameraControl2d::CameraControl2d( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg )
+        : CameraControlEditable( cameraRig, rsg ) {
+    toggle( rig()->Cvt(), ViewportToggles::DrawGrid );
+}
+
 

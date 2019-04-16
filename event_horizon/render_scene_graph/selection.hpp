@@ -77,6 +77,8 @@ public:
     bool IsAlreadyInUse() const;
     bool isImGuiBusy() const;
 
+    bool inputIsBlockedOnSelection() const;
+
 protected:
     virtual void unselectImpl( const UUID& _uuid, Selectable& _node ) = 0;
 
