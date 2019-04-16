@@ -12,5 +12,3 @@ struct GeomData {
     ResourceRef material;
 };
 
-using Geom = RecursiveTransformation<GeomData>;
-

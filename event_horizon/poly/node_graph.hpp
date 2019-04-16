@@ -9,6 +9,7 @@
 #include <functional>
 #include <boost/signals2.hpp>
 #include <core/resources/resource_utils.hpp>
+#include <core/resources/resource_types.hpp>
 
 using NodeVariantsSP = GeomSP;
 

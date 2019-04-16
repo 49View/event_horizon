@@ -14,6 +14,7 @@
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/material.h>
 #include <core/resources/profile.hpp>
+#include <core/resources/resource_types.hpp>
 #include <core/name_policy.hpp>
 #include <poly/follower.hpp>
 #include <poly/poly_helper.h>
