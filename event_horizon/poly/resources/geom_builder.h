@@ -252,15 +252,8 @@ public:
 //        return *this;
 //    }
 //
-//    GeomBuilder& c( const Color4f & _color ) {
-//        materialColor( _color );
-//        return *this;
-//    }
-//
-//    GeomBuilder& c( const std::string& _hexcolor ) {
-//        materialColor( Vector4f::XTORGBA( _hexcolor ) );
-//        return *this;
-//    }
+    GeomBuilder& c( const Color4f & _color );
+    GeomBuilder& c( const std::string& _hexcolor );
 
     GeomSP buildr();
 

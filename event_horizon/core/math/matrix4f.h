@@ -30,6 +30,8 @@ public:
 	static const Matrix4f IDENTITY;
 	static const Matrix4f IDENTITY_YINV;
 	static const Matrix4f BEEF;
+    static const Matrix4f ZERO;
+    static const Matrix4f ONE;
 
 	Matrix4f() {
 	}

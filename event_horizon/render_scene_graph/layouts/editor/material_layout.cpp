@@ -53,7 +53,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
         auto matName = mate.first.substr(0, 10);
         ImGui::TextColored( ImVec4{1.0f,0.8f,0.3f,1.0f}, "%s", matName.c_str() );
         bool bHasTexture = false;
-        for ( const auto& [k, mt] : mat->Values()->getTextureNameMap() ) {
+        for ( const auto& [k, mt] : mat->Values()->getMap<std::string>() ) {
             if ( k == UniformNames::diffuseTexture || k == UniformNames::colorTexture ) {
                 ImGuiMatImage( mt, ImColor{200, 200, 200}, textureSize, p->RSG().RR().TM()->TD(mt) );
                 bHasTexture = true;
@@ -61,10 +61,7 @@ void ImGuiMaterials::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
             }
         }
         if (!bHasTexture) {
-            V3f cv3 = Vector3f::ONE;
-            if ( mat->Values()->hasVector3f(UniformNames::diffuseColor) ) {
-                mat->Values()->get( UniformNames::diffuseColor, cv3 );
-            }
+            V3f cv3 = mat->Values()->getDef<V3f>(UniformNames::diffuseColor);
             ImGui::PushID( (mate.first + "dc").c_str() );
             if ( ImGui::ColorEdit3( "Diffuse", cv3.rawPtr(), ImGuiColorEditFlags_NoInputs ) ) {
                 mat->Values()->assign( UniformNames::diffuseColor, cv3 );

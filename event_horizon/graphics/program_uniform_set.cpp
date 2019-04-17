@@ -93,7 +93,7 @@ GPUHeterogeneousMap::GPUHeterogeneousMap( std::shared_ptr<HeterogeneousMap> _val
                                           values( std::move( _values )) {
 
     int counter = 0;
-    for( const auto& [k,n] : values->getTextureNameMap() ) {
+    for( const auto& [k,n] : values->getMap<std::string>() ) {
         TextureUniformDesc u{};
         u.handle = _rr.TD( n )->getHandle();
         u.target = _rr.TD( n )->getTarget();

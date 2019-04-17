@@ -2,11 +2,20 @@
 #include <core/descriptors/uniform_names.h>
 
 Material::Material( const std::string& _type ) {
-    values = std::make_shared<HeterogeneousMap>(_type);
+    makeValues(_type);
 }
 
 Material::Material( std::shared_ptr<HeterogeneousMap> _values ) {
     values = std::move( _values );
+}
+
+Material::Material( const Color4f& _color, const std::string& _type ) {
+    makeValues(_type);
+    Values()->assign( UniformNames::diffuseColor, _color );
+}
+
+void Material::makeValues( const std::string& _type ) {
+    values = std::make_shared<HeterogeneousMap>(_type);
 }
 
 //static inline bool isShaderStreammable( const std::string& _sn ) {
@@ -55,9 +64,8 @@ void Material::resolveDynamicConstants() {
 //}
 
 float Material::getMetallicValue() const {
-    float ret;
-    values->get( UniformNames::metallic, ret );
-    return ret;
+    auto ret = values->get<float>( UniformNames::metallic );
+    return ret ? *ret : 1.0f;
 }
 
 void Material::setMetallicValue( float _metallicValue ) {
@@ -65,9 +73,8 @@ void Material::setMetallicValue( float _metallicValue ) {
 }
 
 float Material::getRoughnessValue() const {
-    float ret;
-    values->get( UniformNames::roughness, ret );
-    return ret;
+    auto ret = values->get<float>( UniformNames::roughness );
+    return ret ? *ret : 1.0f;
 }
 
 void Material::setRoughnessValue( float _roughnessValue ) {
@@ -75,9 +82,8 @@ void Material::setRoughnessValue( float _roughnessValue ) {
 }
 
 float Material::getAoValue() const {
-    float ret;
-    values->get( UniformNames::ao, ret );
-    return ret;
+    auto ret = values->get<float>( UniformNames::ao );
+    return ret ? *ret : 1.0f;
 }
 
 void Material::setAoValue( float _aoValue ) {
@@ -85,9 +91,8 @@ void Material::setAoValue( float _aoValue ) {
 }
 
 float Material::getOpacity() const {
-    float ret;
-    values->get( UniformNames::opacity, ret );
-    return ret;
+    auto ret = values->get<float>( UniformNames::opacity );
+    return ret ? *ret : 1.0f;
 }
 
 void Material::setOpacity( float _opacityValue ) {

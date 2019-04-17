@@ -262,6 +262,17 @@ GeomBuilder& GeomBuilder::pb( const float _a, const float _b ) {
     return *this;
 }
 
+GeomBuilder& GeomBuilder::c( const Color4f& _color ) {
+    auto matFromColor = std::make_shared<Material>(_color, S::SH);
+    matRef = sg.B<MB>(_color.toString()).addIM( matFromColor );
+    return *this;
+}
+
+GeomBuilder& GeomBuilder::c( const std::string& _hexcolor ) {
+//    materialColor( Vector4f::XTORGBA( _hexcolor ) );
+    return *this;
+}
+
 //bool GeomFileAssetBuilder::makeImpl( uint8_p&& _data, const DependencyStatus _status ) {
 //
 //    if ( _status == DependencyStatus::LoadedSuccessfully ) {

@@ -9,6 +9,7 @@
 #include "shader_material.hpp"
 #include <graphics/renderer.h>
 #include <graphics/program.h>
+#include <core/descriptors/uniform_names.h>
 
 ShaderMaterial::ShaderMaterial( std::string _sn ) : shaderName( std::move( _sn )) {
 }
@@ -24,6 +25,14 @@ void ShaderMaterial::activate( Renderer& _rr ) {
     }
 //  ### MAT Double check how we inject default unassigned values, it should never be the case anyway!!
     values->injectIfNotPresent( *shaderProgram->getDefaultUniforms() );
+
+    // Sanitize Colors into color - opacity
+    if ( auto op = values->get<V4f>( UniformNames::diffuseColor ); op ) {
+        V4f c4f = *op;
+        values->remove<V4f>( UniformNames::diffuseColor );
+        values->assign( UniformNames::diffuseColor, c4f.xyz() );
+        values->assign( UniformNames::opacity, c4f.w() );
+    }
 }
 
 const std::string& ShaderMaterial::SN() const {

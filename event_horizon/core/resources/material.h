@@ -24,6 +24,7 @@ public:
     JSONSERIAL( Material, values );
     explicit Material( const std::string& _type );
     explicit Material( std::shared_ptr<HeterogeneousMap> _values );
+    explicit Material( const Color4f & _color, const std::string& _type );
 
     void resolveDynamicConstants();
 
@@ -43,7 +44,9 @@ public:
     std::shared_ptr<HeterogeneousMap> Values();
     void Values( std::shared_ptr<HeterogeneousMap> _values );
 
+private:
+    void makeValues(  const std::string& _type );
 protected:
-    std::shared_ptr<HeterogeneousMap>     values;
+    std::shared_ptr<HeterogeneousMap> values;
 };
 

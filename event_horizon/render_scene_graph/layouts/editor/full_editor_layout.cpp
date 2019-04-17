@@ -73,7 +73,7 @@ void FullEditor::init() {
             topX, topX + cameraWidth,
             uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Plan2d );
 
-    o()->getCamera(Name::Foxtrot)->setPosition(V3f::ONE);
+    o()->getCamera(Name::Foxtrot)->setPosition(V3f::Y_AXIS*10.0f);
     o()->getCamera(Name::Foxtrot)->setQuatAngles(V3f{M_PI_2, 0.0f, 0.0f});
     allCallbacksEntitySetup();
     o()->setDragAndDropFunction(allConversionsDragAndDropCallback);

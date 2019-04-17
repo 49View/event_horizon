@@ -63,7 +63,7 @@ void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
         auto pr = std::make_shared<Profile>();
         pr->createWire(0.1f, 6);
         auto prId = B<PB>("ProfileWire").addIM(pr);
-        auto gref = GB{ *this, GeomBuilderType::follower, prId, vlist }.m(mat).build();
+        auto gref = GB{ *this, GeomBuilderType::follower, prId, vlist }.c(Color4f::RED).build();
         addNode( gref );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
 //        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;

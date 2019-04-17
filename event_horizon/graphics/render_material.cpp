@@ -32,8 +32,8 @@ RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program,
 void RenderMaterial::calcHash() {
     mHash = Uniforms()->Values()->Hash();
 
-    TransparencyValue( Uniforms()->Values()->getFloatWithDefault( UniformNames::alpha, 1.0f ) *
-                       Uniforms()->Values()->getFloatWithDefault( UniformNames::opacity, 1.0f ));
+    TransparencyValue( Uniforms()->Values()->getDef( UniformNames::alpha, 1.0f ) *
+                       Uniforms()->Values()->getDef( UniformNames::opacity, 1.0f ));
 }
 
 void RenderMaterial::submitBufferUniforms() {
