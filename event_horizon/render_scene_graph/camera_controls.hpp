@@ -73,6 +73,7 @@ protected:
 class CameraControlWalk : public CameraControl {
 public:
     using CameraControl::CameraControl;
+    CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
     ~CameraControlWalk() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
     void renderControls( SceneOrchestrator* _p ) override {}
@@ -83,7 +84,7 @@ protected:
 class CameraControl2d : public CameraControlEditable {
 public:
     using CameraControlEditable::CameraControlEditable;
-    CameraControl2d( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
+    CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
     ~CameraControl2d() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
     void renderControls( SceneOrchestrator* _p ) override;
