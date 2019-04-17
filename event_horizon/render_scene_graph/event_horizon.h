@@ -22,13 +22,35 @@ namespace di = boost::di;
 template<typename T>
 class EventHorizon {
 public:
-    explicit EventHorizon() {
+    explicit EventHorizon( int argc, char *argv[] ) {
         Http::init();
-//        presenter = di::make_injector(APP_RSGINJECTOR).template create<std::shared_ptr<SceneOrchestrator>>();
         presenter = di::make_injector().create<std::shared_ptr<SceneOrchestrator>>();
         presenter->StateMachine( std::make_shared<T>(presenter.get()) );
+        checkLayoutArgvs( argc, argv );
         mainLoop( presenter );
     }
+
+private:
+    std::optional<InitializeWindowFlagsT> checkLayoutParam( const std::string& _param ) const {
+        if ( toLower(_param) == toLower("Normal"       ) ) return InitializeWindowFlags::Normal;
+        if ( toLower(_param) == toLower("FullScreen"   ) ) return InitializeWindowFlags::FullScreen;
+        if ( toLower(_param) == toLower("Minimize"     ) ) return InitializeWindowFlags::Minimize;
+        if ( toLower(_param) == toLower("Maximize"     ) ) return InitializeWindowFlags::Maximize;
+        if ( toLower(_param) == toLower("HalfSize"     ) ) return InitializeWindowFlags::HalfSize;
+        if ( toLower(_param) == toLower("ThreeQuarter" ) ) return InitializeWindowFlags::ThreeQuarter;
+
+        return std::nullopt;
+    }
+
+    void checkLayoutArgvs(int argc, char *argv[]) {
+        for ( auto t = 1; t < argc; t++ ) {
+            std::string arg{argv[t]};
+            if  ( auto param = checkLayoutParam( arg ); param ) {
+                presenter->setLayoutInitFlags( *param);
+            }
+        }
+    }
+
 private:
     std::shared_ptr<SceneOrchestrator> presenter;
 };

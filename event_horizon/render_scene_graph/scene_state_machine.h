@@ -213,17 +213,12 @@ public:
         }
     }
 
-    InitializeWindowFlagsT getLayoutInitFlags() const {
-        return initFlags;
-    }
-
 protected:
     void postDefaults();
     void addBoxToViewport( const std::string& _nane, const Boxes& _box );
 
 private:
     std::unordered_map<std::string, Boxes> boxes;
-    InitializeWindowFlagsT initFlags = InitializeWindowFlags::Maximize;
     std::unique_ptr<msm::back::state_machine<SceneStateMachine>> stateMachine;
     std::unordered_map<std::string, std::shared_ptr<LayoutBoxRenderer>> boxFunctionMapping;
     friend class SceneOrchestrator;

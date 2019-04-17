@@ -237,10 +237,6 @@ const cameraRigsMap& SceneOrchestrator::getRigs() const {
 	return mRigs;
 }
 
-InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
-	return stateMachine->getLayoutInitFlags();
-}
-
 std::shared_ptr<SceneStateMachineBackEnd> SceneOrchestrator::StateMachine()  {
     return stateMachine;
 }
@@ -276,4 +272,12 @@ AVInitCallback SceneOrchestrator::avcbTM() {
                      RSG().RR().TM().get(),
                      std::placeholders::_1,
                      std::placeholders::_2);
+}
+
+InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
+    return initFlags;
+}
+
+void SceneOrchestrator::setLayoutInitFlags( InitializeWindowFlagsT _flags ) {
+    orBitWiseFlag( initFlags, _flags );
 }

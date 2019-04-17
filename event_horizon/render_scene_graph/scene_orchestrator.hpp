@@ -86,7 +86,6 @@ public:
 
 	void StateMachine( std::shared_ptr<SceneStateMachineBackEnd> _l );
 	std::shared_ptr<SceneStateMachineBackEnd> StateMachine();
-	InitializeWindowFlagsT getLayoutInitFlags() const;
 
 	const std::shared_ptr<ImGuiConsole>& Console() const;
 
@@ -96,6 +95,10 @@ public:
 	void setDragAndDropFunction( DragAndDropFunction dd );
 
 	void script( const std::string& _line );
+
+    InitializeWindowFlagsT getLayoutInitFlags() const;
+    void setLayoutInitFlags( InitializeWindowFlagsT _flags );
+
 public:
 	static std::vector<std::string> callbackPaths;
 	static Vector2i callbackResizeWindow;
@@ -118,6 +121,7 @@ protected:
 	std::shared_ptr<ImGuiConsole> console;
 	SceneEventNotifications notifications;
 	DragAndDropFunction dragAndDropFunc = nullptr;
+    InitializeWindowFlagsT initFlags = InitializeWindowFlags::Maximize;
 
 private:
 	void updateCallbacks();
