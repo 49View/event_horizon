@@ -16,9 +16,6 @@
 
 RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg) {
 
-//    hierRenderObserver = std::make_shared<HierGeomRenderObserver>(rr);
-//    uiRenderObserver = std::make_shared<UIElementRenderObserver>(rr);
-
     sg.TL().connect( [this](const ResourceTransfer<RawImage>& _val ) {
         LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addTextureResource(_val);
@@ -117,40 +114,4 @@ Renderer& RenderSceneGraph::RR() { return rr; }
 //
 //void RenderSceneGraph::updateImpl() {
 //    am->update();
-//}
-
-//std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>
-//HierGeomRenderObserver::generateGeometryVP( const VData& __data ) {
-//    const VData* _data = &__data;
-//    if ( _data->numIndices() < 3 ) return nullptr;
-//
-//    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[_data->numIndices()] );
-//    std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
-//    auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( _data->numVerts(), PRIMITIVE_TRIANGLES,
-//                                                                   VFVertexAllocation::PreAllocate, _data->numIndices(),
-//                                                                   _indices );
-//    for ( int32_t t = 0; t < _data->numVerts(); t++ ) {
-//        SOAData->addVertex( _data->vertexAt( t ), _data->uvAt( t ), _data->uv2At( t ), _data->normalAt( t ),
-//                            _data->tangentAt( t ), _data->binormalAt( t ), _data->colorAt(t) );
-//    }
-//    return SOAData;
-//}
-
-//void HierGeomRenderObserver::notified( GeomSP _source, const std::string& generator ) {
-////    auto mat = _source->Data()->getMaterial();
-////  ### MAT reinstate materials
-////    auto lvl = rr.VPL( CommandBufferLimits::PBRStart, _source->getLocalHierTransform(), 1.0f ); // mat->translucency()
-////    VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ rr, lvl, ShaderMaterial{S::SH} } //mat->getShaderName(), mat->Values()
-////            .p(generateGeometryVP(_source->Data()->vData())).n(_source->UUiD()).g(_source->GHType()).build();
-//}
-//
-//void UIElementRenderObserver::notified( UIAssetSP _source, const std::string& generator ) {
-////    auto mat = _source->Data()->getMaterial();
-////  ### MAT reinstate materials
-////    auto renderBucketIndex = _source->Data()->RenderBucketIndex();
-////    auto vpList = rr.VPL( CommandBufferLimits::UIStart + renderBucketIndex, _source->getLocalHierTransform(), 1.0f );
-////    //mat->getOpacity()
-////    auto vs = _source->Data()->VertexList();
-////    VPBuilder<PosTex3dStrip>{rr,vpList, ShaderMaterial{S::SH}}. //mat->getShaderName(),mat->Values()
-////    p(vs).n(_source->UUiD()).build();
 //}

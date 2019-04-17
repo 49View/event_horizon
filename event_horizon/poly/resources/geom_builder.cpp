@@ -269,8 +269,7 @@ GeomBuilder& GeomBuilder::c( const Color4f& _color ) {
 }
 
 GeomBuilder& GeomBuilder::c( const std::string& _hexcolor ) {
-//    materialColor( Vector4f::XTORGBA( _hexcolor ) );
-    return *this;
+    return c( Vector4f::XTORGBA( _hexcolor ) );
 }
 
 //bool GeomFileAssetBuilder::makeImpl( uint8_p&& _data, const DependencyStatus _status ) {

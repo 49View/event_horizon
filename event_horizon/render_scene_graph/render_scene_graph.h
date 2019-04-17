@@ -25,17 +25,6 @@ public:
     Renderer& RR();
     SceneGraph& SG() { return sg; }
 protected:
-//    void updateImpl() override;
-//    void addImpl(NodeVariants _geom) override;
-//    void removeImpl( const UUID& _uuid ) override;
-//    void cmdChangeTimeImpl( const std::vector<std::string>& _params ) override;
-//    void changeMaterialTagImpl( const std::vector<std::string>& _params ) override;
-//    void changeMaterialColorTagImpl( const std::vector<std::string>& _params ) override;
-//    void cmdCreateGeometryImpl( const std::vector<std::string>& _params ) override;
-//    void cmdRemoveGeometryImpl( const std::vector<std::string>& _params ) override;
-//    void cmdloadObjectImpl( const std::vector<std::string>& _params ) override;
-//    void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) override;
-//
     void changeMaterialTagCallback( const std::vector<std::string>& _params );
     void changeMaterialColorCallback( const std::vector<std::string>& _params );
 

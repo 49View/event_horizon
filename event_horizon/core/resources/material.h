@@ -26,8 +26,6 @@ public:
     explicit Material( std::shared_ptr<HeterogeneousMap> _values );
     explicit Material( const Color4f & _color, const std::string& _type );
 
-    void resolveDynamicConstants();
-
     float getMetallicValue() const;
     void setMetallicValue( float _metallicValue );
     float getRoughnessValue() const;

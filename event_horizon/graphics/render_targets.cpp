@@ -71,6 +71,8 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     // Create the SunBuilder to for PBR scenes
     mSunBuilder = std::make_shared<SunBuilder>();
 
+    changeTime( mSunBuilder->getSunPosition() );
+
     // Create PBR resources
     mConvolution = std::make_unique<ConvolutionEnvironmentMap>(rr);
     mIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
@@ -371,10 +373,12 @@ void RLTarget::clearCB() {
 }
 
 void RLTargetPBR::startCL( CommandBufferList& cb ) {
+    // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
+    // Especially Skyboxes and probes!!
+    addShadowMaps();
     if ( mSkybox->precalc( 1.0f ) ) {
         addProbes();
     }
-    addShadowMaps();
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     cb.setCameraUniforms( cameraRig->getCamera() );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );

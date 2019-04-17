@@ -71,14 +71,14 @@ void FullEditor::init() {
     float cameraHeight = cameraWidth*(cameraAspectRatio*(1280.0f/720.0f));
     addBox( Name::Foxtrot,
             topX, topX + cameraWidth,
-            uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Plan2d );
+            uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Fly );
 
     o()->getCamera(Name::Foxtrot)->setPosition(V3f::Y_AXIS*10.0f);
     o()->getCamera(Name::Foxtrot)->setQuatAngles(V3f{M_PI_2, 0.0f, 0.0f});
     allCallbacksEntitySetup();
     o()->setDragAndDropFunction(allConversionsDragAndDropCallback);
 
-    o()->script("change time 14:00");
+//    o()->script("change time 14:00");
 //    o()->getCamera(Name::Foxtrot)->setPosition( Vector3f( 0.0f, .5f, -2.0f ) );
 //    o()->getCamera(Name::Foxtrot)->setQuatAngles( Vector3f( 0.2f, M_PI, 0.0f ) );
 

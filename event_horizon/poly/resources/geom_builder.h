@@ -235,23 +235,10 @@ public:
 
     GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
 
-// MaterialBuildable policies
-//    GeomBuilder& m( std::shared_ptr<Material> _value ) {
-//        materialSet(_value);
-//        return *this;
-//    }
-//
     GeomBuilder& m( const ResourceRef& _mat ) {
         matRef = _mat;
         return *this;
     }
-//
-//    template <typename T>
-//    GeomBuilder& mc( const std::string& _name, T _value ) {
-//        materialConstant( _name, _value);
-//        return *this;
-//    }
-//
     GeomBuilder& c( const Color4f & _color );
     GeomBuilder& c( const std::string& _hexcolor );
 
@@ -302,8 +289,6 @@ private:
     QuadVector3fNormalfList quads;
 
     GeomBuilderType builderType = GeomBuilderType::unknown;
-
-//    std::vector<std::shared_ptr<MaterialBuilder>> matBuilders;
 
     GeomSP elem = nullptr;
     GeomSP elemInjFather = nullptr;

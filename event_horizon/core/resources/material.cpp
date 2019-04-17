@@ -22,7 +22,7 @@ void Material::makeValues( const std::string& _type ) {
 //    return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
 //}
 
-void Material::resolveDynamicConstants() {
+//void Material::resolveDynamicConstants() {
 //    ### MAT Fix up this
 //    values->visitTexturesWithKey( [&]( std::string& u, const std::string& _key ) {
 //        if ( _key == UniformNames::yTexture) {
@@ -33,34 +33,6 @@ void Material::resolveDynamicConstants() {
 //            u = Name() + "_v";
 //        }
 //    });
-}
-
-//std::string Material::PBRName( const std::string& _type ) const {
-//    return Name() + "_" + _type;
-//}
-//
-//const std::string Material::getBaseColor() const {
-//    return PBRName(MPBRTextures::basecolorString);
-//}
-//
-//const std::string Material::getNormal() const {
-//    return PBRName(MPBRTextures::normalString);
-//}
-//
-//const std::string Material::getAmbientOcclusion() const {
-//    return PBRName(MPBRTextures::ambientOcclusionString);
-//}
-//
-//const std::string Material::getRoughness() const {
-//    return PBRName(MPBRTextures::roughnessString);
-//}
-//
-//const std::string Material::getMetallic() const {
-//    return PBRName(MPBRTextures::metallicString);
-//}
-//
-//const std::string Material::getHeight() const {
-//    return PBRName(MPBRTextures::heightString);
 //}
 
 float Material::getMetallicValue() const {

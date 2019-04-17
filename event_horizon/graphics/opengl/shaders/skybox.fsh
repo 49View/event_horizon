@@ -116,12 +116,12 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
 
 void main()
 {
-    vec3 light_pos = normalize( -u_sunDirection ).xyz;
+    vec3 light_pos = normalize( u_sunDirection ).xyz;
 
     color.xyz = atmosphere(
         normalize(v_texCoord),          // normalized ray direction
         vec3(0,6372e3,0),               // ray origin
-        -light_pos,                     // position of the sun
+        light_pos,                     // position of the sun
         89.0,                           // intensity of the sun
         6371e3,                         // radius of the planet in meters
         6471e3,                         // radius of the atmosphere in meters
