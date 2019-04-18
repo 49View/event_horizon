@@ -13,20 +13,6 @@
 #include <core/v_data.hpp>
 #include <poly/resources/ui_shape_builder.h>
 
-std::shared_ptr<CameraControl> CameraControlFactory::make( CameraControls _cc, std::shared_ptr<CameraRig> _cr,
-                                                           RenderSceneGraph& _rsg) {
-    switch ( _cc ) {
-        case CameraControls::Fly:
-            return std::make_shared<CameraControlFly>(_cr, _rsg);
-        case CameraControls::Walk:
-            return std::make_shared<CameraControlWalk>(_cr, _rsg);
-        case CameraControls::Plan2d:
-            return std::make_shared<CameraControl2d>(_cr, _rsg);
-        default:
-            return nullptr;
-    };
-}
-
 CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg ) :
                               mCameraRig(std::move( cameraRig )), rsg( rsg) {}
 

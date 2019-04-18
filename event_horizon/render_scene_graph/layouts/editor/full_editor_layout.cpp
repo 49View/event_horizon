@@ -69,9 +69,9 @@ void FullEditor::init() {
     float cameraWidth = (1.0f-uivl.rightPanelWidth*2.0f);
     float cameraAspectRatio = (720.0f / 1280.0f);
     float cameraHeight = cameraWidth*(cameraAspectRatio*(1280.0f/720.0f));
-    addBox( Name::Foxtrot,
-            topX, topX + cameraWidth,
-            uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight, CameraControls::Plan2d );
+    addRig<CameraControl2d>( Name::Foxtrot,
+                             topX, topX + cameraWidth,
+                             uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight );
 
     allCallbacksEntitySetup();
     o()->setDragAndDropFunction(allConversionsDragAndDropCallback);

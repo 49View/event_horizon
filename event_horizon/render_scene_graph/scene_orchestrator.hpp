@@ -17,6 +17,7 @@
 #include <render_scene_graph/render_scene_graph.h>
 #include <render_scene_graph/camera_controls.hpp>
 #include <graphics/renderer.h>
+#include <graphics/render_targets.hpp>
 
 class MouseInput;
 class SceneStateMachineBackEnd;
@@ -52,8 +53,18 @@ public:
 
 	void activate();
 
-    void addViewport( RenderTargetType _rtt, std::shared_ptr<CameraRig> _rig,
-    				  const Rect2f& _viewport, CameraControls _cc, BlitType _bt );
+	template <typename T>
+    void addViewport( RenderTargetType _rtt, const std::string& _rigname, const Rect2f& _viewport, BlitType _bt ) {
+        auto _rig = getRig(_rigname);
+        _rig->setViewport(_viewport);
+
+        if ( mRigs.find(_rig->Name()) == mRigs.end() ) {
+            RenderTargetFactory::make( _rtt, _rig, _viewport, _bt, RSG().RR() );
+            mRigs[_rig->Name()] = std::make_shared<T>( _rig, rsg );
+        } else {
+            setViewportOnRig( _rig, _viewport );
+        }
+    }
 
     void takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata );
 
@@ -77,7 +88,8 @@ public:
 	RenderSceneGraph& RSG();
 	SceneGraph& SG();
 	CommandQueue& CQ();
-    std::shared_ptr<Camera> getCamera( const std::string& _name );
+    std::shared_ptr<Camera>    getCamera( const std::string& _name );
+    std::shared_ptr<CameraRig> getRig( const std::string& _name );
 
 	template <typename T>
 	void addHttpStream( const std::string& _streamName ) {
@@ -96,7 +108,7 @@ public:
 
 	void script( const std::string& _line );
 
-    InitializeWindowFlagsT getLayoutInitFlags() const;
+    InitializeWindowFlagsT getLayoutInitFlags() const;\
     void setLayoutInitFlags( InitializeWindowFlagsT _flags );
 
 public:
@@ -108,7 +120,8 @@ protected:
     AVInitCallback avcbTM();
 	void resetSingleEventNotifications();
 	void reloadShaders( SocketCallbackDataTypeConstRef _data );
-
+    void setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport );
+    void setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport );
 protected:
 	std::shared_ptr<SceneStateMachineBackEnd> stateMachine;
 	SceneGraph& sg;

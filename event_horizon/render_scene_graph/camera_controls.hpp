@@ -93,8 +93,3 @@ public:
 protected:
     void unselectImpl( const UUID& _uuid, Selectable& _node ) override;
 };
-
-class CameraControlFactory {
-public:
-    static std::shared_ptr<CameraControl> make( CameraControls _cc, std::shared_ptr<CameraRig> _cr, RenderSceneGraph& _rsg );
-};

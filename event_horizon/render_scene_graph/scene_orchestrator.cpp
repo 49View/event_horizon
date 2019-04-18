@@ -221,8 +221,8 @@ const std::shared_ptr<ImGuiConsole>& SceneOrchestrator::Console() const {
 }
 
 void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
-    addViewport( RenderTargetType::PBR, SG().CM().get(Name::Sierra),
-    		     Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), CameraControls::Fly, BlitType::OffScreen );
+    addViewport<CameraControlFly>( RenderTargetType::PBR, Name::Sierra,
+    		     Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
     getCamera(Name::Sierra)->center(_box);
     RSG().RR().getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
@@ -243,16 +243,6 @@ std::shared_ptr<SceneStateMachineBackEnd> SceneOrchestrator::StateMachine()  {
 
 void SceneOrchestrator::script( const std::string& _line ) {
 	cq.script(_line);
-}
-
-void SceneOrchestrator::addViewport( RenderTargetType _rtt, std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport,
-									 CameraControls _cc, BlitType _bt ) {
-	if ( mRigs.find(_rig->Name()) == mRigs.end() ) {
-		RenderTargetFactory::make( _rtt, _rig, _viewport, _bt, RSG().RR() );
-		mRigs[_rig->Name()] = CameraControlFactory::make( _cc, _rig, rsg );
-	} else {
-		RSG().RR().getTarget(_rig->Name())->getRig()->setViewport(_viewport);
-	}
 }
 
 CommandQueue& SceneOrchestrator::CQ() {
@@ -280,4 +270,16 @@ InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
 
 void SceneOrchestrator::setLayoutInitFlags( InitializeWindowFlagsT _flags ) {
     orBitWiseFlag( initFlags, _flags );
+}
+
+void SceneOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
+    RSG().RR().getTarget(_rig->Name())->getRig()->setViewport(_viewport);
+}
+
+void SceneOrchestrator::setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport ) {
+    RSG().RR().getTarget(_rigName)->getRig()->setViewport(_viewport);
+}
+
+std::shared_ptr<CameraRig> SceneOrchestrator::getRig( const std::string& _name ) {
+    return SG().CM().get(_name);
 }

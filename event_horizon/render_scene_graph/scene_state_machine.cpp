@@ -72,30 +72,12 @@ SceneStateMachineBackEnd::SceneStateMachineBackEnd( SceneOrchestrator* _p ) : Sc
 
 void SceneStateMachineBackEnd::addBoxToViewport( const std::string& _name, const Boxes& _box ) {
     if ( boxes.find(_name) != boxes.end() ) return;
-
 	boxes[_name] = _box;
-
-	if ( _box.cc != CameraControls::Edit2d ) {
-		auto lViewport = boxes[_name].updateAndGetRect();
-
-		auto rig = o()->SG().CM().get(Name::Foxtrot);
-        rig->setViewport(lViewport);
-
-		RenderTargetType rtt = RenderTargetType::PBR;
-		o()->addViewport( rtt, rig, lViewport, boxes[_name].cc, BlitType::OnScreen );
-	}
-}
-
-void SceneStateMachineBackEnd::addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc ) {
-	addBoxToViewport( _name,{ { sPresenterArrangerLeftFunction3d,
-					   sPresenterArrangerRightFunction3d,
-					   sPresenterArrangerTopFunction3d,
-					   sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, _cc, nullptr } );
 }
 
 void SceneStateMachineBackEnd::addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible ) {
 	if ( auto rlf = boxFunctionMapping.find( _name ); rlf != boxFunctionMapping.end() ) {
-		addBoxToViewport( _name,{ { _l, _r, _t, _b}, CameraControls::Edit2d, rlf->second } );
+		addBoxToViewport( _name,{ { _l, _r, _t, _b}, rlf->second } );
 		boxes[_name].setVisible( _bVisible );
 	}
 }
@@ -103,7 +85,7 @@ void SceneStateMachineBackEnd::addBox( const std::string& _name, float _l, float
 void SceneStateMachineBackEnd::resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize ) {
 	for ( auto& [k,v] : boxes ) {
 		orBitWiseFlag( v.flags, BoxFlags::Resize );
-		if ( v.cc == CameraControls::Fly ) {
+		if ( o()->getRig(k) ) {
 			auto r = v.updateAndGetRect();
 			_target->RSG().RR().getTarget( k )->resize( r );
 			_target->SG().CM().get(k)->setViewport( r );
@@ -160,7 +142,7 @@ void SceneStateMachineBackEnd::postDefaults() {
     // These are the defaults what will be set in case they haven't been set already in init() virtual
 
     // Set a fullscreen camera in case there's none
-    addBox( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f, CameraControls::Fly );
+    addRig<CameraControlFly>( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f );
 }
 
 void SceneStateMachineBackEnd::initNV() {

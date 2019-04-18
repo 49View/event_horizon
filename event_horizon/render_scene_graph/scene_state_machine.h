@@ -9,6 +9,7 @@
 #include <core/math/rect2f.h>
 #include <render_scene_graph/camera_controls.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
+#include <render_scene_graph/scene_orchestrator.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
@@ -173,13 +174,22 @@ public:
         void setVisible( bool _bVis );
 
         SceneRectArranger rectArranger;
-        CameraControls cc = CameraControls::Fly;
         std::shared_ptr<LayoutBoxRenderer> renderer;
         BoxFlagsT flags = BoxFlags::Rearrange|BoxFlags::Visible;
         static const Boxes INVALID;
     };
 
-    void addBox( const std::string& _name, float _l, float _r, float _t, float _b, CameraControls _cc  );
+    template <typename T>
+    void addRig( const std::string& _name, float _l, float _r, float _t, float _b ) {
+        Boxes _box{ { sPresenterArrangerLeftFunction3d,
+                      sPresenterArrangerRightFunction3d,
+                      sPresenterArrangerTopFunction3d,
+                      sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, nullptr };
+        addBoxToViewport( _name, _box );
+        auto lViewport = boxes[_name].updateAndGetRect();
+        o()->addViewport<T>( RenderTargetType::PBR, _name, lViewport, BlitType::OnScreen );
+    }
+
     void addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible = true );
 
     const Boxes& Box( const std::string& _key ) const {
