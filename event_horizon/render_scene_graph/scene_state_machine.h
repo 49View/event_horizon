@@ -103,8 +103,8 @@ public:
         return rect;
     }
 
-    void setRect( const Rect2f& rect ) {
-        SceneRectArranger::rect = rect;
+    void setRect( const Rect2f& _rect ) {
+        SceneRectArranger::rect = _rect;
     }
 
 private:
@@ -212,8 +212,6 @@ public:
             it->second.toggleVisible();
         }
     }
-//
-//    static std::shared_ptr<SceneStateMachineBackEnd> makeDefault();
 
     void resizeCallback( SceneOrchestrator* _target, const Vector2i& _resize );
 
