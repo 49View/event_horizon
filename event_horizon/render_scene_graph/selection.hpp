@@ -68,7 +68,7 @@ public:
 //        }
     }
 
-    void showGizmo(Selectable& _node, std::shared_ptr<Camera> _cam, SceneOrchestrator* _p );
+    void showGizmo(Selectable& _node, std::shared_ptr<Camera> _cam );
 
     bool IsSelected() const;
     void IsSelected( bool bIsSelected );

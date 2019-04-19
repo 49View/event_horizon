@@ -7,12 +7,12 @@
 #include <core/math/vector2f.h>
 #include <graphics/graphic_constants.h>
 #include <render_scene_graph/selection.hpp>
-#include <render_scene_graph/render_scene_graph.h>
 
 class CameraRig;
 class Camera;
 class RenderSceneGraph;
 class TextInput;
+struct AggregatedInputData;
 
 enum class CameraControls {
     Edit2d,
@@ -21,24 +21,13 @@ enum class CameraControls {
     Walk
 };
 
-struct CameraInputData {
-    TextInput& ti;
-    Vector2f mousePos = Vector2f::ZERO;
-    bool isMouseTouchedDown = false;
-    bool isMouseTouchDownFirst = false;
-    bool isMouseSingleTap = false;
-    float scrollValue = 0.0f;
-    Vector2f moveDiff = Vector2f::ZERO;
-    Vector2f moveDiffSS = Vector2f::ZERO;
-};
-
 class CameraControl {
 public:
     explicit CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
     virtual ~CameraControl() = default;
-    void updateFromInputData( const CameraInputData& mi );
-    virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) = 0;
-    virtual void renderControls( SceneOrchestrator* _p ) = 0;
+    void updateFromInputData( const AggregatedInputData& mi );
+    virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) = 0;
+    virtual void renderControls() = 0;
 
     std::shared_ptr<CameraRig> rig();
     std::shared_ptr<Camera> getMainCamera();
@@ -51,7 +40,7 @@ protected:
 class CameraControlEditable : public CameraControl, public Selection {
 protected:
     using CameraControl::CameraControl;
-    void togglesUpdate( const CameraInputData& mi );
+    void togglesUpdate( const AggregatedInputData& mi );
 };
 
 class CameraControlFly : public CameraControlEditable {
@@ -59,8 +48,8 @@ public:
     using CameraControlEditable::CameraControlEditable;
     CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
     ~CameraControlFly() override = default;
-    void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
-    void renderControls( SceneOrchestrator* _p ) override;
+    void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
+    void renderControls() override;
     void selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariantsSP _node, SelectableFlagT _flags ) override;
 
 protected:
@@ -75,8 +64,8 @@ public:
     using CameraControl::CameraControl;
     CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
     ~CameraControlWalk() override = default;
-    void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
-    void renderControls( SceneOrchestrator* _p ) override {}
+    void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
+    void renderControls() override {}
 protected:
     bool isWASDActive = false;
 };
@@ -86,8 +75,8 @@ public:
     using CameraControlEditable::CameraControlEditable;
     CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
     ~CameraControl2d() override = default;
-    void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) override;
-    void renderControls( SceneOrchestrator* _p ) override;
+    void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
+    void renderControls() override;
     void selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariantsSP _node, SelectableFlagT _flags ) override;
 
 protected:

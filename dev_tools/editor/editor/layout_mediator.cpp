@@ -3,7 +3,7 @@
 //
 
 #include "layout_mediator.hpp"
-#include "render_scene_graph/layouts/editor/timeline_layout.h"
+#include "editor/timeline_layout.h"
 
 namespace LayoutMediator {
 

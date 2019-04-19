@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 // Created by Dado on 01/01/2018.
 //
@@ -15,10 +13,10 @@
 #include <graphics/mouse_input.hpp>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
-namespace di = boost::di;
-
-void mainLoop( std::shared_ptr<SceneOrchestrator> p ) {
-    auto rl = di::make_injector().create<RunLoopGraphics>();
-    rl.initWindow( std::move( p ));
-    rl.runSingleThread();
-}
+//namespace di = boost::di;
+//
+//void mainLoop( std::shared_ptr<SceneOrchestrator> p ) {
+//    auto rl = di::make_injector().create<RunLoopGraphics>();
+//    rl.initWindow( std::move( p ));
+//    rl.runSingleThread();
+//}

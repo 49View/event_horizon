@@ -14,20 +14,20 @@
 #include <graphics/render_list.h>
 #include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
-#include <render_scene_graph/scene_state_machine.h>
+#include <render_scene_graph/scene_bridge.h>
 #include <core/resources/resource_manager.hpp>
 
 namespace di = boost::di;
 
-template<typename T>
+template<typename FE>
 class EventHorizon {
 public:
     explicit EventHorizon( int argc, char *argv[] ) {
         Http::init();
-        presenter = di::make_injector().create<std::shared_ptr<SceneOrchestrator>>();
-        presenter->StateMachine( std::make_shared<T>(presenter.get()) );
-        checkLayoutArgvs( argc, argv );
-        mainLoop( presenter );
+//        presenter->StateMachine( std::make_shared<T>(presenter.get()) );
+//        backEnd = std::make_unique<msm::back::state_machine<BE>>();
+//        app->start();
+        mainLoop<FE>(checkLayoutArgvs( argc, argv ));
     }
 
 private:
@@ -42,15 +42,14 @@ private:
         return std::nullopt;
     }
 
-    void checkLayoutArgvs(int argc, char *argv[]) {
+    InitializeWindowFlagsT checkLayoutArgvs(int argc, char *argv[]) {
+        InitializeWindowFlagsT initFlags =  InitializeWindowFlags::Normal;
         for ( auto t = 1; t < argc; t++ ) {
             std::string arg{argv[t]};
             if  ( auto param = checkLayoutParam( arg ); param ) {
-                presenter->setLayoutInitFlags( *param);
+                orBitWiseFlag( initFlags, *param );
             }
         }
+        return initFlags;
     }
-
-private:
-    std::shared_ptr<SceneOrchestrator> presenter;
 };

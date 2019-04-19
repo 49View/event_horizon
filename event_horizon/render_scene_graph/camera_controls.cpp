@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 // Created by Dado on 2019-01-11.
 //
@@ -7,16 +5,19 @@
 #include "camera_controls.hpp"
 #include <core/camera.h>
 #include <core/node.hpp>
-#include <graphics/text_input.hpp>
-#include <graphics/renderer.h>
 #include <core/camera_rig.hpp>
 #include <core/v_data.hpp>
+#include <graphics/mouse_input.hpp>
+#include <graphics/text_input.hpp>
+#include <graphics/renderer.h>
 #include <poly/resources/ui_shape_builder.h>
+#include <render_scene_graph/render_scene_graph.h>
+
 
 CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg ) :
                               mCameraRig(std::move( cameraRig )), rsg( rsg) {}
 
-void CameraControl::updateFromInputData( const CameraInputData& mi ) {
+void CameraControl::updateFromInputData( const AggregatedInputData& mi ) {
 
     auto camera = mCameraRig->getMainCamera();
     if ( !camera->ViewPort().contains( mi.mousePos) ) return;
@@ -34,7 +35,7 @@ std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
 }
 
-void CameraControlEditable::togglesUpdate( const CameraInputData& mi ) {
+void CameraControlEditable::togglesUpdate( const AggregatedInputData& mi ) {
     if ( !inputIsBlockedOnSelection() ) {
         ViewportTogglesT cvtTggles = ViewportToggles::None;
         // Keyboards
@@ -66,7 +67,7 @@ void CameraControlFly::unselectImpl( const UUID& _uuid, Selectable& _node ) {
     rsg.RR().changeMaterialColorOnUUID( _uuid, _node.oldColor, oldColor );
 }
 
-void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
+void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
 
     if ( !IsAlreadyInUse() || isWASDActive ) {
         togglesUpdate( mi );
@@ -133,9 +134,9 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
 //    }
 }
 
-void CameraControlFly::renderControls( SceneOrchestrator* _p ) {
+void CameraControlFly::renderControls() {
     for ( auto& [k,n] : selectedNodes ) {
-        showGizmo( n, getMainCamera(), _p );
+        showGizmo( n, getMainCamera() );
     }
 }
 
@@ -145,7 +146,7 @@ CameraControlFly::CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig,
     cameraRig->getCamera()->setPosition( Vector3f( 0.0f, 1.0f, 3.0f ) );
 }
 
-void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
+void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
     _cam->LockAtWalkingHeight(true);
 
     static float camVelocity = 1.000f;
@@ -199,7 +200,7 @@ void CameraControl2d::unselectImpl( const UUID& _uuid, Selectable& _node ) {
     rsg.RR().changeMaterialColorOnUUID( _uuid, _node.oldColor, oldColor );
 }
 
-void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const CameraInputData& mi ) {
+void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
 
     if ( IsAlreadyInUse() ) return;
 
@@ -224,9 +225,9 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
 
 }
 
-void CameraControl2d::renderControls( SceneOrchestrator* _p ) {
+void CameraControl2d::renderControls() {
     for ( auto& [k,n] : selectedNodes ) {
-        showGizmo( n, getMainCamera(), _p );
+        showGizmo( n, getMainCamera() );
     }
 }
 

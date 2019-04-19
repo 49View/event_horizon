@@ -19,6 +19,17 @@ class Renderer;
 struct GLFWwindow;
 struct GLFWcursor;
 
+struct AggregatedInputData {
+    TextInput& ti;
+    Vector2f mousePos = Vector2f::ZERO;
+    bool isMouseTouchedDown = false;
+    bool isMouseTouchDownFirst = false;
+    bool isMouseSingleTap = false;
+    float scrollValue = 0.0f;
+    Vector2f moveDiff = Vector2f::ZERO;
+    Vector2f moveDiffSS = Vector2f::ZERO;
+};
+
 class MouseInput : public Observable<MouseInput> {
 public:
 	MouseInput();

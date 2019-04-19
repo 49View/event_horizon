@@ -40,7 +40,7 @@ namespace WindowHandling {
             if ( checkBitWiseFlag( flags, InitializeWindowFlags::HalfSize )) scaleFactor = 2.0f;
             if ( checkBitWiseFlag( flags, InitializeWindowFlags::ThreeQuarter )) scaleFactor = 1.5f;
             window = glfwCreateWindow( static_cast<int>( mode->width / scaleFactor ),
-                                           static_cast<int>( mode->height / scaleFactor ), "Sixth View", NULL, NULL );
+                                           static_cast<int>( mode->height / scaleFactor ), "Event Horizon", NULL, NULL );
         }
         glfwSwapInterval( -1 );
 

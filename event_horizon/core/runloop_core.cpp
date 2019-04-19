@@ -29,12 +29,6 @@ void RunLoop::updateTime() {
 	GameTime::setPausedTimeStep(0.0f);
 }
 
-template<>
-void mainLoop<CommandConsole>( [[maybe_unused]] uint64_t _flags, [[maybe_unused]] RunLoopThreading rt ) {
-	auto rl = boost::di::make_injector(boost::di::bind<CommandQueue>().in(boost::di::singleton)).create<RunLoop>();
-    rl.runConsolePrompt();
-}
-
 std::atomic<bool> deamonBreaker = false;
 
 void daemonLoop( int _sleepSeconds, bool& _awake, std::function<void()> _elaborateFunc ) {

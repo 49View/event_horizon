@@ -8,6 +8,7 @@
 #include "core/camera_rig.hpp"
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
+#include <render_scene_graph/scene_bridge.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
 //namespace CameraRigAngles {
@@ -25,7 +26,7 @@ void ImGuiCamera::renderImpl( SceneOrchestrator* p, JMATH::Rect2f& f ) {
 //        ImGui::InputFloat3("Top", lTop);
 //        CameraRigAngles::Top = V3f{lTop};
 //    ImGui::EndGroup();
-    for ( const auto& [k,v] : p->getRigs() ) {
+    for ( const auto& [k,v] : p->StateMachine()->getRigs() ) {
         auto cam = v->getMainCamera();
         ImGui::BeginGroup();
         ImGui::Text( "Name: %s", cam->Name().c_str());

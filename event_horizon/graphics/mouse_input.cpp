@@ -71,7 +71,7 @@ void MouseInput::onTouchUp( const Vector2f& pos, UpdateSignals& _updateSignals )
 	mTouchedDownFirstTime = false;
 	// Check if a single tap was performed
 	mSingleTapEvent = false;
-	if ( mGesturesTaps.size() > 0 && mGestureTime < SINGLE_TAP_TIME_LIMIT ) {
+	if ( !mGesturesTaps.empty() && mGestureTime < SINGLE_TAP_TIME_LIMIT ) {
 		Vector2f xyd = mGesturesTaps.back() - mGesturesTaps.front();
 		if ( length( xyd ) < TAP_AREA ) {
 			mSingleTapEvent = true;

@@ -17,10 +17,9 @@
 #include <render_scene_graph/render_scene_graph.h>
 #include <render_scene_graph/camera_controls.hpp>
 #include <graphics/renderer.h>
-#include <graphics/render_targets.hpp>
 
 class MouseInput;
-class SceneStateMachineBackEnd;
+class SceneBridge;
 class SceneOrchestrator;
 struct ImGuiConsole;
 class CameraRig;
@@ -29,16 +28,10 @@ class RenderSceneGraph;
 class TextInput;
 class CommandQueue;
 class CameraControl;
-class CommandScriptPresenterManager;
 class StreamingMediator;
 enum class RenderTargetType;
 
-namespace PresenterEventFunctionKey {
-	const static std::string Activate = "activate";
-}
-
 using PresenterUpdateCallbackFunc = std::function<void(SceneOrchestrator* p)>;
-using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 using DragAndDropFunction = std::function<void(SceneOrchestrator* p, const std::string&)>;
 
 struct SceneEventNotifications {
@@ -48,22 +41,10 @@ struct SceneEventNotifications {
 class SceneOrchestrator : public Observer<MouseInput> {
 public:
 	SceneOrchestrator( SceneGraph& _sg, RenderSceneGraph& _rsg, TextInput& ti, MouseInput& mi, CommandQueue& cq );
-
 	virtual ~SceneOrchestrator() = default;
 
-	void activate();
-
-	template <typename T>
-    void addViewport( RenderTargetType _rtt, const std::string& _rigname, const Rect2f& _viewport, BlitType _bt ) {
-        auto _rig = getRig(_rigname);
-        _rig->setViewport(_viewport);
-
-        if ( mRigs.find(_rig->Name()) == mRigs.end() ) {
-            RenderTargetFactory::make( _rtt, _rig, _viewport, _bt, RSG().RR() );
-            mRigs[_rig->Name()] = std::make_shared<T>( _rig, rsg );
-        } else {
-            setViewportOnRig( _rig, _viewport );
-        }
+    void activate() {
+        preActivate();
     }
 
     void takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata );
@@ -71,7 +52,6 @@ public:
 	void inputPollUpdate();
 	void update();
 	void render();
-	void init();
 	void enableInputs( bool _bEnabled );
 	void deactivate();
 
@@ -88,28 +68,22 @@ public:
 	RenderSceneGraph& RSG();
 	SceneGraph& SG();
 	CommandQueue& CQ();
-    std::shared_ptr<Camera>    getCamera( const std::string& _name );
-    std::shared_ptr<CameraRig> getRig( const std::string& _name );
 
 	template <typename T>
 	void addHttpStream( const std::string& _streamName ) {
 		RSG().RR().SSM().addStream<T>( _streamName, avcbTM() );
 	}
 
-	void StateMachine( std::shared_ptr<SceneStateMachineBackEnd> _l );
-	std::shared_ptr<SceneStateMachineBackEnd> StateMachine();
+	void StateMachine( std::shared_ptr<SceneBridge> _l );
+	std::shared_ptr<SceneBridge> StateMachine();
 
 	const std::shared_ptr<ImGuiConsole>& Console() const;
 
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
-	const cameraRigsMap& getRigs() const;
 
 	void setDragAndDropFunction( DragAndDropFunction dd );
 
 	void script( const std::string& _line );
-
-    InitializeWindowFlagsT getLayoutInitFlags() const;\
-    void setLayoutInitFlags( InitializeWindowFlagsT _flags );
 
 public:
 	static std::vector<std::string> callbackPaths;
@@ -120,21 +94,17 @@ protected:
     AVInitCallback avcbTM();
 	void resetSingleEventNotifications();
 	void reloadShaders( SocketCallbackDataTypeConstRef _data );
-    void setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport );
-    void setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport );
+    void preActivate();
 protected:
-	std::shared_ptr<SceneStateMachineBackEnd> stateMachine;
+	std::shared_ptr<SceneBridge> stateMachine;
 	SceneGraph& sg;
 	RenderSceneGraph& rsg;
     TextInput& ti;
     MouseInput& mi;
 	CommandQueue& cq;
-	cameraRigsMap mRigs;
-    std::shared_ptr<CommandScriptPresenterManager> hcs;
 	std::shared_ptr<ImGuiConsole> console;
 	SceneEventNotifications notifications;
 	DragAndDropFunction dragAndDropFunc = nullptr;
-    InitializeWindowFlagsT initFlags = InitializeWindowFlags::Maximize;
 
 private:
 	void updateCallbacks();

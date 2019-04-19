@@ -14,7 +14,7 @@
 #include <graphics/ui/imgui_console.h>
 #include <graphics/render_targets.hpp>
 
-#include <render_scene_graph/scene_state_machine.h>
+#include <render_scene_graph/scene_bridge.h>
 #include <render_scene_graph/render_scene_graph.h>
 
 #include <core/resources/resource_manager.hpp>
@@ -25,17 +25,6 @@ std::vector<std::string> SceneOrchestrator::callbackPaths;
 Vector2i SceneOrchestrator::callbackResizeWindow = Vector2i(-1, -1);
 Vector2i SceneOrchestrator::callbackResizeFrameBuffer = Vector2i(-1, -1);
 std::vector<PresenterUpdateCallbackFunc> SceneOrchestrator::sUpdateCallbacks;
-
-class CommandScriptPresenterManager : public CommandScript {
-public:
-	explicit CommandScriptPresenterManager( SceneOrchestrator& hm );
-	virtual ~CommandScriptPresenterManager() = default;
-};
-
-CommandScriptPresenterManager::CommandScriptPresenterManager( SceneOrchestrator& _hm ) {
-//    addCommandDefinition("enable keyboard", std::bind(&SceneOrchestrator::cmdEnableKeyboard, &_hm, std::placeholders::_1));
-//    addCommandDefinition("disable keyboard", std::bind(&SceneOrchestrator::cmdDisableKeyboard, &_hm, std::placeholders::_1));
-}
 
 void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
 	ASSERT( count > 0 );
@@ -60,8 +49,6 @@ SceneOrchestrator::SceneOrchestrator( SceneGraph& _sg,
 									  MouseInput& mi,
 									  CommandQueue& cq ) :
 									  sg(_sg), rsg(_rsg), ti( ti), mi( mi ), cq( cq) {
-	hcs = std::make_shared<CommandScriptPresenterManager>(*this);
-	cq.registerCommandScript(hcs);
 	console = std::make_shared<ImGuiConsole>(cq);
 }
 
@@ -96,14 +83,14 @@ void SceneOrchestrator::updateCallbacks() {
 		WH::resizeWindow( callbackResizeFrameBuffer );
 		WH::gatherMainScreenInfo();
 		RSG().RR().resetDefaultFB(callbackResizeFrameBuffer);
-		stateMachine->resizeCallback( this, callbackResizeFrameBuffer );
+        RSG().resizeCallback( callbackResizeFrameBuffer );
 		callbackResizeFrameBuffer = Vector2i{-1, -1};
 	}
 
 }
 
 void SceneOrchestrator::update() {
-	stateMachine->run();
+//	stateMachine->run();
 	inputPollUpdate();
 	updateCallbacks();
 	SG().update();
@@ -112,18 +99,15 @@ void SceneOrchestrator::update() {
 void SceneOrchestrator::deactivate() {
 }
 
-void SceneOrchestrator::activate() {
-
-	WH::setDropCallback( GDropCallback );
-	WH::setResizeWindowCallback( GResizeWindowCallback );
-	WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
+void SceneOrchestrator::preActivate() {
+    WH::setDropCallback( GDropCallback );
+    WH::setResizeWindowCallback( GResizeWindowCallback );
+    WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
 
 #ifndef _PRODUCTION_
-	Socket::on( "shaderchange",
-				std::bind(&SceneOrchestrator::reloadShaders, this, std::placeholders::_1 ) );
+    Socket::on( "shaderchange",
+                std::bind(&SceneOrchestrator::reloadShaders, this, std::placeholders::_1 ) );
 #endif
-
-	stateMachine->activate();
 }
 
 void SceneOrchestrator::reloadShaders( SocketCallbackDataTypeConstRef _data ) {
@@ -145,19 +129,6 @@ void SceneOrchestrator::resetSingleEventNotifications() {
 }
 
 void SceneOrchestrator::inputPollUpdate() {
-
-	CameraInputData cid{ ti,
-			  mi.getCurrPos(),
-			  mi.isTouchedDown(),
-			  mi.isTouchedDownFirstTime(),
-			  notifications.singleMouseTapEvent,
-			  mi.getScrollValue(),
-			  mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
-			  mi.getCurrMoveDiffNorm().dominant() };
-
-	for ( auto& [k,v] : mRigs ) {
-		v->updateFromInputData( cid );
-	}
 
 	resetSingleEventNotifications();
 }
@@ -185,13 +156,13 @@ void SceneOrchestrator::notified( MouseInput& _source, const std::string& genera
 void SceneOrchestrator::render() {
 	ImGui::NewFrame();
 
-	stateMachine->render( this );
-
-	for ( auto& [k,v] : mRigs ) {
-		v->renderControls(this);
-	}
-
-	RSG().RR().directRenderLoop();
+//	stateMachine->render( this );
+//
+//	for ( auto& [k,v] : StateMachine()->getRigs() ) {
+//		v->renderControls();
+//	}
+//
+//	RSG().RR().directRenderLoop();
 
 	ImGui::Render();
 }
@@ -212,7 +183,7 @@ void SceneOrchestrator::cmdDisableKeyboard( const std::vector<std::string>& para
     WH::disableInputCallbacks();
 }
 
-void SceneOrchestrator::StateMachine( std::shared_ptr<SceneStateMachineBackEnd> _l ) {
+void SceneOrchestrator::StateMachine( std::shared_ptr<SceneBridge> _l ) {
 	stateMachine = _l;
 }
 
@@ -221,23 +192,15 @@ const std::shared_ptr<ImGuiConsole>& SceneOrchestrator::Console() const {
 }
 
 void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
-    addViewport<CameraControlFly>( RenderTargetType::PBR, Name::Sierra,
-    		     Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
-    getCamera(Name::Sierra)->center(_box);
-    RSG().RR().getTarget(Name::Sierra)->takeScreenShot( _outdata );
+//    addViewport<CameraControlFly>( RenderTargetType::PBR, Name::Sierra,
+//    		     Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
+//    getCamera(Name::Sierra)->center(_box);
+//    RSG().RR().getTarget(Name::Sierra)->takeScreenShot( _outdata );
 }
 
 RenderSceneGraph& SceneOrchestrator::RSG() { return rsg; }
 
-std::shared_ptr<Camera> SceneOrchestrator::getCamera( const std::string& _name ) {
-	return SG().CM().get(_name)->getMainCamera();
-}
-
-const cameraRigsMap& SceneOrchestrator::getRigs() const {
-	return mRigs;
-}
-
-std::shared_ptr<SceneStateMachineBackEnd> SceneOrchestrator::StateMachine()  {
+std::shared_ptr<SceneBridge> SceneOrchestrator::StateMachine()  {
     return stateMachine;
 }
 
@@ -253,33 +216,9 @@ SceneGraph& SceneOrchestrator::SG() {
     return sg;
 }
 
-void SceneOrchestrator::init() {
-    sg.init();
-}
-
 AVInitCallback SceneOrchestrator::avcbTM() {
     return std::bind(&TextureManager::preparingStremingTexture,
                      RSG().RR().TM().get(),
                      std::placeholders::_1,
                      std::placeholders::_2);
-}
-
-InitializeWindowFlagsT SceneOrchestrator::getLayoutInitFlags() const {
-    return initFlags;
-}
-
-void SceneOrchestrator::setLayoutInitFlags( InitializeWindowFlagsT _flags ) {
-    orBitWiseFlag( initFlags, _flags );
-}
-
-void SceneOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
-    RSG().RR().getTarget(_rig->Name())->getRig()->setViewport(_viewport);
-}
-
-void SceneOrchestrator::setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport ) {
-    RSG().RR().getTarget(_rigName)->getRig()->setViewport(_viewport);
-}
-
-std::shared_ptr<CameraRig> SceneOrchestrator::getRig( const std::string& _name ) {
-    return SG().CM().get(_name);
 }

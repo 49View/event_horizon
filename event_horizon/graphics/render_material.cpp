@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 //  material.cpp
 //  6thViewImporter

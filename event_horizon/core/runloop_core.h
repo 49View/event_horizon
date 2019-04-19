@@ -11,7 +11,6 @@
 #include <cstdint>
 #include <functional>
 
-struct CommandConsole {};
 class CommandQueue;
 
 enum class RunLoopThreading {
@@ -21,7 +20,7 @@ enum class RunLoopThreading {
 
 class RunLoop {
 public:
-    RunLoop( CommandQueue& _cq ) : cq( _cq ) {}
+    explicit RunLoop( CommandQueue& _cq ) : cq( _cq ) {}
 	virtual ~RunLoop() = default;
 
     void coreLoop();
@@ -39,10 +38,6 @@ protected:
 	bool mbExitTriggered = false;
 	CommandQueue& cq;
 };
-
-template< typename T > void mainLoop( uint64_t _flags = 0, RunLoopThreading rt = RunLoopThreading::Sync );
-
-template <> void mainLoop<CommandConsole>( uint64_t _flags, RunLoopThreading rt );
 
 void updateTime();
 void daemonLoop( int _sleepSeconds, bool& _awake, std::function<void()> _elaborateFunc );

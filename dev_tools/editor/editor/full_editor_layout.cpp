@@ -8,13 +8,13 @@
 #include <core/camera_rig.hpp>
 #include <core/camera.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
-#include <render_scene_graph/scene_state_machine.h>
+#include <render_scene_graph/scene_bridge.h>
 #include <poly/resources/ui_shape_builder.h>
 #include <poly/resources/geom_builder.h>
 #include <media/audio_video_stream.hpp>
 #include "callbacks_layout.h"
 
-void FullEditor::init() {
+void FullEditorStateMachine::init() {
 
     struct UIViewLayout {
         float consoleHeight = 0.0f;
@@ -42,50 +42,42 @@ void FullEditor::init() {
 
 #define CENTER(xc,yc) 0.5f-xc*0.5f, 0.5f+xc*0.5f, 0.5f-yc*0.5f, 0.5f+yc*0.5f
 
-    addBox( SceneLayoutDefaultNames::Taskbar, 0.0f, 1.0f, 0.0f, uivl.taskbarHeight );
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::Taskbar, 0.0f, 1.0f, 0.0f, uivl.taskbarHeight );
 
-    addBox( SceneLayoutDefaultNames::Login, CENTER(uivl.rightPanelWidth, uivl.loginPanelHeight), false);
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::Login, CENTER(uivl.rightPanelWidth, uivl.loginPanelHeight), false);
 
-    addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f );
-    addBox( SceneLayoutDefaultNames::Scene, 0.0f, uivl.rightPanelWidth, uivl.taskbarHeight, timeLineY + uivl.taskbarHeight );
-    addBox( SceneLayoutDefaultNames::Material, 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f - uivl.taskbarHeight, false );
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::Console, 0.0f, 1.0f, 1.0f-uivl.consoleHeight, 1.0f );
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::Scene, 0.0f, uivl.rightPanelWidth, uivl.taskbarHeight, timeLineY + uivl.taskbarHeight );
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::Material, 0.0f, uivl.rightPanelWidth, uivl.leftPanelHeight, uivl.leftPanelHeight*2.0f - uivl.taskbarHeight, false );
 
-    addBox( SceneLayoutDefaultNames::Image, CENTER(uivl.rightPanelWidth, uivl.leftPanelHeight2*5.0f), false );
-//    addBox( SceneLayoutDefaultNames::Camera, 1.0f-uivl.rightPanelWidth, 1.0f,
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::Image, CENTER(uivl.rightPanelWidth, uivl.leftPanelHeight2*5.0f), false );
+//    so->StateMachine()->addBox( SceneLayoutDefaultNames::Camera, 1.0f-uivl.rightPanelWidth, 1.0f,
 //                     timeLineY - uivl.leftPanelHeight2 + uivl.taskbarHeight,
 //                     timeLineY+ uivl.taskbarHeight);
 
-    addBox( SceneLayoutDefaultNames::Timeline,
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::Timeline,
                      0.0f, 1.0f,
                      timeLineY +uivl.taskbarHeight, timeLineY + uivl.timeLinePanelSize.y() );
 
-    addBox( SceneLayoutDefaultNames::CloudMaterial,
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::CloudMaterial,
                      1.0f-uivl.rightPanelWidth, 1.0f, uivl.loginPanelHeight, uivl.loginPanelHeight + uivl.rightPanelHeight, false );
 
-    addBox( SceneLayoutDefaultNames::CloudGeom,
+    so->StateMachine()->addBox( SceneLayoutDefaultNames::CloudGeom,
                      1.0f-uivl.rightPanelWidth, 1.0f, uivl.loginPanelHeight + uivl.rightPanelHeight, uivl.loginPanelHeight + uivl.rightPanelHeight*2, false );
 
     float topX = uivl.rightPanelWidth;
     float cameraWidth = (1.0f-uivl.rightPanelWidth*2.0f);
     float cameraAspectRatio = (720.0f / 1280.0f);
     float cameraHeight = cameraWidth*(cameraAspectRatio*(1280.0f/720.0f));
-    addRig<CameraControl2d>( Name::Foxtrot,
+    so->StateMachine()->addRig<CameraControl2d>( Name::Foxtrot,
                              topX, topX + cameraWidth,
                              uivl.taskbarHeight, cameraHeight + uivl.taskbarHeight );
 
     allCallbacksEntitySetup();
-    o()->setDragAndDropFunction(allConversionsDragAndDropCallback);
-
-//    o()->script("change time 14:00");
-//    o()->getCamera(Name::Foxtrot)->setPosition( Vector3f( 0.0f, .5f, -2.0f ) );
-//    o()->getCamera(Name::Foxtrot)->setQuatAngles( Vector3f( 0.2f, M_PI, 0.0f ) );
+    so->setDragAndDropFunction(allConversionsDragAndDropCallback);
 
 //        auto streamName = "http://192.168.1.123:8080/video";
 //        o()->addHttpStream<AudioVideoStreamFFmpeg>(streamName);
 //        GB{ShapeType::Panel}.m(S::YUV_GREENSCREEN,streamName).build(o()->RSG());
-//        GB{ShapeType::Sphere}.m(S::SH, "rustic").build(o()->RSG());
 
-}
-
-void FullEditor::run() {
 }

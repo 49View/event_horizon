@@ -13,6 +13,7 @@
 #include <graphics/renderer.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
+#include <render_scene_graph/scene_bridge.h>
 
 RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg) {
 
@@ -39,6 +40,17 @@ RenderSceneGraph::RenderSceneGraph( Renderer& rr, SceneGraph& _sg ) : rr( rr ), 
     });
 
     am = std::make_shared<AudioManagerOpenAL>();
+}
+
+void RenderSceneGraph::init() {
+    // Set a fullscreen camera in case there's none
+    addRig<CameraControlFly>( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f );
+}
+
+void RenderSceneGraph::updateInputs( const AggregatedInputData& _aid ) {
+    for ( auto& [k,v] : mRigs ) {
+        v->updateFromInputData( _aid );
+    }
 }
 
 //void RenderSceneGraph::addImpl( NodeVariants _geom ) {
@@ -88,24 +100,49 @@ void RenderSceneGraph::changeMaterialColorCallback( const std::vector<std::strin
 
 Renderer& RenderSceneGraph::RR() { return rr; }
 
+void RenderSceneGraph::addBoxToViewport( const std::string& _name, const SceneScreenBox& _box ) {
+    if ( boxes.find(_name) != boxes.end() ) return;
+    boxes[_name] = _box;
+}
+
+std::shared_ptr<CameraRig> RenderSceneGraph::getRig( const std::string& _name ) {
+    return sg.CM().get(_name);
+}
+
+std::shared_ptr<Camera> RenderSceneGraph::getCamera( const std::string& _name ) {
+    return sg.CM().get(_name)->getMainCamera();
+}
+
+void RenderSceneGraph::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
+    rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
+}
+
+void RenderSceneGraph::setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport ) {
+    rr.getTarget(_rigName)->getRig()->setViewport(_viewport);
+}
+
+void RenderSceneGraph::addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible ) {
+//    if ( auto rlf = boxFunctionMapping.find( _name ); rlf != boxFunctionMapping.end() ) {
+//        addBoxToViewport( _name,{ { _l, _r, _t, _b}, rlf->second } );
+//        boxes[_name].setVisible( _bVisible );
+//    }
+}
+
+void RenderSceneGraph::resizeCallback( const Vector2i& _resize ) {
+    for ( auto& [k,v] : boxes ) {
+        orBitWiseFlag( v.flags, BoxFlags::Resize );
+        if ( getRig(k) ) {
+            auto r = v.updateAndGetRect();
+            rr.getTarget( k )->resize( r );
+            sg.CM().get(k)->setViewport( r );
+        }
+    }
+}
+
 //void RenderSceneGraph::changeMaterialColorTagImpl( const std::vector<std::string>& _params ) {
 //    ColorBuilder{cl, concatParams(_params, 1)}.load(std::bind( &RenderSceneGraph::changeMaterialColorCallback,
 //                                                               this,
 //                                                               _params), _params);
-//}
-
-//void RenderSceneGraph::cmdCreateGeometryImpl( const std::vector<std::string>& _params ) {
-//
-//    auto st = shapeTypeFromString( _params[0] );
-//    if ( st != ShapeType::None) {
-//        auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
-//        auto shd = ( _params.size() > 2 ) ? _params[2] : S::SH;
-//        GB{*this, st }.n("ucarcamagnu").g(9200).m(shd,mat).build();
-//    } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
-//        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
-//        UISB{*this, UIShapeType::Text3d, _params[1], 0.6f }.c(col).buildr();
-//    }
-//
 //}
 //
 //void RenderSceneGraph::cmdRemoveGeometryImpl( const std::vector<std::string>& _params ) {

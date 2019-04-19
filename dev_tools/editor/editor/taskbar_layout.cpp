@@ -7,7 +7,7 @@
 #include <graphics/imgui/imgui.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 #include <render_scene_graph/layouts/layout_helper.hpp>
-#include <render_scene_graph/scene_state_machine.h>
+#include <render_scene_graph/scene_bridge.h>
 
 void ImGuiTaskbar::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
 

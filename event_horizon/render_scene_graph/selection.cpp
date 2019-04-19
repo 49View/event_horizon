@@ -8,10 +8,9 @@
 #include <core/geom.hpp>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/ImGuizmo.h>
-#include <render_scene_graph/layouts/layout_mediator.hpp>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
-void Selection::showGizmo( Selectable& _node, std::shared_ptr<Camera> _cam, SceneOrchestrator* _p ) {
+void Selection::showGizmo( Selectable& _node, std::shared_ptr<Camera> _cam ) {
 
     const Matrix4f& _view = _cam->getViewMatrix();
     const Matrix4f& _proj = _cam->getProjectionMatrix();
