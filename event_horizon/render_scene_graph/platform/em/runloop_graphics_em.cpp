@@ -11,7 +11,7 @@
 #include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
-//RunLoopGraphics rl = di::make_injector().create<RunLoopGraphics>();
+RunLoopGraphics rl = di::make_injector().create<RunLoopGraphics>();
 
 std::string addScriptLine( std::string _str ) {
 //	rl.addScriptLine( _str );
@@ -51,12 +51,11 @@ int em_resize_callback(int eventType, const EmscriptenUiEvent *uiEvent, void *us
 }
 
 void main_loop_em() {
-//	rl.singleThreadLoop();
+	rl.singleThreadLoop();
 }
 
 void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
     emscripten_set_resize_callback(nullptr, nullptr, true, em_resize_callback );
-    auto rl = di::make_injector().create<RunLoopGraphics>();
     rl.init( initFlags, std::move(_be) );
     emscripten_set_main_loop( main_loop_em, 0, 0 );
 }
