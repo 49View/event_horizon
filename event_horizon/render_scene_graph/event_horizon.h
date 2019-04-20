@@ -17,17 +17,21 @@
 #include <render_scene_graph/scene_bridge.h>
 #include <core/resources/resource_manager.hpp>
 
+#ifdef __EMSCRIPTEN__
+#include <render_scene_graph/platform/em/runloop_graphics_em.h>
+#else
+#include <render_scene_graph/platform/desktop/runloop_graphics_desktop.h>
+#endif
+
 namespace di = boost::di;
 
-template<typename FE>
+template<typename BE>
 class EventHorizon {
 public:
     explicit EventHorizon( int argc, char *argv[] ) {
         Http::init();
-//        presenter->StateMachine( std::make_shared<T>(presenter.get()) );
-//        backEnd = std::make_unique<msm::back::state_machine<BE>>();
-//        app->start();
-        mainLoop<FE>(checkLayoutArgvs( argc, argv ));
+        auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
+        mainLoop(checkLayoutArgvs( argc, argv ), std::move(backEnd) );
     }
 
 private:

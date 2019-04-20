@@ -4,4 +4,4 @@
 
 #pragma once
 
-#include "../../runloop_graphics.h"
+void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be );

@@ -9,9 +9,12 @@
 
 namespace Http {
 
-    std::unordered_map<std::string, std::function<void( const Http::Result& )>> argCallbackMap;
+    using callbackRespondeMap = std::unordered_map<std::string, ResponseCallbackFunc>;
+    callbackRespondeMap argCallbackMapOk;
+    callbackRespondeMap argCallbackMapFail;
 
-    void responseCallback( const char* ckey, int code, void* data, unsigned numBytes ) {
+    void responseCallback( callbackRespondeMap& argCallbackMap,
+                           const char* ckey, int code, void* data, unsigned numBytes ) {
         auto skey = std::string( ckey );
         if ( argCallbackMap[skey] ) {
             argCallbackMap[skey]( { skey, reinterpret_cast<const char*>(data), numBytes, code } );
@@ -21,12 +24,12 @@ namespace Http {
 
     void onSuccessWget( unsigned boh, void* arg, int code, void* data, unsigned numBytes ) {
         LOGR( "[HTTP-RESPONSE] code: %d, handle %d, numBytes: %d", code, boh, numBytes );
-        responseCallback( reinterpret_cast<char*>(arg), code, data, numBytes );
+        responseCallback( argCallbackMapOk, reinterpret_cast<char*>(arg), code, data, numBytes );
     }
 
     void onFailWget( [[maybe_unused]] unsigned boh, void *arg, int code, const char* why ) {
         LOGR("[HTTP-RESPONSE][ERROR] handle: %d code: %d URI: %s -- %s", boh, code, reinterpret_cast<char*>(arg), why );
-        responseCallback( reinterpret_cast<char*>(arg), code, nullptr, 0 );
+        responseCallback( argCallbackMapFail,  reinterpret_cast<char*>(arg), code, nullptr, 0 );
     }
 
     void onProgressWget( [[maybe_unused]] unsigned boh, [[maybe_unused]] void* arg,
@@ -45,9 +48,11 @@ namespace Http {
         return ss.str();
     }
 
-    char* urlKeyPassing( const Url& uri, const std::function<void( const Http::Result& )> callback ) {
+    char* urlKeyPassing( const Url& uri, const ResponseCallbackFunc callbackOk,
+                                         const ResponseCallbackFunc callbackFail ) {
         auto key = uri.toString();
-        argCallbackMap[key] = callback;
+        argCallbackMapOk[key] = callbackOk;
+        argCallbackMapFail[key] = callbackFail;
         char* keyToCharCPassing = new char[key.size()+1];
         strcpy( keyToCharCPassing, key.c_str() );
         keyToCharCPassing[key.size()] = '\0';
@@ -55,7 +60,8 @@ namespace Http {
     }
 
     void getInternal( const Url& uri,
-                      const std::function<void( const Http::Result& )> callback,
+                      ResponseCallbackFunc callback,
+                      ResponseCallbackFunc callbackFailed,
                       [[maybe_unused]] ResponseFlags rf ) {
 
         emscripten_async_http_request(uri.toString().c_str(),
@@ -64,7 +70,7 @@ namespace Http {
                                     nullptr,
                                     0,
                                     nullptr,
-                                    reinterpret_cast<void*>(urlKeyPassing(uri, callback)),
+                                    reinterpret_cast<void*>(urlKeyPassing(uri, callback, callbackFailed)),
                                     false,
                                     onSuccessWget,
                                     onFailWget,
@@ -72,7 +78,8 @@ namespace Http {
                                     true );
     }
 
-    void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt, ResponseCallbackFunc callback ) {
+    void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt,
+                       ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
 
         LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
@@ -84,7 +91,7 @@ namespace Http {
                                        buff,
                                        static_cast<int>(length),
                                        contenType.c_str(),
-                                       reinterpret_cast<void*>(urlKeyPassing(uri, callback)),
+                                       reinterpret_cast<void*>(urlKeyPassing(uri, callback, callbackFailed)),
                                        false,
                                        onSuccessWget,
                                        onFailWget,

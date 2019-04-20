@@ -6,17 +6,15 @@
 //  Copyright (c) 2012Dado. All rights reserved.
 //
 
-#include "../../runloop_graphics.h"
-#include "runloop_graphics_em.h"
+//#include "runloop_graphics_em.h"
 #include <emscripten/bind.h>
-#include <graphics/di_modules.h>
+#include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/scene_orchestrator.hpp>
 
-//RunLoopGraphics rl = di::make_injector(APP_GINJECTOR).template create<RunLoopGraphics>();
-RunLoopGraphics rl = di::make_injector().create<RunLoopGraphics>();
+//RunLoopGraphics rl = di::make_injector().create<RunLoopGraphics>();
 
 std::string addScriptLine( std::string _str ) {
-	rl.addScriptLine( _str );
+//	rl.addScriptLine( _str );
 	return "Enqueued command: " + _str;
 }
 
@@ -53,14 +51,12 @@ int em_resize_callback(int eventType, const EmscriptenUiEvent *uiEvent, void *us
 }
 
 void main_loop_em() {
-	rl.singleThreadLoop();
+//	rl.singleThreadLoop();
 }
 
-void mainLoop( std::shared_ptr<SceneOrchestrator> p ) {
-
+void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
     emscripten_set_resize_callback(nullptr, nullptr, true, em_resize_callback );
-	rl.initWindow( p );
-
-	p->activate();
-	emscripten_set_main_loop( main_loop_em, 0, 0 );
+    auto rl = di::make_injector().create<RunLoopGraphics>();
+    rl.init( initFlags, std::move(_be) );
+    emscripten_set_main_loop( main_loop_em, 0, 0 );
 }

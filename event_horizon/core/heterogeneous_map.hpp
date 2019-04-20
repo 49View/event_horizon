@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <optional>
 #include <core/htypes_shared.hpp>
 #include <core/math/vector4f.h>
 #include <core/math/matrix4f.h>

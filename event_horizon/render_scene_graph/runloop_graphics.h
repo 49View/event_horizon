@@ -12,6 +12,7 @@
 #include <core/util.h>
 #include <core/http/webclient.h>
 #include <core/di.hpp>
+#include <core/resources/resource_manager.hpp>
 #include <core/state_machine_helper.hpp>
 #include <core/command.hpp>
 #include <graphics/window_handling.hpp>
@@ -22,46 +23,43 @@
 
 namespace di = boost::di;
 
-
-template <typename FE>
-class RunLoopBackEnd {
+class RunLoopBackEndBase {
 public:
-    using BE = msm::back::state_machine<FE>;
-
-    RunLoopBackEnd( SceneGraph& _sg, RenderSceneGraph& _rsg) : sg(_sg), rsg(_rsg) {
-        backEnd = std::make_unique<BE>( &_sg, &_rsg );
+    RunLoopBackEndBase( SceneGraph& _sg, RenderSceneGraph& _rsg) : sg(_sg), rsg(_rsg) {
     }
-    virtual ~RunLoopBackEnd() = default;
+    virtual ~RunLoopBackEndBase() = default;
 
     void update( const AggregatedInputData& _aid ) {
         rsg.updateInputs( _aid );
+        updateImpl();
     };
 
     void activate() {
         sg.init();
         rsg.init();
-        backEnd->start();
+        activateImpl();
     }
+
+    virtual void updateImpl() = 0;
+    virtual void activateImpl() = 0;
 
 protected:
     SceneGraph& sg;
     RenderSceneGraph& rsg;
-    std::unique_ptr<BE> backEnd;
 };
 
-template <typename FE>
 class RunLoopGraphics : public RunLoop {
 public:
     using RunLoop::RunLoop;
 	RunLoopGraphics( CommandQueue& _cq, Renderer& rr, TextInput& ti,
 	                 MouseInput& mi, SceneGraph& _sg, RenderSceneGraph& _rsg )
-                     : RunLoop( _cq ), rr( rr ), ti( ti), mi( mi), sg(_sg), rsg(_rsg) {
-        rlbackEnd = std::make_unique<RunLoopBackEnd<FE>>( sg, rsg );
-	}
+                     : RunLoop( _cq ), rr( rr ), ti( ti), mi( mi), sg(_sg), rsg(_rsg) {}
 
-    void init( InitializeWindowFlagsT _initFlags ) {
+    void init( InitializeWindowFlagsT _initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
+        rlbackEnd = std::move(_be);
         WH::initializeWindow( _initFlags, rr );
         rr.init();
+        rlbackEnd->activate();
         //	mi.subscribe( pm );
     }
 
@@ -79,7 +77,6 @@ public:
     }
 
     void runSingleThread() override {
-        rlbackEnd->activate();
         while ( !WH::shouldWindowBeClosed() ) {
             singleThreadLoop();
         }
@@ -119,7 +116,7 @@ protected:
         WH::flush();
     }
 
-    auto aggregateInputs() {
+    AggregatedInputData aggregateInputs() {
         return AggregatedInputData{ ti,
                              mi.getCurrPos(),
                              mi.isTouchedDown(),
@@ -137,17 +134,11 @@ protected:
     MouseInput& mi;
     SceneGraph& sg;
     RenderSceneGraph& rsg;
+    std::unique_ptr<RunLoopBackEndBase> rlbackEnd;
 
 	int nUpdates = 0;
 	int nRenders = 0;
 	int nTicks = 0;
 	UpdateSignals mUpdateSignals;
-	std::unique_ptr<RunLoopBackEnd<FE>> rlbackEnd;
 };
 
-template <typename FE>
-void mainLoop( InitializeWindowFlagsT initFlags ) {
-    auto rl = di::make_injector().create<RunLoopGraphics<FE>>();
-    rl.init( initFlags );
-    rl.runSingleThread();
-}
