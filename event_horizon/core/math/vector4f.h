@@ -392,6 +392,11 @@ public:
 			   ( static_cast<uint8_t>(mZ*255.0f) << 16 );
 	}
 
+    friend std::ostream& operator<<( std::ostream& o, const Vector4f& val ) {
+        o << val.toString();
+        return o;
+    }
+
 private:
 	// Note: these elements should be declared contiguously and ordered X/Y/W/Z
 	// due to a memory-layout assumption in operator[].

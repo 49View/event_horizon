@@ -1,6 +1,6 @@
 #include "../framebuffer_opengl.h"
 
-void checkFrameBufferStatus() {
+void Framebuffer::checkFrameBufferStatus() {
     GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
     switch ( fbs ) {
         case GL_FRAMEBUFFER_UNDEFINED:

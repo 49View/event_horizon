@@ -46,7 +46,7 @@ public: // these are globals data accessed from low level functions on inputs et
 
 	bool hasBeenTappedInRect( JMATH::Rect2f& rect );
 	bool isRectInput() const { return mIsRectInput; }
-	void setRectInput( const bool _val );
+	void setRectInput( bool _val );
 	void updateRectInput();
 	void pushNewRectInput();
 	void ToggleRectInput();
@@ -57,7 +57,7 @@ public: // these are globals data accessed from low level functions on inputs et
 		return mInputRects;
 	}
 
-	bool wasTouchUpSingleEvent() { return mSingleTapEvent && !mDoubleTapEvent; }
+	bool wasTouchUpSingleEvent() const { return mSingleTapEvent && !mDoubleTapEvent; }
 	bool wasDoubleTapEvent() { return mDoubleTapEvent; }
 	float checkLinearSwipe( const vector2fList& targetSwipes, const vector2fList& playerSwipes );
 	SwipeDirection checkSwipe();
@@ -82,11 +82,11 @@ public: // these are globals data accessed from low level functions on inputs et
 	void setCursorType( MouseCursorType mct );
 
 	float arrowVelocity() const { return accumulatedArrowVelocity; }
-	void leftArrowPressed( const float speed = 1.0f );
-	void rightArrowPressed( const float speed = 1.0f );
+	void leftArrowPressed( float speed = 1.0f );
+	void rightArrowPressed( float speed = 1.0f );
 
 	void update( UpdateSignals& _updateSignals );
-	void enableMouseCursor( const bool val );
+	void enableMouseCursor( bool val );
 
 	Vector2f getCurrPos() const;
 	Vector2f getCurrPosSS() const;

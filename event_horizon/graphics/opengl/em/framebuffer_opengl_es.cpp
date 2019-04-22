@@ -3,8 +3,11 @@
 #include "../gl_util.h"
 #include "../../graphic_functions.hpp"
 
-void checkFrameBufferStatus() {
+void Framebuffer::checkFrameBufferStatus() {
     GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+    if ( fbs == GL_FRAMEBUFFER_COMPLETE ) return;
+
+    LOGRS( "Framebuffer " << mName << " size: [" << mWidth << ":" << mHeight << "] format : " << mFormat );
     switch ( fbs ) {
         case GL_FRAMEBUFFER_UNDEFINED:
             LOGR( "Frame Buffer creation error code: GL_FRAMEBUFFER_UNDEFINED" );
@@ -23,9 +26,6 @@ void checkFrameBufferStatus() {
 
         case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
             LOGR( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" );
-            break;
-
-        case GL_FRAMEBUFFER_COMPLETE:
             break;
 
         default:
@@ -56,8 +56,7 @@ void Framebuffer::clearDepthBuffer( const float _clearDepthValue ) {
     GLCALL( glClear( GL_DEPTH_BUFFER_BIT ));
 }
 
-void Framebuffer::setSRGB( bool value ) {
-    return;
+void Framebuffer::setSRGB( [[maybe_unused]] bool value ) {
 //    if ( value ) {
 //        glEnable( GL_FRAMEBUFFER_SRGB );
 //    } else {

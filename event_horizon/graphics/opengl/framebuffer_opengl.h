@@ -23,7 +23,7 @@ struct FrameBufferTextureValues;
 
 class Framebuffer {
 public:
-	Framebuffer() {}
+	Framebuffer() = default;
 
 	void release();
 
@@ -42,6 +42,7 @@ public:
 	std::shared_ptr<VPList> VP() { return mVPListIM; };
 	// Init the framebuffer with a texture
 	void init( std::shared_ptr<TextureManager> tm );
+    void checkFrameBufferStatus();
 	void initSimple();
 	void initDepth( std::shared_ptr<TextureManager> tm );
 	void initCubeMap( std::shared_ptr<Texture> cubemapTarget, uint32_t cubemapFaceIndex, uint32_t mipIndex = 0 );
@@ -81,8 +82,8 @@ private:
     GLuint depthTexture = 0;
 
 	std::string mName;
-	int mWidth;
-	int mHeight;
+	int mWidth{};
+	int mHeight{};
 	bool mMultisample = false;
 	bool mHDR = false;
 	bool mCubeMap = false;

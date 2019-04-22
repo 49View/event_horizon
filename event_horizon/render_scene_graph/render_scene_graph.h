@@ -14,6 +14,7 @@
 #include <render_scene_graph/scene_bridge.h>
 
 struct scene_t;
+struct PickRayData;
 class AudioManager;
 class Renderer;
 class VData;
@@ -87,8 +88,11 @@ public:
 
     void resizeCallback( const Vector2i& _resize );
 
+    PickRayData rayViewportPickIntersection( const V2f& _screenPos ) const;
+
 protected:
     std::shared_ptr<Camera>    getCamera( const std::string& _name );
+    const Camera* getCamera( const std::string& _name ) const;
     std::shared_ptr<CameraRig> getRig( const std::string& _name );
     void addBoxToViewport( const std::string& _nane, const SceneScreenBox& _box );
     void setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport );

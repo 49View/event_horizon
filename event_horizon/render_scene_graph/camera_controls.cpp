@@ -6,6 +6,7 @@
 #include <core/camera.h>
 #include <core/node.hpp>
 #include <core/camera_rig.hpp>
+#include <core/math/vector_util.hpp>
 #include <core/v_data.hpp>
 #include <graphics/mouse_input.hpp>
 #include <graphics/text_input.hpp>
@@ -103,11 +104,9 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
 
         if ( !inputIsBlockedOnSelection() && mi.isMouseSingleTap ) {
             unselectAll();
-            Vector3f mRayNear = Vector3f::ZERO;
-            Vector3f mRayFar = Vector3f::ZERO;
-            _cam->mousePickRay( mi.mousePos, mRayNear, mRayFar );
+            auto rayPick = _cam->rayViewportPickIntersection( mi.mousePos );
 //            bool bHit =
-            rsg.SG().rayIntersect( mRayNear, mRayFar, [&]( NodeVariantsSP _geom, float _near) {
+            rsg.SG().rayIntersect( rayPick.rayNear, rayPick.rayFar, [&]( NodeVariantsSP _geom, float _near) {
 //                ### REF reimplement selection
 //                std::visit( SelectionRecursiveLamba{*this}, _geom );
             } );
@@ -215,6 +214,9 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
         strafe = mi.moveDiff.x();
     }
     moveForward = mi.scrollValue; // It's safe to call it every frame as no gesture on wheel/magic mouse
+    if ( moveForward != 0.0f ) {
+        LOGRS( "Mouse scroll value: " << moveForward );
+    }
 
     _cam->moveForward( moveForward );
     _cam->strafe( strafe );

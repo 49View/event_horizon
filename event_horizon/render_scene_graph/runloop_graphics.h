@@ -31,7 +31,7 @@ public:
 
     void update( const AggregatedInputData& _aid ) {
         rsg.updateInputs( _aid );
-        updateImpl();
+        updateImpl( _aid );
     };
 
     void activate() {
@@ -40,7 +40,7 @@ public:
         activateImpl();
     }
 
-    virtual void updateImpl() = 0;
+    virtual void updateImpl( const AggregatedInputData& _aid ) = 0;
     virtual void activateImpl() = 0;
 
 protected:
@@ -121,7 +121,7 @@ protected:
                              mi.getCurrPos(),
                              mi.isTouchedDown(),
                              mi.isTouchedDownFirstTime(),
-                             false,//notifications.singleMouseTapEvent,
+                             mi.wasTouchUpSingleEvent(),
                              mi.getScrollValue(),
                              mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
                              mi.getCurrMoveDiffNorm().dominant() };

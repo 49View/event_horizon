@@ -19,11 +19,13 @@
 #include <core/camera_utils.hpp>
 #include <core/name_policy.hpp>
 
-void MultiplyMatrices4by4OpenGL_FLOAT( float *result, float *matrix1, float *matrix2 );
+void MultiplyMatrices4by4OpenGL_FLOAT( float *result, const float *matrix1, const float *matrix2 );
 void MultiplyMatrixByVector4by4OpenGL_FLOAT( float *resultvector, const float *matrix, const float *pvector );
 int glhInvertMatrixf2( float *m, float *out );
 int glhUnProjectf( float winx, float winy, float winz, float *modelview, float *projection, int *viewport, float *objectCoordinate );
 int glhProjectf( float objx, float objy, float objz, float *modelview, float *projection, int *viewport, float *windowCoordinate );
+
+struct PickRayData;
 
 struct Frustum {
 	Plane3f l;
@@ -119,7 +121,7 @@ public:
 
 	void getViewporti( int* viewport ) const;
 
-	void mousePickRay( const Vector2f& p1, Vector3f& rayNear, Vector3f& rayFar );
+	PickRayData rayViewportPickIntersection( const Vector2f& p1 ) const;
 	Vector2f mousePickRayOrtho( const Vector2f& _pos );
 
 	void ModeInc();
@@ -170,5 +172,5 @@ private:
 
 	Vector3f qangleEuler = Vector3f::ZERO;
 
-	JMATH::Rect2f mViewPort;
+	JMATH::Rect2f mViewPort{};
 };

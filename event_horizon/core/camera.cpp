@@ -7,11 +7,12 @@
 //
 
 #include "camera.h"
-#include "core/math/path_util.h"
-#include "core/app_globals.h"
-#include "core/math/plane3f.h"
-#include "core/math/quaternion.h"
-#include "core/math/anim.h"
+#include <core/math/path_util.h>
+#include <core/app_globals.h>
+#include <core/math/plane3f.h>
+#include <core/math/quaternion.h>
+#include <core/math/anim.h>
+#include <core/math/vector_util.hpp>
 
 int glhProjectf( float objx, float objy, float objz, float *modelview, float *projection, int *viewport, float *windowCoordinate ) {
 	//Transformation vectors
@@ -44,7 +45,7 @@ int glhProjectf( float objx, float objy, float objz, float *modelview, float *pr
 	return 1;
 }
 
-int glhUnProjectf( float winx, float winy, float winz, float *modelview, float *projection, int *viewport, float *objectCoordinate ) {
+int glhUnProjectf( float winx, float winy, float winz, const float *modelview, const float *projection, int *viewport, float *objectCoordinate ) {
 	//Transformation matrices
 	float m[16], A[16];
 	float in[4], out[4];
@@ -70,7 +71,7 @@ int glhUnProjectf( float winx, float winy, float winz, float *modelview, float *
 	return 1;
 }
 
-void MultiplyMatrices4by4OpenGL_FLOAT( float *result, float *matrix1, float *matrix2 ) {
+void MultiplyMatrices4by4OpenGL_FLOAT( float *result, const float *matrix1, const float *matrix2 ) {
 	result[0] = matrix1[0] * matrix2[0] +
 		matrix1[4] * matrix2[1] +
 		matrix1[8] * matrix2[2] +
@@ -571,11 +572,11 @@ bool Camera::frustomClipping( const AABB& bbox ) const {
 	return true;
 }
 
-void Camera::mousePickRay( const Vector2f& p1, Vector3f& rayNear, Vector3f& rayFar ) {
+PickRayData Camera::rayViewportPickIntersection( const Vector2f& p1 ) const {
 	// get point on the 'near' plane (third param is set to 0.0f)
 
-	float* matModelView = mView.rawPtr();
-	float* matProjection = mProjection.rawPtr();
+	const float* matModelView = mView.rawPtr();
+	const float* matProjection = mProjection.rawPtr();
 	int viewport[4];
 	getViewporti( viewport );
 
@@ -586,8 +587,7 @@ void Camera::mousePickRay( const Vector2f& p1, Vector3f& rayNear, Vector3f& rayF
 	// get point on the 'far' plane (third param is set to 1.0f)
 	glhUnProjectf( p1.x(), p1.y(), 1.0f, matModelView, matProjection, viewport, farPj );
 
-	rayNear = Vector3f( nearPj );
-	rayFar = Vector3f( farPj );
+	return PickRayData{ V3f( nearPj ), V3f( farPj ) };
 }
 
 void Camera::update() {

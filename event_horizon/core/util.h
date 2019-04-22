@@ -428,3 +428,4 @@ private:
 	bool bFirstInvalidated = false;
 	int  frameCounter = -1;
 };
+

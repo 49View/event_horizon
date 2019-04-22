@@ -26,6 +26,11 @@ std::string Vector2f::toString() const {
 	return "X = " + floatToFixedDigits( mX ) + " Y = " + floatToFixedDigits( mY );
 }
 
+std::ostream& operator<<( std::ostream& os, const Vector2f& f ) {
+    os << "X: " << f.mX << " Y: " << f.mY;
+    return os;
+}
+
 int winding( const std::vector<Vector2f>& points ) {
 	float s = 0.0f;
 	int si = static_cast<int>( points.size() );

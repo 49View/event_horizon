@@ -5,7 +5,9 @@
 #include "render_scene_graph.h"
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/resource_manager.hpp>
+#include <core/math/vector_util.hpp>
 #include <core/raw_image.h>
+#include <core/camera.h>
 #include <core/node.hpp>
 #include <core/geom.hpp>
 #include <poly/resources/geom_builder.h>
@@ -113,6 +115,10 @@ std::shared_ptr<Camera> RenderSceneGraph::getCamera( const std::string& _name ) 
     return sg.CM().get(_name)->getMainCamera();
 }
 
+const Camera* RenderSceneGraph::getCamera( const std::string& _name ) const {
+    return sg.CM().get(_name)->getMainCamera().get();
+}
+
 void RenderSceneGraph::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 }
@@ -138,6 +144,11 @@ void RenderSceneGraph::resizeCallback( const Vector2i& _resize ) {
         }
     }
 }
+
+PickRayData RenderSceneGraph::rayViewportPickIntersection( const V2f& _screenPos ) const {
+    return getCamera( Name::Foxtrot )->rayViewportPickIntersection( _screenPos );
+}
+
 
 //void RenderSceneGraph::changeMaterialColorTagImpl( const std::vector<std::string>& _params ) {
 //    ColorBuilder{cl, concatParams(_params, 1)}.load(std::bind( &RenderSceneGraph::changeMaterialColorCallback,

@@ -70,7 +70,6 @@ void MouseInput::onTouchUp( const Vector2f& pos, UpdateSignals& _updateSignals )
 	mTouchedDown = false;
 	mTouchedDownFirstTime = false;
 	// Check if a single tap was performed
-	mSingleTapEvent = false;
 	if ( !mGesturesTaps.empty() && mGestureTime < SINGLE_TAP_TIME_LIMIT ) {
 		Vector2f xyd = mGesturesTaps.back() - mGesturesTaps.front();
 		if ( length( xyd ) < TAP_AREA ) {
@@ -79,7 +78,6 @@ void MouseInput::onTouchUp( const Vector2f& pos, UpdateSignals& _updateSignals )
 		}
 	}
 	// Handle and check if double tap
-	mDoubleTapEvent = false;
 	mTouchupTimeStamps.push_back( mCurrTimeStamp );
 	if ( mTouchupTimeStamps.size() > 1 ) {
 		float time2 = mTouchupTimeStamps.back();
@@ -284,7 +282,9 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
 	accumulatedArrowVelocity *= 0.90f;
 	mGestureTapsFront = Vector2f::ZERO;
 	mGestureTapsBack = Vector2f::ZERO;
-	if ( mGesturesTaps.size() > 0 ) {
+    mSingleTapEvent = false;
+    mDoubleTapEvent = false;
+    if ( !mGesturesTaps.empty() ) {
 		mGestureTapsFront = mGesturesTaps.front();
 		mGestureTapsBack = mGesturesTaps.back();
 	}
@@ -322,7 +322,7 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
 	}
 
 	//io.MouseDown[1] = true;
-	onScroll( GScrollData.y() != io.MouseWheel ? io.MouseWheel : 0.0f, _updateSignals );
+	onScroll( GScrollData.y() != io.MouseWheel ? io.MouseWheel - GScrollData.y() : 0.0f, _updateSignals );
 	GScrollData = { io.MouseWheelH, io.MouseWheel };
 }
 

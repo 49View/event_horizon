@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <vector>
+#include <ostream>
 #include "../util.h"
 #include "math_util.h"
 #include "vector2i.h"
@@ -12,8 +13,8 @@ using namespace JMATH;
 
 class Vector2f {
 public:
-
-	static const Vector2f ZERO;
+    friend std::ostream& operator<<( std::ostream& os, const Vector2f& f );
+    static const Vector2f ZERO;
 	static const Vector2f X_AXIS;
 	static const Vector2f Y_AXIS;
 	static const Vector2f X_AXIS_NEG;
