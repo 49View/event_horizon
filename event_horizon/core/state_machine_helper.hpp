@@ -4,19 +4,22 @@
 
 #pragma once
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#ifndef BOOST_NO_AUTO_PTR
-#define BOOST_NO_AUTO_PTR
-#endif
-#include <boost/msm/back/state_machine.hpp>
-#include <boost/msm/front/state_machine_def.hpp>
-#include <boost/msm/front/functor_row.hpp>
-#include <boost/msm/front/euml/common.hpp>
-#pragma GCC diagnostic pop
+#include <core/sml.hpp>
+using namespace boost::sml;
 
-namespace msm = boost::msm;
-namespace mpl = boost::mpl;
-using namespace msm::front;
-#define sm_not template <class FSM, class Event> void no_transition(Event const& e, FSM&, int state) {}
-
+// This is using boost::msm with functors but we are trying to go with kris-jusiak [boost]::sml. Feeling brave.
+//#pragma GCC diagnostic push
+//#pragma GCC diagnostic ignored "-Wall"
+//#ifndef BOOST_NO_AUTO_PTR
+//#define BOOST_NO_AUTO_PTR
+//#endif
+//#include <boost/msm/back/state_machine.hpp>
+//#include <boost/msm/front/state_machine_def.hpp>
+//#include <boost/msm/front/functor_row.hpp>
+//#pragma GCC diagnostic pop
+//
+//namespace msm = boost::msm;
+//namespace mpl = boost::mpl;
+//using namespace msm::front;
+//#define sm_not template <class FSM, class Event> void no_transition(Event const& e, FSM&, int state) {}
+//
