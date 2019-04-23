@@ -255,13 +255,37 @@ void Renderer::drawCircle( int bucketIndex, const Vector3f& center, float radius
     _verts[0].pos = center;
     for ( int t = 1; t < numIndices; t++ ) {
         float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( subdivs - 1 )) * TWO_PI;
-        _verts[t].pos = Vector3f( center.xy() + Vector2f( sinf( angle ), cosf( angle )) * radius, center.z());
+        _verts[t].pos = Vector3f( center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius);
     }
 
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                    _verts, _indices );
 
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
+}
+
+void Renderer::drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color, int32_t subdivs,
+                             const std::string& _name ) {
+    int32_t numIndices = subdivs + 1;
+    if ( numIndices < 3 ) return;
+    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[numIndices] );
+    std::unique_ptr<VFPos2d[]> _verts = std::unique_ptr<VFPos2d[]>( new VFPos2d[numIndices] );
+
+    for ( int t = 0; t < numIndices; t++ ) {
+        _indices[t] = t;
+    }
+    _verts[0].pos = center;
+    for ( int t = 1; t < numIndices; t++ ) {
+        float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( subdivs - 1 )) * TWO_PI;
+        _verts[t].pos = Vector2f(
+                center + Vector2f( sinf( angle ), cosf( angle )) * ( getScreenAspectRatioVectorY * radius ));
+    }
+
+    std::shared_ptr<Pos2dStrip> ps = std::make_shared<Pos2dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
+                                                                   _verts, _indices );
+
+    auto vp = VPBuilder<Pos2dStrip>{*this,ShaderMaterial{S::COLOR_2D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
 }
 
@@ -288,30 +312,6 @@ void Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Vector
                                                                    _verts, _indices );
 
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
-    VPL( bucketIndex, vp );
-}
-
-void Renderer::drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color, int32_t subdivs,
-              const std::string& _name ) {
-    int32_t numIndices = subdivs + 1;
-    if ( numIndices < 3 ) return;
-    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[numIndices] );
-    std::unique_ptr<VFPos2d[]> _verts = std::unique_ptr<VFPos2d[]>( new VFPos2d[numIndices] );
-
-    for ( int t = 0; t < numIndices; t++ ) {
-        _indices[t] = t;
-    }
-    _verts[0].pos = center;
-    for ( int t = 1; t < numIndices; t++ ) {
-        float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( subdivs - 1 )) * TWO_PI;
-        _verts[t].pos = Vector2f(
-                center + Vector2f( sinf( angle ), cosf( angle )) * ( getScreenAspectRatioVectorY * radius ));
-    }
-
-    std::shared_ptr<Pos2dStrip> ps = std::make_shared<Pos2dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
-                                                                   _verts, _indices );
-
-    auto vp = VPBuilder<Pos2dStrip>{*this,ShaderMaterial{S::COLOR_2D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
 }
 

@@ -12,6 +12,7 @@
 #include <boost/msm/back/state_machine.hpp>
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/front/functor_row.hpp>
+#include <boost/msm/front/euml/common.hpp>
 #pragma GCC diagnostic pop
 
 namespace msm = boost::msm;

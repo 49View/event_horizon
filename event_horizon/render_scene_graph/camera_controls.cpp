@@ -214,10 +214,6 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
         strafe = mi.moveDiff.x();
     }
     moveForward = mi.scrollValue; // It's safe to call it every frame as no gesture on wheel/magic mouse
-    if ( moveForward != 0.0f ) {
-        LOGRS( "Mouse scroll value: " << moveForward );
-    }
-
     _cam->moveForward( moveForward );
     _cam->strafe( strafe );
     _cam->moveUp( moveUp );
