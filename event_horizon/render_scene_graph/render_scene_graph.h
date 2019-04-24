@@ -23,10 +23,10 @@ struct AggregatedInputData;
 
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 
-class RenderSceneGraph {
+class RenderOrchestrator {
 public:
-    RenderSceneGraph( Renderer& rr, SceneGraph& _sg );
-    virtual ~RenderSceneGraph() = default;
+    RenderOrchestrator( Renderer& rr, SceneGraph& _sg );
+    virtual ~RenderOrchestrator() = default;
 
     void init();
     void updateInputs( const AggregatedInputData& _aid );

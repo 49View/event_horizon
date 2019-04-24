@@ -10,7 +10,7 @@
 
 class CameraRig;
 class Camera;
-class RenderSceneGraph;
+class RenderOrchestrator;
 class TextInput;
 struct AggregatedInputData;
 
@@ -23,7 +23,7 @@ enum class CameraControls {
 
 class CameraControl {
 public:
-    explicit CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
+    explicit CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     virtual ~CameraControl() = default;
     void updateFromInputData( const AggregatedInputData& mi );
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) = 0;
@@ -34,7 +34,7 @@ public:
 
 protected:
     std::shared_ptr<CameraRig> mCameraRig;
-    RenderSceneGraph& rsg;
+    RenderOrchestrator& rsg;
 };
 
 class CameraControlEditable : public CameraControl, public Selection {
@@ -46,7 +46,7 @@ protected:
 class CameraControlFly : public CameraControlEditable {
 public:
     using CameraControlEditable::CameraControlEditable;
-    CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg );
+    CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderOrchestrator& rsg );
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
     void renderControls() override;
@@ -62,7 +62,7 @@ protected:
 class CameraControlWalk : public CameraControl {
 public:
     using CameraControl::CameraControl;
-    CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
+    CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControlWalk() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
     void renderControls() override {}
@@ -73,7 +73,7 @@ protected:
 class CameraControl2d : public CameraControlEditable {
 public:
     using CameraControlEditable::CameraControlEditable;
-    CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg );
+    CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControl2d() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
     void renderControls() override;

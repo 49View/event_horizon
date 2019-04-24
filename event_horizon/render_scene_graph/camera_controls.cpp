@@ -15,7 +15,7 @@
 #include <render_scene_graph/render_scene_graph.h>
 
 
-CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg ) :
+CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg ) :
                               mCameraRig(std::move( cameraRig )), rsg( rsg) {}
 
 void CameraControl::updateFromInputData( const AggregatedInputData& mi ) {
@@ -139,7 +139,7 @@ void CameraControlFly::renderControls() {
     }
 }
 
-CameraControlFly::CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderSceneGraph& rsg )
+CameraControlFly::CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable( cameraRig, rsg ) {
     toggle( rig()->Cvt(), ViewportToggles::DrawGrid );
     cameraRig->getCamera()->setPosition( Vector3f( 0.0f, 1.0f, 3.0f ) );
@@ -229,7 +229,7 @@ void CameraControl2d::renderControls() {
     }
 }
 
-CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg )
+CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable( cameraRig, rsg ) {
     toggle( rig()->Cvt(), ViewportToggles::DrawGrid );
    cameraRig->getCamera()->setPosition(V3f::Y_AXIS*10.0f);
@@ -237,7 +237,7 @@ CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderSc
 }
 
 
-CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderSceneGraph& rsg )
+CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControl( cameraRig, rsg ) {
     cameraRig->getCamera()->setPosition( Vector3f( 0.0f, 1.0f, 3.0f ) );
 }

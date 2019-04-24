@@ -44,7 +44,7 @@ void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
 }
 
 SceneOrchestrator::SceneOrchestrator( SceneGraph& _sg,
-                                      RenderSceneGraph& _rsg,
+                                      RenderOrchestrator& _rsg,
 									  TextInput& ti,
 									  MouseInput& mi,
 									  CommandQueue& cq ) :
@@ -82,18 +82,16 @@ void SceneOrchestrator::updateCallbacks() {
 	if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
 		WH::resizeWindow( callbackResizeFrameBuffer );
 		WH::gatherMainScreenInfo();
-		RSG().RR().resetDefaultFB(callbackResizeFrameBuffer);
-        RSG().resizeCallback( callbackResizeFrameBuffer );
+//		RSG().RR().resetDefaultFB(callbackResizeFrameBuffer);
+//        RSG().resizeCallback( callbackResizeFrameBuffer );
 		callbackResizeFrameBuffer = Vector2i{-1, -1};
 	}
 
 }
 
 void SceneOrchestrator::update() {
-//	stateMachine->run();
-	inputPollUpdate();
 	updateCallbacks();
-	SG().update();
+//	SG().update();
 }
 
 void SceneOrchestrator::deactivate() {
@@ -114,43 +112,10 @@ void SceneOrchestrator::reloadShaders( SocketCallbackDataTypeConstRef _data ) {
 
 	ShaderLiveUpdateMap shadersToUpdate{_data};
 
-	for ( const auto& ss : shadersToUpdate.shaders ) {
-		RSG().RR().injectShader( ss.first, ss.second );
-	}
+//	for ( const auto& ss : shadersToUpdate.shaders ) {
+//		RSG().RR().injectShader( ss.first, ss.second );
+//	}
 	cq.script( "reload shaders" );
-}
-
-void SceneOrchestrator::enableInputs( bool _bEnabled ) {
-	ti.setEnabled( _bEnabled );
-}
-
-void SceneOrchestrator::resetSingleEventNotifications() {
-    notifications.singleMouseTapEvent = false;
-}
-
-void SceneOrchestrator::inputPollUpdate() {
-
-	resetSingleEventNotifications();
-}
-
-bool SceneOrchestrator::checkKeyPressed( int keyCode ) {
-	return ti.checkKeyPressed( keyCode );
-}
-
-bool SceneOrchestrator::checkKeyToggled( int keyCode ) {
-	return ti.checkKeyToggleOn( keyCode );
-}
-
-void SceneOrchestrator::notified( MouseInput& _source, const std::string& generator ) {
-
-	if ( generator == "onTouchUp" ) {
-//		onTouchUpImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
-	} else if ( generator == "onSingleTap" ) {
-		notifications.singleMouseTapEvent = true;
-	} else if ( generator == "onDoubleTap" ) {
-//		onDoubleTapImpl( mi.getCurrPosSS(), ti.mModKeyCurrent );
-	}
-	//LOGR( generator.c_str() );
 }
 
 void SceneOrchestrator::render() {
@@ -171,54 +136,10 @@ void SceneOrchestrator::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
 	sUpdateCallbacks.push_back( uc );
 }
 
-const std::string SceneOrchestrator::DC() {
-	return Name::Foxtrot;
-}
-
-void SceneOrchestrator::cmdEnableKeyboard( const std::vector<std::string>& params ) {
-    WH::enableInputCallbacks();
-}
-
-void SceneOrchestrator::cmdDisableKeyboard( const std::vector<std::string>& params ) {
-    WH::disableInputCallbacks();
-}
-
-void SceneOrchestrator::StateMachine( std::shared_ptr<SceneBridge> _l ) {
-	stateMachine = _l;
-}
-
-const std::shared_ptr<ImGuiConsole>& SceneOrchestrator::Console() const {
-	return console;
-}
-
-void SceneOrchestrator::takeScreenShot( const JMATH::AABB& _box, ScreenShotContainerPtr _outdata ) {
-//    addViewport<CameraControlFly>( RenderTargetType::PBR, Name::Sierra,
-//    		     Rect2f( Vector2f::ZERO, Vector2f{128.0f} ), BlitType::OffScreen );
-//    getCamera(Name::Sierra)->center(_box);
-//    RSG().RR().getTarget(Name::Sierra)->takeScreenShot( _outdata );
-}
-
-RenderSceneGraph& SceneOrchestrator::RSG() { return rsg; }
-
-std::shared_ptr<SceneBridge> SceneOrchestrator::StateMachine()  {
-    return stateMachine;
-}
-
-void SceneOrchestrator::script( const std::string& _line ) {
-	cq.script(_line);
-}
-
-CommandQueue& SceneOrchestrator::CQ() {
-    return cq;
-}
-
-SceneGraph& SceneOrchestrator::SG() {
-    return sg;
-}
-
 AVInitCallback SceneOrchestrator::avcbTM() {
-    return std::bind(&TextureManager::preparingStremingTexture,
-                     RSG().RR().TM().get(),
-                     std::placeholders::_1,
-                     std::placeholders::_2);
+    return nullptr;
+//    return std::bind(&TextureManager::preparingStremingTexture,
+//                     RSG().RR().TM().get(),
+//                     std::placeholders::_1,
+//                     std::placeholders::_2);
 }

@@ -25,7 +25,7 @@ namespace di = boost::di;
 
 class RunLoopBackEndBase {
 public:
-    RunLoopBackEndBase( SceneGraph& _sg, RenderSceneGraph& _rsg) : sg(_sg), rsg(_rsg) {
+    RunLoopBackEndBase( SceneGraph& _sg, RenderOrchestrator& _rsg) : sg(_sg), rsg(_rsg) {
     }
     virtual ~RunLoopBackEndBase() = default;
 
@@ -45,14 +45,14 @@ public:
 
 protected:
     SceneGraph& sg;
-    RenderSceneGraph& rsg;
+    RenderOrchestrator& rsg;
 };
 
 class RunLoopGraphics : public RunLoop {
 public:
     using RunLoop::RunLoop;
 	RunLoopGraphics( CommandQueue& _cq, Renderer& rr, TextInput& ti,
-	                 MouseInput& mi, SceneGraph& _sg, RenderSceneGraph& _rsg )
+	                 MouseInput& mi, SceneGraph& _sg, RenderOrchestrator& _rsg )
                      : RunLoop( _cq ), rr( rr ), ti( ti), mi( mi), sg(_sg), rsg(_rsg) {}
 
     void init( InitializeWindowFlagsT _initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
@@ -133,7 +133,7 @@ protected:
     TextInput& ti;
     MouseInput& mi;
     SceneGraph& sg;
-    RenderSceneGraph& rsg;
+    RenderOrchestrator& rsg;
     std::unique_ptr<RunLoopBackEndBase> rlbackEnd;
 
 	int nUpdates = 0;

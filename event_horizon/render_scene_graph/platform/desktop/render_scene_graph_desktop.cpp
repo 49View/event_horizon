@@ -460,7 +460,7 @@ int loadSimpleObjFile(const char *filename, vertex_t **vertices, unsigned int *v
     return 1;
 }
 
-int RenderSceneGraph::bake(scene_t *scene)
+int RenderOrchestrator::bake(scene_t *scene)
 {
     lm_context *ctx = lmCreate(
             64,               // hemisphere resolution (power of two, max=512)
@@ -543,7 +543,7 @@ int RenderSceneGraph::bake(scene_t *scene)
 }
 
 
-//void RenderSceneGraph::cmdCalcLightmapsImpl( const std::vector<std::string>& _params ) {
+//void RenderOrchestrator::cmdCalcLightmapsImpl( const std::vector<std::string>& _params ) {
 
 //    loadSimpleObjFile("/Users/Dado/Documents/49View/external/thekla_atlas_b/gazebo.obj",
 //                      &_outputScene.vertices, &_outputScene.vertexCount, &_outputScene.indices, &_outputScene.indexCount);

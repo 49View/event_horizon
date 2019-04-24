@@ -18,7 +18,7 @@ class RenderMaterial;
 class CommandQueue;
 class ShaderManager;
 class LightManager;
-class RenderSceneGraph;
+class RenderOrchestrator;
 class StreamingMediator;
 class RLTarget;
 class ProgramUniformSet;

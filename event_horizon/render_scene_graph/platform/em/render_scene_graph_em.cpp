@@ -4,6 +4,6 @@
 
 #include "../../render_scene_graph.h"
 
-//void RenderSceneGraph::cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {
+//void RenderOrchestrator::cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {
 //
 //}
