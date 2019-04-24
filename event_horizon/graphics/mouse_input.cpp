@@ -7,6 +7,8 @@
 #include "window_handling.hpp"
 #include "core/app_globals.h"
 
+Vector2f MouseInput::GScrollData{V2f::ZERO};
+
 MouseInput::MouseInput() {
 	mGesturesTaps.reserve( 100 );
 }
@@ -31,7 +33,7 @@ void MouseInput::onTouchDown( const Vector2f& pos, UpdateSignals& _updateSignals
 void MouseInput::onTouchMove( const Vector2f& pos, UpdateSignals& _updateSignals ) {
 	mMouseButtonStatus = MouseButtonStatusValues::MOVING;
 	mTouchedDownFirstTime = false;
-	if ( mGesturesTaps.size() == 0 ) {
+	if ( mGesturesTaps.empty() ) {
 		mGesturesTaps.push_back( pos );
 	}
 	if ( pos != mGesturesTaps.back() ) {
@@ -153,7 +155,7 @@ void MouseInput::setupRectInputAfterStatusChange() {
 }
 
 JMATH::Rect2f MouseInput::CurrRectInput() const {
-	return mInputRects.size() > 0 ? mInputRects.back() : Rect2f::INVALID;
+	return !mInputRects.empty() ? mInputRects.back() : Rect2f::INVALID;
 }
 
 bool MouseInput::hasBeenTappedInRect( JMATH::Rect2f& rect ) {
@@ -212,11 +214,7 @@ bool MouseInput::checkLongTapDistance() {
 
 	Vector2f xyd = mGesturesTaps.back() - mGesturesTaps.front();
 
-	if ( length( xyd ) < TAP_AREA ) {
-		return true;
-	} else {
-		return false;
-	}
+    return length( xyd ) < TAP_AREA;
 }
 
 void MouseInput::setPaused( bool isPaused ) {
@@ -225,7 +223,7 @@ void MouseInput::setPaused( bool isPaused ) {
 
 Vector2f MouseInput::getLastTap( YGestureInvert yInv /*= YGestureInvert::No*/ ) const {
 	Vector2f pos = Vector2f::ZERO;
-	if ( mGesturesTaps.size() > 0 ) {
+	if ( !mGesturesTaps.empty() ) {
 		pos = mGesturesTaps.back();
 		if ( yInv == YGestureInvert::Yes ) pos.invertY();
 	}
@@ -275,7 +273,15 @@ void MouseInput::rightArrowPressed( const float speed ) {
 	accumulateArrowTouches( speed );
 }
 
+void GscrollCallback( [[maybe_unused]] GLFWwindow* window, double xoffset, double yoffset ) {
+    MouseInput::GScrollData = { xoffset, yoffset };
+}
+
 void MouseInput::update( UpdateSignals& _updateSignals ) {
+    static bool firstTimer = true;
+    if ( firstTimer ) {
+        glfwSetScrollCallback(WH::window, GscrollCallback);
+    }
 	mCurrTimeStamp = GameTime::getCurrTimeStamp();
 	mCurrTimeStep = GameTime::getCurrTimeStep();
 	mGestureTime += GameTime::getCurrTimeStep();
@@ -305,9 +311,10 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
 //		_updateSignals.NeedsUpdate(true);
 //	}
 
-	ImGuiIO& io = ImGui::GetIO();
+    int mouseLeftState = glfwGetMouseButton(WH::window, GLFW_MOUSE_BUTTON_LEFT);
+//    int mouseLeftState = glfwGetMouseButton(WH::window, GLFW_MOUSE_BUTTON_RIGHT);
 
-	if ( io.MouseDown[0] ) {
+	if ( mouseLeftState == GLFW_PRESS ) {
 		if ( glfwMousePressLeftTick == 0 ) {
 			onTouchDown( { xpos, ypos }, _updateSignals );
 		} else {
@@ -321,9 +328,8 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
 		glfwMousePressLeftTick = 0;
 	}
 
-	//io.MouseDown[1] = true;
-	onScroll( GScrollData.y() != io.MouseWheel ? io.MouseWheel - GScrollData.y() : 0.0f, _updateSignals );
-	GScrollData = { io.MouseWheelH, io.MouseWheel };
+	onScroll( GScrollData.y(), _updateSignals );
+	GScrollData = { 0.0f, 0.0f };
 }
 
 void MouseInput::enableMouseCursor( const bool val ) {

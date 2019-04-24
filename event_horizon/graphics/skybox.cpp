@@ -168,7 +168,7 @@ PrefilterSpecularMap::PrefilterSpecularMap( Renderer& rr ) : RenderModule( rr ) 
 
 void PrefilterBRDF::init() {
     mBRDF = FrameBufferBuilder{ rr, MPBRTextures::ibl_brdf }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
-            PIXEL_FORMAT_HDR_RG_16 ). IM(S::IBL_BRDF).noDepth().build();
+            PIXEL_FORMAT_HDR_RG_16 ).IM(S::IBL_BRDF).noDepth().build();
 }
 
 void PrefilterBRDF::render( ) {

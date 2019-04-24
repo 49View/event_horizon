@@ -119,7 +119,6 @@ private:
 	double ypos = 0.0;
 	double xposOld = 0.0;
 	double yposOld = 0.0;
-	Vector2f GScrollData = Vector2f::ZERO;
 
 	MouseButtonStatusValues mMouseButtonStatus;
 
@@ -140,6 +139,7 @@ private:
 	GLFWcursor* mCursorHResize = nullptr;
 
 public: // these are globals data accessed from low level functions on inputs etc
+    static Vector2f GScrollData;
 	mutable std::mutex mInputRectLock;
 };
 

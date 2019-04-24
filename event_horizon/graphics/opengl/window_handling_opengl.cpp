@@ -6,6 +6,8 @@
 
 #include <graphics/window_handling.hpp>
 
+//#define _USE_IMGUI_
+
 namespace WindowHandling {
 
     GLFWwindow* window = nullptr;
@@ -36,6 +38,7 @@ namespace WindowHandling {
     }
 
     void initImGUI() {
+#ifdef _USE_IMGUI_
         // Setup Dear ImGui binding
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -55,26 +58,35 @@ namespace WindowHandling {
 
         // Setup style
         ImGui::StyleColorsDark();
+#endif
     }
 
     void preUpdate() {
+#ifdef _USE_IMGUI_
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
+#endif
     }
 
     void enableInputCallbacks() {
         bUseGLFWPoll = true;
+#ifdef _USE_IMGUI_
         ImGui_ImplGlfw_InstallCallbacks( window );
+#endif
     }
 
     void disableInputCallbacks() {
         bUseGLFWPoll = false;
+#ifdef _USE_IMGUI_
         ImGui_ImplGlfw_DisableCallbacks( window );
+#endif
     }
 
     void flush() {
+#ifdef _USE_IMGUI_
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
         glfwSwapBuffers( window );
 #ifdef __APPLE__
         static bool macMoved = false;

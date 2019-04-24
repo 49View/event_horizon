@@ -217,8 +217,12 @@ void Selection::unselectAll() {
 }
 
 bool Selection::isImGuiBusy() const {
+#ifdef _USE_IMGUI_
     ImGuiIO& io = ImGui::GetIO();
     return io.WantCaptureKeyboard || io.WantCaptureMouse;
+#else
+    return false;
+#endif
 }
 
 void Selection::unselect( const UUID& _uuid, Selectable& _node ) {

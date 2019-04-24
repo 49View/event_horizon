@@ -89,11 +89,11 @@ public:
     void resizeCallback( const Vector2i& _resize );
 
     PickRayData rayViewportPickIntersection( const V2f& _screenPos ) const;
+    std::shared_ptr<CameraRig> getRig( const std::string& _name );
 
 protected:
     std::shared_ptr<Camera>    getCamera( const std::string& _name );
     const Camera* getCamera( const std::string& _name ) const;
-    std::shared_ptr<CameraRig> getRig( const std::string& _name );
     void addBoxToViewport( const std::string& _nane, const SceneScreenBox& _box );
     void setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport );
     void setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport );
