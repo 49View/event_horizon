@@ -116,21 +116,18 @@ std::shared_ptr<CameraRig> RLTargetPBR::getProbeRig( int t, const std::string& _
 
 void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at ) {
 
-    auto cbfb = FrameBufferBuilder{rr, "ProbeFB"}.size(512).buildSimple();
+    auto cbfb = FrameBufferBuilder{rr, "convolution"+_probeCameraName}.size(128).buildSimple();
 
     auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{512}, true) );
 
-    auto convolutionRT = rr.TM()->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution }
-                                                            .setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
+    auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto convolutionRT = rr.TM()->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
                                                             .setGenerateMipMaps( false )
-                                                            .setIsFramebufferTarget( true )
-                                                            .wm( WRAP_MODE_CLAMP_TO_EDGE ) );
-
-    auto preFilterSpecularRT = rr.TM()->addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter }
-                                                                  .setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
+                                                            .setIsFramebufferTarget( true ) );
+    trd.setSize(512);
+    auto preFilterSpecularRT = rr.TM()->addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter, trd }
                                                                   .setGenerateMipMaps( true )
-                                                                  .setIsFramebufferTarget( true )
-                                                                  .wm( WRAP_MODE_CLAMP_TO_EDGE ) );
+                                                                  .setIsFramebufferTarget( true ) );
 
     // convolution
     auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
@@ -144,9 +141,11 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
 
     // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
     int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)512 ) ) );
-//    int preFilterMipMaps = log2((float)512 );
     for ( int m = 0; m < preFilterMipMaps; m++ ) {
-        convolutionProbe->render( preFilterSpecularRT, 512>>m, m, [&]() {
+        auto fbSize = 512>>m;
+        auto cbfbPrefilter = FrameBufferBuilder{rr, "prefilter"+std::to_string(m)+_probeCameraName}.size(fbSize).buildSimple();
+        auto preFilterProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfbPrefilter, rr );
+        preFilterProbe->render( preFilterSpecularRT, fbSize, m, [&]() {
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
             float roughness = (float)m / (float)(preFilterMipMaps - 1);

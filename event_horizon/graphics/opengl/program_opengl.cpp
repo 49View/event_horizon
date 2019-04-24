@@ -53,7 +53,6 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
             break;
         case GL_SAMPLER_2D:
         case GL_SAMPLER_CUBE:
-        case GL_SAMPLER_2D_SHADOW:
             if ( _name == UniformNames::diffuseTexture ) {
                 uniformDefaults->assign( _name, S::WHITE );
             } else if ( _name == UniformNames::normalTexture ) {
@@ -75,6 +74,9 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
             }else {
                 uniformDefaults->assign( _name, S::WHITE );
             }
+            break;
+        case GL_SAMPLER_2D_SHADOW:
+            uniformDefaults->assign( _name, S::shadowmap );
             break;
         default:
             ASSERTV(0, "Unknown uniform mapping %d", uf );

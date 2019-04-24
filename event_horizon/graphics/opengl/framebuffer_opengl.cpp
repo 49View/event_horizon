@@ -57,10 +57,10 @@ void Framebuffer::initDepth( std::shared_ptr<TextureManager> tm ) {
     GLCALL( glGenFramebuffers( 1, &mFramebufferHandle ));
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 
-    mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName }.size( mWidth, mHeight )
-                                                      .wm( WRAP_MODE_REPEAT )
+    auto trd = ImageParams{}.size( mWidth, mHeight ).format( PIXEL_FORMAT_DEPTH_32 ).setWrapMode(WRAP_MODE_REPEAT);
+    mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName, trd }
                                                       .fm( FILTER_LINEAR )
-                                                      .format( PIXEL_FORMAT_DEPTH_32 ).setIsFramebufferTarget( true )
+                                                      .setIsFramebufferTarget( true )
                                                       .GPUSlot( mTextureGPUSlot ).setGenerateMipMaps(false) );
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
@@ -82,14 +82,15 @@ void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
         GLCALL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mRenderbufferHandle
         ) );
     } else {
-        mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName }.size( mWidth, mHeight )
-                                                          .wm( WRAP_MODE_CLAMP_TO_EDGE ).format( mFormat )
+        auto trd = ImageParams{}.size( mWidth, mHeight ).format( mFormat ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+        mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName, trd }
                                                           .setIsFramebufferTarget( true )
                                                           .GPUSlot( mTextureGPUSlot )
                                                           .setGenerateMipMaps( mUseMipMaps )
                                                           .setMultisample( mMultisample ));
 
-        LOGR( "Allocating FRAMEBUFFER %s on target %d", mName.c_str(), mRenderToTexture->getGlTextureImageTarget());
+        LOGRS( "[FRAMEBUFFER] " << mName << " Target: [" << mRenderToTexture->getGlTextureImageTargetString()
+            << "] Format: [" << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "]" )
 
 //        mTargetType = mRenderToTexture->getGlTextureImageTarget();
 //        mTargetHandle = mRenderToTexture->getHandle();
@@ -102,7 +103,7 @@ void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
     }
 //    GLenum attch = GL_COLOR_ATTACHMENT0;
 //    GLCALL( glDrawBuffers( 1, &attch ));
-//    checkFrameBufferStatus();
+    checkFrameBufferStatus();
 }
 
 void Framebuffer::initSimple() {
@@ -166,6 +167,10 @@ void Framebuffer::bind( const FrameBufferTextureValues* _values ) {
         GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                         frameBufferTargetToGl(_values->targetType),
                                         _values->targetHandle, _values->targetMipmap ));
+//        LOGRS( "[FramebufferValues] format: [" << glEnumToString( frameBufferTargetToGl(_values->targetType)) << "]"
+//        << "target: [" << _values->targetHandle << "]"
+//        << "targetMipmap: [" << _values->targetMipmap << "]"
+//        );
         GLCALL( glViewport( 0, 0, _values->width, _values->height ));
     } else {
         GLCALL( glViewport( 0, 0, mWidth, mHeight ));

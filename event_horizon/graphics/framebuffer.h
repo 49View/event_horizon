@@ -34,7 +34,7 @@ class FrameBufferBuilder {
     std::string mIMShaderName;
 
 public:
-    FrameBufferBuilder( Renderer& _rr, const std::string& name ) : mName( name ), rr(_rr) {}
+    FrameBufferBuilder( Renderer& _rr, std::string name ) : mName(std::move( name )), rr(_rr) {}
 
     const std::string& getName() const {
         return mName;

@@ -229,6 +229,8 @@ public:
         return glTextureImageTarget;
     }
 
+    std::string getGlTextureImageTargetString() const;
+
     Filter getFilter() const {
         return mFilter;
     }

@@ -75,12 +75,11 @@ cubeMapFrameBuffers FrameBufferBuilder::buildCube() {
     cubeMapFrameBuffers retContainer;
 
     // Create the whole cubemap texture, once
-    auto mRenderToTexture = rr.TM()->addCubemapTexture( TextureRenderData{ mName }
-                                                               .setSize( mWidth ).format( mFormat )
-                                                               .setGenerateMipMaps( mUseMipMaps )
-                                                               .setIsFramebufferTarget( true )
-                                                               .wm( WRAP_MODE_CLAMP_TO_EDGE )
-                                                               .GPUSlot( mTextureGPUSlot ));
+    auto trd = ImageParams{}.setSize( mWidth ).format( mFormat ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto mRenderToTexture = rr.TM()->addCubemapTexture( TextureRenderData{ mName, trd }
+                                                       .setGenerateMipMaps( mUseMipMaps )
+                                                       .setIsFramebufferTarget( true )
+                                                       .GPUSlot( mTextureGPUSlot ));
 
     GLuint mips = mUseMipMaps ? 1 + static_cast<GLuint>( floor( log( (float)max( mWidth, mHeight ) ) ) ) : 1;
 

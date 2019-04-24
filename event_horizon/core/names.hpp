@@ -42,4 +42,13 @@ namespace S {
     const std::string DEBUG_UV = "debug_uv";
 
     const std::string WHITE_PBR = "white_pbr";
+
+    const std::string shadowmap = "shadowMap_d";
+    const std::string lightmap = "lightMap_t";
+    const std::string sceneprobe = "sceneprobe";
+    const std::string blur_horizontal = "blur_horizontal_b";
+    const std::string blur_vertical = "blur_vertical_b";
+    const std::string colorFinalFrameBuffer = "colorFinalFrameBuffer";
+    const std::string offScreenFinalFrameBuffer = "offScreenFinalFrameBuffer";
+
 };

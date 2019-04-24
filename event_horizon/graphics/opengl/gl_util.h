@@ -36,6 +36,8 @@ GLenum imageTargetToGl( TextureTargetMode mode, bool multiSampled );
 GLenum nameToCubeMapSide( const std::string& name);
 GLuint nameToCubeMapLayer( const std::string& name );
 
+std::string glEnumToString( GLenum value );
+
 UniformFormat GLToUniformFormat( GLenum uf );
 
 const char* pixelFormatToString( PixelFormat pixelFormat );

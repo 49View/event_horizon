@@ -148,12 +148,20 @@ GLenum pixelFormatToGlInternalFormat( PixelFormat pixelFormat ) {
         case PIXEL_FORMAT_SRGBA:
             return GL_SRGB8_ALPHA8;
         case PIXEL_FORMAT_RGB:
+#if OPENGLES
+            return GL_RGB8_OES;
+#else
             return GL_RGB8;
+#endif
         case PIXEL_FORMAT_RGB565:
             return GL_RGB565;
         case PIXEL_FORMAT_RGBA:
         case PIXEL_FORMAT_BGRA:
+#if OPENGLES
+            return GL_RGBA8_OES;
+#else
             return GL_RGBA8;
+#endif
         case PIXEL_FORMAT_RG:
             return GL_RG8;
         case PIXEL_FORMAT_HDR_RG_16:
@@ -540,9 +548,160 @@ UniformFormat GLToUniformFormat( GLenum uf ) {
            return UF_SAMPLER_2D;
        case GL_SAMPLER_CUBE:
            return UF_SAMPLER_CUBE;
-        case GL_SAMPLER_2D_SHADOW:
+       case GL_SAMPLER_2D_SHADOW:
            return UF_SAMPLER_2D_SHADOW;
+       default:
+            ASSERTV(0, "Unknown uniform mapping %d", uf );
     };
-    ASSERTV(0, "Unknown uniform mapping %d", uf );
     return UF_FLOAT;
+}
+
+std::string glEnumToString( GLenum value ) {
+    switch ( value ) {
+        case GL_BYTE:
+            return "GL_BYTE";
+        case GL_FLOAT:
+            return "GL_FLOAT";
+        case GL_BOOL:
+            return "GL_BOOL";
+        case GL_INT:
+            return "GL_INT";
+        case GL_FLOAT_VEC2:
+            return "GL_FLOAT_VEC2";
+        case GL_FLOAT_VEC3:
+            return "GL_FLOAT_VEC3";
+        case GL_FLOAT_VEC4:
+            return "GL_FLOAT_VEC4";
+        case GL_INT_VEC2:
+            return "GL_INT_VEC2";
+        case GL_INT_VEC3:
+            return "GL_INT_VEC3";
+        case GL_INT_VEC4:
+            return "GL_INT_VEC4";
+        case GL_BOOL_VEC2:
+            return "GL_BOOL_VEC2";
+        case GL_BOOL_VEC3:
+            return "GL_BOOL_VEC3";
+        case GL_BOOL_VEC4:
+            return "GL_BOOL_VEC4";
+        case GL_FLOAT_MAT2:
+            return "GL_FLOAT_MAT2";
+        case GL_FLOAT_MAT3:
+            return "GL_FLOAT_MAT3";
+        case GL_FLOAT_MAT4:
+            return "GL_FLOAT_MAT4";
+        case GL_SAMPLER_2D:
+            return "GL_SAMPLER_2D";
+        case GL_SAMPLER_CUBE:
+            return "GL_SAMPLER_CUBE";
+        case GL_SAMPLER_2D_SHADOW:
+            return "GL_SAMPLER_2D_SHADOW";
+        case GL_DEPTH_COMPONENT16:
+            return "GL_DEPTH_COMPONENT16";
+        case GL_DEPTH_COMPONENT24:
+            return "GL_DEPTH_COMPONENT24";
+        case GL_DEPTH_COMPONENT32F:
+            return "GL_DEPTH_COMPONENT32F";
+        case GL_RGB16F:
+            return "GL_RGB16F";
+        case GL_RGBA16F:
+            return "GL_RGBA16F";
+        case GL_RGB32F:
+            return "GL_RGB32F";
+        case GL_RGBA32F:
+            return "GL_RGBA32F";
+        case GL_SRGB8:
+            return "GL_SRGB8";
+        case GL_SRGB8_ALPHA8:
+            return "GL_SRGB8_ALPHA8";
+        case GL_RGB8:
+            return "GL_RGB8";
+        case GL_RGB565:
+            return "GL_RGB565";
+        case GL_RGBA8:
+            return "GL_RGBA8";
+        case GL_RG16F:
+            return "GL_RG16F";
+        case GL_RG32F:
+            return "GL_RG32F";
+        case GL_R16F:
+            return "GL_R16F";
+        case GL_R32F:
+            return "GL_R32F";
+        case GL_LUMINANCE:
+            return "GL_LUMINANCE";
+#if OPENGLES
+        case GL_LUMINANCE_ALPHA:
+            return "GL_LUMINANCE_ALPHA";
+#else
+        case GL_R8:
+            return "GL_R8";
+#endif
+#if OPENGLES
+        case GL_LUMINANCE_ALPHA:
+            return "GL_LUMINANCE_ALPHA";
+#else
+        case GL_RG8:
+            return "GL_RG8";
+#endif
+        case GL_ALPHA:
+            return "GL_ALPHA";
+        case GL_RGB:
+            return "GL_RGB";
+        case GL_RGBA:
+            return "GL_RGBA";
+        case GL_UNSIGNED_BYTE:
+                return "GL_UNSIGNED_BYTE";
+        case GL_UNSIGNED_SHORT_5_6_5:
+                return "GL_UNSIGNED_SHORT_5_6_5";
+        case GL_UNSIGNED_SHORT_4_4_4_4:
+            return "GL_UNSIGNED_SHORT_4_4_4_4";
+        case GL_UNSIGNED_SHORT_5_5_5_1:
+            return "GL_UNSIGNED_SHORT_5_5_5_1";
+        case GL_RGBA4:
+                return "GL_RGBA4";
+        case GL_RGB5_A1:
+                return "GL_RGB5_A1";
+        case GL_STENCIL_INDEX8:
+                return "GL_STENCIL_INDEX8";
+#if OPENGLES
+        case GL_RGB8_OES:
+            return "GL_RGB8_OES";
+#endif
+#if OPENGLES
+        case GL_RGBA8_OES:
+            return "GL_RGBA8_OES";
+#endif
+        case GL_LINEAR:
+            return "GL_LINEAR";
+        case GL_NEAREST:
+            return "GL_NEAREST";
+        case GL_LINEAR_MIPMAP_LINEAR:
+            return "GL_LINEAR_MIPMAP_LINEAR";
+        case GL_CLAMP_TO_EDGE:
+            return "GL_CLAMP_TO_EDGE";
+        case GL_REPEAT:
+            return "GL_REPEAT";
+        case GL_TEXTURE_2D:
+            return "GL_TEXTURE_2D";
+        case GL_TEXTURE_3D:
+            return "GL_TEXTURE_3D";
+        case GL_TEXTURE_CUBE_MAP:
+            return "GL_TEXTURE_CUBE_MAP";
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+            return "GL_TEXTURE_CUBE_MAP_POSITIVE_X";
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+            return "GL_TEXTURE_CUBE_MAP_NEGATIVE_X";
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+            return "GL_TEXTURE_CUBE_MAP_POSITIVE_Y";
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+            return "GL_TEXTURE_CUBE_MAP_NEGATIVE_Y";
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+            return "GL_TEXTURE_CUBE_MAP_POSITIVE_Z";
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+            return "GL_TEXTURE_CUBE_MAP_NEGATIVE_Z";
+
+        default:
+            return "unknown";
+    }
 }

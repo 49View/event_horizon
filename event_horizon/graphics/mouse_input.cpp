@@ -274,7 +274,7 @@ void MouseInput::rightArrowPressed( const float speed ) {
 }
 
 void GscrollCallback( [[maybe_unused]] GLFWwindow* window, double xoffset, double yoffset ) {
-    MouseInput::GScrollData = { xoffset, yoffset };
+    MouseInput::GScrollData = V2f{ sign(xoffset), sign(yoffset) } * 0.1f;
 }
 
 void MouseInput::update( UpdateSignals& _updateSignals ) {

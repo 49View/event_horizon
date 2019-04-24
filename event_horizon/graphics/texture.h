@@ -20,11 +20,18 @@ struct TextureRenderData : public ImageParams {
     bool isFramebufferTarget = false;
     bool generateMipMaps = true;
 
+    TextureRenderData( const std::string& _name, const ImageParams& _ip ) : ImageParams(_ip) {
+        names.emplace(_name);
+    }
+
     TextureRenderData( const std::string& _name ) {
         names.emplace(_name);
     }
 
     TextureRenderData( const StringUniqueCollection& _names ) : names( _names ) {
+    }
+
+    TextureRenderData( const StringUniqueCollection& _names, const ImageParams& _ip ) : ImageParams(_ip), names( _names ) {
     }
 
     TextureRenderData(  const std::string& _name, int width, int height, int channels, int bpp ) :
@@ -44,40 +51,13 @@ struct TextureRenderData : public ImageParams {
         return *this;
     }
 
-    TextureRenderData& setSize( int s ) {
-        width = s;
-        height = s;
-        return *this;
-    }
-
-    TextureRenderData& size( int _width, int _height ) {
-        width = _width;
-        height = _height;
-        return *this;
-    }
-
-    TextureRenderData& setWidth( int _width ) {
-        TextureRenderData::width = _width;
-        return *this;
-    }
-
-    TextureRenderData& setHeight( int _height ) {
-        TextureRenderData::height = _height;
-        return *this;
-    }
-
     TextureRenderData& ch( int _channels ) {
         channels = _channels;
         return *this;
     }
 
-    TextureRenderData& setBpp( int s ) {
-        bpp = s;
-        return *this;
-    }
-
     TextureRenderData& setFormatFromBpp() {
-        HDR = bpp > 8 ? true : false;
+        HDR = bpp > 8;
         int forcedBpp = bpp;
         if ( HDR && bpp == 32 ) {
             forcedBpp = forceHDRTarget16bit ? 16 : 32;
@@ -100,16 +80,6 @@ struct TextureRenderData : public ImageParams {
             if ( channels==3 ) outFormat = PIXEL_FORMAT_HDR_RGB_32;
             if ( channels==4 ) outFormat = PIXEL_FORMAT_HDR_RGBA_32;
         }
-        return *this;
-    }
-
-    TextureRenderData& format( PixelFormat _outFormat ) {
-        outFormat = _outFormat;
-        return *this;
-    }
-
-    TextureRenderData& target( TextureTargetMode _ttm ) {
-        ttm = _ttm;
         return *this;
     }
 

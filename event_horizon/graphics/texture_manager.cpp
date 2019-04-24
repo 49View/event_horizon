@@ -69,7 +69,8 @@ std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& raw
 std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage,
                                                              const StringUniqueCollection& _names,
                                                              TextureSlots _tslot ) {
-    auto tb = TextureRenderData{ _names }.setWidth(rawImage.width).setHeight(rawImage.height).GPUSlot(_tslot);
+    auto trd = ImageParams{}.size( rawImage.width, rawImage.height );
+    auto tb = TextureRenderData{ _names, trd }.GPUSlot(_tslot);
     tb.format( channelsToFormat( rawImage.channels ) );
 
     for ( const auto& _name : _names ) {

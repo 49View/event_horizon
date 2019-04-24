@@ -5,6 +5,7 @@
 #include <array>
 #include <unordered_set>
 #include <core/uuid.hpp>
+#include <core/names.hpp>
 #include <core/math/matrix4f.h>
 #include <core/heterogeneous_map.hpp>
 #include <graphics/framebuffer.h>
@@ -43,13 +44,13 @@ namespace CommandBufferLimits {
 
 namespace FBNames {
 
-	const static std::string shadowmap = "shadowMap_d";
-	const static std::string lightmap = "lightMap_t";
-	const static std::string sceneprobe = "sceneprobe";
-	const static std::string blur_horizontal = "blur_horizontal_b";
-	const static std::string blur_vertical = "blur_vertical_b";
-	const static std::string colorFinalFrameBuffer = "colorFinalFrameBuffer";
-	const static std::string offScreenFinalFrameBuffer = "offScreenFinalFrameBuffer";
+	const static std::string shadowmap                  = S::shadowmap                ;
+	const static std::string lightmap                   = S::lightmap                 ;
+	const static std::string sceneprobe                 = S::sceneprobe               ;
+	const static std::string blur_horizontal            = S::blur_horizontal          ;
+	const static std::string blur_vertical              = S::blur_vertical            ;
+	const static std::string colorFinalFrameBuffer      = S::colorFinalFrameBuffer    ;
+	const static std::string offScreenFinalFrameBuffer  = S::offScreenFinalFrameBuffer;
 
 	static std::unordered_set<std::string> mFBNames;
 

@@ -2,7 +2,6 @@
 
 #include "gl_util.h"
 
-
 // These are default values for mapping, they can be changed by the client app
 // Defaults are 4 pixels per millimeter (4000)
 Vector2f Texture::TexturePixelCMScale = Vector2f( 4000.0f, 4000.0f );
@@ -57,7 +56,7 @@ void Texture::init_r( const uint8_t* _data ) {
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MAG_FILTER, glFilter ));
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MIN_FILTER, glFilter ));
 
-    LOGI( "Initialising texture %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
+    LOGR( "Initialising texture %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
           Name().c_str(), mHandle );
 
     init_data_r( _data );
@@ -102,7 +101,7 @@ void Texture::init_cubemap_r() {
         GLCALL( glGenerateMipmap( glTextureTarget ));
     }
 
-    LOGI( "Initialising texture cubemap %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
+    LOGR( "Initialising texture cubemap %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
           Name().c_str(), mHandle );
 }
 
@@ -196,4 +195,8 @@ void Texture::release() {
         GLCALL( glDeleteTextures( 1, &mHandle ));
         mHandle = 0;
     }
+}
+
+std::string Texture::getGlTextureImageTargetString() const {
+    return glEnumToString( glTextureImageTarget );
 }

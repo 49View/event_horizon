@@ -60,13 +60,13 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
 bool Skybox::precalc( float _sunHDRMult ) {
     if ( needsRefresh() ) {
 
-        mSkyboxTexture = rr.TM()->addCubemapTexture( TextureRenderData{ "skybox" }
-                                                                .setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 )
-                                                                .setGenerateMipMaps( false )
-                                                                .setIsFramebufferTarget( true )
-                                                                .wm( WRAP_MODE_CLAMP_TO_EDGE ) );
+        auto trd = ImageParams{}.setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
 
-        auto cbfb = FrameBufferBuilder{rr, "ProbeFB"}.size(512).buildSimple();
+        mSkyboxTexture = rr.TM()->addCubemapTexture( TextureRenderData{ "skybox", trd }
+                                                                .setGenerateMipMaps( false )
+                                                                .setIsFramebufferTarget( true ) );
+
+        auto cbfb = FrameBufferBuilder{rr, "SkyboxFlatFB"}.size(512).buildSimple();
         auto cubeMapRig = addCubeMapRig( "cubemapRig", Vector3f::ZERO, Rect2f(V2f{512}) );
         auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
         probe->render( mSkyboxTexture, 512, 0, [&]() {

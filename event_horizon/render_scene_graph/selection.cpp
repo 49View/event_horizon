@@ -192,8 +192,8 @@ bool Selection::IsSelected() const {
     return bIsSelected;
 }
 
-void Selection::IsSelected( bool bIsSelected ) {
-    Selection::bIsSelected = bIsSelected;
+void Selection::IsSelected( bool _bIsSelected ) {
+    Selection::bIsSelected = _bIsSelected;
 }
 
 bool Selection::IsOver() const {

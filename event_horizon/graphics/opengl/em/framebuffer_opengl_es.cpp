@@ -1,5 +1,6 @@
 #include "../framebuffer_opengl.h"
 
+#include <graphics/texture.h>
 #include "../gl_util.h"
 #include "../../graphic_functions.hpp"
 
@@ -7,7 +8,15 @@ void Framebuffer::checkFrameBufferStatus() {
     GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
     if ( fbs == GL_FRAMEBUFFER_COMPLETE ) return;
 
-    LOGRS( "Framebuffer " << mName << " size: [" << mWidth << ":" << mHeight << "] format : " << mFormat );
+    LOGRS( "Framebuffer " << mName << " size: [" << mWidth << ":" << mHeight << "] format : ["
+                          << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "] "
+                          << "Texture Slot: [" << mTextureGPUSlot << "] "
+//                          << "mIsMultisampled: ["  << std::boolalpha << mMultisample << "] "
+//                          << "mIsHDR         : ["  << std::boolalpha << mHDR       << "] "
+//                          << "mIsCubemap     : ["  << std::boolalpha << mCubeMap   << "] "
+//                          << "mUseMipMaps    : ["  << std::boolalpha << mUseMipMaps  << "] "
+//                          << "Name           : ["  << mRenderToTexture->names.begin() << "] "
+    );
     switch ( fbs ) {
         case GL_FRAMEBUFFER_UNDEFINED:
             LOGR( "Frame Buffer creation error code: GL_FRAMEBUFFER_UNDEFINED" );
