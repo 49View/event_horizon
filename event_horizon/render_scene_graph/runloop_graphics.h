@@ -19,7 +19,7 @@
 #include <core/math/anim.h>
 #include <poly/scene_graph.h>
 #include <render_scene_graph/scene_bridge.h>
-#include <render_scene_graph/render_scene_graph.h>
+#include <render_scene_graph/render_orchestrator.h>
 
 namespace di = boost::di;
 
@@ -31,6 +31,7 @@ public:
 
     void update( const AggregatedInputData& _aid ) {
         rsg.updateInputs( _aid );
+        sg.update();
         updateImpl( _aid );
     };
 
@@ -106,7 +107,6 @@ protected:
 
     void render() {
 //        ImGui::NewFrame();
-//        stateMachine->render( this );
 //        for ( auto& [k,v] : StateMachine()->getRigs() ) {
 //            v->renderControls(this);
 //        }

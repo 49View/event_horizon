@@ -7,9 +7,9 @@
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
 #include <core/app_globals.h>
-#include <graphics/render_targets.hpp>
-#include <render_scene_graph/scene_orchestrator.hpp>
 #include <core/resources/resource_manager.hpp>
+#include <graphics/render_targets.hpp>
+#include <graphics/framebuffer.h>
 
 float sPresenterArrangerLeftFunction( float _value ) {
     return getScreenSizefUI.x() * _value;

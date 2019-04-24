@@ -43,12 +43,6 @@ namespace SelectionTraverseFlag {
 
 using SelectionTraverseFlagT = uint64_t;
 
-template <typename Tint, typename T>
-void xandBitWiseFlag( Tint& source, T flag ) {
-    int dest = source ^ flag;
-    source = static_cast<Tint>(dest);
-}
-
 class Selection {
 public:
     virtual void selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariantsSP _node, SelectableFlagT _flags ) = 0;

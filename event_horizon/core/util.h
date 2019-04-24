@@ -157,6 +157,12 @@ void orBitWiseFlag( Tint& source, T flag ) {
 	source = static_cast<Tint>(dest);
 }
 
+template <typename Tint, typename T>
+void xandBitWiseFlag( Tint& source, T flag ) {
+    int dest = source ^ flag;
+    source = static_cast<Tint>(dest);
+}
+
 template<typename T>
 void toggle( T& _input, const T _flag ) {
 	if ( checkBitWiseFlag( _input, _flag) ) {

@@ -8,6 +8,7 @@
 #include <string>
 #include <core/observer.h>
 #include <core/soa_utils.h>
+#include <core/streaming_mediator.hpp>
 #include <poly/scene_graph.h>
 #include <graphics/renderer.h>
 #include <render_scene_graph/camera_controls.hpp>
@@ -22,6 +23,8 @@ class SceneBridge;
 struct AggregatedInputData;
 
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
+using PresenterUpdateCallbackFunc = std::function<void(RenderOrchestrator* p)>;
+using DragAndDropFunction = std::function<void(RenderOrchestrator* p, const std::string&)>;
 
 class RenderOrchestrator {
 public:
@@ -91,7 +94,17 @@ public:
     PickRayData rayViewportPickIntersection( const V2f& _screenPos ) const;
     std::shared_ptr<CameraRig> getRig( const std::string& _name );
 
+    void addUpdateCallback( PresenterUpdateCallbackFunc uc );
+    void setDragAndDropFunction( DragAndDropFunction dd );
+    void reloadShaders( SocketCallbackDataTypeConstRef _data );
+
+    template <typename T>
+    void addHttpStream( const std::string& _streamName ) {
+        rr.SSM().addStream<T>( _streamName, avcbTM() );
+    }
+
 protected:
+    AVInitCallback avcbTM();
     std::shared_ptr<Camera>    getCamera( const std::string& _name );
     const Camera* getCamera( const std::string& _name ) const;
     void addBoxToViewport( const std::string& _nane, const SceneScreenBox& _box );
@@ -102,6 +115,7 @@ public:
     Renderer& RR();
     SceneGraph& SG() { return sg; }
 protected:
+    void updateCallbacks();
     void changeMaterialTagCallback( const std::vector<std::string>& _params );
     void changeMaterialColorCallback( const std::vector<std::string>& _params );
 
@@ -114,6 +128,14 @@ private:
     std::unordered_map<std::string, SceneScreenBox> boxes;
 
     std::shared_ptr<AudioManager> am;
+
+    DragAndDropFunction dragAndDropFunc = nullptr;
+
+public:
+    static std::vector<std::string> callbackPaths;
+    static Vector2i callbackResizeWindow;
+    static Vector2i callbackResizeFrameBuffer;
+    static std::vector<PresenterUpdateCallbackFunc> sUpdateCallbacks;
 };
 
 

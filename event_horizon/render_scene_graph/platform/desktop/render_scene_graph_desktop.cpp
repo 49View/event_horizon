@@ -2,7 +2,7 @@
 // Created by Dado on 08/02/2018.
 //
 
-#include "../../render_scene_graph.h"
+#include "event_horizon/event_horizon/render_scene_graph/render_orchestrator.h"
 #include <core/node.hpp>
 #include <core/geom.hpp>
 #include <poly/resources/geom_builder.h>

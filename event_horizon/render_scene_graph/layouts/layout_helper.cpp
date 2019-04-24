@@ -7,7 +7,6 @@
 #include <core/math/rect2f.h>
 #include <core/util.h>
 #include <graphics/imgui/imgui.h>
-#include <render_scene_graph/scene_orchestrator.hpp>
 
 bool LayoutBoxRenderer::startRender(JMATH::Rect2f& _r, BoxFlagsT _flags) {
     ImGui::SetNextWindowPos( ImVec2{ _r.origin().x(), _r.origin().y() } );

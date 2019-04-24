@@ -2,7 +2,7 @@
 // Created by Dado on 08/02/2018.
 //
 
-#include "render_scene_graph.h"
+#include "render_orchestrator.h"
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/resource_manager.hpp>
 #include <core/math/vector_util.hpp>
@@ -13,9 +13,74 @@
 #include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
 #include <graphics/renderer.h>
+#include <graphics/shader_manager.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
+#include <graphics/window_handling.hpp>
 #include <render_scene_graph/scene_bridge.h>
+
+std::vector<std::string> RenderOrchestrator::callbackPaths;
+Vector2i RenderOrchestrator::callbackResizeWindow = Vector2i(-1, -1);
+Vector2i RenderOrchestrator::callbackResizeFrameBuffer = Vector2i(-1, -1);
+std::vector<PresenterUpdateCallbackFunc> RenderOrchestrator::sUpdateCallbacks;
+
+void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
+    ASSERT( count > 0 );
+
+    RenderOrchestrator::callbackPaths.clear();
+    for ( auto i = 0; i < count; i++ ) {
+        RenderOrchestrator::callbackPaths.emplace_back( std::string(paths[i]) );
+    }
+}
+
+void GResizeWindowCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
+    RenderOrchestrator::callbackResizeWindow = Vector2i{w, h};
+}
+
+void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
+    RenderOrchestrator::callbackResizeFrameBuffer = Vector2i{w, h};
+}
+
+void RenderOrchestrator::setDragAndDropFunction( DragAndDropFunction dd ) {
+    dragAndDropFunc = dd;
+}
+
+void RenderOrchestrator::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
+    sUpdateCallbacks.push_back( uc );
+}
+
+void RenderOrchestrator::updateCallbacks() {
+
+    if ( !sUpdateCallbacks.empty() ) {
+        for ( auto& c : sUpdateCallbacks ) {
+            c( this );
+        }
+        sUpdateCallbacks.clear();
+    }
+
+    if ( !callbackPaths.empty() ) {
+        for ( auto& path : callbackPaths ) {
+            if ( dragAndDropFunc ) dragAndDropFunc( this, path );
+        }
+        callbackPaths.clear();
+    }
+
+    if ( callbackResizeWindow.x() > 0 && callbackResizeWindow.y() > 0 ) {
+        // For now we do everything in the callbackResizeFrameBuffer so this is redundant for now, just a nop
+        // to be re-enabled in the future if we need it
+//		LOGR("Resized window: [%d, %d]", callbackResizeWindow.x(), callbackResizeWindow.y() );
+        callbackResizeWindow = Vector2i{-1, -1};
+    }
+
+    if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
+        WH::resizeWindow( callbackResizeFrameBuffer );
+        WH::gatherMainScreenInfo();
+		rr.resetDefaultFB(callbackResizeFrameBuffer);
+        resizeCallback( callbackResizeFrameBuffer );
+        callbackResizeFrameBuffer = Vector2i{-1, -1};
+    }
+
+}
 
 RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg) {
 
@@ -44,15 +109,36 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     am = std::make_shared<AudioManagerOpenAL>();
 }
 
-void RenderOrchestrator::init() {
-    // Set a fullscreen camera in case there's none
-    addRig<CameraControlFly>( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f );
-}
-
 void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
+    updateCallbacks();
+
     for ( auto& [k,v] : mRigs ) {
         v->updateFromInputData( _aid );
     }
+}
+
+void RenderOrchestrator::init() {
+    WH::setDropCallback( GDropCallback );
+    WH::setResizeWindowCallback( GResizeWindowCallback );
+    WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
+
+#ifndef _PRODUCTION_
+    Socket::on( "shaderchange",
+                std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1 ) );
+#endif
+
+    // Set a fullscreen camera by default
+    addRig<CameraControlFly>( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f );
+}
+
+void RenderOrchestrator::reloadShaders( SocketCallbackDataTypeConstRef _data ) {
+
+    ShaderLiveUpdateMap shadersToUpdate{_data};
+
+	for ( const auto& ss : shadersToUpdate.shaders ) {
+		rr.injectShader( ss.first, ss.second );
+	}
+	rr.cmdReloadShaders( {} );
 }
 
 //void RenderOrchestrator::addImpl( NodeVariants _geom ) {
@@ -163,3 +249,10 @@ PickRayData RenderOrchestrator::rayViewportPickIntersection( const V2f& _screenP
 //void RenderOrchestrator::updateImpl() {
 //    am->update();
 //}
+
+AVInitCallback RenderOrchestrator::avcbTM() {
+    return std::bind(&TextureManager::preparingStremingTexture,
+                     rr.TM().get(),
+                     std::placeholders::_1,
+                     std::placeholders::_2);
+}
