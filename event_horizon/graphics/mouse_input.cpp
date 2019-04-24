@@ -15,7 +15,7 @@ MouseInput::MouseInput() {
 
 void MouseInput::onTouchDown( const Vector2f& pos, UpdateSignals& _updateSignals ) {
 	mMouseButtonStatus = MouseButtonStatusValues::DOWN;
-	mGesturesTaps.clear();
+	if ( mGesturesTaps.size() > 2 ) mGesturesTaps.clear();
 	mGesturesTaps.push_back( pos );
 	mGestureTime = 0.0f;
 	mOverridedSwipe = false;
@@ -71,22 +71,23 @@ void MouseInput::onTouchUp( const Vector2f& pos, UpdateSignals& _updateSignals )
 	mHasTouchedUp = true;
 	mTouchedDown = false;
 	mTouchedDownFirstTime = false;
+
+    Vector2f xyd = mGesturesTaps.back() - mGesturesTaps.front();
 	// Check if a single tap was performed
 	if ( !mGesturesTaps.empty() && mGestureTime < SINGLE_TAP_TIME_LIMIT ) {
-		Vector2f xyd = mGesturesTaps.back() - mGesturesTaps.front();
-		if ( length( xyd ) < TAP_AREA ) {
-			mSingleTapEvent = true;
-			mSingleTapPos = mGesturesTaps.back();
-		}
+        mSingleTapEvent = true;
+        mSingleTapPos = mGesturesTaps.back();
 	}
 	// Handle and check if double tap
 	mTouchupTimeStamps.push_back( mCurrTimeStamp );
-	if ( mTouchupTimeStamps.size() > 1 ) {
+	if ( mTouchupTimeStamps.size() > 1 && mGesturesTaps.size() > 2 ) {
 		float time2 = mTouchupTimeStamps.back();
 		float time1 = mTouchupTimeStamps[mTouchupTimeStamps.size() - 2];
 		if ( time2 - time1 < DOUBLE_TAP_TIME_LIMIT ) {
-			mDoubleTapEvent = true;
-			mTouchupTimeStamps.clear();
+            if ( length( xyd ) < TAP_AREA ) {
+                mDoubleTapEvent = true;
+                mTouchupTimeStamps.clear();
+            }
 		}
 	}
 
