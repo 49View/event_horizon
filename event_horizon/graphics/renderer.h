@@ -36,7 +36,9 @@ namespace CommandBufferLimits {
 	const static int CoreStart = 0;
 	const static int CoreGrid = 1;
 	const static int CoreEnd = 999;
-	const static int UIStart = 1000;
+    const static int UnsortedStart = 1000;
+    const static int UnsortedEnd = 1999;
+	const static int UIStart = 2000;
 	const static int UIEnd = 9999;
 	const static int PBRStart = 10000;
 	const static int PBREnd = 99999999;
@@ -98,6 +100,7 @@ public:
 	void directRenderLoop();
 
 	void removeFromCL( const UUID& _uuid );
+    void clearBucket( int _bucket );
 
     std::shared_ptr<Texture> addTextureResource( const ResourceTransfer<RawImage>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ResourceTransfer<Material>& _val );
@@ -133,7 +136,7 @@ public:
 
 	bool hasTag( uint64_t _tag ) const;
 
-	inline CommandBufferList& CB_U() { return *mCommandBuffers.get(); }
+	inline CommandBufferList& CB_U() { return *mCommandBuffers; }
 	inline std::map<int, CommandBufferListVector>& CL() { return mCommandLists; }
     inline const std::map<int, CommandBufferListVector>& CL() const { return mCommandLists; }
 

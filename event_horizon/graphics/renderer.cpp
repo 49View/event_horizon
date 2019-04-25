@@ -201,6 +201,10 @@ void Renderer::clearCommandList() {
     mCommandLists.clear();
 }
 
+void Renderer::clearBucket( const int _bucket ) {
+    if ( auto it = mCommandLists.find(_bucket); it != mCommandLists.end() ) mCommandLists.erase(it);
+}
+
 void Renderer::renderCommands( int eye ) {
     //PROFILE_BLOCK("Total Render render");
     CB_U().render( eye );
@@ -330,7 +334,6 @@ void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _m
                                    std::shared_ptr<RenderMaterial> _forcedMaterial ) {
     for ( const auto& vp : _map ) {
         CB_U().pushVP( vp );
-//        vp->addToCommandBuffer( *this, vp->getTransform(), _forcedMaterial );
     }
 }
 

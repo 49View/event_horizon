@@ -25,6 +25,7 @@ struct AggregatedInputData {
     bool isMouseTouchedDown = false;
     bool isMouseTouchDownFirst = false;
     bool isMouseSingleTap = false;
+    bool hasMouseMoved = false;
     float scrollValue = 0.0f;
     Vector2f moveDiff = Vector2f::ZERO;
     Vector2f moveDiffSS = Vector2f::ZERO;
@@ -90,6 +91,7 @@ public: // these are globals data accessed from low level functions on inputs et
 
 	Vector2f getCurrPos() const;
 	Vector2f getCurrPosSS() const;
+    bool hasMouseMoved() const;
 
 private:
 	void setupRectInputAfterStatusChange();
@@ -106,6 +108,7 @@ private:
 	bool  mTouchedDownFirstTime = false;
 	bool  mDoubleTapEvent = false;
 	bool  mSingleTapEvent = false;
+	bool  mbHasMouseMoved = false;
 	Vector2f mRawTouchDownPos = Vector2f::ZERO;
 	Vector2f mNormTouchDownPos = Vector2f::ZERO;
 	Plane3f mUIPlane{ Vector3f::Z_AXIS* 1.0f, 0.0f };

@@ -57,6 +57,7 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     framebuffer = mComposite->getColorFB();
     bucketRanges.emplace_back( CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd );
     bucketRanges.emplace_back( CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd );
+    bucketRanges.emplace_back( CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
 
     mShadowMapFB = FrameBufferBuilder{ rr, FBNames::shadowmap }.size(4096).GPUSlot(TSLOT_SHADOWMAP).depthOnly().build();
@@ -307,6 +308,12 @@ void RLTarget::addToCBCore( CommandBufferList& cb ) {
 
     if ( checkBitWiseFlag( lcvt, ViewportToggles::DrawGrid ) ) {
         rr.addToCommandBuffer( CommandBufferLimits::CoreGrid );
+    }
+
+    for ( const auto& [k, vl] : rr.CL() ) {
+        if ( isKeyInRange(k) ) {
+            rr.addToCommandBuffer( k );
+        }
     }
 
 }

@@ -301,16 +301,14 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
 	}
 
 	glfwGetCursorPos( WH::window, &xpos, &ypos );
-//	if ( xpos != xposOld || ypos != yposOld ) {
-		xposOld = xpos;
-		yposOld = ypos;
+    mbHasMouseMoved = ( xpos != xposOld || ypos != yposOld );
+    xposOld = xpos;
+    yposOld = ypos;
 #ifdef OSX
-		xpos *= 2.0;
-		ypos *= 2.0;
+    xpos *= 2.0;
+    ypos *= 2.0;
 #endif
-		ypos = ( getScreenSizef.y() - ypos );
-//		_updateSignals.NeedsUpdate(true);
-//	}
+    ypos = ( getScreenSizef.y() - ypos );
 
     int mouseLeftState = glfwGetMouseButton(WH::window, GLFW_MOUSE_BUTTON_LEFT);
 //    int mouseLeftState = glfwGetMouseButton(WH::window, GLFW_MOUSE_BUTTON_RIGHT);
@@ -344,4 +342,8 @@ Vector2f MouseInput::getCurrPos() const {
 
 Vector2f MouseInput::getCurrPosSS() const {
 	return Vector2f{ xpos, getScreenSizef.y() - ypos };
+}
+
+bool MouseInput::hasMouseMoved() const {
+    return mbHasMouseMoved;
 }
