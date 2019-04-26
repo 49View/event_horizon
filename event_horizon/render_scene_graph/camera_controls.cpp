@@ -231,13 +231,9 @@ void CameraControl2d::renderControls() {
 
 CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable( cameraRig, rsg ) {
-    toggle( rig()->Cvt(), ViewportToggles::DrawGrid );
-   cameraRig->getCamera()->setPosition(V3f::Y_AXIS*10.0f);
-   cameraRig->getCamera()->setQuatAngles(V3f{M_PI_2, 0.0f, 0.0f});
 }
 
 
 CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControl( cameraRig, rsg ) {
-    cameraRig->getCamera()->setPosition( Vector3f( 0.0f, 1.0f, 3.0f ) );
 }

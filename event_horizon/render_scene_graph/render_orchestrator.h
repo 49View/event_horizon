@@ -60,10 +60,14 @@ public:
     }
 
     template <typename T>
-    void setRigCameraController( const std::string& _rigname ) {
+    void setRigCameraController( const std::string& _rigname = Name::Foxtrot ) {
         if ( auto rig = getRig(_rigname); rig ) {
             mRigs[rig->Name()] = std::make_shared<T>( rig, *this );
         }
+    }
+
+    std::shared_ptr<Camera> DC() {
+        return getRig( Name::Foxtrot)->getCamera();
     }
 
     void addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible = true );
