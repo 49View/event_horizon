@@ -342,33 +342,15 @@ void Frustum::calculateFromMVP( const Matrix4f& mat ) {
 	f.d = mat[15] - mat[14];
 }
 
-Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) {
-	mbLocked = true;
-	Name( cameraName );
+Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NamePolicy( cameraName ) {
 
-	mMode = CameraMode::Edit2d;
 	ViewPort( _viewport);
 
-	mHAngle = 1.0f;
-	mVAngle = 1.0f;
-	mAspectRatioMultiplier = 1.0f;
-
-	//mNearClipPlaneZ = 0.01f;
-	//mFarClipPlaneZ = 200.0f;
-	mNearClipPlaneZ = 0.01f;
-	mFarClipPlaneZ = 100.0f;
-
 	qangle = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, Name() + "_Angle" );
-	mPos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
+	mPos   = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
+	mFov   = std::make_shared<AnimType<float>>( 72.0f, Name() + "_Fov" );
 
-	mFov = std::make_shared<AnimType<float>>( 72.0f, Name() + "_Fov" );
-
-	mLockAtWalkingHeight = false;
-
-	mView = Matrix4f::MIDENTITY();
 	mProjection.setPerspective( mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ );
-	mMVP = Matrix4f::MIDENTITY();
-
 	mOrthogonal.setOrthogonalProjection();
 	mAspectRatio.setAspectRatioMatrix( mViewPort.ratio() );
 }
@@ -381,12 +363,12 @@ void Camera::ModeInc() {
 }
 
 void Camera::setFoV( float fieldOfView ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 	mFov->value = fieldOfView;
 }
 
 void Camera::setPosition( const Vector3f& pos ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 	mPos->value = pos;
 }
 
@@ -401,7 +383,7 @@ void Camera::setProjectionMatrix( const Matrix4f& val ) {
 }
 
 void Camera::translate( const Vector3f& pos ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 	Vector3f mask = LockAtWalkingHeight() ? Vector3f::MASK_UP_OUT : Vector3f::ONE;
 	setPosition( mPos->value + ( pos * mask ) );
 }
@@ -409,7 +391,7 @@ void Camera::translate( const Vector3f& pos ) {
 void Camera::zoom2d( float amount ) {
 	constexpr float UI_ZOOM_SCALER = 10.0f;
 
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 	amount /= -UI_ZOOM_SCALER;
 	if ( Mode() == CameraMode::Edit2d ) {
 		mPos->value.setY(clamp(mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d));
@@ -417,7 +399,7 @@ void Camera::zoom2d( float amount ) {
 }
 
 void Camera::moveUp( float amount ) {
-	if ( amount == 0.0f || !mbLocked ) return;
+	if ( amount == 0.0f || mbLocked ) return;
 	Matrix4f invView;
 	mView.invert( invView );
 	Vector3f dir = invView.getRow( 1 ).xyz();
@@ -429,7 +411,7 @@ void Camera::moveUp( float amount ) {
 }
 
 void Camera::moveForward( float amount ) {
-	if ( amount == 0.0f || !mbLocked ) return;
+	if ( amount == 0.0f || mbLocked ) return;
 	Matrix4f invView;
 	mView.invert( invView );
 	Vector3f dir = invView.getRow( 2 ).xyz();
@@ -438,7 +420,7 @@ void Camera::moveForward( float amount ) {
 }
 
 void Camera::strafe( float amount ) {
-	if ( amount == 0.0f || !mbLocked ) return;
+	if ( amount == 0.0f || mbLocked ) return;
 	Matrix4f invView;
 	mView.invert( invView );
 	Vector3f dir = invView.getRow( 0 ).xyz();
@@ -447,7 +429,7 @@ void Camera::strafe( float amount ) {
 }
 
 void Camera::setViewMatrix( const Vector3f&pos, const Quaternion& q ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 	quatMatrix = q.rotationMatrix();// * Matrix4f( Vector3f::ZERO, M_PI_2, Vector3f::X_AXIS );
 
 	quatMatrix.invert( quatMatrix );
@@ -455,7 +437,7 @@ void Camera::setViewMatrix( const Vector3f&pos, const Quaternion& q ) {
 }
 
 void Camera::setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Matrix4f& origRotMatrix ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 	quatMatrix = q.rotationMatrix() * origRotMatrix;
 
 	//	quatMatrix.invert(quatMatrix);
@@ -463,17 +445,17 @@ void Camera::setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Mat
 }
 
 void Camera::lookAt( const Vector3f& posAt ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 //	mTarget->value = posAt;
 }
 
 void Camera::lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 //	qangle->set(angleAt);
 }
 
 void Camera::lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& up ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 	Vector3f z = normalize( eye - at );  // Forward
 	Vector3f x = normalize( cross( up, z ) ); // Right
 	Vector3f y = cross( z, x );
@@ -485,7 +467,7 @@ void Camera::lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& 
 }
 
 void Camera::center( const AABB& _bbox ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 	float aperture = ( tanf( degToRad( 90.0f - (mFov->value) ) ) ) / mViewPort.ratio();
 
 	float bdiameter = _bbox.calcRadius();
@@ -495,7 +477,7 @@ void Camera::center( const AABB& _bbox ) {
 }
 
 void Camera::pan( const Vector3f& posDiff ) {
-	if ( !mbLocked ) return;
+	if ( mbLocked ) return;
 
 	mPos->value += ( Vector3f::X_AXIS * posDiff.x() );
 	mPos->value += ( Vector3f::Z_AXIS * posDiff.y() );
@@ -627,7 +609,7 @@ void Camera::update() {
 }
 
 std::ostream& operator<<( std::ostream& os, const Camera& camera ) {
-	os << "mName: " << camera.mName << " mPos: " << camera.mPos->value << " qangle: " << camera.qangle->value << "\n";
+	os << "mName: " << camera.Name() << " mPos: " << camera.mPos->value << " qangle: " << camera.qangle->value << "\n";
 	return os;
 }
 
@@ -667,20 +649,23 @@ void Camera::setQuat( const Quaternion& a ) {
 	qangle->value = a;
 }
 
+Quaternion quatCompose( const Vector3f& a ) {
+    Quaternion qz( a.z(), Vector3f::Z_AXIS );
+    Quaternion qy( a.y(), Vector3f::Y_AXIS );
+    Quaternion qx( a.x(), Vector3f::X_AXIS );
+
+    return  qx * qy * qz;
+}
+
 void Camera::setQuatAngles( const Vector3f& a ) {
-	if ( !mbLocked ) return;
-
-	qangleEuler = a;
-
-    Quaternion qz( qangleEuler.z(), Vector3f::Z_AXIS );
-    Quaternion qy( qangleEuler.y(), Vector3f::Y_AXIS );
-    Quaternion qx( qangleEuler.x(), Vector3f::X_AXIS );
-
-    qangle->value = ( qx * qy * qz );
+	if ( mbLocked ) return;
+    qangle->value = quatCompose(a);
 }
 
 void Camera::incrementQuatAngles( const Vector3f& a ) {
-	setQuatAngles( qangleEuler + a );
+    if ( mbLocked ) return;
+    incrementalEulerQuatAngle += a;
+    qangle->value=quatCompose( incrementalEulerQuatAngle );
 }
 
 Quaternion Camera::quatAngle() const { return qangle->value; }

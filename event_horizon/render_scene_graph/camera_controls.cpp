@@ -99,7 +99,7 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
         _cam->strafe( strafe );
         _cam->moveUp( moveUp );
         if ( mi.moveDiffSS != Vector2f::ZERO ) {
-            _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
+            _cam->incrementQuatAngles( V3f{ mi.moveDiffSS.yx(), 0.0f } );
         }
 
         if ( !inputIsBlockedOnSelection() && mi.isMouseSingleTap ) {
@@ -174,7 +174,7 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     _cam->strafe( strafe );
     _cam->moveUp( moveUp );
     if ( mi.moveDiffSS != Vector2f::ZERO ) {
-        _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
+        _cam->incrementQuatAngles( V3f{ mi.moveDiffSS.yx(), 0.0f } );
     }
 }
 
@@ -217,9 +217,6 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
     _cam->moveForward( moveForward );
     _cam->strafe( strafe );
     _cam->moveUp( moveUp );
-//    if ( mi.moveDiffSS != Vector2f::ZERO ) {
-//        _cam->incrementQuatAngles( Vector3f( mi.moveDiffSS.yx(), 0.0f ));
-//    }
 
 }
 

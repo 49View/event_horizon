@@ -140,37 +140,34 @@ public:
 private:
 	void translate( const Vector3f& pos );
 
-	std::string mName;
-	CameraMode mMode;
-	Frustum mFrustom;
+	CameraMode mMode = CameraMode::Edit2d;
+	Frustum mFrustom{};
 
-	float mHAngle;
-	float mVAngle;
-	float mAspectRatioMultiplier;
+    float mAspectRatioMultiplier = 1.0f;
+    float mNearClipPlaneZ = 0.01f;
+    float mFarClipPlaneZ = 100.0f;
 
-	float mNearClipPlaneZ;
-	float mFarClipPlaneZ;
 	float mNearClipPlaneZClampEdit2d = 0.5f;
 	float mFarClipPlaneZClampEdit2d = 30.0f;
 
-	bool mLockAtWalkingHeight;
-	bool mbLocked;
+	bool mLockAtWalkingHeight = false;
+	bool mbLocked = false;
 
-	Matrix4f mView;
-	Matrix4f mProjection;
-	Matrix4f mOrthogonal;
-	Matrix4f mAspectRatio;
-	Matrix4f mScreenAspectRatio;
-	Matrix4f mVP;
+	Matrix4f mView              = Matrix4f::MIDENTITY();
+	Matrix4f mProjection        = Matrix4f::MIDENTITY();
+	Matrix4f mOrthogonal        = Matrix4f::MIDENTITY();
+	Matrix4f mAspectRatio       = Matrix4f::MIDENTITY();
+	Matrix4f mScreenAspectRatio = Matrix4f::MIDENTITY();
+	Matrix4f mVP                = Matrix4f::MIDENTITY();
 
-	Matrix4f mMVP;
-	Matrix4f quatMatrix;
+	Matrix4f mMVP               = Matrix4f::MIDENTITY();
+	Matrix4f quatMatrix         = Matrix4f::MIDENTITY();
 
 	V3fa mPos;
 	Quaterniona qangle; // angles of x,y,z axis to be fed into quaternion math
     floata mFov;
 
-	Vector3f qangleEuler = Vector3f::ZERO;
+    V3f incrementalEulerQuatAngle = Vector3f::ZERO;
 
-	JMATH::Rect2f mViewPort{};
+    JMATH::Rect2f mViewPort{};
 };

@@ -134,6 +134,10 @@ public:
 		return product( rhs );
 	}
 
+    void operator*=( const Quaternion& rhs ) {
+        *this = rhs.product( *this );
+    }
+
 	/**
 	* @brief Quaternion scalar product operator.
 	* @param s A scalar by which to multiply all components
