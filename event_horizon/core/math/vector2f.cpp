@@ -180,4 +180,67 @@ void removeCollinear( vector2fList& cs, float epsilon ) {
 	cs.erase( remove_if( cs.begin(), cs.end(), []( Vector2f const& sc ) -> bool { return sc == Vector2f::HUGE_VALUE_POS; } ), cs.end() );
 }
 
+//bool intersection( Vector2f const& p0, Vector2f const& p1, Vector2f const& p2, Vector2f const& p3, Vector2f& i ) {
+//    Vector2f const s1 = p1 - p0;
+//    Vector2f const s2 = p3 - p2;
+//
+//    Vector2f const u = p0 - p2;
+//
+//    float const ip = 1.f / ( -s2.x() * s1.y() + s1.x() * s2.y() );
+//
+//    float const s = ( -s1.y() * u.x() + s1.x() * u.y() ) * ip;
+//    float const t = ( s2.x() * u.y() - s2.y() * u.x() ) * ip;
+//
+//    if ( s >= 0.0f && s <= 1.0f && t >= 0.0f && t <= 1.0f ) {
+//        i = p0 + ( s1 * t );
+//        return true;
+//    }
+//
+//    return false;
+//}
 
+bool intersection(const V2f& p, const V2f& p2, const V2f& q, const V2f& q2, Vector2f& i ) {
+    auto r = p2 - p;
+    auto s = q2 - q;
+    auto rxs = r.cross(s);
+    auto qpxr = (q - p).cross(r);
+
+    // If r x s = 0 and (q - p) x r = 0, then the two lines are collinear.
+    if ( rxs == 0.0f && qpxr == 0.0f ) {
+        // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
+        // then the two lines are overlapping,
+//        if (considerCollinearOverlapAsIntersect)
+//            if ((0 <= (q - p)*r && (q - p)*r <= r*r) || (0 <= (p - q)*s && (p - q)*s <= s*s))
+//                return true;
+
+        // 2. If neither 0 <= (q - p) * r = r * r nor 0 <= (p - q) * s <= s * s
+        // then the two lines are collinear but disjoint.
+        // No need to implement this expression, as it follows from the expression above.
+        return false;
+    }
+
+    // 3. If r x s = 0 and (q - p) x r != 0, then the two lines are parallel and non-intersecting.
+    if ( rxs == 0.0f && qpxr != 0.0f)
+        return false;
+
+    // t = (q - p) x s / (r x s)
+    auto t = (q - p).cross(s)/rxs;
+
+    // u = (q - p) x r / (r x s)
+
+    auto u = (q - p).cross(r)/rxs;
+
+    // 4. If r x s != 0 and 0 <= t <= 1 and 0 <= u <= 1
+    // the two line segments meet at the point p + t r = q + u s.
+    if ( rxs != 0.0f && (0.0f <= t && t <= 1.0f) && (0.0f <= u && u <= 1.0f))
+    {
+        // We can calculate the intersection point using either t or u.
+        i = p + t*r;
+
+        // An intersection was found.
+        return true;
+    }
+
+    // 5. Otherwise, the two line segments are not parallel but do not intersect.
+    return false;
+}

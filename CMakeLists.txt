@@ -676,7 +676,12 @@ macro(link_restbed)
     link_libraries_multi("restbed" "restbed" "restbed" "restbed" OFF)
     if (APPLE OR LINUX)
         message(STATUS "Linking system library -lcrypto;-lssl")
-        target_link_libraries(${PROJECT_NAME} "-lcrypto;-lssl")
+#        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+        link_libraries_if("${APPLE}" "crypto" "/usr/local/opt/openssl/lib/" "libcrypto.a")
+        link_libraries_if("${APPLE}" "ssl" "/usr/local/opt/openssl/lib/" "libssl.a")
+
+        link_system_libraries_if("${LINUX}" "-lcrypto;-lssl")
+#        target_link_libraries(${PROJECT_NAME} "-lcrypto;-lssl")
     endif()
 
 #    add_postbuild_copy_command("restbed" "librestbed")
@@ -932,7 +937,6 @@ function(link_libraries_if condition libName librariesPath libraries)
         message(STATUS "Linking.. ${libName}")
 
         message(STATUS "	Searching in " ${librariesPath})
-
         FOREACH (lib ${libraries})
             find_library(PATHS_${lib} NAMES ${lib} PATHS ${librariesPath})
             target_link_libraries(${PROJECT_NAME} ${PATHS_${lib}})

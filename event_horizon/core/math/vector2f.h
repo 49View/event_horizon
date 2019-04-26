@@ -239,7 +239,11 @@ public:
 		mY /= rhs.y();
 	}
 
-	Vector2f ss() const {
+    float cross( const Vector2f& _v ) {
+        return mX * _v.y() - mY * _v.x();
+    }
+
+    Vector2f ss() const {
 		return Vector2f( xss(), yss() );
 	}
 
@@ -320,7 +324,7 @@ public:
 		return 0;
 	}
 
-	inline void rotate( float angle ) {
+    inline void rotate( float angle ) {
 		Vector2f r;
 		float cs = cosf( angle );
 		float sn = sinf( angle );
@@ -482,24 +486,7 @@ inline bool isInsideRect( const Vector2f& position, const Vector2f& rectPos, con
 
 bool isInsideTriangle( const Vector2f& P, const Vector2f& A, const Vector2f& B, const Vector2f& C );
 
-inline bool intersection( Vector2f const& p0, Vector2f const& p1, Vector2f const& p2, Vector2f const& p3, Vector2f& i ) {
-	Vector2f const s1 = p1 - p0;
-	Vector2f const s2 = p3 - p2;
-
-	Vector2f const u = p0 - p2;
-
-	float const ip = 1.f / ( -s2.x() * s1.y() + s1.x() * s2.y() );
-
-	float const s = ( -s1.y() * u.x() + s1.x() * u.y() ) * ip;
-	float const t = ( s2.x() * u.y() - s2.y() * u.x() ) * ip;
-
-	if ( s >= 0.0f && s <= 1.0f && t >= 0.0f && t <= 1.0f ) {
-		i = p0 + ( s1 * t );
-		return true;
-	}
-
-	return false;
-}
+bool intersection( Vector2f const& p0, Vector2f const& p1, Vector2f const& p2, Vector2f const& p3, Vector2f& i );
 
 inline bool isVectorIntersectingWithLine( std::vector<Vector2f> tvr, Vector2f& v1, Vector2f& v2 ) {
 	for ( int64_t m = 0; m < static_cast<int64_t>( tvr.size() ); m++ ) {
