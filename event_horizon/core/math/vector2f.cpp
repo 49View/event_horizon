@@ -210,13 +210,12 @@ bool intersection(const V2f& p, const V2f& p2, const V2f& q, const V2f& q2, Vect
         // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
         // then the two lines are overlapping,
 //        if (considerCollinearOverlapAsIntersect)
-//            if ((0 <= (q - p)*r && (q - p)*r <= r*r) || (0 <= (p - q)*s && (p - q)*s <= s*s))
-//                return true;
+        return ( V2f::ZERO <= ( q - p ) * r && ( q - p ) * r <= r * r ) ||
+               ( V2f::ZERO <= ( p - q ) * s && ( p - q ) * s <= s * s );
 
         // 2. If neither 0 <= (q - p) * r = r * r nor 0 <= (p - q) * s <= s * s
         // then the two lines are collinear but disjoint.
         // No need to implement this expression, as it follows from the expression above.
-        return false;
     }
 
     // 3. If r x s = 0 and (q - p) x r != 0, then the two lines are parallel and non-intersecting.

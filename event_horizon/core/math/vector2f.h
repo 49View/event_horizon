@@ -214,7 +214,23 @@ public:
 		return Vector2f( mX * recip, mY * recip );
 	}
 
-	void operator*=( float rhs ) {
+    bool operator<=( const Vector2f& rhs ) const {
+        return mX <= rhs.mX && mY <= rhs.mY;
+    }
+
+    bool operator<( const Vector2f& rhs ) const {
+        return mX < rhs.mX && mY < rhs.mY;
+    }
+
+    bool operator>=( const Vector2f& rhs ) const {
+        return mX >= rhs.mX && mY >= rhs.mY;
+    }
+
+    bool operator>( const Vector2f& rhs ) const {
+        return mX > rhs.mX && mY > rhs.mY;
+    }
+
+    void operator*=( float rhs ) {
 		mX *= rhs;
 		mY *= rhs;
 	}
