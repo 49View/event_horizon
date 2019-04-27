@@ -132,7 +132,7 @@ namespace GT {
 
     struct Shape   : GTPolicyShape {};
     struct Follower         {};
-    struct Extrude : GTPolicyExtrusion {};
+    struct Extrude : GTPolicyExtrusion, GTPolicyMapping {};
     struct Poly    : GTPolicyPolyline, GTPolicyMapping {};
     struct Mesh             {};
     struct GLTF2            {};

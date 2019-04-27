@@ -150,6 +150,10 @@ namespace VDataServices {
     void buildInternal( const GT::Poly& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Poly& _d );
 
+    void prepare( GT::Extrude& _d );
+    void buildInternal( const GT::Extrude& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::Extrude& _d );
+
     template <typename DT>
     std::shared_ptr<VData> build( const DT& _d ) {
         auto ret = std::make_shared<VData>();
@@ -209,105 +213,64 @@ struct PolyLine2d : public PolyLineBase2d, public PolyLineCommond {
 
 using QuadVector3fNormalfList = std::vector<QuadVector3fNormal>;
 
-class GeomDataBuilder {
-public:
-    std::shared_ptr<VData> build() {
-        auto ret = std::make_shared<VData>();
-        if ( mappingData.bDoNotScaleMapping ) MappingServices::doNotScaleMapping(mappingData);
-        buildInternal(ret);
-        return ret;
-    }
-    std::string refName() const { return mRefName; };
-    virtual void setupRefName() = 0;
-
-protected:
-    virtual void buildInternal( std::shared_ptr<VData> _ret ) = 0;
-
-protected:
-    std::string mRefName;
-    GeomMappingData mappingData;
-};
-
-class GeomDataOutlineBuilder : public GeomDataBuilder {
-public:
-    explicit GeomDataOutlineBuilder( std::vector<PolyOutLine> outlineVerts ) : outlineVerts( std::move( outlineVerts )) {}
-    virtual ~GeomDataOutlineBuilder() = default;
-    void setupRefName() override;
-protected:
-    void buildInternal( std::shared_ptr<VData> _ret ) override;
-protected:
-    std::vector<PolyOutLine> outlineVerts;
-};
-
-class GeomDataPolyBuilder : public GeomDataBuilder {
-public:
-    explicit GeomDataPolyBuilder( std::vector<PolyLine> _polyLine ) : polyLine( std::move( _polyLine )) {}
-    virtual ~GeomDataPolyBuilder() = default;
-    void setupRefName() override;
-protected:
-    void buildInternal( std::shared_ptr<VData> _ret ) override;
-protected:
-    std::vector<PolyLine> polyLine;
-};
-
-class GeomDataQuadMeshBuilder : public GeomDataBuilder {
-public:
-    explicit GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
-    virtual ~GeomDataQuadMeshBuilder() = default;
-    void setupRefName() override;
-protected:
-    void buildInternal( std::shared_ptr<VData> _ret ) override;
-protected:
-    QuadVector3fNormalfList quads;
-};
-
-class GeomDataFollowerBuilder : public GeomDataBuilder {
-public:
-    GeomDataFollowerBuilder( std::shared_ptr<Profile> _profile,
-                             std::vector<Vector3f> _verts,
-                             const FollowerFlags f = FollowerFlags::Defaults,
-                             const PolyRaise _r = PolyRaise::None,
-                             const Vector2f& _flipVector = Vector2f::ZERO,
-                             FollowerGap _gaps = FollowerGap::Empty,
-                             const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
-                             mProfile( std::move( _profile )), mVerts( std::move( _verts )),
-                             followersFlags(f), mRaiseEnum(_r),
-                             mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
-    virtual ~GeomDataFollowerBuilder() = default;
-    void setupRefName() override;
-protected:
-    void buildInternal( std::shared_ptr<VData> _ret ) override;
-protected:
-    std::shared_ptr<Profile> mProfile;
-    std::vector<Vector3f> mVerts;
-    FollowerFlags followersFlags = FollowerFlags::Defaults;
-    Vector2f mRaise = Vector2f::ZERO;
-    PolyRaise mRaiseEnum = PolyRaise::None;
-    Vector2f mFlipVector = Vector2f::ZERO;
-    FollowerGap mGaps = FollowerGap::Empty;
-    Vector3f mSuggestedAxis = Vector3f::ZERO;
-};
-
-template <typename T>
-class GeomDataBuilderBaseList {
-public:
-    virtual std::vector<std::shared_ptr<T>> build() = 0;
-};
-
-class GeomDataBuilderList : public GeomDataBuilderBaseList<VData> {
-public:
-    virtual ~GeomDataBuilderList() = default;
-};
-
-class GeomDataSVGBuilder : public GeomDataBuilderList {
-public:
-    GeomDataSVGBuilder( std::string _svgString, std::shared_ptr<Profile> _profile ) :
-                        svgAscii(std::move( _svgString )), mProfile(std::move(_profile)) {}
-    GeomDataListBuilderRetType build() override;
-protected:
-    std::string svgAscii;
-    std::shared_ptr<Profile> mProfile;
-};
+//class GeomDataQuadMeshBuilder : public GeomDataBuilder {
+//public:
+//    explicit GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
+//    virtual ~GeomDataQuadMeshBuilder() = default;
+//    void setupRefName() override;
+//protected:
+//    void buildInternal( std::shared_ptr<VData> _ret ) override;
+//protected:
+//    QuadVector3fNormalfList quads;
+//};
+//
+//class GeomDataFollowerBuilder : public GeomDataBuilder {
+//public:
+//    GeomDataFollowerBuilder( std::shared_ptr<Profile> _profile,
+//                             std::vector<Vector3f> _verts,
+//                             const FollowerFlags f = FollowerFlags::Defaults,
+//                             const PolyRaise _r = PolyRaise::None,
+//                             const Vector2f& _flipVector = Vector2f::ZERO,
+//                             FollowerGap _gaps = FollowerGap::Empty,
+//                             const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
+//                             mProfile( std::move( _profile )), mVerts( std::move( _verts )),
+//                             followersFlags(f), mRaiseEnum(_r),
+//                             mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
+//    virtual ~GeomDataFollowerBuilder() = default;
+//    void setupRefName() override;
+//protected:
+//    void buildInternal( std::shared_ptr<VData> _ret ) override;
+//protected:
+//    std::shared_ptr<Profile> mProfile;
+//    std::vector<Vector3f> mVerts;
+//    FollowerFlags followersFlags = FollowerFlags::Defaults;
+//    Vector2f mRaise = Vector2f::ZERO;
+//    PolyRaise mRaiseEnum = PolyRaise::None;
+//    Vector2f mFlipVector = Vector2f::ZERO;
+//    FollowerGap mGaps = FollowerGap::Empty;
+//    Vector3f mSuggestedAxis = Vector3f::ZERO;
+//};
+//
+//template <typename T>
+//class GeomDataBuilderBaseList {
+//public:
+//    virtual std::vector<std::shared_ptr<T>> build() = 0;
+//};
+//
+//class GeomDataBuilderList : public GeomDataBuilderBaseList<VData> {
+//public:
+//    virtual ~GeomDataBuilderList() = default;
+//};
+//
+//class GeomDataSVGBuilder : public GeomDataBuilderList {
+//public:
+//    GeomDataSVGBuilder( std::string _svgString, std::shared_ptr<Profile> _profile ) :
+//                        svgAscii(std::move( _svgString )), mProfile(std::move(_profile)) {}
+//    GeomDataListBuilderRetType build() override;
+//protected:
+//    std::string svgAscii;
+//    std::shared_ptr<Profile> mProfile;
+//};
 
 void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution, const Vector3f& _normal,
                          ReverseFlag rf = ReverseFlag::False );

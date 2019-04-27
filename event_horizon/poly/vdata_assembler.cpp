@@ -62,6 +62,8 @@ namespace VDataServices {
 
 // ___ SHAPE BUILDER ___
 
+    void prepare( GT::Shape& _d ) {}
+
     void buildInternal( const GT::Shape& _d, std::shared_ptr<VData> _ret ) {
         V3f center = V3f::ZERO;
         V3f size = V3f::ONE;
@@ -142,33 +144,30 @@ namespace VDataServices {
         return "Poly--" + Hashable<>::hashOf(c);
     }
 
-}
+    // ___ EXTRUDER BUILDER ___
 
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-//
-// ___ EXTRUDER BUILDER ___
-//
-// ********************************************************************************************************************
-// ********************************************************************************************************************
+    void prepare( GT::Extrude& _d ) {}
 
-void GeomDataOutlineBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
-    for ( auto& ot : outlineVerts ) {
-        PolyServices::pull( _ret, ot.verts, ot.zPull, mappingData ); //pullFlags
-    }
-}
-
-void GeomDataOutlineBuilder::setupRefName() {
-    std::stringstream oss;
-    for ( const auto& ot : outlineVerts ) {
-        for ( const auto& v : ot.verts ) {
-            oss << v.toString();
+    void buildInternal( const GT::Extrude& _d, std::shared_ptr<VData> _ret ){
+        auto dmProgressive = _d.mappingData;
+        for ( auto& ot : _d.extrusionVerts ) {
+            PolyServices::pull( _ret, ot.verts, ot.zPull, dmProgressive ); //pullFlags
         }
-        oss << ot.zPull;
     }
-    auto c = mappingData.serialize();
-    c.insert(std::end(c), std::begin(oss.str()), std::end(oss.str()));
-    mRefName = "Extrude--" + Hashable<>::hashOf(c);
+
+    ResourceRef refName( const GT::Extrude& _d ) {
+        std::stringstream oss;
+        for ( const auto& ot : _d.extrusionVerts ) {
+            for ( const auto& v : ot.verts ) {
+                oss << v.toString();
+            }
+            oss << ot.zPull;
+        }
+        auto c = _d.mappingData.serialize();
+        c.insert(std::end(c), std::begin(oss.str()), std::end(oss.str()));
+        return "Extrude--" + Hashable<>::hashOf(c);
+    }
+
 }
 
 // ********************************************************************************************************************
@@ -179,77 +178,22 @@ void GeomDataOutlineBuilder::setupRefName() {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-void GeomDataQuadMeshBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
-    for ( const auto& q : quads ) {
-        PolyServices::addFlatPoly( _ret, q.quad, q.normal, mappingData );
-    }
-}
-
-void GeomDataQuadMeshBuilder::setupRefName() {
-    std::stringstream oss;
-    for ( const auto& q : quads ) {
-        oss << q.normal.toString();
-        for ( const auto& v : q.quad ) {
-            oss << v.toString();
-        }
-    }
-    mRefName = "Poly--" + Hashable<>::hashOf(oss.str());
-}
-
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-//
-// ___ FOLLOWER BUILDER ___
-//
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-
-void GeomDataFollowerBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
-    ASSERT( !mProfile->Points().empty() );
-
-    Profile lProfile{ *mProfile.get() };
-    Vector2f lRaise = mRaise;
-    if ( mRaiseEnum != PolyRaise::None ) {
-        switch ( mRaiseEnum ) {
-            case PolyRaise::None:break;
-            case PolyRaise::HorizontalPos:
-                lRaise= ( Vector2f::X_AXIS * lProfile.width() );
-                break;
-            case PolyRaise::HorizontalNeg:
-                lRaise= ( Vector2f::X_AXIS_NEG * lProfile.width());
-                break;
-            case PolyRaise::VerticalPos:
-                lRaise= ( Vector2f::Y_AXIS * lProfile.height() );
-                break;
-            case PolyRaise::VerticalNeg:
-                lRaise= ( Vector2f::Y_AXIS_NEG * lProfile.height() );
-                break;
-        };
-    }
-
-    lProfile.raise( lRaise );
-    lProfile.flip( mFlipVector );
-
-    FollowerService::extrude( _ret, mVerts, lProfile, mSuggestedAxis, followersFlags );
-}
-
-void GeomDataFollowerBuilder::setupRefName() {
-    std::stringstream oss;
-    oss << mProfile->Name();
-    for ( const auto& v : mVerts ) {
-        oss << v.toString();
-    }
-    oss << followersFlags;
-    oss << mRaise.toString();
-    oss << static_cast<uint64_t>(mRaiseEnum);
-    oss << mFlipVector.toString();
-    // ### Implement this for gaps
-//    for ( const auto& v : mGaps ) {
-//        oss << static_cast<uint64_t>(v);
+//void GeomDataQuadMeshBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
+//    for ( const auto& q : quads ) {
+//        PolyServices::addFlatPoly( _ret, q.quad, q.normal, mappingData );
 //    }
-    oss << mSuggestedAxis.toString();
-    mRefName = "Follower--" + Hashable<>::hashOf(oss.str());
-}
+//}
+//
+//void GeomDataQuadMeshBuilder::setupRefName() {
+//    std::stringstream oss;
+//    for ( const auto& q : quads ) {
+//        oss << q.normal.toString();
+//        for ( const auto& v : q.quad ) {
+//            oss << v.toString();
+//        }
+//    }
+//    mRefName = "Poly--" + Hashable<>::hashOf(oss.str());
+//}
 
 // ********************************************************************************************************************
 // ********************************************************************************************************************
@@ -259,17 +203,72 @@ void GeomDataFollowerBuilder::setupRefName() {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
-    auto rawPoints = SVGC::SVGToPoly( svgAscii );
+//void GeomDataFollowerBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
+//    ASSERT( !mProfile->Points().empty() );
+//
+//    Profile lProfile{ *mProfile.get() };
+//    Vector2f lRaise = mRaise;
+//    if ( mRaiseEnum != PolyRaise::None ) {
+//        switch ( mRaiseEnum ) {
+//            case PolyRaise::None:break;
+//            case PolyRaise::HorizontalPos:
+//                lRaise= ( Vector2f::X_AXIS * lProfile.width() );
+//                break;
+//            case PolyRaise::HorizontalNeg:
+//                lRaise= ( Vector2f::X_AXIS_NEG * lProfile.width());
+//                break;
+//            case PolyRaise::VerticalPos:
+//                lRaise= ( Vector2f::Y_AXIS * lProfile.height() );
+//                break;
+//            case PolyRaise::VerticalNeg:
+//                lRaise= ( Vector2f::Y_AXIS_NEG * lProfile.height() );
+//                break;
+//        };
+//    }
+//
+//    lProfile.raise( lRaise );
+//    lProfile.flip( mFlipVector );
+//
+//    FollowerService::extrude( _ret, mVerts, lProfile, mSuggestedAxis, followersFlags );
+//}
+//
+//void GeomDataFollowerBuilder::setupRefName() {
+//    std::stringstream oss;
+//    oss << mProfile->Name();
+//    for ( const auto& v : mVerts ) {
+//        oss << v.toString();
+//    }
+//    oss << followersFlags;
+//    oss << mRaise.toString();
+//    oss << static_cast<uint64_t>(mRaiseEnum);
+//    oss << mFlipVector.toString();
+//    // ### Implement this for gaps
+////    for ( const auto& v : mGaps ) {
+////        oss << static_cast<uint64_t>(v);
+////    }
+//    oss << mSuggestedAxis.toString();
+//    mRefName = "Follower--" + Hashable<>::hashOf(oss.str());
+//}
 
-    GeomDataListBuilderRetType logoGeoms{};
-    logoGeoms.reserve( rawPoints.size() );
-    for ( const auto& points : rawPoints ) {
-        auto fb = std::make_shared<GeomDataFollowerBuilder>( mProfile,
-                                                             XZY::C(points.path,0.0f),
-                                                             FollowerFlags::WrapPath );
-//        _mat->c( points.strokeColor );
-        logoGeoms.emplace_back(fb->build());
-    }
-    return logoGeoms;
-}
+// ********************************************************************************************************************
+// ********************************************************************************************************************
+//
+// ___ SVG BUILDER ___
+//
+// ********************************************************************************************************************
+// ********************************************************************************************************************
+
+//GeomDataListBuilderRetType GeomDataSVGBuilder::build() {
+//    auto rawPoints = SVGC::SVGToPoly( svgAscii );
+//
+//    GeomDataListBuilderRetType logoGeoms{};
+//    logoGeoms.reserve( rawPoints.size() );
+//    for ( const auto& points : rawPoints ) {
+//        auto fb = std::make_shared<GeomDataFollowerBuilder>( mProfile,
+//                                                             XZY::C(points.path,0.0f),
+//                                                             FollowerFlags::WrapPath );
+////        _mat->c( points.strokeColor );
+//        logoGeoms.emplace_back(fb->build());
+//    }
+//    return logoGeoms;
+//}
