@@ -306,7 +306,7 @@ void UVSphere( Topology& mesh ) {
     uint32_t meridians = 40;
     uint32_t parallels = 40;
 
-    mesh.vertices.emplace_back(0.0f, 1.0f, 0.0f);
+    mesh.vertices.emplace_back(V3f::Y_AXIS*0.5f);
     for (uint32_t j = 0; j < parallels - 1; ++j)
     {
         double const polar = M_PI * double(j+1) / double(parallels);
@@ -320,10 +320,10 @@ void UVSphere( Topology& mesh ) {
             double const x = sp * ca;
             double const y = cp;
             double const z = sp * sa;
-            mesh.vertices.emplace_back(x, y, z);
+            mesh.vertices.emplace_back( V3f{x, y, z}*0.5f );
         }
     }
-    mesh.vertices.emplace_back(0.0f, -1.0f, 0.0f);
+    mesh.vertices.emplace_back(V3f::Y_AXIS_NEG*0.5f);
 
     for (uint32_t i = 0; i < meridians; ++i)
     {

@@ -6,6 +6,10 @@
 
 #include <memory>
 #include <variant>
+#include <string>
+#include <vector>
+#include <core/math/poly_shapes.hpp>
+#include <core/resources/resource_serialization.hpp>
 
 enum class UIShapeType {
     CameraFrustom2d,
@@ -70,22 +74,72 @@ enum class GeomBuilderType {
     SVG,
 };
 
+struct GeomMappingData {
+//    MappingDirection getMappingDirection() const { return mapping.direction; }
+//    void setMappingDirection( MappingDirection val ) { mapping.direction = val; }
+//    Vector2f MappingOffset() const { return mapping.offset; }
+//    void MappingOffset( const Vector2f& val ) { mapping.offset = val; }
+//    MappingMirrorE MappingMirror() const { return mapping.mirroring; }
+//    void MappingMirror( MappingMirrorE val ) { mapping.mirroring = val; }
+//    bool UnitMapping() const { return mapping.bUnitMapping; }
+//    void UnitMapping( bool val ) { mapping.bUnitMapping = val; }
+//    subdivisionAccuray SubdivAccuracy() const { return mSubdivAccuracy; }
+//    void SubdivAccuracy( subdivisionAccuray val ) { mSubdivAccuracy = val; }
+//    const std::vector<Vector2f>& WrapMappingCoords() const { return wrapMappingCoords; }
+//    void WrapMappingCoords( const std::vector<Vector2f>& val ) { wrapMappingCoords = val; }
+
+    // Mapping constants
+    MappingDirection direction = MappingDirection::X_POS;
+    bool bDoNotScaleMapping = false;
+    Vector2f offset = Vector2f::ZERO;
+    MappingMirrorE mirroring = MappingMirrorE::None;
+    bool bUnitMapping = false;
+    subdivisionAccuray subdivAccuracy = accuracyNone;
+    WindingOrderT windingOrder = WindingOrder::CCW;
+
+    JSONSERIALBIN( direction, bDoNotScaleMapping, offset, mirroring, bUnitMapping, subdivAccuracy, windingOrder)
+    // Mappping computed
+    mutable float fuvScale = 1.0f;
+    mutable Vector2f uvScale = Vector2f::ONE;
+    mutable Vector2f uvScaleInv = Vector2f::ONE;
+    mutable std::vector<Vector2f> wrapMappingCoords;
+    mutable Vector2f pullMappingCoords = Vector2f::ZERO;
+};
+
+struct PolyOutLine;
+struct PolyLine;
+
 namespace GT {
-    struct Sphere           {};
-    struct Cylinder         {};
-    struct Pyramid          {};
-    struct Cube             {};
-    struct RoundedCube      {};
-    struct Panel            {};
-    struct Pillow           {};
-    struct Arrow            {};
+    struct GTPolicyText {
+        std::string text;
+    };
+    struct GTPolicyExtrusion {
+        std::vector<PolyOutLine> extrusionVerts;
+    };
+    struct GTPolicyPolyline {
+        std::vector<Vector3f> sourcePolysVList;
+        std::vector<Triangle3d> sourcePolysTris;
+        std::vector<PolyLine> polyLines;
+        Vector3f forcingNormalPoly = Vector3f::ZERO;
+        ReverseFlag rfPoly = ReverseFlag::False;
+    };
+    struct GTPolicyShape {
+        ShapeType shapeType = ShapeType::None;
+    };
+    struct GTPolicyMapping {
+        GeomMappingData mappingData;
+    };
+
+    struct Shape   : GTPolicyShape {};
     struct Follower         {};
-    struct Extrude          {};
-    struct Poly             {};
+    struct Extrude : GTPolicyExtrusion {};
+    struct Poly    : GTPolicyPolyline, GTPolicyMapping {};
     struct Mesh             {};
     struct GLTF2            {};
     struct Asset            {};
     struct File             {};
     struct SVG              {};
-
+    struct TextUI : GTPolicyText {};
+    struct Text2d : GTPolicyText {};
+    struct Text3d : GTPolicyText {};
 }

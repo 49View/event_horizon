@@ -1,251 +1,249 @@
+////
+//// Created by Dado on 29/10/2017.
+////
 //
-// Created by Dado on 29/10/2017.
+//#pragma once
 //
-
-#pragma once
-
-#include <memory>
-#include <string>
-#include <core/math/vector3f.h>
-#include <core/service_factory.h>
-#include <core/math/poly_shapes.hpp>
-#include <core/resources/material.h>
-#include <core/resources/profile.hpp>
-#include <core/resources/resource_types.hpp>
-#include <core/name_policy.hpp>
-#include <poly/follower.hpp>
-#include <poly/poly.hpp>
-#include <poly/poly_helper.h>
-#include <core/uuid.hpp>
-
-class SceneGraph;
-
-struct ZPull {
-    explicit  ZPull( float value ) : value( value ) {}
-    float operator()() {
-        return value;
-    }
-    float value;
-};
-
-template <typename T>
-class GeomBuilder : public GeomBasicBuilder<GeomBuilder<T>>, public NamePolicy<> {
-public:
-    template <typename ...Args>
-    explicit GeomBuilder( Args&&... args ) {
-        Name( UUIDGen::make() );
-        (addParam<T>(std::forward<Args>(args)), ...); // Fold expression (c++17)
-    }
-
-    virtual ~GeomBuilder() = default;
-
-    explicit GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt );
-    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _name );
-    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
-
-    // Polygon list
-    explicit GeomBuilder( SceneGraph& _sg, const Rect2f& _rect, float _z = 0.0f );
-    explicit GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist );
-    explicit GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& _vlist );
-    explicit GeomBuilder( SceneGraph& _sg, const std::vector<Triangle2d>& _tris, float _z = 0.0f );
-    explicit GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine2d>& _plines, float _z = 0.0f );
-
-    // Outlines
-    GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector3f>&& arguments_list, float _zPull );
-    GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector2f>&& arguments_list, float _zPull );
-    GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& arguments_list, float _zPull );
-    GeomBuilder( SceneGraph& _sg, const std::vector<Vector2f>& arguments_list, float _zPull );
-
-    // Profile/Follwoers
-    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
-                 const std::vector<Vector2f>& _outline,
-                 float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO );
-    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
-                 const std::vector<Vector3f>& _outline,
-                 const Vector3f& _suggestedAxis = Vector3f::ZERO );
-    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
-                 const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
-
-    template <typename SGT, typename M>
-    GeomBuilder& addParam( const M& _param ) {
-        if constexpr ( std::is_same<M, PolyOutLine>::value ) {
-            static_assert( std::is_same<SGT, GT::Extrude>::value );
-            outlineVerts.emplace_back( _param );
-        }
-        if constexpr ( std::is_same<M, std::vector<Vector3f>>::value ) {
-            static_assert( std::is_same<SGT, GT::Poly>::value );
-            sourcePolysVList = _param;
-        }
-        return *this;
-    }
-
-    GeomBuilder& inj( GeomSP _hier );
-
-    GeomBuilder& id( const uint64_t _id ) {
-        mId = _id;
-        return *this;
-    }
-
-    GeomBuilder& pb( float _a, float _b );
-
-    GeomBuilder& ascii( const std::string& _value ) {
-        asciiText = _value;
-        return *this;
-    }
-
-    GeomBuilder& md( const MappingDirection _md ) {
-        mapping.direction = _md;
-        return *this;
-    }
-
-    GeomBuilder& n( const std::string& _s ) {
-        Name(_s);
-        return *this;
-    }
-
-    GeomBuilder& g( const uint64_t & _gt ) {
-        gt = _gt;
-        return *this;
-    }
-
-    GeomBuilder& pr( const PolyRaise _profileRaise ) {
-        fraise = _profileRaise;
-        return *this;
-    }
-
-    GeomBuilder& fnp( const Vector3f& _n ) {
-        forcingNormalPoly = _n;
-        return *this;
-    }
-
-    GeomBuilder& prf() {
-        rfPoly = ReverseFlag::True;
-        return *this;
-    }
-
-    GeomBuilder& addPoly( const PolyLine& _polyLine );
-    GeomBuilder& addPoly( const PolyLine2d& _polyLine2d, float heightOffset );
-    GeomBuilder& addOutline( const std::vector<Vector3f>& _polyLine, float _raise );
-
-    GeomBuilder& accuracy( const subdivisionAccuray _val ) {
-        subdivAccuracy = _val;
-        return *this;
-    }
-
-    GeomBuilder& doNotScaleMapping() {
-        mapping.bDoNotScaleMapping = true;
-        return *this;
-    }
-
-    GeomBuilder& mappingOffset( const Vector2f& _val ) {
-        mapping.offset = _val;
-        return *this;
-    }
-
-    GeomBuilder& mappingMirror( const MappingMirrorE _val ) {
-        mapping.mirroring = _val;
-        return *this;
-    }
-
-    GeomBuilder& unitMapping() {
-        mapping.bUnitMapping = true;
-        return *this;
-    }
-
-    GeomBuilder& ff( const FollowerFlags f ) {
-        fflags |= f;
-        return *this;
-    }
-
-    GeomBuilder& ff( const uint32_t f ) {
-        fflags |= static_cast<FollowerFlags>(f);
-        return *this;
-    }
-
-    GeomBuilder& fflip( const Vector2f& _v ) {
-        flipVector = _v;
-        return *this;
-    }
-
-    GeomBuilder& gaps( const FollowerGap& _gaps ) {
-        mGaps = _gaps;
-        return *this;
-    }
-
-    GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
-
-    GeomBuilder& m( const ResourceRef& _mat ) {
-        matRef = _mat;
-        return *this;
-    }
-    GeomBuilder& c( const Color4f & _color );
-    GeomBuilder& c( const std::string& _hexcolor );
-
-    GeomSP buildr();
-
-    ResourceRef build();
-
-//protected:
-public:
-    void elemCreate();
-    GeomSP Elem() { return elem; }
-
-    bool validate() const;
-    void elaborateMaterial();
-    void preparePolyLines();
-    void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb );
-    void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb );
-    void createFromAsset( GeomSP asset );
-
-//private:
-public:
-    uint64_t mId = 0;
-    uint64_t gt = 1; // This is the generic geom ID, as we reserve 0 as null
-
-    ResourceRef matRef;
-    ResourceRef vdataRef;
-
-    ShapeType shapeType = ShapeType::None;
-    subdivisionAccuray subdivAccuracy = accuracyNone;
-
-    std::string mDepResourceName;
-    std::vector<Vector3f> profilePath;
-    FollowerFlags fflags = FollowerFlags::Defaults;
-    PolyRaise fraise = PolyRaise::None;
-    Vector2f flipVector = Vector2f::ZERO;
-    FollowerGap mGaps = FollowerGap::Empty;
-    Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
-
-    std::string asciiText;
-
-    GeomMappingData mapping;
-
-    std::vector<PolyOutLine> outlineVerts;
-    std::vector<Vector3f> sourcePolysVList;
-    std::vector<Triangle3d> sourcePolysTris;
-    std::vector<PolyLine> polyLines;
-
-    Vector3f forcingNormalPoly = Vector3f::ZERO;
-    ReverseFlag rfPoly = ReverseFlag::False;
-    QuadVector3fNormalfList quads;
-
-    GeomSP elem = nullptr;
-    GeomSP elemInjFather = nullptr;
-
-    ScreenShotContainerPtr thumb;
-};
-
-//class GeomBuilderComposer {
-//public:
-//    GeomBuilderComposer();
+//#include <memory>
+//#include <string>
+//#include <core/math/vector3f.h>
+//#include <core/service_factory.h>
+//#include <core/math/poly_shapes.hpp>
+//#include <core/resources/material.h>
+//#include <core/resources/profile.hpp>
+//#include <core/resources/resource_types.hpp>
+//#include <core/name_policy.hpp>
+//#include <poly/follower.hpp>
+//#include <poly/poly.hpp>
+//#include <poly/vdata_assembler.h>
+//#include <core/uuid.hpp>
 //
-//    void add( GeomBuilder _gb );
-//    void build();
+//class SceneGraph;
 //
-//    GeomSP Elem();
-//private:
-//    GeomSP elem = nullptr;
-//    std::vector<GeomBuilder> builders;
+//struct ZPull {
+//    explicit  ZPull( float value ) : value( value ) {}
+//    float operator()() {
+//        return value;
+//    }
+//    float value;
 //};
 //
-//using GBC = GeomBuilderComposer;
+//template <typename T>
+//class GeomBuilder : public VDataBaseAssembler<GeomBuilder<T>>, public NamePolicy<> {
+//public:
+//    template <typename ...Args>
+//    explicit GeomBuilder( Args&&... args ) {
+//        Name( UUIDGen::make() );
+//        (addParam<T>(std::forward<Args>(args)), ...); // Fold expression (c++17)
+//    }
+//    virtual ~GeomBuilder() = default;
+//
+//    template <typename SGT, typename M>
+//    GeomBuilder& addParam( const M& _param ) {
+//
+//        if constexpr ( std::is_same<M, std::string>::value ) {
+//            static_assert( std::is_same<SGT, GT::Text2d>::value ||
+//                           std::is_same<SGT, GT::Text3d>::value ||
+//                           std::is_same<SGT, GT::TextUI>::value );
+//            dataTypeHolder.text = _param;
+//        }
+//
+//        if constexpr ( std::is_same<M, ShapeType >::value ) {
+//            static_assert( std::is_same<SGT, GT::Shape>::value );
+//            dataTypeHolder.shapeType = _param;
+//        }
+//
+//        if constexpr ( std::is_same<M, PolyOutLine>::value ) {
+//            static_assert( std::is_same<SGT, GT::Extrude>::value );
+//            dataTypeHolder.extrusionVerts.emplace_back( _param );
+//        }
+//
+//        if constexpr ( std::is_same<M, std::vector<Vector3f>>::value ) {
+//            static_assert( std::is_same<SGT, GT::Poly>::value );
+//            dataTypeHolder.sourcePolysVList = _param;
+//        }
+//
+//        return *this;
+//    }
+//
+//    T dataTypeHolder;
+//
+//    explicit GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt );
+//    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _name );
+//    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::initializer_list<std::string>& _tags );
+//
+//    // Polygon list
+//    explicit GeomBuilder( SceneGraph& _sg, const Rect2f& _rect, float _z = 0.0f );
+//    explicit GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine>& _plist );
+//    explicit GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& _vlist );
+//    explicit GeomBuilder( SceneGraph& _sg, const std::vector<Triangle2d>& _tris, float _z = 0.0f );
+//    explicit GeomBuilder( SceneGraph& _sg, const std::vector<PolyLine2d>& _plines, float _z = 0.0f );
+//
+//    // Outlines
+//    GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector3f>&& arguments_list, float _zPull );
+//    GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector2f>&& arguments_list, float _zPull );
+//    GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& arguments_list, float _zPull );
+//    GeomBuilder( SceneGraph& _sg, const std::vector<Vector2f>& arguments_list, float _zPull );
+//
+//    // Profile/Follwoers
+//    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
+//                 const std::vector<Vector2f>& _outline,
+//                 float _z = 0.0f, const Vector3f& _suggestedAxis = Vector3f::ZERO );
+//    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
+//                 const std::vector<Vector3f>& _outline,
+//                 const Vector3f& _suggestedAxis = Vector3f::ZERO );
+//    GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
+//                 const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
+//
+//    GeomBuilder& inj( GeomSP _hier );
+//
+//    GeomBuilder& id( const uint64_t _id ) {
+//        mId = _id;
+//        return *this;
+//    }
+//
+//    GeomBuilder& pb( float _a, float _b );
+//
+//    GeomBuilder& ascii( const std::string& _value ) {
+//        asciiText = _value;
+//        return *this;
+//    }
+//
+////    GeomBuilder& md( const MappingDirection _md ) {
+////        mapping.direction = _md;
+////        return *this;
+////    }
+//
+//    GeomBuilder& n( const std::string& _s ) {
+//        Name(_s);
+//        return *this;
+//    }
+//
+//    GeomBuilder& g( const uint64_t & _gt ) {
+//        gt = _gt;
+//        return *this;
+//    }
+//
+//    GeomBuilder& pr( const PolyRaise _profileRaise ) {
+//        fraise = _profileRaise;
+//        return *this;
+//    }
+//
+////    GeomBuilder& fnp( const Vector3f& _n ) {
+////        forcingNormalPoly = _n;
+////        return *this;
+////    }
+////
+////    GeomBuilder& prf() {
+////        rfPoly = ReverseFlag::True;
+////        return *this;
+////    }
+//
+//    GeomBuilder& addPoly( const PolyLine& _polyLine );
+//    GeomBuilder& addPoly( const PolyLine2d& _polyLine2d, float heightOffset );
+//    GeomBuilder& addOutline( const std::vector<Vector3f>& _polyLine, float _raise );
+//
+//    GeomBuilder& accuracy( const subdivisionAccuray _val ) {
+//        subdivAccuracy = _val;
+//        return *this;
+//    }
+//
+////    GeomBuilder& doNotScaleMapping() {
+////        mapping.bDoNotScaleMapping = true;
+////        return *this;
+////    }
+////
+////    GeomBuilder& mappingOffset( const Vector2f& _val ) {
+////        mapping.offset = _val;
+////        return *this;
+////    }
+////
+////    GeomBuilder& mappingMirror( const MappingMirrorE _val ) {
+////        mapping.mirroring = _val;
+////        return *this;
+////    }
+////
+////    GeomBuilder& unitMapping() {
+////        mapping.bUnitMapping = true;
+////        return *this;
+////    }
+//
+//    GeomBuilder& ff( const FollowerFlags f ) {
+//        fflags |= f;
+//        return *this;
+//    }
+//
+//    GeomBuilder& ff( const uint32_t f ) {
+//        fflags |= static_cast<FollowerFlags>(f);
+//        return *this;
+//    }
+//
+//    GeomBuilder& fflip( const Vector2f& _v ) {
+//        flipVector = _v;
+//        return *this;
+//    }
+//
+//    GeomBuilder& gaps( const FollowerGap& _gaps ) {
+//        mGaps = _gaps;
+//        return *this;
+//    }
+//
+//    GeomBuilder& addQuad( const QuadVector3fNormal& quad, bool reverseIfTriangulated = false );
+//
+////    GeomBuilder& m( const ResourceRef& _mat ) {
+////        matRef = _mat;
+////        return *this;
+////    }
+////    GeomBuilder& c( const Color4f & _color );
+////    GeomBuilder& c( const std::string& _hexcolor );
+//
+//    GeomSP buildr();
+//
+//    ResourceRef build();
+//
+////protected:
+//public:
+//    void elemCreate();
+////    GeomSP Elem() { return elem; }
+//
+//    bool validate() const;
+//    void elaborateMaterial();
+//    void preparePolyLines();
+//    void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb );
+//    void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb );
+//    void createFromAsset( GeomSP asset );
+//
+////private:
+//public:
+//    uint64_t mId = 0;
+//    uint64_t gt = 1; // This is the generic geom ID, as we reserve 0 as null
+//
+//    subdivisionAccuray subdivAccuracy = accuracyNone;
+//
+//    std::string mDepResourceName;
+//    std::vector<Vector3f> profilePath;
+//    FollowerFlags fflags = FollowerFlags::Defaults;
+//    PolyRaise fraise = PolyRaise::None;
+//    Vector2f flipVector = Vector2f::ZERO;
+//    FollowerGap mGaps = FollowerGap::Empty;
+//    Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
+//
+//    std::string asciiText;
+//
+//    QuadVector3fNormalfList quads;
+//};
+//
+////class GeomBuilderComposer {
+////public:
+////    GeomBuilderComposer();
+////
+////    void add( GeomBuilder _gb );
+////    void build();
+////
+////    GeomSP Elem();
+////private:
+////    GeomSP elem = nullptr;
+////    std::vector<GeomBuilder> builders;
+////};
+////
+////using GBC = GeomBuilderComposer;

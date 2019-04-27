@@ -14,6 +14,8 @@
 #include <core/file_manager.h>
 #include <core/v_data.hpp>
 #include <core/resources/entity_factory.hpp>
+#include <core/recursive_transformation.hpp>
+
 
 GLTF2::IntermediateMaterial::IntermediateMaterial() {
     values = std::make_shared<HeterogeneousMap>(S::SH);

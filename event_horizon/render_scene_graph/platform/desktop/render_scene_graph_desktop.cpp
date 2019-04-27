@@ -5,7 +5,6 @@
 #include "event_horizon/event_horizon/render_scene_graph/render_orchestrator.h"
 #include <core/node.hpp>
 #include <core/geom.hpp>
-#include <poly/resources/geom_builder.h>
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
 

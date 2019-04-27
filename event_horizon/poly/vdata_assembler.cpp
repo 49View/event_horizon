@@ -2,7 +2,7 @@
 // Created by Dado on 2018-12-11.
 //
 
-#include "poly_helper.h"
+#include "vdata_assembler.h"
 #include <core/resources/profile.hpp>
 #include <poly/polyclipping/clipper.hpp>
 #include <poly/poly_services.hpp>
@@ -51,57 +51,103 @@ ClipperLib::Path getPerimeterPath( const std::vector<Vector2f>& _values ) {
     return ret;
 }
 
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-//
+void internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
+    if ( ln == Vector3f::ZERO ) {
+        ln = normalize( crossProduct( v1, v2, v3 ));
+        if ( rf == ReverseFlag::True ) ln *= -1.0f;
+    }
+}
+
+namespace VDataServices {
+
 // ___ SHAPE BUILDER ___
-//
-// ********************************************************************************************************************
-// ********************************************************************************************************************
 
-GeomDataShapeBuilder::GeomDataShapeBuilder( ShapeType shapeType ) : shapeType( shapeType ) {}
+    void buildInternal( const GT::Shape& _d, std::shared_ptr<VData> _ret ) {
+        V3f center = V3f::ZERO;
+        V3f size = V3f::ONE;
+        int subDivs = 3;
+        PolyStruct ps;
 
-void GeomDataShapeBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
-    V3f center = V3f::ZERO;
-    V3f size = V3f::ONE;
-    int subDivs = 3;
-    PolyStruct ps;
+        switch ( _d.shapeType ) {
+            case ShapeType::Cylinder:
+                ps = createGeomForCylinder( center, size.xy(), subDivs );
+                break;
+            case ShapeType::Sphere:
+                ps = createGeomForSphere( center, size.x(), subDivs );
+                break;
+            case ShapeType::Cube:
+                ps = createGeomForCube( center, size );
+                break;
+            case ShapeType::Panel:
+                ps = createGeomForPanel( center, size );
+                break;
+            case ShapeType::Pillow:
+                ps = createGeomForPillow( center, size, subDivs );
+                break;
+            case ShapeType::RoundedCube:
+                ps = createGeomForRoundedCube( center, size, subDivs );
+                break;
+            default:
+                ps = createGeomForSphere( center, size.x(), subDivs );
+        }
 
-    switch ( shapeType ) {
-        case ShapeType::Cylinder:
-            ps = createGeomForCylinder( center, size.xy(), subDivs );
-            break;
-        case ShapeType::Sphere:
-            ps = createGeomForSphere( center, size.x(), subDivs );
-            break;
-        case ShapeType::Cube:
-            ps = createGeomForCube( center, size );
-            break;
-        case ShapeType::Panel:
-            ps = createGeomForPanel( center, size );
-            break;
-        case ShapeType::Pillow:
-            ps = createGeomForPillow( center, size, subDivs );
-            break;
-        case ShapeType::RoundedCube:
-            ps = createGeomForRoundedCube( center, size, subDivs );
-            break;
-        default:
-            ps = createGeomForSphere( center, size.x(), subDivs );
+        _ret->fill( ps );
+        _ret->BBox3d( ps.bbox3d );
     }
 
-    _ret->fill(ps);
-    _ret->BBox3d(ps.bbox3d);
-}
+    ResourceRef refName( const GT::Shape& _d ) {
+        return shapeTypeToString( _d.shapeType );
+    }
 
-void GeomDataShapeBuilder::setupRefName() {
-    mRefName = shapeTypeToString( shapeType );
+// ___ POLY BUILDER ___
+
+    void prepare( GT::Poly& _d ) {
+        if ( _d.mappingData.bDoNotScaleMapping ) MappingServices::doNotScaleMapping(_d.mappingData);
+        if ( _d.polyLines.empty() ) {
+            Vector3f ln = _d.forcingNormalPoly;
+            if ( !_d.sourcePolysTris.empty() ) {
+                auto [v1,v2,v3] = _d.sourcePolysTris[0];
+                internalCheckPolyNormal( ln, v1, v2, v3, _d.rfPoly );
+                for ( const auto& tri : _d.sourcePolysTris ) {
+                    _d.polyLines.emplace_back(PolyLine{ tri, ln, _d.rfPoly});
+                }
+            }
+            if ( !_d.sourcePolysVList.empty() ) {
+                internalCheckPolyNormal( ln, _d.sourcePolysVList.at(0), _d.sourcePolysVList.at(1), _d.sourcePolysVList.at(2), _d.rfPoly );
+                _d.polyLines.emplace_back( PolyLine{ _d.sourcePolysVList, ln, _d.rfPoly } );
+            }
+        }
+    }
+
+    void buildInternal( const GT::Poly& _d, std::shared_ptr<VData> _ret ) {
+        auto dmProgressive = _d.mappingData;
+        for ( const auto& poly : _d.polyLines ) {
+            PolyServices::addFlatPolyTriangulated( _ret, poly.verts.size(), poly.verts.data(), poly.normal,
+                                                   dmProgressive,
+                                                   static_cast<bool>(poly.reverseFlag) );
+        }
+    }
+
+    ResourceRef refName( const GT::Poly& _d ) {
+        std::stringstream oss;
+        for ( const auto& poly : _d.polyLines ) {
+            for ( const auto& v : poly.verts ) {
+                oss << v.toString();
+            }
+            oss << poly.normal.toString();
+            oss << static_cast<uint64_t>(poly.reverseFlag);
+        }
+        auto c = _d.mappingData.serialize();
+        c.insert(std::end(c), std::begin(oss.str()), std::end(oss.str()));
+        return "Poly--" + Hashable<>::hashOf(c);
+    }
+
 }
 
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 //
-// ___ OUTLINE BUILDER ___
+// ___ EXTRUDER BUILDER ___
 //
 // ********************************************************************************************************************
 // ********************************************************************************************************************
@@ -123,35 +169,6 @@ void GeomDataOutlineBuilder::setupRefName() {
     auto c = mappingData.serialize();
     c.insert(std::end(c), std::begin(oss.str()), std::end(oss.str()));
     mRefName = "Extrude--" + Hashable<>::hashOf(c);
-}
-
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-//
-// ___ POLY BUILDER ___
-//
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-
-void GeomDataPolyBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
-    for ( const auto& poly : polyLine ) {
-        PolyServices::addFlatPolyTriangulated( _ret, poly.verts.size(), poly.verts.data(), poly.normal, mappingData,
-                                               static_cast<bool>(poly.reverseFlag) );
-    }
-}
-
-void GeomDataPolyBuilder::setupRefName() {
-    std::stringstream oss;
-    for ( const auto& poly : polyLine ) {
-        for ( const auto& v : poly.verts ) {
-            oss << v.toString();
-        }
-        oss << poly.normal.toString();
-        oss << static_cast<uint64_t>(poly.reverseFlag);
-    }
-    auto c = mappingData.serialize();
-    c.insert(std::end(c), std::begin(oss.str()), std::end(oss.str()));
-    mRefName = "Poly--" + Hashable<>::hashOf(c);
 }
 
 // ********************************************************************************************************************

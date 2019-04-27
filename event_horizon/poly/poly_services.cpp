@@ -7,7 +7,7 @@
 #include <core/math/vector3f.h>
 #include <core/math/quad_vertices.h>
 #include <poly/triangulator.hpp>
-#include <poly/poly_helper.h>
+#include <poly/vdata_assembler.h>
 
 void pushQuad( VDataSP vdata, const std::array<Vector3f, 4>& vs, const std::array<Vector2f, 4>& vts,
                const Vector3f& vn, GeomMappingData& m );

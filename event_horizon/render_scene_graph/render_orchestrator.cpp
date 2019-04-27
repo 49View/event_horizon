@@ -10,7 +10,7 @@
 #include <core/camera.h>
 #include <core/node.hpp>
 #include <core/geom.hpp>
-#include <poly/resources/geom_builder.h>
+#include <core/resources/material.h>
 #include <poly/resources/ui_shape_builder.h>
 #include <graphics/renderer.h>
 #include <graphics/shader_manager.h>

@@ -9,7 +9,7 @@
 #include "follower.hpp"
 #include "poly_services.hpp"
 #include <core/math/quaternion.h>
-#include <poly/poly_helper.h>
+#include <poly/vdata_assembler.h>
 #include <poly/poly_services.hpp>
 
 FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,

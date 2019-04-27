@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <core/recursive_transformation.hpp>
 #include <core/htypes_shared.hpp>
 
 struct GeomData {

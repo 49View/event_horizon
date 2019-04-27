@@ -10,8 +10,8 @@
 #include <core/geom.hpp>
 #include <core/names.hpp>
 #include <core/resources/resource_builder.hpp>
-#include <poly/resources/geom_builder.h>
 #include <poly/resources/ui_shape_builder.h>
+#include <core/resources/material.h>
 
 UUID SceneGraph::addNode( const ResourceRef& _hash ) {
     auto cloned = GM().clone( _hash );
@@ -178,28 +178,3 @@ void SceneGraph::init() {
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }
 
-void SceneGraph::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, GeomSP elem, const ResourceRef& matRef ) {
-    gb->setupRefName();
-    auto rna = VL().getHash( gb->refName() );
-    auto vdataRef = rna.empty() ? B<VB>( gb->refName() ).addIM( gb->build() ) : rna;
-
-    elem->pushData( GeomData{vdataRef, matRef} );
-}
-
-ResourceRef SceneGraph::createGBMatRef( const ResourceRef& _sourceMatRef ) {
-    return _sourceMatRef.empty() ? S::WHITE_PBR : ML().getHash(_sourceMatRef);
-}
-
-UUID SceneGraph::finaliseGB( const GeomSP& elem, GeomSP elemInjFather, const ResourceRef& gbName,
-                             const Vector3f& pos, const Vector3f& rot, const Vector3f& scale) {
-    if ( elemInjFather ) elemInjFather->addChildren(elem);
-
-    elem->updateExistingTransform( pos, rot, scale );
-
-    auto ref = B<GRB>(gbName).addIM( elem );
-    return addNode( ref );
-}
-
-GeomSP SceneGraph::createGBGeom( const std::string& _name ) {
-    return std::make_shared<Geom>(_name);
-}

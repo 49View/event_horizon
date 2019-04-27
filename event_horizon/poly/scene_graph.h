@@ -13,10 +13,13 @@
 
 #include <core/uuid.hpp>
 #include <core/command.hpp>
+#include <core/recursive_transformation.hpp>
+#include <core/geom.hpp>
 #include <core/resources/resource_utils.hpp>
+#include <core/resources/resource_manager.hpp>
 #include <poly/poly.hpp>
 #include <poly/node_graph.hpp>
-#include <poly/resources/geom_builder.h>
+#include <poly/vdata_assembler.h>
 
 class SceneGraph;
 
@@ -97,84 +100,29 @@ public:
 
     template <typename T, typename ...Args>
     UUID GB( Args&&... args ) {
-        GeomBuilder<T> gb{std::forward<Args>(args)...};
-        return buildGeom<T>(gb);
+        return geomAssembler<T>(VDataAssembler<T>{std::forward<Args>(args)...});
     }
 
 protected:
     template <typename T>
-    UUID buildGeom( GeomBuilder<T>& gb ) {
-        auto elem   = createGBGeom(gb.Name());
-        auto matRef = createGBMatRef(gb.matRef);
+    UUID geomAssembler( VDataAssembler<T> gb ) {
+        auto matRef     = ML().getHash(gb.matRef);
 
-        if constexpr ( std::is_same<T, GT::Cube>::value ) {
-            createFromProcedural( std::make_shared<GeomDataShapeBuilder>( ShapeType::Cube ), elem, matRef );
-        } else if constexpr ( std::is_same<T, GT::Poly>::value ) {
-            preparePolyLines( gb );
-            createFromProcedural( std::make_shared<GeomDataPolyBuilder>( gb.polyLines ), elem, matRef );
-        } else if constexpr ( std::is_same<T, GT::Extrude>::value ) {
-            createFromProcedural( std::make_shared<GeomDataOutlineBuilder>( gb.outlineVerts ), elem, matRef );
+        VDataServices::prepare( gb.dataTypeHolder );
+        auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
+        auto vdataRef = VL().getHash( hashRefName );
+        if ( vdataRef.empty() ) {
+            vdataRef = B<VB>( hashRefName ).addIM( VDataServices::build(gb.dataTypeHolder) );
         }
 
-//        case GeomBuilderType::poly:
-//            preparePolyLines();
-//            createFromProcedural( std::make_shared<GeomDataPolyBuilder>( polyLines ) );
-//            break;
-//        case GeomBuilderType::mesh:
-//            createFromProcedural( std::make_shared<GeomDataQuadMeshBuilder>( quads ) );
-//            break;
-//        case GeomBuilderType::follower: {
-//            createFromProcedural( std::make_shared<GeomDataFollowerBuilder>( sg.PL().get( mDepResourceName ),
-//                                                                             profilePath,
-//                                                                             fflags,
-//                                                                             fraise,
-//                                                                             flipVector,
-//                                                                             mGaps,
-//                                                                             mFollowerSuggestedAxis ) );
-//        }
-//            break;
-//        case GeomBuilderType::svg:
-//            createFromProcedural( std::make_shared<GeomDataSVGBuilder>( asciiText, sg.PL().get( mDepResourceName ) ) );
-//            break;
-//        case GeomBuilderType::unknown:
-//            LOGE( "Unknown builder type" );
-//            return {};
-//        default:
-//            break;
-//    }
-        return finaliseGB( elem, gb.elemInjFather, gb.Name(), gb.pos, gb.axis, gb.scale );
-    }
+        auto elem = std::make_shared<Geom>(gb.Name());
+        elem->pushData( GeomData{vdataRef, matRef } );
 
-    void internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
-        if ( ln == Vector3f::ZERO ) {
-            ln = normalize( crossProduct( v1, v2, v3 ));
-            if ( rf == ReverseFlag::True ) ln *= -1.0f;
-        }
+        if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
+        elem->updateExistingTransform( gb.pos, gb.axis, gb.scale );
+        auto ref = B<GRB>( gb.Name() ).addIM( elem );
+        return addNode( ref );
     }
-
-    template <typename T>
-    void preparePolyLines( GeomBuilder<T>& gb ) {
-        if ( gb.polyLines.empty() ) {
-            Vector3f ln = gb.forcingNormalPoly;
-            if ( !gb.sourcePolysTris.empty() ) {
-                auto [v1,v2,v3] = gb.sourcePolysTris[0];
-                internalCheckPolyNormal( ln, v1, v2, v3, gb.rfPoly );
-                for ( const auto& tri : gb.sourcePolysTris ) {
-                    gb.polyLines.emplace_back(PolyLine{ tri, ln, gb.rfPoly});
-                }
-            }
-            if ( !gb.sourcePolysVList.empty() ) {
-                internalCheckPolyNormal( ln, gb.sourcePolysVList.at(0), gb.sourcePolysVList.at(1), gb.sourcePolysVList.at(2), gb.rfPoly );
-                gb.polyLines.emplace_back( PolyLine{ gb.sourcePolysVList, ln, gb.rfPoly } );
-            }
-        }
-    }
-
-    GeomSP createGBGeom( const std::string& _name );
-    ResourceRef createGBMatRef( const ResourceRef& _sourceMatRef );
-    void createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, GeomSP elem, const ResourceRef& matRef );
-    UUID finaliseGB( const GeomSP& elem, GeomSP elemInjFather, const ResourceRef& gbName,
-                     const Vector3f& pos, const Vector3f& rot, const Vector3f& scale );
 
 //    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}

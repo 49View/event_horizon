@@ -6,12 +6,32 @@
 
 #include <utility>
 #include <core/v_data.hpp>
+#include <core/uuid.hpp>
+#include <core/names.hpp>
+#include <core/name_policy.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/math/poly_shapes.hpp>
+#include <core/resources/resource_types.hpp>
 #include <poly/poly_services.hpp>
+#include <poly/poly.hpp>
+
+class Profile;
+
+using GeomDataListBuilderRetType = std::vector<std::shared_ptr<VData>>;
+
+namespace ClipperLib {
+    struct IntPoint;
+    typedef std::vector< IntPoint > Path;
+    typedef std::vector< Path > Paths;
+}
+
+struct QuadVector3fNormal {
+    QuadVector3f quad;
+    Vector3f normal;
+};
 
 template <typename T>
-class GeomBasicBuilder {
+class VDataBaseAssembler {
 public:
 
     T& r( const Vector3f& _axis ) {
@@ -76,20 +96,67 @@ public:
     MatrixAnim matrixAnim;
 };
 
-class Profile;
+template <typename T>
+class VDataAssembler : public VDataBaseAssembler<VDataAssembler<T>>, public NamePolicy<> {
+public:
+    template<typename ...Args>
+    explicit VDataAssembler( Args&& ... args ) {
+        Name( UUIDGen::make());
+        (addParam<T>( std::forward<Args>( args )), ...); // Fold expression (c++17)
+    }
 
-using GeomDataListBuilderRetType = std::vector<std::shared_ptr<VData>>;
+    virtual ~VDataAssembler() = default;
 
-namespace ClipperLib {
-    struct IntPoint;
-    typedef std::vector< IntPoint > Path;
-    typedef std::vector< Path > Paths;
-}
+    template<typename SGT, typename M>
+    VDataAssembler& addParam( const M& _param ) {
 
-struct QuadVector3fNormal {
-    QuadVector3f quad;
-    Vector3f normal;
+        if constexpr ( std::is_same<M, std::string>::value ) {
+            static_assert( std::is_same<SGT, GT::Text2d>::value ||
+                           std::is_same<SGT, GT::Text3d>::value ||
+                           std::is_same<SGT, GT::TextUI>::value );
+            dataTypeHolder.text = _param;
+        }
+
+        if constexpr ( std::is_same<M, ShapeType>::value ) {
+            static_assert( std::is_same<SGT, GT::Shape>::value );
+            dataTypeHolder.shapeType = _param;
+        }
+
+        if constexpr ( std::is_same<M, PolyOutLine>::value ) {
+            static_assert( std::is_same<SGT, GT::Extrude>::value );
+            dataTypeHolder.extrusionVerts.emplace_back( _param );
+        }
+
+        if constexpr ( std::is_same<M, std::vector<Vector3f>>::value ) {
+            static_assert( std::is_same<SGT, GT::Poly>::value );
+            dataTypeHolder.sourcePolysVList = _param;
+        }
+
+        return *this;
+    }
+
+    T dataTypeHolder;
+    ResourceRef matRef = S::WHITE_PBR;
+    GeomSP elemInjFather = nullptr;
 };
+
+namespace VDataServices {
+
+    void prepare( GT::Shape& _d );
+    void buildInternal( const GT::Shape& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::Shape& _d );
+
+    void prepare( GT::Poly& _d );
+    void buildInternal( const GT::Poly& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::Poly& _d );
+
+    template <typename DT>
+    std::shared_ptr<VData> build( const DT& _d ) {
+        auto ret = std::make_shared<VData>();
+        buildInternal( _d, ret);
+        return ret;
+    }
+}
 
 struct PolyLineBase3d {
     explicit PolyLineBase3d( std::vector<Vector3f> verts ) : verts( std::move( verts )) {}
@@ -142,38 +209,6 @@ struct PolyLine2d : public PolyLineBase2d, public PolyLineCommond {
 
 using QuadVector3fNormalfList = std::vector<QuadVector3fNormal>;
 
-struct GeomMappingData {
-//    MappingDirection getMappingDirection() const { return mapping.direction; }
-//    void setMappingDirection( MappingDirection val ) { mapping.direction = val; }
-//    Vector2f MappingOffset() const { return mapping.offset; }
-//    void MappingOffset( const Vector2f& val ) { mapping.offset = val; }
-//    MappingMirrorE MappingMirror() const { return mapping.mirroring; }
-//    void MappingMirror( MappingMirrorE val ) { mapping.mirroring = val; }
-//    bool UnitMapping() const { return mapping.bUnitMapping; }
-//    void UnitMapping( bool val ) { mapping.bUnitMapping = val; }
-//    subdivisionAccuray SubdivAccuracy() const { return mSubdivAccuracy; }
-//    void SubdivAccuracy( subdivisionAccuray val ) { mSubdivAccuracy = val; }
-//    const std::vector<Vector2f>& WrapMappingCoords() const { return wrapMappingCoords; }
-//    void WrapMappingCoords( const std::vector<Vector2f>& val ) { wrapMappingCoords = val; }
-
-    // Mapping constants
-    MappingDirection direction = MappingDirection::X_POS;
-    bool bDoNotScaleMapping = false;
-    Vector2f offset = Vector2f::ZERO;
-    MappingMirrorE mirroring = MappingMirrorE::None;
-    bool bUnitMapping = false;
-    subdivisionAccuray subdivAccuracy = accuracyNone;
-    WindingOrderT windingOrder = WindingOrder::CCW;
-
-    JSONSERIALBIN( direction, bDoNotScaleMapping, offset, mirroring, bUnitMapping, subdivAccuracy, windingOrder)
-    // Mappping computed
-    float fuvScale = 1.0f;
-    Vector2f uvScale = Vector2f::ONE;
-    Vector2f uvScaleInv = Vector2f::ONE;
-    std::vector<Vector2f> wrapMappingCoords;
-    Vector2f pullMappingCoords = Vector2f::ZERO;
-};
-
 class GeomDataBuilder {
 public:
     std::shared_ptr<VData> build() {
@@ -191,17 +226,6 @@ protected:
 protected:
     std::string mRefName;
     GeomMappingData mappingData;
-};
-
-class GeomDataShapeBuilder : public GeomDataBuilder {
-public:
-    explicit GeomDataShapeBuilder( ShapeType shapeType );
-    virtual ~GeomDataShapeBuilder() = default;
-    void setupRefName() override;
-protected:
-    void buildInternal( std::shared_ptr<VData> _ret ) override;
-protected:
-    ShapeType shapeType;
 };
 
 class GeomDataOutlineBuilder : public GeomDataBuilder {

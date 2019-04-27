@@ -2,12 +2,12 @@
 // Created by Dado on 29/10/2017.
 //
 
-#include "geom_builder.h"
-#include <core/names.hpp>
-#include <core/resources/resource_manager.hpp>
-#include <core/resources/resource_builder.hpp>
-#include <core/geom.hpp>
-#include <poly/poly.hpp>
+//#include "geom_builder.h"
+//#include <core/names.hpp>
+//#include <core/resources/resource_manager.hpp>
+//#include <core/resources/resource_builder.hpp>
+//#include <core/geom.hpp>
+//#include <poly/poly.hpp>
 
 //GeomBuilder::GeomBuilder( SceneGraph& _sg, const GeomBuilderType gbt ) : builderType(gbt), sg(_sg) {
 //}
@@ -18,19 +18,19 @@
 //GeomBuilder::GeomBuilder( SceneGraph& _sg, std::initializer_list<Vector2f>&& arguments_list, float _zPull ) : sg(_sg) {
 //    std::vector<Vector3f> lverts;
 //    for (auto &v: arguments_list) lverts.emplace_back(v);
-//    outlineVerts.emplace_back( lverts, _zPull );
+//    extrusionVerts.emplace_back( lverts, _zPull );
 //    builderType = GeomBuilderType::outline;
 //}
 //
 //GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& arguments_list, float _zPull ) : sg(_sg) {
-//    outlineVerts.emplace_back( arguments_list, _zPull );
+//    extrusionVerts.emplace_back( arguments_list, _zPull );
 //    builderType = GeomBuilderType::outline;
 //}
 //
 //GeomBuilder::GeomBuilder( SceneGraph& _sg, const std::vector<Vector2f>& arguments_list, float _zPull ) : sg(_sg) {
 //    std::vector<Vector3f> lverts;
 //    for (auto &v: arguments_list) lverts.emplace_back(v) ;
-//    outlineVerts.emplace_back( lverts, _zPull );
+//    extrusionVerts.emplace_back( lverts, _zPull );
 //    builderType = GeomBuilderType::outline;
 //}
 //
@@ -63,7 +63,7 @@
 //                        : sg(_sg) {
 //    std::vector<Vector3f> lverts;
 //    for (auto &v: arguments_list) lverts.emplace_back( v );
-//    outlineVerts.emplace_back( lverts, _zPull );
+//    extrusionVerts.emplace_back( lverts, _zPull );
 //    builderType = GeomBuilderType::outline;
 //}
 //
@@ -138,7 +138,7 @@
 //            createFromProcedural( std::make_shared<GeomDataShapeBuilder>( shapeType ) );
 //            break;
 //        case GeomBuilderType::outline:
-//            createFromProcedural( std::make_shared<GeomDataOutlineBuilder>( outlineVerts ) );
+//            createFromProcedural( std::make_shared<GeomDataOutlineBuilder>( extrusionVerts ) );
 //            break;
 //        case GeomBuilderType::poly:
 //            preparePolyLines();
@@ -203,7 +203,7 @@
 //}
 //
 //GeomBuilder& GeomBuilder::addOutline( const std::vector<Vector3f>& _polyLine, const float _raise ) {
-//    outlineVerts.emplace_back( _polyLine, _raise );
+//    extrusionVerts.emplace_back( _polyLine, _raise );
 //    return *this;
 //}
 //
