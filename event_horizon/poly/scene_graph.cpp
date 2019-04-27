@@ -58,13 +58,13 @@ void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
         auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
 //        GB{ *this, st }.m(mat).n("ucarcamagnu").g(9200).build();
 //        GB{ *this, Rect2f::IDENTITY, 0.0f }.build();
-        std::vector<V3f> vlist { V3f::ZERO, V3f{0.8f, 0.0f, 0.0f}, V3f{0.2f, 0.0f, 0.9f } };
+//        std::vector<V3f> vlist { V3f::ZERO, V3f{0.8f, 0.0f, 0.0f}, V3f{0.2f, 0.0f, 0.9f } };
 //        GB{ *this, vlist, 0.2f }.build();
-        auto pr = std::make_shared<Profile>();
-        pr->createWire(0.1f, 6);
-        auto prId = B<PB>("ProfileWire").addIM(pr);
-        auto gref = GB{ *this, GeomBuilderType::follower, prId, vlist }.c(Color4f::RED).build();
-        addNode( gref );
+//        auto pr = std::make_shared<Profile>();
+//        pr->createWire(0.1f, 6);
+//        auto prId = B<PB>("ProfileWire").addIM(pr);
+//        auto gref = GB{ *this, GeomBuilderType::follower, prId, vlist }.c(Color4f::RED).build();
+//        addNode( gref );
     } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
 //        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
         UISB{*this, UIShapeType::Text3d, _params[1], 0.6f }.buildr();
@@ -176,4 +176,30 @@ void SceneGraph::init() {
 //    B<MB>( "tomato" ).load();
 
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
+}
+
+void SceneGraph::createFromProcedural( std::shared_ptr<GeomDataBuilder> gb, GeomSP elem, const ResourceRef& matRef ) {
+    gb->setupRefName();
+    auto rna = VL().getHash( gb->refName() );
+    auto vdataRef = rna.empty() ? B<VB>( gb->refName() ).addIM( gb->build() ) : rna;
+
+    elem->pushData( GeomData{vdataRef, matRef} );
+}
+
+ResourceRef SceneGraph::createGBMatRef( const ResourceRef& _sourceMatRef ) {
+    return _sourceMatRef.empty() ? S::WHITE_PBR : ML().getHash(_sourceMatRef);
+}
+
+UUID SceneGraph::finaliseGB( const GeomSP& elem, GeomSP elemInjFather, const ResourceRef& gbName,
+                             const Vector3f& pos, const Vector3f& rot, const Vector3f& scale) {
+    if ( elemInjFather ) elemInjFather->addChildren(elem);
+
+    elem->updateExistingTransform( pos, rot, scale );
+
+    auto ref = B<GRB>(gbName).addIM( elem );
+    return addNode( ref );
+}
+
+GeomSP SceneGraph::createGBGeom( const std::string& _name ) {
+    return std::make_shared<Geom>(_name);
 }

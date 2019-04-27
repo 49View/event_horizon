@@ -6,8 +6,75 @@
 
 #include <utility>
 #include <core/v_data.hpp>
+#include <core/math/matrix_anim.h>
 #include <core/math/poly_shapes.hpp>
 #include <poly/poly_services.hpp>
+
+template <typename T>
+class GeomBasicBuilder {
+public:
+
+    T& r( const Vector3f& _axis ) {
+        axis = _axis;
+        return static_cast<T&>(*this);
+    }
+
+    T& s( const Vector3f& _scaling ) {
+        scale = _scaling;
+        return static_cast<T&>(*this);
+    }
+
+    T& s( const float _scaling ) {
+        scale = Vector3f{_scaling};
+        return static_cast<T&>(*this);
+    }
+
+    T& withScaling( const Vector3f& _scaling ) {
+        scale = _scaling;
+        return static_cast<T&>(*this);
+    }
+
+    T& withScaling( const float _scaling ) {
+        scale = Vector3f{_scaling};
+        return static_cast<T&>(*this);
+    }
+
+    T& at( const Vector3f& _pos ) {
+        pos = _pos;
+        return static_cast<T&>(*this);
+    }
+
+    T& bboff( const Vector3f& _pos ) {
+        bboxOffset = _pos;
+        return static_cast<T&>(*this);
+    }
+
+    T& at( const Vector3f& _pos, const Vector3f& _axis ) {
+        pos = _pos;
+        axis = _axis;
+        return static_cast<T&>(*this);
+    }
+
+    T& at( const Vector3f& _pos, const Vector3f& _axis,
+           const Vector3f& _scaling ) {
+        pos = _pos;
+        axis = _axis;
+        scale = _scaling;
+        return static_cast<T&>(*this);
+    }
+
+    T& withMatrix( const MatrixAnim& _m ) {
+        matrixAnim = _m;
+        return static_cast<T&>(*this);
+    }
+
+//protected:
+    Vector3f pos = Vector3f::ZERO;
+    Vector3f bboxOffset = Vector3f::ZERO;
+    Vector3f axis = Vector3f::ZERO;
+    Vector3f scale = Vector3f::ONE;
+    MatrixAnim matrixAnim;
+};
 
 class Profile;
 

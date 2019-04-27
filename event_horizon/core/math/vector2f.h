@@ -371,10 +371,11 @@ private:
 	float mY;
 };
 
-typedef std::vector<Vector2f> vector2fList;
-using Vector2fList = std::vector<Vector2f>;
-typedef std::pair<Vector2f, float> NormalDirPair;
-typedef std::tuple<Vector2f, Vector2f, Vector2f> Triangle2d;
+using V2f = Vector2f;
+using Vector2fList = std::vector<V2f>;
+using vector2fList = Vector2fList;
+typedef std::pair<V2f, float> NormalDirPair;
+typedef std::tuple<V2f, V2f, V2f> Triangle2d;
 
 inline float dot( const Vector2f& a, const Vector2f& b ) {
 	return a.x() * b.x() + a.y() * b.y();
@@ -553,5 +554,5 @@ bool distanceFromLineCapsule( const Vector2f& p, const Vector2f& p1, const Vecto
 bool isPointInsideLineCapsule( const Vector2f& p, const Vector2f& p1, const Vector2f& p2, float radius );
 void straightenOnMainAxis( Vector2f& a, Vector2f& b, float straightCoeff );
 void removeCollinear( vector2fList& cs, float epsilon );
+bool pointWithinSegment( const V2f& p, const V2f& p1, const V2f& p2 );
 
-using V2f = Vector2f;

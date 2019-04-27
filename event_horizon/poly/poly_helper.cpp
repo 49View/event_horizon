@@ -107,7 +107,7 @@ void GeomDataShapeBuilder::setupRefName() {
 // ********************************************************************************************************************
 
 void GeomDataOutlineBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
-    for ( const auto& ot : outlineVerts ) {
+    for ( auto& ot : outlineVerts ) {
         PolyServices::pull( _ret, ot.verts, ot.zPull, mappingData ); //pullFlags
     }
 }
@@ -122,7 +122,7 @@ void GeomDataOutlineBuilder::setupRefName() {
     }
     auto c = mappingData.serialize();
     c.insert(std::end(c), std::begin(oss.str()), std::end(oss.str()));
-    mRefName = "Outline--" + Hashable<>::hashOf(c);
+    mRefName = "Extrude--" + Hashable<>::hashOf(c);
 }
 
 // ********************************************************************************************************************

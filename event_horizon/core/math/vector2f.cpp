@@ -180,6 +180,13 @@ void removeCollinear( vector2fList& cs, float epsilon ) {
 	cs.erase( remove_if( cs.begin(), cs.end(), []( Vector2f const& sc ) -> bool { return sc == Vector2f::HUGE_VALUE_POS; } ), cs.end() );
 }
 
+bool pointWithinSegment( const V2f& p, const V2f& p1, const V2f& p2 ) {
+    auto AB = sqrtf((p2.x()-p1.x())*(p2.x()-p1.x())+(p2.y()-p1.y())*(p2.y()-p1.y()));
+    auto AP = sqrtf((p.x()-p1.x())*(p.x()-p1.x())+(p.y()-p1.y())*(p.y()-p1.y()));
+    auto PB = sqrtf((p2.x()-p.x())*(p2.x()-p.x())+(p2.y()-p.y())*(p2.y()-p.y()));
+    return (isScalarEqual( AB, AP + PB) );
+}
+
 //bool intersection( Vector2f const& p0, Vector2f const& p1, Vector2f const& p2, Vector2f const& p3, Vector2f& i ) {
 //    Vector2f const s1 = p1 - p0;
 //    Vector2f const s2 = p3 - p2;

@@ -462,7 +462,7 @@ inline Vector4f fma( const Vector4f& a, const Vector4f& b, const Vector4f& c ) {
 }
 
 inline Vector4f convertStringHexColorInVector4( const std::string& color, int32_t numbits = 32 ) {
-	uint32_t number = (uint32_t)strtol( color.c_str(), nullptr, 0 );
+	auto number = (uint32_t)strtol( color.c_str(), nullptr, 0 );
 	return Vector4f::ITORGBA( number, numbits );
 }
 
@@ -471,4 +471,5 @@ inline Vector4f color4fAlpha( const float alpha ) {
 }
 
 using Color4f = Vector4f;
+using C4f = Vector4f;
 using V4f = Vector4f;

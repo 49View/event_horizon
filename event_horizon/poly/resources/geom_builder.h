@@ -7,7 +7,6 @@
 #include <memory>
 #include <string>
 #include <core/math/vector3f.h>
-#include <core/math/matrix_anim.h>
 #include <core/service_factory.h>
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/material.h>
@@ -15,92 +14,29 @@
 #include <core/resources/resource_types.hpp>
 #include <core/name_policy.hpp>
 #include <poly/follower.hpp>
+#include <poly/poly.hpp>
 #include <poly/poly_helper.h>
-#include <poly/scene_graph.h>
+#include <core/uuid.hpp>
 
-enum class GeomBuilderType {
-    shape,
-    follower,
-    outline,
-    poly,
-    mesh,
-    gltf2,
-    asset,
-    file,
-    svg,
+class SceneGraph;
 
-    unknown
+struct ZPull {
+    explicit  ZPull( float value ) : value( value ) {}
+    float operator()() {
+        return value;
+    }
+    float value;
 };
 
 template <typename T>
-class GeomBasicBuilder {
+class GeomBuilder : public GeomBasicBuilder<GeomBuilder<T>>, public NamePolicy<> {
 public:
-
-    T& r( const Vector3f& _axis ) {
-        axis = _axis;
-        return static_cast<T&>(*this);
+    template <typename ...Args>
+    explicit GeomBuilder( Args&&... args ) {
+        Name( UUIDGen::make() );
+        (addParam<T>(std::forward<Args>(args)), ...); // Fold expression (c++17)
     }
 
-    T& s( const Vector3f& _scaling ) {
-        scale = _scaling;
-        return static_cast<T&>(*this);
-    }
-
-    T& s( const float _scaling ) {
-        scale = Vector3f{_scaling};
-        return static_cast<T&>(*this);
-    }
-
-    T& withScaling( const Vector3f& _scaling ) {
-        scale = _scaling;
-        return static_cast<T&>(*this);
-    }
-
-    T& withScaling( const float _scaling ) {
-        scale = Vector3f{_scaling};
-        return static_cast<T&>(*this);
-    }
-
-    T& at( const Vector3f& _pos ) {
-        pos = _pos;
-        return static_cast<T&>(*this);
-    }
-
-    T& bboff( const Vector3f& _pos ) {
-        bboxOffset = _pos;
-        return static_cast<T&>(*this);
-    }
-
-    T& at( const Vector3f& _pos, const Vector3f& _axis ) {
-        pos = _pos;
-        axis = _axis;
-        return static_cast<T&>(*this);
-    }
-
-    T& at( const Vector3f& _pos, const Vector3f& _axis,
-           const Vector3f& _scaling ) {
-        pos = _pos;
-        axis = _axis;
-        scale = _scaling;
-        return static_cast<T&>(*this);
-    }
-
-    T& withMatrix( const MatrixAnim& _m ) {
-        matrixAnim = _m;
-        return static_cast<T&>(*this);
-    }
-
-protected:
-    Vector3f pos = Vector3f::ZERO;
-    Vector3f bboxOffset = Vector3f::ZERO;
-    Vector3f axis = Vector3f::ZERO;
-    Vector3f scale = Vector3f::ONE;
-    MatrixAnim matrixAnim;
-};
-
-class GeomBuilder : public GeomBasicBuilder<GeomBuilder>, public NamePolicy<> {
-public:
-    explicit GeomBuilder( SceneGraph& _sg );
     virtual ~GeomBuilder() = default;
 
     explicit GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt );
@@ -120,9 +56,6 @@ public:
     GeomBuilder( SceneGraph& _sg, const std::vector<Vector3f>& arguments_list, float _zPull );
     GeomBuilder( SceneGraph& _sg, const std::vector<Vector2f>& arguments_list, float _zPull );
 
-    // Shapes
-    explicit GeomBuilder( SceneGraph& _sg, ShapeType _st, const Vector3f& _size = Vector3f::ONE );
-
     // Profile/Follwoers
     GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
                  const std::vector<Vector2f>& _outline,
@@ -133,19 +66,27 @@ public:
     GeomBuilder( SceneGraph& _sg, GeomBuilderType gbt, const std::string& _resourceName,
                  const Rect2f& _r, const Vector3f& _suggestedAxis = Vector3f::ZERO );
 
-    GeomBuilder& inj( GeomSP _hier );
-
-    GeomBuilder& bt( const GeomBuilderType _gbt ) {
-        builderType = _gbt;
+    template <typename SGT, typename M>
+    GeomBuilder& addParam( const M& _param ) {
+        if constexpr ( std::is_same<M, PolyOutLine>::value ) {
+            static_assert( std::is_same<SGT, GT::Extrude>::value );
+            outlineVerts.emplace_back( _param );
+        }
+        if constexpr ( std::is_same<M, std::vector<Vector3f>>::value ) {
+            static_assert( std::is_same<SGT, GT::Poly>::value );
+            sourcePolysVList = _param;
+        }
         return *this;
     }
+
+    GeomBuilder& inj( GeomSP _hier );
 
     GeomBuilder& id( const uint64_t _id ) {
         mId = _id;
         return *this;
     }
 
-    GeomBuilder& pb( const float _a, const float _b );
+    GeomBuilder& pb( float _a, float _b );
 
     GeomBuilder& ascii( const std::string& _value ) {
         asciiText = _value;
@@ -244,7 +185,8 @@ public:
 
     ResourceRef build();
 
-protected:
+//protected:
+public:
     void elemCreate();
     GeomSP Elem() { return elem; }
 
@@ -255,7 +197,8 @@ protected:
     void createFromProcedural( std::shared_ptr<GeomDataBuilderList> gb );
     void createFromAsset( GeomSP asset );
 
-private:
+//private:
+public:
     uint64_t mId = 0;
     uint64_t gt = 1; // This is the generic geom ID, as we reserve 0 as null
 
@@ -278,37 +221,31 @@ private:
     GeomMappingData mapping;
 
     std::vector<PolyOutLine> outlineVerts;
-
     std::vector<Vector3f> sourcePolysVList;
     std::vector<Triangle3d> sourcePolysTris;
     std::vector<PolyLine> polyLines;
+
     Vector3f forcingNormalPoly = Vector3f::ZERO;
     ReverseFlag rfPoly = ReverseFlag::False;
     QuadVector3fNormalfList quads;
-
-    GeomBuilderType builderType = GeomBuilderType::unknown;
 
     GeomSP elem = nullptr;
     GeomSP elemInjFather = nullptr;
 
     ScreenShotContainerPtr thumb;
-
-    SceneGraph& sg;
 };
 
-using GB = GeomBuilder;
-
-class GeomBuilderComposer {
-public:
-    GeomBuilderComposer();
-
-    void add( GeomBuilder _gb );
-    void build();
-
-    GeomSP Elem();
-private:
-    GeomSP elem = nullptr;
-    std::vector<GeomBuilder> builders;
-};
-
-using GBC = GeomBuilderComposer;
+//class GeomBuilderComposer {
+//public:
+//    GeomBuilderComposer();
+//
+//    void add( GeomBuilder _gb );
+//    void build();
+//
+//    GeomSP Elem();
+//private:
+//    GeomSP elem = nullptr;
+//    std::vector<GeomBuilder> builders;
+//};
+//
+//using GBC = GeomBuilderComposer;

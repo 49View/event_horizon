@@ -50,3 +50,42 @@ enum UIRenderFlags {
     DropShaodws = 1 << 1,
     RoundedCorners = 1 << 2
 };
+
+enum class GeomBuilderType {
+    Sphere,
+    Cylinder,
+    Pyramid,
+    Cube,
+    RoundedCube,
+    Panel,
+    Pillow,
+    Arrow,
+    Follower,
+    Outline,
+    Poly,
+    Mesh,
+    GLTF2,
+    Asset,
+    File,
+    SVG,
+};
+
+namespace GT {
+    struct Sphere           {};
+    struct Cylinder         {};
+    struct Pyramid          {};
+    struct Cube             {};
+    struct RoundedCube      {};
+    struct Panel            {};
+    struct Pillow           {};
+    struct Arrow            {};
+    struct Follower         {};
+    struct Extrude          {};
+    struct Poly             {};
+    struct Mesh             {};
+    struct GLTF2            {};
+    struct Asset            {};
+    struct File             {};
+    struct SVG              {};
+
+}
