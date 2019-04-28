@@ -16,6 +16,7 @@
 #include <poly/poly.hpp>
 
 class Profile;
+class SceneGraph;
 
 using GeomDataListBuilderRetType = std::vector<std::shared_ptr<VData>>;
 
@@ -110,29 +111,38 @@ public:
     template<typename SGT, typename M>
     VDataAssembler& addParam( const M& _param ) {
 
-        if constexpr ( std::is_same<M, std::string>::value ) {
-            static_assert( std::is_same<SGT, GT::Text2d>::value ||
-                           std::is_same<SGT, GT::Text3d>::value ||
-                           std::is_same<SGT, GT::TextUI>::value );
+        if constexpr ( std::is_same_v<M, std::string> || std::is_same_v<std::decay_t<M>, char*>) {
+            static_assert( std::is_same_v<SGT, GT::Text> );
             dataTypeHolder.text = _param;
+            return *this;
+        }
+
+        if constexpr ( std::is_same_v<M, Color4f> ) {
+            static_assert( std::is_same_v<SGT, GT::Text> );
+            dataTypeHolder.color = _param;
+            return *this;
         }
 
         if constexpr ( std::is_same<M, ShapeType>::value ) {
             static_assert( std::is_same<SGT, GT::Shape>::value );
             dataTypeHolder.shapeType = _param;
+            return *this;
         }
 
         if constexpr ( std::is_same<M, PolyOutLine>::value ) {
             static_assert( std::is_same<SGT, GT::Extrude>::value );
             dataTypeHolder.extrusionVerts.emplace_back( _param );
+            return *this;
         }
 
         if constexpr ( std::is_same<M, std::vector<Vector3f>>::value ) {
             static_assert( std::is_same<SGT, GT::Poly>::value );
             dataTypeHolder.sourcePolysVList = _param;
+            return *this;
         }
 
-        return *this;
+//        static_assert( std::false_type::value, "VData assembly params type not mapped " );
+//        return *this;
     }
 
     T dataTypeHolder;
@@ -142,17 +152,21 @@ public:
 
 namespace VDataServices {
 
-    void prepare( GT::Shape& _d );
+    void prepare( SceneGraph& sg, GT::Shape& _d );
     void buildInternal( const GT::Shape& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Shape& _d );
 
-    void prepare( GT::Poly& _d );
+    void prepare( SceneGraph& sg, GT::Poly& _d );
     void buildInternal( const GT::Poly& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Poly& _d );
 
-    void prepare( GT::Extrude& _d );
+    void prepare( SceneGraph& sg, GT::Extrude& _d );
     void buildInternal( const GT::Extrude& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Extrude& _d );
+
+    void prepare( SceneGraph& sg, GT::Text& _d );
+    void buildInternal( const GT::Text& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::Text& _d );
 
     template <typename DT>
     std::shared_ptr<VData> build( const DT& _d ) {

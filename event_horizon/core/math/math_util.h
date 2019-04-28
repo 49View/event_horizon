@@ -694,20 +694,23 @@ void alignLineOnMainAxis( const T& p1, T& p2 ) {
 }
 
 template<typename T>
-void sanitizePath( const std::vector<T>& _verts, std::vector<T>& ret, bool wrapPath = true, float epsilon = 0.001f ) {
+std::vector<T> sanitizePath( const std::vector<T>& _verts, bool wrapPath = true, float epsilon = 0.001f ) {
+    std::vector<T> ret;
 	int csize = static_cast<int>( _verts.size() );
 
-	if ( csize == 0 ) return;
+	if ( csize == 0 ) {
+	    return ret;
+	}
 	if ( csize == 1 ) {
 		ret.push_back( _verts[0] );
-		return;
+		return ret;
 	}
 	if ( csize == 2 ) {
 		ret.push_back( _verts[0] );
 		if ( !isVerySimilar( _verts[0], _verts[1], epsilon ) ) {
 			ret.push_back( _verts[1] );
 		}
-		return;
+		return ret;
 	}
 
 	for ( int q = 0; q < csize; q++ ) {
@@ -719,4 +722,5 @@ void sanitizePath( const std::vector<T>& _verts, std::vector<T>& ret, bool wrapP
 			ret.push_back( p2 );
 		}
 	}
+	return ret;
 }

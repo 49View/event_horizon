@@ -24,9 +24,19 @@ namespace JMATH {
 	return stream.str();
 }
 
-std::string floatToDistance( const float number ) {
+std::string floatToDistance( float number ) {
 	std::stringstream stream;
-	stream << std::fixed << std::setprecision( 1 ) << number;
+	if ( number < 1.0f ) {
+	    number *= 100.0f;
+        stream << std::fixed << std::setprecision( 0 ) << number << "cm";
+	} else if ( number < 100.0f ) {
+        stream << std::fixed << std::setprecision( 2 ) << number << "m";
+	} else if ( number < 1000.0f ) {
+        stream << std::fixed << std::setprecision( 1 ) << number << "m";
+    } else {
+        number /= 1000.0f;
+        stream << std::fixed << std::setprecision( 2 ) << number << "km";
+	}
 	return stream.str();
 }
 

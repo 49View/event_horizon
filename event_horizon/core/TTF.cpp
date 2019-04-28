@@ -793,8 +793,8 @@ Mesh Triangulator::GetTriangulation( CItr begin, CItr end ) {
 //    Font
 // ---------------------------------------------------------------------------------------------------------------------------
 
-//Font::MeshCache Font::meshCache;            // glyph mesh cache
-Triangulator Font::trianglulator;     // triangulation data structures/functions
+//FontInternal::MeshCache FontInternal::meshCache;            // glyph mesh cache
+Triangulator FontInternal::trianglulator;     // triangulation data structures/functions
 
 // ----- Font internal types -----
 TableEntry::TableEntry() {
@@ -818,7 +818,7 @@ CodePoint::CodePoint( ulong codeId_, ushort platformId_, ushort encodingId_, ush
 }
 
 // ----- constructor/destructor -----
-Font::Font( std::string flnm ) {
+FontInternal::FontInternal( std::string flnm ) {
 	// load font file
 	std::fstream file( flnm.c_str(), std::fstream::in | std::fstream::binary );
 	file.seekg( 0, std::ios::end );
@@ -850,7 +850,7 @@ Font::Font( std::string flnm ) {
 	VerifyTrueTypeTables();
 }
 
-Font::Font( const void* rawData, MapFromData ) {
+FontInternal::FontInternal( const void* rawData, MapFromData ) {
 	// intialize variables
 	buffer = reinterpret_cast<const char*>( rawData );
 
@@ -861,7 +861,7 @@ Font::Font( const void* rawData, MapFromData ) {
 	VerifyTrueTypeTables();
 }
 
-void Font::bufferDecode( const unsigned char* rawData, size_t length ) {
+void FontInternal::bufferDecode( const unsigned char* rawData, size_t length ) {
     // sanity check
     if ( length == 0 ) {
         throw FileLengthError();
@@ -878,29 +878,29 @@ void Font::bufferDecode( const unsigned char* rawData, size_t length ) {
     VerifyTrueTypeTables();
 }
 
-Font::~Font() {}
+FontInternal::~FontInternal() {}
 
 // ----- read helpers -----
-unsigned char Font::ReadBYTE( FItr& itr ) const {
+unsigned char FontInternal::ReadBYTE( FItr& itr ) const {
 	unsigned char r = *reinterpret_cast<const unsigned char*>( itr );
 	itr += 1;
 	return r;
 }
 
-signed char Font::ReadCHAR( FItr& itr ) const {
+signed char FontInternal::ReadCHAR( FItr& itr ) const {
 	signed char r = *reinterpret_cast<const signed char*>( itr );
 	itr += 1;
 	return r;
 }
 
-unsigned short Font::ReadUSHORT( FItr& itr ) const {
+unsigned short FontInternal::ReadUSHORT( FItr& itr ) const {
 	unsigned short r = ReadBYTE( itr );
 	r <<= 8;
 	r += ReadBYTE( itr );
 	return r;
 }
 
-signed short Font::ReadSHORT( FItr& itr ) const {
+signed short FontInternal::ReadSHORT( FItr& itr ) const {
 	signed short  r = 0;
 	unsigned char i = ReadBYTE( itr );
 
@@ -915,7 +915,7 @@ signed short Font::ReadSHORT( FItr& itr ) const {
 	return r;
 }
 
-unsigned long Font::ReadUINT24( FItr& itr ) const {
+unsigned long FontInternal::ReadUINT24( FItr& itr ) const {
 	unsigned long r = ReadBYTE( itr );
 	r <<= 8;
 	r += ReadBYTE( itr );
@@ -924,7 +924,7 @@ unsigned long Font::ReadUINT24( FItr& itr ) const {
 	return r;
 }
 
-unsigned long Font::ReadULONG( FItr& itr ) const {
+unsigned long FontInternal::ReadULONG( FItr& itr ) const {
 	unsigned long r = ReadBYTE( itr );
 	r <<= 8;
 	r += ReadBYTE( itr );
@@ -935,7 +935,7 @@ unsigned long Font::ReadULONG( FItr& itr ) const {
 	return r;
 }
 
-signed long Font::ReadLONG( FItr& itr ) const {
+signed long FontInternal::ReadLONG( FItr& itr ) const {
 	signed long   r = 0;
 	unsigned char i = ReadBYTE( itr );
 
@@ -954,11 +954,11 @@ signed long Font::ReadLONG( FItr& itr ) const {
 	return r;
 }
 
-float Font::ReadFIXED32( FItr& itr ) const {
+float FontInternal::ReadFIXED32( FItr& itr ) const {
 	return static_cast<float>( ReadLONG( itr ) ) / 65536.0f;
 }
 
-long long Font::ReadLONGDATETIME( FItr& itr ) const {
+long long FontInternal::ReadLONGDATETIME( FItr& itr ) const {
 	signed long   r = 0;
 	unsigned char i = ReadBYTE( itr );
 
@@ -985,19 +985,19 @@ long long Font::ReadLONGDATETIME( FItr& itr ) const {
 	return r;
 }
 
-float Font::ReadFIXED16( FItr& itr ) const {
+float FontInternal::ReadFIXED16( FItr& itr ) const {
 	return static_cast<float>( ReadSHORT( itr ) ) / 16384.0f;
 }
 
-unsigned char Font::ReadBYTE( FItr && itr ) const {
+unsigned char FontInternal::ReadBYTE( FItr && itr ) const {
 	return *reinterpret_cast<const unsigned char*>( itr );
 }
 
-signed char Font::ReadCHAR( FItr && itr ) const {
+signed char FontInternal::ReadCHAR( FItr && itr ) const {
 	return *reinterpret_cast<const signed char*>( itr );
 }
 
-unsigned short Font::ReadUSHORT( FItr && itr_ ) const {
+unsigned short FontInternal::ReadUSHORT( FItr && itr_ ) const {
 	FItr           itr = itr_;
 	unsigned short r = ReadBYTE( itr );
 	r <<= 8;
@@ -1005,7 +1005,7 @@ unsigned short Font::ReadUSHORT( FItr && itr_ ) const {
 	return r;
 }
 
-signed short Font::ReadSHORT( FItr && itr_ ) const {
+signed short FontInternal::ReadSHORT( FItr && itr_ ) const {
 	FItr          itr = itr_;
 	signed short  r = 0;
 	unsigned char i = ReadBYTE( itr );
@@ -1021,7 +1021,7 @@ signed short Font::ReadSHORT( FItr && itr_ ) const {
 	return r;
 }
 
-unsigned long Font::ReadUINT24( FItr && itr_ ) const {
+unsigned long FontInternal::ReadUINT24( FItr && itr_ ) const {
 	FItr          itr = itr_;
 	unsigned long r = ReadBYTE( itr );
 	r <<= 8;
@@ -1031,7 +1031,7 @@ unsigned long Font::ReadUINT24( FItr && itr_ ) const {
 	return r;
 }
 
-unsigned long Font::ReadULONG( FItr && itr_ ) const {
+unsigned long FontInternal::ReadULONG( FItr && itr_ ) const {
 	FItr          itr = itr_;
 	unsigned long r = ReadBYTE( itr );
 	r <<= 8;
@@ -1043,7 +1043,7 @@ unsigned long Font::ReadULONG( FItr && itr_ ) const {
 	return r;
 }
 
-signed long Font::ReadLONG( FItr && itr_ ) const {
+signed long FontInternal::ReadLONG( FItr && itr_ ) const {
 	FItr          itr = itr_;
 	signed long   r = 0;
 	unsigned char i = ReadBYTE( itr );
@@ -1063,12 +1063,12 @@ signed long Font::ReadLONG( FItr && itr_ ) const {
 	return r;
 }
 
-float Font::ReadFIXED32( FItr && itr_ ) const {
+float FontInternal::ReadFIXED32( FItr && itr_ ) const {
 	FItr itr = itr_;
 	return static_cast<float>( ReadLONG( itr ) ) / 65536.0f;
 }
 
-long long Font::ReadLONGDATETIME( FItr && itr_ ) const {
+long long FontInternal::ReadLONGDATETIME( FItr && itr_ ) const {
 	FItr          itr = itr_;
 	signed long   r = 0;
 	unsigned char i = ReadBYTE( itr );
@@ -1096,13 +1096,13 @@ long long Font::ReadLONGDATETIME( FItr && itr_ ) const {
 	return r;
 }
 
-float Font::ReadFIXED16( FItr && itr_ ) const {
+float FontInternal::ReadFIXED16( FItr && itr_ ) const {
 	FItr itr = itr_;
 	return static_cast<float>( ReadSHORT( itr ) ) / 16384.0f;
 }
 
 // ----- more read helpers -----
-TTFHeader Font::ReadTTFHeader( FItr& itr ) const {
+TTFHeader FontInternal::ReadTTFHeader( FItr& itr ) const {
 	TTFHeader header;
 	header.version = ReadFIXED32( itr );
 	header.numTables = ReadUSHORT( itr );
@@ -1113,7 +1113,7 @@ TTFHeader Font::ReadTTFHeader( FItr& itr ) const {
 	return header;
 }
 
-TableEntry Font::ReadTableEntry( FItr& itr ) const {
+TableEntry FontInternal::ReadTableEntry( FItr& itr ) const {
 	TableEntry te;
 	te.tag = ReadULONG( itr );
 	DecomposeTag( te.tag, te.tagstr );
@@ -1124,7 +1124,7 @@ TableEntry Font::ReadTableEntry( FItr& itr ) const {
 	return te;
 }
 
-HeadTable Font::ReadHeadTable() const {
+HeadTable FontInternal::ReadHeadTable() const {
 	FItr itr = GetTableEntry( CreateTag( 'h', 'e', 'a', 'd' ) ).begin;
 
 	HeadTable ht;
@@ -1149,7 +1149,7 @@ HeadTable Font::ReadHeadTable() const {
 	return ht;
 }
 
-GlyphProfile Font::ReadMAXPTable() const {
+GlyphProfile FontInternal::ReadMAXPTable() const {
 	FItr itr = GetTableEntry( CreateTag( 'm', 'a', 'x', 'p' ) ).begin;
 
 	GlyphProfile gp;
@@ -1175,18 +1175,18 @@ GlyphProfile Font::ReadMAXPTable() const {
 	return gp;
 }
 
-short Font::GetIndexToLocFormat() const {
+short FontInternal::GetIndexToLocFormat() const {
 	FItr itr = GetTableEntry( CreateTag( 'h', 'e', 'a', 'd' ) ).begin;
 	return ReadSHORT( itr + 50 );
 }
 
-ushort Font::GetNumGlyphs() const {
+ushort FontInternal::GetNumGlyphs() const {
 	FItr itr = GetTableEntry( CreateTag( 'm', 'a', 'x', 'p' ) ).begin;
 	return ReadUSHORT( itr + 4 );
 }
 
 // ----- table helpers -----
-ulong Font::CreateTag( char c0, char c1, char c2, char c3 ) const {
+ulong FontInternal::CreateTag( char c0, char c1, char c2, char c3 ) const {
 	ulong r;
 	r = static_cast<ulong>( c0 );
 	r <<= 8;
@@ -1199,7 +1199,7 @@ ulong Font::CreateTag( char c0, char c1, char c2, char c3 ) const {
 	return r;
 }
 
-ulong Font::CreateTag( char* s ) const {
+ulong FontInternal::CreateTag( char* s ) const {
 	ulong r;
 	r = static_cast<ulong>( s[0] );
 	r <<= 8;
@@ -1212,7 +1212,7 @@ ulong Font::CreateTag( char* s ) const {
 	return r;
 }
 
-void Font::DecomposeTag( ulong tag, char* s ) const {
+void FontInternal::DecomposeTag( ulong tag, char* s ) const {
 	s[0] = static_cast<char>( ( tag >> 24 ) & 0xff );
 	s[1] = static_cast<char>( ( tag >> 16 ) & 0xff );
 	s[2] = static_cast<char>( ( tag >> 8 ) & 0xff );
@@ -1220,13 +1220,13 @@ void Font::DecomposeTag( ulong tag, char* s ) const {
 	s[4] = 0;
 }
 
-std::string Font::DecomposeTag( ulong tag ) const {
+std::string FontInternal::DecomposeTag( ulong tag ) const {
 	char str[5];
 	DecomposeTag( tag, str );
 	return str;
 }
 
-TableEntry Font::GetTableEntry( ulong tag ) const {
+TableEntry FontInternal::GetTableEntry( ulong tag ) const {
 	// find table
 	auto i = tableMap.find( tag );
 
@@ -1237,7 +1237,7 @@ TableEntry Font::GetTableEntry( ulong tag ) const {
 	return i->second;
 }
 
-bool Font::VerifyTableCheckSum( const TableEntry& te ) const {
+bool FontInternal::VerifyTableCheckSum( const TableEntry& te ) const {
 	if ( te.tag == CreateTag( 'h', 'e', 'a', 'd' ) ) {
 		return VerifyHeadCheckSum( te );
 	} else {
@@ -1245,7 +1245,7 @@ bool Font::VerifyTableCheckSum( const TableEntry& te ) const {
 	}
 }
 
-bool Font::VerifyNormalCheckSum( const TableEntry& te ) const {
+bool FontInternal::VerifyNormalCheckSum( const TableEntry& te ) const {
 	ulong checkSum = 0;
 	FItr  i = te.begin;
 
@@ -1257,7 +1257,7 @@ bool Font::VerifyNormalCheckSum( const TableEntry& te ) const {
 	return checkSum == te.checkSum;
 }
 
-bool Font::VerifyHeadCheckSum( const TableEntry& te ) const {
+bool FontInternal::VerifyHeadCheckSum( const TableEntry& te ) const {
 	ulong checkSum = 0;
 	FItr  i = te.begin;
 
@@ -1274,7 +1274,7 @@ bool Font::VerifyHeadCheckSum( const TableEntry& te ) const {
 }
 
 // ----- intial loading functions -----
-void Font::CreateTableMap() {
+void FontInternal::CreateTableMap() {
 	// intialize
 	FItr itr = buffer;
 	tableMap.clear();
@@ -1284,11 +1284,11 @@ void Font::CreateTableMap() {
 
 	for ( ushort i = 0; i < header.numTables; ++i ) {
 		TableEntry       te = ReadTableEntry( itr );
-		tableMap[te.tag] = te;
+		tableMap.emplace( te.tag, te );
 	}
 }
 
-void Font::VerifyTableCheckSums() const {
+void FontInternal::VerifyTableCheckSums() const {
 	for ( auto i = tableMap.begin(); i != tableMap.end(); ++i ) {
 		if ( VerifyTableCheckSum( i->second ) == false ) {
 			throw ChecksumException( i->second.tagstr );
@@ -1296,7 +1296,7 @@ void Font::VerifyTableCheckSums() const {
 	}
 }
 
-void Font::VerifyRequiredTables() const {
+void FontInternal::VerifyRequiredTables() const {
 	ulong requiredTables[] =
 	{
 		CreateTag( 'c', 'm', 'a', 'p' ),
@@ -1317,7 +1317,7 @@ void Font::VerifyRequiredTables() const {
 	}
 }
 
-void Font::VerifyTrueTypeTables() const {
+void FontInternal::VerifyTrueTypeTables() const {
 	ulong requiredTables[] =
 	{
 		CreateTag( 'c', 'v', 't', ' ' ),
@@ -1336,11 +1336,11 @@ void Font::VerifyTrueTypeTables() const {
 }
 
 // ----- CodePoint mapping -----
-Font::FRange Font::GetGlyphData( CodePoint codePoint ) const {
+FontInternal::FRange FontInternal::GetGlyphData( CodePoint codePoint ) const {
 	return MapGlyphIndexToRange( GetGlyphIndex( codePoint ) );
 }
 
-ushort Font::GetGlyphIndex( CodePoint codePoint ) const {
+ushort FontInternal::GetGlyphIndex( CodePoint codePoint ) const {
 	// convenience variables
 	ulong  codeId = codePoint.codeId;
 	ushort rpid = codePoint.platformId;
@@ -1464,7 +1464,7 @@ ushort Font::GetGlyphIndex( CodePoint codePoint ) const {
 	return 0;
 }
 
-Font::FRange Font::MapGlyphIndexToRange( ushort glyphIndex ) const {
+FontInternal::FRange FontInternal::MapGlyphIndexToRange( ushort glyphIndex ) const {
 	// intialize variables
 	short      ilf = GetIndexToLocFormat();
 	ushort     numGlyps = GetNumGlyphs();
@@ -1495,7 +1495,7 @@ Font::FRange Font::MapGlyphIndexToRange( ushort glyphIndex ) const {
 	throw InvalidFontException( "Invalid 'head' indexToLocFormat value." );
 }
 
-ushort Font::GetGlyphIndexF0( FItr itr, ushort langId, ulong codeId ) const {
+ushort FontInternal::GetGlyphIndexF0( FItr itr, ushort langId, ulong codeId ) const {
 	// load header
 	ushort format = ReadUSHORT( itr );
 	//    ushort length   = ReadUSHORT(itr);
@@ -1517,7 +1517,7 @@ ushort Font::GetGlyphIndexF0( FItr itr, ushort langId, ulong codeId ) const {
 	return 0;
 }
 
-ushort Font::GetGlyphIndexF2( FItr /*itr*/, ushort /*langId*/, ulong /*codeId*/ ) const {
+ushort FontInternal::GetGlyphIndexF2( FItr /*itr*/, ushort /*langId*/, ulong /*codeId*/ ) const {
 	// variable sized 1 or 2 byte character encoding
 	// the docs are are very unclear at how to decode this
 	// on top of that I have no easy way to indicate how many bytes were consumed
@@ -1551,7 +1551,7 @@ ushort Font::GetGlyphIndexF2( FItr /*itr*/, ushort /*langId*/, ulong /*codeId*/ 
 	return 0;
 }
 
-ushort Font::GetGlyphIndexF4( FItr itr, ushort langId, ulong codeId ) const {
+ushort FontInternal::GetGlyphIndexF4( FItr itr, ushort langId, ulong codeId ) const {
 	// I have code for both linear and binary search
 	// linear is faster (due to early exit) for most english
 	// binary would be faster if using alot of weird glyphs or other languages found later in the BMP
@@ -1651,7 +1651,7 @@ ushort Font::GetGlyphIndexF4( FItr itr, ushort langId, ulong codeId ) const {
 	return glyphIndex;
 }
 
-ushort Font::GetGlyphIndexF6( FItr itr, ushort langId, ulong codeId ) const {
+ushort FontInternal::GetGlyphIndexF6( FItr itr, ushort langId, ulong codeId ) const {
 	// load header
 	ushort format = ReadUSHORT( itr );
 	//    ushort length       =
@@ -1678,12 +1678,12 @@ ushort Font::GetGlyphIndexF6( FItr itr, ushort langId, ulong codeId ) const {
 	return 0;
 }
 
-ushort Font::GetGlyphIndexF8( FItr /*itr*/, ushort /*langId*/, ulong /*codeId*/ ) const {
+ushort FontInternal::GetGlyphIndexF8( FItr /*itr*/, ushort /*langId*/, ulong /*codeId*/ ) const {
 	// variable sized format not supported
 	return 0;
 }
 
-ushort Font::GetGlyphIndexF10( FItr itr, ushort langId, ulong codeId ) const {
+ushort FontInternal::GetGlyphIndexF10( FItr itr, ushort langId, ulong codeId ) const {
 	// 32 bit dense format, same as format 6 with just a few changes to the types
 
 	float format = ReadFIXED32( itr ); // 10.0 (unlike the other formats, this is in FIXED32 format)
@@ -1711,7 +1711,7 @@ ushort Font::GetGlyphIndexF10( FItr itr, ushort langId, ulong codeId ) const {
 	return 0;
 }
 
-ushort Font::GetGlyphIndexF12( FItr itr, ushort langId, ulong codeId ) const {
+ushort FontInternal::GetGlyphIndexF12( FItr itr, ushort langId, ulong codeId ) const {
 	// 32 bit sparse format, similar to format 4 (actually much simpler and makes more sense)
 
 	ushort format = ReadUSHORT( itr );
@@ -1757,7 +1757,7 @@ ushort Font::GetGlyphIndexF12( FItr itr, ushort langId, ulong codeId ) const {
 	return 0;
 }
 
-ushort Font::GetGlyphIndexF13( FItr itr, ushort langId, ulong codeId ) const {
+ushort FontInternal::GetGlyphIndexF13( FItr itr, ushort langId, ulong codeId ) const {
 	// 32 bit 'many to one' format, similar to format 12
 
 	ushort format = ReadUSHORT( itr );
@@ -1803,14 +1803,14 @@ ushort Font::GetGlyphIndexF13( FItr itr, ushort langId, ulong codeId ) const {
 	return 0;
 }
 
-ushort Font::GetGlyphIndexF14( FItr /*itr*/, ushort /*langId*/, ulong /*codeId*/ ) const {
+ushort FontInternal::GetGlyphIndexF14( FItr /*itr*/, ushort /*langId*/, ulong /*codeId*/ ) const {
 	// unicode variation sequences
 	// not supported
 	return 0;
 }
 
 // ----- metrics helpers -----
-GlyphMetrics Font::GetGlyphMetrics( ushort glyphIndex ) const {
+GlyphMetrics FontInternal::GetGlyphMetrics( ushort glyphIndex ) const {
 	// read hhea data
 	FItr  itr = GetTableEntry( CreateTag( 'h', 'h', 'e', 'a' ) ).begin;
 	ulong version = ReadULONG( itr );
@@ -1855,7 +1855,7 @@ GlyphMetrics Font::GetGlyphMetrics( ushort glyphIndex ) const {
 	return gm;
 }
 
-VGlyphMetrics Font::GetVGlyphMetrics( ushort glyphIndex ) const {
+VGlyphMetrics FontInternal::GetVGlyphMetrics( ushort glyphIndex ) const {
 	VGlyphMetrics vgm;
 	vgm.hasVerticalFontMetrics = false;
 
@@ -1918,7 +1918,7 @@ VGlyphMetrics Font::GetVGlyphMetrics( ushort glyphIndex ) const {
 	return vgm;
 }
 
-vec2f Font::GetKerning( CodePoint cp0, CodePoint cp1, bool hk ) const {
+vec2f FontInternal::GetKerning( CodePoint cp0, CodePoint cp1, bool hk ) const {
 	// intialize variables
 	ushort g0 = GetGlyphIndex( cp0 );
 	ushort g1 = GetGlyphIndex( cp1 );
@@ -1956,7 +1956,7 @@ vec2f Font::GetKerning( CodePoint cp0, CodePoint cp1, bool hk ) const {
 	return kv;
 }
 
-float Font::ParseKernTableF0( FItr itr, ushort g0, ushort g1 ) const {
+float FontInternal::ParseKernTableF0( FItr itr, ushort g0, ushort g1 ) const {
 	// read header
 	ushort nPairs = ReadUSHORT( itr );
 	//    ushort searchRange   =
@@ -1993,7 +1993,7 @@ float Font::ParseKernTableF0( FItr itr, ushort g0, ushort g1 ) const {
 	}
 }
 
-float Font::ParseKernTableF2( FItr itr, ushort g0, ushort /*g1*/ ) const {
+float FontInternal::ParseKernTableF2( FItr itr, ushort g0, ushort /*g1*/ ) const {
 	ushort leftClassOffset = 0;
 	ushort rightClassOffset = 0;
 
@@ -2028,7 +2028,7 @@ float Font::ParseKernTableF2( FItr itr, ushort g0, ushort /*g1*/ ) const {
 	return static_cast<float>( ReadSHORT( itr + leftClassOffset + rightClassOffset ) );
 }
 
-ushort Font::ParseMSKernTable( FItr itr, ushort g0, ushort g1, bool hk, vec2f& kv ) const {
+ushort FontInternal::ParseMSKernTable( FItr itr, ushort g0, ushort g1, bool hk, vec2f& kv ) const {
 	// read table header
 //    ushort version    =
 	ReadUSHORT( itr );
@@ -2081,7 +2081,7 @@ ushort Font::ParseMSKernTable( FItr itr, ushort g0, ushort g1, bool hk, vec2f& k
 	return length;
 }
 
-ulong Font::ParseAppleKernTable( FItr itr, ushort g0, ushort g1, bool hk, vec2f& kv ) const {
+ulong FontInternal::ParseAppleKernTable( FItr itr, ushort g0, ushort g1, bool hk, vec2f& kv ) const {
 	// read table header
 	ulong  length = ReadULONG( itr );
 	ushort coverage = ReadUSHORT( itr );
@@ -2127,7 +2127,7 @@ ulong Font::ParseAppleKernTable( FItr itr, ushort g0, ushort g1, bool hk, vec2f&
 }
 
 // ----- triangulation functions -----
-Mesh Font::GetGlyphMesh( ushort glyphIndex ) const {
+Mesh FontInternal::GetGlyphMesh( ushort glyphIndex ) const {
 	// get glyph data
 	auto range = MapGlyphIndexToRange( glyphIndex );
 
@@ -2149,7 +2149,7 @@ Mesh Font::GetGlyphMesh( ushort glyphIndex ) const {
 	}
 }
 
-Mesh Font::GetSimpleMesh( FItr itr ) const {
+Mesh FontInternal::GetSimpleMesh( FItr itr ) const {
 	// read header
 	ushort contourCount = ReadUSHORT( itr );            // safe because its already been checked
 	itr += 8;
@@ -2250,7 +2250,7 @@ Mesh Font::GetSimpleMesh( FItr itr ) const {
 	return trianglulator.GetTriangulation( contours.begin(), contours.end() );
 }
 
-Mesh Font::GetComplexMesh( FItr itr ) const {
+Mesh FontInternal::GetComplexMesh( FItr itr ) const {
 	using std::max;
 	using std::abs;
 
@@ -2347,7 +2347,7 @@ Mesh Font::GetComplexMesh( FItr itr ) const {
 }
 
 // ----- font info -----
-vec4f Font::GetMasterRect() const {
+vec4f FontInternal::GetMasterRect() const {
 	HeadTable ht = ReadHeadTable();
 	float     x = static_cast<float>( ht.xMin );
 	float     y = static_cast<float>( ht.yMin );
@@ -2357,7 +2357,7 @@ vec4f Font::GetMasterRect() const {
 	return vec4f( x, y, z, w );
 }
 
-vec4f Font::GetGlyphRect( CodePoint codePoint ) const {
+vec4f FontInternal::GetGlyphRect( CodePoint codePoint ) const {
 	// get glyph data
 	FRange glyphData = GetGlyphData( codePoint );
 	FItr   itr = glyphData.first;
@@ -2375,7 +2375,7 @@ vec4f Font::GetGlyphRect( CodePoint codePoint ) const {
 	return r;
 }
 
-FontMetrics Font::GetFontMetrics() const {
+FontMetrics FontInternal::GetFontMetrics() const {
 	// read hhea data
 	FItr   itr = GetTableEntry( CreateTag( 'h', 'h', 'e', 'a' ) ).begin;
 	ulong  version = ReadULONG( itr );
@@ -2425,11 +2425,11 @@ FontMetrics Font::GetFontMetrics() const {
 	return fm;
 }
 
-GlyphMetrics Font::GetGlyphMetrics( CodePoint codePoint ) const {
+GlyphMetrics FontInternal::GetGlyphMetrics( CodePoint codePoint ) const {
 	return GetGlyphMetrics( GetGlyphIndex( codePoint ) );
 }
 
-VFontMetrics Font::GetVFontMetrics() const {
+VFontMetrics FontInternal::GetVFontMetrics() const {
 	// get vhea table data
 	VFontMetrics vfm;
 	auto i = tableMap.find( CreateTag( 'v', 'h', 'e', 'a' ) );
@@ -2489,37 +2489,37 @@ VFontMetrics Font::GetVFontMetrics() const {
 	return vfm;
 }
 
-VGlyphMetrics Font::GetVGlyphMetrics( CodePoint codePoint ) const {
+VGlyphMetrics FontInternal::GetVGlyphMetrics( CodePoint codePoint ) const {
 	return GetVGlyphMetrics( GetGlyphIndex( codePoint ) );
 }
 
-vec2f Font::GetKerning( CodePoint cp0, CodePoint cp1 ) const {
+vec2f FontInternal::GetKerning( CodePoint cp0, CodePoint cp1 ) const {
 	return GetKerning( cp0, cp1, true );
 }
 
-vec2f Font::GetVKerning( CodePoint cp0, CodePoint cp1 ) const {
+vec2f FontInternal::GetVKerning( CodePoint cp0, CodePoint cp1 ) const {
 	return GetKerning( cp0, cp1, false );
 }
 
 // ----- glyph triangulation -----
-const Mesh& Font::GetTriangulation( CodePoint codePoint ) const {
+const Mesh& FontInternal::GetTriangulation( CodePoint codePoint ) const {
 	// an upgrade_mutex doesn't make sense here, so we have to 'double' check the glyph cache
 
 	ushort glyphIndex = GetGlyphIndex( codePoint );
 
 	// check cache
-	scope
-	{
-		        std::lock_guard<std::mutex> lock( cacheMutex );
-				auto i = meshCache.find( glyphIndex );
-
-				if ( i != meshCache.end() ) {
-					return i->second;
-				}
-	}
+//	scope
+//	{
+////		        std::lock_guard<std::mutex> lock( cacheMutex );
+//				auto i = meshCache.find( glyphIndex );
+//
+//				if ( i != meshCache.end() ) {
+//					return i->second;
+//				}
+//	}
 
 	// triangulate
-	std::lock_guard<std::mutex> lock( cacheMutex );
+//	std::lock_guard<std::mutex> lock( cacheMutex );
 	auto i = meshCache.find( glyphIndex );
 
 	if ( i != meshCache.end() ) {
@@ -2529,21 +2529,21 @@ const Mesh& Font::GetTriangulation( CodePoint codePoint ) const {
 	return meshCache.insert( std::make_pair( glyphIndex, GetGlyphMesh( glyphIndex ) ) ).first->second;
 }
 
-size_t Font::GetTriCount( CodePoint codePoint ) const {
+size_t FontInternal::GetTriCount( CodePoint codePoint ) const {
 	return GetTriangulation( codePoint ).verts.size();            // was more complex at one time...
 }
 
-void Font::ClearGlyphCache() {
-	std::lock_guard<std::mutex> lock( cacheMutex );
+void FontInternal::ClearGlyphCache() {
+//	std::lock_guard<std::mutex> lock( cacheMutex );
 	meshCache.clear();
 }
 
-void Font::PreCache( ulong codeStart, ulong codeEnd ) {
+void FontInternal::PreCache( ulong codeStart, ulong codeEnd ) {
 	PreCache( codeStart, codeEnd, 3, 1, 0 );
 }
 
-void Font::PreCache( ulong codeStart, ulong codeEnd, ushort platformId, ushort encodingId, ushort languageId ) {
-	std::lock_guard<std::mutex> lock( cacheMutex );
+void FontInternal::PreCache( ulong codeStart, ulong codeEnd, ushort platformId, ushort encodingId, ushort languageId ) {
+//	std::lock_guard<std::mutex> lock( cacheMutex );
 
 	for ( ulong i = codeStart; i <= codeEnd; ++i ) {
 		ushort glyphIndex = GetGlyphIndex( CodePoint( i, platformId, encodingId, languageId ) );
@@ -2556,7 +2556,19 @@ void Font::PreCache( ulong codeStart, ulong codeEnd, ushort platformId, ushort e
 }
 
 // ----- helpers -----
-void Font::PreCacheBasicLatin() {
+void FontInternal::PreCacheBasicLatin() {
 	PreCache( 0x20, 0x7f, 3, 1, 0 );
+}
+
+FontInternal::FontInternal( const FontInternal& _source ) {
+    bufferCache = _source.bufferCache;
+    buffer = &bufferCache.front();
+
+    CreateTableMap();
+    VerifyTableCheckSums();
+    VerifyRequiredTables();
+    VerifyTrueTypeTables();
+
+//    tableMap = _source.tableMap;
 }
 

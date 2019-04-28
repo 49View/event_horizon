@@ -27,7 +27,7 @@ public:
 	UiTextInputRenderer( Renderer& _rr );
 
 	void printTextInput( const std::string& _title, const std::string& _text,
-						 const Utility::TTFCore::Font& _font );
+						 const Font& _font );
 	void clear();
 
 protected:

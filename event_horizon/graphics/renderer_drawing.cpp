@@ -315,4 +315,39 @@ void Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Vector
     VPL( bucketIndex, vp );
 }
 
+void Renderer::drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
+                         std::shared_ptr<Font> font, const Color4f& color ) {
+    //        VPBuilder<FontStrip>{*this}.vl(_vpl).p(fs).m(_vpl->Is2d() ? S::FONT_2D: S::FONT).c(color).n(_vpname).build();
 
+    Vector2f cursor = Vector2f::ZERO;
+
+    for ( char i : text ) {
+        Utility::TTF::CodePoint cp( static_cast<Utility::TTFCore::ulong>(i));
+        const Utility::TTF::Mesh& m = font->GetTriangulation( cp );
+
+        // Don't draw an empty space
+        if ( !m.verts.empty() ) {
+            auto ps = std::make_shared<FontStrip>( m.verts.size(), PRIMITIVE_TRIANGLES, VFVertexAllocation::PreAllocate );
+
+            for ( size_t t = 0; t < m.verts.size(); t+=3 ) {
+                Vector2f p1{ m.verts[t].pos.x  , ( m.verts[t].pos.y ) };
+                Vector2f p3{ m.verts[t+1].pos.x, ( m.verts[t+1].pos.y ) };
+                Vector2f p2{ m.verts[t+2].pos.x, ( m.verts[t+2].pos.y ) };
+                ps->addVertex( XZY::C( p1 + cursor ), m.verts[t].texCoord, m.verts[t].coef );
+                ps->addVertex( XZY::C( p2 + cursor ), m.verts[t+2].texCoord, m.verts[t+2].coef );
+                ps->addVertex( XZY::C( p3 + cursor ), m.verts[t+1].texCoord, m.verts[t+1].coef );
+            }
+
+            auto trams = std::make_shared<Matrix4f>(pos, Vector3f::ZERO, V3f{scale * Font::gliphScaler()} * V3f{1.0f, -1.0f, -1.0f} );
+            auto vp = VPBuilder<FontStrip>{*this,ShaderMaterial{S::FONT, mapColor(color)}}.p(ps).t(trams).n(text).build();
+            VPL( bucketIndex, vp );
+        }
+
+        Utility::TTFCore::vec2f kerning = font->GetKerning( Utility::TTF::CodePoint( i ), cp );
+        Vector2f nextCharPos = V2f( kerning.x, kerning.y );
+        cursor += nextCharPos;
+    }
+
+//    fs->addVertex( XZY::C(pos4.xyz() + orig), Vector2f{ m.verts[t].texCoord, m.verts[t].coef } );
+
+}

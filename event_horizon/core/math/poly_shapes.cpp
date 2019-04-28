@@ -10,180 +10,156 @@
 #include <unordered_map>
 #include <core/soa_utils.h>
 
-struct Edge {
-    uint32_t v0;
-    uint32_t v1;
-
-    Edge( uint32_t v0, uint32_t v1 )
-            : v0( v0 < v1 ? v0 : v1 ), v1( v0 < v1 ? v1 : v0 ) {
+Vector3f Topology::normalFromSmartSmoothing( uint32_t index, int vIndex ) {
+    size_t idx = vertices[index].hash();
+    bool bSmooth = false;
+    Vector3f n = vertexNormals[vIndex];
+    for ( const auto& v : smoothing[idx] ) {
+        bSmooth = true;
+        float odot = dot(n, v);
+        float ndot = acos(odot) - M_PI_2;
+        if ( fabs(ndot) < 0.05f ) {
+            bSmooth = false;
+            break;
+        }
     }
-
-    bool operator<( const Edge& rhs ) const {
-        return v0 < rhs.v0 || ( v0 == rhs.v0 && v1 < rhs.v1 );
-    }
-};
-
-struct Topology {
-    std::vector<Vector3f> vertices;
-    std::vector<uint32_t> triangles;
-    std::unordered_map<size_t, std::vector<Vector3f>> smoothing;
-    std::vector<Vector3f> vertexNormals;
-
-    uint32_t indexCount() const { return static_cast<uint32_t >( triangles.size()); }
-    uint32_t triangleCount() const { return static_cast<uint32_t >( triangles.size() / 3 ); }
-    uint32_t vertexCount() const { return static_cast<uint32_t >( vertices.size()); }
-
-    Vector3f normalFromSmartSmoothing( uint32_t index, int vIndex ) {
-        size_t idx = vertices[index].hash();
-        bool bSmooth = false;
-        Vector3f n = vertexNormals[vIndex];
+    if ( bSmooth ) {
+        Vector3f tn = Vector3f::ZERO;
         for ( const auto& v : smoothing[idx] ) {
-            bSmooth = true;
-            float odot = dot(n, v);
-            float ndot = acos(odot) - M_PI_2;
-            if ( fabs(ndot) < 0.05f ) {
-                bSmooth = false;
-                break;
-            }
+            tn += v;
         }
-        if ( bSmooth ) {
-            Vector3f tn = Vector3f::ZERO;
-            for ( const auto& v : smoothing[idx] ) {
-                tn += v;
-            }
-            return normalize( tn );
-        } else {
-            return n;
-        }
+        return normalize( tn );
+    } else {
+        return n;
     }
+}
 
-    void addTriangle( uint32_t a, uint32_t b, uint32_t c ) {
-        triangles.emplace_back( a );
-        triangles.emplace_back( b );
-        triangles.emplace_back( c );
-        Vector3f n = normalize( crossProduct( vertices[a], vertices[c], vertices[b] ) );
-        vertexNormals.emplace_back( n );
-        vertexNormals.emplace_back( n );
-        vertexNormals.emplace_back( n );
-        smoothing[vertices[a].hash()].emplace_back( n );
-        smoothing[vertices[b].hash()].emplace_back( n );
-        smoothing[vertices[c].hash()].emplace_back( n );
-    }
+void Topology::addTriangle( uint32_t a, uint32_t b, uint32_t c ) {
+    triangles.emplace_back( a );
+    triangles.emplace_back( b );
+    triangles.emplace_back( c );
+    Vector3f n = normalize( crossProduct( vertices[a], vertices[c], vertices[b] ) );
+    vertexNormals.emplace_back( n );
+    vertexNormals.emplace_back( n );
+    vertexNormals.emplace_back( n );
+    smoothing[vertices[a].hash()].emplace_back( n );
+    smoothing[vertices[b].hash()].emplace_back( n );
+    smoothing[vertices[c].hash()].emplace_back( n );
+}
 
-    void addQuad( uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
-        addTriangle( a, b, c );
-        addTriangle( c, b, d );
-    }
+void Topology::addQuad( uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
+    addTriangle( a, b, c );
+    addTriangle( c, b, d );
+}
 
-    void addQuadAlt( uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
-        addTriangle( a, b, d );
-        addTriangle( b, c, d );
-    }
+void Topology::addQuadAlt( uint32_t a, uint32_t b, uint32_t c, uint32_t d ) {
+    addTriangle( a, b, d );
+    addTriangle( b, c, d );
+}
 
-    void clear() {
-        vertices.clear();
-        triangles.clear();
-    }
+void Topology::clear() {
+    vertices.clear();
+    triangles.clear();
+}
 
-    double distance( const Vector3f& p, uint32_t tidx ) const {
-        const uint32_t idx0 = triangles[tidx];
-        const uint32_t idx1 = triangles[tidx + 1];
-        const uint32_t idx2 = triangles[tidx + 2];
-        const Vector3f v0 = vertices[idx0];
-        const Vector3f v1 = vertices[idx1];
-        const Vector3f v2 = vertices[idx2];
-        const Vector3f bv = v0;
-        const Vector3f e0 = v1 - v0;
-        const Vector3f e1 = v2 - v0;
-        const Vector3f dv = bv - p;
-        const double a = dot( e0, e0 );
-        const double b = dot( e0, e1 );
-        const double c = dot( e1, e1 );
-        const double d = dot( e0, dv );
-        const double e = dot( e1, dv );
-        //const double f = dot( dv, dv );
+double Topology::distance( const Vector3f& p, uint32_t tidx ) const {
+    const uint32_t idx0 = triangles[tidx];
+    const uint32_t idx1 = triangles[tidx + 1];
+    const uint32_t idx2 = triangles[tidx + 2];
+    const Vector3f v0 = vertices[idx0];
+    const Vector3f v1 = vertices[idx1];
+    const Vector3f v2 = vertices[idx2];
+    const Vector3f bv = v0;
+    const Vector3f e0 = v1 - v0;
+    const Vector3f e1 = v2 - v0;
+    const Vector3f dv = bv - p;
+    const double a = dot( e0, e0 );
+    const double b = dot( e0, e1 );
+    const double c = dot( e1, e1 );
+    const double d = dot( e0, dv );
+    const double e = dot( e1, dv );
+    //const double f = dot( dv, dv );
 
-        const double det = a * c - b * b;
-        double s = b * e - c * d;
-        double t = b * d - a * e;
+    const double det = a * c - b * b;
+    double s = b * e - c * d;
+    double t = b * d - a * e;
 
-        if ( s + t <= det ) {
-            if ( s < 0.0 ) {
-                if ( t < 0.0 ) {
-                    // region 4
-                    if ( d < 0.0 ) {
-                        t = 0.0;
-                        s = -d >= a ? 1.0 : -d / a;
-                    } else {
-                        s = 0.0;
-                        t = e >= 0.0 ? 0.0 : ( -e >= c ? 1.0 : -e / c );
-                    }
+    if ( s + t <= det ) {
+        if ( s < 0.0 ) {
+            if ( t < 0.0 ) {
+                // region 4
+                if ( d < 0.0 ) {
+                    t = 0.0;
+                    s = -d >= a ? 1.0 : -d / a;
                 } else {
-                    // region 3
                     s = 0.0;
                     t = e >= 0.0 ? 0.0 : ( -e >= c ? 1.0 : -e / c );
                 }
-            } else if ( t < 0.0 ) {
-                // region 5
-                s = d >= 0.0 ? 0.0 : ( -d >= a ? 1.0 : -d / a );
-                t = 0.0;
             } else {
-                // region 0
-                const double invDet = 1.0 / det;
-                s *= invDet;
-                t *= invDet;
+                // region 3
+                s = 0.0;
+                t = e >= 0.0 ? 0.0 : ( -e >= c ? 1.0 : -e / c );
+            }
+        } else if ( t < 0.0 ) {
+            // region 5
+            s = d >= 0.0 ? 0.0 : ( -d >= a ? 1.0 : -d / a );
+            t = 0.0;
+        } else {
+            // region 0
+            const double invDet = 1.0 / det;
+            s *= invDet;
+            t *= invDet;
+        }
+    } else {
+        if ( s < 0.0 ) {
+            // region 2
+            const double tmp0 = b + d;
+            const double tmp1 = c + e;
+            if ( tmp1 > tmp0 ) {
+                const double numer = tmp1 - tmp0;
+                const double denom = a - 2.0 * b + c;
+                s = numer >= denom ? 1.0 : numer / denom;
+                t = 1.0 - s;
+            } else {
+                s = 0.0;
+                t = ( tmp1 <= 0.0 ? 1.0 : ( e >= 0.0 ? 0.0 : -e / c ));
+            }
+        } else if ( t < 0.0 ) {
+            // region 6
+            const double tmp0 = b + e;
+            const double tmp1 = a + d;
+            if ( tmp1 > tmp0 ) {
+                const double numer = tmp1 - tmp0;
+                const double denom = a - 2.0 * b + c;
+                t = numer >= denom ? 1.0 : numer / denom;
+                s = 1.0 - t;
+            } else {
+                s = ( tmp1 <= 0.0 ? 1.0 : ( d >= 0.0 ? 0.0 : -d / a ));
+                t = 0.0;
             }
         } else {
-            if ( s < 0.0 ) {
-                // region 2
-                const double tmp0 = b + d;
-                const double tmp1 = c + e;
-                if ( tmp1 > tmp0 ) {
-                    const double numer = tmp1 - tmp0;
-                    const double denom = a - 2.0 * b + c;
-                    s = numer >= denom ? 1.0 : numer / denom;
-                    t = 1.0 - s;
-                } else {
-                    s = 0.0;
-                    t = ( tmp1 <= 0.0 ? 1.0 : ( e >= 0.0 ? 0.0 : -e / c ));
-                }
-            } else if ( t < 0.0 ) {
-                // region 6
-                const double tmp0 = b + e;
-                const double tmp1 = a + d;
-                if ( tmp1 > tmp0 ) {
-                    const double numer = tmp1 - tmp0;
-                    const double denom = a - 2.0 * b + c;
-                    t = numer >= denom ? 1.0 : numer / denom;
-                    s = 1.0 - t;
-                } else {
-                    s = ( tmp1 <= 0.0 ? 1.0 : ( d >= 0.0 ? 0.0 : -d / a ));
-                    t = 0.0;
-                }
+            // region 1
+            const double numer = c + e - b - d;
+            if ( numer <= 0 ) {
+                s = 0.0;
             } else {
-                // region 1
-                const double numer = c + e - b - d;
-                if ( numer <= 0 ) {
-                    s = 0.0;
-                } else {
-                    const double denom = a - 2.0 * b + c;
-                    s = numer >= denom ? 1.0 : numer / denom;
-                }
-                t = 1.0 - s;
+                const double denom = a - 2.0 * b + c;
+                s = numer >= denom ? 1.0 : numer / denom;
             }
+            t = 1.0 - s;
         }
-
-        return length( p - ( v0 + Vector3f( s ) * e0 + Vector3f( t ) * e1 ));
     }
 
-    double distance( const Vector3f& p ) const {
-        double min = 10e10;
-        for ( uint32_t i = 0; i < triangles.size(); i += 3 ) {
-            min = std::fmin( min, distance( p, i ));
-        }
-        return min;
+    return length( p - ( v0 + Vector3f( s ) * e0 + Vector3f( t ) * e1 ));
+}
+
+double Topology::distance( const Vector3f& p ) const {
+    double min = 10e10;
+    for ( uint32_t i = 0; i < triangles.size(); i += 3 ) {
+        min = std::fmin( min, distance( p, i ));
     }
-};
+    return min;
+}
 
 ShapeType shapeTypeFromString( const std::string& value ) {
 
@@ -644,8 +620,7 @@ void RoundedCube( Topology& mesh, uint32_t subdivs, float radius ) {
 //    *targetV = (-normal->y + 1) / 2;
 //}
 
-PolyStruct createGeom( Topology& mesh, [[maybe_unused]] const Vector3f& center, const Vector3f& size, GeomMapping mt,
-        int subdivs ) {
+PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs ) {
 
     for ( int j = 0; j < subdivs; ++j ) {
         mesh = SubdivideMesh( mesh );
@@ -838,7 +813,7 @@ PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, co
 //    Icosahedron( mesh );
 //    return createGeom( mesh, center, Vector3f{ diameter }, GeomMapping::Spherical, subdivs );
     UVSphere( mesh );
-    return createGeom( mesh, center, Vector3f{ diameter }, GeomMapping::SphericalUV, 0 );
+    return createGeom( mesh, Vector3f{ diameter }, GeomMapping::SphericalUV, 0 );
 }
 
 PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
@@ -846,7 +821,7 @@ PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
     Topology mesh;
     Cube( mesh );
 
-    return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
+    return createGeom( mesh, size, GeomMapping::Cube, 0 );
 }
 
 PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
@@ -854,7 +829,7 @@ PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
     Topology mesh;
     Panel( mesh );
 
-    return createGeom( mesh, center, size, GeomMapping::PlanarNoTile, 0 );
+    return createGeom( mesh, size, GeomMapping::PlanarNoTile, 0 );
 }
 
 PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const int subdivs ) {
@@ -863,7 +838,7 @@ PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const
     int edges = subdivs * 8;
     Cylinder( mesh, edges );
 
-    return createGeom( mesh, center, Vector3f{ size.x(), size.y(), size.x() }, GeomMapping::Cylindrical, 0 );
+    return createGeom( mesh, Vector3f{ size.x(), size.y(), size.x() }, GeomMapping::Cylindrical, 0 );
 }
 
 PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
@@ -871,7 +846,7 @@ PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, co
     Topology mesh;
     Pillow( mesh, subdivs, radius * size.y() );
 
-    return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
+    return createGeom( mesh, size, GeomMapping::Cube, 0 );
 }
 
 PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
@@ -879,5 +854,5 @@ PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& siz
     Topology mesh;
     RoundedCube( mesh, subdivs, radius * size.y() );
 
-    return createGeom( mesh, center, size, GeomMapping::Cube, 0 );
+    return createGeom( mesh, size, GeomMapping::Cube, 0 );
 }

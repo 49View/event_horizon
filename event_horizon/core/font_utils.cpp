@@ -11,7 +11,7 @@
 
 namespace FontUtils {
 
-Rect2f measure( const std::string& msg, std::shared_ptr<Utility::TTFCore::Font> f, float height ) {
+Rect2f measure( const std::string& msg, std::shared_ptr<Font> f, float height ) {
     int32_t numPolysRendered = 0;
     int32_t numTotalPolys = 0;
     int32_t numPolysToDraw = 0;
@@ -69,7 +69,7 @@ Rect2f measure( const std::string& msg, std::shared_ptr<Utility::TTFCore::Font> 
 }
 
 Rect2f optimalSizeForText( const Vector2f& size,
-                           std::shared_ptr<Utility::TTFCore::Font> f,
+                           std::shared_ptr<Font> f,
                            const std::string& text,
                            float& outputHeight ) {
 

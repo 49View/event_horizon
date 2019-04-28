@@ -113,7 +113,7 @@ public:
 		return mFontName;
 	}
 
-	const Utility::TTFCore::Font& getFont() const {
+	const Font& getFont() const {
 		return fm[mFontName];
 	}
 

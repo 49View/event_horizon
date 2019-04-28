@@ -7,11 +7,13 @@
 #include <core/raw_image.h>
 #include <core/camera_rig.hpp>
 #include <core/TTF.h>
+#include <core/amarant_font.hpp>
 #include <core/geom.hpp>
 #include <core/names.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <poly/resources/ui_shape_builder.h>
 #include <core/resources/material.h>
+#include <core/file_manager.h>
 
 UUID SceneGraph::addNode( const ResourceRef& _hash ) {
     auto cloned = GM().clone( _hash );
@@ -175,6 +177,8 @@ void SceneGraph::init() {
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
 //    B<MB>( "tomato" ).load();
 
+    B<FB>( S::DEFAULT_FONT ).addIM( Font{FontAmaranthRegularBin, FontAmaranthRegularBinLen} );
+//    B<FB>( S::DEFAULT_FONT ).addIM( Font{FM::readLocalFileC("/Users/Dado/Downloads/Banner5_ForSending/AkkuratFont/Akkurat-Light.ttf")} );
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }
 

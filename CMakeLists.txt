@@ -771,7 +771,14 @@ function(linker PROJECT_NAME WHICH_LIBS)
     link_libraries_multi("zlib" "zlib" OFF OFF OFF)
 
     # common libraries
-    link_system_libraries_if("${APPLE}" "-llapack;-lz;-lbz2;-liconv;")
+    link_system_libraries_if("${APPLE}" "-llapack;-lbz2;-liconv;")
+
+    if ( APPLE )
+        target_link_libraries(${PROJECT_NAME} "/opt/local/lib/libz.a")
+        message(STATUS "Linking opt /opt/local/lib/libz.a")
+    endif()
+
+#    link_libraries_if("${APPLE}" "libz" "/opt/local/lib/" "libz.a")
 #    link_libraries_if("${APPLE}" "X11" "/usr/X11/lib/" "X11")
 
     link_system_libraries_if("${WIN32}" "-lws2_32")

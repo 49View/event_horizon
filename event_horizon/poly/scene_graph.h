@@ -70,14 +70,14 @@ public:
 
     template <typename R>
     auto& M() {
-        if constexpr ( std::is_same<R, VData>::value )                  return VL();
-        if constexpr ( std::is_same<R, RawImage>::value )               return TL();
-        if constexpr ( std::is_same<R, Material>::value )               return ML();
-        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return FM();
-        if constexpr ( std::is_same<R, Profile>::value )                return PL();
-        if constexpr ( std::is_same<R, MaterialColor>::value )          return MC();
-        if constexpr ( std::is_same<R, CameraRig>::value )              return CM();
-        if constexpr ( std::is_same<R, Geom>::value )                   return GM();
+        if constexpr ( std::is_same_v<R, VData>         ) return VL();
+        if constexpr ( std::is_same_v<R, RawImage>      ) return TL();
+        if constexpr ( std::is_same_v<R, Material>      ) return ML();
+        if constexpr ( std::is_same_v<R, Font>          ) return FM();
+        if constexpr ( std::is_same_v<R, Profile>       ) return PL();
+        if constexpr ( std::is_same_v<R, MaterialColor> ) return MC();
+        if constexpr ( std::is_same_v<R, CameraRig>     ) return CM();
+        if constexpr ( std::is_same_v<R, Geom>          ) return GM();
     }
 
     template <typename T>
@@ -100,15 +100,10 @@ public:
 
     template <typename T, typename ...Args>
     UUID GB( Args&&... args ) {
-        return geomAssembler<T>(VDataAssembler<T>{std::forward<Args>(args)...});
-    }
-
-protected:
-    template <typename T>
-    UUID geomAssembler( VDataAssembler<T> gb ) {
+        VDataAssembler<T> gb{std::forward<Args>(args)...};
         auto matRef     = ML().getHash(gb.matRef);
 
-        VDataServices::prepare( gb.dataTypeHolder );
+        VDataServices::prepare( *this, gb.dataTypeHolder );
         auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
         auto vdataRef = VL().getHash( hashRefName );
         if ( vdataRef.empty() ) {
@@ -124,6 +119,7 @@ protected:
         return addNode( ref );
     }
 
+protected:
 //    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}

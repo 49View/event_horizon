@@ -165,7 +165,7 @@ textureQuadFillModeMapping( const RectFillMode fm, const Rect2f& rect, float _im
 //                               const Utility::TTFCore::Font& f, float height, const Vector4f& color,
 //                               const std::string& _vpname, bool bMeasureOnly, bool centered ) {
 
-std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( std::shared_ptr<Utility::TTFCore::Font> f ) {
+std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeText( std::shared_ptr<Font> f ) {
     int32_t numPolysRendered = 0;
     int32_t numTotalPolys = 0;
     int32_t numPolysToDraw = 0;

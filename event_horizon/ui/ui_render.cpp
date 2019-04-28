@@ -267,7 +267,7 @@ UiControlRenderer::~UiControlRenderer() {
 }
 
 void UiTextInputRenderer::printTextInput( const std::string& _title, const std::string& _text,
-                                          [[maybe_unused]] const Utility::TTFCore::Font& _font) {
+                                          [[maybe_unused]] const Font& _font) {
     float tsize = 0.25f;
     float tcenter = 0.5f;
     float tpad = 0.01f;

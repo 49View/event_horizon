@@ -48,7 +48,7 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
         rawPoints.pop_back();
         nsvgDelete( image );
 
-        sanitizePath( rawPoints, mPoints, true, 0.0001f * 0.0001f );
+        mPoints = sanitizePath( rawPoints, true, 0.0001f * 0.0001f );
         ASSERT( mPoints.size() > 2 );
         auto wo = detectWindingOrder( mPoints[0], mPoints[1], mPoints[2] );
         if ( wo == WindingOrder::CCW ) {

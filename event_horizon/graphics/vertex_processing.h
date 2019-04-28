@@ -46,7 +46,7 @@ class VPList {
 public:
     VPList( std::shared_ptr<GPUVData> value,
             std::shared_ptr<RenderMaterial> _mat,
-            std::shared_ptr<Matrix4f> _transform,
+            const std::shared_ptr<Matrix4f>& _transform,
             uint64_t _tag );
 
     inline std::shared_ptr<RenderMaterial> getMaterial() const {

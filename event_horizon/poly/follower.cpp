@@ -179,7 +179,7 @@ void extrude( std::shared_ptr<VData> geom,
 
     // Sanitize same points and collinear
     std::vector<Vector3f> verts;
-    sanitizePath( _verts, verts, bWrap );
+    verts = sanitizePath( _verts, bWrap );
 
     auto vaCount = verts.size();
     if ( vaCount < 2 ) {

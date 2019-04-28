@@ -440,7 +440,7 @@ struct MapFromData {
 };
 
 // ----- Font -----
-class Font {
+class FontInternal {
 private:
 
 	// internal types
@@ -458,7 +458,7 @@ private:
 
 	// temp/cache data
 //    boost::shared_mutex cacheMutex; // cache mutex
-	mutable std::mutex cacheMutex; // cache mutex
+//	mutable std::mutex cacheMutex; // cache mutex
 	mutable MeshCache meshCache;            // glyph mesh cache
 	static Triangulator trianglulator;     // triangulation data structures/functions
 
@@ -543,10 +543,11 @@ private:
     void bufferDecode( const unsigned char* rawData, size_t length );
 
 public:
-	Font( std::string flnm );                   // construct from file
-	Font( const void* rawData, MapFromData );   // map from raw data (no copy made, data must exist for the duration of the Font object)
-    RESOURCE_CTORS(Font);
-	virtual ~Font();
+    FontInternal( const FontInternal& _source );
+    explicit FontInternal( std::string flnm );                   // construct from file
+    FontInternal( const void* rawData, MapFromData );   // map from raw data (no copy made, data must exist for the duration of the Font object)
+    RESOURCE_CTORS(FontInternal);
+	virtual ~FontInternal();
 
 public:
     // font info
@@ -572,6 +573,8 @@ public:
 
 	// helpers
 	void PreCacheBasicLatin();                     // pre cache all the standard basic latin glyphs
+
+	static constexpr float gliphScaler() { return 1.0f/1000.0f; }
 };
 
 // ----- end of TTFCore namespace -----
@@ -597,7 +600,7 @@ using TTFCore::InvalidFontException;
 using TTFCore::UnsupportedCap;
 
 // ----- types -----
-using TTFCore::Font;
+using TTFCore::FontInternal;
 using TTFCore::CodePoint;
 using TTFCore::GlyphMetrics;
 using TTFCore::FontMetrics;
@@ -618,3 +621,5 @@ const TTFCore::MapFromData mapFromData;
 }    // Utility namespace
 
 #endif
+
+using Font = Utility::TTFCore::FontInternal;

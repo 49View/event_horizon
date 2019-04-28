@@ -708,10 +708,7 @@ struct VFA8 {
 template<class V>
 class VertexStripIBVB {
 public:
-    VertexStripIBVB() {
-        primiteType = PRIMITIVE_TRIANGLE_STRIP;
-        reset();
-    }
+    VertexStripIBVB() = default;
 
     VertexStripIBVB( const VertexStripIBVB& cc ) {
         init( cc.numVerts, cc.primiteType, cc.numIndices, cc.verts, cc.indices );
@@ -719,7 +716,6 @@ public:
 
     VertexStripIBVB( Primitive _primitiveType ) {
         primiteType = _primitiveType;
-        reset();
     }
 
     VertexStripIBVB( int32_t _numVerts, Primitive _primitiveType, VFVertexAllocation vAlloc ) {
@@ -812,13 +808,6 @@ public:
         init( 4, PRIMITIVE_TRIANGLE_STRIP, 4, _verts, _indices );
     }
 
-    void reset() {
-        indices = nullptr;
-        verts = nullptr;
-        numIndices = 0;
-        numVerts = 0;
-    }
-
     Vector3f centre() const {
         AABB ret{AABB::INVALID};
         for ( int32_t t = 0; t < numVerts; t++ ) ret.expand( verts[t].pos );
@@ -844,7 +833,6 @@ public:
     void generateStripsFromVerts( const std::vector<Vector3f>& vList, bool wrapIt ) {
         if ( vList.size() < 3 ) return;
 
-        reset();
         int32_t wrapVertsCount = wrapIt ? 2 : 0;
         int64_t numStripVerts = vList.size() * 2 + wrapVertsCount;
         indices = std::unique_ptr<int32_t[]>( new int32_t[numStripVerts] );
@@ -1080,10 +1068,10 @@ public:
     std::unique_ptr<int32_t[]> indices;
     std::unique_ptr<V[]> verts;
 
-    int32_t numIndices;
-    int32_t numVerts;
+    int32_t numIndices = 0;
+    int32_t numVerts = 0;
 
-    Primitive primiteType;
+    Primitive primiteType = PRIMITIVE_TRIANGLE_STRIP;
 };
 
 typedef VFA1<Vector2f> VFPos2d;

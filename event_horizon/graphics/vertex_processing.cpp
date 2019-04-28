@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "vertex_processing.h"
 
 #include <core/math/matrix4f.h>
@@ -14,13 +16,12 @@
 
 VPList::VPList( std::shared_ptr<GPUVData> _gpuData,
                 std::shared_ptr<RenderMaterial> _mat,
-                std::shared_ptr<Matrix4f> _transform,
+                const std::shared_ptr<Matrix4f>& _transform,
                 const uint64_t _tag ) {
-    gpuData = _gpuData;
-    if ( _transform == nullptr ) {
+    gpuData = std::move(_gpuData);
+    mTransform = _transform;
+    if ( !_transform ) {
         mTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
-    } else {
-        mTransform = _transform;
     }
     material = _mat;
     mTag = _tag;

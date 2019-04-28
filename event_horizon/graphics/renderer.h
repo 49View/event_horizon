@@ -240,6 +240,6 @@ public:
 	void drawCone( int bucketIndex, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
 				   float size, const std::string& _name = "" );
 
-	friend class RenderSceneGraph;
-	friend struct HierGeomRenderObserver;
+    void drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
+                   std::shared_ptr<Font> font, const Color4f& color );
 };

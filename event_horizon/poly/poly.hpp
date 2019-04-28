@@ -10,6 +10,7 @@
 #include <vector>
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/resource_serialization.hpp>
+#include <event_horizon/event_horizon/core/names.hpp>
 
 enum class UIShapeType {
     CameraFrustom2d,
@@ -108,10 +109,26 @@ struct GeomMappingData {
 
 struct PolyOutLine;
 struct PolyLine;
+namespace Utility::TTFCore { class FontInternal;}
+using Font = Utility::TTFCore::FontInternal;
 
 namespace GT {
+    enum class TextType {
+        TextUI,
+        Text2d,
+        Text3d
+    };
+
+    struct GTPolicyColor {
+        C4f color;
+    };
     struct GTPolicyText {
         std::string text;
+        std::string fontName = S::DEFAULT_FONT;
+        std::shared_ptr<Font> font;
+        TextType ttype;
+        float fontHeight = .1f;
+        JSONSERIALBIN( text, fontName, ttype, fontHeight )
     };
     struct GTPolicyExtrusion {
         std::vector<PolyOutLine> extrusionVerts;
@@ -130,16 +147,14 @@ namespace GT {
         GeomMappingData mappingData;
     };
 
-    struct Shape   : GTPolicyShape {};
+    struct Shape   : GTPolicyShape, GTPolicyColor {};
     struct Follower         {};
-    struct Extrude : GTPolicyExtrusion, GTPolicyMapping {};
-    struct Poly    : GTPolicyPolyline, GTPolicyMapping {};
+    struct Extrude : GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor {};
+    struct Poly    : GTPolicyPolyline, GTPolicyMapping, GTPolicyColor {};
     struct Mesh             {};
     struct GLTF2            {};
     struct Asset            {};
     struct File             {};
     struct SVG              {};
-    struct TextUI : GTPolicyText {};
-    struct Text2d : GTPolicyText {};
-    struct Text3d : GTPolicyText {};
+    struct Text : GTPolicyText, GTPolicyColor {};
 }

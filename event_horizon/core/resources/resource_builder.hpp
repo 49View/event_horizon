@@ -85,7 +85,7 @@ public:
             if ( rd.group == ResourceGroup::Image ) {
                 add<RawImage>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
             } else if ( rd.group == ResourceGroup::Font ) {
-                add<Utility::TTFCore::Font>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
+                add<Font>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
             } else if ( rd.group == ResourceGroup::Profile ) {
                 add<Profile>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
             } else if ( rd.group == ResourceGroup::Color ) {

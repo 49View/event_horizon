@@ -86,7 +86,7 @@ public:
         if constexpr ( std::is_same<R, MaterialColor>::value )          return false;
         if constexpr ( std::is_same<R, Profile>::value )                return false;
         if constexpr ( std::is_same<R, RawImage>::value )               return false;
-        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return false;
+        if constexpr ( std::is_same<R, Font>::value ) return false;
         if constexpr ( std::is_same<R, UIElement>::value )              return true ;
         if constexpr ( std::is_same<R, CameraRig>::value )              return false;
     }
@@ -98,7 +98,7 @@ public:
         if constexpr ( std::is_same<R, MaterialColor>::value )          return {};
         if constexpr ( std::is_same<R, Profile>::value )                return {};
         if constexpr ( std::is_same<R, RawImage>::value )               return _val->serialize();
-        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return {};
+        if constexpr ( std::is_same<R, Font>::value ) return {};
         if constexpr ( std::is_same<R, UIElement>::value )              return {};
         if constexpr ( std::is_same<R, CameraRig>::value )              return {};
     }
@@ -110,7 +110,7 @@ public:
         if constexpr ( std::is_same<R, MaterialColor>::value ) return ResourceGroup::Color;
         if constexpr ( std::is_same<R, Profile>::value ) return ResourceGroup::Profile;
         if constexpr ( std::is_same<R, RawImage>::value ) return ResourceGroup::Image;
-        if constexpr ( std::is_same<R, Utility::TTFCore::Font>::value ) return ResourceGroup::Font;
+        if constexpr ( std::is_same<R, Font>::value ) return ResourceGroup::Font;
         if constexpr ( std::is_same<R, UIElement>::value ) return ResourceGroup::UI;
         if constexpr ( std::is_same<R, CameraRig>::value ) return ResourceGroup::CameraRig;
     }
@@ -125,7 +125,7 @@ public:
 
         if ( std::is_same<R, Profile>::value  )                 return "profile";
         if ( std::is_same<R, RawImage>::value  )                return "image";
-        if ( std::is_same<R, Utility::TTFCore::Font>::value  )  return "font";
+        if ( std::is_same<R, Font>::value  )  return "font";
         return "unknown";
     }
 
@@ -145,7 +145,7 @@ using PB = ProfileBuilder;
 using CameraBuilder = ResourceBuilder<CameraRig>;
 using CB = CameraBuilder;
 
-using FontBuilder = ResourceBuilder<Utility::TTFCore::Font>;
+using FontBuilder = ResourceBuilder<Font>;
 using FB = FontBuilder;
 
 using MaterialColorBuilder = ResourceBuilder<MaterialColor>;
@@ -161,7 +161,7 @@ template<typename T, typename C> class ResourceManager;
 
 using VDataManager      = ResourceManager<VData, ResourceManagerContainer<VData>>;
 using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
-using FontManager       = ResourceManager<Utility::TTFCore::Font, ResourceManagerContainer<Utility::TTFCore::Font>>;
+using FontManager       = ResourceManager<Font, ResourceManagerContainer<Font>>;
 using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Profile>>;
 using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Material>>;
 using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>>;
