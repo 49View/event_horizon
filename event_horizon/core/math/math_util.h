@@ -682,6 +682,31 @@ T snapTo( const T& value, const std::vector<T>& snapPoints, float distThreshold 
 			}
 		}
 	}
+
+    if ( !snapPoints.empty() && ret == value && value != snapPoints.back()) {
+        T lastLine = value - snapPoints.back();
+        constexpr float slopeMinAngle = 0.06f;
+        float slope = dot( T::X_AXIS, normalize(lastLine) );
+        if constexpr ( T::vsize() == 3 ) {
+            if ( fabs(acos(slope)) < slopeMinAngle ) {
+                ret.setZ( snapPoints.back().z() );
+            }
+            slope = dot( T::Z_AXIS, normalize(lastLine) );
+            if ( fabs(acos(slope)) < slopeMinAngle ) {
+                ret.setX( snapPoints.back().x() );
+            }
+        }
+        if constexpr ( T::vsize() == 2 ) {
+            if ( fabs(acos(slope)) < slopeMinAngle ) {
+                ret.setY( snapPoints.back().y() );
+            }
+            slope = dot( T::Y_AXIS, normalize(lastLine) );
+            if ( fabs(acos(slope)) < slopeMinAngle ) {
+                ret.setX( snapPoints.back().x() );
+            }
+        }
+    }
+
 	return ret;
 }
 

@@ -13,7 +13,7 @@ static std::shared_ptr<HeterogeneousMap> mapColor( const Color4f& _matColor ) {
     return values;
 }
 
-void Renderer::drawIncGridLines( int numGridLines, float deltaInc, float gridLinesWidth,
+void Renderer::drawIncGridLines( const int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
                        const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
                        const float zoffset, const std::string& _name ) {
     float delta = deltaInc;
@@ -23,49 +23,99 @@ void Renderer::drawIncGridLines( int numGridLines, float deltaInc, float gridLin
                                        constAxis0.dominantElement() == 2 ? constAxis0.z() : delta );
         Vector3f lerpRightX = Vector3f( constAxis1.dominantElement() == 0 ? constAxis1.x() : delta, zoffset,
                                         constAxis1.dominantElement() == 2 ? constAxis1.z() : delta );
-        drawLine( CommandBufferLimits::CoreGrid, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+        drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
                   _name + std::to_string( t ) + "+" );
         lerpLeftX = Vector3f( constAxis0.dominantElement() == 0 ? constAxis0.x() : -delta, zoffset,
                               constAxis0.dominantElement() == 2 ? constAxis0.z() : -delta );
         lerpRightX = Vector3f( constAxis1.dominantElement() == 0 ? constAxis1.x() : -delta, zoffset,
                                constAxis1.dominantElement() == 2 ? constAxis1.z() : -delta );
-        drawLine( CommandBufferLimits::CoreGrid, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+        drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
                   _name + std::to_string( t ) + "-" );
         delta += deltaInc;
     }
 }
 
-void Renderer::createGrid( float unit, const Color4f& /*mainAxisColor*/,
+void Renderer::createGrid( const int bucketIndex, float unit, const Color4f& mainAxisColor,
                            const Color4f& smallAxisColor, const Vector2f& limits, const float axisSize,
-                           const float zoffset, bool _monochrome, const std::string& _name ) {
-    float mainAxisWidth = axisSize * 0.25f;
-    float gridLinesWidth = mainAxisWidth;
+                           const std::string& _name ) {
+    float mainAxisWidth = axisSize;
+    float gridLinesWidth = mainAxisWidth * 0.5f;
+    float zoffset = 0.0f;
 
     Vector3f leftXAxis  = Vector3f( -limits.x(), zoffset, 0.0f );
     Vector3f rightXAxis = Vector3f(  limits.x(), zoffset, 0.0f );
 
-    Vector3f topYAxis =    Vector3f( 0.0f, zoffset + 0.01f, -limits.y() );
-    Vector3f bottomYAxis = Vector3f( 0.0f, zoffset + 0.01f,  limits.y() );
+    Vector3f topYAxis =    Vector3f( 0.0f, zoffset, -limits.y() );
+    Vector3f bottomYAxis = Vector3f( 0.0f, zoffset,  limits.y() );
 
     Vector2f axisLenghts = { limits.x() * 2.0f, limits.y() * 2.0f };
 
-    drawIncGridLines( static_cast<int>(( axisLenghts.y() / unit ) / 2.0f ), unit, gridLinesWidth, leftXAxis,
+    drawIncGridLines( bucketIndex, static_cast<int>(( axisLenghts.y() / unit ) / 2.0f ), unit, gridLinesWidth, leftXAxis,
                       rightXAxis, smallAxisColor, zoffset-0.01f, _name + "y_axis" );
-    drawIncGridLines( static_cast<int>(( axisLenghts.x() / unit ) / 2.0f ), unit, gridLinesWidth, topYAxis,
+    drawIncGridLines( bucketIndex, static_cast<int>(( axisLenghts.x() / unit ) / 2.0f ), unit, gridLinesWidth, topYAxis,
                       bottomYAxis, smallAxisColor, zoffset-0.01f, _name + "x_axis" );
 
     // Main axis
-    Color4f mc = Color4f{ smallAxisColor * 1.5f }.A(1.0f);
-    Color4f xAxisColorPos = _monochrome ? mc : Color4f::PASTEL_RED * 0.75f;
-    Color4f xAxisColorNeg = _monochrome ? mc : Color4f::PASTEL_RED * 1.25f;
-    Color4f yAxisColorPos = _monochrome ? mc : Color4f::PASTEL_CYAN * 0.75f;
-    Color4f yAxisColorNeg = _monochrome ? mc : Color4f::PASTEL_CYAN * 1.25f;
+    drawLine( bucketIndex, leftXAxis, rightXAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "xAxis" );
+    drawLine( bucketIndex, topYAxis, bottomYAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "yAxis" );
+}
 
-    Vector3f base = { 0.0f, zoffset, 0.0f  };
-    drawLine( CommandBufferLimits::CoreGrid, leftXAxis, base, xAxisColorPos, mainAxisWidth, false, 0.0f, 1.0f, _name + "xNeg" );
-    drawLine( CommandBufferLimits::CoreGrid, base, rightXAxis, xAxisColorNeg, mainAxisWidth, false, 0.0f, 1.0f, _name + "xPos" );
-    drawLine( CommandBufferLimits::CoreGrid, topYAxis, base, yAxisColorPos, mainAxisWidth, false, 0.0f, 1.0f, _name + "yNeg" );
-    drawLine( CommandBufferLimits::CoreGrid, base, bottomYAxis, yAxisColorNeg, mainAxisWidth, false, 0.0f, 1.0f, _name + "yPos" );
+void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& mainAxisColor,
+                           const Color4f& smallAxisColor, const Vector2f& limits, const float axisSize,
+                           const std::string& _name ) {
+    float mainAxisWidth = axisSize;
+    float gridLinesWidth = mainAxisWidth * 0.5f;
+
+    Vector3f leftXAxis  = V3f{ -limits.x(), 0.0f, 0.0f };
+    Vector3f rightXAxis = V3f{  limits.x(), 0.0f, 0.0f };
+
+    Vector3f topYAxis =    Vector3f( 0.0f, 0.0f, -limits.y() );
+    Vector3f bottomYAxis = Vector3f( 0.0f, 0.0f,  limits.y() );
+
+    Vector2f axisLenghts = { limits.x() * 2.0f, limits.y() * 2.0f };
+
+    auto numGridLinesY = static_cast<int>(( axisLenghts.y() / unit ));
+    float delta = topYAxis.z();
+    for ( int t = 0; t < numGridLinesY; t++ ) {
+        // xLines
+        Vector3f lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
+        Vector3f lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
+        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+                  _name + std::to_string( t ) + "+" );
+        for ( int q = 0; q < 3; q++ ) {
+            delta += unit * 0.25f;
+            lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
+            lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+                      _name + std::to_string( t ) + "+" );
+        }
+        delta += unit * 0.25f;
+    }
+
+    auto numGridLinesX = static_cast<int>(( axisLenghts.x() / unit ) );
+    delta = leftXAxis.x();
+    for ( int t = 0; t < numGridLinesX; t++ ) {
+        // xLines
+        Vector3f lerpLeftX = topYAxis + V3f::X_AXIS * delta;
+        Vector3f lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
+        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+                  _name + std::to_string( t ) + "+" );
+        for ( int q = 0; q < 3; q++ ) {
+            delta += unit * 0.25f;
+            lerpLeftX = topYAxis + V3f::X_AXIS * delta;
+            lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+                      _name + std::to_string( t ) + "+" );
+        }
+        delta += unit * 0.25f;
+    }
+
+//    drawIncGridLines( bucketIndex, static_cast<int>(( axisLenghts.x() / unit ) / 2.0f ), unit, gridLinesWidth, topYAxis,
+//                      bottomYAxis, smallAxisColor, zoffset-0.01f, _name + "x_axis" );
+
+    // Main axis
+//    drawLine( bucketIndex, leftXAxis, rightXAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "xAxis" );
+//    drawLine( bucketIndex, topYAxis, bottomYAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "yAxis" );
 }
 
 void Renderer::drawArrow( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color,
@@ -236,6 +286,26 @@ void Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float rad
     }
 
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
+                                                                   _verts, _indices );
+
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
+}
+
+void Renderer::drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color, const std::string& _name ) {
+    auto numIndices = 5;
+    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[numIndices] );
+    std::unique_ptr<VFPos3d[]> _verts = std::unique_ptr<VFPos3d[]>( new VFPos3d[numIndices] );
+
+    for ( int t = 0; t < numIndices; t++ ) {
+        _indices[t] = t;
+    }
+    for ( int t = 0; t < numIndices; t++ ) {
+        float angle = M_PI_4 + ( static_cast<float>( t - 1 ) / static_cast<float>( numIndices - 1 )) * TWO_PI;
+        _verts[t].pos = Vector3f( center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius * sqrt(2.0f));
+    }
+
+    std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( 4, PRIMITIVE_TRIANGLE_FAN, 4,
                                                                    _verts, _indices );
 
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();

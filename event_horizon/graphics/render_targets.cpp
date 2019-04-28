@@ -56,15 +56,13 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     mComposite = std::make_shared<CompositePBR>(rr, cameraRig->getMainCamera()->Name(), screenViewport, finalDestBlit);
     framebuffer = mComposite->getColorFB();
     bucketRanges.emplace_back( CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd );
-    bucketRanges.emplace_back( CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd );
-    bucketRanges.emplace_back( CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
 
     mShadowMapFB = FrameBufferBuilder{ rr, FBNames::shadowmap }.size(4096).GPUSlot(TSLOT_SHADOWMAP).depthOnly().build();
 
     smm = std::make_unique<ShadowMapManager>();
 
-    rr.createGrid( 1.0f, Color4f::ACQUA_T, Color4f::PASTEL_GRAYLIGHT, Vector2f( 10.0f ), 0.075f );
+//    rr.createGrid( 1.0f, Color4f::ACQUA_T, Color4f::PASTEL_GRAYLIGHT, Vector2f( 10.0f ), 0.075f );
 
     // Create a default skybox
     mSkybox = createSkybox();
@@ -298,8 +296,6 @@ CompositePBR::CompositePBR( Renderer& _rr, [[maybe_unused]] const std::string& _
 void RLTarget::addToCBCore( CommandBufferList& cb ) {
     auto lcvt = cameraRig->getCvt();
 
-    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-
     if ( checkBitWiseFlag( lcvt, ViewportToggles::DrawWireframe ) ) {
         cb.pushCommand( { CommandBufferCommandName::wireFrameModeTrue } );
     } else {
@@ -310,11 +306,7 @@ void RLTarget::addToCBCore( CommandBufferList& cb ) {
         rr.addToCommandBuffer( CommandBufferLimits::CoreGrid );
     }
 
-    for ( const auto& [k, vl] : rr.CL() ) {
-        if ( isKeyInRange(k) ) {
-            rr.addToCommandBuffer( k );
-        }
-    }
+    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
 
 }
 
@@ -379,17 +371,29 @@ void RLTarget::clearCB() {
 }
 
 void RLTargetPBR::startCL( CommandBufferList& cb ) {
+
+    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+    cb.setCameraUniforms( cameraRig->getCamera() );
+    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
+    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
+    cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
+
+    for ( const auto& [k, vl] : rr.CL() ) {
+        if ( inRange( k, { CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd} ) ) {
+            rr.addToCommandBuffer( k );
+        }
+    }
+
+//    addToCBCore( cb );
+
     // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
-    // Especially Skyboxes and probes!!
+    // (that has got 3d lighting in it) especially skyboxes and probes!!
     addShadowMaps();
     if ( mSkybox->precalc( 1.0f ) ) {
         addProbes();
     }
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
-    cb.setCameraUniforms( cameraRig->getCamera() );
-    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
-    addToCBCore( cb );
+
 }
 
 void RLTargetPBR::endCL( CommandBufferList& cb ) {
@@ -404,8 +408,9 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     startCL( cb );
 
-    mSkybox->render();
+//    mSkybox->render();
 
+    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k) ) {
             rr.addToCommandBuffer( vl.mVList );
@@ -418,6 +423,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
             rr.addToCommandBuffer( vl.mVListTransparent );
         }
     }
+
     cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
     cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
 

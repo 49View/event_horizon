@@ -102,7 +102,8 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     sg.nodeAddConnect( [this](NodeGraphConnectParamsSig _geom) {
         LOGRS( "[SG-Node] Add " << _geom->Name() );
         auto dataRef = _geom->DataRef(0);
-        auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.n(_geom->UUiD()).build();
+        auto transformMatrix = std::make_shared<Matrix4f>(_geom->getLocalHierTransform());
+        auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.n(_geom->UUiD()).t(transformMatrix).build();
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);
     });
 

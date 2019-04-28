@@ -34,6 +34,8 @@ enum class RLClearFlag {
     All
 };
 
+using RenderBucketRanges = std::vector<std::pair<int, int>>;
+
 class Composite {
 public:
     explicit Composite( Renderer& rr ) : rr( rr ) {}
@@ -191,7 +193,7 @@ public:
     bool bEnabled = true;
     BlitType finalDestBlit = BlitType::OnScreen;
     ScreenShotContainerPtr screenShotContainer;
-    std::vector<std::pair<int, int>> bucketRanges;
+    RenderBucketRanges bucketRanges;
 
 protected:
     void updateStreamPacket( const std::string& _streamName );

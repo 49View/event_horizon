@@ -17,7 +17,8 @@
 VPList::VPList( std::shared_ptr<GPUVData> _gpuData,
                 std::shared_ptr<RenderMaterial> _mat,
                 const std::shared_ptr<Matrix4f>& _transform,
-                const uint64_t _tag ) {
+                const uint64_t _tag,
+                const UUID& _uuid ) : UUIDCopiable(_uuid) {
     gpuData = std::move(_gpuData);
     mTransform = _transform;
     if ( !_transform ) {

@@ -202,7 +202,19 @@ void Renderer::clearCommandList() {
 }
 
 void Renderer::clearBucket( const int _bucket ) {
-    if ( auto it = mCommandLists.find(_bucket); it != mCommandLists.end() ) mCommandLists.erase(it);
+    if ( auto it = mCommandLists.find(_bucket); it != mCommandLists.end() ) {
+        mCommandLists.erase(it);
+    }
+}
+
+void Renderer::removeFromCL( const UUID& _uuid ) {
+
+    auto removeUUID = [_uuid]( const auto & us ) -> bool { return us->UUiD() == _uuid; };
+
+    for ( auto& [k, vl] : CL() ) {
+        erase_if( vl.mVList, removeUUID );
+        erase_if( vl.mVListTransparent, removeUUID );
+    }
 }
 
 void Renderer::renderCommands( int eye ) {
@@ -305,16 +317,6 @@ void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _colo
                 v->setMaterialColorWithUUID(_color, _tag, _oldColor);
             }
     }
-}
-
-void Renderer::removeFromCL( const UUID& _uuid ) {
-//    ### REF re-think this!!!
-//    auto removeUUID = [_uuid]( const auto & us ) -> bool { return us->Name() == _uuid; };
-//
-//    for ( auto& [k, vl] : CL() ) {
-//        erase_if( vl.mVList, removeUUID );
-//        erase_if( vl.mVListTransparent, removeUUID );
-//    }
 }
 
 void Renderer::invalidateOnAdd() {

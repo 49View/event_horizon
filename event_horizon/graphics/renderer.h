@@ -187,15 +187,16 @@ protected:
 
 public:
 
-	void drawIncGridLines( int numGridLines, float deltaInc, float gridLinesWidth,
+	void drawIncGridLines( int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
 						   const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
-						   const float zoffset, const std::string& _name = "" );
+						   float zoffset, const std::string& _name = "" );
 	void drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
 						const Vector4f& color, float width, int32_t subdivs, const std::string& _name = "" );
 
-	void createGrid( float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
-					 const Vector2f& limits, const float axisSize, const float zoffset = 0.0f, bool _monochrome = false,
-					 const std::string& _name = "" );
+	void createGrid( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
+					 const Vector2f& limits, float axisSize, const std::string& _name = "" );
+    void createGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
+                     const Vector2f& limits, float axisSize, const std::string& _name = "" );
 	void
 	drawArrow( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color, float width,
 			   float angle, float arrowlength, float _z, float percToBeDrawn, const std::string& _name1,
@@ -221,12 +222,13 @@ public:
 	void
 	draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
 				  const std::string& _name = "" );
+    void drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color, const std::string& _name = "" );
 	void drawCircle( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
-					 int32_t subdivs = 10, const std::string& _name = "" );
+					 int32_t subdivs = 12, const std::string& _name = "" );
 	void drawCircle( int bucketIndex, const Vector3f& center, const Vector3f& normal, float radius,
 					 const Color4f& color, int32_t subdivs, const std::string& _name = "" );
 	void drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color,
-					   int32_t subdivs = 10, const std::string& _name = "" );
+					   int32_t subdivs = 12, const std::string& _name = "" );
 	void drawArc( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
 				  const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
 				  const std::string& _name = "" );

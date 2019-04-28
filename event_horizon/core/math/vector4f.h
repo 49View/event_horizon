@@ -397,6 +397,8 @@ public:
         return o;
     }
 
+    static constexpr int32_t vsize() { return 4; }
+
 private:
 	// Note: these elements should be declared contiguously and ordered X/Y/W/Z
 	// due to a memory-layout assumption in operator[].

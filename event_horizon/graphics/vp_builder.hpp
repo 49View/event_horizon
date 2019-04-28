@@ -35,13 +35,15 @@ public:
                     gpuDataSP,
                     renderMaterialSP,
                     transformMatrix,
-                    tag );
+                    tag,
+                    name );
         }
         return std::make_shared<VPList>(
                rr.addVDataResource( cpuVBIB{ ps }, name ),
                rr.addMaterialResource( shaderMaterial, name ),
                transformMatrix,
-               tag );
+               tag,
+               name );
     }
 
 private:

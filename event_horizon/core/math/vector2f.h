@@ -366,6 +366,8 @@ public:
 
 	std::string toString() const;
 
+    static constexpr int32_t vsize() { return 2; }
+
 private:
 	float mX;
 	float mY;

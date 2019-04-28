@@ -122,6 +122,11 @@ namespace GT {
     struct GTPolicyColor {
         C4f color;
     };
+    struct GTPolicyTRS {
+        Vector3f pos = Vector3f::ZERO;
+        Vector3f axis = Vector3f::ZERO;
+        Vector3f scale = Vector3f::ONE;
+    };
     struct GTPolicyText {
         std::string text;
         std::string fontName = S::DEFAULT_FONT;
@@ -147,14 +152,14 @@ namespace GT {
         GeomMappingData mappingData;
     };
 
-    struct Shape   : GTPolicyShape, GTPolicyColor {};
-    struct Follower         {};
-    struct Extrude : GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor {};
-    struct Poly    : GTPolicyPolyline, GTPolicyMapping, GTPolicyColor {};
-    struct Mesh             {};
-    struct GLTF2            {};
-    struct Asset            {};
-    struct File             {};
-    struct SVG              {};
-    struct Text : GTPolicyText, GTPolicyColor {};
+    struct Shape    : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
+    struct Follower : GTPolicyTRS {};
+    struct Extrude  : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor {};
+    struct Poly     : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor {};
+    struct Mesh              {};
+    struct GLTF2             {};
+    struct Asset             {};
+    struct File              {};
+    struct SVG               {};
+    struct Text     : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
 }

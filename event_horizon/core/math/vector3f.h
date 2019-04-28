@@ -480,6 +480,8 @@ public:
 		return o;
 	}
 
+    static constexpr int32_t vsize() { return 3; }
+
 private:
 	float mX;
 	float mY;

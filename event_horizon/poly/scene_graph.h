@@ -114,7 +114,7 @@ public:
         elem->pushData( GeomData{vdataRef, matRef } );
 
         if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
-        elem->updateExistingTransform( gb.pos, gb.axis, gb.scale );
+        elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
         auto ref = B<GRB>( gb.Name() ).addIM( elem );
         return addNode( ref );
     }

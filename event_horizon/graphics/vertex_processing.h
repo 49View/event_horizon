@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/uuid.hpp>
+#include <core/uuidcopyable.hpp>
 #include <core/soa_utils.h>
 #include <graphics/graphic_constants.h>
 #include <graphics/render_material.hpp>
@@ -42,12 +43,15 @@ struct cpuVBIB {
     int vElementAttribSize;
 };
 
-class VPList {
+class VPList : public UUIDCopiable {
 public:
+    using UUIDCopiable::UUIDCopiable;
+
     VPList( std::shared_ptr<GPUVData> value,
             std::shared_ptr<RenderMaterial> _mat,
             const std::shared_ptr<Matrix4f>& _transform,
-            uint64_t _tag );
+            uint64_t _tag,
+            const UUID& _uuid );
 
     inline std::shared_ptr<RenderMaterial> getMaterial() const {
         return material;
@@ -102,6 +106,6 @@ public:
 private:
     std::shared_ptr<GPUVData> gpuData;
     std::shared_ptr<RenderMaterial> material;
-    uint64_t mTag = GT_Generic;
     std::shared_ptr<Matrix4f> mTransform;
+    uint64_t mTag = GT_Generic;
 };
