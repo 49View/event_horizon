@@ -612,9 +612,11 @@ void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
 std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, float width, bool wrapIt,
 							 float rotAngle = 0.0f, float percToBeDrawn = 1.0f );
 
-typedef Vector3f Color3f;
-typedef std::vector<Vector3f> vector3fList;
-typedef std::tuple<Vector3f, Vector3f, Vector3f> Triangle3d;
+using Color3f = Vector3f;
+using vector3fList = std::vector<Vector3f>;
+using V3fVector         = std::vector<Vector3f>;
+using V3fVectorOfVector = std::vector<std::vector<Vector3f>>;
+using Triangle3d   = std::tuple<Vector3f, Vector3f, Vector3f>;
 using QuadVector3f = std::array<Vector3f, 4>;
 using QuadVector3fList = std::vector<QuadVector3f>;
 

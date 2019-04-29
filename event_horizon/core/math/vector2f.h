@@ -376,6 +376,9 @@ private:
 using V2f = Vector2f;
 using Vector2fList = std::vector<V2f>;
 using vector2fList = Vector2fList;
+using V2fVector         = std::vector<Vector2f>;
+using V2fVectorOfVector = std::vector<std::vector<Vector2f>>;
+
 typedef std::pair<V2f, float> NormalDirPair;
 typedef std::tuple<V2f, V2f, V2f> Triangle2d;
 

@@ -158,8 +158,11 @@ std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, f
 		v1 = vleft - percVa[m];
 		v2 = percVa[m] - vright;
 
-		v1 = XZY::C(Vector3f( rotate90( normalize( v1 ).xz()), 0.0f ));
-		v2 = XZY::C(Vector3f( rotate90( normalize( v2 ).xz()), 0.0f ));
+		auto v1n = normalize( v1 );
+		auto v2n = normalize( v2 );
+
+		v1 = XZY::C(rotate90( v1n.xz()));
+		v2 = XZY::C(rotate90( v2n.xz()));
 
 		if ( !isValid( v1.x()) || !isValid( v2.x())) continue;
 
