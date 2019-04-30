@@ -223,32 +223,30 @@ namespace VDataServices {
         return "Text--" + Hashable<>::hashOf( c );
     }
 
-}
-
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-//
 // ___ QUAD MESH BUILDER ___
-//
-// ********************************************************************************************************************
-// ********************************************************************************************************************
 
-//void GeomDataQuadMeshBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
-//    for ( const auto& q : quads ) {
-//        PolyServices::addFlatPoly( _ret, q.quad, q.normal, mappingData );
-//    }
-//}
-//
-//void GeomDataQuadMeshBuilder::setupRefName() {
-//    std::stringstream oss;
-//    for ( const auto& q : quads ) {
-//        oss << q.normal.toString();
-//        for ( const auto& v : q.quad ) {
-//            oss << v.toString();
-//        }
-//    }
-//    mRefName = "Poly--" + Hashable<>::hashOf(oss.str());
-//}
+    void prepare( SceneGraph& sg, GT::Mesh& _d ) {
+    }
+
+    void buildInternal( const GT::Mesh& _d, std::shared_ptr<VData> _ret ) {
+        auto dmProgressive = _d.mappingData;
+        for ( const auto& q : _d.quads ) {
+            PolyServices::addFlatPoly( _ret, q.quad, q.normal, dmProgressive );
+        }
+    }
+
+    ResourceRef refName( const GT::Mesh& _d ) {
+        std::stringstream oss;
+        for ( const auto& q : _d.quads ) {
+            oss << q.normal.toString();
+            for ( const auto& v : q.quad ) {
+                oss << v.toString();
+            }
+        }
+        return "Poly--" + Hashable<>::hashOf(oss.str());
+    }
+
+}
 
 // ********************************************************************************************************************
 // ********************************************************************************************************************

@@ -183,6 +183,7 @@ RawImage RawImage::NORMAL4x4() {                           //AABBGGRR
 
 void RawImage::bufferDecode( const unsigned char* _buffer, size_t _length ) {
     // ### fix this!!
+    stbi_set_flip_vertically_on_load(true);
     auto _mt = RawImageMemory::Compressed;
     rawBtyes = imageUtil::decodeFromMemory( ucchar_p{_buffer, _length},
                                             width, height, channels, bpp, _mt == RawImageMemory::Raw );

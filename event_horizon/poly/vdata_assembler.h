@@ -26,11 +26,6 @@ namespace ClipperLib {
     typedef std::vector< Path > Paths;
 }
 
-struct QuadVector3fNormal {
-    QuadVector3f quad;
-    Vector3f normal;
-};
-
 template <typename T>
 class VDataAssembler : public NamePolicy<> {
 public:
@@ -75,11 +70,24 @@ public:
             return *this;
         }
 
+        if constexpr ( std::is_same<M, PolyLine2d>::value ) {
+            static_assert( std::is_same<SGT, GT::Extrude>::value );
+            dataTypeHolder.extrusionVerts.emplace_back( _param );
+            return *this;
+        }
+
         if constexpr ( std::is_same<M, std::vector<Vector3f>>::value ) {
             static_assert( std::is_same<SGT, GT::Poly>::value );
             dataTypeHolder.sourcePolysVList = _param;
             return *this;
         }
+
+        if constexpr ( std::is_same<M, QuadVector3fNormalfList>::value ) {
+            static_assert( std::is_same<SGT, GT::Mesh>::value );
+            dataTypeHolder.quads = _param;
+            return *this;
+        }
+
 
 //        static_assert( std::false_type::value, "VData assembly params type not mapped " );
 //        return *this;
@@ -107,6 +115,10 @@ namespace VDataServices {
     void prepare( SceneGraph& sg, GT::Text& _d );
     void buildInternal( const GT::Text& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Text& _d );
+
+    void prepare( SceneGraph& sg, GT::Mesh& _d );
+    void buildInternal( const GT::Mesh& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::Mesh& _d );
 
     template <typename DT>
     std::shared_ptr<VData> build( const DT& _d ) {
@@ -164,8 +176,6 @@ struct PolyLine2d : public PolyLineBase2d, public PolyLineCommond {
                 const ReverseFlag _reverseFlag = ReverseFlag::False ) :
             PolyLineBase2d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
 };
-
-using QuadVector3fNormalfList = std::vector<QuadVector3fNormal>;
 
 //class GeomDataQuadMeshBuilder : public GeomDataBuilder {
 //public:

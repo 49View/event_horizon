@@ -328,6 +328,11 @@ namespace Http {
         Http::login();
     }
 
+    void init( const LoginFields& lf ) {
+        initBase();
+        Http::login( lf );
+    }
+
     void initDaemon() {
         initBase();
         Http::login(LoginFields::Daemon());

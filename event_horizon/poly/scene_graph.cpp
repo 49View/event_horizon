@@ -6,6 +6,7 @@
 #include <core/node.hpp>
 #include <core/raw_image.h>
 #include <core/camera_rig.hpp>
+#include <core/resources/profile.hpp>
 #include <core/TTF.h>
 #include <core/amarant_font.hpp>
 #include <core/geom.hpp>

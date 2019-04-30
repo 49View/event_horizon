@@ -74,6 +74,7 @@ namespace WindowHandling {
 
         // Get info on default framebuffer:
         gatherMainScreenInfo();
+//        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
         initImGUI();
     }

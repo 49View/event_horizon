@@ -4,10 +4,20 @@
 
 #include "renderer.h"
 #include <core/TTF.h>
+#include <core/raw_image.h>
+#include <core/image_mapping.hpp>
 #include <graphics/vp_builder.hpp>
 
 static std::shared_ptr<HeterogeneousMap> mapColor( const Color4f& _matColor ) {
     auto values = std::make_shared<HeterogeneousMap>();
+    values->assign( UniformNames::opacity, _matColor.w() );
+    values->assign( UniformNames::diffuseColor, _matColor.xyz() );
+    return values;
+}
+
+static std::shared_ptr<HeterogeneousMap> mapTextureAndColor( const std::string& _tname, const Color4f& _matColor ) {
+    auto values = std::make_shared<HeterogeneousMap>();
+    values->assign( UniformNames::colorTexture, _tname );
     values->assign( UniformNames::opacity, _matColor.w() );
     values->assign( UniformNames::diffuseColor, _matColor.xyz() );
     return values;
@@ -109,13 +119,25 @@ void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& m
         }
         delta += unit * 0.25f;
     }
+}
 
-//    drawIncGridLines( bucketIndex, static_cast<int>(( axisLenghts.x() / unit ) / 2.0f ), unit, gridLinesWidth, topYAxis,
-//                      bottomYAxis, smallAxisColor, zoffset-0.01f, _name + "x_axis" );
+void Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture,
+                         float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
+    Rect2f rect{ p1, p2, true };
+    QuadVertices2 qvt = textureQuadFillModeMapping( fm, rect, ratio );
+    auto ps = std::make_shared<PosTex3dStrip>( rect, qvt, 0.0f );
+    auto vp = VPBuilder<PosTex3dStrip>{*this,ShaderMaterial{S::TEXTURE_3D, mapTextureAndColor(_texture, color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
+}
 
-    // Main axis
-//    drawLine( bucketIndex, leftXAxis, rightXAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "xAxis" );
-//    drawLine( bucketIndex, topYAxis, bottomYAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "yAxis" );
+void Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
+                           const std::string& _name ) {
+
+    auto ps = std::make_shared<Pos3dStrip>( Rect2f{ p1, p2, true }, 0.0f );
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
+//    VPBuilder<Pos2dStrip>{*this}.vl(_vpl).p(std::make_shared<Pos2dStrip>( JMATH::Rect2f( Vector2f::ZERO, size *
+//                                                                                                         Vector2f::Y_INV))).m(S::COLOR_2D).c(color).n(_name).build();
 }
 
 void Renderer::drawArrow( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color,

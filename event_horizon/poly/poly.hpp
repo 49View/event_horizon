@@ -40,16 +40,6 @@ enum class RectCreateAnchor {
     RightCenter
 };
 
-enum class RectFillMode {
-    Scale,
-    AspectFit,
-    AspectFill,
-    AspectFitLeft,
-    AspectFitRight,
-    AspectFitTop,
-    AspectFitBottom,
-};
-
 enum UIRenderFlags {
     NoEffects = 1 << 0,
     DropShaodws = 1 << 1,
@@ -107,10 +97,17 @@ struct GeomMappingData {
     mutable Vector2f pullMappingCoords = Vector2f::ZERO;
 };
 
+struct QuadVector3fNormal {
+    QuadVector3f quad;
+    Vector3f normal;
+};
+
 struct PolyOutLine;
 struct PolyLine;
+struct PolyLine2d;
 namespace Utility::TTFCore { class FontInternal;}
 using Font = Utility::TTFCore::FontInternal;
+using QuadVector3fNormalfList = std::vector<QuadVector3fNormal>;
 
 namespace GT {
     enum class TextType {
@@ -152,11 +149,15 @@ namespace GT {
         GeomMappingData mappingData;
     };
 
+    struct GTPolicyQuad {
+        QuadVector3fNormalfList quads;
+    };
+
     struct Shape    : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
     struct Follower : GTPolicyTRS {};
     struct Extrude  : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor {};
     struct Poly     : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor {};
-    struct Mesh              {};
+    struct Mesh     : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor {};
     struct GLTF2             {};
     struct Asset             {};
     struct File              {};

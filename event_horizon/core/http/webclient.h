@@ -140,6 +140,7 @@ namespace Http {
     };
 
     void init();
+    void init( const LoginFields& lf );
     void initDaemon();
 
     void login();

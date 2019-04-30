@@ -6,12 +6,11 @@
 #include <core/node.hpp>
 #include <core/app_globals.h>
 #include <core/TTF.h>
+#include <core/image_mapping.hpp>
 #include <core/font_utils.hpp>
 #include <core/resources/resource_manager.hpp>
 #include <core/geom.hpp>
 #include <core/names.hpp>
-
-typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 
 uint64_t UIShapeBuilder::sid = 0;
 
@@ -25,87 +24,6 @@ UIShapeBuilder::UIShapeBuilder( SceneGraph& _sg, UIShapeType _shapeType, const s
     init();
     if ( _fh != 0.0f ) fh(_fh);
     ti(_ti);
-}
-
-TextureFillModeScalers
-getTextureFillModeScalers( const RectFillMode fm, const Vector2f& size, float _aspectRation ) {
-    // Those 2 variables handle basically a "AspectFit" scaling, in which the image is scaled in a way the whole image is present maintaining the aspect ratio.
-    Vector2f texAspectVector = size.vectorRatio();
-    Vector2f texAspectVectorOffset = Vector2f::ZERO;
-
-    if ( fm == RectFillMode::Scale ) {
-        texAspectVector = Vector2f::ONE;
-    }
-
-    if ( fm == RectFillMode::AspectFill ) {
-        float aoh = _aspectRation;
-        float sar = size.ratio();
-        if ( aoh > sar ) {
-            texAspectVector = Vector2f{ (1.0f/aoh) * getScreenAspectRatio, 1.0f };
-            texAspectVectorOffset = { (aoh / getScreenAspectRatio) * 0.5f + 0.5f, 0.0f };
-        } else {
-            texAspectVector = Vector2f{ 1.0f, aoh / (getScreenAspectRatio) };
-            texAspectVectorOffset = { 0.0f, (aoh / getScreenAspectRatio) * -0.5f + 0.5f };
-        }
-    }
-    if ( fm == RectFillMode::AspectFit || fm == RectFillMode::AspectFitLeft ||
-         fm == RectFillMode::AspectFitRight ) {
-        float sizeTexRatio = size.ratio() / _aspectRation;
-        if ( sizeTexRatio > 1.0f ) {
-            texAspectVector = { sizeTexRatio, 1.0f };
-            texAspectVectorOffset = { sizeTexRatio * -0.5f + 0.5f, 0.0f };
-            if ( fm == RectFillMode::AspectFitLeft ) texAspectVectorOffset = Vector2f::ZERO;
-            if ( fm == RectFillMode::AspectFitRight )
-                texAspectVectorOffset.setX( texAspectVectorOffset.x() * 2.0f );
-        } else {
-            float invSizeTexRatio = 1.0f / sizeTexRatio;
-            texAspectVector = { 1.0f, invSizeTexRatio };
-            texAspectVectorOffset = { 0.0f, ( invSizeTexRatio * -0.5f + 0.5f ) };
-        }
-    }
-
-    return std::make_pair( texAspectVector, texAspectVectorOffset );
-}
-
-TextureFillModeScalers
-getTextureFillModeScalers( const RectFillMode fm, const Vector2f& size ) {
-    // Those 2 variables handle basically a "AspectFit" scaling, in which the image is scaled in a way the whole image is present maintaining the aspect ratio.
-    Vector2f texAspectVector = Vector2f::ONE;// size.vectorRatio();
-    Vector2f texAspectVectorOffset = Vector2f::ZERO;
-
-    switch ( fm ) {
-        case RectFillMode::Scale:
-            texAspectVector = Vector2f::ONE;
-            break;
-        case RectFillMode::AspectFit:
-        case RectFillMode::AspectFill:
-        case RectFillMode::AspectFitLeft:
-        case RectFillMode::AspectFitRight:
-        case RectFillMode::AspectFitTop:
-        case RectFillMode::AspectFitBottom:
-            texAspectVector = size.vectorRatio();
-            break;
-        default:
-            break;
-    }
-
-    return std::make_pair( texAspectVector, texAspectVectorOffset );
-}
-
-Vector2f textureFillModeMapping( const Rect2f& rect, const Vector2f pos, TextureFillModeScalers tfms ) {
-    return rect.normalizeWithinRect( pos ) * tfms.first + tfms.second;
-}
-
-QuadVertices2
-textureQuadFillModeMapping( const RectFillMode fm, const Rect2f& rect, float _imageAspectRatio ) {
-    TextureFillModeScalers tmfs = getTextureFillModeScalers( fm, rect.size(), _imageAspectRatio );
-    QuadVertices2 qvt(
-            textureFillModeMapping( rect, rect.topRight(), tmfs ),
-            textureFillModeMapping( rect, rect.bottomRight(), tmfs ),
-            textureFillModeMapping( rect, rect.topLeft(), tmfs ),
-            textureFillModeMapping( rect, rect.bottomLeft(), tmfs )
-    );
-    return qvt;
 }
 
 //void createRoundedRect( std::shared_ptr<VPList> _vpl, const Vector2f& size, const Vector3f& _originalPos,

@@ -768,28 +768,28 @@ public:
         std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[4]{ 0, 1, 2, 3 } );
         std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
 
-        _verts[0].pos = Vector3f( rect.bottomRight(), z );
-        _verts[1].pos = Vector3f( rect.topRight(), z );
-        _verts[2].pos = Vector3f( rect.bottomLeft(), z );
-        _verts[3].pos = Vector3f( rect.topLeft(), z );
+        _verts[0].pos = XZY::C( rect.bottomRight() );
+        _verts[1].pos = XZY::C( rect.topRight());
+        _verts[2].pos = XZY::C( rect.bottomLeft() );
+        _verts[3].pos = XZY::C( rect.topLeft() );
 
         init( 4, PRIMITIVE_TRIANGLE_STRIP, 4, _verts, _indices );
     }
 
-    VertexStripIBVB( const JMATH::Rect2f& rect, const QuadVertices2& tcoords, float z ) {
-        std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[6]{ 1, 0, 2, 1, 2, 3 } );
+    VertexStripIBVB( const JMATH::Rect2f& rect, const QuadVertices2& tcoords, [[maybe_unused]] float z ) {
+        std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[4]{ 0, 1, 2, 3 } );
         std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
 
-        _verts[0].pos = Vector3f( rect.bottomRight(), z );
+        _verts[0].pos = XZY::C( rect.bottomRight() );
+        _verts[1].pos = XZY::C( rect.topRight() );
+        _verts[2].pos = XZY::C( rect.bottomLeft() );
+        _verts[3].pos = XZY::C( rect.topLeft() );
         _verts[0].a1 = tcoords[0];// Vector2f(1.0f, 0.0f);
-        _verts[1].pos = Vector3f( rect.topRight(), z );
         _verts[1].a1 = tcoords[1];//Vector2f(1.0f, 1.0f);
-        _verts[2].pos = Vector3f( rect.bottomLeft(), z );
         _verts[2].a1 = tcoords[2];//Vector2f(0.0f, 0.0f);
-        _verts[3].pos = Vector3f( rect.topLeft(), z );
         _verts[3].a1 = tcoords[3];//Vector2f(0.0f, 1.0f);
 
-        init( 4, PRIMITIVE_TRIANGLES, 6, _verts, _indices );
+        init( 4, PRIMITIVE_TRIANGLE_STRIP, 4, _verts, _indices );
     }
 
     VertexStripIBVB( const JMATH::Rect2f& rect, const QuadVertices2& tcoords ) {

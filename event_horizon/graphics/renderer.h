@@ -244,4 +244,10 @@ public:
 
     void drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
                    std::shared_ptr<Font> font, const Color4f& color );
+
+    void drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
+                   const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
+    void drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
+                   const std::string& _name = {} );
+
 };

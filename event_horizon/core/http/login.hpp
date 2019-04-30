@@ -28,6 +28,12 @@ JSONDATA( LoginFields, project, email, password )
         password = _password;
     }
 
+    explicit LoginFields( const std::string& _username, const std::string& _password, const std::string& _proj ) {
+        project = _proj;
+        email = _username;
+        password = _password;
+    }
+
     static LoginFields Daemon( const std::string& _project = "" ) {
         static LoginFields ret;
         ret.project = _project.empty() ? LoginSandbox::Name : _project;

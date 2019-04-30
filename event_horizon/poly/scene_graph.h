@@ -68,6 +68,8 @@ public:
     ColorManager& MC() { return cl; }
     GeomManager& GM() { return gm; }
 
+    RawImage* TL( const ResourceRef& _ref ) const { return tl.get(_ref).get(); }
+
     template <typename R>
     auto& M() {
         if constexpr ( std::is_same_v<R, VData>         ) return VL();

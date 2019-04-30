@@ -28,7 +28,11 @@ template<typename BE>
 class EventHorizon {
 public:
     explicit EventHorizon( int argc, char *argv[] ) {
-        Http::init();
+        if constexpr ( BE::hasLF() ) {
+            Http::init( BE::loginCert() );
+        } else {
+            Http::init();
+        }
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
         mainLoop(checkLayoutArgvs( argc, argv ), std::move(backEnd) );
     }

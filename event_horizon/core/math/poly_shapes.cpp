@@ -368,10 +368,10 @@ void Cube( Topology& mesh ) {
 void Panel( Topology& mesh ) {
     // Vertices
 
-    mesh.vertices.emplace_back( Vector3f( -0.500000, -0.500000, 0.000000 ));
-    mesh.vertices.emplace_back( Vector3f( 0.500000 , -0.500000, 0.000000 ));
-    mesh.vertices.emplace_back( Vector3f( -0.500000, 0.500000 , 0.000000 ));
-    mesh.vertices.emplace_back( Vector3f( 0.500000 , 0.500000 , 0.000000 ));
+    mesh.vertices.emplace_back( -0.500000, -0.500000, 0.000000 );
+    mesh.vertices.emplace_back( 0.500000 , -0.500000, 0.000000 );
+    mesh.vertices.emplace_back( -0.500000, 0.500000 , 0.000000 );
+    mesh.vertices.emplace_back( 0.500000 , 0.500000 , 0.000000 );
 
     // Faces
     mesh.addQuad(1, 0, 3, 2);

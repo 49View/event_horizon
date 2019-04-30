@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <core/math/vector2f.h>
+
 enum PixelFormat {
     PIXEL_FORMAT_UNFORCED = -1,
     PIXEL_FORMAT_RGB = 0,
@@ -86,6 +88,11 @@ struct ImageParams {
     TextureTargetMode ttm = TEXTURE_2D;
     WrapMode wrapMode = WRAP_MODE_REPEAT;
     Filter filterMode = FILTER_LINEAR;
+
+    Vector2f getAspectRatioV() const {
+        float r = getAspectRatio();
+        return r > 1.0f ? V2f{ r, 1.0f} : V2f{ 1.0f, 1.0f/r};
+    }
 
     float getAspectRatio() const {
         return static_cast<float>(width) / static_cast<float>(height);
@@ -170,3 +177,4 @@ struct ImageParams {
     }
                                                                       
 };
+

@@ -230,7 +230,6 @@
 //
 //    std::string asciiText;
 //
-//    QuadVector3fNormalfList quads;
 //};
 //
 ////class GeomBuilderComposer {

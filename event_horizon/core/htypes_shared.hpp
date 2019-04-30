@@ -101,6 +101,16 @@ enum class MappingMirrorE : int {
 	BothWays = 3
 };
 
+enum class RectFillMode {
+    Scale,
+    AspectFit,
+    AspectFill,
+    AspectFitLeft,
+    AspectFitRight,
+    AspectFitTop,
+    AspectFitBottom,
+};
+
 enum UiControlFlag {
 	NoFlags = 0,
 	UseScreenSpace = 1 << 0,
@@ -331,4 +341,5 @@ enum class DependencyStatus {
     } \
 
 using ResourceRef = std::string;
+using CResourceRef = const std::string&;
 using ResourceDependencyDict    = std::unordered_map<std::string, std::vector<ResourceRef>>;
