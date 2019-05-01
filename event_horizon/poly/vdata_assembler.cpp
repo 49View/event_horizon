@@ -248,6 +248,9 @@ namespace VDataServices {
 
     // ___ FOLLOWER BUILDER ___
     void prepare( SceneGraph& sg, GT::Follower& _d ) {
+        if ( _d.profilePath.empty() && !_d.profilePath2d.empty() ) {
+            for (auto &v: _d.profilePath2d) _d.profilePath.emplace_back( Vector3f{v, _d.z} );
+        }
     }
 
     void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret ) {

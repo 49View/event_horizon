@@ -139,6 +139,24 @@ namespace GT {
         V3f data;
     };
 
+    struct Flip {
+        template<typename ...Args>
+        explicit Flip( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        V2f operator()() const noexcept {
+            return data;
+        }
+        V2f data;
+    };
+
+    struct Z {
+        template<typename ...Args>
+        explicit Z( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        float operator()() const noexcept {
+            return data;
+        }
+        float data;
+    };
+
     enum class TextType {
         TextUI,
         Text2d,
@@ -174,11 +192,15 @@ namespace GT {
     struct GTPolicyFollower {
         std::shared_ptr<Profile> profile;
         std::vector<Vector3f> profilePath;
+        std::vector<Vector2f> profilePath2d;
         FollowerFlags fflags = FollowerFlags::Defaults;
         PolyRaise fraise = PolyRaise::None;
         Vector2f flipVector = Vector2f::ZERO;
         FollowerGap mGaps = FollowerGap::Empty;
         Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
+    };
+    struct GTPolicyZ {
+        float z = 0.0f;
     };
     struct GTPolicyShape {
         ShapeType shapeType = ShapeType::None;
@@ -191,13 +213,13 @@ namespace GT {
     };
 
     struct Shape    : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
-    struct Follower : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor {};
-    struct Extrude  : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor {};
-    struct Poly     : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor {};
+    struct Follower : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ {};
+    struct Extrude  : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor, GTPolicyZ {};
+    struct Poly     : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ {};
     struct Mesh     : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor {};
-    struct GLTF2             {};
-    struct Asset             {};
-    struct File              {};
-    struct SVG               {};
+    struct GLTF2    {};
+    struct Asset    {};
+    struct File     {};
+    struct SVG      {};
     struct Text     : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
 }

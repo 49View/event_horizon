@@ -64,8 +64,17 @@ public:
         }
         if constexpr ( std::is_same_v<M, GT::Direction> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
-            if constexpr ( std::is_same_v<SGT, GT::Follower> )
-                dataTypeHolder.mFollowerSuggestedAxis = _param();
+            dataTypeHolder.mFollowerSuggestedAxis = _param();
+            return *this;
+        }
+        if constexpr ( std::is_same_v<M, GT::Flip> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
+            dataTypeHolder.flipVector = _param();
+            return *this;
+        }
+        if constexpr ( std::is_same_v<M, FollowerFlags> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
+            dataTypeHolder.fflags = _param;
             return *this;
         }
 
@@ -99,6 +108,15 @@ public:
                 dataTypeHolder.sourcePolysVList = _param;
             if constexpr ( std::is_same_v<SGT, GT::Follower> )
                 dataTypeHolder.profilePath = _param;
+            return *this;
+        }
+
+        if constexpr ( std::is_same_v<M, std::vector<Vector2f>> ) {
+            static_assert( std::is_same_v<SGT, GT::Poly> || std::is_same_v<SGT, GT::Follower> );
+            if constexpr ( std::is_same_v<SGT, GT::Poly> )
+                dataTypeHolder.sourcePolysVList = _param;
+            if constexpr ( std::is_same_v<SGT, GT::Follower> )
+                dataTypeHolder.profilePath2d = _param;
             return *this;
         }
 
