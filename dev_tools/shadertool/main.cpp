@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <vector>
 #include <core/file_manager.h>
+#include <core/http/webclient.h>
 #include <graphics/platform_graphics.hpp>
 #include <graphics/shader_manager.h>
 #include <core/http/basen.hpp>
