@@ -23,7 +23,8 @@ class SceneBridge;
 struct AggregatedInputData;
 
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
-using PresenterUpdateCallbackFunc = std::function<void(RenderOrchestrator* p)>;
+using UpdateCallbackSign = RenderOrchestrator*;
+using PresenterUpdateCallbackFunc = std::function<void(UpdateCallbackSign)>;
 using DragAndDropFunction = std::function<void(RenderOrchestrator* p, const std::string&)>;
 
 class RenderOrchestrator {

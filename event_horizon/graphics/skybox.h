@@ -99,6 +99,4 @@ public:
 	explicit PrefilterBRDF( Renderer& rr );
 private:
 	void init();
-private:
-	std::shared_ptr<Framebuffer> mBRDF;
 };

@@ -52,7 +52,6 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
             uniformDefaults->assign( _name, Matrix4f::IDENTITY );
             break;
         case GL_SAMPLER_2D:
-        case GL_SAMPLER_CUBE:
             if ( _name == UniformNames::diffuseTexture ) {
                 uniformDefaults->assign( _name, S::WHITE );
             } else if ( _name == UniformNames::normalTexture ) {
@@ -65,14 +64,17 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
                 uniformDefaults->assign( _name, S::WHITE );
             } else if ( _name == UniformNames::heightTexture ) {
                 uniformDefaults->assign( _name, S::BLACK );
-            } else if ( _name == UniformNames::ibl_irradianceMap ) {
-                uniformDefaults->assign( _name, MPBRTextures::convolution );
-            } else if ( _name == UniformNames::ibl_specularMap ) {
-                uniformDefaults->assign( _name, MPBRTextures::specular_prefilter );
             } else if ( _name == UniformNames::ibl_brdfLUTMap ) {
                 uniformDefaults->assign( _name, MPBRTextures::ibl_brdf );
             }else {
                 uniformDefaults->assign( _name, S::WHITE );
+            }
+            break;
+        case GL_SAMPLER_CUBE:
+            if ( _name == UniformNames::ibl_irradianceMap ) {
+                uniformDefaults->assign( _name, MPBRTextures::convolution );
+            } else if ( _name == UniformNames::ibl_specularMap ) {
+                uniformDefaults->assign( _name, MPBRTextures::specular_prefilter );
             }
             break;
         case GL_SAMPLER_2D_SHADOW:

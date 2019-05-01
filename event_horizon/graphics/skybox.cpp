@@ -88,8 +88,7 @@ bool Skybox::precalc( float _sunHDRMult ) {
 }
 
 void Skybox::render() {
-    if ( mSkyboxTexture )
-        mCubeMapRender->render( mSkyboxTexture );
+    mCubeMapRender->render( mSkyboxTexture );
 }
 
 Skybox::Skybox( Renderer& rr, const SkyBoxInitParams& _params ) : RenderModule( rr ) {
@@ -168,13 +167,11 @@ PrefilterSpecularMap::PrefilterSpecularMap( Renderer& rr ) : RenderModule( rr ) 
 }
 
 void PrefilterBRDF::init() {
-    mBRDF = FrameBufferBuilder{ rr, MPBRTextures::ibl_brdf }.size( 512 ).GPUSlot( TSLOT_IBL_BRDFLUT ).format(
-            PIXEL_FORMAT_HDR_RG_16 ).IM(S::IBL_BRDF).noDepth().build();
 }
 
 void PrefilterBRDF::render( ) {
-    rr.CB_U().startTarget( mBRDF, rr );
-    rr.CB_U().pushVP( mBRDF->VP() );
+    rr.CB_U().startTarget( rr.BRDFTarget(), rr );
+    rr.CB_U().pushVP( rr.BRDFTarget()->VP() );
 }
 
 PrefilterBRDF::PrefilterBRDF( Renderer& rr ) : RenderModule( rr ) {

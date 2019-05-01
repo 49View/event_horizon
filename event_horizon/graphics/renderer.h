@@ -130,6 +130,7 @@ public:
     std::shared_ptr<LightManager>   LM() { return lm; }
 	std::shared_ptr<TextureManager> TM() { return tm; }
 	std::shared_ptr<ShaderManager>  SM() { return sm; }
+    std::shared_ptr<Framebuffer> BRDFTarget() { return mBRDF; };
 	StreamingMediator& SSM();
 
     void VPL( int _bucket, std::shared_ptr<VPList> nvp, float alpha = 1.0f );
@@ -149,6 +150,9 @@ public:
 	std::shared_ptr<Framebuffer> getDefaultFB() {
 		return mDefaultFB;
 	}
+    std::shared_ptr<Framebuffer> getShadowMapFB() {
+        return mShadowMapFB;
+    }
 
 	int UpdateCounter() const { return mUpdateCounter; }
 	void invalidateOnAdd();
@@ -173,6 +177,8 @@ protected:
 	RenderCameraManager rcm;
 
 	std::shared_ptr<Framebuffer> mDefaultFB;
+    std::shared_ptr<Framebuffer> mBRDF;
+    std::shared_ptr<Framebuffer> mShadowMapFB;
 
 	int mUpdateCounter = 0;
 	bool bInvalidated = false;

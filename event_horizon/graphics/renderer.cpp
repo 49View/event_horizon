@@ -118,7 +118,22 @@ void Renderer::init() {
     am.init();
     sm->loadShaders();
     tm->addTextureWithData(RawImage::WHITE4x4(), FBNames::lightmap, TSLOT_LIGHTMAP );
+    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).depthOnly().build();
+
+    auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    tm->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
+                                                             .setGenerateMipMaps( false )
+                                                             .setIsFramebufferTarget( true ) );
+    trd.setSize(512);
+    tm->addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter, trd }
+                                                                   .setGenerateMipMaps( true )
+                                                                   .setIsFramebufferTarget( true ) );
+
+    mBRDF = FrameBufferBuilder{ *this, MPBRTextures::ibl_brdf }.size( 512 ).format(
+            PIXEL_FORMAT_HDR_RG_16 ).IM(S::IBL_BRDF).noDepth().build();
+
     rmm->addRenderMaterial( S::SHADOW_MAP );
+
     afterShaderSetup();
 }
 
@@ -335,7 +350,7 @@ void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {
 void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
                                    std::shared_ptr<RenderMaterial> _forcedMaterial ) {
     for ( const auto& vp : _map ) {
-        CB_U().pushVP( vp );
+        CB_U().pushVP( vp, _forcedMaterial );
     }
 }
 

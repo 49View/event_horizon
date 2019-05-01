@@ -45,7 +45,9 @@ public:
 
     template <typename T>
     void visit( const T& _visitor ) {
-        for ( auto& u : mTextureMappings )  { _visitor.visit( u.first.c_str(), u.second ); }
+        for ( auto& u : mTextureMappings ) {
+            _visitor.visit( u.first.c_str(), u.second );
+        }
         values->visit( _visitor );
     }
 

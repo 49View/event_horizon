@@ -131,8 +131,9 @@ public:
 
 class CommandBufferEntry {
 public:
-    std::shared_ptr<VPList>   mVPList;
-    std::shared_ptr<Matrix4f> mModelMatrix;
+    std::shared_ptr<VPList>         mVPList;
+    std::shared_ptr<RenderMaterial> mMaterial;
+    std::shared_ptr<Matrix4f>       mModelMatrix;
 };
 
 enum class CommandBufferFrameBufferType {

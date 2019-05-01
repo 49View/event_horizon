@@ -181,7 +181,7 @@ void CommandBufferList::pushVP( std::shared_ptr<VPList> _vp,
                                 std::shared_ptr<Matrix4f> _modelMatrix ) {
     const static float alpha_threashold = 0.0f;
     if ( _vp->transparencyValue() > alpha_threashold ) {
-        mCurrent->push( { _vp, _modelMatrix } );
+        mCurrent->push( CommandBufferEntry{ _vp, _mat, _modelMatrix } );
     }
 }
 
@@ -192,6 +192,7 @@ void CommandBufferList::pushCommand( const CommandBufferCommand& cmd ) {
 void CommandBufferList::startTarget( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) {
     startList( std::make_shared<RLTargetFB>( _fbt, _rr ), CommandBufferFlags::CBF_DoNotSort );
     pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
+    pushCommand( { CommandBufferCommandName::cullModeNone } );
 }
 
 void CommandBufferList::startList( std::shared_ptr<RLTarget> _target, CommandBufferFlags flags ) {
@@ -316,9 +317,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::colorFBTexture,
                     cstack->fb(CommandBufferFrameBufferType::finalResolve)->RenderToTexture()->TDI(0));
-            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
-                    UniformNames::bloomTexture,
-                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture()->TDI(1));
+//            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+//                    UniformNames::bloomTexture,
+//                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture()->TDI(1));
 //            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
 //                    UniformNames::shadowMapTexture,
 //                    rr.getShadowMapFB()->RenderToTexture());

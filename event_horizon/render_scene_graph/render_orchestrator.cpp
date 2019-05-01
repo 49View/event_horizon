@@ -141,7 +141,9 @@ void RenderOrchestrator::reloadShaders( SocketCallbackDataTypeConstRef _data ) {
 	for ( const auto& ss : shadersToUpdate.shaders ) {
 		rr.injectShader( ss.first, ss.second );
 	}
-	rr.cmdReloadShaders( {} );
+
+	addUpdateCallback( [this](UpdateCallbackSign) { rr.cmdReloadShaders( {} ); } );
+
 }
 
 //void RenderOrchestrator::addImpl( NodeVariants _geom ) {

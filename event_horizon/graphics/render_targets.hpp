@@ -277,8 +277,6 @@ public:
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
     void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
 
-    std::shared_ptr<Framebuffer> getShadowMapFB();
-
     void changeTime( const V3f& _solarTime ) override;
     void invalidateOnAdd() override;
 protected:
@@ -294,7 +292,6 @@ protected:
 protected:
     std::shared_ptr<CompositePBR> mComposite;
 
-    std::shared_ptr<Framebuffer> mShadowMapFB;
     bool mbUseInfiniteHorizonForShadows = true;
     Vector3f mCachedSunPosition = Vector3f::ZERO;
     SkyBoxInitParams mSkyBoxParams;

@@ -58,8 +58,6 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     bucketRanges.emplace_back( CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
 
-    mShadowMapFB = FrameBufferBuilder{ rr, FBNames::shadowmap }.size(4096).GPUSlot(TSLOT_SHADOWMAP).depthOnly().build();
-
     smm = std::make_unique<ShadowMapManager>();
 
 //    rr.createGrid( 1.0f, Color4f::ACQUA_T, Color4f::PASTEL_GRAYLIGHT, Vector2f( 10.0f ), 0.075f );
@@ -84,7 +82,7 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
         case CommandBufferFrameBufferType::sourceColor:
             return mComposite->getColorFB();
         case CommandBufferFrameBufferType::shadowMap:
-            return getShadowMapFB();
+            return rr.getShadowMapFB();
         case CommandBufferFrameBufferType::finalResolve:
             return mComposite->getColorFinalFB();
         case CommandBufferFrameBufferType::blurVertical:
@@ -119,14 +117,8 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
 
     auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{512}, true) );
 
-    auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
-    auto convolutionRT = rr.TM()->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
-                                                            .setGenerateMipMaps( false )
-                                                            .setIsFramebufferTarget( true ) );
-    trd.setSize(512);
-    auto preFilterSpecularRT = rr.TM()->addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter, trd }
-                                                                  .setGenerateMipMaps( true )
-                                                                  .setIsFramebufferTarget( true ) );
+    auto convolutionRT = rr.TD(MPBRTextures::convolution);
+    auto preFilterSpecularRT = rr.TD(MPBRTextures::specular_prefilter);
 
     // convolution
     auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
@@ -375,8 +367,6 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.setCameraUniforms( cameraRig->getCamera() );
 
-//    mSkybox->render();
-
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
     cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
@@ -387,8 +377,6 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
         }
     }
 
-//    addToCBCore( cb );
-
     cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
 
     // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
@@ -397,8 +385,9 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
     if ( mSkybox->precalc( 1.0f ) ) {
         addProbes();
     }
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
 
+    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
+//    mSkybox->render();
 }
 
 void RLTargetPBR::endCL( CommandBufferList& cb ) {
@@ -437,10 +426,6 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 void RLTargetPBR::resize( const Rect2f& _r ) {
     mComposite->setup( _r );
     framebuffer = mComposite->getColorFB();
-}
-
-std::shared_ptr<Framebuffer> RLTargetPBR::getShadowMapFB() {
-    return mShadowMapFB;
 }
 
 void RLTargetPBR::changeTime( const V3f& _solarTime ) {
