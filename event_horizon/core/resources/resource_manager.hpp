@@ -10,7 +10,6 @@
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/entity_factory.hpp>
 
-using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
 using ResourceMapperDict = std::unordered_map<std::string, ResourceRef>;
 using DependencyDict = std::unordered_map<std::string, std::unordered_map<std::string, bool>>;
 using ResourceDependencyMap = std::unordered_map<std::string, std::string>;
@@ -58,9 +57,10 @@ public:
     }
 
     void add( std::shared_ptr<T> _elem, const std::string& _name,
-                       const std::string& _hash, AddResourcePolicy _arp, const std::string& _aliasKey = "" ) {
+              const std::string& _hash, AddResourcePolicy _arp, const std::string& _aliasKey = "",
+              CommandResouceCallbackFunction _ccf = nullptr ) {
         if ( _arp == AddResourcePolicy::Deferred ) {
-            addDeferred( _elem, _name, _hash, _aliasKey );
+            addDeferred( _elem, _name, _hash, _aliasKey, _ccf );
         } else {
             addImmediate( _elem, _name, _hash, _aliasKey );
         }
@@ -73,9 +73,10 @@ public:
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
-                      const ResourceRef& _hash, const std::string& _aliasKey = "" ) {
+                      const ResourceRef& _hash, const std::string& _aliasKey = "",
+                      CommandResouceCallbackFunction _ccf = nullptr) {
         add( _elem, _name, _hash, _aliasKey );
-        addToSignal( signalAddElements, { _elem, _hash, {_hash, _name, _aliasKey} } );
+        addToSignal( signalAddElements, { _elem, _hash, {_hash, _name, _aliasKey}, _ccf } );
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {

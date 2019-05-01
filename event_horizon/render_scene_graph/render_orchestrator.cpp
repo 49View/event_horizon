@@ -87,16 +87,19 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     sg.TL().connect( [this](const ResourceTransfer<RawImage>& _val ) {
         LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addTextureResource(_val);
+        if ( _val.ccf ) _val.ccf({});
     });
 
     sg.ML().connect( [this](const ResourceTransfer<Material>& _val ) {
         LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<Material>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addMaterialResource(_val);
+        if ( _val.ccf ) _val.ccf({});
     });
 
     sg.VL().connect( [this](const ResourceTransfer<VData>& _val ) {
         LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addVDataResource(_val);
+        if ( _val.ccf ) _val.ccf({});
     });
 
     sg.nodeAddConnect( [this]( NodeGraphConnectParamsSig _geom ) {

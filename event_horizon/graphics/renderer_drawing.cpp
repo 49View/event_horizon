@@ -96,7 +96,7 @@ void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& m
             delta += unit * 0.25f;
             lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
             lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f, false, 0.0f, 1.0f,
                       _name + std::to_string( t ) + "+" );
         }
         delta += unit * 0.25f;
@@ -114,7 +114,7 @@ void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& m
             delta += unit * 0.25f;
             lerpLeftX = topYAxis + V3f::X_AXIS * delta;
             lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f, false, 0.0f, 1.0f,
                       _name + std::to_string( t ) + "+" );
         }
         delta += unit * 0.25f;
@@ -136,8 +136,24 @@ void Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector
     auto ps = std::make_shared<Pos3dStrip>( Rect2f{ p1, p2, true }, 0.0f );
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
-//    VPBuilder<Pos2dStrip>{*this}.vl(_vpl).p(std::make_shared<Pos2dStrip>( JMATH::Rect2f( Vector2f::ZERO, size *
-//                                                                                                         Vector2f::Y_INV))).m(S::COLOR_2D).c(color).n(_name).build();
+}
+
+void Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
+                         const std::string& _name ) {
+
+    auto ps = std::make_shared<Pos3dStrip>( Rect2f{ p1, p2, true } );
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_2D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
+}
+
+void Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture,
+                         float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
+    Rect2f rect{ p1, p2 };
+//    QuadVertices2 qvt = textureQuadFillModeMapping( fm, rect, ratio );
+//    auto ps = std::make_shared<PosTex3dStrip>( rect, qvt );
+    auto ps = std::make_shared<PosTex3dStrip>( rect, QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS );
+    auto vp = VPBuilder<PosTex3dStrip>{*this,ShaderMaterial{S::TEXTURE_2D, mapTextureAndColor(_texture, color)}}.p(ps).n(_name).build();
+    VPL( bucketIndex, vp );
 }
 
 void Renderer::drawArrow( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color,

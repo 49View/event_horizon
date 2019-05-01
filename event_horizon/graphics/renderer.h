@@ -42,6 +42,8 @@ namespace CommandBufferLimits {
 	const static int UIEnd = 9999;
 	const static int PBRStart = 10000;
 	const static int PBREnd = 99999999;
+    const static int UI2dStart = 100000000;
+    const static int UI2dEnd = 100090000;
 }
 
 namespace FBNames {
@@ -254,6 +256,10 @@ public:
     void drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
                    const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
     void drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
+                   const std::string& _name = {} );
+    void drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
+                   const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
+    void drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
                    const std::string& _name = {} );
 
 };

@@ -844,7 +844,7 @@ PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const
 PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
 
     Topology mesh;
-    Pillow( mesh, subdivs, radius * size.y() );
+    Pillow( mesh, subdivs, radius * size.y() *0.05f );
 
     return createGeom( mesh, size, GeomMapping::Cube, 0 );
 }

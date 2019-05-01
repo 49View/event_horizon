@@ -47,9 +47,8 @@ public:
                        if ( tarUtil::isTar(buff) ) {
                            addResources( buff, AddResourcePolicy::Deferred );
                        } else {
-                           add<R>( buff, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
+                           add<R>( buff, this->Name(), this->Hash(), AddResourcePolicy::Deferred, ccf );
                        }
-                       if ( ccf ) ccf(params);
                    } );
     }
 
@@ -58,17 +57,17 @@ public:
     ResourceRef addIM( const R& _res ) {
         return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }
-    ResourceRef addDF( const R& _res ) {
-        return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Deferred );
+    ResourceRef addDF( const R& _res, CommandResouceCallbackFunction _ccf = nullptr ) {
+        return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Deferred, _ccf );
     }
     ResourceRef addIM( std::shared_ptr<R> _res ) {
         return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }
-    ResourceRef addDF( std::shared_ptr<R> _res ) {
-        return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
+    ResourceRef addDF( std::shared_ptr<R> _res, CommandResouceCallbackFunction _ccf = nullptr ) {
+        return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Deferred, _ccf );
     }
-    ResourceRef add( std::shared_ptr<R> _res, AddResourcePolicy _arp ) {
-        return addInternal<R>( _res, this->Name(), this->Hash(), _arp );
+    ResourceRef add( std::shared_ptr<R> _res, AddResourcePolicy _arp, CommandResouceCallbackFunction _ccf = nullptr ) {
+        return addInternal<R>( _res, this->Name(), this->Hash(), _arp, _ccf );
     }
 
     void addResources( const SerializableContainer& _data, AddResourcePolicy _arp ) {
@@ -134,9 +133,10 @@ protected:
     std::shared_ptr<DEP> add( const SerializableContainer& _data,
                               const std::string& _name,
                               const ResourceRef& _hash,
-                              AddResourcePolicy _arp ) {
+                              AddResourcePolicy _arp,
+                              CommandResouceCallbackFunction _ccf = nullptr ) {
         auto ret = EF::create<DEP>(_data);
-        addInternal<DEP>( ret, _name, _hash, _arp );
+        addInternal<DEP>( ret, _name, _hash, _arp, _ccf );
         return ret;
     }
 
@@ -144,7 +144,8 @@ protected:
     ResourceRef addInternal( std::shared_ptr<DEP> _res,
                       const std::string& _name,
                       const ResourceRef& _hash,
-                      AddResourcePolicy _arp ) {
+                      AddResourcePolicy _arp,
+                      CommandResouceCallbackFunction _ccf = nullptr ) {
         // NDDADO: This could be very slow, might need to find a flyweight to calculate the whole hash
         ResourceRef resolvedHash = _hash;
         if constexpr ( std::is_same<R, DEP>::value ) {
@@ -155,7 +156,7 @@ protected:
         }
         ASSERT( !resolvedHash.empty() );
 
-        sg.M<DEP>().add( _res, _name, resolvedHash, _arp, this->Name() );
+        sg.M<DEP>().add( _res, _name, resolvedHash, _arp, this->Name(), _ccf );
         return resolvedHash;
     }
 

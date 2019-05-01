@@ -19,6 +19,8 @@ enum class AddResourcePolicy {
     Deferred
 };
 
+using CommandResouceCallbackFunction = std::function<void(const std::vector<std::string>&)>;
+
 JSONDATA( ResourceTarDict, group, filename, hash )
     ResourceTarDict( std::string group, std::string filename, std::string hash ) :
             group( std::move( group )), filename( std::move( filename )), hash( std::move( hash )) {}
@@ -39,6 +41,7 @@ struct ResourceTransfer {
     std::shared_ptr<T>      elem;
     std::string             hash;
     StringUniqueCollection  names;
+    CommandResouceCallbackFunction ccf = nullptr;
 
     // operator < is needed for boost signal sorting
     bool operator <(const ResourceTransfer &b) const {

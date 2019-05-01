@@ -20,12 +20,12 @@ void main()
     // FragColor = sceneColor + bloomColor;
     //FragColor.xyz /= ( FragColor.xyz + vec3( 1.0 ) );
 
-    vec2 uv = v_texCoord;
-    uv *=  1.0 - uv.yx; 
-    float vig = uv.x*uv.y * 2500.0; // multiply with sth for intensity
-    vig = clamp( pow(vig, 2.95), 0.0, 1.0); // change pow for modifying the extend of the  vignette
+    // vec2 uv = v_texCoord;
+    // uv *=  1.0 - uv.yx; 
+    // float vig = uv.x*uv.y * 2500.0; // multiply with sth for intensity
+    // vig = clamp( pow(vig, 2.95), 0.0, 1.0); // change pow for modifying the extend of the  vignette
 
-    FragColor = vec4( mix( vec3(1.0), pow( FragColor.xyz, vec3( 1.0 / 2.2 ) ), vig), FragColor.a );
+    // FragColor = vec4( mix( vec3(1.0), pow( FragColor.xyz, vec3( 1.0 / 2.2 ) ), vig), FragColor.a );
 
-    //FragColor = sceneColor;
+    FragColor = sceneColor;
 }

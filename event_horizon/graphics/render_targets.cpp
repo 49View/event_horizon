@@ -395,6 +395,13 @@ void RLTargetPBR::endCL( CommandBufferList& cb ) {
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
     cb.pushCommand( { CommandBufferCommandName::wireFrameModeFalse } );
 
+    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+    for ( const auto& [k, vl] : rr.CL() ) {
+        if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) ) {
+            rr.addToCommandBuffer( k );
+        }
+    }
+
     blit(cb);
 }
 
@@ -418,7 +425,6 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
     cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-
 
     endCL( cb );
 }
