@@ -105,11 +105,40 @@ struct QuadVector3fNormal {
 struct PolyOutLine;
 struct PolyLine;
 struct PolyLine2d;
+class Profile;
 namespace Utility::TTFCore { class FontInternal;}
 using Font = Utility::TTFCore::FontInternal;
 using QuadVector3fNormalfList = std::vector<QuadVector3fNormal>;
 
 namespace GT {
+
+    struct Scale {
+        template<typename ...Args>
+        explicit Scale( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        V3f operator()() const noexcept {
+            return data;
+        }
+        V3f data;
+    };
+
+    struct Rotate {
+        template<typename ...Args>
+        explicit Rotate( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        V3f operator()() const noexcept {
+            return data;
+        }
+        V3f data;
+    };
+
+    struct Direction {
+        template<typename ...Args>
+        explicit Direction( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        V3f operator()() const noexcept {
+            return data;
+        }
+        V3f data;
+    };
+
     enum class TextType {
         TextUI,
         Text2d,
@@ -142,19 +171,27 @@ namespace GT {
         Vector3f forcingNormalPoly = Vector3f::ZERO;
         ReverseFlag rfPoly = ReverseFlag::False;
     };
+    struct GTPolicyFollower {
+        std::shared_ptr<Profile> profile;
+        std::vector<Vector3f> profilePath;
+        FollowerFlags fflags = FollowerFlags::Defaults;
+        PolyRaise fraise = PolyRaise::None;
+        Vector2f flipVector = Vector2f::ZERO;
+        FollowerGap mGaps = FollowerGap::Empty;
+        Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
+    };
     struct GTPolicyShape {
         ShapeType shapeType = ShapeType::None;
     };
     struct GTPolicyMapping {
         GeomMappingData mappingData;
     };
-
     struct GTPolicyQuad {
         QuadVector3fNormalfList quads;
     };
 
     struct Shape    : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
-    struct Follower : GTPolicyTRS {};
+    struct Follower : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor {};
     struct Extrude  : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor {};
     struct Poly     : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor {};
     struct Mesh     : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor {};

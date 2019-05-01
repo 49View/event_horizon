@@ -176,7 +176,7 @@ void Renderer::drawLine( int bucketIndex, const std::vector<Vector3f>& verts, co
     if ( verts.size() < 2 ) return;
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
 
-    colorStrip->generateStripsFromVerts( extrudePointsWithWidth( verts, width, wrapIt, rotAngle, percToBeDrawn ), wrapIt );
+    colorStrip->generateStripsFromVerts( extrudePointsWithWidth<ExtrudeStrip>( verts, width, wrapIt ), wrapIt );
 
     auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
     VPL( bucketIndex, vp );

@@ -488,6 +488,8 @@ private:
 	float mZ;
 };
 
+using V3f = Vector3f;
+
 inline float dot( const Vector3f& a, const Vector3f& b ) {
 	return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
 }
@@ -609,8 +611,8 @@ void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
              Vector4f& tangent1, Vector4f& tangent2, Vector4f& tangent3,
              Vector3f& bitangent1, Vector3f& bitangent2, Vector3f& bitangent3 );
 
-std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, float width, bool wrapIt,
-							 float rotAngle = 0.0f, float percToBeDrawn = 1.0f );
+struct ExtrudeStrip {};
+struct ExtrudeComtour {};
 
 using Color3f = Vector3f;
 using vector3fList = std::vector<Vector3f>;
@@ -628,4 +630,84 @@ struct XZY {
 	static std::vector<Vector3f> C( const std::vector<Vector2f>& _v, float _z = 0.0f );
 };
 
-using V3f = Vector3f;
+template <typename T>
+std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, float width, bool wrapIt )  {
+    ASSERT( va.size() > 1 );
+
+//	auto vaCount = static_cast<int32_t>( va.size());
+
+    // calc the length of it
+//	float totalLength = 0.0f;
+//	std::unique_ptr<float[]> lengths = std::make_unique<float[]>( vaCount );
+//	lengths[0] = 0.0f;
+//	for ( int m = 1; m < vaCount; m++ ) {
+//		lengths[m] = lengths[m - 1] + distance( va[m], va[m - 1] );
+//	}
+//	totalLength = lengths[vaCount - 1];
+//
+//	if ( isScalarEqual( totalLength, 0.0f )) return {};
+
+    Vector3f v1;
+    Vector3f v2;
+    std::vector<Vector3f> vList;
+    vList.reserve(va.size()*2);
+
+    std::vector<Vector3f> vList1{};
+    std::vector<Vector3f> vList2{};
+    if constexpr ( std::is_same_v<T, ExtrudeComtour> ) {
+        vList1.reserve( va.size());
+        vList2.reserve( va.size());
+    }
+
+    for ( int m = 0; m < static_cast<int>( va.size()); m++ ) {
+        Vector3f vleft = getLeftVectorFromList( va, m, wrapIt );
+        Vector3f vright = getRightVectorFromList( va, m, wrapIt );
+
+        v1 = vleft - va[m];
+        v2 = va[m] - vright;
+
+        auto v1n = normalize( v1 );
+        auto v2n = normalize( v2 );
+
+        v1 = XZY::C(rotate90( v1n.xz()));
+        v2 = XZY::C(rotate90( v2n.xz()));
+
+        if ( !isValid( v1.x()) || !isValid( v2.x())) continue;
+
+        float ndot = dot( v1, v2 );
+        float extwidth = JMATH::lerp( ndot, sqrtf( width * width + width * width ), width );
+        Vector3f vn = v1 + v2;  //crossProduct(v1, v2, Vector3f::Z_AXIS);
+        if ( length( vn ) == 0.0f ) {
+            vn = v2;
+        }
+        vn = normalize( vn );
+
+        v2 = va[m] + ( vn *  0.5f * extwidth );
+        v1 = va[m] + ( vn * -0.5f * extwidth );
+
+        if constexpr ( std::is_same_v<T, ExtrudeStrip> ) {
+            vList.push_back( v1 );
+            vList.push_back( v2 );
+        }
+
+        if constexpr ( std::is_same_v<T, ExtrudeComtour> ) {
+            vList1.push_back( v1 );
+            vList2.push_back( v2 );
+        }
+    }
+
+    if constexpr ( std::is_same_v<T, ExtrudeStrip> ) {
+        return vList;
+    }
+
+    if constexpr ( std::is_same_v<T, ExtrudeComtour> ) {
+        for ( auto& t : vList2 ) {
+            vList.emplace_back( t );
+        }
+        for ( int t = static_cast<int>(vList1.size() - 1); t >= 0; t-- ) {
+            vList.emplace_back( vList1[t] );
+        }
+        return vList;
+    }
+}
+

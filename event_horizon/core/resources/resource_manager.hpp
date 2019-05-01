@@ -85,14 +85,9 @@ public:
     ResourceRef getHash( const std::string& _key ) {
         if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
             return res->second;
-        } else {
-            if ( !resources.empty() ) {
-                LOGRS("Resource " << _key << " unmapped returning default");
-                return resourcesMapper.begin()->second;
-            }
         }
-        LOGRS("Resource " << _key << " unmapped and mamanger empty, returning null");
-        return "";
+        LOGRS("Resource " << _key << " unmapped, returning empty hash");
+        return {};
     }
 
     std::shared_ptr<T> get( const std::string& _key ) {
@@ -100,7 +95,7 @@ public:
             return resources[res->second];
         } else {
             if ( !resources.empty() ) {
-                LOGRS("Resource " << _key << " unmapped returning default");
+                LOGRS("Resource " << _key << " unmapped returning default elem");
                 return resources.begin()->second;
             }
         }

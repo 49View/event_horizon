@@ -88,7 +88,8 @@ bool Skybox::precalc( float _sunHDRMult ) {
 }
 
 void Skybox::render() {
-    mCubeMapRender->render( mSkyboxTexture );
+    if ( mSkyboxTexture )
+        mCubeMapRender->render( mSkyboxTexture );
 }
 
 Skybox::Skybox( Renderer& rr, const SkyBoxInitParams& _params ) : RenderModule( rr ) {

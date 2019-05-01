@@ -59,7 +59,7 @@ public:
 	}
 
 	explicit Rect2f( const Vector2f& topLeft, const Vector2f& bottomRight, bool /*expand*/ ) {
-		*this = INVALID;
+		invalidate();
 		expand( topLeft );
 		expand( topLeft + bottomRight );
 	}
@@ -69,28 +69,42 @@ public:
 		mBottomRight.set( right, bottom );
 	}
 
-	explicit Rect2f( const std::vector<Vector2f>& points ) {
-		*this = INVALID;
-		for ( auto& p : points ) expand( p );
+	explicit Rect2f( const V2fVector & points ) {
+		invalidate();
+		for ( const auto& p : points ) expand( p );
 	}
 
+    explicit Rect2f( const V2fVectorOfVector& points ) {
+        invalidate();
+        for ( const auto& pl1 : points ) {
+            for ( const auto& p : pl1 ) {
+                expand( p );
+            }
+        }
+    }
+
 	explicit Rect2f( const std::initializer_list<Vector2f>& points ) {
-		*this = INVALID;
+		invalidate();
 		for ( auto& p : points ) expand( p );
 	}
 
 	explicit Rect2f( const std::vector<Vector3f>& points ) {
-		*this = INVALID;
+		invalidate();
 		for ( auto& p : points ) expand( p.xy() );
 	}
 
 	explicit Rect2f( const Vector3f* points, size_t vsize ) {
-		*this = INVALID;
+		invalidate();
 		for ( size_t t = 0; t < vsize; t++ ) expand( points[t].xy() );
 	}
 
 	float* rawPtr() {
 		return reinterpret_cast<float*>( &mTopLeft[0] );
+	}
+
+	void invalidate() {
+	    mTopLeft = V2f{std::numeric_limits<float>::max()};
+	    mBottomRight = V2f{std::numeric_limits<float>::lowest()};
 	}
 
 	Rect2f ss() const {

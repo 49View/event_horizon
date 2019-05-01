@@ -374,6 +374,9 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.setCameraUniforms( cameraRig->getCamera() );
+
+//    mSkybox->render();
+
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
     cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
@@ -385,6 +388,8 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
     }
 
 //    addToCBCore( cb );
+
+    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
 
     // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
     // (that has got 3d lighting in it) especially skyboxes and probes!!
@@ -407,8 +412,6 @@ void RLTargetPBR::endCL( CommandBufferList& cb ) {
 void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     startCL( cb );
-
-//    mSkybox->render();
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     for ( const auto& [k, vl] : rr.CL() ) {

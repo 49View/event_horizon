@@ -209,7 +209,7 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeLine( const std::vector<Vecto
                                                                                  VFVertexAllocation::PreAllocate );
 
 //    colorStrip->generateStripsFromVerts( extrudePointsWithWidth( _vlist, lineWidth, wrapLine ), wrapLine );
-    colorStrip->generateTriangleListFromVerts( extrudePointsWithWidth( _vlist, lineWidth, wrapLine ) );
+    colorStrip->generateTriangleListFromVerts( extrudePointsWithWidth<ExtrudeStrip>( _vlist, lineWidth, wrapLine ) );
 
     return colorStrip;
 }
@@ -249,8 +249,8 @@ std::shared_ptr<PosTex3dStrip> UIShapeBuilder::makeArrow() {
 //    return makeLine( vlistStem );
 
     std::vector<std::vector<Vector3f>> cumulativeVlist;
-    cumulativeVlist.push_back( extrudePointsWithWidth( vlistArrowBit, lineWidth, wrapLine ) );
-    cumulativeVlist.push_back( extrudePointsWithWidth( vlistStem, lineWidth * 0.66f, wrapLine ) );
+    cumulativeVlist.push_back( extrudePointsWithWidth<ExtrudeStrip>( vlistArrowBit, lineWidth, wrapLine ) );
+    cumulativeVlist.push_back( extrudePointsWithWidth<ExtrudeStrip>( vlistStem, lineWidth * 0.66f, wrapLine ) );
 
     return makeLines( cumulativeVlist );
 //    drawLine( _vpl, vlist, color, width, false, 0.0f, percToBeDrawn, _name1 );

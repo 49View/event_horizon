@@ -177,9 +177,24 @@ void SceneGraph::init() {
 
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
 //    B<MB>( "tomato" ).load();
-
+//    B<FB>( S::DEFAULT_FONT ).addIM( Font{Poppins_Medium_ttf, Poppins_Medium_ttf_len} );
     B<FB>( S::DEFAULT_FONT ).addIM( Font{FontAmaranthRegularBin, FontAmaranthRegularBinLen} );
 //    B<FB>( S::DEFAULT_FONT ).addIM( Font{FM::readLocalFileC("/Users/Dado/Downloads/Banner5_ForSending/AkkuratFont/Akkurat-Light.ttf")} );
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
+}
+
+GeomSP SceneGraph::GC() {
+    auto ret = std::make_shared<Geom>();
+    ret->Name( B<GRB>( ret->UUiD() ).addIM( ret ) );
+    return ret;
+}
+
+UUID SceneGraph::GC( const GeomSP& _geom ) {
+    auto ref = GM().getHash( _geom->Name() );
+    auto ret = addNode( ref );
+    for (const auto& c : _geom->Children() ) {
+        GC( c );
+    }
+    return ret;
 }
 

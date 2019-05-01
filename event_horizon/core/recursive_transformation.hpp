@@ -9,6 +9,7 @@
 #include <core/math/matrix_anim.h>
 #include <core/boxable.hpp>
 #include <core/uuidable.hpp>
+#include <core/serialization.hpp>
 
 enum UpdateTypeFlag {
     Nothing =  0,
@@ -48,6 +49,15 @@ public:
         generateMatrixHierarchy(fatherRootTransform());
     }
 
+    inline void serialize( MegaWriter* visitor ) const {
+        visitor->StartObject();
+        visitor->serialize( "UUID", UUiD() );
+        visitor->EndObject();
+    }
+	inline SerializableContainer serialize() const {
+        MegaWriter mw; serialize(&mw); return mw.getSerializableContainer();
+    }
+
     bool empty() const {
         return data.empty();
     }
@@ -60,8 +70,9 @@ public:
         return data[_index];
     }
 
-    void pushData( const T& _data ) {
-        data.emplace_back( _data );
+    template <typename ...Args>
+    void pushData( Args&&... args ) {
+        data.emplace_back( T{std::forward<Args>( args )...} );
     }
 
     void updateAnim() {

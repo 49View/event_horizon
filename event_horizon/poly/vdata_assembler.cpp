@@ -243,65 +243,61 @@ namespace VDataServices {
                 oss << v.toString();
             }
         }
-        return "Poly--" + Hashable<>::hashOf(oss.str());
+        return "Quad--" + Hashable<>::hashOf(oss.str());
+    }
+
+    // ___ FOLLOWER BUILDER ___
+    void prepare( SceneGraph& sg, GT::Follower& _d ) {
+    }
+
+    void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret ) {
+        ASSERT( !_d.profile->Points().empty() );
+
+        Profile lProfile{ *_d.profile.get() };
+        Vector2f lRaise{V2f::ZERO};
+        if ( _d.fraise != PolyRaise::None ) {
+            switch ( _d.fraise ) {
+                case PolyRaise::None:break;
+                case PolyRaise::HorizontalPos:
+                    lRaise= ( Vector2f::X_AXIS * lProfile.width() );
+                    break;
+                case PolyRaise::HorizontalNeg:
+                    lRaise= ( Vector2f::X_AXIS_NEG * lProfile.width());
+                    break;
+                case PolyRaise::VerticalPos:
+                    lRaise= ( Vector2f::Y_AXIS * lProfile.height() );
+                    break;
+                case PolyRaise::VerticalNeg:
+                    lRaise= ( Vector2f::Y_AXIS_NEG * lProfile.height() );
+                    break;
+            };
+        }
+
+        lProfile.raise( lRaise );
+        lProfile.flip( _d.flipVector );
+
+        FollowerService::extrude( _ret, _d.profilePath, lProfile, _d.mFollowerSuggestedAxis, _d.fflags );
+    }
+
+    ResourceRef refName( const GT::Follower& _d ) {
+        std::stringstream oss;
+        oss << _d.profile->Name();
+        for ( const auto& v : _d.profilePath ) {
+            oss << v.toString();
+        }
+        oss << _d.fflags;
+        oss << static_cast<uint64_t>(_d.fraise);
+        oss << _d.flipVector.toString();
+        // ### Implement this for gaps
+//    for ( const auto& v : mGaps ) {
+//        oss << static_cast<uint64_t>(v);
+//    }
+        oss << _d.mFollowerSuggestedAxis.toString();
+       return "Follower--" + Hashable<>::hashOf(oss.str());
     }
 
 }
 
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-//
-// ___ FOLLOWER BUILDER ___
-//
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-
-//void GeomDataFollowerBuilder::buildInternal( std::shared_ptr<VData> _ret ) {
-//    ASSERT( !mProfile->Points().empty() );
-//
-//    Profile lProfile{ *mProfile.get() };
-//    Vector2f lRaise = mRaise;
-//    if ( mRaiseEnum != PolyRaise::None ) {
-//        switch ( mRaiseEnum ) {
-//            case PolyRaise::None:break;
-//            case PolyRaise::HorizontalPos:
-//                lRaise= ( Vector2f::X_AXIS * lProfile.width() );
-//                break;
-//            case PolyRaise::HorizontalNeg:
-//                lRaise= ( Vector2f::X_AXIS_NEG * lProfile.width());
-//                break;
-//            case PolyRaise::VerticalPos:
-//                lRaise= ( Vector2f::Y_AXIS * lProfile.height() );
-//                break;
-//            case PolyRaise::VerticalNeg:
-//                lRaise= ( Vector2f::Y_AXIS_NEG * lProfile.height() );
-//                break;
-//        };
-//    }
-//
-//    lProfile.raise( lRaise );
-//    lProfile.flip( mFlipVector );
-//
-//    FollowerService::extrude( _ret, mVerts, lProfile, mSuggestedAxis, followersFlags );
-//}
-//
-//void GeomDataFollowerBuilder::setupRefName() {
-//    std::stringstream oss;
-//    oss << mProfile->Name();
-//    for ( const auto& v : mVerts ) {
-//        oss << v.toString();
-//    }
-//    oss << followersFlags;
-//    oss << mRaise.toString();
-//    oss << static_cast<uint64_t>(mRaiseEnum);
-//    oss << mFlipVector.toString();
-//    // ### Implement this for gaps
-////    for ( const auto& v : mGaps ) {
-////        oss << static_cast<uint64_t>(v);
-////    }
-//    oss << mSuggestedAxis.toString();
-//    mRefName = "Follower--" + Hashable<>::hashOf(oss.str());
-//}
 
 // ********************************************************************************************************************
 // ********************************************************************************************************************

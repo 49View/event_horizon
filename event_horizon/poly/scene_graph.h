@@ -113,13 +113,16 @@ public:
         }
 
         auto elem = std::make_shared<Geom>(gb.Name());
-        elem->pushData( GeomData{vdataRef, matRef } );
+        elem->pushData( vdataRef, matRef );
 
         if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
         elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
         auto ref = B<GRB>( gb.Name() ).addIM( elem );
-        return addNode( ref );
+        return gb.elemInjFather ? ref : addNode( ref );
     }
+
+    GeomSP GC();
+    UUID GC( const GeomSP& _geom );
 
 protected:
 //    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}

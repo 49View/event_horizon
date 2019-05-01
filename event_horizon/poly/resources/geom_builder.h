@@ -220,13 +220,6 @@
 //
 //    subdivisionAccuray subdivAccuracy = accuracyNone;
 //
-//    std::string mDepResourceName;
-//    std::vector<Vector3f> profilePath;
-//    FollowerFlags fflags = FollowerFlags::Defaults;
-//    PolyRaise fraise = PolyRaise::None;
-//    Vector2f flipVector = Vector2f::ZERO;
-//    FollowerGap mGaps = FollowerGap::Empty;
-//    Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
 //
 //    std::string asciiText;
 //

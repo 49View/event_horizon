@@ -57,6 +57,17 @@ public:
             dataTypeHolder.pos = _param;
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GT::Scale> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyTRS, SGT> );
+            dataTypeHolder.scale = _param();
+            return *this;
+        }
+        if constexpr ( std::is_same_v<M, GT::Direction> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
+            if constexpr ( std::is_same_v<SGT, GT::Follower> )
+                dataTypeHolder.mFollowerSuggestedAxis = _param();
+            return *this;
+        }
 
         if constexpr ( std::is_same<M, ShapeType>::value ) {
             static_assert( std::is_same<SGT, GT::Shape>::value );
@@ -76,9 +87,18 @@ public:
             return *this;
         }
 
+        if constexpr ( std::is_same_v<M, std::shared_ptr<Profile>> ) {
+            static_assert( std::is_same_v<SGT, GT::Follower> );
+            dataTypeHolder.profile = _param;
+            return *this;
+        }
+
         if constexpr ( std::is_same<M, std::vector<Vector3f>>::value ) {
-            static_assert( std::is_same<SGT, GT::Poly>::value );
-            dataTypeHolder.sourcePolysVList = _param;
+            static_assert( std::is_same_v<SGT, GT::Poly> || std::is_same_v<SGT, GT::Follower> );
+            if constexpr ( std::is_same_v<SGT, GT::Poly> )
+                dataTypeHolder.sourcePolysVList = _param;
+            if constexpr ( std::is_same_v<SGT, GT::Follower> )
+                dataTypeHolder.profilePath = _param;
             return *this;
         }
 
@@ -88,6 +108,10 @@ public:
             return *this;
         }
 
+        if constexpr ( std::is_same<M, GeomSP>::value ) {
+            elemInjFather = _param;
+            return *this;
+        }
 
 //        static_assert( std::false_type::value, "VData assembly params type not mapped " );
 //        return *this;
@@ -119,6 +143,10 @@ namespace VDataServices {
     void prepare( SceneGraph& sg, GT::Mesh& _d );
     void buildInternal( const GT::Mesh& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Mesh& _d );
+
+    void prepare( SceneGraph& sg, GT::Follower& _d );
+    void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::Follower& _d );
 
     template <typename DT>
     std::shared_ptr<VData> build( const DT& _d ) {
