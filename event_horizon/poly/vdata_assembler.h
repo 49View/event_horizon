@@ -57,6 +57,11 @@ public:
             dataTypeHolder.pos = _param;
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GT::Rotate> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyTRS, SGT> );
+            dataTypeHolder.axis = _param();
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, GT::Scale> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyTRS, SGT> );
             dataTypeHolder.scale = _param();
@@ -117,6 +122,15 @@ public:
                 dataTypeHolder.sourcePolysVList = _param;
             if constexpr ( std::is_same_v<SGT, GT::Follower> )
                 dataTypeHolder.profilePath2d = _param;
+            return *this;
+        }
+
+        if constexpr ( std::is_same_v<M, Rect2f> ) {
+            static_assert( std::is_same_v<SGT, GT::Poly> || std::is_same_v<SGT, GT::Follower> );
+            if constexpr ( std::is_same_v<SGT, GT::Poly> )
+                dataTypeHolder.sourcePolysVList = XZY::C(_param.points3d(0.0f));
+            if constexpr ( std::is_same_v<SGT, GT::Follower> )
+                for ( auto &v: _param.points3dcw() ) dataTypeHolder.profilePath.emplace_back( v );
             return *this;
         }
 

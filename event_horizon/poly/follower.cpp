@@ -33,7 +33,7 @@ FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<
 
     int i1 = _wo == WindingOrder::CCW ? 1 : 2;
     int i2 = _wo == WindingOrder::CCW ? 2 : 1;
-    vn = normalize( crossProduct( vs[0], vs[i1], vs[i2] ));
+    vn = normalize( crossProduct( vs[0], vs[i2], vs[i1] ));
 
     float d1 = dot( vn, vnm1 );
     float d2 = dot( vn, vnp1 );
