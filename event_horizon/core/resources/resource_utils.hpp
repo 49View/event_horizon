@@ -12,6 +12,7 @@
 #include <unordered_map>
 
 #include <core/serialization.hpp>
+#include <core/http/webclient.h>
 #include <core/resources/resource_types.hpp>
 
 enum class AddResourcePolicy {
@@ -41,7 +42,7 @@ struct ResourceTransfer {
     std::shared_ptr<T>      elem;
     std::string             hash;
     StringUniqueCollection  names;
-    CommandResouceCallbackFunction ccf = nullptr;
+    HttpDeferredResouceCallbackFunction ccf = nullptr;
 
     // operator < is needed for boost signal sorting
     bool operator <(const ResourceTransfer &b) const {

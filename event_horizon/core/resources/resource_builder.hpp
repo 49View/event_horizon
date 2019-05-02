@@ -37,19 +37,22 @@ public:
     }
     virtual ~ResourceBuilder() = default;
 
-    void load( CommandResouceCallbackFunction _ccf = nullptr, const std::vector<std::string>& _params = {} ) {
-        ccf = _ccf;
-        params = _params;
+    void load( HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
         Http::get( Url( HttpFilePrefix::entities + ResourceVersioning<R>::Prefix() + "/" + url_encode( this->Name() ) ),
-                   [&](HttpResponeParams _res) {
+                   [](HttpResponeParams _res) {
                        if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
                        auto buff = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
                        if ( tarUtil::isTar(buff) ) {
-                           addResources( buff, AddResourcePolicy::Deferred );
+                           SceneGraph::addDeferredComp( std::move(buff), _res.ccf );
                        } else {
-                           add<R>( buff, this->Name(), this->Hash(), AddResourcePolicy::Deferred, ccf );
+                           SceneGraph::addDeferred<R>( getFileNameCallbackKey( _res.uri ),
+                                                       std::move(buff),
+                                                       _res.ccf );
                        }
-                   } );
+                   },
+                   nullptr,
+                   Http::ResponseFlags::None,
+                   _ccf );
     }
 
     // add*: this->Hash() will be empty "" if it comes from a procedural resource (IE not loaded from a file)
@@ -57,45 +60,17 @@ public:
     ResourceRef addIM( const R& _res ) {
         return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }
-    ResourceRef addDF( const R& _res, CommandResouceCallbackFunction _ccf = nullptr ) {
+    ResourceRef addDF( const R& _res, HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
         return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Deferred, _ccf );
     }
     ResourceRef addIM( std::shared_ptr<R> _res ) {
         return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Immediate );
     }
-    ResourceRef addDF( std::shared_ptr<R> _res, CommandResouceCallbackFunction _ccf = nullptr ) {
+    ResourceRef addDF( std::shared_ptr<R> _res, HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
         return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Deferred, _ccf );
     }
-    ResourceRef add( std::shared_ptr<R> _res, AddResourcePolicy _arp, CommandResouceCallbackFunction _ccf = nullptr ) {
+    ResourceRef add( std::shared_ptr<R> _res, AddResourcePolicy _arp, HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
         return addInternal<R>( _res, this->Name(), this->Hash(), _arp, _ccf );
-    }
-
-    void addResources( const SerializableContainer& _data, AddResourcePolicy _arp ) {
-
-        auto fs = tarUtil::untar(_data);
-        ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
-        auto dict = deserializeArray<ResourceTarDict>( fs[ResourceCatalog::Key] );
-
-        std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
-            return resourcePriority( a.group ) < resourcePriority( b.group );
-        } );
-
-        for ( const auto& rd : dict ) {
-            if ( rd.group == ResourceGroup::Image ) {
-                add<RawImage>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-            } else if ( rd.group == ResourceGroup::Font ) {
-                add<Font>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-            } else if ( rd.group == ResourceGroup::Profile ) {
-                add<Profile>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-            } else if ( rd.group == ResourceGroup::Color ) {
-                add<MaterialColor>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-            } else if ( rd.group == ResourceGroup::Material ) {
-                add<Material>( fs[rd.filename], rd.filename, rd.hash, AddResourcePolicy::Deferred );
-            } else {
-                LOGRS("{" << rd.group << "} Resource not supported yet in dependency unpacking");
-                ASSERT(0);
-            }
-        }
     }
 
     std::shared_ptr<R> make( const SerializableContainer& _data, const ResourceRef& _hash = {} ) {
@@ -134,7 +109,7 @@ protected:
                               const std::string& _name,
                               const ResourceRef& _hash,
                               AddResourcePolicy _arp,
-                              CommandResouceCallbackFunction _ccf = nullptr ) {
+                              HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
         auto ret = EF::create<DEP>(_data);
         addInternal<DEP>( ret, _name, _hash, _arp, _ccf );
         return ret;
@@ -145,7 +120,7 @@ protected:
                       const std::string& _name,
                       const ResourceRef& _hash,
                       AddResourcePolicy _arp,
-                      CommandResouceCallbackFunction _ccf = nullptr ) {
+                             HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
         // NDDADO: This could be very slow, might need to find a flyweight to calculate the whole hash
         ResourceRef resolvedHash = _hash;
         if constexpr ( std::is_same<R, DEP>::value ) {
@@ -164,5 +139,5 @@ protected:
     SceneGraph& sg;
     std::map<std::string, std::vector<ResourceRef>> dependencies;
     std::vector<std::string> params;
-    CommandResouceCallbackFunction ccf = nullptr;
+    HttpDeferredResouceCallbackFunction ccf = nullptr;
 };

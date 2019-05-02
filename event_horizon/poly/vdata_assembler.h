@@ -72,6 +72,11 @@ public:
             dataTypeHolder.mFollowerSuggestedAxis = _param();
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GT::Z> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyExtrusion, SGT> );
+            dataTypeHolder.z = _param();
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, GT::Flip> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
             dataTypeHolder.flipVector = _param();
@@ -82,7 +87,11 @@ public:
             dataTypeHolder.fflags = _param;
             return *this;
         }
-
+        if constexpr ( std::is_same_v<M, PolyRaise> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
+            dataTypeHolder.fraise = _param;
+            return *this;
+        }
         if constexpr ( std::is_same<M, ShapeType>::value ) {
             static_assert( std::is_same<SGT, GT::Shape>::value );
             dataTypeHolder.shapeType = _param;

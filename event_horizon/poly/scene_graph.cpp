@@ -16,6 +16,16 @@
 #include <core/resources/material.h>
 #include <core/file_manager.h>
 
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackVData        ;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackRawImage     ;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackMaterial     ;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackFont         ;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackProfile      ;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackMaterialColor;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackCameraRig    ;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackGeom         ;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite    ;
+
 UUID SceneGraph::addNode( const ResourceRef& _hash ) {
     auto cloned = GM().clone( _hash );
     nodeAddSignal(cloned);
@@ -31,6 +41,27 @@ void SceneGraph::removeNode( const UUID& _uuid ) {
 }
 
 void SceneGraph::update() {
+
+    for ( const auto& res : resourceCallbackVData        ) {addVData        ( res.key, VData        {res.data}, res.ccf ); }
+    for ( const auto& res : resourceCallbackRawImage     ) {addRawImage     ( res.key, RawImage     {res.data}, res.ccf ); }
+    for ( const auto& res : resourceCallbackMaterial     ) {addMaterial     ( res.key, Material     {res.data}, res.ccf ); }
+    for ( const auto& res : resourceCallbackFont         ) {addFont         ( res.key, Font         {res.data}, res.ccf ); }
+    for ( const auto& res : resourceCallbackProfile      ) {addProfile      ( res.key, Profile      {res.data}, res.ccf ); }
+    for ( const auto& res : resourceCallbackMaterialColor) {addMaterialColor( res.key, MaterialColor{res.data}, res.ccf ); }
+//    for ( const auto& res : resourceCallbackCameraRig    ) {addCameraRig    ( res.key, CameraRig    {res.data}, res.ccf ); }
+//    for ( const auto& res : resourceCallbackGeom         ) {addGeom         ( res.key, Geom         {res.data}, res.ccf ); }
+    for ( const auto& res : resourceCallbackComposite    ) {addResources( res.data, res.ccf ); }
+
+    resourceCallbackVData        .clear();
+    resourceCallbackRawImage     .clear();
+    resourceCallbackMaterial     .clear();
+    resourceCallbackFont         .clear();
+    resourceCallbackProfile      .clear();
+    resourceCallbackMaterialColor.clear();
+    resourceCallbackCameraRig    .clear();
+    resourceCallbackGeom         .clear();
+    resourceCallbackComposite    .clear();
+
     VL().update();
     TL().update();
     PL().update();
@@ -181,6 +212,48 @@ void SceneGraph::init() {
     B<FB>( S::DEFAULT_FONT ).addIM( Font{FontAmaranthRegularBin, FontAmaranthRegularBinLen} );
 //    B<FB>( S::DEFAULT_FONT ).addIM( Font{FM::readLocalFileC("/Users/Dado/Downloads/Banner5_ForSending/AkkuratFont/Akkurat-Light.ttf")} );
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
+}
+
+ResourceRef SceneGraph::addVData         ( const ResourceRef& _key, const VData        & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<VB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addRawImage      ( const ResourceRef& _key, const RawImage     & _res, HttpDeferredResouceCallbackFunction _ccf ) {
+    B<IB> (_key).addDF( _res, _ccf );
+    return _key;
+}
+ResourceRef SceneGraph::addMaterial      ( const ResourceRef& _key, const Material     & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<MB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addFont          ( const ResourceRef& _key, const Font         & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<FB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<PB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpDeferredResouceCallbackFunction _ccf ) { B<MCB>(_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<CB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<GRB>(_key).addDF( _res, _ccf ); return _key; }
+
+void SceneGraph::addResources( const SerializableContainer& _data, HttpDeferredResouceCallbackFunction _ccf ) {
+
+    auto fs = tarUtil::untar(_data);
+    ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
+    auto dict = deserializeArray<ResourceTarDict>( fs[ResourceCatalog::Key] );
+
+    std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
+        return resourcePriority( a.group ) < resourcePriority( b.group );
+    } );
+
+    for ( const auto& rd : dict ) {
+        if ( rd.group == ResourceGroup::Image ) {
+            B<IB>( rd.filename ).make( fs[rd.filename], rd.hash );
+        } else if ( rd.group == ResourceGroup::Font ) {
+            B<FB>( rd.filename ).make( fs[rd.filename], rd.hash );
+        } else if ( rd.group == ResourceGroup::Profile ) {
+            B<PB>( rd.filename ).make( fs[rd.filename], rd.hash );
+        } else if ( rd.group == ResourceGroup::Color ) {
+            B<MCB>( rd.filename ).make( fs[rd.filename], rd.hash );
+        } else if ( rd.group == ResourceGroup::Material ) {
+            B<MB>( rd.filename ).make( fs[rd.filename], rd.hash );
+        } else {
+            LOGRS("{" << rd.group << "} Resource not supported yet in dependency unpacking");
+            ASSERT(0);
+        }
+    }
+
+    if ( _ccf) _ccf();
 }
 
 GeomSP SceneGraph::GC() {

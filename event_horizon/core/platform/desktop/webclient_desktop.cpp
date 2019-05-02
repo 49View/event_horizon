@@ -84,7 +84,8 @@ namespace Http {
     void getInternal( const Url& url,
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
-                      ResponseFlags rf ) {
+                      ResponseFlags rf,
+                      HttpDeferredResouceCallbackFunction mainThreadCallback ) {
         auto request = makeRequest( url );
 
         auto settings = std::make_shared< restbed::Settings >( );
@@ -98,6 +99,7 @@ namespace Http {
                 LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
                 auto lRes = handleResponse( res, url, rf );
                 if ( lRes.isSuccessStatusCode() ) {
+                    lRes.ccf = mainThreadCallback;
                     if ( callback ) callback( lRes );
                 } else {
                     if ( callbackFailed ) callbackFailed( lRes );
@@ -112,7 +114,8 @@ namespace Http {
     }
 
     void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt,
-                       ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
+                       ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
+                       HttpDeferredResouceCallbackFunction mainThreadCallback ) {
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
@@ -134,6 +137,7 @@ namespace Http {
                                       auto lRes = handleResponse( res, url, ResponseFlags::None );
                                       if ( lRes.isSuccessStatusCode() ) {
                                           if ( callback ) {
+                                              lRes.ccf = mainThreadCallback;
                                               callback( lRes );
                                           }
                                       } else {

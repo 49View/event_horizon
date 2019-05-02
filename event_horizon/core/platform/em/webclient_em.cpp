@@ -10,14 +10,16 @@
 namespace Http {
 
     using callbackRespondeMap = std::unordered_map<std::string, ResponseCallbackFunc>;
+    using callbackRespondeCCF = std::unordered_map<std::string, HttpDeferredResouceCallbackFunction>;
     callbackRespondeMap argCallbackMapOk;
     callbackRespondeMap argCallbackMapFail;
+    callbackRespondeCCF argCallbackMapCCF;
 
     void responseCallback( callbackRespondeMap& argCallbackMap,
                            const char* ckey, int code, void* data, unsigned numBytes ) {
         auto skey = std::string( ckey );
         if ( argCallbackMap[skey] ) {
-            argCallbackMap[skey]( { skey, reinterpret_cast<const char*>(data), numBytes, code } );
+            argCallbackMap[skey]( { skey, reinterpret_cast<const char*>(data), numBytes, code, argCallbackMapCCF[skey] } );
         }
         delete [] ckey;
     }
@@ -49,10 +51,12 @@ namespace Http {
     }
 
     char* urlKeyPassing( const Url& uri, const ResponseCallbackFunc callbackOk,
-                                         const ResponseCallbackFunc callbackFail ) {
+                                         const ResponseCallbackFunc callbackFail,
+                                         HttpDeferredResouceCallbackFunction ccf ) {
         auto key = uri.toString();
         argCallbackMapOk[key] = callbackOk;
         argCallbackMapFail[key] = callbackFail;
+        argCallbackMapCCF[key] = ccf;
         char* keyToCharCPassing = new char[key.size()+1];
         strcpy( keyToCharCPassing, key.c_str() );
         keyToCharCPassing[key.size()] = '\0';
@@ -62,7 +66,8 @@ namespace Http {
     void getInternal( const Url& uri,
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
-                      [[maybe_unused]] ResponseFlags rf ) {
+                      [[maybe_unused]] ResponseFlags rf,
+                      HttpDeferredResouceCallbackFunction ccf ) {
 
         emscripten_async_http_request(uri.toString().c_str(),
                                     "GET",
@@ -70,7 +75,7 @@ namespace Http {
                                     nullptr,
                                     0,
                                     nullptr,
-                                    reinterpret_cast<void*>(urlKeyPassing(uri, callback, callbackFailed)),
+                                    reinterpret_cast<void*>(urlKeyPassing(uri, callback, callbackFailed, ccf)),
                                     false,
                                     onSuccessWget,
                                     onFailWget,
@@ -79,7 +84,8 @@ namespace Http {
     }
 
     void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt,
-                       ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed ) {
+                       ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
+                       HttpDeferredResouceCallbackFunction ccf ) {
 
         LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
@@ -91,7 +97,7 @@ namespace Http {
                                        buff,
                                        static_cast<int>(length),
                                        contenType.c_str(),
-                                       reinterpret_cast<void*>(urlKeyPassing(uri, callback, callbackFailed)),
+                                       reinterpret_cast<void*>(urlKeyPassing(uri, callback, callbackFailed, ccf)),
                                        false,
                                        onSuccessWget,
                                        onFailWget,
