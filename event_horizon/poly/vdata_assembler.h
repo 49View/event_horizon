@@ -45,13 +45,11 @@ public:
             dataTypeHolder.text = _param;
             return *this;
         }
-
         if constexpr ( std::is_same_v<M, Color4f> ) {
-            static_assert( std::is_same_v<SGT, GT::Text> );
+            static_assert( std::is_base_of_v<GT::GTPolicyColor, SGT> );
             dataTypeHolder.color = _param;
             return *this;
         }
-
         if constexpr ( std::is_same_v<M, Vector3f> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyTRS, SGT> );
             dataTypeHolder.pos = _param;

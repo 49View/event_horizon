@@ -69,8 +69,7 @@ std::vector<Vector3f> utilGenerateFlatBoxFromSize( float width, float height, fl
     return bboxPoints;
 }
 
-std::vector<Vector2f> utilGenerateFlatRect( const Vector2f& size, const WindingOrderT wo,
-                                            PivotPointPosition ppp, const Vector2f& /*pivot*/ ) {
+std::vector<Vector2f> utilGenerateFlatRect( const Vector2f& size, const WindingOrderT wo, PivotPointPosition ppp ) {
     std::vector<Vector2f> fverts;
 
     if ( wo == WindingOrder::CW ) {

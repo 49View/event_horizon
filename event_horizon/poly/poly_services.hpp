@@ -23,6 +23,8 @@ enum PullFlags : uint32_t {
     All = 0xffffffff,
 };
 
+std::vector<Vector2f> utilGenerateFlatRect( const Vector2f& size, WindingOrderT wo, PivotPointPosition ppp );
+
 namespace MappingServices {
     void doNotScaleMapping( GeomMappingData& m );
     void resetMapping( GeomMappingData& m, uint64_t arraySize );
@@ -54,7 +56,6 @@ namespace PolyServices {
     void addFlatPolyWithMapping( VDataSP vdata,size_t vsize, const Vector3f *vs, const Vector2f *vts,
                                  GeomMappingData& m, const Vector3f* vn = nullptr );
     void addFlatPolyWithMapping( VDataSP vdata, const QuadStripUV& qs, GeomMappingData& m );
-
     void pull( VDataSP vdata, const std::vector<Vector2f>& verts, float height, float zOffset,
                GeomMappingData& m, PullFlags pullFlags = PullFlags::All );
     void pull( VDataSP vdata, const std::vector<Vector3f>& verts, float height,
