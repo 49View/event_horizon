@@ -82,6 +82,17 @@ JSONDATA( RefreshToken, session, token, expires )
     uint64_t expires;
 };
 
+struct LoginFieldsPrecached {};
+struct LoginFieldsCanonicalRoute {};
+
+template <typename HLF = LoginFieldsCanonicalRoute >
+class LoginActivation {
+public:
+    static constexpr bool hasLF() {
+        return std::is_same_v<HLF, LoginFieldsPrecached>;
+    }
+};
+
 namespace Http {
 
     enum UsePort {
