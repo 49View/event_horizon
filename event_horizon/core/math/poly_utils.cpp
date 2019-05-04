@@ -151,3 +151,12 @@ WindingOrderT detectWindingOrder( const std::vector<Vector2f>& _input ) {
 	LOGR("[ERROR] cannot get winding order of these points cos area is 0");
 	return WindingOrder::CCW;
 }
+
+std::vector<Vector2f> forceWindingOrder( const std::vector<Vector2f>& _input, WindingOrderT _forcedWO ) {
+
+    std::vector<Vector2f> ret = _input;
+
+    if ( detectWindingOrder( _input ) == _forcedWO ) return ret;
+    std::reverse( std::begin(ret), std::end(ret) );
+    return ret;
+}

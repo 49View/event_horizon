@@ -62,6 +62,7 @@ Vector3f utilMirrorFlip( const Vector3f& v, WindingOrderT wow, WindingOrderT woh
 WindingOrderT detectWindingOrder( const Vector2f& pa, const Vector2f& pb, const Vector2f& pc );
 WindingOrderT detectWindingOrder( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3 );
 WindingOrderT detectWindingOrder( const std::vector<Vector2f>& _input );
+std::vector<Vector2f> forceWindingOrder( const std::vector<Vector2f>& _input, WindingOrderT _forcedWO );
 
 std::vector<Vector3f> createQuadPoints( const Vector2f& size = Vector2f::ONE );
 

@@ -50,10 +50,7 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
 
         mPoints = sanitizePath( rawPoints, true, 0.0001f * 0.0001f );
         ASSERT( mPoints.size() > 2 );
-        auto wo = detectWindingOrder( mPoints[0], mPoints[1], mPoints[2] );
-        if ( wo == WindingOrder::CCW ) {
-            std::reverse( std::begin(mPoints), std::end(mPoints) );
-        }
+        mPoints = forceWindingOrder( mPoints, WindingOrder::CCW );
         for ( auto& p : mPoints ) {
             p.setY( lbbox.height() - p.y());
         }
