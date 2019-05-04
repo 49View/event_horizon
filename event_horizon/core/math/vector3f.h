@@ -634,19 +634,6 @@ template <typename T>
 std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, float width, bool wrapIt )  {
     ASSERT( va.size() > 1 );
 
-//	auto vaCount = static_cast<int32_t>( va.size());
-
-    // calc the length of it
-//	float totalLength = 0.0f;
-//	std::unique_ptr<float[]> lengths = std::make_unique<float[]>( vaCount );
-//	lengths[0] = 0.0f;
-//	for ( int m = 1; m < vaCount; m++ ) {
-//		lengths[m] = lengths[m - 1] + distance( va[m], va[m - 1] );
-//	}
-//	totalLength = lengths[vaCount - 1];
-//
-//	if ( isScalarEqual( totalLength, 0.0f )) return {};
-
     Vector3f v1;
     Vector3f v2;
     std::vector<Vector3f> vList;
@@ -672,7 +659,9 @@ std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, f
         v1 = XZY::C(rotate90( v1n.xz()));
         v2 = XZY::C(rotate90( v2n.xz()));
 
-        if ( !isValid( v1.x()) || !isValid( v2.x())) continue;
+        if ( !isValid( v1.x()) || !isValid( v2.x())) {
+            continue;
+        }
 
         float ndot = dot( v1, v2 );
         float extwidth = JMATH::lerp( ndot, sqrtf( width * width + width * width ), width );
