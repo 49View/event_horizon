@@ -271,6 +271,10 @@ std::shared_ptr<Profile> Profile::fromPoints( const std::string& name,  const st
 
 }
 
+Profile::Profile( const Vector2f& a, const Vector2f& b, WindingOrderT wo ) {
+    createLine( a, b, wo );
+}
+
 void ProfileMaker::add( const V2f& _p ) {
 	points.emplace_back( _p * scale );
 }

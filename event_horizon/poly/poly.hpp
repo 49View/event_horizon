@@ -10,7 +10,7 @@
 #include <vector>
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/resource_serialization.hpp>
-#include <event_horizon/event_horizon/core/names.hpp>
+#include <core/names.hpp>
 
 enum class UIShapeType {
     CameraFrustom2d,
@@ -182,12 +182,14 @@ namespace GT {
     struct GTPolicyExtrusion {
         std::vector<PolyOutLine> extrusionVerts;
     };
+    struct GTReverseNormals {
+        ReverseFlag rfPoly = ReverseFlag::False;
+    };
     struct GTPolicyPolyline {
         std::vector<Vector3f> sourcePolysVList;
         std::vector<Triangle3d> sourcePolysTris;
         std::vector<PolyLine> polyLines;
         Vector3f forcingNormalPoly = Vector3f::ZERO;
-        ReverseFlag rfPoly = ReverseFlag::False;
     };
     struct GTPolicyFollower {
         std::shared_ptr<Profile> profile;
@@ -213,9 +215,9 @@ namespace GT {
     };
 
     struct Shape    : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
-    struct Follower : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ {};
-    struct Extrude  : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor, GTPolicyZ {};
-    struct Poly     : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ {};
+    struct Follower : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
+    struct Extrude  : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
+    struct Poly     : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
     struct Mesh     : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor {};
     struct GLTF2    {};
     struct Asset    {};

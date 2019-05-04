@@ -90,6 +90,11 @@ public:
             dataTypeHolder.fraise = _param;
             return *this;
         }
+        if constexpr ( std::is_same_v<M, ReverseFlag> ) {
+            static_assert( std::is_base_of_v<GT::GTReverseNormals, SGT> );
+            dataTypeHolder.rfPoly = _param;
+            return *this;
+        }
         if constexpr ( std::is_same<M, ShapeType>::value ) {
             static_assert( std::is_same<SGT, GT::Shape>::value );
             dataTypeHolder.shapeType = _param;
@@ -129,6 +134,20 @@ public:
                 dataTypeHolder.sourcePolysVList = _param;
             if constexpr ( std::is_same_v<SGT, GT::Follower> )
                 dataTypeHolder.profilePath2d = _param;
+            return *this;
+        }
+
+        if constexpr ( std::is_same_v<M, std::vector<Triangle2d>> ) {
+            static_assert( std::is_same_v<SGT, GT::Poly> );
+            for ( const auto& [v1,v2,v3] : _param ) {
+                dataTypeHolder.sourcePolysTris.emplace_back(Triangle3d( v1, v2, v3 ) );
+            }
+            return *this;
+        }
+
+        if constexpr ( std::is_same_v<M, std::vector<Triangle3d>> ) {
+            static_assert( std::is_same_v<SGT, GT::Poly> );
+            dataTypeHolder.sourcePolysTris = _param;
             return *this;
         }
 

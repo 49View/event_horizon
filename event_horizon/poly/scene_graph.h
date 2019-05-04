@@ -84,15 +84,27 @@ public:
     ColorManager&    MC() { return cl; }
     GeomManager&     GM() { return gm; }
 
-    std::shared_ptr<RawImage     >  TL( const ResourceRef& _ref ) const { return tl.get(_ref); }
     std::shared_ptr<VData        >  VL( const ResourceRef& _ref ) const { return vl.get(_ref); }
-    std::shared_ptr<Profile      >  PL( const ResourceRef& _ref ) const { return pl.get(_ref); }
+    std::shared_ptr<RawImage     >  TL( const ResourceRef& _ref ) const { return tl.get(_ref); }
     std::shared_ptr<Material     >  ML( const ResourceRef& _ref ) const { return ml.get(_ref); }
+    std::shared_ptr<Font         >  FM( const ResourceRef& _ref ) const { return fm.get(_ref); }
+    std::shared_ptr<Profile      >  PL( const ResourceRef& _ref ) const { return pl.get(_ref); }
     std::shared_ptr<MaterialColor>  CL( const ResourceRef& _ref ) const { return cl.get(_ref); }
     std::shared_ptr<CameraRig    >  CM( const ResourceRef& _ref ) const { return cm.get(_ref); }
-    std::shared_ptr<Font         >  FM( const ResourceRef& _ref ) const { return fm.get(_ref); }
-    std::shared_ptr<MaterialColor>  MC( const ResourceRef& _ref ) const { return cl.get(_ref); }
     std::shared_ptr<Geom         >  GM( const ResourceRef& _ref ) const { return gm.get(_ref); }
+    std::shared_ptr<MaterialColor>  MC( const ResourceRef& _ref ) const { return cl.get(_ref); }
+
+    template <typename T>
+    std::shared_ptr<T> get( const ResourceRef& _ref ) {
+        if constexpr ( std::is_same_v<T, VData>         ) { return vl.get(_ref); }
+        if constexpr ( std::is_same_v<T, RawImage>      ) { return tl.get(_ref); }
+        if constexpr ( std::is_same_v<T, Material>      ) { return ml.get(_ref); }
+        if constexpr ( std::is_same_v<T, Font>          ) { return fm.get(_ref); }
+        if constexpr ( std::is_same_v<T, Profile>       ) { return pl.get(_ref); }
+        if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.get(_ref); }
+        if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.get(_ref); }
+        if constexpr ( std::is_same_v<T, Geom>          ) { return gm.get(_ref); }
+    }
 
     template <typename R>
     auto& M() {

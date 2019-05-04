@@ -157,3 +157,25 @@ Triangulator::execute2d( const vector2fList& _verts, const std::vector<Vector2fL
 	Triangulator tri{ _verts, _holes, _accuracy };
 	return tri.get2dTrianglesTuple();
 }
+
+std::vector<Triangle3d>
+Triangulator::execute3d( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float zOff, float _accuracy ) {
+    Triangulator tri{ _verts, _holes, _accuracy };
+    std::vector<Triangle3d> ret;
+    for ( const auto& [v1,v2,v3] : tri.get2dTrianglesTuple() ) {
+        ret.emplace_back(Triangle3d( {v1, zOff}, {v3, zOff}, {v2, zOff} ) );
+    }
+
+    return ret;
+}
+
+std::vector<Triangle3d>
+Triangulator::setZTriangles( std::vector<Triangle3d>& _source, float zOff ) {
+    for ( auto& [v1,v2,v3] :_source ) {
+        v1[2] = zOff;
+        v2[2] = zOff;
+        v3[2] = zOff;
+    }
+
+    return _source;
+}

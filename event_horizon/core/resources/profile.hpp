@@ -23,6 +23,7 @@ public:
     virtual ~Profile() = default;
     RESOURCE_CTORS(Profile);
     void bufferDecode( const unsigned char* _buffer, size_t _length );
+    Profile( const Vector2f& a, const Vector2f& b, WindingOrderT wo = WindingOrder::CCW );
 
     void createWire( float radius, int numSubDivs );
 	void createLine( const Vector2f& a, const Vector2f& b, WindingOrderT wo = WindingOrder::CCW );
