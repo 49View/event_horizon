@@ -252,15 +252,16 @@ GLenum pixelFormatToGlFormat( PixelFormat pixelFormat ) {
 GLenum pixelFormatToGlType( PixelFormat pixelFormat ) {
     switch ( pixelFormat ) {
         case PIXEL_FORMAT_DEPTH_16:
-        case PIXEL_FORMAT_DEPTH_24:
-        case PIXEL_FORMAT_DEPTH_32:
         case PIXEL_FORMAT_HDR_RGB_16:
         case PIXEL_FORMAT_HDR_RGBA_16:
+        case PIXEL_FORMAT_HDR_RG_16:
+        case PIXEL_FORMAT_HDR_R16:
+            return GL_HALF_FLOAT;
+        case PIXEL_FORMAT_DEPTH_24:
+        case PIXEL_FORMAT_DEPTH_32:
         case PIXEL_FORMAT_HDR_RGB_32:
         case PIXEL_FORMAT_HDR_RGBA_32:
-        case PIXEL_FORMAT_HDR_RG_16:
         case PIXEL_FORMAT_HDR_RG32:
-        case PIXEL_FORMAT_HDR_R16:
         case PIXEL_FORMAT_HDR_R32:
             return GL_FLOAT;
         case PIXEL_FORMAT_SRGB:
