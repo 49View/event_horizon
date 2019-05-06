@@ -142,6 +142,11 @@ public:
 //        calcCompleteBBox3d();
     }
 
+    void generateLocalTransformData( const Vector3f& pos, const Vector4f& rotAxis, const Vector3f& scale = Vector3f::ONE ) {
+        mTRS.set( pos, rotAxis, scale );
+        mLocalTransform = Matrix4f{ mTRS };
+    }
+
     void generateLocalTransformData( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale = Vector3f::ONE ) {
         mTRS.set( pos, rot, scale );
         mLocalTransform = Matrix4f{ mTRS };
@@ -197,6 +202,11 @@ public:
     }
 
     void updateTransform( const Vector3f& pos, const Vector3f& rot ) {
+        generateLocalTransformData( pos, rot, mTRS.Scale());
+        generateMatrixHierarchy( fatherRootTransform());
+    }
+
+    void updateTransform( const Vector3f& pos, const Vector4f& rot ) {
         generateLocalTransformData( pos, rot, mTRS.Scale());
         generateMatrixHierarchy( fatherRootTransform());
     }

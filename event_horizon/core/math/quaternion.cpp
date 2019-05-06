@@ -90,3 +90,13 @@ Vector3f Quaternion::euler2( void ) const {
 
     return {roll, pitch, yaw};
 }
+
+void Quaternion::fromAxis( const Vector4f& w ) {
+    float theta = w.w();
+    float s = sinf( theta / 2.0f );
+    Vector3f W( w.xyz() * s );
+    mData[0] = W[0];
+    mData[1] = W[1];
+    mData[2] = W[2];
+    mData[3] = cosf( theta / 2.0f );
+}

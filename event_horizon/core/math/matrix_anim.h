@@ -22,6 +22,7 @@ public:
 	void Scale( const Vector3f& val );
 
 	void set( const Vector3f& _pos, const Vector3f& _angleAxis, const Vector3f& _scale );
+	void set( const Vector3f& _pos, const Vector4f& _angleAxis, const Vector3f& _scale );
 	void set( const Vector3f& _pos, const Quaternion& _rot, const Vector3f& _scale );
 
     MatrixAnim clone( const MatrixAnim& _source);

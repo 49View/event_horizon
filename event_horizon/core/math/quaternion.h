@@ -302,7 +302,12 @@ public:
 		}
 	}
 
-	/**
+    /**
+    * @brief Sets quaternion to be same as rotation by scaled axis w.
+    */
+    void fromAxis( const Vector4f& w );
+
+    /**
 	* @brief Returns a vector rotated by this quaternion.
 	*
 	* Functionally equivalent to:  (rotationMatrix() * v)

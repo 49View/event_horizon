@@ -34,6 +34,12 @@ void MatrixAnim::RotZ( const float& val ) { rot->value = Quaternion{Vector3f::Z_
 const Vector3f& MatrixAnim::Scale() const { return scale->value; }
 void MatrixAnim::Scale( const Vector3f& val ) { scale->value = val; }
 
+void MatrixAnim::set( const Vector3f& _pos, const Vector4f& _angleAxis, const Vector3f& _scale ) {
+    pos->value = _pos;
+    scale->value = _scale;
+    rot->value.fromAxis( _angleAxis );
+}
+
 void MatrixAnim::set( const Vector3f& _pos, const Vector3f& _angleAxis, const Vector3f& _scale ) {
     pos->value = _pos;
     scale->value = _scale;
