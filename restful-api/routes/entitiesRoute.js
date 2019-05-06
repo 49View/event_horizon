@@ -34,7 +34,6 @@ router.get('/:group/:tags', async (req, res, next) => {
         //Check existing entity for use project (or public)
         console.log( group, tags, project );
         const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, tags, true, 1);
-        console.log( foundEntities );
         if (foundEntities!==null && foundEntities.length>0) {
             const entity = foundEntities[0];            
             const filePath=entityController.getFilePath(entity.project, entity.group, entity.metadata.name);

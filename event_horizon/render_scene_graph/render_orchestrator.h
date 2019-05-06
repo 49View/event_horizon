@@ -11,6 +11,7 @@
 #include <core/streaming_mediator.hpp>
 #include <poly/scene_graph.h>
 #include <graphics/renderer.h>
+#include <graphics/render_targets.hpp>
 #include <render_scene_graph/camera_controls.hpp>
 #include <render_scene_graph/scene_bridge.h>
 
@@ -25,7 +26,7 @@ struct AggregatedInputData;
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 using UpdateCallbackSign = RenderOrchestrator*;
 using PresenterUpdateCallbackFunc = std::function<void(UpdateCallbackSign)>;
-using DragAndDropFunction = std::function<void(RenderOrchestrator* p, const std::string&)>;
+using DragAndDropFunction = std::function<void(const std::string&)>;
 
 class RenderOrchestrator {
 public:

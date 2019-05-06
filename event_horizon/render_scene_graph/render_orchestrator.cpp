@@ -17,7 +17,6 @@
 #include <graphics/vp_builder.hpp>
 #include <graphics/audio/audio_manager_openal.hpp>
 #include <graphics/window_handling.hpp>
-#include <render_scene_graph/scene_bridge.h>
 
 std::vector<std::string> RenderOrchestrator::callbackPaths;
 Vector2i RenderOrchestrator::callbackResizeWindow = Vector2i(-1, -1);
@@ -51,16 +50,9 @@ void RenderOrchestrator::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
 
 void RenderOrchestrator::updateCallbacks() {
 
-    if ( !sUpdateCallbacks.empty() ) {
-        for ( auto& c : sUpdateCallbacks ) {
-            c( this );
-        }
-        sUpdateCallbacks.clear();
-    }
-
     if ( !callbackPaths.empty() ) {
         for ( auto& path : callbackPaths ) {
-            if ( dragAndDropFunc ) dragAndDropFunc( this, path );
+            if ( dragAndDropFunc ) dragAndDropFunc( path );
         }
         callbackPaths.clear();
     }
