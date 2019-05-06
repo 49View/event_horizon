@@ -36,7 +36,8 @@ public:
 
 struct LoadedResouceCallbackData {
     LoadedResouceCallbackData( ResourceRef  key, SerializableContainer&& data,
-                               HttpDeferredResouceCallbackFunction  ccf ) : key(std::move( key )), data( std::move(data) ), ccf(std::move( ccf )) {}
+                               HttpDeferredResouceCallbackFunction  ccf ) :
+                               key(std::move( key )), data( std::move(data) ), ccf(std::move( ccf )) {}
 
     ResourceRef                         key;
     SerializableContainer               data;
@@ -44,6 +45,8 @@ struct LoadedResouceCallbackData {
 };
 
 using LoadedResouceCallbackContainer = std::vector<LoadedResouceCallbackData>;
+using GenericSceneCallbackValueMap = std::tuple<std::string, SerializableContainer>;
+using GenericSceneCallback = std::unordered_map<std::string, GenericSceneCallbackValueMap>;
 
 class SceneGraph : public NodeGraph {
 public:
@@ -155,6 +158,10 @@ public:
     ResourceRef addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
     void addResources( const SerializableContainer& _data, HttpDeferredResouceCallbackFunction _ccf = nullptr );
 
+    static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
+        SceneGraph::genericSceneCallback.emplace( _key, std::move(_value) );
+    }
+
     template <typename T>
     T B( const std::string& _name ) {
         return T{ *this, _name };
@@ -197,6 +204,7 @@ public:
     GeomSP GC();
     UUID GC( const GeomSP& _geom );
 
+    static GenericSceneCallback           genericSceneCallback         ;
     static LoadedResouceCallbackContainer resourceCallbackVData        ;
     static LoadedResouceCallbackContainer resourceCallbackRawImage     ;
     static LoadedResouceCallbackContainer resourceCallbackMaterial     ;

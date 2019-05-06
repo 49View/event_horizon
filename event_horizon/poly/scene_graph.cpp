@@ -8,7 +8,6 @@
 #include <core/camera_rig.hpp>
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
-#include <core/amarant_font.hpp>
 #include <core/geom.hpp>
 #include <core/names.hpp>
 #include <core/resources/resource_builder.hpp>
@@ -16,6 +15,7 @@
 #include <core/resources/material.h>
 #include <core/file_manager.h>
 
+GenericSceneCallback           SceneGraph::genericSceneCallback         ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackVData        ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackRawImage     ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackMaterial     ;
@@ -41,6 +41,28 @@ void SceneGraph::removeNode( const UUID& _uuid ) {
 }
 
 void SceneGraph::update() {
+
+    for ( auto& [k, v] : genericSceneCallback ) {
+
+        if ( k == ResourceGroup::Image ) {
+            B<IB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+        } else if ( k == ResourceGroup::Font ) {
+            B<FB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+        } else if ( k == ResourceGroup::Profile ) {
+            B<PB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+        } else if ( k == ResourceGroup::Color ) {
+            B<MCB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+        } else if ( k == ResourceGroup::Material ) {
+            B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+        } else {
+            LOGRS("{" << k << "} Resource not supported yet in callback updating");
+            ASSERT(0);
+        }
+//        auto tr = sceneEntityFilesCallbacks[T::Prefix()];
+//        B<T>(std::get<0>(tr)).publishAndAdd( std::get<1>(tr) );
+//        c( this );
+    }
+    genericSceneCallback.clear();
 
     for ( const auto& res : resourceCallbackVData        ) {addVData        ( res.key, VData        {res.data}, res.ccf ); }
     for ( const auto& res : resourceCallbackRawImage     ) {addRawImage     ( res.key, RawImage     {res.data}, res.ccf ); }
@@ -209,7 +231,7 @@ void SceneGraph::init() {
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
 //    B<MB>( "tomato" ).load();
 //    B<FB>( S::DEFAULT_FONT ).addIM( Font{Poppins_Medium_ttf, Poppins_Medium_ttf_len} );
-    B<FB>( S::DEFAULT_FONT ).addIM( Font{FontAmaranthRegularBin, FontAmaranthRegularBinLen} );
+//    B<FB>( S::DEFAULT_FONT ).addIM( Font{FontAmaranthRegularBin, FontAmaranthRegularBinLen} );
 //    B<FB>( S::DEFAULT_FONT ).addIM( Font{FM::readLocalFileC("/Users/Dado/Downloads/Banner5_ForSending/AkkuratFont/Akkurat-Light.ttf")} );
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }
