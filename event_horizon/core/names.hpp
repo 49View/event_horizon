@@ -43,7 +43,7 @@ namespace S {
 
     const std::string WHITE_PBR = "white_pbr";
 
-    const std::string DEFAULT_FONT = "DEFAULT_FONT";
+    const std::string DEFAULT_FONT = "amaranth";
 
     const std::string shadowmap = "shadowMap_d";
     const std::string lightmap = "lightMap_t";

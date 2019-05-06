@@ -133,7 +133,7 @@ void main()
     );
 
     float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-    color = (vec4(1.0) - exp(-1.0 * gray*u_sunHDRMult))*1.5;
+    color = (vec4(1.0) - exp(-1.0 * gray*u_sunHDRMult))*3.5;
     // color = vec4(1.0) - exp(-1.0 * color*u_sunHDRMult*10.5);
     color.w = 1.0;
     
