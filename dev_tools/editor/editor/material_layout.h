@@ -10,7 +10,7 @@ public:
     virtual ~ImGuiMaterials() = default;
     using LayoutBoxRenderer::LayoutBoxRenderer;
 protected:
-    void renderImpl( SceneOrchestrator *scene, JMATH::Rect2f& f ) override;
+    void renderImpl( SceneGraph& _sg, RenderOrchestrator& _rsg, JMATH::Rect2f& f ) override;
 };
 
 void callbackMaterial( const std::string& _filename, const SerializableContainer& _data );

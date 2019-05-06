@@ -7,7 +7,7 @@
 #include <core/camera.h>
 #include "core/camera_rig.hpp"
 #include <graphics/imgui/imgui.h>
-#include <render_scene_graph/scene_orchestrator.hpp>
+#include <render_scene_graph/render_orchestrator.h>
 #include <render_scene_graph/scene_bridge.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
@@ -20,13 +20,13 @@
 //    extern Vector3f Back  ;
 //}
 
-void ImGuiCamera::renderImpl( SceneOrchestrator* p, JMATH::Rect2f& f ) {
+void ImGuiCamera::renderImpl( SceneGraph& _sg, RenderOrchestrator& _rsg, JMATH::Rect2f& f ) {
 //    float lTop[3] = { CameraRigAngles::Top.x(), CameraRigAngles::Top.y(), CameraRigAngles::Top.z()};
 //    ImGui::BeginGroup();
 //        ImGui::InputFloat3("Top", lTop);
 //        CameraRigAngles::Top = V3f{lTop};
 //    ImGui::EndGroup();
-    for ( const auto& [k,v] : p->StateMachine()->getRigs() ) {
+    for ( const auto& v : _sg.M<CameraRig>().list() ) {
         auto cam = v->getMainCamera();
         ImGui::BeginGroup();
         ImGui::Text( "Name: %s", cam->Name().c_str());

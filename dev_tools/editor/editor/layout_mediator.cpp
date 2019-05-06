@@ -3,7 +3,7 @@
 //
 
 #include "layout_mediator.hpp"
-#include "editor/timeline_layout.h"
+#include "timeline_layout.h"
 
 namespace LayoutMediator {
 

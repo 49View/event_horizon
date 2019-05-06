@@ -4,41 +4,44 @@
 
 #pragma once
 
-#include <render_scene_graph/scene_bridge.h>
+#include <core/state_machine_helper.hpp>
+#include <core/camera.h>
+#include <render_scene_graph/runloop_graphics.h>
 
-struct FullEditorStateMachine : state_machine_def<FullEditorStateMachine> {
-    explicit FullEditorStateMachine( SceneOrchestrator* _owner ) : so( _owner ) {}
+// Events
+struct OnActivate {};
 
-    // Events
-    struct OnWantToStartGame{};
-    struct OnWantToEndGame{};
-
-    // States
-    struct InitialStateSetup : state<> {
-        template <class Event, class FSM>
-        void on_entry(Event const& evt, FSM& _sm)
-        {
-            _sm.init();
-        }
-    };
-    struct Play : state<> {};
-
-    // Actions
-    void startGame( OnWantToStartGame const &) {
+// Actions
+struct Activate {
+    void operator()( SceneGraph& _sg, RenderOrchestrator& rsg ) noexcept {
+        rsg.setRigCameraController<CameraControl2d>();
+        rsg.DC()->setPosition(V3f::Y_AXIS*4.0f);
+        rsg.DC()->setQuatAngles(V3f{M_PI_2, 0.0f, 0.0f});
     }
-    void endGame( OnWantToEndGame const &) {
+};
+
+// State machine Front End
+struct EditorStateMachineSML { auto operator()() const noexcept { return make_transition_table(
+                *state<class Initial>      + event<OnActivate>                                / Activate{}             = state<class Editor>
+        ); } };
+
+using FrontEnd = sm<EditorStateMachineSML>;
+
+// Back End
+class EditorBackEnd : public RunLoopBackEndBase, public LoginActivation<LoginFieldsPrecached> {
+public:
+    EditorBackEnd( SceneGraph& _sg, RenderOrchestrator& _rsg ) : RunLoopBackEndBase(_sg, _rsg) {
+        backEnd = std::make_unique<FrontEnd>( *this, _sg, _rsg );
+    }
+    ~EditorBackEnd() override = default;
+
+    void updateImpl( const AggregatedInputData& _aid ) override;
+    void activateImpl() override;
+
+    const static LoginFields loginCert() {
+        return LoginFields{ "carillow@49view.com", "932hjkd987asd", "carillo" };
     }
 
-    struct transition_table : mpl::vector<
-            a_row<InitialStateSetup, OnWantToStartGame, Play, &FullEditorStateMachine::startGame>
-    > {};
-
-    typedef InitialStateSetup initial_state;
-
-    sm_not // Just to reduce boilderplate of no_transaction empty function
-
-    void init();
-
-private:
-    SceneOrchestrator* so;
+protected:
+    std::unique_ptr<FrontEnd> backEnd;
 };

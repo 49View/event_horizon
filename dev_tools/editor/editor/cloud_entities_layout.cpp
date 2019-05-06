@@ -4,15 +4,15 @@
 
 #include "cloud_entities_layout.h"
 #include <core/raw_image.h>
+#include <core/resources/resource_builder.hpp>
 #include <graphics/imgui/imgui.h>
 #include <graphics/texture_manager.h>
-#include <render_scene_graph/scene_orchestrator.hpp>
-#include <core/resources/resource_builder.hpp>
+#include <render_scene_graph/render_orchestrator.h>
 
 static std::string remoteFilterString;
 static std::multimap<std::string, CoreMetaData> cloudEntitiesTypeMap;
 
-void listCloudCallback( SceneOrchestrator* p ) {
+void listCloudCallback() {
 
     if ( remoteFilterString.empty() ) return;
 
@@ -26,12 +26,13 @@ void listCloudCallback( SceneOrchestrator* p ) {
     for ( const auto& elem : newFilteredResult ) {
         SerializableContainer rd;
         bn::decode_b64( elem.getThumb().begin(), elem.getThumb().end(), std::back_inserter(rd) );
-        IB{ p->SG(), elem.getName() }.make( rd );
+//        IB{ p->SG(), elem.getName() }.make( rd );
         cloudEntitiesTypeMap.insert( {elem.getGroup(), elem} );
     }
 }
 
-void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string& _title, const std::string& _entType ) {
+void ImGuiCloudEntities( SceneGraph& _sg, RenderOrchestrator& _rsg, Rect2f& _r,
+                         const std::string& _title, const std::string& _entType ) {
 
     static char buf1[1024];
     static char buf2[1024];
@@ -41,7 +42,7 @@ void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string& _t
         Http::get( Url::entityMetadata( _entType, std::string(buf)),
                    [&](const Http::Result&_res) {
                        remoteFilterString = _res.bufferString;
-                       SceneOrchestrator::sUpdateCallbacks.emplace_back( listCloudCallback );
+//                       SceneOrchestrator::sUpdateCallbacks.emplace_back( listCloudCallback );
                    } );
     };
     ImGui::PopID();
@@ -50,7 +51,7 @@ void ImGuiCloudEntities( SceneOrchestrator* p, Rect2f& _r, const std::string& _t
         ImGui::BeginGroup();
         auto& elem = it->second;
         ImGui::Text( "Name: %s", elem.getName().c_str());
-        auto tex = p->RSG().RR().TM()->TD( elem.getName() );
+        auto tex = _rsg.RR().TM()->TD( elem.getName() );
         ImGui::Image( reinterpret_cast<void *>(tex->getHandle()), ImVec2{ 100, 100 } );
         ImGui::EndGroup();
     }

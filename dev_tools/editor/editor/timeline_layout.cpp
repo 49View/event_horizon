@@ -9,7 +9,7 @@
 #include <core/camera.h>
 #include <graphics/imgui/imgui.h>
 #include <graphics/imgui/imgui_internal.h>
-#include <render_scene_graph/scene_orchestrator.hpp>
+#include <render_scene_graph/render_orchestrator.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 #include <core/resources/resource_manager.hpp>
 
@@ -33,7 +33,7 @@ namespace GuiTimeline {
 
 };
 
-void ImGuiTimeline::renderImpl( [[maybe_unused]] SceneOrchestrator* p, Rect2f& _r ) {
+void ImGuiTimeline::renderImpl( SceneGraph& _sg, RenderOrchestrator& _rsg, Rect2f& _r ) {
 
     auto tgroups = Timeline::Groups();
     auto gsize = tgroups.size();
@@ -83,7 +83,7 @@ void ImGuiTimeline::renderImpl( [[maybe_unused]] SceneOrchestrator* p, Rect2f& _
 
     ImGui::SameLine();
     if ( ImGui::Button( "Camera" ) && timelineNameCStr ) {
-        Timeline::addLinked( timelineNameCStr, p->SG().CM().get(Name::Foxtrot)->getMainCamera(), currframeToTime() );
+        Timeline::addLinked( timelineNameCStr, _sg.CM().get(Name::Foxtrot)->getMainCamera(), currframeToTime() );
     }
 
     if ( currentFrame < 0 ) currentFrame = 0;

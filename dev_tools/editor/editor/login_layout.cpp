@@ -4,10 +4,10 @@
 
 #include "login_layout.h"
 #include <graphics/imgui/imgui.h>
-#include <render_scene_graph/scene_orchestrator.hpp>
+#include <render_scene_graph/render_orchestrator.h>
 #include <render_scene_graph/layouts/layout_helper.hpp>
 
-void ImGuiLogin::renderImpl( SceneOrchestrator* p, Rect2f& _r ) {
+void ImGuiLogin::renderImpl( SceneGraph& _sg, RenderOrchestrator& _rsg, Rect2f& _r ) {
     static char projectInputChar[256];
     static char emailInputChar[256];
     static char passwordInputChar[256];

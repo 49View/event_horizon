@@ -4,6 +4,7 @@ project(editor)
 
 set(BUILD_FROM_SOURCE TRUE)
 compile( core graphics media poly render_scene_graph converters )
+compile_local( editor )
 
 add_executable(${PROJECT_NAME} ${BUILD_FILES})
 

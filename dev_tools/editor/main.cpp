@@ -3,7 +3,7 @@
 
 int main( int argc, char *argv[] ) {
 
-    EventHorizon<FullEditor> ev{ argc, argv };
+    EventHorizon<EditorBackEnd> ev{ argc, argv };
 
     return 0;
 }

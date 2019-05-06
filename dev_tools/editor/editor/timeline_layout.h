@@ -11,7 +11,7 @@ public:
     virtual ~ImGuiTimeline() = default;
     using LayoutBoxRenderer::LayoutBoxRenderer;
 protected:
-    void renderImpl( SceneOrchestrator *scene, JMATH::Rect2f& f ) override;
+    void renderImpl( SceneGraph& _sg, RenderOrchestrator& _rsg, JMATH::Rect2f& f ) override;
 };
 
 namespace GuiTimeline {
