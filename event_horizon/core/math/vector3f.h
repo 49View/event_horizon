@@ -628,6 +628,7 @@ struct XZY {
 	static Vector3f C( const float x, const float y, const float z );
 	static std::vector<Vector3f> C( const std::vector<Vector3f>& _v );
 	static std::vector<Vector3f> C( const std::vector<Vector2f>& _v, float _z = 0.0f );
+    static std::vector<Vector2f> C2( const std::vector<Vector3f>& _v );
 };
 
 template <typename T>
