@@ -14,9 +14,7 @@
 struct ImGuiConsole;
 class SceneBridge;
 
-using InitLayoutFunction = std::function<void(SceneBridge* _layout, SceneOrchestrator*_target)>;
-using RenderFunction = std::function<void( SceneOrchestrator* )>;
-using RenderLayoutFunction = std::function<void( SceneOrchestrator* _target, Rect2f& )>;
+using RenderLayoutFunction = std::function<void( RenderOrchestrator& _rsg, Rect2f& )>;
 
 using PresenterArrangeFunction = std::function<float( float )>;
 
@@ -101,7 +99,7 @@ private:
 struct SceneScreenBox {
     Rect2f& updateAndGetRect();
     Rect2f getRect() const;
-    void render( SceneOrchestrator* _target, Rect2f& _rect );
+    void render( RenderOrchestrator& _rsg, Rect2f& _rect );
     void toggleVisible();
     void setVisible( bool _bVis );
 

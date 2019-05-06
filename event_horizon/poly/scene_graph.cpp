@@ -231,7 +231,6 @@ void SceneGraph::init() {
     B<MB>( S::WHITE_PBR ).addIM( Material{S::SH} );
 //    B<MB>( "tomato" ).load();
 //    B<FB>( S::DEFAULT_FONT ).addIM( Font{Poppins_Medium_ttf, Poppins_Medium_ttf_len} );
-//    B<FB>( S::DEFAULT_FONT ).addIM( Font{FontAmaranthRegularBin, FontAmaranthRegularBinLen} );
 //    B<FB>( S::DEFAULT_FONT ).addIM( Font{FM::readLocalFileC("/Users/Dado/Downloads/Banner5_ForSending/AkkuratFont/Akkurat-Light.ttf")} );
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }

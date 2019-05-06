@@ -81,10 +81,10 @@ Rect2f SceneScreenBox::getRect() const {
     return rectArranger.getRect();
 }
 
-void SceneScreenBox::render( SceneOrchestrator *_target, Rect2f& _rect ) {
-    if ( renderer ) {
-        renderer->render( _target, _rect, flags );
-    }
+void SceneScreenBox::render( RenderOrchestrator& _rsg, Rect2f& _rect ) {
+//    if ( renderer ) {
+//        renderer->render( _target, _rect, flags );
+//    }
 }
 
 void SceneScreenBox::toggleVisible() {
