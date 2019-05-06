@@ -99,7 +99,7 @@ private:
 struct SceneScreenBox {
     Rect2f& updateAndGetRect();
     Rect2f getRect() const;
-    void render( RenderOrchestrator& _rsg, Rect2f& _rect );
+    void render( SceneGraph& _sg, RenderOrchestrator& _rsg, Rect2f& _rect );
     void toggleVisible();
     void setVisible( bool _bVis );
 
