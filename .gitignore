@@ -108,3 +108,5 @@ restful-api/bin/localhost.key
 Makefile
 dev_tools/wasmloader/editor.js
 dev_tools/wasmloader/editor.wasm
+platform/android/include
+platform/android/lib

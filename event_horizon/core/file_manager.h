@@ -6,8 +6,8 @@
 #include <unordered_map>
 
 #include "htypes_shared.hpp"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
 
 struct FileInfo {
 	std::string fullPath;

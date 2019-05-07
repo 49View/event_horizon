@@ -4,6 +4,9 @@
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>
 #include <GLFW/glfw3.h>
+#elif ANDROID
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
 #elif defined(WIN32)
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
