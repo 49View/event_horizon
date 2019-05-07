@@ -50,6 +50,13 @@ void RenderOrchestrator::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
 
 void RenderOrchestrator::updateCallbacks() {
 
+    if ( !sUpdateCallbacks.empty() ) {
+        for ( auto& c : sUpdateCallbacks ) {
+            c( this );
+        }
+        sUpdateCallbacks.clear();
+    }
+
     if ( !callbackPaths.empty() ) {
         for ( auto& path : callbackPaths ) {
             if ( dragAndDropFunc ) dragAndDropFunc( path );

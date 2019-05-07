@@ -157,6 +157,15 @@ namespace GT {
         float data;
     };
 
+    struct M {
+        template<typename ...Args>
+        explicit M( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        ResourceRef operator()() const noexcept {
+            return data;
+        }
+        ResourceRef data;
+    };
+
     enum class TextType {
         TextUI,
         Text2d,

@@ -109,6 +109,18 @@ public:
         if constexpr ( std::is_same_v<T, Geom>          ) { return gm.get(_ref); }
     }
 
+    template <typename T>
+    ResourceRef getHash( const ResourceRef& _ref ) {
+        if constexpr ( std::is_same_v<T, VData>         ) { return vl.getHash(_ref); }
+        if constexpr ( std::is_same_v<T, RawImage>      ) { return tl.getHash(_ref); }
+        if constexpr ( std::is_same_v<T, Material>      ) { return ml.getHash(_ref); }
+        if constexpr ( std::is_same_v<T, Font>          ) { return fm.getHash(_ref); }
+        if constexpr ( std::is_same_v<T, Profile>       ) { return pl.getHash(_ref); }
+        if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.getHash(_ref); }
+        if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.getHash(_ref); }
+        if constexpr ( std::is_same_v<T, Geom>          ) { return gm.getHash(_ref); }
+    }
+
     template <typename R>
     auto& M() {
         if constexpr ( std::is_same_v<R, VData>         ) return VL();
