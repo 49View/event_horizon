@@ -46,11 +46,6 @@ void addFileCallback( const std::string& _path ) {
     SerializableContainer fileContent;
     FM::readLocalFile( _path, fileContent );
     SceneGraph::addGenericCallback( ResourceVersioning<T>::Prefix(), { getFileName(_path), fileContent} );
-//    sceneEntityFilesCallbacks[T::Prefix()] = { getFileName(_path), fileContent};
-//    RenderOrchestrator::sUpdateCallbacks.emplace_back( [&]( SceneOrchestrator* p ) {
-//        auto tr = sceneEntityFilesCallbacks[T::Prefix()];
-//        p->SG().B<T>(std::get<0>(tr)).publishAndAdd( std::get<1>(tr) );
-//    } );
 }
 
 void allConversionsDragAndDropCallback( const std::string& _path ) {
