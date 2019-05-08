@@ -23,7 +23,7 @@ var options = {
   cert: fs.readFileSync(path.resolve(__dirname, process.env.NODE_ENV == 'dev' ?'localhost.crt' : 'server-crt.pem')),
   ca: fs.readFileSync(path.resolve(__dirname,'ca-crt.pem')), 
   requestCert: true,
-  rejectUnauthorized: false
+  rejectUnauthorized: false,
 }; 
 
 /**
@@ -47,6 +47,7 @@ var server = https.createServer(options, app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+server.keepAliveTimeout = 12000;
 
 socketController.createSocketServer(server);
 
