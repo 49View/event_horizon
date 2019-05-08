@@ -14,6 +14,7 @@
 #include <core/htypes_shared.hpp>
 #include <core/name_policy.hpp>
 #include <core/math/vector3f.h>
+#include <core/serialization.hpp>
 
 namespace JMATH { class Rect2f; }
 
@@ -22,6 +23,7 @@ public:
     Profile() = default;
     virtual ~Profile() = default;
     RESOURCE_CTORS(Profile);
+    JSONSERIALONLY( Profile, mBBox, mPoints, mLengths, mPerimeter, mNormal);
     void bufferDecode( const unsigned char* _buffer, size_t _length );
     Profile( const Vector2f& a, const Vector2f& b, WindingOrderT wo = WindingOrder::CCW );
 

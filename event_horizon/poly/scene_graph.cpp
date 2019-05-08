@@ -292,3 +292,14 @@ UUID SceneGraph::GC( const GeomSP& _geom ) {
     return ret;
 }
 
+ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {
+    auto matRef = ML().getHash(_matref);
+    if ( _color != C4f::WHITE ) {
+        auto matClone = EF::clone( ML().get(matRef) );
+        matClone->setDiffuseColor( _color.xyz() );
+        matClone->setOpacity( _color.w() );
+        matRef = B<MB>(_matref+_color.toString()).addIM( matClone );
+    }
+    return matRef;
+}
+

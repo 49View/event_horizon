@@ -44,6 +44,10 @@ public:
             matRef = _param();
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GT::A> ) {
+            matColor.setW( _param() );
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, std::string> || std::is_same_v<std::decay_t<M>, char*>) {
             static_assert( std::is_same_v<SGT, GT::Text> );
             dataTypeHolder.text = _param;
@@ -52,6 +56,7 @@ public:
         if constexpr ( std::is_same_v<M, Color4f> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyColor, SGT> );
             dataTypeHolder.color = _param;
+            matColor = _param;
             return *this;
         }
         if constexpr ( std::is_same_v<M, Vector3f> ) {
@@ -104,25 +109,26 @@ public:
             dataTypeHolder.shapeType = _param;
             return *this;
         }
-
         if constexpr ( std::is_same<M, PolyOutLine>::value ) {
             static_assert( std::is_same<SGT, GT::Extrude>::value );
             dataTypeHolder.extrusionVerts.emplace_back( _param );
             return *this;
         }
-
         if constexpr ( std::is_same<M, PolyLine2d>::value ) {
             static_assert( std::is_same<SGT, GT::Extrude>::value );
             dataTypeHolder.extrusionVerts.emplace_back( _param );
             return *this;
         }
-
         if constexpr ( std::is_same_v<M, std::shared_ptr<Profile>> ) {
             static_assert( std::is_same_v<SGT, GT::Follower> );
             dataTypeHolder.profile = _param;
             return *this;
         }
-
+        if constexpr ( std::is_same<M, std::shared_ptr<Cloth>>::value ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyCloth, SGT> );
+            dataTypeHolder.cloth = _param;
+            return *this;
+        }
         if constexpr ( std::is_same<M, std::vector<Vector3f>>::value ) {
             static_assert( std::is_same_v<SGT, GT::Poly> || std::is_same_v<SGT, GT::Follower> );
             if constexpr ( std::is_same_v<SGT, GT::Poly> )
@@ -181,6 +187,7 @@ public:
 
     T dataTypeHolder;
     ResourceRef matRef = S::WHITE_PBR;
+    Color4f matColor = C4f::WHITE;
     GeomSP elemInjFather = nullptr;
 };
 
@@ -205,6 +212,10 @@ namespace VDataServices {
     void prepare( SceneGraph& sg, GT::Mesh& _d );
     void buildInternal( const GT::Mesh& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Mesh& _d );
+
+    void prepare( SceneGraph& sg, GT::ClothMesh& _d );
+    void buildInternal( const GT::ClothMesh& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::ClothMesh& _d );
 
     void prepare( SceneGraph& sg, GT::Follower& _d );
     void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret );

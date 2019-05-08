@@ -195,8 +195,8 @@ namespace VDataServices {
             if ( !m.verts.empty() ) {
                 for ( size_t t = 0; t < m.verts.size(); t+=3 ) {
                     Vector2f p1{ m.verts[t].pos.x / gliphScaler  , 1.0f - ( m.verts[t].pos.y / gliphScaler ) };
-                    Vector2f p3{ m.verts[t+1].pos.x / gliphScaler, 1.0f - ( m.verts[t+1].pos.y / gliphScaler ) };
-                    Vector2f p2{ m.verts[t+2].pos.x / gliphScaler, 1.0f - ( m.verts[t+2].pos.y / gliphScaler ) };
+                    Vector2f p3{ m.verts[t+2].pos.x / gliphScaler, 1.0f - ( m.verts[t+2].pos.y / gliphScaler ) };
+                    Vector2f p2{ m.verts[t+1].pos.x / gliphScaler, 1.0f - ( m.verts[t+1].pos.y / gliphScaler ) };
                     mesh.vertices.emplace_back( XZY::C( p1 + cursor ) );
                     mesh.vertices.emplace_back( XZY::C( p2 + cursor ) );
                     mesh.vertices.emplace_back( XZY::C( p3 + cursor ) );
@@ -246,7 +246,59 @@ namespace VDataServices {
         return "Quad--" + Hashable<>::hashOf(oss.str());
     }
 
-    // ___ FOLLOWER BUILDER ___
+    // ___ CLOTH MESH BUILDER ___
+
+    void prepare( SceneGraph& sg, GT::ClothMesh& _d ) {
+    }
+
+    void buildInternal( const GT::ClothMesh& _d, std::shared_ptr<VData> _ret ) {
+        if ( _d.cloth ) {
+            Topology mesh;
+
+            auto ph = _d.cloth->getParticleHeight();
+            auto pw = _d.cloth->getParticleWidth();
+            for (int y = 0; y < ph; y++) {
+                for (int x = 0; x < pw; x++) {
+                    glm::vec3 vy, vx;
+                    Particle *p = &_d.cloth->particles[y*pw+x];
+
+                    if (y > 0) vy = _d.cloth->particles[(y-1)*pw+x].pos;
+                    else vy = p->pos;
+                    if (y < ph) vy -= _d.cloth->particles[(ph-1)*pw+x].pos;
+                    else vy -= p->pos;
+
+                    if (x > 0) vx = _d.cloth->particles[y*pw+x-1].pos;
+                    else vx = p->pos;
+                    if (x < pw-1) vx -= _d.cloth->particles[y*pw+x+1].pos;
+                    else vx -= p->pos;
+
+                    p->normal = glm::normalize(glm::cross(vy, vx));
+                }
+            }
+
+            int q = 0;
+            for ( const auto tri : _d.cloth->Triangles() ) {
+                mesh.vertices.emplace_back( V3f{ tri.particles[0]->pos.x, tri.particles[0]->pos.y, tri.particles[0]->pos.z}*0.1f );
+                mesh.vertices.emplace_back( V3f{ tri.particles[2]->pos.x, tri.particles[2]->pos.y, tri.particles[2]->pos.z}*0.1f );
+                mesh.vertices.emplace_back( V3f{ tri.particles[1]->pos.x, tri.particles[1]->pos.y, tri.particles[1]->pos.z}*0.1f );
+                mesh.addTriangle( q, q+1, q+2 );
+                q+=3;
+            }
+
+            PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping::Cube );
+            _ret->fill( ps );
+            _ret->BBox3d( ps.bbox3d );
+        }
+    }
+
+    ResourceRef refName( const GT::ClothMesh& _d ) {
+        std::stringstream oss;
+        oss << _d.cloth->getParticleHeight() << _d.cloth->getParticleWidth();
+        return "Cloth--" + oss.str();
+    }
+
+// ___ FOLLOWER BUILDER ___
+
     void prepare( SceneGraph& sg, GT::Follower& _d ) {
         if ( _d.profilePath.empty() && !_d.profilePath2d.empty() ) {
             for (auto &v: _d.profilePath2d) _d.profilePath.emplace_back( Vector3f{v, _d.z} );

@@ -88,3 +88,12 @@ void Material::Values( std::shared_ptr<HeterogeneousMap> _values ) {
     Material::values = std::move( _values );
 }
 
+V3f Material::getDiffuseColor() const {
+    auto ret = values->get<V3f>( UniformNames::diffuseColor );
+    return ret ? *ret : V3f::ONE;
+}
+
+void Material::setDiffuseColor( const V3f& _value ) {
+    values->assign( UniformNames::diffuseColor, _value );
+}
+

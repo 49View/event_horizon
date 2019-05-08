@@ -195,7 +195,7 @@ public:
     template <typename T, typename ...Args>
     UUID GB( Args&&... args ) {
         VDataAssembler<T> gb{std::forward<Args>(args)...};
-        auto matRef     = ML().getHash(gb.matRef);
+        auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
 
         VDataServices::prepare( *this, gb.dataTypeHolder );
         auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
@@ -228,6 +228,7 @@ public:
     static LoadedResouceCallbackContainer resourceCallbackComposite    ;
 
 protected:
+    ResourceRef GBMatInternal( CResourceRef _matref, const C4f& _color );
 //    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}

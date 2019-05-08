@@ -89,22 +89,32 @@ namespace Http {
         auto request = makeRequest( url );
 
         auto settings = std::make_shared< restbed::Settings >( );
-        settings->set_connection_limit( 60*5 );
+//        settings->set_connection_limit( 60*60 );
 
         std::shared_ptr< restbed::Response > res;
         try {
-            restbed::Http::async(
-                request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
-                              std::shared_ptr< restbed::Response > res) {
-                LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
-                auto lRes = handleResponse( res, url, rf );
-                if ( lRes.isSuccessStatusCode() ) {
-                    lRes.ccf = mainThreadCallback;
-                    if ( callback ) callback( lRes );
-                } else {
-                    if ( callbackFailed ) callbackFailed( lRes );
-                }
-            }, settings );
+            res = restbed::Http::sync( request, settings );
+            LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
+            auto lRes = handleResponse( res, url, rf );
+            if ( lRes.isSuccessStatusCode() ) {
+                lRes.ccf = mainThreadCallback;
+                if ( callback ) callback( lRes );
+            } else {
+                if ( callbackFailed ) callbackFailed( lRes );
+            }
+
+//            restbed::Http::async(
+//                request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
+//                              std::shared_ptr< restbed::Response > res) {
+//                LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
+//                auto lRes = handleResponse( res, url, rf );
+//                if ( lRes.isSuccessStatusCode() ) {
+//                    lRes.ccf = mainThreadCallback;
+//                    if ( callback ) callback( lRes );
+//                } else {
+//                    if ( callbackFailed ) callbackFailed( lRes );
+//                }
+//            }, settings );
         } catch ( const std::exception& ex ) {
             LOGR( "[HTTP-GET-RESPONSE][ERROR] on %s", url.toString().c_str());
             LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
