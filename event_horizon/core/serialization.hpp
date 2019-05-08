@@ -222,6 +222,11 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 	visitor.deserialize( name.c_str(), value );
 }
 
+#define JSONSERIALONLY(CLASSNAME,...) \
+	inline void serialize( MegaWriter* visitor ) const { visitor->StartObject(); serializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); visitor->EndObject(); } \
+	inline SerializableContainer serialize() const { MegaWriter mw; serialize(&mw); return mw.getSerializableContainer();} \
+	inline void deserialize( const MegaReader& visitor ) { deserializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); }
+
 #define JSONSERIAL(CLASSNAME,...) \
     RESOURCE_CTORS(CLASSNAME); \
 	explicit CLASSNAME( const MegaReader& reader ) { deserialize( reader ); } \

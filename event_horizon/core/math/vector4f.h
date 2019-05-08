@@ -14,6 +14,7 @@ class Vector4f {
 public:
 
 	static const Vector4f ZERO;
+	static const Vector4f QUAT_UNIT;
 	static const Vector4f X_AXIS;
 	static const Vector4f Y_AXIS;
 	static const Vector4f Z_AXIS;

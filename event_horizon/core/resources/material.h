@@ -34,6 +34,8 @@ public:
     void setAoValue( float _aoValue );
     float getOpacity() const;
     void setOpacity( float _opacityValue );
+    V3f getDiffuseColor() const;
+    void setDiffuseColor( const V3f& _value );
 
 //    bool isStreammable() const;
     float translucency() const;

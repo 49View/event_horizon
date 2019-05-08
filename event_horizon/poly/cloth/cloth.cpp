@@ -101,6 +101,9 @@ Cloth::Cloth(float width, float height, int particleWidth, int particleHeight, f
 	//particles[particleWidth/2].isStatic = true; //top middle
 	particles[0].isStatic = true; //top left
 	particles[particleWidth-1].isStatic = true; //top right
+	for ( int q = 0; q < particleWidth; q+=3 ) {
+	    particles[q].isStatic = true;
+	}
 	//particles[numParticles-particleWidth].isStatic = true; //bottom left
 	//particles[numParticles-1].isStatic = true; //bottom right
 

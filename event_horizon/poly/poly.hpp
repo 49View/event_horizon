@@ -11,6 +11,7 @@
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/resource_serialization.hpp>
 #include <core/names.hpp>
+#include <poly/cloth/cloth.h>
 
 enum class UIShapeType {
     CameraFrustom2d,
@@ -124,10 +125,10 @@ namespace GT {
     struct Rotate {
         template<typename ...Args>
         explicit Rotate( Args&& ... args ) : data(std::forward<Args>( args )...) {}
-        V3f operator()() const noexcept {
+        V4f operator()() const noexcept {
             return data;
         }
-        V3f data;
+        V4f data;
     };
 
     struct Direction {
@@ -157,6 +158,15 @@ namespace GT {
         float data;
     };
 
+    struct A {
+        template<typename ...Args>
+        explicit A( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        float operator()() const noexcept {
+            return data;
+        }
+        float data;
+    };
+
     struct M {
         template<typename ...Args>
         explicit M( Args&& ... args ) : data(std::forward<Args>( args )...) {}
@@ -177,7 +187,7 @@ namespace GT {
     };
     struct GTPolicyTRS {
         Vector3f pos = Vector3f::ZERO;
-        Vector3f axis = Vector3f::ZERO;
+        Vector4f axis = Vector4f::QUAT_UNIT;
         Vector3f scale = Vector3f::ONE;
     };
     struct GTPolicyText {
@@ -222,15 +232,19 @@ namespace GT {
     struct GTPolicyQuad {
         QuadVector3fNormalfList quads;
     };
+    struct GTPolicyCloth {
+        std::shared_ptr<Cloth>  cloth;
+    };
 
-    struct Shape    : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
-    struct Follower : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
-    struct Extrude  : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
-    struct Poly     : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
-    struct Mesh     : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor {};
-    struct GLTF2    {};
-    struct Asset    {};
-    struct File     {};
-    struct SVG      {};
-    struct Text     : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
+    struct Shape     : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
+    struct Follower  : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
+    struct Extrude   : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
+    struct Poly      : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
+    struct Mesh      : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor {};
+    struct ClothMesh : GTPolicyTRS, GTPolicyCloth, GTPolicyMapping, GTPolicyColor {};
+    struct GLTF2     {};
+    struct Asset     {};
+    struct File      {};
+    struct SVG       {};
+    struct Text      : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
 }

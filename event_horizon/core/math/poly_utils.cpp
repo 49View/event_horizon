@@ -137,26 +137,3 @@ std::vector<Vector3f> createQuadPoints( const Vector2f& size ) {
 
 	return lPoints;
 }
-
-WindingOrderT detectWindingOrder( const std::vector<Vector2f>& _input ) {
-	size_t i1, i2;
-	float area = 0;
-	for ( i1 = 0; i1 < _input.size(); i1++ ) {
-		i2 = i1 + 1;
-		if ( i2 == _input.size() ) i2 = 0;
-		area += _input[i1].x() * _input[i2].y() - _input[i1].y() * _input[i2].x();
-	}
-	if ( area > 0 ) return WindingOrder::CW;
-	if ( area < 0 ) return WindingOrder::CCW;
-	LOGR("[ERROR] cannot get winding order of these points cos area is 0");
-	return WindingOrder::CCW;
-}
-
-std::vector<Vector2f> forceWindingOrder( const std::vector<Vector2f>& _input, WindingOrderT _forcedWO ) {
-
-    std::vector<Vector2f> ret = _input;
-
-    if ( detectWindingOrder( _input ) == _forcedWO ) return ret;
-    std::reverse( std::begin(ret), std::end(ret) );
-    return ret;
-}

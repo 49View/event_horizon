@@ -75,6 +75,7 @@ Vector4f Vector4f::COLORA( const Vector4f& source, const float a ) {
 }
 
 const Vector4f Vector4f::ZERO = Vector4f( 0.0f, 0.0f, 0.0f, 0.0f );
+const Vector4f Vector4f::QUAT_UNIT = Vector4f( 0.0f, 0.0f, 0.0f, 1.0f );
 const Vector4f Vector4f::X_AXIS = Vector4f( 1.0f, 0.0f, 0.0f, 0.0f );
 const Vector4f Vector4f::Y_AXIS = Vector4f( 0.0f, 1.0f, 0.0f, 0.0f );
 const Vector4f Vector4f::Z_AXIS = Vector4f( 0.0f, 0.0f, 1.0f, 0.0f );

@@ -221,7 +221,7 @@ public:
         generateMatrixHierarchy( fatherRootTransform());
     }
 
-    void updateExistingTransform( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale ) {
+    void updateExistingTransform( const Vector3f& pos, const Vector4f& rot, const Vector3f& scale ) {
         mTRS.set( pos, rot, scale );
         auto mm = Matrix4f{ mTRS };
         mLocalTransform = mLocalTransform * mm;
