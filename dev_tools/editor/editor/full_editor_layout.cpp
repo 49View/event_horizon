@@ -2,10 +2,6 @@
 // Created by Dado on 2018-10-16.
 //
 
-//
-// Created by Dado on 2018-10-16.
-//
-
 #include "full_editor_layout.h"
 #include <poly/scene_events.h>
 #include <core/math/plane3f.h>
@@ -28,10 +24,13 @@ void EditorBackEnd::activateImpl() {
     rsg.setRigCameraController<CameraControlFly>();
     rsg.DC()->setPosition(V3f{ 0.0f, 1.5f, 5.0f});
 
+    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
+                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
+
 //    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 0.6f ) );
 //    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
 
-    rsg.RR().drawRect2d( CommandBufferLimits::UI2dStart, V2f{0.03f, 0.96f}, V2f{ 0.03f * 0.02f, 0.98f}, C4f::GREEN  );
+//    rsg.RR().drawRect2d( CommandBufferLimits::UI2dStart, V2f{0.03f, 0.96f}, V2f{ 0.03f * 0.02f, 0.98f}, C4f::GREEN  );
 }
 
 void EditorBackEnd::updateImpl( const AggregatedInputData& _aid ) {
