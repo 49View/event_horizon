@@ -49,6 +49,13 @@ public:
         generateMatrixHierarchy(fatherRootTransform());
     }
 
+    void visit( std::function<void(NodeSP)> f ) {
+        f(this->shared_from_this());
+        for ( auto& c : Children() ) {
+            c->visit( f );
+        }
+    }
+
     inline void serialize( MegaWriter* visitor ) const {
         visitor->StartObject();
         visitor->serialize( "UUID", UUiD() );

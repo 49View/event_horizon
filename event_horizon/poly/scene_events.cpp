@@ -15,6 +15,7 @@
 #include <core/resources/profile.hpp>
 
 #include <core/resources/resource_builder.hpp>
+#include <editor/editor/geom_layout.h>
 
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
 
@@ -45,14 +46,13 @@ template <typename T>
 void addFileCallback( const std::string& _path ) {
     SerializableContainer fileContent;
     FM::readLocalFile( _path, fileContent );
-    SceneGraph::addGenericCallback( ResourceVersioning<T>::Prefix(), { getFileName(_path), fileContent} );
+    SceneGraph::addGenericCallback( ResourceVersioning<T>::Prefix(), { getFileName(_path), fileContent, _path } );
 }
 
 void allConversionsDragAndDropCallback( const std::string& _path ) {
     std::string pathSanitized = url_encode_spacesonly(_path);
     std::string ext = getFileNameExt( pathSanitized );
     std::string extl = toLower(ext);
-    std::string finalPath = pathSanitized;
 
     if ( extl == ".fbx" ) {
         FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(ResourceGroup::Geom) + getFileName(pathSanitized) );
@@ -78,7 +78,7 @@ void allConversionsDragAndDropCallback( const std::string& _path ) {
     else if ( extl == ".sbsar" ) {
         FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(ResourceGroup::Material)+ getFileName(pathSanitized));
     }
-//    else if ( extl == ".gltf" || extl == ".glb" ) {
-//        callbackGeomGLTF( finalPath );
-//    }
+    else if ( extl == ".gltf" || extl == ".glb" ) {
+        addFileCallback<Geom>( pathSanitized );
+    }
 }

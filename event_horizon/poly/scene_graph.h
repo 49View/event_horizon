@@ -45,7 +45,7 @@ struct LoadedResouceCallbackData {
 };
 
 using LoadedResouceCallbackContainer = std::vector<LoadedResouceCallbackData>;
-using GenericSceneCallbackValueMap = std::tuple<std::string, SerializableContainer>;
+using GenericSceneCallbackValueMap = std::tuple<std::string, SerializableContainer, std::string>;
 using GenericSceneCallback = std::unordered_map<std::string, GenericSceneCallbackValueMap>;
 
 class SceneGraph : public NodeGraph {

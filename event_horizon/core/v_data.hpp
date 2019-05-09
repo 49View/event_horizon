@@ -33,6 +33,7 @@ public:
     void fillTangets( const std::vector<Vector4f>& _tangents, bool _bInvert = false );
     void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
     void fillColors( const std::vector<Vector4f>& _colors );
+    void forcePlanarMapping();
     void changeWindingOrder();
     void sanitizeUVMap();
     void calcBinormal();

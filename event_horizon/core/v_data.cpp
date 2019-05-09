@@ -348,3 +348,11 @@ Primitive VData::getPrimitive() const {
 void VData::setPrimitive( Primitive _primitive ) {
     VData::primitive = _primitive;
 }
+
+void VData::forcePlanarMapping() {
+    for (auto & t : vSoaData) {
+        t.a1 = dominantMapping( t.a3, t.pos );
+        t.a2 = t.a1;
+    }
+
+}

@@ -14,6 +14,7 @@
 #include <poly/resources/ui_shape_builder.h>
 #include <core/resources/material.h>
 #include <core/file_manager.h>
+#include <poly/converters/gltf2/gltf2.h>
 
 GenericSceneCallback           SceneGraph::genericSceneCallback         ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackVData        ;
@@ -54,6 +55,17 @@ void SceneGraph::update() {
             B<MCB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else if ( k == ResourceGroup::Material ) {
             B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+        } else if ( k == ResourceGroup::Geom ) {
+            GLTF2Service::load( *this, std::get<2>(v) );
+//            for ( auto& scene : glt ) {
+//                scene->visit( [this]( std::shared_ptr<GeomSceneArtifact> _geom ) {
+//                    if ( !_geom->empty() ) {
+//                        B<MB>( "urca" ).addIM( _geom->Data().materialSP );
+//                    }
+//                });
+//            }
+//            std::make_shared<GLTF2>( std::get<1>(v), std::get<0>(v) );
+//            B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else {
             LOGRS("{" << k << "} Resource not supported yet in callback updating");
             ASSERT(0);
@@ -285,7 +297,7 @@ GeomSP SceneGraph::GC() {
 
 UUID SceneGraph::GC( const GeomSP& _geom ) {
     auto ref = GM().getHash( _geom->Name() );
-    auto ret = addNode( ref );
+    ResourceRef ret = !ref.empty() ? addNode( ref ) : "";
     for (const auto& c : _geom->Children() ) {
         GC( c );
     }

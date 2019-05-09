@@ -510,6 +510,17 @@ inline Vector3f normalize( const Vector3f& v ) {
 	return result;
 }
 
+inline Vector2f dominantMapping( const V3f& n, const V3f& v, const V3f& size = V3f::ONE ) {
+    switch ( n.dominantElement() ) {
+        case 0:
+            return ( n[0] > 0.0f ? v.yz() : -v.yz()) * size.yz();
+        case 1:
+            return ( n[1] > 0.0f ? v.zx() : -v.zx()) * size.zx();
+    }
+
+    return ( n[2] > 0.0f ? v.xy() : -v.xy() ) * size.xy();
+}
+
 inline Vector3f cross( const Vector3f& a, const Vector3f& b ) {
 	return Vector3f( a.y() * b.z() - a.z() * b.y(), a.z() * b.x() - a.x() * b.z(), a.x() * b.y() - a.y() * b.x() );
 }

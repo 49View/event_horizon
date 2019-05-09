@@ -14,9 +14,6 @@ struct OnActivate {};
 // Actions
 struct Activate {
     void operator()( SceneGraph& _sg, RenderOrchestrator& rsg ) noexcept {
-        rsg.setRigCameraController<CameraControl2d>();
-        rsg.DC()->setPosition(V3f::Y_AXIS*4.0f);
-        rsg.DC()->setQuatAngles(V3f{M_PI_2, 0.0f, 0.0f});
     }
 };
 

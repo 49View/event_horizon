@@ -111,6 +111,8 @@ namespace Utility::TTFCore { class FontInternal;}
 using Font = Utility::TTFCore::FontInternal;
 using QuadVector3fNormalfList = std::vector<QuadVector3fNormal>;
 
+namespace tinygltf{ class Model; }
+
 namespace GT {
 
     struct Scale {
@@ -176,6 +178,24 @@ namespace GT {
         ResourceRef data;
     };
 
+    struct GLTF2PrimitiveIndex {
+        template<typename ...Args>
+        explicit GLTF2PrimitiveIndex( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        float operator()() const noexcept {
+            return data;
+        }
+        int data;
+    };
+
+    struct GLTF2MeshIndex {
+        template<typename ...Args>
+        explicit GLTF2MeshIndex( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        float operator()() const noexcept {
+            return data;
+        }
+        int data;
+    };
+
     enum class TextType {
         TextUI,
         Text2d,
@@ -184,6 +204,9 @@ namespace GT {
 
     struct GTPolicyColor {
         C4f color;
+    };
+    struct GTPolicyNameId {
+        std::string nameId;
     };
     struct GTPolicyTRS {
         Vector3f pos = Vector3f::ZERO;
@@ -235,6 +258,11 @@ namespace GT {
     struct GTPolicyCloth {
         std::shared_ptr<Cloth>  cloth;
     };
+    struct GTPolicyGLTF2Model {
+        tinygltf::Model* model = nullptr;
+        int meshIndex = 0;
+        int primitiveIndex = 0;
+    };
 
     struct Shape     : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
     struct Follower  : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
@@ -242,9 +270,8 @@ namespace GT {
     struct Poly      : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
     struct Mesh      : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor {};
     struct ClothMesh : GTPolicyTRS, GTPolicyCloth, GTPolicyMapping, GTPolicyColor {};
-    struct GLTF2     {};
-    struct Asset     {};
-    struct File      {};
-    struct SVG       {};
+    struct GLTF2     : GTPolicyTRS, GTPolicyGLTF2Model {};
+    struct SVG       : GTPolicyTRS {};
+    struct VData     : GTPolicyTRS {};
     struct Text      : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
 }

@@ -10,6 +10,7 @@
 #include <poly/poly_services.hpp>
 #include <poly/follower.hpp>
 #include <poly/converters/svg/svgtopoly.hpp>
+#include <poly/converters/gltf2/gltf2.h>
 #include <poly/scene_graph.h>
 
 void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution,
@@ -223,7 +224,7 @@ namespace VDataServices {
         return "Text--" + Hashable<>::hashOf( c );
     }
 
-// ___ QUAD MESH BUILDER ___
+    // ___ QUAD MESH BUILDER ___
 
     void prepare( SceneGraph& sg, GT::Mesh& _d ) {
     }
@@ -351,8 +352,20 @@ namespace VDataServices {
        return "Follower--" + Hashable<>::hashOf(oss.str());
     }
 
-}
+    // ___ GLTF2 BUILDER ___
 
+    void prepare( SceneGraph& sg, GT::GLTF2& _d ) {
+    }
+
+    void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret ) {
+        GLTF2Service::fillGeom( _ret, _d.model, _d.meshIndex, _d.primitiveIndex );
+    }
+
+    ResourceRef refName( const GT::GLTF2& _d ) {
+        std::stringstream oss;
+        oss << _d.meshIndex <<  _d.primitiveIndex;
+        return "GLTF2--" + oss.str();
+    }
 
 // ********************************************************************************************************************
 // ********************************************************************************************************************
@@ -376,3 +389,5 @@ namespace VDataServices {
 //    }
 //    return logoGeoms;
 //}
+
+}

@@ -671,19 +671,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
         for ( int q = 0; q < ret.numIndices; q++ ) {
             Vector3f v = ret.verts[ret.indices[q]];
             Vector3f n = ret.normals[q];
-            switch ( n.dominantElement() ) {
-                case 0:
-                    ret.uvs[q] = ( n[0] > 0.0f ? v.yz() : -v.yz() ) * size.yz();
-                    break;
-                case 1:
-                    ret.uvs[q] = ( n[1] > 0.0f ? v.zx() : -v.zx() ) * size.zx();
-                    break;
-                case 2:
-                    ret.uvs[q] = ( n[2] > 0.0f ? v.xy() : -v.xy() ) * size.xy();
-                    break;
-                default:
-                    break;
-            }
+            ret.uvs[q] = dominantMapping( n, v, size );
         }
     }
 
@@ -692,19 +680,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
         for ( int q = 0; q < ret.numIndices; q++ ) {
             Vector3f v = ret.verts[ret.indices[q]] + off;
             Vector3f n = ret.normals[q];
-            switch ( n.dominantElement() ) {
-                case 0:
-                    ret.uvs[q] = ( n[0] > 0.0f ? v.yz() : -v.yz() ) * size.yz();
-                    break;
-                case 1:
-                    ret.uvs[q] = ( n[1] > 0.0f ? v.zx() : -v.zx() ) * size.zx();
-                    break;
-                case 2:
-                    ret.uvs[q] = ( n[2] > 0.0f ? v.xy() : -v.xy() ) * size.xy();
-                    break;
-                default:
-                    break;
-            }
+            ret.uvs[q] = dominantMapping( n, v, size );
         }
     }
 

@@ -8,6 +8,15 @@
 
 #include "full_editor_layout.h"
 #include <poly/scene_events.h>
+#include <core/math/plane3f.h>
+#include <core/raw_image.h>
+#include <core/TTF.h>
+#include <core/camera.h>
+#include <core/resources/profile.hpp>
+#include <core/resources/material.h>
+#include <render_scene_graph/render_orchestrator.h>
+#include <core/resources/resource_builder.hpp>
+#include <core/math/vector_util.hpp>
 
 void EditorBackEnd::activateImpl() {
 
@@ -15,6 +24,13 @@ void EditorBackEnd::activateImpl() {
     rsg.setDragAndDropFunction(allConversionsDragAndDropCallback);
 
     backEnd->process_event( OnActivate{} );
+
+    rsg.setRigCameraController<CameraControlFly>();
+    rsg.DC()->setPosition(V3f{ 0.0f, 1.5f, 5.0f});
+
+//    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 0.6f ) );
+//    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
+
     rsg.RR().drawRect2d( CommandBufferLimits::UI2dStart, V2f{0.03f, 0.96f}, V2f{ 0.03f * 0.02f, 0.98f}, C4f::GREEN  );
 }
 

@@ -176,7 +176,25 @@ public:
             return *this;
         }
 
-        if constexpr ( std::is_same<M, GeomSP>::value ) {
+        if constexpr ( std::is_same_v<M, tinygltf::Model*> ) {
+            static_assert( std::is_same_v<SGT, GT::GLTF2> );
+            dataTypeHolder.model = _param;
+            return *this;
+        }
+
+        if constexpr ( std::is_same_v<M, GT::GLTF2PrimitiveIndex> ) {
+            static_assert( std::is_same_v<SGT, GT::GLTF2> );
+            dataTypeHolder.primitiveIndex = _param();
+            return *this;
+        }
+
+        if constexpr ( std::is_same_v<M, GT::GLTF2MeshIndex> ) {
+            static_assert( std::is_same_v<SGT, GT::GLTF2> );
+            dataTypeHolder.meshIndex = _param();
+            return *this;
+        }
+
+        if constexpr ( std::is_same_v<M, GeomSP> ) {
             elemInjFather = _param;
             return *this;
         }
@@ -220,6 +238,10 @@ namespace VDataServices {
     void prepare( SceneGraph& sg, GT::Follower& _d );
     void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Follower& _d );
+
+    void prepare( SceneGraph& sg, GT::GLTF2& _d );
+    void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::GLTF2& _d );
 
     template <typename DT>
     std::shared_ptr<VData> build( const DT& _d ) {
