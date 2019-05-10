@@ -10,9 +10,9 @@ ShadowMapManager::ShadowMapManager() {
 			0.5f, 0.5f, 0.5f, 1.0f
 	);
 
-	float bs = 20.0f;
+	float bs = 5.0f;
 
-	setFrusom( { -bs, bs}, { -bs, bs}, { 1.0f, bs} );
+	setFrusom( { -bs, bs}, { -bs, bs}, { 0.0f, bs} );
 }
 
 void ShadowMapManager::updateDepthProjectionMatrix() {
@@ -58,8 +58,8 @@ void ShadowMapManager::SunPosition( const Vector3f& sunPos ) {
 
 void ShadowMapManager::calculateShadowMapMatrices() {
 	// Compute the MVP matrix from the light's point of view
-	depthViewMatrix.lookAt( mShadowMapLightSourcePos, mShadowMapLightSourcePos + mShadowMapSunLightDir,
-	        Vector3f::Y_AXIS );
+	depthViewMatrix.lookAt( mShadowMapLightSourcePos, mShadowMapLightSourcePos + mShadowMapSunLightDir, V3f::Y_AXIS );
+//    depthViewMatrix = Matrix4f::IDENTITY;
 	depthMVP = depthViewMatrix * depthProjectionMatrix;
 	depthBiasMVP = depthMVP * mBiasMatrix;
 }

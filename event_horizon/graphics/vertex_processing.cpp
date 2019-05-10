@@ -63,15 +63,15 @@ void VPList::setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid,
 
 void VPList::draw() {
     if ( gpuData->isEmpty()) return;
-    setMaterialGlobalConstant( UniformNames::modelMatrix, *getTransform().get() );
-    gpuData->programStart( material );
+    setMaterialGlobalConstant( UniformNames::modelMatrix, *getTransform() );
+    gpuData->programStart( material.get() );
     gpuData->draw();
 }
 
-void VPList::drawWith( std::shared_ptr<RenderMaterial> _material ) {
+void VPList::drawWith( RenderMaterial* _material ) {
     if ( gpuData->isEmpty()) return;
-    setMaterialGlobalConstant( UniformNames::modelMatrix, *getTransform() );
-    gpuData->programStart( std::move( _material ));
+    _material->setGlobalConstant( UniformNames::modelMatrix, *getTransform() );
+    gpuData->programStart( _material );
     gpuData->draw();
 }
 

@@ -4,7 +4,7 @@
 
 unsigned int sLastHandle = 0;
 
-void GPUVData::programStart( std::shared_ptr<RenderMaterial> _material ) const {
+void GPUVData::programStart( RenderMaterial* _material ) const {
 //    sNumDrawCalls++;
     if ( sLastHandle != _material->BoundProgram()->handle()) {
         GLCALL( glUseProgram( _material->BoundProgram()->handle()));

@@ -10,7 +10,7 @@ class GPUVData {
 public:
     explicit GPUVData( const cpuVBIB& _vbib );
     void draw() const;
-    void programStart( std::shared_ptr<RenderMaterial> _material ) const;
+    void programStart( RenderMaterial* _material ) const;
 
     bool Dynamic() const { return dynamic; }
     void Dynamic( bool val ) { dynamic = val; }

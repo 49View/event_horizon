@@ -15,7 +15,6 @@
 #include <core/resources/profile.hpp>
 
 #include <core/resources/resource_builder.hpp>
-#include <editor/editor/geom_layout.h>
 
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
 

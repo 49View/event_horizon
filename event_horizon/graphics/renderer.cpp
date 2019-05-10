@@ -118,6 +118,7 @@ void Renderer::init() {
     am.init();
     sm->loadShaders();
     tm->addTextureWithData(RawImage::WHITE4x4(), FBNames::lightmap, TSLOT_LIGHTMAP );
+//    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).build();
     mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).depthOnly().build();
 
     auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);

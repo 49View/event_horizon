@@ -240,12 +240,15 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 #end_code
 
 #define_code shadow_code
-float visibility = 0.0;
-    // if ( dot( N, normalize( u_sunPosition - Position_worldspace ) ) > 0.25 )  {
-    for ( int i = 0; i < 4; i++ ) {
-        int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;
-        visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3.xy + poissonDisk[index] / 4096.0, v_shadowmap_coord3.z ) ) * 0.25;// * u_timeOfTheDay;
-    }
+float visibility = 1.0;
+    vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
+    float nlAngle = clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
+    v_shadowmap_coord3Biases.z -= 0.05100 * tan(acos(nlAngle));
+    visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy, v_shadowmap_coord3Biases.z ) );
+
+    // for ( int i = 0; i < 4; i++ ) {
+    //     int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;
+    //     visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3.xy + poissonDisk[index] / 4096.0, v_shadowmap_coord3.z ) ) * 0.25;// * u_timeOfTheDay;
     // }
 #end_code
 
@@ -272,11 +275,11 @@ vec3 R = reflect(-V, N);
 vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness*MAX_REFLECTION_LOD).rgb;
 // gr = prefilteredColor.r * 0.3 + prefilteredColor.g * 0.59 + prefilteredColor.b * 0.11;
 // prefilteredColor.rgb = vec3(gr);
-vec2 brdf  = texture(ibl_brdfLUTMap, vec2( 1.0-ndotl, roughness*0.5)).rg;
-vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
+vec3 specular = prefilteredColor * (F * (brdf.x + brdf.y));
 // specular = pow(specular, vec3(2.2/1.0)); 
 
-vec3 ambient = (kD * diffuseV + specular) * visibility* ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
+vec3 ambient = (kD * diffuseV + specular) * visibility * ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
 // vec3 ambient = (kD );
 
 // vec3 finalColor = (Lo * visibility) + ambient; 

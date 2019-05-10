@@ -104,7 +104,11 @@ void CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer* cb ) const {
         mCommand.issue( rr, cb );
     } else {
 //        LOGRS("        Render geom: " << mVP->mVPList.Name() );
-        mVP->mVPList->draw();
+        if ( mVP->mMaterial ) {
+            mVP->mVPList->drawWith(mVP->mMaterial.get());
+        } else {
+            mVP->mVPList->draw();
+        }
     }
 }
 
@@ -320,9 +324,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
 //            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
 //                    UniformNames::bloomTexture,
 //                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture()->TDI(1));
-//            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
-//                    UniformNames::shadowMapTexture,
-//                    rr.getShadowMapFB()->RenderToTexture());
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::shadowMapTexture,
+                    rr.getShadowMapFB()->RenderToTexture()->TDI(1));
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->draw();
 
             cstack->postBlit();

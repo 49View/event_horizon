@@ -154,9 +154,10 @@ void RLTargetPBR::addShadowMaps() {
 
     rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor() );
 
-    if ( smm->needsRefresh(rr.UpdateCounter()) ) {
+//    if ( smm->needsRefresh(rr.UpdateCounter()) ) {
         rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
         rr.CB_U().pushCommand( { CommandBufferCommandName::shadowMapBufferBind } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteTrue } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::wireFrameModeFalse } );
@@ -173,7 +174,7 @@ void RLTargetPBR::addShadowMaps() {
             }
         }
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
-    }
+//    }
 }
 
 // This does NOT update and invalidate skybox and probes
@@ -386,8 +387,9 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
         addProbes();
     }
 
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
-//    mSkybox->render();
+//    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
+    cb.pushCommand( { CommandBufferCommandName::colorBufferBind } );
+//    mSkybox->render();a
 }
 
 void RLTargetPBR::endCL( CommandBufferList& cb ) {
@@ -410,21 +412,21 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     startCL( cb );
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
+    cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
+    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k) ) {
             rr.addToCommandBuffer( vl.mVList );
         }
     }
 
-    cb.pushCommand( { CommandBufferCommandName::depthWriteFalse } );
-    for ( const auto& [k, vl] : rr.CL() ) {
-        if ( isKeyInRange(k) ) {
-            rr.addToCommandBuffer( vl.mVListTransparent );
-        }
-    }
-
-    cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
-    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
+//    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
+//    cb.pushCommand( { CommandBufferCommandName::depthWriteFalse } );
+//    for ( const auto& [k, vl] : rr.CL() ) {
+//        if ( isKeyInRange(k) ) {
+//            rr.addToCommandBuffer( vl.mVListTransparent );
+//        }
+//    }
 
     endCL( cb );
 }

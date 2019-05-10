@@ -101,7 +101,7 @@ public:
     void tag( const uint64_t tag ) { mTag = tag; }
 
     void draw();
-    void drawWith( std::shared_ptr<RenderMaterial> _material );
+    void drawWith( RenderMaterial* _material );
 
 private:
     std::shared_ptr<GPUVData> gpuData;

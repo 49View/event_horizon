@@ -21,7 +21,6 @@ mat3 shVertexData() {
 
    // Shadowmap
    vec4 v_shadowmap_coord = u_depthBiasMVP * vec4( Position_worldspace, 1.0 );
-   v_shadowmap_coord.z -= 0.0100;
    v_shadowmap_coord3 = vec3( v_shadowmap_coord.xy, v_shadowmap_coord.z / v_shadowmap_coord.w );
 
    gl_Position = u_mvpMatrix * u_modelMatrix * pos4;
