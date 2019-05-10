@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "../text_input.hpp"
-#include "../mouse_input.hpp"
-#include "../renderer.h"
+#include <graphics/text_input.hpp>
+#include <graphics/mouse_input.hpp>
+#include <graphics/renderer.h>
 
 struct GLFWwindow;
 typedef void (* GLFWdropfun)(GLFWwindow*,int,const char**);

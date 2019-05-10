@@ -1,12 +1,12 @@
-#include "../window_handling_opengl.hpp"
 #include "../../platform_graphics.hpp"
 
-#include "core/util.h"
+#include <core/util.h>
+#include <core/configuration/app_options.h>
+#include <graphics/opengl/GLFW/window_handling_opengl.hpp>
 #include "../gl_util.h"
 #include "imgui.h"
 #include "../imgui_impl_glfw.h"
 #include "../imgui_impl_opengl3.h"
-#include "core/configuration/app_options.h"
 
 namespace WindowHandling {
 

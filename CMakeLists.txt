@@ -131,6 +131,12 @@ macro(register_graphics_module)
     register_module("audio")
     include_directories(${MODULE_ROOT_COMP}imgui)
 
+    if ( NOT ANDROID AND NOT IOS )
+        register_module("opengl/GLFW")
+    else()
+        register_module("opengl/GLFM")
+    endif()
+
     register_platform_module_files("opengl")
 
     if (OPENGL_ES)

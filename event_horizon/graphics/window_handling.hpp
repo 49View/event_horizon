@@ -26,5 +26,5 @@ namespace WindowHandling {
 namespace WH = WindowHandling;
 
 #ifdef _OPENGL
-#include "opengl/window_handling_opengl.hpp"
+#include <graphics/opengl/GLFW/window_handling_opengl.hpp>
 #endif
