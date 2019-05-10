@@ -66,7 +66,7 @@ void Framebuffer::initDepth( std::shared_ptr<TextureManager> tm ) {
     GLCALL( glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL ) );
     GLCALL( glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE ) );
     GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mRenderToTexture->getHandle(), 0 ) );
-    GLCALL( glDrawBuffer(GL_NONE) );
+    GLCALL( glDrawBuffers(0, GL_NONE) );
     GLCALL( glReadBuffer(GL_NONE) );
 
     checkFrameBufferStatus();
