@@ -4,7 +4,7 @@
 
 #include "text_input_glfm.hpp"
 #include <graphics/window_handling.hpp>
-#include <graphics/opengl/GLFM/window_handling_opengl_glfm.hpp>
+#include <event_horizon/event_horizon/graphics/opengl/android/window_handling_opengl_glfm.hpp>
 #include <graphics/text_input.hpp>
 
 bool TextInput::checkKeyToggleOn( int keyCode, bool overrideTextInput ) {
