@@ -8,16 +8,21 @@
 #include <string>
 #include <memory>
 #include <mutex>
-#include "core/math/vector3f.h"
-#include "core/math/plane3f.h"
-#include "core/math/rect2f.h"
-#include "core/htypes_shared.hpp"
-#include "core/observable.h"
+#include <core/math/vector3f.h>
+#include <core/math/plane3f.h>
+#include <core/math/rect2f.h>
+#include <core/htypes_shared.hpp>
+#include <core/observable.h>
+
 #include "text_input.hpp"
 
+#ifdef USE_GLFW
+#include <graphics/opengl/GLFW/mouse_input_glfw.hpp>
+#elif USE_GLFM
+#include <graphics/opengl/GLFW/text_input_glfw.hpp>
+#endif
+
 class Renderer;
-struct GLFWwindow;
-struct GLFWcursor;
 
 struct AggregatedInputData {
     TextInput& ti;
@@ -94,7 +99,11 @@ public: // these are globals data accessed from low level functions on inputs et
     bool hasMouseMoved() const;
 
 private:
-	void setupRectInputAfterStatusChange();
+    void setWheelScrollcallbackOnce();
+    void mouseButtonEventsUpdate( UpdateSignals& _updateSignals );
+    int  getLeftMouseButtonState();
+    void getCursorPos( double& xpos, double& ypos );
+    void setupRectInputAfterStatusChange();
 	void accumulateArrowTouches( float direction );
 	bool checkLongTapDistance();
 
@@ -137,14 +146,7 @@ private:
 	std::vector<float> mTouchupTimeStamps;
 	float mCurrTimeStamp = 0.0f;
 
-	// cursor types
-	GLFWcursor* mCursorArrow = nullptr;
-	GLFWcursor* mCursorHResize = nullptr;
-
 public: // these are globals data accessed from low level functions on inputs etc
     static Vector2f GScrollData;
 	mutable std::mutex mInputRectLock;
 };
-
-void GscrollCallback( GLFWwindow* window, double xoffset, double yoffset );
-void GMouseButtonCallback( GLFWwindow* window, int button, int action, int mods );

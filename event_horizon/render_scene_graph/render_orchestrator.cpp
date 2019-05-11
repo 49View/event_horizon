@@ -15,7 +15,6 @@
 #include <graphics/renderer.h>
 #include <graphics/shader_manager.h>
 #include <graphics/vp_builder.hpp>
-#include <graphics/audio/audio_manager_openal.hpp>
 #include <graphics/window_handling.hpp>
 
 std::vector<std::string> RenderOrchestrator::callbackPaths;
@@ -110,8 +109,6 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.n(_geom->UUiD()).t(transformMatrix).build();
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);
     });
-
-    am = std::make_shared<AudioManagerOpenAL>();
 }
 
 void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {

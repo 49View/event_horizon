@@ -44,6 +44,7 @@ find_library( zlib-lib z )
 
 target_link_libraries( # Specifies the target library.
         native-lib
+
         49viewgraphics
         49viewcore
         49viewpoly

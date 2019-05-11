@@ -2,7 +2,6 @@
 //  mouse_input.cpp
 //
 
-#include <graphics/imgui/imgui.h>
 #include "mouse_input.hpp"
 #include "window_handling.hpp"
 #include "core/app_globals.h"
@@ -245,22 +244,6 @@ Vector3f MouseInput::getCurrMoveDiffMousePick() const {
 	return mMoveDiffMousePick;
 }
 
-void MouseInput::setCursorType( MouseCursorType mct ) {
-	switch ( mct ) {
-		case MouseCursorType::ARROW:
-		if ( mCursorArrow == nullptr ) mCursorArrow = glfwCreateStandardCursor( GLFW_ARROW_CURSOR );
-		glfwSetCursor( WH::window, mCursorArrow );
-		break;
-		case MouseCursorType::HRESIZE:
-		if ( mCursorHResize == nullptr ) mCursorHResize = glfwCreateStandardCursor( GLFW_HRESIZE_CURSOR );
-		glfwSetCursor( WH::window, mCursorHResize );
-		break;
-
-		default:
-		break;
-	}
-}
-
 void MouseInput::accumulateArrowTouches( float direction ) {
 	accumulatedArrowVelocity += ( mCurrTimeStep * direction ) / 10.0f;
 	if ( accumulatedArrowVelocity > 0.1f ) accumulatedArrowVelocity = 0.1f;
@@ -274,15 +257,27 @@ void MouseInput::rightArrowPressed( const float speed ) {
 	accumulateArrowTouches( speed );
 }
 
-void GscrollCallback( [[maybe_unused]] GLFWwindow* window, double xoffset, double yoffset ) {
-    MouseInput::GScrollData = V2f{ sign(xoffset), sign(yoffset) } * 0.1f;
+void MouseInput::mouseButtonEventsUpdate( UpdateSignals& _updateSignals ) {
+    int mouseLeftState = getLeftMouseButtonState();
+
+    if ( mouseLeftState == MB_PRESS ) {
+        if ( glfwMousePressLeftTick == 0 ) {
+            onTouchDown( { xpos, ypos }, _updateSignals );
+        } else {
+            onTouchMove( { xpos, ypos }, _updateSignals );
+        }
+        ++glfwMousePressLeftTick;
+    } else {
+        if ( glfwMousePressLeftTick != 0 ) {
+            onTouchUp( { xpos, ypos }, _updateSignals );
+        }
+        glfwMousePressLeftTick = 0;
+    }
 }
 
 void MouseInput::update( UpdateSignals& _updateSignals ) {
-    static bool firstTimer = true;
-    if ( firstTimer ) {
-        glfwSetScrollCallback(WH::window, GscrollCallback);
-    }
+    setWheelScrollcallbackOnce();
+
 	mCurrTimeStamp = GameTime::getCurrTimeStamp();
 	mCurrTimeStep = GameTime::getCurrTimeStep();
 	mGestureTime += GameTime::getCurrTimeStep();
@@ -300,7 +295,7 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
 		mCanTriggerLongTap = false;
 	}
 
-	glfwGetCursorPos( WH::window, &xpos, &ypos );
+    getCursorPos( xpos, ypos );
     mbHasMouseMoved = ( xpos != xposOld || ypos != yposOld );
     xposOld = xpos;
     yposOld = ypos;
@@ -310,30 +305,10 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
 #endif
     ypos = ( getScreenSizef.y() - ypos );
 
-    int mouseLeftState = glfwGetMouseButton(WH::window, GLFW_MOUSE_BUTTON_LEFT);
-//    int mouseLeftState = glfwGetMouseButton(WH::window, GLFW_MOUSE_BUTTON_RIGHT);
-
-	if ( mouseLeftState == GLFW_PRESS ) {
-		if ( glfwMousePressLeftTick == 0 ) {
-			onTouchDown( { xpos, ypos }, _updateSignals );
-		} else {
-			onTouchMove( { xpos, ypos }, _updateSignals );
-		}
-		++glfwMousePressLeftTick;
-	} else {
-		if ( glfwMousePressLeftTick != 0 ) {
-			onTouchUp( { xpos, ypos }, _updateSignals );
-		}
-		glfwMousePressLeftTick = 0;
-	}
+    mouseButtonEventsUpdate( _updateSignals );
 
 	onScroll( GScrollData.y(), _updateSignals );
 	GScrollData = { 0.0f, 0.0f };
-}
-
-void MouseInput::enableMouseCursor( const bool val ) {
-	int cursor = val ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED;
-	glfwSetInputMode( WH::window, GLFW_CURSOR, cursor );
 }
 
 Vector2f MouseInput::getCurrPos() const {

@@ -17,10 +17,8 @@
 
 struct scene_t;
 struct PickRayData;
-class AudioManager;
 class Renderer;
 class VData;
-class SceneBridge;
 struct AggregatedInputData;
 
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
@@ -132,8 +130,6 @@ private:
     SceneGraph& sg;
     cameraRigsMap mRigs;
     std::unordered_map<std::string, SceneScreenBox> boxes;
-
-    std::shared_ptr<AudioManager> am;
 
     DragAndDropFunction dragAndDropFunc = nullptr;
 

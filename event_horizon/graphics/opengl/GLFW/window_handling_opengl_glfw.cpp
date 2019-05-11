@@ -1,7 +1,7 @@
-#include "window_handling_opengl.hpp"
+#include "window_handling_opengl_glfw.hpp"
 #include "imgui.h"
 #include <graphics/opengl/gl_headers.hpp>
-#include <graphics/opengl/imgui_impl_glfw.h>
+#include <graphics/opengl/GLFW/imgui_impl_glfw.h>
 #include <graphics/opengl/imgui_impl_opengl3.h>
 
 #include <graphics/window_handling.hpp>

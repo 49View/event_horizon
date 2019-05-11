@@ -10,8 +10,8 @@
 #include <graphics/audio/audio_file.h>
 
 #ifdef OSX
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
+#include <OpenAL/OpenAL.h>
+#include <OpenAL/OpenAL.h>
 #else
 #include <AL/al.h>
 #include <AL/alc.h>

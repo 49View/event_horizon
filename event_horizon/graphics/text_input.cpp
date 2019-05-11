@@ -3,24 +3,22 @@
 //
 
 #include "text_input.hpp"
-
 #include "window_handling.hpp"
 #include "mouse_input.hpp"
-
 
 std::wstring TextInput::GInputString;
 ModifiersKey TextInput::mModKeyCurrent;
 
-ModifiersKey convertFromGLFWModifiers( int mod ) {
-	switch ( mod ) {
-		case GLFW_MOD_ALT: return GMK_MOD_ALT;
-		case GLFW_MOD_CONTROL: return GMK_MOD_CONTROL;
-		case GLFW_MOD_SHIFT: return GMK_MOD_SHIFT;
-		case GLFW_MOD_SUPER: return GMK_MOD_SUPER;
-		case GLFW_KEY_BACKSPACE: return GMK_MOD_BACKSPACE;
-		default: return GMK_MOD_NONE;
-	}
-}
+//ModifiersKey convertFromGLFWModifiers( int mod ) {
+//	switch ( mod ) {
+//		case GLFW_MOD_ALT: return GMK_MOD_ALT;
+//		case GLFW_MOD_CONTROL: return GMK_MOD_CONTROL;
+//		case GLFW_MOD_SHIFT: return GMK_MOD_SHIFT;
+//		case GLFW_MOD_SUPER: return GMK_MOD_SUPER;
+//		case GLFW_KEY_BACKSPACE: return GMK_MOD_BACKSPACE;
+//		default: return GMK_MOD_NONE;
+//	}
+//}
 
 TextInput::TextInput() {
 	GInputString = L"";
@@ -28,50 +26,33 @@ TextInput::TextInput() {
 	mModKeyCurrent = GMK_MOD_NONE;
 }
 
-bool TextInput::checkKeyToggleOn( int keyCode, bool overrideTextInput ) {
-	if ( !isEnabled() ) return false;
-	if ( ( GIsEnteringText && ! IsAnyModKeyPressed() ) && !overrideTextInput ) return false;
-	int currWState = glfwGetKey( WH::window, keyCode );
-	int prevState = mPrevKeyStates[keyCode];
-	mPrevKeyStates[keyCode] = currWState;
-	mStateUpdates[keyCode] = currWState;
-	return ( currWState == GLFW_PRESS && prevState == GLFW_RELEASE );
-}
-
-bool TextInput::checkKeyPressed( int keyCode ) {
-	if ( !isEnabled() ) return false;
-	if ( GIsEnteringText || IsAnyModKeyPressed() ) return false;
-	int currWState = glfwGetKey( WH::window, keyCode );
-	return currWState == GLFW_PRESS;
-}
-
 int TextInput::checkWASDPressed() {
 	if ( !isEnabled() ) return false;
 	if ( GIsEnteringText || IsAnyModKeyPressed() ) return -1;
 	int currKeyPressed = -1;
-	if ( glfwGetKey( WH::window, GLFW_KEY_W ) == GLFW_PRESS ) currKeyPressed = GLFW_KEY_W;
-	if ( glfwGetKey( WH::window, GLFW_KEY_A ) == GLFW_PRESS ) currKeyPressed = GLFW_KEY_A;
-	if ( glfwGetKey( WH::window, GLFW_KEY_S ) == GLFW_PRESS ) currKeyPressed = GLFW_KEY_S;
-	if ( glfwGetKey( WH::window, GLFW_KEY_D ) == GLFW_PRESS ) currKeyPressed = GLFW_KEY_D;
-	if ( glfwGetKey( WH::window, GLFW_KEY_R ) == GLFW_PRESS ) currKeyPressed = GLFW_KEY_R;
-	if ( glfwGetKey( WH::window, GLFW_KEY_F ) == GLFW_PRESS ) currKeyPressed = GLFW_KEY_F;
+	checkKeyPressedStateless( GMK_W, currKeyPressed );
+	checkKeyPressedStateless( GMK_A, currKeyPressed );
+	checkKeyPressedStateless( GMK_S, currKeyPressed );
+	checkKeyPressedStateless( GMK_D, currKeyPressed );
+	checkKeyPressedStateless( GMK_R, currKeyPressed );
+	checkKeyPressedStateless( GMK_F, currKeyPressed );
 	return currKeyPressed;
 }
 
 void TextInput::update_render_thread() {
 	if ( GIsEnteringText ) {
-		if ( checkKeyToggleOn( GLFW_KEY_BACKSPACE, true ) ) {
+		if ( checkKeyToggleOn( GMK_BACKSPACE, true ) ) {
 			update_pop_back();
 		}
 	}
 	if ( !HasToggledEnter() ) {
-		HasToggledEnter( checkKeyToggleOn( GLFW_KEY_ENTER, true ) );
+		HasToggledEnter( checkKeyToggleOn( GMK_ENTER, true ) );
 	}
 	if ( !HasToggledEscape() ) {
-		HasToggledEscape( checkKeyToggleOn( GLFW_KEY_ESCAPE, true ) );
+		HasToggledEscape( checkKeyToggleOn( GMK_ESCAPE, true ) );
 	}
 
-	anyModKeyPressed = 0;
+	anyModKeyPressed = false;
 	anyModKeyPressed |= ModKeyCurrent( GMK_MOD_SHIFT );
     anyModKeyPressed |= ModKeyCurrent( GMK_MOD_CONTROL );
     anyModKeyPressed |= ModKeyCurrent( GMK_MOD_ALT );
@@ -86,13 +67,13 @@ void TextInput::update_render_thread() {
 
 void TextInput::update_update_thread() {
 	if ( mbPopBack ) {
-		if ( GInputString.size() > 0 ) {
+		if ( !GInputString.empty() ) {
 			GInputString.pop_back();
 		}
 		mbPopBack = false;
 	}
 
-	if ( mCallbacksQueue.size() > 0 ) {
+	if ( !mCallbacksQueue.empty() ) {
 		if ( HasToggledEnter() ) {
 			if ( mCallbacksQueue.top().mEnterCallbackFunction ) {
 				if ( mCallbacksQueue.top().mEnterCallbackFunction() ) {
@@ -111,7 +92,7 @@ void TextInput::update_update_thread() {
 }
 
 bool TextInput::readNumber( float& _number ) {
-	if ( GInputString.size() == 0 ) return false;
+	if ( GInputString.empty() ) return false;
 	std::string ns( GInputString.begin(), GInputString.end() );
 	try {
 		_number = std::stof( ns );
@@ -124,11 +105,11 @@ bool TextInput::readNumber( float& _number ) {
 }
 
 void TextInput::push_back_callbacks( std::function<bool()> enterCallbackFunction, std::function<void()> escapeCallbackFunction ) {
-	mCallbacksQueue.push( { enterCallbackFunction, escapeCallbackFunction } );
+	mCallbacksQueue.push( { std::move(enterCallbackFunction), std::move(escapeCallbackFunction) } );
 }
 
 void TextInput::pop_callbacks() {
-	if ( mCallbacksQueue.size() > 0 ) {
+	if ( !mCallbacksQueue.empty() ) {
 		mCallbacksQueue.pop();
 	}
 }
@@ -137,7 +118,7 @@ void TextInput::startListeningForTextInput( const std::string& title, std::funct
 	mTextInputBoxTitle = title;
 	GIsEnteringText = true;
 	GInputString = L"";
-	push_back_callbacks( enterCallbackFunction, escapeCallbackFunction );
+	push_back_callbacks( std::move(enterCallbackFunction), std::move(escapeCallbackFunction) );
 }
 
 void TextInput::resetInput() {

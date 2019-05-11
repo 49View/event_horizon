@@ -17,7 +17,7 @@ namespace WindowHandling {
 	bool shouldWindowBeClosed();
 	void flush();
 	void pollEvents();
-	void enableVSync( const bool val );
+	void enableVSync( bool val );
 	void enableInputCallbacks();
 	void disableInputCallbacks();
 	bool isInputEnabled();
@@ -25,6 +25,8 @@ namespace WindowHandling {
 
 namespace WH = WindowHandling;
 
-#ifdef _OPENGL
-#include <graphics/opengl/GLFW/window_handling_opengl.hpp>
+#ifdef USE_GLFW
+#include <graphics/opengl/GLFW/window_handling_opengl_glfw.hpp>
+#elif USE_GLFM
+#include <graphics/opengl/GLFM/window_handling_opengl_glfm.hpp>
 #endif

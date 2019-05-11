@@ -36,6 +36,10 @@ macro(set_platform)
         set(OPENGL_ES TRUE)
     endif ()
 
+    if (ANDROID)
+        set(OPENGL_ES TRUE)
+    endif ()
+
 endmacro()
 
 macro(register_link LIBNAME )
@@ -98,6 +102,28 @@ macro(register_platform_module_files PLATFORM_FOLDER)
 
 endmacro(register_platform_module_files)
 
+macro(register_platform_opengl_module_files PLATFORM_FOLDER)
+
+    register_module_norec(${PLATFORM_FOLDER})
+    if (WIN32)
+        register_module_norec("${PLATFORM_FOLDER}/desktop")
+        register_module("${PLATFORM_FOLDER}/desktop/windows")
+        include_directories(${PLATFORM_FOLDER}/desktop/windows)
+    elseif (APPLE)
+        register_module_norec("${PLATFORM_FOLDER}/desktop")
+        register_module("${PLATFORM_FOLDER}/desktop/apple")
+        include_directories(${PLATFORM_FOLDER}/desktop/apple)
+    elseif (EMSCRIPTEN OR ANDROID)
+        register_module("${PLATFORM_FOLDER}/es")
+        include_directories(${PLATFORM_FOLDER}/es)
+    elseif (UNIX)
+        register_module_norec("${PLATFORM_FOLDER}/desktop")
+        register_module("${PLATFORM_FOLDER}/desktop/linux")
+        include_directories(${PLATFORM_FOLDER}/desktop/linux)
+    endif ()
+
+endmacro(register_platform_opengl_module_files)
+
 macro(precompile_step)
     set_cpp_flags()
 endmacro(precompile_step)
@@ -128,7 +154,6 @@ macro(register_graphics_module)
 
     register_module("ui")
     register_module("imgui")
-    register_module("audio")
     include_directories(${MODULE_ROOT_COMP}imgui)
 
     if ( NOT ANDROID AND NOT IOS )
@@ -137,13 +162,8 @@ macro(register_graphics_module)
         register_module("opengl/GLFM")
     endif()
 
-    register_platform_module_files("opengl")
-
-    if (OPENGL_ES)
-        register_module_norec("opengl/es")
-    else ()
-        register_module_norec("opengl/desktop")
-    endif ()
+    register_platform_opengl_module_files("opengl")
+    register_platform_module_files("audio")
 
     if (NOT BUILD_FROM_SOURCE)
         add_lib( graphics )
@@ -986,6 +1006,7 @@ macro(set_cpp_flags)
     set_platform()
 
     if (WIN32)
+        add_definitions(-DUSE_GLFW)
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
             # using Clang
         elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
@@ -1006,6 +1027,7 @@ macro(set_cpp_flags)
         set(CMAKE_CXX_STANDARD 17) # C++17...
         set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
         set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
+        add_definitions(-DUSE_GLFW)
         add_definitions(-DOSX)
         add_definitions(-DGL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED -DGL_SILENCE_DEPRECATION)
         add_definitions(-D__STDC_CONSTANT_MACROS)
@@ -1015,6 +1037,7 @@ macro(set_cpp_flags)
             set(CMAKE_CXX_STANDARD 17) # C++17...
             set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
             set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
+            add_definitions(-DUSE_GLFW)
             add_definitions(-DEMSCRIPTEN)
             add_definitions(-DGL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED)
             add_definitions(-D__STDC_CONSTANT_MACROS)
@@ -1023,11 +1046,13 @@ macro(set_cpp_flags)
             endif ()
             SET(CMAKE_CXX_FLAGS "-Wall -Werror --bind")
         elseif (ANDROID)
+            add_definitions(-DUSE_GLFM)
             set(CMAKE_CXX_STANDARD 17) # C++17...
             set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
             set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
         else ()
             add_definitions(-DLINUX)
+            add_definitions(-DUSE_GLFW)
             SET(CMAKE_CXX_FLAGS "-D__STDC_FORMAT_MACROS=1 -DUNICODE -std=c++17 -Wall -Werror")
             add_definitions(-D__STDC_FORMAT_MACROS=1)
             add_definitions(-DBOOST_NO_AUTO_PTR=1)
