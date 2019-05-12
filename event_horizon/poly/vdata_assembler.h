@@ -104,6 +104,12 @@ public:
             dataTypeHolder.rfPoly = _param;
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GT::ForceNormalAxis> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyPolyline, SGT> );
+            dataTypeHolder.forcingNormalPoly = _param();
+            return *this;
+        }
+
         if constexpr ( std::is_same<M, ShapeType>::value ) {
             static_assert( std::is_same<SGT, GT::Shape>::value );
             dataTypeHolder.shapeType = _param;

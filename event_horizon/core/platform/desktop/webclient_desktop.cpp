@@ -4,6 +4,7 @@
 #include <restbed>
 #include <iomanip>
 #include <core/serialization.hpp>
+#include <core/file_manager.h>
 
 namespace Http {
 
@@ -93,9 +94,24 @@ namespace Http {
 
         std::shared_ptr< restbed::Response > res;
         try {
-            res = restbed::Http::sync( request, settings );
-            LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
-            auto lRes = handleResponse( res, url, rf );
+            Result lRes;
+            std::string fileHash = url_encode( url.uri );
+            if ( FM::useFileSystemCachePolicy() ) {
+                lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
+                if ( lRes.length ) {
+                    lRes.uri = url.uri;
+                    lRes.statusCode = 200;
+                }
+            }
+            if ( !lRes.isSuccessStatusCode() ) {
+                res = restbed::Http::sync( request, settings );
+                LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
+                lRes = handleResponse( res, url, rf );
+                if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() ) {
+                    FM::writeLocalFile( cacheFolder() + fileHash, reinterpret_cast<const char *>( lRes.buffer.get() ), lRes.length );
+                }
+            }
+
             if ( lRes.isSuccessStatusCode() ) {
                 lRes.ccf = mainThreadCallback;
                 if ( callback ) callback( lRes );

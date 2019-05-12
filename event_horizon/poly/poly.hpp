@@ -178,10 +178,19 @@ namespace GT {
         ResourceRef data;
     };
 
+    struct ForceNormalAxis {
+        template<typename ...Args>
+        explicit ForceNormalAxis( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        V3f operator()() const noexcept {
+            return data;
+        }
+        V3f data;
+    };
+
     struct GLTF2PrimitiveIndex {
         template<typename ...Args>
         explicit GLTF2PrimitiveIndex( Args&& ... args ) : data(std::forward<Args>( args )...) {}
-        float operator()() const noexcept {
+        int operator()() const noexcept {
             return data;
         }
         int data;
@@ -190,7 +199,7 @@ namespace GT {
     struct GLTF2MeshIndex {
         template<typename ...Args>
         explicit GLTF2MeshIndex( Args&& ... args ) : data(std::forward<Args>( args )...) {}
-        float operator()() const noexcept {
+        int operator()() const noexcept {
             return data;
         }
         int data;
