@@ -4,7 +4,7 @@
 
 #include "mouse_input_glfm.hpp"
 #include <graphics/window_handling.hpp>
-#include <event_horizon/event_horizon/graphics/opengl/android/window_handling_opengl_glfm.hpp>
+#include <graphics/opengl/mobile/window_handling_opengl_glfm.hpp>
 #include <graphics/mouse_input.hpp>
 
 void MouseInput::setCursorType( MouseCursorType mct ) {

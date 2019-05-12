@@ -28,5 +28,5 @@ namespace WH = WindowHandling;
 #ifdef USE_GLFW
 #include <graphics/opengl/GLFW/window_handling_opengl_glfw.hpp>
 #elif USE_GLFM
-#include <graphics/opengl/GLFM/window_handling_opengl_glfm.hpp>
+#include <graphics/opengl/mobile/window_handling_opengl_glfm.hpp>
 #endif

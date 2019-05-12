@@ -11,6 +11,7 @@ include( ../../../../../../../CMakeLists.txt NO_POLICY_SCOPE)
 set(BUILD_FROM_SOURCE TRUE)
 #compile( core graphics poly render_scene_graph converters )
 
+build_core_lib( render_scene_graph )
 build_core_lib( graphics )
 build_core_lib( core )
 build_core_lib( poly )
@@ -45,6 +46,7 @@ find_library( zlib-lib z )
 target_link_libraries( # Specifies the target library.
         native-lib
 
+        49viewrender_scene_graph
         49viewgraphics
         49viewcore
         49viewpoly
