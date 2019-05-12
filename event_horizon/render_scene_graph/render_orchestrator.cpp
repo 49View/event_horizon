@@ -16,28 +16,10 @@
 #include <graphics/shader_manager.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/window_handling.hpp>
+#include <render_scene_graph/render_orchestrator_callbacks.hpp>
 
 std::vector<std::string> RenderOrchestrator::callbackPaths;
-Vector2i RenderOrchestrator::callbackResizeWindow = Vector2i(-1, -1);
-Vector2i RenderOrchestrator::callbackResizeFrameBuffer = Vector2i(-1, -1);
 std::vector<PresenterUpdateCallbackFunc> RenderOrchestrator::sUpdateCallbacks;
-
-void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
-    ASSERT( count > 0 );
-
-    RenderOrchestrator::callbackPaths.clear();
-    for ( auto i = 0; i < count; i++ ) {
-        RenderOrchestrator::callbackPaths.emplace_back( std::string(paths[i]) );
-    }
-}
-
-void GResizeWindowCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
-    RenderOrchestrator::callbackResizeWindow = Vector2i{w, h};
-}
-
-void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
-    RenderOrchestrator::callbackResizeFrameBuffer = Vector2i{w, h};
-}
 
 void RenderOrchestrator::setDragAndDropFunction( DragAndDropFunction dd ) {
     dragAndDropFunc = dd;
@@ -63,21 +45,7 @@ void RenderOrchestrator::updateCallbacks() {
         callbackPaths.clear();
     }
 
-    if ( callbackResizeWindow.x() > 0 && callbackResizeWindow.y() > 0 ) {
-        // For now we do everything in the callbackResizeFrameBuffer so this is redundant for now, just a nop
-        // to be re-enabled in the future if we need it
-//		LOGR("Resized window: [%d, %d]", callbackResizeWindow.x(), callbackResizeWindow.y() );
-        callbackResizeWindow = Vector2i{-1, -1};
-    }
-
-    if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
-        WH::resizeWindow( callbackResizeFrameBuffer );
-        WH::gatherMainScreenInfo();
-		rr.resetDefaultFB(callbackResizeFrameBuffer);
-        resizeCallback( callbackResizeFrameBuffer );
-        callbackResizeFrameBuffer = Vector2i{-1, -1};
-    }
-
+    resizeCallbacks();
 }
 
 RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg) {
@@ -120,9 +88,7 @@ void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
 }
 
 void RenderOrchestrator::init() {
-    WH::setDropCallback( GDropCallback );
-    WH::setResizeWindowCallback( GResizeWindowCallback );
-    WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
+    initWHCallbacks();
 
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",

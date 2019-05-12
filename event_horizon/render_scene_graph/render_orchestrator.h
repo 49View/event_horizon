@@ -120,6 +120,8 @@ public:
     SceneGraph& SG() { return sg; }
 protected:
     void updateCallbacks();
+    void resizeCallbacks();
+    void initWHCallbacks();
     void changeMaterialTagCallback( const std::vector<std::string>& _params );
     void changeMaterialColorCallback( const std::vector<std::string>& _params );
 
@@ -135,8 +137,6 @@ private:
 
 public:
     static std::vector<std::string> callbackPaths;
-    static Vector2i callbackResizeWindow;
-    static Vector2i callbackResizeFrameBuffer;
     static std::vector<PresenterUpdateCallbackFunc> sUpdateCallbacks;
 };
 
