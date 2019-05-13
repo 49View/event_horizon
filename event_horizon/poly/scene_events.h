@@ -11,5 +11,5 @@
 using entityDaemonCallbackFunction = void( const std::string&, const SerializableContainer& );
 
 void allCallbacksEntitySetup();
-void allConversionsDragAndDropCallback( const std::string& _path );
+void allConversionsDragAndDropCallback( std::vector<std::string>& _paths );
 

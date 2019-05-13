@@ -51,6 +51,7 @@ exports.checkObjectExists = async ( key, bucket ) => {
 		await s3.headObject(params).promise();
 		return true;
 	} catch (err) {
+		console.log( "[INFO] CloudAPI : object " + params + " does not exist" );
 		return false;
 	}
 }
@@ -71,8 +72,12 @@ exports.get = ( key, bucket ) => {
         Bucket: bucket,
         Key: key
     };
-	
-    return s3.getObject(params).promise();
+	try {	
+		return s3.getObject(params).promise();
+	} catch (err) {
+		console.log( "[ERROR] CloudAPI-Get : object " + params + " could not be retrived" );
+		return false;
+	}	
 }
 
 exports.delete = ( key, bucket ) => {

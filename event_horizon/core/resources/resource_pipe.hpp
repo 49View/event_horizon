@@ -18,7 +18,7 @@ public:
     auto pipeFile( const std::string& _filename ) {
         auto fileContent = FM::readLocalFileC(_filename);
         if ( !fileContent.empty()) {
-            return pipe<R>(_filename, fileContent);
+            return pipe<R>( toLower(_filename), fileContent);
         }
         return ResourceTarDict{};
     }

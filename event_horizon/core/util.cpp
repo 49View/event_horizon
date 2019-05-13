@@ -268,6 +268,24 @@ std::string getLastEntryInPath( const std::string& input ) {
 	return ret;
 }
 
+std::string getLastFolderInPath( const std::string& input ) {
+    std::string ret = input;
+    if ( ret[ret.size()-1] == '/' ) {
+        ret = ret.substr(0, ret.size()-1);
+    }
+    // trim path before filename
+    size_t pos = ret.find_last_of( "/" );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( 0, pos );
+        pos = ret.find_last_of( "/" );
+        if ( pos != std::string::npos ) {
+            ret = ret.substr( pos + 1, ret.length() );
+        }
+    }
+
+    return ret;
+}
+
 bool isFileExtAnImage( const std::string& _ext ) {
 
 	auto ext = toLower(_ext);

@@ -24,7 +24,7 @@ struct AggregatedInputData;
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 using UpdateCallbackSign = RenderOrchestrator*;
 using PresenterUpdateCallbackFunc = std::function<void(UpdateCallbackSign)>;
-using DragAndDropFunction = std::function<void(const std::string&)>;
+using DragAndDropFunction = std::function<void(std::vector<std::string>& _paths)>;
 
 class RenderOrchestrator {
 public:

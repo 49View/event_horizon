@@ -38,12 +38,7 @@ void RenderOrchestrator::updateCallbacks() {
         sUpdateCallbacks.clear();
     }
 
-    if ( !callbackPaths.empty() ) {
-        for ( auto& path : callbackPaths ) {
-            if ( dragAndDropFunc ) dragAndDropFunc( path );
-        }
-        callbackPaths.clear();
-    }
+    if ( dragAndDropFunc ) dragAndDropFunc( callbackPaths );
 
     resizeCallbacks();
 }

@@ -93,6 +93,8 @@ void elaborateMatFile( const std::string& mainFileName, const std::string& layer
     rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::roughnessString        + fext );
     rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::normalString           + fext );
     rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::ambientOcclusionString + fext );
+    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::opacityString          + fext );
+    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::translucencyString     + fext );
 
     auto values = std::make_shared<HeterogeneousMap>(S::SH);
     for ( const auto& entry : rpipe.getCatalog() ) {

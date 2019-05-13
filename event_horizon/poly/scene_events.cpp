@@ -9,11 +9,14 @@
 #include <core/util.h>
 #include <rapidjson/document.h>
 #include <core/file_manager.h>
+#include <core/descriptors/uniform_names.h>
+#include <core/heterogeneous_map.hpp>
 #include <core/http/webclient.h>
 #include <core/TTF.h>
 #include <core/raw_image.h>
 #include <core/resources/profile.hpp>
-
+#include <core/resources/material.h>
+#include <core/resources/resource_pipe.hpp>
 #include <core/resources/resource_builder.hpp>
 
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
@@ -48,14 +51,36 @@ void addFileCallback( const std::string& _path ) {
     SceneGraph::addGenericCallback( ResourceVersioning<T>::Prefix(), { getFileName(_path), fileContent, _path } );
 }
 
-void allConversionsDragAndDropCallback( const std::string& _path ) {
-    std::string pathSanitized = url_encode_spacesonly(_path);
-    std::string ext = getFileNameExt( pathSanitized );
-    std::string extl = toLower(ext);
+void allConversionsDragAndDropCallbackMultiplePaths( const std::vector<std::string>& _paths ) {
+    ResourcePipe rpipe;
 
-    if ( extl == ".fbx" ) {
-        FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(ResourceGroup::Geom) + getFileName(pathSanitized) );
+    for ( const auto& path : _paths ) {
+        rpipe.pipeFile<RawImage>( path );
     }
+
+    auto values = std::make_shared<HeterogeneousMap>(S::SH);
+    for ( const auto& entry : rpipe.getCatalog() ) {
+        values->assign( MPBRTextures::mapToTextureUniform( entry.filename ), entry.hash );
+    }
+
+    auto fn = getLastFolderInPath( _paths.back() );
+    rpipe.pipe<Material>( fn , Material{values}.serialize() );
+    rpipe.publish();
+}
+
+void allConversionsDragAndDropCallback( std::vector<std::string>& _paths ) {
+
+    if ( _paths.empty() ) return;
+
+    if ( _paths.size() == 1 ) {
+        auto _path = _paths.back();
+        std::string pathSanitized = url_encode_spacesonly(_path);
+        std::string ext = getFileNameExt( pathSanitized );
+        std::string extl = toLower(ext);
+
+        if ( extl == ".fbx" ) {
+            FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(ResourceGroup::Geom) + getFileName(pathSanitized) );
+        }
 //    else if ( extl == ".obj" ) {
 //        // Convert to GLTF
 //        finalPath = getFileNamePath(pathSanitized) + "/" + getFileNameOnly(finalPath) + ".gltf";
@@ -65,19 +90,24 @@ void allConversionsDragAndDropCallback( const std::string& _path ) {
 //    } else if ( extl == ".stl" ) {
 //        stl::parse_stl(pathSanitized);
 //    }
-    else if ( extl == ".jpg" || extl == ".jepg" || extl == ".png" ) {
-        addFileCallback<RawImage>( pathSanitized );
+        else if ( extl == ".jpg" || extl == ".jepg" || extl == ".png" ) {
+            addFileCallback<RawImage>( pathSanitized );
+        }
+        else if ( extl == ".ttf" ) {
+            addFileCallback<Font>( pathSanitized );
+        }
+        else if ( extl == ".svg" ) {
+            addFileCallback<Profile>( pathSanitized );
+        }
+        else if ( extl == ".sbsar" ) {
+            FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(ResourceGroup::Material)+ getFileName(pathSanitized));
+        }
+        else if ( extl == ".gltf" || extl == ".glb" ) {
+            addFileCallback<Geom>( pathSanitized );
+        }
+    } else {
+        allConversionsDragAndDropCallbackMultiplePaths( _paths );
     }
-    else if ( extl == ".ttf" ) {
-        addFileCallback<Font>( pathSanitized );
-    }
-    else if ( extl == ".svg" ) {
-        addFileCallback<Profile>( pathSanitized );
-    }
-    else if ( extl == ".sbsar" ) {
-        FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(ResourceGroup::Material)+ getFileName(pathSanitized));
-    }
-    else if ( extl == ".gltf" || extl == ".glb" ) {
-        addFileCallback<Geom>( pathSanitized );
-    }
+
+    _paths.clear();
 }
