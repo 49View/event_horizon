@@ -24,6 +24,8 @@ uniform sampler2D aoTexture;              // 6 glTextureSlot
 uniform sampler2D roughnessTexture;
 uniform sampler2D metallicTexture;        // 8 glTextureSlot
 uniform sampler2D heightTexture;
+uniform sampler2D opacityTexture; 
+uniform sampler2D translucencyTexture;
 uniform sampler2D lightmapTexture;
 // IBL
 uniform samplerCube ibl_irradianceMap;        // 9 glTextureSlot
@@ -45,6 +47,8 @@ float metallic;
 float roughness;
 float ao;
 float height_scale = .04;
+float opacityV = 1.0;
+float translucencyV = 1.0;
 
 const float PI = 3.14159265359;
 
@@ -279,8 +283,8 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 vec3 specular = prefilteredColor * (F * (brdf.x + brdf.y));
 // specular = pow(specular, vec3(2.2/1.0)); 
 
-vec3 ambient = (kD * diffuseV + specular) * visibility * ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
-// vec3 ambient = (kD );
+vec3 ambient = (kD * diffuseV + specular) * translucencyV *  visibility * ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
+// vec3 ambient = (kD ); 
 
 // vec3 finalColor = (Lo * visibility) + ambient; 
 
@@ -292,8 +296,8 @@ finalColor = vec3(1.0) - exp(-finalColor * 1.0);
 
 //finalColor = pow(finalColor, vec3(2.2/1.0));
 
-FragColor = vec4( finalColor, opacity * alpha ); 
-
+FragColor = vec4( finalColor, opacityV * alpha ); 
+ 
 //	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
 BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );
 //        BloomColor = vec4( finalColor*2, 1.0 );

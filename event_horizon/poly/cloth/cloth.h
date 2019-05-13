@@ -13,6 +13,13 @@
 #include <poly/cloth/constraint.h>
 #include <poly/cloth/triangle.h>
 
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/fast_square_root.hpp>
+
 class Cloth {
 public:
 	Cloth( float width, float height, int particleWidth, int particleHeight, float weight, float damping,

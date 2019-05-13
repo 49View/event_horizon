@@ -236,7 +236,7 @@ CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
 
 void SceneGraph::init() {
     B<IB>( S::WHITE     ).addIM( RawImage::WHITE4x4()      );
-    B<IB>( S::BLACK     ).addIM( RawImage::BLACK_RGBA4x4() );
+    B<IB>( S::BLACK     ).addIM( RawImage::BLACK_ARGB4x4() );
     B<IB>( S::NORMAL    ).addIM( RawImage::NORMAL4x4()     );
     B<IB>( S::DEBUG_UV  ).addIM( RawImage::DEBUG_UV()      );
 

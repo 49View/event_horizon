@@ -90,7 +90,8 @@ namespace Http {
         auto request = makeRequest( url );
 
         auto settings = std::make_shared< restbed::Settings >( );
-//        settings->set_connection_limit( 60*60 );
+        settings->set_connection_limit( 60*60*60*60 );
+        settings->set_connection_timeout( std::chrono::seconds(120) );
 
         std::shared_ptr< restbed::Response > res;
         try {

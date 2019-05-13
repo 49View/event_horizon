@@ -212,7 +212,7 @@ namespace VDataServices {
             cursor += nextCharPos;
         }
 
-        PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping::Planar );
+        PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMappingT::Planar );
         _ret->fill( ps );
         _ret->BBox3d( ps.bbox3d );
     }
@@ -286,7 +286,7 @@ namespace VDataServices {
                 q+=3;
             }
 
-            PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping::Cube );
+            PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping{ GeomMappingT::Cube, V3f::ONE*8.0f} );
             _ret->fill( ps );
             _ret->BBox3d( ps.bbox3d );
         }

@@ -667,15 +667,15 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
 //        ret.normals[q] = normalize( ret.normals[q] );
 //    }
 
-    if ( mt == GeomMapping::Cube ) {
+    if ( mt.type == GeomMappingT::Cube ) {
         for ( int q = 0; q < ret.numIndices; q++ ) {
-            Vector3f v = ret.verts[ret.indices[q]];
+            Vector3f v = ret.verts[ret.indices[q]] * mt.scaling;
             Vector3f n = ret.normals[q];
             ret.uvs[q] = dominantMapping( n, v, size );
         }
     }
 
-    if ( mt == GeomMapping::PlanarNoTile ) {
+    if ( mt.type == GeomMappingT::PlanarNoTile ) {
         const Vector3f off = ret.bbox3d.size() * 0.5f;
         for ( int q = 0; q < ret.numIndices; q++ ) {
             Vector3f v = ret.verts[ret.indices[q]] + off;
@@ -684,7 +684,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
         }
     }
 
-    if ( mt == GeomMapping::Spherical ) {
+    if ( mt.type == GeomMappingT::Spherical ) {
 
         for ( int q = 0; q < ret.numIndices; q++ ) {
             Vector3f p = ret.verts[ret.indices[q]];
@@ -726,7 +726,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
         }
     }
 
-    if ( mt == GeomMapping::SphericalUV ) {
+    if ( mt.type == GeomMappingT::SphericalUV ) {
         Vector2f uvSphericalNorm{ 3.0f, 1.5f };
         for ( int q = 0; q < ret.numIndices; q++ ) {
             Vector3f p = ret.verts[ret.indices[q]];
@@ -787,9 +787,9 @@ PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, co
 
     Topology mesh;
 //    Icosahedron( mesh );
-//    return createGeom( mesh, center, Vector3f{ diameter }, GeomMapping::Spherical, subdivs );
+//    return createGeom( mesh, center, Vector3f{ diameter }, GeomMappingT::Spherical, subdivs );
     UVSphere( mesh );
-    return createGeom( mesh, Vector3f{ diameter }, GeomMapping::SphericalUV, 0 );
+    return createGeom( mesh, Vector3f{ diameter }, GeomMappingT::SphericalUV, 0 );
 }
 
 PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
@@ -797,7 +797,7 @@ PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
     Topology mesh;
     Cube( mesh );
 
-    return createGeom( mesh, size, GeomMapping::Cube, 0 );
+    return createGeom( mesh, size, GeomMappingT::Cube, 0 );
 }
 
 PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
@@ -805,7 +805,7 @@ PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
     Topology mesh;
     Panel( mesh );
 
-    return createGeom( mesh, size, GeomMapping::PlanarNoTile, 0 );
+    return createGeom( mesh, size, GeomMappingT::PlanarNoTile, 0 );
 }
 
 PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const int subdivs ) {
@@ -814,7 +814,7 @@ PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const
     int edges = subdivs * 8;
     Cylinder( mesh, edges );
 
-    return createGeom( mesh, Vector3f{ size.x(), size.y(), size.x() }, GeomMapping::Cylindrical, 0 );
+    return createGeom( mesh, Vector3f{ size.x(), size.y(), size.x() }, GeomMappingT::Cylindrical, 0 );
 }
 
 PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
@@ -822,7 +822,7 @@ PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, co
     Topology mesh;
     Pillow( mesh, subdivs, radius * size.y() *0.05f );
 
-    return createGeom( mesh, size, GeomMapping::Cube, 0 );
+    return createGeom( mesh, size, GeomMappingT::Cube, 0 );
 }
 
 PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
@@ -830,5 +830,5 @@ PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& siz
     Topology mesh;
     RoundedCube( mesh, subdivs, radius * size.y() );
 
-    return createGeom( mesh, size, GeomMapping::Cube, 0 );
+    return createGeom( mesh, size, GeomMappingT::Cube, 0 );
 }

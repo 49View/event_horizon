@@ -25,6 +25,8 @@ void main() {
    ao = texture( aoTexture, texCoords ).x * aoV;
    roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
    metallic = (texture( metallicTexture, texCoords ).x * metallicV);
+   opacityV = max(1.0, (texture( opacityTexture, texCoords ).x * 1.0 + 0.0 )) * opacity; 
+   translucencyV = 1.0 + texture( translucencyTexture, texCoords ).x;
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
     albedo = pow(albedo, vec3(2.2/1.0));
     //albedo = pow(albedo, vec3(1.0/2.2));
@@ -38,15 +40,5 @@ void main() {
    light_code
 
    final_combine
-
-      //sunDir = vec3(1);
-//      vec3 LD = normalize( u_sunPosition - Position_worldspace );
-      //vec3 HF = normalize( LD + V );
-
-        //float spec = pow(max(dot(N, HF), 0.0), 100.0);
-        //float diff = max(dot(N, LD), 0.0);
-        //finalColor = vec3(spec + diff);
-        //FragColor = vec4( finalColor, opacity * alpha );
-
 }
     

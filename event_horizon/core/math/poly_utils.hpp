@@ -9,13 +9,21 @@
 
 class DeserializeBin;
 
-enum class GeomMapping {
+enum class GeomMappingT {
     Spherical,
     SphericalUV,
     Cube,
     Planar,
     PlanarNoTile,
     Cylindrical
+};
+
+struct GeomMapping {
+    GeomMapping( GeomMappingT _type ) : type(_type) {}
+    GeomMapping( GeomMappingT _type, const V3f& _scaling ) : type(_type), scaling(_scaling) {}
+
+    GeomMappingT type;
+    V3f scaling = V3f::ONE;
 };
 
 enum ReservedPolyTags {
