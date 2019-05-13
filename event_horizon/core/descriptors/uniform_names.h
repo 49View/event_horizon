@@ -47,6 +47,8 @@ namespace UniformNames {
 	const std::string roughnessTexture = "roughnessTexture";
 	const std::string metallicTexture = "metallicTexture";
 	const std::string heightTexture = "heightTexture";
+	const std::string opacityTexture = "opacityTexture";
+	const std::string translucencyTexture = "translucencyTexture";
 	const std::string lightmapTexture = "lightmapTexture";
 	const std::string cubeMapTexture = "cubeMapTexture";
 	const std::string ibl_irradianceMap = "ibl_irradianceMap";
@@ -93,14 +95,18 @@ namespace MPBRTextures {
     const static std::string ibl_brdf = "ibl_brdf";
 
     static const std::string basecolorString = "basecolor";
+    static const std::string base_colorString = "base_color";
     static const std::string heightString = "height";
     static const std::string metallicString = "metallic";
     static const std::string roughnessString = "roughness";
     static const std::string normalString = "normal";
     static const std::string ambientOcclusionString = "ambient_occlusion";
+    static const std::string opacityString = "opacity";
+    static const std::string translucencyString = "translucency";
 
-    const static std::vector<std::string> g_pbrNames{ "_basecolor","_normal","_ambient_occlusion","_roughness",
-                                                      "_metallic","_height" };
+    const static std::vector<std::string> g_pbrNames{ "_basecolor", "_base_color", "_normal","_ambient_occlusion",
+                                                      "_roughness",
+                                                      "_metallic","_height", "_opacity", "_translucency" };
 
     static inline const std::vector<std::string>& Names() {
         return g_pbrNames;
@@ -108,21 +114,27 @@ namespace MPBRTextures {
 
     static inline const std::string findTextureInString( const std::string& _value ) {
         if ( _value.find( basecolorString ) != std::string::npos ) return basecolorString;
+        if ( _value.find( base_colorString ) != std::string::npos ) return basecolorString;
         if ( _value.find( heightString  ) != std::string::npos ) return heightString;
         if ( _value.find( metallicString  ) != std::string::npos ) return metallicString;
         if ( _value.find( roughnessString  ) != std::string::npos ) return roughnessString;
         if ( _value.find( normalString ) != std::string::npos ) return normalString;
         if ( _value.find( ambientOcclusionString ) != std::string::npos ) return ambientOcclusionString;
+        if ( _value.find( opacityString ) != std::string::npos ) return opacityString;
+        if ( _value.find( translucencyString ) != std::string::npos ) return translucencyString;
         return "";
     }
 
     static inline const std::string mapToTextureUniform( const std::string& _value ) {
         if ( _value.find( basecolorString ) != std::string::npos ) return UniformNames::diffuseTexture;
+        if ( _value.find( base_colorString ) != std::string::npos ) return UniformNames::diffuseTexture;
         if ( _value.find( heightString  ) != std::string::npos ) return UniformNames::heightTexture;
         if ( _value.find( metallicString  ) != std::string::npos ) return UniformNames::metallicTexture;
         if ( _value.find( roughnessString  ) != std::string::npos ) return UniformNames::roughnessTexture;
         if ( _value.find( normalString ) != std::string::npos ) return UniformNames::normalTexture;
         if ( _value.find( ambientOcclusionString ) != std::string::npos ) return UniformNames::aoTexture;
+        if ( _value.find( opacityString ) != std::string::npos ) return UniformNames::opacityTexture;
+        if ( _value.find( translucencyString ) != std::string::npos ) return UniformNames::translucencyTexture;
         ASSERTV(0, "Couldn't map PBR texture %s", _value.c_str() );
         return "";
     }
