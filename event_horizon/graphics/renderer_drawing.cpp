@@ -425,10 +425,7 @@ void Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Vector
 
 void Renderer::drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
                          std::shared_ptr<Font> font, const Color4f& color ) {
-    //        VPBuilder<FontStrip>{*this}.vl(_vpl).p(fs).m(_vpl->Is2d() ? S::FONT_2D: S::FONT).c(color).n(_vpname).build();
-
     Vector2f cursor = Vector2f::ZERO;
-
     for ( char i : text ) {
         Utility::TTF::CodePoint cp( static_cast<Utility::TTFCore::ulong>(i));
         const Utility::TTF::Mesh& m = font->GetTriangulation( cp );
@@ -455,7 +452,4 @@ void Renderer::drawText( int bucketIndex, const std::string& text, const V3f& po
         Vector2f nextCharPos = V2f( kerning.x, kerning.y );
         cursor += nextCharPos;
     }
-
-//    fs->addVertex( XZY::C(pos4.xyz() + orig), Vector2f{ m.verts[t].texCoord, m.verts[t].coef } );
-
 }
