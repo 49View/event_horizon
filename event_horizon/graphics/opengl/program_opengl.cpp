@@ -48,6 +48,7 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
         case GL_FLOAT_MAT3:
             uniformDefaults->assign( _name, Matrix3f::IDENTITY );
             break;
+
         case GL_FLOAT_MAT4:
             uniformDefaults->assign( _name, Matrix4f::IDENTITY );
             break;

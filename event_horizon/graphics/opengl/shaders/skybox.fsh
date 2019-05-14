@@ -132,9 +132,9 @@ void main()
         0.758                           // Mie preferred scattering direction
     );
 
-    float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-    color = (vec4(1.0) - exp(-1.0 * gray));
-    // color = vec4(1.0) - exp(-1.0 * color*u_sunHDRMult*10.5);
+    // float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    // color = (vec4(1.0) - exp(-1.0 * gray));
+    color = vec4(1.0) - exp(-1.0 * color);
     color.w = 1.0;
     
     // color.rgb = v_texCoord * 0.5 + 0.5;

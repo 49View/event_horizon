@@ -389,7 +389,6 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
 
 //    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBind } );
-//    mSkybox->render();a
 }
 
 void RLTargetPBR::endCL( CommandBufferList& cb ) {
@@ -414,6 +413,11 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
     cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
+
+    if ( skyBoxRenderEnabled() ) {
+        mSkybox->render();
+    }
+
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k) ) {
             rr.addToCommandBuffer( vl.mVList );
@@ -443,6 +447,14 @@ void RLTargetPBR::changeTime( const V3f& _solarTime ) {
 
 void RLTargetPBR::invalidateOnAdd() {
     invalidateShadowMaps();
+}
+
+bool RLTargetPBR::skyBoxRenderEnabled() const {
+    return bEnableSkyBoxRendering;
+}
+
+void RLTargetPBR::skyBoxRenderEnabled( bool _value )  {
+    bEnableSkyBoxRendering = _value;
 }
 
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {

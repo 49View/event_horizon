@@ -25,8 +25,8 @@ void main() {
    ao = texture( aoTexture, texCoords ).x * aoV;
    roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
    metallic = (texture( metallicTexture, texCoords ).x * metallicV);
-   opacityV = max(1.0, (texture( opacityTexture, texCoords ).x * 1.0 + 0.0 )) * opacity; 
-   translucencyV = 1.0 + texture( translucencyTexture, texCoords ).x;
+   opacityV = texture( opacityTexture, texCoords ).x; // * 1.0 - 0.0 ) * opacity; 
+   translucencyV = 1.0 + (texture( translucencyTexture, texCoords ).x);
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
     albedo = pow(albedo, vec3(2.2/1.0));
     //albedo = pow(albedo, vec3(1.0/2.2));

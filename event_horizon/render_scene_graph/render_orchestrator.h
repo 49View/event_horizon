@@ -67,7 +67,7 @@ public:
     }
 
     std::shared_ptr<Camera> DC() {
-        return getRig( Name::Foxtrot)->getCamera();
+        return getRig( Name::Foxtrot )->getCamera();
     }
 
     void addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible = true );
@@ -106,6 +106,9 @@ public:
     void addHttpStream( const std::string& _streamName ) {
         rr.SSM().addStream<T>( _streamName, avcbTM() );
     }
+
+    bool skyBoxRenderEnabled( const std::string& _target = "" ) const;
+    void skyBoxRenderEnabled( bool _value, const std::string& _target = "" );
 
 protected:
     AVInitCallback avcbTM();

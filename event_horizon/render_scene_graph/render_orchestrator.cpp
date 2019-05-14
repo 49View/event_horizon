@@ -174,6 +174,19 @@ void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, cons
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 }
 
+bool RenderOrchestrator::skyBoxRenderEnabled( const std::string& _target ) const {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        return pbrTarget->skyBoxRenderEnabled();
+    }
+    return false;
+}
+
+void RenderOrchestrator::skyBoxRenderEnabled( bool _value, const std::string& _target ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->skyBoxRenderEnabled( _value );
+    }
+}
+
 void RenderOrchestrator::setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport ) {
     rr.getTarget(_rigName)->getRig()->setViewport(_viewport);
 }

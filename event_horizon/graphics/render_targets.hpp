@@ -279,6 +279,9 @@ public:
 
     void changeTime( const V3f& _solarTime ) override;
     void invalidateOnAdd() override;
+    bool skyBoxRenderEnabled() const;
+    void skyBoxRenderEnabled( bool _value);
+
 protected:
     std::shared_ptr<Skybox> createSkybox();
     void addProbes();
@@ -295,6 +298,7 @@ protected:
     bool mbUseInfiniteHorizonForShadows = true;
     Vector3f mCachedSunPosition = Vector3f::ZERO;
     SkyBoxInitParams mSkyBoxParams;
+    bool bEnableSkyBoxRendering = false;
 
     std::shared_ptr<SunBuilder> mSunBuilder;
     std::shared_ptr<Skybox> mSkybox;

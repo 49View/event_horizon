@@ -283,17 +283,21 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 vec3 specular = prefilteredColor * (F * (brdf.x + brdf.y));
 // specular = pow(specular, vec3(2.2/1.0)); 
 
-vec3 ambient = (kD * diffuseV + specular) * translucencyV *  visibility * ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
+float ndotlConstrast = 0.5f;  
+float Fc = (1.04 * ( ndotlConstrast + 1.0 )) / (1.0 + (1.04-ndotlConstrast) );
+float ndotlC = Fc * ( ndotl - 0.5 ) + 0.5;
+
+vec3 ambient = (kD * diffuseV + specular ) * (translucencyV) * visibility * ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
 // vec3 ambient = (kD ); 
 
 // vec3 finalColor = (Lo * visibility) + ambient; 
 
-vec3 finalColor = ambient;//pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
+vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
 
 // finalColor = finalColor / ( finalColor + vec3(1.00));
 
 finalColor = vec3(1.0) - exp(-finalColor * 1.0);
-
+ 
 //finalColor = pow(finalColor, vec3(2.2/1.0));
 
 FragColor = vec4( finalColor, opacityV * alpha ); 

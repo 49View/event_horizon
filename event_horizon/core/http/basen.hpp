@@ -173,7 +173,7 @@ namespace bn
                     continue;
                 }
                 char value = ConversionTraits::decode(*iter);
-                if (value == Error) {
+                if (value == (char)Error) {
                     // malformed data, but let's go on...
                     ++iter;
                     continue;
