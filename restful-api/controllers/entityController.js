@@ -159,6 +159,14 @@ const getEntityByIdProject = async (project, entityId, returnPublic) => {
     return result!==null?result.toObject():null;
 }
 
+const getEntityByHash = async (entityId) => {
+    let query;
+    query = { "metadata.hash" : entityId };
+    const result = await entityModel.findOne(query);
+
+    return result!==null?result.toObject():null;
+}
+
 const getEntitiesOfProject = async (project, returnPublic) => {
     let query;
     if (returnPublic) {
@@ -271,6 +279,7 @@ module.exports = {
     deleteEntity : deleteEntity,
     deleteEntityComplete : deleteEntityComplete,
     getEntityByIdProject : getEntityByIdProject,
+    getEntityByHash : getEntityByHash,
     getEntitiesOfProject : getEntitiesOfProject,
     getEntitiesOfProjectWithGroup : getEntitiesOfProjectWithGroup,
     getEntityDeps : getEntityDeps,

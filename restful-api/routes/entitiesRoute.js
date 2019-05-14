@@ -207,9 +207,32 @@ router.delete('/:id', async (req, res, next) => {
             console.log( "[INFO] Deletion of " + entityId + " not found, no operations performed" );
             res.status(204).send();
         } else {
+            for ( ktype of currentEntity["metadata"]["deps"] ) {
+                for ( key of ktype["value"] ) {
+                    const currDep = await entityController.getEntityByHash( key );
+                    if ( currDep !== null ) {
+                        await entityController.deleteEntityComplete( project, currDep);
+                    }
+                }
+            }
             await entityController.deleteEntityComplete( project, currentEntity);
             res.status(201).send();
         }
+    } catch (ex) {
+        console.log("ERROR DELETING ENTITY: ", ex);
+        res.sendStatus(400);
+    }
+
+});
+
+router.delete('/hash/:hashId', async (req, res, next) => {
+    try {
+        const project = req.user.project;
+        const currDep = await entityController.getEntityByHash( req.params.hashId );
+        if ( currDep !== null ) {
+            await entityController.deleteEntityComplete( project, currDep);
+        }
+        res.status(201).send();
     } catch (ex) {
         console.log("ERROR DELETING ENTITY: ", ex);
         res.sendStatus(400);

@@ -160,10 +160,10 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
         std::string fileContent = FM::readLocalTextFile( line );
         auto fileContent64 = bn::encode_b64(fileContent);
         shaderHeader << "{ \"" << fkey << "\", \"" << fileContent64 << "\"},\n";
-        if ( checkFileChanged( fc, filesCached) ) {
+//        if ( checkFileChanged( fc, filesCached) ) {
             sm.inject(fkey, fileContent64);
             shaderEmit.shaders.emplace_back( fkey, fileContent64 );
-        }
+//        }
     }
 
     shaderHeader << "};\n";
