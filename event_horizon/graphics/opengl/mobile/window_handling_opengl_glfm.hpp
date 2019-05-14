@@ -9,6 +9,9 @@
 #include <graphics/mouse_input.hpp>
 #include <graphics/renderer.h>
 
+struct GLFMDisplay;
+extern GLFMDisplay *glfmdisplay;
+
 namespace WindowHandling {
 
 	void initImGUI();
