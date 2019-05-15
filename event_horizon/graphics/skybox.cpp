@@ -77,10 +77,10 @@ bool Skybox::precalc( float _sunHDRMult ) {
             rr.CB_U().pushVP( mVPList );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
-            for ( const auto& [k, vl] : rr.CL() ) {
-                rr.addToCommandBuffer( vl.mVList );
-            }
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
+            for ( const auto& [k, vl] : rr.CL() ) {
+                rr.addToCommandBuffer( vl.mVList , nullptr, rr.P(S::SH_NOTEXTURE).get() );
+            }
         });
 
         validated();

@@ -115,10 +115,19 @@ std::string ShaderManager::injectPreprocessorMacro( std::string& sm ) {
 
     size_t fi = 0;
     for ( auto& w : mDefineMap ) {
-        if (( fi = sm.find( w.first )) != std::string::npos ) {
-            auto fe = fi + w.first.size();
-            sm.erase( sm.begin() + fi, sm.begin() + fe + 1 );
-            sm.insert( fi, w.second );
+        std::istringstream smStream(sm);
+        size_t numCharRead = 0;
+        for (std::string line; std::getline(smStream, line); ) {
+            numCharRead += line.size();
+            if (( fi = line.find( w.first )) != std::string::npos ) {
+                size_t fe = line.find( "//" );
+                if ( fe == std::string::npos || fe > fi ) {
+                    fi = sm.find( w.first, numCharRead );
+                    fe = fi + w.first.size();
+                    sm.erase( sm.begin() + fi, sm.begin() + fe + 1 );
+                    sm.insert( fi, w.second );
+                }
+            }
         }
     }
 

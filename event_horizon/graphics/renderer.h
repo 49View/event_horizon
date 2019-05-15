@@ -123,7 +123,8 @@ public:
 
 	void addToCommandBuffer( CommandBufferLimitsT _entry );
 	void addToCommandBuffer( std::vector<std::shared_ptr<VPList>> _map,
-							 std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr);
+							 std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr,
+                             Program* _forceProgram = nullptr );
 
 	void setRenderHook( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _hook );
 	void setGlobalTextures();

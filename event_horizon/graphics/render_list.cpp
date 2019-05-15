@@ -105,9 +105,9 @@ void CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer* cb ) const {
     } else {
 //        LOGRS("        Render geom: " << mVP->mVPList.Name() );
         if ( mVP->mMaterial ) {
-            mVP->mVPList->drawWith(mVP->mMaterial.get());
+            mVP->mVPList->drawWith(mVP->mMaterial.get(), mVP->mProgram);
         } else {
-            mVP->mVPList->draw();
+            mVP->mVPList->draw(mVP->mProgram);
         }
     }
 }
@@ -182,10 +182,11 @@ void CommandBufferList::end() {
 
 void CommandBufferList::pushVP( std::shared_ptr<VPList> _vp,
                                 std::shared_ptr<RenderMaterial> _mat,
-                                std::shared_ptr<Matrix4f> _modelMatrix ) {
+                                std::shared_ptr<Matrix4f> _modelMatrix,
+                                Program* _forceProgram ) {
     const static float alpha_threashold = 0.0f;
     if ( _vp->transparencyValue() > alpha_threashold ) {
-        mCurrent->push( CommandBufferEntry{ _vp, _mat, _modelMatrix } );
+        mCurrent->push( CommandBufferEntry{ _vp, _mat, _modelMatrix, _forceProgram } );
     }
 }
 

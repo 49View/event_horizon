@@ -4,17 +4,18 @@
 
 unsigned int sLastHandle = 0;
 
-void GPUVData::programStart( RenderMaterial* _material ) const {
+void GPUVData::programStart( RenderMaterial* _material, Program* _program ) const {
 //    sNumDrawCalls++;
-    if ( sLastHandle != _material->BoundProgram()->handle()) {
-        GLCALL( glUseProgram( _material->BoundProgram()->handle()));
-        sLastHandle = _material->BoundProgram()->handle();
+    auto handle = _program ? _program->handle() : _material->BoundProgram()->handle();
+    if ( sLastHandle != handle) {
+        GLCALL( glUseProgram( handle ));
+        sLastHandle = handle;
     }
-    _material->GlobalUniforms()->setOn( _material->BoundProgram()->handle());
+    _material->GlobalUniforms()->setOn( handle );
 //    if ( _material->Hash() != sMaterialHash ) {
 //        sNumStateChanges++;
     //		sMatHash.insert( _material->Hash() );
-    _material->Uniforms()->setOn( _material->BoundProgram()->handle());
+    _material->Uniforms()->setOn( handle );
 //        sMaterialHash = _material->Hash();
 //    }
 }

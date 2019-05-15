@@ -132,6 +132,8 @@ void Renderer::init() {
 
     mBRDF = FrameBufferBuilder{ *this, MPBRTextures::ibl_brdf }.size( 512 ).format(
             PIXEL_FORMAT_HDR_RG_16 ).IM(S::IBL_BRDF).noDepth().build();
+    mBRDF->bindAndClear();
+    mBRDF->VP()->draw();
 
     rmm->addRenderMaterial( S::SHADOW_MAP );
 
@@ -349,9 +351,10 @@ void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {
 }
 
 void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
-                                   std::shared_ptr<RenderMaterial> _forcedMaterial ) {
+                                   std::shared_ptr<RenderMaterial> _forcedMaterial,
+                                   Program* _forceProgram ) {
     for ( const auto& vp : _map ) {
-        CB_U().pushVP( vp, _forcedMaterial );
+        CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram );
     }
 }
 

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <graphics/opengl/gl_util.h>
+#include <graphics/program.h>
 
 class RenderMaterial;
 struct cpuVBIB;
@@ -9,8 +10,8 @@ struct cpuVBIB;
 class GPUVData {
 public:
     explicit GPUVData( const cpuVBIB& _vbib );
-    void draw() const;
-    void programStart( RenderMaterial* _material ) const;
+    void draw( ) const;
+    void programStart( RenderMaterial* _material, Program* _program = nullptr ) const;
 
     bool Dynamic() const { return dynamic; }
     void Dynamic( bool val ) { dynamic = val; }

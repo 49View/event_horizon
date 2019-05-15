@@ -73,7 +73,6 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     // Create PBR resources
     mConvolution = std::make_unique<ConvolutionEnvironmentMap>(rr);
     mIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
-    mIBLPrefilterBRDF = std::make_unique<PrefilterBRDF>(rr);
 }
 
 std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBufferType fbt ) {
@@ -147,8 +146,6 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
         });
     }
-
-    mIBLPrefilterBRDF->render();
 }
 
 void RLTargetPBR::addShadowMaps() {
@@ -553,7 +550,7 @@ void RLTargetCubeMap::render( std::shared_ptr<Texture> _renderToTexture, int cms
                                           _renderToTexture->getHandle(),
                                           static_cast<uint32_t>(mip),
                                           cmsize, cmsize } );
-        rr.CB_U().pushCommand( { CommandBufferCommandName::colorBufferTargetBindAndClear } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
         rr.CB_U().setCameraUniforms( cameraRig[t]->getCamera() );
         rcb();
     }

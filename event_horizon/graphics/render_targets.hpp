@@ -305,7 +305,6 @@ protected:
     std::shared_ptr<ShadowMapManager> smm;
     std::shared_ptr<ConvolutionEnvironmentMap> mConvolution;
     std::shared_ptr<PrefilterSpecularMap> mIBLPrefilterSpecular;
-    std::shared_ptr<PrefilterBRDF> mIBLPrefilterBRDF;
 };
 
 
