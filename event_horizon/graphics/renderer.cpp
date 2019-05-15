@@ -118,7 +118,6 @@ void Renderer::init() {
     am.init();
     sm->loadShaders();
     tm->addTextureWithData(RawImage::WHITE4x4(), FBNames::lightmap, TSLOT_LIGHTMAP );
-//    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).build();
     mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).depthOnly().build();
 
     auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGB_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
@@ -129,6 +128,10 @@ void Renderer::init() {
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter, trd }
                                                                    .setGenerateMipMaps( true )
                                                                    .setIsFramebufferTarget( true ) );
+
+    tm->addCubemapTexture( TextureRenderData{ "probe_render_target", trd }
+                                             .setGenerateMipMaps( false )
+                                             .setIsFramebufferTarget( true ) );
 
     mBRDF = FrameBufferBuilder{ *this, MPBRTextures::ibl_brdf }.size( 512 ).format(
             PIXEL_FORMAT_HDR_RG_16 ).IM(S::IBL_BRDF).noDepth().build();

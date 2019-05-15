@@ -60,11 +60,12 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
 bool Skybox::precalc( float _sunHDRMult ) {
     if ( needsRefresh() ) {
 
-        auto trd = ImageParams{}.setSize( 512 ).format( PIXEL_FORMAT_HDR_RGB_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
-
-        mSkyboxTexture = rr.TM()->addCubemapTexture( TextureRenderData{ "skybox", trd }
-                                                                .setGenerateMipMaps( false )
-                                                                .setIsFramebufferTarget( true ) );
+        if ( !mSkyboxTexture ) {
+            auto trd = ImageParams{}.setSize( 512 ).format( PIXEL_FORMAT_HDR_RGB_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+            mSkyboxTexture = rr.TM()->addCubemapTexture( TextureRenderData{ "skybox", trd }
+                                                                 .setGenerateMipMaps( false )
+                                                                 .setIsFramebufferTarget( true ) );
+        }
 
         auto cbfb = FrameBufferBuilder{rr, "SkyboxFlatFB"}.size(512).buildSimple();
         auto cubeMapRig = addCubeMapRig( "cubemapRig",  V3f::UP_AXIS, Rect2f(V2f{512}) );
@@ -78,9 +79,6 @@ bool Skybox::precalc( float _sunHDRMult ) {
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
-            for ( const auto& [k, vl] : rr.CL() ) {
-                rr.addToCommandBuffer( vl.mVList , nullptr, rr.P(S::SH_NOTEXTURE).get() );
-            }
         });
 
         validated();

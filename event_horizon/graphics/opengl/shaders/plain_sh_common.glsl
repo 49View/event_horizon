@@ -203,8 +203,10 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 Lo = vec3( 0.0 );
 
+#ifdef sh_reflections
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance*2 );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance * 2.0 );
+#endif
 
 // for ( int i = 0; i < u_numPointLights; i++ ) {
 //     vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;

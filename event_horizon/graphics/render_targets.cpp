@@ -112,19 +112,31 @@ std::shared_ptr<CameraRig> RLTargetPBR::getProbeRig( int t, const std::string& _
 
 void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at ) {
 
-    auto cbfb = FrameBufferBuilder{rr, "convolution"+_probeCameraName}.size(128).buildSimple();
-
-    auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{512}, true) );
-
     auto convolutionRT = rr.TD(MPBRTextures::convolution);
     auto preFilterSpecularRT = rr.TD(MPBRTextures::specular_prefilter);
+    auto probeRenderTarget = rr.TD("probe_render_target");
+
+    auto cbfb = FrameBufferBuilder{rr, "convolution"+_probeCameraName}.size(128).buildSimple();
+    auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{512}, true) );
+
+//    auto cbfb = FrameBufferBuilder{rr, "probePB"}.size(512).buildSimple();
+//    auto cubeMapRig = addCubeMapRig( "cubemapRig",  V3f::UP_AXIS, Rect2f(V2f{512}) );
+    auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
+    probe->render( probeRenderTarget, 512, 0, [&]() {
+        mSkybox->render();
+        for ( const auto& [k, vl] : rr.CL() ) {
+            if ( isKeyInRange(k) ) {
+                rr.addToCommandBuffer( vl.mVList, nullptr, rr.P( S::SH_NOTEXTURE ).get());
+            }
+        }
+    });
 
     // convolution
     auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
     convolutionProbe->render( convolutionRT, 128, 0, [&]() {
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
-        mConvolution->render( mSkybox->getSkyboxTexture() );
+        mConvolution->render( probeRenderTarget );
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
     });
@@ -141,7 +153,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
             float roughness = (float)m / (float)(preFilterMipMaps - 1);
-            lIBLPrefilterSpecular->render( mSkybox->getSkyboxTexture(), roughness );
+            lIBLPrefilterSpecular->render( probeRenderTarget, roughness );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
         });
@@ -382,6 +394,7 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
     // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
     // (that has got 3d lighting in it) especially skyboxes and probes!!
     addShadowMaps();
+
     if ( mSkybox->precalc( 0.0f ) ) {
         addProbes();
     }
