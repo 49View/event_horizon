@@ -35,7 +35,7 @@ ShaderManager::ShaderManager() {
     allocateProgram( ShaderProgramDesc{ S::IBL_SPECULAR }.vsh( "plain_cubemap" ).fsh( "ibl_specular_prefilter" ));
     allocateProgram( ShaderProgramDesc{ S::IBL_BRDF }.vsh( "vertex_shader_brdf" ).fsh( "plain_brdf" ));
     allocateProgram( ShaderProgramDesc{ S::SH }.vsh( "vertex_shader_3d_sh" ).fsh( "plain_sh" ));
-    allocateProgram( ShaderProgramDesc{ S::SH_NOTEXTURE }.vsh( "vertex_shader_3d_sh_notexture" ).fsh( "plain_sh_notexture" ));
+    allocateProgram( ShaderProgramDesc{ S::SH_NOTEXTURE }.vsh( "vertex_shader_3d_sh" ).fsh( "plain_sh_notexture" ));
 }
 
 void ShaderManager::allocateProgram( const ShaderProgramDesc& _pd ) {

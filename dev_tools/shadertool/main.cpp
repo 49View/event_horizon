@@ -149,7 +149,7 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
 
     if ( files.empty() ) return 1; // what no files???
 
-    auto filesCached = getCachedFile(files);
+//    auto filesCached = getCachedFile(files);
 
     std::stringstream shaderHeader;
     ShaderLiveUpdateMap shaderEmit;
