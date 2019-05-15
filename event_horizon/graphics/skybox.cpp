@@ -60,25 +60,27 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
 bool Skybox::precalc( float _sunHDRMult ) {
     if ( needsRefresh() ) {
 
-        auto trd = ImageParams{}.setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+        auto trd = ImageParams{}.setSize( 512 ).format( PIXEL_FORMAT_HDR_RGB_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
 
         mSkyboxTexture = rr.TM()->addCubemapTexture( TextureRenderData{ "skybox", trd }
                                                                 .setGenerateMipMaps( false )
                                                                 .setIsFramebufferTarget( true ) );
 
         auto cbfb = FrameBufferBuilder{rr, "SkyboxFlatFB"}.size(512).buildSimple();
-        auto cubeMapRig = addCubeMapRig( "cubemapRig", Vector3f::ZERO, Rect2f(V2f{512}) );
+        auto cubeMapRig = addCubeMapRig( "cubemapRig",  V3f::UP_AXIS, Rect2f(V2f{512}) );
         auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
         probe->render( mSkyboxTexture, 512, 0, [&]() {
             mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
-
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
             rr.CB_U().pushVP( mVPList );
-            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
-            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
+            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
+            for ( const auto& [k, vl] : rr.CL() ) {
+                rr.addToCommandBuffer( vl.mVList );
+            }
+            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
         });
 
         validated();
@@ -155,8 +157,9 @@ void PrefilterSpecularMap::init() {
 }
 
 void PrefilterSpecularMap::render( std::shared_ptr<Texture> cmt, const float roughness ) {
-    rr.CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
-    rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+//    rr.CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
+//    if ( roughness > 1 ) return;
+//    rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
     mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
     mVPList->setMaterialConstant( UniformNames::roughness, roughness );
     rr.CB_U().pushVP( mVPList );

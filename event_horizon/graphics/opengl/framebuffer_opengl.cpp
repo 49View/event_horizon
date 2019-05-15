@@ -170,8 +170,10 @@ void Framebuffer::bind( const FrameBufferTextureValues* _values ) {
                                         frameBufferTargetToGl(_values->targetType),
                                         _values->targetHandle, _values->targetMipmap ));
 //        LOGRS( "[FramebufferValues] format: [" << glEnumToString( frameBufferTargetToGl(_values->targetType)) << "]"
-//        << "target: [" << _values->targetHandle << "]"
-//        << "targetMipmap: [" << _values->targetMipmap << "]"
+//        << " target: [" << _values->targetHandle << "]"
+//        << " targetMipmap: [" << _values->targetMipmap << "]"
+//        << " Width/mWidth: " << _values->width << "/" << mWidth << " Height/mHeight: " << _values->height << "/" << mHeight
+//        << " Handle: " << mFramebufferHandle
 //        );
         GLCALL( glViewport( 0, 0, _values->width, _values->height ));
     } else {
@@ -184,13 +186,13 @@ void Framebuffer::bind( const FrameBufferTextureValues* _values ) {
 void Framebuffer::bindAndClear( const FrameBufferTextureValues* _values ) {
     bind( _values );
     clearColorBuffer();
-    if ( depthTexture ) clearDepthBuffer(); // ### reintroduce clear only if it has depth... if ( depthTexture )
+    clearDepthBuffer();
 }
 
 void Framebuffer::bindAndClearWithColor( const Color4f& clearColor, const FrameBufferTextureValues* _values ) {
     bind( _values );
     clearColorBufferWithColor( clearColor );
-    clearDepthBuffer(); // ### reintroduce clear only if it has depth... if ( depthTexture )
+    clearDepthBuffer();
 }
 
 void Framebuffer::setViewport( int x, int y, int width, int height ) {

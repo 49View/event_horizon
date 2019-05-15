@@ -91,11 +91,17 @@ void Texture::init_cubemap_r() {
     auto minFilter = mGenerateMipMaps ? GL_LINEAR_MIPMAP_LINEAR : glFilter;
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MIN_FILTER, minFilter ));
 
-//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_BASE_LEVEL, 0) );
-//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_MAX_LEVEL, 7) );
+//    GLuint mips = mGenerateMipMaps ? 1 + static_cast<GLuint>( floor( log( (float)max( mWidth, mHeight ) ) ) ) : 1;
 
-    GLuint mips = mGenerateMipMaps ? 1 + static_cast<GLuint>( floor( log( (float)max( mWidth, mHeight ) ) ) ) : 1;
-    GLCALL( glTexStorage2D( glTextureTarget, mips, glInternalFormat, mWidth, mHeight ));
+//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_BASE_LEVEL, 0) );
+//    GLCALL( glTexParameteri(glTextureTarget, GL_TEXTURE_MAX_LEVEL, mips) );
+
+    for (unsigned int i = 0; i < 6; ++i)
+    {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType, nullptr);
+    }
+
+//    GLCALL( glTexStorage2D( glTextureTarget, mips, glInternalFormat, mWidth, mHeight ));
 
     if ( mGenerateMipMaps ) {
         GLCALL( glGenerateMipmap( glTextureTarget ));

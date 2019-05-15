@@ -71,6 +71,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         auto transformMatrix = std::make_shared<Matrix4f>(_geom->getLocalHierTransform());
         auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.n(_geom->UUiD()).t(transformMatrix).build();
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);
+        this->RR().invalidateOnAdd();
     });
 }
 

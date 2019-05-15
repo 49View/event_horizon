@@ -273,19 +273,18 @@ vec3 aoLightmapColor = texture(lightmapTexture, v_texCoord2).rgb;
 vec3 diffuseV = Lo + (irradiance * albedo );
 
 // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
-const float MAX_REFLECTION_LOD = 9.0;
+const float MAX_REFLECTION_LOD = 6.0;
 vec3 R = reflect(-V, N);
 // vec3 prefilteredColor = textureLod(ibl_specularMap, R, 0.0 + (0.5 * MAX_REFLECTION_LOD)).rgb;
-vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness*MAX_REFLECTION_LOD).rgb;
-// gr = prefilteredColor.r * 0.3 + prefilteredColor.g * 0.59 + prefilteredColor.b * 0.11;
-// prefilteredColor.rgb = vec3(gr);
+vec3 prefilteredColor = textureLod(ibl_specularMap, R, 0*MAX_REFLECTION_LOD).rgb;
+// vec3 prefilteredColor = texture(ibl_specularMap, R).rgb;
 vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
-vec3 specular = prefilteredColor * (F * (brdf.x + brdf.y));
+vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 
-float ndotlConstrast = 0.5f;  
-float Fc = (1.04 * ( ndotlConstrast + 1.0 )) / (1.0 + (1.04-ndotlConstrast) );
-float ndotlC = Fc * ( ndotl - 0.5 ) + 0.5;
+// float ndotlConstrast = 0.5f;  
+// float Fc = (1.04 * ( ndotlConstrast + 1.0 )) / (1.0 + (1.04-ndotlConstrast) );
+// float ndotlC = Fc * ( ndotl - 0.5 ) + 0.5;
 
 vec3 ambient = (kD * diffuseV + specular ) * (translucencyV) * visibility * ao;//* visibility// * pow(aoLightmapColor, vec3(8.2));// * visibility;//;
 // vec3 ambient = (kD ); 

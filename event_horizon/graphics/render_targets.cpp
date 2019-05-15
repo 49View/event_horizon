@@ -136,15 +136,17 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
         auto fbSize = 512>>m;
         auto cbfbPrefilter = FrameBufferBuilder{rr, "prefilter"+std::to_string(m)+_probeCameraName}.size(fbSize).buildSimple();
         auto preFilterProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfbPrefilter, rr );
+        auto lIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
+
         preFilterProbe->render( preFilterSpecularRT, fbSize, m, [&]() {
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
             float roughness = (float)m / (float)(preFilterMipMaps - 1);
-            mIBLPrefilterSpecular->render( mSkybox->getSkyboxTexture(), roughness );
+            lIBLPrefilterSpecular->render( mSkybox->getSkyboxTexture(), roughness );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
         });
-    };
+    }
 
     mIBLPrefilterBRDF->render();
 }
@@ -383,7 +385,7 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
     // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
     // (that has got 3d lighting in it) especially skyboxes and probes!!
     addShadowMaps();
-    if ( mSkybox->precalc( 1.0f ) ) {
+    if ( mSkybox->precalc( 0.0f ) ) {
         addProbes();
     }
 
@@ -447,6 +449,7 @@ void RLTargetPBR::changeTime( const V3f& _solarTime ) {
 
 void RLTargetPBR::invalidateOnAdd() {
     invalidateShadowMaps();
+    mSkybox->invalidate();
 }
 
 bool RLTargetPBR::skyBoxRenderEnabled() const {
@@ -544,14 +547,14 @@ void RLTargetCubeMap::render( std::shared_ptr<Texture> _renderToTexture, int cms
     Rect2f lViewport(V2f::ZERO, V2f{cmsize}, true);
     for ( uint32_t t = 0; t < 6; t++ ) {
         startCL( rr.CB_U() );
+        cameraRig[t]->setViewport( lViewport );
         rr.CB_U().setFramebufferTexture(
                 FrameBufferTextureValues{ indexToFBT(t),
                                           _renderToTexture->getHandle(),
                                           static_cast<uint32_t>(mip),
                                           cmsize, cmsize } );
-        cameraRig[t]->setViewport( lViewport );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::colorBufferTargetBindAndClear } );
         rr.CB_U().setCameraUniforms( cameraRig[t]->getCamera() );
-        rr.CB_U().pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
         rcb();
     }
 }

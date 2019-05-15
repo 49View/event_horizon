@@ -99,25 +99,7 @@ void main()
             totalWeight      += NdotL;
         }
     }
-
     prefilteredColor = prefilteredColor / totalWeight;
-    // if ( roughnessV < 1.0 ) {
-    //     prefilteredColor = vec3(1.0, 0.0, 0.0);
-    // } else if ( roughnessV < 2.0 ) {
-    //     prefilteredColor = vec3(1.0, 1.0, 0.0);
-    // } else if ( roughnessV < 3.0 ) {
-    //     prefilteredColor = vec3(1.0, 0.0, 1.0);
-    // } else if ( roughnessV < 4.0 ) {
-    //     prefilteredColor = vec3(0.0, 1.0, 0.0);
-    // } else if ( roughnessV < 5.0 ) {
-    //     prefilteredColor = vec3(0.0, 1.0, 1.0);
-    // } else if ( roughnessV < 6.0 ) {
-    //     prefilteredColor = vec3(0.0, 0.0, 1.0);
-    // } else if ( roughnessV < 7.0 ) {
-    //     prefilteredColor = vec3(0.5, 1.0, 0.5);
-    // } else {
-    //     prefilteredColor = vec3(1.0, 1.0, 1.0);
-    // }
-
+    
     FragColor = vec4(prefilteredColor, 1.0);
 }

@@ -151,7 +151,7 @@ public:
 
     void clearCB();
 
-    bool isKeyInRange( const int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
+    bool isKeyInRange( int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
 
     bool isTakingScreenShot() {
         return mbTakeScreenShot && ++mTakeScreenShotDelay > 2;

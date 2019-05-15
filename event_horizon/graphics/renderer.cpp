@@ -121,7 +121,7 @@ void Renderer::init() {
 //    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).build();
     mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).depthOnly().build();
 
-    auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGB_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
                                                              .setGenerateMipMaps( false )
                                                              .setIsFramebufferTarget( true ) );
