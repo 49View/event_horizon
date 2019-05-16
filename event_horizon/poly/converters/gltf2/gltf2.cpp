@@ -177,7 +177,6 @@ namespace GLTF2Service {
         _sg.GB<GT::GLTF2>( _gltf.model.get(),
                            GT::GLTF2MeshIndex( meshIndex ), GT::GLTF2PrimitiveIndex( primitiveIndex ),
                            GT::M( _gltf.matMap.at( material.name )), father );
-//    gnode->pushData( GeomSceneArtifactData{ geom, nullptr } );
     }
 
     template<typename T1, typename T2>
@@ -345,7 +344,7 @@ namespace GLTF2Service {
 
         for ( const auto& ci : node.children ) {
             auto nextNode = _gltf.model->nodes[ci];
-            if ( nextNode.mesh >= 0 ) {
+            if ( nextNode.mesh >= 0 || !nextNode.children.empty()) {
                 auto c = hier->addChildren( nextNode.name );
                 addMeshNode( _sg, _gltf, nextNode, c );
             }
