@@ -286,7 +286,7 @@ namespace VDataServices {
                 q+=3;
             }
 
-            PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping{ GeomMappingT::Cube, V3f::ONE*8.0f} );
+            PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping{ GeomMappingT::Cube, V3f::ONE*8.0f}, 0, _d.rfPoly );
             _ret->fill( ps );
             _ret->BBox3d( ps.bbox3d );
         }

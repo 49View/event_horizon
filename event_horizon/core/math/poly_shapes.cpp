@@ -620,7 +620,7 @@ void RoundedCube( Topology& mesh, uint32_t subdivs, float radius ) {
 //    *targetV = (-normal->y + 1) / 2;
 //}
 
-PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs ) {
+PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs, ReverseFlag rf ) {
 
     for ( int j = 0; j < subdivs; ++j ) {
         mesh = SubdivideMesh( mesh );
@@ -662,6 +662,11 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
 
     for ( int q = 0; q < ret.numIndices; q++ ) {
         ret.normals[q] = mesh.normalFromSmartSmoothing( mesh.triangles[q], q );
+    }
+    if ( rf == ReverseFlag::True ) {
+        for ( int q = 0; q < ret.numIndices; q++ ) {
+            ret.normals[q] *= -1.0f;
+        }
     }
 //    for ( int q = 0; q < ret.numIndices; q++ ) {
 //        ret.normals[q] = normalize( ret.normals[q] );

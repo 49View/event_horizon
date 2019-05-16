@@ -64,7 +64,8 @@ PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size );
 PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs = 5, float radius = 0.15f );
 PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs = 5, float radius = 0.05f );
 
-PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs = 0 );
+PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt,
+                       int subdivs = 0, ReverseFlag rf = ReverseFlag::False );
 
 ShapeType shapeTypeFromString( const std::string& value );
 std::string shapeTypeToString( ShapeType value );
