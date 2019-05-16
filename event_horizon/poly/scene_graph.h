@@ -216,6 +216,8 @@ public:
     GeomSP GC();
     UUID GC( const GeomSP& _geom );
 
+    void dumpAsObjFile() const;
+
     static GenericSceneCallback           genericSceneCallback         ;
     static LoadedResouceCallbackContainer resourceCallbackVData        ;
     static LoadedResouceCallbackContainer resourceCallbackRawImage     ;
