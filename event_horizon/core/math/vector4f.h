@@ -321,6 +321,7 @@ public:
 	std::string toString() const;
 	std::string toStringCommaSeparated() const;
 	std::string toStringJSONArray() const;
+    std::string toStringObj( const std::string& _prefix) const;
 
 	size_t hash() const {
 		std::hash<float> hasher;

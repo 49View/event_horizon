@@ -2,8 +2,6 @@
 #include "matrix2f.h"
 #include "math_util.h"
 
-
-
 const Vector2f Vector2f::ZERO = Vector2f( 0.0f, 0.0f );
 const Vector2f Vector2f::X_AXIS = Vector2f( 1.0f, 0.0f );
 const Vector2f Vector2f::Y_AXIS = Vector2f( 0.0f, 1.0f );
@@ -24,6 +22,12 @@ int64_t Vector2f::hash() const {
 
 std::string Vector2f::toString() const {
 	return "X = " + floatToFixedDigits( mX ) + " Y = " + floatToFixedDigits( mY );
+}
+
+std::string Vector2f::toStringObj( const std::string& _prefix ) const {
+    std::ostringstream ss;
+    ss << _prefix << " " << mX << " " << mY << std::endl;
+    return ss.str();
 }
 
 std::ostream& operator<<( std::ostream& os, const Vector2f& f ) {

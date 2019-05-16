@@ -27,9 +27,10 @@ void EditorBackEnd::activateImpl() {
     rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
                            (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
 
-//    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 0.6f ) );
-//    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
+    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.26, GT::Scale( 0.6f ) );
+    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
 
+//    sg.dumpAsObjFile();
 //    rsg.RR().drawRect2d( CommandBufferLimits::UI2dStart, V2f{0.03f, 0.96f}, V2f{ 0.03f * 0.02f, 0.98f}, C4f::GREEN  );
 }
 

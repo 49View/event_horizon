@@ -365,6 +365,7 @@ public:
 	}
 
 	std::string toString() const;
+    std::string toStringObj( const std::string& _prefix) const;
 
     static constexpr int32_t vsize() { return 2; }
 

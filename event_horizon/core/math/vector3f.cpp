@@ -16,6 +16,12 @@ std::string Vector3f::toStringJSONArray() const {
 	return "[" + floatToFixedDigits( mX ) + "," + floatToFixedDigits( mY ) + "," + floatToFixedDigits( mZ ) + "]";
 }
 
+std::string Vector3f::toStringObj( const std::string& _prefix ) const {
+    std::ostringstream ss;
+    ss << _prefix << " " << mX << " " << mY << " " << mZ << std::endl;
+    return ss.str();
+}
+
 const Vector3f Vector3f::ZERO = Vector3f( 0.0f, 0.0f, 0.0f );
 const Vector3f Vector3f::X_AXIS = Vector3f( 1.0f, 0.0f, 0.0f );
 const Vector3f Vector3f::Y_AXIS = Vector3f( 0.0f, 1.0f, 0.0f );

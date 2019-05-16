@@ -468,6 +468,7 @@ public:
 	std::string toString() const;
 	std::string toStringValuesOnly() const;
 	std::string toStringJSONArray() const;
+    std::string toStringObj( const std::string& _prefix) const;
 
 	void writeTo( std::basic_ostream<char, std::char_traits<char>> &stream, char separator = ',', char endChar = 0 ) const {
 		stream << mX << separator << mY << separator << mZ;

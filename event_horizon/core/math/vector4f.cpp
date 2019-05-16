@@ -23,6 +23,12 @@ std::string Vector4f::toStringJSONArray() const {
 		   floatToFixedDigits( mW ) + "]";
 }
 
+std::string Vector4f::toStringObj( const std::string& _prefix ) const {
+    std::ostringstream ss;
+    ss << _prefix << " " << mX << " " << mY << " " << mZ << " " << mW <<std::endl;
+    return ss.str();
+}
+
 Vector4f Vector4f:: ITORGBA( uint32_t number, int32_t numbits ) {
 	int32_t blue = ( number & 0x00ff0000 ) >> 16;
 	int32_t green = ( number & 0x0000ff00 ) >> 8;

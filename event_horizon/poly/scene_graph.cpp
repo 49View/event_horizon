@@ -315,64 +315,45 @@ ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color )
     return matRef;
 }
 
+void writeFace( size_t base, size_t i1, size_t i2,size_t i3, std::ostringstream& ssf ) {
+    size_t pi1 = base + i1;
+    size_t pi2 = base + i2;
+    size_t pi3 = base + i3;
+    ssf << "f " << pi1 << "/" << pi1   << "/" << pi1  << " ";
+    ssf         << pi2 << "/" << pi2 << "/" << pi2 << " ";
+    ssf         << pi3 << "/" << pi3 << "/" << pi3;
+    ssf << std::endl;
+}
+
 void SceneGraph::dumpAsObjFile() const {
     std::ostringstream ss;
+    std::ostringstream ssf;
+    size_t totalVerts = 1;
     for ( const auto& gg : gm.list() ) {
         if ( !gg->empty() ) {
-//            auto mat = gg->getLocalHierTransform();
+            auto mat = gg->getLocalHierTransform();
             auto vData = vl.get(gg->Data(0).vData);
-            for ( size_t t = 0; t < vData->numIndices(); t++ ) {
-                ss << vData->vertexAt(t);
+            for ( size_t t = 0; t < vData->numVerts(); t++ ) {
+                auto v = vData->vertexAt(t);
+                v = mat.transform(v);
+                ss << v.toStringObj("v");
+                auto n = vData->normalAt(t);
+                n = mat.transform(n);
+                n = normalize(n);
+                ss << n.toStringObj("vn");
+                ss << vData->uvAt(t).toStringObj("vt");
             }
+            for ( size_t t = 0; t < vData->numIndices(); t+=3 ) {
+                writeFace( totalVerts,
+                           vData->getVIndices()[t],
+                           vData->getVIndices()[t+1],
+                           vData->getVIndices()[t+2],
+                           ssf );
+            }
+            totalVerts += vData->numIndices();
         }
     }
 
-//    if ( !_g->empty() ) {
-//        auto vData = _g->Data()->vData();
-//        Matrix4f lMatfull = *(_g->getLocalHierTransform().get());
-//        Matrix4f lRot = lMatfull;
-//        lRot.make3x3NormalizedRotationMatrix();
-//
-//        for ( size_t q = 0; q < vData.numVerts(); q++ ) {
-//            Vector3f posTrasformed = lMatfull * vData.getVcoords3d()[q];
-//            Vector3f norTrasformed = lRot * vData.getVnormals3d()[q];
-//            norTrasformed = normalize( norTrasformed );
-//
-//            inputMesh.vertex_array[_vi+q].position[0] = posTrasformed[0];
-//            inputMesh.vertex_array[_vi+q].position[1] = posTrasformed[1];
-//            inputMesh.vertex_array[_vi+q].position[2] = posTrasformed[2];
-//            inputMesh.vertex_array[_vi+q].normal[0] = norTrasformed[0];
-//            inputMesh.vertex_array[_vi+q].normal[1] = norTrasformed[1];
-//            inputMesh.vertex_array[_vi+q].normal[2] = norTrasformed[2];
-//            inputMesh.vertex_array[_vi+q].uv[0] = vData.getVUVs()[q][0];
-//            inputMesh.vertex_array[_vi+q].uv[1] = vData.getVUVs()[q][1];
-//            inputMesh.vertex_array[_vi+q].first_colocal = _vi+q;
-//
-//            // Link colocals. You probably want to do this more efficiently! Sort by one axis or use a hash or grid.
-////            for (int vv = 0; vv < q; vv++) {
-////                if (inputMesh.vertex_array[_vi+q].position[0] == inputMesh.vertex_array[_vi+vv].position[0] &&
-////                    inputMesh.vertex_array[_vi+q].position[1] == inputMesh.vertex_array[_vi+vv].position[1] &&
-////                    inputMesh.vertex_array[_vi+q].position[2] == inputMesh.vertex_array[_vi+vv].position[2]) {
-////                    inputMesh.vertex_array[_vi+q].first_colocal = _vi+vv;
-////                }
-////            }
-//
-//        }
-//
-//        size_t numFaceCount = vData.numIndices() / 3;
-//        for (size_t f = 0; f < numFaceCount; f++) {
-//            inputMesh.face_array[_fi+f].material_index = 0;
-//            inputMesh.face_array[_fi+f].vertex_index[0]= _vi + vData.getVIndices()[f*3+0];
-//            inputMesh.face_array[_fi+f].vertex_index[1]= _vi + vData.getVIndices()[f*3+1];
-//            inputMesh.face_array[_fi+f].vertex_index[2]= _vi + vData.getVIndices()[f*3+2];
-//        }
-//
-//        _vi += vData.numVerts();
-//        _fi += numFaceCount;
-//    }
-//
-//    for ( const auto& c : _g->Children() ) {
-//        chart( c, inputMesh, _vi, _fi );
-//    }
-
+    ss << ssf.str();
+    FM::writeLocalFile("house.obj", ss.str() );
 }
