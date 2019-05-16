@@ -146,8 +146,11 @@ public:
 
         if constexpr ( std::is_same_v<M, std::vector<Vector2f>> ) {
             static_assert( std::is_same_v<SGT, GT::Poly> || std::is_same_v<SGT, GT::Follower> );
-            if constexpr ( std::is_same_v<SGT, GT::Poly> )
-                dataTypeHolder.sourcePolysVList = _param;
+            if constexpr ( std::is_same_v<SGT, GT::Poly> ) {
+                for ( const auto& v : _param ) {
+                    dataTypeHolder.sourcePolysVList.emplace_back( XZY::C(v) );
+                }
+            }
             if constexpr ( std::is_same_v<SGT, GT::Follower> )
                 dataTypeHolder.profilePath2d = _param;
             return *this;

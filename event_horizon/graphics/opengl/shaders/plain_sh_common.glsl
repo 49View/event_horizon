@@ -249,7 +249,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float visibility = 1.0;
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     float nlAngle = clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
-    v_shadowmap_coord3Biases.z -= 0.05100 * tan(acos(nlAngle));
+    v_shadowmap_coord3Biases.z -= 0.001100 * tan(acos(nlAngle));
     visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases );
 
     // for ( int i = 0; i < 4; i++ ) {
@@ -287,9 +287,11 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = prefilteredColor;
-#endif 
-
 vec3 ambient = (kD * diffuseV + specular ) * (translucencyV) * visibility * ao;
+#else
+vec3 ambient = Lo + kD*albedo;
+#endif
+
 
 // float ndotlConstrast = 0.5f;  
 // float Fc = (1.04 * ( ndotlConstrast + 1.0 )) / (1.0 + (1.04-ndotlConstrast) );
