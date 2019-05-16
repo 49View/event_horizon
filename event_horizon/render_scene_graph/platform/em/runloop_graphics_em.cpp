@@ -10,6 +10,7 @@
 #include <emscripten/bind.h>
 #include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/render_orchestrator.h>
+#include <render_scene_graph/render_orchestrator_callbacks.hpp>
 
 RunLoopGraphics rl = di::make_injector().create<RunLoopGraphics>();
 
@@ -43,7 +44,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
 }
 
 int em_resize_callback(int eventType, const EmscriptenUiEvent *uiEvent, void *userData) {
-	RenderOrchestrator::callbackResizeFrameBuffer = Vector2i{ uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight };
+	callbackResizeFrameBuffer = Vector2i{ uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight };
 //	LOGR("documentBodyClient size %d, %d: ", uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight );
 //	LOGR("windowInner size %d, %d: ", uiEvent->windowInnerWidth, uiEvent->windowInnerHeight );
 //	LOGR("windowOuter size %d, %d: ", uiEvent->windowOuterWidth, uiEvent->windowOuterHeight );

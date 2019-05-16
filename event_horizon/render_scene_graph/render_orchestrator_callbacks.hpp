@@ -8,7 +8,7 @@
 static inline Vector2i callbackResizeWindow = Vector2i(-1, -1);
 static inline Vector2i callbackResizeFrameBuffer = Vector2i(-1, -1);
 
-void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
+static inline void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
     ASSERT( count > 0 );
 
     RenderOrchestrator::callbackPaths.clear();
@@ -17,16 +17,16 @@ void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char *
     }
 }
 
-void GResizeWindowCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
+static inline void GResizeWindowCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
     callbackResizeWindow = Vector2i{w, h};
 }
 
-void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
+static inline void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
     callbackResizeFrameBuffer = Vector2i{w, h};
 }
 #endif
 
-void RenderOrchestrator::initWHCallbacks() {
+inline void RenderOrchestrator::initWHCallbacks() {
 #ifdef USE_GLFW
     WH::setDropCallback( GDropCallback );
     WH::setResizeWindowCallback( GResizeWindowCallback );
@@ -34,7 +34,7 @@ void RenderOrchestrator::initWHCallbacks() {
 #endif
 }
 
-void RenderOrchestrator::resizeCallbacks() {
+inline void RenderOrchestrator::resizeCallbacks() {
 #ifdef USE_GLFW
     if ( callbackResizeWindow.x() > 0 && callbackResizeWindow.y() > 0 ) {
 // For now we do everything in the callbackResizeFrameBuffer so this is redundant for now, just a nop
