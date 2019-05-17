@@ -62,7 +62,7 @@ void Texture::init_r( const uint8_t* _data ) {
     init_data_r( _data );
 
     if ( mGenerateMipMaps ) {
-        if ( _data ) {
+        if ( _data && isPowerOfTwo(getWidth()) && isPowerOfTwo(getHeight())) {
             GLCALL( glGenerateMipmap( glTextureTarget ));
         }
     }

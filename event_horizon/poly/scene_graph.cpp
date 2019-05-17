@@ -3,6 +3,7 @@
 //
 
 #include "scene_graph.h"
+#include <core/lightmap_exchange_format.h>
 #include <core/node.hpp>
 #include <core/raw_image.h>
 #include <core/camera_rig.hpp>
@@ -15,6 +16,10 @@
 #include <core/resources/material.h>
 #include <core/file_manager.h>
 #include <poly/converters/gltf2/gltf2.h>
+#include <poly/baking/xatlas_client.hpp>
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <poly/converters/obj/tiny_obj_loader.h>
 
 GenericSceneCallback           SceneGraph::genericSceneCallback         ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackVData        ;
@@ -325,10 +330,11 @@ void writeFace( size_t base, size_t i1, size_t i2,size_t i3, std::ostringstream&
     ssf << std::endl;
 }
 
-void SceneGraph::dumpAsObjFile() const {
+void SceneGraph::chartMeshes( scene_t& scene ) const {
     std::ostringstream ss;
     std::ostringstream ssf;
     size_t totalVerts = 1;
+
     for ( const auto& gg : gm.list() ) {
         if ( !gg->empty() ) {
             auto mat = gg->getLocalHierTransform();
@@ -355,5 +361,16 @@ void SceneGraph::dumpAsObjFile() const {
     }
 
     ss << ssf.str();
-    FM::writeLocalFile("house.obj", ss.str() );
+    std::istringstream ssi(ss.str());
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string basePath;
+    tinyobj::MaterialFileReader matFileReader(basePath);
+    std::string err;
+    if (!tinyobj::LoadObj(shapes, materials, err, ssi, matFileReader, tinyobj::triangulation)) {
+        LOGR("Error: %s\n", err.c_str());
+    }
+    xatlasParametrize( shapes, &scene );
+
+//    FM::writeLocalFile("house.obj", ss.str() );
 }

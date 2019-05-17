@@ -97,5 +97,5 @@ static inline std::string cubemapFaceToString( const CubemapFaces cmf ) {
 
 // Rig utils
 using CubeMapRigContainer = std::array<std::shared_ptr<CameraRig>, 6>;
-CubeMapRigContainer addCubeMapRig( const std::string& _name, const Vector3f& _pos, const Rect2f& _viewPort );
+CubeMapRigContainer addCubeMapRig( const std::string& _name, const Vector3f& _pos, const JMATH::Rect2f& _viewPort );
 std::string cubeRigName( int t, const std::string& _probeName );

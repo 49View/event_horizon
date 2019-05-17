@@ -13,6 +13,7 @@ public:
     void draw( ) const;
     void programStart( RenderMaterial* _material, Program* _program = nullptr ) const;
 
+    void updateVBO( const cpuVBIB& _vbib );
     bool Dynamic() const { return dynamic; }
     void Dynamic( bool val ) { dynamic = val; }
 

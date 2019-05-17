@@ -27,6 +27,7 @@
 #include <poly/vdata_assembler.h>
 
 class SceneGraph;
+struct scene_t;
 
 class CommandScriptSceneGraph : public CommandScript {
 public:
@@ -216,7 +217,7 @@ public:
     GeomSP GC();
     UUID GC( const GeomSP& _geom );
 
-    void dumpAsObjFile() const;
+    void chartMeshes( scene_t& scene ) const;
 
     static GenericSceneCallback           genericSceneCallback         ;
     static LoadedResouceCallbackContainer resourceCallbackVData        ;

@@ -150,12 +150,9 @@ public:
 	std::shared_ptr<RLTarget> getTarget( const std::string& _name );
 	void clearTargets();
 
-	std::shared_ptr<Framebuffer> getDefaultFB() {
-		return mDefaultFB;
-	}
-    std::shared_ptr<Framebuffer> getShadowMapFB() {
-        return mShadowMapFB;
-    }
+	std::shared_ptr<Framebuffer> getDefaultFB() { return mDefaultFB; }
+    std::shared_ptr<Framebuffer> getShadowMapFB() { return mShadowMapFB; }
+    std::shared_ptr<Framebuffer> getProbing(int _index);
 
 	int UpdateCounter() const { return mUpdateCounter; }
 	void invalidateOnAdd();
@@ -182,6 +179,7 @@ protected:
 	std::shared_ptr<Framebuffer> mDefaultFB;
     std::shared_ptr<Framebuffer> mBRDF;
     std::shared_ptr<Framebuffer> mShadowMapFB;
+    std::unordered_map<int, std::shared_ptr<Framebuffer>> mProbingsFB;
 
 	int mUpdateCounter = 0;
 	bool bInvalidated = false;

@@ -55,21 +55,20 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
                                                                                sp.numIndices, vpos3d, sp.indices );
         mVPList = VPBuilder<Pos3dStrip>{rr,ShaderMaterial{S::SKYBOX}}.p(colorStrip).n("skybox").build();
     }
+
+    if ( mode != SkyBoxMode::EquirectangularTexture && !mSkyboxTexture ) {
+        auto trd = ImageParams{}.setSize( 512 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+        mSkyboxTexture = rr.TM()->addCubemapTexture( TextureRenderData{ "skybox", trd }
+                                                             .setGenerateMipMaps( false )
+                                                             .setIsFramebufferTarget( true ) );
+        cubeMapRig = addCubeMapRig( "cubemapRig", V3f::UP_AXIS, Rect2f(V2f{512}) );
+    }
+
 }
 
 bool Skybox::precalc( float _sunHDRMult ) {
     if ( needsRefresh() ) {
-
-        if ( !mSkyboxTexture ) {
-            auto trd = ImageParams{}.setSize( 512 ).format( PIXEL_FORMAT_HDR_RGB_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
-            mSkyboxTexture = rr.TM()->addCubemapTexture( TextureRenderData{ "skybox", trd }
-                                                                 .setGenerateMipMaps( false )
-                                                                 .setIsFramebufferTarget( true ) );
-        }
-
-        auto cbfb = FrameBufferBuilder{rr, "SkyboxFlatFB"}.size(512).buildSimple();
-        auto cubeMapRig = addCubeMapRig( "cubemapRig",  V3f::UP_AXIS, Rect2f(V2f{512}) );
-        auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
+        auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(512), rr );
         probe->render( mSkyboxTexture, 512, 0, [&]() {
             mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );

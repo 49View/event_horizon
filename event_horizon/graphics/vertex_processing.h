@@ -96,6 +96,8 @@ public:
 
     void setTransform( std::shared_ptr<Matrix4f> lTransform );
 
+    void updateGPUVData( const cpuVBIB& _vbib );
+
     bool hasTag( uint64_t _tag) const;
     uint64_t tag() const { return mTag; }
     void tag( const uint64_t tag ) { mTag = tag; }

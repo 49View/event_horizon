@@ -105,8 +105,12 @@ public:
             return *this;
         }
         if constexpr ( std::is_same_v<M, GT::ForceNormalAxis> ) {
-            static_assert( std::is_base_of_v<GT::GTPolicyPolyline, SGT> );
-            dataTypeHolder.forcingNormalPoly = _param();
+            static_assert( std::is_base_of_v<GT::GTPolicyPolyline, SGT> ||
+                           std::is_base_of_v<GT::GTPolicyFollower, SGT>);
+            if constexpr ( std::is_base_of_v<GT::GTPolicyPolyline, SGT> )
+                dataTypeHolder.forcingNormalPoly = _param();
+            if constexpr ( std::is_base_of_v<GT::GTPolicyFollower, SGT> )
+                dataTypeHolder.mFollowerSuggestedAxis = _param();
             return *this;
         }
 

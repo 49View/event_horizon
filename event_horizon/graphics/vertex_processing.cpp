@@ -90,3 +90,7 @@ std::shared_ptr<Matrix4f> VPList::getTransform() const {
 void VPList::setTransform( std::shared_ptr<Matrix4f> lTransform ) {
     if ( lTransform ) VPList::mTransform = lTransform;
 }
+
+void VPList::updateGPUVData( const cpuVBIB& _vbib ) {
+    gpuData->updateVBO( _vbib );
+}

@@ -116,12 +116,9 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     auto preFilterSpecularRT = rr.TD(MPBRTextures::specular_prefilter);
     auto probeRenderTarget = rr.TD("probe_render_target");
 
-    auto cbfb = FrameBufferBuilder{rr, "convolution"+_probeCameraName}.size(128).buildSimple();
     auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{512}, true) );
 
-//    auto cbfb = FrameBufferBuilder{rr, "probePB"}.size(512).buildSimple();
-//    auto cubeMapRig = addCubeMapRig( "cubemapRig",  V3f::UP_AXIS, Rect2f(V2f{512}) );
-    auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
+    auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(512), rr );
     probe->render( probeRenderTarget, 512, 0, [&]() {
         mSkybox->render();
         for ( const auto& [k, vl] : rr.CL() ) {
@@ -132,7 +129,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     });
 
     // convolution
-    auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfb, rr );
+    auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(128), rr );
     convolutionProbe->render( convolutionRT, 128, 0, [&]() {
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
@@ -145,8 +142,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)512 ) ) );
     for ( int m = 0; m < preFilterMipMaps; m++ ) {
         auto fbSize = 512>>m;
-        auto cbfbPrefilter = FrameBufferBuilder{rr, "prefilter"+std::to_string(m)+_probeCameraName}.size(fbSize).buildSimple();
-        auto preFilterProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, cbfbPrefilter, rr );
+        auto preFilterProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(fbSize), rr );
         auto lIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
 
         preFilterProbe->render( preFilterSpecularRT, fbSize, m, [&]() {

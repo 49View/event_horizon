@@ -274,7 +274,7 @@ namespace GT {
     };
 
     struct Shape     : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
-    struct Follower  : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
+    struct Follower  : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals, ForceNormalAxis {};
     struct Extrude   : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
     struct Poly      : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
     struct Mesh      : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};

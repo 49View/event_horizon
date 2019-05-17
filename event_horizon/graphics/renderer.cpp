@@ -117,10 +117,10 @@ void Renderer::init() {
     rcm.init();
     am.init();
     sm->loadShaders();
-    tm->addTextureWithData(RawImage::WHITE4x4(), FBNames::lightmap, TSLOT_LIGHTMAP );
+    tm->addTextureWithData(RawImage{512, 512, 4, 0xff000000}, FBNames::lightmap, TSLOT_LIGHTMAP );
     mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).depthOnly().build();
 
-    auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGB_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
                                                              .setGenerateMipMaps( false )
                                                              .setIsFramebufferTarget( true ) );
@@ -137,6 +137,18 @@ void Renderer::init() {
             PIXEL_FORMAT_HDR_RG_16 ).IM(S::IBL_BRDF).noDepth().build();
     mBRDF->bindAndClear();
     mBRDF->VP()->draw();
+
+    // add cascades framebuffer for downsampling, as OpenGLES does not support difference between render_frame_buffer
+    // sizes and render target texture sizes on framebuffer, or at least this seems to be the case in my observations
+
+    mProbingsFB.emplace(512, FrameBufferBuilder{*this, "Probing512"}.size(512).buildSimple());
+    mProbingsFB.emplace(256, FrameBufferBuilder{*this, "Probing256"}.size(256).buildSimple());
+    mProbingsFB.emplace(128, FrameBufferBuilder{*this, "Probing128"}.size(128).buildSimple());
+    mProbingsFB.emplace( 64, FrameBufferBuilder{*this, "Probing_64"}.size( 64).buildSimple());
+    mProbingsFB.emplace( 32, FrameBufferBuilder{*this, "Probing_32"}.size( 32).buildSimple());
+    mProbingsFB.emplace( 16, FrameBufferBuilder{*this, "Probing_16"}.size( 16).buildSimple());
+    mProbingsFB.emplace(  8, FrameBufferBuilder{*this, "Probing__8"}.size(  8).buildSimple());
+    mProbingsFB.emplace(  4, FrameBufferBuilder{*this, "Probing__4"}.size(  4).buildSimple());
 
     rmm->addRenderMaterial( S::SHADOW_MAP );
 
@@ -372,6 +384,10 @@ std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot )
 TextureUniformDesc Renderer::TDI( const std::string& _id, unsigned int tSlot ) {
     auto t = TD( _id, tSlot );
     return { t->getHandle(), tSlot, t->getTarget() };
+}
+
+std::shared_ptr<Framebuffer> Renderer::getProbing( int _index ) {
+    return mProbingsFB[_index];
 }
 
 void RenderAnimationManager::setTiming() {

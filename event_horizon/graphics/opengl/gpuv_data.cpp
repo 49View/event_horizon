@@ -30,6 +30,13 @@ void GPUVData::draw() const {
     }
 }
 
+void GPUVData::updateVBO( const cpuVBIB& _vbib ) {
+    GLCALL(glBindVertexArray( vao ));
+    GLCALL(glBindBuffer( GL_ARRAY_BUFFER, vbo ));
+    GLCALL(glBufferData( GL_ARRAY_BUFFER, _vbib.numVerts * _vbib.elenentSize, _vbib.bufferVerts.get(), GL_STATIC_DRAW ));
+
+}
+
 GPUVData::GPUVData( const cpuVBIB& _vbib ) {
     bool bCreate = vao == 0;
     if ( bCreate ) GLCALL(glGenVertexArrays( 1, &vao ));

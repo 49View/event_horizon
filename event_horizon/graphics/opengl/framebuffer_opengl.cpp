@@ -169,12 +169,12 @@ void Framebuffer::bind( const FrameBufferTextureValues* _values ) {
         GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                         frameBufferTargetToGl(_values->targetType),
                                         _values->targetHandle, _values->targetMipmap ));
-//        LOGRS( "[FramebufferValues] format: [" << glEnumToString( frameBufferTargetToGl(_values->targetType)) << "]"
-//        << " target: [" << _values->targetHandle << "]"
-//        << " targetMipmap: [" << _values->targetMipmap << "]"
-//        << " Width/mWidth: " << _values->width << "/" << mWidth << " Height/mHeight: " << _values->height << "/" << mHeight
-//        << " Handle: " << mFramebufferHandle
-//        );
+        LOGRS( "[FramebufferValues] format: [" << glEnumToString( frameBufferTargetToGl(_values->targetType)) << "]"
+        << " target: [" << _values->targetHandle << "]"
+        << " targetMipmap: [" << _values->targetMipmap << "]"
+        << " Width/mWidth: " << _values->width << "/" << mWidth << " Height/mHeight: " << _values->height << "/" << mHeight
+        << " Handle: " << mFramebufferHandle
+        );
         GLCALL( glViewport( 0, 0, _values->width, _values->height ));
     } else {
         GLCALL( glViewport( 0, 0, mWidth, mHeight ));

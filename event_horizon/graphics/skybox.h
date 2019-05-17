@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <core/util.h>
+#include <core/camera_utils.hpp>
 
 class VPList;
 class Texture;
@@ -71,7 +72,7 @@ private:
 	SkyBoxMode mode = SkyBoxMode::CubeProcedural;
 	std::unique_ptr<CubeEnvironmentMap> mCubeMapRender;
 	std::shared_ptr<Texture> mSkyboxTexture;
-
+    CubeMapRigContainer cubeMapRig;
 };
 
 class ConvolutionEnvironmentMap : public RenderModule {
