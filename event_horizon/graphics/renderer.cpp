@@ -73,12 +73,6 @@ void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>
 }
 
 Renderer::Renderer( StreamingMediator& _ssm) : ssm(_ssm) {
-    sm = std::make_shared<ShaderManager>();
-    tm = std::make_shared<TextureManager>();
-    lm = std::make_shared<LightManager>();
-    gm = std::make_shared<GPUVDataManager>();
-    rmm = std::make_shared<RenderMaterialManager>(*this);
-    mCommandBuffers = std::make_shared<CommandBufferList>(*this);
 }
 
 std::shared_ptr<RLTarget> Renderer::getTarget( const std::string& _name ) {
@@ -113,6 +107,13 @@ void Renderer::resetDefaultFB( const Vector2i& forceSize ) {
 }
 
 void Renderer::init() {
+    sm = std::make_shared<ShaderManager>();
+    tm = std::make_shared<TextureManager>();
+    lm = std::make_shared<LightManager>();
+    gm = std::make_shared<GPUVDataManager>();
+    rmm = std::make_shared<RenderMaterialManager>(*this);
+    mCommandBuffers = std::make_shared<CommandBufferList>(*this);
+
     resetDefaultFB();
     rcm.init();
     am.init();

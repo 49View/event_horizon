@@ -10,6 +10,7 @@
 #include <math.h>
 #include <assert.h>
 #include <core/lightmap_exchange_format.h>
+#include <core/game_time.h>
 
 #include <graphics/opengl/gl_headers.hpp>
 #define LIGHTMAPPER_IMPLEMENTATION
@@ -252,7 +253,7 @@ int bake( scene_t *scene, Renderer& rr )
         drawScene(scene, view, projection);
 
         // display progress every second (printf is expensive)
-        double time = glfwGetTime();
+        double time = GameTime::getCurrTimeStep();
         if (time - lastUpdateTime > 1.0)
         {
             lastUpdateTime = time;

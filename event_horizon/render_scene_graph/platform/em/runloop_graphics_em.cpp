@@ -57,6 +57,7 @@ void main_loop_em() {
 
 void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
     emscripten_set_resize_callback(nullptr, nullptr, true, em_resize_callback );
-    rl.init( initFlags, std::move(_be) );
+    rl.setBackEnd(std::move(_be));
+    rl.init( initFlags );
     emscripten_set_main_loop( main_loop_em, 0, 0 );
 }

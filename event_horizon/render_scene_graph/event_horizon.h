@@ -19,7 +19,11 @@
 #ifdef __EMSCRIPTEN__
 #include <render_scene_graph/platform/em/runloop_graphics_em.h>
 #else
+#ifdef ANDROID
+#include <render_scene_graph/platform/android/runloop_graphics_android.h>
+#else
 #include <render_scene_graph/platform/desktop/runloop_graphics_desktop.h>
+#endif
 #endif
 
 namespace di = boost::di;

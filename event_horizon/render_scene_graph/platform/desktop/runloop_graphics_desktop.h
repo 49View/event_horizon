@@ -8,6 +8,8 @@
 
 inline void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
     auto rl = di::make_injector().create<RunLoopGraphics>();
-    rl.init( initFlags, std::move(_be) );
+    // We split setBackEnd and init to allow shitty platforms (IE android) to have their own mainloops etc, poor. 
+    rl.setBackEnd(std::move(_be));
+    rl.init( initFlags );
     rl.runSingleThread();
 }

@@ -765,7 +765,7 @@ static void _glfmDrawFrame(GLFMPlatformData *platformData) {
                 _glfmTimeSubstract(_glfmTimeNow(), platformData->initTime));
         platformData->display->mainLoopFunc(platformData->display, frameTime);
     } else {
-        glClearColor(0.0, 0.0, 0.0, 1.0);
+        glClearColor(0.5, 0.9, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
     }
 

@@ -56,8 +56,11 @@ public:
 	                 MouseInput& mi, SceneGraph& _sg, RenderOrchestrator& _rsg )
                      : RunLoop( _cq ), rr( rr ), ti( ti), mi( mi), sg(_sg), rsg(_rsg) {}
 
-    void init( InitializeWindowFlagsT _initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
+    void setBackEnd( std::unique_ptr<RunLoopBackEndBase>&& _be ) {
         rlbackEnd = std::move(_be);
+	}
+
+    void init( InitializeWindowFlagsT _initFlags ) {
         WH::initializeWindow( _initFlags, rr );
         rr.init();
         rlbackEnd->activate();
