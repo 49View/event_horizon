@@ -2,6 +2,22 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <sstream>
+#include <android/log.h>
+
+void platformLogPrint( const std::string& logTag, float time, const std::string& message ) {
+
+    #define  LOG_TAG    "[EH]"
+
+    if ( logTag == "[INFO]" ) {
+        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "%s \n", message.c_str());
+    }
+    if ( logTag == "[WARNING]" ) {
+        __android_log_print(ANDROID_LOG_WARN, LOG_TAG, "%s \n", message.c_str());
+    }
+    if ( logTag == "[ERROR]" ) {
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "%s \n", message.c_str());
+    }
+}
 
 void saveImageFromClipboard(const std::string& folderName) {
 }

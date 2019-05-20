@@ -16,24 +16,90 @@
 
 #include "text_input.hpp"
 
-#ifdef USE_GLFW
-#include <graphics/opengl/GLFW/mouse_input_glfw.hpp>
-#elif USE_GLFM
-#include <graphics/opengl/GLFW/text_input_glfw.hpp>
-#endif
+//#ifdef USE_GLFW
+//#include <graphics/opengl/GLFW/mouse_input_glfw.hpp>
+//#elif USE_GLFM
+//#include <graphics/opengl/GLFM/text_input_glfm.hpp>
+//#endif
 
 class Renderer;
+class TextInput;
+
+static constexpr size_t MAX_TAPS = 10;
+
+struct MouseButtonDataEntry {
+    int action = MB_RELEASE;
+    int mods = 0;
+    double xpos;
+    double ypos;
+};
+
+struct MouseButtonData {
+    std::array<MouseButtonDataEntry, MAX_TAPS> button;
+};
+
+struct TouchStatus {
+    bool hasTouchedUp{false};
+    bool touchedDown{false};
+    bool touchedDownFirstTime{false};
+    bool doubleTapEvent{false};
+    bool singleTapEvent{false};
+    bool bHasMouseMoved{false};
+    bool overridedSwipe{false};
+    bool canTriggerLongTap{false};
+
+    float gestureTime{0.0f}; // From Touch Down to Up
+    std::vector<float> touchupTimeStamps{0.0f};
+
+    Vector2f rawTouchDownPos {Vector2f::ZERO};
+    Vector2f normTouchDownPos{Vector2f::ZERO};
+
+    int32_t touchPressTick{0};
+
+    double xpos    {0.0};
+    double ypos    {0.0};
+    double xposOld {0.0};
+    double yposOld {0.0};
+
+    Vector2f  moveDiff            {V2f::ZERO};
+    Vector3f  moveDiffMousePick   {V3f::ZERO};
+    Vector2f  singleTapPos        {V2f::ZERO};
+    Vector2f  gestureTapsFront    {V2f::ZERO};
+    Vector2f  gestureTapsBack     {V2f::ZERO};
+    V2fVector gesturesTaps{};
+
+    MouseButtonStatusValues mouseButtonStatus{MouseButtonStatusValues::UNKNOWN};
+};
+
+enum TouchIndex {
+    TOUCH_ZERO = 0,
+    TOUCH_ONE = 1,
+    TOUCH_TWO = 2,
+    TOUCH_THREE = 3,
+};
 
 struct AggregatedInputData {
-    TextInput& ti;
-    Vector2f mousePos = Vector2f::ZERO;
-    bool isMouseTouchedDown = false;
-    bool isMouseTouchDownFirst = false;
-    bool isMouseSingleTap = false;
-    bool hasMouseMoved = false;
-    float scrollValue = 0.0f;
-    Vector2f moveDiff = Vector2f::ZERO;
-    Vector2f moveDiffSS = Vector2f::ZERO;
+    TextInput&                        ti;
+    float                             scrollValue = 0.0f;
+    std::array<TouchStatus, MAX_TAPS> status;
+
+    bool isMouseSingleTap( int _touchIndex ) const { return status[_touchIndex].touchedDownFirstTime; }
+    bool isMouseTouchedDown( int _touchIndex ) const { return status[_touchIndex].touchedDown; }
+    bool hasMouseMoved( int _touchIndex ) const { return status[_touchIndex].bHasMouseMoved; }
+    V2f  mousePos( int _touchIndex ) const { return V2f{ status[_touchIndex].xpos, status[_touchIndex].ypos }; }
+    V2f  moveDiffSS( int _touchIndex ) const { return getCurrMoveDiffNorm(_touchIndex).dominant(); }
+    V2f  moveDiff( int _touchIndex ) const { return getCurrMoveDiff( _touchIndex, YGestureInvert::No ).dominant()*0.01f; }
+
+//    Vector2f mousePos = Vector2f::ZERO;
+//    bool isMouseTouchedDown{};
+//    bool isMouseSingleTap = false;
+//    bool hasMouseMoved = false;
+//    Vector2f moveDiff = Vector2f::ZERO;
+//    Vector2f moveDiffSS = Vector2f::ZERO;
+private:
+    Vector2f getCurrMoveDiff( int _touchIndex, YGestureInvert yInv = YGestureInvert::Yes ) const;
+    Vector2f getCurrMoveDiffNorm( int _touchIndex, YGestureInvert yInv = YGestureInvert::Yes ) const;
+    Vector3f getCurrMoveDiffMousePick( int _touchIndex ) const;
 };
 
 class MouseInput : public Observable<MouseInput> {
@@ -43,110 +109,58 @@ public:
 	void operator=( MouseInput const& ) = delete;
 
 public: // these are globals data accessed from low level functions on inputs etc
-	void onTouchDown( const Vector2f& pos, UpdateSignals& _updateSignals );
-	void onTouchMove( const Vector2f& pos, UpdateSignals& _updateSignals );
-	void onTouchMoveM( float* x, float *y, int size, UpdateSignals& _updateSignals );
-	void onTouchUp( const Vector2f& pos, UpdateSignals& _updateSignals );
-	void onScroll( float amount, UpdateSignals& _updateSignals );
-	void clearTaps();
+    void clearTaps();
+    void setPaused( bool isPaused );
+    inline bool isPaused() { return mPaused; }
 
-	bool hasBeenTappedInRect( JMATH::Rect2f& rect );
-	bool isRectInput() const { return mIsRectInput; }
-	void setRectInput( bool _val );
-	void updateRectInput();
-	void pushNewRectInput();
-	void ToggleRectInput();
-	bool CanDrawRectInput() { return mCanDrawRectInput; }
-	JMATH::Rect2f CurrRectInput() const;
-	const std::vector<Rect2f>& inputRects() const {
-		std::lock_guard<std::mutex> lock( mInputRectLock );
-		return mInputRects;
-	}
+	void onTouchDown( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals );
+	void onTouchMove( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals );
+	void onTouchUp(   int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals );
 
-	bool wasTouchUpSingleEvent() const { return mSingleTapEvent && !mDoubleTapEvent; }
-	bool wasDoubleTapEvent() { return mDoubleTapEvent; }
-	float checkLinearSwipe( const vector2fList& targetSwipes, const vector2fList& playerSwipes );
-	SwipeDirection checkSwipe();
-	void setPaused( bool isPaused );
-	inline bool isPaused() { return mPaused; }
-	inline bool isTouchedDown() const { return mTouchedDown; }
-	inline bool isTouchedDownFirstTime() const { return mTouchedDownFirstTime; }
+    bool isTouchedDown(int _touchIndex) const;
+    bool isTouchedDownFirstTime(int _touchIndex) const;
+    bool wasTouchUpSingleEvent(int _touchIndex) const;
+	bool wasDoubleTapEvent(int _touchIndex);
+    bool hasMouseMoved( int _touchIndex ) const;
+
+    Vector2f getFirstTap( int _touchIndex, YGestureInvert yInv = YGestureInvert::No ) const;
+    Vector2f getLastTap( int _touchIndex, YGestureInvert yInv = YGestureInvert::No ) const;
+
+    inline const vector2fList& getGestureTaps( int _touchIndex ) const;
+
+    MouseButtonStatusValues MouseButtonStatus( int _touchIndex ) const;
+    void MouseButtonStatus( int _touchIndex, MouseButtonStatusValues val );
+
+    Vector2f getCurrPos( int _touchIndex ) const;
+    Vector2f getCurrPosSS( int _touchIndex ) const;
+
+    float checkLinearSwipe( int _touchIndex, const vector2fList& targetSwipes, const vector2fList& playerSwipes );
+	SwipeDirection checkSwipe( int _touchIndex );
+
+    void onScroll( float amount, UpdateSignals& _updateSignals );
 	inline float getScrollValue() const { return mScrollValue; }
-	inline const vector2fList& getGestureTaps() const { return mGesturesTaps; }
-	Vector2f getFirstTap( YGestureInvert yInv = YGestureInvert::No ) const {
-		Vector2f pos = mGesturesTaps.front();
-		if ( yInv == YGestureInvert::Yes ) pos.invertY();
-		return pos;
-	}
-	Vector2f getLastTap( YGestureInvert yInv = YGestureInvert::No ) const;
-	Vector2f getCurrMoveDiff( YGestureInvert yInv = YGestureInvert::Yes ) const;
-	Vector2f getCurrMoveDiffNorm( YGestureInvert yInv = YGestureInvert::Yes ) const;
-	Vector3f getCurrMoveDiffMousePick() const;
-	MouseButtonStatusValues MouseButtonStatus() const { return mMouseButtonStatus; }
-	void MouseButtonStatus( MouseButtonStatusValues val ) { mMouseButtonStatus = val; }
 
 	void setCursorType( MouseCursorType mct );
+    void enableMouseCursor( bool val );
 
-	float arrowVelocity() const { return accumulatedArrowVelocity; }
-	void leftArrowPressed( float speed = 1.0f );
-	void rightArrowPressed( float speed = 1.0f );
-
+    std::array<TouchStatus, MAX_TAPS> Status() const;
 	void update( UpdateSignals& _updateSignals );
-	void enableMouseCursor( bool val );
-
-	Vector2f getCurrPos() const;
-	Vector2f getCurrPosSS() const;
-    bool hasMouseMoved() const;
 
 private:
     void setWheelScrollcallbackOnce();
-    void mouseButtonEventsUpdate( UpdateSignals& _updateSignals );
-    int  getLeftMouseButtonState();
+    void mouseButtonUpdatePositions( int _touchIndex, double xpos, double ypos );
+    void mouseButtonEventsUpdate( int _touchIndex, UpdateSignals& _updateSignals );
     void getCursorPos( double& xpos, double& ypos );
-    void setupRectInputAfterStatusChange();
-	void accumulateArrowTouches( float direction );
-	bool checkLongTapDistance();
+	bool checkLongTapDistance( int _touchIndex );
 
 private:
-	float mGestureTime = 0.0f; // From Touch Down to Up
-	bool  mOverridedSwipe = false;
-	bool  mCanTriggerLongTap = false;
 	bool  mPaused = false;
-	bool  mHasTouchedUp = false;
-	bool  mTouchedDown = false;
-	bool  mTouchedDownFirstTime = false;
-	bool  mDoubleTapEvent = false;
-	bool  mSingleTapEvent = false;
-	bool  mbHasMouseMoved = false;
-	Vector2f mRawTouchDownPos = Vector2f::ZERO;
-	Vector2f mNormTouchDownPos = Vector2f::ZERO;
-	Plane3f mUIPlane{ Vector3f::Z_AXIS* 1.0f, 0.0f };
-	float accumulatedArrowVelocity = 0.0f;
-	float mCurrTimeStep = 0;
-	int32_t glfwMousePressLeftTick = 0;
-	bool   mIsRectInput = false;
-	bool   mCanDrawRectInput = false;
-	std::vector<Rect2f> mInputRects;
-	double xpos = 0.0;
-	double ypos = 0.0;
-	double xposOld = 0.0;
-	double yposOld = 0.0;
+    float mCurrTimeStamp = 0.0f;
 
-	MouseButtonStatusValues mMouseButtonStatus;
-
+    std::array<TouchStatus, MAX_TAPS> status;
 	float mScrollValue = 0.0f;
-	Vector2f mMoveDiff = Vector2f::ZERO;
-	Vector3f mMoveDiffMousePick = Vector3f::ZERO;
-	Vector2f mSingleTapPos = Vector2f::ZERO;
-
-	Vector2f mGestureTapsFront = Vector2f::ZERO;
-	Vector2f mGestureTapsBack = Vector2f::ZERO;
-
-	vector2fList mGesturesTaps;
-	std::vector<float> mTouchupTimeStamps;
-	float mCurrTimeStamp = 0.0f;
 
 public: // these are globals data accessed from low level functions on inputs etc
     static Vector2f GScrollData;
-	mutable std::mutex mInputRectLock;
+    static MouseButtonData GMouseButtonData;
 };

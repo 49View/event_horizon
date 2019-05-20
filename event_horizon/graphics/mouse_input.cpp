@@ -7,92 +7,98 @@
 #include "core/app_globals.h"
 
 Vector2f MouseInput::GScrollData{V2f::ZERO};
+MouseButtonData MouseInput::GMouseButtonData{};
 
-MouseInput::MouseInput() {
-	mGesturesTaps.reserve( 100 );
+Vector2f AggregatedInputData::getCurrMoveDiff( int _touchIndex, YGestureInvert yInv ) const {
+    Vector2f ret = status[_touchIndex].moveDiff;
+    if ( yInv == YGestureInvert::Yes ) ret.invertY();
+    return  ret;
 }
 
-void MouseInput::onTouchDown( const Vector2f& pos, UpdateSignals& _updateSignals ) {
-	mMouseButtonStatus = MouseButtonStatusValues::DOWN;
-	if ( mGesturesTaps.size() > 2 ) mGesturesTaps.clear();
-	mGesturesTaps.push_back( pos );
-	mGestureTime = 0.0f;
-	mOverridedSwipe = false;
-	mCanTriggerLongTap = true;
-	mHasTouchedUp = false;
-	mTouchedDownFirstTime = (!mTouchedDown);
-	mTouchedDown = true;
-	mMoveDiff = Vector2f::ZERO;
-	mRawTouchDownPos = pos;
-	mNormTouchDownPos = pos / getScreenSizef;
+Vector2f AggregatedInputData::getCurrMoveDiffNorm( int _touchIndex, YGestureInvert yInv ) const {
+    return ( getCurrMoveDiff( _touchIndex, yInv ) / getScreenSizef ) * getScreenAspectRatioVector;
+}
+
+Vector3f AggregatedInputData::getCurrMoveDiffMousePick( int _touchIndex ) const {
+    return status[_touchIndex].moveDiffMousePick;
+}
+
+MouseInput::MouseInput() {
+    for ( auto& st : status ) {
+        st.gesturesTaps.reserve( 100 );
+    }
+}
+
+void MouseInput::onTouchDown( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals ) {
+	status[_touchIndex].mouseButtonStatus = MouseButtonStatusValues::DOWN;
+	if ( status[_touchIndex].gesturesTaps.size() > 2 ) status[_touchIndex].gesturesTaps.clear();
+	status[_touchIndex].gesturesTaps.push_back( pos );
+	status[_touchIndex].gestureTime = 0.0f;
+	status[_touchIndex].overridedSwipe = false;
+	status[_touchIndex].canTriggerLongTap = true;
+
+    status[_touchIndex].hasTouchedUp = false;
+	status[_touchIndex].touchedDownFirstTime = (!status[_touchIndex].touchedDown);
+	status[_touchIndex].touchedDown = true;
+	status[_touchIndex].moveDiff = Vector2f::ZERO;
+	status[_touchIndex].rawTouchDownPos = pos;
+	status[_touchIndex].normTouchDownPos = pos / getScreenSizef;
     notify( *this, "OnTouchDown");
 	_updateSignals.NeedsUpdate(true);
 }
 
-void MouseInput::onTouchMove( const Vector2f& pos, UpdateSignals& _updateSignals ) {
-	mMouseButtonStatus = MouseButtonStatusValues::MOVING;
-	mTouchedDownFirstTime = false;
-	if ( mGesturesTaps.empty() ) {
-		mGesturesTaps.push_back( pos );
+void MouseInput::onTouchMove( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals ) {
+	status[_touchIndex].mouseButtonStatus = MouseButtonStatusValues::MOVING;
+	status[_touchIndex].touchedDownFirstTime = false;
+	if ( status[_touchIndex].gesturesTaps.empty() ) {
+		status[_touchIndex].gesturesTaps.push_back( pos );
 	}
-	if ( pos != mGesturesTaps.back() ) {
-//		Vector3f p1 = mousePickOnUIPlane( mGesturesTaps.back(), mUIPlane );
-//		Vector3f p2 = mousePickOnUIPlane( pos, mUIPlane );
-//		mMoveDiffMousePick = p2 - p1;
-
-		mMoveDiff = pos - mGesturesTaps.back();
-		mGesturesTaps.push_back( pos );
+	if ( pos != status[_touchIndex].gesturesTaps.back() ) {
+		status[_touchIndex].moveDiff = pos - status[_touchIndex].gesturesTaps.back();
+		status[_touchIndex].gesturesTaps.push_back( pos );
 	} else {
-		mMoveDiff = Vector2f::ZERO;
-		mMoveDiffMousePick = Vector3f::ZERO;
+		status[_touchIndex].moveDiff = Vector2f::ZERO;
+		status[_touchIndex].moveDiffMousePick = Vector3f::ZERO;
 	}
 
-	if ( mGestureTime > MAX_SWIPE_TIME_LIMIT ) {
-		checkSwipe();
+	if ( status[_touchIndex].gestureTime > MAX_SWIPE_TIME_LIMIT ) {
+		checkSwipe(_touchIndex);
 	}
-	mCanTriggerLongTap = checkLongTapDistance();
+	status[_touchIndex].canTriggerLongTap = checkLongTapDistance(_touchIndex);
     notify( *this, "onTouchMove");
 	_updateSignals.NeedsUpdate(true);
 }
 
-void MouseInput::onTouchMoveM( [[maybe_unused]] float* x, [[maybe_unused]] float *y,
-							   [[maybe_unused]] int size, UpdateSignals& _updateSignals ) {
-	mMouseButtonStatus = MouseButtonStatusValues::MOVING;
-	mCanTriggerLongTap = false;
-    notify( *this, "onTouchMoveM");
-	_updateSignals.NeedsUpdate(true);
-}
+void MouseInput::onTouchUp( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals ) {
+	status[_touchIndex].mouseButtonStatus = MouseButtonStatusValues::UP;
+	status[_touchIndex].gesturesTaps.push_back( pos );
+	status[_touchIndex].canTriggerLongTap = false;
+	status[_touchIndex].hasTouchedUp = true;
+	status[_touchIndex].touchedDown = false;
+	status[_touchIndex].touchedDownFirstTime = false;
 
-void MouseInput::onTouchUp( const Vector2f& pos, UpdateSignals& _updateSignals ) {
-	mMouseButtonStatus = MouseButtonStatusValues::UP;
-	mGesturesTaps.push_back( pos );
-	mCanTriggerLongTap = false;
-	mHasTouchedUp = true;
-	mTouchedDown = false;
-	mTouchedDownFirstTime = false;
-
-    Vector2f xyd = mGesturesTaps.back() - mGesturesTaps.front();
+    Vector2f xyd = status[_touchIndex].gesturesTaps.back() - status[_touchIndex].gesturesTaps.front();
 	// Check if a single tap was performed
-	if ( !mGesturesTaps.empty() && mGestureTime < SINGLE_TAP_TIME_LIMIT ) {
-        mSingleTapEvent = true;
-        mSingleTapPos = mGesturesTaps.back();
+	if ( !status[_touchIndex].gesturesTaps.empty() && status[_touchIndex].gestureTime < SINGLE_TAP_TIME_LIMIT ) {
+        status[_touchIndex].singleTapEvent = true;
+        status[_touchIndex].singleTapPos = status[_touchIndex].gesturesTaps.back();
 	}
 	// Handle and check if double tap
-	mTouchupTimeStamps.push_back( mCurrTimeStamp );
-	if ( mTouchupTimeStamps.size() > 1 && mGesturesTaps.size() > 2 ) {
-		float time2 = mTouchupTimeStamps.back();
-		float time1 = mTouchupTimeStamps[mTouchupTimeStamps.size() - 2];
+	status[_touchIndex].touchupTimeStamps.push_back( mCurrTimeStamp );
+	if ( status[_touchIndex].touchupTimeStamps.size() > 1 && status[_touchIndex].gesturesTaps.size() > 2 ) {
+		float time2 = status[_touchIndex].touchupTimeStamps.back();
+		float time1 = status[_touchIndex].touchupTimeStamps[status[_touchIndex].touchupTimeStamps.size() - 2];
 		if ( time2 - time1 < DOUBLE_TAP_TIME_LIMIT ) {
             if ( length( xyd ) < TAP_AREA ) {
-                mDoubleTapEvent = true;
-                mTouchupTimeStamps.clear();
+                status[_touchIndex].doubleTapEvent = true;
+                status[_touchIndex].touchupTimeStamps.clear();
             }
 		}
 	}
 
-	if ( mDoubleTapEvent ) {
+	if ( status[_touchIndex].doubleTapEvent ) {
 		notify( *this, "onDoubleTap");
-	} else if ( mSingleTapEvent ) {
+	} else if ( status[_touchIndex].singleTapEvent ) {
 		notify( *this, "onSingleTap");
 	} else {
 		notify( *this, "onTouchUp");
@@ -113,68 +119,24 @@ void MouseInput::onScroll( float amount, UpdateSignals& _updateSignals ) {
 }
 
 void MouseInput::clearTaps() {
-	mGesturesTaps.clear();
+    for ( auto& st : status ) {
+        st.gesturesTaps.clear();
+    }
 }
 
-void MouseInput::updateRectInput() {
-	std::lock_guard<std::mutex> lock( mInputRectLock );
-	if ( mIsRectInput && mGesturesTaps.size() > 1 && !mInputRects.empty() ) {
-//		Vector3f p1 = mousePickOnUIPlane( mGesturesTaps.back(), mUIPlane );
-//		Vector3f p2 = mousePickOnUIPlane( mGesturesTaps.front(), mUIPlane );
-//		mInputRects.back() = Rect2f{ {p1.xy(), p2.xy()} };
-		mCanDrawRectInput = true;
-	}
-}
-
-void MouseInput::pushNewRectInput() {
-	std::lock_guard<std::mutex> lock( mInputRectLock );
-	clearTaps();
-	mInputRects.push_back( Rect2f::INVALID );
-}
-
-void MouseInput::ToggleRectInput() {
-	mIsRectInput = !mIsRectInput;
-	setupRectInputAfterStatusChange();
-}
-
-void MouseInput::setRectInput( const bool _val ) {
-	if ( _val != mIsRectInput ) {
-		ToggleRectInput();
-	}
-}
-
-void MouseInput::setupRectInputAfterStatusChange() {
-//	rr.CM().enableInputs( !mIsRectInput );
-	mInputRects.clear();
-	if ( mIsRectInput ) {
-		pushNewRectInput();
-	} else {
-		clearTaps();
-		mCanDrawRectInput = false;
-	}
-}
-
-JMATH::Rect2f MouseInput::CurrRectInput() const {
-	return !mInputRects.empty() ? mInputRects.back() : Rect2f::INVALID;
-}
-
-bool MouseInput::hasBeenTappedInRect( JMATH::Rect2f& rect ) {
-	return mSingleTapEvent && rect.contains( mSingleTapPos );
-}
-
-SwipeDirection MouseInput::checkSwipe() {
+SwipeDirection MouseInput::checkSwipe( int _touchIndex ) {
 	// Check Swipe
-	if ( mOverridedSwipe ) {
+	if ( status[_touchIndex].overridedSwipe ) {
 		return SwipeDirection::INVALID;
 	}
 
-	Vector2f xyd = mGesturesTaps.back() - mGesturesTaps.front();
+	Vector2f xyd = status[_touchIndex].gesturesTaps.back() - status[_touchIndex].gesturesTaps.front();
 
 	const float SWIPE_ANGLE = 0.5f;
 	const float SWIPE_LENGTH = 0.05f;
 
 	if ( ( fabs( xyd.x() ) < SWIPE_ANGLE || fabs( xyd.y() ) < SWIPE_ANGLE ) && ( length( xyd ) > SWIPE_LENGTH ) ) {
-		mOverridedSwipe = true;
+		status[_touchIndex].overridedSwipe = true;
 		if ( fabs( xyd.x() ) > fabs( xyd.y() ) ) {
 			if ( xyd.x() > 0.0f ) {
 				return SwipeDirection::LEFT;
@@ -194,8 +156,9 @@ SwipeDirection MouseInput::checkSwipe() {
 
 // Check Swipe on an arbitrary direction
 // Return deviation from direction
-float MouseInput::checkLinearSwipe( const vector2fList& targetSwipes, const vector2fList& playerSwipes ) {
-	if ( mGesturesTaps.size() > 2 && mHasTouchedUp ) {
+float MouseInput::checkLinearSwipe( int _touchIndex, const vector2fList& targetSwipes,
+                                    const vector2fList& playerSwipes ) {
+	if ( status[_touchIndex].gesturesTaps.size() > 2 && status[_touchIndex].hasTouchedUp ) {
 		float dist1 = distance( targetSwipes.front(), playerSwipes.front() );
 		float dist2 = distance( targetSwipes.back(), playerSwipes.back() );
 
@@ -206,13 +169,13 @@ float MouseInput::checkLinearSwipe( const vector2fList& targetSwipes, const vect
 	}
 }
 
-bool MouseInput::checkLongTapDistance() {
+bool MouseInput::checkLongTapDistance( int _touchIndex ) {
 	// Check Swipe
-	if ( !mCanTriggerLongTap ) {
+	if ( !status[_touchIndex].canTriggerLongTap ) {
 		return false;
 	}
 
-	Vector2f xyd = mGesturesTaps.back() - mGesturesTaps.front();
+	Vector2f xyd = status[_touchIndex].gesturesTaps.back() - status[_touchIndex].gesturesTaps.front();
 
     return length( xyd ) < TAP_AREA;
 }
@@ -221,104 +184,123 @@ void MouseInput::setPaused( bool isPaused ) {
 	mPaused = isPaused;
 }
 
-Vector2f MouseInput::getLastTap( YGestureInvert yInv /*= YGestureInvert::No*/ ) const {
+Vector2f MouseInput::getLastTap( int _touchIndex, YGestureInvert yInv /*= YGestureInvert::No*/ ) const {
 	Vector2f pos = Vector2f::ZERO;
-	if ( !mGesturesTaps.empty() ) {
-		pos = mGesturesTaps.back();
+	if ( !status[_touchIndex].gesturesTaps.empty() ) {
+		pos = status[_touchIndex].gesturesTaps.back();
 		if ( yInv == YGestureInvert::Yes ) pos.invertY();
 	}
 	return pos;
 }
 
-Vector2f MouseInput::getCurrMoveDiff( YGestureInvert yInv ) const {
-	Vector2f ret = mMoveDiff;
-	if ( yInv == YGestureInvert::Yes ) ret.invertY();
-	return  ret;
+Vector2f MouseInput::getCurrPos( int _touchIndex ) const {
+    return Vector2f{ status[_touchIndex].xpos, status[_touchIndex].ypos };
 }
 
-Vector2f MouseInput::getCurrMoveDiffNorm( YGestureInvert yInv ) const {
-	return ( getCurrMoveDiff( yInv ) / getScreenSizef ) * getScreenAspectRatioVector;
+Vector2f MouseInput::getCurrPosSS( int _touchIndex ) const {
+    return Vector2f{ status[_touchIndex].xpos, getScreenSizef.y() - status[_touchIndex].ypos };
 }
 
-Vector3f MouseInput::getCurrMoveDiffMousePick() const {
-	return mMoveDiffMousePick;
+bool MouseInput::hasMouseMoved( int _touchIndex ) const {
+    return status[_touchIndex].bHasMouseMoved;
 }
 
-void MouseInput::accumulateArrowTouches( float direction ) {
-	accumulatedArrowVelocity += ( mCurrTimeStep * direction ) / 10.0f;
-	if ( accumulatedArrowVelocity > 0.1f ) accumulatedArrowVelocity = 0.1f;
+Vector2f MouseInput::getFirstTap( int _touchIndex, YGestureInvert yInv ) const {
+    Vector2f pos = status[_touchIndex].gesturesTaps.front();
+    if ( yInv == YGestureInvert::Yes ) pos.invertY();
+    return pos;
 }
 
-void MouseInput::leftArrowPressed( const float speed ) {
-	accumulateArrowTouches( -speed );
+bool MouseInput::isTouchedDown( int _touchIndex ) const {
+    return status[_touchIndex].touchedDown;
 }
 
-void MouseInput::rightArrowPressed( const float speed ) {
-	accumulateArrowTouches( speed );
+bool MouseInput::isTouchedDownFirstTime( int _touchIndex ) const {
+    return status[_touchIndex].touchedDownFirstTime;
 }
 
-void MouseInput::mouseButtonEventsUpdate( UpdateSignals& _updateSignals ) {
-    int mouseLeftState = getLeftMouseButtonState();
+bool MouseInput::wasTouchUpSingleEvent( int _touchIndex ) const {
+    return status[_touchIndex].singleTapEvent && !status[_touchIndex].doubleTapEvent;
+}
 
-    if ( mouseLeftState == MB_PRESS ) {
-        if ( glfwMousePressLeftTick == 0 ) {
-            onTouchDown( { xpos, ypos }, _updateSignals );
+bool MouseInput::wasDoubleTapEvent( int _touchIndex ) {
+    return status[_touchIndex].doubleTapEvent;
+}
+
+const vector2fList& MouseInput::getGestureTaps( int _touchIndex ) const {
+    return status[_touchIndex].gesturesTaps;
+}
+
+MouseButtonStatusValues MouseInput::MouseButtonStatus( int _touchIndex ) const {
+    return status[_touchIndex].mouseButtonStatus;
+}
+
+void MouseInput::MouseButtonStatus( int _touchIndex, MouseButtonStatusValues val ) {
+    status[_touchIndex].mouseButtonStatus = val;
+}
+
+void MouseInput::mouseButtonUpdatePositions( int _touchIndex, double xpos, double ypos ) {
+    getCursorPos( xpos, ypos ); // if doesNotHandleTouchMove use direct call, otherwise do nothing and rely on callback
+    status[_touchIndex].xpos = xpos;
+    status[_touchIndex].ypos = ypos;
+    status[_touchIndex].bHasMouseMoved = ( status[_touchIndex].xpos != status[_touchIndex].xposOld ||
+                                           status[_touchIndex].ypos != status[_touchIndex].yposOld );
+    status[_touchIndex].xposOld = status[_touchIndex].xpos;
+    status[_touchIndex].yposOld = status[_touchIndex].ypos;
+#ifdef OSX
+    status[_touchIndex].xpos *= 2.0;
+    status[_touchIndex].ypos *= 2.0;
+#endif
+    status[_touchIndex].ypos = ( getScreenSizef.y() - status[_touchIndex].ypos );
+}
+
+void MouseInput::mouseButtonEventsUpdate( int _touchIndex, UpdateSignals& _updateSignals ) {
+    auto buttonStatus = GMouseButtonData.button[_touchIndex];
+    int mouseButtonState = buttonStatus.action;
+    mouseButtonUpdatePositions( _touchIndex, buttonStatus.xpos, buttonStatus.ypos );
+    if ( mouseButtonState == MB_PRESS ) {
+        if ( status[_touchIndex].touchPressTick == 0 ) {
+            onTouchDown( _touchIndex, { status[_touchIndex].xpos, status[_touchIndex].ypos }, _updateSignals );
         } else {
-            onTouchMove( { xpos, ypos }, _updateSignals );
+            onTouchMove( _touchIndex, { status[_touchIndex].xpos, status[_touchIndex].ypos }, _updateSignals );
         }
-        ++glfwMousePressLeftTick;
-    } else {
-        if ( glfwMousePressLeftTick != 0 ) {
-            onTouchUp( { xpos, ypos }, _updateSignals );
+        ++status[_touchIndex].touchPressTick;
+    } else if ( mouseButtonState == MB_RELEASE ) {
+        if ( status[_touchIndex].touchPressTick != 0 ) {
+            onTouchUp( _touchIndex, { status[_touchIndex].xpos, status[_touchIndex].ypos }, _updateSignals );
         }
-        glfwMousePressLeftTick = 0;
+        status[_touchIndex].touchPressTick = 0;
     }
 }
 
+std::array<TouchStatus, MAX_TAPS> MouseInput::Status() const {
+    return status;
+}
+
 void MouseInput::update( UpdateSignals& _updateSignals ) {
+    static constexpr size_t NUM_MOUSE_BUTTONS = 2;
     setWheelScrollcallbackOnce();
 
 	mCurrTimeStamp = GameTime::getCurrTimeStamp();
-	mCurrTimeStep = GameTime::getCurrTimeStep();
-	mGestureTime += GameTime::getCurrTimeStep();
-	accumulatedArrowVelocity *= 0.90f;
-	mGestureTapsFront = Vector2f::ZERO;
-	mGestureTapsBack = Vector2f::ZERO;
-    mSingleTapEvent = false;
-    mDoubleTapEvent = false;
-    if ( !mGesturesTaps.empty() ) {
-		mGestureTapsFront = mGesturesTaps.front();
-		mGestureTapsBack = mGesturesTaps.back();
-	}
+	
+	for ( size_t _touchIndex = 0; _touchIndex < NUM_MOUSE_BUTTONS; _touchIndex++ ) {
+        status[_touchIndex].gestureTime += GameTime::getCurrTimeStep();
+        status[_touchIndex].gestureTapsFront = Vector2f::ZERO;
+        status[_touchIndex].gestureTapsBack = Vector2f::ZERO;
+        status[_touchIndex].singleTapEvent = false;
+        status[_touchIndex].doubleTapEvent = false;
+        if ( !status[_touchIndex].gesturesTaps.empty()) {
+            status[_touchIndex].gestureTapsFront = status[_touchIndex].gesturesTaps.front();
+            status[_touchIndex].gestureTapsBack = status[_touchIndex].gesturesTaps.back();
+        }
 
-	if ( mCanTriggerLongTap && mGestureTime > LONG_TAP_TIME_LIMIT ) {
-		mCanTriggerLongTap = false;
-	}
+        if ( status[_touchIndex].canTriggerLongTap && status[_touchIndex].gestureTime > LONG_TAP_TIME_LIMIT ) {
+            status[_touchIndex].canTriggerLongTap = false;
+        }
 
-    getCursorPos( xpos, ypos );
-    mbHasMouseMoved = ( xpos != xposOld || ypos != yposOld );
-    xposOld = xpos;
-    yposOld = ypos;
-#ifdef OSX
-    xpos *= 2.0;
-    ypos *= 2.0;
-#endif
-    ypos = ( getScreenSizef.y() - ypos );
-
-    mouseButtonEventsUpdate( _updateSignals );
-
+        mouseButtonEventsUpdate( _touchIndex, _updateSignals );
+    }
+	
 	onScroll( GScrollData.y(), _updateSignals );
 	GScrollData = { 0.0f, 0.0f };
-}
-
-Vector2f MouseInput::getCurrPos() const {
-	return Vector2f{ xpos, ypos };
-}
-
-Vector2f MouseInput::getCurrPosSS() const {
-	return Vector2f{ xpos, getScreenSizef.y() - ypos };
-}
-
-bool MouseInput::hasMouseMoved() const {
-    return mbHasMouseMoved;
 }

@@ -6,9 +6,14 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <iostream>
 #include <pwd.h>
 
 #include "../../../util.h"
+
+void platformLogPrint( const std::string& logTag, float time, const std::string& message ) {
+    std::cout << logTag << " " << time << " " << message << std::endl;
+}
 
 void saveImageFromClipboard( [[maybe_unused]] const std::string& folderName) {
 }

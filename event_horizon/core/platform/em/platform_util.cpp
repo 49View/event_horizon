@@ -2,6 +2,11 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <sstream>
+#include <iostream>
+
+void platformLogPrint( const std::string& logTag, float time, const std::string& message ) {
+    std::cout << logTag << " " << time << " " << message << std::endl;
+}
 
 void saveImageFromClipboard(const std::string& folderName) {
 }

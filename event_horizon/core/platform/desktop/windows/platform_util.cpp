@@ -6,11 +6,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdint.h>
+#include <iostream>
 #define stat _stat
 
 #include "../../../util.h"
 
 #include <windows.h>
+
+void platformLogPrint( const std::string& logTag, float time, const std::string& message ) {
+    std::cout << logTag << " " << time << " " << message << std::endl;
+}
 
 bool isalnumCC(char c) {
 	return isalnum(c);

@@ -120,16 +120,7 @@ protected:
     }
 
     AggregatedInputData aggregateInputs() {
-        return AggregatedInputData{ ti,
-                             mi.getCurrPos(),
-                             mi.isTouchedDown(),
-                             mi.isTouchedDownFirstTime(),
-                             mi.wasTouchUpSingleEvent(),
-                             mi.hasMouseMoved(),
-                             mi.getScrollValue(),
-                             mi.getCurrMoveDiff( YGestureInvert::No ).dominant()*0.01f,
-                             mi.getCurrMoveDiffNorm().dominant() };
-
+        return AggregatedInputData{ ti, mi.getScrollValue(), mi.Status() };
     }
 
 protected:

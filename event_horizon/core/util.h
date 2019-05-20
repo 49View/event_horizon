@@ -58,7 +58,7 @@ void logPrint( LogPriority logPriority, const char *tag, const char *fmt, ... );
 void doAssert( bool condition, const char* text, int line, const char* file );
 void doAssertV( bool condition, const char* text, int line, const char* file, const char *fmt, ... );
 void platformBreakpoint();
-void platformLogPrint( LogPriority priority, const char* tag, const char *fmt, va_list vl );
+void platformLogPrint( const std::string& logTag, float time, const std::string& message );
 int threadId();
 
 namespace ClipBoard {
@@ -331,7 +331,7 @@ extern int64_t globalHash;
 
 #define ARRAY_LENGTH(X) (sizeof(X) / sizeof((X)[0]))
 
-#ifndef NDEBUG
+#ifndef _PRODUCTION_
 
 #ifdef TRACE_FUNCTIONS
 #define FUNCTION_BEGIN() logPrint(LOG_PRIOTITY_INFO, LOG_TAG, "%s() - begin\n", __FUNCTION__ )

@@ -217,7 +217,8 @@ enum class SwipeDirection {
 enum class MouseButtonStatusValues {
 	UP,
 	DOWN,
-	MOVING
+	MOVING,
+    UNKNOWN
 };
 
 enum class MouseCursorType {

@@ -7,18 +7,14 @@
 #include <graphics/opengl/mobile/window_handling_opengl_glfm.hpp>
 #include <graphics/mouse_input.hpp>
 
-void MouseInput::setCursorType( MouseCursorType mct ) {
+void MouseInput::setCursorType( [[maybe_unused]] MouseCursorType mct ) {
 }
 
-void MouseInput::enableMouseCursor( const bool val ) {
+void MouseInput::enableMouseCursor( [[maybe_unused]] const bool val ) {
 }
 
 void MouseInput::setWheelScrollcallbackOnce() {
 }
 
-int MouseInput::getLeftMouseButtonState() {
-    return 0;
-}
-
-void MouseInput::getCursorPos( double& xpos, double& ypos ) {
+void MouseInput::getCursorPos( [[maybe_unused]] double& xpos, [[maybe_unused]] double& ypos ) {
 }

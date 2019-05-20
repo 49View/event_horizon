@@ -39,32 +39,6 @@ void hookLogCallbackFunction( logCF _cf ) {
 	logCallback = _cf;
 }
 
-void platformLogPrint( LogPriority priority, const char* /*tag*/, const char *fmt, va_list vl ) {
-	char buffer[65536];
-
-	if ( priority == LOG_PRIORITY_ERROR ) {
-		vsnprintf( buffer, 65536, fmt, vl );
-	} else if ( priority == LOG_PRIORITY_WARN ) {
-		vsnprintf( buffer, 65536, fmt, vl );
-	} else {
-		vsnprintf( buffer, 65536, fmt, vl );
-	}
-
-	//TODO fo linux it works just as follow
-	std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - GameTime::getStartTimeStamp();
-	auto ts = static_cast<float>(elapsed_seconds.count());
-
-	std::cout << ts << " " << buffer << std::endl;
-	if ( logCallback ) {
-		logCallback( buffer );
-	}
-
-	//std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	//std::wstring wbuffer = converter.from_bytes( buffer );
-
-	//std::wcout << wbuffer << L"\n";
-}
-
 void platformBreakpoint() {
 	// Use abort, so we will get a callstack sometimes
 	std::abort();
@@ -74,8 +48,31 @@ void logPrint( LogPriority logPriority, const char *tag, const char *fmt, ... ) 
 	va_list vl;
 	va_start( vl, fmt );
 
-	// Android specific print
-	platformLogPrint( logPriority, tag, fmt, vl );
+    char buffer[65536];
+    vsnprintf( buffer, 65536, fmt, vl );
+
+    std::string logTag = "[INFO]";
+    if ( logPriority == LOG_PRIORITY_ERROR ) {
+        logTag = "[ERROR]";
+    } else if ( logPriority == LOG_PRIORITY_WARN ) {
+        logTag = "[WARNING]";
+    }
+
+    std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - GameTime::getStartTimeStamp();
+    auto ts = static_cast<float>(elapsed_seconds.count());
+
+    // Android specific print
+	platformLogPrint( logTag, ts, std::string(buffer) );
+
+    if ( logCallback ) {
+        logCallback( buffer );
+    }
+
+    //TODO fo linux it works just as follow
+    //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    //std::wstring wbuffer = converter.from_bytes( buffer );
+
+    //std::wcout << wbuffer << L"\n";
 
 	va_end( vl );
 }
@@ -95,7 +92,8 @@ void doAssertV( bool condition, const char* text, int line, const char* file, co
 		// Print error message
 		va_list vl;
 		va_start( vl, fmt );
-		platformLogPrint( LOG_PRIORITY_ERROR, LOG_TAG, fmt, vl );
+		LOGE( fmt, vl);
+//		platformLogPrint( LOG_PRIORITY_ERROR, LOG_TAG, fmt, vl );
 		va_end( vl );
 
 		// Do assert

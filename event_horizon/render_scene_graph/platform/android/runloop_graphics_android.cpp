@@ -37,6 +37,8 @@ void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndB
                          GLFMStencilFormatNone,
                          GLFMMultisampleNone);
 
+//    glfmSetUserData(glfmdisplay, app);
+    glfmSetMultitouchEnabled(glfmdisplay, true);
     glfmSetSurfaceCreatedFunc(glfmdisplay, onSurfaceCreated);
     glfmSetSurfaceResizedFunc(glfmdisplay, onSurfaceCreated);
     glfmSetSurfaceDestroyedFunc(glfmdisplay, onSurfaceDestroyed);
@@ -46,18 +48,11 @@ void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndB
 }
 
 static bool onTouch(GLFMDisplay *display, int touch, GLFMTouchPhase phase, double x, double y) {
-//    if (phase == GLFMTouchPhaseHover) {
-//        return false;
-//    }
-//    ExampleApp *app = (ExampleApp*)glfmGetUserData(display);
-//    if (phase != GLFMTouchPhaseBegan) {
-//        int width, height;
-//        glfmGetDisplaySize(display, &width, &height);
-//        app->offsetX += 2 * (x - app->lastTouchX) / width;
-//        app->offsetY -= 2 * (y - app->lastTouchY) / height;
-//    }
-//    app->lastTouchX = x;
-//    app->lastTouchY = y;
+    LOGRS( "Touch# " << touch << " Phase: " << phase << " [" << x << "," << y << "]" );
+    rl.MI().GMouseButtonData.button[touch].action = (phase == 1 || phase == 2) ? MB_PRESS : MB_RELEASE;
+    rl.MI().GMouseButtonData.button[touch].xpos = x;
+    rl.MI().GMouseButtonData.button[touch].ypos = y;
+
     return true;
 }
 
