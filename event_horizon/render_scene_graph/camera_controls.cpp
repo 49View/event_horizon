@@ -102,7 +102,7 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
             _cam->incrementQuatAngles( V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f } );
         }
 
-        if ( !inputIsBlockedOnSelection() && mi.isMouseSingleTap(TOUCH_ZERO) ) {
+        if ( !inputIsBlockedOnSelection() && mi.isMouseTouchedDownFirstTime(TOUCH_ZERO) ) {
             unselectAll();
             auto rayPick = _cam->rayViewportPickIntersection( mi.mousePos(TOUCH_ZERO) );
 //            bool bHit =
@@ -209,9 +209,9 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
     float strafe = 0.0f;
     float moveUp = 0.0f;
 
-    if ( mi.isMouseTouchedDown(TOUCH_ZERO)) {
-        moveUp = mi.moveDiff(TOUCH_ZERO).y();
-        strafe = mi.moveDiff(TOUCH_ZERO).x();
+    if ( mi.isMouseTouchedDown(TOUCH_ONE)) {
+        moveUp = mi.moveDiff(TOUCH_ONE).y();
+        strafe = mi.moveDiff(TOUCH_ONE).x();
     }
     moveForward = mi.scrollValue; // It's safe to call it every frame as no gesture on wheel/magic mouse
     _cam->moveForward( moveForward );

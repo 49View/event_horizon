@@ -289,6 +289,7 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
         status[_touchIndex].gestureTapsBack = Vector2f::ZERO;
         status[_touchIndex].singleTapEvent = false;
         status[_touchIndex].doubleTapEvent = false;
+        status[_touchIndex].hasTouchedUp = false;
         if ( !status[_touchIndex].gesturesTaps.empty()) {
             status[_touchIndex].gestureTapsFront = status[_touchIndex].gesturesTaps.front();
             status[_touchIndex].gestureTapsBack = status[_touchIndex].gesturesTaps.back();

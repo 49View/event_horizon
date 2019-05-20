@@ -84,6 +84,8 @@ static bool onKey(GLFMDisplay *display, GLFMKey keyCode, GLFMKeyAction action, i
     return handled;
 }
 
+static bool bSurfaceCreatedCallback = false;
+
 static void onSurfaceCreated(GLFMDisplay *display, int width, int height) {
     GLFMRenderingAPI api = glfmGetRenderingAPI(display);
     V2i sizei{width,height};
@@ -94,7 +96,8 @@ static void onSurfaceCreated(GLFMDisplay *display, int width, int height) {
            api == GLFMRenderingAPIOpenGLES32 ? "ES 3.2" :
            api == GLFMRenderingAPIOpenGLES31 ? "ES 3.1" :
            api == GLFMRenderingAPIOpenGLES3 ? "ES 3.0" : "ES 2.0");
-    rl.init(InitializeWindowFlags::FullScreen);
+
+    bSurfaceCreatedCallback = true;
 }
 
 static void onSurfaceDestroyed(GLFMDisplay *display) {
@@ -102,5 +105,9 @@ static void onSurfaceDestroyed(GLFMDisplay *display) {
 }
 
 static void onFrame(GLFMDisplay *display, double frameTime) {
+    if ( bSurfaceCreatedCallback ) {
+        rl.init(InitializeWindowFlags::FullScreen);
+        bSurfaceCreatedCallback = false;
+    }
     rl.singleThreadLoop();
 }

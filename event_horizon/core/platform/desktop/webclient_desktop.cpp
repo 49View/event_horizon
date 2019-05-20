@@ -109,7 +109,9 @@ namespace Http {
                 LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
                 lRes = handleResponse( res, url, rf );
                 if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() ) {
-                    FM::writeLocalFile( cacheFolder() + fileHash, reinterpret_cast<const char *>( lRes.buffer.get() ), lRes.length );
+                    FM::writeLocalFile( cacheFolder() + fileHash,
+                                        reinterpret_cast<const char *>( lRes.buffer.get() ),
+                                        lRes.length );
                 }
             }
 

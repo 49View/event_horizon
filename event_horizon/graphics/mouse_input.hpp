@@ -83,8 +83,10 @@ struct AggregatedInputData {
     float                             scrollValue = 0.0f;
     std::array<TouchStatus, MAX_TAPS> status;
 
-    bool isMouseSingleTap( int _touchIndex ) const { return status[_touchIndex].touchedDownFirstTime; }
+    bool isMouseTouchedDownFirstTime( int _touchIndex ) const { return status[_touchIndex].touchedDownFirstTime; }
     bool isMouseTouchedDown( int _touchIndex ) const { return status[_touchIndex].touchedDown; }
+    bool isMouseTouchedUp( int _touchIndex ) const { return status[_touchIndex].hasTouchedUp; }
+    bool isMouseSingleTap( int _touchIndex ) const { return status[_touchIndex].singleTapEvent; }
     bool hasMouseMoved( int _touchIndex ) const { return status[_touchIndex].bHasMouseMoved; }
     V2f  mousePos( int _touchIndex ) const { return V2f{ status[_touchIndex].xpos, status[_touchIndex].ypos }; }
     V2f  moveDiffSS( int _touchIndex ) const { return getCurrMoveDiffNorm(_touchIndex).dominant(); }

@@ -9,31 +9,23 @@
 #include "http/webclient.h"
 #include "util.h"
 
+size_t fcread(void *cookie, char *buf, size_t size);
+size_t fclength(void *cookie);
+size_t fcwrite(void *cookie, const char *buf, int size);
+size_t fcseek(void *cookie, fpos_t offset, int whence);
+void fcclose(void *cookie);
+FILE * fcopen(const char *filename, const char *mode);
+
 namespace FileManager {
 
-    std::string filenameOnly( const std::string& input ) {
-        std::string ret = input;
-        // trim path before filename
-        size_t pos = ret.find_last_of( "/" );
-        if ( pos != std::string::npos ) {
-            ret = ret.substr( pos + 1, ret.length());
-        }
-        pos = ret.find_last_of( "\\" );
-        if ( pos != std::string::npos ) {
-            ret = ret.substr( pos + 1, ret.length());
-        }
-
-        return ret;
-    }
-
-    std::string filenameOnlyNoExtension( const std::string& input ) {
-        std::string ret = filenameOnly( input );
-        size_t pos = ret.find_last_of( "." );
-        if ( pos != std::string::npos ) {
-            ret = ret.substr( 0, pos );
-        }
-        return ret;
-    }
+//    std::string filenameOnlyNoExtension( const std::string& input ) {
+//        std::string ret = filenameOnly( input );
+//        size_t pos = ret.find_last_of( "." );
+//        if ( pos != std::string::npos ) {
+//            ret = ret.substr( 0, pos );
+//        }
+//        return ret;
+//    }
 
     bool fileExist( const std::string& filename ) {
         std::ofstream ffile( "data/" + filename, std::ios::in | std::ios::binary );
@@ -130,17 +122,16 @@ namespace FileManager {
                                               bool addTrailingZero ) {
         std::unique_ptr<uint8_t[]> memblock;
 
-        std::ifstream file( filename, std::ios::in | std::ios::binary | std::ios::ate );
-        if ( file.is_open()) {
-            _length = static_cast<uint64_t>(file.tellg());
+        std::string fullPath = systemRootDir() + filename;
+        FILE *afile = fcopen(fullPath.c_str(), "rb");
+        if (afile) {
+            _length = (uint64_t)fclength(afile);
             memblock = std::make_unique<uint8_t[]>( _length + addTrailingZero );
-            file.seekg( 0, std::ios::beg );
-            file.read( reinterpret_cast<char *>( memblock.get()), _length );
-            file.close();
-        }
-
-        if ( addTrailingZero ) {
-            memblock[_length] = 0;
+            fcread( afile, reinterpret_cast<char *>( memblock.get()), _length);
+            if ( addTrailingZero ) {
+                memblock[_length] = 0;
+            }
+            fcclose(afile);
         }
         return memblock;
     }

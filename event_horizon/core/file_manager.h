@@ -26,9 +26,10 @@ namespace FileManager {
     bool useFileSystemCachePolicy();
 	bool fileExist( const std::string& filename );
 	bool fileExistAbs( const std::string& filename );
+    std::string systemRootDir();
 	uint64_t fileDate( const std::string& filename );
-	std::string filenameOnly( const std::string& input );
-	std::string filenameOnlyNoExtension( const std::string& input );
+//	std::string filenameOnly( const std::string& input );
+//	std::string filenameOnlyNoExtension( const std::string& input );
 
 	// Persistent storages, mainly for web-browsers/emscripten types
 	void initPersistent();
