@@ -138,12 +138,16 @@ void Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector
     VPL( bucketIndex, vp );
 }
 
-void Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
-                         const std::string& _name ) {
-
-    auto ps = std::make_shared<Pos3dStrip>( Rect2f{ p1, p2, true } );
+void Renderer::drawRect2d( const int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name ) {
+    auto ps = std::make_shared<Pos3dStrip>( r1 );
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_2D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
+}
+
+void Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
+                           const std::string& _name ) {
+
+    drawRect2d( bucketIndex, Rect2f{ p1, p2, true }, color, _name );
 }
 
 void Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture,
@@ -163,9 +167,9 @@ void Renderer::drawArrow( const int bucketIndex, const Vector2f& p1, const Vecto
     Vector2f n = normalize( p2 - p1 );
     auto pn1 = rotate( n, angle );
     auto pn2 = rotate( n, -angle );
-    vlist.push_back( { p1 + pn1 * arrowlength, _z } );
-    vlist.push_back( { p1, _z } );
-    vlist.push_back( { p1 + pn2 * arrowlength, _z } );
+    vlist.emplace_back( p1 + pn1 * arrowlength, _z );
+    vlist.emplace_back( p1, _z );
+    vlist.emplace_back( p1 + pn2 * arrowlength, _z );
     drawLine( bucketIndex, vlist, color, width, false, 0.0f, percToBeDrawn, _name1 );
     drawLine( bucketIndex, p1, p2, color, width * 0.75f, false, 0.0f, percToBeDrawn, _name2 );
 }

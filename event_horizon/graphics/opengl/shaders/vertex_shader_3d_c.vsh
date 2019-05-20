@@ -1,4 +1,4 @@
-#include "layout_pos_tex3d.glsl"
+#include "layout_pos3d.glsl"
 #include "camera_uniforms.glsl"
 
 uniform mat4 u_modelMatrix;

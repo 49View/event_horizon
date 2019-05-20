@@ -1,7 +1,7 @@
 #version #opengl_version
 
 layout( location = 0 ) out vec4 FragColor;
-layout( location = 1 ) out vec4 BloomColor;
+// layout( location = 1 ) out vec4 BloomColor;
 
 in vec2 v_texCoord;
 in vec2 v_texCoord2;
@@ -11,7 +11,7 @@ in vec3 v_tan;
 in vec3 v_bitan;
 in vec3 v_shadowmap_coord3;
 in vec3 Position_worldspace;
-in vec4 v_t8;
+// in vec4 v_t8;
 
 #include "lighting_uniforms.glsl"
 #include "camera_uniforms.glsl"
@@ -288,6 +288,7 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = prefilteredColor;
 vec3 ambient = (kD * diffuseV + specular ) * (translucencyV) * visibility * ao;
+//vec3 ambient = vec3(translucencyV);
 #else
 vec3 ambient = Lo + kD*albedo;
 #endif
@@ -312,7 +313,7 @@ finalColor = vec3(1.0) - exp(-finalColor * 1.0);
 FragColor = vec4( finalColor, opacityV * alpha ); 
  
 //	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
-BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );
+// BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );
 //        BloomColor = vec4( finalColor*2, 1.0 );
 
 #end_code

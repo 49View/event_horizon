@@ -22,12 +22,12 @@
 
        out vec2 v_texCoord;
        out vec2 v_texCoord2;
-       out vec3 v_color;
+      //  out vec3 v_color;
        out vec3 v_norm;
        out vec3 v_tan;
        out vec3 v_bitan;
        out vec3 v_shadowmap_coord3;
-       out vec4 v_t8;
+      //  out vec4 v_t8;
 
        out vec3 Position_worldspace;
     

@@ -260,5 +260,5 @@ public:
                    const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
     void drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
                    const std::string& _name = {} );
-
+    void drawRect2d( int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name = {} );
 };

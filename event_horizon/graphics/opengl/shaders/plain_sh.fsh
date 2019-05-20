@@ -2,11 +2,11 @@
 #include "texture_notile.glsl"
 #define sh_reflections
 
-float edgeFactorTri() {
-      vec3 d = fwidth( v_t8.xyz );
-      vec3 a3 = smoothstep( vec3( 0.0 ), d * 1.5, v_t8.xyz );
-      return min( min( a3.x, a3.y ), a3.z );
-}
+// float edgeFactorTri() {
+//       vec3 d = fwidth( v_t8.xyz );
+//       vec3 a3 = smoothstep( vec3( 0.0 ), d * 1.5, v_t8.xyz );
+//       return min( min( a3.x, a3.y ), a3.z );
+// }
 
 void main() {
 

@@ -1,4 +1,4 @@
-#include "layout_sh.glsl"
+#include "layout_pos3d.glsl"
 #include "lighting_uniforms.glsl"
 #include "camera_uniforms.glsl"
 

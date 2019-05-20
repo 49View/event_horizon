@@ -38,7 +38,7 @@ mat3 shVertexData() {
 //    v_color.b += dot( shLightCoeffs[1], shB2 );
 //    v_color.b += dot( shLightCoeffs[2], shB3 );
 
-   v_t8 = a_t8;
+   // v_t8 = a_t8;
 
    return modelMatrix3x3;
 }
