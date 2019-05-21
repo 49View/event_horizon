@@ -80,6 +80,13 @@ inline static TimelineIndex getTI( Quaterniona _source ) {
 
 }
 
+enum class KeyFramePosition {
+    Invalid,
+    Pre,
+    Valid,
+    Post
+};
+
 template <typename T>
 struct KeyFramePair {
     KeyFramePair( float timeStamp, T value ) : time( timeStamp ), value( value ) {}
@@ -137,27 +144,33 @@ public:
         sortOnTime();
     }
 
-    bool getKeyFrameIndexAt( float _timeElapsed, uint64_t& _index, float& _delta ) {
+    KeyFramePosition getKeyFrameIndexAt( float _timeElapsed, uint64_t& _index, float& _delta ) {
 
-        if ( keyframes.size() < 2 ) return false;
-        if ( _timeElapsed < 0.0f ) return false;
+        if ( keyframes.size() < 2 ) return KeyFramePosition::Invalid;
+        if ( _timeElapsed < 0.0f ) return KeyFramePosition::Pre;
 
         for ( uint64_t t = 0; t < keyframes.size()-1; t++ ) {
             if ( inRangeEx( _timeElapsed, keyframes[t].time, keyframes[t+1].time) ) {
                 _delta = interpolateInverse( keyframes[t].time, keyframes[t+1].time, _timeElapsed );
                 _index = t;
-                return true;
+                return KeyFramePosition::Valid;
             }
         }
+        // Time is outside the last keyframe, so clamp it to the end
+        _delta = 1.0f;
+        _index = keyframes.size()-2;
 
-        return false;
+        return KeyFramePosition::Post;
     }
 
     T valueAt( float _timeElapsed ) {
         auto value = source->value;
         uint64_t keyFrameIndex = 0;
         float delta = 0.0f;
-        source->isAnimating = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
+        auto keyFramePos = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
+        source->isAnimating = keyFramePos == KeyFramePosition::Valid ||
+                              ( keyFramePos == KeyFramePosition::Post && !triggeredPost );
+        if ( keyFramePos == KeyFramePosition::Post ) triggeredPost = true;
         if ( source->isAnimating ) {
             uint64_t p1 = keyFrameIndex;
             uint64_t p2 = keyFrameIndex+1;
@@ -273,6 +286,7 @@ private:
     AnimValue<T> source;
     std::vector<KeyFramePair<T>> keyframes;
     TimelineIndex timelineIndex = 0;
+    bool triggeredPost = false;
 };
 
 template<typename V>
@@ -337,59 +351,23 @@ class Timeline {
 public:
     class TimelineGroup {
     public:
-        void play( float _startTimeOffset = 0.0f, TimelineGroupCCF _ccf = nullptr) {
-            animationStartTime = GameTime::getCurrTimeStamp();
-            animationInitialDelay = _startTimeOffset;
-            bIsPlaying = true;
-            bForceOneFrameOnly = false;
-            ccf = _ccf;
-        }
-
-        void playOneFrame( float _startTimeOffset = 0.0f ) {
-            animationStartTime = GameTime::getCurrTimeStamp();
-            animationInitialDelay = _startTimeOffset;
-            bIsPlaying = true;
-            bForceOneFrameOnly = true;
-        }
-
-        void update() {
-            if ( !bIsPlaying ) return;
-
-            timeElapsed = (GameTime::getCurrTimeStamp() - animationStartTime) + animationInitialDelay;
-            auto tl = Timeline::Timelines();
-            bIsPlaying = false;
-            for ( auto k : timelines ) {
-                bIsPlaying |= tl.update( k, timeElapsed );
-            }
-            if ( !bIsPlaying ) {
-                if (ccf) ccf();
-            }
-            if ( bForceOneFrameOnly ) {
-                bIsPlaying = false;
-                bForceOneFrameOnly = false;
-            }
-        }
-
-        void visit( AnimVisitCallback _callback ) {
-            auto tl = Timeline::Timelines();
-            for ( auto k : timelines ) {
-                tl.visit( k, _callback );
-            }
-        }
-
-        void addTimeline( TimelineIndex _ti ) {
-            timelines.emplace(_ti);
-        }
-
-        float animationTime() const { return bIsPlaying ? timeElapsed : -1.0f; }
+        void play( float _startTimeOffset = 0.0f, uint64_t _frameTickOffset = 0, TimelineGroupCCF _ccf = nullptr);
+        void playOneFrame( float _startTimeOffset = 0.0f );
+        void update();
+        void visit( AnimVisitCallback _callback );
+        void addTimeline( TimelineIndex _ti );
+        float animationTime() const;
 
     private:
         TimelineIndexVector timelines;
-        float animationStartTime = 0.0f;
+        float animationStartTime = -1.0f;
         float animationInitialDelay = 0.0f;
-        float timeElapsed = -1.0f;
+        float timeElapsed = 0.0f;
+        float meanTimeDelta = 0.0f;
         bool bIsPlaying = false;
         bool bForceOneFrameOnly = false;
+        uint64_t frameTickOffset = 0;
+        uint64_t frameTickCount = 0;
         TimelineGroupCCF ccf = nullptr;
     };
 
@@ -401,9 +379,12 @@ public:
         }
     }
 
-    static void play( const std::string & _groupName, float _startTimeOffset = 0.0f, TimelineGroupCCF _ccf = nullptr ) {
+    static void play( const std::string & _groupName,
+                      float _startTimeOffset = 0.0f,
+                      uint64_t frameTickOffset = 0,
+                      TimelineGroupCCF _ccf = nullptr ) {
         if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            it->second.play( _startTimeOffset, _ccf );
+            it->second.play( _startTimeOffset, frameTickOffset, _ccf );
         }
     }
 
@@ -427,6 +408,7 @@ public:
     }
 
     static const TimelineMapSpec& Timelines() { return timelines; }
+    static TimelineMapSpec& TimelinesToUpdate() { return timelines; }
     static const TimelineGroupMap& Groups() { return timelineGroups; }
 
     template <typename T>

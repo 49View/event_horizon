@@ -19,10 +19,14 @@ enum UpdateTypeFlag {
 };
 
 class TransformNodeData {
+public:
+    TransformNodeData() {
+        mLocalHierTransform = std::make_shared<Matrix4f>();
+    }
 protected:
     MatrixAnim mTRS;
     Matrix4f mLocalTransform = Matrix4f::IDENTITY;
-    Matrix4f mLocalHierTransform;
+    std::shared_ptr<Matrix4f> mLocalHierTransform;
 };
 
 template <typename T>
@@ -94,7 +98,7 @@ public:
     std::shared_ptr<RecursiveTransformation<T>> Father() const { return father; }
     Matrix4f fatherRootTransform() const {
         if ( father == nullptr ) return Matrix4f::IDENTITY;
-        return father->mLocalHierTransform;
+        return *father->mLocalHierTransform.get();
     }
 
     void prune() {
@@ -147,13 +151,13 @@ public:
 //    }
 
     void createLocalHierMatrix( Matrix4f cmat ) {
-        mLocalHierTransform = mLocalTransform * cmat;
+        *mLocalHierTransform = mLocalTransform * cmat;
     }
 
     void generateMatrixHierarchyRec( Matrix4f cmat ) {
         createLocalHierMatrix( cmat );
         for ( auto& c : children ) {
-            c->generateMatrixHierarchyRec( mLocalHierTransform );
+            c->generateMatrixHierarchyRec( *mLocalHierTransform.get() );
         }
     }
 
@@ -290,7 +294,7 @@ public:
 
     Matrix4f RootTransform() const { return mLocalTransform; }
     void RootTransform( const Matrix4f& val ) { mLocalTransform = val; }
-    Matrix4f getLocalHierTransform() { return mLocalHierTransform; }
+    std::shared_ptr<Matrix4f> getLocalHierTransform() { return mLocalHierTransform; }
     Matrix4f LocalTransform() const { return mLocalTransform; }
     Matrix4f& LocalTransform() { return mLocalTransform; }
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }

@@ -1,5 +1,5 @@
 #version #opengl_version
-precision highp float;
+// precision highp float;
 
 layout( location = 0 ) out vec4 FragColor;
 // layout( location = 1 ) out vec4 BloomColor;

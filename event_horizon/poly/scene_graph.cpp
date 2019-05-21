@@ -35,6 +35,7 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite    ;
 UUID SceneGraph::addNode( const ResourceRef& _hash ) {
     auto cloned = GM().clone( _hash );
     nodeAddSignal(cloned);
+    nodes.emplace( _hash, cloned );
     return cloned->UUiD();
 }
 
@@ -111,10 +112,10 @@ void SceneGraph::update() {
     MC().update();
     GM().update();
 
-// ### Reintroduce anims for scene graph
-//    for ( auto& [k,v] : nodes ) {
+    for ( auto& [k,v] : nodes ) {
+        v->updateAnim();
 //        std::visit( lambdaUpdateAnimVisitor, v );
-//    }
+    }
 }
 
 void SceneGraph::cmdChangeMaterialTag( const std::vector<std::string>& _params ) {
@@ -341,10 +342,10 @@ void SceneGraph::chartMeshes( scene_t& scene ) const {
             auto vData = vl.get(gg->Data(0).vData);
             for ( size_t t = 0; t < vData->numVerts(); t++ ) {
                 auto v = vData->vertexAt(t);
-                v = mat.transform(v);
+                v = mat->transform(v);
                 ss << v.toStringObj("v");
                 auto n = vData->normalAt(t);
-                n = mat.transform(n);
+                n = mat->transform(n);
                 n = normalize(n);
                 ss << n.toStringObj("vn");
                 ss << vData->uvAt(t).toStringObj("vt");

@@ -128,3 +128,73 @@ void TimelineMapSpec::visit( TimelineIndex _k, AnimVisitCallback _callback ) {
             break;
     }
 }
+
+void Timeline::TimelineGroup::play( float _startTimeOffset, uint64_t _frameTickOffset, TimelineGroupCCF _ccf ) {
+    animationStartTime = -1.0f;
+    frameTickOffset = _frameTickOffset;
+    animationInitialDelay = _startTimeOffset;
+    bIsPlaying = true;
+    bForceOneFrameOnly = false;
+    ccf = _ccf;
+}
+
+void Timeline::TimelineGroup::playOneFrame( float _startTimeOffset ) {
+    animationStartTime = -1.0f;
+    animationInitialDelay = _startTimeOffset;
+    bIsPlaying = true;
+    bForceOneFrameOnly = true;
+}
+
+void Timeline::TimelineGroup::update() {
+    if ( !bIsPlaying ) return;
+
+    if ( ++frameTickCount <= frameTickOffset ) return;
+    uint64_t realFrameTicks = frameTickCount - frameTickOffset;
+
+    auto currGameStamp = GameTime::getCurrTimeStamp();
+    if ( animationStartTime < 0.0f ) {
+        animationStartTime = currGameStamp;
+    }
+
+    float timeDelta = timeElapsed;
+    timeElapsed = ( currGameStamp - animationStartTime);// + animationInitialDelay;
+    timeDelta = timeElapsed - timeDelta;
+    float meanTimeDeltaAvr = meanTimeDelta / realFrameTicks;
+    if ( timeDelta > meanTimeDeltaAvr*3.0f && realFrameTicks > 3 ) {
+        timeElapsed -= timeDelta;
+        timeElapsed += meanTimeDeltaAvr;
+        timeDelta = meanTimeDeltaAvr;
+    }
+    meanTimeDelta += timeDelta;
+    auto& tl = Timeline::TimelinesToUpdate();
+    bIsPlaying = false;
+    for ( auto k : timelines ) {
+        bIsPlaying |= tl.update( k, timeElapsed );
+    }
+    if ( !bIsPlaying ) {
+        timeElapsed = 0.0f;
+        meanTimeDelta = 0.0f;
+        frameTickCount = 0;
+        frameTickOffset = 0;
+        if (ccf) ccf();
+    }
+    if ( bForceOneFrameOnly ) {
+        bIsPlaying = false;
+        bForceOneFrameOnly = false;
+    }
+}
+
+void Timeline::TimelineGroup::visit( AnimVisitCallback _callback ) {
+    auto tl = Timeline::Timelines();
+    for ( auto k : timelines ) {
+        tl.visit( k, _callback );
+    }
+}
+
+void Timeline::TimelineGroup::addTimeline( TimelineIndex _ti ) {
+    timelines.emplace(_ti);
+}
+
+float Timeline::TimelineGroup::animationTime() const {
+    return bIsPlaying ? timeElapsed : -1.0f;
+}
