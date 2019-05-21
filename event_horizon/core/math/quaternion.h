@@ -70,7 +70,8 @@ public:
 	float w() const { return real(); }
 
 	friend std::ostream& operator<<( std::ostream& os, const Quaternion& quaternion ) {
-		os << quaternion.mData;
+		os << "[X,Y,Z] = [" << quaternion.mData[0] << "," << quaternion.mData[1] << "," << quaternion.mData[2] << "]"
+		   << "[W] = " << quaternion.mData[3];
 		return os;
 	}
 

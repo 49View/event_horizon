@@ -381,6 +381,7 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
     cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
+    cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
 
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( inRange( k, { CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd} ) ) {
