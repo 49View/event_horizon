@@ -161,7 +161,7 @@ void RLTargetPBR::addShadowMaps() {
 
     rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor() );
 
-    if ( smm->needsRefresh(rr.UpdateCounter()) ) {
+    if ( smm->invalidated() ) {
         rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
         rr.CB_U().pushCommand( { CommandBufferCommandName::shadowMapBufferBind } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteTrue } );
@@ -181,6 +181,7 @@ void RLTargetPBR::addShadowMaps() {
             }
         }
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
+        smm->validated();
     }
 }
 

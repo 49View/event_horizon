@@ -150,14 +150,19 @@ void Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vect
     drawRect2d( bucketIndex, Rect2f{ p1, p2, true }, color, _name );
 }
 
-void Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture,
-                         float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
-    Rect2f rect{ p1, p2 };
+void Renderer::drawRect2d( const int bucketIndex, const Rect2f& rect, CResourceRef _texture,
+                           float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
 //    QuadVertices2 qvt = textureQuadFillModeMapping( fm, rect, ratio );
 //    auto ps = std::make_shared<PosTex3dStrip>( rect, qvt );
     auto ps = std::make_shared<PosTex3dStrip>( rect, QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS );
     auto vp = VPBuilder<PosTex3dStrip>{*this,ShaderMaterial{S::TEXTURE_2D, mapTextureAndColor(_texture, color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
+}
+
+void Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture,
+                         float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
+    Rect2f rect{ p1, p2 };
+    drawRect2d( bucketIndex, rect, _texture, ratio, color, fm, _name );
 }
 
 void Renderer::drawArrow( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color,

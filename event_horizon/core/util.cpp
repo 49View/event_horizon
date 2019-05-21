@@ -445,27 +445,9 @@ float stringFeetInchesToCm( const std::string& _text ) {
 
 void FrameInvalidator::invalidate() {
 	bInvalidated = true;
-	bFirstInvalidated = true;
 }
 
-bool FrameInvalidator::needsRefresh( int _counter, int _frameGap ) {
-
-	if ( bInvalidated ) {
-		if ( bFirstInvalidated ) {
-			frameCounter = _counter;
-			bFirstInvalidated = false;
-		}
-		if ( _counter == frameCounter + _frameGap ) {
-			bInvalidated = false;
-			return true;
-		}
-		return false;
-	}
-
-	return false;
-}
-
-bool FrameInvalidator::needsRefresh() const {
+bool FrameInvalidator::invalidated() const {
 	return bInvalidated;
 }
 

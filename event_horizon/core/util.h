@@ -424,15 +424,10 @@ private:
 class FrameInvalidator {
 public:
 	void invalidate();
-	bool needsRefresh( int _counter, int _frameGap = 1 );
-
-	// Immediate mode invalidate/validate, IE do not wait across frames
-	bool needsRefresh() const;
+	bool invalidated() const;
 	void validated();
 
 private:
 	bool bInvalidated = false;
-	bool bFirstInvalidated = false;
-	int  frameCounter = -1;
 };
 

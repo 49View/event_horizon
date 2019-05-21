@@ -1,4 +1,5 @@
 #version #opengl_version
+precision highp float;
 
 layout( location = 0 ) out vec4 FragColor;
 // layout( location = 1 ) out vec4 BloomColor;
@@ -286,9 +287,8 @@ vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness*MAX_REFLECTION_
 vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
-// vec3 ambient = prefilteredColor;
+// vec3 ambient = Lo;
 vec3 ambient = (kD * diffuseV + specular ) * (translucencyV) * visibility * ao;
-//vec3 ambient = vec3(translucencyV);
 #else
 vec3 ambient = Lo + kD*albedo;
 #endif
@@ -308,7 +308,7 @@ vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_tex
 
 finalColor = vec3(1.0) - exp(-finalColor * 1.0);
  
-//finalColor = pow(finalColor, vec3(2.2/1.0));
+// finalColor = pow(finalColor, vec3(2.2/1.0));
 
 FragColor = vec4( finalColor, opacityV * alpha ); 
  

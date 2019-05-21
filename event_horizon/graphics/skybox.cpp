@@ -67,19 +67,16 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
 }
 
 bool Skybox::precalc( float _sunHDRMult ) {
-    if ( needsRefresh() ) {
+    if ( invalidated() ) {
         auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(512), rr );
         probe->render( mSkyboxTexture, 512, 0, [&]() {
             mVPList->setMaterialConstant( UniformNames::sunHRDMult, _sunHDRMult );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
-            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
             rr.CB_U().pushVP( mVPList );
             rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
             rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
-            rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
         });
-
         validated();
         return true;
     }
