@@ -331,16 +331,18 @@ struct TimelineMapSpec {
     static TimelineIndex mkf;
 };
 
+using TimelineGroupCCF = std::function<void()>;
 
 class Timeline {
 public:
     class TimelineGroup {
     public:
-        void play( float _startTimeOffset = 0.0f ) {
+        void play( float _startTimeOffset = 0.0f, TimelineGroupCCF _ccf = nullptr) {
             animationStartTime = GameTime::getCurrTimeStamp();
             animationInitialDelay = _startTimeOffset;
             bIsPlaying = true;
             bForceOneFrameOnly = false;
+            ccf = _ccf;
         }
 
         void playOneFrame( float _startTimeOffset = 0.0f ) {
@@ -358,6 +360,9 @@ public:
             bIsPlaying = false;
             for ( auto k : timelines ) {
                 bIsPlaying |= tl.update( k, timeElapsed );
+            }
+            if ( !bIsPlaying ) {
+                if (ccf) ccf();
             }
             if ( bForceOneFrameOnly ) {
                 bIsPlaying = false;
@@ -385,6 +390,7 @@ public:
         float timeElapsed = -1.0f;
         bool bIsPlaying = false;
         bool bForceOneFrameOnly = false;
+        TimelineGroupCCF ccf = nullptr;
     };
 
     using TimelineGroupMap = std::unordered_map<std::string, TimelineGroup>;
@@ -395,9 +401,9 @@ public:
         }
     }
 
-    static void play( const std::string & _groupName, float _startTimeOffset = 0.0f ) {
+    static void play( const std::string & _groupName, float _startTimeOffset = 0.0f, TimelineGroupCCF _ccf = nullptr ) {
         if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            it->second.play( _startTimeOffset );
+            it->second.play( _startTimeOffset, _ccf );
         }
     }
 

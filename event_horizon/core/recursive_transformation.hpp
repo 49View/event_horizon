@@ -101,6 +101,19 @@ public:
         pruneRec( this->shared_from_this() );
     }
 
+    V3fa PosAnim() {
+        return mTRS.pos;
+    }
+    Quaterniona RotAnim() {
+        return mTRS.rot;
+    }
+    V3fa ScaleAnim() {
+        return mTRS.scale;
+    }
+    MatrixAnim& TRS() { return mTRS; }
+    const MatrixAnim& TRS() const { return mTRS; }
+    void TRS( const MatrixAnim& val ) { mTRS = val; }
+
 //    void containingAABBRec( JMATH::AABB& _bbox ) const {
 //        auto cr = Boxable::BBox3d();
 //        _bbox.merge( cr );
