@@ -627,7 +627,7 @@ float Camera::FoV() const {
 	return mFov->value;
 }
 
-floata Camera::FoVAnim() {
+floata& Camera::FoVAnim() {
 	return mFov;
 }
 
@@ -670,9 +670,9 @@ void Camera::incrementQuatAngles( const Vector3f& a ) {
 
 Quaternion Camera::quatAngle() const { return qangle->value; }
 
-V3fa Camera::PosAnim() { return mPos; }
+V3fa& Camera::PosAnim() { return mPos; }
 
-Quaterniona Camera::QAngleAnim() { return qangle; }
+Quaterniona& Camera::QAngleAnim() { return qangle; }
 
 TimelineSet Camera::addKeyFrame( const std::string& _name, float _time ) {
     TimelineSet ret{};

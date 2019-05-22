@@ -115,9 +115,9 @@ public:
 	void AspectRatioMultiplier( float val );
 
 	float FoV() const;
-	floata 		FoVAnim();
-	V3fa   		PosAnim();
-	Quaterniona QAngleAnim();
+	floata& 		FoVAnim();
+	V3fa&   		PosAnim();
+	Quaterniona& QAngleAnim();
 
 	void getViewporti( int* viewport ) const;
 

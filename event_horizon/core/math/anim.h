@@ -429,11 +429,13 @@ public:
     }
 
     template <typename T, typename ...Args>
-    static void play( AnimValue<T> _source, Args&& ... args ) {
+    static void play( AnimValue<T>& _source, Args&& ... args ) {
         auto groupName = UUIDGen::make();
-        timelineGroups.emplace( groupName, TimelineGroup{} );
+        TimelineGroup tg;
 
-        (addParam<T>( groupName, _source, std::forward<Args>( args )), ...); // Fold expression (c++17)
+        (addParam<T>( tg, _source, std::forward<Args>( args )), ...); // Fold expression (c++17)
+
+        timelineGroups.emplace( groupName, tg );
 
         play( groupName );
     }
@@ -452,21 +454,20 @@ public:
     }
 
     template<typename SGT, typename M>
-    static void addParam( const std::string& _groupName, AnimValue<SGT> _source, const M& _param ) {
+    static void addParam( TimelineGroup& tg, AnimValue<SGT>& _source, const M& _param ) {
         if constexpr ( std::is_same_v<M, KeyFramePair<SGT>> ) {
-            timelineGroups[_groupName].addTimeline(timelines.add( _source, {0.0f, _source->value} ));
-            timelineGroups[_groupName].addTimeline(timelines.add( _source, _param ));
-        } else if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ||
-                std::is_same_v<M, std::initializer_list<KeyFramePair<SGT>>> ) {
+            tg.addTimeline(timelines.add( _source, {0.0f, _source->value} ));
+            tg.addTimeline(timelines.add( _source, _param ));
+        } else if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
             for (const auto& elem : _param ) {
-                timelineGroups[_groupName].addTimeline(timelines.add( _source, elem ));
+                tg.addTimeline(timelines.add( _source, elem ));
             }
         } else if constexpr ( std::is_integral_v<M> ) {
-            timelineGroups[_groupName].FrameTickOffset(_param);
+            tg.FrameTickOffset(_param);
         } else if constexpr ( std::is_floating_point_v<M> ) {
-            timelineGroups[_groupName].StartTimeOffset(_param);
+            tg.StartTimeOffset(_param);
         } else {
-            timelineGroups[_groupName].CCF(_param);
+            tg.CCF(_param);
         }
     }
 

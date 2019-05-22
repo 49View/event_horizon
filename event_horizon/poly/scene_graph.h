@@ -59,7 +59,7 @@ public:
 
     void init();
     GeomSP getNode( const UUID& _uuid );
-    GeomSP addNode( const ResourceRef& _hash );
+    void addNode( GeomSP _node );
     void removeNode( const UUID& _uuid );
 
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
@@ -208,12 +208,13 @@ public:
         if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
         elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
         auto ref = B<GRB>( gb.Name() ).addIM( elem );
-        return gb.elemInjFather ? elem : addNode( ref );
-//        return elem;
+        addNode(elem);
+//        return gb.elemInjFather ? elem : addNodeSP( ref );
+        return elem;
     }
 
     GeomSP GC();
-    GeomSP GC( const GeomSP& _geom );
+    void GC( const GeomSP& _geom );
 
     void chartMeshes( scene_t& scene ) const;
 

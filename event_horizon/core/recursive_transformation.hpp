@@ -38,12 +38,23 @@ class RecursiveTransformation : public Boxable<JMATH::AABB>,
 public:
 
     using NodeSP = std::shared_ptr<RecursiveTransformation<T>>;
+    using NodeP = RecursiveTransformation<T>*;
 
     RecursiveTransformation() = default;
     virtual ~RecursiveTransformation() = default;
     // This ctor is effectively a "clone"
-    explicit RecursiveTransformation( NodeSP _source ) {
+    RecursiveTransformation( const RecursiveTransformation<T>& _source ) {
         addNodeRec( _source, nullptr );
+    }
+    explicit RecursiveTransformation( const RecursiveTransformation<T>& _source, NodeP _father  ) {
+        addNodeRec( _source, _father );
+    }
+    // This ctor is effectively a "clone"
+    explicit RecursiveTransformation( NodeSP _source ) {
+        addNodeRec( *_source.get(), nullptr );
+    }
+    RecursiveTransformation( NodeSP _source, NodeP _father ) {
+        addNodeRec( *_source.get(), _father );
     }
     explicit RecursiveTransformation( const std::string& _name ) : NamePolicy(_name) {}
     template <typename R>
@@ -93,25 +104,25 @@ public:
         }
     }
 
-    void Father( std::shared_ptr<RecursiveTransformation<T>> val ) { father = val; }
-    std::shared_ptr<RecursiveTransformation<T>> Father() { return father; }
-    std::shared_ptr<RecursiveTransformation<T>> Father() const { return father; }
+    void Father( NodeP val ) { father = val; }
+    NodeP Father() { return father; }
+    NodeP Father() const { return father; }
     Matrix4f fatherRootTransform() const {
         if ( father == nullptr ) return Matrix4f::IDENTITY;
-        return *father->mLocalHierTransform.get();
+        return *father->mLocalHierTransform.get();;
     }
 
     void prune() {
         pruneRec( this->shared_from_this() );
     }
 
-    V3fa PosAnim() {
+    V3fa& PosAnim() {
         return mTRS.pos;
     }
-    Quaterniona RotAnim() {
+    Quaterniona& RotAnim() {
         return mTRS.rot;
     }
-    V3fa ScaleAnim() {
+    V3fa& ScaleAnim() {
         return mTRS.scale;
     }
     MatrixAnim& TRS() { return mTRS; }
@@ -266,7 +277,7 @@ public:
                             const Vector3f& rot = Vector3f::ZERO,
                             const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
         auto geom = _node;
-        geom->Father( this->shared_from_this() );
+        geom->Father( this );
         geom->updateTransform( pos, rot, scale );
         children.push_back( geom );
         return geom;
@@ -274,7 +285,7 @@ public:
 
     NodeSP addChildren( const std::string& _name ) {
         NodeSP node = std::make_shared<RecursiveTransformation<T>>();
-        node->Father( this->shared_from_this() );
+        node->Father( this );
         node->Name( _name );
         node->updateTransform();
         children.push_back( node );
@@ -304,25 +315,22 @@ public:
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
 
 private:
-    NodeSP addNodeRec( NodeSP _node, NodeSP _father ) {
+    void addNodeRec( const RecursiveTransformation<T>& _node, NodeP _father ) {
         cloneData( _node, _father );
-        for ( const auto& c : _node->Children() ) {
-            children.emplace_back( addNodeRec( c, this->shared_from_this() ) );
+        for ( const auto& c : _node.Children() ) {
+            children.emplace_back( std::make_shared<RecursiveTransformation<T>>( c, this ) );
         }
     }
 
-    void cloneData( NodeSP _source, NodeSP _father ) {
-        if ( _father ) {
-            father = _father;
-        } else {
-            assingNewUUID();
-        }
-        Name( _source->Name() );
-        BBox3d( _source->BBox3d() );
-        data = _source->data;
-        mTRS = _source->clone();
-        mLocalTransform = _source->mLocalTransform;
-        mLocalHierTransform = _source->mLocalHierTransform;
+    void cloneData( const RecursiveTransformation<T>& _source, NodeP _father ) {
+        assingNewUUID();
+        father = _father;
+        Name( _source.Name() );
+        BBox3d( _source.BBox3d() );
+        data = _source.data;
+        _source.TRS().clone(mTRS);
+        mLocalTransform = _source.mLocalTransform;
+        mLocalHierTransform = std::make_shared<Matrix4f>(*_source.mLocalHierTransform.get());
     }
 
     bool pruneRec( NodeSP it ) {
@@ -337,7 +345,7 @@ private:
     }
 
 protected:
-    NodeSP father;
+    NodeP father = nullptr;
     std::vector<T> data;
     std::vector<NodeSP> children;
 };

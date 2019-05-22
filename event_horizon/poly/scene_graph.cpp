@@ -32,11 +32,16 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackCameraRig    ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackGeom         ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite    ;
 
-GeomSP SceneGraph::addNode( const ResourceRef& _hash ) {
-    auto cloned = GM().clone( _hash );
-    nodeAddSignal(cloned);
-    nodes.emplace( cloned->UUiD(), cloned );
-    return cloned;//->UUiD();
+//GeomSP SceneGraph::addNode( const ResourceRef& _hash ) {
+//    auto cloned = GM().clone( _hash );
+//    nodeAddSignal(cloned);
+//    nodes.emplace( cloned->UUiD(), cloned );
+//    return cloned;//->UUiD();
+//}
+
+void SceneGraph::addNode( GeomSP _node ) {
+    nodeAddSignal(_node);
+    nodes.emplace( _node->UUiD(), _node );
 }
 
 void SceneGraph::removeNode( const UUID& _uuid ) {
@@ -308,13 +313,13 @@ GeomSP SceneGraph::GC() {
     return ret;
 }
 
-GeomSP SceneGraph::GC( const GeomSP& _geom ) {
-    auto ref = GM().getHash( _geom->Name() );
-    auto elem = ref.empty() ? nullptr : addNode( ref );
+void SceneGraph::GC( const GeomSP& _geom ) {
+//    auto ref = GM().getHash( _geom->Name() );
+//    auto elem = ref.empty() ? nullptr : addNode( ref );
+    addNode( _geom );
     for (const auto& c : _geom->Children() ) {
         GC( c );
     }
-    return elem;
 }
 
 ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {

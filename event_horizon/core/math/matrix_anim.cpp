@@ -41,7 +41,7 @@ MatrixAnim::MatrixAnim( const MA::Scale& _scale ) {
     scale = std::make_shared<AnimType<Vector3f>>( _scale(), "Scale" );
 }
 
-MatrixAnim MatrixAnim::clone( const MatrixAnim& _source ) {
+MatrixAnim MatrixAnim::clone( const MatrixAnim& _source ) const {
     MatrixAnim ret;
 
     ret.Pos(_source.Pos());
