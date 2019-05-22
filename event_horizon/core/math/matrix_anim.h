@@ -4,9 +4,37 @@
 #include "quaternion.h"
 #include <core/math/anim_type.hpp>
 
+namespace MA {
+
+    struct Scale {
+        template<typename ...Args>
+        explicit Scale( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        V3f operator()() const noexcept {
+            return data;
+        }
+        V3f data;
+    };
+
+    struct Rotate {
+        template<typename ...Args>
+        explicit Rotate( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        Quaternion operator()() const noexcept {
+            return data;
+        }
+        Quaternion data;
+    };
+
+}
+
 class MatrixAnim {
 public:
 	MatrixAnim();
+	explicit MatrixAnim( const V3f& _pos );
+	MatrixAnim( const V3f& _pos, const Quaternion& _rot );
+	MatrixAnim( const V3f& _pos, const Quaternion& _rot, const V3f& _scale );
+	explicit MatrixAnim( const MA::Rotate& _rot );
+	explicit MatrixAnim( const MA::Scale& _scale );
+
 	const Vector3f& Pos() const;
 	void Pos( const Vector3f& val );
 

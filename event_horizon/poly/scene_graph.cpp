@@ -35,7 +35,7 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite    ;
 UUID SceneGraph::addNode( const ResourceRef& _hash ) {
     auto cloned = GM().clone( _hash );
     nodeAddSignal(cloned);
-    nodes.emplace( _hash, cloned );
+    nodes.emplace( cloned->UUiD(), cloned );
     return cloned->UUiD();
 }
 
@@ -45,6 +45,13 @@ void SceneGraph::removeNode( const UUID& _uuid ) {
 //        removeImpl(_uuid);
         nodes.erase( it );
     }
+}
+
+GeomSP SceneGraph::getNode(  const UUID& _uuid ) {
+    if ( auto it = nodes.find(_uuid); it != nodes.end() ) {
+        return it->second;
+    }
+    return nullptr;
 }
 
 void SceneGraph::update() {

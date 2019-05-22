@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <core/math/poly_shapes.hpp>
+#include <core/math/matrix_anim.h>
 #include <core/resources/resource_serialization.hpp>
 #include <core/names.hpp>
 #include <poly/cloth/cloth.h>

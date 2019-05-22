@@ -74,6 +74,11 @@ public:
             dataTypeHolder.scale = _param();
             return *this;
         }
+        if constexpr ( std::is_same_v<M, MatrixAnim> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyTRS, SGT> );
+            mTRS = _param;
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, GT::Direction> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
             dataTypeHolder.mFollowerSuggestedAxis = _param();
@@ -219,6 +224,7 @@ public:
     T dataTypeHolder;
     ResourceRef matRef = S::WHITE_PBR;
     Color4f matColor = C4f::WHITE;
+    MatrixAnim mTRS;
     GeomSP elemInjFather = nullptr;
 };
 

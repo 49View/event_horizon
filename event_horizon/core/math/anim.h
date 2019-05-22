@@ -411,12 +411,13 @@ public:
     static TimelineMapSpec& TimelinesToUpdate() { return timelines; }
     static const TimelineGroupMap& Groups() { return timelineGroups; }
 
-    template <typename T>
-    static TimelineIndex add( const std::string& _group, AnimValue<T> _source, const KeyFramePair<T>& _keys ) {
+    template <typename T, typename ...Args>
+    static void add( const std::string& _group, AnimValue<T> _source, Args&& ... args ) {
         addGroupIfEmpty(_group);
-        auto ki = timelines.add( _source, _keys );
-        timelineGroups[_group].addTimeline(ki);
-        return ki;
+        if constexpr ( sizeof...(Args) == 1 ) {
+            timelineGroups[_group].addTimeline(timelines.add( _source, {0.0f, _source->value} ));
+        }
+        (timelineGroups[_group].addTimeline(timelines.add( _source, args )), ...);
     }
 
     static bool deleteKey( const std::string& _group, TimelineIndex _ti, uint64_t _index ) {

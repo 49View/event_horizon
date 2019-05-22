@@ -677,8 +677,8 @@ Quaterniona Camera::QAngleAnim() { return qangle; }
 TimelineSet Camera::addKeyFrame( const std::string& _name, float _time ) {
     TimelineSet ret{};
 
-    ret.emplace( Timeline::add( _name, PosAnim(),    {_time, getPosition() } ) );
-    ret.emplace( Timeline::add( _name, QAngleAnim(), {_time, quatAngle()   } ) );
+    Timeline::add( _name, PosAnim(),    KeyFramePair{_time, getPosition() } );
+    Timeline::add( _name, QAngleAnim(), KeyFramePair{_time, quatAngle()   } );
 
     return ret;
 }

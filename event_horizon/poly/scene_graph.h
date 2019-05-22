@@ -58,6 +58,7 @@ public:
                          GeomManager& _gm);
 
     void init();
+    GeomSP getNode(  const UUID& _uuid );
     UUID addNode( const ResourceRef& _hash );
     void removeNode( const UUID& _uuid );
 
@@ -205,7 +206,9 @@ public:
         elem->pushData( vdataRef, matRef );
 
         if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
+        elem->TRS(gb.mTRS);
         elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
+        elem->updateTransform();
         auto ref = B<GRB>( gb.Name() ).addIM( elem );
         return gb.elemInjFather ? ref : addNode( ref );
     }

@@ -88,8 +88,8 @@ public:
 
     void updateAnim() {
         if ( mTRS.isAnimating() ) {
-            mLocalTransform = Matrix4f{ mTRS };
-            generateMatrixHierarchy( fatherRootTransform());
+//            mLocalTransform = Matrix4f{ mTRS };
+            generateMatrixHierarchy( fatherRootTransform() * Matrix4f{ mTRS } );
         }
     }
 
@@ -167,18 +167,21 @@ public:
     }
 
     void generateLocalTransformData( const Vector3f& pos, const Vector4f& rotAxis, const Vector3f& scale = Vector3f::ONE ) {
-        mTRS.set( pos, rotAxis, scale );
-        mLocalTransform = Matrix4f{ mTRS };
+        MatrixAnim lTRS;
+        lTRS.set( pos, rotAxis, scale );
+        mLocalTransform = Matrix4f{ lTRS };
     }
 
     void generateLocalTransformData( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale = Vector3f::ONE ) {
-        mTRS.set( pos, rot, scale );
-        mLocalTransform = Matrix4f{ mTRS };
+        MatrixAnim lTRS;
+        lTRS.set( pos, rot, scale );
+        mLocalTransform = Matrix4f{ lTRS };
     }
 
     void generateLocalTransformData( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale=Vector3f::ONE ) {
-        mTRS.set( pos, rot, scale );
-        mLocalTransform = Matrix4f{ mTRS };
+        MatrixAnim lTRS;
+        lTRS.set( pos, rot, scale );
+        mLocalTransform = Matrix4f{ lTRS };
     }
 
     void updateTransformRec( const std::string& nodeName,
@@ -241,14 +244,15 @@ public:
     }
 
     void updateTransform() {
-        generateLocalTransformData( mTRS.Pos(), mTRS.Rot(), mTRS.Scale());
-        generateMatrixHierarchy( fatherRootTransform());
+//        generateLocalTransformData( mTRS.Pos(), mTRS.Rot(), mTRS.Scale());
+        generateMatrixHierarchy( fatherRootTransform() * Matrix4f{mTRS} );
     }
 
     void updateExistingTransform( const Vector3f& pos, const Vector4f& rot, const Vector3f& scale ) {
-        mTRS.set( pos, rot, scale );
-        auto mm = Matrix4f{ mTRS };
-        mLocalTransform = mLocalTransform * mm;
+        MatrixAnim lTRS;
+        lTRS.set( pos, rot, scale );
+//        auto mm = Matrix4f{ mTRS };
+        mLocalTransform = mLocalTransform * lTRS;
 
         generateMatrixHierarchy( fatherRootTransform() );
     }
