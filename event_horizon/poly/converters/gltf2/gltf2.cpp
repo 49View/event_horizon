@@ -156,7 +156,7 @@ namespace GLTF2Service {
             }
         }
 
-        if ( checkBitWiseFlag( NTBFill, TEXCOORD_MASK ) ) {
+        if ( !checkBitWiseFlag( NTBFill, TEXCOORD_MASK ) ) {
             geom->forcePlanarMapping();
         }
         if ( NTBFill < 2 ) {
@@ -384,7 +384,7 @@ namespace GLTF2Service {
         gltfScene.model = std::make_shared<tinygltf::Model>();
 
         bool ret = false;
-        if ( ext.compare( "glb" ) == 0 ) {
+        if ( ext.compare( ".glb" ) == 0 ) {
             std::cout << "Reading binary glTF" << std::endl;
             if ( _array.empty()) {
                 ret = gltf_ctx.LoadBinaryFromFile( gltfScene.model.get(), &err, &warn, _path.c_str());
@@ -393,7 +393,6 @@ namespace GLTF2Service {
                                                      reinterpret_cast<const unsigned char *>(_array.data()),
                                                      _array.size());
             }
-
         } else {
             std::cout << "Reading ASCII glTF" << std::endl;
             if ( _array.empty()) {
