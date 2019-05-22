@@ -318,7 +318,7 @@ RLTargetPlain::RLTargetPlain( std::shared_ptr<CameraRig> cameraRig, const Rect2f
         : RLTarget( cameraRig, screenViewport, _bt, rr ) {
     mComposite = std::make_shared<CompositePlain>( rr, cameraRig->getMainCamera()->Name(), screenViewport );
     framebuffer = mComposite->getColorFB();
-    bucketRanges.push_back( {CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd} );
+    bucketRanges.emplace_back( CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd );
 }
 
 void RLTargetPlain::startCL( CommandBufferList& cb ) {
@@ -366,7 +366,7 @@ void RLTargetPlain::resize( const Rect2f& _r ) {
 
 void RLTarget::clearCB() {
     for ( auto& [k, vl] : rr.CL() ) {
-        if ( isKeyInRange( k, RLClearFlag::DontIncludeCore ) ) {
+        if ( isKeyInRange( k, CheckEnableBucket::False, RLClearFlag::DontIncludeCore ) ) {
             vl.mVListTransparent.clear();
             vl.mVList.clear();
         }
@@ -431,7 +431,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     }
 
     for ( const auto& [k, vl] : rr.CL() ) {
-        if ( isKeyInRange(k) ) {
+        if ( isKeyInRange(k, CheckEnableBucket::True) ) {
             rr.addToCommandBuffer( vl.mVList );
         }
     }
@@ -501,7 +501,7 @@ void RLTargetProbe::startCL( CommandBufferList& cb ) {
     cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
 }
 
-bool RLTarget::isKeyInRange( const int _key, RLClearFlag _clearFlags ) const {
+bool RLTarget::isKeyInRange( const int _key, CheckEnableBucket _checkBucketVisibility, RLClearFlag _clearFlags ) const {
 
     if ( _clearFlags == RLClearFlag::DontIncludeCore ) {
         if ( inRange( _key, {CommandBufferLimits::CoreStart, CommandBufferLimits::CoreEnd} ) ) {
@@ -510,7 +510,8 @@ bool RLTarget::isKeyInRange( const int _key, RLClearFlag _clearFlags ) const {
     }
 
     for ( const auto& p : bucketRanges ) {
-        if ( inRange( _key, p) ) return true;
+        if ( ((_checkBucketVisibility == CheckEnableBucket::False ) || p.enabled ) &&
+             inRange( _key, p.range) ) return true;
     }
 
     return false;

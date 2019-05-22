@@ -438,12 +438,26 @@ public:
         play( groupName );
     }
 
+    static void sleep( float _seconds = 0.016f, uint64_t frameSkipper = 0, TimelineGroupCCF _ccf = nullptr ) {
+        auto groupName = UUIDGen::make();
+        auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Sleeping");
+
+        timelineGroups.emplace( groupName, TimelineGroup{} );
+        timelineGroups[groupName].FrameTickOffset(frameSkipper);
+        timelineGroups[groupName].addTimeline(timelines.add( sleepingBeauty, {0.0f, 0.0f} ));
+        timelineGroups[groupName].addTimeline(timelines.add( sleepingBeauty, {_seconds, 0.0f} ));
+        timelineGroups[groupName].CCF(_ccf);
+
+        play( groupName );
+    }
+
     template<typename SGT, typename M>
     static void addParam( const std::string& _groupName, AnimValue<SGT> _source, const M& _param ) {
         if constexpr ( std::is_same_v<M, KeyFramePair<SGT>> ) {
             timelineGroups[_groupName].addTimeline(timelines.add( _source, {0.0f, _source->value} ));
             timelineGroups[_groupName].addTimeline(timelines.add( _source, _param ));
-        } else if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
+        } else if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ||
+                std::is_same_v<M, std::initializer_list<KeyFramePair<SGT>>> ) {
             for (const auto& elem : _param ) {
                 timelineGroups[_groupName].addTimeline(timelines.add( _source, elem ));
             }

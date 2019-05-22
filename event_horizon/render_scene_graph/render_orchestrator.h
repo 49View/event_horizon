@@ -109,6 +109,8 @@ public:
 
     bool skyBoxRenderEnabled( const std::string& _target = "" ) const;
     void skyBoxRenderEnabled( bool _value, const std::string& _target = "" );
+    void hidePBRRender( const std::string& _target = "" );
+    void showPBRRender( const std::string& _target = "" );
 
 protected:
     AVInitCallback avcbTM();

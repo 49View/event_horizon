@@ -29,12 +29,25 @@ enum class RenderTargetType {
     Probe
 };
 
+enum class CheckEnableBucket {
+    False,
+    True
+};
+
 enum class RLClearFlag {
     DontIncludeCore,
     All
 };
 
-using RenderBucketRanges = std::vector<std::pair<int, int>>;
+struct RenderBucketRange {
+    RenderBucketRange() = default;
+    explicit RenderBucketRange( int _r1, int _r2, bool enabled = true ) : enabled( enabled ) {
+        range = { _r1, _r2 };
+    }
+
+    std::pair<int, int> range;
+    bool enabled = true;
+};
 
 class Composite {
 public:
@@ -151,7 +164,8 @@ public:
 
     void clearCB();
 
-    bool isKeyInRange( int _key, RLClearFlag _clearFlags = RLClearFlag::All ) const;
+    bool isKeyInRange( int _key, CheckEnableBucket _checkBucketVisibility = CheckEnableBucket::False,
+                       RLClearFlag _clearFlags = RLClearFlag::All ) const;
 
     bool isTakingScreenShot() {
         return mbTakeScreenShot && ++mTakeScreenShotDelay > 2;
@@ -186,6 +200,10 @@ public:
     void enable() { bEnabled = true; }
     void disable() { bEnabled = false; }
 
+    void enableBucket( bool _flag,  size_t _bucketInndex = 0 ) {
+        bucketRanges[_bucketInndex].enabled = _flag;
+    }
+
 public:
     std::shared_ptr<CameraRig> cameraRig = nullptr;
     std::shared_ptr<Framebuffer> framebuffer = nullptr;
@@ -193,7 +211,7 @@ public:
     bool bEnabled = true;
     BlitType finalDestBlit = BlitType::OnScreen;
     ScreenShotContainerPtr screenShotContainer;
-    RenderBucketRanges bucketRanges;
+    std::vector<RenderBucketRange> bucketRanges;
 
 protected:
     void updateStreamPacket( const std::string& _streamName );

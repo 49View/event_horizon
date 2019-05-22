@@ -176,23 +176,23 @@ void Timeline::TimelineGroup::update() {
     if ( !bIsPlaying ) return;
 
     if ( ++frameTickCount <= frameTickOffset ) return;
-    uint64_t realFrameTicks = frameTickCount - frameTickOffset;
 
     auto currGameStamp = GameTime::getCurrTimeStamp();
     if ( animationStartTime < 0.0f ) {
         animationStartTime = currGameStamp;
     }
 
-    float timeDelta = timeElapsed;
+//    uint64_t realFrameTicks = frameTickCount - frameTickOffset;
+//    float timeDelta = timeElapsed;
     timeElapsed = ( currGameStamp - animationStartTime);// + animationInitialDelay;
-    timeDelta = timeElapsed - timeDelta;
-    float meanTimeDeltaAvr = meanTimeDelta / realFrameTicks;
-    if ( timeDelta > meanTimeDeltaAvr*3.0f && realFrameTicks > 3 ) {
-        timeElapsed -= timeDelta;
-        timeElapsed += meanTimeDeltaAvr;
-        timeDelta = meanTimeDeltaAvr;
-    }
-    meanTimeDelta += timeDelta;
+//    timeDelta = timeElapsed - timeDelta;
+//    float meanTimeDeltaAvr = meanTimeDelta / realFrameTicks;
+//    if ( timeDelta > meanTimeDeltaAvr*3.0f && realFrameTicks > 3 ) {
+//        timeElapsed -= timeDelta;
+//        timeElapsed += meanTimeDeltaAvr;
+//        timeDelta = meanTimeDeltaAvr;
+//    }
+//    meanTimeDelta += timeDelta;
     auto& tl = Timeline::TimelinesToUpdate();
     bIsPlaying = false;
     for ( auto k : timelines ) {

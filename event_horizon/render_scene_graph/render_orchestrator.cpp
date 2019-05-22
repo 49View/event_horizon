@@ -187,6 +187,18 @@ void RenderOrchestrator::skyBoxRenderEnabled( bool _value, const std::string& _t
     }
 }
 
+void RenderOrchestrator::hidePBRRender( const std::string& _target ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->enableBucket( false );
+    }
+}
+
+void RenderOrchestrator::showPBRRender( const std::string& _target ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->enableBucket( true );
+    }
+}
+
 void RenderOrchestrator::setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport ) {
     rr.getTarget(_rigName)->getRig()->setViewport(_viewport);
 }

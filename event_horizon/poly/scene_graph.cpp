@@ -308,12 +308,13 @@ GeomSP SceneGraph::GC() {
     return ret;
 }
 
-void SceneGraph::GC( const GeomSP& _geom ) {
+GeomSP SceneGraph::GC( const GeomSP& _geom ) {
     auto ref = GM().getHash( _geom->Name() );
-    if ( !ref.empty() ) addNode( ref );
+    auto elem = ref.empty() ? nullptr : addNode( ref );
     for (const auto& c : _geom->Children() ) {
         GC( c );
     }
+    return elem;
 }
 
 ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {

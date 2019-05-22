@@ -206,16 +206,14 @@ public:
         elem->pushData( vdataRef, matRef );
 
         if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
-        elem->TRS(gb.mTRS);
         elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
-        elem->updateTransform();
         auto ref = B<GRB>( gb.Name() ).addIM( elem );
         return gb.elemInjFather ? elem : addNode( ref );
 //        return elem;
     }
 
     GeomSP GC();
-    void GC( const GeomSP& _geom );
+    GeomSP GC( const GeomSP& _geom );
 
     void chartMeshes( scene_t& scene ) const;
 
