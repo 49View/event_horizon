@@ -21,6 +21,7 @@
 #include <core/math/quaternion.h>
 #include <core/math/anim_type.hpp>
 #include <core/game_time.h>
+#include <core/uuid.hpp>
 
 enum class AnimLoopType {
 	Linear,
@@ -147,7 +148,7 @@ public:
     KeyFramePosition getKeyFrameIndexAt( float _timeElapsed, uint64_t& _index, float& _delta ) {
 
         if ( keyframes.size() < 2 ) return KeyFramePosition::Invalid;
-        if ( _timeElapsed < 0.0f ) return KeyFramePosition::Pre;
+        if ( _timeElapsed < keyframes[0].time ) return KeyFramePosition::Pre;
 
         for ( uint64_t t = 0; t < keyframes.size()-1; t++ ) {
             if ( inRangeEx( _timeElapsed, keyframes[t].time, keyframes[t+1].time) ) {
@@ -163,15 +164,21 @@ public:
         return KeyFramePosition::Post;
     }
 
+    void addDelay( float _delay ) {
+        for ( auto& k : keyframes ) {
+            k.time += _delay;
+        }
+    }
+
     T valueAt( float _timeElapsed ) {
         auto value = source->value;
         uint64_t keyFrameIndex = 0;
         float delta = 0.0f;
         auto keyFramePos = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
-        source->isAnimating = keyFramePos == KeyFramePosition::Valid ||
+        source->isAnimating = keyFramePos == KeyFramePosition::Pre ||
+                              keyFramePos == KeyFramePosition::Valid ||
                               ( keyFramePos == KeyFramePosition::Post && !triggeredPost );
-        if ( keyFramePos == KeyFramePosition::Post ) triggeredPost = true;
-        if ( source->isAnimating ) {
+        if ( keyFramePos == KeyFramePosition::Valid || ( keyFramePos == KeyFramePosition::Post && !triggeredPost ) ) {
             uint64_t p1 = keyFrameIndex;
             uint64_t p2 = keyFrameIndex+1;
             switch ( keyframes[p2].velocityType ) {
@@ -195,6 +202,7 @@ public:
                     break;
             }
         }
+        if ( keyFramePos == KeyFramePosition::Post ) triggeredPost = true;
         return value;
     }
 
@@ -303,6 +311,7 @@ struct TimelineMapSpec {
 
     void visit( TimelineIndex _k,  AnimVisitCallback _callback );
     bool update( TimelineIndex _k, float _timeElapsed );
+    void addDelay( TimelineIndex _k, float _delay );
     bool isActive( TimelineIndex _k ) const;
     bool deleteKey( TimelineIndex _k, uint64_t _index );
     void updateKeyTime( TimelineIndex _k, uint64_t _index, float _time );
@@ -351,17 +360,19 @@ class Timeline {
 public:
     class TimelineGroup {
     public:
-        void play( float _startTimeOffset = 0.0f, uint64_t _frameTickOffset = 0, TimelineGroupCCF _ccf = nullptr);
-        void playOneFrame( float _startTimeOffset = 0.0f );
+        void play();
+        void playOneFrame();
         void update();
         void visit( AnimVisitCallback _callback );
         void addTimeline( TimelineIndex _ti );
         float animationTime() const;
-
+        void FrameTickOffset( uint64_t _value );
+        void StartTimeOffset( float _value );
+        void CCF( TimelineGroupCCF _value );
     private:
         TimelineIndexVector timelines;
         float animationStartTime = -1.0f;
-        float animationInitialDelay = 0.0f;
+        float startTimeOffset = 0.0f;
         float timeElapsed = 0.0f;
         float meanTimeDelta = 0.0f;
         bool bIsPlaying = false;
@@ -379,18 +390,15 @@ public:
         }
     }
 
-    static void play( const std::string & _groupName,
-                      float _startTimeOffset = 0.0f,
-                      uint64_t frameTickOffset = 0,
-                      TimelineGroupCCF _ccf = nullptr ) {
+    static void play( const std::string & _groupName ) {
         if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            it->second.play( _startTimeOffset, frameTickOffset, _ccf );
+            it->second.play();
         }
     }
 
-    static void playOneFrame( const std::string & _groupName, float _startTimeOffset ) {
+    static void playOneFrame( const std::string & _groupName ) {
         if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            it->second.playOneFrame( _startTimeOffset );
+            it->second.playOneFrame();
         }
     }
 
@@ -418,6 +426,34 @@ public:
             timelineGroups[_group].addTimeline(timelines.add( _source, {0.0f, _source->value} ));
         }
         (timelineGroups[_group].addTimeline(timelines.add( _source, args )), ...);
+    }
+
+    template <typename T, typename ...Args>
+    static void play( AnimValue<T> _source, Args&& ... args ) {
+        auto groupName = UUIDGen::make();
+        timelineGroups.emplace( groupName, TimelineGroup{} );
+
+        (addParam<T>( groupName, _source, std::forward<Args>( args )), ...); // Fold expression (c++17)
+
+        play( groupName );
+    }
+
+    template<typename SGT, typename M>
+    static void addParam( const std::string& _groupName, AnimValue<SGT> _source, const M& _param ) {
+        if constexpr ( std::is_same_v<M, KeyFramePair<SGT>> ) {
+            timelineGroups[_groupName].addTimeline(timelines.add( _source, {0.0f, _source->value} ));
+            timelineGroups[_groupName].addTimeline(timelines.add( _source, _param ));
+        } else if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
+            for (const auto& elem : _param ) {
+                timelineGroups[_groupName].addTimeline(timelines.add( _source, elem ));
+            }
+        } else if constexpr ( std::is_integral_v<M> ) {
+            timelineGroups[_groupName].FrameTickOffset(_param);
+        } else if constexpr ( std::is_floating_point_v<M> ) {
+            timelineGroups[_groupName].StartTimeOffset(_param);
+        } else {
+            timelineGroups[_groupName].CCF(_param);
+        }
     }
 
     static bool deleteKey( const std::string& _group, TimelineIndex _ti, uint64_t _index ) {

@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 template <typename T> class RecursiveTransformation;
 
 class VData;
@@ -14,6 +17,7 @@ using Font = Utility::TTFCore::FontInternal;
 struct GeomData;
 using Geom = RecursiveTransformation<GeomData>;
 using GeomSP = std::shared_ptr<Geom>;
+using GeomSPContainer = std::vector<GeomSP>;
 class Profile;
 class MaterialColor;
 class UIElement;

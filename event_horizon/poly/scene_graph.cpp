@@ -32,11 +32,11 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackCameraRig    ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackGeom         ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite    ;
 
-UUID SceneGraph::addNode( const ResourceRef& _hash ) {
+GeomSP SceneGraph::addNode( const ResourceRef& _hash ) {
     auto cloned = GM().clone( _hash );
     nodeAddSignal(cloned);
     nodes.emplace( cloned->UUiD(), cloned );
-    return cloned->UUiD();
+    return cloned;//->UUiD();
 }
 
 void SceneGraph::removeNode( const UUID& _uuid ) {
@@ -308,13 +308,12 @@ GeomSP SceneGraph::GC() {
     return ret;
 }
 
-UUID SceneGraph::GC( const GeomSP& _geom ) {
+void SceneGraph::GC( const GeomSP& _geom ) {
     auto ref = GM().getHash( _geom->Name() );
-    ResourceRef ret = !ref.empty() ? addNode( ref ) : "";
+    if ( !ref.empty() ) addNode( ref );
     for (const auto& c : _geom->Children() ) {
         GC( c );
     }
-    return ret;
 }
 
 ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {

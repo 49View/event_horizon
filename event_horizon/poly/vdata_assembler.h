@@ -31,7 +31,7 @@ class VDataAssembler : public NamePolicy<> {
 public:
     template<typename ...Args>
     explicit VDataAssembler( Args&& ... args ) {
-        Name( UUIDGen::make());
+        Name(UUIDGen::make());
         (addParam<T>( std::forward<Args>( args )), ...); // Fold expression (c++17)
     }
 

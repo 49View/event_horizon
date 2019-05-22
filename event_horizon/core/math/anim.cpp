@@ -8,6 +8,31 @@ TimelineMapSpec             Timeline::timelines;
 Timeline::TimelineGroupMap  Timeline::timelineGroups;
 TimelineLinks               Timeline::links;
 
+void TimelineMapSpec::addDelay( TimelineIndex _k, float _delay ) {
+    auto ki = _k / tiNorm;
+    switch (ki) {
+        case tiIntIndex:
+            tmapi[_k].addDelay( _delay );
+            break;
+        case tiFloatIndex:
+            tmapf[_k].addDelay( _delay );
+            break;
+        case tiV2fIndex:
+            tmapV2[_k].addDelay( _delay );
+            break;
+        case tiV3fIndex:
+            tmapV3[_k].addDelay( _delay );
+            break;
+        case tiV4fIndex:
+            tmapV4[_k].addDelay( _delay );
+            break;
+        case tiQuatIndex:
+            tmapQ[_k].addDelay( _delay );
+        default:
+            break;
+    }
+}
+
 bool TimelineMapSpec::update( TimelineIndex _k, float _timeElapsed ) {
     auto ki = _k / tiNorm;
     switch (ki) {
@@ -129,18 +154,20 @@ void TimelineMapSpec::visit( TimelineIndex _k, AnimVisitCallback _callback ) {
     }
 }
 
-void Timeline::TimelineGroup::play( float _startTimeOffset, uint64_t _frameTickOffset, TimelineGroupCCF _ccf ) {
+void Timeline::TimelineGroup::play() {
     animationStartTime = -1.0f;
-    frameTickOffset = _frameTickOffset;
-    animationInitialDelay = _startTimeOffset;
+    if ( startTimeOffset > 0.0f ) {
+        auto& tl = Timeline::TimelinesToUpdate();
+        for ( auto k : timelines ) {
+            tl.addDelay( k, startTimeOffset );
+        }
+    }
     bIsPlaying = true;
     bForceOneFrameOnly = false;
-    ccf = _ccf;
 }
 
-void Timeline::TimelineGroup::playOneFrame( float _startTimeOffset ) {
+void Timeline::TimelineGroup::playOneFrame() {
     animationStartTime = -1.0f;
-    animationInitialDelay = _startTimeOffset;
     bIsPlaying = true;
     bForceOneFrameOnly = true;
 }
@@ -197,4 +224,16 @@ void Timeline::TimelineGroup::addTimeline( TimelineIndex _ti ) {
 
 float Timeline::TimelineGroup::animationTime() const {
     return bIsPlaying ? timeElapsed : -1.0f;
+}
+
+void Timeline::TimelineGroup::FrameTickOffset( uint64_t _value ) {
+    frameTickOffset = _value;
+}
+
+void Timeline::TimelineGroup::StartTimeOffset( float _value ) {
+    startTimeOffset = _value;
+}
+
+void Timeline::TimelineGroup::CCF( TimelineGroupCCF _value ) {
+    ccf = _value;
 }

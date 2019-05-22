@@ -58,8 +58,8 @@ public:
                          GeomManager& _gm);
 
     void init();
-    GeomSP getNode(  const UUID& _uuid );
-    UUID addNode( const ResourceRef& _hash );
+    GeomSP getNode( const UUID& _uuid );
+    GeomSP addNode( const ResourceRef& _hash );
     void removeNode( const UUID& _uuid );
 
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
@@ -191,7 +191,7 @@ public:
     }
 
     template <typename T, typename ...Args>
-    UUID GB( Args&&... args ) {
+    GeomSP GB( Args&&... args ) {
         VDataAssembler<T> gb{std::forward<Args>(args)...};
         auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
 
@@ -210,11 +210,12 @@ public:
         elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
         elem->updateTransform();
         auto ref = B<GRB>( gb.Name() ).addIM( elem );
-        return gb.elemInjFather ? ref : addNode( ref );
+        return gb.elemInjFather ? elem : addNode( ref );
+//        return elem;
     }
 
     GeomSP GC();
-    UUID GC( const GeomSP& _geom );
+    void GC( const GeomSP& _geom );
 
     void chartMeshes( scene_t& scene ) const;
 
