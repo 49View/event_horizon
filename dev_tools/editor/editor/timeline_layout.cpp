@@ -63,16 +63,16 @@ void ImGuiTimeline::renderImpl( SceneGraph& _sg, RenderOrchestrator& _rsg, Rect2
     ImGui::SameLine();
 
     if ( ImGui::Button( "->" ) ) {
-        Timeline::play(timelineNameCStr, currframeToTime());
+//        Timeline::play(timelineNameCStr, currframeToTime());
     }
     ImGui::SameLine();
     if ( ImGui::Button( "|->" ) ) {
-        Timeline::play(timelineNameCStr, 0.0f);
+//        Timeline::play(timelineNameCStr, 0.0f);
     }
     ImGui::SameLine();
     ImGui::PushItemWidth(90);
     if ( ImGui::InputInt("Frame ", &currentFrame) ) {
-        Timeline::playOneFrame(timelineNameCStr, currframeToTime() );
+//        Timeline::playOneFrame(timelineNameCStr, currframeToTime() );
     } else {
         if ( timelineNameCStr ) {
             if ( auto ct = Timeline::groupAnimTime( timelineNameCStr ); ct > 0.0f ) {
@@ -134,7 +134,7 @@ void ImGuiTimeline::renderImpl( SceneGraph& _sg, RenderOrchestrator& _rsg, Rect2
         frameLineCol = 0xFFBFBF00;
         if ( ImGui::IsMouseDown(0) ) {
             seCurrentFrameFromMouseX();
-            Timeline::playOneFrame(timelineNameCStr, currframeToTime() );
+//            Timeline::playOneFrame(timelineNameCStr, currframeToTime() );
         }
     }
     for ( int fl = 0; fl < canvas_size.x; fl+=currFrameWidth ) {
