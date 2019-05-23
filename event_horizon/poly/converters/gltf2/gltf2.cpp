@@ -159,10 +159,10 @@ namespace GLTF2Service {
         if ( !checkBitWiseFlag( NTBFill, TEXCOORD_MASK ) ) {
             geom->forcePlanarMapping();
         }
-        if ( NTBFill < 2 ) {
-            geom->calcBinormal();
-        } else {
+        if ( checkBitWiseFlag( NTBFill, NORMAL_MASK ) &&  checkBitWiseFlag( NTBFill, TANGENT_MASK ) ) {
             geom->calcBinormalFromNormAndTang();
+        } else {
+            geom->calcBinormal();
         }
     }
 

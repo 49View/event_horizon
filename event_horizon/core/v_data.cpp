@@ -30,10 +30,17 @@ void VData::fillCoors3d( const std::vector<Vector3f>& _verts ) {
 }
 
 void VData::fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index ) {
-    ASSERT( _index < 2 );
-    vSoaData.resize( _uvs.size() );
-    for ( size_t t = 0; t < _uvs.size(); t++ ) {
-        ( _index == 0 ) ? vSoaData[t].a1 : vSoaData[t].a2 = _uvs[t];
+    if ( _index < 2 ) {
+        vSoaData.resize( _uvs.size() );
+        for ( size_t t = 0; t < _uvs.size(); t++ ) {
+            if ( _index == 0 ) {
+                vSoaData[t].a1 = _uvs[t];
+            } else {
+                vSoaData[t].a2 = _uvs[t];
+            } 
+        }
+    } else {
+        LOGR("[GLTF2]: Mora than 2 sets of data, don't know what to do with it.");
     }
 }
 
