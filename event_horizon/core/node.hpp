@@ -78,9 +78,9 @@ public:
     TimelineSet addKeyFrame( const std::string& _name, float _time ) override {
         TimelineSet ret{};
 
-        ret.emplace( Timeline::add( _name, mTRS.pos  , {_time, mTRS.Pos()} ) );
-        ret.emplace( Timeline::add( _name, mTRS.rot  , {_time, mTRS.Rot()} ) );
-        ret.emplace( Timeline::add( _name, mTRS.scale, {_time, mTRS.Scale()} ) );
+//        ret.emplace( Timeline::add( _name, mTRS.pos  , {_time, mTRS.Pos()} ) );
+//        ret.emplace( Timeline::add( _name, mTRS.rot  , {_time, mTRS.Rot()} ) );
+//        ret.emplace( Timeline::add( _name, mTRS.scale, {_time, mTRS.Scale()} ) );
 
         return ret;
     }

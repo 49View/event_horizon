@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 //  anim.h
 //  sixthview
@@ -101,7 +103,11 @@ template <typename T>
 class TimelineStream {
 public:
     TimelineStream() = default;
-    explicit TimelineStream( AnimValue<T> source ) : source( std::move( source )) {}
+    explicit TimelineStream( AnimValue<T> _source ) : source( std::move( _source )) {}
+
+    void Source( AnimValue<T> _source ) {
+        source = _source;
+    }
 
     void sortOnTime() {
         std::sort( keyframes.begin(), keyframes.end(),
@@ -165,6 +171,7 @@ public:
     }
 
     void addDelay( float _delay ) {
+        if ( _delay <= 0.0f ) return;
         for ( auto& k : keyframes ) {
             k.time += _delay;
         }
@@ -287,8 +294,10 @@ public:
         TimelineStream::timelineIndex = timelineIndex;
     }
 
+    T value() const {
+        return source->value;
+    }
     bool isActive() const { return source->isAnimating; };
-
     const std::string& Name() const { return source->Name(); }
 private:
     AnimValue<T> source;
@@ -355,166 +364,255 @@ struct TimelineMapSpec {
 };
 
 using TimelineGroupCCF = std::function<void()>;
+template <typename V>
+class TimelineGroup {
+public:
+    TimelineGroup() = default;
+    explicit TimelineGroup( AnimValue<V> _source ) {
+        stream.Source( std::move(_source) );
+    }
+
+    void play() {
+        animationStartTime = -1.0f;
+        stream.addDelay( startTimeOffset );
+        bIsPlaying = true;
+        bForceOneFrameOnly = false;
+    }
+
+    void playOneFrame() {
+        animationStartTime = -1.0f;
+        bIsPlaying = true;
+        bForceOneFrameOnly = true;
+    }
+
+    void update() {
+        if ( !bIsPlaying ) return;
+
+        if ( ++frameTickCount <= frameTickOffset ) return;
+
+        auto currGameStamp = GameTime::getCurrTimeStamp();
+        if ( animationStartTime < 0.0f ) {
+            animationStartTime = currGameStamp;
+        }
+
+//    uint64_t realFrameTicks = frameTickCount - frameTickOffset;
+//    float timeDelta = timeElapsed;
+        timeElapsed = ( currGameStamp - animationStartTime);// + animationInitialDelay;
+//    timeDelta = timeElapsed - timeDelta;
+//    float meanTimeDeltaAvr = meanTimeDelta / realFrameTicks;
+//    if ( timeDelta > meanTimeDeltaAvr*3.0f && realFrameTicks > 3 ) {
+//        timeElapsed -= timeDelta;
+//        timeElapsed += meanTimeDeltaAvr;
+//        timeDelta = meanTimeDeltaAvr;
+//    }
+//    meanTimeDelta += timeDelta;
+        bIsPlaying = stream.update( timeElapsed );
+        if ( !bIsPlaying ) {
+            timeElapsed = 0.0f;
+            meanTimeDelta = 0.0f;
+            frameTickCount = 0;
+            frameTickOffset = 0;
+            if (ccf) ccf();
+        }
+        if ( bForceOneFrameOnly ) {
+            bIsPlaying = false;
+            bForceOneFrameOnly = false;
+        }
+    }
+
+    float animationTime() const {
+        return bIsPlaying ? timeElapsed : -1.0f;
+    }
+
+    void FrameTickOffset( uint64_t _value ) {
+        frameTickOffset = _value;
+    }
+
+    void StartTimeOffset( float _value ) {
+        startTimeOffset = _value;
+    }
+
+    void CCF( TimelineGroupCCF _value ) {
+        ccf = _value;
+    }
+
+    TimelineStream<V> stream;
+
+private:
+    float animationStartTime = -1.0f;
+    float startTimeOffset = 0.0f;
+    float timeElapsed = 0.0f;
+    float meanTimeDelta = 0.0f;
+    bool bIsPlaying = false;
+    bool bForceOneFrameOnly = false;
+    uint64_t frameTickOffset = 0;
+    uint64_t frameTickCount = 0;
+    TimelineGroupCCF ccf = nullptr;
+};
 
 class Timeline {
 public:
-    class TimelineGroup {
-    public:
-        void play();
-        void playOneFrame();
-        void update();
-        void visit( AnimVisitCallback _callback );
-        void addTimeline( TimelineIndex _ti );
-        float animationTime() const;
-        void FrameTickOffset( uint64_t _value );
-        void StartTimeOffset( float _value );
-        void CCF( TimelineGroupCCF _value );
-    private:
-        TimelineIndexVector timelines;
-        float animationStartTime = -1.0f;
-        float startTimeOffset = 0.0f;
-        float timeElapsed = 0.0f;
-        float meanTimeDelta = 0.0f;
-        bool bIsPlaying = false;
-        bool bForceOneFrameOnly = false;
-        uint64_t frameTickOffset = 0;
-        uint64_t frameTickCount = 0;
-        TimelineGroupCCF ccf = nullptr;
-    };
-
-    using TimelineGroupMap = std::unordered_map<std::string, TimelineGroup>;
 
     static void update() {
-        for( auto& [k,g] : timelineGroups ) {
-            g.update();
-        }
+       for( auto& [k,g] : timelinei ) {
+           g->update();
+       }
+       for( auto& [k,g] : timelinef ) {
+           g->update();
+       }
+       for( auto& [k,g] : timelineV2 ) {
+           g->update();
+       }
+       for( auto& [k,g] : timelineV3 ) {
+           g->update();
+       }
+       for( auto& [k,g] : timelineV4 ) {
+           g->update();
+       }
+       for( auto& [k,g] : timelineQ ) {
+           g->update();
+       }
     }
 
-    static void play( const std::string & _groupName ) {
-        if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            it->second.play();
-        }
-    }
+//    static void play( const std::string & _groupName ) {
+//        if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+//            it->second.play();
+//        }
+//    }
+//
+//    static void playOneFrame( const std::string & _groupName ) {
+//        if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+//            it->second.playOneFrame();
+//        }
+//    }
+//
+//    static float groupAnimTime( const std::string & _groupName ) {
+//        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+//            return it->second.animationTime();
+//        }
+//        return -1.0f;
+//    }
+//
+//    static void visitGroup( const std::string& _groupName, AnimVisitCallback _callback ) {
+//        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
+//            it->second.visit( std::move(_callback) );
+//        }
+//    }
 
-    static void playOneFrame( const std::string & _groupName ) {
-        if ( auto it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            it->second.playOneFrame();
-        }
-    }
+//    static const TimelineMapSpec& Timelines() { return timelines; }
+//    static TimelineMapSpec& TimelinesToUpdate() { return timelines; }
+//    static const TimelineGroupMap& Groups() { return timelineGroups; }
 
-    static float groupAnimTime( const std::string & _groupName ) {
-        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            return it->second.animationTime();
-        }
-        return -1.0f;
-    }
-
-    static void visitGroup( const std::string& _groupName, AnimVisitCallback _callback ) {
-        if ( const auto& it = timelineGroups.find(_groupName); it != timelineGroups.end() ) {
-            it->second.visit( _callback );
-        }
-    }
-
-    static const TimelineMapSpec& Timelines() { return timelines; }
-    static TimelineMapSpec& TimelinesToUpdate() { return timelines; }
-    static const TimelineGroupMap& Groups() { return timelineGroups; }
-
-    template <typename T, typename ...Args>
-    static void add( const std::string& _group, AnimValue<T> _source, Args&& ... args ) {
-        addGroupIfEmpty(_group);
-        if constexpr ( sizeof...(Args) == 1 ) {
-            timelineGroups[_group].addTimeline(timelines.add( _source, {0.0f, _source->value} ));
-        }
-        (timelineGroups[_group].addTimeline(timelines.add( _source, args )), ...);
-    }
+//    template <typename T, typename ...Args>
+//    static void add( const std::string& _group, AnimValue<T> _source, Args&& ... args ) {
+//        addGroupIfEmpty(_group);
+//        if constexpr ( sizeof...(Args) == 1 ) {
+//            timelineGroups[_group].addTimeline(timelines.add( _source, {0.0f, _source->value} ));
+//        }
+//        (timelineGroups[_group].addTimeline(timelines.add( _source, args )), ...);
+//    }
 
     template <typename T, typename ...Args>
     static void play( AnimValue<T>& _source, Args&& ... args ) {
         auto groupName = UUIDGen::make();
-        TimelineGroup tg;
+        auto tg = std::make_shared<TimelineGroup<T>>(_source);
 
-        (addParam<T>( tg, _source, std::forward<Args>( args )), ...); // Fold expression (c++17)
+        (addParam<T>( tg, std::forward<Args>( args )), ...); // Fold expression (c++17)
 
-        timelineGroups.emplace( groupName, tg );
+        if constexpr (std::is_same_v<T, float>) {
+            timelinef.emplace( groupName, tg );
+        } else if constexpr (std::is_same_v<T, V2f>) {
+            timelineV2.emplace( groupName, tg );
+        } else if constexpr (std::is_same_v<T, V3f>) {
+            timelineV3.emplace( groupName, tg );
+        } else if constexpr (std::is_same_v<T, V4f>) {
+            timelineV4.emplace( groupName, tg );
+        } else if constexpr (std::is_same_v<T, Quaternion>) {
+            timelineQ.emplace( groupName, tg );
+        } else if constexpr (std::is_same_v<T, int>) {
+            timelinei.emplace( groupName, tg );
+        }
 
-        play( groupName );
+        tg->play();
     }
 
     static void sleep( float _seconds = 0.016f, uint64_t frameSkipper = 0, TimelineGroupCCF _ccf = nullptr ) {
         auto groupName = UUIDGen::make();
         auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Sleeping");
 
-        timelineGroups.emplace( groupName, TimelineGroup{} );
-        timelineGroups[groupName].FrameTickOffset(frameSkipper);
-        timelineGroups[groupName].addTimeline(timelines.add( sleepingBeauty, {0.0f, 0.0f} ));
-        timelineGroups[groupName].addTimeline(timelines.add( sleepingBeauty, {_seconds, 0.0f} ));
-        timelineGroups[groupName].CCF(_ccf);
-
-        play( groupName );
+        play( sleepingBeauty, frameSkipper, _ccf, KeyFramePair{ _seconds, 0.0f } );
     }
 
     template<typename SGT, typename M>
-    static void addParam( TimelineGroup& tg, AnimValue<SGT>& _source, const M& _param ) {
+    static void addParam( std::shared_ptr<TimelineGroup<SGT>> tg, const M& _param ) {
         if constexpr ( std::is_same_v<M, KeyFramePair<SGT>> ) {
-            tg.addTimeline(timelines.add( _source, {0.0f, _source->value} ));
-            tg.addTimeline(timelines.add( _source, _param ));
+            tg->stream.k( { 0.0f, tg->stream.value() } );
+            tg->stream.k( _param );
         } else if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
             for (const auto& elem : _param ) {
-                tg.addTimeline(timelines.add( _source, elem ));
+                tg->stream.k( elem );
             }
         } else if constexpr ( std::is_integral_v<M> ) {
-            tg.FrameTickOffset(_param);
+            tg->FrameTickOffset(_param);
         } else if constexpr ( std::is_floating_point_v<M> ) {
-            tg.StartTimeOffset(_param);
+            tg->StartTimeOffset(_param);
         } else {
-            tg.CCF(_param);
+            tg->CCF(_param);
         }
     }
 
-    static bool deleteKey( const std::string& _group, TimelineIndex _ti, uint64_t _index ) {
-        auto ki = timelines.deleteKey(_ti, _index );
-        if ( const auto& linkedKeys = links.find(_ti); linkedKeys != links.end() ) {
-            for ( const auto& lk : linkedKeys->second ) {
-                ki |= timelines.deleteKey(lk, _index );
-            }
-        }
-        return ki;
-    }
-
-    static void updateKeyTime( const std::string& _group, TimelineIndex _ti, uint64_t _index, float _time ) {
-        timelines.updateKeyTime(_ti, _index, _time );
-        if ( const auto& linkedKeys = links.find(_ti); linkedKeys != links.end() ) {
-            for ( const auto& lk : linkedKeys->second ) {
-                timelines.updateKeyTime(lk, _index, _time );
-            }
-        }
-    }
-
-    template <typename T>
-    static void addLinked( const std::string& _group, std::shared_ptr<T> _linkable, float _time ) {
-        auto lKeys = _linkable->addKeyFrame( _group, _time );
-        for ( const auto& k : lKeys ) {
-            for ( const auto& m : lKeys ) {
-                if ( k != m ) links[k].emplace(m);
-            }
-        }
-    }
-
-    template <typename T>
-    static void deleteLinked( const std::string& _group, std::shared_ptr<T> _linkable, float _time ) {
-        _linkable->deleteKeyFrame( _group, _time );
-    }
+//    static bool deleteKey( const std::string& _group, TimelineIndex _ti, uint64_t _index ) {
+//        auto ki = timelines.deleteKey(_ti, _index );
+//        if ( const auto& linkedKeys = links.find(_ti); linkedKeys != links.end() ) {
+//            for ( const auto& lk : linkedKeys->second ) {
+//                ki |= timelines.deleteKey(lk, _index );
+//            }
+//        }
+//        return ki;
+//    }
+//
+//    static void updateKeyTime( const std::string& _group, TimelineIndex _ti, uint64_t _index, float _time ) {
+//        timelines.updateKeyTime(_ti, _index, _time );
+//        if ( const auto& linkedKeys = links.find(_ti); linkedKeys != links.end() ) {
+//            for ( const auto& lk : linkedKeys->second ) {
+//                timelines.updateKeyTime(lk, _index, _time );
+//            }
+//        }
+//    }
+//
+//    template <typename T>
+//    static void addLinked( const std::string& _group, std::shared_ptr<T> _linkable, float _time ) {
+//        auto lKeys = _linkable->addKeyFrame( _group, _time );
+//        for ( const auto& k : lKeys ) {
+//            for ( const auto& m : lKeys ) {
+//                if ( k != m ) links[k].emplace(m);
+//            }
+//        }
+//    }
+//
+//    template <typename T>
+//    static void deleteLinked( const std::string& _group, std::shared_ptr<T> _linkable, float _time ) {
+//        _linkable->deleteKeyFrame( _group, _time );
+//    }
 
 private:
-    static void addGroupIfEmpty( const std::string& _group ) {
-        if ( const auto& it = timelineGroups.find(_group); it == timelineGroups.end() ) {
-            timelineGroups.emplace( _group, TimelineGroup{} );
-        }
-    }
+//    static void addGroupIfEmpty( const std::string& _group ) {
+//        if ( const auto& it = timelineGroups.find(_group); it == timelineGroups.end() ) {
+//            timelineGroups.emplace( _group, TimelineGroup{} );
+//        }
+//    }
 private:
-    static TimelineGroupMap timelineGroups;
-    static TimelineMapSpec  timelines;
-    static TimelineLinks    links;
+//    using TimelineGroupMap = std::unordered_map<std::string, TimelineGroup>;
+    static std::unordered_map<std::string, std::shared_ptr<TimelineGroup<int>        >> timelinei;
+    static std::unordered_map<std::string, std::shared_ptr<TimelineGroup<float>      >> timelinef;
+    static std::unordered_map<std::string, std::shared_ptr<TimelineGroup<Vector2f>   >> timelineV2;
+    static std::unordered_map<std::string, std::shared_ptr<TimelineGroup<Vector3f>   >> timelineV3;
+    static std::unordered_map<std::string, std::shared_ptr<TimelineGroup<Vector4f>   >> timelineV4;
+    static std::unordered_map<std::string, std::shared_ptr<TimelineGroup<Quaternion> >> timelineQ;
+
+//    static TimelineGroupMap timelineGroups;
+//    static TimelineMapSpec  timelines;
+//    static TimelineLinks    links;
 
     template <typename U>
     friend class TimelineStream;
