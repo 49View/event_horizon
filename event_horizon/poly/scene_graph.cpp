@@ -32,13 +32,6 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackCameraRig    ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackGeom         ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite    ;
 
-//GeomSP SceneGraph::addNode( const ResourceRef& _hash ) {
-//    auto cloned = GM().clone( _hash );
-//    nodeAddSignal(cloned);
-//    nodes.emplace( cloned->UUiD(), cloned );
-//    return cloned;//->UUiD();
-//}
-
 void SceneGraph::addNode( GeomSP _node ) {
     nodeAddSignal(_node);
     nodes.emplace( _node->UUiD(), _node );
@@ -46,8 +39,6 @@ void SceneGraph::addNode( GeomSP _node ) {
 
 void SceneGraph::removeNode( const UUID& _uuid ) {
     if ( auto it = nodes.find(_uuid); it != nodes.end() ) {
-        // Remove all child
-//        removeImpl(_uuid);
         nodes.erase( it );
     }
 }
@@ -75,22 +66,10 @@ void SceneGraph::update() {
             B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else if ( k == ResourceGroup::Geom ) {
             GLTF2Service::load( *this, std::get<2>(v) );
-//            for ( auto& scene : glt ) {
-//                scene->visit( [this]( std::shared_ptr<GeomSceneArtifact> _geom ) {
-//                    if ( !_geom->empty() ) {
-//                        B<MB>( "urca" ).addIM( _geom->Data().materialSP );
-//                    }
-//                });
-//            }
-//            std::make_shared<GLTF2>( std::get<1>(v), std::get<0>(v) );
-//            B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else {
             LOGRS("{" << k << "} Resource not supported yet in callback updating");
             ASSERT(0);
         }
-//        auto tr = sceneEntityFilesCallbacks[T::Prefix()];
-//        B<T>(std::get<0>(tr)).publishAndAdd( std::get<1>(tr) );
-//        c( this );
     }
     genericSceneCallback.clear();
 

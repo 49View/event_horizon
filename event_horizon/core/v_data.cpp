@@ -37,7 +37,7 @@ void VData::fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index ) {
                 vSoaData[t].a1 = _uvs[t];
             } else {
                 vSoaData[t].a2 = _uvs[t];
-            } 
+            }
         }
     } else {
         LOGR("[GLTF2]: Mora than 2 sets of data, don't know what to do with it.");
