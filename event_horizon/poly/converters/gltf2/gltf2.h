@@ -69,5 +69,4 @@ namespace GLTF2Service {
     GeomSP load( SceneGraph& _sg, const std::string& _path, const SerializableContainer& _array = {} );
 
     void fillGeom( std::shared_ptr<VData> geom, tinygltf::Model* model, int meshIndex, int primitiveIndex );
-
 };

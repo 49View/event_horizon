@@ -382,7 +382,7 @@ namespace GLTF2Service {
         gltfScene.model = std::make_shared<tinygltf::Model>();
 
         bool ret = false;
-        if ( ext.compare( ".glb" ) == 0 ) {
+        if ( ext == ".glb" ) {
             std::cout << "Reading binary glTF" << std::endl;
             if ( _array.empty()) {
                 ret = gltf_ctx.LoadBinaryFromFile( gltfScene.model.get(), &err, &warn, _path.c_str());
@@ -408,7 +408,7 @@ namespace GLTF2Service {
         for ( const auto& gltfMaterial : gltfScene.model->materials ) {
             elaborateMaterial( _sg, gltfScene, gltfMaterial );
         }
-        auto rootScene = _sg.GC();
+        auto rootScene = EF::create<Geom>(gltfScene.Name());
         for ( const auto& scene : gltfScene.model->scenes ) {
             for ( auto nodeIndex = 0; nodeIndex < scene.nodes.size(); nodeIndex++ ) {
                 auto node = gltfScene.model->nodes[nodeIndex];
@@ -416,7 +416,6 @@ namespace GLTF2Service {
             }
         }
         rootScene->updateTransform( V3f::ZERO );
-        _sg.GC(rootScene);
 
         return rootScene;
     }

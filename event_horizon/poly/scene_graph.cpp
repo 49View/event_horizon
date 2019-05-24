@@ -35,6 +35,9 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite    ;
 void SceneGraph::addNode( GeomSP _node ) {
     nodeAddSignal(_node);
     nodes.emplace( _node->UUiD(), _node );
+    for (const auto& c : _node->Children() ) {
+        addNode( c );
+    }
 }
 
 void SceneGraph::removeNode( const UUID& _uuid ) {
@@ -284,19 +287,6 @@ void SceneGraph::addResources( const SerializableContainer& _data, HttpDeferredR
     }
 
     if ( _ccf) _ccf();
-}
-
-GeomSP SceneGraph::GC() {
-    auto ret = std::make_shared<Geom>();
-    ret->Name( B<GRB>( ret->UUiD() ).addIM( ret ) );
-    return ret;
-}
-
-void SceneGraph::GC( const GeomSP& _geom ) {
-    addNode( _geom );
-    for (const auto& c : _geom->Children() ) {
-        GC( c );
-    }
 }
 
 ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {

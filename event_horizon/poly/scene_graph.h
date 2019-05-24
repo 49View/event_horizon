@@ -208,13 +208,10 @@ public:
         if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
         elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
         auto ref = B<GRB>( gb.Name() ).addIM( elem );
-        addNode(elem);
+        if ( !gb.elemInjFather ) addNode(elem);
 //        return gb.elemInjFather ? elem : addNodeSP( ref );
         return elem;
     }
-
-    GeomSP GC();
-    void GC( const GeomSP& _geom );
 
     void chartMeshes( scene_t& scene ) const;
 

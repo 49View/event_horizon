@@ -249,7 +249,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float visibility = 1.0;
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     float nlAngle = clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
-    v_shadowmap_coord3Biases.z -= 0.001100 * tan(acos(nlAngle));
+    v_shadowmap_coord3Biases.z -= 0.001100;// * tan(acos(nlAngle));
     visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases );
 
     // for ( int i = 0; i < 4; i++ ) {
