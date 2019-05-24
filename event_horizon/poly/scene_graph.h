@@ -240,6 +240,14 @@ public:
             elem = EF::clone(get<Geom>(gb.dataTypeHolder.nameId));
             elem->Father( gb.elemInjFather.get() );
             elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
+            if ( !gb.matRef.empty() ) {
+                auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
+                elem->visit( [&matRef](GeomSP _geom) {
+                    if ( !_geom->empty() ) {
+                        _geom->DataRef().material = matRef;
+                    }
+                });
+            }
             addNode( elem );
         }
         return elem;
