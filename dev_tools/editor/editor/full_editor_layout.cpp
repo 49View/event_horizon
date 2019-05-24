@@ -31,6 +31,9 @@ void EditorBackEnd::activateImpl() {
 //    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.26, GT::Scale( 0.6f ) );
     sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
 
+    sg.load<Geom>("curtain", [this](HttpResouceCBSign key) {
+        sg.addNode( sg.get<Geom>(key) );
+    } );
 //    sg.dumpAsObjFile();
 //    rsg.RR().drawRect2d( CommandBufferLimits::UI2dStart, V2f{0.03f, 0.96f}, V2f{ 0.03f * 0.02f, 0.98f}, C4f::GREEN  );
 }

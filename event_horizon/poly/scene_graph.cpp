@@ -68,7 +68,8 @@ void SceneGraph::update() {
         } else if ( k == ResourceGroup::Material ) {
             B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else if ( k == ResourceGroup::Geom ) {
-            GLTF2Service::load( *this, std::get<2>(v) );
+            B<GRB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+//            GLTF2Service::load( *this, std::get<2>(v) );
         } else {
             LOGRS("{" << k << "} Resource not supported yet in callback updating");
             ASSERT(0);
@@ -83,7 +84,10 @@ void SceneGraph::update() {
     for ( const auto& res : resourceCallbackProfile      ) {addProfile      ( res.key, Profile      {res.data}, res.ccf ); }
     for ( const auto& res : resourceCallbackMaterialColor) {addMaterialColor( res.key, MaterialColor{res.data}, res.ccf ); }
 //    for ( const auto& res : resourceCallbackCameraRig    ) {addCameraRig    ( res.key, CameraRig    {res.data}, res.ccf ); }
-//    for ( const auto& res : resourceCallbackGeom         ) {addGeom         ( res.key, Geom         {res.data}, res.ccf ); }
+    for ( const auto& res : resourceCallbackGeom         ) {
+        auto geom = GLTF2Service::load( *this, res.key, res.data );
+        addGeom( res.key, *geom.get(), res.ccf );
+    }
     for ( const auto& res : resourceCallbackComposite    ) {addResources( res.data, res.ccf ); }
 
     resourceCallbackVData        .clear();
@@ -257,7 +261,10 @@ ResourceRef SceneGraph::addFont          ( const ResourceRef& _key, const Font  
 ResourceRef SceneGraph::addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpResouceCB _ccf ) { B<PB> (_key).addDF( _res, _ccf ); return _key; }
 ResourceRef SceneGraph::addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf ) { B<MCB>(_key).addDF( _res, _ccf ); return _key; }
 ResourceRef SceneGraph::addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResouceCB _ccf ) { B<CB> (_key).addDF( _res, _ccf ); return _key; }
-ResourceRef SceneGraph::addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpResouceCB _ccf ) { B<GRB>(_key).addDF( _res, _ccf ); return _key; }
+
+ResourceRef SceneGraph::addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpResouceCB _ccf ) {
+    B<GRB>(_key).addDF( _res, _ccf ); return _key;
+}
 
 void SceneGraph::addResources( const SerializableContainer& _data, HttpResouceCB _ccf ) {
 

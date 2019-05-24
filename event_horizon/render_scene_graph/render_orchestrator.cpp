@@ -63,6 +63,11 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
+    sg.GM().connect( [](const ResourceTransfer<Geom>& _val ) {
+        LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
+        if ( _val.ccf ) _val.ccf(_val.hash);
+    });
+
     sg.nodeAddConnect( [this]( NodeGraphConnectParamsSig _geom ) {
         auto bEmpty = _geom->empty();
         LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );

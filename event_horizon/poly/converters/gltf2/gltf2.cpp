@@ -382,22 +382,18 @@ namespace GLTF2Service {
         gltfScene.model = std::make_shared<tinygltf::Model>();
 
         bool ret = false;
-        if ( ext == ".glb" ) {
-            std::cout << "Reading binary glTF" << std::endl;
-            if ( _array.empty()) {
-                ret = gltf_ctx.LoadBinaryFromFile( gltfScene.model.get(), &err, &warn, _path.c_str());
-            } else {
-                ret = gltf_ctx.LoadBinaryFromMemory( gltfScene.model.get(), &err, &warn,
-                                                     reinterpret_cast<const unsigned char *>(_array.data()),
-                                                     _array.size());
-            }
-        } else {
-            std::cout << "Reading ASCII glTF" << std::endl;
-            if ( _array.empty()) {
-                ret = gltf_ctx.LoadASCIIFromFile( gltfScene.model.get(), &err, &warn, _path.c_str());
-            } else {
+        if ( _array.empty()) {
+            ret = gltf_ctx.LoadBinaryFromFile( gltfScene.model.get(), &err, &warn, _path.c_str());
+            if ( !ret ) {
                 auto str = std::string( _array.begin(), _array.end());
                 ret = gltf_ctx.LoadASCIIFromString( gltfScene.model.get(), &err, &warn, str.c_str(), str.size(), "" );
+            }
+        } else {
+            ret = gltf_ctx.LoadBinaryFromMemory( gltfScene.model.get(), &err, &warn,
+                                                 reinterpret_cast<const unsigned char *>(_array.data()),
+                                                 _array.size());
+            if ( !ret ) {
+                ret = gltf_ctx.LoadASCIIFromFile( gltfScene.model.get(), &err, &warn, _path.c_str());
             }
         }
 

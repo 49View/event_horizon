@@ -40,6 +40,9 @@ public:
     using NodeSP = std::shared_ptr<RecursiveTransformation<T>>;
     using NodeP = RecursiveTransformation<T>*;
 
+    RESOURCE_CTORS(RecursiveTransformation);
+    void bufferDecode( const unsigned char* rawData, size_t length ) {}
+
     RecursiveTransformation() = default;
     virtual ~RecursiveTransformation() = default;
     // This ctor is effectively a "clone"
