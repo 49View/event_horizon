@@ -5,6 +5,7 @@
 #include <vector>
 #include <core/util.h>
 #include <core/camera_utils.hpp>
+#include <core/math/anim_type.hpp>
 
 class VPList;
 class Texture;
@@ -48,10 +49,14 @@ public:
 	void InfiniteSkyboxMode( bool _infiniteSkyboxMode ) {
 		mbInfiniteSkyboxMode = _infiniteSkyboxMode ? InifinititeSkyBox::True : InifinititeSkyBox::False;
 	}
+    floata& DeltaInterpolation() {
+	    return mDeltaInterpolation;
+	}
 
 private:
 	void init();
 	InifinititeSkyBox mbInfiniteSkyboxMode = InifinititeSkyBox::False;
+	floata mDeltaInterpolation;
 };
 
 class Skybox : public RenderModule, public FrameInvalidator {
@@ -65,6 +70,7 @@ public:
 
     std::shared_ptr<Texture> getSkyboxTexture() { return mSkyboxTexture; }
 
+    floata& DeltaInterpolation() { return mCubeMapRender->DeltaInterpolation(); }
 private:
 	void init( SkyBoxMode _sbm, const std::string& _textureName = "" );
 	void equirectangularTextureInit( const std::vector<std::string>& params );

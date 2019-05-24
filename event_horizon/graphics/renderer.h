@@ -157,8 +157,6 @@ public:
 	int UpdateCounter() const { return mUpdateCounter; }
 	void invalidateOnAdd();
 
-	void changeTime( const V3f& _solarTime );
-
 protected:
 	void changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt );
 	void clearCommandList();

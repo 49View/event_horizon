@@ -293,8 +293,6 @@ GeomSP SceneGraph::GC() {
 }
 
 void SceneGraph::GC( const GeomSP& _geom ) {
-//    auto ref = GM().getHash( _geom->Name() );
-//    auto elem = ref.empty() ? nullptr : addNode( ref );
     addNode( _geom );
     for (const auto& c : _geom->Children() ) {
         GC( c );

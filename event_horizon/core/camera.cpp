@@ -668,6 +668,14 @@ void Camera::incrementQuatAngles( const Vector3f& a ) {
     qangle->value=quatCompose( incrementalEulerQuatAngle );
 }
 
+void Camera::UpdateIncrementalEulerFromQangle() {
+    incrementalEulerQuatAngle = V3f{ M_PI } - qangle->value.euler2();
+}
+
+void Camera::UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget ) {
+    incrementalEulerQuatAngle = V3f{ M_PI } - _qtarget.euler2();
+}
+
 Quaternion Camera::quatAngle() const { return qangle->value; }
 
 V3fa& Camera::PosAnim() { return mPos; }
@@ -736,4 +744,5 @@ void Camera::Mode( const CameraMode& val ) {
 CameraMode Camera::Mode() const {
 	return mMode;
 }
+
 

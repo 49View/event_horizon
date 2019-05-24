@@ -93,6 +93,7 @@ Skybox::Skybox( Renderer& rr, const SkyBoxInitParams& _params ) : RenderModule( 
 
 void CubeEnvironmentMap::init() {
     auto sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
+    mDeltaInterpolation = std::make_shared<AnimType<float>>(1.0f, "deltaInterpolation");
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
@@ -109,13 +110,19 @@ CubeEnvironmentMap::CubeEnvironmentMap( Renderer& rr, CubeEnvironmentMap::Inifin
 
 void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
     if ( InfiniteSkyboxMode() ) {
-        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
+//        rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteFalse } );
+//        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLEqual } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteTrue } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
     }
     mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
+    mVPList->setMaterialConstant( "delta", mDeltaInterpolation->value );
     rr.CB_U().pushVP( mVPList );
     if ( InfiniteSkyboxMode() ) {
-        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
+//        rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteTrue } );
+//        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
+        rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
     }
 }

@@ -68,7 +68,7 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     // Create the SunBuilder to for PBR scenes
     mSunBuilder = std::make_shared<SunBuilder>();
 
-    changeTime( mSunBuilder->getSunPosition() );
+    changeTime( "spring noon" );
 
     // Create PBR resources
     mConvolution = std::make_unique<ConvolutionEnvironmentMap>(rr);
@@ -374,11 +374,31 @@ void RLTarget::clearCB() {
 }
 
 void RLTargetPBR::startCL( CommandBufferList& cb ) {
+}
+
+void RLTargetPBR::endCL( CommandBufferList& cb ) {
+}
+
+void RLTargetPBR::addToCB( CommandBufferList& cb ) {
+
+//    startCL( cb );
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.setCameraUniforms( cameraRig->getCamera() );
 
+    // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
+    // (that has got 3d lighting in it) especially skyboxes and probes!!
+    addShadowMaps();
+
+    if ( mSkybox->precalc( 0.0f ) ) {
+        addProbes();
+    }
+
+    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
+
+    mSkybox->render();
+
     cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
     cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
@@ -389,46 +409,10 @@ void RLTargetPBR::startCL( CommandBufferList& cb ) {
         }
     }
 
-    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-
-    // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
-    // (that has got 3d lighting in it) especially skyboxes and probes!!
-    addShadowMaps();
-
-    if ( mSkybox->precalc( 0.0f ) ) {
-        addProbes();
-    }
-
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBind } );
-}
-
-void RLTargetPBR::endCL( CommandBufferList& cb ) {
-    cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
-    cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
-    cb.pushCommand( { CommandBufferCommandName::wireFrameModeFalse } );
-
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-    for ( const auto& [k, vl] : rr.CL() ) {
-        if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) ) {
-            rr.addToCommandBuffer( k );
-        }
-    }
-
-    blit(cb);
-}
-
-void RLTargetPBR::addToCB( CommandBufferList& cb ) {
-
-    startCL( cb );
-
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
     cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
     cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-
-    if ( skyBoxRenderEnabled() ) {
-        mSkybox->render();
-    }
 
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k, CheckEnableBucket::True) ) {
@@ -444,7 +428,20 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 //        }
 //    }
 
-    endCL( cb );
+    cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
+    cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
+    cb.pushCommand( { CommandBufferCommandName::wireFrameModeFalse } );
+
+    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+    for ( const auto& [k, vl] : rr.CL() ) {
+        if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) ) {
+            rr.addToCommandBuffer( k );
+        }
+    }
+
+    blit(cb);
+
+//    endCL( cb );
 }
 
 void RLTargetPBR::resize( const Rect2f& _r ) {
@@ -452,9 +449,11 @@ void RLTargetPBR::resize( const Rect2f& _r ) {
     framebuffer = mComposite->getColorFB();
 }
 
-void RLTargetPBR::changeTime( const V3f& _solarTime ) {
+void RLTargetPBR::changeTime( const std::string& _time ) {
+    mSunBuilder->buildFromString( _time );
+//    RR().changeTime( SB().getSunPosition() );
     mSkybox->invalidate();
-    setShadowMapPosition(_solarTime);
+    setShadowMapPosition(mSunBuilder->getSunPosition());
 }
 
 void RLTargetPBR::invalidateOnAdd() {
@@ -462,12 +461,8 @@ void RLTargetPBR::invalidateOnAdd() {
     mSkybox->invalidate();
 }
 
-bool RLTargetPBR::skyBoxRenderEnabled() const {
-    return bEnableSkyBoxRendering;
-}
-
-void RLTargetPBR::skyBoxRenderEnabled( bool _value )  {
-    bEnableSkyBoxRendering = _value;
+floata& RLTargetPBR::skyBoxDeltaInterpolation() {
+    return mSkybox->DeltaInterpolation();
 }
 
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {

@@ -1,5 +1,5 @@
 #version #opengl_version
-precision highp float;
+#precision_high
 #include "lighting_uniforms.glsl"
 #include "animation_uniforms.glsl"
 

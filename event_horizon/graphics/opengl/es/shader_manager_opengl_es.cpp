@@ -2,6 +2,11 @@
 
 void ShaderManager::createCCInjectionMap() {
     ccShaderMap["#opengl_version"] = "300 es\nprecision mediump float;\nprecision mediump int;\nprecision mediump sampler2DShadow;";
+#ifdef ANDROID
+    ccShaderMap["#precision_high"] = "precision highp float;";
+#else
+    ccShaderMap["#precision_high"] = "precision mediump float;";
+#endif
 }
 
 // this was required for font rendering but probably legacy 1.00 GL_ES

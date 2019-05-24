@@ -1,8 +1,7 @@
 #version #opengl_version
-precision highp float;
+#precision_high
 
 layout( location = 0 ) out vec4 FragColor;
-// layout( location = 1 ) out vec4 BloomColor;
 
 in vec2 v_texCoord;
 in vec2 v_texCoord2;

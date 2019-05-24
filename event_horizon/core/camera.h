@@ -131,7 +131,8 @@ public:
 	bool LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
 	void LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
 	void ToggleLockAtWalkingHeight() { mLockAtWalkingHeight = !mLockAtWalkingHeight; }
-
+    void UpdateIncrementalEulerFromQangle();
+    void UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget);
 	void enableInputs( bool _enableInputs ) { mbLocked = _enableInputs; }
 
 	JMATH::Rect2f ViewPort() const { return mViewPort; }

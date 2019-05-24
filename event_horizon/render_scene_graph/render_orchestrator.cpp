@@ -174,19 +174,6 @@ void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, cons
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 }
 
-bool RenderOrchestrator::skyBoxRenderEnabled( const std::string& _target ) const {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        return pbrTarget->skyBoxRenderEnabled();
-    }
-    return false;
-}
-
-void RenderOrchestrator::skyBoxRenderEnabled( bool _value, const std::string& _target ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->skyBoxRenderEnabled( _value );
-    }
-}
-
 void RenderOrchestrator::hidePBRRender( const std::string& _target ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
         pbrTarget->enableBucket( false );
@@ -198,6 +185,23 @@ void RenderOrchestrator::showPBRRender( const std::string& _target ) {
         pbrTarget->enableBucket( true );
     }
 }
+
+void RenderOrchestrator::changeTime( const std::string& _time ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->changeTime( _time );
+    }
+}
+
+floata& RenderOrchestrator::skyBoxDeltaInterpolation() {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        return pbrTarget->skyBoxDeltaInterpolation();
+    }
+    ASSERT("Target doesnt have skybox!");
+    static floata reterror;
+    return reterror;
+}
+
+
 
 void RenderOrchestrator::setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport ) {
     rr.getTarget(_rigName)->getRig()->setViewport(_viewport);

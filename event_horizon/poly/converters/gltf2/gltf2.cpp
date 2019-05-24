@@ -351,26 +351,24 @@ namespace GLTF2Service {
         }
     }
 
-    void convert( SceneGraph& _sg, IntermediateGLTF& _gltf ) {
+    bool handleLoadingMessages( const std::string& err, const std::string& warn, bool ret ) {
+        if ( !warn.empty()) {
+            LOGR( "Warn: %s", warn.c_str());
+        }
 
-        for ( const auto& gltfMaterial : _gltf.model->materials ) {
-            elaborateMaterial( _sg, _gltf, gltfMaterial );
+        if ( !err.empty()) {
+            LOGR( "Err: %s", err.c_str());
         }
-        for ( const auto& scene : _gltf.model->scenes ) {
-            auto rootScene = _sg.GC();
-            for ( auto nodeIndex = 0; nodeIndex < scene.nodes.size(); nodeIndex++ ) {
-                auto node = _gltf.model->nodes[nodeIndex];
-//                auto cscene = std::make_shared<GeomSceneArtifact>( node.name );
-                addMeshNode( _sg, _gltf, node, rootScene );
-//                cscene->prune();
-//                cscene->generateMatrixHierarchy();
-            }
-            rootScene->updateTransform( V3f::ZERO );
-            _sg.GC(rootScene);
+
+        if ( !ret ) {
+            LOGR( "Failed to parse glTF" );
+            return false;
         }
+
+        return true;
     }
 
-    void load( SceneGraph& _sg, const std::string& _path, const SerializableContainer& _array ) {
+    GeomSP load( SceneGraph& _sg, const std::string& _path, const SerializableContainer& _array ) {
 
         tinygltf::TinyGLTF gltf_ctx;
         std::string err;
@@ -403,21 +401,23 @@ namespace GLTF2Service {
             }
         }
 
-        if ( !warn.empty()) {
-            LOGR( "Warn: %s", warn.c_str());
+        if ( !handleLoadingMessages( err, warn, ret ) ) {
+            return nullptr;
         }
 
-        if ( !err.empty()) {
-            LOGR( "Err: %s", err.c_str());
+        for ( const auto& gltfMaterial : gltfScene.model->materials ) {
+            elaborateMaterial( _sg, gltfScene, gltfMaterial );
         }
-
-        if ( !ret ) {
-            LOGR( "Failed to parse glTF" );
-            return;
+        auto rootScene = _sg.GC();
+        for ( const auto& scene : gltfScene.model->scenes ) {
+            for ( auto nodeIndex = 0; nodeIndex < scene.nodes.size(); nodeIndex++ ) {
+                auto node = gltfScene.model->nodes[nodeIndex];
+                addMeshNode( _sg, gltfScene, node, rootScene );
+            }
         }
+        rootScene->updateTransform( V3f::ZERO );
+        _sg.GC(rootScene);
 
-        convert( _sg, gltfScene );
-
-//    Dump( model );
+        return rootScene;
     }
 }

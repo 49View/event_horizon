@@ -107,11 +107,10 @@ public:
         rr.SSM().addStream<T>( _streamName, avcbTM() );
     }
 
-    bool skyBoxRenderEnabled( const std::string& _target = "" ) const;
-    void skyBoxRenderEnabled( bool _value, const std::string& _target = "" );
     void hidePBRRender( const std::string& _target = "" );
     void showPBRRender( const std::string& _target = "" );
-
+    void changeTime( const std::string& _time );
+    floata& skyBoxDeltaInterpolation();
 protected:
     AVInitCallback avcbTM();
     std::shared_ptr<Camera>    getCamera( const std::string& _name );

@@ -66,16 +66,8 @@ namespace GLTF2Service {
         std::string basePath;
     };
 
-    void load( SceneGraph& _sg, const std::string& _path, const SerializableContainer& _array = {} );
+    GeomSP load( SceneGraph& _sg, const std::string& _path, const SerializableContainer& _array = {} );
 
     void fillGeom( std::shared_ptr<VData> geom, tinygltf::Model* model, int meshIndex, int primitiveIndex );
-//    void load( const SerializableContainer& _array, const std::string& _name );
-//    void convert( SceneGraph& _sg, IntermediateGLTF& _scene );
-
-//    void addGeom( SceneGraph& _sg, int meshIndex, int primitiveIndex, std::shared_ptr<GeomSceneArtifact> gnode );
-//    void addMeshNode( SceneGraph& _sg, const tinygltf::Node& node, std::shared_ptr<GeomSceneArtifact> hier );
-//    IntermediateMaterial elaborateMaterial( SceneGraph& _sg, const tinygltf::Material& mat );
-//    void saveMaterial( const IntermediateMaterial& im );
-//    void saveInternalPBRComponent( const IntermediateMaterial& _im, const InternalPBRComponent& ic, const std::string& _uniformName );
 
 };

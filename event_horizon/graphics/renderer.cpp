@@ -92,12 +92,6 @@ void Renderer::clearTargets() {
     }
 }
 
-void Renderer::changeTime( const V3f& _solar ) {
-    for ( auto& t : mTargets ) {
-        t->changeTime( _solar );
-    }
-}
-
 StreamingMediator& Renderer::SSM() {
     return ssm;
 }

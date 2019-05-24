@@ -154,7 +154,7 @@ public:
     void addToCBCore( CommandBufferList& cb );
     void updateStreams();
     virtual void invalidateOnAdd() {}
-    virtual void changeTime( const V3f& solarTime ) {}
+    virtual void changeTime( const std::string& time ) {}
     virtual void addToCB( CommandBufferList& cb ) = 0;
     virtual void startCL( CommandBufferList& fbt ) = 0;
     virtual void endCL( CommandBufferList& fbt ) = 0;
@@ -295,10 +295,9 @@ public:
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
     void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
 
-    void changeTime( const V3f& _solarTime ) override;
+    void changeTime( const std::string& time ) override;
     void invalidateOnAdd() override;
-    bool skyBoxRenderEnabled() const;
-    void skyBoxRenderEnabled( bool _value);
+    floata& skyBoxDeltaInterpolation();
 
 protected:
     std::shared_ptr<Skybox> createSkybox();
