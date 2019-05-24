@@ -217,23 +217,31 @@ public:
     template <typename T, typename ...Args>
     GeomSP GB( Args&&... args ) {
         VDataAssembler<T> gb{std::forward<Args>(args)...};
-        auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
+        GeomSP elem;
+        if constexpr ( !std::is_same_v<T, GT::Asset> ) {
+            auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
 
-        VDataServices::prepare( *this, gb.dataTypeHolder );
-        auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
-        auto vdataRef = VL().getHash( hashRefName );
-        if ( vdataRef.empty() ) {
-            vdataRef = B<VB>( hashRefName ).addIM( VDataServices::build(gb.dataTypeHolder) );
+            VDataServices::prepare( *this, gb.dataTypeHolder );
+            auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
+            auto vdataRef = VL().getHash( hashRefName );
+            if ( vdataRef.empty() ) {
+                vdataRef = B<VB>( hashRefName ).addIM( VDataServices::build(gb.dataTypeHolder) );
+            }
+
+            elem = std::make_shared<Geom>(gb.Name());
+            elem->pushData( vdataRef, matRef );
+
+            if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
+            elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
+            auto ref = B<GRB>( gb.Name() ).addIM( elem );
+            if ( !gb.elemInjFather ) addNode(elem);
+            return elem;
+        } else {
+            elem = EF::clone(get<Geom>(gb.dataTypeHolder.nameId));
+            elem->Father( gb.elemInjFather.get() );
+            elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
+            addNode( elem );
         }
-
-        auto elem = std::make_shared<Geom>(gb.Name());
-        elem->pushData( vdataRef, matRef );
-
-        if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
-        elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
-        auto ref = B<GRB>( gb.Name() ).addIM( elem );
-        if ( !gb.elemInjFather ) addNode(elem);
-//        return gb.elemInjFather ? elem : addNodeSP( ref );
         return elem;
     }
 

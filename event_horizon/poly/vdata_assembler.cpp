@@ -367,6 +367,22 @@ namespace VDataServices {
         return "GLTF2--" + oss.str();
     }
 
+    // ___ ASSET BUILDER ___
+
+    void prepare( SceneGraph& sg, GT::Asset& _d ) {
+
+    }
+
+    void buildInternal( const GT::Asset& _d, std::shared_ptr<VData> _ret ) {
+
+    }
+
+    ResourceRef refName( const GT::Asset& _d ) {
+        std::stringstream oss;
+        oss << _d.nameId;
+        return "Asset--" + oss.str();
+    }
+
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 //

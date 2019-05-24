@@ -49,8 +49,11 @@ public:
             return *this;
         }
         if constexpr ( std::is_same_v<M, std::string> || std::is_same_v<std::decay_t<M>, char*>) {
-            static_assert( std::is_same_v<SGT, GT::Text> );
-            dataTypeHolder.text = _param;
+            static_assert( std::is_same_v<SGT, GT::Text> || std::is_same_v<SGT, GT::Asset> );
+            if constexpr ( std::is_same_v<SGT, GT::Text> )
+                dataTypeHolder.text = _param;
+            if constexpr ( std::is_same_v<SGT, GT::Asset> )
+                dataTypeHolder.nameId = _param;
             return *this;
         }
         if constexpr ( std::is_same_v<M, Color4f> ) {
@@ -261,6 +264,10 @@ namespace VDataServices {
     void prepare( SceneGraph& sg, GT::GLTF2& _d );
     void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::GLTF2& _d );
+
+    void prepare( SceneGraph& sg, GT::Asset& _d );
+    void buildInternal( const GT::Asset& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::Asset& _d );
 
     template <typename DT>
     std::shared_ptr<VData> build( const DT& _d ) {

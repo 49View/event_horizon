@@ -281,6 +281,7 @@ namespace GT {
     struct Mesh      : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
     struct ClothMesh : GTPolicyTRS, GTPolicyCloth, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
     struct GLTF2     : GTPolicyTRS, GTPolicyGLTF2Model {};
+    struct Asset     : GTPolicyTRS, GTPolicyNameId {};
     struct SVG       : GTPolicyTRS {};
     struct VData     : GTPolicyTRS {};
     struct Text      : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
