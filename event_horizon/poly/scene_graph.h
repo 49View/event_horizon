@@ -60,6 +60,7 @@ public:
     void init();
     GeomSP getNode( const UUID& _uuid );
     void addNode( GeomSP _node );
+    void addNode( const UUID& _uuid );
     void removeNode( const UUID& _uuid );
 
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );

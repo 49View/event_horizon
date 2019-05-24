@@ -83,6 +83,7 @@ public:
         if ( prepAndCheck(_data ) ) return;
 
         this->publish( _data, _res, [&]( HttpResponeParams _res ) {
+            if ( _res.statusCode == 204 ) return; // Nothing to do
             JSONResourceResponse resJson( _res.bufferString );
             // We make sure that in case server side has to change name in case
             // of duplicates we reflect it here client side

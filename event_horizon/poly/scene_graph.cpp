@@ -40,13 +40,17 @@ void SceneGraph::addNode( GeomSP _node ) {
     }
 }
 
+void SceneGraph::addNode(  const UUID& _uuid ) {
+    addNode( get<Geom>(_uuid) );
+}
+
 void SceneGraph::removeNode( const UUID& _uuid ) {
     if ( auto it = nodes.find(_uuid); it != nodes.end() ) {
         nodes.erase( it );
     }
 }
 
-GeomSP SceneGraph::getNode(  const UUID& _uuid ) {
+GeomSP SceneGraph::getNode( const UUID& _uuid ) {
     if ( auto it = nodes.find(_uuid); it != nodes.end() ) {
         return it->second;
     }
