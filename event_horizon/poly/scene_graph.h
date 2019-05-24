@@ -33,12 +33,12 @@ public:
 
 struct LoadedResouceCallbackData {
     LoadedResouceCallbackData( ResourceRef  key, SerializableContainer&& data,
-                               HttpDeferredResouceCallbackFunction  ccf ) :
+                               HttpResouceCB  ccf ) :
                                key(std::move( key )), data( std::move(data) ), ccf(std::move( ccf )) {}
 
     ResourceRef                         key;
     SerializableContainer               data;
-    HttpDeferredResouceCallbackFunction ccf;
+    HttpResouceCB ccf;
 };
 
 using LoadedResouceCallbackContainer = std::vector<LoadedResouceCallbackData>;
@@ -132,7 +132,7 @@ public:
     }
 
     template <typename R>
-    static void addDeferred( const ResourceRef& _key, SerializableContainer&& _res, HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
+    static void addDeferred( const ResourceRef& _key, SerializableContainer&& _res, HttpResouceCB _ccf = nullptr ) {
         if constexpr ( std::is_same_v<R, VData          > ) resourceCallbackVData        .emplace_back( _key, std::move(_res), _ccf );
         if constexpr ( std::is_same_v<R, RawImage       > ) resourceCallbackRawImage     .emplace_back( _key, std::move(_res), _ccf );
         if constexpr ( std::is_same_v<R, Material       > ) resourceCallbackMaterial     .emplace_back( _key, std::move(_res), _ccf );
@@ -142,12 +142,12 @@ public:
         if constexpr ( std::is_same_v<R, CameraRig      > ) resourceCallbackCameraRig    .emplace_back( _key, std::move(_res), _ccf );
         if constexpr ( std::is_same_v<R, Geom           > ) resourceCallbackGeom         .emplace_back( _key, std::move(_res), _ccf );
     }
-    static void addDeferredComp( SerializableContainer&& _data, HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
+    static void addDeferredComp( SerializableContainer&& _data, HttpResouceCB _ccf = nullptr ) {
         resourceCallbackComposite.emplace_back( "", std::move(_data), _ccf );
     }
 
     template <typename R>
-    ResourceRef add( const ResourceRef& _key, const R& _res, HttpDeferredResouceCallbackFunction _ccf = nullptr ) {
+    ResourceRef add( const ResourceRef& _key, const R& _res, HttpResouceCB _ccf = nullptr ) {
         if constexpr ( std::is_same_v<R, VData          > ) return addVData        ( _key, _res, _ccf );
         if constexpr ( std::is_same_v<R, RawImage       > ) return addRawImage     ( _key, _res, _ccf );
         if constexpr ( std::is_same_v<R, Material       > ) return addMaterial     ( _key, _res, _ccf );
@@ -158,15 +158,15 @@ public:
         if constexpr ( std::is_same_v<R, Geom           > ) return addGeom         ( _key, _res, _ccf );
     }
 
-    ResourceRef addVData         ( const ResourceRef& _key, const VData        & _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
-    ResourceRef addRawImage      ( const ResourceRef& _key, const RawImage     & _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
-    ResourceRef addMaterial      ( const ResourceRef& _key, const Material     & _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
-    ResourceRef addFont          ( const ResourceRef& _key, const Font         & _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
-    ResourceRef addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
-    ResourceRef addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
-    ResourceRef addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
-    ResourceRef addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpDeferredResouceCallbackFunction _ccf = nullptr );
-    void addResources( const SerializableContainer& _data, HttpDeferredResouceCallbackFunction _ccf = nullptr );
+    ResourceRef addVData         ( const ResourceRef& _key, const VData        & _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addRawImage      ( const ResourceRef& _key, const RawImage     & _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addMaterial      ( const ResourceRef& _key, const Material     & _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addFont          ( const ResourceRef& _key, const Font         & _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpResouceCB _ccf = nullptr );
+    void addResources( const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
 
     static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
         SceneGraph::genericSceneCallback.emplace( _key, std::move(_value) );
@@ -175,6 +175,29 @@ public:
     template <typename T>
     T B( const std::string& _name ) {
         return T{ *this, _name };
+    }
+
+    void loadVData         ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadRawImage      ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadMaterial      ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadFont          ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadProfile       ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadMaterialColor ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadCameraRig     ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadGeom          ( std::string _names, HttpResouceCB _ccf = nullptr );
+
+    template <typename R>
+    void load( std::string _names, HttpResouceCB _ccf = nullptr ) {
+
+        replaceAllStrings( _names, " ", "," );
+        if constexpr ( std::is_same_v<R, VData          > ) loadVData        ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, RawImage       > ) loadRawImage     ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, Material       > ) loadMaterial     ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, Font           > ) loadFont         ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, Profile        > ) loadProfile      ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, MaterialColor  > ) loadMaterialColor( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, CameraRig      > ) loadCameraRig    ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, Geom           > ) loadGeom         ( std::move(_names), _ccf );
     }
 
     void mapGeomType( uint64_t _value, const std::string& _key );

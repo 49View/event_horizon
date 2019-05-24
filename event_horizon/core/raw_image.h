@@ -16,7 +16,7 @@ enum class RawImageMemory {
 
 class RawImage : public ImageParams {
 public:
-    RESOURCE_CTORS(RawImage);
+    RESOURCE_CTORS_ONLY(RawImage);
 
     RawImage( unsigned int _w, unsigned int _h, int channels, uint32_t _col);
     RawImage( unsigned int _w, unsigned int _h, uint8_t _col );
@@ -100,9 +100,6 @@ public:
 	static RawImage BLACK_ARGB4x4();
 	static RawImage BLACK_RGBA4x4();
 	static RawImage NORMAL4x4();
-
-private:
-    void bufferDecode( const unsigned char* _buffer, size_t _length );
 };
 
 //RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string& _name = "", int forceChannels = 0 );

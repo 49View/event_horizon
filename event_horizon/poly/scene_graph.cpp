@@ -247,19 +247,19 @@ void SceneGraph::init() {
     B<CB>( Name::Foxtrot ).addIM( CameraRig{Name::Foxtrot} );
 }
 
-ResourceRef SceneGraph::addVData         ( const ResourceRef& _key, const VData        & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<VB> (_key).addDF( _res, _ccf ); return _key; }
-ResourceRef SceneGraph::addRawImage      ( const ResourceRef& _key, const RawImage     & _res, HttpDeferredResouceCallbackFunction _ccf ) {
+ResourceRef SceneGraph::addVData         ( const ResourceRef& _key, const VData        & _res, HttpResouceCB _ccf ) { B<VB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addRawImage      ( const ResourceRef& _key, const RawImage     & _res, HttpResouceCB _ccf ) {
     B<IB> (_key).addDF( _res, _ccf );
     return _key;
 }
-ResourceRef SceneGraph::addMaterial      ( const ResourceRef& _key, const Material     & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<MB> (_key).addDF( _res, _ccf ); return _key; }
-ResourceRef SceneGraph::addFont          ( const ResourceRef& _key, const Font         & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<FB> (_key).addDF( _res, _ccf ); return _key; }
-ResourceRef SceneGraph::addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<PB> (_key).addDF( _res, _ccf ); return _key; }
-ResourceRef SceneGraph::addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpDeferredResouceCallbackFunction _ccf ) { B<MCB>(_key).addDF( _res, _ccf ); return _key; }
-ResourceRef SceneGraph::addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<CB> (_key).addDF( _res, _ccf ); return _key; }
-ResourceRef SceneGraph::addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpDeferredResouceCallbackFunction _ccf ) { B<GRB>(_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addMaterial      ( const ResourceRef& _key, const Material     & _res, HttpResouceCB _ccf ) { B<MB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addFont          ( const ResourceRef& _key, const Font         & _res, HttpResouceCB _ccf ) { B<FB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpResouceCB _ccf ) { B<PB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf ) { B<MCB>(_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResouceCB _ccf ) { B<CB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpResouceCB _ccf ) { B<GRB>(_key).addDF( _res, _ccf ); return _key; }
 
-void SceneGraph::addResources( const SerializableContainer& _data, HttpDeferredResouceCallbackFunction _ccf ) {
+void SceneGraph::addResources( const SerializableContainer& _data, HttpResouceCB _ccf ) {
 
     auto fs = tarUtil::untar(_data);
     ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
@@ -286,7 +286,7 @@ void SceneGraph::addResources( const SerializableContainer& _data, HttpDeferredR
         }
     }
 
-    if ( _ccf) _ccf();
+    if ( _ccf) _ccf("");
 }
 
 ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {
@@ -353,4 +353,36 @@ void SceneGraph::chartMeshes( scene_t& scene ) const {
     xatlasParametrize( shapes, &scene );
 
 //    FM::writeLocalFile("house.obj", ss.str() );
+}
+
+void SceneGraph::loadVData( std::string _names, HttpResouceCB _ccf ) {
+    B<VB>( _names ).load( _ccf );
+}
+
+void SceneGraph::loadRawImage( std::string _names, HttpResouceCB _ccf ) {
+    B<IB>( _names ).load( _ccf );
+}
+
+void SceneGraph::loadMaterial( std::string _names, HttpResouceCB _ccf ) {
+    B<MB>( _names ).load( _ccf );
+}
+
+void SceneGraph::loadFont( std::string _names, HttpResouceCB _ccf ) {
+    B<FB>( _names ).load( _ccf );
+}
+
+void SceneGraph::loadProfile( std::string _names, HttpResouceCB _ccf ) {
+    B<PB>( _names ).load( _ccf );
+}
+
+void SceneGraph::loadMaterialColor( std::string _names, HttpResouceCB _ccf ) {
+    B<MCB>( _names ).load( _ccf );
+}
+
+void SceneGraph::loadCameraRig( std::string _names, HttpResouceCB _ccf ) {
+    B<CB>( _names ).load( _ccf );
+}
+
+void SceneGraph::loadGeom( std::string _names, HttpResouceCB _ccf ) {
+    B<GRB>( _names ).load( _ccf );
 }

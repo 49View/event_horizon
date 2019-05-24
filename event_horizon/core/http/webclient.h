@@ -42,7 +42,9 @@ using SocketCallbackDataType = rapidjson::Document;
 using SocketCallbackDataTypeConstRef = const SocketCallbackDataType&;
 using SocketCallbackFunc = std::function<void( SocketCallbackDataTypeConstRef message )>;
 using LoginCallback = std::function<void()>;
-using HttpDeferredResouceCallbackFunction = std::function<void()>;
+using HttpResouceCBSign = const std::string&;
+using HttpResouceCB = std::function<void(HttpResouceCBSign)>;
+//using HttpResouceCB = std::function<void(const std::string&)>;
 
 namespace Socket {
     static std::unordered_map<std::string, SocketCallbackFunc> callbacksMap;
@@ -130,7 +132,7 @@ namespace Http {
         int statusCode = 0;
         std::string ETag;
         std::string lastModified;
-        HttpDeferredResouceCallbackFunction ccf = nullptr;
+        HttpResouceCB ccf = nullptr;
 
         void setBuffer( const char* cbuffer, uint64_t _length ) {
             length = _length;
@@ -141,10 +143,10 @@ namespace Http {
 
         Result( uint64_t length = 0, int statusCode = 500 ) : length( length ), statusCode( statusCode ) {}
 
-        Result( const std::string& uri, std::unique_ptr<uint8_t[]>&& buffer, uint64_t length, int statusCode, HttpDeferredResouceCallbackFunction _ccf = nullptr)
+        Result( const std::string& uri, std::unique_ptr<uint8_t[]>&& buffer, uint64_t length, int statusCode, HttpResouceCB _ccf = nullptr)
                 : uri( uri ), buffer( std::move(buffer) ), length( length ), statusCode( statusCode ), ccf(_ccf) {}
 
-        Result( const std::string& uri, const char* cbuffer, uint64_t length, int statusCode, HttpDeferredResouceCallbackFunction _ccf = nullptr )
+        Result( const std::string& uri, const char* cbuffer, uint64_t length, int statusCode, HttpResouceCB _ccf = nullptr )
                 : uri( uri ), length( length ), statusCode( statusCode ), ccf(_ccf) {
             setBuffer(cbuffer, length);
         }
@@ -165,35 +167,35 @@ namespace Http {
     void get( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
-              HttpDeferredResouceCallbackFunction mainThreadCallback = nullptr );
+              HttpResouceCB mainThreadCallback = nullptr );
     void getInternal( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
               ResponseFlags rf = ResponseFlags::None,
-              HttpDeferredResouceCallbackFunction mainThreadCallback = nullptr );
+              HttpResouceCB mainThreadCallback = nullptr );
 
     void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-                       HttpDeferredResouceCallbackFunction mainThreadCallback );
+                       HttpResouceCB mainThreadCallback );
 
     void post( const Url& url, const std::string& _data,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpDeferredResouceCallbackFunction mainThreadCallback = nullptr );
+               HttpResouceCB mainThreadCallback = nullptr );
     void post( const Url& url, const uint8_p& buffer,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpDeferredResouceCallbackFunction mainThreadCallback = nullptr );
+               HttpResouceCB mainThreadCallback = nullptr );
     void post( const Url& url, const char *buff, uint64_t length,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpDeferredResouceCallbackFunction mainThreadCallback = nullptr );
+               HttpResouceCB mainThreadCallback = nullptr );
     void post( const Url& url, const std::vector<unsigned char>& buffer,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpDeferredResouceCallbackFunction mainThreadCallback = nullptr );
+               HttpResouceCB mainThreadCallback = nullptr );
     void post( const Url& url,
                ResponseCallbackFunc callback,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpDeferredResouceCallbackFunction mainThreadCallback = nullptr );
+               HttpResouceCB mainThreadCallback = nullptr );
 
     void useLocalHost( bool _flag );
     void userLoggedIn( bool _flag );

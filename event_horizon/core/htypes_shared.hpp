@@ -331,6 +331,7 @@ enum class DependencyStatus {
 };
 
 #define RESOURCE_CTORS(N) \
+    public: \
     explicit N( uint8_p&& data ) { \
         bufferDecode( data.first.get(), data.second ); \
     } \
@@ -340,6 +341,12 @@ enum class DependencyStatus {
     explicit N( const unsigned char* _buffer, size_t _length ) { \
         bufferDecode( _buffer, _length ); \
     } \
+
+#define RESOURCE_CTORS_ONLY(N) \
+    RESOURCE_CTORS(N) \
+    private: \
+    void bufferDecode( const unsigned char* rawData, size_t length ); \
+    public:
 
 using ResourceRef = std::string;
 using CResourceRef = const std::string&;

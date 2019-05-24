@@ -10,7 +10,7 @@
 namespace Http {
 
     using callbackRespondeMap = std::unordered_map<std::string, ResponseCallbackFunc>;
-    using callbackRespondeCCF = std::unordered_map<std::string, HttpDeferredResouceCallbackFunction>;
+    using callbackRespondeCCF = std::unordered_map<std::string, HttpResouceCB>;
     callbackRespondeMap argCallbackMapOk;
     callbackRespondeMap argCallbackMapFail;
     callbackRespondeCCF argCallbackMapCCF;
@@ -52,7 +52,7 @@ namespace Http {
 
     char* urlKeyPassing( const Url& uri, const ResponseCallbackFunc callbackOk,
                                          const ResponseCallbackFunc callbackFail,
-                                         HttpDeferredResouceCallbackFunction ccf ) {
+                                         HttpResouceCB ccf ) {
         auto key = uri.toString();
         argCallbackMapOk[key] = callbackOk;
         argCallbackMapFail[key] = callbackFail;
@@ -67,7 +67,7 @@ namespace Http {
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       [[maybe_unused]] ResponseFlags rf,
-                      HttpDeferredResouceCallbackFunction ccf ) {
+                      HttpResouceCB ccf ) {
 
         emscripten_async_http_request(uri.toString().c_str(),
                                     "GET",
@@ -85,7 +85,7 @@ namespace Http {
 
     void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-                       HttpDeferredResouceCallbackFunction ccf ) {
+                       HttpResouceCB ccf ) {
 
         LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );

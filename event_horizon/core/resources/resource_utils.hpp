@@ -42,7 +42,7 @@ struct ResourceTransfer {
     std::shared_ptr<T>      elem;
     std::string             hash;
     StringUniqueCollection  names;
-    HttpDeferredResouceCallbackFunction ccf = nullptr;
+    HttpResouceCB ccf = nullptr;
 
     // operator < is needed for boost signal sorting
     bool operator <(const ResourceTransfer &b) const {

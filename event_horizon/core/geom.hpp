@@ -7,6 +7,11 @@
 #include <core/htypes_shared.hpp>
 
 struct GeomData {
+    GeomData() = default;
+    GeomData( ResourceRef vData, ResourceRef material );
+
+RESOURCE_CTORS_ONLY(GeomData);
+
     ResourceRef vData;
     ResourceRef material;
 };

@@ -178,7 +178,7 @@ namespace Http {
     static std::unordered_set<std::string> requestCache;
 
     void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
-              HttpDeferredResouceCallbackFunction mainThreadCallback ) {
+              HttpResouceCB mainThreadCallback ) {
         bool bPerformLoad = false;
 
         if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) ) {
@@ -198,32 +198,32 @@ namespace Http {
 
     void post( const Url& url, const std::string& _data,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpDeferredResouceCallbackFunction mainThreadCallback ) {
+               HttpResouceCB mainThreadCallback ) {
         postInternal( url, _data.data(), _data.size(), HttpQuery::JSON, callback, callbackFailed, mainThreadCallback );
     }
 
     void post( const Url& url, const uint8_p& buffer,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpDeferredResouceCallbackFunction mainThreadCallback ) {
+               HttpResouceCB mainThreadCallback ) {
         postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second, HttpQuery::Binary,
                       callback, callbackFailed, mainThreadCallback );
     }
 
     void post( const Url& url, const char *buff, uint64_t length,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpDeferredResouceCallbackFunction mainThreadCallback) {
+               HttpResouceCB mainThreadCallback) {
         postInternal( url, buff, length, HttpQuery::Binary, callback, callbackFailed, mainThreadCallback );
     }
 
     void post( const Url& url, const std::vector<unsigned  char>& buffer,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpDeferredResouceCallbackFunction mainThreadCallback ) {
+               HttpResouceCB mainThreadCallback ) {
         postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary,
                       callback, callbackFailed, mainThreadCallback );
     }
 
     void post( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpDeferredResouceCallbackFunction mainThreadCallback ) {
+               HttpResouceCB mainThreadCallback ) {
         postInternal( url, nullptr, 0, HttpQuery::Binary, callback, callbackFailed, mainThreadCallback );
     }
 

@@ -540,13 +540,11 @@ private:
 	Mesh GetSimpleMesh( FItr ) const;             // gets the simple glyph's mesh
 	Mesh GetComplexMesh( FItr ) const;            // gets the complex glyph's mesh
 
-    void bufferDecode( const unsigned char* rawData, size_t length );
-
 public:
     FontInternal( const FontInternal& _source );
     explicit FontInternal( std::string flnm );                   // construct from file
     FontInternal( const void* rawData, MapFromData );   // map from raw data (no copy made, data must exist for the duration of the Font object)
-    RESOURCE_CTORS(FontInternal);
+    RESOURCE_CTORS_ONLY(FontInternal);
 	virtual ~FontInternal();
 
 public:

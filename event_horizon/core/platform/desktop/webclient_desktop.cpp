@@ -86,7 +86,7 @@ namespace Http {
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       ResponseFlags rf,
-                      HttpDeferredResouceCallbackFunction mainThreadCallback ) {
+                      HttpResouceCB mainThreadCallback ) {
         auto request = makeRequest( url );
 
         auto settings = std::make_shared< restbed::Settings >( );
@@ -144,7 +144,7 @@ namespace Http {
 
     void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-                       HttpDeferredResouceCallbackFunction mainThreadCallback ) {
+                       HttpResouceCB mainThreadCallback ) {
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
 
