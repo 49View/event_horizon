@@ -45,7 +45,9 @@ public:
                        if ( tarUtil::isTar(buff) ) {
                            SceneGraph::addDeferredComp( std::move(buff), _res.ccf );
                        } else {
+                           auto resHash = _res.ETag.empty() ? _res.uri + std::to_string(_res.length) : _res.ETag;
                            SceneGraph::addDeferred<R>( getFileNameCallbackKey( _res.uri ),
+                                                       _res.ETag,
                                                        std::move(buff),
                                                        _res.ccf );
                        }

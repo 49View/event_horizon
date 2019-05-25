@@ -174,7 +174,7 @@ namespace GLTF2Service {
         if ( primitive.indices < 0 ) return;
 
         auto material = _gltf.model->materials[primitive.material];
-        _sg.GB<GT::GLTF2>( _gltf.model.get(),
+        _sg.GB<GT::GLTF2>( _gltf.contentHash, _gltf.model.get(),
                            GT::GLTF2MeshIndex( meshIndex ), GT::GLTF2PrimitiveIndex( primitiveIndex ),
                            GT::M( _gltf.matMap.at( material.name )), father );
     }
@@ -378,12 +378,13 @@ namespace GLTF2Service {
         IntermediateGLTF gltfScene;
 
         gltfScene.basePath = getFileNamePath( _path ) + "/";
+        gltfScene.contentHash = _path;
         gltfScene.Name( getFileNameOnly( _path ));
         gltfScene.model = std::make_shared<tinygltf::Model>();
 
         bool ret = false;
         if ( _array.empty()) {
-            ret = gltf_ctx.LoadBinaryFromFile( gltfScene.model.get(), &err, &warn, _path.c_str());
+            ret = gltf_ctx.LoadBinaryFromFile( gltfScene.model.get(), &err, &warn, _path);
             if ( !ret ) {
                 auto str = std::string( _array.begin(), _array.end());
                 ret = gltf_ctx.LoadASCIIFromString( gltfScene.model.get(), &err, &warn, str.c_str(), str.size(), "" );
@@ -393,7 +394,7 @@ namespace GLTF2Service {
                                                  reinterpret_cast<const unsigned char *>(_array.data()),
                                                  _array.size());
             if ( !ret ) {
-                ret = gltf_ctx.LoadASCIIFromFile( gltfScene.model.get(), &err, &warn, _path.c_str());
+                ret = gltf_ctx.LoadASCIIFromFile( gltfScene.model.get(), &err, &warn, _path);
             }
         }
 

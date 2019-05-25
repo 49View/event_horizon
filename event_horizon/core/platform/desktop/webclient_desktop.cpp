@@ -102,6 +102,7 @@ namespace Http {
                 if ( lRes.length ) {
                     lRes.uri = url.uri;
                     lRes.statusCode = 200;
+                    lRes.ETag = cacheFolder() + fileHash + std::to_string(lRes.length);
                 }
             }
             if ( !lRes.isSuccessStatusCode() ) {

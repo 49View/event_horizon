@@ -363,7 +363,7 @@ namespace VDataServices {
 
     ResourceRef refName( const GT::GLTF2& _d ) {
         std::stringstream oss;
-        oss << _d.meshIndex <<  _d.primitiveIndex;
+        oss << _d.nameId << _d.meshIndex <<  _d.primitiveIndex;
         return "GLTF2--" + oss.str();
     }
 

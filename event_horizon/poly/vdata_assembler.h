@@ -49,10 +49,11 @@ public:
             return *this;
         }
         if constexpr ( std::is_same_v<M, std::string> || std::is_same_v<std::decay_t<M>, char*>) {
-            static_assert( std::is_same_v<SGT, GT::Text> || std::is_same_v<SGT, GT::Asset> );
+            static_assert( std::is_same_v<SGT, GT::Text> || std::is_same_v<SGT, GT::Asset> ||
+                           std::is_same_v<SGT, GT::GLTF2>);
             if constexpr ( std::is_same_v<SGT, GT::Text> )
                 dataTypeHolder.text = _param;
-            if constexpr ( std::is_same_v<SGT, GT::Asset> )
+            if constexpr ( std::is_same_v<SGT, GT::Asset> || std::is_same_v<SGT, GT::GLTF2> )
                 dataTypeHolder.nameId = _param;
             return *this;
         }

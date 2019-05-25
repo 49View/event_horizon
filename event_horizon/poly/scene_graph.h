@@ -32,11 +32,13 @@ public:
 };
 
 struct LoadedResouceCallbackData {
-    LoadedResouceCallbackData( ResourceRef  key, SerializableContainer&& data,
+    LoadedResouceCallbackData( ResourceRef  key, ResourceRef _hash, SerializableContainer&& data,
                                HttpResouceCB  ccf ) :
-                               key(std::move( key )), data( std::move(data) ), ccf(std::move( ccf )) {}
+                               key(std::move( key )), hash(std::move( _hash )),
+                               data( std::move(data) ), ccf(std::move( ccf )) {}
 
     ResourceRef                         key;
+    ResourceRef                         hash;
     SerializableContainer               data;
     HttpResouceCB ccf;
 };
@@ -133,18 +135,18 @@ public:
     }
 
     template <typename R>
-    static void addDeferred( const ResourceRef& _key, SerializableContainer&& _res, HttpResouceCB _ccf = nullptr ) {
-        if constexpr ( std::is_same_v<R, VData          > ) resourceCallbackVData        .emplace_back( _key, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, RawImage       > ) resourceCallbackRawImage     .emplace_back( _key, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Material       > ) resourceCallbackMaterial     .emplace_back( _key, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Font           > ) resourceCallbackFont         .emplace_back( _key, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Profile        > ) resourceCallbackProfile      .emplace_back( _key, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, MaterialColor  > ) resourceCallbackMaterialColor.emplace_back( _key, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, CameraRig      > ) resourceCallbackCameraRig    .emplace_back( _key, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Geom           > ) resourceCallbackGeom         .emplace_back( _key, std::move(_res), _ccf );
+    static void addDeferred( const ResourceRef& _key, const ResourceRef& _hash, SerializableContainer&& _res, HttpResouceCB _ccf = nullptr ) {
+        if constexpr ( std::is_same_v<R, VData          > ) resourceCallbackVData        .emplace_back( _key, _hash, std::move(_res), _ccf );
+        if constexpr ( std::is_same_v<R, RawImage       > ) resourceCallbackRawImage     .emplace_back( _key, _hash, std::move(_res), _ccf );
+        if constexpr ( std::is_same_v<R, Material       > ) resourceCallbackMaterial     .emplace_back( _key, _hash, std::move(_res), _ccf );
+        if constexpr ( std::is_same_v<R, Font           > ) resourceCallbackFont         .emplace_back( _key, _hash, std::move(_res), _ccf );
+        if constexpr ( std::is_same_v<R, Profile        > ) resourceCallbackProfile      .emplace_back( _key, _hash, std::move(_res), _ccf );
+        if constexpr ( std::is_same_v<R, MaterialColor  > ) resourceCallbackMaterialColor.emplace_back( _key, _hash, std::move(_res), _ccf );
+        if constexpr ( std::is_same_v<R, CameraRig      > ) resourceCallbackCameraRig    .emplace_back( _key, _hash, std::move(_res), _ccf );
+        if constexpr ( std::is_same_v<R, Geom           > ) resourceCallbackGeom         .emplace_back( _key, _hash, std::move(_res), _ccf );
     }
     static void addDeferredComp( SerializableContainer&& _data, HttpResouceCB _ccf = nullptr ) {
-        resourceCallbackComposite.emplace_back( "", std::move(_data), _ccf );
+        resourceCallbackComposite.emplace_back( "", "", std::move(_data), _ccf );
     }
 
     template <typename R>
@@ -166,7 +168,7 @@ public:
     ResourceRef addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpResouceCB _ccf = nullptr );
     ResourceRef addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf = nullptr );
     ResourceRef addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addGeom          ( const ResourceRef& _key,       GeomSP         _res, HttpResouceCB _ccf = nullptr );
     void addResources( const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
 
     static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {

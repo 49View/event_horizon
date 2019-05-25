@@ -280,7 +280,7 @@ namespace GT {
     struct Poly      : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
     struct Mesh      : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
     struct ClothMesh : GTPolicyTRS, GTPolicyCloth, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
-    struct GLTF2     : GTPolicyTRS, GTPolicyGLTF2Model {};
+    struct GLTF2     : GTPolicyTRS, GTPolicyGLTF2Model, GTPolicyNameId {};
     struct Asset     : GTPolicyTRS, GTPolicyNameId {};
     struct SVG       : GTPolicyTRS {};
     struct VData     : GTPolicyTRS {};

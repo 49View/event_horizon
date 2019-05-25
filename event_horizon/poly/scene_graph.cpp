@@ -89,8 +89,8 @@ void SceneGraph::update() {
     for ( const auto& res : resourceCallbackMaterialColor) {addMaterialColor( res.key, MaterialColor{res.data}, res.ccf ); }
 //    for ( const auto& res : resourceCallbackCameraRig    ) {addCameraRig    ( res.key, CameraRig    {res.data}, res.ccf ); }
     for ( const auto& res : resourceCallbackGeom         ) {
-        auto geom = GLTF2Service::load( *this, res.key, res.data );
-        addGeom( res.key, *geom.get(), res.ccf );
+        auto geom = GLTF2Service::load( *this, res.hash, res.data );
+        addGeom( res.key, geom, res.ccf );
     }
     for ( const auto& res : resourceCallbackComposite    ) {addResources( res.data, res.ccf ); }
 
@@ -266,8 +266,10 @@ ResourceRef SceneGraph::addProfile       ( const ResourceRef& _key, const Profil
 ResourceRef SceneGraph::addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf ) { B<MCB>(_key).addDF( _res, _ccf ); return _key; }
 ResourceRef SceneGraph::addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResouceCB _ccf ) { B<CB> (_key).addDF( _res, _ccf ); return _key; }
 
-ResourceRef SceneGraph::addGeom          ( const ResourceRef& _key, const Geom         & _res, HttpResouceCB _ccf ) {
-    B<GRB>(_key).addDF( _res, _ccf ); return _key;
+ResourceRef SceneGraph::addGeom          ( const ResourceRef& _key, GeomSP               _res, HttpResouceCB _ccf ) {
+    B<GRB>(_key).addIM( _res );
+    if ( _ccf ) _ccf(_key);
+    return _key;
 }
 
 void SceneGraph::addResources( const SerializableContainer& _data, HttpResouceCB _ccf ) {
