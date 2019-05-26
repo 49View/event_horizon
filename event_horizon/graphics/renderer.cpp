@@ -362,9 +362,10 @@ void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {
 
 void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
                                    std::shared_ptr<RenderMaterial> _forcedMaterial,
-                                   Program* _forceProgram ) {
+                                   Program* _forceProgram,
+                                   float _alphaDrawThreshold ) {
     for ( const auto& vp : _map ) {
-        CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram );
+        CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram, _alphaDrawThreshold );
     }
 }
 

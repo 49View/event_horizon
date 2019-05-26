@@ -120,7 +120,10 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
 
     auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(512), rr );
     probe->render( probeRenderTarget, 512, 0, [&]() {
+        auto deltaCopy = mSkybox->DeltaInterpolation()->value;
+        mSkybox->DeltaInterpolation()->value = 0.0f;
         mSkybox->render();
+        mSkybox->DeltaInterpolation()->value = deltaCopy;
         for ( const auto& [k, vl] : rr.CL() ) {
             if ( isKeyInRange(k) ) {
                 rr.addToCommandBuffer( vl.mVList, nullptr, rr.P( S::SH_NOTEXTURE ).get());
@@ -176,7 +179,7 @@ void RLTargetPBR::addShadowMaps() {
 
             for ( const auto& [k, vl] : rr.CL() ) {
                 if ( isKeyInRange(k) ) {
-                    rr.addToCommandBuffer( vl.mVList, rr.getMaterial(S::SHADOW_MAP) );
+                    rr.addToCommandBuffer( vl.mVList, rr.getMaterial(S::SHADOW_MAP), nullptr, 0.91f );
                 }
             }
         }

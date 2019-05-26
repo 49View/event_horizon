@@ -30,8 +30,15 @@ RenderMaterial::RenderMaterial( std::shared_ptr<Program> _program,
 void RenderMaterial::calcHash() {
     mHash = Uniforms()->Values()->Hash();
 
+    auto ot = Uniforms()->Values()->get<std::string>( UniformNames::opacityTexture);
+    auto tt = Uniforms()->Values()->get<std::string>( UniformNames::translucencyTexture);
+    float ottFactor = 1.0f;
+    ottFactor *= ((*ot).empty() || (*ot) == S::WHITE ) ? 1.0f : 0.9f;
+    ottFactor *= ((*tt).empty() || (*tt) == S::BLACK ) ? 1.0f : 0.9f;
+
     TransparencyValue( Uniforms()->Values()->getDef( UniformNames::alpha, 1.0f ) *
-                       Uniforms()->Values()->getDef( UniformNames::opacity, 1.0f ));
+                       Uniforms()->Values()->getDef( UniformNames::opacity, 1.0f ) *
+                       ottFactor );
 }
 
 void RenderMaterial::submitBufferUniforms() {

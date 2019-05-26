@@ -183,9 +183,9 @@ void CommandBufferList::end() {
 void CommandBufferList::pushVP( std::shared_ptr<VPList> _vp,
                                 std::shared_ptr<RenderMaterial> _mat,
                                 std::shared_ptr<Matrix4f> _modelMatrix,
-                                Program* _forceProgram ) {
-    const static float alpha_threashold = 0.0f;
-    if ( _vp->transparencyValue() > alpha_threashold ) {
+                                Program* _forceProgram,
+                                float alphaDrawThreshold ) {
+    if ( _vp->transparencyValue() > alphaDrawThreshold ) {
         mCurrent->push( CommandBufferEntry{ _vp, _mat, _modelMatrix, _forceProgram } );
     }
 }
