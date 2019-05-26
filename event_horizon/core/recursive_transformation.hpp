@@ -21,7 +21,7 @@ enum UpdateTypeFlag {
 class TransformNodeData {
 public:
     TransformNodeData() {
-        mLocalHierTransform = std::make_shared<Matrix4f>();
+        mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::MIDENTITY());
     }
 protected:
     MatrixAnim mTRS;
@@ -29,16 +29,16 @@ protected:
     std::shared_ptr<Matrix4f> mLocalHierTransform;
 };
 
-template <typename T>
-class RecursiveTransformation : public Boxable<JMATH::AABB>,
+template <typename T, typename B>
+class RecursiveTransformation : public Boxable<B>,
                                 public NamePolicy<>,
                                 public UUIDable,
                                 public TransformNodeData,
-                                public std::enable_shared_from_this<RecursiveTransformation<T>> {
+                                public std::enable_shared_from_this<RecursiveTransformation<T,B>> {
 public:
 
-    using NodeSP = std::shared_ptr<RecursiveTransformation<T>>;
-    using NodeP = RecursiveTransformation<T>*;
+    using NodeSP = std::shared_ptr<RecursiveTransformation<T, B>>;
+    using NodeP = RecursiveTransformation<T, B>*;
 
     RESOURCE_CTORS(RecursiveTransformation);
     void bufferDecode( const unsigned char* rawData, size_t length ) {}
@@ -46,10 +46,10 @@ public:
     RecursiveTransformation() = default;
     virtual ~RecursiveTransformation() = default;
     // This ctor is effectively a "clone"
-    RecursiveTransformation( const RecursiveTransformation<T>& _source ) {
+    RecursiveTransformation( const RecursiveTransformation<T,B>& _source ) {
         addNodeRec( _source, nullptr );
     }
-    explicit RecursiveTransformation( const RecursiveTransformation<T>& _source, NodeP _father  ) {
+    explicit RecursiveTransformation( const RecursiveTransformation<T,B>& _source, NodeP _father  ) {
         addNodeRec( _source, _father );
     }
     // This ctor is effectively a "clone"
@@ -141,17 +141,24 @@ public:
 //        }
 //    }
 //
-//    JMATH::AABB calcCompleteBBox3dRec() {
-//        auto lBBox = mData->BBox3d();
-//        lBBox.transform( *mLocalHierTransform );
-//        Boxable::bbox3d = lBBox;
-//
-//        for ( auto& c : children ) {
-//            Boxable::bbox3d.merge( c->calcCompleteBBox3dRec() );
-//        }
-//
-//        return Boxable::bbox3d;
-//    }
+    JMATH::AABB calcCompleteBBox3dRec() {
+        if constexpr ( std::is_same_v<JMATH::AABB, B> ) {
+            this->BBox3d(AABB::INVALID);
+            if ( !data.empty() ) {
+                for ( const auto & bd : data ) {
+                    this->BBox3d().merge( bd.BBox3d().transform( *mLocalHierTransform ) );
+                }
+            }
+
+            for ( auto& c : children ) {
+                this->bbox3d.merge( c->calcCompleteBBox3dRec() );
+            }
+
+            return this->bbox3d;
+        } else {
+            return AABB::INVALID;
+        }
+    }
 //
 //    JMATH::AABB containingAABB() const {
 //        JMATH::AABB ret = Boxable::BBox3d();
@@ -159,10 +166,9 @@ public:
 //        return ret;
 //    }
 //
-//    void calcCompleteBBox3d() {
-//        Boxable::bbox3d = AABB::INVALID;
-//        Boxable::bbox3d = calcCompleteBBox3dRec();
-//    }
+    void calcCompleteBBox3d() {
+        this->bbox3d = calcCompleteBBox3dRec();
+    }
 
     void createLocalHierMatrix( Matrix4f cmat ) {
         *mLocalHierTransform = mLocalTransform * cmat;
@@ -177,7 +183,7 @@ public:
 
     void generateMatrixHierarchy( Matrix4f cmat = Matrix4f::IDENTITY ) {
         generateMatrixHierarchyRec( cmat );
-//        calcCompleteBBox3d();
+        calcCompleteBBox3d();
     }
 
     void generateLocalTransformData( const Vector3f& pos, const Vector4f& rotAxis, const Vector3f& scale = Vector3f::ONE ) {
@@ -287,7 +293,7 @@ public:
     }
 
     NodeSP addChildren( const std::string& _name ) {
-        NodeSP node = std::make_shared<RecursiveTransformation<T>>();
+        NodeSP node = std::make_shared<RecursiveTransformation<T,B>>();
         node->Father( this );
         node->Name( _name );
         node->updateTransform();
@@ -300,7 +306,7 @@ public:
                             const R& rot = R::ZERO,
                             const Vector3f& scale = Vector3f::ONE ) {
         static_assert( std::is_same<R, Vector3f>::value || std::is_same<R, Quaternion>::value );
-        NodeSP node = std::make_shared<RecursiveTransformation<T>>(pos, rot, scale);
+        NodeSP node = std::make_shared<RecursiveTransformation<T,B>>(pos, rot, scale);
         node->Father( this->shared_from_this() );
         node->updateTransform( pos, rot, scale );
         children.push_back( node );
@@ -318,18 +324,18 @@ public:
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
 
 private:
-    void addNodeRec( const RecursiveTransformation<T>& _node, NodeP _father ) {
+    void addNodeRec( const RecursiveTransformation<T,B>& _node, NodeP _father ) {
         cloneData( _node, _father );
         for ( const auto& c : _node.Children() ) {
-            children.emplace_back( std::make_shared<RecursiveTransformation<T>>( c, this ) );
+            children.emplace_back( std::make_shared<RecursiveTransformation<T,B>>( c, this ) );
         }
     }
 
-    void cloneData( const RecursiveTransformation<T>& _source, NodeP _father ) {
+    void cloneData( const RecursiveTransformation<T,B>& _source, NodeP _father ) {
         assingNewUUID();
         father = _father;
         Name( _source.Name() );
-        BBox3d( _source.BBox3d() );
+        this->BBox3d( _source.BBox3d() );
         data = _source.data;
         _source.TRS().clone(mTRS);
         mLocalTransform = _source.mLocalTransform;

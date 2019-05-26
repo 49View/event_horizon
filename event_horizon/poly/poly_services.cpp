@@ -85,33 +85,33 @@ std::vector<Vector2f> utilGenerateFlatRect( const Vector2f& size, const WindingO
     }
     for ( auto& v : fverts ) {
         switch ( ppp ) {
-            case PivotPointPosition::PPP_CENTER:
+            case PivotPointPosition::Center:
                 v -= size * 0.5f;
                 break;
-            case PivotPointPosition::PPP_BOTTOM_CENTER:
+            case PivotPointPosition::BottomCenter:
                 v -= Vector2f( size.x() * 0.5f, 0.0f );
                 break;
-            case PivotPointPosition::PPP_TOP_CENTER:
+            case PivotPointPosition::TopCenter:
                 v -= size * 0.5f;
                 break;
-            case PivotPointPosition::PPP_LEFT_CENTER:
+            case PivotPointPosition::LeftCenter:
                 v -= size * 0.5f;
                 break;
-            case PivotPointPosition::PPP_RIGHT_CENTER:
+            case PivotPointPosition::RightCenter:
                 v -= Vector2f( size.x() * 0.5f, 0.0f );
                 break;
-            case PivotPointPosition::PPP_BOTTOM_RIGHT:
+            case PivotPointPosition::BottomRight:
                 v -= size * 0.5f;
                 break;
-            case PivotPointPosition::PPP_BOTTOM_LEFT:
+            case PivotPointPosition::BottomLeft:
                 v -= Vector2f( size.x() * 0.5f, 0.0f );
                 break;
-            case PivotPointPosition::PPP_TOP_LEFT:
+            case PivotPointPosition::TopLeft:
                 break;
-            case PivotPointPosition::PPP_TOP_RIGHT:
+            case PivotPointPosition::TopRight:
                 v -= size * 0.5f;
                 break;
-            case PivotPointPosition::PPP_CUSTOM:
+            case PivotPointPosition::Custom:
                 v -= size * 0.5f;
                 break;
             default:

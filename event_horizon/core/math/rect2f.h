@@ -30,7 +30,9 @@ public:
 	static const Rect2f INVALID;
 	static const Rect2f ZERO;
 
-	static Rect2f& MIDENTITY()  // return reference.
+    friend std::ostream& operator<<( std::ostream& os, const Rect2f& f );
+
+    static Rect2f& MIDENTITY()  // return reference.
 	{
 		static Rect2f a( 0.0f, 0.0f, 1.0f, 1.0f );
 		return a;

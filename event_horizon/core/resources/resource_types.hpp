@@ -7,7 +7,11 @@
 #include <memory>
 #include <vector>
 
-template <typename T> class RecursiveTransformation;
+namespace JMATH {
+    class AABB;
+}
+
+template <typename T, typename B = JMATH::AABB> class RecursiveTransformation;
 
 class VData;
 class Material;

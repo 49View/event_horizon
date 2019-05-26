@@ -1,5 +1,4 @@
-#ifndef D_MATH_AABB_H
-#define D_MATH_AABB_H
+#pragma once
 
 #include "vector3f.h"
 #include "matrix4f.h"
@@ -31,15 +30,20 @@ public:
 
 	static constexpr bool IsSerializable() { return true; }
 
-	AABB() {
-	}
+    friend std::ostream& operator<<( std::ostream& os, const AABB& f );
+
+    AABB() = default;
 
 	AABB( const Vector3f& minPoint, const Vector3f& maxPoint ) {
 		mMinPoint = minPoint;
 		mMaxPoint = maxPoint;
 	}
 
-	AABB( const std::vector<Vector3f> points ) {
+    AABB( const Vector3f& minPoint, const Vector3f& maxPoint, bool bt ) {
+	    set(minPoint, maxPoint);
+    }
+
+	explicit AABB( const std::vector<Vector3f> points ) {
 		*this = INVALID;
 		for ( auto& p : points ) expand( p );
 	}
@@ -205,7 +209,14 @@ public:
 		set( mi, ma );
 	}
 
-	AABB rotate( float angle, const Vector3f& axis ) const;
+    AABB transform( const Matrix4f& mat ) const {
+        Vector3f mi = mat.transform( mMinPoint );
+        Vector3f ma = mat.transform( mMaxPoint );
+
+        return AABB( mi, ma, true );
+    }
+
+    AABB rotate( float angle, const Vector3f& axis ) const;
 
 	std::vector<Vector3f> topDownOutline( CompositeWrapping _wrap = CompositeWrapping::NoWrap ) const;
 
@@ -316,7 +327,3 @@ public:
 	Vector3f mMaxPoint;
 };
 }
-
-
-
-#endif // D_AABB_H

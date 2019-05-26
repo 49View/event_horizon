@@ -92,5 +92,5 @@ private:
 	std::string mGeomName;
 	bool mbUsePlanarMapping;
 public:
-	static void createQuadPath( std::vector<Vector2f>& fverts, float width, float height, PivotPointPosition alignment = PivotPointPosition::PPP_CENTER );
+	static void createQuadPath( std::vector<Vector2f>& fverts, float width, float height, PivotPointPosition alignment = PivotPointPosition::Center );
 };

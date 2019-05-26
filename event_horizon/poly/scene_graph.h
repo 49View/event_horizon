@@ -231,7 +231,7 @@ public:
             }
 
             elem = std::make_shared<Geom>(gb.Name());
-            elem->pushData( vdataRef, matRef );
+            elem->pushData( vdataRef, get<VData>( vdataRef)->BBox3d(), matRef );
 
             if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
             elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );

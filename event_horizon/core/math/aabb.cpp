@@ -1,10 +1,15 @@
 
 #include "aabb.h"
 
-
-
 const JMATH::AABB JMATH::AABB::IDENTITY = AABB( Vector3f::ZERO, Vector3f::ONE );
 const JMATH::AABB JMATH::AABB::ZERO = AABB( Vector3f::ZERO, Vector3f::ZERO );
+
+namespace JMATH {
+    std::ostream& operator<<( std::ostream& os, const JMATH::AABB& f ) {
+        os << "Min: " << f.mMinPoint << " Max: " << f.mMaxPoint;
+        return os;
+    }
+}
 
 void JMATH::AABB::merge( const AABB& val ) {
 	expandMax( val.mMaxPoint );

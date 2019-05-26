@@ -1,9 +1,4 @@
-#ifdef UE4
-#include "SixthViewer.h"
-#endif
 #include "rect2f.h"
-
-
 
 const JMATH::Rect2f JMATH::Rect2f::IDENTITY = Rect2f( 0.0f, 0.0f, 1.0f, 1.0f );
 const JMATH::Rect2f JMATH::Rect2f::ZERO = Rect2f( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -11,6 +6,11 @@ const JMATH::Rect2f JMATH::Rect2f::INVALID = Rect2f( std::numeric_limits<float>:
 													 std::numeric_limits<float>::max(),
 													 std::numeric_limits<float>::lowest(),
 													 std::numeric_limits<float>::lowest() );
+
+std::ostream& operator<<( std::ostream& os, const Rect2f& f ) {
+    os << "Min: " << f.topLeft() << " Max: " << f.bottomRight();
+    return os;
+}
 
 void poly_edge_clip( std::vector<Vector2f>& sub, Vector2f& x0, Vector2f& x1, int left, std::vector<Vector2f>& res ) {
 	size_t i;

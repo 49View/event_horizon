@@ -166,7 +166,31 @@ public:
 		return mZ;
 	}
 
-	float* rawPtr() {
+    float r() const {
+        return mX;
+    }
+
+    float g() const {
+        return mY;
+    }
+
+    float b() const {
+        return mZ;
+    }
+
+    float width() const {
+        return mX;
+    }
+
+    float height() const {
+        return mY;
+    }
+
+    float depth() const {
+        return mZ;
+    }
+
+    float* rawPtr() {
 		return &mX;
 	}
 

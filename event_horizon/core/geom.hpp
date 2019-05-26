@@ -5,10 +5,11 @@
 #pragma once
 
 #include <core/htypes_shared.hpp>
+#include <core/boxable.hpp>
 
-struct GeomData {
+struct GeomData : public Boxable<JMATH::AABB> {
     GeomData() = default;
-    GeomData( ResourceRef vData, ResourceRef material );
+    GeomData( ResourceRef vData, JMATH::AABB _bbox,  ResourceRef material );
 
 RESOURCE_CTORS_ONLY(GeomData);
 

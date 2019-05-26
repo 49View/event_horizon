@@ -56,19 +56,19 @@ enum class ReverseFlag {
 using WindingOrderT = uint64_t;
 
 enum class PivotPointPosition {
-	PPP_CENTER,
+	Center,
 
-	PPP_BOTTOM_CENTER,
-	PPP_TOP_CENTER,
-	PPP_LEFT_CENTER,
-	PPP_RIGHT_CENTER,
+	BottomCenter,
+	TopCenter,
+	LeftCenter,
+	RightCenter,
 
-	PPP_BOTTOM_RIGHT,
-	PPP_BOTTOM_LEFT,
-	PPP_TOP_LEFT,
-	PPP_TOP_RIGHT,
+	BottomRight,
+	BottomLeft,
+	TopLeft,
+	TopRight,
 
-	PPP_CUSTOM
+	Custom
 };
 
 enum class PillowEdges {
