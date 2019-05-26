@@ -71,6 +71,8 @@ enum class PivotPointPosition {
 	Custom
 };
 
+using PPP = PivotPointPosition;
+
 enum class PillowEdges {
 	None,
 	All,

@@ -111,6 +111,18 @@ public:
     }
 
     template <typename T>
+    const T* get( const ResourceRef& _ref ) const {
+        if constexpr ( std::is_same_v<T, VData>         ) { return vl.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, RawImage>      ) { return tl.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, Material>      ) { return ml.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, Font>          ) { return fm.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, Profile>       ) { return pl.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, Geom>          ) { return gm.get(_ref).get(); }
+    }
+
+    template <typename T>
     ResourceRef getHash( const ResourceRef& _ref ) {
         if constexpr ( std::is_same_v<T, VData>         ) { return vl.getHash(_ref); }
         if constexpr ( std::is_same_v<T, RawImage>      ) { return tl.getHash(_ref); }
@@ -201,6 +213,10 @@ public:
         if constexpr ( std::is_same_v<R, MaterialColor  > ) loadMaterialColor( std::move(_names), _ccf );
         if constexpr ( std::is_same_v<R, CameraRig      > ) loadCameraRig    ( std::move(_names), _ccf );
         if constexpr ( std::is_same_v<R, Geom           > ) loadGeom         ( std::move(_names), _ccf );
+    }
+
+    std::tuple<std::string, V3f> getGeomNameSize( const ResourceRef& _ref ) const {
+        return { _ref, get<Geom>( _ref )->BBox3d().size() };
     }
 
     void mapGeomType( uint64_t _value, const std::string& _key );
