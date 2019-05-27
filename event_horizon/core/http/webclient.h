@@ -150,6 +150,10 @@ namespace Http {
                 : uri( uri ), length( length ), statusCode( statusCode ), ccf(_ccf) {
             setBuffer(cbuffer, length);
         }
+        Result( const std::string& uri, const char* cbuffer, uint64_t length, int statusCode, std::string _etag, HttpResouceCB _ccf = nullptr )
+                : uri( uri ), length( length ), statusCode( statusCode ), ETag(std::move(_etag)), ccf(_ccf) {
+            setBuffer(cbuffer, length);
+        }
 
         bool isSuccessStatusCode() const; //all 200s
     };
