@@ -38,10 +38,12 @@ const createEntityFromMetadata = async (project, metadata) => {
         let savedFilename = {"changed":false, "name": filePath};
         await fsController.cloudStorageGetFilenameAndDuplicateIfExists( filePath, "eventhorizonentities", savedFilename );
         if ( savedFilename['changed'] == true ) {
-            const nn = savedFilename["name"];
-            cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
+            const entityToDelete = await getEntityByName( project, group, cleanMetadata.name );
+            await deleteEntityComplete(project, entityToDelete );
+            // const nn = savedFilename["name"];
+            // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
         }
-        filePath = savedFilename["name"];
+        // filePath = savedFilename["name"];
         await fsController.cloudStorageFileUpload(content, filePath, "eventhorizonentities" );
         //Create entity
         return await createEntity(project, group, isPublic, isRestricted, cleanMetadata);
@@ -167,6 +169,14 @@ const getEntityByHash = async (entityId) => {
     return result!==null?result.toObject():null;
 }
 
+const getEntityByName = async (project, group, name ) => {
+    let query;
+    query = { "project":project, "group":group, "metadata.name" : name };
+    const result = await entityModel.findOne(query);
+
+    return result!==null?result.toObject():null;
+}
+
 const getEntitiesOfProject = async (project, returnPublic) => {
     let query;
     if (returnPublic) {
@@ -280,6 +290,7 @@ module.exports = {
     deleteEntityComplete : deleteEntityComplete,
     getEntityByIdProject : getEntityByIdProject,
     getEntityByHash : getEntityByHash,
+    getEntityByName : getEntityByName,
     getEntitiesOfProject : getEntitiesOfProject,
     getEntitiesOfProjectWithGroup : getEntitiesOfProjectWithGroup,
     getEntityDeps : getEntityDeps,
