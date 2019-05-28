@@ -346,10 +346,16 @@ public:
 		mRows[3].setZ( offset.z() );
 	}
 
-	void scale( const float scale ) {
+    void setScale( const Vector3f& scale ) {
+        mRows[0].setX( scale.x() );
+        mRows[1].setY( scale.y() );
+        mRows[2].setZ( scale.z() );
+    }
+
+    void scale( const float scale ) {
 		mRows[0].setX( mRows[0].x() * scale );
 		mRows[1].setY( mRows[1].y() * scale );
-		mRows[1].setY( mRows[1].y() * scale );
+		mRows[2].setZ( mRows[2].z() * scale );
 	}
 
 	void scale( const Vector2f& scale ) {

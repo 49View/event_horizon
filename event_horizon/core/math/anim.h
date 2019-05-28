@@ -43,6 +43,7 @@ enum class AnimVelocityType {
 using KeyFrameTimes_t = std::vector<float>;
 using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, TimelineIndex, int)>;
 using TimelineLinks = std::unordered_map< TimelineIndex, TimelineSet >;
+using TimelineGroupCCF = std::function<void()>;
 
 const static TimelineIndex   tiNorm  = 1000000000;
 
@@ -82,6 +83,24 @@ inline static TimelineIndex getTI( Quaterniona _source ) {
 }
 
 }
+
+struct AnimUpdateCallback {
+    template<typename ...Args>
+    explicit AnimUpdateCallback( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    TimelineGroupCCF operator()() const noexcept {
+        return data;
+    }
+    TimelineGroupCCF data;
+};
+
+struct AnimEndCallback {
+    template<typename ...Args>
+    explicit AnimEndCallback( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    TimelineGroupCCF operator()() const noexcept {
+        return data;
+    }
+    TimelineGroupCCF data;
+};
 
 enum class KeyFramePosition {
     Invalid,
@@ -308,62 +327,7 @@ private:
 
 template<typename V>
 using TimelineMap = std::unordered_map<uint64_t, TimelineStream<V>>;
-using TimelineIndexVector = std::set<TimelineIndex>;
 
-struct TimelineMapSpec {
-    TimelineMap<int>        tmapi;
-    TimelineMap<float>      tmapf;
-    TimelineMap<Vector2f>   tmapV2;
-    TimelineMap<Vector3f>   tmapV3;
-    TimelineMap<Vector4f>   tmapV4;
-    TimelineMap<Quaternion> tmapQ;
-
-    void visit( TimelineIndex _k,  AnimVisitCallback _callback );
-    bool update( TimelineIndex _k, float _timeElapsed );
-    void addDelay( TimelineIndex _k, float _delay );
-    bool isActive( TimelineIndex _k ) const;
-    bool deleteKey( TimelineIndex _k, uint64_t _index );
-    void updateKeyTime( TimelineIndex _k, uint64_t _index, float _time );
-
-#define addTimeLineMapValue(tmt) auto it = tmt.find(ti); \
-    if ( it == tmt.end() ) { \
-        tmt.emplace( ti, _source ); \
-        it = tmt.begin(); \
-    } \
-    it->second.k(_values); \
-    return ti; \
-
-    TimelineIndex add( inta _source, const KeyFramePair<int>& _values ) {
-        TimelineIndex ti = tiInt + _source->UID();
-        addTimeLineMapValue(tmapi)
-    }
-
-    TimelineIndex add( floata _source, const KeyFramePair<float>& _values ) {
-        TimelineIndex ti = tiFloat + _source->UID();
-        addTimeLineMapValue(tmapf)
-    }
-
-    TimelineIndex add( V2fa _source, const KeyFramePair<Vector2f>& _values ) {
-        TimelineIndex ti = tiV2f + _source->UID();
-        addTimeLineMapValue(tmapV2)
-    }
-    TimelineIndex add( V3fa _source, const KeyFramePair<Vector3f>& _values ) {
-        TimelineIndex ti = tiV3f + _source->UID();
-        addTimeLineMapValue(tmapV3)
-    }
-    TimelineIndex add( V4fa _source, const KeyFramePair<Vector4f>& _values ) {
-        TimelineIndex ti = tiV4f + _source->UID();
-        addTimeLineMapValue(tmapV4)
-    }
-    TimelineIndex add( Quaterniona _source, const KeyFramePair<Quaternion>& _values ) {
-        TimelineIndex ti = tiQuat + _source->UID();
-        addTimeLineMapValue(tmapQ)
-    }
-
-    static TimelineIndex mkf;
-};
-
-using TimelineGroupCCF = std::function<void()>;
 template <typename V>
 class TimelineGroup {
 public:
@@ -412,7 +376,10 @@ public:
             meanTimeDelta = 0.0f;
             frameTickCount = 0;
             frameTickOffset = 0;
-            if (ccf) ccf();
+            if ( cuf ) cuf();
+            if ( ccf ) ccf();
+        } else {
+            if ( cuf ) cuf();
         }
         if ( bForceOneFrameOnly ) {
             bIsPlaying = false;
@@ -435,6 +402,9 @@ public:
     void CCF( TimelineGroupCCF _value ) {
         ccf = _value;
     }
+    void CUF( TimelineGroupCCF _value ) {
+        cuf = _value;
+    }
 
     TimelineStream<V> stream;
 
@@ -448,6 +418,7 @@ private:
     uint64_t frameTickOffset = 0;
     uint64_t frameTickCount = 0;
     TimelineGroupCCF ccf = nullptr;
+    TimelineGroupCCF cuf = nullptr;
 };
 
 class Timeline {
@@ -513,7 +484,7 @@ public:
 //    }
 
     template <typename T, typename ...Args>
-    static void play( AnimValue<T>& _source, Args&& ... args ) {
+    static std::string play( AnimValue<T>& _source, Args&& ... args ) {
         auto groupName = UUIDGen::make();
         auto tg = std::make_shared<TimelineGroup<T>>(_source);
 
@@ -534,6 +505,25 @@ public:
         }
 
         tg->play();
+        return groupName;
+    }
+
+    template <typename T>
+    static void stop( AnimValue<T>& _source, const std::string& groupName, const T& _restoreValue ) {
+        if constexpr (std::is_same_v<T, float>) {
+            timelinef.erase( groupName );
+        } else if constexpr (std::is_same_v<T, V2f>) {
+            timelineV2.erase( groupName );
+        } else if constexpr (std::is_same_v<T, V3f>) {
+            timelineV3.erase( groupName );
+        } else if constexpr (std::is_same_v<T, V4f>) {
+            timelineV4.erase( groupName );
+        } else if constexpr (std::is_same_v<T, Quaternion>) {
+            timelineQ.erase( groupName );
+        } else if constexpr (std::is_same_v<T, int>) {
+            timelinei.erase( groupName );
+        }
+        _source->value = _restoreValue;
     }
 
     static void sleep( float _seconds = 0.016f, uint64_t frameSkipper = 0, TimelineGroupCCF _ccf = nullptr ) {
@@ -556,6 +546,8 @@ public:
             tg->FrameTickOffset(_param);
         } else if constexpr ( std::is_floating_point_v<M> ) {
             tg->StartTimeOffset(_param);
+        } else if constexpr ( std::is_same_v<M, AnimUpdateCallback> ) {
+            tg->CUF(_param());
         } else {
             tg->CCF(_param);
         }

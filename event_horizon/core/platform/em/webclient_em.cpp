@@ -20,7 +20,7 @@ namespace Http {
         auto skey = std::string( ckey );
         if ( argCallbackMap[skey] ) {
             argCallbackMap[skey]( { skey, reinterpret_cast<const char*>(data), numBytes, code,
-                                    std::string(etag), argCallbackMapCCF[skey] } ); 
+                                    std::string(etag), argCallbackMapCCF[skey] } );
         }
         delete [] ckey;
     }

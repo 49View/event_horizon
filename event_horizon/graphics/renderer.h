@@ -10,27 +10,9 @@
 #include <core/heterogeneous_map.hpp>
 #include <graphics/framebuffer.h>
 #include <graphics/graphic_constants.h>
+#include <graphics/ghtypes.hpp>
 #include <graphics/shadowmap_manager.h>
 #include <core/resources/resource_utils.hpp>
-
-class Renderer;
-class RenderMaterial;
-class CommandQueue;
-class ShaderManager;
-class LightManager;
-class RenderOrchestrator;
-class StreamingMediator;
-class RLTarget;
-class ProgramUniformSet;
-class Program;
-class CommandBufferEntry;
-class CommandBufferList;
-struct CommandBufferListVector;
-class ShaderMaterial;
-class RenderMaterialManager;
-struct cpuVBIB;
-class GPUVData;
-class GPUVDataManager;
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -196,70 +178,70 @@ public:
 	void drawIncGridLines( int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
 						   const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
 						   float zoffset, const std::string& _name = "" );
-	void drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
+    VPListSP drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
 						const Vector4f& color, float width, int32_t subdivs, const std::string& _name = "" );
 
 	void createGrid( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
 					 const Vector2f& limits, float axisSize, const std::string& _name = "" );
     void createGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
                      const Vector2f& limits, float axisSize, const std::string& _name = "" );
-	void
+    VPListSP
 	drawArrow( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color, float width,
 			   float angle, float arrowlength, float _z, float percToBeDrawn, const std::string& _name1,
 			   const std::string& _name2 );
 
-	void drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
+    VPListSP drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
 				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
 				   const std::string& _name = "" );
-	void
+    VPListSP
 	drawLine( int bucketIndex, const std::vector<Vector2f>& verts, float z, const Vector4f& color, float width,
 			  bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f, const std::string& _name = "" );
-	void drawLine( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
+    VPListSP drawLine( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
 				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
 				   const std::string& _name = "" );
-	void drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
+    VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
 					   const std::string& _name = "" );
-	void drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
+    VPListSP drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
 					   const std::string& _name = "" );
-	void drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
+    VPListSP drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
 					   const std::string& _name="");
-	void drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
+    VPListSP drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
 					   const Vector4f& color, const std::string& _name="");
-	void
+    VPListSP
 	draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
 				  const std::string& _name = "" );
-    void drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color, const std::string& _name = "" );
-	void drawCircle( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
+    VPListSP drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color, const std::string& _name = "" );
+    VPListSP drawCircle( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
 					 int32_t subdivs = 12, const std::string& _name = "" );
-	void drawCircle( int bucketIndex, const Vector3f& center, const Vector3f& normal, float radius,
+    VPListSP drawCircle( int bucketIndex, const Vector3f& center, const Vector3f& normal, float radius,
 					 const Color4f& color, int32_t subdivs, const std::string& _name = "" );
-	void drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color,
+    VPListSP drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color,
 					   int32_t subdivs = 12, const std::string& _name = "" );
-	void drawArc( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
+    VPListSP drawArc( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
 				  const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
 				  const std::string& _name = "" );
-	void drawArc( int bucketIndex, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
+    VPListSP drawArc( int bucketIndex, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
 				  const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
 				  const std::string& _name = "" );
-	void
+    VPListSP
 	drawCylinder( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
 				  const std::string& _name = "" );
 
-	void drawCone( int bucketIndex, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
+    VPListSP drawCone( int bucketIndex, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
 				   float size, const std::string& _name = "" );
 
     void drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
                    std::shared_ptr<Font> font, const Color4f& color );
 
-    void drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
+    VPListSP drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
                    const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
-    void drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
+    VPListSP drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
                    const std::string& _name = {} );
-    void drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
+    VPListSP drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
                    const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
-    void drawRect2d( int bucketIndex, const Rect2f& r1, CResourceRef _texture, float ratio = 1.0f,
+    VPListSP drawRect2d( int bucketIndex, const Rect2f& r1, CResourceRef _texture, float ratio = 1.0f,
                      const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
-    void drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
+    VPListSP drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
                    const std::string& _name = {} );
-    void drawRect2d( int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name = {} );
+    VPListSP drawRect2d( int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name = {} );
 };

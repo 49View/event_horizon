@@ -328,7 +328,7 @@ void SceneGraph::chartMeshes( scene_t& scene ) const {
     std::ostringstream ssf;
     size_t totalVerts = 1;
 
-    for ( const auto& gg : gm.list() ) {
+    for ( const auto& [k, gg] : nodes ) {
         if ( !gg->empty() ) {
             auto mat = gg->getLocalHierTransform();
             auto vData = vl.get(gg->Data(0).vData);
@@ -360,7 +360,7 @@ void SceneGraph::chartMeshes( scene_t& scene ) const {
     std::string basePath;
     tinyobj::MaterialFileReader matFileReader(basePath);
     std::string err;
-    if (!tinyobj::LoadObj(shapes, materials, err, ssi, matFileReader, tinyobj::triangulation)) {
+    if (!tinyobj::LoadObj(shapes, materials, err, ssi, matFileReader, 0)) {
         LOGR("Error: %s\n", err.c_str());
     }
     xatlasParametrize( shapes, &scene );

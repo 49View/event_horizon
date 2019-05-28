@@ -25,7 +25,10 @@ public:
     };
 
     VPBuilder& p( std::shared_ptr<V> _ps ) { ps = _ps; return *this; }
-    VPBuilder& n( const std::string& _name ) { name = _name; return *this; }
+    VPBuilder& n( const std::string& _name ) {
+        if ( !_name.empty() ) name = _name;
+        return *this;
+    }
     VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
     VPBuilder& t( std::shared_ptr<Matrix4f> _t ) { transformMatrix = _t; return *this; }
 
