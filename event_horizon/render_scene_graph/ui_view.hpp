@@ -77,6 +77,7 @@ public:
     void touchDownKeyCached( uint64_t _key ) const;
     void touchedUp( uint64_t _key );
     uint64_t touchDownKeyCached() const;
+    void loadResources();
     void loaded( uint64_t _key );
     void hoover( uint64_t _key );
     void transform( uint64_t _key, float _duration, uint64_t _frameSkipper,
@@ -121,7 +122,6 @@ private:
     RenderOrchestrator& rsg;
     std::unordered_map<uint64_t, std::shared_ptr<UITapArea>> tapAreas;
     mutable uint64_t touchDownStartingKey = 0;
-    bool backGroundLoaded = false;
 //    bool backGroundShadowLoaded = false;
 //    std::string shadowBackground = "button,square,shadow";
 
