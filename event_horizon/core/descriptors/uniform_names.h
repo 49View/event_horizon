@@ -49,6 +49,7 @@ namespace UniformNames {
 	const std::string heightTexture = "heightTexture";
 	const std::string opacityTexture = "opacityTexture";
 	const std::string translucencyTexture = "translucencyTexture";
+	const std::string emissionTexture = "emissionTexture";
 	const std::string lightmapTexture = "lightmapTexture";
 	const std::string cubeMapTexture = "cubeMapTexture";
 	const std::string ibl_irradianceMap = "ibl_irradianceMap";
@@ -103,9 +104,10 @@ namespace MPBRTextures {
     static const std::string ambientOcclusionString = "ambient_occlusion";
     static const std::string opacityString = "opacity";
     static const std::string translucencyString = "translucency";
+    static const std::string emissionString = "emission";
 
     const static std::vector<std::string> g_pbrNames{ "_basecolor", "_base_color", "_normal","_ambient_occlusion",
-                                                      "_roughness",
+                                                      "_roughness", "_emission",
                                                       "_metallic","_height", "_opacity", "_translucency" };
 
     static inline const std::vector<std::string>& Names() {
@@ -122,6 +124,7 @@ namespace MPBRTextures {
         if ( _value.find( ambientOcclusionString ) != std::string::npos ) return ambientOcclusionString;
         if ( _value.find( opacityString ) != std::string::npos ) return opacityString;
         if ( _value.find( translucencyString ) != std::string::npos ) return translucencyString;
+        if ( _value.find( emissionString ) != std::string::npos ) return emissionString;
         return "";
     }
 
@@ -134,6 +137,7 @@ namespace MPBRTextures {
         if ( _value.find( normalString ) != std::string::npos ) return UniformNames::normalTexture;
         if ( _value.find( ambientOcclusionString ) != std::string::npos ) return UniformNames::aoTexture;
         if ( _value.find( opacityString ) != std::string::npos ) return UniformNames::opacityTexture;
+        if ( _value.find( emissionString ) != std::string::npos ) return UniformNames::emissionTexture;
         if ( _value.find( translucencyString ) != std::string::npos ) return UniformNames::translucencyTexture;
         ASSERTV(0, "Couldn't map PBR texture %s", _value.c_str() );
         return "";
