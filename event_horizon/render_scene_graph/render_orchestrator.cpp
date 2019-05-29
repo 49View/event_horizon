@@ -73,7 +73,11 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );
         if ( bEmpty ) return;
         auto dataRef = _geom->DataRef(0);
-        auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.n(_geom->UUiD()).t(_geom->getLocalHierTransform()).build();
+        auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.
+                  n(_geom->UUiD()).
+                  g(_geom->Tag()).
+                  t(_geom->getLocalHierTransform()).
+                  build();
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);
         this->RR().invalidateOnAdd();
     });

@@ -48,13 +48,16 @@ public:
             matColor.setW( _param() );
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GT::Tag> ) {
+            tag = _param();
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, std::string> || std::is_same_v<std::decay_t<M>, char*>) {
-            static_assert( std::is_same_v<SGT, GT::Text> || std::is_same_v<SGT, GT::Asset> ||
-                           std::is_same_v<SGT, GT::GLTF2>);
             if constexpr ( std::is_same_v<SGT, GT::Text> )
                 dataTypeHolder.text = _param;
             if constexpr ( std::is_same_v<SGT, GT::Asset> || std::is_same_v<SGT, GT::GLTF2> )
                 dataTypeHolder.nameId = _param;
+            Name( _param );
             return *this;
         }
         if constexpr ( std::is_same_v<M, Color4f> ) {
@@ -228,6 +231,7 @@ public:
     T dataTypeHolder;
     ResourceRef matRef = S::WHITE_PBR;
     Color4f matColor = C4f::WHITE;
+    uint64_t tag = 0;
     MatrixAnim mTRS;
     GeomSP elemInjFather = nullptr;
 };

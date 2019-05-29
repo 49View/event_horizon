@@ -305,9 +305,12 @@ void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer&
     mChangeMaterialCallbacks.emplace_back( _cmt );
 }
 
-void Renderer::changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt ) {
+void Renderer::changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt ) {
     // ### MAT This will need to be handled differently, I reckon
     auto rmaterial = rmm->getFromHash(_cmt.matHash);
+    if ( !rmaterial ) {
+        rmaterial = getMaterial( _cmt.matHash );
+    }
 
     for ( const auto& [k, vl] : CL() ) {
         if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {

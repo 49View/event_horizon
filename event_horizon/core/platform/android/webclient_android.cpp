@@ -8,7 +8,7 @@ namespace Http {
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       [[maybe_unused]] ResponseFlags rf,
-                      HttpDeferredResouceCallbackFunction ccf ) {
+                      HttpResouceCB ccf ) {
 
         Result lRes;
         std::string fileHash = url_encode( url.uri );
@@ -39,7 +39,7 @@ namespace Http {
 
     void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-                       HttpDeferredResouceCallbackFunction ccf ) {
+                       HttpResouceCB ccf ) {
 
         LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );

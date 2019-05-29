@@ -247,6 +247,7 @@ public:
             }
 
             elem = std::make_shared<Geom>(gb.Name());
+            elem->setTag(gb.tag);
             elem->pushData( vdataRef, get<VData>( vdataRef)->BBox3d(), matRef );
 
             if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
@@ -256,7 +257,8 @@ public:
             return elem;
         } else {
             elem = EF::clone(get<Geom>(gb.dataTypeHolder.nameId));
-            elem->Father( gb.elemInjFather.get() );
+            elem->setTag(gb.tag);
+            if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
             elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
             if ( !gb.matRef.empty() ) {
                 auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
@@ -266,7 +268,7 @@ public:
                     }
                 });
             }
-            addNode( elem );
+            if ( !gb.elemInjFather ) addNode(elem);
         }
         return elem;
     }

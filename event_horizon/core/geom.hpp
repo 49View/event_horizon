@@ -9,7 +9,7 @@
 
 struct GeomData : public Boxable<JMATH::AABB> {
     GeomData() = default;
-    GeomData( ResourceRef vData, JMATH::AABB _bbox,  ResourceRef material );
+    GeomData( ResourceRef vData, JMATH::AABB _bbox, ResourceRef material );
 
 RESOURCE_CTORS_ONLY(GeomData);
 

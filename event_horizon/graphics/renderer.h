@@ -140,8 +140,9 @@ public:
 	int UpdateCounter() const { return mUpdateCounter; }
 	void invalidateOnAdd();
 
+    void changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt );
+
 protected:
-	void changeMaterialOnTags( ChangeMaterialOnTagContainer& _cmt );
 	void clearCommandList();
 	void renderCBList();
 	void renderCommands( int eye );

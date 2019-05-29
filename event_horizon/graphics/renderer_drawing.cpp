@@ -90,16 +90,19 @@ void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& m
         // xLines
         Vector3f lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
         Vector3f lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
-                  _name + std::to_string( t ) + "+" );
+        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth );
         for ( int q = 0; q < 3; q++ ) {
             delta += unit * 0.25f;
             lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
             lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f, false, 0.0f, 1.0f,
-                      _name + std::to_string( t ) + "+" );
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f );
         }
         delta += unit * 0.25f;
+        if ( t == numGridLinesY - 1 ) {
+            lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
+            lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth);
+        }
     }
 
     auto numGridLinesX = static_cast<int>(( axisLenghts.x() / unit ) );
@@ -108,16 +111,19 @@ void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& m
         // xLines
         Vector3f lerpLeftX = topYAxis + V3f::X_AXIS * delta;
         Vector3f lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
-                  _name + std::to_string( t ) + "+" );
+        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth );
         for ( int q = 0; q < 3; q++ ) {
             delta += unit * 0.25f;
             lerpLeftX = topYAxis + V3f::X_AXIS * delta;
             lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f, false, 0.0f, 1.0f,
-                      _name + std::to_string( t ) + "+" );
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f );
         }
         delta += unit * 0.25f;
+        if ( t == numGridLinesX - 1 ) {
+            lerpLeftX = topYAxis + V3f::X_AXIS * delta;
+            lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth );
+        }
     }
 }
 

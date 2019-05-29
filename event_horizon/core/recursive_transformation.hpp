@@ -174,6 +174,13 @@ public:
         *mLocalHierTransform = mLocalTransform * cmat;
     }
 
+    void setTag( uint64_t _tag ) {
+        tag = _tag;
+        for ( auto& c : children ) {
+            c->setTag( _tag );
+        }
+    }
+
     void generateMatrixHierarchyRec( Matrix4f cmat ) {
         createLocalHierMatrix( cmat );
         for ( auto& c : children ) {
@@ -323,6 +330,7 @@ public:
     Matrix4f& LocalTransform() { return mLocalTransform; }
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
 
+    uint64_t Tag() const { return tag; }
 private:
     void addNodeRec( const RecursiveTransformation<T,B>& _node, NodeP _father ) {
         cloneData( _node, _father );
@@ -355,6 +363,7 @@ private:
 
 protected:
     NodeP father = nullptr;
+    uint64_t tag = 0;
     std::vector<T> data;
     std::vector<NodeSP> children;
 };

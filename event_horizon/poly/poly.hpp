@@ -161,6 +161,15 @@ namespace GT {
         float data;
     };
 
+    struct Tag {
+        template<typename ...Args>
+        explicit Tag( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        uint64_t operator()() const noexcept {
+            return data;
+        }
+        uint64_t data;
+    };
+
     struct A {
         template<typename ...Args>
         explicit A( Args&& ... args ) : data(std::forward<Args>( args )...) {}
