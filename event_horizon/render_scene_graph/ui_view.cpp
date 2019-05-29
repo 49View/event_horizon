@@ -39,7 +39,9 @@ void UITapArea::transform( float _duration, uint64_t _frameSkipper,
     Timeline::play( backgroundAnim.pos, _frameSkipper, colDown, AnimUpdateCallback([this]() {
         backgroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
         foregroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
-    } ));
+    } ), [this]() {
+        area.translate( backgroundAnim.Pos().xy() );
+    } );
 
 }
 
