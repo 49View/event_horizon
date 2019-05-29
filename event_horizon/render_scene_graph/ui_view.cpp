@@ -21,12 +21,10 @@ UITapArea::UITapArea( UIView* _owner, const Rect2f& _area, uint64_t _type, UITap
 }
 
 void UITapArea::loadResource( uint64_t _idb ) {
-    this->owner->SG().load<RawImage>( foreground, [this, _idb](HttpResouceCBSign _key) {
-        this->owner->loaded( _idb );
-        auto statusColor = owner->colorFromStatus( status );
-        backgroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, background, 1.0f, statusColor );
-        foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, foreground );
-    });
+    this->owner->loaded( _idb );
+    auto statusColor = owner->colorFromStatus( status );
+    backgroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, background, 1.0f, statusColor );
+    foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, foreground );
 }
 
 void UITapArea::transform( float _duration, uint64_t _frameSkipper,
@@ -41,7 +39,9 @@ void UITapArea::transform( float _duration, uint64_t _frameSkipper,
     Timeline::play( backgroundAnim.pos, _frameSkipper, colDown, AnimUpdateCallback([this]() {
         backgroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
         foregroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
-    } ));
+    } ), [this]() {
+        area.translate( backgroundAnim.Pos().xy() );
+    } );
 
 }
 
@@ -79,7 +79,7 @@ void UITapArea::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
 }
 
 void UITapArea::hoover( bool isHoovering ) {
-    if ( status == UITapAreaStatus::Enabled ) {
+    if ( ready && status == UITapAreaStatus::Enabled ) {
         auto color = isHoovering ? owner->getHooverColor().xyz() : owner->getEnabledColor().xyz();
         auto alpha = isHoovering ? owner->getHooverColor().w() : owner->getEnabledColor().w();
         backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color );
@@ -157,15 +157,7 @@ void UIView::hoover( uint64_t _key) {
 void UIView::addButton( uint64_t _key, const Rect2f& _rect, uint64_t _type, UITapAreaStatus _status,
                         std::string _foreground, std::string _background, const V3f& _initialPos ) {
 
-    if ( tapAreas.empty() ) {
-        sg.load<RawImage>( _background, [this](HttpResouceCBSign _key) {
-            this->backGroundLoaded = true;
-        } );
-    }
-
-    auto tap = std::make_shared<UITapArea>(this, _rect, _type, _status, std::move(_foreground), std::move(_background));
-    tapAreas.emplace( _key, tap );
-    tap->loadResource( _key );
+    tapAreas.emplace( _key, std::make_shared<UITapArea>(this, _rect, _type, _status, std::move(_foreground), std::move(_background)) );
 }
 
 void UIView::loaded( uint64_t _key ) {
@@ -211,4 +203,10 @@ bool UIView::isButtonEnabled( uint64_t _key ) const {
 void UIView::transform( uint64_t _key, float _duration, uint64_t _frameSkipper,
                         const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
     tapAreas.at(_key)->transform( _duration, _frameSkipper, _pos, _rot, _scale );
+}
+
+void UIView::loadResources() {
+    for ( auto& [k,v] : tapAreas ) {
+        v->loadResource( k );
+    }
 }

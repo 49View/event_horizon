@@ -100,3 +100,11 @@ void Quaternion::fromAxis( const Vector4f& w ) {
     mData[2] = W[2];
     mData[3] = cosf( theta / 2.0f );
 }
+
+Quaternion quatCompose( const Vector3f& a ) {
+    Quaternion qz( a.z(), Vector3f::Z_AXIS );
+    Quaternion qy( a.y(), Vector3f::Y_AXIS );
+    Quaternion qx( a.x(), Vector3f::X_AXIS );
+
+    return  qx * qy * qz;
+}

@@ -649,14 +649,6 @@ void Camera::setQuat( const Quaternion& a ) {
 	qangle->value = a;
 }
 
-Quaternion quatCompose( const Vector3f& a ) {
-    Quaternion qz( a.z(), Vector3f::Z_AXIS );
-    Quaternion qy( a.y(), Vector3f::Y_AXIS );
-    Quaternion qx( a.x(), Vector3f::X_AXIS );
-
-    return  qx * qy * qz;
-}
-
 void Camera::setQuatAngles( const Vector3f& a ) {
 	if ( mbLocked ) return;
     qangle->value = quatCompose(a);
