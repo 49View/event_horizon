@@ -45,6 +45,16 @@ void RenderOrchestrator::updateCallbacks() {
 
 RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg) {
 
+    sg.FM().connect( [](const ResourceTransfer<Font>& _val ) {
+        LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<Font>::Prefix() << ": "  << *_val.names.begin() );
+        if ( _val.ccf ) _val.ccf(_val.hash);
+    });
+
+    sg.PL().connect( [](const ResourceTransfer<Profile>& _val ) {
+        LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<Profile>::Prefix() << ": "  << *_val.names.begin() );
+        if ( _val.ccf ) _val.ccf(_val.hash);
+    });
+
     sg.TL().connect( [this](const ResourceTransfer<RawImage>& _val ) {
         LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addTextureResource(_val);

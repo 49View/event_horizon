@@ -278,6 +278,7 @@ namespace GLTF2Service {
     IntermediateMaterial elaborateMaterial( SceneGraph& _sg, IntermediateGLTF& _gltf, const tinygltf::Material& mat ) {
         IntermediateMaterial im;
         im.name = toLower( mat.name );
+        LOGRS("GLTF2 Material: " << mat.name );
         removeNonAlphaCharFromString( im.name );
 
         for ( const auto&[k, v] : mat.values ) {
@@ -309,8 +310,18 @@ namespace GLTF2Service {
 
         saveMaterial( _gltf, _sg, im );
 
-        auto materialSP = std::make_shared<Material>( im.values );
-        auto matRef = _sg.B<MB>( mat.name ).addIM( materialSP );
+        auto mname = mat.name;
+        if ( mname == "Brimnes" ) mname = "Brimnes_Base";
+        if ( mname == "01 - Default1" && _gltf.contentHash.find("lauter") != std::string::npos ) mname = "lauter";
+        if ( mname == "01 - Default1" && _gltf.contentHash.find("shelf") != std::string::npos ) mname = "Hemnes_Shelf";
+        if ( mname == "01 - Default" && _gltf.contentHash.find("drawer") != std::string::npos ) mname = "Hemnes_Drawer";
+        if ( mname == "01 - Default" && _gltf.contentHash.find("lauter") != std::string::npos ) mname = "selije";
+        if ( mname == "Soderhamn" ) mname = "Soderhamn_Base";
+        auto matRef = _sg.getHash<Material>(mname);
+        if ( matRef.empty() ) {
+            auto materialSP = std::make_shared<Material>( im.values );
+            matRef = _sg.B<MB>( mat.name ).addIM( materialSP );
+        }
 
         _gltf.matMap[mat.name] = matRef;
 

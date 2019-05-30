@@ -12,11 +12,13 @@ void GPUVData::programStart( RenderMaterial* _material, Program* _program ) cons
         sLastHandle = handle;
     }
     _material->GlobalUniforms()->setOn( handle );
+    static std::string sMaterialHash;
+
 //    if ( _material->Hash() != sMaterialHash ) {
 //        sNumStateChanges++;
     //		sMatHash.insert( _material->Hash() );
-    _material->Uniforms()->setOn( handle );
-//        sMaterialHash = _material->Hash();
+        _material->Uniforms()->setOn( handle );
+        sMaterialHash = _material->Hash();
 //    }
 }
 

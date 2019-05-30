@@ -260,7 +260,7 @@ public:
             elem->setTag(gb.tag);
             if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
             elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
-            if ( !gb.matRef.empty() ) {
+            if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
                 auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
                 elem->visit( [&matRef](GeomSP _geom) {
                     if ( !_geom->empty() ) {
