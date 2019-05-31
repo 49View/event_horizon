@@ -162,7 +162,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
 void RLTargetPBR::addShadowMaps() {
     if ( !smm ) return;
 
-    rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor() );
+    rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor() * 2.5f );
 
     if ( smm->invalidated() ) {
         rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );

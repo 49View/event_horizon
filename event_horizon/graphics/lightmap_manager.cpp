@@ -279,9 +279,11 @@ int bake( scene_t *scene, Renderer& rr )
     lmImagePower(data, w, h, 4, 1.0f / 4.2f, 0x7); // gamma correct color channels
     free(temp);
 
+#ifndef ANDROID
     // save result to a file
     if (lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f))
         printf("Saved result.tga\n");
+#endif
 
     // upload result
     glBindTexture(GL_TEXTURE_2D, scene->lightmap);

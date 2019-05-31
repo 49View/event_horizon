@@ -403,8 +403,9 @@ int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
     scene );
     scene->unchart = unchart;
 
+#ifndef ANDROID
     xatlasDump(atlas);
-
+#endif
     // Cleanup.
     xatlas::Destroy(atlas);
     return 0;

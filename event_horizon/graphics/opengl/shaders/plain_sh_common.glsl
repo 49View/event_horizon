@@ -205,7 +205,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
 #ifdef sh_reflections
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance * 2.0 );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance );
 #endif
 
 // for ( int i = 0; i < u_numPointLights; i++ ) {
@@ -291,7 +291,7 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = (kD * diffuseV + specular ) * (translucencyV) * visibility * ao * aoLightmapColor;
+vec3 ambient = (kD * diffuseV + specular ) * visibility * ao * aoLightmapColor * 1.5;
 #else
 vec3 ambient = Lo + kD*albedo;
 #endif

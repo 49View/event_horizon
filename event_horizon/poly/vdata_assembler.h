@@ -101,6 +101,11 @@ public:
             dataTypeHolder.flipVector = _param();
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GT::FlipNormal> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyModifiers, SGT> );
+            dataTypeHolder.flipNormals = _param();
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, FollowerFlags> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
             dataTypeHolder.fflags = _param;

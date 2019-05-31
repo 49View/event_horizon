@@ -152,6 +152,12 @@ namespace GT {
         V2f data;
     };
 
+    struct FlipNormal {
+        bool constexpr operator()() const noexcept {
+            return true;
+        }
+    };
+
     struct Z {
         template<typename ...Args>
         explicit Z( Args&& ... args ) : data(std::forward<Args>( args )...) {}
@@ -282,6 +288,9 @@ namespace GT {
         int meshIndex = 0;
         int primitiveIndex = 0;
     };
+    struct GTPolicyModifiers {
+        bool flipNormals = false;
+    };
 
     struct Shape     : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
     struct Follower  : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals, ForceNormalAxis {};
@@ -289,7 +298,7 @@ namespace GT {
     struct Poly      : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
     struct Mesh      : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
     struct ClothMesh : GTPolicyTRS, GTPolicyCloth, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
-    struct GLTF2     : GTPolicyTRS, GTPolicyGLTF2Model, GTPolicyNameId {};
+    struct GLTF2     : GTPolicyTRS, GTPolicyGLTF2Model, GTPolicyNameId, GTPolicyModifiers {};
     struct Asset     : GTPolicyTRS, GTPolicyNameId {};
     struct SVG       : GTPolicyTRS {};
     struct VData     : GTPolicyTRS {};

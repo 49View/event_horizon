@@ -312,6 +312,7 @@ namespace GLTF2Service {
         saveMaterial( _gltf, _sg, im );
 
         auto mname = mat.name;
+        if ( mname == "Curtain1" || mname == "Curtain2" ) mname = "carillo_diamante_curtain";
         if ( mname == "Brimnes" ) mname = "Brimnes_Base";
         if ( mname == "01 - Default1" && _gltf.contentHash.find("lauter") != std::string::npos ) mname = "lauter";
         if ( mname == "01 - Default1" && _gltf.contentHash.find("shelf") != std::string::npos ) mname = "Hemnes_Shelf";
@@ -320,8 +321,7 @@ namespace GLTF2Service {
         if ( mname == "Soderhamn" ) mname = "Soderhamn_Base";
         auto matRef = _sg.getHash<Material>(mname);
         if ( matRef.empty() ) {
-//            auto materialSP = std::make_shared<Material>( im.values );
-            matRef = _sg.getHash<Material>(S::WHITE_PBR);//_sg.B<MB>( mat.name ).addIM( materialSP );
+            matRef = _sg.getHash<Material>(S::WHITE_PBR);
         }
 
         _gltf.matMap[mat.name] = matRef;

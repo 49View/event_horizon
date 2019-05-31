@@ -712,17 +712,17 @@ static void lm_writeResultsToLightmap(lm_context *ctx)
 	float *hemi = (float*)LM_CALLOC(ctx->lightmap.width * ctx->lightmap.height, 4 * sizeof(float));
 	glBindTexture(GL_TEXTURE_2D, ctx->hemisphere.storage.texture);
 
-//    GLuint fbo;
-//    glGenFramebuffers(1, &fbo);
-//    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ctx->hemisphere.storage.texture, 0);
-//
-//    glReadPixels(0, 0, ctx->lightmap.width, ctx->lightmap.height, GL_RGBA, GL_FLOAT, hemi);
-//
-//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//    glDeleteFramebuffers(1, &fbo);
+    GLuint fbo;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ctx->hemisphere.storage.texture, 0);
 
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, hemi);
+    glReadPixels(0, 0, ctx->lightmap.width, ctx->lightmap.height, GL_RGBA, GL_FLOAT, hemi);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fbo);
+
+//	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, hemi);
 
 	// write results to lightmap texture
 	for (int y = 0; y < ctx->hemisphere.storage.writePosition.y + (int)ctx->hemisphere.fbHemiCountY; y++)
