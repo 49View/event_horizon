@@ -276,7 +276,7 @@ int bake( scene_t *scene, Renderer& rr )
     }
     lmImageSmooth(data, temp, w, h, 4);
     lmImageDilate(temp, data, w, h, 4);
-    lmImagePower(data, w, h, 4, 1.0f / 2.2f, 0x7); // gamma correct color channels
+    lmImagePower(data, w, h, 4, 1.0f / 4.2f, 0x7); // gamma correct color channels
     free(temp);
 
     // save result to a file
@@ -325,8 +325,8 @@ int initScene( scene_t *scene, Renderer& rr ) {
 //    unsigned char emissive[] = { 0, 0, 0, 255 };
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
 
-    scene->w = 128;
-    scene->h = 128;
+    scene->w = 512;
+    scene->h = 512;
 //    glGenTextures(1, &scene->lightmap);
     glBindTexture(GL_TEXTURE_2D, scene->lightmap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

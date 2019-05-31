@@ -274,6 +274,7 @@ vec2 uv2 = v_texCoord2;
 // uv2.x = 1.0 - uv2.x;
 // uv2.y = 1.0 - uv2.y;
 vec3 aoLightmapColor = texture(lightmapTexture, uv2).rrr;
+// aoLightmapColor = pow(aoLightmapColor, vec3(1.0/5.0));
 vec3 diffuseV = Lo + (irradiance * albedo );
 
 vec3 specular = vec3(0.0);
@@ -290,7 +291,7 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = aoLightmapColor;//(kD * diffuseV + specular ) * (translucencyV) * visibility * ao * aoLightmapColor;
+vec3 ambient = (kD * diffuseV + specular ) * (translucencyV) * visibility * ao * aoLightmapColor;
 #else
 vec3 ambient = Lo + kD*albedo;
 #endif

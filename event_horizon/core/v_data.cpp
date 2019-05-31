@@ -44,6 +44,21 @@ void VData::fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index ) {
     }
 }
 
+void VData::fillSetUV( size_t _size, const Vector2f& _uvs, uint32_t _index ) {
+    if ( _index < 2 ) {
+        vSoaData.resize( _size );
+        for ( size_t t = 0; t < _size; t++ ) {
+            if ( _index == 0 ) {
+                vSoaData[t].a1 = _uvs;
+            } else {
+                vSoaData[t].a2 = _uvs;
+            }
+        }
+    } else {
+        LOGR("[GLTF2]: Mora than 2 sets of data, don't know what to do with it.");
+    }
+}
+
 void VData::fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert ) {
     vSoaData.resize( _normals.size() );
     float bi = _bInvert ? -1.0f : 1.0f;
@@ -362,4 +377,68 @@ void VData::forcePlanarMapping() {
         t.a2 = t.a1;
     }
 
+}
+
+void VData::flattenStride( void* ret, size_t _index, std::shared_ptr<Matrix4f> _mat ) {
+
+    size_t off = 0;
+    size_t stride = sizeof(float)*3;
+    switch (_index ) {
+//        case 0:
+//        case 3:
+//        case 5:
+//            stride = sizeof(float)*3;
+//            break;
+        case 1:
+        case 2:
+            stride = sizeof(float)*2;
+            break;
+        case 4:
+        case 6:
+            stride = sizeof(float)*4;
+            break;
+        default:
+            break;
+    }
+
+    for ( const auto& elem : vSoaData ) {
+        switch (_index ) {
+            case 0: {
+                auto v1 = _mat ? _mat->transform(elem.pos) : elem.pos;
+                memcpy((unsigned char*)ret + off*stride, &v1, stride );
+            }
+            break;
+            case 1:
+                memcpy((unsigned char*)ret + off*stride, &elem.a1, stride );
+                break;
+            case 2:
+                memcpy((unsigned char*)ret + off*stride, &elem.a2, stride );
+                break;
+            case 3: {
+                auto v1 = _mat ? _mat->transform3x3(elem.a3) : elem.a3;
+                if ( _mat) v1 = normalize(v1);
+                memcpy((unsigned char*)ret + off*stride, &v1, stride );
+            }
+                break;
+            case 4:
+                memcpy((unsigned char*)ret + off*stride, &elem.a4, stride );
+                break;
+            case 5:
+                memcpy((unsigned char*)ret + off*stride, &elem.a5, stride );
+                break;
+            case 6:
+                memcpy((unsigned char*)ret + off*stride, &elem.a6, stride );
+                break;
+            default:
+                break;
+        }
+        off++;
+    }
+}
+
+void VData::flattenIndices( void* ret, size_t _startIndex ) {
+    memcpy(ret, vIndices.data(), vIndices.size() * sizeof(uint32_t) );
+    for ( size_t t = 0; t < vIndices.size(); t++ ) {
+        ((uint32_t*)(ret))[t] += _startIndex;
+    }
 }

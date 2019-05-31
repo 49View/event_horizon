@@ -323,7 +323,7 @@ void writeFace( size_t base, size_t i1, size_t i2,size_t i3, std::ostringstream&
     ssf << std::endl;
 }
 
-void SceneGraph::chartMeshes( scene_t& scene ) const {
+void SceneGraph::chartMeshes( scene_t& scene ) {
     std::ostringstream ss;
     std::ostringstream ssf;
     size_t totalVerts = 1;
@@ -369,9 +369,15 @@ void SceneGraph::chartMeshes( scene_t& scene ) const {
     if (!tinyobj::LoadObj(shapes, materials, err, ssi, matFileReader, 0)) {
         LOGR("Error: %s\n", err.c_str());
     }
+
     xatlasParametrize( shapes, &scene );
     scene.unchart = unchart;
 //    FM::writeLocalFile("house.obj", ss.str() );
+
+}
+
+void SceneGraph::chartMeshes2( scene_t& scene ) {
+    xatlasParametrize( *this, nodes, &scene );
 }
 
 void SceneGraph::loadVData( std::string _names, HttpResouceCB _ccf ) {

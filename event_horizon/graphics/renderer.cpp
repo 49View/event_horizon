@@ -320,10 +320,18 @@ void Renderer::remapLightmapUVs( const scene_t& scene ) {
 
         auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( (int32_t)vo.size, PRIMITIVE_TRIANGLES,
                                                                        VFVertexAllocation::PreAllocate );
+//        for ( size_t t = 0; t < vo.size; t++ ) {
+//            const auto& v = scene.vertices[vo.offset+t];
+//            PUUNTBC p;
+//            p.pos = V3f{ v.p[0], v.p[1], v.p[2] };
+//            p.a2  = V2f{ v.t[0], v.t[1] };
+//
+//            SOAData->addVertex( p );
+//        }
+
         for ( size_t t = 0; t < vo.size; t++ ) {
             const auto& v = scene.vertices[vo.offset+t];
-            PUUNTBC p;
-            p.pos = V3f{ v.p[0], v.p[1], v.p[2] };
+            PUUNTBC p = scene.vertices[vo.offset+t].orig;
             p.a2  = V2f{ v.t[0], v.t[1] };
 
             SOAData->addVertex( p );

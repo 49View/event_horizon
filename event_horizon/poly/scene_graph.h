@@ -273,7 +273,8 @@ public:
         return elem;
     }
 
-    void chartMeshes( scene_t& scene ) const;
+    void chartMeshes( scene_t& scene );
+    void chartMeshes2( scene_t& scene );
 
     static GenericSceneCallback           genericSceneCallback         ;
     static LoadedResouceCallbackContainer resourceCallbackVData        ;

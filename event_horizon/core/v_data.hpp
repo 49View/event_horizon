@@ -28,11 +28,16 @@ public:
     void fillIndices( const std::vector<int32_t>& _indices );
     void fillCoors3d( const std::vector<Vector3f>& _verts );
     void fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index = 0 );
+    void fillSetUV( size_t _size, const Vector2f& _uvs, uint32_t _index );
     void fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert = false );
     void fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert = false );
     void fillTangets( const std::vector<Vector4f>& _tangents, bool _bInvert = false );
     void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
     void fillColors( const std::vector<Vector4f>& _colors );
+
+    void flattenStride( void* ret, size_t _index, std::shared_ptr<Matrix4f> _mat = nullptr );
+    void flattenIndices( void* ret, size_t _startIndex );
+
     void forcePlanarMapping();
     void changeWindingOrder();
     void sanitizeUVMap();

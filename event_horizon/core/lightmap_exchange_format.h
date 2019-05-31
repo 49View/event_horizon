@@ -11,6 +11,8 @@
 struct vertex_t {
     float p[3];
     float t[2];
+
+    PUUNTBC orig;
 } ;
 
 struct VertexOffsetScene {
@@ -34,7 +36,6 @@ struct scene_t
 
     unsigned int vao, vbo, ibo;
     vertex_t *vertices;
-    PUUNTBC *verticesComplete;
     unsigned short *indices;
     uint32_t *xrefs;
     unsigned int vertexCount, indexCount;

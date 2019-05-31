@@ -149,10 +149,11 @@ namespace GLTF2Service {
                 geom->fillTangets( fillData<Vector4f>( *model, v ));
             } else if ( k == "TEXCOORD_0" ) {
                 NTBFill |= TEXCOORD_MASK;
-                geom->fillUV( fillData<Vector2f>( *model, v ), 0 );
-                geom->fillUV( fillData<Vector2f>( *model, v ), 1 ); // By default fill second uvs anyway
+                auto fillingUV = fillData<Vector2f>( *model, v );
+                geom->fillUV( fillingUV, 0 );
+                geom->fillSetUV( fillingUV.size(), V2f::ZERO, 1 ); // By default fill second uvs anyway
             } else if ( k == "TEXCOORD_1" ) {
-                geom->fillUV( fillData<Vector2f>( *model, v ), 1 );
+//                geom->fillUV( fillData<Vector2f>( *model, v ), 1 );
             }
         }
 

@@ -18,9 +18,9 @@ void main()
     vec3 N = normalize(v_texCoord);
 
     vec3 irradiance = vec3(0.0);
-    irradiance += texture(cubeMapTexture, N).rgb;
-    FragColor = vec4(irradiance, 1.0);
-    return;
+    // irradiance += texture(cubeMapTexture, N).rgb;
+    // FragColor = vec4(irradiance, 1.0);
+    // return;
     // tangent space calculation from origin point
     vec3 up    = vec3(0.0, 1.0, 0.0); 
     vec3 right = cross(up, N);
@@ -44,7 +44,7 @@ void main()
 
     irradiance = PI * irradiance * (1.0 / float(nrSamples));
 
-    FragColor = vec4(irradiance, 1.0);
+    FragColor = vec4(irradiance*1.0, 1.0);
     // FragColor = vec4( texture(cubeMapTexture, v_texCoord).xyz, 1.0);
     // FragColor = vec4( 1.0);
 }
