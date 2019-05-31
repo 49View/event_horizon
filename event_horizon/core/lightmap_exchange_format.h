@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <core/soa_utils.h>
 
 struct vertex_t {
     float p[3];
@@ -33,6 +34,7 @@ struct scene_t
 
     unsigned int vao, vbo, ibo;
     vertex_t *vertices;
+    PUUNTBC *verticesComplete;
     unsigned short *indices;
     uint32_t *xrefs;
     unsigned int vertexCount, indexCount;

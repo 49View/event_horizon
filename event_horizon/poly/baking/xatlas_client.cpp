@@ -137,7 +137,6 @@ void saveToSceneT( xatlas::Atlas *atlas, std::vector<tinyobj::shape_t>& shapes, 
         for (uint32_t v = 0; v < mesh.vertexCount; v++) {
             const xatlas::Vertex &vertex = mesh.vertexArray[v];
             const float *pos = &shapes[i].mesh.positions[vertex.xref * 3];
-//            const float *pos = &shapes[i].mesh.positions[v * 3];
             size_t voff = (v * sizeof(vertex_t));
             float uvs[2];
             uvs[0] = vertex.uv[0] / atlas->width;

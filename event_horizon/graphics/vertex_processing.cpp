@@ -91,10 +91,10 @@ void VPList::setTransform( std::shared_ptr<Matrix4f> lTransform ) {
     if ( lTransform ) VPList::mTransform = lTransform;
 }
 
-void VPList::updateGPUVData( const cpuVBIB& _vbib ) {
-    gpuData->updateVBO( _vbib );
+void VPList::updateGPUVData( cpuVBIB&& _vbib ) {
+    gpuData->updateVBO( std::move(_vbib) );
 }
 
-void VPList::remapUVs( uint32_t *_indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index ) {
-    gpuData->updateUVs( _indices, _pos, _uvs, _index );
+void VPList::remapUVs( uint32_t *_indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart ) {
+    gpuData->updateUVs( _indices, _pos, _uvs, _index, _xrefStart );
 }

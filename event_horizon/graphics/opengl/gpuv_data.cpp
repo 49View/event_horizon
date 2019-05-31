@@ -32,10 +32,11 @@ void GPUVData::draw() const {
     }
 }
 
-void GPUVData::updateVBO( const cpuVBIB& _vbib ) {
+void GPUVData::updateVBO( cpuVBIB&& _vbib ) {
+    vbib = std::move(_vbib);
     GLCALL(glBindVertexArray( vao ));
     GLCALL(glBindBuffer( GL_ARRAY_BUFFER, vbo ));
-    GLCALL(glBufferData( GL_ARRAY_BUFFER, _vbib.numVerts * _vbib.elenentSize, _vbib.bufferVerts.get(), GL_STATIC_DRAW ));
+    GLCALL(glBufferData( GL_ARRAY_BUFFER, vbib.numVerts * vbib.elenentSize, vbib.bufferVerts.get(), GL_STATIC_DRAW ));
 }
 
 GPUVData::GPUVData( cpuVBIB&& _vbib ) : vbib(std::move(_vbib)) {
@@ -108,14 +109,22 @@ bool GPUVData::isEmpty() const {
     return numIndices == 0 || vao == 0;
 }
 
-void GPUVData::updateUVs( const uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index ) {
+void GPUVData::updateUVs( const uint32_t *xrefs, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart ) {
 
     size_t uvStride = vbib.vElementAttrib[1+_index].offset;
     size_t uvSize = vbib.vElementAttrib[1+_index].size * sizeof(float);
 
+    std::vector<V3f> remappedPos{};
+    for ( size_t t = 0; t < vbib.numVerts; t++ ) {
+        V3f p{};
+        memcpy( (char*)(&p), vbib.bufferVerts.get() + vbib.elenentSize*t, sizeof(float)*3 );
+        remappedPos.emplace_back( p );
+    }
+
     for ( size_t t = 0; t < vbib.numVerts; t++ ) {
         memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t + uvStride, (const char*)(&_uvs[t]), uvSize );
         memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t, (const char*)(&_pos[t]), sizeof(float)*3 );
+//        memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t, (const char*)(&remappedPos[xrefs[t+_xrefStart]]), sizeof(float)*3 );
     }
 
     GLCALL(glBindVertexArray( vao ));

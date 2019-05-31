@@ -314,15 +314,29 @@ void Renderer::remapLightmapUVs( const scene_t& scene ) {
         std::vector<V2f> ev{};
         std::vector<V3f> pv{};
         std::vector<size_t> xrefs{};
-        uint32_t * fake = nullptr;
 
+//        auto _indices = std::unique_ptr<uint32_t[]>( new uint32_t[_data->numIndices()] );
+//        std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
+
+        auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( (int32_t)vo.size, PRIMITIVE_TRIANGLES,
+                                                                       VFVertexAllocation::PreAllocate );
         for ( size_t t = 0; t < vo.size; t++ ) {
             const auto& v = scene.vertices[vo.offset+t];
-//            const auto& v = scene.vertices[scene.xrefs[vo.offset+t]];
-            ev.emplace_back( V2f{ v.t[0], v.t[1] } );
-            pv.emplace_back( V3f{ v.p[0], v.p[1], v.p[2] } );
+            PUUNTBC p;
+            p.pos = V3f{ v.p[0], v.p[1], v.p[2] };
+            p.a2  = V2f{ v.t[0], v.t[1] };
+
+            SOAData->addVertex( p );
         }
-        mVPLMap[vo.uuid]->remapUVs( fake, pv, ev, 1 );
+
+        mVPLMap[vo.uuid]->updateGPUVData( cpuVBIB{SOAData} );
+
+//        for ( size_t t = 0; t < vo.size; t++ ) {
+//            const auto& v = scene.vertices[vo.offset+t];
+//            ev.emplace_back( V2f{ v.t[0], v.t[1] } );
+//            pv.emplace_back( V3f{ v.p[0], v.p[1], v.p[2] } );
+//        }
+//        mVPLMap[vo.uuid]->remapUVs( scene.xrefs, pv, ev, 1, vo.offset );
     }
 }
 

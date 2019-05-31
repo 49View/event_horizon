@@ -23,7 +23,7 @@ enum LogPriority {
 	LOG_PRIORITY_WARN
 };
 
-enum PerfOptions {
+enum class PerfOptions {
 	Print,
 	NoPrint
 };

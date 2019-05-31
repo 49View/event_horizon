@@ -14,8 +14,8 @@ public:
     void draw( ) const;
     void programStart( RenderMaterial* _material, Program* _program = nullptr ) const;
 
-    void updateVBO( const cpuVBIB& _vbib );
-    void updateUVs( const uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index );
+    void updateVBO( cpuVBIB&& _vbib );
+    void updateUVs( const uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart );
     bool Dynamic() const { return dynamic; }
     void Dynamic( bool val ) { dynamic = val; }
 
