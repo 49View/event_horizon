@@ -58,6 +58,7 @@ public:
 
     // OpenGL initialisation
     void init_r( const uint8_t* _data );
+    void init_null();
     void init_cubemap_r();
 
     void refresh( const uint8_t *data );

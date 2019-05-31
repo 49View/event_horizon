@@ -26,7 +26,7 @@ public:
     std::unique_ptr<Vector4f[]> tangents;
     std::unique_ptr<Vector3f[]> binormals;
     std::unique_ptr<Vector4f[]> colors;
-    std::unique_ptr<int32_t[]> indices;
+    std::unique_ptr<uint32_t[]> indices;
     int numVerts = 0;
     int32_t numIndices = 0;
     AABB bbox3d = AABB::INVALID;
@@ -719,41 +719,41 @@ public:
     }
 
     VertexStripIBVB( int32_t _numVerts, Primitive _primitiveType, VFVertexAllocation vAlloc ) {
-        std::unique_ptr<int32_t[]> _indices;
+        std::unique_ptr<uint32_t[]> _indices;
         std::unique_ptr<V[]> _verts;
         init( _numVerts, _primitiveType, 0, _verts, _indices, vAlloc );
     }
 
     VertexStripIBVB( int32_t _numVerts, int32_t _numIndices, Primitive _primitiveType, VFVertexAllocation vAlloc ) {
-        std::unique_ptr<int32_t[]> _indices;
+        std::unique_ptr<uint32_t[]> _indices;
         std::unique_ptr<V[]> _verts;
         init( _numVerts, _primitiveType, _numIndices, _verts, _indices, vAlloc );
     }
 
     VertexStripIBVB( int32_t _numVerts, Primitive _primitiveType, VFVertexAllocation vAlloc, int32_t _numIndices,
-                     std::unique_ptr<int32_t[]>& _indices ) {
+                     std::unique_ptr<uint32_t[]>& _indices ) {
         std::unique_ptr<V[]> _verts;
         init( _numVerts, _primitiveType, _numIndices, _verts, _indices, vAlloc );
     }
 
     VertexStripIBVB( int32_t _numVerts, Primitive _primitiveType, std::unique_ptr<V[]> _verts ) {
-        std::unique_ptr<int32_t[]> _indices;
+        std::unique_ptr<uint32_t[]> _indices;
         init( _numVerts, _primitiveType, 0, _verts, _indices );
     }
 
     VertexStripIBVB( int32_t _numVerts, Primitive _primitiveType ) {
-        std::unique_ptr<int32_t[]> _indices;
+        std::unique_ptr<uint32_t[]> _indices;
         std::unique_ptr<V[]> _verts;
         init( _numVerts, _primitiveType, 0, _verts, _indices );
     }
 
     VertexStripIBVB( int32_t _numVerts, Primitive _pt, int32_t _numIndices, std::unique_ptr<V[]>& _verts,
-                     std::unique_ptr<int32_t[]>& _indices, VFVertexAllocation vAlloc = VFVertexAllocation::Ignore ) {
+                     std::unique_ptr<uint32_t[]>& _indices, VFVertexAllocation vAlloc = VFVertexAllocation::Ignore ) {
         init( _numVerts, _pt, _numIndices, _verts, _indices, vAlloc );
     }
 
     VertexStripIBVB( const JMATH::Rect2f& rect ) {
-        std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[4]{ 0, 1, 2, 3 } );
+        std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[4]{ 0, 1, 2, 3 } );
         std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
 
         _verts[0].pos = Vector2f( rect.bottomRight());
@@ -765,7 +765,7 @@ public:
     }
 
     VertexStripIBVB( const JMATH::Rect2f& rect, float z ) {
-        std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[4]{ 0, 1, 2, 3 } );
+        std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[4]{ 0, 1, 2, 3 } );
         std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
 
         _verts[0].pos = XZY::C( rect.bottomRight() );
@@ -777,7 +777,7 @@ public:
     }
 
     VertexStripIBVB( const JMATH::Rect2f& rect, const QuadVertices2& tcoords, [[maybe_unused]] float z ) {
-        std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[4]{ 0, 1, 2, 3 } );
+        std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[4]{ 0, 1, 2, 3 } );
         std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
 
         _verts[0].pos = XZY::C( rect.bottomRight() );
@@ -793,7 +793,7 @@ public:
     }
 
     VertexStripIBVB( const JMATH::Rect2f& rect, const QuadVertices2& tcoords ) {
-        std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[4]{ 0, 1, 2, 3 } );
+        std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[4]{ 0, 1, 2, 3 } );
         std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
 
         _verts[0].pos = Vector2f( rect.bottomRight());
@@ -835,7 +835,7 @@ public:
 
         int32_t wrapVertsCount = wrapIt ? 2 : 0;
         int64_t numStripVerts = vList.size() * 2 + wrapVertsCount;
-        indices = std::unique_ptr<int32_t[]>( new int32_t[numStripVerts] );
+        indices = std::unique_ptr<uint32_t[]>( new uint32_t[numStripVerts] );
         verts = std::unique_ptr<V[]>( new V[numStripVerts] );
         primiteType = PRIMITIVE_TRIANGLE_STRIP;
 
@@ -1034,7 +1034,7 @@ public:
     }
 
     void init( int32_t _numVerts, Primitive _pt, int32_t _numIndices, std::unique_ptr<V[]>& _verts,
-               std::unique_ptr<int32_t[]>& _indices, VFVertexAllocation vAlloc = VFVertexAllocation::Ignore ) {
+               std::unique_ptr<uint32_t[]>& _indices, VFVertexAllocation vAlloc = VFVertexAllocation::Ignore ) {
         ASSERT( _numVerts > 0 );
 
         numIndices = _indices ? _numIndices : 0;
@@ -1049,7 +1049,7 @@ public:
         if ( _indices ) {
             indices = std::move( _indices );
         } else {
-            indices = std::make_unique<int32_t[]>( _numIndices );
+            indices = std::make_unique<uint32_t[]>( _numIndices );
         }
     }
 
@@ -1065,7 +1065,7 @@ public:
         return retArray;
     }
 
-    std::unique_ptr<int32_t[]> indices;
+    std::unique_ptr<uint32_t[]> indices;
     std::unique_ptr<V[]> verts;
 
     int32_t numIndices = 0;

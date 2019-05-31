@@ -288,6 +288,8 @@ int bake( scene_t *scene, Renderer& rr )
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
     free(data);
 
+    glEnable( GL_BLEND );
+
     return 1;
 }
 
@@ -295,6 +297,11 @@ int initScene( scene_t *scene, Renderer& rr ) {
 
     glGenVertexArrays(1, &scene->vao);
     glBindVertexArray(scene->vao);
+
+    glDisable( GL_BLEND );
+//    glDisable(GL_CULL_FACE);
+//    glDisable(GL_DEPTH_TEST);
+//    glDisable(GL_SCISSOR_TEST);
 
     glGenBuffers(1, &scene->vbo);
     glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
@@ -311,20 +318,23 @@ int initScene( scene_t *scene, Renderer& rr ) {
 
     // create lightmap texture
     auto sceneTexture = rr.TD(FBNames::lightmap);
-    scene->w = sceneTexture->getWidth();
-    scene->h = sceneTexture->getHeight();
+//    scene->w = sceneTexture->getWidth();
+//    scene->h = sceneTexture->getHeight();
     scene->lightmap = sceneTexture->getHandle();
-
-//    scene->w = 654;
-//    scene->h = 654;
-//    glGenTextures(1, &scene->lightmap);
 //    glBindTexture(GL_TEXTURE_2D, scene->lightmap);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 //    unsigned char emissive[] = { 0, 0, 0, 255 };
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
+
+    scene->w = 128;
+    scene->h = 128;
+//    glGenTextures(1, &scene->lightmap);
+    glBindTexture(GL_TEXTURE_2D, scene->lightmap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    unsigned char emissive[] = { 0, 0, 0, 255 };
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
 
     // load shader
     const char *vp =
@@ -369,6 +379,10 @@ int initScene( scene_t *scene, Renderer& rr ) {
     scene->u_lightmap = glGetUniformLocation(scene->program, "u_lightmap");
 
     return 1;
+}
+
+void apply( scene_t &scene, Renderer& rr ) {
+    rr.remapLightmapUVs( scene );
 }
 
 }

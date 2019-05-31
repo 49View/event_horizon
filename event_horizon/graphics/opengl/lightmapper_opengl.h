@@ -712,17 +712,17 @@ static void lm_writeResultsToLightmap(lm_context *ctx)
 	float *hemi = (float*)LM_CALLOC(ctx->lightmap.width * ctx->lightmap.height, 4 * sizeof(float));
 	glBindTexture(GL_TEXTURE_2D, ctx->hemisphere.storage.texture);
 
-    GLuint fbo;
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ctx->hemisphere.storage.texture, 0);
+//    GLuint fbo;
+//    glGenFramebuffers(1, &fbo);
+//    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ctx->hemisphere.storage.texture, 0);
+//
+//    glReadPixels(0, 0, ctx->lightmap.width, ctx->lightmap.height, GL_RGBA, GL_FLOAT, hemi);
+//
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//    glDeleteFramebuffers(1, &fbo);
 
-    glReadPixels(0, 0, ctx->lightmap.width, ctx->lightmap.height, GL_RGBA, GL_UNSIGNED_BYTE, hemi);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDeleteFramebuffers(1, &fbo);
-
-//	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, hemi);
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, hemi);
 
 	// write results to lightmap texture
 	for (int y = 0; y < ctx->hemisphere.storage.writePosition.y + (int)ctx->hemisphere.fbHemiCountY; y++)
@@ -972,7 +972,7 @@ static void lm_setMeshPosition(lm_context *ctx, unsigned int indicesTriangleBase
 			vIndex = ((const unsigned short*)ctx->mesh.indices + ctx->meshPosition.triangle.baseIndex)[i];
 			break;
 		case LM_UNSIGNED_INT:
-			vIndex = ((const unsigned int*)ctx->mesh.indices + ctx->meshPosition.triangle.baseIndex)[i];
+			vIndex = ((const uint32_t *)ctx->mesh.indices + ctx->meshPosition.triangle.baseIndex)[i];
 			break;
 		default:
 			assert(LM_FALSE);

@@ -14,6 +14,8 @@ enum class RawImageMemory {
     Compressed
 };
 
+class Vector4f;
+
 class RawImage : public ImageParams {
 public:
     RESOURCE_CTORS_ONLY(RawImage);
@@ -25,6 +27,7 @@ public:
     RawImage( unsigned int _w, unsigned int _h, float _col );
     RawImage( int width, int height, int channels, const char* rawBtyes );
     RawImage( int width, int height, int channels, const char* rawBtyes, const std::string& _forcedhash );
+    RawImage( unsigned int _w, unsigned int _h, const Vector4f& _value, int _bpp );
 
     void copyFrom( const char* buffer );
 

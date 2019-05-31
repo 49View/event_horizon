@@ -632,7 +632,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     ret.numIndices = mesh.indexCount();
 
     ret.verts = std::make_unique<Vector3f[]>( ret.numVerts );
-    ret.indices = std::make_unique<int32_t[]>( ret.numIndices );
+    ret.indices = std::make_unique<uint32_t[]>( ret.numIndices );
     ret.colors = std::make_unique<Vector4f[]>( ret.numIndices );
 
     int t = 0;

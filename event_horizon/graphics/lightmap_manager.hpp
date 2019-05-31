@@ -11,4 +11,5 @@ class Renderer;
 namespace LightmapManager {
     int initScene( scene_t *scene, Renderer& rr );
     int bake( scene_t *scene, Renderer& rr );
+    void apply( scene_t &scene, Renderer& rr );
 }

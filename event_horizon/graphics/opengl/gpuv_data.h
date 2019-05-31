@@ -3,17 +3,19 @@
 #include <memory>
 #include <graphics/opengl/gl_util.h>
 #include <graphics/program.h>
+#include <graphics/vertex_processing.h>
 
 class RenderMaterial;
 struct cpuVBIB;
 
 class GPUVData {
 public:
-    explicit GPUVData( const cpuVBIB& _vbib );
+    explicit GPUVData( cpuVBIB&& _vbib );
     void draw( ) const;
     void programStart( RenderMaterial* _material, Program* _program = nullptr ) const;
 
     void updateVBO( const cpuVBIB& _vbib );
+    void updateUVs( const uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index );
     bool Dynamic() const { return dynamic; }
     void Dynamic( bool val ) { dynamic = val; }
 
@@ -28,5 +30,6 @@ private:
     GLuint numIndices = 0;
     GLenum primitveType = PRIMITIVE_TRIANGLE_STRIP;
     bool dynamic = false;
+    cpuVBIB vbib; // Source data copy, for now we need it to easy remapping
 };
 

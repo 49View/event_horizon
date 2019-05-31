@@ -28,6 +28,7 @@ public:
                                                  const StringUniqueCollection& _names,
                                                  TextureSlots _tslot = TSLOT_COLOR );
     std::shared_ptr<Texture> addTextureNoData( TextureRenderData& tb );
+    std::shared_ptr<Texture> addTextureRef( const std::string& _name );
     std::shared_ptr<Texture> addCubemapTexture( TextureRenderData& tb );
     std::shared_ptr<Texture> addTextureWithGPUHandle( const std::string& id, unsigned int _handle,
                                                       unsigned int _secondaryHandle = 0 );

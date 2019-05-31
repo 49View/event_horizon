@@ -32,7 +32,7 @@ struct cpuVBIB {
         }
     }
 
-    std::unique_ptr<int32_t[]> bufferIndices;
+    std::unique_ptr<uint32_t[]> bufferIndices;
     std::unique_ptr<char[]> bufferVerts;
     int numVerts;
     int numIndices;
@@ -97,6 +97,7 @@ public:
     void setTransform( std::shared_ptr<Matrix4f> lTransform );
 
     void updateGPUVData( const cpuVBIB& _vbib );
+    void remapUVs( uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index );
 
     bool hasTag( uint64_t _tag) const;
     uint64_t tag() const { return mTag; }

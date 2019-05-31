@@ -21,6 +21,19 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, int _channels, const uint3
     }
 }
 
+RawImage::RawImage( unsigned int _w, unsigned int _h, const V4f& _value, int _bpp ) {
+    width = _w;
+    height = _h;
+    channels = 4;
+    bpp = _bpp;
+    rawBtyes = std::make_unique<uint8_t[]>( width * height * channels * 4 );
+    for ( int t = 0; t < height; t++ ){
+        for ( int q = 0; q < width; q++ ){
+            std::memcpy( rawBtyes.get() + ((t * width * channels) + q*bppStride()), &_value, bppStride() );
+        }
+    }
+}
+
 RawImage::RawImage( unsigned int _w, unsigned int _h, const uint8_t _col ) {
     width = _w;
     height = _h;

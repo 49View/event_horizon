@@ -32,6 +32,16 @@ void Texture::init_data_r( const uint8_t* _data ) {
     }
 }
 
+void Texture::init_null() {
+    GLCALL( glGenTextures( 1, &mHandle ));
+    GLCALL( glBindTexture(GL_TEXTURE_2D, mHandle) );
+//    float f = 1.0f;
+//    GLCALL( glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_FLOAT, &f) );
+    unsigned char emissive[] = { 255, 255, 255, 255 };
+    GLCALL( glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive) );
+
+}
+
 void Texture::init_r( const uint8_t* _data ) {
     //	ASSERT( mWrapMode == WRAP_MODE_CLAMP_TO_EDGE || (JMATH::isPowerOfTwo(mWidth) && JMATH::isPowerOfTwo(mHeight)));
     //	mWrapMode = (JMATH::isPowerOfTwo(mWidth) && JMATH::isPowerOfTwo(mHeight)) ? WRAP_MODE_REPEAT : WRAP_MODE_CLAMP_TO_EDGE;

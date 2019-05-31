@@ -71,6 +71,8 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
                 uniformDefaults->assign( _name, S::BLACK );
             } else if ( _name == UniformNames::ibl_brdfLUTMap ) {
                 uniformDefaults->assign( _name, MPBRTextures::ibl_brdf );
+            } else if ( _name == UniformNames::lightmapTexture ) {
+                uniformDefaults->assign( _name, S::lightmap );
             } else {
                 uniformDefaults->assign( _name, S::WHITE );
             }

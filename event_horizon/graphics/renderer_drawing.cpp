@@ -90,12 +90,56 @@ void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& m
         // xLines
         Vector3f lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
         Vector3f lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth );
+//        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth );
         for ( int q = 0; q < 3; q++ ) {
             delta += unit * 0.25f;
             lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
             lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
             drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f );
+        }
+        delta += unit * 0.25f;
+//        if ( t == numGridLinesY - 1 ) {
+//            lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
+//            lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
+//            drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth);
+//        }
+    }
+
+    auto numGridLinesX = static_cast<int>(( axisLenghts.x() / unit ) );
+    delta = leftXAxis.x();
+    for ( int t = 0; t < numGridLinesX; t++ ) {
+        // xLines
+        Vector3f lerpLeftX = topYAxis + V3f::X_AXIS * delta;
+        Vector3f lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
+//        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth );
+        for ( int q = 0; q < 3; q++ ) {
+            delta += unit * 0.25f;
+            lerpLeftX = topYAxis + V3f::X_AXIS * delta;
+            lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
+            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f );
+        }
+        delta += unit * 0.25f;
+//        if ( t == numGridLinesX - 1 ) {
+//            lerpLeftX = topYAxis + V3f::X_AXIS * delta;
+//            lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
+//            drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth );
+//        }
+    }
+
+
+
+
+
+    delta = topYAxis.z();
+    for ( int t = 0; t < numGridLinesY; t++ ) {
+        // xLines
+        Vector3f lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
+        Vector3f lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
+        drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth );
+        for ( int q = 0; q < 3; q++ ) {
+            delta += unit * 0.25f;
+            lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
+            lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
         }
         delta += unit * 0.25f;
         if ( t == numGridLinesY - 1 ) {
@@ -105,7 +149,6 @@ void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& m
         }
     }
 
-    auto numGridLinesX = static_cast<int>(( axisLenghts.x() / unit ) );
     delta = leftXAxis.x();
     for ( int t = 0; t < numGridLinesX; t++ ) {
         // xLines
@@ -116,7 +159,7 @@ void Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& m
             delta += unit * 0.25f;
             lerpLeftX = topYAxis + V3f::X_AXIS * delta;
             lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f );
+//            drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f );
         }
         delta += unit * 0.25f;
         if ( t == numGridLinesX - 1 ) {
@@ -266,14 +309,14 @@ VPListSP Renderer::drawTriangles(int bucketIndex, const std::vector<Vector3f>& v
     //Multiple of 3.d
     if (verts.size()==0 || indices.size()==0 || indices.size() % 3 != 0) return nullptr;
 
-    std::unique_ptr<int32_t[]> i = std::make_unique<int32_t[]>(indices.size());
+    std::unique_ptr<uint32_t[]> i = std::make_unique<uint32_t[]>(indices.size());
 
     memcpy(i.get(), indices.data(), sizeof(int32_t)*indices.size());
 
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( static_cast<int32_t>(verts.size()),
                                                                            PRIMITIVE_TRIANGLES,
                                                                            VFVertexAllocation::PreAllocate,
-                                                                           static_cast<int32_t>(indices.size()),
+                                                                           static_cast<uint32_t>(indices.size()),
                                                                            i );
 
     for (auto& v : verts) {
@@ -337,7 +380,7 @@ VPListSP Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float
                     const Vector4f& color, float /*width*/, int32_t subdivs, const std::string& _name ) {
     int32_t numIndices = subdivs + 1;
     if ( numIndices < 3 ) return nullptr;
-    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[numIndices] );
+    std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[numIndices] );
     std::unique_ptr<VFPos3d[]> _verts = std::unique_ptr<VFPos3d[]>( new VFPos3d[numIndices] );
 
     for ( int t = 0; t < numIndices; t++ ) {
@@ -360,7 +403,7 @@ VPListSP Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float
 
 VPListSP Renderer::drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color, const std::string& _name ) {
     auto numIndices = 5;
-    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[numIndices] );
+    std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[numIndices] );
     std::unique_ptr<VFPos3d[]> _verts = std::unique_ptr<VFPos3d[]>( new VFPos3d[numIndices] );
 
     for ( int t = 0; t < numIndices; t++ ) {
@@ -383,7 +426,7 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, float ra
             const std::string& _name ) {
     int32_t numIndices = subdivs + 1;
     if ( numIndices < 3 ) return nullptr;
-    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[numIndices] );
+    std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[numIndices] );
     std::unique_ptr<VFPos3d[]> _verts = std::unique_ptr<VFPos3d[]>( new VFPos3d[numIndices] );
 
     for ( int t = 0; t < numIndices; t++ ) {
@@ -407,7 +450,7 @@ VPListSP Renderer::drawCircle2d( int bucketIndex, const Vector2f& center, float 
                              const std::string& _name ) {
     int32_t numIndices = subdivs + 1;
     if ( numIndices < 3 ) return nullptr;
-    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[numIndices] );
+    std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[numIndices] );
     std::unique_ptr<VFPos2d[]> _verts = std::unique_ptr<VFPos2d[]>( new VFPos2d[numIndices] );
 
     for ( int t = 0; t < numIndices; t++ ) {
@@ -432,7 +475,7 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Ve
                  const Color4f& color, int32_t subdivs, const std::string& _name ) {
     int32_t numIndices = subdivs + 1;
     if ( numIndices < 3 ) return nullptr;
-    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[numIndices] );
+    std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[numIndices] );
     std::unique_ptr<VFPos3d[]> _verts = std::unique_ptr<VFPos3d[]>( new VFPos3d[numIndices] );
 
     for ( int t = 0; t < numIndices; t++ ) {

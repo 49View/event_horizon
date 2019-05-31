@@ -328,10 +328,15 @@ void SceneGraph::chartMeshes( scene_t& scene ) const {
     std::ostringstream ssf;
     size_t totalVerts = 1;
 
+    std::vector<VertexOffsetScene> unchart;
+
+    size_t currUnchartOffset = 0;
     for ( const auto& [k, gg] : nodes ) {
         if ( !gg->empty() ) {
             auto mat = gg->getLocalHierTransform();
             auto vData = vl.get(gg->Data(0).vData);
+            unchart.emplace_back( gg->UUiD(), currUnchartOffset, vData->numVerts() );
+            currUnchartOffset += vData->numVerts();
             for ( size_t t = 0; t < vData->numVerts(); t++ ) {
                 auto v = vData->vertexAt(t);
                 v = mat->transform(v);
@@ -354,6 +359,7 @@ void SceneGraph::chartMeshes( scene_t& scene ) const {
     }
 
     ss << ssf.str();
+    LOGRS( ss.str() );
     std::istringstream ssi(ss.str());
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
@@ -364,7 +370,7 @@ void SceneGraph::chartMeshes( scene_t& scene ) const {
         LOGR("Error: %s\n", err.c_str());
     }
     xatlasParametrize( shapes, &scene );
-
+    scene.unchart = unchart;
 //    FM::writeLocalFile("house.obj", ss.str() );
 }
 

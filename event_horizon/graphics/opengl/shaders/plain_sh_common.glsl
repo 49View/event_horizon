@@ -270,7 +270,10 @@ kD *= 1.0 - metallic;
 vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
 // float gr = irradiance.r * 0.3 + irradiance.g * 0.59 + irradiance.b * 0.11;
 // irradiance.rgb = vec3(gr);
-vec3 aoLightmapColor = texture(lightmapTexture, v_texCoord2).rgb;
+vec2 uv2 = v_texCoord2;
+// uv2.x = 1.0 - uv2.x;
+// uv2.y = 1.0 - uv2.y;
+vec3 aoLightmapColor = texture(lightmapTexture, uv2).rrr;
 vec3 diffuseV = Lo + (irradiance * albedo );
 
 vec3 specular = vec3(0.0);
@@ -287,7 +290,7 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = (kD * diffuseV + specular ) * (translucencyV) * visibility * ao;
+vec3 ambient = aoLightmapColor;//(kD * diffuseV + specular ) * (translucencyV) * visibility * ao * aoLightmapColor;
 #else
 vec3 ambient = Lo + kD*albedo;
 #endif

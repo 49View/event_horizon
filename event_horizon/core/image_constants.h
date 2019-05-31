@@ -98,6 +98,10 @@ struct ImageParams {
         return static_cast<float>(width) / static_cast<float>(height);
     }
 
+    int bppStride() const {
+        return channels * (bpp/8);
+    }
+
     void setFormatFromChannels() {
         if ( bpp == 8 ) {
             if ( channels==1 ) outFormat = PIXEL_FORMAT_R;

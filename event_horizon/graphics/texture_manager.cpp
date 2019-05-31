@@ -55,6 +55,16 @@ std::shared_ptr<Texture> TextureManager::addCubemapTexture( TextureRenderData& t
     return ret;
 }
 
+std::shared_ptr<Texture> TextureManager::addTextureRef( const std::string& _name ) {
+    TextureRenderData tb{_name};
+    auto ltexture = std::make_shared<Texture>( tb );
+
+    add( tb.names, ltexture );
+    ltexture->init_null();
+
+    return ltexture;
+}
+
 std::shared_ptr<Texture> TextureManager::addTextureNoData( TextureRenderData& tb ) {
     std::unique_ptr<uint8_t []> _data;
     return addTextureImmediate( tb, _data.get() );

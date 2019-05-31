@@ -70,6 +70,8 @@ struct ChangeMaterialOnTagContainer {
 	std::string matHash;
 };
 
+struct scene_t;
+
 class Renderer {
 public:
     explicit Renderer( StreamingMediator& _ssm );
@@ -90,7 +92,7 @@ public:
     std::shared_ptr<RenderMaterial> addMaterialResource( const ResourceTransfer<Material>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ShaderMaterial& _val, const std::string& _name );
     std::shared_ptr<GPUVData> addVDataResource( const ResourceTransfer<VData>& _val );
-    std::shared_ptr<GPUVData> addVDataResource( const cpuVBIB& _val, const std::string& _name );
+    std::shared_ptr<GPUVData> addVDataResource( cpuVBIB&& _val, const std::string& _name );
 
 	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
     std::shared_ptr<GPUVData>       getGPUVData( const std::string& _key );
@@ -141,6 +143,7 @@ public:
 	void invalidateOnAdd();
 
     void changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt );
+    void remapLightmapUVs( const scene_t& scene );
 
 protected:
 	void clearCommandList();
@@ -169,6 +172,7 @@ protected:
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	std::shared_ptr<CommandBufferList> mCommandBuffers;
 	std::map<int, CommandBufferListVector> mCommandLists;
+	std::unordered_map<UUID, VPListSP> mVPLMap;
 
 	std::vector<ChangeMaterialOnTagContainer> mChangeMaterialCallbacks;
 

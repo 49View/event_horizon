@@ -36,25 +36,25 @@ void GPUVData::updateVBO( const cpuVBIB& _vbib ) {
     GLCALL(glBindVertexArray( vao ));
     GLCALL(glBindBuffer( GL_ARRAY_BUFFER, vbo ));
     GLCALL(glBufferData( GL_ARRAY_BUFFER, _vbib.numVerts * _vbib.elenentSize, _vbib.bufferVerts.get(), GL_STATIC_DRAW ));
-
 }
 
-GPUVData::GPUVData( const cpuVBIB& _vbib ) {
+GPUVData::GPUVData( cpuVBIB&& _vbib ) : vbib(std::move(_vbib)) {
+
     bool bCreate = vao == 0;
     if ( bCreate ) GLCALL(glGenVertexArrays( 1, &vao ));
     GLCALL(glBindVertexArray( vao ));
 
     if ( bCreate ) glGenBuffers( 1, &vbo );
     GLCALL(glBindBuffer( GL_ARRAY_BUFFER, vbo ));
-    GLCALL(glBufferData( GL_ARRAY_BUFFER, _vbib.numVerts * _vbib.elenentSize, _vbib.bufferVerts.get(), GL_STATIC_DRAW ));
+    GLCALL(glBufferData( GL_ARRAY_BUFFER, vbib.numVerts * vbib.elenentSize, vbib.bufferVerts.get(), GL_STATIC_DRAW ));
 
     if ( bCreate ) {
-        int stride = _vbib.elenentSize;
+        int stride = vbib.elenentSize;
         GLint attIndex = 0;
-        for ( int32_t t = 0; t < _vbib.vElementAttribSize; t++ ) {
+        for ( int32_t t = 0; t < vbib.vElementAttribSize; t++ ) {
             GLCALL(glEnableVertexAttribArray( attIndex ));
-            int size = _vbib.vElementAttrib[t].size;
-            uintptr_t offset = _vbib.vElementAttrib[t].offset;
+            int size = vbib.vElementAttrib[t].size;
+            uintptr_t offset = vbib.vElementAttrib[t].offset;
             if ( size <= 4 ) {
                 GLCALL(glVertexAttribPointer( attIndex, size, GL_FLOAT, GL_FALSE, stride,
                                        reinterpret_cast<GLvoid *>( offset )));
@@ -87,15 +87,15 @@ GPUVData::GPUVData( const cpuVBIB& _vbib ) {
             }
         }
     }
-    if ( _vbib.numIndices > 0 ) {
+    if ( vbib.numIndices > 0 ) {
         if ( bCreate ) GLCALL(glGenBuffers( 1, &ibo ));
         GLCALL(glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo ));
-        GLCALL(glBufferData( GL_ELEMENT_ARRAY_BUFFER, _vbib.numIndices * sizeof( int32_t ), _vbib.bufferIndices.get(),
+        GLCALL(glBufferData( GL_ELEMENT_ARRAY_BUFFER, vbib.numIndices * sizeof( uint32_t ), vbib.bufferIndices.get(),
                       GL_STATIC_DRAW ));
     }
 
-    numIndices = static_cast<GLuint>(_vbib.numIndices == 0 ? _vbib.numVerts : _vbib.numIndices);
-    primitveType = primitiveToGl( _vbib.primiteType );
+    numIndices = static_cast<GLuint>(vbib.numIndices == 0 ? vbib.numVerts : vbib.numIndices);
+    primitveType = primitiveToGl( vbib.primiteType );
 }
 
 void GPUVData::deleteBuffers() {
@@ -106,4 +106,28 @@ void GPUVData::deleteBuffers() {
 
 bool GPUVData::isEmpty() const {
     return numIndices == 0 || vao == 0;
+}
+
+void GPUVData::updateUVs( const uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index ) {
+
+    size_t uvStride = vbib.vElementAttrib[1+_index].offset;
+    size_t uvSize = vbib.vElementAttrib[1+_index].size * sizeof(float);
+
+    for ( size_t t = 0; t < vbib.numVerts; t++ ) {
+        memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t + uvStride, (const char*)(&_uvs[t]), uvSize );
+        memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t, (const char*)(&_pos[t]), sizeof(float)*3 );
+    }
+
+    GLCALL(glBindVertexArray( vao ));
+    GLCALL(glBindBuffer( GL_ARRAY_BUFFER, vbo ));
+    GLCALL(glBufferData( GL_ARRAY_BUFFER, vbib.numVerts * vbib.elenentSize, vbib.bufferVerts.get(), GL_STATIC_DRAW ));
+
+//    LOGRS( "Indices dump");
+//    for ( auto t = 0; t < vbib.numIndices; t++ ) {
+//        LOGRS( indices[t] );
+//    }
+//    GLCALL(glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo ));
+//    GLCALL(glBufferData( GL_ELEMENT_ARRAY_BUFFER, vbib.numIndices * sizeof( uint32_t ), indices,
+//                         GL_STATIC_DRAW ));
+
 }

@@ -13,6 +13,7 @@
 #include <core/v_data.hpp>
 #include <core/resources/material.h>
 #include <core/streaming_mediator.hpp>
+#include <core/lightmap_exchange_format.h>
 #include <core/descriptors/uniform_names.h>
 #include <core/resources/resource_utils.hpp>
 #include <graphics/graphic_functions.hpp>
@@ -56,7 +57,7 @@ std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>
 generateGeometryVP( std::shared_ptr<VData> _data ) {
     if ( _data->numIndices() < 3 ) return nullptr;
 
-    std::unique_ptr<int32_t[]> _indices = std::unique_ptr<int32_t[]>( new int32_t[_data->numIndices()] );
+    auto _indices = std::unique_ptr<uint32_t[]>( new uint32_t[_data->numIndices()] );
     std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
     auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( _data->numVerts(), PRIMITIVE_TRIANGLES,
                                                                    VFVertexAllocation::PreAllocate, _data->numIndices(),
@@ -112,7 +113,8 @@ void Renderer::init() {
     rcm.init();
     am.init();
     sm->loadShaders();
-    tm->addTextureWithData(RawImage{512, 512, 4, 0xff000000}, FBNames::lightmap, TSLOT_LIGHTMAP );
+//    tm->addTextureWithData(RawImage{54, 54, V4f::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
+    tm->addTextureRef( FBNames::lightmap );
     mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).depthOnly().build();
 
     auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
@@ -161,17 +163,17 @@ void Renderer::afterShaderSetup() {
 }
 
 void Renderer::setGlobalTextures() {
-    auto p = sm->P(S::SH);
-
-    auto lmt = tm->TD(FBNames::lightmap);
-    if ( lmt ) {
-        lmt->bind( lmt->textureSlot(), p->handle(), UniformNames::lightmapTexture.c_str() );
-    }
-
-    auto smt = tm->TD(FBNames::shadowmap);
-    if ( smt ) {
-        smt->bind( smt->textureSlot(), p->handle(), UniformNames::shadowMapTexture.c_str() );
-    }
+//    auto p = sm->P(S::SH);
+//
+//    auto lmt = tm->TD( FBNames::lightmap);
+//    if ( lmt ) {
+//        lmt->bind( lmt->textureSlot(), p->handle(), UniformNames::lightmapTexture.c_str() );
+//    }
+//
+//    auto smt = tm->TD(FBNames::shadowmap);
+//    if ( smt ) {
+//        smt->bind( smt->textureSlot(), p->handle(), UniformNames::shadowMapTexture.c_str() );
+//    }
 }
 
 void Renderer::directRenderLoop() {
@@ -256,6 +258,7 @@ void Renderer::VPL( const int _bucket, std::shared_ptr<VPList> nvp, float alpha 
     } else {
         mCommandLists[_bucket].mVList.push_back(nvp);
     }
+    mVPLMap.emplace( nvp->UUiD(), nvp );
 }
 
 bool Renderer::hasTag( uint64_t _tag ) const {
@@ -288,8 +291,8 @@ std::shared_ptr<RenderMaterial> Renderer::getMaterial( const std::string& _key )
     return rmm->get(_key);
 }
 
-std::shared_ptr<GPUVData> Renderer::addVDataResource( const cpuVBIB& _val, const std::string& _name ) {
-    return gm->addGPUVData(_val, {_name} );
+std::shared_ptr<GPUVData> Renderer::addVDataResource( cpuVBIB&& _val, const std::string& _name ) {
+    return gm->addGPUVData( std::move(_val), {_name} );
 }
 
 std::shared_ptr<GPUVData> Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
@@ -305,8 +308,25 @@ void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer&
     mChangeMaterialCallbacks.emplace_back( _cmt );
 }
 
+void Renderer::remapLightmapUVs( const scene_t& scene ) {
+
+    for ( const auto& vo : scene.unchart ) {
+        std::vector<V2f> ev{};
+        std::vector<V3f> pv{};
+        std::vector<size_t> xrefs{};
+        uint32_t * fake = nullptr;
+
+        for ( size_t t = 0; t < vo.size; t++ ) {
+            const auto& v = scene.vertices[vo.offset+t];
+//            const auto& v = scene.vertices[scene.xrefs[vo.offset+t]];
+            ev.emplace_back( V2f{ v.t[0], v.t[1] } );
+            pv.emplace_back( V3f{ v.p[0], v.p[1], v.p[2] } );
+        }
+        mVPLMap[vo.uuid]->remapUVs( fake, pv, ev, 1 );
+    }
+}
+
 void Renderer::changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt ) {
-    // ### MAT This will need to be handled differently, I reckon
     auto rmaterial = rmm->getFromHash(_cmt.matHash);
     if ( !rmaterial ) {
         rmaterial = getMaterial( _cmt.matHash );

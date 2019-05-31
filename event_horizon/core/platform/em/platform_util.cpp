@@ -82,3 +82,7 @@ namespace ClipBoard {
         return exec(cmd.str().c_str());
     }
 }
+
+bool isTouchBased() {
+    return false;
+}

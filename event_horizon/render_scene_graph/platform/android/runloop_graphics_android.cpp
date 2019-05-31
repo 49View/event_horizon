@@ -48,7 +48,7 @@ void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndB
 }
 
 static bool onTouch(GLFMDisplay *display, int touch, GLFMTouchPhase phase, double x, double y) {
-    LOGRS( "Touch# " << touch << " Phase: " << phase << " [" << x << "," << y << "]" );
+//    LOGRS( "Touch# " << touch << " Phase: " << phase << " [" << x << "," << y << "]" );
     rl.MI().GMouseButtonData.button[touch].action = (phase == 1 || phase == 2) ? MB_PRESS : MB_RELEASE;
     rl.MI().GMouseButtonData.button[touch].xpos = x;
     rl.MI().GMouseButtonData.button[touch].ypos = y;

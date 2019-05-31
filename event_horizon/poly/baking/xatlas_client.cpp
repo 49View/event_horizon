@@ -129,6 +129,7 @@ void saveToSceneT( xatlas::Atlas *atlas, std::vector<tinyobj::shape_t>& shapes, 
     scene->vertices = (vertex_t *)calloc(scene->vertexCount, sizeof(vertex_t));
     scene->indexCount = atlas->meshes[0].indexCount;
     scene->indices = (unsigned short *)calloc(scene->indexCount, sizeof(unsigned short));
+    scene->xrefs   = (uint32_t *)calloc(scene->indexCount, sizeof(uint32_t));
 
     uint32_t firstVertex = 0;
     for (uint32_t i = 0; i < atlas->meshCount; i++) {
@@ -136,13 +137,14 @@ void saveToSceneT( xatlas::Atlas *atlas, std::vector<tinyobj::shape_t>& shapes, 
         for (uint32_t v = 0; v < mesh.vertexCount; v++) {
             const xatlas::Vertex &vertex = mesh.vertexArray[v];
             const float *pos = &shapes[i].mesh.positions[vertex.xref * 3];
+//            const float *pos = &shapes[i].mesh.positions[v * 3];
             size_t voff = (v * sizeof(vertex_t));
             float uvs[2];
             uvs[0] = vertex.uv[0] / atlas->width;
             uvs[1] = vertex.uv[1] / atlas->height;
             memcpy( (char*)scene->vertices + voff + 0, pos, sizeof(float) * 3 );
             memcpy( (char*)scene->vertices + voff + sizeof(float) * 3, uvs, sizeof(float) * 2 );
-
+            scene->xrefs[v] = vertex.xref;
 //            fprintf(file, "v %g %g %g\n", pos[0], pos[1], pos[2]);
 //            if (!shapes[i].mesh.normals.empty()) {
 //                const float *normal = &shapes[i].mesh.normals[vertex.xref * 3];

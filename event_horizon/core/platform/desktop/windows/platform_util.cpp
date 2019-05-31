@@ -21,6 +21,10 @@ bool isalnumCC(char c) {
 	return isalnum(c);
 }
 
+bool isTouchBased() {
+    return false;
+}
+
 std::string cacheFolder() {
 	const char* homeDir = getenv( "TEMP" );
 	return std::string( homeDir ) + "/";

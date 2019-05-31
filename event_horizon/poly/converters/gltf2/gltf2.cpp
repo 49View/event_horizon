@@ -281,32 +281,32 @@ namespace GLTF2Service {
         LOGRS("GLTF2 Material: " << mat.name );
         removeNonAlphaCharFromString( im.name );
 
-        for ( const auto&[k, v] : mat.values ) {
-            if ( k == "baseColorFactor" ) {
-                im.baseColor.value = v.number_array;
-                im.values->assign( UniformNames::diffuseColor, im.baseColor.value.xyz());
-            } else if ( k == "baseColorTexture" ) {
-                readParameterJsonDoubleValue( v, "index", "texCoord", im.baseColor.texture );
-            } else if ( k == "metallicFactor" ) {
-                auto lv = static_cast<float>(v.number_value);
-                im.metallic.value = Vector4f{ lv, lv, lv, 1.0f };
-                im.values->assign( UniformNames::metallic, lv );
-            } else if ( k == "metallicTexture" ) {
-                readParameterJsonDoubleValue( v, "index", "texCoord", im.metallic.texture );
-            } else if ( k == "roughnessFactor" ) {
-                auto lv = static_cast<float>(v.number_value);
-                im.values->assign( UniformNames::roughness, lv );
-                im.roughness.value = Vector4f{ lv, lv, lv, 1.0f };
-            } else if ( k == "roughnessTexture" ) {
-                readParameterJsonDoubleValue( v, "index", "texCoord", im.roughness.texture );
-            }
-        }
-
-        for ( const auto&[k, v] : mat.additionalValues ) {
-            if ( k == "normalTexture" ) {
-                readParameterJsonDoubleValue( v, "index", "texCoord", im.normal.texture );
-            }
-        }
+//        for ( const auto&[k, v] : mat.values ) {
+//            if ( k == "baseColorFactor" ) {
+//                im.baseColor.value = v.number_array;
+//                im.values->assign( UniformNames::diffuseColor, im.baseColor.value.xyz());
+//            } else if ( k == "baseColorTexture" ) {
+//                readParameterJsonDoubleValue( v, "index", "texCoord", im.baseColor.texture );
+//            } else if ( k == "metallicFactor" ) {
+//                auto lv = static_cast<float>(v.number_value);
+//                im.metallic.value = Vector4f{ lv, lv, lv, 1.0f };
+//                im.values->assign( UniformNames::metallic, lv );
+//            } else if ( k == "metallicTexture" ) {
+//                readParameterJsonDoubleValue( v, "index", "texCoord", im.metallic.texture );
+//            } else if ( k == "roughnessFactor" ) {
+//                auto lv = static_cast<float>(v.number_value);
+//                im.values->assign( UniformNames::roughness, lv );
+//                im.roughness.value = Vector4f{ lv, lv, lv, 1.0f };
+//            } else if ( k == "roughnessTexture" ) {
+//                readParameterJsonDoubleValue( v, "index", "texCoord", im.roughness.texture );
+//            }
+//        }
+//
+//        for ( const auto&[k, v] : mat.additionalValues ) {
+//            if ( k == "normalTexture" ) {
+//                readParameterJsonDoubleValue( v, "index", "texCoord", im.normal.texture );
+//            }
+//        }
 
         saveMaterial( _gltf, _sg, im );
 
@@ -319,8 +319,8 @@ namespace GLTF2Service {
         if ( mname == "Soderhamn" ) mname = "Soderhamn_Base";
         auto matRef = _sg.getHash<Material>(mname);
         if ( matRef.empty() ) {
-            auto materialSP = std::make_shared<Material>( im.values );
-            matRef = _sg.B<MB>( mat.name ).addIM( materialSP );
+//            auto materialSP = std::make_shared<Material>( im.values );
+            matRef = _sg.getHash<Material>(S::WHITE_PBR);//_sg.B<MB>( mat.name ).addIM( materialSP );
         }
 
         _gltf.matMap[mat.name] = matRef;
