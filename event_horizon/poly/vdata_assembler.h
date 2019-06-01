@@ -86,6 +86,11 @@ public:
             mTRS = _param;
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GeomMappingData> ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyMapping, SGT> );
+            dataTypeHolder.mappingData = _param;
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, GT::Direction> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyFollower, SGT> );
             dataTypeHolder.mFollowerSuggestedAxis = _param();

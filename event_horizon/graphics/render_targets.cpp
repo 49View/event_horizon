@@ -110,14 +110,13 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     auto preFilterSpecularRT = rr.TD(MPBRTextures::specular_prefilter);
     auto probeRenderTarget = rr.TD("probe_render_target");
 
-    auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{512}, true) );
+    int preFilterSize = 128;
 
-    auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(512), rr );
-    probe->render( probeRenderTarget, 512, 0, [&]() {
-        auto deltaCopy = mSkybox->DeltaInterpolation()->value;
-        mSkybox->DeltaInterpolation()->value = 0.0f;
+    auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{preFilterSize}, true) );
+
+    auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(preFilterSize), rr );
+    probe->render( probeRenderTarget, preFilterSize, 0, [&]() {
         mSkybox->render();
-        mSkybox->DeltaInterpolation()->value = deltaCopy;
         for ( const auto& [k, vl] : rr.CL() ) {
             if ( isKeyInRange(k) ) {
                 rr.addToCommandBuffer( vl.mVList, nullptr, rr.P( S::SH_NOTEXTURE ).get());
@@ -126,8 +125,9 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     });
 
     // convolution
-    auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(128), rr );
-    convolutionProbe->render( convolutionRT, 128, 0, [&]() {
+    auto cubeMapRigConvolution = addCubeMapRig( "cubemapRigConvolution", Vector3f::ZERO, Rect2f(V2f::ZERO, V2f{32}, true) );
+    auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRigConvolution, rr.getProbing(32), rr );
+    convolutionProbe->render( convolutionRT, 32, 0, [&]() {
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
         mConvolution->render( probeRenderTarget );
@@ -136,10 +136,11 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     });
 
     // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
-    int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)512 ) ) );
+    auto cubeMapRigPre = addCubeMapRig( "cubemapRigPre", Vector3f::ZERO, Rect2f(V2f::ZERO, V2f{preFilterSize}, true) );
+    int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)preFilterSize ) ) );
     for ( int m = 0; m < preFilterMipMaps; m++ ) {
-        auto fbSize = 512>>m;
-        auto preFilterProbe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(fbSize), rr );
+        auto fbSize = preFilterSize>>m;
+        auto preFilterProbe = std::make_shared<RLTargetCubeMap>( cubeMapRigPre, rr.getProbing(fbSize), rr );
         auto lIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
 
         preFilterProbe->render( preFilterSpecularRT, fbSize, m, [&]() {
@@ -201,7 +202,7 @@ void RLTargetPBR::invalidateShadowMaps() {
 }
 
 void RLTargetPBR::addProbes() {
-    addProbeToCB( FBNames::sceneprobe, Vector3f::ZERO );
+    addProbeToCB( FBNames::sceneprobe, mProbePosition );
 }
 
 void CompositePBR::bloom() {
@@ -482,15 +483,15 @@ std::shared_ptr<Framebuffer> RLTargetProbe::getFrameBuffer( [[maybe_unused]] Com
 }
 
 void RLTargetProbe::startCL( CommandBufferList& cb ) {
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-
-    cb.setCameraUniforms( cameraRig->getCamera() );
-
-    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-
-    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
-    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-    cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+//    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+//
+//    cb.setCameraUniforms( cameraRig->getCamera() );
+//
+//    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
+//
+//    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
+//    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
+//    cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
 }
 
 bool RLTarget::isKeyInRange( const int _key, CheckEnableBucket _checkBucketVisibility, RLClearFlag _clearFlags ) const {

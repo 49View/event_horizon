@@ -71,6 +71,7 @@ generateGeometryVP( std::shared_ptr<VData> _data ) {
 void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>& _params ) {
     sm->loadShaders();
     afterShaderSetup();
+    invalidateOnAdd();
 }
 
 Renderer::Renderer( StreamingMediator& _ssm) : ssm(_ssm) {
@@ -117,11 +118,11 @@ void Renderer::init() {
     tm->addTextureRef( FBNames::lightmap );
     mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).depthOnly().build();
 
-    auto trd = ImageParams{}.setSize( 128 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto trd = ImageParams{}.setSize( 32 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
                                                              .setGenerateMipMaps( false )
                                                              .setIsFramebufferTarget( true ) );
-    trd.setSize(512);
+    trd.setSize(128);
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter, trd }
                                                                    .setGenerateMipMaps( true )
                                                                    .setIsFramebufferTarget( true ) );

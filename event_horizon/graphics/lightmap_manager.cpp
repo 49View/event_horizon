@@ -276,7 +276,7 @@ int bake( scene_t *scene, Renderer& rr )
     }
     lmImageSmooth(data, temp, w, h, 4);
     lmImageDilate(temp, data, w, h, 4);
-    lmImagePower(data, w, h, 4, 1.0f / 2.2f, 0x7); // gamma correct color channels
+    lmImagePower(data, w, h, 4, 1.0f / 3.0f, 0x7); // gamma correct color channels
     free(temp);
 
 #ifndef ANDROID

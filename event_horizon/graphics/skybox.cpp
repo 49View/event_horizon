@@ -128,7 +128,9 @@ void ConvolutionEnvironmentMap::init() {
 }
 
 void ConvolutionEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
-    rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeFront } );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeNone } );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteFalse } );
     mVPList->setMaterialConstant( UniformNames::cubeMapTexture, cmt->TDI(0) );
     rr.CB_U().pushVP( mVPList );
 }

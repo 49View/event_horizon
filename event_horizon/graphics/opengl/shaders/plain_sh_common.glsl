@@ -203,9 +203,20 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 Lo = vec3( 0.0 );
 
-#ifdef sh_reflections
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
     Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance );
+
+    Lo *= (visibility-0.5);
+
+    // single point light 
+    vec3 plmfrag = vec3(1.7, 2.0, 0.0f) - Position_worldspace;
+    float pldistance = length( plmfrag );
+    vec3 L = normalize( plmfrag );
+    float plattenuation = 1.0 / (pldistance * pldistance);
+    vec3 lradiance = vec3(10.0) * plattenuation;
+    Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
+#ifdef sh_reflections
+
 #endif
 
 // for ( int i = 0; i < u_numPointLights; i++ ) {
@@ -274,14 +285,14 @@ vec2 uv2 = v_texCoord2;
 // uv2.x = 1.0 - uv2.x;
 // uv2.y = 1.0 - uv2.y;
 vec3 aoLightmapColor = texture(lightmapTexture, uv2).rrr;
-// aoLightmapColor = pow(aoLightmapColor, vec3(1.0/5.0));
-vec3 diffuseV = Lo + (irradiance * albedo );
+//aoLightmapColor = pow(aoLightmapColor, vec3(1.0/1.5)); 
+vec3 diffuseV = (Lo + (irradiance * albedo)) * aoLightmapColor;
 
 vec3 specular = vec3(0.0);
 
 #ifdef sh_reflections
 // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
-const float MAX_REFLECTION_LOD = 6.0;
+const float MAX_REFLECTION_LOD = 4.0;
 vec3 R = reflect(-V, N);
 
 // vec3 prefilteredColor = textureLod(ibl_specularMap, R, 0.0 + (0.5 * MAX_REFLECTION_LOD)).rgb;
@@ -291,9 +302,9 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = (kD * diffuseV + specular ) * visibility * ao * aoLightmapColor * 1.5;
-#else
-vec3 ambient = Lo + kD*albedo;
+vec3 ambient = (kD * diffuseV + specular ) * ao;
+#else 
+vec3 ambient = kD * diffuseV * visibility * ao;
 #endif
 
 
@@ -314,6 +325,7 @@ finalColor = vec3(1.0) - exp(-finalColor * 1.0);
 // finalColor = pow(finalColor, vec3(2.2/1.0));
 
 FragColor = vec4( finalColor, opacityV * alpha ); 
+//FragColor = vec4( finalColor, 1.0 ); 
  
 //	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
 // BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );

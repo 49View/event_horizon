@@ -81,10 +81,6 @@ std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& raw
                                                              TextureSlots _tslot ) {
     auto trd = ImageParams{}.size( rawImage.width, rawImage.height ).format(rawImage.outFormat);
     auto tb = TextureRenderData{ _names, trd }.GPUSlot(_tslot);
-//    tb.format( rawImage.outFormat );
-if (  rawImage.width == 2048 ) {
-    LOGR("Arrrrgh");
-}
     tb.format( channelsToFormat( rawImage.channels, rawImage.bpp ) );
 
     for ( const auto& _name : _names ) {

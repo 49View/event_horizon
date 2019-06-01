@@ -315,6 +315,7 @@ protected:
 
     bool mbUseInfiniteHorizonForShadows = true;
     Vector3f mCachedSunPosition = Vector3f::ZERO;
+    V3f mProbePosition = Vector3f{1.8f, 1.5f, 0.0f};
     SkyBoxInitParams mSkyBoxParams;
     bool bEnableSkyBoxRendering = false;
 

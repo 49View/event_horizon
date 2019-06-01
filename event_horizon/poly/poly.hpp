@@ -81,6 +81,16 @@ struct GeomMappingData {
 //    const std::vector<Vector2f>& WrapMappingCoords() const { return wrapMappingCoords; }
 //    void WrapMappingCoords( const std::vector<Vector2f>& val ) { wrapMappingCoords = val; }
 
+    GeomMappingData() = default;
+    GeomMappingData(const V2f& _scale) {
+        setUVScale(_scale);
+    }
+
+    void setUVScale( const V2f& _scale ) {
+        uvScale = _scale;
+        uvScaleInv = V2f::ONE / uvScale;
+    }
+
     // Mapping constants
     MappingDirection direction = MappingDirection::X_POS;
     bool bDoNotScaleMapping = false;

@@ -42,9 +42,9 @@ void main()
         }
     }
 
-    irradiance = PI * irradiance * (1.0 / float(nrSamples));
+    irradiance = PI * irradiance * (1.0 / nrSamples);
 
-    FragColor = vec4(irradiance*2.5, 1.0);
+    FragColor = vec4(irradiance, 1.0);
     // FragColor = vec4( texture(cubeMapTexture, v_texCoord).xyz, 1.0);
     // FragColor = vec4( 1.0);
 }
