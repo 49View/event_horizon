@@ -60,19 +60,18 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
 
     smm = std::make_unique<ShadowMapManager>();
 
-//    rr.createGrid( 1.0f, Color4f::ACQUA_T, Color4f::PASTEL_GRAYLIGHT, Vector2f( 10.0f ), 0.075f );
-
-    // Create a default skybox
-    mSkybox = createSkybox();
-
     // Create the SunBuilder to for PBR scenes
     mSunBuilder = std::make_shared<SunBuilder>();
 
-    changeTime( "spring noon" );
+//    changeTime( "spring noon" );
 
     // Create PBR resources
     mConvolution = std::make_unique<ConvolutionEnvironmentMap>(rr);
     mIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
+}
+
+void RLTargetPBR::createSkybox( const SkyBoxInitParams& _skyboxParams ) {
+    mSkybox = std::make_unique<Skybox>(rr, _skyboxParams);
 }
 
 std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBufferType fbt ) {
@@ -98,11 +97,6 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
     }
 
     return framebuffer;
-}
-
-std::shared_ptr<Skybox> RLTargetPBR::createSkybox() {
-    mSkyBoxParams.mode = SkyBoxMode::CubeProcedural;
-    return std::make_unique<Skybox>(rr, mSkyBoxParams);
 }
 
 std::shared_ptr<CameraRig> RLTargetPBR::getProbeRig( int t, const std::string& _probeName, int mipmap ) {
@@ -197,7 +191,7 @@ void RLTargetPBR::cacheShadowMapSunPosition( const Vector3f& _smsp ) {
 void RLTargetPBR::setShadowMapPosition( const Vector3f& _sp ) {
     cacheShadowMapSunPosition( _sp );
     smm->SunPosition( _sp );
-    mSkybox->invalidate();
+    if ( mSkybox ) mSkybox->invalidate();
 }
 
 void RLTargetPBR::invalidateShadowMaps() {
@@ -393,14 +387,14 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     // (that has got 3d lighting in it) especially skyboxes and probes!!
     addShadowMaps();
 
-    if ( mSkybox->precalc( 0.0f ) ) {
+    if ( mSkybox && mSkybox->precalc( 0.0f ) ) {
         addProbes();
     }
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
 
-    mSkybox->render();
+    if ( mSkybox ) mSkybox->render();
 
     cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
@@ -455,13 +449,13 @@ void RLTargetPBR::resize( const Rect2f& _r ) {
 void RLTargetPBR::changeTime( const std::string& _time ) {
     mSunBuilder->buildFromString( _time );
 //    RR().changeTime( SB().getSunPosition() );
-    mSkybox->invalidate();
+    if ( mSkybox ) mSkybox->invalidate();
     setShadowMapPosition(mSunBuilder->getSunPosition());
 }
 
 void RLTargetPBR::invalidateOnAdd() {
     invalidateShadowMaps();
-    mSkybox->invalidate();
+    if ( mSkybox ) mSkybox->invalidate();
 }
 
 floata& RLTargetPBR::skyBoxDeltaInterpolation() {

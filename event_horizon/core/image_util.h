@@ -9,9 +9,10 @@ class RawImage;
 
 namespace imageUtil {
     template<typename T>
-    std::unique_ptr<uint8_t[]> decodeFromStream( T* _data, int& width, int& height, int& channels ) {
-        std::unique_ptr<uint8_t[]> decodedData = std::make_unique<uint8_t[]>( width * height * channels * sizeof(T) );
-        memcpy( decodedData.get(), _data, width * height * channels * sizeof(T) );
+    std::unique_ptr<uint8_t[]> decodeFromStream( T* _data, int width, int height, int channels ) {
+        auto sizeOf = sizeof(T);
+        std::unique_ptr<uint8_t[]> decodedData = std::make_unique<uint8_t[]>( width * height * channels * sizeOf );
+        memcpy( decodedData.get(), _data, width * height * channels * sizeOf );
         stbi_image_free( _data );
         return decodedData;
     }

@@ -26,6 +26,7 @@ enum PixelFormat {
     PIXEL_FORMAT_DEPTH_32,
     PIXEL_FORMAT_RG,
     PIXEL_FORMAT_HDR_RG_16,
+    PIXEL_FORMAT_HDR_RG_32,
     PIXEL_FORMAT_R,
     PIXEL_FORMAT_HDR_R16,
     PIXEL_FORMAT_HDR_RG32,
@@ -104,8 +105,8 @@ struct ImageParams {
 
     void setFormatFromChannels() {
         if ( bpp == 8 ) {
-            if ( channels==1 ) outFormat = PIXEL_FORMAT_R;
-            if ( channels==2 ) outFormat = PIXEL_FORMAT_RG;
+            if ( channels==1 ) outFormat = PIXEL_FORMAT_LUMINANCE;//PIXEL_FORMAT_R;
+            if ( channels==2 ) outFormat = PIXEL_FORMAT_LUMINANCE_ALPHA;//PIXEL_FORMAT_RG;
             if ( channels==3 ) outFormat = PIXEL_FORMAT_RGB;
             if ( channels==4 ) outFormat = PIXEL_FORMAT_RGBA;
         }
