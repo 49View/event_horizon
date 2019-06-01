@@ -90,7 +90,7 @@ void allConversionsDragAndDropCallback( std::vector<std::string>& _paths ) {
 //    } else if ( extl == ".stl" ) {
 //        stl::parse_stl(pathSanitized);
 //    }
-        else if ( extl == ".jpg" || extl == ".jepg" || extl == ".png" ) {
+        else if ( isFileExtAnImage(extl) ) {
             addFileCallback<RawImage>( pathSanitized );
         }
         else if ( extl == ".ttf" ) {
