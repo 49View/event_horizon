@@ -22,4 +22,4 @@ void setDepthFunction( DepthFunction dp );
 void enableMultiSample( bool enabled );
 void grabScreen( int x, int y, int w, int h, void* buffer );
 
-PixelFormat channelsToFormat( int _channels );
+PixelFormat channelsToFormat( int _channels, int _bpp );

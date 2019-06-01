@@ -205,6 +205,12 @@ void RenderOrchestrator::showPBRRender( const std::string& _target ) {
     }
 }
 
+void RenderOrchestrator::createSkybox( const SkyBoxInitParams& _skyboxParams ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->createSkybox( _skyboxParams );
+    }
+}
+
 void RenderOrchestrator::changeTime( const std::string& _time ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
         pbrTarget->changeTime( _time );

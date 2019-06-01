@@ -285,6 +285,7 @@ public:
     RLTargetPBR() = delete;
     RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& rr );
     ~RLTargetPBR() override = default;
+
     void addToCB( CommandBufferList& cb ) override;
     void blit(CommandBufferList& cbl) override;
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
@@ -292,6 +293,7 @@ public:
     void endCL( CommandBufferList& fbt ) override;
     void resize( const Rect2f& _r ) override;
 
+    void createSkybox( const SkyBoxInitParams& _skyboxParams );
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
     void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
 
@@ -300,7 +302,6 @@ public:
     floata& skyBoxDeltaInterpolation();
 
 protected:
-    std::shared_ptr<Skybox> createSkybox();
     void addProbes();
     void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
     std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName, int mipmap );
