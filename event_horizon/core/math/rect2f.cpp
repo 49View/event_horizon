@@ -153,3 +153,8 @@ void Rect2f::percentage( const Rect2f _percRect, const Vector2f& _scale ) {
 	setTop( _percRect.top() * _scale.y() );
 	setBottom( _percRect.bottom() * _scale.y() );
 }
+
+void Rect2f::centered( const V2f& _size ) {
+    mTopLeft = V2f{-_size.x()*0.5f, -_size.y()*0.5f};
+    mBottomRight = V2f{_size.x()*0.5f, _size.y()*0.5f};
+}

@@ -26,6 +26,11 @@ namespace ClipperLib {
     typedef std::vector< Path > Paths;
 }
 
+struct V2ff {
+    V2f v2;
+    float f;
+};
+
 template <typename T>
 class VDataAssembler : public NamePolicy<> {
 public:
@@ -144,6 +149,17 @@ public:
         if constexpr ( std::is_same<M, PolyOutLine>::value ) {
             static_assert( std::is_same<SGT, GT::Extrude>::value );
             dataTypeHolder.extrusionVerts.emplace_back( _param );
+            return *this;
+        }
+        if constexpr ( std::is_same<M, V2ff>::value ) {
+            static_assert( std::is_same<SGT, GT::Extrude>::value );
+            dataTypeHolder.extrusionVerts.emplace_back(
+                    PolyOutLine{ Rect2f{_param.v2, RectV2f::Centered }.points3dcw_xzy(), _param.f} );
+            return *this;
+        }
+        if constexpr ( std::is_same<M, std::vector<PolyLine2d>>::value ) {
+            static_assert( std::is_base_of_v<GT::GTPolicyPolyline, SGT> );
+            dataTypeHolder.sourcePolylines2d = _param;
             return *this;
         }
         if constexpr ( std::is_same<M, PolyLine2d>::value ) {

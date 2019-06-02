@@ -265,6 +265,7 @@ namespace GT {
     struct GTPolicyPolyline {
         std::vector<Vector3f> sourcePolysVList;
         std::vector<Triangle3d> sourcePolysTris;
+        std::vector<PolyLine2d> sourcePolylines2d;
         std::vector<PolyLine> polyLines;
         Vector3f forcingNormalPoly = Vector3f::ZERO;
     };

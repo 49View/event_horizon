@@ -123,6 +123,12 @@ namespace VDataServices {
                                          _d.sourcePolysVList.at( 2 ), _d.rfPoly );
                 _d.polyLines.emplace_back( PolyLine{ _d.sourcePolysVList, ln, _d.rfPoly } );
             }
+            if ( !_d.sourcePolylines2d.empty()) {
+                std::vector<Vector3f> pl3{};
+                for ( const auto& pl : _d.sourcePolylines2d ) {
+                    _d.polyLines.emplace_back( PolyLine{ XZY::C(pl.verts), ln, _d.rfPoly } );
+                }
+            }
         }
     }
 

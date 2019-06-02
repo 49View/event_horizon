@@ -107,6 +107,7 @@ public:
         rr.SSM().addStream<T>( _streamName, avcbTM() );
     }
 
+    void clearPBRRender( const std::string& _target = "" );
     void hidePBRRender( const std::string& _target = "" );
     void showPBRRender( const std::string& _target = "" );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );

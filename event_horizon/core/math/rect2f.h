@@ -23,6 +23,10 @@ struct Rect2fFeature {
 
 using Rect2fFeatureT = uint64_t;
 
+enum class RectV2f {
+    Centered
+};
+
 class Rect2f {
 public:
 
@@ -54,6 +58,10 @@ public:
 		mTopLeft = topLeft;
 		mBottomRight = Vector2f::ZERO;
 	}
+
+    Rect2f( const Vector2f& _center, RectV2f rt) { // = RectV2f::Centered
+	    centered( _center );
+    }
 
 	explicit Rect2f( const Vector2f& topLeft, const Vector2f& bottomRight ) {
 		mTopLeft = topLeft;
@@ -100,7 +108,9 @@ public:
 		for ( size_t t = 0; t < vsize; t++ ) expand( points[t].xy() );
 	}
 
-	float* rawPtr() {
+    void centered( const V2f& _size );
+
+    float* rawPtr() {
 		return reinterpret_cast<float*>( &mTopLeft[0] );
 	}
 
@@ -511,7 +521,14 @@ public:
 		return ret;
 	}
 
-	std::vector<Vector3f> points3dcw( float z = 0.0f ) const {
+    std::vector<Vector3f> points3d_xzy() const {
+        return XZY::C(points());
+    }
+    std::vector<Vector3f> points3dcw_xzy() const {
+        return XZY::C(pointscw());
+    }
+
+    std::vector<Vector3f> points3dcw( float z = 0.0f ) const {
 		std::vector<Vector3f> ret;
 
 		ret.emplace_back( topLeft(), z );

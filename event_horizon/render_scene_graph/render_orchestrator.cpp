@@ -193,6 +193,12 @@ void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, cons
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 }
 
+void RenderOrchestrator::clearPBRRender( const std::string& _target ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->clearCB();
+    }
+}
+
 void RenderOrchestrator::hidePBRRender( const std::string& _target ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
         pbrTarget->enableBucket( false );
