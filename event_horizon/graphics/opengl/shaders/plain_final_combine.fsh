@@ -9,6 +9,7 @@ uniform sampler2D shadowMapTexture;
 void main()
 {
     FragColor = texture(colorFBTexture, v_texCoord);
+    FragColor.a = 1.0;
     // FragColor = vec4(0.0);
 
     // vec4 bloomColor = texture(bloomTexture, v_texCoord);

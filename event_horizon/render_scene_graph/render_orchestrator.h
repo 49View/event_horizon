@@ -110,6 +110,7 @@ public:
     void hidePBRRender( const std::string& _target = "" );
     void showPBRRender( const std::string& _target = "" );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
+    void useSkybox( bool _value );
     void changeTime( const std::string& _time );
     floata& skyBoxDeltaInterpolation();
 protected:

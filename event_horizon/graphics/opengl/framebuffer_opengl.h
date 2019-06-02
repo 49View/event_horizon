@@ -70,6 +70,7 @@ public:
 	static void setViewport( const Rect2f& rect );
 	static JMATH::Rect2f getCurrentViewport();
 	static void setSRGB( bool value );
+    static Color4f clearColorValue;
 
 	std::shared_ptr<Texture> RenderToTexture() { return mRenderToTexture; }
 	std::shared_ptr<Texture> ColorAttachment1Texture() const { return mColorAttachment1Texture; }

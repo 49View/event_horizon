@@ -217,6 +217,12 @@ void RenderOrchestrator::changeTime( const std::string& _time ) {
     }
 }
 
+void RenderOrchestrator::useSkybox( bool _value ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->enableSkybox( _value );
+    }
+}
+
 floata& RenderOrchestrator::skyBoxDeltaInterpolation() {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
         return pbrTarget->skyBoxDeltaInterpolation();
@@ -275,3 +281,4 @@ AVInitCallback RenderOrchestrator::avcbTM() {
                      std::placeholders::_1,
                      std::placeholders::_2);
 }
+

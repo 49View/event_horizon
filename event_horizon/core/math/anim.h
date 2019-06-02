@@ -44,6 +44,7 @@ using KeyFrameTimes_t = std::vector<float>;
 using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, TimelineIndex, int)>;
 using TimelineLinks = std::unordered_map< TimelineIndex, TimelineSet >;
 using TimelineGroupCCF = std::function<void()>;
+using TimelineUpdateGroupCCF = std::function<void(float)>;
 
 const static TimelineIndex   tiNorm  = 1000000000;
 
@@ -87,10 +88,10 @@ inline static TimelineIndex getTI( Quaterniona _source ) {
 struct AnimUpdateCallback {
     template<typename ...Args>
     explicit AnimUpdateCallback( Args&& ... args ) : data(std::forward<Args>( args )...) {}
-    TimelineGroupCCF operator()() const noexcept {
+    TimelineUpdateGroupCCF operator()() const noexcept {
         return data;
     }
-    TimelineGroupCCF data;
+    TimelineUpdateGroupCCF data;
 };
 
 struct AnimEndCallback {
@@ -376,10 +377,10 @@ public:
             meanTimeDelta = 0.0f;
             frameTickCount = 0;
             frameTickOffset = 0;
-            if ( cuf ) cuf();
+            if ( cuf ) cuf( timeElapsed );
             if ( ccf ) ccf();
         } else {
-            if ( cuf ) cuf();
+            if ( cuf ) cuf( timeElapsed );
         }
         if ( bForceOneFrameOnly ) {
             bIsPlaying = false;
@@ -402,7 +403,7 @@ public:
     void CCF( TimelineGroupCCF _value ) {
         ccf = _value;
     }
-    void CUF( TimelineGroupCCF _value ) {
+    void CUF( TimelineUpdateGroupCCF _value ) {
         cuf = _value;
     }
 
@@ -418,7 +419,7 @@ private:
     uint64_t frameTickOffset = 0;
     uint64_t frameTickCount = 0;
     TimelineGroupCCF ccf = nullptr;
-    TimelineGroupCCF cuf = nullptr;
+    TimelineUpdateGroupCCF cuf = nullptr;
 };
 
 class Timeline {
@@ -531,6 +532,13 @@ public:
         auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Sleeping");
 
         play( sleepingBeauty, frameSkipper, _ccf, KeyFramePair{ _seconds, 0.0f } );
+    }
+
+    static void intermezzo( float _seconds, uint64_t frameSkipper, AnimUpdateCallback _cuf ) {
+        auto groupName = UUIDGen::make();
+        auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Intermezzo");
+
+        play( sleepingBeauty, frameSkipper, KeyFramePair{ _seconds, 0.0f }, _cuf );
     }
 
     template<typename SGT, typename M>

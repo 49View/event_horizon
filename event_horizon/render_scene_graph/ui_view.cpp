@@ -32,15 +32,16 @@ void UITapArea::transform( float _duration, uint64_t _frameSkipper,
 
     const float downtime = _duration;
     auto colDown = std::vector<KeyFramePair<V3f>>{
-            KeyFramePair{ 0.0f, V3f::ZERO },
-            KeyFramePair{ downtime, _pos }
+            KeyFramePair{ 0.0f, backgroundAnim.Pos() },
+            KeyFramePair{ downtime, backgroundAnim.Pos() + _pos }
     };
 
-    Timeline::play( backgroundAnim.pos, _frameSkipper, colDown, AnimUpdateCallback([this]() {
+    area.translate( _pos.xy() );
+
+    Timeline::play( backgroundAnim.pos, _frameSkipper, colDown, AnimUpdateCallback([this](float) {
         backgroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
         foregroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
-    } ), [this]() {
-        area.translate( backgroundAnim.Pos().xy() );
+    } ), []() {
     } );
 
 }
@@ -55,7 +56,7 @@ void UITapArea::touchedDown() {
             KeyFramePair{ downtime, targetColor }
     };
 
-    touchDownAnimNameScale = Timeline::play( backgroundColor, colDown, AnimUpdateCallback([this]() {
+    touchDownAnimNameScale = Timeline::play( backgroundColor, colDown, AnimUpdateCallback([this](float) {
         backgroundVP->setMaterialConstant( UniformNames::diffuseColor, backgroundColor->value.xyz() );
         backgroundVP->setMaterialConstant( UniformNames::alpha, backgroundColor->value.w() );
     } ));

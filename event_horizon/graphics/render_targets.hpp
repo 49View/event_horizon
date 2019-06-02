@@ -293,6 +293,7 @@ public:
     void endCL( CommandBufferList& fbt ) override;
     void resize( const Rect2f& _r ) override;
 
+    void enableSkybox( bool _value );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
     void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
@@ -318,6 +319,7 @@ protected:
     V3f mProbePosition = Vector3f{1.8f, 1.5f, 0.0f};
     SkyBoxInitParams mSkyBoxParams;
     bool bEnableSkyBoxRendering = false;
+    bool mbEnableSkybox = false;
 
     std::shared_ptr<SunBuilder> mSunBuilder;
     std::shared_ptr<Skybox> mSkybox;

@@ -394,8 +394,9 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
+    cb.setCameraUniforms( cameraRig->getCamera() );
 
-    if ( mSkybox ) mSkybox->render();
+    if ( mbEnableSkybox && mSkybox ) mSkybox->render();
 
     cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
@@ -461,6 +462,10 @@ void RLTargetPBR::invalidateOnAdd() {
 
 floata& RLTargetPBR::skyBoxDeltaInterpolation() {
     return mSkybox->DeltaInterpolation();
+}
+
+void RLTargetPBR::enableSkybox( bool _value ) {
+    mbEnableSkybox = _value;
 }
 
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {

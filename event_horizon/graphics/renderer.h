@@ -188,7 +188,7 @@ public:
 
 	void createGrid( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
 					 const Vector2f& limits, float axisSize, const std::string& _name = "" );
-    void createGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
+    std::vector<VPListSP> createGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
                      const Vector2f& limits, float axisSize, const std::string& _name = "" );
     VPListSP
 	drawArrow( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color, float width,

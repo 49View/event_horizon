@@ -1,10 +1,14 @@
 #include "framebuffer_opengl.h"
 #include "../framebuffer.h"
 
+#include <core/math/vector4f.h>
+
 #include "../texture_manager.h"
 #include "../graphic_functions.hpp"
 #include "../render_material.hpp"
 #include "../render_list.h"
+
+Color4f Framebuffer::clearColorValue = Color4f::XTORGBA("#238FCB");
 
 bool canUseMultiSample() {
 #ifdef _OPENGL_ES
@@ -221,7 +225,7 @@ JMATH::Rect2f Framebuffer::getCurrentViewport() {
 }
 
 void Framebuffer::clearColorBuffer() {
-    GLCALL( glClearColor( 1.f, 1.f, 1.f, 1.0f ));
+    GLCALL( glClearColor( clearColorValue.x(), clearColorValue.y(), clearColorValue.z(), clearColorValue.w() ));
     GLCALL( glClear( GL_COLOR_BUFFER_BIT ));
 }
 
