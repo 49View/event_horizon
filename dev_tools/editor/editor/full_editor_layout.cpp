@@ -27,7 +27,7 @@ void EditorBackEnd::activateImpl() {
     rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
                            (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
 
-    rsg.skyBoxDeltaInterpolation()->value = 0.0f;
+//    rsg.skyBoxDeltaInterpolation()->value = 0.0f;
 //    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.26, GT::Scale( 0.6f ) );
     sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
 
