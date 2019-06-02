@@ -12,7 +12,7 @@ layout( std140 ) uniform LightingUniforms {
     vec3 u_sunRadiance;
     mat4 u_mvpShadowMap;
     mat4 u_depthBiasMVP;
-    float u_timeOfTheDay;
+    vec4 u_timeOfTheDay;
     int  u_numPointLights;
     mat3 shLightCoeffs;
 };

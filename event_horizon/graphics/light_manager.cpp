@@ -91,7 +91,6 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     std::vector<float> lbeamAngle;
     std::vector<int> lType;
 
-    lpos.push_back(Vector3f::ONE);
     int numLightsClamped = 0;
     for ( auto& pl : mPointLights ) {
         lpos.push_back(  pl.Pos());
@@ -116,7 +115,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     mLigthingUniform->setUBODatav( UniformNames::outerCutOff, lbeamAngle );
     mLigthingUniform->setUBODatav( UniformNames::lightType, lType );
     mLigthingUniform->setUBOData( UniformNames::numPointLights, numLightsClamped );
-    mLigthingUniform->setUBOData( UniformNames::timeOfTheDay, 1.0f ); //SB.GoldenHour()
+    mLigthingUniform->setUBOData( UniformNames::timeOfTheDay, V4f{1.0f} ); //SB.GoldenHour()
     mLigthingUniform->setUBOData( UniformNames::sunDirection,  uSunDirection);// );
     mLigthingUniform->setUBOData( UniformNames::sunPosition, uSunDirection * 100000.0f );// );
     mLigthingUniform->setUBOData( UniformNames::sunRadiance, _sunRadiance );// );

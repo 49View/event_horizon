@@ -278,7 +278,7 @@ std::array<TouchStatus, MAX_TAPS> MouseInput::Status() const {
 }
 
 void MouseInput::update( UpdateSignals& _updateSignals ) {
-    static constexpr size_t NUM_MOUSE_BUTTONS = 2;
+    static constexpr size_t NUM_MOUSE_BUTTONS = 3;
     setWheelScrollcallbackOnce();
 
 	mCurrTimeStamp = GameTime::getCurrTimeStamp();
