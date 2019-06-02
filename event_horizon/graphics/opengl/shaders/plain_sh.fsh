@@ -36,7 +36,7 @@ void main() {
    vec3 N = getNormalFromMap(texCoords);
 
    shadow_code
-   translucencyV = texture( translucencyTexture, texCoords ).x * visibility;
+   translucencyV = texture( translucencyTexture, texCoords ).x * visibility * 4.0;
    N = mix(N, -N, translucencyV);
 
    light_code

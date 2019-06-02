@@ -125,11 +125,11 @@ private:
 //    bool backGroundShadowLoaded = false;
 //    std::string shadowBackground = "button,square,shadow";
 
-    C4f enabledColor = V4f::ITORGBA(27,156,238,255);
-    C4f selectedColor = V4f::ITORGBA(169,119,248,255);
-    C4f disabledColor = V4f::ITORGBA(126,126,126,255);
-    C4f hooverColor = V4f::ITORGBA(20,119,224,255);
-    C4f pressedDownColor = V4f::ITORGBA(0,0,151,255);
+    C4f enabledColor = V4f::XTORGBA("f2a571");
+    C4f selectedColor = V4f::XTORGBA("ffe68e");
+    C4f disabledColor = V4f::XTORGBA("b5b3ad");
+    C4f hooverColor = V4f::XTORGBA("cea71a");
+    C4f pressedDownColor = V4f::XTORGBA("ed7525");
 };
 
 

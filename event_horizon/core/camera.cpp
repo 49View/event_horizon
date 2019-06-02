@@ -591,6 +591,7 @@ void Camera::update() {
 		quatMatrix = qangle->value.rotationMatrix();
 	}
 
+//	LOGRS( quatAngle() );
 	quatMatrix.setTranslation( mPos->value );
 	quatMatrix.invert( mView );
 

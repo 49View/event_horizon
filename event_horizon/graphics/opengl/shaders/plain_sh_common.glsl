@@ -206,14 +206,14 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
     Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance );
 
-    Lo *= (visibility-0.5);
+    Lo *= (visibility-0.8);
 
     // single point light 
     vec3 plmfrag = vec3(1.7, 2.0, 0.0f) - Position_worldspace;
     float pldistance = length( plmfrag );
     vec3 L = normalize( plmfrag );
     float plattenuation = 1.0 / (pldistance * pldistance);
-    vec3 lradiance = vec3(10.0) * plattenuation;
+    vec3 lradiance = vec3(5.0) * plattenuation;
     Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
 #ifdef sh_reflections
 
