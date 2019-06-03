@@ -33,8 +33,8 @@ void LightManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
     mLigthingUniform->generateUBO( sm, "LightingUniforms");
 }
 
-void LightManager::addPointLight( const Vector3f& pos, float intensity, const Vector3f& attenuation ) {
-    mPointLights.emplace_back( pos, 50.0f, intensity, attenuation );
+void LightManager::addPointLight( const Vector3f& pos, float _wattage, float intensity, const Vector3f& attenuation ) {
+    mPointLights.emplace_back( pos, _wattage, intensity, attenuation );
 }
 
 void LightManager::removePointLight( const size_t index ) {
@@ -46,17 +46,24 @@ void LightManager::removeAllPointLights() {
     mPointLights.clear();
 }
 
-void LightManager::switchLightsOn( float animTime ) {
-//    for ( auto& pl : mPointLights ) {
-//        animateTo( pl.IntensityAnim(), 1.0f, animTime );
-//    }
+void LightManager::switchLightsOn( float animTime, TimelineGroupCCF _ccf ) {
+    for ( auto& pl : mPointLights ) {
+        Timeline::play( pl.IntensityAnim(), 2, KeyFramePair{animTime, 1.0f }, _ccf );
+    }
 //    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
 }
 
-void LightManager::switchLightsOff( float animTime ) {
-//    for ( auto& pl : mPointLights ) {
-//        animateTo( pl.IntensityAnim(), 0.0f, animTime );
-//    }
+void LightManager::setPointLightWattages( float _watt ) {
+    for ( auto& pl : mPointLights ) {
+        pl.setWattage( _watt );
+    }
+//    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
+}
+
+void LightManager::switchLightsOff( float animTime, TimelineGroupCCF _ccf ) {
+    for ( auto& pl : mPointLights ) {
+        Timeline::play( pl.IntensityAnim(), 2, KeyFramePair{animTime, 0.0f }, _ccf );
+    }
 //    animateTo( mDirectionalLightIntensity, 0.0f, animTime );
 }
 
@@ -78,7 +85,8 @@ void LightManager::toggleLightsOnOff() {
 
 void LightManager::setUniforms( const Vector3f& _cameraPos,
                                 std::shared_ptr<ShadowMapManager> smm,
-                                const V3f& _sunRadiance ) {
+                                const V3f& _sunRadiance,
+                                float _goldenHour ) {
     std::sort( mPointLights.begin(), mPointLights.end(), [_cameraPos]( const auto& a, const auto& b ) -> bool {
         return distance( a.Pos(), _cameraPos ) < distance( b.Pos(), _cameraPos );
     } );
@@ -95,7 +103,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     for ( auto& pl : mPointLights ) {
         lpos.push_back(  pl.Pos());
         ldir.push_back( Vector3f::Y_AXIS );
-        lintensity.emplace_back( pl.Intensity());
+        lintensity.emplace_back( pl.Intensity() );
         lattn.push_back( pl.Attenuation());
         lbeamdir.push_back( Vector3f::Z_AXIS );
         lbeamAngle.push_back( 60.0f );
@@ -115,7 +123,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     mLigthingUniform->setUBODatav( UniformNames::outerCutOff, lbeamAngle );
     mLigthingUniform->setUBODatav( UniformNames::lightType, lType );
     mLigthingUniform->setUBOData( UniformNames::numPointLights, numLightsClamped );
-    mLigthingUniform->setUBOData( UniformNames::timeOfTheDay, V4f{1.0f} ); //SB.GoldenHour()
+    mLigthingUniform->setUBOData( UniformNames::timeOfTheDay, V4f{_goldenHour} );
     mLigthingUniform->setUBOData( UniformNames::sunDirection,  uSunDirection);// );
     mLigthingUniform->setUBOData( UniformNames::sunPosition, uSunDirection * 100000.0f );// );
     mLigthingUniform->setUBOData( UniformNames::sunRadiance, _sunRadiance );// );

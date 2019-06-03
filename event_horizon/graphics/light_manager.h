@@ -2,6 +2,7 @@
 
 #include "core/math/vector3f.h"
 #include <core/math/anim_type.hpp>
+#include <core/math/anim.h>
 
 class ProgramUniformSet;
 class ShaderManager;
@@ -24,12 +25,20 @@ public:
 	}
 
 	float Intensity() const { return mIntensity->value * mWattage; }
-	std::shared_ptr<AnimType<float>> IntensityAnim() { return mIntensity; }
+	std::shared_ptr<AnimType<float>>& IntensityAnim() { return mIntensity; }
 	void Intensity( float val ) { mIntensity->value = val; }
 	Vector3f Attenuation() const { return mAttenuation->value; }
 	void Attenuation( const Vector3f& val ) { mAttenuation->value = val; }
 	LightType Type() const { return mType; }
 	void Type( LightType val ) { mType = val; }
+
+    float getWattage() const {
+        return mWattage;
+    }
+
+    void setWattage( float _wattage ) {
+        LightBase::mWattage = _wattage;
+    }
 
 protected:
 	std::string name;
@@ -88,16 +97,18 @@ class LightManager {
 public:
     LightManager();
 
-	void addPointLight( const Vector3f& pos, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
+	void addPointLight( const Vector3f& pos, float _wattage, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
+    void setPointLightWattages( float _watt );
 	void removePointLight( size_t index );
 	void removeAllPointLights();
 	void toggleLightsOnOff();
-	void switchLightsOn( float animTime = 2.0f );
-	void switchLightsOff( float animTime = 2.0f );
+	void switchLightsOn( float animTime, TimelineGroupCCF _ccf = nullptr );
+	void switchLightsOff( float animTime, TimelineGroupCCF _ccf = nullptr );
 
 	void setLightsIntensity( float _intensity );
 
-	void setUniforms( const Vector3f& _cameraPos, std::shared_ptr<ShadowMapManager> smm, const V3f& _sunRadiance );
+	void setUniforms( const Vector3f& _cameraPos, std::shared_ptr<ShadowMapManager> smm,
+	                  const V3f& _sunRadiance, float _goldenHour );
 	void setUniforms_r();
 	void generateUBO( std::shared_ptr<ShaderManager> sm );
 	void update( float timeStamp );

@@ -37,7 +37,7 @@ void main() {
 
    shadow_code
    translucencyV = texture( translucencyTexture, texCoords ).x * visibility * 4.0;
-   N = mix(N, -N, translucencyV);
+   N = mix(N, -N, translucencyV * u_timeOfTheDay.r);
 
    light_code
 
