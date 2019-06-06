@@ -71,11 +71,9 @@ void Renderer::createGrid( const int bucketIndex, float unit, const Color4f& mai
 }
 
 std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& mainAxisColor,
-                           const Color4f& smallAxisColor, const Vector2f& limits, const float axisSize,
+                           const Color4f& smallAxisColor, const Vector2f& limits, const float gridLinesWidth,
                            const std::string& _name ) {
     std::vector<VPListSP> ret;
-    float mainAxisWidth = axisSize;
-    float gridLinesWidth = mainAxisWidth * 0.5f;
 
     Vector3f leftXAxis  = V3f{ -limits.x(), 0.0f, 0.0f };
     Vector3f rightXAxis = V3f{  limits.x(), 0.0f, 0.0f };
@@ -96,7 +94,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
             delta += unit * 0.25f;
             lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
             lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-            ret.emplace_back(drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f) );
+            ret.emplace_back(drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.5f) );
         }
         delta += unit * 0.25f;
 //        if ( t == numGridLinesY - 1 ) {
