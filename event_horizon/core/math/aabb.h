@@ -126,6 +126,7 @@ public:
 	void merge( const AABB& val );
 
 	Rect2f demoteTo2d() const;
+    JMATH::Rect2f topDown() const;
 	int leastDominantAxis() const {
 		Vector3f diff = mMaxPoint - mMinPoint;
 		return diff.leastDominantElement();
@@ -217,6 +218,7 @@ public:
     }
 
     AABB rotate( float angle, const Vector3f& axis ) const;
+    AABB rotate( const Vector4f& axisAngle ) const;
 
 	std::vector<Vector3f> topDownOutline( CompositeWrapping _wrap = CompositeWrapping::NoWrap ) const;
 

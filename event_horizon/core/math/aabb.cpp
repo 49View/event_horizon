@@ -27,12 +27,24 @@ JMATH::Rect2f JMATH::AABB::demoteTo2d() const {
 	return Rect2f( mMinPoint.xy(), mMaxPoint.xy() );
 }
 
+JMATH::Rect2f JMATH::AABB::topDown() const {
+    return Rect2f( mMinPoint.xz(), mMaxPoint.xz() );
+}
+
+JMATH::AABB JMATH::AABB::rotate( const Vector4f& axisAngle ) const {
+    return rotate( axisAngle.w(), axisAngle.xyz() );
+}
+
 JMATH::AABB JMATH::AABB::rotate( float angle, const Vector3f& axis ) const {
 	Matrix3f mat;
 	mat.setRotation( angle, axis );
 
-	Vector3f mi = mat * mMinPoint;
-	Vector3f ma = mat * mMaxPoint;
+
+	Vector3f mi = mat * (mMinPoint - centre());
+	Vector3f ma = mat * (mMaxPoint - centre());
+
+	mi += centre();
+	ma += centre();
 
 	AABB ret;
 	ret.set( mi, ma );
