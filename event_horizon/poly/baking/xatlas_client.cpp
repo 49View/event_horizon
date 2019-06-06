@@ -161,33 +161,20 @@ void saveToSceneT( xatlas::Atlas *atlas, std::vector<tinyobj::shape_t>& shapes, 
     }
 }
 
-void saveToSceneT( xatlas::Atlas *atlas,
-                   const float* positions,
-                   const float* originalPositions   ,
-                   const float* originalUV          ,
-                   const float* originalNormals     ,
-                   const float* originalTangents    ,
-                   const float* originalBinorms     ,
-                   scene_t* scene ) {
+void saveToSceneT( SceneGraph& sg, xatlas::Atlas *atlas, const float* positions, scene_t* scene ) {
 
     // allocate memory
     scene->vertexCount = atlas->meshes[0].vertexCount;
     scene->vertices = (vertex_t *)calloc(scene->vertexCount, sizeof(vertex_t));
     scene->indexCount = atlas->meshes[0].indexCount;
     scene->indices = (unsigned short *)calloc(scene->indexCount, sizeof(unsigned short));
-    scene->xrefs   = (uint32_t *)calloc(scene->indexCount, sizeof(uint32_t));
 
     uint32_t firstVertex = 0;
     for (uint32_t i = 0; i < atlas->meshCount; i++) {
         const xatlas::Mesh &mesh = atlas->meshes[i];
         for (uint32_t v = 0; v < mesh.vertexCount; v++) {
             const xatlas::Vertex &vertex = mesh.vertexArray[v];
-            const float *pos = &positions[vertex.xref * 3];
-            const float *oPositions = &originalPositions[vertex.xref * 3];
-            const float *oUV        = &originalUV       [vertex.xref * 2];
-            const float *oNormals   = &originalNormals  [vertex.xref * 3];
-            const float *oTangents  = &originalTangents [vertex.xref * 4];
-            const float *oBinorms   = &originalBinorms  [vertex.xref * 3];
+            const float *pos        = &positions[vertex.xref * 3];
 
             size_t voff = (v * sizeof(vertex_t));
             float uvs[2];
@@ -197,29 +184,18 @@ void saveToSceneT( xatlas::Atlas *atlas,
             memcpy( (char*)scene->vertices + voff + strideOff, pos, sizeof(float) * 3 );
             strideOff +=sizeof(float) * 3;
             memcpy( (char*)scene->vertices + voff + strideOff, uvs, sizeof(float) * 2 );
-            strideOff +=sizeof(float) * 2;
 
-            memcpy( (char*)scene->vertices + voff + strideOff, oPositions, sizeof(float) * 3 );
-            strideOff +=sizeof(float) * 3;
-            memcpy( (char*)scene->vertices + voff + strideOff, oUV       , sizeof(float) * 2 );
-            strideOff +=sizeof(float) * 4;
-            memcpy( (char*)scene->vertices + voff + strideOff, oNormals  , sizeof(float) * 3 );
-            strideOff +=sizeof(float) * 3;
-            memcpy( (char*)scene->vertices + voff + strideOff, oTangents , sizeof(float) * 4 );
-            strideOff +=sizeof(float) * 4;
-            memcpy( (char*)scene->vertices + voff + strideOff, oBinorms  , sizeof(float) * 3 );
-
-            scene->xrefs[v] = vertex.xref;
+            auto lNode = sg.getNode( scene->unchart[vertex.xref].hash );
+            auto gref = lNode->DataRef();
+            auto vdata = sg.get<VData>(gref.vData);
+            vdata->setVUV2s( scene->unchart[vertex.xref].index, V2f{uvs[0], uvs[1]} );
         }
-        for (uint32_t f = 0; f < mesh.indexCount; f += 3) {
-            for (uint32_t j = 0; j < 3; j++) {
-                const uint32_t index = firstVertex + mesh.indexArray[f + j]; // add +1 for obj file indexed
-                scene->indices[f+j] = index;
-            }
+        for (uint32_t f = 0; f < mesh.indexCount; f++) {
+            const uint32_t index = firstVertex + mesh.indexArray[f]; // add +1 for obj file indexed
+            scene->indices[f] = index;
         }
-        firstVertex += mesh.vertexCount;
+        firstVertex += mesh.indexCount;
     }
-
 }
 
 int xatlasParametrize( std::vector<tinyobj::shape_t>& shapes, scene_t* scene ) {
@@ -309,23 +285,24 @@ int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
     // Create single flattened mesh
     xatlas::MeshDecl meshDecl;// = saoToXMesh(source);
     size_t totalVerts = 0;
+    size_t totalIndices = 0;
 
-    std::vector<VertexOffsetScene> unchart;
-
-    size_t currUnchartOffset = 0;
+    size_t vcurrUnchartOffset = 0;
+    size_t icurrUnchartOffset = 0;
     for ( const auto& [k, gg] : nodes ) {
         if ( !gg->empty() ) {
             auto vData = sg.VL().get(gg->Data(0).vData);
-            unchart.emplace_back( gg->UUiD(), currUnchartOffset, vData->numVerts() );
-            currUnchartOffset += vData->numVerts();
-            totalVerts += vData->numIndices();
+            vcurrUnchartOffset += vData->numVerts();
+            icurrUnchartOffset += vData->numIndices();
+            totalVerts += vData->numVerts();
+            totalIndices += vData->numIndices();
+            scene->ggLImap[gg->UUiD()] = sg.VL().get(gg->Data(0).vData);
         }
     }
 
     meshDecl.vertexCount = totalVerts;//source->numVerts();// (int)objMesh.positions.size() / 3;
     meshDecl.vertexPositionStride = sizeof(float) * 3;
     auto totalPosSize = totalVerts*meshDecl.vertexPositionStride;
-    auto tangentStride = sizeof(float) * 4;
     auto posData = new char[totalPosSize];
     meshDecl.vertexPositionData = posData;
     meshDecl.vertexNormalStride = sizeof(float) * 3;
@@ -335,35 +312,26 @@ int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
     auto uvData = new char[totalVerts*meshDecl.vertexUvStride];
     meshDecl.vertexUvData = uvData;
 
-    meshDecl.indexCount = totalVerts;//(int)objMesh.indices.size();
-    auto indicesData = new char[totalVerts*sizeof(uint32_t)]; //objMesh.indices.data();
+    meshDecl.indexCount = totalIndices;//(int)objMesh.indices.size();
+    auto indicesData = new char[totalIndices*sizeof(uint32_t)]; //objMesh.indices.data();
     meshDecl.indexData = indicesData;
     meshDecl.indexFormat = xatlas::IndexFormat::UInt32;
 
-    auto originalPosData   = new char[totalPosSize];
-    auto originalUV        = new char[totalVerts*meshDecl.vertexUvStride];
-    auto originalNormals   = new char[totalPosSize];
-    auto originalTangents  = new char[totalVerts*tangentStride];
-    auto originalBinorms   = new char[totalPosSize];
-
-    size_t currIndexOffset = 0;
+    vcurrUnchartOffset = 0;
+    icurrUnchartOffset = 0;
     for ( const auto& [k, gg] : nodes ) {
         if ( !gg->empty() ) {
             auto mat = gg->getLocalHierTransform();
             auto vData = sg.VL().get(gg->Data(0).vData);
+            auto ghash = gg->UUiD();
 
-            vData->flattenStride( posData + currIndexOffset*meshDecl.vertexPositionStride, 0, mat );
-            vData->flattenStride( uvData+ currIndexOffset*meshDecl.vertexUvStride, 1, mat );
-            vData->flattenStride( normalData+ currIndexOffset*meshDecl.vertexNormalStride, 3, mat );
-            vData->flattenIndices( indicesData+ currIndexOffset*sizeof(uint32_t), currIndexOffset );
+            vData->flattenStride( posData + vcurrUnchartOffset*meshDecl.vertexPositionStride, 0, mat );
+            vData->flattenStride( uvData+ vcurrUnchartOffset*meshDecl.vertexUvStride, 1, mat );
+            vData->flattenStride( normalData+ vcurrUnchartOffset*meshDecl.vertexNormalStride, 3, mat );
+            vData->mapIndices( indicesData, icurrUnchartOffset, vcurrUnchartOffset, ghash, scene->unchart );
 
-            vData->flattenStride( originalPosData  + currIndexOffset*meshDecl.vertexPositionStride, 0 );
-            vData->flattenStride( originalUV       + currIndexOffset*meshDecl.vertexUvStride, 1 );
-            vData->flattenStride( originalNormals  + currIndexOffset*meshDecl.vertexPositionStride, 3 );
-            vData->flattenStride( originalTangents + currIndexOffset * tangentStride, 4 );
-            vData->flattenStride( originalBinorms  + currIndexOffset*meshDecl.vertexPositionStride, 5 );
-
-            currIndexOffset += vData->numIndices();
+            vcurrUnchartOffset += vData->numVerts();
+            icurrUnchartOffset += vData->numIndices();
         }
     }
 
@@ -394,14 +362,7 @@ int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
     printf("   %u total triangles\n", totalFaces);
     printf("%.2f seconds (%g ms) elapsed total\n", globalStopwatch.elapsed() / 1000.0, globalStopwatch.elapsed());
 
-    saveToSceneT( atlas, (float*)posData,
-                            (float*)originalPosData,
-                            (float*)originalUV,
-                            (float*)originalNormals,
-                            (float*)originalTangents,
-                            (float*)originalBinorms,
-    scene );
-    scene->unchart = unchart;
+    saveToSceneT( sg, atlas, (float*)posData, scene );
 
 #ifndef ANDROID
     xatlasDump(atlas);

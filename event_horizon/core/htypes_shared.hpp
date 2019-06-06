@@ -28,6 +28,11 @@ typedef std::pair<unsigned char*, uint64_t> uchar_p;
 typedef std::pair<const unsigned char*, uint64_t> ucchar_p;
 typedef std::pair<std::unique_ptr<uint8_t[]>, uint64_t> uint8_p;
 
+struct HashIndexPairU32 {
+    std::string hash;
+    uint32_t    index;
+};
+
 using StringUniqueCollection = std::unordered_set<std::string>;
 
 enum class TextFormatting {

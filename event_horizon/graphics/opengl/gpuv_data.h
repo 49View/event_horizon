@@ -24,6 +24,8 @@ public:
     bool isEmpty() const;
 
 private:
+    void setupVIO();
+private:
     GLuint vao = 0;
     GLuint vbo = 0;
     GLuint ibo = 0;

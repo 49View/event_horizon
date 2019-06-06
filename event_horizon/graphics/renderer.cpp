@@ -61,7 +61,7 @@ generateGeometryVP( std::shared_ptr<VData> _data ) {
     std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
     auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( _data->numVerts(), PRIMITIVE_TRIANGLES,
                                                                    VFVertexAllocation::PreAllocate, _data->numIndices(),
-                                                                   _indices );
+                                                                   std::move(_indices) );
     for ( int32_t t = 0; t < _data->numVerts(); t++ ) {
         SOAData->addVertex( _data->soaAt(t) );
     }
@@ -311,42 +311,35 @@ void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer&
 
 void Renderer::remapLightmapUVs( const scene_t& scene ) {
 
-    for ( const auto& vo : scene.unchart ) {
-        std::vector<V2f> ev{};
-        std::vector<V3f> pv{};
-        std::vector<size_t> xrefs{};
+    for ( const auto& [k,v] : scene.ggLImap ) {
+        auto vl = generateGeometryVP(v);
+        mVPLMap[k]->updateGPUVData( cpuVBIB{vl} );
+    }
 
-//        auto _indices = std::unique_ptr<uint32_t[]>( new uint32_t[_data->numIndices()] );
-//        std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
-
-        auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( (int32_t)vo.size, PRIMITIVE_TRIANGLES,
-                                                                       VFVertexAllocation::PreAllocate );
-//        for ( size_t t = 0; t < vo.size; t++ ) {
-//            const auto& v = scene.vertices[vo.offset+t];
-//            PUUNTBC p;
-//            p.pos = V3f{ v.p[0], v.p[1], v.p[2] };
+//    for ( const auto& vo : scene.unchart ) {
+//        std::vector<V2f> ev{};
+//        std::vector<V3f> pv{};
+//        std::vector<size_t> xrefs{};
+//
+//        auto _indices = std::unique_ptr<uint32_t[]>( new uint32_t[vo.isize] );
+//        for ( size_t t = 0; t < vo.isize; t++ ) {
+//            _indices[t] = scene.indices[t + vo.ioffset] - vo.ioffset;
+//        }
+//
+//        auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( (int32_t)vo.vsize, PRIMITIVE_TRIANGLES,
+//                                                                       VFVertexAllocation::PreAllocate, (int32_t)vo.isize,
+//                                                                       std::move(_indices) );
+//        for ( size_t t = 0; t < vo.vsize; t++ ) {
+//            const auto& v = scene.vertices[vo.voffset+t];
+//            PUUNTBC p = scene.vertices[vo.voffset+t].orig;
 //            p.a2  = V2f{ v.t[0], v.t[1] };
+//            LOGRS( "UV Index [" << t << "] value: " << p.a2 );
 //
 //            SOAData->addVertex( p );
 //        }
-
-        for ( size_t t = 0; t < vo.size; t++ ) {
-            const auto& v = scene.vertices[vo.offset+t];
-            PUUNTBC p = scene.vertices[vo.offset+t].orig;
-            p.a2  = V2f{ v.t[0], v.t[1] };
-
-            SOAData->addVertex( p );
-        }
-
-        mVPLMap[vo.uuid]->updateGPUVData( cpuVBIB{SOAData} );
-
-//        for ( size_t t = 0; t < vo.size; t++ ) {
-//            const auto& v = scene.vertices[vo.offset+t];
-//            ev.emplace_back( V2f{ v.t[0], v.t[1] } );
-//            pv.emplace_back( V3f{ v.p[0], v.p[1], v.p[2] } );
-//        }
-//        mVPLMap[vo.uuid]->remapUVs( scene.xrefs, pv, ev, 1, vo.offset );
-    }
+//
+//        mVPLMap[vo.uuid]->updateGPUVData( cpuVBIB{SOAData} );
+//    }
 }
 
 void Renderer::changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt ) {

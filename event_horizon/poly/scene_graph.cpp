@@ -335,7 +335,7 @@ void SceneGraph::chartMeshes( scene_t& scene ) {
         if ( !gg->empty() ) {
             auto mat = gg->getLocalHierTransform();
             auto vData = vl.get(gg->Data(0).vData);
-            unchart.emplace_back( gg->UUiD(), currUnchartOffset, vData->numVerts() );
+            unchart.emplace_back( gg->UUiD(), currUnchartOffset, vData->numVerts(), currUnchartOffset, vData->numVerts() );
             currUnchartOffset += vData->numVerts();
             for ( size_t t = 0; t < vData->numVerts(); t++ ) {
                 auto v = vData->vertexAt(t);
@@ -371,7 +371,6 @@ void SceneGraph::chartMeshes( scene_t& scene ) {
     }
 
     xatlasParametrize( shapes, &scene );
-    scene.unchart = unchart;
 //    FM::writeLocalFile("house.obj", ss.str() );
 
 }

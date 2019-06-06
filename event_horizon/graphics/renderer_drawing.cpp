@@ -319,7 +319,7 @@ VPListSP Renderer::drawTriangles(int bucketIndex, const std::vector<Vector3f>& v
                                                                            PRIMITIVE_TRIANGLES,
                                                                            VFVertexAllocation::PreAllocate,
                                                                            static_cast<uint32_t>(indices.size()),
-                                                                           i );
+                                                                           std::move(i) );
 
     for (auto& v : verts) {
         colorStrip->addVertex(v);
@@ -396,7 +396,7 @@ VPListSP Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float
     }
 
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
-                                                                   _verts, _indices );
+                                                                   _verts, std::move(_indices) );
 
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
@@ -417,7 +417,7 @@ VPListSP Renderer::drawDot( int bucketIndex, const Vector3f& center, float radiu
     }
 
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( 4, PRIMITIVE_TRIANGLE_FAN, 4,
-                                                                   _verts, _indices );
+                                                                   _verts, std::move(_indices) );
 
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
@@ -441,7 +441,7 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, float ra
     }
 
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
-                                                                   _verts, _indices );
+                                                                   _verts, std::move(_indices) );
 
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
@@ -466,7 +466,7 @@ VPListSP Renderer::drawCircle2d( int bucketIndex, const Vector2f& center, float 
     }
 
     std::shared_ptr<Pos2dStrip> ps = std::make_shared<Pos2dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
-                                                                   _verts, _indices );
+                                                                   _verts, std::move(_indices) );
 
     auto vp = VPBuilder<Pos2dStrip>{*this,ShaderMaterial{S::COLOR_2D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
@@ -493,7 +493,7 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Ve
     }
 
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>( numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
-                                                                   _verts, _indices );
+                                                                   _verts, std::move(_indices) );
 
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );

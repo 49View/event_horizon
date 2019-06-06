@@ -13,7 +13,7 @@ void Skybox::equirectangularTextureInit( const std::vector<std::string>& params 
     PolyStruct sp = createGeomForCube( Vector3f::ZERO, Vector3f{1.0f} );
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                           sp.numIndices, vpos3d, sp.indices );
+                                                                           sp.numIndices, vpos3d, std::move(sp.indices) );
 
 }
 
@@ -39,7 +39,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                           sp.numIndices, vpos3d, sp.indices );
+                                                                           sp.numIndices, vpos3d, std::move(sp.indices));
 
 
     ShaderMaterial sm = mode == SkyBoxMode::EquirectangularTexture ?
@@ -87,7 +87,7 @@ void CubeEnvironmentMap::init() {
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                           sp.numIndices, vpos3d, sp.indices );
+                                                                           sp.numIndices, vpos3d, std::move(sp.indices));
 
     auto shaderName = InfiniteSkyboxMode() ? S::SKYBOX_CUBEMAP : S::PLAIN_CUBEMAP;
     mVPList = VPBuilder<Pos3dStrip>{rr,ShaderMaterial{shaderName}}.p(colorStrip).n("cubeEnvMap-"+shaderName).build();
@@ -122,7 +122,7 @@ void ConvolutionEnvironmentMap::init() {
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                           sp.numIndices, vpos3d, sp.indices );
+                                                                           sp.numIndices, vpos3d, std::move(sp.indices));
 
     mVPList = VPBuilder<Pos3dStrip>{rr,ShaderMaterial{S::CONVOLUTION}}.p(colorStrip).n("cubeEnvMap").build();
 }
@@ -144,7 +144,7 @@ void PrefilterSpecularMap::init() {
 
     std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF( sp.verts, sp.numVerts );
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>( sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                           sp.numIndices, vpos3d, sp.indices );
+                                                                           sp.numIndices, vpos3d, std::move(sp.indices));
 
     mVPList = VPBuilder<Pos3dStrip>{rr,ShaderMaterial{S::IBL_SPECULAR}}.p(colorStrip).n("iblSpecularEnvMap").build();
 }

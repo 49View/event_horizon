@@ -13,6 +13,10 @@
 #include <render_scene_graph/render_orchestrator.h>
 #include <core/resources/resource_builder.hpp>
 #include <core/math/vector_util.hpp>
+#include <core/lightmap_exchange_format.h>
+#include <graphics/lightmap_manager.hpp>
+
+scene_t scene{0};
 
 void EditorBackEnd::activateImpl() {
 
@@ -21,6 +25,8 @@ void EditorBackEnd::activateImpl() {
 
     backEnd->process_event( OnActivate{} );
 
+    rsg.useSkybox(true);
+    rsg.changeTime("summer noon");
     rsg.setRigCameraController<CameraControlFly>();
     rsg.DC()->setPosition(V3f{ 0.0f, 1.5f, 5.0f});
 
@@ -28,15 +34,15 @@ void EditorBackEnd::activateImpl() {
                            (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
 
 //    rsg.skyBoxDeltaInterpolation()->value = 0.0f;
-//    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.26, GT::Scale( 0.6f ) );
+    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.32, GT::Scale( 0.6f ) );
     sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
 
 //    sg.load<Geom>( "bed", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
-//    sg.load<Geom>( "lauter,selije", [this](HttpResouceCBSign key) {
-//        sg.GB<GT::Asset>( key );
-//    } );
+    sg.load<Geom>( "lauter,selije", [this](HttpResouceCBSign key) {
+        sg.GB<GT::Asset>( key );
+    } );
 
 //    sg.load<Geom>("curtain", [this](HttpResouceCBSign key) {
 //        sg.addNode( key );
@@ -46,6 +52,12 @@ void EditorBackEnd::activateImpl() {
 }
 
 void EditorBackEnd::updateImpl( const AggregatedInputData& _aid ) {
+    if ( _aid.ti.checkKeyToggleOn(GMK_Z) ) {
+        sg.chartMeshes2( scene );
+        LightmapManager::initScene( &scene, rsg.RR());
+        LightmapManager::bake( &scene, rsg.RR());
+        LightmapManager::apply( scene, rsg.RR());
+    }
 }
 
 

@@ -129,7 +129,7 @@ namespace GLTF2Service {
         auto mesh = model->meshes[meshIndex];
         tinygltf::Primitive primitive = mesh.primitives[primitiveIndex];
 
-        geom->fillIndices( fillData<int32_t>( *model, primitive.indices ));
+        geom->fillIndices( fillData<uint32_t>( *model, primitive.indices ));
 
         int64_t NTBFill = 0;
         constexpr uint64_t NORMAL_MASK = 2;

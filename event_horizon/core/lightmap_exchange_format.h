@@ -6,7 +6,11 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+#include <unordered_set>
 #include <core/soa_utils.h>
+
+class VData;
 
 struct vertex_t {
     float p[3];
@@ -16,12 +20,14 @@ struct vertex_t {
 } ;
 
 struct VertexOffsetScene {
-    VertexOffsetScene( const std::string& uuid, size_t offset, size_t size ) : uuid( uuid ), offset( offset ),
-                                                                               size( size ) {}
+    VertexOffsetScene( const std::string& uuid, size_t voffset, size_t vsize, size_t ioffset, size_t isize ) : uuid(
+            uuid ), voffset( voffset ), vsize( vsize ), ioffset( ioffset ), isize( isize ) {}
 
     std::string uuid;
-    size_t offset;
-    size_t size;
+    size_t voffset = 0;
+    size_t vsize = 0;
+    size_t ioffset = 0;
+    size_t isize = 0;
 };
 
 struct scene_t
@@ -40,5 +46,6 @@ struct scene_t
     uint32_t *xrefs;
     unsigned int vertexCount, indexCount;
 
-    std::vector<VertexOffsetScene> unchart;
+    std::unordered_map<uint32_t, HashIndexPairU32> unchart;
+    std::unordered_map<std::string, std::shared_ptr<VData>> ggLImap;
 };

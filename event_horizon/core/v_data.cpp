@@ -17,7 +17,7 @@ void VData::fill( const PolyStruct& ps ) {
     }
 }
 
-void VData::fillIndices( const std::vector<int32_t>& _indices ) {
+void VData::fillIndices( const std::vector<uint32_t>& _indices ) {
     vIndices = _indices;
 }
 
@@ -170,14 +170,14 @@ void VData::mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox
     }
 }
 
-void VData::checkBaricentricCoordsOn( const Vector3f& i, int32_t pIndexStart, int32_t pIndexEnd, int32_t& pIndex,
+void VData::checkBaricentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, uint32_t pIndexEnd, uint32_t& pIndex,
                                       float& u, float& v ) {
     Vector3f a = Vector3f::ZERO;
     Vector3f b = Vector3f::ZERO;
     Vector3f c = Vector3f::ZERO;
-    int32_t vi = pIndexStart;
-    int32_t possibleIndices[256];
-    int32_t pii = 0;
+    uint32_t vi = pIndexStart;
+    uint32_t possibleIndices[256];
+    uint32_t pii = 0;
     pIndex = pIndexStart;
     u = 0.0f;
     v = 0.0f;
@@ -248,7 +248,7 @@ void VData::addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const V
     vIndices.push_back( vIndices.size() );
 }
 
-void VData::add( int32_t _i, const Vector3f& _v, const Vector3f& _n, const Vector2f& _uv, const Vector2f& _uv2,
+void VData::add( uint32_t _i, const Vector3f& _v, const Vector3f& _n, const Vector2f& _uv, const Vector2f& _uv2,
                  const Vector4f& _t, const Vector3f& _b, const Vector4f& _c ) {
     BBox3d().expand(_v);
     vIndices.push_back( _i );
@@ -283,7 +283,7 @@ size_t VData::numIndices() const { return vIndices.size(); }
 
 size_t VData::numVerts() const { return vSoaData.size(); }
 
-const std::vector<int32_t>& VData::getVIndices() const {
+const std::vector<uint32_t>& VData::getVIndices() const {
     return vIndices;
 }
 
@@ -315,7 +315,7 @@ const std::vector<int32_t>& VData::getVIndices() const {
 //    return vColor;
 //}
 
-void VData::setVIndices( const size_t _index, const int32_t& _value ) {
+void VData::setVIndices( const size_t _index, const uint32_t& _value ) {
     vIndices[_index] = _value;
 }
 
@@ -339,9 +339,9 @@ void VData::setVIndices( const size_t _index, const int32_t& _value ) {
 //    vUVs[_index] = _value;
 //}
 //
-//void VData::setVUV2s( const size_t _index, const Vector2f& _value ) {
-//    vUV2s[_index] = _value;
-//}
+void VData::setVUV2s( const size_t _index, const Vector2f& _value ) {
+    vSoaData[_index].a2 = _value;
+}
 //
 //void VData::setVColor( const size_t _index, const Vector4f& _value ) {
 //    vColor[_index] = _value;
@@ -436,9 +436,12 @@ void VData::flattenStride( void* ret, size_t _index, std::shared_ptr<Matrix4f> _
     }
 }
 
-void VData::flattenIndices( void* ret, size_t _startIndex ) {
-    memcpy(ret, vIndices.data(), vIndices.size() * sizeof(uint32_t) );
+void VData::mapIndices( void* ret, uint32_t _startIndex, uint32_t _voffsetIndex,
+                            const std::string& _oRef, std::unordered_map<uint32_t, HashIndexPairU32>& _oMap  ) {
+    auto fill = (uint32_t*)ret;
+    fill += _startIndex;
     for ( size_t t = 0; t < vIndices.size(); t++ ) {
-        ((uint32_t*)(ret))[t] += _startIndex;
+        fill[t] = vIndices[t] + _voffsetIndex;
+        _oMap[_startIndex+t] = { _oRef, vIndices[t] };
     }
 }

@@ -32,15 +32,7 @@ void GPUVData::draw() const {
     }
 }
 
-void GPUVData::updateVBO( cpuVBIB&& _vbib ) {
-    vbib = std::move(_vbib);
-    GLCALL(glBindVertexArray( vao ));
-    GLCALL(glBindBuffer( GL_ARRAY_BUFFER, vbo ));
-    GLCALL(glBufferData( GL_ARRAY_BUFFER, vbib.numVerts * vbib.elenentSize, vbib.bufferVerts.get(), GL_STATIC_DRAW ));
-}
-
-GPUVData::GPUVData( cpuVBIB&& _vbib ) : vbib(std::move(_vbib)) {
-
+void GPUVData::setupVIO() {
     bool bCreate = vao == 0;
     if ( bCreate ) GLCALL(glGenVertexArrays( 1, &vao ));
     GLCALL(glBindVertexArray( vao ));
@@ -58,31 +50,31 @@ GPUVData::GPUVData( cpuVBIB&& _vbib ) : vbib(std::move(_vbib)) {
             uintptr_t offset = vbib.vElementAttrib[t].offset;
             if ( size <= 4 ) {
                 GLCALL(glVertexAttribPointer( attIndex, size, GL_FLOAT, GL_FALSE, stride,
-                                       reinterpret_cast<GLvoid *>( offset )));
+                                              reinterpret_cast<GLvoid *>( offset )));
                 ++attIndex;
             } else {
                 if ( size == 9 ) {
                     GLCALL(glEnableVertexAttribArray( attIndex + 1 ));
                     GLCALL(glEnableVertexAttribArray( attIndex + 2 ));
                     GLCALL(glVertexAttribPointer( attIndex, size / 3, GL_FLOAT, GL_FALSE, stride,
-                                           reinterpret_cast<GLvoid *>( offset + ( 0 * sizeof( float ) * 3 ))));
+                                                  reinterpret_cast<GLvoid *>( offset + ( 0 * sizeof( float ) * 3 ))));
                     GLCALL(glVertexAttribPointer( attIndex + 1, size / 3, GL_FLOAT, GL_FALSE, stride,
-                                           reinterpret_cast<GLvoid *>( offset + ( 1 * sizeof( float ) * 3 ))));
+                                                  reinterpret_cast<GLvoid *>( offset + ( 1 * sizeof( float ) * 3 ))));
                     GLCALL(glVertexAttribPointer( attIndex + 2, size / 3, GL_FLOAT, GL_FALSE, stride,
-                                           reinterpret_cast<GLvoid *>( offset + ( 2 * sizeof( float ) * 3 ))));
+                                                  reinterpret_cast<GLvoid *>( offset + ( 2 * sizeof( float ) * 3 ))));
                     attIndex += 3;
                 } else if ( size == 16 ) {
                     GLCALL(glEnableVertexAttribArray( attIndex + 1 ));
                     GLCALL(glEnableVertexAttribArray( attIndex + 2 ));
                     GLCALL(glEnableVertexAttribArray( attIndex + 3 ));
                     GLCALL(glVertexAttribPointer( attIndex, size / 4, GL_FLOAT, GL_FALSE, stride,
-                                           reinterpret_cast<GLvoid *>( offset + ( 0 * sizeof( float ) * 4 ))));
+                                                  reinterpret_cast<GLvoid *>( offset + ( 0 * sizeof( float ) * 4 ))));
                     GLCALL(glVertexAttribPointer( attIndex + 1, size / 4, GL_FLOAT, GL_FALSE, stride,
-                                           reinterpret_cast<GLvoid *>( offset + ( 1 * sizeof( float ) * 4 ))));
+                                                  reinterpret_cast<GLvoid *>( offset + ( 1 * sizeof( float ) * 4 ))));
                     GLCALL(glVertexAttribPointer( attIndex + 2, size / 4, GL_FLOAT, GL_FALSE, stride,
-                                           reinterpret_cast<GLvoid *>( offset + ( 2 * sizeof( float ) * 4 ))));
+                                                  reinterpret_cast<GLvoid *>( offset + ( 2 * sizeof( float ) * 4 ))));
                     GLCALL(glVertexAttribPointer( attIndex + 3, size / 4, GL_FLOAT, GL_FALSE, stride,
-                                           reinterpret_cast<GLvoid *>( offset + ( 3 * sizeof( float ) * 4 ))));
+                                                  reinterpret_cast<GLvoid *>( offset + ( 3 * sizeof( float ) * 4 ))));
                     attIndex += 4;
                 }
             }
@@ -92,17 +84,29 @@ GPUVData::GPUVData( cpuVBIB&& _vbib ) : vbib(std::move(_vbib)) {
         if ( bCreate ) GLCALL(glGenBuffers( 1, &ibo ));
         GLCALL(glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, ibo ));
         GLCALL(glBufferData( GL_ELEMENT_ARRAY_BUFFER, vbib.numIndices * sizeof( uint32_t ), vbib.bufferIndices.get(),
-                      GL_STATIC_DRAW ));
+                             GL_STATIC_DRAW ));
     }
 
     numIndices = static_cast<GLuint>(vbib.numIndices == 0 ? vbib.numVerts : vbib.numIndices);
     primitveType = primitiveToGl( vbib.primiteType );
 }
 
+void GPUVData::updateVBO( cpuVBIB&& _vbib ) {
+    vbib = std::move(_vbib);
+    setupVIO();
+}
+
+GPUVData::GPUVData( cpuVBIB&& _vbib ) : vbib(std::move(_vbib)) {
+    setupVIO();
+}
+
 void GPUVData::deleteBuffers() {
     GLCALL(glDeleteBuffers( 1, &vbo ));
     GLCALL(glDeleteBuffers( 1, &ibo ));
     GLCALL(glDeleteVertexArrays( 1, &vao ));
+    vao = 0;
+    ibo = 0;
+    vbo = 0;
 }
 
 bool GPUVData::isEmpty() const {

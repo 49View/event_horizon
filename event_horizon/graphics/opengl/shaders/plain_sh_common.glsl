@@ -306,7 +306,7 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = (kD * diffuseV + specular ) * ao;
+vec3 ambient = aoLightmapColor;//(kD * diffuseV + specular ) * ao;
 #else 
 vec3 ambient = kD * diffuseV * visibility * ao;
 #endif
