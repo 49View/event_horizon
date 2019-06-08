@@ -1117,7 +1117,7 @@ macro(set_linker_flags)
         endif ()
     elseif (APPLE)
     elseif (EMSCRIPTEN)
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_ZLIB=1 -s LINKABLE=1 -s SOCKET_DEBUG=1 -lopenal -s ASSERTIONS=1 -s GL_ASSERTIONS=1 -s GL_DEBUG=1")
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s USE_ZLIB=1 -s LINKABLE=1 -s SOCKET_DEBUG=1 -lopenal -s ASSERTIONS=1 -s GL_ASSERTIONS=1 -s GL_DEBUG=1 -s DISABLE_EXCEPTION_CATCHING=0")
         #-s ASSERTIONS=1 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1
     elseif (UNIX)
         set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "--whole-file")
