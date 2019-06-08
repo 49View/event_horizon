@@ -571,8 +571,6 @@ public:
 
 	// helpers
 	void PreCacheBasicLatin();                     // pre cache all the standard basic latin glyphs
-
-	static constexpr float gliphScaler() { return 1.0f/1000.0f; }
 };
 
 // ----- end of TTFCore namespace -----

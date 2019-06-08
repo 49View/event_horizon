@@ -7,6 +7,7 @@
 #include <core/raw_image.h>
 #include <core/image_mapping.hpp>
 #include <graphics/vp_builder.hpp>
+#include <core/font_utils.hpp>
 
 static std::shared_ptr<HeterogeneousMap> mapColor( const Color4f& _matColor ) {
     auto values = std::make_shared<HeterogeneousMap>();
@@ -21,6 +22,39 @@ static std::shared_ptr<HeterogeneousMap> mapTextureAndColor( const std::string& 
     values->assign( UniformNames::opacity, _matColor.w() );
     values->assign( UniformNames::diffuseColor, _matColor.xyz() );
     return values;
+}
+
+template <typename T, typename ...Args>
+std::vector<T> stripInserter( Args&&... targs ) {
+    std::vector<T> ret {};
+
+    auto inbetweenInserter = [&](const std::vector<T>& t ) {
+        if ( t.empty() ) return;
+        if ( !ret.empty() ) ret.push_back( t.front() );
+        inserter( ret, t );
+        ret.push_back( t.back() );
+    };
+    ( inbetweenInserter(std::forward<Args>(targs)), ... );
+
+    ret.pop_back();
+
+    return ret;
+//    v1.push_back(v1.back());
+//    v2.insert(v2.begin(), v2.front());
+//    v2.push_back(v2.back());
+//    v3.insert(v3.begin(), v3.front());
+//    strip_inserter(v1, v2);
+//    inserter(v1, v3);
+
+}
+
+auto Renderer::addVertexStrips( const int bucketIndex, const V3fVector& v1, const V4f& color, const std::string& _name ) {
+    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
+    colorStrip->generateStripsFromVerts( v1, false );
+
+    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    VPL( bucketIndex, vp );
+    return vp;
 }
 
 void Renderer::drawIncGridLines( const int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
@@ -170,6 +204,14 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
     return ret;
 }
 
+VPListSP Renderer::drawRect( const int bi, const Rect2f& r, const Color4f& color, const std::string& _name ) {
+
+    auto ps = std::make_shared<Pos3dStrip>( r, 0.0f );
+    auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
+    VPL( bi, vp );
+    return vp;
+}
+
 VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture,
                          float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
     Rect2f rect{ p1, p2, true };
@@ -203,9 +245,7 @@ VPListSP Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const 
 }
 
 VPListSP Renderer::drawRect2d( const int bucketIndex, const Rect2f& rect, CResourceRef _texture,
-                           float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
-//    QuadVertices2 qvt = textureQuadFillModeMapping( fm, rect, ratio );
-//    auto ps = std::make_shared<PosTex3dStrip>( rect, qvt );
+                               float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
     auto ps = std::make_shared<PosTex3dStrip>( rect, QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS );
     auto vp = VPBuilder<PosTex3dStrip>{*this,ShaderMaterial{S::TEXTURE_2D, mapTextureAndColor(_texture, color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
@@ -218,19 +258,90 @@ VPListSP Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const 
     return drawRect2d( bucketIndex, rect, _texture, ratio, color, fm, _name );
 }
 
-VPListSP Renderer::drawArrow( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color,
-                          float width, float angle, float arrowlength, float _z, float percToBeDrawn,
-                          const std::string& _name1, const std::string& _name2 ) {
+auto createAngleBrackets(  const Vector3f& p1, const Vector3f& p2, float angle, float arrowlength ) {
     std::vector<Vector3f> vlist;
-    Vector2f n = normalize( p2 - p1 );
+    Vector2f n = normalize( p2 - p1 ).xz();
     auto pn1 = rotate( n, angle );
     auto pn2 = rotate( n, -angle );
-    vlist.emplace_back( p1 + pn1 * arrowlength, _z );
-    vlist.emplace_back( p1, _z );
-    vlist.emplace_back( p1 + pn2 * arrowlength, _z );
-    drawLine( bucketIndex, vlist, color, width, false, 0.0f, percToBeDrawn, _name1 );
-    // ### FIXME VP
-    return drawLine( bucketIndex, p1, p2, color, width * 0.75f, false, 0.0f, percToBeDrawn, _name2 );
+    vlist.emplace_back( p1 + XZY::C(pn1 * arrowlength) );
+    vlist.emplace_back( p1 );
+    vlist.emplace_back( p1 + XZY::C(pn2 * arrowlength) );
+    return vlist;
+}
+
+auto creteDoubleArrow( const Vector3f& p1, const Vector3f& p2, float width, float angle, float arrowlength ) {
+    auto vlist = createAngleBrackets( p1, p2, angle, arrowlength );
+    auto vlist2 = createAngleBrackets( p2, p1, -angle, arrowlength );
+
+    auto v1 = extrudePointsWithWidth<ExtrudeStrip>( vlist, width, false );
+    auto v2 = extrudePointsWithWidth<ExtrudeStrip>( vlist2, width, false );
+    auto v3 = extrudePointsWithWidth<ExtrudeStrip>( {p1, p2}, width, false );
+
+    return stripInserter<V3f>(v1, v2, v3);
+}
+
+VPListSP Renderer::drawArrow( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
+        const V4f& color, float width, float angle, float arrowlength, const std::string& _name ) {
+    auto vlist = createAngleBrackets( p1, p2, angle, arrowlength );
+
+    auto v1 = extrudePointsWithWidth<ExtrudeStrip>( vlist, width, false );
+    auto v2 = extrudePointsWithWidth<ExtrudeStrip>( {p1, p2}, width, false );
+
+    return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2), color, _name);
+}
+
+VPListSP Renderer::drawDoubleArrow( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
+                                    const V4f& color, float width, float angle, float arrowlength,
+                                    const std::string& _name ) {
+    return addVertexStrips( bucketIndex, creteDoubleArrow( p1, p2, width, angle, arrowlength ), color, _name);
+}
+
+VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
+                                          const V4f& color, float width, float angle, float arrowlength,
+                                          float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
+                                          const C4f& fontBackGroundColor, const std::string& _name ) {
+
+
+    auto p12n = normalize(p1.xz() - p2.xz());
+    float textAngle = atan2(p12n.y(), p12n.x());
+    V3f sp1 = p1;
+    V3f sp2 = p2;
+    if ( textAngle < -M_PI_2 || textAngle > M_PI_2 ) {
+        p12n *= -1.0f;
+        textAngle += M_PI;
+        sp1 = p2;
+        sp2 = p1;
+    }
+    auto seg90_1 = XZY::C(rotate90(p12n));
+    auto op1 = sp1+seg90_1 * offsetGap;
+    auto op2 = sp2+seg90_1 * offsetGap;
+    auto l1 = extrudePointsWithWidth<ExtrudeStrip>( {sp1, op1}, width, false );
+    auto l2 = extrudePointsWithWidth<ExtrudeStrip>( {sp2, op2}, width, false );
+    auto v1 = extrudePointsWithWidth<ExtrudeStrip>( createAngleBrackets( op1, op2,  angle, arrowlength ), width );
+    auto v2 = extrudePointsWithWidth<ExtrudeStrip>( createAngleBrackets( op2, op1, -angle, arrowlength ), width );
+
+    float measure = JMATH::distance( sp1, sp2 );
+    std::string measureText = floatToDistance(measure);
+    auto textRect = FontUtils::measure(measureText, font, fontHeight );
+    float textSize = (((textRect.width()/measure)*0.5f));
+    auto of1 = sp1+seg90_1 * (offsetGap-textRect.height()*0.5f);
+    auto of2 = sp2+seg90_1 * (offsetGap-textRect.height()*0.5f);
+    auto tdelta = ( 0.5f > textSize ) ? 0.5f - textSize : 1.25f;
+    auto textPos = lerp( tdelta, of2, of1);
+
+    float textOffGap = (textSize*1.35f);
+    V3fVector v3{};
+    V3fVector v4{};
+    if ( textOffGap < 0.5f ) {
+        auto leftLinePos = lerp(0.5f - textOffGap, op2, op1);
+        auto rightLinePos = lerp(0.5f + textOffGap, op2, op1);
+        v3 = extrudePointsWithWidth<ExtrudeStrip>( {leftLinePos, op2}, width, false );
+        v4 = extrudePointsWithWidth<ExtrudeStrip>( {rightLinePos, op1}, width, false );
+    }
+
+    drawText( bucketIndex, measureText, textPos, fontHeight, font, fontColor, textAngle );
+
+    return addVertexStrips( bucketIndex, stripInserter<V3f>(l1, l2, v1, v2, v3, v4), color, _name);
 }
 
 VPListSP Renderer::drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
@@ -243,10 +354,10 @@ VPListSP Renderer::drawLine( int bucketIndex, const Vector3f& p1, const Vector3f
     return drawLine( bucketIndex, vlist, color, width, wrapIt, rotAngle, percToBeDrawn, _name );
 }
 
-VPListSP Renderer::drawLine( int bucketIndex, const std::vector<Vector2f>& verts, float z, const Vector4f& color, float width,
-          bool wrapIt, float rotAngle, float percToBeDrawn, const std::string& _name ) {
+VPListSP Renderer::drawLine( int bucketIndex, const std::vector<Vector2f>& verts, float z, const Vector4f& color,
+                             float width, bool wrapIt, float rotAngle, float percToBeDrawn, const std::string& _name ) {
     std::vector<Vector3f> vlist;
-    for ( auto& v : verts ) vlist.push_back( { v, z } );
+    for ( auto& v : verts ) vlist.emplace_back( v, z );
     return drawLine( bucketIndex, vlist, color, width, wrapIt, rotAngle, percToBeDrawn, _name );
 }
 
@@ -499,9 +610,13 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Ve
 }
 
 void Renderer::drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
-                         std::shared_ptr<Font> font, const Color4f& color ) {
+                         const Font* font, const Color4f& color, float angle ) {
     Vector2f cursor = Vector2f::ZERO;
-    for ( char i : text ) {
+    auto frect = font->GetMasterRect();
+    V3f fscale{ 1.0f/(frect.z - frect.x), 1.0f, 1.0f/(frect.w - frect.y) };
+
+    for ( size_t t = 0; t < text.size(); t++ ) {
+        char i = text[t];
         Utility::TTF::CodePoint cp( static_cast<Utility::TTFCore::ulong>(i));
         const Utility::TTF::Mesh& m = font->GetTriangulation( cp );
 
@@ -518,13 +633,20 @@ void Renderer::drawText( int bucketIndex, const std::string& text, const V3f& po
                 ps->addVertex( XZY::C( p3 + cursor ), m.verts[t+1].texCoord, m.verts[t+1].coef );
             }
 
-            auto trams = std::make_shared<Matrix4f>(pos, Vector3f::ZERO, V3f{scale * Font::gliphScaler()} * V3f{1.0f, -1.0f, -1.0f} );
-            auto vp = VPBuilder<FontStrip>{*this,ShaderMaterial{S::FONT, mapColor(color)}}.p(ps).t(trams).n(text).build();
+            auto trams = std::make_shared<Matrix4f>(pos,
+                    V3f::Y_AXIS * angle,
+                    fscale * V3f{1.0f, -1.0f, -1.0f} * scale );
+            auto vp = VPBuilder<FontStrip>{*this,ShaderMaterial{S::FONT, mapColor(color)}}.
+                                            p(ps).t(trams).n(text).
+                                            build();
             VPL( bucketIndex, vp );
         }
 
-        Utility::TTFCore::vec2f kerning = font->GetKerning( Utility::TTF::CodePoint( i ), cp );
-        Vector2f nextCharPos = V2f( kerning.x, kerning.y );
-        cursor += nextCharPos;
+        if ( t < text.size() - 1 ) {
+            Utility::TTFCore::vec2f kerning = font->GetKerning( cp, Utility::TTF::CodePoint( text[t+1] ) );
+            Vector2f nextCharPos = V2f( kerning.x, kerning.y );
+            cursor += nextCharPos;
+        }
     }
 }
+

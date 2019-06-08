@@ -323,7 +323,7 @@ void UIShapeBuilder::assemble() {
             break;
         case UIShapeType::Text2d:
         case UIShapeType::Text3d: {
-            Rect2f textRectOffset = FontUtils::measure( title, sg.FM().get(fontName), fontHeight );
+            Rect2f textRectOffset{FontUtils::measure( title, sg.FM().get(fontName).get(), fontHeight )};
             orig += Vector2f( -textRectOffset.left(), -textRectOffset.top());
             if ( textAlignment == UiControlFlag::TextAlignRight && size.x() > textRectOffset.width() ) {
                 orig.setX( size.x() - textRectOffset.width() + orig.x() );

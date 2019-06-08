@@ -179,6 +179,7 @@ protected:
 	template <typename V> friend class VPBuilder;
 
 public:
+    auto addVertexStrips( int bucketIndex, const V3fVector& v1, const V4f& color, const std::string& _name = "");
 
 	void drawIncGridLines( int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
 						   const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
@@ -191,9 +192,11 @@ public:
     std::vector<VPListSP> createGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
                      const Vector2f& limits, float axisSize, const std::string& _name = "" );
     VPListSP
-	drawArrow( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Vector4f& color, float width,
-			   float angle, float arrowlength, float _z, float percToBeDrawn, const std::string& _name1,
-			   const std::string& _name2 );
+	drawArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
+			   float angle, float arrowlength, const std::string& _name = "" );
+    VPListSP
+    drawDoubleArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
+               float angle, float arrowlength, const std::string& _name = "" );
 
     VPListSP drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
 				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
@@ -236,7 +239,9 @@ public:
 				   float size, const std::string& _name = "" );
 
     void drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
-                   std::shared_ptr<Font> font, const Color4f& color );
+                   const Font* font, const Color4f& color, float angle = 0.0f );
+
+    VPListSP drawRect( int bi, const Rect2f& r, const Color4f& color, const std::string& _name = {} );
 
     VPListSP drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
                    const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
@@ -249,4 +254,9 @@ public:
     VPListSP drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
                    const std::string& _name = {} );
     VPListSP drawRect2d( int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name = {} );
+
+    VPListSP drawMeasurementArrow1( int bucketIndex, const Vector3f& p1, const Vector3f& p2,
+                                    const V4f& color, float width, float angle, float arrowlength,
+                                    float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
+                                    const C4f& fontBackGroundColor, const std::string& _name = {} );
 };

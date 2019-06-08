@@ -668,7 +668,7 @@ struct XZY {
 };
 
 template <typename T>
-std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, float width, bool wrapIt )  {
+std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, float width, bool wrapIt = false )  {
     ASSERT( va.size() > 1 );
 
     Vector3f v1;

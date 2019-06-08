@@ -251,6 +251,11 @@ T getRightVectorFromList( const std::vector<T>& va, int64_t m, bool wrapIt ) {
 }
 
 template<typename T>
+void inserter( std::vector<T>& dest, const std::vector<T>& source ) {
+    dest.insert(std::end(dest), std::begin(source), std::end(source));
+}
+
+template<typename T>
 bool inRange( const T _key, const std::pair<T,T>& _range ) {
 	return _range.first <= _key && _range.second >= _key;
 }
