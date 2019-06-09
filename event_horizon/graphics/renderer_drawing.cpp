@@ -297,9 +297,9 @@ VPListSP Renderer::drawDoubleArrow( const int bucketIndex, const Vector3f& p1, c
 }
 
 VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
-                                          const V4f& color, float width, float angle, float arrowlength,
-                                          float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
-                                          const C4f& fontBackGroundColor, const std::string& _name ) {
+                                           const V4f& color, float width, float angle, float arrowlength,
+                                           float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
+                                           const C4f& fontBackGroundColor, const std::string& _name ) {
 
 
     auto p12n = normalize(p1.xz() - p2.xz());
@@ -342,6 +342,51 @@ VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f&
     drawText( bucketIndex, measureText, textPos, fontHeight, font, fontColor, textAngle );
 
     return addVertexStrips( bucketIndex, stripInserter<V3f>(l1, l2, v1, v2, v3, v4), color, _name);
+}
+
+VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
+                                          const V2f& p12n, const Vector3f& op1, const Vector3f& op2,
+                                          const V4f& color, float width, float angle, float arrowlength,
+                                          float minDistance, const Font* font, float fontHeight, const C4f& fontColor,
+                                          const C4f& fontBackGroundColor, const std::string& _name ) {
+
+    if ( distance( p1, p2 ) < minDistance ) { return nullptr; }
+    float textAngle = atan2(p12n.y(), p12n.x());
+    auto seg90_1 = XZY::C(rotate90(p12n));
+    auto v1 = extrudePointsWithWidth<ExtrudeStrip>( createAngleBrackets( p1, p2,  angle, arrowlength ), width );
+    auto v2 = extrudePointsWithWidth<ExtrudeStrip>( createAngleBrackets( p2, p1, -angle, arrowlength ), width );
+
+    float measure = JMATH::distance( p1, p2 );
+    std::string measureText = floatToDistance(measure);
+    auto textRect = FontUtils::measure(measureText, font, fontHeight );
+    float textSize = (((textRect.width()/measure)*0.5f));
+    auto of1 = p1 - seg90_1 * (textRect.height()*0.5f);
+    auto of2 = p2 - seg90_1 * (textRect.height()*0.5f);
+    auto tdelta = ( 0.5f > textSize ) ? 0.5f - textSize : 1.25f;
+    auto oti1 = of1;
+    auto oti2 = of2;
+    if ( of1.x() == of2.x() ) {
+        if ( of1.z() < of2.z()) { std::swap( oti1, oti2 ); }
+    } else if ( of1.y() == of2.y() ) {
+        if ( of1.x() > of2.x() ) { std::swap( oti1, oti2 ); }
+    }
+    auto textPos = lerp( tdelta, oti1, oti2);
+
+    float textOffGap = (textSize*1.15f);
+    V3fVector v3{};
+    V3fVector v4{};
+    if ( textOffGap < 0.5f ) {
+        auto leftLinePos = lerp(0.5f - textOffGap, p2, p1);
+        auto rightLinePos = lerp(0.5f + textOffGap, p2, p1);
+        v3 = extrudePointsWithWidth<ExtrudeStrip>( {leftLinePos, p2}, width, false );
+        v4 = extrudePointsWithWidth<ExtrudeStrip>( {rightLinePos, p1}, width, false );
+        drawText( bucketIndex, measureText, textPos, fontHeight, font, fontColor, textAngle );
+    }
+
+    auto v5 = extrudePointsWithWidth<ExtrudeStrip>( { p1, op1}, width*0.75f );
+    auto v6 = extrudePointsWithWidth<ExtrudeStrip>( { p2, op2}, width*0.75f );
+
+    return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2, v3, v4, v5, v6), color, _name);
 }
 
 VPListSP Renderer::drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,

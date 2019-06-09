@@ -242,16 +242,23 @@ public:
 	}
 
 	bool operator==( const Rect2f& rhs ) const {
-		if ( bottomLeft() != rhs.bottomLeft() || topRight() != rhs.topRight() ) return false;
-		return true;
-	}
+        return !( bottomLeft() != rhs.bottomLeft() || topRight() != rhs.topRight());
+    }
 
 	bool operator!=( const Rect2f& rhs ) const {
-		if ( bottomLeft() == rhs.bottomLeft() && topRight() == rhs.topRight() ) return false;
-		return true;
-	}
+        return !( bottomLeft() == rhs.bottomLeft() && topRight() == rhs.topRight());
+    }
 
-	Rect2f operator*( float rhs ) const {
+    float operator[]( const unsigned int rhs ) const {
+        ASSERT(rhs < 4 );
+        if ( rhs == 0 ) return left();
+        if ( rhs == 1 ) return right();
+        if ( rhs == 2 ) return top();
+        if ( rhs == 3 ) return bottom();
+        return left();
+    }
+
+    Rect2f operator*( float rhs ) const {
 		return Rect2f( left()*rhs, top()*rhs, right()*rhs, bottom()*rhs );
 	}
 

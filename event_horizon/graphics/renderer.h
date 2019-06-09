@@ -259,4 +259,9 @@ public:
                                     const V4f& color, float width, float angle, float arrowlength,
                                     float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
+    VPListSP drawMeasurementArrow2( int bucketIndex, const Vector3f& p1, const Vector3f& p2,
+                                    const V2f& p12n, const Vector3f& op1, const Vector3f& op2,
+                                    const V4f& color, float width, float angle, float arrowlength,
+                                    float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
+                                    const C4f& fontBackGroundColor, const std::string& _name = {} );
 };

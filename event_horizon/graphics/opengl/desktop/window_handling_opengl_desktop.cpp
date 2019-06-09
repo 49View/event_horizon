@@ -19,7 +19,7 @@ namespace WindowHandling {
     void initializeWindow( uint64_t flags, Renderer& rr ) {
         LOGR( "--- Initialising Graphics ---" );
 
-        glfwWindowHint( GLFW_SAMPLES, 16 );
+        glfwWindowHint( GLFW_SAMPLES, 4 );
         glfwWindowHint( GLFW_SRGB_CAPABLE, GLFW_TRUE );
 
         if ( !glfwInit() ) {
