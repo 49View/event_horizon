@@ -322,6 +322,20 @@ inline bool isbetween( V x, V a, V b ) {
 	return !( x > a && x > b ) && !( x < a && x < b );
 }
 
+template<typename V>
+inline bool isbetween( const V& x, const std::pair<V,V>& range ) {
+    return ( x > range.first && x < range.second );
+}
+
+template<typename V>
+inline bool isOverlapping( const std::pair<V,V>& range1, const std::pair<V,V>& range2 ) {
+    if ( isbetween( range1.first,  range2 ) ) return true;
+    if ( isbetween( range1.second, range2 ) ) return true;
+    if ( isbetween( range2.first,  range1 ) ) return true;
+    if ( isbetween( range2.second, range1 ) ) return true;
+    return false;
+}
+
 template<typename V, typename T>
 inline V interpolate( V a, V b, T t ) {
 	return ( b - a ) * t + a;
