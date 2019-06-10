@@ -50,6 +50,7 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
                         }
                     }
                 }
+//                if ( path->closed ) lPath.push_back(lPath.front());
                 mPaths.push_back( lPath );
             }
         }
@@ -65,7 +66,7 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
         mTotalBBox = lTotalbbox.size();
 
         mPoints = sanitizePath( rawPoints, true, 0.0001f * 0.0001f );
-        ASSERT( mPoints.size() > 2 );
+//        ASSERT( mPoints.size() > 2 );
         mPoints = forceWindingOrder( mPoints, WindingOrder::CCW );
         for ( auto& p : mPoints ) {
             p.setY( lbbox.height() - p.y());
@@ -96,7 +97,7 @@ void Profile::calculatePerimeter() {
 		mLengths.push_back( mPerimeter );
 	}
 
-	ASSERT( mPerimeter > 0.0f );
+//	ASSERT( mPerimeter > 0.0f );
 	// Normalise distances
 //	for ( auto&& l : mLenghts ) {
 //		l /= mPerimeter;

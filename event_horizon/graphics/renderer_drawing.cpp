@@ -24,17 +24,32 @@ static std::shared_ptr<HeterogeneousMap> mapTextureAndColor( const std::string& 
     return values;
 }
 
+template <typename T>
+auto inBetweenInserterFunc( std::vector<T>& ret, const std::vector<T>& t) {
+    if ( t.empty() ) return;
+    if ( !ret.empty() ) ret.push_back( t.front() );
+    inserter( ret, t );
+    ret.push_back( t.back() );
+}
+
 template <typename T, typename ...Args>
 std::vector<T> stripInserter( Args&&... targs ) {
     std::vector<T> ret {};
 
-    auto inbetweenInserter = [&](const std::vector<T>& t ) {
-        if ( t.empty() ) return;
-        if ( !ret.empty() ) ret.push_back( t.front() );
-        inserter( ret, t );
-        ret.push_back( t.back() );
-    };
-    ( inbetweenInserter(std::forward<Args>(targs)), ... );
+    ( inBetweenInserterFunc(ret, std::forward<Args>(targs)), ... );
+
+    ret.pop_back();
+
+    return ret;
+}
+
+template <typename T>
+std::vector<T> stripInserter( const std::vector<std::vector<T>> sources ) {
+    std::vector<T> ret {};
+
+    for ( const auto& s : sources ) {
+        inBetweenInserterFunc(ret, s );
+    }
 
     ret.pop_back();
 
@@ -418,15 +433,12 @@ VPListSP Renderer::drawLines( int bucketIndex, const V2fVectorOfVector& verts, c
 
     V3fVectorOfVector allVLists;
     for ( const auto& lines : verts ) {
-        allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( XZY::C(lines), width, false ) );
+        if ( lines.size() > 1 ) {
+            allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( XZY::C(lines), width, false ) );
+        }
     }
 
-    V3fVector tristrip{};
-    for ( const auto& av : allVLists ) {
-        auto na = stripInserter<V3f>(av);
-        tristrip.insert( tristrip.end(), na.begin(), na.end() );
-    }
-    return addVertexStrips( bucketIndex, tristrip, color, mat, _name);
+    return addVertexStrips( bucketIndex, stripInserter<V3f>(allVLists), color, mat, _name);
 }
 
 VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
