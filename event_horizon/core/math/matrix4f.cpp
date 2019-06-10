@@ -154,4 +154,12 @@ Matrix4f::Matrix4f( const MatrixAnim& rts ) {
 	*this = mscale * mrot * mpos;
 }
 
+Matrix4f::Matrix4f( const Vector3f& pos, const Quaternion& axis, const Vector3f& zoom ) {
+    Matrix4f mpos = Matrix4f{ pos };
+    Matrix4f mscale = Matrix4f::IDENTITY;
+    Matrix4f mrot{ axis };
+    mscale.scale( zoom );
+
+    *this = mscale * mrot * mpos;
+}
 

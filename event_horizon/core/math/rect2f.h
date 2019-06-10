@@ -31,6 +31,7 @@ class Rect2f {
 public:
 
 	static const Rect2f IDENTITY;
+	static const Rect2f IDENTITY_CENTERED;
 	static const Rect2f INVALID;
 	static const Rect2f ZERO;
 

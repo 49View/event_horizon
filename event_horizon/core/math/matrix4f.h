@@ -59,7 +59,7 @@ public:
 	}
 
 	Matrix4f( const MatrixAnim& rts );
-
+    Matrix4f( const Vector3f& pos, const Quaternion& axis, const Vector3f& zoom );
 	// This just sets the translation
 	Matrix4f( const Vector3f& row3 ) {
 		mRows[0] = Matrix4f::IDENTITY.getRow( 0 );

@@ -561,4 +561,5 @@ bool isPointInsideLineCapsule( const Vector2f& p, const Vector2f& p1, const Vect
 void straightenOnMainAxis( Vector2f& a, Vector2f& b, float straightCoeff );
 void removeCollinear( vector2fList& cs, float epsilon );
 bool pointWithinSegment( const V2f& p, const V2f& p1, const V2f& p2 );
+float getAreaOf( const std::vector<Triangle2d>& tris );
 

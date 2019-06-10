@@ -254,3 +254,21 @@ bool intersection(const V2f& p, const V2f& p2, const V2f& q, const V2f& q2, Vect
     // 5. Otherwise, the two line segments are not parallel but do not intersect.
     return false;
 }
+
+float getAreaOf( const std::vector<Triangle2d>& tris ) {
+    float ret = 0.0f;
+    for ( const auto& tr : tris ) {
+        auto l1 = std::get<0>(tr);
+        auto l2 = std::get<1>(tr);
+        auto l3 = std::get<2>(tr);
+
+        float d1 = distance(l1,l2);
+        float d2 = distance(l1,l3);
+        float d3 = distance(l3,l2);
+
+        float s = (d1 + d2 + d3) / 2.0f;
+
+        ret += sqrt((s*(s-d1))*((s-d2))*((s-d3)));
+    }
+    return ret;
+}

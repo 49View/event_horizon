@@ -179,8 +179,8 @@ protected:
 	template <typename V> friend class VPBuilder;
 
 public:
-    auto addVertexStrips( int bucketIndex, const V3fVector& v1, const V4f& color, const std::string& _name = "");
-
+    auto addVertexStrips( int bucketIndex, const V3fVector& v1, const V4f& color,
+                          const Matrix4f& mat = Matrix4f::IDENTITY, const std::string& _name = "");
 	void drawIncGridLines( int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
 						   const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
 						   float zoffset, const std::string& _name = "" );
@@ -207,6 +207,8 @@ public:
     VPListSP drawLine( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
 				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
 				   const std::string& _name = "" );
+    VPListSP drawLines( int bucketIndex, const V2fVectorOfVector& verts, const Vector4f& color, float width,
+                        const Matrix4f& mat = Matrix4f::IDENTITY, const std::string& _name = {} );
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
 					   const std::string& _name = "" );
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,

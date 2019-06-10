@@ -31,6 +31,7 @@ public:
     }
     VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
     VPBuilder& t( std::shared_ptr<Matrix4f> _t ) { transformMatrix = _t; return *this; }
+    VPBuilder& t( const Matrix4f& _t ) { transformMatrix = std::make_shared<Matrix4f>(_t); return *this; }
 
     auto build() {
         if ( bStraightRef ) {

@@ -1,6 +1,7 @@
 #include "rect2f.h"
 
 const JMATH::Rect2f JMATH::Rect2f::IDENTITY = Rect2f( 0.0f, 0.0f, 1.0f, 1.0f );
+const JMATH::Rect2f JMATH::Rect2f::IDENTITY_CENTERED = Rect2f( -0.5f, -0.5f, 0.5f, 0.5f );
 const JMATH::Rect2f JMATH::Rect2f::ZERO = Rect2f( 0.0f, 0.0f, 0.0f, 0.0f );
 const JMATH::Rect2f JMATH::Rect2f::INVALID = Rect2f( std::numeric_limits<float>::max(),
 													 std::numeric_limits<float>::max(),

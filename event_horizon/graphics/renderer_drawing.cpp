@@ -39,20 +39,15 @@ std::vector<T> stripInserter( Args&&... targs ) {
     ret.pop_back();
 
     return ret;
-//    v1.push_back(v1.back());
-//    v2.insert(v2.begin(), v2.front());
-//    v2.push_back(v2.back());
-//    v3.insert(v3.begin(), v3.front());
-//    strip_inserter(v1, v2);
-//    inserter(v1, v3);
-
 }
 
-auto Renderer::addVertexStrips( const int bucketIndex, const V3fVector& v1, const V4f& color, const std::string& _name ) {
+auto Renderer::addVertexStrips( const int bucketIndex, const V3fVector& v1, const V4f& color, const Matrix4f& mat,
+                                const std::string& _name ) {
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
     colorStrip->generateStripsFromVerts( v1, false );
 
-    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
+    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.
+                                   t(mat).p(colorStrip).n(_name).build();
     VPL( bucketIndex, vp );
     return vp;
 }
@@ -287,13 +282,13 @@ VPListSP Renderer::drawArrow( const int bucketIndex, const Vector3f& p1, const V
     auto v1 = extrudePointsWithWidth<ExtrudeStrip>( vlist, width, false );
     auto v2 = extrudePointsWithWidth<ExtrudeStrip>( {p1, p2}, width, false );
 
-    return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2), color, _name);
+    return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2), color, Matrix4f::IDENTITY, _name);
 }
 
 VPListSP Renderer::drawDoubleArrow( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
                                     const V4f& color, float width, float angle, float arrowlength,
                                     const std::string& _name ) {
-    return addVertexStrips( bucketIndex, creteDoubleArrow( p1, p2, width, angle, arrowlength ), color, _name);
+    return addVertexStrips( bucketIndex, creteDoubleArrow( p1, p2, width, angle, arrowlength ), color, Matrix4f::IDENTITY, _name);
 }
 
 VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
@@ -341,7 +336,7 @@ VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f&
 
     drawText( bucketIndex, measureText, textPos, fontHeight, font, fontColor, textAngle );
 
-    return addVertexStrips( bucketIndex, stripInserter<V3f>(l1, l2, v1, v2, v3, v4), color, _name);
+    return addVertexStrips( bucketIndex, stripInserter<V3f>(l1, l2, v1, v2, v3, v4), color, Matrix4f::IDENTITY, _name);
 }
 
 VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
@@ -386,7 +381,7 @@ VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f&
     auto v5 = extrudePointsWithWidth<ExtrudeStrip>( { p1, op1}, width*0.75f );
     auto v6 = extrudePointsWithWidth<ExtrudeStrip>( { p2, op2}, width*0.75f );
 
-    return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2, v3, v4, v5, v6), color, _name);
+    return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2, v3, v4, v5, v6), color, Matrix4f::IDENTITY, _name);
 }
 
 VPListSP Renderer::drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
@@ -416,6 +411,22 @@ VPListSP Renderer::drawLine( int bucketIndex, const std::vector<Vector3f>& verts
     auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
     VPL( bucketIndex, vp );
     return vp;
+}
+
+VPListSP Renderer::drawLines( int bucketIndex, const V2fVectorOfVector& verts, const Vector4f& color, float width,
+                              const Matrix4f& mat, const std::string& _name ) {
+
+    V3fVectorOfVector allVLists;
+    for ( const auto& lines : verts ) {
+        allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( XZY::C(lines), width, false ) );
+    }
+
+    V3fVector tristrip{};
+    for ( const auto& av : allVLists ) {
+        auto na = stripInserter<V3f>(av);
+        tristrip.insert( tristrip.end(), na.begin(), na.end() );
+    }
+    return addVertexStrips( bucketIndex, tristrip, color, mat, _name);
 }
 
 VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,

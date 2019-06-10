@@ -132,5 +132,4 @@ float degToRad() {
 	return ( M_PI / 180.0f );
 }
 
-
 }

@@ -415,4 +415,4 @@ public:
 Quaternion operator*( float s, const Quaternion& q );
 
 Quaternion quatCompose( const Vector3f& a );
-
+Quaternion quatFromAxis( const Vector4f& w );

@@ -58,6 +58,8 @@ public:
 	Vector3f Normal() const { return mNormal; }
 	void Normal( Vector3f val ) { mNormal = val; }
 
+	const V2fVectorOfVector& Paths() const { return mPaths; }
+
     static std::shared_ptr<Profile> makeLine(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
     static std::shared_ptr<Profile> makeWire(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
 
@@ -68,11 +70,13 @@ private:
 	void calcBBox();
 
 private:
-	Vector2f				mBBox = Vector2f::ZERO;
-	std::vector<Vector2f>	mPoints;
+	V2f		        		mBBox = V2f::ZERO;
+	V2f                     mTotalBBox = V2f::ZERO;
+	V2fVector	            mPoints;
 	std::vector<float>		mLengths;
 	float					mPerimeter = 0.0f;
-	Vector3f				mNormal = Vector3f::X_AXIS;
+	V3f	        			mNormal = V3f::X_AXIS;
+	V2fVectorOfVector       mPaths;
 };
 
 class ProfileMaker {

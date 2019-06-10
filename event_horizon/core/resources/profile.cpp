@@ -24,29 +24,45 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
         NSVGimage* image = nsvgParse( reinterpret_cast<char *>(prof.get()), "pc", 96 );
         mBBox = { image->width, image->height };
         Rect2f lbbox = Rect2f::INVALID;
+        Rect2f lTotalbbox = Rect2f::INVALID;
         std::vector<Vector2f> rawPoints;
         // #### NDDADO: we fix subDivs=0 because it's dangerous to interpolate bezier paths when you need total accuracy
         // on connecting profiles with straight elements (IE think about a flat wall)
         int subDivs = 0;
         for ( auto shape = image->shapes; shape != NULL; shape = shape->next ) {
-            if ( shape->next != nullptr ) continue;
+//            if ( shape->next != nullptr ) continue;
             for ( auto path = shape->paths; path != NULL; path = path->next ) {
+                V2fVector lPath{};
                 for ( auto i = 0; i < path->npts - 1; i += 3 ) {
                     float *p = &path->pts[i * 2];
                     for ( int s = 0; s < subDivs + 1; s++ ) {
                         float t = s / static_cast<float>(subDivs + 1);
                         Vector2f pi = interpolateBezier( Vector2f{ p[0], p[1] }, Vector2f{ p[2], p[3] },
                                                          Vector2f{ p[4], p[5] }, Vector2f{ p[6], p[7] }, t );
-                        pi -= Vector2f{ path->bounds[0], path->bounds[1] };
-                        pi *= 0.01f;
-                        rawPoints.push_back( pi );
-                        lbbox.expand( pi );
+                        lPath.emplace_back( pi );
+                        lTotalbbox.expand(pi);
+                        // NDDADO in case of profile path just add the last one, we should clearly change it!
+                        if ( shape->next == nullptr ) {
+                            pi -= Vector2f{ path->bounds[0], path->bounds[1] };
+                            pi *= 0.01f;
+                            rawPoints.push_back( pi );
+                            lbbox.expand( pi );
+                        }
                     }
                 }
+                mPaths.push_back( lPath );
             }
         }
         rawPoints.pop_back();
         nsvgDelete( image );
+
+        for ( auto& ps : mPaths ) {
+            for ( auto& pp : ps ) {
+                pp -= lTotalbbox.centre();
+                pp /= lTotalbbox.size();
+            }
+        }
+        mTotalBBox = lTotalbbox.size();
 
         mPoints = sanitizePath( rawPoints, true, 0.0001f * 0.0001f );
         ASSERT( mPoints.size() > 2 );
