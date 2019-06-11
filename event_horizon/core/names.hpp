@@ -42,6 +42,7 @@ namespace S {
     const std::string DEBUG_UV = "debug_uv";
 
     const std::string WHITE_PBR = "white_pbr";
+    const std::string SQUARE = "square";
 
     const std::string DEFAULT_FONT = "amaranth";
 

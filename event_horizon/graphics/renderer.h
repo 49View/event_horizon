@@ -43,6 +43,28 @@ namespace FBNames {
 	bool isPartOf( const std::string& _val );
 }
 
+struct RendererDrawingSet {
+    int bucketIndex = -1;
+    bool wrapIt = false;
+    V3fVector verts;
+    V3fVectorOfVector multiVerts;
+    C4f color = C4f::WHITE;
+    float width = 0.1f;
+    std::string name{};
+    Matrix4f matrix{Matrix4f::IDENTITY};
+    Matrix4f preMultMatrix{Matrix4f::IDENTITY};
+    bool usePreMult = false;
+};
+
+struct RDSPreMult {
+    template<typename ...Args>
+    explicit RDSPreMult( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    Matrix4f operator()() const noexcept {
+        return data;
+    }
+    Matrix4f data;
+};
+
 using CommandBufferLimitsT = int;
 
 class RenderAnimationManager {
@@ -198,10 +220,7 @@ public:
     drawDoubleArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
                float angle, float arrowlength, const std::string& _name = "" );
 
-    VPListSP drawLineFinal( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
-                            const Matrix4f& mat, bool wrapiIt, const std::string& _name );
-    VPListSP drawLines( int bucketIndex, const V2fVectorOfVector& verts, const Vector4f& color, float width,
-                        const Matrix4f& mat = Matrix4f::IDENTITY, const std::string& _name = {} );
+    VPListSP drawLineFinal( RendererDrawingSet& rds );
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
 					   const std::string& _name = "" );
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
@@ -260,16 +279,6 @@ public:
                                     float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
 
-    struct RendererDrawingSet {
-        int bucketIndex = -1;
-        bool wrapIt = false;
-        std::vector<V3f> verts;
-        C4f color = C4f::WHITE;
-        float width = 0.1f;
-        std::string name{};
-        Matrix4f matrix{Matrix4f::IDENTITY};
-    };
-
     template<typename M>
     void addRendererDrawingSetParam( RendererDrawingSet& rds, const M& _param ) {
         if constexpr ( std::is_same_v<M, int> ) {
@@ -280,7 +289,7 @@ public:
             rds.wrapIt = _param;
             return;
         }
-        if constexpr ( std::is_same_v<M, std::vector<V3f>> ) {
+        if constexpr ( std::is_same_v<M, V3fVector> ) {
             rds.verts = _param;
             return;
         }
@@ -304,6 +313,20 @@ public:
             rds.verts.emplace_back( _param );
             return;
         }
+        if constexpr ( std::is_same_v<M, V3f> ) {
+            rds.verts.emplace_back( _param );
+            return;
+        }
+        if constexpr ( std::is_same_v<M, RDSPreMult> ) {
+            rds.usePreMult = true;
+            rds.preMultMatrix = _param();
+            return;
+        }
+        if constexpr ( std::is_same_v<M, V3fVectorOfVector> ) {
+            rds.multiVerts = _param;
+            return;
+        }
+
     }
 
     template <typename ...Args>
@@ -312,6 +335,6 @@ public:
 
         (addRendererDrawingSetParam( rds, std::forward<Args>( args )), ...);
 
-        return drawLineFinal( rds.bucketIndex, rds.verts, rds.color, rds.width, rds.matrix, rds.wrapIt, rds.name );
+        return drawLineFinal( rds );
     }
 };

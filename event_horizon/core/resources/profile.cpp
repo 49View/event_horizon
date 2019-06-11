@@ -79,6 +79,20 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
     calculatePerimeter();
 }
 
+V3fVectorOfVector Profile::Paths3d() const {
+    V3fVectorOfVector ret;
+
+    for ( const auto& path : mPaths ) {
+        V3fVector vv;
+        for ( const auto pp : path ) {
+            vv.emplace_back( XZY::C(pp) );
+        }
+        ret.emplace_back(vv);
+    }
+
+    return ret;
+}
+
 std::vector<Vector3f> Profile::Points3d( const Vector3f & /*mainAxis*/ ) const {
 	std::vector<Vector3f> ret;
 	for ( auto& p : mPoints ) {
@@ -147,6 +161,8 @@ void Profile::createRect( const Vector2f& size, WindingOrderT wo ) {
 	}
 	// In this case the bbox is the same as the rect's size
 	mBBox = size;
+    mTotalBBox = mBBox;
+    mPaths.push_back(mPoints);
 
 	calculatePerimeter();
 }
@@ -159,6 +175,8 @@ void Profile::createRect( const JMATH::Rect2f& _rect ) {
 	mPoints.push_back( _rect.bottomRight() );
 	// In this case the bbox is the same as the rect's size
 	mBBox = _rect.size();
+    mTotalBBox = mBBox;
+    mPaths.push_back(mPoints);
 
 	calculatePerimeter();
 }

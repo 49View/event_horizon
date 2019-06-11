@@ -399,32 +399,49 @@ VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f&
     return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2, v3, v4, v5, v6), color, Matrix4f::IDENTITY, _name);
 }
 
-VPListSP Renderer::drawLineFinal( int bucketIndex, const std::vector<Vector3f>& verts,
-        const Vector4f& color, float width, const Matrix4f& mat,
-        bool wrapIt, const std::string& _name ) {
+VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
 
-    if ( verts.size() < 2 ) return nullptr;
-    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
-
-    colorStrip->generateStripsFromVerts( extrudePointsWithWidth<ExtrudeStrip>( verts, width, wrapIt ), wrapIt );
-
-    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(colorStrip).n(_name).build();
-    VPL( bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawLines( int bucketIndex, const V2fVectorOfVector& verts, const Vector4f& color, float width,
-                              const Matrix4f& mat, const std::string& _name ) {
+    if ( !rds.verts.empty() ) {
+        rds.multiVerts.emplace_back( rds.verts );
+    }
 
     V3fVectorOfVector allVLists;
-    for ( const auto& lines : verts ) {
+    for ( auto& lines : rds.multiVerts ) {
         if ( lines.size() > 1 ) {
-            allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( XZY::C(lines), width, false ) );
+            if ( rds.usePreMult ) {
+                for ( auto& p : lines ) {
+                    p = rds.preMultMatrix.transform( p );
+                }
+            }
+            allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( lines, rds.width, false ) );
         }
     }
 
-    return addVertexStrips( bucketIndex, stripInserter<V3f>(allVLists), color, mat, _name);
+    return addVertexStrips( rds.bucketIndex, stripInserter<V3f>(allVLists), rds.color, rds.matrix, rds.name);
+
+//    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
+//
+//    colorStrip->generateStripsFromVerts( extrudePointsWithWidth<ExtrudeStrip>( rds.verts, rds.width, rds.wrapIt ),
+//            rds.wrapIt );
+//
+//    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(rds.color)}}.
+//            p(colorStrip).n(rds.name).build();
+//    VPL( rds.bucketIndex, vp );
+//    return vp;
 }
+
+//VPListSP Renderer::drawLines( int bucketIndex, const V2fVectorOfVector& verts, const Vector4f& color, float width,
+//                              const Matrix4f& mat, const std::string& _name ) {
+//
+//    V3fVectorOfVector allVLists;
+//    for ( const auto& lines : verts ) {
+//        if ( lines.size() > 1 ) {
+//            allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( XZY::C(lines), width, false ) );
+//        }
+//    }
+//
+//    return addVertexStrips( bucketIndex, stripInserter<V3f>(allVLists), color, mat, _name);
+//}
 
 VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
                    const std::string& _name ) {
