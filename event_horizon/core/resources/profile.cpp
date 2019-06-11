@@ -28,29 +28,31 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
         std::vector<Vector2f> rawPoints;
         // #### NDDADO: we fix subDivs=0 because it's dangerous to interpolate bezier paths when you need total accuracy
         // on connecting profiles with straight elements (IE think about a flat wall)
-        int subDivs = 0;
+        int subDivs = 4;
         for ( auto shape = image->shapes; shape != NULL; shape = shape->next ) {
-//            if ( shape->next != nullptr ) continue;
             for ( auto path = shape->paths; path != NULL; path = path->next ) {
                 V2fVector lPath{};
                 for ( auto i = 0; i < path->npts - 1; i += 3 ) {
                     float *p = &path->pts[i * 2];
-                    for ( int s = 0; s < subDivs + 1; s++ ) {
-                        float t = s / static_cast<float>(subDivs + 1);
-                        Vector2f pi = interpolateBezier( Vector2f{ p[0], p[1] }, Vector2f{ p[2], p[3] },
-                                                         Vector2f{ p[4], p[5] }, Vector2f{ p[6], p[7] }, t );
-                        lPath.emplace_back( pi );
+                    int extraPoint = path->npts == 4 ? 1 : 0; // if it's a line or single path then close it, adding a trailing end cp
+                    int totalSubDivs = subDivs + 1 + extraPoint;
+                    for ( int s = 0; s < totalSubDivs; s++ ) {
+                        float t = s / static_cast<float>(totalSubDivs - extraPoint);
+                        Vector2f pi = interpolateBezier( V2f{ p[0], p[1] }, V2f{ p[2], p[3] },
+                                                         V2f{ p[4], p[5] }, V2f{ p[6], p[7] }, t );
+                        lPath.emplace_back(pi);
                         lTotalbbox.expand(pi);
                         // NDDADO in case of profile path just add the last one, we should clearly change it!
-                        if ( shape->next == nullptr ) {
-                            pi -= Vector2f{ path->bounds[0], path->bounds[1] };
-                            pi *= 0.01f;
-                            rawPoints.push_back( pi );
-                            lbbox.expand( pi );
-                        }
+                    }
+                    if ( shape->next == nullptr ) {
+                        V2f pi{ p[0], p[1] };
+                        pi -= Vector2f{ path->bounds[0], path->bounds[1] };
+                        pi *= 0.01f;
+                        rawPoints.push_back( pi );
+                        lbbox.expand( pi );
                     }
                 }
-//                if ( path->closed ) lPath.push_back(lPath.front());
+                if ( path->closed && path->npts % 4 != 0 ) lPath.push_back(lPath.front());
                 mPaths.push_back( lPath );
             }
         }

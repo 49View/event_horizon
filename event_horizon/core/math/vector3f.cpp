@@ -58,7 +58,6 @@ void Vector3f::fmod( float _value ) {
 }
 
 Vector3f Vector3f::fmod( float _value ) const {
-
 	return {fmodAntiGimbal( mX, _value ), fmodAntiGimbal( mY, _value ), fmodAntiGimbal( mZ, _value )};
 }
 
