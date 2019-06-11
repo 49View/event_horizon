@@ -399,25 +399,10 @@ VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f&
     return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2, v3, v4, v5, v6), color, Matrix4f::IDENTITY, _name);
 }
 
-VPListSP Renderer::drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
-               bool wrapIt, float rotAngle, float percToBeDrawn, const std::string& _name ) {
-    std::vector<Vector3f> vlist;
+VPListSP Renderer::drawLineFinal( int bucketIndex, const std::vector<Vector3f>& verts,
+        const Vector4f& color, float width, const Matrix4f& mat,
+        bool wrapIt, const std::string& _name ) {
 
-    vlist.push_back( p1 );
-    vlist.push_back( p2 );
-
-    return drawLine( bucketIndex, vlist, color, width, wrapIt, rotAngle, percToBeDrawn, _name );
-}
-
-VPListSP Renderer::drawLine( int bucketIndex, const std::vector<Vector2f>& verts, float z, const Vector4f& color,
-                             float width, bool wrapIt, float rotAngle, float percToBeDrawn, const std::string& _name ) {
-    std::vector<Vector3f> vlist;
-    for ( auto& v : verts ) vlist.emplace_back( v, z );
-    return drawLine( bucketIndex, vlist, color, width, wrapIt, rotAngle, percToBeDrawn, _name );
-}
-
-VPListSP Renderer::drawLine( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
-               bool wrapIt, float rotAngle, float percToBeDrawn, const std::string& _name ) {
     if ( verts.size() < 2 ) return nullptr;
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
 

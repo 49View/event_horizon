@@ -198,15 +198,8 @@ public:
     drawDoubleArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
                float angle, float arrowlength, const std::string& _name = "" );
 
-    VPListSP drawLine( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const Vector4f& color, float width,
-				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
-				   const std::string& _name = "" );
-    VPListSP
-	drawLine( int bucketIndex, const std::vector<Vector2f>& verts, float z, const Vector4f& color, float width,
-			  bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f, const std::string& _name = "" );
-    VPListSP drawLine( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
-				   bool scaleEnds = true, float rotAngle = 0.0f, float percToBeDrawn = 1.0f,
-				   const std::string& _name = "" );
+    VPListSP drawLineFinal( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color, float width,
+                            const Matrix4f& mat, bool wrapiIt, const std::string& _name );
     VPListSP drawLines( int bucketIndex, const V2fVectorOfVector& verts, const Vector4f& color, float width,
                         const Matrix4f& mat = Matrix4f::IDENTITY, const std::string& _name = {} );
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
@@ -266,4 +259,59 @@ public:
                                     const V4f& color, float width, float angle, float arrowlength,
                                     float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
+
+    struct RendererDrawingSet {
+        int bucketIndex = -1;
+        bool wrapIt = false;
+        std::vector<V3f> verts;
+        C4f color = C4f::WHITE;
+        float width = 0.1f;
+        std::string name{};
+        Matrix4f matrix{Matrix4f::IDENTITY};
+    };
+
+    template<typename M>
+    void addRendererDrawingSetParam( RendererDrawingSet& rds, const M& _param ) {
+        if constexpr ( std::is_same_v<M, int> ) {
+            rds.bucketIndex = _param;
+            return;
+        }
+        if constexpr ( std::is_same_v<M, bool> ) {
+            rds.wrapIt = _param;
+            return;
+        }
+        if constexpr ( std::is_same_v<M, std::vector<V3f>> ) {
+            rds.verts = _param;
+            return;
+        }
+        if constexpr ( std::is_same_v<M, C4f> ) {
+            rds.color = _param;
+            return;
+        }
+        if constexpr ( std::is_same_v<M, float> ) {
+            rds.width = _param;
+            return;
+        }
+        if constexpr ( std::is_same_v<M, std::string> ) {
+            rds.name = _param;
+            return;
+        }
+        if constexpr ( std::is_same_v<M, Matrix4f> ) {
+            rds.matrix = _param;
+            return;
+        }
+        if constexpr ( std::is_same_v<M, V3f> ) {
+            rds.verts.emplace_back( _param );
+            return;
+        }
+    }
+
+    template <typename ...Args>
+    VPListSP drawLine( Args&& ... args ) {
+        RendererDrawingSet rds{};
+
+        (addRendererDrawingSetParam( rds, std::forward<Args>( args )), ...);
+
+        return drawLineFinal( rds.bucketIndex, rds.verts, rds.color, rds.width, rds.matrix, rds.wrapIt, rds.name );
+    }
 };
