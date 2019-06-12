@@ -358,3 +358,13 @@ enum class DependencyStatus {
 using ResourceRef = std::string;
 using CResourceRef = const std::string&;
 using ResourceDependencyDict    = std::unordered_map<std::string, std::vector<ResourceRef>>;
+
+template <typename T>
+struct VectorWrap {
+    VectorWrap() = default;
+    VectorWrap( const std::vector<T>& v, bool wrap ) : v( v ), wrap( wrap ) {}
+
+    std::vector<T> v; bool wrap = false; };
+
+template <typename T>
+using VectorOfVectorWrap = std::vector<VectorWrap<T>>;

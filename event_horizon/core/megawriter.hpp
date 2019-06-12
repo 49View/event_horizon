@@ -90,7 +90,23 @@ public:
 		writer->EndArray();
 	}
 
-	void serialize( const char* _name, const std::set<std::string>& array ) {
+    template<typename T>
+    void serialize( const char* _name, const VectorWrap<T>& array ) {
+        if ( _name != nullptr ) writer->String( _name );
+        writer->StartObject();
+        writer->String( "v" );
+        writer->StartArray();
+        for ( auto& value : array.v ) {
+            for ( size_t t = 0; t < value.size(); t++ )
+                serialize( nullptr, value[t] );
+        }
+        writer->EndArray();
+        writer->String( "wrap" );
+        writer->Bool( array.wrap );
+        writer->EndObject();
+    }
+
+    void serialize( const char* _name, const std::set<std::string>& array ) {
 		if ( _name != nullptr ) writer->String( _name );
 		writer->StartArray();
 		for ( auto& value : array ) {
@@ -129,11 +145,21 @@ public:
 				value.serialize( this );
 			}
 			writer->EndArray();
-		}
+        }
 		writer->EndArray();
 	}
 
-	void serialize( const char* name, const char* value ) {
+    template<typename T>
+    void serialize( const char* _name, const VectorOfVectorWrap<T>& array ) {
+        if ( _name != nullptr ) writer->String( _name );
+        writer->StartArray();
+        for ( auto& subarray : array ) {
+            serialize( nullptr, subarray );
+        }
+        writer->EndArray();
+    }
+
+    void serialize( const char* name, const char* value ) {
         if ( name != nullptr ) writer->String( name );
 		writer->String( value );
 	}

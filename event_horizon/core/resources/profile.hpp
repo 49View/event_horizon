@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 //  profile.hpp
 //  6thViewImporter
@@ -41,25 +43,25 @@ public:
 	std::vector<Vector3f> rotatePoints( const Vector3f& nx, const Vector3f& ny,
 										const Vector3f& offset = Vector3f::ZERO ) const;
 
-	inline int32_t numVerts() const { return static_cast<int32_t>( mPoints.size() ); }
+	inline int32_t numVerts() const { return static_cast<int32_t>( mPoints.v.size() ); }
 	inline float width() const { return mBBox.x(); }
 	inline float height() const { return mBBox.y(); }
 
-	inline Vector2f pointAt( uint64_t index ) const { return mPoints[index]; }
+	inline Vector2f pointAt( uint64_t index ) const { return mPoints.v[index]; }
 	inline float lengthAt( uint64_t index ) { return mLengths[index]; }
 
-	std::vector<Vector2f> Points() const { return mPoints; }
-	std::vector<Vector3f> Points3d( const Vector3f& mainAxis ) const;
-	void Points( const std::vector<Vector2f>& val ) { mPoints = val; }
+	V2fVector Points() const { return mPoints.v; }
+    V3fVector Points3d( const Vector3f& mainAxis ) const;
+	void Points( const V2fVector& val ) { mPoints.v = val; }
 
 	std::vector<float> Lengths() const { return mLengths; }
-	void Lengths( std::vector<float> val ) { mLengths = val; }
+	void Lengths( std::vector<float> val ) { mLengths = std::move(val); }
 
 	Vector3f Normal() const { return mNormal; }
 	void Normal( Vector3f val ) { mNormal = val; }
 
-	const V2fVectorOfVector& Paths() const { return mPaths; }
-	V3fVectorOfVector Paths3d() const;
+	const V2fVectorOfVectorWrap& Paths() const { return mPaths; }
+    V3fVectorOfVectorWrap Paths3d() const;
 
     static std::shared_ptr<Profile> makeLine(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
     static std::shared_ptr<Profile> makeWire(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
@@ -73,11 +75,11 @@ private:
 private:
 	V2f		        		mBBox = V2f::ZERO;
 	V2f                     mTotalBBox = V2f::ZERO;
-	V2fVector	            mPoints;
+	V2fVectorWrap           mPoints;
 	std::vector<float>		mLengths;
 	float					mPerimeter = 0.0f;
 	V3f	        			mNormal = V3f::X_AXIS;
-	V2fVectorOfVector       mPaths;
+	V2fVectorOfVectorWrap   mPaths;
 };
 
 class ProfileMaker {

@@ -478,4 +478,7 @@ using Color4f = Vector4f;
 using C4f = Vector4f;
 using V4f = Vector4f;
 using V4fVector         = std::vector<Vector4f>;
-using V4fVectorOfVector = std::vector<std::vector<Vector4f>>;
+using V4fVectorOfVector = std::vector<V4fVector>;
+
+using V4fVectorWrap = VectorWrap<V4f>;
+using V4fVectorOfVectorWrap = VectorOfVectorWrap<V4f>;

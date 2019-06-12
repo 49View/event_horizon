@@ -653,7 +653,9 @@ struct ExtrudeComtour {};
 using Color3f = Vector3f;
 using vector3fList = std::vector<Vector3f>;
 using V3fVector         = std::vector<Vector3f>;
-using V3fVectorOfVector = std::vector<std::vector<Vector3f>>;
+using V3fVectorOfVector = std::vector<V3fVector>;
+using V3fVectorWrap = VectorWrap<V3f>;
+using V3fVectorOfVectorWrap = VectorOfVectorWrap<V3f>;
 using Triangle3d   = std::tuple<Vector3f, Vector3f, Vector3f>;
 using QuadVector3f = std::array<Vector3f, 4>;
 using QuadVector3fList = std::vector<QuadVector3f>;
@@ -719,6 +721,17 @@ std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, f
         if constexpr ( std::is_same_v<T, ExtrudeComtour> ) {
             vList1.push_back( v1 );
             vList2.push_back( v2 );
+        }
+    }
+    if ( wrapIt ) {
+        if constexpr ( std::is_same_v<T, ExtrudeStrip> ) {
+            vList.push_back( vList.front() );
+            vList.push_back( *(vList.begin()+1) );
+        }
+
+        if constexpr ( std::is_same_v<T, ExtrudeComtour> ) {
+            vList1.push_back( vList1.front() );
+            vList2.push_back( vList2.front() );
         }
     }
 

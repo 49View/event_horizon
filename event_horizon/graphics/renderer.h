@@ -45,9 +45,8 @@ namespace FBNames {
 
 struct RendererDrawingSet {
     int bucketIndex = -1;
-    bool wrapIt = false;
-    V3fVector verts;
-    V3fVectorOfVector multiVerts;
+    V3fVectorWrap verts;
+    V3fVectorOfVectorWrap multiVerts;
     C4f color = C4f::WHITE;
     float width = 0.1f;
     std::string name{};
@@ -284,49 +283,59 @@ public:
         if constexpr ( std::is_same_v<M, int> ) {
             rds.bucketIndex = _param;
             return;
-        }
+        } else
         if constexpr ( std::is_same_v<M, bool> ) {
-            rds.wrapIt = _param;
+            rds.verts.wrap = _param;
             return;
-        }
+        } else
         if constexpr ( std::is_same_v<M, V3fVector> ) {
+            rds.verts.v = _param;
+            return;
+        } else
+        if constexpr ( std::is_same_v<M, V3fVectorWrap> ) {
             rds.verts = _param;
             return;
-        }
+        } else
+        if constexpr ( std::is_same_v<M, Rect2f> ) {
+            rds.verts.v = _param.points3dcw_xzy();
+            rds.verts.wrap = true;
+            return;
+        } else
         if constexpr ( std::is_same_v<M, C4f> ) {
             rds.color = _param;
             return;
-        }
+        } else
         if constexpr ( std::is_same_v<M, float> ) {
             rds.width = _param;
             return;
-        }
+        } else
         if constexpr ( std::is_same_v<M, std::string> ) {
             rds.name = _param;
             return;
-        }
+        } else
         if constexpr ( std::is_same_v<M, Matrix4f> ) {
             rds.matrix = _param;
             return;
-        }
+        } else
         if constexpr ( std::is_same_v<M, V3f> ) {
-            rds.verts.emplace_back( _param );
+            rds.verts.v.emplace_back( _param );
             return;
-        }
+        } else
         if constexpr ( std::is_same_v<M, V3f> ) {
-            rds.verts.emplace_back( _param );
+            rds.verts.v.emplace_back( _param );
             return;
-        }
+        } else
         if constexpr ( std::is_same_v<M, RDSPreMult> ) {
             rds.usePreMult = true;
             rds.preMultMatrix = _param();
             return;
-        }
-        if constexpr ( std::is_same_v<M, V3fVectorOfVector> ) {
+        } else
+        if constexpr ( std::is_same_v<M, V3fVectorOfVectorWrap > ) {
             rds.multiVerts = _param;
             return;
+        } else {
+//            static_assert(std::false_type::value, "RendererDrawingSetParam not supported");
         }
-
     }
 
     template <typename ...Args>

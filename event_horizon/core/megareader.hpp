@@ -277,7 +277,21 @@ public:
 		}
 	}
 
-	void deserialize( const char* name, std::vector<Triangle2d>& ret ) const {
+	template <typename T>
+    void deserialize( const char* name, VectorWrap<T>& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType t = 0; t < ( *( value ) )[name]["v"].Size(); t++ ) {
+                Vector2f v1 = Vector2f::ZERO;
+                for ( SizeType m = 0; m < ( *( value ) )[name]["v"][t].Size(); m++ ) {
+                    v1[m] = ( ( *( value ) )[name][t][m].GetFloat() );
+                }
+                ret.v.push_back( v1 );
+            }
+            ret.wrap = ( ( *( value ) )[name]["wrap"].GetBool() );
+        }
+    }
+
+    void deserialize( const char* name, std::vector<Triangle2d>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t+=3 ) {
 				Triangle2d sv;
@@ -523,6 +537,17 @@ public:
 			}
 		}
 	}
+
+	template <typename T>
+    void deserialize( const char* name, VectorOfVectorWrap<T>& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+                VectorWrap<T> sv;
+                deserialize( nullptr, sv );
+                ret.push_back( sv );
+            }
+        }
+    }
 
 //	void deserialize( std::vector<CoreMetaData>& _vec ) {
 //		const static char* metadataS = "metadata";

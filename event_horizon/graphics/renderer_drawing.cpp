@@ -401,19 +401,19 @@ VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f&
 
 VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
 
-    if ( !rds.verts.empty() ) {
+    if ( !rds.verts.v.empty() ) {
         rds.multiVerts.emplace_back( rds.verts );
     }
 
     V3fVectorOfVector allVLists;
     for ( auto& lines : rds.multiVerts ) {
-        if ( lines.size() > 1 ) {
+        if ( lines.v.size() > 1 ) {
             if ( rds.usePreMult ) {
-                for ( auto& p : lines ) {
+                for ( auto& p : lines.v ) {
                     p = rds.preMultMatrix.transform( p );
                 }
             }
-            allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( lines, rds.width, false ) );
+            allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( lines.v, rds.width, lines.wrap ) );
         }
     }
 

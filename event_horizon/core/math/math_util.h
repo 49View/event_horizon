@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include <unordered_set>
 
 #include "../util.h"
 
@@ -735,31 +736,40 @@ void alignLineOnMainAxis( const T& p1, T& p2 ) {
 template<typename T>
 std::vector<T> sanitizePath( const std::vector<T>& _verts, bool wrapPath = true, float epsilon = 0.001f ) {
     std::vector<T> ret;
-	int csize = static_cast<int>( _verts.size() );
+    int csize = static_cast<int>( _verts.size() );
 
-	if ( csize == 0 ) {
-	    return ret;
-	}
-	if ( csize == 1 ) {
-		ret.push_back( _verts[0] );
-		return ret;
-	}
-	if ( csize == 2 ) {
-		ret.push_back( _verts[0] );
-		if ( !isVerySimilar( _verts[0], _verts[1], epsilon ) ) {
-			ret.push_back( _verts[1] );
-		}
-		return ret;
-	}
+    if ( csize == 0 ) {
+        return ret;
+    }
+    if ( csize == 1 ) {
+        ret.push_back( _verts[0] );
+        return ret;
+    }
+    if ( csize == 2 ) {
+        ret.push_back( _verts[0] );
+        if ( !isVerySimilar( _verts[0], _verts[1], epsilon ) ) {
+            ret.push_back( _verts[1] );
+        }
+        return ret;
+    }
 
-	for ( int q = 0; q < csize; q++ ) {
-		T p1 = _verts[getCircularArrayIndex( q - 1, csize )];
-		T p2 = _verts[q];
-		T p3 = _verts[getCircularArrayIndex( q + 1, csize )];
-		if ( ( ( q == ( csize - 1 ) || q == 0 ) && !wrapPath ) || ( !isVerySimilar( p2, p1, epsilon )
-			 && !isCollinear( p1, p2, p3, epsilon ) ) ) {
-			ret.push_back( p2 );
-		}
-	}
-	return ret;
+    std::unordered_set<int> doNotCopyList{};
+    int wrappingOff = wrapPath ? 0 : 1;
+    for ( int q = wrappingOff; q < csize-wrappingOff; q++ ) {
+        int qm1 = getCircularArrayIndex( q - 1, csize );
+        int qp1 = getCircularArrayIndex( q + 1, csize );
+        T p1 = _verts[qm1];
+        T p2 = _verts[q];
+        T p3 = _verts[qp1];
+        if ( isCollinear( p1, p2, p3, epsilon ) &&
+             !( wrapPath && q == csize - 1 &&  doNotCopyList.find(0) != doNotCopyList.end() ) ) {
+            doNotCopyList.insert( q );
+        }
+    }
+
+    for ( size_t t = 0; t < _verts.size(); t++ ) {
+        if ( doNotCopyList.find(t) == doNotCopyList.end() ) ret.push_back( _verts[t] );
+    }
+
+    return ret;
 }

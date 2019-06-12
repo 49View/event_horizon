@@ -563,3 +563,5 @@ void removeCollinear( vector2fList& cs, float epsilon );
 bool pointWithinSegment( const V2f& p, const V2f& p1, const V2f& p2 );
 float getAreaOf( const std::vector<Triangle2d>& tris );
 
+using V2fVectorWrap = VectorWrap<V2f>;
+using V2fVectorOfVectorWrap = VectorOfVectorWrap<V2f>;
