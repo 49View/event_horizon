@@ -28,6 +28,30 @@ namespace UITapAreaType {
     constexpr uint64_t stickyButton = 1 << 2;
 }
 
+class ColorScheme {
+public:
+    static constexpr size_t ShadesNum = 5;
+    ColorScheme( const std::string& colorDescriptor );
+
+    C4f Primary( int index = 0 ) const {
+        return primaryColors[index];
+    }
+    C4f Secondary1( int index = 0 ) const {
+        return secondary1Colors[index];
+    }
+    C4f Secondary2( int index = 0 ) const {
+        return secondary2Colors[index];
+    }
+    C4f Complement( int index = 0 ) const {
+        return complementColors[index];
+    }
+private:
+    std::array<C4f, ShadesNum> primaryColors;
+    std::array<C4f, ShadesNum> secondary1Colors;
+    std::array<C4f, ShadesNum> secondary2Colors;
+    std::array<C4f, ShadesNum> complementColors;
+};
+
 struct UITapArea {
     UITapArea(  UIView* _owner, const Rect2f& _area, uint64_t _type, UITapAreaStatus _status,
                 std::string _foreground, std::string _background );
@@ -66,7 +90,7 @@ struct UITapArea {
 
 class UIView {
 public:
-    UIView( SceneGraph& sg, RenderOrchestrator& rsg ) : sg( sg ), rsg( rsg ) {}
+    UIView( SceneGraph& sg, RenderOrchestrator& rsg, const ColorScheme& cs ) : sg( sg ), rsg( rsg ), colorScheme(cs) {}
 
     void addButton( uint64_t _key, const Rect2f& _area, uint64_t _type, UITapAreaStatus _status,
                     std::string _foreground, std::string _background, const V3f& _initialPos = V3f::ZERO );
@@ -91,24 +115,24 @@ public:
     Renderer& RR();
     SceneGraph& SG();
 
-    const C4f& getEnabledColor() const {
-        return enabledColor;
+    C4f getEnabledColor() const {
+        return colorScheme.Primary(0);
     }
 
-    const C4f& getSelectedColor() const {
-        return selectedColor;
+    C4f getSelectedColor() const {
+        return colorScheme.Primary(3);
     }
 
-    const C4f& getDisabledColor() const {
-        return disabledColor;
+    C4f getDisabledColor() const {
+        return colorScheme.Primary(4);
     }
 
-    const C4f& getHooverColor() const {
-        return hooverColor;
+    C4f getHooverColor() const {
+        return colorScheme.Primary(2);
     }
 
-    const C4f& getPressedDownColor() const {
-        return pressedDownColor;
+    C4f getPressedDownColor() const {
+        return colorScheme.Primary(3);
     }
 
 //    const std::string& getShadowBackground() const {
@@ -120,16 +144,9 @@ public:
 private:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
+    ColorScheme colorScheme;
     std::unordered_map<uint64_t, std::shared_ptr<UITapArea>> tapAreas;
     mutable uint64_t touchDownStartingKey = 0;
-//    bool backGroundShadowLoaded = false;
-//    std::string shadowBackground = "button,square,shadow";
-
-    C4f enabledColor = V4f::XTORGBA("f2a571");
-    C4f selectedColor = V4f::XTORGBA("ffe68e");
-    C4f disabledColor = V4f::XTORGBA("b5b3ad");
-    C4f hooverColor = V4f::XTORGBA("cea71a");
-    C4f pressedDownColor = V4f::XTORGBA("ed7525");
 };
 
 

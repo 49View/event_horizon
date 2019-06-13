@@ -10,6 +10,34 @@
 #include <graphics/renderer.h>
 #include <render_scene_graph/render_orchestrator.h>
 
+ColorScheme::ColorScheme( const std::string& colorDescriptor ) {
+    size_t i0 = 0;
+    for ( size_t t = 0; t < 4; t++ ) {
+        for ( size_t q = 0; q < 5; q++ ) {
+            auto i1 = colorDescriptor.find("shade " + std::to_string(q), i0);
+            auto i2 = colorDescriptor.find('#', i1);
+            auto pc = colorDescriptor.substr( i2, 7);
+            switch ( t ) {
+                case 0:
+                    primaryColors[q] = C4f::XTORGBA( pc);
+                    break;
+                case 1:
+                    secondary1Colors[q] = C4f::XTORGBA( pc);
+                    break;
+                case 2:
+                    secondary2Colors[q] = C4f::XTORGBA( pc);
+                    break;
+                case 3:
+                    complementColors[q] = C4f::XTORGBA( pc);
+                    break;
+                default:
+                    break;
+            }
+            i0 = i2;
+        }
+    }
+}
+
 constexpr static uint64_t UI2dMenu = CommandBufferLimits::UI2dStart + 1;
 
 UITapArea::UITapArea( UIView* _owner, const Rect2f& _area, uint64_t _type, UITapAreaStatus _status,
@@ -124,12 +152,6 @@ void UIView::handleTouchDownUIEvent( const V2f& _p ) {
 
 void UIView::touchDownKeyCached( uint64_t _key ) const {
     touchDownStartingKey = _key;
-//    if ( getButtonStatus(_key) == UITapAreaStatus::Enabled ||
-//         getButtonStatus(_key) == UITapAreaStatus::Selected ) {
-//        touchDownStartingKey = _key;
-//    } else {
-//        touchDownStartingKey = 0;
-//    }
 }
 
 uint64_t UIView::touchDownKeyCached() const {
@@ -176,15 +198,15 @@ SceneGraph& UIView::SG() {
 C4f UIView::colorFromStatus( UITapAreaStatus _status ) {
     switch (_status) {
         case UITapAreaStatus::Enabled:
-            return enabledColor;
+            return getEnabledColor();
         case UITapAreaStatus::Selected:
-            return selectedColor;
+            return getSelectedColor();
         case UITapAreaStatus::Disabled:
-            return disabledColor;
+            return getDisabledColor();
         case UITapAreaStatus::Hidden:
-            return enabledColor;
+            return getEnabledColor();
         case UITapAreaStatus::Hoover:
-            return hooverColor;
+            return getHooverColor();
     }
 }
 
