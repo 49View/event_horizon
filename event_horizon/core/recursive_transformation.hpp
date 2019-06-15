@@ -29,6 +29,8 @@ protected:
     std::shared_ptr<Matrix4f> mLocalHierTransform;
 };
 
+struct PFC{};
+
 template <typename T, typename B>
 class RecursiveTransformation : public Boxable<B>,
                                 public NamePolicy<>,
@@ -45,6 +47,12 @@ public:
 
     RecursiveTransformation() = default;
     virtual ~RecursiveTransformation() = default;
+
+    template <typename ...Args>
+    explicit RecursiveTransformation( PFC _pfc, Args&& ... args ) {
+        pushData( std::forward<Args>( args )...);
+    }
+
     // This ctor is effectively a "clone"
     RecursiveTransformation( const RecursiveTransformation<T,B>& _source ) {
         addNodeRec( _source, nullptr );

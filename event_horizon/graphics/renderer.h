@@ -43,13 +43,26 @@ namespace FBNames {
 	bool isPartOf( const std::string& _val );
 }
 
+struct DLine {};
+struct DRect {};
+struct DRect2d {};
+struct DRect2dRounded {};
+
 struct RendererDrawingSet {
+    RendererDrawingSet() = default;
+    RendererDrawingSet( int bi, Color4f c, std::string sn, std::string n ) :
+        bucketIndex(bi), color(std::move(c)), name(std::move(n)), shaderName(std::move(sn)) {}
+
     int bucketIndex = -1;
+    Primitive prim = PRIMITIVE_TRIANGLE_STRIP;
     V3fVectorWrap verts;
     V3fVectorOfVectorWrap multiVerts;
+    Rect2f rect = Rect2f::MIDENTITY();
+    float roundedCorner = 0.05f;
     C4f color = C4f::WHITE;
     float width = 0.1f;
     std::string name{};
+    std::string shaderName = S::COLOR_3D;
     Matrix4f matrix{Matrix4f::IDENTITY};
     Matrix4f preMultMatrix{Matrix4f::IDENTITY};
     bool usePreMult = false;
@@ -200,8 +213,6 @@ protected:
 	template <typename V> friend class VPBuilder;
 
 public:
-    auto addVertexStrips( int bucketIndex, const V3fVector& v1, const V4f& color,
-                          const Matrix4f& mat = Matrix4f::IDENTITY, const std::string& _name = "");
 	void drawIncGridLines( int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
 						   const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
 						   float zoffset, const std::string& _name = "" );
@@ -220,6 +231,8 @@ public:
                float angle, float arrowlength, const std::string& _name = "" );
 
     VPListSP drawLineFinal( RendererDrawingSet& rds );
+    VPListSP drawRectFinal( RendererDrawingSet& rds );
+
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
 					   const std::string& _name = "" );
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
@@ -278,9 +291,9 @@ public:
                                     float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
 
-    template<typename M>
+    template<typename T, typename M>
     void addRendererDrawingSetParam( RendererDrawingSet& rds, const M& _param ) {
-        if constexpr ( std::is_same_v<M, int> ) {
+        if constexpr ( std::is_integral_v<M> && !std::is_same_v<M, bool> ) {
             rds.bucketIndex = _param;
             return;
         } else
@@ -292,13 +305,24 @@ public:
             rds.verts.v = _param;
             return;
         } else
+        if constexpr ( std::is_same_v<M, V2fVector> ) {
+            for ( const auto& v : _param ) rds.verts.v.emplace_back(v);
+            return;
+        } else
         if constexpr ( std::is_same_v<M, V3fVectorWrap> ) {
             rds.verts = _param;
             return;
         } else
         if constexpr ( std::is_same_v<M, Rect2f> ) {
-            rds.verts.v = _param.points3dcw_xzy();
-            rds.verts.wrap = true;
+            if constexpr ( std::is_same_v<T, DRect2d> )
+            {
+                for ( const auto& v : _param.pointsStrip() ) rds.verts.v.emplace_back(v);
+            } else if constexpr ( std::is_same_v<T, DRect2dRounded> ) {
+                rds.rect = _param;
+            } else {
+                rds.verts.v = _param.points3dcw_xzy();
+                rds.verts.wrap = true;
+            }
             return;
         } else
         if constexpr ( std::is_same_v<M, C4f> ) {
@@ -338,12 +362,28 @@ public:
         }
     }
 
-    template <typename ...Args>
-    VPListSP drawLine( Args&& ... args ) {
+    template <typename T, typename ...Args>
+    VPListSP draw( Args&& ... args ) {
         RendererDrawingSet rds{};
 
-        (addRendererDrawingSetParam( rds, std::forward<Args>( args )), ...);
+        (addRendererDrawingSetParam<T>( rds, std::forward<Args>( args )), ...);
 
-        return drawLineFinal( rds );
+        if constexpr ( std::is_same_v<T, DLine> ) {
+            return drawLineFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DRect> ) {
+            return drawRectFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DRect2d> ) {
+            rds.shaderName = S::COLOR_2D;
+            return drawRectFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DRect2dRounded> ) {
+            rds.shaderName = S::COLOR_2D;
+            rds.prim = PRIMITIVE_TRIANGLE_FAN;
+            rds.verts.v = roundedCornerFanFromRect( rds.rect, rds.roundedCorner );
+            return drawRectFinal( rds );
+        }
+        return nullptr;
     }
 };

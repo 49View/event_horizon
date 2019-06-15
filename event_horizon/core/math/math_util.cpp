@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include "matrix2f.h"
+#include "rect2f.h"
 
 namespace JMATH {
 
@@ -132,4 +133,38 @@ float degToRad() {
 	return ( M_PI / 180.0f );
 }
 
+}
+
+void innerRoundCornerInter( std::vector<Vector3f>& ret, const V2f& tl1,  const V2f& tlm,  const V2f& tl2 ) {
+    ret.emplace_back( tl1 );
+    for ( size_t t = 1; t < 5; t++ ) {
+        float delta = (float)t / 5.0f;
+        ret.emplace_back( interpolateQuadraticBezier( tl1, tlm, tl2, delta ) );
+    }
+    ret.emplace_back( tl2 );
+}
+
+std::vector<Vector3f> roundedCornerFanFromRect( const JMATH::Rect2f& rect, float cornerAngle ) {
+    std::vector<Vector3f> ret{};
+
+    float cornerRatio = 3.0f*cornerAngle * ( rect.ratio() > 1.0f ? rect.height() : rect.width() );
+
+    V2f tl1 = rect.topLeft() + (V2f::Y_AXIS * cornerRatio);
+    V2f tl2 = rect.topLeft() + (V2f::X_AXIS * cornerRatio);
+
+    V2f tr1 = rect.topRight() + (V2f::X_AXIS_NEG * cornerRatio);
+    V2f tr2 = rect.topRight() + (V2f::Y_AXIS * cornerRatio);
+
+    V2f br1 = rect.bottomRight() + (V2f::Y_AXIS_NEG * cornerRatio);
+    V2f br2 = rect.bottomRight() + (V2f::X_AXIS_NEG * cornerRatio);
+
+    V2f bl1 = rect.bottomLeft() + (V2f::X_AXIS * cornerRatio);
+    V2f bl2 = rect.bottomLeft() + (V2f::Y_AXIS_NEG *cornerRatio);
+
+    innerRoundCornerInter( ret, tl1, rect.topLeft(),     tl2 );
+    innerRoundCornerInter( ret, tr1, rect.topRight(),    tr2 );
+    innerRoundCornerInter( ret, br1, rect.bottomRight(), br2 );
+    innerRoundCornerInter( ret, bl1, rect.bottomLeft(),  bl2 );
+
+    return ret;
 }

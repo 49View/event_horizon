@@ -11,7 +11,6 @@
 #include <core/node.hpp>
 #include <core/geom.hpp>
 #include <core/resources/material.h>
-#include <poly/resources/ui_shape_builder.h>
 #include <graphics/renderer.h>
 #include <graphics/shader_manager.h>
 #include <graphics/vp_builder.hpp>

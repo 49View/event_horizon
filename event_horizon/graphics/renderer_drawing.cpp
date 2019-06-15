@@ -56,14 +56,14 @@ std::vector<T> stripInserter( const std::vector<std::vector<T>> sources ) {
     return ret;
 }
 
-auto Renderer::addVertexStrips( const int bucketIndex, const V3fVector& v1, const V4f& color, const Matrix4f& mat,
-                                const std::string& _name ) {
-    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
-    colorStrip->generateStripsFromVerts( v1, false );
+template <typename TS, typename T>
+auto addVertexStrips( Renderer& _rr, const std::vector<T>& verts, const RendererDrawingSet& rds ) {
+    auto colorStrip = std::make_shared<TS>();
+    colorStrip->generateStripsFromVerts( verts, rds.prim );
 
-    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(color)}}.
-                                   t(mat).p(colorStrip).n(_name).build();
-    VPL( bucketIndex, vp );
+    auto vp = VPBuilder<TS>{_rr, ShaderMaterial{rds.shaderName, mapColor(rds.color)}}.
+            t(rds.matrix).p(colorStrip).n(rds.name).build();
+    _rr.VPL( rds.bucketIndex, vp );
     return vp;
 }
 
@@ -77,13 +77,13 @@ void Renderer::drawIncGridLines( const int bucketIndex, int numGridLines, float 
                                        constAxis0.dominantElement() == 2 ? constAxis0.z() : delta );
         Vector3f lerpRightX = Vector3f( constAxis1.dominantElement() == 0 ? constAxis1.x() : delta, zoffset,
                                         constAxis1.dominantElement() == 2 ? constAxis1.z() : delta );
-        drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+        draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
                   _name + std::to_string( t ) + "+" );
         lerpLeftX = Vector3f( constAxis0.dominantElement() == 0 ? constAxis0.x() : -delta, zoffset,
                               constAxis0.dominantElement() == 2 ? constAxis0.z() : -delta );
         lerpRightX = Vector3f( constAxis1.dominantElement() == 0 ? constAxis1.x() : -delta, zoffset,
                                constAxis1.dominantElement() == 2 ? constAxis1.z() : -delta );
-        drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
+        draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
                   _name + std::to_string( t ) + "-" );
         delta += deltaInc;
     }
@@ -110,8 +110,8 @@ void Renderer::createGrid( const int bucketIndex, float unit, const Color4f& mai
                       bottomYAxis, smallAxisColor, zoffset-0.01f, _name + "x_axis" );
 
     // Main axis
-    drawLine( bucketIndex, leftXAxis, rightXAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "xAxis" );
-    drawLine( bucketIndex, topYAxis, bottomYAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "yAxis" );
+    draw<DLine>( bucketIndex, leftXAxis, rightXAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "xAxis" );
+    draw<DLine>( bucketIndex, topYAxis, bottomYAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "yAxis" );
 }
 
 std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& mainAxisColor,
@@ -138,7 +138,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
             delta += unit * 0.25f;
             lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
             lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-            ret.emplace_back(drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.5f) );
+            ret.emplace_back(draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.5f) );
         }
         delta += unit * 0.25f;
 //        if ( t == numGridLinesY - 1 ) {
@@ -159,7 +159,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
             delta += unit * 0.25f;
             lerpLeftX = topYAxis + V3f::X_AXIS * delta;
             lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-            ret.emplace_back(drawLine( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f));
+            ret.emplace_back(draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth*0.75f));
         }
         delta += unit * 0.25f;
 //        if ( t == numGridLinesX - 1 ) {
@@ -178,7 +178,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
         // xLines
         Vector3f lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
         Vector3f lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-        ret.emplace_back( drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
+        ret.emplace_back( draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
         for ( int q = 0; q < 3; q++ ) {
             delta += unit * 0.25f;
             lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
@@ -188,7 +188,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
         if ( t == numGridLinesY - 1 ) {
             lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
             lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-            ret.emplace_back( drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth) );
+            ret.emplace_back( draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth) );
         }
     }
 
@@ -197,7 +197,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
         // xLines
         Vector3f lerpLeftX = topYAxis + V3f::X_AXIS * delta;
         Vector3f lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-        ret.emplace_back( drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
+        ret.emplace_back( draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
         for ( int q = 0; q < 3; q++ ) {
             delta += unit * 0.25f;
             lerpLeftX = topYAxis + V3f::X_AXIS * delta;
@@ -208,7 +208,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
         if ( t == numGridLinesX - 1 ) {
             lerpLeftX = topYAxis + V3f::X_AXIS * delta;
             lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-            ret.emplace_back( drawLine( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
+            ret.emplace_back( draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
         }
     }
     return ret;
@@ -234,7 +234,6 @@ VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Ve
 
 VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
                            const std::string& _name ) {
-
     auto ps = std::make_shared<Pos3dStrip>( Rect2f{ p1, p2, true }, 0.0f );
     auto vp = VPBuilder<Pos3dStrip>{*this,ShaderMaterial{S::COLOR_3D, mapColor(color)}}.p(ps).n(_name).build();
     VPL( bucketIndex, vp );
@@ -297,13 +296,15 @@ VPListSP Renderer::drawArrow( const int bucketIndex, const Vector3f& p1, const V
     auto v1 = extrudePointsWithWidth<ExtrudeStrip>( vlist, width, false );
     auto v2 = extrudePointsWithWidth<ExtrudeStrip>( {p1, p2}, width, false );
 
-    return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2), color, Matrix4f::IDENTITY, _name);
+    RendererDrawingSet rds{ bucketIndex, color, S::COLOR_3D, _name };
+    return addVertexStrips<Pos3dStrip>( *this, stripInserter<V3f>(v1, v2), rds );
 }
 
 VPListSP Renderer::drawDoubleArrow( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
                                     const V4f& color, float width, float angle, float arrowlength,
                                     const std::string& _name ) {
-    return addVertexStrips( bucketIndex, creteDoubleArrow( p1, p2, width, angle, arrowlength ), color, Matrix4f::IDENTITY, _name);
+    RendererDrawingSet rds{ bucketIndex, color, S::COLOR_3D, _name };
+    return addVertexStrips<Pos3dStrip>( *this, creteDoubleArrow( p1, p2, width, angle, arrowlength ), rds );
 }
 
 VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
@@ -351,7 +352,9 @@ VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f&
 
     drawText( bucketIndex, measureText, textPos, fontHeight, font, fontColor, textAngle );
 
-    return addVertexStrips( bucketIndex, stripInserter<V3f>(l1, l2, v1, v2, v3, v4), color, Matrix4f::IDENTITY, _name);
+    RendererDrawingSet rds{ bucketIndex, color, S::COLOR_3D, _name };
+
+    return addVertexStrips<Pos3dStrip>( *this, stripInserter<V3f>(l1, l2, v1, v2, v3, v4), rds );
 }
 
 VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
@@ -396,7 +399,9 @@ VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f&
     auto v5 = extrudePointsWithWidth<ExtrudeStrip>( { p1, op1}, width*0.75f );
     auto v6 = extrudePointsWithWidth<ExtrudeStrip>( { p2, op2}, width*0.75f );
 
-    return addVertexStrips( bucketIndex, stripInserter<V3f>(v1, v2, v3, v4, v5, v6), color, Matrix4f::IDENTITY, _name);
+    RendererDrawingSet rds{ bucketIndex, color, S::COLOR_3D, _name };
+
+    return addVertexStrips<Pos3dStrip>( *this, stripInserter<V3f>(v1, v2, v3, v4, v5, v6), rds );
 }
 
 VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
@@ -417,31 +422,12 @@ VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
         }
     }
 
-    return addVertexStrips( rds.bucketIndex, stripInserter<V3f>(allVLists), rds.color, rds.matrix, rds.name);
-
-//    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>();
-//
-//    colorStrip->generateStripsFromVerts( extrudePointsWithWidth<ExtrudeStrip>( rds.verts, rds.width, rds.wrapIt ),
-//            rds.wrapIt );
-//
-//    auto vp = VPBuilder<Pos3dStrip>{*this, ShaderMaterial{S::COLOR_3D, mapColor(rds.color)}}.
-//            p(colorStrip).n(rds.name).build();
-//    VPL( rds.bucketIndex, vp );
-//    return vp;
+    return addVertexStrips<Pos3dStrip>( *this, stripInserter<V3f>(allVLists), rds);
 }
 
-//VPListSP Renderer::drawLines( int bucketIndex, const V2fVectorOfVector& verts, const Vector4f& color, float width,
-//                              const Matrix4f& mat, const std::string& _name ) {
-//
-//    V3fVectorOfVector allVLists;
-//    for ( const auto& lines : verts ) {
-//        if ( lines.size() > 1 ) {
-//            allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( XZY::C(lines), width, false ) );
-//        }
-//    }
-//
-//    return addVertexStrips( bucketIndex, stripInserter<V3f>(allVLists), color, mat, _name);
-//}
+VPListSP Renderer::drawRectFinal( RendererDrawingSet& rds ) {
+    return addVertexStrips<Pos3dStrip>( *this, rds.verts.v, rds);
+}
 
 VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
                    const std::string& _name ) {
@@ -512,9 +498,9 @@ VPListSP Renderer::drawTriangles(int bucketIndex, const std::vector<Vector3f>& v
 VPListSP Renderer::drawCylinder( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f&
 color, float size,
               const std::string& _name ) {
-    drawLine( bucketIndex, pos, dir, color, size, false, 0.0f, 1.0f, _name );
+    draw<DLine>( bucketIndex, pos, dir, color, size, false, 0.0f, 1.0f, _name );
     //### FIXME VP
-    return drawLine( bucketIndex, pos, dir, color, size, false, M_PI_2, 1.0f, _name );
+    return draw<DLine>( bucketIndex, pos, dir, color, size, false, M_PI_2, 1.0f, _name );
 }
 
 VPListSP Renderer::drawCone( int bucketIndex, const Vector3f& /*posBase*/, const Vector3f& /*posTop*/,
@@ -537,7 +523,7 @@ VPListSP Renderer::drawArc( int bucketIndex, const Vector3f& center, float radiu
         points.push_back( Vector3f( center.xy() + Vector2f( sinf( angle ), cosf( angle )) * radius, center.z()));
     }
 
-    return drawLine( bucketIndex, points, color, width, false, 0.0f, percToBeDrawn, _name );
+    return draw<DLine>( bucketIndex, points, color, width, false, 0.0f, percToBeDrawn, _name );
 }
 
 VPListSP Renderer::drawArc( int bucketIndex, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
@@ -554,7 +540,7 @@ VPListSP Renderer::drawArc( int bucketIndex, const Vector3f& center, const Vecto
         points.push_back( pm );
     }
 
-    return drawLine( bucketIndex, points, color, width, false, 0.0f, percToBeDrawn, _name );
+    return draw<DLine>( bucketIndex, points, color, width, false, 0.0f, percToBeDrawn, _name );
 }
 
 VPListSP Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,

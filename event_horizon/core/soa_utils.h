@@ -830,21 +830,16 @@ public:
         }
     }
 
-    void generateStripsFromVerts( const std::vector<Vector3f>& vList, bool wrapIt ) {
+    void generateStripsFromVerts( const std::vector<Vector3f>& vList, Primitive _prim ) {
         if ( vList.size() < 3 ) return;
 
-        int32_t wrapVertsCount = wrapIt ? 2 : 0;
-        int64_t numStripVerts = vList.size() * 2 + wrapVertsCount;
-        indices = std::unique_ptr<uint32_t[]>( new uint32_t[numStripVerts] );
-        verts = std::unique_ptr<V[]>( new V[numStripVerts] );
-        primiteType = PRIMITIVE_TRIANGLE_STRIP;
+        numVerts = static_cast<uint32_t >(vList.size());
+        verts = std::make_unique<V[]>( numVerts );
+        primiteType = _prim;
 
+        size_t vc = 0;
         for ( auto& v : vList ) {
-            addStripVertex( v );
-        }
-        if ( wrapIt ) {
-            addStripVertex( verts[0].pos );
-            addStripVertex( verts[1].pos );
+            verts[vc++].pos = v;
         }
     }
 
@@ -1068,8 +1063,8 @@ public:
     std::unique_ptr<uint32_t[]> indices;
     std::unique_ptr<V[]> verts;
 
-    int32_t numIndices = 0;
-    int32_t numVerts = 0;
+    uint32_t numIndices = 0;
+    uint32_t numVerts = 0;
 
     Primitive primiteType = PRIMITIVE_TRIANGLE_STRIP;
 };

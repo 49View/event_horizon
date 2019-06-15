@@ -40,22 +40,16 @@ ColorScheme::ColorScheme( const std::string& colorDescriptor ) {
 
 constexpr static uint64_t UI2dMenu = CommandBufferLimits::UI2dStart + 1;
 
-UITapArea::UITapArea( UIView* _owner, const Rect2f& _area, uint64_t _type, UITapAreaStatus _status,
-                      std::string _foreground, std::string _background ) :
-        owner(_owner), area( _area ), type(_type), status(_status), foreground( std::move(_foreground) ),
-        background( std::move(_background)) {
-    foregroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "ForeGroundButtonColor" );
-    backgroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "BackGroundButtonColor" );
-}
-
-void UITapArea::loadResource( uint64_t _idb ) {
+void UIElement::loadResource( CResourceRef _idb ) {
     this->owner->loaded( _idb );
     auto statusColor = owner->colorFromStatus( status );
-    backgroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, background, 1.0f, statusColor );
-    foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, foreground );
+    backgroundVP = this->owner->RR().draw<DRect2dRounded>( UI2dMenu, area, statusColor );
+    if ( !foreground.empty() ) {
+        foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, foreground );
+    }
 }
 
-void UITapArea::transform( float _duration, uint64_t _frameSkipper,
+void UIElement::transform( float _duration, uint64_t _frameSkipper,
                            const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
 
     const float downtime = _duration;
@@ -74,11 +68,11 @@ void UITapArea::transform( float _duration, uint64_t _frameSkipper,
 
 }
 
-void UITapArea::touchedDown() {
+void UIElement::touchedDown() {
     if ( status != UITapAreaStatus::Enabled ) return;
 
     const float downtime = 0.1f;
-    auto targetColor = checkBitWiseFlag(type, UITapAreaType::stickyButton) ? owner->getSelectedColor() : owner->getPressedDownColor();
+    auto targetColor = checkBitWiseFlag(type(), UIT::stickyButton()) ? owner->getSelectedColor() : owner->getPressedDownColor();
     auto colDown = std::vector<KeyFramePair<C4f>>{
             KeyFramePair{ 0.0f, owner->getEnabledColor() },
             KeyFramePair{ downtime, targetColor }
@@ -91,12 +85,12 @@ void UITapArea::touchedDown() {
 
 }
 
-void UITapArea::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
+void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
 
-    if ( hasBeenTapped && checkBitWiseFlag(type, UITapAreaType::stickyButton) ) {
+    if ( hasBeenTapped && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
         status = UITapAreaStatus::Selected;
     }
-    if ( !hasBeenTapped && isTouchUpGroup && checkBitWiseFlag(type, UITapAreaType::stickyButton) ) {
+    if ( !hasBeenTapped && isTouchUpGroup && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
         status = UITapAreaStatus::Enabled;
     }
     setStatus( status );
@@ -107,7 +101,7 @@ void UITapArea::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
     }
 }
 
-void UITapArea::hoover( bool isHoovering ) {
+void UIElement::hoover( bool isHoovering ) {
     if ( ready && status == UITapAreaStatus::Enabled ) {
         auto color = isHoovering ? owner->getHooverColor().xyz() : owner->getEnabledColor().xyz();
         auto alpha = isHoovering ? owner->getHooverColor().w() : owner->getEnabledColor().w();
@@ -116,7 +110,7 @@ void UITapArea::hoover( bool isHoovering ) {
     }
 }
 
-void UITapArea::setStatus( UITapAreaStatus _status ) {
+void UIElement::setStatus( UITapAreaStatus _status ) {
     if ( !ready ) return;
     status = _status;
     auto color = owner->colorFromStatus(status);
@@ -124,67 +118,61 @@ void UITapArea::setStatus( UITapAreaStatus _status ) {
     backgroundVP->setMaterialConstant( UniformNames::alpha, color.w() );
 }
 
-uint64_t UIView::isTapInArea( const V2f& _tap ) const {
+ResourceRef UIView::isTapInArea( const V2f& _tap ) const {
     V2f tapS = (_tap / getScreenSizef) * getScreenAspectRatioVector;
     for ( const auto& [k,v] : tapAreas ) {
-        if ( v->contains( tapS ) ) {
+        if ( v->Data().contains( tapS ) ) {
             return k;
         }
     }
-    return 0;
+    return {};
 }
 
-std::shared_ptr<UITapArea> UIView::TapArea( uint64_t _key ) const {
+UIElementSP UIView::TapArea( CResourceRef _key ) {
     return tapAreas.find(_key)->second;
 }
 
 bool UIView::isTouchDownInside( const V2f& _p ) {
     auto k = isTapInArea(_p);
-    if ( k ) {
-        TapArea(k)->touchedDown();
+    if ( !k.empty() ) {
+        TapArea(k)->DataRef().touchedDown();
     }
-    return k > 0;
+    return !k.empty();
 }
 
 void UIView::handleTouchDownUIEvent( const V2f& _p ) {
     touchDownKeyCached( isTapInArea(_p) );
 }
 
-void UIView::touchDownKeyCached( uint64_t _key ) const {
+void UIView::touchDownKeyCached( CResourceRef _key ) const {
     touchDownStartingKey = _key;
 }
 
-uint64_t UIView::touchDownKeyCached() const {
+CResourceRef UIView::touchDownKeyCached() const {
     return touchDownStartingKey;
 }
 
-void UIView::touchedUp( uint64_t _key ) {
+void UIView::touchedUp( CResourceRef _key ) {
     for ( auto& [k, button] : tapAreas ) {
         bool touchUpGroup = false;
-        if ( k == 1 || k == 2 || k == 3 ) {
-            touchUpGroup = _key == 1 || _key ==2 || _key == 3;
+        if ( k == "1" || k == "2" || k == "3" ) {
+            touchUpGroup = _key == "1" || _key == "2" || _key == "3";
         }
-        if ( k ==5 || k == 6 ) {
-            touchUpGroup = _key == 5 || _key == 6;
+        if ( k == "5" || k == "6" ) {
+            touchUpGroup = _key == "5" || _key == "6";
         }
-        button->touchedUp( k == _key, touchUpGroup );
+        button->DataRef().touchedUp( k == _key, touchUpGroup );
     }
 }
 
-void UIView::hoover( uint64_t _key) {
+void UIView::hoover( CResourceRef _key) {
     for ( auto& [k, button] : tapAreas ) {
-        button->hoover( k == _key );
+        button->DataRef().hoover( k == _key );
     }
 }
 
-void UIView::addButton( uint64_t _key, const Rect2f& _rect, uint64_t _type, UITapAreaStatus _status,
-                        std::string _foreground, std::string _background, const V3f& _initialPos ) {
-
-    tapAreas.emplace( _key, std::make_shared<UITapArea>(this, _rect, _type, _status, std::move(_foreground), std::move(_background)) );
-}
-
-void UIView::loaded( uint64_t _key ) {
-    tapAreas.at(_key)->loaded();
+void UIView::loaded( CResourceRef _key ) {
+    tapAreas.at(_key)->DataRef().loaded();
 }
 
 Renderer& UIView::RR() {
@@ -210,26 +198,46 @@ C4f UIView::colorFromStatus( UITapAreaStatus _status ) {
     }
 }
 
-void UIView::setButtonStatus( uint64_t _key, UITapAreaStatus _status ) {
-    tapAreas.at(_key)->setStatus( _status );
+void UIView::setButtonStatus( CResourceRef _key, UITapAreaStatus _status ) {
+    tapAreas.at(_key)->DataRef().setStatus( _status );
 }
 
-UITapAreaStatus UIView::getButtonStatus( uint64_t _key ) const {
-    return tapAreas.at(_key)->status;
+UITapAreaStatus UIView::getButtonStatus( CResourceRef _key ) const {
+    return tapAreas.at(_key)->DataRef().Status();
 }
 
-bool UIView::isButtonEnabled( uint64_t _key ) const {
+bool UIView::isButtonEnabled( CResourceRef _key ) const {
     auto bs = getButtonStatus( _key );
     return bs == UITapAreaStatus::Enabled || bs == UITapAreaStatus::Selected;
 }
 
-void UIView::transform( uint64_t _key, float _duration, uint64_t _frameSkipper,
+void UIView::transform( CResourceRef _key, float _duration, uint64_t _frameSkipper,
                         const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
-    tapAreas.at(_key)->transform( _duration, _frameSkipper, _pos, _rot, _scale );
+    tapAreas.at(_key)->DataRef().transform( _duration, _frameSkipper, _pos, _rot, _scale );
 }
 
 void UIView::loadResources() {
     for ( auto& [k,v] : tapAreas ) {
-        v->loadResource( k );
+        v->DataRef().loadResource( k );
     }
+}
+
+C4f UIView::getEnabledColor() const {
+    return colorScheme.Secondary1(0);
+}
+
+C4f UIView::getSelectedColor() const {
+    return colorScheme.Secondary1(3);
+}
+
+C4f UIView::getDisabledColor() const {
+    return colorScheme.Secondary1(4);
+}
+
+C4f UIView::getHooverColor() const {
+    return colorScheme.Secondary1(2);
+}
+
+C4f UIView::getPressedDownColor() const {
+    return colorScheme.Secondary1(3);
 }

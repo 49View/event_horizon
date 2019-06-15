@@ -11,7 +11,6 @@
 #include <graphics/mouse_input.hpp>
 #include <graphics/text_input.hpp>
 #include <graphics/renderer.h>
-#include <poly/resources/ui_shape_builder.h>
 #include <render_scene_graph/render_orchestrator.h>
 
 

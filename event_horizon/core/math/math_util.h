@@ -773,3 +773,8 @@ std::vector<T> sanitizePath( const std::vector<T>& _verts, bool wrapPath = true,
 
     return ret;
 }
+
+class Vector3f;
+namespace JMATH { class Rect2f; }
+
+std::vector<Vector3f> roundedCornerFanFromRect( const JMATH::Rect2f& rect, float cornerAngle );

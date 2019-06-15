@@ -12,7 +12,6 @@
 #include <core/geom.hpp>
 #include <core/names.hpp>
 #include <core/resources/resource_builder.hpp>
-#include <poly/resources/ui_shape_builder.h>
 #include <core/resources/material.h>
 #include <core/file_manager.h>
 #include <poly/converters/gltf2/gltf2.h>
@@ -141,9 +140,6 @@ void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
 //        auto prId = B<PB>("ProfileWire").addIM(pr);
 //        auto gref = GB{ *this, GeomBuilderType::follower, prId, vlist }.c(Color4f::RED).build();
 //        addNode( gref );
-    } else if ( toLower(_params[0]) == "text" && _params.size() > 1 ) {
-//        Color4f col = _params.size() > 2 ? Vector4f::XTORGBA(_params[2]) : Color4f::BLACK;
-        UISB{*this, UIShapeType::Text3d, _params[1], 0.6f }.buildr();
     }
 }
 

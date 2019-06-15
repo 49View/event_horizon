@@ -25,9 +25,11 @@ public:
     template <typename T>
     static std::shared_ptr<T> create( const SerializableContainer& _data ) {
         return std::make_shared<T>(_data);
-//        auto ret = std::make_shared<T>();
-//        ret->deserialize(_data);
-//        return ret;
+    }
+
+    template <typename T, typename ...Args>
+    static std::shared_ptr<T> create( Args&& ... args ) {
+        return std::make_shared<T>( std::forward<Args>( args )... );
     }
 
     template <typename T>

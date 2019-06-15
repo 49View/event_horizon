@@ -507,7 +507,18 @@ public:
 		return ret;
 	}
 
-	std::vector<Vector2f> pointscw() const {
+    V2fVector pointsStrip() const {
+        V2fVector ret;
+
+        ret.push_back( bottomRight());
+        ret.push_back( topRight());
+        ret.push_back( bottomLeft());
+        ret.push_back( topLeft());
+
+        return ret;
+    }
+
+    std::vector<Vector2f> pointscw() const {
 		std::vector<Vector2f> ret;
 
 		ret.push_back( topLeft() );
