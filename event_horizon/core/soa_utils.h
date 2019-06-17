@@ -1094,7 +1094,7 @@ typedef VFA7<Vector3f, Vector2f, Vector2f, Vector3f, Vector4f, Vector3f, Vector4
 typedef VFA8<Vector3f, Vector2f, Vector3f, Vector3f, Vector3f, Matrix3f, Matrix3f, Matrix3f, Vector4f>
         PosTexNorTanBinSHCol3d;
 
-typedef VFA3<Vector3f, float, float> VFFont;
+typedef VFA2<Vector3f, V2f> VFFont;
 
 typedef VertexStripIBVB<VFPos2d> Pos2dStrip;
 typedef VertexStripIBVB<VFPos3d> Pos3dStrip;

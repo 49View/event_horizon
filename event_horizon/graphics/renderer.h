@@ -47,11 +47,24 @@ struct DLine {};
 struct DRect {};
 struct DRect2d {};
 struct DRect2dRounded {};
+struct DText {};
+struct DText2d {};
+
+struct FontDrawingSet {
+    std::string text{};
+    const Font* font = nullptr;
+    V3f pos = V3f::ZERO;
+    float fontHeight = 0.01f;
+    float fontAngle = 0.0f;
+};
+
+using FDS = FontDrawingSet;
 
 struct RendererDrawingSet {
     RendererDrawingSet() = default;
     RendererDrawingSet( int bi, Color4f c, std::string sn, std::string n ) :
         bucketIndex(bi), color(std::move(c)), name(std::move(n)), shaderName(std::move(sn)) {}
+    void setupFontData();
 
     int bucketIndex = -1;
     Primitive prim = PRIMITIVE_TRIANGLE_STRIP;
@@ -61,8 +74,10 @@ struct RendererDrawingSet {
     float roundedCorner = 0.05f;
     C4f color = C4f::WHITE;
     float width = 0.1f;
+    FDS fds;
     std::string name{};
     std::string shaderName = S::COLOR_3D;
+    std::string textureRef{};
     Matrix4f matrix{Matrix4f::IDENTITY};
     Matrix4f preMultMatrix{Matrix4f::IDENTITY};
     bool usePreMult = false;
@@ -75,6 +90,15 @@ struct RDSPreMult {
         return data;
     }
     Matrix4f data;
+};
+
+struct RDSImage {
+    template<typename ...Args>
+    explicit RDSImage( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    ResourceRef operator()() const noexcept {
+        return data;
+    }
+    ResourceRef data;
 };
 
 using CommandBufferLimitsT = int;
@@ -232,6 +256,7 @@ public:
 
     VPListSP drawLineFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinal( RendererDrawingSet& rds );
+    VPListSP drawTextFinal( const RendererDrawingSet& rds );
 
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
 					   const std::string& _name = "" );
@@ -263,9 +288,6 @@ public:
 
     VPListSP drawCone( int bucketIndex, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
 				   float size, const std::string& _name = "" );
-
-    void drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
-                   const Font* font, const Color4f& color, float angle = 0.0f );
 
     VPListSP drawRect( int bi, const Rect2f& r, const Color4f& color, const std::string& _name = {} );
 
@@ -337,6 +359,14 @@ public:
             rds.name = _param;
             return;
         } else
+        if constexpr ( std::is_same_v<M, FDS> ) {
+            rds.fds = _param;
+            return;
+        } else
+        if constexpr ( std::is_same_v<M, RDSImage> ) {
+            rds.textureRef = _param();
+            return;
+        } else
         if constexpr ( std::is_same_v<M, Matrix4f> ) {
             rds.matrix = _param;
             return;
@@ -374,9 +404,20 @@ public:
         if constexpr ( std::is_same_v<T, DRect> ) {
             return drawRectFinal( rds );
         }
+        if constexpr ( std::is_same_v<T, DText2d> || std::is_same_v<T, DText> ) {
+            rds.shaderName = std::is_same_v<T, DText2d> ? S::FONT_2D : S::FONT;
+            rds.setupFontData();
+            return drawTextFinal( rds );
+        }
         if constexpr ( std::is_same_v<T, DRect2d> ) {
-            rds.shaderName = S::COLOR_2D;
-            return drawRectFinal( rds );
+//            rds.shaderName = S::COLOR_2D;
+//            rds.shaderName = S::TEXTURE_2D;
+//            auto ps = std::make_shared<PosTex3dStrip>( rds.rect, QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS );
+//
+//            auto vp = VPBuilder<PosTex3dStrip>{*this,ShaderMaterial{S::TEXTURE_2D, mapTextureAndColor(rds.textureRef, rds.color)}}.p(ps).n(_name).build();
+//            VPL( rds.bucketIndex, vp );
+//
+//            return drawRectFinal( rds );
         }
         if constexpr ( std::is_same_v<T, DRect2dRounded> ) {
             rds.shaderName = S::COLOR_2D;

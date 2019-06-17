@@ -11,6 +11,7 @@
 #include <core/math/matrix_anim.h>
 #include <core/recursive_transformation.hpp>
 #include <graphics/ghtypes.hpp>
+#include <poly/poly.hpp>
 
 class UIView;
 class SceneGraph;
@@ -21,7 +22,8 @@ enum class UITapAreaStatus {
     Disabled,
     Selected,
     Hidden,
-    Hoover
+    Hoover,
+    Fixed,
 };
 
 using UITS = UITapAreaStatus;
@@ -72,6 +74,7 @@ namespace UIT {
     static const UITapAreaType background   = UITapAreaType{1 << 0};
     static const UITapAreaType pushButton   = UITapAreaType{1 << 1};
     static const UITapAreaType stickyButton = UITapAreaType{1 << 2};
+    static const UITapAreaType label        = UITapAreaType{1 << 3};
 }
 
 struct UIFontRef {
@@ -81,6 +84,15 @@ struct UIFontRef {
         return data;
     }
     std::string data;
+};
+
+struct UIFontAngle {
+    template<typename ...Args>
+    explicit UIFontAngle( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    float operator()() const noexcept {
+        return data;
+    }
+    float data;
 };
 
 struct UIFontText {
@@ -101,117 +113,14 @@ struct UIForegroundIcon {
     std::string data;
 };
 
-class UIElement2 {
-public:
-    template <typename ...Args>
-    explicit UIElement2( Args&& ... args ) {
-        (parseParam( std::forward<Args>( args )), ...); // Fold expression (c++17)
-//        foregroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "ForeGroundButtonColor" );
-//        backgroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "BackGroundButtonColor" );
-    }
-private:
-    template<typename M>
-    void parseParam( const M& _param ) {
-        if constexpr ( std::is_same_v<M, UIKey > ) {
-            key = _param;
-        }
-        if constexpr ( std::is_same_v<M, UITapAreaType > ) {
-            type = _param;
-        }
-        if constexpr ( std::is_same_v<M, JMATH::Rect2f > ) {
-            area = _param;
-        }
-        if constexpr ( std::is_same_v<M, UITapAreaStatus > ) {
-            status = _param;
-        }
-        if constexpr ( std::is_same_v<M, UIFontRef > ) {
-            fontRef = _param();
-        }
-        if constexpr ( std::is_same_v<M, UIFontText > ) {
-            text = _param();
-        }
-        if constexpr ( std::is_same_v<M, UIForegroundIcon > ) {
-            foreground = _param();
-        }
-        if constexpr ( std::is_pointer_v<M> ) {
-            owner = _param;
-        }
-    }
-
-public:
-    ResourceRef Key() const {
-        return key();
-    }
-
-    uint64_t Type() const {
-        return type();
-    }
-
-    const Rect2f& Area() const {
-        return area;
-    }
-
-    UITapAreaStatus Status() const {
-        return status;
-    }
-
-    const ResourceRef& FontRef() const {
-        return fontRef;
-    }
-
-    const std::string& Text() const {
-        return text;
-    }
-
-    const std::string& Foreground() const {
-        return foreground;
-    }
-
-    void Owner( UIView* _elem ) {
-        owner = _elem;
-    }
-
-    bool contains( const V2f& _point ) const {
-        return area.contains( _point );
-    }
-    void touchedDown();
-    void touchedUp( bool hasBeenTapped, bool isTouchUpGroup );
-    void transform( float _duration, uint64_t _frameSkipper,
-                    const V3f& _pos,
-                    const Quaternion& _rot = Quaternion{},
-                    const V3f& _scale = V3f::ONE );
-    void loadResource( CResourceRef _idb );
-    void loaded() { ready = true; }
-    void hoover( bool isHoovering );
-    void setStatus( UITapAreaStatus _status );
-
-private:
-    UIKey           key;
-    UITapAreaType   type;
-    Rect2f          area   = Rect2f::INVALID;
-    UITapAreaStatus status = UITapAreaStatus::Enabled;
-    ResourceRef     fontRef;
-    std::string     text;
-    std::string     foreground;
-    UIView*         owner = nullptr;
-    bool            ready = false;
-    std::string     background;
-    std::string     touchDownAnimNamePos;
-    std::string     touchDownAnimNameScale;
-    VPListSP        foregroundVP;
-    VPListSP        backgroundVP;
-    VPListSP        shadowVP;
-    MatrixAnim      foregroundAnim;
-    MatrixAnim      backgroundAnim;
-    V4fa            foregroundColor;
-    V4fa            backgroundColor;
-};
-
 class UIElement {
 public:
     template <typename ...Args>
     explicit UIElement( Args&& ... args ) {
         (parseParam( std::forward<Args>( args )), ...); // Fold expression (c++17)
+        if ( type() == UIT::background() ) {
+            status = UITS::Fixed;
+        }
         foregroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "ForeGroundButtonColor" );
         backgroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "BackGroundButtonColor" );
     }
@@ -233,6 +142,9 @@ private:
         if constexpr ( std::is_same_v<M, UIFontText > ) {
             text = _param();
         }
+        if constexpr ( std::is_same_v<M, UIFontAngle > ) {
+            fontAngle = _param();
+        }
         if constexpr ( std::is_same_v<M, UIForegroundIcon > ) {
             foreground = _param();
         }
@@ -270,6 +182,10 @@ public:
         owner = _elem;
     }
 
+    void Font( const Font* _fontPtr ) {
+        font = _fontPtr;
+    }
+
     bool contains( const V2f& _point ) const {
         return area.contains( _point );
     }
@@ -288,8 +204,11 @@ private:
     UITapAreaType   type;
     Rect2f          area   = Rect2f::INVALID;
     UITapAreaStatus status = UITapAreaStatus::Enabled;
-    ResourceRef     fontRef;
+    const ::Font*   font = nullptr;
+    std::string     fontRef;
     std::string     text;
+    float           fontAngle = 0.0f;
+
     std::string     foreground;
 
     UIView*         owner = nullptr;
@@ -313,13 +232,7 @@ class UIView {
 public:
     UIView( SceneGraph& sg, RenderOrchestrator& rsg, const ColorScheme& cs ) : sg( sg ), rsg( rsg ), colorScheme(cs) {}
 
-    void add( CResourceRef _key, UIElementSP _elem ) {
-//        if constexpr ( std::is_same_v<M, UIKey > ) {
-//            key = _param;
-//        }
-        _elem->DataRef().Owner(this);
-        tapAreas[_key] = _elem;
-    }
+    void add( CResourceRef _key, UIElementSP _elem );
 
     ResourceRef isTapInArea( const V2f& tap ) const;
     bool isTouchDownInside( const V2f& _p );
@@ -347,10 +260,6 @@ public:
     C4f getDisabledColor() const;
     C4f getHooverColor() const;
     C4f getPressedDownColor() const;
-
-//    const std::string& getShadowBackground() const {
-//        return shadowBackground;
-//    }
 
     C4f colorFromStatus( UITapAreaStatus _status );
 

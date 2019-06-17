@@ -47,6 +47,9 @@ void UIElement::loadResource( CResourceRef _idb ) {
     if ( !foreground.empty() ) {
         foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, foreground );
     }
+    if ( !text.empty() ) {
+        this->owner->RR().draw<DText2d>( UI2dMenu, FDS{text, font, area.centre(), 0.02f, fontAngle}, C4f::WHITE );
+    }
 }
 
 void UIElement::transform( float _duration, uint64_t _frameSkipper,
@@ -195,6 +198,8 @@ C4f UIView::colorFromStatus( UITapAreaStatus _status ) {
             return getEnabledColor();
         case UITapAreaStatus::Hoover:
             return getHooverColor();
+        case UITapAreaStatus::Fixed:
+            return colorScheme.Complement(1);
     }
 }
 
@@ -218,7 +223,14 @@ void UIView::transform( CResourceRef _key, float _duration, uint64_t _frameSkipp
 
 void UIView::loadResources() {
     for ( auto& [k,v] : tapAreas ) {
-        v->DataRef().loadResource( k );
+        if ( v->DataRef().Type() == UIT::background() ) {
+            v->DataRef().loadResource( k );
+        }
+    }
+    for ( auto& [k,v] : tapAreas ) {
+        if ( v->DataRef().Type() != UIT::background() ) {
+            v->DataRef().loadResource( k );
+        }
     }
 }
 
@@ -240,4 +252,13 @@ C4f UIView::getHooverColor() const {
 
 C4f UIView::getPressedDownColor() const {
     return colorScheme.Secondary1(3);
+}
+
+void UIView::add( const std::string& _key, UIElementSP _elem ) {
+    _elem->DataRef().Owner(this);
+    if ( !_elem->DataRef().FontRef().empty() ) {
+        _elem->DataRef().Font( sg.FM().get(S::DEFAULT_FONT).get() );
+    }
+
+    tapAreas[_key] = _elem;
 }

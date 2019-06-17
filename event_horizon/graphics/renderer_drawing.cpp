@@ -350,7 +350,7 @@ VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f&
         v4 = extrudePointsWithWidth<ExtrudeStrip>( {rightLinePos, op1}, width, false );
     }
 
-    drawText( bucketIndex, measureText, textPos, fontHeight, font, fontColor, textAngle );
+    draw<DText>( bucketIndex, FDS{ measureText, font, textPos, fontHeight, textAngle}, fontColor );
 
     RendererDrawingSet rds{ bucketIndex, color, S::COLOR_3D, _name };
 
@@ -393,7 +393,7 @@ VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f&
         auto rightLinePos = lerp(0.5f + textOffGap, p2, p1);
         v3 = extrudePointsWithWidth<ExtrudeStrip>( {leftLinePos, p2}, width, false );
         v4 = extrudePointsWithWidth<ExtrudeStrip>( {rightLinePos, p1}, width, false );
-        drawText( bucketIndex, measureText, textPos, fontHeight, font, fontColor, textAngle );
+        draw<DText>( bucketIndex, FDS{ measureText, font, textPos, fontHeight, textAngle}, fontColor );
     }
 
     auto v5 = extrudePointsWithWidth<ExtrudeStrip>( { p1, op1}, width*0.75f );
@@ -665,44 +665,71 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Ve
     return vp;
 }
 
-void Renderer::drawText( int bucketIndex, const std::string& text, const V3f& pos, float scale,
-                         const Font* font, const Color4f& color, float angle ) {
-    Vector2f cursor = Vector2f::ZERO;
-    auto frect = font->GetMasterRect();
+void RendererDrawingSet::setupFontData() {
+    auto frect = fds.font->GetMasterRect();
     V3f fscale{ 1.0f/(frect.z - frect.x), 1.0f, 1.0f/(frect.w - frect.y) };
+    V3f fscale2d{ 1.0f/(frect.z - frect.x), 1.0f/(frect.w - frect.y), 1.0f };
 
-    for ( size_t t = 0; t < text.size(); t++ ) {
-        char i = text[t];
+    if ( shaderName == S::FONT_2D ) {
+        preMultMatrix = Matrix4f( fds.pos,
+                                  V3f::Z_AXIS * fds.fontAngle,
+                                  fscale2d * V3f{1.0f, 1.0f, 1.0f} * fds.fontHeight );
+    } else {
+        preMultMatrix = Matrix4f( fds.pos,
+                                  V3f::Y_AXIS * fds.fontAngle,
+                                  fscale * V3f{1.0f, -1.0f, -1.0f} * fds.fontHeight );
+    }
+}
+
+VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
+    Vector2f cursor = Vector2f::ZERO;
+
+    size_t totalVerts = 0;
+    for ( size_t t = 0; t < rds.fds.text.size(); t++ ) {
+        char i = rds.fds.text[t];
         Utility::TTF::CodePoint cp( static_cast<Utility::TTFCore::ulong>(i));
-        const Utility::TTF::Mesh& m = font->GetTriangulation( cp );
+        totalVerts += rds.fds.font->GetTriangulation( cp ).verts.size();
+    }
+
+    auto ps = std::make_shared<FontStrip>(totalVerts, PRIMITIVE_TRIANGLES, VFVertexAllocation::PreAllocate);
+
+    for ( size_t t = 0; t < rds.fds.text.size(); t++ ) {
+        char i = rds.fds.text[t];
+        Utility::TTF::CodePoint cp( static_cast<Utility::TTFCore::ulong>(i));
+        const Utility::TTF::Mesh& m = rds.fds.font->GetTriangulation( cp );
 
         // Don't draw an empty space
         if ( !m.verts.empty() ) {
-            auto ps = std::make_shared<FontStrip>( m.verts.size(), PRIMITIVE_TRIANGLES, VFVertexAllocation::PreAllocate );
 
-            for ( size_t t = 0; t < m.verts.size(); t+=3 ) {
-                Vector2f p1{ m.verts[t].pos.x  , ( m.verts[t].pos.y ) };
-                Vector2f p3{ m.verts[t+1].pos.x, ( m.verts[t+1].pos.y ) };
-                Vector2f p2{ m.verts[t+2].pos.x, ( m.verts[t+2].pos.y ) };
-                ps->addVertex( XZY::C( p1 + cursor ), m.verts[t].texCoord, m.verts[t].coef );
-                ps->addVertex( XZY::C( p2 + cursor ), m.verts[t+2].texCoord, m.verts[t+2].coef );
-                ps->addVertex( XZY::C( p3 + cursor ), m.verts[t+1].texCoord, m.verts[t+1].coef );
+            for ( size_t tr = 0; tr < m.verts.size(); tr+=3 ) {
+                Vector2f p1{ m.verts[tr].pos.x  , ( m.verts[tr].pos.y ) };
+                Vector2f p3{ m.verts[tr+1].pos.x, ( m.verts[tr+1].pos.y ) };
+                Vector2f p2{ m.verts[tr+2].pos.x, ( m.verts[tr+2].pos.y ) };
+                if ( rds.shaderName == S::FONT_2D ) {
+                    ps->addVertex( p1 + cursor, V2f{m.verts[tr+0].texCoord/127.0f, m.verts[tr+0].coef/127.0f } );
+                    ps->addVertex( p2 + cursor, V2f{m.verts[tr+2].texCoord/127.0f, m.verts[tr+2].coef/127.0f } );
+                    ps->addVertex( p3 + cursor, V2f{m.verts[tr+1].texCoord/127.0f, m.verts[tr+1].coef/127.0f } );
+                } else {
+                    ps->addVertex( XZY::C(p1 + cursor), V2f{m.verts[tr+0].texCoord/127.0f, m.verts[tr+0].coef/127.0f } );
+                    ps->addVertex( XZY::C(p2 + cursor), V2f{m.verts[tr+2].texCoord/127.0f, m.verts[tr+2].coef/127.0f } );
+                    ps->addVertex( XZY::C(p3 + cursor), V2f{m.verts[tr+1].texCoord/127.0f, m.verts[tr+1].coef/127.0f } );
+                }
             }
-
-            auto trams = std::make_shared<Matrix4f>(pos,
-                    V3f::Y_AXIS * angle,
-                    fscale * V3f{1.0f, -1.0f, -1.0f} * scale );
-            auto vp = VPBuilder<FontStrip>{*this,ShaderMaterial{S::FONT, mapColor(color)}}.
-                                            p(ps).t(trams).n(text).
-                                            build();
-            VPL( bucketIndex, vp );
         }
 
-        if ( t < text.size() - 1 ) {
-            Utility::TTFCore::vec2f kerning = font->GetKerning( cp, Utility::TTF::CodePoint( text[t+1] ) );
+        if ( t < rds.fds.text.size() - 1 ) {
+            Utility::TTFCore::vec2f kerning = rds.fds.font->GetKerning( cp, Utility::TTF::CodePoint( rds.fds.text[t+1] ) );
             Vector2f nextCharPos = V2f( kerning.x, kerning.y );
             cursor += nextCharPos;
         }
     }
-}
 
+    auto trams = std::make_shared<Matrix4f>( rds.preMultMatrix );//
+
+    auto vp = VPBuilder<FontStrip>{*this,ShaderMaterial{rds.shaderName, mapColor(rds.color)}}.
+            p(ps).t(trams).n(rds.fds.text).
+            build();
+
+    VPL( rds.bucketIndex, vp );
+    return vp;
+}
