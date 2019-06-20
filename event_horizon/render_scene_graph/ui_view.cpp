@@ -43,12 +43,12 @@ constexpr static uint64_t UI2dMenu = CommandBufferLimits::UI2dStart + 1;
 void UIElement::loadResource( CResourceRef _idb ) {
     this->owner->loaded( _idb );
     auto statusColor = owner->colorFromStatus( status );
-    backgroundVP = this->owner->RR().draw<DRect2dRounded>( UI2dMenu, area, statusColor );
+    backgroundVP = this->owner->RR().draw<DRect2dRounded>( UI2dMenu, bbox, statusColor );
     if ( !foreground.empty() ) {
-        foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, area, foreground );
+        foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, bbox, foreground );
     }
     if ( !text.empty() ) {
-        this->owner->RR().draw<DText2d>( UI2dMenu, FDS{text, font, area.centre(), 0.02f, fontAngle}, C4f::WHITE );
+        this->owner->RR().draw<DText2d>( UI2dMenu, FDS{ text, font, bbox.centre(), 0.02f, fontAngle}, C4f::WHITE );
     }
 }
 
@@ -61,7 +61,7 @@ void UIElement::transform( float _duration, uint64_t _frameSkipper,
             KeyFramePair{ downtime, backgroundAnim.Pos() + _pos }
     };
 
-    area.translate( _pos.xy() );
+    bbox.translate( _pos.xy() );
 
     Timeline::play( backgroundAnim.pos, _frameSkipper, colDown, AnimUpdateCallback([this](float) {
         backgroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );

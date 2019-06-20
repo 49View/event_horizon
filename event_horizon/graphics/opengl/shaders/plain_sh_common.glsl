@@ -183,7 +183,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float G = GeometrySmith( N, V, L, roughness );
 
     vec3 nominator = NDF * G * F;
-    float denominator = ( (1.0/radiance.r)*40.0 * max( dot( N, V ), 0.0 ) * NdotL) + 0.000001;
+    float denominator = ( (1.0/radiance.r) * max( dot( N, V ), 0.0 ) * NdotL) + 0.000001;
     vec3 specular = nominator / denominator;
 
     vec3 kS = F;
@@ -203,69 +203,32 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 Lo = vec3( 0.0 );
 
-    vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance );
-
-    Lo *= (visibility-0.8);
+    // vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
+    // Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance*0.0 );
 
     // single point light 
-//    vec3 plmfrag = vec3(1.7, 2.0, 0.0f) - Position_worldspace;
- for ( int i = 0; i < u_numPointLights; i++ ) {
-    // vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;
-    vec3 plmfrag = vec3(u_pointLightPos[i]) - Position_worldspace;
-    float pldistance = length( plmfrag );
-    vec3 L = normalize( plmfrag );
-    float plattenuation = 1.0 / (pldistance * pldistance);
-    vec3 lradiance = u_pointLightIntensity[i] * plattenuation;
-    Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
-}
+    for ( int i = 0; i < u_numPointLights; i++ ) {
+        // vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;
+        vec3 plmfrag = vec3(u_pointLightPos[i]) - Position_worldspace;
+        float pldistance = length( plmfrag );
+        vec3 L = normalize( plmfrag );
+        float plattenuation = 1.0 / (pldistance );
+        vec3 lradiance = u_pointLightIntensity[i] * plattenuation * 3;
+        Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
+    }
+
 #ifdef sh_reflections
 
 #endif
 
-// for ( int i = 0; i < u_numPointLights; i++ ) {
-//     vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;
-
-// #ifdef sh_notexture
-//     vec3 L = normalize( plmfrag );
-//     vec3 spotLightBeamDir = u_spotLightBeamDir[i];
-// #else
-//     vec3 L = itbn * normalize( plmfrag );
-//     vec3 spotLightBeamDir = itbn * u_spotLightBeamDir[i];
-// #endif
-
-//     // Spotlight
-//     //float theta = dot( L, spotLightBeamDir );
-//     //float intensity = 1.0;
-//     //float outerCutOff = 0.84;
-//     //if ( theta > outerCutOff ) {
-//     //	// spotlight
-//     //	float epsilon = 0.90 - outerCutOff;
-//     //	intensity = clamp( ( theta - outerCutOff ) / epsilon, 0.0, 1.0 );
-//     //	// Attenuation
-//     //	float distance = length( plmfrag );
-//     //	float attenuation = 1.0 / ( u_pointLightAttenuation[i].x + u_pointLightAttenuation[i].y * distance + u_pointLightAttenuation[i].z * ( distance * distance ) );
-//     //	diffuseValue += max( dot( N, L ) * intensity * u_pointLightIntensity[i].x * attenuation, 0.0 );
-//     //}
-
-//     // Pointlight
-//     float distance = length( plmfrag );
-//     float attenuation = 1.0 / ( u_pointLightAttenuation[i].x + u_pointLightAttenuation[i].y * distance + u_pointLightAttenuation[i].z * ( distance * distance ) );
-//     float radiance = u_pointLightIntensity[i].x * attenuation;// *pow( visibility, 4 );
-
-//     Lo += rendering_equation( albedo, L, V, N, F0, radiance );
-// }
-
-//    Lo *= v_color;
-
 #end_code
 
 #define_code shadow_code
-    float visibility = 1.0;
+    float visibility = 0.0;
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     float nlAngle = clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
     v_shadowmap_coord3Biases.z -= 0.001;// * tan(acos(nlAngle));
-    visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases );
+    visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * 20.0;
 
     // for ( int i = 0; i < 4; i++ ) {
     //     int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;
@@ -283,19 +246,14 @@ vec3 kD = 1.0 - kS;
 kD *= 1.0 - metallic;
 
 vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
-// float gr = irradiance.r * 0.3 + irradiance.g * 0.59 + irradiance.b * 0.11;
-// irradiance.rgb = vec3(gr);
-vec2 uv2 = v_texCoord2;
-// uv2.x = 1.0 - uv2.x;
-// uv2.y = 1.0 - uv2.y;
-vec3 aoLightmapColor = texture(lightmapTexture, uv2).rrr;
-//aoLightmapColor = pow(aoLightmapColor, vec3(1.0/1.5)); 
-vec3 diffuseV = (Lo + (irradiance * albedo)) * aoLightmapColor;
+vec3 aoLightmapColor = texture(lightmapTexture, v_texCoord2).rrr;
 
 vec3 specular = vec3(0.0);
 
 #ifdef sh_reflections
 // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+vec3 diffuseV = (irradiance * albedo);// * aoLightmapColor;
+
 const float MAX_REFLECTION_LOD = 4.0;
 vec3 R = reflect(-V, N);
 
@@ -306,30 +264,18 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = (kD * diffuseV + specular) * ao;
+vec3 ambient = Lo + ((kD * diffuseV + specular) * ao * visibility);
 #else 
-vec3 ambient = kD * diffuseV * visibility * ao;
+vec3 diffuseV = Lo * albedo;// * aoLightmapColor;
+vec3 ambient = kD * diffuseV * ao;// * visibility;
 #endif
 
 
-// float ndotlConstrast = 0.5f;  
-// float Fc = (1.04 * ( ndotlConstrast + 1.0 )) / (1.0 + (1.04-ndotlConstrast) );
-// float ndotlC = Fc * ( ndotl - 0.5 ) + 0.5;
-
-// vec3 ambient = (kD ); 
-
-// vec3 finalColor = (Lo * visibility) + ambient; 
-
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
-
-// finalColor = finalColor / ( finalColor + vec3(1.00));
 
 finalColor = vec3(1.0) - exp(-finalColor * 1.0);
  
-// finalColor = pow(finalColor, vec3(2.2/1.0));
-
 FragColor = vec4( finalColor, opacityV * alpha ); 
-//FragColor = vec4( finalColor, 1.0 ); 
  
 //	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
 // BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );

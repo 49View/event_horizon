@@ -26,6 +26,8 @@ void main() {
    ao = texture( aoTexture, texCoords ).x * aoV;
    roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
    metallic = (texture( metallicTexture, texCoords ).x * metallicV);
+//    roughness = 0.0;
+//    metallic = 1.0;
    opacityV = texture( opacityTexture, texCoords ).x; // * 1.0 - 0.0 ) * opacity; 
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
     albedo = pow(albedo, vec3(2.2/1.0));
@@ -36,8 +38,8 @@ void main() {
    vec3 N = getNormalFromMap(texCoords);
 
    shadow_code
-   translucencyV = texture( translucencyTexture, texCoords ).x * visibility * 4.0;
-   N = mix(N, -N, translucencyV * u_timeOfTheDay.r);
+   translucencyV = texture( translucencyTexture, texCoords ).x;// * visibility * 14.0;
+   //N = mix(N, -N, translucencyV * u_timeOfTheDay.r);
 
    light_code
 

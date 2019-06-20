@@ -113,12 +113,12 @@ struct UIForegroundIcon {
     std::string data;
 };
 
-class UIElement {
+class UIElement : public Boxable<> {
 public:
     template <typename ...Args>
     explicit UIElement( Args&& ... args ) {
         (parseParam( std::forward<Args>( args )), ...); // Fold expression (c++17)
-        if ( type() == UIT::background() ) {
+        if ( type() == UIT::background() || type() == UIT::label() ) {
             status = UITS::Fixed;
         }
         foregroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "ForeGroundButtonColor" );
@@ -131,7 +131,7 @@ private:
             type = _param;
         }
         if constexpr ( std::is_same_v<M, JMATH::Rect2f > ) {
-            area = _param;
+            bbox = _param;
         }
         if constexpr ( std::is_same_v<M, UITapAreaStatus > ) {
             status = _param;
@@ -159,7 +159,7 @@ public:
     }
 
     const Rect2f& Area() const {
-        return area;
+        return bbox;
     }
 
     UITapAreaStatus Status() const {
@@ -187,7 +187,7 @@ public:
     }
 
     bool contains( const V2f& _point ) const {
-        return area.contains( _point );
+        return bbox.contains( _point );
     }
     void touchedDown();
     void touchedUp( bool hasBeenTapped, bool isTouchUpGroup );
@@ -202,7 +202,7 @@ public:
 
 private:
     UITapAreaType   type;
-    Rect2f          area   = Rect2f::INVALID;
+    Rect2f          bbox   = Rect2f::INVALID;
     UITapAreaStatus status = UITapAreaStatus::Enabled;
     const ::Font*   font = nullptr;
     std::string     fontRef;

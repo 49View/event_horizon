@@ -175,7 +175,9 @@ public:
 //    }
 //
     void calcCompleteBBox3d() {
-        this->bbox3d = calcCompleteBBox3dRec();
+        if constexpr ( std::is_same_v<B, AABB> ) {
+            this->bbox3d = calcCompleteBBox3dRec();
+        }
     }
 
     void createLocalHierMatrix( Matrix4f cmat ) {
