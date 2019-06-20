@@ -26,6 +26,7 @@ LightManager::LightManager() {
     mLigthingUniform->setUBOStructure( UniformNames::mvpMatrixDepthBias, 64 );
     mLigthingUniform->setUBOStructure( UniformNames::timeOfTheDay, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::numPointLights, 16 );
+    mLigthingUniform->setUBOStructure( UniformNames::hdrExposures, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::shLightCoeffs, 48 );
 }
 
@@ -101,16 +102,14 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
 
     int numLightsClamped = 0;
     for ( auto& pl : mPointLights ) {
-        lpos.push_back(  pl.Pos());
+        lpos.push_back(  pl.Pos() );
         ldir.push_back( Vector3f::Y_AXIS );
         lintensity.emplace_back( pl.Intensity() );
-        lattn.push_back( pl.Attenuation());
+        lattn.push_back( pl.Attenuation() );
         lbeamdir.push_back( Vector3f::Z_AXIS );
         lbeamAngle.push_back( 60.0f );
         lType.push_back( 0 );
-
         numLightsClamped++;
-
         if ( numLightsClamped == mMaxLights ) break;
     }
 
@@ -129,6 +128,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     mLigthingUniform->setUBOData( UniformNames::sunRadiance, _sunRadiance );// );
     mLigthingUniform->setUBOData( UniformNames::mvpMatrixDepthBias, smm->ShadowMapMVPBias( true ));
     mLigthingUniform->setUBOData( UniformNames::mvpShadowMap, smm->ShadowMapMVP() );
+    mLigthingUniform->setUBOData( UniformNames::hdrExposures, hdrExposures );
     mLigthingUniform->setUBOData( UniformNames::shLightCoeffs, Matrix3f( SSH.LightCoeffs()) );
 }
 

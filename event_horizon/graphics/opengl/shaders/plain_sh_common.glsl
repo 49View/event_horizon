@@ -264,16 +264,15 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = Lo + ((kD * diffuseV + specular) * ao * visibility);
+vec3 ambient = Lo + ((kD * diffuseV + specular) * ao ) * (visibility+diffuseV*2.0);
 #else 
 vec3 diffuseV = Lo * albedo;// * aoLightmapColor;
 vec3 ambient = kD * diffuseV * ao;// * visibility;
 #endif
 
-
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
 
-finalColor = vec3(1.0) - exp(-finalColor * 1.0);
+finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
  
 FragColor = vec4( finalColor, opacityV * alpha ); 
  

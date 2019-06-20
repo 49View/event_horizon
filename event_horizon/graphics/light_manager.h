@@ -122,7 +122,7 @@ private:
 	std::unique_ptr<ProgramUniformSet> mLigthingUniform;
 
 	int mMaxLights = 16;
-
+    V4f hdrExposures = V4f::WHITE;
 	//	DataVisualizerWindow* dvWindow;
 };
 
