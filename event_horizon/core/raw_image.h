@@ -14,6 +14,11 @@ enum class RawImageMemory {
     Compressed
 };
 
+enum class ImagaHeaderType {
+    STB_Compatible,
+    EXR,
+};
+
 class Vector4f;
 
 class RawImage : public ImageParams {

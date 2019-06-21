@@ -8,6 +8,8 @@
 #include <core/http/basen.hpp>
 #include <core/util.h>
 #include <core/serializebin.hpp>
+#define TINYEXR_IMPLEMENTATION
+#include <core/tinyexr.h>
 
 RawImage::RawImage( unsigned int _w, unsigned int _h, int _channels, const uint32_t _col ) {
     width = _w;
@@ -194,12 +196,41 @@ RawImage RawImage::NORMAL4x4() {                           //AABBGGRR
     return RawImage{ 4, 4, 3, static_cast<uint32_t>(0xffff7f7f) };
 }
 
+ImagaHeaderType detectHeader( const unsigned char* _buffer, size_t _length ) {
+
+    EXRVersion exr_headers;
+    int ret = ParseEXRVersionFromMemory(&exr_headers, _buffer, _length );
+    if ( ret != 0 ) {
+        return ImagaHeaderType::STB_Compatible;
+    }
+
+    return ImagaHeaderType::EXR;
+}
+
 void RawImage::bufferDecode( const unsigned char* _buffer, size_t _length ) {
-    // ### fix this!!
-    stbi_set_flip_vertically_on_load(true);
-    auto _mt = RawImageMemory::Compressed;
-    rawBtyes = imageUtil::decodeFromMemory( ucchar_p{_buffer, _length},
-                                            width, height, channels, bpp, _mt == RawImageMemory::Raw );
+
+    auto ht = detectHeader( _buffer, _length );
+    if ( ht == ImagaHeaderType::EXR ) {
+        float* image;
+        const char *err;
+
+        int ret = LoadEXRFromMemory(&image, &width, &height, _buffer, _length, &err);
+        if (ret != 0) {
+            LOGR( "Load EXR err: %s\n", err);
+        }
+        rawBtyes = std::make_unique<uint8_t[]>(width*height*4*4);
+        memcpy( rawBtyes.get(), image, width*height*4*4);
+        channels = 4;
+        bpp = 32;
+        free(image);
+    } else {
+        // ### fix this!!
+        stbi_set_flip_vertically_on_load(true);
+        auto _mt = RawImageMemory::Compressed;
+        rawBtyes = imageUtil::decodeFromMemory( ucchar_p{_buffer, _length},
+                                                width, height, channels, bpp, _mt == RawImageMemory::Raw );
+    }
+
     setFormatFromChannels();
 }
 
