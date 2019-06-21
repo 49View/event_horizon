@@ -15,7 +15,7 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, int _channels, const uint3
     width = _w;
     height = _h;
     channels = _channels;
-    rawBtyes = std::make_unique<uint8_t[]>( width * height * channels );
+    rawBtyes = std::make_unique<uint8_t[]>( memorySize() );
     for ( int t = 0; t < height; t++ ){
         for ( int q = 0; q < width; q++ ){
             std::memcpy( rawBtyes.get() + ((t * width * channels) + q*channels), &_col, channels );
@@ -28,7 +28,7 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, const V4f& _value, int _bp
     height = _h;
     channels = 4;
     bpp = _bpp;
-    rawBtyes = std::make_unique<uint8_t[]>( width * height * channels * 4 );
+    rawBtyes = std::make_unique<uint8_t[]>( memorySize() );
     for ( int t = 0; t < height; t++ ){
         for ( int q = 0; q < width; q++ ){
             std::memcpy( rawBtyes.get() + ((t * width * channels) + q*bppStride()), &_value, bppStride() );
@@ -40,8 +40,8 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, const uint8_t _col ) {
     width = _w;
     height = _h;
     channels = 1;
-    rawBtyes = std::make_unique<uint8_t[]>( width * height );
-    std::memset( rawBtyes.get(), width * height, _col);
+    rawBtyes = std::make_unique<uint8_t[]>( memorySize() );
+    std::memset( rawBtyes.get(), memorySize(), _col);
 }
 
 RawImage::RawImage( unsigned int _w, unsigned int _h, const float _col ) {
@@ -49,8 +49,8 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, const float _col ) {
     height = _h;
     channels = 1;
     auto _colval = static_cast<uint8_t >(clamp( _col * 255.0f, 0.0f, 255.0f) );
-    rawBtyes = std::make_unique<uint8_t[]>( width * height );
-    std::memset( rawBtyes.get(), width * height, _colval);
+    rawBtyes = std::make_unique<uint8_t[]>( memorySize() );
+    std::memset( rawBtyes.get(), memorySize(), _colval);
 }
 
 RawImage::RawImage( int width,
@@ -88,9 +88,8 @@ RawImage rawImageSubImage( const RawImage& _source, const JMATH::Rect2f& _area,
 }
 
 void RawImage::copyFrom( const char *buffer ) {
-    auto bsize = width * height * channels;
-    rawBtyes = std::make_unique<uint8_t[]>( bsize );
-    std::memcpy( rawBtyes.get(), buffer, bsize );
+    rawBtyes = std::make_unique<uint8_t[]>( memorySize() );
+    std::memcpy( rawBtyes.get(), buffer, memorySize() );
 }
 
 void RawImage::grayScale() {
@@ -218,10 +217,10 @@ void RawImage::bufferDecode( const unsigned char* _buffer, size_t _length ) {
         if (ret != 0) {
             LOGR( "Load EXR err: %s\n", err);
         }
-        rawBtyes = std::make_unique<uint8_t[]>(width*height*4*4);
-        memcpy( rawBtyes.get(), image, width*height*4*4);
         channels = 4;
-        bpp = 32;
+        bpp = sizeof(float) * 8;
+        rawBtyes = std::make_unique<uint8_t[]>(memorySize());
+        memcpy( rawBtyes.get(), image, memorySize());
         free(image);
     } else {
         // ### fix this!!

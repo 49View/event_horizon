@@ -17,6 +17,6 @@ void main()
 {
     vec2 uv = SampleSphericalMap(normalize(v_texCoord));
     color = texture(colorTexture, uv);
-    color.xyz = vec3(1.0) - exp(-color.xyz * 1.0);
+    color.xyz = vec3(1.0) - exp(-color.xyz * 2.0);
 }
     

@@ -40,6 +40,7 @@ public:
         width = _val.width;
         height = _val.height;
         channels = _val.channels;
+        bpp = _val.bpp;
         rawBtyes = std::move(_val.rawBtyes);
     }
 

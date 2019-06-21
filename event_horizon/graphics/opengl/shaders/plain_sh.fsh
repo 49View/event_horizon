@@ -34,7 +34,7 @@ void main() {
     //albedo = pow(albedo, vec3(1.0/2.2));
 //    albedo *= diffuseColor;
    //roughness = pow(roughness, 1.0/2.2);
-
+ 
    vec3 N = getNormalFromMap(texCoords);
 
    shadow_code

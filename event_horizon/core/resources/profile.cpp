@@ -54,10 +54,10 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
                 }
 
                 auto pathSan = sanitizePath( lPath, path->closed );
-                LOGR("New Path");
-                for ( const auto& ppp : pathSan ) {
-                    LOGRS( ppp );
-                }
+//                LOGR("New Path");
+//                for ( const auto& ppp : pathSan ) {
+//                    LOGRS( ppp );
+//                }
 
 //                mPaths.emplace_back( lPath, (path->closed && path->npts % 4 != 0) );
                 mPaths.emplace_back( pathSan, path->closed );

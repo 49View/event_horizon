@@ -103,6 +103,10 @@ struct ImageParams {
         return channels * (bpp/8);
     }
 
+    size_t memorySize() const {
+        return width * height * channels * (bpp/8);
+    }
+
     void setFormatFromChannels() {
         if ( bpp == 8 ) {
             if ( channels==1 ) outFormat = PIXEL_FORMAT_LUMINANCE;//PIXEL_FORMAT_R;
