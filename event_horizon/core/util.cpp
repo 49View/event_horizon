@@ -297,6 +297,7 @@ bool isFileExtAnImage( const std::string& _ext ) {
 	if ( ext == ".gif" ) return true;
 	if ( ext == ".hdr" ) return true;
 	if ( ext == ".pic" ) return true;
+	if ( ext == ".exr" ) return true;
 
 	return false;
 }

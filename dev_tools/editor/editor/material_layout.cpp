@@ -10,8 +10,6 @@
 #include <core/descriptors/uniform_names.h>
 #include <core/resources/resource_builder.hpp>
 
-#include <poly/resources/geom_builder.h>
-
 #include <graphics/imgui/imgui.h>
 #include <graphics/texture_manager.h>
 
