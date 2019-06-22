@@ -7,6 +7,8 @@
 #include <graphics/shader_material.hpp>
 #include <core/descriptors/uniform_names.h>
 
+namespace JMATH { class AABB; }
+
 template <typename V>
 class VPBuilder {
 public:
@@ -32,6 +34,7 @@ public:
     VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
     VPBuilder& t( std::shared_ptr<Matrix4f> _t ) { transformMatrix = _t; return *this; }
     VPBuilder& t( const Matrix4f& _t ) { transformMatrix = std::make_shared<Matrix4f>(_t); return *this; }
+    VPBuilder& b( std::shared_ptr<AABB> _value ) { bbox3d = _value; return *this; }
 
     auto build() {
         if ( bStraightRef ) {
@@ -39,6 +42,7 @@ public:
                     gpuDataSP,
                     renderMaterialSP,
                     transformMatrix,
+                    bbox3d,
                     tag,
                     name );
         }
@@ -46,6 +50,7 @@ public:
                rr.addVDataResource( cpuVBIB{ ps }, name ),
                rr.addMaterialResource( shaderMaterial, name ),
                transformMatrix,
+               bbox3d,
                tag,
                name );
     }
@@ -59,6 +64,7 @@ private:
     std::shared_ptr<GPUVData> gpuDataSP;
     std::shared_ptr<RenderMaterial> renderMaterialSP;
     std::shared_ptr<Matrix4f> transformMatrix;
+    std::shared_ptr<AABB> bbox3d;
     std::string name;
     bool bStraightRef = false;
 };

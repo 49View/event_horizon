@@ -12,7 +12,7 @@
 #include <core/soa_utils.h>
 #include <core/resources/resource_serialization.hpp>
 
-class VData : public Boxable<JMATH::AABB> {
+class VData : public BoxableRef<JMATH::AABB> {
 public:
     VData() = default;
     size_t numIndices() const;

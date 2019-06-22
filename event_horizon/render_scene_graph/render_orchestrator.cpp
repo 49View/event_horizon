@@ -86,6 +86,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
                   n(_geom->UUiD()).
                   g(_geom->Tag()).
                   t(_geom->getLocalHierTransform()).
+                  b(_geom->BBox3d()).
                   build();
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);
         this->RR().invalidateOnAdd();

@@ -154,15 +154,15 @@ public:
             this->BBox3d(AABB::INVALID);
             if ( !data.empty() ) {
                 for ( const auto & bd : data ) {
-                    this->BBox3d().merge( bd.BBox3d().transform( *mLocalHierTransform ) );
+                    this->BBox3d()->merge( bd.BBox3dPtr()->transform( *mLocalHierTransform ) );
                 }
             }
 
             for ( auto& c : children ) {
-                this->bbox3d.merge( c->calcCompleteBBox3dRec() );
+                this->BBox3d()->merge( c->calcCompleteBBox3dRec() );
             }
 
-            return this->bbox3d;
+            return this->BBox3dCopy();
         } else {
             return AABB::INVALID;
         }
@@ -176,7 +176,7 @@ public:
 //
     void calcCompleteBBox3d() {
         if constexpr ( std::is_same_v<B, AABB> ) {
-            this->bbox3d = calcCompleteBBox3dRec();
+            this->BBox3d(calcCompleteBBox3dRec());
         }
     }
 
@@ -353,7 +353,7 @@ private:
         assingNewUUID();
         father = _father;
         Name( _source.Name() );
-        this->BBox3d( _source.BBox3d() );
+        this->BBox3d( _source.BBox3dCopy() );
         data = _source.data;
         _source.TRS().clone(mTRS);
         mLocalTransform = _source.mLocalTransform;

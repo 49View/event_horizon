@@ -109,13 +109,7 @@ protected:
     }
 
     void render() {
-//        ImGui::NewFrame();
-//        for ( auto& [k,v] : StateMachine()->getRigs() ) {
-//            v->renderControls(this);
-//        }
         RR().directRenderLoop();
-//        ImGui::Render();
-
         WH::flush();
     }
 

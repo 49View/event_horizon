@@ -10,6 +10,8 @@ class Renderer;
 class Matrix4f;
 class GPUVData;
 
+namespace JMATH { class AABB; }
+
 struct cpuVertexDescriptor {
     int size = 0;
     uintptr_t offset = 0;
@@ -50,6 +52,7 @@ public:
     VPList( std::shared_ptr<GPUVData> value,
             std::shared_ptr<RenderMaterial> _mat,
             const std::shared_ptr<Matrix4f>& _transform,
+            const std::shared_ptr<AABB>& _bbox3d,
             uint64_t _tag,
             const UUID& _uuid );
 
@@ -107,8 +110,9 @@ public:
     void drawWith( RenderMaterial* _material, Program* _program = nullptr );
 
 private:
-    std::shared_ptr<GPUVData> gpuData;
-    std::shared_ptr<RenderMaterial> material;
-    std::shared_ptr<Matrix4f> mTransform;
+    std::shared_ptr<GPUVData>           gpuData;
+    std::shared_ptr<RenderMaterial>     material;
+    std::shared_ptr<Matrix4f>           mTransform;
+    std::shared_ptr<AABB>               bbox3d;
     uint64_t mTag = GT_Generic;
 };

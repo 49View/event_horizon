@@ -25,6 +25,9 @@
 #include <graphics/shader_material.hpp>
 #include <graphics/render_material_manager.hpp>
 #include <graphics/gpuv_data_manager.hpp>
+#ifdef _USE_IMGUI_
+#include <graphics/imgui/imgui.h>
+#endif
 
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -179,6 +182,10 @@ void Renderer::setGlobalTextures() {
 
 void Renderer::directRenderLoop() {
 
+#ifdef _USE_IMGUI_
+    ImGui::NewFrame();
+#endif
+
     CB_U().start();
     CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
     CB_U().pushCommand( { CommandBufferCommandName::clearDefaultFramebuffer } );
@@ -209,6 +216,10 @@ void Renderer::directRenderLoop() {
     renderCBList();
 
 //    VRM.update();
+
+#ifdef _USE_IMGUI_
+    ImGui::Render();
+#endif
 
     mUpdateCounter++;
 }

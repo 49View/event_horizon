@@ -16,6 +16,22 @@ struct EmptyBox {
 template <typename T = JMATH::AABB>
 class Boxable {
 public:
+    Boxable() { bbox3d = std::make_shared<T>(); }
+
+    inline const std::shared_ptr<T>& BBox3d() const { return bbox3d; }
+    inline std::shared_ptr<T>& BBox3d() { return bbox3d; }
+    inline T BBox3dCopy() const { return *bbox3d.get(); }
+    inline const T* BBox3dPtr() const { return bbox3d.get(); }
+    inline void BBox3d( const Vector3f& bmix, const Vector3f& bmax ) { *bbox3d.get() = T{ bmix, bmax }; }
+    inline void BBox3d( const T& _value ) { *bbox3d.get() = _value; }
+
+protected:
+    std::shared_ptr<T> bbox3d;
+};
+
+template <typename T = JMATH::AABB>
+class BoxableRef {
+public:
     inline const T& BBox3d() const { return bbox3d; }
     inline T& BBox3d() { return bbox3d; }
     inline T  BBox3dCopy() const { return bbox3d; }

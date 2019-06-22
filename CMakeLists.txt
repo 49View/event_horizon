@@ -1100,6 +1100,9 @@ macro(set_cpp_flags)
     if ( _ULTRADEBUG )
         add_definitions(-D_ULTRADEBUG=1)
     endif()
+    if ( _USE_IMGUI_ )
+        add_definitions(-D_USE_IMGUI_=1)
+    endif()
 
     set_include_paths()
 
