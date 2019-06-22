@@ -165,6 +165,7 @@ public:
 
 	void addToCommandBuffer( CommandBufferLimitsT _entry );
 	void addToCommandBuffer( std::vector<std::shared_ptr<VPList>> _map,
+                             CameraRig* _cameraRig = nullptr,
 							 std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr,
                              Program* _forceProgram = nullptr,
                              float _alphaDrawThreshold = 0.0f );
@@ -205,8 +206,8 @@ public:
 
 protected:
 	void clearCommandList();
-	void renderCBList();
-	void renderCommands( int eye );
+	size_t renderCBList();
+	size_t renderCommands( int eye );
 
 protected:
 	std::shared_ptr<ShaderManager>          sm;
@@ -225,6 +226,7 @@ protected:
     std::unordered_map<int, std::shared_ptr<Framebuffer>> mProbingsFB;
 
 	int mUpdateCounter = 0;
+	size_t mDrawCallsPerFrame = 0;
 	bool bInvalidated = false;
 
 	std::vector<std::shared_ptr<RLTarget>> mTargets;

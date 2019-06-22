@@ -98,10 +98,11 @@ void CommandBuffer::sort() {
 //               []( const auto& a, const auto& b ) -> bool { return a.mHash > b.mHash; } );
 }
 
-void CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer* cb ) const {
+size_t CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer* cb ) const {
     if ( Type() == CommandBufferEntryCommandType::Comamnd ) {
 //        LOGRS("        Command: " << commandToNmeHumanReadable(mCommand.name) );
         mCommand.issue( rr, cb );
+        return 0;
     } else {
 //        LOGRS("        Render geom: " << mVP->mVPList.Name() );
         if ( mVP->mMaterial ) {
@@ -109,15 +110,18 @@ void CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer* cb ) const {
         } else {
             mVP->mVPList->draw(mVP->mProgram);
         }
+        return 1;
     }
 }
 
-void CommandBuffer::render( Renderer& rr ) {
+size_t CommandBuffer::render( Renderer& rr ) {
 //    LOGR("CommandList RENDER START %d", mCommandList.size() );
 //    LOGR("****************************************************************************");
+    size_t ret = 0;
     for ( const auto& i : mCommandList ) {
-        i.run( rr, this );
+        ret += i.run( rr, this );
     }
+    return ret;
 //    LOGR("****************************************************************************");
 //    LOGR("CommandList RENDER END");
 }
@@ -206,10 +210,12 @@ void CommandBufferList::startList( std::shared_ptr<RLTarget> _target, CommandBuf
     mCurrent->mTarget = _target;
 }
 
-void CommandBufferList::render( [[maybe_unused]] int eye ) {
+size_t CommandBufferList::render( [[maybe_unused]] int eye ) {
+    size_t numDrawCalls = 0;
     for ( auto& cb : mCommandBuffers ) {
-        cb.render( rr );
+        numDrawCalls += cb.render( rr );
     }
+    return numDrawCalls;
 }
 
 void CommandBufferList::getCommandBufferEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& wp ) {

@@ -8,6 +8,7 @@
 #include <core/suncalc/sun_builder.h>
 #include <core/zlib_util.h>
 #include <core/camera_rig.hpp>
+#include <core/camera.h>
 #include <core/tar_util.h>
 #include <core/profiler.h>
 #include <core/v_data.hpp>
@@ -213,25 +214,31 @@ void Renderer::directRenderLoop() {
     }
     mChangeMaterialCallbacks.clear();
 
-    renderCBList();
+    mDrawCallsPerFrame = renderCBList();
 
 //    VRM.update();
 
 #ifdef _USE_IMGUI_
+    ImGui::Begin("Renderer Console");
+    ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate );
+    ImGui::Text("Current FrameRate (%.1f FPS)", ImGui::GetIO().Framerate );
+    ImGui::Text("Number drawcalls: %lu", mDrawCallsPerFrame );
+    ImGui::End();
+
     ImGui::Render();
 #endif
 
     mUpdateCounter++;
 }
 
-void Renderer::renderCBList() {
+size_t Renderer::renderCBList() {
 //    if ( VRM.IsOn()) {
 //        for ( int eye = 0; eye < 2; eye++ ) {
 //            renderCommands( eye );
 //        }
 //    } else
         {
-        renderCommands( -1 );
+        return renderCommands( -1 );
     }
 
 //    if ( VRM.IsOn()) {
@@ -259,9 +266,9 @@ void Renderer::removeFromCL( const UUID& _uuid ) {
     }
 }
 
-void Renderer::renderCommands( int eye ) {
+size_t Renderer::renderCommands( int eye ) {
     //PROFILE_BLOCK("Total Render render");
-    CB_U().render( eye );
+    return CB_U().render( eye );
 }
 
 void Renderer::VPL( const int _bucket, std::shared_ptr<VPList> nvp, float alpha ) {
@@ -411,11 +418,19 @@ void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {
 }
 
 void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
+                                   CameraRig* _cameraRig,
                                    std::shared_ptr<RenderMaterial> _forcedMaterial,
                                    Program* _forceProgram,
                                    float _alphaDrawThreshold ) {
+    Camera* cam = _cameraRig ? _cameraRig->getCamera().get() : nullptr;
+    bool addVP = true;
     for ( const auto& vp : _map ) {
-        CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram, _alphaDrawThreshold );
+        if ( cam ) {
+            addVP = cam->frustomClipping( vp->BBox3d() );
+        }
+        if ( addVP ) {
+            CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram, _alphaDrawThreshold );
+        }
     }
 }
 

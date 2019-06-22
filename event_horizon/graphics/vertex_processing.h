@@ -102,6 +102,8 @@ public:
     void updateGPUVData( cpuVBIB&& _vbib );
     void remapUVs( uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart );
 
+    const AABB& BBox3d() const;
+
     bool hasTag( uint64_t _tag) const;
     uint64_t tag() const { return mTag; }
     void tag( const uint64_t tag ) { mTag = tag; }

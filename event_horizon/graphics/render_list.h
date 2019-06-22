@@ -156,7 +156,8 @@ public:
     CommandBufferEntryCommand( CommandBufferCommand _command );
     CommandBufferEntryCommand( CommandBufferEntry _vp );
 
-    void run( Renderer& rr, CommandBuffer* cb ) const;
+    // Returns the number of drawcalls, 0 if it's just setting state
+    size_t run( Renderer& rr, CommandBuffer* cb ) const;
 
     CommandBufferEntryCommandType Type() const;
     void Type( CommandBufferEntryCommandType type );
@@ -178,7 +179,7 @@ public:
     void push( const CommandBufferEntry& entry );
     void push( const CommandBufferCommand& entry );
     void clear();
-    void render( Renderer& rr );
+    size_t render( Renderer& rr );
     void sort();
     bool findEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _wp );
     void                         postBlit();
@@ -225,7 +226,7 @@ public:
     void pushCommand( const CommandBufferCommand& _cmd );
 
     void startList( std::shared_ptr<RLTarget> _target, CommandBufferFlags flags = CommandBufferFlags::CBF_None );
-    void render( int eye );
+    size_t render( int eye );
     void setCameraUniforms( std::shared_ptr<Camera> c0 );
     void setFramebufferTexture( const FrameBufferTextureValues& values );
     void getCommandBufferEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& wp );

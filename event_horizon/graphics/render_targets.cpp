@@ -119,7 +119,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
         mSkybox->render();
         for ( const auto& [k, vl] : rr.CL() ) {
             if ( isKeyInRange(k) ) {
-                rr.addToCommandBuffer( vl.mVList, nullptr, rr.P( S::SH_NOTEXTURE ).get());
+                rr.addToCommandBuffer( vl.mVList, nullptr, nullptr, rr.P( S::SH_NOTEXTURE ).get());
             }
         }
     });
@@ -174,7 +174,7 @@ void RLTargetPBR::addShadowMaps() {
 
             for ( const auto& [k, vl] : rr.CL() ) {
                 if ( isKeyInRange(k) ) {
-                    rr.addToCommandBuffer( vl.mVList, rr.getMaterial(S::SHADOW_MAP), nullptr, 0.91f );
+                    rr.addToCommandBuffer( vl.mVList, nullptr, rr.getMaterial(S::SHADOW_MAP), nullptr, 0.91f );
                 }
             }
         }
@@ -415,7 +415,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k, CheckEnableBucket::True) ) {
-            rr.addToCommandBuffer( vl.mVList );
+            rr.addToCommandBuffer( vl.mVList, cameraRig.get() );
         }
     }
 

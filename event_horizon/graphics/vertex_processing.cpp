@@ -100,3 +100,7 @@ void VPList::updateGPUVData( cpuVBIB&& _vbib ) {
 void VPList::remapUVs( uint32_t *_indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart ) {
     gpuData->updateUVs( _indices, _pos, _uvs, _index, _xrefStart );
 }
+
+const AABB& VPList::BBox3d() const {
+    return *bbox3d;
+}
