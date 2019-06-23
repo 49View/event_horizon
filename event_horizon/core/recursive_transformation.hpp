@@ -105,7 +105,7 @@ public:
 
     template <typename ...Args>
     void pushData( Args&&... args ) {
-        data.emplace_back( T{std::forward<Args>( args )...} );
+        data.emplace_back( std::move(T{std::forward<Args>( args )...}) );
     }
 
     void updateAnim() {

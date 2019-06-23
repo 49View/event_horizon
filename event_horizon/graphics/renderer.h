@@ -71,7 +71,7 @@ struct RendererDrawingSet {
     V3fVectorWrap verts;
     V3fVectorOfVectorWrap multiVerts;
     Rect2f rect = Rect2f::MIDENTITY();
-    float roundedCorner = 0.05f;
+    float roundedCorner = 0.01f;
     C4f color = C4f::WHITE;
     float width = 0.1f;
     FDS fds;

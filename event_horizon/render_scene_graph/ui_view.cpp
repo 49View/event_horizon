@@ -42,8 +42,8 @@ constexpr static uint64_t UI2dMenu = CommandBufferLimits::UI2dStart + 1;
 
 void UIElement::loadResource( CResourceRef _idb ) {
     this->owner->loaded( _idb );
-    auto statusColor = owner->colorFromStatus( status );
-    backgroundVP = this->owner->RR().draw<DRect2dRounded>( UI2dMenu, bbox, statusColor );
+//    auto statusColor = owner->colorFromStatus( status );
+    backgroundVP = this->owner->RR().draw<DRect2dRounded>( UI2dMenu, bbox, C4f::WHITE.A(0.10f) );
     if ( !foreground.empty() ) {
         foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, bbox, foreground );
     }
@@ -123,7 +123,7 @@ void UIElement::setStatus( UITapAreaStatus _status ) {
 
 ResourceRef UIView::isTapInArea( const V2f& _tap ) const {
     V2f tapS = (_tap / getScreenSizef) * getScreenAspectRatioVector;
-    for ( const auto& [k,v] : tapAreas ) {
+    for ( const auto& [k,v] : elements ) {
         if ( v->Data().contains( tapS ) ) {
             return k;
         }
@@ -132,7 +132,7 @@ ResourceRef UIView::isTapInArea( const V2f& _tap ) const {
 }
 
 UIElementSP UIView::TapArea( CResourceRef _key ) {
-    return tapAreas.find(_key)->second;
+    return elements.find( _key)->second;
 }
 
 bool UIView::isTouchDownInside( const V2f& _p ) {
@@ -156,7 +156,7 @@ CResourceRef UIView::touchDownKeyCached() const {
 }
 
 void UIView::touchedUp( CResourceRef _key ) {
-    for ( auto& [k, button] : tapAreas ) {
+    for ( auto& [k, button] : elements ) {
         bool touchUpGroup = false;
         if ( k == "1" || k == "2" || k == "3" ) {
             touchUpGroup = _key == "1" || _key == "2" || _key == "3";
@@ -169,13 +169,13 @@ void UIView::touchedUp( CResourceRef _key ) {
 }
 
 void UIView::hoover( CResourceRef _key) {
-    for ( auto& [k, button] : tapAreas ) {
+    for ( auto& [k, button] : elements ) {
         button->DataRef().hoover( k == _key );
     }
 }
 
 void UIView::loaded( CResourceRef _key ) {
-    tapAreas.at(_key)->DataRef().loaded();
+    elements.at( _key)->DataRef().loaded();
 }
 
 Renderer& UIView::RR() {
@@ -204,11 +204,11 @@ C4f UIView::colorFromStatus( UITapAreaStatus _status ) {
 }
 
 void UIView::setButtonStatus( CResourceRef _key, UITapAreaStatus _status ) {
-    tapAreas.at(_key)->DataRef().setStatus( _status );
+    elements.at( _key)->DataRef().setStatus( _status );
 }
 
 UITapAreaStatus UIView::getButtonStatus( CResourceRef _key ) const {
-    return tapAreas.at(_key)->DataRef().Status();
+    return elements.at( _key)->DataRef().Status();
 }
 
 bool UIView::isButtonEnabled( CResourceRef _key ) const {
@@ -218,16 +218,16 @@ bool UIView::isButtonEnabled( CResourceRef _key ) const {
 
 void UIView::transform( CResourceRef _key, float _duration, uint64_t _frameSkipper,
                         const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
-    tapAreas.at(_key)->DataRef().transform( _duration, _frameSkipper, _pos, _rot, _scale );
+    elements.at( _key)->DataRef().transform( _duration, _frameSkipper, _pos, _rot, _scale );
 }
 
 void UIView::loadResources() {
-    for ( auto& [k,v] : tapAreas ) {
+    for ( auto& [k,v] : elements ) {
         if ( v->DataRef().Type() == UIT::background() ) {
             v->DataRef().loadResource( k );
         }
     }
-    for ( auto& [k,v] : tapAreas ) {
+    for ( auto& [k,v] : elements ) {
         if ( v->DataRef().Type() != UIT::background() ) {
             v->DataRef().loadResource( k );
         }
@@ -254,11 +254,16 @@ C4f UIView::getPressedDownColor() const {
     return colorScheme.Secondary1(3);
 }
 
-void UIView::add( const std::string& _key, UIElementSP _elem ) {
+void UIView::add( UIElementSP _elem ) {
+
     _elem->DataRef().Owner(this);
     if ( !_elem->DataRef().FontRef().empty() ) {
         _elem->DataRef().Font( sg.FM().get(S::DEFAULT_FONT).get() );
     }
 
-    tapAreas[_key] = _elem;
+    elements[_elem->Data().Key()] = _elem;
+
+    for ( const auto& c : _elem->Children() ) {
+        add( c );
+    }
 }

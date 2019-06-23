@@ -147,7 +147,7 @@ void innerRoundCornerInter( std::vector<Vector3f>& ret, const V2f& tl1,  const V
 std::vector<Vector3f> roundedCornerFanFromRect( const JMATH::Rect2f& rect, float cornerAngle ) {
     std::vector<Vector3f> ret{};
 
-    float cornerRatio = 3.0f*cornerAngle * ( rect.ratio() > 1.0f ? rect.height() : rect.width() );
+    float cornerRatio = cornerAngle;
 
     V2f tl1 = rect.topLeft() + (V2f::Y_AXIS * cornerRatio);
     V2f tl2 = rect.topLeft() + (V2f::X_AXIS * cornerRatio);

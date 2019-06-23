@@ -113,6 +113,14 @@ struct UIForegroundIcon {
     std::string data;
 };
 
+template<class T>
+struct is_c_str
+        : std::integral_constant<
+                bool,
+                std::is_same_v<char const *, typename std::decay_t<T>> ||
+                std::is_same_v<char *, typename std::decay_t<T>>
+        > {};
+
 class UIElement : public Boxable<> {
 public:
     template <typename ...Args>
@@ -127,6 +135,9 @@ public:
 private:
     template<typename M>
     void parseParam( const M& _param ) {
+        if constexpr ( std::is_same_v<M, std::string > || is_c_str<M>::value ) {
+            key = _param;
+        }
         if constexpr ( std::is_same_v<M, UITapAreaType > ) {
             type = _param;
         }
@@ -154,8 +165,13 @@ private:
     }
 
 public:
+
     uint64_t Type() const {
         return type();
+    }
+
+    std::string Key() const {
+        return key;
     }
 
     const Rect2f& Area() const {
@@ -201,6 +217,7 @@ public:
     void setStatus( UITapAreaStatus _status );
 
 private:
+    std::string     key;
     UITapAreaType   type;
     Rect2f          bbox   = Rect2f::INVALID;
     UITapAreaStatus status = UITapAreaStatus::Enabled;
@@ -232,7 +249,7 @@ class UIView {
 public:
     UIView( SceneGraph& sg, RenderOrchestrator& rsg, const ColorScheme& cs ) : sg( sg ), rsg( rsg ), colorScheme(cs) {}
 
-    void add( CResourceRef _key, UIElementSP _elem );
+    void add( UIElementSP _elem );
 
     ResourceRef isTapInArea( const V2f& tap ) const;
     bool isTouchDownInside( const V2f& _p );
@@ -267,7 +284,7 @@ private:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
     ColorScheme colorScheme;
-    std::unordered_map<ResourceRef, UIElementSP> tapAreas;
+    std::unordered_map<ResourceRef, UIElementSP> elements;
     mutable ResourceRef touchDownStartingKey;
 };
 
