@@ -1,32 +1,30 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
-import Footer from "./Footer";
 import { connect } from "react-redux";
-import { setAlert } from "../../actions/alert";
-import Moment from "react-moment";
+import { logout } from "../../actions/auth";
 
-const Dashboard = ({ isAuthenticated }) => {
-  return (
-    <Fragment>
-      <h5 className="lead ">
-        <i className="fas fa-columns" />
-        &nbsp; Dashboard
-      </h5>
-    </Fragment>
-  );
+const Dashboard = ({ userstate, logout }) => {
+  // console.log(userstate);
+
+  if (!userstate.isAuthenticated) {
+    return <Redirect to="/" />;
+  }
+
+  return <Fragment />;
 };
 
 Dashboard.propTypes = {
   // setAlert: PropTypes.func.isRequired,
-  isAuthenticated: PropTypes.bool
+  userstate: PropTypes.object,
+  logout: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-  isAuthenticated: state.auth.isAuthenticated
+  userstate: state.auth
 });
 
 export default connect(
   mapStateToProps,
-  {}
+  { logout }
 )(Dashboard);

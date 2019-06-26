@@ -25,6 +25,8 @@ void EditorBackEnd::activateImpl() {
 
     backEnd->process_event( OnActivate{} );
 
+    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural });
+
     rsg.useSkybox(true);
     rsg.changeTime("summer noon");
     rsg.setRigCameraController<CameraControlFly>();
@@ -34,15 +36,15 @@ void EditorBackEnd::activateImpl() {
                            (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
 
 //    rsg.skyBoxDeltaInterpolation()->value = 0.0f;
-    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.32, GT::Scale( 0.6f ) );
+//    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.32, GT::Scale( 0.6f ) );
     sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
 
 //    sg.load<Geom>( "bed", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
-    sg.load<Geom>( "lauter,selije", [this](HttpResouceCBSign key) {
-        sg.GB<GT::Asset>( key );
-    } );
+//    sg.load<Geom>( "lauter,selije", [this](HttpResouceCBSign key) {
+//        sg.GB<GT::Asset>( key );
+//    } );
 
 //    sg.load<Geom>("curtain", [this](HttpResouceCBSign key) {
 //        sg.addNode( key );

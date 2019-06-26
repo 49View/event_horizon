@@ -7,16 +7,15 @@ import {
   AUTH_ERROR,
   LOGIN_SUCCESS,
   LOGIN_FAIL,
-  LOGOUT,
-  CLEAR_PROFILE
+  LOGOUT
 } from "./types";
 import setAuthToken from "../utils/setAuthToken";
 
 // Load User
 export const loadUser = () => async dispatch => {
-  if (localStorage.token) {
-    setAuthToken(localStorage.token);
-  }
+  if (localStorage.token === undefined) return {};
+
+  setAuthToken(localStorage.token);
 
   try {
     const res = await axios.get("/user");
@@ -43,7 +42,7 @@ export const register = ({ name, email, password }) => async dispatch => {
   const body = JSON.stringify({ name, email, password });
 
   try {
-    const res = await axios.post("/api/users", body, config);
+    const res = await axios.post("/createuser", body, config);
 
     dispatch({
       type: REGISTER_SUCCESS,
@@ -73,7 +72,6 @@ export const login = (email, password, project) => async dispatch => {
   };
 
   const body = JSON.stringify({ email, password, project });
-  console.log(body);
   try {
     const res = await axios.post("/gettoken", body, config);
 
@@ -97,8 +95,7 @@ export const login = (email, password, project) => async dispatch => {
   }
 };
 
-// // Logout / Clear Profile
-// export const logout = () => dispatch => {
-//   dispatch({ type: CLEAR_PROFILE });
-//   dispatch({ type: LOGOUT });
-// };
+// Logout / Clear Profile
+export const logout = () => dispatch => {
+  dispatch({ type: LOGOUT });
+};

@@ -4,6 +4,7 @@
   --dark-color: #343a40;
   --light-color: #f4f4f4;
   --danger-color: #dc3545;
+  --project-color: #dcd505;
   --success-color: #28a745;
 }
 
@@ -163,13 +164,32 @@ img {
 }
 
 .navdiv-title {
+  font-family: "Raleway", sans-serif;
+  width: 35%;
   display: table-cell;
   vertical-align: middle;
 }
 
+.navdiv-titletext {
+  color: var(--primary-color);
+}
+
+.navdiv-projecttext {
+  color: var(--project-color);
+}
+
+.project-navbar {
+  width: 30%;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
 .user-navbar {
+  width: 35%;
   display: table-cell;
   vertical-align: middle;
+  text-align: right;
 }
 
 .btn-primary,

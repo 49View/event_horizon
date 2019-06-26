@@ -1,13 +1,43 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { logout } from "../../actions/auth";
 
-const Navbar = auth => {
-  const proj = auth.auth.project;
-  const userName = ""; //auth.auth.user;
+const Navbar = ({ userstate, logout }) => {
+  let proj = "";
+  let userName = ""; //auth.auth.user;
   //const user = JSON.parse(auth.auth.user);
-  //console.log(auth.auth.user);
+  // console.log(userstate);
+
+  if (userstate.isAuthenticated) {
+    if (userstate.userdata && userstate.userdata.user.name)
+      userName = userstate.userdata.user.name;
+    if (userstate.project && userstate.project !== "") {
+      proj = userstate.project;
+    } else {
+      if (userstate.userdata && userstate.userdata.project)
+        proj = userstate.userdata.project;
+    }
+  }
+
+  const authlinks = (
+    <Fragment>
+      <h2>
+        <div className="project-navbar">
+          <span className="navdiv-projecttext">{proj}</span>
+        </div>
+      </h2>
+      <div className="user-navbar">
+        {userName}
+        <a onClick={logout} href="#!">
+          <i className="fas fa-sign-out-alt" /> Logout
+        </a>
+      </div>
+    </Fragment>
+  );
+
+  const nolinks = <Fragment />;
 
   return (
     <nav className="navbar bg-dark">
@@ -15,26 +45,28 @@ const Navbar = auth => {
         <div className="navdiv-title">
           <h1>
             <Link to="/">
-              <i className="fas fa-code" /> Event Horizon
+              <span className="navdiv-titletext">
+                <i className="fas fa-dice-d20" /> Event Horizon
+              </span>
             </Link>
           </h1>
         </div>
-        {/* <div className="user-navbar">Project: {proj}</div>
-        <div className="user-navbar">Name: {userName}</div> */}
+        {userstate.isAuthenticated ? authlinks : nolinks}
       </div>
     </nav>
   );
 };
 
 Navbar.propTypes = {
-  auth: PropTypes.object
+  userstate: PropTypes.object,
+  logout: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-  auth: state.auth
+  userstate: state.auth
 });
 
 export default connect(
   mapStateToProps,
-  {}
+  { logout }
 )(Navbar);

@@ -1,11 +1,8 @@
 import React, { Fragment, useEffect } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
-import Login from "./components/auth/Login";
-import Dashboard from "./components/layout/Dashboard";
 import Landing from "./components/layout/Landing";
-import Register from "./components/auth/Register";
-import Alert from "./components/layout/Alert";
+import Routes from "./components/routing/Routes";
 
 // Redux
 import { Provider } from "react-redux";
@@ -32,16 +29,12 @@ const App = () => {
           <Navbar />
           <Switch>
             <Route exact path="/" component={Landing} />
-            <section className="container">
-              <Alert />
-              <Route exact path="/dashboard" component={Dashboard} />
-              <Route exact path="/register" component={Register} />
-              <Route exact path="/login" component={Login} />
-            </section>
+            <Route component={Routes} />
           </Switch>
         </Fragment>
       </Router>
     </Provider>
   );
 };
+
 export default App;
