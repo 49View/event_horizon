@@ -121,9 +121,10 @@ const getTokenResponse = async (res, req, project, email, password) => {
         email: dbUser.email,
         guest: dbUser.guest
       };
-      project !== ""
-        ? project
-        : await userController.setDefaultUserProject(dbUser._id);
+      tokenInfo.project =
+        project !== ""
+          ? project
+          : await userController.setDefaultUserProject(dbUser._id);
     }
   } catch (ex) {
     console.log("gettoken failed", ex);
