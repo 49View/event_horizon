@@ -134,7 +134,7 @@ const getTokenResponse = async (res, req, project, email, password) => {
 
   if (error === null) {
     res.status(400).send();
-  } else if (error) {
+  } else if (error === true) {
     res.status(401).send(errmessage);
   } else {
     const d = new Date(0);
