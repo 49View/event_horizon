@@ -132,25 +132,26 @@ const getTokenResponse = async (res, req, project, email, password) => {
     error = true;
   }
 
-  if (error === null) {
-    res.status(400).send();
-  } else if (error === true) {
-    res.status(401).send(errmessage);
-  } else {
-    const d = new Date(0);
-    d.setUTCSeconds(tokenInfo.expires);
+  //   if (error === null) {
+  //     res.status(400).send();
+  //   } else if (error === true) {
+  //     res.status(401).send(errmessage);
+  //   } else
+  //   {
+  const d = new Date(0);
+  d.setUTCSeconds(tokenInfo.expires);
 
-    res
-      .cookie("eh_jwt", tokenInfo.token, {
-        httpOnly: true,
-        sameSite: false,
-        signed: true,
-        secure: true,
-        expires: d
-      })
-      .send(tokenInfo);
-    // next();
-  }
+  res
+    .cookie("eh_jwt", tokenInfo.token, {
+      httpOnly: true,
+      sameSite: false,
+      signed: true,
+      secure: true,
+      expires: d
+    })
+    .send(tokenInfo);
+  // next();
+  //   }
 };
 
 router.post("/getToken", async (req, res, next) => {
