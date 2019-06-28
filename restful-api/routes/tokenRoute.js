@@ -96,6 +96,7 @@ router.post(
 
 const getTokenResponse = async (res, req, project, email, password) => {
   let error = false;
+  let errmessage = "";
   let tokenInfo = null;
   const ipAddress = req.ip;
   const userAgent = req.headers["user-agent"] || null;
@@ -127,13 +128,14 @@ const getTokenResponse = async (res, req, project, email, password) => {
     }
   } catch (ex) {
     console.log("gettoken failed", ex);
+    errmessage = ex;
     error = true;
   }
 
   if (error === null) {
     res.status(400).send();
   } else if (error) {
-    res.status(401).send();
+    res.status(401).send(errmessage);
   } else {
     const d = new Date(0);
     d.setUTCSeconds(tokenInfo.expires);
