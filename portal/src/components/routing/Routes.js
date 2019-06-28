@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { Route, Switch } from "react-router-dom";
 import Register from "../auth/Register";
 import Login from "../auth/Login";
@@ -9,7 +9,7 @@ import PrivateRoute from "../routing/PrivateRoute";
 
 const Routes = () => {
   return (
-    <section className="container">
+    <Fragment>
       <Alert />
       <Switch>
         <Route exact path="/register" component={Register} />
@@ -17,7 +17,7 @@ const Routes = () => {
         <PrivateRoute exact path="/dashboard" component={Dashboard} />
         <Route component={NotFound} />
       </Switch>
-    </section>
+    </Fragment>
   );
 };
 

@@ -29,6 +29,7 @@
     "query-string": "^6.2.0",
     "serve-favicon": "~2.4.2",
     "sha256": "^0.2.0",
+    "sharp": "^0.22.1",
     "tar": "^4.4.8",
     "tar-stream": "^2.0.1",
     "uniqid": "^5.0.3",

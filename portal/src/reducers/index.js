@@ -1,10 +1,10 @@
 import { combineReducers } from "redux";
 import alert from "./alert";
 import auth from "./auth";
-// import entry from "./entry";
+import entities from "./entities";
 
 export default combineReducers({
   alert,
-  auth
-  // entry
+  auth,
+  entities
 });

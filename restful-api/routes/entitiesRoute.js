@@ -8,23 +8,7 @@ const zlib = require("zlib");
 
 router.get("/content/byId/:id", async (req, res, next) => {
   try {
-    const entityId = req.params.id;
-    const project = req.user.project;
-    //Check existing entity for use project (or public)
-    const currentEntity = await entityController.getEntityByIdProject(
-      project,
-      entityId,
-      true
-    );
-    if (currentEntity === null) {
-      throw "Invalid entity for user project";
-    }
-    const filePath = entityController.getFilePath(
-      currentEntity.project,
-      currentEntity.group,
-      currentEntity.metadata.name
-    );
-    const fileData = await fsController.cloudStorageEntityGet(filePath);
+    const fileData = await entityController.getEntityContent(entityId, project);
 
     fsController.writeFile(res, fileData);
   } catch (ex) {
@@ -146,10 +130,10 @@ router.get("/metadata/byGroupTags/:group/:tags", async (req, res, next) => {
   }
 });
 
-router.get("/metadata/list/:group", async (req, res, next) => {
+router.get("/metadata/list/:group/:project", async (req, res, next) => {
   try {
     const group = req.params.group;
-    const project = req.user.project;
+    const project = req.params.project;
     //Check existing entity for use project (or public)
     const foundEntities = await entityController.getEntitiesOfProjectWithGroup(
       project,
@@ -161,6 +145,32 @@ router.get("/metadata/list/:group", async (req, res, next) => {
     } else {
       res.sendStatus(204);
     }
+  } catch (ex) {
+    console.log("ERROR GETTING ENTITY METADATA BYGROUP: ", ex);
+    res.sendStatus(400);
+  }
+});
+
+router.put("/metadata/upserthumb/:id", async (req, res, next) => {
+  try {
+    const entityId = req.params.id;
+    res.sendStatus(await entityController.upsertThumb(entityId));
+  } catch (ex) {
+    console.log("ERROR GETTING ENTITY METADATA BYGROUP: ", ex);
+    res.sendStatus(400);
+  }
+});
+
+router.put("/metadata/upserthumbs/:group/:project", async (req, res, next) => {
+  try {
+    const entitiesId = await entityController.getEntitiesIdOfProjectWithGroup(
+      req.params.project,
+      req.params.group
+    );
+    for (e of entitiesId) {
+      await entityController.upsertThumb(e.id);
+    }
+    res.sendStatus(200);
   } catch (ex) {
     console.log("ERROR GETTING ENTITY METADATA BYGROUP: ", ex);
     res.sendStatus(400);
