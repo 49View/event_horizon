@@ -237,6 +237,7 @@ const updateById = async (entityId, updatedEntity) => {
 
 const gtr_dep0 = "dep0";
 const gtr_content = "content";
+const gtr_content_vector = "content_vector";
 
 const groupThumbnailCalcRule = group => {
   let contentType = null;
@@ -244,13 +245,15 @@ const groupThumbnailCalcRule = group => {
     contentType = gtr_dep0;
   } else if (group === "image") {
     contentType = gtr_content;
+  } else if (group === "profile") {
+    contentType = gtr_content_vector;
   }
   return contentType;
 };
 
 const groupThumbnailSourceContent = async (entity, gtr) => {
   try {
-    if (gtr === gtr_content) {
+    if (gtr === gtr_content || gtr === gtr_content_vector) {
       return await getEntityContent(entity._id, entity.project);
     }
     if (gtr === gtr_dep0) {
@@ -274,10 +277,15 @@ const upsertThumb = async (entityId, gtr) => {
     const content = await groupThumbnailSourceContent(entity, gtr);
 
     try {
-      const thumbBuff = await sharp(content.Body)
-        .resize(64, 64)
-        .toFormat("jpg")
-        .toBuffer();
+      let thumbBuff = null;
+      if (gtr === gtr_content_vector) {
+        thumbBuff = content.Body;
+      } else {
+        const thumbBuff = await sharp(content.Body)
+          .resize(64, 64)
+          .toFormat("jpg")
+          .toBuffer();
+      }
       entity.metadata.thumb = thumbBuff.toString("base64");
       await updateById(entityId, entity);
       return 201;
