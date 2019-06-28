@@ -211,7 +211,14 @@ exports.getToken = async (userId, project, ipAddress, userAgent) => {
   const issuedAt = Math.floor(Date.now() / 1000);
   const expiresAt = issuedAt + 60 * 60 * JWT_EXPIRES_AFTER_HOURS;
 
-  const session = "aa"; //await sessionController.createSession(userId, project, ipAddress, userAgent, issuedAt, expiresAt);
+  const session = await sessionController.createSession(
+    userId,
+    project,
+    ipAddress,
+    userAgent,
+    issuedAt,
+    expiresAt
+  );
   const jwt = await createJwtToken(session._id, issuedAt, expiresAt);
 
   return {
