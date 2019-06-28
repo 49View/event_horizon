@@ -77,7 +77,8 @@ img {
   );
   padding: 8px 16px;
   overflow: hidden;
-  font-size: 0.8rem;
+  font-size: 0.6rem;
+  text-align: center;
 }
 
 .EntityThumbnailInset {
@@ -119,8 +120,8 @@ img {
 
 input#search-bar {
   margin: 0 auto;
-  width: 50%;
   height: 45px;
+  width: 745px;
   padding: 0 20px;
   font-size: 1rem;
   border: 1px solid #d0cfce;
@@ -150,23 +151,23 @@ input#search-bar {
   float: left;
   /* width: 75px;
   height: 75px; */
-  top: 11px;
-  right: -822px;
+  top: -33px;
+  right: -710px;
 }
 
 .entitiesSearchBox {
-  padding-left: 144px;
-  padding-right: 48px;
-  height: 64px;
-  width: 100%;
+  margin: 12px 0px 12px 166px;
+  height: 45px;
+  width: 748px;
   overflow: hidden;
-  padding-top: 12px;
+  display: block;
 }
 
 .leftSideBar {
   width: 128px;
   height: 100%;
   float: left;
+  margin-top: 6px;
   /* display: inline-block; */
 }
 

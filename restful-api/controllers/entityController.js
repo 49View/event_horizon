@@ -235,19 +235,57 @@ const updateById = async (entityId, updatedEntity) => {
   return result !== null ? result.toObject() : null;
 };
 
-const upsertThumb = async entityId => {
-  const entity = await getEntityById(entityId);
-  //   if (entity.metadata.thumb.length == 0) {
-  const content = await getEntityContent(entityId, entity.project);
+const gtr_dep0 = "dep0";
+const gtr_content = "content";
 
-  const thumbBuff = await sharp(content.Body)
-    .resize(64, 64)
-    .toFormat("jpg")
-    .toBuffer();
-  entity.metadata.thumb = thumbBuff.toString("base64");
-  await updateById(entityId, entity);
-  return 201;
-  //   }
+const groupThumbnailCalcRule = group => {
+  let contentType = null;
+  if (group === "material") {
+    contentType = gtr_dep0;
+  } else if (group === "image") {
+    contentType = gtr_content;
+  }
+  return contentType;
+};
+
+const groupThumbnailSourceContent = async (entity, gtr) => {
+  try {
+    if (gtr === gtr_content) {
+      return await getEntityContent(entity._id, entity.project);
+    }
+    if (gtr === gtr_dep0) {
+      for (element of entity.metadata.deps) {
+        if (element.key === "image") {
+          const dep0Entity = await getEntityByHash(element.value[0]);
+          console.log(dep0Entity);
+          return await getEntityContent(dep0Entity._id, dep0Entity.project);
+        }
+      }
+    }
+  } catch (error) {
+    console.log("groupThumbnailSourceContent failed. Reason: " + error);
+    return null;
+  }
+};
+
+const upsertThumb = async (entityId, gtr) => {
+  const entity = await getEntityById(entityId);
+  if (entity.metadata.thumb.length == 0) {
+    const content = await groupThumbnailSourceContent(entity, gtr);
+
+    try {
+      const thumbBuff = await sharp(content.Body)
+        .resize(64, 64)
+        .toFormat("jpg")
+        .toBuffer();
+      entity.metadata.thumb = thumbBuff.toString("base64");
+      await updateById(entityId, entity);
+      return 201;
+    } catch (error) {
+      console.log("Upsert thumb on id " + entityId + " failed. Cause:" + error);
+      return 204;
+    }
+  }
   return 204;
 };
 
@@ -413,6 +451,7 @@ module.exports = {
   createEntity: createEntity,
   updateById: updateById,
   updateEntity: updateEntity,
+  groupThumbnailCalcRule: groupThumbnailCalcRule,
   upsertThumb: upsertThumb,
   deleteEntity: deleteEntity,
   deleteEntityComplete: deleteEntityComplete,

@@ -63,12 +63,10 @@ const Dashboard = ({ userstate, entities, getEntitiesOfGroup }) => {
   const searchBox = (
     <Fragment>
       <div className="entitiesSearchBox">
-        <form className="search-container">
-          <input type="text" id="search-bar" placeholder="Search for..." />
-          <a href="#!" className="search-icon">
-            <i className="fas fa-search" />
-          </a>
-        </form>
+        <input type="text" id="search-bar" placeholder="Search for..." />
+        <a href="#!" className="search-icon">
+          <i className="fas fa-search" />
+        </a>
       </div>
     </Fragment>
   );

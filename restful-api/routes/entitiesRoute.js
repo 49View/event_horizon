@@ -156,23 +156,33 @@ router.put("/metadata/upserthumb/:id", async (req, res, next) => {
     const entityId = req.params.id;
     res.sendStatus(await entityController.upsertThumb(entityId));
   } catch (ex) {
-    console.log("ERROR GETTING ENTITY METADATA BYGROUP: ", ex);
+    console.log("ERROR upserthumb: ", ex);
     res.sendStatus(400);
   }
 });
 
 router.put("/metadata/upserthumbs/:group/:project", async (req, res, next) => {
   try {
+    const group = req.params.group;
+
+    // Check the entity group has a valid rule to how to generate thumbnails
+    const gtr = entityController.groupThumbnailCalcRule(group);
+    if (gtr === null) {
+      res.sendStatus(204);
+      return;
+    }
+
     const entitiesId = await entityController.getEntitiesIdOfProjectWithGroup(
       req.params.project,
-      req.params.group
+      group
     );
+
     for (e of entitiesId) {
-      await entityController.upsertThumb(e.id);
+      await entityController.upsertThumb(e.id, gtr);
     }
     res.sendStatus(200);
   } catch (ex) {
-    console.log("ERROR GETTING ENTITY METADATA BYGROUP: ", ex);
+    console.log("ERROR upserthumbs: ", ex);
     res.sendStatus(400);
   }
 });
