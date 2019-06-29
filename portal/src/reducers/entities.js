@@ -1,6 +1,6 @@
 import {
   GET_ENTITIES,
-  GET_ENTITIES_DAILY,
+  UPDATE_ENTITIES_PARTIAL_SEARCH,
   ENTITY_ERROR,
   DELETE_ENTITY,
   ADD_ENTITY,
@@ -10,6 +10,7 @@ import {
 
 const initialState = {
   entries: [],
+  entriesFiltered: [],
   loading: true,
   error: {}
 };
@@ -21,13 +22,21 @@ export default function(state = initialState, action) {
     case GET_ENTITIES:
       return {
         ...state,
-        entries: payload,
+        entries: payload.data,
+        entriesFiltered: payload.data,
         loading: false
       };
-    case GET_ENTITIES_DAILY:
+    case UPDATE_ENTITIES_PARTIAL_SEARCH:
+      let filteredResult = [];
+      //   state.entriesFiltered.data.length = 0;
+      for (const e of state.entries) {
+        if (e.metadata.name.toLowerCase().includes(payload)) {
+          filteredResult.push(e);
+        }
+      }
       return {
         ...state,
-        entries_daily: payload,
+        entriesFiltered: filteredResult,
         loading: false
       };
     case GET_ENTITY:

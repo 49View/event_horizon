@@ -2,7 +2,10 @@ import React, { Fragment } from "react";
 import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { getEntitiesOfGroup } from "../../actions/entities";
+import {
+  getEntitiesOfGroup,
+  updateEntriesPartialSearch
+} from "../../actions/entities";
 import Entries from "./entities/Entries";
 
 const ObjectsStrID = "Objects";
@@ -12,7 +15,11 @@ const FontsStrID = "Fonts";
 const VectorsStrID = "Vectors";
 const ColorsStrID = "Colors";
 
-const Dashboard = ({ userstate, getEntitiesOfGroup }) => {
+const Dashboard = ({
+  userstate,
+  getEntitiesOfGroup,
+  updateEntriesPartialSearch
+}) => {
   // console.log(userstate);
 
   // useEffect(() => {
@@ -59,10 +66,19 @@ const Dashboard = ({ userstate, getEntitiesOfGroup }) => {
     </div>
   );
 
+  const onChange = e => {
+    updateEntriesPartialSearch(e.target.value.toLowerCase());
+  };
+
   const searchBox = (
     <Fragment>
       <div className="entitiesSearchBox">
-        <input type="text" id="search-bar" placeholder="Search for..." />
+        <input
+          type="text"
+          id="search-bar"
+          placeholder="Search for..."
+          onChange={e => onChange(e)}
+        />
         <a href="#!" className="search-icon">
           <i className="fas fa-search" />
         </a>
@@ -92,15 +108,16 @@ Dashboard.propTypes = {
   // setAlert: PropTypes.func.isRequired,
   userstate: PropTypes.object,
   entities: PropTypes.array,
-  getEntitiesOfGroup: PropTypes.func.isRequired
+  getEntitiesOfGroup: PropTypes.func.isRequired,
+  updateEntriesPartialSearch: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
   userstate: state.auth,
-  entities: state.entities.entries.data
+  entities: state.entities.entries
 });
 
 export default connect(
   mapStateToProps,
-  { getEntitiesOfGroup }
+  { getEntitiesOfGroup, updateEntriesPartialSearch }
 )(Dashboard);

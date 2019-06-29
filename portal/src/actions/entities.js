@@ -2,7 +2,8 @@ import axios from "axios";
 import { setAlert } from "./alert";
 import {
   GET_ENTITIES,
-  GET_ENTITIES_DAILY,
+  UPDATE_ENTITIES_PARTIAL_SEARCH,
+  ENTITIES_PARTIAL_SEARCH_ERROR,
   ENTITY_ERROR,
   DELETE_ENTITY,
   ADD_ENTITY,
@@ -27,18 +28,16 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
   }
 };
 
-// Get entries
-export const getEntriesDaily = () => async dispatch => {
+// Get entries partial search
+export const updateEntriesPartialSearch = partialString => dispatch => {
   try {
-    const res = await axios.get("/api/entries/dailycutoff");
-
     dispatch({
-      type: GET_ENTITIES_DAILY,
-      payload: res.data
+      type: UPDATE_ENTITIES_PARTIAL_SEARCH,
+      payload: partialString
     });
   } catch (err) {
     dispatch({
-      type: ENTITY_ERROR,
+      type: ENTITIES_PARTIAL_SEARCH_ERROR,
       payload: { msg: err.response }
     });
   }

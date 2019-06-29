@@ -89,8 +89,8 @@ Entries.propTypes = {
 };
 
 const mapStateToProps = state => ({
-  entries: state.entities.entries.data,
-  loading: state.entities.loading
+  entries: state.entities.entriesFiltered,
+  loading: state.auth.loading
 });
 
 export default connect(
