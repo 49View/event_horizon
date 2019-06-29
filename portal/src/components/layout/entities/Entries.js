@@ -61,14 +61,18 @@ const Entries = ({ entries, loading }) => {
     return <img width="64" height="64" src={entry.thumb} alt="" />;
   };
 
+  const viewMore = group => () => {};
+
   const thumbEntry = (
     <Fragment>
       {entitiesRes.map(entry => (
         <div className="EntityThumbnail" key={entry.id}>
-          <div className="EntityThumbnailInset">
-            {entityTypeSelector(entry)}
-          </div>
-          <div className="EntityThumbnailText">{entry.name}</div>
+          <a onClick={viewMore(entry.id)} href="#!">
+            <div className="EntityThumbnailInset">
+              {entityTypeSelector(entry)}
+            </div>
+            <div className="EntityThumbnailText">{entry.name}</div>
+          </a>
         </div>
       ))}
     </Fragment>
@@ -78,7 +82,7 @@ const Entries = ({ entries, loading }) => {
     <Spinner />
   ) : (
     <Fragment>
-      <div className="mainEntityArea">{thumbEntry}</div>
+      <div className="thumbsEntityArea">{thumbEntry}</div>
     </Fragment>
   );
 };

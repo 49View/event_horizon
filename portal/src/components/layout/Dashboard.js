@@ -7,6 +7,7 @@ import {
   updateEntriesPartialSearch
 } from "../../actions/entities";
 import Entries from "./entities/Entries";
+import EntriesEditor from "./entities/EntriesEditor";
 
 const ObjectsStrID = "Objects";
 const MaterialsStrID = "Materials";
@@ -86,19 +87,24 @@ const Dashboard = ({
     </Fragment>
   );
 
+  const leftSideBar = (
+    <div className="leftSideBar">
+      {leftSideEntry("fas fa-cube", ObjectsStrID)}
+      {leftSideEntry("fas fa-code-branch", MaterialsStrID)}
+      {leftSideEntry("fas fa-images", ImagesStrID)}
+      {leftSideEntry("fas fa-font", FontsStrID)}
+      {leftSideEntry("fas fa-vector-square", VectorsStrID)}
+      {leftSideEntry("fas fa-brush", ColorsStrID)}
+    </div>
+  );
+
   return (
     <Fragment>
       <div className="entitiesContainer">
         {searchBox}
-        <div className="leftSideBar">
-          {leftSideEntry("fas fa-cube", ObjectsStrID)}
-          {leftSideEntry("fas fa-code-branch", MaterialsStrID)}
-          {leftSideEntry("fas fa-images", ImagesStrID)}
-          {leftSideEntry("fas fa-font", FontsStrID)}
-          {leftSideEntry("fas fa-vector-square", VectorsStrID)}
-          {leftSideEntry("fas fa-brush", ColorsStrID)}
-        </div>
+        {leftSideBar}
         <Entries />
+        <EntriesEditor />
       </div>
     </Fragment>
   );

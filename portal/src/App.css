@@ -18,9 +18,14 @@
 body {
   font-family: "Raleway", sans-serif;
   font-size: 1rem;
-  line-height: 1.6;
+  /* line-height: 1.6; */
   background-color: #fff;
   color: #333;
+}
+
+.mainDesktopPageLayout {
+  width: 1280px;
+  margin: 0 auto;
 }
 
 .imagerotate {
@@ -79,6 +84,16 @@ img {
   overflow: hidden;
   font-size: 0.6rem;
   text-align: center;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
+}
+
+.EntityThumbnail:hover {
+  border: solid 1px rgba(23, 162, 184, 0.55);
+  background-image: linear-gradient(
+    rgba(23, 162, 184, 0.15),
+    rgba(23, 162, 184, 0)
+  );
+  box-shadow: 0 2px 1px 0 rgba(0, 0, 0, 0.2), 0 2px 1px 0 rgba(0, 0, 0, 0.19);
 }
 
 .EntityThumbnailInset {
@@ -91,6 +106,7 @@ img {
   padding: 0;
   width: 64px;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Utilities */
@@ -104,13 +120,12 @@ img {
 }
 
 .entitiesContainer {
-  width: 1920px;
-  height: 768px;
+  width: 1280px;
+  height: 720px;
   border-radius: 4px;
   /* border: 1px solid #d0cfce; */
   display: inline-block;
-  padding: 0 2%;
-  margin-top: 42px;
+  padding: 0 1%;
   margin-bottom: 3rem;
   background-image: linear-gradient(
     rgba(23, 162, 184, 0.06),
@@ -121,7 +136,7 @@ img {
 input#search-bar {
   margin: 0 auto;
   height: 45px;
-  width: 745px;
+  width: 758px;
   padding: 0 20px;
   font-size: 1rem;
   border: 1px solid #d0cfce;
@@ -149,16 +164,14 @@ input#search-bar {
 .search-icon {
   position: relative;
   float: left;
-  /* width: 75px;
-  height: 75px; */
-  top: -33px;
-  right: -710px;
+  top: -31px;
+  right: -723px;
 }
 
 .entitiesSearchBox {
-  margin: 12px 0px 12px 166px;
+  margin: 0.75% auto;
   height: 45px;
-  width: 748px;
+  width: 758px;
   overflow: hidden;
   display: block;
 }
@@ -167,19 +180,17 @@ input#search-bar {
   width: 128px;
   height: 100%;
   float: left;
-  margin-top: 6px;
-  /* display: inline-block; */
 }
 
 .leftSideBarGroup {
   width: 100%;
-  height: 7%;
+  height: 5%;
   padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  font-family: "Roboto";
-  font-size: 1rem;
+  font-family: "Roboto", sans-serif;
+  font-size: 0.8rem;
   font-style: thin;
   font-weight: 100;
   color: var(--primary-color-dark);
@@ -212,11 +223,23 @@ input#search-bar {
   float: right;
 }
 
-.mainEntityArea {
+.thumbsEntityArea {
   float: left;
-  width: 894px;
+  width: 234px;
   height: 88%;
-  padding-left: 32px;
+  margin-left: 1%;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  overflow-y: scroll;
+}
+
+.entryEditor {
+  float: left;
+  width: 867px;
+  height: 88%;
+  margin-left: 1%;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .geomThumbNotFound {
@@ -365,6 +388,7 @@ input#search-bar {
   display: table-cell;
   text-align: center;
   vertical-align: middle;
+  font-family: "Nunito", sans-serif;
 }
 
 .user-navbar {
@@ -519,17 +543,12 @@ button {
 
 /* Navbar */
 .navbar {
-  display: flex;
+  display: block;
   justify-content: space-between;
   align-items: center;
-  padding: 0.1rem 2rem;
-  position: fixed;
-  z-index: 1;
-  width: 100%;
-  top: 0;
-  border-bottom: solid 1px var(--primary-color);
-  opacity: 0.8;
+  padding: 0.25% 1%;
   height: 42px;
+  position: relative;
 }
 
 .navbar ul {

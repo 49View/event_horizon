@@ -6,17 +6,21 @@ import Alert from "../layout/Alert";
 import Dashboard from "../layout/Dashboard";
 import NotFound from "../layout/NotFound";
 import PrivateRoute from "../routing/PrivateRoute";
+import Navbar from "../../components/layout/Navbar";
 
 const Routes = () => {
   return (
     <Fragment>
-      <Alert />
-      <Switch>
-        <Route exact path="/register" component={Register} />
-        <Route exact path="/login" component={Login} />
-        <PrivateRoute exact path="/dashboard" component={Dashboard} />
-        <Route component={NotFound} />
-      </Switch>
+      <div className="mainDesktopPageLayout">
+        <Navbar />
+        <Alert />
+        <Switch>
+          <Route exact path="/register" component={Register} />
+          <Route exact path="/login" component={Login} />
+          <PrivateRoute exact path="/dashboard" component={Dashboard} />
+          <Route component={NotFound} />
+        </Switch>
+      </div>
     </Fragment>
   );
 };
