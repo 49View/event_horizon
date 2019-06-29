@@ -219,6 +219,14 @@ input#search-bar {
   padding-left: 32px;
 }
 
+.geomThumbNotFound {
+  font-size: 3rem;
+}
+
+.imageThumbNotFound {
+  font-size: 3rem;
+}
+
 /* Text Styles*/
 .x-large {
   font-size: 4rem;

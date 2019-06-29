@@ -37,14 +37,14 @@ void EditorBackEnd::activateImpl() {
 
 //    rsg.skyBoxDeltaInterpolation()->value = 0.0f;
 //    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.32, GT::Scale( 0.6f ) );
-    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
+//    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
 
 //    sg.load<Geom>( "bed", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
-//    sg.load<Geom>( "lauter,selije", [this](HttpResouceCBSign key) {
-//        sg.GB<GT::Asset>( key );
-//    } );
+    sg.load<Geom>( "lauter,selije", [this](HttpResouceCBSign key) {
+        sg.GB<GT::Asset>( key );
+    } );
 
 //    sg.load<Geom>("curtain", [this](HttpResouceCBSign key) {
 //        sg.addNode( key );

@@ -1,4 +1,3 @@
-import axios from "axios";
 import { setAlert } from "./alert";
 import {
   REGISTER_SUCCESS,
@@ -10,6 +9,7 @@ import {
   LOGOUT
 } from "./types";
 import setAuthToken from "../utils/setAuthToken";
+import axios from "axios";
 
 // Load User
 export const loadUser = () => async dispatch => {
@@ -82,7 +82,7 @@ export const login = (email, password, project) => async dispatch => {
 
     dispatch(loadUser());
   } catch (err) {
-    const errors = err.response.data.errors;
+    const errors = err.errors;
 
     if (errors) {
       errors.forEach(error => dispatch(setAlert(error.msg, "danger")));

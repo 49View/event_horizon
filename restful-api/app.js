@@ -50,7 +50,7 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Expose-Headers", "ETag");
   res.header(
     "Access-Control-Allow-Headers",
-    "access-control-allow-origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Accept, Cache-Control, Set-Cookie, authorization, x-eventhorizon-guest, ETag"
+    "access-control-allow-origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Accept, Cache-Control, Set-Cookie, x-eventhorizon-guest, ETag"
   );
   if (req.method === "OPTIONS") {
     res.status(200).send();
@@ -63,8 +63,6 @@ app.use("/", indexRoute);
 app.use("/", tokenRoute);
 
 app.use(authController.authenticate);
-// app.use(authController.authorize);
-
 app.use(projectController.checkProjectRoutes);
 
 app.use("/user", usersRoute);

@@ -10,8 +10,16 @@ import store from "./store";
 
 import { loadUser } from "./actions/auth";
 import setAuthToken from "./utils/setAuthToken";
+import axios from "axios";
 
 import "./App.css";
+
+if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+  // dev code
+} else {
+  axios.defaults.baseURL = "https://api.ateventhorizon.com";
+  // production code
+}
 
 if (localStorage.token) {
   setAuthToken(localStorage.token);
