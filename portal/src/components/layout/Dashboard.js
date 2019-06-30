@@ -71,8 +71,19 @@ const Dashboard = ({
     updateEntriesPartialSearch(e.target.value.toLowerCase());
   };
 
+  let proj = "";
+  if (userstate.project && userstate.project !== "") {
+    proj = userstate.project;
+  } else if (userstate.userdata && userstate.userdata.project) {
+    proj = userstate.userdata.project;
+  }
+
   const searchBox = (
     <Fragment>
+      <div className="project-navbar large">
+        <span className="navdiv-projecttext">{proj}</span>
+      </div>
+
       <div className="entitiesSearchBox">
         <input
           type="text"

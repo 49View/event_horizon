@@ -5,29 +5,18 @@ import { connect } from "react-redux";
 import { logout } from "../../actions/auth";
 
 const Navbar = ({ userstate, logout }) => {
-  let proj = "";
   let userName = ""; //auth.auth.user;
   //const user = JSON.parse(auth.auth.user);
   // console.log(userstate);
 
   if (userstate.isAuthenticated) {
-    if (userstate.userdata && userstate.userdata.user.name)
+    if (userstate.userdata && userstate.userdata.user.name) {
       userName = userstate.userdata.user.name;
-    if (userstate.project && userstate.project !== "") {
-      proj = userstate.project;
-    } else {
-      if (userstate.userdata && userstate.userdata.project)
-        proj = userstate.userdata.project;
     }
   }
 
   const authlinks = (
     <Fragment>
-      <h2>
-        <div className="project-navbar">
-          <span className="navdiv-projecttext">{proj}</span>
-        </div>
-      </h2>
       <div className="user-navbar">
         {userName}
         <a onClick={logout} href="#!">
