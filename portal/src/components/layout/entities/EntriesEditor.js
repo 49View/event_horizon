@@ -8,7 +8,11 @@ const EntriesEditor = ({ entry, loading }) => {
     <Spinner />
   ) : (
     <Fragment>
-      <div className="entryEditor" />
+      <div className="entryEditor">
+        <div id="viewport">
+          <canvas width="960" height="500" />
+        </div>
+      </div>
     </Fragment>
   );
 };
