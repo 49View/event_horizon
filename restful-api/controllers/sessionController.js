@@ -34,7 +34,7 @@ exports.createSession = async (
     dbSession = await sessionModel.create(session);
     dbSession = dbSession.toObject();
   } catch (error) {
-    dbSession = session;
+    dbSession = null; //session;
   }
   return dbSession;
   // return session;
