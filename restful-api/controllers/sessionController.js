@@ -1,6 +1,8 @@
+const mongoose = require("mongoose");
 const sha256 = require("sha256");
 const uniqid = require("uniqid");
 const sessionModel = require("../models/session");
+const ObjectId = mongoose.Types.ObjectId;
 
 exports.createSession = async (
   userId,
@@ -18,7 +20,7 @@ exports.createSession = async (
 
   const session = {
     ids: id,
-    userId: userId,
+    userId: ObjectId(userId),
     project: project,
     ipAddress: ipAddress,
     userAgent: userAgent,
