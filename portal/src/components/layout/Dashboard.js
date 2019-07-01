@@ -46,18 +46,15 @@ const Dashboard = ({
       <Fragment>
         <div className="userWithNoProject">
           <div className="large">
-            <span>Hello, </span> <span>{userstate.userdata.user.name}</span>
+            <span>Hello, </span>{" "}
+            <span className="navdiv-projecttext">
+              {userstate.userdata.user.name}
+            </span>
           </div>
           You don't seem to have any project assigned yet. Request acess here:
           <form className="form" onSubmit={e => onRequestProject(e)}>
             <div className="form-group">
-              <input
-                type="text"
-                placeholder="Project Name"
-                name="project"
-                value={userstate.userdata.project}
-                onChange={e => onChange(e)}
-              />
+              <input type="text" placeholder="Project Name" name="project" />
             </div>
             <input
               type="submit"

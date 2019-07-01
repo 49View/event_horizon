@@ -275,6 +275,6 @@ exports.setDefaultUserProject = async userId => {
   return await setDefaultUserProject(userId);
 };
 
-exports.addRolesForProject = async userId => {
-  return await addRolesForProject(userId);
+exports.addRolesForProject = async (project, email, roles) => {
+  return await addRolesForProject(project, email, roles);
 };
