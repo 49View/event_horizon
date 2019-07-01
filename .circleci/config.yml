@@ -98,7 +98,7 @@ jobs:
             scp editor.js $DROPLET_USER@$DROPLET_IP:/home/circleci/
             scp editor.wasm $DROPLET_USER@$DROPLET_IP:/home/circleci/
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo tar -xvzf portal_static.gz;
-            cd public;
+            cd portal/build;
             sudo rm -rf /usr/share/nginx/html/editor;
             sudo mkdir /usr/share/nginx/html/editor;
             sudo cp -rf * /usr/share/nginx/html/editor;
