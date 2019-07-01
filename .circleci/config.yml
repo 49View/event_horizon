@@ -54,8 +54,8 @@ jobs:
           paths:
             - restful-api/node_modules
           key: v2-dependencies-{{ checksum "restful-api/package.json" }}
-      - run: >
-          cd restful-api && npm test
+#      - run: >
+#          cd restful-api && npm test
 
       - restore_cache:
           keys:
