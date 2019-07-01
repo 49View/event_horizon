@@ -40,15 +40,16 @@ ColorScheme::ColorScheme( const std::string& colorDescriptor ) {
 
 constexpr static uint64_t UI2dMenu = CommandBufferLimits::UI2dStart + 1;
 
-void UIElement::loadResource( CResourceRef _idb ) {
-    this->owner->loaded( _idb );
+void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
 //    auto statusColor = owner->colorFromStatus( status );
-    backgroundVP = this->owner->RR().draw<DRect2dRounded>( UI2dMenu, bbox, C4f::WHITE.A(0.10f) );
+    backgroundVP = this->owner->RR().draw<DRect2dRounded>( UI2dMenu, bbox, _localHierMat, C4f::WHITE.A(0.10f) );
     if ( !foreground.empty() ) {
         foregroundVP = this->owner->RR().drawRect2d( UI2dMenu, bbox, foreground );
     }
     if ( !text.empty() ) {
-        this->owner->RR().draw<DText2d>( UI2dMenu, FDS{ text, font, bbox.centre(), 0.02f, fontAngle}, C4f::WHITE );
+        this->owner->RR().draw<DText2d>( UI2dMenu,
+                FDS{ text, font, bbox.centre(), fontHeight, fontAngle},
+                _localHierMat, C4f::WHITE );
     }
 }
 
@@ -223,14 +224,11 @@ void UIView::transform( CResourceRef _key, float _duration, uint64_t _frameSkipp
 
 void UIView::loadResources() {
     for ( auto& [k,v] : elements ) {
-        if ( v->DataRef().Type() == UIT::background() ) {
-            v->DataRef().loadResource( k );
-        }
-    }
-    for ( auto& [k,v] : elements ) {
-        if ( v->DataRef().Type() != UIT::background() ) {
-            v->DataRef().loadResource( k );
-        }
+        v->visit( []( UIElementSP node) {
+            node->DataRef().loadResource( node->getLocalHierTransform() );
+        });
+//        loadResourcesRec( v );
+        loaded( k );
     }
 }
 
@@ -254,16 +252,18 @@ C4f UIView::getPressedDownColor() const {
     return colorScheme.Secondary1(3);
 }
 
-void UIView::add( UIElementSP _elem ) {
-
+void UIView::addRecursive( UIElementSP _elem ) {
     _elem->DataRef().Owner(this);
     if ( !_elem->DataRef().FontRef().empty() ) {
         _elem->DataRef().Font( sg.FM().get(S::DEFAULT_FONT).get() );
     }
 
-    elements[_elem->Data().Key()] = _elem;
-
     for ( const auto& c : _elem->Children() ) {
-        add( c );
+        addRecursive( c );
     }
+}
+
+void UIView::add( UIElementSP _elem ) {
+    addRecursive( _elem );
+    elements[_elem->Data().Key()] = _elem;
 }

@@ -830,6 +830,10 @@ public:
         }
     }
 
+    void transform( const Matrix4f& _mat ) {
+        for ( int32_t t = 0; t < numVerts; t++ ) verts[t].pos = _mat.transform(verts[t].pos );
+    }
+
     void generateStripsFromVerts( const std::vector<Vector3f>& vList, Primitive _prim ) {
         if ( vList.size() < 3 ) return;
 

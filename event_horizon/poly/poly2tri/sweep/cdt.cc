@@ -69,7 +69,7 @@ void CDT::init( const std::vector<p2t::Point*>& polyline ) {
 	for ( auto& v : polyline ) {
 		bool isPresent = false;
 		for ( auto& vp : polylineSanitized ) {
-			if ( isVerySimilar( { v->x, v->y }, { vp->x, vp->y }, 0.000001f ) ) {
+			if ( isVerySimilar( V2f{ v->x, v->y }, V2f{ vp->x, vp->y }, 0.000001f ) ) {
 				isPresent = true;
 				break;
 			}

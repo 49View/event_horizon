@@ -95,6 +95,15 @@ struct UIFontAngle {
     float data;
 };
 
+struct UIFontHeight {
+    template<typename ...Args>
+    explicit UIFontHeight( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    float operator()() const noexcept {
+        return data;
+    }
+    float data;
+};
+
 struct UIFontText {
     template<typename ...Args>
     explicit UIFontText( Args&& ... args ) : data(std::forward<Args>( args )...) {}
@@ -129,6 +138,7 @@ public:
         if ( type() == UIT::background() || type() == UIT::label() ) {
             status = UITS::Fixed;
         }
+
         foregroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "ForeGroundButtonColor" );
         backgroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "BackGroundButtonColor" );
     }
@@ -137,6 +147,15 @@ private:
     void parseParam( const M& _param ) {
         if constexpr ( std::is_same_v<M, std::string > || is_c_str<M>::value ) {
             key = _param;
+        }
+        if constexpr ( std::is_same_v<M, V3f > || std::is_same_v<M, V2f > ) {
+            pos = _param;
+        }
+        if constexpr ( std::is_same_v<M, Quaternion > ) {
+            rot = _param;
+        }
+        if constexpr ( std::is_same_v<M, MScale > ) {
+            scale = _param();
         }
         if constexpr ( std::is_same_v<M, UITapAreaType > ) {
             type = _param;
@@ -155,6 +174,9 @@ private:
         }
         if constexpr ( std::is_same_v<M, UIFontAngle > ) {
             fontAngle = _param();
+        }
+        if constexpr ( std::is_same_v<M, UIFontHeight > ) {
+            fontHeight = _param();
         }
         if constexpr ( std::is_same_v<M, UIForegroundIcon > ) {
             foreground = _param();
@@ -211,7 +233,7 @@ public:
                     const V3f& _pos,
                     const Quaternion& _rot = Quaternion{},
                     const V3f& _scale = V3f::ONE );
-    void loadResource( CResourceRef _idb );
+    void loadResource( std::shared_ptr<Matrix4f> _localHierMat );
     void loaded() { ready = true; }
     void hoover( bool isHoovering );
     void setStatus( UITapAreaStatus _status );
@@ -219,12 +241,16 @@ public:
 private:
     std::string     key;
     UITapAreaType   type;
-    Rect2f          bbox   = Rect2f::INVALID;
+    V3f             pos = V3f::ZERO;
+    Quaternion      rot;
+    V3f             scale = V3f::ONE;
+    Rect2f          bbox   = Rect2f::IDENTITY;
     UITapAreaStatus status = UITapAreaStatus::Enabled;
     const ::Font*   font = nullptr;
     std::string     fontRef;
     std::string     text;
     float           fontAngle = 0.0f;
+    float           fontHeight = 0.2f;
 
     std::string     foreground;
 
@@ -279,6 +305,9 @@ public:
     C4f getPressedDownColor() const;
 
     C4f colorFromStatus( UITapAreaStatus _status );
+
+private:
+    void addRecursive( UIElementSP _elem );
 
 private:
     SceneGraph& sg;

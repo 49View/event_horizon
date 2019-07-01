@@ -251,6 +251,11 @@ public:
 
 	void invY() { mY *= -1.0f; }
 
+    void oneMinusX() { mX = 1.0f - mX; }
+    void oneMinusY() { mY = 1.0f - mY; }
+    void oneMinusZ() { mZ = 1.0f - mZ; }
+    void oneMinusW() { mW = 1.0f - mW; }
+
 	bool operator==( const Vector4f& rhs ) const {
 		return mX == rhs.mX && mY == rhs.mY && mZ == rhs.mZ && mW == rhs.mW;
 	}

@@ -78,7 +78,7 @@ struct RendererDrawingSet {
     std::string name{};
     std::string shaderName = S::COLOR_3D;
     std::string textureRef{};
-    Matrix4f matrix{Matrix4f::IDENTITY};
+    std::shared_ptr<Matrix4f> matrix;
     Matrix4f preMultMatrix{Matrix4f::IDENTITY};
     bool usePreMult = false;
 };
@@ -369,7 +369,7 @@ public:
             rds.textureRef = _param();
             return;
         } else
-        if constexpr ( std::is_same_v<M, Matrix4f> ) {
+        if constexpr ( std::is_same_v<M, std::shared_ptr<Matrix4f>> ) {
             rds.matrix = _param;
             return;
         } else

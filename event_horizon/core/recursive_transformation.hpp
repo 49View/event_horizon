@@ -18,6 +18,37 @@ enum UpdateTypeFlag {
     Scale =    1 << 2
 };
 
+struct MPos2d {
+    template<typename ...Args>
+    explicit MPos2d( Args&& ... args ) : data( std::forward<Args>( args )...) {
+        data.oneMinusY();
+    }
+    V3f operator()() const noexcept {
+        return data;
+    }
+    V3f data = V3f::ZERO;
+};
+
+struct MScale {
+    template<typename ...Args>
+    explicit MScale( Args&& ... args ) : data( std::forward<Args>( args )...) {}
+    V3f operator()() const noexcept {
+        return data;
+    }
+    V3f data;
+};
+
+struct MScale2d {
+    template<typename ...Args>
+    explicit MScale2d( Args&& ... args ) : data( std::forward<Args>( args )...) {
+        data.invY();
+    }
+    V3f operator()() const noexcept {
+        return data;
+    }
+    V3f data = V3f::ONE;
+};
+
 class TransformNodeData {
 public:
     TransformNodeData() {
@@ -50,6 +81,13 @@ public:
 
     template <typename ...Args>
     explicit RecursiveTransformation( PFC _pfc, Args&& ... args ) {
+        (parseParams( std::forward<Args>( args )), ... );
+        // Set the mTRS after parse params
+        mLocalTransform = Matrix4f{ mTRS };
+        generateMatrixHierarchy(fatherRootTransform());
+        // Then reset it to zero to use it for animations later on
+        mTRS.set( V3f::ZERO, Quaternion{}, V3f::ONE );
+        // Parse the data object with the same params, some of them might be redundant
         pushData( std::forward<Args>( args )...);
     }
 
@@ -120,7 +158,7 @@ public:
     NodeP Father() const { return father; }
     Matrix4f fatherRootTransform() const {
         if ( father == nullptr ) return Matrix4f::IDENTITY;
-        return *father->mLocalHierTransform.get();;
+        return *father->mLocalHierTransform.get();
     }
 
     void prune() {
@@ -342,6 +380,23 @@ public:
 
     uint64_t Tag() const { return tag; }
 private:
+
+    template <typename M>
+    void parseParams( const M& _param ) {
+        if constexpr ( std::is_same_v<M, MPos2d > ) {
+            mTRS.Pos( _param());
+        }
+        if constexpr ( std::is_same_v<M, V3f > ) {
+            mTRS.Pos(_param);
+        }
+        if constexpr ( std::is_same_v<M, Quaternion > ) {
+            mTRS.Rot(_param);
+        }
+        if constexpr ( std::is_same_v<M, MScale > || std::is_same_v<M, MScale2d > ) {
+            mTRS.Scale( _param());
+        }
+    }
+
     void addNodeRec( const RecursiveTransformation<T,B>& _node, NodeP _father ) {
         cloneData( _node, _father );
         for ( const auto& c : _node.Children() ) {

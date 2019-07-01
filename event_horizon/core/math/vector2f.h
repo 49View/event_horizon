@@ -289,6 +289,9 @@ public:
 		return{ mX, -mY };
 	}
 
+    void oneMinusX() { mX = 1.0f - mX; }
+    void oneMinusY() { mY = 1.0f - mY; }
+
 	Vector2f dominant() const {
 		if ( fabs( x() ) >= fabs( y() ) ) {
 			return Vector2f( mX, 0.0f );

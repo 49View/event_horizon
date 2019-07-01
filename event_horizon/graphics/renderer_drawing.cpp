@@ -8,6 +8,7 @@
 #include <core/image_mapping.hpp>
 #include <graphics/vp_builder.hpp>
 #include <core/font_utils.hpp>
+#include <core/math/matrix_anim.h>
 
 static std::shared_ptr<HeterogeneousMap> mapColor( const Color4f& _matColor ) {
     auto values = std::make_shared<HeterogeneousMap>();
@@ -664,17 +665,25 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Ve
 void RendererDrawingSet::setupFontData() {
     auto frect = fds.font->GetMasterRect();
     V3f fscale{ 1.0f/(frect.z - frect.x), 1.0f, 1.0f/(frect.w - frect.y) };
-    V3f fscale2d{ 1.0f/(frect.z - frect.x), 1.0f/(frect.w - frect.y), 1.0f };
+//    V3f fscale2d{ 1.0f/(frect.z - frect.x), 1.0f/(frect.w - frect.y), 1.0f };
 
+    MatrixAnim lTRS;
+    lTRS.Pos( fds.pos );
     if ( shaderName == S::FONT_2D ) {
-        preMultMatrix = Matrix4f( fds.pos,
-                                  V3f::Z_AXIS * fds.fontAngle,
-                                  fscale2d * V3f{1.0f, 1.0f, 1.0f} * fds.fontHeight );
+        lTRS.Rot( quatFromAxis( V4f{V3f::Z_AXIS, fds.fontAngle} ));
+        lTRS.Scale( V3f{1.0f, -1.0f, 1.0f} * fds.fontHeight * 0.001f );
+//        preMultMatrix = Matrix4f( fds.pos,
+//                                  V3f::Z_AXIS * fds.fontAngle,
+//                                  fscale2d * V3f{1.0f, 1.0f, 1.0f} * fds.fontHeight );
     } else {
-        preMultMatrix = Matrix4f( fds.pos,
-                                  V3f::Y_AXIS * fds.fontAngle,
-                                  fscale * V3f{1.0f, -1.0f, -1.0f} * fds.fontHeight );
+        lTRS.Rot( quatFromAxis( V4f{V3f::Y_AXIS, fds.fontAngle} ));
+        lTRS.Scale(fscale * V3f{1.0f, -1.0f, -1.0f} * fds.fontHeight);
+//        preMultMatrix = Matrix4f( fds.pos,
+//                                  V3f::Y_AXIS * fds.fontAngle,
+//                                  fscale * V3f{1.0f, -1.0f, -1.0f} * fds.fontHeight );
     }
+    preMultMatrix = Matrix4f{ lTRS };
+
 }
 
 VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
@@ -702,13 +711,13 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
                 Vector2f p3{ m.verts[tr+1].pos.x, ( m.verts[tr+1].pos.y ) };
                 Vector2f p2{ m.verts[tr+2].pos.x, ( m.verts[tr+2].pos.y ) };
                 if ( rds.shaderName == S::FONT_2D ) {
-                    ps->addVertex( p1 + cursor, V2f{m.verts[tr+0].texCoord/127.0f, m.verts[tr+0].coef/127.0f } );
-                    ps->addVertex( p2 + cursor, V2f{m.verts[tr+2].texCoord/127.0f, m.verts[tr+2].coef/127.0f } );
-                    ps->addVertex( p3 + cursor, V2f{m.verts[tr+1].texCoord/127.0f, m.verts[tr+1].coef/127.0f } );
+                    ps->addVertex( p1 + cursor, V2f{m.verts[tr+0].texCoord, m.verts[tr+0].coef } );
+                    ps->addVertex( p2 + cursor, V2f{m.verts[tr+2].texCoord, m.verts[tr+2].coef } );
+                    ps->addVertex( p3 + cursor, V2f{m.verts[tr+1].texCoord, m.verts[tr+1].coef } );
                 } else {
-                    ps->addVertex( XZY::C(p1 + cursor), V2f{m.verts[tr+0].texCoord/127.0f, m.verts[tr+0].coef/127.0f } );
-                    ps->addVertex( XZY::C(p2 + cursor), V2f{m.verts[tr+2].texCoord/127.0f, m.verts[tr+2].coef/127.0f } );
-                    ps->addVertex( XZY::C(p3 + cursor), V2f{m.verts[tr+1].texCoord/127.0f, m.verts[tr+1].coef/127.0f } );
+                    ps->addVertex( XZY::C(p1 + cursor), V2f{m.verts[tr+0].texCoord, m.verts[tr+0].coef } );
+                    ps->addVertex( XZY::C(p2 + cursor), V2f{m.verts[tr+2].texCoord, m.verts[tr+2].coef } );
+                    ps->addVertex( XZY::C(p3 + cursor), V2f{m.verts[tr+1].texCoord, m.verts[tr+1].coef } );
                 }
             }
         }
@@ -720,10 +729,11 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
         }
     }
 
-    auto trams = std::make_shared<Matrix4f>( rds.preMultMatrix );//
+    ps->transform(rds.preMultMatrix);
+//    auto trams = std::make_shared<Matrix4f>( rds.preMultMatrix );//
 
     auto vp = VPBuilder<FontStrip>{*this,ShaderMaterial{rds.shaderName, mapColor(rds.color)}}.
-            p(ps).t(trams).n(rds.fds.text).
+            p(ps).t(rds.matrix).n(rds.fds.text).
             build();
 
     VPL( rds.bucketIndex, vp );

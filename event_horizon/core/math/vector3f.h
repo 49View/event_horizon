@@ -130,7 +130,13 @@ public:
 
 	Vector3f( const Vector4f& v4 );
 
-	Vector3f( const Vector2f& v2, float z ) {
+    Vector3f( float x, float y ) {
+        mX = x;
+        mY = y;
+        mZ = 0.0f;
+    }
+
+    Vector3f( const Vector2f& v2, float z ) {
 		mX = v2.x();
 		mY = v2.y();
 		mZ = z;
@@ -276,7 +282,11 @@ public:
 	void invY() { mY *= -1.0f; }
 	void invZ() { mZ *= -1.0f; }
 
-	void swizzle( uint32_t i1, uint32_t i2 ) {
+    void oneMinusX() { mX = 1.0f - mX; }
+    void oneMinusY() { mY = 1.0f - mY; }
+    void oneMinusZ() { mZ = 1.0f - mZ; }
+
+    void swizzle( uint32_t i1, uint32_t i2 ) {
 		ASSERT( i1 < 3 && i2 < 3 );
 		float c = ( *this )[i1];
 		( *this )[i1] = ( *this )[i2];
