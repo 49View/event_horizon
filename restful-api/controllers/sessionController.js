@@ -20,7 +20,7 @@ exports.createSession = async (
 
   const session = {
     ids: id,
-    userId: ObjectId("121212121212121212121212"),
+    userId: new mongoose.mongo.ObjectId(userId),
     project: project,
     ipAddress: ipAddress,
     userAgent: userAgent,
