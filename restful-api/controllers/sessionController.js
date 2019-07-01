@@ -30,8 +30,12 @@ exports.createSession = async (
     expiresAtDate: expiresAtDate
   };
 
-  dbSession = await sessionModel.create(session);
-  dbSession = dbSession.toObject();
+  try {
+    dbSession = await sessionModel.create(session);
+    dbSession = dbSession.toObject();
+  } catch (error) {
+    dbSession = session;
+  }
   return dbSession;
   // return session;
 };
