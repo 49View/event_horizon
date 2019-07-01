@@ -97,7 +97,7 @@ jobs:
             cd portal/build;
             sudo rm -rf /usr/share/nginx/html/editor;
             sudo mkdir /usr/share/nginx/html/editor;
-            sudo cp -rf * /usr/share/nginx/html/editor;
+            sudo cp -rf * /usr/share/nginx/html/editor'
 
   buildCPP:
     <<: *defaults
