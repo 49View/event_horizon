@@ -48,9 +48,10 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
   res.header("Access-Control-Expose-Headers", "ETag");
+  res.header("Access-Control-Expose-Headers", "ETag");
   res.header(
     "Access-Control-Allow-Headers",
-    "access-control-allow-origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Accept, Cache-Control, Set-Cookie, x-eventhorizon-guest, ETag"
+    "access-control-allow-origin, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Accept, Cache-Control, Set-Cookie, x-eventhorizon-guest, ETag, Authorization"
   );
   if (req.method === "OPTIONS") {
     res.status(200).send();
