@@ -19,7 +19,7 @@ exports.createSession = async (
   );
 
   const session = {
-    _id: id,
+    ids: id,
     userId: userId,
     project: project,
     ipAddress: ipAddress,
@@ -48,7 +48,7 @@ exports.getValidSessionById = async sessionId => {
   const query = {
     $and: [
       // {_id: ObjectId(sessionId)},
-      { _id: sessionId },
+      { ids: sessionId },
       // {issuedAt: {$lte: currentEpoch }},
       // {expiresAt: {$gte: currentEpoch}},
       { issuedAtDate: { $lte: currentDate } },
@@ -69,7 +69,7 @@ exports.getValidSessionById = async sessionId => {
 exports.invalidateSessionById = async sessionId => {
   const expiresAtDate = new Date(new Date() - 10000);
   // const query = { _id: ObjectId(sessionId)};
-  const query = { _id: sessionId };
+  const query = { ids: sessionId };
   const updated = { expiresAtDate: expiresAtDate };
   await sessionModel.updateOne(query, updated);
 };
