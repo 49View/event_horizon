@@ -20,7 +20,7 @@ exports.createSession = async (
 
   const session = {
     ids: id,
-    userId: ObjectId(userId),
+    userId: ObjectId("121212121212121212121212"),
     project: project,
     ipAddress: ipAddress,
     userAgent: userAgent,
