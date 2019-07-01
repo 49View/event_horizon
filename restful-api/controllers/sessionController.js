@@ -1,8 +1,6 @@
-const mongoose = require("mongoose");
 const sha256 = require("sha256");
 const uniqid = require("uniqid");
 const sessionModel = require("../models/session");
-const ObjectId = mongoose.Types.ObjectId;
 
 exports.createSession = async (
   userId,
@@ -32,13 +30,12 @@ exports.createSession = async (
 
   try {
     console.log("[Session]", session);
-    dbSession = await sessionModel.create(session);
-    dbSession = dbSession.toObject();
+    await sessionModel.create(session);
+    return session; //dbSession.toObject();
   } catch (error) {
     console.log("[Catch: (EX) Session Error]", error);
-    dbSession = null; //session;
+    return null;
   }
-  return dbSession;
   // return session;
 };
 
