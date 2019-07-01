@@ -12,7 +12,4 @@ var Schema = mongoose.Schema;
 //     return uid;
 // }
 
-module.exports = mongoose.model(
-  "sessions",
-  new Schema({ ids: { type: String } }, { strict: false })
-);
+module.exports = mongoose.model("sessions", new Schema({}, { strict: false }));

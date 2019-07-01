@@ -219,10 +219,10 @@ exports.getToken = async (userId, project, ipAddress, userAgent) => {
     issuedAt,
     expiresAt
   );
-  const jwt = await createJwtToken(session._id, issuedAt, expiresAt);
+  const jwt = await createJwtToken(session.ids, issuedAt, expiresAt);
 
   return {
-    session: session._id,
+    session: session.ids,
     token: jwt,
     expires: expiresAt
   };
