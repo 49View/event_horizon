@@ -33,13 +33,39 @@ const Dashboard = ({
     return <Redirect to="/" />;
   }
 
+  const onRequestProject = e => {
+    e.preventDefault();
+    // login(email, password, project);
+  };
+
   if (
     userstate.userdata &&
     (userstate.userdata.project === null || userstate.userdata.project === "")
   ) {
     return (
       <Fragment>
-        <div>You don't seem to have any project assigned yet.</div>
+        <div className="userWithNoProject">
+          <div className="large">
+            <span>Hello, </span> <span>{userstate.userdata.user.name}</span>
+          </div>
+          You don't seem to have any project assigned yet. Request acess here:
+          <form className="form" onSubmit={e => onRequestProject(e)}>
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="Project Name"
+                name="project"
+                value={userstate.userdata.project}
+                onChange={e => onChange(e)}
+              />
+            </div>
+            <input
+              type="submit"
+              className="btn btn-primary"
+              value="Request Access"
+            />
+          </form>
+        </div>
       </Fragment>
     );
   }

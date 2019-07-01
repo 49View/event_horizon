@@ -20,7 +20,7 @@ exports.createSession = async (
 
   const session = {
     ids: id,
-    userId: userIdObject, //new mongoose.mongo.ObjectId(userId),
+    // userId: userIdObject, //new mongoose.mongo.ObjectId(userId),
     project: project,
     ipAddress: ipAddress,
     userAgent: userAgent,
@@ -33,11 +33,11 @@ exports.createSession = async (
   try {
     console.log("[Session]", session);
     const dbSession = await sessionModel.create(session);
-    // dbSession.userId = userIdObject;
-    // await sessionModel.updateOne(
-    //   { _id: dbSession._id },
-    //   { $set: { userId: userIdObject } }
-    // );
+    dbSession.userId = userIdObject;
+    await sessionModel.updateOne(
+      { _id: dbSession._id },
+      { $set: { userId: userIdObject } }
+    );
     return dbSession.toObject();
   } catch (error) {
     console.log("[Catch: (EX) Session Error]", error);
