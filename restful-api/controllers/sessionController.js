@@ -35,7 +35,7 @@ exports.createSession = async (
     dbSession = await sessionModel.create(session);
     dbSession = dbSession.toObject();
   } catch (error) {
-    console.log("[Catch: (EX) Session]", session);
+    console.log("[Catch: (EX) Session Error]", error);
     dbSession = null; //session;
   }
   return dbSession;
