@@ -59,11 +59,21 @@ std::vector<T> stripInserter( const std::vector<std::vector<T>> sources ) {
 
 template <typename TS, typename T>
 auto addVertexStrips( Renderer& _rr, const std::vector<T>& verts, const RendererDrawingSet& rds ) {
+    ASSERT(!verts.empty());
     auto colorStrip = std::make_shared<TS>();
     colorStrip->generateStripsFromVerts( verts, rds.prim );
 
     auto vp = VPBuilder<TS>{_rr, ShaderMaterial{rds.shaderName, mapColor(rds.color)}}.
             t(rds.matrix).p(colorStrip).n(rds.name).build();
+    _rr.VPL( rds.bucketIndex, vp );
+    return vp;
+}
+
+template <typename TS>
+auto addVertexStripsTM( Renderer& _rr, std::shared_ptr<TS>& ps, const RendererDrawingSet& rds ) {
+
+    auto vp = VPBuilder<TS>{_rr, ShaderMaterial{rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color)}}.
+            t(rds.matrix).p(ps).n(rds.name).build();
     _rr.VPL( rds.bucketIndex, vp );
     return vp;
 }
@@ -426,6 +436,11 @@ VPListSP Renderer::drawRectFinal( RendererDrawingSet& rds ) {
     return addVertexStrips<Pos3dStrip>( *this, rds.verts.v, rds);
 }
 
+VPListSP Renderer::drawRectFinalTM( RendererDrawingSet& rds ) {
+    auto ps = std::make_shared<PosTex3dStrip>( rds.rect, QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS );
+    return addVertexStripsTM<PosTex3dStrip>( *this, ps, rds);
+}
+
 VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
                    const std::string& _name ) {
     if ( verts.size() != 3 ) return nullptr;
@@ -696,6 +711,7 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
         totalVerts += rds.fds.font->GetTriangulation( cp ).verts.size();
     }
 
+    auto vhfm = rds.fds.font->GetFontMetrics();
     auto ps = std::make_shared<FontStrip>(totalVerts, PRIMITIVE_TRIANGLES, VFVertexAllocation::PreAllocate);
 
     for ( size_t t = 0; t < rds.fds.text.size(); t++ ) {
@@ -705,11 +721,10 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
 
         // Don't draw an empty space
         if ( !m.verts.empty() ) {
-
             for ( size_t tr = 0; tr < m.verts.size(); tr+=3 ) {
-                Vector2f p1{ m.verts[tr].pos.x  , ( m.verts[tr].pos.y ) };
-                Vector2f p3{ m.verts[tr+1].pos.x, ( m.verts[tr+1].pos.y ) };
-                Vector2f p2{ m.verts[tr+2].pos.x, ( m.verts[tr+2].pos.y ) };
+                Vector2f p1{ m.verts[tr].pos.x  , vhfm.ascent - ( m.verts[tr].pos.y ) };
+                Vector2f p3{ m.verts[tr+1].pos.x, vhfm.ascent - ( m.verts[tr+1].pos.y ) };
+                Vector2f p2{ m.verts[tr+2].pos.x, vhfm.ascent - ( m.verts[tr+2].pos.y ) };
                 if ( rds.shaderName == S::FONT_2D ) {
                     ps->addVertex( p1 + cursor, V2f{m.verts[tr+0].texCoord, m.verts[tr+0].coef } );
                     ps->addVertex( p2 + cursor, V2f{m.verts[tr+2].texCoord, m.verts[tr+2].coef } );

@@ -159,3 +159,12 @@ void Rect2f::centered( const V2f& _size ) {
     mTopLeft = V2f{-_size.x()*0.5f, -_size.y()*0.5f};
     mBottomRight = V2f{_size.x()*0.5f, _size.y()*0.5f};
 }
+
+[[nodiscard]] Rect2f Rect2f::oneMinusY() const {
+    Rect2f ret{Rect2f::INVALID};
+
+    ret.expand( ::oneMinusY(topLeft()) );
+    ret.expand( ::oneMinusY(bottomRight()) );
+
+    return ret;
+}

@@ -554,6 +554,10 @@ inline float sideOfLine( const Vector2f& p, const Vector2f& p1, const Vector2f& 
 inline int winding( const Vector2f& p, const Vector2f& p1, const Vector2f& p2 ) {
 	return sideOfLine( p, p1, p2 ) > 0.0f ? 1 : 0;
 }
+
+[[nodiscard]] inline Vector2f oneMinusX( const Vector2f& p ) { return Vector2f{1.0f - p.x(), p.y()}; }
+[[nodiscard]] inline Vector2f oneMinusY( const Vector2f& p ) { return Vector2f{p.x(), 1.0f - p.y()}; }
+
 int winding( const std::vector<Vector2f>& points );
 
 float distanceFromLine( const Vector2f& p, const Vector2f& p1, const Vector2f& p2 );

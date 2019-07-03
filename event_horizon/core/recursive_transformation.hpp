@@ -10,6 +10,7 @@
 #include <core/boxable.hpp>
 #include <core/uuidable.hpp>
 #include <core/serialization.hpp>
+#include <core/app_globals.h>
 
 enum UpdateTypeFlag {
     Nothing =  0,
@@ -22,6 +23,7 @@ struct MPos2d {
     template<typename ...Args>
     explicit MPos2d( Args&& ... args ) : data( std::forward<Args>( args )...) {
         data.oneMinusY();
+        data *= getScreenAspectRatioVector;
     }
     V3f operator()() const noexcept {
         return data;
@@ -40,8 +42,39 @@ struct MScale {
 
 struct MScale2d {
     template<typename ...Args>
-    explicit MScale2d( Args&& ... args ) : data( std::forward<Args>( args )...) {
-        data.invY();
+    explicit MScale2d( Args&& ... args ) : data( std::forward<Args>( args )...) {}
+    V3f operator()() const noexcept {
+        return data;
+    }
+    V3f data = V3f::ONE;
+};
+
+struct MScale2dXS {
+    template<typename ...Args>
+    explicit MScale2dXS( Args&& ... args ) : data( std::forward<Args>( args )...) {
+        data[0] *= getScreenAspectRatio;
+    }
+    V3f operator()() const noexcept {
+        return data;
+    }
+    V3f data = V3f::ONE;
+};
+
+struct MScale2dYS {
+    template<typename ...Args>
+    explicit MScale2dYS( Args&& ... args ) : data( std::forward<Args>( args )...) {
+        data[1] *= getScreenAspectRatio;
+    }
+    V3f operator()() const noexcept {
+        return data;
+    }
+    V3f data = V3f::ONE;
+};
+
+struct MScale2dXYS {
+    template<typename ...Args>
+    explicit MScale2dXYS( Args&& ... args ) : data( std::forward<Args>( args )...) {
+        data *= getScreenAspectRatio;
     }
     V3f operator()() const noexcept {
         return data;
@@ -82,13 +115,13 @@ public:
     template <typename ...Args>
     explicit RecursiveTransformation( PFC _pfc, Args&& ... args ) {
         (parseParams( std::forward<Args>( args )), ... );
+        // Parse the data object with the same params, some of them might be redundant
+        pushData( std::forward<Args>( args )...);
         // Set the mTRS after parse params
         mLocalTransform = Matrix4f{ mTRS };
         generateMatrixHierarchy(fatherRootTransform());
         // Then reset it to zero to use it for animations later on
         mTRS.set( V3f::ZERO, Quaternion{}, V3f::ONE );
-        // Parse the data object with the same params, some of them might be redundant
-        pushData( std::forward<Args>( args )...);
     }
 
     // This ctor is effectively a "clone"
@@ -191,8 +224,8 @@ public:
         if constexpr ( std::is_same_v<JMATH::AABB, B> ) {
             this->BBox3d(AABB::INVALID);
             if ( !data.empty() ) {
-                for ( const auto & bd : data ) {
-                    this->BBox3d()->merge( bd.BBox3dPtr()->transform( *mLocalHierTransform ) );
+                for ( auto & bd : data ) {
+                    this->BBox3d()->merge( bd.BBoxTransform( *mLocalHierTransform ) );
                 }
             }
 
@@ -383,6 +416,9 @@ private:
 
     template <typename M>
     void parseParams( const M& _param ) {
+        if constexpr ( std::is_same_v<M, NodeP > ) {
+            father = _param;
+        }
         if constexpr ( std::is_same_v<M, MPos2d > ) {
             mTRS.Pos( _param());
         }
@@ -391,9 +427,6 @@ private:
         }
         if constexpr ( std::is_same_v<M, Quaternion > ) {
             mTRS.Rot(_param);
-        }
-        if constexpr ( std::is_same_v<M, MScale > || std::is_same_v<M, MScale2d > ) {
-            mTRS.Scale( _param());
         }
     }
 

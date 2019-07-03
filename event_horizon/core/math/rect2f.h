@@ -295,6 +295,8 @@ public:
 		return r;
 	}
 
+	[[nodiscard]] Rect2f oneMinusY() const;
+
 	std::vector<Rect2f> booleanDifference( const Rect2f& diffRect ) const;
 	bool lineIntersection( const Vector2f& p1, const Vector2f& p2 ) const;
 

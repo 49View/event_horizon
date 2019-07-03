@@ -12,6 +12,7 @@
 #include <core/recursive_transformation.hpp>
 #include <graphics/ghtypes.hpp>
 #include <poly/poly.hpp>
+#include <core/resources/entity_factory.hpp>
 
 class UIView;
 class SceneGraph;
@@ -52,6 +53,14 @@ private:
     std::array<C4f, ShadesNum> complementColors;
 };
 
+template<class T>
+struct is_c_str
+        : std::integral_constant<
+                bool,
+                std::is_same_v<char const *, typename std::decay_t<T>> ||
+                std::is_same_v<char *, typename std::decay_t<T>>
+        > {};
+
 struct UIKey {
     template<typename ...Args>
     explicit UIKey( Args&& ... args ) : data(std::forward<Args>( args )...) {}
@@ -75,6 +84,8 @@ namespace UIT {
     static const UITapAreaType pushButton   = UITapAreaType{1 << 1};
     static const UITapAreaType stickyButton = UITapAreaType{1 << 2};
     static const UITapAreaType label        = UITapAreaType{1 << 3};
+    static const UITapAreaType separator_h  = UITapAreaType{1 << 4};
+    static const UITapAreaType separator_v  = UITapAreaType{1 << 5};
 }
 
 struct UIFontRef {
@@ -95,22 +106,13 @@ struct UIFontAngle {
     float data;
 };
 
-struct UIFontHeight {
-    template<typename ...Args>
-    explicit UIFontHeight( Args&& ... args ) : data(std::forward<Args>( args )...) {}
-    float operator()() const noexcept {
-        return data;
-    }
-    float data;
-};
-
 struct UIFontText {
-    template<typename ...Args>
-    explicit UIFontText( Args&& ... args ) : data(std::forward<Args>( args )...) {}
-    std::string operator()() const noexcept {
-        return data;
-    }
-    std::string data;
+    UIFontText( const ResourceRef& fontRef, float height, const std::string& text ) : fontRef( fontRef ),
+                                                                                      height( height ), text( text ) {}
+
+    ResourceRef fontRef;
+    float height = 0.1f;
+    std::string text;
 };
 
 struct UIForegroundIcon {
@@ -122,18 +124,11 @@ struct UIForegroundIcon {
     std::string data;
 };
 
-template<class T>
-struct is_c_str
-        : std::integral_constant<
-                bool,
-                std::is_same_v<char const *, typename std::decay_t<T>> ||
-                std::is_same_v<char *, typename std::decay_t<T>>
-        > {};
-
 class UIElement : public Boxable<> {
 public:
     template <typename ...Args>
     explicit UIElement( Args&& ... args ) {
+        bbox3d->identity();
         (parseParam( std::forward<Args>( args )), ...); // Fold expression (c++17)
         if ( type() == UIT::background() || type() == UIT::label() ) {
             status = UITS::Fixed;
@@ -148,21 +143,28 @@ private:
         if constexpr ( std::is_same_v<M, std::string > || is_c_str<M>::value ) {
             key = _param;
         }
-        if constexpr ( std::is_same_v<M, V3f > || std::is_same_v<M, V2f > ) {
-            pos = _param;
-        }
-        if constexpr ( std::is_same_v<M, Quaternion > ) {
-            rot = _param;
-        }
-        if constexpr ( std::is_same_v<M, MScale > ) {
-            scale = _param();
+//        if constexpr ( std::is_same_v<M, V3f > || std::is_same_v<M, V2f > ) {
+//            pos = _param;
+//        }
+//        if constexpr ( std::is_same_v<M, Quaternion > ) {
+//            rot = _param;
+//        }
+//        if constexpr ( std::is_same_v<M, MScale > ) {
+//            scale = _param();
+//        }
+        if constexpr ( std::is_same_v<M, MScale2d > ||
+                std::is_same_v<M, MScale2dXS > ||
+                std::is_same_v<M, MScale2dYS > ||
+                std::is_same_v<M, MScale2dXYS >) {
+            bbox3d->scaleX( _param().x() );
+            bbox3d->scaleZ( _param().y() );
         }
         if constexpr ( std::is_same_v<M, UITapAreaType > ) {
             type = _param;
         }
-        if constexpr ( std::is_same_v<M, JMATH::Rect2f > ) {
-            bbox = _param;
-        }
+//        if constexpr ( std::is_same_v<M, JMATH::Rect2f > ) {
+//            bbox = _param;
+//        }
         if constexpr ( std::is_same_v<M, UITapAreaStatus > ) {
             status = _param;
         }
@@ -170,13 +172,12 @@ private:
             fontRef = _param();
         }
         if constexpr ( std::is_same_v<M, UIFontText > ) {
-            text = _param();
+            fontRef = _param.fontRef;
+            text = _param.text;
+            fontHeight = _param.height;
         }
         if constexpr ( std::is_same_v<M, UIFontAngle > ) {
             fontAngle = _param();
-        }
-        if constexpr ( std::is_same_v<M, UIFontHeight > ) {
-            fontHeight = _param();
         }
         if constexpr ( std::is_same_v<M, UIForegroundIcon > ) {
             foreground = _param();
@@ -196,8 +197,8 @@ public:
         return key;
     }
 
-    const Rect2f& Area() const {
-        return bbox;
+    Rect2f Area() const {
+        return bbox3d->topDown();
     }
 
     UITapAreaStatus Status() const {
@@ -224,9 +225,7 @@ public:
         font = _fontPtr;
     }
 
-    bool contains( const V2f& _point ) const {
-        return bbox.contains( _point );
-    }
+    [[nodiscard]] bool contains( const V2f& _point ) const;
     void touchedDown();
     void touchedUp( bool hasBeenTapped, bool isTouchUpGroup );
     void transform( float _duration, uint64_t _frameSkipper,
@@ -241,10 +240,10 @@ public:
 private:
     std::string     key;
     UITapAreaType   type;
-    V3f             pos = V3f::ZERO;
-    Quaternion      rot;
-    V3f             scale = V3f::ONE;
-    Rect2f          bbox   = Rect2f::IDENTITY;
+//    V3f             pos = V3f::ZERO;
+//    Quaternion      rot;
+//    V3f             scale = V3f::ONE;
+//    Rect2f          bbox   = Rect2f::IDENTITY;
     UITapAreaStatus status = UITapAreaStatus::Enabled;
     const ::Font*   font = nullptr;
     std::string     fontRef;
@@ -317,5 +316,50 @@ private:
     mutable ResourceRef touchDownStartingKey;
 };
 
+enum class CSSDisplayMode {
+    Block,
+    Inline
+};
 
+class UIContainer2d {
+public:
+    template <typename S>
+    UIContainer2d( UIView& _owner, const MPos2d& _pos, const S& _size ) : owner(_owner), pos( _pos ), size( _size() ) {
+        node = EF::create<UIElementRT>( PFC{}, UUIDGen::make(), pos, _size, UIT::background );
+        innerPaddedX = size.x()-(padding.x()*2.0f);
+        caret = padding;
+        wholeLineSize = MScale2d{innerPaddedX, -padding.y()};
+    }
+
+    void addEmptyCaret();
+    void addEmptyCaretNewLine();
+    void addTitle( const UIFontText& _text );
+    void addListEntry( CResourceRef _icon, const std::vector<UIFontText>& _lines );
+    void addListEntryGrid( CResourceRef _icon, const std::vector<UIFontText>& _lines, bool _newLine = false );
+    void addButtonGroupLine( UITapAreaType _uit,
+                             const std::vector<ResourceRef>& _icons,
+                             const std::vector<UIFontText>& _labels );
+    void popCaretX();
+    void finalise();
+
+private:
+    void advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize );
+    void addSeparator( float percScaleY = 1.0f );
+    void addLabel( const UIFontText& _text, const MScale2d& bsize, CSSDisplayMode displayMode,
+                   const V2f& _pos = V2f::ZERO );
+    void addButton( CResourceRef _icon, const MScale2d& bisze, CSSDisplayMode displayMode,
+                    UITapAreaType _bt = UIT::pushButton, const V2f& _pos = V2f::ZERO );
+
+private:
+    UIView& owner;
+    MPos2d pos;
+    V2f padding{0.02f, -0.01f};
+    V3f size;
+    UIElementSP node;
+
+    float innerPaddedX = 0.0f;
+    V2f caret{V2f::ZERO};
+    std::vector<V2f> caretQueue;
+    MScale2d wholeLineSize{0.0f, 0.0f};
+};
 

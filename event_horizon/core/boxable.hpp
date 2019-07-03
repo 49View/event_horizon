@@ -16,17 +16,27 @@ struct EmptyBox {
 template <typename T = JMATH::AABB>
 class Boxable {
 public:
-    Boxable() { bbox3d = std::make_shared<T>(); }
+    Boxable() {
+        bbox3d = std::make_shared<T>();
+        bbox3dT = std::make_shared<T>();
+    }
 
     inline const std::shared_ptr<T>& BBox3d() const { return bbox3d; }
     inline std::shared_ptr<T>& BBox3d() { return bbox3d; }
+    inline std::shared_ptr<T>& BBox3dT() { return bbox3dT; }
     inline T BBox3dCopy() const { return *bbox3d.get(); }
+    inline const AABB& BBoxTransform( const Matrix4f& _m ) {
+        bbox3dT->set( bbox3d->gettransform( _m ) );
+        return *bbox3dT;
+    }
     inline const T* BBox3dPtr() const { return bbox3d.get(); }
+    inline const T* BBox3dTPtr() const { return bbox3dT.get(); }
     inline void BBox3d( const Vector3f& bmix, const Vector3f& bmax ) { *bbox3d.get() = T{ bmix, bmax }; }
     inline void BBox3d( const T& _value ) { *bbox3d.get() = _value; }
 
 protected:
     std::shared_ptr<T> bbox3d;
+    std::shared_ptr<T> bbox3dT;
 };
 
 template <typename T = JMATH::AABB>

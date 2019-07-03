@@ -44,6 +44,7 @@ namespace FBNames {
 }
 
 struct DLine {};
+struct DLine2d {};
 struct DRect {};
 struct DRect2d {};
 struct DRect2dRounded {};
@@ -68,8 +69,8 @@ struct RendererDrawingSet {
 
     int bucketIndex = -1;
     Primitive prim = PRIMITIVE_TRIANGLE_STRIP;
-    V3fVectorWrap verts;
-    V3fVectorOfVectorWrap multiVerts;
+    VTMVectorWrap verts;
+    VTMVectorOfVectorWrap multiVerts;
     Rect2f rect = Rect2f::MIDENTITY();
     float roundedCorner = 0.01f;
     C4f color = C4f::WHITE;
@@ -99,6 +100,15 @@ struct RDSImage {
         return data;
     }
     ResourceRef data;
+};
+
+struct RDSRoundedCorner {
+    template<typename ...Args>
+    explicit RDSRoundedCorner( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    float operator()() const noexcept {
+        return data;
+    }
+    float data;
 };
 
 using CommandBufferLimitsT = int;
@@ -258,6 +268,7 @@ public:
 
     VPListSP drawLineFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinal( RendererDrawingSet& rds );
+    VPListSP drawRectFinalTM( RendererDrawingSet& rds );
     VPListSP drawTextFinal( const RendererDrawingSet& rds );
 
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
@@ -338,10 +349,8 @@ public:
             return;
         } else
         if constexpr ( std::is_same_v<M, Rect2f> ) {
-            if constexpr ( std::is_same_v<T, DRect2d> )
+            if constexpr ( std::is_same_v<T, DRect2d> || std::is_same_v<T, DRect2dRounded> )
             {
-                for ( const auto& v : _param.pointsStrip() ) rds.verts.v.emplace_back(v);
-            } else if constexpr ( std::is_same_v<T, DRect2dRounded> ) {
                 rds.rect = _param;
             } else {
                 rds.verts.v = _param.points3dcw_xzy();
@@ -386,7 +395,11 @@ public:
             rds.preMultMatrix = _param();
             return;
         } else
-        if constexpr ( std::is_same_v<M, V3fVectorOfVectorWrap > ) {
+        if constexpr ( std::is_same_v<M, RDSRoundedCorner> ) {
+            rds.roundedCorner = _param();
+            return;
+        } else
+        if constexpr ( std::is_same_v<M, VTMVectorOfVectorWrap > ) {
             rds.multiVerts = _param;
             return;
         } else {
@@ -403,6 +416,10 @@ public:
         if constexpr ( std::is_same_v<T, DLine> ) {
             return drawLineFinal( rds );
         }
+        if constexpr ( std::is_same_v<T, DLine2d> ) {
+            rds.shaderName = S::COLOR_2D;
+            return drawLineFinal( rds );
+        }
         if constexpr ( std::is_same_v<T, DRect> ) {
             return drawRectFinal( rds );
         }
@@ -413,13 +430,8 @@ public:
         }
         if constexpr ( std::is_same_v<T, DRect2d> ) {
 //            rds.shaderName = S::COLOR_2D;
-//            rds.shaderName = S::TEXTURE_2D;
-//            auto ps = std::make_shared<PosTex3dStrip>( rds.rect, QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS );
-//
-//            auto vp = VPBuilder<PosTex3dStrip>{*this,ShaderMaterial{S::TEXTURE_2D, mapTextureAndColor(rds.textureRef, rds.color)}}.p(ps).n(_name).build();
-//            VPL( rds.bucketIndex, vp );
-//
-//            return drawRectFinal( rds );
+            rds.shaderName = S::TEXTURE_2D;
+            return drawRectFinalTM( rds );
         }
         if constexpr ( std::is_same_v<T, DRect2dRounded> ) {
             rds.shaderName = S::COLOR_2D;

@@ -138,3 +138,16 @@ std::vector<Vector3f> AABB::topDownOutline( CompositeWrapping _wrap ) const {
     }
     return ret;
 }
+
+bool AABB::containsXZ( const V2f& _point ) const {
+    return _point.x() > minPoint().x() && _point.x() < maxPoint().x() &&
+           _point.y() > minPoint().z() && _point.x() < maxPoint().z();
+}
+
+void AABB::identity() {
+    *this = MIDENTITY();
+}
+
+void AABB::identityCentered() {
+    *this = MIDENTITYCENTER();
+}

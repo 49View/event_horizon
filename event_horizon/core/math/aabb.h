@@ -24,7 +24,12 @@ public:
 		return a;
 	}
 
-	static AABB MINVALID() {
+    static AABB& MIDENTITYCENTER() {
+        static AABB a( Vector3f( -0.5f ), Vector3f( 0.5f ) );
+        return a;
+    }
+
+    static AABB MINVALID() {
 		return AABB::INVALID;
 	}
 
@@ -43,10 +48,14 @@ public:
 	    set(minPoint, maxPoint);
     }
 
-	explicit AABB( const std::vector<Vector3f> points ) {
+    explicit AABB( const std::vector<Vector3f> points ) {
 		*this = INVALID;
 		for ( auto& p : points ) expand( p );
 	}
+
+    void set( const AABB& _aabb ) {
+        *this = _aabb;
+    }
 
 	bool isValid() const {
 		return *this != AABB::INVALID;
@@ -125,6 +134,8 @@ public:
 
 	void merge( const AABB& val );
 
+	void identity();
+	void identityCentered();
 	Rect2f demoteTo2d() const;
     JMATH::Rect2f topDown() const;
 	int leastDominantAxis() const {
@@ -210,7 +221,7 @@ public:
 		set( mi, ma );
 	}
 
-    AABB transform( const Matrix4f& mat ) const {
+    [[nodiscard]] AABB gettransform( const Matrix4f& mat ) const {
         Vector3f mi = mat.transform( mMinPoint );
         Vector3f ma = mat.transform( mMaxPoint );
 
@@ -260,6 +271,7 @@ public:
 	}
 
 	bool intersectLine( const Vector3f& linePos, const Vector3f& lineDir, float &tNear, float &tFar ) const;
+    [[nodiscard]] bool containsXZ( const V2f& _point ) const;
 
 	//std::vector<Vector3f> points3d() const {
 	//	std::vector<Vector3f> ret;

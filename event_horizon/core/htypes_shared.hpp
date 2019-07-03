@@ -364,7 +364,23 @@ struct VectorWrap {
     VectorWrap() = default;
     VectorWrap( const std::vector<T>& v, bool wrap ) : v( v ), wrap( wrap ) {}
 
-    std::vector<T> v; bool wrap = false; };
+    std::vector<T> v;
+    bool wrap = false;
+};
+
+template <typename T, typename M>
+struct VectorWrapT2 {
+    VectorWrapT2() = default;
+    VectorWrapT2( const std::vector<T>& _v, bool wrap ) : v(  _v ), wrap( wrap ) {}
+    VectorWrapT2( const std::vector<T>& _v, const std::vector<T>& _m, bool wrap ) : v(  _v ), vm( _m ), wrap( wrap ) {}
+
+    std::vector<T> v;
+    std::vector<M> vm;
+    bool wrap = false;
+};
 
 template <typename T>
 using VectorOfVectorWrap = std::vector<VectorWrap<T>>;
+
+template <typename T, typename M>
+using VectorOfVectorWrapT2 = std::vector<VectorWrapT2<T, M>>;
