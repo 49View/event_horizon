@@ -262,7 +262,7 @@ public:
             elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
             if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
                 auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
-                elem->visit( [&matRef](GeomSP _geom) {
+                elem->foreach( [&matRef](GeomSP _geom) {
                     if ( !_geom->empty() ) {
                         _geom->DataRef().material = matRef;
                     }

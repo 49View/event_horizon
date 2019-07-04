@@ -42,7 +42,7 @@ constexpr static uint64_t UI2dMenu = CommandBufferLimits::UI2dStart + 1;
 
 void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
 //    auto statusColor = owner->colorFromStatus( status );
-    auto ssBBox = bbox3d->topDown();
+    auto ssBBox = bbox3d->front();
     ssBBox.translate( V2f::Y_AXIS_NEG * ssBBox.height() );
 
     if ( type() == UIT::separator_h() ) {
@@ -73,7 +73,7 @@ void UIElement::transform( float _duration, uint64_t _frameSkipper,
             KeyFramePair{ downtime, backgroundAnim.Pos() + _pos }
     };
 
-    bbox3d->topDown().translate( _pos.xy() );
+    bbox3d->front().translate( _pos.xy() );
 
     Timeline::play( backgroundAnim.pos, _frameSkipper, colDown, AnimUpdateCallback([this](float) {
         backgroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
@@ -102,6 +102,9 @@ void UIElement::touchedDown() {
 
 void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
 
+    if ( status == UITapAreaStatus::Fixed ) {
+        return; // nothing to do here
+    }
     if ( hasBeenTapped && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
         status = UITapAreaStatus::Selected;
     }
@@ -133,65 +136,83 @@ void UIElement::setStatus( UITapAreaStatus _status ) {
     backgroundVP->setMaterialConstant( UniformNames::alpha, color.w() );
 }
 
+bool UIElement::hasActiveStatus() const {
+    return !( status == UITapAreaStatus::Fixed || status == UITapAreaStatus::Hidden || status == UITapAreaStatus::Disabled );
+}
+
 bool UIElement::contains( const V2f& _point ) const {
-    return bbox3dT->containsXZ( _point );
+    return bbox3dT->containsXY( _point );
 }
 
-ResourceRef UIView::isTapInArea( const V2f& _tap ) const {
-    V2f tapS = (_tap / getScreenSizef) * getScreenAspectRatioVector;
-    for ( const auto& [k,v] : elements ) {
-        if ( v->Data().contains( tapS ) ) {
-            return k;
-        }
+bool UIElement::containsActive( const V2f& _point ) const {
+    if ( !hasActiveStatus() ) return false;
+    return bbox3dT->containsXY( _point );
+}
+
+void UIView::foreach( std::function<void(UIElementSP)> f ) {
+    for ( auto& v : elements ) {
+        v->foreach( f );
     }
-    return {};
 }
 
-UIElementSP UIView::TapArea( CResourceRef _key ) {
-    return elements.find( _key)->second;
+void UIView::visit( std::function<void( const UIElementSPConst)> f ) const {
+    for ( const auto& v : elements ) {
+        v->visit( f );
+    }
+}
+
+UIElementSP UIView::tapHandlers( const V2f& _tap ) {
+    V2f tapS = (_tap / getScreenSizef) * getScreenAspectRatioVector;
+    std::vector<UIElementSP> taps;
+    foreach( [&]( UIElementSP n ) {
+        if ( n->Data().containsActive( tapS ) ) {
+            taps.emplace_back(n);
+        }
+    } );
+
+    if ( taps.empty() ) return nullptr;
+    return taps.back();
 }
 
 bool UIView::isTouchDownInside( const V2f& _p ) {
-    auto k = isTapInArea(_p);
-    if ( !k.empty() ) {
-        TapArea(k)->DataRef().touchedDown();
+    if ( auto k = tapHandlers( _p ); k != nullptr ) {
+        k->DataRef().touchedDown();
+        return true;
     }
-    return !k.empty();
+    return false;
 }
 
 void UIView::handleTouchDownUIEvent( const V2f& _p ) {
-    touchDownKeyCached( isTapInArea(_p) );
+    touchDownKeyCached( tapHandlers( _p ) );
 }
 
-void UIView::touchDownKeyCached( CResourceRef _key ) const {
+void UIView::touchDownKeyCached( UIElementSP _key ) const {
     touchDownStartingKey = _key;
 }
 
-CResourceRef UIView::touchDownKeyCached() const {
+UIElementSP UIView::touchDownKeyCached() const {
     return touchDownStartingKey;
 }
 
-void UIView::touchedUp( CResourceRef _key ) {
-    for ( auto& [k, button] : elements ) {
+void UIView::touchedUp( UIElementSP _key ) {
+    foreach( [&]( UIElementSP n) {
         bool touchUpGroup = false;
-        if ( k == "1" || k == "2" || k == "3" ) {
-            touchUpGroup = _key == "1" || _key == "2" || _key == "3";
-        }
-        if ( k == "5" || k == "6" ) {
-            touchUpGroup = _key == "5" || _key == "6";
-        }
-        button->DataRef().touchedUp( k == _key, touchUpGroup );
-    }
+//        if ( k == "1" || k == "2" || k == "3" ) {
+//            touchUpGroup = _key == "1" || _key == "2" || _key == "3";
+//        }
+//        if ( k == "5" || k == "6" ) {
+//            touchUpGroup = _key == "5" || _key == "6";
+//        }
+        n->DataRef().touchedUp( _key == n, touchUpGroup );
+    });
 }
 
-void UIView::hoover( CResourceRef _key) {
-    for ( auto& [k, button] : elements ) {
-        button->DataRef().hoover( k == _key );
-    }
-}
+void UIView::hoover( const V2f& _point ) {
+    V2f tapS = (_point / getScreenSizef) * getScreenAspectRatioVector;
 
-void UIView::loaded( CResourceRef _key ) {
-    elements.at( _key)->DataRef().loaded();
+    foreach( [&]( UIElementSP n) {
+        n->DataRef().hoover( n->Data().containsActive( tapS ) );
+    });
 }
 
 Renderer& UIView::RR() {
@@ -219,32 +240,28 @@ C4f UIView::colorFromStatus( UITapAreaStatus _status ) {
     }
 }
 
-void UIView::setButtonStatus( CResourceRef _key, UITapAreaStatus _status ) {
-    elements.at( _key)->DataRef().setStatus( _status );
+void UIView::setButtonStatus( UIElementSP _key, UITapAreaStatus _status ) {
+    _key->DataRef().setStatus( _status );
 }
 
-UITapAreaStatus UIView::getButtonStatus( CResourceRef _key ) const {
-    return elements.at( _key)->DataRef().Status();
+UITapAreaStatus UIView::getButtonStatus( UIElementSP _key ) const {
+    return _key->DataRef().Status();
 }
 
-bool UIView::isButtonEnabled( CResourceRef _key ) const {
+bool UIView::isButtonEnabled( UIElementSP _key ) const {
     auto bs = getButtonStatus( _key );
     return bs == UITapAreaStatus::Enabled || bs == UITapAreaStatus::Selected;
 }
 
-void UIView::transform( CResourceRef _key, float _duration, uint64_t _frameSkipper,
+void UIView::transform( UIElementSP _key, float _duration, uint64_t _frameSkipper,
                         const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
-    elements.at( _key)->DataRef().transform( _duration, _frameSkipper, _pos, _rot, _scale );
+    _key->DataRef().transform( _duration, _frameSkipper, _pos, _rot, _scale );
 }
 
 void UIView::loadResources() {
-    for ( auto& [k,v] : elements ) {
-        v->visit( []( UIElementSP node) {
-            node->DataRef().loadResource( node->getLocalHierTransform() );
-        });
-//        loadResourcesRec( v );
-        loaded( k );
-    }
+    foreach( []( UIElementSP node ) {
+        node->DataRef().loadResource( node->getLocalHierTransform() );
+    });
 }
 
 C4f UIView::getEnabledColor() const {
@@ -280,11 +297,16 @@ void UIView::addRecursive( UIElementSP _elem ) {
 
 void UIView::add( UIElementSP _elem ) {
     addRecursive( _elem );
-    elements[_elem->Data().Key()] = _elem;
+    elements.push_back(_elem);
 }
 
 void UIContainer2d::finalise() {
     owner.add( node );
+
+//    node->visit( []( UIElementSP n ) {
+//        LOGRS( "BBox: " << *n->BBox3d() );
+//        LOGRS( "BBoxT: " << *n->BBox3dT() );
+//    } );
 }
 
 void UIContainer2d::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize ) {

@@ -31,6 +31,10 @@ JMATH::Rect2f JMATH::AABB::topDown() const {
     return Rect2f( mMinPoint.xz(), mMaxPoint.xz() );
 }
 
+JMATH::Rect2f JMATH::AABB::front() const {
+    return Rect2f( mMinPoint.xy(), mMaxPoint.xy() );
+}
+
 JMATH::AABB JMATH::AABB::rotate( const Vector4f& axisAngle ) const {
     return rotate( axisAngle.w(), axisAngle.xyz() );
 }
@@ -141,7 +145,12 @@ std::vector<Vector3f> AABB::topDownOutline( CompositeWrapping _wrap ) const {
 
 bool AABB::containsXZ( const V2f& _point ) const {
     return _point.x() > minPoint().x() && _point.x() < maxPoint().x() &&
-           _point.y() > minPoint().z() && _point.x() < maxPoint().z();
+           _point.y() > minPoint().z() && _point.y() < maxPoint().z();
+}
+
+bool AABB::containsXY( const V2f& _point ) const {
+    return _point.x() > minPoint().x() && _point.x() < maxPoint().x() &&
+           _point.y() > minPoint().y() && _point.y() < maxPoint().y();
 }
 
 void AABB::identity() {

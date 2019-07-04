@@ -138,6 +138,7 @@ public:
 	void identityCentered();
 	Rect2f demoteTo2d() const;
     JMATH::Rect2f topDown() const;
+    JMATH::Rect2f front() const;
 	int leastDominantAxis() const {
 		Vector3f diff = mMaxPoint - mMinPoint;
 		return diff.leastDominantElement();
@@ -272,6 +273,7 @@ public:
 
 	bool intersectLine( const Vector3f& linePos, const Vector3f& lineDir, float &tNear, float &tFar ) const;
     [[nodiscard]] bool containsXZ( const V2f& _point ) const;
+    [[nodiscard]] bool containsXY( const V2f& _point ) const;
 
 	//std::vector<Vector3f> points3d() const {
 	//	std::vector<Vector3f> ret;

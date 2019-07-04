@@ -124,7 +124,7 @@ struct UIForegroundIcon {
     std::string data;
 };
 
-class UIElement : public Boxable<> {
+class UIElement : public Boxable<JMATH::AABB, BBoxProjection2d> {
 public:
     template <typename ...Args>
     explicit UIElement( Args&& ... args ) {
@@ -157,7 +157,8 @@ private:
                 std::is_same_v<M, MScale2dYS > ||
                 std::is_same_v<M, MScale2dXYS >) {
             bbox3d->scaleX( _param().x() );
-            bbox3d->scaleZ( _param().y() );
+            bbox3d->scaleY( _param().y() );
+            bbox3d->scaleZ( 0.0f );
         }
         if constexpr ( std::is_same_v<M, UITapAreaType > ) {
             type = _param;
@@ -226,6 +227,8 @@ public:
     }
 
     [[nodiscard]] bool contains( const V2f& _point ) const;
+    [[nodiscard]] bool containsActive( const V2f& _point ) const;
+    [[nodiscard]] bool hasActiveStatus() const;
     void touchedDown();
     void touchedUp( bool hasBeenTapped, bool isTouchUpGroup );
     void transform( float _duration, uint64_t _frameSkipper,
@@ -233,7 +236,6 @@ public:
                     const Quaternion& _rot = Quaternion{},
                     const V3f& _scale = V3f::ONE );
     void loadResource( std::shared_ptr<Matrix4f> _localHierMat );
-    void loaded() { ready = true; }
     void hoover( bool isHoovering );
     void setStatus( UITapAreaStatus _status );
 
@@ -267,8 +269,10 @@ private:
     V4fa            backgroundColor;
 };
 
-using UIElementRT = RecursiveTransformation<UIElement, JMATH::AABB>;
-using UIElementSP = std::shared_ptr<UIElementRT>;
+using UIElementRT       = RecursiveTransformation<UIElement, JMATH::AABB>;
+using UIElementSP       = std::shared_ptr<UIElementRT>;
+using UIElementSPConst  = std::shared_ptr<const UIElementRT>;
+using UIElementSPCC     = const UIElementSPConst;
 
 class UIView {
 public:
@@ -276,23 +280,21 @@ public:
 
     void add( UIElementSP _elem );
 
-    ResourceRef isTapInArea( const V2f& tap ) const;
+    UIElementSP tapHandlers( const V2f& tap );
     bool isTouchDownInside( const V2f& _p );
     void handleTouchDownUIEvent( const V2f& _p );
-    UIElementSP TapArea( CResourceRef _key );
-    void touchDownKeyCached( CResourceRef _key ) const;
-    void touchedUp( CResourceRef _key );
-    CResourceRef touchDownKeyCached() const;
+    void touchDownKeyCached( UIElementSP _key ) const;
+    void touchedUp( UIElementSP _key );
+    UIElementSP touchDownKeyCached() const;
     void loadResources();
-    void loaded( CResourceRef _key );
-    void hoover( CResourceRef _key );
-    void transform( CResourceRef _key, float _duration, uint64_t _frameSkipper,
+    void hoover(  const V2f& _point );
+    void transform( UIElementSP _key, float _duration, uint64_t _frameSkipper,
                     const V3f& _pos,
                     const Quaternion& _rot = Quaternion{},
                     const V3f& _scale = V3f::ONE );
-    void setButtonStatus( CResourceRef _key, UITapAreaStatus _status );
-    UITapAreaStatus getButtonStatus( CResourceRef _key ) const;
-    bool isButtonEnabled( CResourceRef _key ) const;
+    void setButtonStatus( UIElementSP _key, UITapAreaStatus _status );
+    UITapAreaStatus getButtonStatus( UIElementSP _key ) const;
+    bool isButtonEnabled( UIElementSP _key ) const;
 
     Renderer& RR();
     SceneGraph& SG();
@@ -305,6 +307,9 @@ public:
 
     C4f colorFromStatus( UITapAreaStatus _status );
 
+    void visit( std::function<void(const UIElementSPConst)> f ) const ;
+    void foreach( std::function<void(UIElementSP)> f );
+
 private:
     void addRecursive( UIElementSP _elem );
 
@@ -312,8 +317,8 @@ private:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
     ColorScheme colorScheme;
-    std::unordered_map<ResourceRef, UIElementSP> elements;
-    mutable ResourceRef touchDownStartingKey;
+    std::vector<UIElementSP> elements;
+    mutable UIElementSP touchDownStartingKey;
 };
 
 enum class CSSDisplayMode {

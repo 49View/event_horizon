@@ -104,6 +104,7 @@ class RecursiveTransformation : public Boxable<B>,
 public:
 
     using NodeSP = std::shared_ptr<RecursiveTransformation<T, B>>;
+    using NodeSPConst = std::shared_ptr<const RecursiveTransformation<T, B>>;
     using NodeP = RecursiveTransformation<T, B>*;
 
     RESOURCE_CTORS(RecursiveTransformation);
@@ -146,10 +147,17 @@ public:
         generateMatrixHierarchy(fatherRootTransform());
     }
 
-    void visit( std::function<void(NodeSP)> f ) {
+    void visit( std::function<void( const NodeSPConst)> f ) const {
+        f( this->shared_from_this() );
+        for ( const auto& c : Children() ) {
+            c->visit( f );
+        }
+    }
+
+    void foreach( std::function<void(NodeSP)> f ) {
         f(this->shared_from_this());
         for ( auto& c : Children() ) {
-            c->visit( f );
+            c->foreach( f );
         }
     }
 
@@ -162,7 +170,7 @@ public:
         MegaWriter mw; serialize(&mw); return mw.getSerializableContainer();
     }
 
-    bool empty() const {
+    [[nodiscard]] bool empty() const {
         return data.empty();
     }
 

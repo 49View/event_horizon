@@ -13,7 +13,10 @@ struct EmptyBox {
     static EmptyBox MINVALID() { return EmptyBox{}; };
 };
 
-template <typename T = JMATH::AABB>
+struct BBoxProjection3d {};
+struct BBoxProjection2d {};
+
+template <typename T = JMATH::AABB, typename D = BBoxProjection3d>
 class Boxable {
 public:
     Boxable() {
@@ -25,7 +28,12 @@ public:
     inline std::shared_ptr<T>& BBox3d() { return bbox3d; }
     inline std::shared_ptr<T>& BBox3dT() { return bbox3dT; }
     inline T BBox3dCopy() const { return *bbox3d.get(); }
-    inline const AABB& BBoxTransform( const Matrix4f& _m ) {
+    inline const AABB& BBoxTransform( Matrix4f _m ) {
+        if ( std::is_same_v<D, BBoxProjection2d> ) {
+            V3f ssTranslate = _m.getPosition3();
+            ssTranslate.oneMinusY();
+            _m.setTranslation( ssTranslate );
+        }
         bbox3dT->set( bbox3d->gettransform( _m ) );
         return *bbox3dT;
     }
