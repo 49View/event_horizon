@@ -722,14 +722,17 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
         // Don't draw an empty space
         if ( !m.verts.empty() ) {
             for ( size_t tr = 0; tr < m.verts.size(); tr+=3 ) {
-                Vector2f p1{ m.verts[tr].pos.x  , vhfm.ascent - ( m.verts[tr].pos.y ) };
-                Vector2f p3{ m.verts[tr+1].pos.x, vhfm.ascent - ( m.verts[tr+1].pos.y ) };
-                Vector2f p2{ m.verts[tr+2].pos.x, vhfm.ascent - ( m.verts[tr+2].pos.y ) };
                 if ( rds.shaderName == S::FONT_2D ) {
+                    Vector2f p1{ m.verts[tr+0].pos.x, vhfm.ascent - ( m.verts[tr+0].pos.y ) };
+                    Vector2f p3{ m.verts[tr+1].pos.x, vhfm.ascent - ( m.verts[tr+1].pos.y ) };
+                    Vector2f p2{ m.verts[tr+2].pos.x, vhfm.ascent - ( m.verts[tr+2].pos.y ) };
                     ps->addVertex( p1 + cursor, V2f{m.verts[tr+0].texCoord, m.verts[tr+0].coef } );
                     ps->addVertex( p2 + cursor, V2f{m.verts[tr+2].texCoord, m.verts[tr+2].coef } );
                     ps->addVertex( p3 + cursor, V2f{m.verts[tr+1].texCoord, m.verts[tr+1].coef } );
                 } else {
+                    Vector2f p1{ m.verts[tr+0].pos.x, ( m.verts[tr+0].pos.y ) };
+                    Vector2f p3{ m.verts[tr+1].pos.x, ( m.verts[tr+1].pos.y ) };
+                    Vector2f p2{ m.verts[tr+2].pos.x, ( m.verts[tr+2].pos.y ) };
                     ps->addVertex( XZY::C(p1 + cursor), V2f{m.verts[tr+0].texCoord, m.verts[tr+0].coef } );
                     ps->addVertex( XZY::C(p2 + cursor), V2f{m.verts[tr+2].texCoord, m.verts[tr+2].coef } );
                     ps->addVertex( XZY::C(p3 + cursor), V2f{m.verts[tr+1].texCoord, m.verts[tr+1].coef } );

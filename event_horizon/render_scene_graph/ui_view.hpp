@@ -143,6 +143,7 @@ private:
         if constexpr ( std::is_same_v<M, std::string > || is_c_str<M>::value ) {
             key = _param;
         }
+
 //        if constexpr ( std::is_same_v<M, V3f > || std::is_same_v<M, V2f > ) {
 //            pos = _param;
 //        }
@@ -256,7 +257,6 @@ private:
     std::string     foreground;
 
     UIView*         owner = nullptr;
-    bool            ready = false;
     std::string     background;
     std::string     touchDownAnimNamePos;
     std::string     touchDownAnimNameScale;
@@ -267,6 +267,7 @@ private:
     MatrixAnim      backgroundAnim;
     V4fa            foregroundColor;
     V4fa            backgroundColor;
+    C4f             defaultBackgroundColor = C4f::WHITE;
 };
 
 using UIElementRT       = RecursiveTransformation<UIElement, JMATH::AABB>;
@@ -274,27 +275,30 @@ using UIElementSP       = std::shared_ptr<UIElementRT>;
 using UIElementSPConst  = std::shared_ptr<const UIElementRT>;
 using UIElementSPCC     = const UIElementSPConst;
 
+enum class UICheckActiveOnly {
+    False,
+    True
+};
+
 class UIView {
 public:
     UIView( SceneGraph& sg, RenderOrchestrator& rsg, const ColorScheme& cs ) : sg( sg ), rsg( rsg ), colorScheme(cs) {}
 
     void add( UIElementSP _elem );
 
-    UIElementSP tapHandlers( const V2f& tap );
-    bool isTouchDownInside( const V2f& _p );
-    void handleTouchDownUIEvent( const V2f& _p );
-    void touchDownKeyCached( UIElementSP _key ) const;
-    void touchedUp( UIElementSP _key );
-    UIElementSP touchDownKeyCached() const;
+    void handleTouchDownEvent( const V2f& _p );
+    void handleTouchUpEvent( const V2f& _p );
     void loadResources();
     void hoover(  const V2f& _point );
     void transform( UIElementSP _key, float _duration, uint64_t _frameSkipper,
                     const V3f& _pos,
                     const Quaternion& _rot = Quaternion{},
                     const V3f& _scale = V3f::ONE );
-    void setButtonStatus( UIElementSP _key, UITapAreaStatus _status );
-    UITapAreaStatus getButtonStatus( UIElementSP _key ) const;
-    bool isButtonEnabled( UIElementSP _key ) const;
+    void setButtonStatus( CResourceRef _key, UITapAreaStatus _status );
+    UITapAreaStatus getButtonStatus( CResourceRef _key ) const;
+    bool isButtonEnabled( CResourceRef _key ) const;
+    bool isHandlingUI() const;
+    [[nodiscard]] bool pointInUIArea( const V2f& tap, UICheckActiveOnly _checkFlag ) const;
 
     Renderer& RR();
     SceneGraph& SG();
@@ -311,6 +315,8 @@ public:
     void foreach( std::function<void(UIElementSP)> f );
 
 private:
+    void touchDownKeyCached( UIElementSP _key ) const;
+    UIElementSP touchDownKeyCached() const;
     void addRecursive( UIElementSP _elem );
 
 private:
@@ -318,12 +324,37 @@ private:
     RenderOrchestrator& rsg;
     ColorScheme colorScheme;
     std::vector<UIElementSP> elements;
+    std::vector<UIElementSP> activeTaps;
     mutable UIElementSP touchDownStartingKey;
 };
 
 enum class CSSDisplayMode {
     Block,
     Inline
+};
+
+using ControlDefKey = std::string;
+using ControlDefIconRef = std::string;
+using ControlSingleTapCallback = std::function<void(ControlDefKey)>;
+
+struct ControlDef {
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines )
+            : key( key ), icon( icon ), textLines( textLines ) {}
+
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon ) : key( key ), icon( icon ) {}
+
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon,
+                const ControlSingleTapCallback& singleTapCallback ) : key( key ), icon( icon ),
+                                                                      singleTapCallback( singleTapCallback ) {}
+
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines,
+                const ControlSingleTapCallback& singleTapCallback ) : key( key ), icon( icon ), textLines( textLines ),
+                                                                      singleTapCallback( singleTapCallback ) {}
+
+    ControlDefKey key;
+    ControlDefIconRef icon;
+    std::vector<UIFontText> textLines;
+    ControlSingleTapCallback singleTapCallback;
 };
 
 class UIContainer2d {
@@ -339,11 +370,9 @@ public:
     void addEmptyCaret();
     void addEmptyCaretNewLine();
     void addTitle( const UIFontText& _text );
-    void addListEntry( CResourceRef _icon, const std::vector<UIFontText>& _lines );
-    void addListEntryGrid( CResourceRef _icon, const std::vector<UIFontText>& _lines, bool _newLine = false );
-    void addButtonGroupLine( UITapAreaType _uit,
-                             const std::vector<ResourceRef>& _icons,
-                             const std::vector<UIFontText>& _labels );
+    void addListEntry( const ControlDef& _cd );
+    void addListEntryGrid( const ControlDef& _cd, bool _newLine = false );
+    void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds );
     void popCaretX();
     void finalise();
 
@@ -352,7 +381,7 @@ private:
     void addSeparator( float percScaleY = 1.0f );
     void addLabel( const UIFontText& _text, const MScale2d& bsize, CSSDisplayMode displayMode,
                    const V2f& _pos = V2f::ZERO );
-    void addButton( CResourceRef _icon, const MScale2d& bisze, CSSDisplayMode displayMode,
+    UIElementSP addButton( const ControlDef& _cd, const MScale2d& bisze, CSSDisplayMode displayMode,
                     UITapAreaType _bt = UIT::pushButton, const V2f& _pos = V2f::ZERO );
 
 private:
@@ -362,6 +391,7 @@ private:
     V3f size;
     UIElementSP node;
 
+    std::unordered_map<std::string, UIElementSP> icontrols;
     float innerPaddedX = 0.0f;
     V2f caret{V2f::ZERO};
     std::vector<V2f> caretQueue;

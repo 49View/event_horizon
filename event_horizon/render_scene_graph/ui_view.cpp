@@ -10,6 +10,12 @@
 #include <graphics/renderer.h>
 #include <render_scene_graph/render_orchestrator.h>
 
+V2f ssOneMinusY( const V2f& _point ) {
+    auto ret = (_point / getScreenSizef) * getScreenAspectRatioVector;
+    ret.oneMinusY();
+    return ret;
+}
+
 ColorScheme::ColorScheme( const std::string& colorDescriptor ) {
     size_t i0 = 0;
     for ( size_t t = 0; t < 4; t++ ) {
@@ -46,21 +52,24 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
     ssBBox.translate( V2f::Y_AXIS_NEG * ssBBox.height() );
 
     if ( type() == UIT::separator_h() ) {
+        defaultBackgroundColor = C4f::WHITE.A(0.45f);
         backgroundVP = this->owner->RR().draw<DRect2dRounded>(UI2dMenu, ssBBox, _localHierMat,
-                RDSRoundedCorner(ssBBox.height()*0.33f), C4f::WHITE.A(0.45f));
+                RDSRoundedCorner(ssBBox.height()*0.33f), defaultBackgroundColor );
         return;
     }
 
     if ( text.empty() ) {
-        backgroundVP = this->owner->RR().draw<DRect2dRounded>(UI2dMenu, ssBBox, _localHierMat, C4f::WHITE.A(0.3f));
+        defaultBackgroundColor = C4f::WHITE.A(0.3f);
+        backgroundVP = this->owner->RR().draw<DRect2dRounded>(UI2dMenu, ssBBox, _localHierMat, defaultBackgroundColor);
     }
     if ( !foreground.empty() && text.empty() ) {
         foregroundVP = this->owner->RR().draw<DRect2d>( UI2dMenu, ssBBox, _localHierMat, RDSImage{foreground} );
     }
     if ( !text.empty() ) {
+        defaultBackgroundColor = C4f::WHITE;
         this->owner->RR().draw<DText2d>( UI2dMenu,
                 FDS{ text, font, ssBBox.bottomLeft(), fontHeight, fontAngle},
-                _localHierMat, C4f::WHITE );
+                _localHierMat, defaultBackgroundColor );
     }
 }
 
@@ -120,16 +129,15 @@ void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
 }
 
 void UIElement::hoover( bool isHoovering ) {
-    if ( ready && status == UITapAreaStatus::Enabled ) {
-        auto color = isHoovering ? owner->getHooverColor().xyz() : owner->getEnabledColor().xyz();
-        auto alpha = isHoovering ? owner->getHooverColor().w() : owner->getEnabledColor().w();
+    if ( status == UITapAreaStatus::Enabled ) {
+        auto color = isHoovering ? owner->getHooverColor().xyz() : defaultBackgroundColor.xyz();
+        auto alpha = isHoovering ? owner->getHooverColor().w() : defaultBackgroundColor.w();
         backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color );
         backgroundVP->setMaterialConstant( UniformNames::alpha, alpha );
     }
 }
 
 void UIElement::setStatus( UITapAreaStatus _status ) {
-    if ( !ready ) return;
     status = _status;
     auto color = owner->colorFromStatus(status);
     backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color.xyz() );
@@ -161,29 +169,43 @@ void UIView::visit( std::function<void( const UIElementSPConst)> f ) const {
     }
 }
 
-UIElementSP UIView::tapHandlers( const V2f& _tap ) {
-    V2f tapS = (_tap / getScreenSizef) * getScreenAspectRatioVector;
-    std::vector<UIElementSP> taps;
-    foreach( [&]( UIElementSP n ) {
-        if ( n->Data().containsActive( tapS ) ) {
-            taps.emplace_back(n);
+bool UIView::isHandlingUI() const {
+    return !activeTaps.empty();
+}
+
+bool UIView::pointInUIArea( const V2f& _tap, UICheckActiveOnly _checkFlag ) const {
+    bool ret = false;
+    V2f tapS = ssOneMinusY(_tap);
+    visit( [&]( UIElementSPCC n ) {
+        if ( _checkFlag == UICheckActiveOnly::True ? n->Data().containsActive( tapS ) : n->Data().contains( tapS ) ) {
+            ret = true;
         }
     } );
-
-    if ( taps.empty() ) return nullptr;
-    return taps.back();
+    return ret;
 }
 
-bool UIView::isTouchDownInside( const V2f& _p ) {
-    if ( auto k = tapHandlers( _p ); k != nullptr ) {
-        k->DataRef().touchedDown();
-        return true;
-    }
-    return false;
+void UIView::handleTouchDownEvent( const V2f& _p ) {
+    V2f tapS = ssOneMinusY(_p);
+    activeTaps.clear();
+    foreach( [&]( UIElementSP n ) {
+        if ( n->Data().containsActive( tapS ) ) {
+            activeTaps.emplace_back(n);
+        }
+    } );
+    touchDownKeyCached( activeTaps.empty() ? nullptr : activeTaps.back() );
 }
 
-void UIView::handleTouchDownUIEvent( const V2f& _p ) {
-    touchDownKeyCached( tapHandlers( _p ) );
+void UIView::handleTouchUpEvent( const V2f& _p ) {
+    foreach( [&]( UIElementSP n) {
+//        bool touchUpGroup = false;
+//        if ( k == "1" || k == "2" || k == "3" ) {
+//            touchUpGroup = _key == "1" || _key == "2" || _key == "3";
+//        }
+//        if ( k == "5" || k == "6" ) {
+//            touchUpGroup = _key == "5" || _key == "6";
+//        }
+//        n->DataRef().touchedUp( _key == n, touchUpGroup );
+    });
 }
 
 void UIView::touchDownKeyCached( UIElementSP _key ) const {
@@ -194,21 +216,8 @@ UIElementSP UIView::touchDownKeyCached() const {
     return touchDownStartingKey;
 }
 
-void UIView::touchedUp( UIElementSP _key ) {
-    foreach( [&]( UIElementSP n) {
-        bool touchUpGroup = false;
-//        if ( k == "1" || k == "2" || k == "3" ) {
-//            touchUpGroup = _key == "1" || _key == "2" || _key == "3";
-//        }
-//        if ( k == "5" || k == "6" ) {
-//            touchUpGroup = _key == "5" || _key == "6";
-//        }
-        n->DataRef().touchedUp( _key == n, touchUpGroup );
-    });
-}
-
 void UIView::hoover( const V2f& _point ) {
-    V2f tapS = (_point / getScreenSizef) * getScreenAspectRatioVector;
+    V2f tapS = ssOneMinusY(_point);
 
     foreach( [&]( UIElementSP n) {
         n->DataRef().hoover( n->Data().containsActive( tapS ) );
@@ -240,15 +249,27 @@ C4f UIView::colorFromStatus( UITapAreaStatus _status ) {
     }
 }
 
-void UIView::setButtonStatus( UIElementSP _key, UITapAreaStatus _status ) {
-    _key->DataRef().setStatus( _status );
+void UIView::setButtonStatus( CResourceRef _key, UITapAreaStatus _status ) {
+    foreach( [&]( UIElementSP node ) {
+        if ( node->Data().Key() == _key ) {
+            node->DataRef().setStatus( _status );
+        }
+    });
 }
 
-UITapAreaStatus UIView::getButtonStatus( UIElementSP _key ) const {
-    return _key->DataRef().Status();
+UITapAreaStatus UIView::getButtonStatus( CResourceRef _key ) const {
+    UITapAreaStatus ret = UITapAreaStatus::Enabled;
+
+    visit( [&]( UIElementSPCC node ) {
+        if ( node->Data().Key() == _key ) {
+            ret = node->Data().Status();
+        }
+    });
+
+    return ret;
 }
 
-bool UIView::isButtonEnabled( UIElementSP _key ) const {
+bool UIView::isButtonEnabled( CResourceRef _key ) const {
     auto bs = getButtonStatus( _key );
     return bs == UITapAreaStatus::Enabled || bs == UITapAreaStatus::Selected;
 }
@@ -351,12 +372,13 @@ void UIContainer2d::addLabel( const UIFontText& _text,
     advanceCaret( displayMode, lsize );
 }
 
-void UIContainer2d::addButton( CResourceRef _icon, const MScale2d& bsize, CSSDisplayMode displayMode,
+UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& bsize, CSSDisplayMode displayMode,
         UITapAreaType _bt, const V2f& _pos ) {
 
-    auto child = EF::create<UIElementRT>(PFC{}, UUIDGen::make(), bsize, _bt, UIForegroundIcon{_icon} );
+    auto child = EF::create<UIElementRT>(PFC{}, _cd.key, bsize, _bt, UIForegroundIcon{_cd.icon} );
     node->addChildren( child, caret );
     advanceCaret( displayMode, bsize );
+    return child;
 }
 
 void UIContainer2d::addTitle( const UIFontText& _text ) {
@@ -364,13 +386,13 @@ void UIContainer2d::addTitle( const UIFontText& _text ) {
     addSeparator();
 }
 
-void UIContainer2d::addListEntry( CResourceRef _icon, const std::vector<UIFontText>& _lines ) {
+void UIContainer2d::addListEntry( const ControlDef& _cd ) {
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     float totalTextHeight = 0.0f;
-    for ( const auto& ltext : _lines ) totalTextHeight += ltext.height + (-padding.y());
+    for ( const auto& ltext : _cd.textLines ) totalTextHeight += ltext.height + (-padding.y());
     MScale2d bsize{ totalTextHeight, totalTextHeight };
-    addButton( _icon, bsize, CSSDisplayMode::Inline );
-    for ( const auto& ltext : _lines ) {
+    icontrols[_cd.key] = addButton( _cd, bsize, CSSDisplayMode::Inline );
+    for ( const auto& ltext : _cd.textLines ) {
         auto lsize = MScale2d{innerPaddedX, ltext.height };
         addLabel( ltext, lsize, CSSDisplayMode::Block );
     }
@@ -379,13 +401,13 @@ void UIContainer2d::addListEntry( CResourceRef _icon, const std::vector<UIFontTe
     addSeparator( 0.5f );
 }
 
-void UIContainer2d::addListEntryGrid( CResourceRef _icon, const std::vector<UIFontText>& _lines, bool _newLine ) {
+void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine ) {
     float totalTextHeight = 0.0f;
-    for ( const auto& ltext : _lines ) totalTextHeight += ltext.height + (-padding.y());
+    for ( const auto& ltext : _cd.textLines ) totalTextHeight += ltext.height + (-padding.y());
     MScale2d bsize{ totalTextHeight, totalTextHeight };
     auto oldCaret = caret;
-    addButton( _icon, bsize, CSSDisplayMode::Inline );
-    for ( const auto& ltext : _lines ) {
+    icontrols[_cd.key] = addButton( _cd, bsize, CSSDisplayMode::Inline );
+    for ( const auto& ltext : _cd.textLines ) {
         auto lsize = MScale2d{innerPaddedX, ltext.height };
         addLabel( ltext, lsize, CSSDisplayMode::Block );
     }
@@ -400,24 +422,23 @@ void UIContainer2d::addListEntryGrid( CResourceRef _icon, const std::vector<UIFo
 }
 
 void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
-                                        const std::vector<ResourceRef>& _icons,
-                                        const std::vector<UIFontText>& _labels ) {
+                                        const std::vector<ControlDef>& _cds ) {
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     MScale2d bsize{ 0.07f, 0.07f };
-    for ( const auto& i : _icons ) {
-        addButton( i, bsize, CSSDisplayMode::Inline, UIT::stickyButton );
+    for ( const auto& i : _cds ) {
+        icontrols[i.key] = addButton( i, bsize, CSSDisplayMode::Inline, UIT::stickyButton );
     }
     advanceCaret( CSSDisplayMode::Block, MScale2d{0.0f, bsize().y() + padding.y()} );
-    for ( size_t t = 0; t < _icons.size(); t++ ) popCaretX();
+    for ( size_t t = 0; t < _cds.size(); t++ ) popCaretX();
 
-    if ( !_labels.empty() ) {
-        for ( const auto& i : _labels ) {
+    for ( const auto& cd : _cds ) {
+        for ( const auto& i : cd.textLines ) {
             MScale2d lsize{ bsize().x(), i.height };
             addLabel( i, lsize, CSSDisplayMode::Inline );
         }
-        for ( size_t t = 0; t < _icons.size(); t++ ) popCaretX();
     }
+    for ( const auto& cd : _cds ) if ( !cd.textLines.empty() ) popCaretX();
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     addSeparator( 0.5f );
