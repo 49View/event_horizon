@@ -6,6 +6,7 @@ const fsController = require("../controllers/fsController");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const sharp = require("sharp");
+const md5 = require("md5");
 
 const getMetadataFromBody = (checkGroup, checkRaw, req) => {
   if (req.body === null || !(req.body instanceof Object)) {
@@ -62,6 +63,23 @@ const createEntityFromMetadata = async (project, metadata) => {
       // const nn = savedFilename["name"];
       // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
     }
+
+    cleanMetadata.thumb = await thumbFromContent(
+      content,
+      groupThumbnailCalcRule(group)
+    );
+
+    // Hashing of content
+    cleanMetadata.hash = md5(content);
+
+    // Insert dates
+    const idate = new Date();
+    cleanMetadata.creationDate = idate;
+    cleanMetadata.lastUpdatedDate = idate;
+
+    // Defaults
+    cleanMetadata.accessCount = 0;
+
     // filePath = savedFilename["name"];
     await fsController.cloudStorageFileUpload(
       content,
@@ -123,7 +141,13 @@ const cleanupMetadata = metadata => {
   const result = {};
 
   if (typeof metadata.raw !== "undefined") {
-    result.content = zlib.inflateSync(new Buffer.from(metadata.raw, "base64"));
+    try {
+      result.content = zlib.inflateSync(
+        new Buffer.from(metadata.raw, "base64")
+      );
+    } catch (error) {
+      result.content = new Buffer.from(metadata.raw, "base64");
+    }
   } else {
     result.content = null;
   }
@@ -271,22 +295,26 @@ const groupThumbnailSourceContent = async (entity, gtr) => {
   }
 };
 
+const thumbFromContent = async (content, gtr) => {
+  let thumbBuff = null;
+  if (gtr === gtr_content_vector) {
+    thumbBuff = content;
+  } else {
+    thumbBuff = await sharp(content)
+      .resize(64, 64)
+      .toFormat("jpg")
+      .toBuffer();
+  }
+  return thumbBuff.toString("base64");
+};
+
 const upsertThumb = async (entityId, gtr) => {
   const entity = await getEntityById(entityId);
   if (entity.metadata.thumb.length == 0) {
     const content = await groupThumbnailSourceContent(entity, gtr);
 
     try {
-      let thumbBuff = null;
-      if (gtr === gtr_content_vector) {
-        thumbBuff = content.Body;
-      } else {
-        const thumbBuff = await sharp(content.Body)
-          .resize(64, 64)
-          .toFormat("jpg")
-          .toBuffer();
-      }
-      entity.metadata.thumb = thumbBuff.toString("base64");
+      entity.metadata.thumb = await thumbFromContent(content.Body, gtr);
       await updateById(entityId, entity);
       return 201;
     } catch (error) {

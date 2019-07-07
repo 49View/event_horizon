@@ -2,23 +2,46 @@ import React, { Fragment, useCallback } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "../Spinner";
-import { decode } from "base64-arraybuffer";
+import { encode, decode } from "base64-arraybuffer";
 import { useDropzone } from "react-dropzone";
 import { getFullEntity, addEntity } from "../../../actions/entities";
 
-const Entries = ({ entries, getFullEntity, group, loading }) => {
-  const onDrop = useCallback(acceptedFiles => {
-    const reader = new FileReader();
+const Entries = ({
+  entries,
+  getFullEntity,
+  addEntity,
+  group,
+  user,
+  loading
+}) => {
+  const onDrop = useCallback(
+    acceptedFiles => {
+      const reader = new FileReader();
 
-    reader.onabort = () => console.log("file reading was aborted");
-    reader.onerror = () => console.log("file reading has failed");
-    reader.onload = () => {
-      // Do whatever you want with the file contents
-      // const binaryStr = reader.result;
-    };
+      reader.onabort = () => console.log("file reading was aborted");
+      reader.onerror = () => console.log("file reading has failed");
+      reader.onload = e => {
+        const tags = acceptedFiles[0].name.split(/[\s,._]+/);
+        const entry = {
+          group: group,
+          isPublic: false,
+          isRestricted: false,
+          creator: { name: user.name, email: user.email },
+          name: acceptedFiles[0].name,
+          thumb: "",
+          tags: tags,
+          deps: [],
+          raw: encode(reader.result)
+        };
+        addEntity(entry);
+        // Do whatever you want with the file contents
+        // const binaryStr = reader.result;
+      };
 
-    acceptedFiles.forEach(file => reader.readAsBinaryString(file));
-  }, []);
+      acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
+    },
+    [group, user, addEntity]
+  );
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   let entitiesRes = [];
@@ -115,6 +138,7 @@ Entries.propTypes = {
   entries: PropTypes.array,
   loading: PropTypes.bool,
   group: PropTypes.string,
+  user: PropTypes.object,
   getFullEntity: PropTypes.func.isRequired,
   addEntity: PropTypes.func.isRequired
 };
@@ -122,7 +146,8 @@ Entries.propTypes = {
 const mapStateToProps = state => ({
   entries: state.entities.entriesFiltered,
   group: state.entities.group,
-  loading: state.auth.loading
+  loading: state.auth.loading,
+  user: state.auth.userdata.user
 });
 
 export default connect(

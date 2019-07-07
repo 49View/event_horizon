@@ -101,22 +101,22 @@ export const deleteEntry = id => async dispatch => {
 };
 
 // Add post
-export const addEntity = formData => async dispatch => {
+export const addEntity = entity => async dispatch => {
   const config = {
     headers: {
       "Content-Type": "application/json"
     }
   };
 
+  console.log("New Entity: ", entity);
+
   try {
-    const res = await axios.post("/api/entries", formData, config);
+    const res = await axios.post("/entities", entity, config);
 
     dispatch({
       type: ADD_ENTITY,
       payload: res.data
     });
-
-    dispatch(setAlert("Welcome to Park Hill " + res.data.name, "success"));
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,
