@@ -17,8 +17,8 @@ const Navbar = ({ userstate, logout }) => {
 
   const authlinks = (
     <Fragment>
-      <div className="user-navbar">
-        {userName}
+      <div className="navbaruser-a">
+        {userName}{" "}
         <a onClick={logout} href="#!">
           <i className="fas fa-sign-out-alt" /> Logout
         </a>
@@ -29,20 +29,16 @@ const Navbar = ({ userstate, logout }) => {
   const nolinks = <Fragment />;
 
   return (
-    <nav className="navbar bg-dark">
-      <div className="navdiv">
-        <div className="navdiv-title">
-          <h1>
-            <Link to="/">
-              <span className="navdiv-titletext">
-                <i className="fas fa-dice-d20" /> Event Horizon
-              </span>
-            </Link>
-          </h1>
-        </div>
-        {userstate.isAuthenticated ? authlinks : nolinks}
+    <div className="navbarGrid">
+      <div className="navbareh-a">
+        <Link to="/">
+          <span className="navdiv-titletext">
+            <i className="fas fa-dice-d20" /> Event Horizon
+          </span>
+        </Link>
       </div>
-    </nav>
+      {userstate.isAuthenticated ? authlinks : nolinks}
+    </div>
   );
 };
 

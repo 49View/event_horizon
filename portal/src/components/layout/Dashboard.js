@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
@@ -21,13 +21,17 @@ const Dashboard = ({
   getEntitiesOfGroup,
   updateEntriesPartialSearch
 }) => {
-  // console.log(userstate);
+  const [currentGroup, setCurrentGroup] = useState("default");
 
-  // useEffect(() => {
-  //   if (userstate.userdata && userstate.userdata.project !== "") {
-  //     getEntitiesOfGroup("image", userstate.userdata.project);
-  //   }
-  // }, [getEntitiesOfGroup, userstate]);
+  useEffect(() => {
+    if (
+      userstate.userdata &&
+      userstate.userdata.project !== null &&
+      currentGroup === "default"
+    ) {
+      getEntitiesOfGroup("material", userstate.userdata.project);
+    }
+  });
 
   if (!userstate.isAuthenticated) {
     return <Redirect to="/" />;
@@ -51,7 +55,7 @@ const Dashboard = ({
               {userstate.userdata.user.name}
             </span>
           </div>
-          You don't seem to have any project assigned yet. Request acess here:
+          You don't seem to have any project assigned yet. Request access here:
           <form className="form" onSubmit={e => onRequestProject(e)}>
             <div className="form-group">
               <input type="text" placeholder="Project Name" name="project" />
@@ -68,19 +72,25 @@ const Dashboard = ({
   }
 
   const viewMore = group => () => {
-    let groupId = "undefined";
+    let groupId = "";
     if (group === ObjectsStrID) groupId = "geom";
     if (group === MaterialsStrID) groupId = "material";
     if (group === ImagesStrID) groupId = "image";
     if (group === FontsStrID) groupId = "font";
     if (group === VectorsStrID) groupId = "profile";
     if (group === ColorsStrID) groupId = "color_scheme";
+    setCurrentGroup(groupId);
     getEntitiesOfGroup(groupId, userstate.userdata.project);
-    // console.log(group);
   };
 
-  const leftSideEntry = (icon, text) => (
-    <div className="leftSideBarGroup">
+  const leftSideEntry = (icon, text, selected) => (
+    <div
+      className={
+        selected
+          ? "leftSideBarGroup leftSideBarGroupSelected"
+          : "leftSideBarGroup"
+      }
+    >
       <a onClick={viewMore(text)} href="#!">
         <div className="leftSideBarIcon">
           <i className={icon} />
@@ -103,11 +113,9 @@ const Dashboard = ({
 
   const searchBox = (
     <Fragment>
-      <div className="project-navbar large">
-        <span className="navdiv-projecttext">{proj}</span>
-      </div>
+      <div className="project-a navdiv-projecttext">{proj}</div>
 
-      <div className="entitiesSearchBox">
+      <div className=" searchbar-a entitiesSearchBox">
         <input
           type="text"
           id="search-bar"
@@ -122,13 +130,25 @@ const Dashboard = ({
   );
 
   const leftSideBar = (
-    <div className="leftSideBar">
-      {leftSideEntry("fas fa-cube", ObjectsStrID)}
-      {leftSideEntry("fas fa-code-branch", MaterialsStrID)}
-      {leftSideEntry("fas fa-images", ImagesStrID)}
-      {leftSideEntry("fas fa-font", FontsStrID)}
-      {leftSideEntry("fas fa-vector-square", VectorsStrID)}
-      {leftSideEntry("fas fa-brush", ColorsStrID)}
+    <div className="sidebar-a leftSideBar">
+      {leftSideEntry("fas fa-cube", ObjectsStrID, currentGroup === "geom")}
+      {leftSideEntry(
+        "fas fa-code-branch",
+        MaterialsStrID,
+        currentGroup === "material" || currentGroup === "default"
+      )}
+      {leftSideEntry("fas fa-images", ImagesStrID, currentGroup === "image")}
+      {leftSideEntry("fas fa-font", FontsStrID, currentGroup === "font")}
+      {leftSideEntry(
+        "fas fa-vector-square",
+        VectorsStrID,
+        currentGroup === "profile"
+      )}
+      {leftSideEntry(
+        "fas fa-brush",
+        ColorsStrID,
+        currentGroup === "colors_scheme"
+      )}
     </div>
   );
 
@@ -147,14 +167,12 @@ const Dashboard = ({
 Dashboard.propTypes = {
   // setAlert: PropTypes.func.isRequired,
   userstate: PropTypes.object,
-  entities: PropTypes.array,
   getEntitiesOfGroup: PropTypes.func.isRequired,
   updateEntriesPartialSearch: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-  userstate: state.auth,
-  entities: state.entities.entries
+  userstate: state.auth
 });
 
 export default connect(

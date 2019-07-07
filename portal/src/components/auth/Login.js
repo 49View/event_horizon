@@ -42,6 +42,7 @@ const Login = ({ login, isAuthenticated, user }) => {
             <input
               type="email"
               placeholder="Email Address"
+              autoComplete="email"
               name="email"
               value={email}
               onChange={e => onChange(e)}
@@ -52,6 +53,7 @@ const Login = ({ login, isAuthenticated, user }) => {
               type="password"
               placeholder="Password"
               name="password"
+              autoComplete="current-password"
               value={password}
               onChange={e => onChange(e)}
               minLength="6"

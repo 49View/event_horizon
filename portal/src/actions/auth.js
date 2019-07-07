@@ -71,9 +71,16 @@ export const login = (email, password, project) => async dispatch => {
     }
   };
 
-  const body = JSON.stringify({ email, password, project });
+  let body = JSON.stringify({ email, password, project });
   try {
-    const res = await axios.post("/gettoken", body, config);
+    let res = await axios.post("/gettoken", body, config);
+
+    if (project === null || project.length === 0) {
+      // Make sure we re-login with project set, otherwise most of the entity rest api req will fail
+      project = res.data.project;
+      body = JSON.stringify({ email, password, project });
+      res = await axios.post("/gettoken", body, config);
+    }
 
     dispatch({
       type: LOGIN_SUCCESS,

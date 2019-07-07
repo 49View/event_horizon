@@ -11,6 +11,8 @@ import {
 const initialState = {
   entries: [],
   entriesFiltered: [],
+  currentEntity: null,
+  group: "material",
   loading: true,
   error: {}
 };
@@ -24,6 +26,7 @@ export default function(state = initialState, action) {
         ...state,
         entries: payload.data,
         entriesFiltered: payload.data,
+        group: payload.group,
         loading: false
       };
     case UPDATE_ENTITIES_PARTIAL_SEARCH:
@@ -42,7 +45,7 @@ export default function(state = initialState, action) {
     case GET_ENTITY:
       return {
         ...state,
-        entry: payload,
+        currentEntity: payload,
         loading: false
       };
     case ADD_ENTITY:

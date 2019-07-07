@@ -8,6 +8,9 @@ const zlib = require("zlib");
 
 router.get("/content/byId/:id", async (req, res, next) => {
   try {
+    const entityId = req.params.id;
+    const project = req.user.project;
+    console.log("User:", req.user);
     const fileData = await entityController.getEntityContent(entityId, project);
 
     fsController.writeFile(res, fileData);

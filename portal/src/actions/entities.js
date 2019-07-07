@@ -16,10 +16,7 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
   try {
     const res = await axios.get(`/entities/metadata/list/${group}/${project}`);
 
-    dispatch({
-      type: GET_ENTITIES,
-      payload: res
-    });
+    dispatch({ type: GET_ENTITIES, payload: { data: res.data, group: group } });
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,
@@ -38,6 +35,29 @@ export const updateEntriesPartialSearch = partialString => dispatch => {
   } catch (err) {
     dispatch({
       type: ENTITIES_PARTIAL_SEARCH_ERROR,
+      payload: { msg: err.response }
+    });
+  }
+};
+
+// Get entity
+export const getFullEntity = entitySource => async dispatch => {
+  try {
+    const res = await axios.get(`/entities/content/byId/${entitySource.id}`, {
+      responseType: "arraybuffer"
+    });
+    const entityFull = {
+      entity: entitySource,
+      blobURL: URL.createObjectURL(new Blob([res.data]))
+    };
+
+    dispatch({
+      type: GET_ENTITY,
+      payload: entityFull
+    });
+  } catch (err) {
+    dispatch({
+      type: ENTITY_ERROR,
       payload: { msg: err.response }
     });
   }
@@ -81,7 +101,7 @@ export const deleteEntry = id => async dispatch => {
 };
 
 // Add post
-export const addEntry = formData => async dispatch => {
+export const addEntity = formData => async dispatch => {
   const config = {
     headers: {
       "Content-Type": "application/json"
@@ -97,23 +117,6 @@ export const addEntry = formData => async dispatch => {
     });
 
     dispatch(setAlert("Welcome to Park Hill " + res.data.name, "success"));
-  } catch (err) {
-    dispatch({
-      type: ENTITY_ERROR,
-      payload: { msg: err.response }
-    });
-  }
-};
-
-// Get post
-export const getEntry = id => async dispatch => {
-  try {
-    const res = await axios.get(`/api/entries/${id}`);
-
-    dispatch({
-      type: GET_ENTITY,
-      payload: res.data
-    });
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,
