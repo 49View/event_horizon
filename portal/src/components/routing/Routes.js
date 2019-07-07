@@ -2,24 +2,36 @@ import React, { Fragment } from "react";
 import { Route, Switch } from "react-router-dom";
 import Register from "../auth/Register";
 import Login from "../auth/Login";
-import Alert from "../layout/Alert";
 import Dashboard from "../layout/Dashboard";
 import NotFound from "../layout/NotFound";
 import PrivateRoute from "../routing/PrivateRoute";
 import Navbar from "../../components/layout/Navbar";
+import { transitions, positions, Provider as AlertProvider } from "react-alert";
+import AlertTemplate from "react-alert-template-basic";
+
+// optional cofiguration
+const alertOptions = {
+  // you can also just use 'bottom center'
+  position: positions.MIDDLE,
+  timeout: 5000,
+  offset: "30px",
+  // you can also just use 'scale'
+  transition: transitions.SCALE
+};
 
 const Routes = () => {
   return (
     <Fragment>
       <div className="mainDesktopPageLayout">
         <Navbar />
-        <Alert />
-        <Switch>
-          <Route exact path="/register" component={Register} />
-          <Route exact path="/login" component={Login} />
-          <PrivateRoute exact path="/dashboard" component={Dashboard} />
-          <Route component={NotFound} />
-        </Switch>
+        <AlertProvider template={AlertTemplate} {...alertOptions}>
+          <Switch>
+            <Route exact path="/register" component={Register} />
+            <Route exact path="/login" component={Login} />
+            <PrivateRoute exact path="/dashboard" component={Dashboard} />
+            <Route component={NotFound} />
+          </Switch>
+        </AlertProvider>
       </div>
     </Fragment>
   );

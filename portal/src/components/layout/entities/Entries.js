@@ -4,7 +4,33 @@ import { connect } from "react-redux";
 import Spinner from "../Spinner";
 import { encode, decode } from "base64-arraybuffer";
 import { useDropzone } from "react-dropzone";
+import { useAlert } from "react-alert";
 import { getFullEntity, addEntity } from "../../../actions/entities";
+
+export const checkFileExtensionsOnEntityGroup = (group, filename) => {
+  const ext = filename
+    .split(".")
+    .pop()
+    .toLowerCase();
+
+  if (group === "material") {
+    if (ext === "zip") return true;
+  } else if (group === "image") {
+    if (
+      ext === "jpeg" ||
+      ext === "png" ||
+      ext === "jpg" ||
+      ext === "exr" ||
+      ext === "tga" ||
+      ext === "tiff" ||
+      ext === "gif"
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
 
 const Entries = ({
   entries,
@@ -14,33 +40,37 @@ const Entries = ({
   user,
   loading
 }) => {
+  const alert = useAlert();
   const onDrop = useCallback(
     acceptedFiles => {
-      const reader = new FileReader();
-
-      reader.onabort = () => console.log("file reading was aborted");
-      reader.onerror = () => console.log("file reading has failed");
-      reader.onload = e => {
-        const tags = acceptedFiles[0].name.split(/[\s,._]+/);
-        const entry = {
-          group: group,
-          isPublic: false,
-          isRestricted: false,
-          creator: { name: user.name, email: user.email },
-          name: acceptedFiles[0].name,
-          thumb: "",
-          tags: tags,
-          deps: [],
-          raw: encode(reader.result)
+      // check file dragged has a valid extension for asset type
+      if (checkFileExtensionsOnEntityGroup(group, acceptedFiles[0].name)) {
+        const reader = new FileReader();
+        reader.onabort = () => console.log("file reading was aborted");
+        reader.onerror = () => console.log("file reading has failed");
+        reader.onload = e => {
+          const tags = acceptedFiles[0].name.split(/[\s,._]+/);
+          const entry = {
+            group: group,
+            isPublic: false,
+            isRestricted: false,
+            creator: { name: user.name, email: user.email },
+            name: acceptedFiles[0].name,
+            thumb: "",
+            tags: tags,
+            deps: [],
+            raw: encode(reader.result)
+          };
+          addEntity(entry);
+          // Do whatever you want with the file contents
+          // const binaryStr = reader.result;
         };
-        addEntity(entry);
-        // Do whatever you want with the file contents
-        // const binaryStr = reader.result;
-      };
-
-      acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
+        acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
+      } else {
+        alert.show("Wrong file type", { type: "error" });
+      }
     },
-    [group, user, addEntity]
+    [group, user, addEntity, alert]
   );
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 

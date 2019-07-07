@@ -72,7 +72,6 @@ export const checkoutEntry = id => async dispatch => {
       type: CHECKOUT_ENTITY,
       payload: res.data
     });
-    dispatch(setAlert("Thank you for visiting Park Hill School", "success"));
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,
