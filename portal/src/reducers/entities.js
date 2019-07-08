@@ -26,6 +26,7 @@ export default function(state = initialState, action) {
         ...state,
         entries: payload.data,
         entriesFiltered: payload.data,
+        currentEntity: null,
         group: payload.group,
         loading: false
       };

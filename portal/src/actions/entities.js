@@ -6,7 +6,6 @@ import {
   ENTITIES_PARTIAL_SEARCH_ERROR,
   ENTITY_ERROR,
   DELETE_ENTITY,
-  ADD_ENTITY,
   GET_ENTITY,
   CHECKOUT_ENTITY
 } from "./types";
@@ -43,7 +42,7 @@ export const updateEntriesPartialSearch = partialString => dispatch => {
 // Get entity
 export const getFullEntity = entitySource => async dispatch => {
   try {
-    const res = await axios.get(`/entities/content/byId/${entitySource.id}`, {
+    const res = await axios.get(`/entities/content/byId/${entitySource._id}`, {
       responseType: "arraybuffer"
     });
     const entityFull = {
@@ -107,14 +106,19 @@ export const addEntity = entity => async dispatch => {
     }
   };
 
-  console.log("New Entity: ", entity);
-
   try {
     const res = await axios.post("/entities", entity, config);
+    const fullres = await axios.get(`/entities/content/byId/${res.data._id}`, {
+      responseType: "arraybuffer"
+    });
+    const entityFull = {
+      entity: res.data,
+      blobURL: URL.createObjectURL(new Blob([fullres.data]))
+    };
 
     dispatch({
-      type: ADD_ENTITY,
-      payload: res.data
+      type: GET_ENTITY,
+      payload: entityFull
     });
   } catch (err) {
     dispatch({

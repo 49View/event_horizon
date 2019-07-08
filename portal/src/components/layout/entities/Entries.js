@@ -62,8 +62,6 @@ const Entries = ({
             raw: encode(reader.result)
           };
           addEntity(entry);
-          // Do whatever you want with the file contents
-          // const binaryStr = reader.result;
         };
         acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
       } else {
@@ -77,31 +75,27 @@ const Entries = ({
   let entitiesRes = [];
   if (entries && entries.length > 0) {
     entries.map(e => {
-      const b64 = decode(e.metadata.thumb);
-      const bb = new Blob([b64]);
-      entitiesRes.push({
-        id: e._id,
-        name: e.metadata.name,
-        hash: e.metadata.hash,
-        tags: e.metadata.tags,
-        deps: e.metadata.deps,
-        group: e.group,
-        thumb: e.metadata.thumb !== "" ? URL.createObjectURL(bb) : ""
-      });
+      let entryWithThumb = e;
+      if (!e.metadata.thumb.startsWith("blob:")) {
+        const bb = new Blob([decode(e.metadata.thumb)]);
+        entryWithThumb.metadata.thumb =
+          e.metadata.thumb !== "" ? URL.createObjectURL(bb) : "";
+      }
+      entitiesRes.push(entryWithThumb);
       return 0;
     });
   }
 
   const entityTypeSelector = entry => {
     if (entry.group === "geom") {
-      if (entry.thumb === "")
+      if (entry.metadata.thumb === "")
         return (
           <span className="geomThumbNotFound">
             <i className="fas fa-cubes" />
           </span>
         );
     } else if (entry.group === "image") {
-      if (entry.thumb === "") {
+      if (entry.metadata.thumb === "") {
         return (
           <span className="imageThumbNotFound">
             <i className="far fa-frown" />
@@ -115,18 +109,18 @@ const Entries = ({
         </span>
       );
     } else if (entry.group === "profile") {
-      if (entry.thumb === "") {
+      if (entry.metadata.thumb === "") {
         return (
           <span className="imageThumbNotFound">
             <i className="far fa-frown" />
           </span>
         );
       } else {
-        return <svg>{entry.thumb}</svg>;
+        return <svg>{entry.metadata.thumb}</svg>;
       }
     }
 
-    return <img width="64" height="64" src={entry.thumb} alt="" />;
+    return <img width="64" height="64" src={entry.metadata.thumb} alt="" />;
   };
 
   const viewMore = entityToRender => () => {
@@ -143,12 +137,12 @@ const Entries = ({
       </div>
 
       {entitiesRes.map(entry => (
-        <div className="EntityThumbnail" key={entry.id}>
+        <div className="EntityThumbnail" key={entry._id}>
           <a onClick={viewMore(entry)} href="#!">
             <div className="EntityThumbnailInset">
               {entityTypeSelector(entry)}
             </div>
-            <div className="EntityThumbnailText">{entry.name}</div>
+            <div className="EntityThumbnailText">{entry.metadata.name}</div>
           </a>
         </div>
       ))}
