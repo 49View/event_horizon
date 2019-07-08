@@ -387,6 +387,10 @@ input#search-bar:hover {
   font-size: 4rem;
 }
 
+.rightFloat {
+  display: block;
+  float: right;
+}
 /* Text Styles*/
 .x-large {
   font-size: 4rem;

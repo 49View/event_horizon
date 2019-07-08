@@ -5,10 +5,17 @@ import Spinner from "../Spinner";
 import { useDropzone } from "react-dropzone";
 import { showConfirmAlert } from "../../../actions/confirmalert";
 import ConfirmAlert from "../ConfirmAlert";
+import { addTagsToEntity } from "../../../actions/entities";
 const moment = require("moment");
 const ReactTags = require("react-tag-autocomplete");
 
-const EntriesEditor = ({ currentEntity, loading, showConfirmAlert }) => {
+const EntriesEditor = ({
+  currentEntity,
+  tags,
+  loading,
+  showConfirmAlert,
+  addTagsToEntity
+}) => {
   // const [tags, setTags] = useState({});
 
   const onDrop = useCallback(acceptedFiles => {
@@ -25,26 +32,31 @@ const EntriesEditor = ({ currentEntity, loading, showConfirmAlert }) => {
   }, []);
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
-  const tags = [];
-  if (currentEntity !== null) {
-    let c = 0;
-    for (const tag of currentEntity.entity.metadata.tags) {
-      tags.push({ id: c, name: tag });
-      c++;
-    }
-  }
-
   const handleDelete = i => {
     const ntags = tags.slice(0);
     ntags.splice(i, 1);
-    console.log(ntags);
+    let newTags = [];
+    for (const tag of ntags) {
+      newTags.push(tag.name);
+    }
+    addTagsToEntity(currentEntity.entity._id, newTags);
     // setTags({ ntags });
   };
 
   const handleAddition = tag => {
-    console.log(tag);
-    // const ntags = [].concat(tags.tags, tag);
-    // setTags({ ntags });
+    let ntags = [];
+    for (const tag of tags) {
+      ntags.push(tag.name);
+    }
+    if (ntags.indexOf(tag.name) !== -1) return;
+    ntags.push(tag.name);
+    addTagsToEntity(currentEntity.entity._id, ntags);
+  };
+
+  const refreshTagsFromEntityName = e => {
+    e.preventDefault();
+    const ntags = currentEntity.entity.metadata.name.split(/[\s,._]+/);
+    addTagsToEntity(currentEntity.entity._id, ntags);
   };
 
   const onDeleteEntity = e => {
@@ -83,6 +95,11 @@ const EntriesEditor = ({ currentEntity, loading, showConfirmAlert }) => {
         <div className="entity-tags-a">
           <p>
             <i className="fas fa-tags"> </i> Tags
+            <a onClick={e => refreshTagsFromEntityName(e)} href="#!">
+              <span className="rightFloat">
+                <i className="fas fa-redo" />
+              </span>
+            </a>
           </p>
           <ReactTags
             tags={tags}
@@ -148,16 +165,19 @@ const EntriesEditor = ({ currentEntity, loading, showConfirmAlert }) => {
 
 EntriesEditor.propTypes = {
   currentEntity: PropTypes.object,
+  tags: PropTypes.array,
   loading: PropTypes.bool,
-  showConfirmAlert: PropTypes.func.isRequired
+  showConfirmAlert: PropTypes.func.isRequired,
+  addTagsToEntity: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
+  tags: state.entities.currentTags ? state.entities.currentTags : [],
   loading: state.auth.loading
 });
 
 export default connect(
   mapStateToProps,
-  { showConfirmAlert }
+  { showConfirmAlert, addTagsToEntity }
 )(EntriesEditor);

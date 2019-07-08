@@ -23,4 +23,4 @@ export const GET_ENTITY = "GET_ENTITY";
 export const ENTITY_ERROR = "ENTITY_ERROR";
 export const DELETE_ENTITY = "DELETE_ENTITY";
 export const ADD_ENTITY = "ADD_ENTITY";
-export const CHECKOUT_ENTITY = "CHECKOUT_ENTITY";
+export const REPLACE_ENTITY_TAGS = "REPLACE_ENTITY_TAGS";

@@ -7,7 +7,7 @@ import {
   ENTITY_ERROR,
   DELETE_ENTITY,
   GET_ENTITY,
-  CHECKOUT_ENTITY
+  REPLACE_ENTITY_TAGS
 } from "./types";
 
 // Get entries
@@ -63,13 +63,23 @@ export const getFullEntity = entitySource => async dispatch => {
 };
 
 // checkout visitor
-export const checkoutEntry = id => async dispatch => {
+export const addTagsToEntity = (id, tags) => async dispatch => {
   try {
-    const res = await axios.put(`/api/entries/checkout/${id}`);
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    const bodyTags = {
+      tags: tags
+    };
+
+    await axios.put(`/entities/metadata/addtags/${id}`, bodyTags, config);
 
     dispatch({
-      type: CHECKOUT_ENTITY,
-      payload: res.data
+      type: REPLACE_ENTITY_TAGS,
+      payload: tags
     });
   } catch (err) {
     dispatch({

@@ -325,6 +325,19 @@ const upsertThumb = async (entityId, gtr) => {
   return 204;
 };
 
+const upsertTags = async (entityId, tags) => {
+  try {
+    const entity = await getEntityById(entityId);
+    entity.metadata.tags = tags;
+    await updateById(entityId, entity);
+    return 201;
+  } catch (error) {
+    console.log("Upsert tags on id " + entityId + " failed. Cause:" + error);
+    return 204;
+  }
+  return 204;
+};
+
 const getEntityContent = async (entityId, project) => {
   //Check existing entity for use project (or public)
   const currentEntity = await getEntityByIdProject(project, entityId, true);
@@ -487,6 +500,7 @@ module.exports = {
   createEntity: createEntity,
   updateById: updateById,
   updateEntity: updateEntity,
+  upsertTags: upsertTags,
   groupThumbnailCalcRule: groupThumbnailCalcRule,
   upsertThumb: upsertThumb,
   deleteEntity: deleteEntity,

@@ -5,7 +5,7 @@ import {
   DELETE_ENTITY,
   ADD_ENTITY,
   GET_ENTITY,
-  CHECKOUT_ENTITY
+  REPLACE_ENTITY_TAGS
 } from "../actions/types";
 
 const initialState = {
@@ -19,6 +19,16 @@ const initialState = {
 
 export default function(state = initialState, action) {
   const { type, payload } = action;
+
+  const evaluateTags = sourceTags => {
+    let tags = [];
+    let c = 0;
+    for (const tag of sourceTags) {
+      tags.push({ id: c, name: tag });
+      c++;
+    }
+    return tags;
+  };
 
   switch (type) {
     case GET_ENTITIES:
@@ -47,6 +57,7 @@ export default function(state = initialState, action) {
       return {
         ...state,
         currentEntity: payload,
+        currentTags: evaluateTags(payload.entity.metadata.tags),
         loading: false
       };
     case ADD_ENTITY:
@@ -56,15 +67,10 @@ export default function(state = initialState, action) {
         entry: {},
         loading: false
       };
-    case CHECKOUT_ENTITY:
+    case REPLACE_ENTITY_TAGS:
       return {
         ...state,
-        entries: state.entries.map(entry =>
-          entry._id === payload._id
-            ? { ...entry, timeout: payload.timeout }
-            : entry
-        ),
-        // entries: [...state.entries],
+        currentTags: evaluateTags(payload),
         loading: false
       };
     case DELETE_ENTITY:

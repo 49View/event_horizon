@@ -190,6 +190,17 @@ router.put("/metadata/upserthumbs/:group/:project", async (req, res, next) => {
   }
 });
 
+router.put("/metadata/addtags/:id", async (req, res, next) => {
+  try {
+    const entityId = req.params.id;
+    const tags = req.body.tags;
+    res.sendStatus(await entityController.upsertTags(entityId, tags));
+  } catch (ex) {
+    console.log("ERROR addtags: ", ex);
+    res.sendStatus(400);
+  }
+});
+
 router.post("/", async (req, res, next) => {
   try {
     const project = req.user.project;
