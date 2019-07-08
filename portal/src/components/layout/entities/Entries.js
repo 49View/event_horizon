@@ -54,7 +54,10 @@ const Entries = ({
             group: group,
             isPublic: false,
             isRestricted: false,
-            creator: { name: user.name, email: user.email },
+            creator: {
+              name: user ? user.name : "n/a",
+              email: user ? user.email : "N/A"
+            },
             name: acceptedFiles[0].name,
             thumb: "",
             tags: tags,
@@ -171,7 +174,7 @@ const mapStateToProps = state => ({
   entries: state.entities.entriesFiltered,
   group: state.entities.group,
   loading: state.auth.loading,
-  user: state.auth.userdata.user
+  user: state.auth.userdata ? state.auth.userdata.user : null
 });
 
 export default connect(
