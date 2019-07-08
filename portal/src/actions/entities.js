@@ -79,17 +79,18 @@ export const checkoutEntry = id => async dispatch => {
   }
 };
 
-// Delete post
-export const deleteEntry = id => async dispatch => {
+export const deleteEntity = id => async dispatch => {
   try {
-    await axios.delete(`/api/entries/${id}`);
+    await axios.delete(`/entities/${id}`);
 
     dispatch({
       type: DELETE_ENTITY,
       payload: id
     });
 
-    dispatch(setAlert("Visitor Removed", "success"));
+    dispatch(
+      setAlert("Asset deleted, hope you are not going to regret it!", "success")
+    );
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,

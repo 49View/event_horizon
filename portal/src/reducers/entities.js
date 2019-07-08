@@ -71,6 +71,8 @@ export default function(state = initialState, action) {
       return {
         ...state,
         entries: state.entries.filter(entry => entry._id !== payload),
+        entriesFiltered: state.entries.filter(entry => entry._id !== payload),
+        currentEntity: null,
         loading: false
       };
     case ENTITY_ERROR:

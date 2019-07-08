@@ -3,10 +3,12 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "../Spinner";
 import { useDropzone } from "react-dropzone";
+import { showConfirmAlert } from "../../../actions/confirmalert";
+import ConfirmAlert from "../ConfirmAlert";
 const moment = require("moment");
 const ReactTags = require("react-tag-autocomplete");
 
-const EntriesEditor = ({ currentEntity, loading }) => {
+const EntriesEditor = ({ currentEntity, loading, showConfirmAlert }) => {
   // const [tags, setTags] = useState({});
 
   const onDrop = useCallback(acceptedFiles => {
@@ -43,6 +45,11 @@ const EntriesEditor = ({ currentEntity, loading }) => {
     console.log(tag);
     // const ntags = [].concat(tags.tags, tag);
     // setTags({ ntags });
+  };
+
+  const onDeleteEntity = e => {
+    // e.preventDefault();
+    showConfirmAlert("Confirm deletion of ", "danger");
   };
 
   const creationDate =
@@ -109,13 +116,18 @@ const EntriesEditor = ({ currentEntity, loading }) => {
         <div className="metaValue-a medium text-primary">
           {currentEntity.entity.metadata.name}
         </div>
-        <div />
+        <ConfirmAlert />
         <div className="metaHash-a normal">Hash:</div>
         <div className="metaValueHash-a normal text-pale">
           {currentEntity.entity.metadata.hash}
         </div>
         <div className="deleteentity-a">
-          <input type="submit" className="btn2 btn-danger" value="Delete" />
+          <input
+            type="button"
+            className="btn2 btn-danger"
+            value="Delete"
+            onClick={e => onDeleteEntity(e)}
+          />
         </div>
       </div>
     );
@@ -136,7 +148,8 @@ const EntriesEditor = ({ currentEntity, loading }) => {
 
 EntriesEditor.propTypes = {
   currentEntity: PropTypes.object,
-  loading: PropTypes.bool
+  loading: PropTypes.bool,
+  showConfirmAlert: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -146,5 +159,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  {}
+  { showConfirmAlert }
 )(EntriesEditor);

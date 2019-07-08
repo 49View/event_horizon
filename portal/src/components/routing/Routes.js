@@ -6,6 +6,7 @@ import Dashboard from "../layout/Dashboard";
 import NotFound from "../layout/NotFound";
 import PrivateRoute from "../routing/PrivateRoute";
 import Navbar from "../../components/layout/Navbar";
+import Alert from "../../components/layout/Alert";
 import { transitions, positions, Provider as AlertProvider } from "react-alert";
 import AlertTemplate from "react-alert-template-basic";
 
@@ -24,6 +25,7 @@ const Routes = () => {
     <Fragment>
       <div className="mainDesktopPageLayout">
         <Navbar />
+        <Alert />
         <AlertProvider template={AlertTemplate} {...alertOptions}>
           <Switch>
             <Route exact path="/register" component={Register} />
