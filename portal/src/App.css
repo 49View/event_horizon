@@ -317,28 +317,9 @@ input#search-bar:hover {
   overflow: hidden;
 }
 
-.metaName-a {
-  grid-area: metaName;
-  padding-left: 7px;
+.nameValue-a {
   justify-self: start;
-}
-
-.metaHash-a {
-  grid-area: metaHash;
-  padding-left: 7px;
-  justify-self: start;
-  align-self: start;
-  margin-top: -10px;
-}
-
-.metaValue-a {
-  justify-self: start;
-}
-
-.metaValueHash-a {
-  justify-self: start;
-  align-self: start;
-  margin-top: -10px;
+  padding-left: 10px;
 }
 
 .entity-drag-a {
@@ -354,22 +335,18 @@ input#search-bar:hover {
   margin-top: 10px;
 }
 
-.entity-creator-a {
-  grid-area: entity-creator;
-  justify-self: stretch;
-  align-self: start;
-}
-
-.entity-dates-a {
-  grid-area: entity-dates;
-  justify-self: stretch;
-  align-self: start;
-}
-
 .entity-info-a {
   grid-area: entity-info;
-  justify-self: start;
+  justify-self: stretch;
   align-self: start;
+}
+
+.entity-info-c {
+  border: 1px solid #d1d1d140;
+  border-radius: 4px;
+  cursor: text;
+  margin: 10px 0px;
+  padding: 5px 5px;
 }
 
 .deleteentity-a {
@@ -379,19 +356,27 @@ input#search-bar:hover {
   margin-top: -10px;
 }
 
+.metaInfiTitle {
+  position: absolute;
+}
+
+.metaInfoValue {
+  position: absolute;
+  padding-left: 65px;
+  margin-top: -0.08rem;
+}
+
 .EntryEditorRenderGrid {
   display: grid;
   /* margin: 10px; */
-  grid-template-columns: 55px 457px 295px;
-  grid-template-rows: 75px 209px 69px 109px 49px 55px 35px;
+  grid-template-columns: 512px 305px;
+  grid-template-rows: 75px 319px 117px 55px 35px;
   grid-template-areas:
-    "render render drag"
-    "render render entity-tags"
-    "render render entity-creator"
-    "render render entity-dates"
-    "render render entity-into"
-    "metaName nameValue ."
-    "metaHash hashValue deleteentity";
+    "render drag"
+    "render entity-tags"
+    "render entity-info"
+    "nameValue ."
+    ". deleteentity";
   grid-gap: 0px 5px;
   align-items: center;
   justify-items: center;
