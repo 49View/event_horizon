@@ -7,12 +7,18 @@ import {
   ENTITY_ERROR,
   DELETE_ENTITY,
   GET_ENTITY,
+  GET_ENTITY_LOAD,
   REPLACE_ENTITY_TAGS
 } from "./types";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
   try {
+    dispatch({
+      type: GET_ENTITY_LOAD,
+      payload: null
+    });
+
     const res = await axios.get(`/entities/metadata/list/${group}/${project}`);
 
     dispatch({ type: GET_ENTITIES, payload: { data: res.data, group: group } });
@@ -42,6 +48,11 @@ export const updateEntriesPartialSearch = partialString => dispatch => {
 // Get entity
 export const getFullEntity = entitySource => async dispatch => {
   try {
+    dispatch({
+      type: GET_ENTITY_LOAD,
+      payload: null
+    });
+
     // Get dependencies for
     let deps = {};
 

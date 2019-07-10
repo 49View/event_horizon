@@ -159,6 +159,7 @@ EntriesEditor.propTypes = {
 
 const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
+  loading: state.entities.loading,
   group: state.entities.group
 });
 

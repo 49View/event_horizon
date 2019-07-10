@@ -18,6 +18,7 @@ const ColorsStrID = "Colors";
 
 const Dashboard = ({
   userstate,
+  loading,
   getEntitiesOfGroup,
   updateEntriesPartialSearch
 }) => {
@@ -31,7 +32,7 @@ const Dashboard = ({
     ) {
       getEntitiesOfGroup("material", userstate.userdata.project);
     }
-  });
+  }, [getEntitiesOfGroup, currentGroup, userstate]);
 
   if (!userstate.isAuthenticated) {
     return <Redirect to="/" />;
@@ -167,12 +168,14 @@ const Dashboard = ({
 Dashboard.propTypes = {
   // setAlert: PropTypes.func.isRequired,
   userstate: PropTypes.object,
+  loading: PropTypes.bool,
   getEntitiesOfGroup: PropTypes.func.isRequired,
   updateEntriesPartialSearch: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-  userstate: state.auth
+  userstate: state.auth,
+  loading: state.entities.loading
 });
 
 export default connect(

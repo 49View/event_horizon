@@ -5,6 +5,7 @@ import {
   DELETE_ENTITY,
   ADD_ENTITY,
   GET_ENTITY,
+  GET_ENTITY_LOAD,
   REPLACE_ENTITY_TAGS
 } from "../actions/types";
 
@@ -52,6 +53,11 @@ export default function(state = initialState, action) {
         ...state,
         entriesFiltered: filteredResult,
         loading: false
+      };
+    case GET_ENTITY_LOAD:
+      return {
+        ...state,
+        loading: true
       };
     case GET_ENTITY:
       return {
