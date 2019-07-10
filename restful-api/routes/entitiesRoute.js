@@ -10,12 +10,29 @@ router.get("/content/byId/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
     const project = req.user.project;
-    console.log("User:", req.user);
+    // console.log("User:", req.user);
     const fileData = await entityController.getEntityContent(entityId, project);
-
     fsController.writeFile(res, fileData);
   } catch (ex) {
     console.log("ERROR GETTING ENTITY CONTENT BYID: ", ex);
+    res.sendStatus(400);
+  }
+});
+
+router.get("/content/byHash/:hashId", async (req, res, next) => {
+  try {
+    const project = req.user.project;
+    const entity = await entityController.getEntityByHash(
+      req.params.hashId,
+      project
+    );
+    const fileData = await entityController.getEntityContent(
+      entity._id,
+      project
+    );
+    fsController.writeFile(res, fileData);
+  } catch (ex) {
+    console.log("ERROR GET CONTENT ENTITY BY HASH: ", ex);
     res.sendStatus(400);
   }
 });
@@ -106,6 +123,20 @@ router.get("/:group/:tags", async (req, res, next) => {
   } catch (ex) {
     console.log("ERROR GETTING ENTITY CONTENT BYGROUPTAGS: ", ex);
     res.status(400).send(ex);
+  }
+});
+
+router.get("/metadata/byHash/:hashId", async (req, res, next) => {
+  try {
+    const project = req.user.project;
+    const entity = await entityController.getEntityByHash(
+      req.params.hashId,
+      project
+    );
+    res.status(200).send(entity);
+  } catch (ex) {
+    console.log("ERROR GET METADATA ENTITY BY HASH: ", ex);
+    res.sendStatus(400);
   }
 });
 
@@ -356,7 +387,10 @@ router.delete("/:id", async (req, res, next) => {
     } else {
       for (ktype of currentEntity["metadata"]["deps"]) {
         for (key of ktype["value"]) {
-          const currDep = await entityController.getEntityByHash(key);
+          const currDep = await entityController.getEntityByHash(
+            key,
+            currentEntity.project
+          );
           if (currDep !== null) {
             await entityController.deleteEntityComplete(project, currDep);
           }
@@ -374,7 +408,10 @@ router.delete("/:id", async (req, res, next) => {
 router.delete("/hash/:hashId", async (req, res, next) => {
   try {
     const project = req.user.project;
-    const currDep = await entityController.getEntityByHash(req.params.hashId);
+    const currDep = await entityController.getEntityByHash(
+      req.params.hashId,
+      project
+    );
     if (currDep !== null) {
       await entityController.deleteEntityComplete(project, currDep);
     }

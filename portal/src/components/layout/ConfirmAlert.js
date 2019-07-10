@@ -10,8 +10,6 @@ const ConfirmAlert = ({
   deleteEntity,
   removeConfirmAlert
 }) => {
-  console.log(confirmalert.alert);
-
   if (!confirmalert.alert) {
     return <div> </div>;
   }
@@ -26,7 +24,7 @@ const ConfirmAlert = ({
   };
 
   return (
-    <div>
+    <div className="confirm-alert">
       <input
         type="button"
         className="btnConfirm btn-danger"

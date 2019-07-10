@@ -91,7 +91,7 @@ body {
 .entitiesContainer {
   display: grid;
   grid-template-columns: 128px 270px 831px;
-  grid-template-rows: 55px 595px;
+  grid-template-rows: 55px 584px;
   grid-template-areas:
     "project searchbar searchbar"
     "sidebar thumbs editor";
@@ -145,15 +145,6 @@ ul {
 img {
   width: 100%;
   border-radius: 4px;
-}
-
-.noborders {
-  max-width: 512px;
-  max-height: 512px;
-  object-fit: contain;
-  padding: 5px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
 }
 
 .EntityThumbnail {
@@ -306,9 +297,12 @@ input#search-bar:hover {
 
 .EntryEditorRender {
   grid-area: render;
-  width: 522px;
-  height: 522px;
-  padding: 10px;
+  align-self: stretch;
+  justify-self: stretch;
+
+  /* width: 512px;
+  height: 512px; */
+  /* padding: 10px; */
   /* border-radius: 8px; */
   /* border: 1px solid var(--dark-color); */
 }
@@ -318,8 +312,11 @@ input#search-bar:hover {
 }
 
 .nameValue-a {
+  grid-area: nameValue;
   justify-self: start;
-  padding-left: 10px;
+  align-self: center;
+  padding-left: 12px;
+  /* padding-top: 5px; */
 }
 
 .entity-drag-a {
@@ -351,9 +348,8 @@ input#search-bar:hover {
 
 .deleteentity-a {
   grid-area: deleteentity;
-  justify-self: stretch;
-  align-self: start;
-  margin-top: -10px;
+  justify-self: end;
+  align-self: center;
 }
 
 .metaInfiTitle {
@@ -366,20 +362,74 @@ input#search-bar:hover {
   margin-top: -0.08rem;
 }
 
+.metaInfoValueNoOff {
+  position: absolute;
+  padding-left: 65px;
+}
+
 .EntryEditorRenderGrid {
   display: grid;
   /* margin: 10px; */
-  grid-template-columns: 512px 305px;
-  grid-template-rows: 75px 319px 117px 55px 35px;
+  grid-template-columns: 536px 281px;
+  grid-template-rows: 45px 373px 117px 45px;
   grid-template-areas:
-    "render drag"
+    "nameValue drag"
     "render entity-tags"
     "render entity-info"
-    "nameValue ."
-    ". deleteentity";
+    "render deleteentity";
   grid-gap: 0px 5px;
   align-items: center;
   justify-items: center;
+}
+
+.confirm-alert {
+  position: absolute;
+  margin: auto;
+  padding-top: 250px;
+  padding-left: 200px;
+}
+
+.bigimagequad {
+  grid-area: render;
+  width: 522px;
+  height: 522px;
+  object-fit: contain;
+  margin: 7px;
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
+}
+
+.materialPBRContainer {
+  display: inline-block;
+  width: 536px;
+  height: 536px;
+  grid-area: render;
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.mediumPBRquad {
+  float: left;
+  width: 156px;
+  height: 180px;
+  padding: 2px;
+  margin: 7px;
+  justify-self: stretch;
+  align-self: stretch;
+  border-radius: 2.5px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
+  /* overflow: scroll; */
+}
+
+.materialPBRRaw {
+  width: 680px;
+  height: 200px;
+  /* overflow: scroll; */
+}
+
+.mediumimagequad {
+  object-fit: contain;
 }
 
 .geomThumbNotFound {
@@ -826,7 +876,7 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 7px;
   border-width: 2px;
   border-radius: 2px;
   border-color: #eeeeee;

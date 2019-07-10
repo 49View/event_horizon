@@ -42,12 +42,35 @@ export const updateEntriesPartialSearch = partialString => dispatch => {
 // Get entity
 export const getFullEntity = entitySource => async dispatch => {
   try {
+    // Get dependencies for
+    let deps = {};
+
+    for (const depElem of entitySource.metadata.deps) {
+      for (const depValue of depElem.value) {
+        const res = await axios.get(`/entities/content/byHash/${depValue}`, {
+          responseType: "arraybuffer"
+        });
+        deps[depValue] = URL.createObjectURL(new Blob([res.data]));
+      }
+    }
+
+    let responseTypeValue = "arraybuffer";
+    if (entitySource.group === "material") {
+      responseTypeValue = "json";
+    }
+
     const res = await axios.get(`/entities/content/byId/${entitySource._id}`, {
-      responseType: "arraybuffer"
+      responseType: responseTypeValue
     });
+
     const entityFull = {
       entity: entitySource,
-      blobURL: URL.createObjectURL(new Blob([res.data]))
+      deps: deps,
+      blobURL:
+        responseTypeValue === "arraybuffer"
+          ? URL.createObjectURL(new Blob([res.data]))
+          : null,
+      jsonRet: responseTypeValue === "arraybuffer" ? null : res.data
     };
 
     dispatch({

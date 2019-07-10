@@ -360,9 +360,9 @@ const getEntityById = async entityId => {
   return result !== null ? result.toObject() : null;
 };
 
-const getEntityByHash = async entityId => {
+const getEntityByHash = async (entityId, project) => {
   let query;
-  query = { "metadata.hash": entityId };
+  query = { project: project, "metadata.hash": entityId };
   const result = await entityModel.findOne(query);
 
   return result !== null ? result.toObject() : null;
