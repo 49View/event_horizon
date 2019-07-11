@@ -1,5 +1,3 @@
-#include <utility>
-
 //
 //  profile.hpp
 //  6thViewImporter
@@ -62,6 +60,7 @@ public:
 
 	const V2fVectorOfVectorWrap& Paths() const { return mPaths; }
     V3fVectorOfVectorWrap Paths3d() const;
+    VTMVectorOfVectorWrap Paths3dWithUV() const;
 
     static std::shared_ptr<Profile> makeLine(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
     static std::shared_ptr<Profile> makeWire(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);

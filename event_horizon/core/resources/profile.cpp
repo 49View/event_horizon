@@ -101,6 +101,22 @@ V3fVectorOfVectorWrap Profile::Paths3d() const {
     return ret;
 }
 
+VTMVectorOfVectorWrap Profile::Paths3dWithUV() const {
+    VTMVectorOfVectorWrap ret;
+
+    for ( const auto& path : mPaths ) {
+        VTMVectorWrap vv;
+        for ( const auto pp : path.v ) {
+            vv.v.emplace_back( XZY::C(pp) );
+            vv.vm.emplace_back( pp );
+        }
+        vv.wrap = path.wrap;
+        ret.emplace_back(vv);
+    }
+
+    return ret;
+}
+
 V3fVector Profile::Points3d( const Vector3f & /*mainAxis*/ ) const {
     V3fVector ret;
 	for ( auto& p : mPoints.v ) {

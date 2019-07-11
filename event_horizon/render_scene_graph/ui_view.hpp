@@ -18,6 +18,10 @@ class UIView;
 class SceneGraph;
 class RenderOrchestrator;
 
+using ControlDefKey = std::string;
+using ControlDefIconRef = std::string;
+using ControlSingleTapCallback = std::function<void()>;
+
 enum class UITapAreaStatus {
     Enabled,
     Disabled,
@@ -27,30 +31,9 @@ enum class UITapAreaStatus {
     Fixed,
 };
 
-using UITS = UITapAreaStatus;
-
-class ColorScheme {
-public:
-    static constexpr size_t ShadesNum = 5;
-    ColorScheme( const std::string& colorDescriptor );
-
-    C4f Primary( int index = 0 ) const {
-        return primaryColors[index];
-    }
-    C4f Secondary1( int index = 0 ) const {
-        return secondary1Colors[index];
-    }
-    C4f Secondary2( int index = 0 ) const {
-        return secondary2Colors[index];
-    }
-    C4f Complement( int index = 0 ) const {
-        return complementColors[index];
-    }
-private:
-    std::array<C4f, ShadesNum> primaryColors;
-    std::array<C4f, ShadesNum> secondary1Colors;
-    std::array<C4f, ShadesNum> secondary2Colors;
-    std::array<C4f, ShadesNum> complementColors;
+enum class CSSDisplayMode {
+    Block,
+    Inline
 };
 
 template<class T>
@@ -124,6 +107,52 @@ struct UIForegroundIcon {
     std::string data;
 };
 
+struct ControlDef {
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines )
+            : key( key ), icon( icon ), textLines( textLines ) {}
+
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon ) : key( key ), icon( icon ) {}
+
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon,
+                const ControlSingleTapCallback& singleTapCallback ) : key( key ), icon( icon ),
+                                                                      singleTapCallback( singleTapCallback ) {}
+
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines,
+                const ControlSingleTapCallback& singleTapCallback ) : key( key ), icon( icon ), textLines( textLines ),
+                                                                      singleTapCallback( singleTapCallback ) {}
+
+    ControlDefKey key;
+    ControlDefIconRef icon;
+    std::vector<UIFontText> textLines;
+    ControlSingleTapCallback singleTapCallback;
+};
+
+using UITS = UITapAreaStatus;
+
+class ColorScheme {
+public:
+    static constexpr size_t ShadesNum = 5;
+    ColorScheme( const std::string& colorDescriptor );
+
+    C4f Primary( int index = 0 ) const {
+        return primaryColors[index];
+    }
+    C4f Secondary1( int index = 0 ) const {
+        return secondary1Colors[index];
+    }
+    C4f Secondary2( int index = 0 ) const {
+        return secondary2Colors[index];
+    }
+    C4f Complement( int index = 0 ) const {
+        return complementColors[index];
+    }
+private:
+    std::array<C4f, ShadesNum> primaryColors;
+    std::array<C4f, ShadesNum> secondary1Colors;
+    std::array<C4f, ShadesNum> secondary2Colors;
+    std::array<C4f, ShadesNum> complementColors;
+};
+
 class UIElement : public Boxable<JMATH::AABB, BBoxProjection2d> {
 public:
     template <typename ...Args>
@@ -140,6 +169,11 @@ public:
 private:
     template<typename M>
     void parseParam( const M& _param ) {
+        if constexpr ( std::is_same_v<M, ControlDef > ) {
+            key = _param.key;
+            singleTapCallback = _param.singleTapCallback;
+        }
+
         if constexpr ( std::is_same_v<M, std::string > || is_c_str<M>::value ) {
             key = _param;
         }
@@ -239,6 +273,7 @@ public:
     void loadResource( std::shared_ptr<Matrix4f> _localHierMat );
     void hoover( bool isHoovering );
     void setStatus( UITapAreaStatus _status );
+    void singleTap() const;
 
 private:
     std::string     key;
@@ -268,6 +303,7 @@ private:
     V4fa            foregroundColor;
     V4fa            backgroundColor;
     C4f             defaultBackgroundColor = C4f::WHITE;
+    ControlSingleTapCallback singleTapCallback = nullptr;
 };
 
 using UIElementRT       = RecursiveTransformation<UIElement, JMATH::AABB>;
@@ -326,35 +362,6 @@ private:
     std::vector<UIElementSP> elements;
     std::vector<UIElementSP> activeTaps;
     mutable UIElementSP touchDownStartingKey;
-};
-
-enum class CSSDisplayMode {
-    Block,
-    Inline
-};
-
-using ControlDefKey = std::string;
-using ControlDefIconRef = std::string;
-using ControlSingleTapCallback = std::function<void(ControlDefKey)>;
-
-struct ControlDef {
-    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines )
-            : key( key ), icon( icon ), textLines( textLines ) {}
-
-    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon ) : key( key ), icon( icon ) {}
-
-    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon,
-                const ControlSingleTapCallback& singleTapCallback ) : key( key ), icon( icon ),
-                                                                      singleTapCallback( singleTapCallback ) {}
-
-    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines,
-                const ControlSingleTapCallback& singleTapCallback ) : key( key ), icon( icon ), textLines( textLines ),
-                                                                      singleTapCallback( singleTapCallback ) {}
-
-    ControlDefKey key;
-    ControlDefIconRef icon;
-    std::vector<UIFontText> textLines;
-    ControlSingleTapCallback singleTapCallback;
 };
 
 class UIContainer2d {

@@ -52,14 +52,14 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
     ssBBox.translate( V2f::Y_AXIS_NEG * ssBBox.height() );
 
     if ( type() == UIT::separator_h() ) {
-        defaultBackgroundColor = C4f::WHITE.A(0.45f);
+        defaultBackgroundColor = C4f::WHITE.A(0.4f);
         backgroundVP = this->owner->RR().draw<DRect2dRounded>(UI2dMenu, ssBBox, _localHierMat,
                 RDSRoundedCorner(ssBBox.height()*0.33f), defaultBackgroundColor );
         return;
     }
 
     if ( text.empty() ) {
-        defaultBackgroundColor = C4f::WHITE.A(0.3f);
+        defaultBackgroundColor = type() == UIT::background() ? Color4f::XTORGBA("#036FAB").A(0.9f) : C4f::WHITE.A(0.3f);
         backgroundVP = this->owner->RR().draw<DRect2dRounded>(UI2dMenu, ssBBox, _localHierMat, defaultBackgroundColor);
     }
     if ( !foreground.empty() && text.empty() ) {
@@ -133,7 +133,8 @@ void UIElement::hoover( bool isHoovering ) {
         auto color = isHoovering ? owner->getHooverColor().xyz() : defaultBackgroundColor.xyz();
         auto alpha = isHoovering ? owner->getHooverColor().w() : defaultBackgroundColor.w();
         backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color );
-        backgroundVP->setMaterialConstant( UniformNames::alpha, alpha );
+//        backgroundVP->setMaterialConstant( UniformNames::alpha, alpha );
+        backgroundVP->setMaterialConstant( UniformNames::opacity, alpha );
     }
 }
 
@@ -141,7 +142,8 @@ void UIElement::setStatus( UITapAreaStatus _status ) {
     status = _status;
     auto color = owner->colorFromStatus(status);
     backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color.xyz() );
-    backgroundVP->setMaterialConstant( UniformNames::alpha, color.w() );
+//    backgroundVP->setMaterialConstant( UniformNames::alpha, color.w() );
+    backgroundVP->setMaterialConstant( UniformNames::opacity, color.w() );
 }
 
 bool UIElement::hasActiveStatus() const {
@@ -155,6 +157,10 @@ bool UIElement::contains( const V2f& _point ) const {
 bool UIElement::containsActive( const V2f& _point ) const {
     if ( !hasActiveStatus() ) return false;
     return bbox3dT->containsXY( _point );
+}
+
+void UIElement::singleTap() const {
+    if ( singleTapCallback ) singleTapCallback();
 }
 
 void UIView::foreach( std::function<void(UIElementSP)> f ) {
@@ -196,6 +202,11 @@ void UIView::handleTouchDownEvent( const V2f& _p ) {
 }
 
 void UIView::handleTouchUpEvent( const V2f& _p ) {
+
+    if ( !activeTaps.empty() ) {
+        activeTaps[0]->Data().singleTap();
+    }
+    activeTaps.clear();
     foreach( [&]( UIElementSP n) {
 //        bool touchUpGroup = false;
 //        if ( k == "1" || k == "2" || k == "3" ) {
@@ -375,7 +386,7 @@ void UIContainer2d::addLabel( const UIFontText& _text,
 UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& bsize, CSSDisplayMode displayMode,
         UITapAreaType _bt, const V2f& _pos ) {
 
-    auto child = EF::create<UIElementRT>(PFC{}, _cd.key, bsize, _bt, UIForegroundIcon{_cd.icon} );
+    auto child = EF::create<UIElementRT>(PFC{}, _cd, bsize, _bt, UIForegroundIcon{_cd.icon} );
     node->addChildren( child, caret );
     advanceCaret( displayMode, bsize );
     return child;

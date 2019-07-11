@@ -8,11 +8,12 @@
 #include <core/names.hpp>
 #include <core/math/matrix4f.h>
 #include <core/heterogeneous_map.hpp>
+#include <core/resources/resource_utils.hpp>
+#include <core/resources/profile.hpp>
 #include <graphics/framebuffer.h>
 #include <graphics/graphic_constants.h>
 #include <graphics/ghtypes.hpp>
 #include <graphics/shadowmap_manager.h>
-#include <core/resources/resource_utils.hpp>
 
 namespace CommandBufferLimits {
 	const static int CoreStart = 0;
@@ -331,23 +332,23 @@ public:
         if constexpr ( std::is_integral_v<M> && !std::is_same_v<M, bool> ) {
             rds.bucketIndex = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, bool> ) {
             rds.verts.wrap = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, V3fVector> ) {
             rds.verts.v = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, V2fVector> ) {
             for ( const auto& v : _param ) rds.verts.v.emplace_back(v);
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, V3fVectorWrap> ) {
             rds.verts = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, Rect2f> ) {
             if constexpr ( std::is_same_v<T, DRect2d> || std::is_same_v<T, DRect2dRounded> )
             {
@@ -357,53 +358,59 @@ public:
                 rds.verts.wrap = true;
             }
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, C4f> ) {
             rds.color = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, float> ) {
             rds.width = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, std::string> ) {
             rds.name = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, FDS> ) {
             rds.fds = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, RDSImage> ) {
             rds.textureRef = _param();
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, std::shared_ptr<Matrix4f>> ) {
             rds.matrix = _param;
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, V3f> ) {
             rds.verts.v.emplace_back( _param );
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, V3f> ) {
             rds.verts.v.emplace_back( _param );
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, RDSPreMult> ) {
             rds.usePreMult = true;
             rds.preMultMatrix = _param();
             return;
-        } else
+        }
         if constexpr ( std::is_same_v<M, RDSRoundedCorner> ) {
             rds.roundedCorner = _param();
             return;
-        } else
+        }
+        if constexpr ( std::is_same_v<M, V3fVectorOfVectorWrap > ) {
+            ASSERTV(false,"Please provide a VTMVectorOfVectorWrap instead of a V3fVectorOfVectorWrap" );
+            return;
+        }
+        if constexpr ( std::is_same_v<M, std::shared_ptr<Profile> > ) {
+            rds.multiVerts = _param->Paths3dWithUV();
+            return;
+        }
         if constexpr ( std::is_same_v<M, VTMVectorOfVectorWrap > ) {
             rds.multiVerts = _param;
             return;
-        } else {
-//            static_assert(std::false_type::value, "RendererDrawingSetParam not supported");
         }
     }
 
