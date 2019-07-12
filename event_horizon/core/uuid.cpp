@@ -9,6 +9,11 @@
 #include "uuid.hpp"
 
 uint64_t UUIDGen::sGlobalCounter = 1;
+uint64_t UUIDIntegerInc::SGlobalIntegerIncCounter = 1;
+
+UUIDIntegerInc::UUIDIntegerInc( uint64_t _base ) {
+    mIntegerId = _base + SGlobalIntegerIncCounter++;
+}
 
 std::string UUIDGen::make() {
     static bool hasBeenInitialized = false;

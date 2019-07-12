@@ -288,3 +288,9 @@ AVInitCallback RenderOrchestrator::avcbTM() {
                      std::placeholders::_2);
 }
 
+void RenderOrchestrator::setVisible( uint64_t _cbIndex, bool _value ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->setVisibleCB( _cbIndex, _value );
+    }
+}
+

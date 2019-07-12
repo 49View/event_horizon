@@ -16,3 +16,12 @@ private:
 
 using UUID = std::string;
 
+class UUIDIntegerInc {
+public:
+    explicit UUIDIntegerInc( uint64_t _base = 0 );
+
+    [[nodiscard]] uint64_t getUUIntegerId() const { return mIntegerId; }
+private:
+    uint64_t mIntegerId = 0;
+    static uint64_t SGlobalIntegerIncCounter;
+};

@@ -433,7 +433,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     for ( const auto& [k, vl] : rr.CL() ) {
-        if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) ) {
+        if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
             rr.addToCommandBuffer( k );
         }
     }
@@ -537,6 +537,18 @@ void RLTarget::updateStreams() {
     updateStreamPacket("http://192.168.1.123:8080/video_y");
     updateStreamPacket("http://192.168.1.123:8080/video_u");
     updateStreamPacket("http://192.168.1.123:8080/video_v");
+}
+
+void RLTarget::setVisibleCB( int _index, bool _value ) {
+    if ( _value ) {
+        hiddenSet.erase( _index );
+    } else {
+        hiddenSet.emplace( _index );
+    }
+}
+
+bool RLTarget::hiddenCB( int _cbIndex ) {
+    return hiddenSet.find( _cbIndex ) != hiddenSet.end();
 }
 
 RLTargetCubeMap::RLTargetCubeMap( const CubeMapRigContainer& _rig, std::shared_ptr<Framebuffer> _fb,

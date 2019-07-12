@@ -199,6 +199,7 @@ public:
 
     void enable() { bEnabled = true; }
     void disable() { bEnabled = false; }
+    void setVisibleCB( int _index, bool _value );
 
     void enableBucket( bool _flag,  size_t _bucketInndex = 0 ) {
         bucketRanges[_bucketInndex].enabled = _flag;
@@ -212,9 +213,12 @@ public:
     BlitType finalDestBlit = BlitType::OnScreen;
     ScreenShotContainerPtr screenShotContainer;
     std::vector<RenderBucketRange> bucketRanges;
+    std::unordered_set<int> hiddenSet;
 
 protected:
     void updateStreamPacket( const std::string& _streamName );
+    [[nodiscard]] bool hiddenCB( int _cbIndex );
+
 protected:
     std::unordered_map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
     bool mbTakeScreenShot = false;

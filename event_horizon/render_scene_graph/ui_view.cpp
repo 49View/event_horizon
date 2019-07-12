@@ -44,7 +44,6 @@ ColorScheme::ColorScheme( const std::string& colorDescriptor ) {
     }
 }
 
-constexpr static uint64_t UI2dMenu = CommandBufferLimits::UI2dStart + 1;
 
 void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
 //    auto statusColor = owner->colorFromStatus( status );
@@ -53,23 +52,22 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
 
     if ( type() == UIT::separator_h() ) {
         defaultBackgroundColor = C4f::WHITE.A(0.4f);
-        backgroundVP = this->owner->RR().draw<DRect2dRounded>(UI2dMenu, ssBBox, _localHierMat,
+        backgroundVP = this->owner->RR().draw<DRect2dRounded>(getUUIntegerId(), ssBBox, _localHierMat,
                 RDSRoundedCorner(ssBBox.height()*0.33f), defaultBackgroundColor );
         return;
     }
 
     if ( text.empty() ) {
         defaultBackgroundColor = type() == UIT::background() ? Color4f::XTORGBA("#036FAB").A(0.9f) : C4f::WHITE.A(0.3f);
-        backgroundVP = this->owner->RR().draw<DRect2dRounded>(UI2dMenu, ssBBox, _localHierMat, defaultBackgroundColor);
+        backgroundVP = this->owner->RR().draw<DRect2dRounded>(getUUIntegerId(), ssBBox, _localHierMat, defaultBackgroundColor);
     }
     if ( !foreground.empty() && text.empty() ) {
-        foregroundVP = this->owner->RR().draw<DRect2d>( UI2dMenu, ssBBox, _localHierMat, RDSImage{foreground} );
+        foregroundVP = this->owner->RR().draw<DRect2d>( getUUIntegerId(), ssBBox, _localHierMat, RDSImage{foreground} );
     }
     if ( !text.empty() ) {
-        defaultBackgroundColor = C4f::WHITE;
-        this->owner->RR().draw<DText2d>( UI2dMenu,
+        foregroundVP = this->owner->RR().draw<DText2d>( getUUIntegerId(),
                 FDS{ text, font, ssBBox.bottomLeft(), fontHeight, fontAngle},
-                _localHierMat, defaultBackgroundColor );
+                _localHierMat, fontColor );
     }
 }
 
@@ -85,15 +83,15 @@ void UIElement::transform( float _duration, uint64_t _frameSkipper,
     bbox3d->front().translate( _pos.xy() );
 
     Timeline::play( backgroundAnim.pos, _frameSkipper, colDown, AnimUpdateCallback([this](float) {
-        backgroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
-        foregroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
+        if ( backgroundVP ) backgroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
+        if ( foregroundVP ) foregroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
     } ), []() {
     } );
 
 }
 
 void UIElement::touchedDown() {
-    if ( status != UITapAreaStatus::Enabled ) return;
+    if ( status != UIElementStatus::Enabled ) return;
 
     const float downtime = 0.1f;
     auto targetColor = checkBitWiseFlag(type(), UIT::stickyButton()) ? owner->getSelectedColor() : owner->getPressedDownColor();
@@ -103,22 +101,22 @@ void UIElement::touchedDown() {
     };
 
     touchDownAnimNameScale = Timeline::play( backgroundColor, colDown, AnimUpdateCallback([this](float) {
-        backgroundVP->setMaterialConstant( UniformNames::diffuseColor, backgroundColor->value.xyz() );
-        backgroundVP->setMaterialConstant( UniformNames::alpha, backgroundColor->value.w() );
+        if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::diffuseColor, backgroundColor->value.xyz() );
+        if ( foregroundVP ) backgroundVP->setMaterialConstant( UniformNames::alpha, backgroundColor->value.w() );
     } ));
 
 }
 
 void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
 
-    if ( status == UITapAreaStatus::Fixed ) {
+    if ( status == UIElementStatus::Fixed ) {
         return; // nothing to do here
     }
     if ( hasBeenTapped && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
-        status = UITapAreaStatus::Selected;
+        status = UIElementStatus::Selected;
     }
     if ( !hasBeenTapped && isTouchUpGroup && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
-        status = UITapAreaStatus::Enabled;
+        status = UIElementStatus::Enabled;
     }
     setStatus( status );
     auto color = owner->colorFromStatus(status);
@@ -129,7 +127,7 @@ void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
 }
 
 void UIElement::hoover( bool isHoovering ) {
-    if ( status == UITapAreaStatus::Enabled ) {
+    if ( status == UIElementStatus::Enabled ) {
         auto color = isHoovering ? owner->getHooverColor().xyz() : defaultBackgroundColor.xyz();
         auto alpha = isHoovering ? owner->getHooverColor().w() : defaultBackgroundColor.w();
         backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color );
@@ -138,7 +136,7 @@ void UIElement::hoover( bool isHoovering ) {
     }
 }
 
-void UIElement::setStatus( UITapAreaStatus _status ) {
+void UIElement::setStatus( UIElementStatus _status ) {
     status = _status;
     auto color = owner->colorFromStatus(status);
     backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color.xyz() );
@@ -147,7 +145,7 @@ void UIElement::setStatus( UITapAreaStatus _status ) {
 }
 
 bool UIElement::hasActiveStatus() const {
-    return !( status == UITapAreaStatus::Fixed || status == UITapAreaStatus::Hidden || status == UITapAreaStatus::Disabled );
+    return !( status == UIElementStatus::Fixed || status == UIElementStatus::Hidden || status == UIElementStatus::Disabled );
 }
 
 bool UIElement::contains( const V2f& _point ) const {
@@ -164,13 +162,13 @@ void UIElement::singleTap() const {
 }
 
 void UIView::foreach( std::function<void(UIElementSP)> f ) {
-    for ( auto& v : elements ) {
+    for ( auto& [k,v] : elements ) {
         v->foreach( f );
     }
 }
 
 void UIView::visit( std::function<void( const UIElementSPConst)> f ) const {
-    for ( const auto& v : elements ) {
+    for ( const auto& [k,v] : elements ) {
         v->visit( f );
     }
 }
@@ -243,24 +241,24 @@ SceneGraph& UIView::SG() {
     return sg;
 }
 
-C4f UIView::colorFromStatus( UITapAreaStatus _status ) {
+C4f UIView::colorFromStatus( UIElementStatus _status ) {
     switch (_status) {
-        case UITapAreaStatus::Enabled:
+        case UIElementStatus::Enabled:
             return getEnabledColor();
-        case UITapAreaStatus::Selected:
+        case UIElementStatus::Selected:
             return getSelectedColor();
-        case UITapAreaStatus::Disabled:
+        case UIElementStatus::Disabled:
             return getDisabledColor();
-        case UITapAreaStatus::Hidden:
+        case UIElementStatus::Hidden:
             return getEnabledColor();
-        case UITapAreaStatus::Hoover:
+        case UIElementStatus::Hoover:
             return getHooverColor();
-        case UITapAreaStatus::Fixed:
+        case UIElementStatus::Fixed:
             return colorScheme.Complement(1);
     }
 }
 
-void UIView::setButtonStatus( CResourceRef _key, UITapAreaStatus _status ) {
+void UIView::setButtonStatus( CResourceRef _key, UIElementStatus _status ) {
     foreach( [&]( UIElementSP node ) {
         if ( node->Data().Key() == _key ) {
             node->DataRef().setStatus( _status );
@@ -268,8 +266,8 @@ void UIView::setButtonStatus( CResourceRef _key, UITapAreaStatus _status ) {
     });
 }
 
-UITapAreaStatus UIView::getButtonStatus( CResourceRef _key ) const {
-    UITapAreaStatus ret = UITapAreaStatus::Enabled;
+UIElementStatus UIView::getButtonStatus( CResourceRef _key ) const {
+    UIElementStatus ret = UIElementStatus::Enabled;
 
     visit( [&]( UIElementSPCC node ) {
         if ( node->Data().Key() == _key ) {
@@ -282,17 +280,34 @@ UITapAreaStatus UIView::getButtonStatus( CResourceRef _key ) const {
 
 bool UIView::isButtonEnabled( CResourceRef _key ) const {
     auto bs = getButtonStatus( _key );
-    return bs == UITapAreaStatus::Enabled || bs == UITapAreaStatus::Selected;
+    return bs == UIElementStatus::Enabled || bs == UIElementStatus::Selected;
 }
 
-void UIView::transform( UIElementSP _key, float _duration, uint64_t _frameSkipper,
+void UIView::transform( CResourceRef _key, float _duration, uint64_t _frameSkipper,
                         const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
-    _key->DataRef().transform( _duration, _frameSkipper, _pos, _rot, _scale );
+
+    auto colDown = std::vector<KeyFramePair<V3f>>{
+            KeyFramePair{ 0.0f, elements[_key]->PosAnim()->value },
+            KeyFramePair{ _duration, elements[_key]->PosAnim()->value + _pos }
+    };
+
+    Timeline::play( elements[_key]->PosAnim(), _frameSkipper, colDown );
+
+//    elements[_key]->updateTransform( _pos );
+//    elements[_key]->foreach( [&]( UIElementSP node) {
+//        node->DataRef().transform( _duration, _frameSkipper, _pos, _rot, _scale );
+//    } );
 }
 
 void UIView::loadResources() {
     foreach( []( UIElementSP node ) {
         node->DataRef().loadResource( node->getLocalHierTransform() );
+    });
+}
+
+void UIView::updateAnim() {
+    foreach( []( UIElementSP node ) {
+        node->updateAnim();
     });
 }
 
@@ -305,7 +320,7 @@ C4f UIView::getSelectedColor() const {
 }
 
 C4f UIView::getDisabledColor() const {
-    return colorScheme.Secondary1(4);
+    return C4f::DARK_GRAY.A(0.3f); //colorScheme.Secondary1(4);
 }
 
 C4f UIView::getHooverColor() const {
@@ -327,18 +342,19 @@ void UIView::addRecursive( UIElementSP _elem ) {
     }
 }
 
-void UIView::add( UIElementSP _elem ) {
+void UIView::add( UIElementSP _elem, UIElementStatus _initialStatus ) {
     addRecursive( _elem );
-    elements.push_back(_elem);
+    elements.emplace( _elem->Name(), _elem);
+
+    if ( _initialStatus == UIElementStatus::Hidden ) {
+        _elem->visit( [this]( UIElementSPCC _node) {
+            this->rsg.setVisible( _node->Data().getUUIntegerId(), false );
+        } );
+    }
 }
 
-void UIContainer2d::finalise() {
-    owner.add( node );
-
-//    node->visit( []( UIElementSP n ) {
-//        LOGRS( "BBox: " << *n->BBox3d() );
-//        LOGRS( "BBoxT: " << *n->BBox3dT() );
-//    } );
+void UIView::add( const UIContainer2d& _container, UIElementStatus _initialStatus ) {
+    add( _container.Node(), _initialStatus );
 }
 
 void UIContainer2d::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize ) {
@@ -436,7 +452,6 @@ void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
                                         const std::vector<ControlDef>& _cds ) {
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
-    MScale2d bsize{ 0.07f, 0.07f };
     for ( const auto& i : _cds ) {
         icontrols[i.key] = addButton( i, bsize, CSSDisplayMode::Inline, UIT::stickyButton );
     }
@@ -455,3 +470,14 @@ void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
     addSeparator( 0.5f );
 }
 
+void UIContainer2d::setButtonSize( const MScale2d& _bs ) {
+    bsize = _bs;
+}
+
+void UIContainer2d::setPadding( const V2f& _value ) {
+    padding = _value;
+}
+
+void UIContainer2d::setVisible( bool _value ) {
+
+}

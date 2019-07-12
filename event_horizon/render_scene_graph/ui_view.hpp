@@ -10,9 +10,9 @@
 #include <core/math/rect2f.h>
 #include <core/math/matrix_anim.h>
 #include <core/recursive_transformation.hpp>
-#include <graphics/ghtypes.hpp>
-#include <poly/poly.hpp>
 #include <core/resources/entity_factory.hpp>
+#include <poly/poly.hpp>
+#include <graphics/ghtypes.hpp>
 
 class UIView;
 class SceneGraph;
@@ -22,7 +22,7 @@ using ControlDefKey = std::string;
 using ControlDefIconRef = std::string;
 using ControlSingleTapCallback = std::function<void()>;
 
-enum class UITapAreaStatus {
+enum class UIElementStatus {
     Enabled,
     Disabled,
     Selected,
@@ -90,11 +90,15 @@ struct UIFontAngle {
 };
 
 struct UIFontText {
-    UIFontText( const ResourceRef& fontRef, float height, const std::string& text ) : fontRef( fontRef ),
-                                                                                      height( height ), text( text ) {}
+    UIFontText( ResourceRef  fontRef, float height, std::string  text ) : fontRef(std::move( fontRef )),
+                                                                                      height( height ), text(std::move( text )) {}
+
+    UIFontText( ResourceRef  fontRef, float height, const C4f& color, std::string  text ) : fontRef(std::move(
+            fontRef )), height( height ), color( color ), text(std::move( text )) {}
 
     ResourceRef fontRef;
     float height = 0.1f;
+    C4f color = C4f::WHITE;
     std::string text;
 };
 
@@ -108,26 +112,38 @@ struct UIForegroundIcon {
 };
 
 struct ControlDef {
-    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines )
-            : key( key ), icon( icon ), textLines( textLines ) {}
+    ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines )
+            : key(std::move( key )), icon(std::move( icon )), textLines(std::move( textLines )) {}
 
-    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon ) : key( key ), icon( icon ) {}
+    ControlDef( ControlDefKey  key, ControlDefIconRef  icon ) : key(std::move( key )), icon(std::move( icon )) {}
 
-    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon,
-                const ControlSingleTapCallback& singleTapCallback ) : key( key ), icon( icon ),
-                                                                      singleTapCallback( singleTapCallback ) {}
+    ControlDef( ControlDefKey  key, ControlDefIconRef  icon,
+                ControlSingleTapCallback  singleTapCallback ) : key(std::move( key )), icon(std::move( icon )),
+                                                                      singleTapCallback(std::move( singleTapCallback )) {}
 
-    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines,
-                const ControlSingleTapCallback& singleTapCallback ) : key( key ), icon( icon ), textLines( textLines ),
-                                                                      singleTapCallback( singleTapCallback ) {}
+    ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines,
+                ControlSingleTapCallback  singleTapCallback ) : key(std::move( key )), icon(std::move( icon )), textLines(std::move( textLines )),
+                                                                      singleTapCallback(std::move( singleTapCallback )) {}
+
+    ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines,
+                const Color4f& foreGroundColor ) : key(std::move( key )), icon(std::move( icon )), textLines(std::move( textLines )),
+                                                   foreGroundColor( foreGroundColor ) {}
+
+    ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines,
+                const Color4f& foreGroundColor, const Color4f& backGroundColor ) : key(std::move( key )), icon(std::move( icon )),
+                                                                                   textLines(std::move( textLines )),
+                                                                                   foreGroundColor( foreGroundColor ),
+                                                                                   backGroundColor( backGroundColor ) {}
 
     ControlDefKey key;
     ControlDefIconRef icon;
     std::vector<UIFontText> textLines;
+    Color4f foreGroundColor = V4f::HUGE_VALUE_NEG;
+    Color4f backGroundColor = V4f::HUGE_VALUE_NEG;
     ControlSingleTapCallback singleTapCallback;
 };
 
-using UITS = UITapAreaStatus;
+using UITS = UIElementStatus;
 
 class ColorScheme {
 public:
@@ -153,10 +169,10 @@ private:
     std::array<C4f, ShadesNum> complementColors;
 };
 
-class UIElement : public Boxable<JMATH::AABB, BBoxProjection2d> {
+class UIElement : public Boxable<JMATH::AABB, BBoxProjection2d>, public UUIDIntegerInc {
 public:
     template <typename ...Args>
-    explicit UIElement( Args&& ... args ) {
+    explicit UIElement( Args&& ... args ) : UUIDIntegerInc(CommandBufferLimits::UI2dStart) {
         bbox3d->identity();
         (parseParam( std::forward<Args>( args )), ...); // Fold expression (c++17)
         if ( type() == UIT::background() || type() == UIT::label() ) {
@@ -201,7 +217,7 @@ private:
 //        if constexpr ( std::is_same_v<M, JMATH::Rect2f > ) {
 //            bbox = _param;
 //        }
-        if constexpr ( std::is_same_v<M, UITapAreaStatus > ) {
+        if constexpr ( std::is_same_v<M, UIElementStatus > ) {
             status = _param;
         }
         if constexpr ( std::is_same_v<M, UIFontRef > ) {
@@ -210,6 +226,7 @@ private:
         if constexpr ( std::is_same_v<M, UIFontText > ) {
             fontRef = _param.fontRef;
             text = _param.text;
+            fontColor = _param.color;
             fontHeight = _param.height;
         }
         if constexpr ( std::is_same_v<M, UIFontAngle > ) {
@@ -237,7 +254,7 @@ public:
         return bbox3d->topDown();
     }
 
-    UITapAreaStatus Status() const {
+    UIElementStatus Status() const {
         return status;
     }
 
@@ -272,7 +289,7 @@ public:
                     const V3f& _scale = V3f::ONE );
     void loadResource( std::shared_ptr<Matrix4f> _localHierMat );
     void hoover( bool isHoovering );
-    void setStatus( UITapAreaStatus _status );
+    void setStatus( UIElementStatus _status );
     void singleTap() const;
 
 private:
@@ -282,12 +299,13 @@ private:
 //    Quaternion      rot;
 //    V3f             scale = V3f::ONE;
 //    Rect2f          bbox   = Rect2f::IDENTITY;
-    UITapAreaStatus status = UITapAreaStatus::Enabled;
+    UIElementStatus status = UIElementStatus::Enabled;
     const ::Font*   font = nullptr;
     std::string     fontRef;
     std::string     text;
     float           fontAngle = 0.0f;
     float           fontHeight = 0.2f;
+    C4f             fontColor = C4f::WHITE;
 
     std::string     foreground;
 
@@ -316,22 +334,26 @@ enum class UICheckActiveOnly {
     True
 };
 
+class UIContainer2d;
+
 class UIView {
 public:
     UIView( SceneGraph& sg, RenderOrchestrator& rsg, const ColorScheme& cs ) : sg( sg ), rsg( rsg ), colorScheme(cs) {}
 
-    void add( UIElementSP _elem );
+    void add( UIElementSP _elem, UIElementStatus _initialStatus = UIElementStatus::Enabled );
+    void add( const UIContainer2d& _container, UIElementStatus _initialStatus = UIElementStatus::Enabled );
 
     void handleTouchDownEvent( const V2f& _p );
     void handleTouchUpEvent( const V2f& _p );
     void loadResources();
     void hoover(  const V2f& _point );
-    void transform( UIElementSP _key, float _duration, uint64_t _frameSkipper,
+    void transform( CResourceRef _key, float _duration, uint64_t _frameSkipper,
                     const V3f& _pos,
                     const Quaternion& _rot = Quaternion{},
                     const V3f& _scale = V3f::ONE );
-    void setButtonStatus( CResourceRef _key, UITapAreaStatus _status );
-    UITapAreaStatus getButtonStatus( CResourceRef _key ) const;
+    void updateAnim();
+    void setButtonStatus( CResourceRef _key, UIElementStatus _status );
+    UIElementStatus getButtonStatus( CResourceRef _key ) const;
     bool isButtonEnabled( CResourceRef _key ) const;
     bool isHandlingUI() const;
     [[nodiscard]] bool pointInUIArea( const V2f& tap, UICheckActiveOnly _checkFlag ) const;
@@ -345,7 +367,7 @@ public:
     C4f getHooverColor() const;
     C4f getPressedDownColor() const;
 
-    C4f colorFromStatus( UITapAreaStatus _status );
+    C4f colorFromStatus( UIElementStatus _status );
 
     void visit( std::function<void(const UIElementSPConst)> f ) const ;
     void foreach( std::function<void(UIElementSP)> f );
@@ -359,7 +381,7 @@ private:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
     ColorScheme colorScheme;
-    std::vector<UIElementSP> elements;
+    std::unordered_map<ResourceRef, UIElementSP> elements;
     std::vector<UIElementSP> activeTaps;
     mutable UIElementSP touchDownStartingKey;
 };
@@ -367,8 +389,9 @@ private:
 class UIContainer2d {
 public:
     template <typename S>
-    UIContainer2d( UIView& _owner, const MPos2d& _pos, const S& _size ) : owner(_owner), pos( _pos ), size( _size() ) {
+    UIContainer2d( CResourceRef _name, const MPos2d& _pos, const S& _size ) : pos( _pos ), size( _size() ) {
         node = EF::create<UIElementRT>( PFC{}, UUIDGen::make(), pos, _size, UIT::background );
+        node->Name( _name );
         innerPaddedX = size.x()-(padding.x()*2.0f);
         caret = padding;
         wholeLineSize = MScale2d{innerPaddedX, -padding.y()};
@@ -381,7 +404,10 @@ public:
     void addListEntryGrid( const ControlDef& _cd, bool _newLine = false );
     void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds );
     void popCaretX();
-    void finalise();
+    [[nodiscard]] UIElementSP Node() const { return node; };
+    void setButtonSize( const MScale2d& _bs );
+    void setPadding( const V2f& _value );
+    void setVisible( bool _value );
 
 private:
     void advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize );
@@ -392,11 +418,11 @@ private:
                     UITapAreaType _bt = UIT::pushButton, const V2f& _pos = V2f::ZERO );
 
 private:
-    UIView& owner;
     MPos2d pos;
     V2f padding{0.02f, -0.01f};
     V3f size;
     UIElementSP node;
+    MScale2d bsize{ 0.07f, 0.07f };
 
     std::unordered_map<std::string, UIElementSP> icontrols;
     float innerPaddedX = 0.0f;
