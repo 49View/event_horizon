@@ -13,6 +13,7 @@
 #include <core/resources/entity_factory.hpp>
 #include <poly/poly.hpp>
 #include <graphics/ghtypes.hpp>
+#include <render_scene_graph/render_orchestrator.h>
 
 class UIView;
 class SceneGraph;
@@ -172,7 +173,7 @@ private:
 class UIElement : public Boxable<JMATH::AABB, BBoxProjection2d>, public UUIDIntegerInc {
 public:
     template <typename ...Args>
-    explicit UIElement( Args&& ... args ) : UUIDIntegerInc(CommandBufferLimits::UI2dStart) {
+    explicit UIElement( RenderOrchestrator& _rsg, Args&& ... args ) : UUIDIntegerInc(CommandBufferLimits::UI2dStart), rsg(_rsg) {
         bbox3d->identity();
         (parseParam( std::forward<Args>( args )), ...); // Fold expression (c++17)
         if ( type() == UIT::background() || type() == UIT::label() ) {
@@ -194,15 +195,6 @@ private:
             key = _param;
         }
 
-//        if constexpr ( std::is_same_v<M, V3f > || std::is_same_v<M, V2f > ) {
-//            pos = _param;
-//        }
-//        if constexpr ( std::is_same_v<M, Quaternion > ) {
-//            rot = _param;
-//        }
-//        if constexpr ( std::is_same_v<M, MScale > ) {
-//            scale = _param();
-//        }
         if constexpr ( std::is_same_v<M, MScale2d > ||
                 std::is_same_v<M, MScale2dXS > ||
                 std::is_same_v<M, MScale2dYS > ||
@@ -278,6 +270,10 @@ public:
         font = _fontPtr;
     }
 
+    void setVisible( bool _value );
+
+    void fadeTo( float _duration, float _value );
+
     [[nodiscard]] bool contains( const V2f& _point ) const;
     [[nodiscard]] bool containsActive( const V2f& _point ) const;
     [[nodiscard]] bool hasActiveStatus() const;
@@ -293,12 +289,10 @@ public:
     void singleTap() const;
 
 private:
+    RenderOrchestrator& rsg;
+
     std::string     key;
     UITapAreaType   type;
-//    V3f             pos = V3f::ZERO;
-//    Quaternion      rot;
-//    V3f             scale = V3f::ONE;
-//    Rect2f          bbox   = Rect2f::IDENTITY;
     UIElementStatus status = UIElementStatus::Enabled;
     const ::Font*   font = nullptr;
     std::string     fontRef;
@@ -343,15 +337,16 @@ public:
     void add( UIElementSP _elem, UIElementStatus _initialStatus = UIElementStatus::Enabled );
     void add( const UIContainer2d& _container, UIElementStatus _initialStatus = UIElementStatus::Enabled );
 
+    UIElementSP operator()( CResourceRef _key );
+
     void handleTouchDownEvent( const V2f& _p );
     void handleTouchUpEvent( const V2f& _p );
     void loadResources();
     void hoover(  const V2f& _point );
-    void transform( CResourceRef _key, float _duration, uint64_t _frameSkipper,
-                    const V3f& _pos,
-                    const Quaternion& _rot = Quaternion{},
-                    const V3f& _scale = V3f::ONE );
     void updateAnim();
+
+    UIElementSP node( CResourceRef& _key );
+
     void setButtonStatus( CResourceRef _key, UIElementStatus _status );
     UIElementStatus getButtonStatus( CResourceRef _key ) const;
     bool isButtonEnabled( CResourceRef _key ) const;
@@ -389,8 +384,9 @@ private:
 class UIContainer2d {
 public:
     template <typename S>
-    UIContainer2d( CResourceRef _name, const MPos2d& _pos, const S& _size ) : pos( _pos ), size( _size() ) {
-        node = EF::create<UIElementRT>( PFC{}, UUIDGen::make(), pos, _size, UIT::background );
+    UIContainer2d( RenderOrchestrator& _rsg,
+    CResourceRef _name, const MPos2d& _pos, const S& _size ) : rsg(_rsg), pos( _pos ), size( _size() ) {
+        node = EF::create<UIElementRT>( PFC{}, rsg, UUIDGen::make(), pos, _size, UIT::background );
         node->Name( _name );
         innerPaddedX = size.x()-(padding.x()*2.0f);
         caret = padding;
@@ -407,7 +403,7 @@ public:
     [[nodiscard]] UIElementSP Node() const { return node; };
     void setButtonSize( const MScale2d& _bs );
     void setPadding( const V2f& _value );
-    void setVisible( bool _value );
+    [[nodiscard]] V3f getSize() const;
 
 private:
     void advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize );
@@ -418,6 +414,8 @@ private:
                     UITapAreaType _bt = UIT::pushButton, const V2f& _pos = V2f::ZERO );
 
 private:
+    RenderOrchestrator& rsg;
+
     MPos2d pos;
     V2f padding{0.02f, -0.01f};
     V3f size;

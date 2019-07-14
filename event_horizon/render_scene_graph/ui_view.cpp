@@ -161,6 +161,19 @@ void UIElement::singleTap() const {
     if ( singleTapCallback ) singleTapCallback();
 }
 
+void UIElement::setVisible( bool _value ) {
+    rsg.setVisible( getUUIntegerId(), _value );
+}
+
+void UIElement::fadeTo( float _duration, float _value ) {
+    fader( _duration, _value, backgroundVP, foregroundVP );
+    Timeline::intermezzo( _duration, 1, AnimUpdateCallback([this, _value](float _elapsed) {
+        if ( _elapsed == 0.0f ) {
+            setVisible( _value > 0.0f );
+        }
+    }) );
+}
+
 void UIView::foreach( std::function<void(UIElementSP)> f ) {
     for ( auto& [k,v] : elements ) {
         v->foreach( f );
@@ -283,22 +296,6 @@ bool UIView::isButtonEnabled( CResourceRef _key ) const {
     return bs == UIElementStatus::Enabled || bs == UIElementStatus::Selected;
 }
 
-void UIView::transform( CResourceRef _key, float _duration, uint64_t _frameSkipper,
-                        const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
-
-    auto colDown = std::vector<KeyFramePair<V3f>>{
-            KeyFramePair{ 0.0f, elements[_key]->PosAnim()->value },
-            KeyFramePair{ _duration, elements[_key]->PosAnim()->value + _pos }
-    };
-
-    Timeline::play( elements[_key]->PosAnim(), _frameSkipper, colDown );
-
-//    elements[_key]->updateTransform( _pos );
-//    elements[_key]->foreach( [&]( UIElementSP node) {
-//        node->DataRef().transform( _duration, _frameSkipper, _pos, _rot, _scale );
-//    } );
-}
-
 void UIView::loadResources() {
     foreach( []( UIElementSP node ) {
         node->DataRef().loadResource( node->getLocalHierTransform() );
@@ -344,17 +341,20 @@ void UIView::addRecursive( UIElementSP _elem ) {
 
 void UIView::add( UIElementSP _elem, UIElementStatus _initialStatus ) {
     addRecursive( _elem );
+    _elem->setVisible( _initialStatus != UIElementStatus::Hidden );
     elements.emplace( _elem->Name(), _elem);
-
-    if ( _initialStatus == UIElementStatus::Hidden ) {
-        _elem->visit( [this]( UIElementSPCC _node) {
-            this->rsg.setVisible( _node->Data().getUUIntegerId(), false );
-        } );
-    }
 }
 
 void UIView::add( const UIContainer2d& _container, UIElementStatus _initialStatus ) {
     add( _container.Node(), _initialStatus );
+}
+
+UIElementSP UIView::node( CResourceRef& _key ) {
+    return elements[_key];
+}
+
+UIElementSP UIView::operator()( const std::string& _key ) {
+    return node(_key);
 }
 
 void UIContainer2d::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize ) {
@@ -385,7 +385,7 @@ void UIContainer2d::popCaretX() {
 }
 
 void UIContainer2d::addSeparator( float percScaleY ) {
-    auto childDadeT2 = EF::create<UIElementRT>(PFC{}, UUIDGen::make(), MScale2d{innerPaddedX, 0.0025f*percScaleY},
+    auto childDadeT2 = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), MScale2d{innerPaddedX, 0.0025f*percScaleY},
                                                UIT::separator_h );
 
     node->addChildren( childDadeT2, caret );
@@ -394,17 +394,17 @@ void UIContainer2d::addSeparator( float percScaleY ) {
 
 void UIContainer2d::addLabel( const UIFontText& _text,
                               const MScale2d& lsize, CSSDisplayMode displayMode, const V2f& _pos ) {
-    auto child = EF::create<UIElementRT>(PFC{}, UUIDGen::make(), UIT::label, lsize, _text );
+    auto child = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), UIT::label, lsize, _text );
     node->addChildren( child, caret );
     advanceCaret( displayMode, lsize );
 }
 
-UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& bsize, CSSDisplayMode displayMode,
+UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& _bsize, CSSDisplayMode displayMode,
         UITapAreaType _bt, const V2f& _pos ) {
 
-    auto child = EF::create<UIElementRT>(PFC{}, _cd, bsize, _bt, UIForegroundIcon{_cd.icon} );
+    auto child = EF::create<UIElementRT>(PFC{}, rsg, _cd, _bsize, _bt, UIForegroundIcon{_cd.icon} );
     node->addChildren( child, caret );
-    advanceCaret( displayMode, bsize );
+    advanceCaret( displayMode, _bsize );
     return child;
 }
 
@@ -478,6 +478,6 @@ void UIContainer2d::setPadding( const V2f& _value ) {
     padding = _value;
 }
 
-void UIContainer2d::setVisible( bool _value ) {
-
+V3f UIContainer2d::getSize() const {
+    return size;
 }

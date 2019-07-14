@@ -7,6 +7,7 @@
 #include <memory>
 #include <core/name_policy.hpp>
 #include <core/math/matrix_anim.h>
+#include <core/math/anim.h>
 #include <core/boxable.hpp>
 #include <core/uuidable.hpp>
 #include <core/serialization.hpp>
@@ -87,6 +88,31 @@ public:
     TransformNodeData() {
         mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::MIDENTITY());
     }
+
+    V3fa& PosAnim() {
+        return mTRS.pos;
+    }
+    Quaterniona& RotAnim() {
+        return mTRS.rot;
+    }
+    V3fa& ScaleAnim() {
+        return mTRS.scale;
+    }
+
+    template <typename ...Args>
+    void animMove( Args&& ... args ) {
+        Timeline::play( PosAnim(), (std::forward<Args>(args), ...) );
+    }
+
+    template <typename ...Args>
+    void slide( float _duration, const V3f& _direction, float _amount, Args&& ... args ) {
+        Timeline::play( PosAnim(), (std::forward<Args>(args), ...), KFP<V3f>{_duration, _direction*_amount} );
+    }
+
+    MatrixAnim& TRS() { return mTRS; }
+    [[nodiscard]] const MatrixAnim& TRS() const { return mTRS; }
+    void TRS( const MatrixAnim& val ) { mTRS = val; }
+
 protected:
     MatrixAnim mTRS;
     Matrix4f mLocalTransform = Matrix4f::IDENTITY;
@@ -206,28 +232,6 @@ public:
         pruneRec( this->shared_from_this() );
     }
 
-    V3fa& PosAnim() {
-        return mTRS.pos;
-    }
-    Quaterniona& RotAnim() {
-        return mTRS.rot;
-    }
-    V3fa& ScaleAnim() {
-        return mTRS.scale;
-    }
-    MatrixAnim& TRS() { return mTRS; }
-    const MatrixAnim& TRS() const { return mTRS; }
-    void TRS( const MatrixAnim& val ) { mTRS = val; }
-
-//    void containingAABBRec( JMATH::AABB& _bbox ) const {
-//        auto cr = Boxable::BBox3d();
-//        _bbox.merge( cr );
-//
-//        for ( auto& c : children ) {
-//            c->containingAABBRec( _bbox );
-//        }
-//    }
-//
     JMATH::AABB calcCompleteBBox3dRec() {
         if constexpr ( std::is_same_v<JMATH::AABB, B> ) {
             this->BBox3d(AABB::INVALID);
@@ -246,13 +250,7 @@ public:
             return AABB::INVALID;
         }
     }
-//
-//    JMATH::AABB containingAABB() const {
-//        JMATH::AABB ret = Boxable::BBox3d();
-//        containingAABBRec( ret );
-//        return ret;
-//    }
-//
+
     void calcCompleteBBox3d() {
         if constexpr ( std::is_same_v<B, AABB> ) {
             this->BBox3d(calcCompleteBBox3dRec());
@@ -420,6 +418,55 @@ public:
     void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
 
     uint64_t Tag() const { return tag; }
+
+    void setVisible( bool _value ) {
+        foreach( [_value]( NodeSP _node) {
+            _node->DataRef().setVisible( _value );
+        } );
+    }
+
+#define VisibleCallbackShow AnimUpdateCallback([this](float _at) { if ( _at == 0.0f ) { this->setVisible( true );}})
+#define VisibleCallbackHide AnimEndCallback([this]() {this->setVisible( false );})
+
+    void slideLeftIn( float _duration ) {
+        slide( _duration, V3f::X_AXIS_NEG, this->BBox3d()->calcWidth(), VisibleCallbackShow );
+    }
+    void slideRightIn( float _duration ) {
+        slide( _duration, V3f::X_AXIS, this->BBox3d()->calcWidth(), VisibleCallbackShow );
+    }
+    void slideUpIn( float _duration, float _overrideAmount = 0.0f ) {
+        slide( _duration, V3f::Y_AXIS_NEG, this->BBox3d()->calcHeight(), VisibleCallbackShow );
+    }
+    void slideDownIn( float _duration, float _overrideAmount = 0.0f ) {
+        slide( _duration, V3f::Y_AXIS, this->BBox3d()->calcHeight(), VisibleCallbackShow );
+    }
+
+    void slideLeftOut( float _duration, float _overrideAmount = 0.0f ) {
+        slide( _duration, V3f::ZERO,  this->BBox3d()->calcWidth(), VisibleCallbackHide);
+    }
+    void slideRightOut( float _duration, float _overrideAmount = 0.0f ) {
+        slide( _duration, V3f::X_AXIS,  this->BBox3d()->calcWidth(), VisibleCallbackHide );
+    }
+    void slideUpOut( float _duration, float _overrideAmount = 0.0f ) {
+        slide( _duration, V3f::Y_AXIS_NEG,  this->BBox3d()->calcHeight(), VisibleCallbackHide );
+    }
+    void slideDownOut( float _duration, float _overrideAmount = 0.0f ) {
+        slide( _duration, V3f::Y_AXIS,  this->BBox3d()->calcHeight(), VisibleCallbackHide );
+    }
+
+    void fadeTo( float _duration, float _value ) {
+        foreach( [_duration, _value]( NodeSP _node) {
+            _node->DataRef().fadeTo( _duration, _value );
+        } );
+    }
+
+    void fadeIn( float _duration ) {
+        fadeTo( _duration, 1.0f );
+    }
+    void fadeOut( float _duration ) {
+        fadeTo( _duration, 0.0f );
+    }
+
 private:
 
     template <typename M>

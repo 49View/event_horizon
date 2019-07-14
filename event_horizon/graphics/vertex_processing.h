@@ -3,6 +3,7 @@
 #include <core/uuid.hpp>
 #include <core/uuidcopyable.hpp>
 #include <core/soa_utils.h>
+#include <core/math/anim.h>
 #include <graphics/graphic_constants.h>
 #include <graphics/render_material.hpp>
 
@@ -118,3 +119,34 @@ private:
     std::shared_ptr<AABB>               bbox3d;
     uint64_t mTag = GT_Generic;
 };
+
+template <typename M>
+void parseFader( std::vector<std::shared_ptr<VPList>>& vp, const M& _param ) {
+
+    if constexpr ( std::is_same_v<M, std::shared_ptr<VPList>> ) {
+        if ( _param ) vp.emplace_back( _param );
+    }
+    if constexpr ( std::is_same_v<M, std::vector<std::shared_ptr<VPList>>> ) {
+        std::copy (_param.begin(), _param.end(), std::back_inserter(vp));
+    }
+}
+
+template<typename ...Args>
+void fader( float _duration, float _value, Args&& ...args ) {
+
+    std::vector<std::shared_ptr<VPList>> vplists{};
+
+    ( parseFader( vplists, std::forward<Args>(args)),... );
+
+    Timeline::intermezzo( _duration, 0, AnimUpdateCallback([vplists, _value, _duration](float _elapsed) {
+        for ( auto& vl : vplists ) {
+            if ( _elapsed > 0.0f ) {
+                if ( _value > 0.0f ) {
+                    vl->setMaterialConstantAlpha( min( _value, (_elapsed / _duration) ) );
+                } else {
+                    vl->setMaterialConstantAlpha( max( _value, (1.0f-_value)-(_elapsed / _duration) ) );
+                }
+            }
+        }
+    }) );
+}

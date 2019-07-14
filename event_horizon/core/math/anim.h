@@ -91,7 +91,7 @@ struct AnimUpdateCallback {
     TimelineUpdateGroupCCF operator()() const noexcept {
         return data;
     }
-    TimelineUpdateGroupCCF data;
+    TimelineUpdateGroupCCF data = nullptr;
 };
 
 struct AnimEndCallback {
@@ -118,6 +118,9 @@ struct KeyFramePair {
     T value;
     AnimVelocityType velocityType = AnimVelocityType::Hermite;
 };
+
+template < typename T>
+using KFP = KeyFramePair<T>;
 
 template <typename T>
 class TimelineStream {
@@ -546,17 +549,22 @@ public:
         if constexpr ( std::is_same_v<M, KeyFramePair<SGT>> ) {
             tg->stream.k( { 0.0f, tg->stream.value() } );
             tg->stream.k( _param );
-        } else if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
+        }
+        if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
             for (const auto& elem : _param ) {
                 tg->stream.k( elem );
             }
-        } else if constexpr ( std::is_integral_v<M> ) {
+        }
+        if constexpr ( std::is_integral_v<M> ) {
             tg->FrameTickOffset(_param);
-        } else if constexpr ( std::is_floating_point_v<M> ) {
+        }
+        if constexpr ( std::is_floating_point_v<M> ) {
             tg->StartTimeOffset(_param);
-        } else if constexpr ( std::is_same_v<M, AnimUpdateCallback> ) {
+        }
+        if constexpr ( std::is_same_v<M, AnimUpdateCallback> ) {
             tg->CUF(_param());
-        } else {
+        }
+        if constexpr ( std::is_same_v<M, AnimEndCallback> ) {
             tg->CCF(_param);
         }
     }
