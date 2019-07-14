@@ -54,7 +54,7 @@ MatrixAnim MatrixAnim::clone( const MatrixAnim& _source ) const {
 const Vector3f& MatrixAnim::Pos() const { return pos->value; }
 void MatrixAnim::Pos( const Vector3f& val ) { pos->value = val; }
 
-const Quaternion MatrixAnim::Rot() const { return rot->value; }
+Quaternion MatrixAnim::Rot() const { return rot->value; }
 void MatrixAnim::Rot( const Quaternion& val ) { rot->value = val; }
 
 void MatrixAnim::RotX( const float& val ) { rot->value = Quaternion{Vector3f::X_AXIS*val}; }
@@ -88,4 +88,17 @@ bool MatrixAnim::isAnimating() const {
 
 Vector3f MatrixAnim::Euler() const {
     return rot->value.euler2();
+}
+
+Matrix4f MatrixAnim::transform( const Matrix4f& _sourceMatrix ) const {
+    Matrix4f ret = _sourceMatrix;
+    if ( !rot->isAnimating ) {
+        if ( pos->isAnimating ) ret.translate( pos->value );
+        if ( scale->isAnimating ) {
+            ret.scale( scale->value );
+        }
+    } else {
+        return _sourceMatrix * Matrix4f{ *this };
+    }
+    return ret;
 }

@@ -50,6 +50,9 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
     auto ssBBox = bbox3d->front();
     ssBBox.translate( V2f::Y_AXIS_NEG * ssBBox.height() );
 
+//    rds.matrix->translate( rds.rect.size() * -10.5f );
+//    rds.rect.centerAroundOrigin();
+
     if ( type() == UIT::separator_h() ) {
         defaultBackgroundColor = C4f::WHITE.A(0.4f);
         backgroundVP = this->owner->RR().draw<DRect2dRounded>(getUUIntegerId(), ssBBox, _localHierMat,
@@ -102,7 +105,7 @@ void UIElement::touchedDown() {
 
     touchDownAnimNameScale = Timeline::play( backgroundColor, colDown, AnimUpdateCallback([this](float) {
         if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::diffuseColor, backgroundColor->value.xyz() );
-        if ( foregroundVP ) backgroundVP->setMaterialConstant( UniformNames::alpha, backgroundColor->value.w() );
+        if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::opacity, backgroundColor->value.w() );
     } ));
 
 }
@@ -113,7 +116,7 @@ void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
         return; // nothing to do here
     }
     if ( hasBeenTapped && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
-        status = UIElementStatus::Selected;
+        status = status == UIElementStatus::Selected ? UIElementStatus::Enabled : UIElementStatus::Selected;
     }
     if ( !hasBeenTapped && isTouchUpGroup && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
         status = UIElementStatus::Enabled;
@@ -124,6 +127,8 @@ void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
         Timeline::stop( backgroundColor, touchDownAnimNameScale, color );
         touchDownAnimNameScale = {};
     }
+    if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color.xyz() );
+    if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::opacity, color.w() );
 }
 
 void UIElement::hoover( bool isHoovering ) {
@@ -131,7 +136,6 @@ void UIElement::hoover( bool isHoovering ) {
         auto color = isHoovering ? owner->getHooverColor().xyz() : defaultBackgroundColor.xyz();
         auto alpha = isHoovering ? owner->getHooverColor().w() : defaultBackgroundColor.w();
         backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color );
-//        backgroundVP->setMaterialConstant( UniformNames::alpha, alpha );
         backgroundVP->setMaterialConstant( UniformNames::opacity, alpha );
     }
 }
@@ -139,8 +143,8 @@ void UIElement::hoover( bool isHoovering ) {
 void UIElement::setStatus( UIElementStatus _status ) {
     status = _status;
     auto color = owner->colorFromStatus(status);
+    if ( status == UIElementStatus::Enabled ) color = defaultBackgroundColor;
     backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color.xyz() );
-//    backgroundVP->setMaterialConstant( UniformNames::alpha, color.w() );
     backgroundVP->setMaterialConstant( UniformNames::opacity, color.w() );
 }
 
@@ -158,7 +162,15 @@ bool UIElement::containsActive( const V2f& _point ) const {
 }
 
 void UIElement::singleTap() const {
-    if ( singleTapCallback ) singleTapCallback();
+    if ( type() == UIT::stickyButton() ) {
+        if ( status == UIElementStatus::Selected ) {
+            if ( singleTapCallback ) singleTapCallback();
+        } else {
+            if ( singleTapOffToggleCallback ) singleTapOffToggleCallback();
+        }
+    } else {
+        if ( singleTapCallback ) singleTapCallback();
+    }
 }
 
 void UIElement::setVisible( bool _value ) {
@@ -167,11 +179,13 @@ void UIElement::setVisible( bool _value ) {
 
 void UIElement::fadeTo( float _duration, float _value ) {
     fader( _duration, _value, backgroundVP, foregroundVP );
-    Timeline::intermezzo( _duration, 1, AnimUpdateCallback([this, _value](float _elapsed) {
-        if ( _elapsed == 0.0f ) {
-            setVisible( _value > 0.0f );
+    Timeline::intermezzo( _duration, 1, AnimUpdateCallback([this, _value,_duration](float _elapsed) {
+        if ( _elapsed == 0.0f && _value > 0.0f ) {
+            setVisible( true );
+        } else if ( _elapsed >= _duration && _value == 0.0f ) {
+            setVisible( false );
         }
-    }) );
+    }));
 }
 
 void UIView::foreach( std::function<void(UIElementSP)> f ) {
@@ -207,6 +221,8 @@ void UIView::handleTouchDownEvent( const V2f& _p ) {
     foreach( [&]( UIElementSP n ) {
         if ( n->Data().containsActive( tapS ) ) {
             activeTaps.emplace_back(n);
+            n->DataRef().touchedDown();
+            n->moveDownRight(0.03f, MScale2dXS{0.0005f}());
         }
     } );
     touchDownKeyCached( activeTaps.empty() ? nullptr : activeTaps.back() );
@@ -215,7 +231,9 @@ void UIView::handleTouchDownEvent( const V2f& _p ) {
 void UIView::handleTouchUpEvent( const V2f& _p ) {
 
     if ( !activeTaps.empty() ) {
+        activeTaps[0]->DataRef().touchedUp(true, true);
         activeTaps[0]->Data().singleTap();
+        activeTaps[0]->moveUpLeft(0.03f, 0.0f);
     }
     activeTaps.clear();
     foreach( [&]( UIElementSP n) {
@@ -453,7 +471,7 @@ void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     for ( const auto& i : _cds ) {
-        icontrols[i.key] = addButton( i, bsize, CSSDisplayMode::Inline, UIT::stickyButton );
+        icontrols[i.key] = addButton( i, bsize, CSSDisplayMode::Inline, _uit );
     }
     advanceCaret( CSSDisplayMode::Block, MScale2d{0.0f, bsize().y() + padding.y()} );
     for ( size_t t = 0; t < _cds.size(); t++ ) popCaretX();

@@ -121,6 +121,9 @@ struct ControlDef {
     ControlDef( ControlDefKey  key, ControlDefIconRef  icon,
                 ControlSingleTapCallback  singleTapCallback ) : key(std::move( key )), icon(std::move( icon )),
                                                                       singleTapCallback(std::move( singleTapCallback )) {}
+    ControlDef( ControlDefKey  key, ControlDefIconRef  icon,
+                ControlSingleTapCallback  cbOn, ControlSingleTapCallback  cbOff ) : key(std::move( key )), icon(std::move( icon )),
+                                                                singleTapCallback(std::move( cbOn )), singleTapOffToggleCallback(std::move( cbOff )){}
 
     ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines,
                 ControlSingleTapCallback  singleTapCallback ) : key(std::move( key )), icon(std::move( icon )), textLines(std::move( textLines )),
@@ -142,6 +145,7 @@ struct ControlDef {
     Color4f foreGroundColor = V4f::HUGE_VALUE_NEG;
     Color4f backGroundColor = V4f::HUGE_VALUE_NEG;
     ControlSingleTapCallback singleTapCallback;
+    ControlSingleTapCallback singleTapOffToggleCallback;
 };
 
 using UITS = UIElementStatus;
@@ -188,7 +192,8 @@ private:
     void parseParam( const M& _param ) {
         if constexpr ( std::is_same_v<M, ControlDef > ) {
             key = _param.key;
-            singleTapCallback = _param.singleTapCallback;
+            singleTapCallback           = _param.singleTapCallback;
+            singleTapOffToggleCallback  = _param.singleTapOffToggleCallback;
         }
 
         if constexpr ( std::is_same_v<M, std::string > || is_c_str<M>::value ) {
@@ -316,6 +321,7 @@ private:
     V4fa            backgroundColor;
     C4f             defaultBackgroundColor = C4f::WHITE;
     ControlSingleTapCallback singleTapCallback = nullptr;
+    ControlSingleTapCallback singleTapOffToggleCallback = nullptr;
 };
 
 using UIElementRT       = RecursiveTransformation<UIElement, JMATH::AABB>;

@@ -100,13 +100,18 @@ public:
     }
 
     template <typename ...Args>
-    void animMove( Args&& ... args ) {
-        Timeline::play( PosAnim(), (std::forward<Args>(args), ...) );
+    void animMove( float _duration, const V3f& _pos, Args&& ... args ) {
+        Timeline::play( PosAnim(), (std::forward<Args>(args), ...), KFP<V3f>{_duration, _pos} );
     }
 
     template <typename ...Args>
     void slide( float _duration, const V3f& _direction, float _amount, Args&& ... args ) {
         Timeline::play( PosAnim(), (std::forward<Args>(args), ...), KFP<V3f>{_duration, _direction*_amount} );
+    }
+
+    template <typename ...Args>
+    void scale( float _duration, const V3f& _scale, Args&& ... args ) {
+        Timeline::play( ScaleAnim(), (std::forward<Args>(args), ...), KFP<V3f>{_duration, _scale} );
     }
 
     MatrixAnim& TRS() { return mTRS; }
@@ -216,14 +221,14 @@ public:
     void updateAnim() {
         if ( mTRS.isAnimating() ) {
 //            mLocalTransform = Matrix4f{ mTRS };
-            generateMatrixHierarchy( fatherRootTransform() * Matrix4f{ mTRS } );
+            generateMatrixHierarchy( mTRS.transform(fatherRootTransform()) );
         }
     }
 
     void Father( NodeP val ) { father = val; }
     NodeP Father() { return father; }
     NodeP Father() const { return father; }
-    Matrix4f fatherRootTransform() const {
+    [[nodiscard]] Matrix4f fatherRootTransform() const {
         if ( father == nullptr ) return Matrix4f::IDENTITY;
         return *father->mLocalHierTransform.get();
     }
@@ -467,6 +472,31 @@ public:
         fadeTo( _duration, 0.0f );
     }
 
+    template <typename S>
+    void scaleDown( float _duration, const S& _scale ) {
+        scale( _duration, V3f::ONE * _scale, nullptr );
+    }
+
+    template <typename S>
+    void moveDown( float _duration, const S& _amount ) {
+        animMove( _duration, V3f::Y_AXIS_NEG * _amount, nullptr );
+    }
+
+    template <typename S>
+    void moveUp( float _duration, const S& _amount ) {
+        animMove( _duration, V3f::Y_AXIS * _amount, nullptr );
+    }
+
+    template <typename S>
+    void moveDownRight( float _duration, const S& _amount ) {
+        animMove( _duration, V3f::MASK_Z_OUT * V3f::Y_AXIS_NEG_MASK * _amount, nullptr );
+    }
+
+    template <typename S>
+    void moveUpLeft( float _duration, const S& _amount ) {
+        animMove( _duration, V3f::MASK_Z_OUT * _amount, nullptr );
+    }
+
 private:
 
     template <typename M>
@@ -498,7 +528,7 @@ private:
         Name( _source.Name() );
         this->BBox3d( _source.BBox3dCopy() );
         data = _source.data;
-        _source.TRS().clone(mTRS);
+//        _source.TRS().clone(mTRS);
         mLocalTransform = _source.mLocalTransform;
         mLocalHierTransform = std::make_shared<Matrix4f>(*_source.mLocalHierTransform.get());
     }

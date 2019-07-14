@@ -110,6 +110,7 @@ public:
 	}
 
     void centered( const V2f& _size );
+    void centerAroundOrigin();
 
     float* rawPtr() {
 		return reinterpret_cast<float*>( &mTopLeft[0] );

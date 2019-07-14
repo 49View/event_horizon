@@ -168,3 +168,7 @@ void Rect2f::centered( const V2f& _size ) {
 
     return ret;
 }
+
+void Rect2f::centerAroundOrigin() {
+    centered( size() );
+}
