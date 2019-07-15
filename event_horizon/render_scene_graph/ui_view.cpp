@@ -533,6 +533,7 @@ void UIContainer2d::setButtonSize( const MScale2d& _bs ) {
 
 void UIContainer2d::setPadding( const V2f& _value ) {
     padding = _value;
+    caret = padding;
 }
 
 V3f UIContainer2d::getSize() const {
