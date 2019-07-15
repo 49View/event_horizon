@@ -9,7 +9,7 @@ void main()
 {
     float alphaV = 1.0;
     // alphaV = round((tpos.x * tpos.x - tpos.y) * tpos.z + 0.5f);
-    if ( tpos.z < 0 ) {
+    if ( tpos.z < 0.0 ) {
         vec2 p = tpos.xy;
         // Gradients
         vec2 px = dFdx(p);

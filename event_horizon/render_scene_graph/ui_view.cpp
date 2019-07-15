@@ -97,7 +97,7 @@ void UIElement::touchedDown() {
     if ( status != UIElementStatus::Enabled ) return;
 
     const float downtime = 0.1f;
-    auto targetColor = checkBitWiseFlag(type(), UIT::stickyButton()) ? owner->getSelectedColor() : owner->getPressedDownColor();
+    auto targetColor = owner->getPressedDownColor();
     auto colDown = std::vector<KeyFramePair<C4f>>{
             KeyFramePair{ 0.0f, owner->getEnabledColor() },
             KeyFramePair{ downtime, targetColor }
@@ -110,17 +110,23 @@ void UIElement::touchedDown() {
 
 }
 
-void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
+void UIElement::touchedUp( const V2f& _point ) {
 
     if ( status == UIElementStatus::Fixed ) {
         return; // nothing to do here
     }
-    if ( hasBeenTapped && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
-        status = status == UIElementStatus::Selected ? UIElementStatus::Enabled : UIElementStatus::Selected;
-    }
-    if ( !hasBeenTapped && isTouchUpGroup && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
+    if ( containsActive( _point ) ) {
+        if ( checkBitWiseFlag( type(), UIT::stickyButton())) {
+            status = UIElementStatus::Selected;
+        }
+        if ( checkBitWiseFlag( type(), UIT::toggleButton())) {
+            status = status == UIElementStatus::Selected ? UIElementStatus::Enabled : UIElementStatus::Selected;
+        }
+        singleTap();
+    } else {
         status = UIElementStatus::Enabled;
     }
+
     updateStatus();
 }
 
@@ -157,6 +163,7 @@ bool UIElement::hasActiveStatus() const {
 }
 
 bool UIElement::contains( const V2f& _point ) const {
+    if ( !bVisible ) return false;
     return bbox3dT->containsXY( _point );
 }
 
@@ -168,7 +175,7 @@ bool UIElement::containsActive( const V2f& _point ) const {
 void UIElement::singleTap() const {
     if ( !bVisible ) return;
 
-    if ( type() == UIT::stickyButton() ) {
+    if ( type() == UIT::stickyButton() || type() == UIT::toggleButton() ) {
         if ( status == UIElementStatus::Selected ) {
             singleTapCallback(0);
         } else {
@@ -185,7 +192,7 @@ void UIElement::singleTap() const {
 }
 
 void UIElement::toggle() {
-    if ( type() == UIT::stickyButton() ) {
+    if ( type() == UIT::stickyButton() || type() == UIT::toggleButton() ) {
         if ( status == UIElementStatus::Selected ) {
             status = UIElementStatus::Enabled;
             singleTapOffToggleCallback(0);
@@ -259,22 +266,12 @@ void UIView::handleTouchDownEvent( const V2f& _p ) {
 
 void UIView::handleTouchUpEvent( const V2f& _p ) {
 
-    if ( !activeTaps.empty() ) {
-        activeTaps[0]->DataRef().touchedUp(true, true);
-        activeTaps[0]->Data().singleTap();
-        activeTaps[0]->moveUpLeft(0.03f, 0.0f);
+    V2f tapS = ssOneMinusY(_p);
+    for ( auto& tap : activeTaps ) {
+        tap->DataRef().touchedUp( tapS );
+        tap->moveUpLeft( 0.03f, 0.0f );
     }
     activeTaps.clear();
-    foreach( [&]( UIElementSP n) {
-//        bool touchUpGroup = false;
-//        if ( k == "1" || k == "2" || k == "3" ) {
-//            touchUpGroup = _key == "1" || _key == "2" || _key == "3";
-//        }
-//        if ( k == "5" || k == "6" ) {
-//            touchUpGroup = _key == "5" || _key == "6";
-//        }
-//        n->DataRef().touchedUp( _key == n, touchUpGroup );
-    });
 }
 
 void UIView::touchDownKeyCached( UIElementSP _key ) const {
@@ -356,15 +353,15 @@ void UIView::updateAnim() {
 }
 
 C4f UIView::getEnabledColor() const {
-    return colorScheme.Secondary1(0);
+    return C4f::WHITE.A(0.4f);//colorScheme.Secondary1(0);
 }
 
 C4f UIView::getSelectedColor() const {
-    return colorScheme.Secondary1(3);
+    return C4f::DARK_GRAY.A(0.5f);//colorScheme.Secondary1(3);
 }
 
 C4f UIView::getDisabledColor() const {
-    return C4f::DARK_GRAY.A(0.3f); //colorScheme.Secondary1(4);
+    return C4f::DARK_GRAY.A(0.15f); //colorScheme.Secondary1(4);
 }
 
 C4f UIView::getHooverColor() const {
@@ -372,7 +369,7 @@ C4f UIView::getHooverColor() const {
 }
 
 C4f UIView::getPressedDownColor() const {
-    return colorScheme.Secondary1(3);
+    return colorScheme.Secondary1(2).A(0.65f);
 }
 
 void UIView::addRecursive( UIElementSP _elem ) {
@@ -502,7 +499,7 @@ void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
     for ( const auto& i : _cds ) {
         icontrols[i.key] = addButton( i, bsize, CSSDisplayMode::Inline, _uit );
     }
-    if ( _uit() == UIT::stickyButton() ) {
+    if ( _uit() == UIT::stickyButton() || _uit() == UIT::toggleButton() ) {
         for ( size_t t = 0; t < _cds.size(); t++ ) {
             for ( size_t m = 0; m < _cds.size(); m++ ) {
                 if ( m != t ) {
