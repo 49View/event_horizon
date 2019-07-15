@@ -381,7 +381,9 @@ public:
             frameTickCount = 0;
             frameTickOffset = 0;
             if ( cuf ) cuf( timeElapsed );
-            if ( ccf ) ccf();
+            if ( ccf ) {
+                ccf();
+            }
         } else {
             if ( cuf ) cuf( timeElapsed );
         }

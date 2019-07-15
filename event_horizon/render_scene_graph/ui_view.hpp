@@ -20,8 +20,10 @@ class SceneGraph;
 class RenderOrchestrator;
 
 using ControlDefKey = std::string;
+using ControlTapKey = uint64_t ;
 using ControlDefIconRef = std::string;
-using ControlSingleTapCallback = std::function<void()>;
+using ControlSingleTapCallback = std::function<void(ControlTapKey)>;
+const static auto ControlTapCallbackEmpty = [](ControlTapKey) {};
 
 enum class UIElementStatus {
     Enabled,
@@ -129,23 +131,33 @@ struct ControlDef {
                 ControlSingleTapCallback  singleTapCallback ) : key(std::move( key )), icon(std::move( icon )), textLines(std::move( textLines )),
                                                                       singleTapCallback(std::move( singleTapCallback )) {}
 
-    ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines,
-                const Color4f& foreGroundColor ) : key(std::move( key )), icon(std::move( icon )), textLines(std::move( textLines )),
-                                                   foreGroundColor( foreGroundColor ) {}
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines,
+                const ControlSingleTapCallback& singleTapCallback, const Color4f& tintColor ) : key( key ),
+                                                                                                icon( icon ),
+                                                                                                textLines( textLines ),
+                                                                                                singleTapCallback(
+                                                                                                        singleTapCallback ),
+                                                                                                tintColor(
+                                                                                                        tintColor ) {}
 
-    ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines,
-                const Color4f& foreGroundColor, const Color4f& backGroundColor ) : key(std::move( key )), icon(std::move( icon )),
-                                                                                   textLines(std::move( textLines )),
-                                                                                   foreGroundColor( foreGroundColor ),
-                                                                                   backGroundColor( backGroundColor ) {}
+    ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines,
+                const Color4f& tintColor ) : key( key ), icon( icon ), textLines( textLines ), tintColor( tintColor ) {}
+//    ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines,
+//                const Color4f& _color ) : key(std::move( key )), icon(std::move( icon )), textLines(std::move( textLines )),
+//                                                   tintColor( _color ) {}
+
+//    ControlDef( ControlDefKey  key, ControlDefIconRef  icon, std::vector<UIFontText>  textLines,
+//                const Color4f& foreGroundColor, const Color4f& backGroundColor ) : key(std::move( key )), icon(std::move( icon )),
+//                                                                                   textLines(std::move( textLines )),
+//                                                                                   foreGroundColor( foreGroundColor ),
+//                                                                                   backGroundColor( backGroundColor ) {}
 
     ControlDefKey key;
     ControlDefIconRef icon;
     std::vector<UIFontText> textLines;
-    Color4f foreGroundColor = V4f::HUGE_VALUE_NEG;
-    Color4f backGroundColor = V4f::HUGE_VALUE_NEG;
     ControlSingleTapCallback singleTapCallback;
     ControlSingleTapCallback singleTapOffToggleCallback;
+    Color4f tintColor = C4f::WHITE;
 };
 
 using UITS = UIElementStatus;
@@ -174,6 +186,13 @@ private:
     std::array<C4f, ShadesNum> complementColors;
 };
 
+class UIElement;
+
+using UIElementRT       = RecursiveTransformation<UIElement, JMATH::AABB>;
+using UIElementSP       = std::shared_ptr<UIElementRT>;
+using UIElementSPConst  = std::shared_ptr<const UIElementRT>;
+using UIElementSPCC     = const UIElementSPConst;
+
 class UIElement : public Boxable<JMATH::AABB, BBoxProjection2d>, public UUIDIntegerInc {
 public:
     template <typename ...Args>
@@ -184,7 +203,6 @@ public:
             status = UITS::Fixed;
         }
 
-        foregroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "ForeGroundButtonColor" );
         backgroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "BackGroundButtonColor" );
     }
 private:
@@ -232,6 +250,9 @@ private:
         if constexpr ( std::is_same_v<M, UIForegroundIcon > ) {
             foreground = _param();
         }
+        if constexpr ( std::is_same_v<M, C4f > ) {
+            tintColor = _param;
+        }
         if constexpr ( std::is_pointer_v<M> ) {
             owner = _param;
         }
@@ -239,31 +260,31 @@ private:
 
 public:
 
-    uint64_t Type() const {
+    [[nodiscard]] uint64_t Type() const {
         return type();
     }
 
-    std::string Key() const {
+    [[nodiscard]] std::string Key() const {
         return key;
     }
 
-    Rect2f Area() const {
+    [[nodiscard]] Rect2f Area() const {
         return bbox3d->topDown();
     }
 
-    UIElementStatus Status() const {
+    [[nodiscard]] UIElementStatus Status() const {
         return status;
     }
 
-    const ResourceRef& FontRef() const {
+    [[nodiscard]] const ResourceRef& FontRef() const {
         return fontRef;
     }
 
-    const std::string& Text() const {
+    [[nodiscard]] const std::string& Text() const {
         return text;
     }
 
-    const std::string& Foreground() const {
+    [[nodiscard]] const std::string& Foreground() const {
         return foreground;
     }
 
@@ -276,9 +297,10 @@ public:
     }
 
     void setVisible( bool _value );
-
+    void toggle();
     void fadeTo( float _duration, float _value );
 
+    void insertGroupElement( UIElementSP _elem );
     [[nodiscard]] bool contains( const V2f& _point ) const;
     [[nodiscard]] bool containsActive( const V2f& _point ) const;
     [[nodiscard]] bool hasActiveStatus() const;
@@ -294,11 +316,15 @@ public:
     void singleTap() const;
 
 private:
+    void updateStatus();
+
+private:
     RenderOrchestrator& rsg;
 
     std::string     key;
     UITapAreaType   type;
     UIElementStatus status = UIElementStatus::Enabled;
+    bool            bVisible = true;
     const ::Font*   font = nullptr;
     std::string     fontRef;
     std::string     text;
@@ -309,25 +335,19 @@ private:
     std::string     foreground;
 
     UIView*         owner = nullptr;
+    std::vector<UIElementSP> groupElements;
     std::string     background;
-    std::string     touchDownAnimNamePos;
     std::string     touchDownAnimNameScale;
     VPListSP        foregroundVP;
     VPListSP        backgroundVP;
     VPListSP        shadowVP;
-    MatrixAnim      foregroundAnim;
     MatrixAnim      backgroundAnim;
-    V4fa            foregroundColor;
     V4fa            backgroundColor;
     C4f             defaultBackgroundColor = C4f::WHITE;
-    ControlSingleTapCallback singleTapCallback = nullptr;
-    ControlSingleTapCallback singleTapOffToggleCallback = nullptr;
+    C4f             tintColor = C4f::WHITE;
+    ControlSingleTapCallback singleTapCallback = ControlTapCallbackEmpty;
+    ControlSingleTapCallback singleTapOffToggleCallback = ControlTapCallbackEmpty;
 };
-
-using UIElementRT       = RecursiveTransformation<UIElement, JMATH::AABB>;
-using UIElementSP       = std::shared_ptr<UIElementRT>;
-using UIElementSPConst  = std::shared_ptr<const UIElementRT>;
-using UIElementSPCC     = const UIElementSPConst;
 
 enum class UICheckActiveOnly {
     False,

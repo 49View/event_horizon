@@ -65,7 +65,7 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
         backgroundVP = this->owner->RR().draw<DRect2dRounded>(getUUIntegerId(), ssBBox, _localHierMat, defaultBackgroundColor);
     }
     if ( !foreground.empty() && text.empty() ) {
-        foregroundVP = this->owner->RR().draw<DRect2d>( getUUIntegerId(), ssBBox, _localHierMat, RDSImage{foreground} );
+        foregroundVP = this->owner->RR().draw<DRect2d>( getUUIntegerId(), ssBBox, _localHierMat, RDSImage{foreground}, tintColor );
     }
     if ( !text.empty() ) {
         foregroundVP = this->owner->RR().draw<DText2d>( getUUIntegerId(),
@@ -121,14 +121,7 @@ void UIElement::touchedUp( bool hasBeenTapped, bool isTouchUpGroup ) {
     if ( !hasBeenTapped && isTouchUpGroup && checkBitWiseFlag(type(), UIT::stickyButton()) ) {
         status = UIElementStatus::Enabled;
     }
-    setStatus( status );
-    auto color = owner->colorFromStatus(status);
-    if ( !touchDownAnimNameScale.empty() ) {
-        Timeline::stop( backgroundColor, touchDownAnimNameScale, color );
-        touchDownAnimNameScale = {};
-    }
-    if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color.xyz() );
-    if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::opacity, color.w() );
+    updateStatus();
 }
 
 void UIElement::hoover( bool isHoovering ) {
@@ -140,6 +133,17 @@ void UIElement::hoover( bool isHoovering ) {
     }
 }
 
+void UIElement::updateStatus() {
+    setStatus( status );
+    auto color = owner->colorFromStatus(status);
+    if ( !touchDownAnimNameScale.empty() ) {
+        Timeline::stop( backgroundColor, touchDownAnimNameScale, color );
+        touchDownAnimNameScale = {};
+    }
+    if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::diffuseColor, color.xyz() );
+    if ( backgroundVP ) backgroundVP->setMaterialConstant( UniformNames::opacity, color.w() );
+}
+
 void UIElement::setStatus( UIElementStatus _status ) {
     status = _status;
     auto color = owner->colorFromStatus(status);
@@ -149,7 +153,7 @@ void UIElement::setStatus( UIElementStatus _status ) {
 }
 
 bool UIElement::hasActiveStatus() const {
-    return !( status == UIElementStatus::Fixed || status == UIElementStatus::Hidden || status == UIElementStatus::Disabled );
+    return !( !bVisible || status == UIElementStatus::Fixed || status == UIElementStatus::Hidden || status == UIElementStatus::Disabled );
 }
 
 bool UIElement::contains( const V2f& _point ) const {
@@ -162,18 +166,39 @@ bool UIElement::containsActive( const V2f& _point ) const {
 }
 
 void UIElement::singleTap() const {
+    if ( !bVisible ) return;
+
     if ( type() == UIT::stickyButton() ) {
         if ( status == UIElementStatus::Selected ) {
-            if ( singleTapCallback ) singleTapCallback();
+            singleTapCallback(0);
         } else {
-            if ( singleTapOffToggleCallback ) singleTapOffToggleCallback();
+           singleTapOffToggleCallback(0);
+        }
+        for ( auto& groupElem : groupElements ) {
+            if ( groupElem->DataRef().Status() == UIElementStatus::Selected ) {
+                groupElem->DataRef().toggle();
+            }
         }
     } else {
-        if ( singleTapCallback ) singleTapCallback();
+        singleTapCallback(0);
+    }
+}
+
+void UIElement::toggle() {
+    if ( type() == UIT::stickyButton() ) {
+        if ( status == UIElementStatus::Selected ) {
+            status = UIElementStatus::Enabled;
+            singleTapOffToggleCallback(0);
+        } else {
+            singleTapCallback(0);
+            status = UIElementStatus::Selected;
+        }
+        updateStatus();
     }
 }
 
 void UIElement::setVisible( bool _value ) {
+    bVisible = _value;
     rsg.setVisible( getUUIntegerId(), _value );
 }
 
@@ -186,6 +211,10 @@ void UIElement::fadeTo( float _duration, float _value ) {
             setVisible( false );
         }
     }));
+}
+
+void UIElement::insertGroupElement( UIElementSP _elem ) {
+    groupElements.emplace_back( _elem );
 }
 
 void UIView::foreach( std::function<void(UIElementSP)> f ) {
@@ -420,7 +449,7 @@ void UIContainer2d::addLabel( const UIFontText& _text,
 UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& _bsize, CSSDisplayMode displayMode,
         UITapAreaType _bt, const V2f& _pos ) {
 
-    auto child = EF::create<UIElementRT>(PFC{}, rsg, _cd, _bsize, _bt, UIForegroundIcon{_cd.icon} );
+    auto child = EF::create<UIElementRT>(PFC{}, rsg, _cd, _bsize, _bt, UIForegroundIcon{_cd.icon}, _cd.tintColor );
     node->addChildren( child, caret );
     advanceCaret( displayMode, _bsize );
     return child;
@@ -435,8 +464,8 @@ void UIContainer2d::addListEntry( const ControlDef& _cd ) {
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     float totalTextHeight = 0.0f;
     for ( const auto& ltext : _cd.textLines ) totalTextHeight += ltext.height + (-padding.y());
-    MScale2d bsize{ totalTextHeight, totalTextHeight };
-    icontrols[_cd.key] = addButton( _cd, bsize, CSSDisplayMode::Inline );
+    MScale2d lbsize{ totalTextHeight, totalTextHeight };
+    icontrols[_cd.key] = addButton( _cd, lbsize, CSSDisplayMode::Inline );
     for ( const auto& ltext : _cd.textLines ) {
         auto lsize = MScale2d{innerPaddedX, ltext.height };
         addLabel( ltext, lsize, CSSDisplayMode::Block );
@@ -449,9 +478,9 @@ void UIContainer2d::addListEntry( const ControlDef& _cd ) {
 void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine ) {
     float totalTextHeight = 0.0f;
     for ( const auto& ltext : _cd.textLines ) totalTextHeight += ltext.height + (-padding.y());
-    MScale2d bsize{ totalTextHeight, totalTextHeight };
+    MScale2d lbsize{ totalTextHeight, totalTextHeight };
     auto oldCaret = caret;
-    icontrols[_cd.key] = addButton( _cd, bsize, CSSDisplayMode::Inline );
+    icontrols[_cd.key] = addButton( _cd, lbsize, CSSDisplayMode::Inline );
     for ( const auto& ltext : _cd.textLines ) {
         auto lsize = MScale2d{innerPaddedX, ltext.height };
         addLabel( ltext, lsize, CSSDisplayMode::Block );
@@ -473,6 +502,16 @@ void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
     for ( const auto& i : _cds ) {
         icontrols[i.key] = addButton( i, bsize, CSSDisplayMode::Inline, _uit );
     }
+    if ( _uit() == UIT::stickyButton() ) {
+        for ( size_t t = 0; t < _cds.size(); t++ ) {
+            for ( size_t m = 0; m < _cds.size(); m++ ) {
+                if ( m != t ) {
+                    icontrols[_cds[m].key]->DataRef().insertGroupElement(icontrols[_cds[t].key]);
+                }
+            }
+        }
+    }
+
     advanceCaret( CSSDisplayMode::Block, MScale2d{0.0f, bsize().y() + padding.y()} );
     for ( size_t t = 0; t < _cds.size(); t++ ) popCaretX();
 
