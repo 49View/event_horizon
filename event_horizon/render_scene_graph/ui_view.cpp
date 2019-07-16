@@ -451,7 +451,9 @@ void UIContainer2d::addLabel( const UIFontText& _text,
     fsize.setY( _text.height );
     auto child = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), UIT::label, MScale2d{fsize}, _text );
 //    child->BBox3d( V2f::ZERO, fsize );
-    node->addChildren( child, caret );
+    auto tpos = caret;
+    if ( lsize().x() != 0.0f ) tpos.setX( (lsize().x() - fsize.x()*0.5f) );
+    node->addChildren( child, tpos );
     advanceCaret( displayMode, MScale2d{fsize} );
 }
 
