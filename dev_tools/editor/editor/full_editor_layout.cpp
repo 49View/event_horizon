@@ -42,7 +42,7 @@ void EditorBackEnd::activateImpl() {
 //    sg.load<Geom>( "bed", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
-    sg.load<Geom>( "lauter,selije", [this](HttpResouceCBSign key) {
+    sg.load<Geom>( "lauter,selije,bedside", [this](HttpResouceCBSign key) {
         sg.GB<GT::Asset>( key );
     } );
 
