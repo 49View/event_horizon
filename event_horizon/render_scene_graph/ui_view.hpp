@@ -344,7 +344,8 @@ public:
     void loadResource( std::shared_ptr<Matrix4f> _localHierMat );
     void hoover( bool isHoovering );
     void setStatus( UIElementStatus _status );
-    void singleTap() const;
+    void singleTap();
+    void toggleSelected();
 
 private:
     void updateStatus();

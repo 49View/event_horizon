@@ -172,7 +172,7 @@ bool UIElement::containsActive( const V2f& _point ) const {
     return bbox3dT->containsXY( _point );
 }
 
-void UIElement::singleTap() const {
+void UIElement::singleTap() {
     if ( !bVisible ) return;
 
     if ( type() == UIT::stickyButton() || type() == UIT::toggleButton() ) {
@@ -181,13 +181,17 @@ void UIElement::singleTap() const {
         } else {
            singleTapOffToggleCallback(0);
         }
-        for ( auto& groupElem : groupElements ) {
-            if ( groupElem->DataRef().Status() == UIElementStatus::Selected ) {
-                groupElem->DataRef().toggle();
-            }
-        }
+        toggleSelected();
     } else {
         singleTapCallback(0);
+    }
+}
+
+void UIElement::toggleSelected() {
+    for ( auto& groupElem : groupElements ) {
+        if ( groupElem->DataRef().Status() == UIElementStatus::Selected ) {
+            groupElem->DataRef().toggle();
+        }
     }
 }
 
