@@ -394,7 +394,7 @@ public:
                                                                                colorScheme( cs ) {}
 
     void add( UIElementSP _elem, UIElementStatus _initialStatus = UIElementStatus::Enabled );
-    void add( const UIContainer2d& _container, UIElementStatus _initialStatus = UIElementStatus::Enabled );
+    void add( const MPos2d& _at, UIContainer2d& _container, UIElementStatus _initialStatus = UIElementStatus::Enabled );
 
     UIElementSP operator()( CResourceRef _key );
 
@@ -442,12 +442,10 @@ private:
 
 class UIContainer2d {
 public:
-    template<typename S>
     UIContainer2d( RenderOrchestrator& _rsg,
-                   CResourceRef _name, const MPos2d& _pos, const S& _size ) : rsg( _rsg ), pos( _pos ), size( _size()) {
-        node = EF::create<UIElementRT>( PFC{}, rsg, UUIDGen::make(), pos, _size, UIT::background );
+                   CResourceRef _name ) : rsg( _rsg ) {
+        node = EF::create<UIElementRT>( PFC{}, rsg, UUIDGen::make(), pos, UIT::background );
         node->Name( _name );
-        innerPaddedX = size.x() - ( padding.x() * 2.0f );
         caret = padding;
         wholeLineSize = MScale2d{ innerPaddedX, -padding.y() };
     }
@@ -457,7 +455,7 @@ public:
     void addTitle( const UIFontText& _text );
     void addListEntry( const ControlDef& _cd );
     void addListEntryGrid( const ControlDef& _cd, bool _newLine = false );
-    void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds );
+    void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds, bool addSep = true );
     void popCaretX();
 
     [[nodiscard]] UIElementSP Node() const { return node; };
@@ -465,6 +463,7 @@ public:
     void setPadding( const V2f& _value );
     [[nodiscard]] V3f getSize() const;
 
+    void finalize( const MPos2d& _at );
 private:
     void advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize );
     void addSeparator( float percScaleY = 1.0f );
@@ -478,14 +477,16 @@ private:
 
     MPos2d pos;
     V2f padding{ 0.02f, -0.01f };
-    V3f size;
+    V3f size = V3f::ONE;
     UIElementSP node;
     MScale2d bsize{ 0.07f, 0.07f };
 
     std::unordered_map<std::string, UIElementSP> icontrols;
     float innerPaddedX = 0.0f;
     V2f caret{ V2f::ZERO };
+    V2f boundaries{ V2f::ZERO };
     std::vector<V2f> caretQueue;
+    std::vector<UIElementSP> wholeLiners;
     MScale2d wholeLineSize{ 0.0f, 0.0f };
 };
 

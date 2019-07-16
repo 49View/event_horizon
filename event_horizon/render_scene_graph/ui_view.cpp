@@ -6,6 +6,7 @@
 
 #include <core/math/anim.h>
 #include <core/descriptors/uniform_names.h>
+#include <core/font_utils.hpp>
 #include <poly/scene_graph.h>
 #include <graphics/renderer.h>
 #include <render_scene_graph/render_orchestrator.h>
@@ -393,7 +394,8 @@ void UIView::add( UIElementSP _elem, UIElementStatus _initialStatus ) {
     elements.emplace( _elem->Name(), _elem);
 }
 
-void UIView::add( const UIContainer2d& _container, UIElementStatus _initialStatus ) {
+void UIView::add( const MPos2d& _at, UIContainer2d& _container, UIElementStatus _initialStatus ) {
+    _container.finalize(_at);
     add( _container.Node(), _initialStatus );
 }
 
@@ -409,10 +411,13 @@ void UIContainer2d::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _
 
     if ( _displayMode == CSSDisplayMode::Block ) {
         caret -= V2f{ 0.0f, _elemSize().y() - padding.y()};
+        float elemS = _elemSize().x() == 0.0f ? 0.0f : _elemSize().x() + padding.x();
+        boundaries = max(boundaries, { caret.x() + elemS, -caret.y()} );
     }
     if ( _displayMode == CSSDisplayMode::Inline ) {
         caretQueue.push_back( caret );
         caret += V2f{ padding.x() + _elemSize().x(), 0.0f };
+        boundaries = max(boundaries, { caret.x() - padding.x(), -caret.y() + _elemSize().y()} );
     }
 
 }
@@ -436,15 +441,18 @@ void UIContainer2d::addSeparator( float percScaleY ) {
     auto childDadeT2 = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), MScale2d{innerPaddedX, 0.0025f*percScaleY},
                                                UIT::separator_h );
 
-    node->addChildren( childDadeT2, caret );
+    wholeLiners.push_back( node->addChildren( childDadeT2, caret ) );
     advanceCaret( CSSDisplayMode::Block, MScale2d{ innerPaddedX, padding.y() } );
 }
 
 void UIContainer2d::addLabel( const UIFontText& _text,
                               const MScale2d& lsize, CSSDisplayMode displayMode, const V2f& _pos ) {
-    auto child = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), UIT::label, lsize, _text );
+    auto fsize = FontUtils::measure( _text.text, rsg.SG().get<Font>(_text.fontRef).get(), _text.height ).size();
+    fsize.setY( _text.height );
+    auto child = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), UIT::label, MScale2d{fsize}, _text );
+//    child->BBox3d( V2f::ZERO, fsize );
     node->addChildren( child, caret );
-    advanceCaret( displayMode, lsize );
+    advanceCaret( displayMode, MScale2d{fsize} );
 }
 
 UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& _bsize, CSSDisplayMode displayMode,
@@ -497,7 +505,7 @@ void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine ) {
 }
 
 void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
-                                        const std::vector<ControlDef>& _cds ) {
+                                        const std::vector<ControlDef>& _cds, bool addSep ) {
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     for ( const auto& i : _cds ) {
@@ -516,16 +524,20 @@ void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
     advanceCaret( CSSDisplayMode::Block, MScale2d{0.0f, bsize().y() + padding.y()} );
     for ( size_t t = 0; t < _cds.size(); t++ ) popCaretX();
 
+    float xt = padding.x();
     for ( const auto& cd : _cds ) {
         for ( const auto& i : cd.textLines ) {
-            MScale2d lsize{ bsize().x(), i.height };
+            MScale2d lsize{ xt + bsize().x()*0.5f, i.height };
             addLabel( i, lsize, CSSDisplayMode::Inline );
         }
+        xt += padding.x() + bsize().x();
     }
     for ( const auto& cd : _cds ) if ( !cd.textLines.empty() ) popCaretX();
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
-    addSeparator( 0.5f );
+    if ( addSep ) {
+        addSeparator( 0.5f );
+    }
 }
 
 void UIContainer2d::setButtonSize( const MScale2d& _bs ) {
@@ -539,4 +551,16 @@ void UIContainer2d::setPadding( const V2f& _value ) {
 
 V3f UIContainer2d::getSize() const {
     return size;
+}
+
+void UIContainer2d::finalize( const MPos2d& _at ) {
+    auto fakeAA = AABB::MIDENTITY();
+    fakeAA.scaleX(boundaries.x());
+    fakeAA.scaleY(boundaries.y() );
+    innerPaddedX = boundaries.x() - ( padding.x() * 2.0f );
+    for ( auto& wle : wholeLiners ) {
+        wle->DataRef().BBox3d()->setMaxPoint(V3f{innerPaddedX, wle->DataRef().BBox3d()->maxPoint().y(), 0.0f} );
+    }
+    Node()->DataRef().BBox3d( fakeAA );
+    Node()->updateTransform( _at() );
 }
