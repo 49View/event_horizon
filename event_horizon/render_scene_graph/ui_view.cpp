@@ -486,7 +486,7 @@ void UIContainer2d::addListEntry( const ControlDef& _cd ) {
     addSeparator( 0.5f );
 }
 
-void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine ) {
+void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine, bool _lastOne ) {
     float totalTextHeight = 0.0f;
     for ( const auto& ltext : _cd.textLines ) totalTextHeight += ltext.height + (-padding.y());
     MScale2d lbsize{ totalTextHeight, totalTextHeight };
@@ -497,7 +497,7 @@ void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine ) {
         addLabel( ltext, lsize, CSSDisplayMode::Block );
     }
     caret = oldCaret;
-    if ( !_newLine ) {
+    if ( !_newLine && !_lastOne ) {
         advanceCaret( CSSDisplayMode::Inline, MScale2d{0.30f, 0.0f} );
     } else {
         caret.setX( padding.x() );

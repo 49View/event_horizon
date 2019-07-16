@@ -454,7 +454,7 @@ public:
     void addEmptyCaretNewLine();
     void addTitle( const UIFontText& _text );
     void addListEntry( const ControlDef& _cd );
-    void addListEntryGrid( const ControlDef& _cd, bool _newLine = false );
+    void addListEntryGrid( const ControlDef& _cd, bool _newLine = false, bool _lastOne = false );
     void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds, bool addSep = true );
     void popCaretX();
 
