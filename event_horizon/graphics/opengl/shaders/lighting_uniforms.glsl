@@ -15,5 +15,6 @@ layout( std140 ) uniform LightingUniforms {
     vec4 u_timeOfTheDay;
     int  u_numPointLights;
     vec4 u_hdrExposures;
+    vec4 u_shadowParameters;
     mat3 shLightCoeffs;
 };

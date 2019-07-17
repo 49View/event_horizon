@@ -27,6 +27,7 @@ LightManager::LightManager() {
     mLigthingUniform->setUBOStructure( UniformNames::timeOfTheDay, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::numPointLights, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::hdrExposures, 16 );
+    mLigthingUniform->setUBOStructure( UniformNames::shadowParameters, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::shLightCoeffs, 48 );
 }
 
@@ -129,6 +130,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     mLigthingUniform->setUBOData( UniformNames::mvpMatrixDepthBias, smm->ShadowMapMVPBias( true ));
     mLigthingUniform->setUBOData( UniformNames::mvpShadowMap, smm->ShadowMapMVP() );
     mLigthingUniform->setUBOData( UniformNames::hdrExposures, hdrExposures );
+    mLigthingUniform->setUBOData( UniformNames::shadowParameters, shadowParameters );
     mLigthingUniform->setUBOData( UniformNames::shLightCoeffs, Matrix3f( SSH.LightCoeffs()) );
 }
 
@@ -138,5 +140,9 @@ void LightManager::setUniforms_r() {
 
 void LightManager::update( float /*timeStamp*/ ) {
 //	setLightsIntensity( 1.0f - SB.GoldenHour() );
+}
+
+void LightManager::setShadowOverBurnCofficient( float _overBurn ) {
+    shadowParameters[1] = _overBurn;
 }
 

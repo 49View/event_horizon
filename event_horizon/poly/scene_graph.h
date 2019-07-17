@@ -183,6 +183,8 @@ public:
     ResourceRef addGeom          ( const ResourceRef& _key,       GeomSP         _res, HttpResouceCB _ccf = nullptr );
     void addResources( const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
 
+    ResourceRef addMaterialIM    ( const ResourceRef& _key, const Material     & _res );
+
     static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
         SceneGraph::genericSceneCallback.emplace( _key, std::move(_value) );
     }

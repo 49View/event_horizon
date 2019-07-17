@@ -112,6 +112,7 @@ public:
 	void setUniforms_r();
 	void generateUBO( std::shared_ptr<ShaderManager> sm );
 	void update( float timeStamp );
+	void setShadowOverBurnCofficient( float _overBurn );
 private:
 	bool mbGlobalOnOffSwitch;
 	std::vector<DirectionalLight> mDirectionalLights;
@@ -123,6 +124,7 @@ private:
 
 	int mMaxLights = 16;
     V4f hdrExposures = V4f::WHITE;
+    V4f shadowParameters = V4f{0.001f, 1.0f, 1.0f, 1.0f};
 	//	DataVisualizerWindow* dvWindow;
 };
 

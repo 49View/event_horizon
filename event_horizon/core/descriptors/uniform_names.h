@@ -26,6 +26,7 @@ namespace UniformNames {
 	const std::string lightType = "u_lightType";
 	const std::string numPointLights = "u_numPointLights";
 	const std::string hdrExposures = "u_hdrExposures";
+	const std::string shadowParameters = "u_shadowParameters";
 
 	const std::string deltaAnimTime = "u_deltaAnimTime";
 

@@ -257,6 +257,7 @@ ResourceRef SceneGraph::addRawImage      ( const ResourceRef& _key, const RawIma
     return _key;
 }
 ResourceRef SceneGraph::addMaterial      ( const ResourceRef& _key, const Material     & _res, HttpResouceCB _ccf ) { B<MB> (_key).addDF( _res, _ccf ); return _key; }
+ResourceRef SceneGraph::addMaterialIM    ( const ResourceRef& _key, const Material     & _res ) { B<MB> (_key).addIM( _res ); return _key; }
 ResourceRef SceneGraph::addFont          ( const ResourceRef& _key, const Font         & _res, HttpResouceCB _ccf ) { B<FB> (_key).addDF( _res, _ccf ); return _key; }
 ResourceRef SceneGraph::addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpResouceCB _ccf ) { B<PB> (_key).addDF( _res, _ccf ); return _key; }
 ResourceRef SceneGraph::addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf ) { B<MCB>(_key).addDF( _res, _ccf ); return _key; }
