@@ -113,6 +113,7 @@ public:
 	void generateUBO( std::shared_ptr<ShaderManager> sm );
 	void update( float timeStamp );
 	void setShadowOverBurnCofficient( float _overBurn );
+    void setShadowZFightCofficient( float _value );
 private:
 	bool mbGlobalOnOffSwitch;
 	std::vector<DirectionalLight> mDirectionalLights;

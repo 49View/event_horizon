@@ -146,3 +146,6 @@ void LightManager::setShadowOverBurnCofficient( float _overBurn ) {
     shadowParameters[1] = _overBurn;
 }
 
+void LightManager::setShadowZFightCofficient( float _value ) {
+    shadowParameters[0] = _value;
+}

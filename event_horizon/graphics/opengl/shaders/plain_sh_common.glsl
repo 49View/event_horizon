@@ -203,8 +203,8 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 Lo = vec3( 0.0 );
 
-    // vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
-    // Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance*0.0 );
+    vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance );
 
     // single point light 
     for ( int i = 0; i < u_numPointLights; i++ ) {
@@ -227,8 +227,10 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float visibility = 0.0;
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     float nlAngle = clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
-    v_shadowmap_coord3Biases.z -= 0.001;// * tan(acos(nlAngle));
-    visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * 20.0;
+    // u_shadowParameters[0] == depth value z offset to avoid horrible aliasing
+    // u_shadowParameters[1] == shadowOverBurn coefficient 
+    v_shadowmap_coord3Biases.z -= u_shadowParameters[0] ;
+    visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1] * tan(acos(1.0-nlAngle));
 
     // for ( int i = 0; i < 4; i++ ) {
     //     int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;
@@ -264,7 +266,7 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = Lo + ((kD * diffuseV + specular) * ao ) * (visibility+diffuseV*2.0);
+vec3 ambient = Lo + ((kD * diffuseV + specular) * ao ) * (visibility+diffuseV);
 #else 
 vec3 diffuseV = Lo * albedo;// * aoLightmapColor;
 vec3 ambient = kD * diffuseV * ao;// * visibility;

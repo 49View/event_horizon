@@ -217,7 +217,7 @@ void SunBuilder::setCurrentLocation( std::string locationHint ) {
 
 V3f SunBuilder::GoldenHourColor() const {
 	ASSERT( GoldenHour() >= 0.0f && GoldenHour() <= 1.0f );
-	const float sunK = 10.0f;
+	const float sunK = 1.0f;
 	float sunPower = mSunPosition.altitudeRad > 0.0f ? ((mSunPosition.altitudeRad+0.1f) / M_PI_2) * sunK : 1.0f;
     auto gdl = static_cast<size_t>(goldenHourGradient->width - 1);
 	auto index = gdl - static_cast<size_t>(GoldenHour() * gdl);
