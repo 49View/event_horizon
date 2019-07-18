@@ -11,6 +11,7 @@ const broadcastRoute = require("./routes/broadcastRoute");
 const usersRoute = require("./routes/usersRoute");
 const tokenRoute = require("./routes/tokenRoute");
 const fsRoute = require("./routes/fsRoute");
+const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
 const projectController = require("./controllers/projectController");
 const cryptoController = require("./controllers/cryptoController");

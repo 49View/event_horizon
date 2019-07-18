@@ -43,7 +43,6 @@ router.get("/:group/:tags", async (req, res, next) => {
     const tags = req.params.tags.split(",");
     const project = req.user.project;
     //Check existing entity for use project (or public)
-    console.log(group, tags, project);
     const foundEntities = await entityController.getEntitiesByProjectGroupTags(
       project,
       group,

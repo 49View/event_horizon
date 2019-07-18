@@ -64,10 +64,10 @@ const createEntityFromMetadata = async (project, metadata) => {
       // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
     }
 
-    cleanMetadata.thumb = await thumbFromContent(
-      content,
-      groupThumbnailCalcRule(group)
-    );
+    // cleanMetadata.thumb = await thumbFromContent(
+    //   content,
+    //   groupThumbnailCalcRule(group)
+    // );
 
     // Hashing of content
     cleanMetadata.hash = md5(content);
@@ -262,6 +262,7 @@ const updateById = async (entityId, updatedEntity) => {
 const gtr_dep0 = "dep0";
 const gtr_content = "content";
 const gtr_content_vector = "content_vector";
+const gtr_content_default = "content_default";
 
 const groupThumbnailCalcRule = group => {
   let contentType = null;
@@ -271,6 +272,8 @@ const groupThumbnailCalcRule = group => {
     contentType = gtr_content;
   } else if (group === "profile") {
     contentType = gtr_content_vector;
+  } else if (group === "geom") {
+    contentType = gtr_content_default;
   }
   return contentType;
 };
@@ -279,15 +282,18 @@ const groupThumbnailSourceContent = async (entity, gtr) => {
   try {
     if (gtr === gtr_content || gtr === gtr_content_vector) {
       return await getEntityContent(entity._id, entity.project);
-    }
-    if (gtr === gtr_dep0) {
+    } else if (gtr === gtr_dep0) {
       for (element of entity.metadata.deps) {
         if (element.key === "image") {
-          const dep0Entity = await getEntityByHash(element.value[0]);
-          console.log(dep0Entity);
+          const dep0Entity = await getEntityByHash(
+            element.value[0],
+            entity.project
+          );
           return await getEntityContent(dep0Entity._id, dep0Entity.project);
         }
       }
+    } else if (gtr === gtr_content_default) {
+      return "";
     }
   } catch (error) {
     console.log("groupThumbnailSourceContent failed. Reason: " + error);
@@ -428,9 +434,20 @@ const getEntitiesByProjectGroupTags = async (
             $or: [{ project: project }, { isPublic: true }]
           },
           {
-            "metadata.tags": {
-              $all: tags
-            }
+            $or: [
+              {
+                "metadata.tags": {
+                  $all: tags
+                }
+              },
+              { "metadata.name": tags[0] },
+              {
+                _id:
+                  tags[0].length == 12 || tags[0].length == 24
+                    ? mongoose.Types.ObjectId(tags[0])
+                    : "DDDDDDDDDDDD"
+              }
+            ]
           }
         ]
       }

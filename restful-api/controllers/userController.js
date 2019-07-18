@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 const userModel = require("../models/user");
 const userRoleModel = require("../models/user_role");
+const userStateModel = require("../models/user_state");
 const asyncModelOperations = require("../assistants/asyncModelOperations");
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -277,4 +278,25 @@ exports.setDefaultUserProject = async userId => {
 
 exports.addRolesForProject = async (project, email, roles) => {
   return await addRolesForProject(project, email, roles);
+};
+
+exports.setCurrentPortalEntity = async (user, entity) => {
+  try {
+    await userStateModel.findOneAndUpdate(
+      { user_id: user._id },
+      { user_id: user._id, entity: entity, date: new Date() },
+      { upsert: true }
+    );
+  } catch (error) {
+    console.log("ERROR setCurrentPortalEntity: ", error);
+  }
+};
+
+exports.getCurrentPortalEntity = async (user, entity) => {
+  try {
+    return await userStateModel.findOne({ user_id: user._id });
+  } catch (error) {
+    console.log("ERROR getCurrentPortalEntity: ", error);
+    return null;
+  }
 };
