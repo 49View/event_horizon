@@ -43,6 +43,8 @@ jobs:
     steps:
       - checkout
       - run: >
+          git lfs install
+      - run: >
           git lfs pull
       - run: *s3utils
       - restore_cache:
