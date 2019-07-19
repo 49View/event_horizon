@@ -15,6 +15,7 @@
 #include <core/math/vector_util.hpp>
 #include <core/lightmap_exchange_format.h>
 #include <graphics/lightmap_manager.hpp>
+#include <graphics/light_manager.h>
 
 scene_t scene{ 0 };
 
@@ -31,15 +32,17 @@ void EditorBackEnd::activateImpl() {
 
     rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural } );
     rsg.useSkybox( false );
+    rsg.RR().LM()->setShadowZFightCofficient(0.02f);
     rsg.changeTime( "summer noon" );
     rsg.setRigCameraController<CameraControlFly>();
-    rsg.DC()->setPosition( V3f{ 0.0f, 1.5f, 5.0f } );
 
     Http::get( Url{ "/user/portaltoload" },
        [&]( const Http::Result& _res ) {
            PortalToLoad entity{_res.bufferString};
            sg.load<Geom>( entity.entity, [this]( HttpResouceCBSign key ) {
-               sg.GB<GT::Asset>( key );
+               auto geom = sg.GB<GT::Asset>( key );
+               rsg.DC()->center( geom->BBox3dCopy() );
+               rsg.DC()->setFoV(60.0f);
            } );
     } );
 

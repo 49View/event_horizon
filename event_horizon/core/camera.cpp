@@ -470,7 +470,7 @@ void Camera::center( const AABB& _bbox ) {
 	if ( mbLocked ) return;
 	float aperture = ( tanf( degToRad( 90.0f - (mFov->value) ) ) ) / mViewPort.ratio();
 
-	float bdiameter = _bbox.calcRadius();
+	float bdiameter = _bbox.calcDiameter();
 	Vector3f cp = { 0.0f, 0.0f, aperture + bdiameter };
 	mPos->value = cp + _bbox.centre();
 	qangle->value = Quaternion{Vector3f::ZERO};

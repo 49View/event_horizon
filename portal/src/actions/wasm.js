@@ -97,13 +97,16 @@ export const loadWasm = project => {
         throw new Error("WebGl2 not supported");
       }
 
+      let wasmAxios = axios.create();
+      wasmAxios.defaults.baseURL = "";
+
       const currentDate = new Date();
       let downloadConfig = {
         url: project + ".wasm?t=" + currentDate.getTime(),
         method: "get",
         responseType: "arraybuffer"
       };
-      const binaryContent = await axios(downloadConfig);
+      const binaryContent = await wasmAxios(downloadConfig);
       const wasmBinary = new Uint8Array(binaryContent.data);
 
       downloadConfig = {
@@ -111,7 +114,7 @@ export const loadWasm = project => {
         method: "get",
         responseType: "text"
       };
-      const content = await axios(downloadConfig);
+      const content = await wasmAxios(downloadConfig);
 
       const wasmScript = content.data;
       window.wasmBinary = wasmBinary;
