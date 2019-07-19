@@ -34,12 +34,21 @@ template<typename BE>
 class EventHorizon {
 public:
     explicit EventHorizon( int argc, char *argv[] ) {
-#ifndef __USE_OFFLINE__
+#if !defined(__USE_OFFLINE__) && !defined(__EMSCRIPTEN__)
         if constexpr ( BE::hasLF() ) {
             Http::init( BE::loginCert() );
         } else {
             Http::init();
         }
+#endif
+#ifdef __EMSCRIPTEN__
+        if ( argc >= 2 ) {
+            LOGR("Setting user token ok");
+            Http::userToken(argv[1]);
+        }
+#ifdef USE_LOCALHOST
+        Http::useLocalHost(true);
+#endif
 #endif
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
         mainLoop(checkLayoutArgvs( argc, argv ), std::move(backEnd) );

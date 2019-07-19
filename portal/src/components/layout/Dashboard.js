@@ -8,6 +8,7 @@ import {
 } from "../../actions/entities";
 import Entries from "./entities/Entries";
 import EntriesEditor from "./entities/EntriesEditor";
+import { loadWasm } from "../../actions/wasm";
 
 const ObjectsStrID = "Objects";
 const MaterialsStrID = "Materials";
@@ -19,7 +20,9 @@ const ColorsStrID = "Colors";
 const Dashboard = ({
   userstate,
   loading,
+  isWasmLoaded,
   getEntitiesOfGroup,
+  loadWasm,
   updateEntriesPartialSearch
 }) => {
   const [currentGroup, setCurrentGroup] = useState("default");
@@ -32,7 +35,11 @@ const Dashboard = ({
     ) {
       getEntitiesOfGroup("material", userstate.userdata.project);
     }
-  }, [getEntitiesOfGroup, currentGroup, userstate]);
+    if (!isWasmLoaded) {
+      // console.log("load wasm");
+      loadWasm("editor");
+    }
+  }, [getEntitiesOfGroup, currentGroup, isWasmLoaded, userstate, loadWasm]);
 
   if (!userstate.isAuthenticated) {
     return <Redirect to="/" />;
@@ -169,16 +176,19 @@ Dashboard.propTypes = {
   // setAlert: PropTypes.func.isRequired,
   userstate: PropTypes.object,
   loading: PropTypes.bool,
+  isWasmLoaded: PropTypes.bool,
   getEntitiesOfGroup: PropTypes.func.isRequired,
-  updateEntriesPartialSearch: PropTypes.func.isRequired
+  updateEntriesPartialSearch: PropTypes.func.isRequired,
+  loadWasm: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
   userstate: state.auth,
-  loading: state.entities.loading
+  loading: state.entities.loading,
+  isWasmLoaded: state.wasm.loaded
 });
 
 export default connect(
   mapStateToProps,
-  { getEntitiesOfGroup, updateEntriesPartialSearch }
+  { getEntitiesOfGroup, updateEntriesPartialSearch, loadWasm }
 )(Dashboard);

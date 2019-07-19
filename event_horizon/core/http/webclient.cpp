@@ -280,6 +280,14 @@ namespace Http {
         return sUserToken;
     }
 
+    const std::string userBearerToken() {
+#ifdef __EMSCRIPTEN__
+        return std::string{"Bearer+"} + std::string{Http::userToken()};
+#else
+        return std::string{"Bearer "} + std::string{Http::userToken()};
+#endif
+    }
+
     void sessionId( std::string_view _sid ) {
         sUserSessionId = _sid;
     }

@@ -8,10 +8,6 @@
 
 namespace Http {
 
-    const std::string userBearerToken() {
-        return std::string{"Bearer "} + std::string{Http::userToken()};
-    }
-
     std::shared_ptr<restbed::Request> makeRequestBase( const Url& url ) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri(url.toString()));
         request->set_header( "Accept", "*/*" );
@@ -109,7 +105,7 @@ namespace Http {
                 res = restbed::Http::sync( request, settings );
                 LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
                 lRes = handleResponse( res, url, rf );
-                if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() ) {
+                if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() && lRes.buffer ) {
                     FM::writeLocalFile( cacheFolder() + fileHash,
                                         reinterpret_cast<const char *>( lRes.buffer.get() ),
                                         lRes.length );

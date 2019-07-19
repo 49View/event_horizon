@@ -16,24 +16,35 @@
 #include <core/lightmap_exchange_format.h>
 #include <graphics/lightmap_manager.hpp>
 
-scene_t scene{0};
+scene_t scene{ 0 };
+
+JSONDATA( PortalToLoad, entity )
+    std::string entity;
+};
 
 void EditorBackEnd::activateImpl() {
 
     allCallbacksEntitySetup();
-    rsg.setDragAndDropFunction(allConversionsDragAndDropCallback);
+    rsg.setDragAndDropFunction( allConversionsDragAndDropCallback );
 
     backEnd->process_event( OnActivate{} );
 
-    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural });
-
-    rsg.useSkybox(true);
-    rsg.changeTime("summer noon");
+    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural } );
+    rsg.useSkybox( false );
+    rsg.changeTime( "summer noon" );
     rsg.setRigCameraController<CameraControlFly>();
-    rsg.DC()->setPosition(V3f{ 0.0f, 1.5f, 5.0f});
+    rsg.DC()->setPosition( V3f{ 0.0f, 1.5f, 5.0f } );
 
-    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
-                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
+    Http::get( Url{ "/user/portaltoload" },
+       [&]( const Http::Result& _res ) {
+           PortalToLoad entity{_res.bufferString};
+           sg.load<Geom>( entity.entity, [this]( HttpResouceCBSign key ) {
+               sg.GB<GT::Asset>( key );
+           } );
+    } );
+
+//    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
+//                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
 
 //    rsg.skyBoxDeltaInterpolation()->value = 0.0f;
 //    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.32, GT::Scale( 0.6f ) );
@@ -42,9 +53,13 @@ void EditorBackEnd::activateImpl() {
 //    sg.load<Geom>( "bed", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
-    sg.load<Geom>( "lauter,selije,bedside", [this](HttpResouceCBSign key) {
-        sg.GB<GT::Asset>( key );
-    } );
+//    sg.load<Geom>( "lauter,selije,bedside", [this](HttpResouceCBSign key) {
+//        sg.GB<GT::Asset>( key );
+//    } );
+
+//    sg.load<Geom>( "vitra", [this](HttpResouceCBSign key) {
+//        sg.GB<GT::Asset>( key );
+//    } );
 
 //    sg.load<Geom>("curtain", [this](HttpResouceCBSign key) {
 //        sg.addNode( key );
@@ -54,7 +69,7 @@ void EditorBackEnd::activateImpl() {
 }
 
 void EditorBackEnd::updateImpl( const AggregatedInputData& _aid ) {
-    if ( _aid.ti.checkKeyToggleOn(GMK_Z) ) {
+    if ( _aid.ti.checkKeyToggleOn( GMK_Z )) {
         sg.chartMeshes2( scene );
         LightmapManager::initScene( &scene, rsg.RR());
         LightmapManager::bake( &scene, rsg.RR());

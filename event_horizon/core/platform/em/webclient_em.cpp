@@ -45,8 +45,8 @@ namespace Http {
 
 //        ss << "Accept" << " " << "*/*" << " ";
 //        ss << "Connection" << " " << "keep-alive" << " ";
-//        ss << "Authorization" << " " <<  Http::userBearerToken() );
-        ss << "x-eventhorizon-guest" << " " << Http::project();
+        ss << "Authorization " <<  Http::userBearerToken() << " "
+           << "x-eventhorizon-guest " << Http::project();
 
         return ss.str();
     }

@@ -71,6 +71,7 @@ router.put("/removeRolesForProject", async (req, res, next) => {
 
 router.get("/portaltoload", async (req, res, next) => {
   try {
+    console.log(req.user);
     const ret = await userController.getCurrentPortalEntity(req.user);
     res.status(200).send(ret.toObject().entity);
   } catch (ex) {

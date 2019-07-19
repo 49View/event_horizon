@@ -218,6 +218,7 @@ namespace Http {
     void sessionId( std::string_view _sid );
     std::string_view userToken();
     std::string_view sessionId();
+    const std::string userBearerToken();
 
     const std::string CLOUD_PROTOCOL();
     const std::string CLOUD_SERVER();

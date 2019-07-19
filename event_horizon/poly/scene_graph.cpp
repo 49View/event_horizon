@@ -71,7 +71,13 @@ void SceneGraph::update() {
         } else if ( k == ResourceGroup::Material ) {
             B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else if ( k == ResourceGroup::Geom ) {
-            B<GRB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+//            B<GRB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+            auto fn = getFileNameNoExt(std::get<0>(v));
+            replaceAllStrings( fn, "_", ",");
+            load<Geom>( fn, [this](HttpResouceCBSign key) {
+                GB<GT::Asset>( key );
+            } );
+
 //            GLTF2Service::load( *this, std::get<2>(v) );
         } else {
             LOGRS("{" << k << "} Resource not supported yet in callback updating");

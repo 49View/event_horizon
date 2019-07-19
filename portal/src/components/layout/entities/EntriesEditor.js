@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "../Spinner";
@@ -7,15 +7,62 @@ import ConfirmAlert from "../ConfirmAlert";
 import EntityUpdateContent from "./EntityUpdateContent";
 import EntityTags from "./EntityTags";
 import EntityInfo from "./EntityInfo";
+import { runWasm } from "../../../actions/wasm";
 
-const EntriesEditor = ({ currentEntity, loading, group, showConfirmAlert }) => {
+const EntriesEditor = ({
+  currentEntity,
+  loading,
+  group,
+  isWasmLoaded,
+  isWasmRunning,
+  userToken,
+  showConfirmAlert,
+  runWasm
+}) => {
   const onDeleteEntity = e => {
     // e.preventDefault();
     showConfirmAlert("Confirm deletion of ", "danger");
   };
 
+  let localWasmcanvas = null;
+  useEffect(() => {
+    if (
+      group === "geom" &&
+      isWasmLoaded &&
+      currentEntity !== null //&&
+      // !isWasmRunning
+    ) {
+      console.log("Running wasm");
+      runWasm(localWasmcanvas, userToken);
+    }
+    // if (
+    //   group === "geom" &&
+    //   isWasmLoaded &&
+    //   currentEntity !== null &&
+    //   isWasmRunning
+    // ) {
+    //   reCanvas(localWasmcanvas);
+    // }
+  }, [
+    currentEntity,
+    group,
+    isWasmLoaded,
+    isWasmRunning,
+    userToken,
+    runWasm,
+    loading,
+    localWasmcanvas
+  ]);
+
   let mainContent = <Fragment />;
   if (currentEntity !== null) {
+    if (group === "geom") {
+      mainContent = (
+        <div className="EntryEditorRender">
+          <canvas ref={e => (localWasmcanvas = e)} className="Canvas" />
+        </div>
+      );
+    }
     if (group === "image") {
       mainContent = (
         <div className="EntryEditorRender">
@@ -153,17 +200,32 @@ const EntriesEditor = ({ currentEntity, loading, group, showConfirmAlert }) => {
 EntriesEditor.propTypes = {
   currentEntity: PropTypes.object,
   loading: PropTypes.bool,
+  isWasmLoaded: PropTypes.bool,
+  isWasmRunning: PropTypes.bool,
   group: PropTypes.string,
-  showConfirmAlert: PropTypes.func.isRequired
+  userToken: PropTypes.string,
+  showConfirmAlert: PropTypes.func.isRequired,
+  runWasm: PropTypes.func.isRequired,
+  wasmCanvas: PropTypes.object
 };
 
 const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
   loading: state.entities.loading,
-  group: state.entities.group
+  userToken: state.auth.token,
+  group: state.entities.group,
+  isWasmLoaded: state.wasm.loaded,
+  isWasmRunning: state.wasm.running,
+  wasmCanvas: state.wasm.wasmCanvas
 });
+
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     onRunWasm: canvas => dispatch(actions.runWasm(canvas))
+//   };
+// };
 
 export default connect(
   mapStateToProps,
-  { showConfirmAlert }
+  { showConfirmAlert, runWasm }
 )(EntriesEditor);

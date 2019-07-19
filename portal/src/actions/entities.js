@@ -84,6 +84,16 @@ export const getFullEntity = entitySource => async dispatch => {
       jsonRet: responseTypeValue === "arraybuffer" ? null : res.data
     };
 
+    const portalToLoadBody = {
+      entity: entitySource._id
+    };
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+    await axios.post(`/user/portaltoload`, portalToLoadBody, config);
+
     dispatch({
       type: GET_ENTITY,
       payload: entityFull

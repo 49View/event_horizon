@@ -38,10 +38,16 @@ void cloudCallback( SocketCallbackDataTypeConstRef data ) {
     }
 }
 
+void loadAssetCallback( SocketCallbackDataTypeConstRef data ) {
+    LOGR("loadAsset Callback activated");
+    SceneGraph::addGenericCallback( ResourceGroup::Geom, { getFileName(data["name"].GetString()), {}, data["name"].GetString() } );
+}
+
 void allCallbacksEntitySetup() {
 //    daemonEntityCallbacks[ResourceGroup::Geom] = callbackGeom;
 //    daemonEntityCallbacks[ResourceGroup::Material] = callbackMaterial;
     Socket::on( "cloudStorageFileUpdate", cloudCallback );
+    Socket::on( "loadAsset", loadAssetCallback );
 }
 
 template <typename T>
