@@ -42,6 +42,7 @@ jobs:
     <<: *nodejsfaults
     steps:
       - checkout
+      - git lfs pull
       - run: *s3utils
       - restore_cache:
           keys:
