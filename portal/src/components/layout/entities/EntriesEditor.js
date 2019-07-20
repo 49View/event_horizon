@@ -59,7 +59,11 @@ const EntriesEditor = ({
     if (group === "geom") {
       mainContent = (
         <div className="EntryEditorRender">
-          <canvas ref={e => (localWasmcanvas = e)} className="Canvas" />
+          <canvas
+            ref={e => (localWasmcanvas = e)}
+            className="Canvas"
+            onContextMenu={e => e.preventDefault()}
+          />
         </div>
       );
     }
@@ -169,6 +173,7 @@ const EntriesEditor = ({
               <canvas
                 ref={e => (localWasmcanvas = e)}
                 className="CanvasMaterial"
+                onContextMenu={e => e.preventDefault()}
               />
             </div>
           </div>
