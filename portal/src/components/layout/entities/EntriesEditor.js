@@ -27,7 +27,7 @@ const EntriesEditor = ({
   let localWasmcanvas = null;
   useEffect(() => {
     if (
-      group === "geom" &&
+      (group === "geom" || group === "material") &&
       isWasmLoaded &&
       currentEntity !== null //&&
       // !isWasmRunning
@@ -116,46 +116,60 @@ const EntriesEditor = ({
             <div className="materialPBRRaw">
               <div className="mediumPBRquad">
                 <img src={depPBRMap.albedoTexture} alt="" />
-                <div className="normal text-secondary text-center">Albedo</div>
+                <div className="normal text-secondary text-center material-text">
+                  Albedo
+                </div>
               </div>
               <div className="mediumPBRquad">
                 <img src={depPBRMap.roughnessTexture} alt="" />
-                <div className="normal text-secondary text-center">
+                <div className="normal text-secondary text-center material-text">
                   Roughness
                 </div>
               </div>
               <div className="mediumPBRquad">
                 <img src={depPBRMap.aoTexture} alt="" />
-                <div className="normal text-secondary text-center">
+                <div className="normal text-secondary text-center material-text">
                   Ambient Occlusion
                 </div>
               </div>
               <div className="mediumPBRquad">
                 <img src={depPBRMap.heightTexture} alt="" />
-                <div className="normal text-secondary text-center">Height</div>
+                <div className="normal text-secondary text-center material-text">
+                  Height
+                </div>
               </div>
             </div>
-            <div className="materialPBRRaw">
+            <div className="materialPBRRaw2">
               <div className="mediumPBRquad">
                 <img src={depPBRMap.normalTexture} alt="" />
-                <div className="normal text-secondary text-center">Normal</div>
+                <div className="normal text-secondary text-center material-text">
+                  Normal
+                </div>
               </div>
               <div className="mediumPBRquad">
                 <img src={depPBRMap.metallicTexture} alt="" />
-                <div className="normal text-secondary text-center">
+                <div className="normal text-secondary text-center material-text">
                   Metallic
                 </div>
               </div>
               <div className="mediumPBRquad">
                 <img src={depPBRMap.opacityTexture} alt="" />
-                <div className="normal text-secondary text-center">Opacity</div>
+                <div className="normal text-secondary text-center material-text">
+                  Opacity
+                </div>
               </div>
               <div className="mediumPBRquad">
                 <img src={depPBRMap.translucencyTexture} alt="" />
-                <div className="normal text-secondary text-center">
+                <div className="normal text-secondary text-center material-text">
                   Translucency
                 </div>
               </div>
+            </div>
+            <div className="materialRender">
+              <canvas
+                ref={e => (localWasmcanvas = e)}
+                className="CanvasMaterial"
+              />
             </div>
           </div>
         );

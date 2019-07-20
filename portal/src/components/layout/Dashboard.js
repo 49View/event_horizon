@@ -2,10 +2,7 @@ import React, { Fragment, useState, useEffect } from "react";
 import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import {
-  getEntitiesOfGroup,
-  updateEntriesPartialSearch
-} from "../../actions/entities";
+import { getEntitiesOfGroup } from "../../actions/entities";
 import Entries from "./entities/Entries";
 import EntriesEditor from "./entities/EntriesEditor";
 import { loadWasm } from "../../actions/wasm";
@@ -22,8 +19,7 @@ const Dashboard = ({
   loading,
   isWasmLoaded,
   getEntitiesOfGroup,
-  loadWasm,
-  updateEntriesPartialSearch
+  loadWasm
 }) => {
   const [currentGroup, setCurrentGroup] = useState("default");
 
@@ -108,10 +104,6 @@ const Dashboard = ({
     </div>
   );
 
-  const onChange = e => {
-    updateEntriesPartialSearch(e.target.value.toLowerCase());
-  };
-
   let proj = "";
   if (userstate.project && userstate.project !== "") {
     proj = userstate.project;
@@ -119,26 +111,14 @@ const Dashboard = ({
     proj = userstate.userdata.project;
   }
 
-  const searchBox = (
+  const projectNameBox = (
     <Fragment>
       <div className="project-a navdiv-projecttext">{proj}</div>
-
-      <div className=" searchbar-a entitiesSearchBox">
-        <input
-          type="text"
-          id="search-bar"
-          placeholder="Search for..."
-          onChange={e => onChange(e)}
-        />
-        <a href="#!" className="search-icon">
-          <i className="fas fa-search" />
-        </a>
-      </div>
     </Fragment>
   );
 
-  const leftSideBar = (
-    <div className="sidebar-a leftSideBar">
+  const topEntitySelectorBar = (
+    <div className="topentityselectorbar-a topEntitySelectorBar">
       {leftSideEntry("fas fa-cube", ObjectsStrID, currentGroup === "geom")}
       {leftSideEntry(
         "fas fa-code-branch",
@@ -162,9 +142,9 @@ const Dashboard = ({
 
   return (
     <Fragment>
-      <div className="entitiesContainer">
-        {searchBox}
-        {leftSideBar}
+      <div className="dashboardContainer">
+        {projectNameBox}
+        {topEntitySelectorBar}
         <Entries />
         <EntriesEditor />
       </div>
@@ -178,7 +158,6 @@ Dashboard.propTypes = {
   loading: PropTypes.bool,
   isWasmLoaded: PropTypes.bool,
   getEntitiesOfGroup: PropTypes.func.isRequired,
-  updateEntriesPartialSearch: PropTypes.func.isRequired,
   loadWasm: PropTypes.func.isRequired
 };
 
@@ -190,5 +169,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { getEntitiesOfGroup, updateEntriesPartialSearch, loadWasm }
+  { getEntitiesOfGroup, loadWasm }
 )(Dashboard);

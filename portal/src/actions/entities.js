@@ -85,7 +85,9 @@ export const getFullEntity = entitySource => async dispatch => {
     };
 
     const portalToLoadBody = {
-      entity: entitySource._id
+      group: entitySource.group,
+      hash: entitySource.metadata.hash,
+      entity_id: entitySource._id
     };
     const config = {
       headers: {

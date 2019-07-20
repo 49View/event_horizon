@@ -346,9 +346,10 @@ Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NameP
 
 	ViewPort( _viewport);
 
-	qangle = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, Name() + "_Angle" );
-	mPos   = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
-	mFov   = std::make_shared<AnimType<float>>( 72.0f, Name() + "_Fov" );
+	qangle  = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, Name() + "_Angle" );
+	mPos    = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
+	mTarget = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Target" );
+	mFov    = std::make_shared<AnimType<float>>( 72.0f, Name() + "_Fov" );
 
 	mProjection.setPerspective( mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ );
 	mOrthogonal.setOrthogonalProjection();
@@ -385,7 +386,12 @@ void Camera::setProjectionMatrix( const Matrix4f& val ) {
 void Camera::translate( const Vector3f& pos ) {
 	if ( mbLocked ) return;
 	Vector3f mask = LockAtWalkingHeight() ? Vector3f::MASK_UP_OUT : Vector3f::ONE;
-	setPosition( mPos->value + ( pos * mask ) );
+	if ( Mode() == CameraMode::Orbit ) {
+//	    mTarget->value += pos*mask;
+	    mOrbitStrafe += pos;
+	} else {
+        setPosition( mPos->value + ( pos * mask ) );
+	}
 }
 
 void Camera::zoom2d( float amount ) {
@@ -446,34 +452,41 @@ void Camera::setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Mat
 
 void Camera::lookAt( const Vector3f& posAt ) {
 	if ( mbLocked ) return;
-//	mTarget->value = posAt;
+	mTarget->value = posAt;
 }
 
-void Camera::lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay ) {
-	if ( mbLocked ) return;
-//	qangle->set(angleAt);
+void Camera::lookAtCalc() {
+    if ( mbLocked ) return;
+    Vector3f z = normalize( mPos->value - mTarget->value );  // Forward
+    Vector3f x = normalize( cross( V3f::UP_AXIS, z ) ); // Right
+    Vector3f y = cross( z, x );
+
+    auto finalPos = mPos->value + mOrbitStrafe;
+    mView = Matrix4f( Vector4f( x.x(), y.x(), z.x(), 0.0f ),
+                      Vector4f( x.y(), y.y(), z.y(), 0.0f ),
+                      Vector4f( x.z(), y.z(), z.z(), 0.0f ),
+                      Vector4f( -( dot( x, finalPos ) ), -( dot( y, finalPos ) ), -( dot( z, finalPos ) ), 1.0f ) );
 }
 
-void Camera::lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& up ) {
-	if ( mbLocked ) return;
-	Vector3f z = normalize( eye - at );  // Forward
-	Vector3f x = normalize( cross( up, z ) ); // Right
-	Vector3f y = cross( z, x );
-
-	mView = Matrix4f( Vector4f( x.x(), y.x(), z.x(), 0.0f ),
-					  Vector4f( x.y(), y.y(), z.y(), 0.0f ),
-					  Vector4f( x.z(), y.z(), z.z(), 0.0f ),
-					  Vector4f( -( dot( x, eye ) ), -( dot( y, eye ) ), -( dot( z, eye ) ), 1.0f ) );
-}
-
-void Camera::center( const AABB& _bbox ) {
+void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
 	if ( mbLocked ) return;
 	float aperture = ( tanf( degToRad( 90.0f - (mFov->value) ) ) ) / mViewPort.ratio();
 
 	float bdiameter = _bbox.calcDiameter();
 	Vector3f cp = { 0.0f, 0.0f, aperture + bdiameter };
-	mPos->value = cp + _bbox.centre();
-	qangle->value = Quaternion{Vector3f::ZERO};
+
+	if ( cca == CameraCenterAngle::Front ) {
+        mPos->value = cp + _bbox.centre();
+        qangle->value = Quaternion{Vector3f::ZERO};
+        sphericalAcc = V2f{0.0f, M_PI_2};
+	} else if ( cca == CameraCenterAngle::Back ) {
+        mPos->value = _bbox.centre() - cp;
+        qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS};
+        UpdateIncrementalEulerFromQangle();
+        sphericalAcc = V2f{M_PI, M_PI_2};
+    }
+	mTarget->value = _bbox.centre();
+	mOrbitDistance = cp.z();
 }
 
 void Camera::pan( const Vector3f& posDiff ) {
@@ -591,17 +604,21 @@ void Camera::update() {
 		quatMatrix = qangle->value.rotationMatrix();
 	}
 
+    if ( Mode() == CameraMode::Orbit ) {
+        lookAtCalc();
+    }
 //	LOGRS( "Camera Position: " << getPosition() << "Camera Rotation: " << quatAngle() );
-	quatMatrix.setTranslation( mPos->value );
-	quatMatrix.invert( mView );
+
+    if ( Mode() != CameraMode::Orbit ) {
+        quatMatrix.setTranslation( mPos->value );
+        quatMatrix.invert( mView );
+    }
 
 	if ( Mode() == CameraMode::Edit2d ) {
 		float vs = mPos->value.y();
 		mProjection.setOrthogonalProjection( -0.5f * mViewPort.ratio() * vs, 0.5f * mViewPort.ratio() * vs,
 				                             -0.5f * vs, 0.5f *vs );
-	}
-
-	if ( Mode() == CameraMode::Doom ) {
+	} else {
 		mProjection.setPerspective( mFov->value, mViewPort.ratio() * mAspectRatioMultiplier, mNearClipPlaneZ,
 									mFarClipPlaneZ );
 	}
@@ -659,6 +676,33 @@ void Camera::incrementQuatAngles( const Vector3f& a ) {
     if ( mbLocked ) return;
     incrementalEulerQuatAngle += a;
     qangle->value=quatCompose( incrementalEulerQuatAngle );
+}
+
+void Camera::incrementOrbitDistance( float _d ) {
+    if ( _d == 0.0f ) return;
+
+    mOrbitDistance += _d;
+    if ( mOrbitDistance < mNearClipPlaneZ * 2.0f ) {
+        mOrbitDistance = mNearClipPlaneZ * 2.0f;
+    }
+    computeOrbitPosition();
+}
+
+void Camera::incrementSphericalAngles( const V2f& _sph ) {
+    sphericalAcc -= _sph;
+
+    if ( sphericalAcc.y() <= 0.0f )  sphericalAcc.setY(0.0000001f);
+    if ( sphericalAcc.y() >= M_PI )  sphericalAcc.setY(M_PI-0.00001f);
+
+    if ( sphericalAcc.x() <= 0.0f )    sphericalAcc.setX(TWO_PI-0.0001f);
+    if ( sphericalAcc.x() >= TWO_PI )  sphericalAcc.setX(0.0f);
+
+    computeOrbitPosition();
+}
+
+void Camera::computeOrbitPosition() {
+    auto stc = sphericalToCartasian( V3f{sphericalAcc, mOrbitDistance});
+    setPosition( mTarget->value * V3f::UP_AXIS + XZY::C( stc ) );
 }
 
 void Camera::UpdateIncrementalEulerFromQangle() {

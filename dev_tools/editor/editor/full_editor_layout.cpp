@@ -19,8 +19,10 @@
 
 scene_t scene{ 0 };
 
-JSONDATA( PortalToLoad, entity )
-    std::string entity;
+JSONDATA( PortalToLoad, group, hash, entity_id )
+    std::string group;
+    std::string hash;
+    std::string entity_id;
 };
 
 void EditorBackEnd::activateImpl() {
@@ -33,17 +35,25 @@ void EditorBackEnd::activateImpl() {
     rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural } );
     rsg.useSkybox( false );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
-    rsg.changeTime( "summer noon" );
-    rsg.setRigCameraController<CameraControlFly>();
+    rsg.changeTime( "winter noon" );
+    rsg.setRigCameraController<CameraControlOrbit3d>();
+    rsg.DC()->setFoV(60.0f);
 
     Http::get( Url{ "/user/portaltoload" },
        [&]( const Http::Result& _res ) {
            PortalToLoad entity{_res.bufferString};
-           sg.load<Geom>( entity.entity, [this]( HttpResouceCBSign key ) {
-               auto geom = sg.GB<GT::Asset>( key );
-               rsg.DC()->center( geom->BBox3dCopy() );
-               rsg.DC()->setFoV(60.0f);
-           } );
+           if ( entity.group == ResourceGroup::Geom ) {
+               sg.load<Geom>( entity.entity_id, [this]( HttpResouceCBSign key ) {
+                   auto geom = sg.GB<GT::Asset>( key );
+                   rsg.DC()->center( geom->BBox3dCopy() );
+               } );
+           } else if ( entity.group == ResourceGroup::Material ) {
+               sg.load<Material>( entity.entity_id, [this, entity]( HttpResouceCBSign key ) {
+                   auto geom = sg.GB<GT::Shape>( ShapeType::Sphere, GT::Tag(1001) );
+                   rsg.RR().changeMaterialOnTags( { 1001, entity.hash } );
+                   rsg.DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Back );
+               } );
+           }
     } );
 
 //    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,

@@ -5,7 +5,11 @@ import Spinner from "../Spinner";
 import { encode, decode } from "base64-arraybuffer";
 import { useDropzone } from "react-dropzone";
 import { useAlert } from "react-alert";
-import { getFullEntity, addEntity } from "../../../actions/entities";
+import {
+  getFullEntity,
+  addEntity,
+  updateEntriesPartialSearch
+} from "../../../actions/entities";
 
 export const checkFileExtensionsOnEntityGroup = (group, filename) => {
   const ext = filename
@@ -38,7 +42,8 @@ const Entries = ({
   addEntity,
   group,
   user,
-  loading
+  loading,
+  updateEntriesPartialSearch
 }) => {
   const alert = useAlert();
   const onDrop = useCallback(
@@ -126,12 +131,33 @@ const Entries = ({
     return <img width="64" height="64" src={entry.metadata.thumb} alt="" />;
   };
 
+  const onChange = e => {
+    updateEntriesPartialSearch(e.target.value.toLowerCase());
+  };
+
+  const searchBox = (
+    <Fragment>
+      <div className="searchbar-a entitiesSearchBox">
+        <input
+          type="text"
+          id="search-bar"
+          placeholder="Search for..."
+          onChange={e => onChange(e)}
+        />
+        <a href="#!" className="search-icon">
+          <i className="fas fa-search" />
+        </a>
+      </div>
+    </Fragment>
+  );
+
   const viewMore = entityToRender => () => {
     getFullEntity(entityToRender);
   };
 
   const thumbEntry = (
     <Fragment>
+      {searchBox}
       <div {...getRootProps({ className: "dropzone" })}>
         <input {...getInputProps()} />
         <p>
@@ -167,6 +193,7 @@ Entries.propTypes = {
   group: PropTypes.string,
   user: PropTypes.object,
   getFullEntity: PropTypes.func.isRequired,
+  updateEntriesPartialSearch: PropTypes.func.isRequired,
   addEntity: PropTypes.func.isRequired
 };
 
@@ -179,5 +206,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { getFullEntity, addEntity }
+  { getFullEntity, addEntity, updateEntriesPartialSearch }
 )(Entries);

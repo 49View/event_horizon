@@ -253,3 +253,23 @@ CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOr
 CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControl( cameraRig, rsg ) {
 }
+
+CameraControlOrbit3d::CameraControlOrbit3d( const std::shared_ptr<CameraRig>& cameraRig, RenderOrchestrator& rsg )
+        : CameraControlEditable( cameraRig, rsg ) {
+    cameraRig->getCamera()->Mode( CameraMode::Orbit );
+}
+
+void CameraControlOrbit3d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
+    if ( mi.scrollValue != 0.0f ) {
+        _cam->incrementOrbitDistance( -mi.scrollValue );
+    }
+
+    if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO ) {
+        _cam->incrementSphericalAngles( mi.moveDiffSS(TOUCH_ZERO) );
+    }
+    if ( mi.moveDiffSS(TOUCH_ONE) != Vector2f::ZERO ) {
+        _cam->strafe(  mi.moveDiff(TOUCH_ONE).x() );
+        _cam->moveUp(  mi.moveDiff(TOUCH_ONE).y() );
+    }
+
+}

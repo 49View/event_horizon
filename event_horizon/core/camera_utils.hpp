@@ -20,6 +20,7 @@ enum class CameraProjectionType {
 enum CameraMode {
     Edit2d = 0,
     Doom,
+    Orbit,
     CameraMode_max
 };
 

@@ -38,6 +38,11 @@ struct Frustum {
 	void calculateFromMVP( const Matrix4f& _mvp );
 };
 
+enum class CameraCenterAngle {
+    Front,
+    Back
+};
+
 class Camera : public Animable, public NamePolicy<> {
 public:
 	Camera( const std::string& cameraName, const Rect2f& _viewport );
@@ -51,6 +56,8 @@ public:
 
 	void setQuatAngles( const Vector3f&a );
 	void incrementQuatAngles( const Vector3f& a );
+    void incrementSphericalAngles( const V2f& _sph );
+    void incrementOrbitDistance( float _d );
 
 	Quaternion quatAngle() const;
 	Vector3f centerScreenOn( const Vector2f& area, const float bMiddleIsCenter = true, const float slack = 0.0f );
@@ -64,11 +71,9 @@ public:
 	void strafe( float amount );
 	void setViewMatrix( const Vector3f&pos, const Quaternion& q );
 	void setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Matrix4f& origRotMatrix );
-	void lookAt( const Vector3f& pos );
-	void lookAtAngles( const Vector3f& angleAt, const float _time, const float _delay = 0.0f );
-	void lookAtRH( const Vector3f& eye, const Vector3f& at, const Vector3f& up );
+	void lookAt( const Vector3f& _at );
 	void pan( const Vector3f& posDiff );
-	void center( const AABB& _bbox );
+	void center( const AABB& _bbox, CameraCenterAngle cca = CameraCenterAngle::Front );
 
 	void update();
 
@@ -139,8 +144,11 @@ public:
 	void ViewPort( JMATH::Rect2f val );
 
 private:
-	void translate( const Vector3f& pos );
+    void lookAtCalc();
+    void translate( const Vector3f& pos );
+    void computeOrbitPosition();
 
+private:
 	CameraMode mMode = CameraMode::Edit2d;
 	Frustum mFrustom{};
 
@@ -165,10 +173,14 @@ private:
 	Matrix4f quatMatrix         = Matrix4f::MIDENTITY();
 
 	V3fa mPos;
+	V3fa mTarget;
 	Quaterniona qangle; // angles of x,y,z axis to be fed into quaternion math
     floata mFov;
 
     V3f incrementalEulerQuatAngle = Vector3f::ZERO;
+    V2f sphericalAcc = V2f::ZERO;
+    V3f mOrbitStrafe = V3f::ZERO;
+    float mOrbitDistance = 2.0f;
 
     JMATH::Rect2f mViewPort{};
 };
