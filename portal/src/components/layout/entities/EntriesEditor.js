@@ -28,7 +28,7 @@ const EntriesEditor = ({
   };
 
   const canvasRef = React.useRef(null);
-  const [count, setCount] = useState(0);
+  // const [count, setCount] = useState(0);
 
   useEffect(() => {
     if (
@@ -70,12 +70,12 @@ const EntriesEditor = ({
         }
       };
 
-      if (count === 0) {
-        const s = document.createElement("script");
-        s.text = window.wasmScript;
-        document.body.appendChild(s);
-        //setCount(1);
-      }
+      // if (count === 0) {
+      const s = document.createElement("script");
+      s.text = window.wasmScript;
+      document.body.appendChild(s);
+      // setCount(1);
+      // }
 
       //        runWasm(canvasRef.current, userToken, userSessionId);
     }

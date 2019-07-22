@@ -27,13 +27,7 @@ if (localStorage.token) {
 const App = () => {
   useEffect(() => {
     store.dispatch(loadUser());
-  }, []);
-
-  // window.SocketClientHandler.send({
-  //   msg: "loadAsset",
-  //   name: "shelf",
-  //   project: "carillo"
-  // });
+  });
 
   return (
     <Provider store={store}>
