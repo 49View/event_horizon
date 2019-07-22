@@ -6,6 +6,7 @@ import {
   ADD_ENTITY,
   GET_ENTITY,
   GET_ENTITY_LOAD,
+  SET_ENTITY_NODES,
   REPLACE_ENTITY_TAGS
 } from "../actions/types";
 
@@ -65,6 +66,11 @@ export default function(state = initialState, action) {
         currentEntity: payload,
         currentTags: evaluateTags(payload.entity.metadata.tags),
         loading: false
+      };
+    case SET_ENTITY_NODES:
+      return {
+        ...state,
+        currentEntityNodes: payload
       };
     case ADD_ENTITY:
       return {

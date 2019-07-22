@@ -71,6 +71,7 @@ app.use("/user", usersRoute);
 app.use("/fs", fsRoute);
 app.use("/entities", entitiesRoute);
 app.use("/broadcast", broadcastRoute);
+app.use("/socket", socketRoute);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

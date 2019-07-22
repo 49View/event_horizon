@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "../Spinner";
@@ -9,6 +9,8 @@ import EntityTags from "./EntityTags";
 import EntityInfo from "./EntityInfo";
 import { runWasm } from "../../../actions/wasm";
 
+let localWasmcanvas = null;
+
 const EntriesEditor = ({
   currentEntity,
   loading,
@@ -16,6 +18,7 @@ const EntriesEditor = ({
   isWasmLoaded,
   isWasmRunning,
   userToken,
+  userSessionId,
   showConfirmAlert,
   runWasm
 }) => {
@@ -24,16 +27,57 @@ const EntriesEditor = ({
     showConfirmAlert("Confirm deletion of ", "danger");
   };
 
-  let localWasmcanvas = null;
+  const canvasRef = React.useRef(null);
+  const [count, setCount] = useState(0);
+
   useEffect(() => {
     if (
       (group === "geom" || group === "material") &&
-      isWasmLoaded &&
-      currentEntity !== null //&&
+      currentEntity !== null &&
+      !loading
       // !isWasmRunning
     ) {
-      console.log("Running wasm");
-      runWasm(localWasmcanvas, userToken);
+      // if (count % 2 === 0) {
+      console.log(currentEntity);
+      window.Module = {
+        arguments: [userToken, userSessionId],
+        print: text => {
+          console.log("W: " + text);
+        },
+        printErr: text => {
+          console.log("W ERROR: " + text);
+        },
+        canvas: canvasRef.current,
+        onRuntimeInitialized: () => {
+          console.log("Runtime initialized");
+
+          // dispatch(wasmRunSuccess(canvas));
+        },
+        instantiateWasm: (imports, successCallback) => {
+          WebAssembly.instantiate(window.wasmBinary, imports)
+            .then(function(output) {
+              console.log("wasm instantiation succeeded");
+              successCallback(output.instance);
+            })
+            .catch(function(e) {
+              console.log("wasm instantiation failed! " + e);
+              // dispatch(wasmRunFailed(e.message));
+            });
+          return {};
+        },
+        destroy: cpp => {
+          console.log("destroy");
+        }
+      };
+
+      if (count === 0) {
+        const s = document.createElement("script");
+        s.text = window.wasmScript;
+        document.body.appendChild(s);
+        //setCount(1);
+      }
+
+      //        runWasm(canvasRef.current, userToken, userSessionId);
     }
     // if (
     //   group === "geom" &&
@@ -43,24 +87,24 @@ const EntriesEditor = ({
     // ) {
     //   reCanvas(localWasmcanvas);
     // }
-  }, [
-    currentEntity,
-    group,
-    isWasmLoaded,
-    isWasmRunning,
-    userToken,
-    runWasm,
-    loading,
-    localWasmcanvas
-  ]);
+  });
+
+  // useEffect(() => {});
+
+  // {e => (localWasmcanvas = e)}
+  // setCount(count + 1);
 
   let mainContent = <Fragment />;
   if (currentEntity !== null) {
     if (group === "geom") {
+      console.log("localCanvas ", localWasmcanvas, " ref ", canvasRef);
       mainContent = (
         <div className="EntryEditorRender">
           <canvas
-            ref={e => (localWasmcanvas = e)}
+            id="#canvas"
+            ref={canvasRef}
+            //ref={useRef("#canvas")}
+            // ref={e => (localWasmcanvas = e)}
             className="Canvas"
             onContextMenu={e => e.preventDefault()}
           />
@@ -223,6 +267,7 @@ EntriesEditor.propTypes = {
   isWasmRunning: PropTypes.bool,
   group: PropTypes.string,
   userToken: PropTypes.string,
+  userSessionId: PropTypes.string,
   showConfirmAlert: PropTypes.func.isRequired,
   runWasm: PropTypes.func.isRequired,
   wasmCanvas: PropTypes.object
@@ -232,6 +277,9 @@ const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
   loading: state.entities.loading,
   userToken: state.auth.token,
+  userSessionId: state.auth.session
+    ? state.auth.session
+    : state.auth.userdata.session,
   group: state.entities.group,
   isWasmLoaded: state.wasm.loaded,
   isWasmRunning: state.wasm.running,

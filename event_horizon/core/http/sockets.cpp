@@ -27,6 +27,7 @@ namespace Socket {
 
     void emitImpl( const std::string& _message );
     void emit( const std::string& _message ) {
+        LOGRS("[WSS][CLIENT] Send " << _message );
         emitImpl(_message);
     }
 

@@ -21,6 +21,7 @@ using Font = Utility::TTFCore::FontInternal;
 struct GeomData;
 using Geom = RecursiveTransformation<GeomData>;
 using GeomSP = std::shared_ptr<Geom>;
+using GeomSPConst = std::shared_ptr<const Geom>;
 using GeomSPContainer = std::vector<GeomSP>;
 class Profile;
 class MaterialColor;

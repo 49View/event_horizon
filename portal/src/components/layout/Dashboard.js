@@ -30,10 +30,9 @@ const Dashboard = ({
       currentGroup === "default"
     ) {
       getEntitiesOfGroup("material", userstate.userdata.project);
-    }
-    if (!isWasmLoaded) {
-      // console.log("load wasm");
-      loadWasm("editor");
+      if (!isWasmLoaded) {
+        loadWasm("editor");
+      }
     }
   }, [getEntitiesOfGroup, currentGroup, isWasmLoaded, userstate, loadWasm]);
 
@@ -140,6 +139,7 @@ const Dashboard = ({
     </div>
   );
 
+  console.log("Dashboard render");
   return (
     <Fragment>
       <div className="dashboardContainer">

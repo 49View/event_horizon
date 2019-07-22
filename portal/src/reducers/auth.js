@@ -8,6 +8,8 @@ import {
   LOGOUT
 } from "../actions/types";
 
+import { wscConnect, wscClose } from "../utils/webSocketClient";
+
 const initialState = {
   token: localStorage.getItem("token"),
   isAuthenticated: null,
@@ -20,6 +22,7 @@ export default function(state = initialState, action) {
 
   switch (type) {
     case USER_LOADED:
+      wscConnect(payload.session);
       return {
         ...state,
         isAuthenticated: true,
@@ -40,6 +43,7 @@ export default function(state = initialState, action) {
     case LOGIN_FAIL:
     case LOGOUT:
       localStorage.removeItem("token");
+      wscClose(state.userdata.user);
       return {
         token: null,
         isAuthenticated: false,

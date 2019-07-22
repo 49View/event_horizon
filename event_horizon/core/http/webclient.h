@@ -47,6 +47,13 @@ using HttpResouceCB = std::function<void(HttpResouceCBSign)>;
 //using HttpResouceCB = std::function<void(const std::string&)>;
 
 namespace Socket {
+
+    template <typename  T>
+    JSONDATA( SendMessageStruct, msg, data )
+        std::string msg;
+        T data{};
+    };
+
     static std::unordered_map<std::string, SocketCallbackFunc> callbacksMap;
 
     // Create connection has to be called after login
@@ -56,6 +63,15 @@ namespace Socket {
     void emit( const std::string& _message );
     void on( const std::string& eventName, SocketCallbackFunc f );
     void close();
+
+    template <typename T>
+    void send( const std::string& _message, const T& _data ) {
+        SendMessageStruct<T> sm;
+        sm.msg = _message;
+        sm.data = _data;
+        emit(sm.serialize());
+    }
+
 }
 
 JSONDATA( UserLoginToken, name, email, guest )

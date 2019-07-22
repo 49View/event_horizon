@@ -10,6 +10,7 @@
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
 #include <core/geom.hpp>
+#include <core/camera.h>
 #include <core/names.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <core/resources/material.h>
@@ -56,6 +57,14 @@ GeomSP SceneGraph::getNode( const UUID& _uuid ) {
     return nullptr;
 }
 
+std::shared_ptr<Camera> SceneGraph::DC() {
+    return CM().get(Name::Foxtrot)->getCamera();
+}
+
+JSONDATA( MatGeomSerData, mrefs )
+    std::set<ResourceRef> mrefs;
+};
+
 void SceneGraph::update() {
 
     for ( auto& [k, v] : genericSceneCallback ) {
@@ -72,13 +81,17 @@ void SceneGraph::update() {
             B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else if ( k == ResourceGroup::Geom ) {
 //            B<GRB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
-            auto fn = getFileNameNoExt(std::get<0>(v));
-            replaceAllStrings( fn, "_", ",");
-            load<Geom>( fn, [this](HttpResouceCBSign key) {
-                GB<GT::Asset>( key );
+            load<Geom>( std::get<0>(v), [this](HttpResouceCBSign key) {
+                auto geom = GB<GT::Asset>( key );
+                DC()->center( geom->BBox3dCopy());
+                MatGeomSerData matSet{};
+                geom->visit( [&]( const GeomSPConst node ) {
+                    for ( const auto& data : node->DataV()) {
+                        matSet.mrefs.emplace( data.material );
+                    }
+                } );
+                Socket::send("materialsForGeom", matSet );
             } );
-
-//            GLTF2Service::load( *this, std::get<2>(v) );
         } else {
             LOGRS("{" << k << "} Resource not supported yet in callback updating");
             ASSERT(0);

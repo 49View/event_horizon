@@ -29,6 +29,12 @@ const App = () => {
     store.dispatch(loadUser());
   }, []);
 
+  // window.SocketClientHandler.send({
+  //   msg: "loadAsset",
+  //   name: "shelf",
+  //   project: "carillo"
+  // });
+
   return (
     <Provider store={store}>
       <Router>

@@ -209,6 +209,10 @@ public:
         return data[_index];
     }
 
+    const std::vector<T>& DataV() const {
+        return data;
+    }
+
     T& DataRef( size_t _index = 0 ) {
         return data[_index];
     }

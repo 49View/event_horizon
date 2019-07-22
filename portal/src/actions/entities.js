@@ -8,8 +8,10 @@ import {
   DELETE_ENTITY,
   GET_ENTITY,
   GET_ENTITY_LOAD,
+  SET_ENTITY_NODES,
   REPLACE_ENTITY_TAGS
 } from "./types";
+import store from "../store";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
@@ -24,6 +26,20 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
     dispatch({ type: GET_ENTITIES, payload: { data: res.data, group: group } });
   } catch (err) {
     dispatch({
+      type: ENTITY_ERROR,
+      payload: { msg: err.response }
+    });
+  }
+};
+
+export const setEntityNodes = nodes => {
+  try {
+    store.dispatch({
+      type: SET_ENTITY_NODES,
+      payload: nodes
+    });
+  } catch (err) {
+    store.dispatch({
       type: ENTITY_ERROR,
       payload: { msg: err.response }
     });
@@ -83,18 +99,6 @@ export const getFullEntity = entitySource => async dispatch => {
           : null,
       jsonRet: responseTypeValue === "arraybuffer" ? null : res.data
     };
-
-    const portalToLoadBody = {
-      group: entitySource.group,
-      hash: entitySource.metadata.hash,
-      entity_id: entitySource._id
-    };
-    const config = {
-      headers: {
-        "Content-Type": "application/json"
-      }
-    };
-    await axios.post(`/user/portaltoload`, portalToLoadBody, config);
 
     dispatch({
       type: GET_ENTITY,

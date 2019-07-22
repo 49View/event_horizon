@@ -22,15 +22,15 @@
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
 
 void cloudCallback( SocketCallbackDataTypeConstRef data ) {
-    std::string filename = url_decode( data["name"].GetString() );
-    for ( const auto& [k,func] : daemonEntityCallbacks ) {
-        if ( filename.find(DaemonPaths::store(k)) != std::string::npos ) {
-            FM::readRemoteSimpleCallback( filename, [&](const Http::Result& _res) {
-                const auto lFilename = url_decode(_res.uri);
-                for ( const auto& [k,func] : daemonEntityCallbacks ) {
+    std::string filename = url_decode( data["name"].GetString());
+    for ( const auto&[k, func] : daemonEntityCallbacks ) {
+        if ( filename.find( DaemonPaths::store( k )) != std::string::npos ) {
+            FM::readRemoteSimpleCallback( filename, [&]( const Http::Result& _res ) {
+                const auto lFilename = url_decode( _res.uri );
+                for ( const auto&[k, func] : daemonEntityCallbacks ) {
                     if ( lFilename.find( DaemonPaths::store( k )) != std::string::npos ) {
-                        auto fn = getFileName( url_decode(_res.uri) );
-                        func( fn, zlibUtil::inflateFromMemory( _res ) );
+                        auto fn = getFileName( url_decode( _res.uri ));
+                        func( fn, zlibUtil::inflateFromMemory( _res ));
                     }
                 }
             } );
@@ -38,9 +38,11 @@ void cloudCallback( SocketCallbackDataTypeConstRef data ) {
     }
 }
 
-void loadAssetCallback( SocketCallbackDataTypeConstRef data ) {
-    LOGR("loadAsset Callback activated");
-    SceneGraph::addGenericCallback( ResourceGroup::Geom, { getFileName(data["name"].GetString()), {}, data["name"].GetString() } );
+void loadAssetCallback( SocketCallbackDataTypeConstRef doc ) {
+    LOGR( "loadAsset Callback activated" );
+    SceneGraph::addGenericCallback( ResourceGroup::Geom,
+                                    { getFileName( doc["data"]["entity_id"].GetString()), {},
+                                      doc["data"]["entity_id"].GetString() } );
 }
 
 void allCallbacksEntitySetup() {
@@ -50,11 +52,11 @@ void allCallbacksEntitySetup() {
     Socket::on( "loadAsset", loadAssetCallback );
 }
 
-template <typename T>
+template<typename T>
 void addFileCallback( const std::string& _path ) {
     SerializableContainer fileContent;
     FM::readLocalFile( _path, fileContent );
-    SceneGraph::addGenericCallback( ResourceVersioning<T>::Prefix(), { getFileName(_path), fileContent, _path } );
+    SceneGraph::addGenericCallback( ResourceVersioning<T>::Prefix(), { getFileName( _path ), fileContent, _path } );
 }
 
 void allConversionsDragAndDropCallbackMultiplePaths( const std::vector<std::string>& _paths ) {
@@ -64,28 +66,29 @@ void allConversionsDragAndDropCallbackMultiplePaths( const std::vector<std::stri
         rpipe.pipeFile<RawImage>( path );
     }
 
-    auto values = std::make_shared<HeterogeneousMap>(S::SH);
-    for ( const auto& entry : rpipe.getCatalog() ) {
+    auto values = std::make_shared<HeterogeneousMap>( S::SH );
+    for ( const auto& entry : rpipe.getCatalog()) {
         values->assign( MPBRTextures::mapToTextureUniform( entry.filename ), entry.hash );
     }
 
-    auto fn = getLastFolderInPath( _paths.back() );
-    rpipe.pipe<Material>( fn , Material{values}.serialize() );
+    auto fn = getLastFolderInPath( _paths.back());
+    rpipe.pipe<Material>( fn, Material{ values }.serialize());
     rpipe.publish();
 }
 
 void allConversionsDragAndDropCallback( std::vector<std::string>& _paths ) {
 
-    if ( _paths.empty() ) return;
+    if ( _paths.empty()) return;
 
     if ( _paths.size() == 1 ) {
         auto _path = _paths.back();
-        std::string pathSanitized = url_encode_spacesonly(_path);
+        std::string pathSanitized = url_encode_spacesonly( _path );
         std::string ext = getFileNameExt( pathSanitized );
-        std::string extl = toLower(ext);
+        std::string extl = toLower( ext );
 
         if ( extl == ".fbx" ) {
-            FM::copyLocalToRemote( pathSanitized, DaemonPaths::upload(ResourceGroup::Geom) + getFileName(pathSanitized) );
+            FM::copyLocalToRemote( pathSanitized,
+                                   DaemonPaths::upload( ResourceGroup::Geom ) + getFileName( pathSanitized ));
         }
 //    else if ( extl == ".obj" ) {
 //        // Convert to GLTF
@@ -96,19 +99,16 @@ void allConversionsDragAndDropCallback( std::vector<std::string>& _paths ) {
 //    } else if ( extl == ".stl" ) {
 //        stl::parse_stl(pathSanitized);
 //    }
-        else if ( isFileExtAnImage(extl) ) {
+        else if ( isFileExtAnImage( extl )) {
             addFileCallback<RawImage>( pathSanitized );
-        }
-        else if ( extl == ".ttf" ) {
+        } else if ( extl == ".ttf" ) {
             addFileCallback<Font>( pathSanitized );
-        }
-        else if ( extl == ".svg" ) {
+        } else if ( extl == ".svg" ) {
             addFileCallback<Profile>( pathSanitized );
-        }
-        else if ( extl == ".sbsar" ) {
-            FM::copyLocalToRemote(pathSanitized, DaemonPaths::upload(ResourceGroup::Material)+ getFileName(pathSanitized));
-        }
-        else if ( extl == ".gltf" || extl == ".glb" ) {
+        } else if ( extl == ".sbsar" ) {
+            FM::copyLocalToRemote( pathSanitized,
+                                   DaemonPaths::upload( ResourceGroup::Material ) + getFileName( pathSanitized ));
+        } else if ( extl == ".gltf" || extl == ".glb" ) {
             addFileCallback<Geom>( pathSanitized );
         }
     } else {

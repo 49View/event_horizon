@@ -24,6 +24,7 @@
 
 class SceneGraph;
 struct scene_t;
+class Camera;
 
 class CommandScriptSceneGraph : public CommandScript {
 public:
@@ -77,6 +78,7 @@ public:
     bool rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback );
 
     size_t countGeoms() const;
+    std::shared_ptr<Camera> DC();
 
     ImageManager&    TL() { return tl; }
     VDataManager&    VL() { return vl; }

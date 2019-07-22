@@ -25,12 +25,10 @@ export const reCanvas = canvas => {
   window.Module["canvas"] = canvas;
 };
 
-export const runWasm = (canvas, token) => {
+export const runWasm = (canvas, token, sessionId) => {
   return dispatch => {
-    console.log("Running wasm start");
-
     window.Module = {
-      arguments: [token],
+      arguments: [token, sessionId],
       print: text => {
         console.log("W: " + text);
       },
@@ -87,6 +85,7 @@ export const wasmLoadFailed = error => {
 };
 
 export const loadWasm = project => {
+  console.log("load wasm");
   return wrap(async dispatch => {
     dispatch(wasmLoadStart());
     try {
