@@ -44,10 +44,6 @@ export const wscConnect = session => {
     }
     if (mdata.msg === "materialsForGeom") {
       console.log("[WSS-REACT][MSGREC] ", mdata.data);
-      // store.dispatch({
-      //   type: SET_ENTITY_NODES,
-      //   payload: mdata.data
-      // });
       setEntityNodes(mdata.data);
     }
     // console.log(message);

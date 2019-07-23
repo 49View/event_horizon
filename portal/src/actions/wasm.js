@@ -132,7 +132,6 @@ export const loadWasmComplete = async (
   userToken,
   userSessionId
 ) => {
-  // dispatch(wasmLoadStart());
   try {
     if (!checkWasmSupport()) {
       throw new Error("Web assembly not supported");
@@ -163,10 +162,8 @@ export const loadWasmComplete = async (
     const wasmScript = content.data;
     window.wasmBinary = wasmBinary;
     window.wasmScript = wasmScript;
-    // dispatch(wasmLoadSuccess());
   } catch (ex) {
     console.log(ex);
-    // dispatch(wasmLoadFailed(ex.message));
   }
 
   window.Module = {
