@@ -50,6 +50,14 @@ void SceneGraph::removeNode( const UUID& _uuid ) {
     }
 }
 
+void SceneGraph::removeNode( GeomSP _node ) {
+    nodeRemoveSignal(_node);
+    for (const auto& c : _node->Children() ) {
+        removeNode( c );
+    }
+    removeNode( _node->UUiD() );
+}
+
 GeomSP SceneGraph::getNode( const UUID& _uuid ) {
     if ( auto it = nodes.find(_uuid); it != nodes.end() ) {
         return it->second;
@@ -81,6 +89,9 @@ void SceneGraph::update() {
             B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else if ( k == ResourceGroup::Geom ) {
 //            B<GRB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
+            if ( !nodes.empty() ) removeNode( nodes.begin()->second );
+            GM().clear();
+            Http::clearRequestCache();
             load<Geom>( std::get<0>(v), [this](HttpResouceCBSign key) {
                 auto geom = GB<GT::Asset>( key );
                 DC()->center( geom->BBox3dCopy());

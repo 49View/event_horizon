@@ -8,3 +8,6 @@ void NodeGraph::nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _s
     nodeAddSignal.connect( _slot );
 }
 
+void NodeGraph::nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot ) {
+    nodeRemoveSignal.connect( _slot );
+}

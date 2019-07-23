@@ -166,13 +166,13 @@ const Entries = ({
       </div>
 
       {entitiesRes.map(entry => (
-        <div className="EntityThumbnail" key={entry._id}>
-          <a onClick={viewMore(entry)} href="#!">
+        <div className="EntityThumbnail text-primary" key={entry._id}>
+          <span onClick={viewMore(entry)}>
             <div className="EntityThumbnailInset">
               {entityTypeSelector(entry)}
             </div>
             <div className="EntityThumbnailText">{entry.metadata.name}</div>
-          </a>
+          </span>
         </div>
       ))}
     </Fragment>

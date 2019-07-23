@@ -126,6 +126,87 @@ export const loadWasm = project => {
   });
 };
 
+export const loadWasmComplete = async (
+  project,
+  canvasRef,
+  userToken,
+  userSessionId
+) => {
+  // dispatch(wasmLoadStart());
+  try {
+    if (!checkWasmSupport()) {
+      throw new Error("Web assembly not supported");
+    }
+    if (!checkWebGL2Support()) {
+      throw new Error("WebGl2 not supported");
+    }
+
+    let wasmAxios = axios.create();
+    wasmAxios.defaults.baseURL = "";
+
+    const currentDate = new Date();
+    let downloadConfig = {
+      url: project + ".wasm?t=" + currentDate.getTime(),
+      method: "get",
+      responseType: "arraybuffer"
+    };
+    const binaryContent = await wasmAxios(downloadConfig);
+    const wasmBinary = new Uint8Array(binaryContent.data);
+
+    downloadConfig = {
+      url: project + ".js?t=" + currentDate.getTime(),
+      method: "get",
+      responseType: "text"
+    };
+    const content = await wasmAxios(downloadConfig);
+
+    const wasmScript = content.data;
+    window.wasmBinary = wasmBinary;
+    window.wasmScript = wasmScript;
+    // dispatch(wasmLoadSuccess());
+  } catch (ex) {
+    console.log(ex);
+    // dispatch(wasmLoadFailed(ex.message));
+  }
+
+  window.Module = {
+    arguments: [userToken, userSessionId],
+    print: text => {
+      console.log("W: " + text);
+    },
+    printErr: text => {
+      console.log("W ERROR: " + text);
+    },
+    canvas: canvasRef,
+    onRuntimeInitialized: () => {
+      console.log("Runtime initialized");
+      // dispatch(wasmRunSuccess(canvas));
+    },
+    instantiateWasm: (imports, successCallback) => {
+      WebAssembly.instantiate(window.wasmBinary, imports)
+        .then(function(output) {
+          console.log("wasm instantiation succeeded");
+          successCallback(output.instance);
+        })
+        .catch(function(e) {
+          console.log("wasm instantiation failed! " + e);
+          // dispatch(wasmRunFailed(e.message));
+        });
+      return {};
+    },
+    destroy: cpp => {
+      console.log("destroy");
+    }
+  };
+
+  // if (count === 0) {
+  const s = document.createElement("script");
+  s.text = window.wasmScript;
+  document.body.appendChild(s);
+  // setCount(1);
+  // }
+};
+
 const checkWasmSupport = () => {
   return typeof WebAssembly === "object";
 };

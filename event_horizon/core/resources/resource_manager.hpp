@@ -45,6 +45,12 @@ public:
         return nullptr;
     }
 
+    void clear() {
+        resources.erase(resources.begin(), resources.end());
+        resourcesMapper.erase(resourcesMapper.begin(), resourcesMapper.end());
+        dependencyDict.erase(dependencyDict.begin(), dependencyDict.end());
+    }
+
     void update() {
         for ( const auto& s : signalAddElements ) {
             addSignal(s);
@@ -165,4 +171,8 @@ private:
 
     SignalsDeferredContainer<T> signalAddElements;
     boost::signals2::signal<void(const ResourceTransfer<T>&)> addSignal;
+
+    SignalsDeferredContainer<T> signalRemoveElement;
+    boost::signals2::signal<void(const ResourceTransfer<T>&)> removeSignal;
+
 };

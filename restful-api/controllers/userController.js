@@ -173,20 +173,20 @@ const getUserWithRolesByIdProject = async (id, project) => {
   return dbUser;
 };
 
-const setDefaultUserProject = async userId => {
-  const projects = await getProjectsByUser(userId);
-  if (projects !== null && projects.length == 1) {
-    return projects[0].project;
-  }
-  return "";
+const getUserProjects = async userId => {
+  return await getProjectsByUser(userId);
 };
 
 const getProjectsByUser = async id => {
   const query = [];
   query.push({ $match: { userId: ObjectId(id) } });
+  query.push({ $match: { project: { $ne: "" } } });
 
-  const projects = await asyncModelOperations.aggregate(userRoleModel, query);
-  return projects;
+  try {
+    return await asyncModelOperations.aggregate(userRoleModel, query);
+  } catch (error) {
+    return null;
+  }
 };
 
 exports.createUser = async (name, email, password) => {
@@ -272,8 +272,8 @@ exports.getProjectsByUser = async userId => {
   return await getProjectsByUser(userId);
 };
 
-exports.setDefaultUserProject = async userId => {
-  return await setDefaultUserProject(userId);
+exports.getUserProjects = async userId => {
+  return await getUserProjects(userId);
 };
 
 exports.addRolesForProject = async (project, email, roles) => {

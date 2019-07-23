@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "../Spinner";
@@ -7,20 +7,16 @@ import ConfirmAlert from "../ConfirmAlert";
 import EntityUpdateContent from "./EntityUpdateContent";
 import EntityTags from "./EntityTags";
 import EntityInfo from "./EntityInfo";
-import { runWasm } from "../../../actions/wasm";
-
-let localWasmcanvas = null;
+import { loadWasmComplete } from "../../../actions/wasm";
 
 const EntriesEditor = ({
   currentEntity,
   loading,
   group,
   isWasmLoaded,
-  isWasmRunning,
   userToken,
   userSessionId,
-  showConfirmAlert,
-  runWasm
+  showConfirmAlert
 }) => {
   const onDeleteEntity = e => {
     // e.preventDefault();
@@ -28,89 +24,44 @@ const EntriesEditor = ({
   };
 
   const canvasRef = React.useRef(null);
-  // const [count, setCount] = useState(0);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (
-      (group === "geom" || group === "material") &&
-      currentEntity !== null &&
-      !loading
-      // !isWasmRunning
-    ) {
-      // if (count % 2 === 0) {
-      console.log(currentEntity);
-      window.Module = {
-        arguments: [userToken, userSessionId],
-        print: text => {
-          console.log("W: " + text);
-        },
-        printErr: text => {
-          console.log("W ERROR: " + text);
-        },
-        canvas: canvasRef.current,
-        onRuntimeInitialized: () => {
-          console.log("Runtime initialized");
-
-          // dispatch(wasmRunSuccess(canvas));
-        },
-        instantiateWasm: (imports, successCallback) => {
-          WebAssembly.instantiate(window.wasmBinary, imports)
-            .then(function(output) {
-              console.log("wasm instantiation succeeded");
-              successCallback(output.instance);
-            })
-            .catch(function(e) {
-              console.log("wasm instantiation failed! " + e);
-              // dispatch(wasmRunFailed(e.message));
-            });
-          return {};
-        },
-        destroy: cpp => {
-          console.log("destroy");
-        }
-      };
-
-      // if (count === 0) {
-      const s = document.createElement("script");
-      s.text = window.wasmScript;
-      document.body.appendChild(s);
-      // setCount(1);
-      // }
-
-      //        runWasm(canvasRef.current, userToken, userSessionId);
+    if (currentEntity !== null) {
+      if (count === 0) {
+        loadWasmComplete("editor", canvasRef.current, userToken, userSessionId);
+        setCount(1);
+      }
     }
-    // if (
-    //   group === "geom" &&
-    //   isWasmLoaded &&
-    //   currentEntity !== null &&
-    //   isWasmRunning
-    // ) {
-    //   reCanvas(localWasmcanvas);
-    // }
-  });
-
-  // useEffect(() => {});
-
-  // {e => (localWasmcanvas = e)}
-  // setCount(count + 1);
+  }, [count, userToken, userSessionId, currentEntity]);
 
   let mainContent = <Fragment />;
+  mainContent = (
+    <div className="EntryEditorRender">
+      <canvas
+        id="#canvas"
+        ref={canvasRef}
+        className="Canvas"
+        onContextMenu={e => e.preventDefault()}
+      />
+    </div>
+  );
   if (currentEntity !== null) {
-    if (group === "geom") {
-      console.log("localCanvas ", localWasmcanvas, " ref ", canvasRef);
-      mainContent = (
-        <div className="EntryEditorRender">
-          <canvas
-            id="#canvas"
-            ref={canvasRef}
-            //ref={useRef("#canvas")}
-            // ref={e => (localWasmcanvas = e)}
-            className="Canvas"
-            onContextMenu={e => e.preventDefault()}
-          />
-        </div>
-      );
-    }
+    // if (group === "geom") {
+    //   console.log("localCanvas ", localWasmcanvas, " ref ", canvasRef);
+    //   mainContent = (
+    //     <div className="EntryEditorRender">
+    //       <canvas
+    //         id="#canvas"
+    //         ref={canvasRef}
+    //         //ref={useRef("#canvas")}
+    //         // ref={e => (localWasmcanvas = e)}
+    //         className="Canvas"
+    //         onContextMenu={e => e.preventDefault()}
+    //       />
+    //     </div>
+    //   );
+    // }
     if (group === "image") {
       mainContent = (
         <div className="EntryEditorRender">
@@ -215,7 +166,7 @@ const EntriesEditor = ({
             </div>
             <div className="materialRender">
               <canvas
-                ref={e => (localWasmcanvas = e)}
+                // ref={e => (localWasmcanvas = e)}
                 className="CanvasMaterial"
                 onContextMenu={e => e.preventDefault()}
               />
@@ -251,10 +202,9 @@ const EntriesEditor = ({
       </div>
     );
 
-  return loading ? (
-    <Spinner />
-  ) : (
+  return (
     <Fragment>
+      {loading && <Spinner />}
       <div className="editor-a entryEditor">{entityRender}</div>
     </Fragment>
   );
@@ -269,7 +219,6 @@ EntriesEditor.propTypes = {
   userToken: PropTypes.string,
   userSessionId: PropTypes.string,
   showConfirmAlert: PropTypes.func.isRequired,
-  runWasm: PropTypes.func.isRequired,
   wasmCanvas: PropTypes.object
 };
 
@@ -294,5 +243,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { showConfirmAlert, runWasm }
+  { showConfirmAlert }
 )(EntriesEditor);

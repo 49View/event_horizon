@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 const Landing = auth => {
   if (auth.auth && auth.auth.isAuthenticated === true) {
-    return <Redirect to="/dashboard" />;
+    return <Redirect to="/dashboarduser" />;
   }
 
   return (

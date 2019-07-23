@@ -91,6 +91,10 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         this->RR().VPL( CommandBufferLimits::PBRStart, vp);
         this->RR().invalidateOnAdd();
     });
+
+    sg.nodeRemoveConnect( [this]( NodeGraphConnectParamsSig _geom ) {
+        this->RR().clearBucket( CommandBufferLimits::PBRStart );
+    });
 }
 
 void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {

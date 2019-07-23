@@ -43,7 +43,7 @@ export default function(state = initialState, action) {
     case LOGIN_FAIL:
     case LOGOUT:
       localStorage.removeItem("token");
-      wscClose(state.userdata.user);
+      if (state.userdata) wscClose(state.userdata.user);
       return {
         token: null,
         isAuthenticated: false,

@@ -10,6 +10,8 @@ import {
   REPLACE_ENTITY_TAGS
 } from "../actions/types";
 
+import { requestAsset } from "../utils/webSocketClient";
+
 const initialState = {
   entries: [],
   entriesFiltered: [],
@@ -61,6 +63,7 @@ export default function(state = initialState, action) {
         loading: true
       };
     case GET_ENTITY:
+      requestAsset(payload);
       return {
         ...state,
         currentEntity: payload,

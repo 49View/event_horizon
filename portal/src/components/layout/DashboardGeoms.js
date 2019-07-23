@@ -14,7 +14,7 @@ const FontsStrID = "Fonts";
 const VectorsStrID = "Vectors";
 const ColorsStrID = "Colors";
 
-const Dashboard = ({
+const DashboardGeoms = ({
   userstate,
   loading,
   isWasmLoaded,
@@ -29,12 +29,9 @@ const Dashboard = ({
       userstate.userdata.project !== null &&
       currentGroup === "default"
     ) {
-      getEntitiesOfGroup("material", userstate.userdata.project);
-      if (!isWasmLoaded) {
-        loadWasm("editor");
-      }
+      getEntitiesOfGroup("geom", userstate.userdata.project);
     }
-  }, [getEntitiesOfGroup, currentGroup, isWasmLoaded, userstate, loadWasm]);
+  }, [getEntitiesOfGroup, currentGroup, userstate]);
 
   if (!userstate.isAuthenticated) {
     return <Redirect to="/" />;
@@ -60,12 +57,12 @@ const Dashboard = ({
           : "leftSideBarGroup"
       }
     >
-      <a onClick={viewMore(text)} href="#!">
+      <span onClick={viewMore(text)} href="#">
         <div className="leftSideBarIcon">
           <i className={icon} />
         </div>
         <div className="leftSideBarText"> {text}</div>
-      </a>
+      </span>
     </div>
   );
 
@@ -84,11 +81,15 @@ const Dashboard = ({
 
   const topEntitySelectorBar = (
     <div className="topentityselectorbar-a topEntitySelectorBar">
-      {leftSideEntry("fas fa-cube", ObjectsStrID, currentGroup === "geom")}
+      {leftSideEntry(
+        "fas fa-cube",
+        ObjectsStrID,
+        currentGroup === "geom" || currentGroup === "default"
+      )}
       {leftSideEntry(
         "fas fa-code-branch",
         MaterialsStrID,
-        currentGroup === "material" || currentGroup === "default"
+        currentGroup === "material"
       )}
       {leftSideEntry("fas fa-images", ImagesStrID, currentGroup === "image")}
       {leftSideEntry("fas fa-font", FontsStrID, currentGroup === "font")}
@@ -105,7 +106,7 @@ const Dashboard = ({
     </div>
   );
 
-  console.log("Dashboard render");
+  console.log("DashboardGeoms render");
   return (
     <Fragment>
       <div className="dashboardContainer">
@@ -118,7 +119,7 @@ const Dashboard = ({
   );
 };
 
-Dashboard.propTypes = {
+DashboardGeoms.propTypes = {
   // setAlert: PropTypes.func.isRequired,
   userstate: PropTypes.object,
   loading: PropTypes.bool,
@@ -136,4 +137,4 @@ const mapStateToProps = state => ({
 export default connect(
   mapStateToProps,
   { getEntitiesOfGroup, loadWasm }
-)(Dashboard);
+)(DashboardGeoms);

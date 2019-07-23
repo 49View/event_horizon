@@ -16,19 +16,19 @@ router.get("/myProject", async (req, res, next) => {
 
 router.get("/", async (req, res, next) => {
   // console.log("USER GET /");
-  // res.send("dado");
-  //console.log(req.user);
   const result = {
     expires: req.user.expires,
     user: { name: req.user.name, email: req.user.email, guest: req.user.guest },
-    project: req.user.project
+    project: req.user.project,
+    projects: []
   };
   if (req.user.hasSession === true) {
     result.session = req.user.sessionId;
   }
-  if (result.project === "") {
-    result.project = await userController.setDefaultUserProject(req.user._id);
-  }
+  result.projects = await userController.getUserProjects(req.user._id);
+  // if (result.project === "" && result.projects.length == 1) {
+  //   result.project = result.projects[0];
+  // }
 
   res.send(result);
 });
@@ -45,6 +45,24 @@ router.put("/addRolesFor/:project", async (req, res, next) => {
     await userController.addRolesForProject(project, email, roles);
   } catch (ex) {
     console.log("Error adding roles for project", ex);
+    error = true;
+  }
+
+  error === null ? res.sendStatus(400) : res.sendStatus(204);
+});
+
+router.post("/createProject/:project", async (req, res, next) => {
+  console.log("Create project ", req.params.project);
+
+  const project = req.params.project;
+  const email = req.user.email;
+  const roles = ["admin", "user"];
+  let error = false;
+
+  try {
+    await userController.addRolesForProject(project, email, roles);
+  } catch (ex) {
+    console.log("Error creating project", ex);
     error = true;
   }
 

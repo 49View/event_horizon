@@ -106,3 +106,60 @@ export const login = (email, password, project) => async dispatch => {
 export const logout = () => dispatch => {
   dispatch({ type: LOGOUT });
 };
+
+// Create Project
+export const createProject = projectName => async dispatch => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    console.log("Create user Project post ", projectName);
+    await axios.post("user/createProject/" + projectName);
+
+    // Make sure we re-login with project set, otherwise most of the entity rest api req will fail
+    const res = await axios.post("/refreshtoken/" + projectName, {}, config);
+
+    dispatch({
+      type: LOGIN_SUCCESS,
+      payload: res.data
+    });
+
+    dispatch(loadUser());
+  } catch (err) {
+    console.log("craete project error: ", err);
+    const errors = err.errors;
+
+    if (errors) {
+      errors.forEach(error => dispatch(setAlert(error.msg, "danger")));
+    }
+
+    dispatch({
+      type: LOGIN_FAIL
+    });
+    dispatch(setAlert("Creating New Project Failed", "danger"));
+  }
+};
+
+// Create Project
+export const setCurrentProject = projectName => async dispatch => {
+  try {
+    // Make sure we re-login with project set, otherwise most of the entity rest api req will fail
+    const res = await axios.post("/refreshtoken/" + projectName);
+
+    dispatch({
+      type: LOGIN_SUCCESS,
+      payload: res.data
+    });
+
+    dispatch(loadUser());
+  } catch (err) {
+    console.log("craete project error: ", err);
+    dispatch({
+      type: LOGIN_FAIL
+    });
+    dispatch(setAlert("Cannot login to new project", "danger"));
+  }
+};

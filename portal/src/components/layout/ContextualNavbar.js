@@ -3,8 +3,6 @@ import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { getEntitiesOfGroup } from "../../actions/entities";
-import Entries from "./entities/Entries";
-import EntriesEditor from "./entities/EntriesEditor";
 import { loadWasm } from "../../actions/wasm";
 
 const ObjectsStrID = "Objects";
@@ -111,8 +109,6 @@ const Dashboard = ({
       <div className="dashboardContainer">
         {projectNameBox}
         {topEntitySelectorBar}
-        <Entries />
-        <EntriesEditor />
       </div>
     </Fragment>
   );

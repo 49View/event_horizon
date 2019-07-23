@@ -183,6 +183,7 @@ namespace Http {
     void loginSession();
     void refreshToken();
     void xProjectHeader( const LoginFields& _lf );
+    void clearRequestCache();
 
     void get( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,

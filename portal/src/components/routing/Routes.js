@@ -2,7 +2,8 @@ import React, { Fragment } from "react";
 import { Route, Switch } from "react-router-dom";
 import Register from "../auth/Register";
 import Login from "../auth/Login";
-import Dashboard from "../layout/Dashboard";
+import DashboardGeoms from "../layout/DashboardGeoms";
+import DashboardUser from "../layout/DashboardUser";
 import NotFound from "../layout/NotFound";
 import PrivateRoute from "../routing/PrivateRoute";
 import Navbar from "../../components/layout/Navbar";
@@ -30,7 +31,16 @@ const Routes = () => {
           <Switch>
             <Route exact path="/register" component={Register} />
             <Route exact path="/login" component={Login} />
-            <PrivateRoute exact path="/dashboard" component={Dashboard} />
+            <PrivateRoute
+              exact
+              path="/dashboard/geoms"
+              component={DashboardGeoms}
+            />
+            <PrivateRoute
+              exact
+              path="/dashboarduser"
+              component={DashboardUser}
+            />
             <Route component={NotFound} />
           </Switch>
         </AlertProvider>

@@ -22,9 +22,11 @@ using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
 class NodeGraph {
 public:
     void nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
+    void nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
 
 protected:
     NodeGraphContainer nodes;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
+    boost::signals2::signal<NodeGraphConnectFuncSig> nodeRemoveSignal;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
 };

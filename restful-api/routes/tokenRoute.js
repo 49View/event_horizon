@@ -94,6 +94,67 @@ router.post(
   }
 );
 
+router.post(
+  "/refreshToken/:project",
+  authController.authenticate,
+  async (req, res, next) => {
+    // console.log(req.user);
+    if (req.user === undefined || req.user === null) {
+      res.status(401).send();
+    } else {
+      let error = false;
+      let tokenInfo = null;
+      const ipAddress = req.ip;
+      const userAgent = req.headers["user-agent"] || null;
+
+      try {
+        if (req.user.hasToken === true) {
+          const sessionId = req.user.sessionId;
+
+          await sessionController.invalidateSessionById(sessionId);
+          tokenInfo = await authController.getToken(
+            req.user._id,
+            req.params.project,
+            ipAddress,
+            userAgent
+          );
+          await socketController.replaceClientsSession(
+            sessionId,
+            tokenInfo.session
+          );
+          tokenInfo.user = {
+            name: req.user.name,
+            email: req.user.email,
+            guest: req.user.guest
+          };
+          tokenInfo.project = req.params.project;
+        } else {
+          throw new Error("Can't refresh token");
+        }
+      } catch (ex) {
+        console.log("Error refreshing token", ex);
+        error = true;
+      }
+      if (error) {
+        res.status(401).send();
+      } else {
+        const d = new Date(0);
+        d.setUTCSeconds(tokenInfo.expires);
+
+        res
+          .cookie("eh_jwt", tokenInfo.token, {
+            httpOnly: true,
+            sameSite: false,
+            signed: true,
+            secure: true,
+            expires: d
+          })
+          .send(tokenInfo);
+      }
+    }
+  }
+);
+
 const getTokenResponse = async (res, req, project, email, password) => {
   let error = false;
   let errmessage = "";
@@ -121,10 +182,7 @@ const getTokenResponse = async (res, req, project, email, password) => {
         email: dbUser.email,
         guest: dbUser.guest
       };
-      tokenInfo.project =
-        project !== ""
-          ? project
-          : await userController.setDefaultUserProject(dbUser._id);
+      tokenInfo.project = project !== "" ? project : ""; //await userController.setDefaultUserProject(dbUser._id);
     }
   } catch (ex) {
     console.log("gettoken failed", ex);

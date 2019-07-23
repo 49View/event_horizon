@@ -112,3 +112,4 @@ platform/android/include
 platform/android/lib
 # Project exclude paths
 /portal/public/lc
+/portal/public/

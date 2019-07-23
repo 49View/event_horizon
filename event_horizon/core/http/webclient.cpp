@@ -177,6 +177,10 @@ namespace Http {
 
     static std::unordered_set<std::string> requestCache;
 
+    void clearRequestCache() {
+        requestCache.clear();
+    }
+
     void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
               HttpResouceCB mainThreadCallback ) {
         bool bPerformLoad = false;
