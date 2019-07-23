@@ -12,8 +12,9 @@ import { wscConnect, wscClose } from "../utils/webSocketClient";
 
 const initialState = {
   token: localStorage.getItem("token"),
-  isAuthenticated: null,
+  isAuthenticated: false,
   loading: true,
+  project: null,
   userdata: null
 };
 

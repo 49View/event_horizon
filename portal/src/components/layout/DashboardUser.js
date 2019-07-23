@@ -60,6 +60,7 @@ const DashboardUser = ({
               type="button"
               className="btn btn-primary"
               value={projectObject.project}
+              key={projectObject.project}
               onClick={e => onLoginToProject(e)}
             />
           ))}

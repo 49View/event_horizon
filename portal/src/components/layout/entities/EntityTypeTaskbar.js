@@ -99,8 +99,10 @@ const EntityTypeTaskBar = ({ userstate, getEntitiesOfGroup }) => {
 
   return (
     <Fragment>
-      {projectNameBox}
-      {topEntitySelectorBar}
+      <div className="projetTaskbar">
+        {projectNameBox}
+        {topEntitySelectorBar}
+      </div>
     </Fragment>
   );
 };

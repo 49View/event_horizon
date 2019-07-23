@@ -10,7 +10,7 @@ import EntityTags from "./EntityTags";
 import EntityInfo from "./EntityInfo";
 import { loadWasmComplete } from "../../../actions/wasm";
 
-const EntriesEditor = ({
+const GeomEditor = ({
   currentEntity,
   currentEntityNodes,
   loading,
@@ -223,7 +223,7 @@ const EntriesEditor = ({
   );
 };
 
-EntriesEditor.propTypes = {
+GeomEditor.propTypes = {
   currentEntity: PropTypes.object,
   currentEntityNodes: PropTypes.object,
   loading: PropTypes.bool,
@@ -255,4 +255,4 @@ const mapStateToProps = state => ({
 export default connect(
   mapStateToProps,
   { showConfirmAlert }
-)(EntriesEditor);
+)(GeomEditor);

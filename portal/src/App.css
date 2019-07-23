@@ -107,11 +107,26 @@ body {
   align-self: stretch;
 }
 
+.projetTaskbar {
+  display: grid;
+  grid-template-columns: 230px 1020px;
+  grid-template-rows: 55px;
+  grid-template-areas: "project topentityselectorbar";
+  grid-gap: 5px 5px;
+  align-items: center;
+  justify-items: stretch;
+  justify-content: center;
+  background-image: linear-gradient(
+    rgba(23, 162, 184, 0),
+    rgba(23, 162, 184, 0.06)
+  );
+}
+
 .dashboardContainer {
   display: grid;
   grid-template-columns: 230px 1020px;
-  grid-template-rows: 55px 584px;
-  grid-template-areas: "project topentityselectorbar" "thumbs editor";
+  grid-template-rows: 584px;
+  grid-template-areas: "thumbs editor";
   grid-gap: 5px 5px;
   align-items: center;
   justify-items: stretch;
