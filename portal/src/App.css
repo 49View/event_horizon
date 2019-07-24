@@ -366,6 +366,26 @@ input#search-bar:hover {
   align-self: start;
 }
 
+.nodeViewer-a {
+  grid-area: nodeViewer;
+  justify-self: stretch;
+  align-self: start;
+  padding: 5px;
+  margin: 5px;
+  border: 1px solid #d1d1d140;
+  border-radius: 4px;
+}
+
+.smallObjectMaterial {
+  width: 100%;
+  display: inline-block;
+  border: solid 1px rgba(23, 162, 184, 0.55);
+  background-image: linear-gradient(
+    rgba(23, 162, 184, 0.15),
+    rgba(23, 162, 184, 0)
+  );
+}
+
 .entity-info-c {
   border: 1px solid #d1d1d140;
   border-radius: 4px;
@@ -405,6 +425,21 @@ input#search-bar:hover {
     "render entity-tags"
     "render entity-info"
     "render deleteentity";
+  grid-gap: 0px 5px;
+  align-items: center;
+  justify-items: start;
+}
+
+.GeomEditorRenderGrid {
+  display: grid;
+  /* margin: 10px; */
+  grid-template-columns: 522px 203px 280px;
+  grid-template-rows: 45px 373px 117px 45px;
+  grid-template-areas:
+    "nameValue nameValue drag"
+    "render nodeViewer entity-tags"
+    "render nodeViewer entity-info"
+    "render nodeViewer deleteentity";
   grid-gap: 0px 5px;
   align-items: center;
   justify-items: start;
@@ -1088,7 +1123,7 @@ button {
 }
 
 .loader {
-  color: #fff;
+  color: rgb(21, 156, 156);
   position: fixed;
   box-sizing: border-box;
   left: -9999px;
@@ -1104,7 +1139,7 @@ button {
   display: none;
 }
 .loader.is-active {
-  background-color: rgba(0, 0, 0, 0.75);
+  /* background-color: rgba(0, 0, 0, 0.12); */
   width: 100%;
   height: 100%;
   left: 0;
@@ -1157,7 +1192,7 @@ button {
   position: fixed;
   width: 48px;
   height: 48px;
-  border: 8px solid #fff;
+  border: 8px solid rgb(21, 156, 156);
   border-left-color: transparent;
   border-radius: 50%;
   top: calc(50% - 24px);
@@ -1181,7 +1216,7 @@ button {
 .loader-double:after {
   width: 48px;
   height: 48px;
-  border-color: #fff;
+  border-color: rgb(21, 156, 156);
   border-left-color: transparent;
   top: calc(50% - 24px);
   left: calc(50% - 24px);
@@ -1197,7 +1232,7 @@ button {
 }
 .loader-bar[data-text]:before {
   top: calc(50% - 40px);
-  color: #fff;
+  color: rgb(21, 156, 156);
 }
 .loader-bar:after {
   content: "";
@@ -1309,7 +1344,7 @@ button {
   }
 }
 .loader-border[data-text]:before {
-  color: #fff;
+  color: rgb(21, 156, 156);
 }
 .loader-border:after {
   content: "";
@@ -1329,7 +1364,7 @@ button {
   top: 50%;
   left: 50%;
   margin: -25px 0 0 -25px;
-  background-color: #fff;
+  background-color: rgb(21, 156, 156);
   border-radius: 50%;
   z-index: 1;
   animation: kickBall 1s infinite alternate ease-in both;
@@ -1382,7 +1417,7 @@ button {
 }
 .loader-smartphone:after {
   content: "";
-  color: #fff;
+  color: rgb(21, 156, 156);
   font-size: 12px;
   font-family: Helvetica, Arial, sans-serif;
   text-align: center;
@@ -1505,7 +1540,7 @@ button {
   color: #666;
 }
 .loader-curtain:after {
-  color: #fff;
+  color: rgb(21, 156, 156);
   height: 0;
   animation: curtain 1s linear infinite alternate both;
 }
@@ -1575,7 +1610,7 @@ button {
   border-radius: 50%;
   text-align: center;
   line-height: 240px;
-  color: #fff;
+  color: rgb(21, 156, 156);
   font-size: 40px;
   font-family: Helvetica, Arial, sans-serif;
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
@@ -1589,7 +1624,7 @@ button {
   box-shadow: 0 0 0 10px;
 }
 .loader-music[data-hey-oh]:before {
-  background-color: #fff;
+  background-color: rgb(21, 156, 156);
   color: #000;
   animation: coinBack 2.5s linear infinite, oh 5s 1.25s linear infinite both;
 }
@@ -1738,9 +1773,15 @@ button {
   top: 50%;
   left: 50%;
   margin: -50px 0 0 -50px;
-  background: linear-gradient(180deg, red 42%, #000 0, #000 58%, #fff 0);
+  background: linear-gradient(
+    180deg,
+    red 42%,
+    #000 0,
+    #000 58%,
+    rgb(21, 156, 156) 0
+  );
   background-repeat: no-repeat;
-  background-color: #fff;
+  background-color: rgb(21, 156, 156);
   border-radius: 50%;
   z-index: 1;
   animation: movePokeball 1s linear infinite both;
@@ -1753,13 +1794,13 @@ button {
   top: 50%;
   left: 50%;
   margin: -12px 0 0 -12px;
-  background-color: #fff;
+  background-color: rgb(21, 156, 156);
   border-radius: 50%;
   z-index: 2;
   animation: movePokeball 1s linear infinite both,
     flashPokeball 0.5s infinite alternate;
   border: 2px solid #000;
-  box-shadow: 0 0 0 5px #fff, 0 0 0 10px #000;
+  box-shadow: 0 0 0 5px rgb(21, 156, 156), 0 0 0 10px #000;
 }
 @keyframes movePokeball {
   0% {
@@ -1777,7 +1818,7 @@ button {
 }
 @keyframes flashPokeball {
   0% {
-    background-color: #fff;
+    background-color: rgb(21, 156, 156);
   }
   to {
     background-color: #fd0;
@@ -1792,7 +1833,7 @@ button {
   top: calc(50% - 10px);
   left: calc(50% - 10px);
   border-radius: 50%;
-  background-color: #fff;
+  background-color: rgb(21, 156, 156);
   animation: kick 0.6s infinite alternate;
 }
 .loader-bouncing:after {

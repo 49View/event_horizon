@@ -20,11 +20,6 @@ const GeomEditor = ({
   userSessionId,
   showConfirmAlert
 }) => {
-  const onDeleteEntity = e => {
-    // e.preventDefault();
-    showConfirmAlert("Confirm deletion of ", "danger");
-  };
-
   const canvasRef = React.useRef(null);
   const [count, setCount] = useState(0);
 
@@ -41,7 +36,15 @@ const GeomEditor = ({
     return <Redirect to="/" />;
   }
 
+  const onDeleteEntity = e => {
+    // e.preventDefault();
+    showConfirmAlert("Confirm deletion of ", "danger");
+  };
+
+  const onReplaceEntity = e => {};
+
   let mainContent = <Fragment />;
+
   mainContent = (
     <Fragment>
       <div className="EntryEditorRender">
@@ -52,149 +55,30 @@ const GeomEditor = ({
           onContextMenu={e => e.preventDefault()}
         />
       </div>
-      <div>
+      <div className="nodeViewer-a">
         {currentEntityNodes &&
-          currentEntityNodes.mrefs.map(e => <div>{e}</div>)}
-        ;
+          currentEntityNodes.mrefs.map(e => (
+            <div key={e.key} className="smallObjectMaterial">
+              {e.key}
+              {e.value.values.mV3fs[0].key}
+              <input
+                type="button"
+                className="btn2 btn-primary"
+                value="Replace"
+                name={e.key}
+                onClick={eb => onReplaceEntity(eb)}
+              />
+            </div>
+          ))}
       </div>
     </Fragment>
   );
-  if (currentEntity !== null) {
-    // if (group === "geom") {
-    //   console.log("localCanvas ", localWasmcanvas, " ref ", canvasRef);
-    //   mainContent = (
-    //     <div className="EntryEditorRender">
-    //       <canvas
-    //         id="#canvas"
-    //         ref={canvasRef}
-    //         //ref={useRef("#canvas")}
-    //         // ref={e => (localWasmcanvas = e)}
-    //         className="Canvas"
-    //         onContextMenu={e => e.preventDefault()}
-    //       />
-    //     </div>
-    //   );
-    // }
-    if (group === "image") {
-      mainContent = (
-        <div className="EntryEditorRender">
-          <img className="bigimagequad" src={currentEntity.blobURL} alt="" />
-        </div>
-      );
-    }
-    if (group === "material") {
-      if (currentEntity.jsonRet.values.mType === "PN_SH") {
-        // Base Color
-        let depPBRMap = {
-          albedoTexture: "empty.png",
-          normalTexture: "empty.png",
-          roughnessTexture: "empty.png",
-          metallicTexture: "empty.png",
-          aoTexture: "empty.png",
-          heightTexture: "empty.png",
-          opacityTexture: "empty.png",
-          translucencyTexture: "empty.png"
-        };
-
-        for (const dep of currentEntity.jsonRet.values.mStrings) {
-          if (dep.key === "diffuseTexture") {
-            depPBRMap.albedoTexture = currentEntity.deps[dep.value];
-          }
-          if (dep.key === "normalTexture") {
-            depPBRMap.normalTexture = currentEntity.deps[dep.value];
-          }
-          if (dep.key === "roughnessTexture") {
-            depPBRMap.roughnessTexture = currentEntity.deps[dep.value];
-          }
-          if (dep.key === "metallicTexture") {
-            depPBRMap.metallicTexture = currentEntity.deps[dep.value];
-          }
-          if (dep.key === "aoTexture") {
-            depPBRMap.aoTexture = currentEntity.deps[dep.value];
-          }
-          if (dep.key === "heightTexture") {
-            depPBRMap.heightTexture = currentEntity.deps[dep.value];
-          }
-          if (dep.key === "opacityTexture") {
-            depPBRMap.opacityTexture = currentEntity.deps[dep.value];
-          }
-          if (dep.key === "translucencyTexture") {
-            depPBRMap.translucencyTexture = currentEntity.deps[dep.value];
-          }
-        }
-
-        mainContent = (
-          <div className="materialPBRContainer">
-            <div className="materialPBRRaw">
-              <div className="mediumPBRquad">
-                <img src={depPBRMap.albedoTexture} alt="" />
-                <div className="normal text-secondary text-center material-text">
-                  Albedo
-                </div>
-              </div>
-              <div className="mediumPBRquad">
-                <img src={depPBRMap.roughnessTexture} alt="" />
-                <div className="normal text-secondary text-center material-text">
-                  Roughness
-                </div>
-              </div>
-              <div className="mediumPBRquad">
-                <img src={depPBRMap.aoTexture} alt="" />
-                <div className="normal text-secondary text-center material-text">
-                  Ambient Occlusion
-                </div>
-              </div>
-              <div className="mediumPBRquad">
-                <img src={depPBRMap.heightTexture} alt="" />
-                <div className="normal text-secondary text-center material-text">
-                  Height
-                </div>
-              </div>
-            </div>
-            <div className="materialPBRRaw2">
-              <div className="mediumPBRquad">
-                <img src={depPBRMap.normalTexture} alt="" />
-                <div className="normal text-secondary text-center material-text">
-                  Normal
-                </div>
-              </div>
-              <div className="mediumPBRquad">
-                <img src={depPBRMap.metallicTexture} alt="" />
-                <div className="normal text-secondary text-center material-text">
-                  Metallic
-                </div>
-              </div>
-              <div className="mediumPBRquad">
-                <img src={depPBRMap.opacityTexture} alt="" />
-                <div className="normal text-secondary text-center material-text">
-                  Opacity
-                </div>
-              </div>
-              <div className="mediumPBRquad">
-                <img src={depPBRMap.translucencyTexture} alt="" />
-                <div className="normal text-secondary text-center material-text">
-                  Translucency
-                </div>
-              </div>
-            </div>
-            <div className="materialRender">
-              <canvas
-                // ref={e => (localWasmcanvas = e)}
-                className="CanvasMaterial"
-                onContextMenu={e => e.preventDefault()}
-              />
-            </div>
-          </div>
-        );
-      }
-    }
-  }
 
   const entityRender =
     currentEntity === null ? (
       <div className="EntryEditorRender" />
     ) : (
-      <div className="EntryEditorRenderGrid">
+      <div className="GeomEditorRenderGrid">
         <div className="nameValue-a medium text-primary">
           {currentEntity.entity.metadata.name}
         </div>

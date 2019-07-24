@@ -110,6 +110,14 @@ public:
         return nullptr;
     }
 
+    std::vector<std::string> getNames( const std::string& _key ) {
+        std::vector<std::string> ret{};
+        for ( const auto& [k,v] : resourcesMapper ) {
+            if ( v == _key && k != _key ) ret.emplace_back( k );
+        }
+        return ret;
+    }
+
     void connect( std::function<void (const ResourceTransfer<T>&)> _slot ) {
         addSignal.connect( _slot );
     }

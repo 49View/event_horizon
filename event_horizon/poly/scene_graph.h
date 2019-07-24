@@ -47,6 +47,7 @@ struct LoadedResouceCallbackData {
 using LoadedResouceCallbackContainer = std::vector<LoadedResouceCallbackData>;
 using GenericSceneCallbackValueMap = std::tuple<std::string, SerializableContainer, std::string>;
 using GenericSceneCallback = std::unordered_map<std::string, GenericSceneCallbackValueMap>;
+using EventSceneCallback = GenericSceneCallback;
 
 class SceneGraph : public NodeGraph {
 public:
@@ -114,7 +115,31 @@ public:
     }
 
     template <typename T>
-    const T* get( const ResourceRef& _ref ) const {
+    std::vector<std::string> getNames( const ResourceRef& _ref ) {
+        if constexpr ( std::is_same_v<T, VData>         ) { return vl.getNames(_ref); }
+        if constexpr ( std::is_same_v<T, RawImage>      ) { return tl.getNames(_ref); }
+        if constexpr ( std::is_same_v<T, Material>      ) { return ml.getNames(_ref); }
+        if constexpr ( std::is_same_v<T, Font>          ) { return fm.getNames(_ref); }
+        if constexpr ( std::is_same_v<T, Profile>       ) { return pl.getNames(_ref); }
+        if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.getNames(_ref); }
+        if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.getNames(_ref); }
+        if constexpr ( std::is_same_v<T, Geom>          ) { return gm.getNames(_ref); }
+    }
+
+    template <typename T>
+    [[nodiscard]] const T* get( const ResourceRef& _ref ) const {
+        if constexpr ( std::is_same_v<T, VData>         ) { return vl.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, RawImage>      ) { return tl.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, Material>      ) { return ml.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, Font>          ) { return fm.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, Profile>       ) { return pl.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, Geom>          ) { return gm.get(_ref).get(); }
+    }
+
+    template <typename T>
+    [[nodiscard]] const T* getPtr( const ResourceRef& _ref ) const {
         if constexpr ( std::is_same_v<T, VData>         ) { return vl.get(_ref).get(); }
         if constexpr ( std::is_same_v<T, RawImage>      ) { return tl.get(_ref).get(); }
         if constexpr ( std::is_same_v<T, Material>      ) { return ml.get(_ref).get(); }
@@ -190,6 +215,9 @@ public:
 
     static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
         SceneGraph::genericSceneCallback.emplace( _key, std::move(_value) );
+    }
+    static void addEventCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
+        SceneGraph::eventSceneCallback.emplace( _key, std::move(_value) );
     }
 
     template <typename T>
@@ -282,6 +310,7 @@ public:
     void chartMeshes2( scene_t& scene );
 
     static GenericSceneCallback           genericSceneCallback         ;
+    static EventSceneCallback             eventSceneCallback           ;
     static LoadedResouceCallbackContainer resourceCallbackVData        ;
     static LoadedResouceCallbackContainer resourceCallbackRawImage     ;
     static LoadedResouceCallbackContainer resourceCallbackMaterial     ;

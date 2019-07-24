@@ -22,7 +22,7 @@ export const requestAsset = currentEntity => {
       hash: currentEntity.entity.metadata.hash,
       entity_id: currentEntity.entity._id
     };
-    wscSend("loadAsset", obj);
+    wscSend("LoadGeomAndReset", obj);
   } catch (err) {
     console.log(err);
   }

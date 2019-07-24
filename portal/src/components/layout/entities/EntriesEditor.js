@@ -42,39 +42,7 @@ const EntriesEditor = ({
   }
 
   let mainContent = <Fragment />;
-  mainContent = (
-    <Fragment>
-      <div className="EntryEditorRender">
-        <canvas
-          id="#canvas"
-          ref={canvasRef}
-          className="Canvas"
-          onContextMenu={e => e.preventDefault()}
-        />
-      </div>
-      <div>
-        {currentEntityNodes &&
-          currentEntityNodes.mrefs.map(e => <div>{e}</div>)}
-        ;
-      </div>
-    </Fragment>
-  );
   if (currentEntity !== null) {
-    // if (group === "geom") {
-    //   console.log("localCanvas ", localWasmcanvas, " ref ", canvasRef);
-    //   mainContent = (
-    //     <div className="EntryEditorRender">
-    //       <canvas
-    //         id="#canvas"
-    //         ref={canvasRef}
-    //         //ref={useRef("#canvas")}
-    //         // ref={e => (localWasmcanvas = e)}
-    //         className="Canvas"
-    //         onContextMenu={e => e.preventDefault()}
-    //       />
-    //     </div>
-    //   );
-    // }
     if (group === "image") {
       mainContent = (
         <div className="EntryEditorRender">

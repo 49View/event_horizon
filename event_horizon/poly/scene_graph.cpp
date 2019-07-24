@@ -17,11 +17,13 @@
 #include <core/file_manager.h>
 #include <poly/converters/gltf2/gltf2.h>
 #include <poly/baking/xatlas_client.hpp>
+#include <poly/scene_events.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <poly/converters/obj/tiny_obj_loader.h>
 
 GenericSceneCallback           SceneGraph::genericSceneCallback         ;
+EventSceneCallback             SceneGraph::eventSceneCallback           ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackVData        ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackRawImage     ;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackMaterial     ;
@@ -70,7 +72,7 @@ std::shared_ptr<Camera> SceneGraph::DC() {
 }
 
 JSONDATA( MatGeomSerData, mrefs )
-    std::set<ResourceRef> mrefs;
+    std::unordered_map<std::string, Material> mrefs;
 };
 
 void SceneGraph::update() {
@@ -88,27 +90,39 @@ void SceneGraph::update() {
         } else if ( k == ResourceGroup::Material ) {
             B<MB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else if ( k == ResourceGroup::Geom ) {
-//            B<GRB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
-            if ( !nodes.empty() ) removeNode( nodes.begin()->second );
-            GM().clear();
-            Http::clearRequestCache();
-            load<Geom>( std::get<0>(v), [this](HttpResouceCBSign key) {
-                auto geom = GB<GT::Asset>( key );
-                DC()->center( geom->BBox3dCopy());
-                MatGeomSerData matSet{};
-                geom->visit( [&]( const GeomSPConst node ) {
-                    for ( const auto& data : node->DataV()) {
-                        matSet.mrefs.emplace( data.material );
-                    }
-                } );
-                Socket::send("materialsForGeom", matSet );
-            } );
+            B<GRB>( std::get<0>(v) ).publishAndAdd( std::get<1>(v) );
         } else {
             LOGRS("{" << k << "} Resource not supported yet in callback updating");
             ASSERT(0);
         }
     }
     genericSceneCallback.clear();
+
+    for ( auto& [k, v] : eventSceneCallback ) {
+        if ( k == SceneEvents::LoadGeomAndReset ) {
+            if ( !nodes.empty()) removeNode( nodes.begin()->second );
+            GM().clear();
+            Http::clearRequestCache();
+            load<Geom>( std::get<0>( v ), [this]( HttpResouceCBSign key ) {
+                auto geom = GB<GT::Asset>( key );
+                DC()->center( geom->BBox3dCopy());
+                MatGeomSerData matSet{};
+                geom->visit( [&]( const GeomSPConst node ) {
+                    for ( const auto& data : node->DataV()) {
+                        auto mat = get<Material>(data.material);
+                        auto names = getNames<Material>(data.material);
+                        auto matName = names.empty() ? data.material : names[0];
+                        matSet.mrefs.emplace( matName, *mat );
+                    }
+                } );
+                Socket::send( "materialsForGeom", matSet );
+            } );
+        }
+        if ( k == SceneEvents::LoadMaterialOnCurrent ) {
+
+        }
+    }
+    eventSceneCallback.clear();
 
     for ( const auto& res : resourceCallbackVData        ) {addVData        ( res.key, VData        {res.data}, res.ccf ); }
     for ( const auto& res : resourceCallbackRawImage     ) {addRawImage     ( res.key, RawImage     {res.data}, res.ccf ); }

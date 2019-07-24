@@ -210,30 +210,38 @@ public:
             for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
                 auto tname = std::string( (*(value))[name][t]["key"].GetString());
                 if ( (*(value))[name][t].FindMember( "value" ) != (*(value))[name][t].MemberEnd() ) {
-                    T mvalue;
-                    if constexpr ( std::is_same<T, std::string>::value ) mvalue = std::string((*(value))[name][t]["value"].GetString());
-                    if constexpr ( std::is_integral<T>::value ) mvalue = (*(value))[name][t]["value"].GetInt();
-                    if constexpr ( std::is_floating_point<T>::value ) mvalue = (*(value))[name][t]["value"].GetFloat();
+//                    T mvalue{ ( *( value ) )[name][t] };
+                    if constexpr ( std::is_same<T, std::string>::value ) {
+                        ret.emplace(tname, std::string((*(value))[name][t]["value"].GetString()));
+                    }
+                    if constexpr ( std::is_integral<T>::value ) {
+                        ret.emplace(tname, (*(value))[name][t]["value"].GetInt());
+                    }
+                    if constexpr ( std::is_floating_point<T>::value ) {
+                        ret.emplace(tname, (*(value))[name][t]["value"].GetFloat());
+                    }
                     if constexpr ( std::is_same<T, Vector2f>::value ||
                          std::is_same<T, Vector3f>::value ||
                          std::is_same<T, Vector4f>::value ||
                          std::is_same<T, Matrix4f>::value ||
                          std::is_same<T, Matrix3f>::value ) {
+                        T mvalue{};
                         for ( int q = 0; q < mvalue.size(); q++ ) {
                             mvalue[q] =(*(value))[name][t]["value"][q].GetFloat();
                         }
+                        ret.emplace(tname, mvalue);
                     }
                     if constexpr ( std::is_same<T, std::vector<Vector3f>>::value ) {
                         auto asize = ( *( value ) )[name][t]["value"].Size();
+                        T mvalue{};
                         mvalue.resize(asize);
                         for ( SizeType m = 0; m < asize; m++ ) {
                             for ( int q = 0; q < mvalue.size(); q++ ) {
                                 mvalue[m][q] = ( *( value ))[name][t]["value"][m][q].GetFloat();
                             }
                         }
+                        ret.emplace(tname, mvalue);
                     }
-
-                    ret.emplace(tname, mvalue);
                 }
             }
         }

@@ -690,9 +690,10 @@ void Camera::incrementOrbitDistance( float _d ) {
 
 void Camera::incrementSphericalAngles( const V2f& _sph ) {
     sphericalAcc -= _sph;
+    float sphericalSafeAntiGLockClamp = 0.02f;
 
-    if ( sphericalAcc.y() <= 0.0f )  sphericalAcc.setY(0.0000001f);
-    if ( sphericalAcc.y() >= M_PI )  sphericalAcc.setY(M_PI-0.00001f);
+    if ( sphericalAcc.y() <= sphericalSafeAntiGLockClamp ) sphericalAcc.setY(sphericalSafeAntiGLockClamp);
+    if ( sphericalAcc.y() >= M_PI-sphericalSafeAntiGLockClamp ) sphericalAcc.setY(M_PI-sphericalSafeAntiGLockClamp);
 
     if ( sphericalAcc.x() <= 0.0f )    sphericalAcc.setX(TWO_PI-0.0001f);
     if ( sphericalAcc.x() >= TWO_PI )  sphericalAcc.setX(0.0f);

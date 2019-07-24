@@ -8,6 +8,11 @@
 #include <vector>
 #include <core/htypes_shared.hpp>
 
+namespace SceneEvents {
+    static const std::string LoadGeomAndReset      = "LoadGeomAndReset";
+    static const std::string LoadMaterialOnCurrent = "LoadMaterialOnCurrent";
+};
+
 using entityDaemonCallbackFunction = void( const std::string&, const SerializableContainer& );
 
 void allCallbacksEntitySetup();
