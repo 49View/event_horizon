@@ -140,6 +140,7 @@ public:
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
+	void replaceMaterial( const std::string& _oldMatRef , const std::string& _newMatRef );
 
 	std::shared_ptr<Program> P(const std::string& _id);
 	std::shared_ptr<Texture> TD( const std::string& _id, int tSlot = -1 );

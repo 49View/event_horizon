@@ -10,7 +10,7 @@
 
 namespace SceneEvents {
     static const std::string LoadGeomAndReset      = "LoadGeomAndReset";
-    static const std::string LoadMaterialOnCurrent = "LoadMaterialOnCurrent";
+    static const std::string ReplaceMaterialOnCurrentObject = "ReplaceMaterialOnCurrentObject";
 };
 
 using entityDaemonCallbackFunction = void( const std::string&, const SerializableContainer& );

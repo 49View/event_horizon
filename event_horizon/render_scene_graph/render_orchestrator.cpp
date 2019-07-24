@@ -95,6 +95,11 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     sg.nodeRemoveConnect( [this]( NodeGraphConnectParamsSig _geom ) {
         this->RR().clearBucket( CommandBufferLimits::PBRStart );
     });
+
+    sg.replaceMaterialConnect( [this]( const std::string& _oldMatRef , const std::string& _newMatRef ) {
+        this->RR().replaceMaterial( _oldMatRef, _newMatRef );
+    });
+
 }
 
 void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {

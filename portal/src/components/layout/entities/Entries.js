@@ -10,11 +10,11 @@ import EntityDragAndImport from "./EntityDragAndImport";
 import EntitiesSearchBox from "./EntitiesSearchBox";
 import EntitiesThumbHandler from "./EntitiesThumbHandler";
 
-const Entries = ({ loading, entries }) => {
+const Entries = ({ loading, entries, cname }) => {
   return loading ? (
     <Spinner />
   ) : (
-    <div className="thumbs-a thumbsEntityArea">
+    <div className={cname}>
       <EntitiesSearchBox updatePartialSearch={updateEntriesPartialSearch} />
       <EntityDragAndImport />
       <EntitiesThumbHandler entries={entries} onClicked={getFullEntity} />

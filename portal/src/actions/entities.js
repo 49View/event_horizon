@@ -2,6 +2,7 @@ import axios from "axios";
 import { setAlert } from "./alert";
 import {
   GET_ENTITIES,
+  GET_MATERIALS_META,
   UPDATE_ENTITIES_PARTIAL_SEARCH,
   ENTITIES_PARTIAL_SEARCH_ERROR,
   ENTITY_ERROR,
@@ -12,6 +13,7 @@ import {
   REPLACE_ENTITY_TAGS
 } from "./types";
 import store from "../store";
+import { wscSend } from "../utils/webSocketClient";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
@@ -24,6 +26,51 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
     const res = await axios.get(`/entities/metadata/list/${group}/${project}`);
 
     dispatch({ type: GET_ENTITIES, payload: { data: res.data, group: group } });
+  } catch (err) {
+    dispatch({
+      type: ENTITY_ERROR,
+      payload: { msg: err.response }
+    });
+  }
+};
+
+export const replaceMaterial = entity => async dispatch => {
+  try {
+    // dispatch({
+    //   type: GET_ENTITY_LOAD,
+    //   payload: null
+    // });
+    const state = store.getState();
+    wscSend("ReplaceMaterialOnCurrentObject", {
+      entity_id: entity.metadata.name,
+      source_id: state.entities.selectedMatName
+    });
+
+    // dispatch({
+    //   type: GET_MATERIALS_META,
+    //   payload: { data: res.data }
+    // });
+  } catch (err) {
+    dispatch({
+      type: ENTITY_ERROR,
+      payload: { msg: err.response }
+    });
+  }
+};
+
+export const getAllMaterialsMeta = project => async dispatch => {
+  try {
+    dispatch({
+      type: GET_ENTITY_LOAD,
+      payload: null
+    });
+
+    const res = await axios.get(`/entities/metadata/list/material/${project}`);
+
+    dispatch({
+      type: GET_MATERIALS_META,
+      payload: { data: res.data }
+    });
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,

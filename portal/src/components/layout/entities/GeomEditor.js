@@ -3,25 +3,23 @@ import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "../Spinner";
-import { showConfirmAlert } from "../../../actions/confirmalert";
-import ConfirmAlert from "../ConfirmAlert";
 import EntityUpdateContent from "./EntityUpdateContent";
-import EntityTags from "./EntityTags";
-import EntityInfo from "./EntityInfo";
 import { loadWasmComplete } from "../../../actions/wasm";
+import SmallEntriesDialog from "./SmallEntriesDialog";
+import EntityMetaSection from "./EntityMetaSection";
+import { SET_SELECTED_MAT_NAME } from "../../../actions/types";
+import store from "../../../store";
 
 const GeomEditor = ({
   currentEntity,
   currentEntityNodes,
   loading,
-  group,
-  isWasmLoaded,
   userToken,
-  userSessionId,
-  showConfirmAlert
+  userSessionId
 }) => {
   const canvasRef = React.useRef(null);
   const [count, setCount] = useState(0);
+  const [replaceMaterialOn, setReplaceMaterialOn] = useState(false);
 
   useEffect(() => {
     if (currentEntity !== null) {
@@ -36,14 +34,35 @@ const GeomEditor = ({
     return <Redirect to="/" />;
   }
 
-  const onDeleteEntity = e => {
-    // e.preventDefault();
-    showConfirmAlert("Confirm deletion of ", "danger");
+  const onReplaceEntity = e => {
+    store.dispatch({ type: SET_SELECTED_MAT_NAME, payload: e.target.name });
+    setReplaceMaterialOn(true);
   };
 
-  const onReplaceEntity = e => {};
-
   let mainContent = <Fragment />;
+
+  const InObjectMaterials = () => {
+    return (
+      <Fragment>
+        <div className="nodeViewer-a">
+          {currentEntityNodes &&
+            currentEntityNodes.mrefs.map(e => (
+              <div key={e.key} className="smallObjectMaterial">
+                {e.key}
+                {e.value.values.mV3fs[0].key}
+                <input
+                  type="button"
+                  className="btn2 btn-primary"
+                  value="Replace"
+                  name={e.key}
+                  onClick={eb => onReplaceEntity(eb)}
+                />
+              </div>
+            ))}
+        </div>
+      </Fragment>
+    );
+  };
 
   mainContent = (
     <Fragment>
@@ -55,22 +74,7 @@ const GeomEditor = ({
           onContextMenu={e => e.preventDefault()}
         />
       </div>
-      <div className="nodeViewer-a">
-        {currentEntityNodes &&
-          currentEntityNodes.mrefs.map(e => (
-            <div key={e.key} className="smallObjectMaterial">
-              {e.key}
-              {e.value.values.mV3fs[0].key}
-              <input
-                type="button"
-                className="btn2 btn-primary"
-                value="Replace"
-                name={e.key}
-                onClick={eb => onReplaceEntity(eb)}
-              />
-            </div>
-          ))}
-      </div>
+      {replaceMaterialOn ? <SmallEntriesDialog /> : <InObjectMaterials />}
     </Fragment>
   );
 
@@ -84,18 +88,7 @@ const GeomEditor = ({
         </div>
         <EntityUpdateContent />
         {mainContent}
-        <EntityTags />
-        <EntityInfo />
-        <ConfirmAlert />
-        <div />
-        <div className="deleteentity-a">
-          <input
-            type="button"
-            className="btn2 btn-danger"
-            value="Delete :'("
-            onClick={e => onDeleteEntity(e)}
-          />
-        </div>
+        <EntityMetaSection />
       </div>
     );
 
@@ -111,12 +104,8 @@ GeomEditor.propTypes = {
   currentEntity: PropTypes.object,
   currentEntityNodes: PropTypes.object,
   loading: PropTypes.bool,
-  isWasmLoaded: PropTypes.bool,
-  isWasmRunning: PropTypes.bool,
-  group: PropTypes.string,
   userToken: PropTypes.string,
   userSessionId: PropTypes.string,
-  showConfirmAlert: PropTypes.func.isRequired,
   wasmCanvas: PropTypes.object
 };
 
@@ -130,13 +119,10 @@ const mapStateToProps = state => ({
       ? state.auth.session
       : state.auth.userdata.session
     : null,
-  group: state.entities.group,
-  isWasmLoaded: state.wasm.loaded,
-  isWasmRunning: state.wasm.running,
   wasmCanvas: state.wasm.wasmCanvas
 });
 
 export default connect(
   mapStateToProps,
-  { showConfirmAlert }
+  {}
 )(GeomEditor);

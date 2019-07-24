@@ -185,8 +185,8 @@ public:
         if constexpr ( std::is_same_v<R, CameraRig      > ) resourceCallbackCameraRig    .emplace_back( _key, _hash, std::move(_res), _ccf );
         if constexpr ( std::is_same_v<R, Geom           > ) resourceCallbackGeom         .emplace_back( _key, _hash, std::move(_res), _ccf );
     }
-    static void addDeferredComp( SerializableContainer&& _data, HttpResouceCB _ccf = nullptr ) {
-        resourceCallbackComposite.emplace_back( "", "", std::move(_data), _ccf );
+    static void addDeferredComp( const ResourceRef& _key, SerializableContainer&& _data, HttpResouceCB _ccf = nullptr ) {
+        resourceCallbackComposite.emplace_back( _key, "", std::move(_data), _ccf );
     }
 
     template <typename R>
@@ -209,7 +209,7 @@ public:
     ResourceRef addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf = nullptr );
     ResourceRef addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResouceCB _ccf = nullptr );
     ResourceRef addGeom          ( const ResourceRef& _key,       GeomSP         _res, HttpResouceCB _ccf = nullptr );
-    void addResources( const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
+    void addResources( CResourceRef _key, const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
 
     ResourceRef addMaterialIM    ( const ResourceRef& _key, const Material     & _res );
 

@@ -43,7 +43,7 @@ public:
                        if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
                        auto buff = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
                        if ( tarUtil::isTar(buff) ) {
-                           SceneGraph::addDeferredComp( std::move(buff), _res.ccf );
+                           SceneGraph::addDeferredComp( getFileNameCallbackKey( _res.uri ), std::move(buff), _res.ccf );
                        } else {
                            auto resHash = _res.ETag.empty() ? _res.uri + std::to_string(_res.length) : _res.ETag;
                            SceneGraph::addDeferred<R>( getFileNameCallbackKey( _res.uri ),

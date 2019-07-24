@@ -61,7 +61,7 @@ public:
         return material;
     }
 
-    inline void setMaterial( std::shared_ptr<RenderMaterial> mp );
+    void setMaterial( std::shared_ptr<RenderMaterial> mp );
 
     template<typename T>
     inline void setMaterialConstant( const std::string& name, const T& val ) {

@@ -104,7 +104,7 @@ void SceneGraph::update() {
             GM().clear();
             Http::clearRequestCache();
             load<Geom>( std::get<0>( v ), [this]( HttpResouceCBSign key ) {
-                auto geom = GB<GT::Asset>( key );
+                auto geom = GB<GT::Asset>( key, GT::Tag(1001) );
                 DC()->center( geom->BBox3dCopy());
                 MatGeomSerData matSet{};
                 geom->visit( [&]( const GeomSPConst node ) {
@@ -118,8 +118,14 @@ void SceneGraph::update() {
                 Socket::send( "materialsForGeom", matSet );
             } );
         }
-        if ( k == SceneEvents::LoadMaterialOnCurrent ) {
-
+        if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
+            auto matId =  std::get<0>( v );
+            auto oldMaterialRef = std::get<2>( v );
+            load<Material>( matId, [this, oldMaterialRef]( HttpResouceCBSign key ) {
+//                rsg.RR().changeMaterialOnTags(
+//                        { ArchType::CurtainT, sg.getHash<Material>( curtainSwapCycle[_index] ) } );
+                replaceMaterialSignal( oldMaterialRef, key );
+            });
         }
     }
     eventSceneCallback.clear();
@@ -135,7 +141,7 @@ void SceneGraph::update() {
         auto geom = GLTF2Service::load( *this, res.hash, res.data );
         addGeom( res.key, geom, res.ccf );
     }
-    for ( const auto& res : resourceCallbackComposite    ) {addResources( res.data, res.ccf ); }
+    for ( const auto& res : resourceCallbackComposite    ) {addResources( res.key, res.data, res.ccf ); }
 
     resourceCallbackVData        .clear();
     resourceCallbackRawImage     .clear();
@@ -313,7 +319,7 @@ ResourceRef SceneGraph::addGeom          ( const ResourceRef& _key, GeomSP      
     return _key;
 }
 
-void SceneGraph::addResources( const SerializableContainer& _data, HttpResouceCB _ccf ) {
+void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _data, HttpResouceCB _ccf ) {
 
     auto fs = tarUtil::untar(_data);
     ASSERT( fs.find(ResourceCatalog::Key) != fs.end() );
@@ -340,7 +346,7 @@ void SceneGraph::addResources( const SerializableContainer& _data, HttpResouceCB
         }
     }
 
-    if ( _ccf) _ccf("");
+    if ( _ccf) _ccf(_key);
 }
 
 ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {

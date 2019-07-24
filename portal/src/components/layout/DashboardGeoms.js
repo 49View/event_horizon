@@ -6,7 +6,7 @@ import GeomEditor from "./entities/GeomEditor";
 const DashboardGeoms = () => {
   return (
     <div className="dashboardContainer">
-      <Entries />
+      <Entries cname="thumbs-a thumbsEntityArea" />
       <GeomEditor />
     </div>
   );

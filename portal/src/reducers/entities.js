@@ -1,5 +1,6 @@
 import {
   GET_ENTITIES,
+  GET_MATERIALS_META,
   UPDATE_ENTITIES_PARTIAL_SEARCH,
   ENTITY_ERROR,
   DELETE_ENTITY,
@@ -7,6 +8,7 @@ import {
   GET_ENTITY,
   GET_ENTITY_LOAD,
   SET_ENTITY_NODES,
+  SET_SELECTED_MAT_NAME,
   REPLACE_ENTITY_TAGS
 } from "../actions/types";
 
@@ -15,6 +17,8 @@ import { requestAsset } from "../utils/webSocketClient";
 const initialState = {
   entries: [],
   entriesFiltered: [],
+  matEntries: [],
+  matEntriesFiltered: [],
   currentEntity: null,
   group: "material",
   loading: true,
@@ -43,6 +47,18 @@ export default function(state = initialState, action) {
         currentEntity: null,
         group: payload.group,
         loading: false
+      };
+    case GET_MATERIALS_META:
+      return {
+        ...state,
+        matEntries: payload.data,
+        matEntriesFiltered: payload.data,
+        loading: false
+      };
+    case SET_SELECTED_MAT_NAME:
+      return {
+        ...state,
+        selectedMatName: payload
       };
     case UPDATE_ENTITIES_PARTIAL_SEARCH:
       let filteredResult = [];

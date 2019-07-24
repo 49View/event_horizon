@@ -45,9 +45,9 @@ void loadGeomResetCallback( SocketCallbackDataTypeConstRef doc ) {
 }
 
 void loadMaterialOnCurrentCallback( SocketCallbackDataTypeConstRef doc ) {
-    SceneGraph::addEventCallback( SceneEvents::LoadMaterialOnCurrent,
+    SceneGraph::addEventCallback( SceneEvents::ReplaceMaterialOnCurrentObject,
                                   { getFileName( doc["data"]["entity_id"].GetString()), {},
-                                    doc["data"]["entity_id"].GetString() } );
+                                    doc["data"]["source_id"].GetString() } );
 }
 
 void allCallbacksEntitySetup() {
@@ -55,7 +55,7 @@ void allCallbacksEntitySetup() {
 //    daemonEntityCallbacks[ResourceGroup::Material] = callbackMaterial;
     Socket::on( "cloudStorageFileUpdate", cloudCallback );
     Socket::on( SceneEvents::LoadGeomAndReset, loadGeomResetCallback );
-    Socket::on( SceneEvents::LoadMaterialOnCurrent, loadMaterialOnCurrentCallback );
+    Socket::on( SceneEvents::ReplaceMaterialOnCurrentObject, loadMaterialOnCurrentCallback );
 }
 
 template<typename T>

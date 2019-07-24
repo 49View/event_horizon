@@ -404,6 +404,19 @@ void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _colo
     }
 }
 
+void Renderer::replaceMaterial( const std::string& _oldMatRef, const std::string& _newMatRef ) {
+    auto oldMat = rmm->getFromHash( _oldMatRef );
+    auto newMat = rmm->getFromHash( _newMatRef );
+    for ( const auto& [k, vl] : CL() ) {
+        for ( const auto& v : vl.mVList ) {
+            if ( v->getMaterial() == oldMat ) v->setMaterial( newMat );
+        }
+        for ( const auto& v : vl.mVListTransparent ) {
+            if ( v->getMaterial() == oldMat ) v->setMaterial( newMat );
+        }
+    }
+}
+
 void Renderer::invalidateOnAdd() {
     bInvalidated = true;
 }
