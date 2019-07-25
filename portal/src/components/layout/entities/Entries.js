@@ -15,7 +15,10 @@ const Entries = ({ loading, entries, cname }) => {
     <Spinner />
   ) : (
     <div className={cname}>
-      <EntitiesSearchBox updatePartialSearch={updateEntriesPartialSearch} />
+      <EntitiesSearchBox
+        updatePartialSearch={updateEntriesPartialSearch}
+        placeHolderText="Filter..."
+      />
       <EntityDragAndImport />
       <EntitiesThumbHandler entries={entries} onClicked={getFullEntity} />
     </div>

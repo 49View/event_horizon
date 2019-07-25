@@ -5,6 +5,7 @@ import {
   GET_MATERIALS_META,
   UPDATE_ENTITIES_PARTIAL_SEARCH,
   ENTITIES_PARTIAL_SEARCH_ERROR,
+  UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH,
   ENTITY_ERROR,
   DELETE_ENTITY,
   GET_ENTITY,
@@ -98,6 +99,20 @@ export const updateEntriesPartialSearch = partialString => dispatch => {
   try {
     dispatch({
       type: UPDATE_ENTITIES_PARTIAL_SEARCH,
+      payload: partialString
+    });
+  } catch (err) {
+    dispatch({
+      type: ENTITIES_PARTIAL_SEARCH_ERROR,
+      payload: { msg: err.response }
+    });
+  }
+};
+
+export const updateReplaceMaterialPartialSearch = partialString => dispatch => {
+  try {
+    dispatch({
+      type: UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH,
       payload: partialString
     });
   } catch (err) {

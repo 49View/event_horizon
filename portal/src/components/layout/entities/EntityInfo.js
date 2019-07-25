@@ -58,7 +58,7 @@ const EntityInfo = ({ currentEntity }) => {
           <i className="fas fa-code" />
           &nbsp;hash
         </span>
-        <span className="metaInfoValueNoOff small text-secondary">
+        <span className="metaInfoValueNoOff extra-small text-secondary">
           {currentEntity.entity.metadata.hash}
         </span>
         <br />

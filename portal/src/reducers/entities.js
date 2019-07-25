@@ -2,6 +2,7 @@ import {
   GET_ENTITIES,
   GET_MATERIALS_META,
   UPDATE_ENTITIES_PARTIAL_SEARCH,
+  UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH,
   ENTITY_ERROR,
   DELETE_ENTITY,
   ADD_ENTITY,
@@ -9,6 +10,7 @@ import {
   GET_ENTITY_LOAD,
   SET_ENTITY_NODES,
   SET_SELECTED_MAT_NAME,
+  CLOSE_REPLACE_MATERIAL,
   REPLACE_ENTITY_TAGS
 } from "../actions/types";
 
@@ -20,6 +22,7 @@ const initialState = {
   matEntries: [],
   matEntriesFiltered: [],
   currentEntity: null,
+  replaceMaterialOn: false,
   group: "material",
   loading: true,
   error: {}
@@ -55,9 +58,16 @@ export default function(state = initialState, action) {
         matEntriesFiltered: payload.data,
         loading: false
       };
+    case CLOSE_REPLACE_MATERIAL:
+      return {
+        ...state,
+        replaceMaterialOn: false,
+        selectedMatName: ""
+      };
     case SET_SELECTED_MAT_NAME:
       return {
         ...state,
+        replaceMaterialOn: true,
         selectedMatName: payload
       };
     case UPDATE_ENTITIES_PARTIAL_SEARCH:
@@ -73,6 +83,20 @@ export default function(state = initialState, action) {
         entriesFiltered: filteredResult,
         loading: false
       };
+    case UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH:
+      let matFilteredResult = [];
+      //   state.entriesFiltered.data.length = 0;
+      for (const e of state.matEntries) {
+        if (e.metadata.name.toLowerCase().includes(payload)) {
+          matFilteredResult.push(e);
+        }
+      }
+      return {
+        ...state,
+        matEntriesFiltered: matFilteredResult,
+        loading: false
+      };
+
     case GET_ENTITY_LOAD:
       return {
         ...state,

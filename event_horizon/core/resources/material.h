@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/heterogeneous_map.hpp>
+#include <core/name_policy.hpp>
 
 class MaterialColor {
 public:
@@ -19,28 +20,29 @@ public:
     }
 };
 
-class Material {
+class Material : public Keyable<> {
 public:
-    JSONSERIAL( Material, values );
+    JSONSERIAL( Material, mKey, values );
     explicit Material( const std::string& _type );
+    explicit Material( const std::string& _type, const std::string& _key );
     explicit Material( std::shared_ptr<HeterogeneousMap> _values );
     explicit Material( const Color4f & _color, const std::string& _type );
 
-    float getMetallicValue() const;
+    [[nodiscard]] float getMetallicValue() const;
     void setMetallicValue( float _metallicValue );
-    float getRoughnessValue() const;
+    [[nodiscard]] float getRoughnessValue() const;
     void setRoughnessValue( float _roughnessValue );
-    float getAoValue() const;
+    [[nodiscard]] float getAoValue() const;
     void setAoValue( float _aoValue );
-    float getOpacity() const;
+    [[nodiscard]] float getOpacity() const;
     void setOpacity( float _opacityValue );
-    V3f getDiffuseColor() const;
+    [[nodiscard]] V3f getDiffuseColor() const;
     void setDiffuseColor( const V3f& _value );
 
 //    bool isStreammable() const;
-    float translucency() const;
+    [[nodiscard]] float translucency() const;
 
-    const std::shared_ptr<HeterogeneousMap> Values() const;
+    [[nodiscard]] const std::shared_ptr<HeterogeneousMap> Values() const;
     std::shared_ptr<HeterogeneousMap> Values();
     void Values( std::shared_ptr<HeterogeneousMap> _values );
 

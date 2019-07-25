@@ -5,6 +5,11 @@ Material::Material( const std::string& _type ) {
     makeValues(_type);
 }
 
+Material::Material( const std::string& _type, const std::string& _key ) {
+    Key(_key);
+    makeValues(_type);
+}
+
 Material::Material( std::shared_ptr<HeterogeneousMap> _values ) {
     values = std::move( _values );
 }
@@ -20,19 +25,6 @@ void Material::makeValues( const std::string& _type ) {
 
 //static inline bool isShaderStreammable( const std::string& _sn ) {
 //    return ( _sn == S::YUV_GREENSCREEN || _sn == S::YUV );
-//}
-
-//void Material::resolveDynamicConstants() {
-//    ### MAT Fix up this
-//    values->visitTexturesWithKey( [&]( std::string& u, const std::string& _key ) {
-//        if ( _key == UniformNames::yTexture) {
-//            u = Name() + "_y";
-//        } else if ( _key == UniformNames::uTexture) {
-//            u = Name() + "_u";
-//        } else if ( _key == UniformNames::vTexture) {
-//            u = Name() + "_v";
-//        }
-//    });
 //}
 
 float Material::getMetallicValue() const {

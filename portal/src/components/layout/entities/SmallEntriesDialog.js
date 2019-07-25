@@ -3,18 +3,21 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "../Spinner";
 import {
-  updateEntriesPartialSearch,
+  updateReplaceMaterialPartialSearch,
   replaceMaterial,
   getAllMaterialsMeta
 } from "../../../actions/entities";
-import EntityDragAndImport from "./EntityDragAndImport";
+import { CLOSE_REPLACE_MATERIAL } from "../../../actions/types";
+
 import EntitiesSearchBox from "./EntitiesSearchBox";
 import EntitiesThumbHandler from "./EntitiesThumbHandler";
+import store from "../../../store";
 
 const SmallEntriesDialog = ({
   loading,
   entries,
   project,
+  selectedMatName,
   getAllMaterialsMeta
 }) => {
   const [count, setCount] = useState(0);
@@ -26,12 +29,30 @@ const SmallEntriesDialog = ({
     }
   }, [count, entries, getAllMaterialsMeta, project]);
 
+  const closeReplaceMaterial = flag => () => {
+    store.dispatch({ type: CLOSE_REPLACE_MATERIAL, payload: flag });
+  };
+
   return loading ? (
     <Spinner />
   ) : (
     <div className="nodeViewer-a">
-      <EntitiesSearchBox updatePartialSearch={updateEntriesPartialSearch} />
-      <EntityDragAndImport />
+      <div className="closeButton">
+        <span className="leftFloat text-secondary normal">
+          {selectedMatName}
+        </span>
+        <span
+          className="text-danger rightFloat medium clickable"
+          onClick={closeReplaceMaterial(false)}
+        >
+          <i className="far fa-times-circle" />
+        </span>
+      </div>
+      <EntitiesSearchBox
+        updatePartialSearch={updateReplaceMaterialPartialSearch}
+        placeHolderText="Replace with..."
+        extraClassName="search-bar-smaller"
+      />
       <EntitiesThumbHandler entries={entries} onClicked={replaceMaterial} />
     </div>
   );
@@ -40,13 +61,15 @@ const SmallEntriesDialog = ({
 SmallEntriesDialog.propTypes = {
   loading: PropTypes.bool,
   project: PropTypes.string,
+  selectedMatName: PropTypes.string,
   entries: PropTypes.array
 };
 
 const mapStateToProps = state => ({
   loading: state.auth.loading,
   project: state.auth.userdata.project,
-  entries: state.entities.matEntriesFiltered
+  entries: state.entities.matEntriesFiltered,
+  selectedMatName: state.entities.selectedMatName
 });
 
 export default connect(

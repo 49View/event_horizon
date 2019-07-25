@@ -473,7 +473,9 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
 	float aperture = ( tanf( degToRad( 90.0f - (mFov->value) ) ) ) / mViewPort.ratio();
 
 	float bdiameter = _bbox.calcDiameter();
-	Vector3f cp = { 0.0f, 0.0f, aperture + bdiameter };
+	mOrbitDistance = aperture + bdiameter;
+	Vector3f cp = { 0.0f, 0.0f, mOrbitDistance };
+    mTarget->value = _bbox.centre();
 
 	if ( cca == CameraCenterAngle::Front ) {
         mPos->value = cp + _bbox.centre();
@@ -484,9 +486,16 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
         qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS};
         UpdateIncrementalEulerFromQangle();
         sphericalAcc = V2f{M_PI, M_PI_2};
-    }
-	mTarget->value = _bbox.centre();
-	mOrbitDistance = cp.z();
+    } else if ( cca == CameraCenterAngle::Halfway ) {
+        qangle->value = Quaternion{ M_PI_4, Vector3f::UP_AXIS} * Quaternion{ M_PI_4, Vector3f::Z_AXIS};
+        UpdateIncrementalEulerFromQangle();
+        sphericalAcc = V2f{TWO_PI - (float)M_PI_4*0.5f, (float)M_PI_4+ (float)M_PI_4*0.5f};
+        if ( Mode() == CameraMode::Orbit ) {
+            computeOrbitPosition();
+        } else {
+            mPos->value = cp + _bbox.centre();
+        }
+	}
 }
 
 void Camera::pan( const Vector3f& posDiff ) {

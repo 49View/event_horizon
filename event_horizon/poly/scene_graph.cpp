@@ -105,14 +105,13 @@ void SceneGraph::update() {
             Http::clearRequestCache();
             load<Geom>( std::get<0>( v ), [this]( HttpResouceCBSign key ) {
                 auto geom = GB<GT::Asset>( key, GT::Tag(1001) );
-                DC()->center( geom->BBox3dCopy());
+                DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Halfway );
                 MatGeomSerData matSet{};
                 geom->visit( [&]( const GeomSPConst node ) {
                     for ( const auto& data : node->DataV()) {
                         auto mat = get<Material>(data.material);
-                        auto names = getNames<Material>(data.material);
-                        auto matName = names.empty() ? data.material : names[0];
-                        matSet.mrefs.emplace( matName, *mat );
+                        LOGRS("MAT Name: " << mat->Key() );
+                        matSet.mrefs.emplace( mat->Key(), *mat );
                     }
                 } );
                 Socket::send( "materialsForGeom", matSet );
