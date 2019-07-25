@@ -410,7 +410,7 @@ input#search-bar:hover {
   height: 522px;
   border: 1px solid #d1d1d140;
   border-radius: 4px;
-  /* overflow-y: scroll; */
+  overflow-y: auto;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
 }
 
@@ -428,7 +428,7 @@ input#search-bar:hover {
 
 .replaceMat-a {
   grid-area: replaceMat;
-  justify-self: center;
+  justify-self: end;
   align-self: center;
   cursor: pointer;
 }
@@ -453,7 +453,7 @@ input#search-bar:hover {
 
 .baseColorPicker-a {
   grid-area: baseColorPicker;
-  justify-self: center;
+  justify-self: end;
   align-self: center;
 }
 
@@ -562,8 +562,9 @@ input#search-bar:hover {
   margin: 10px 0px;
   padding: 4px 8px;
   padding-top: 2px;
-  grid-template-columns: 32px 32px 32px 32px 32px 32px;
-  grid-template-rows: 32px 28px 28px 28px 28px 32px 8px;
+  grid-template-columns: repeat(6, 15.5%);
+  grid-template-rows: 32px 22px 16px 16px 16px 32px 8px;
+  grid-template-rows: 32px 22px 16px 16px 16px 32px 8px;
   grid-template-areas:
     "matName matName matName matName matName replaceMat"
     "baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorPicker"

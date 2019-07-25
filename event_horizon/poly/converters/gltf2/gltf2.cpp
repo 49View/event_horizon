@@ -254,21 +254,6 @@ namespace GLTF2Service {
         removeNonAlphaCharFromString( im.name );
 
         auto mname = mat.name;
-//        if ( mname == "Curtain1" || mname == "Curtain2" ) mname = "carillo_diamante_curtain";
-//        if ( mname == "Brimnes" ) mname = "Brimnes_Base";
-//        if ( mname == "Material #0" ) mname = "picture001";
-//        if ( mname == "Material #1" ) mname = "picture002";
-//        if ( mname == "Material #2" ) mname = "picture005";
-//        if ( mname == "Material #3" ) mname = "picture004";
-//        if ( mname == "01 - Default" && _gltf.contentHash.find( "picture" ) != std::string::npos )
-//            mname = "picture2_frame";
-//        if ( mname == "01 - Default1" && _gltf.contentHash.find( "lauter" ) != std::string::npos ) mname = "lauter";
-//        if ( mname == "01 - Default1" && _gltf.contentHash.find( "shelf" ) != std::string::npos )
-//            mname = "Hemnes_Shelf";
-//        if ( mname == "01 - Default" && _gltf.contentHash.find( "drawer" ) != std::string::npos )
-//            mname = "Hemnes_Drawer";
-//        if ( mname == "01 - Default" && _gltf.contentHash.find( "lauter" ) != std::string::npos ) mname = "selije";
-//        if ( mname == "Soderhamn" ) mname = "Soderhamn_Base";
         auto matRef = _sg.getHash<Material>( mname );
         if ( matRef.empty()) {
             Material imMat{ S::SH, mname };

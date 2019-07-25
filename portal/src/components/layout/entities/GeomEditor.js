@@ -44,7 +44,10 @@ const GeomEditor = ({
   }
 
   const onReplaceEntity = e => {
-    store.dispatch({ type: SET_SELECTED_MAT_NAME, payload: e.target.name });
+    store.dispatch({
+      type: SET_SELECTED_MAT_NAME,
+      payload: e.currentTarget.dataset.id
+    });
   };
 
   const onChangeMaterialColor = e => {
@@ -92,7 +95,7 @@ const GeomEditor = ({
             <div key={e.key} className="smallObjectMaterial">
               <div className="matName-a">{e.key}</div>
               <div className="replaceMat-a">
-                <span name={e.key} onClick={eb => onReplaceEntity(eb)}>
+                <span data-id={e.key} onClick={eb => onReplaceEntity(eb)}>
                   <i className="fas fa-exchange-alt" />
                 </span>
               </div>
@@ -135,7 +138,7 @@ const GeomEditor = ({
                 />
               </div>
 
-              <div className="aoLabel-a">Roughness</div>
+              <div className="aoLabel-a">Ambient Occlusion</div>
               <div className="aoSlider-a">
                 <input
                   type="range"

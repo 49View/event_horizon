@@ -108,6 +108,7 @@ export default function(state = initialState, action) {
         ...state,
         currentEntity: payload,
         currentTags: evaluateTags(payload.entity.metadata.tags),
+        replaceMaterialOn: false,
         loading: false
       };
     case SET_ENTITY_NODES:
