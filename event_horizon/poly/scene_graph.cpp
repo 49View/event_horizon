@@ -121,14 +121,22 @@ void SceneGraph::update() {
         }
         if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
             auto matId = getFileName( doc["data"]["entity_id"].GetString());
-            auto oldMaterialRef = doc["data"]["source_id"].GetString();
-            load<Material>( matId, [this, oldMaterialRef]( HttpResouceCBSign key ) {
-                replaceMaterialSignal( oldMaterialRef, key );
+            signalValueMap["source_material_id"] =  std::string(doc["data"]["source_id"].GetString());
+            load<Material>( matId, [&]( HttpResouceCBSign key ) {
+                LOGRS( "OldMaterialRef: " << signalValueMap["source_material_id"] );
+                replaceMaterialSignal( signalValueMap["source_material_id"], key );
             } );
         }
         if ( k == SceneEvents::ChangeMaterialProperty ) {
-            changeMaterialPropertySignal( doc["data"]["property_id"].GetString(),
-                    doc["data"]["mat_id"].GetString(), doc["data"]["value_str"].GetString() );
+            if ( doc["data"]["value_type"].GetString() == std::string("hexcolor") ) {
+                auto value = C4f::XTORGBA( doc["data"]["value_str"].GetString() ).xyz();
+                changeMaterialPropertyV3fSignal( doc["data"]["property_id"].GetString(),
+                                                 doc["data"]["mat_id"].GetString(), value );
+            } else if ( doc["data"]["value_type"].GetString() == std::string("float100") ) {
+                float value = std::stof( doc["data"]["value_str"].GetString() ) / 100.0f;
+                changeMaterialPropertyFloatSignal( doc["data"]["property_id"].GetString(),
+                                                 doc["data"]["mat_id"].GetString(), value );
+            }
         }
     }
     eventSceneCallback.clear();

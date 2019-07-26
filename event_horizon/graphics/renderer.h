@@ -84,6 +84,7 @@ struct RDSRoundedCorner {
 };
 
 using CommandBufferLimitsT = int;
+using CommandBufferListVectorMap = std::map<int, CommandBufferListVector>;
 
 class RenderAnimationManager {
 public:
@@ -156,6 +157,7 @@ public:
 
 	void setRenderHook( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _hook );
 	void setGlobalTextures();
+    [[nodiscard]] std::shared_ptr<RenderMaterial> getRenderMaterialFromHash( CResourceRef _hash );
 
 	std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
     std::shared_ptr<LightManager>   LM() { return lm; }
@@ -169,8 +171,8 @@ public:
 	bool hasTag( uint64_t _tag ) const;
 
 	inline CommandBufferList& CB_U() { return *mCommandBuffers; }
-	inline std::map<int, CommandBufferListVector>& CL() { return mCommandLists; }
-    inline const std::map<int, CommandBufferListVector>& CL() const { return mCommandLists; }
+	inline CommandBufferListVectorMap& CL() { return mCommandLists; }
+    inline const CommandBufferListVectorMap& CL() const { return mCommandLists; }
 
 	void resetDefaultFB( const Vector2i& forceSize = Vector2i{-1});
 

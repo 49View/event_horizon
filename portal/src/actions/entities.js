@@ -126,10 +126,12 @@ export const updateReplaceMaterialPartialSearch = partialString => dispatch => {
 
 export const changeMaterialPropery = event => dispatch => {
   try {
+    const [propertyStr, valueType] = event.target.name.split("-", 2);
     wscSend("ChangeMaterialProperty", {
       mat_id: event.target.id,
-      property_id: event.target.name,
-      value_str: event.target.value
+      property_id: propertyStr,
+      value_str: event.target.value,
+      value_type: valueType
     });
     dispatch({ type: CHANGE_MATERIAL_COLOR, payload: event.target.value });
   } catch (error) {

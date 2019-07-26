@@ -42,6 +42,21 @@ void RenderOrchestrator::updateCallbacks() {
     resizeCallbacks();
 }
 
+template <typename T>
+void setMatProperty( std::vector<std::shared_ptr<VPList>>& vList, std::shared_ptr<RenderMaterial> mat,
+                     const std::string& _uniform, const T& _value ) {
+    for ( const auto& v : vList ) {
+        if ( v->getMaterial() == mat ) v->getMaterial()->setConstant( _uniform, _value );
+    }
+}
+
+template <typename F, typename T, typename ...Args>
+void foreachCL( CommandBufferListVectorMap& CL, F func, const T& _value, Args ...args ) {
+    for ( auto&[k, vl] : CL ) {
+        vl.foreach( func, std::forward<Args>( args )..., _value );
+    }
+}
+
 RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg) {
 
     sg.FM().connect( [](const ResourceTransfer<Font>& _val ) {
@@ -100,8 +115,28 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         this->RR().replaceMaterial( _oldMatRef, _newMatRef );
     });
 
-    sg.changeMaterialPropertyConnect( [this]( const std::string& _prop, const std::string& _key, const std::string& _value ) {
-        this->RR().changeMaterialProperty( _prop, _key, _value );
+    sg.changeMaterialPropertyConnectString( [this]( const std::string& _prop, const std::string& _key,
+                                                 const std::string& _value ) {
+        foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
+                   this->RR().getRenderMaterialFromHash( _key ), _prop );
+    });
+
+    sg.changeMaterialPropertyConnectFloat( [this]( const std::string& _prop, const std::string& _key,
+                                                 const float& _value ) {
+        foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
+                   this->RR().getRenderMaterialFromHash( _key ), _prop );
+    });
+
+    sg.changeMaterialPropertyConnectV3f( [this]( const std::string& _prop, const std::string& _key,
+                                              const V3f& _value ) {
+        foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
+                this->RR().getRenderMaterialFromHash( _key ), _prop );
+    });
+
+    sg.changeMaterialPropertyConnectV4f( [this]( const std::string& _prop, const std::string& _key,
+                                                 const V4f& _value ) {
+        foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
+                   this->RR().getRenderMaterialFromHash( _key ), _prop );
     });
 
 }

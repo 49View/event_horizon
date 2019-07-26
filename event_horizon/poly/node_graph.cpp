@@ -16,6 +16,18 @@ void NodeGraph::replaceMaterialConnect( const std::function<NodeGraphConnectRepl
     replaceMaterialSignal.connect( _slot );
 }
 
-void NodeGraph::changeMaterialPropertyConnect( const std::function<NodeGraphConnectChangeMaterialPropertyFuncSig>& _slot ) {
-    changeMaterialPropertySignal.connect(_slot);
+void NodeGraph::changeMaterialPropertyConnectString( const std::function<NodeGraphConnectChangeMaterialPropertySFuncSig>& _slot ) {
+    changeMaterialPropertyStringSignal.connect(_slot);
+}
+
+void NodeGraph::changeMaterialPropertyConnectFloat( const std::function<NodeGraphConnectChangeMaterialPropertyFFuncSig>& _slot ) {
+    changeMaterialPropertyFloatSignal.connect(_slot);
+}
+
+void NodeGraph::changeMaterialPropertyConnectV3f( const std::function<NodeGraphConnectChangeMaterialPropertyV3fFuncSig>& _slot ) {
+    changeMaterialPropertyV3fSignal.connect(_slot);
+}
+
+void NodeGraph::changeMaterialPropertyConnectV4f( const std::function<NodeGraphConnectChangeMaterialPropertyV4fFuncSig>& _slot ) {
+    changeMaterialPropertyV4fSignal.connect(_slot);
 }

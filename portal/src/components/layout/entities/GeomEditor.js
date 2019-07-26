@@ -120,7 +120,7 @@ const GeomEditor = ({
                 <input
                   type="color"
                   id={e.key}
-                  name="diffuseColor"
+                  name="diffuseColor-hexcolor"
                   defaultValue={e.baseColor}
                   onChange={eb => onChangeMaterialPropery(eb)}
                 />
@@ -135,7 +135,7 @@ const GeomEditor = ({
                   max="100"
                   defaultValue={e.metallicValue * 100}
                   id={e.key}
-                  name="metallicV"
+                  name="metallicV-float100"
                   onChange={eb => onChangeMaterialPropery(eb)}
                 />
               </div>
@@ -148,7 +148,7 @@ const GeomEditor = ({
                   min="1"
                   max="100"
                   defaultValue={e.roughnessValue * 100}
-                  name="roughnessV"
+                  name="roughnessV-float100"
                   id={e.key}
                   onChange={eb => onChangeMaterialPropery(eb)}
                 />
@@ -162,7 +162,7 @@ const GeomEditor = ({
                   min="1"
                   max="100"
                   defaultValue={e.aoValue * 100}
-                  name="aoV"
+                  name="aoV-float100"
                   id={e.key}
                   onChange={eb => onChangeMaterialPropery(eb)}
                 />
@@ -176,7 +176,7 @@ const GeomEditor = ({
                   min="1"
                   max="100"
                   defaultValue={e.opacityValue * 100}
-                  name="opacity"
+                  name="opacity-float100"
                   id={e.key}
                   onChange={eb => onChangeMaterialPropery(eb)}
                 />

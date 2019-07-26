@@ -26,6 +26,7 @@
 #include <graphics/shader_material.hpp>
 #include <graphics/render_material_manager.hpp>
 #include <graphics/gpuv_data_manager.hpp>
+
 #ifdef _USE_IMGUI_
 #include <graphics/imgui/imgui.h>
 #endif
@@ -33,6 +34,7 @@
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #endif
+
 #include <stb/stb_image_write.h>
 #include "core/service_factory.h"
 
@@ -40,7 +42,7 @@ namespace FBNames {
     static std::unordered_set<std::string> sFBNames;
 
     bool isPartOf( const std::string& _val ) {
-        if ( sFBNames.empty() ) {
+        if ( sFBNames.empty()) {
             sFBNames.insert( shadowmap );
             sFBNames.insert( lightmap );
             sFBNames.insert( sceneprobe );
@@ -65,9 +67,9 @@ generateGeometryVP( std::shared_ptr<VData> _data ) {
     std::memcpy( _indices.get(), _data->Indices(), _data->numIndices() * sizeof( int32_t ));
     auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( _data->numVerts(), PRIMITIVE_TRIANGLES,
                                                                    VFVertexAllocation::PreAllocate, _data->numIndices(),
-                                                                   std::move(_indices) );
+                                                                   std::move( _indices ));
     for ( int32_t t = 0; t < _data->numVerts(); t++ ) {
-        SOAData->addVertex( _data->soaAt(t) );
+        SOAData->addVertex( _data->soaAt( t ));
     }
     return SOAData;
 }
@@ -78,7 +80,7 @@ void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>
     invalidateOnAdd();
 }
 
-Renderer::Renderer( StreamingMediator& _ssm) : ssm(_ssm) {
+Renderer::Renderer( StreamingMediator& _ssm ) : ssm( _ssm ) {
 }
 
 std::shared_ptr<RLTarget> Renderer::getTarget( const std::string& _name ) {
@@ -89,7 +91,7 @@ std::shared_ptr<RLTarget> Renderer::getTarget( const std::string& _name ) {
 }
 
 void Renderer::addTarget( std::shared_ptr<RLTarget> _target ) {
-    mTargets.emplace_back(_target);
+    mTargets.emplace_back( _target );
 }
 
 void Renderer::clearTargets() {
@@ -103,7 +105,7 @@ StreamingMediator& Renderer::SSM() {
 }
 
 void Renderer::resetDefaultFB( const Vector2i& forceSize ) {
-    mDefaultFB = FrameBufferBuilder{ *this, "default" }.size(forceSize).build();
+    mDefaultFB = FrameBufferBuilder{ *this, "default" }.size( forceSize ).build();
 }
 
 void Renderer::init() {
@@ -111,8 +113,8 @@ void Renderer::init() {
     tm = std::make_shared<TextureManager>();
     lm = std::make_shared<LightManager>();
     gm = std::make_shared<GPUVDataManager>();
-    rmm = std::make_shared<RenderMaterialManager>(*this);
-    mCommandBuffers = std::make_shared<CommandBufferList>(*this);
+    rmm = std::make_shared<RenderMaterialManager>( *this );
+    mCommandBuffers = std::make_shared<CommandBufferList>( *this );
 
     resetDefaultFB();
     rcm.init();
@@ -120,37 +122,37 @@ void Renderer::init() {
     sm->loadShaders();
 //    tm->addTextureWithData(RawImage{54, 54, V4f::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
     tm->addTextureRef( FBNames::lightmap );
-    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size(4096).depthOnly().build();
+    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 4096 ).depthOnly().build();
 
-    auto trd = ImageParams{}.setSize( 32 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto trd = ImageParams{}.setSize( 32 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode( WRAP_MODE_CLAMP_TO_EDGE );
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
-                                                             .setGenerateMipMaps( false )
-                                                             .setIsFramebufferTarget( true ) );
-    trd.setSize(128);
+                                   .setGenerateMipMaps( false )
+                                   .setIsFramebufferTarget( true ));
+    trd.setSize( 128 );
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::specular_prefilter, trd }
-                                                                   .setGenerateMipMaps( true )
-                                                                   .setIsFramebufferTarget( true ) );
+                                   .setGenerateMipMaps( true )
+                                   .setIsFramebufferTarget( true ));
 
     tm->addCubemapTexture( TextureRenderData{ "probe_render_target", trd }
-                                             .setGenerateMipMaps( false )
-                                             .setIsFramebufferTarget( true ) );
+                                   .setGenerateMipMaps( false )
+                                   .setIsFramebufferTarget( true ));
 
     mBRDF = FrameBufferBuilder{ *this, MPBRTextures::ibl_brdf }.size( 512 ).format(
-            PIXEL_FORMAT_HDR_RG_16 ).IM(S::IBL_BRDF).noDepth().build();
+            PIXEL_FORMAT_HDR_RG_16 ).IM( S::IBL_BRDF ).noDepth().build();
     mBRDF->bindAndClear();
     mBRDF->VP()->draw();
 
     // add cascades framebuffer for downsampling, as OpenGLES does not support difference between render_frame_buffer
     // sizes and render target texture sizes on framebuffer, or at least this seems to be the case in my observations
 
-    mProbingsFB.emplace(512, FrameBufferBuilder{*this, "Probing512"}.size(512).buildSimple());
-    mProbingsFB.emplace(256, FrameBufferBuilder{*this, "Probing256"}.size(256).buildSimple());
-    mProbingsFB.emplace(128, FrameBufferBuilder{*this, "Probing128"}.size(128).buildSimple());
-    mProbingsFB.emplace( 64, FrameBufferBuilder{*this, "Probing_64"}.size( 64).buildSimple());
-    mProbingsFB.emplace( 32, FrameBufferBuilder{*this, "Probing_32"}.size( 32).buildSimple());
-    mProbingsFB.emplace( 16, FrameBufferBuilder{*this, "Probing_16"}.size( 16).buildSimple());
-    mProbingsFB.emplace(  8, FrameBufferBuilder{*this, "Probing__8"}.size(  8).buildSimple());
-    mProbingsFB.emplace(  4, FrameBufferBuilder{*this, "Probing__4"}.size(  4).buildSimple());
+    mProbingsFB.emplace( 512, FrameBufferBuilder{ *this, "Probing512" }.size( 512 ).buildSimple());
+    mProbingsFB.emplace( 256, FrameBufferBuilder{ *this, "Probing256" }.size( 256 ).buildSimple());
+    mProbingsFB.emplace( 128, FrameBufferBuilder{ *this, "Probing128" }.size( 128 ).buildSimple());
+    mProbingsFB.emplace( 64, FrameBufferBuilder{ *this, "Probing_64" }.size( 64 ).buildSimple());
+    mProbingsFB.emplace( 32, FrameBufferBuilder{ *this, "Probing_32" }.size( 32 ).buildSimple());
+    mProbingsFB.emplace( 16, FrameBufferBuilder{ *this, "Probing_16" }.size( 16 ).buildSimple());
+    mProbingsFB.emplace( 8, FrameBufferBuilder{ *this, "Probing__8" }.size( 8 ).buildSimple());
+    mProbingsFB.emplace( 4, FrameBufferBuilder{ *this, "Probing__4" }.size( 4 ).buildSimple());
 
     rmm->addRenderMaterial( S::SHADOW_MAP );
 
@@ -193,10 +195,10 @@ void Renderer::directRenderLoop() {
     CB_U().pushCommand( { CommandBufferCommandName::setGlobalTextures } );
 
     for ( const auto& target : mTargets ) {
-        if ( target->enabled() ) {
+        if ( target->enabled()) {
             if ( bInvalidated ) target->invalidateOnAdd();
             target->updateStreams();
-            target->addToCB( CB_U() );
+            target->addToCB( CB_U());
         }
     }
 
@@ -237,7 +239,7 @@ size_t Renderer::renderCBList() {
 //            renderCommands( eye );
 //        }
 //    } else
-        {
+    {
         return renderCommands( -1 );
     }
 
@@ -251,16 +253,16 @@ void Renderer::clearCommandList() {
 }
 
 void Renderer::clearBucket( const int _bucket ) {
-    if ( auto it = mCommandLists.find(_bucket); it != mCommandLists.end() ) {
-        mCommandLists.erase(it);
+    if ( auto it = mCommandLists.find( _bucket ); it != mCommandLists.end()) {
+        mCommandLists.erase( it );
     }
 }
 
 void Renderer::removeFromCL( const UUID& _uuid ) {
 
-    auto removeUUID = [_uuid]( const auto & us ) -> bool { return us->UUiD() == _uuid; };
+    auto removeUUID = [_uuid]( const auto& us ) -> bool { return us->UUiD() == _uuid; };
 
-    for ( auto& [k, vl] : CL() ) {
+    for ( auto&[k, vl] : CL()) {
         erase_if( vl.mVList, removeUUID );
         erase_if( vl.mVListTransparent, removeUUID );
     }
@@ -273,21 +275,21 @@ size_t Renderer::renderCommands( int eye ) {
 
 void Renderer::VPL( const int _bucket, std::shared_ptr<VPList> nvp, float alpha ) {
     if ( alpha < 1.0f ) {
-        mCommandLists[_bucket].mVListTransparent.push_back(nvp);
+        mCommandLists[_bucket].mVListTransparent.push_back( nvp );
     } else {
-        mCommandLists[_bucket].mVList.push_back(nvp);
+        mCommandLists[_bucket].mVList.push_back( nvp );
     }
     mVPLMap.emplace( nvp->UUiD(), nvp );
 }
 
 bool Renderer::hasTag( uint64_t _tag ) const {
-    for ( const auto& [k, vl] : CL() ) {
+    for ( const auto&[k, vl] : CL()) {
         if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
             for ( const auto& v : vl.mVList ) {
-                if ( v->hasTag(_tag) ) return true;
+                if ( v->hasTag( _tag )) return true;
             }
             for ( const auto& v : vl.mVListTransparent ) {
-                if ( v->hasTag(_tag) ) return true;
+                if ( v->hasTag( _tag )) return true;
             }
         }
     }
@@ -299,7 +301,7 @@ std::shared_ptr<Texture> Renderer::addTextureResource( const ResourceTransfer<Ra
 }
 
 std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ShaderMaterial& _val, const std::string& _name ) {
-    return rmm->addRenderMaterial( _val.SN(), _val.Values(), {_name} );
+    return rmm->addRenderMaterial( _val.SN(), _val.Values(), { _name } );
 }
 
 std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ResourceTransfer<Material>& _val ) {
@@ -307,19 +309,19 @@ std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ResourceTra
 }
 
 std::shared_ptr<RenderMaterial> Renderer::getMaterial( const std::string& _key ) {
-    return rmm->get(_key);
+    return rmm->get( _key );
 }
 
 std::shared_ptr<GPUVData> Renderer::addVDataResource( cpuVBIB&& _val, const std::string& _name ) {
-    return gm->addGPUVData( std::move(_val), {_name} );
+    return gm->addGPUVData( std::move( _val ), { _name } );
 }
 
 std::shared_ptr<GPUVData> Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
-    return gm->addGPUVData( cpuVBIB{ generateGeometryVP(_val.elem) }, _val.names );
+    return gm->addGPUVData( cpuVBIB{ generateGeometryVP( _val.elem ) }, _val.names );
 }
 
 std::shared_ptr<GPUVData> Renderer::getGPUVData( const std::string& _key ) {
-    return gm->get(_key);
+    return gm->get( _key );
 }
 
 
@@ -329,9 +331,9 @@ void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer&
 
 void Renderer::remapLightmapUVs( const scene_t& scene ) {
 
-    for ( const auto& [k,v] : scene.ggLImap ) {
-        auto vl = generateGeometryVP(v);
-        mVPLMap[k]->updateGPUVData( cpuVBIB{vl} );
+    for ( const auto&[k, v] : scene.ggLImap ) {
+        auto vl = generateGeometryVP( v );
+        mVPLMap[k]->updateGPUVData( cpuVBIB{ vl } );
     }
 
 //    for ( const auto& vo : scene.unchart ) {
@@ -361,18 +363,18 @@ void Renderer::remapLightmapUVs( const scene_t& scene ) {
 }
 
 void Renderer::changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt ) {
-    auto rmaterial = rmm->getFromHash(_cmt.matHash);
+    auto rmaterial = rmm->getFromHash( _cmt.matHash );
     if ( !rmaterial ) {
         rmaterial = getMaterial( _cmt.matHash );
     }
 
-    for ( const auto& [k, vl] : CL() ) {
+    for ( const auto&[k, vl] : CL()) {
         if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
             for ( auto& v : vl.mVList ) {
-                v->setMaterialWithTag(rmaterial, _cmt.tag);
+                v->setMaterialWithTag( rmaterial, _cmt.tag );
             }
             for ( auto& v : vl.mVListTransparent ) {
-                v->setMaterialWithTag(rmaterial, _cmt.tag);
+                v->setMaterialWithTag( rmaterial, _cmt.tag );
             }
         }
     }
@@ -380,13 +382,13 @@ void Renderer::changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt ) 
 
 void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color ) {
     // NDDado: we only use RGB, not Alpha, in here
-    for ( const auto& [k, vl] : CL() ) {
+    for ( const auto&[k, vl] : CL()) {
         if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
             for ( const auto& v : vl.mVList ) {
-                v->setMaterialColorWithTag(_color, _tag);
+                v->setMaterialColorWithTag( _color, _tag );
             }
             for ( const auto& v : vl.mVListTransparent ) {
-                v->setMaterialColorWithTag(_color, _tag);
+                v->setMaterialColorWithTag( _color, _tag );
             }
         }
     }
@@ -394,41 +396,26 @@ void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color )
 
 void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor ) {
     // NDDado: we only use RGB, not Alpha, in here
-    for ( const auto& [k, vl] : CL() ) {
-            for ( const auto& v : vl.mVList ) {
-                v->setMaterialColorWithUUID(_color, _tag, _oldColor);
-            }
-            for ( const auto& v : vl.mVListTransparent ) {
-                v->setMaterialColorWithUUID(_color, _tag, _oldColor);
-            }
+    for ( const auto&[k, vl] : CL()) {
+        for ( const auto& v : vl.mVList ) {
+            v->setMaterialColorWithUUID( _color, _tag, _oldColor );
+        }
+        for ( const auto& v : vl.mVListTransparent ) {
+            v->setMaterialColorWithUUID( _color, _tag, _oldColor );
+        }
     }
 }
 
 void Renderer::replaceMaterial( const std::string& _oldMatRef, const std::string& _newMatRef ) {
     auto oldMat = rmm->getFromHash( _oldMatRef );
     auto newMat = rmm->getFromHash( _newMatRef );
-    for ( const auto& [k, vl] : CL() ) {
+    for ( const auto&[k, vl] : CL()) {
         for ( const auto& v : vl.mVList ) {
             if ( v->getMaterial() == oldMat ) v->setMaterial( newMat );
         }
         for ( const auto& v : vl.mVListTransparent ) {
             if ( v->getMaterial() == oldMat ) v->setMaterial( newMat );
         }
-    }
-}
-
-void setMatColor( std::vector<std::shared_ptr<VPList>>& vList, std::shared_ptr<RenderMaterial> mat,
-        const std::string& _uniform,
-        const V3f& _value ) {
-    for ( const auto& v : vList ) {
-        if ( v->getMaterial() == mat ) v->getMaterial()->setConstant(_uniform, _value );
-    }
-}
-
-void Renderer::changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value ) {
-    auto mat = rmm->getFromHash( _matKey );
-    for ( auto& [k, vl] : CL() ) {
-        vl.foreach(setMatColor, mat, _prop, C4f::XTORGBA(_value).xyz() );
     }
 }
 
@@ -446,15 +433,15 @@ void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {
 }
 
 void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
-                                   CameraRig* _cameraRig,
+                                   CameraRig *_cameraRig,
                                    std::shared_ptr<RenderMaterial> _forcedMaterial,
-                                   Program* _forceProgram,
+                                   Program *_forceProgram,
                                    float _alphaDrawThreshold ) {
-    Camera* cam = _cameraRig ? _cameraRig->getCamera().get() : nullptr;
+    Camera *cam = _cameraRig ? _cameraRig->getCamera().get() : nullptr;
     bool addVP = true;
     for ( const auto& vp : _map ) {
         if ( cam ) {
-            addVP = cam->frustomClipping( vp->BBox3d() );
+            addVP = cam->frustomClipping( vp->BBox3d());
         }
         if ( addVP ) {
             CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram, _alphaDrawThreshold );
@@ -463,7 +450,7 @@ void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _m
 }
 
 std::shared_ptr<Program> Renderer::P( const std::string& _id ) {
-    return sm->P(_id);
+    return sm->P( _id );
 }
 
 std::shared_ptr<Texture> Renderer::TD( const std::string& _id, const int tSlot ) {
@@ -479,9 +466,14 @@ std::shared_ptr<Framebuffer> Renderer::getProbing( int _index ) {
     return mProbingsFB[_index];
 }
 
+std::shared_ptr<RenderMaterial> Renderer::getRenderMaterialFromHash( CResourceRef _hash ) {
+    return rmm->getFromHash( _hash );
+}
+
 void RenderAnimationManager::setTiming() {
-    mAnimUniforms->setUBOData( UniformNames::deltaAnimTime, Vector4f{GameTime::getCurrTimeStep(), GameTime::getCurrTimeStamp(),
-                                                                     GameTime::getLastTimeStamp(), 0.0f } );
+    mAnimUniforms->setUBOData( UniformNames::deltaAnimTime,
+                               Vector4f{ GameTime::getCurrTimeStep(), GameTime::getCurrTimeStamp(),
+                                         GameTime::getLastTimeStamp(), 0.0f } );
 }
 
 void RenderAnimationManager::setUniforms_r() {
