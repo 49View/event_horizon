@@ -21,7 +21,7 @@
 
 std::unordered_map<std::string, std::function<entityDaemonCallbackFunction>> daemonEntityCallbacks;
 
-void cloudCallback( SocketCallbackDataTypeConstRef data ) {
+void cloudCallback( const std::string& msg, SocketCallbackDataType&& data ) {
     std::string filename = url_decode( data["name"].GetString());
     for ( const auto&[k, func] : daemonEntityCallbacks ) {
         if ( filename.find( DaemonPaths::store( k )) != std::string::npos ) {
@@ -38,24 +38,13 @@ void cloudCallback( SocketCallbackDataTypeConstRef data ) {
     }
 }
 
-void loadGeomResetCallback( SocketCallbackDataTypeConstRef doc ) {
-    SceneGraph::addEventCallback( SceneEvents::LoadGeomAndReset,
-                                    { getFileName( doc["data"]["entity_id"].GetString()), {},
-                                      doc["data"]["entity_id"].GetString() } );
-}
-
-void loadMaterialOnCurrentCallback( SocketCallbackDataTypeConstRef doc ) {
-    SceneGraph::addEventCallback( SceneEvents::ReplaceMaterialOnCurrentObject,
-                                  { getFileName( doc["data"]["entity_id"].GetString()), {},
-                                    doc["data"]["source_id"].GetString() } );
-}
-
 void allCallbacksEntitySetup() {
 //    daemonEntityCallbacks[ResourceGroup::Geom] = callbackGeom;
 //    daemonEntityCallbacks[ResourceGroup::Material] = callbackMaterial;
     Socket::on( "cloudStorageFileUpdate", cloudCallback );
-    Socket::on( SceneEvents::LoadGeomAndReset, loadGeomResetCallback );
-    Socket::on( SceneEvents::ReplaceMaterialOnCurrentObject, loadMaterialOnCurrentCallback );
+    Socket::on( SceneEvents::LoadGeomAndReset, SceneGraph::addEventCallback );
+    Socket::on( SceneEvents::ReplaceMaterialOnCurrentObject, SceneGraph::addEventCallback );
+    Socket::on( SceneEvents::ChangeMaterialProperty, SceneGraph::addEventCallback );
 }
 
 template<typename T>

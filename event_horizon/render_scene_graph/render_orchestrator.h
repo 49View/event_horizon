@@ -100,7 +100,7 @@ public:
 
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
     void setDragAndDropFunction( DragAndDropFunction dd );
-    void reloadShaders( SocketCallbackDataTypeConstRef _data );
+    void reloadShaders( const std::string& _msg, SocketCallbackDataType&& _data );
 
     template <typename T>
     void addHttpStream( const std::string& _streamName ) {

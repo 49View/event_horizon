@@ -40,7 +40,7 @@ struct Url;
 
 using SocketCallbackDataType = rapidjson::Document;
 using SocketCallbackDataTypeConstRef = const SocketCallbackDataType&;
-using SocketCallbackFunc = std::function<void( SocketCallbackDataTypeConstRef message )>;
+using SocketCallbackFunc = std::function<void( const std::string& msg,  SocketCallbackDataType&& message )>;
 using LoginCallback = std::function<void()>;
 using HttpResouceCBSign = const std::string&;
 using HttpResouceCB = std::function<void(HttpResouceCBSign)>;

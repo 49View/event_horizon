@@ -417,6 +417,21 @@ void Renderer::replaceMaterial( const std::string& _oldMatRef, const std::string
     }
 }
 
+void setMatColor( std::vector<std::shared_ptr<VPList>>& vList, std::shared_ptr<RenderMaterial> mat,
+        const std::string& _uniform,
+        const V3f& _value ) {
+    for ( const auto& v : vList ) {
+        if ( v->getMaterial() == mat ) v->getMaterial()->setConstant(_uniform, _value );
+    }
+}
+
+void Renderer::changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value ) {
+    auto mat = rmm->getFromHash( _matKey );
+    for ( auto& [k, vl] : CL() ) {
+        vl.foreach(setMatColor, mat, _prop, C4f::XTORGBA(_value).xyz() );
+    }
+}
+
 void Renderer::invalidateOnAdd() {
     bInvalidated = true;
 }

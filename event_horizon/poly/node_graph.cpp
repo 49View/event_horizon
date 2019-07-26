@@ -15,3 +15,7 @@ void NodeGraph::nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>&
 void NodeGraph::replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot ) {
     replaceMaterialSignal.connect( _slot );
 }
+
+void NodeGraph::changeMaterialPropertyConnect( const std::function<NodeGraphConnectChangeMaterialPropertyFuncSig>& _slot ) {
+    changeMaterialPropertySignal.connect(_slot);
+}

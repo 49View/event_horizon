@@ -513,6 +513,20 @@ input#search-bar:hover {
   align-self: center;
 }
 
+.opacityLabel-a {
+  grid-area: opacityLabel;
+  justify-self: start;
+  align-self: center;
+  font-size: var(--font-size-small);
+  color: var(--dark-color);
+}
+
+.opacitySlider-a {
+  grid-area: opacitySlider;
+  justify-self: center;
+  align-self: center;
+}
+
 .normalTexture-a {
   grid-area: normalTexture;
 }
@@ -564,13 +578,14 @@ input#search-bar:hover {
   padding-top: 2px;
   grid-template-columns: repeat(6, 15.5%);
   grid-template-rows: 32px 22px 16px 16px 16px 32px 8px;
-  grid-template-rows: 32px 22px 16px 16px 16px 32px 8px;
+  grid-template-rows: 32px 22px repeat(4, 16px) 32px 8px;
   grid-template-areas:
     "matName matName matName matName matName replaceMat"
     "baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorPicker"
     "metallicLabel metallicLabel metallicLabel metallicSlider metallicSlider metallicSlider"
     "roughnessLabel roughnessLabel roughnessLabel roughnessSlider roughnessSlider roughnessSlider"
     "aoLabel aoLabel aoLabel aoSlider aoSlider aoSlider"
+    "opacityLabel opacityLabel opacityLabel opacitySlider opacitySlider opacitySlider"
     "baseTexture normalTexture metallicTexture roughnessTexture aoTexture emissiveTexture"
     "baseTextureLabel normalTextureLabel metallicTextureLabel roughnessTextureLabel aoTextureLabel emissiveTextureLabel";
   grid-gap: 4px 3px;

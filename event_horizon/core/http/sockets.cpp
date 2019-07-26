@@ -54,7 +54,7 @@ namespace Socket {
         auto msg = document["msg"].GetString();
 
         if ( auto fi = callbacksMap.find(std::string(msg)); fi != callbacksMap.end() ) {
-            fi->second( document );
+            fi->second( msg, std::move(document) );
         }
     }
 

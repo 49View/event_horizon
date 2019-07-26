@@ -241,6 +241,12 @@ struct CommandBufferListVector {
     CommandBufferFlags flags = CommandBufferFlags::CBF_None;
     std::vector<std::shared_ptr<VPList>> mVList;
     std::vector<std::shared_ptr<VPList>> mVListTransparent;
+
+    template <typename F, typename ...Args>
+    void foreach( F func, Args ...args ) {
+        func( mVList, std::forward<Args>(args)... );
+        func( mVListTransparent, std::forward<Args>(args)... );
+    }
 };
 
 struct VSGUIDData {

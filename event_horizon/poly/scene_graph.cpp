@@ -98,19 +98,21 @@ void SceneGraph::update() {
     }
     genericSceneCallback.clear();
 
-    for ( auto& [k, v] : eventSceneCallback ) {
+    for ( auto& [k, doc] : eventSceneCallback ) {
         if ( k == SceneEvents::LoadGeomAndReset ) {
+            auto v0 = getFileName( doc["data"]["entity_id"].GetString());
+
             if ( !nodes.empty()) removeNode( nodes.begin()->second );
             GM().clear();
             Http::clearRequestCache();
-            load<Geom>( std::get<0>( v ), [this]( HttpResouceCBSign key ) {
-                auto geom = GB<GT::Asset>( key, GT::Tag(1001) );
+            load<Geom>( v0, [this]( HttpResouceCBSign key ) {
+                auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
                 DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Halfway );
                 MatGeomSerData matSet{};
                 geom->visit( [&]( const GeomSPConst node ) {
                     for ( const auto& data : node->DataV()) {
-                        auto mat = get<Material>(data.material);
-                        LOGRS("MAT Name: " << mat->Key() );
+                        auto mat = get<Material>( data.material );
+                        LOGRS( "MAT Name: " << mat->Key());
                         matSet.mrefs.emplace( mat->Key(), *mat );
                     }
                 } );
@@ -118,13 +120,15 @@ void SceneGraph::update() {
             } );
         }
         if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
-            auto matId =  std::get<0>( v );
-            auto oldMaterialRef = std::get<2>( v );
+            auto matId = getFileName( doc["data"]["entity_id"].GetString());
+            auto oldMaterialRef = doc["data"]["source_id"].GetString();
             load<Material>( matId, [this, oldMaterialRef]( HttpResouceCBSign key ) {
-//                rsg.RR().changeMaterialOnTags(
-//                        { ArchType::CurtainT, sg.getHash<Material>( curtainSwapCycle[_index] ) } );
                 replaceMaterialSignal( oldMaterialRef, key );
-            });
+            } );
+        }
+        if ( k == SceneEvents::ChangeMaterialProperty ) {
+            changeMaterialPropertySignal( doc["data"]["property_id"].GetString(),
+                    doc["data"]["mat_id"].GetString(), doc["data"]["value_str"].GetString() );
         }
     }
     eventSceneCallback.clear();

@@ -11,7 +11,8 @@ import {
   GET_ENTITY,
   GET_ENTITY_LOAD,
   SET_ENTITY_NODES,
-  REPLACE_ENTITY_TAGS
+  REPLACE_ENTITY_TAGS,
+  CHANGE_MATERIAL_COLOR
 } from "./types";
 import store from "../store";
 import { wscSend } from "../utils/webSocketClient";
@@ -120,6 +121,19 @@ export const updateReplaceMaterialPartialSearch = partialString => dispatch => {
       type: ENTITIES_PARTIAL_SEARCH_ERROR,
       payload: { msg: err.response }
     });
+  }
+};
+
+export const changeMaterialPropery = event => dispatch => {
+  try {
+    wscSend("ChangeMaterialProperty", {
+      mat_id: event.target.id,
+      property_id: event.target.name,
+      value_str: event.target.value
+    });
+    dispatch({ type: CHANGE_MATERIAL_COLOR, payload: event.target.value });
+  } catch (error) {
+    console.log(error);
   }
 };
 

@@ -19,17 +19,20 @@ using SceneRayIntersectCallback = std::function<void(NodeVariantsSP, float)>;
 using NodeGraphConnectParamsSig = NodeVariantsSP;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
 using NodeGraphConnectReplaceFuncSig = void(const std::string&, const std::string&);
+using NodeGraphConnectChangeMaterialPropertyFuncSig = void(const std::string&, const std::string&, const std::string&);
 
 class NodeGraph {
 public:
     void nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
+    void changeMaterialPropertyConnect( const std::function<NodeGraphConnectChangeMaterialPropertyFuncSig>& _slot );
 
 protected:
     NodeGraphContainer nodes;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeRemoveSignal;
     boost::signals2::signal<NodeGraphConnectReplaceFuncSig> replaceMaterialSignal;
+    boost::signals2::signal<NodeGraphConnectChangeMaterialPropertyFuncSig> changeMaterialPropertySignal;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
 };

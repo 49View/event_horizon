@@ -11,12 +11,14 @@ import {
   SET_ENTITY_NODES,
   SET_SELECTED_MAT_NAME,
   CLOSE_REPLACE_MATERIAL,
-  REPLACE_ENTITY_TAGS
+  REPLACE_ENTITY_TAGS,
+  CHANGE_MATERIAL_COLOR
 } from "../actions/types";
 
 import { requestAsset } from "../utils/webSocketClient";
 
 const initialState = {
+  events: {},
   entries: [],
   entriesFiltered: [],
   matEntries: [],
@@ -136,6 +138,11 @@ export default function(state = initialState, action) {
         entriesFiltered: state.entries.filter(entry => entry._id !== payload),
         currentEntity: null,
         loading: false
+      };
+    case CHANGE_MATERIAL_COLOR:
+      return {
+        ...state,
+        lastColorChanged: payload
       };
     case ENTITY_ERROR:
       return {

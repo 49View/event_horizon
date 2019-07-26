@@ -47,7 +47,7 @@ struct LoadedResouceCallbackData {
 using LoadedResouceCallbackContainer = std::vector<LoadedResouceCallbackData>;
 using GenericSceneCallbackValueMap = std::tuple<std::string, SerializableContainer, std::string>;
 using GenericSceneCallback = std::unordered_map<std::string, GenericSceneCallbackValueMap>;
-using EventSceneCallback = GenericSceneCallback;
+using EventSceneCallback = std::unordered_map<std::string, SocketCallbackDataType>;
 
 class SceneGraph : public NodeGraph {
 public:
@@ -216,7 +216,7 @@ public:
     static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
         SceneGraph::genericSceneCallback.emplace( _key, std::move(_value) );
     }
-    static void addEventCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
+    static void addEventCallback( const std::string& _key, SocketCallbackDataType&& _value ) {
         SceneGraph::eventSceneCallback.emplace( _key, std::move(_value) );
     }
 

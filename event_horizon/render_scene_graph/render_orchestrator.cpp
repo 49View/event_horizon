@@ -100,6 +100,10 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         this->RR().replaceMaterial( _oldMatRef, _newMatRef );
     });
 
+    sg.changeMaterialPropertyConnect( [this]( const std::string& _prop, const std::string& _key, const std::string& _value ) {
+        this->RR().changeMaterialProperty( _prop, _key, _value );
+    });
+
 }
 
 void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
@@ -115,16 +119,16 @@ void RenderOrchestrator::init() {
 
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",
-                std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1 ) );
+                std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1, std::placeholders::_2 ) );
 #endif
 
     // Set a fullscreen camera by default
     addRig<CameraControlFly>( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f );
 }
 
-void RenderOrchestrator::reloadShaders( SocketCallbackDataTypeConstRef _data ) {
+void RenderOrchestrator::reloadShaders( const std::string& _msg, SocketCallbackDataType&& _data ) {
 
-    ShaderLiveUpdateMap shadersToUpdate{_data};
+    ShaderLiveUpdateMap shadersToUpdate{std::move(_data)};
 
 	for ( const auto& ss : shadersToUpdate.shaders ) {
 		rr.injectShader( ss.first, ss.second );

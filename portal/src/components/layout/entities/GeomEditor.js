@@ -9,6 +9,7 @@ import SmallEntriesDialog from "./SmallEntriesDialog";
 import EntityMetaSection from "./EntityMetaSection";
 import { SET_SELECTED_MAT_NAME } from "../../../actions/types";
 import store from "../../../store";
+import { changeMaterialPropery } from "../../../actions/entities";
 
 const rgbToHex = (r, g, b) =>
   "#" +
@@ -25,7 +26,8 @@ const GeomEditor = ({
   loading,
   replaceMaterialOn,
   userToken,
-  userSessionId
+  userSessionId,
+  changeMaterialPropery
 }) => {
   const canvasRef = React.useRef(null);
   const [count, setCount] = useState(0);
@@ -50,12 +52,8 @@ const GeomEditor = ({
     });
   };
 
-  const onChangeMaterialColor = e => {
-    // store.dispatch({ type: SET_SELECTED_MAT_NAME, payload: e.target.name });
-  };
-
-  const onChangeMaterialMetalness = e => {
-    // store.dispatch({ type: SET_SELECTED_MAT_NAME, payload: e.target.name });
+  const onChangeMaterialPropery = e => {
+    changeMaterialPropery(e);
   };
 
   let mainContent = <Fragment />;
@@ -67,15 +65,32 @@ const GeomEditor = ({
       let matSimpleEntry = {
         key: e.key,
         baseColor: "#ff",
-        baseTexture: ""
+        baseTexture: "",
+        aoValue: 1.0,
+        roughnessValue: 1.0,
+        metallicValue: 0.0,
+        opacityValue: 1.0
       };
-      if (e.value.values.mV3fs[0].key === "diffuseColor") {
-        const rgbC = e.value.values.mV3fs[0].value;
-        matSimpleEntry.baseColor = rgbToHex(
-          rgbC[0] * 255,
-          rgbC[1] * 255,
-          rgbC[2] * 255
-        );
+      for (const v3f of e.value.values.mV3fs) {
+        if (v3f.key === "diffuseColor") {
+          const rgbC = e.value.values.mV3fs[0].value;
+          matSimpleEntry.baseColor = rgbToHex(
+            rgbC[0] * 255,
+            rgbC[1] * 255,
+            rgbC[2] * 255
+          );
+        }
+      }
+      for (const fv of e.value.values.mFloats) {
+        if (fv.key === "aoV") {
+          matSimpleEntry.aoValue = fv.value;
+        } else if (fv.key === "roughnessV") {
+          matSimpleEntry.roughnessValue = fv.value;
+        } else if (fv.key === "metallicV") {
+          matSimpleEntry.metallicValue = fv.value;
+        } else if (fv.key === "opacityV") {
+          matSimpleEntry.opacityValue = fv.value;
+        }
       }
       for (const tn of e.value.values.mStrings) {
         if (tn.key === "diffuseColor") {
@@ -90,7 +105,7 @@ const GeomEditor = ({
     return (
       <Fragment>
         <div className="nodeViewer-a">
-          <div className="medium text-primary titleMargin">Materials</div>
+          <div className="text-primary titleMargin">Materials</div>
           {matSimples.map(e => (
             <div key={e.key} className="smallObjectMaterial">
               <div className="matName-a">{e.key}</div>
@@ -104,9 +119,10 @@ const GeomEditor = ({
               <div className="baseColorPicker-a">
                 <input
                   type="color"
-                  name="head"
+                  id={e.key}
+                  name="diffuseColor"
                   defaultValue={e.baseColor}
-                  onChange={eb => onChangeMaterialColor(eb)}
+                  onChange={eb => onChangeMaterialPropery(eb)}
                 />
               </div>
 
@@ -117,10 +133,10 @@ const GeomEditor = ({
                   className="pbrSlider"
                   min="1"
                   max="100"
-                  defaultValue="25"
-                  name="metallic"
-                  id="metallicSlider"
-                  onChange={eb => onChangeMaterialMetalness(eb)}
+                  defaultValue={e.metallicValue * 100}
+                  id={e.key}
+                  name="metallicV"
+                  onChange={eb => onChangeMaterialPropery(eb)}
                 />
               </div>
 
@@ -131,10 +147,10 @@ const GeomEditor = ({
                   className="pbrSlider"
                   min="1"
                   max="100"
-                  defaultValue="25"
-                  name="roughness"
-                  id="roughnessSlider"
-                  onChange={eb => onChangeMaterialMetalness(eb)}
+                  defaultValue={e.roughnessValue * 100}
+                  name="roughnessV"
+                  id={e.key}
+                  onChange={eb => onChangeMaterialPropery(eb)}
                 />
               </div>
 
@@ -145,10 +161,24 @@ const GeomEditor = ({
                   className="pbrSlider"
                   min="1"
                   max="100"
-                  defaultValue="25"
-                  name="ao"
-                  id="aoSlider"
-                  onChange={eb => onChangeMaterialMetalness(eb)}
+                  defaultValue={e.aoValue * 100}
+                  name="aoV"
+                  id={e.key}
+                  onChange={eb => onChangeMaterialPropery(eb)}
+                />
+              </div>
+
+              <div className="opacityLabel-a">Opacity</div>
+              <div className="opacitySlider-a">
+                <input
+                  type="range"
+                  className="pbrSlider"
+                  min="1"
+                  max="100"
+                  defaultValue={e.opacityValue * 100}
+                  name="opacity"
+                  id={e.key}
+                  onChange={eb => onChangeMaterialPropery(eb)}
                 />
               </div>
 
@@ -227,7 +257,8 @@ GeomEditor.propTypes = {
   replaceMaterialOn: PropTypes.bool,
   userToken: PropTypes.string,
   userSessionId: PropTypes.string,
-  wasmCanvas: PropTypes.object
+  wasmCanvas: PropTypes.object,
+  changeMaterialPropery: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -246,5 +277,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  {}
+  { changeMaterialPropery }
 )(GeomEditor);
