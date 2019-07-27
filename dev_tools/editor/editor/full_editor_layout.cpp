@@ -25,19 +25,32 @@ JSONDATA( PortalToLoad, group, hash, entity_id )
     std::string entity_id;
 };
 
-void EditorBackEnd::activateImpl() {
+void EditorBackEnd::activatePostLoad() {
 
     allCallbacksEntitySetup();
     rsg.setDragAndDropFunction( allConversionsDragAndDropCallback );
 
     backEnd->process_event( OnActivate{} );
 
-    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural } );
+//    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural } );
+
+    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture,
+                                        sg.getHash<RawImage>( "skybox,equirectangular,park,generic,001" ) } );
+
     rsg.useSkybox( false );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
     rsg.changeTime( "winter noon" );
     rsg.setRigCameraController<CameraControlOrbit3d>();
     rsg.DC()->setFoV(60.0f);
+
+    Socket::emit("{ \"msg\": \"requestAsset\"}");
+}
+
+void EditorBackEnd::activateImpl() {
+
+    rawImageResourceLoad.emplace_back( "skybox,equirectangular,park,generic,001" );
+
+    loadSceneEntities();
 
 //    Http::get( Url{ "/user/portaltoload" },
 //       [&]( const Http::Result& _res ) {
@@ -58,7 +71,6 @@ void EditorBackEnd::activateImpl() {
 
 //                   auto geom = sg.GB<GT::Shape>( ShapeType::Sphere, GT::Tag(1001) );
 
-    Socket::emit("{ \"msg\": \"requestAsset\"}");
 //    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
 //                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
 

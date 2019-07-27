@@ -24,7 +24,7 @@ void SceneLoader::loadResCount( HttpResouceCBSign _key ) {
 void SceneLoader::loadGeomResCount( HttpResouceCBSign _key ) {
     loadedResCounter.emplace_back( _key );
     LOGRS( "[Scene Loader] Resource: " << _key );
-    if ( loadedResCounter.size() == geomResourceLoad.size() ) {
+    if ( loadedResCounter.size() == geomResourceLoad.size()) {
         activatePostLoad();
     }
 }
@@ -32,11 +32,11 @@ void SceneLoader::loadGeomResCount( HttpResouceCBSign _key ) {
 void SceneLoader::activateGeomLoad() {
 #define LGFUNC std::bind(&SceneLoader::loadGeomResCount, this, std::placeholders::_1)
 
-    if ( geomResourceLoad.empty() ) {
+    if ( geomResourceLoad.empty()) {
         activatePostLoad();
     } else {
-        for ( const auto& r : geomResourceLoad      ) {
-            sgl.load<Geom>        ( r , LGFUNC );
+        for ( const auto& r : geomResourceLoad ) {
+            sgl.load<Geom>( r, LGFUNC );
         }
     }
 
@@ -45,10 +45,15 @@ void SceneLoader::activateGeomLoad() {
 void SceneLoader::loadSceneEntities() {
 #define LRFUNC std::bind(&SceneLoader::loadResCount, this, std::placeholders::_1)
 
-    for ( const auto& r : fontResourceLoad      )      sgl.load<Font>        ( r , LRFUNC );
-    for ( const auto& r : rawImageResourceLoad  )      sgl.load<RawImage>    ( r , LRFUNC );
-    for ( const auto& r : materialResourceLoad  )      sgl.load<Material>    ( r , LRFUNC );
-    for ( const auto& r : profileResourceLoad   )      sgl.load<Profile>     ( r , LRFUNC );
+    if ( fontResourceLoad.empty() && rawImageResourceLoad.empty() && materialResourceLoad.empty()
+         && profileResourceLoad.empty() ) {
+        activatePostLoad();
+    } else {
+        for ( const auto& r : fontResourceLoad ) sgl.load<Font>( r, LRFUNC );
+        for ( const auto& r : rawImageResourceLoad ) sgl.load<RawImage>( r, LRFUNC );
+        for ( const auto& r : materialResourceLoad ) sgl.load<Material>( r, LRFUNC );
+        for ( const auto& r : profileResourceLoad ) sgl.load<Profile>( r, LRFUNC );
+    }
 }
 
 SceneLoader::SceneLoader( SceneGraph& sg ) : sgl( sg ) {}

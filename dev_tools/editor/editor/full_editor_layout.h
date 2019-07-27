@@ -7,6 +7,7 @@
 #include <core/state_machine_helper.hpp>
 #include <core/camera.h>
 #include <render_scene_graph/runloop_graphics.h>
+#include <render_scene_graph/scene_loader.hpp>
 
 // Events
 struct OnActivate {};
@@ -25,9 +26,9 @@ struct EditorStateMachineSML { auto operator()() const noexcept { return make_tr
 using FrontEnd = sm<EditorStateMachineSML>;
 
 // Back End
-class EditorBackEnd : public RunLoopBackEndBase, public LoginActivation<LoginFieldsPrecached> {
+class EditorBackEnd : public RunLoopBackEndBase, public LoginActivation<LoginFieldsPrecached>, public SceneLoader {
 public:
-    EditorBackEnd( SceneGraph& _sg, RenderOrchestrator& _rsg ) : RunLoopBackEndBase(_sg, _rsg) {
+    EditorBackEnd( SceneGraph& _sg, RenderOrchestrator& _rsg ) : RunLoopBackEndBase(_sg, _rsg), SceneLoader( _sg ) {
         backEnd = std::make_unique<FrontEnd>( *this, _sg, _rsg );
     }
     ~EditorBackEnd() override = default;
@@ -39,6 +40,9 @@ public:
 //        return LoginFields{ "carillow@49view.com", "932hjkd987asd", "carillo" };
         return LoginFields{ "ziocleto@gmail.com", "49View", "carillo" };
     }
+
+protected:
+    void activatePostLoad() override;
 
 protected:
     std::unique_ptr<FrontEnd> backEnd;

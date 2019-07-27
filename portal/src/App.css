@@ -455,6 +455,7 @@ input#search-bar:hover {
   grid-area: baseColorPicker;
   justify-self: end;
   align-self: center;
+  cursor: pointer;
 }
 
 .baseTexture-a {
@@ -594,6 +595,14 @@ input#search-bar:hover {
   border: solid 1px rgba(23, 162, 184, 0.55);
   background-image: linear-gradient(
     rgba(23, 162, 184, 0.15),
+    rgba(23, 162, 184, 0)
+  );
+}
+
+.smallObjectMaterial:hover {
+  border: solid 1px rgba(23, 162, 184, 0.85);
+  background-image: linear-gradient(
+    rgba(23, 162, 184, 0.25),
     rgba(23, 162, 184, 0)
   );
 }
