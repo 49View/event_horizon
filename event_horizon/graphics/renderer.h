@@ -121,6 +121,7 @@ public:
     void cmdReloadShaders( const std::vector<std::string>& _params );
 
 	void init();
+	static void clearColor( const C4f& _color );
 	void afterShaderSetup();
 	void injectShader( const std::string& _key, const std::string& content );
 

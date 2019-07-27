@@ -76,6 +76,7 @@ void MouseInput::onTouchUp( int _touchIndex, const Vector2f& pos, UpdateSignals&
 	status[_touchIndex].hasTouchedUp = true;
 	status[_touchIndex].touchedDown = false;
 	status[_touchIndex].touchedDownFirstTime = false;
+    status[_touchIndex].moveDiff = Vector2f::ZERO;
 
     Vector2f xyd = status[_touchIndex].gesturesTaps.back() - status[_touchIndex].gesturesTaps.front();
 	// Check if a single tap was performed
@@ -88,7 +89,7 @@ void MouseInput::onTouchUp( int _touchIndex, const Vector2f& pos, UpdateSignals&
 	if ( status[_touchIndex].touchupTimeStamps.size() > 1 && status[_touchIndex].gesturesTaps.size() > 2 ) {
 		float time2 = status[_touchIndex].touchupTimeStamps.back();
 		float time1 = status[_touchIndex].touchupTimeStamps[status[_touchIndex].touchupTimeStamps.size() - 2];
-		if ( time2 - time1 < DOUBLE_TAP_TIME_LIMIT ) {
+		if ( time2 - time1 < DOUBLE_TAP_TIME_LIMIT ) { 
             if ( length( xyd ) < TAP_AREA ) {
                 status[_touchIndex].doubleTapEvent = true;
                 status[_touchIndex].touchupTimeStamps.clear();

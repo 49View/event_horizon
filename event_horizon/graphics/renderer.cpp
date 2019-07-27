@@ -470,6 +470,10 @@ std::shared_ptr<RenderMaterial> Renderer::getRenderMaterialFromHash( CResourceRe
     return rmm->getFromHash( _hash );
 }
 
+void Renderer::clearColor( const C4f& _color ) {
+    Framebuffer::clearColorValue = _color;
+}
+
 void RenderAnimationManager::setTiming() {
     mAnimUniforms->setUBOData( UniformNames::deltaAnimTime,
                                Vector4f{ GameTime::getCurrTimeStep(), GameTime::getCurrTimeStamp(),

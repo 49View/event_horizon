@@ -10,7 +10,7 @@ ShadowMapManager::ShadowMapManager() {
 			0.5f, 0.5f, 0.5f, 1.0f
 	);
 
-	float bs = 2.50f;
+	float bs = 12.0f;
 
 	setFrusom( { -bs, bs}, { -bs, bs}, { 0.0f, bs} );
 }

@@ -171,10 +171,8 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     if ( isTouchBased() ) {
         if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO &&
              mi.moveDiffSS(TOUCH_ONE) != Vector2f::ZERO &&
-             mi.moveDiffSS(TOUCH_TWO) != Vector2f::ZERO &&
              mi.isMouseTouchedDown(TOUCH_ZERO) &&
-             mi.isMouseTouchedDown(TOUCH_ONE) &&
-             mi.isMouseTouchedDown(TOUCH_TWO) ) {
+             mi.isMouseTouchedDown(TOUCH_ONE) ) {
             moveForward += mi.moveDiffSS( TOUCH_ONE ).y() * -4.0f;
             strafe += mi.moveDiffSS( TOUCH_ONE ).x() * -4.0f;
         }
@@ -182,18 +180,11 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     _cam->moveForward( moveForward );
     _cam->strafe( strafe );
     _cam->moveUp( moveUp );
-    if ( isTouchBased() ) {
-        if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO &&
-             mi.moveDiffSS(TOUCH_ONE) != Vector2f::ZERO &&
-                mi.isMouseTouchedDown(TOUCH_ZERO) &&
-                mi.isMouseTouchedDown(TOUCH_ONE) &&
-                !mi.isMouseTouchedDown(TOUCH_TWO) ) {
-            _cam->incrementQuatAngles( V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f } );
-        }
-    } else {
-        if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO ) {
-            _cam->incrementQuatAngles( V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f } );
-        }
+    auto mdss = mi.moveDiffSS(TOUCH_ZERO);
+    auto mdss1 = mi.moveDiffSS(TOUCH_ONE);
+    if ( mdss != Vector2f::ZERO && mdss1 == V2f::ZERO ) {
+        auto angledd = isTouchBased() ? mdss.yx() * V2f::Y_INV : mdss.yx();
+        _cam->incrementQuatAngles( V3f{ angledd, 0.0f } );
     }
 }
 
