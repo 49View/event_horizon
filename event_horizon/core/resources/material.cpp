@@ -89,3 +89,47 @@ void Material::setDiffuseColor( const V3f& _value ) {
     values->assign( UniformNames::diffuseColor, _value );
 }
 
+ResourceRef Material::getTexture( const std::string& _tt ) const {
+    auto ret = values->get<std::string>( _tt );
+    return ret ? *ret : "";
+}
+
+ResourceRef Material::getDiffuseTexture() const {
+    auto ret = values->get<std::string>( UniformNames::diffuseTexture );
+    return ret ? *ret : "";
+}
+
+ResourceRef Material::getNormalTexture() const {
+    auto ret = values->get<std::string>( UniformNames::normalTexture );
+    return ret ? *ret : "";
+}
+
+ResourceRef Material::getMetallicTexture() const {
+    auto ret = values->get<std::string>( UniformNames::metallicTexture );
+    return ret ? *ret : "";
+}
+
+ResourceRef Material::getRoughnessTexture() const {
+    auto ret = values->get<std::string>( UniformNames::roughnessTexture );
+    return ret ? *ret : "";
+}
+
+ResourceRef Material::getAOTexture() const {
+    auto ret = values->get<std::string>( UniformNames::aoTexture );
+    return ret ? *ret : "";
+}
+
+ResourceRef Material::getHeightTexture() const {
+    auto ret = values->get<std::string>( UniformNames::heightTexture );
+    return ret ? *ret : "";
+}
+
+ResourceRef Material::getOpacityTexture() const {
+    auto ret = values->get<std::string>( UniformNames::opacityTexture );
+    return ret ? *ret : "";
+}
+
+ResourceRef Material::getTranslucencyTexture() const {
+    auto ret = values->get<std::string>( UniformNames::translucencyTexture );
+    return ret ? *ret : "";
+}

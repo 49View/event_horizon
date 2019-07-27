@@ -2,6 +2,8 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { decode } from "base64-arraybuffer";
+// import zlib from "react-zlib-js";
 import Spinner from "../Spinner";
 import EntityUpdateContent from "./EntityUpdateContent";
 import { loadWasmComplete } from "../../../actions/wasm";
@@ -11,6 +13,8 @@ import { SET_SELECTED_MAT_NAME } from "../../../actions/types";
 import store from "../../../store";
 import { changeMaterialPropery } from "../../../actions/entities";
 
+const zlib = require("zlib");
+
 const rgbToHex = (r, g, b) =>
   "#" +
   [r, g, b]
@@ -19,6 +23,23 @@ const rgbToHex = (r, g, b) =>
       return hex.length === 1 ? "0" + hex : hex;
     })
     .join("");
+
+const getThumbnailURLBlobFor = (thumbsContainer, thumbName) => {
+  let thumb = "";
+  for (const th of thumbsContainer) {
+    if (th.key === thumbName) {
+      thumb = th.value;
+    }
+  }
+
+  return thumb === ""
+    ? "/white.png"
+    : URL.createObjectURL(
+        new Blob([
+          new Buffer.from(zlib.inflateSync(new Buffer.from(decode(thumb))))
+        ])
+      );
+};
 
 const GeomEditor = ({
   currentEntity,
@@ -65,7 +86,12 @@ const GeomEditor = ({
       let matSimpleEntry = {
         key: e.key,
         baseColor: "#ff",
-        baseTexture: "",
+        diffuseTexture: "/white.png",
+        normalTexture: "/normal.png",
+        metallicTexture: "/white.png",
+        roughnessTexture: "/white.png",
+        aoTexture: "/white.png",
+        opacityTexture: "/white.png",
         aoValue: 1.0,
         roughnessValue: 1.0,
         metallicValue: 0.0,
@@ -93,9 +119,10 @@ const GeomEditor = ({
         }
       }
       for (const tn of e.value.values.mStrings) {
-        if (tn.key === "diffuseColor") {
-          matSimpleEntry.baseTexture = tn.value;
-        }
+        matSimpleEntry[tn.key] = getThumbnailURLBlobFor(
+          e.value.thumbValues,
+          tn.key
+        );
       }
       matSimples.push(matSimpleEntry);
     }
@@ -183,22 +210,22 @@ const GeomEditor = ({
               </div>
 
               <div className="baseTexture-a">
-                <img src="/empty.png" alt="B" />
+                <img src={e.diffuseTexture} alt="B" />
               </div>
               <div className="baseTexture-a">
-                <img src="/empty.png" alt="B" />
+                <img src={e.normalTexture} alt="B" />
               </div>
               <div className="baseTexture-a">
-                <img src="/empty.png" alt="B" />
+                <img src={e.metallicTexture} alt="B" />
               </div>
               <div className="baseTexture-a">
-                <img src="/empty.png" alt="B" />
+                <img src={e.roughnessTexture} alt="B" />
               </div>
               <div className="baseTexture-a">
-                <img src="/empty.png" alt="B" />
+                <img src={e.aoTexture} alt="B" />
               </div>
               <div className="baseTexture-a">
-                <img src="/empty.png" alt="B" />
+                <img src={e.opacityTexture} alt="B" />
               </div>
 
               <div className="baseTextureLabel-a">Base</div>
@@ -206,7 +233,7 @@ const GeomEditor = ({
               <div className="baseTextureLabel-a">Metal</div>
               <div className="baseTextureLabel-a">Rough</div>
               <div className="baseTextureLabel-a">AO</div>
-              <div className="baseTextureLabel-a">Emissive</div>
+              <div className="baseTextureLabel-a">Opacity</div>
             </div>
           ))}
         </div>

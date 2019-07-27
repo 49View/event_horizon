@@ -30,11 +30,6 @@ public:
     }
 
 protected:
-    std::string rawb64gzip( const SerializableContainer& _raw ) const {
-        auto f = zlibUtil::deflateMemory( std::string{ _raw.begin(), _raw.end() } );
-        auto rawm = bn::encode_b64( f );
-        return std::string{ rawm.begin(), rawm.end() };
-    }
 
     std::string toMetaData( const SerializableContainer& _raw,
                             const ResourceDependencyDict& _deps ) const {
@@ -43,7 +38,7 @@ protected:
                           ResourceVersioning<T>::Prefix(),
                           this->Hash(),
                           "",//T::GenerateThumbnail((T&)*this),
-                          rawb64gzip(_raw),
+                          zlibUtil::rawb64gzip(_raw),
                           this->Tags(),
                           _deps };
         cmd.serialize(&writer);

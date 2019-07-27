@@ -3,6 +3,8 @@
 #include <cstring>
 #include "zlib_util.h"
 
+#include <core/http/basen.hpp>
+
 namespace zlibUtil {
 
 #define CHUNK 16384
@@ -199,6 +201,12 @@ namespace zlibUtil {
         (void)deflateEnd(&strm);
 
         return deflatedMemory;
+    }
+
+    std::string rawb64gzip( const SerializableContainer& _raw ) {
+        auto f = zlibUtil::deflateMemory( std::string{ _raw.begin(), _raw.end() } );
+        auto rawm = bn::encode_b64( f );
+        return std::string{ rawm.begin(), rawm.end() };
     }
 
 }

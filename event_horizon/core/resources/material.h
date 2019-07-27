@@ -39,7 +39,17 @@ public:
     [[nodiscard]] V3f getDiffuseColor() const;
     void setDiffuseColor( const V3f& _value );
 
-//    bool isStreammable() const;
+    [[nodiscard]] ResourceRef getTexture( const std::string& _tt ) const;
+    [[nodiscard]] ResourceRef getDiffuseTexture() const;
+    [[nodiscard]] ResourceRef getNormalTexture() const;
+    [[nodiscard]] ResourceRef getMetallicTexture() const;
+    [[nodiscard]] ResourceRef getRoughnessTexture() const;
+    [[nodiscard]] ResourceRef getAOTexture() const;
+    [[nodiscard]] ResourceRef getHeightTexture() const;
+    [[nodiscard]] ResourceRef getOpacityTexture() const;
+    [[nodiscard]] ResourceRef getTranslucencyTexture() const;
+
+    //    bool isStreammable() const;
     [[nodiscard]] float translucency() const;
 
     [[nodiscard]] const std::shared_ptr<HeterogeneousMap> Values() const;
@@ -51,4 +61,3 @@ private:
 protected:
     std::shared_ptr<HeterogeneousMap> values;
 };
-

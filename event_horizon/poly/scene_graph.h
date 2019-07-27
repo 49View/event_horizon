@@ -14,6 +14,7 @@
 #include <core/http/webclient.h>
 #include <core/uuid.hpp>
 #include <core/command.hpp>
+#include <core/resources/material.h>
 #include <core/recursive_transformation.hpp>
 #include <core/geom.hpp>
 #include <core/resources/resource_utils.hpp>
@@ -342,4 +343,16 @@ protected:
     GeomManager& gm;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
+};
+
+class MaterialThumbnail : public Material {
+public:
+    explicit MaterialThumbnail( SceneGraph* _sg, const Material& _mat );
+    JSONSERIALONLY( MaterialThumbnail, mKey, values, thumbValues );
+
+protected:
+    void setThumbnailFor( const std::string& _textureType );
+protected:
+    std::unordered_map<std::string, std::string> thumbValues;
+    SceneGraph* sg;
 };

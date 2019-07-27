@@ -6,6 +6,8 @@
 
 namespace zlibUtil {
 
+    [[nodiscard]] std::string rawb64gzip( const SerializableContainer& _raw );
+
     // Decompress
     SerializableContainer inflateFromMemory( uint8_p&& fin );
     // Compress

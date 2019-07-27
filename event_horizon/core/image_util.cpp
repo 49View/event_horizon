@@ -4,12 +4,12 @@
 
 #include "image_util.h"
 #include <core/util.h>
-
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb/stb_image_resize.h>
 #include <stb/stb_image_write.h>
 #include <core/raw_image.h>
 #include <core/http/basen.hpp>
+#include <core/zlib_util.h>
 
 
 namespace imageUtil {
@@ -30,6 +30,17 @@ namespace imageUtil {
         stbir_resize_uint8( image.get(), sw, sh, sw*channels*(bpp/8), output.get(),
                             width, height, width*channels*(bpp/8), channels );
         return output;
+    }
+
+    std::unique_ptr<uint8_t[]> resize( const RawImage& si, int width, int height ) {
+        std::unique_ptr<uint8_t[]> output = std::make_unique<uint8_t[]>( width * height * si.channels *(si.bpp/8) );
+        stbir_resize_uint8( si.data(), si.width, si.height, si.width*si.channels*(si.bpp/8), output.get(),
+                            width, height, width*si.channels*(si.bpp/8), si.channels );
+        return output;
+    }
+
+    std::unique_ptr<uint8_t[]> resize( std::shared_ptr<RawImage> si, int width, int height ) {
+        return resize( *si, width, height );
     }
 
     std::unique_ptr<uint8_t[]> decodeFromMemoryStream( const unsigned char* _data, int length  ) {
@@ -147,4 +158,25 @@ namespace imageUtil {
     uint8_p rawToPngMemory( const RawImage& _input ) {
         return bufferToPngMemory( _input.width, _input.height, _input.channels, _input.data() );
     }
+
+    std::string rawToPng64gzip( const RawImage& _input ) {
+        auto dtc = imageUtil::rawToPngMemory( _input );
+        return zlibUtil::rawb64gzip( SerializableContainer{ dtc.first.get(), dtc.first.get() + dtc.second } );
+    }
+
+    std::string rawToPng64gzip( std::shared_ptr<RawImage> _input ) {
+        return rawToPng64gzip( *_input );
+    }
+
+    std::string rawResizeToPng64gzip( const RawImage& dt, int tw, int th ) {
+        auto dtcr = imageUtil::resize(dt, tw, th );
+        auto dtc = imageUtil::bufferToPngMemory( tw, th, dt.channels, dt.data() );
+        auto sc = SerializableContainer{ dtc.first.get(), dtc.first.get() + dtc.second };
+        return zlibUtil::rawb64gzip(sc);
+    }
+
+    std::string rawResizeToPng64gzip( std::shared_ptr<RawImage> dt, int tw, int th ) {
+        return rawResizeToPng64gzip( *dt, tw, th );
+    }
+
 }

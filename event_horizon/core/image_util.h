@@ -20,7 +20,8 @@ namespace imageUtil {
     std::unique_ptr<uint8_t[]> resize( const unsigned char* _data, int length, int width, int height,
                                        int& channels, int& bpp );
 
-    void resizeCallbackb64(void* ctx, void*data, int size);
+    std::unique_ptr<uint8_t[]> resize( std::shared_ptr<RawImage>, int width, int height );
+    std::unique_ptr<uint8_t[]> resize( const RawImage&, int width, int height );
 
     std::unique_ptr<uint8_t[]> decodeFromMemoryStream( const unsigned char* _data, int length  );
     std::unique_ptr<uint8_t[]> decodeFromMemory( const unsigned char* _data,  int length, int& width, int& height,
@@ -35,5 +36,8 @@ namespace imageUtil {
     std::unique_ptr<uint8_t[]> zeroImage3( uint32_t color, int width, int height );
 
     uint8_p bufferToPngMemory( int w, int h, int comp, void* data );
-    uint8_p rawToPngMemory( const RawImage& _input );
+    std::string rawToPng64gzip( const RawImage& _input );
+    std::string rawToPng64gzip( std::shared_ptr<RawImage> _input );
+    std::string rawResizeToPng64gzip( const RawImage& _input, int tw, int th );
+    std::string rawResizeToPng64gzip( std::shared_ptr<RawImage> _input, int tw, int th );
 }
