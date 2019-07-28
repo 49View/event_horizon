@@ -87,25 +87,25 @@ router.put("/removeRolesForProject", async (req, res, next) => {
   error === null ? res.sendStatus(400) : res.sendStatus(204);
 });
 
-router.get("/portaltoload", async (req, res, next) => {
-  try {
-    console.log(req.user);
-    const ret = await userController.getCurrentPortalEntity(req.user);
-    res.status(200).send(ret.toObject().entity);
-  } catch (ex) {
-    console.log("ERROR [GET] portaltoload: ", ex);
-    res.sendStatus(400);
-  }
-});
+// router.get("/portaltoload", async (req, res, next) => {
+//   try {
+//     console.log(req.user);
+//     const ret = await userController.getCurrentPortalEntity(req.user);
+//     res.status(200).send(ret.toObject().entity);
+//   } catch (ex) {
+//     console.log("ERROR [GET] portaltoload: ", ex);
+//     res.sendStatus(400);
+//   }
+// });
 
-router.post("/portaltoload", async (req, res, next) => {
-  try {
-    await userController.setCurrentPortalEntity(req.user, req.body);
-    res.sendStatus(204);
-  } catch (ex) {
-    console.log("ERROR [POST] portaltoload: ", ex);
-    res.sendStatus(400);
-  }
-});
+// router.post("/portaltoload", async (req, res, next) => {
+//   try {
+//     await userController.setCurrentPortalEntity(req.user, req.body);
+//     res.sendStatus(204);
+//   } catch (ex) {
+//     console.log("ERROR [POST] portaltoload: ", ex);
+//     res.sendStatus(400);
+//   }
+// });
 
 module.exports = router;

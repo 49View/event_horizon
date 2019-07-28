@@ -10,6 +10,7 @@ const entitiesRoute = require("./routes/entitiesRoute");
 const broadcastRoute = require("./routes/broadcastRoute");
 const usersRoute = require("./routes/usersRoute");
 const tokenRoute = require("./routes/tokenRoute");
+const stripeRoute = require("./routes/stripeRoute");
 const fsRoute = require("./routes/fsRoute");
 const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
@@ -63,6 +64,7 @@ app.use(function(req, res, next) {
 
 app.use("/", indexRoute);
 app.use("/", tokenRoute);
+app.use("/stripe", stripeRoute);
 
 app.use(authController.authenticate);
 app.use(projectController.checkProjectRoutes);
