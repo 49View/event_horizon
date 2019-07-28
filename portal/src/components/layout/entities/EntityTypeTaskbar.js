@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
-// import { Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { getEntitiesOfGroup } from "../../../actions/entities";
@@ -37,25 +37,31 @@ const EntityTypeTaskBar = ({ userstate, getEntitiesOfGroup }) => {
     if (currentGroup !== groupId) {
       setCurrentGroup(groupId);
       getEntitiesOfGroup(groupId, userstate.userdata.project);
+      // return <Redirect to="/dashboard/material" />;
     }
   };
 
-  const topSideEntry = (icon, text, selected) => (
-    <div
-      className={
-        selected
-          ? "leftSideBarGroup leftSideBarGroupSelected"
-          : "leftSideBarGroup"
-      }
-    >
-      <span onClick={viewMore(text)} href="#">
-        <div className="leftSideBarIcon">
-          <i className={icon} />
-        </div>
-        <div className="leftSideBarText"> {text}</div>
-      </span>
-    </div>
-  );
+  const topSideEntry = (icon, text, selected) => {
+    const redir = "/dashboard/" + text;
+    return (
+      <div
+        className={
+          selected
+            ? "leftSideBarGroup leftSideBarGroupSelected"
+            : "leftSideBarGroup"
+        }
+      >
+        <Link to={redir} onClick={viewMore(text)}>
+          <span>
+            <div className="leftSideBarIcon">
+              <i className={icon} />
+            </div>
+            <div className="leftSideBarText"> {text}</div>
+          </span>
+        </Link>
+      </div>
+    );
+  };
 
   let proj = "";
   if (userstate.project && userstate.project !== "") {

@@ -20,7 +20,7 @@ const DashboardUser = ({
     userstate.userdata &&
     userstate.userdata.project !== ""
   ) {
-    return <Redirect to="/dashboard/geoms" />;
+    return <Redirect to="/dashboard/Objects" />;
   }
 
   //   const onRequestProject = e => {
