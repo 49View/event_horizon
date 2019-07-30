@@ -15,6 +15,7 @@ import "./App.css";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
   // dev code
+  axios.defaults.baseURL = "https://localhost:3000";
 } else {
   axios.defaults.baseURL = "https://api.ateventhorizon.com";
   // production code

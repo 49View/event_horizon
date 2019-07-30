@@ -245,7 +245,6 @@ const GeomEditor = ({
     <Fragment>
       <div className="EntryEditorRender">
         <canvas
-          id="#canvas"
           ref={canvasRef}
           className="Canvas"
           onContextMenu={e => e.preventDefault()}
@@ -257,7 +256,14 @@ const GeomEditor = ({
 
   const entityRender =
     currentEntity === null ? (
-      <div className="EntryEditorRender" />
+      <div className="EntryEditorRender">
+        {/* <canvas
+          id="#canvas2"
+          ref={canvasRef}
+          className="Canvas"
+          onContextMenu={e => e.preventDefault()}
+        /> */}
+      </div>
     ) : (
       <div className="GeomEditorRenderGrid">
         <div className="nameValue-a medium text-primary">

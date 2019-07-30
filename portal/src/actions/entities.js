@@ -239,13 +239,12 @@ export const deleteEntity = id => async dispatch => {
 
 // Add post
 export const addEntity = entity => async dispatch => {
-  const config = {
-    headers: {
-      "Content-Type": "application/json"
-    }
-  };
-
   try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
     const res = await axios.post("/entities", entity, config);
     const fullres = await axios.get(`/entities/content/byId/${res.data._id}`, {
       responseType: "arraybuffer"

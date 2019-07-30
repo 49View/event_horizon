@@ -102,7 +102,14 @@ export default function(state = initialState, action) {
     case GET_ENTITY_LOAD:
       return {
         ...state,
-        loading: true
+        loading: true,
+        currentTags: [],
+        currentEntityNodes: null
+      };
+    case ADD_ENTITY:
+      // sendAssetToDaemonIfNeeded(payload);
+      return {
+        ...state
       };
     case GET_ENTITY:
       requestAsset(payload);
@@ -110,21 +117,21 @@ export default function(state = initialState, action) {
         ...state,
         currentEntity: payload,
         currentTags: evaluateTags(payload.entity.metadata.tags),
-        replaceMaterialOn: false,
-        loading: false
+        replaceMaterialOn: false
       };
     case SET_ENTITY_NODES:
       return {
         ...state,
+        loading: false,
         currentEntityNodes: payload
       };
-    case ADD_ENTITY:
-      return {
-        ...state,
-        entries: [...state.entries, payload],
-        entry: {},
-        loading: false
-      };
+    // case ADD_ENTITY:
+    //   return {
+    //     ...state,
+    //     entries: [...state.entries, payload],
+    //     entry: {},
+    //     loading: false
+    //   };
     case REPLACE_ENTITY_TAGS:
       return {
         ...state,

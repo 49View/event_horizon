@@ -3,6 +3,7 @@ const zlib = require("zlib");
 const entityModel = require("../models/entity");
 const asyncModelOperations = require("../assistants/asyncModelOperations");
 const fsController = require("../controllers/fsController");
+const socketController = require("../controllers/socketController");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const sharp = require("sharp");
@@ -31,16 +32,14 @@ const getMetadataFromBody = (checkGroup, checkRaw, req) => {
   return metadata;
 };
 
-const createEntityFromMetadata = async (project, metadata) => {
-  // console.log( metadata );
-  // console.log( "Project: ", project, " Group: ", metadata.group, " Name:", metadata.name );
-  const {
-    content,
-    group,
-    isPublic,
-    isRestricted,
-    cleanMetadata
-  } = cleanupMetadata(metadata);
+const createEntityFromMetadata = async (
+  content,
+  project,
+  group,
+  isPublic,
+  isRestricted,
+  cleanMetadata
+) => {
   let filePath = getFilePath(project, group, cleanMetadata.name);
   //Check content exists in project and group
   const copyEntity = await checkFileExists(project, group, cleanMetadata.hash);
@@ -64,10 +63,10 @@ const createEntityFromMetadata = async (project, metadata) => {
       // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
     }
 
-    // cleanMetadata.thumb = await thumbFromContent(
-    //   content,
-    //   groupThumbnailCalcRule(group)
-    // );
+    cleanMetadata.thumb = await thumbFromContent(
+      content,
+      groupThumbnailCalcRule(group)
+    );
 
     // Hashing of content
     cleanMetadata.hash = md5(content);
@@ -87,16 +86,38 @@ const createEntityFromMetadata = async (project, metadata) => {
       "eventhorizonentities"
     );
     //Create entity
-    return await createEntity(
+    const entity = await createEntity(
       project,
       group,
       isPublic,
       isRestricted,
       cleanMetadata
     );
+
+    if (entity !== null) {
+      let json = {
+        msg: "entityAdded",
+        data: entity
+      };
+      socketController.sendMessageToAllClients(JSON.stringify(json));
+    }
+
+    return entity;
   }
   //Create entity
   return null;
+};
+
+const createEntityFromMetadataToBeCleaned = async (project, metadata) => {
+  const {
+    content,
+    group,
+    isPublic,
+    isRestricted,
+    cleanMetadata
+  } = cleanupMetadata(metadata);
+
+  return await createEntityFromMetadata();
 };
 
 const createEntitiesFromContainer = async (project, containerBody) => {
@@ -259,17 +280,17 @@ const updateById = async (entityId, updatedEntity) => {
   return result !== null ? result.toObject() : null;
 };
 
-const gtr_dep0 = "dep0";
-const gtr_content = "content";
+const gtr_dep0_image = "dep0";
+const gtr_content_image = "content";
 const gtr_content_vector = "content_vector";
 const gtr_content_default = "content_default";
 
 const groupThumbnailCalcRule = group => {
   let contentType = null;
   if (group === "material") {
-    contentType = gtr_dep0;
+    contentType = gtr_dep0_image;
   } else if (group === "image") {
-    contentType = gtr_content;
+    contentType = gtr_content_image;
   } else if (group === "profile") {
     contentType = gtr_content_vector;
   } else if (group === "geom") {
@@ -280,9 +301,9 @@ const groupThumbnailCalcRule = group => {
 
 const groupThumbnailSourceContent = async (entity, gtr) => {
   try {
-    if (gtr === gtr_content || gtr === gtr_content_vector) {
+    if (gtr === gtr_content_image || gtr === gtr_content_vector) {
       return await getEntityContent(entity._id, entity.project);
-    } else if (gtr === gtr_dep0) {
+    } else if (gtr === gtr_dep0_image) {
       for (element of entity.metadata.deps) {
         if (element.key === "image") {
           const dep0Entity = await getEntityByHash(
@@ -305,13 +326,13 @@ const thumbFromContent = async (content, gtr) => {
   let thumbBuff = null;
   if (gtr === gtr_content_vector) {
     thumbBuff = content;
-  } else {
+  } else if (gtr === gtr_content_image || gtr === gtr_dep0_image) {
     thumbBuff = await sharp(content)
       .resize(64, 64)
       .toFormat("jpg")
       .toBuffer();
   }
-  return thumbBuff.toString("base64");
+  return thumbBuff === null ? "" : thumbBuff.toString("base64");
 };
 
 const upsertThumb = async (entityId, gtr) => {

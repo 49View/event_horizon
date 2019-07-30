@@ -233,12 +233,7 @@ router.put("/metadata/addtags/:id", async (req, res, next) => {
 
 router.post("/", async (req, res, next) => {
   try {
-    const project = req.user.project;
-    const metadata = entityController.getMetadataFromBody(true, true, req);
-    const newEntity = await entityController.createEntityFromMetadata(
-      project,
-      metadata
-    );
+    const newEntity = entityController.addEntity(req);
     const status = newEntity === null ? 204 : 200;
     res.status(status).send(newEntity);
   } catch (ex) {
@@ -246,6 +241,57 @@ router.post("/", async (req, res, next) => {
     res.sendStatus(400);
   }
 });
+
+// this post have a binary body and will automatically create metadata itself
+// it will probably come from a daemon so it won't have req.user information
+// hence we need to pass them down
+router.post(
+  "/:filename/:project/:group/:username/:useremail",
+  async (req, res, next) => {
+    const filename = req.params.filename;
+    const group = req.params.group;
+    const project = req.params.project;
+    const username = req.params.username;
+    const useremail = req.params.useremail;
+    try {
+      const tags = filename.split(/[\s,._]+/);
+      const metadata = {
+        group: group,
+        isPublic: false,
+        isRestricted: false,
+        creator: {
+          name: username,
+          email: useremail
+        },
+        name: filename,
+        thumb: "",
+        tags: tags,
+        deps: []
+        // raw: encode(req.body)
+      };
+
+      const entity = await entityController.createEntityFromMetadata(
+        req.body,
+        project,
+        group,
+        false,
+        false,
+        metadata
+      );
+
+      if (entity !== null) {
+        res.status(201).json(entity);
+        // res.status(201).json({ ETag: data.ETag });
+        res.end();
+      } else {
+        throw "[post.entity] Entity created is null";
+      }
+    } catch (ex) {
+      console.log("ERROR ADDING FILE TO FS: ", ex);
+      res.sendStatus(400);
+    }
+  }
+);
 
 router.post("/multi", async (req, res, next) => {
   try {
@@ -276,7 +322,7 @@ router.post("/multi", async (req, res, next) => {
       // all entries read
       for (metadata of metadatas) {
         metadata = JSON.parse(metadata);
-        const newEntity = await entityController.createEntityFromMetadata(
+        const newEntity = await entityController.createEntityFromMetadataToBeCleaned(
           project,
           metadata
         );

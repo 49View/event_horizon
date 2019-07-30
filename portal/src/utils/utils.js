@@ -6,7 +6,9 @@ export const checkFileExtensionsOnEntityGroup = (group, filename) => {
     .pop()
     .toLowerCase();
 
-  if (group === "material") {
+  if (group === "geom") {
+    if (ext === "glb" || ext === "fbx") return true;
+  } else if (group === "material") {
     if (ext === "zip") return true;
   } else if (group === "image") {
     if (

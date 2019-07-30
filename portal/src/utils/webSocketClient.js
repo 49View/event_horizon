@@ -1,6 +1,6 @@
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import store from "../store";
-import { setEntityNodes } from "../actions/entities";
+import { setEntityNodes, getFullEntity } from "../actions/entities";
 
 let webSocketClient = null;
 
@@ -42,8 +42,10 @@ export const wscConnect = session => {
         requestAsset(state.entities.currentEntity);
       }
     }
+    if (mdata.msg === "entityAdded") {
+      store.dispatch(getFullEntity(mdata.data));
+    }
     if (mdata.msg === "materialsForGeom") {
-      console.log("[WSS-REACT][MSGREC] ", mdata.data);
       setEntityNodes(mdata.data);
     }
     // console.log(message);
