@@ -186,7 +186,7 @@ void VData::checkBaricentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, u
         // Shortest distance from i
         float minD = std::numeric_limits<float>::max();
         float d = 0.0f;
-        for ( int q = pIndexStart; q < pIndexEnd; q += 3 ) {
+        for ( auto q = pIndexStart; q < pIndexEnd; q += 3 ) {
             d = distance( i, vSoaData[q].pos );
             if ( d < minD ) {
                 pii = 0;
@@ -212,7 +212,7 @@ void VData::checkBaricentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, u
             }
         }
 
-        for ( int h = 0; h < pii; h++ ) {
+        for ( uint32_t h = 0; h < pii; h++ ) {
             vi = possibleIndices[h];
             passes = 0;
             for ( int q = 0; q < 3; q++ ) {
