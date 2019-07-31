@@ -97,7 +97,7 @@ public:
         writer->String( "v" );
         writer->StartArray();
         for ( auto& value : array.v ) {
-            for ( size_t t = 0; t < value.size(); t++ )
+            for ( int t = 0; t < value.size(); t++ )
                 serialize( nullptr, value[t] );
         }
         writer->EndArray();
