@@ -11,6 +11,7 @@ import {
   SET_ENTITY_NODES,
   SET_SELECTED_MAT_NAME,
   CLOSE_REPLACE_MATERIAL,
+  REPLACE_MATERIAL,
   REPLACE_ENTITY_TAGS,
   CHANGE_MATERIAL_COLOR
 } from "../actions/types";
@@ -25,6 +26,7 @@ const initialState = {
   matEntriesFiltered: [],
   currentEntity: null,
   replaceMaterialOn: false,
+  currentEntityNodes: null,
   group: "material",
   loading: true,
   error: {}
@@ -59,6 +61,12 @@ export default function(state = initialState, action) {
         matEntries: payload.data,
         matEntriesFiltered: payload.data,
         loading: false
+      };
+    case REPLACE_MATERIAL:
+      return {
+        ...state,
+        loading: true,
+        replaceMaterialOn: false
       };
     case CLOSE_REPLACE_MATERIAL:
       return {
@@ -103,8 +111,7 @@ export default function(state = initialState, action) {
       return {
         ...state,
         loading: true,
-        currentTags: [],
-        currentEntityNodes: null
+        currentTags: []
       };
     case ADD_ENTITY:
       // sendAssetToDaemonIfNeeded(payload);

@@ -196,12 +196,9 @@ export const loadWasmComplete = async (
     }
   };
 
-  // if (count === 0) {
   const s = document.createElement("script");
   s.text = window.wasmScript;
   document.body.appendChild(s);
-  // setCount(1);
-  // }
 };
 
 const checkWasmSupport = () => {

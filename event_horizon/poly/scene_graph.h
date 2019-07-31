@@ -324,6 +324,8 @@ public:
 
 protected:
     ResourceRef GBMatInternal( CResourceRef _matref, const C4f& _color );
+    void materialsForGeomSocketMessage();
+    void replaceMaterialOnNodes( const std::string& _key );
 //    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}

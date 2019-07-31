@@ -193,6 +193,11 @@ void Framebuffer::bindAndClear( const FrameBufferTextureValues* _values ) {
     clearDepthBuffer();
 }
 
+void Framebuffer::bindAndClearDepthOnly( const FrameBufferTextureValues* _values ) {
+    bind( _values );
+    clearDepthBuffer();
+}
+
 void Framebuffer::bindAndClearWithColor( const Color4f& clearColor, const FrameBufferTextureValues* _values ) {
     bind( _values );
     clearColorBufferWithColor( clearColor );

@@ -213,6 +213,10 @@ public:
         return data;
     }
 
+    std::vector<T>& DataVRef() {
+        return data;
+    }
+
     T& DataRef( size_t _index = 0 ) {
         return data[_index];
     }

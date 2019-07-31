@@ -12,6 +12,7 @@ import {
   GET_ENTITY_LOAD,
   SET_ENTITY_NODES,
   REPLACE_ENTITY_TAGS,
+  REPLACE_MATERIAL,
   CHANGE_MATERIAL_COLOR
 } from "./types";
 import store from "../store";
@@ -38,13 +39,18 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
 
 export const replaceMaterial = entity => async dispatch => {
   try {
+    dispatch({
+      type: REPLACE_MATERIAL,
+      payload: null
+    });
     // dispatch({
-    //   type: GET_ENTITY_LOAD,
+    //   type: REPLACE_MATERIAL,
     //   payload: null
     // });
     const state = store.getState();
     wscSend("ReplaceMaterialOnCurrentObject", {
-      entity_id: entity.metadata.name,
+      mat_id: entity.metadata.name,
+      entity_id: state.entities.currentEntity.entity.metadata.name,
       source_id: state.entities.selectedMatName
     });
 

@@ -40,7 +40,7 @@ router.get("/content/byHash/:hashId", async (req, res, next) => {
 router.get("/:group/:tags", async (req, res, next) => {
   try {
     const group = req.params.group;
-    const tags = req.params.tags.split(",");
+    const tags = req.params.tags.split(/[\s,._]+/);
     const project = req.user.project;
     //Check existing entity for use project (or public)
     const foundEntities = await entityController.getEntitiesByProjectGroupTags(
@@ -142,7 +142,7 @@ router.get("/metadata/byHash/:hashId", async (req, res, next) => {
 router.get("/metadata/byGroupTags/:group/:tags", async (req, res, next) => {
   try {
     const group = req.params.group;
-    const tags = req.params.tags.split(",");
+    const tags = req.params.tags.split(/[\s,._]+/);
     const project = req.user.project;
     //Check existing entity for use project (or public)
     const foundEntities = await entityController.getEntitiesByProjectGroupTags(

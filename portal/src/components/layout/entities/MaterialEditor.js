@@ -29,7 +29,10 @@ const MaterialEditor = ({
   }, [count, userToken, userSessionId, currentEntity]);
 
   let mainContent = <Fragment />;
-  if (currentEntity && currentEntity.jsonRet.values.mType === "PN_SH") {
+  if (
+    currentEntity !== null &&
+    currentEntity.jsonRet.values.mType === "PN_SH"
+  ) {
     // Base Color
     let depPBRMap = {
       albedoTexture: "/empty.png",

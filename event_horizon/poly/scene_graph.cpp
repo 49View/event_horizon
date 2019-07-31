@@ -101,6 +101,32 @@ MaterialThumbnail::MaterialThumbnail( SceneGraph *_sg, const Material& _mat ) : 
     setThumbnailFor( UniformNames::opacityTexture );
 }
 
+void SceneGraph::materialsForGeomSocketMessage() {
+    MatGeomSerData matSet{};
+    for ( const auto& [k, node] : Nodes() ) {
+        for ( const auto& data : node->DataV()) {
+            auto mat = get<Material>( data.material );
+//            auto matKey = mat->Key().empty() ? data.material : mat->Key();
+            matSet.mrefs.emplace( mat->Key(), MaterialThumbnail( this, *mat ));
+        }
+    }
+    Socket::send( "materialsForGeom", matSet );
+}
+
+void SceneGraph::replaceMaterialOnNodes( const std::string& _key ) {
+    LOGRS( "OldMaterialRef: " << signalValueMap["source_material_id"] );
+    for ( auto& [k, node] : Nodes() ) {
+        for ( auto& data : node->DataVRef()) {
+            auto mat = get<Material>( data.material );
+            if ( mat->Key() == signalValueMap["source_material_id"] ) {
+                data.material = _key;
+            }
+        }
+    }
+    materialsForGeomSocketMessage();
+    replaceMaterialSignal( signalValueMap["source_material_id"], _key );
+}
+
 void SceneGraph::update() {
 
     for ( auto&[k, v] : genericSceneCallback ) {
@@ -130,27 +156,20 @@ void SceneGraph::update() {
 
             if ( !nodes.empty()) removeNode( nodes.begin()->second );
             GM().clear();
+            Nodes().clear();
             Http::clearRequestCache();
             load<Geom>( v0, [this]( HttpResouceCBSign key ) {
                 auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
                 DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Halfway );
-                MatGeomSerData matSet{};
-                geom->visit( [&]( const GeomSPConst node ) {
-                    for ( const auto& data : node->DataV()) {
-                        auto mat = get<Material>( data.material );
-                        LOGRS( "MAT Name: " << mat->Key());
-                        matSet.mrefs.emplace( mat->Key(), MaterialThumbnail( this, *mat ));
-                    }
-                } );
-                Socket::send( "materialsForGeom", matSet );
+                materialsForGeomSocketMessage();
             } );
         }
         if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
-            auto matId = getFileName( doc["data"]["entity_id"].GetString());
+            auto matId = getFileName( doc["data"]["mat_id"].GetString());
+            auto objId = getFileName( doc["data"]["entity_id"].GetString());
             signalValueMap["source_material_id"] = std::string( doc["data"]["source_id"].GetString());
             load<Material>( matId, [&]( HttpResouceCBSign key ) {
-                LOGRS( "OldMaterialRef: " << signalValueMap["source_material_id"] );
-                replaceMaterialSignal( signalValueMap["source_material_id"], key );
+                replaceMaterialOnNodes(key);
             } );
         }
         if ( k == SceneEvents::ChangeMaterialProperty ) {
@@ -169,7 +188,12 @@ void SceneGraph::update() {
 
     for ( const auto& res : resourceCallbackVData ) { addVData( res.key, VData{ res.data }, res.ccf ); }
     for ( const auto& res : resourceCallbackRawImage ) { addRawImage( res.key, RawImage{ res.data }, res.ccf ); }
-    for ( const auto& res : resourceCallbackMaterial ) { addMaterial( res.key, Material{ res.data }, res.ccf ); }
+    for ( const auto& res : resourceCallbackMaterial )
+    {
+        auto mat = Material{ res.data };
+        mat.Key( res.key );
+        addMaterial( res.key, mat, res.ccf );
+    }
     for ( const auto& res : resourceCallbackFont ) { addFont( res.key, Font{ res.data }, res.ccf ); }
     for ( const auto& res : resourceCallbackProfile ) { addProfile( res.key, Profile{ res.data }, res.ccf ); }
     for ( const auto& res : resourceCallbackMaterialColor ) {
@@ -180,7 +204,9 @@ void SceneGraph::update() {
         auto geom = GLTF2Service::load( *this, res.hash, res.data );
         addGeom( res.key, geom, res.ccf );
     }
-    for ( const auto& res : resourceCallbackComposite ) { addResources( res.key, res.data, res.ccf ); }
+    for ( const auto& res : resourceCallbackComposite ) {
+        addResources( res.key, res.data, res.ccf );
+    }
 
     resourceCallbackVData.clear();
     resourceCallbackRawImage.clear();
@@ -408,7 +434,8 @@ void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _
         } else if ( rd.group == ResourceGroup::Color ) {
             B<MCB>( rd.filename ).make( fs[rd.filename], rd.hash );
         } else if ( rd.group == ResourceGroup::Material ) {
-            B<MB>( rd.filename ).make( fs[rd.filename], rd.hash );
+            auto mat = B<MB>( rd.filename ).make( fs[rd.filename], rd.hash );
+            mat->Key( _key );
         } else {
             LOGRS( "{" << rd.group << "} Resource not supported yet in dependency unpacking" );
             ASSERT( 0 );

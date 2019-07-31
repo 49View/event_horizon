@@ -393,6 +393,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     }
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+//    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClearDepthOnly } );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
     cb.setCameraUniforms( cameraRig->getCamera() );
 

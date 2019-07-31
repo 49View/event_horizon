@@ -51,6 +51,7 @@ public:
 
 	void bind( const FrameBufferTextureValues* _values = nullptr );
 	void bindAndClear( const FrameBufferTextureValues* _values = nullptr );
+	void bindAndClearDepthOnly( const FrameBufferTextureValues* _values = nullptr );
 	void bindAndClearWithColor( const Color4f& clearColor, const FrameBufferTextureValues* _values  = nullptr );
 
 	Vector4f ClearColor() const { return mClearColor; }

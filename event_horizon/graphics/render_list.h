@@ -99,6 +99,7 @@ enum class CommandBufferCommandName {
 
     colorBufferBind,
     colorBufferBindAndClear,
+    colorBufferBindAndClearDepthOnly,
     colorBufferClear,
 
     clearDefaultFramebuffer,

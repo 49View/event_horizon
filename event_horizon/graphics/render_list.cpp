@@ -53,6 +53,8 @@ std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
             return "colorBufferBind";
         case CommandBufferCommandName::colorBufferBindAndClear:
             return "colorBufferBindAndClear";
+        case CommandBufferCommandName::colorBufferBindAndClearDepthOnly:
+            return "colorBufferBindAndClearDepthOnly";
         case CommandBufferCommandName::colorBufferClear:
             return "colorBufferClear";
         case CommandBufferCommandName::clearDefaultFramebuffer:
@@ -298,6 +300,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             break;
         case CommandBufferCommandName::colorBufferBindAndClear:
             cstack->fb(CommandBufferFrameBufferType::sourceColor)->bindAndClear(cstack->frameBufferTextureValues.get());
+            break;
+        case CommandBufferCommandName::colorBufferBindAndClearDepthOnly:
+            cstack->fb(CommandBufferFrameBufferType::sourceColor)->bindAndClearDepthOnly(cstack->frameBufferTextureValues.get());
             break;
         case CommandBufferCommandName::colorBufferClear:
             cstack->fb(CommandBufferFrameBufferType::sourceColor)->clearColorBuffer();
