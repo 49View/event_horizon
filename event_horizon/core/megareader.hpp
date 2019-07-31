@@ -236,7 +236,7 @@ public:
                         T mvalue{};
                         mvalue.resize(asize);
                         for ( SizeType m = 0; m < asize; m++ ) {
-                            for ( int q = 0; q < mvalue.size(); q++ ) {
+                            for ( std::vector<Vector3f>::size_type q = 0; q < mvalue.size(); q++ ) {
                                 mvalue[m][q] = ( *( value ))[name][t]["value"][m][q].GetFloat();
                             }
                         }
