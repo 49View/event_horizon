@@ -226,7 +226,7 @@ public:
                          std::is_same<T, Matrix4f>::value ||
                          std::is_same<T, Matrix3f>::value ) {
                         T mvalue{};
-                        for ( size_t q = 0; q < mvalue.size(); q++ ) {
+                        for ( int q = 0; q < mvalue.size(); q++ ) {
                             mvalue[q] =(*(value))[name][t]["value"][q].GetFloat();
                         }
                         ret.emplace(tname, mvalue);
@@ -236,7 +236,7 @@ public:
                         T mvalue{};
                         mvalue.resize(asize);
                         for ( SizeType m = 0; m < asize; m++ ) {
-                            for ( size_t q = 0; q < mvalue.size(); q++ ) {
+                            for ( int q = 0; q < mvalue.size(); q++ ) {
                                 mvalue[m][q] = ( *( value ))[name][t]["value"][m][q].GetFloat();
                             }
                         }

@@ -293,7 +293,7 @@ public:
 		( *this )[i2] = c;
 	}
 
-	int32_t size() const {
+	int size() const {
 		return 3;
 	}
 

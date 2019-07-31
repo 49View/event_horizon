@@ -179,7 +179,7 @@ public:
 		return mW;
 	}
 
-	int32_t size() const {
+	int size() const {
 		return 4;
 	}
 
