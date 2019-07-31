@@ -135,7 +135,7 @@ jobs:
       - run:
           name: SubstanceDaemon cmake
           command: |
-            mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release ../../daemons/substance_daemon/
+            mkdir builds/sat && cd builds/sat/ && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_FROM_SOURCE=TRUE ../../daemons/substance_daemon/
       - run:
           name: SubstanceDaemon make
           command: |
