@@ -14,7 +14,8 @@ import {
   REPLACE_MATERIAL,
   REPLACE_ENTITY_TAGS,
   CHANGE_MATERIAL_COLOR,
-  RESET_CURRENT_ENTITY
+  RESET_CURRENT_ENTITY,
+  LOADING_FINISHED
 } from "../actions/types";
 
 import { requestAsset } from "../utils/webSocketClient";
@@ -47,6 +48,11 @@ export default function(state = initialState, action) {
   };
 
   switch (type) {
+    case LOADING_FINISHED:
+      return {
+        ...state,
+        loading: false
+      };
     case GET_ENTITIES:
       return {
         ...state,

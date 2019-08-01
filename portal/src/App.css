@@ -637,25 +637,10 @@ input#search-bar:hover {
   margin-top: 2px;
 }
 
-.EntryEditorRenderGrid {
-  display: grid;
-  /* margin: 10px; */
-  grid-template-columns: 725px 280px;
-  grid-template-rows: 45px 373px 117px 45px;
-  grid-template-areas:
-    "nameValue drag"
-    "render entity-tags"
-    "render entity-info"
-    "render deleteentity";
-  grid-gap: 0px 5px;
-  align-items: center;
-  justify-items: start;
-}
-
 .GeomEditorRenderGrid {
   display: grid;
   /* margin: 10px; */
-  grid-template-columns: 522px 253px 230px;
+  grid-template-columns: 522px 253px 228px;
   grid-template-rows: 45px 373px 117px 45px;
   grid-template-areas:
     "nameValue nameValue drag"
@@ -685,16 +670,6 @@ input#search-bar:hover {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
 }
 
-.materialPBRContainer {
-  display: inline-block;
-  width: 725px;
-  height: 536px;
-  padding-left: 3px;
-  grid-area: render;
-  /* overflow-x: scroll;
-  overflow-y: hidden; */
-}
-
 .materialRender {
   float: left;
   width: 400px;
@@ -702,27 +677,12 @@ input#search-bar:hover {
 }
 
 .material-text {
-  margin: auto;
-  margin-top: 3px;
-}
-
-.CanvasMaterial {
-  display: inline;
-  float: left;
-  width: 400px;
-  height: 340px;
-  margin: 7px;
-  padding: 5px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
+  padding-bottom: 2px;
 }
 
 .mediumPBRquad {
-  float: left;
-  width: 138px;
-  height: 166px;
   padding: 2px;
-  margin: 5px 6px;
+  margin-bottom: 5px;
   justify-self: stretch;
   align-self: stretch;
   border-radius: 2.5px;
@@ -755,10 +715,21 @@ input#search-bar:hover {
   font-size: 4rem;
 }
 
+.leftPadded {
+  padding-left: 4px;
+}
+
 .rightFloat {
   display: block;
   float: right;
 }
+
+.rightFloatPadded {
+  display: block;
+  float: right;
+  padding-right: 4px;
+}
+
 /* Text Styles*/
 .x-large {
   font-size: 4rem;

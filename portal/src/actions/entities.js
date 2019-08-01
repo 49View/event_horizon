@@ -14,7 +14,8 @@ import {
   REPLACE_ENTITY_TAGS,
   REPLACE_MATERIAL,
   CHANGE_MATERIAL_COLOR,
-  RESET_CURRENT_ENTITY
+  RESET_CURRENT_ENTITY,
+  LOADING_FINISHED
 } from "./types";
 import store from "../store";
 import { wscSend } from "../utils/webSocketClient";
@@ -159,6 +160,13 @@ export const changeMaterialPropery = event => dispatch => {
   } catch (error) {
     console.log(error);
   }
+};
+
+export const wasmClientFinishedLoadingData = () => dispatch => {
+  dispatch({
+    type: LOADING_FINISHED,
+    payload: null
+  });
 };
 
 // Get entity

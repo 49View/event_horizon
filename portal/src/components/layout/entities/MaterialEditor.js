@@ -45,65 +45,54 @@ const MaterialEditor = ({ currentEntity }) => {
     }
 
     mainContent = (
-      <div className="materialPBRContainer">
-        <div className="materialPBRRaw">
-          <div className="mediumPBRquad">
-            <img src={depPBRMap.albedoTexture} alt="" />
-            <div className="normal text-secondary text-center material-text">
-              Albedo
-            </div>
-          </div>
-          <div className="mediumPBRquad">
-            <img src={depPBRMap.roughnessTexture} alt="" />
-            <div className="normal text-secondary text-center material-text">
-              Roughness
-            </div>
-          </div>
-          <div className="mediumPBRquad">
-            <img src={depPBRMap.aoTexture} alt="" />
-            <div className="normal text-secondary text-center material-text">
-              Ambient Occlusion
-            </div>
-          </div>
-          <div className="mediumPBRquad">
-            <img src={depPBRMap.heightTexture} alt="" />
-            <div className="normal text-secondary text-center material-text">
-              Height
-            </div>
+      <div className="nodeViewer-a">
+        <div className="mediumPBRquad">
+          <img src={depPBRMap.albedoTexture} alt="" />
+          <div className="normal text-secondary text-center material-text">
+            Albedo
           </div>
         </div>
-        <div className="materialPBRRaw2">
-          <div className="mediumPBRquad">
-            <img src={depPBRMap.normalTexture} alt="" />
-            <div className="normal text-secondary text-center material-text">
-              Normal
-            </div>
-          </div>
-          <div className="mediumPBRquad">
-            <img src={depPBRMap.metallicTexture} alt="" />
-            <div className="normal text-secondary text-center material-text">
-              Metallic
-            </div>
-          </div>
-          <div className="mediumPBRquad">
-            <img src={depPBRMap.opacityTexture} alt="" />
-            <div className="normal text-secondary text-center material-text">
-              Opacity
-            </div>
-          </div>
-          <div className="mediumPBRquad">
-            <img src={depPBRMap.translucencyTexture} alt="" />
-            <div className="normal text-secondary text-center material-text">
-              Translucency
-            </div>
+        <div className="mediumPBRquad">
+          <img src={depPBRMap.roughnessTexture} alt="" />
+          <div className="normal text-secondary text-center material-text">
+            Roughness
           </div>
         </div>
-        <div className="materialRender">
-          {/* <canvas
-            ref={canvasRef2}
-            className="CanvasMaterial"
-            onContextMenu={e => e.preventDefault()}
-          /> */}
+        <div className="mediumPBRquad">
+          <img src={depPBRMap.aoTexture} alt="" />
+          <div className="normal text-secondary text-center material-text">
+            Ambient Occlusion
+          </div>
+        </div>
+        <div className="mediumPBRquad">
+          <img src={depPBRMap.heightTexture} alt="" />
+          <div className="normal text-secondary text-center material-text">
+            Height
+          </div>
+        </div>
+        <div className="mediumPBRquad">
+          <img src={depPBRMap.normalTexture} alt="" />
+          <div className="normal text-secondary text-center material-text">
+            Normal
+          </div>
+        </div>
+        <div className="mediumPBRquad">
+          <img src={depPBRMap.metallicTexture} alt="" />
+          <div className="normal text-secondary text-center material-text">
+            Metallic
+          </div>
+        </div>
+        <div className="mediumPBRquad">
+          <img src={depPBRMap.opacityTexture} alt="" />
+          <div className="normal text-secondary text-center material-text">
+            Opacity
+          </div>
+        </div>
+        <div className="mediumPBRquad">
+          <img src={depPBRMap.translucencyTexture} alt="" />
+          <div className="normal text-secondary text-center material-text">
+            Translucency
+          </div>
         </div>
       </div>
     );

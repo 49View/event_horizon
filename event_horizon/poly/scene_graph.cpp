@@ -75,8 +75,11 @@ std::shared_ptr<Camera> SceneGraph::DC() {
 }
 
 JSONDATA( MatGeomSerData, mrefs )
-
     std::unordered_map<std::string, MaterialThumbnail> mrefs;
+};
+
+JSONDATA( LoadFinishData, flag )
+    bool flag = true;
 };
 
 void MaterialThumbnail::setThumbnailFor( const std::string& _textureType ) {
@@ -153,17 +156,29 @@ void SceneGraph::update() {
     for ( auto&[k, doc] : eventSceneCallback ) {
         if ( k == SceneEvents::LoadGeomAndReset ) {
             auto v0 = getFileName( doc["data"]["entity_id"].GetString());
+            auto vHash = getFileName( doc["data"]["hash"].GetString());
 
             if ( !nodes.empty()) removeNode( nodes.begin()->second );
             GM().clear();
             Nodes().clear();
             Http::clearRequestCache();
-            load<Geom>( v0, [this]( HttpResouceCBSign key ) {
-                auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
-                geom->updateTransform( V3f::ZERO, Quaternion{ (float)M_PI, V3f::UP_AXIS }, V3f::ONE);
-                DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
-                materialsForGeomSocketMessage();
-            } );
+
+            auto entityGroup = doc["data"]["group"].GetString();
+
+            if ( entityGroup == ResourceGroup::Geom ) {
+                load<Geom>( v0, [this]( HttpResouceCBSign key ) {
+                    auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
+                    geom->updateTransform( V3f::ZERO, Quaternion{ (float)M_PI, V3f::UP_AXIS }, V3f::ONE);
+                    DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
+                    materialsForGeomSocketMessage();
+                } );
+            } else if ( entityGroup == ResourceGroup::Material ) {
+                load<Material>( v0, [this, vHash]( HttpResouceCBSign key ) {
+                    auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M(vHash));
+                    DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Back );
+                    Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
+                } );
+            }
         }
         if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
             auto matId = getFileName( doc["data"]["mat_id"].GetString());

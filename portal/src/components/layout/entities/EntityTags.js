@@ -34,10 +34,10 @@ const EntityTags = ({ currentEntity, tags, addTagsToEntity }) => {
 
   return (
     <div className="entity-tags-a">
-      <p>
+      <p className="leftPadded">
         <i className="fas fa-tags"> </i> Tags
         <a onClick={e => refreshTagsFromEntityName(e)} href="#!">
-          <span className="rightFloat">
+          <span className="rightFloatPadded">
             <i className="fas fa-redo" />
           </span>
         </a>

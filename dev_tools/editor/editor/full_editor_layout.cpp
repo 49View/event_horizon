@@ -47,7 +47,7 @@ void EditorBackEnd::activatePostLoad() {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
 
-    Socket::emit("{ \"msg\": \"requestAsset\"}");
+//    Socket::emit("{ \"msg\": \"requestAsset\"}");
 }
 
 void EditorBackEnd::activateImpl() {

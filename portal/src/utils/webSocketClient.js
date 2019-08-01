@@ -1,6 +1,10 @@
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import store from "../store";
-import { setEntityNodes, getFullEntity } from "../actions/entities";
+import {
+  setEntityNodes,
+  getFullEntity,
+  wasmClientFinishedLoadingData
+} from "../actions/entities";
 
 let webSocketClient = null;
 
@@ -51,8 +55,9 @@ export const wscConnect = session => {
     }
     if (mdata.msg === "entityAdded") {
       store.dispatch(getFullEntity(mdata.data));
-    }
-    if (mdata.msg === "materialsForGeom") {
+    } else if (mdata.msg === "wasmClientFinishedLoadingData") {
+      store.dispatch(wasmClientFinishedLoadingData());
+    } else if (mdata.msg === "materialsForGeom") {
       setEntityNodes(mdata.data);
     }
     // console.log(message);

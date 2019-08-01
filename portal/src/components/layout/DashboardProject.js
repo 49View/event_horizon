@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Entries from "./entities/Entries";
@@ -35,22 +35,20 @@ const DashboardProject = ({
   loading,
   group,
   userToken,
-  userSessionId
+  userData
 }) => {
   let canvas = React.useRef(null);
 
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (currentEntity !== null) {
-      if (count === 0) {
-        loadWasmComplete("editor", canvas.current, userToken, userSessionId);
-        setCount(1);
-      }
+    // if (currentEntity !== null) {
+    if (count === 0 && userData) {
+      loadWasmComplete("editor", canvas.current, userToken, userData.session);
+      setCount(1);
     }
-  }, [canvas, count, userToken, userSessionId, currentEntity]);
-
-  let mainEditorDiv = <Fragment />;
+    // }
+  }, [canvas, count, userToken, userData]);
 
   const canvasStyle = {
     visibility: currentEntity ? "visible" : "hidden"
@@ -60,7 +58,7 @@ const DashboardProject = ({
     group
   );
 
-  mainEditorDiv = (
+  const mainEditorDiv = (
     <div className={mainContainerClass}>
       <div className="nameValue-a medium text-primary">
         {currentEntity && currentEntity.entity.metadata.name}
@@ -93,7 +91,7 @@ DashboardProject.propTypes = {
   loading: PropTypes.bool,
   group: PropTypes.string,
   userToken: PropTypes.string,
-  userSessionId: PropTypes.string
+  userData: PropTypes.object
 };
 
 const mapStateToProps = state => ({
@@ -101,11 +99,7 @@ const mapStateToProps = state => ({
   loading: state.entities.loading,
   group: state.entities.group,
   userToken: state.auth.token,
-  userSessionId: state.auth.userdata
-    ? state.auth.session
-      ? state.auth.session
-      : state.auth.userdata.session
-    : null
+  userData: state.auth.userdata
 });
 
 export default connect(
