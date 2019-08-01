@@ -159,9 +159,15 @@ export const loadWasmComplete = async (
     let wasmAxios = axios.create();
     wasmAxios.defaults.baseURL = "";
 
+    let prefolder = "";
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+      // dev code
+      prefolder = "local/";
+    }
+
     const currentDate = new Date();
     let downloadConfig = {
-      url: project + ".wasm?t=" + currentDate.getTime(),
+      url: prefolder + project + ".wasm?t=" + currentDate.getTime(),
       method: "get",
       responseType: "arraybuffer"
     };
@@ -169,7 +175,7 @@ export const loadWasmComplete = async (
     const wasmBinary = new Uint8Array(binaryContent.data);
 
     downloadConfig = {
-      url: project + ".js?t=" + currentDate.getTime(),
+      url: prefolder + project + ".js?t=" + currentDate.getTime(),
       method: "get",
       responseType: "text"
     };

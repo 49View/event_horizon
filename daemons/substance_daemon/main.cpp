@@ -164,6 +164,8 @@ void elaborateGeom( const std::string& _filename, const std::string& project, co
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
+    LOGRS("Daemon version 2.0.1");
+
     Http::initDaemon();
 
 //    initDeamon();
@@ -185,6 +187,7 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
             reqUsername = _data["data"]["uname"].GetString();
             reqUserEmail = _data["data"]["uemail"].GetString();
             bAwaking = true;
+            LOGRS("Daemon will awake from cloudStorageFileToElaborate");
         } );
 
         daemonLoop( 1, bAwaking, [&]() {
