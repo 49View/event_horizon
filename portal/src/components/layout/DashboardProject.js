@@ -52,12 +52,9 @@ const DashboardProject = ({
 
   let mainEditorDiv = <Fragment />;
 
-  const canvasStyle = currentEntity
-    ? {}
-    : {
-        position: "absolute",
-        top: "-20000px"
-      };
+  const canvasStyle = {
+    visibility: currentEntity ? "visible" : "hidden"
+  };
 
   const { mainContainerClass, mainContainerDiv } = containerClassFromGroup(
     group

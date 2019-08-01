@@ -29,7 +29,14 @@ export const requestAsset = currentEntity => {
 };
 
 export const wscConnect = session => {
-  webSocketClient = new W3CWebSocket("wss://localhost:3000/?s=" + session);
+  let webSocketServerAddress = "wss://api.ateventhorizon.com";
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+    // dev code
+    webSocketServerAddress = "wss://localhost:3000";
+  }
+  webSocketServerAddress += "/?s=" + session;
+
+  webSocketClient = new W3CWebSocket(webSocketServerAddress);
   webSocketClient.onopen = () => {
     console.log("[WSS-REACT]WebSocket Client Connected");
   };

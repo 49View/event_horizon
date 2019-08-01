@@ -1,0 +1,1 @@
+cd public && scp -i ~/.ssh/ziocleto -rp ./editor.* root@159.89.249.161:/usr/share/nginx/html/editor
