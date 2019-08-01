@@ -160,7 +160,8 @@ void SceneGraph::update() {
             Http::clearRequestCache();
             load<Geom>( v0, [this]( HttpResouceCBSign key ) {
                 auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
-                DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Halfway );
+                geom->updateTransform( V3f::ZERO, Quaternion{ (float)M_PI, V3f::UP_AXIS }, V3f::ONE);
+                DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
                 materialsForGeomSocketMessage();
             } );
         }

@@ -13,7 +13,8 @@ import {
   SET_ENTITY_NODES,
   REPLACE_ENTITY_TAGS,
   REPLACE_MATERIAL,
-  CHANGE_MATERIAL_COLOR
+  CHANGE_MATERIAL_COLOR,
+  RESET_CURRENT_ENTITY
 } from "./types";
 import store from "../store";
 import { wscSend } from "../utils/webSocketClient";
@@ -29,6 +30,21 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
     const res = await axios.get(`/entities/metadata/list/${group}/${project}`);
 
     dispatch({ type: GET_ENTITIES, payload: { data: res.data, group: group } });
+  } catch (err) {
+    dispatch({
+      type: ENTITY_ERROR,
+      payload: { msg: err.response }
+    });
+  }
+};
+
+export const changeEntitiesGroup = (group, project) => async dispatch => {
+  try {
+    dispatch({
+      type: RESET_CURRENT_ENTITY,
+      payload: null
+    });
+    dispatch(getEntitiesOfGroup(group, project));
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,

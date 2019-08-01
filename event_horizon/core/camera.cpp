@@ -486,10 +486,11 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
         qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS};
         UpdateIncrementalEulerFromQangle();
         sphericalAcc = V2f{M_PI, M_PI_2};
-    } else if ( cca == CameraCenterAngle::Halfway ) {
-        qangle->value = Quaternion{ M_PI_4, Vector3f::UP_AXIS} * Quaternion{ M_PI_4, Vector3f::Z_AXIS};
+    } else if ( cca == CameraCenterAngle::Halfway || cca == CameraCenterAngle::HalfwayOpposite ) {
+	    float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : static_cast<float>(TWO_PI - M_PI_4);
+        qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS} * Quaternion{ M_PI_4, Vector3f::Z_AXIS};
         UpdateIncrementalEulerFromQangle();
-        sphericalAcc = V2f{TWO_PI - (float)M_PI_4*0.5f, (float)M_PI_4+ (float)M_PI_4*0.5f};
+        sphericalAcc = V2f{TWO_PI - (float)rangle*0.5f, (float)M_PI_4+ (float)M_PI_4*0.5f};
         if ( Mode() == CameraMode::Orbit ) {
             computeOrbitPosition();
         } else {

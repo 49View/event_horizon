@@ -1,14 +1,8 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { Redirect } from "react-router-dom";
+import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { decode } from "base64-arraybuffer";
-// import zlib from "react-zlib-js";
-import Spinner from "../Spinner";
-import EntityUpdateContent from "./EntityUpdateContent";
-import { loadWasmComplete } from "../../../actions/wasm";
 import SmallEntriesDialog from "./SmallEntriesDialog";
-import EntityMetaSection from "./EntityMetaSection";
 import { SET_SELECTED_MAT_NAME } from "../../../actions/types";
 import store from "../../../store";
 import { changeMaterialPropery } from "../../../actions/entities";
@@ -42,30 +36,10 @@ const getThumbnailURLBlobFor = (thumbsContainer, thumbName) => {
 };
 
 const GeomEditor = ({
-  currentEntity,
   currentEntityNodes,
-  loading,
   replaceMaterialOn,
-  userToken,
-  userSessionId,
   changeMaterialPropery
 }) => {
-  const canvasRef = React.useRef(null);
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (currentEntity !== null) {
-      if (count === 0) {
-        loadWasmComplete("editor", canvasRef.current, userToken, userSessionId);
-        setCount(1);
-      }
-    }
-  }, [count, userToken, userSessionId, currentEntity]);
-
-  if (userSessionId === null) {
-    return <Redirect to="/" />;
-  }
-
   const onReplaceEntity = e => {
     store.dispatch({
       type: SET_SELECTED_MAT_NAME,
@@ -76,8 +50,6 @@ const GeomEditor = ({
   const onChangeMaterialPropery = e => {
     changeMaterialPropery(e);
   };
-
-  let mainContent = <Fragment />;
 
   let matSimples = [];
 
@@ -241,71 +213,22 @@ const GeomEditor = ({
     );
   };
 
-  mainContent = (
-    <Fragment>
-      <div className="EntryEditorRender">
-        <canvas
-          ref={canvasRef}
-          className="Canvas"
-          onContextMenu={e => e.preventDefault()}
-        />
-      </div>
-      {replaceMaterialOn ? <SmallEntriesDialog /> : <InObjectMaterials />}
-    </Fragment>
-  );
-
-  const entityRender =
-    currentEntity === null ? (
-      <div className="EntryEditorRender">
-        {/* <canvas
-          id="#canvas2"
-          ref={canvasRef}
-          className="Canvas"
-          onContextMenu={e => e.preventDefault()}
-        /> */}
-      </div>
-    ) : (
-      <div className="GeomEditorRenderGrid">
-        <div className="nameValue-a medium text-primary">
-          {currentEntity.entity.metadata.name}
-        </div>
-        <EntityUpdateContent />
-        {mainContent}
-        <EntityMetaSection />
-      </div>
-    );
-
   return (
     <Fragment>
-      {loading && <Spinner />}
-      <div className="editor-a entryEditor">{entityRender}</div>
+      {replaceMaterialOn ? <SmallEntriesDialog /> : <InObjectMaterials />}
     </Fragment>
   );
 };
 
 GeomEditor.propTypes = {
-  currentEntity: PropTypes.object,
   currentEntityNodes: PropTypes.object,
-  loading: PropTypes.bool,
   replaceMaterialOn: PropTypes.bool,
-  userToken: PropTypes.string,
-  userSessionId: PropTypes.string,
-  wasmCanvas: PropTypes.object,
   changeMaterialPropery: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-  currentEntity: state.entities.currentEntity,
   currentEntityNodes: state.entities.currentEntityNodes,
-  loading: state.entities.loading,
-  replaceMaterialOn: state.entities.replaceMaterialOn,
-  userToken: state.auth.token,
-  userSessionId: state.auth.userdata
-    ? state.auth.session
-      ? state.auth.session
-      : state.auth.userdata.session
-    : null,
-  wasmCanvas: state.wasm.wasmCanvas
+  replaceMaterialOn: state.entities.replaceMaterialOn
 });
 
 export default connect(

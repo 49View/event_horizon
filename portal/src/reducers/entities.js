@@ -13,7 +13,8 @@ import {
   CLOSE_REPLACE_MATERIAL,
   REPLACE_MATERIAL,
   REPLACE_ENTITY_TAGS,
-  CHANGE_MATERIAL_COLOR
+  CHANGE_MATERIAL_COLOR,
+  RESET_CURRENT_ENTITY
 } from "../actions/types";
 
 import { requestAsset } from "../utils/webSocketClient";
@@ -54,6 +55,11 @@ export default function(state = initialState, action) {
         currentEntity: null,
         group: payload.group,
         loading: false
+      };
+    case RESET_CURRENT_ENTITY:
+      return {
+        ...state,
+        currentEntity: null
       };
     case GET_MATERIALS_META:
       return {

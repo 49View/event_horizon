@@ -1,38 +1,10 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import Spinner from "../Spinner";
-import EntityUpdateContent from "./EntityUpdateContent";
-import { loadWasmComplete } from "../../../actions/wasm";
-import EntityMetaSection from "./EntityMetaSection";
-import { changeMaterialPropery } from "../../../actions/entities";
 
-const MaterialEditor = ({
-  currentEntity,
-  currentEntityNodes,
-  loading,
-  replaceMaterialOn,
-  userToken,
-  userSessionId,
-  changeMaterialPropery
-}) => {
-  const canvasRef = React.useRef(null);
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (currentEntity !== null) {
-      if (count === 0) {
-        loadWasmComplete("editor", canvasRef.current, userToken, userSessionId);
-        setCount(1);
-      }
-    }
-  }, [count, userToken, userSessionId, currentEntity]);
-
+const MaterialEditor = ({ currentEntity }) => {
   let mainContent = <Fragment />;
-  if (
-    currentEntity !== null &&
-    currentEntity.jsonRet.values.mType === "PN_SH"
-  ) {
+  if (currentEntity.jsonRet.values.mType === "PN_SH") {
     // Base Color
     let depPBRMap = {
       albedoTexture: "/empty.png",
@@ -127,64 +99,28 @@ const MaterialEditor = ({
           </div>
         </div>
         <div className="materialRender">
-          <canvas
-            // ref={e => (localWasmcanvas = e)}
+          {/* <canvas
+            ref={canvasRef2}
             className="CanvasMaterial"
             onContextMenu={e => e.preventDefault()}
-          />
+          /> */}
         </div>
       </div>
     );
   }
 
-  const entityRender =
-    currentEntity === null ? (
-      <div className="EntryEditorRender" />
-    ) : (
-      <div className="GeomEditorRenderGrid">
-        <div className="nameValue-a medium text-primary">
-          {currentEntity.entity.metadata.name}
-        </div>
-        <EntityUpdateContent />
-        {mainContent}
-        <EntityMetaSection />
-      </div>
-    );
-
-  return (
-    <Fragment>
-      {loading && <Spinner />}
-      <div className="editor-a entryEditor">{entityRender}</div>
-    </Fragment>
-  );
+  return <Fragment>{mainContent}</Fragment>;
 };
 
 MaterialEditor.propTypes = {
-  currentEntity: PropTypes.object,
-  currentEntityNodes: PropTypes.object,
-  loading: PropTypes.bool,
-  replaceMaterialOn: PropTypes.bool,
-  userToken: PropTypes.string,
-  userSessionId: PropTypes.string,
-  wasmCanvas: PropTypes.object,
-  changeMaterialPropery: PropTypes.func.isRequired
+  currentEntity: PropTypes.object
 };
 
 const mapStateToProps = state => ({
-  currentEntity: state.entities.currentEntity,
-  currentEntityNodes: state.entities.currentEntityNodes,
-  loading: state.entities.loading,
-  replaceMaterialOn: state.entities.replaceMaterialOn,
-  userToken: state.auth.token,
-  userSessionId: state.auth.userdata
-    ? state.auth.session
-      ? state.auth.session
-      : state.auth.userdata.session
-    : null,
-  wasmCanvas: state.wasm.wasmCanvas
+  currentEntity: state.entities.currentEntity
 });
 
 export default connect(
   mapStateToProps,
-  { changeMaterialPropery }
+  {}
 )(MaterialEditor);

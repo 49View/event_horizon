@@ -41,7 +41,8 @@ struct Frustum {
 enum class CameraCenterAngle {
     Front,
     Back,
-    Halfway
+    Halfway,
+    HalfwayOpposite
 };
 
 class Camera : public Animable, public NamePolicy<> {

@@ -37,11 +37,15 @@ void EditorBackEnd::activatePostLoad() {
     rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture,
                                         sg.getHash<RawImage>( "skybox,equirectangular,park,generic,001" ) } );
 
-    rsg.useSkybox( false );
+    rsg.useSkybox( true );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
     rsg.changeTime( "winter noon" );
     rsg.setRigCameraController<CameraControlOrbit3d>();
     rsg.DC()->setFoV(60.0f);
+
+//        sg.load<Geom>( "window", [this](HttpResouceCBSign key) {
+//        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
+//    } );
 
     Socket::emit("{ \"msg\": \"requestAsset\"}");
 }

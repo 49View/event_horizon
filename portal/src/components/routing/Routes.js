@@ -2,13 +2,8 @@ import React, { Fragment } from "react";
 import { Route, Switch } from "react-router-dom";
 import Register from "../auth/Register";
 import Login from "../auth/Login";
-import DashboardGeoms from "../layout/DashboardGeoms";
-import DashboardMaterials from "../layout/DashboardMaterials";
-import DashboardImages from "../layout/DashboardImages";
-import DashboardFonts from "../layout/DashboardFonts";
-import DashboardVectors from "../layout/DashboardVectors";
-import DashboardColors from "../layout/DashboardColors";
 import DashboardUser from "../layout/DashboardUser";
+import DashboardProject from "../layout/DashboardProject";
 import NotFound from "../layout/NotFound";
 import PrivateRoute from "../routing/PrivateRoute";
 import Navbar from "../../components/layout/Navbar";
@@ -40,38 +35,13 @@ const Routes = () => {
             <Route exact path="/login" component={Login} />
             <PrivateRoute
               exact
-              path="/dashboard/Objects"
-              component={DashboardGeoms}
-            />
-            <PrivateRoute
-              exact
-              path="/dashboard/Materials"
-              component={DashboardMaterials}
-            />
-            <PrivateRoute
-              exact
-              path="/dashboard/Images"
-              component={DashboardImages}
-            />
-            <PrivateRoute
-              exact
-              path="/dashboard/Fonts"
-              component={DashboardFonts}
-            />
-            <PrivateRoute
-              exact
-              path="/dashboard/Vectors"
-              component={DashboardVectors}
-            />
-            <PrivateRoute
-              exact
-              path="/dashboard/Colors"
-              component={DashboardColors}
-            />
-            <PrivateRoute
-              exact
               path="/dashboarduser"
               component={DashboardUser}
+            />
+            <Route
+              exact
+              path="/dashboardproject"
+              component={DashboardProject}
             />
             <Route component={NotFound} />
           </Switch>

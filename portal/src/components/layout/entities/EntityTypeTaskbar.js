@@ -1,8 +1,10 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { getEntitiesOfGroup } from "../../../actions/entities";
+import {
+  getEntitiesOfGroup,
+  changeEntitiesGroup
+} from "../../../actions/entities";
 
 const ObjectsStrID = "Objects";
 const MaterialsStrID = "Materials";
@@ -11,7 +13,11 @@ const FontsStrID = "Fonts";
 const VectorsStrID = "Vectors";
 const ColorsStrID = "Colors";
 
-const EntityTypeTaskBar = ({ userstate, getEntitiesOfGroup }) => {
+const EntityTypeTaskBar = ({
+  userstate,
+  getEntitiesOfGroup,
+  changeEntitiesGroup
+}) => {
   const [currentGroup, setCurrentGroup] = useState("default");
 
   useEffect(() => {
@@ -36,13 +42,12 @@ const EntityTypeTaskBar = ({ userstate, getEntitiesOfGroup }) => {
     if (group === ColorsStrID) groupId = "color_scheme";
     if (currentGroup !== groupId) {
       setCurrentGroup(groupId);
-      getEntitiesOfGroup(groupId, userstate.userdata.project);
+      changeEntitiesGroup(groupId, userstate.userdata.project);
       // return <Redirect to="/dashboard/material" />;
     }
   };
 
   const topSideEntry = (icon, text, selected) => {
-    const redir = "/dashboard/" + text;
     return (
       <div
         className={
@@ -51,14 +56,14 @@ const EntityTypeTaskBar = ({ userstate, getEntitiesOfGroup }) => {
             : "leftSideBarGroup"
         }
       >
-        <Link to={redir} onClick={viewMore(text)}>
-          <span>
+        <Fragment>
+          <span onClick={viewMore(text)}>
             <div className="leftSideBarIcon">
               <i className={icon} />
             </div>
             <div className="leftSideBarText"> {text}</div>
           </span>
-        </Link>
+        </Fragment>
       </div>
     );
   };
@@ -115,7 +120,8 @@ const EntityTypeTaskBar = ({ userstate, getEntitiesOfGroup }) => {
 
 EntityTypeTaskBar.propTypes = {
   userstate: PropTypes.object,
-  getEntitiesOfGroup: PropTypes.func.isRequired
+  getEntitiesOfGroup: PropTypes.func.isRequired,
+  changeEntitiesGroup: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -124,5 +130,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { getEntitiesOfGroup }
+  { getEntitiesOfGroup, changeEntitiesGroup }
 )(EntityTypeTaskBar);

@@ -4,7 +4,8 @@ import {
   WASM_LOAD_SUCCESS,
   WASM_LOAD_FAILED,
   WASM_RUN_SUCCESS,
-  WASM_RUN_FAILED
+  WASM_RUN_FAILED,
+  WASM_SET_ROOT_CANVAS
 } from "./types";
 
 export const wasmRunSuccess = canvas => {
@@ -19,6 +20,19 @@ export const wasmRunFailed = error => {
     type: WASM_RUN_FAILED,
     error: error
   };
+};
+
+export const setMainCanvas = canvas => dispatch => {
+  dispatch({
+    type: WASM_SET_ROOT_CANVAS,
+    payload_canvas: canvas
+  });
+};
+
+export const setWasmLoaded = flag => dispatch => {
+  dispatch({
+    type: flag === true ? WASM_LOAD_SUCCESS : WASM_LOAD_FAILED
+  });
 };
 
 export const reCanvas = canvas => {
@@ -132,6 +146,8 @@ export const loadWasmComplete = async (
   userToken,
   userSessionId
 ) => {
+  //async dispatch =>
+  //async dispatch =>
   try {
     if (!checkWasmSupport()) {
       throw new Error("Web assembly not supported");
