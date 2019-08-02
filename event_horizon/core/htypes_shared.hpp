@@ -298,6 +298,7 @@ namespace Name {
 }
 
 namespace ResourceGroup {
+	const static std::string AppData   = "appdata";
 	const static std::string Material  = "material";
 	const static std::string Color     = "color";
 	const static std::string VData     = "vdata";

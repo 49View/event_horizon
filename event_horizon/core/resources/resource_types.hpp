@@ -13,6 +13,7 @@ namespace JMATH {
 
 template <typename T, typename B = JMATH::AABB> class RecursiveTransformation;
 
+class AppData;
 class VData;
 class Material;
 class RawImage;

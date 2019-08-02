@@ -57,12 +57,14 @@ template <typename T>
 using SignalsDeferredContainer = std::set<ResourceTransfer<T>>;
 
 inline static size_t resourcePriority( const ResourceRef& ref ) {
+    if ( ref == ResourceGroup::AppData ) return 0;
+
     if ( ref == ResourceGroup::Image ||
          ref == ResourceGroup::VData ||
          ref == ResourceGroup::Font ||
          ref == ResourceGroup::Color ||
          ref == ResourceGroup::CameraRig ||
-         ref == ResourceGroup::Profile ) return 0;
+         ref == ResourceGroup::Profile ) return 1;
 
     if ( ref == ResourceGroup::Material ) return 10;
 
@@ -76,6 +78,7 @@ class ResourceVersioning {
 public:
 
     inline static size_t Version() {
+        if ( std::is_same<R, AppData>::value )         return  1000;
         if ( std::is_same<R, Material>::value )         return 2500;
         if ( std::is_same<R, Geom>::value )         return 2000;
         if ( std::is_same<R, VData>::value )            return 1000;
@@ -84,6 +87,7 @@ public:
     }
 
     inline static bool HasDeps() {
+        if constexpr ( std::is_same<R, AppData>::value )                return false;
         if constexpr ( std::is_same<R, VData>::value )                  return false;
         if constexpr ( std::is_same<R, Material>::value )               return true ;
         if constexpr ( std::is_same<R, Geom>::value )                   return true ;
@@ -96,6 +100,7 @@ public:
     }
 
     inline static SerializableContainer HashResolver( std::shared_ptr<R> _val ) {
+        if constexpr ( std::is_same<R, AppData>::value )                return _val->serialize();
         if constexpr ( std::is_same<R, VData>::value )                  return _val->serialize();
         if constexpr ( std::is_same<R, Material>::value )               return _val->serialize();
         if constexpr ( std::is_same<R, Geom>::value )                   return _val->serialize();
@@ -108,6 +113,7 @@ public:
     }
 
     inline static std::string Prefix() {
+        if constexpr ( std::is_same<R, AppData>::value ) return ResourceGroup::AppData;
         if constexpr ( std::is_same<R, VData>::value ) return ResourceGroup::VData;
         if constexpr ( std::is_same<R, Material>::value ) return ResourceGroup::Material;
         if constexpr ( std::is_same<R, Geom>::value ) return ResourceGroup::Geom;
@@ -120,9 +126,10 @@ public:
     }
 
     inline static std::string GenerateThumbnail( const R& _res ) {
+        if ( std::is_same<R, AppData>::value    )               return "appData";
         if ( std::is_same<R, VData>::value    )                 return "vdata";
         if ( std::is_same<R, Material>::value )                 return "material";
-        if ( std::is_same<R, Geom>::value )                 return "geom";
+        if ( std::is_same<R, Geom>::value )                     return "geom";
 
         if ( std::is_same<R, MaterialColor>::value  )           return "color";
         if ( std::is_same<R, CameraRig>::value )                return "camera";
@@ -136,6 +143,9 @@ public:
 };
 
 template<typename R> class ResourceBuilder;
+
+using AppDataBuilder = ResourceBuilder<AppData>;
+using AB = AppDataBuilder;
 
 using VDataBuilder = ResourceBuilder<VData>;
 using VB = VDataBuilder;
@@ -163,6 +173,7 @@ using GRB = GeomRBuilder;
 
 template<typename T, typename C> class ResourceManager;
 
+using AppDataManager    = ResourceManager<AppData, ResourceManagerContainer<AppData>>;
 using VDataManager      = ResourceManager<VData, ResourceManagerContainer<VData>>;
 using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
 using FontManager       = ResourceManager<Font, ResourceManagerContainer<Font>>;

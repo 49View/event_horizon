@@ -7,12 +7,13 @@
 #include <vector>
 #include <string>
 #include <core/http/webclient.h>
+#include <core/app_data.hpp>
 
 class SceneGraph;
 
-class SceneLoader {
+class ScenePreLoader {
 public:
-    explicit SceneLoader( SceneGraph& sg );
+    explicit ScenePreLoader( SceneGraph& sg );
     void loadSceneEntities();
 protected:
     virtual void loadResCount( HttpResouceCBSign _key );
@@ -23,13 +24,7 @@ protected:
 protected:
     SceneGraph& sgl;
     std::vector<std::string> loadedResCounter;
-
-    std::vector<std::string> geomResourceLoad;
-    std::vector<std::string> materialColorResourceLoad;
-    std::vector<std::string> materialResourceLoad;
-    std::vector<std::string> profileResourceLoad;
-    std::vector<std::string> rawImageResourceLoad;
-    std::vector<std::string> fontResourceLoad;
+    AppData appData;
 };
 
 
