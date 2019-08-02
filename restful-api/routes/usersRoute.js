@@ -1,4 +1,5 @@
 const express = require("express");
+const projectController = require("../controllers/projectController");
 const userController = require("../controllers/userController");
 
 const router = express.Router();
@@ -61,12 +62,30 @@ router.post("/createProject/:project", async (req, res, next) => {
 
   try {
     await userController.addRolesForProject(project, email, roles);
+    // add default app for this project
+    const content = JSON.stringify({});
+    await projectController.addApp(project, project + "App", content);
   } catch (ex) {
     console.log("Error creating project", ex);
     error = true;
   }
 
   error === null ? res.sendStatus(400) : res.sendStatus(204);
+});
+
+router.post("/addProjectApp/:project/:appname", async (req, res, next) => {
+  try {
+    const content = JSON.stringify({});
+    await projectController.addApp(
+      req.params.project,
+      req.params.appname,
+      content
+    );
+    res.sendStatus(204);
+  } catch (ex) {
+    console.log("Error adding app for project ", ex);
+    res.sendStatus(400);
+  }
 });
 
 router.put("/removeRolesForProject", async (req, res, next) => {

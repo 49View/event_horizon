@@ -40,72 +40,79 @@ const createEntityFromMetadata = async (
   isRestricted,
   cleanMetadata
 ) => {
-  let filePath = getFilePath(project, group, cleanMetadata.name);
-  //Check content exists in project and group
-  const copyEntity = await checkFileExists(project, group, cleanMetadata.hash);
-  if (copyEntity === null) {
-    //Upload file to S3
-    // console.log( "Adding: ", filePath );
-    let savedFilename = { changed: false, name: filePath };
-    await fsController.cloudStorageGetFilenameAndDuplicateIfExists(
-      filePath,
-      "eventhorizonentities",
-      savedFilename
-    );
-    if (savedFilename["changed"] == true) {
-      const entityToDelete = await getEntityByName(
-        project,
-        group,
-        cleanMetadata.name
-      );
-      await deleteEntityComplete(project, entityToDelete);
-      // const nn = savedFilename["name"];
-      // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
-    }
-
-    cleanMetadata.thumb = await thumbFromContent(
-      content,
-      groupThumbnailCalcRule(group)
-    );
-
-    // Hashing of content
-    cleanMetadata.hash = md5(content);
-
-    // Insert dates
-    const idate = new Date();
-    cleanMetadata.creationDate = idate;
-    cleanMetadata.lastUpdatedDate = idate;
-
-    // Defaults
-    cleanMetadata.accessCount = 0;
-
-    // filePath = savedFilename["name"];
-    await fsController.cloudStorageFileUpload(
-      content,
-      filePath,
-      "eventhorizonentities"
-    );
-    //Create entity
-    const entity = await createEntity(
+  try {
+    let filePath = getFilePath(project, group, cleanMetadata.name);
+    //Check content exists in project and group
+    const copyEntity = await checkFileExists(
       project,
       group,
-      isPublic,
-      isRestricted,
-      cleanMetadata
+      cleanMetadata.hash
     );
+    if (copyEntity === null) {
+      //Upload file to S3
+      // console.log( "Adding: ", filePath );
+      let savedFilename = { changed: false, name: filePath };
+      await fsController.cloudStorageGetFilenameAndDuplicateIfExists(
+        filePath,
+        "eventhorizonentities",
+        savedFilename
+      );
+      if (savedFilename["changed"] == true) {
+        const entityToDelete = await getEntityByName(
+          project,
+          group,
+          cleanMetadata.name
+        );
+        await deleteEntityComplete(project, entityToDelete);
+        // const nn = savedFilename["name"];
+        // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
+      }
 
-    if (entity !== null) {
-      let json = {
-        msg: "entityAdded",
-        data: entity
-      };
-      socketController.sendMessageToAllClients(JSON.stringify(json));
+      cleanMetadata.thumb = await thumbFromContent(
+        content,
+        groupThumbnailCalcRule(group)
+      );
+
+      // Hashing of content
+      cleanMetadata.hash = md5(content);
+
+      // Insert dates
+      const idate = new Date();
+      cleanMetadata.creationDate = idate;
+      cleanMetadata.lastUpdatedDate = idate;
+
+      // Defaults
+      cleanMetadata.accessCount = 0;
+
+      // filePath = savedFilename["name"];
+      await fsController.cloudStorageFileUpload(
+        content,
+        filePath,
+        "eventhorizonentities"
+      );
+      //Create entity
+      const entity = await createEntity(
+        project,
+        group,
+        isPublic,
+        isRestricted,
+        cleanMetadata
+      );
+
+      if (entity !== null) {
+        let json = {
+          msg: "entityAdded",
+          data: entity
+        };
+        socketController.sendMessageToAllClients(JSON.stringify(json));
+      }
+
+      return entity;
     }
-
-    return entity;
+  } catch (error) {
+    console.log("Cannot create entity: ", error);
+    return null;
   }
-  //Create entity
-  return null;
 };
 
 const createEntityFromMetadataToBeCleaned = async (project, metadata) => {

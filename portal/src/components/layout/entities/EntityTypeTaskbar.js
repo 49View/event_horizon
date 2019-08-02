@@ -6,6 +6,7 @@ import {
   changeEntitiesGroup
 } from "../../../actions/entities";
 
+const AppStrID = "Apps";
 const ObjectsStrID = "Objects";
 const MaterialsStrID = "Materials";
 const ImagesStrID = "Images";
@@ -26,7 +27,7 @@ const EntityTypeTaskBar = ({
       userstate.userdata.project !== null &&
       currentGroup === "default"
     ) {
-      const groupId = "geom";
+      const groupId = "app";
       setCurrentGroup(groupId);
       getEntitiesOfGroup(groupId, userstate.userdata.project);
     }
@@ -34,6 +35,7 @@ const EntityTypeTaskBar = ({
 
   const viewMore = group => () => {
     let groupId = "";
+    if (group === AppStrID) groupId = "app";
     if (group === ObjectsStrID) groupId = "geom";
     if (group === MaterialsStrID) groupId = "material";
     if (group === ImagesStrID) groupId = "image";
@@ -83,11 +85,8 @@ const EntityTypeTaskBar = ({
 
   const topEntitySelectorBar = (
     <div className="topentityselectorbar-a topEntitySelectorBar">
-      {topSideEntry(
-        "fas fa-cube",
-        ObjectsStrID,
-        currentGroup === "geom" || currentGroup === "default"
-      )}
+      {topSideEntry("fas fa-rocket", AppStrID, currentGroup === "app")}
+      {topSideEntry("fas fa-cube", ObjectsStrID, currentGroup === "geom")}
       {topSideEntry(
         "fas fa-code-branch",
         MaterialsStrID,

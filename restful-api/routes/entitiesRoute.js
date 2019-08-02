@@ -178,7 +178,7 @@ router.get("/metadata/list/:group/:project", async (req, res, next) => {
     if (foundEntities !== null && foundEntities.length > 0) {
       res.status(200).send(foundEntities);
     } else {
-      res.sendStatus(204);
+      res.status(200).json([]);
     }
   } catch (ex) {
     console.log("ERROR GETTING ENTITY METADATA BYGROUP: ", ex);

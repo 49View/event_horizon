@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import Entries from "./entities/Entries";
 import Spinner from "./Spinner";
 // import ColorEditor from "./ColorEditor";
+import AppEditor from "./entities/AppEditor";
 import GeomEditor from "./entities/GeomEditor";
 import MaterialEditor from "./entities/MaterialEditor";
 import { loadWasmComplete } from "../../actions/wasm";
@@ -21,6 +22,11 @@ const containerClassFromGroup = group => {
       return {
         mainContainerClass: "GeomEditorRenderGrid",
         mainContainerDiv: <MaterialEditor />
+      };
+    case "app":
+      return {
+        mainContainerClass: "GeomEditorRenderGrid",
+        mainContainerDiv: <AppEditor />
       };
     default:
       return {
