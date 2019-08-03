@@ -1,7 +1,10 @@
 import React, { Fragment } from "react";
 import { connect } from "react-redux";
 import { decode } from "base64-arraybuffer";
-import { entityTypeSelector } from "../../../utils/utils";
+import {
+  entityTypeSelector,
+  checkCommonFileExtension
+} from "../../../utils/utils";
 import store from "../../../store";
 
 const EntitiesThumbHandler = ({ entries, onClicked }) => {
@@ -23,16 +26,46 @@ const EntitiesThumbHandler = ({ entries, onClicked }) => {
     store.dispatch(onClicked(entityToRender));
   };
 
+  let displayNames = {};
+  entitiesRes.forEach(entry => {
+    displayNames[entry._id] = [];
+    if (entry.metadata.tags.length === 0) {
+      displayNames[entry._id].push(entry.metadata.name);
+    } else {
+      entry.metadata.tags.forEach(element => {
+        if (!checkCommonFileExtension(entry.group, element)) {
+          displayNames[entry._id].push(element);
+        }
+      });
+    }
+  });
+
   return (
     <Fragment>
       {entitiesRes.map(entry => (
-        <div className="EntityThumbnail text-primary" key={entry._id}>
-          <span onClick={viewMore(entry)}>
-            <div className="EntityThumbnailInset">
-              {entityTypeSelector(entry)}
-            </div>
-            <div className="EntityThumbnailText">{entry.metadata.name}</div>
-          </span>
+        <div
+          className="EntityThumbnail"
+          key={entry._id}
+          onClick={viewMore(entry)}
+        >
+          <div className="EntityThumbnailInset">
+            {entityTypeSelector(entry)}
+          </div>
+          <div className="EntityThumbnailText text-primary normal">
+            {displayNames[entry._id].map(e => (
+              <span>{e} </span>
+            ))}
+          </div>
+          <div className="EntityThumbnailOwner small">
+            <span className="text-pale">
+              <i className="fas fa-user-tag" />{" "}
+            </span>
+            <span className="text-secondary">
+              {entry.metadata.creator
+                ? entry.metadata.creator.name
+                : entry.project}
+            </span>
+          </div>
         </div>
       ))}
     </Fragment>

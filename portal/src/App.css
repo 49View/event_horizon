@@ -185,17 +185,23 @@ img {
 }
 
 .EntityThumbnail {
-  width: 93px;
-  height: 92px;
+  display: grid;
+  grid-template-columns: 48px 142px;
+  grid-template-rows: 32px 18px;
+  grid-template-areas:
+    "EntityThumbnailInset EntityThumbnailTags"
+    "EntityThumbnailInset EntityThumbnailOwner";
+  width: 94%;
+  height: 58px;
   float: left;
   border-radius: 4px;
-  margin: 6px;
+  margin: 3px 6px;
   background-image: linear-gradient(
     rgba(23, 162, 184, 0.06),
     rgba(23, 162, 184, 0)
   );
   cursor: pointer;
-  padding: 4px 4px;
+  padding: 4px 5px;
   overflow: hidden;
   font-size: 0.6rem;
   text-align: center;
@@ -221,20 +227,28 @@ img {
 }
 
 .EntityThumbnailInset {
-  padding: 0;
-  margin: auto;
-  width: 64px;
-  height: 64px;
+  grid-area: EntityThumbnailInset;
 }
 
 .EntityThumbnailText {
-  padding: 0;
-  width: 100%;
+  grid-area: EntityThumbnailTags;
+  height: 100%;
+  align-self: start;
+  justify-self: start;
   overflow: hidden;
-  text-overflow: hidden;
-  margin-top: 6px;
-  color: var(--dark-color);
-  white-space: nowrap;
+  padding: 0px 8px;
+  text-overflow: ellipsis;
+  text-align: left;
+  color: var(--primary-color);
+  word-wrap: break-word;
+}
+
+.EntityThumbnailOwner {
+  grid-area: EntityThumbnailOwner;
+  color: var(--secondary-color);
+  align-content: start;
+  padding: 0px 8px;
+  justify-self: start;
 }
 
 /* Utilities */
@@ -578,7 +592,6 @@ input#search-bar:hover {
   padding: 4px 8px;
   padding-top: 2px;
   grid-template-columns: repeat(6, 15.5%);
-  grid-template-rows: 32px 22px 16px 16px 16px 32px 8px;
   grid-template-rows: 32px 22px repeat(4, 16px) 32px 8px;
   grid-template-areas:
     "matName matName matName matName matName replaceMat"

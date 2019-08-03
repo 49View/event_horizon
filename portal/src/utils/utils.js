@@ -1,11 +1,6 @@
 import React from "react";
 
-export const checkFileExtensionsOnEntityGroup = (group, filename) => {
-  const ext = filename
-    .split(".")
-    .pop()
-    .toLowerCase();
-
+export const checkCommonFileExtension = (group, ext) => {
   if (group === "geom") {
     if (ext === "glb" || ext === "fbx") return true;
   } else if (group === "material") {
@@ -27,8 +22,24 @@ export const checkFileExtensionsOnEntityGroup = (group, filename) => {
   return false;
 };
 
+export const checkFileExtensionsOnEntityGroup = (group, filename) => {
+  const ext = filename
+    .split(".")
+    .pop()
+    .toLowerCase();
+
+  return checkCommonFileExtension(group, ext);
+};
+
 export const entityTypeSelector = entry => {
-  if (entry.group === "geom") {
+  if (entry.group === "app") {
+    if (entry.metadata.thumb === "")
+      return (
+        <span className="geomThumbNotFound">
+          <i className="fas fa-rocket" />
+        </span>
+      );
+  } else if (entry.group === "geom") {
     if (entry.metadata.thumb === "")
       return (
         <span className="geomThumbNotFound">
@@ -61,5 +72,5 @@ export const entityTypeSelector = entry => {
     }
   }
 
-  return <img width="64" height="64" src={entry.metadata.thumb} alt="" />;
+  return <img src={entry.metadata.thumb} alt="" />;
 };

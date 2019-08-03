@@ -25,7 +25,7 @@ const containerClassFromGroup = group => {
       };
     case "app":
       return {
-        mainContainerClass: "GeomEditorRenderGrid",
+        mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <AppEditor />
       };
     default:

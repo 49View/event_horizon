@@ -32,7 +32,7 @@ const EntityInfo = ({ currentEntity }) => {
         <span className="metaInfoValue normal text-secondary">
           {currentEntity.entity.metadata.creator
             ? currentEntity.entity.metadata.creator.name
-            : "Unknown"}
+            : currentEntity.entity.project}
         </span>
         <br />
         <span
