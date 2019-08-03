@@ -6,9 +6,9 @@ exports.getSession = async skId => {
     line_items: [
       {
         name: "49view tier1",
-        description: "Small business service",
+        description: "Small business service premium",
         images: ["https://49view.com/49view_logo_header.svg"],
-        amount: 25000,
+        amount: 50000,
         currency: "gbp",
         quantity: 1
       }
