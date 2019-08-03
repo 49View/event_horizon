@@ -8,7 +8,7 @@
 #include "../render_material.hpp"
 #include "../render_list.h"
 
-Color4f Framebuffer::clearColorValue = Color4f::XTORGBA("#238FCB00");
+Color4f Framebuffer::clearColorValue = Color4f::XTORGBA("#238FCBFF");
 
 bool canUseMultiSample() {
 #ifdef _OPENGL_ES

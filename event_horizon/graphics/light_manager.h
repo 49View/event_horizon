@@ -114,6 +114,7 @@ public:
 	void update( float timeStamp );
 	void setShadowOverBurnCofficient( float _overBurn );
     void setShadowZFightCofficient( float _value );
+    void setIndoorSceneCoeff( float _value );
 private:
 	bool mbGlobalOnOffSwitch;
 	std::vector<DirectionalLight> mDirectionalLights;
@@ -125,7 +126,7 @@ private:
 
 	int mMaxLights = 16;
     V4f hdrExposures = V4f::WHITE;
-    V4f shadowParameters = V4f{0.001f, 1.0f, 1.0f, 1.0f};
+    V4f shadowParameters = V4f{0.001f, 1.0f, 0.0f, 1.0f};
 	//	DataVisualizerWindow* dvWindow;
 };
 

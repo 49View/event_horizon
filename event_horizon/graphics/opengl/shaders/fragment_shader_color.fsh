@@ -6,5 +6,6 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4(diffuseColor, alpha*opacity);
+    float preMultAlpha = alpha*opacity;
+    FragColor = vec4(diffuseColor * preMultAlpha, preMultAlpha);
 }

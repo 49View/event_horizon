@@ -9,6 +9,6 @@ uniform sampler2D colorTexture;
 void main()
 {
     vec4 textureCol = texture(colorTexture, v_texCoord);
-    FragColor = vec4( textureCol.rgb * diffuseColor, min(alpha, textureCol.a*opacity));
+    float preMultAlpha = min(alpha, textureCol.a*opacity);
+    FragColor = vec4( textureCol.rgb * diffuseColor * preMultAlpha, preMultAlpha);
 }
-    

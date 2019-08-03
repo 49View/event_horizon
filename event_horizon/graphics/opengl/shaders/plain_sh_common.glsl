@@ -204,6 +204,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     vec3 Lo = vec3( 0.0 );
 
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
+
     Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance );
 
     // single point light 
@@ -224,7 +225,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 #end_code
 
 #define_code shadow_code
-    float visibility = 0.0;
+    float visibility = u_shadowParameters[2];
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     float nlAngle = clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
     // u_shadowParameters[0] == depth value z offset to avoid horrible aliasing
@@ -266,7 +267,7 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
-vec3 ambient = Lo + ((kD * diffuseV + specular) * ao ) * (visibility+diffuseV);
+vec3 ambient = ((Lo + (kD * diffuseV + specular))*ao) * visibility;// * (visibility+diffuseV);
 #else 
 vec3 diffuseV = Lo * albedo;// * aoLightmapColor;
 vec3 ambient = kD * diffuseV * ao;// * visibility;
@@ -276,7 +277,8 @@ vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_tex
 
 finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
  
-FragColor = vec4( finalColor, opacityV * alpha ); 
+float preMultAlpha = opacityV * alpha;
+FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
  
 //	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
 // BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );

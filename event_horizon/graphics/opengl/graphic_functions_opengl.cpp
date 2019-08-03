@@ -25,7 +25,8 @@ void setDepthWrite( bool enabled ) {
 void setAlphaBlending( bool enabled ) {
 	if ( enabled ) {
 		GLCALL( glEnable( GL_BLEND ) );
-		GLCALL( glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ) );
+//		GLCALL( glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA ) ); // Straight Alpha
+		GLCALL( glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA ) ); // Premultiplied Alpha
 	} else {
 		GLCALL( glDisable( GL_BLEND ) );
 	}
