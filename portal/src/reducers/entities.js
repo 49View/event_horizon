@@ -35,7 +35,7 @@ const initialState = {
 };
 
 export default function(state = initialState, action) {
-  const { type, payload } = action;
+  const { type, payload, requireWasmUpdate } = action;
 
   const evaluateTags = sourceTags => {
     let tags = [];
@@ -131,12 +131,13 @@ export default function(state = initialState, action) {
         ...state
       };
     case GET_ENTITY:
-      requestAsset(payload);
+      if (requireWasmUpdate) requestAsset(payload);
       return {
         ...state,
         currentEntity: payload,
         currentTags: evaluateTags(payload.entity.metadata.tags),
-        replaceMaterialOn: false
+        replaceMaterialOn: false,
+        loading: requireWasmUpdate
       };
     case SET_ENTITY_NODES:
       return {

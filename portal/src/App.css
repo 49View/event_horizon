@@ -228,6 +228,8 @@ img {
 
 .EntityThumbnailInset {
   grid-area: EntityThumbnailInset;
+  align-content: stretch;
+  justify-content: stretch;
 }
 
 .EntityThumbnailText {
@@ -721,11 +723,11 @@ input#search-bar:hover {
 }
 
 .geomThumbNotFound {
-  font-size: 3rem;
+  font-size: 2.8rem;
 }
 
 .imageThumbNotFound {
-  font-size: 4rem;
+  font-size: 3rem;
 }
 
 .leftPadded {

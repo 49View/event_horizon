@@ -177,6 +177,8 @@ export const getFullEntity = entitySource => async dispatch => {
       payload: null
     });
 
+    const requireWasmUpdate =
+      entitySource.group === "geom" || entitySource.group === "material";
     // Get dependencies for
     let deps = {};
 
@@ -208,10 +210,18 @@ export const getFullEntity = entitySource => async dispatch => {
       jsonRet: responseTypeValue === "arraybuffer" ? null : res.data
     };
 
-    dispatch({
-      type: GET_ENTITY,
-      payload: entityFull
-    });
+    if (entitySource.group === "app") {
+      dispatch({
+        type: LOADING_FINISHED,
+        payload: null
+      });
+    } else {
+      dispatch({
+        type: GET_ENTITY,
+        payload: entityFull,
+        requireWasmUpdate: requireWasmUpdate
+      });
+    }
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,

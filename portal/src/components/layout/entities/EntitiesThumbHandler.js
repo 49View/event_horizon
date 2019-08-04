@@ -53,7 +53,7 @@ const EntitiesThumbHandler = ({ entries, onClicked }) => {
           </div>
           <div className="EntityThumbnailText text-primary normal">
             {displayNames[entry._id].map(e => (
-              <span>{e} </span>
+              <span key={entry._id + e}>{e} </span>
             ))}
           </div>
           <div className="EntityThumbnailOwner small">

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Entries from "./entities/Entries";
 import Spinner from "./Spinner";
-// import ColorEditor from "./ColorEditor";
+import ImageEditor from "./entities/ImageEditor";
 import AppEditor from "./entities/AppEditor";
 import GeomEditor from "./entities/GeomEditor";
 import MaterialEditor from "./entities/MaterialEditor";
@@ -22,6 +22,11 @@ const containerClassFromGroup = group => {
       return {
         mainContainerClass: "GeomEditorRenderGrid",
         mainContainerDiv: <MaterialEditor />
+      };
+    case "image":
+      return {
+        mainContainerClass: "GeomEditorRenderGrid",
+        mainContainerDiv: <ImageEditor />
       };
     case "app":
       return {
@@ -56,13 +61,20 @@ const DashboardProject = ({
     // }
   }, [canvas, count, userToken, userData]);
 
+  const canvasVisibility =
+    currentEntity && (group === "geom" || group === "material")
+      ? "visible"
+      : "hidden";
+
   const canvasStyle = {
-    visibility: currentEntity ? "visible" : "hidden"
+    visibility: canvasVisibility
   };
 
   const { mainContainerClass, mainContainerDiv } = containerClassFromGroup(
     group
   );
+
+  // const entityBased = group !== "app";
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>

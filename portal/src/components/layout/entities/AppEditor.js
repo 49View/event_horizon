@@ -1,52 +1,18 @@
 import React, { Fragment } from "react";
-import PropTypes from "prop-types";
+// import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import Spinner from "../Spinner";
-import EntityUpdateContent from "./EntityUpdateContent";
-import EntityMetaSection from "./EntityMetaSection";
 
-const AppEditor = ({ currentEntity, loading }) => {
-  let mainContent = <Fragment />;
-
-  if (currentEntity) {
-    mainContent = (
-      <div className="EntryEditorRender">
-        <img className="bigimagequad" src={currentEntity.blobURL} alt="" />
-      </div>
-    );
-  }
-
-  const entityRender =
-    currentEntity === null ? (
-      <div className="EntryEditorRender" />
-    ) : (
-      <div className="GeomEditorRenderGrid">
-        <div className="nameValue-a medium text-primary">
-          {currentEntity.entity.metadata.name}
-        </div>
-        <EntityUpdateContent />
-        {mainContent}
-        <EntityMetaSection />
-      </div>
-    );
-
+const AppEditor = () => {
   return (
     <Fragment>
-      {loading && <Spinner />}
-      <div className="editor-a entryEditor">{entityRender}</div>
+      <div>Ciao mamma</div>
     </Fragment>
   );
 };
 
-AppEditor.propTypes = {
-  currentEntity: PropTypes.object,
-  loading: PropTypes.bool
-};
+AppEditor.propTypes = {};
 
-const mapStateToProps = state => ({
-  currentEntity: state.entities.currentEntity,
-  loading: state.entities.loading
-});
+const mapStateToProps = state => ({});
 
 export default connect(
   mapStateToProps,
