@@ -12,10 +12,11 @@ const usersRoute = require("./routes/usersRoute");
 const tokenRoute = require("./routes/tokenRoute");
 const stripeRoute = require("./routes/stripeRoute");
 const fsRoute = require("./routes/fsRoute");
+const appdataRoute = require("./routes/appdataRoute");
 const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
 const projectController = require("./controllers/projectController");
-const mailController = require('./controllers/mailController');
+const mailController = require("./controllers/mailController");
 const cryptoController = require("./controllers/cryptoController");
 
 const app = express();
@@ -71,6 +72,7 @@ app.use(authController.authenticate);
 app.use(projectController.checkProjectRoutes);
 
 app.use("/user", usersRoute);
+app.use("/appdata", appdataRoute);
 app.use("/fs", fsRoute);
 app.use("/entities", entitiesRoute);
 app.use("/broadcast", broadcastRoute);
