@@ -232,7 +232,11 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 	explicit CLASSNAME( const MegaReader& reader ) { deserialize( reader ); } \
 	inline void serialize( MegaWriter* visitor ) const { visitor->StartObject(); serializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); visitor->EndObject(); } \
 	inline SerializableContainer serialize() const { MegaWriter mw; serialize(&mw); return mw.getSerializableContainer();} \
+	inline std::string serializeString() const { MegaWriter mw; serialize(&mw); return mw.getString();} \
 	inline void deserialize( const MegaReader& visitor ) { deserializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); } \
+	void bufferDecode( const std::string& _json ) { \
+	    bufferDecode( reinterpret_cast<const unsigned char *>( _json.data() ), _json.size() ); \
+    } \
 	void bufferDecode( const unsigned char *_buffer, size_t _length ) { \
         std::string strBuff{ _buffer, _buffer + _length}; \
         rapidjson::Document document; \

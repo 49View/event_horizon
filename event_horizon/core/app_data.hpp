@@ -4,44 +4,53 @@
 
 #pragma once
 
-class AppData {
+#include <core/name_policy.hpp>
+
+JSONDATA( AppRenderSettings, shadowOverBurnCofficient, indoorSceneCoeff, shadowZFightCofficient )
+    float shadowOverBurnCofficient = 2.0f;
+    float indoorSceneCoeff = 1.0f;
+    float shadowZFightCofficient = 0.002f;
+};
+
+class AppData : public Keyable<> {
 public:
     AppData() = default;
-JSONSERIAL( AppData, geomres, colorres, materialres, profileres,
-            imageres, fontres );
+JSONSERIAL( AppData, renderSettings, mKey, geoms, colors, materials, profiles,
+            images, fonts );
 
     [[nodiscard]] size_t firstTierResourceCount() const {
-        return colorres.size() +
-               materialres.size() +
-               profileres.size() +
-               imageres.size() +
-               fontres.size();
+        return colors.size() +
+               materials.size() +
+               profiles.size() +
+               images.size() +
+               fonts.size();
     };
 
     [[nodiscard]] size_t secondTierResourceCount() const {
-        return geomres.size();
+        return geoms.size();
     }
 
-    [[nodiscard]] const std::vector<std::string>& Geoms()          { return geomres; }
-    [[nodiscard]] const std::vector<std::string>& MaterialColors() { return colorres; }
-    [[nodiscard]] const std::vector<std::string>& Materials()      { return materialres; }
-    [[nodiscard]] const std::vector<std::string>& Profiles()       { return profileres; }
-    [[nodiscard]] const std::vector<std::string>& RawImages()      { return imageres; }
-    [[nodiscard]] const std::vector<std::string>& Fonts()          { return fontres; }
+    [[nodiscard]] const std::vector<std::string>& Geoms()          { return geoms; }
+    [[nodiscard]] const std::vector<std::string>& MaterialColors() { return colors; }
+    [[nodiscard]] const std::vector<std::string>& Materials()      { return materials; }
+    [[nodiscard]] const std::vector<std::string>& Profiles()       { return profiles; }
+    [[nodiscard]] const std::vector<std::string>& RawImages()      { return images; }
+    [[nodiscard]] const std::vector<std::string>& Fonts()          { return fonts; }
 
-    void addGeom         ( CResourceRef _value ) { geomres.emplace_back(_value);  }
-    void addMaterialColor( CResourceRef _value ) { colorres.emplace_back(_value);  }
-    void addMaterial     ( CResourceRef _value ) { materialres.emplace_back(_value);  }
-    void addProfile      ( CResourceRef _value ) { profileres.emplace_back(_value);  }
-    void addRawImage     ( CResourceRef _value ) { imageres.emplace_back(_value);  }
-    void addFont         ( CResourceRef _value ) { fontres.emplace_back(_value);  }
+    void addGeom         ( CResourceRef _value ) { geoms.emplace_back( _value);  }
+    void addMaterialColor( CResourceRef _value ) { colors.emplace_back( _value);  }
+    void addMaterial     ( CResourceRef _value ) { materials.emplace_back( _value);  }
+    void addProfile      ( CResourceRef _value ) { profiles.emplace_back( _value);  }
+    void addRawImage     ( CResourceRef _value ) { images.emplace_back( _value);  }
+    void addFont         ( CResourceRef _value ) { fonts.emplace_back( _value);  }
 
 protected:
-    std::vector<std::string> geomres;
-    std::vector<std::string> colorres;
-    std::vector<std::string> materialres;
-    std::vector<std::string> profileres;
-    std::vector<std::string> imageres;
-    std::vector<std::string> fontres;
+    AppRenderSettings        renderSettings;
+    std::vector<std::string> geoms;
+    std::vector<std::string> colors;
+    std::vector<std::string> materials;
+    std::vector<std::string> profiles;
+    std::vector<std::string> images;
+    std::vector<std::string> fonts;
 };
 
