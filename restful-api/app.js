@@ -15,6 +15,7 @@ const fsRoute = require("./routes/fsRoute");
 const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
 const projectController = require("./controllers/projectController");
+const mailController = require('./controllers/mailController');
 const cryptoController = require("./controllers/cryptoController");
 
 const app = express();
