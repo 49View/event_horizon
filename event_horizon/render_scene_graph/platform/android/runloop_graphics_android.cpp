@@ -10,12 +10,14 @@
 #include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/render_orchestrator.h>
 #include <render_scene_graph/render_orchestrator_callbacks.hpp>
-#include <graphics/opengl/mobile/glfm.h>
 
 RunLoopGraphics rl = di::make_injector().create<RunLoopGraphics>();
-
 void RunLoop::consolePrompt() {}
 void RunLoop::runConsolePrompt() {}
+
+#ifdef USE_GLFM
+
+#include <graphics/opengl/mobile/glfm.h>
 
 GLFMDisplay *glfmdisplay = nullptr;
 
@@ -111,3 +113,5 @@ static void onFrame(GLFMDisplay *display, double frameTime) {
     }
     rl.singleThreadLoop();
 }
+
+#endif

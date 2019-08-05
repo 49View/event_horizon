@@ -7,8 +7,14 @@
 #include <stdio.h>
 #include <errno.h>
 
+#ifdef USE_GLFM
 #include <graphics/opengl/mobile/glfm.h>
 #define FILE_COMPAT_ANDROID_ACTIVITY glfmAndroidGetActivity()
+#endif
+#ifdef USE_GLFVR
+#include <android/native_activity.h>
+#define FILE_COMPAT_ANDROID_ACTIVITY NULL
+#endif
 #include <android/asset_manager.h>
 
 #if !defined(FILE_COMPAT_ANDROID_ACTIVITY)

@@ -15,7 +15,9 @@
 #define MB_RELEASE 0
 #define MB_PRESS   1
 
-#ifdef USE_GLFW
+#ifdef USE_GLFVR
+#include <graphics/opengl/GLFVR/text_input_glfvr.hpp>
+#elif USE_GLFW
 #include <graphics/opengl/GLFW/text_input_glfw.hpp>
 #elif USE_GLFM
 #include <graphics/opengl/GLFW/text_input_glfw.hpp>
