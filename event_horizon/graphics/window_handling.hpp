@@ -29,4 +29,6 @@ namespace WH = WindowHandling;
 #include <graphics/opengl/GLFW/window_handling_opengl_glfw.hpp>
 #elif USE_GLFM
 #include <graphics/opengl/mobile/window_handling_opengl_glfm.hpp>
+#elif USE_GLFVR
+#include <graphics/opengl/mobile_vr/window_handling_opengl_glfvr.hpp>
 #endif
