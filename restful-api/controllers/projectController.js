@@ -31,27 +31,6 @@ const getProjectInfo = async projectName => {
   return projectInfo;
 };
 
-exports.addApp = async (projectName, appName, content) => {
-  try {
-    await entityController.createEntityFromMetadata(
-      content,
-      projectName,
-      "app",
-      false,
-      false,
-      {
-        name: appName,
-        hash: md5(content),
-        thumb: "",
-        tags: [],
-        deps: []
-      }
-    );
-  } catch (error) {
-    console.log("Error adding app to project ", error);
-  }
-};
-
 exports.checkProjectRoutes = async (req, res, next) => {
   try {
     const currentUser = req.user;
