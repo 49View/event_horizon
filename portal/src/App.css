@@ -193,9 +193,8 @@ img {
     "EntityThumbnailInset EntityThumbnailOwner";
   width: 94%;
   height: 58px;
-  float: left;
   border-radius: 4px;
-  margin: 3px 6px;
+  margin: 4px 6px;
   background-image: linear-gradient(
     rgba(23, 162, 184, 0.06),
     rgba(23, 162, 184, 0)
@@ -679,6 +678,16 @@ input#search-bar:hover {
   width: 522px;
   height: 522px;
   object-fit: contain;
+  margin: 7px;
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
+}
+
+.appdataquad {
+  grid-area: render;
+  width: 1003px;
+  height: 522px;
   margin: 7px;
   padding: 5px;
   border-radius: 10px;
@@ -1244,6 +1253,7 @@ input[type="color"]:active {
   border-style: dashed;
   background-color: #fafafa;
   margin: 5px;
+  margin-bottom: 7px;
   color: #bdbdbd;
   outline: none;
   transition: border 0.24s ease-in-out;

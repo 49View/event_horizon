@@ -30,7 +30,7 @@ const containerClassFromGroup = group => {
       };
     case "app":
       return {
-        mainContainerClass: "AppEditorRenderGrid",
+        mainContainerClass: "GeomEditorRenderGrid",
         mainContainerDiv: <AppEditor />
       };
     default:
@@ -53,12 +53,10 @@ const DashboardProject = ({
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    // if (currentEntity !== null) {
     if (count === 0 && userData) {
       loadWasmComplete("editor", canvas.current, userToken, userData.session);
       setCount(1);
     }
-    // }
   }, [canvas, count, userToken, userData]);
 
   const canvasVisibility =
@@ -76,12 +74,13 @@ const DashboardProject = ({
 
   // const entityBased = group !== "app";
 
+  const entityUpdateDivVisible = currentEntity && group !== "app";
   const mainEditorDiv = (
     <div className={mainContainerClass}>
       <div className="nameValue-a medium text-primary">
         {currentEntity && currentEntity.entity.metadata.name}
       </div>
-      {currentEntity && <EntityUpdateContent />}
+      {entityUpdateDivVisible && <EntityUpdateContent />}
       <div className="EntryEditorRender">
         <canvas
           style={canvasStyle}

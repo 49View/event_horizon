@@ -4,6 +4,7 @@ const entityModel = require("../models/entity");
 const asyncModelOperations = require("../assistants/asyncModelOperations");
 const fsController = require("../controllers/fsController");
 const socketController = require("../controllers/socketController");
+const metadataAssistant = require("../assistants/metadataAssistant");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const sharp = require("sharp");
@@ -74,15 +75,7 @@ const createEntityFromMetadata = async (
       );
 
       // Hashing of content
-      cleanMetadata.hash = md5(content);
-
-      // Insert dates
-      const idate = new Date();
-      cleanMetadata.creationDate = idate;
-      cleanMetadata.lastUpdatedDate = idate;
-
-      // Defaults
-      cleanMetadata.accessCount = 0;
+      metadataAssistant.udpateMetadata(cleanMetadata, content);
 
       // filePath = savedFilename["name"];
       await fsController.cloudStorageFileUpload(

@@ -9,6 +9,7 @@ import {
   ENTITY_ERROR,
   DELETE_ENTITY,
   GET_ENTITY,
+  GET_APPS,
   GET_ENTITY_LOAD,
   SET_ENTITY_NODES,
   REPLACE_ENTITY_TAGS,
@@ -28,9 +29,18 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
       payload: null
     });
 
-    const res = await axios.get(`/entities/metadata/list/${group}/${project}`);
-
-    dispatch({ type: GET_ENTITIES, payload: { data: res.data, group: group } });
+    let res = null;
+    let dtype = GET_ENTITIES;
+    if (group === "app") {
+      res = await axios.get(`/appdata/list/${project}`);
+      dtype = GET_APPS;
+    } else {
+      res = await axios.get(`/entities/metadata/list/${group}/${project}`);
+    }
+    dispatch({
+      type: dtype,
+      payload: { data: res.data, group: group }
+    });
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,
@@ -181,47 +191,44 @@ export const getFullEntity = entitySource => async dispatch => {
       entitySource.group === "geom" || entitySource.group === "material";
     // Get dependencies for
     let deps = {};
-
-    for (const depElem of entitySource.metadata.deps) {
-      for (const depValue of depElem.value) {
-        const res = await axios.get(`/entities/content/byHash/${depValue}`, {
-          responseType: "arraybuffer"
-        });
-        deps[depValue] = URL.createObjectURL(new Blob([res.data]));
-      }
-    }
-
+    let fullData = null;
     let responseTypeValue = "arraybuffer";
-    if (entitySource.group === "material") {
+    if (entitySource.group === "material" || entitySource.group === "app") {
       responseTypeValue = "json";
     }
 
-    const res = await axios.get(`/entities/content/byId/${entitySource._id}`, {
-      responseType: responseTypeValue
-    });
+    if (entitySource.group !== "app") {
+      for (const depElem of entitySource.metadata.deps) {
+        for (const depValue of depElem.value) {
+          const res = await axios.get(`/entities/content/byHash/${depValue}`, {
+            responseType: "arraybuffer"
+          });
+          deps[depValue] = URL.createObjectURL(new Blob([res.data]));
+        }
+      }
+
+      fullData = await axios.get(`/entities/content/byId/${entitySource._id}`, {
+        responseType: responseTypeValue
+      });
+    } else if (entitySource.group === "app") {
+      fullData = entitySource; //await axios.get(`/appdata/${entitySource.mKey}`);
+    }
 
     const entityFull = {
       entity: entitySource,
       deps: deps,
       blobURL:
         responseTypeValue === "arraybuffer"
-          ? URL.createObjectURL(new Blob([res.data]))
+          ? URL.createObjectURL(new Blob([fullData.data]))
           : null,
-      jsonRet: responseTypeValue === "arraybuffer" ? null : res.data
+      jsonRet: responseTypeValue === "arraybuffer" ? null : fullData.data
     };
 
-    if (entitySource.group === "app") {
-      dispatch({
-        type: LOADING_FINISHED,
-        payload: null
-      });
-    } else {
-      dispatch({
-        type: GET_ENTITY,
-        payload: entityFull,
-        requireWasmUpdate: requireWasmUpdate
-      });
-    }
+    dispatch({
+      type: GET_ENTITY,
+      payload: entityFull,
+      requireWasmUpdate: requireWasmUpdate
+    });
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,
@@ -278,14 +285,51 @@ export const deleteEntity = id => async dispatch => {
 };
 
 // Add post
-export const addEntity = entity => async dispatch => {
+export const addEntity = (
+  fileName,
+  fileData,
+  group,
+  project,
+  user
+) => async dispatch => {
   try {
-    const config = {
+    const octet = {
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/octet-stream"
       }
     };
-    const res = await axios.post("/entities", entity, config);
+    let res = null;
+    if (group === "geom" || group === "material") {
+      const urlEnc = encodeURIComponent("elaborate/geom/" + fileName);
+      console.log("Url encoded resource: ", urlEnc);
+      res = await axios.post(
+        "fs/entity_to_elaborate/" + urlEnc,
+        fileData,
+        octet
+      );
+    } else {
+      res = await axios.post(
+        "entities/" +
+          fileName +
+          "/" +
+          project +
+          "/" +
+          group +
+          "/" +
+          user.name +
+          "/" +
+          user.email,
+        fileData,
+        octet
+      );
+    }
+
+    // const config = {
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   }
+    // };
+    // const res = await axios.post("/entities", entity, config);
     const fullres = await axios.get(`/entities/content/byId/${res.data._id}`, {
       responseType: "arraybuffer"
     });

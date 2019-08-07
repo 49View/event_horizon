@@ -10,7 +10,7 @@ import EntityDragAndImport from "./EntityDragAndImport";
 import EntitiesSearchBox from "./EntitiesSearchBox";
 import EntitiesThumbHandler from "./EntitiesThumbHandler";
 
-const Entries = ({ loading, entries, cname }) => {
+const Entries = ({ loading, entries, currentEntity, cname }) => {
   return loading ? (
     <Spinner />
   ) : (
@@ -20,19 +20,25 @@ const Entries = ({ loading, entries, cname }) => {
         placeHolderText="Filter..."
       />
       <EntityDragAndImport />
-      <EntitiesThumbHandler entries={entries} onClicked={getFullEntity} />
+      <EntitiesThumbHandler
+        currentEntity={currentEntity}
+        entries={entries}
+        onClicked={getFullEntity}
+      />
     </div>
   );
 };
 
 Entries.propTypes = {
   loading: PropTypes.bool,
-  entries: PropTypes.array
+  entries: PropTypes.array,
+  currentEntity: PropTypes.object
 };
 
 const mapStateToProps = state => ({
   loading: state.auth.loading,
-  entries: state.entities.entriesFiltered
+  entries: state.entities.entriesFiltered,
+  currentEntity: state.entities.currentEntity
 });
 
 export default connect(

@@ -1,5 +1,6 @@
 import {
   GET_ENTITIES,
+  GET_APPS,
   GET_MATERIALS_META,
   UPDATE_ENTITIES_PARTIAL_SEARCH,
   UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH,
@@ -51,6 +52,15 @@ export default function(state = initialState, action) {
     case LOADING_FINISHED:
       return {
         ...state,
+        loading: false
+      };
+    case GET_APPS:
+      return {
+        ...state,
+        entries: payload.data,
+        entriesFiltered: payload.data,
+        currentEntity: null,
+        group: payload.group,
         loading: false
       };
     case GET_ENTITIES:

@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { connect } from "react-redux";
 import { decode } from "base64-arraybuffer";
 import {
@@ -7,7 +7,14 @@ import {
 } from "../../../utils/utils";
 import store from "../../../store";
 
-const EntitiesThumbHandler = ({ entries, onClicked }) => {
+const EntitiesThumbHandler = ({ currentEntity, entries, onClicked }) => {
+  useEffect(() => {
+    if (entries.length === 1 && !currentEntity) {
+      store.dispatch(onClicked(entries[0]));
+    }
+  }, [entries, currentEntity, onClicked]);
+
+  // console.log("###Current entity: ", currentEntity);
   let entitiesRes = [];
   if (entries && entries.length > 0) {
     entries.map(e => {
@@ -17,6 +24,11 @@ const EntitiesThumbHandler = ({ entries, onClicked }) => {
         entryWithThumb.metadata.thumb =
           e.metadata.thumb !== "" ? URL.createObjectURL(bb) : "";
       }
+      entryWithThumb.cname = "EntityThumbnail";
+      if (currentEntity && e._id === currentEntity.entity._id) {
+        entryWithThumb.cname += " leftSideBarGroupSelected";
+      }
+
       entitiesRes.push(entryWithThumb);
       return 0;
     });
@@ -43,11 +55,7 @@ const EntitiesThumbHandler = ({ entries, onClicked }) => {
   return (
     <Fragment>
       {entitiesRes.map(entry => (
-        <div
-          className="EntityThumbnail"
-          key={entry._id}
-          onClick={viewMore(entry)}
-        >
+        <div className={entry.cname} key={entry._id} onClick={viewMore(entry)}>
           <div className="EntityThumbnailInset">
             {entityTypeSelector(entry)}
           </div>

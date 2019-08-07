@@ -1,13 +1,9 @@
-import React, { Fragment } from "react";
+import React from "react";
 // import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 const AppEditor = () => {
-  return (
-    <Fragment>
-      <div>Ciao mamma</div>
-    </Fragment>
-  );
+  return <div className="appdataquad">Ciao mamma</div>;
 };
 
 AppEditor.propTypes = {};
