@@ -52,7 +52,7 @@ void EditorBackEnd::activatePostLoad() {
 
 void EditorBackEnd::activateImpl() {
 
-    rawImageResourceLoad.emplace_back( "skybox,equirectangular,park,generic,001" );
+    appData.addRawImage( "skybox,equirectangular,park,generic,001" );
 
     loadSceneEntities();
 

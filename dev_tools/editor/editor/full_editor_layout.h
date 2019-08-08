@@ -26,9 +26,9 @@ struct EditorStateMachineSML { auto operator()() const noexcept { return make_tr
 using FrontEnd = sm<EditorStateMachineSML>;
 
 // Back End
-class EditorBackEnd : public RunLoopBackEndBase, public LoginActivation<LoginFieldsPrecached>, public SceneLoader {
+class EditorBackEnd : public RunLoopBackEndBase, public LoginActivation<LoginFieldsPrecached>, public ScenePreLoader {
 public:
-    EditorBackEnd( SceneGraph& _sg, RenderOrchestrator& _rsg ) : RunLoopBackEndBase(_sg, _rsg), SceneLoader( _sg ) {
+    EditorBackEnd( SceneGraph& _sg, RenderOrchestrator& _rsg ) : RunLoopBackEndBase(_sg, _rsg), ScenePreLoader( _sg, _rsg ) {
         backEnd = std::make_unique<FrontEnd>( *this, _sg, _rsg );
     }
     ~EditorBackEnd() override = default;
