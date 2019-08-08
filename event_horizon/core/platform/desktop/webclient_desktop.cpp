@@ -83,32 +83,28 @@ namespace Http {
                       ResponseCallbackFunc callbackFailed,
                       ResponseFlags rf,
                       HttpResouceCB mainThreadCallback ) {
-        auto request = makeRequest( url );
 
-        auto settings = std::make_shared< restbed::Settings >( );
-        settings->set_connection_limit( 60*60*60*60 );
-        settings->set_connection_timeout( std::chrono::seconds(120) );
-
-        std::shared_ptr< restbed::Response > res;
         try {
-            Result lRes;
             std::string fileHash = url_encode( url.uri );
-            if ( FM::useFileSystemCachePolicy() ) {
-                lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
-                if ( lRes.length ) {
-                    lRes.uri = url.uri;
-                    lRes.statusCode = 200;
-                    lRes.ETag = cacheFolder() + fileHash + std::to_string(lRes.length);
-                }
-            }
+            Result lRes = tryFileInCache( fileHash, url, rf );
             if ( !lRes.isSuccessStatusCode() ) {
+                auto request = makeRequest( url );
+                auto settings = std::make_shared< restbed::Settings >( );
+                settings->set_connection_limit( 60*60*60*60 );
+                settings->set_connection_timeout( std::chrono::seconds(120) );
+                std::shared_ptr< restbed::Response > res;
                 res = restbed::Http::sync( request, settings );
                 LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
                 lRes = handleResponse( res, url, rf );
-                if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() && lRes.buffer ) {
-                    FM::writeLocalFile( cacheFolder() + fileHash,
-                                        reinterpret_cast<const char *>( lRes.buffer.get() ),
-                                        lRes.length );
+                if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() ) {
+                    if ( lRes.buffer ) {
+                        FM::writeLocalFile( cacheFolder() + fileHash,
+                                            reinterpret_cast<const char *>( lRes.buffer.get() ),
+                                            lRes.length );
+                    } else {
+                        FM::writeLocalFile( cacheFolder() + fileHash,
+                                            lRes.bufferString );
+                    }
                 }
             }
 

@@ -181,6 +181,23 @@ namespace Http {
         requestCache.clear();
     }
 
+    Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf ) {
+        Result lRes;
+        if ( FM::useFileSystemCachePolicy() ) {
+            if ( rf == ResponseFlags::JSON || rf == ResponseFlags::Text ) {
+                lRes.bufferString = FM::readLocalTextFile( cacheFolder() + fileHash );
+            } else {
+                lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
+            }
+            if ( lRes.length || !lRes.bufferString.empty() ) {
+                lRes.uri = url.uri;
+                lRes.statusCode = 200;
+                lRes.ETag = cacheFolder() + fileHash + std::to_string(lRes.length);
+            }
+        }
+        return lRes;
+    }
+
     void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
               HttpResouceCB mainThreadCallback ) {
         bool bPerformLoad = false;

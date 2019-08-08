@@ -40,6 +40,7 @@ void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndB
                          GLFMMultisampleNone);
 
 //    glfmSetUserData(glfmdisplay, app);
+
     glfmSetMultitouchEnabled(glfmdisplay, true);
     glfmSetSurfaceCreatedFunc(glfmdisplay, onSurfaceCreated);
     glfmSetSurfaceResizedFunc(glfmdisplay, onSurfaceCreated);
@@ -119,11 +120,11 @@ static void onFrame(GLFMDisplay *display, double frameTime) {
 #include <graphics/opengl/mobile_vr/glfvr.h>
 
 void mainLoopFunc() {
-    rl.singleThreadLoop();
+//    rl.singleThreadLoop();
 }
 
 void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
-    rl.setBackEnd(std::move(_be));
+//    rl.setBackEnd(std::move(_be));
 }
 
 #endif

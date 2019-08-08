@@ -10,16 +10,8 @@ namespace Http {
                       [[maybe_unused]] ResponseFlags rf,
                       HttpResouceCB ccf ) {
 
-        Result lRes;
         std::string fileHash = url_encode( url.uri );
-        if ( FM::useFileSystemCachePolicy() ) {
-            lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
-            if ( lRes.length ) {
-                lRes.uri = url.uri;
-                lRes.statusCode = 200;
-                lRes.ETag = cacheFolder() + fileHash + std::to_string(lRes.length);
-            }
-        }
+        Result lRes = tryFileInCache( fileHash, url, rf );
 //        if ( !lRes.isSuccessStatusCode() ) {
 //            res = restbed::Http::sync( request, settings );
 //            LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
@@ -33,6 +25,7 @@ namespace Http {
             lRes.ccf = ccf;
             if ( callback ) callback( lRes );
         } else {
+
             if ( callbackFailed ) callbackFailed( lRes );
         }
     }

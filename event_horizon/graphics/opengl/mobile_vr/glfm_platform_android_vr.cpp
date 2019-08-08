@@ -28,6 +28,8 @@ Copyright	:	Copyright (c) Facebook Technologies, LLC and its affiliates. All rig
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 #include <core/util.h>
+#include "glfvr.h"
+
 
 #if !defined( EGL_OPENGL_ES3_BIT_KHR )
 #define EGL_OPENGL_ES3_BIT_KHR		0x0040
@@ -1968,6 +1970,8 @@ void android_main( struct android_app * app )
 
     const double startTime = GetTimeInSeconds();
 
+    mainLoop();
+
     while ( app->destroyRequested == 0 )
     {
         // Read all pending events.
@@ -2053,6 +2057,8 @@ void android_main( struct android_app * app )
 
         // Advance the simulation based on the elapsed time since start of loop till predicted display time.
         ovrSimulation_Advance( &appState.Simulation, predictedDisplayTime - startTime );
+
+        // Mainloop callback on client
 
 #if MULTI_THREADED
         // Render the eye images on a separate thread.

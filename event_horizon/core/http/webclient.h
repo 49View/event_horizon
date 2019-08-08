@@ -184,6 +184,7 @@ namespace Http {
     void refreshToken();
     void xProjectHeader( const LoginFields& _lf );
     void clearRequestCache();
+    Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf );
 
     void get( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,
