@@ -4,6 +4,10 @@
 
 #include "node_graph.hpp"
 
+void NodeGraph::preloadCompleteConnect( const std::function<ConnectVoidFuncSig>& _slot ) {
+    preloadCompleteSignal.connect( _slot );
+}
+
 void NodeGraph::nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _slot ) {
     nodeAddSignal.connect( _slot );
 }

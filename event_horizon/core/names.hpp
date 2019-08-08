@@ -23,6 +23,7 @@ namespace S {
     const std::string IBL_SPECULAR = "IBL_SPECULAR";
     const std::string IBL_BRDF = "IBL_BRDF";
     const std::string SKYBOX = "skybox";
+    const std::string LOADING_SCREEN = "loading_screen";
     const std::string WIREFRAME = "wireframe";
     const std::string FONT_2D = "PN_2D_FONT";
     const std::string FONT = "PN_FONT";

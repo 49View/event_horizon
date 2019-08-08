@@ -59,6 +59,10 @@ void foreachCL( CommandBufferListVectorMap& CL, F func, const T& _value, Args ..
 
 RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg) {
 
+    sg.preloadCompleteConnect( [this]( ConnectVoidParamSig _value ) {
+        this->RR().setLoadingFlag(!_value );
+    });
+
     sg.FM().connect( [](const ResourceTransfer<Font>& _val ) {
         LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<Font>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);

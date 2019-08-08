@@ -77,6 +77,12 @@ void VPList::drawWith( RenderMaterial* _material, Program* _program ) {
     gpuData->draw();
 }
 
+void VPList::drawWithProgram( Program* _program ) {
+    if ( gpuData->isEmpty()) return;
+    gpuData->programStart( _program );
+    gpuData->draw();
+}
+
 void VPList::setMaterialConstantAlpha( float alpha ) {
     material->setConstant( UniformNames::alpha, alpha );
 }

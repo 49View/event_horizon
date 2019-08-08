@@ -130,8 +130,7 @@ void SceneGraph::replaceMaterialOnNodes( const std::string& _key ) {
     replaceMaterialSignal( signalValueMap["source_material_id"], _key );
 }
 
-void SceneGraph::update() {
-
+void SceneGraph::publishAndAddCallback() {
     for ( auto&[k, v] : genericSceneCallback ) {
 
         if ( k == ResourceGroup::Image ) {
@@ -152,7 +151,9 @@ void SceneGraph::update() {
         }
     }
     genericSceneCallback.clear();
+}
 
+void SceneGraph::realTimeCallbacks() {
     for ( auto&[k, doc] : eventSceneCallback ) {
         if ( k == SceneEvents::LoadGeomAndReset ) {
             auto v0 = getFileName( doc["data"]["entity_id"].GetString());
@@ -201,38 +202,32 @@ void SceneGraph::update() {
         }
     }
     eventSceneCallback.clear();
+}
 
-    for ( const auto& res : resourceCallbackVData ) { addVData( res.key, VData{ res.data }, res.ccf ); }
-    for ( const auto& res : resourceCallbackRawImage ) { addRawImage( res.key, RawImage{ res.data }, res.ccf ); }
-    for ( const auto& res : resourceCallbackMaterial )
-    {
-        auto mat = Material{ res.data };
-        mat.Key( res.key );
-        addMaterial( res.key, mat, res.ccf );
-    }
-    for ( const auto& res : resourceCallbackFont ) { addFont( res.key, Font{ res.data }, res.ccf ); }
-    for ( const auto& res : resourceCallbackProfile ) { addProfile( res.key, Profile{ res.data }, res.ccf ); }
-    for ( const auto& res : resourceCallbackMaterialColor ) {
-        addMaterialColor( res.key, MaterialColor{ res.data }, res.ccf );
-    }
-//    for ( const auto& res : resourceCallbackCameraRig    ) {addCameraRig    ( res.key, CameraRig    {res.data}, res.ccf ); }
-    for ( const auto& res : resourceCallbackGeom ) {
-        auto geom = GLTF2Service::load( *this, res.hash, res.data );
-        addGeom( res.key, geom, res.ccf );
-    }
-    for ( const auto& res : resourceCallbackComposite ) {
-        addResources( res.key, res.data, res.ccf );
+void SceneGraph::loadCallbacks() {
+    loadResourceCallback<VData, VB>(resourceCallbackVData);
+    loadResourceCallback<RawImage, IB>(resourceCallbackRawImage);
+    loadResourceCallback<Font, FB>(resourceCallbackFont);
+    loadResourceCallback<Profile, PB>(resourceCallbackProfile);
+    loadResourceCallback<MaterialColor, MCB>(resourceCallbackMaterialColor);
+    loadResourceCallbackWithKey<Material, MB>(resourceCallbackMaterial);
+    loadResourceCallbackWithLoader<Geom, GRB >(resourceCallbackGeom, GLTF2Service::load);
+    loadResourceCompositeCallback( resourceCallbackComposite );
+}
+
+void SceneGraph::update() {
+
+    static bool firstFrameEver = true;
+
+    if ( firstFrameEver ) {
+        firstFrameEver = false;
+        return;
     }
 
-    resourceCallbackVData.clear();
-    resourceCallbackRawImage.clear();
-    resourceCallbackMaterial.clear();
-    resourceCallbackFont.clear();
-    resourceCallbackProfile.clear();
-    resourceCallbackMaterialColor.clear();
-    resourceCallbackCameraRig.clear();
-    resourceCallbackGeom.clear();
-    resourceCallbackComposite.clear();
+    // NDDado, these are mainly dealt with the react portal now, might become obsolete soon
+    publishAndAddCallback();
+    realTimeCallbacks();
+    loadCallbacks();
 
     VL().update();
     TL().update();
@@ -246,7 +241,6 @@ void SceneGraph::update() {
 
     for ( auto&[k, v] : nodes ) {
         v->updateAnim();
-//        std::visit( lambdaUpdateAnimVisitor, v );
     }
 }
 

@@ -30,6 +30,10 @@ JSONSERIAL( AppData, renderSettings, mKey, geoms, colors, materials, profiles,
         return geoms.size();
     }
 
+    [[nodiscard]] size_t totalResourceCount() const {
+        return firstTierResourceCount() + secondTierResourceCount();
+    }
+
     [[nodiscard]] const std::vector<std::string>& Geoms()          { return geoms; }
     [[nodiscard]] const std::vector<std::string>& MaterialColors() { return colors; }
     [[nodiscard]] const std::vector<std::string>& Materials()      { return materials; }
