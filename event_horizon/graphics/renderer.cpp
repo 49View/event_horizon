@@ -474,10 +474,26 @@ void Renderer::clearColor( const C4f& _color ) {
     Framebuffer::clearColorValue = _color;
 }
 
+void Renderer::setLoadingFlag( bool _value ) {
+    bIsLoading = _value;
+}
+
+bool Renderer::isLoading() const {
+    return bIsLoading;
+}
+
+void Renderer::setProgressionTiming( float _progress ) {
+    am.setProgressionTiming( _progress );
+}
+
 void RenderAnimationManager::setTiming() {
     mAnimUniforms->setUBOData( UniformNames::deltaAnimTime,
                                Vector4f{ GameTime::getCurrTimeStep(), GameTime::getCurrTimeStamp(),
-                                         GameTime::getLastTimeStamp(), 0.0f } );
+                                         GameTime::getLastTimeStamp(), progress } );
+}
+
+void RenderAnimationManager::setProgressionTiming( float _progress ) {
+    progress = _progress;
 }
 
 void RenderAnimationManager::setUniforms_r() {

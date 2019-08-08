@@ -22,6 +22,14 @@ void GPUVData::programStart( RenderMaterial* _material, Program* _program ) cons
 //    }
 }
 
+void GPUVData::programStart(  Program* _program ) const {
+//    sNumDrawCalls++;
+    if ( sLastHandle != _program->handle()) {
+        GLCALL( glUseProgram( _program->handle() ));
+        sLastHandle = _program->handle();
+    }
+}
+
 void GPUVData::draw() const {
     GLCALL( glBindVertexArray( vao ) );
     if ( ibo == 0 ) {

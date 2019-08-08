@@ -323,6 +323,50 @@ public:
     static LoadedResouceCallbackContainer resourceCallbackComposite    ;
 
 protected:
+    template <typename  T>
+    void loadResourceCompositeCallback( T& cba ) {
+        if ( !cba.empty()) {
+            auto res = cba.back();
+            addResources( res.key, res.data, res.ccf );
+            cba.pop_back();
+        }
+    }
+
+    template <typename R, typename BB>
+    void loadResourceCallback( LoadedResouceCallbackContainer& cba ) {
+        if ( !cba.empty()) {
+            auto res = cba.back();
+            B<BB>( res.key ).addDF( R{ res.data }, res.ccf );
+            cba.pop_back();
+        }
+    }
+
+    template <typename R, typename BB>
+    void loadResourceCallbackWithKey( LoadedResouceCallbackContainer& cba ) {
+        if ( !cba.empty()) {
+            auto res = cba.back();
+            auto r = R{ res.data };
+            r.Key( res.key );
+            B<BB>( res.key ).addDF( r, res.ccf );
+            cba.pop_back();
+        }
+    }
+
+    template <typename R, typename BB, typename T>
+    void loadResourceCallbackWithLoader( LoadedResouceCallbackContainer& cba, T loadFunc ) {
+        if ( !cba.empty()) {
+            auto res = cba.back();
+            auto ent = loadFunc( *this, res.hash, res.data );
+            B<BB>( res.key ).addIM( ent );
+            if ( res.ccf ) res.ccf( res.key );
+            cba.pop_back();
+        }
+    }
+
+    void publishAndAddCallback();
+    void realTimeCallbacks();
+    void loadCallbacks();
+
     ResourceRef GBMatInternal( CResourceRef _matref, const C4f& _color );
     void materialsForGeomSocketMessage();
     void replaceMaterialOnNodes( const std::string& _key );

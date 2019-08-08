@@ -13,6 +13,7 @@ public:
     explicit GPUVData( cpuVBIB&& _vbib );
     void draw( ) const;
     void programStart( RenderMaterial* _material, Program* _program = nullptr ) const;
+    void programStart( Program* _program = nullptr ) const;
 
     void updateVBO( cpuVBIB&& _vbib );
     void updateUVs( const uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart );

@@ -18,6 +18,7 @@
 #include <graphics/framebuffer.h>
 #include <graphics/shadowmap_manager.h>
 #include <graphics/render_targets.hpp>
+#include <graphics/shader_manager.h>
 
 std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
     switch (cname) {
@@ -339,7 +340,12 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::shadowMapTexture,
                     rr.getShadowMapFB()->RenderToTexture()->TDI(1));
-            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->draw();
+            if ( rr.isLoading() ) {
+                cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
+                        rr.SM()->P(S::LOADING_SCREEN).get() );
+            } else {
+                cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->draw();
+            }
 
             cstack->postBlit();
 

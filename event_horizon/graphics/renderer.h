@@ -91,9 +91,11 @@ public:
     void init();
 	void generateUBO( std::shared_ptr<ShaderManager> sm );
     void setTiming();
+    void setProgressionTiming( float _progress );
     void setUniforms_r();
 private:
     std::unique_ptr<ProgramUniformSet> mAnimUniforms;
+    float progress = 0.0f;
 };
 
 class RenderCameraManager {
@@ -191,6 +193,9 @@ public:
     void changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt );
     void remapLightmapUVs( const scene_t& scene );
 
+    bool isLoading() const;
+    void setLoadingFlag( bool _value );
+    void setProgressionTiming( float _progress );
 protected:
 	void clearCommandList();
 	size_t renderCBList();
@@ -215,6 +220,7 @@ protected:
 	int mUpdateCounter = 0;
 	size_t mDrawCallsPerFrame = 0;
 	bool bInvalidated = false;
+    bool bIsLoading = true;
 
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	std::shared_ptr<CommandBufferList> mCommandBuffers;

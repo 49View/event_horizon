@@ -111,6 +111,7 @@ public:
 
     void draw( Program* _program = nullptr );
     void drawWith( RenderMaterial* _material, Program* _program = nullptr );
+    void drawWithProgram( Program* _program );
 
 private:
     std::shared_ptr<GPUVData>           gpuData;

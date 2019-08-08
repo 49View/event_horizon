@@ -9,12 +9,333 @@
 
 ShaderManager::ShaderManager() {
 
+//    std::string loadingScreen = R"(#version #opengl_version
+//
+//    #include "animation_uniforms.glsl"
+//    in vec2 v_texCoord;
+//    out vec4 FragColor;
+//
+//    void main() {
+//
+//        float iTime = u_deltaAnimTime.y;
+//        vec2 iResolution = vec2(1280.0, 720.0);
+//
+//        // Loading Screen
+//        vec3 col = vec3(.2,.2,.2);
+//
+//        vec2 p = (-1.0+2.0*v_texCoord)*vec2(iResolution.x/iResolution.y,1.0);
+//        vec2 q = p + 0.2;
+//
+//        q *= 1.0 + 0.3*q.x;
+//        float r = length(q);
+//        float a = atan(q.y,q.x) + 1.0*iTime;
+//        col = mix( col, vec3(0.1), (1.0-smoothstep( 0.0,0.24,abs(r-0.5)))*smoothstep(-1.0,1.0,sin(17.0*a))   );
+//
+//        p *= 1.0 + 0.3*p.x;
+//        r = length(p);
+//        a = atan(p.y,p.x) + 1.0*iTime;
+//        col = mix( col, vec3(1.0,1.0,1.0), (1.0-smoothstep( 0.10,0.14,abs(r-0.5)))*smoothstep(0.4,1.0,sin(17.0*a))   );
+//
+//        float gl = 0.6 + 0.4*sin(0.5*6.2831*iTime);
+//        col += gl * vec3(1.0,0.5,0.2) * (1.0-smoothstep( 0.10,0.20,abs(r-0.5)))*smoothstep(-1.0,0.5,sin(17.0*a))   ;
+//
+//        FragColor = vec4(col,1.0);
+//    }
+//    )";
+
+//std::string loadingScreen = R"(#version #opengl_version
+///* ----------------
+//*	zlnimda wrote this file and is under license CC-BY-SA-4.0
+//* 	( see legal notice: https://creativecommons.org/licenses/by-sa/4.0/legalcode )
+///* ----------------
+//* 	Animation of loading
+//*/
+//#include "animation_uniforms.glsl"
+//in vec2 v_texCoord;
+//out vec4 fragColor;
+//vec2 iResolution = vec2(640.0, 360.0);
+//
+//// AA
+//#define	LOW_RPX	(4./max(iResolution.x,iResolution.y))
+//
+//#define RATIO	(iResolution.x/iResolution.y)
+//#define FONT_R	(16.)
+//#define FONT_S	(1./FONT_R)
+//
+//const float M_PI = 3.1415926535897932384626433832795;
+//
+//const vec4	YELOW  = vec4(vec3(0xD3, 0xE7, 0x14) / vec3(0xFF), 1.);
+//const vec4 	RED    = vec4(vec3(0xFF, 0x38, 0x67) / vec3(0xFF), 1.);
+//const vec4	BLUE   = vec4(vec3(0x46, 0x2D, 0xFE) / vec3(0xFF), 1.);
+//const vec4	CYAN   = vec4(vec3(0x09, 0xDE, 0xAF) / vec3(0xFF), 1.);
+//const vec4 	WHITE  = vec4(1.);
+//const vec4 	BBLACK = vec4(0., 0., 0., 1.);
+//
+//
+//vec2 rot(vec2 uv, float a)
+//{
+//    return (mat2(cos(a), -sin(a), sin(a), cos(a)) * mat2(RATIO, 0., 0., 1.)) * uv;
+//}
+//
+//// almost signed dist sq
+//vec2 sdsq(vec2 uv, vec2 o, vec2 s, float a)
+//{
+//    // handle angle & ratio
+//    uv = rot(o - uv, a);
+//    return s/2.0 - abs(uv);
+//}
+//
+//
+//// almost signed dist sp
+//float sdsp(vec2 uv, vec2 o, float s)
+//{
+//    // handle angle & ratio
+//    uv = o - uv;
+//    return length(uv) - s*.5;
+//}
+//
+//// sq color
+//vec4 sq(vec2 uv, vec2 o, vec2 s, vec4 c, float a)
+//{
+//    // AA
+//    s *= 1.+LOW_RPX;
+//    vec2 d = sdsq(uv, o, s, a);
+//    // AA
+//    float dd = min(d.x, d.y);
+//    vec3 rc = mix(vec3(.0), c.xyz,
+//               // step(.0, dd)
+//                clamp(smoothstep(.0, LOW_RPX, dd) / LOW_RPX, .0, 1.)
+//              );
+//    return vec4(rc, mix(.0, c.a, step(.0, dd)));
+//}
+//
+//// sp color
+//vec4 sp(vec2 uv, vec2 o, float s, vec4 c)
+//{
+//    // AA
+//    s *= 1.+LOW_RPX;
+//    float d = sdsp(uv, o, s);
+//    //return mix(c, vec4(0.0), step(0.0, d));
+//
+//    // AA
+//    vec3 rc = mix(c.xyz, vec3(.0),
+//               // step(.0, dd)
+//                clamp(smoothstep(.0, LOW_RPX, d) / LOW_RPX, .0, 1.)
+//              );
+//    return vec4(rc, mix(c.a, .0, step(.0, d)));
+//}
+//
+//float BezierDeg4(float p0, float p1, float p2, float p3, float t)
+//{
+//    // bezier formula following bernstein Bez(t) = E(i->n)Bern(t).Pi with t=[0,1]
+//    return p0*pow(1.-t, 3.) + p1*3.*t*pow(1.-t, 2.) + p2*3.*t*t*(1.-t) + p3*t*t*t;
+//}
+//
+//float easingBezier(vec2 r, vec2 p0, vec2 p1, float t)
+//{
+//    t = BezierDeg4(0., p0.x, p1.x, 1., t);
+//    return BezierDeg4(r.x, p0.y, p1.y, r.y, t);
+//}
+//
+//float easingInOutBack(float t)
+//{
+//    return easingBezier(vec2(0., 1.), vec2(0.265, -0.55), vec2(0.68, 1.55), t);
+//}
+//
+//vec4 anim(vec2 uv, float t, vec4 c, float i)
+//{
+//    float ta = t + i *0.03 * mix(-1., 1., step(.5, t));
+//    ta = mix(1.-easingInOutBack(ta*2.),
+//            easingBezier(vec2(0., 1.), vec2(0.1, 0.75), vec2(0.67, 3.6), (ta-.5)*2.),
+//            step(.5, ta));
+//    vec2 s = vec2(ta * .25, .015);
+//    float e = step(1.8, ta);
+//    return sq(uv, vec2(s.x*.5, s.y*i*4.)/RATIO, s, mix(WHITE, c, e), .0)
+//        + e * sp(uv, vec2(.315, s.y*i*2.3), .011, c);
+//}
+//
+//vec4 drawsq(vec2 uv, float t, vec4 c)
+//{
+//    vec4 ec;
+//    ec += anim(uv, t, c, 0.);
+//    ec += anim(uv, t, c, 1.);
+//    ec += anim(uv, t, c, 2.);
+//    return ec;
+//}
+//
+//vec4 animDrawSq(vec2 uv, float t)
+//{
+//    vec4 c;
+//    vec2 uvfk;
+//    float r = easingInOutBack(t)+.125;
+//
+//    const vec2 off  = vec2(.0, .030);
+//    const vec2 cent = vec2(.5, .55);
+//    uvfk = rot(uv-cent + off, r *2.* M_PI) - off;
+//    c += drawsq(uvfk, t, YELOW);
+//    uvfk = rot(uv-cent + off, (r + 0.25) *2.* M_PI) - off;
+//    c += drawsq(uvfk, t, CYAN);
+//    uvfk = rot(uv-cent + off, (r + 0.50) *2.* M_PI) - off;
+//    c += drawsq(uvfk, t, BLUE);
+//    uvfk = rot(uv-cent + off, (r + 0.75) *2.* M_PI) - off;
+//    c += drawsq(uvfk, t, RED);
+//    return c;
+//}
+//
+//float inRect(vec2 pos, vec2 topLeft, vec2 rightBottom) {
+//	return step(topLeft.x, pos.x) * step(rightBottom.y, pos.y) * step(-rightBottom.x, -pos.x) * step(-topLeft.y, -pos.y);
+//}
+//
+//float inBetween(float x, float a, float b) {
+//    return step(a, x) * step(-b, -x);
+//}
+//
+//vec3 loadingColor( vec2 uv, float progress ) {
+//    vec2 inv_resolution = 1.0 / iResolution.xy;
+//	float sWidth = iResolution.x * inv_resolution.y;
+//    const float barWidthRatio = 0.7;
+//    float inv_barWidth = 1.0 / (barWidthRatio * sWidth);
+//    float barHeight = 0.0070;
+//    float twice_inv_barHeight = 2.0 / barHeight;
+//    uv.x = uv.x * sWidth;
+//
+//    mat3 T_bar2s = mat3(
+//        vec3(inv_barWidth, 0.0, 0.0),
+//        vec3(0.0, inv_barWidth, 0.0),
+//        vec3((1.0 - sWidth * inv_barWidth) * 0.5, -0.15 * inv_barWidth, 1.0)
+//    );
+//
+//    vec2 uv_bar = (T_bar2s * vec3(uv.xy, 1.0)).xy;
+//    float isInBaseRect = inRect(uv_bar, vec2(0.0, 0.5 * barHeight), vec2(1.0, -0.5 * barHeight));
+//    float isInActiveRect = inRect(uv_bar, vec2(0.0, 0.5 * barHeight), vec2(progress, -0.5 * barHeight));
+//    vec3 baseColor = vec3(0.12941, 0.13725, 0.17647);
+//    vec3 activeColor = mix(vec3(0.2, 0.35294, 0.91373), vec3(0.43529, 0.43529, 0.96078), uv_bar.x);
+//    vec3 color = vec3(0.0, 0.0, 0.0);
+//    color = mix(color, baseColor, isInBaseRect);
+//    color = mix(color, activeColor, isInActiveRect);
+//
+//	return color;
+//}
+//
+//void main() {
+//
+//    float iTime = u_deltaAnimTime.y;
+//    float progress = u_deltaAnimTime.w;
+//    vec2 uv = v_texCoord;
+//
+//    float t = mod(iTime, 2.)/2.;
+//
+//    vec4 c;
+//
+//    c += animDrawSq(uv, t);
+//
+//    const float stp = 4.;		// 20 step
+//    const float dt = 15./60.; 	// 5 frames
+//    float mm = 1.;
+//    for (float it = 1.; it < stp; ++it)
+//    {
+//        float imp = it/stp;
+//        imp = pow(1.-imp, 7.);
+//    	c += animDrawSq(uv, t-dt*(it/stp)) * imp;
+//        mm += imp * imp;
+//    }
+//    c /= mm*2.0;
+//
+//    float lowerLimit = 0.2;
+//    float higherLimit = 1.0f - lowerLimit;
+//    float alphaing = 1.0;
+//
+//    if ( progress < lowerLimit ) {
+//    	alphaing = smoothstep(0.0f, lowerLimit, progress);
+//    } else if ( progress > higherLimit ) {
+//    	alphaing = 1.0 - smoothstep(higherLimit, 1.0f, progress);
+//    }
+//
+//    c.xyz += loadingColor(uv, progress);
+//    c *= alphaing;
+//
+//    fragColor = c;
+//}
+//)";
+
+    std::string loadingScreen = R"(#version #opengl_version
+/* ----------------
+*	zlnimda wrote this file and is under license CC-BY-SA-4.0
+* 	( see legal notice: https://creativecommons.org/licenses/by-sa/4.0/legalcode )
+/* ----------------
+* 	Animation of loading
+*/
+#include "animation_uniforms.glsl"
+in vec2 v_texCoord;
+out vec4 fragColor;
+vec2 iResolution = vec2(640.0, 360.0);
+
+float inRect(vec2 pos, vec2 topLeft, vec2 rightBottom) {
+	return step(topLeft.x, pos.x) * step(rightBottom.y, pos.y) * step(-rightBottom.x, -pos.x) * step(-topLeft.y, -pos.y);
+}
+
+float inBetween(float x, float a, float b) {
+    return step(a, x) * step(-b, -x);
+}
+
+vec3 loadingColor( vec2 uv, float progress ) {
+    vec2 inv_resolution = 1.0 / iResolution.xy;
+	float sWidth = iResolution.x * inv_resolution.y;
+    const float barWidthRatio = 0.7;
+    float inv_barWidth = 1.0 / (barWidthRatio * sWidth);
+    float barHeight = 0.0070;
+    float twice_inv_barHeight = 2.0 / barHeight;
+    uv.x = uv.x * sWidth;
+
+    mat3 T_bar2s = mat3(
+        vec3(inv_barWidth, 0.0, 0.0),
+        vec3(0.0, inv_barWidth, 0.0),
+        vec3((1.0 - sWidth * inv_barWidth) * 0.5, -0.48 * inv_barWidth, 1.0)
+    );
+
+    vec2 uv_bar = (T_bar2s * vec3(uv.xy, 1.0)).xy;
+    float isInBaseRect = inRect(uv_bar, vec2(0.0, 0.5 * barHeight), vec2(1.0, -0.5 * barHeight));
+    float isInActiveRect = inRect(uv_bar, vec2(0.0, 0.5 * barHeight), vec2(progress, -0.5 * barHeight));
+    vec3 baseColor = vec3(0.12941, 0.13725, 0.17647);
+    vec3 activeColor = mix(vec3(0.2, 0.35294, 0.91373), vec3(0.43529, 0.43529, 0.96078), uv_bar.x);
+    vec3 color = vec3(0.0, 0.0, 0.0);
+    color = mix(color, baseColor, isInBaseRect);
+    color = mix(color, activeColor, isInActiveRect);
+
+	return color;
+}
+
+void main() {
+
+    float iTime = u_deltaAnimTime.y;
+    float progress = u_deltaAnimTime.w;
+    vec2 uv = v_texCoord;
+
+    float lowerLimit = 0.2;
+    float higherLimit = 1.0f - lowerLimit;
+    float alphaing = progress < lowerLimit ? progress : 1.0;
+
+    if ( progress < lowerLimit ) {
+    	alphaing = smoothstep(0.0f, lowerLimit, progress);
+    } else if ( progress > higherLimit ) {
+    	alphaing = 1.0 - smoothstep(higherLimit, 1.0f, progress);
+    }
+
+    vec4 c = vec4(loadingColor(uv, progress), 0.0);
+    c *= alphaing;
+
+    fragColor = c;
+}
+)";
+
+    gShaderInjection["loading_screen.fsh"] = bn::encode_b64(loadingScreen);
     for ( const auto& [k,v] : gShaderInjection ) {
         shaderSourcesMap.insert( {k, v } );
     }
 
     createCCInjectionMap();
 
+    allocateProgram( ShaderProgramDesc{ S::LOADING_SCREEN }.vsh( "vertex_shader_blitcopy" ).fsh( "loading_screen" ) );
     allocateProgram( ShaderProgramDesc{ S::WIREFRAME } );
     allocateProgram( ShaderProgramDesc{ S::SHADOW_MAP } );
     allocateProgram( ShaderProgramDesc{ S::SKYBOX } );
