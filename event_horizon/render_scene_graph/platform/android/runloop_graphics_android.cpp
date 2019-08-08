@@ -114,4 +114,16 @@ static void onFrame(GLFMDisplay *display, double frameTime) {
     rl.singleThreadLoop();
 }
 
+#elif USE_GLFVR
+
+#include <graphics/opengl/mobile_vr/glfvr.h>
+
+void mainLoopFunc() {
+    rl.singleThreadLoop();
+}
+
+void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
+    rl.setBackEnd(std::move(_be));
+}
+
 #endif
