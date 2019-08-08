@@ -3,6 +3,7 @@ const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 const sessionController = require("../controllers/sessionController");
 const socketController = require("../controllers/socketController");
+const mailController = require("../controllers/mailController");
 
 const router = express.Router();
 
@@ -183,6 +184,8 @@ const getTokenResponse = async (res, req, project, email, password) => {
         guest: dbUser.guest
       };
       tokenInfo.project = project !== "" ? project : ""; //await userController.setDefaultUserProject(dbUser._id);
+
+      await mailController.sendMail(dbUser.email, "no-replay@eventhorizon.at", "User logged in", "User "+dbUser.name+" logged in ("+ tokenInfo.project + ")");
     }
   } catch (ex) {
     console.log("gettoken failed", ex);

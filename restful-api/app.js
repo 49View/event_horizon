@@ -16,7 +16,7 @@ const appdataRoute = require("./routes/appdataRoute");
 const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
 const projectController = require("./controllers/projectController");
-const mailController = require("./controllers/mailController");
+//const mailController = require("./controllers/mailController");
 const cryptoController = require("./controllers/cryptoController");
 
 const app = express();
@@ -38,6 +38,7 @@ let db = mongoose.connection;
 //Bind connection to error event (to get notification of connection errors)
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
+console.log("Started");
 //cryptoController.generateKey();
 authController.InitializeAuthentication();
 
