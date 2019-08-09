@@ -214,7 +214,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         float pldistance = length( plmfrag );
         vec3 L = normalize( plmfrag );
         float plattenuation = 1.0 / (pldistance );
-        vec3 lradiance = u_pointLightIntensity[i] * plattenuation;
+        vec3 lradiance = u_pointLightIntensity[i] * plattenuation * (1.0+translucencyV);
         Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
     }
 
