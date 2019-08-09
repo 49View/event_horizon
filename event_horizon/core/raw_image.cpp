@@ -53,6 +53,18 @@ RawImage::RawImage( unsigned int _w, unsigned int _h, const float _col ) {
     std::memset( rawBtyes.get(), memorySize(), _colval);
 }
 
+// Shortcut ctor for 3D Lut or generally cube 3d textures
+RawImage::RawImage( unsigned int _s, TextureTargetMode _ttm ) {
+    ASSERT( _ttm == TextureTargetMode::TEXTURE_3D );
+    ttm = _ttm;
+    width = _s;
+    height = _s;
+    depth = _s;
+    channels = 3;
+    rawBtyes = std::make_unique<uint8_t[]>( memorySize() );
+    std::memset( rawBtyes.get(), memorySize(), 0xff);
+}
+
 RawImage::RawImage( int width,
                     int height,
                     int channels,
@@ -193,6 +205,10 @@ RawImage RawImage::BLACK_RGBA4x4() {                            //AABBGGRR
 
 RawImage RawImage::NORMAL4x4() {                           //AABBGGRR
     return RawImage{ 4, 4, 3, static_cast<uint32_t>(0xffff7f7f) };
+}
+
+RawImage RawImage::LUT_3D_TEST() {
+    return RawImage{ 17, TextureTargetMode::TEXTURE_3D };
 }
 
 ImagaHeaderType detectHeader( const unsigned char* _buffer, size_t _length ) {

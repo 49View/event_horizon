@@ -28,6 +28,8 @@ public:
     RawImage( unsigned int _w, unsigned int _h, int channels, uint32_t _col);
     RawImage( unsigned int _w, unsigned int _h, uint8_t _col );
 
+    RawImage( unsigned int _s, TextureTargetMode _ttm );
+
     // A single float number equals a grayscale (1 channel) image
     RawImage( unsigned int _w, unsigned int _h, float _col );
     RawImage( int width, int height, int channels, const char* rawBtyes );
@@ -109,6 +111,7 @@ public:
 	static RawImage BLACK_ARGB4x4();
 	static RawImage BLACK_RGBA4x4();
 	static RawImage NORMAL4x4();
+    static RawImage LUT_3D_TEST();
 };
 
 //RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string& _name = "", int forceChannels = 0 );

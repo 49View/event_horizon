@@ -26,8 +26,13 @@ void Texture::init_data_r( const uint8_t* _data ) {
                                          _data ) );
             }
         } else {
-            GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType,
-                                  _data));
+            if ( glTextureImageTarget == GL_TEXTURE_3D ) {
+                GLCALL( glTexImage3D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, mDepth, 0, glFormat, glType,
+                                      _data));
+            } else {
+                GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType,
+                                      _data));
+            }
         }
     }
 }

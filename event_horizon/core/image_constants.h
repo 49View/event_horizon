@@ -83,6 +83,7 @@ inline FrameBufferTextureTarget2d indexToFBT( const int index ) {
 struct ImageParams {
     int width = 0;
     int height = 0;
+    int depth = 1;
     int channels = 3;
     int bpp = 8;
     PixelFormat outFormat = PIXEL_FORMAT_RGB;
@@ -104,7 +105,7 @@ struct ImageParams {
     }
 
     size_t memorySize() const {
-        return width * height * channels * (bpp/8);
+        return width * height * depth * channels * (bpp/8);
     }
 
     void setFormatFromChannels() {

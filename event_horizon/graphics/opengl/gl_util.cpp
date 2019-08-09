@@ -547,6 +547,8 @@ UniformFormat GLToUniformFormat( GLenum uf ) {
            return UF_MAT4F;
        case GL_SAMPLER_2D:
            return UF_SAMPLER_2D;
+        case GL_SAMPLER_3D:
+            return UF_SAMPLER_3D;
        case GL_SAMPLER_CUBE:
            return UF_SAMPLER_CUBE;
        case GL_SAMPLER_2D_SHADOW:

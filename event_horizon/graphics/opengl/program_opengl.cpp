@@ -77,6 +77,11 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
                 uniformDefaults->assign( _name, S::WHITE );
             }
             break;
+        case GL_SAMPLER_3D:
+            if ( _name == UniformNames::lut3dTexture ) {
+                uniformDefaults->assign( _name, S::LUT_3D_TEST );
+            }
+        break;
         case GL_SAMPLER_CUBE:
             if ( _name == UniformNames::ibl_irradianceMap ) {
                 uniformDefaults->assign( _name, MPBRTextures::convolution );

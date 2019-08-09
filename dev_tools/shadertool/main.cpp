@@ -168,7 +168,8 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
 
     shaderHeader << "};\n";
 
-    if ( shaderEmit.count() > 0 && sm.loadShaders() ) {
+    bool performCompilerOnly = true;
+    if ( shaderEmit.count() > 0 && sm.loadShaders( performCompilerOnly ) ) {
         FM::writeLocalFile("../shaders.hpp", shaderHeader );
         Http::useLocalHost(true);
         Http::login(LoginFields::Daemon());

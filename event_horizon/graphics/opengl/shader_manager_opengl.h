@@ -66,7 +66,7 @@ public:
     bool loadProgram( const ShaderProgramDesc& sb );
 
     // OpenGL init function
-    bool loadShaders();
+    bool loadShaders( bool _performCompileOnly = false );
     std::shared_ptr<ProgramOpenGL> P( const std::string& id ) const;
 
     int getProgramCount() const;

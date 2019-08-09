@@ -41,6 +41,7 @@ namespace S {
     const std::string BLACK = "black";
     const std::string NORMAL = "normal";
     const std::string DEBUG_UV = "debug_uv";
+    const std::string LUT_3D_TEST = "lut3dTexture";
 
     const std::string WHITE_PBR = "white_pbr";
     const std::string SQUARE = "square";

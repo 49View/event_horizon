@@ -5,6 +5,7 @@ out vec4 FragColor;
 uniform sampler2D colorFBTexture;
 // uniform sampler2D bloomTexture;
 uniform sampler2D shadowMapTexture;
+uniform sampler3D lut3dTexture;
 
 float vignetting() {
     // Vignetting
@@ -20,6 +21,8 @@ float vignetting() {
 void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
+
+    // sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
 
     sceneColor.xyz *= vignetting();
 

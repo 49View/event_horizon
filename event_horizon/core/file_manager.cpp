@@ -143,9 +143,9 @@ namespace FileManager {
         FILE *afile = fcopen(fullPath.c_str(), "rt");
         if (afile) {
             auto _length = (uint64_t)fclength(afile);
-            content.resize( _length + 1 );
+            content.resize( _length );
             fcread( afile, content.data(), _length);
-            content[_length] = '\0';
+//            content[_length] = '\0';
             fcclose(afile);
         }
 

@@ -41,6 +41,7 @@ namespace UniformNames {
 	const std::string uTexture = "uTexture";
 	const std::string vTexture = "vTexture";
 	const std::string shadowMapTexture = "shadowMapTexture";
+	const std::string lut3dTexture = "lut3dTexture";
 	const std::string colorFBTexture = "colorFBTexture";
 	const std::string bloomTexture = "bloomTexture";
 	const std::string aoTexture = "aoTexture";

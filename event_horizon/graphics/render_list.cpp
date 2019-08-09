@@ -340,6 +340,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::shadowMapTexture,
                     rr.getShadowMapFB()->RenderToTexture()->TDI(1));
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::lut3dTexture,
+                    rr.TM()->TD(UniformNames::lut3dTexture)->TDI(2));
             if ( rr.isLoading() ) {
                 cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
                         rr.SM()->P(S::LOADING_SCREEN).get() );

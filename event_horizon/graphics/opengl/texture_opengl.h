@@ -34,10 +34,12 @@ public:
         }
         mFormat = tb.outFormat;
         mFilter = tb.filterMode;
+        mTarget = tb.ttm;
         mWrapMode = tb.wrapMode;
         mTarget = tb.ttm;
         mWidth = tb.width;
         mHeight = tb.height;
+        mDepth = tb.depth;
         mMultisample = tb.multisample;
 #ifdef _OPENGL_ES
         mMultisample = false;
@@ -260,6 +262,7 @@ private:
     TextureTargetMode mTarget = TEXTURE_2D;
     int mWidth = 0;
     int mHeight = 0;
+    int mDepth = 0;
     bool mMultisample = false;
     bool mHDR = false;
     bool mIsFramebufferTarget = false;
