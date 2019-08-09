@@ -1,5 +1,7 @@
 #version #opengl_version
 
+#include "lighting_uniforms.glsl"
+
 in vec2 v_texCoord;
 out vec4 FragColor;
 uniform sampler2D colorFBTexture;
@@ -21,6 +23,8 @@ float vignetting() {
 void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
+
+    // sceneColor.xyz = vec3(1.0) - exp(-sceneColor.xyz * u_hdrExposures.x*0.55);
 
     // sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
 

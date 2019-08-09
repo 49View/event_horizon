@@ -79,7 +79,7 @@ std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& raw
 std::shared_ptr<Texture> TextureManager::addTextureWithData( const RawImage& rawImage,
                                                              const StringUniqueCollection& _names,
                                                              TextureSlots _tslot ) {
-    auto trd = ImageParams{}.size( rawImage.width, rawImage.height ).format(rawImage.outFormat).setBpp(rawImage.bpp).target(rawImage.ttm);
+    auto trd = ImageParams{}.size( rawImage.width, rawImage.height, rawImage.depth ).format(rawImage.outFormat).setBpp(rawImage.bpp).target(rawImage.ttm).setWrapMode(rawImage.wrapMode);
     auto tb = TextureRenderData{ _names, trd }.GPUSlot(_tslot);
     if ( rawImage.ttm == TextureTargetMode::TEXTURE_3D ) tb.setGenerateMipMaps(false);
     tb.format( channelsToFormat( rawImage.channels, rawImage.bpp ) );

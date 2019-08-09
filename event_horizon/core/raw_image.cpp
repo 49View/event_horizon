@@ -1,3 +1,4 @@
+#include "lut_3d.hpp"
 #include "raw_image.h"
 
 #include <core/image_util.h>
@@ -10,6 +11,8 @@
 #include <core/serializebin.hpp>
 #define TINYEXR_IMPLEMENTATION
 #include <core/tinyexr.h>
+
+#include "file_manager.h"
 
 RawImage::RawImage( unsigned int _w, unsigned int _h, int _channels, const uint32_t _col ) {
     width = _w;
@@ -62,7 +65,15 @@ RawImage::RawImage( unsigned int _s, TextureTargetMode _ttm ) {
     depth = _s;
     channels = 3;
     rawBtyes = std::make_unique<uint8_t[]>( memorySize() );
-    std::memset( rawBtyes.get(), memorySize(), 0xff);
+    std::memset( rawBtyes.get(), 0xff, memorySize() );
+}
+
+RawImage::RawImage( int _width, int _height, int _depth, int _channels, int _bpp ) {
+    width    = _width;
+    height   = _height;
+    depth    = _depth;
+    bpp      = _bpp;
+    channels = _channels;
 }
 
 RawImage::RawImage( int width,
@@ -208,24 +219,58 @@ RawImage RawImage::NORMAL4x4() {                           //AABBGGRR
 }
 
 RawImage RawImage::LUT_3D_TEST() {
-    return RawImage{ 17, TextureTargetMode::TEXTURE_3D };
+    int dimension = 17;
+
+    RawImage ret{dimension, dimension, dimension, 3, 8};
+    ret.target(TextureTargetMode::TEXTURE_3D);
+    ret.setWrapMode(WrapMode::WRAP_MODE_CLAMP_TO_EDGE);
+    createPlainLUT3D(dimension, ret.rawBtyes);
+
+    return ret;
+
+//    return RawImage{ FM::readLocalFile("howlite.cube") };
 }
 
 ImagaHeaderType detectHeader( const unsigned char* _buffer, size_t _length ) {
 
-    EXRVersion exr_headers;
-    int ret = ParseEXRVersionFromMemory(&exr_headers, _buffer, _length );
-    if ( ret != 0 ) {
+    if ( memcmp( "\x89PNG", _buffer, 4) == 0) {
+        return ImagaHeaderType::STB_Compatible;
+    }
+    if ( memcmp( "\xFF\xD8\xFF", _buffer, 3) == 0) {
         return ImagaHeaderType::STB_Compatible;
     }
 
-    return ImagaHeaderType::EXR;
+    EXRVersion exr_headers;
+    if ( ParseEXRVersionFromMemory(&exr_headers, _buffer, _length ) == 0 ) {
+        return ImagaHeaderType::EXR;
+    }
+
+    // ### Implement header check for LUT3D
+    return ImagaHeaderType::LUT3D;
+
+//    return ImagaHeaderType::STB_Compatible;
 }
 
 void RawImage::bufferDecode( const unsigned char* _buffer, size_t _length ) {
 
     auto ht = detectHeader( _buffer, _length );
-    if ( ht == ImagaHeaderType::EXR ) {
+    if ( ht == ImagaHeaderType::STB_Compatible ) {
+        // ### fix this!!
+        stbi_set_flip_vertically_on_load(true);
+        auto _mt = RawImageMemory::Compressed;
+        rawBtyes = imageUtil::decodeFromMemory( ucchar_p{_buffer, _length},
+                                                width, height, channels, bpp, _mt == RawImageMemory::Raw );
+    } else if ( ht == ImagaHeaderType::LUT3D ) {
+        int dimension = 0;
+        rawBtyes = loadLUT3D( _buffer, _length, dimension );
+        width    = dimension;
+        height   = dimension;
+        depth    = dimension;
+        bpp      = 8;
+        channels = 3;
+        ttm      = TextureTargetMode::TEXTURE_3D;
+        wrapMode = WrapMode::WRAP_MODE_CLAMP_TO_EDGE;
+    } else if ( ht == ImagaHeaderType::EXR ) {
         float* image;
         const char *err;
 
@@ -238,12 +283,6 @@ void RawImage::bufferDecode( const unsigned char* _buffer, size_t _length ) {
         rawBtyes = std::make_unique<uint8_t[]>(memorySize());
         memcpy( rawBtyes.get(), image, memorySize());
         free(image);
-    } else {
-        // ### fix this!!
-        stbi_set_flip_vertically_on_load(true);
-        auto _mt = RawImageMemory::Compressed;
-        rawBtyes = imageUtil::decodeFromMemory( ucchar_p{_buffer, _length},
-                                                width, height, channels, bpp, _mt == RawImageMemory::Raw );
     }
 
     setFormatFromChannels();
@@ -257,4 +296,5 @@ SerializableContainer RawImage::serialize() const {
 
     return mw.serialize();
 }
+
 

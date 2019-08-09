@@ -57,9 +57,9 @@ void Texture::init_r( const uint8_t* _data ) {
     glFormat             = pixelFormatToGlFormat( mFormat );
     glType               = pixelFormatToGlType( mFormat );
     glFilter             = filterToGl( mFilter );
-    glWrapMode           = wrapModeToGl( mWrapMode );
     glTextureTarget      = targetToGl( mTarget );
     glTextureImageTarget = imageTargetToGl( mTarget, mMultisample );
+    glWrapMode           = wrapModeToGl( mWrapMode );
 
     // Make sure we are not recreating the handle every time
     GLCALL( glGenTextures( 1, &mHandle ));

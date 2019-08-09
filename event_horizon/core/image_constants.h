@@ -151,6 +151,13 @@ struct ImageParams {
         return *this;
     }
 
+    ImageParams& size( int _width, int _height, int _depth ) {
+        width = _width;
+        height = _height;
+        depth = _depth;
+        return *this;
+    }
+
     ImageParams& setWidth( int _width ) {
         width = _width;
         return *this;
