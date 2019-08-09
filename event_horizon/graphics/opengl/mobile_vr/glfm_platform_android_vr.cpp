@@ -1220,6 +1220,8 @@ static ovrLayerProjection2 ovrRenderer_RenderFrame( ovrRenderer * renderer, cons
                                                     const ovrScene * scene, const ovrSimulation * simulation,
                                                     const ovrTracking2 * tracking, ovrMobile * ovr )
 {
+    mainLoopFunc();
+
     ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
     for ( int i = 0; i < NUM_ROTATIONS; i++ )
     {
@@ -1970,7 +1972,7 @@ void android_main( struct android_app * app )
 
     const double startTime = GetTimeInSeconds();
 
-    mainLoop();
+    glfvrMain();
 
     while ( app->destroyRequested == 0 )
     {

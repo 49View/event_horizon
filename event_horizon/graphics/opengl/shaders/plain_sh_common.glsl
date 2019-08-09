@@ -5,7 +5,7 @@ layout( location = 0 ) out vec4 FragColor;
 
 in vec2 v_texCoord;
 in vec2 v_texCoord2;
-in vec3 v_color;
+// in vec3 v_color;
 in vec3 v_norm;
 in vec3 v_tan;
 in vec3 v_bitan;
@@ -267,6 +267,7 @@ vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = Lo;
+
 vec3 ambient = ((Lo + (kD * diffuseV + specular))*ao) * visibility;// * (visibility+diffuseV);
 #else 
 vec3 diffuseV = Lo * albedo;// * aoLightmapColor;

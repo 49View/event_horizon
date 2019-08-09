@@ -7,5 +7,7 @@
 
 /// Main entry point for the app, where the display can be initialized and the GLFMMainLoopFunc
 /// can be set.
+extern void glfvrMain();
+
 extern void mainLoopFunc();
 
