@@ -24,9 +24,9 @@ void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
 
-    // sceneColor.xyz = vec3(1.0) - exp(-sceneColor.xyz * u_hdrExposures.x*0.55);
+    // sceneColor.xyz = vec3(1.0) - exp(-sceneColor.xyz * u_hdrExposures.x*0.95);
 
-    // sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
+    sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
 
     sceneColor.xyz *= vignetting();
 

@@ -228,7 +228,9 @@ RawImage RawImage::LUT_3D_TEST() {
 
     return ret;
 
-//    return RawImage{ FM::readLocalFile("howlite.cube") };
+//    return RawImage{ FM::readLocalFile("W-ARAPAHO-33-STD.cube") };
+//    return RawImage{ FM::readLocalFile("StrollingStiffs_CLog_C100.cube") };
+//    return RawImage{ FM::readLocalFile("Hackmanite - Rec709.cube") };
 }
 
 ImagaHeaderType detectHeader( const unsigned char* _buffer, size_t _length ) {
