@@ -81,6 +81,8 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
             return mComposite->getColorFB();
         case CommandBufferFrameBufferType::shadowMap:
             return rr.getShadowMapFB();
+        case CommandBufferFrameBufferType::depthMap:
+            return rr.getDepthMapFB();
         case CommandBufferFrameBufferType::finalResolve:
             return mComposite->getColorFinalFB();
         case CommandBufferFrameBufferType::blurVertical:
@@ -183,6 +185,20 @@ void RLTargetPBR::addShadowMaps() {
     }
 }
 
+void RLTargetPBR::renderDepthMap() {
+
+    rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::depthMapBufferBindAndClear } );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteTrue } );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
+
+    for ( const auto& [k, vl] : rr.CL() ) {
+        if ( isKeyInRange(k) ) {
+            rr.addToCommandBuffer( vl.mVList, nullptr, rr.getMaterial(S::DEPTH_MAP), nullptr, 0.91f );
+        }
+    }
+}
+
 // This does NOT update and invalidate skybox and probes
 void RLTargetPBR::cacheShadowMapSunPosition( const Vector3f& _smsp ) {
     mCachedSunPosition = _smsp;
@@ -270,11 +286,11 @@ void CompositePBR::blit( CommandBufferList& cbl ) {
 void CompositePBR::setup( const Rect2f& _destViewport ) {
 //    float bloomScale = 1.0f/8.0f;
     Vector2f vsize = _destViewport.size();
-//    mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
-//            (PIXEL_FORMAT_HDR_RGBA_16).addColorBufferAttachments({ "colorFrameBufferAtth1", 1 }).build();
-
     mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
-            (PIXEL_FORMAT_HDR_RGBA_16).build();
+            (PIXEL_FORMAT_HDR_RGBA_16).addColorBufferAttachments({ "colorFrameBufferAtth1", 1 }).build();
+
+//    mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
+//            (PIXEL_FORMAT_HDR_RGBA_16).build();
 //    mBlurHorizontalFB = FrameBufferBuilder{ rr, FBNames::blur_horizontal }.size(vsize*bloomScale).noDepth()
 //            .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_HORIZONTAL).build();
 //    mBlurVerticalFB = FrameBufferBuilder{ rr, FBNames::blur_vertical }.size(vsize*bloomScale).noDepth()
@@ -389,6 +405,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
     // (that has got 3d lighting in it) especially skyboxes and probes!!
     addShadowMaps();
+    renderDepthMap();
 
     if ( mSkybox && mSkybox->precalc( 0.0f ) ) {
         addProbes();
@@ -397,7 +414,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
 //    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClearDepthOnly } );
     cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-    cb.setCameraUniforms( cameraRig->getCamera() );
+//    cb.setCameraUniforms( cameraRig->getCamera() );
 
     if ( mbEnableSkybox && mSkybox ) mSkybox->render();
 
@@ -434,14 +451,14 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
     cb.pushCommand( { CommandBufferCommandName::wireFrameModeFalse } );
 
+    blit(cb);
+
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
             rr.addToCommandBuffer( k );
         }
     }
-
-    blit(cb);
 
 //    endCL( cb );
 }

@@ -36,6 +36,7 @@ namespace S {
     const std::string BLUR_VERTICAL = "PN_BLUR_VERTICAL";
     const std::string FINAL_COMBINE = "PN_FINAL_COMBINE";
     const std::string SHADOW_MAP = "shadowmap";
+    const std::string DEPTH_MAP = "depthmap";
 
     const std::string WHITE = "white";
     const std::string BLACK = "black";
@@ -49,6 +50,7 @@ namespace S {
     const std::string DEFAULT_FONT = "amaranth";
 
     const std::string shadowmap = "shadowMap_d";
+    const std::string depthmap = "depthmap_d";
     const std::string lightmap = "lightMap_t";
     const std::string sceneprobe = "sceneprobe";
     const std::string blur_horizontal = "blur_horizontal_b";

@@ -111,6 +111,8 @@ enum class CommandBufferCommandName {
     shadowMapClearDepthBufferZero,
     shadowMapClearDepthBufferOne,
 
+    depthMapBufferBindAndClear,
+
     blitToScreen,
     blitPRB,
 
@@ -141,6 +143,7 @@ public:
 enum class CommandBufferFrameBufferType {
     sourceColor,
     shadowMap,
+    depthMap,
     finalResolve,
     finalBlit,
     blurVertical,

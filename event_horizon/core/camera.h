@@ -109,6 +109,7 @@ public:
 	void setFarClipPlaneZClampEdit2d( float _value ) { mFarClipPlaneZClampEdit2d = _value;}
 
 	Vector3f getPosition() const;
+	Vector4f getNearFar() const;
 	Vector3f getPositionInv() const;
 	Vector3f getPositionRH() const;
 	Vector3f getYawVector() const;

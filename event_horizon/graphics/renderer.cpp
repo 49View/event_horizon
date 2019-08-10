@@ -122,7 +122,8 @@ void Renderer::init() {
     sm->loadShaders();
 //    tm->addTextureWithData(RawImage{54, 54, V4f::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
     tm->addTextureRef( FBNames::lightmap );
-    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 4096 ).depthOnly().build();
+    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).depthOnly().build();
+    mDepthFB = FrameBufferBuilder{ *this, FBNames::depthmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).depthOnly().build();
 
     auto trd = ImageParams{}.setSize( 32 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode( WRAP_MODE_CLAMP_TO_EDGE );
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
@@ -155,6 +156,7 @@ void Renderer::init() {
     mProbingsFB.emplace( 4, FrameBufferBuilder{ *this, "Probing__4" }.size( 4 ).buildSimple());
 
     rmm->addRenderMaterial( S::SHADOW_MAP );
+    rmm->addRenderMaterial( S::DEPTH_MAP );
 
     afterShaderSetup();
 }
@@ -516,6 +518,7 @@ void RenderCameraManager::init() {
     mCameraUBO->setUBOStructure( UniformNames::projMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::screenSpaceMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::eyePos, 16 );
+    mCameraUBO->setUBOStructure( UniformNames::nearFar, 16 );
 }
 
 void RenderCameraManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {

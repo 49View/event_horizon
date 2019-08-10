@@ -307,6 +307,7 @@ public:
     floata& skyBoxDeltaInterpolation();
 
 protected:
+    void renderDepthMap();
     void addProbes();
     void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
     std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName, int mipmap );

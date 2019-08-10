@@ -32,6 +32,7 @@ namespace UniformNames {
 
 	const std::string eyeDir = "u_eyeDir";
 	const std::string eyePos = "u_eyePos";
+	const std::string nearFar = "u_nearFar";
 	const std::string timeOfTheDay = "u_timeOfTheDay";
 	const std::string sunHRDMult = "u_sunHDRMult";
 
@@ -41,6 +42,7 @@ namespace UniformNames {
 	const std::string uTexture = "uTexture";
 	const std::string vTexture = "vTexture";
 	const std::string shadowMapTexture = "shadowMapTexture";
+	const std::string depthMapTexture = "depthMapTexture";
 	const std::string lut3dTexture = "lut3dTexture";
 	const std::string colorFBTexture = "colorFBTexture";
 	const std::string bloomTexture = "bloomTexture";

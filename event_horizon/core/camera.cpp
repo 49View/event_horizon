@@ -793,4 +793,8 @@ CameraMode Camera::Mode() const {
 	return mMode;
 }
 
+Vector4f Camera::getNearFar() const {
+    return V4f{ mNearClipPlaneZ, mFarClipPlaneZ, mFov->value, 1.0f };
+}
+
 

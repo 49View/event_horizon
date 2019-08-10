@@ -66,6 +66,8 @@ std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
             return "setGlobalTextures";
         case CommandBufferCommandName::shadowMapBufferBind:
             return "shadowMapBufferBind";
+        case CommandBufferCommandName::depthMapBufferBindAndClear:
+            return "depthMapBufferBindAndClear";
         case CommandBufferCommandName::shadowMapClearDepthBufferZero:
             return "shadowMapClearDepthBufferZero";
         case CommandBufferCommandName::shadowMapClearDepthBufferOne:
@@ -242,6 +244,7 @@ void CommandBufferList::setCameraUniforms( std::shared_ptr<Camera> c0 ) {
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::projMatrix, c0->getProjectionMatrix(), mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::screenSpaceMatrix, c0->ScreenAspectRatio(),mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyePos, c0->getPosition(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData( rr.CameraUBO(), UniformNames::nearFar, c0->getNearFar(), mCurrent->UBOCameraBuffer.get());
 
     pushCommand( { CommandBufferCommandName::setCameraUniforms } );
 }
@@ -311,6 +314,10 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
         case CommandBufferCommandName::shadowMapBufferBind:
             cstack->fb(CommandBufferFrameBufferType::shadowMap)->bind();
             break;
+        case CommandBufferCommandName::depthMapBufferBindAndClear:
+            cstack->fb(CommandBufferFrameBufferType::depthMap)->bind();
+            cstack->fb(CommandBufferFrameBufferType::depthMap)->clearDepthBuffer( 1.0f );
+            break;
         case CommandBufferCommandName::shadowMapClearDepthBufferZero:
             cstack->fb(CommandBufferFrameBufferType::shadowMap)->clearDepthBuffer( 0.0f );
             break;
@@ -340,6 +347,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::shadowMapTexture,
                     rr.getShadowMapFB()->RenderToTexture()->TDI(1));
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::depthMapTexture,
+                    rr.getDepthMapFB()->RenderToTexture()->TDI(3));
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::lut3dTexture,
                     rr.TM()->TD(UniformNames::lut3dTexture)->TDI(2));
