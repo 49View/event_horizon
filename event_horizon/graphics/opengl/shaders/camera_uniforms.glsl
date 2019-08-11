@@ -5,6 +5,7 @@ layout( std140 ) uniform CameraUniforms{
     mat4 u_projMatrix;
     mat4 u_screenSpaceMatrix;
     vec3 u_eyePos;
-    vec4 u_nearFar;            
+    vec3 u_eyeDir;
+    vec4 u_nearFar;
 };
     

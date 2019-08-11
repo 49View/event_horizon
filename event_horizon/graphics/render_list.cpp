@@ -244,6 +244,7 @@ void CommandBufferList::setCameraUniforms( std::shared_ptr<Camera> c0 ) {
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::projMatrix, c0->getProjectionMatrix(), mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::screenSpaceMatrix, c0->ScreenAspectRatio(),mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyePos, c0->getPosition(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyeDir, c0->getDirection(), mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::nearFar, c0->getNearFar(), mCurrent->UBOCameraBuffer.get());
 
     pushCommand( { CommandBufferCommandName::setCameraUniforms } );
@@ -331,6 +332,7 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             break;
         case CommandBufferCommandName::blitPRB:
 
+            dynamic_cast<CompositePBR*>(dynamic_cast<RLTargetPBR*>(cstack->Target().get())->Composite().get())->bloom();
             Framebuffer::blit( cstack->fb(CommandBufferFrameBufferType::sourceColor),
                                cstack->fb(CommandBufferFrameBufferType::finalResolve),
                                GL_COLOR_ATTACHMENT0,
@@ -341,9 +343,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::colorFBTexture,
                     cstack->fb(CommandBufferFrameBufferType::finalResolve)->RenderToTexture()->TDI(0));
-//            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
-//                    UniformNames::bloomTexture,
-//                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture()->TDI(1));
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::bloomTexture,
+                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture()->TDI(4));
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::shadowMapTexture,
                     rr.getShadowMapFB()->RenderToTexture()->TDI(1));

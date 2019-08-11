@@ -122,8 +122,10 @@ void Renderer::init() {
     sm->loadShaders();
 //    tm->addTextureWithData(RawImage{54, 54, V4f::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
     tm->addTextureRef( FBNames::lightmap );
-    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).depthOnly().build();
+    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 1024 ).depthOnly().build();
     mDepthFB = FrameBufferBuilder{ *this, FBNames::depthmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).depthOnly().build();
+
+//    mDepthFB = FrameBufferBuilder{ *this, FBNames::depthmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).format( PIXEL_FORMAT_HDR_RGBA_16 ).build();
 
     auto trd = ImageParams{}.setSize( 32 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode( WRAP_MODE_CLAMP_TO_EDGE );
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
@@ -518,6 +520,7 @@ void RenderCameraManager::init() {
     mCameraUBO->setUBOStructure( UniformNames::projMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::screenSpaceMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::eyePos, 16 );
+    mCameraUBO->setUBOStructure( UniformNames::eyeDir, 16 );
     mCameraUBO->setUBOStructure( UniformNames::nearFar, 16 );
 }
 

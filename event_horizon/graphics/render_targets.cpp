@@ -54,6 +54,7 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
         : RLTarget( cameraRig, screenViewport, _bt, rr ) {
 
     mComposite = std::make_shared<CompositePBR>(rr, cameraRig->getMainCamera()->Name(), screenViewport, finalDestBlit);
+    mComposite->useBloom(true);
     framebuffer = mComposite->getColorFB();
     bucketRanges.emplace_back( CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd );
     cameraRig->getMainCamera()->Mode( CameraMode::Doom );
@@ -221,6 +222,10 @@ void RLTargetPBR::addProbes() {
     addProbeToCB( FBNames::sceneprobe, mProbePosition );
 }
 
+std::shared_ptr<CompositePBR> RLTargetPBR::Composite() {
+    return mComposite;
+}
+
 void CompositePBR::bloom() {
     if ( !isUsingBloom() ) return;
 
@@ -284,17 +289,17 @@ void CompositePBR::blit( CommandBufferList& cbl ) {
 }
 
 void CompositePBR::setup( const Rect2f& _destViewport ) {
-//    float bloomScale = 1.0f/8.0f;
+    float bloomScale = 1.0f/8.0f;
     Vector2f vsize = _destViewport.size();
     mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
             (PIXEL_FORMAT_HDR_RGBA_16).addColorBufferAttachments({ "colorFrameBufferAtth1", 1 }).build();
 
 //    mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
 //            (PIXEL_FORMAT_HDR_RGBA_16).build();
-//    mBlurHorizontalFB = FrameBufferBuilder{ rr, FBNames::blur_horizontal }.size(vsize*bloomScale).noDepth()
-//            .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_HORIZONTAL).build();
-//    mBlurVerticalFB = FrameBufferBuilder{ rr, FBNames::blur_vertical }.size(vsize*bloomScale).noDepth()
-//            .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_VERTICAL).build();
+    mBlurHorizontalFB = FrameBufferBuilder{ rr, FBNames::blur_horizontal }.size(vsize*bloomScale).noDepth()
+            .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_HORIZONTAL).build();
+    mBlurVerticalFB = FrameBufferBuilder{ rr, FBNames::blur_vertical }.size(vsize*bloomScale).noDepth()
+            .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_VERTICAL).build();
 
     mColorFinalFB = FrameBufferBuilder{ rr, FBNames::colorFinalFrameBuffer}.size(vsize).noDepth().
             dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).

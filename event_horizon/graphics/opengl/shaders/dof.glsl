@@ -20,7 +20,7 @@ const int rings = RINGS; //ring count
 
 const int maxringsamples = rings * samples;
 
-bool  manualdof = false; // manual dof calculation
+bool  manualdof = true; // manual dof calculation
 float ndofstart = 1.0; // near dof blur start
 float ndofdist = 2.0; // near dof blur falloff distance
 float fdofstart = 1.0; // far dof blur start

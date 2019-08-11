@@ -130,10 +130,8 @@ public:
 
     std::shared_ptr<VPList> getVPFinalCombine() const;
 
-    void blit( CommandBufferList& cbl ) override;
-
-private:
     void bloom();
+    void blit( CommandBufferList& cbl ) override;
 
 private:
     bool mbUseBloom = false;
@@ -306,6 +304,7 @@ public:
     void invalidateOnAdd() override;
     floata& skyBoxDeltaInterpolation();
 
+    std::shared_ptr<CompositePBR> Composite();
 protected:
     void renderDepthMap();
     void addProbes();
