@@ -113,6 +113,7 @@ public:
 	static RawImage BLACK_ARGB4x4();
 	static RawImage BLACK_RGBA4x4();
 	static RawImage NORMAL4x4();
+	static RawImage NOISE4x4();
     static RawImage LUT_3D_TEST();
 };
 

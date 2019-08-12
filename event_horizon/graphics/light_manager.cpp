@@ -9,6 +9,19 @@ LightManager::LightManager() {
     mbGlobalOnOffSwitch = true;
     mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f, "LightDirectionalIntensity" );
 
+    // Preallocating and gnerating hemisphere kernel size
+    for (int i = 0; i < mNumHemiKernelSize; ++i) {
+        V3f sample{ signedUnitRand(), signedUnitRand(), unitRand() };
+        sample = normalize(sample);
+        // Distribuite within the hemisphere not just on the surface
+        sample *= unitRand();
+        // Accelerate toward center so we have a more meaningful distribution
+        float scale = static_cast<float>(i) / static_cast<float>(mNumHemiKernelSize);
+        scale = lerp(0.1f, 1.0f, scale * scale);
+        sample *= scale;
+        mHemisphereKernelSamples.emplace_back(sample);
+    }
+
     // Lights UBO
     mLigthingUniform = std::make_unique<ProgramUniformSet>();
 
@@ -29,6 +42,8 @@ LightManager::LightManager() {
     mLigthingUniform->setUBOStructure( UniformNames::hdrExposures, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::shadowParameters, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::shLightCoeffs, 48 );
+    mLigthingUniform->setUBOStructure( UniformNames::hemisphereKernelSize, 16 );
+    mLigthingUniform->setUBOStructure( UniformNames::hemisphereKernel, 16 * mNumHemiKernelSize );
 }
 
 void LightManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
@@ -132,6 +147,8 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     mLigthingUniform->setUBOData( UniformNames::hdrExposures, hdrExposures );
     mLigthingUniform->setUBOData( UniformNames::shadowParameters, shadowParameters );
     mLigthingUniform->setUBOData( UniformNames::shLightCoeffs, Matrix3f( SSH.LightCoeffs()) );
+    mLigthingUniform->setUBOData( UniformNames::hemisphereKernelSize, mNumHemiKernelSize );
+    mLigthingUniform->setUBODatav( UniformNames::hemisphereKernel, mHemisphereKernelSamples );
 }
 
 void LightManager::setUniforms_r() {

@@ -90,6 +90,7 @@ private:
 	bool mHDR = false;
 	bool mCubeMap = false;
 	bool mUseMipMaps = false;
+    int  mNumColorAttachments = 0;
 	TextureSlots mTextureGPUSlot = TextureSlots::TSLOT_NORMAL;
 	Vector4f mClearColor = Vector4f::BLACK;
 	std::shared_ptr<Texture> mRenderToTexture;

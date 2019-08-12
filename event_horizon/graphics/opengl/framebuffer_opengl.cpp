@@ -55,6 +55,7 @@ void Framebuffer::attachColorBuffer( unsigned int index ) {
     std::unique_ptr<GLuint[]> attachments( new GLuint[index + 1] );
     for ( unsigned int t = 0; t < index + 1; t++ ) attachments[t] = GL_COLOR_ATTACHMENT0 + t;
     GLCALL( glDrawBuffers( index + 1, attachments.get()) );
+    mNumColorAttachments++;
 }
 
 void Framebuffer::initDepth( std::shared_ptr<TextureManager> tm ) {

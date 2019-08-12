@@ -218,6 +218,26 @@ RawImage RawImage::NORMAL4x4() {                           //AABBGGRR
     return RawImage{ 4, 4, 3, static_cast<uint32_t>(0xffff7f7f) };
 }
 
+RawImage RawImage::NOISE4x4() {
+
+    const int is = 4;
+    unsigned char buff[is*is*3];
+
+#define bcol(t,m,r,g,b) \
+    { buff[(t*is*3)+(m*3+0)] = r; \
+      buff[(t*is*3)+(m*3+1)] = g; \
+      buff[(t*is*3)+(m*3+2)] = b; }
+
+    for ( size_t t = 0; t < is; t++ ) {
+        for ( size_t m = 0; m < is; m++ ) {
+            V3f v3{ unitRand(), unitRand(), 0.0f };
+            v3 = normalize( v3 );
+            bcol(t,m, static_cast<unsigned char>(v3.x()*255.0f),static_cast<unsigned char>(v3.y()*255.0f),0);
+        }
+    }
+    return RawImage{ is, is, 3, reinterpret_cast<const char*>(buff) };
+}
+
 RawImage RawImage::LUT_3D_TEST() {
     int dimension = 17;
 

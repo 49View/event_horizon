@@ -84,6 +84,8 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
             return rr.getShadowMapFB();
         case CommandBufferFrameBufferType::depthMap:
             return rr.getDepthMapFB();
+        case CommandBufferFrameBufferType::normalMap:
+            return rr.getNormalMapFB();
         case CommandBufferFrameBufferType::finalResolve:
             return mComposite->getColorFinalFB();
         case CommandBufferFrameBufferType::blurVertical:
@@ -196,6 +198,17 @@ void RLTargetPBR::renderDepthMap() {
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k) ) {
             rr.addToCommandBuffer( vl.mVList, nullptr, rr.getMaterial(S::DEPTH_MAP), nullptr, 0.91f );
+        }
+    }
+}
+
+void RLTargetPBR::renderNormalMap() {
+    rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::normalMapBufferBindAndClear } );
+
+    for ( const auto& [k, vl] : rr.CL() ) {
+        if ( isKeyInRange(k) ) {
+            rr.addToCommandBuffer( vl.mVList, nullptr, rr.getMaterial(S::NORMAL_MAP) );
         }
     }
 }
@@ -411,6 +424,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     // (that has got 3d lighting in it) especially skyboxes and probes!!
     addShadowMaps();
     renderDepthMap();
+    renderNormalMap();
 
     if ( mSkybox && mSkybox->precalc( 0.0f ) ) {
         addProbes();

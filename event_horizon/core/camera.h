@@ -35,6 +35,8 @@ struct Frustum {
 	Plane3f n;
 	Plane3f f; // Frustum-planes
 
+	std::array<V3f, 4> corners;
+
 	void calculateFromMVP( const Matrix4f& _mvp );
 };
 

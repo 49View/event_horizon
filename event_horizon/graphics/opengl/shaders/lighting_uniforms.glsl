@@ -17,4 +17,6 @@ layout( std140 ) uniform LightingUniforms {
     vec4 u_hdrExposures;
     vec4 u_shadowParameters;
     mat3 shLightCoeffs;
+    int  u_hemisphereSampleKernelSize;
+    vec3 u_hemisphereSampleKernel[64];
 };

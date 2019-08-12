@@ -43,6 +43,7 @@ namespace UniformNames {
 	const std::string vTexture = "vTexture";
 	const std::string shadowMapTexture = "shadowMapTexture";
 	const std::string depthMapTexture = "depthMapTexture";
+	const std::string normalMapTexture = "normalMapTexture";
 	const std::string lut3dTexture = "lut3dTexture";
 	const std::string colorFBTexture = "colorFBTexture";
 	const std::string bloomTexture = "bloomTexture";
@@ -56,6 +57,7 @@ namespace UniformNames {
 	const std::string translucencyTexture = "translucencyTexture";
 	const std::string emissionTexture = "emissionTexture";
 	const std::string lightmapTexture = "lightmapTexture";
+	const std::string noise4x4Texture = "noise4x4Texture";
 	const std::string cubeMapTexture = "cubeMapTexture";
 	const std::string ibl_irradianceMap = "ibl_irradianceMap";
 	const std::string ibl_specularMap = "ibl_specularMap";
@@ -75,6 +77,8 @@ namespace UniformNames {
 	const std::string opacity = "opacity";
 	const std::string diffuse = "diffuse";
 
+	const std::string hemisphereKernelSize = "u_hemisphereSampleKernelSize";
+	const std::string hemisphereKernel = "u_hemisphereSampleKernel";
 	const std::string shLightCoeffs = "shLightCoeffs";
 
 	const std::string specularColor = "specularColor";

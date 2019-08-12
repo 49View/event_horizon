@@ -340,6 +340,7 @@ void Frustum::calculateFromMVP( const Matrix4f& mat ) {
 	f.n.setY( mat[7] - mat[6] );
 	f.n.setZ( mat[11] - mat[10] );
 	f.d = mat[15] - mat[14];
+
 }
 
 Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NamePolicy( cameraName ) {
@@ -578,7 +579,6 @@ bool Camera::frustomClipping( const AABB& bbox ) const {
 }
 
 PickRayData Camera::rayViewportPickIntersection( const Vector2f& p1 ) const {
-	// get point on the 'near' plane (third param is set to 0.0f)
 
 	const float* matModelView = mView.rawPtr();
 	const float* matProjection = mProjection.rawPtr();
@@ -587,6 +587,8 @@ PickRayData Camera::rayViewportPickIntersection( const Vector2f& p1 ) const {
 
 	float nearPj[3] = { 0.0f, 0.0f, 0.0f };
 	float farPj[3] = { 0.0f, 0.0f, 0.0f };
+
+    // get point on the 'near' plane (third param is set to 0.0f)
 	glhUnProjectf( p1.x(), p1.y(), 0.0f, matModelView, matProjection, viewport, nearPj );
 
 	// get point on the 'far' plane (third param is set to 1.0f)

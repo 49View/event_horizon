@@ -281,8 +281,9 @@ finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
  
 float preMultAlpha = opacityV * alpha;
 FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
- 
-FragAttach1 = vec4(translucencyV*(visibility-1.0), 0.0, 0.0, 1.0);//vec4(gl_FragCoord.z);
+
+vec3 bloom = finalColor * (translucencyV*(visibility-1.0));
+FragAttach1 = vec4( bloom, 1.0 );//vec4(gl_FragCoord.z);
 //	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
 // BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );
 //        BloomColor = vec4( finalColor*2, 1.0 );

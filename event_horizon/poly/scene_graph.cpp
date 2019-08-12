@@ -369,6 +369,7 @@ void SceneGraph::init() {
     B<IB>( S::WHITE ).addIM(RawImage::WHITE4x4());
     B<IB>( S::BLACK ).addIM(RawImage::BLACK_ARGB4x4());
     B<IB>( S::NORMAL ).addIM(RawImage::NORMAL4x4());
+    B<IB>( S::NOISE4x4 ).addIM(RawImage::NOISE4x4());
     B<IB>( S::DEBUG_UV ).addIM(RawImage::DEBUG_UV());
     B<IB>( S::LUT_3D_TEST ).addIM(RawImage::LUT_3D_TEST());
 

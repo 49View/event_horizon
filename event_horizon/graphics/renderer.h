@@ -186,6 +186,7 @@ public:
 	std::shared_ptr<Framebuffer> getDefaultFB() { return mDefaultFB; }
     std::shared_ptr<Framebuffer> getShadowMapFB() { return mShadowMapFB; }
     std::shared_ptr<Framebuffer> getDepthMapFB() { return mDepthFB; }
+    std::shared_ptr<Framebuffer> getNormalMapFB() { return mNormalFB; }
     std::shared_ptr<Framebuffer> getProbing(int _index);
 
 	int UpdateCounter() const { return mUpdateCounter; }
@@ -217,6 +218,7 @@ protected:
     std::shared_ptr<Framebuffer> mBRDF;
     std::shared_ptr<Framebuffer> mShadowMapFB;
     std::shared_ptr<Framebuffer> mDepthFB;
+    std::shared_ptr<Framebuffer> mNormalFB;
     std::unordered_map<int, std::shared_ptr<Framebuffer>> mProbingsFB;
 
 	int mUpdateCounter = 0;

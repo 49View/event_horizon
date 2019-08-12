@@ -37,10 +37,12 @@ namespace S {
     const std::string FINAL_COMBINE = "PN_FINAL_COMBINE";
     const std::string SHADOW_MAP = "shadowmap";
     const std::string DEPTH_MAP = "depthmap";
+    const std::string NORMAL_MAP = "normalmap_buffer";
 
     const std::string WHITE = "white";
     const std::string BLACK = "black";
     const std::string NORMAL = "normal";
+    const std::string NOISE4x4 = "noise4x4";
     const std::string DEBUG_UV = "debug_uv";
     const std::string LUT_3D_TEST = "lut3dTexture";
 
@@ -51,6 +53,7 @@ namespace S {
 
     const std::string shadowmap = "shadowMap_d";
     const std::string depthmap = "depthmap_d";
+    const std::string normalmap = "normalmap_n";
     const std::string lightmap = "lightMap_t";
     const std::string sceneprobe = "sceneprobe";
     const std::string blur_horizontal = "blur_horizontal_b";

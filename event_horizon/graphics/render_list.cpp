@@ -68,6 +68,8 @@ std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
             return "shadowMapBufferBind";
         case CommandBufferCommandName::depthMapBufferBindAndClear:
             return "depthMapBufferBindAndClear";
+        case CommandBufferCommandName::normalMapBufferBindAndClear:
+            return "normalMapBufferBindAndClear";
         case CommandBufferCommandName::shadowMapClearDepthBufferZero:
             return "shadowMapClearDepthBufferZero";
         case CommandBufferCommandName::shadowMapClearDepthBufferOne:
@@ -319,6 +321,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::depthMap)->bind();
             cstack->fb(CommandBufferFrameBufferType::depthMap)->clearDepthBuffer( 1.0f );
             break;
+        case CommandBufferCommandName::normalMapBufferBindAndClear:
+            cstack->fb(CommandBufferFrameBufferType::normalMap)->bindAndClearWithColor(C4f::GREEN);
+            break;
         case CommandBufferCommandName::shadowMapClearDepthBufferZero:
             cstack->fb(CommandBufferFrameBufferType::shadowMap)->clearDepthBuffer( 0.0f );
             break;
@@ -353,8 +358,14 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
                     UniformNames::depthMapTexture,
                     rr.getDepthMapFB()->RenderToTexture()->TDI(3));
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::normalMapTexture,
+                    rr.getNormalMapFB()->RenderToTexture()->TDI(5));
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::lut3dTexture,
                     rr.TM()->TD(UniformNames::lut3dTexture)->TDI(2));
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::noise4x4Texture,
+                    rr.TM()->TD(S::NOISE4x4)->TDI(6));
             if ( rr.isLoading() ) {
                 cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
                         rr.SM()->P(S::LOADING_SCREEN).get() );
