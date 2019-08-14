@@ -10,8 +10,7 @@ uniform sampler2D bloomTexture;
 uniform sampler2D shadowMapTexture;
 uniform sampler3D lut3dTexture;
 uniform sampler2D depthMapTexture;
-uniform sampler2D normalMapTexture;
-uniform sampler2D noise4x4Texture;
+uniform sampler2D ssaoMapTexture;
 
 float vignetting() {
     // Vignetting
@@ -41,51 +40,8 @@ vec3 bloom( float amount ) {
     return vec3(texture(bloomTexture, v_texCoord).r*amount);
 }
 
-float ssao() {
-    float occluded = 1.0;
-    vec2 uNoiseScale = vec2(2560.0/4.0, 1440.0/4.0);
-    vec3 origin = u_eyeDir.xyz * linearize( texture(depthMapTexture, v_texCoord).r );
-    vec3 normal = texture(normalMapTexture, v_texCoord).xyz * 2.0 - 1.0;
-    normal = normalize(normal);
-    vec3 rvec = texture(noise4x4Texture, v_texCoord * uNoiseScale).xyz * 2.0 - 1.0;
-    vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
-    vec3 bitangent = cross(normal, tangent);
-    mat3 tbn = mat3(tangent, bitangent, normal);
-
-    float currZ = linearize(texture(depthMapTexture, v_texCoord).r);
-    // for ( int t = 0; t < u_hemisphereSampleKernelSize; t++ ) {
-    //     float sampledZ = linearize(texture(depthMapTexture, v_texCoord + (u_hemisphereSampleKernel[t].xy/15.0)*rvec.xy).r);
-    //     if ( sampledZ < currZ && currZ - sampledZ < 0.2) { //
-    //         occluded -= 1.0/u_hemisphereSampleKernelSize;
-    //     }
-    // }
-
-    float occlusion = 0.0;
-    float uRadius = 0.5;///25.0;
-    for (int i = 0; i < u_hemisphereSampleKernelSize; ++i) {
-        // get sample position:
-        vec3 zsample = tbn * u_hemisphereSampleKernel[i];
-        // zsample = zsample * uRadius + origin;
-        zsample = origin;
-        
-        // project zsample position:
-        vec4 offset = vec4(zsample, 1.0);
-        offset = u_projMatrix * offset;
-        
-        offset.xyz /= offset.w;
-        offset.xyz = offset.xyz * 0.5 + 0.5;
-        
-        // get zsample depth:
-        float sampleDepth = linearize(texture(depthMapTexture, offset.xy).r);
-        vec3 sampleDepth3 = u_eyeDir.xyz * linearize(texture(depthMapTexture, offset.xy).r);
-    return sampleDepth3.z;        
-        // range check & accumulate:
-        float rangeCheck= abs(origin.z - sampleDepth) < uRadius ? 1.0 : 0.0;
-        rangeCheck = 1.0;
-        occlusion += (sampleDepth <= zsample.z ? 1.0 : 0.0) * rangeCheck;
-    }
-
-    return 1.0 - (occlusion/u_hemisphereSampleKernelSize);
+vec3 ssao() {
+    return texture(ssaoMapTexture, v_texCoord).xyz;
 }
 
 #include "dof.glsl"
@@ -130,7 +86,9 @@ void main() {
 
     // sceneColor.xyz *= ssao();
     // sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
+
     sceneColor.xyz += bloom(0.35); 
+    // sceneColor.xyz = ssao(); 
     sceneColor.xyz *= vignetting();
     sceneColor.xyz *= grain();
 

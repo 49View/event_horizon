@@ -116,6 +116,9 @@ public:
         return mBlurVerticalFB;
     }
 
+    std::shared_ptr<Framebuffer> getNormalMapFB() { return mNormalFB; }
+    std::shared_ptr<Framebuffer> getSSAOMapFB() { return mSSAOFB; }
+
     void setBlurVerticalFB( const std::shared_ptr<Framebuffer>& _BlurVerticalFB ) {
         mBlurVerticalFB = _BlurVerticalFB;
     }
@@ -138,6 +141,8 @@ private:
     std::shared_ptr<Framebuffer> mColorFinalFB;
     std::shared_ptr<Framebuffer> mBlurHorizontalFB;
     std::shared_ptr<Framebuffer> mBlurVerticalFB;
+    std::shared_ptr<Framebuffer> mNormalFB;
+    std::shared_ptr<Framebuffer> mSSAOFB;
 };
 
 class RLTarget : public std::enable_shared_from_this<RLTarget> {
@@ -295,6 +300,8 @@ public:
     void endCL( CommandBufferList& fbt ) override;
     void resize( const Rect2f& _r ) override;
 
+    [[nodiscard]] bool useSSAO() const;
+    void useSSAO( bool _flag );
     void enableSkybox( bool _value );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
@@ -308,6 +315,7 @@ public:
 protected:
     void renderDepthMap();
     void renderNormalMap();
+    void renderSSAO();
     void addProbes();
     void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
     std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName, int mipmap );
@@ -325,6 +333,7 @@ protected:
     SkyBoxInitParams mSkyBoxParams;
     bool bEnableSkyBoxRendering = false;
     bool mbEnableSkybox = false;
+    bool mbUseSSAO = false;
 
     std::shared_ptr<SunBuilder> mSunBuilder;
     std::shared_ptr<Skybox> mSkybox;

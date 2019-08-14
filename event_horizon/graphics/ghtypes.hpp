@@ -46,6 +46,7 @@ namespace FBNames {
     const static std::string shadowmap                  = S::shadowmap                ;
     const static std::string depthmap                   = S::depthmap                 ;
     const static std::string normalmap                  = S::normalmap                ;
+    const static std::string ssaomap                    = S::ssaomap                  ;
     const static std::string lightmap                   = S::lightmap                 ;
     const static std::string sceneprobe                 = S::sceneprobe               ;
     const static std::string blur_horizontal            = S::blur_horizontal          ;

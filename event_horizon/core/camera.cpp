@@ -300,8 +300,19 @@ int glhInvertMatrixf2( float *m, float *out ) {
 	return 1;
 }
 
-void Frustum::calculateFromMVP( const Matrix4f& mat ) {
-	l.n.setX( mat[3] + mat[0] );
+void getViewporti( int *viewport, const JMATH::Rect2f& viewportRect ) {
+    viewport[0] = static_cast<int>( viewportRect.topLeft()[0] );
+    viewport[1] = static_cast<int>( viewportRect.topLeft()[1] );
+    viewport[2] = static_cast<int>( viewportRect.width() );
+    viewport[3] = static_cast<int>( viewportRect.height() );
+}
+
+void Frustum::calculateFromMVP( const V3f& cameraPos, const Matrix4f& viewMat, const Matrix4f& projMat, const Rect2f& viewportRect ) {
+    Matrix4f mat = viewMat * projMat;
+    int viewport[4];
+    getViewporti( viewport, viewportRect );
+
+    l.n.setX( mat[3] + mat[0] );
 	l.n.setY( mat[7] + mat[4] );
 	l.n.setZ( mat[11] + mat[8] );
 	l.d = mat[15] + mat[12];
@@ -335,12 +346,40 @@ void Frustum::calculateFromMVP( const Matrix4f& mat ) {
 	n.d = mat[15] + mat[14];
 
 	// Far Plane
-	// col4 - col3
+	// col4 - mProjection
 	f.n.setX( mat[3] - mat[2] );
 	f.n.setY( mat[7] - mat[6] );
 	f.n.setZ( mat[11] - mat[10] );
 	f.d = mat[15] - mat[14];
 
+//	Vector2f p1 = viewportRect.topLeft();
+//	Vector2f p2 = viewportRect.topRight();
+//	Vector2f p3 = viewportRect.bottomLeft();
+//	Vector2f p4 = viewportRect.bottomRight();
+
+    Vector2f p1 = viewportRect.topRight();
+    Vector2f p2 = viewportRect.bottomRight();
+    Vector2f p3 = viewportRect.topLeft();;
+    Vector2f p4 = viewportRect.bottomLeft();
+
+    float farPj[3] = { 0.0f, 0.0f, 0.0f };
+    glhUnProjectf( p1.x(), p1.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
+    cornersFar[0] = V3f{farPj};
+    glhUnProjectf( p2.x(), p2.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
+    cornersFar[1] = V3f{farPj};
+    glhUnProjectf( p3.x(), p3.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
+    cornersFar[2] = V3f{farPj};
+    glhUnProjectf( p4.x(), p4.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
+    cornersFar[3] = V3f{farPj};
+
+//    cornersFar[0] = V3f::ZERO;
+//    cornersFar[1] = C4f::RED;
+//    cornersFar[2] = C4f::GREEN;
+//    cornersFar[3] = C4f::BLUE;
+    for ( int t = 0; t < 4; t++ ) {
+        cornersFar[t] = normalize( cornersFar[t] - cameraPos );
+//        cornersFar[t] -= cameraPos;
+    }
 }
 
 Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NamePolicy( cameraName ) {
@@ -376,12 +415,12 @@ void Camera::setPosition( const Vector3f& pos ) {
 
 void Camera::setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar ) {
 	mProjection.setPerspective( fovyInDegrees, aspectRatio, znear, zfar );
-	mFrustom.calculateFromMVP( mView * mProjection );
+	mFrustom.calculateFromMVP( mPos->value, mView, mProjection, mViewPort );
 }
 
 void Camera::setProjectionMatrix( const Matrix4f& val ) {
 	mProjection = val;
-	mFrustom.calculateFromMVP( mView * mProjection );
+	mFrustom.calculateFromMVP( mPos->value, mView, mProjection, mViewPort );
 }
 
 void Camera::translate( const Vector3f& pos ) {
@@ -635,7 +674,7 @@ void Camera::update() {
 									mFarClipPlaneZ );
 	}
 
-	mFrustom.calculateFromMVP( mView * mProjection );
+	mFrustom.calculateFromMVP( mPos->value, mView, mProjection, mViewPort );
 }
 
 std::ostream& operator<<( std::ostream& os, const Camera& camera ) {
@@ -797,6 +836,12 @@ CameraMode Camera::Mode() const {
 
 Vector4f Camera::getNearFar() const {
     return V4f{ mNearClipPlaneZ, mFarClipPlaneZ, mFov->value, 1.0f };
+}
+
+std::vector<V3f> Camera::frustumFarViewPort() const {
+    std::vector<V3f> ret;
+    for ( int t = 0; t < 4; t++ ) ret.emplace_back(mFrustom.cornersFar[t]);
+    return ret;
 }
 
 

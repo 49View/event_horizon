@@ -35,6 +35,7 @@ namespace S {
     const std::string BLUR_HORIZONTAL = "PN_BLUR_HORIZONTAL";
     const std::string BLUR_VERTICAL = "PN_BLUR_VERTICAL";
     const std::string FINAL_COMBINE = "PN_FINAL_COMBINE";
+    const std::string SSAO = "PN_SSAO";
     const std::string SHADOW_MAP = "shadowmap";
     const std::string DEPTH_MAP = "depthmap";
     const std::string NORMAL_MAP = "normalmap_buffer";
@@ -54,6 +55,7 @@ namespace S {
     const std::string shadowmap = "shadowMap_d";
     const std::string depthmap = "depthmap_d";
     const std::string normalmap = "normalmap_n";
+    const std::string ssaomap = "ssaomap_n";
     const std::string lightmap = "lightMap_t";
     const std::string sceneprobe = "sceneprobe";
     const std::string blur_horizontal = "blur_horizontal_b";

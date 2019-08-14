@@ -1,7 +1,7 @@
 #include "../shader_manager_opengl.h"
 
 void ShaderManager::createCCInjectionMap() {
-    ccShaderMap["#opengl_version"] = "300 es\nprecision mediump float;\nprecision mediump int;\nprecision mediump sampler2DShadow;";
+    ccShaderMap["#opengl_version"] = "300 es\nprecision mediump float;\nprecision mediump int;\nprecision mediump sampler2DShadow;\nprecision mediump sampler3D;";
 #ifdef ANDROID
     ccShaderMap["#precision_high"] = "precision highp float;";
 #else

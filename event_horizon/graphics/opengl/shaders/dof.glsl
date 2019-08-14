@@ -2,10 +2,10 @@ const float PI = 3.14159265;
 const int SAMPLES = 4;
 const int RINGS = 4;
 
-float width = 1280; //texture width
-float height = 720; //texture height
+const float width = 1280.0; //texture width
+const float height = 720.0; //texture height
 
-vec2 texel = vec2(1.0/width,1.0/height);
+const vec2 texel = vec2(1.0/width,1.0/height);
 
 float focalDepth = 5.0;  //focal distance value in meters, but you may use autofocus option below
 float focalLength = 30.0; //focal length in mm
@@ -40,13 +40,13 @@ float maxblur = 1.0;
 //clamp value of max blur (0.0 = no blur, 1.0 default)
 
 float threshold = 0.5; // highlight threshold;
-float gain = 2; // highlight gain;
-float bias = 0; // bokeh edge bias
+float gain = 2.0; // highlight gain;
+float bias = 0.0; // bokeh edge bias
 float fringe = 2.8; // bokeh chromatic aberration / fringing
 bool noise = false; //use noise instead of pattern for sample dithering
 
-float dithering = 0.00004;
-float namount = dithering; //dither amount
+const float dithering = 0.00004;
+const float namount = dithering; //dither amount
 
 bool depthblur = false; // blur the depth buffer
 float dbsize = 1.25; // depth blur size

@@ -100,6 +100,7 @@ public:
 
     void setTransform( std::shared_ptr<Matrix4f> lTransform );
 
+    void updateP3V3( const std::vector<V3f>& _values );
     void updateGPUVData( cpuVBIB&& _vbib );
     void remapUVs( uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart );
 

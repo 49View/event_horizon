@@ -35,9 +35,10 @@ struct Frustum {
 	Plane3f n;
 	Plane3f f; // Frustum-planes
 
-	std::array<V3f, 4> corners;
+	std::array<V3f, 4> cornersFar;
+	std::array<V3f, 4> cornersNear;
 
-	void calculateFromMVP( const Matrix4f& _mvp );
+	void calculateFromMVP( const V3f& cameraPos, const Matrix4f& viewMat, const Matrix4f& projMat, const Rect2f& viewport );
 };
 
 enum class CameraCenterAngle {
@@ -121,6 +122,8 @@ public:
 	Vector3f getDirection() const;
 	Vector3f getDirectionInv() const;
 	Vector3f getDirectionRH() const;
+
+	[[nodiscard]] std::vector<V3f> frustumFarViewPort() const;
 
 	void AspectRatioMultiplier( float val );
 

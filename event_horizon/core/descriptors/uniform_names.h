@@ -44,6 +44,7 @@ namespace UniformNames {
 	const std::string shadowMapTexture = "shadowMapTexture";
 	const std::string depthMapTexture = "depthMapTexture";
 	const std::string normalMapTexture = "normalMapTexture";
+	const std::string ssaoMapTexture = "ssaoMapTexture";
 	const std::string lut3dTexture = "lut3dTexture";
 	const std::string colorFBTexture = "colorFBTexture";
 	const std::string bloomTexture = "bloomTexture";

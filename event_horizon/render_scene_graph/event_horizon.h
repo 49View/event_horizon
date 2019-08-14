@@ -50,6 +50,12 @@ public:
             Http::userToken(argv[1]);
             Http::sessionId(argv[2]);
             Socket::createConnection();
+        } else {
+            if constexpr ( BE::hasLF() ) {
+                Http::init( BE::loginCert() );
+            } else {
+                Http::init();
+            }
         }
 #endif
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();

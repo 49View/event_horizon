@@ -70,6 +70,8 @@ std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
             return "depthMapBufferBindAndClear";
         case CommandBufferCommandName::normalMapBufferBindAndClear:
             return "normalMapBufferBindAndClear";
+        case CommandBufferCommandName::ssaoRender:
+            return "ssaoMapBufferBindAndClear";
         case CommandBufferCommandName::shadowMapClearDepthBufferZero:
             return "shadowMapClearDepthBufferZero";
         case CommandBufferCommandName::shadowMapClearDepthBufferOne:
@@ -324,6 +326,28 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
         case CommandBufferCommandName::normalMapBufferBindAndClear:
             cstack->fb(CommandBufferFrameBufferType::normalMap)->bindAndClearWithColor(C4f::GREEN);
             break;
+        case CommandBufferCommandName::ssaoRender: {
+            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->bind();
+            enableDepthTest( false );
+            setCullMode( CULL_NONE );
+            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->setMaterialConstant(
+                    UniformNames::depthMapTexture,
+                    rr.getDepthMapFB()->RenderToTexture()->TDI( 0 ));
+            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->setMaterialConstant(
+                    UniformNames::normalMapTexture,
+                    cstack->fb( CommandBufferFrameBufferType::normalMap )->RenderToTexture()->TDI( 1 ));
+            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->setMaterialConstant(
+                    UniformNames::noise4x4Texture,
+                    rr.TM()->TD( S::NOISE4x4 )->TDI( 2 ));
+
+//            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->updateGPUVData( vbib );
+            auto farClipCorners = cstack->Target()->getCamera()->frustumFarViewPort();
+            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->updateP3V3(farClipCorners);
+            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->draw();
+            enableDepthTest( true );
+            setCullMode( CULL_BACK );
+        }
+            break;
         case CommandBufferCommandName::shadowMapClearDepthBufferZero:
             cstack->fb(CommandBufferFrameBufferType::shadowMap)->clearDepthBuffer( 0.0f );
             break;
@@ -348,24 +372,27 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::colorFBTexture,
                     cstack->fb(CommandBufferFrameBufferType::finalResolve)->RenderToTexture()->TDI(0));
+
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::bloomTexture,
-                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture()->TDI(4));
+                    cstack->fb(CommandBufferFrameBufferType::blurVertical)->RenderToTexture()->TDI(1));
+
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::shadowMapTexture,
-                    rr.getShadowMapFB()->RenderToTexture()->TDI(1));
-            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
-                    UniformNames::depthMapTexture,
-                    rr.getDepthMapFB()->RenderToTexture()->TDI(3));
-            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
-                    UniformNames::normalMapTexture,
-                    rr.getNormalMapFB()->RenderToTexture()->TDI(5));
+                    rr.getShadowMapFB()->RenderToTexture()->TDI(2));
+
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::lut3dTexture,
-                    rr.TM()->TD(UniformNames::lut3dTexture)->TDI(2));
+                    rr.TM()->TD(UniformNames::lut3dTexture)->TDI(3));
+
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
-                    UniformNames::noise4x4Texture,
-                    rr.TM()->TD(S::NOISE4x4)->TDI(6));
+                    UniformNames::depthMapTexture,
+                    rr.getDepthMapFB()->RenderToTexture()->TDI(4));
+
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::ssaoMapTexture,
+                    cstack->fb(CommandBufferFrameBufferType::ssaoMap)->RenderToTexture()->TDI(5));
+
             if ( rr.isLoading() ) {
                 cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
                         rr.SM()->P(S::LOADING_SCREEN).get() );

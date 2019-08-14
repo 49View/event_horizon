@@ -808,6 +808,26 @@ public:
         init( 4, PRIMITIVE_TRIANGLE_STRIP, 4, _verts, std::move(_indices) );
     }
 
+    VertexStripIBVB( const JMATH::Rect2f& rect, const QuadVertices2& tcoords, const QuadVertices3& tcoords2 ) {
+        std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[4]{ 0, 1, 2, 3 } );
+        std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
+
+        _verts[0].pos = Vector2f( rect.bottomRight());
+        _verts[0].a1 = tcoords[0];// Vector2f(1.0f, 0.0f);
+        _verts[0].a2 = tcoords2[0];// Vector2f(1.0f, 0.0f);
+        _verts[1].pos = Vector2f( rect.topRight());
+        _verts[1].a1 = tcoords[1];//Vector2f(1.0f, 1.0f);
+        _verts[1].a2 = tcoords2[1];//Vector2f(1.0f, 1.0f);
+        _verts[2].pos = Vector2f( rect.bottomLeft());
+        _verts[2].a1 = tcoords[2];//Vector2f(0.0f, 0.0f);
+        _verts[2].a2 = tcoords2[2];//Vector2f(0.0f, 0.0f);
+        _verts[3].pos = Vector2f( rect.topLeft());
+        _verts[3].a1 = tcoords[3];//Vector2f(0.0f, 1.0f);
+        _verts[3].a2 = tcoords2[3];//Vector2f(0.0f, 1.0f);
+
+        init( 4, PRIMITIVE_TRIANGLE_STRIP, 4, _verts, std::move(_indices) );
+    }
+
     Vector3f centre() const {
         AABB ret{AABB::INVALID};
         for ( int32_t t = 0; t < numVerts; t++ ) ret.expand( verts[t].pos );
@@ -1081,6 +1101,9 @@ typedef VFA2<Vector2f, Vector2f> VFPosTex2d;
 typedef VFA2<Vector3f, Vector2f> VFPosTex3d;
 typedef VFA2<Vector4f, Vector2f> VFPosTex4d;
 
+typedef VFA3<Vector2f, Vector2f, Vector3f> VFPosTexNor2d;
+typedef VFA3<Vector3f, Vector2f, Vector3f> VFPosTexNor3d;
+
 typedef VFA2<Vector2f, Vector4f> VFPosCol2d;
 typedef VFA2<Vector3f, Vector4f> VFPosCol3d;
 typedef VFA2<Vector4f, Vector4f> VFPosCol4d;
@@ -1107,6 +1130,9 @@ typedef VertexStripIBVB<VFPos4d> Pos4dStrip;
 typedef VertexStripIBVB<VFPosTex2d> PosTex2dStrip;
 typedef VertexStripIBVB<VFPosTex3d> PosTex3dStrip;
 typedef VertexStripIBVB<VFPosTex4d> PosTex4dStrip;
+
+typedef VertexStripIBVB<VFPosTexNor2d> PosTexNor2dStrip;
+typedef VertexStripIBVB<VFPosTexNor3d> PosTexNor3dStrip;
 
 typedef VertexStripIBVB<VFPosCol2d> PosCol2dStrip;
 typedef VertexStripIBVB<VFPosCol3d> PosCol3dStrip;

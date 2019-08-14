@@ -346,6 +346,7 @@ ShaderManager::ShaderManager() {
     allocateProgram( ShaderProgramDesc{ S::BLUR_HORIZONTAL }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_blur_horizontal" ));
     allocateProgram( ShaderProgramDesc{ S::BLUR_VERTICAL }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_blur_vertical" ));
     allocateProgram( ShaderProgramDesc{ S::FINAL_COMBINE }.vsh( "vertex_shader_blitcopy" ).fsh( "plain_final_combine" ));
+    allocateProgram( ShaderProgramDesc{ S::SSAO }.vsh( "vertex_shader_blitcopy_viewspace" ).fsh( "ssao" ));
     allocateProgram( ShaderProgramDesc{ S::COLOR_2D }.vsh( "vertex_shader_2d_c" ).fsh( "fragment_shader_color" ));
     allocateProgram( ShaderProgramDesc{ S::COLOR_3D }.vsh( "vertex_shader_3d_c" ).fsh( "fragment_shader_color" ));
     allocateProgram( ShaderProgramDesc{ S::TEXTURE_2D }.vsh( "vertex_shader_2d_t" ).fsh( "fragment_shader_texture" ));

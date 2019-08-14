@@ -85,7 +85,9 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
         case CommandBufferFrameBufferType::depthMap:
             return rr.getDepthMapFB();
         case CommandBufferFrameBufferType::normalMap:
-            return rr.getNormalMapFB();
+            return mComposite->getNormalMapFB();
+        case CommandBufferFrameBufferType::ssaoMap:
+            return mComposite->getSSAOMapFB();
         case CommandBufferFrameBufferType::finalResolve:
             return mComposite->getColorFinalFB();
         case CommandBufferFrameBufferType::blurVertical:
@@ -213,6 +215,16 @@ void RLTargetPBR::renderNormalMap() {
     }
 }
 
+void RLTargetPBR::renderSSAO() {
+
+    if ( !useSSAO() ) return;
+
+    renderNormalMap();
+
+    rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::ssaoRender } );
+}
+
 // This does NOT update and invalidate skybox and probes
 void RLTargetPBR::cacheShadowMapSunPosition( const Vector3f& _smsp ) {
     mCachedSunPosition = _smsp;
@@ -322,6 +334,15 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
                 .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).
                         IM(S::FINAL_COMBINE).build();
     }
+
+    mNormalFB = FrameBufferBuilder{ rr, FBNames::normalmap }.size( vsize ).format( PIXEL_FORMAT_RGBA ).build();
+
+    mSSAOFB = FrameBufferBuilder{ rr, FBNames::ssaomap }.size( vsize ).format( PIXEL_FORMAT_RGBA ).IM(S::SSAO).setViewSpace().build();
+
+//    auto build = VPBuilder<PosTex2dStrip>{ rr, ShaderMaterial{S::SSAO} }.
+//            p(std::make_shared<PosTex2dStrip>( mDestViewport.ss(),
+//                                               QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS )).n(vn).build();
+
 }
 
 CompositePBR::CompositePBR( Renderer& _rr, [[maybe_unused]] const std::string& _name, const Rect2f& _destViewport,
@@ -423,8 +444,9 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
     // (that has got 3d lighting in it) especially skyboxes and probes!!
     addShadowMaps();
+
     renderDepthMap();
-    renderNormalMap();
+    renderSSAO();
 
     if ( mSkybox && mSkybox->precalc( 0.0f ) ) {
         addProbes();
@@ -505,6 +527,14 @@ floata& RLTargetPBR::skyBoxDeltaInterpolation() {
 
 void RLTargetPBR::enableSkybox( bool _value ) {
     mbEnableSkybox = _value;
+}
+
+bool RLTargetPBR::useSSAO() const {
+    return mbUseSSAO;
+}
+
+void RLTargetPBR::useSSAO( bool _flag ) {
+    mbUseSSAO = _flag;
 }
 
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {

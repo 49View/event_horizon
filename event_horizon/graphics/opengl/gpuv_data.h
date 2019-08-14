@@ -17,6 +17,7 @@ public:
 
     void updateVBO( cpuVBIB&& _vbib );
     void updateUVs( const uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart );
+    void updateP3V3( const std::vector<V3f>& _values );
     bool Dynamic() const { return dynamic; }
     void Dynamic( bool val ) { dynamic = val; }
 

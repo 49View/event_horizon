@@ -28,6 +28,7 @@ uniform sampler2D heightTexture;
 uniform sampler2D opacityTexture; 
 uniform sampler2D translucencyTexture;
 uniform sampler2D lightmapTexture;
+
 // IBL
 uniform samplerCube ibl_irradianceMap;        // 9 glTextureSlot
 uniform samplerCube ibl_specularMap;         // 10 glTextureSlot

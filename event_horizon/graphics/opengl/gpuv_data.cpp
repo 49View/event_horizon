@@ -152,3 +152,17 @@ void GPUVData::updateUVs( const uint32_t *xrefs, const std::vector<V3f>& _pos, c
 //                         GL_STATIC_DRAW ));
 
 }
+
+void GPUVData::updateP3V3( const std::vector<V3f>& _values ) {
+
+    size_t nStride = vbib.vElementAttrib[2].offset;
+    size_t nSize = vbib.vElementAttrib[2].size * sizeof(float);
+
+    for ( size_t t = 0; t < vbib.numVerts; t++ ) {
+        memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t + nStride, (const char*)(&_values[t]), nSize );
+    }
+
+    GLCALL(glBindVertexArray( vao ));
+    GLCALL(glBindBuffer( GL_ARRAY_BUFFER, vbo ));
+    GLCALL(glBufferData( GL_ARRAY_BUFFER, vbib.numVerts * vbib.elenentSize, vbib.bufferVerts.get(), GL_DYNAMIC_DRAW ));
+}

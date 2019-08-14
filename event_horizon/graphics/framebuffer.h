@@ -29,6 +29,7 @@ class FrameBufferBuilder {
     bool mUseMipMaps = false;
     bool mAttachDepth = true;
     bool mDepthOnly = false;
+    bool mHashViewSpace = false;
     Rect2f mDestViewport = Rect2f::IDENTITY;
     std::vector<std::pair<std::string, int>> mColorBufferAttachments;
     std::string mIMShaderName;
@@ -120,6 +121,12 @@ public:
     bool isUseMipMaps() const {
         return mUseMipMaps;
     }
+
+    FrameBufferBuilder& setViewSpace() {
+        mHashViewSpace = true;
+        return *this;
+    }
+
 
     FrameBufferBuilder& mipMaps() {
         mUseMipMaps = true;

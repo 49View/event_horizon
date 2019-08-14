@@ -110,3 +110,7 @@ void VPList::remapUVs( uint32_t *_indices, const std::vector<V3f>& _pos, const s
 const AABB& VPList::BBox3d() const {
     return *bbox3d;
 }
+
+void VPList::updateP3V3( const std::vector<V3f>& _values ) {
+    gpuData->updateP3V3( _values );
+}
