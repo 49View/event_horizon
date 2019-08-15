@@ -88,7 +88,7 @@ void main() {
     // sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
 
     sceneColor.xyz += bloom(0.35); 
-    // sceneColor.xyz = ssao(); 
+    sceneColor.xyz *= ssao(); 
     sceneColor.xyz *= vignetting();
     sceneColor.xyz *= grain();
 

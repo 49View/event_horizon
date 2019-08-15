@@ -363,6 +363,7 @@ void Frustum::calculateFromMVP( const V3f& cameraPos, const Matrix4f& viewMat, c
     Vector2f p4 = viewportRect.bottomLeft();
 
     float farPj[3] = { 0.0f, 0.0f, 0.0f };
+//    Matrix4f mid = Matrix4f::IDENTITY;
     glhUnProjectf( p1.x(), p1.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
     cornersFar[0] = V3f{farPj};
     glhUnProjectf( p2.x(), p2.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
@@ -377,7 +378,8 @@ void Frustum::calculateFromMVP( const V3f& cameraPos, const Matrix4f& viewMat, c
 //    cornersFar[2] = C4f::GREEN;
 //    cornersFar[3] = C4f::BLUE;
     for ( int t = 0; t < 4; t++ ) {
-        cornersFar[t] = normalize( cornersFar[t] - cameraPos );
+        cornersFar[t] = viewMat * cornersFar[t];
+//        cornersFar[t].setZ(1.0f);
 //        cornersFar[t] -= cameraPos;
     }
 }

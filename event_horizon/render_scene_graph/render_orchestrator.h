@@ -113,6 +113,7 @@ public:
     void setVisible( uint64_t _cbIndex, bool _value );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     void useSkybox( bool _value );
+    void useSSAO( bool _value );
     void changeTime( const std::string& _time );
     floata& skyBoxDeltaInterpolation();
 protected:

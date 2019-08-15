@@ -20,8 +20,11 @@ float ssao() {
     float occluded = 1.0;
     vec2 uNoiseScale = vec2(2560.0/4.0, 1440.0/4.0);
     vec3 origin = v_texT2 * linearize( texture(depthMapTexture, v_texCoord).r );
+    // vec3 origin = v_texT2 * texture(depthMapTexture, v_texCoord).r;
+    //return -origin.z/1000;
     vec3 normal = texture(normalMapTexture, v_texCoord).xyz * 2.0 - 1.0;
     normal = normalize(normal);
+    normal.y = -normal.y;
     vec3 rvec = texture(noise4x4Texture, v_texCoord * uNoiseScale).xyz * 2.0 - 1.0;
     vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
     vec3 bitangent = cross(normal, tangent);
@@ -37,34 +40,36 @@ float ssao() {
     //return origin.z;
 
     float occlusion = 0.0;
-    float uRadius = 0.13;///25.0;
-    int numSamples = 32; // u_hemisphereSampleKernelSize
+    float uRadius = 25.15;///25.0;
+    int numSamples = 64; // u_hemisphereSampleKernelSize
     for (int i = 0; i < numSamples; ++i) {
         // get sample position:
-        vec3 zsample = tbn * u_hemisphereSampleKernel[i];
+        vec3 sam = u_hemisphereSampleKernel[i];
+        //sam.z = -sam.z;
+        vec3 zsample = tbn * sam;
         zsample = zsample * uRadius + origin;
-        //zsample = origin;
+        // zsample = origin;
         
         // project zsample position:
         vec4 offset = vec4(zsample, 1.0);
         offset = u_projMatrix * offset;
         
-        offset.xy /= offset.w;
-        offset.xy = offset.xy * 0.5 + 0.5;
+        offset.xy /= -offset.w;
+        offset.xy = offset.xy * vec2(-0.5, 0.5) + 0.5;
         
         // get zsample depth:
         float sampleDepth = linearize(texture(depthMapTexture, offset.xy).r);
         // vec3 sampleDepth3 = u_eyeDir.xyz * linearize(texture(depthMapTexture, offset.xy).r);
         // return offset.y/50;        
-        //return sampleDepth;
+        // return sampleDepth/4;
         //return sampleDepth - zsample.z;
-        //return zsample.z;
+        // return -zsample.z/400;
         // range check & accumulate:
-        float rangeCheck= abs(origin.z - sampleDepth) < uRadius ? 1.0 : 0.0;
+        float rangeCheck= abs(-origin.z/u_nearFar.y - sampleDepth) < uRadius ? 1.0 : 0.0;
         //return rangeCheck;
         //return (sampleDepth <= zsample.z ? 1.0 : 0.0);
         //rangeCheck = 1.0;
-        occlusion += (sampleDepth <= zsample.z ? 1.0 : 0.0) * rangeCheck;
+        occlusion += (sampleDepth <= (-zsample.z/u_nearFar.y) ? 1.0 : 0.0) * rangeCheck;
     }
 
     return 1.0 - (occlusion/float(numSamples));
@@ -105,7 +110,7 @@ void main() {
     // sceneColor.xyz = vec3(v_texCoord, 0.0);
     // sceneColor.xyz = vec3((offset.xyz)/10);
 
-    //sceneColor.xyz = texture(normalMapTexture, v_texCoord).rgb;
+    sceneColor.xyz = texture(normalMapTexture, v_texCoord).rgb;
 
     float currZ = linearize( texture(depthMapTexture, v_texCoord).r );
     //sceneColor.xyz = v_texT2 * currZ;
@@ -113,7 +118,7 @@ void main() {
     //sceneColor.z = currZ;
 
     float ao = ssao();
-    sceneColor.xyz = vec3(currZ/4.0);
+    // sceneColor.xyz = vec3(currZ/4.0);
  
     // sceneColor.xyz *= ssao();
     // sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
@@ -121,7 +126,8 @@ void main() {
     // FragColor = vec4(abs(u_projMatrix[2].www)*0.5, 1.0);
     //FragColor = vec4(abs(v_texT2/100), 1.0);
     FragColor = vec4( vec3(ao), 1.0);
-    //FragColor = vec4(v_texT2*0.5+0.5, 1.0);
+    // FragColor = vec4(v_texT2*0.5+0.5, 1.0);
+    // FragColor = vec4(v_texT2, 1.0);
     //FragColor = vec4(sceneColor.xyz, 1.0);
-    // FragColor = vec4(currZ, currZ, currZ, 1.0);
+    //FragColor = vec4(vec3(currZ)/4, 1.0);
 }
