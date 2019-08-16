@@ -102,6 +102,7 @@ enum class CommandBufferCommandName {
     colorBufferBindAndClearDepthOnly,
     colorBufferClear,
 
+    defaultFrameBufferBind,
     clearDefaultFramebuffer,
 
     setCameraUniforms,
@@ -117,6 +118,7 @@ enum class CommandBufferCommandName {
 
     blitToScreen,
     blitPRB,
+    blitPBRToScreen,
 
     takeScreenShot,
 
@@ -151,7 +153,8 @@ enum class CommandBufferFrameBufferType {
     finalResolve,
     finalBlit,
     blurVertical,
-    blurHorizontal
+    blurHorizontal,
+    screen
 };
 
 enum class CommandBufferEntryCommandType {

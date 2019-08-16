@@ -194,11 +194,11 @@ void Renderer::directRenderLoop() {
 
     CB_U().start();
     CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
-    CB_U().pushCommand( { CommandBufferCommandName::clearDefaultFramebuffer } );
+//    CB_U().pushCommand( { CommandBufferCommandName::clearDefaultFramebuffer } );
     CB_U().pushCommand( { CommandBufferCommandName::setGlobalTextures } );
 
     for ( const auto& target : mTargets ) {
-        if ( target->enabled()) {
+        if ( target->enabled() ) {
             if ( bInvalidated ) target->invalidateOnAdd();
             target->updateStreams();
             target->addToCB( CB_U());
@@ -213,11 +213,6 @@ void Renderer::directRenderLoop() {
     am.setTiming();
     lm->setUniforms_r();
     am.setUniforms_r();
-
-    for ( auto& mcc : mChangeMaterialCallbacks ) {
-        changeMaterialOnTags( mcc );
-    }
-    mChangeMaterialCallbacks.clear();
 
     mDrawCallsPerFrame = renderCBList();
 

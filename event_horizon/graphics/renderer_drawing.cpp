@@ -150,7 +150,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
             delta += unit * 0.25f;
             lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
             lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-            smallLines.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( {lerpLeftX, lerpRightX}, gridLinesWidth*0.5f ) );
+            smallLines.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( {lerpLeftX, lerpRightX}, gridLinesWidth*0.75f ) );
         }
         delta += unit * 0.25f;
     }

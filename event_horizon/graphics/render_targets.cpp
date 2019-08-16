@@ -99,6 +99,8 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
                 return rr.getDefaultFB();
             else
                 return mComposite->getOffScreenFB();
+        case CommandBufferFrameBufferType::screen:
+            return rr.getDefaultFB();
         default:
             ASSERT(0);
     }
@@ -162,10 +164,6 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
 }
 
 void RLTargetPBR::addShadowMaps() {
-    if ( !smm ) return;
-
-    rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor(), mSunBuilder->GoldenHour() );
-
     if ( smm->invalidated() ) {
         rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
         rr.CB_U().pushCommand( { CommandBufferCommandName::shadowMapBufferBind } );
@@ -335,9 +333,11 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
                         IM(S::FINAL_COMBINE).build();
     }
 
-    mNormalFB = FrameBufferBuilder{ rr, FBNames::normalmap }.size( vsize ).format( PIXEL_FORMAT_RGBA ).build();
+    float ssaoScaling = 1.0f;
+    auto ssaoSize = vsize * ssaoScaling;
+    mNormalFB = FrameBufferBuilder{ rr, FBNames::normalmap }.size( ssaoSize ).format( PIXEL_FORMAT_RGBA ).build();
 
-    mSSAOFB = FrameBufferBuilder{ rr, FBNames::ssaomap }.size( vsize ).format( PIXEL_FORMAT_RGBA ).IM(S::SSAO).setViewSpace().build();
+    mSSAOFB = FrameBufferBuilder{ rr, FBNames::ssaomap }.size( ssaoSize ).format( PIXEL_FORMAT_RGBA ).IM(S::SSAO).setViewSpace().build();
 
 //    auto build = VPBuilder<PosTex2dStrip>{ rr, ShaderMaterial{S::SSAO} }.
 //            p(std::make_shared<PosTex2dStrip>( mDestViewport.ss(),
@@ -440,68 +440,63 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.setCameraUniforms( cameraRig->getCamera() );
+    rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor(), mSunBuilder->GoldenHour() );
 
-    // Add Shadowmaps sets all the lighting information, so it needs to be used before pretty much everything else
-    // (that has got 3d lighting in it) especially skyboxes and probes!!
-    addShadowMaps();
+    bool bAddProbe = mSkybox && mSkybox->precalc( 0.0f );
 
-    renderDepthMap();
-    renderSSAO();
-
-    if ( mSkybox && mSkybox->precalc( 0.0f ) ) {
+    if ( bAddProbe ) {
         addProbes();
-    }
+    } else {
+        addShadowMaps();
 
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-//    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClearDepthOnly } );
-    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-//    cb.setCameraUniforms( cameraRig->getCamera() );
+        renderDepthMap();
+        renderSSAO();
 
-    if ( mbEnableSkybox && mSkybox ) mSkybox->render();
 
-    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
-    cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
-    cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+        cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+        cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
 
-    for ( const auto& [k, vl] : rr.CL() ) {
-        if ( inRange( k, { CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd} ) ) {
-            rr.addToCommandBuffer( k );
+        if ( mbEnableSkybox && mSkybox ) {
+            mSkybox->render();
+        }
+
+        cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
+        cb.pushCommand( { CommandBufferCommandName::colorBufferBind } );
+        cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
+        cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
+        cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
+        cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+
+        for ( const auto&[k, vl] : rr.CL()) {
+            if ( isKeyInRange( k, CheckEnableBucket::True )) {
+                rr.addToCommandBuffer( vl.mVList, cameraRig.get());
+            }
+        }
+        blit( cb );
+
+        cb.pushCommand( { CommandBufferCommandName::blitPBRToScreen } );
+
+        cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+        cb.pushCommand( { CommandBufferCommandName::defaultFrameBufferBind } );
+        cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
+        cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
+        cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+
+        for ( const auto&[k, vl] : rr.CL()) {
+            if ( inRange( k,
+                 { CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd } ) &&
+                 !hiddenCB(k)) {
+                rr.addToCommandBuffer( k );
+            }
+        }
+
+        for ( const auto& [k, vl] : rr.CL() ) {
+            if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
+                rr.addToCommandBuffer( k );
+            }
         }
     }
 
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
-    cb.pushCommand( { CommandBufferCommandName::colorBufferBind } );
-    cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
-    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-
-    for ( const auto& [k, vl] : rr.CL() ) {
-        if ( isKeyInRange(k, CheckEnableBucket::True) ) {
-            rr.addToCommandBuffer( vl.mVList, cameraRig.get() );
-        }
-    }
-
-//    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
-//    cb.pushCommand( { CommandBufferCommandName::depthWriteFalse } );
-//    for ( const auto& [k, vl] : rr.CL() ) {
-//        if ( isKeyInRange(k) ) {
-//            rr.addToCommandBuffer( vl.mVListTransparent );
-//        }
-//    }
-
-    cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
-    cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
-    cb.pushCommand( { CommandBufferCommandName::wireFrameModeFalse } );
-
-    blit(cb);
-
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-    for ( const auto& [k, vl] : rr.CL() ) {
-        if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
-            rr.addToCommandBuffer( k );
-        }
-    }
-
-//    endCL( cb );
 }
 
 void RLTargetPBR::resize( const Rect2f& _r ) {

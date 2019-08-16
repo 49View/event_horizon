@@ -354,12 +354,25 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
         case CommandBufferCommandName::shadowMapClearDepthBufferOne:
             cstack->fb(CommandBufferFrameBufferType::shadowMap)->clearDepthBuffer( 1.0f );
             break;
+        case CommandBufferCommandName::defaultFrameBufferBind:
+            rr.getDefaultFB()->bind();
+            break;
         case CommandBufferCommandName::blitToScreen:
             Framebuffer::blitWithRect( cstack->fb(CommandBufferFrameBufferType::sourceColor), rr.getDefaultFB(),
                                GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0,
                                cstack->sourceViewport(), cstack->destViewport() );
             break;
+        case CommandBufferCommandName::blitPBRToScreen:
+            Framebuffer::blit( cstack->fb(CommandBufferFrameBufferType::finalBlit),
+                               cstack->fb(CommandBufferFrameBufferType::screen),
+                               GL_COLOR_ATTACHMENT0,
+                               GL_COLOR_ATTACHMENT0 );
+            break;
         case CommandBufferCommandName::blitPRB:
+
+            setCullMode( CULL_NONE );
+            enableDepthTest( false );
+            setWireFrame( false );
 
             dynamic_cast<CompositePBR*>(dynamic_cast<RLTargetPBR*>(cstack->Target().get())->Composite().get())->bloom();
             Framebuffer::blit( cstack->fb(CommandBufferFrameBufferType::sourceColor),
@@ -402,7 +415,7 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
 
             cstack->postBlit();
 
-        break;
+            break;
         case CommandBufferCommandName::targetVP:
             break;
 

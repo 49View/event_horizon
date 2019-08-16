@@ -43,7 +43,7 @@ public:
                                sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, nullptr };
         addBoxToViewport( _name, _box );
         auto lViewport = boxes[_name].updateAndGetRect();
-        addViewport<T>( RenderTargetType::PBR, _name, lViewport, BlitType::OnScreen );
+        addViewport<T>( RenderTargetType::PBR, _name, lViewport, BlitType::OffScreen );
     }
 
     template <typename T>

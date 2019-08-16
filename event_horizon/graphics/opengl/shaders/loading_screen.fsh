@@ -55,8 +55,8 @@ void main() {
     	alphaing = 1.0 - smoothstep(higherLimit, 1.0f, progress);
     }
 
-    vec4 c = vec4(loadingColor(uv, progress), 0.0);
-    c *= alphaing;
+    vec4 c = vec4(loadingColor(uv, progress) * alphaing, 1.0);
+    //c *= alphaing;
 
     fragColor = c;
 }

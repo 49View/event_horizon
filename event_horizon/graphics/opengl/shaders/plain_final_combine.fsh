@@ -49,46 +49,10 @@ vec3 ssao() {
 void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
-    // sceneColor.xyz = vec3(linearize( texture(depthMapTexture, v_texCoord).r ) / 4.0);
-    // vec4 sceneColor = texture(shadowMapTexture, v_texCoord);
-
-    // sceneColor.xyz = vec3(1.0) - exp(-sceneColor.xyz * u_hdrExposures.x*0.95);
-
-    // sceneColor.xyz = origin;
-
     // sceneColor.xyz = dof();
-    // sceneColor.xyz = vec3(1.0);
 
-    // float currZ = linearize( texture(depthMapTexture, v_texCoord).r );
-    // vec3 origin = u_eyeDir.xyz * linearize( texture(depthMapTexture, v_texCoord).r );
-
-    // vec4 offset = vec4(origin, 1.0);
-    //offset = u_projMatrix * offset;    
-    // offset.xyz /= offset.w;
-    // offset.xyz = offset.xyz * 0.5 + 0.5;
-    
-    // vec3 origin2 = u_eyeDir.xyz * linearize(texture(depthMapTexture, offset.xy).r);
-    // float origin2Z = linearize(texture(depthMapTexture, offset.xy).r);
-    // float z2 = linearize(texture(depthMapTexture, offset.xy).r);
-    // sceneColor.xyz = vec3(z2);
-    // sceneColor.xyz = vec3(origin2.z);
-    // sceneColor.xyz = vec3(offset.xyz);
-    //sceneColor.xyz = vec3(origin.z/10);
-    // sceneColor.xyz = vec3(currZ/10);
-    // sceneColor.xyz = vec3(origin);
-    // sceneColor.xyz = vec3(abs(currZ-origin.z));
-    //sceneColor.xyz = vec3(abs(origin2Z)/10);
-    // sceneColor.xyz = vec3(abs(v_texCoord-offset.xy), 0.0);
-    // sceneColor.xyz = vec3(v_texCoord, 0.0);
-    // sceneColor.xyz = vec3((offset.xyz)/10);
-
-    // sceneColor.xyz = texture(normalMapTexture, v_texCoord).rgb;
-
-    // sceneColor.xyz *= ssao();
-    // sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
-
-    sceneColor.xyz += bloom(0.35); 
-    sceneColor.xyz *= ssao(); 
+    // sceneColor.xyz += bloom(0.35); 
+    //sceneColor.xyz *= ssao(); 
     sceneColor.xyz *= vignetting();
     sceneColor.xyz *= grain();
 
