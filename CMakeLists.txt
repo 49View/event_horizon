@@ -161,6 +161,17 @@ macro(register_core_module)
 
 endmacro(register_core_module)
 
+macro(register_lua_module)
+
+    include_directories(${MODULE_ROOT_COMP}../lua)
+
+    if (NOT BUILD_FROM_SOURCE)
+        add_lib( lua )
+    endif()
+    add_lib( lua_libs )
+
+endmacro(register_lua_module)
+
 macro(register_graphics_module)
 
     register_module("ui")
@@ -377,6 +388,8 @@ macro(compile)
         message(STATUS "adding ${module} to compiler")
         if (${module} STREQUAL "core")
             register_core_module()
+        elseif (${module} STREQUAL "lua")
+            register_lua_module()
         elseif (${module} STREQUAL "graphics")
             register_graphics_module()
         elseif (${module} STREQUAL "media")
