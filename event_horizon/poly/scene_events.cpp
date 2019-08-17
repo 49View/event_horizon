@@ -42,6 +42,7 @@ void allCallbacksEntitySetup() {
 //    daemonEntityCallbacks[ResourceGroup::Geom] = callbackGeom;
 //    daemonEntityCallbacks[ResourceGroup::Material] = callbackMaterial;
     Socket::on( "cloudStorageFileUpdate", cloudCallback );
+    Socket::on( SceneEvents::ReloadLuaScript, SceneGraph::addEventCallback );
     Socket::on( SceneEvents::LoadGeomAndReset, SceneGraph::addEventCallback );
     Socket::on( SceneEvents::ReplaceMaterialOnCurrentObject, SceneGraph::addEventCallback );
     Socket::on( SceneEvents::ChangeMaterialProperty, SceneGraph::addEventCallback );

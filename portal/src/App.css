@@ -36,10 +36,10 @@ body {
 
 .Canvas {
   grid-area: render;
-  width: 522px;
+  /* width: 522px;
   height: 522px;
   margin: 7px;
-  padding: 5px;
+  padding: 5px; */
   border-radius: 10px;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
 }
@@ -666,6 +666,16 @@ input#search-bar:hover {
   justify-items: start;
 }
 
+.AppEditorRenderGrid {
+  display: grid;
+  grid-template-columns: 522px 481px;
+  grid-template-rows: 582px;
+  grid-template-areas: "source render";
+  grid-gap: 0px 0px;
+  align-items: center;
+  justify-items: start;
+}
+
 .confirm-alert {
   position: absolute;
   margin: auto;
@@ -685,13 +695,13 @@ input#search-bar:hover {
 }
 
 .appdataquad {
-  grid-area: render;
-  width: 1003px;
-  height: 522px;
-  margin: 7px;
-  padding: 5px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
+  grid-area: source;
+  align-self: stretch;
+  justify-self: stretch;
+}
+
+.CodeMirror {
+  height: 582px;
 }
 
 .materialRender {

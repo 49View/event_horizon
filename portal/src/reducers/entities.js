@@ -1,5 +1,6 @@
 import {
   GET_ENTITIES,
+  CLEAR_ENTITIES,
   GET_APPS,
   GET_MATERIALS_META,
   UPDATE_ENTITIES_PARTIAL_SEARCH,
@@ -49,6 +50,14 @@ export default function(state = initialState, action) {
   };
 
   switch (type) {
+    case CLEAR_ENTITIES:
+      return {
+        ...state,
+        entries: [],
+        entriesFiltered: [],
+        currentEntity: null,
+        group: ""
+      };
     case LOADING_FINISHED:
       return {
         ...state,

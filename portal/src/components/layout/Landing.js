@@ -13,12 +13,12 @@ const Landing = auth => {
       <div className="dark-overlay">
         <div className="landing-inner">
           <h1 className="x-large">Event Horizon</h1>
-          <p className="lead">Bring it on</p>
+          <p className="lead my-1">Fight against mediocrity</p>
           <div className="buttons">
-            <Link to="./register" className="btn btn-primary">
+            <Link to="./register" className="btn btn-primary my-2">
               Sign Up
-            </Link>
-            <Link to="./login" className="btn btn-light">
+            </Link>{" "}
+            <Link to="./login" className="btn btn-light my-2">
               Login
             </Link>
           </div>

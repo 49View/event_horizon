@@ -4,6 +4,7 @@ import {
   USER_LOADED,
   AUTH_ERROR,
   LOGIN_SUCCESS,
+  LOGOFF_FROM_PROJECT,
   LOGIN_FAIL,
   LOGOUT
 } from "../actions/types";
@@ -52,6 +53,9 @@ export default function(state = initialState, action) {
         project: null,
         userdata: null
       };
+    case LOGOFF_FROM_PROJECT:
+      state.userdata.project = null;
+      return state;
     default:
       return state;
   }

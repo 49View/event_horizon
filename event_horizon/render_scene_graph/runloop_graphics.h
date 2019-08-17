@@ -20,6 +20,8 @@
 #include <poly/scene_graph.h>
 #include <render_scene_graph/scene_bridge.h>
 #include <render_scene_graph/render_orchestrator.h>
+#define SOL_ALL_SAFETIES_ON 1
+#include <lua/sol/sol.hpp> // or #include "sol.hpp", whichever suits your needs
 
 namespace di = boost::di;
 
@@ -38,6 +40,8 @@ public:
     void activate() {
         sg.init();
         rsg.init();
+        lua.open_libraries();
+//        lua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::string, sol::lib::io);
         activateImpl();
     }
 
@@ -47,6 +51,7 @@ public:
 protected:
     SceneGraph& sg;
     RenderOrchestrator& rsg;
+    sol::state lua{};
 };
 
 class RunLoopGraphics : public RunLoop {

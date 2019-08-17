@@ -31,9 +31,6 @@
 #include <graphics/imgui/imgui.h>
 #endif
 
-#ifndef STB_IMAGE_WRITE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#endif
 
 #include <stb/stb_image_write.h>
 #include "core/service_factory.h"

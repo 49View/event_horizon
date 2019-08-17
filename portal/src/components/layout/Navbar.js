@@ -2,12 +2,10 @@ import React, { Fragment } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { logout } from "../../actions/auth";
+import { logoffFromProject } from "../../actions/auth";
 
-const Navbar = ({ userstate, logout }) => {
-  let userName = ""; //auth.auth.user;
-  //const user = JSON.parse(auth.auth.user);
-  // console.log(userstate);
+const Navbar = ({ userstate, logoffFromProject }) => {
+  let userName = "";
 
   if (userstate.isAuthenticated) {
     if (userstate.userdata && userstate.userdata.user.name) {
@@ -18,9 +16,8 @@ const Navbar = ({ userstate, logout }) => {
   const authlinks = (
     <Fragment>
       <div className="navbaruser-a">
-        {userName}{" "}
-        <a onClick={logout} href="#!">
-          <i className="fas fa-sign-out-alt" /> Logout
+        <a onClick={logoffFromProject} href="/#/dashboarduser">
+          <i className="fas fa-user" /> {userName}
         </a>
       </div>
     </Fragment>
@@ -44,7 +41,7 @@ const Navbar = ({ userstate, logout }) => {
 
 Navbar.propTypes = {
   userstate: PropTypes.object,
-  logout: PropTypes.func.isRequired
+  logoffFromProject: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -53,5 +50,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { logout }
+  { logoffFromProject }
 )(Navbar);

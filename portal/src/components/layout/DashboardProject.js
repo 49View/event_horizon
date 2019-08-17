@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Entries from "./entities/Entries";
@@ -30,7 +31,7 @@ const containerClassFromGroup = group => {
       };
     case "app":
       return {
-        mainContainerClass: "GeomEditorRenderGrid",
+        mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <AppEditor />
       };
     default:
@@ -59,13 +60,28 @@ const DashboardProject = ({
     }
   }, [canvas, count, userToken, userData]);
 
+  if (!userData || !userData.project) {
+    return <Redirect to="/" />;
+  }
+
   const canvasVisibility =
-    currentEntity && (group === "geom" || group === "material")
+    currentEntity &&
+    (group === "app" || group === "geom" || group === "material")
       ? "visible"
       : "hidden";
 
+  const entityUpdateDivVisible = currentEntity && group !== "app";
+
+  const canvasSizeX = entityUpdateDivVisible ? "522px" : "480px";
+  const canvasSizeY = entityUpdateDivVisible ? "522px" : "270px";
+  const canvasPadding = entityUpdateDivVisible ? "5px" : "0px";
+
   const canvasStyle = {
-    visibility: canvasVisibility
+    visibility: canvasVisibility,
+    width: canvasSizeX,
+    height: canvasSizeY,
+    margin: "7px",
+    padding: canvasPadding
   };
 
   const { mainContainerClass, mainContainerDiv } = containerClassFromGroup(
@@ -74,12 +90,13 @@ const DashboardProject = ({
 
   // const entityBased = group !== "app";
 
-  const entityUpdateDivVisible = currentEntity && group !== "app";
   const mainEditorDiv = (
     <div className={mainContainerClass}>
-      <div className="nameValue-a medium text-primary">
-        {currentEntity && currentEntity.entity.metadata.name}
-      </div>
+      {entityUpdateDivVisible && (
+        <div className="nameValue-a medium text-primary">
+          {currentEntity && currentEntity.entity.metadata.name}
+        </div>
+      )}
       {entityUpdateDivVisible && <EntityUpdateContent />}
       <div className="EntryEditorRender">
         <canvas
@@ -90,7 +107,7 @@ const DashboardProject = ({
         />
       </div>
       {currentEntity && mainContainerDiv}
-      {currentEntity && <EntityMetaSection />}
+      {currentEntity && entityUpdateDivVisible && <EntityMetaSection />}
     </div>
   );
 

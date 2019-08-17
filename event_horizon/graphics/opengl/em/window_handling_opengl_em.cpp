@@ -26,11 +26,9 @@ namespace WindowHandling {
 
     void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
 
-        double width{ 1280.0*2 };
-        double height{ 720.0*2 };
-        emscripten_get_element_css_size( "#canvas", &width, &height );
-        width *= 2.0f;
-        height *= 2.0f;
+        double width{ 1280.0 };
+        double height{ 720.0 };
+        emscripten_get_element_css_size( nullptr, &width, &height );
 //        emscripten_set_canvas_element_size( nullptr, int(width), int(height));
         LOGR( "GetWidnowSize %f %f", width, height );
 

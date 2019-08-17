@@ -3,13 +3,14 @@ import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Spinner from "./Spinner";
-import { createProject, setCurrentProject } from "../../actions/auth";
+import { createProject, setCurrentProject, logout } from "../../actions/auth";
 
 const DashboardUser = ({
   userstate,
   loading,
   createProject,
-  setCurrentProject
+  setCurrentProject,
+  logout
 }) => {
   const [newProjectformData, setNewProjectformData] = useState({
     projectNew: ""
@@ -18,14 +19,11 @@ const DashboardUser = ({
   if (
     userstate.isAuthenticated &&
     userstate.userdata &&
+    userstate.userdata.project !== null &&
     userstate.userdata.project !== ""
   ) {
     return <Redirect to="/dashboardproject" />;
   }
-
-  //   const onRequestProject = e => {
-  //     e.preventDefault();
-  //   };
 
   const onChange = e => {
     setNewProjectformData({
@@ -36,7 +34,6 @@ const DashboardUser = ({
 
   const onCreateProject = e => {
     e.preventDefault();
-    console.log("urca");
     createProject(newProjectformData.projectNew);
   };
 
@@ -45,7 +42,10 @@ const DashboardUser = ({
     setCurrentProject(e.target.value);
   };
 
-  console.log("DashboardUser render");
+  const onLogout = e => {
+    e.preventDefault();
+    logout();
+  };
 
   if (loading || userstate.userdata === null) return <Spinner />;
 
@@ -109,6 +109,20 @@ const DashboardUser = ({
     </div>
   );
 
+  const logoff = (
+    <div>
+      <div className="yourproject">
+        <i className="fas fa-sign-out-alt"> </i> Great Scott, get me out of here
+      </div>
+      <input
+        type="button"
+        className="btn btn-danger"
+        value="Logout"
+        onClick={e => onLogout(e)}
+      />
+    </div>
+  );
+
   return (
     <Fragment>
       <div className="userWithNoProject">
@@ -121,6 +135,7 @@ const DashboardUser = ({
         {userProjects}
         {createNewProject}
         {askToJoinExistingProject}
+        {logoff}
       </div>
     </Fragment>
   );
@@ -130,7 +145,8 @@ DashboardUser.propTypes = {
   userstate: PropTypes.object,
   loading: PropTypes.bool,
   createProject: PropTypes.func.isRequired,
-  setCurrentProject: PropTypes.func.isRequired
+  setCurrentProject: PropTypes.func.isRequired,
+  logout: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -140,5 +156,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { createProject, setCurrentProject }
+  { createProject, setCurrentProject, logout }
 )(DashboardUser);

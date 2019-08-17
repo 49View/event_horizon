@@ -4,6 +4,8 @@ import {
   REGISTER_FAIL,
   USER_LOADED,
   AUTH_ERROR,
+  CLEAR_ENTITIES,
+  LOGOFF_FROM_PROJECT,
   LOGIN_SUCCESS,
   LOGIN_FAIL,
   LOGOUT
@@ -105,6 +107,11 @@ export const login = (email, password, project) => async dispatch => {
 // Logout / Clear Profile
 export const logout = () => dispatch => {
   dispatch({ type: LOGOUT });
+};
+
+export const logoffFromProject = () => dispatch => {
+  dispatch({ type: LOGOFF_FROM_PROJECT });
+  dispatch({ type: CLEAR_ENTITIES });
 };
 
 // Create Project

@@ -9,7 +9,8 @@
 #include <core/htypes_shared.hpp>
 
 namespace SceneEvents {
-    static const std::string LoadGeomAndReset      = "LoadGeomAndReset";
+    static const std::string LoadGeomAndReset     = "LoadGeomAndReset";
+    static const std::string ReloadLuaScript      = "ReloadLuaScript";
     static const std::string ReplaceMaterialOnCurrentObject = "ReplaceMaterialOnCurrentObject";
     static const std::string ChangeMaterialProperty = "ChangeMaterialProperty";
 };
