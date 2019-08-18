@@ -53,7 +53,7 @@ exports.InitializeAuthentication = () => {
             error = "User not found!!!!";
           } else {
             user.roles = user.roles.map(v => v.toLowerCase());
-            user.project = session.project.toLowerCase();
+            user.project = session.project;
             user.expires = session.expiresAt;
             user.sessionId = clientCertificateInfo.sessionId;
             user.hasSession = true;
@@ -133,7 +133,7 @@ exports.InitializeAuthentication = () => {
             error = "Invalid user";
           } else {
             user.roles = user.roles.map(v => v.toLowerCase());
-            user.project = session.project.toLowerCase();
+            user.project = session.project;
             user.sessionId = sessionId;
             user.expires = jwtPayload.exp;
             user.hasToken = true;
@@ -169,7 +169,7 @@ exports.InitializeAuthentication = () => {
           //console.log("U:", user);
           if (user !== null) {
             user.roles = user.roles.map(v => v.toLowerCase());
-            user.project = project.toLowerCase();
+            user.project = project;
             user.expires = Math.floor(new Date().getTime() / 1000) + 3600;
             user.sessionId = null;
           } else {

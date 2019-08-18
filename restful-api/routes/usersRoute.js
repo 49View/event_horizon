@@ -62,13 +62,9 @@ router.post("/createProject/:project", async (req, res, next) => {
   let error = false;
 
   try {
-    await userController.addRolesForProject(project, email, roles);
     // add default app for this project
-    const content = JSON.stringify({
-      name: project + "App",
-      project: project
-    });
-    await appdataController.addApp(content);
+    await appdataController.addAppWithName(project, project + "App");
+    await userController.addRolesForProject(project, email, roles);
   } catch (ex) {
     console.log("Error creating project", ex);
     error = true;
@@ -79,7 +75,6 @@ router.post("/createProject/:project", async (req, res, next) => {
 
 router.post("/addProjectApp/:project/:appname", async (req, res, next) => {
   try {
-    const content = JSON.stringify({});
     await projectController.addApp({
       name: req.params.appname,
       project: req.params.project
@@ -109,25 +104,16 @@ router.put("/removeRolesForProject", async (req, res, next) => {
   error === null ? res.sendStatus(400) : res.sendStatus(204);
 });
 
-// router.get("/portaltoload", async (req, res, next) => {
-//   try {
-//     console.log(req.user);
-//     const ret = await userController.getCurrentPortalEntity(req.user);
-//     res.status(200).send(ret.toObject().entity);
-//   } catch (ex) {
-//     console.log("ERROR [GET] portaltoload: ", ex);
-//     res.sendStatus(400);
-//   }
-// });
-
-// router.post("/portaltoload", async (req, res, next) => {
-//   try {
-//     await userController.setCurrentPortalEntity(req.user, req.body);
-//     res.sendStatus(204);
-//   } catch (ex) {
-//     console.log("ERROR [POST] portaltoload: ", ex);
-//     res.sendStatus(400);
-//   }
-// });
+router.delete("/project/:project", async (req, res, next) => {
+  try {
+    const project = req.params.project;
+    await userController.removeAllRolesForProject(project);
+    await appdataController.deleteApp(project);
+    res.sendStatus(204);
+  } catch (ex) {
+    console.log("Error deleting project ", ex);
+    res.sendStatus(400);
+  }
+});
 
 module.exports = router;

@@ -185,7 +185,7 @@ const getTokenResponse = async (res, req, project, email, password) => {
       };
       tokenInfo.project = project !== "" ? project : ""; //await userController.setDefaultUserProject(dbUser._id);
 
-      await mailController.sendMail(dbUser.email, "no-replay@eventhorizon.at", "User logged in", "User "+dbUser.name+" logged in ("+ tokenInfo.project + ")");
+      // await mailController.sendMail(dbUser.email, "no-replay@eventhorizon.at", "User logged in", "User "+dbUser.name+" logged in ("+ tokenInfo.project + ")");
     }
   } catch (ex) {
     console.log("gettoken failed", ex);

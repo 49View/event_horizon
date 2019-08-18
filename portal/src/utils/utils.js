@@ -72,5 +72,9 @@ export const entityTypeSelector = entry => {
     }
   }
 
-  return <img src={entry.metadata.thumb} alt="" />;
+  return (
+    <span className="imageThumbNotFound">
+      <i className="far fa-frown" />
+    </span>
+  );
 };

@@ -2,6 +2,7 @@ const fsController = require("../controllers/fsController");
 const express = require("express");
 const router = express.Router();
 const entityController = require("../controllers/entityController");
+const metaAssistant = require("../assistants/metadataAssistant");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const zlib = require("zlib");
@@ -40,9 +41,7 @@ router.get("/content/byHash/:hashId", async (req, res, next) => {
 router.get("/:group/:tags", async (req, res, next) => {
   try {
     const group = req.params.group;
-    const tags = req.params.tags.split(/[\s,._]+/).map(e => {
-      return e.toLowerCase();
-    });
+    const tags = metaAssistant.splitTags(req.params.tags);
     const project = req.user.project;
     //Check existing entity for use project (or public)
     const foundEntities = await entityController.getEntitiesByProjectGroupTags(

@@ -1,8 +1,6 @@
-const entityController = require("./entityController");
 const projectModel = require("../models/project");
 const jsonWebToken = require("jsonwebtoken");
 const axios = require("axios");
-const md5 = require("md5");
 var https = require("https");
 
 const getProjectInfo = async projectName => {

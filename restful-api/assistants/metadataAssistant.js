@@ -1,7 +1,40 @@
 const md5 = require("md5");
 
+const gsplitTags = source => {
+  return source.split(/[\s,._]+/).map(e => {
+    return e.toLowerCase();
+  });
+};
+
 module.exports = {
+  splitTags: source => {
+    return gsplitTags(source);
+  },
+
+  createMetadata: content => {
+    let cleanMetadata = {};
+    cleanMetadata.name = "";
+    if (content.mKey) cleanMetadata.name = content.mKey;
+    if (content.name) cleanMetadata.name = content.name;
+    cleanMetadata.hash = md5(content);
+    const idate = new Date();
+    cleanMetadata.lastUpdatedDate = idate;
+    cleanMetadata.creationDate = idate;
+    cleanMetadata.accessCount = 0;
+    cleanMetadata.thumb = "";
+    cleanMetadata.tags = gsplitTags(cleanMetadata.name);
+    cleanMetadata.deps = [];
+    return cleanMetadata;
+  },
+
   udpateMetadata: (cleanMetadata, content) => {
+    if (!cleanMetadata) {
+      if (content.mKey) metaname = content.mKey;
+      if (content.name) metaname = content.name;
+      cleanMetadata = {
+        name: content.mKey
+      };
+    }
     cleanMetadata.hash = md5(content);
     const idate = new Date();
     cleanMetadata.lastUpdatedDate = idate;

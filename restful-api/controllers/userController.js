@@ -264,6 +264,11 @@ exports.removeRolesForProject = async (project, email, roles) => {
   await userRoleModel.updateOne(query, update, options);
 };
 
+exports.removeAllRolesForProject = async project => {
+  const query = { project: project };
+  await userRoleModel.deleteOne(query);
+};
+
 exports.getUsersByProject = async project => {
   return await getUsersByProject(project);
 };
