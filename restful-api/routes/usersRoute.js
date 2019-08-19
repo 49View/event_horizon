@@ -99,9 +99,10 @@ router.put("/invitetoproject", async (req, res, next) => {
     const userEmail = await userController.getUserByName(req.body.persontoadd);
     if (userEmail === null) {
       console.log("User you are trying to invite doesn't exist");
-      res
-        .status(400)
-        .send({ msg: "User you are trying to invite doesn't exist" });
+      res.status(202).send({
+        code: 202,
+        msg: "User " + req.body.persontoadd + " doesn't exist in here"
+      });
       return;
     }
     // Check if the user is already part of the project
@@ -110,7 +111,10 @@ router.put("/invitetoproject", async (req, res, next) => {
     }, 0);
     if (isAlreadyInThere > 0) {
       console.log("User already in project ", isAlreadyInThere);
-      res.status(400).send({ msg: "User Already in project" });
+      res.status(202).send({
+        code: 202,
+        msg: "User " + req.body.persontoadd + " already in project"
+      });
       return;
     }
 
@@ -122,7 +126,10 @@ router.put("/invitetoproject", async (req, res, next) => {
       )
     ) {
       console.log("User already been invited");
-      res.status(400).send({ msg: "User already been invited" });
+      res.status(202).send({
+        code: 202,
+        msg: "User " + req.body.persontoadd + " has already been invited"
+      });
       return;
     }
 
@@ -168,7 +175,10 @@ router.put("/invitetoproject", async (req, res, next) => {
       html
     );
 
-    res.sendStatus(204);
+    res.status(200).send({
+      code: 200,
+      msg: "User " + req.body.persontoadd + " has been invited"
+    });
   } catch (ex) {
     console.log("Error sending invite for project ", ex);
     res.sendStatus(400);

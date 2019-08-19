@@ -68,9 +68,8 @@ exports.getUserByName = async name => {
 
 exports.checkProjectAlreadyExists = async project => {
   let dbUser = null;
-  const query = { project: project };
+  const query = { project: { $regex: project + "$", $options: "i" } };
   dbUser = await userRoleModel.find(query);
-  console.log("IS PROJECT PRENSET ", dbUser);
   return dbUser !== null && dbUser.length > 0 ? true : false;
 };
 

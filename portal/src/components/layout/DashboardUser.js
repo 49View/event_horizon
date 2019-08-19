@@ -15,24 +15,10 @@ import {
   acceptInvitation,
   declineInvitation,
   setCurrentProject,
+  sendInvitationToProject,
   logout
 } from "../../actions/auth";
-import axios from "axios";
-
-const sendInvitationToProject = async (adminuser, project, personToAdd) => {
-  const config = {
-    headers: {
-      "Content-Type": "application/json"
-    }
-  };
-
-  const body = {
-    adminuser: adminuser,
-    project: project,
-    persontoadd: personToAdd
-  };
-  return await axios.put("/user/invitetoproject", body, config);
-};
+import LocalAlert from "./LocalAlert";
 
 const DashboardUser = ({
   userstate,
@@ -41,6 +27,7 @@ const DashboardUser = ({
   acceptInvitation,
   declineInvitation,
   setCurrentProject,
+  sendInvitationToProject,
   logout
 }) => {
   let inviteNameRef = React.useRef(null);
@@ -112,7 +99,9 @@ const DashboardUser = ({
   if (userstate.userdata.projects !== null) {
     userProjects = (
       <Fragment>
-        <div className="yourproject">Your Projects:</div>
+        <div className="yourproject">
+          <i className="fas fa-rocket" /> Your Projects:
+        </div>
         <div className="project-login">
           {userstate.userdata.projects.map(projectObject => (
             <Fragment key={`fragment-${projectObject.project}`}>
@@ -188,6 +177,7 @@ const DashboardUser = ({
           </Button>
         </InputGroup.Append>
       </InputGroup>
+      <LocalAlert />
     </div>
   );
 
@@ -297,6 +287,7 @@ DashboardUser.propTypes = {
   acceptInvitation: PropTypes.func.isRequired,
   declineInvitation: PropTypes.func.isRequired,
   setCurrentProject: PropTypes.func.isRequired,
+  sendInvitationToProject: PropTypes.func.isRequired,
   logout: PropTypes.func.isRequired
 };
 
@@ -312,6 +303,7 @@ export default connect(
     acceptInvitation,
     declineInvitation,
     setCurrentProject,
+    sendInvitationToProject,
     logout
   }
 )(DashboardUser);

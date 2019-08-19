@@ -1,4 +1,5 @@
 import { setAlert } from "./alert";
+import { setLocalAlert } from "./localalert";
 import {
   REGISTER_SUCCESS,
   REGISTER_FAIL,
@@ -234,5 +235,35 @@ export const setCurrentProject = projectName => async dispatch => {
       type: LOGIN_FAIL
     });
     dispatch(setAlert("Cannot login to new project", "danger"));
+  }
+};
+
+export const sendInvitationToProject = (
+  adminuser,
+  project,
+  personToAdd
+) => async dispatch => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    const body = {
+      adminuser: adminuser,
+      project: project,
+      persontoadd: personToAdd
+    };
+
+    const res = await axios.put("/user/invitetoproject", body, config);
+    console.log(res);
+    dispatch(
+      setLocalAlert(res.data.msg, res.data.code === 200 ? "success" : "danger")
+    );
+  } catch (ex) {
+    dispatch(
+      setLocalAlert("Server responded 400, it means it's bonker :'(", "danger")
+    );
   }
 };
