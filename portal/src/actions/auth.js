@@ -143,14 +143,80 @@ export const createProject = projectName => async dispatch => {
       errors.forEach(error => dispatch(setAlert(error.msg, "danger")));
     }
 
-    dispatch({
-      type: LOGIN_FAIL
-    });
     dispatch(setAlert("Creating New Project Failed", "danger"));
   }
 };
 
-// Create Project
+export const acceptInvitation = (projectName, userEmail) => async dispatch => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    const body = {
+      email: userEmail,
+      roles: ["user"]
+    };
+    await axios.put(
+      "user/addRolesFor/" + projectName,
+      JSON.stringify(body),
+      config
+    );
+
+    // delete invitation as last step so we are sure if something goes wrong the invitation is still on
+    const bodyDelete = {
+      persontoadd: userEmail,
+      project: projectName
+    };
+    await axios.delete("user/invitetoproject/", bodyDelete, config);
+
+    // dispatch({
+    //   type: LOGIN_SUCCESS,
+    //   payload: res.data
+    // });
+
+    dispatch(loadUser());
+  } catch (err) {
+    dispatch(setAlert("Cannot join project, investigating why...", "danger"));
+  }
+};
+
+export const declineInvitation = (projectName, userEmail) => async dispatch => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    };
+
+    const bodyDelete = {
+      persontoadd: userEmail,
+      project: projectName
+    };
+    await axios.delete(
+      "user/invitetoproject/",
+      JSON.stringify(bodyDelete),
+      config
+    );
+
+    // dispatch({
+    //   type: LOGIN_SUCCESS,
+    //   payload: res.data
+    // });
+
+    dispatch(loadUser());
+  } catch (err) {
+    dispatch(
+      setAlert(
+        "Cannot remove invitation to project, investigating why...",
+        "danger"
+      )
+    );
+  }
+};
+
 export const setCurrentProject = projectName => async dispatch => {
   try {
     // Make sure we re-login with project set, otherwise most of the entity rest api req will fail

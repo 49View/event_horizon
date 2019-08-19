@@ -6,7 +6,7 @@
   --font-size-small: 0.7rem;
   --font-size-extrasmall: 0.55rem;
   --primary-color: rgb(23, 162, 184);
-  --secondary-color: #e76848;
+  --secondary-alt-color: #e76848;
   --primary-color-dark: rgb(20, 100, 112);
   --dark-color: #343a40;
   --light-color: #f4f4f4;
@@ -64,6 +64,18 @@ body {
   grid-template-columns: 15px 260px 990px 15px;
   grid-template-rows: 42px;
   grid-template-areas: ". navbareh navbaruser .";
+}
+
+.projectInvitationGrid {
+  display: grid;
+  grid-template-columns: 90% 10%;
+  grid-template-rows: 100%;
+  grid-template-areas: "projectTitle closeButton";
+}
+
+.closeButton-a {
+  grid-area: closeButton;
+  justify-self: end;
 }
 
 .mainDesktopPageLayout {
@@ -246,7 +258,7 @@ img {
 
 .EntityThumbnailOwner {
   grid-area: EntityThumbnailOwner;
-  color: var(--secondary-color);
+  color: var(--secondary-alt-color);
   align-content: start;
   padding: 0px 8px;
   justify-self: start;
@@ -438,7 +450,7 @@ input#search-bar:hover {
   justify-self: start;
   align-self: center;
   font-size: var(--font-size-one);
-  color: var(--secondary-color);
+  color: var(--secondary-alt-color);
 }
 
 .replaceMat-a {
@@ -804,8 +816,8 @@ input#search-bar:hover {
   color: var(--primary-color);
 }
 
-.text-secondary {
-  color: var(--secondary-color);
+.text-secondary-alt {
+  color: var(--secondary-alt-color);
 }
 
 .text-dark {
@@ -871,6 +883,18 @@ input#search-bar:hover {
 .my-3 {
   margin: 3rem 0;
 }
+.mx {
+  margin: 0 0.5rem;
+}
+.mx-1 {
+  margin: 0 1rem;
+}
+.mx-2 {
+  margin: 0 2rem;
+}
+.mx-3 {
+  margin: 0 3rem;
+}
 
 .rightFloater {
   float: right;
@@ -893,7 +917,7 @@ input#search-bar:hover {
   display: block;
 }
 
-.btn {
+/* .btn {
   display: inline-block;
   background: var(--light-color);
   color: #333;
@@ -905,7 +929,7 @@ input#search-bar:hover {
   transition: opacity 0.2s ease-in;
   outline: none;
   border-radius: 3px;
-}
+} */
 
 .btn2 {
   width: 100%;
@@ -996,7 +1020,7 @@ input#search-bar:hover {
 }
 
 .navdiv-projecttext {
-  color: var(--secondary-color);
+  color: var(--secondary-alt-color);
 }
 
 .user-navbar {
@@ -1006,13 +1030,13 @@ input#search-bar:hover {
   text-align: right;
 }
 
-.btn-primary,
+/* .btn-primary,
 .bg-primary,
 .badge-primary,
 .alert-primary {
   background: var(--primary-color);
   color: #fff;
-}
+} */
 
 .btn-light,
 .bg-light,
@@ -1216,6 +1240,14 @@ input[type="color"]:active {
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+
+.projectManagementContainer {
+  width: 50%;
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid grey;
+  border-radius: 5px;
 }
 
 /* Tooltip container */

@@ -2,19 +2,54 @@ import React, { Fragment, useState } from "react";
 import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import {
+  SplitButton,
+  Dropdown,
+  InputGroup,
+  FormControl,
+  Button
+} from "react-bootstrap";
 import Spinner from "./Spinner";
-import { createProject, setCurrentProject, logout } from "../../actions/auth";
+import {
+  createProject,
+  acceptInvitation,
+  declineInvitation,
+  setCurrentProject,
+  logout
+} from "../../actions/auth";
+import axios from "axios";
+
+const sendInvitationToProject = async (adminuser, project, personToAdd) => {
+  const config = {
+    headers: {
+      "Content-Type": "application/json"
+    }
+  };
+
+  const body = {
+    adminuser: adminuser,
+    project: project,
+    persontoadd: personToAdd
+  };
+  return await axios.put("/user/invitetoproject", body, config);
+};
 
 const DashboardUser = ({
   userstate,
   loading,
   createProject,
+  acceptInvitation,
+  declineInvitation,
   setCurrentProject,
   logout
 }) => {
+  let inviteNameRef = React.useRef(null);
+
   const [newProjectformData, setNewProjectformData] = useState({
     projectNew: ""
   });
+
+  const [currentManagedProject, setCurrentManagedProject] = useState(null);
 
   if (
     userstate.isAuthenticated &&
@@ -37,9 +72,33 @@ const DashboardUser = ({
     createProject(newProjectformData.projectNew);
   };
 
-  const onLoginToProject = e => {
+  const onAcceptInvitation = project => {
+    acceptInvitation(project, userstate.userdata.user.email);
+  };
+
+  const onDeclineInvitation = project => {
+    declineInvitation(project, userstate.userdata.user.email);
+  };
+
+  const invitePerson = async () => {
+    await sendInvitationToProject(
+      userstate.userdata.user.name,
+      currentManagedProject,
+      inviteNameRef.current.value
+    );
+  };
+
+  const closeProjectManagement = () => {
+    setCurrentManagedProject(null);
+  };
+
+  const onManageProject = name => {
+    setCurrentManagedProject(name);
+  };
+
+  const onLoginToProject = (e, name) => {
     e.preventDefault();
-    setCurrentProject(e.target.value);
+    setCurrentProject(name);
   };
 
   const onLogout = e => {
@@ -56,13 +115,32 @@ const DashboardUser = ({
         <div className="yourproject">Your Projects:</div>
         <div className="project-login">
           {userstate.userdata.projects.map(projectObject => (
-            <input
-              type="button"
-              className="btn btn-primary"
-              value={projectObject.project}
-              key={projectObject.project}
-              onClick={e => onLoginToProject(e)}
-            />
+            <Fragment key={`fragment-${projectObject.project}`}>
+              <SplitButton
+                title={projectObject.project}
+                variant="primary"
+                id={`dropdown-split-variants-${projectObject.project}`}
+                key={projectObject.project}
+                onClick={e => onLoginToProject(e, projectObject.project)}
+              >
+                <Dropdown.Item
+                  eventKey="1"
+                  onClick={e => onLoginToProject(e, projectObject.project)}
+                >
+                  Open
+                </Dropdown.Item>
+                <Dropdown.Item
+                  eventKey="2"
+                  onClick={e => onManageProject(projectObject.project)}
+                >
+                  Invite People
+                </Dropdown.Item>
+              </SplitButton>
+              <div
+                key={`dropdown-split-spacer-${projectObject.project}`}
+                className="inliner mx-1"
+              />
+            </Fragment>
           ))}
         </div>
       </Fragment>
@@ -79,6 +157,39 @@ const DashboardUser = ({
       </Fragment>
     );
   }
+
+  const projectManagement = (
+    <div className="projectManagementContainer">
+      <div className="projectInvitationGrid">
+        <div className="lead text-secondary-alt">{currentManagedProject}</div>
+        <div className="closeButton-a">
+          <Button
+            variant="outline-dark"
+            onClick={e => closeProjectManagement()}
+          >
+            <i className="fas fa-times-circle" />
+          </Button>
+        </div>
+      </div>
+      <div className="width100">Send invitation to join:</div>
+      <InputGroup className="mb-3">
+        <InputGroup.Prepend>
+          <InputGroup.Text id="basic-addon1">@</InputGroup.Text>
+        </InputGroup.Prepend>
+        <FormControl
+          placeholder="Username or email address"
+          aria-label="Username"
+          aria-describedby="basic-addon1"
+          ref={inviteNameRef}
+        />
+        <InputGroup.Append>
+          <Button variant="info" onClick={e => invitePerson(e)}>
+            Invite
+          </Button>
+        </InputGroup.Append>
+      </InputGroup>
+    </div>
+  );
 
   const createNewProject = (
     <Fragment>
@@ -100,12 +211,49 @@ const DashboardUser = ({
     </Fragment>
   );
 
+  const invitations = userstate.userdata.invitations;
+
+  const invitationsCode =
+    invitations.length === 0 ? (
+      <span className="normal text-secondary-alt">No invitations yet.</span>
+    ) : (
+      <div className="project-login">
+        {invitations.map(projectObject => (
+          <Fragment key={`fragment-${projectObject.project}`}>
+            <SplitButton
+              title={projectObject.project}
+              variant="info"
+              id={`dropdown-split-variants-${projectObject.project}`}
+              key={projectObject.project}
+            >
+              <Dropdown.Item
+                eventKey="1"
+                onClick={e => onAcceptInvitation(projectObject.project)}
+              >
+                Accept
+              </Dropdown.Item>
+              <Dropdown.Item
+                eventKey="2"
+                onClick={e => onDeclineInvitation(projectObject.project)}
+              >
+                Decline
+              </Dropdown.Item>
+            </SplitButton>
+            <div
+              key={`dropdown-split-spacer-${projectObject.project}`}
+              className="inliner mx-1"
+            />
+          </Fragment>
+        ))}
+      </div>
+    );
+
   const askToJoinExistingProject = (
     <div>
       <div className="yourproject">
         <i className="far fa-envelope-open"> </i> Pending Project invitations
       </div>
-      <span className="normal text-primary">No invitations yet.</span>
+      {invitationsCode}
     </div>
   );
 
@@ -133,6 +281,7 @@ const DashboardUser = ({
           </span>
         </div>
         {userProjects}
+        {currentManagedProject && projectManagement}
         {createNewProject}
         {askToJoinExistingProject}
         {logoff}
@@ -145,6 +294,8 @@ DashboardUser.propTypes = {
   userstate: PropTypes.object,
   loading: PropTypes.bool,
   createProject: PropTypes.func.isRequired,
+  acceptInvitation: PropTypes.func.isRequired,
+  declineInvitation: PropTypes.func.isRequired,
   setCurrentProject: PropTypes.func.isRequired,
   logout: PropTypes.func.isRequired
 };
@@ -156,5 +307,11 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { createProject, setCurrentProject, logout }
+  {
+    createProject,
+    acceptInvitation,
+    declineInvitation,
+    setCurrentProject,
+    logout
+  }
 )(DashboardUser);

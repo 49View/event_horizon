@@ -4,13 +4,14 @@ const globalConfig = require("../config_api.js");
 
 sgMail.setApiKey(globalConfig.SendGrid);
 
-exports.sendMail = async (to, from, subject, text) => {
+exports.sendMail = async (to, from, subject, text, html) => {
 
     const msg = {
         to: to,
         from: from,
         subject: subject,
-        text: text
+        text: text,
+        html: html
     }
 
     console.log("Start sending mail");

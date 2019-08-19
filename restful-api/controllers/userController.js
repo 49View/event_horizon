@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const userModel = require("../models/user");
 const userRoleModel = require("../models/user_role");
 const userStateModel = require("../models/user_state");
+const userProjectInvitationModel = require("../models/user_project_invitation");
 const asyncModelOperations = require("../assistants/asyncModelOperations");
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -50,6 +51,55 @@ const getUserByEmail = async email => {
   dbUser = dbUser.toObject();
 
   return dbUser;
+};
+
+exports.getUserByName = async name => {
+  let dbUser = null;
+  const query = { name: name };
+
+  dbUser = await userModel.findOne(query);
+  if (dbUser !== null) {
+    dbUser = dbUser.toObject();
+    return dbUser;
+  } else {
+    return null;
+  }
+};
+
+exports.checkProjectAlreadyExists = async project => {
+  let dbUser = null;
+  const query = { project: project };
+  dbUser = await userRoleModel.find(query);
+  console.log("IS PROJECT PRENSET ", dbUser);
+  return dbUser !== null && dbUser.length > 0 ? true : false;
+};
+
+exports.addInvitation = async (persontoadd, project) => {
+  let dbUser = null;
+  const query = { persontoadd: persontoadd, project: project };
+
+  dbUser = await userProjectInvitationModel.create(query);
+  dbUser = dbUser.toObject();
+
+  return dbUser;
+};
+
+exports.removeInvitation = async entry => {
+  await userProjectInvitationModel.remove(entry);
+};
+
+exports.getUserInvitationToProject = async (persontocheck, project) => {
+  const query = { persontoadd: persontocheck, project: project };
+
+  const dbUser = await userProjectInvitationModel.findOne(query);
+  return dbUser !== null;
+};
+
+exports.getUserInvites = async userEmail => {
+  const query = { persontoadd: userEmail };
+
+  const invites = await userProjectInvitationModel.find(query);
+  return invites !== null ? invites : [];
 };
 
 const getUserWithRolesByEmailProject = async (email, project) => {
