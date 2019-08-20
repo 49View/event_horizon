@@ -96,14 +96,17 @@ router.put("/invitetoproject", async (req, res, next) => {
     const projectUsers = await userController.getUsersByProject(
       req.body.project
     );
-    const userEmail = await userController.getUserByName(req.body.persontoadd);
+    let userEmail = await userController.getUserByName(req.body.persontoadd);
     if (userEmail === null) {
-      console.log("User you are trying to invite doesn't exist");
-      res.status(202).send({
-        code: 202,
-        msg: "User " + req.body.persontoadd + " doesn't exist in here"
-      });
-      return;
+      userEmail = await userController.getUserByEmail(req.body.persontoadd);
+      if (userEmail === null) {
+        console.log("User you are trying to invite doesn't exist");
+        res.status(202).send({
+          code: 202,
+          msg: "User " + req.body.persontoadd + " doesn't exist in here"
+        });
+        return;
+      }
     }
     // Check if the user is already part of the project
     const isAlreadyInThere = projectUsers.reduce((present, e) => {

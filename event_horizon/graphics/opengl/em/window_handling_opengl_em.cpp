@@ -3,8 +3,7 @@
 #include "../../platform_graphics.hpp"
 
 #include "../gl_util.h"
-#include "core/util.h"
-#include "core/configuration/app_options.h"
+#include <core/util.h>
 
 namespace WindowHandling {
 
@@ -17,18 +16,22 @@ namespace WindowHandling {
     }
 
     void reinitializeWindowWithSize( int width, int height ) {
-        glfwSetWindowSize( window, width, height );
+//        glfwSetWindowSize( window, width, height );
 
-//        glfwDestroyWindow( window );
-//        window = glfwCreateWindow( width, height, "Sixthview", NULL, NULL );
-//        glfwMakeContextCurrent( window );
+        glfwDestroyWindow( window );
+        window = glfwCreateWindow( width, height, "Sixthview", NULL, NULL );
+        glfwMakeContextCurrent( window );
     }
 
     void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
 
         double width{ 1280.0 };
         double height{ 720.0 };
-        emscripten_get_element_css_size( nullptr, &width, &height );
+        emscripten_get_element_css_size( "#canvas", &width, &height );
+        width*=DevicePixelRatio();
+        height*=DevicePixelRatio();
+        AppGlobals::getInstance().setScreenSizei( {static_cast<int>(width), static_cast<int>(height)} );
+
 //        emscripten_set_canvas_element_size( nullptr, int(width), int(height));
         LOGR( "GetWidnowSize %f %f", width, height );
 
@@ -91,6 +94,8 @@ namespace WindowHandling {
 //        }
 
         initImGUI();
+
+        rr.setForcedFrameBufferSize( getScreenSizei );
     }
 
 }

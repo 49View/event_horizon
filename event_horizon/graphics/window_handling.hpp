@@ -11,6 +11,10 @@ class TextInput;
 class MouseInput;
 class Renderer;
 
+struct WHDevice {
+    static float devicePixelRatio;
+};
+
 namespace WindowHandling {
 	void initializeWindow( uint64_t flags, Renderer& rr );
 	void reinitializeWindowWithSize( int width, int height );
@@ -21,6 +25,13 @@ namespace WindowHandling {
 	void enableInputCallbacks();
 	void disableInputCallbacks();
 	bool isInputEnabled();
+
+    static inline float DevicePixelRatio() {
+        return WHDevice::devicePixelRatio;
+    }
+    static inline void DevicePixelRatio(float _pr ) {
+        WHDevice::devicePixelRatio = _pr;
+    }
 };
 
 namespace WH = WindowHandling;

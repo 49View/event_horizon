@@ -33,9 +33,9 @@ const EntityDragAndImport = ({ addEntity, group, project, user }) => {
     <Fragment>
       <div {...getRootProps({ className: "dropzone" })}>
         <input {...getInputProps()} />
-        <p>
+        <span>
           <i className="fas fa-plus-circle" /> &nbsp; Add new {group}
-        </p>
+        </span>
       </div>
     </Fragment>
   );

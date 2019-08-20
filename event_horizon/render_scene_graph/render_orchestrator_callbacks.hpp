@@ -5,8 +5,14 @@
 #pragma once
 
 #ifdef USE_GLFW
+
+struct ResizeData {
+    static Vector2i callbackResizeFrameBuffer;
+    static Vector2i callbackResizeFrameBufferOld;
+};
+
 static inline Vector2i callbackResizeWindow = Vector2i(-1, -1);
-static inline Vector2i callbackResizeFrameBuffer = Vector2i(-1, -1);
+static inline Vector2i callbackResizeFrameBuffer = Vector2i(-2, -2);
 
 static inline void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
     ASSERT( count > 0 );
@@ -22,7 +28,7 @@ static inline void GResizeWindowCallback( [[maybe_unused]] GLFWwindow *, int w, 
 }
 
 static inline void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, int w, int h ) {
-    callbackResizeFrameBuffer = Vector2i{w, h};
+    ResizeData::callbackResizeFrameBuffer = Vector2i{w, h};
 }
 #endif
 
@@ -43,12 +49,15 @@ inline void RenderOrchestrator::resizeCallbacks() {
         callbackResizeWindow = Vector2i{-1, -1};
     }
 
-    if ( callbackResizeFrameBuffer.x() > 0 && callbackResizeFrameBuffer.y() > 0 ) {
-        WH::resizeWindow( callbackResizeFrameBuffer );
+//    LOGR("Resizing window: [%d,%d]", ResizeData::callbackResizeFrameBuffer.x(), ResizeData::callbackResizeFrameBuffer.y() );
+    if (! (ResizeData::callbackResizeFrameBuffer == getScreenSizei) &&
+            ! (ResizeData::callbackResizeFrameBuffer == Vector2i::ZERO)) {
+        LOGR("Resizing window: [%d,%d]", ResizeData::callbackResizeFrameBuffer.x(), ResizeData::callbackResizeFrameBuffer.y() );
+        WH::resizeWindow( ResizeData::callbackResizeFrameBuffer );
         WH::gatherMainScreenInfo();
-        rr.resetDefaultFB(callbackResizeFrameBuffer);
-        resizeCallback( callbackResizeFrameBuffer );
-        callbackResizeFrameBuffer = Vector2i{-1, -1};
+        rr.resetDefaultFB(ResizeData::callbackResizeFrameBuffer);
+        resizeCallback( ResizeData::callbackResizeFrameBuffer );
+        AppGlobals::getInstance().setScreenSizei( ResizeData::callbackResizeFrameBuffer );
     }
 #endif
 }

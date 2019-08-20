@@ -757,3 +757,4 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
     VPL( rds.bucketIndex, vp );
     return vp;
 }
+

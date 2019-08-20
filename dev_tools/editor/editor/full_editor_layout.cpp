@@ -31,7 +31,7 @@ void EditorBackEnd::activatePostLoad() {
 //    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture,
 //                                        sg.getHash<RawImage>( "skybox,equirectangular,park,generic,001" ) } );
 
-    rsg.useSkybox( true );
+    rsg.useSkybox( false );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
     rsg.changeTime( "winter noon" );
     rsg.setRigCameraController<CameraControlOrbit3d>();
@@ -45,7 +45,7 @@ void EditorBackEnd::activatePostLoad() {
 
 void EditorBackEnd::activateImpl() {
 
-    appData.addRawImage( "skybox,equirectangular,park,generic,001" );
+//    appData.addRawImage( "skybox,equirectangular,park,generic,001" );
 
     loadSceneEntities();
 

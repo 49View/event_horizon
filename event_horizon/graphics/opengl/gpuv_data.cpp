@@ -32,6 +32,7 @@ void GPUVData::programStart(  Program* _program ) const {
 
 void GPUVData::draw() const {
     GLCALL( glBindVertexArray( vao ) );
+//    LOGRS( "Drawing " << numIndices << " with VAO, IBO: " << vao << ", " << ibo << "primitive: " << primitveType );
     if ( ibo == 0 ) {
         GLCALL( glDrawArrays( primitveType, 0, numIndices ) );
     } else {

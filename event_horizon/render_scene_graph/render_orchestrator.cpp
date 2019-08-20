@@ -20,6 +20,9 @@
 std::vector<std::string> RenderOrchestrator::callbackPaths;
 std::vector<PresenterUpdateCallbackFunc> RenderOrchestrator::sUpdateCallbacks;
 
+Vector2i ResizeData::callbackResizeFrameBuffer = Vector2i::ZERO;
+Vector2i ResizeData::callbackResizeFrameBufferOld = Vector2i::ZERO;
+
 void RenderOrchestrator::setDragAndDropFunction( DragAndDropFunction dd ) {
     dragAndDropFunc = dd;
 }
@@ -310,9 +313,12 @@ void RenderOrchestrator::addBox( const std::string& _name, float _l, float _r, f
 }
 
 void RenderOrchestrator::resizeCallback( const Vector2i& _resize ) {
+    LOGR("ResizeCallbackViewports Start");
     for ( auto& [k,v] : boxes ) {
+        LOGRS("Resizing " << k);
         orBitWiseFlag( v.flags, BoxFlags::Resize );
         if ( getRig(k) ) {
+            LOGRS("Resizing Rig " << k);
             auto r = v.updateAndGetRect();
             rr.getTarget( k )->resize( r );
             sg.CM().get(k)->setViewport( r );

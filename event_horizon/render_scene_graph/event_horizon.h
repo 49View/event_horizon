@@ -17,6 +17,7 @@
 #include <core/resources/resource_manager.hpp>
 
 #ifdef __EMSCRIPTEN__
+#include <graphics/window_handling.hpp>
 #include <render_scene_graph/platform/em/runloop_graphics_em.h>
 #else
 #ifdef ANDROID
@@ -45,10 +46,12 @@ public:
         }
 #endif
 #ifdef __EMSCRIPTEN__
-        if ( argc >= 3 ) {
+        if ( argc >= 4 ) {
             LOGR("Setting user token and sessionID ok");
+            LOGRS("DevicePixelRatio: " << argv[3] );
             Http::userToken(argv[1]);
             Http::sessionId(argv[2]);
+            WH::DevicePixelRatio( std::stof(std::string(argv[3])));
             Socket::createConnection();
         } else {
             if constexpr ( BE::hasLF() ) {

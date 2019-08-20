@@ -197,6 +197,9 @@ public:
     bool isLoading() const;
     void setLoadingFlag( bool _value );
     void setProgressionTiming( float _progress );
+
+    const Vector2i& getForcedFrameBufferSize() const;
+    void setForcedFrameBufferSize( const Vector2i& mForcedFrameBufferSize );
 protected:
 	void clearCommandList();
 	size_t renderCBList();
@@ -223,6 +226,7 @@ protected:
 	size_t mDrawCallsPerFrame = 0;
 	bool bInvalidated = false;
     bool bIsLoading = true;
+    Vector2i mForcedFrameBufferSize{-1, -1};
 
 	std::vector<std::shared_ptr<RLTarget>> mTargets;
 	std::shared_ptr<CommandBufferList> mCommandBuffers;

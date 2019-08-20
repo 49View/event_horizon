@@ -1,4 +1,4 @@
-#include "layout_sh.glsl"
+#include "layout_normal.glsl"
 #include "camera_uniforms.glsl"
 
 uniform mat4 u_modelMatrix;

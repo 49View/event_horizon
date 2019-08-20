@@ -132,6 +132,7 @@ export const loadWasm = project => {
       const wasmScript = content.data;
       window.wasmBinary = wasmBinary;
       window.wasmScript = wasmScript;
+
       dispatch(wasmLoadSuccess());
     } catch (ex) {
       console.log(ex);
@@ -189,7 +190,11 @@ export const loadWasmComplete = async (
   }
 
   window.Module = {
-    arguments: [userToken, userSessionId],
+    arguments: [
+      userToken,
+      userSessionId,
+      (window.devicePixelRatio || 1).toString()
+    ],
     print: text => {
       console.log("W: " + text);
     },
@@ -215,7 +220,8 @@ export const loadWasmComplete = async (
     },
     destroy: cpp => {
       console.log("destroy");
-    }
+    },
+    doNotCaptureKeyboard: true
   };
 
   const s = document.createElement("script");

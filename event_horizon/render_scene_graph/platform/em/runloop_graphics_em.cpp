@@ -8,6 +8,7 @@
 
 //#include "runloop_graphics_em.h"
 #include <emscripten/bind.h>
+#include <graphics/window_handling.hpp>
 #include <render_scene_graph/runloop_graphics.h>
 #include <render_scene_graph/render_orchestrator.h>
 #include <render_scene_graph/render_orchestrator_callbacks.hpp>
@@ -45,9 +46,22 @@ EMSCRIPTEN_BINDINGS(my_module) {
 
 int em_resize_callback(int eventType, const EmscriptenUiEvent *uiEvent, void *userData) {
 	callbackResizeFrameBuffer = Vector2i{ uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight };
-//	LOGR("documentBodyClient size %d, %d: ", uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight );
-//	LOGR("windowInner size %d, %d: ", uiEvent->windowInnerWidth, uiEvent->windowInnerHeight );
-//	LOGR("windowOuter size %d, %d: ", uiEvent->windowOuterWidth, uiEvent->windowOuterHeight );
+	LOGR("documentBodyClient size %d, %d: ", uiEvent->documentBodyClientWidth, uiEvent->documentBodyClientHeight );
+	LOGR("windowInner size %d, %d: ", uiEvent->windowInnerWidth, uiEvent->windowInnerHeight );
+	LOGR("windowOuter size %d, %d: ", uiEvent->windowOuterWidth, uiEvent->windowOuterHeight );
+    return true;
+}
+
+int em_focus_callback(int eventType, const EmscriptenFocusEvent  *uiEvent, void *userData) {
+
+    double width{ 1280.0 };
+    double height{ 720.0 };
+    emscripten_get_element_css_size( nullptr, &width, &height );
+    GResizeFramebufferCallback( nullptr, static_cast<int>(width*WH::DevicePixelRatio()), static_cast<int>(height*WH::DevicePixelRatio()) );
+
+//    LOGRS("Canvas sizes " << callbackResizeFrameBuffer.x() << "," << callbackResizeFrameBuffer.y() );
+//    LOGRS("Focus Callback, type: " << eventType << " on element ID: " << uiEvent->id << " and nodeName: " << uiEvent->nodeName);
+
     return true;
 }
 
@@ -56,7 +70,8 @@ void main_loop_em() {
 }
 
 void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
-    emscripten_set_resize_callback(nullptr, nullptr, true, em_resize_callback );
+    emscripten_set_resize_callback("#canvas", nullptr, true, em_resize_callback );
+    emscripten_set_focus_callback(NULL, nullptr, true, em_focus_callback );
     rl.setBackEnd(std::move(_be));
     rl.init( initFlags );
     emscripten_set_main_loop( main_loop_em, 0, 0 );

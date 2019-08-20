@@ -101,7 +101,16 @@ StreamingMediator& Renderer::SSM() {
     return ssm;
 }
 
+const Vector2i& Renderer::getForcedFrameBufferSize() const {
+    return mForcedFrameBufferSize;
+}
+
+void Renderer::setForcedFrameBufferSize( const Vector2i& mForcedFrameBufferSize ) {
+    Renderer::mForcedFrameBufferSize = mForcedFrameBufferSize;
+}
+
 void Renderer::resetDefaultFB( const Vector2i& forceSize ) {
+    LOGR("ResetDefaultFB with [%d,%d]", forceSize.x(), forceSize.y());
     mDefaultFB = FrameBufferBuilder{ *this, "default" }.size( forceSize ).build();
 }
 
@@ -113,7 +122,7 @@ void Renderer::init() {
     rmm = std::make_shared<RenderMaterialManager>( *this );
     mCommandBuffers = std::make_shared<CommandBufferList>( *this );
 
-    resetDefaultFB();
+    resetDefaultFB(mForcedFrameBufferSize);
     rcm.init();
     am.init();
     sm->loadShaders();

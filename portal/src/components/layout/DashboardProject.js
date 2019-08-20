@@ -72,15 +72,25 @@ const DashboardProject = ({
 
   const entityUpdateDivVisible = currentEntity && group !== "app";
 
-  const canvasSizeX = entityUpdateDivVisible ? "522px" : "480px";
-  const canvasSizeY = entityUpdateDivVisible ? "522px" : "270px";
+  const canvasSizeXNum = entityUpdateDivVisible ? 522 : 480;
+  const canvasSizeYNum = entityUpdateDivVisible ? 522 : 270;
+
+  const canvasSizeX = canvasSizeXNum.toString() + "px";
+  const canvasSizeY = canvasSizeYNum.toString() + "px";
+
+  const canvasClientSizeX =
+    (canvasSizeXNum * (window.devicePixelRatio || 1)).toString() + "px";
+  const canvasClientSizeY =
+    (canvasSizeYNum * (window.devicePixelRatio || 1)).toString() + "px";
+
   const canvasPadding = entityUpdateDivVisible ? "5px" : "0px";
+  const canvasMargin = entityUpdateDivVisible ? "7px" : "7px";
 
   const canvasStyle = {
     visibility: canvasVisibility,
     width: canvasSizeX,
     height: canvasSizeY,
-    margin: "7px",
+    margin: canvasMargin,
     padding: canvasPadding
   };
 
@@ -100,6 +110,8 @@ const DashboardProject = ({
       {entityUpdateDivVisible && <EntityUpdateContent />}
       <div className="EntryEditorRender">
         <canvas
+          width={canvasClientSizeX}
+          height={canvasClientSizeY}
           style={canvasStyle}
           ref={canvas}
           className="Canvas"

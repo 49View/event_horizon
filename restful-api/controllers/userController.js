@@ -43,19 +43,26 @@ const getUsersByProject = async project => {
   return await asyncModelOperations.aggregate(userRoleModel, query);
 };
 
-const getUserByEmail = async email => {
+const getUserByEmailInternal = async email => {
   let dbUser = null;
-  const query = { email: email };
+  const query = { email: { $regex: email + "$", $options: "i" } };
 
   dbUser = await userModel.findOne(query);
-  dbUser = dbUser.toObject();
+  if (dbUser !== null) {
+    dbUser = dbUser.toObject();
+    return dbUser;
+  } else {
+    return null;
+  }
+};
 
-  return dbUser;
+exports.getUserByEmail = async email => {
+  return await getUserByEmailInternal(email);
 };
 
 exports.getUserByName = async name => {
   let dbUser = null;
-  const query = { name: name };
+  const query = { name: { $regex: name + "$", $options: "i" } };
 
   dbUser = await userModel.findOne(query);
   if (dbUser !== null) {
@@ -298,7 +305,7 @@ exports.getUserByIdProject = async (id, project) => {
 };
 
 const addRolesForProject = async (project, email, roles) => {
-  const dbUser = await getUserByEmail(email);
+  const dbUser = await getUserByEmailInternal(email);
   const query = { $and: [{ userId: dbUser._id }, { project: project }] };
   const update = { $addToSet: { roles: { $each: roles } } };
   const options = { upsert: true };
@@ -306,7 +313,7 @@ const addRolesForProject = async (project, email, roles) => {
 };
 
 exports.removeRolesForProject = async (project, email, roles) => {
-  const dbUser = await getUserByEmail(email);
+  const dbUser = await getUserByEmailInternal(email);
   const query = { $and: [{ userId: dbUser._id }, { project: project }] };
   const update = { $pull: { roles: { $in: roles } } };
   const options = {};
