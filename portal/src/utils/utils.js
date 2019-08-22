@@ -1,5 +1,18 @@
 import React from "react";
 
+export const getFileName = pathname => {
+  return pathname
+    .split("\\")
+    .pop()
+    .split("/")
+    .pop();
+};
+
+export const getFileNameOnlyNoExt = pathname => {
+  let ret = getFileName(pathname);
+  return ret.substring(0, ret.lastIndexOf(".")) || ret;
+};
+
 export const checkCommonFileExtension = (group, ext) => {
   if (group === "geom") {
     if (ext === "glb" || ext === "fbx") return true;

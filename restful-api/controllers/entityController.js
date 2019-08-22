@@ -33,6 +33,20 @@ const getMetadataFromBody = (checkGroup, checkRaw, req) => {
   return metadata;
 };
 
+const createMetadataStartup = (filename, username, useremail) => {
+  const tags = filename.split(/[\s,._]+/);
+  return (metadata = {
+    creator: {
+      name: username,
+      email: useremail
+    },
+    name: filename,
+    thumb: "",
+    tags: tags,
+    deps: []
+  });
+};
+
 const createEntityFromMetadata = async (
   content,
   project,
@@ -69,13 +83,17 @@ const createEntityFromMetadata = async (
         // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
       }
 
-      cleanMetadata.thumb = await thumbFromContent(
-        content,
-        groupThumbnailCalcRule(group)
-      );
+      console.log("Filename: ", savedFilename);
+
+      // cleanMetadata.thumb = await thumbFromContent(
+      //   content,
+      //   groupThumbnailCalcRule(group)
+      // );
 
       // Hashing of content
       metadataAssistant.udpateMetadata(cleanMetadata, content);
+
+      console.log("Metadata udated: ", cleanMetadata);
 
       // filePath = savedFilename["name"];
       await fsController.cloudStorageFileUpload(
@@ -83,6 +101,8 @@ const createEntityFromMetadata = async (
         filePath,
         "eventhorizonentities"
       );
+
+      console.log("File udated: ", filePath);
       //Create entity
       const entity = await createEntity(
         project,
@@ -241,16 +261,18 @@ const deleteEntity = async entityId => {
 };
 
 const deleteEntityComplete = async (project, entity) => {
-  currentEntity = entity;
-  console.log("[INFO] deleting entity " + currentEntity.metadata.name);
-  const group = currentEntity.group;
-  //Remove current file from S3
-  await fsController.cloudStorageDelete(
-    module.exports.getFilePath(project, group, currentEntity.metadata.name),
-    "eventhorizonentities"
-  );
-  //Delete existing entity
-  await module.exports.deleteEntity(currentEntity._id);
+  if (entity) {
+    currentEntity = entity;
+    console.log("[INFO] deleting entity " + currentEntity.metadata.name);
+    const group = currentEntity.group;
+    //Remove current file from S3
+    await fsController.cloudStorageDelete(
+      module.exports.getFilePath(project, group, currentEntity.metadata.name),
+      "eventhorizonentities"
+    );
+    //Delete existing entity
+    await module.exports.deleteEntity(currentEntity._id);
+  }
 };
 
 const getEntityByIdProject = async (project, entityId, returnPublic) => {
@@ -528,6 +550,7 @@ const getEntityDeps = async (project, group, deps) => {
 };
 
 module.exports = {
+  createMetadataStartup: createMetadataStartup,
   getMetadataFromBody: getMetadataFromBody,
   createEntityFromMetadata: createEntityFromMetadata,
   createEntitiesFromContainer: createEntitiesFromContainer,

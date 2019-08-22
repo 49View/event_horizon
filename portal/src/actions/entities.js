@@ -20,6 +20,7 @@ import {
 } from "./types";
 import store from "../store";
 import { wscSend } from "../utils/webSocketClient";
+import { getFileNameOnlyNoExt } from "../utils/utils";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
@@ -284,6 +285,21 @@ export const deleteEntity = id => async dispatch => {
   }
 };
 
+const postEntityMaker = (fileName, project, group, uname, uemail) => {
+  return (
+    "entities/" +
+    fileName +
+    "/" +
+    project +
+    "/" +
+    group +
+    "/" +
+    uname +
+    "/" +
+    uemail
+  );
+};
+
 // Add post
 export const addEntity = (
   fileName,
@@ -300,39 +316,37 @@ export const addEntity = (
     };
     let res = null;
     if (group === "geom" || group === "material") {
-      const urlEnc = encodeURIComponent("elaborate/geom/" + fileName);
-      console.log("Url encoded resource: ", urlEnc);
-      res = await axios.post(
-        "fs/entity_to_elaborate/" + urlEnc,
-        fileData,
-        octet
-      );
+      const fileext = fileName.split(".").pop();
+      if (group === "material" && fileext === "zip") {
+        const fname = getFileNameOnlyNoExt(fileName);
+        await axios.post(
+          "/entities/multizip/" + fname + "/" + group,
+          fileData,
+          octet
+        );
+      } else {
+        const urlEnc = encodeURIComponent(
+          "elaborate/" + group + "/" + fileName
+        );
+        console.log("Url encoded resource: ", urlEnc);
+        res = await axios.post(
+          "fs/entity_to_elaborate/" + group + "/" + urlEnc,
+          fileData,
+          octet
+        );
+      }
     } else {
       res = await axios.post(
-        "entities/" +
-          fileName +
-          "/" +
-          project +
-          "/" +
-          group +
-          "/" +
-          user.name +
-          "/" +
-          user.email,
+        postEntityMaker(fileName, project, group, user.name, user.email),
         fileData,
         octet
       );
     }
 
-    // const config = {
-    //   headers: {
-    //     "Content-Type": "application/json"
-    //   }
-    // };
-    // const res = await axios.post("/entities", entity, config);
     const fullres = await axios.get(`/entities/content/byId/${res.data._id}`, {
       responseType: "arraybuffer"
     });
+
     const entityFull = {
       entity: res.data,
       blobURL: URL.createObjectURL(new Blob([fullres.data]))

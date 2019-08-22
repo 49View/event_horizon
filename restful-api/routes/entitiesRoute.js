@@ -6,6 +6,8 @@ const metaAssistant = require("../assistants/metadataAssistant");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const zlib = require("zlib");
+const Base64 = require("js-base64").Base64;
+const JSZip = require("jszip");
 
 router.get("/content/byId/:id", async (req, res, next) => {
   try {
@@ -254,22 +256,13 @@ router.post(
     const project = req.params.project;
     const username = req.params.username;
     const useremail = req.params.useremail;
+
     try {
-      const tags = filename.split(/[\s,._]+/);
-      const metadata = {
-        group: group,
-        isPublic: false,
-        isRestricted: false,
-        creator: {
-          name: username,
-          email: useremail
-        },
-        name: filename,
-        thumb: "",
-        tags: tags,
-        deps: []
-        // raw: encode(req.body)
-      };
+      const metadata = entityController.createMetadataStartup(
+        filename,
+        username,
+        useremail
+      );
 
       const entity = await entityController.createEntityFromMetadata(
         req.body,
@@ -293,6 +286,137 @@ router.post(
     }
   }
 );
+
+const getFileName = pathname => {
+  return pathname
+    .split("\\")
+    .pop()
+    .split("/")
+    .pop();
+};
+
+const checkCommonFileExtension = (group, ext) => {
+  if (group === "geom") {
+    if (ext === "glb" || ext === "fbx") return true;
+  } else if (group === "material") {
+    if (ext === "zip") return true;
+  } else if (group === "image") {
+    if (
+      ext === "jpeg" ||
+      ext === "png" ||
+      ext === "jpg" ||
+      ext === "exr" ||
+      ext === "tga" ||
+      ext === "tiff" ||
+      ext === "gif"
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const checkFileExtensionsOnEntityGroup = (group, filename) => {
+  const ext = filename
+    .split(".")
+    .pop()
+    .toLowerCase();
+
+  return checkCommonFileExtension(group, ext);
+};
+
+const decompress = async (zip, project, username, useremail) => {
+  let fileList = [];
+  let deps = [];
+  zip.forEach((relativePath, zipEntry) => {
+    if (zipEntry.dir === false) {
+      fileList.push(zipEntry);
+    }
+  });
+
+  for (let zipEntry of fileList) {
+    const content = await zipEntry.async("uint8array");
+    if (checkFileExtensionsOnEntityGroup("image", zipEntry.name)) {
+      const depGruop = "image";
+
+      const metadatadep = entityController.createMetadataStartup(
+        getFileName(zipEntry.name),
+        username,
+        useremail
+      );
+
+      const entity = await entityController.createEntityFromMetadata(
+        Buffer.from(content),
+        project,
+        depGruop,
+        false,
+        false,
+        metadatadep
+      );
+
+      deps.push(entity);
+    }
+  }
+
+  return deps;
+};
+
+router.post("/multizip/:filename/:group", async (req, res, next) => {
+  try {
+    const project = req.user.project;
+    const filename = req.params.filename;
+    const group = req.params.group;
+    const username = req.user.name;
+    const useremail = req.user.email;
+
+    let metadata = entityController.createMetadataStartup(
+      filename,
+      username,
+      useremail
+    );
+
+    const zip = await new JSZip().loadAsync(req.body);
+    let deps = await decompress(zip, project, username, useremail);
+
+    const material = {
+      mKey: filename,
+      values: {
+        mType: "PN_SH",
+        mStrings: [
+          {
+            key: "diffuseTexture",
+            value: deps[0].metadata.hash
+          }
+        ]
+      }
+    };
+    metadata.deps = [
+      {
+        key: "image",
+        value: [deps[0].metadata.hash]
+      }
+    ];
+
+    const entity = await entityController.createEntityFromMetadata(
+      JSON.stringify(material),
+      project,
+      group,
+      false,
+      false,
+      metadata
+    );
+
+    if (entity !== null) {
+      res.status(201).json(entity);
+      res.end();
+    } else {
+      throw "[post.entity] Entity created is null";
+    }
+  } catch (ex) {
+    console.log(ex);
+  }
+});
 
 router.post("/multi", async (req, res, next) => {
   try {

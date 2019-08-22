@@ -18,6 +18,14 @@ const EntityDragAndImport = ({ addEntity, group, project, user }) => {
         reader.onabort = () => console.log("file reading was aborted");
         reader.onerror = () => console.log("file reading has failed");
         reader.onload = e => {
+          console.log(
+            "Adding ",
+            acceptedFiles[0].name,
+            " as ",
+            group,
+            " to ",
+            project
+          );
           addEntity(acceptedFiles[0].name, reader.result, group, project, user);
         };
         acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));

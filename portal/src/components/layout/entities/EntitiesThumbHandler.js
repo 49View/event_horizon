@@ -9,9 +9,9 @@ import store from "../../../store";
 
 const EntitiesThumbHandler = ({ currentEntity, entries, onClicked }) => {
   useEffect(() => {
-    if (entries.length === 1 && !currentEntity) {
-      store.dispatch(onClicked(entries[0]));
-    }
+    // if (entries.length === 1 && !currentEntity) {
+    //   store.dispatch(onClicked(entries[0]));
+    // }
   }, [entries, currentEntity, onClicked]);
 
   // console.log("###Current entity: ", currentEntity);
