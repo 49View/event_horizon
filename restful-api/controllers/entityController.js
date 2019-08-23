@@ -34,7 +34,7 @@ const getMetadataFromBody = (checkGroup, checkRaw, req) => {
 };
 
 const createMetadataStartup = (filename, username, useremail) => {
-  const tags = filename.split(/[\s,._]+/);
+  const tags = filename.split(/[\s,._-]+/);
   return (metadata = {
     creator: {
       name: username,
@@ -53,7 +53,9 @@ const createEntityFromMetadata = async (
   group,
   isPublic,
   isRestricted,
-  cleanMetadata
+  cleanMetadata,
+  sendBroadcast,
+  presetThumb = null
 ) => {
   try {
     let filePath = getFilePath(project, group, cleanMetadata.name);
@@ -83,7 +85,20 @@ const createEntityFromMetadata = async (
         // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
       }
 
-      console.log("Filename: ", savedFilename);
+      // const gtr = groupThumbnailCalcRule(group);
+      // const dep0Entity = await getEntityByHash(
+      //   deps[0].metadata.hash,
+      //   project
+      // );
+      // const content = await getEntityContent(
+      //   dep0Entity._id,
+      //   dep0Entity.project
+      // );
+      cleanMetadata.thumb = await thumbFromContent(
+        content,
+        presetThumb,
+        groupThumbnailCalcRule(group)
+      );
 
       // cleanMetadata.thumb = await thumbFromContent(
       //   content,
@@ -93,8 +108,6 @@ const createEntityFromMetadata = async (
       // Hashing of content
       metadataAssistant.udpateMetadata(cleanMetadata, content);
 
-      console.log("Metadata udated: ", cleanMetadata);
-
       // filePath = savedFilename["name"];
       await fsController.cloudStorageFileUpload(
         content,
@@ -102,9 +115,8 @@ const createEntityFromMetadata = async (
         "eventhorizonentities"
       );
 
-      console.log("File udated: ", filePath);
       //Create entity
-      const entity = await createEntity(
+      let entity = await createEntity(
         project,
         group,
         isPublic,
@@ -117,7 +129,9 @@ const createEntityFromMetadata = async (
           msg: "entityAdded",
           data: entity
         };
-        socketController.sendMessageToAllClients(JSON.stringify(json));
+        if (sendBroadcast) {
+          socketController.sendMessageToAllClients(JSON.stringify(json));
+        }
       }
 
       return entity;
@@ -344,34 +358,35 @@ const groupThumbnailSourceContent = async (entity, gtr) => {
   }
 };
 
-const thumbFromContent = async (content, gtr) => {
+const thumbFromContent = async (content, presetThumb, gtr) => {
   let thumbBuff = null;
   if (gtr === gtr_content_vector) {
     thumbBuff = content;
-  } else if (gtr === gtr_content_image || gtr === gtr_dep0_image) {
+  } else if (gtr === gtr_content_image) {
     thumbBuff = await sharp(content)
       .resize(64, 64)
       .toFormat("jpg")
       .toBuffer();
+  } else if (gtr === gtr_dep0_image) {
+    thumbBuff = presetThumb;
   }
   return thumbBuff === null ? "" : thumbBuff.toString("base64");
 };
 
-const upsertThumb = async (entityId, gtr) => {
+const upsertThumb = async entityId => {
   const entity = await getEntityById(entityId);
   if (entity.metadata.thumb.length == 0) {
-    const content = await groupThumbnailSourceContent(entity, gtr);
-
     try {
-      entity.metadata.thumb = await thumbFromContent(content.Body, gtr);
-      await updateById(entityId, entity);
-      return 201;
+      const gtr = groupThumbnailCalcRule(entity.group);
+      const content = await groupThumbnailSourceContent(entity, gtr);
+      entity.metadata.thumb = await thumbFromContent(content.Body, null, gtr);
+      return await updateById(entityId, entity);
     } catch (error) {
       console.log("Upsert thumb on id " + entityId + " failed. Cause:" + error);
-      return 204;
+      return null;
     }
   }
-  return 204;
+  return {};
 };
 
 const upsertTags = async (entityId, tags) => {
@@ -564,6 +579,7 @@ module.exports = {
   upsertTags: upsertTags,
   groupThumbnailCalcRule: groupThumbnailCalcRule,
   upsertThumb: upsertThumb,
+  thumbFromContent: thumbFromContent,
   deleteEntity: deleteEntity,
   deleteEntityComplete: deleteEntityComplete,
   getEntityByIdProject: getEntityByIdProject,

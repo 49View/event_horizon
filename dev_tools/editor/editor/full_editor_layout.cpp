@@ -19,6 +19,8 @@
 
 scene_t scene{ 0 };
 
+const std::string testLoad = "rock";
+
 void EditorBackEnd::activatePostLoad() {
 
     allCallbacksEntitySetup();
@@ -41,11 +43,13 @@ void EditorBackEnd::activatePostLoad() {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
 
+    sg.GB<GT::Shape>( ShapeType::Sphere, GT::M( testLoad ));
 }
 
 void EditorBackEnd::activateImpl() {
 
 //    appData.addRawImage( "skybox,equirectangular,park,generic,001" );
+    appData.addMaterial( testLoad );
 
     loadSceneEntities();
 
@@ -73,7 +77,6 @@ void EditorBackEnd::activateImpl() {
 
 //    rsg.skyBoxDeltaInterpolation()->value = 0.0f;
 //    sg.GB<GT::Shape>( ShapeType::Cube, V3f::UP_AXIS*0.32, GT::Scale( 0.6f ) );
-//    sg.GB<GT::Shape>( ShapeType::Cube, GT::Scale( 5.f, 0.01f, 5.f ) );
 
 //    sg.load<Geom>( "bed", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );

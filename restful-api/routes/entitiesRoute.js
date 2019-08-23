@@ -92,7 +92,6 @@ router.get("/:group/:tags", async (req, res, next) => {
               const depData = await fsController.cloudStorageEntityGet(
                 depFilePath
               );
-              console.log(dep.metadata.name, depData.ContentLength);
               tarPack.entry(
                 { name: dep.metadata.name, size: depData.ContentLength },
                 depData["Body"]
@@ -105,7 +104,6 @@ router.get("/:group/:tags", async (req, res, next) => {
             }
           }
         }
-        console.log(JSON.stringify(tarDict));
         tarPack.entry({ name: "catalog" }, JSON.stringify(tarDict));
 
         tarPack.finalize();
@@ -190,7 +188,7 @@ router.get("/metadata/list/:group/:project", async (req, res, next) => {
 router.put("/metadata/upserthumb/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
-    res.sendStatus(await entityController.upsertThumb(entityId));
+    res.send(await entityController.upsertThumb(entityId));
   } catch (ex) {
     console.log("ERROR upserthumb: ", ex);
     res.sendStatus(400);
@@ -270,7 +268,9 @@ router.post(
         group,
         false,
         false,
-        metadata
+        metadata,
+        true,
+        null
       );
 
       if (entity !== null) {
@@ -352,7 +352,9 @@ const decompress = async (zip, project, username, useremail) => {
         depGruop,
         false,
         false,
-        metadatadep
+        metadatadep,
+        false,
+        null
       );
 
       deps.push(entity);
@@ -387,6 +389,10 @@ router.post("/multizip/:filename/:group", async (req, res, next) => {
           {
             key: "diffuseTexture",
             value: deps[0].metadata.hash
+          },
+          {
+            key: "normalTexture",
+            value: "normal"
           }
         ]
       }
@@ -398,13 +404,21 @@ router.post("/multizip/:filename/:group", async (req, res, next) => {
       }
     ];
 
+    const presetThumbEntity = await entityController.getEntityByHash(
+      deps[0].metadata.hash,
+      project
+    );
+    const presetThumb = presetThumbEntity.metadata.thumb;
+
     const entity = await entityController.createEntityFromMetadata(
       JSON.stringify(material),
       project,
       group,
       false,
       false,
-      metadata
+      metadata,
+      true,
+      presetThumb
     );
 
     if (entity !== null) {

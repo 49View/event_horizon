@@ -450,7 +450,7 @@ void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _
         } else if ( rd.group == ResourceGroup::Color ) {
             B<MCB>( rd.filename ).make( fs[rd.filename], rd.hash );
         } else if ( rd.group == ResourceGroup::Material ) {
-            auto mat = B<MB>( rd.filename ).make( fs[rd.filename], rd.hash );
+            auto mat = B<MB>( rd.filename ).make( fs[rd.filename], rd.hash, _key );
             mat->Key( _key );
         } else {
             LOGRS( "{" << rd.group << "} Resource not supported yet in dependency unpacking" );

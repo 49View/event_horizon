@@ -60,25 +60,25 @@ public:
     // add*: this->Hash() will be empty "" if it comes from a procedural resource (IE not loaded from a file)
     // it will then be calculated in addInternal because every resource has to have an hash
     ResourceRef addIM( const R& _res ) {
-        return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Immediate );
+        return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), {}, AddResourcePolicy::Immediate );
     }
     ResourceRef addDF( const R& _res, HttpResouceCB _ccf = nullptr ) {
-        return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), AddResourcePolicy::Deferred, _ccf );
+        return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), {}, AddResourcePolicy::Deferred, _ccf );
     }
     ResourceRef addIM( std::shared_ptr<R> _res ) {
-        return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Immediate );
+        return addInternal<R>( _res, this->Name(), this->Hash(), {}, AddResourcePolicy::Immediate );
     }
     ResourceRef addDF( std::shared_ptr<R> _res, HttpResouceCB _ccf = nullptr ) {
-        return addInternal<R>( _res, this->Name(), this->Hash(), AddResourcePolicy::Deferred, _ccf );
+        return addInternal<R>( _res, this->Name(), this->Hash(), {}, AddResourcePolicy::Deferred, _ccf );
     }
     ResourceRef add( std::shared_ptr<R> _res, AddResourcePolicy _arp, HttpResouceCB _ccf = nullptr ) {
-        return addInternal<R>( _res, this->Name(), this->Hash(), _arp, _ccf );
+        return addInternal<R>( _res, this->Name(), this->Hash(), {}, _arp, _ccf );
     }
 
-    std::shared_ptr<R> make( const SerializableContainer& _data, const ResourceRef& _hash = {} ) {
+    std::shared_ptr<R> make( const SerializableContainer& _data, const ResourceRef& _hash = {}, const ResourceRef& _key = {} ) {
         auto ret = prepAndCheck(_data, _hash );
         if ( ret ) return ret;
-        return add<R>(_data, this->Name(), this->Hash(), AddResourcePolicy::Immediate);
+        return add<R>(_data, this->Name(), this->Hash(), _key, AddResourcePolicy::Immediate);
     }
 
     void publishAndAdd( const SerializableContainer& _data, const ResourceDependencyDict& _res = {} ) {
@@ -90,7 +90,7 @@ public:
             // We make sure that in case server side has to change name in case
             // of duplicates we reflect it here client side
             this->Name( resJson.metadata.name );
-            add < R > ( _data, this->Name(), this->Hash(), AddResourcePolicy::Deferred );
+            add < R > ( _data, this->Name(), this->Hash(), {}, AddResourcePolicy::Deferred );
         } );
     }
 
@@ -111,10 +111,11 @@ protected:
     std::shared_ptr<DEP> add( const SerializableContainer& _data,
                               const std::string& _name,
                               const ResourceRef& _hash,
+                              const ResourceRef& _key,
                               AddResourcePolicy _arp,
                               HttpResouceCB _ccf = nullptr ) {
         auto ret = EF::create<DEP>(_data);
-        addInternal<DEP>( ret, _name, _hash, _arp, _ccf );
+        addInternal<DEP>( ret, _name, _hash, _key, _arp, _ccf );
         return ret;
     }
 
@@ -122,6 +123,7 @@ protected:
     ResourceRef addInternal( std::shared_ptr<DEP> _res,
                       const std::string& _name,
                       const ResourceRef& _hash,
+                      const ResourceRef& _key,
                       AddResourcePolicy _arp,
                              HttpResouceCB _ccf = nullptr ) {
         // NDDADO: This could be very slow, might need to find a flyweight to calculate the whole hash
@@ -134,7 +136,7 @@ protected:
         }
         ASSERT( !resolvedHash.empty() );
 
-        sg.M<DEP>().add( _res, _name, resolvedHash, _arp, this->Name(), _ccf );
+        sg.M<DEP>().add( _res, _name, resolvedHash, _arp, this->Name(), _key, _ccf );
         return resolvedHash;
     }
 

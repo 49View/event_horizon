@@ -38,7 +38,7 @@ public:
 
     const static LoginFields loginCert() {
 //        return LoginFields{ "carillow@49view.com", "932hjkd987asd", "carillo" };
-        return LoginFields{ "ziocleto@gmail.com", "49View", "carillo" };
+        return LoginFields{ "ziocleto@gmail.com", "49View", "Sumix" };
     }
 
 protected:

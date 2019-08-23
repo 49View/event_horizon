@@ -64,25 +64,26 @@ public:
 
     void add( std::shared_ptr<T> _elem, const std::string& _name,
               const std::string& _hash, AddResourcePolicy _arp, const std::string& _aliasKey = "",
+              const std::string& _key = {},
               HttpResouceCB _ccf = nullptr ) {
         if ( _arp == AddResourcePolicy::Deferred ) {
-            addDeferred( _elem, _name, _hash, _aliasKey, _ccf );
+            addDeferred( _elem, _name, _hash, _aliasKey, _key, _ccf );
         } else {
-            addImmediate( _elem, _name, _hash, _aliasKey );
+            addImmediate( _elem, _name, _hash, _aliasKey, _key );
         }
     }
 
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
-                       const std::string& _hash, const std::string& _aliasKey = "" ) {
-        add( _elem, _name, _hash, _aliasKey );
-        addSignal( { _elem, _hash, {_hash, _name, _aliasKey} } );
+                       const std::string& _hash, const std::string& _aliasKey = {}, const std::string& _key = {} ) {
+        add( _elem, _name, _hash, _aliasKey, _key );
+        addSignal( { _elem, _hash, {_hash, _name, _aliasKey, _key} } );
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
-                      const ResourceRef& _hash, const std::string& _aliasKey = "",
+                      const ResourceRef& _hash, const std::string& _aliasKey = "", const std::string& _key = "",
                       HttpResouceCB _ccf = nullptr) {
-        add( _elem, _name, _hash, _aliasKey );
-        addToSignal( signalAddElements, { _elem, _hash, {_hash, _name, _aliasKey}, _ccf } );
+        add( _elem, _name, _hash, _aliasKey, _key );
+        addToSignal( signalAddElements, { _elem, _hash, {_hash, _name, _aliasKey, _key}, _ccf } );
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {
@@ -159,11 +160,12 @@ public:
 
 protected:
     void add( std::shared_ptr<T> _elem, const std::string& _name,
-              const std::string& _hash, const std::string& _aliasKey = "" ) {
+              const std::string& _hash, const std::string& _aliasKey = {}, const std::string& _key = {} ) {
         resources[_hash] = _elem;
         resourcesMapper[_hash] = _hash;
         if ( !_name.empty() ) resourcesMapper[_name] = _hash;
         if ( !_aliasKey.empty() ) resourcesMapper[_aliasKey] = _hash;
+        if ( !_key.empty() ) resourcesMapper[_key] = _hash;
     }
 
     C& Resources() {

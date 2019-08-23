@@ -59,7 +59,7 @@ export const entityTypeSelector = entry => {
           <i className="fas fa-cubes" />
         </span>
       );
-  } else if (entry.group === "image") {
+  } else if (entry.group === "image" || entry.group === "material") {
     if (entry.metadata.thumb === "") {
       return (
         <span className="imageThumbNotFound">
@@ -85,9 +85,5 @@ export const entityTypeSelector = entry => {
     }
   }
 
-  return (
-    <span className="imageThumbNotFound">
-      <i className="far fa-frown" />
-    </span>
-  );
+  return <img src={entry.metadata.thumb} alt="" />;
 };
