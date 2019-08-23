@@ -21,8 +21,7 @@ const AppEditor = () => {
           lineNumbers: true
         }}
         onKeyPress={(editor, event) => {
-          console.log(event);
-          if (event.key === "Enter" && event.ctrlKey === true) {
+          if (event.code === "Enter" && event.ctrlKey === true) {
             window.Module.addScriptLine(editor.getValue());
           }
         }}
