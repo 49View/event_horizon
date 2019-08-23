@@ -15,9 +15,8 @@
 
 RunLoopGraphics rl = di::make_injector().create<RunLoopGraphics>();
 
-std::string addScriptLine( std::string _str ) {
-//	rl.addScriptLine( _str );
-	return "Enqueued command: " + _str;
+void updateLuaScript( std::string _str ) {
+	rl.updateLuaScript( _str );
 }
 
 void RunLoop::consolePrompt() {
@@ -39,7 +38,7 @@ void resumeMainLoop() {
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
-	emscripten::function("addScriptLine", &addScriptLine);
+	emscripten::function("addScriptLine", &updateLuaScript);
 	emscripten::function("pauseMainLoop", &pauseMainLoop);
 	emscripten::function("resumeMainLoop", &resumeMainLoop);
 }

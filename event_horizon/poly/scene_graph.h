@@ -322,14 +322,6 @@ public:
     static LoadedResouceCallbackContainer resourceCallbackGeom         ;
     static LoadedResouceCallbackContainer resourceCallbackComposite    ;
 
-    const std::string& getLuaScriptHotReload() const {
-        return luaScriptHotReload;
-    }
-
-    void setLuaScriptHotReload( const std::string& luaScriptHotReload ) {
-        SceneGraph::luaScriptHotReload = luaScriptHotReload;
-    }
-
 protected:
     template <typename  T>
     void loadResourceCompositeCallback( T& cba ) {
@@ -397,7 +389,6 @@ protected:
     GeomManager& gm;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
-    std::string luaScriptHotReload;
 };
 
 class MaterialThumbnail : public Material {

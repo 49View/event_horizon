@@ -287,83 +287,6 @@ router.post(
   }
 );
 
-const getFileName = pathname => {
-  return pathname
-    .split("\\")
-    .pop()
-    .split("/")
-    .pop();
-};
-
-const checkCommonFileExtension = (group, ext) => {
-  if (group === "geom") {
-    if (ext === "glb" || ext === "fbx") return true;
-  } else if (group === "material") {
-    if (ext === "zip") return true;
-  } else if (group === "image") {
-    if (
-      ext === "jpeg" ||
-      ext === "png" ||
-      ext === "jpg" ||
-      ext === "exr" ||
-      ext === "tga" ||
-      ext === "tiff" ||
-      ext === "gif"
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-const checkFileExtensionsOnEntityGroup = (group, filename) => {
-  const ext = filename
-    .split(".")
-    .pop()
-    .toLowerCase();
-
-  return checkCommonFileExtension(group, ext);
-};
-
-const decompress = async (zip, project, username, useremail) => {
-  let fileList = [];
-  let deps = [];
-  zip.forEach((relativePath, zipEntry) => {
-    if (zipEntry.dir === false) {
-      fileList.push(zipEntry);
-    }
-  });
-
-  for (let zipEntry of fileList) {
-    const content = await zipEntry.async("uint8array");
-    if (checkFileExtensionsOnEntityGroup("image", zipEntry.name)) {
-      const depGruop = "image";
-
-      const metadatadep = entityController.createMetadataStartup(
-        getFileName(zipEntry.name),
-        username,
-        useremail
-      );
-
-      const entity = await entityController.createEntityFromMetadata(
-        Buffer.from(content),
-        project,
-        depGruop,
-        false,
-        false,
-        metadatadep,
-        false,
-        null
-      );
-
-      deps.push(entity);
-    }
-  }
-
-  return deps;
-};
-
 router.post("/multizip/:filename/:group", async (req, res, next) => {
   try {
     const project = req.user.project;
@@ -379,7 +302,12 @@ router.post("/multizip/:filename/:group", async (req, res, next) => {
     );
 
     const zip = await new JSZip().loadAsync(req.body);
-    let deps = await decompress(zip, project, username, useremail);
+    let deps = await entityController.decompressZipppedEntityDeps(
+      zip,
+      project,
+      username,
+      useremail
+    );
 
     const material = {
       mKey: filename,

@@ -148,7 +148,21 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
 
 }
 
+void RenderOrchestrator::luaUpdate() {
+    if ( auto luaScript = getLuaScriptHotReload(); !luaScript.empty() ) {
+        try {
+            lua.script( luaScript );
+        } catch (const std::exception& e) { // caught by reference to base
+            std::cout << " a standard exception was caught, with message '"
+                      << e.what() << "'\n";
+        }
+
+        setLuaScriptHotReload("");
+    }
+}
+
 void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
+    luaUpdate();
     updateCallbacks();
 
     for ( auto& [k,v] : mRigs ) {
@@ -158,6 +172,7 @@ void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
 
 void RenderOrchestrator::init() {
     initWHCallbacks();
+    lua.open_libraries();
 
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",

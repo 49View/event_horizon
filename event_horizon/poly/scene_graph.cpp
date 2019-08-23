@@ -155,9 +155,6 @@ void SceneGraph::publishAndAddCallback() {
 
 void SceneGraph::realTimeCallbacks() {
     for ( auto&[k, doc] : eventSceneCallback ) {
-        if ( k == SceneEvents::ReloadLuaScript ) {
-            luaScriptHotReload = getFileName( doc["data"]["source"].GetString());
-        }
 
         if ( k == SceneEvents::LoadGeomAndReset ) {
             auto v0 = getFileName( doc["data"]["entity_id"].GetString());

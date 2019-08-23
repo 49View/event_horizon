@@ -19,7 +19,7 @@
 
 scene_t scene{ 0 };
 
-const std::string testLoad = "rock";
+//const std::string testLoad = "rock";
 
 void EditorBackEnd::activatePostLoad() {
 
@@ -43,13 +43,13 @@ void EditorBackEnd::activatePostLoad() {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
 
-    sg.GB<GT::Shape>( ShapeType::Sphere, GT::M( testLoad ));
+//    sg.GB<GT::Shape>( ShapeType::Sphere, GT::M( testLoad ));
 }
 
 void EditorBackEnd::activateImpl() {
 
 //    appData.addRawImage( "skybox,equirectangular,park,generic,001" );
-    appData.addMaterial( testLoad );
+//    appData.addMaterial( testLoad );
 
     loadSceneEntities();
 
@@ -97,17 +97,6 @@ void EditorBackEnd::activateImpl() {
 }
 
 void EditorBackEnd::updateImpl( const AggregatedInputData& _aid ) {
-
-    if ( auto luaScript = sg.getLuaScriptHotReload(); !luaScript.empty() ) {
-        try {
-            lua.script( bn::decode_b64(luaScript) );
-        } catch (const std::exception& e) { // caught by reference to base
-            std::cout << " a standard exception was caught, with message '"
-                      << e.what() << "'\n";
-        }
-
-        sg.setLuaScriptHotReload("");
-    }
 
     if ( _aid.ti.checkKeyToggleOn( GMK_Z )) {
         sg.chartMeshes2( scene );

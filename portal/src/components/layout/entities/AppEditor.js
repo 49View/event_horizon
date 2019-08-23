@@ -2,7 +2,7 @@ import React from "react";
 // import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { UnControlled as CodeMirror } from "react-codemirror2";
-import { wscSend } from "../../../utils/webSocketClient";
+// import { wscSend } from "../../../utils/webSocketClient";
 
 require("codemirror/lib/codemirror.css");
 require("codemirror/theme/material.css");
@@ -13,15 +13,17 @@ const AppEditor = () => {
   return (
     <div className="appdataquad">
       <CodeMirror
-        value="print('Hello, world!')"
+        value=""
         className="react-codemirror2 appdataquad"
         options={{
           mode: "lua",
           theme: "material",
           lineNumbers: true
         }}
-        onChange={(editor, data, value) => {
-          wscSend("ReloadLuaScript", { source: btoa(value) });
+        onKeyPress={(editor, event) => {
+          if (event.key === "Enter" && event.ctrlKey === true) {
+            window.Module.addScriptLine(editor.getValue());
+          }
         }}
       />
     </div>

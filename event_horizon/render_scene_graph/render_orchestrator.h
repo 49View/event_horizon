@@ -14,6 +14,8 @@
 #include <graphics/render_targets.hpp>
 #include <render_scene_graph/camera_controls.hpp>
 #include <render_scene_graph/scene_bridge.h>
+#define SOL_ALL_SAFETIES_ON 1
+#include <lua/sol/sol.hpp> // or #include "sol.hpp", whichever suits your needs
 
 struct scene_t;
 struct PickRayData;
@@ -116,6 +118,15 @@ public:
     void useSSAO( bool _value );
     void changeTime( const std::string& _time );
     floata& skyBoxDeltaInterpolation();
+
+    const std::string& getLuaScriptHotReload() const {
+        return luaScriptHotReload;
+    }
+
+    void setLuaScriptHotReload( const std::string& _luaScriptHotReload ) {
+        luaScriptHotReload = _luaScriptHotReload;
+    }
+
 protected:
     AVInitCallback avcbTM();
     std::shared_ptr<Camera>    getCamera( const std::string& _name );
@@ -123,6 +134,7 @@ protected:
     void addBoxToViewport( const std::string& _nane, const SceneScreenBox& _box );
     void setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport );
     void setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport );
+    void luaUpdate();
 
 public:
     Renderer& RR();
@@ -141,6 +153,8 @@ private:
     SceneGraph& sg;
     cameraRigsMap mRigs;
     std::unordered_map<std::string, SceneScreenBox> boxes;
+    sol::state lua{};
+    std::string luaScriptHotReload;
 
     DragAndDropFunction dragAndDropFunc = nullptr;
 

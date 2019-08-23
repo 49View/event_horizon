@@ -316,6 +316,94 @@ const updateById = async (entityId, updatedEntity) => {
   return result !== null ? result.toObject() : null;
 };
 
+const getFileName = pathname => {
+  return pathname
+    .split("\\")
+    .pop()
+    .split("/")
+    .pop();
+};
+
+const checkCommonFileExtension = (group, ext) => {
+  if (group === "geom") {
+    if (ext === "glb" || ext === "fbx") return true;
+  } else if (group === "material") {
+    if (ext === "zip") return true;
+  } else if (group === "image") {
+    if (
+      ext === "jpeg" ||
+      ext === "png" ||
+      ext === "jpg" ||
+      ext === "exr" ||
+      ext === "tga" ||
+      ext === "tiff" ||
+      ext === "gif"
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const checkFileExtensionsOnEntityGroup = (group, filename) => {
+  const ext = filename
+    .split(".")
+    .pop()
+    .toLowerCase();
+
+  return checkCommonFileExtension(group, ext);
+};
+
+const decompressZipppedEntityDeps = async (
+  zip,
+  project,
+  username,
+  useremail
+) => {
+  let fileList = [];
+  let deps = [];
+  zip.forEach((relativePath, zipEntry) => {
+    if (zipEntry.dir === false) {
+      fileList.push(zipEntry);
+    }
+  });
+
+  for (let zipEntry of fileList) {
+    const content = await zipEntry.async("uint8array");
+    if (checkFileExtensionsOnEntityGroup("image", zipEntry.name)) {
+      const depGruop = "image";
+
+      const metadatadep = createMetadataStartup(
+        getFileName(zipEntry.name),
+        username,
+        useremail
+      );
+
+      // Resize image to 512x512
+      const fullSizeImage = Buffer.from(content);
+      const scaledDown = await sharp(fullSizeImage)
+        .resize(512, 512, { fit: "inside", withoutEnlargement: true })
+        .toFormat("jpg")
+        .toBuffer();
+      const entity = await createEntityFromMetadata(
+        scaledDown,
+        project,
+        depGruop,
+        false,
+        false,
+        metadatadep,
+        false,
+        null
+      );
+
+      deps.push(entity);
+    }
+  }
+
+  return deps;
+};
+
 const gtr_dep0_image = "dep0";
 const gtr_content_image = "content";
 const gtr_content_vector = "content_vector";
@@ -364,7 +452,7 @@ const thumbFromContent = async (content, presetThumb, gtr) => {
     thumbBuff = content;
   } else if (gtr === gtr_content_image) {
     thumbBuff = await sharp(content)
-      .resize(64, 64)
+      .resize(64, 64, { fit: "inside", withoutEnlargement: true })
       .toFormat("jpg")
       .toBuffer();
   } else if (gtr === gtr_dep0_image) {
@@ -570,6 +658,7 @@ module.exports = {
   createEntityFromMetadata: createEntityFromMetadata,
   createEntitiesFromContainer: createEntitiesFromContainer,
   cleanupMetadata: cleanupMetadata,
+  decompressZipppedEntityDeps: decompressZipppedEntityDeps,
   getFilePath: getFilePath,
   getEntityContent: getEntityContent,
   checkFileExists: checkFileExists,
