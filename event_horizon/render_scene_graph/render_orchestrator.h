@@ -14,7 +14,7 @@
 #include <graphics/render_targets.hpp>
 #include <render_scene_graph/camera_controls.hpp>
 #include <render_scene_graph/scene_bridge.h>
-#define SOL_ALL_SAFETIES_ON 1
+//#define SOL_ALL_SAFETIES_ON 1
 #include <lua/sol/sol.hpp> // or #include "sol.hpp", whichever suits your needs
 
 struct scene_t;

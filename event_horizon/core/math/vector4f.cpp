@@ -42,11 +42,23 @@ Vector4f Vector4f:: ITORGBA( uint32_t number, int32_t numbits ) {
 Vector4f Vector4f::XTORGBA( const std::string& _hexstring ) {
 	if ( _hexstring.empty() ) return Vector4f::BLACK;
 	std::string sanitized = string_trim_after(_hexstring, "#");
-	if ( sanitized.size() != 6 && sanitized.size() != 8 ) return Vector4f::BLACK;
-	std::string red    = "0x" + sanitized.substr(0, 2);
-	std::string green  = "0x" + sanitized.substr(2, 2);
-	std::string blue   = "0x" + sanitized.substr(4, 2);
-	std::string alpha  = "0x" + (sanitized.size() == 8 ? sanitized.substr(6, 2) : "ff");
+	if ( sanitized.size() != 3 && sanitized.size() != 6 && sanitized.size() != 8 ) return Vector4f::BLACK;
+    std::string red  {};
+    std::string green{};
+    std::string blue {};
+    std::string alpha{};
+
+    if ( sanitized.size() != 3 ) {
+        red    = "0x" + sanitized.substr(0, 2);
+        green  = "0x" + sanitized.substr(2, 2);
+        blue   = "0x" + sanitized.substr(4, 2);
+        alpha  = "0x" + (sanitized.size() == 8 ? sanitized.substr(6, 2) : "ff");
+	} else {
+        red    = "0x" + sanitized.substr(0, 1) + "0";
+        green  = "0x" + sanitized.substr(1, 1) + "0";
+        blue   = "0x" + sanitized.substr(2, 1) + "0";
+        alpha  = "0xFF";
+    }
 
 	int redi   = (int)strtol(red.c_str(), nullptr, 0);
 	int greeni = (int)strtol(green.c_str(), nullptr, 0);

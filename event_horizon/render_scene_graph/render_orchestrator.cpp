@@ -173,7 +173,10 @@ void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
 void RenderOrchestrator::init() {
     initWHCallbacks();
     lua.open_libraries();
-
+//    lua.set_function("clearColor", &Renderer::clearColor);
+    lua.set_function("clearColor", [](const std::string& _col ) {
+        Renderer::clearColor( V4f::XTORGBA(_col) );
+    });
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",
                 std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1, std::placeholders::_2 ) );
