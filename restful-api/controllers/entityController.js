@@ -8,7 +8,7 @@ const metadataAssistant = require("../assistants/metadataAssistant");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const sharp = require("sharp");
-const md5 = require("md5");
+const JSZip = require("jszip");
 
 const getMetadataFromBody = (checkGroup, checkRaw, req) => {
   if (req.body === null || !(req.body instanceof Object)) {
@@ -355,50 +355,96 @@ const checkFileExtensionsOnEntityGroup = (group, filename) => {
   return checkCommonFileExtension(group, ext);
 };
 
+const array_intersection = (tags, against) => {
+  const res = tags.filter(value => against.includes(value));
+  return res.length > 0;
+};
+
+const arrangePBRness = tags => {
+  const textureCheckMap = {
+    hasNormal: ["normal"],
+    hasMetallic: ["metallic", "metalness"],
+    hasRoughness: ["roughness"],
+    hasOpacity: ["opacity"],
+    hasAO: ["ambientocclusion", "ao", "ambient", "occlusion"],
+    hasHeight: ["height"],
+    hasTranslucency: ["translucency"]
+  };
+
+  if (array_intersection(tags, textureCheckMap.hasNormal))
+    return "normalTexture";
+  if (array_intersection(tags, textureCheckMap.hasMetallic))
+    return "metallicTexture";
+  if (array_intersection(tags, textureCheckMap.hasRoughness))
+    return "roughnessTexture";
+  if (array_intersection(tags, textureCheckMap.hasOpacity))
+    return "opacityTexture";
+  if (array_intersection(tags, textureCheckMap.hasAO)) return "aoTexture";
+  if (array_intersection(tags, textureCheckMap.hasHeight))
+    return "heightTexture";
+  if (array_intersection(tags, textureCheckMap.hasTranslucency))
+    return "translucencyTexture";
+  return "diffuseTexture";
+};
+
 const decompressZipppedEntityDeps = async (
-  zip,
+  zipFile,
   project,
   username,
   useremail
 ) => {
+  const zip = await new JSZip().loadAsync(zipFile);
+
   let fileList = [];
-  let deps = [];
   zip.forEach((relativePath, zipEntry) => {
     if (zipEntry.dir === false) {
-      fileList.push(zipEntry);
+      if (checkFileExtensionsOnEntityGroup("image", relativePath)) {
+        const tags = metadataAssistant.splitTags(getFileName(relativePath));
+        fileList.push({ type: arrangePBRness(tags), entry: zipEntry });
+      }
     }
   });
 
+  let deps = {};
+  deps["mStrings"] = [];
+  deps["deps"] = [];
   for (let zipEntry of fileList) {
-    const content = await zipEntry.async("uint8array");
-    if (checkFileExtensionsOnEntityGroup("image", zipEntry.name)) {
-      const depGruop = "image";
+    const content = await zipEntry.entry.async("uint8array");
+    const depGruop = "image";
 
-      const metadatadep = createMetadataStartup(
-        getFileName(zipEntry.name),
-        username,
-        useremail
-      );
+    const metadatadep = createMetadataStartup(
+      getFileName(zipEntry.entry.name),
+      username,
+      useremail
+    );
 
-      // Resize image to 512x512
-      const fullSizeImage = Buffer.from(content);
-      const scaledDown = await sharp(fullSizeImage)
-        .resize(512, 512, { fit: "inside", withoutEnlargement: true })
-        .toFormat("jpg")
-        .toBuffer();
-      const entity = await createEntityFromMetadata(
-        scaledDown,
-        project,
-        depGruop,
-        false,
-        false,
-        metadatadep,
-        false,
-        null
-      );
+    // Resize image to a decente size
+    const decentSize = 512;
+    const fullSizeImage = Buffer.from(content);
+    const scaledDown = await sharp(fullSizeImage)
+      .resize(decentSize, decentSize, {
+        fit: "inside",
+        withoutEnlargement: true
+      })
+      .toFormat("jpg")
+      .toBuffer();
+    const entity = await createEntityFromMetadata(
+      scaledDown,
+      project,
+      depGruop,
+      false,
+      false,
+      metadatadep,
+      false,
+      null
+    );
 
-      deps.push(entity);
-    }
+    deps[zipEntry.type] = entity;
+    deps["mStrings"].push({
+      key: zipEntry.type,
+      value: entity.metadata.hash
+    });
+    deps["deps"].push(entity.metadata.hash);
   }
 
   return deps;

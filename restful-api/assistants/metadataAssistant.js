@@ -1,7 +1,7 @@
 const md5 = require("md5");
 
 const gsplitTags = source => {
-  return source.split(/[\s,._]+/).map(e => {
+  return source.split(/[\s,._-]+/).map(e => {
     return e.toLowerCase();
   });
 };

@@ -6,8 +6,6 @@ const metaAssistant = require("../assistants/metadataAssistant");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const zlib = require("zlib");
-const Base64 = require("js-base64").Base64;
-const JSZip = require("jszip");
 
 router.get("/content/byId/:id", async (req, res, next) => {
   try {
@@ -301,9 +299,8 @@ router.post("/multizip/:filename/:group", async (req, res, next) => {
       useremail
     );
 
-    const zip = await new JSZip().loadAsync(req.body);
-    let deps = await entityController.decompressZipppedEntityDeps(
-      zip,
+    const deps = await entityController.decompressZipppedEntityDeps(
+      req.body,
       project,
       username,
       useremail
@@ -313,30 +310,17 @@ router.post("/multizip/:filename/:group", async (req, res, next) => {
       mKey: filename,
       values: {
         mType: "PN_SH",
-        mStrings: [
-          {
-            key: "diffuseTexture",
-            value: deps[0].metadata.hash
-          },
-          {
-            key: "normalTexture",
-            value: "normal"
-          }
-        ]
+        mStrings: deps["mStrings"]
       }
     };
     metadata.deps = [
       {
         key: "image",
-        value: [deps[0].metadata.hash]
+        value: deps["deps"]
       }
     ];
 
-    const presetThumbEntity = await entityController.getEntityByHash(
-      deps[0].metadata.hash,
-      project
-    );
-    const presetThumb = presetThumbEntity.metadata.thumb;
+    const presetThumb = deps["diffuseTexture"].metadata.thumb;
 
     const entity = await entityController.createEntityFromMetadata(
       JSON.stringify(material),

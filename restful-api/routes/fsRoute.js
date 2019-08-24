@@ -41,7 +41,7 @@ router.post("/:key", async (req, res, next) => {
   }
 });
 
-router.post("/entity_to_elaborate/:key", async (req, res, next) => {
+router.post("/entity_to_elaborate/:group/:key", async (req, res, next) => {
   try {
     const data = await fsc.cloudStorageFileUpload(
       req.body,
@@ -53,6 +53,7 @@ router.post("/entity_to_elaborate/:key", async (req, res, next) => {
       data: {
         name: req.params.key,
         project: req.user.project,
+        group: req.params.group,
         uname: req.user.name,
         uemail: req.user.email
       }
