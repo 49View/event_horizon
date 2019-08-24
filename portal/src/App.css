@@ -682,9 +682,11 @@ input#search-bar:hover {
 .AppEditorRenderGrid {
   display: grid;
   grid-template-columns: 522px 481px;
-  grid-template-rows: 582px;
-  grid-template-areas: "source render";
-  grid-gap: 0px 0px;
+  grid-template-rows: 552px 20px;
+  grid-template-areas:
+    "source render"
+    "source_controls render";
+  grid-gap: 0;
   align-items: center;
   justify-items: start;
 }
@@ -711,10 +713,11 @@ input#search-bar:hover {
   grid-area: source;
   align-self: stretch;
   justify-self: stretch;
+  padding: 1px;
 }
 
 .CodeMirror {
-  height: 582px;
+  height: 552px;
 }
 
 .materialRender {

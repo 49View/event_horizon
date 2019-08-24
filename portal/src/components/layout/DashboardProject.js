@@ -70,10 +70,10 @@ const DashboardProject = ({
       ? "visible"
       : "hidden";
 
-  const entityUpdateDivVisible = currentEntity && group !== "app";
+  const bShowEntityCanvas = currentEntity && group !== "app";
 
-  const canvasSizeXNum = entityUpdateDivVisible ? 522 : 480;
-  const canvasSizeYNum = entityUpdateDivVisible ? 522 : 270;
+  const canvasSizeXNum = bShowEntityCanvas ? 522 : 495;
+  const canvasSizeYNum = bShowEntityCanvas ? 522 : 278;
 
   const canvasSizeX = canvasSizeXNum.toString() + "px";
   const canvasSizeY = canvasSizeYNum.toString() + "px";
@@ -83,8 +83,8 @@ const DashboardProject = ({
   const canvasClientSizeY =
     (canvasSizeYNum * (window.devicePixelRatio || 1)).toString() + "px";
 
-  const canvasPadding = entityUpdateDivVisible ? "5px" : "0px";
-  const canvasMargin = entityUpdateDivVisible ? "7px" : "7px";
+  const canvasPadding = bShowEntityCanvas ? "5px" : "1px";
+  const canvasMargin = bShowEntityCanvas ? "7px" : "0px";
 
   const canvasStyle = {
     visibility: canvasVisibility,
@@ -102,12 +102,12 @@ const DashboardProject = ({
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>
-      {entityUpdateDivVisible && (
+      {bShowEntityCanvas && (
         <div className="nameValue-a medium text-primary">
           {currentEntity && currentEntity.entity.metadata.name}
         </div>
       )}
-      {entityUpdateDivVisible && <EntityUpdateContent />}
+      {bShowEntityCanvas && <EntityUpdateContent />}
       <div className="EntryEditorRender">
         <canvas
           width={canvasClientSizeX}
@@ -119,7 +119,7 @@ const DashboardProject = ({
         />
       </div>
       {currentEntity && mainContainerDiv}
-      {currentEntity && entityUpdateDivVisible && <EntityMetaSection />}
+      {currentEntity && bShowEntityCanvas && <EntityMetaSection />}
     </div>
   );
 
