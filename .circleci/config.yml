@@ -2,7 +2,7 @@
 #
 
 parameters:
-  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.12
+  docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.13
 
 s3utils: &s3utils
            name: S3 utils
@@ -81,6 +81,11 @@ jobs:
       - run: >
           cd portal && npm run build
       - run: >
+          name: Untar editor
+          command: |
+            s3-artifacts.sh GET editor.tar.gz
+            tar -xzvf editor.tar.gz ./portal/build
+      - run: >
           tar -zcvf portal_static.gz ./portal/build
       - run:
           name: Save portal_static artifact
@@ -123,6 +128,22 @@ jobs:
 #      - run: make -j8 -C 'builds/event_horizon_em/'
 #      - run: make install -C 'builds/event_horizon_em/'
 
+      # editor
+      - run: >
+          source /3rdpartylibs/emsdk/emsdk_env.sh && mkdir builds/editor_em && cd builds/editor_em/ &&
+          cmake -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/incoming/cmake/Modules/Platform/Emscripten.cmake
+          ../../event_horizon/
+      - run: make -j8 -C 'builds/editor_em/'
+      - run:
+          name: Tar editor
+          command: |
+            cd /app/builds/editor_em/ && tar -cvfz editor.tar.gz editor.js editor.wasm
+      - run:
+          name: Store editor artifact
+          command: |
+            cd /app/builds/editor_em/ && s3-artifacts.sh PUT editor.tar.gz
+
       # event_horizon
 #      - run: >
 #          mkdir builds/event_horizon && cd builds/event_horizon/ &&
@@ -145,18 +166,6 @@ jobs:
           command: |
             cd /app/builds/sat/ && s3-artifacts.sh PUT substance_daemon
 
-      # Editor
-#      - run: >
-#          mkdir builds/editor_em && cd builds/editor_em/ && cmake -DCMAKE_BUILD_TYPE=Release
-#          -DCMAKE_TOOLCHAIN_FILE=/3rdpartylibs/emsdk/emscripten/incoming/cmake/Modules/Platform/Emscripten.cmake
-#          ../../dev_tools/editor/
-#      - run: make -j8 -C 'builds/editor_em/'
-#      - run:
-#          name: Store Editor (js,wasm) artifacts
-#          command: |
-#            cd /app/builds/editor_em/ && s3-artifacts.sh PUT editor.js
-#            cd /app/builds/editor_em/ && s3-artifacts.sh PUT editor.wasm
-
       # run tests!
 
   deployCPP:
@@ -172,7 +181,7 @@ jobs:
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo mkdir sat;
             sudo mv substance_daemon sat/;
             sudo mv FBX2glTF sat/;
-            cd sat; echo -e "FROM sixthview/build:1.2.12\nADD substance_daemon /\nADD FBX2glTF /\nCMD [\"./substance_daemon\" ] " | sudo tee dockerfile;
+            cd sat; echo -e "FROM sixthview/build:1.2.13\nADD substance_daemon /\nADD FBX2glTF /\nCMD [\"./substance_daemon\" ] " | sudo tee dockerfile;
             sudo chmod u+x substance_daemon;
             sudo chmod u+x FBX2glTF;
             sudo docker kill $(docker ps --filter "ancestor=sat" -q);
@@ -183,11 +192,11 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - buildNODEJSAPI
       - buildCPP:
           filters:
             branches:
               only: master
+      - buildNODEJSAPI
       - deployNODEJSAPI:
           requires:
             - buildNODEJSAPI
