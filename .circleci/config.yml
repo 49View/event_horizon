@@ -84,7 +84,7 @@ jobs:
           name: Untar editor
           command: |
             s3-artifacts.sh GET editor.tar.gz
-            tar -xzvf editor.tar.gz ./portal/build
+            tar xzvf editor.tar.gz -C ./portal/build
       - run: >
           tar -zcvf portal_static.gz ./portal/build
       - run:
@@ -192,10 +192,10 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - buildCPP:
-          filters:
-            branches:
-              only: master
+#      - buildCPP:
+#          filters:
+#            branches:
+#              only: master
       - buildNODEJSAPI
       - deployNODEJSAPI:
           requires:
