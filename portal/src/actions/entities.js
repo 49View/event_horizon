@@ -341,21 +341,24 @@ export const addEntity = (
         fileData,
         octet
       );
+
+      const fullres = await axios.get(
+        `/entities/content/byId/${res.data._id}`,
+        {
+          responseType: "arraybuffer"
+        }
+      );
+
+      const entityFull = {
+        entity: res.data,
+        blobURL: URL.createObjectURL(new Blob([fullres.data]))
+      };
+
+      dispatch({
+        type: GET_ENTITY,
+        payload: entityFull
+      });
     }
-
-    const fullres = await axios.get(`/entities/content/byId/${res.data._id}`, {
-      responseType: "arraybuffer"
-    });
-
-    const entityFull = {
-      entity: res.data,
-      blobURL: URL.createObjectURL(new Blob([fullres.data]))
-    };
-
-    dispatch({
-      type: GET_ENTITY,
-      payload: entityFull
-    });
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,
