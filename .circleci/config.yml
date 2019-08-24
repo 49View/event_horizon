@@ -80,7 +80,7 @@ jobs:
 #          cd portal && npm test
       - run: >
           cd portal && npm run build
-      - run: >
+      - run:
           name: Untar editor
           command: |
             s3-artifacts.sh GET editor.tar.gz
