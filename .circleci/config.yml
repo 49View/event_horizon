@@ -138,7 +138,7 @@ jobs:
       - run:
           name: Tar editor
           command: |
-            cd /app/builds/editor_em/ && tar -cvfz editor.tar.gz editor.js editor.wasm
+            cd /app/builds/editor_em/ && tar cvfz editor.tar.gz editor.js editor.wasm
       - run:
           name: Store editor artifact
           command: |
