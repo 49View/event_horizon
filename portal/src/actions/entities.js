@@ -78,7 +78,6 @@ export const replaceMaterial = entity => async dispatch => {
     const state = store.getState();
     wscSend("ReplaceMaterialOnCurrentObject", {
       mat_id: entity.metadata.name, //entity._id,
-      mat_name: entity.metadata.name,
       entity_id: state.entities.currentEntity.entity.metadata.name,
       source_id: state.entities.selectedMatName
     });

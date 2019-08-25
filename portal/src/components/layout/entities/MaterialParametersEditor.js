@@ -2,10 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { fillMaterialParams } from "../../../utils/materialUtils";
+import { changeMaterialPropery } from "../../../actions/entities";
 
-const MaterialParametersEditor = ({ entity, cname }) => {
+const MaterialParametersEditor = ({ entity, cname, changeMaterialPropery }) => {
   const onChangeMaterialPropery = e => {
-    // changeMaterialPropery(e);
+    changeMaterialPropery(e);
   };
 
   const e = fillMaterialParams(entity.jsonRet.mKey, entity.jsonRet.values);
@@ -83,7 +84,8 @@ const MaterialParametersEditor = ({ entity, cname }) => {
 };
 
 MaterialParametersEditor.propTypes = {
-  currentEntity: PropTypes.object
+  currentEntity: PropTypes.object,
+  changeMaterialPropery: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -92,5 +94,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  {}
+  { changeMaterialPropery }
 )(MaterialParametersEditor);

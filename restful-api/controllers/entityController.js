@@ -426,7 +426,7 @@ const decompressZipppedEntityDeps = async (
         fit: "inside",
         withoutEnlargement: true
       })
-      .toFormat("jpg")
+      .toFormat("png")
       .toBuffer();
     const entity = await createEntityFromMetadata(
       scaledDown,

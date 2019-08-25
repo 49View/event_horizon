@@ -53,7 +53,6 @@ export const fillMaterialParams = (key, values, thumbValues = null) => {
           rgbC[1] * 255,
           rgbC[2] * 255
         );
-        console.log("rgbC, basecolor: ", rgbC, matSimpleEntry.baseColor);
       }
     }
   }
