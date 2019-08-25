@@ -172,7 +172,9 @@ void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
 
 void RenderOrchestrator::init() {
     initWHCallbacks();
+
     lua.open_libraries();
+
     auto luarr = lua["rr"].get_or_create<sol::table>();
     luarr["clearColor"] = [](const std::string& _col ) {
         Renderer::clearColor( V4f::XTORGBA(_col) );

@@ -261,6 +261,9 @@ ImagaHeaderType detectHeader( const unsigned char* _buffer, size_t _length ) {
     if ( memcmp( "\xFF\xD8\xFF", _buffer, 3) == 0) {
         return ImagaHeaderType::STB_Compatible;
     }
+    if ( memcmp( "#?RADIANCE", _buffer, 10) == 0) {
+        return ImagaHeaderType::STB_Compatible;
+    }
 
     EXRVersion exr_headers;
     if ( ParseEXRVersionFromMemory(&exr_headers, _buffer, _length ) == 0 ) {

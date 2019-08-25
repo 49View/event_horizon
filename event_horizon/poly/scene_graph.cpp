@@ -109,7 +109,6 @@ void SceneGraph::materialsForGeomSocketMessage() {
     for ( const auto& [k, node] : Nodes() ) {
         for ( const auto& data : node->DataV()) {
             auto mat = get<Material>( data.material );
-//            auto matKey = mat->Key().empty() ? data.material : mat->Key();
             matSet.mrefs.emplace( mat->Key(), MaterialThumbnail( this, *mat ));
         }
     }

@@ -144,11 +144,6 @@ export default function(state = initialState, action) {
         loading: true,
         currentTags: []
       };
-    case ADD_ENTITY:
-      // sendAssetToDaemonIfNeeded(payload);
-      return {
-        ...state
-      };
     case GET_ENTITY:
       if (requireWasmUpdate) requestAsset(payload);
       return {
@@ -164,13 +159,13 @@ export default function(state = initialState, action) {
         loading: false,
         currentEntityNodes: payload
       };
-    // case ADD_ENTITY:
-    //   return {
-    //     ...state,
-    //     entries: [...state.entries, payload],
-    //     entry: {},
-    //     loading: false
-    //   };
+    case ADD_ENTITY:
+      return {
+        ...state,
+        entries: [...state.entries, payload],
+        entriesFiltered: [...state.entriesFiltered, payload],
+        loading: false
+      };
     case REPLACE_ENTITY_TAGS:
       return {
         ...state,

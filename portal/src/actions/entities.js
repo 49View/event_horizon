@@ -77,7 +77,8 @@ export const replaceMaterial = entity => async dispatch => {
     // });
     const state = store.getState();
     wscSend("ReplaceMaterialOnCurrentObject", {
-      mat_id: entity.metadata.name,
+      mat_id: entity.metadata.name, //entity._id,
+      mat_name: entity.metadata.name,
       entity_id: state.entities.currentEntity.entity.metadata.name,
       source_id: state.entities.selectedMatName
     });
@@ -309,6 +310,11 @@ export const addEntity = (
   user
 ) => async dispatch => {
   try {
+    dispatch({
+      type: GET_ENTITY_LOAD,
+      payload: null
+    });
+
     const octet = {
       headers: {
         "Content-Type": "application/octet-stream"

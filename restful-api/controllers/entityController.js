@@ -613,6 +613,7 @@ const getEntitiesByProjectGroupTags = async (
   project,
   group,
   tags,
+  fullName,
   fullData,
   randomElements
 ) => {
@@ -633,6 +634,7 @@ const getEntitiesByProjectGroupTags = async (
                 }
               },
               { "metadata.name": tags[0] },
+              { "metadata.name": fullName },
               {
                 _id:
                   tags[0].length == 12 || tags[0].length == 24

@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import MaterialParametersEditor from "./MaterialParametersEditor";
 
 const MaterialEditor = ({ currentEntity }) => {
   let mainContent = <Fragment />;
@@ -46,6 +47,10 @@ const MaterialEditor = ({ currentEntity }) => {
 
     mainContent = (
       <div className="nodeViewer-a">
+        <MaterialParametersEditor
+          entity={currentEntity}
+          cname="materialParams"
+        ></MaterialParametersEditor>
         <div className="mediumPBRquad">
           <img src={depPBRMap.albedoTexture} alt="" />
           <div className="normal text-secondary text-center material-text">

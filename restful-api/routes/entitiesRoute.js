@@ -48,6 +48,7 @@ router.get("/:group/:tags", async (req, res, next) => {
       project,
       group,
       tags,
+      req.params.tags,
       true,
       1
     );
@@ -148,6 +149,7 @@ router.get("/metadata/byGroupTags/:group/:tags", async (req, res, next) => {
       project,
       group,
       tags,
+      req.params.tags,
       false,
       null
     );

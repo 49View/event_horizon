@@ -626,6 +626,29 @@ input#search-bar:hover {
   );
 }
 
+.materialParams {
+  display: grid;
+  margin: 0;
+  margin-bottom: 5px;
+  padding: 8px 8px;
+  grid-template-columns: repeat(6, 15.5%);
+  grid-template-rows: 22px repeat(4, 16px);
+  grid-template-areas:
+    "baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorPicker"
+    "metallicLabel metallicLabel metallicLabel metallicSlider metallicSlider metallicSlider"
+    "roughnessLabel roughnessLabel roughnessLabel roughnessSlider roughnessSlider roughnessSlider"
+    "aoLabel aoLabel aoLabel aoSlider aoSlider aoSlider"
+    "opacityLabel opacityLabel opacityLabel opacitySlider opacitySlider opacitySlider";
+  grid-gap: 4px 3px;
+  align-items: center;
+  justify-items: start;
+  border: solid 1px rgba(23, 162, 184, 0.55);
+  background-image: linear-gradient(
+    rgba(23, 162, 184, 0.15),
+    rgba(23, 162, 184, 0)
+  );
+}
+
 .smallObjectMaterial:hover {
   border: solid 1px rgba(23, 162, 184, 0.85);
   background-image: linear-gradient(
