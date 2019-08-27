@@ -3,6 +3,7 @@
 #define _VIGNETTING_ 0
 #define _GRAINING_ 0
 #define _DOFING_ 0
+#define _LUT3DING_ 0
 #define _BLOOMING_ 0
 #define _SSAOING_ 0
 
@@ -44,6 +45,10 @@ vec3 ssao() {
     return texture(ssaoMapTexture, v_texCoord).xyz;
 }
 
+vec3 lut3d( vec3 sceneColor ) {
+    return texture( lut3dTexture, sceneColor ).xyz;
+}
+
 #include "dof.glsl"
 
 void main() {
@@ -51,6 +56,10 @@ void main() {
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
     #if _DOFING_
     sceneColor.xyz = dof();
+    #endif
+
+    #if _LUT3DING_
+    sceneColor.xyz = lut3d(sceneColor.xyz);
     #endif
 
     #if _BLOOMING_
@@ -69,5 +78,5 @@ void main() {
     sceneColor.xyz *= grain();
     #endif
 
-    FragColor = sceneColor;
+    FragColor = sceneColor*0.2;
 }

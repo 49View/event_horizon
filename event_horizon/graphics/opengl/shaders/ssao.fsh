@@ -121,7 +121,6 @@ void main() {
     // sceneColor.xyz = vec3(currZ/4.0);
  
     // sceneColor.xyz *= ssao();
-    // sceneColor.xyz = texture( lut3dTexture, sceneColor.xyz ).xyz;
 
     // FragColor = vec4(abs(u_projMatrix[2].www)*0.5, 1.0);
     //FragColor = vec4(abs(v_texT2/100), 1.0);
