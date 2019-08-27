@@ -478,6 +478,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
         cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
         cb.pushCommand( { CommandBufferCommandName::defaultFrameBufferBind } );
+//        cb.pushCommand( { CommandBufferCommandName::clearDefaultFramebuffer } );
         cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
         cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
         cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );

@@ -11,9 +11,10 @@ uniform sampler2D normalMapTexture;
 uniform sampler2D noise4x4Texture;
 
 float linearize(float depth) {
-    float znear = u_nearFar.x;
-    float zfar = u_nearFar.y;
-	return -zfar * znear / (depth * (zfar - znear) - zfar);
+    return depth;
+    // float znear = u_nearFar.x;
+    // float zfar = u_nearFar.y;
+	// return -zfar * znear / (depth * (zfar - znear) - zfar);
 }
 
 float ssao() {

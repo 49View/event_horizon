@@ -51,6 +51,12 @@ vec3 lut3d( vec3 sceneColor ) {
 
 #include "dof.glsl"
 
+float linearize2(float depth) {
+    float znear = u_nearFar.x;
+    float zfar = u_nearFar.y;
+	return -zfar * znear / (depth * (zfar - znear) - zfar);
+}
+
 void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
@@ -78,5 +84,8 @@ void main() {
     sceneColor.xyz *= grain();
     #endif
 
-    FragColor = sceneColor*0.2;
+    // sceneColor.xyz = vec3(linearize2(texture(depthMapTexture, v_texCoord).r))/40;
+    // sceneColor.xyz = texture(depthMapTexture, v_texCoord).rrr;
+    // sceneColor.w = 1.0;
+    FragColor = sceneColor;
 }

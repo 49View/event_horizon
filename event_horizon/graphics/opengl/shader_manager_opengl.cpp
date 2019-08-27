@@ -339,7 +339,7 @@ ShaderManager::ShaderManager() {
     allocateProgram( ShaderProgramDesc{ S::WIREFRAME } );
     allocateProgram( ShaderProgramDesc{ S::SHADOW_MAP } );
     allocateProgram( ShaderProgramDesc{ S::NORMAL_MAP } );
-    allocateProgram( ShaderProgramDesc{ S::DEPTH_MAP }.vsh( "vertex_shader_3d_c" ).fsh( "shadowmap" ) );
+    allocateProgram( ShaderProgramDesc{ S::DEPTH_MAP }.vsh( "vertex_shader_3d_c" ).fsh( "depthmap" ) );
     allocateProgram( ShaderProgramDesc{ S::SKYBOX } );
     allocateProgram( ShaderProgramDesc{ S::FONT_2D }.vsh( "vertex_shader_2d_font" ).fsh( "plain_font" ));
     allocateProgram( ShaderProgramDesc{ S::FONT }.vsh( "vertex_shader_3d_font" ).fsh( "plain_font" ));
