@@ -23,6 +23,8 @@ public:
 	static const Vector4f HUGE_VALUE_POS;
 	static const Vector4f HUGE_VALUE_NEG;
 
+	static const Vector4f NORMAL_MAP_COLOR;
+
 	static const Vector4f WHITE;
 	static const Vector4f BLACK;
 	static const Vector4f YELLOW;

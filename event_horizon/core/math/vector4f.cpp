@@ -112,6 +112,9 @@ const Vector4f Vector4f::BROWN = Vector4f( 0.6f, 0.2f, 0.2f, 1.0f );
 const Vector4f Vector4f::CYAN = Vector4f( 0.0f, 1.0f, 1.0f, 1.0f );
 const Vector4f Vector4f::PURPLE = Vector4f( 1.0f, 0.0f, 1.0f, 1.0f );
 
+const Vector4f Vector4f::NORMAL_MAP_COLOR = Vector4f( 0.5f, 0.5f, 1.0f, 1.0f );
+
+
 const Vector4f Vector4f::PASTEL_GRAY = Vector4f( 64.0f / 255.0f, 64.0f / 255.0f, 64.0f / 255.0f, 1.0f );
 const Vector4f Vector4f::PASTEL_GRAYLIGHT = Vector4f( 128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f, 1.0f );
 const Vector4f Vector4f::PASTEL_ORANGE = Vector4f( 241.0f / 255.0f, 103.0f / 255.0f, 69.0f / 255.0f, 1.0f );

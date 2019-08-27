@@ -5,12 +5,12 @@ import ToggleButton from "react-bootstrap/ToggleButton";
 import { alphaBool } from "../../../utils/utils";
 
 const RenderParamsToolbar = () => {
-  const [useSkybox, setUseSkybox] = useState(false);
+  const [useSkybox, setUseSkybox] = useState(true);
   const [useVignette, setVignette] = useState(true);
   const [useFilmGrain, setFilmGrain] = useState(true);
   const [useBloom, setBloom] = useState(true);
-  //   const [useDOF, setDOF] = useState(false);
-  //   const [useSSAO, setSSAO] = useState(false);
+  const [useDOF, setDOF] = useState(false);
+  const [useSSAO, setSSAO] = useState(false);
 
   return (
     <div className="renderParams-a">
@@ -66,22 +66,22 @@ const RenderParamsToolbar = () => {
         <ToggleButton
           variant="secondary"
           value={5}
-          //   onChange={e => {
-          //     window.Module.addScriptLine("rr.useDOF(" + alphaBool(useDOF) + ")");
-          //     setDOF(!useDOF);
-          //   }}
+          onChange={e => {
+            window.Module.addScriptLine("rr.useDOF(" + alphaBool(useDOF) + ")");
+            setDOF(!useDOF);
+          }}
         >
           <i className="far fa-images"></i>
         </ToggleButton>
         <ToggleButton
           variant="secondary"
           value={6}
-          //   onChange={e => {
-          //     window.Module.addScriptLine(
-          //       "rr.useSSAO(" + alphaBool(useSSAO) + ")"
-          //     );
-          //     setSSAO(!useSSAO);
-          //   }}
+          onChange={e => {
+            window.Module.addScriptLine(
+              "rr.useSSAO(" + alphaBool(useSSAO) + ")"
+            );
+            setSSAO(!useSSAO);
+          }}
         >
           <i className="fas fa-rainbow"></i>
         </ToggleButton>

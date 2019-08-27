@@ -194,6 +194,9 @@ void RLTargetPBR::renderDepthMap() {
     rr.CB_U().pushCommand( { CommandBufferCommandName::depthMapBufferBindAndClear } );
     rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteTrue } );
     rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestTrue } );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestLess } );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::alphaBlendingFalse } );
+    rr.CB_U().pushCommand( { CommandBufferCommandName::cullModeBack } );
 
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange(k) ) {

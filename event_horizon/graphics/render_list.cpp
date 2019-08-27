@@ -320,11 +320,11 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::shadowMap)->bind();
             break;
         case CommandBufferCommandName::depthMapBufferBindAndClear:
-            cstack->fb(CommandBufferFrameBufferType::depthMap)->bind();
-            cstack->fb(CommandBufferFrameBufferType::depthMap)->clearDepthBuffer( 1.0f );
+            cstack->fb(CommandBufferFrameBufferType::depthMap)->bindAndClearWithColor(C4f::WHITE*100.0f);
+//            cstack->fb(CommandBufferFrameBufferType::depthMap)->clearDepthBuffer( 100.0f );
             break;
         case CommandBufferCommandName::normalMapBufferBindAndClear:
-            cstack->fb(CommandBufferFrameBufferType::normalMap)->bindAndClearWithColor(C4f::GREEN);
+            cstack->fb(CommandBufferFrameBufferType::normalMap)->bindAndClearWithColor(C4f::NORMAL_MAP_COLOR);
             break;
         case CommandBufferCommandName::ssaoRender: {
             cstack->fb( CommandBufferFrameBufferType::ssaoMap )->bind();
