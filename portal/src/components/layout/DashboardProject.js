@@ -11,6 +11,7 @@ import MaterialEditor from "./entities/MaterialEditor";
 import { loadWasmComplete } from "../../actions/wasm";
 import EntityUpdateContent from "./entities/EntityUpdateContent";
 import EntityMetaSection from "./entities/EntityMetaSection";
+import RenderParamsToolbar from "./entities/RenderParamsToolbar";
 
 const containerClassFromGroup = group => {
   switch (group) {
@@ -72,8 +73,8 @@ const DashboardProject = ({
 
   const bShowEntityCanvas = currentEntity && group !== "app";
 
-  const canvasSizeXNum = bShowEntityCanvas ? 522 : 495;
-  const canvasSizeYNum = bShowEntityCanvas ? 522 : 278;
+  const canvasSizeXNum = bShowEntityCanvas ? 529 : 495;
+  const canvasSizeYNum = bShowEntityCanvas ? 536 : 278;
 
   const canvasSizeX = canvasSizeXNum.toString() + "px";
   const canvasSizeY = canvasSizeYNum.toString() + "px";
@@ -84,7 +85,7 @@ const DashboardProject = ({
     (canvasSizeYNum * (window.devicePixelRatio || 1)).toString() + "px";
 
   const canvasPadding = bShowEntityCanvas ? "5px" : "1px";
-  const canvasMargin = bShowEntityCanvas ? "7px" : "0px";
+  const canvasMargin = bShowEntityCanvas ? "0px" : "0px";
 
   const canvasStyle = {
     visibility: canvasVisibility,
@@ -102,11 +103,12 @@ const DashboardProject = ({
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>
-      {bShowEntityCanvas && (
+      {/* {bShowEntityCanvas && (
         <div className="nameValue-a medium text-primary">
           {currentEntity && currentEntity.entity.metadata.name}
         </div>
-      )}
+      )} */}
+      {bShowEntityCanvas && <RenderParamsToolbar />}
       {bShowEntityCanvas && <EntityUpdateContent />}
       <div className="EntryEditorRender">
         <canvas
@@ -127,7 +129,7 @@ const DashboardProject = ({
     <div className="dashboardContainer">
       {loading && <Spinner />}
       <Entries cname="thumbs-a thumbsEntityArea" />
-      <div className="editor-a entryEditor">{mainEditorDiv}</div>
+      <div className="editor-a">{mainEditorDiv}</div>
     </div>
   );
 };

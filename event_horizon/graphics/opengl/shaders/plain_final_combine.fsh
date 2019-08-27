@@ -1,5 +1,11 @@
 #version #opengl_version
 
+#define _VIGNETTING_ 0
+#define _GRAINING_ 0
+#define _DOFING_ 0
+#define _BLOOMING_ 0
+#define _SSAOING_ 0
+
 #include "lighting_uniforms.glsl"
 #include "camera_uniforms.glsl"
 
@@ -30,12 +36,6 @@ float grain() {
 	return 1.0 - ((mod((mod(x, 17.0) + 1.0) * (mod(x, 123.0) + 1.0), 0.02)-0.0075) * strength);
 }
 
-float linearize(float depth) {
-    float znear = u_nearFar.x;
-    float zfar = u_nearFar.y;
-	return -zfar * znear / (depth * (zfar - znear) - zfar);
-}
-
 vec3 bloom( float amount ) {
     return vec3(texture(bloomTexture, v_texCoord).r*amount);
 }
@@ -49,12 +49,25 @@ vec3 ssao() {
 void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
-    // sceneColor.xyz = dof();
+    #if _DOFING_
+    sceneColor.xyz = dof();
+    #endif
 
-    // sceneColor.xyz += bloom(0.35); 
-    //sceneColor.xyz *= ssao(); 
+    #if _BLOOMING_
+    sceneColor.xyz += bloom(0.35); 
+    #endif
+
+    #if _SSAOING_
+    sceneColor.xyz *= ssao(); 
+    #endif
+
+    #if _VIGNETTING_
     sceneColor.xyz *= vignetting();
+    #endif
+
+    #if _GRAINING_
     sceneColor.xyz *= grain();
+    #endif
 
     FragColor = sceneColor;
 }

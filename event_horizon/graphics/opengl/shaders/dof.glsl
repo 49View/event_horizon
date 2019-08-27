@@ -62,6 +62,12 @@ float feather = 0.4; //pentagon shape feather
 
 //------------------------------------------
 
+float linearize(float depth) {
+    float znear = u_nearFar.x;
+    float zfar = u_nearFar.y;
+	return -zfar * znear / (depth * (zfar - znear) - zfar);
+}
+
 float penta(vec2 coords) {
     //pentagonal shape
     float scale = float(rings) - 1.3;

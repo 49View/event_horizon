@@ -33,7 +33,7 @@ const ImageEditor = ({ currentEntity, loading }) => {
   return (
     <Fragment>
       {loading && <Spinner />}
-      <div className="editor-a entryEditor">{entityRender}</div>
+      <div className="editor-a">{entityRender}</div>
     </Fragment>
   );
 };

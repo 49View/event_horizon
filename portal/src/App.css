@@ -82,6 +82,7 @@ body {
 .mainDesktopPageLayout {
   width: 1280px;
   margin: 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .project-a {
@@ -204,10 +205,10 @@ img {
   grid-template-areas:
     "EntityThumbnailInset EntityThumbnailTags"
     "EntityThumbnailInset EntityThumbnailOwner";
-  width: 94%;
+  width: 98%;
   height: 58px;
   border-radius: 4px;
-  margin: 4px 6px;
+  margin: 6px 2px;
   background-image: linear-gradient(
     rgba(23, 162, 184, 0.06),
     rgba(23, 162, 184, 0)
@@ -319,8 +320,6 @@ input#search-bar:hover {
 }
 
 .entitiesSearchBox {
-  /* margin: auto; */
-  padding: 5px;
   height: 45px;
   width: 100%;
   overflow: hidden;
@@ -382,14 +381,7 @@ input#search-bar:hover {
 }
 
 .thumbsEntityArea {
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  overflow-y: scroll;
-}
-
-.entryEditor {
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
 }
 
 .EntryEditorRender {
@@ -402,12 +394,19 @@ input#search-bar:hover {
   overflow: hidden;
 }
 
+.renderParams-a {
+  grid-area: renderParams;
+  justify-self: start;
+  align-self: center;
+  padding-left: 8px;
+}
+
 .nameValue-a {
   grid-area: nameValue;
   justify-self: start;
   align-self: center;
-  padding-left: 12px;
-  /* padding-top: 5px; */
+  padding-left: 8px;
+  font-size: 1rem;
 }
 
 .entity-drag-a {
@@ -434,8 +433,8 @@ input#search-bar:hover {
   justify-self: stretch;
   align-self: start;
   padding: 5px;
-  margin: 7px;
-  height: 522px;
+  margin: 0px 7px;
+  height: 100%;
   border: 1px solid #d1d1d140;
   border-radius: 4px;
   overflow-y: auto;
@@ -443,7 +442,7 @@ input#search-bar:hover {
 }
 
 .titleMargin {
-  margin: 8px 2px;
+  margin: 12px 2px;
 }
 
 .matName-a {
@@ -690,10 +689,10 @@ input#search-bar:hover {
 .GeomEditorRenderGrid {
   display: grid;
   /* margin: 10px; */
-  grid-template-columns: 522px 253px 228px;
+  grid-template-columns: 522px 253px 235px;
   grid-template-rows: 45px 373px 117px 45px;
   grid-template-areas:
-    "nameValue nameValue drag"
+    "renderParams nodeViewer drag"
     "render nodeViewer entity-tags"
     "render nodeViewer entity-info"
     "render nodeViewer deleteentity";
@@ -1322,7 +1321,6 @@ input[type="color"]:active {
   border-color: #eeeeee;
   border-style: dashed;
   background-color: #fafafa;
-  margin: 5px;
   margin-bottom: 7px;
   color: #bdbdbd;
   outline: none;
@@ -1331,7 +1329,7 @@ input[type="color"]:active {
 }
 
 .dropzoneNoHMargins {
-  margin: 5px 0px;
+  /* margin: 5px 0px; */
   cursor: pointer;
 }
 

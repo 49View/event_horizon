@@ -63,3 +63,25 @@ GLuint Shader::compile() {
 	}
 
 }
+
+void Shader::setPreprocessDefine( const std::string& _define, const std::string& _value ) {
+    // Inject global macros
+
+    size_t fi = 0;
+    std::istringstream smStream(mSource);
+    size_t numCharRead = 0;
+    auto defineStr = "#define " + _define;
+    for (std::string line; std::getline(smStream, line); ) {
+        numCharRead += line.size();
+        if (( fi = line.find( defineStr )) != std::string::npos ) {
+            size_t fe = line.find( "//" );
+            if ( fe == std::string::npos || fe > fi ) {
+                fi = mSource.find( defineStr, numCharRead-line.size() );
+                fe = mSource.find( '\n', numCharRead );
+                mSource.erase( mSource.begin() + fi, mSource.begin() + fe );
+                mSource.insert( fi, defineStr + " " + _value );
+            }
+        }
+    }
+
+}

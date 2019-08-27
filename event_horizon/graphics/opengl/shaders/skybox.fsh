@@ -141,6 +141,4 @@ void main()
     
     // color.rgb = v_texCoord * 0.5 + 0.5;
     // color = vec4(.8);
-
-    return;
 }

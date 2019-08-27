@@ -170,15 +170,49 @@ void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
     }
 }
 
+std::string boolAlphaBinary( bool _flag ) {
+    return _flag ? "1" : "0";
+}
+
 void RenderOrchestrator::init() {
     initWHCallbacks();
 
     lua.open_libraries();
 
     auto luarr = lua["rr"].get_or_create<sol::table>();
+
     luarr["clearColor"] = [](const std::string& _col ) {
         Renderer::clearColor( V4f::XTORGBA(_col) );
     };
+    luarr["useSkybox"] = [&](bool _flag) {
+        useSkybox(_flag);
+    };
+
+    luarr["useVignette"] = [&](bool _flag) {
+        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine", "_VIGNETTING_", boolAlphaBinary(_flag) );
+    };
+
+    luarr["useFilmGrain"] = [&](bool _flag) {
+        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+                                     "_GRAINING_", boolAlphaBinary(_flag) );
+    };
+
+    luarr["useBloom"] = [&](bool _flag) {
+        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+                               "_BLOOMING_", boolAlphaBinary(_flag) );
+    };
+
+    luarr["useDOF"] = [&](bool _flag) {
+        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+                               "_DOFING_", boolAlphaBinary(_flag) );
+    };
+
+    luarr["useSSAO"] = [&](bool _flag) {
+        useSSAO(_flag);
+        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+                               "_SSAOING_", boolAlphaBinary(_flag) );
+    };
+
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",
                 std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1, std::placeholders::_2 ) );

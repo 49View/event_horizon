@@ -43,7 +43,9 @@ public:
 		mSource = source;
 	}
 
-	GLuint compile();
+    void setPreprocessDefine( const std::string& _define, const std::string& _value );
+
+    GLuint compile();
 
 	GLenum getShaderType() const;
 

@@ -67,12 +67,14 @@ public:
 
     // OpenGL init function
     bool loadShaders( bool _performCompileOnly = false );
+    bool injectDefine( const std::string& _shaderName, Shader::Type stype, const std::string& id, const std::string& _define, const std::string& _value );
     std::shared_ptr<ProgramOpenGL> P( const std::string& id ) const;
 
     int getProgramCount() const;
     std::vector<GLuint> ProgramsHandles() const;
 
     void inject( const std::string& key, const std::string& text );
+    bool injectDefines( Shader::Type stype, const std::string& shaderName, const std::string& _define, const std::string& _value );
     bool checkShaderChanged( const std::string& key, const std::string& text ) const;
     bool injectIfChanged( const std::string& key, const std::string& text );
     void createCCInjectionMap();
@@ -83,7 +85,6 @@ private:
     void allocateProgram( const ShaderProgramDesc& _pd );
     void allocateShader( const std::string& id, Shader::Type stype );
     bool injectShadersWithCode();
-
     std::string openFileWithIncludeParsing( const std::string& filename );
     std::string parsePreprocessorMacro( std::string& source );
     std::string injectPreprocessorMacro( std::string& source );

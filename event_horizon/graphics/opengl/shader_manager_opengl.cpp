@@ -429,13 +429,6 @@ std::string ShaderManager::parsePreprocessorMacro( std::string& sm ) {
 
 std::string ShaderManager::injectPreprocessorMacro( std::string& sm ) {
     // Inject global macros
-//    auto vi = sm.find( "#version" );
-//    ASSERT( vi != std::string::npos );
-//    auto viendline = sm.find( "\n", vi );
-//
-//    for ( auto& d : mGlobalMacros ) {
-//        sm.insert( viendline + 1, "#define " + d.first + " " + d.second + "\r\n" );
-//    }
 
     size_t fi = 0;
     for ( auto& w : mDefineMap ) {
@@ -510,35 +503,39 @@ bool ShaderManager::addShader( const std::string& id, Shader::Type stype ) {
     //LOGI("Adding vertex shader: %s", id);
     if ( id.empty() ) return true;
 
+    std::shared_ptr<Shader> sid = nullptr;
+
     switch ( stype ) {
         case Shader::TYPE_VERTEX_SHADER:
             mVertexShaders[id]->setSource( openFileWithIncludeParsing( id + ".vsh" ) );
-            return mVertexShaders[id]->compile();
+            sid = mVertexShaders[id];
             break;
         case Shader::TYPE_TESSELATION_CONTROL_SHADER:
             mTesselationControlShaders[id]->setSource( openFileWithIncludeParsing( id + ".tch" ) );
-            return mTesselationControlShaders[id]->compile();
+            sid =  mTesselationControlShaders[id];
             break;
         case Shader::TYPE_TESSELATION_EVALUATION_SHADER:
             mTesselationEvaluationShaders[id]->setSource(  openFileWithIncludeParsing( id + ".teh" ) );
-            return mTesselationEvaluationShaders[id]->compile();
+            sid = mTesselationEvaluationShaders[id];
             break;
         case Shader::TYPE_GEOMETRY_SHADER:
             mGeometryShaders[id]->setSource( openFileWithIncludeParsing( id + ".gsh" ) );
-            return mGeometryShaders[id]->compile();
+            sid = mGeometryShaders[id];
             break;
         case Shader::TYPE_FRAGMENT_SHADER:
             mFragmentShaders[id]->setSource( openFileWithIncludeParsing( id + ".fsh" ) );
-            return mFragmentShaders[id]->compile();
+            sid = mFragmentShaders[id];
             break;
         case Shader::TYPE_COMPUTE_SHADER:
             mComputeShaders[id]->setSource( openFileWithIncludeParsing( id + ".csh" ) );
-            return mComputeShaders[id]->compile();
+            sid = mComputeShaders[id];
             break;
         default:
             return false;
-            break;
     }
+
+    return sid->compile();
+
 }
 
 std::shared_ptr<ProgramOpenGL> ShaderManager::initProgram( const ShaderProgramDesc& sb ) {
@@ -565,6 +562,37 @@ bool ShaderManager::loadProgram( const ShaderProgramDesc& sb ) {
                                     gshForProgram(program),
                                     fshForProgram(program),
                                     cshForProgram(program) );
+}
+
+bool ShaderManager::injectDefines( Shader::Type stype, const std::string& id, const std::string& _define, const std::string& _value ) {
+
+    std::shared_ptr<Shader> sid = nullptr;
+    switch ( stype ) {
+        case Shader::TYPE_VERTEX_SHADER:
+            sid = mVertexShaders[id];
+            break;
+        case Shader::TYPE_TESSELATION_CONTROL_SHADER:
+            sid = mTesselationControlShaders[id];
+            break;
+        case Shader::TYPE_TESSELATION_EVALUATION_SHADER:
+            sid = mTesselationEvaluationShaders[id];
+            break;
+        case Shader::TYPE_GEOMETRY_SHADER:
+            sid = mGeometryShaders[id];
+            break;
+        case Shader::TYPE_FRAGMENT_SHADER:
+            sid = mFragmentShaders[id];
+            break;
+        case Shader::TYPE_COMPUTE_SHADER:
+            sid = mComputeShaders[id];
+            break;
+        default:
+            return false;
+            break;
+    }
+    sid->setPreprocessDefine( _define, _value);
+    sid->compile();
+    return true;
 }
 
 bool ShaderManager::injectShadersWithCode() {
@@ -606,6 +634,23 @@ bool ShaderManager::loadShaders( bool _performCompileOnly ) {
     for ( const auto& pd : programDescs ) {
         compilationResult = loadProgram( pd );
         if ( !compilationResult ) return false;
+    }
+
+    mNumReloads++;
+    return true;
+}
+
+bool ShaderManager::injectDefine( const std::string& _shaderName, Shader::Type stype, const std::string& _id, const std::string& _define, const std::string& _value ) {
+
+    bool compilationResult = injectDefines( stype, _id, _define, _value );
+
+    if ( !compilationResult ) return false;
+
+    for ( const auto& pd : programDescs ) {
+        if ( pd.name.value == _shaderName ) {
+            compilationResult = loadProgram( pd );
+            if ( !compilationResult ) return false;
+        }
     }
 
     mNumReloads++;

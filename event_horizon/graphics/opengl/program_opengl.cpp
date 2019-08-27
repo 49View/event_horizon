@@ -106,14 +106,14 @@ bool ProgramOpenGL::createOrUpdate( std::shared_ptr<Shader> vertexShader,
                                     std::shared_ptr<Shader> computeShader ) {
 
     if ( mHandle > 0 ) {
-        const static size_t maxShaderAttached = 16;
-        GLsizei numAttachedShaders = 0;
-        GLuint attachedShadersHandles[maxShaderAttached];
-        GLCALL( glGetAttachedShaders( mHandle, maxShaderAttached, &numAttachedShaders, attachedShadersHandles ) );
-        for ( int t = 0; t < numAttachedShaders; t++ ) {
-            GLCALL( glDetachShader(mHandle, attachedShadersHandles[t] ) );
-        }
-        GLCALL( glDeleteProgram( mHandle ) );
+//        const static size_t maxShaderAttached = 16;
+//        GLsizei numAttachedShaders = 0;
+//        GLuint attachedShadersHandles[maxShaderAttached];
+//        GLCALL( glGetAttachedShaders( mHandle, maxShaderAttached, &numAttachedShaders, attachedShadersHandles ) );
+//        for ( int t = 0; t < numAttachedShaders; t++ ) {
+//            GLCALL( glDetachShader(mHandle, attachedShadersHandles[t] ) );
+//        }
+//        GLCALL( glDeleteProgram( mHandle ) );
     }
     GLCALLRET(mHandle, glCreateProgram() );
     if ( mHandle > 0 ) {

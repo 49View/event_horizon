@@ -16,6 +16,7 @@
 #include <core/lightmap_exchange_format.h>
 #include <graphics/lightmap_manager.hpp>
 #include <graphics/light_manager.h>
+#include <graphics/shader_manager.h>
 
 scene_t scene{ 0 };
 

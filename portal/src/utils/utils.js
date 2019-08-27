@@ -1,5 +1,9 @@
 import React from "react";
 
+export const alphaBool = flag => {
+  return flag === true ? "true" : "false";
+};
+
 export const getFileName = pathname => {
   return pathname
     .split("\\")
