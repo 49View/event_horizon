@@ -21,8 +21,10 @@ float ssao() {
     float occluded = 1.0;
     vec2 uNoiseScale = vec2(1024.0/4.0, 1024.0/4.0);
     vec3 origin = v_texT2 * linearize( texture(depthMapTexture, v_texCoord).r );
+
     // vec3 origin = v_texT2 * texture(depthMapTexture, v_texCoord).r;
-    //return -origin.z/1000;
+    if ( -origin.z > 999.9 ) return 1.0;
+    // return -origin.z/100.0;
     vec3 normal = texture(normalMapTexture, v_texCoord).xyz * 2.0 - 1.0;
     normal = normalize(normal);
     normal.y = -normal.y;
@@ -41,7 +43,7 @@ float ssao() {
     //return origin.z;
 
     float occlusion = 0.0;
-    float uRadius = 15.015;///25.0;
+    float uRadius = 10.15;///25.0;
     int numSamples = 32; // u_hemisphereSampleKernelSize
     for (int i = 0; i < numSamples; ++i) {
         // get sample position:
@@ -66,7 +68,7 @@ float ssao() {
         //return sampleDepth - zsample.z;
         // return -zsample.z/400;
         // range check & accumulate:
-        float rangeCheck= abs(-origin.z/u_nearFar.y - sampleDepth) < uRadius ? 1.0 : 0.0;
+        float rangeCheck= abs(-origin.z/u_nearFar.y - sampleDepth) < 0.1 ? 1.0 : 0.0;
         //return rangeCheck;
         //return (sampleDepth <= zsample.z ? 1.0 : 0.0);
         //rangeCheck = 1.0;
@@ -128,6 +130,6 @@ void main() {
     FragColor = vec4( vec3(ao), 1.0);
     // FragColor = vec4(v_texT2*0.5+0.5, 1.0);
     // FragColor = vec4(v_texT2, 1.0);
-    //FragColor = vec4(sceneColor.xyz, 1.0);
+    // FragColor = vec4(sceneColor.xyz, 1.0);
     // FragColor = vec4(vec3(currZ)/4.0, 1.0);
 }
