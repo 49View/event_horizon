@@ -232,13 +232,13 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float visibility = u_shadowParameters[2];
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     // float nlAngle = clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
-    v_shadowmap_coord3Biases.z -= u_shadowParameters[0] ;
-    visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
+    v_shadowmap_coord3Biases.z -= u_shadowParameters[0]*2.5;
+    // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
-    // for ( int i = 0; i < 4; i++ ) {
-    //     int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;
-    //     visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3.xy + poissonDisk[index] / 4096.0, v_shadowmap_coord3.z ) ) * 0.25;// * u_timeOfTheDay;
-    // }
+    for ( int i = 0; i < 4; i++ ) {
+        int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;
+        visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + poissonDisk[index] / 1024.0, v_shadowmap_coord3Biases.z ) ) * 0.25 * u_shadowParameters[1];// * u_timeOfTheDay;
+    }
 #end_code
 
 #define_code final_combine
