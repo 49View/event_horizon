@@ -834,4 +834,8 @@ std::vector<V3f> Camera::frustumFarViewPort() const {
     return ret;
 }
 
+Vector4f Camera::getMotionBlurParams() const {
+    return mMotionBlurParams;
+}
+
 

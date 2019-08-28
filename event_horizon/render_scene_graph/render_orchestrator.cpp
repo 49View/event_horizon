@@ -16,6 +16,7 @@
 #include <graphics/vp_builder.hpp>
 #include <graphics/window_handling.hpp>
 #include <render_scene_graph/render_orchestrator_callbacks.hpp>
+#include <render_scene_graph/lua_scripts.hpp>
 
 std::vector<std::string> RenderOrchestrator::callbackPaths;
 std::vector<PresenterUpdateCallbackFunc> RenderOrchestrator::sUpdateCallbacks;
@@ -148,7 +149,41 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
 
 }
 
-void RenderOrchestrator::luaUpdate() {
+//#define LUA_HARDCODED_DEBUG
+
+void RenderOrchestrator::luaUpdate( const AggregatedInputData& _aid ) {
+
+#ifdef     LUA_HARDCODED_DEBUG
+    lua.script( R"(
+
+local machine = require('statemachine')
+
+local fsm = machine.create({
+  initial = 'green',
+  events = {
+    { name = 'warn',  from = 'green',  to = 'yellow' },
+    { name = 'panic', from = 'yellow', to = 'red'    },
+    { name = 'calm',  from = 'red',    to = 'yellow' },
+    { name = 'clear', from = 'yellow', to = 'green'  }
+  },
+  callbacks = {
+    onpanic =  function(self, event, from, to, msg) print('panic! ' .. msg)    end,
+    onclear =  function(self, event, from, to, msg) print('thanks to ' .. msg) end,
+    ongreen =  function(self, event, from, to)      print('green light')       end,
+    onyellow = function(self, event, from, to)      print('yellow light')      end,
+    onred =    function(self, event, from, to)      print('red light')         end,
+  }
+})
+
+function update(aid)
+-- print(aid.scrollValue);
+-- fsm:warn()
+print(fsm.current)
+print("Hello world")
+end
+
+)");
+#else
     if ( auto luaScript = getLuaScriptHotReload(); !luaScript.empty() ) {
         try {
             lua.script( luaScript );
@@ -159,10 +194,16 @@ void RenderOrchestrator::luaUpdate() {
 
         setLuaScriptHotReload("");
     }
+#endif
+    // Call update every frame
+    auto updateFunction = lua["update"];
+    if ( updateFunction ) {
+        updateFunction(_aid);
+    }
 }
 
 void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
-    luaUpdate();
+    luaUpdate(_aid);
     updateCallbacks();
 
     for ( auto& [k,v] : mRigs ) {
@@ -178,6 +219,19 @@ void RenderOrchestrator::init() {
     initWHCallbacks();
 
     lua.open_libraries();
+
+    auto v2fLua = lua.new_usertype<Vector2f>("V2f",
+                                          sol::constructors<>());
+    v2fLua["x"] = &Vector2f::x;
+    v2fLua["y"] = &Vector2f::y;
+
+    lua.new_usertype<AggregatedInputData>("AggregatedInputData",
+            sol::constructors<>(),
+            "scrollValue", &AggregatedInputData::scrollValue,
+            "isMouseTouchedDown", &AggregatedInputData::isMouseTouchedDown);
+
+    // State machine require
+    lua.require_script("statemachine", luaStateMachine);
 
     auto luarr = lua["rr"].get_or_create<sol::table>();
 

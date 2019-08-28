@@ -134,7 +134,7 @@ protected:
     void addBoxToViewport( const std::string& _nane, const SceneScreenBox& _box );
     void setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport );
     void setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport );
-    void luaUpdate();
+    void luaUpdate(const AggregatedInputData& _aid);
 
 public:
     Renderer& RR();

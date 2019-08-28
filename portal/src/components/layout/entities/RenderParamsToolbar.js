@@ -9,8 +9,8 @@ const RenderParamsToolbar = () => {
   const [useVignette, setVignette] = useState(true);
   const [useFilmGrain, setFilmGrain] = useState(true);
   const [useBloom, setBloom] = useState(true);
-  const [useDOF, setDOF] = useState(false);
-  const [useSSAO, setSSAO] = useState(false);
+  const [useDOF, setDOF] = useState(true);
+  const [useSSAO, setSSAO] = useState(true);
 
   return (
     <div className="renderParams-a">

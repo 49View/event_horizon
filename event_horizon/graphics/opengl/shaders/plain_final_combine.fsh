@@ -87,5 +87,5 @@ void main() {
     // sceneColor.xyz = vec3(linearize2(texture(depthMapTexture, v_texCoord).r))/40;
     // sceneColor.xyz = texture(depthMapTexture, v_texCoord).rrr;
     // sceneColor.w = 1.0;
-    FragColor = sceneColor;
+    FragColor = sceneColor;//*u_motionBlurParams[0];
 }

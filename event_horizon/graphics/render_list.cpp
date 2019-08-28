@@ -250,6 +250,7 @@ void CommandBufferList::setCameraUniforms( std::shared_ptr<Camera> c0 ) {
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyePos, c0->getPosition(), mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyeDir, c0->getDirection(), mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::nearFar, c0->getNearFar(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData( rr.CameraUBO(), UniformNames::motionBlurParams, c0->getMotionBlurParams(), mCurrent->UBOCameraBuffer.get());
 
     pushCommand( { CommandBufferCommandName::setCameraUniforms } );
 }

@@ -122,6 +122,7 @@ public:
 	Vector3f getDirection() const;
 	Vector3f getDirectionInv() const;
 	Vector3f getDirectionRH() const;
+	Vector4f getMotionBlurParams() const;
 
 	[[nodiscard]] std::vector<V3f> frustumFarViewPort() const;
 
@@ -167,6 +168,7 @@ private:
 	float mNearClipPlaneZClampEdit2d = 0.5f;
 	float mFarClipPlaneZClampEdit2d = 30.0f;
 
+	V4f mMotionBlurParams = V4f::ONE;
 	bool mLockAtWalkingHeight = false;
 	bool mbLocked = false;
 

@@ -39,6 +39,7 @@ void EditorBackEnd::activatePostLoad() {
     Renderer::clearColor(C4f::WHITE);
     rsg.useSkybox( false );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
+    rsg.RR().LM()->setIndoorSceneCoeff(2.0f);
     rsg.changeTime( "winter noon" );
     rsg.setRigCameraController<CameraControlOrbit3d>();
     rsg.DC()->setFoV(60.0f);

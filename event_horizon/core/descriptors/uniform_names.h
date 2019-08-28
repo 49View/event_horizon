@@ -33,6 +33,7 @@ namespace UniformNames {
 	const std::string eyeDir = "u_eyeDir";
 	const std::string eyePos = "u_eyePos";
 	const std::string nearFar = "u_nearFar";
+	const std::string motionBlurParams = "u_motionBlurParams";
 	const std::string timeOfTheDay = "u_timeOfTheDay";
 	const std::string sunHRDMult = "u_sunHDRMult";
 
