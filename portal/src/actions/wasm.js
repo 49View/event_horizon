@@ -161,10 +161,10 @@ export const loadWasmComplete = async (
     wasmAxios.defaults.baseURL = "";
 
     let prefolder = "";
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
-      // dev code
-      prefolder = "local/";
-    }
+    // if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+    //   // dev code
+    //   prefolder = "local/";
+    // }
 
     const currentDate = new Date();
     let downloadConfig = {

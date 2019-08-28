@@ -156,49 +156,38 @@ void RenderOrchestrator::luaUpdate( const AggregatedInputData& _aid ) {
 #ifdef     LUA_HARDCODED_DEBUG
     lua.script( R"(
 
-local machine = require('statemachine')
-
-local fsm = machine.create({
-  initial = 'green',
-  events = {
-    { name = 'warn',  from = 'green',  to = 'yellow' },
-    { name = 'panic', from = 'yellow', to = 'red'    },
-    { name = 'calm',  from = 'red',    to = 'yellow' },
-    { name = 'clear', from = 'yellow', to = 'green'  }
-  },
-  callbacks = {
-    onpanic =  function(self, event, from, to, msg) print('panic! ' .. msg)    end,
-    onclear =  function(self, event, from, to, msg) print('thanks to ' .. msg) end,
-    ongreen =  function(self, event, from, to)      print('green light')       end,
-    onyellow = function(self, event, from, to)      print('yellow light')      end,
-    onred =    function(self, event, from, to)      print('red light')         end,
-  }
-})
-
 function update(aid)
--- print(aid.scrollValue);
--- fsm:warn()
-print(fsm.current)
-print("Hello world")
-end
+  if ( aid:isMouseSingleTap(0) == true ) then
+    print("Z")
+    end
+  end
 
 )");
 #else
     if ( auto luaScript = getLuaScriptHotReload(); !luaScript.empty() ) {
         try {
-            lua.script( luaScript );
+            lua.safe_script( luaScript );
         } catch (const std::exception& e) { // caught by reference to base
             std::cout << " a standard exception was caught, with message '"
                       << e.what() << "'\n";
+        } catch (...) {
+            std::cout << "... Except not handled";
         }
 
         setLuaScriptHotReload("");
     }
 #endif
     // Call update every frame
-    auto updateFunction = lua["update"];
-    if ( updateFunction ) {
-        updateFunction(_aid);
+    try {
+        sol::protected_function updateFunction = lua["update"];
+        if ( updateFunction ) {
+            updateFunction(_aid);
+        }
+    } catch (const std::exception& e) { // caught by reference to base
+        std::cout << " a standard exception was caught, with message '"
+                  << e.what() << "'\n";
+    } catch (...) {
+        std::cout << "... Except not handled";
     }
 }
 
@@ -218,17 +207,28 @@ std::string boolAlphaBinary( bool _flag ) {
 void RenderOrchestrator::init() {
     initWHCallbacks();
 
-    lua.open_libraries();
+    lua.open_libraries( sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::math, sol::lib::table
+            , sol::lib::debug, sol::lib::bit32, sol::lib::io, sol::lib::ffi);
 
     auto v2fLua = lua.new_usertype<Vector2f>("V2f",
                                           sol::constructors<>());
     v2fLua["x"] = &Vector2f::x;
     v2fLua["y"] = &Vector2f::y;
 
-    lua.new_usertype<AggregatedInputData>("AggregatedInputData",
-            sol::constructors<>(),
-            "scrollValue", &AggregatedInputData::scrollValue,
-            "isMouseTouchedDown", &AggregatedInputData::isMouseTouchedDown);
+    auto aid = lua.new_usertype<AggregatedInputData>("AggregatedInputData",
+            sol::constructors<>() );
+
+    aid["scrollValue"] = &AggregatedInputData::scrollValue;
+    aid.set("isMouseTouchedDownFirstTime", sol::readonly(&AggregatedInputData::isMouseTouchedDownFirstTime));
+    aid.set("isMouseTouchedUp", sol::readonly(&AggregatedInputData::isMouseTouchedUp));
+    aid.set("isMouseTouchedDown", sol::readonly(&AggregatedInputData::isMouseTouchedDown));
+    aid.set("isMouseSingleTap", sol::readonly(&AggregatedInputData::isMouseSingleTap));
+    aid.set("hasMouseMoved", sol::readonly(&AggregatedInputData::hasMouseMoved));
+
+    aid.set("mousePos", sol::readonly(&AggregatedInputData::mousePos));
+    aid.set("moveDiffSS", sol::readonly(&AggregatedInputData::moveDiffSS));
+    aid.set("moveDiff", sol::readonly(&AggregatedInputData::moveDiff));
+    aid.set("checkKeyToggleOn", sol::readonly(&AggregatedInputData::checkKeyToggleOn));
 
     // State machine require
     lua.require_script("statemachine", luaStateMachine);

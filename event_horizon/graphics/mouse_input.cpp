@@ -125,6 +125,10 @@ void MouseInput::clearTaps() {
     }
 }
 
+bool AggregatedInputData::checkKeyToggleOn( int keyCode, bool overrideTextInput ) const {
+    return ti.checkKeyToggleOn( keyCode, overrideTextInput );
+}
+
 SwipeDirection MouseInput::checkSwipe( int _touchIndex ) {
 	// Check Swipe
 	if ( status[_touchIndex].overridedSwipe ) {
