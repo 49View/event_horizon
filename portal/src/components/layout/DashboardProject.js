@@ -73,8 +73,8 @@ const DashboardProject = ({
 
   const bShowEntityCanvas = currentEntity && group !== "app";
 
-  const canvasSizeXNum = bShowEntityCanvas ? 529 : 495;
-  const canvasSizeYNum = bShowEntityCanvas ? 536 : 278;
+  const canvasSizeXNum = bShowEntityCanvas ? 529 : 510;
+  const canvasSizeYNum = bShowEntityCanvas ? 536 : 286;
 
   const canvasSizeX = canvasSizeXNum.toString() + "px";
   const canvasSizeY = canvasSizeYNum.toString() + "px";
@@ -103,11 +103,6 @@ const DashboardProject = ({
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>
-      {/* {bShowEntityCanvas && (
-        <div className="nameValue-a medium text-primary">
-          {currentEntity && currentEntity.entity.metadata.name}
-        </div>
-      )} */}
       {bShowEntityCanvas && <RenderParamsToolbar />}
       {bShowEntityCanvas && <EntityUpdateContent />}
       <div className="EntryEditorRender">

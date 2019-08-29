@@ -703,14 +703,32 @@ input#search-bar:hover {
 
 .AppEditorRenderGrid {
   display: grid;
-  grid-template-columns: 522px 481px;
-  grid-template-rows: 552px 20px;
+  grid-template-columns: 510px 510px;
+  grid-template-rows: 30px 262px 262px 30px;
   grid-template-areas:
+    "source_tabs render"
     "source render"
-    "source_controls render";
+    "source app_controls"
+    "source_controls app_controls";
   grid-gap: 0;
   align-items: center;
   justify-items: start;
+}
+
+.source_tabs-a {
+  grid-area: source_tabs;
+  background: white;
+  /* color: var(--primary-color); */
+  width: 100%;
+  height: 100%;
+}
+
+.source_controls-a {
+  grid-area: source_controls;
+}
+
+.app_controls-a {
+  grid-area: app_controls;
 }
 
 .confirm-alert {
@@ -735,11 +753,10 @@ input#search-bar:hover {
   grid-area: source;
   align-self: stretch;
   justify-self: stretch;
-  padding: 1px;
 }
 
 .CodeMirror {
-  height: 552px;
+  height: 524px;
 }
 
 .materialRender {

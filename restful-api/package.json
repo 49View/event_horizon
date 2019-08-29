@@ -35,6 +35,7 @@
     "serve-favicon": "~2.4.2",
     "sha256": "^0.2.0",
     "sharp": "^0.23.0",
+    "simple-git": "^1.124.0",
     "stripe": "^7.5.0",
     "tar": "^4.4.8",
     "tar-stream": "^2.0.1",
