@@ -3,6 +3,9 @@ import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import Landing from "./components/layout/Landing";
 import Routes from "./components/routing/Routes";
 
+import { DBConfig } from './DBConfig';
+import { initDB } from 'react-indexed-db';
+
 // Redux
 import { Provider } from "react-redux";
 import store from "./store";
@@ -13,7 +16,7 @@ import axios from "axios";
 
 import "./App.css";
 
-if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV && process.env.NODE_ENV === "development") {
   // dev code
   axios.defaults.baseURL = "https://localhost:3000";
 } else {
@@ -21,9 +24,17 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
   // production code
 }
 
+console.log("REACT_APP_USE_API:"+process.env.REACT_APP_USE_API);
+if (process.env.REACT_APP_USE_API && process.env.REACT_APP_USE_API==="production") {
+  axios.defaults.baseURL = "https://api.ateventhorizon.com";
+}
+
+
 if (localStorage.token) {
   setAuthToken(localStorage.token);
 }
+
+initDB(DBConfig);
 
 const App = () => {
   useEffect(() => {
