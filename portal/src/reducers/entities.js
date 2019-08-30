@@ -42,6 +42,7 @@ export default function(state = initialState, action) {
   const evaluateTags = sourceTags => {
     let tags = [];
     let c = 0;
+    // eslint-disable-next-line
     for (const tag of sourceTags) {
       tags.push({ id: c, name: tag });
       c++;
@@ -114,6 +115,7 @@ export default function(state = initialState, action) {
     case UPDATE_ENTITIES_PARTIAL_SEARCH:
       let filteredResult = [];
       //   state.entriesFiltered.data.length = 0;
+      // eslint-disable-next-line
       for (const e of state.entries) {
         if (e.metadata.name.toLowerCase().includes(payload)) {
           filteredResult.push(e);
@@ -127,6 +129,7 @@ export default function(state = initialState, action) {
     case UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH:
       let matFilteredResult = [];
       //   state.entriesFiltered.data.length = 0;
+      // eslint-disable-next-line
       for (const e of state.matEntries) {
         if (e.metadata.name.toLowerCase().includes(payload)) {
           matFilteredResult.push(e);

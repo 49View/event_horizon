@@ -4,6 +4,7 @@ const zlib = require("zlib");
 
 const getThumbnailURLBlobFor = (thumbsContainer, thumbName) => {
   let thumb = "";
+  // eslint-disable-next-line
   for (const th of thumbsContainer) {
     if (th.key === thumbName) {
       thumb = th.value;
@@ -45,6 +46,7 @@ export const fillMaterialParams = (key, values, thumbValues = null) => {
   };
 
   if (values.mV3fs) {
+    // eslint-disable-next-line
     for (const v3f of values.mV3fs) {
       if (v3f.key === "diffuseColor") {
         const rgbC = values.mV3fs[0].value;
@@ -58,6 +60,7 @@ export const fillMaterialParams = (key, values, thumbValues = null) => {
   }
 
   if (values.mFloats) {
+    // eslint-disable-next-line
     for (const fv of values.mFloats) {
       if (fv.key === "aoV") {
         matSimpleEntry.aoValue = fv.value;
@@ -72,6 +75,7 @@ export const fillMaterialParams = (key, values, thumbValues = null) => {
   }
 
   if (thumbValues) {
+    // eslint-disable-next-line
     for (const tn of values.mStrings) {
       matSimpleEntry[tn.key] = getThumbnailURLBlobFor(thumbValues, tn.key);
     }

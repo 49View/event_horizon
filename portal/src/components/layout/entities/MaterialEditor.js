@@ -18,6 +18,7 @@ const MaterialEditor = ({ currentEntity }) => {
       translucencyTexture: "/empty.png"
     };
 
+    // eslint-disable-next-line
     for (const dep of currentEntity.jsonRet.values.mStrings) {
       if (dep.key === "diffuseTexture") {
         depPBRMap.albedoTexture = currentEntity.deps[dep.value];

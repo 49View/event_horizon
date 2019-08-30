@@ -199,7 +199,9 @@ export const getFullEntity = entitySource => async dispatch => {
     }
 
     if (entitySource.group !== "app") {
+      // eslint-disable-next-line
       for (const depElem of entitySource.metadata.deps) {
+        // eslint-disable-next-line
         for (const depValue of depElem.value) {
           const res = await axios.get(`/entities/content/byHash/${depValue}`, {
             responseType: "arraybuffer"

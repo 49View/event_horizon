@@ -26,6 +26,7 @@ const GeomEditor = ({
   let matSimples = [];
 
   if (currentEntityNodes) {
+    // eslint-disable-next-line
     for (const e of currentEntityNodes.mrefs) {
       matSimples.push(
         fillMaterialParams(e.key, e.value.values, e.value.thumbValues)

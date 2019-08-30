@@ -9,6 +9,7 @@ const EntityTags = ({ currentEntity, tags, addTagsToEntity }) => {
     const ntags = tags.slice(0);
     ntags.splice(i, 1);
     let newTags = [];
+    // eslint-disable-next-line
     for (const tag of ntags) {
       newTags.push(tag.name);
     }
@@ -18,6 +19,7 @@ const EntityTags = ({ currentEntity, tags, addTagsToEntity }) => {
 
   const handleAddition = tag => {
     let ntags = [];
+    // eslint-disable-next-line
     for (const tag of tags) {
       ntags.push(tag.name);
     }

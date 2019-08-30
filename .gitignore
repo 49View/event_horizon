@@ -100,7 +100,6 @@ typings/
 
 # next.js build output
 .next
-package-lock.json
 
 event_horizon/graphics/opengl/shaders/.cachedShaderMap.txt
 restful-api/bin/localhost.crt

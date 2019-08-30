@@ -192,11 +192,11 @@ workflows:
   version: 2
   build-deploy:
     jobs:
+      - buildNODEJSAPI
       - buildCPP:
           filters:
             branches:
               only: master
-      - buildNODEJSAPI
       - deployNODEJSAPI:
           requires:
             - buildNODEJSAPI
