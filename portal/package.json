@@ -6,28 +6,28 @@
     "axios": "^0.19.0",
     "base64-arraybuffer": "^0.2.0",
     "bootstrap": "^4.3.1",
-    "codemirror": "^5.48.2",
+    "codemirror": "^5.48.4",
     "js-base64": "^2.5.1",
     "jszip": "^3.2.2",
     "md5": "^2.2.1",
     "moment": "^2.24.0",
-    "react": "^16.8.6",
+    "react": "^16.9.0",
     "react-alert": "^5.5.0",
     "react-alert-template-basic": "^1.0.0",
-    "react-bootstrap": "^1.0.0-beta.11",
+    "react-bootstrap": "^1.0.0-beta.12",
     "react-codemirror2": "^6.0.0",
     "react-confirm-alert": "^2.4.1",
-    "react-dom": "^16.8.6",
-    "react-dropzone": "^10.1.5",
+    "react-dom": "^16.9.0",
+    "react-dropzone": "^10.1.8",
     "react-indexed-db": "^1.0.8",
     "react-moment": "^0.9.2",
-    "react-redux": "^7.1.0",
+    "react-redux": "^7.1.1",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "react-tag-autocomplete": "^5.11.1",
-    "react-transition-group": "^4.2.1",
+    "react-transition-group": "^4.2.2",
     "react-zlib-js": "^1.0.4",
-    "redux": "^4.0.1",
+    "redux": "^4.0.4",
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
     "websocket": "^1.0.29"
@@ -40,7 +40,14 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "plugins": [
+      "react-hooks"
+    ],
+    "rules": {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn"
+    }
   },
   "browserslist": {
     "production": [
@@ -54,5 +61,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "https://localhost:3000"
+  "proxy": "https://localhost:3000",
+  "devDependencies": {
+    "eslint-plugin-react-hooks": "^2.0.1"
+  }
 }

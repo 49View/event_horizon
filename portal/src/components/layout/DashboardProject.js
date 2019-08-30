@@ -86,13 +86,15 @@ const DashboardProject = ({
 
   const canvasPadding = bShowEntityCanvas ? "5px" : "1px";
   const canvasMargin = bShowEntityCanvas ? "0px" : "0px";
+  const canvasRadius = bShowEntityCanvas ? "10px" : "3px";
 
   const canvasStyle = {
     visibility: canvasVisibility,
     width: canvasSizeX,
     height: canvasSizeY,
     margin: canvasMargin,
-    padding: canvasPadding
+    padding: canvasPadding,
+    borderRadius: canvasRadius
   };
 
   const { mainContainerClass, mainContainerDiv } = containerClassFromGroup(
