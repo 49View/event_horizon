@@ -65,11 +65,11 @@ jobs:
 #      - run: >
 #          cd restful-api && npm test
 
-      - restore_cache:
-          keys:
-            - v2-dependencies-{{ checksum "portal/package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v2-dependencies-
+#      - restore_cache:
+#          keys:
+#            - v2-dependencies-{{ checksum "portal/package.json" }}
+#            # fallback to using the latest cache if no exact match is found
+#            - v2-dependencies-
       - run: >
           cd portal && npm install
       - save_cache:
