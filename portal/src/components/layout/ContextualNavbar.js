@@ -7,7 +7,6 @@ const ContextualNavBar = ({ isAuth, userdata }) => {
   const [taskBarSelector, setTaskBarSelector] = useState(0);
 
   useEffect(() => {
-    console.log("Refresh navbar");
     if (!isAuth) {
       setTaskBarSelector(0);
       return;

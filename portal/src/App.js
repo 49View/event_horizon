@@ -3,8 +3,8 @@ import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import Landing from "./components/layout/Landing";
 import Routes from "./components/routing/Routes";
 
-import { DBConfig } from './DBConfig';
-import { initDB } from 'react-indexed-db';
+import { DBConfig } from "./DBConfig";
+import { initDB } from "react-indexed-db";
 
 // Redux
 import { Provider } from "react-redux";
@@ -24,11 +24,13 @@ if (process.env.NODE_ENV && process.env.NODE_ENV === "development") {
   // production code
 }
 
-console.log("REACT_APP_USE_API:"+process.env.REACT_APP_USE_API);
-if (process.env.REACT_APP_USE_API && process.env.REACT_APP_USE_API==="production") {
+console.log("REACT_APP_USE_API:" + process.env.REACT_APP_USE_API);
+if (
+  process.env.REACT_APP_USE_API &&
+  process.env.REACT_APP_USE_API === "production"
+) {
   axios.defaults.baseURL = "https://api.ateventhorizon.com";
 }
-
 
 if (localStorage.token) {
   setAuthToken(localStorage.token);

@@ -13,10 +13,11 @@ require("codemirror/theme/material.css");
 require("codemirror/theme/neat.css");
 require("codemirror/mode/lua/lua.js");
 
-const AppEditor = ({ currentEntity, userData }) => {
+const AppEditor = ({ currentEntity, userData, wasmLogs }) => {
   const { getAll, add, update } = useIndexedDB("files");
   const [fileData, setFileData] = useState(null);
   const [fileC, setFileC] = useState(null);
+  const [consoleArrayLogs, setConsoleArrayLogs] = useState([]);
 
   useEffect(() => {
     if (
@@ -44,7 +45,17 @@ const AppEditor = ({ currentEntity, userData }) => {
         });
       });
     }
-  }, [currentEntity, getAll, fileData, userData]);
+    if (consoleArrayLogs.length < wasmLogs.length) {
+      let newConsoleLog = consoleArrayLogs;
+      for (let t = consoleArrayLogs.length; t < wasmLogs.length; t++) {
+        newConsoleLog.push({
+          key: t.toString(),
+          text: wasmLogs[t]
+        });
+      }
+      setConsoleArrayLogs(newConsoleLog);
+    }
+  }, [userData, currentEntity, fileData, consoleArrayLogs, wasmLogs, getAll]);
 
   const handleClick = () => {
     if (fileData === null) {
@@ -136,18 +147,35 @@ const AppEditor = ({ currentEntity, userData }) => {
           </Button>
         </ButtonGroup>
       </div>
+      <div className="app_controls-a">
+        <Tabs defaultActiveKey="console" id="uncontrolled-tab-example">
+          <Tab eventKey="console" title="console">
+            <div className="console-output small">
+              <ul>
+                {consoleArrayLogs.map(e => (
+                  <li key={e.key}>{e.text}</li>
+                ))}
+              </ul>
+            </div>
+          </Tab>
+          <Tab eventKey="settings" title="settings"></Tab>
+          <Tab eventKey="builds" title="builds"></Tab>
+        </Tabs>
+      </div>
     </Fragment>
   );
 };
 
 AppEditor.propTypes = {
   currentEntity: PropTypes.object,
-  userData: PropTypes.object
+  userData: PropTypes.object,
+  wasmLogs: PropTypes.array
 };
 
 const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
-  userData: state.auth.userdata
+  userData: state.auth.userdata,
+  wasmLogs: state.wasm.consoleOutput
 });
 
 export default connect(

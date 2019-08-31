@@ -13,6 +13,54 @@ router.get("/list/:project", async (req, res, next) => {
   }
 });
 
+router.get("/convert/:key", async (req, res, next) => {
+  try {
+    let ret = await appdataController.getApp(req.params.key);
+    if (!ret.entities) ret.entities = [];
+    ret.entities.push({
+      key: "geoms",
+      value: ret.geoms
+    });
+    ret.entities.push({
+      key: "colors",
+      value: ret.colors
+    });
+    ret.entities.push({
+      key: "materials",
+      value: ret.materials
+    });
+    ret.entities.push({
+      key: "profiles",
+      value: ret.profiles
+    });
+    ret.entities.push({
+      key: "images",
+      value: ret.images
+    });
+    ret.entities.push({
+      key: "fonts",
+      value: ret.fonts
+    });
+    ret.entities.push({
+      key: "scripts",
+      value: ret.scripts ? ret.scripts : []
+    });
+    // delete ret._id;
+    delete ret.geoms;
+    delete ret.colors;
+    delete ret.materials;
+    delete ret.profiles;
+    delete ret.images;
+    delete ret.fonts;
+    delete ret.scripts;
+    const newRet = await appdataController.replaceApp(ret);
+    res.json(newRet);
+  } catch (ex) {
+    console.log("Error getting app", ex);
+    res.sendStatus(400);
+  }
+});
+
 router.get("/:key", async (req, res, next) => {
   try {
     const ret = await appdataController.getApp(req.params.key);

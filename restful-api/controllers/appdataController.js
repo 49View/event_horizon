@@ -12,6 +12,17 @@ const addAppInternal = async content => {
   }
 };
 
+const replaceAppInternal = async content => {
+  try {
+    return await appdataModel.findOneAndReplace(
+      { mKey: content.mKey },
+      content
+    );
+  } catch (error) {
+    console.log("Error adding app to project ", error);
+  }
+};
+
 exports.addAppWithName = async (project, appName) => {
   try {
     const rs = {
@@ -25,13 +36,7 @@ exports.addAppWithName = async (project, appName) => {
       renderSettings: rs,
       project: project,
       group: "app",
-      geoms: [],
-      colors: [],
-      materials: [],
-      profiles: [],
-      images: [],
-      fonts: [],
-      scripts: []
+      entities: []
     };
     content.metadata = metadataAssistant.createMetadata(content);
 
@@ -46,6 +51,14 @@ exports.addApp = async content => {
     return await addAppInternal(content);
   } catch (error) {
     console.log("Error adding app to project ", error);
+  }
+};
+
+exports.replaceApp = async content => {
+  try {
+    return await replaceAppInternal(content);
+  } catch (error) {
+    console.log("Error replacing app to project ", error);
   }
 };
 

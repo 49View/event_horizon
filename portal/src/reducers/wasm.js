@@ -4,7 +4,8 @@ import {
   WASM_LOAD_FAILED,
   WASM_RUN_SUCCESS,
   WASM_RUN_FAILED,
-  WASM_SET_ROOT_CANVAS
+  WASM_SET_ROOT_CANVAS,
+  ADD_CONSOLE_TEXT
 } from "../actions/types";
 import { updateObject } from "../utils/wasmUtils";
 
@@ -13,7 +14,8 @@ const initialState = {
   loading: false,
   loaded: false,
   running: false,
-  wasmCanvas: null
+  wasmCanvas: null,
+  consoleOutput: []
 };
 
 const wasmLoadStart = (state, action) => {
@@ -64,8 +66,10 @@ const reducer = (state = initialState, action) => {
       return wasmRunSuccess(state, action);
     case WASM_RUN_FAILED:
       return wasmRunFailed(state, action);
+    case ADD_CONSOLE_TEXT:
+      state.consoleOutput.push(action.payload);
+      return state;
     case WASM_SET_ROOT_CANVAS:
-      console.log("circular");
       return {
         ...state,
         wasmCanvas: action.payload_canvas

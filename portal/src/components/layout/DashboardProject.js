@@ -12,6 +12,8 @@ import { loadWasmComplete } from "../../actions/wasm";
 import EntityUpdateContent from "./entities/EntityUpdateContent";
 import EntityMetaSection from "./entities/EntityMetaSection";
 import RenderParamsToolbar from "./entities/RenderParamsToolbar";
+import { getFullEntity } from "../../actions/entities";
+import store from "../../store";
 
 const containerClassFromGroup = group => {
   switch (group) {
@@ -45,6 +47,7 @@ const containerClassFromGroup = group => {
 
 const DashboardProject = ({
   currentEntity,
+  entities,
   loading,
   group,
   userToken,
@@ -59,7 +62,11 @@ const DashboardProject = ({
       loadWasmComplete("editor", canvas.current, userToken, userData.session);
       setCount(1);
     }
-  }, [canvas, count, userToken, userData]);
+    // Shortcut to go straight to app/coding from the outset for most projects
+    if (group === "app" && entities.length === 1 && !currentEntity) {
+      store.dispatch(getFullEntity(entities[0]));
+    }
+  }, [currentEntity, entities, group, canvas, count, userToken, userData]);
 
   if (!userData || !userData.project) {
     return <Redirect to="/" />;
@@ -133,6 +140,7 @@ const DashboardProject = ({
 
 DashboardProject.propTypes = {
   currentEntity: PropTypes.object,
+  entities: PropTypes.array,
   loading: PropTypes.bool,
   group: PropTypes.string,
   userToken: PropTypes.string,
@@ -141,6 +149,7 @@ DashboardProject.propTypes = {
 
 const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
+  entities: state.entities.entries,
   loading: state.entities.loading,
   group: state.entities.group,
   userToken: state.auth.token,

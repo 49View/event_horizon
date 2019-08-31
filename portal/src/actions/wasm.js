@@ -5,8 +5,10 @@ import {
   WASM_LOAD_FAILED,
   WASM_RUN_SUCCESS,
   WASM_RUN_FAILED,
-  WASM_SET_ROOT_CANVAS
+  WASM_SET_ROOT_CANVAS,
+  ADD_CONSOLE_TEXT
 } from "./types";
+import store from "../store";
 
 export const wasmRunSuccess = canvas => {
   return {
@@ -37,44 +39,6 @@ export const setWasmLoaded = flag => dispatch => {
 
 export const reCanvas = canvas => {
   window.Module["canvas"] = canvas;
-};
-
-export const runWasm = (canvas, token, sessionId) => {
-  return dispatch => {
-    window.Module = {
-      arguments: [token, sessionId],
-      print: text => {
-        console.log("W: " + text);
-      },
-      printErr: text => {
-        console.log("W ERROR: " + text);
-      },
-      canvas: canvas,
-      onRuntimeInitialized: () => {
-        console.log("Runtime initialized");
-        dispatch(wasmRunSuccess(canvas));
-      },
-      instantiateWasm: (imports, successCallback) => {
-        WebAssembly.instantiate(window.wasmBinary, imports)
-          .then(function(output) {
-            console.log("wasm instantiation succeeded");
-            successCallback(output.instance);
-          })
-          .catch(function(e) {
-            console.log("wasm instantiation failed! " + e);
-            dispatch(wasmRunFailed(e.message));
-          });
-        return {};
-      },
-      destroy: cpp => {
-        console.log("destroy");
-      }
-    };
-
-    const s = document.createElement("script");
-    s.text = window.wasmScript;
-    document.body.appendChild(s);
-  };
 };
 
 export const wasmLoadStart = () => {
@@ -197,6 +161,12 @@ export const loadWasmComplete = async (
     ],
     print: text => {
       console.log("W: " + text);
+      if (!text.startsWith("[INFO]")) {
+        store.dispatch({
+          type: ADD_CONSOLE_TEXT,
+          payload: text
+        });
+      }
     },
     printErr: text => {
       console.log("W ERROR: " + text);
