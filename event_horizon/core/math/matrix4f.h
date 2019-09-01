@@ -224,7 +224,11 @@ public:
 		return true;
 	}
 
-	float operator()( int64_t index ) const {
+    bool operator!=( const Matrix4f& rhs ) const {
+	    return !operator==(rhs);
+    }
+
+    float operator()( int64_t index ) const {
 		ASSERT( index < 16 );
 		if ( index == 0 ) return mRows[0].x();
 		if ( index == 1 ) return mRows[0].y();

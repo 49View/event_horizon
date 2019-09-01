@@ -114,6 +114,32 @@ void Renderer::resetDefaultFB( const Vector2i& forceSize ) {
     mDefaultFB = FrameBufferBuilder{ *this, "default" }.size( forceSize ).build();
 }
 
+void Renderer::useVignette(bool _flag) {
+    SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine", "_VIGNETTING_", boolAlphaBinary(_flag) );
+}
+
+void Renderer::useFilmGrain(bool _flag) {
+SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+"_GRAINING_", boolAlphaBinary(_flag) );
+}
+
+void Renderer::useBloom(bool _flag) {
+SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+"_BLOOMING_", boolAlphaBinary(_flag) );
+}
+
+void Renderer::useDOF(bool _flag) {
+SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+"_DOFING_", boolAlphaBinary(_flag) );
+}
+
+void Renderer::useSSAO(bool _flag) {
+    //useSSAO(_flag);
+SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+"_SSAOING_", boolAlphaBinary(_flag) );
+}
+
+
 void Renderer::init() {
     sm = std::make_shared<ShaderManager>();
     tm = std::make_shared<TextureManager>();
@@ -194,6 +220,8 @@ void Renderer::setGlobalTextures() {
 
 void Renderer::directRenderLoop() {
 
+    SM()->reloadDirtyPrograms();
+
 #ifdef _USE_IMGUI_
     ImGui::NewFrame();
 #endif
@@ -210,6 +238,8 @@ void Renderer::directRenderLoop() {
             target->addToCB( CB_U());
         }
     }
+
+    CB_U().pushCommand( { CommandBufferCommandName::preFlush } );
 
     bInvalidated = false;
 

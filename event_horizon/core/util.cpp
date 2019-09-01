@@ -444,6 +444,10 @@ float stringFeetInchesToCm( const std::string& _text ) {
 
 }
 
+std::string boolAlphaBinary( bool _flag ) {
+    return _flag ? "1" : "0";
+}
+
 void FrameInvalidator::invalidate() {
 	bInvalidated = true;
 }

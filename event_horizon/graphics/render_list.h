@@ -123,6 +123,7 @@ enum class CommandBufferCommandName {
     takeScreenShot,
 
     targetVP,
+    preFlush
 };
 
 std::string commandToNmeHumanReadable( CommandBufferCommandName cname );

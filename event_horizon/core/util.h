@@ -283,6 +283,7 @@ std::string UTCMillisToString();
 int convertStringToHour( const std::string& _str );
 int convertStringToMinuteOrSecond( const std::string& _str );
 
+std::string boolAlphaBinary( bool _flag );
 
 template <typename C, typename L>
 void erase_if( C& container, L lambda ) {

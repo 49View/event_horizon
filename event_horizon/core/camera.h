@@ -18,6 +18,7 @@
 #include <core/math/anim_type.hpp>
 #include <core/camera_utils.hpp>
 #include <core/name_policy.hpp>
+#include <core/dirtable.hpp>
 
 void MultiplyMatrices4by4OpenGL_FLOAT( float *result, const float *matrix1, const float *matrix2 );
 void MultiplyMatrixByVector4by4OpenGL_FLOAT( float *resultvector, const float *matrix, const float *pvector );
@@ -48,7 +49,7 @@ enum class CameraCenterAngle {
     HalfwayOpposite
 };
 
-class Camera : public Animable, public NamePolicy<> {
+class Camera : public Dirtable, public Animable, public NamePolicy<> {
 public:
 	Camera( const std::string& cameraName, const Rect2f& _viewport );
     virtual ~Camera() = default;

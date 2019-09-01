@@ -447,42 +447,41 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor(), mSunBuilder->GoldenHour() );
 
     bool bAddProbe = mSkybox && mSkybox->precalc( 0.0f );
+    setDirtyCumulative( "PBR", cameraRig->getCamera()->isDirty() || bAddProbe );
 
     if ( bAddProbe ) {
         addProbes();
     } else {
-        addShadowMaps();
+        if ( isDirty("PBR") ) {
+            addShadowMaps();
 
-        renderDepthMap();
-        renderSSAO();
+            renderDepthMap();
+            renderSSAO();
 
+            cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+            cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
 
-        cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-        cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-
-        if ( mbEnableSkybox && mSkybox ) {
-            mSkybox->render();
-        }
-
-        cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
-        cb.pushCommand( { CommandBufferCommandName::colorBufferBind } );
-        cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
-        cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-        cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
-        cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
-
-        for ( const auto&[k, vl] : rr.CL()) {
-            if ( isKeyInRange( k, CheckEnableBucket::True )) {
-                rr.addToCommandBuffer( vl.mVList, cameraRig.get());
+            if ( mbEnableSkybox && mSkybox ) {
+                mSkybox->render();
             }
-        }
-        blit( cb );
 
+            cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
+            cb.pushCommand( { CommandBufferCommandName::depthWriteTrue } );
+            cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
+            cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
+            cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+
+            for ( const auto&[k, vl] : rr.CL()) {
+                if ( isKeyInRange( k, CheckEnableBucket::True )) {
+                    rr.addToCommandBuffer( vl.mVList, cameraRig.get());
+                }
+            }
+            blit( cb );
+        }
         cb.pushCommand( { CommandBufferCommandName::blitPBRToScreen } );
 
         cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
         cb.pushCommand( { CommandBufferCommandName::defaultFrameBufferBind } );
-//        cb.pushCommand( { CommandBufferCommandName::clearDefaultFramebuffer } );
         cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
         cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
         cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
@@ -500,6 +499,8 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                 rr.addToCommandBuffer( k );
             }
         }
+
+        setDirty( "PBR",false );
     }
 
 }

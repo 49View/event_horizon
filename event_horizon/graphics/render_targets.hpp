@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <core/dirtable.hpp>
 #include <graphics/render_list.h>
 
 class Framebuffer;
@@ -145,7 +146,7 @@ private:
     std::shared_ptr<Framebuffer> mSSAOFB;
 };
 
-class RLTarget : public std::enable_shared_from_this<RLTarget> {
+class RLTarget : public Dirtable, public std::enable_shared_from_this<RLTarget> {
 public:
     explicit RLTarget( Renderer& _rr ) : rr( _rr ) {}
     RLTarget( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& _rr ) :
@@ -323,7 +324,6 @@ protected:
     void cacheShadowMapSunPosition( const Vector3f& _smsp );
     void invalidateShadowMaps();
     void setShadowMapPosition( const Vector3f& _sp );
-
 protected:
     std::shared_ptr<CompositePBR> mComposite;
 

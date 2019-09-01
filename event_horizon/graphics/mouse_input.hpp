@@ -93,7 +93,6 @@ struct AggregatedInputData {
     V2f  moveDiff( int _touchIndex ) const { return getCurrMoveDiff( _touchIndex, YGestureInvert::No ).dominant()*0.01f; }
 
     bool checkKeyToggleOn( int keyCode, bool overrideTextInput = false ) const;
-
 //    Vector2f mousePos = Vector2f::ZERO;
 //    bool isMouseTouchedDown{};
 //    bool isMouseSingleTap = false;

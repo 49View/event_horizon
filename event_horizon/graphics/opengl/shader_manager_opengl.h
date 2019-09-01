@@ -64,6 +64,7 @@ public:
 public:
     bool addShader( const std::string& id, Shader::Type stype );
     bool loadProgram( const ShaderProgramDesc& sb );
+    void reloadDirtyPrograms();
 
     // OpenGL init function
     bool loadShaders( bool _performCompileOnly = false );
@@ -89,6 +90,7 @@ private:
     std::string parsePreprocessorMacro( std::string& source );
     std::string injectPreprocessorMacro( std::string& source );
     std::string injectIncludes( std::string& sm );
+    void touchProgram( const ShaderProgramDesc& sb );
 
     std::shared_ptr<Shader> vshForProgram( std::shared_ptr<ProgramOpenGL> program );
     std::shared_ptr<Shader> tchForProgram( std::shared_ptr<ProgramOpenGL> program );
@@ -119,6 +121,7 @@ private:
     ProgramMap mPrograms;
 
     std::vector<ShaderProgramDesc> programDescs;
+    std::vector<ShaderProgramDesc> mProgramsToReload;
 
     int mNumReloads = 0;
 };

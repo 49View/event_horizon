@@ -628,6 +628,9 @@ PickRayData Camera::rayViewportPickIntersection( const Vector2f& p1 ) const {
 
 void Camera::update() {
 
+    Matrix4f oldQuatMatrix = quatMatrix;
+    Matrix4f oldProjectonMatrix = mProjection;
+
 	if ( Mode() == CameraMode::Edit2d ) {
 		Quaternion qy( M_PI_2, Vector3f::X_AXIS );
 //		Quaternion qx( qangle->value.x(), Vector3f::Z_AXIS );
@@ -665,6 +668,8 @@ void Camera::update() {
 	}
 
 	mFrustom.calculateFromMVP( mPos->value, mView, mProjection, mViewPort );
+
+    setDirty(oldQuatMatrix != quatMatrix || oldProjectonMatrix != mProjection);
 }
 
 std::ostream& operator<<( std::ostream& os, const Camera& camera ) {

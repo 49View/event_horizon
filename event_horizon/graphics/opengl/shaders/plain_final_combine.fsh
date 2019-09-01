@@ -1,4 +1,5 @@
 #version #opengl_version
+#precision_high
 
 #define _VIGNETTING_ 0
 #define _GRAINING_ 0

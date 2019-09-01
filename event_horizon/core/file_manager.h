@@ -44,6 +44,7 @@ namespace FileManager {
     void writeRemoteFile( const std::string& filename, const char *buff, uint64_t length,
                           HttpUrlEncode _filenameEnc = HttpUrlEncode::Yes );
     void writeRemoteFile( const std::string& _filename, const std::vector<unsigned char>& _data );
+    void writeRemoteEntity( const std::string& _filename, const std::string& _group, const SerializableContainer& data );
 //	void renameRemoteFile( const std::string& filename, const std::string& newfilename );
 //	void removeRemoteFile( const std::string& filename );
 //	std::vector<FileInfo> listRemoteFolder( const std::string& _folderName, const std::string& _maskOut = "" );

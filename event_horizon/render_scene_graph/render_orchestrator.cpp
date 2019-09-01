@@ -21,8 +21,12 @@
 std::vector<std::string> RenderOrchestrator::callbackPaths;
 std::vector<PresenterUpdateCallbackFunc> RenderOrchestrator::sUpdateCallbacks;
 
+#ifdef USE_GLFW
+
 Vector2i ResizeData::callbackResizeFrameBuffer = Vector2i::ZERO;
 Vector2i ResizeData::callbackResizeFrameBufferOld = Vector2i::ZERO;
+
+#endif
 
 void RenderOrchestrator::setDragAndDropFunction( DragAndDropFunction dd ) {
     dragAndDropFunc = dd;
@@ -198,10 +202,6 @@ void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
     for ( auto& [k,v] : mRigs ) {
         v->updateFromInputData( _aid );
     }
-}
-
-std::string boolAlphaBinary( bool _flag ) {
-    return _flag ? "1" : "0";
 }
 
 void RenderOrchestrator::init() {
@@ -396,6 +396,7 @@ void RenderOrchestrator::useSSAO( bool _value ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
         pbrTarget->useSSAO( _value );
     }
+    rr.useSSAO(_value);
 }
 
 floata& RenderOrchestrator::skyBoxDeltaInterpolation() {

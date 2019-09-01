@@ -640,6 +640,19 @@ bool ShaderManager::loadShaders( bool _performCompileOnly ) {
     return true;
 }
 
+void ShaderManager::touchProgram( const ShaderProgramDesc& sb ) {
+    mProgramsToReload.emplace_back( sb );
+}
+
+void ShaderManager::reloadDirtyPrograms() {
+    if ( mProgramsToReload.empty() ) return;
+
+    for ( const auto& pd : mProgramsToReload ) {
+        loadProgram( pd );
+    }
+    mProgramsToReload.clear();
+}
+
 bool ShaderManager::injectDefine( const std::string& _shaderName, Shader::Type stype, const std::string& _id, const std::string& _define, const std::string& _value ) {
 
     bool compilationResult = injectDefines( stype, _id, _define, _value );
@@ -648,12 +661,10 @@ bool ShaderManager::injectDefine( const std::string& _shaderName, Shader::Type s
 
     for ( const auto& pd : programDescs ) {
         if ( pd.name.value == _shaderName ) {
-            compilationResult = loadProgram( pd );
-            if ( !compilationResult ) return false;
+            touchProgram(pd);
         }
     }
 
-    mNumReloads++;
     return true;
 }
 
@@ -711,5 +722,6 @@ std::vector<GLuint> ShaderManager::ProgramsHandles() const {
 
     return ret;
 }
+
 
 

@@ -200,6 +200,13 @@ public:
 
     const Vector2i& getForcedFrameBufferSize() const;
     void setForcedFrameBufferSize( const Vector2i& mForcedFrameBufferSize );
+
+    void useVignette(bool _flag);
+    void useFilmGrain(bool _flag);
+    void useBloom(bool _flag);
+    void useDOF(bool _flag);
+    void useSSAO(bool _flag);
+
 protected:
 	void clearCommandList();
 	size_t renderCBList();

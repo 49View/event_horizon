@@ -63,4 +63,5 @@ namespace S {
     const std::string colorFinalFrameBuffer = "colorFinalFrameBuffer";
     const std::string offScreenFinalFrameBuffer = "offScreenFinalFrameBuffer";
 
+    std::string makeImaginary();
 };

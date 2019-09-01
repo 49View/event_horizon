@@ -407,12 +407,7 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
                     UniformNames::ssaoMapTexture,
                     cstack->fb(CommandBufferFrameBufferType::ssaoMap)->RenderToTexture()->TDI(5));
 
-            if ( rr.isLoading() ) {
-                cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
-                        rr.SM()->P(S::LOADING_SCREEN).get() );
-            } else {
-                cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->draw();
-            }
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->draw();
 
             cstack->postBlit();
 
@@ -420,6 +415,12 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
         case CommandBufferCommandName::targetVP:
             break;
 
+        case CommandBufferCommandName::preFlush:
+            if ( rr.isLoading() ) {
+                cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
+                        rr.SM()->P(S::LOADING_SCREEN).get() );
+            }
+            break;
         default:
             break;
     };
