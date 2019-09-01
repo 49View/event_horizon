@@ -13,7 +13,7 @@ require("codemirror/theme/material.css");
 require("codemirror/theme/neat.css");
 require("codemirror/mode/lua/lua.js");
 
-const AppEditor = ({ currentEntity, userData, wasmLogs }) => {
+const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
   const { getAll, add, update } = useIndexedDB("files");
   const [fileData, setFileData] = useState(null);
   const [fileC, setFileC] = useState(null);
@@ -55,7 +55,15 @@ const AppEditor = ({ currentEntity, userData, wasmLogs }) => {
       }
       setConsoleArrayLogs(newConsoleLog);
     }
-  }, [userData, currentEntity, fileData, consoleArrayLogs, wasmLogs, getAll]);
+  }, [
+    userData,
+    currentEntity,
+    fileData,
+    consoleArrayLogs,
+    wasmLogs,
+    wasmOutputDirty,
+    getAll
+  ]);
 
   const handleClick = () => {
     if (fileData === null) {
@@ -169,13 +177,15 @@ const AppEditor = ({ currentEntity, userData, wasmLogs }) => {
 AppEditor.propTypes = {
   currentEntity: PropTypes.object,
   userData: PropTypes.object,
-  wasmLogs: PropTypes.array
+  wasmLogs: PropTypes.array,
+  wasmOutputDirty: PropTypes.bool
 };
 
 const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
   userData: state.auth.userdata,
-  wasmLogs: state.wasm.consoleOutput
+  wasmLogs: state.wasm.consoleOutput,
+  wasmOutputDirty: state.wasm.consoleOutputDirty
 });
 
 export default connect(

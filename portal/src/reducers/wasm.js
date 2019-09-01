@@ -15,7 +15,8 @@ const initialState = {
   loaded: false,
   running: false,
   wasmCanvas: null,
-  consoleOutput: []
+  consoleOutput: [],
+  consoleOutputDirty: false
 };
 
 const wasmLoadStart = (state, action) => {
@@ -68,6 +69,7 @@ const reducer = (state = initialState, action) => {
       return wasmRunFailed(state, action);
     case ADD_CONSOLE_TEXT:
       state.consoleOutput.push(action.payload);
+      state.consoleOutputDirty = !state.consoleOutputDirty;
       return state;
     case WASM_SET_ROOT_CANVAS:
       return {
