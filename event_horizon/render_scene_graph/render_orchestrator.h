@@ -109,6 +109,7 @@ public:
         rr.SSM().addStream<T>( _streamName, avcbTM() );
     }
 
+    void setDirtyFlagOnPBRRender( const std::string& _target, const std::string& _sub, bool _flag );
     void clearPBRRender( const std::string& _target = "" );
     void hidePBRRender( const std::string& _target = "" );
     void showPBRRender( const std::string& _target = "" );

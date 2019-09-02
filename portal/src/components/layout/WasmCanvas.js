@@ -46,7 +46,6 @@ const WasmCanvas = ({
   const canvasMargin = bShowEntityCanvas ? "0px" : "0px";
   const canvasRadius = bShowEntityCanvas ? "10px" : "3px";
 
-  console.log("Canvas Top/Left", top, left);
   const canvasStyle = {
     position: "absolute",
     visibility: canvasVisibility,

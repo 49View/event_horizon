@@ -235,8 +235,9 @@ void RenderOrchestrator::init() {
 
     auto luarr = lua["rr"].get_or_create<sol::table>();
 
-    luarr["clearColor"] = [](const std::string& _col ) {
+    luarr["clearColor"] = [&](const std::string& _col ) {
         Renderer::clearColor( V4f::XTORGBA(_col) );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
     luarr["useSkybox"] = [&](bool _flag) {
         useSkybox(_flag);
@@ -354,6 +355,12 @@ const Camera* RenderOrchestrator::getCamera( const std::string& _name ) const {
 
 void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
+}
+
+void RenderOrchestrator::setDirtyFlagOnPBRRender( const std::string& _target, const std::string& _sub, bool _flag ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->setDirty( _sub, _flag );
+    }
 }
 
 void RenderOrchestrator::clearPBRRender( const std::string& _target ) {

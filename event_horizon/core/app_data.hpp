@@ -14,6 +14,8 @@ JSONDATA( AppRenderSettings, shadowOverBurnCofficient, indoorSceneCoeff, shadowZ
 };
 
 struct AppEntities {
+    AppEntities( const std::string& key, const std::vector<std::string>& value ) : key( key ), value( value ) {}
+
 JSONSERIAL( AppEntities, key, value );
     std::string key;
     std::vector<std::string> value;
@@ -108,13 +110,23 @@ JSONSERIAL( AppData, renderSettings, mKey, entities );
         return {};
     }
 
-//
-//    void addGeom         ( CResourceRef _value ) { geoms.emplace_back( _value);  }
-//    void addMaterialColor( CResourceRef _value ) { colors.emplace_back( _value);  }
-//    void addMaterial     ( CResourceRef _value ) { materials.emplace_back( _value);  }
-//    void addProfile      ( CResourceRef _value ) { profiles.emplace_back( _value);  }
-//    void addRawImage     ( CResourceRef _value ) { images.emplace_back( _value);  }
-//    void addFont         ( CResourceRef _value ) { fonts.emplace_back( _value);  }
+    void add( const std::string& _key, const std::string& _value ) {
+        for ( auto& ent : entities ) {
+            if ( ent.key == _key ) {
+                ent.value.emplace_back(_value);
+                return;
+            }
+        }
+        // Not found and active key yet, create one
+        entities.emplace_back( AppEntities{_key, {_value}} );
+    }
+
+    void addGeom         ( CResourceRef _value ) { add( S::GEOMS, _value); }
+    void addMaterialColor( CResourceRef _value ) { add( S::COLORS, _value); }
+    void addMaterial     ( CResourceRef _value ) { add( S::MATERIALS, _value); }
+    void addProfile      ( CResourceRef _value ) { add( S::PROFILES, _value); }
+    void addRawImage     ( CResourceRef _value ) { add( S::IMAGES, _value); }
+    void addFont         ( CResourceRef _value ) { add( S::FONTS, _value); }
 
 protected:
     AppRenderSettings        renderSettings;

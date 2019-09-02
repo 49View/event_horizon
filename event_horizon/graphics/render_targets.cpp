@@ -447,12 +447,12 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor(), mSunBuilder->GoldenHour() );
 
     bool bAddProbe = mSkybox && mSkybox->precalc( 0.0f );
-    setDirtyCumulative( "PBR", cameraRig->getCamera()->isDirty() || bAddProbe );
+    setDirtyCumulative( S::PBR, cameraRig->getCamera()->isDirty() || bAddProbe );
 
     if ( bAddProbe ) {
         addProbes();
     } else {
-        if ( isDirty("PBR") ) {
+        if ( isDirty(S::PBR) ) {
             addShadowMaps();
 
             renderDepthMap();
@@ -500,7 +500,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
             }
         }
 
-        setDirty( "PBR",false );
+        setDirty( S::PBR,false );
     }
 
 }

@@ -7,6 +7,8 @@
 
 namespace S {
 
+    const std::string PBR       = "PBR";
+
     const std::string GEOMS     = "geoms";
     const std::string COLORS    = "colors";
     const std::string MATERIALS = "materials";
