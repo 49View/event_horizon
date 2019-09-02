@@ -12,7 +12,6 @@ void ScenePreLoader::loadResCount( HttpResouceCBSign _key ) {
     loadedResCounter.emplace_back( _key );
     float progress = ( static_cast<float>(loadedResCounter.size()) / static_cast<float>(appData.totalResourceCount()));
     rsgl.RR().setProgressionTiming( progress );
-//    LOGRS( "[Scene Loader] Resource: " << _key );
     if ( loadedResCounter.size() == targetNum ) {
         loadedResCounter.clear();
         activateGeomLoad();
@@ -21,11 +20,11 @@ void ScenePreLoader::loadResCount( HttpResouceCBSign _key ) {
 
 void ScenePreLoader::loadGeomResCount( HttpResouceCBSign _key ) {
     loadedResCounter.emplace_back( _key );
-//    LOGRS( "[Scene Loader] Resource: " << _key );
     float progress = ( static_cast<float>(loadedResCounter.size() + appData.firstTierResourceCount()) /
                        static_cast<float>(appData.totalResourceCount()));
     rsgl.RR().setProgressionTiming( progress );
     if ( loadedResCounter.size() == appData.secondTierResourceCount()) {
+        loadedResCounter.clear();
         activatePostLoadInternal();
     }
 }
@@ -33,7 +32,7 @@ void ScenePreLoader::loadGeomResCount( HttpResouceCBSign _key ) {
 void ScenePreLoader::activateGeomLoad() {
 #define LGFUNC std::bind(&ScenePreLoader::loadGeomResCount, this, std::placeholders::_1)
 
-    if ( appData.secondTierResourceCount() == 0) {
+    if ( appData.secondTierResourceCount() == 0 ) {
         activatePostLoadInternal();
     } else {
         for ( const auto& r : appData.Geoms() ) {
@@ -59,16 +58,50 @@ void ScenePreLoader::loadSceneEntities() {
 
 ScenePreLoader::ScenePreLoader( SceneGraph& sg, RenderOrchestrator& _rsg ) : sgl( sg ), rsgl(_rsg) {}
 
-void ScenePreLoader::activatePostLoadInternal() {
+void ScenePreLoader::activateFinalLoadInternal() {
     rsgl.RR().setLoadingFlag( false );
     activatePostLoad();
 }
 
-//{
-//    fontres: [],
-//    imageres: [],
-//    materialres: [],
-//    colorres: [],
-//    profileres: [],
-//    geomres: []
-//}
+void ScenePreLoader::loadCustomResCount( HttpResouceCBSign _key ) {
+
+    loadedResCounter.emplace_back( _key );
+    float progress = ( static_cast<float>(loadedResCounter.size() + appData.firstTierResourceCount()+ appData.secondTierResourceCount()) /
+                       static_cast<float>(appData.totalResourceCount()));
+    rsgl.RR().setProgressionTiming( progress );
+    if ( loadedResCounter.size() == appData.customTierResourceCount()) {
+        activateFinalLoadInternal();
+    }
+}
+
+void ScenePreLoader::activatePostLoadInternal() {
+#define LCFUNC std::bind(&ScenePreLoader::loadCustomResCount, this, std::placeholders::_1)
+
+    if ( appData.customTierResourceCount() > 0 ) {
+        std::string ckey = "room_layout";
+        for ( const auto& r : appData.Custom(ckey) ) {
+            Http::get( Url( HttpFilePrefix::entities + ckey + "/" + url_encode( r ) ),
+               [this, ckey](HttpResponeParams _res) {
+                   if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
+                   auto c = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
+                   if ( auto it = customResources.find(ckey);  it == customResources.end() ) {
+                       std::vector<SerializableContainer> cs{};
+                       cs.emplace_back(c);
+                       customResources.emplace( ckey, cs );
+                   } else {
+                       it->second.emplace_back(c);
+                   }
+                   _res.ccf(ckey);
+               },
+               nullptr,
+               Http::ResponseFlags::None,
+               LCFUNC );
+        }
+    } else {
+        activateFinalLoadInternal();
+    }
+}
+
+const SerializableContainer& ScenePreLoader::getPreloadCustomSerializableContainer( const std::string& _key, size_t _index ) {
+    return customResources[_key][_index];
+}
