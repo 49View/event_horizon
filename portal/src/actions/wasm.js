@@ -6,9 +6,28 @@ import {
   WASM_RUN_SUCCESS,
   WASM_RUN_FAILED,
   WASM_SET_ROOT_CANVAS,
-  ADD_CONSOLE_TEXT
+  ADD_CONSOLE_TEXT,
+  WASM_SET_CANVAS_SIZE,
+  WASM_SET_CANVAS_VISIBILITY
 } from "./types";
 import store from "../store";
+
+export const wasmSetCanvasSize = (top,left,width,height) => {
+  return {
+    type: WASM_SET_CANVAS_SIZE,
+    top: top,
+    left: left,
+    width: width,
+    height: height
+  }
+}
+
+export const wasmSetCanvasVisibility = (visible) => {
+  return {
+    type: WASM_SET_CANVAS_VISIBILITY,
+    visible: visible
+  }
+}
 
 export const wasmRunSuccess = canvas => {
   return {

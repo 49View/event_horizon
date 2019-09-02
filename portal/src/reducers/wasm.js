@@ -5,7 +5,9 @@ import {
   WASM_RUN_SUCCESS,
   WASM_RUN_FAILED,
   WASM_SET_ROOT_CANVAS,
-  ADD_CONSOLE_TEXT
+  ADD_CONSOLE_TEXT,
+  WASM_SET_CANVAS_SIZE,
+  WASM_SET_CANVAS_VISIBILITY
 } from "../actions/types";
 import { updateObject } from "../utils/wasmUtils";
 
@@ -16,7 +18,12 @@ const initialState = {
   running: false,
   wasmCanvas: null,
   consoleOutput: [],
-  consoleOutputDirty: false
+  consoleOutputDirty: false,
+  canvasWidth: 100,
+  canvasHeight: 100,
+  canvasTop: 0,
+  canvasLeft: 0,
+  canvasVisible: true
 };
 
 const wasmLoadStart = (state, action) => {
@@ -55,6 +62,21 @@ const wasmRunFailed = (state, action) => {
   });
 };
 
+const wasmSetCanvasSize = (state, action) => {
+  return updateObject(state, {
+    canvasTop: action.top,
+    canvasLeft: action.left,
+    canvasWidth: action.width,
+    canvasHeight: action.height
+  });
+};
+
+const wasmSetCanvasVisibility = (state, action) => {
+  return updateObject(state, {
+    canvasVisible: action.visible
+  });
+};
+
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case WASM_LOAD_START:
@@ -76,6 +98,10 @@ const reducer = (state = initialState, action) => {
         ...state,
         wasmCanvas: action.payload_canvas
       };
+    case WASM_SET_CANVAS_SIZE:
+      return wasmSetCanvasSize(state, action);
+    case WASM_SET_CANVAS_VISIBILITY:
+      return wasmSetCanvasVisibility(state, action);
     default:
       return state;
   }

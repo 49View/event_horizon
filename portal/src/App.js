@@ -15,6 +15,7 @@ import setAuthToken from "./utils/setAuthToken";
 import axios from "axios";
 
 import "./App.css";
+import WasmCanvas from "./components/layout/WasmCanvas";
 
 if (process.env.NODE_ENV && process.env.NODE_ENV === "development") {
   // dev code
@@ -46,6 +47,7 @@ const App = () => {
   return (
     <Provider store={store}>
       <Router>
+        <WasmCanvas></WasmCanvas>
         <Fragment>
           <Switch>
             <Route exact path="/" component={Landing} />
