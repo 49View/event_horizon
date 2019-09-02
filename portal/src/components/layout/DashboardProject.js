@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
@@ -8,7 +8,7 @@ import ImageEditor from "./entities/ImageEditor";
 import AppEditor from "./entities/AppEditor";
 import GeomEditor from "./entities/GeomEditor";
 import MaterialEditor from "./entities/MaterialEditor";
-import { loadWasmComplete } from "../../actions/wasm";
+import { wasmSetCanvasSize } from "../../actions/wasm";
 import EntityUpdateContent from "./entities/EntityUpdateContent";
 import EntityMetaSection from "./entities/EntityMetaSection";
 import RenderParamsToolbar from "./entities/RenderParamsToolbar";
@@ -53,77 +53,36 @@ const DashboardProject = ({
   userToken,
   userData
 }) => {
-  let canvas = React.useRef(null);
-
-  const [count, setCount] = useState(0);
+  let canvasContainer = React.useRef(null);
 
   useEffect(() => {
-    if (count === 0 && userData) {
-      loadWasmComplete("editor", canvas.current, userToken, userData.session);
-      setCount(1);
-    }
     // Shortcut to go straight to app/coding from the outset for most projects
     if (group === "app" && entities.length === 1 && !currentEntity) {
       store.dispatch(getFullEntity(entities[0]));
     }
-  }, [currentEntity, entities, group, canvas, count, userToken, userData]);
+  }, [currentEntity, entities, group]);
 
   if (!userData || !userData.project) {
     return <Redirect to="/" />;
   }
 
-  const canvasVisibility =
-    currentEntity &&
-    (group === "app" || group === "geom" || group === "material")
-      ? "visible"
-      : "hidden";
-
-  const bShowEntityCanvas = currentEntity && group !== "app";
-
-  const canvasSizeXNum = bShowEntityCanvas ? 529 : 510;
-  const canvasSizeYNum = bShowEntityCanvas ? 536 : 286;
-
-  const canvasSizeX = canvasSizeXNum.toString() + "px";
-  const canvasSizeY = canvasSizeYNum.toString() + "px";
-
-  const canvasClientSizeX =
-    (canvasSizeXNum * (window.devicePixelRatio || 1)).toString() + "px";
-  const canvasClientSizeY =
-    (canvasSizeYNum * (window.devicePixelRatio || 1)).toString() + "px";
-
-  const canvasPadding = bShowEntityCanvas ? "5px" : "1px";
-  const canvasMargin = bShowEntityCanvas ? "0px" : "0px";
-  const canvasRadius = bShowEntityCanvas ? "10px" : "3px";
-
-  const canvasStyle = {
-    visibility: canvasVisibility,
-    width: canvasSizeX,
-    height: canvasSizeY,
-    margin: canvasMargin,
-    padding: canvasPadding,
-    borderRadius: canvasRadius
-  };
-
   const { mainContainerClass, mainContainerDiv } = containerClassFromGroup(
     group
   );
 
+  const bShowEntityCanvas = currentEntity && group !== "app";
+
+  if (canvasContainer.current) {
+    const rect = canvasContainer.current.getBoundingClientRect();
+    store.dispatch(wasmSetCanvasSize(rect));
+  }
   // const entityBased = group !== "app";
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>
       {bShowEntityCanvas && <RenderParamsToolbar />}
       {bShowEntityCanvas && <EntityUpdateContent />}
-      <div className="EntryEditorRender">
-        <canvas
-          width={canvasClientSizeX}
-          height={canvasClientSizeY}
-          style={canvasStyle}
-          ref={canvas}
-          className="Canvas"
-          onContextMenu={e => e.preventDefault()}
-        />
-      </div>
+      <div className="EntryEditorRender" ref={canvasContainer}></div>
       {currentEntity && mainContainerDiv}
       {currentEntity && bShowEntityCanvas && <EntityMetaSection />}
     </div>

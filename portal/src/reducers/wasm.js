@@ -62,12 +62,12 @@ const wasmRunFailed = (state, action) => {
   });
 };
 
-const wasmSetCanvasSize = (state, action) => {
+const wasmSetCanvasSize = (state, rect) => {
   return updateObject(state, {
-    canvasTop: action.top,
-    canvasLeft: action.left,
-    canvasWidth: action.width,
-    canvasHeight: action.height
+    canvasTop: rect.top,
+    canvasLeft: rect.left,
+    canvasWidth: rect.width,
+    canvasHeight: rect.height
   });
 };
 
@@ -99,7 +99,7 @@ const reducer = (state = initialState, action) => {
         wasmCanvas: action.payload_canvas
       };
     case WASM_SET_CANVAS_SIZE:
-      return wasmSetCanvasSize(state, action);
+      return wasmSetCanvasSize(state, action.payload);
     case WASM_SET_CANVAS_VISIBILITY:
       return wasmSetCanvasVisibility(state, action);
     default:

@@ -12,22 +12,19 @@ import {
 } from "./types";
 import store from "../store";
 
-export const wasmSetCanvasSize = (top,left,width,height) => {
+export const wasmSetCanvasSize = rect => {
   return {
     type: WASM_SET_CANVAS_SIZE,
-    top: top,
-    left: left,
-    width: width,
-    height: height
-  }
-}
+    payload: rect
+  };
+};
 
-export const wasmSetCanvasVisibility = (visible) => {
+export const wasmSetCanvasVisibility = visible => {
   return {
     type: WASM_SET_CANVAS_VISIBILITY,
     visible: visible
-  }
-}
+  };
+};
 
 export const wasmRunSuccess = canvas => {
   return {
