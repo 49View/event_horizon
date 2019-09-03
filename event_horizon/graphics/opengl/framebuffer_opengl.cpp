@@ -189,6 +189,7 @@ void Framebuffer::bind( const FrameBufferTextureValues* _values ) {
 }
 
 void Framebuffer::bindAndClear( const FrameBufferTextureValues* _values ) {
+//    LOGRS( "Framebuffer bindclear handle " << mFramebufferHandle << "[" << mWidth << "," << mHeight << "]" );
     bind( _values );
     clearColorBuffer();
     clearDepthBuffer();

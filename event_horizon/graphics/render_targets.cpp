@@ -380,24 +380,9 @@ RLTargetPlain::RLTargetPlain( std::shared_ptr<CameraRig> cameraRig, const Rect2f
     bucketRanges.emplace_back( CommandBufferLimits::UIStart, CommandBufferLimits::UIEnd );
 }
 
-void RLTargetPlain::startCL( CommandBufferList& cb ) {
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-    cb.setCameraUniforms( cameraRig->getCamera() );
-    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-
-//    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
-//    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-    cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
-
-    addToCBCore( cb );
-}
-
-void RLTargetPlain::endCL( CommandBufferList& cb ) {
-    blit(cb);
-}
-
 void RLTargetPlain::addToCB( CommandBufferList& cb ) {
-    startCL( cb );
+
+    cb.startList( shared_from_this(), CommandBufferFlags::CBF_None );
 
     cb.pushCommand( { CommandBufferCommandName::depthWriteFalse } );
     for ( const auto& [k, vl] : rr.CL() ) {
@@ -415,7 +400,7 @@ void RLTargetPlain::addToCB( CommandBufferList& cb ) {
         }
     }
 
-    endCL( cb );
+    blit(cb);
 }
 
 void RLTargetPlain::resize( const Rect2f& _r ) {
@@ -432,15 +417,7 @@ void RLTarget::clearCB() {
     }
 }
 
-void RLTargetPBR::startCL( CommandBufferList& cb ) {
-}
-
-void RLTargetPBR::endCL( CommandBufferList& cb ) {
-}
-
 void RLTargetPBR::addToCB( CommandBufferList& cb ) {
-
-//    startCL( cb );
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.setCameraUniforms( cameraRig->getCamera() );
@@ -557,17 +534,6 @@ std::shared_ptr<Framebuffer> RLTargetProbe::getFrameBuffer( [[maybe_unused]] Com
     return framebuffer;
 }
 
-void RLTargetProbe::startCL( CommandBufferList& cb ) {
-//    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-//
-//    cb.setCameraUniforms( cameraRig->getCamera() );
-//
-//    cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-//
-//    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
-//    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-//    cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
-}
 
 bool RLTarget::isKeyInRange( const int _key, CheckEnableBucket _checkBucketVisibility, RLClearFlag _clearFlags ) const {
 
@@ -627,17 +593,10 @@ RLTargetCubeMap::RLTargetCubeMap( const CubeMapRigContainer& _rig, std::shared_p
     framebuffer = _fb;
 }
 
-void RLTargetCubeMap::startCL( CommandBufferList& cb ) {
-    cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-//    cb.pushCommand( { CommandBufferCommandName::cullModeBack } );
-//    cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
-//    cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
-}
-
 void RLTargetCubeMap::render( std::shared_ptr<Texture> _renderToTexture, int cmsize, int mip, CubeMapRenderFunction rcb ) {
     Rect2f lViewport(V2f::ZERO, V2f{cmsize}, true);
     for ( uint32_t t = 0; t < 6; t++ ) {
-        startCL( rr.CB_U() );
+        rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
         cameraRig[t]->setViewport( lViewport );
         rr.CB_U().setFramebufferTexture(
                 FrameBufferTextureValues{ indexToFBT(t),

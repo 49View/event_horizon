@@ -160,8 +160,6 @@ public:
     virtual void invalidateOnAdd() {}
     virtual void changeTime( const std::string& time ) {}
     virtual void addToCB( CommandBufferList& cb ) = 0;
-    virtual void startCL( CommandBufferList& fbt ) = 0;
-    virtual void endCL( CommandBufferList& fbt ) = 0;
     virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) { return framebuffer; }
     virtual void blit( CommandBufferList& cbl ) = 0;
     virtual void resize( const Rect2f& _r ) = 0;
@@ -238,8 +236,6 @@ public:
     void addToCB( CommandBufferList& cb ) override;
     virtual void blit(CommandBufferList& cbl) override;
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
-    void startCL( CommandBufferList& fbt ) override;
-    void endCL( CommandBufferList& fbt ) override;
     void resize( const Rect2f& _r ) override;
 
 protected:
@@ -253,8 +249,6 @@ public:
     void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
     void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
-    void startCL( [[maybe_unused]] CommandBufferList& fbt ) override {};
-    void endCL( [[maybe_unused]] CommandBufferList& fbt ) override {}
     void resize( const Rect2f& _r ) override;
 };
 
@@ -264,9 +258,7 @@ public:
     ~RLTargetCubeMap() override = default;
     void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
     virtual void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
-    void startCL( CommandBufferList& fbt ) override;
     void render( std::shared_ptr<Texture> _renderToTexture, int cmsize, int mip, CubeMapRenderFunction rcb );
-    void endCL( [[maybe_unused]] CommandBufferList& fbt ) override {}
     void resize( [[maybe_unused]] const Rect2f& _r ) override {}
 
 protected:
@@ -280,8 +272,6 @@ public:
     void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
     virtual void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
     virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
-    void startCL( CommandBufferList& fbt ) override;;
-    void endCL( [[maybe_unused]] CommandBufferList& fbt ) override {}
     void resize( [[maybe_unused]] const Rect2f& _r ) override {}
 
 protected:
@@ -297,8 +287,6 @@ public:
     void addToCB( CommandBufferList& cb ) override;
     void blit(CommandBufferList& cbl) override;
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
-    void startCL( CommandBufferList& fbt ) override;
-    void endCL( CommandBufferList& fbt ) override;
     void resize( const Rect2f& _r ) override;
 
     [[nodiscard]] bool useSSAO() const;
