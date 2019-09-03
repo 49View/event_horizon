@@ -73,7 +73,8 @@ enum class PivotPointPosition {
 	TopLeft,
 	TopRight,
 
-	Custom
+	Custom,
+	Invalid
 };
 
 using PPP = PivotPointPosition;
