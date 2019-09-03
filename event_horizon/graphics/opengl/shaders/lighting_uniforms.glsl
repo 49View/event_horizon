@@ -19,4 +19,5 @@ layout( std140 ) uniform LightingUniforms {
     mat3 shLightCoeffs;
     int  u_hemisphereSampleKernelSize;
     vec3 u_hemisphereSampleKernel[64];
+    vec4 u_ssaoParameters;
 };

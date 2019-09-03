@@ -115,12 +115,16 @@ public:
 	void setShadowOverBurnCofficient( float _overBurn );
     void setShadowZFightCofficient( float _value );
     void setIndoorSceneCoeff( float _value );
+    void setSSAOKernelRadius( float _value );
+    void setSSAOFalloffRadius( float _value );
+    void setSSAONumRealTimeSamples( float _value );
 private:
 	bool mbGlobalOnOffSwitch;
 	std::vector<DirectionalLight> mDirectionalLights;
 	std::vector<PointLight> mPointLights;
 	std::vector<SpotLight> mSpotLights;
 	std::vector<V3f> mHemisphereKernelSamples;
+	V4f mSSAOParameters = V4f{ 25.0f, 16.0f, 0.5f, 1.0f};
 	std::shared_ptr<AnimType<float>> mDirectionalLightIntensity;
 
 	std::unique_ptr<ProgramUniformSet> mLigthingUniform;

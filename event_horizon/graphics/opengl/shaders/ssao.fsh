@@ -43,8 +43,8 @@ float ssao() {
     //return origin.z;
 
     float occlusion = 0.0;
-    float uRadius = 10.15;///25.0;
-    int numSamples = 32; // u_hemisphereSampleKernelSize
+    float uRadius = u_ssaoParameters[0]; //25.0 defaults;
+    int numSamples = int(u_ssaoParameters[1]); // u_hemisphereSampleKernelSize
     for (int i = 0; i < numSamples; ++i) {
         // get sample position:
         vec3 sam = u_hemisphereSampleKernel[i];
@@ -68,7 +68,7 @@ float ssao() {
         //return sampleDepth - zsample.z;
         // return -zsample.z/400;
         // range check & accumulate:
-        float rangeCheck= abs(-origin.z/u_nearFar.y - sampleDepth) < 0.1 ? 1.0 : 0.0;
+        float rangeCheck= abs(-origin.z/u_nearFar.y - sampleDepth) < u_ssaoParameters[3] ? 1.0 : 0.0;
         //return rangeCheck;
         //return (sampleDepth <= zsample.z ? 1.0 : 0.0);
         //rangeCheck = 1.0;

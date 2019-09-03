@@ -81,6 +81,7 @@ namespace UniformNames {
 
 	const std::string hemisphereKernelSize = "u_hemisphereSampleKernelSize";
 	const std::string hemisphereKernel = "u_hemisphereSampleKernel";
+	const std::string ssaoParameters = "u_ssaoParameters";
 	const std::string shLightCoeffs = "shLightCoeffs";
 
 	const std::string specularColor = "specularColor";

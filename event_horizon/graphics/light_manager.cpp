@@ -44,6 +44,7 @@ LightManager::LightManager() {
     mLigthingUniform->setUBOStructure( UniformNames::shLightCoeffs, 48 );
     mLigthingUniform->setUBOStructure( UniformNames::hemisphereKernelSize, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::hemisphereKernel, 16 * mNumHemiKernelSize );
+    mLigthingUniform->setUBOStructure( UniformNames::ssaoParameters, 16 );
 }
 
 void LightManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
@@ -149,6 +150,7 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     mLigthingUniform->setUBOData( UniformNames::shLightCoeffs, Matrix3f( SSH.LightCoeffs()) );
     mLigthingUniform->setUBOData( UniformNames::hemisphereKernelSize, mNumHemiKernelSize );
     mLigthingUniform->setUBODatav( UniformNames::hemisphereKernel, mHemisphereKernelSamples );
+    mLigthingUniform->setUBOData( UniformNames::ssaoParameters, mSSAOParameters );
 }
 
 void LightManager::setUniforms_r() {
@@ -169,4 +171,16 @@ void LightManager::setIndoorSceneCoeff( float _value ) {
 
 void LightManager::setShadowZFightCofficient( float _value ) {
     shadowParameters[0] = _value;
+}
+
+void LightManager::setSSAOKernelRadius( float _value ) {
+    mSSAOParameters[0] = _value;
+}
+
+void LightManager::setSSAOFalloffRadius( float _value ) {
+    mSSAOParameters[2] = _value;
+}
+
+void LightManager::setSSAONumRealTimeSamples( float _value ) {
+    mSSAOParameters[1] = _value;
 }
