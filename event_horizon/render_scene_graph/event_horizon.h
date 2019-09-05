@@ -46,12 +46,12 @@ public:
         }
 #endif
 #ifdef __EMSCRIPTEN__
-        if ( argc >= 4 ) {
+        if ( argc >= 3 ) {
             LOGR("Setting user token and sessionID ok");
-            LOGRS("DevicePixelRatio: " << argv[3] );
-            Http::userToken(argv[1]);
-            Http::sessionId(argv[2]);
-            WH::DevicePixelRatio( std::stof(std::string(argv[3])));
+            LOGRS("DevicePixelRatio: " << argv[2] );
+//            Http::userToken(argv[1]);
+            Http::sessionId(argv[1]);
+            WH::DevicePixelRatio( std::stof(std::string(argv[2])));
             Socket::createConnection();
         } else {
             if constexpr ( BE::hasLF() ) {

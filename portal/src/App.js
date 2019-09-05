@@ -24,6 +24,7 @@ if (process.env.NODE_ENV && process.env.NODE_ENV === "development") {
   axios.defaults.baseURL = "https://api.ateventhorizon.com";
   // production code
 }
+axios.defaults.withCredentials = true;
 
 console.log("REACT_APP_USE_API:" + process.env.REACT_APP_USE_API);
 if (
@@ -33,9 +34,9 @@ if (
   axios.defaults.baseURL = "https://api.ateventhorizon.com";
 }
 
-if (localStorage.token) {
-  setAuthToken(localStorage.token);
-}
+// if (localStorage.token) {
+//   setAuthToken(localStorage.token);
+// }
 
 initDB(DBConfig);
 

@@ -171,7 +171,7 @@ export const loadWasmComplete = async (
 
   window.Module = {
     arguments: [
-      userToken,
+      // userToken,
       userSessionId,
       (window.devicePixelRatio || 1).toString()
     ],
