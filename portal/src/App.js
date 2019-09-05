@@ -11,7 +11,6 @@ import { Provider } from "react-redux";
 import store from "./store";
 
 import { loadUser } from "./actions/auth";
-import setAuthToken from "./utils/setAuthToken";
 import axios from "axios";
 
 import "./App.css";
@@ -33,10 +32,6 @@ if (
 ) {
   axios.defaults.baseURL = "https://api.ateventhorizon.com";
 }
-
-// if (localStorage.token) {
-//   setAuthToken(localStorage.token);
-// }
 
 initDB(DBConfig);
 
