@@ -23,6 +23,11 @@ struct Rect2fFeature {
 
 using Rect2fFeatureT = uint64_t;
 
+enum class EdgeTouchingIsIntersecting {
+    Yes,
+    No
+};
+
 enum class RectV2f {
     Centered
 };
@@ -151,20 +156,28 @@ public:
 		return isInside;
 	}
 
-	bool contains( float x, float y ) const {
+    bool containsEqual( const Vector2f& pos ) const {
+        bool isInside = JMATH::isbetweenEqual( pos.x(), mTopLeft.x(), mBottomRight.x() ) && JMATH::isbetweenEqual( pos.y(), mTopLeft.y(), mBottomRight.y() );
+        return isInside;
+    }
+
+    bool contains( float x, float y ) const {
 		bool isInside = JMATH::isbetween( x, mTopLeft.x(), mBottomRight.x() ) && JMATH::isbetween( y, mTopLeft.y(), mBottomRight.y() );
 		return isInside;
 	}
 
-	bool contains( const Rect2f& rect ) const {
+    bool containsEqual( float x, float y ) const {
+        bool isInside = JMATH::isbetweenEqual( x, mTopLeft.x(), mBottomRight.x() ) && JMATH::isbetweenEqual( y, mTopLeft.y(), mBottomRight.y() );
+        return isInside;
+    }
+
+    bool contains( const Rect2f& rect ) const {
 		return contains( rect.topLeft() ) && contains( bottomRight() );
 	}
 
-	bool intersect( const Rect2f& rect ) const {
-		return contains( rect.topLeft() ) || contains( bottomRight() );
-	}
+    bool intersect( const Rect2f& rect, float _epsilon = 0.00001f, EdgeTouchingIsIntersecting _eti = EdgeTouchingIsIntersecting::No ) const;
 
-	bool isValid() const {
+    bool isValid() const {
 		return !( mTopLeft == Rect2f::INVALID.topLeft() && mBottomRight == Rect2f::INVALID.bottomRight() );
 	}
 

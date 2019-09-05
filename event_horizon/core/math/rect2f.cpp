@@ -172,3 +172,14 @@ void Rect2f::centered( const V2f& _size ) {
 void Rect2f::centerAroundOrigin() {
     centered( size() );
 }
+
+bool Rect2f::intersect( const Rect2f& rect, float _epsilon, EdgeTouchingIsIntersecting _eti ) const {
+    auto ac = centre();
+    auto bc = rect.centre();
+    if ( _eti == EdgeTouchingIsIntersecting::Yes ) {
+        return (abs(ac.x() - bc.x()) * (2.0f+_epsilon) <= (width() + rect.width())) &&
+               (abs(ac.y() - bc.y()) * (2.0f+_epsilon) <= (height() + rect.height()));
+    }
+    return (abs(ac.x() - bc.x()) * (2.0f+_epsilon) < (width() + rect.width())) &&
+           (abs(ac.y() - bc.y()) * (2.0f+_epsilon) < (height() + rect.height()));
+}

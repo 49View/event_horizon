@@ -324,6 +324,11 @@ inline bool isbetween( V x, V a, V b ) {
 }
 
 template<typename V>
+inline bool isbetweenEqual( V x, V a, V b ) {
+    return !( x >= a && x >= b ) && !( x <= a && x <= b );
+}
+
+template<typename V>
 inline bool isbetween( const V& x, const std::pair<V,V>& range ) {
     return ( x > range.first && x < range.second );
 }
