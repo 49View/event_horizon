@@ -58,6 +58,14 @@ body {
   z-index: 50000;
 }
 
+.navbarlogo-a {
+  grid-area: navbarlogo;
+  align-self: center;
+  justify-self: center;
+  font-size: 1.3rem;
+  color: white;
+}
+
 .navbareh-a {
   grid-area: navbareh;
   align-self: center;
@@ -75,9 +83,9 @@ body {
 .navbarGrid {
   background: var(--dark-color);
   display: grid;
-  grid-template-columns: 15px 260px 990px 15px;
+  grid-template-columns: 42px 233px 990px 15px;
   grid-template-rows: 42px;
-  grid-template-areas: ". navbareh navbaruser .";
+  grid-template-areas: "navbarlogo navbareh navbaruser .";
 }
 
 .projectInvitationGrid {

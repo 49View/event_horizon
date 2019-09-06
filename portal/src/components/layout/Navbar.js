@@ -1,12 +1,13 @@
 import React, { Fragment } from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { logoffFromProject } from "../../actions/auth";
+import Spinner from "react-bootstrap/Spinner";
 
-const Navbar = ({ userstate, logoffFromProject }) => {
+const Navbar = ({ userstate, logoffFromProject, loading, loading2 }) => {
   let userName = "";
 
+  console.log("Rerender navbar");
   if (userstate.isAuthenticated) {
     if (userstate.userdata && userstate.userdata.user.name) {
       userName = userstate.userdata.user.name;
@@ -27,13 +28,14 @@ const Navbar = ({ userstate, logoffFromProject }) => {
 
   return (
     <div className="navbarGrid">
-      <div className="navbareh-a">
-        <Link to="/">
-          <span className="navdiv-titletext">
-            <i className="fas fa-dice-d20" /> Event Horizon
-          </span>
-        </Link>
+      <div className="navbarlogo-a">
+        {loading || loading2 ? (
+          <Spinner animation="border" variant="warning" />
+        ) : (
+          <i className="fas fa-dice-d20" />
+        )}
       </div>
+      <div className="navbareh-a navdiv-titletext">Event Horizon</div>
       {userstate.isAuthenticated ? authlinks : nolinks}
     </div>
   );
@@ -41,11 +43,15 @@ const Navbar = ({ userstate, logoffFromProject }) => {
 
 Navbar.propTypes = {
   userstate: PropTypes.object,
+  loading: PropTypes.bool,
+  loading2: PropTypes.bool,
   logoffFromProject: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-  userstate: state.auth
+  userstate: state.auth,
+  loading: state.auth.loading,
+  loading2: state.entities.loading
 });
 
 export default connect(

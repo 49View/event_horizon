@@ -9,7 +9,6 @@ import {
   FormControl,
   Button
 } from "react-bootstrap";
-import Spinner from "./Spinner";
 import {
   createProject,
   acceptInvitation,
@@ -93,7 +92,7 @@ const DashboardUser = ({
     logout();
   };
 
-  if (loading || userstate.userdata === null) return <Spinner />;
+  if (userstate.userdata === null) return <Fragment />;
 
   let userProjects;
   if (userstate.userdata.projects !== null) {

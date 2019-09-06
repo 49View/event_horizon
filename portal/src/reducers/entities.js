@@ -29,10 +29,10 @@ const initialState = {
   matEntries: [],
   matEntriesFiltered: [],
   currentEntity: null,
-  replaceMaterialOn: false,
+  smallEntityModalOn: false,
   currentEntityNodes: null,
   group: "material",
-  loading: true,
+  loading: false,
   error: {}
 };
 
@@ -98,18 +98,18 @@ export default function(state = initialState, action) {
       return {
         ...state,
         loading: true,
-        replaceMaterialOn: false
+        smallEntityModalOn: false
       };
     case CLOSE_REPLACE_MATERIAL:
       return {
         ...state,
-        replaceMaterialOn: false,
+        smallEntityModalOn: false,
         selectedMatName: ""
       };
     case SET_SELECTED_MAT_NAME:
       return {
         ...state,
-        replaceMaterialOn: true,
+        smallEntityModalOn: true,
         selectedMatName: payload
       };
     case UPDATE_ENTITIES_PARTIAL_SEARCH:
@@ -153,7 +153,7 @@ export default function(state = initialState, action) {
         ...state,
         currentEntity: payload,
         currentTags: evaluateTags(payload.entity.metadata.tags),
-        replaceMaterialOn: false,
+        smallEntityModalOn: false,
         loading: requireWasmUpdate
       };
     case SET_ENTITY_NODES:

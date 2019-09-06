@@ -9,7 +9,7 @@ import { fillMaterialParams } from "../../../utils/materialUtils";
 
 const GeomEditor = ({
   currentEntityNodes,
-  replaceMaterialOn,
+  smallEntityModalOn,
   changeMaterialPropery
 }) => {
   const onReplaceEntity = e => {
@@ -149,20 +149,21 @@ const GeomEditor = ({
 
   return (
     <Fragment>
-      {replaceMaterialOn ? <SmallEntriesDialog /> : <InObjectMaterials />}
+      {smallEntityModalOn && <SmallEntriesDialog />}
+      <InObjectMaterials />
     </Fragment>
   );
 };
 
 GeomEditor.propTypes = {
   currentEntityNodes: PropTypes.object,
-  replaceMaterialOn: PropTypes.bool,
+  smallEntityModalOn: PropTypes.bool,
   changeMaterialPropery: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
   currentEntityNodes: state.entities.currentEntityNodes,
-  replaceMaterialOn: state.entities.replaceMaterialOn
+  smallEntityModalOn: state.entities.smallEntityModalOn
 });
 
 export default connect(

@@ -3,7 +3,6 @@ import { Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Entries from "./entities/Entries";
-import Spinner from "./Spinner";
 import ImageEditor from "./entities/ImageEditor";
 import AppEditor from "./entities/AppEditor";
 import GeomEditor from "./entities/GeomEditor";
@@ -90,7 +89,6 @@ const DashboardProject = ({
 
   return (
     <div className="dashboardContainer">
-      {loading && <Spinner />}
       <Entries cname="thumbs-a thumbsEntityArea" />
       <div className="editor-a">{mainEditorDiv}</div>
     </div>

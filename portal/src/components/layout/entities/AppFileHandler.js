@@ -3,31 +3,6 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Treebeard } from "react-treebeard";
 
-// const dataExample = {
-//   name: "root",
-//   toggled: true,
-//   children: [
-//     {
-//       name: "parent",
-//       children: [{ name: "child1" }, { name: "child2" }]
-//     },
-//     {
-//       name: "loading parent",
-//       loading: true,
-//       children: []
-//     },
-//     {
-//       name: "parent",
-//       children: [
-//         {
-//           name: "nested parent",
-//           children: [{ name: "nested child 1" }, { name: "nested child 2" }]
-//         }
-//       ]
-//     }
-//   ]
-// };
-
 const AppFileHandler = ({ appData }) => {
   const [data, setData] = useState({});
   const [cursor, setCursor] = useState(false);
@@ -40,9 +15,25 @@ const AppFileHandler = ({ appData }) => {
         children: []
       };
 
+      const addStyle = {
+        color: "yellow"
+      };
+      const addDecorator = {
+        Header: () => {
+          return (
+            <div style={addStyle}>
+              <i className="fas fa-plus-circle"></i> Add
+            </div>
+          );
+        }
+      };
       // eslint-disable-next-line
       for (const ent of appData.entities) {
         let entChildren = [];
+        entChildren.push({
+          name: "add...",
+          decorators: addDecorator
+        });
         // eslint-disable-next-line
         for (const ev of ent.value) {
           entChildren.push({
@@ -59,6 +50,9 @@ const AppFileHandler = ({ appData }) => {
   }, [appData]);
 
   const onToggle = (node, toggled) => {
+    if (cursor.children && cursor.children[0] === node) {
+      console.log(node, cursor);
+    }
     if (cursor) {
       cursor.active = false;
     }
