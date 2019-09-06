@@ -79,7 +79,7 @@ export const replaceMaterial = entity => async dispatch => {
     wscSend("ReplaceMaterialOnCurrentObject", {
       mat_id: entity.metadata.name, //entity._id,
       entity_id: state.entities.currentEntity.entity.metadata.name,
-      source_id: state.entities.selectedMatName
+      source_id: state.entities.selectedModalEntityName
     });
 
     // dispatch({
@@ -94,14 +94,14 @@ export const replaceMaterial = entity => async dispatch => {
   }
 };
 
-export const getAllMaterialsMeta = project => async dispatch => {
+export const getMetadataListOf = (group, project) => async dispatch => {
   try {
     dispatch({
       type: GET_ENTITY_LOAD,
       payload: null
     });
 
-    const res = await axios.get(`/entities/metadata/list/material/${project}`);
+    const res = await axios.get(`/entities/metadata/list/${group}/${project}`);
 
     dispatch({
       type: GET_MATERIALS_META,

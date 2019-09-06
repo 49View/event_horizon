@@ -71,6 +71,10 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         this->RR().setLoadingFlag(!_value );
     });
 
+    sg.propagateDirtyFlagConnect( [this]( ConnectPairStringBoolParamSig _value ) {
+        setDirtyFlagOnPBRRender( Name::Foxtrot, _value.first, _value.second );
+    });
+
     sg.FM().connect( [](const ResourceTransfer<Font>& _val ) {
         LOGRS( "[SG-Resrouce] Add " << ResourceVersioning<Font>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
@@ -121,34 +125,40 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
 
     sg.nodeRemoveConnect( [this]( NodeGraphConnectParamsSig _geom ) {
         this->RR().clearBucket( CommandBufferLimits::PBRStart );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     });
 
     sg.replaceMaterialConnect( [this]( const std::string& _oldMatRef , const std::string& _newMatRef ) {
         this->RR().replaceMaterial( _oldMatRef, _newMatRef );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     });
 
     sg.changeMaterialPropertyConnectString( [this]( const std::string& _prop, const std::string& _key,
                                                  const std::string& _value ) {
         foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
                    this->RR().getRenderMaterialFromHash( _key ), _prop );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     });
 
     sg.changeMaterialPropertyConnectFloat( [this]( const std::string& _prop, const std::string& _key,
                                                  const float& _value ) {
         foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
                    this->RR().getRenderMaterialFromHash( _key ), _prop );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     });
 
     sg.changeMaterialPropertyConnectV3f( [this]( const std::string& _prop, const std::string& _key,
                                               const V3f& _value ) {
         foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
                 this->RR().getRenderMaterialFromHash( _key ), _prop );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     });
 
     sg.changeMaterialPropertyConnectV4f( [this]( const std::string& _prop, const std::string& _key,
                                                  const V4f& _value ) {
         foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
                    this->RR().getRenderMaterialFromHash( _key ), _prop );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     });
 
 }
@@ -241,31 +251,37 @@ void RenderOrchestrator::init() {
     };
     luarr["useSkybox"] = [&](bool _flag) {
         useSkybox(_flag);
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
 
     luarr["useVignette"] = [&](bool _flag) {
         rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine", "_VIGNETTING_", boolAlphaBinary(_flag) );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
 
     luarr["useFilmGrain"] = [&](bool _flag) {
         rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
                                      "_GRAINING_", boolAlphaBinary(_flag) );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
 
     luarr["useBloom"] = [&](bool _flag) {
         rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
                                "_BLOOMING_", boolAlphaBinary(_flag) );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
 
     luarr["useDOF"] = [&](bool _flag) {
         rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
                                "_DOFING_", boolAlphaBinary(_flag) );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
 
     luarr["useSSAO"] = [&](bool _flag) {
         useSSAO(_flag);
         rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
                                "_SSAOING_", boolAlphaBinary(_flag) );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
 
 #ifndef _PRODUCTION_

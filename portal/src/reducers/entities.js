@@ -11,8 +11,8 @@ import {
   GET_ENTITY,
   GET_ENTITY_LOAD,
   SET_ENTITY_NODES,
-  SET_SELECTED_MAT_NAME,
-  CLOSE_REPLACE_MATERIAL,
+  SET_MODAL_SELECTED_ENTITY_NAME,
+  CLOSE_ENTITIES_MODAL,
   REPLACE_MATERIAL,
   REPLACE_ENTITY_TAGS,
   CHANGE_MATERIAL_COLOR,
@@ -100,17 +100,17 @@ export default function(state = initialState, action) {
         loading: true,
         smallEntityModalOn: false
       };
-    case CLOSE_REPLACE_MATERIAL:
+    case CLOSE_ENTITIES_MODAL:
       return {
         ...state,
         smallEntityModalOn: false,
-        selectedMatName: ""
+        selectedModalEntityName: ""
       };
-    case SET_SELECTED_MAT_NAME:
+    case SET_MODAL_SELECTED_ENTITY_NAME:
       return {
         ...state,
         smallEntityModalOn: true,
-        selectedMatName: payload
+        selectedModalEntityName: payload
       };
     case UPDATE_ENTITIES_PARTIAL_SEARCH:
       let filteredResult = [];

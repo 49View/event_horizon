@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import {
   updateReplaceMaterialPartialSearch,
-  replaceMaterial,
-  getAllMaterialsMeta
+  getMetadataListOf
 } from "../../../actions/entities";
-import { CLOSE_REPLACE_MATERIAL } from "../../../actions/types";
+import { CLOSE_ENTITIES_MODAL } from "../../../actions/types";
 
 import EntitiesSearchBox from "./EntitiesSearchBox";
 import EntitiesThumbHandler from "./EntitiesThumbHandler";
@@ -15,24 +14,20 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
 const SmallEntriesDialog = ({
-  loading,
+  group,
   entries,
   project,
-  selectedMatName,
+  selectedModalEntityName,
   smallEntityModalOn,
-  getAllMaterialsMeta
+  getMetadataListOf,
+  onClickCallback
 }) => {
-  const [count, setCount] = useState(0);
-
   useEffect(() => {
-    if (count === 0) {
-      getAllMaterialsMeta(project);
-      setCount(1);
-    }
-  }, [count, getAllMaterialsMeta, project]);
+    getMetadataListOf(group, project);
+  }, [getMetadataListOf, project, group]);
 
   const closeReplaceMaterial = flag => {
-    store.dispatch({ type: CLOSE_REPLACE_MATERIAL, payload: flag });
+    store.dispatch({ type: CLOSE_ENTITIES_MODAL, payload: flag });
   };
 
   return (
@@ -46,7 +41,7 @@ const SmallEntriesDialog = ({
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
           <span className="leftFloat text-secondary lead">
-            {selectedMatName}
+            {selectedModalEntityName}
           </span>
         </Modal.Title>
       </Modal.Header>
@@ -56,7 +51,7 @@ const SmallEntriesDialog = ({
           placeHolderText="Filter..."
           extraClassName="search-bar-smaller"
         />
-        <EntitiesThumbHandler entries={entries} onClicked={replaceMaterial} />
+        <EntitiesThumbHandler entries={entries} onClicked={onClickCallback} />
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={() => closeReplaceMaterial(false)}>Close</Button>
@@ -66,22 +61,24 @@ const SmallEntriesDialog = ({
 };
 
 SmallEntriesDialog.propTypes = {
-  loading: PropTypes.bool,
   smallEntityModalOn: PropTypes.bool,
   project: PropTypes.string,
-  selectedMatName: PropTypes.string,
-  entries: PropTypes.array
+  selectedModalEntityName: PropTypes.string,
+  entries: PropTypes.array,
+  group: PropTypes.string,
+  onClickCallback: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => ({
-  loading: state.auth.loading,
+const mapStateToProps = (state, ownProps) => ({
   project: state.auth.userdata.project,
   entries: state.entities.matEntriesFiltered,
-  selectedMatName: state.entities.selectedMatName,
-  smallEntityModalOn: state.entities.smallEntityModalOn
+  selectedModalEntityName: state.entities.selectedModalEntityName,
+  smallEntityModalOn: state.entities.smallEntityModalOn,
+  group: ownProps.group,
+  onClickCallback: ownProps.onClickCallback
 });
 
 export default connect(
   mapStateToProps,
-  { getAllMaterialsMeta }
+  { getMetadataListOf }
 )(SmallEntriesDialog);

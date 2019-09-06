@@ -7,7 +7,6 @@ import Spinner from "react-bootstrap/Spinner";
 const Navbar = ({ userstate, logoffFromProject, loading, loading2 }) => {
   let userName = "";
 
-  console.log("Rerender navbar");
   if (userstate.isAuthenticated) {
     if (userstate.userdata && userstate.userdata.user.name) {
       userName = userstate.userdata.user.name;

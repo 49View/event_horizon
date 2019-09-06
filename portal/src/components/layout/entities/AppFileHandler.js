@@ -50,8 +50,10 @@ const AppFileHandler = ({ appData }) => {
   }, [appData]);
 
   const onToggle = (node, toggled) => {
+    console.log("Clicked");
+    console.log(node, cursor);
     if (cursor.children && cursor.children[0] === node) {
-      console.log(node, cursor);
+      console.log("Node 0");
     }
     if (cursor) {
       cursor.active = false;

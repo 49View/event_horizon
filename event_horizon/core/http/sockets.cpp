@@ -33,7 +33,7 @@ namespace Socket {
 
     void onMessage( const std::string& _message ) {
 
-        LOGR( "[WEB-SOCKET-MESSAGE] %s", _message.c_str());
+//        LOGR( "[WEB-SOCKET-MESSAGE] %s", _message.c_str());
 
         rapidjson::Document document;
         document.Parse( _message.c_str() );

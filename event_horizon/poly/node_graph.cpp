@@ -8,6 +8,10 @@ void NodeGraph::preloadCompleteConnect( const std::function<ConnectVoidFuncSig>&
     preloadCompleteSignal.connect( _slot );
 }
 
+void NodeGraph::propagateDirtyFlagConnect( const std::function<ConnectPairStringBoolFuncSig>& _slot ) {
+    propagateDirtyFlagSignal.connect( _slot );
+}
+
 void NodeGraph::nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _slot ) {
     nodeAddSignal.connect( _slot );
 }

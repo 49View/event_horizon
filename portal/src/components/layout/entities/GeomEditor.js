@@ -2,9 +2,12 @@ import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import SmallEntriesDialog from "./SmallEntriesDialog";
-import { SET_SELECTED_MAT_NAME } from "../../../actions/types";
+import { SET_MODAL_SELECTED_ENTITY_NAME } from "../../../actions/types";
 import store from "../../../store";
-import { changeMaterialPropery } from "../../../actions/entities";
+import {
+  changeMaterialPropery,
+  replaceMaterial
+} from "../../../actions/entities";
 import { fillMaterialParams } from "../../../utils/materialUtils";
 
 const GeomEditor = ({
@@ -14,7 +17,7 @@ const GeomEditor = ({
 }) => {
   const onReplaceEntity = e => {
     store.dispatch({
-      type: SET_SELECTED_MAT_NAME,
+      type: SET_MODAL_SELECTED_ENTITY_NAME,
       payload: e.currentTarget.dataset.id
     });
   };
@@ -149,7 +152,12 @@ const GeomEditor = ({
 
   return (
     <Fragment>
-      {smallEntityModalOn && <SmallEntriesDialog />}
+      {smallEntityModalOn && (
+        <SmallEntriesDialog
+          group="material"
+          onClickCallback={replaceMaterial}
+        />
+      )}
       <InObjectMaterials />
     </Fragment>
   );

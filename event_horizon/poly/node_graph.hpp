@@ -17,7 +17,9 @@ using NodeGraphContainer = std::unordered_map<ResourceRef, NodeVariantsSP>;
 using SceneRayIntersectCallback = std::function<void(NodeVariantsSP, float)>;
 
 using ConnectVoidParamSig = bool;
+using ConnectPairStringBoolParamSig = std::pair<std::string, bool>;
 using ConnectVoidFuncSig = void(ConnectVoidParamSig);
+using ConnectPairStringBoolFuncSig = void(ConnectPairStringBoolParamSig);
 using NodeGraphConnectParamsSig = NodeVariantsSP;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
 using NodeGraphConnectReplaceFuncSig = void(const std::string&, const std::string&);
@@ -32,6 +34,7 @@ public:
     void nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
     void preloadCompleteConnect( const std::function<ConnectVoidFuncSig>& _slot );
+    void propagateDirtyFlagConnect( const std::function<ConnectPairStringBoolFuncSig>& _slot );
     void changeMaterialPropertyConnectString( const std::function<NodeGraphConnectChangeMaterialPropertySFuncSig>& _slot );
     void changeMaterialPropertyConnectFloat( const std::function<NodeGraphConnectChangeMaterialPropertyFFuncSig>& _slot );
     void changeMaterialPropertyConnectV3f( const std::function<NodeGraphConnectChangeMaterialPropertyV3fFuncSig>& _slot );
@@ -39,6 +42,7 @@ public:
 
 protected:
     NodeGraphContainer nodes;
+    boost::signals2::signal<ConnectPairStringBoolFuncSig> propagateDirtyFlagSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeRemoveSignal;
     boost::signals2::signal<ConnectVoidFuncSig> preloadCompleteSignal;

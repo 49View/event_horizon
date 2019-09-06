@@ -15,7 +15,7 @@ const wscSendInternal = (message, obj) => {
       msg: message,
       data: obj
     };
-    console.log("[WSS] Sending: ", sd);
+    // console.log("[WSS] Sending: ", sd);
     webSocketClient.send(JSON.stringify(sd));
   }
 };
@@ -35,7 +35,12 @@ export const requestAsset = currentEntity => {
 
 export const wscConnect = session => {
   let webSocketServerAddress = "wss://api.ateventhorizon.com";
-  if (process.env.NODE_ENV && process.env.NODE_ENV === "development" && (!process.env.REACT_APP_USE_API || process.env.REACT_APP_USE_API!=="production")) {
+  if (
+    process.env.NODE_ENV &&
+    process.env.NODE_ENV === "development" &&
+    (!process.env.REACT_APP_USE_API ||
+      process.env.REACT_APP_USE_API !== "production")
+  ) {
     // dev code
     webSocketServerAddress = "wss://localhost:3000";
   }
@@ -48,7 +53,7 @@ export const wscConnect = session => {
   webSocketClient.onmessage = message => {
     const mdata = JSON.parse(message.data);
     const state = store.getState();
-    console.log("[WSS-REACT][MSGREC] ", mdata);
+    //console.log("[WSS-REACT][MSGREC] ", mdata);
     if (state.entities.currentEntity) {
       if (mdata.msg === "requestAsset") {
         requestAsset(state.entities.currentEntity);
