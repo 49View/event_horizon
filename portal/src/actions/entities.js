@@ -16,7 +16,8 @@ import {
   REPLACE_MATERIAL,
   CHANGE_MATERIAL_COLOR,
   RESET_CURRENT_ENTITY,
-  LOADING_FINISHED
+  LOADING_FINISHED,
+  CLOSE_ENTITIES_MODAL
 } from "./types";
 import store from "../store";
 import { wscSend } from "../utils/webSocketClient";
@@ -178,6 +179,40 @@ export const wasmClientFinishedLoadingData = () => dispatch => {
     type: LOADING_FINISHED,
     payload: null
   });
+};
+
+export const addEntityToAppData = entitySource => async dispatch => {
+  try {
+    dispatch({
+      type: GET_ENTITY_LOAD,
+      payload: null
+    });
+    const state = store.getState();
+    const appKey = state.entities.currentEntity.entity.mKey;
+    const appDataJson = await axios.put(
+      `/appdata/${appKey}/${entitySource.group}/${entitySource.metadata.name}`
+    );
+    dispatch({ type: CLOSE_ENTITIES_MODAL, payload: false });
+
+    const entityFull = {
+      entity: appDataJson.data,
+      deps: [],
+      blobURL: null,
+      jsonRet: null
+    };
+
+    dispatch({
+      type: GET_ENTITY,
+      payload: entityFull,
+      requireWasmUpdate: false
+    });
+  } catch (err) {
+    console.log("EntityError: ", err.response);
+    dispatch({
+      type: ENTITY_ERROR,
+      payload: { msg: err.response }
+    });
+  }
 };
 
 // Get entity

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment } from "react";
 import { connect } from "react-redux";
 import { decode } from "base64-arraybuffer";
 import {
@@ -8,12 +8,6 @@ import {
 import store from "../../../store";
 
 const EntitiesThumbHandler = ({ currentEntity, entries, onClicked }) => {
-  useEffect(() => {
-    // if (entries.length === 1 && !currentEntity) {
-    //   store.dispatch(onClicked(entries[0]));
-    // }
-  }, [entries, currentEntity, onClicked]);
-
   // console.log("###Current entity: ", currentEntity);
   let entitiesRes = [];
   if (entries && entries.length > 0) {

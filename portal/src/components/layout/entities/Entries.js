@@ -11,7 +11,7 @@ import EntitiesThumbHandler from "./EntitiesThumbHandler";
 import AppFileHandler from "./AppFileHandler";
 
 const Entries = ({ entries, currentEntity, cname }) => {
-  console.log("CurrentEntity: ", currentEntity);
+  // console.log("CurrentEntity: ", currentEntity);
 
   const handler =
     currentEntity !== null && currentEntity.entity.group === "app" ? (

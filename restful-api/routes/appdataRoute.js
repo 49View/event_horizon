@@ -106,4 +106,37 @@ router.put("/:key", async (req, res, next) => {
   }
 });
 
+router.put("/:key/:group/:value", async (req, res, next) => {
+  try {
+    const content = await appdataController.getApp(req.params.key);
+    if (content === null) {
+      throw ("appData Key not found", req.params.key);
+    }
+    let bAssigned = false;
+    for (let entI = 0; entI < content.entities.length; entI++) {
+      if (content.entities[entI].key === req.params.group) {
+        if (content.entities[entI].value.indexOf(req.params.value) === -1) {
+          content.entities[entI].value.push(req.params.value);
+          bAssigned = true;
+          break;
+        } else {
+          res.json(content);
+          return;
+        }
+      }
+    }
+    if (!bAssigned) {
+      content.entities.push({
+        key: req.params.group,
+        value: [req.params.value]
+      });
+    }
+    const ret = await appdataController.updateApp(content);
+    res.json(ret);
+  } catch (ex) {
+    console.log("Error creating app", ex);
+    res.sendStatus(400);
+  }
+});
+
 module.exports = router;
