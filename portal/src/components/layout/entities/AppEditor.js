@@ -45,25 +45,27 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
         });
       });
     }
-    if (consoleArrayLogs.length < wasmLogs.length) {
-      let newConsoleLog = consoleArrayLogs;
-      for (let t = consoleArrayLogs.length; t < wasmLogs.length; t++) {
-        newConsoleLog.push({
-          key: t.toString(),
-          text: wasmLogs[t]
-        });
-      }
-      setConsoleArrayLogs(newConsoleLog);
-    }
   }, [
     userData,
     currentEntity,
     fileData,
+    fileC,
     consoleArrayLogs,
     wasmLogs,
     wasmOutputDirty,
     getAll
   ]);
+
+  if (consoleArrayLogs.length < wasmLogs.length) {
+    let newConsoleLog = consoleArrayLogs;
+    for (let t = consoleArrayLogs.length; t < wasmLogs.length; t++) {
+      newConsoleLog.push({
+        key: t.toString(),
+        text: wasmLogs[t]
+      });
+    }
+    setConsoleArrayLogs(newConsoleLog);
+  }
 
   const handleClick = () => {
     if (fileData === null) {

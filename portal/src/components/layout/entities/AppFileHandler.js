@@ -51,8 +51,7 @@ const AppFileHandler = ({ appData, smallEntityModalOn }) => {
         }
         lData.children.push({
           name: getEntityDBGroup(ent.key),
-          children: entChildren,
-          toggled: true
+          children: entChildren
         });
       }
       setData(lData);
