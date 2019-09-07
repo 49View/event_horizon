@@ -90,9 +90,11 @@ const reducer = (state = initialState, action) => {
     case WASM_RUN_FAILED:
       return wasmRunFailed(state, action);
     case ADD_CONSOLE_TEXT:
-      state.consoleOutput.push(action.payload);
-      state.consoleOutputDirty = !state.consoleOutputDirty;
-      return state;
+      return {
+        ...state,
+        consoleOutput: [...state.consoleOutput, action.payload],
+        consoleOutputDirty: !state.consoleOutputDirty
+      };
     case WASM_SET_ROOT_CANVAS:
       return {
         ...state,

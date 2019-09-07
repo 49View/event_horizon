@@ -44,14 +44,7 @@ const containerClassFromGroup = group => {
   }
 };
 
-const DashboardProject = ({
-  currentEntity,
-  entities,
-  loading,
-  group,
-  userToken,
-  userData
-}) => {
+const DashboardProject = ({ currentEntity, entities, group, userData }) => {
   let canvasContainer = React.useRef(null);
 
   useEffect(() => {
@@ -98,18 +91,14 @@ const DashboardProject = ({
 DashboardProject.propTypes = {
   currentEntity: PropTypes.object,
   entities: PropTypes.array,
-  loading: PropTypes.bool,
   group: PropTypes.string,
-  userToken: PropTypes.string,
   userData: PropTypes.object
 };
 
 const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
   entities: state.entities.entries,
-  loading: state.entities.loading,
   group: state.entities.group,
-  userToken: state.auth.token,
   userData: state.auth.userdata
 });
 
