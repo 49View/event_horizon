@@ -45,6 +45,8 @@ void ScenePreLoader::activateGeomLoad() {
 void ScenePreLoader::loadSceneEntities() {
 #define LRFUNC std::bind(&ScenePreLoader::loadResCount, this, std::placeholders::_1)
 
+    sgl.setMaterialRemap( appData.getMatRemapping() );
+
     rsgl.RR().setLoadingFlag( true );
     if ( appData.firstTierResourceCount() == 0 ) {
         activatePostLoadInternal();
@@ -60,6 +62,11 @@ ScenePreLoader::ScenePreLoader( SceneGraph& sg, RenderOrchestrator& _rsg ) : sgl
 
 void ScenePreLoader::activateFinalLoadInternal() {
     rsgl.RR().setLoadingFlag( false );
+
+    rsgl.RR().setShadowOverBurnCofficient( appData.getRenderSettings().shadowOverBurnCofficient );
+    rsgl.RR().setIndoorSceneCoeff(appData.getRenderSettings().indoorSceneCoeff);
+    rsgl.RR().setShadowZFightCofficient(appData.getRenderSettings().shadowZFightCofficient);
+
     activatePostLoad();
 }
 

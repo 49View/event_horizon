@@ -253,7 +253,7 @@ namespace GLTF2Service {
         LOGRS( "GLTF2 Material: " << mat.name );
         removeNonAlphaCharFromString( im.name );
 
-        auto mname = mat.name;
+        auto mname = _sg.possibleRemap( _gltf.key, mat.name );
 //        if ( mname == "Curtain1" || mname == "Curtain2" ) mname = "carillo_diamante_curtain";
 //        if ( mname == "Brimnes" ) mname = "Brimnes_Base";
 //        if ( mname == "Material #0" ) mname = "picture001";
@@ -269,7 +269,6 @@ namespace GLTF2Service {
 //            mname = "Hemnes_Drawer";
 //        if ( mname == "01 - Default" && _gltf.contentHash.find( "lauter" ) != std::string::npos ) mname = "selije";
 //        if ( mname == "Soderhamn" ) mname = "Soderhamn_Base";
-
 
         auto matRef = _sg.getHash<Material>( mname );
         if ( matRef.empty()) {
@@ -363,7 +362,7 @@ namespace GLTF2Service {
         return true;
     }
 
-    GeomSP load( SceneGraph& _sg, const std::string& _path, const SerializableContainer& _array ) {
+    GeomSP load( SceneGraph& _sg, const std::string& _key, const std::string& _path, const SerializableContainer& _array ) {
 
         tinygltf::TinyGLTF gltf_ctx;
         std::string err;
@@ -376,6 +375,7 @@ namespace GLTF2Service {
         gltfScene.contentHash = _path;
         gltfScene.Name( getFileNameOnly( _path ));
         gltfScene.model = std::make_shared<tinygltf::Model>();
+        gltfScene.key = _key;
 
         bool ret = false;
         if ( _array.empty()) {

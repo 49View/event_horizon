@@ -516,6 +516,18 @@ bool Renderer::isLoading() const {
     return bIsLoading;
 }
 
+void Renderer::setShadowOverBurnCofficient( float _value ) {
+    LM()->setShadowOverBurnCofficient( _value );
+}
+
+void Renderer::setShadowZFightCofficient( float _value ) {
+    LM()->setIndoorSceneCoeff(_value);
+}
+
+void Renderer::setIndoorSceneCoeff( float _value ) {
+    LM()->setShadowZFightCofficient(_value);
+}
+
 void Renderer::setProgressionTiming( float _progress ) {
     am.setProgressionTiming( _progress );
 }
