@@ -10,6 +10,7 @@ import {
   DELETE_ENTITY,
   GET_ENTITY,
   GET_APPS,
+  SET_ENTITY_APP_NAME,
   GET_ENTITY_LOAD,
   SET_ENTITY_NODES,
   REPLACE_ENTITY_TAGS,
@@ -77,10 +78,27 @@ export const replaceMaterial = entity => async dispatch => {
     //   payload: null
     // });
     const state = store.getState();
+    const matId = entity.metadata.name;
+    const entityId = state.entities.currentEntity.entity.metadata.name;
+    const sourceId = state.entities.selectedModalEntityName;
     wscSend("ReplaceMaterialOnCurrentObject", {
-      mat_id: entity.metadata.name, //entity._id,
-      entity_id: state.entities.currentEntity.entity.metadata.name,
-      source_id: state.entities.selectedModalEntityName
+      mat_id: matId, //entity._id,
+      entity_id: entityId,
+      source_id: sourceId
+    });
+
+    const appKey = state.entities.appKey;
+    const body = {
+      key: appKey,
+      matkey: sourceId,
+      objkey: entityId,
+      value: matId
+    };
+
+    await axios.put(`/appdata/matremap`, body, {
+      headers: {
+        "Content-Type": "application/json"
+      }
     });
 
     // dispatch({
@@ -250,6 +268,10 @@ export const getFullEntity = entitySource => async dispatch => {
       });
     } else if (entitySource.group === "app") {
       fullData = entitySource; //await axios.get(`/appdata/${entitySource.mKey}`);
+      dispatch({
+        type: SET_ENTITY_APP_NAME,
+        payload: fullData.mKey
+      });
     }
 
     const entityFull = {

@@ -9,6 +9,7 @@ import {
   DELETE_ENTITY,
   ADD_ENTITY,
   GET_ENTITY,
+  SET_ENTITY_APP_NAME,
   GET_ENTITY_LOAD,
   SET_ENTITY_NODES,
   SET_MODAL_SELECTED_ENTITY_NAME,
@@ -31,6 +32,7 @@ const initialState = {
   currentEntity: null,
   smallEntityModalOn: false,
   currentEntityNodes: null,
+  appKey: "",
   group: "material",
   loading: false,
   error: {}
@@ -155,6 +157,11 @@ export default function(state = initialState, action) {
         currentTags: evaluateTags(payload.entity.metadata.tags),
         smallEntityModalOn: false,
         loading: requireWasmUpdate
+      };
+    case SET_ENTITY_APP_NAME:
+      return {
+        ...state,
+        appKey: payload
       };
     case SET_ENTITY_NODES:
       return {

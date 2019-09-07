@@ -34,6 +34,8 @@ export const checkCommonFileExtension = (group, ext) => {
     ) {
       return true;
     }
+  } else if (group === "font") {
+    if (ext === "ttf") return true;
   }
 
   return false;

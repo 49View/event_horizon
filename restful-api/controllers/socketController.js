@@ -72,7 +72,13 @@ const onSocketClientHeartBeat = client => {
 };
 
 const onSocketClientMessage = async (client, message) => {
-  console.log("[WSS]['msg'] {", client.session.user.name, "} ", message);
+  console.log(
+    "[WSS]['msg'] {",
+    client.session.user.name,
+    "} ",
+    message.slice(0, 50),
+    " ...(truncated)"
+  );
   // console.log("Message: "+message);
   try {
     //   let messageObject=JSON.parse(message);

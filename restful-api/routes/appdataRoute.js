@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const appdataController = require("../controllers/appdataController");
 const metadataAssistant = require("../assistants/metadataAssistant");
+const path = require("path");
 
 router.get("/list/:project", async (req, res, next) => {
   try {
@@ -89,6 +90,46 @@ router.post("/", async (req, res, next) => {
 });
 
 // Update
+
+router.put("/matremap/", async (req, res, next) => {
+  try {
+    const { key, matkey, objkey, value } = req.body;
+    const content = await appdataController.getApp(key);
+    if (content === null) {
+      throw ("appData Key not found", key);
+    }
+    if (content.matRemapping === null || content.matRemapping === undefined) {
+      content.matRemapping = {};
+    }
+    if (
+      content.matRemapping.remap === null ||
+      content.matRemapping.remap === undefined
+    ) {
+      content.matRemapping.remap = [];
+    }
+    const compkey = path.parse(objkey).name + "," + matkey;
+    let bAssigned = false;
+    for (let entI = 0; entI < content.matRemapping.remap.length; entI++) {
+      if (content.matRemapping.remap[entI].key === compkey) {
+        content.matRemapping.remap[entI].value = value;
+        bAssigned = true;
+        break;
+      }
+    }
+    if (!bAssigned) {
+      content.matRemapping.remap.push({
+        key: compkey,
+        value: value
+      });
+    }
+    const ret = await appdataController.updateApp(content);
+    res.json(ret);
+  } catch (ex) {
+    console.log("Error creating app", ex);
+    res.sendStatus(400);
+  }
+});
+
 router.put("/:key", async (req, res, next) => {
   try {
     const content = await appdataController.getApp(req.params.key);
