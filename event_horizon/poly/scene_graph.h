@@ -26,6 +26,7 @@
 class SceneGraph;
 struct scene_t;
 class Camera;
+using MaterialMap = std::unordered_map<std::string, std::string>;
 
 class CommandScriptSceneGraph : public CommandScript {
 public:
@@ -356,7 +357,7 @@ protected:
     void loadResourceCallbackWithLoader( LoadedResouceCallbackContainer& cba, T loadFunc ) {
         if ( !cba.empty()) {
             auto res = cba.back();
-            auto ent = loadFunc( *this, res.hash, res.data );
+            auto ent = loadFunc( *this, res.key, res.hash, res.data );
             B<BB>( res.key ).addIM( ent );
             if ( res.ccf ) res.ccf( res.key );
             cba.pop_back();
@@ -370,6 +371,10 @@ protected:
     ResourceRef GBMatInternal( CResourceRef _matref, const C4f& _color );
     void materialsForGeomSocketMessage();
     void replaceMaterialOnNodes( const std::string& _key );
+public:
+    [[nodiscard]] const MaterialMap& getMaterialRemap() const;
+    void setMaterialRemap( const MaterialMap& materialRemap );
+    [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
 //    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
@@ -389,6 +394,7 @@ protected:
     GeomManager& gm;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
+    MaterialMap materialRemap;
 };
 
 class MaterialThumbnail : public Material {

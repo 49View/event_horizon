@@ -566,3 +566,18 @@ void SceneGraph::loadCameraRig( std::string _names, HttpResouceCB _ccf ) {
 void SceneGraph::loadGeom( std::string _names, HttpResouceCB _ccf ) {
     B<GRB>( _names ).load( _ccf );
 }
+
+const MaterialMap& SceneGraph::getMaterialRemap() const {
+    return materialRemap;
+}
+
+void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {
+    materialRemap = _materialRemap;
+}
+
+std::string SceneGraph::possibleRemap( const std::string& _key, const std::string& _value ) const {
+    if ( const auto& it = materialRemap.find(_key + "," + _value ); it != materialRemap.end() ) {
+        return it->second;
+    }
+    return _value;
+}

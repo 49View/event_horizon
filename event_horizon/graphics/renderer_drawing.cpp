@@ -758,3 +758,4 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
     return vp;
 }
 
+

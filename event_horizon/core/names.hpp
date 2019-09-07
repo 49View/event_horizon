@@ -9,13 +9,13 @@ namespace S {
 
     const std::string PBR       = "PBR";
 
-    const std::string GEOMS     = "geoms";
-    const std::string COLORS    = "colors";
-    const std::string MATERIALS = "materials";
-    const std::string PROFILES  = "profiles";
-    const std::string IMAGES    = "images";
-    const std::string FONTS     = "fonts";
-    const std::string SCRIPTS   = "scripts";
+    const std::string GEOMS     = "geom";
+    const std::string COLORS    = "color";
+    const std::string MATERIALS = "material";
+    const std::string PROFILES  = "profile";
+    const std::string IMAGES    = "image";
+    const std::string FONTS     = "font";
+    const std::string SCRIPTS   = "script";
 
     const std::string COLOR_2D = "PN_2D_COLOR";
     const std::string TEXTURE_2D = "PN_2D_TEXTURE";

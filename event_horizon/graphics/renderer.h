@@ -206,6 +206,9 @@ public:
     void useBloom(bool _flag);
     void useDOF(bool _flag);
     void useSSAO(bool _flag);
+    void setShadowOverBurnCofficient( float _overBurn );
+    void setShadowZFightCofficient( float _value );
+    void setIndoorSceneCoeff( float _value );
 
 protected:
 	void clearCommandList();

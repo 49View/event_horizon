@@ -65,9 +65,10 @@ namespace GLTF2Service {
         MaterialMap matMap;
         std::string basePath;
         std::string contentHash;
+        std::string key;
     };
 
-    GeomSP load( SceneGraph& _sg, const std::string& _path, const SerializableContainer& _array = {} );
+    GeomSP load( SceneGraph& _sg, const std::string& _key, const std::string& _path, const SerializableContainer& _array = {} );
 
     void fillGeom( std::shared_ptr<VData> geom, tinygltf::Model* model, int meshIndex, int primitiveIndex );
 };

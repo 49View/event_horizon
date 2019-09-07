@@ -7,14 +7,20 @@
 #include <core/name_policy.hpp>
 #include <core/names.hpp>
 
+using MaterialMap = std::unordered_map<std::string, std::string>;
+
 JSONDATA( AppRenderSettings, shadowOverBurnCofficient, indoorSceneCoeff, shadowZFightCofficient )
     float shadowOverBurnCofficient = 2.0f;
     float indoorSceneCoeff = 1.0f;
     float shadowZFightCofficient = 0.002f;
 };
 
+JSONDATA( AppMaterialsRemapping, remap )
+    MaterialMap remap;
+};
+
 struct AppEntities {
-    AppEntities( const std::string& key, const std::vector<std::string>& value ) : key( key ), value( value ) {}
+    AppEntities( std::string  key, const std::vector<std::string>& value ) : key(std::move( key )), value( value ) {}
 
 JSONSERIAL( AppEntities, key, value );
     std::string key;
@@ -24,7 +30,7 @@ JSONSERIAL( AppEntities, key, value );
 class AppData : public Keyable<> {
 public:
     AppData() = default;
-JSONSERIAL( AppData, renderSettings, mKey, entities );
+JSONSERIAL( AppData, renderSettings, matRemapping, mKey, entities );
 
     [[nodiscard]] size_t firstTierResourceCount() const {
         size_t ret = 0;
@@ -128,8 +134,17 @@ JSONSERIAL( AppData, renderSettings, mKey, entities );
     void addRawImage     ( CResourceRef _value ) { add( S::IMAGES, _value); }
     void addFont         ( CResourceRef _value ) { add( S::FONTS, _value); }
 
+    [[nodiscard]] const AppRenderSettings& getRenderSettings() const {
+        return renderSettings;
+    }
+
+    [[nodiscard]] const MaterialMap& getMatRemapping() const {
+        return matRemapping.remap;
+    }
+
 protected:
     AppRenderSettings        renderSettings;
+    AppMaterialsRemapping    matRemapping;
     std::vector<AppEntities> entities;
 };
 
