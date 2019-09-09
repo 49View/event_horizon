@@ -7,6 +7,7 @@ import Tab from "react-bootstrap/Tab";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 import { useIndexedDB } from "react-indexed-db";
+import Table from "react-bootstrap/Table";
 
 require("codemirror/lib/codemirror.css");
 require("codemirror/theme/material.css");
@@ -168,7 +169,30 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
               </ul>
             </div>
           </Tab>
-          <Tab eventKey="settings" title="settings"></Tab>
+          <Tab eventKey="settings" title="settings">
+            <Table striped bordered hover size="sm">
+              <thead>
+                <tr>
+                  <th>Rendering</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Shadow OverBurn Coef</td>
+                  <td>2.0</td>
+                </tr>
+                <tr>
+                  <td>Indoor Scene Coeff</td>
+                  <td>1.0</td>
+                </tr>
+                <tr>
+                  <td>Shadow Z-Fight Coeff</td>
+                  <td>0.002</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Tab>
           <Tab eventKey="builds" title="builds"></Tab>
         </Tabs>
       </div>

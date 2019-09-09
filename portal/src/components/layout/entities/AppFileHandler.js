@@ -6,10 +6,15 @@ import SmallEntriesDialog from "./SmallEntriesDialog";
 import { SET_MODAL_SELECTED_ENTITY_NAME } from "../../../actions/types";
 import store from "../../../store";
 import { addEntityToAppData } from "../../../actions/entities";
+// import Popover from "react-bootstrap/Popover";
+// import Button from "react-bootstrap/Button";
+// import PopoverTitle from 'react-bootstrap/PopoverTitle'
+// import PopoverContent from 'react-bootstrap/PopoverContent'
 
 const AppFileHandler = ({ appData, smallEntityModalOn }) => {
   const [data, setData] = useState({});
   const [cursor, setCursor] = useState(false);
+  // const [nodeSelected, setNodeSelected] = useState(false);
   const [currFileHandlerGroup, setCurrFileHandlerGroup] = useState(null);
 
   const addId = "Add..";
@@ -71,11 +76,16 @@ const AppFileHandler = ({ appData, smallEntityModalOn }) => {
       });
     }
     if (cursor) {
-      cursor.active = false;
+      cursor.active = !cursor.active;
     }
-    node.active = true;
+    node.active = !node.active;
     if (node.children) {
       node.toggled = toggled;
+    } else {
+      if (node.name !== addId) {
+        setCurrFileHandlerGroup(node.id);
+        // setNodeSelected(true);
+      }
     }
     setCursor(node);
     setData(Object.assign({}, data));
@@ -89,7 +99,7 @@ const AppFileHandler = ({ appData, smallEntityModalOn }) => {
           onClickCallback={addEntityToAppData}
         />
       )}
-
+      {/* {nodeSelected && <Button variant="danger">Remove from app list</Button>} */}
       <Treebeard data={data} onToggle={onToggle} />
     </Fragment>
   );

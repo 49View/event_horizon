@@ -11,6 +11,7 @@ const ObjectsStrID = "Objects";
 const MaterialsStrID = "Materials";
 const ImagesStrID = "Images";
 const FontsStrID = "Fonts";
+const GUIsStrID = "GUIs";
 const VectorsStrID = "Vectors";
 const ColorsStrID = "Colors";
 
@@ -39,6 +40,7 @@ const EntityTypeTaskBar = ({
     if (group === ObjectsStrID) groupId = "geom";
     if (group === MaterialsStrID) groupId = "material";
     if (group === ImagesStrID) groupId = "image";
+    if (group === GUIsStrID) groupId = "ui";
     if (group === FontsStrID) groupId = "font";
     if (group === VectorsStrID) groupId = "profile";
     if (group === ColorsStrID) groupId = "color_scheme";
@@ -93,6 +95,7 @@ const EntityTypeTaskBar = ({
         currentGroup === "material"
       )}
       {topSideEntry("fas fa-images", ImagesStrID, currentGroup === "image")}
+      {topSideEntry("fas fa-bars", GUIsStrID, currentGroup === "ui")}
       {topSideEntry("fas fa-font", FontsStrID, currentGroup === "font")}
       {topSideEntry(
         "fas fa-vector-square",
