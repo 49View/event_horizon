@@ -36,8 +36,45 @@ export const checkCommonFileExtension = (group, ext) => {
     }
   } else if (group === "font") {
     if (ext === "ttf") return true;
+  } else if (group === "ui") {
+    if (ext === "json") return true;
   }
 
+  return false;
+};
+
+export const groupHasCreateEditor = group => {
+  if (group === "ui") {
+    return true;
+  }
+  return false;
+};
+
+export const groupHasImportFacility = group => {
+  if (group !== "app") {
+    return true;
+  }
+  return false;
+};
+
+export const groupHasUpdateFacility = (currEntity, group) => {
+  if (currEntity && group !== "app") {
+    return true;
+  }
+  return false;
+};
+
+export const groupHasMetadataSection = (currEntity, group) => {
+  if (currEntity && group !== "app") {
+    return true;
+  }
+  return false;
+};
+
+export const groupHasRenderToolbar = (currEntity, group) => {
+  if (currEntity && (group === "geom" || group === "material")) {
+    return true;
+  }
   return false;
 };
 

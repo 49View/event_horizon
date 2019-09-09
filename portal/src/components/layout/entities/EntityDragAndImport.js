@@ -3,10 +3,14 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useDropzone } from "react-dropzone";
 import { useAlert } from "react-alert";
-// import axios from "axios";
+import Button from "react-bootstrap/Button";
 
 import { addEntity } from "../../../actions/entities";
-import { checkFileExtensionsOnEntityGroup } from "../../../utils/utils";
+import {
+  checkFileExtensionsOnEntityGroup,
+  groupHasCreateEditor,
+  groupHasImportFacility
+} from "../../../utils/utils";
 
 const EntityDragAndImport = ({ addEntity, group, project, user }) => {
   const alert = useAlert();
@@ -35,16 +39,34 @@ const EntityDragAndImport = ({ addEntity, group, project, user }) => {
     },
     [addEntity, group, project, user, alert]
   );
+
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const addButton = groupHasCreateEditor(group);
+  const importButton = groupHasImportFacility(group);
+
+  const gapStyle = {
+    width: "100%",
+    marginBottom: "5px"
+  };
 
   return (
     <Fragment>
-      <div {...getRootProps({ className: "dropzone" })}>
-        <input {...getInputProps()} />
-        <span>
-          <i className="fas fa-plus-circle" /> &nbsp; Add new {group}
-        </span>
-      </div>
+      {addButton && (
+        <Fragment>
+          <Button variant="primary" size="sm" block>
+            <i className="fas fa-plus" /> &nbsp; Add {group}
+          </Button>
+          <div style={gapStyle}></div>
+        </Fragment>
+      )}
+      {importButton && (
+        <div {...getRootProps({ className: "dropzone" })}>
+          <input {...getInputProps()} />
+          <span>
+            <i className="fas fa-upload" /> &nbsp; Import {group}
+          </span>
+        </div>
+      )}
     </Fragment>
   );
 };

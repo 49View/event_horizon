@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import Entries from "./entities/Entries";
 import ImageEditor from "./entities/ImageEditor";
 import AppEditor from "./entities/AppEditor";
+import GUIEditor from "./entities/GUIEditor";
 import GeomEditor from "./entities/GeomEditor";
 import MaterialEditor from "./entities/MaterialEditor";
 import { wasmSetCanvasSize } from "../../actions/wasm";
@@ -12,6 +13,12 @@ import EntityUpdateContent from "./entities/EntityUpdateContent";
 import EntityMetaSection from "./entities/EntityMetaSection";
 import RenderParamsToolbar from "./entities/RenderParamsToolbar";
 import { getFullEntity } from "../../actions/entities";
+import {
+  groupHasRenderToolbar,
+  groupHasUpdateFacility,
+  groupHasMetadataSection
+} from "../../utils/utils";
+
 import store from "../../store";
 
 const containerClassFromGroup = group => {
@@ -35,6 +42,11 @@ const containerClassFromGroup = group => {
       return {
         mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <AppEditor />
+      };
+    case "ui":
+      return {
+        mainContainerClass: "GUIEditorRenderGrid",
+        mainContainerDiv: <GUIEditor />
       };
     default:
       return {
@@ -62,7 +74,9 @@ const DashboardProject = ({ currentEntity, entities, group, userData }) => {
     group
   );
 
-  const bShowEntityCanvas = currentEntity && group !== "app";
+  const bUseRenderParams = groupHasRenderToolbar(currentEntity, group);
+  const bUseEntityUpdate = groupHasUpdateFacility(currentEntity, group);
+  const bShowMetaSection = groupHasMetadataSection(currentEntity, group);
 
   if (canvasContainer.current) {
     const rect = canvasContainer.current.getBoundingClientRect();
@@ -72,11 +86,11 @@ const DashboardProject = ({ currentEntity, entities, group, userData }) => {
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>
-      {bShowEntityCanvas && <RenderParamsToolbar />}
-      {bShowEntityCanvas && <EntityUpdateContent />}
+      {bUseRenderParams && <RenderParamsToolbar />}
+      {bUseEntityUpdate && <EntityUpdateContent />}
       <div className="EntryEditorRender" ref={canvasContainer}></div>
       {currentEntity && mainContainerDiv}
-      {currentEntity && bShowEntityCanvas && <EntityMetaSection />}
+      {bShowMetaSection && <EntityMetaSection />}
     </div>
   );
 

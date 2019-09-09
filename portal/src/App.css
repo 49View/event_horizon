@@ -814,6 +814,30 @@ input#search-bar:hover {
   height: 524px;
 }
 
+.GUIEditorRenderGrid {
+  display: grid;
+  grid-template-columns: 510px 510px;
+  grid-template-rows: 30px 554px;
+  grid-template-areas:
+    "ui_tabs render"
+    "ui_source render";
+  grid-gap: 0;
+}
+
+.ui_tabs-a {
+  grid-area: ui_tabs;
+  background: var(--dark-color);
+  /* color: var(--primary-color); */
+  width: 100%;
+  height: 100%;
+}
+
+.ui_source-a {
+  grid-area: ui_source;
+  align-self: stretch;
+  justify-self: stretch;
+}
+
 .materialRender {
   float: left;
   width: 400px;
