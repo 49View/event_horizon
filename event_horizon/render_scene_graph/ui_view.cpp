@@ -178,13 +178,13 @@ void UIElement::singleTap() {
 
     if ( type() == UIT::stickyButton() || type() == UIT::toggleButton() ) {
         if ( status == UIElementStatus::Selected ) {
-            singleTapCallback(0);
+            singleTapCallback(cbParam);
         } else {
-           singleTapOffToggleCallback(0);
+           singleTapOffToggleCallback(cbParam);
         }
         toggleSelected();
     } else {
-        singleTapCallback(0);
+        singleTapCallback(cbParam);
     }
 }
 
@@ -407,6 +407,14 @@ UIElementSP UIView::operator()( const std::string& _key ) {
     return node(_key);
 }
 
+void UIView::addCallback( const std::string& _key, UICallbackFunc cf ) {
+    callbacks.emplace( _key, cf );
+}
+
+UICallbackMap& UIView::Callbacks() {
+    return callbacks;
+}
+
 void UIContainer2d::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize ) {
 
     if ( _displayMode == CSSDisplayMode::Block ) {
@@ -460,7 +468,7 @@ void UIContainer2d::addLabel( const UIFontText& _text,
 UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& _bsize, CSSDisplayMode displayMode,
         UITapAreaType _bt, const V2f& _pos ) {
 
-    auto child = EF::create<UIElementRT>(PFC{}, rsg, _cd, _bsize, _bt, UIForegroundIcon{_cd.icon}, _cd.tintColor );
+    auto child = EF::create<UIElementRT>(PFC{}, rsg, _cd, _bsize, _bt, UIForegroundIcon{_cd.icon}, _cd.tintColor, _cd.cbParam );
     node->addChildren( child, caret );
     advanceCaret( displayMode, _bsize );
     return child;
@@ -565,4 +573,56 @@ void UIContainer2d::finalize( const MPos2d& _at ) {
     }
     Node()->DataRef().BBox3d( fakeAA );
     Node()->updateTransform( _at() );
+}
+
+void UIContainer2d::raii( const std::string& _name ) {
+    node = EF::create<UIElementRT>( PFC{}, rsg, UUIDGen::make(), pos, UIT::background );
+    node->Name( _name );
+    caret = padding;
+    wholeLineSize = MScale2d{ innerPaddedX, -padding.y() };
+}
+
+UITapAreaType tapTypeFromString( const std::string& _value ) {
+    if ( _value == "background" )       return UIT::background;
+    if ( _value == "pushButton" )       return UIT::pushButton;
+    if ( _value == "stickyButton"  )    return UIT::stickyButton;
+    if ( _value == "label" )            return UIT::label;
+    if ( _value == "separator" )        return UIT::separator_h;
+    if ( _value == "separator_v" )      return UIT::separator_v;
+    if ( _value == "toggleButton" )     return UIT::toggleButton;
+    return UIT::background;
+}
+
+void UIContainer2d::unpack( const SerializableContainer& _data ) {
+    UIContainer2dLogical cl{_data};
+
+    std::unordered_map<std::string, float> uiFontSizes{
+            { "title", 0.025f }, { "lead", 0.020f }, { "normal", 0.016f }
+    };
+    for ( const auto& entry : cl.entries ) {
+        if ( entry.type == "EmptyCaret" ) {
+            addEmptyCaret();
+        }
+        if ( entry.type == "Title" ) {
+            addTitle( { S::DEFAULT_FONT, uiFontSizes["title"], entry.text } );
+        } else if ( entry.type == "ListEntry" ) {
+            std::vector<UIFontText> te;
+            for ( const auto& tf : entry.entries ) {
+                te.emplace_back( tf.font, uiFontSizes[tf.size], C4f::XTORGBA(tf.color), tf.text );
+            }
+            auto cb = entry.func.empty() ? sUIEmptyCallback : callbackMap[entry.func[0]];
+            auto cbParam = entry.func.size() >= 2 ? entry.func[1] : "-1";
+            addListEntry( { entry.id, entry.icon, te, cb, cbParam  } );
+        } else if ( entry.type == "ButtonGroupLine" ) {
+            std::vector<ControlDef> te;
+            for ( const auto& tf : entry.entries ) {
+                auto cb = tf.func.empty() ? sUIEmptyCallback : callbackMap[tf.func[0]];
+                auto cbParam = tf.func.size() >= 2 ? tf.func[1] : "-1";
+                te.emplace_back( ControlDef{tf.id, tf.icon, {tf.font, uiFontSizes[tf.size], C4f::XTORGBA(tf.color), tf.text}, cb, cbParam} );
+            }
+
+            addButtonGroupLine( tapTypeFromString(entry.tapType), te );
+        }
+    }
+//    LOGRS( cl.type );
 }

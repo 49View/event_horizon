@@ -21,11 +21,24 @@ class SceneGraph;
 
 class RenderOrchestrator;
 
+struct UICallbackHandle {
+    UICallbackHandle() {}
+    UICallbackHandle( const std::string& _index ) {
+        index = std::stoi( _index );
+    }
+    UICallbackHandle( int _index ) : index( _index ) {}
+
+    int index = -1;
+};
+
 using ControlDefKey = std::string;
 using ControlTapKey = uint64_t;
 using ControlDefIconRef = std::string;
-using ControlSingleTapCallback = std::function<void( ControlTapKey )>;
-const static auto ControlTapCallbackEmpty = []( ControlTapKey ) {};
+using UICallbackFunc = std::function<void( const UICallbackHandle& )>;
+using ControlSingleTapCallback = UICallbackFunc;//std::function<void( ControlTapKey )>;
+using UICallbackMap  = std::unordered_map<std::string, UICallbackFunc>;
+const static auto sUIEmptyCallback = []( const UICallbackHandle& ) { LOGRS("[WARNING] void UI callback called")};
+const static auto ControlTapCallbackEmpty = sUIEmptyCallback;//[]( ControlTapKey ) {};
 
 enum class UIElementStatus {
     Enabled,
@@ -146,15 +159,17 @@ struct ControlDef {
                                                                                           std::move( cbOff )) {}
 
     ControlDef( ControlDefKey key, ControlDefIconRef icon, const UIFontText& textLine,
-                ControlSingleTapCallback singleTapCallback ) : key( std::move( key )), icon( std::move( icon )),
-                                                               singleTapCallback( std::move( singleTapCallback )) {
+                ControlSingleTapCallback singleTapCallback, const UICallbackHandle& _cbParam = {} ) : key( std::move( key )), icon( std::move( icon )),
+                                                               singleTapCallback( std::move( singleTapCallback )), cbParam(_cbParam) {
         textLines.push_back( textLine );
     }
 
     ControlDef( ControlDefKey key, ControlDefIconRef icon, std::vector<UIFontText> textLines,
-                ControlSingleTapCallback singleTapCallback ) : key( std::move( key )), icon( std::move( icon )),
+                ControlSingleTapCallback singleTapCallback, const UICallbackHandle& _cbParam = {} ) : key( std::move( key )), icon( std::move( icon )),
                                                                textLines( std::move( textLines )),
-                                                               singleTapCallback( std::move( singleTapCallback )) {}
+                                                               singleTapCallback( std::move( singleTapCallback )),
+                                                               cbParam(_cbParam){}
+
 
     ControlDef( const ControlDefKey& key, const ControlDefIconRef& icon, const std::vector<UIFontText>& textLines,
                 const ControlSingleTapCallback& singleTapCallback, const Color4f& tintColor ) : key( key ),
@@ -183,6 +198,7 @@ struct ControlDef {
     ControlSingleTapCallback singleTapCallback = ControlTapCallbackEmpty;
     ControlSingleTapCallback singleTapOffToggleCallback = ControlTapCallbackEmpty;
     Color4f tintColor = C4f::WHITE;
+    UICallbackHandle cbParam;
 };
 
 using UITS = UIElementStatus;
@@ -247,6 +263,10 @@ private:
 
         if constexpr ( std::is_same_v<M, std::string> || is_c_str<M>::value ) {
             key = _param;
+        }
+
+        if constexpr ( std::is_same_v<M, UICallbackHandle> ) {
+            cbParam = _param;
         }
 
         if constexpr ( std::is_same_v<M, MScale2d> ||
@@ -379,6 +399,7 @@ private:
     C4f tintColor = C4f::WHITE;
     ControlSingleTapCallback singleTapCallback = ControlTapCallbackEmpty;
     ControlSingleTapCallback singleTapOffToggleCallback = ControlTapCallbackEmpty;
+    UICallbackHandle cbParam;
 };
 
 enum class UICheckActiveOnly {
@@ -386,7 +407,83 @@ enum class UICheckActiveOnly {
     True
 };
 
-class UIContainer2d;
+
+JSONDATA( UIElementContainerLogical, id, type, text, icon, tapType, func, entries )
+    std::string id;
+    std::string type;
+    std::string text;
+    std::string icon;
+    std::string tapType;
+    std::string font = S::DEFAULT_FONT;
+    std::string size = "normal";
+    std::string color = "#FFF";
+    std::vector<std::string> func;
+    std::vector<UIElementContainerLogical> entries;
+};
+
+JSONDATA( UIContainer2dLogical, type, entries )
+    std::string type;
+    std::vector<UIElementContainerLogical> entries;
+};
+
+class UIContainer2d {
+public:
+    UIContainer2d( RenderOrchestrator& _rsg,
+                   UICallbackMap& _callbackMap,
+                   CResourceRef _name ) : rsg( _rsg ), callbackMap(_callbackMap) {
+        raii( _name );
+    }
+
+    UIContainer2d( RenderOrchestrator& _rsg,
+                   UICallbackMap& _callbackMap,
+                   CResourceRef _name,
+                   const SerializableContainer& _data ) : rsg( _rsg ), callbackMap(_callbackMap) {
+        raii( _name );
+        unpack( _data );
+    }
+
+    void addEmptyCaret();
+    void addEmptyCaretNewLine();
+    void addTitle( const UIFontText& _text );
+    void addListEntry( const ControlDef& _cd );
+    void addListEntryGrid( const ControlDef& _cd, bool _newLine = false, bool _lastOne = false );
+    void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds, bool addSep = true );
+    void popCaretX();
+
+    [[nodiscard]] UIElementSP Node() const { return node; };
+    void setButtonSize( const MScale2d& _bs );
+    void setPadding( const V2f& _value );
+    [[nodiscard]] V3f getSize() const;
+
+    void finalize( const MPos2d& _at );
+private:
+    void raii( CResourceRef _name );
+    void unpack( const SerializableContainer& _data );
+    void advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize );
+    void addSeparator( float percScaleY = 1.0f );
+    void addLabel( const UIFontText& _text, const MScale2d& bsize, CSSDisplayMode displayMode,
+                   const V2f& _pos = V2f::ZERO );
+    UIElementSP addButton( const ControlDef& _cd, const MScale2d& bisze, CSSDisplayMode displayMode,
+                           UITapAreaType _bt = UIT::pushButton, const V2f& _pos = V2f::ZERO );
+
+private:
+    RenderOrchestrator& rsg;
+    UICallbackMap& callbackMap;
+
+    MPos2d pos;
+    V2f padding{ 0.02f, -0.01f };
+    V3f size = V3f::ONE;
+    UIElementSP node;
+    MScale2d bsize{ 0.07f, 0.07f };
+
+    std::unordered_map<std::string, UIElementSP> icontrols;
+    float innerPaddedX = 0.0f;
+    V2f caret{ V2f::ZERO };
+    V2f boundaries{ V2f::ZERO };
+    std::vector<V2f> caretQueue;
+    std::vector<UIElementSP> wholeLiners;
+    MScale2d wholeLineSize{ 0.0f, 0.0f };
+};
 
 class UIView {
 public:
@@ -425,7 +522,8 @@ public:
 
     void visit( std::function<void( const UIElementSPConst )> f ) const;
     void foreach( std::function<void( UIElementSP )> f );
-
+    void addCallback( const std::string& _key, UICallbackFunc cf );
+    UICallbackMap& Callbacks();
 private:
     void touchDownKeyCached( UIElementSP _key ) const;
     UIElementSP touchDownKeyCached() const;
@@ -436,57 +534,7 @@ private:
     RenderOrchestrator& rsg;
     ColorScheme colorScheme;
     std::unordered_map<ResourceRef, UIElementSP> elements;
+    UICallbackMap callbacks;
     std::vector<UIElementSP> activeTaps;
     mutable UIElementSP touchDownStartingKey;
 };
-
-class UIContainer2d {
-public:
-    UIContainer2d( RenderOrchestrator& _rsg,
-                   CResourceRef _name ) : rsg( _rsg ) {
-        node = EF::create<UIElementRT>( PFC{}, rsg, UUIDGen::make(), pos, UIT::background );
-        node->Name( _name );
-        caret = padding;
-        wholeLineSize = MScale2d{ innerPaddedX, -padding.y() };
-    }
-
-    void addEmptyCaret();
-    void addEmptyCaretNewLine();
-    void addTitle( const UIFontText& _text );
-    void addListEntry( const ControlDef& _cd );
-    void addListEntryGrid( const ControlDef& _cd, bool _newLine = false, bool _lastOne = false );
-    void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds, bool addSep = true );
-    void popCaretX();
-
-    [[nodiscard]] UIElementSP Node() const { return node; };
-    void setButtonSize( const MScale2d& _bs );
-    void setPadding( const V2f& _value );
-    [[nodiscard]] V3f getSize() const;
-
-    void finalize( const MPos2d& _at );
-private:
-    void advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize );
-    void addSeparator( float percScaleY = 1.0f );
-    void addLabel( const UIFontText& _text, const MScale2d& bsize, CSSDisplayMode displayMode,
-                   const V2f& _pos = V2f::ZERO );
-    UIElementSP addButton( const ControlDef& _cd, const MScale2d& bisze, CSSDisplayMode displayMode,
-                           UITapAreaType _bt = UIT::pushButton, const V2f& _pos = V2f::ZERO );
-
-private:
-    RenderOrchestrator& rsg;
-
-    MPos2d pos;
-    V2f padding{ 0.02f, -0.01f };
-    V3f size = V3f::ONE;
-    UIElementSP node;
-    MScale2d bsize{ 0.07f, 0.07f };
-
-    std::unordered_map<std::string, UIElementSP> icontrols;
-    float innerPaddedX = 0.0f;
-    V2f caret{ V2f::ZERO };
-    V2f boundaries{ V2f::ZERO };
-    std::vector<V2f> caretQueue;
-    std::vector<UIElementSP> wholeLiners;
-    MScale2d wholeLineSize{ 0.0f, 0.0f };
-};
-

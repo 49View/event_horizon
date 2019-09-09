@@ -248,6 +248,11 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 
 #define JSONDATA(CLASSNAME,...) \
 	struct CLASSNAME { \
+	explicit CLASSNAME( const SerializableContainer& _str ) { \
+		rapidjson::Document document; \
+		document.Parse<rapidjson::kParseStopWhenDoneFlag>( reinterpret_cast<const char*>(_str.data()) ); \
+		MegaReader reader( document ); \
+		deserialize( reader ); } \
 	CLASSNAME() = default; \
 	explicit CLASSNAME( const std::string& _str ) { \
 		rapidjson::Document document; \
