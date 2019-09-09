@@ -27,5 +27,6 @@ using GeomSPContainer = std::vector<GeomSP>;
 class Profile;
 class MaterialColor;
 class UIElement;
+struct UIContainer;
 class CameraRig;
 

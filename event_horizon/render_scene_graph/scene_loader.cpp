@@ -38,6 +38,9 @@ void ScenePreLoader::activateGeomLoad() {
         for ( const auto& r : appData.Geoms() ) {
             sgl.load<Geom>( r, LGFUNC );
         }
+        for ( const auto& r : appData.UIs() ) {
+            sgl.load<UIContainer>( r, LGFUNC );
+        }
     }
 
 }

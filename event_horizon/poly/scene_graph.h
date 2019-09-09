@@ -61,7 +61,8 @@ public:
                          ColorManager& _cl,
                          FontManager& _fm,
                          CameraManager& _cm,
-                         GeomManager& _gm);
+                         GeomManager& _gm,
+                         UIManager& _um );
 
     void init();
     GeomSP getNode( const UUID& _uuid );
@@ -93,6 +94,7 @@ public:
     FontManager&     FM() { return fm; }
     ColorManager&    MC() { return cl; }
     GeomManager&     GM() { return gm; }
+    UIManager&       UM() { return um; }
 
     std::shared_ptr<VData        >  VL( const ResourceRef& _ref ) const { return vl.get(_ref); }
     std::shared_ptr<RawImage     >  TL( const ResourceRef& _ref ) const { return tl.get(_ref); }
@@ -103,6 +105,7 @@ public:
     std::shared_ptr<CameraRig    >  CM( const ResourceRef& _ref ) const { return cm.get(_ref); }
     std::shared_ptr<Geom         >  GM( const ResourceRef& _ref ) const { return gm.get(_ref); }
     std::shared_ptr<MaterialColor>  MC( const ResourceRef& _ref ) const { return cl.get(_ref); }
+    std::shared_ptr<UIContainer>    UL( const ResourceRef& _ref ) const { return um.get(_ref); }
 
     template <typename T>
     std::shared_ptr<T> get( const ResourceRef& _ref ) {
@@ -114,6 +117,7 @@ public:
         if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.get(_ref); }
         if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.get(_ref); }
         if constexpr ( std::is_same_v<T, Geom>          ) { return gm.get(_ref); }
+        if constexpr ( std::is_same_v<T, UIContainer>   ) { return um.get(_ref); }
     }
 
     template <typename T>
@@ -126,6 +130,7 @@ public:
         if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.getNames(_ref); }
         if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.getNames(_ref); }
         if constexpr ( std::is_same_v<T, Geom>          ) { return gm.getNames(_ref); }
+        if constexpr ( std::is_same_v<T, UIContainer>   ) { return um.getNames(_ref); }
     }
 
     template <typename T>
@@ -138,6 +143,7 @@ public:
         if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.get(_ref).get(); }
         if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.get(_ref).get(); }
         if constexpr ( std::is_same_v<T, Geom>          ) { return gm.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, UIContainer>   ) { return um.get(_ref).get(); }
     }
 
     template <typename T>
@@ -150,6 +156,7 @@ public:
         if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.get(_ref).get(); }
         if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.get(_ref).get(); }
         if constexpr ( std::is_same_v<T, Geom>          ) { return gm.get(_ref).get(); }
+        if constexpr ( std::is_same_v<T, UIContainer>   ) { return um.get(_ref).get(); }
     }
 
     template <typename T>
@@ -162,6 +169,7 @@ public:
         if constexpr ( std::is_same_v<T, MaterialColor> ) { return cl.getHash(_ref); }
         if constexpr ( std::is_same_v<T, CameraRig>     ) { return cm.getHash(_ref); }
         if constexpr ( std::is_same_v<T, Geom>          ) { return gm.getHash(_ref); }
+        if constexpr ( std::is_same_v<T, UIContainer>   ) { return um.getHash(_ref); }
     }
 
     template <typename R>
@@ -174,6 +182,7 @@ public:
         if constexpr ( std::is_same_v<R, MaterialColor> ) return MC();
         if constexpr ( std::is_same_v<R, CameraRig>     ) return CM();
         if constexpr ( std::is_same_v<R, Geom>          ) return GM();
+        if constexpr ( std::is_same_v<R, UIContainer>   ) return UM();
     }
 
     template <typename R>
@@ -186,6 +195,7 @@ public:
         if constexpr ( std::is_same_v<R, MaterialColor  > ) resourceCallbackMaterialColor.emplace_back( _key, _hash, std::move(_res), _ccf );
         if constexpr ( std::is_same_v<R, CameraRig      > ) resourceCallbackCameraRig    .emplace_back( _key, _hash, std::move(_res), _ccf );
         if constexpr ( std::is_same_v<R, Geom           > ) resourceCallbackGeom         .emplace_back( _key, _hash, std::move(_res), _ccf );
+        if constexpr ( std::is_same_v<R, UIContainer    > ) resourceCallbackUI           .emplace_back( _key, _hash, std::move(_res), _ccf );
     }
     static void addDeferredComp( const ResourceRef& _key, SerializableContainer&& _data, HttpResouceCB _ccf = nullptr ) {
         resourceCallbackComposite.emplace_back( _key, "", std::move(_data), _ccf );
@@ -201,6 +211,7 @@ public:
         if constexpr ( std::is_same_v<R, MaterialColor  > ) return addMaterialColor( _key, _res, _ccf );
         if constexpr ( std::is_same_v<R, CameraRig      > ) return addCameraRig    ( _key, _res, _ccf );
         if constexpr ( std::is_same_v<R, Geom           > ) return addGeom         ( _key, _res, _ccf );
+        if constexpr ( std::is_same_v<R, UIContainer    > ) return addUI           ( _key, _res, _ccf );
     }
 
     ResourceRef addVData         ( const ResourceRef& _key, const VData        & _res, HttpResouceCB _ccf = nullptr );
@@ -211,6 +222,7 @@ public:
     ResourceRef addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf = nullptr );
     ResourceRef addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResouceCB _ccf = nullptr );
     ResourceRef addGeom          ( const ResourceRef& _key,       GeomSP         _res, HttpResouceCB _ccf = nullptr );
+    ResourceRef addUI            ( const ResourceRef& _key, const UIContainer&   _res, HttpResouceCB _ccf = nullptr );
     void addResources( CResourceRef _key, const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
 
     ResourceRef addMaterialIM    ( const ResourceRef& _key, const Material     & _res );
@@ -234,20 +246,23 @@ public:
     void loadProfile       ( std::string _names, HttpResouceCB _ccf = nullptr );
     void loadMaterialColor ( std::string _names, HttpResouceCB _ccf = nullptr );
     void loadCameraRig     ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadLogicalUI     ( std::string _names, HttpResouceCB _ccf = nullptr );
     void loadGeom          ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadUI            ( std::string _names, HttpResouceCB _ccf = nullptr );
 
     template <typename R>
     void load( std::string _names, HttpResouceCB _ccf = nullptr ) {
 
         replaceAllStrings( _names, " ", "," );
-        if constexpr ( std::is_same_v<R, VData          > ) loadVData        ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, RawImage       > ) loadRawImage     ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, Material       > ) loadMaterial     ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, Font           > ) loadFont         ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, Profile        > ) loadProfile      ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, MaterialColor  > ) loadMaterialColor( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, CameraRig      > ) loadCameraRig    ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, Geom           > ) loadGeom         ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, VData               > ) loadVData        ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, RawImage            > ) loadRawImage     ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, Material            > ) loadMaterial     ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, Font                > ) loadFont         ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, Profile             > ) loadProfile      ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, MaterialColor       > ) loadMaterialColor( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, CameraRig           > ) loadCameraRig    ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, UIContainer         > ) loadUI           ( std::move(_names), _ccf );
+        if constexpr ( std::is_same_v<R, Geom                > ) loadGeom         ( std::move(_names), _ccf );
     }
 
     std::tuple<std::string, V3f> getGeomNameSize( const ResourceRef& _ref ) const {
@@ -321,6 +336,7 @@ public:
     static LoadedResouceCallbackContainer resourceCallbackMaterialColor;
     static LoadedResouceCallbackContainer resourceCallbackCameraRig    ;
     static LoadedResouceCallbackContainer resourceCallbackGeom         ;
+    static LoadedResouceCallbackContainer resourceCallbackUI           ;
     static LoadedResouceCallbackContainer resourceCallbackComposite    ;
 
 protected:
@@ -392,6 +408,7 @@ protected:
     FontManager& fm;
     CameraManager& cm;
     GeomManager& gm;
+    UIManager& um;
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     MaterialMap materialRemap;

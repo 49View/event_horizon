@@ -593,13 +593,13 @@ UITapAreaType tapTypeFromString( const std::string& _value ) {
     return UIT::background;
 }
 
-void UIContainer2d::unpack( const SerializableContainer& _data ) {
-    UIContainer2dLogical cl{_data};
+void UIContainer2d::unpack( UIContainer* _data ) {
+    if ( !_data ) return;
 
     std::unordered_map<std::string, float> uiFontSizes{
             { "title", 0.025f }, { "lead", 0.020f }, { "normal", 0.016f }
     };
-    for ( const auto& entry : cl.entries ) {
+    for ( const auto& entry : _data->entries ) {
         if ( entry.type == "EmptyCaret" ) {
             addEmptyCaret();
         }

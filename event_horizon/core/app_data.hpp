@@ -60,6 +60,9 @@ JSONSERIAL( AppData, renderSettings, matRemapping, mKey, entities );
             if ( ent.key == S::GEOMS ) {
                 ret += ent.value.size();
             }
+            if ( ent.key == S::UIS ) {
+                ret += ent.value.size();
+            }
         }
         return ret;
     }
@@ -68,7 +71,7 @@ JSONSERIAL( AppData, renderSettings, matRemapping, mKey, entities );
         size_t ret = 0;
         for ( const auto& ent : entities ) {
             if ( ent.key != S::COLORS && ent.key != S::MATERIALS && ent.key != S::PROFILES && ent.key != S::IMAGES &&
-                ent.key != S::FONTS && ent.key != S::GEOMS) {
+                ent.key != S::FONTS && ent.key != S::GEOMS && ent.key != S::UIS) {
                 ret += ent.value.size();
             }
         }
@@ -82,6 +85,12 @@ JSONSERIAL( AppData, renderSettings, matRemapping, mKey, entities );
     [[nodiscard]] std::vector<std::string> Geoms() {
         for ( const auto& ent : entities ) {
             if ( ent.key == S::GEOMS ) { return ent.value; }
+        }
+        return {};
+    }
+    [[nodiscard]] std::vector<std::string> UIs() {
+        for ( const auto& ent : entities ) {
+            if ( ent.key == S::UIS ) { return ent.value; }
         }
         return {};
     }
@@ -133,6 +142,7 @@ JSONSERIAL( AppData, renderSettings, matRemapping, mKey, entities );
     void addProfile      ( CResourceRef _value ) { add( S::PROFILES, _value); }
     void addRawImage     ( CResourceRef _value ) { add( S::IMAGES, _value); }
     void addFont         ( CResourceRef _value ) { add( S::FONTS, _value); }
+    void addUI           ( CResourceRef _value ) { add( S::UIS, _value); }
 
     [[nodiscard]] const AppRenderSettings& getRenderSettings() const {
         return renderSettings;

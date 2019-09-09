@@ -78,9 +78,9 @@ class ResourceVersioning {
 public:
 
     inline static size_t Version() {
-        if ( std::is_same<R, AppData>::value )         return  1000;
+        if ( std::is_same<R, AppData>::value )          return  1000;
         if ( std::is_same<R, Material>::value )         return 2500;
-        if ( std::is_same<R, Geom>::value )         return 2000;
+        if ( std::is_same<R, Geom>::value )             return 2000;
         if ( std::is_same<R, VData>::value )            return 1000;
         if ( std::is_same<R, MaterialColor>::value  )   return 1000;
         return 0;
@@ -94,8 +94,8 @@ public:
         if constexpr ( std::is_same<R, MaterialColor>::value )          return false;
         if constexpr ( std::is_same<R, Profile>::value )                return false;
         if constexpr ( std::is_same<R, RawImage>::value )               return false;
-        if constexpr ( std::is_same<R, Font>::value ) return false;
-        if constexpr ( std::is_same<R, UIElement>::value )              return true ;
+        if constexpr ( std::is_same<R, Font>::value )                   return false;
+        if constexpr ( std::is_same<R, UIContainer>::value )     return true ;
         if constexpr ( std::is_same<R, CameraRig>::value )              return false;
     }
 
@@ -107,8 +107,8 @@ public:
         if constexpr ( std::is_same<R, MaterialColor>::value )          return {};
         if constexpr ( std::is_same<R, Profile>::value )                return _val->serialize();
         if constexpr ( std::is_same<R, RawImage>::value )               return _val->serialize();
-        if constexpr ( std::is_same<R, Font>::value ) return {};
-        if constexpr ( std::is_same<R, UIElement>::value )              return {};
+        if constexpr ( std::is_same<R, Font>::value )                   return {};
+        if constexpr ( std::is_same<R, UIContainer>::value )     return {};
         if constexpr ( std::is_same<R, CameraRig>::value )              return {};
     }
 
@@ -121,7 +121,7 @@ public:
         if constexpr ( std::is_same<R, Profile>::value ) return ResourceGroup::Profile;
         if constexpr ( std::is_same<R, RawImage>::value ) return ResourceGroup::Image;
         if constexpr ( std::is_same<R, Font>::value ) return ResourceGroup::Font;
-        if constexpr ( std::is_same<R, UIElement>::value ) return ResourceGroup::UI;
+        if constexpr ( std::is_same<R, UIContainer>::value ) return ResourceGroup::UI;
         if constexpr ( std::is_same<R, CameraRig>::value ) return ResourceGroup::CameraRig;
     }
 
@@ -168,6 +168,9 @@ using MCB = MaterialColorBuilder;
 using MaterialBuilder = ResourceBuilder<Material>;
 using MB = MaterialBuilder;
 
+using UIBuilder = ResourceBuilder<UIContainer>;
+using UIB = UIBuilder;
+
 using GeomRBuilder = ResourceBuilder<Geom>;
 using GRB = GeomRBuilder;
 
@@ -182,3 +185,4 @@ using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Mat
 using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>>;
 using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>>;
 using GeomManager       = ResourceManager<Geom, ResourceManagerContainer<Geom>>;
+using UIManager         = ResourceManager<UIContainer, ResourceManagerContainer<UIContainer>>;

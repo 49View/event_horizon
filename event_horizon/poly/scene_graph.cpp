@@ -9,13 +9,13 @@
 #include <core/camera_rig.hpp>
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
-#include <core/raw_image.h>
 #include <core/image_util.h>
 #include <core/geom.hpp>
 #include <core/camera.h>
 #include <core/names.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <core/resources/material.h>
+#include <core/resources/ui_container.hpp>
 #include <core/file_manager.h>
 #include <poly/converters/gltf2/gltf2.h>
 #include <poly/baking/xatlas_client.hpp>
@@ -35,6 +35,7 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackProfile;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackMaterialColor;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackCameraRig;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackGeom;
+LoadedResouceCallbackContainer SceneGraph::resourceCallbackUI;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite;
 
 void SceneGraph::addNode( GeomSP _node ) {
@@ -209,6 +210,7 @@ void SceneGraph::loadCallbacks() {
     loadResourceCallback<RawImage, IB>(resourceCallbackRawImage);
     loadResourceCallback<Font, FB>(resourceCallbackFont);
     loadResourceCallback<Profile, PB>(resourceCallbackProfile);
+    loadResourceCallback<UIContainer, UIB>(resourceCallbackUI);
     loadResourceCallback<MaterialColor, MCB>(resourceCallbackMaterialColor);
     loadResourceCallbackWithKey<Material, MB>(resourceCallbackMaterial);
     loadResourceCallbackWithLoader<Geom, GRB >(resourceCallbackGeom, GLTF2Service::load);
@@ -238,6 +240,7 @@ void SceneGraph::update() {
     FM().update();
     MC().update();
     GM().update();
+    UM().update();
 
     for ( auto&[k, v] : nodes ) {
         v->updateAnim();
@@ -296,8 +299,9 @@ SceneGraph::SceneGraph( CommandQueue& cq,
                         ColorManager& _cl,
                         FontManager& _fm,
                         CameraManager& _cm,
-                        GeomManager& _gm ) : vl( _vl ), tl( _tl ), pl( _pl ), ml( _ml ), cl( _cl ), fm( _fm ),
-                                             cm( _cm ), gm( _gm ) {
+                        GeomManager& _gm,
+                        UIManager& _um) : vl( _vl ), tl( _tl ), pl( _pl ), ml( _ml ), cl( _cl ), fm( _fm ),
+                                             cm( _cm ), gm( _gm ), um( _um ) {
 
     hcs = std::make_shared<CommandScriptSceneGraph>( *this );
     cq.registerCommandScript( hcs );
@@ -561,6 +565,10 @@ void SceneGraph::loadMaterialColor( std::string _names, HttpResouceCB _ccf ) {
 
 void SceneGraph::loadCameraRig( std::string _names, HttpResouceCB _ccf ) {
     B<CB>( _names ).load( _ccf );
+}
+
+void SceneGraph::loadUI( std::string _names, HttpResouceCB _ccf ) {
+    B<UIB>( _names ).load( _ccf );
 }
 
 void SceneGraph::loadGeom( std::string _names, HttpResouceCB _ccf ) {

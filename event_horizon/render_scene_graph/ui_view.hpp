@@ -11,6 +11,7 @@
 #include <core/math/matrix_anim.h>
 #include <core/recursive_transformation.hpp>
 #include <core/resources/entity_factory.hpp>
+#include <core/resources/ui_container.hpp>
 #include <poly/poly.hpp>
 #include <graphics/ghtypes.hpp>
 #include <render_scene_graph/render_orchestrator.h>
@@ -407,25 +408,6 @@ enum class UICheckActiveOnly {
     True
 };
 
-
-JSONDATA( UIElementContainerLogical, id, type, text, icon, tapType, func, entries )
-    std::string id;
-    std::string type;
-    std::string text;
-    std::string icon;
-    std::string tapType;
-    std::string font = S::DEFAULT_FONT;
-    std::string size = "normal";
-    std::string color = "#FFF";
-    std::vector<std::string> func;
-    std::vector<UIElementContainerLogical> entries;
-};
-
-JSONDATA( UIContainer2dLogical, type, entries )
-    std::string type;
-    std::vector<UIElementContainerLogical> entries;
-};
-
 class UIContainer2d {
 public:
     UIContainer2d( RenderOrchestrator& _rsg,
@@ -437,7 +419,7 @@ public:
     UIContainer2d( RenderOrchestrator& _rsg,
                    UICallbackMap& _callbackMap,
                    CResourceRef _name,
-                   const SerializableContainer& _data ) : rsg( _rsg ), callbackMap(_callbackMap) {
+                   UIContainer* _data ) : rsg( _rsg ), callbackMap(_callbackMap) {
         raii( _name );
         unpack( _data );
     }
@@ -458,7 +440,7 @@ public:
     void finalize( const MPos2d& _at );
 private:
     void raii( CResourceRef _name );
-    void unpack( const SerializableContainer& _data );
+    void unpack( UIContainer* _data );
     void advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize );
     void addSeparator( float percScaleY = 1.0f );
     void addLabel( const UIFontText& _text, const MScale2d& bsize, CSSDisplayMode displayMode,
