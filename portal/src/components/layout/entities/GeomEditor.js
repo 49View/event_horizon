@@ -41,7 +41,7 @@ const GeomEditor = ({
     return (
       <Fragment>
         <div className="nodeViewer-a">
-          <div className="text-primary titleMargin">Materials</div>
+          <div className="titleMargin">Materials</div>
           {matSimples.map(e => (
             <div key={e.key} className="smallObjectMaterial">
               <div className="matName-a">{e.key}</div>

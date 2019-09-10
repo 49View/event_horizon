@@ -21,7 +21,7 @@ import {
 
 import store from "../../store";
 
-const containerClassFromGroup = group => {
+const containerClassFromGroup = (currEntity, group) => {
   switch (group) {
     case "geom":
       return {
@@ -50,8 +50,8 @@ const containerClassFromGroup = group => {
       };
     default:
       return {
-        mainContainerClass: "GeomEditorRenderGrid",
-        mainContainerDiv: <GeomEditor />
+        mainContainerClass: "AppEditorRenderGrid",
+        mainContainerDiv: <AppEditor />
       };
   }
 };
@@ -71,6 +71,7 @@ const DashboardProject = ({ currentEntity, entities, group, userData }) => {
   }
 
   const { mainContainerClass, mainContainerDiv } = containerClassFromGroup(
+    currentEntity,
     group
   );
 

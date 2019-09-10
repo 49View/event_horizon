@@ -128,5 +128,5 @@ export const entityTypeSelector = entry => {
     }
   }
 
-  return <img src={entry.metadata.thumb} alt="" />;
+  return <img className="imgGreyOutline" src={entry.metadata.thumb} alt="" />;
 };

@@ -63,6 +63,7 @@ const wasmRunFailed = (state, action) => {
 };
 
 const wasmSetCanvasSize = (state, rect) => {
+  console.log("update canvas with ", rect);
   return updateObject(state, {
     canvasTop: rect.top,
     canvasLeft: rect.left,

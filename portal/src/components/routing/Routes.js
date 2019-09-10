@@ -10,7 +10,6 @@ import Navbar from "../../components/layout/Navbar";
 import Alert from "../../components/layout/Alert";
 import { transitions, positions, Provider as AlertProvider } from "react-alert";
 import AlertTemplate from "react-alert-template-basic";
-import ContextualNavbar from "../layout/ContextualNavbar";
 
 // optional cofiguration
 const alertOptions = {
@@ -28,7 +27,6 @@ const Routes = () => {
       <div className="mainDesktopPageLayout">
         <Navbar />
         <Alert />
-        <ContextualNavbar />
         <AlertProvider template={AlertTemplate} {...alertOptions}>
           <Switch>
             <Route exact path="/register" component={Register} />

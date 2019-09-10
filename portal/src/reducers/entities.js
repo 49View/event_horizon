@@ -33,7 +33,7 @@ const initialState = {
   smallEntityModalOn: false,
   currentEntityNodes: null,
   appKey: "",
-  group: "material",
+  group: "apps",
   loading: false,
   error: {}
 };
@@ -80,8 +80,6 @@ export default function(state = initialState, action) {
         ...state,
         entries: payload.data,
         entriesFiltered: payload.data,
-        currentEntity: null,
-        group: payload.group,
         loading: false
       };
     case RESET_CURRENT_ENTITY:
@@ -154,6 +152,7 @@ export default function(state = initialState, action) {
       return {
         ...state,
         currentEntity: payload,
+        group: payload.entity.group,
         currentTags: evaluateTags(payload.entity.metadata.tags),
         smallEntityModalOn: false,
         loading: requireWasmUpdate

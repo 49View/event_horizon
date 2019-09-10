@@ -1,27 +1,28 @@
-import React from "react";
+import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import {
-  updateEntriesPartialSearch,
-  getFullEntity
+  updateEntriesPartialSearch
+  // getFullEntity
 } from "../../../actions/entities";
 import EntityDragAndImport from "./EntityDragAndImport";
 import EntitiesSearchBox from "./EntitiesSearchBox";
-import EntitiesThumbHandler from "./EntitiesThumbHandler";
-import AppFileHandler from "./AppFileHandler";
+
+import ContextualNavbar from "../ContextualNavbar";
 
 const Entries = ({ entries, currentEntity, cname }) => {
   // console.log("CurrentEntity: ", currentEntity);
 
   const handler =
     currentEntity !== null && currentEntity.entity.group === "app" ? (
-      <AppFileHandler></AppFileHandler>
+      <Fragment>
+        <ContextualNavbar />
+      </Fragment>
     ) : (
-      <EntitiesThumbHandler
-        currentEntity={currentEntity}
-        entries={entries}
-        onClicked={getFullEntity}
-      />
+      // <AppFileHandler></AppFileHandler>
+      <Fragment>
+        <ContextualNavbar />
+      </Fragment>
     );
 
   return (

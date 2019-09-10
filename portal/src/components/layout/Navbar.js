@@ -24,6 +24,7 @@ const Navbar = ({ userstate, logoffFromProject, loading, loading2 }) => {
   );
 
   const nolinks = <Fragment />;
+  const title = userstate.userdata ? userstate.userdata.project : "";
 
   return (
     <div className="navbarGrid">
@@ -31,10 +32,16 @@ const Navbar = ({ userstate, logoffFromProject, loading, loading2 }) => {
         {loading || loading2 ? (
           <Spinner animation="border" variant="warning" />
         ) : (
-          <i className="fas fa-dice-d20" />
+          <img src="/ehlogo.svg" alt="" />
         )}
       </div>
-      <div className="navbareh-a navdiv-titletext">Event Horizon</div>
+      <div className="navbareh-a navdiv-titletext">
+        {" "}
+        <span className="colorLogo1">E</span>
+        <span>vent</span> <span className="colorLogo2">H</span>
+        <span>orizon</span>
+      </div>
+      <div className="navbartitle-a">{title}</div>
       {userstate.isAuthenticated ? authlinks : nolinks}
     </div>
   );

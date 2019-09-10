@@ -3,8 +3,11 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import {
   getEntitiesOfGroup,
+  getFullEntity,
   changeEntitiesGroup
 } from "../../../actions/entities";
+
+import EntitiesThumbHandler from "./EntitiesThumbHandler";
 
 const AppStrID = "Apps";
 const ObjectsStrID = "Objects";
@@ -18,7 +21,9 @@ const ColorsStrID = "Colors";
 const EntityTypeTaskBar = ({
   userstate,
   getEntitiesOfGroup,
-  changeEntitiesGroup
+  changeEntitiesGroup,
+  entries,
+  currentEntity
 }) => {
   const [currentGroup, setCurrentGroup] = useState("default");
 
@@ -53,37 +58,31 @@ const EntityTypeTaskBar = ({
 
   const topSideEntry = (icon, text, selected) => {
     return (
-      <div
-        className={
-          selected
-            ? "leftSideBarGroup leftSideBarGroupSelected"
-            : "leftSideBarGroup"
-        }
-      >
-        <Fragment>
+      <Fragment>
+        <div
+          className={
+            selected
+              ? "leftSideBarGroup leftSideBarGroupSelected"
+              : "leftSideBarGroup"
+          }
+        >
           <span onClick={viewMore(text)}>
             <div className="leftSideBarIcon">
               <i className={icon} />
             </div>
             <div className="leftSideBarText"> {text}</div>
           </span>
-        </Fragment>
-      </div>
+        </div>
+        {selected && (
+          <EntitiesThumbHandler
+            currentEntity={currentEntity}
+            entries={entries}
+            onClicked={getFullEntity}
+          />
+        )}
+      </Fragment>
     );
   };
-
-  let proj = "";
-  if (userstate.project && userstate.project !== "") {
-    proj = userstate.project;
-  } else if (userstate.userdata && userstate.userdata.project) {
-    proj = userstate.userdata.project;
-  }
-
-  const projectNameBox = (
-    <Fragment>
-      <div className="project-a navdiv-projecttext">{proj}</div>
-    </Fragment>
-  );
 
   const topEntitySelectorBar = (
     <div className="topentityselectorbar-a topEntitySelectorBar">
@@ -110,24 +109,21 @@ const EntityTypeTaskBar = ({
     </div>
   );
 
-  return (
-    <Fragment>
-      <div className="projetTaskbar">
-        {projectNameBox}
-        {topEntitySelectorBar}
-      </div>
-    </Fragment>
-  );
+  return <Fragment>{topEntitySelectorBar}</Fragment>;
 };
 
 EntityTypeTaskBar.propTypes = {
   userstate: PropTypes.object,
   getEntitiesOfGroup: PropTypes.func.isRequired,
-  changeEntitiesGroup: PropTypes.func.isRequired
+  changeEntitiesGroup: PropTypes.func.isRequired,
+  entries: PropTypes.array,
+  currentEntity: PropTypes.object
 };
 
 const mapStateToProps = state => ({
-  userstate: state.auth
+  userstate: state.auth,
+  entries: state.entities.entriesFiltered,
+  currentEntity: state.entities.currentEntity
 });
 
 export default connect(
