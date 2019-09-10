@@ -7,14 +7,14 @@ import {
 } from "../../../actions/entities";
 import EntityDragAndImport from "./EntityDragAndImport";
 import EntitiesSearchBox from "./EntitiesSearchBox";
-
 import ContextualNavbar from "../ContextualNavbar";
+import { GroupApp } from "../../../utils/utils";
 
 const Entries = ({ entries, currentEntity, cname }) => {
   // console.log("CurrentEntity: ", currentEntity);
 
   const handler =
-    currentEntity !== null && currentEntity.entity.group === "app" ? (
+    currentEntity !== null && currentEntity.entity.group === GroupApp ? (
       <Fragment>
         <ContextualNavbar />
       </Fragment>

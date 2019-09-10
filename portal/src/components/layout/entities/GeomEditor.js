@@ -9,6 +9,7 @@ import {
   replaceMaterial
 } from "../../../actions/entities";
 import { fillMaterialParams } from "../../../utils/materialUtils";
+import { GroupMaterial } from "../../../utils/utils";
 
 const GeomEditor = ({
   currentEntityNodes,
@@ -154,7 +155,7 @@ const GeomEditor = ({
     <Fragment>
       {smallEntityModalOn && (
         <SmallEntriesDialog
-          group="material"
+          group={GroupMaterial}
           onClickCallback={replaceMaterial}
         />
       )}

@@ -22,7 +22,12 @@ import {
 } from "./types";
 import store from "../store";
 import { wscSend } from "../utils/webSocketClient";
-import { getFileNameOnlyNoExt } from "../utils/utils";
+import {
+  getFileNameOnlyNoExt,
+  GroupApp,
+  GroupGeom,
+  GroupMaterial
+} from "../utils/utils";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
@@ -34,7 +39,7 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
 
     let res = null;
     let dtype = GET_ENTITIES;
-    if (group === "app") {
+    if (group === GroupApp) {
       res = await axios.get(`/appdata/list/${project}`);
       dtype = GET_APPS;
     } else {
@@ -242,16 +247,19 @@ export const getFullEntity = entitySource => async dispatch => {
     });
 
     const requireWasmUpdate =
-      entitySource.group === "geom" || entitySource.group === "material";
+      entitySource.group === GroupGeom || entitySource.group === GroupMaterial;
     // Get dependencies for
     let deps = {};
     let fullData = null;
     let responseTypeValue = "arraybuffer";
-    if (entitySource.group === "material" || entitySource.group === "app") {
+    if (
+      entitySource.group === GroupMaterial ||
+      entitySource.group === GroupApp
+    ) {
       responseTypeValue = "json";
     }
 
-    if (entitySource.group !== "app") {
+    if (entitySource.group !== GroupApp) {
       // eslint-disable-next-line
       for (const depElem of entitySource.metadata.deps) {
         // eslint-disable-next-line
@@ -266,7 +274,7 @@ export const getFullEntity = entitySource => async dispatch => {
       fullData = await axios.get(`/entities/content/byId/${entitySource._id}`, {
         responseType: responseTypeValue
       });
-    } else if (entitySource.group === "app") {
+    } else if (entitySource.group === GroupApp) {
       fullData = entitySource; //await axios.get(`/appdata/${entitySource.mKey}`);
       dispatch({
         type: SET_ENTITY_APP_NAME,
@@ -379,9 +387,9 @@ export const addEntity = (
       }
     };
     let res = null;
-    if (group === "geom" || group === "material") {
+    if (group === GroupGeom || group === GroupMaterial) {
       const fileext = fileName.split(".").pop();
-      if (group === "material" && fileext === "zip") {
+      if (group === GroupMaterial && fileext === "zip") {
         const fname = getFileNameOnlyNoExt(fileName);
         await axios.post(
           "/entities/multizip/" + fname + "/" + group,

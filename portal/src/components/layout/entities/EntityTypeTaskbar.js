@@ -6,7 +6,15 @@ import {
   getFullEntity,
   changeEntitiesGroup
 } from "../../../actions/entities";
-
+import {
+  GroupApp,
+  GroupMaterial,
+  GroupGeom,
+  GroupImage,
+  GroupUI,
+  GroupProfile,
+  GroupFont
+} from "../../../utils/utils";
 import EntitiesThumbHandler from "./EntitiesThumbHandler";
 
 const AppStrID = "Apps";
@@ -33,7 +41,7 @@ const EntityTypeTaskBar = ({
       userstate.userdata.project !== null &&
       currentGroup === "default"
     ) {
-      const groupId = "app";
+      const groupId = GroupApp;
       setCurrentGroup(groupId);
       getEntitiesOfGroup(groupId, userstate.userdata.project);
     }
@@ -41,13 +49,13 @@ const EntityTypeTaskBar = ({
 
   const viewMore = group => () => {
     let groupId = "";
-    if (group === AppStrID) groupId = "app";
-    if (group === ObjectsStrID) groupId = "geom";
-    if (group === MaterialsStrID) groupId = "material";
-    if (group === ImagesStrID) groupId = "image";
-    if (group === GUIsStrID) groupId = "ui";
-    if (group === FontsStrID) groupId = "font";
-    if (group === VectorsStrID) groupId = "profile";
+    if (group === AppStrID) groupId = GroupApp;
+    if (group === ObjectsStrID) groupId = GroupGeom;
+    if (group === MaterialsStrID) groupId = GroupMaterial;
+    if (group === ImagesStrID) groupId = GroupImage;
+    if (group === GUIsStrID) groupId = GroupUI;
+    if (group === FontsStrID) groupId = GroupFont;
+    if (group === VectorsStrID) groupId = GroupProfile;
     if (group === ColorsStrID) groupId = "color_scheme";
     if (currentGroup !== groupId) {
       setCurrentGroup(groupId);
@@ -86,20 +94,20 @@ const EntityTypeTaskBar = ({
 
   const topEntitySelectorBar = (
     <div className="topentityselectorbar-a topEntitySelectorBar">
-      {topSideEntry("fas fa-rocket", AppStrID, currentGroup === "app")}
-      {topSideEntry("fas fa-cube", ObjectsStrID, currentGroup === "geom")}
+      {topSideEntry("fas fa-rocket", AppStrID, currentGroup === GroupApp)}
+      {topSideEntry("fas fa-cube", ObjectsStrID, currentGroup === GroupGeom)}
       {topSideEntry(
         "fas fa-code-branch",
         MaterialsStrID,
-        currentGroup === "material"
+        currentGroup === GroupMaterial
       )}
-      {topSideEntry("fas fa-images", ImagesStrID, currentGroup === "image")}
-      {topSideEntry("fas fa-bars", GUIsStrID, currentGroup === "ui")}
-      {topSideEntry("fas fa-font", FontsStrID, currentGroup === "font")}
+      {topSideEntry("fas fa-images", ImagesStrID, currentGroup === GroupImage)}
+      {topSideEntry("fas fa-bars", GUIsStrID, currentGroup === GroupUI)}
+      {topSideEntry("fas fa-font", FontsStrID, currentGroup === GroupFont)}
       {topSideEntry(
         "fas fa-vector-square",
         VectorsStrID,
-        currentGroup === "profile"
+        currentGroup === GroupProfile
       )}
       {topSideEntry(
         "fas fa-brush",

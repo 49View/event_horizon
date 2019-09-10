@@ -22,6 +22,7 @@ import {
 } from "../actions/types";
 
 import { requestAsset } from "../utils/webSocketClient";
+import { GroupApp } from "../utils/utils";
 
 const initialState = {
   events: {},
@@ -33,7 +34,7 @@ const initialState = {
   smallEntityModalOn: false,
   currentEntityNodes: null,
   appKey: "",
-  group: "apps",
+  group: GroupApp,
   loading: false,
   error: {}
 };

@@ -1,5 +1,14 @@
 import React from "react";
 
+export const GroupApp = "app";
+export const GroupGeom = "geom";
+export const GroupMaterial = "material";
+export const GroupImage = "image";
+export const GroupProfile = "profile";
+export const GroupScript = "script";
+export const GroupFont = "font";
+export const GroupUI = "ui";
+
 export const alphaBool = flag => {
   return flag === true ? "true" : "false";
 };
@@ -18,11 +27,11 @@ export const getFileNameOnlyNoExt = pathname => {
 };
 
 export const checkCommonFileExtension = (group, ext) => {
-  if (group === "geom") {
+  if (group === GroupGeom) {
     if (ext === "glb" || ext === "fbx") return true;
-  } else if (group === "material") {
+  } else if (group === GroupMaterial) {
     if (ext === "zip") return true;
-  } else if (group === "image") {
+  } else if (group === GroupImage) {
     if (
       ext === "jpeg" ||
       ext === "png" ||
@@ -34,9 +43,9 @@ export const checkCommonFileExtension = (group, ext) => {
     ) {
       return true;
     }
-  } else if (group === "font") {
+  } else if (group === GroupFont) {
     if (ext === "ttf") return true;
-  } else if (group === "ui") {
+  } else if (group === GroupUI) {
     if (ext === "json") return true;
   }
 
@@ -44,35 +53,35 @@ export const checkCommonFileExtension = (group, ext) => {
 };
 
 export const groupHasCreateEditor = group => {
-  if (group === "ui") {
+  if (group === GroupUI) {
     return true;
   }
   return false;
 };
 
 export const groupHasImportFacility = group => {
-  if (group !== "app") {
+  if (group !== GroupApp) {
     return true;
   }
   return false;
 };
 
 export const groupHasUpdateFacility = (currEntity, group) => {
-  if (currEntity && group !== "app") {
+  if (currEntity && group !== GroupApp) {
     return true;
   }
   return false;
 };
 
 export const groupHasMetadataSection = (currEntity, group) => {
-  if (currEntity && group !== "app") {
+  if (currEntity && group !== GroupApp) {
     return true;
   }
   return false;
 };
 
 export const groupHasRenderToolbar = (currEntity, group) => {
-  if (currEntity && (group === "geom" || group === "material")) {
+  if (currEntity && (group === GroupGeom || group === GroupMaterial)) {
     return true;
   }
   return false;
@@ -88,21 +97,21 @@ export const checkFileExtensionsOnEntityGroup = (group, filename) => {
 };
 
 export const entityTypeSelector = entry => {
-  if (entry.group === "app") {
+  if (entry.group === GroupApp) {
     if (entry.metadata.thumb === "")
       return (
         <span className="geomThumbNotFound">
           <i className="fas fa-rocket" />
         </span>
       );
-  } else if (entry.group === "geom") {
+  } else if (entry.group === GroupGeom) {
     if (entry.metadata.thumb === "")
       return (
         <span className="geomThumbNotFound">
           <i className="fas fa-cubes" />
         </span>
       );
-  } else if (entry.group === "image" || entry.group === "material") {
+  } else if (entry.group === GroupImage || entry.group === GroupMaterial) {
     if (entry.metadata.thumb === "") {
       return (
         <span className="imageThumbNotFound">
@@ -110,13 +119,13 @@ export const entityTypeSelector = entry => {
         </span>
       );
     }
-  } else if (entry.group === "font") {
+  } else if (entry.group === GroupFont) {
     return (
       <span className="imageThumbNotFound">
         <i className="fas fa-font" />
       </span>
     );
-  } else if (entry.group === "profile") {
+  } else if (entry.group === GroupProfile) {
     if (entry.metadata.thumb === "") {
       return (
         <span className="imageThumbNotFound">

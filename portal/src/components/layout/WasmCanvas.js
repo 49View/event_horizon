@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { loadWasmComplete } from "../../actions/wasm";
+import { GroupApp, GroupMaterial, GroupGeom } from "../../utils/utils";
 
 const WasmCanvas = ({
   left,
@@ -25,11 +26,11 @@ const WasmCanvas = ({
 
   const canvasVisibility =
     currentEntity &&
-    (group === "app" || group === "geom" || group === "material")
+    (group === GroupApp || group === GroupGeom || group === GroupMaterial)
       ? "visible"
       : "hidden";
 
-  const bShowEntityCanvas = currentEntity && group !== "app";
+  const bShowEntityCanvas = currentEntity && group !== GroupApp;
 
   const canvasSizeXNum = width; // bShowEntityCanvas ? 529 : 510;
   const canvasSizeYNum = height; //bShowEntityCanvas ? 536 : 286;

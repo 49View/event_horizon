@@ -16,34 +16,39 @@ import { getFullEntity } from "../../actions/entities";
 import {
   groupHasRenderToolbar,
   groupHasUpdateFacility,
-  groupHasMetadataSection
+  groupHasMetadataSection,
+  GroupApp,
+  GroupGeom,
+  GroupMaterial,
+  GroupImage,
+  GroupUI
 } from "../../utils/utils";
 
 import store from "../../store";
 
 const containerClassFromGroup = (currEntity, group) => {
   switch (group) {
-    case "geom":
+    case GroupGeom:
       return {
         mainContainerClass: "GeomEditorRenderGrid",
         mainContainerDiv: <GeomEditor />
       };
-    case "material":
+    case GroupMaterial:
       return {
         mainContainerClass: "GeomEditorRenderGrid",
         mainContainerDiv: <MaterialEditor />
       };
-    case "image":
+    case GroupImage:
       return {
         mainContainerClass: "GeomEditorRenderGrid",
         mainContainerDiv: <ImageEditor />
       };
-    case "app":
+    case GroupApp:
       return {
         mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <AppEditor />
       };
-    case "ui":
+    case GroupUI:
       return {
         mainContainerClass: "GUIEditorRenderGrid",
         mainContainerDiv: <GUIEditor />
@@ -61,7 +66,7 @@ const DashboardProject = ({ currentEntity, entities, group, userData }) => {
 
   useEffect(() => {
     // Shortcut to go straight to app/coding from the outset for most projects
-    if (group === "app" && entities.length === 1 && !currentEntity) {
+    if (group === GroupApp && entities.length === 1 && !currentEntity) {
       store.dispatch(getFullEntity(entities[0]));
     }
   }, [currentEntity, entities, group]);
@@ -83,7 +88,7 @@ const DashboardProject = ({ currentEntity, entities, group, userData }) => {
     const rect = canvasContainer.current.getBoundingClientRect();
     store.dispatch(wasmSetCanvasSize(rect));
   }
-  // const entityBased = group !== "app";
+  // const entityBased = group !== GroupApp;
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>
