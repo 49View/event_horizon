@@ -125,6 +125,9 @@ void UIElement::touchedUp( const V2f& _point ) {
         }
         singleTap();
     } else {
+        if ( checkBitWiseFlag( type(), UIT::stickyButton())) {
+            toggleSelected();
+        }
         status = UIElementStatus::Enabled;
     }
 
@@ -269,6 +272,17 @@ void UIView::handleTouchDownEvent( const V2f& _p ) {
     touchDownKeyCached( activeTaps.empty() ? nullptr : activeTaps.back() );
 }
 
+void UIView::clearOnTouchUpEvent() {
+
+//    foreach( [&]( UIElementSP n) {
+//        if ( checkBitWiseFlag( n->DataRef().Type(), UIT::stickyButton()) ) {
+//            n->DataRef().toggle();
+//        }
+//    });
+
+    activeTaps.clear();
+}
+
 void UIView::handleTouchUpEvent( const V2f& _p ) {
 
     V2f tapS = ssOneMinusY(_p);
@@ -276,7 +290,7 @@ void UIView::handleTouchUpEvent( const V2f& _p ) {
         tap->DataRef().touchedUp( tapS );
         tap->moveUpLeft( 0.03f, 0.0f );
     }
-    activeTaps.clear();
+    clearOnTouchUpEvent();
 }
 
 void UIView::touchDownKeyCached( UIElementSP _key ) const {
@@ -477,6 +491,24 @@ UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& _bs
 void UIContainer2d::addTitle( const UIFontText& _text ) {
     addLabel( _text, MScale2d{innerPaddedX, _text.height}, CSSDisplayMode::Block );
     addSeparator();
+}
+
+void UIContainer2d::addNavBar( const ControlDef& _logo ) {
+//    addButton( _logo, MScale2d{0.06f, 0.06f}, CSSDisplayMode::Inline );
+
+//    auto padding = 0.01f * getScreenAspectRatio;
+//    auto headerTop = 0.94f;
+//    rsg.RR().drawRect2d( CommandBufferLimits::UI2dStart,
+//                         V2f{ padding, headerTop },
+//                         V2f{ getScreenAspectRatioVector.x(), 1.0f - headerTop } -
+//                         V2f{ padding * 2.0f, padding / getScreenAspectRatio },
+//                         C4f::PASTEL_YELLOW.A( 0.9f ));
+//
+//    float ar = sg.TL( "carillo,logo" )->getAspectRatio();
+//    float logoPadding = (( 1.0f - headerTop ) - padding - 0.01f ) * 0.5f;
+//    rsg.RR().drawRect2d( CommandBufferLimits::UI2dStart, V2f{ 0.03f, headerTop + logoPadding },
+//                         V2f{ 0.03f + ar * 0.02f, headerTop + logoPadding + 0.02f },
+//                         "carillo,logo" );
 }
 
 void UIContainer2d::addListEntry( const ControlDef& _cd ) {

@@ -20,7 +20,7 @@ float linearize(float depth) {
 float ssao() {
     float occluded = 1.0;
     vec2 uNoiseScale = vec2(1024.0/4.0, 1024.0/4.0);
-    vec3 origin = v_texT2 * linearize( texture(depthMapTexture, v_texCoord).r );
+    vec3 origin = v_texT2 * (linearize( texture(depthMapTexture, v_texCoord).r ));
 
     // vec3 origin = v_texT2 * texture(depthMapTexture, v_texCoord).r;
     if ( -origin.z > 999.9 ) return 1.0;
@@ -72,7 +72,7 @@ float ssao() {
         //return rangeCheck;
         //return (sampleDepth <= zsample.z ? 1.0 : 0.0);
         //rangeCheck = 1.0;
-        occlusion += (sampleDepth <= (-zsample.z/u_nearFar.y) ? 1.0 : 0.0) * rangeCheck;
+        occlusion += (sampleDepth+0.01 < (-zsample.z/u_nearFar.y) ? 1.0 : 0.0) * rangeCheck;
     } 
 
     return 1.0 - (occlusion/float(numSamples));

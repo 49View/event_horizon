@@ -367,7 +367,6 @@ public:
     void setStatus( UIElementStatus _status );
     void singleTap();
     void toggleSelected();
-
 private:
     void updateStatus();
 
@@ -428,6 +427,7 @@ public:
     void addEmptyCaretNewLine();
     void addTitle( const UIFontText& _text );
     void addListEntry( const ControlDef& _cd );
+    void addNavBar( const ControlDef& _logo );
     void addListEntryGrid( const ControlDef& _cd, bool _newLine = false, bool _lastOne = false );
     void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds, bool addSep = true );
     void popCaretX();
@@ -507,6 +507,7 @@ public:
     void addCallback( const std::string& _key, UICallbackFunc cf );
     UICallbackMap& Callbacks();
 private:
+    void clearOnTouchUpEvent();
     void touchDownKeyCached( UIElementSP _key ) const;
     UIElementSP touchDownKeyCached() const;
     void addRecursive( UIElementSP _elem );

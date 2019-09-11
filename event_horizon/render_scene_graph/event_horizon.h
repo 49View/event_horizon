@@ -58,6 +58,7 @@ public:
                 Http::init( BE::loginCert() );
             } else {
                 Http::init();
+                Http::project(argv[1]);
             }
         }
 #endif

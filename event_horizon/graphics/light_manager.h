@@ -124,7 +124,7 @@ private:
 	std::vector<PointLight> mPointLights;
 	std::vector<SpotLight> mSpotLights;
 	std::vector<V3f> mHemisphereKernelSamples;
-	V4f mSSAOParameters = V4f{ 25.0f, 16.0f, 0.5f, 1.0f};
+	V4f mSSAOParameters = V4f{ 12.5f, 16.0f, 0.9f, 1.0f};
 	std::shared_ptr<AnimType<float>> mDirectionalLightIntensity;
 
 	std::unique_ptr<ProgramUniformSet> mLigthingUniform;
