@@ -92,7 +92,7 @@ export const replaceMaterial = entity => async dispatch => {
       source_id: sourceId
     });
 
-    const appKey = state.entities.appKey;
+    const appKey = state.auth.userdata.project;
     const body = {
       key: appKey,
       matkey: sourceId,

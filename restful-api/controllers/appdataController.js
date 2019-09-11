@@ -15,7 +15,7 @@ const addAppInternal = async content => {
 const replaceAppInternal = async content => {
   try {
     return await appdataModel.findOneAndReplace(
-      { mKey: content.mKey },
+      { project: content.project },
       content
     );
   } catch (error) {
@@ -23,7 +23,7 @@ const replaceAppInternal = async content => {
   }
 };
 
-exports.addAppWithName = async (project, appName) => {
+exports.addApp = async project => {
   try {
     const rs = {
       shadowOverBurnCofficient: 2,
@@ -32,7 +32,6 @@ exports.addAppWithName = async (project, appName) => {
     };
 
     const content = {
-      mKey: appName,
       renderSettings: rs,
       project: project,
       group: "app",
@@ -62,9 +61,9 @@ exports.replaceApp = async content => {
   }
 };
 
-exports.getApp = async key => {
+exports.getApp = async project => {
   try {
-    const ret = await appdataModel.findOne({ mKey: key });
+    const ret = await appdataModel.findOne({ project: project });
     return ret.toObject();
   } catch (error) {
     console.log("Error adding app to project ", error);
@@ -74,7 +73,7 @@ exports.getApp = async key => {
 exports.updateApp = async content => {
   try {
     const ret = await appdataModel.findOneAndUpdate(
-      { mKey: content.mKey },
+      { project: content.project },
       content,
       {
         new: true

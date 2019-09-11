@@ -130,22 +130,22 @@ router.put("/matremap/", async (req, res, next) => {
   }
 });
 
-router.put("/:key", async (req, res, next) => {
-  try {
-    const content = await appdataController.getApp(req.params.key);
-    if (!content.metadata) {
-      content.metadata = {
-        name: content.mKey
-      };
-    }
-    metadataAssistant.udpateMetadata(content.metadata, content);
-    const ret = await appdataController.updateApp(content);
-    res.json(ret);
-  } catch (ex) {
-    console.log("Error creating app", ex);
-    res.sendStatus(400);
-  }
-});
+// router.put("/:key", async (req, res, next) => {
+//   try {
+//     const content = await appdataController.getApp(req.params.key);
+//     if (!content.metadata) {
+//       content.metadata = {
+//         name: content.mKey
+//       };
+//     }
+//     metadataAssistant.udpateMetadata(content.metadata, content);
+//     const ret = await appdataController.updateApp(content);
+//     res.json(ret);
+//   } catch (ex) {
+//     console.log("Error creating app", ex);
+//     res.sendStatus(400);
+//   }
+// });
 
 router.put("/:key/:group/:value", async (req, res, next) => {
   try {
