@@ -426,7 +426,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     bool bAddProbe = mSkybox && mSkybox->precalc( 0.0f );
     setDirtyCumulative( S::PBR, cameraRig->getCamera()->isDirty() || bAddProbe );
 
-    setDirty( S::PBR, true);
+//    setDirty( S::PBR, true);
     if ( bAddProbe ) {
         addProbes();
     } else {

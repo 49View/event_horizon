@@ -27,10 +27,10 @@ JSONSERIAL( AppEntities, key, value );
     std::vector<std::string> value;
 };
 
-class AppData : public Keyable<> {
+class AppData {
 public:
     AppData() = default;
-JSONSERIAL( AppData, renderSettings, matRemapping, mKey, entities );
+JSONSERIAL( AppData, project, renderSettings, matRemapping, entities );
 
     [[nodiscard]] size_t firstTierResourceCount() const {
         size_t ret = 0;
@@ -153,6 +153,7 @@ JSONSERIAL( AppData, renderSettings, matRemapping, mKey, entities );
     }
 
 protected:
+    std::string              project;
     AppRenderSettings        renderSettings;
     AppMaterialsRemapping    matRemapping;
     std::vector<AppEntities> entities;

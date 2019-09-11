@@ -521,11 +521,11 @@ void Renderer::setShadowOverBurnCofficient( float _value ) {
 }
 
 void Renderer::setShadowZFightCofficient( float _value ) {
-    LM()->setIndoorSceneCoeff(_value);
+    LM()->setShadowZFightCofficient(_value);
 }
 
 void Renderer::setIndoorSceneCoeff( float _value ) {
-    LM()->setShadowZFightCofficient(_value);
+    LM()->setIndoorSceneCoeff(_value);
 }
 
 void Renderer::setProgressionTiming( float _progress ) {
