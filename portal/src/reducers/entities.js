@@ -22,7 +22,6 @@ import {
 } from "../actions/types";
 
 import { requestAsset } from "../utils/webSocketClient";
-import { GroupApp } from "../utils/utils";
 
 const initialState = {
   events: {},
@@ -34,7 +33,7 @@ const initialState = {
   smallEntityModalOn: false,
   currentEntityNodes: null,
   appKey: "",
-  group: GroupApp,
+  group: "",
   loading: false,
   error: {}
 };
@@ -81,11 +80,15 @@ export default function(state = initialState, action) {
         ...state,
         entries: payload.data,
         entriesFiltered: payload.data,
+        group: payload.group,
         loading: false
       };
     case RESET_CURRENT_ENTITY:
       return {
         ...state,
+        entries: [],
+        entriesFiltered: [],
+        group: "",
         currentEntity: null
       };
     case GET_MATERIALS_META:

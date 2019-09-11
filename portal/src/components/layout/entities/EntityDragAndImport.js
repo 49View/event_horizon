@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useDropzone } from "react-dropzone";
 import { useAlert } from "react-alert";
-import Button from "react-bootstrap/Button";
 
 import { addEntity } from "../../../actions/entities";
 import {
@@ -44,27 +43,21 @@ const EntityDragAndImport = ({ addEntity, group, project, user }) => {
   const addButton = groupHasCreateEditor(group);
   const importButton = groupHasImportFacility(group);
 
-  const gapStyle = {
-    width: "100%",
-    marginBottom: "5px"
-  };
-
   return (
     <Fragment>
       {addButton && (
-        <Fragment>
-          <Button variant="primary" size="sm" block>
-            <i className="fas fa-plus" /> &nbsp; Add {group}
-          </Button>
-          <div style={gapStyle}></div>
-        </Fragment>
+        <div className="leftSideBarGroupCreate">
+          <i className="fas fa-plus" />
+        </div>
       )}
       {importButton && (
-        <div {...getRootProps({ className: "dropzone" })}>
-          <input {...getInputProps()} />
-          <span>
-            <i className="fas fa-upload" /> &nbsp; Import {group}
-          </span>
+        <div className="leftSideBarGroupImport">
+          <div {...getRootProps({ className: "dropzone" })}>
+            <input {...getInputProps()} />
+            <span>
+              <i className="fas fa-upload" />
+            </span>
+          </div>
         </div>
       )}
     </Fragment>

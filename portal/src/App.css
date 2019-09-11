@@ -69,12 +69,20 @@ body {
   z-index: 50000;
 }
 
+.backdropModal {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.025);
+  left: 0;
+  top: 0;
+  z-index: 450;
+}
+
 .navbarlogo-a {
   grid-area: navbarlogo;
   align-self: center;
-  justify-self: start;
-  font-size: 1.3rem;
-  color: white;
+  justify-self: center;
 }
 
 .navbareh-a {
@@ -376,13 +384,12 @@ input#search-bar:hover {
 }
 
 .leftSideBarGroup {
-  width: 75%;
-  padding: 8px 0px;
+  width: 66%;
+  padding: 4% 0px;
   margin-bottom: 1.5%;
   float: left;
   font-family: "Roboto", sans-serif;
   font-size: 0.8rem;
-  font-style: thin;
   font-weight: 100;
   /* color: var(--primary-color-dark); */
   border-radius: 6px;
@@ -391,6 +398,26 @@ input#search-bar:hover {
     rgba(23, 162, 184, 0.03),
     rgba(23, 162, 184, 0)
   ); */
+  cursor: pointer;
+}
+
+.leftSideBarGroupImport {
+  width: 15%;
+  float: right;
+}
+
+.leftSideBarGroupCreate {
+  flex: 1 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 15%;
+  padding: 8px;
+  float: right;
+  border-style: dashed;
+  margin-left: 2%;
+  border-radius: 6px;
+  border-width: 1px;
   cursor: pointer;
 }
 
@@ -412,7 +439,7 @@ input#search-bar:hover {
 }
 
 .leftSideBarIcon {
-  padding: 0% 2%;
+  padding: 0% 5%;
   width: 12%;
   color: var(--secondary-alt-color);
   /* width: 20%; */
@@ -420,7 +447,7 @@ input#search-bar:hover {
 }
 
 .leftSideBarText {
-  padding: 0% 1%;
+  padding: 0% 10%;
   /* padding-left: 10%; */
   /* width: 80%; */
   float: left;
@@ -522,6 +549,7 @@ input#search-bar:hover {
   justify-self: start;
   align-self: center;
   font-size: var(--font-size-small);
+  color: var(--logo-color-1);
 }
 
 .baseColorPicker-a {
@@ -549,6 +577,7 @@ input#search-bar:hover {
   justify-self: start;
   align-self: center;
   font-size: var(--font-size-small);
+  color: var(--logo-color-2);
 }
 
 .metallicSlider-a {
@@ -562,6 +591,7 @@ input#search-bar:hover {
   justify-self: start;
   align-self: center;
   font-size: var(--font-size-small);
+  color: var(--logo-color-2);
 }
 
 .roughnessSlider-a {
@@ -575,6 +605,7 @@ input#search-bar:hover {
   justify-self: start;
   align-self: center;
   font-size: var(--font-size-small);
+  color: var(--logo-color-2);
 }
 
 .aoSlider-a {
@@ -588,12 +619,14 @@ input#search-bar:hover {
   justify-self: start;
   align-self: center;
   font-size: var(--font-size-small);
+  color: var(--logo-color-2);
 }
 
 .opacitySlider-a {
   grid-area: opacitySlider;
   justify-self: center;
   align-self: center;
+  color: var(--logo-color-2);
 }
 
 .normalTexture-a {
@@ -1079,7 +1112,8 @@ input#search-bar:hover {
   color: #333;
   padding: 0.4rem 1.3rem;
   font-size: 1rem;
-  border: none;
+  border-radius: 3px;
+  border: 1px;
   cursor: pointer;
   transition: opacity 0.2s ease-in;
   outline: none;
@@ -1422,13 +1456,13 @@ input[type="color"]:active {
   flex-direction: column;
   align-items: center;
   padding: 7px;
-  border-width: 2px;
-  border-radius: 2px;
-  border-color: #eeeeee;
+  border-width: 1px;
+  border-radius: 20%;
+  border-color: var(--light-color);
   border-style: dashed;
-  background-color: #fafafa;
-  margin-bottom: 7px;
-  color: #bdbdbd;
+  /* background-color: #fafafa;
+  margin-bottom: 7px; */
+  color: var(--light-color);
   outline: none;
   transition: border 0.24s ease-in-out;
   cursor: pointer;

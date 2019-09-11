@@ -88,7 +88,6 @@ const DashboardProject = ({ currentEntity, entities, group, userData }) => {
     const rect = canvasContainer.current.getBoundingClientRect();
     store.dispatch(wasmSetCanvasSize(rect));
   }
-  // const entityBased = group !== GroupApp;
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>

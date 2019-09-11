@@ -53,28 +53,28 @@ export const checkCommonFileExtension = (group, ext) => {
 };
 
 export const groupHasCreateEditor = group => {
-  if (group === GroupUI) {
+  if (group !== "" && (group === GroupUI || group === GroupScript)) {
     return true;
   }
   return false;
 };
 
 export const groupHasImportFacility = group => {
-  if (group !== GroupApp) {
+  if (group !== "" && group !== GroupScript) {
     return true;
   }
   return false;
 };
 
 export const groupHasUpdateFacility = (currEntity, group) => {
-  if (currEntity && group !== GroupApp) {
+  if (currEntity && group !== GroupScript) {
     return true;
   }
   return false;
 };
 
 export const groupHasMetadataSection = (currEntity, group) => {
-  if (currEntity && group !== GroupApp) {
+  if (currEntity && group !== GroupScript) {
     return true;
   }
   return false;
@@ -123,6 +123,12 @@ export const entityTypeSelector = entry => {
     return (
       <span className="imageThumbNotFound">
         <i className="fas fa-font" />
+      </span>
+    );
+  } else if (entry.group === GroupUI) {
+    return (
+      <span className="imageThumbNotFound">
+        <i className="fas fa-bars" />
       </span>
     );
   } else if (entry.group === GroupProfile) {

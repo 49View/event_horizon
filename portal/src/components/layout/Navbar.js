@@ -30,7 +30,10 @@ const Navbar = ({ userstate, logoffFromProject, loading, loading2 }) => {
     <div className="navbarGrid">
       <div className="navbarlogo-a">
         {loading || loading2 ? (
-          <Spinner animation="border" variant="warning" />
+          <Fragment>
+            <Spinner animation="border" variant="warning" size="sm" />
+            <div className="backdropModal" />
+          </Fragment>
         ) : (
           <img src="/ehlogo.svg" alt="" />
         )}

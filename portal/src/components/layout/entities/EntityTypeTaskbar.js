@@ -7,22 +7,24 @@ import {
   changeEntitiesGroup
 } from "../../../actions/entities";
 import {
-  GroupApp,
   GroupMaterial,
   GroupGeom,
   GroupImage,
   GroupUI,
   GroupProfile,
-  GroupFont
+  GroupFont,
+  GroupScript
 } from "../../../utils/utils";
 import EntitiesThumbHandler from "./EntitiesThumbHandler";
+import EntityDragAndImport from "./EntityDragAndImport";
 
-const AppStrID = "Apps";
+// const AppStrID = "Apps";
+const ScriptStrID = "Scripts";
 const ObjectsStrID = "Objects";
 const MaterialsStrID = "Materials";
 const ImagesStrID = "Images";
 const FontsStrID = "Fonts";
-const GUIsStrID = "GUIs";
+const GUIsStrID = "UIs";
 const VectorsStrID = "Vectors";
 const ColorsStrID = "Colors";
 
@@ -41,7 +43,7 @@ const EntityTypeTaskBar = ({
       userstate.userdata.project !== null &&
       currentGroup === "default"
     ) {
-      const groupId = GroupApp;
+      const groupId = GroupScript;
       setCurrentGroup(groupId);
       getEntitiesOfGroup(groupId, userstate.userdata.project);
     }
@@ -49,7 +51,7 @@ const EntityTypeTaskBar = ({
 
   const viewMore = group => () => {
     let groupId = "";
-    if (group === AppStrID) groupId = GroupApp;
+    if (group === ScriptStrID) groupId = GroupScript;
     if (group === ObjectsStrID) groupId = GroupGeom;
     if (group === MaterialsStrID) groupId = GroupMaterial;
     if (group === ImagesStrID) groupId = GroupImage;
@@ -74,19 +76,22 @@ const EntityTypeTaskBar = ({
               : "leftSideBarGroup"
           }
         >
-          <span onClick={viewMore(text)}>
+          <div onClick={viewMore(text)}>
             <div className="leftSideBarIcon">
               <i className={icon} />
             </div>
             <div className="leftSideBarText"> {text}</div>
-          </span>
+          </div>
         </div>
         {selected && (
-          <EntitiesThumbHandler
-            currentEntity={currentEntity}
-            entries={entries}
-            onClicked={getFullEntity}
-          />
+          <Fragment>
+            <EntityDragAndImport />
+            <EntitiesThumbHandler
+              currentEntity={currentEntity}
+              entries={entries}
+              onClicked={getFullEntity}
+            />
+          </Fragment>
         )}
       </Fragment>
     );
@@ -94,7 +99,7 @@ const EntityTypeTaskBar = ({
 
   const topEntitySelectorBar = (
     <div className="topentityselectorbar-a topEntitySelectorBar">
-      {topSideEntry("fas fa-rocket", AppStrID, currentGroup === GroupApp)}
+      {topSideEntry("fas fa-rocket", ScriptStrID, currentGroup === GroupScript)}
       {topSideEntry("fas fa-cube", ObjectsStrID, currentGroup === GroupGeom)}
       {topSideEntry(
         "fas fa-code-branch",
