@@ -277,9 +277,7 @@ void RenderOrchestrator::init() {
     };
 
     luarr["useDOF"] = [&](bool _flag) {
-        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
-                               "_DOFING_", boolAlphaBinary(_flag) );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        useDOF( _flag );
     };
 
     luarr["useSSAO"] = [&](bool _flag) {
@@ -427,6 +425,14 @@ void RenderOrchestrator::useSSAO( bool _value ) {
     rr.useSSAO(_value);
 }
 
+void RenderOrchestrator::useDOF( bool _value ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->useDOF( _value );
+    }
+    rr.useDOF(_value);
+    setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+}
+
 floata& RenderOrchestrator::skyBoxDeltaInterpolation() {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
         return pbrTarget->skyBoxDeltaInterpolation();
@@ -435,8 +441,6 @@ floata& RenderOrchestrator::skyBoxDeltaInterpolation() {
     static floata reterror;
     return reterror;
 }
-
-
 
 void RenderOrchestrator::setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport ) {
     rr.getTarget(_rigName)->getRig()->setViewport(_viewport);

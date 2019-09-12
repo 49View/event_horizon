@@ -117,6 +117,7 @@ public:
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     void useSkybox( bool _value );
     void useSSAO( bool _value );
+    void useDOF( bool _value );
     void changeTime( const std::string& _time );
     floata& skyBoxDeltaInterpolation();
 

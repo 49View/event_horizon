@@ -2,14 +2,14 @@ const float PI = 3.14159265;
 const int SAMPLES = 4;
 const int RINGS = 4;
 
-const float width = 1280.0; //texture width
-const float height = 720.0; //texture height
+const float width = 2560.0; //texture width
+const float height = 1440.0; //texture height
 
 const vec2 texel = vec2(1.0/width,1.0/height);
 
 float focalDepth = 5.0;  //focal distance value in meters, but you may use autofocus option below
-float focalLength = 30.0; //focal length in mm
-float fstop = 9.0; //f-stop value
+float focalLength = 20.0; //focal length in mm
+float fstop = 13.0; //f-stop value
 bool showFocus = false; //show debug focus point and focal range (red = focal point, green = focal range)
 
 //------------------------------------------
@@ -21,34 +21,34 @@ const int rings = RINGS; //ring count
 const int maxringsamples = rings * samples;
 
 bool  manualdof = true; // manual dof calculation
-float ndofstart = 1.0; // near dof blur start
-float ndofdist = 2.0; // near dof blur falloff distance
-float fdofstart = 1.0; // far dof blur start
-float fdofdist = 3.0; // far dof blur falloff distance
+float ndofstart = 0.0; // near dof blur start
+float ndofdist = 4.0; // near dof blur falloff distance
+float fdofstart = 5.0; // far dof blur start
+float fdofdist = 5.0; // far dof blur falloff distance
 
-float CoC = 0.03; //circle of confusion size in mm (35mm film = 0.03mm)
+float CoC = 100.03; //circle of confusion size in mm (35mm film = 0.03mm)
 
-bool autofocus = true;
+bool autofocus = false;
 //use autofocus in shader - use with focusCoords
 // disable if you use external focalDepth value
 
-vec2 focusCoords = vec2(0.5, 0.5);
+vec2 focusCoords = vec2(1.0, 1.0);
 // autofocus point on screen (0.0,0.0 - left lower corner, 1.0,1.0 - upper right)
 // if center of screen use vec2(0.5, 0.5);
 
-float maxblur = 1.0;
+float maxblur = 2.0;
 //clamp value of max blur (0.0 = no blur, 1.0 default)
 
-float threshold = 0.5; // highlight threshold;
-float gain = 2.0; // highlight gain;
+float threshold = 1.5; // highlight threshold;
+float gain = 1.0; // highlight gain;
 float bias = 0.0; // bokeh edge bias
-float fringe = 2.8; // bokeh chromatic aberration / fringing
+float fringe = 0.18; // bokeh chromatic aberration / fringing
 bool noise = false; //use noise instead of pattern for sample dithering
 
 const float dithering = 0.00004;
 const float namount = dithering; //dither amount
 
-bool depthblur = false; // blur the depth buffer
+bool depthblur = true; // blur the depth buffer
 float dbsize = 1.25; // depth blur size
 
 /*

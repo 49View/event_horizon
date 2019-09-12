@@ -488,9 +488,11 @@ UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& _bs
     return child;
 }
 
-void UIContainer2d::addTitle( const UIFontText& _text ) {
+void UIContainer2d::addTitle( const UIFontText& _text, UIAlignFlags _flags ) {
     addLabel( _text, MScale2d{innerPaddedX, _text.height}, CSSDisplayMode::Block );
-    addSeparator();
+    if ( !checkBitWiseFlag(_flags, UIAF_DoNotAddSeparator ) ) {
+        addSeparator();
+    }
 }
 
 void UIContainer2d::addNavBar( const ControlDef& _logo ) {
@@ -547,7 +549,7 @@ void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine, bool
 }
 
 void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
-                                        const std::vector<ControlDef>& _cds, bool addSep ) {
+                                        const std::vector<ControlDef>& _cds, UIAlignFlags _flags ) {
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     for ( const auto& i : _cds ) {
@@ -577,7 +579,7 @@ void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
     for ( const auto& cd : _cds ) if ( !cd.textLines.empty() ) popCaretX();
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
-    if ( addSep ) {
+    if ( !checkBitWiseFlag(_flags, UIAF_DoNotAddSeparator ) ) {
         addSeparator( 0.5f );
     }
 }

@@ -291,6 +291,7 @@ public:
 
     [[nodiscard]] bool useSSAO() const;
     void useSSAO( bool _flag );
+    void useDOF( bool _flag );
     void enableSkybox( bool _value );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
@@ -322,6 +323,7 @@ protected:
     bool bEnableSkyBoxRendering = false;
     bool mbEnableSkybox = false;
     bool mbUseSSAO = false;
+    bool mbUseDOF = false;
 
     std::shared_ptr<SunBuilder> mSunBuilder;
     std::shared_ptr<Skybox> mSkybox;

@@ -17,9 +17,7 @@
 #include <render_scene_graph/render_orchestrator.h>
 
 class UIView;
-
 class SceneGraph;
-
 class RenderOrchestrator;
 
 struct UICallbackHandle {
@@ -53,6 +51,11 @@ enum class UIElementStatus {
 enum class CSSDisplayMode {
     Block,
     Inline
+};
+
+enum UIAlignFlags {
+    UIAF_None                       = 0,
+    UIAF_DoNotAddSeparator          = 1 << 0,
 };
 
 template<class T>
@@ -425,11 +428,11 @@ public:
 
     void addEmptyCaret();
     void addEmptyCaretNewLine();
-    void addTitle( const UIFontText& _text );
+    void addTitle( const UIFontText& _text, UIAlignFlags flags = UIAF_None );
     void addListEntry( const ControlDef& _cd );
     void addNavBar( const ControlDef& _logo );
     void addListEntryGrid( const ControlDef& _cd, bool _newLine = false, bool _lastOne = false );
-    void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds, bool addSep = true );
+    void addButtonGroupLine( UITapAreaType _uit, const std::vector<ControlDef>& _cds, UIAlignFlags flags = UIAF_None );
     void popCaretX();
 
     [[nodiscard]] UIElementSP Node() const { return node; };

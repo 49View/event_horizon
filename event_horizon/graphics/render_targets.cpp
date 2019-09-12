@@ -516,6 +516,10 @@ void RLTargetPBR::useSSAO( bool _flag ) {
     mbUseSSAO = _flag;
 }
 
+void RLTargetPBR::useDOF( bool _flag ) {
+    mbUseDOF = _flag;
+}
+
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {
     framebuffer = _fbt;
 }
