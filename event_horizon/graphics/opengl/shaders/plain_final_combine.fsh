@@ -12,6 +12,7 @@
 #include "camera_uniforms.glsl"
 
 in vec2 v_texCoord;
+in vec3 v_texT2;
 out vec4 FragColor;
 uniform sampler2D colorFBTexture;
 uniform sampler2D bloomTexture;
@@ -61,9 +62,26 @@ float linearize2(float depth) {
 void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
+
     #if _DOFING_
     sceneColor.xyz = dof();
     #endif
+
+    // vec4 current = vec4(v_texT2 * texture(depthMapTexture, v_texCoord).r, 1.0);
+    // current = u_inverseMvMatrix * current; 
+    // vec4 previous = u_prevMvpMatrix * vec4(current.xyz, 1.0);
+    // previous.xy /= -previous.w;
+    // previous.xy = previous.xy * vec2(-0.5, 0.5) + 0.5;
+    // float mblurScale = (1.0/u_motionBlurParams[0]) / 60.0;
+    // vec2 blurVec = (previous.xy - v_texCoord) * mblurScale;
+
+    // const int nSamples = 4;
+    // for (int i = 1; i < nSamples; ++i) {
+    //     vec2 offset = blurVec * (float(i) / float(nSamples - 1) - 0.5);  
+    //     sceneColor.xyz += texture(colorFBTexture, v_texCoord + offset ).xyz;
+    // }
+ 
+    // sceneColor.xyz /= float(nSamples);
 
     #if _LUT3DING_
     sceneColor.xyz = lut3d(sceneColor.xyz);
@@ -85,8 +103,5 @@ void main() {
     sceneColor.xyz *= grain();
     #endif
 
-    // sceneColor.xyz = vec3(linearize2(texture(depthMapTexture, v_texCoord).r))/40;
-    // sceneColor.xyz = texture(depthMapTexture, v_texCoord).rrr;
-    // sceneColor.w = 1.0;
-    FragColor = sceneColor;//*u_motionBlurParams[0];
+    FragColor = sceneColor;
 }

@@ -328,7 +328,7 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
     mBlurVerticalFB = FrameBufferBuilder{ rr, FBNames::blur_vertical }.size(vsize*bloomScale).noDepth()
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_VERTICAL).build();
 
-    mColorFinalFB = FrameBufferBuilder{ rr, FBNames::colorFinalFrameBuffer}.size(vsize).noDepth().
+    mColorFinalFB = FrameBufferBuilder{ rr, FBNames::colorFinalFrameBuffer}.size(vsize).noDepth().setViewSpace().
             dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).
             IM(S::FINAL_COMBINE).build();
     if ( mCompositeFinalDest == BlitType::OffScreen) {
@@ -342,10 +342,6 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
     mNormalFB = FrameBufferBuilder{ rr, FBNames::normalmap }.size( ssaoSize ).format( PIXEL_FORMAT_RGBA ).build();
 
     mSSAOFB = FrameBufferBuilder{ rr, FBNames::ssaomap }.size( ssaoSize ).format( PIXEL_FORMAT_RGBA ).IM(S::SSAO).setViewSpace().build();
-
-//    auto build = VPBuilder<PosTex2dStrip>{ rr, ShaderMaterial{S::SSAO} }.
-//            p(std::make_shared<PosTex2dStrip>( mDestViewport.ss(),
-//                                               QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS )).n(vn).build();
 
 }
 

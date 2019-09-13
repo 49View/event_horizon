@@ -250,7 +250,9 @@ void CommandBufferList::setCameraUniforms( std::shared_ptr<Camera> c0 ) {
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyePos, c0->getPosition(), mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyeDir, c0->getDirection(), mCurrent->UBOCameraBuffer.get());
     UBO::mapUBOData( rr.CameraUBO(), UniformNames::nearFar, c0->getNearFar(), mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::motionBlurParams, c0->getMotionBlurParams(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData( rr.CameraUBO(), UniformNames::motionBlurParams, V4f{GameTime::getCurrTimeStep(), 1.0f, 1.0f, 1.0f}, mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData( rr.CameraUBO(), UniformNames::inverseMvMatrix, c0->getInverseMV(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData( rr.CameraUBO(), UniformNames::prevMvpMatrix, c0->getPrevMVP(), mCurrent->UBOCameraBuffer.get());
 
     pushCommand( { CommandBufferCommandName::setCameraUniforms } );
 }
@@ -406,6 +408,8 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::ssaoMapTexture,
                     cstack->fb(CommandBufferFrameBufferType::ssaoMap)->RenderToTexture()->TDI(5));
+
+            cstack->fb( CommandBufferFrameBufferType::finalResolve )->VP()->updateP3V3(cstack->Target()->getCamera()->frustumFarViewPort());
 
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->draw();
 

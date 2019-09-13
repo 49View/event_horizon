@@ -7,6 +7,7 @@ compile( core graphics )
 
 add_executable(${PROJECT_NAME} ${BUILD_FILES})
 
+link_boost()
 linker(${PROJECT_NAME} "${LIBS}")
 
 install(TARGETS ${PROJECT_NAME} DESTINATION /usr/local/bin )

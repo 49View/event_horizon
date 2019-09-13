@@ -85,25 +85,20 @@ public:
 
 	friend std::ostream& operator<<( std::ostream& os, const Camera& camera );
 
-	bool isDoom() const {
-		return Mode() == CameraMode::Doom;
-	}
+	bool isDoom() const;
 
 	Matrix4f& MVP( const Matrix4f& model = Matrix4f::IDENTITY, CameraProjectionType cpType =
 	CameraProjectionType::Perspective );
 
-	bool frustomClipping( const AABB& bbox ) const;
+	[[nodiscard]] bool frustomClipping( const AABB& bbox ) const;
 
-	Matrix4f getViewMatrix() const {
-		return mView;
-	}
+	[[nodiscard]] Matrix4f getViewMatrix() const;
+	[[nodiscard]] Matrix4f getProjectionMatrix() const;
+    [[nodiscard]] Matrix4f getInverseMV() const;
+    [[nodiscard]] Matrix4f getPrevMVP() const;
 
-	Matrix4f getProjectionMatrix() const {
-		return mProjection;
-	}
-
-	Matrix4f AspectRatio() const { return mAspectRatio; }
-	const Matrix4f& ScreenAspectRatio() const { return mScreenAspectRatio; }
+	[[nodiscard]] Matrix4f AspectRatio() const { return mAspectRatio; }
+	[[nodiscard]] const Matrix4f& ScreenAspectRatio() const { return mScreenAspectRatio; }
 
 	void setViewMatrix( const Matrix4f& val ) {
 		mView = val;
@@ -123,34 +118,33 @@ public:
 	Vector3f getDirection() const;
 	Vector3f getDirectionInv() const;
 	Vector3f getDirectionRH() const;
-	Vector4f getMotionBlurParams() const;
 
 	[[nodiscard]] std::vector<V3f> frustumFarViewPort() const;
 
 	void AspectRatioMultiplier( float val );
 
-	float FoV() const;
+	[[nodiscard]] float FoV() const;
 	floata& 		FoVAnim();
 	V3fa&   		PosAnim();
 	Quaterniona& QAngleAnim();
 
 	void getViewporti( int* viewport ) const;
 
-	PickRayData rayViewportPickIntersection( const Vector2f& p1 ) const;
+	[[nodiscard]] PickRayData rayViewportPickIntersection( const Vector2f& p1 ) const;
 	Vector2f mousePickRayOrtho( const Vector2f& _pos );
 
 	void ModeInc();
 	void Mode( const CameraMode& val );
-	CameraMode Mode() const;
+	[[nodiscard]] CameraMode Mode() const;
 
-	bool LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
+	[[nodiscard]] bool LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
 	void LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
 	void ToggleLockAtWalkingHeight() { mLockAtWalkingHeight = !mLockAtWalkingHeight; }
     void UpdateIncrementalEulerFromQangle();
     void UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget);
 	void enableInputs( bool _enableInputs ) { mbLocked = _enableInputs; }
 
-	JMATH::Rect2f ViewPort() const { return mViewPort; }
+	[[nodiscard]] JMATH::Rect2f ViewPort() const { return mViewPort; }
 	void ViewPort( JMATH::Rect2f val );
 
 private:
@@ -169,7 +163,6 @@ private:
 	float mNearClipPlaneZClampEdit2d = 0.5f;
 	float mFarClipPlaneZClampEdit2d = 30.0f;
 
-	V4f mMotionBlurParams = V4f::ONE;
 	bool mLockAtWalkingHeight = false;
 	bool mbLocked = false;
 
@@ -181,6 +174,8 @@ private:
 	Matrix4f mVP                = Matrix4f::MIDENTITY();
 
 	Matrix4f mMVP               = Matrix4f::MIDENTITY();
+	Matrix4f mInverseMV         = Matrix4f::MIDENTITY();
+	Matrix4f mPrevMVP           = Matrix4f::MIDENTITY();
 	Matrix4f quatMatrix         = Matrix4f::MIDENTITY();
 
 	V3fa mPos;

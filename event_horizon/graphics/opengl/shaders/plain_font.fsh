@@ -23,5 +23,6 @@ void main()
         // Linear alpha
         alphaV = clamp(0.5 - sd, 0.0, 1.0);
     }
-    FragColor = vec4(diffuseColor, alpha*alphaV*opacity);
+    float aFactor = alpha*alphaV*opacity;
+    FragColor = vec4(diffuseColor * aFactor, aFactor);
 }

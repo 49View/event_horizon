@@ -565,6 +565,8 @@ void RenderCameraManager::init() {
     mCameraUBO->setUBOStructure( UniformNames::eyeDir, 16 );
     mCameraUBO->setUBOStructure( UniformNames::nearFar, 16 );
     mCameraUBO->setUBOStructure( UniformNames::motionBlurParams, 16 );
+    mCameraUBO->setUBOStructure( UniformNames::inverseMvMatrix, 64 );
+    mCameraUBO->setUBOStructure( UniformNames::prevMvpMatrix, 64 );
 }
 
 void RenderCameraManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {

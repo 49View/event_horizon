@@ -554,20 +554,23 @@ Vector3f Camera::centerScreenOnWithinArea( Vector2f area, const Rect2f& targetAr
 }
 
 Matrix4f& Camera::MVP( const Matrix4f& model, CameraProjectionType cpType ) {
+    mPrevMVP = mMVP;
 	mMVP = model;
 	switch ( cpType ) {
-	case CameraProjectionType::Perspective:
-	mMVP.mult( mView );
-	mMVP.mult( mProjection );
-	break;
-	case CameraProjectionType::Orthogonal:
-	mMVP.mult( mAspectRatio );
-	mMVP.mult( mOrthogonal );
-	break;
+        case CameraProjectionType::Perspective:
+            mMVP.mult( mView );
+            mMVP.mult( mProjection );
+        break;
+        case CameraProjectionType::Orthogonal:
+            mMVP.mult( mAspectRatio );
+            mMVP.mult( mOrthogonal );
+        break;
 
-	default:
-	break;
+        default:
+        break;
 	}
+    mView.invert(mInverseMV);
+
 	return mMVP;
 }
 
@@ -839,8 +842,24 @@ std::vector<V3f> Camera::frustumFarViewPort() const {
     return ret;
 }
 
-Vector4f Camera::getMotionBlurParams() const {
-    return mMotionBlurParams;
+Matrix4f Camera::getViewMatrix() const {
+    return mView;
+}
+
+Matrix4f Camera::getProjectionMatrix() const {
+    return mProjection;
+}
+
+Matrix4f Camera::getInverseMV() const {
+    return mInverseMV;
+}
+
+Matrix4f Camera::getPrevMVP() const {
+    return mPrevMVP;
+}
+
+bool Camera::isDoom() const {
+    return Mode() == CameraMode::Doom;
 }
 
 
