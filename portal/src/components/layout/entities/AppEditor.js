@@ -2,12 +2,9 @@ import React, { Fragment, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Controlled as CodeMirror } from "react-codemirror2";
-import Tabs from "react-bootstrap/Tabs";
-import Tab from "react-bootstrap/Tab";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 import { useIndexedDB } from "react-indexed-db";
-import Table from "react-bootstrap/Table";
 
 require("codemirror/lib/codemirror.css");
 require("codemirror/theme/material.css");
@@ -34,8 +31,7 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
         filesFromDb.some(fileFromDb => {
           if (
             fileFromDb.project === userData.project &&
-            fileFromDb.app === currentEntity.entity.mKey &&
-            fileFromDb.file === "main.lua" &&
+            fileFromDb.file === currentEntity.entity.metadata.name &&
             fileFromDb.user === userData.user.email
           ) {
             setFileData(fileFromDb);
@@ -74,7 +70,7 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
       add({
         project: userData.project,
         app: currentEntity.entity.mKey,
-        file: "main.lua",
+        file: currentEntity.entity.metadata.name,
         user: userData.user.email,
         content: fileC
       }).then(
@@ -83,7 +79,7 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
             id: event,
             project: userData.project,
             app: currentEntity.entity.mKey,
-            file: "main.lua",
+            file: currentEntity.entity.metadata.name,
             user: userData.user.email,
             content: fileC
           };
@@ -108,11 +104,7 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
 
   return (
     <Fragment>
-      <div className="source_tabs-a">
-        <Tabs defaultActiveKey="profile" id="uncontrolled-tab-example">
-          <Tab eventKey="home" title="main.lua"></Tab>
-        </Tabs>
-      </div>
+      <div className="source_tabs-a">{currentEntity.entity.metadata.name}</div>
       <div className="appdataquad">
         <CodeMirror
           value={fileC}
@@ -158,43 +150,12 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
           </Button>
         </ButtonGroup>
       </div>
-      <div className="app_controls-a">
-        <Tabs defaultActiveKey="console" id="uncontrolled-tab-example">
-          <Tab eventKey="console" title="console">
-            <div className="console-output small">
-              <ul>
-                {consoleArrayLogs.map(e => (
-                  <li key={e.key}>{e.text}</li>
-                ))}
-              </ul>
-            </div>
-          </Tab>
-          <Tab eventKey="settings" title="settings">
-            <Table striped bordered hover size="sm">
-              <thead>
-                <tr>
-                  <th>Rendering</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Shadow OverBurn Coef</td>
-                  <td>2.0</td>
-                </tr>
-                <tr>
-                  <td>Indoor Scene Coeff</td>
-                  <td>1.0</td>
-                </tr>
-                <tr>
-                  <td>Shadow Z-Fight Coeff</td>
-                  <td>0.002</td>
-                </tr>
-              </tbody>
-            </Table>
-          </Tab>
-          <Tab eventKey="builds" title="builds"></Tab>
-        </Tabs>
+      <div className="app_controls-a small">
+        <ul>
+          {consoleArrayLogs.map(e => (
+            <li key={e.key}>{e.text}</li>
+          ))}
+        </ul>
       </div>
     </Fragment>
   );

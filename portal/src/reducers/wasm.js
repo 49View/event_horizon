@@ -7,12 +7,14 @@ import {
   WASM_SET_ROOT_CANVAS,
   ADD_CONSOLE_TEXT,
   WASM_SET_CANVAS_SIZE,
+  WASM_RESIZE_CALLBACK,
   WASM_SET_CANVAS_VISIBILITY
 } from "../actions/types";
 import { updateObject } from "../utils/wasmUtils";
 
 const initialState = {
   error: null,
+  resize: true,
   loading: false,
   loaded: false,
   running: false,
@@ -68,7 +70,8 @@ const wasmSetCanvasSize = (state, rect) => {
     canvasTop: rect.top,
     canvasLeft: rect.left,
     canvasWidth: rect.width,
-    canvasHeight: rect.height
+    canvasHeight: rect.height,
+    resize: false
   });
 };
 
@@ -100,6 +103,11 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         wasmCanvas: action.payload_canvas
+      };
+    case WASM_RESIZE_CALLBACK:
+      return {
+        ...state,
+        resize: true
       };
     case WASM_SET_CANVAS_SIZE:
       return wasmSetCanvasSize(state, action.payload);

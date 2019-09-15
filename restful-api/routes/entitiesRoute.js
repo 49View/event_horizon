@@ -243,6 +243,40 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.post("/:group/:filename", async (req, res, next) => {
+  const filename = req.params.filename;
+  const group = req.params.group;
+  const project = req.user.project;
+  const username = req.user.name;
+  const useremail = req.user.email;
+
+  console.log("Body: [", req.body, "]");
+  try {
+    const entity = await entityController.createEntityFromMetadata(
+      req.body,
+      project,
+      group,
+      false,
+      false,
+      entityController.createMetadataStartup(filename, username, useremail),
+      true,
+      null
+    );
+
+    if (entity !== null) {
+      res
+        .status(201)
+        .json(entity)
+        .end();
+    } else {
+      throw "[post.entity] Entity created is null";
+    }
+  } catch (ex) {
+    console.log("[POST] Entity error: ", ex);
+    res.sendStatus(400);
+  }
+});
+
 // this post have a binary body and will automatically create metadata itself
 // it will probably come from a daemon so it won't have req.user information
 // hence we need to pass them down
@@ -256,32 +290,27 @@ router.post(
     const useremail = req.params.useremail;
 
     try {
-      const metadata = entityController.createMetadataStartup(
-        filename,
-        username,
-        useremail
-      );
-
       const entity = await entityController.createEntityFromMetadata(
         req.body,
         project,
         group,
         false,
         false,
-        metadata,
+        entityController.createMetadataStartup(filename, username, useremail),
         true,
         null
       );
 
       if (entity !== null) {
-        res.status(201).json(entity);
-        // res.status(201).json({ ETag: data.ETag });
-        res.end();
+        res
+          .status(201)
+          .json(entity)
+          .end();
       } else {
         throw "[post.entity] Entity created is null";
       }
     } catch (ex) {
-      console.log("ERROR ADDING FILE TO FS: ", ex);
+      console.log("[POST] Entity error: ", ex);
       res.sendStatus(400);
     }
   }

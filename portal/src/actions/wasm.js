@@ -7,6 +7,7 @@ import {
   WASM_RUN_FAILED,
   WASM_SET_ROOT_CANVAS,
   ADD_CONSOLE_TEXT,
+  WASM_RESIZE_CALLBACK,
   WASM_SET_CANVAS_SIZE,
   WASM_SET_CANVAS_VISIBILITY
 } from "./types";
@@ -16,6 +17,13 @@ export const wasmSetCanvasSize = rect => {
   return {
     type: WASM_SET_CANVAS_SIZE,
     payload: rect
+  };
+};
+
+export const wasmSetCanvasSizeCallback = () => {
+  return {
+    type: WASM_RESIZE_CALLBACK,
+    payload: null
   };
 };
 
@@ -168,6 +176,11 @@ export const loadWasmComplete = async (
   } catch (ex) {
     console.log(ex);
   }
+
+  window.addEventListener("resize", () => {
+    store.dispatch(wasmSetCanvasSizeCallback());
+    console.log("Window Resize: ", window.innerWidth, window.innerWidth);
+  });
 
   window.Module = {
     arguments: [

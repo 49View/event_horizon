@@ -24,9 +24,7 @@ const app = express();
 express.static.mime.types["wasm"] = "application/wasm";
 
 //Set up default mongoose connection
-const mongoDB = `mongodb+srv://${globalConfig.MongoDBUser}:${
-  globalConfig.MongoDBPass
-}@${globalConfig.MongoDBURI}`;
+const mongoDB = `mongodb+srv://${globalConfig.MongoDBUser}:${globalConfig.MongoDBPass}@${globalConfig.MongoDBURI}`;
 mongoose.connect(mongoDB, {
   dbName: globalConfig.MongoDBdbName,
   useNewUrlParser: true
@@ -39,7 +37,7 @@ let db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 console.log("Started");
-//cryptoController.generateKey();
+// cryptoController.generateKey();
 authController.InitializeAuthentication();
 
 app.use(logger("dev"));

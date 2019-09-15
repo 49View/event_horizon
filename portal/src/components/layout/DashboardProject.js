@@ -17,11 +17,11 @@ import {
   groupHasRenderToolbar,
   groupHasUpdateFacility,
   groupHasMetadataSection,
-  GroupApp,
   GroupGeom,
   GroupMaterial,
   GroupImage,
-  GroupUI
+  GroupUI,
+  GroupScript
 } from "../../utils/utils";
 
 import store from "../../store";
@@ -43,7 +43,7 @@ const containerClassFromGroup = (currEntity, group) => {
         mainContainerClass: "GeomEditorRenderGrid",
         mainContainerDiv: <ImageEditor />
       };
-    case GroupApp:
+    case GroupScript:
       return {
         mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <AppEditor />
@@ -61,12 +61,18 @@ const containerClassFromGroup = (currEntity, group) => {
   }
 };
 
-const DashboardProject = ({ currentEntity, entities, group, userData }) => {
+const DashboardProject = ({
+  resize,
+  currentEntity,
+  entities,
+  group,
+  userData
+}) => {
   let canvasContainer = React.useRef(null);
 
   useEffect(() => {
     // Shortcut to go straight to app/coding from the outset for most projects
-    if (group === GroupApp && entities.length === 1 && !currentEntity) {
+    if (group === GroupScript && entities.length === 1 && !currentEntity) {
       store.dispatch(getFullEntity(entities[0]));
     }
   }, [currentEntity, entities, group]);
@@ -108,6 +114,7 @@ const DashboardProject = ({ currentEntity, entities, group, userData }) => {
 };
 
 DashboardProject.propTypes = {
+  resize: PropTypes.bool,
   currentEntity: PropTypes.object,
   entities: PropTypes.array,
   group: PropTypes.string,
@@ -115,6 +122,7 @@ DashboardProject.propTypes = {
 };
 
 const mapStateToProps = state => ({
+  resize: state.wasm.resize,
   currentEntity: state.entities.currentEntity,
   entities: state.entities.entries,
   group: state.entities.group,

@@ -47,6 +47,8 @@ export const checkCommonFileExtension = (group, ext) => {
     if (ext === "ttf") return true;
   } else if (group === GroupUI) {
     if (ext === "json") return true;
+  } else if (group === GroupProfile) {
+    if (ext === "svg") return true;
   }
 
   return false;
@@ -97,7 +99,7 @@ export const checkFileExtensionsOnEntityGroup = (group, filename) => {
 };
 
 export const entityTypeSelector = entry => {
-  if (entry.group === GroupApp) {
+  if (entry.group === GroupScript) {
     if (entry.metadata.thumb === "")
       return (
         <span className="geomThumbNotFound">

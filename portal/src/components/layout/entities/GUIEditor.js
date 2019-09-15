@@ -80,11 +80,7 @@ const GUIEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
 
   return (
     <Fragment>
-      <div className="ui_tabs-a">
-        {/* <Tabs defaultActiveKey="profile" id="uncontrolled-tab-example">
-          <Tab eventKey="home" title="main.lua"></Tab>
-        </Tabs> */}
-      </div>
+      <div className="ui_tabs-a"></div>
       <div className="ui_source-a">
         <CodeMirror
           value={fileC}

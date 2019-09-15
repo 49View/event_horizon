@@ -24,27 +24,17 @@ const alertOptions = {
 const Routes = () => {
   return (
     <Fragment>
-      <div className="mainDesktopPageLayout">
-        <Navbar />
-        <Alert />
-        <AlertProvider template={AlertTemplate} {...alertOptions}>
-          <Switch>
-            <Route exact path="/register" component={Register} />
-            <Route exact path="/login" component={Login} />
-            <PrivateRoute
-              exact
-              path="/dashboarduser"
-              component={DashboardUser}
-            />
-            <Route
-              exact
-              path="/dashboardproject"
-              component={DashboardProject}
-            />
-            <Route component={NotFound} />
-          </Switch>
-        </AlertProvider>
-      </div>
+      <Navbar />
+      <Alert />
+      <AlertProvider template={AlertTemplate} {...alertOptions}>
+        <Switch>
+          <Route exact path="/register" component={Register} />
+          <Route exact path="/login" component={Login} />
+          <PrivateRoute exact path="/dashboarduser" component={DashboardUser} />
+          <Route exact path="/dashboardproject" component={DashboardProject} />
+          <Route component={NotFound} />
+        </Switch>
+      </AlertProvider>
     </Fragment>
   );
 };

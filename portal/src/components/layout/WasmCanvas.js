@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { loadWasmComplete } from "../../actions/wasm";
-import { GroupApp, GroupMaterial, GroupGeom } from "../../utils/utils";
+import { GroupScript, GroupMaterial, GroupGeom } from "../../utils/utils";
 
 const WasmCanvas = ({
   left,
@@ -26,11 +26,11 @@ const WasmCanvas = ({
 
   const canvasVisibility =
     currentEntity &&
-    (group === GroupApp || group === GroupGeom || group === GroupMaterial)
+    (group === GroupScript || group === GroupGeom || group === GroupMaterial)
       ? "visible"
       : "hidden";
 
-  const bShowEntityCanvas = currentEntity && group !== GroupApp;
+  const bShowEntityCanvas = currentEntity && group !== GroupScript;
 
   const canvasSizeXNum = width; // bShowEntityCanvas ? 529 : 510;
   const canvasSizeYNum = height; //bShowEntityCanvas ? 536 : 286;
@@ -59,12 +59,14 @@ const WasmCanvas = ({
     borderRadius: canvasRadius
   };
 
+  // console.log("Canvas attriubes: ", canvasStyle);
   // let visibility = "hidden";
   // if (visible === true) {
   //   visibility = "visible";
   // }
   return (
     <canvas
+      id="WasmCanvas"
       width={canvasClientSizeX}
       height={canvasClientSizeY}
       style={canvasStyle}
