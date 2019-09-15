@@ -30,8 +30,6 @@ const WasmCanvas = ({
       ? "visible"
       : "hidden";
 
-  const bShowEntityCanvas = currentEntity && group !== GroupScript;
-
   const canvasSizeXNum = width; // bShowEntityCanvas ? 529 : 510;
   const canvasSizeYNum = height; //bShowEntityCanvas ? 536 : 286;
 
@@ -43,9 +41,9 @@ const WasmCanvas = ({
   const canvasClientSizeY =
     (canvasSizeYNum * (window.devicePixelRatio || 1)).toString() + "px";
 
-  const canvasPadding = bShowEntityCanvas ? "5px" : "1px";
-  const canvasMargin = bShowEntityCanvas ? "0px" : "0px";
-  const canvasRadius = bShowEntityCanvas ? "10px" : "3px";
+  const canvasPadding = "5px";
+  const canvasMargin = "0px";
+  const canvasRadius = "10px";
 
   const canvasStyle = {
     position: "absolute",

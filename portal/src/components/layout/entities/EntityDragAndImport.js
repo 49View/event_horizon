@@ -46,13 +46,13 @@ const EntityDragAndImport = ({ addEntity, group, project, user }) => {
   return (
     <Fragment>
       {addButton && (
-        <div className="leftSideBarGroupCreate">
+        <div className="leftSideBarGroupImport">
           <i className="fas fa-plus" />
         </div>
       )}
       {importButton && (
         <div className="leftSideBarGroupImport">
-          <div {...getRootProps({ className: "dropzone" })}>
+          <div {...getRootProps({ className: "dropzoneNoHMargins" })}>
             <input {...getInputProps()} />
             <span>
               <i className="fas fa-upload" />

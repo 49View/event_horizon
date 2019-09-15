@@ -68,7 +68,7 @@ const EntityTypeTaskBar = ({
 
   const topSideEntry = (icon, text, selected) => {
     return (
-      <Fragment>
+      <div className="leftSideBarGroupContainer">
         <div
           className={
             selected
@@ -76,12 +76,12 @@ const EntityTypeTaskBar = ({
               : "leftSideBarGroup"
           }
         >
-          <div onClick={viewMore(text)}>
-            <div className="leftSideBarIcon">
+          <span onClick={viewMore(text)}>
+            <span className="leftSideBarIcon">
               <i className={icon} />
-            </div>
-            <div className="leftSideBarText"> {text}</div>
-          </div>
+            </span>
+            <span className="leftSideBarText"> {text}</span>
+          </span>
         </div>
         {selected && (
           <Fragment>
@@ -93,7 +93,7 @@ const EntityTypeTaskBar = ({
             />
           </Fragment>
         )}
-      </Fragment>
+      </div>
     );
   };
 
