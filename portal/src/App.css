@@ -10,6 +10,7 @@
   --primary-color-dark: rgb(20, 100, 112);
   --primary-color-light: rgb(23, 162, 244);
   --dark-color: #343a40;
+  --dark-color-transparent: #343a4070;
   --light-color: #f4f4f4;
   --danger-color: #dc3545;
   --happy-color: #dcd505;
@@ -77,10 +78,18 @@ body {
   z-index: 450;
 }
 
+.blooming {
+  text-shadow: -1px -1px 4px white;
+}
+
 .navbarlogo-a {
   grid-area: navbarlogo;
   align-self: center;
   justify-self: center;
+}
+
+.logofont {
+  font-family: "Righteous", cursive;
 }
 
 .navbareh-a {
@@ -109,8 +118,14 @@ body {
 }
 
 .navbarGrid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50000;
   height: var(--navbar-height);
-  background: var(--dark-color);
+  background: var(--dark-color-transparent);
+  background-color: var(--dark-color-transparent);
   display: grid;
   grid-template-columns: 2% 23% 50% 25%;
   grid-template-rows: 100%;
@@ -337,8 +352,7 @@ img {
 }
 
 .container {
-  max-width: 1920px;
-  margin: auto;
+  margin: 3% auto;
   overflow: hidden;
   padding: 0 25%;
 }
@@ -1293,7 +1307,7 @@ li.app_controls-a {
 .form select,
 .form textarea {
   display: block;
-  width: 90%;
+  width: 100%;
   max-width: 600px;
   padding: 0.4rem;
   font-size: 1.2rem;
@@ -1438,7 +1452,7 @@ input[type="color"]:active {
 }
 
 .userWithNoProject {
-  margin: 2% 1.5%;
+  margin: 6% 3%;
 }
 
 .dropzone {

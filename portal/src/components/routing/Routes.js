@@ -6,7 +6,6 @@ import DashboardUser from "../layout/DashboardUser";
 import DashboardProject from "../layout/DashboardProject";
 import NotFound from "../layout/NotFound";
 import PrivateRoute from "../routing/PrivateRoute";
-import Navbar from "../../components/layout/Navbar";
 import Alert from "../../components/layout/Alert";
 import { transitions, positions, Provider as AlertProvider } from "react-alert";
 import AlertTemplate from "react-alert-template-basic";
@@ -24,7 +23,6 @@ const alertOptions = {
 const Routes = () => {
   return (
     <Fragment>
-      <Navbar />
       <Alert />
       <AlertProvider template={AlertTemplate} {...alertOptions}>
         <Switch>
