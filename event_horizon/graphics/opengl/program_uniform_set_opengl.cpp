@@ -7,6 +7,7 @@
 void ProgramUniformSet::generateUBO( std::shared_ptr<ShaderManager> sm, const std::string& uniformName ) {
 
 	mUBOBuffer = std::make_unique<char[]>( mUBOSize );
+	if ( mUBOHandle != 0 ) glDeleteBuffers( 1, &mUBOHandle );
 	glGenBuffers( 1, &mUBOHandle );
 	glBindBuffer( GL_UNIFORM_BUFFER, mUBOHandle );
 	glBufferData( GL_UNIFORM_BUFFER, mUBOSize, NULL, GL_DYNAMIC_DRAW );

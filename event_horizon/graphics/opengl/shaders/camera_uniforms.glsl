@@ -7,7 +7,6 @@ layout( std140 ) uniform CameraUniforms{
     vec3 u_eyePos;
     vec3 u_eyeDir;
     vec4 u_nearFar;
-    vec4 u_motionBlurParams;
     mat4 u_inverseMvMatrix;
     mat4 u_prevMvpMatrix;
 };

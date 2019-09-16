@@ -16,6 +16,7 @@
 using namespace boost::filesystem;
 
 const std::string cachedFileName = ".cachedShaderMap.txt";
+const std::string sVersionString = "2.1.0";
 
 JSONDATA(FileCheck, filename, lastWriteTime, size, hash)
 
@@ -117,6 +118,7 @@ bool checkFileChanged( const FileCheck& _fc, const CacheCheckMap& _cache ) {
 int main( int argc, [[maybe_unused]] char *argv[] ) {
 
     int ret = 0;
+    LOGRS("ShaderTool Version: " << sVersionString );
 
     if ( !glfwInit() ) {
         LOGE( "Could not start GLFW3" );

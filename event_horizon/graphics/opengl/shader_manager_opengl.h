@@ -64,7 +64,7 @@ public:
 public:
     bool addShader( const std::string& id, Shader::Type stype );
     bool loadProgram( const ShaderProgramDesc& sb );
-    void reloadDirtyPrograms();
+    [[nodiscard]] bool reloadDirtyPrograms();
 
     // OpenGL init function
     bool loadShaders( bool _performCompileOnly = false );

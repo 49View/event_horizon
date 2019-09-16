@@ -1,6 +1,7 @@
 #version #opengl_version
 #precision_high
 
+#define _CAMERA_MOTION_BLURRING_ 0
 #define _VIGNETTING_ 0
 #define _GRAINING_ 0
 #define _DOFING_ 0
@@ -10,6 +11,7 @@
 
 #include "lighting_uniforms.glsl"
 #include "camera_uniforms.glsl"
+#include "animation_uniforms.glsl"
 
 in vec2 v_texCoord;
 in vec3 v_texT2;
@@ -51,37 +53,38 @@ vec3 lut3d( vec3 sceneColor ) {
     return texture( lut3dTexture, sceneColor ).xyz;
 }
 
-#include "dof.glsl"
+vec3 cameraMotionBlur( vec3 sceneColor ) {
+    vec4 current = vec4(v_texT2 * texture(depthMapTexture, v_texCoord).r, 1.0);
+    current = u_inverseMvMatrix * current; 
+    vec4 previous = u_prevMvpMatrix * vec4(current.xyz, 1.0);
+    previous.xy /= -previous.w;
+    previous.xy = previous.xy * vec2(-0.5, 0.5) + 0.5;
+    float mblurScale = (1.0/u_deltaAnimTime.x) / 60.0;
+    vec2 blurVec = (previous.xy - v_texCoord) * mblurScale;
 
-float linearize2(float depth) {
-    float znear = u_nearFar.x;
-    float zfar = u_nearFar.y;
-	return -zfar * znear / (depth * (zfar - znear) - zfar);
+    const int nSamples = 4;
+    for (int i = 1; i < nSamples; ++i) {
+        vec2 offset = blurVec * (float(i) / float(nSamples - 1) - 0.5);  
+        sceneColor.xyz += texture(colorFBTexture, v_texCoord + offset ).xyz;
+    }
+ 
+    sceneColor.xyz /= float(nSamples);
+    return sceneColor;
 }
+
+#include "dof.glsl"
 
 void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
 
+    #if _CAMERA_MOTION_BLURRING_
+    sceneColor.xyz = cameraMotionBlur(sceneColor.xyz);
+    #endif
+
     #if _DOFING_
     sceneColor.xyz = dof();
     #endif
-
-    // vec4 current = vec4(v_texT2 * texture(depthMapTexture, v_texCoord).r, 1.0);
-    // current = u_inverseMvMatrix * current; 
-    // vec4 previous = u_prevMvpMatrix * vec4(current.xyz, 1.0);
-    // previous.xy /= -previous.w;
-    // previous.xy = previous.xy * vec2(-0.5, 0.5) + 0.5;
-    // float mblurScale = (1.0/u_motionBlurParams[0]) / 60.0;
-    // vec2 blurVec = (previous.xy - v_texCoord) * mblurScale;
-
-    // const int nSamples = 4;
-    // for (int i = 1; i < nSamples; ++i) {
-    //     vec2 offset = blurVec * (float(i) / float(nSamples - 1) - 0.5);  
-    //     sceneColor.xyz += texture(colorFBTexture, v_texCoord + offset ).xyz;
-    // }
- 
-    // sceneColor.xyz /= float(nSamples);
 
     #if _LUT3DING_
     sceneColor.xyz = lut3d(sceneColor.xyz);

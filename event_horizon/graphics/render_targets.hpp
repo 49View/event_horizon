@@ -290,8 +290,11 @@ public:
     void resize( const Rect2f& _r ) override;
 
     [[nodiscard]] bool useSSAO() const;
+    [[nodiscard]] bool useDOF() const;
+    [[nodiscard]] bool useMotionBlur() const;
     void useSSAO( bool _flag );
     void useDOF( bool _flag );
+    void useMotionBlur( bool _flag );
     void enableSkybox( bool _value );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
@@ -324,6 +327,7 @@ protected:
     bool mbEnableSkybox = false;
     bool mbUseSSAO = false;
     bool mbUseDOF = false;
+    bool mbUseMotionBlur = false;
 
     std::shared_ptr<SunBuilder> mSunBuilder;
     std::shared_ptr<Skybox> mSkybox;

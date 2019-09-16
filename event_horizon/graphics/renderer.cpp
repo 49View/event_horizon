@@ -139,6 +139,11 @@ SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final
 "_SSAOING_", boolAlphaBinary(_flag) );
 }
 
+void Renderer::useMotionBlur(bool _flag) {
+    //useSSAO(_flag);
+    SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+                        "_CAMERA_MOTION_BLURRING_", boolAlphaBinary(_flag) );
+}
 
 void Renderer::init() {
     sm = std::make_shared<ShaderManager>();
@@ -220,7 +225,9 @@ void Renderer::setGlobalTextures() {
 
 void Renderer::directRenderLoop() {
 
-    SM()->reloadDirtyPrograms();
+    if ( SM()->reloadDirtyPrograms() ) {
+        afterShaderSetup();
+    }
 
 #ifdef _USE_IMGUI_
     ImGui::NewFrame();
@@ -564,7 +571,6 @@ void RenderCameraManager::init() {
     mCameraUBO->setUBOStructure( UniformNames::eyePos, 16 );
     mCameraUBO->setUBOStructure( UniformNames::eyeDir, 16 );
     mCameraUBO->setUBOStructure( UniformNames::nearFar, 16 );
-    mCameraUBO->setUBOStructure( UniformNames::motionBlurParams, 16 );
     mCameraUBO->setUBOStructure( UniformNames::inverseMvMatrix, 64 );
     mCameraUBO->setUBOStructure( UniformNames::prevMvpMatrix, 64 );
 }

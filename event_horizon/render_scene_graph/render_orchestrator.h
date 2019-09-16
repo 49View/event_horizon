@@ -118,6 +118,7 @@ public:
     void useSkybox( bool _value );
     void useSSAO( bool _value );
     void useDOF( bool _value );
+    void useMotionBlur( bool _value );
     void changeTime( const std::string& _time );
     floata& skyBoxDeltaInterpolation();
 

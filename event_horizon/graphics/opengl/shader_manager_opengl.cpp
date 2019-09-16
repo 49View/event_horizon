@@ -644,13 +644,15 @@ void ShaderManager::touchProgram( const ShaderProgramDesc& sb ) {
     mProgramsToReload.emplace_back( sb );
 }
 
-void ShaderManager::reloadDirtyPrograms() {
-    if ( mProgramsToReload.empty() ) return;
+bool ShaderManager::reloadDirtyPrograms() {
+    if ( mProgramsToReload.empty() ) return false;
 
     for ( const auto& pd : mProgramsToReload ) {
         loadProgram( pd );
     }
+
     mProgramsToReload.clear();
+    return true;
 }
 
 bool ShaderManager::injectDefine( const std::string& _shaderName, Shader::Type stype, const std::string& _id, const std::string& _define, const std::string& _value ) {

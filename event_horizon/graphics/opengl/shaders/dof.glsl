@@ -22,11 +22,11 @@ const int maxringsamples = rings * samples;
 
 bool  manualdof = true; // manual dof calculation
 float ndofstart = 0.0; // near dof blur start
-float ndofdist = 4.0; // near dof blur falloff distance
-float fdofstart = 5.0; // far dof blur start
-float fdofdist = 5.0; // far dof blur falloff distance
+float ndofdist = 10.0; // near dof blur falloff distance
+float fdofstart = 10000.0; // far dof blur start
+float fdofdist = 10000.0; // far dof blur falloff distance
 
-float CoC = 100.03; //circle of confusion size in mm (35mm film = 0.03mm)
+float CoC = 0.03; //circle of confusion size in mm (35mm film = 0.03mm)
 
 bool autofocus = false;
 //use autofocus in shader - use with focusCoords
@@ -36,11 +36,11 @@ vec2 focusCoords = vec2(1.0, 1.0);
 // autofocus point on screen (0.0,0.0 - left lower corner, 1.0,1.0 - upper right)
 // if center of screen use vec2(0.5, 0.5);
 
-float maxblur = 2.0;
+float maxblur = 2.5;
 //clamp value of max blur (0.0 = no blur, 1.0 default)
 
-float threshold = 1.5; // highlight threshold;
-float gain = 1.0; // highlight gain;
+float threshold = 2.15; // highlight threshold;
+float gain = 2.0; // highlight gain;
 float bias = 0.0; // bokeh edge bias
 float fringe = 0.18; // bokeh chromatic aberration / fringing
 bool noise = false; //use noise instead of pattern for sample dithering
@@ -48,7 +48,7 @@ bool noise = false; //use noise instead of pattern for sample dithering
 const float dithering = 0.00004;
 const float namount = dithering; //dither amount
 
-bool depthblur = true; // blur the depth buffer
+bool depthblur = false; // blur the depth buffer
 float dbsize = 1.25; // depth blur size
 
 /*

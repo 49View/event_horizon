@@ -429,7 +429,9 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
         if ( isDirty(S::PBR) ) {
             addShadowMaps();
 
-            renderDepthMap();
+            if( useSSAO() || useDOF() || useMotionBlur() ) {
+                renderDepthMap();
+            }
             renderSSAO();
 
             cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
@@ -512,8 +514,21 @@ void RLTargetPBR::useSSAO( bool _flag ) {
     mbUseSSAO = _flag;
 }
 
+bool RLTargetPBR::useDOF() const {
+    return mbUseDOF;
+}
+
 void RLTargetPBR::useDOF( bool _flag ) {
     mbUseDOF = _flag;
+}
+
+bool RLTargetPBR::useMotionBlur() const {
+    return mbUseMotionBlur;
+}
+
+void RLTargetPBR::useMotionBlur( bool _flag ) {
+    mbUseMotionBlur = _flag;
+    setDirtDelay( _flag ? 2 : 1 );
 }
 
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {

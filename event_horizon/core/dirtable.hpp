@@ -8,32 +8,47 @@
 #include <unordered_map>
 
 class Dirtable {
-    bool mIsDirty = false;
-    std::unordered_map<std::string, bool> mSubDirts;
+    uint64_t mIsDirty = 0;
+    uint64_t mFrameDelays = 1;
+    std::unordered_map<std::string, uint64_t> mSubDirts;
 public:
+    void setDirtDelay( uint64_t _delay ) {
+        mFrameDelays = _delay;
+    }
+
     void setDirty( bool _flag ) {
-        mIsDirty = _flag;
+        if ( _flag ) {
+            mIsDirty = mFrameDelays;
+        } else {
+            if ( mIsDirty > 0 ) mIsDirty--;
+        }
     }
 
     void setDirtyCumulative( bool _flag ) {
-        mIsDirty |= _flag;
+        if ( _flag ) mIsDirty = mFrameDelays;
     }
 
     [[nodiscard]] bool isDirty() const {
-        return mIsDirty;
+        return mIsDirty > 0;
     }
 
     void setDirty( const std::string& _key, bool _flag ) {
-        mSubDirts[_key] = _flag;
+        if ( _flag ) {
+            mSubDirts[_key] = mFrameDelays;
+        } else {
+            if ( mSubDirts[_key] > 0 ) mSubDirts[_key] = mSubDirts[_key]-1;
+        }
     }
 
     void setDirtyCumulative( const std::string& _key, bool _flag ) {
-        mSubDirts[_key] |= _flag;
+        if ( _flag ) {
+            mSubDirts[_key] = mFrameDelays;
+        }
     }
 
     [[nodiscard]] bool isDirty(const std::string& _key) const {
         if ( auto it = mSubDirts.find(_key); it != mSubDirts.end() ) {
-            return it->second;
+            return it->second > 0;
         }
         return false;
     }

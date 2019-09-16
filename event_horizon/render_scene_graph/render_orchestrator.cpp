@@ -423,6 +423,7 @@ void RenderOrchestrator::useSSAO( bool _value ) {
         pbrTarget->useSSAO( _value );
     }
     rr.useSSAO(_value);
+    setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
 }
 
 void RenderOrchestrator::useDOF( bool _value ) {
@@ -430,6 +431,14 @@ void RenderOrchestrator::useDOF( bool _value ) {
         pbrTarget->useDOF( _value );
     }
     rr.useDOF(_value);
+    setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+}
+
+void RenderOrchestrator::useMotionBlur( bool _value ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->useMotionBlur( _value );
+    }
+    rr.useMotionBlur(_value);
     setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
 }
 
