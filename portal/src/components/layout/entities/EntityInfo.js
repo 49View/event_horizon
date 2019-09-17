@@ -16,16 +16,19 @@ const EntityInfo = ({ currentEntity }) => {
       ? moment(currentEntity.entity.metadata.lastUpdatedDate).fromNow()
       : "Never";
 
+  const hs = currentEntity ? currentEntity.entity.metadata.hash : "";
+  const pad = 6;
+  const hashContrived = currentEntity
+    ? hs.slice(0, pad) + "..." + hs.slice(hs.legnth - pad, pad)
+    : hs;
+
   return (
     <div className="entity-info-a">
       <p>
         <i className="fas fa-info-circle"> </i> Info
       </p>
       <div className="entity-info-c">
-        <span
-          className="metaInfiTitle small text-pale"
-          style={{ minWidth: "300px" }}
-        >
+        <span className="metaInfiTitle small text-pale">
           <i className="fas fa-user" />
           &nbsp;owner&nbsp;
         </span>
@@ -35,10 +38,7 @@ const EntityInfo = ({ currentEntity }) => {
             : currentEntity.entity.project}
         </span>
         <br />
-        <span
-          className="metaInfiTitle small text-pale"
-          style={{ minWidth: "300px" }}
-        >
+        <span className="metaInfiTitle small text-pale">
           <i className="fas fa-clock" />
           &nbsp;created&nbsp;
         </span>
@@ -59,7 +59,7 @@ const EntityInfo = ({ currentEntity }) => {
           &nbsp;hash
         </span>
         <span className="metaInfoValueNoOff extra-small text-secondary">
-          {currentEntity.entity.metadata.hash}
+          {hashContrived}
         </span>
         <br />
       </div>

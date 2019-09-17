@@ -9,12 +9,10 @@ import GUIEditor from "./entities/GUIEditor";
 import GeomEditor from "./entities/GeomEditor";
 import MaterialEditor from "./entities/MaterialEditor";
 import { wasmSetCanvasSize } from "../../actions/wasm";
-import EntityUpdateContent from "./entities/EntityUpdateContent";
 import EntityMetaSection from "./entities/EntityMetaSection";
 import RenderParamsToolbar from "./entities/RenderParamsToolbar";
 import { getFullEntity } from "../../actions/entities";
 import {
-  groupHasUpdateFacility,
   groupHasMetadataSection,
   GroupGeom,
   GroupMaterial,
@@ -34,7 +32,7 @@ const containerClassFromGroup = (currEntity, group) => {
       };
     case GroupMaterial:
       return {
-        mainContainerClass: "GeomEditorRenderGrid",
+        mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <MaterialEditor />
       };
     case GroupImage:
@@ -86,7 +84,7 @@ const DashboardProject = ({
     group
   );
 
-  const bUseEntityUpdate = groupHasUpdateFacility(currentEntity, group);
+  // const bUseEntityUpdate = groupHasUpdateFacility(currentEntity, group);
   const bShowMetaSection = groupHasMetadataSection(currentEntity, group);
 
   if (canvasContainer.current) {
@@ -94,10 +92,18 @@ const DashboardProject = ({
     store.dispatch(wasmSetCanvasSize(rect));
   }
 
+  const entityName = (
+    <div className="source_tabs-a">
+      <div className="source_tabs-internal">
+        {currentEntity && currentEntity.entity.metadata.name}
+      </div>
+    </div>
+  );
+
   const mainEditorDiv = (
     <div className={mainContainerClass}>
+      {entityName}
       <RenderParamsToolbar />
-      {bUseEntityUpdate && <EntityUpdateContent />}
       <div className="EntryEditorRender" ref={canvasContainer}></div>
       {currentEntity && mainContainerDiv}
       {bShowMetaSection && <EntityMetaSection />}

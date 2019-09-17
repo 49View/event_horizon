@@ -36,14 +36,10 @@ const EntityTags = ({ currentEntity, tags, addTagsToEntity }) => {
 
   return (
     <div className="entity-tags-a">
-      <p className="leftPadded">
-        <i className="fas fa-tags"> </i> Tags
-        <a onClick={e => refreshTagsFromEntityName(e)} href="#!">
-          <span className="rightFloatPadded">
-            <i className="fas fa-redo" />
-          </span>
-        </a>
-      </p>
+      <i className="fas fa-tags"> </i> Tags
+      <a className="px-2" onClick={e => refreshTagsFromEntityName(e)} href="#!">
+        <i className="fas fa-redo" />
+      </a>
       <ReactTags
         tags={tags}
         // suggestions={tags.suggestions}

@@ -498,16 +498,36 @@ input#search-bar:hover {
 }
 
 .entity-tags-a {
-  grid-area: entity-tags;
-  justify-self: center;
-  align-self: start;
-  margin-top: 10px;
+  grid-area: meta_tags;
+  margin: 0.33rem 0 0.33rem 0.33rem;
+  padding: 0.3rem;
+  background-image: linear-gradient(
+    rgba(50, 118, 248, 0.1),
+    rgba(41, 166, 244, 0.1)
+  );
+  overflow: auto;
 }
 
 .entity-info-a {
-  grid-area: entity-info;
-  justify-self: stretch;
-  align-self: start;
+  grid-area: meta_info;
+  margin: 0.33rem 0 0.33rem 0.33rem;
+  padding: 0.33rem;
+  overflow: auto;
+  background-image: linear-gradient(
+    rgba(50, 118, 248, 0.1),
+    rgba(41, 166, 244, 0.1)
+  );
+}
+
+.entity-control-a {
+  grid-area: meta_controls;
+  margin: 0.33rem;
+  padding: 0.33rem;
+  overflow: auto;
+  background-image: linear-gradient(
+    rgba(50, 118, 248, 0.1),
+    rgba(41, 166, 244, 0.1)
+  );
 }
 
 .nodeViewer-a {
@@ -751,8 +771,9 @@ input#search-bar:hover {
   border: 1px solid #d1d1d140;
   border-radius: 4px;
   cursor: text;
-  margin: 10px 0px;
+  margin: 0.5rem 0px;
   padding: 5px 5px;
+  overflow: auto;
 }
 
 .deleteentity-a {
@@ -822,6 +843,21 @@ li.app_controls-a {
   overflow: auto;
   display: flex;
   flex-direction: column-reverse;
+  border-radius: 5px;
+  border: 1px solid var(--middle-grey-color);
+}
+
+.metadata_controls-a {
+  grid-area: app_controls;
+  display: grid;
+  grid-template-columns: 50% 25% 25%;
+  grid-template-rows: 100%;
+  grid-template-areas: "meta_tags meta_info meta_controls";
+  background-color: #333;
+  align-self: start;
+  justify-self: start;
+  width: 100%;
+  height: 100%;
   border-radius: 5px;
   border: 1px solid var(--middle-grey-color);
 }
@@ -1045,6 +1081,19 @@ li.app_controls-a {
 }
 .py-3 {
   padding: 3rem 0;
+}
+
+.px {
+  padding: 0 0.5rem;
+}
+.px-1 {
+  padding: 0 1rem;
+}
+.px-2 {
+  padding: 0 2rem;
+}
+.px-3 {
+  padding: 0 3rem;
 }
 
 /* Margin */
@@ -1488,11 +1537,12 @@ input[type="color"]:active {
 }
 
 .react-tags {
-  position: relative;
-  padding: 6px 0 0 6px;
-  border: 1px solid #d1d1d140;
-  border-radius: 4px;
-  margin-top: 10px;
+  display: inline;
+  /* position: relative; */
+  padding: 3% 0 0 3%;
+  /* border: 1px solid #d1d1d140; */
+  /* border-radius: 4px; */
+  /* margin-top: 10px; */
 
   /* shared font styles */
   color: var(--primary-color);

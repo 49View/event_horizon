@@ -106,11 +106,6 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
 
   return (
     <Fragment>
-      <div className="source_tabs-a">
-        <div className="source_tabs-internal">
-          {currentEntity.entity.metadata.name}
-        </div>
-      </div>
       <div className="appdataquad">
         <CodeMirror
           value={fileC}

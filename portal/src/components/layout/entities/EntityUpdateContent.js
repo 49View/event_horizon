@@ -23,7 +23,7 @@ const EntityUpdateContent = ({ currentEntity }) => {
       <div {...getRootProps({ className: "dropzone dropzoneNoHMargins" })}>
         <input {...getInputProps()} />
         <span>
-          <i className="fas fa-upload" /> &nbsp; Replace Asset Content
+          <i className="fas fa-upload" /> &nbsp; Replace Content
         </span>
       </div>
     </div>

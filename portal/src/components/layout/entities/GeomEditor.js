@@ -160,12 +160,6 @@ const GeomEditor = ({
           onClickCallback={replaceMaterial}
         />
       )}
-      <div className="source_tabs-a">
-        <div className="source_tabs-internal">
-          {currentEntity.entity.metadata.name}
-        </div>
-      </div>
-
       <InObjectMaterials />
     </Fragment>
   );
