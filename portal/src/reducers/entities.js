@@ -11,6 +11,7 @@ import {
   GET_ENTITY,
   SET_ENTITY_APP_NAME,
   GET_ENTITY_LOAD,
+  GET_ENTITY_LIST_PRELOAD,
   SET_ENTITY_NODES,
   SET_MODAL_SELECTED_ENTITY_NAME,
   CLOSE_ENTITIES_MODAL,
@@ -80,7 +81,7 @@ export default function(state = initialState, action) {
         ...state,
         entries: payload.data,
         entriesFiltered: payload.data,
-        group: payload.group,
+        // group: payload.group,
         loading: false
       };
     case RESET_CURRENT_ENTITY:
@@ -145,6 +146,14 @@ export default function(state = initialState, action) {
         loading: false
       };
 
+    case GET_ENTITY_LIST_PRELOAD:
+      return {
+        ...state,
+        loading: true,
+        currentTags: [],
+        entriesFiltered: [],
+        entries: []
+      };
     case GET_ENTITY_LOAD:
       return {
         ...state,

@@ -65,7 +65,7 @@ body {
   position: absolute;
   background-color: black;
   /* border: 2px solid var(--secondary-alt-color); */
-  z-index: 50000;
+  z-index: 500;
 }
 
 .backdropModal {
@@ -89,14 +89,14 @@ body {
 }
 
 .logofont {
-  font-family: "Righteous", cursive;
+  font-family: "Righteous";
 }
 
 .navbareh-a {
   grid-area: navbareh;
   align-self: center;
   justify-self: start;
-  font-family: "Righteous", cursive;
+  font-family: "Righteous";
   font-size: 1.3rem;
   padding-left: 1.5%;
 }
@@ -428,7 +428,7 @@ input#search-bar:hover {
   background-color: var(--dark-color);
   flex-direction: column;
   padding: 0.6rem;
-  margin: 2.5% 5px;
+  margin: 2.5% 0px 5px 5px;
   float: left;
   border-radius: 4px;
   cursor: pointer;
@@ -478,10 +478,9 @@ input#search-bar:hover {
 }
 
 .renderParams-a {
-  grid-area: renderParams;
+  grid-area: render_controls;
   justify-self: start;
   align-self: center;
-  padding-left: 8px;
 }
 
 .nameValue-a {
@@ -493,7 +492,7 @@ input#search-bar:hover {
 }
 
 .entity-drag-a {
-  grid-area: drag;
+  grid-area: source_controls;
   justify-self: stretch;
   align-self: stretch;
 }
@@ -512,12 +511,15 @@ input#search-bar:hover {
 }
 
 .nodeViewer-a {
-  grid-area: nodeViewer;
+  grid-area: source;
+  height: 100%;
+  display: block;
+  float: left;
   justify-self: stretch;
   align-self: start;
   padding: 5px;
-  margin: 0px 7px;
-  height: 100%;
+  /* margin: 0px 7px; */
+  /* height: 100%; */
   /* border: 1px solid #d1d1d140; */
   border-radius: 4px;
   overflow-y: auto;
@@ -525,7 +527,9 @@ input#search-bar:hover {
 }
 
 .titleMargin {
-  margin: 0px 2px;
+  margin: 1%;
+  width: 100%;
+  float: left;
 }
 
 .matName-a {
@@ -685,11 +689,13 @@ input#search-bar:hover {
 
 .smallObjectMaterial {
   display: grid;
-  margin: 10px 0px;
-  padding: 4px 8px;
-  padding-top: 2px;
-  grid-template-columns: repeat(6, 15.5%);
-  grid-template-rows: 32px 22px repeat(4, 16px) 32px 8px;
+  float: left;
+  width: 48%;
+  margin: 1%;
+  padding: 1%;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 28px 32px repeat(4, 24px) 0.166fr 12px;
+  /* grid-template-rows: 0.2% 0.14% repeat(4, 0.1%) 0.2% 0.05%; */
   grid-template-areas:
     "matName matName matName matName matName replaceMat"
     "baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorPicker"
@@ -699,14 +705,15 @@ input#search-bar:hover {
     "opacityLabel opacityLabel opacityLabel opacitySlider opacitySlider opacitySlider"
     "baseTexture normalTexture metallicTexture roughnessTexture aoTexture emissiveTexture"
     "baseTextureLabel normalTextureLabel metallicTextureLabel roughnessTextureLabel aoTextureLabel emissiveTextureLabel";
-  grid-gap: 4px 3px;
+  grid-gap: 4px;
   align-items: center;
   justify-items: start;
   /* border: solid 1px rgba(23, 162, 184, 0.55); */
   background-image: linear-gradient(
     rgba(23, 162, 244, 0.25),
-    rgba(23, 162, 184, 0)
+    rgba(23, 162, 184, 0.1)
   );
+  border: solid 1px rgba(23, 162, 184, 0.05);
 }
 
 .materialParams {
@@ -788,16 +795,15 @@ input#search-bar:hover {
 .AppEditorRenderGrid {
   display: grid;
   grid-template-columns: 40% 60%;
-  grid-template-rows: 30px 1.5fr 0.5fr 31px;
+  grid-template-rows: 31px 1.5fr 0.5fr 31px;
   grid-template-areas:
-    "source_tabs render"
+    "source_tabs render_controls"
     "source render"
     "source app_controls"
     "source_controls app_controls";
-  grid-gap: 0.5%;
+  grid-gap: 3px 5px;
   align-items: center;
   justify-items: center;
-  background: var(--dark-color);
   height: 100%;
 }
 
@@ -807,6 +813,7 @@ li.app_controls-a {
 
 .app_controls-a {
   grid-area: app_controls;
+  background-color: #333;
   align-self: start;
   justify-self: start;
   width: 100%;
@@ -816,11 +823,19 @@ li.app_controls-a {
   display: flex;
   flex-direction: column-reverse;
   border-radius: 5px;
-  border: 3px solid var(--middle-grey-color);
+  border: 1px solid var(--middle-grey-color);
 }
 
 .source_tabs-a {
   grid-area: source_tabs;
+  background: var(--dark-color);
+  width: 100%;
+  height: 100%;
+}
+
+.source_tabs-internal {
+  text-align: center;
+  line-height: 1.9rem;
 }
 
 .source_controls-a {
@@ -1456,7 +1471,7 @@ input[type="color"]:active {
   align-items: center;
   padding: 7px;
   border-width: 1px;
-  border-radius: 5px%;
+  border-radius: 5px;
   border-color: var(--light-color);
   border-style: dashed;
   /* background-color: #fafafa;

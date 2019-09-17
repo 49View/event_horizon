@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { showConfirmAlert } from "../../../actions/confirmalert";
@@ -12,7 +12,7 @@ const EntityMetaSection = ({ showConfirmAlert }) => {
   };
 
   return (
-    <Fragment>
+    <div className="app_controls-a">
       <EntityTags />
       <EntityInfo />
       <ConfirmAlert />
@@ -25,7 +25,7 @@ const EntityMetaSection = ({ showConfirmAlert }) => {
           onClick={e => onDeleteEntity(e)}
         />
       </div>
-    </Fragment>
+    </div>
   );
 };
 

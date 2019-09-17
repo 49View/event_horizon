@@ -9,14 +9,13 @@ import {
   ENTITY_ERROR,
   DELETE_ENTITY,
   GET_ENTITY,
-  GET_APPS,
   SET_ENTITY_APP_NAME,
   GET_ENTITY_LOAD,
+  GET_ENTITY_LIST_PRELOAD,
   SET_ENTITY_NODES,
   REPLACE_ENTITY_TAGS,
   REPLACE_MATERIAL,
   CHANGE_MATERIAL_COLOR,
-  RESET_CURRENT_ENTITY,
   LOADING_FINISHED,
   CLOSE_ENTITIES_MODAL
 } from "./types";
@@ -33,18 +32,13 @@ import {
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
   try {
     dispatch({
-      type: GET_ENTITY_LOAD,
+      type: GET_ENTITY_LIST_PRELOAD,
       payload: null
     });
 
     let res = null;
     let dtype = GET_ENTITIES;
-    if (group === GroupApp) {
-      res = await axios.get(`/appdata/list/${project}`);
-      dtype = GET_APPS;
-    } else {
-      res = await axios.get(`/entities/metadata/list/${group}/${project}`);
-    }
+    res = await axios.get(`/entities/metadata/list/${group}/${project}`);
     dispatch({
       type: dtype,
       payload: { data: res.data, group: group }
@@ -59,10 +53,10 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
 
 export const changeEntitiesGroup = (group, project) => async dispatch => {
   try {
-    dispatch({
-      type: RESET_CURRENT_ENTITY,
-      payload: null
-    });
+    // dispatch({
+    //   type: RESET_CURRENT_ENTITY,
+    //   payload: null
+    // });
     dispatch(getEntitiesOfGroup(group, project));
   } catch (err) {
     dispatch({

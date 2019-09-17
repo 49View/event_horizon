@@ -14,7 +14,6 @@ import EntityMetaSection from "./entities/EntityMetaSection";
 import RenderParamsToolbar from "./entities/RenderParamsToolbar";
 import { getFullEntity } from "../../actions/entities";
 import {
-  groupHasRenderToolbar,
   groupHasUpdateFacility,
   groupHasMetadataSection,
   GroupGeom,
@@ -30,7 +29,7 @@ const containerClassFromGroup = (currEntity, group) => {
   switch (group) {
     case GroupGeom:
       return {
-        mainContainerClass: "GeomEditorRenderGrid",
+        mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <GeomEditor />
       };
     case GroupMaterial:
@@ -72,9 +71,10 @@ const DashboardProject = ({
 
   useEffect(() => {
     // Shortcut to go straight to app/coding from the outset for most projects
-    if (group === GroupScript && entities.length === 1 && !currentEntity) {
+    if (group === "" && entities.length === 1 && !currentEntity) {
       store.dispatch(getFullEntity(entities[0]));
     }
+    console.log("Invalidate: dashboard project");
   }, [currentEntity, entities, group]);
 
   if (!userData || !userData.project) {
@@ -86,7 +86,6 @@ const DashboardProject = ({
     group
   );
 
-  const bUseRenderParams = groupHasRenderToolbar(currentEntity, group);
   const bUseEntityUpdate = groupHasUpdateFacility(currentEntity, group);
   const bShowMetaSection = groupHasMetadataSection(currentEntity, group);
 
@@ -97,7 +96,7 @@ const DashboardProject = ({
 
   const mainEditorDiv = (
     <div className={mainContainerClass}>
-      {bUseRenderParams && <RenderParamsToolbar />}
+      <RenderParamsToolbar />
       {bUseEntityUpdate && <EntityUpdateContent />}
       <div className="EntryEditorRender" ref={canvasContainer}></div>
       {currentEntity && mainContainerDiv}

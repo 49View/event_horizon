@@ -12,6 +12,7 @@ import { fillMaterialParams } from "../../../utils/materialUtils";
 import { GroupMaterial } from "../../../utils/utils";
 
 const GeomEditor = ({
+  currentEntity,
   currentEntityNodes,
   smallEntityModalOn,
   changeMaterialPropery
@@ -159,18 +160,26 @@ const GeomEditor = ({
           onClickCallback={replaceMaterial}
         />
       )}
+      <div className="source_tabs-a">
+        <div className="source_tabs-internal">
+          {currentEntity.entity.metadata.name}
+        </div>
+      </div>
+
       <InObjectMaterials />
     </Fragment>
   );
 };
 
 GeomEditor.propTypes = {
+  currentEntity: PropTypes.object,
   currentEntityNodes: PropTypes.object,
   smallEntityModalOn: PropTypes.bool,
   changeMaterialPropery: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
+  currentEntity: state.entities.currentEntity,
   currentEntityNodes: state.entities.currentEntityNodes,
   smallEntityModalOn: state.entities.smallEntityModalOn
 });

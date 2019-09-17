@@ -22,8 +22,9 @@ const WasmCanvas = ({
       loadWasmComplete("editor", canvas.current, userToken, userData.session);
       setCount(1);
     }
-  }, [canvas, count, userToken, userData]);
+  }, [group, currentEntity, canvas, count, userToken, userData]);
 
+  // console.log("Invalidated: canvas");
   const canvasVisibility =
     currentEntity &&
     (group === GroupScript || group === GroupGeom || group === GroupMaterial)
@@ -41,9 +42,9 @@ const WasmCanvas = ({
   const canvasClientSizeY =
     (canvasSizeYNum * (window.devicePixelRatio || 1)).toString() + "px";
 
-  const canvasPadding = "5px";
+  const canvasPadding = "1px";
   const canvasMargin = "0px";
-  const canvasRadius = "10px";
+  const canvasRadius = "5px";
 
   const canvasStyle = {
     position: "absolute",

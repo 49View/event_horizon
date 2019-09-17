@@ -53,6 +53,8 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
     getAll
   ]);
 
+  if (!currentEntity) return <Fragment></Fragment>;
+
   if (consoleArrayLogs.length < wasmLogs.length) {
     let newConsoleLog = consoleArrayLogs;
     for (let t = consoleArrayLogs.length; t < wasmLogs.length; t++) {
@@ -104,7 +106,11 @@ const AppEditor = ({ currentEntity, userData, wasmLogs, wasmOutputDirty }) => {
 
   return (
     <Fragment>
-      <div className="source_tabs-a">{currentEntity.entity.metadata.name}</div>
+      <div className="source_tabs-a">
+        <div className="source_tabs-internal">
+          {currentEntity.entity.metadata.name}
+        </div>
+      </div>
       <div className="appdataquad">
         <CodeMirror
           value={fileC}
