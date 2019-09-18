@@ -63,7 +63,7 @@ SunBuilder::SunBuilder() {
 
 	setCurrentLocation( "Kingston" );
 
-	buildFromString( "spring 6:20" );
+	buildFromString( "spring sunriseEnd" );
 
 	goldenHourGradient = std::make_shared<RawImage>(golden_color_png, golden_color_png_len);
 }
@@ -110,7 +110,7 @@ void SunBuilder::moveSun( const DateTime& date, const GeoPosition& location ) {
 
     auto lSunriseColor = V4f::XTORGBA("#C6FFDD") ;
     auto lNoonColor = V4f::XTORGBA("#FBD786");
-    auto lSunsetColor = V4f::XTORGBA("#f7797d");
+    auto lSunsetColor = V4f::XTORGBA("#f7999d");
 
     auto times = sunPostionCalculator.getTimes( date, mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
     auto timesDayLater = sunPostionCalculator.getTimes( date.addSeconds(86400), mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
@@ -143,7 +143,8 @@ void SunBuilder::moveSun( const DateTime& date, const GeoPosition& location ) {
     checkTimesRange( currTimeStamp, std::get<0>(sunset), std::get<0>(nadirNextDay), lSunsetColor, nightColor,mSunRadiance );
 
     float sunMult = max( 0.0f, ghr + mSunPosition.altitudeRad );
-    mSunRadiance *= V4f{V3f{sunMult}, ghr};
+
+    mSunRadiance *= V4f{V3f{sunMult}, 1.0f + ( 1.0f - ghr)};
 //    LOGRS( "Current " << date << " Golden Hour: " << ghr << "Altitude: " << mSunPosition.altitudeRad );
 }
 

@@ -216,7 +216,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         float pldistance = length( plmfrag );
         vec3 L = normalize( plmfrag );
         float plattenuation = 1.0 / (pldistance*pldistance );
-        vec3 lradiance = ((u_pointLightIntensity[i]+(u_sunRadiance.xyz))) * plattenuation * (1.0+translucencyV);
+        vec3 lradiance = (((u_pointLightIntensity[i])*(u_sunRadiance.xyz*u_sunRadiance.w) + vec3(1.0-(1.0-u_sunRadiance.w)) )) * plattenuation * (1.0+translucencyV);
         Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
     }
 
@@ -235,10 +235,12 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     v_shadowmap_coord3Biases.z -= u_shadowParameters[0];
     // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
-    float overBurnedfactor = 0.25 * u_shadowParameters[1];
-    for ( int i = 0; i < 4; i++ ) {
-        int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;        
-        visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + poissonDisk[index] / 1024.0, v_shadowmap_coord3Biases.z ) ) * overBurnedfactor;//* tan(acos(1.0-nlAngle));// * u_timeOfTheDay;
+    if ( v_shadowmap_coord3Biases.z > 0.0 ) {
+        float overBurnedfactor = 0.25 * u_shadowParameters[1];
+        for ( int i = 0; i < 4; i++ ) {
+            int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;        
+            visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + poissonDisk[index] / 1024.0, v_shadowmap_coord3Biases.z ) ) * overBurnedfactor;//* tan(acos(1.0-nlAngle));// * u_timeOfTheDay;
+        }
     }
 #end_code
 
