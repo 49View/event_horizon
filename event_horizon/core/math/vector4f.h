@@ -278,6 +278,14 @@ public:
 		return Vector4f( mX + rhs, mY + rhs, mZ + rhs, mW + rhs );
 	}
 
+    Vector4f operator+=( const Vector4f& rhs ) {
+        mX += rhs.mX;
+        mY += rhs.mY;
+        mZ += rhs.mZ;
+        mW += rhs.mW;
+        return *this;
+    }
+
 	Vector4f operator-( const Vector4f& rhs ) const {
 		return Vector4f( mX - rhs.mX, mY - rhs.mY, mZ - rhs.mZ, mW - rhs.mW );
 	}

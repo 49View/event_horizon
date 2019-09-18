@@ -127,6 +127,7 @@ std::unordered_map<std::string, DateTime> SunCalculations::getTimes( DateTime da
 	std::unordered_map<std::string, DateTime> result;
 
 	result["solarNoon"] = DateTime::fromJulianDays( Jnoon );
+	result["noon"] = result["solarNoon"];
 	result["nadir"] = DateTime::fromJulianDays( Jnoon - 0.5 );
 
 	for ( auto time : times ) {

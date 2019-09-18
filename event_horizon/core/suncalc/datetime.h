@@ -10,12 +10,20 @@ public:
 	DateTime();
 	DateTime( int year, int month, int day, int hour = 0, int minutes = 0, int seconds = 0 );
 
-	double getJulianDays();
-	std::string toDateString();
-	std::string toLongString();
-	std::string toString( std::string format );
-	int getHour() const;
-	DateTime addSeconds( int seconds, bool incrementDay = true );
+	double getJulianDays() const;
+	double getTimeStamp() const ;
+	std::string toDateString() const ;
+	std::string toLongString() const ;
+	std::string toLongStringWithTimeStamp() const ;
+	std::string toString( std::string format ) const;
+	[[nodiscard]] int getHour() const;
+	[[nodiscard]] int getMinutes() const;
+	[[nodiscard]] int getSeconds() const;
+    void setHour( int _h );
+    void setMinutes( int _h );
+    void setSeconds( int _h );
+    void setHourMinutesSeconds( int _h, int _m = 0, int _s = 0 );
+	DateTime addSeconds( int seconds, bool incrementDay = true ) const;
 
 private:
 	DateTime( time_t initValue );
@@ -29,6 +37,8 @@ private:
 public:
 	static DateTime fromJulianDays( double days );
 	static DateTime from( DateTime defaultDate, int year = -1, int month = -1, int day = -1, int hour = -1, int minutes = -1, int seconds = -1 );
+
+    friend std::ostream& operator<<( std::ostream& o, const DateTime& val );
 
 private:
 	static tm getLocal( const time_t& dateValue );

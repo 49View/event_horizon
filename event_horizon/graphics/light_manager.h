@@ -108,7 +108,7 @@ public:
 	void setLightsIntensity( float _intensity );
 
 	void setUniforms( const Vector3f& _cameraPos, std::shared_ptr<ShadowMapManager> smm,
-	                  const V3f& _sunRadiance, float _goldenHour );
+	                  const V4f& _sunRadiance );
 	void setUniforms_r();
 	void generateUBO( std::shared_ptr<ShaderManager> sm );
 	void update( float timeStamp );

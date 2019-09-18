@@ -417,7 +417,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.setCameraUniforms( cameraRig->getCamera() );
-    rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor(), mSunBuilder->GoldenHour() );
+    rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor() );
 
     bool bAddProbe = mSkybox && mSkybox->precalc( 0.0f );
     setDirtyCumulative( S::PBR, cameraRig->getCamera()->isDirty() || bAddProbe );

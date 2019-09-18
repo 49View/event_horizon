@@ -31,7 +31,7 @@ tm DateTime::getGmt( const time_t& time ) {
 	return tm_snapshot;
 }
 
-DateTime DateTime::addSeconds( int seconds, bool incrementDay /*= true */ ) {
+DateTime DateTime::addSeconds( int seconds, bool incrementDay /*= true */ ) const {
 	time_t newValue = value + seconds;
 
 	if ( incrementDay || ( newValue - value ) < secondsPerDayTimeT )
@@ -82,21 +82,27 @@ DateTime DateTime::fromJulianDays( double days ) {
 	return DateTime( value );
 }
 
-double DateTime::getJulianDays() {
-	//auto gmt = getGmt(value);
-	//auto gmtValue = mktime(&gmt);
+double DateTime::getJulianDays() const {
 	return ( value / secondsPerDay ) + J1970;
 }
 
-std::string DateTime::toDateString() {
+double DateTime::getTimeStamp() const {
+    return static_cast<double>(value);
+}
+
+std::string DateTime::toDateString() const {
 	return toString( "%d/%m/%Y" );
 }
 
-std::string DateTime::toLongString() {
+std::string DateTime::toLongString() const {
 	return toString( "%d/%m/%Y %H:%M:%S" );
 }
 
-std::string DateTime::toString( std::string format ) {
+std::string DateTime::toLongStringWithTimeStamp() const {
+    return toString( "%d/%m/%Y %H:%M:%S" ) + " " + std::to_string(value);
+}
+
+std::string DateTime::toString( std::string format ) const {
 	char mbstr[100];
 	auto t = getLocal( value );
 	if ( std::strftime( mbstr, sizeof( mbstr ), format.c_str(), &t ) ) {
@@ -109,4 +115,45 @@ std::string DateTime::toString( std::string format ) {
 int DateTime::getHour() const {
 	auto t = getLocal( value );
 	return t.tm_hour;
+}
+
+int DateTime::getMinutes() const {
+    auto t = getLocal( value );
+    return t.tm_min;
+}
+
+int DateTime::getSeconds() const {
+    auto t = getLocal( value );
+    return t.tm_sec;
+}
+
+void DateTime::setHourMinutesSeconds( int _h, int _m, int _s ) {
+    auto t = getLocal( value );
+    t.tm_hour = _h;
+    t.tm_min = _m;
+    t.tm_sec = _s;
+    value = mktime( &t );
+}
+
+void DateTime::setHour( int _h ) {
+    auto t = getLocal( value );
+    t.tm_hour = _h;
+    value = mktime( &t );
+}
+
+void DateTime::setMinutes(int _h ) {
+    auto t = getLocal( value );
+    t.tm_min = _h;
+    value = mktime( &t );
+}
+
+void DateTime::setSeconds(int _h ) {
+    auto t = getLocal( value );
+    t.tm_sec = _h;
+    value = mktime( &t );
+}
+
+std::ostream& operator<<( std::ostream& o, const DateTime& val ) {
+    o << val.toLongStringWithTimeStamp();
+    return o;
 }

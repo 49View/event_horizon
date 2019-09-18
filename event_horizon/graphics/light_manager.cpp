@@ -37,7 +37,6 @@ LightManager::LightManager() {
     mLigthingUniform->setUBOStructure( UniformNames::sunRadiance, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::mvpShadowMap, 64 );
     mLigthingUniform->setUBOStructure( UniformNames::mvpMatrixDepthBias, 64 );
-    mLigthingUniform->setUBOStructure( UniformNames::timeOfTheDay, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::numPointLights, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::hdrExposures, 16 );
     mLigthingUniform->setUBOStructure( UniformNames::shadowParameters, 16 );
@@ -103,8 +102,7 @@ void LightManager::toggleLightsOnOff() {
 
 void LightManager::setUniforms( const Vector3f& _cameraPos,
                                 std::shared_ptr<ShadowMapManager> smm,
-                                const V3f& _sunRadiance,
-                                float _goldenHour ) {
+                                const V4f& _sunRadiance ) {
     std::sort( mPointLights.begin(), mPointLights.end(), [_cameraPos]( const auto& a, const auto& b ) -> bool {
         return distance( a.Pos(), _cameraPos ) < distance( b.Pos(), _cameraPos );
     } );
@@ -138,13 +136,13 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     mLigthingUniform->setUBODatav( UniformNames::spotLightBeamDir, lbeamdir );
     mLigthingUniform->setUBODatav( UniformNames::outerCutOff, lbeamAngle );
     mLigthingUniform->setUBODatav( UniformNames::lightType, lType );
-    mLigthingUniform->setUBOData( UniformNames::numPointLights, numLightsClamped );
-    mLigthingUniform->setUBOData( UniformNames::timeOfTheDay, V4f{_goldenHour} );
+
     mLigthingUniform->setUBOData( UniformNames::sunDirection,  uSunDirection);// );
     mLigthingUniform->setUBOData( UniformNames::sunPosition, uSunDirection * 100000.0f );// );
     mLigthingUniform->setUBOData( UniformNames::sunRadiance, _sunRadiance );// );
     mLigthingUniform->setUBOData( UniformNames::mvpMatrixDepthBias, smm->ShadowMapMVPBias( true ));
     mLigthingUniform->setUBOData( UniformNames::mvpShadowMap, smm->ShadowMapMVP() );
+    mLigthingUniform->setUBOData( UniformNames::numPointLights, numLightsClamped );
     mLigthingUniform->setUBOData( UniformNames::hdrExposures, hdrExposures );
     mLigthingUniform->setUBOData( UniformNames::shadowParameters, shadowParameters );
     mLigthingUniform->setUBOData( UniformNames::shLightCoeffs, Matrix3f( SSH.LightCoeffs()) );

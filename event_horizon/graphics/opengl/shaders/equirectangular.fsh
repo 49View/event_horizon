@@ -4,6 +4,8 @@ out vec4 color;
 
 uniform sampler2D colorTexture;
 
+#include "lighting_uniforms.glsl"
+
 const vec2 invAtan = vec2(0.1591, 0.3183);
 vec2 SampleSphericalMap(vec3 v)
 {
@@ -17,6 +19,6 @@ void main()
 {
     vec2 uv = SampleSphericalMap(normalize(v_texCoord));
     color = texture(colorTexture, uv);
-    color.xyz = vec3(1.0) - exp(-color.xyz * 2.0);
+    color.xyz = vec3(1.0) - exp(-color.xyz * u_sunRadiance.xyz);
 }
     

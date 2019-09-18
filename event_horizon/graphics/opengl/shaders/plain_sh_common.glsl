@@ -207,7 +207,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
 
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
 
     // single point light 
     for ( int i = 0; i < u_numPointLights; i++ ) {
@@ -215,8 +215,8 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         vec3 plmfrag = vec3(u_pointLightPos[i]) - Position_worldspace;
         float pldistance = length( plmfrag );
         vec3 L = normalize( plmfrag );
-        float plattenuation = 1.0 / (pldistance );
-        vec3 lradiance = u_pointLightIntensity[i] * plattenuation * (1.0+translucencyV);
+        float plattenuation = 1.0 / (pldistance*pldistance );
+        vec3 lradiance = ((u_pointLightIntensity[i]+(u_sunRadiance.xyz))) * plattenuation * (1.0+translucencyV);
         Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
     }
 
@@ -238,7 +238,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float overBurnedfactor = 0.25 * u_shadowParameters[1];
     for ( int i = 0; i < 4; i++ ) {
         int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;        
-        visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + poissonDisk[index] / 1024.0, v_shadowmap_coord3Biases.z ) ) * overBurnedfactor;// * u_timeOfTheDay;
+        visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + poissonDisk[index] / 1024.0, v_shadowmap_coord3Biases.z ) ) * overBurnedfactor;//* tan(acos(1.0-nlAngle));// * u_timeOfTheDay;
     }
 #end_code
 
@@ -269,7 +269,7 @@ vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness*MAX_REFLECTION_
 vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
-// vec3 ambient = Lo;
+// vec3 ambient = u_sunRadiance.xyz;
 
 vec3 ambient = ((Lo + (kD * diffuseV + specular))*ao) * visibility;// * (visibility+diffuseV);
 #else 
