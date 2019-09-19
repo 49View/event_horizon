@@ -11,6 +11,7 @@
 #include <core/node.hpp>
 #include <core/geom.hpp>
 #include <core/image_mapping.hpp>
+#include <core/image_params.hpp>
 #include <core/resources/material.h>
 #include <graphics/renderer.h>
 #include <graphics/shader_manager.h>
@@ -136,9 +137,32 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     });
 
     sg.nodeFullScreenImageConnect( [this](CResourceRef _node) {
-        V2f iar = sg.TL( _node )->getAspectRatioV();
+        auto image = sg.TL( _node );
+        V2f iar = image->getAspectRatioV();
         auto fit = getFullScreenAspectFit( iar.ratio() );
         this->RR().drawRect2d( CommandBufferLimits::UI2dStart, fit.first, fit.second, _node );
+        Socket::send( "wasmClientFinishedLoadingData", image->serializeParams() );
+    });
+
+    sg.nodeFullScreenFontSonnetConnect( [this](CResourceRef _node) {
+        auto pfont = sg.FM( _node );
+        std::string message = "Roads? Where we're going, we don't need roads";
+        std::vector<std::pair<float,C4f>> fsize{
+                {0.02f, C4f::LIGHT_GREY},
+                 {0.03f, C4f::DARK_BLUE},
+                  {0.04f, C4f::DARK_CYAN},
+                   {0.05f, C4f::DARK_YELLOW},
+                    {0.07f, C4f::DARK_PURPLE},
+                     {0.10f, C4f::DARK_RED},
+                      {0.12f, C4f::DARK_SALMON},
+                       {0.15f, C4f::DARK_GREEN},
+                        {0.18f, C4f::DARK_BROWN},
+            };
+        float fOff = 0.0f;
+        for ( auto t = 0; t < fsize.size(); t++ ) {
+            this->RR().draw<DText2d>( CommandBufferLimits::UI2dStart,FDS{message, pfont.get(), V2f{0.02f, 0.98f - fOff}, fsize[t].first }, fsize[t].second );
+            fOff += fsize[t].first + fsize[t].first*0.25f;
+        }
     });
 
     sg.replaceMaterialConnect( [this]( const std::string& _oldMatRef , const std::string& _newMatRef ) {

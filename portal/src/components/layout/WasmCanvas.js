@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { loadWasmComplete } from "../../actions/wasm";
-import {
-  GroupScript,
-  GroupMaterial,
-  GroupGeom,
-  GroupImage
-} from "../../utils/utils";
 
 const WasmCanvas = ({
   left,
@@ -30,14 +24,7 @@ const WasmCanvas = ({
   }, [group, currentEntity, canvas, count, userToken, userData]);
 
   // console.log("Invalidated: canvas");
-  const canvasVisibility =
-    currentEntity &&
-    (group === GroupScript ||
-      group === GroupGeom ||
-      group === GroupMaterial ||
-      group === GroupImage)
-      ? "visible"
-      : "hidden";
+  const canvasVisibility = currentEntity && group !== "" ? "visible" : "hidden";
 
   const canvasSizeXNum = width; // bShowEntityCanvas ? 529 : 510;
   const canvasSizeYNum = height; //bShowEntityCanvas ? 536 : 286;

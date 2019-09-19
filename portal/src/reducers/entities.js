@@ -31,6 +31,7 @@ const initialState = {
   matEntries: [],
   matEntriesFiltered: [],
   currentEntity: null,
+  currentEntityData: null,
   smallEntityModalOn: false,
   currentEntityNodes: null,
   appKey: "",
@@ -65,6 +66,7 @@ export default function(state = initialState, action) {
     case LOADING_FINISHED:
       return {
         ...state,
+        currentEntityData: payload,
         loading: false
       };
     case GET_APPS:

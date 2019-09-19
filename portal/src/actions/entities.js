@@ -25,8 +25,8 @@ import {
   getFileNameOnlyNoExt,
   GroupApp,
   GroupGeom,
-  GroupImage,
-  GroupMaterial
+  GroupMaterial,
+  GroupScript
 } from "../utils/utils";
 
 // Get entries
@@ -192,10 +192,10 @@ export const changeMaterialPropery = event => dispatch => {
   }
 };
 
-export const wasmClientFinishedLoadingData = () => dispatch => {
+export const wasmClientFinishedLoadingData = data => dispatch => {
   dispatch({
     type: LOADING_FINISHED,
-    payload: null
+    payload: data
   });
 };
 
@@ -241,10 +241,7 @@ export const getFullEntity = entitySource => async dispatch => {
       payload: null
     });
 
-    const requireWasmUpdate =
-      entitySource.group === GroupGeom ||
-      entitySource.group === GroupMaterial ||
-      entitySource.group === GroupImage;
+    const requireWasmUpdate = entitySource.group !== GroupScript;
     // Get dependencies for
     let deps = {};
     let fullData = null;

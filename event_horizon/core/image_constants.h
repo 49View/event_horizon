@@ -34,22 +34,79 @@ enum PixelFormat {
     PIXEL_FORMAT_INVALID
 };
 
+static inline std::string PixelFormatToString( PixelFormat value ) {
+        switch( value ) {
+            case PIXEL_FORMAT_UNFORCED: return "PIXEL_FORMAT_UNFORCED";
+            case PIXEL_FORMAT_RGB: return "PIXEL_FORMAT_RGB";
+            case PIXEL_FORMAT_RGBA: return "PIXEL_FORMAT_RGBA";
+            case PIXEL_FORMAT_LUMINANCE: return "PIXEL_FORMAT_LUMINANCE";
+            case PIXEL_FORMAT_LUMINANCE_ALPHA: return "PIXEL_FORMAT_LUMINANCE_ALPHA";
+            case PIXEL_FORMAT_BGRA: return "PIXEL_FORMAT_BGRA";
+            case PIXEL_FORMAT_RGB565: return "PIXEL_FORMAT_RGB565";
+            case PIXEL_FORMAT_RGBA_QUADRANTS: return "PIXEL_FORMAT_RGBA_QUADRANTS";
+            case PIXEL_FORMAT_SRGB: return "PIXEL_FORMAT_SRGB";
+            case PIXEL_FORMAT_SRGBA: return "PIXEL_FORMAT_SRGBA";
+            case PIXEL_FORMAT_HDR_RGB_16: return "PIXEL_FORMAT_HDR_RGB_16";
+            case PIXEL_FORMAT_HDR_RGBA_16: return "PIXEL_FORMAT_HDR_RGBA_16";
+            case PIXEL_FORMAT_HDR_RGB_32: return "PIXEL_FORMAT_HDR_RGB_32";
+            case PIXEL_FORMAT_HDR_RGBA_32: return "PIXEL_FORMAT_HDR_RGBA_32";
+            case PIXEL_FORMAT_DEPTH_16: return "PIXEL_FORMAT_DEPTH_16";
+            case PIXEL_FORMAT_DEPTH_24: return "PIXEL_FORMAT_DEPTH_24";
+            case PIXEL_FORMAT_DEPTH_32: return "PIXEL_FORMAT_DEPTH_32";
+            case PIXEL_FORMAT_RG: return "PIXEL_FORMAT_RG";
+            case PIXEL_FORMAT_HDR_RG_16: return "PIXEL_FORMAT_HDR_RG_16";
+            case PIXEL_FORMAT_HDR_RG_32: return "PIXEL_FORMAT_HDR_RG_32";
+            case PIXEL_FORMAT_R: return "PIXEL_FORMAT_R";
+            case PIXEL_FORMAT_HDR_R16: return "PIXEL_FORMAT_HDR_R16";
+            case PIXEL_FORMAT_HDR_RG32: return "PIXEL_FORMAT_HDR_RG32";
+            case PIXEL_FORMAT_HDR_R32: return "PIXEL_FORMAT_HDR_R32";
+            case PIXEL_FORMAT_INVALID: return "PIXEL_FORMAT_INVALID";
+        };
+        return "PIXEL_FORMAT_INVALID";
+}
+
 enum Filter {
     FILTER_LINEAR,
     FILTER_NEAREST,
     FILTER_LINEAR_MIPMAP_LINEAR
 };
 
+static inline std::string FilterFormatToString( Filter value ) {
+    switch ( value ) {
+        case FILTER_LINEAR: return "FILTER_LINEAR";
+        case FILTER_NEAREST: return "FILTER_NEAREST";
+        case FILTER_LINEAR_MIPMAP_LINEAR: return "FILTER_LINEAR_MIPMAP_LINEAR";
+    }
+    return "FILTER_INVALID";
+}
+
 enum WrapMode {
     WRAP_MODE_CLAMP_TO_EDGE = 0,
     WRAP_MODE_REPEAT = 1,
 };
+
+static inline std::string WrapModeFormatToString( WrapMode value ) {
+    switch ( value ) {
+        case WRAP_MODE_CLAMP_TO_EDGE: return "WRAP_MODE_CLAMP_TO_EDGE";
+        case WRAP_MODE_REPEAT: return "WRAP_MODE_REPEAT";
+    }
+    return "WRAP_MODE_INVALID";
+}
 
 enum TextureTargetMode {
     TEXTURE_2D = 0,
     TEXTURE_3D,
     TEXTURE_CUBE_MAP,
 };
+
+static inline std::string TextureTargetModeModeFormatToString( TextureTargetMode value ) {
+    switch ( value ) {
+        case TEXTURE_2D : return "TEXTURE_2D";
+        case TEXTURE_3D : return "TEXTURE_3D";
+        case TEXTURE_CUBE_MAP : return "TEXTURE_CUBE_MAP";
+    }
+    return "TEXTURE_INVALID";
+}
 
 enum FrameBufferTextureTarget2d {
     FBT_TEXTURE_2D = 0,
@@ -80,6 +137,27 @@ inline FrameBufferTextureTarget2d indexToFBT( const int index ) {
     }
 }
 
+enum class ImageHeaderType {
+    Uncompress,
+    Png,
+    Jpg,
+    Radiance,
+    Exr,
+    LUT3D
+};
+
+static inline std::string imageHeaderTypeToString( ImageHeaderType value ) {
+    switch ( value ) {
+        case ImageHeaderType::Uncompress: return "UNCOMPRESS";
+        case ImageHeaderType::Png: return "PNG";
+        case ImageHeaderType::Jpg: return "JPG";
+        case ImageHeaderType::Radiance: return "RADIANCE";
+        case ImageHeaderType::Exr: return "EXR";
+        case ImageHeaderType::LUT3D: return "LUT3D";
+        default: return "UNKNOWN";
+    }
+}
+
 struct ImageParams {
     int width = 0;
     int height = 0;
@@ -90,21 +168,23 @@ struct ImageParams {
     TextureTargetMode ttm = TEXTURE_2D;
     WrapMode wrapMode = WRAP_MODE_REPEAT;
     Filter filterMode = FILTER_LINEAR;
+    ImageHeaderType headerType = ImageHeaderType::Uncompress;
+    size_t compressLength = 0;
 
-    Vector2f getAspectRatioV() const {
+    [[nodiscard]] Vector2f getAspectRatioV() const {
         float r = getAspectRatio();
         return r > 1.0f ? V2f{ r, 1.0f} : V2f{ 1.0f, 1.0f/r};
     }
 
-    float getAspectRatio() const {
+    [[nodiscard]] float getAspectRatio() const {
         return static_cast<float>(width) / static_cast<float>(height);
     }
 
-    int bppStride() const {
+    [[nodiscard]] int bppStride() const {
         return channels * (bpp/8);
     }
 
-    size_t memorySize() const {
+    [[nodiscard]] size_t memorySize() const {
         return width * height * depth * channels * (bpp/8);
     }
 

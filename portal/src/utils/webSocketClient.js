@@ -63,7 +63,7 @@ export const wscConnect = session => {
       store.dispatch(getFullEntity(mdata.data));
       store.dispatch({ type: ADD_ENTITY, payload: mdata.data });
     } else if (mdata.msg === "wasmClientFinishedLoadingData") {
-      store.dispatch(wasmClientFinishedLoadingData());
+      store.dispatch(wasmClientFinishedLoadingData(mdata.data));
     } else if (mdata.msg === "materialsForGeom") {
       setEntityNodes(mdata.data);
     }

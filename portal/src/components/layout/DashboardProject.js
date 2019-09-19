@@ -6,6 +6,7 @@ import ImageEditor from "./entities/ImageEditor";
 import AppEditor from "./entities/AppEditor";
 import GUIEditor from "./entities/GUIEditor";
 import GeomEditor from "./entities/GeomEditor";
+import FontEditor from "./entities/FontEditor";
 import MaterialEditor from "./entities/MaterialEditor";
 import { wasmSetCanvasSize } from "../../actions/wasm";
 import EntityMetaSection from "./entities/EntityMetaSection";
@@ -17,6 +18,7 @@ import {
   GroupMaterial,
   GroupImage,
   GroupUI,
+  GroupFont,
   GroupScript
 } from "../../utils/utils";
 
@@ -43,6 +45,11 @@ const containerClassFromGroup = (currEntity, group) => {
       return {
         mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <AppEditor />
+      };
+    case GroupFont:
+      return {
+        mainContainerClass: "AppEditorRenderGrid",
+        mainContainerDiv: <FontEditor />
       };
     case GroupUI:
       return {
