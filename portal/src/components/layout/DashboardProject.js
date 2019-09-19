@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { Redirect } from "react-router-dom";
+import React, { useEffect, Fragment } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Entries from "./entities/Entries";
@@ -37,7 +36,7 @@ const containerClassFromGroup = (currEntity, group) => {
       };
     case GroupImage:
       return {
-        mainContainerClass: "GeomEditorRenderGrid",
+        mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <ImageEditor />
       };
     case GroupScript:
@@ -47,7 +46,7 @@ const containerClassFromGroup = (currEntity, group) => {
       };
     case GroupUI:
       return {
-        mainContainerClass: "GUIEditorRenderGrid",
+        mainContainerClass: "AppEditorRenderGrid",
         mainContainerDiv: <GUIEditor />
       };
     default:
@@ -76,7 +75,7 @@ const DashboardProject = ({
   }, [currentEntity, entities, group]);
 
   if (!userData || !userData.project) {
-    return <Redirect to="/" />;
+    return <Fragment></Fragment>;
   }
 
   const { mainContainerClass, mainContainerDiv } = containerClassFromGroup(

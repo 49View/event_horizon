@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { loadWasmComplete } from "../../actions/wasm";
-import { GroupScript, GroupMaterial, GroupGeom } from "../../utils/utils";
+import {
+  GroupScript,
+  GroupMaterial,
+  GroupGeom,
+  GroupImage
+} from "../../utils/utils";
 
 const WasmCanvas = ({
   left,
@@ -27,7 +32,10 @@ const WasmCanvas = ({
   // console.log("Invalidated: canvas");
   const canvasVisibility =
     currentEntity &&
-    (group === GroupScript || group === GroupGeom || group === GroupMaterial)
+    (group === GroupScript ||
+      group === GroupGeom ||
+      group === GroupMaterial ||
+      group === GroupImage)
       ? "visible"
       : "hidden";
 

@@ -24,6 +24,10 @@ void NodeGraph::replaceMaterialConnect( const std::function<NodeGraphConnectRepl
     replaceMaterialSignal.connect( _slot );
 }
 
+void NodeGraph::nodeFullScreenImageConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot ) {
+    nodeFullScreenImageSignal.connect( _slot );
+}
+
 void NodeGraph::changeMaterialPropertyConnectString( const std::function<NodeGraphConnectChangeMaterialPropertySFuncSig>& _slot ) {
     changeMaterialPropertyStringSignal.connect(_slot);
 }

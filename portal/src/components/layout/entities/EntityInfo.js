@@ -19,7 +19,7 @@ const EntityInfo = ({ currentEntity }) => {
   const hs = currentEntity ? currentEntity.entity.metadata.hash : "";
   const pad = 6;
   const hashContrived = currentEntity
-    ? hs.slice(0, pad) + "..." + hs.slice(hs.legnth - pad, pad)
+    ? hs.slice(0, pad) + "..." + hs.slice(hs.length - pad, hs.length)
     : hs;
 
   return (

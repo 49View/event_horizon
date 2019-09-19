@@ -25,6 +25,7 @@ import {
   getFileNameOnlyNoExt,
   GroupApp,
   GroupGeom,
+  GroupImage,
   GroupMaterial
 } from "../utils/utils";
 
@@ -241,7 +242,9 @@ export const getFullEntity = entitySource => async dispatch => {
     });
 
     const requireWasmUpdate =
-      entitySource.group === GroupGeom || entitySource.group === GroupMaterial;
+      entitySource.group === GroupGeom ||
+      entitySource.group === GroupMaterial ||
+      entitySource.group === GroupImage;
     // Get dependencies for
     let deps = {};
     let fullData = null;

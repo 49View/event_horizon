@@ -10,6 +10,7 @@
 #include <core/camera.h>
 #include <core/node.hpp>
 #include <core/geom.hpp>
+#include <core/image_mapping.hpp>
 #include <core/resources/material.h>
 #include <graphics/renderer.h>
 #include <graphics/shader_manager.h>
@@ -129,8 +130,15 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     });
 
     sg.nodeRemoveConnect( [this]( NodeGraphConnectParamsSig _geom ) {
+        this->RR().clearBucket( CommandBufferLimits::UI2dStart );
         this->RR().clearBucket( CommandBufferLimits::PBRStart );
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    });
+
+    sg.nodeFullScreenImageConnect( [this](CResourceRef _node) {
+        V2f iar = sg.TL( _node )->getAspectRatioV();
+        auto fit = getFullScreenAspectFit( iar.ratio() );
+        this->RR().drawRect2d( CommandBufferLimits::UI2dStart, fit.first, fit.second, _node );
     });
 
     sg.replaceMaterialConnect( [this]( const std::string& _oldMatRef , const std::string& _newMatRef ) {

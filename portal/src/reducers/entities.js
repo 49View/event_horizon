@@ -157,8 +157,8 @@ export default function(state = initialState, action) {
     case GET_ENTITY_LOAD:
       return {
         ...state,
-        loading: true,
-        currentTags: []
+        loading: true
+        // currentTags: []
       };
     case GET_ENTITY:
       if (requireWasmUpdate) requestAsset(payload);

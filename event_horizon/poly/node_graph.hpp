@@ -23,6 +23,7 @@ using ConnectPairStringBoolFuncSig = void(ConnectPairStringBoolParamSig);
 using NodeGraphConnectParamsSig = NodeVariantsSP;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
 using NodeGraphConnectReplaceFuncSig = void(const std::string&, const std::string&);
+using NodeGraphConnectCResourceRefFuncSig = void(CResourceRef);
 using NodeGraphConnectChangeMaterialPropertySFuncSig = void(const std::string&, const std::string&, const std::string&);
 using NodeGraphConnectChangeMaterialPropertyFFuncSig = void(const std::string&, const std::string&, const float&);
 using NodeGraphConnectChangeMaterialPropertyV3fFuncSig = void(const std::string&, const std::string&, const V3f&);
@@ -33,6 +34,7 @@ public:
     void nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
+    void nodeFullScreenImageConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void preloadCompleteConnect( const std::function<ConnectVoidFuncSig>& _slot );
     void propagateDirtyFlagConnect( const std::function<ConnectPairStringBoolFuncSig>& _slot );
     void changeMaterialPropertyConnectString( const std::function<NodeGraphConnectChangeMaterialPropertySFuncSig>& _slot );
@@ -47,6 +49,7 @@ protected:
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeRemoveSignal;
     boost::signals2::signal<ConnectVoidFuncSig> preloadCompleteSignal;
     boost::signals2::signal<NodeGraphConnectReplaceFuncSig> replaceMaterialSignal;
+    boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenImageSignal;
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertySFuncSig> changeMaterialPropertyStringSignal;
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertyFFuncSig> changeMaterialPropertyFloatSignal;
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertyV3fFuncSig> changeMaterialPropertyV3fSignal;

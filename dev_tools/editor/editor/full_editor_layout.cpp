@@ -59,24 +59,7 @@ void EditorBackEnd::activateImpl() {
 
     loadSceneEntities();
 
-//    Http::get( Url{ "/user/portaltoload" },
-//       [&]( const Http::Result& _res ) {
-//           PortalToLoad entity{_res.bufferString};
-//           if ( entity.group == ResourceGroup::Geom ) {
-//               sg.load<Geom>( entity.entity_id, [this]( HttpResouceCBSign key ) {
-//                   auto geom = sg.GB<GT::Asset>( key );
-//                   rsg.DC()->center( geom->BBox3dCopy() );
-//               } );
-//           } else if ( entity.group == ResourceGroup::Material ) {
-//               sg.load<Material>( entity.entity_id, [this, entity]( HttpResouceCBSign key ) {
-//                   auto geom = sg.GB<GT::Shape>( ShapeType::Sphere, GT::Tag(1001) );
-//                   rsg.RR().changeMaterialOnTags( { 1001, entity.hash } );
-//                   rsg.DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Back );
-//               } );
-//           }
-//    } );
-
-//                   auto geom = sg.GB<GT::Shape>( ShapeType::Sphere, GT::Tag(1001) );
+//    sg.GB<GT::Shape>( ShapeType::Cylinder, GT::Tag(1001) );
 
 //    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
 //                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );

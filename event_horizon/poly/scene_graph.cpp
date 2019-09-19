@@ -58,10 +58,12 @@ void SceneGraph::removeNode( const UUID& _uuid ) {
 
 void SceneGraph::removeNode( GeomSP _node ) {
     nodeRemoveSignal( _node );
-    for ( const auto& c : _node->Children()) {
-        removeNode( c );
+    if ( _node ) {
+        for ( const auto& c : _node->Children()) {
+            removeNode( c );
+        }
+        removeNode( _node->UUiD());
     }
-    removeNode( _node->UUiD());
 }
 
 GeomSP SceneGraph::getNode( const UUID& _uuid ) {
@@ -160,7 +162,7 @@ void SceneGraph::realTimeCallbacks() {
             auto v0 = getFileName( doc["data"]["entity_id"].GetString());
             auto vHash = getFileName( doc["data"]["hash"].GetString());
 
-            if ( !nodes.empty()) removeNode( nodes.begin()->second );
+            removeNode( !nodes.empty() ? nodes.begin()->second : nullptr );
             GM().clear();
             Nodes().clear();
             Http::clearRequestCache();
@@ -178,6 +180,11 @@ void SceneGraph::realTimeCallbacks() {
                 load<Material>( v0, [this, vHash]( HttpResouceCBSign key ) {
                     auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M(vHash));
                     DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Back );
+                    Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
+                } );
+            } else if ( entityGroup == ResourceGroup::Image ) {
+                load<RawImage>( v0, [this, vHash]( HttpResouceCBSign key ) {
+                    nodeFullScreenImageSignal( key );
                     Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
                 } );
             }

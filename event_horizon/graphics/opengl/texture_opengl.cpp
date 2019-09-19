@@ -74,12 +74,11 @@ void Texture::init_r( const uint8_t* _data ) {
     LOGR( "Initialising texture %s %dx%d (%s) handle=%d", pixelFormatToString( mFormat ), mWidth, mHeight,
           Name().c_str(), mHandle );
 
+    mGenerateMipMaps &= _data && isPowerOfTwo(getWidth()) && isPowerOfTwo(getHeight());
     init_data_r( _data );
 
     if ( mGenerateMipMaps ) {
-        if ( _data && isPowerOfTwo(getWidth()) && isPowerOfTwo(getHeight())) {
-            GLCALL( glGenerateMipmap( glTextureTarget ));
-        }
+        GLCALL( glGenerateMipmap( glTextureTarget ));
     }
 }
 

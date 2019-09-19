@@ -10,6 +10,17 @@
 
 typedef std::pair<Vector2f, Vector2f> TextureFillModeScalers;
 
+static inline TextureFillModeScalers getFullScreenAspectFit( float iarRatio ) {
+    float sar = getScreenAspectRatio;
+    if ( sar > iarRatio ) {
+        float off = (sar - iarRatio) * 0.5f;
+        return { V2f{off, 0.0f}, V2f{off + iarRatio, 1.0f} };
+    } else {
+        float off = (( iarRatio - sar ) * 0.5f ) / iarRatio;
+        return { V2f{ 0.0f, off }, V2f{ sar, 1.0f - off }};
+    }
+}
+
 static inline TextureFillModeScalers getTextureFillModeScalers( const RectFillMode fm,
                                                                 const Vector2f& size, float _aspectRation ) {
     // Those 2 variables handle basically a "AspectFit" scaling, in which the image is scaled in a way the whole image is present maintaining the aspect ratio.

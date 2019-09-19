@@ -3,11 +3,7 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 const ImageEditor = ({ currentEntity }) => {
-  return (
-    <Fragment>
-      <img className="bigimagequad" src={currentEntity.blobURL} alt="" />
-    </Fragment>
-  );
+  return <Fragment></Fragment>;
 };
 
 ImageEditor.propTypes = {
