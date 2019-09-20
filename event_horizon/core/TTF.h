@@ -63,6 +63,8 @@
 #include <mutex>
 #include <core/htypes_shared.hpp>
 
+struct FontParamsJSONAble;
+
 // ---------------------------------------------------------------------------------------------------------------------------
 //    Utility namespace
 // ---------------------------------------------------------------------------------------------------------------------------
@@ -548,6 +550,8 @@ public:
 	virtual ~FontInternal();
 
 public:
+    FontParamsJSONAble serializeParams() const;
+
     // font info
 	vec4f GetMasterRect() const;                     // returns a vec4f in font units that encloses every glyph, format is (xMin,yMin,xMax,yMax)
 	vec4f GetGlyphRect( CodePoint ) const;             // returns a vec4f in font units that encloses the glyph, format is (xMin,yMin,xMax,yMax)

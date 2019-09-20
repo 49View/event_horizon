@@ -189,7 +189,6 @@ void SceneGraph::realTimeCallbacks() {
             } else if ( entityGroup == ResourceGroup::Font ) {
                 load<Font>( v0, [this, vHash]( HttpResouceCBSign key ) {
                     nodeFullScreenFontSonnetSignal( key );
-                    Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
                 } );
             }
         }

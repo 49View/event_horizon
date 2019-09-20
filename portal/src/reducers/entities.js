@@ -61,6 +61,7 @@ export default function(state = initialState, action) {
         entries: [],
         entriesFiltered: [],
         currentEntity: null,
+        currentEntityData: null,
         group: ""
       };
     case LOADING_FINISHED:
@@ -75,6 +76,7 @@ export default function(state = initialState, action) {
         entries: payload.data,
         entriesFiltered: payload.data,
         currentEntity: null,
+        currentEntityData: null,
         group: payload.group,
         loading: false
       };
@@ -92,7 +94,8 @@ export default function(state = initialState, action) {
         entries: [],
         entriesFiltered: [],
         group: "",
-        currentEntity: null
+        currentEntity: null,
+        currentEntityData: null
       };
     case GET_MATERIALS_META:
       return {
@@ -181,7 +184,8 @@ export default function(state = initialState, action) {
       return {
         ...state,
         loading: false,
-        currentEntityNodes: payload
+        currentEntityNodes: payload,
+        currentEntityData: null
       };
     case ADD_ENTITY:
       return {
@@ -202,6 +206,7 @@ export default function(state = initialState, action) {
         entries: state.entries.filter(entry => entry._id !== payload),
         entriesFiltered: state.entries.filter(entry => entry._id !== payload),
         currentEntity: null,
+        currentEntityData: null,
         loading: false
       };
     case CHANGE_MATERIAL_COLOR:

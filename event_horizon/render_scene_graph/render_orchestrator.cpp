@@ -4,14 +4,14 @@
 
 #include "render_orchestrator.h"
 #include <core/resources/resource_utils.hpp>
-#include <core/resources/resource_manager.hpp>
 #include <core/math/vector_util.hpp>
 #include <core/raw_image.h>
 #include <core/camera.h>
-#include <core/node.hpp>
 #include <core/geom.hpp>
 #include <core/image_mapping.hpp>
 #include <core/image_params.hpp>
+#include <core/TTF.h>
+#include <core/font_params.hpp>
 #include <core/resources/material.h>
 #include <graphics/renderer.h>
 #include <graphics/shader_manager.h>
@@ -163,6 +163,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
             this->RR().draw<DText2d>( CommandBufferLimits::UI2dStart,FDS{message, pfont.get(), V2f{0.02f, 0.98f - fOff}, fsize[t].first }, fsize[t].second );
             fOff += fsize[t].first + fsize[t].first*0.25f;
         }
+        Socket::send( "wasmClientFinishedLoadingData", pfont->serializeParams() );
     });
 
     sg.replaceMaterialConnect( [this]( const std::string& _oldMatRef , const std::string& _newMatRef ) {

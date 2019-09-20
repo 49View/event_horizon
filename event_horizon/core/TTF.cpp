@@ -18,6 +18,7 @@
 #include <utility>
 #include <cmath>
 #include <sstream>
+#include <core/font_params.hpp>
 
 using namespace Utility;
 using namespace TTFCore;
@@ -2570,5 +2571,17 @@ FontInternal::FontInternal( const FontInternal& _source ) {
     VerifyTrueTypeTables();
 
 //    tableMap = _source.tableMap;
+}
+
+FontParamsJSONAble FontInternal::serializeParams() const {
+
+    auto fm = GetFontMetrics();
+    auto ht = ReadHeadTable();
+
+    return FontParamsJSONAble{
+        ht.fontRevision, ht.unitsPerEm, static_cast<uint64_t>(ht.createdDate), static_cast<uint64_t>(ht.modifiedData),
+        V4f{ static_cast<float>(ht.xMin), static_cast<float>(ht.yMin), static_cast<float>(ht.xMax), static_cast<float>(ht.yMax)},
+        ht.macStyle, ht.lowestRecPPEM, fm.ascent, fm.descent, fm.lineGap, V2f{fm.caretSlope.x, fm.caretSlope.y},
+        fm.caretOffset, fm.minLeftSideBearing, fm.minRightSideBearing, fm.advanceWidthMax};
 }
 
