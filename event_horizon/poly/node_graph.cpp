@@ -32,6 +32,10 @@ void NodeGraph::nodeFullScreenFontSonnetConnect( const std::function<NodeGraphCo
     nodeFullScreenFontSonnetSignal.connect( _slot );
 }
 
+void NodeGraph::nodeFullScreenUIContainerConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot ) {
+    nodeFullScreenUIContainerSignal.connect( _slot );
+}
+
 void NodeGraph::changeMaterialPropertyConnectString( const std::function<NodeGraphConnectChangeMaterialPropertySFuncSig>& _slot ) {
     changeMaterialPropertyStringSignal.connect(_slot);
 }

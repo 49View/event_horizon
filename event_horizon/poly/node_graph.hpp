@@ -36,6 +36,7 @@ public:
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
     void nodeFullScreenImageConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void nodeFullScreenFontSonnetConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
+    void nodeFullScreenUIContainerConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void preloadCompleteConnect( const std::function<ConnectVoidFuncSig>& _slot );
     void propagateDirtyFlagConnect( const std::function<ConnectPairStringBoolFuncSig>& _slot );
     void changeMaterialPropertyConnectString( const std::function<NodeGraphConnectChangeMaterialPropertySFuncSig>& _slot );
@@ -52,6 +53,7 @@ protected:
     boost::signals2::signal<NodeGraphConnectReplaceFuncSig> replaceMaterialSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenImageSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenFontSonnetSignal;
+    boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenUIContainerSignal;
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertySFuncSig> changeMaterialPropertyStringSignal;
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertyFFuncSig> changeMaterialPropertyFloatSignal;
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertyV3fFuncSig> changeMaterialPropertyV3fSignal;

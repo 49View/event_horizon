@@ -190,6 +190,10 @@ void SceneGraph::realTimeCallbacks() {
                 load<Font>( v0, [this, vHash]( HttpResouceCBSign key ) {
                     nodeFullScreenFontSonnetSignal( key );
                 } );
+            } else if ( entityGroup == ResourceGroup::UI ) {
+                load<UIContainer>( v0, [this, vHash]( HttpResouceCBSign key ) {
+                    nodeFullScreenUIContainerSignal( key );
+                } );
             }
         }
         if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {

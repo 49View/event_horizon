@@ -13,6 +13,7 @@
 #include <core/TTF.h>
 #include <core/font_params.hpp>
 #include <core/resources/material.h>
+#include <core/resources/ui_container.hpp>
 #include <graphics/renderer.h>
 #include <graphics/shader_manager.h>
 #include <graphics/vp_builder.hpp>
@@ -142,6 +143,11 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         auto fit = getFullScreenAspectFit( iar.ratio() );
         this->RR().drawRect2d( CommandBufferLimits::UI2dStart, fit.first, fit.second, _node );
         Socket::send( "wasmClientFinishedLoadingData", image->serializeParams() );
+    });
+
+    sg.nodeFullScreenUIContainerConnect( [this](CResourceRef _node) {
+        auto ui = sg.UL( _node );
+        Socket::send( "wasmClientFinishedLoadingData", *ui.get() );
     });
 
     sg.nodeFullScreenFontSonnetConnect( [this](CResourceRef _node) {
