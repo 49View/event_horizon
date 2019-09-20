@@ -14,14 +14,13 @@
 #include <core/resources/ui_container.hpp>
 #include <poly/poly.hpp>
 #include <graphics/ghtypes.hpp>
-#include <render_scene_graph/render_orchestrator.h>
 
-class UIView;
 class SceneGraph;
 class RenderOrchestrator;
+class UIView;
 
 struct UICallbackHandle {
-    UICallbackHandle() {}
+    UICallbackHandle() = default;
     UICallbackHandle( const std::string& _index ) {
         index = std::stoi( _index );
     }
@@ -410,18 +409,16 @@ enum class UICheckActiveOnly {
     True
 };
 
-class UIContainer2d {
+class UIViewContainer {
 public:
-    UIContainer2d( RenderOrchestrator& _rsg,
-                   UICallbackMap& _callbackMap,
-                   CResourceRef _name ) : rsg( _rsg ), callbackMap(_callbackMap) {
+    UIViewContainer( RenderOrchestrator& _rsg,
+                     CResourceRef _name ) : rsg( _rsg ) {
         raii( _name );
     }
 
-    UIContainer2d( RenderOrchestrator& _rsg,
-                   UICallbackMap& _callbackMap,
-                   CResourceRef _name,
-                   UIContainer* _data ) : rsg( _rsg ), callbackMap(_callbackMap) {
+    UIViewContainer( RenderOrchestrator& _rsg,
+                     CResourceRef _name,
+                     UIContainer* _data ) : rsg( _rsg ) {
         raii( _name );
         unpack( _data );
     }
@@ -453,7 +450,6 @@ private:
 
 private:
     RenderOrchestrator& rsg;
-    UICallbackMap& callbackMap;
 
     MPos2d pos;
     V2f padding{ 0.02f, -0.01f };
@@ -472,11 +468,9 @@ private:
 
 class UIView {
 public:
-    UIView( SceneGraph& sg, RenderOrchestrator& rsg, const ColorScheme& cs ) : sg( sg ), rsg( rsg ),
-                                                                               colorScheme( cs ) {}
-
+    UIView( SceneGraph& sg, const ColorScheme& cs ) : sg( sg ), colorScheme( cs ) {}
     void add( UIElementSP _elem, UIElementStatus _initialStatus = UIElementStatus::Enabled );
-    void add( const MPos2d& _at, UIContainer2d& _container, UIElementStatus _initialStatus = UIElementStatus::Enabled );
+    void add( const MPos2d& _at, UIViewContainer& _container, UIElementStatus _initialStatus = UIElementStatus::Enabled );
 
     UIElementSP operator()( CResourceRef _key );
 
@@ -493,9 +487,6 @@ public:
     bool isButtonEnabled( CResourceRef _key ) const;
     bool isHandlingUI() const;
     [[nodiscard]] bool pointInUIArea( const V2f& tap, UICheckActiveOnly _checkFlag ) const;
-
-    Renderer& RR();
-    SceneGraph& SG();
 
     C4f getEnabledColor() const;
     C4f getSelectedColor() const;
@@ -517,7 +508,6 @@ private:
 
 private:
     SceneGraph& sg;
-    RenderOrchestrator& rsg;
     ColorScheme colorScheme;
     std::unordered_map<ResourceRef, UIElementSP> elements;
     UICallbackMap callbacks;

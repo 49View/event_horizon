@@ -14,6 +14,8 @@
 #include <graphics/render_targets.hpp>
 #include <render_scene_graph/camera_controls.hpp>
 #include <render_scene_graph/scene_bridge.h>
+#include <render_scene_graph/ui_view.hpp>
+
 #define SOL_ALL_SAFETIES_ON 1
 #include <lua/sol/sol.hpp> // or #include "sol.hpp", whichever suits your needs
 
@@ -95,6 +97,8 @@ public:
         }
     }
 
+    void addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus = UIElementStatus::Enabled  );
+
     void resizeCallback( const Vector2i& _resize );
 
     PickRayData rayViewportPickIntersection( const V2f& _screenPos ) const;
@@ -141,7 +145,9 @@ protected:
 
 public:
     Renderer& RR();
-    SceneGraph& SG() { return sg; }
+    SceneGraph& SG();
+    UIView& UI();
+    UICallbackMap& UICB();
 protected:
     void updateCallbacks();
     void resizeCallbacks();
@@ -154,6 +160,7 @@ protected:
 private:
     Renderer& rr;
     SceneGraph& sg;
+    UIView uiView;
     cameraRigsMap mRigs;
     std::unordered_map<std::string, SceneScreenBox> boxes;
     sol::state lua{};

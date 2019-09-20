@@ -56,20 +56,20 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
 
     if ( type() == UIT::separator_h() ) {
         defaultBackgroundColor = C4f::WHITE.A(0.4f);
-        backgroundVP = this->owner->RR().draw<DRect2dRounded>(getUUIntegerId(), ssBBox, _localHierMat,
+        backgroundVP = rsg.RR().draw<DRect2dRounded>(getUUIntegerId(), ssBBox, _localHierMat,
                 RDSRoundedCorner(ssBBox.height()*0.33f), defaultBackgroundColor );
         return;
     }
 
     if ( text.empty() ) {
         defaultBackgroundColor = type() == UIT::background() ? Color4f::XTORGBA("#036FAB").A(0.9f) : C4f::WHITE.A(0.3f);
-        backgroundVP = this->owner->RR().draw<DRect2dRounded>(getUUIntegerId(), ssBBox, _localHierMat, defaultBackgroundColor);
+        backgroundVP =rsg.RR().draw<DRect2dRounded>(getUUIntegerId(), ssBBox, _localHierMat, defaultBackgroundColor);
     }
     if ( !foreground.empty() && text.empty() ) {
-        foregroundVP = this->owner->RR().draw<DRect2d>( getUUIntegerId(), ssBBox, _localHierMat, RDSImage{foreground}, tintColor );
+        foregroundVP =rsg.RR().draw<DRect2d>( getUUIntegerId(), ssBBox, _localHierMat, RDSImage{foreground}, tintColor );
     }
     if ( !text.empty() ) {
-        foregroundVP = this->owner->RR().draw<DText2d>( getUUIntegerId(),
+        foregroundVP =rsg.RR().draw<DText2d>( getUUIntegerId(),
                 FDS{ text, font, ssBBox.bottomLeft(), fontHeight, fontAngle},
                 _localHierMat, fontColor );
     }
@@ -309,14 +309,6 @@ void UIView::hoover( const V2f& _point ) {
     });
 }
 
-Renderer& UIView::RR() {
-    return rsg.RR();
-}
-
-SceneGraph& UIView::SG() {
-    return sg;
-}
-
 C4f UIView::colorFromStatus( UIElementStatus _status ) {
     switch (_status) {
         case UIElementStatus::Enabled:
@@ -408,7 +400,7 @@ void UIView::add( UIElementSP _elem, UIElementStatus _initialStatus ) {
     elements.emplace( _elem->Name(), _elem);
 }
 
-void UIView::add( const MPos2d& _at, UIContainer2d& _container, UIElementStatus _initialStatus ) {
+void UIView::add( const MPos2d& _at, UIViewContainer& _container, UIElementStatus _initialStatus ) {
     _container.finalize(_at);
     add( _container.Node(), _initialStatus );
 }
@@ -429,7 +421,7 @@ UICallbackMap& UIView::Callbacks() {
     return callbacks;
 }
 
-void UIContainer2d::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize ) {
+void UIViewContainer::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize ) {
 
     if ( _displayMode == CSSDisplayMode::Block ) {
         caret -= V2f{ 0.0f, _elemSize().y() - padding.y()};
@@ -444,22 +436,22 @@ void UIContainer2d::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _
 
 }
 
-void UIContainer2d::addEmptyCaret() {
+void UIViewContainer::addEmptyCaret() {
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
 }
 
-void UIContainer2d::addEmptyCaretNewLine() {
+void UIViewContainer::addEmptyCaretNewLine() {
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     caret.setX( padding.x() );
 }
 
-void UIContainer2d::popCaretX() {
+void UIViewContainer::popCaretX() {
     auto lc = caretQueue.back();
     caret.setX( lc.x() );
     caretQueue.pop_back();
 }
 
-void UIContainer2d::addSeparator( float percScaleY ) {
+void UIViewContainer::addSeparator( float percScaleY ) {
     auto childDadeT2 = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), MScale2d{innerPaddedX, 0.0025f*percScaleY},
                                                UIT::separator_h );
 
@@ -467,8 +459,8 @@ void UIContainer2d::addSeparator( float percScaleY ) {
     advanceCaret( CSSDisplayMode::Block, MScale2d{ innerPaddedX, padding.y() } );
 }
 
-void UIContainer2d::addLabel( const UIFontText& _text,
-                              const MScale2d& lsize, CSSDisplayMode displayMode, const V2f& _pos ) {
+void UIViewContainer::addLabel( const UIFontText& _text,
+                                const MScale2d& lsize, CSSDisplayMode displayMode, const V2f& _pos ) {
     auto fsize = FontUtils::measure( _text.text, rsg.SG().get<Font>(_text.fontRef).get(), _text.height ).size();
     fsize.setY( _text.height );
     auto child = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), UIT::label, MScale2d{fsize}, _text );
@@ -479,8 +471,8 @@ void UIContainer2d::addLabel( const UIFontText& _text,
     advanceCaret( displayMode, MScale2d{fsize} );
 }
 
-UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& _bsize, CSSDisplayMode displayMode,
-        UITapAreaType _bt, const V2f& _pos ) {
+UIElementSP UIViewContainer::addButton( const ControlDef& _cd, const MScale2d& _bsize, CSSDisplayMode displayMode,
+                                        UITapAreaType _bt, const V2f& _pos ) {
 
     auto child = EF::create<UIElementRT>(PFC{}, rsg, _cd, _bsize, _bt, UIForegroundIcon{_cd.icon}, _cd.tintColor, _cd.cbParam );
     node->addChildren( child, caret );
@@ -488,14 +480,14 @@ UIElementSP UIContainer2d::addButton( const ControlDef& _cd, const MScale2d& _bs
     return child;
 }
 
-void UIContainer2d::addTitle( const UIFontText& _text, UIAlignFlags _flags ) {
+void UIViewContainer::addTitle( const UIFontText& _text, UIAlignFlags _flags ) {
     addLabel( _text, MScale2d{innerPaddedX, _text.height}, CSSDisplayMode::Block );
     if ( !checkBitWiseFlag(_flags, UIAF_DoNotAddSeparator ) ) {
         addSeparator();
     }
 }
 
-void UIContainer2d::addNavBar( const ControlDef& _logo ) {
+void UIViewContainer::addNavBar( const ControlDef& _logo ) {
 //    addButton( _logo, MScale2d{0.06f, 0.06f}, CSSDisplayMode::Inline );
 
 //    auto padding = 0.01f * getScreenAspectRatio;
@@ -513,7 +505,7 @@ void UIContainer2d::addNavBar( const ControlDef& _logo ) {
 //                         "carillo,logo" );
 }
 
-void UIContainer2d::addListEntry( const ControlDef& _cd ) {
+void UIViewContainer::addListEntry( const ControlDef& _cd ) {
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     float totalTextHeight = 0.0f;
     for ( const auto& ltext : _cd.textLines ) totalTextHeight += ltext.height + (-padding.y());
@@ -528,7 +520,7 @@ void UIContainer2d::addListEntry( const ControlDef& _cd ) {
     addSeparator( 0.5f );
 }
 
-void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine, bool _lastOne ) {
+void UIViewContainer::addListEntryGrid( const ControlDef& _cd, bool _newLine, bool _lastOne ) {
     float totalTextHeight = 0.0f;
     for ( const auto& ltext : _cd.textLines ) totalTextHeight += ltext.height + (-padding.y());
     MScale2d lbsize{ totalTextHeight, totalTextHeight };
@@ -548,8 +540,8 @@ void UIContainer2d::addListEntryGrid( const ControlDef& _cd, bool _newLine, bool
     }
 }
 
-void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
-                                        const std::vector<ControlDef>& _cds, UIAlignFlags _flags ) {
+void UIViewContainer::addButtonGroupLine( UITapAreaType _uit,
+                                          const std::vector<ControlDef>& _cds, UIAlignFlags _flags ) {
 
     advanceCaret( CSSDisplayMode::Block, wholeLineSize );
     for ( const auto& i : _cds ) {
@@ -584,20 +576,20 @@ void UIContainer2d::addButtonGroupLine( UITapAreaType _uit,
     }
 }
 
-void UIContainer2d::setButtonSize( const MScale2d& _bs ) {
+void UIViewContainer::setButtonSize( const MScale2d& _bs ) {
     bsize = _bs;
 }
 
-void UIContainer2d::setPadding( const V2f& _value ) {
+void UIViewContainer::setPadding( const V2f& _value ) {
     padding = _value;
     caret = padding;
 }
 
-V3f UIContainer2d::getSize() const {
+V3f UIViewContainer::getSize() const {
     return size;
 }
 
-void UIContainer2d::finalize( const MPos2d& _at ) {
+void UIViewContainer::finalize( const MPos2d& _at ) {
     auto fakeAA = AABB::MIDENTITY();
     fakeAA.scaleX(boundaries.x());
     fakeAA.scaleY(boundaries.y() );
@@ -609,7 +601,7 @@ void UIContainer2d::finalize( const MPos2d& _at ) {
     Node()->updateTransform( _at() );
 }
 
-void UIContainer2d::raii( const std::string& _name ) {
+void UIViewContainer::raii( const std::string& _name ) {
     node = EF::create<UIElementRT>( PFC{}, rsg, UUIDGen::make(), pos, UIT::background );
     node->Name( _name );
     caret = padding;
@@ -627,7 +619,7 @@ UITapAreaType tapTypeFromString( const std::string& _value ) {
     return UIT::background;
 }
 
-void UIContainer2d::unpack( UIContainer* _data ) {
+void UIViewContainer::unpack( UIContainer* _data ) {
     if ( !_data ) return;
 
     std::unordered_map<std::string, float> uiFontSizes{
@@ -644,13 +636,13 @@ void UIContainer2d::unpack( UIContainer* _data ) {
             for ( const auto& tf : entry.entries ) {
                 te.emplace_back( tf.font, uiFontSizes[tf.size], C4f::XTORGBA(tf.color), tf.text );
             }
-            auto cb = entry.func.empty() ? sUIEmptyCallback : callbackMap[entry.func[0]];
+            auto cb = entry.func.empty() ? sUIEmptyCallback : rsg.UICB()[entry.func[0]];
             auto cbParam = entry.func.size() >= 2 ? entry.func[1] : "-1";
             addListEntry( { entry.id, entry.icon, te, cb, cbParam  } );
         } else if ( entry.type == "ButtonGroupLine" ) {
             std::vector<ControlDef> te;
             for ( const auto& tf : entry.entries ) {
-                auto cb = tf.func.empty() ? sUIEmptyCallback : callbackMap[tf.func[0]];
+                auto cb = tf.func.empty() ? sUIEmptyCallback : rsg.UICB()[tf.func[0]];
                 auto cbParam = tf.func.size() >= 2 ? tf.func[1] : "-1";
                 te.emplace_back( ControlDef{tf.id, tf.icon, {tf.font, uiFontSizes[tf.size], C4f::XTORGBA(tf.color), tf.text}, cb, cbParam} );
             }
