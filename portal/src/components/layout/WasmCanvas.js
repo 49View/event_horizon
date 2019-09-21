@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import store from "../../store";
 
 const WASM_LOAD_START = "WASM_LOAD_START";
 const WASM_LOAD_SUCCESS = "WASM_LOAD_SUCCESS";
@@ -13,6 +12,23 @@ const WASM_SET_CANVAS_SIZE = "WASM_SET_CANVAS_SIZE";
 const WASM_RESIZE_CALLBACK = "WASM_RESIZE_CALLBACK";
 const WASM_SET_CANVAS_VISIBILITY = "WASM_SET_CANVAS_VISIBILITY";
 const WASM_ADD_CONSOLE_TEXT = "WASM_ADD_CONSOLE_TEXT";
+
+const initialState = {
+  error: null,
+  resize: true,
+  loading: false,
+  loaded: false,
+  running: false,
+  wasmCanvas: null,
+  wasmParams: null,
+  consoleOutput: [],
+  consoleOutputDirty: false,
+  canvasWidth: 1,
+  canvasHeight: 1,
+  canvasTop: 0,
+  canvasLeft: 0,
+  canvasVisible: "hidden"
+};
 
 export const wasmSetCanvasVisibility = visible => {
   return {
@@ -42,20 +58,18 @@ export const wasmSetCanvasSizeCallback = () => {
   };
 };
 
-export const setMainCanvas = canvas => dispatch => {
-  dispatch({
-    type: WASM_SET_ROOT_CANVAS,
-    payload_canvas: canvas
-  });
-};
-
 export const setWasmLoaded = flag => dispatch => {
   dispatch({
     type: flag === true ? WASM_LOAD_SUCCESS : WASM_LOAD_FAILED
   });
 };
 
-export const loadWasmComplete = async (project, canvasRef, userSessionId) => {
+export const loadWasmComplete = async (
+  project,
+  canvasRef,
+  userSessionId,
+  dispatch
+) => {
   try {
     if (!checkWasmSupport()) {
       throw new Error("Web assembly not supported");
@@ -93,7 +107,7 @@ export const loadWasmComplete = async (project, canvasRef, userSessionId) => {
   }
 
   window.addEventListener("resize", () => {
-    store.dispatch(wasmSetCanvasSizeCallback());
+    dispatch(wasmSetCanvasSizeCallback());
     // console.log("Window Resize: ", window.innerWidth, window.innerWidth);
   });
 
@@ -102,7 +116,7 @@ export const loadWasmComplete = async (project, canvasRef, userSessionId) => {
     print: text => {
       console.log("[WASM] " + text);
       if (!text.startsWith("[INFO]")) {
-        store.dispatch({
+        dispatch({
           type: WASM_ADD_CONSOLE_TEXT,
           payload: text
         });
@@ -154,24 +168,29 @@ const checkWebGL2Support = () => {
   return result;
 };
 
-const WasmCanvas = ({ left, top, width, height, visible, userData }) => {
+const WasmCanvas = () => {
   let canvas = React.useRef(null);
   const [count, setCount] = useState(0);
+  const dispatch = useDispatch();
+
+  const wasmState = useSelector(state => state.wasm);
+  const userData = useSelector(state => state.auth.userdata);
+  const session = userData ? userData.session : null;
 
   useEffect(() => {
-    if (count === 0 && userData) {
-      loadWasmComplete("editor", canvas.current, userData.session);
+    if (count === 0 && session) {
+      loadWasmComplete("editor", canvas.current, session, dispatch);
       setCount(1);
     }
-  }, [canvas, count, userData]);
+  }, [canvas, count, session, dispatch]);
 
-  const canvasSizeX = width.toString() + "px";
-  const canvasSizeY = height.toString() + "px";
+  const canvasSizeX = wasmState.canvasWidth.toString() + "px";
+  const canvasSizeY = wasmState.canvasHeight.toString() + "px";
 
   const canvasClientSizeX =
-    (width * (window.devicePixelRatio || 1)).toString() + "px";
+    (wasmState.canvasWidth * (window.devicePixelRatio || 1)).toString() + "px";
   const canvasClientSizeY =
-    (height * (window.devicePixelRatio || 1)).toString() + "px";
+    (wasmState.canvasHeight * (window.devicePixelRatio || 1)).toString() + "px";
 
   const canvasPadding = "1px";
   const canvasMargin = "0px";
@@ -179,11 +198,11 @@ const WasmCanvas = ({ left, top, width, height, visible, userData }) => {
 
   const canvasStyle = {
     position: "absolute",
-    visibility: visible,
+    visibility: wasmState.canvasVisible,
     width: canvasSizeX,
     height: canvasSizeY,
-    left: left,
-    top: top,
+    left: wasmState.canvasLeft,
+    top: wasmState.canvasTop,
     margin: canvasMargin,
     padding: canvasPadding,
     borderRadius: canvasRadius
@@ -200,38 +219,9 @@ const WasmCanvas = ({ left, top, width, height, visible, userData }) => {
       onContextMenu={e => e.preventDefault()}
     />
   );
-
-  // return <canvas id="WasmCanvas" style={canvasStyle}></canvas>;
 };
 
-const mapStateToProps = state => ({
-  width: state.wasm.canvasWidth,
-  height: state.wasm.canvasHeight,
-  left: state.wasm.canvasLeft,
-  top: state.wasm.canvasTop,
-  visible: state.wasm.canvasVisible,
-  currentEntity: state.entities.currentEntity,
-  group: state.entities.group,
-  userData: state.auth.userdata
-});
-
-export default connect(mapStateToProps)(WasmCanvas);
-
-const initialState = {
-  error: null,
-  resize: true,
-  loading: false,
-  loaded: false,
-  running: false,
-  wasmCanvas: null,
-  consoleOutput: [],
-  consoleOutputDirty: false,
-  canvasWidth: 1,
-  canvasHeight: 1,
-  canvasTop: 0,
-  canvasLeft: 0,
-  canvasVisible: "hidden"
-};
+export default WasmCanvas;
 
 const wasmLoadStart = (state, action) => {
   return updateObject(state, {
