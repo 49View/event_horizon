@@ -103,8 +103,16 @@ export const login = (email, password, project) => async dispatch => {
 };
 
 // Logout / Clear Profile
-export const logout = () => dispatch => {
-  dispatch({ type: LOGOUT });
+export const logout = () => async dispatch => {
+  try {
+    await axios.get("/cleanToken");
+    dispatch({ type: LOGOUT });
+  } catch (error) {
+    dispatch({
+      type: LOGIN_FAIL
+    });
+    dispatch(setAlert("Logout Failed", "danger"));
+  }
 };
 
 export const logoffFromProject = () => dispatch => {

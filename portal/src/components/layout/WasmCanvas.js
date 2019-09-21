@@ -8,8 +8,6 @@ const WasmCanvas = ({
   width,
   height,
   visible,
-  currentEntity,
-  group,
   userToken,
   userData
 }) => {
@@ -21,13 +19,10 @@ const WasmCanvas = ({
       loadWasmComplete("editor", canvas.current, userToken, userData.session);
       setCount(1);
     }
-  }, [group, currentEntity, canvas, count, userToken, userData]);
+  }, [canvas, count, userToken, userData]);
 
-  // console.log("Invalidated: canvas");
-  const canvasVisibility = currentEntity && group !== "" ? "visible" : "hidden";
-
-  const canvasSizeXNum = width; // bShowEntityCanvas ? 529 : 510;
-  const canvasSizeYNum = height; //bShowEntityCanvas ? 536 : 286;
+  const canvasSizeXNum = width;
+  const canvasSizeYNum = height;
 
   const canvasSizeX = canvasSizeXNum.toString() + "px";
   const canvasSizeY = canvasSizeYNum.toString() + "px";
@@ -43,7 +38,7 @@ const WasmCanvas = ({
 
   const canvasStyle = {
     position: "absolute",
-    visibility: canvasVisibility,
+    visibility: visible,
     width: canvasSizeX,
     height: canvasSizeY,
     left: left,
@@ -53,11 +48,6 @@ const WasmCanvas = ({
     borderRadius: canvasRadius
   };
 
-  // console.log("Canvas attriubes: ", canvasStyle);
-  // let visibility = "hidden";
-  // if (visible === true) {
-  //   visibility = "visible";
-  // }
   return (
     <canvas
       id="WasmCanvas"

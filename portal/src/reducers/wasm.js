@@ -25,7 +25,7 @@ const initialState = {
   canvasHeight: 100,
   canvasTop: 0,
   canvasLeft: 0,
-  canvasVisible: true
+  canvasVisible: "hidden"
 };
 
 const wasmLoadStart = (state, action) => {

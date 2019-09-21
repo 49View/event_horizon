@@ -187,6 +187,8 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
 
     sg.nodeFullScreenUIContainerConnect( [this](CResourceRef _node) {
         auto ui = sg.UL( _node );
+        addUIContainer( MPos2d{ 0.0f, 0.07f }, _node );
+
         Socket::send( "wasmClientFinishedLoadingData", *ui.get() );
     });
 

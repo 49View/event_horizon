@@ -8,7 +8,7 @@ import GUIEditor from "./entities/GUIEditor";
 import GeomEditor from "./entities/GeomEditor";
 import FontEditor from "./entities/FontEditor";
 import MaterialEditor from "./entities/MaterialEditor";
-import { wasmSetCanvasSize } from "../../actions/wasm";
+import { wasmSetCanvasSize, wasmSetCanvasVisibility } from "../../actions/wasm";
 import EntityMetaSection from "./entities/EntityMetaSection";
 import RenderParamsToolbar from "./entities/RenderParamsToolbar";
 import { getFullEntity } from "../../actions/entities";
@@ -78,6 +78,11 @@ const DashboardProject = ({
     if (group === "" && entities.length === 1 && !currentEntity) {
       store.dispatch(getFullEntity(entities[0]));
     }
+    store.dispatch(
+      wasmSetCanvasVisibility(
+        currentEntity && group !== "" ? "visible" : "hidden"
+      )
+    );
     console.log("Invalidate: dashboard project");
   }, [currentEntity, entities, group]);
 
