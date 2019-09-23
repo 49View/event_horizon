@@ -11,12 +11,20 @@ import {
   groupHasImportFacility
 } from "../../../utils/utils";
 
-const EntityDragAndImport = ({ addEntity, group, project, user }) => {
+const EntityDragAndImport = ({
+  addEntity,
+  group,
+  groupSelected,
+  project,
+  user
+}) => {
   const alert = useAlert();
   const onDrop = useCallback(
     acceptedFiles => {
       // check file dragged has a valid extension for asset type
-      if (checkFileExtensionsOnEntityGroup(group, acceptedFiles[0].name)) {
+      if (
+        checkFileExtensionsOnEntityGroup(groupSelected, acceptedFiles[0].name)
+      ) {
         const reader = new FileReader();
         reader.onabort = () => console.log("file reading was aborted");
         reader.onerror = () => console.log("file reading has failed");
@@ -25,23 +33,29 @@ const EntityDragAndImport = ({ addEntity, group, project, user }) => {
             "Adding ",
             acceptedFiles[0].name,
             " as ",
-            group,
+            groupSelected,
             " to ",
             project
           );
-          addEntity(acceptedFiles[0].name, reader.result, group, project, user);
+          addEntity(
+            acceptedFiles[0].name,
+            reader.result,
+            groupSelected,
+            project,
+            user
+          );
         };
         acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
       } else {
         alert.show("Wrong file type", { type: "error" });
       }
     },
-    [addEntity, group, project, user, alert]
+    [addEntity, groupSelected, project, user, alert]
   );
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
-  const addButton = groupHasCreateEditor(group);
-  const importButton = groupHasImportFacility(group);
+  const addButton = groupHasCreateEditor(groupSelected);
+  const importButton = groupHasImportFacility(groupSelected);
 
   return (
     <Fragment>
@@ -73,6 +87,7 @@ EntityDragAndImport.propTypes = {
 
 const mapStateToProps = state => ({
   group: state.entities.group,
+  groupSelected: state.entities.groupSelected,
   project: state.auth.userdata.project,
   user: state.auth.userdata ? state.auth.userdata.user : null
 });

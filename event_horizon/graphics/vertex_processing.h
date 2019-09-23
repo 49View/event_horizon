@@ -114,12 +114,17 @@ public:
     void drawWith( RenderMaterial* _material, Program* _program = nullptr );
     void drawWithProgram( Program* _program );
 
+    [[nodiscard]] bool isHidden() const;
+
+    void setHidden( bool _bHidden );
+
 private:
     std::shared_ptr<GPUVData>           gpuData;
     std::shared_ptr<RenderMaterial>     material;
     std::shared_ptr<Matrix4f>           mTransform;
     std::shared_ptr<AABB>               bbox3d;
-    uint64_t mTag = GT_Generic;
+    uint64_t                            mTag = GT_Generic;
+    bool                                bHidden = false;
 };
 
 template <typename M>

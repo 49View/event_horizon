@@ -34,7 +34,7 @@ const getMetadataFromBody = (checkGroup, checkRaw, req) => {
 };
 
 const createMetadataStartup = (filename, username, useremail) => {
-  const tags = filename.split(/[\s,._-]+/);
+  const tags = metadataAssistant.splitTags(filename);
   return (metadata = {
     creator: {
       name: username,

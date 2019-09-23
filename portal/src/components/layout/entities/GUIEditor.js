@@ -2,6 +2,8 @@ import React, { Fragment, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Controlled as CodeMirror } from "react-codemirror2";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Button from "react-bootstrap/Button";
 
 require("codemirror/lib/codemirror.css");
 require("codemirror/theme/material.css");
@@ -29,28 +31,46 @@ const GUIEditor = ({ currentEntityData }) => {
 
   if (!currentEntityData) return <Fragment></Fragment>;
 
+  const handleClick = () => {};
+
   return (
-    <div className="nodeViewer-a">
-      <CodeMirror
-        value={fileC}
-        className="react-codemirror2 appdataquad"
-        options={{
-          mode: "javascript",
-          theme: "material",
-          lineNumbers: true
-        }}
-        onBeforeChange={(editor, data, value) => {
-          setFileC(value);
-        }}
-        onChange={(editor, data, value) => {}}
-        onKeyPress={(editor, event) => {
-          if (event.code === "Enter" && event.ctrlKey === true) {
-            // const content = editor.getValue();
-            // window.Module.addScriptLine(content);
-          }
-        }}
-      />
-    </div>
+    <Fragment>
+      <div className="nodeViewer-a">
+        <CodeMirror
+          value={fileC}
+          className="react-codemirror2 appdataquad"
+          options={{
+            mode: "javascript",
+            theme: "material",
+            lineNumbers: true
+          }}
+          onBeforeChange={(editor, data, value) => {
+            setFileC(value);
+          }}
+          onChange={(editor, data, value) => {}}
+          onKeyPress={(editor, event) => {
+            if (event.code === "Enter" && event.ctrlKey === true) {
+              // const content = editor.getValue();
+              // window.Module.addScriptLine(content);
+            }
+          }}
+        />
+      </div>
+      <div className="source_controls-a">
+        <ButtonGroup size="sm">
+          <Button
+            variant="secondary"
+            value={1}
+            onClick={e => {
+              handleClick();
+              window.Module.addScriptLine(fileC);
+            }}
+          >
+            <i className="fas fa-play"></i>
+          </Button>
+        </ButtonGroup>
+      </div>
+    </Fragment>
   );
 };
 

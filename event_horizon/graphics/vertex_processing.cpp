@@ -114,3 +114,11 @@ const AABB& VPList::BBox3d() const {
 void VPList::updateP3V3( const std::vector<V3f>& _values ) {
     gpuData->updateP3V3( _values );
 }
+
+bool VPList::isHidden() const {
+    return bHidden;
+}
+
+void VPList::setHidden( bool _bHidden ) {
+    bHidden = _bHidden;
+}

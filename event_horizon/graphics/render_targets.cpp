@@ -452,8 +452,13 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                     rr.addToCommandBuffer( vl.mVList, cameraRig.get());
                 }
             }
+#ifndef __EMSCRIPTEN__
             blit( cb );
+#endif
         }
+#ifdef __EMSCRIPTEN__
+        blit( cb );
+#endif
         cb.pushCommand( { CommandBufferCommandName::blitPBRToScreen } );
 
         cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );

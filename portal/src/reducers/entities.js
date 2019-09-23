@@ -36,6 +36,7 @@ const initialState = {
   currentEntityNodes: null,
   appKey: "",
   group: "",
+  groupSelected: "",
   loading: false,
   error: {}
 };
@@ -154,6 +155,7 @@ export default function(state = initialState, action) {
     case GET_ENTITY_LIST_PRELOAD:
       return {
         ...state,
+        groupSelected: payload,
         loading: true,
         currentTags: [],
         entriesFiltered: [],

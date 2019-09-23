@@ -504,7 +504,7 @@ router.delete("/:id", async (req, res, next) => {
     const currentEntity = await entityController.getEntityByIdProject(
       project,
       entityId,
-      false
+      true
     );
     if (currentEntity === null) {
       console.log(

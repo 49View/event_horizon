@@ -174,6 +174,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     sg.nodeRemoveConnect( [this]( NodeGraphConnectParamsSig _geom ) {
         this->RR().clearBucket( CommandBufferLimits::UI2dStart );
         this->RR().clearBucket( CommandBufferLimits::PBRStart );
+        this->RR().clearBucket( CommandBufferLimits::UnsortedStart );
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     });
 
@@ -187,7 +188,8 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
 
     sg.nodeFullScreenUIContainerConnect( [this](CResourceRef _node) {
         auto ui = sg.UL( _node );
-        addUIContainer( MPos2d{ 0.0f, 0.07f }, _node );
+        addUIContainer( MPos2d{ 0.5f, 0.07f }, _node );
+        UI().loadResources();
 
         Socket::send( "wasmClientFinishedLoadingData", *ui.get() );
     });

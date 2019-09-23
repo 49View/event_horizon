@@ -294,9 +294,17 @@ void Renderer::clearCommandList() {
 }
 
 void Renderer::clearBucket( const int _bucket ) {
-    if ( auto it = mCommandLists.find( _bucket ); it != mCommandLists.end()) {
-        mCommandLists.erase( it );
-    }
+
+    bool bHasBucket = false;
+    size_t inc = 0;
+    do {
+        bHasBucket = false;
+        if ( auto it = mCommandLists.find( _bucket + inc ); it != mCommandLists.end()) {
+            mCommandLists.erase( it );
+            bHasBucket = true;
+            inc++;
+        }
+    } while ( bHasBucket );
 }
 
 void Renderer::removeFromCL( const UUID& _uuid ) {
@@ -481,6 +489,7 @@ void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _m
     Camera *cam = _cameraRig ? _cameraRig->getCamera().get() : nullptr;
     bool addVP = true;
     for ( const auto& vp : _map ) {
+        if ( vp->isHidden() ) continue;
         if ( cam ) {
             addVP = cam->frustomClipping( vp->BBox3d());
         }

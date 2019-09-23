@@ -34,7 +34,7 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
   try {
     dispatch({
       type: GET_ENTITY_LIST_PRELOAD,
-      payload: null
+      payload: group
     });
 
     let res = null;
