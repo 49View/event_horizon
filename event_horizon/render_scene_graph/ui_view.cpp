@@ -54,21 +54,22 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
         defaultBackgroundColor = C4f::WHITE.A(0.4f);
         backgroundVP = rsg.RR().draw<DRect2dRounded>(CommandBufferLimits::UI2dStart, ssBBox, _localHierMat,
                 RDSRoundedCorner(ssBBox.height()*0.33f), defaultBackgroundColor );
-        return;
+    } else {
+        if ( text.empty() ) {
+            defaultBackgroundColor = type() == UIT::background() ? Color4f::XTORGBA("#036FAB").A(0.9f) : C4f::WHITE.A(0.3f);
+            backgroundVP =rsg.RR().draw<DRect2dRounded>(CommandBufferLimits::UI2dStart, ssBBox, _localHierMat, defaultBackgroundColor);
+        }
+        if ( !foreground.empty() && text.empty() ) {
+            foregroundVP =rsg.RR().draw<DRect2d>( CommandBufferLimits::UI2dStart, ssBBox, _localHierMat, RDSImage{foreground}, tintColor );
+        }
+        if ( !text.empty() ) {
+            foregroundVP =rsg.RR().draw<DText2d>( CommandBufferLimits::UI2dStart,
+                                                  FDS{ text, font, ssBBox.bottomLeft(), fontHeight, fontAngle},
+                                                  _localHierMat, fontColor );
+        }
     }
 
-    if ( text.empty() ) {
-        defaultBackgroundColor = type() == UIT::background() ? Color4f::XTORGBA("#036FAB").A(0.9f) : C4f::WHITE.A(0.3f);
-        backgroundVP =rsg.RR().draw<DRect2dRounded>(CommandBufferLimits::UI2dStart, ssBBox, _localHierMat, defaultBackgroundColor);
-    }
-    if ( !foreground.empty() && text.empty() ) {
-        foregroundVP =rsg.RR().draw<DRect2d>( CommandBufferLimits::UI2dStart, ssBBox, _localHierMat, RDSImage{foreground}, tintColor );
-    }
-    if ( !text.empty() ) {
-        foregroundVP =rsg.RR().draw<DText2d>( CommandBufferLimits::UI2dStart,
-                FDS{ text, font, ssBBox.bottomLeft(), fontHeight, fontAngle},
-                _localHierMat, fontColor );
-    }
+    applyVisibility();
 }
 
 void UIElement::transform( float _duration, uint64_t _frameSkipper,
@@ -208,10 +209,14 @@ void UIElement::toggle() {
     }
 }
 
+void UIElement::applyVisibility() {
+    if ( foregroundVP ) foregroundVP->setHidden( !bVisible );
+    if ( backgroundVP ) backgroundVP->setHidden( !bVisible );
+}
+
 void UIElement::setVisible( bool _value ) {
     bVisible = _value;
-    foregroundVP->setHidden( !_value );
-    backgroundVP->setHidden( !_value );
+    applyVisibility();
 }
 
 void UIElement::fadeTo( float _duration, float _value ) {

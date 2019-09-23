@@ -371,7 +371,7 @@ public:
     void toggleSelected();
 private:
     void updateStatus();
-
+    void applyVisibility();
 private:
     RenderOrchestrator& rsg;
 
