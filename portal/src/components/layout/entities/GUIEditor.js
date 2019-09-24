@@ -4,6 +4,7 @@ import { Controlled as CodeMirror } from "react-codemirror2";
 import { updateAsset } from "../../../utils/webSocketClient";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
+import axios from "axios";
 
 require("codemirror/lib/codemirror.css");
 require("codemirror/theme/material.css");
@@ -45,6 +46,19 @@ const GUIEditor = () => {
     }
   };
 
+  const saveEntityData = async fileC => {
+    try {
+      const jc = JSON.parse(fileC);
+      await axios.put("entities/" + currentEntity.entity._id, jc, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+    } catch (error) {
+      console.log("JSON error for GUI schema: ", error);
+    }
+  };
+
   return (
     <Fragment>
       <div className="nodeViewer-a">
@@ -79,6 +93,15 @@ const GUIEditor = () => {
             }}
           >
             <i className="fas fa-play"></i>
+          </Button>
+          <Button
+            variant="secondary"
+            value={1}
+            onClick={e => {
+              saveEntityData(fileC);
+            }}
+          >
+            <i className="fas fa-save"></i>
           </Button>
         </ButtonGroup>
       </div>

@@ -251,21 +251,10 @@ const createEntity = async (
   return newEntityDB.toObject();
 };
 
-const updateEntity = async (
-  entityId,
-  project,
-  group,
-  isPublic,
-  isRestricted,
-  metadata
-) => {
+const updateEntity = async (entityId, metadata) => {
   const query = { _id: mongoose.Types.ObjectId(entityId) };
 
   await entityModel.updateOne(query, {
-    project: project,
-    group: group,
-    isPublic: isPublic,
-    isRestricted: isRestricted,
     metadata: metadata
   });
 };

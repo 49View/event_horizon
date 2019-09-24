@@ -6,6 +6,7 @@ const metaAssistant = require("../assistants/metadataAssistant");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const zlib = require("zlib");
+const md5 = require("md5");
 
 router.get("/content/byId/:id", async (req, res, next) => {
   try {
@@ -436,58 +437,51 @@ router.put("/:id", async (req, res, next) => {
       throw "Invalid entity for user project";
     }
     const group = currentEntity.group;
-    const metadata = entityController.getMetadataFromBody(false, false, req);
-    const {
-      content,
-      isPublic,
-      isRestricted,
-      cleanMetadata
-    } = entityController.cleanupMetadata(metadata);
+    let content = req.body;
+    var contype = req.headers["content-type"];
+    if (contype.indexOf("application/json") !== -1) {
+      content = Buffer.from(JSON.stringify(content));
+    }
+
     //If content defined
     if (content !== null) {
-      //Check content exists in project and group
-      const copyEntity = await entityController.checkFileExists(
+      const origFilePath = entityController.getFilePath(
         project,
         group,
-        cleanMetadata.name
+        currentEntity.metadata.name
       );
-      if (copyEntity !== null && !copyEntity._id.equals(currentEntity._id)) {
-        throw "Content already defined";
-      } else if (copyEntity === null) {
-        //Remove current file from S3
-        await fsController.cloudStorageDelete(
-          entityController.getFilePath(
-            project,
-            group,
-            currentEntity.metadata.name
-          ),
-          "eventhorizonentities"
-        );
-        //Upload file to S3
-        const filePath = entityController.getFilePath(
-          project,
-          group,
-          cleanMetadata.name
-        );
-        await fsController.cloudStorageFileUpload(
-          content,
-          filePath,
-          "eventhorizonentities"
-        );
-      }
-    } else {
-      //If content don't change use current name
-      cleanMetadata.name = currentEntity.metadata.name;
+      const tempDeleteFilePath = origFilePath + ".delete";
+      // Remove current file from S3
+      await fsController.cloudStorageRename(
+        origFilePath,
+        tempDeleteFilePath,
+        "eventhorizonentities"
+      );
+      //Upload file to S3
+      const filePath = entityController.getFilePath(
+        project,
+        group,
+        currentEntity.metadata.name
+      );
+      await fsController.cloudStorageFileUpload(
+        content,
+        filePath,
+        "eventhorizonentities"
+      );
+      await fsController.cloudStorageDelete(
+        tempDeleteFilePath,
+        "eventhorizonentities"
+      );
+
+      const metadata = {
+        ...currentEntity.metadata,
+        hash: md5(content),
+        lastUpdatedDate: new Date()
+      };
+
+      //Update entity
+      await entityController.updateEntity(currentEntity._id, metadata);
     }
-    //Update entity
-    await entityController.updateEntity(
-      currentEntity._id,
-      project,
-      group,
-      isPublic,
-      isRestricted,
-      cleanMetadata
-    );
 
     res.status(204).send();
   } catch (ex) {
