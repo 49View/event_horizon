@@ -226,6 +226,7 @@ public:
     void addResources( CResourceRef _key, const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
 
     ResourceRef addMaterialIM    ( const ResourceRef& _key, const Material     & _res );
+    ResourceRef addUIIM          ( const ResourceRef& _key, const UIContainer& _res );
 
     static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
         SceneGraph::genericSceneCallback.emplace( _key, std::move(_value) );
@@ -384,6 +385,7 @@ protected:
     void realTimeCallbacks();
     void loadCallbacks();
 
+    void clearFromRealTimeCallbacks();
     ResourceRef GBMatInternal( CResourceRef _matref, const C4f& _color );
     void materialsForGeomSocketMessage();
     void replaceMaterialOnNodes( const std::string& _key );

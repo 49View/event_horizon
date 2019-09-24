@@ -188,9 +188,9 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
 
     sg.nodeFullScreenUIContainerConnect( [this](CResourceRef _node) {
         auto ui = sg.UL( _node );
-        addUIContainer( MPos2d{ 0.5f, 0.07f }, _node );
+        clearUIView();
+        addUIContainer( MPos2d{ 0.02f, 0.02f*getScreenAspectRatio }, _node );
         UI().loadResources();
-
         Socket::send( "wasmClientFinishedLoadingData", *ui.get() );
     });
 
@@ -596,6 +596,10 @@ SceneGraph& RenderOrchestrator::SG() { return sg; }
 UIView& RenderOrchestrator::UI() { return uiView; }
 
 UICallbackMap& RenderOrchestrator::UICB() { return uiView.Callbacks(); }
+
+void RenderOrchestrator::clearUIView() {
+    uiView.clear();
+}
 
 void RenderOrchestrator::addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus ) {
     UIViewContainer container{ *this, _res, SG().get<UIContainer>( _res ).get() };

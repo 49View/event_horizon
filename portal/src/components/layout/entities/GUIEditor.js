@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
+import { useSelector } from "react-redux";
 import { Controlled as CodeMirror } from "react-codemirror2";
+import { updateAsset } from "../../../utils/webSocketClient";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 
@@ -20,8 +20,13 @@ const removeEmpty = obj => {
   return obj;
 };
 
-const GUIEditor = ({ currentEntityData }) => {
+const GUIEditor = () => {
   const [fileC, setFileC] = useState(null);
+
+  const currentEntityData = useSelector(
+    state => state.entities.currentEntityData
+  );
+  const currentEntity = useSelector(state => state.entities.currentEntity);
 
   useEffect(() => {
     if (currentEntityData) {
@@ -31,7 +36,14 @@ const GUIEditor = ({ currentEntityData }) => {
 
   if (!currentEntityData) return <Fragment></Fragment>;
 
-  const handleClick = () => {};
+  const handleClick = fileC => {
+    try {
+      const jc = JSON.parse(fileC);
+      updateAsset(jc, currentEntity);
+    } catch (error) {
+      console.log("JSON error for GUI schema: ", error);
+    }
+  };
 
   return (
     <Fragment>
@@ -50,6 +62,7 @@ const GUIEditor = ({ currentEntityData }) => {
           onChange={(editor, data, value) => {}}
           onKeyPress={(editor, event) => {
             if (event.code === "Enter" && event.ctrlKey === true) {
+              handleClick(fileC);
               // const content = editor.getValue();
               // window.Module.addScriptLine(content);
             }
@@ -62,8 +75,7 @@ const GUIEditor = ({ currentEntityData }) => {
             variant="secondary"
             value={1}
             onClick={e => {
-              handleClick();
-              window.Module.addScriptLine(fileC);
+              handleClick(fileC);
             }}
           >
             <i className="fas fa-play"></i>
@@ -74,15 +86,4 @@ const GUIEditor = ({ currentEntityData }) => {
   );
 };
 
-GUIEditor.propTypes = {
-  currentEntityData: PropTypes.object
-};
-
-const mapStateToProps = state => ({
-  currentEntityData: state.entities.currentEntityData
-});
-
-export default connect(
-  mapStateToProps,
-  {}
-)(GUIEditor);
+export default GUIEditor;

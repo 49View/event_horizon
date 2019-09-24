@@ -97,6 +97,7 @@ public:
         }
     }
 
+    void clearUIView();
     void addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus = UIElementStatus::Enabled  );
 
     void resizeCallback( const Vector2i& _resize );

@@ -158,6 +158,10 @@ void stripUnicode(std::string & str)
     str.erase(std::remove_if(str.begin(),str.end(), invalidChar), str.end());  
 }
 
+SerializableContainer serializableContainerFromString( const std::string& s ) {
+    return SerializableContainer{ s.data(), s.data() + s.size() };
+}
+
 bool isFilenameAFolder( const std::string& input ) {
 	size_t pos = input.find_last_of( "/" );
 	if ( pos != std::string::npos && pos == input.size() - 1 ) return true;

@@ -7,7 +7,6 @@
 #include <core/math/anim.h>
 #include <core/descriptors/uniform_names.h>
 #include <core/font_utils.hpp>
-#include <poly/scene_graph.h>
 #include <graphics/renderer.h>
 #include <render_scene_graph/render_orchestrator.h>
 
@@ -423,6 +422,12 @@ UICallbackMap& UIView::Callbacks() {
     return callbacks;
 }
 
+void UIView::clear() {
+    elements.clear();
+    callbacks.clear();
+    activeTaps.clear();
+}
+
 void UIViewContainer::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize ) {
 
     if ( _displayMode == CSSDisplayMode::Block ) {
@@ -627,15 +632,17 @@ void UIViewContainer::unpack( UIContainer* _data ) {
     std::unordered_map<std::string, float> uiFontSizes{
             { "title", 0.025f }, { "lead", 0.020f }, { "normal", 0.016f }
     };
-    for ( const auto& entry : _data->entries ) {
+    for ( auto entry : _data->entries ) {
+        entry.fixUpDefaults();
         if ( entry.type == "EmptyCaret" ) {
             addEmptyCaret();
         }
         if ( entry.type == "Title" ) {
-            addTitle( { S::DEFAULT_FONT, uiFontSizes["title"], entry.text } );
+            addTitle( { entry.font, uiFontSizes["title"], entry.text } );
         } else if ( entry.type == "ListEntry" ) {
             std::vector<UIFontText> te;
-            for ( const auto& tf : entry.entries ) {
+            for ( auto tf : entry.entries ) {
+                tf.fixUpDefaults();
                 te.emplace_back( tf.font, uiFontSizes[tf.size], C4f::XTORGBA(tf.color), tf.text );
             }
             auto cb = entry.func.empty() ? sUIEmptyCallback : rsg.UICB()[entry.func[0]];
@@ -643,7 +650,8 @@ void UIViewContainer::unpack( UIContainer* _data ) {
             addListEntry( { entry.id, entry.icon, te, cb, cbParam  } );
         } else if ( entry.type == "ButtonGroupLine" ) {
             std::vector<ControlDef> te;
-            for ( const auto& tf : entry.entries ) {
+            for ( auto tf : entry.entries ) {
+                tf.fixUpDefaults();
                 auto cb = tf.func.empty() ? sUIEmptyCallback : rsg.UICB()[tf.func[0]];
                 auto cbParam = tf.func.size() >= 2 ? tf.func[1] : "-1";
                 te.emplace_back( ControlDef{tf.id, tf.icon, {tf.font, uiFontSizes[tf.size], C4f::XTORGBA(tf.color), tf.text}, cb, cbParam} );

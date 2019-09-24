@@ -20,6 +20,19 @@ const wscSendInternal = (message, obj) => {
   }
 };
 
+export const updateAsset = (currentEntityData, currentEntity) => {
+  try {
+    const obj = {
+      group: currentEntity.entity.group,
+      entity_id: currentEntity.entity._id,
+      data: currentEntityData
+    };
+    wscSend("UpdateEntity", obj);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const requestAsset = currentEntity => {
   try {
     const obj = {

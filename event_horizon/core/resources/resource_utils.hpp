@@ -108,7 +108,7 @@ public:
         if constexpr ( std::is_same<R, Profile>::value )                return _val->serialize();
         if constexpr ( std::is_same<R, RawImage>::value )               return _val->serialize();
         if constexpr ( std::is_same<R, Font>::value )                   return {};
-        if constexpr ( std::is_same<R, UIContainer>::value )     return {};
+        if constexpr ( std::is_same<R, UIContainer>::value )            return serializableContainerFromString(_val->serialize());
         if constexpr ( std::is_same<R, CameraRig>::value )              return {};
     }
 

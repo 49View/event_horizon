@@ -97,6 +97,8 @@ bool isFileExtAnImage( const std::string& _ext );
 std::string toLower( const std::string _input );
 std::string cbToString( uint8_p&& _data );
 
+SerializableContainer serializableContainerFromString( const std::string& s );
+
 bool nameHasImageExtension( const std::string& input );
 bool string_ends_with( const std::string& source, const std::string& match );
 std::string string_trim_upto( const std::string& source, const std::string& match );

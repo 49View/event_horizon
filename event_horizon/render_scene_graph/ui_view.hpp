@@ -471,6 +471,7 @@ public:
     UIView( SceneGraph& sg, const ColorScheme& cs ) : sg( sg ), colorScheme( cs ) {}
     void add( UIElementSP _elem, UIElementStatus _initialStatus = UIElementStatus::Enabled );
     void add( const MPos2d& _at, UIViewContainer& _container, UIElementStatus _initialStatus = UIElementStatus::Enabled );
+    void clear();
 
     UIElementSP operator()( CResourceRef _key );
 

@@ -155,16 +155,30 @@ void SceneGraph::publishAndAddCallback() {
     genericSceneCallback.clear();
 }
 
+void SceneGraph::clearFromRealTimeCallbacks() {
+    removeNode( !nodes.empty() ? nodes.begin()->second : nullptr );
+    GM().clear();
+    Nodes().clear();
+};
+
 void SceneGraph::realTimeCallbacks() {
     for ( auto&[k, doc] : eventSceneCallback ) {
 
+        if ( k == SceneEvents::UpdateEntity ) {
+            clearFromRealTimeCallbacks();
+            auto entityGroup = doc["data"]["group"].GetString();
+
+            if ( entityGroup == ResourceGroup::UI ) {
+                um.clear();
+                auto rref = addUIIM( UUIDGen::make(), UIContainer{doc["data"]["data"]} );
+                nodeFullScreenUIContainerSignal( rref );
+            }
+        }
         if ( k == SceneEvents::LoadGeomAndReset ) {
             auto v0 = getFileName( doc["data"]["entity_id"].GetString());
             auto vHash = getFileName( doc["data"]["hash"].GetString());
 
-            removeNode( !nodes.empty() ? nodes.begin()->second : nullptr );
-            GM().clear();
-            Nodes().clear();
+            clearFromRealTimeCallbacks();
             Http::clearRequestCache();
 
             auto entityGroup = doc["data"]["group"].GetString();
@@ -441,6 +455,16 @@ ResourceRef SceneGraph::addCameraRig( const ResourceRef& _key, const CameraRig& 
 ResourceRef SceneGraph::addGeom( const ResourceRef& _key, GeomSP _res, HttpResouceCB _ccf ) {
     B<GRB>( _key ).addIM( _res );
     if ( _ccf ) _ccf( _key );
+    return _key;
+}
+
+ResourceRef SceneGraph::addUI( const ResourceRef& _key, const UIContainer& _res, HttpResouceCB _ccf ) {
+    B<UIB>( _key ).addDF( _res, _ccf );
+    return _key;
+}
+
+ResourceRef SceneGraph::addUIIM( const ResourceRef& _key, const UIContainer& _res ) {
+    B<UIB>( _key ).addIM( _res );
     return _key;
 }
 
