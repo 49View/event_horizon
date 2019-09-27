@@ -429,7 +429,10 @@ VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
         }
     }
 
-    return addVertexStrips<Pos3dStrip>( *this, stripInserter<V3f>(allVLists), rds);
+    auto lineList = stripInserter<V3f>(allVLists);
+    if ( lineList.empty() ) return nullptr;
+
+    return addVertexStrips<Pos3dStrip>( *this, lineList, rds);
 }
 
 VPListSP Renderer::drawRectFinal( RendererDrawingSet& rds ) {

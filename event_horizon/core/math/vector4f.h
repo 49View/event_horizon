@@ -103,6 +103,7 @@ public:
 	static Vector4f FTORGBA( const float r, const float g, const float b, const float a );
 	static Vector4f FTORGBA( const Vector4f& _val );
 	static Vector4f COLORA( const Vector4f& source, const float a );
+	static Vector4f RANDA1();
 
 	Vector4f() {
 	}

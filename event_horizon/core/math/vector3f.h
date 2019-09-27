@@ -675,7 +675,8 @@ using QuadVector3fList = std::vector<QuadVector3f>;
 struct XZY {
 	static Vector3f C( const Vector3f& _v );
 	static Vector3f C( const Vector2f& v2, const float z );
-	static Vector3f C( const float x, const float y, const float z );
+	static Vector2f C2( const Vector3f& v2 );
+	static Vector3f C( float x, float y, float z );
 	static std::vector<Vector3f> C( const std::vector<Vector3f>& _v );
 	static std::vector<Vector3f> C( const std::vector<Vector2f>& _v, float _z = 0.0f );
     static std::vector<Vector2f> C2( const std::vector<Vector3f>& _v );

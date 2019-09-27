@@ -11,6 +11,8 @@
 
 using namespace JMATH;
 
+class Vector3f;
+
 class Vector2f {
 public:
     friend std::ostream& operator<<( std::ostream& os, const Vector2f& f );
@@ -56,6 +58,8 @@ public:
 		mX = static_cast<float>( v.x() );
 		mY = static_cast<float>( v.y() );
 	}
+
+    Vector2f( const Vector3f& v );
 
     template <typename T>
     Vector2f( const std::vector<T> _v ) {

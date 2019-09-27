@@ -70,8 +70,10 @@ std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
             return "depthMapBufferBindAndClear";
         case CommandBufferCommandName::normalMapBufferBindAndClear:
             return "normalMapBufferBindAndClear";
-        case CommandBufferCommandName::ssaoRender:
+        case CommandBufferCommandName::ssaoBufferBindAndClear:
             return "ssaoMapBufferBindAndClear";
+        case CommandBufferCommandName::ssaoRender:
+            return "ssaoRender";
         case CommandBufferCommandName::shadowMapClearDepthBufferZero:
             return "shadowMapClearDepthBufferZero";
         case CommandBufferCommandName::shadowMapClearDepthBufferOne:
@@ -327,6 +329,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             break;
         case CommandBufferCommandName::normalMapBufferBindAndClear:
             cstack->fb(CommandBufferFrameBufferType::normalMap)->bindAndClearWithColor(C4f::NORMAL_MAP_COLOR);
+            break;
+        case CommandBufferCommandName::ssaoBufferBindAndClear:
+            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->bindAndClearWithColor(C4f::WHITE);
             break;
         case CommandBufferCommandName::ssaoRender: {
             cstack->fb( CommandBufferFrameBufferType::ssaoMap )->bind();

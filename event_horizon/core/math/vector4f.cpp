@@ -178,5 +178,9 @@ const Vector4f Vector4f::SNOW = Vector4f( 255.0f / 255.0f, 250.0f / 255.0f, 250.
 const Vector4f Vector4f::HONEYDEW = Vector4f( 185.0f / 255.0f, 70.0f / 255.0f, 36.0f / 255.0f, 1.0f );
 const Vector4f Vector4f::LIGHT_GREY = Vector4f( 211.0f / 255.0f, 211.0f / 255.0f, 211.0f / 255.0f, 1.0f );
 
+Vector4f Vector4f::RANDA1() {
+    return V4f{unitRand(), unitRand(), unitRand(), 1.0f};
+}
+
 
 

@@ -1,4 +1,5 @@
 #include "vector2f.h"
+#include "vector3f.h"
 #include "matrix2f.h"
 #include "math_util.h"
 
@@ -33,6 +34,11 @@ std::string Vector2f::toStringObj( const std::string& _prefix ) const {
 std::ostream& operator<<( std::ostream& os, const Vector2f& f ) {
     os << "X: " << f.mX << " Y: " << f.mY;
     return os;
+}
+
+Vector2f::Vector2f( const Vector3f& v ) {
+    mX = static_cast<float>( v.x() );
+    mY = static_cast<float>( v.y() );
 }
 
 int winding( const std::vector<Vector2f>& points ) {

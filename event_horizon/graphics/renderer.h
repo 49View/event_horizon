@@ -15,6 +15,7 @@
 #include <graphics/ghtypes.hpp>
 #include <graphics/shadowmap_manager.h>
 
+struct DCircle {};
 struct DLine {};
 struct DLine2d {};
 struct DRect {};

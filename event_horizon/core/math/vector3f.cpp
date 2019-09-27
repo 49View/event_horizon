@@ -147,3 +147,7 @@ std::vector<Vector3f> XZY::C( const std::vector<Vector2f>& _v, float _z ) {
 	for ( auto& v : _v ) ret.emplace_back(Vector3f{v.x(), _z, v.y() });
 	return ret;
 }
+
+Vector2f XZY::C2( const Vector3f& v2 ) {
+    return V2f{v2.x(), v2.z()};
+}

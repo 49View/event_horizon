@@ -114,6 +114,7 @@ enum class CommandBufferCommandName {
 
     depthMapBufferBindAndClear,
     normalMapBufferBindAndClear,
+    ssaoBufferBindAndClear,
     ssaoRender,
 
     blitToScreen,

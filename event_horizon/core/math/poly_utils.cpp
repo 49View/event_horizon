@@ -1,5 +1,6 @@
 #include "poly_utils.hpp"
 #include "../serializebin.hpp"
+#include <poly/triangulator.hpp>
 
 std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
 									 const std::array<Vector2f, 4>& vtcs,
@@ -136,4 +137,12 @@ std::vector<Vector3f> createQuadPoints( const Vector2f& size ) {
 	lPoints.emplace_back( Vector2f( -size.x() * 0.5f, -size.y() * 0.5f ) );
 
 	return lPoints;
+}
+
+float areaOf( const V2fVector& vtri ) {
+
+    if ( vtri.size() < 3 ) return 0.0f;
+    Triangulator tri( vtri );
+
+    return getAreaOf(tri.get2dTrianglesTuple());
 }

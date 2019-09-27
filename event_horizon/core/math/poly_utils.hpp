@@ -112,3 +112,5 @@ template<typename T>
 std::vector<T> lineLR( const T& direction, float length ) {
     return { -direction*(length*0.5f), direction*(length*0.5f) };
 }
+
+float areaOf( const V2fVector& vtri );
