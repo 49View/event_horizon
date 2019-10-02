@@ -162,7 +162,7 @@ namespace VDataServices {
     void buildInternal( const GT::Extrude& _d, std::shared_ptr<VData> _ret ) {
         auto dmProgressive = _d.mappingData;
         for ( auto& ot : _d.extrusionVerts ) {
-            PolyServices::pull( _ret, ot.verts, ot.zPull, dmProgressive ); //pullFlags
+            PolyServices::pull( _ret, ot.verts, ot.normal, ot.zPull, dmProgressive ); //pullFlags
         }
     }
 

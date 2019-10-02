@@ -557,57 +557,25 @@ namespace PolyServices {
         }
     }
 
-    void pull( VDataSP vdata, const std::vector<Vector2f>& verts, float height, float zOffset,
+    void pull( VDataSP vdata, const std::vector<Vector2f>& verts, const V3f& normal, float height, float zOffset,
                GeomMappingData& m, PullFlags pullFlags ) {
         std::vector<Vector3f> v3f = pullWindingOrderCheck( verts, zOffset );
 
-        pull( vdata, v3f, height, m, pullFlags );
+        pull( vdata, v3f, normal, height, m, pullFlags );
     }
 
-    void pull( VDataSP vdata, const std::vector<Vector3f>& verts, float height,
+    void pull( VDataSP vdata, const std::vector<Vector3f>& verts, const V3f& normal, float height,
                GeomMappingData& m, PullFlags pullFlags ) {
         std::array<Vector2f, 4> vtcs{};
-        Vector3f normal = Vector3f::Z_AXIS;
-        Vector3f posNormal = Vector3f::Z_AXIS;
-        Vector3f negNormal = Vector3f::Z_AXIS;
 
         std::vector<Vector3f> vertsSane = verts;
         removeCollinear( vertsSane );
 
         if ( vertsSane.size() < 3 ) return;
 
-        int numPos = 0;
-        int numNeg = 0;
-        size_t vsize = vertsSane.size();
-        if ( vertsSane.size() > 2 ) {
-            for ( size_t t = 0; t < vsize; t++ ) {
-                Vector3f a = vertsSane[t];
-                Vector3f b = vertsSane[getCircularArrayIndexUnsigned( t + 1, vsize )];
-                Vector3f c = vertsSane[getCircularArrayIndexUnsigned( t + 2, vsize )];
-                normal = normalize( crossProduct( a, b, c) );
-                if ( dot( normal, Vector3f::Z_AXIS ) > 0.0f ) {
-                    posNormal = normal;
-                    numPos++;
-                } else {
-                    negNormal = normal;
-                    numNeg++;
-                }
-            }
-        } else {
-            normal = normalize( crossProduct( vertsSane[0], vertsSane[1], vertsSane[0] + Vector3f{ unitRand(), unitRand(), 0.0f } ) );
-        }
-
-        normal = ( numPos > numNeg ) ? posNormal : negNormal;
-        ASSERT( isValid(normal.x()));
-
         std::vector<Vector3f> nvertsSane = vertsSane;
-//        if ( mHasBevel ) {
-//            height -= mBevelAmount.z();
-//            height = max( 0.00001f, height );
-//        }
 
         Vector3f offset = normal * height;
-        // Reset pull mapping
         m.pullMappingCoords = m.offset;
         std::array<Vector3f, 4> vss;
 
@@ -616,10 +584,10 @@ namespace PolyServices {
                 uint64_t index = t;
                 uint32_t nextIndex = static_cast<uint32_t>( getCircularArrayIndexUnsigned( t + 1, nvertsSane.size() ));
 
-                vss[1] = ( vertsSane[index] );
-                vss[0] = ( vertsSane[nextIndex] );
-                vss[3] = ( vertsSane[index] + offset );
-                vss[2] = ( vertsSane[nextIndex] + offset );
+                vss[3] = ( vertsSane[index] );
+                vss[2] = ( vertsSane[nextIndex] );
+                vss[1] = ( vertsSane[index] + offset );
+                vss[0] = ( vertsSane[nextIndex] + offset );
 
                 MappingServices::updatePullMapping( m, vss, vtcs );
                 pushQuadSubDiv( vdata, vss, vtcs, m );
@@ -633,29 +601,6 @@ namespace PolyServices {
             for ( size_t q = 0; q < static_cast<uint64_t>(nvSize); q++ ) {
                 topvertsSane[l++] = nvertsSane[q];
             }
-//            if ( mHasBevel ) {
-//                // Draw bottom cap
-//                addFlatPoly( nvertsSane.size(), topvertsSane.get(), -normal, true );
-//
-//                // Draw Top
-//                for ( size_t q = 0; q < nvertsSane.size(); q++ ) topvertsSane[q] = nvertsSane[q] + offset;
-//                std::unique_ptr<Vector3f[]> bevelvertsSane( new Vector3f[nvSize] );
-//                for ( int32_t t = 0; t < nvSize; t++ ) {
-//                    Vector3f p1 = topvertsSane[getCircularArrayIndex( t - 1, nvSize )];
-//                    Vector3f p2 = topvertsSane[getCircularArrayIndex( t, nvSize )];
-//                    Vector3f p3 = topvertsSane[getCircularArrayIndex( t + 1, nvSize )];
-//                    Vector3f inWardNorm = normalize( normalize( p2 - p1 ) + normalize( p2 - p3 ) );
-//                    bevelvertsSane[t] = topvertsSane[t] + ( -inWardNorm * mBevelAmount.x() ) + ( normal * mBevelAmount.z() );
-//                }
-//                addFlatPoly( nvertsSane.size(), bevelvertsSane.get(), normal );
-//                for ( l = 0; l < nvertsSane.size(); l++ ) {
-//                    uint64_t l1 = getCircularArrayIndexUnsigned( l + 1, static_cast<uint64_t>( nvertsSane.size() ) );
-//                    Vector3f lane1[] = { topvertsSane[l], topvertsSane[l1], bevelvertsSane[l1], bevelvertsSane[l] };
-//                    Vector3f slopeNormal = -normalFromPoints( lane1 );
-//                    addFlatPoly( 4, lane1, slopeNormal );
-//                }
-//            } else {
-//            }
             // Draw bottom cap
             addFlatPoly( vdata, nvertsSane.size(), topvertsSane.get(), -normal, m, true );
             // Draw top cap

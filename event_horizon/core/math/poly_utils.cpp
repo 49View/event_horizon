@@ -146,3 +146,45 @@ float areaOf( const V2fVector& vtri ) {
 
     return getAreaOf(tri.get2dTrianglesTuple());
 }
+
+WindingOrderT detectWindingOrderOpt2d( const V2fVector& vlist ) {
+    if ( vlist.size() < 3 ) return WindingOrder::CCW;
+
+    size_t si = 0;
+    std::vector<size_t> ties{};
+    float minY = std::numeric_limits<float>::max();
+    for ( auto q = 0u; q < vlist.size(); q++ ) {
+        if ( vlist[q].y() < minY ) {
+            minY = vlist[q].y();
+            si = q;
+            continue;
+        }
+        if ( vlist[q].y() == minY ) {
+            ties.emplace_back(q);
+        }
+    }
+    if ( !ties.empty() ) {
+        ties.push_back(si);
+        float maxX = std::numeric_limits<float>::lowest();
+        for ( auto q : ties ) {
+            if ( vlist[q].x() > maxX ) {
+                si = q;
+            }
+        }
+    }
+
+    auto prevIndex = getCircularArrayIndexUnsigned( si -1, vlist.size() );
+    auto nextIndex = getCircularArrayIndexUnsigned( si +1, vlist.size() );
+
+    V2f a = vlist[si];
+    V2f b = vlist[prevIndex];
+    V2f c = vlist[nextIndex];
+    V2f ab = normalize(vlist[si] - vlist[prevIndex]);
+    V2f ac = normalize(vlist[si] - vlist[nextIndex]);
+    float sig = ab.cross(ac);
+    double detOrient = (b.x() * c.y() + a.x() * b.y() + a.y() * c.x()) - (a.y() * b.x() + b.y() * c.x() + a.x() * c.y());
+
+    LOGRS( sig << detOrient );
+    auto ret = sign(detOrient) > 0.0f ? WindingOrder::CCW : WindingOrder::CW;
+    return ret;
+}

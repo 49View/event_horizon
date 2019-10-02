@@ -69,6 +69,7 @@ std::vector<polyQuadSub> quadSubDivInv(const std::array<Vector3f, 4>& vss,
 Vector3f utilMirrorFlip( const Vector3f& v, WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );
 WindingOrderT detectWindingOrder( const Vector2f& pa, const Vector2f& pb, const Vector2f& pc );
 WindingOrderT detectWindingOrder( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3 );
+WindingOrderT detectWindingOrderOpt2d( const V2fVector& vlist );
 
 template <typename VT>
 WindingOrderT detectWindingOrder( const std::vector<VT>& _input ) {

@@ -56,8 +56,8 @@ namespace PolyServices {
     void addFlatPolyWithMapping( VDataSP vdata,size_t vsize, const Vector3f *vs, const Vector2f *vts,
                                  GeomMappingData& m, const Vector3f* vn = nullptr );
     void addFlatPolyWithMapping( VDataSP vdata, const QuadStripUV& qs, GeomMappingData& m );
-    void pull( VDataSP vdata, const std::vector<Vector2f>& verts, float height, float zOffset,
+    void pull( VDataSP vdata, const std::vector<Vector2f>& verts, const Vector3f& normal, float height, float zOffset,
                GeomMappingData& m, PullFlags pullFlags = PullFlags::All );
-    void pull( VDataSP vdata, const std::vector<Vector3f>& verts, float height,
+    void pull( VDataSP vdata, const std::vector<Vector3f>& verts, const Vector3f& normal, float height,
                GeomMappingData& m, PullFlags pullFlags = PullFlags::All );
 }

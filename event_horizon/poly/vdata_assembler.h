@@ -26,8 +26,9 @@ namespace ClipperLib {
     typedef std::vector< Path > Paths;
 }
 
-struct V2ff {
+struct V2nff {
     V2f v2;
+    V3f normal;
     float f;
 };
 
@@ -151,10 +152,10 @@ public:
             dataTypeHolder.extrusionVerts.emplace_back( _param );
             return *this;
         }
-        if constexpr ( std::is_same<M, V2ff>::value ) {
+        if constexpr ( std::is_same<M, V2nff>::value ) {
             static_assert( std::is_same<SGT, GT::Extrude>::value );
             dataTypeHolder.extrusionVerts.emplace_back(
-                    PolyOutLine{ Rect2f{_param.v2, RectV2f::Centered }.points3dcw_xzy(), _param.f} );
+                    PolyOutLine{ Rect2f{_param.v2, RectV2f::Centered }.points3dcw_xzy(), _param.normal, _param.f} );
             return *this;
         }
         if constexpr ( std::is_same<M, std::vector<PolyLine2d>>::value ) {
@@ -343,10 +344,11 @@ struct PolyLine : public PolyLineBase3d, public PolyLineCommond {
 };
 
 struct PolyOutLine : public PolyLineBase3d {
-    PolyOutLine( const std::vector<Vector3f>& _verts, const float _zPull,
+    PolyOutLine( const std::vector<Vector3f>& _verts, const Vector3f& _normal, const float _zPull,
                  const ReverseFlag _reverseFlag = ReverseFlag::False ) :
-                 PolyLineBase3d(_verts), zPull(_zPull), reverseFlag(_reverseFlag) {}
+                 PolyLineBase3d(_verts), normal(_normal), zPull(_zPull), reverseFlag(_reverseFlag) {}
 
+    Vector3f normal;
     float zPull;
     ReverseFlag reverseFlag = ReverseFlag::False;
 };
