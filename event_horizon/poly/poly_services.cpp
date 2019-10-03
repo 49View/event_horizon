@@ -608,4 +608,13 @@ namespace PolyServices {
             addFlatPoly( vdata, nvertsSane.size(), topvertsSane.get(), normal, m );
         }
     }
+
+    float areaOf( const V2fVector& vtri ) {
+
+        if ( vtri.size() < 3 ) return 0.0f;
+        Triangulator tri( vtri );
+
+        return getAreaOf(tri.get2dTrianglesTuple());
+    }
+
 }

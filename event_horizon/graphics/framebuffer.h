@@ -17,6 +17,8 @@ struct FrameBufferTextureValues {
     int       height = 0;
 };
 
+bool isHDRSupported();
+
 class FrameBufferBuilder {
     std::string mName;
     int  mWidth = 0;
@@ -138,10 +140,7 @@ public:
         return *this;
     }
 
-    FrameBufferBuilder& format( PixelFormat _format ) {
-        mFormat = _format;
-        return *this;
-    }
+    FrameBufferBuilder& format( PixelFormat _format );
 
     FrameBufferBuilder& fullScreen() {
         mWidth = getScreenSizei.x();

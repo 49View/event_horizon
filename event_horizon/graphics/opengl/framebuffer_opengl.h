@@ -69,9 +69,12 @@ public:
 	static void setViewport( int width, int height );
 	static void setViewport( const Vector2i& size );
 	static void setViewport( const Rect2f& rect );
+	static bool checkHDRSupport();
+	static bool isHDRSupported();
 	static JMATH::Rect2f getCurrentViewport();
 	static void setSRGB( bool value );
     static Color4f clearColorValue;
+    static bool gbIsHDRSupported;
 
 	std::shared_ptr<Texture> RenderToTexture() { return mRenderToTexture; }
 	std::shared_ptr<Texture> ColorAttachment1Texture() const { return mColorAttachment1Texture; }
@@ -96,7 +99,7 @@ private:
 	std::shared_ptr<Texture> mRenderToTexture;
 	std::shared_ptr<Texture> mColorAttachment1Texture;
 	std::shared_ptr<VPList>  mVPListIM; // immediate render
-	PixelFormat mFormat;
+	PixelFormat mFormat = PIXEL_FORMAT_RGBA;
 
 private:
 	friend class FrameBufferBuilder;

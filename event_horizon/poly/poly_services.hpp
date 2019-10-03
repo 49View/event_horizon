@@ -38,6 +38,8 @@ namespace MappingServices {
 }
 
 namespace PolyServices {
+    float areaOf( const std::vector<Vector2f>& vtri );
+
     void addQuad( VDataSP vdata, const std::array<Vector3f, 4>& vs, const std::array<Vector2f, 4>& vts,
                   const std::array<Vector3f, 4>& vns, GeomMappingData& m );
 

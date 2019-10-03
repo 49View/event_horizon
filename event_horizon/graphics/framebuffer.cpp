@@ -122,3 +122,8 @@ FrameBufferBuilder& FrameBufferBuilder::dv( const Rect2f& _destViewport, BlitTyp
     return *this;
 }
 
+FrameBufferBuilder& FrameBufferBuilder::format( PixelFormat _format ) {
+    mFormat = pixelFormatResolver( _format, Framebuffer::isHDRSupported());
+    return *this;
+}
+

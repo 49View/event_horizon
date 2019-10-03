@@ -1,4 +1,5 @@
 #include "gl_util.h"
+#include <graphics/framebuffer.h>
 
 const int SHADER_ERROR_BUFFER_SIZE = 1024;
 const int SHADER_ERROR_BUFFER_COUNT = 16;
@@ -127,7 +128,9 @@ const char *glRenderBufferFormatToString( int renderBufferFormat ) {
     return "Unknown";
 }
 
-GLenum pixelFormatToGlInternalFormat( PixelFormat pixelFormat ) {
+GLenum pixelFormatToGlInternalFormat( PixelFormat _pixelFormat ) {
+
+    auto pixelFormat = pixelFormatResolver( _pixelFormat, Framebuffer::isHDRSupported() );
     switch ( pixelFormat ) {
         case PIXEL_FORMAT_DEPTH_16:
             return GL_DEPTH_COMPONENT16;

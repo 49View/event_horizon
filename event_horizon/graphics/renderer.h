@@ -195,7 +195,7 @@ public:
     void changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt );
     void remapLightmapUVs( const scene_t& scene );
 
-    bool isLoading() const;
+    [[nodiscard]] bool isLoading() const;
     void setLoadingFlag( bool _value );
     void setProgressionTiming( float _progress );
 

@@ -9,6 +9,7 @@
 #include "../render_list.h"
 
 Color4f Framebuffer::clearColorValue = Color4f::XTORGBA("#238FCBFF");
+bool Framebuffer::gbIsHDRSupported = true;
 
 bool canUseMultiSample() {
 #ifdef _OPENGL_ES
@@ -62,7 +63,7 @@ void Framebuffer::initDepth( std::shared_ptr<TextureManager> tm ) {
     GLCALL( glGenFramebuffers( 1, &mFramebufferHandle ));
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 
-    auto trd = ImageParams{}.size( mWidth, mHeight ).format( PIXEL_FORMAT_DEPTH_32 ).setWrapMode(WRAP_MODE_REPEAT);
+    auto trd = ImageParams{}.size( mWidth, mHeight ).format( PIXEL_FORMAT_DEPTH_32 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName, trd }
                                                       .fm( FILTER_LINEAR )
                                                       .setIsFramebufferTarget( true )
@@ -291,4 +292,35 @@ void Framebuffer::blitWithRect( std::shared_ptr<Framebuffer> source,
                                _destRect.right(), _destRect.bottom(),
                                GL_COLOR_BUFFER_BIT, GL_LINEAR ));
 
+}
+
+bool Framebuffer::checkHDRSupport() {
+//    GLuint fbh;
+//    GLuint fbt;
+//
+//    GLCALL( glGenTextures(1, &fbt) );
+//    GLCALL( glBindTexture(GL_TEXTURE_2D, fbt) );
+//    GLCALL( glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGBA, GL_FLOAT, nullptr) );
+//
+//    GLCALL( glGenFramebuffers( 1, &fbh ));
+//    GLCALL( glBindFramebuffer(GL_FRAMEBUFFER, fbh) );
+//    GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+//                                    GL_TEXTURE_2D,
+//                                    fbt, 0 ));
+//
+//    GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+//    gbIsHDRSupported = fbs == GL_FRAMEBUFFER_COMPLETE;
+//
+//    GLCALL( glDeleteTextures(1, &fbt) );
+//    GLCALL( glDeleteFramebuffers(1, &fbh) );
+//
+//    return gbIsHDRSupported;
+
+    gbIsHDRSupported = true;
+    return gbIsHDRSupported;
+
+}
+
+bool Framebuffer::isHDRSupported() {
+    return Framebuffer::gbIsHDRSupported;
 }

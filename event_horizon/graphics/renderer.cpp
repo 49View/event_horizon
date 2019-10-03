@@ -153,6 +153,8 @@ void Renderer::init() {
     rmm = std::make_shared<RenderMaterialManager>( *this );
     mCommandBuffers = std::make_shared<CommandBufferList>( *this );
 
+    auto bSupportsHDR = Framebuffer::checkHDRSupport();
+    LOGRS( "Is HDR Framebuffer supported: " << bSupportsHDR );
     resetDefaultFB(mForcedFrameBufferSize);
     rcm.init();
     am.init();
@@ -162,7 +164,7 @@ void Renderer::init() {
     mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 1024 ).depthOnly().build();
     mDepthFB = FrameBufferBuilder{ *this, FBNames::depthmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).format(PIXEL_FORMAT_HDR_R16).build();
 
-    auto trd = ImageParams{}.setSize( 32 ).format( PIXEL_FORMAT_HDR_RGBA_16 ).setWrapMode( WRAP_MODE_CLAMP_TO_EDGE );
+    auto trd = ImageParams{}.setSize( 32 ).format( pixelFormatResolver( PIXEL_FORMAT_HDR_RGBA_16, Framebuffer::isHDRSupported()) ).setWrapMode( WRAP_MODE_CLAMP_TO_EDGE );
     tm->addCubemapTexture( TextureRenderData{ MPBRTextures::convolution, trd }
                                    .setGenerateMipMaps( false )
                                    .setIsFramebufferTarget( true ));

@@ -34,6 +34,34 @@ enum PixelFormat {
     PIXEL_FORMAT_INVALID
 };
 
+static inline PixelFormat pixelFormatResolver( PixelFormat input, bool hasHDR ) {
+
+    if ( hasHDR ) return input;
+
+    switch ( input ) {
+        case PIXEL_FORMAT_HDR_RGB_16:
+            return PIXEL_FORMAT_RGB;
+        case PIXEL_FORMAT_HDR_RGBA_16:
+            return PIXEL_FORMAT_RGBA;
+        case PIXEL_FORMAT_HDR_RGB_32:
+            return PIXEL_FORMAT_RGB;
+        case PIXEL_FORMAT_HDR_RGBA_32:
+            return PIXEL_FORMAT_RGBA;
+        case PIXEL_FORMAT_HDR_RG_16:
+            return PIXEL_FORMAT_RG;
+        case PIXEL_FORMAT_HDR_RG_32:
+            return PIXEL_FORMAT_RG;
+        case PIXEL_FORMAT_HDR_R16:
+            return PIXEL_FORMAT_R;
+        case PIXEL_FORMAT_HDR_RG32:
+            return PIXEL_FORMAT_RG;
+        case PIXEL_FORMAT_HDR_R32:
+            return PIXEL_FORMAT_R;
+        default:
+            return input;
+    };
+}
+
 static inline std::string PixelFormatToString( PixelFormat value ) {
         switch( value ) {
             case PIXEL_FORMAT_UNFORCED: return "PIXEL_FORMAT_UNFORCED";
