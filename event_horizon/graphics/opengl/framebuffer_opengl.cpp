@@ -26,7 +26,7 @@ void Framebuffer::attachDepthBuffer() {
     GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, depthTexture) );
 
     if ( mMultisample ) {
-        GLCALL(glRenderbufferStorageMultisample( GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT32F, mWidth, mHeight ) );
+        GLCALL(glRenderbufferStorageMultisample( GL_RENDERBUFFER, getMultiSampleCount(), GL_DEPTH_COMPONENT32F, mWidth, mHeight ) );
     } else {
         GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, mWidth, mHeight ) );
     }
@@ -45,7 +45,7 @@ void Framebuffer::attachColorBuffer( unsigned int index ) {
     GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer) );
 
     if ( mMultisample ) {
-        GLCALL(glRenderbufferStorageMultisample( GL_RENDERBUFFER, 4, pixelFormatToGlInternalFormat(mFormat), mWidth, mHeight ) );
+        GLCALL(glRenderbufferStorageMultisample( GL_RENDERBUFFER, getMultiSampleCount(), pixelFormatToGlInternalFormat(mFormat), mWidth, mHeight ) );
     } else {
         GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, pixelFormatToGlInternalFormat(mFormat), mWidth, mHeight ) );
     }
@@ -85,7 +85,7 @@ void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
     if ( mMultisample ) {
         GLCALL( glGenRenderbuffers(1, &mRenderbufferHandle) );
         GLCALL( glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferHandle) );
-        GLCALL( glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, pixelFormatToGlInternalFormat(mFormat), mWidth,
+        GLCALL( glRenderbufferStorageMultisample(GL_RENDERBUFFER, getMultiSampleCount(), pixelFormatToGlInternalFormat(mFormat), mWidth,
                                                  mHeight) );
         GLCALL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mRenderbufferHandle
         ) );

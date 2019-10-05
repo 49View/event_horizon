@@ -88,6 +88,10 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
             return mComposite->getNormalMapFB();
         case CommandBufferFrameBufferType::ssaoMap:
             return mComposite->getSSAOMapFB();
+        case CommandBufferFrameBufferType::uiMap:
+            return mComposite->getUIMapFB();
+        case CommandBufferFrameBufferType::uiMapResolve:
+            return mComposite->getUIMapResolveFB();
         case CommandBufferFrameBufferType::finalResolve:
             return mComposite->getColorFinalFB();
         case CommandBufferFrameBufferType::blurVertical:
@@ -320,9 +324,11 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
     Vector2f vsize = _destViewport.size();
     mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
             (PIXEL_FORMAT_HDR_RGBA_16).addColorBufferAttachments({ "colorFrameBufferAtth1", 1 }).build();
+    mUIFB = FrameBufferBuilder{rr,"uiFrameBuffer"}.multisampled().size(vsize).format
+            (PIXEL_FORMAT_RGBA).build();
+    mUIBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer}.size(vsize).noDepth()
+            .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).build();
 
-//    mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
-//            (PIXEL_FORMAT_HDR_RGBA_16).build();
     mBlurHorizontalFB = FrameBufferBuilder{ rr, FBNames::blur_horizontal }.size(vsize*bloomScale).noDepth()
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_HORIZONTAL).build();
     mBlurVerticalFB = FrameBufferBuilder{ rr, FBNames::blur_vertical }.size(vsize*bloomScale).noDepth()
@@ -331,11 +337,9 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
     mColorFinalFB = FrameBufferBuilder{ rr, FBNames::colorFinalFrameBuffer}.size(vsize).noDepth().setViewSpace().
             dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).
             IM(S::FINAL_COMBINE).build();
-    if ( mCompositeFinalDest == BlitType::OffScreen) {
-        mOffScreenBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer}.size(vsize).noDepth()
-                .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).
-                        IM(S::FINAL_COMBINE).build();
-    }
+
+    mOffScreenBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer}.size(vsize).noDepth()
+            .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).build();
 
     float ssaoScaling = 1.0f;
     auto ssaoSize = vsize * ssaoScaling;
@@ -452,17 +456,11 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                     rr.addToCommandBuffer( vl.mVList, cameraRig.get());
                 }
             }
-#ifndef __EMSCRIPTEN__
-            blit( cb );
-#endif
+            cb.pushCommand( { CommandBufferCommandName::resolvePBR } );
         }
-#ifdef __EMSCRIPTEN__
-        blit( cb );
-#endif
-        cb.pushCommand( { CommandBufferCommandName::blitPBRToScreen } );
 
         cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-        cb.pushCommand( { CommandBufferCommandName::defaultFrameBufferBind } );
+        cb.pushCommand( { CommandBufferCommandName::uiBufferBindAndClear } );
         cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
         cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
         cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
@@ -480,6 +478,11 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                 rr.addToCommandBuffer( k );
             }
         }
+        cb.pushCommand( { CommandBufferCommandName::resolveUI } );
+
+        blit( cb );
+
+        cb.pushCommand( { CommandBufferCommandName::blitPBRToScreen } );
 
         setDirty( S::PBR,false );
     }

@@ -53,7 +53,7 @@ namespace WindowHandling {
 
         LOGR( "glfwInit" );
 
-        window = glfwCreateWindow( width, height, "Sixthview", NULL, NULL );
+        window = glfwCreateWindow( width, height, "EventHorizon", NULL, NULL );
 
         LOGR( "glfwCreateWindow" );
 

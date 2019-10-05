@@ -333,6 +333,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
         case CommandBufferCommandName::ssaoBufferBindAndClear:
             cstack->fb( CommandBufferFrameBufferType::ssaoMap )->bindAndClearWithColor(C4f::WHITE);
             break;
+        case CommandBufferCommandName::uiBufferBindAndClear:
+            cstack->fb( CommandBufferFrameBufferType::uiMap )->bindAndClearWithColor(C4f::ZERO);
+            break;
         case CommandBufferCommandName::ssaoRender: {
             cstack->fb( CommandBufferFrameBufferType::ssaoMap )->bind();
             enableDepthTest( false );
@@ -375,17 +378,24 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
                                GL_COLOR_ATTACHMENT0,
                                GL_COLOR_ATTACHMENT0 );
             break;
-        case CommandBufferCommandName::blitPRB:
-
-            setCullMode( CULL_NONE );
-            enableDepthTest( false );
-            setWireFrame( false );
+        case CommandBufferCommandName::resolvePBR:
 
             dynamic_cast<CompositePBR*>(dynamic_cast<RLTargetPBR*>(cstack->Target().get())->Composite().get())->bloom();
             Framebuffer::blit( cstack->fb(CommandBufferFrameBufferType::sourceColor),
                                cstack->fb(CommandBufferFrameBufferType::finalResolve),
                                GL_COLOR_ATTACHMENT0,
                                GL_COLOR_ATTACHMENT0 );
+            break;
+        case CommandBufferCommandName::resolveUI:
+            Framebuffer::blit( cstack->fb(CommandBufferFrameBufferType::uiMap),
+                               cstack->fb(CommandBufferFrameBufferType::uiMapResolve),
+                               GL_COLOR_ATTACHMENT0,
+                               GL_COLOR_ATTACHMENT0 );
+            break;
+        case CommandBufferCommandName::blitPRB:
+            setCullMode( CULL_NONE );
+            enableDepthTest( false );
+            setWireFrame( false );
 
             cstack->fb(CommandBufferFrameBufferType::finalBlit)->bind();
 
@@ -412,6 +422,10 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::ssaoMapTexture,
                     cstack->fb(CommandBufferFrameBufferType::ssaoMap)->RenderToTexture()->TDI(5));
+
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::uiTexture,
+                    cstack->fb(CommandBufferFrameBufferType::uiMapResolve)->RenderToTexture()->TDI(6));
 
             cstack->fb( CommandBufferFrameBufferType::finalResolve )->VP()->updateP3V3(cstack->Target()->getCamera()->frustumFarViewPort());
 

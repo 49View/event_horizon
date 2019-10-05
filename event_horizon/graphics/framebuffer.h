@@ -190,6 +190,8 @@ private:
 };
 
 bool canUseMultiSample();
+void setMultiSampleCount( int count );
+int getMultiSampleCount();
 
 #ifdef _OPENGL
 #include "opengl/framebuffer_opengl.h"

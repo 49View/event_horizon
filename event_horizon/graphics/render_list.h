@@ -115,7 +115,11 @@ enum class CommandBufferCommandName {
     depthMapBufferBindAndClear,
     normalMapBufferBindAndClear,
     ssaoBufferBindAndClear,
+    uiBufferBindAndClear,
     ssaoRender,
+
+    resolvePBR,
+    resolveUI,
 
     blitToScreen,
     blitPRB,
@@ -152,6 +156,8 @@ enum class CommandBufferFrameBufferType {
     depthMap,
     normalMap,
     ssaoMap,
+    uiMap,
+    uiMapResolve,
     finalResolve,
     finalBlit,
     blurVertical,

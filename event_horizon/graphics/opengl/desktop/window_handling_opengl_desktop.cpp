@@ -1,11 +1,9 @@
 #include "../../platform_graphics.hpp"
 
 #include <core/util.h>
-#include <core/configuration/app_options.h>
 #include <graphics/opengl/GLFW/window_handling_opengl_glfw.hpp>
-#include "../gl_util.h"
+#include <graphics/framebuffer.h>
 #include "imgui.h"
-#include <graphics/opengl/GLFW/imgui_impl_glfw.h>
 #include "../imgui_impl_opengl3.h"
 
 namespace WindowHandling {
@@ -19,7 +17,6 @@ namespace WindowHandling {
     void initializeWindow( uint64_t flags, Renderer& rr ) {
         LOGR( "--- Initialising Graphics ---" );
 
-        glfwWindowHint( GLFW_SAMPLES, 4 );
         glfwWindowHint( GLFW_SRGB_CAPABLE, GLFW_TRUE );
 
         if ( !glfwInit() ) {
@@ -34,7 +31,7 @@ namespace WindowHandling {
             glfwWindowHint( GLFW_BLUE_BITS, mode->blueBits );
             glfwWindowHint( GLFW_REFRESH_RATE, 90 );// mode->refreshRate
             glfwSwapInterval( 1 );
-            window = glfwCreateWindow( mode->width, mode->height, "Sixth view", glfwGetPrimaryMonitor(), NULL );
+            window = glfwCreateWindow( mode->width, mode->height, "Event Horizon", glfwGetPrimaryMonitor(), NULL );
         } else {
             float scaleFactor = 1.0f;
             if ( checkBitWiseFlag( flags, InitializeWindowFlags::HalfSize )) scaleFactor = 2.0f;
