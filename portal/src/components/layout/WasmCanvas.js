@@ -168,7 +168,7 @@ const checkWebGL2Support = () => {
   return result;
 };
 
-const WasmCanvas = () => {
+const WasmCanvas = props => {
   let canvas = React.useRef(null);
   const [count, setCount] = useState(0);
   const dispatch = useDispatch();
@@ -179,10 +179,10 @@ const WasmCanvas = () => {
 
   useEffect(() => {
     if (count === 0 && session) {
-      loadWasmComplete("editor", canvas.current, session, dispatch);
+      loadWasmComplete(props.wasmName, canvas.current, session, dispatch);
       setCount(1);
     }
-  }, [canvas, count, session, dispatch]);
+  }, [canvas, count, session, dispatch, props]);
 
   const canvasSizeX = wasmState.canvasWidth.toString() + "px";
   const canvasSizeY = wasmState.canvasHeight.toString() + "px";

@@ -44,7 +44,7 @@ const App = () => {
   return (
     <Provider store={store}>
       <Router>
-        <WasmCanvas></WasmCanvas>
+        <WasmCanvas wasmName="editor"></WasmCanvas>
         <Navbar />
         <Fragment>
           <Switch>
