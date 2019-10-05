@@ -150,6 +150,7 @@ public:
     UIView& UI();
     UICallbackMap& UICB();
 protected:
+    void uiViewUpdate( const AggregatedInputData& _aid );
     void updateCallbacks();
     void resizeCallbacks();
     void initWHCallbacks();

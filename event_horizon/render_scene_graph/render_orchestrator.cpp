@@ -293,7 +293,22 @@ function update(aid)
     }
 }
 
+void RenderOrchestrator::uiViewUpdate( const AggregatedInputData& _aid ) {
+    if ( _aid.hasMouseMoved( TOUCH_ZERO ) &&
+         !_aid.isMouseTouchedDown( TOUCH_ZERO ) &&
+         !_aid.isMouseTouchedUp( TOUCH_ZERO )) {
+        UI().hoover( _aid.mousePos( TOUCH_ZERO ) );
+    }
+    if ( _aid.isMouseTouchedDownFirstTime( TOUCH_ZERO )) {
+        UI().handleTouchDownEvent( _aid.mousePos( TOUCH_ZERO ) );
+    }
+    if ( _aid.isMouseTouchedUp( TOUCH_ZERO )) {
+        UI().handleTouchUpEvent( _aid.mousePos( TOUCH_ZERO ) );
+    }
+}
+
 void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
+    uiViewUpdate(_aid);
     luaUpdate(_aid);
     updateCallbacks();
 
