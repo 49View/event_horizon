@@ -29,7 +29,7 @@ public:
     }
     virtual ~RunLoopBackEndBase() = default;
 
-    void update( const AggregatedInputData& _aid ) {
+    void update( AggregatedInputData& _aid ) {
         rsg.updateInputs( _aid );
         sg.update();
         updateImpl( _aid );
@@ -110,7 +110,8 @@ protected:
         cq.execute();
         WH::pollEvents();
         mi.update( mUpdateSignals );
-        rlbackEnd->update(aggregateInputs());
+        auto aid = aggregateInputs();
+        rlbackEnd->update( aid );
     }
 
     void render() {

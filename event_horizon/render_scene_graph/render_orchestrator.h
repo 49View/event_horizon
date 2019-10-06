@@ -36,7 +36,7 @@ public:
     virtual ~RenderOrchestrator() = default;
 
     void init();
-    void updateInputs( const AggregatedInputData& _aid );
+    void updateInputs( AggregatedInputData& _aid );
 
     // Viewport madness
     template <typename T>
@@ -150,7 +150,7 @@ public:
     UIView& UI();
     UICallbackMap& UICB();
 protected:
-    void uiViewUpdate( const AggregatedInputData& _aid );
+    void uiViewUpdate( AggregatedInputData& _aid );
     void updateCallbacks();
     void resizeCallbacks();
     void initWHCallbacks();

@@ -12,6 +12,7 @@
 #include <core/math/plane3f.h>
 #include <core/math/rect2f.h>
 #include <core/htypes_shared.hpp>
+#include <utility>
 #include <core/observable.h>
 
 #include "text_input.hpp"
@@ -79,30 +80,37 @@ enum TouchIndex {
 };
 
 struct AggregatedInputData {
+    AggregatedInputData( TextInput& ti, float scrollValue, std::array<TouchStatus, MAX_TAPS>  status ) : ti( ti ),
+                                                                                                               scrollValue(
+                                                                                                                       scrollValue ),
+                                                                                                               status(std::move( status )) {}
+
+    [[nodiscard]] bool isMouseTouchedDownFirstTime( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].touchedDownFirstTime; }
+    [[nodiscard]] bool isMouseTouchedDown( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].touchedDown; }
+    [[nodiscard]] bool isMouseTouchedUp( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].hasTouchedUp; }
+    [[nodiscard]] bool isMouseSingleTap( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].singleTapEvent; }
+    [[nodiscard]] bool hasMouseMoved( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].bHasMouseMoved; }
+
+    [[nodiscard]] V2f  mousePos( int _touchIndex ) const { return V2f{ status[_touchIndex].xpos, status[_touchIndex].ypos }; }
+    [[nodiscard]] V2f  moveDiffSS( int _touchIndex ) const { return getCurrMoveDiffNorm(_touchIndex).dominant(); }
+    [[nodiscard]] V2f  moveDiff( int _touchIndex ) const { return getCurrMoveDiff( _touchIndex, YGestureInvert::No ).dominant()*0.01f; }
+    [[nodiscard]] float getScrollValue() const { return scrollValue; }
+
+    [[nodiscard]] bool isMouseHasBeenEaten() const { return mouseHasBeenEaten; }
+    void setMouseHasBeenEaten( bool _mouseHasBeenEaten ) { mouseHasBeenEaten = _mouseHasBeenEaten; }
+
+    [[nodiscard]] bool checkKeyToggleOn( int keyCode, bool overrideTextInput = false ) const;
+    [[nodiscard]] TextInput& TI() const { return ti; }
+private:
+    [[nodiscard]] V2f getCurrMoveDiff( int _touchIndex, YGestureInvert yInv = YGestureInvert::Yes ) const;
+    [[nodiscard]] V2f getCurrMoveDiffNorm( int _touchIndex, YGestureInvert yInv = YGestureInvert::Yes ) const;
+    [[nodiscard]] V3f getCurrMoveDiffMousePick( int _touchIndex ) const;
+
+private:
     TextInput&                        ti;
     float                             scrollValue = 0.0f;
     std::array<TouchStatus, MAX_TAPS> status;
-
-    bool isMouseTouchedDownFirstTime( int _touchIndex ) const { return status[_touchIndex].touchedDownFirstTime; }
-    bool isMouseTouchedDown( int _touchIndex ) const { return status[_touchIndex].touchedDown; }
-    bool isMouseTouchedUp( int _touchIndex ) const { return status[_touchIndex].hasTouchedUp; }
-    bool isMouseSingleTap( int _touchIndex ) const { return status[_touchIndex].singleTapEvent; }
-    bool hasMouseMoved( int _touchIndex ) const { return status[_touchIndex].bHasMouseMoved; }
-    V2f  mousePos( int _touchIndex ) const { return V2f{ status[_touchIndex].xpos, status[_touchIndex].ypos }; }
-    V2f  moveDiffSS( int _touchIndex ) const { return getCurrMoveDiffNorm(_touchIndex).dominant(); }
-    V2f  moveDiff( int _touchIndex ) const { return getCurrMoveDiff( _touchIndex, YGestureInvert::No ).dominant()*0.01f; }
-
-    bool checkKeyToggleOn( int keyCode, bool overrideTextInput = false ) const;
-//    Vector2f mousePos = Vector2f::ZERO;
-//    bool isMouseTouchedDown{};
-//    bool isMouseSingleTap = false;
-//    bool hasMouseMoved = false;
-//    Vector2f moveDiff = Vector2f::ZERO;
-//    Vector2f moveDiffSS = Vector2f::ZERO;
-private:
-    Vector2f getCurrMoveDiff( int _touchIndex, YGestureInvert yInv = YGestureInvert::Yes ) const;
-    Vector2f getCurrMoveDiffNorm( int _touchIndex, YGestureInvert yInv = YGestureInvert::Yes ) const;
-    Vector3f getCurrMoveDiffMousePick( int _touchIndex ) const;
+    bool                              mouseHasBeenEaten = false;
 };
 
 class MouseInput : public Observable<MouseInput> {

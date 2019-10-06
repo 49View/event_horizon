@@ -35,12 +35,12 @@ std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
 }
 
-void CameraControlEditable::togglesUpdate( const AggregatedInputData& mi ) {
+void CameraControlEditable::togglesUpdate( const AggregatedInputData& _aid ) {
     if ( !inputIsBlockedOnSelection() ) {
         ViewportTogglesT cvtTggles = ViewportToggles::None;
         // Keyboards
-        if ( mi.ti.checkKeyToggleOn( GMK_1 )) cvtTggles |= ViewportToggles::DrawWireframe;
-        if ( mi.ti.checkKeyToggleOn( GMK_G )) cvtTggles |= ViewportToggles::DrawGrid;
+        if ( _aid.checkKeyToggleOn( GMK_1 )) cvtTggles |= ViewportToggles::DrawWireframe;
+        if ( _aid.checkKeyToggleOn( GMK_G )) cvtTggles |= ViewportToggles::DrawGrid;
         if ( cvtTggles != ViewportToggles::None ) {
             toggle( rig()->Cvt(), cvtTggles );
         }
@@ -78,16 +78,16 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
         float strafe = 0.0f;
         float moveUp = 0.0f;
 
-        isWASDActive = mi.ti.checkWASDPressed() != -1;
+        isWASDActive = mi.TI().checkWASDPressed() != -1;
         if ( isWASDActive ) {
             float vel = 0.003f*GameTime::getCurrTimeStep();
             camVelocity = vel + accumulatedVelocity;
-            if ( mi.ti.checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
-            if ( mi.ti.checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
-            if ( mi.ti.checkKeyPressed( GMK_A ) ) strafe = camVelocity;
-            if ( mi.ti.checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
-            if ( mi.ti.checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
-            if ( mi.ti.checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
+            if ( mi.TI().checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
+            if ( mi.TI().checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
+            if ( mi.TI().checkKeyPressed( GMK_A ) ) strafe = camVelocity;
+            if ( mi.TI().checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
+            if ( mi.TI().checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
+            if ( mi.TI().checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
             accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
             if ( camVelocity > 3.50f ) camVelocity = 3.50f;
         } else {
@@ -113,7 +113,7 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
 //            }
         }
 
-        if ( mi.ti.checkKeyToggleOn( GMK_DELETE )) {
+        if ( mi.TI().checkKeyToggleOn( GMK_DELETE )) {
             std::vector<UUID> uuids;
             for ( const auto& [k,v] : selectedNodes ) {
                 uuids.emplace_back(k);
@@ -153,16 +153,16 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     float strafe = 0.0f;
     float moveUp = 0.0f;
 
-    isWASDActive = mi.ti.checkWASDPressed() != -1;
+    isWASDActive = mi.TI().checkWASDPressed() != -1;
     if ( isWASDActive ) {
         float vel = 0.003f*GameTime::getCurrTimeStep();
         camVelocity = vel + accumulatedVelocity;
-        if ( mi.ti.checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
-        if ( mi.ti.checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
-        if ( mi.ti.checkKeyPressed( GMK_A ) ) strafe = camVelocity;
-        if ( mi.ti.checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
-        if ( mi.ti.checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
-        if ( mi.ti.checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_A ) ) strafe = camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
         accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
         if ( camVelocity > 3.50f ) camVelocity = 3.50f;
     } else {
@@ -223,7 +223,7 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
         moveUp = mi.moveDiff(TOUCH_ONE).y();
         strafe = mi.moveDiff(TOUCH_ONE).x();
     }
-    moveForward = mi.scrollValue; // It's safe to call it every frame as no gesture on wheel/magic mouse
+    moveForward = mi.getScrollValue(); // It's safe to call it every frame as no gesture on wheel/magic mouse
     _cam->moveForward( moveForward );
     _cam->strafe( strafe );
     _cam->moveUp( moveUp );
@@ -251,8 +251,8 @@ CameraControlOrbit3d::CameraControlOrbit3d( const std::shared_ptr<CameraRig>& ca
 }
 
 void CameraControlOrbit3d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
-    if ( mi.scrollValue != 0.0f ) {
-        _cam->incrementOrbitDistance( -mi.scrollValue );
+    if ( mi.getScrollValue() != 0.0f ) {
+        _cam->incrementOrbitDistance( -mi.getScrollValue() );
     }
 
     if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO ) {

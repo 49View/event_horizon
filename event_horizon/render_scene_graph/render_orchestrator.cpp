@@ -293,7 +293,7 @@ function update(aid)
     }
 }
 
-void RenderOrchestrator::uiViewUpdate( const AggregatedInputData& _aid ) {
+void RenderOrchestrator::uiViewUpdate( AggregatedInputData& _aid ) {
     if ( _aid.hasMouseMoved( TOUCH_ZERO ) &&
          !_aid.isMouseTouchedDown( TOUCH_ZERO ) &&
          !_aid.isMouseTouchedUp( TOUCH_ZERO )) {
@@ -305,9 +305,10 @@ void RenderOrchestrator::uiViewUpdate( const AggregatedInputData& _aid ) {
     if ( _aid.isMouseTouchedUp( TOUCH_ZERO )) {
         UI().handleTouchUpEvent( _aid.mousePos( TOUCH_ZERO ) );
     }
+    _aid.setMouseHasBeenEaten( UI().pointInUIArea( _aid.mousePos( TOUCH_ZERO ), UICheckActiveOnly::False ) );
 }
 
-void RenderOrchestrator::updateInputs( const AggregatedInputData& _aid ) {
+void RenderOrchestrator::updateInputs( AggregatedInputData& _aid ) {
     uiViewUpdate(_aid);
     luaUpdate(_aid);
     updateCallbacks();
@@ -331,7 +332,7 @@ void RenderOrchestrator::init() {
     auto aid = lua.new_usertype<AggregatedInputData>("AggregatedInputData",
             sol::constructors<>() );
 
-    aid["scrollValue"] = &AggregatedInputData::scrollValue;
+    aid.set("getScrollValue", sol::readonly(&AggregatedInputData::getScrollValue));
     aid.set("isMouseTouchedDownFirstTime", sol::readonly(&AggregatedInputData::isMouseTouchedDownFirstTime));
     aid.set("isMouseTouchedUp", sol::readonly(&AggregatedInputData::isMouseTouchedUp));
     aid.set("isMouseTouchedDown", sol::readonly(&AggregatedInputData::isMouseTouchedDown));
