@@ -88,7 +88,7 @@ void EditorBackEnd::activateImpl() {
 
 void EditorBackEnd::updateImpl( const AggregatedInputData& _aid ) {
 
-    if ( _aid.ti.checkKeyToggleOn( GMK_Z )) {
+    if ( _aid.TI().checkKeyToggleOn( GMK_Z )) {
         sg.chartMeshes2( scene );
         LightmapManager::initScene( &scene, rsg.RR());
         LightmapManager::bake( &scene, rsg.RR());

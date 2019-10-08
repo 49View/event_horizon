@@ -8,6 +8,23 @@ const streams = require("memory-streams");
 const zlib = require("zlib");
 const md5 = require("md5");
 
+router.get("/check/:id", async (req, res, next) => {
+  try {
+    const entityId = req.params.id;
+    const project = req.user.project;
+    //Check existing entity for use project
+    const currentEntity = await entityController.getEntityByIdProject(
+      project,
+      entityId,
+      false
+    );
+    res.status(200).send({ found: currentEntity ? true : false });
+  } catch (ex) {
+    console.log("ERROR CHECKING ENTITY BYID: ", ex);
+    res.sendStatus(400);
+  }
+});
+
 router.get("/content/byId/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
@@ -244,6 +261,34 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.post("/placeholder/:group", async (req, res, next) => {
+  const project = req.user.project;
+  const group = req.params.group;
+  const username = req.user.name;
+  const useremail = req.user.email;
+
+  try {
+    const entity = await entityController.createPlaceHolderEntity(
+      project,
+      group,
+      username,
+      useremail
+    );
+
+    if (entity !== null) {
+      res
+        .status(201)
+        .json(entity)
+        .end();
+    } else {
+      throw "[post.entity] Entity created is null";
+    }
+  } catch (ex) {
+    console.log("[POST] Entity error: ", ex);
+    res.sendStatus(400);
+  }
+});
+
 router.post("/:group/:filename", async (req, res, next) => {
   const filename = req.params.filename;
   const group = req.params.group;
@@ -434,7 +479,8 @@ router.put("/:id", async (req, res, next) => {
       false
     );
     if (currentEntity === null) {
-      throw "Invalid entity for user project";
+      res.status(204).send();
+      return;
     }
     const group = currentEntity.group;
     let content = req.body;
@@ -483,7 +529,7 @@ router.put("/:id", async (req, res, next) => {
       await entityController.updateEntity(currentEntity._id, metadata);
     }
 
-    res.status(204).send();
+    res.status(200).send();
   } catch (ex) {
     console.log("ERROR UPDATING ENTITY: ", ex);
     res.sendStatus(400);

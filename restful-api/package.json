@@ -41,6 +41,7 @@
     "tar": "^4.4.8",
     "tar-stream": "^2.0.1",
     "uniqid": "^5.0.3",
+    "unique-names-generator": "^3.0.0",
     "uuid": "^3.3.2",
     "winston": "^3.2.1",
     "ws": "^6.1.3"

@@ -33,6 +33,17 @@ export const updateAsset = (currentEntityData, currentEntity) => {
   }
 };
 
+export const placeHolderAsset = group => {
+  try {
+    const obj = {
+      group: group
+    };
+    wscSend("AddPlaceHolderEntity", obj);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const requestAsset = currentEntity => {
   try {
     const obj = {

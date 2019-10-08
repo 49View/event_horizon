@@ -173,8 +173,17 @@ void SceneGraph::realTimeCallbacks() {
                 auto rref = addUIIM( UUIDGen::make(), UIContainer{doc["data"]["data"]} );
                 nodeFullScreenUIContainerSignal( rref );
             }
-        }
-        if ( k == SceneEvents::LoadGeomAndReset ) {
+        } else if ( k == SceneEvents::AddPlaceHolderEntity ) {
+            clearFromRealTimeCallbacks();
+            auto entityGroup = doc["data"]["group"].GetString();
+
+            LOGRS("EntityGroup of AddPlaceHolder:" << entityGroup);
+            if ( entityGroup == ResourceGroup::UI ) {
+                um.clear();
+                auto rref = addUIIM( UUIDGen::make(), UIContainer::placeHolder() );
+                nodeFullScreenUIContainerSignal( rref );
+            }
+        } else if ( k == SceneEvents::LoadGeomAndReset ) {
             auto v0 = getFileName( doc["data"]["entity_id"].GetString());
             auto vHash = getFileName( doc["data"]["hash"].GetString());
 
@@ -209,16 +218,14 @@ void SceneGraph::realTimeCallbacks() {
                     nodeFullScreenUIContainerSignal( key );
                 } );
             }
-        }
-        if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
+        } else if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
             auto matId = getFileName( doc["data"]["mat_id"].GetString());
             auto objId = getFileName( doc["data"]["entity_id"].GetString());
             signalValueMap["source_material_id"] = std::string( doc["data"]["source_id"].GetString());
             load<Material>( matId, [&]( HttpResouceCBSign key ) {
                 replaceMaterialOnNodes(key);
             } );
-        }
-        if ( k == SceneEvents::ChangeMaterialProperty ) {
+        } else if ( k == SceneEvents::ChangeMaterialProperty ) {
             if ( doc["data"]["value_type"].GetString() == std::string( "hexcolor" )) {
                 auto value = C4f::XTORGBA( doc["data"]["value_str"].GetString()).xyz();
                 changeMaterialPropertyV3fSignal( doc["data"]["property_id"].GetString(),

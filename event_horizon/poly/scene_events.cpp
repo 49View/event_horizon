@@ -44,6 +44,7 @@ void allCallbacksEntitySetup() {
     Socket::on( "cloudStorageFileUpdate", cloudCallback );
     Socket::on( SceneEvents::ReloadLuaScript, SceneGraph::addEventCallback );
     Socket::on( SceneEvents::UpdateEntity, SceneGraph::addEventCallback );
+    Socket::on( SceneEvents::AddPlaceHolderEntity, SceneGraph::addEventCallback );
     Socket::on( SceneEvents::LoadGeomAndReset, SceneGraph::addEventCallback );
     Socket::on( SceneEvents::ReplaceMaterialOnCurrentObject, SceneGraph::addEventCallback );
     Socket::on( SceneEvents::ChangeMaterialProperty, SceneGraph::addEventCallback );

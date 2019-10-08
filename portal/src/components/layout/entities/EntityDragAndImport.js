@@ -3,8 +3,10 @@ import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useDropzone } from "react-dropzone";
 import { useAlert } from "react-alert";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Button from "react-bootstrap/Button";
 
-import { addEntity } from "../../../actions/entities";
+import { addEntity, addPlaceHolderEntity } from "../../../actions/entities";
 import {
   checkFileExtensionsOnEntityGroup,
   groupHasCreateEditor,
@@ -13,7 +15,7 @@ import {
 
 const EntityDragAndImport = ({
   addEntity,
-  group,
+  addPlaceHolderEntity,
   groupSelected,
   project,
   user
@@ -59,21 +61,31 @@ const EntityDragAndImport = ({
 
   return (
     <Fragment>
-      {addButton && (
-        <div className="leftSideBarGroupImport">
-          <i className="fas fa-plus" />
-        </div>
-      )}
-      {importButton && (
-        <div className="leftSideBarGroupImport">
-          <div {...getRootProps({ className: "dropzoneNoHMargins" })}>
-            <input {...getInputProps()} />
-            <span>
-              <i className="fas fa-upload" />
-            </span>
-          </div>
-        </div>
-      )}
+      <div className="leftSideBarGroupImport">
+        <ButtonGroup size="sm" type="checkbox">
+          {addButton && (
+            <Button
+              variant="secondary"
+              value={1}
+              onClick={e => {
+                addPlaceHolderEntity(groupSelected);
+              }}
+            >
+              <i className="fas fa-plus"></i>
+            </Button>
+          )}
+          {importButton && (
+            <Button variant="secondary" value={2}>
+              <div {...getRootProps({ className: "dropzoneNoHMargins" })}>
+                <input {...getInputProps()} />
+                <span>
+                  <i className="fas fa-upload" />
+                </span>
+              </div>
+            </Button>
+          )}
+        </ButtonGroup>
+      </div>
     </Fragment>
   );
 };
@@ -82,7 +94,8 @@ EntityDragAndImport.propTypes = {
   group: PropTypes.string,
   project: PropTypes.string,
   user: PropTypes.object,
-  addEntity: PropTypes.func.isRequired
+  addEntity: PropTypes.func.isRequired,
+  addPlaceHolderEntity: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -94,5 +107,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { addEntity }
+  { addEntity, addPlaceHolderEntity }
 )(EntityDragAndImport);

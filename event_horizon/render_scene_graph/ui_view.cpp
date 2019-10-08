@@ -428,6 +428,16 @@ void UIView::clear() {
     activeTaps.clear();
 }
 
+UIContainer UIContainer::placeHolder() {
+    UIContainer ret;
+    ret.type = "UIContainer2d";
+    UIElementContainerLogical le;
+    le.type = "Title";
+    le.text = "New Title";
+    ret.entries.emplace_back( le );
+    return ret;
+}
+
 void UIViewContainer::advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize ) {
 
     if ( _displayMode == CSSDisplayMode::Block ) {

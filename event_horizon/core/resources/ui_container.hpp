@@ -28,6 +28,7 @@ JSONDATA( UIElementContainerLogical, id, type, text, icon, tapType, font, size, 
 JSONDATA( UIContainer, type, entries )
     std::string type;
     std::vector<UIElementContainerLogical> entries;
+    static UIContainer placeHolder();
 };
 
 using UIContainerSP = std::shared_ptr<UIContainer>;

@@ -49,11 +49,25 @@ const GUIEditor = () => {
   const saveEntityData = async fileC => {
     try {
       const jc = JSON.parse(fileC);
-      await axios.put("entities/" + currentEntity.entity._id, jc, {
+      const res = await axios.put("entities/" + currentEntity.entity._id, jc, {
         headers: {
           "Content-Type": "application/json"
         }
       });
+      if (res.status === 204) {
+        await axios.post(
+          "entities/" +
+            currentEntity.entity.group +
+            "/" +
+            currentEntity.entity.metadata.name,
+          jc,
+          {
+            headers: {
+              "Content-Type": "application/octet-stream"
+            }
+          }
+        );
+      }
     } catch (error) {
       console.log("JSON error for GUI schema: ", error);
     }
@@ -77,8 +91,6 @@ const GUIEditor = () => {
           onKeyPress={(editor, event) => {
             if (event.code === "Enter" && event.ctrlKey === true) {
               handleClick(fileC);
-              // const content = editor.getValue();
-              // window.Module.addScriptLine(content);
             }
           }}
         />

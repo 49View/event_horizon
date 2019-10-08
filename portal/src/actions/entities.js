@@ -361,6 +361,10 @@ const postEntityMaker = (fileName, project, group, uname, uemail) => {
   );
 };
 
+const placeHolderEntityMaker = group => {
+  return "entities/placeholder/" + group;
+};
+
 // Add post
 export const addEntity = (
   fileName,
@@ -425,6 +429,33 @@ export const addEntity = (
         payload: entityFull
       });
     }
+  } catch (err) {
+    dispatch({
+      type: ENTITY_ERROR,
+      payload: { msg: err.response }
+    });
+  }
+};
+
+export const addPlaceHolderEntity = group => async dispatch => {
+  try {
+    dispatch({
+      type: GET_ENTITY_LOAD,
+      payload: null
+    });
+
+    const res = await axios.post(placeHolderEntityMaker(group));
+
+    const entityFull = {
+      entity: res.data,
+      blobURL: null
+    };
+
+    dispatch({
+      type: GET_ENTITY,
+      payload: entityFull,
+      requirePlaceHolder: true
+    });
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,

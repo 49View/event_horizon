@@ -9,6 +9,8 @@ const tar = require("tar-stream");
 const streams = require("memory-streams");
 const sharp = require("sharp");
 const JSZip = require("jszip");
+const { uniqueNamesGenerator } = require("unique-names-generator");
+const md5 = require("md5");
 
 const getMetadataFromBody = (checkGroup, checkRaw, req) => {
   if (req.body === null || !(req.body instanceof Object)) {
@@ -142,6 +144,23 @@ const createEntityFromMetadata = async (
   }
 };
 
+const createPlaceHolderEntity = async (project, group, username, useremail) => {
+  try {
+    // Hashing of content
+    const filename = uniqueNamesGenerator();
+    let metadata = createMetadataStartup(filename, username, useremail);
+    metadata.hash = md5(metadata.name);
+    const idate = new Date();
+    metadata.lastUpdatedDate = idate;
+    metadata.creationDate = idate;
+
+    return createEntityModel(project, group, false, false, metadata).toObject();
+  } catch (error) {
+    console.log("Cannot create entity: ", error);
+    return null;
+  }
+};
+
 const createEntityFromMetadataToBeCleaned = async (project, metadata) => {
   const {
     content,
@@ -233,6 +252,22 @@ const checkFileExists = async (project, group, hash) => {
   return result !== null ? result.toObject() : null;
 };
 
+const createEntityModel = (
+  project,
+  group,
+  isPublic,
+  isRestricted,
+  metadata
+) => {
+  return new entityModel({
+    project: project,
+    group: group,
+    isPublic: isPublic,
+    isRestricted: isRestricted,
+    metadata: metadata
+  });
+};
+
 const createEntity = async (
   project,
   group,
@@ -240,13 +275,13 @@ const createEntity = async (
   isRestricted,
   metadata
 ) => {
-  const newEntityDB = new entityModel({
-    project: project,
-    group: group,
-    isPublic: isPublic,
-    isRestricted: isRestricted,
-    metadata: metadata
-  });
+  const newEntityDB = createEntityModel(
+    project,
+    group,
+    isPublic,
+    isRestricted,
+    metadata
+  );
   await newEntityDB.save();
   return newEntityDB.toObject();
 };
@@ -693,6 +728,7 @@ module.exports = {
   createMetadataStartup: createMetadataStartup,
   getMetadataFromBody: getMetadataFromBody,
   createEntityFromMetadata: createEntityFromMetadata,
+  createPlaceHolderEntity: createPlaceHolderEntity,
   createEntitiesFromContainer: createEntitiesFromContainer,
   cleanupMetadata: cleanupMetadata,
   decompressZipppedEntityDeps: decompressZipppedEntityDeps,

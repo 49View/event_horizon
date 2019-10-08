@@ -427,8 +427,8 @@ input#search-bar:hover {
   display: flex;
   background-color: var(--dark-color);
   flex-direction: column;
-  padding: 0.6rem;
-  margin: 2.5% 0px 5px 5px;
+  /* padding: 0.6rem; */
+  margin: 3% 0px 5px 5px;
   float: left;
   border-radius: 4px;
   cursor: pointer;

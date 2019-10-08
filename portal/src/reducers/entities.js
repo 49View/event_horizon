@@ -22,7 +22,7 @@ import {
   LOADING_FINISHED
 } from "../actions/types";
 
-import { requestAsset } from "../utils/webSocketClient";
+import { requestAsset, placeHolderAsset } from "../utils/webSocketClient";
 
 const initialState = {
   events: {},
@@ -42,7 +42,7 @@ const initialState = {
 };
 
 export default function(state = initialState, action) {
-  const { type, payload, requireWasmUpdate } = action;
+  const { type, payload, requireWasmUpdate, requirePlaceHolder } = action;
 
   const evaluateTags = sourceTags => {
     let tags = [];
@@ -169,13 +169,14 @@ export default function(state = initialState, action) {
       };
     case GET_ENTITY:
       if (requireWasmUpdate) requestAsset(payload);
+      if (requirePlaceHolder) placeHolderAsset(payload.entity.group);
       return {
         ...state,
         currentEntity: payload,
         group: payload.entity.group,
         currentTags: evaluateTags(payload.entity.metadata.tags),
         smallEntityModalOn: false,
-        loading: requireWasmUpdate
+        loading: requireWasmUpdate || requirePlaceHolder
       };
     case SET_ENTITY_APP_NAME:
       return {
