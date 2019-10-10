@@ -80,18 +80,7 @@ namespace WindowHandling {
         // Get info on default framebuffer:
         gatherMainScreenInfo();
 
-        emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "EXT_color_buffer_float");
-//        #define glGetDebugMessageLogARB pfnGetDebugMessageLog
-//        PFNGLGETDEBUGMESSAGELOGARB pfnGetDebugMessageLog;
-//        if (glfwExtensionSupported("EXT_color_buffer_float"))
-//        {
-//            pfnGetDebugMessageLog = (PFNGLGETDEBUGMESSAGELOGARB) glfwGetProcAddress("glGetDebugMessageLogARB");
-//            if (pfnGetDebugMessageLog)
-//            {
-//                // Both the extension name and the function pointer are present
-//                has_debug_output = 1;
-//            }
-//        }
+        Framebuffer::checkHDRSupport();
 
         initImGUI();
 

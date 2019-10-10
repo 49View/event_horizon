@@ -294,33 +294,6 @@ void Framebuffer::blitWithRect( std::shared_ptr<Framebuffer> source,
 
 }
 
-bool Framebuffer::checkHDRSupport() {
-//    GLuint fbh;
-//    GLuint fbt;
-//
-//    GLCALL( glGenTextures(1, &fbt) );
-//    GLCALL( glBindTexture(GL_TEXTURE_2D, fbt) );
-//    GLCALL( glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGBA, GL_FLOAT, nullptr) );
-//
-//    GLCALL( glGenFramebuffers( 1, &fbh ));
-//    GLCALL( glBindFramebuffer(GL_FRAMEBUFFER, fbh) );
-//    GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-//                                    GL_TEXTURE_2D,
-//                                    fbt, 0 ));
-//
-//    GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
-//    gbIsHDRSupported = fbs == GL_FRAMEBUFFER_COMPLETE;
-//
-//    GLCALL( glDeleteTextures(1, &fbt) );
-//    GLCALL( glDeleteFramebuffers(1, &fbh) );
-//
-//    return gbIsHDRSupported;
-
-    gbIsHDRSupported = true;
-    return gbIsHDRSupported;
-
-}
-
 bool Framebuffer::isHDRSupported() {
     return Framebuffer::gbIsHDRSupported;
 }

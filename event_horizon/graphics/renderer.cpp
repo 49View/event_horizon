@@ -154,8 +154,8 @@ void Renderer::init() {
     mCommandBuffers = std::make_shared<CommandBufferList>( *this );
 
     setMultiSampleCount(1);
-    auto bSupportsHDR = Framebuffer::checkHDRSupport();
-    LOGRS( "Is HDR Framebuffer supported: " << bSupportsHDR );
+//    auto bSupportsHDR = Framebuffer::checkHDRSupport();
+//    LOGRS( "Is HDR Framebuffer supported: " << bSupportsHDR );
     resetDefaultFB(mForcedFrameBufferSize);
     rcm.init();
     am.init();

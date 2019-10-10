@@ -72,3 +72,12 @@ void Framebuffer::setSRGB( [[maybe_unused]] bool value ) {
 //        glDisable( GL_FRAMEBUFFER_SRGB );
 //    }
 }
+
+bool Framebuffer::checkHDRSupport() {
+
+    auto HDRenabled = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "EXT_color_buffer_float");
+
+    gbIsHDRSupported = HDRenabled == EM_TRUE ? true : false;
+
+    return gbIsHDRSupported;
+}
