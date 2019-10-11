@@ -150,8 +150,8 @@ void elaborateGeom( const std::string& _filename, const std::string& project, co
                                       std::string finalPath = dRoot + filenameglb;
 
                                       std::string reqParams =
-                                              filenameglb + "/" + project + "/" + ResourceGroup::Geom + "/" + uname +
-                                              "/" + uemail;
+                                              filenameglb + "/" + project + "/" + ResourceGroup::Geom + "/" + url_encode(uname) +
+                                              "/" + url_encode(uemail);
                                       Http::post( Url{ HttpFilePrefix::entities + reqParams },
                                                    FM::readLocalFile( finalPath ));
                                   } );
@@ -159,7 +159,7 @@ void elaborateGeom( const std::string& _filename, const std::string& project, co
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
-    LOGRS("Daemon version 2.0.1");
+    LOGRS("Daemon version 2.0.2");
 
     Http::initDaemon();
 
