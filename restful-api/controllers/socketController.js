@@ -50,12 +50,7 @@ const onSocketServerConnection = async (client, req) => {
     client.session = session;
     client.isAlive = true;
     client.ping(noop);
-    console.log(
-      "[WSS] Session connected: ",
-      client.session.ids,
-      " ",
-      new Date()
-    );
+    console.log("[WSS] Session connected: ", client.session, " ", new Date());
     client.on("message", message => onSocketClientMessage(client, message));
     client.on("pong", () => onSocketClientHeartBeat(client));
     client.on("close", () => onSocketClientClose(client));
@@ -87,21 +82,6 @@ const onSocketClientMessage = async (client, message) => {
         oclient.send(message);
       }
     });
-    //   if (messageObject!==null) {
-    //       if (messageObject.type==="refresh") {
-    //           let s = messageObject.s;
-    //           console.log(s);
-    //           let session = await checkSessionById(s, null, null);
-    //           console.log("S:",session);
-    //           if (session!==null) {
-    //               console.log((new Date())+' - Session refreshed: ',session);
-    //               client.session=session;
-    //           } else {
-    //               console.log((new Date())+' - Invalid Session - Client disconnected');
-    //               client.terminate();
-    //           }
-    //       }
-    //   }
   } catch (err) {
     console.log("[WSS][ERROR] Error on send message ", err);
   }
@@ -119,6 +99,7 @@ exports.createSocketServer = server => {
 exports.sendMessageToAllClients = message => {
   console.log(new Date() + " - Send message to all client");
   this.wsServer.clients.forEach(client => {
+    console.log("Client session ", client.session);
     client.send(message);
   });
 };
