@@ -68,10 +68,17 @@ router.get("/:group/:tags", async (req, res, next) => {
       tags,
       req.params.tags,
       true,
-      1
+      null
     );
     if (foundEntities !== null && foundEntities.length > 0) {
-      const entity = foundEntities[0];
+      let entity = foundEntities[0];
+      for (const ent in foundEntities) {
+        if (ent.project === project) {
+          entity = ent;
+          break;
+        }
+      }
+
       const filePath = entityController.getFilePath(
         entity.project,
         entity.group,
@@ -102,7 +109,7 @@ router.get("/:group/:tags", async (req, res, next) => {
             if (depArray !== null && depArray.length > 0) {
               const dep = depArray[0];
               const depFilePath = entityController.getFilePath(
-                entity.project,
+                dep.project,
                 elementGroup.key,
                 dep.metadata.name
               );
@@ -464,6 +471,15 @@ router.post("/multi", async (req, res, next) => {
     reader.pipe(container);
   } catch (ex) {
     console.log("ERROR CREATING ENTITY: ", ex);
+    res.status(400).send(ex);
+  }
+});
+
+router.put("/makepublic/all", async (req, res, next) => {
+  try {
+    res.send(await entityController.makePublicAll());
+  } catch (ex) {
+    console.log("[ERROR] makepublic/all: ", ex);
     res.status(400).send(ex);
   }
 });

@@ -7,6 +7,7 @@ const passport = require("passport");
 const globalConfig = require("./config_api.js");
 const indexRoute = require("./routes/indexRoute");
 const entitiesRoute = require("./routes/entitiesRoute");
+const commandRoute = require("./routes/commandRoute");
 const broadcastRoute = require("./routes/broadcastRoute");
 const usersRoute = require("./routes/usersRoute");
 const tokenRoute = require("./routes/tokenRoute");
@@ -74,6 +75,7 @@ app.use("/user", usersRoute);
 app.use("/appdata", appdataRoute);
 app.use("/fs", fsRoute);
 app.use("/entities", entitiesRoute);
+app.use("/command", commandRoute);
 app.use("/broadcast", broadcastRoute);
 app.use("/socket", socketRoute);
 

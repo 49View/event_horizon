@@ -332,6 +332,16 @@ const getEntityByIdProject = async (project, entityId, returnPublic) => {
   return result !== null ? result.toObject() : null;
 };
 
+const makePublicAll = async () => {
+  let query;
+  query = {};
+  const result = await entityModel.updateMany(query, {
+    $set: { isPublic: true }
+  });
+
+  return result;
+};
+
 const updateById = async (entityId, updatedEntity) => {
   let query;
   query = { _id: entityId };
@@ -737,6 +747,7 @@ module.exports = {
   checkFileExists: checkFileExists,
   createEntity: createEntity,
   updateById: updateById,
+  makePublicAll: makePublicAll,
   updateEntity: updateEntity,
   upsertTags: upsertTags,
   groupThumbnailCalcRule: groupThumbnailCalcRule,
