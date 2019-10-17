@@ -157,18 +157,6 @@ const getUserWithRolesByGuestProject = async project => {
   const query = [];
   query.push({ $match: { guest: true } });
   query.push({
-    $lookup: {
-      from: "users_roles",
-      localField: "_id",
-      foreignField: "userId",
-      as: "roles"
-    }
-  });
-  query.push({ $unwind: { path: "$roles" } });
-  query.push({
-    $match: { "roles.project": { $regex: project + "$", $options: "i" } }
-  });
-  query.push({
     $group: {
       _id: "$_id",
       name: { $first: "$name" },

@@ -163,11 +163,22 @@ const getTokenResponse = async (res, req, project, email, password) => {
   const userAgent = req.headers["user-agent"] || null;
 
   try {
-    dbUser = await userController.getUserByEmailPasswordProject(
-      email,
-      project,
-      password
-    );
+    let dbUser = null;
+
+    if (email == "guest") {
+      dbUser = await userController.getUserByGuestProject(
+        email,
+        project,
+        password
+      );
+    } else {
+      dbUser = await userController.getUserByEmailPasswordProject(
+        email,
+        project,
+        password
+      );
+    }
+
     if (dbUser === null) {
       error = true;
     } else {
