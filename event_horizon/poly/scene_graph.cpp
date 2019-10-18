@@ -164,7 +164,9 @@ void SceneGraph::clearFromRealTimeCallbacks() {
 void SceneGraph::realTimeCallbacks() {
     for ( auto&[k, doc] : eventSceneCallback ) {
 
-        if ( k == SceneEvents::UpdateEntity ) {
+        if ( k == SceneEvents::ReloadLuaScript ) {
+            runLUAScriptSignal(doc["data"].GetString());
+        } else if ( k == SceneEvents::UpdateEntity ) {
             clearFromRealTimeCallbacks();
             auto entityGroup = doc["data"]["group"].GetString();
 

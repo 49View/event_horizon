@@ -436,6 +436,7 @@ void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color )
             }
         }
     }
+    invalidateOnAdd();
 }
 
 void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor ) {

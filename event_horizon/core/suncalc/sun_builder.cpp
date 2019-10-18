@@ -203,32 +203,56 @@ SunPosition SunBuilder::buildFromString( const std::string& _naturalTime ) {
 	auto date = DateTime();
 
 	if ( tokens[0] != "now" ) {
+        bool lbFinshed = false;
+	    if ( tokens.size() == 6 ) {
+	        std::array<int, 6> dvalues{};
+	        lbFinshed = true;
+            size_t c = 0;
+            for ( const auto& t : tokens ) {
+                if ( t.find_first_not_of( "0123456789" ) == std::string::npos ) {
+                    dvalues[c++] = std::atoi( t.c_str() );
+                } else{
+                    lbFinshed = false;
+                    break;
+                }
+            }
+            if ( lbFinshed ) {
+                year = dvalues[0];
+                month = dvalues[1];
+                day = dvalues[2];
+                hourValue = dvalues[3];
+                minuteValue = dvalues[4];
+                secondValue = dvalues[5];
+                date = DateTime::from( date, year, month, day, hourValue, minuteValue, secondValue );
+            }
+        }
+	    if ( !lbFinshed ) {
+            hintDateFrom( tokens );
+            std::string timeHint = hintTimeFrom( tokens );
 
-        hintDateFrom( tokens );
-        std::string timeHint = hintTimeFrom( tokens );
+            if ( timeHint.empty() ) {
+                date = DateTime::from( date, year, month, day, hourValue, minuteValue, secondValue );
+            } else {
+                auto searchDate = DateTime::from( date, year, month, day, hourValue, minuteValue, secondValue );
+                auto times = sunPostionCalculator.getTimes( searchDate, mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
 
-        if ( timeHint.empty() ) {
-			date = DateTime::from( date, year, month, day, hourValue, minuteValue, secondValue );
-		} else {
-			auto searchDate = DateTime::from( date, year, month, day, hourValue, minuteValue, secondValue );
-			auto times = sunPostionCalculator.getTimes( searchDate, mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
-
-			if ( auto timeItr = times.find( timeHint ); timeItr != times.end() ) {
-                date = timeItr->second;
-			} else {
-			    if ( auto [ h, m, s ] = hintFixedTimeFrom( _naturalTime ); h >= 0 && m >= 0 && s >= 0 ) {
-			        hourValue = h;
-			        minuteValue = m;
-			        secondValue = s;
-                    date = DateTime::from( date, year, month, day, h, m, s );
-			    } else {
-                    hourValue = 12;
-                    minuteValue = 0;
-                    secondValue = 0;
-                    date = times["solarNoon"];
-			    }
-			}
-		}
+                if ( auto timeItr = times.find( timeHint ); timeItr != times.end() ) {
+                    date = timeItr->second;
+                } else {
+                    if ( auto [ h, m, s ] = hintFixedTimeFrom( _naturalTime ); h >= 0 && m >= 0 && s >= 0 ) {
+                        hourValue = h;
+                        minuteValue = m;
+                        secondValue = s;
+                        date = DateTime::from( date, year, month, day, h, m, s );
+                    } else {
+                        hourValue = 12;
+                        minuteValue = 0;
+                        secondValue = 0;
+                        date = times["solarNoon"];
+                    }
+                }
+            }
+	    }
 	}
 	//std::cout << date.toLongString();
 

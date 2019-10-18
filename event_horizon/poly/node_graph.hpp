@@ -19,6 +19,7 @@ using SceneRayIntersectCallback = std::function<void(NodeVariantsSP, float)>;
 using ConnectVoidParamSig = bool;
 using ConnectPairStringBoolParamSig = std::pair<std::string, bool>;
 using ConnectVoidFuncSig = void(ConnectVoidParamSig);
+using ConnectLUAScriptSig = void(const std::string&);
 using ConnectPairStringBoolFuncSig = void(ConnectPairStringBoolParamSig);
 using NodeGraphConnectParamsSig = NodeVariantsSP;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
@@ -31,6 +32,7 @@ using NodeGraphConnectChangeMaterialPropertyV4fFuncSig = void(const std::string&
 
 class NodeGraph {
 public:
+    void runLUAScript( const std::function<ConnectLUAScriptSig>& _slot );
     void nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
@@ -46,6 +48,7 @@ public:
 
 protected:
     NodeGraphContainer nodes;
+    boost::signals2::signal<ConnectLUAScriptSig> runLUAScriptSignal;
     boost::signals2::signal<ConnectPairStringBoolFuncSig> propagateDirtyFlagSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeRemoveSignal;

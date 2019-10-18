@@ -110,6 +110,10 @@ void foreachCL( CommandBufferListVectorMap& CL, F func, const T& _value, Args ..
 
 RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg), uiView(_sg, colorScheme) {
 
+    sg.runLUAScript( [this]( const std::string& _value) {
+        this->setLuaScriptHotReload(_value);
+    } );
+
     sg.preloadCompleteConnect( [this]( ConnectVoidParamSig _value ) {
         this->RR().setLoadingFlag(!_value );
     });
@@ -384,6 +388,9 @@ void RenderOrchestrator::init() {
         rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
                                "_SSAOING_", boolAlphaBinary(_flag) );
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+    luarr["changeTime"] = [&](const std::string& _val ) {
+        changeTime( _val );
     };
 
 #ifndef _PRODUCTION_
