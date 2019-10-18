@@ -69,7 +69,7 @@ const onSocketClientHeartBeat = client => {
 const onSocketClientMessage = async (client, message) => {
   console.log(
     "[WSS]['msg'] {",
-    client.session.user.name,
+    client.session.user ? client.session.user.name : client.session.userId,
     "} ",
     message.slice(0, 50),
     " ...(truncated)"
