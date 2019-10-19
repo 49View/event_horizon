@@ -392,6 +392,9 @@ void RenderOrchestrator::init() {
     luarr["changeTime"] = [&](const std::string& _val ) {
         changeTime( _val );
     };
+    luarr["changeColorFor"] = [&](int tag, float r, float g, float b ) {
+        rr.changeMaterialColorOnTags( tag, r, g, b );
+    };
 
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",

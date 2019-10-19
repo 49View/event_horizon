@@ -424,6 +424,23 @@ void Renderer::changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt ) 
     }
 }
 
+void Renderer::changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b ) {
+    // NDDado: we only use RGB, not Alpha, in here
+    V3f color{r,g,b};
+
+    for ( const auto&[k, vl] : CL()) {
+        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
+            for ( const auto& v : vl.mVList ) {
+                v->setMaterialColorWithTag( color, _tag );
+            }
+            for ( const auto& v : vl.mVListTransparent ) {
+                v->setMaterialColorWithTag( color, _tag );
+            }
+        }
+    }
+    invalidateOnAdd();
+}
+
 void Renderer::changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color ) {
     // NDDado: we only use RGB, not Alpha, in here
     for ( const auto&[k, vl] : CL()) {

@@ -144,6 +144,7 @@ public:
 
 	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
+    void changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b );
 	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
 	void replaceMaterial( const std::string& _oldMatRef , const std::string& _newMatRef );
     void changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value );
