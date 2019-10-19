@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const zlib = require("zlib");
 const entityModel = require("../models/entity");
-const materialColorModel = require("../models/material_color");
 const asyncModelOperations = require("../assistants/asyncModelOperations");
 const fsController = require("../controllers/fsController");
 const socketController = require("../controllers/socketController");
@@ -753,46 +752,7 @@ function RGBAToHexA(r, g, b, a) {
   return "#" + r + g + b + a;
 }
 
-const tempConvertColors = async (project, group, username, useremail) => {
-  const resultdb = await materialColorModel.find({});
-  for (const r of resultdb) {
-    const result = r.toObject();
-    delete result._id;
-    delete result.__v;
-    delete result._hash;
-    let filename = result.name
-      .split(" ")
-      .join("_")
-      .toLowerCase();
-
-    const colorCode = RGBAToHexA(
-      result.color[0],
-      result.color[1],
-      result.color[2],
-      result.color[3]
-    );
-    filename += "_#application#" + result.application;
-    filename += "_#brand#" + result.brand;
-    filename += "_#category#" + result.category;
-    filename += "_#code#" + result.code;
-    filename += "_#hex" + colorCode;
-
-    const entity = await createEntityFromMetadata(
-      JSON.stringify(result),
-      project,
-      group,
-      true,
-      false,
-      createMetadataStartup(filename, username, useremail),
-      true,
-      null
-    );
-    console.log(entity);
-  }
-};
-
 module.exports = {
-  tempConvertColors: tempConvertColors,
   createMetadataStartup: createMetadataStartup,
   getMetadataFromBody: getMetadataFromBody,
   createEntityFromMetadata: createEntityFromMetadata,

@@ -8,21 +8,6 @@ const streams = require("memory-streams");
 const zlib = require("zlib");
 const md5 = require("md5");
 
-router.put("/temp_convert_colors", async (req, res, next) => {
-  try {
-    await entityController.tempConvertColors(
-      req.user.project,
-      "color",
-      req.user.name,
-      req.user.email
-    );
-    res.send("OK");
-  } catch (ex) {
-    console.log("ERROR convert_colors: ", ex);
-    res.sendStatus(400);
-  }
-});
-
 router.get("/check/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
