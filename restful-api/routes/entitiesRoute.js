@@ -8,6 +8,21 @@ const streams = require("memory-streams");
 const zlib = require("zlib");
 const md5 = require("md5");
 
+router.put("/temp_convert_colors", async (req, res, next) => {
+  try {
+    await entityController.tempConvertColors(
+      req.user.project,
+      "color",
+      req.user.name,
+      req.user.email
+    );
+    res.send("OK");
+  } catch (ex) {
+    console.log("ERROR convert_colors: ", ex);
+    res.sendStatus(400);
+  }
+});
+
 router.get("/check/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
@@ -167,7 +182,7 @@ router.get("/metadata/byHash/:hashId", async (req, res, next) => {
 router.get("/metadata/byGroupTags/:group/:tags", async (req, res, next) => {
   try {
     const group = req.params.group;
-    const tags = req.params.tags.split(/[\s,._]+/);
+    const tags = metaAssistant.splitTags(decodeURIComponent(req.params.tags));
     const project = req.user.project;
     //Check existing entity for use project (or public)
     const foundEntities = await entityController.getEntitiesByProjectGroupTags(
@@ -303,13 +318,12 @@ router.post("/:group/:filename", async (req, res, next) => {
   const username = req.user.name;
   const useremail = req.user.email;
 
-  console.log("Body: [", req.body, "]");
   try {
     const entity = await entityController.createEntityFromMetadata(
       req.body,
       project,
       group,
-      false,
+      true,
       false,
       entityController.createMetadataStartup(filename, username, useremail),
       true,
@@ -347,7 +361,7 @@ router.post(
         req.body,
         project,
         group,
-        false,
+        true,
         false,
         entityController.createMetadataStartup(filename, username, useremail),
         true,

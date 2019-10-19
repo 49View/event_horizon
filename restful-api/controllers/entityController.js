@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const zlib = require("zlib");
 const entityModel = require("../models/entity");
+const materialColorModel = require("../models/material_color");
 const asyncModelOperations = require("../assistants/asyncModelOperations");
 const fsController = require("../controllers/fsController");
 const socketController = require("../controllers/socketController");
@@ -83,29 +84,13 @@ const createEntityFromMetadata = async (
           cleanMetadata.name
         );
         await deleteEntityComplete(project, entityToDelete);
-        // const nn = savedFilename["name"];
-        // cleanMetadata["name"] = nn.substring( nn.lastIndexOf("/")+1, nn.length);
       }
 
-      // const gtr = groupThumbnailCalcRule(group);
-      // const dep0Entity = await getEntityByHash(
-      //   deps[0].metadata.hash,
-      //   project
-      // );
-      // const content = await getEntityContent(
-      //   dep0Entity._id,
-      //   dep0Entity.project
-      // );
       cleanMetadata.thumb = await thumbFromContent(
         content,
         presetThumb,
         groupThumbnailCalcRule(group)
       );
-
-      // cleanMetadata.thumb = await thumbFromContent(
-      //   content,
-      //   groupThumbnailCalcRule(group)
-      // );
 
       // Hashing of content
       metadataAssistant.udpateMetadata(cleanMetadata, content);
@@ -487,6 +472,7 @@ const decompressZipppedEntityDeps = async (
 const gtr_dep0_image = "dep0";
 const gtr_content_image = "content";
 const gtr_content_vector = "content_vector";
+const gtr_content_color = "content_color";
 const gtr_content_default = "content_default";
 
 const groupThumbnailCalcRule = group => {
@@ -495,6 +481,8 @@ const groupThumbnailCalcRule = group => {
     contentType = gtr_dep0_image;
   } else if (group === "image") {
     contentType = gtr_content_image;
+  } else if (group === "color") {
+    contentType = gtr_content_color;
   } else if (group === "profile") {
     contentType = gtr_content_vector;
   } else if (group === "geom") {
@@ -534,6 +522,23 @@ const thumbFromContent = async (content, presetThumb, gtr) => {
     thumbBuff = await sharp(content)
       .resize(64, 64, { fit: "inside", withoutEnlargement: true })
       .toFormat("jpg")
+      .toBuffer();
+  } else if (gtr === gtr_content_color) {
+    const cp = JSON.parse(content);
+    thumbBuff = await sharp({
+      create: {
+        width: 1,
+        height: 1,
+        channels: 4,
+        background: {
+          r: cp.color[0] * 255.0,
+          g: cp.color[1] * 255.0,
+          b: cp.color[2] * 255.0,
+          alpha: cp.color[3]
+        }
+      }
+    })
+      .png()
       .toBuffer();
   } else if (gtr === gtr_dep0_image) {
     thumbBuff = presetThumb;
@@ -734,7 +739,60 @@ const getEntityDeps = async (project, group, deps) => {
   return result;
 };
 
+function RGBAToHexA(r, g, b, a) {
+  r = Math.round(r * 255).toString(16);
+  g = Math.round(g * 255).toString(16);
+  b = Math.round(b * 255).toString(16);
+  a = Math.round(a * 255).toString(16);
+
+  if (r.length == 1) r = "0" + r;
+  if (g.length == 1) g = "0" + g;
+  if (b.length == 1) b = "0" + b;
+  if (a.length == 1) a = "0" + a;
+
+  return "#" + r + g + b + a;
+}
+
+const tempConvertColors = async (project, group, username, useremail) => {
+  const resultdb = await materialColorModel.find({});
+  for (const r of resultdb) {
+    const result = r.toObject();
+    delete result._id;
+    delete result.__v;
+    delete result._hash;
+    let filename = result.name
+      .split(" ")
+      .join("_")
+      .toLowerCase();
+
+    const colorCode = RGBAToHexA(
+      result.color[0],
+      result.color[1],
+      result.color[2],
+      result.color[3]
+    );
+    filename += "_#application#" + result.application;
+    filename += "_#brand#" + result.brand;
+    filename += "_#category#" + result.category;
+    filename += "_#code#" + result.code;
+    filename += "_#hex" + colorCode;
+
+    const entity = await createEntityFromMetadata(
+      JSON.stringify(result),
+      project,
+      group,
+      true,
+      false,
+      createMetadataStartup(filename, username, useremail),
+      true,
+      null
+    );
+    console.log(entity);
+  }
+};
+
 module.exports = {
+  tempConvertColors: tempConvertColors,
   createMetadataStartup: createMetadataStartup,
   getMetadataFromBody: getMetadataFromBody,
   createEntityFromMetadata: createEntityFromMetadata,

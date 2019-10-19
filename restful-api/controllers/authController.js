@@ -168,7 +168,9 @@ exports.InitializeAuthentication = () => {
           user = await userController.getUserByGuestProject(project);
           //console.log("U:", user);
           if (user !== null) {
-            user.roles = user.roles.map(v => v.toLowerCase());
+            if (user.roles) {
+              user.roles = user.roles.map(v => v.toLowerCase());
+            }
             user.project = project;
             user.expires = Math.floor(new Date().getTime() / 1000) + 3600;
             user.sessionId = null;
