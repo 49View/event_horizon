@@ -18,6 +18,7 @@
 #include <graphics/shader_manager.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/window_handling.hpp>
+#include <poly/scene_events.h>
 #include <render_scene_graph/render_orchestrator_callbacks.hpp>
 #include <render_scene_graph/lua_scripts.hpp>
 
@@ -399,6 +400,8 @@ void RenderOrchestrator::init() {
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",
                 std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1, std::placeholders::_2 ) );
+
+    allCallbacksEntitySetup();
 #endif
 
     // Set a fullscreen camera by default

@@ -15,6 +15,7 @@ namespace Http {
         request->set_header( "Connection", "keep-alive" );
         request->set_header( "Authorization", Http::userBearerToken() );
         request->set_header( "x-eventhorizon-guest", Http::project() );
+        request->set_header( "x-eventhorizon-guest-write", Http::project() );
         return request;
     }
 

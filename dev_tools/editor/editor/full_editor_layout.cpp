@@ -26,7 +26,7 @@ const std::string skyboxName = "skybox,equirectangular,park,generic,001";
 
 void EditorBackEnd::activatePostLoad() {
 
-    allCallbacksEntitySetup();
+//    allCallbacksEntitySetup();
     rsg.setDragAndDropFunction( allConversionsDragAndDropCallback );
 
     backEnd->process_event( OnActivate{} );

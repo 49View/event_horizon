@@ -81,9 +81,8 @@ namespace FileManager {
 
     void writeRemoteEntity( const std::string& _filename, const std::string& _group, const SerializableContainer& data ) {
         auto fn = url_encode( _filename );
-        auto lf = Http::cachedLoginFields();
         Http::post(
-    Url{HttpFilePrefix::entities + fn + "/" + Http::project() + "/" + _group + "/" + lf.email + "/" + lf.email}, data );
+    Url{HttpFilePrefix::entities + _group + "/" + _filename}, data );
     }
 
     void writeRemoteFile( const std::string& _filename, const std::vector<unsigned char>& _data ) {

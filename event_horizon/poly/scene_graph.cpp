@@ -134,7 +134,6 @@ void SceneGraph::replaceMaterialOnNodes( const std::string& _key ) {
 
 void SceneGraph::publishAndAddCallback() {
     for ( auto&[k, v] : genericSceneCallback ) {
-
         if ( k == ResourceGroup::Image ) {
             B<IB>( std::get<0>( v )).publishAndAdd( std::get<1>( v ));
         } else if ( k == ResourceGroup::Font ) {
