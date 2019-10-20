@@ -112,3 +112,4 @@ platform/android/lib
 # Project exclude paths
 /portal/public/editor.wasm
 /portal/public/editor.js
+/portal/public/.cmake/

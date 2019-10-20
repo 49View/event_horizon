@@ -156,24 +156,31 @@ exports.InitializeAuthentication = () => {
   passport.use(
     new RequestStrategy(async (req, done) => {
       // console.log("REQUEST STRATEGY");
-
       let user = false;
       let error = null;
       try {
         let project = null;
         if (req && req.headers && req.headers["x-eventhorizon-guest"]) {
           project = req.headers["x-eventhorizon-guest"];
-          //console.log("P:", project);
+          // console.log("P:", project);
           //Check if exists guest user for project
           user = await userController.getUserByGuestProject(project);
           //console.log("U:", user);
           if (user !== null) {
-            if (user.roles) {
-              user.roles = user.roles.map(v => v.toLowerCase());
+            if (
+              user.guest === true &&
+              req.method !== "GET" &&
+              !req.headers["x-eventhorizon-guest-write"]
+            ) {
+              error = "Non GET method on guest";
+            } else {
+              if (user.roles) {
+                user.roles = user.roles.map(v => v.toLowerCase());
+              }
+              user.project = project;
+              user.expires = Math.floor(new Date().getTime() / 1000) + 3600;
+              user.sessionId = null;
             }
-            user.project = project;
-            user.expires = Math.floor(new Date().getTime() / 1000) + 3600;
-            user.sessionId = null;
           } else {
             error = "Invalid user";
           }
@@ -185,6 +192,7 @@ exports.InitializeAuthentication = () => {
         error = "Invalid user";
       }
       if (error !== null) {
+        console.log(error);
         done(null, false, { message: error });
       } else {
         done(null, user);
@@ -239,7 +247,7 @@ exports.verifyToken = async jwtToken => {
 };
 
 exports.authenticate = passport.authenticate(
-  ["client-cert", "jwt", "request"],
+  ("client-cert", "jwt", "request"),
   { session: false }
 );
 

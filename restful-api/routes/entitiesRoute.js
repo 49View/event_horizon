@@ -300,8 +300,8 @@ router.post("/:group/:filename", async (req, res, next) => {
   const filename = req.params.filename;
   const group = req.params.group;
   const project = req.user.project;
-  const username = req.user.name;
-  const useremail = req.user.email;
+  const username = decodeURIComponent(req.user.name);
+  const useremail = decodeURIComponent(req.user.email);
 
   try {
     const entity = await entityController.createEntityFromMetadata(
