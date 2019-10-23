@@ -282,8 +282,18 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 
 #define JSONDATA_R_H(CLASSNAME, PARENTCLASS,...) \
 	struct CLASSNAME : public PARENTCLASS { \
-	CLASSNAME() {} \
+	CLASSNAME() = default; \
 	virtual ~CLASSNAME() {} \
+	explicit CLASSNAME( const SerializableContainer& _str ) { \
+		rapidjson::Document document; \
+		document.Parse<rapidjson::kParseStopWhenDoneFlag>( reinterpret_cast<const char*>(_str.data()) ); \
+		MegaReader reader( document ); \
+		deserialize( reader ); } \
+	explicit CLASSNAME( const std::string& _str ) { \
+		rapidjson::Document document; \
+		document.Parse<rapidjson::kParseStopWhenDoneFlag>( _str.c_str() ); \
+		MegaReader reader( document ); \
+		deserialize( reader ); } \
 	CLASSNAME( uint8_p& _data ) { \
 		rapidjson::Document document; \
 		document.Parse<rapidjson::kParseStopWhenDoneFlag>( cbToString(std::move(_data)).c_str() ); \
@@ -291,6 +301,7 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 		if ( !reader.isEmpty() ) { deserialize( reader );} \
 	} \
 	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); bIsLoaded = true; } \
+    inline SerializableContainer serialize() const { MegaWriter mw; serialize(&mw); return mw.getSerializableContainer();} \
 	template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( #__VA_ARGS__,__VA_ARGS__ ); } \
 	inline void serialize( MegaWriter* visitor ) const { visitor->StartObject(); serializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); visitor->EndObject(); } \

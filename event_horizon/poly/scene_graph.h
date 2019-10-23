@@ -22,11 +22,18 @@
 #include <poly/poly.hpp>
 #include <poly/node_graph.hpp>
 #include <poly/vdata_assembler.h>
+#include <poly/scene_dependency_resolver.hpp>
 
 class SceneGraph;
 struct scene_t;
 class Camera;
+using HODResolverCallback = std::function<void()>;
 using MaterialMap = std::unordered_map<std::string, std::string>;
+
+namespace HOD { // HighOrderDependency
+    template <typename T>
+    DependencyList resolveDependencies( T* data );
+}
 
 class CommandScriptSceneGraph : public CommandScript {
 public:
@@ -34,19 +41,6 @@ public:
     virtual ~CommandScriptSceneGraph() = default;
 };
 
-struct LoadedResouceCallbackData {
-    LoadedResouceCallbackData( ResourceRef  key, ResourceRef _hash, SerializableContainer&& data,
-                               HttpResouceCB  ccf ) :
-                               key(std::move( key )), hash(std::move( _hash )),
-                               data( std::move(data) ), ccf(std::move( ccf )) {}
-
-    ResourceRef                         key;
-    ResourceRef                         hash;
-    SerializableContainer               data;
-    HttpResouceCB ccf;
-};
-
-using LoadedResouceCallbackContainer = std::vector<LoadedResouceCallbackData>;
 using GenericSceneCallbackValueMap = std::tuple<std::string, SerializableContainer, std::string>;
 using GenericSceneCallback = std::unordered_map<std::string, GenericSceneCallbackValueMap>;
 using EventSceneCallback = std::unordered_map<std::string, SocketCallbackDataType>;
@@ -307,19 +301,21 @@ public:
             if ( !gb.elemInjFather ) addNode(elem);
             return elem;
         } else {
-            elem = EF::clone(get<Geom>(gb.dataTypeHolder.nameId));
-            elem->setTag(gb.tag);
-            if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
-            elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
-            if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
-                auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
-                elem->foreach( [&matRef](GeomSP _geom) {
-                    if ( !_geom->empty() ) {
-                        _geom->DataRef().material = matRef;
-                    }
-                });
+            if ( auto elemToClone = get<Geom>(gb.dataTypeHolder.nameId); elemToClone ) {
+                elem = EF::clone(elemToClone);
+                elem->setTag(gb.tag);
+                if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
+                elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
+                if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
+                    auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
+                    elem->foreach( [&matRef](GeomSP _geom) {
+                        if ( !_geom->empty() ) {
+                            _geom->DataRef().material = matRef;
+                        }
+                    });
+                }
+                if ( !gb.elemInjFather ) addNode(elem);
             }
-            if ( !gb.elemInjFather ) addNode(elem);
         }
         return elem;
     }
@@ -393,6 +389,7 @@ public:
     [[nodiscard]] const MaterialMap& getMaterialRemap() const;
     void setMaterialRemap( const MaterialMap& materialRemap );
     [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
+    void HODResolve( const DependencyList& deps, HODResolverCallback ccf );
 //    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 //    virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
@@ -414,6 +411,7 @@ protected:
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     MaterialMap materialRemap;
+    std::vector<SceneDependencyResolver> dependencyResovlers;
 };
 
 class MaterialThumbnail : public Material {
@@ -427,3 +425,11 @@ protected:
     std::unordered_map<std::string, std::string> thumbValues;
     SceneGraph* sg;
 };
+
+namespace HOD { // HighOrderDependency
+    template<typename T>
+    void resolver( SceneGraph& sg, T* data, HODResolverCallback ccf ) {
+        sg.HODResolve( HOD::resolveDependencies<T>( data ), ccf );
+    }
+
+}

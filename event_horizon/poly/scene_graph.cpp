@@ -509,6 +509,9 @@ void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _
 
 ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {
     auto matRef = ML().getHash( _matref );
+    if ( matRef.empty() ) {
+        matRef = ML().getHash( S::WHITE_PBR );
+    }
     if ( _color != C4f::WHITE ) {
         auto matClone = EF::clone( ML().get( matRef ));
         matClone->setDiffuseColor( _color.xyz());
@@ -634,4 +637,14 @@ std::string SceneGraph::possibleRemap( const std::string& _key, const std::strin
         return it->second;
     }
     return _value;
+}
+
+void SceneGraph::HODResolve( const DependencyList& deps, HODResolverCallback ccf ) {
+    SceneDependencyResolver sdr(*this );
+
+    sdr.addDeps( deps );
+    sdr.addResolveCallback( ccf );
+
+    dependencyResovlers.push_back( sdr );
+    dependencyResovlers.back().resolve();
 }

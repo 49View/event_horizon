@@ -76,14 +76,19 @@ public:
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = {}, const std::string& _key = {} ) {
         add( _elem, _name, _hash, _aliasKey, _key );
-        addSignal( { _elem, _hash, {_hash, _name, _aliasKey, _key} } );
+//        resolveDependencies( [&]() {
+            addSignal( { _elem, _hash, {_hash, _name, _aliasKey, _key} } );
+//        });
+
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
                       const ResourceRef& _hash, const std::string& _aliasKey = "", const std::string& _key = "",
                       HttpResouceCB _ccf = nullptr) {
         add( _elem, _name, _hash, _aliasKey, _key );
-        addToSignal( signalAddElements, { _elem, _hash, {_hash, _name, _aliasKey, _key}, _ccf } );
+//        resolveDependencies( [&]() {
+            addToSignal( signalAddElements, { _elem, _hash, { _hash, _name, _aliasKey, _key }, _ccf } );
+//        });
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {
@@ -101,12 +106,13 @@ public:
     std::shared_ptr<T> get( const std::string& _key ) {
         if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
             return resources[res->second];
-        } else {
-            if ( !resources.empty() ) {
-                LOGRS("Resource " << _key << " unmapped returning default elem");
-                return resources.begin()->second;
-            }
         }
+//        else {
+//            if ( !resources.empty() ) {
+//                LOGRS("Resource " << _key << " unmapped returning default elem");
+//                return resources.begin()->second;
+//            }
+//        }
         LOGRS("Resource " << _key << " unmapped and mamanger empty, returning null");
         return nullptr;
     }

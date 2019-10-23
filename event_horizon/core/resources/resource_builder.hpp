@@ -28,25 +28,25 @@ JSONDATA( JSONResourceResponse, _id, project, group, isPublic, isRestricted, met
     ResourceMetadata metadata;
 };
 
-template <typename R>
+template <typename R, typename SG, template<typename T> typename RV>
 class ResourceBuilder : public Publisher<R, EmptyBox> {
 public:
-    explicit ResourceBuilder( SceneGraph& _sg ) : sg( _sg ) {}
-    ResourceBuilder( SceneGraph& _sg, const std::string& _name ) : sg( _sg ) {
+    explicit ResourceBuilder( SG& _sg ) : sg( _sg ) {}
+    ResourceBuilder( SG& _sg, const std::string& _name ) : sg( _sg ) {
         this->Name(_name);
     }
     virtual ~ResourceBuilder() = default;
 
     void load( HttpResouceCB _ccf = nullptr ) {
-        Http::get( Url( HttpFilePrefix::entities + ResourceVersioning<R>::Prefix() + "/" + url_encode( this->Name() ) ),
+        Http::get( Url( HttpFilePrefix::entities + RV<R>::Prefix() + "/" + url_encode( this->Name() ) ),
                    [](HttpResponeParams _res) {
                        if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
                        auto buff = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
                        if ( tarUtil::isTar(buff) ) {
-                           SceneGraph::addDeferredComp( getFileNameCallbackKey( _res.uri ), std::move(buff), _res.ccf );
+                           SG::addDeferredComp( getFileNameCallbackKey( _res.uri ), std::move(buff), _res.ccf );
                        } else {
                            auto resHash = _res.ETag.empty() ? _res.uri + std::to_string(_res.length) : _res.ETag;
-                           SceneGraph::addDeferred<R>( getFileNameCallbackKey( _res.uri ),
+                           SG::template addDeferred<R>( getFileNameCallbackKey( _res.uri ),
                                                        _res.ETag,
                                                        std::move(buff),
                                                        _res.ccf );
@@ -101,7 +101,7 @@ protected:
         } else {
             this->Hash(_hash);
         }
-        if ( auto ret = sg.M<R>().hashExists( this->Hash() ); ret!= nullptr ) {
+        if ( auto ret = sg.template M<R>().hashExists( this->Hash() ); ret!= nullptr ) {
             return ret;
         }
         return nullptr;
@@ -130,18 +130,18 @@ protected:
         ResourceRef resolvedHash = _hash;
         if constexpr ( std::is_same<R, DEP>::value ) {
             if ( resolvedHash.empty() ) {
-                this->calcHash( ResourceVersioning<DEP>::HashResolver(_res) );
+                this->calcHash( RV<DEP>::HashResolver(_res) );
                 resolvedHash = this->Hash();
             }
         }
         ASSERT( !resolvedHash.empty() );
 
-        sg.M<DEP>().add( _res, _name, resolvedHash, _arp, this->Name(), _key, _ccf );
+        sg.template M<DEP>().add( _res, _name, resolvedHash, _arp, this->Name(), _key, _ccf );
         return resolvedHash;
     }
 
 protected:
-    SceneGraph& sg;
+    SG& sg;
     std::map<std::string, std::vector<ResourceRef>> dependencies;
     std::vector<std::string> params;
     HttpResouceCB ccf = nullptr;

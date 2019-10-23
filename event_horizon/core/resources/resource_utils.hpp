@@ -142,36 +142,39 @@ public:
 
 };
 
-template<typename R> class ResourceBuilder;
 
-using AppDataBuilder = ResourceBuilder<AppData>;
+template<typename R, typename SG, template<typename T> typename RV> class ResourceBuilder;
+
+class SceneGraph;
+
+using AppDataBuilder = ResourceBuilder<AppData, SceneGraph, ResourceVersioning>;
 using AB = AppDataBuilder;
 
-using VDataBuilder = ResourceBuilder<VData>;
+using VDataBuilder = ResourceBuilder<VData, SceneGraph, ResourceVersioning>;
 using VB = VDataBuilder;
 
-using ImageBuilder = ResourceBuilder<RawImage>;
+using ImageBuilder = ResourceBuilder<RawImage, SceneGraph, ResourceVersioning>;
 using IB = ImageBuilder;
 
-using ProfileBuilder = ResourceBuilder<Profile>;
+using ProfileBuilder = ResourceBuilder<Profile, SceneGraph, ResourceVersioning>;
 using PB = ProfileBuilder;
 
-using CameraBuilder = ResourceBuilder<CameraRig>;
+using CameraBuilder = ResourceBuilder<CameraRig, SceneGraph, ResourceVersioning>;
 using CB = CameraBuilder;
 
-using FontBuilder = ResourceBuilder<Font>;
+using FontBuilder = ResourceBuilder<Font, SceneGraph, ResourceVersioning>;
 using FB = FontBuilder;
 
-using MaterialColorBuilder = ResourceBuilder<MaterialColor>;
+using MaterialColorBuilder = ResourceBuilder<MaterialColor, SceneGraph, ResourceVersioning>;
 using MCB = MaterialColorBuilder;
 
-using MaterialBuilder = ResourceBuilder<Material>;
+using MaterialBuilder = ResourceBuilder<Material, SceneGraph, ResourceVersioning>;
 using MB = MaterialBuilder;
 
-using UIBuilder = ResourceBuilder<UIContainer>;
+using UIBuilder = ResourceBuilder<UIContainer, SceneGraph, ResourceVersioning>;
 using UIB = UIBuilder;
 
-using GeomRBuilder = ResourceBuilder<Geom>;
+using GeomRBuilder = ResourceBuilder<Geom, SceneGraph, ResourceVersioning>;
 using GRB = GeomRBuilder;
 
 template<typename T, typename C> class ResourceManager;
@@ -186,3 +189,17 @@ using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContaine
 using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>>;
 using GeomManager       = ResourceManager<Geom, ResourceManagerContainer<Geom>>;
 using UIManager         = ResourceManager<UIContainer, ResourceManagerContainer<UIContainer>>;
+
+struct LoadedResouceCallbackData {
+    LoadedResouceCallbackData( ResourceRef  key, ResourceRef _hash, SerializableContainer&& data,
+                               HttpResouceCB  ccf ) :
+            key(std::move( key )), hash(std::move( _hash )),
+            data( std::move(data) ), ccf(std::move( ccf )) {}
+
+    ResourceRef                         key;
+    ResourceRef                         hash;
+    SerializableContainer               data;
+    HttpResouceCB ccf;
+};
+
+using LoadedResouceCallbackContainer = std::vector<LoadedResouceCallbackData>;
