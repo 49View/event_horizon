@@ -23,7 +23,7 @@ exports.InitializeAuthentication = () => {
   //
   passport.use(
     new ClientCertificateStrategy(async (clientCert, done) => {
-      console.log("CLIENT CERTIFICATE STRATEGY");
+      // console.log("CLIENT CERTIFICATE STRATEGY");
 
       const commonName = clientCert.subject.CN;
       let user = false;
@@ -162,6 +162,7 @@ exports.InitializeAuthentication = () => {
         let project = null;
         if (req && req.headers && req.headers["x-eventhorizon-guest"]) {
           project = req.headers["x-eventhorizon-guest"];
+          // console.log("project for guest user: ", project);
           // console.log("P:", project);
           //Check if exists guest user for project
           user = await userController.getUserByGuestProject(project);
@@ -182,14 +183,14 @@ exports.InitializeAuthentication = () => {
               user.sessionId = null;
             }
           } else {
-            error = "Invalid user";
+            error = "Invalid user - null user";
           }
         } else {
-          error = "Invalid user";
+          error = "Invalid user, not a x-eventhorizon-guest";
         }
       } catch (ex) {
         console.log("Error in REQUEST STRATEGY", ex);
-        error = "Invalid user";
+        error = "Invalid user - caught ex";
       }
       if (error !== null) {
         console.log(error);
