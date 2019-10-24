@@ -18,7 +18,7 @@
 #include <core/descriptors/uniform_names.h>
 #include <core/resources/resource_utils.hpp>
 #include <graphics/graphic_functions.hpp>
-#include <graphics/light_manager.h>
+#include <graphics/render_light_manager.h>
 #include <graphics/render_list.h>
 #include <graphics/render_targets.hpp>
 #include <graphics/shader_manager.h>
@@ -148,7 +148,7 @@ void Renderer::useMotionBlur(bool _flag) {
 void Renderer::init() {
     sm = std::make_shared<ShaderManager>();
     tm = std::make_shared<TextureManager>();
-    lm = std::make_shared<LightManager>();
+    lm = std::make_shared<RenderLightManager>();
     gm = std::make_shared<GPUVDataManager>();
     rmm = std::make_shared<RenderMaterialManager>( *this );
     mCommandBuffers = std::make_shared<CommandBufferList>( *this );

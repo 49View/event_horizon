@@ -8,7 +8,7 @@
 #include <graphics/mouse_input.hpp>
 #include <graphics/shadowmap_manager.h>
 #include <graphics/texture_manager.h>
-#include <graphics/light_manager.h>
+#include <graphics/render_light_manager.h>
 
 namespace di = boost::di;
 

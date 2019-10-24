@@ -16,6 +16,7 @@
 #include <core/resources/ui_container.hpp>
 #include <graphics/renderer.h>
 #include <graphics/shader_manager.h>
+#include <graphics/render_light_manager.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/window_handling.hpp>
 #include <poly/scene_events.h>
@@ -147,6 +148,12 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     sg.ML().connect( [this](const ResourceTransfer<Material>& _val ) {
         LOGRS( "[SG-Resource] Add " << ResourceVersioning<Material>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addMaterialResource(_val);
+        if ( _val.ccf ) _val.ccf(_val.hash);
+    });
+
+    sg.LL().connect( [this](const ResourceTransfer<Light>& _val ) {
+        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Light>::Prefix() << ": "  << *_val.names.begin() );
+        this->RR().LM()->addPointLight( _val.elem->pos, _val.elem->wattage, _val.elem->intensity, _val.elem->attenuation);
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 

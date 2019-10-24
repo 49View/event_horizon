@@ -10,7 +10,7 @@ class Renderer;
 class RenderMaterial;
 class CommandQueue;
 class ShaderManager;
-class LightManager;
+class RenderLightManager;
 class RenderOrchestrator;
 class StreamingMediator;
 class RLTarget;

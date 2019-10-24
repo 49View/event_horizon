@@ -165,7 +165,7 @@ public:
     [[nodiscard]] std::shared_ptr<RenderMaterial> getRenderMaterialFromHash( CResourceRef _hash );
 
 	std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
-    std::shared_ptr<LightManager>   LM() { return lm; }
+    std::shared_ptr<RenderLightManager>   LM() { return lm; }
 	std::shared_ptr<TextureManager> TM() { return tm; }
 	std::shared_ptr<ShaderManager>  SM() { return sm; }
     std::shared_ptr<Framebuffer> BRDFTarget() { return mBRDF; };
@@ -222,7 +222,7 @@ protected:
 	std::shared_ptr<ShaderManager>          sm;
 	std::shared_ptr<TextureManager>         tm;
 	std::shared_ptr<RenderMaterialManager>  rmm;
-    std::shared_ptr<LightManager>           lm;
+    std::shared_ptr<RenderLightManager>           lm;
     std::shared_ptr<GPUVDataManager>        gm;
     StreamingMediator& ssm;
 

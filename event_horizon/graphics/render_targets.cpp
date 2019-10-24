@@ -11,7 +11,7 @@
 #include <core/streaming_mediator.hpp>
 #include <core/descriptors/uniform_names.h>
 #include <graphics/renderer.h>
-#include <graphics/light_manager.h>
+#include <graphics/render_light_manager.h>
 
 std::shared_ptr<RLTarget>
 RenderTargetFactory::make( RenderTargetType rtt, std::shared_ptr<CameraRig> _rig, const Rect2f& screenViewport,

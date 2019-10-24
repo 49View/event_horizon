@@ -309,6 +309,7 @@ namespace ResourceGroup {
 	const static std::string VData     = "vdata";
 	const static std::string Geom      = "geom";
     const static std::string Image     = "image";
+    const static std::string Light     = "light";
     const static std::string Profile   = "profile";
     const static std::string Font      = "font";
 	const static std::string UI        = "ui";

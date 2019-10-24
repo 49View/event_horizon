@@ -1,44 +1,33 @@
-#pragma  once
+#pragma once
 
-#include "core/math/vector3f.h"
+#include <core/math/vector3f.h>
 #include <core/math/anim_type.hpp>
 #include <core/math/anim.h>
+#include <core/resources/light.hpp>
 
 class ProgramUniformSet;
 class ShaderManager;
 class ShadowMapManager;
 
-enum class LightType {
-	Invalid = 0,
-	Directional = 1,
-	Point = 2,
-	Spotlight = 3
-};
-
 class LightBase {
 public:
 	LightBase( float wattage, float intensity, const Vector3f& attenuation ) {
-		Type( LightType::Invalid );
+	    name = "Default";
+		mType = LightType_Invalid;
 		mWattage = wattage;
 		mIntensity = std::make_shared<AnimType<float>>( intensity, "lightIntensity" );
 		mAttenuation = std::make_shared<AnimType<Vector3f>>( attenuation, "lightAttenuation" );
 	}
 
-	float Intensity() const { return mIntensity->value * mWattage; }
+	[[nodiscard]] float Intensity() const { return mIntensity->value * mWattage; }
 	std::shared_ptr<AnimType<float>>& IntensityAnim() { return mIntensity; }
 	void Intensity( float val ) { mIntensity->value = val; }
-	Vector3f Attenuation() const { return mAttenuation->value; }
+	[[nodiscard]] Vector3f Attenuation() const { return mAttenuation->value; }
 	void Attenuation( const Vector3f& val ) { mAttenuation->value = val; }
-	LightType Type() const { return mType; }
+	[[nodiscard]] LightType Type() const { return mType; }
 	void Type( LightType val ) { mType = val; }
-
-    float getWattage() const {
-        return mWattage;
-    }
-
-    void setWattage( float _wattage ) {
-        LightBase::mWattage = _wattage;
-    }
+    [[nodiscard]] float getWattage() const { return mWattage; }
+    void setWattage( float _wattage ) { LightBase::mWattage = _wattage; }
 
 protected:
 	std::string name;
@@ -50,12 +39,12 @@ protected:
 
 class DirectionalLight : public LightBase {
 public:
-	DirectionalLight( const Vector3f& dir, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( wattage, intensity, attenuation ) {
-		Type( LightType::Point );
+	explicit DirectionalLight( const Vector3f& dir, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( wattage, intensity, attenuation ) {
+		Type( LightType_Point );
 		mDir = std::make_shared<AnimType<Vector3f>>( dir, "lightDirection" );
 	}
 
-	Vector3f Dir() const { return mDir->value; }
+	[[nodiscard]] Vector3f Dir() const { return mDir->value; }
 	void Dir( const Vector3f& val ) { mDir->value = val; }
 private:
 	std::shared_ptr<AnimType<Vector3f>>	mDir;
@@ -63,12 +52,12 @@ private:
 
 class PointLight : public LightBase {
 public:
-	PointLight( const Vector3f& pos, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( wattage, intensity, attenuation ) {
-		Type( LightType::Point );
+	explicit PointLight( const Vector3f& pos, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( wattage, intensity, attenuation ) {
+		Type( LightType_Point );
 		mPos = std::make_shared<AnimType<Vector3f>>( pos, "lightPos" );
 	}
 
-	Vector3f Pos() const { return mPos->value; }
+	[[nodiscard]] Vector3f Pos() const { return mPos->value; }
 	void Pos( const Vector3f& val ) { mPos->value = val; }
 protected:
 	std::shared_ptr<AnimType<Vector3f>>	mPos;
@@ -77,25 +66,25 @@ protected:
 class SpotLight : public PointLight {
 public:
 	SpotLight( const Vector3f& pos, const Vector3f& dir, float beamAngle = 60.0f, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : PointLight( pos, wattage, intensity, attenuation ) {
-		Type( LightType::Spotlight );
+		Type( LightType_Spotlight );
 		mDir = std::make_shared<AnimType<Vector3f>>( dir, "lightDirection" );
 		mBeamAngle = std::make_shared<AnimType<float>>( beamAngle, "lightBeamAngle" );
 	}
 
-	Vector3f Dir() const { return mDir->value; }
+	[[nodiscard]] Vector3f Dir() const { return mDir->value; }
 	void Dir( const Vector3f& val ) { mDir->value = val; }
 
 	std::shared_ptr<AnimType<float>> BeamAngle() { return mBeamAngle; };
-	float BeamAngle() const { return mBeamAngle->value; }
+	[[nodiscard]] float BeamAngle() const { return mBeamAngle->value; }
 	void BeamAngle( const float val ) { mBeamAngle->value = val; }
 private:
 	std::shared_ptr<AnimType<Vector3f>>	mDir;
 	std::shared_ptr<AnimType<float>> mBeamAngle;
 };
 
-class LightManager {
+class RenderLightManager {
 public:
-    LightManager();
+    RenderLightManager();
 
 	void addPointLight( const Vector3f& pos, float _wattage, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
     void setPointLightWattages( float _watt );
@@ -135,5 +124,3 @@ private:
     V4f shadowParameters = V4f{0.001f, 1.0f, 0.0f, 1.0f};
 	//	DataVisualizerWindow* dvWindow;
 };
-
-

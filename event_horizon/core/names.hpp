@@ -11,6 +11,7 @@ namespace S {
 
     const std::string GEOMS     = "geom";
     const std::string UIS       = "ui";
+    const std::string LIGHTS    = "lights";
     const std::string COLORS    = "color";
     const std::string MATERIALS = "material";
     const std::string PROFILES  = "profile";

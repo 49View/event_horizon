@@ -5,9 +5,10 @@
 #pragma once
 
 #include <memory>
+#include <graphics/render_light_manager.h>
 #include <core/di.hpp>
 #include <graphics/shader_manager.h>
-#include <graphics/light_manager.h>
+#include <graphics/render_light_manager.h>
 #include <graphics/program_uniform_set.h>
 #include <graphics/mouse_input.hpp>
 #include <graphics/text_input.hpp>
@@ -46,12 +47,12 @@ public:
         }
 #endif
 #ifdef __EMSCRIPTEN__
-        if ( argc >= 3 ) {
+        if ( argc >= 4 ) {
             LOGR("Setting user token and sessionID ok");
             LOGRS("DevicePixelRatio: " << argv[2] );
-//            Http::userToken(argv[1]);
             Http::sessionId(argv[1]);
             WH::DevicePixelRatio( std::stof(std::string(argv[2])));
+            Http::project(std::string(argv[3]));
             Socket::createConnection();
         } else {
             if constexpr ( BE::hasLF() ) {

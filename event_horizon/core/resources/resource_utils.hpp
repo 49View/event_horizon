@@ -64,6 +64,7 @@ inline static size_t resourcePriority( const ResourceRef& ref ) {
          ref == ResourceGroup::Font ||
          ref == ResourceGroup::Color ||
          ref == ResourceGroup::CameraRig ||
+         ref == ResourceGroup::Light ||
          ref == ResourceGroup::Profile ) return 1;
 
     if ( ref == ResourceGroup::Material ) return 10;
@@ -83,6 +84,7 @@ public:
         if ( std::is_same<R, Geom>::value )             return 2000;
         if ( std::is_same<R, VData>::value )            return 1000;
         if ( std::is_same<R, MaterialColor>::value  )   return 1000;
+        if ( std::is_same<R, Light>::value  )           return 1000;
         return 0;
     }
 
@@ -95,8 +97,9 @@ public:
         if constexpr ( std::is_same<R, Profile>::value )                return false;
         if constexpr ( std::is_same<R, RawImage>::value )               return false;
         if constexpr ( std::is_same<R, Font>::value )                   return false;
-        if constexpr ( std::is_same<R, UIContainer>::value )     return true ;
+        if constexpr ( std::is_same<R, UIContainer>::value )            return true ;
         if constexpr ( std::is_same<R, CameraRig>::value )              return false;
+        if constexpr ( std::is_same<R, Light>::value )                  return false;
     }
 
     inline static SerializableContainer HashResolver( std::shared_ptr<R> _val ) {
@@ -107,6 +110,7 @@ public:
         if constexpr ( std::is_same<R, MaterialColor>::value )          return {};
         if constexpr ( std::is_same<R, Profile>::value )                return _val->serialize();
         if constexpr ( std::is_same<R, RawImage>::value )               return _val->serialize();
+        if constexpr ( std::is_same<R, Light>::value )                  return _val->serialize();
         if constexpr ( std::is_same<R, Font>::value )                   return {};
         if constexpr ( std::is_same<R, UIContainer>::value )            return serializableContainerFromString(_val->serialize());
         if constexpr ( std::is_same<R, CameraRig>::value )              return {};
@@ -123,6 +127,7 @@ public:
         if constexpr ( std::is_same<R, Font>::value ) return ResourceGroup::Font;
         if constexpr ( std::is_same<R, UIContainer>::value ) return ResourceGroup::UI;
         if constexpr ( std::is_same<R, CameraRig>::value ) return ResourceGroup::CameraRig;
+        if constexpr ( std::is_same<R, Light>::value ) return ResourceGroup::Light;
     }
 
     inline static std::string GenerateThumbnail( const R& _res ) {
@@ -136,7 +141,8 @@ public:
 
         if ( std::is_same<R, Profile>::value  )                 return "profile";
         if ( std::is_same<R, RawImage>::value  )                return "image";
-        if ( std::is_same<R, Font>::value  )  return "font";
+        if ( std::is_same<R, Light>::value  )                   return "light";
+        if ( std::is_same<R, Font>::value  )                    return "font";
         return "unknown";
     }
 
@@ -171,6 +177,9 @@ using MCB = MaterialColorBuilder;
 using MaterialBuilder = ResourceBuilder<Material, SceneGraph, ResourceVersioning>;
 using MB = MaterialBuilder;
 
+using LightBuilder = ResourceBuilder<Light, SceneGraph, ResourceVersioning>;
+using LB = LightBuilder;
+
 using UIBuilder = ResourceBuilder<UIContainer, SceneGraph, ResourceVersioning>;
 using UIB = UIBuilder;
 
@@ -189,6 +198,7 @@ using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContaine
 using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>>;
 using GeomManager       = ResourceManager<Geom, ResourceManagerContainer<Geom>>;
 using UIManager         = ResourceManager<UIContainer, ResourceManagerContainer<UIContainer>>;
+using LightManager      = ResourceManager<Light, ResourceManagerContainer<Light>>;
 
 struct LoadedResouceCallbackData {
     LoadedResouceCallbackData( ResourceRef  key, ResourceRef _hash, SerializableContainer&& data,

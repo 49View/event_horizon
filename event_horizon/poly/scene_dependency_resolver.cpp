@@ -5,8 +5,6 @@
 #include "scene_dependency_resolver.hpp"
 #include <poly/scene_graph.h>
 
-#include <utility>
-
 void SceneDependencyResolver::loadResCount( HttpResouceCBSign _key ) {
     size_t targetNum = firstTierResourceCount();
 
@@ -56,6 +54,7 @@ void SceneDependencyResolver::resolve() {
         for ( const auto& r : RawImages() ) sgl.load<RawImage>( r, LRFUNC );
         for ( const auto& r : Materials() ) sgl.load<Material>( r, LRFUNC );
         for ( const auto& r : Profiles()  ) sgl.load<Profile>( r, LRFUNC );
+        for ( const auto& r : Lights()  )   sgl.load<Light>( r, LRFUNC );
     }
 }
 
@@ -96,7 +95,9 @@ void SceneDependencyResolver::addDep( const StringsPair& d ) {
         addFont( d.second );
     } else if ( d.first == ResourceGroup::UI ){
         addUI( d.second );
-    } else if ( d.first == ResourceGroup::CameraRig ){
+    } else if ( d.first == ResourceGroup::Light ){
+        addLight( d.second );
+    }else if ( d.first == ResourceGroup::CameraRig ){
 //            addC( d.second );
     }
 }

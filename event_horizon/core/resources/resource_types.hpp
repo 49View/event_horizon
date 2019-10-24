@@ -16,6 +16,7 @@ template <typename T, typename B = JMATH::AABB> class RecursiveTransformation;
 class AppData;
 class VData;
 class Material;
+class Light;
 class RawImage;
 namespace Utility::TTFCore { class FontInternal;}
 using Font = Utility::TTFCore::FontInternal;

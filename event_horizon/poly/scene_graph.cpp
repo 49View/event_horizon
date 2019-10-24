@@ -336,8 +336,9 @@ SceneGraph::SceneGraph( CommandQueue& cq,
                         FontManager& _fm,
                         CameraManager& _cm,
                         GeomManager& _gm,
-                        UIManager& _um) : vl( _vl ), tl( _tl ), pl( _pl ), ml( _ml ), cl( _cl ), fm( _fm ),
-                                             cm( _cm ), gm( _gm ), um( _um ) {
+                        UIManager& _um,
+                        LightManager& _ll) : vl( _vl ), tl( _tl ), pl( _pl ), ml( _ml ), cl( _cl ), fm( _fm ),
+                                             cm( _cm ), gm( _gm ), um( _um ), ll(_ll) {
 
     hcs = std::make_shared<CommandScriptSceneGraph>( *this );
     cq.registerCommandScript( hcs );
@@ -462,6 +463,12 @@ ResourceRef SceneGraph::addCameraRig( const ResourceRef& _key, const CameraRig& 
 
 ResourceRef SceneGraph::addGeom( const ResourceRef& _key, GeomSP _res, HttpResouceCB _ccf ) {
     B<GRB>( _key ).addIM( _res );
+    if ( _ccf ) _ccf( _key );
+    return _key;
+}
+
+ResourceRef SceneGraph::addLight( const ResourceRef& _key, const Light& _res, HttpResouceCB _ccf ) {
+    B<LB>( _key ).addIM( _res );
     if ( _ccf ) _ccf( _key );
     return _key;
 }

@@ -1,11 +1,11 @@
-#include "light_manager.h"
+#include "render_light_manager.h"
 
 #include <core/math/spherical_harmonics.h>
 #include <core/descriptors/uniform_names.h>
 #include <graphics/shadowmap_manager.h>
 #include <graphics/program_uniform_set.h>
 
-LightManager::LightManager() {
+RenderLightManager::RenderLightManager() {
     mbGlobalOnOffSwitch = true;
     mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f, "LightDirectionalIntensity" );
 
@@ -46,51 +46,51 @@ LightManager::LightManager() {
     mLigthingUniform->setUBOStructure( UniformNames::ssaoParameters, 16 );
 }
 
-void LightManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
+void RenderLightManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
     mLigthingUniform->generateUBO( sm, "LightingUniforms");
 }
 
-void LightManager::addPointLight( const Vector3f& pos, float _wattage, float intensity, const Vector3f& attenuation ) {
+void RenderLightManager::addPointLight( const Vector3f& pos, float _wattage, float intensity, const Vector3f& attenuation ) {
     mPointLights.emplace_back( pos, _wattage, intensity, attenuation );
 }
 
-void LightManager::removePointLight( const size_t index ) {
+void RenderLightManager::removePointLight( const size_t index ) {
     ASSERT( index < mPointLights.size());
     mPointLights.erase( mPointLights.begin() + index );
 }
 
-void LightManager::removeAllPointLights() {
+void RenderLightManager::removeAllPointLights() {
     mPointLights.clear();
 }
 
-void LightManager::switchLightsOn( float animTime, TimelineGroupCCF _ccf ) {
+void RenderLightManager::switchLightsOn( float animTime, TimelineGroupCCF _ccf ) {
     for ( auto& pl : mPointLights ) {
         Timeline::play( pl.IntensityAnim(), 2, KeyFramePair{animTime, 1.0f }, _ccf );
     }
 //    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
 }
 
-void LightManager::setPointLightWattages( float _watt ) {
+void RenderLightManager::setPointLightWattages( float _watt ) {
     for ( auto& pl : mPointLights ) {
         pl.setWattage( _watt );
     }
 //    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
 }
 
-void LightManager::switchLightsOff( float animTime, TimelineGroupCCF _ccf ) {
+void RenderLightManager::switchLightsOff( float animTime, TimelineGroupCCF _ccf ) {
     for ( auto& pl : mPointLights ) {
         Timeline::play( pl.IntensityAnim(), 2, KeyFramePair{animTime, 0.0f }, _ccf );
     }
 //    animateTo( mDirectionalLightIntensity, 0.0f, animTime );
 }
 
-void LightManager::setLightsIntensity( float _intensity ) {
+void RenderLightManager::setLightsIntensity( float _intensity ) {
     for ( auto& pl : mPointLights ) {
         pl.IntensityAnim()->value = _intensity;
     }
 }
 
-void LightManager::toggleLightsOnOff() {
+void RenderLightManager::toggleLightsOnOff() {
     mbGlobalOnOffSwitch = !mbGlobalOnOffSwitch;
     float animTime = 2.0f;
     if ( mbGlobalOnOffSwitch ) {
@@ -100,9 +100,9 @@ void LightManager::toggleLightsOnOff() {
     }
 }
 
-void LightManager::setUniforms( const Vector3f& _cameraPos,
-                                std::shared_ptr<ShadowMapManager> smm,
-                                const V4f& _sunRadiance ) {
+void RenderLightManager::setUniforms( const Vector3f& _cameraPos,
+                                      std::shared_ptr<ShadowMapManager> smm,
+                                      const V4f& _sunRadiance ) {
     std::sort( mPointLights.begin(), mPointLights.end(), [_cameraPos]( const auto& a, const auto& b ) -> bool {
         return distance( a.Pos(), _cameraPos ) < distance( b.Pos(), _cameraPos );
     } );
@@ -151,34 +151,34 @@ void LightManager::setUniforms( const Vector3f& _cameraPos,
     mLigthingUniform->setUBOData( UniformNames::ssaoParameters, mSSAOParameters );
 }
 
-void LightManager::setUniforms_r() {
+void RenderLightManager::setUniforms_r() {
     mLigthingUniform->submitUBOData();
 }
 
-void LightManager::update( float /*timeStamp*/ ) {
+void RenderLightManager::update( float /*timeStamp*/ ) {
 //	setLightsIntensity( 1.0f - SB.GoldenHour() );
 }
 
-void LightManager::setShadowOverBurnCofficient( float _overBurn ) {
+void RenderLightManager::setShadowOverBurnCofficient( float _overBurn ) {
     shadowParameters[1] = _overBurn;
 }
 
-void LightManager::setIndoorSceneCoeff( float _value ) {
+void RenderLightManager::setIndoorSceneCoeff( float _value ) {
     shadowParameters[2] = _value;
 }
 
-void LightManager::setShadowZFightCofficient( float _value ) {
+void RenderLightManager::setShadowZFightCofficient( float _value ) {
     shadowParameters[0] = _value;
 }
 
-void LightManager::setSSAOKernelRadius( float _value ) {
+void RenderLightManager::setSSAOKernelRadius( float _value ) {
     mSSAOParameters[0] = _value;
 }
 
-void LightManager::setSSAOFalloffRadius( float _value ) {
+void RenderLightManager::setSSAOFalloffRadius( float _value ) {
     mSSAOParameters[2] = _value;
 }
 
-void LightManager::setSSAONumRealTimeSamples( float _value ) {
+void RenderLightManager::setSSAONumRealTimeSamples( float _value ) {
     mSSAOParameters[1] = _value;
 }

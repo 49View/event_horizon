@@ -27,6 +27,7 @@ public:
     void addRawImage     ( CResourceRef _value ) { add( S::IMAGES, _value); }
     void addFont         ( CResourceRef _value ) { add( S::FONTS, _value); }
     void addUI           ( CResourceRef _value ) { add( S::UIS, _value); }
+    void addLight        ( CResourceRef _value ) { add( S::LIGHTS, _value); }
 
 protected:
 
@@ -59,6 +60,9 @@ protected:
             if ( ent.key == S::FONTS ) {
                 ret += ent.value.size();
             }
+            if ( ent.key == S::LIGHTS ) {
+                ret += ent.value.size();
+            }
         }
         return ret;
     };
@@ -80,7 +84,7 @@ protected:
         size_t ret = 0;
         for ( const auto& ent : entities ) {
             if ( ent.key != S::COLORS && ent.key != S::MATERIALS && ent.key != S::PROFILES && ent.key != S::IMAGES &&
-                 ent.key != S::FONTS && ent.key != S::GEOMS && ent.key != S::UIS) {
+                 ent.key != S::FONTS && ent.key != S::GEOMS && ent.key != S::UIS && ent.key != S::LIGHTS) {
                 ret += ent.value.size();
             }
         }
@@ -124,6 +128,12 @@ protected:
     [[nodiscard]] std::vector<std::string> Fonts(){
         for ( const auto& ent : entities ) {
             if ( ent.key == S::FONTS ) { return ent.value; }
+        }
+        return {};
+    }
+    [[nodiscard]] std::vector<std::string> Lights(){
+        for ( const auto& ent : entities ) {
+            if ( ent.key == S::LIGHTS ) { return ent.value; }
         }
         return {};
     }
