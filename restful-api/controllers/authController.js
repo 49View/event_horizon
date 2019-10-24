@@ -173,7 +173,7 @@ exports.InitializeAuthentication = () => {
               req.method !== "GET" &&
               !req.headers["x-eventhorizon-guest-write"]
             ) {
-              error = "Non GET method on guest";
+              error = "Non GET method on guest user: " + JSON.stringify(user);
             } else {
               if (user.roles) {
                 user.roles = user.roles.map(v => v.toLowerCase());
