@@ -121,19 +121,19 @@ void main()
 
     color.xyz = atmosphere(
         normalize(v_texCoord),          // normalized ray direction
-        vec3(0,6372e3,0),               // ray origin
-        light_pos,                     // position of the sun
-        89.0,                           // intensity of the sun
+        vec3(0,6373e3,0),               // ray origin
+        light_pos,                      // position of the sun
+        69.0,                           // intensity of the sun
         6371e3,                         // radius of the planet in meters
         6471e3,                         // radius of the atmosphere in meters
         vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
         51e-6,                          // Mie scattering coefficient
-        8e3,                            // Rayleigh scale height
+        5e3,                            // Rayleigh scale height
         1.2e3,                          // Mie scale height
         0.758                           // Mie preferred scattering direction
     );
 
-    vec4 gray = vec4(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
+    // vec4 gray = vec4(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
     // color = (vec4(1.0) - exp(-1.0 * gray));
 //    color = vec4(1.0) - exp(-1.0 * mix(color, gray, u_sunHDRMult));
     color = vec4(1.0) - exp(-1.0 * color);
