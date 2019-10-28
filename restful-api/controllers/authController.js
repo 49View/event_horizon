@@ -248,9 +248,12 @@ exports.verifyToken = async jwtToken => {
 };
 
 // NDDado: Reintroduce "client-cert" also, when we are ready
-exports.authenticate = passport.authenticate(("request", "jwt"), {
-  session: false
-});
+exports.authenticate = passport.authenticate(
+  ["client-cert", "jwt", "request"],
+  {
+    session: false
+  }
+);
 
 exports.authorize = async (req, res, next) => {
   const url = req.originalUrl;
