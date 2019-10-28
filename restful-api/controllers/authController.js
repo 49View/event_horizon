@@ -247,15 +247,17 @@ exports.verifyToken = async jwtToken => {
   );
 };
 
-exports.authenticate = passport.authenticate(
-  ("client-cert", "jwt", "request"),
-  { session: false }
-);
+// NDDado: Reintroduce "client-cert" also, when we are ready
+exports.authenticate = passport.authenticate(("request", "jwt"), {
+  session: false
+});
 
 exports.authorize = async (req, res, next) => {
   const url = req.originalUrl;
   const urlParts = url.split("/");
   let authorized = false;
+
+  // console.log("Passport Authorize");
 
   if (urlParts.length > 0 && urlParts[0].length === 0) {
     urlParts.shift();
