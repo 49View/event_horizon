@@ -404,6 +404,15 @@ void RenderOrchestrator::init() {
         rr.changeMaterialColorOnTags( tag, r, g, b );
     };
 
+    luarr["changeMaterialFor"] = [&](int tag, CResourceRef resource ) {
+        sg.loadMaterial( resource, [this,tag](HttpResouceCBSign key) {
+            rr.changeMaterialOnTags(
+                    { (uint64_t)tag, sg.getHash<Material>( key ) } );
+        } );
+    };
+
+
+
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",
                 std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1, std::placeholders::_2 ) );
