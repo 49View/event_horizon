@@ -271,8 +271,8 @@ router.post("/", async (req, res, next) => {
 router.post("/placeholder/:group", async (req, res, next) => {
   const project = req.user.project;
   const group = req.params.group;
-  const username = req.user.name;
-  const useremail = req.user.email;
+  const username = decodeURIComponent(req.user.name);
+  const useremail = decodeURIComponent(req.user.email);
 
   try {
     const entity = await entityController.createPlaceHolderEntity(
