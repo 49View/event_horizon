@@ -15,6 +15,20 @@ JSONDATA( AppRenderSettings, shadowOverBurnCofficient, indoorSceneCoeff, shadowZ
     float shadowZFightCofficient = 0.002f;
 };
 
+JSONDATA( EntityRemapping, sourceEntity, sourceRemap, destRemap )
+    std::string sourceEntity;
+    std::string sourceRemap;
+    std::string destRemap;
+};
+
+JSONDATA( EntityRemappingContainer, erc )
+    std::vector<EntityRemapping> erc;
+};
+
+JSONDATA( EntityRemappingDependencies, erd )
+    std::unordered_map<std::string, std::vector<std::string>> erd;
+};
+
 JSONDATA( AppMaterialsRemapping, remap )
     MaterialMap remap;
 };

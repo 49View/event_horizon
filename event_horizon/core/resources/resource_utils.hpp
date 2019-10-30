@@ -186,19 +186,19 @@ using UIB = UIBuilder;
 using GeomRBuilder = ResourceBuilder<Geom, SceneGraph, ResourceVersioning>;
 using GRB = GeomRBuilder;
 
-template<typename T, typename C> class ResourceManager;
+template<typename T, typename C, typename RV> class ResourceManager;
 
-using AppDataManager    = ResourceManager<AppData, ResourceManagerContainer<AppData>>;
-using VDataManager      = ResourceManager<VData, ResourceManagerContainer<VData>>;
-using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>>;
-using FontManager       = ResourceManager<Font, ResourceManagerContainer<Font>>;
-using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Profile>>;
-using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Material>>;
-using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>>;
-using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>>;
-using GeomManager       = ResourceManager<Geom, ResourceManagerContainer<Geom>>;
-using UIManager         = ResourceManager<UIContainer, ResourceManagerContainer<UIContainer>>;
-using LightManager      = ResourceManager<Light, ResourceManagerContainer<Light>>;
+using AppDataManager    = ResourceManager<AppData, ResourceManagerContainer<AppData>, ResourceVersioning<AppData>>;
+using VDataManager      = ResourceManager<VData, ResourceManagerContainer<VData>, ResourceVersioning<VData>>;
+using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>, ResourceVersioning<RawImage>>;
+using FontManager       = ResourceManager<Font, ResourceManagerContainer<Font>, ResourceVersioning<Font>>;
+using ProfileManager    = ResourceManager<Profile, ResourceManagerContainer<Profile>, ResourceVersioning<Profile>>;
+using MaterialManager   = ResourceManager<Material, ResourceManagerContainer<Material>, ResourceVersioning<Material>>;
+using ColorManager      = ResourceManager<MaterialColor, ResourceManagerContainer<MaterialColor>, ResourceVersioning<MaterialColor>>;
+using CameraManager     = ResourceManager<CameraRig, ResourceManagerContainer<CameraRig>, ResourceVersioning<CameraRig>>;
+using GeomManager       = ResourceManager<Geom, ResourceManagerContainer<Geom>, ResourceVersioning<Geom>>;
+using UIManager         = ResourceManager<UIContainer, ResourceManagerContainer<UIContainer>, ResourceVersioning<UIContainer>>;
+using LightManager      = ResourceManager<Light, ResourceManagerContainer<Light>, ResourceVersioning<Light>>;
 
 struct LoadedResouceCallbackData {
     LoadedResouceCallbackData( ResourceRef  key, ResourceRef _hash, SerializableContainer&& data,

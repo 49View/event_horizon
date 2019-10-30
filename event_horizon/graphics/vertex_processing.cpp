@@ -50,6 +50,12 @@ void VPList::setMaterialColorWithTag( const Color4f& _color, uint64_t _tag ) {
     }
 }
 
+void VPList::setMaterialAlphaWithTag( float _alpha, uint64_t _tag ) {
+    if ( checkBitWiseFlag( tag(), _tag ) ) {
+        setMaterialConstantAlpha( _alpha );
+    }
+}
+
 void VPList::setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid, Color4f& _oldColor ) {
 //    ### REF put UUID in place for VPList
 //    if ( mVP->Name() == _uuid ) {

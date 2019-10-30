@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <boost/signals2.hpp>
 #include <core/util.h>
+#include <core/names.hpp>
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/entity_factory.hpp>
 
@@ -14,7 +15,7 @@ using ResourceMapperDict = std::unordered_map<std::string, ResourceRef>;
 using DependencyDict = std::unordered_map<std::string, std::unordered_map<std::string, bool>>;
 using ResourceDependencyMap = std::unordered_map<std::string, std::string>;
 
-template<typename T, typename C = ResourceManagerContainer<T>>
+template<typename T, typename C = ResourceManagerContainer<T>, typename RV = ResourceVersioning<T>>
 class ResourceManager {
 public:
     std::shared_ptr<T> exists( const std::string& _key ) const {
@@ -162,6 +163,11 @@ public:
             return true;
         }
         return false;
+    }
+
+    void publish( std::shared_ptr<T> elem, const std::string& _name ) {
+        auto fname = _name.empty() ? S::makeImaginary() : _name;
+        Http::post( Url{ HttpFilePrefix::entities + RV::Prefix() + "/" + fname}, elem->serialize() );
     }
 
 protected:

@@ -127,6 +127,12 @@ public:
     void changeTime( const std::string& _time );
     floata& skyBoxDeltaInterpolation();
 
+    template<typename T>
+    void addLuaFunction( const std::string& _key, const std::string& _fname, T _func ) {
+        auto luaKey = lua[_key].get_or_create<sol::table>();
+        luaKey[_fname] = _func;
+    }
+
     const std::string& getLuaScriptHotReload() const {
         return luaScriptHotReload;
     }

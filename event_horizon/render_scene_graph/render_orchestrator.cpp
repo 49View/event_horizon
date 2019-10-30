@@ -361,7 +361,7 @@ void RenderOrchestrator::init() {
 
     auto luarr = lua["rr"].get_or_create<sol::table>();
 
-    luarr["clearColor"] = [&](const std::string& _col ) {
+    luarr["clearColor"] = [&]( const std::string& _col ) {
         Renderer::clearColor( V4f::XTORGBA(_col) );
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
@@ -410,8 +410,6 @@ void RenderOrchestrator::init() {
                     { (uint64_t)tag, sg.getHash<Material>( key ) } );
         } );
     };
-
-
 
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",

@@ -33,7 +33,7 @@ using MaterialMap = std::unordered_map<std::string, std::string>;
 
 namespace HOD { // HighOrderDependency
     template <typename T>
-    DependencyList resolveDependencies( T* data );
+    DependencyList resolveDependencies( T* data, const EntityRemappingDependencies& remaps );
 }
 
 class CommandScriptSceneGraph : public CommandScript {
@@ -401,7 +401,9 @@ protected:
     void replaceMaterialOnNodes( const std::string& _key );
 public:
     [[nodiscard]] const MaterialMap& getMaterialRemap() const;
+    [[nodiscard]] const EntityRemappingDependencies& getEntityRemappingDependencies() const;
     void setMaterialRemap( const MaterialMap& materialRemap );
+    void setEntityRemappingDependencies( const EntityRemappingDependencies& _remaps );
     [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
     void HODResolve( const DependencyList& deps, HODResolverCallback ccf );
 //    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
@@ -426,6 +428,7 @@ protected:
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     MaterialMap materialRemap;
+    EntityRemappingDependencies erd;
     std::vector<SceneDependencyResolver> dependencyResovlers;
 };
 
@@ -444,7 +447,7 @@ protected:
 namespace HOD { // HighOrderDependency
     template<typename T>
     void resolver( SceneGraph& sg, T* data, HODResolverCallback ccf ) {
-        sg.HODResolve( HOD::resolveDependencies<T>( data ), ccf );
+        sg.HODResolve( HOD::resolveDependencies<T>( data, sg.getEntityRemappingDependencies() ), ccf );
     }
 
 }

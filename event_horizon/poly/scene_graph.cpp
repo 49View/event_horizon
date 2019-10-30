@@ -655,3 +655,11 @@ void SceneGraph::HODResolve( const DependencyList& deps, HODResolverCallback ccf
     dependencyResovlers.push_back( sdr );
     dependencyResovlers.back().resolve();
 }
+
+const EntityRemappingDependencies& SceneGraph::getEntityRemappingDependencies() const {
+    return erd;
+}
+
+void SceneGraph::setEntityRemappingDependencies( const EntityRemappingDependencies& _remaps ) {
+    erd = _remaps;
+}
