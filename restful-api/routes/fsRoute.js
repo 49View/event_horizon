@@ -2,6 +2,7 @@ var fsc = require("../controllers/fsController");
 var express = require("express");
 var router = express.Router();
 const socketController = require("../controllers/socketController");
+const sharp = require("sharp");
 
 // github token 5b4240b7e649989c2fb573c6af6a2d2943a97456
 
@@ -14,6 +15,40 @@ router.get("/:key", async (req, res, next) => {
     fsc.writeFile(res, data);
   } catch (ex) {
     console.log("ERROR GETTING FILE FROM FS: ", ex);
+    res.sendStatus(400);
+  }
+});
+
+router.post("/resizeimage/:width/:height/:key", async (req, res, next) => {
+  try {
+    const fullSizeImage = Buffer.from(req.body);
+    const scaledDown = await sharp(fullSizeImage)
+      .resize(Number(req.params.width), Number(req.params.height), {
+        fit: "inside",
+        withoutEnlargement: true
+      })
+      .toFormat("jpg")
+      .toBuffer();
+
+    const data = await fsc.cloudStorageFileUpload(
+      scaledDown,
+      req.params.key,
+      "eventhorizonfs"
+    );
+    let json = {
+      msg: "cloudStorageFileAdded",
+      data: {
+        name: req.params.key,
+        project: req.user.project
+      }
+    };
+    socketController.sendMessageToAllClients(JSON.stringify(json));
+    if (res) {
+      res.status(201).json({ ETag: data.ETag });
+      res.end();
+    }
+  } catch (ex) {
+    console.log("ERROR RESIZING AND ADDING IMAGE FILE TO FS: ", ex);
     res.sendStatus(400);
   }
 });
