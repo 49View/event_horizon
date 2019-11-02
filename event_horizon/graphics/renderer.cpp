@@ -422,6 +422,7 @@ void Renderer::changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt ) 
             }
         }
     }
+    invalidateOnAdd();
 }
 
 void Renderer::changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b ) {
@@ -493,6 +494,7 @@ void Renderer::replaceMaterial( const std::string& _oldMatRef, const std::string
             if ( v->getMaterial() == oldMat ) v->setMaterial( newMat );
         }
     }
+    invalidateOnAdd();
 }
 
 void Renderer::invalidateOnAdd() {
