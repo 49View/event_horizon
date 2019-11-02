@@ -154,18 +154,18 @@ jobs:
 #      - run: make install -C 'builds/event_horizon/'
 
       # Substance daemon
-      - run:
-          name: SubstanceDaemon cmake
-          command: |
-            mkdir builds/sat && cd builds/sat/ && cmake -DUSE_LOCALHOST=FALSE -DCMAKE_BUILD_TYPE=Release -DBUILD_FROM_SOURCE=TRUE ../../daemons/substance_daemon/
-      - run:
-          name: SubstanceDaemon make
-          command: |
-            make -j8 -C 'builds/sat/'
-      - run:
-          name: Store daemon artifact
-          command: |
-            cd /app/builds/sat/ && s3-artifacts.sh PUT substance_daemon
+#      - run:
+#          name: SubstanceDaemon cmake
+#          command: |
+#            mkdir builds/sat && cd builds/sat/ && cmake -DUSE_LOCALHOST=FALSE -DCMAKE_BUILD_TYPE=Release -DBUILD_FROM_SOURCE=TRUE ../../daemons/substance_daemon/
+#      - run:
+#          name: SubstanceDaemon make
+#          command: |
+#            make -j8 -C 'builds/sat/'
+#      - run:
+#          name: Store daemon artifact
+#          command: |
+#            cd /app/builds/sat/ && s3-artifacts.sh PUT substance_daemon
 
       # run tests!
 
