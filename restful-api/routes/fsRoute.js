@@ -44,7 +44,9 @@ router.post("/resizeimage/:width/:height/:key", async (req, res, next) => {
     };
     socketController.sendMessageToAllClients(JSON.stringify(json));
     if (res) {
-      res.status(201).json({ ETag: data.ETag });
+      res
+        .status(201)
+        .json({ ETag: data.ETag, buffer: scaledDown.toString("base64") });
       res.end();
     }
   } catch (ex) {
