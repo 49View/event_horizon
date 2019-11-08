@@ -358,9 +358,6 @@ namespace Http {
     }
 
     void initBase() {
-#ifdef USE_LOCALHOST
-        Http::useLocalHost(true);
-#endif
         FM::initPersistent();
     }
     void init() {

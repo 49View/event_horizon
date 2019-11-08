@@ -30,7 +30,7 @@ export const checkCommonFileExtension = (group, ext) => {
   if (group === GroupGeom) {
     if (ext === "glb" || ext === "fbx") return true;
   } else if (group === GroupMaterial) {
-    if (ext === "zip") return true;
+    if (ext === "zip" || ext === "sbsar") return true;
   } else if (group === GroupImage) {
     if (
       ext === "jpeg" ||

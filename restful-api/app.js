@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const express = require("express");
-const logger = require("morgan");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
@@ -17,7 +16,6 @@ const appdataRoute = require("./routes/appdataRoute");
 const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
 const projectController = require("./controllers/projectController");
-//const mailController = require("./controllers/mailController");
 const cryptoController = require("./controllers/cryptoController");
 
 const app = express();
@@ -41,7 +39,6 @@ console.log("Started");
 // cryptoController.generateKey();
 authController.InitializeAuthentication();
 
-app.use(logger("dev"));
 app.use(bodyParser.raw({ limit: "100mb" }));
 app.use(bodyParser.json({ limit: "100mb" }));
 app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));

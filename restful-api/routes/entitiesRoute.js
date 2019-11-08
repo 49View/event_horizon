@@ -8,6 +8,21 @@ const streams = require("memory-streams");
 const zlib = require("zlib");
 const md5 = require("md5");
 
+const sendResult = (res, ret, successCode = 200, failCode = 400) => {
+  if (ret !== null) {
+    res.status(successCode).send(ret);
+  } else {
+    res.sendStatus(failCode);
+  }
+};
+
+router.get("/remaps", async (req, res, next) => {
+  sendResult(
+    res,
+    await entityController.getEntitiesRemap(req.user.project, req.body)
+  );
+});
+
 router.get("/check/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
@@ -29,7 +44,7 @@ router.get("/content/byId/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
     const project = req.user.project;
-    // console.log("User:", req.user);
+    console.log("User: ", req.user);
     const fileData = await entityController.getEntityContent(entityId, project);
     fsController.writeFile(res, fileData);
   } catch (ex) {
@@ -210,6 +225,10 @@ router.get("/metadata/list/:group/:project", async (req, res, next) => {
   }
 });
 
+router.put("/remaps", async (req, res, next) => {
+  sendResult(res, await entityController.remap(req.user.project, req.body));
+});
+
 router.put("/metadata/upserthumb/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
@@ -267,6 +286,38 @@ router.post("/", async (req, res, next) => {
     res.sendStatus(400);
   }
 });
+
+router.post(
+  "/multizip/:filename/:group/:username?/:useremail?",
+  async (req, res, next) => {
+    const filename = req.params.filename;
+    const group = req.params.group;
+    const body = req.body;
+    const project = decodeURIComponent(req.user.project);
+    const username = decodeURIComponent(
+      req.params.username ? req.params.username : req.user.name
+    );
+    const useremail = decodeURIComponent(
+      req.params.useremail ? req.params.useremail : req.user.email
+    );
+
+    const entity = entityController.postMultiZip(
+      filename,
+      group,
+      body,
+      project,
+      username,
+      useremail
+    );
+
+    if (entity !== null) {
+      res.status(201).json(entity);
+      res.end();
+    } else {
+      res.sendStatus(400);
+    }
+  }
+);
 
 router.post("/placeholder/:group", async (req, res, next) => {
   const project = req.user.project;
@@ -367,112 +418,6 @@ router.post(
     }
   }
 );
-
-router.post("/multizip/:filename/:group", async (req, res, next) => {
-  try {
-    const project = req.user.project;
-    const filename = req.params.filename;
-    const group = req.params.group;
-    const username = req.user.name;
-    const useremail = req.user.email;
-
-    let metadata = entityController.createMetadataStartup(
-      filename,
-      username,
-      useremail
-    );
-
-    const deps = await entityController.decompressZipppedEntityDeps(
-      req.body,
-      project,
-      username,
-      useremail
-    );
-
-    const material = {
-      mKey: filename,
-      values: {
-        mType: "PN_SH",
-        mStrings: deps["mStrings"]
-      }
-    };
-    metadata.deps = [
-      {
-        key: "image",
-        value: deps["deps"]
-      }
-    ];
-
-    const presetThumb = deps["diffuseTexture"].metadata.thumb;
-
-    const entity = await entityController.createEntityFromMetadata(
-      JSON.stringify(material),
-      project,
-      group,
-      false,
-      false,
-      metadata,
-      true,
-      presetThumb
-    );
-
-    if (entity !== null) {
-      res.status(201).json(entity);
-      res.end();
-    } else {
-      throw "[post.entity] Entity created is null";
-    }
-  } catch (ex) {
-    console.log(ex);
-  }
-});
-
-router.post("/multi", async (req, res, next) => {
-  try {
-    const project = req.user.project;
-    // const entities = await entityController.createEntitiesFromContainer(project, req.body);
-    const containerBody = req.body;
-    let container = tar.extract();
-    const metadatas = [];
-    const entities = [];
-
-    container.on("entry", function(header, stream, next) {
-      // console.log( "Header :", header );
-      var writer = new streams.WritableStream();
-      stream.on("end", function() {
-        metadatas.push(writer.toString());
-        next();
-        container.end();
-      });
-      stream.pipe(writer);
-      stream.resume();
-    });
-
-    container.on("error", error => {
-      console.log("Stream ERROR");
-    });
-
-    container.on("finish", async () => {
-      // all entries read
-      for (metadata of metadatas) {
-        metadata = JSON.parse(metadata);
-        const newEntity = await entityController.createEntityFromMetadataToBeCleaned(
-          project,
-          metadata
-        );
-        entities.push(newEntity);
-      }
-      res.status(200).send(JSON.toString(entities));
-    });
-
-    const deflatedBody = zlib.inflateSync(new Buffer.from(containerBody));
-    var reader = new streams.ReadableStream(deflatedBody);
-    reader.pipe(container);
-  } catch (ex) {
-    console.log("ERROR CREATING ENTITY: ", ex);
-    res.status(400).send(ex);
-  }
-});
 
 router.put("/makepublic/all", async (req, res, next) => {
   try {

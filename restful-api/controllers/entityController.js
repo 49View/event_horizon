@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const zlib = require("zlib");
 const entityModel = require("../models/entity");
+const remapModel = require("../models/remap");
 const asyncModelOperations = require("../assistants/asyncModelOperations");
 const fsController = require("../controllers/fsController");
 const socketController = require("../controllers/socketController");
@@ -738,6 +739,108 @@ const getEntityDeps = async (project, group, deps) => {
   return result;
 };
 
+const postMultiZip = async (
+  filename,
+  group,
+  body,
+  project,
+  username,
+  useremail
+) => {
+  try {
+    let metadata = createMetadataStartup(filename, username, useremail);
+
+    const deps = await decompressZipppedEntityDeps(
+      body,
+      project,
+      username,
+      useremail
+    );
+
+    const material = {
+      mKey: filename,
+      values: {
+        mType: "PN_SH",
+        mStrings: deps["mStrings"]
+      }
+    };
+    metadata.deps = [
+      {
+        key: "image",
+        value: deps["deps"]
+      }
+    ];
+
+    const presetThumb = deps["diffuseTexture"].metadata.thumb;
+
+    return await createEntityFromMetadata(
+      JSON.stringify(material),
+      project,
+      group,
+      true,
+      false,
+      metadata,
+      true,
+      presetThumb
+    );
+  } catch (ex) {
+    console.log(ex);
+    return null;
+  }
+};
+
+const remapSave = async (data, project) => {
+  try {
+    data.project = project;
+    data.hash = md5(
+      project + data.sourceEntity + data.sourceRemap + data.destRemap
+    );
+    return await remapModel.findOneAndUpdate({ hash: data.hash }, data, {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true
+    });
+  } catch (ex) {
+    console.log("[ERROR] entityController.remapSave \n", ex);
+  }
+};
+
+const remap = (project, data) => {
+  try {
+    if (Array.isArray(data)) {
+      let rets = [];
+      for (let d of data) {
+        rets.push(remapSave(d, project));
+      }
+      return rets;
+    } else {
+      return remapSave(data, project);
+    }
+  } catch (ex) {
+    console.log("[ERROR] entityController.remap \n", ex);
+    return null;
+  }
+};
+
+const getEntitiesRemap = async (project, entities) => {
+  try {
+    const entitiesArray = entities.entities;
+    if (Array.isArray(entitiesArray)) {
+      let remaps = await remapModel.find({
+        $and: [{ project: project }, { sourceEntity: { $in: entitiesArray } }]
+      });
+      return {
+        remaps: remaps
+      };
+    } else {
+      throw "entities inputs needs to be an array";
+    }
+  } catch (ex) {
+    console.log("[ERROR] entityController.remap \n", ex);
+    return null;
+  }
+};
+
 function RGBAToHexA(r, g, b, a) {
   r = Math.round(r * 255).toString(16);
   g = Math.round(g * 255).toString(16);
@@ -781,5 +884,8 @@ module.exports = {
   getEntitiesOfProject: getEntitiesOfProject,
   getEntitiesOfProjectWithGroup: getEntitiesOfProjectWithGroup,
   getEntityDeps: getEntityDeps,
-  getEntitiesByProjectGroupTags: getEntitiesByProjectGroupTags
+  getEntitiesByProjectGroupTags: getEntitiesByProjectGroupTags,
+  postMultiZip: postMultiZip,
+  getEntitiesRemap: getEntitiesRemap,
+  remap: remap
 };

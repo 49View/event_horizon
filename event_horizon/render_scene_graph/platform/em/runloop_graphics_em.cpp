@@ -56,7 +56,8 @@ int em_focus_callback(int eventType, const EmscriptenFocusEvent  *uiEvent, void 
     double width{ 1280.0 };
     double height{ 720.0 };
     emscripten_get_element_css_size( nullptr, &width, &height );
-    GResizeFramebufferCallback( nullptr, static_cast<int>(width*WH::DevicePixelRatio()), static_cast<int>(height*WH::DevicePixelRatio()) );
+    auto pixelRatio = emscripten_get_device_pixel_ratio();
+    GResizeFramebufferCallback( nullptr, static_cast<int>(width*pixelRatio), static_cast<int>(height*pixelRatio) );
 
 //    LOGRS("Canvas sizes " << callbackResizeFrameBuffer.x() << "," << callbackResizeFrameBuffer.y() );
 //    LOGRS("Focus Callback, type: " << eventType << " on element ID: " << uiEvent->id << " and nodeName: " << uiEvent->nodeName);

@@ -13,7 +13,7 @@ const MaterialParametersEditor = ({ entity, cname, changeMaterialPropery }) => {
 
   return (
     <div key={e.key} className={cname}>
-      <div className="baseColorLabel-a">Color</div>
+      <div className="materialPropertyLabel-a">Color</div>
       <div className="baseColorPicker-a">
         <input
           type="color"
@@ -24,11 +24,11 @@ const MaterialParametersEditor = ({ entity, cname, changeMaterialPropery }) => {
         />
       </div>
 
-      <div className="metallicLabel-a">Metallic</div>
+      <div className="materialPropertyLabel-a">Metallic</div>
       <div className="metallicSlider-a">
         <input
           type="range"
-          className="pbrSlider"
+          className="slider"
           min="1"
           max="100"
           defaultValue={e.metallicValue * 100}
@@ -38,11 +38,11 @@ const MaterialParametersEditor = ({ entity, cname, changeMaterialPropery }) => {
         />
       </div>
 
-      <div className="roughnessLabel-a">Roughness</div>
+      <div className="materialPropertyLabel-a">Roughness</div>
       <div className="roughnessSlider-a">
         <input
           type="range"
-          className="pbrSlider"
+          className="slider"
           min="1"
           max="100"
           defaultValue={e.roughnessValue * 100}
@@ -52,11 +52,11 @@ const MaterialParametersEditor = ({ entity, cname, changeMaterialPropery }) => {
         />
       </div>
 
-      <div className="aoLabel-a">Ambient Occlusion</div>
+      <div className="materialPropertyLabel-a">Ambient Occlusion</div>
       <div className="aoSlider-a">
         <input
           type="range"
-          className="pbrSlider"
+          className="slider"
           min="1"
           max="100"
           defaultValue={e.aoValue * 100}
@@ -66,11 +66,11 @@ const MaterialParametersEditor = ({ entity, cname, changeMaterialPropery }) => {
         />
       </div>
 
-      <div className="opacityLabel-a">Opacity</div>
+      <div className="materialPropertyLabel-a">Opacity</div>
       <div className="opacitySlider-a">
         <input
           type="range"
-          className="pbrSlider"
+          className="slider"
           min="1"
           max="100"
           defaultValue={e.opacityValue * 100}
