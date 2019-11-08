@@ -190,8 +190,12 @@ namespace Http {
               ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
-    void getInternal( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
+    void get( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+              ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
+              HttpResouceCB mainThreadCallback = nullptr );
+    void getInternal( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+              ResponseCallbackFunc callbackFailed, ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
 
     void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt,

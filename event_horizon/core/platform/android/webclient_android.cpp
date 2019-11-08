@@ -5,12 +5,13 @@
 namespace Http {
 
     void getInternal( const Url& url,
+                      const std::string& _data,
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       [[maybe_unused]] ResponseFlags rf,
                       HttpResouceCB ccf ) {
 
-        std::string fileHash = url_encode( url.uri );
+        std::string fileHash = url_encode( url.uri + _data );
         Result lRes = tryFileInCache( fileHash, url, rf );
 //        if ( !lRes.isSuccessStatusCode() ) {
 //            res = restbed::Http::sync( request, settings );

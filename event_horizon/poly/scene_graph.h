@@ -28,12 +28,36 @@
 class SceneGraph;
 struct scene_t;
 class Camera;
+
 using HODResolverCallback = std::function<void()>;
 using MaterialMap = std::unordered_map<std::string, std::string>;
 
 namespace HOD { // HighOrderDependency
+
+    JSONDATA( EntityList, entities )
+        EntityList( const std::unordered_set<std::string>& entities ) : entities( entities ) {}
+        std::unordered_set<std::string> entities;
+    };
+
+    class DepRemapsManager {
+        public:
+            void addDep( const std::string& group, const std::string& resName );
+        public:
+            std::unordered_set<std::string> geoms;
+            DependencyList ret{};
+    };
+
     template <typename T>
-    DependencyList resolveDependencies( T* data, const EntityRemappingDependencies& remaps );
+    DepRemapsManager resolveDependencies( T* data );
+
+    void reducer( SceneGraph& sg, DepRemapsManager& deps, HODResolverCallback ccf );
+
+    template<typename T>
+    void resolver( SceneGraph& sg, T* data, HODResolverCallback ccf ) {
+        auto deps = HOD::resolveDependencies<T>( data );
+        reducer( sg, deps, ccf );
+    }
+
 }
 
 class CommandScriptSceneGraph : public CommandScript {
@@ -399,20 +423,11 @@ protected:
     ResourceRef GBMatInternal( CResourceRef _matref, const C4f& _color );
     void materialsForGeomSocketMessage();
     void replaceMaterialOnNodes( const std::string& _key );
+
 public:
-    [[nodiscard]] const MaterialMap& getMaterialRemap() const;
-    [[nodiscard]] const EntityRemappingDependencies& getEntityRemappingDependencies() const;
     void setMaterialRemap( const MaterialMap& materialRemap );
-    void setEntityRemappingDependencies( const EntityRemappingDependencies& _remaps );
     [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
     void HODResolve( const DependencyList& deps, HODResolverCallback ccf );
-//    virtual void cmdChangeTimeImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-//    virtual void cmdloadObjectImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-//    virtual void cmdCreateGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-//    virtual void cmdRemoveGeometryImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-//    virtual void changeMaterialTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-//    virtual void changeMaterialColorTagImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
-//    virtual void cmdCalcLightmapsImpl( [[maybe_unused]] const std::vector<std::string>& _params ) {}
 
 protected:
     VDataManager& vl;
@@ -428,7 +443,6 @@ protected:
 
     std::shared_ptr<CommandScriptSceneGraph> hcs;
     MaterialMap materialRemap;
-    EntityRemappingDependencies erd;
     std::vector<SceneDependencyResolver> dependencyResovlers;
 };
 
@@ -443,11 +457,3 @@ protected:
     std::unordered_map<std::string, std::string> thumbValues;
     SceneGraph* sg;
 };
-
-namespace HOD { // HighOrderDependency
-    template<typename T>
-    void resolver( SceneGraph& sg, T* data, HODResolverCallback ccf ) {
-        sg.HODResolve( HOD::resolveDependencies<T>( data, sg.getEntityRemappingDependencies() ), ccf );
-    }
-
-}

@@ -10,6 +10,7 @@
 
 #include <array>
 #include <set>
+#include <unordered_set>
 #include <unordered_map>
 
 #include <rapidjson/writer.h>
@@ -114,6 +115,15 @@ public:
 		}
 		writer->EndArray();
 	}
+
+    void serialize( const char* _name, const std::unordered_set<std::string>& array ) {
+        if ( _name != nullptr ) writer->String( _name );
+        writer->StartArray();
+        for ( auto& value : array ) {
+            writer->String( value.c_str() );
+        }
+        writer->EndArray();
+    }
 
     template<typename T>
     void serialize( const char* _name, const std::unordered_map<std::string, T>& _map ) {

@@ -65,6 +65,7 @@ namespace Http {
     }
 
     void getInternal( const Url& uri,
+                      const std::string& _data,
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       [[maybe_unused]] ResponseFlags rf,
@@ -73,8 +74,8 @@ namespace Http {
         emscripten_async_http_request(uri.toString().c_str(),
                                     "GET",
                                     makeHeaders().c_str(),
-                                    nullptr,
-                                    0,
+                                      _data.c_str(),
+                                    _data.size(),
                                     nullptr,
                                     reinterpret_cast<void*>(urlKeyPassing(uri, callback, callbackFailed, ccf)),
                                     false,

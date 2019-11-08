@@ -631,10 +631,6 @@ void SceneGraph::loadGeom( std::string _names, HttpResouceCB _ccf ) {
     B<GRB>( _names ).load( _ccf );
 }
 
-const MaterialMap& SceneGraph::getMaterialRemap() const {
-    return materialRemap;
-}
-
 void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {
     materialRemap = _materialRemap;
 }
@@ -656,10 +652,27 @@ void SceneGraph::HODResolve( const DependencyList& deps, HODResolverCallback ccf
     dependencyResovlers.back().resolve();
 }
 
-const EntityRemappingDependencies& SceneGraph::getEntityRemappingDependencies() const {
-    return erd;
+void HOD::DepRemapsManager::addDep( const std::string& group, const std::string& resName ) {
+    ret.emplace( group, resName );
+    if ( group == ResourceGroup::Geom ) {
+        geoms.emplace( resName );
+    }
 }
 
-void SceneGraph::setEntityRemappingDependencies( const EntityRemappingDependencies& _remaps ) {
-    erd = _remaps;
+void HOD::reducer( SceneGraph& sg, HOD::DepRemapsManager& deps, HODResolverCallback ccf ) {
+
+    HOD::EntityList el{deps.geoms};
+    Http::get( Url{ HttpFilePrefix::entities + "remaps"}, el.serialize(), [&, deps, ccf](HttpResponeParams res) {
+        EntityRemappingContainer erc{res.bufferString};
+        HOD::DepRemapsManager ndeps = deps;
+        AppMaterialsRemapping remaps{};
+        for ( const auto& rm : erc.remaps ) {
+            remaps.remap[rm.sourceEntity+","+rm.sourceRemap] = rm.destRemap;
+            ndeps.addDep( ResourceGroup::Material, rm.destRemap );
+        }
+
+        sg.setMaterialRemap( remaps.remap );
+
+        sg.HODResolve( ndeps.ret, ccf );
+    });
 }

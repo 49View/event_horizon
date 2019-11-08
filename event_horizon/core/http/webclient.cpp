@@ -198,8 +198,8 @@ namespace Http {
         return lRes;
     }
 
-    void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
-              HttpResouceCB mainThreadCallback ) {
+    void get( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+              ResponseCallbackFunc callbackFailed, ResponseFlags rf, HttpResouceCB mainThreadCallback ) {
         bool bPerformLoad = false;
 
         if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) ) {
@@ -213,8 +213,13 @@ namespace Http {
         }
         if ( bPerformLoad ) {
             LOGR("[HTTP-GET] %s", url.toString().c_str() );
-            getInternal( url, callback, callbackFailed, rf, mainThreadCallback );
+            getInternal( url, _data, callback, callbackFailed, rf, mainThreadCallback );
         }
+    }
+
+    void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
+              HttpResouceCB mainThreadCallback ) {
+        get( url, "", std::move(callback), std::move(callbackFailed), rf, std::move(mainThreadCallback));
     }
 
     void post( const Url& url, const std::string& _data,

@@ -63,7 +63,8 @@ void initDeamon() {
     close( STDERR_FILENO );
 }
 
-void elaborateMatFile( const std::string& mainFileName, const std::string& layerName = "", int size = 64 ) {
+void elaborateMatFile( const std::string& mainFileName, const std::string& layerName, int size, const std::string& project, const std::string& uname,
+                       const std::string& uemail ) {
     auto fileRoot = getDaemonRoot();
 
     std::string fn = getFileNameOnly( mainFileName );
@@ -72,45 +73,29 @@ void elaborateMatFile( const std::string& mainFileName, const std::string& layer
     std::string sizeString = std::to_string( log2( size ));
     std::string sbRender = "/opt/Allegorithmic/Substance_Automation_Toolkit/sbsrender render --inputs "
                            + mainFileName +
-                           " --set-value '$outputsize@" + sizeString + "," + sizeString + "' "
+                           " --set-value '$outputsize@" + sizeString + "," + sizeString + "' --output-bit-depth \"8\" --png-format-compression best_compression "
                                                                                           "--output-name {inputName}_{outputNodeName} "
                                                                                           "--input-graph-output basecolor "
                                                                                           "--input-graph-output metallic --input-graph-output ambient_occlusion "
                                                                                           "--input-graph-output roughness --input-graph-output height --input-graph-output normal "
-                                                                                          "--output-path " + fileRoot;
+                                                                                          "--output-path " + fileRoot +
+                                                                                          " && cd " + fileRoot +
+                                                                                          " && sips -Z 512 " + fn + "*.png "
+                                                                                          " && zip -X " + fn + ".zip " + fn + "*.png "
+                                                                                          " && rm " + fn + "*.png ";
 
     std::system( sbRender.c_str());
 
-    ResourcePipe rpipe;
-
-    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::basecolorString + fext );
-    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::heightString + fext );
-    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::metallicString + fext );
-    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::roughnessString + fext );
-    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::normalString + fext );
-    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::ambientOcclusionString + fext );
-    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::opacityString + fext );
-    rpipe.pipeFile<RawImage>( fileRoot + fn + "_" + MPBRTextures::translucencyString + fext );
-
-    auto values = std::make_shared<HeterogeneousMap>( S::SH );
-    for ( const auto& entry : rpipe.getCatalog()) {
-        values->assign( MPBRTextures::mapToTextureUniform( entry.filename ), entry.hash );
-    }
-
-    rpipe.pipe<Material>( fn + layerName, Material{ values }.serialize());
-
-    rpipe.publish();
-
-//    FM::writeRemoteFile( DaemonPaths::store( ResourceGroup::Material, tarname ),
-//                         zlibUtil::deflateMemory(tagStream.str() ) );
+    Http::post( Url{HttpFilePrefix::entities + "multizip/" + fn + "/material/" + url_encode(uname) + "/" + url_encode(uemail) }, FM::readLocalFile(fileRoot + fn + ".zip") );
 }
 
-void elaborateMat( const std::string& _filename ) {
-    FM::readRemoteSimpleCallback( _filename, []( const Http::Result& _res ) {
+void elaborateMat( const std::string& _filename, const std::string& project, const std::string& uname,
+                   const std::string& uemail ) {
+    FM::readRemoteSimpleCallback( _filename, [project, uname, uemail]( const Http::Result& _res ) {
         auto fileRoot = getDaemonRoot();
         std::string filename = getFileName( _res.uri );
         FM::writeLocalFile( fileRoot + filename, reinterpret_cast<const char *>(_res.buffer.get()), _res.length, true );
-        int size = 512;
+        int size = 2048;
         std::string layerName;
         if ( auto p = filename.find( MQSettings::Low ); p != std::string::npos ) {
             size = 128;
@@ -124,7 +109,7 @@ void elaborateMat( const std::string& _filename ) {
             size = 4096;
             layerName = MQSettings::UltraHi;
         }
-        elaborateMatFile( fileRoot + filename, layerName, size );
+        elaborateMatFile( fileRoot + filename, layerName, size, project, uname, uemail );
     } );
 }
 
@@ -167,7 +152,7 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
     if ( argc > 1 ) {
         std::string filename = std::string( argv[1] );
-        elaborateMatFile( filename );
+        elaborateMatFile( filename, "", 2048, "eh_sandbox", "Daemon", "Daemon" );
         return 0;
     } else {
         bool bAwaking = false;
@@ -190,7 +175,7 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
             std::string filename = url_decode( reqFilename );
             Http::login( LoginFields::Daemon( reqProject ), [filename, reqProject, reqUsername, reqUserEmail]() {
                 if ( filename.find( DaemonPaths::upload( ResourceGroup::Material )) != std::string::npos ) {
-                    elaborateMat( filename );
+                    elaborateMat( filename, reqProject, reqUsername, reqUserEmail );
                 } else if ( filename.find( DaemonPaths::upload( ResourceGroup::Geom )) != std::string::npos ) {
                     elaborateGeom( filename, reqProject, reqUsername, reqUserEmail );
                 }

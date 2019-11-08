@@ -19,9 +19,15 @@ namespace Http {
         return request;
     }
 
-    std::shared_ptr<restbed::Request> makeRequest( const Url& url ) {
+    std::shared_ptr<restbed::Request> makeGetRequest( const Url& url, const char *buff = nullptr, uint64_t length = 0 ) {
         auto request = makeRequestBase(url);
         request->set_method( "GET" );
+        if ( length > 0 ) {
+            request->set_header( "Content-Type", "application/json; charset=utf-8" );
+            request->set_header( "Content-Length", std::to_string( length ) );
+            const restbed::Bytes bodybuffer(buff, buff + length);
+            request->set_body( bodybuffer );
+        }
 
         return request;
     }
@@ -80,16 +86,17 @@ namespace Http {
     }
 
     void getInternal( const Url& url,
+                      const std::string& _data,
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       ResponseFlags rf,
                       HttpResouceCB mainThreadCallback ) {
 
         try {
-            std::string fileHash = url_encode( url.uri );
+            std::string fileHash = url_encode( url.uri + _data );
             Result lRes = tryFileInCache( fileHash, url, rf );
             if ( !lRes.isSuccessStatusCode() ) {
-                auto request = makeRequest( url );
+                auto request = makeGetRequest( url, _data.data(), _data.size() );
                 auto settings = std::make_shared< restbed::Settings >( );
                 settings->set_connection_limit( 60*60*60*60 );
                 settings->set_connection_timeout( std::chrono::seconds(120) );
@@ -176,12 +183,12 @@ namespace Http {
     }
 
     void removeFile( const std::string& _filename ) {
-        auto request = makeRequest( Url( "/fs/remove/" + url_encode( _filename )) );
+        auto request = makeGetRequest( Url( "/fs/remove/" + url_encode( _filename )) );
         restbed::Http::async( request, {} );
     }
 
     void listFiles( const std::string& _filename ) {
-        auto request = makeRequest( Url( "/fs/list/" + url_encode( _filename )) );
+        auto request = makeGetRequest( Url( "/fs/list/" + url_encode( _filename )) );
         restbed::Http::async( request, {} );
     }
 

@@ -21,8 +21,8 @@ JSONDATA( EntityRemapping, sourceEntity, sourceRemap, destRemap )
     std::string destRemap;
 };
 
-JSONDATA( EntityRemappingContainer, erc )
-    std::vector<EntityRemapping> erc;
+JSONDATA( EntityRemappingContainer, remaps )
+    std::vector<EntityRemapping> remaps;
 };
 
 JSONDATA( EntityRemappingDependencies, erd )

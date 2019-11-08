@@ -11,6 +11,7 @@
 #include <vector>
 #include <array>
 #include <set>
+#include <unordered_set>
 #include "rapidjson/document.h"
 #include "math/rect2f.h"
 #include "math/aabb.h"
@@ -256,7 +257,24 @@ public:
 		}
 	}
 
+    template<typename T>
+    void deserialize( const char* name, std::unordered_set<T>& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+                ret.emplace( T( ( *( value ) )[name][t] ) );
+            }
+        }
+    }
+
     void deserialize( const char* name, std::set<std::string>& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+                ret.emplace( std::string( ( *( value ) )[name][t].GetString()) );
+            }
+        }
+    }
+
+    void deserialize( const char* name, std::unordered_set<std::string>& ret ) const {
         if ( value->FindMember( name ) != value->MemberEnd() ) {
             for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
                 ret.emplace( std::string( ( *( value ) )[name][t].GetString()) );
