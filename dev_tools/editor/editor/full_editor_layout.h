@@ -37,8 +37,7 @@ public:
     void activateImpl() override;
 
     const static LoginFields loginCert() {
-//        return LoginFields{ "carillow@49view.com", "932hjkd987asd", "carillo" };
-        return LoginFields{ "ziocleto@gmail.com", "49View", "Sumix" };
+        return LoginFields{ "guest", "guest", "eh_sandbox" };
     }
 
 protected:

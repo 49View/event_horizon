@@ -36,9 +36,8 @@ template<typename BE>
 class EventHorizon {
 public:
     explicit EventHorizon( int argc, char *argv[] ) {
-#ifdef USE_LOCALHOST
-        Http::useLocalHost(true);
-#endif
+        bool bUseLocalHost = argc > 1 && std::string( argv[1] ) == "localhost";
+        Http::useLocalHost(bUseLocalHost );
 #if !defined(__USE_OFFLINE__) && !defined(__EMSCRIPTEN__)
         if constexpr ( BE::hasLF() ) {
             Http::init( BE::loginCert() );
@@ -47,28 +46,14 @@ public:
         }
 #endif
 #ifdef __EMSCRIPTEN__
-        if ( argc >= 4 ) {
-            LOGR("Setting user token and sessionID ok");
-            LOGRS("DevicePixelRatio: " << argv[2] );
-            Http::sessionId(argv[1]);
-            WH::DevicePixelRatio( std::stof(std::string(argv[2])));
-            Http::project(std::string(argv[3]));
-            Socket::createConnection();
-        } else {
-            if constexpr ( BE::hasLF() ) {
-                Http::init( BE::loginCert() );
-            } else {
-                Http::init();
-                Http::project(argv[1]);
-            }
-        }
+        Http::init();
 #endif
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
         mainLoop(checkLayoutArgvs( argc, argv ), std::move(backEnd) );
     }
 
 private:
-    std::optional<InitializeWindowFlagsT> checkLayoutParam( const std::string& _param ) const {
+    [[nodiscard]] std::optional<InitializeWindowFlagsT> checkLayoutParam( const std::string& _param ) const {
         if ( toLower(_param) == toLower("Normal"       ) ) return InitializeWindowFlags::Normal;
         if ( toLower(_param) == toLower("FullScreen"   ) ) return InitializeWindowFlags::FullScreen;
         if ( toLower(_param) == toLower("Minimize"     ) ) return InitializeWindowFlags::Minimize;

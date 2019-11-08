@@ -87,15 +87,13 @@ export const replaceMaterial = entity => async dispatch => {
       source_id: sourceId
     });
 
-    const appKey = state.auth.userdata.project;
     const body = {
-      key: appKey,
-      matkey: sourceId,
-      objkey: entityId,
-      value: matId
+      sourceEntity: entityId,
+      sourceRemap: sourceId,
+      destRemap: matId
     };
 
-    await axios.put(`/appdata/matremap`, body, {
+    await axios.put(`/entities/remaps`, body, {
       headers: {
         "Content-Type": "application/json"
       }

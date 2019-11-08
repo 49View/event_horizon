@@ -4,6 +4,8 @@ import Landing from "./components/layout/Landing";
 import Navbar from "./components/layout/Navbar";
 import Routes from "./components/routing/Routes";
 
+import { initHostEnv, getApiHostName } from "./HostEnv";
+
 import { DBConfig } from "./DBConfig";
 import { initDB } from "react-indexed-db";
 
@@ -12,28 +14,11 @@ import { Provider } from "react-redux";
 import store from "./store";
 
 import { loadUser } from "./actions/auth";
-import axios from "axios";
 
 import "./App.css";
 import WasmCanvas from "./components/layout/WasmCanvas";
 
-if (process.env.NODE_ENV && process.env.NODE_ENV === "development") {
-  // dev code
-  axios.defaults.baseURL = "https://localhost:3000";
-} else {
-  axios.defaults.baseURL = "https://api.ateventhorizon.com";
-  // production code
-}
-axios.defaults.withCredentials = true;
-
-// console.log("REACT_APP_USE_API:" + process.env.REACT_APP_USE_API);
-if (
-  process.env.REACT_APP_USE_API &&
-  process.env.REACT_APP_USE_API === "production"
-) {
-  axios.defaults.baseURL = "https://api.ateventhorizon.com";
-}
-
+initHostEnv();
 initDB(DBConfig);
 
 const App = () => {
@@ -41,10 +26,15 @@ const App = () => {
     store.dispatch(loadUser());
   });
 
+  const wasmArgumentList = [getApiHostName()];
+
   return (
     <Provider store={store}>
       <Router>
-        <WasmCanvas wasmName="editor"></WasmCanvas>
+        <WasmCanvas
+          wasmName="editor"
+          argumentList={wasmArgumentList}
+        ></WasmCanvas>
         <Navbar />
         <Fragment>
           <Switch>

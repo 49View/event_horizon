@@ -39,6 +39,29 @@ const GeomEditor = ({
     }
   }
 
+  const MaterialTextureEntry = props => {
+    return (
+      <div className="materialTextureEntity">
+        <div className="materialPropertyLabel">{props.label}</div>
+        <div className="materialPropertySlider">
+          <input
+            type={props.isColor ? "color" : "range"}
+            className={props.isColor ? "" : "slider"}
+            min="1"
+            max="100"
+            id={props.key_id}
+            name={props.inputname}
+            defaultValue={props.value}
+            onChange={eb => onChangeMaterialPropery(eb)}
+          />
+        </div>
+        <div className="materialPropertyTexture">
+          <img src={props.textureName} alt="" />
+        </div>
+      </div>
+    );
+  };
+
   const InObjectMaterials = () => {
     return (
       <Fragment>
@@ -53,98 +76,79 @@ const GeomEditor = ({
                 </span>
               </div>
 
-              <div className="baseColorLabel-a">Color</div>
-              <div className="baseColorPicker-a">
-                <input
-                  type="color"
-                  id={e.key}
-                  name="diffuseColor-hexcolor"
-                  defaultValue={e.baseColor}
-                  onChange={eb => onChangeMaterialPropery(eb)}
-                />
-              </div>
+              <div className="materialTextureContainer">
+                <MaterialTextureEntry
+                  key_id={e.key}
+                  value={e.baseColor}
+                  label="Color"
+                  isColor={true}
+                  inputname="diffuseColor-hexcolor"
+                  textureName={e.diffuseTexture}
+                ></MaterialTextureEntry>
 
-              <div className="metallicLabel-a">Metallic</div>
-              <div className="metallicSlider-a">
-                <input
-                  type="range"
-                  className="pbrSlider"
-                  min="1"
-                  max="100"
-                  defaultValue={e.metallicValue * 100}
-                  id={e.key}
-                  name="metallicV-float100"
-                  onChange={eb => onChangeMaterialPropery(eb)}
-                />
-              </div>
+                <MaterialTextureEntry
+                  key_id={e.key}
+                  value="100"
+                  label="Normal"
+                  isColor={false}
+                  inputname=""
+                  textureName={e.normalTexture}
+                ></MaterialTextureEntry>
 
-              <div className="roughnessLabel-a">Roughness</div>
-              <div className="roughnessSlider-a">
-                <input
-                  type="range"
-                  className="pbrSlider"
-                  min="1"
-                  max="100"
-                  defaultValue={e.roughnessValue * 100}
-                  name="roughnessV-float100"
-                  id={e.key}
-                  onChange={eb => onChangeMaterialPropery(eb)}
-                />
-              </div>
+                <MaterialTextureEntry
+                  key_id={e.key}
+                  value={e.metallicValue * 100}
+                  label="Metallic"
+                  isColor={false}
+                  inputname="metallicV-float100"
+                  textureName={e.metallicTexture}
+                ></MaterialTextureEntry>
 
-              <div className="aoLabel-a">Ambient Occlusion</div>
-              <div className="aoSlider-a">
-                <input
-                  type="range"
-                  className="pbrSlider"
-                  min="1"
-                  max="100"
-                  defaultValue={e.aoValue * 100}
-                  name="aoV-float100"
-                  id={e.key}
-                  onChange={eb => onChangeMaterialPropery(eb)}
-                />
-              </div>
+                <MaterialTextureEntry
+                  key_id={e.key}
+                  value={e.roughnessValue * 100}
+                  label="Roughness"
+                  isColor={false}
+                  inputname="roughnessV-float100"
+                  textureName={e.roughnessTexture}
+                ></MaterialTextureEntry>
 
-              <div className="opacityLabel-a">Opacity</div>
-              <div className="opacitySlider-a">
-                <input
-                  type="range"
-                  className="pbrSlider"
-                  min="1"
-                  max="100"
-                  defaultValue={e.opacityValue * 100}
-                  name="opacity-float100"
-                  id={e.key}
-                  onChange={eb => onChangeMaterialPropery(eb)}
-                />
-              </div>
+                <MaterialTextureEntry
+                  key_id={e.key}
+                  value={e.aoValue * 100}
+                  label="Ambient Occlusion"
+                  isColor={false}
+                  inputname="aoV-float100"
+                  textureName={e.aoTexture}
+                ></MaterialTextureEntry>
 
-              <div className="baseTexture-a">
-                <img src={e.diffuseTexture} alt="B" />
-              </div>
-              <div className="baseTexture-a">
-                <img src={e.normalTexture} alt="B" />
-              </div>
-              <div className="baseTexture-a">
-                <img src={e.metallicTexture} alt="B" />
-              </div>
-              <div className="baseTexture-a">
-                <img src={e.roughnessTexture} alt="B" />
-              </div>
-              <div className="baseTexture-a">
-                <img src={e.aoTexture} alt="B" />
-              </div>
-              <div className="baseTexture-a">
-                <img src={e.opacityTexture} alt="B" />
-              </div>
+                <MaterialTextureEntry
+                  key_id={e.key}
+                  value={e.opacityValue * 100}
+                  label="Opacity"
+                  isColor={false}
+                  inputname="opacity-float100"
+                  textureName={e.opacityTexture}
+                ></MaterialTextureEntry>
 
-              <div className="baseTextureLabel-a">Base</div>
-              <div className="baseTextureLabel-a">Normal</div>
-              <div className="baseTextureLabel-a">Metal</div>
-              <div className="baseTextureLabel-a">Rough</div>
-              <div className="baseTextureLabel-a">AO</div>
-              <div className="baseTextureLabel-a">Opacity</div>
+                <MaterialTextureEntry
+                  key_id={e.key}
+                  value={e.translucencyValue * 100}
+                  label="Translucency"
+                  isColor={false}
+                  inputname="translucency-float100"
+                  textureName={e.translucencyTexture}
+                ></MaterialTextureEntry>
+
+                <MaterialTextureEntry
+                  key_id={e.key}
+                  value={e.heightValue * 100}
+                  label="Height"
+                  isColor={false}
+                  inputname="height-float100"
+                  textureName={e.heightTexture}
+                ></MaterialTextureEntry>
+              </div>
             </div>
           ))}
         </div>

@@ -28,8 +28,8 @@ namespace WindowHandling {
         double width{ 1280.0 };
         double height{ 720.0 };
         emscripten_get_element_css_size( "#canvas", &width, &height );
-        width*=DevicePixelRatio();
-        height*=DevicePixelRatio();
+        width*=emscripten_get_device_pixel_ratio();
+        height*=emscripten_get_device_pixel_ratio();
         AppGlobals::getInstance().setScreenSizei( {static_cast<int>(width), static_cast<int>(height)} );
 
 //        emscripten_set_canvas_element_size( nullptr, int(width), int(height));

@@ -67,7 +67,7 @@ export const setWasmLoaded = flag => dispatch => {
 export const loadWasmComplete = async (
   project,
   canvasRef,
-  userSessionId,
+  argumentList,
   dispatch
 ) => {
   try {
@@ -112,7 +112,7 @@ export const loadWasmComplete = async (
   });
 
   window.Module = {
-    arguments: [userSessionId, (window.devicePixelRatio || 1).toString()],
+    arguments: argumentList,
     print: text => {
       console.log("[WASM] " + text);
       if (!text.startsWith("[INFO]")) {
@@ -179,7 +179,12 @@ const WasmCanvas = props => {
 
   useEffect(() => {
     if (count === 0 && session) {
-      loadWasmComplete(props.wasmName, canvas.current, session, dispatch);
+      loadWasmComplete(
+        props.wasmName,
+        canvas.current,
+        props.argumentList,
+        dispatch
+      );
       setCount(1);
     }
   }, [canvas, count, session, dispatch, props]);

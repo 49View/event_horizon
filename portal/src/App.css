@@ -20,6 +20,7 @@
   --background-color: #343a40;
   --middle-grey-color: #7f7f7f;
   --navbar-height: 50px;
+  --material-texture-size: 128px;
   height: 100vh;
 }
 
@@ -550,27 +551,46 @@ input#search-bar:hover {
   margin: 1%;
   width: 100%;
   float: left;
+  color: var(--primary-color-light);
 }
 
 .matName-a {
   grid-area: matName;
   justify-self: start;
   align-self: center;
-  font-size: var(--font-size-one);
-  color: var(--primary-color-light);
+  padding: 0px 10px;
+  font-size: var(--font-size-medium);
+  color: var(--light-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .replaceMat-a {
   grid-area: replaceMat;
+  margin: 0px 10px;
+  padding: 5px 8px;
   justify-self: end;
   align-self: center;
   cursor: pointer;
+  border-radius: 5px;
+  border: solid 1px rgba(23, 162, 184, 0.55);
+  background-image: linear-gradient(
+    rgba(50, 118, 248, 0.5),
+    rgba(41, 166, 244, 0.1)
+  );
+  font-size: var(--font-size-one);
   color: var(--secondary-alt-color);
 }
 
 .replaceMat-a:hover {
   opacity: 0.8;
-  transition: opacity 0.2s ease-in;
+  border: solid 1px rgba(23, 162, 184, 1);
+  background-image: linear-gradient(
+    rgba(50, 118, 248, 0.9),
+    rgba(41, 166, 244, 0.1)
+  );
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
 }
 
 .replaceMat-a:active {
@@ -578,162 +598,108 @@ input#search-bar:hover {
   transition-duration: 0.2s;
 }
 
-.baseColorLabel-a {
-  grid-area: baseColorLabel;
-  justify-self: start;
+.materialPropertyLabel {
+  grid-area: materialPropertyLabel;
+  /* padding-top: 10px; */
+  width: calc(100% - 20px);
+  height: 1.5em;
+  line-height: 1.5;
+  justify-self: center;
   align-self: center;
-  font-size: var(--font-size-small);
+  text-align: center;
+  font-size: var(--font-size-one);
   color: var(--logo-color-1);
+  overflow: hidden;
 }
 
-.baseColorPicker-a {
-  grid-area: baseColorPicker;
-  justify-self: end;
+.materialPropertySlider {
+  grid-area: materialPropertySlider;
+  width: calc(100% - 20px);
+  height: 23px;
+  justify-self: center;
   align-self: center;
   cursor: pointer;
 }
 
-.baseTexture-a {
-  /* grid-area: baseTexture; */
+.materialPropertyTexture {
+  grid-area: materialPropertyTexture;
+  margin: 5px 10px;
   justify-self: stretch;
   align-self: stretch;
+  border-radius: 10px;
+  border: solid 2px var(--dark-color);
+  box-shadow: 0 0px 2px 0 var(--light-color), 0 0px 2px 0 var(--light-color);
 }
 
-.baseTextureLabel-a {
-  /* grid-area: baseTextureLabel; */
-  justify-self: center;
-  align-self: center;
-  font-size: var(--font-size-extrasmall);
-}
-
-.metallicLabel-a {
-  grid-area: metallicLabel;
-  justify-self: start;
-  align-self: center;
-  font-size: var(--font-size-small);
-  color: var(--logo-color-2);
-}
-
-.metallicSlider-a {
-  grid-area: metallicSlider;
-  justify-self: center;
-  align-self: center;
-}
-
-.roughnessLabel-a {
-  grid-area: roughnessLabel;
-  justify-self: start;
-  align-self: center;
-  font-size: var(--font-size-small);
-  color: var(--logo-color-2);
-}
-
-.roughnessSlider-a {
-  grid-area: roughnessSlider;
-  justify-self: center;
-  align-self: center;
-}
-
-.aoLabel-a {
-  grid-area: aoLabel;
-  justify-self: start;
-  align-self: center;
-  font-size: var(--font-size-small);
-  color: var(--logo-color-2);
-}
-
-.aoSlider-a {
-  grid-area: aoSlider;
-  justify-self: center;
-  align-self: center;
-}
-
-.opacityLabel-a {
-  grid-area: opacityLabel;
-  justify-self: start;
-  align-self: center;
-  font-size: var(--font-size-small);
-  color: var(--logo-color-2);
-}
-
-.opacitySlider-a {
-  grid-area: opacitySlider;
-  justify-self: center;
-  align-self: center;
-  color: var(--logo-color-2);
-}
-
-.normalTexture-a {
-  grid-area: normalTexture;
-}
-
-.normalTextureLabel-a {
-  grid-area: normalTextureLabel;
-}
-
-.metallicTexture-a {
-  grid-area: metallicTexture;
-}
-
-.metallicTextureLabel-a {
-  grid-area: metallicTextureLabel;
-}
-
-.roughnessTexture-a {
-  grid-area: roughnessTexture;
-}
-
-.roughnessTextureLabel-a {
-  grid-area: roughnessTextureLabel;
-}
-
-.aoTexture-a {
-  grid-area: aoTexture;
-}
-
-.aoTextureLabel-a {
-  grid-area: aoTextureLabel;
-}
-
-.emissiveTexture-a {
-  grid-area: emissiveTexture;
-}
-
-.emissiveTextureLabel-a {
-  grid-area: emissiveTextureLabel;
-}
-
-.pbrSlider {
+.materialPropertyTexture > img {
   width: 100%;
+  height: 100%;
+  border-radius: 10px;
 }
-
 .smallObjectMaterial {
   display: grid;
-  float: left;
-  width: 48%;
+  width: 98%;
   margin: 1%;
-  padding: 1%;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: 28px 32px repeat(4, 24px) 0.166fr 12px;
-  /* grid-template-rows: 0.2% 0.14% repeat(4, 0.1%) 0.2% 0.05%; */
+  grid-template-columns: 90% 10%;
+  grid-template-rows: 55px calc(100% - 55px);
   grid-template-areas:
-    "matName matName matName matName matName replaceMat"
-    "baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorPicker"
-    "metallicLabel metallicLabel metallicLabel metallicSlider metallicSlider metallicSlider"
-    "roughnessLabel roughnessLabel roughnessLabel roughnessSlider roughnessSlider roughnessSlider"
-    "aoLabel aoLabel aoLabel aoSlider aoSlider aoSlider"
-    "opacityLabel opacityLabel opacityLabel opacitySlider opacitySlider opacitySlider"
-    "baseTexture normalTexture metallicTexture roughnessTexture aoTexture emissiveTexture"
-    "baseTextureLabel normalTextureLabel metallicTextureLabel roughnessTextureLabel aoTextureLabel emissiveTextureLabel";
-  grid-gap: 4px;
+    "matName replaceMat"
+    "materialTextureContainer materialTextureContainer";
   align-items: center;
   justify-items: start;
-  /* border: solid 1px rgba(23, 162, 184, 0.55); */
+  border-radius: 10px;
+  border: solid 1px rgba(23, 162, 184, 0.5);
+  background-image: linear-gradient(
+    rgba(23, 162, 184, 0.25),
+    rgba(23, 162, 184, 0)
+  );
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+.smallObjectMaterial:hover {
   background-image: linear-gradient(
     rgba(23, 162, 244, 0.25),
     rgba(23, 162, 184, 0.1)
   );
   border: solid 1px rgba(23, 162, 184, 0.05);
+}
+
+.materialTextureContainer {
+  display: grid;
+  width: calc(100% - 20px);
+  align-content: stretch;
+  justify-items: stretch;
+  grid-area: materialTextureContainer;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-areas:
+    "materialTextureEntity materialTextureEntity materialTextureEntity materialTextureEntity"
+    "materialTextureEntity materialTextureEntity materialTextureEntity materialTextureEntity";
+  grid-gap: 10px;
+  margin: 10px;
+}
+
+.materialTextureEntity {
+  display: grid;
+  /* grid-area: materialTextureEntity; */
+  grid-template-columns: 100%;
+  grid-template-rows: 1.5rem 23px calc(100% - 1.5rem - 23px - 10px);
+  grid-template-areas:
+    "materialPropertyLabel"
+    "materialPropertySlider"
+    "materialPropertyTexture";
+  grid-gap: 5px;
+  align-items: center;
+  justify-items: center;
+  background-image: linear-gradient(
+    rgba(23, 162, 244, 0.25),
+    rgba(23, 162, 184, 0.1)
+  );
+  border: solid 1px rgba(23, 162, 184, 0.55);
+  border-radius: 5px;
+  padding: 5px 0px;
+  font-size: var(--font-size-one);
 }
 
 .materialParams {
@@ -744,25 +710,17 @@ input#search-bar:hover {
   grid-template-columns: repeat(6, 15.5%);
   grid-template-rows: 22px repeat(4, 16px);
   grid-template-areas:
-    "baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorLabel baseColorPicker"
-    "metallicLabel metallicLabel metallicLabel metallicSlider metallicSlider metallicSlider"
-    "roughnessLabel roughnessLabel roughnessLabel roughnessSlider roughnessSlider roughnessSlider"
-    "aoLabel aoLabel aoLabel aoSlider aoSlider aoSlider"
-    "opacityLabel opacityLabel opacityLabel opacitySlider opacitySlider opacitySlider";
+    "materialPropertyLabel materialPropertyLabel materialPropertyLabel materialPropertyLabel materialPropertyLabel baseColorPicker"
+    "materialPropertyLabel materialPropertyLabel materialPropertyLabel metallicSlider metallicSlider metallicSlider"
+    "materialPropertyLabel materialPropertyLabel materialPropertyLabel roughnessSlider roughnessSlider roughnessSlider"
+    "materialPropertyLabel materialPropertyLabel materialPropertyLabel aoSlider aoSlider aoSlider"
+    "materialPropertyLabel materialPropertyLabel materialPropertyLabel opacitySlider opacitySlider opacitySlider";
   grid-gap: 4px 3px;
   align-items: center;
   justify-items: start;
   border: solid 1px rgba(23, 162, 184, 0.55);
   background-image: linear-gradient(
     rgba(23, 162, 184, 0.15),
-    rgba(23, 162, 184, 0)
-  );
-}
-
-.smallObjectMaterial:hover {
-  border: solid 1px rgba(23, 162, 184, 0.85);
-  background-image: linear-gradient(
-    rgba(23, 162, 184, 0.25),
     rgba(23, 162, 184, 0)
   );
 }
@@ -1155,6 +1113,44 @@ li.app_controls-a {
   display: block;
 }
 
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 23px;
+  padding: 0px 3px;
+  border-radius: 5px;
+  background: var(--dark-color);
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+  box-shadow: inset 0 0 1px 1px var(--primary-color-light);
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 1px 1px rgba(0, 0, 0, 1);
+  background: var(--primary-color-light);
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 1px 1px rgba(0, 0, 0, 1);
+  background: var(--primary-color-light);
+  cursor: pointer;
+}
+
 /* .btn {
   display: inline-block;
   background: var(--light-color);
@@ -1404,9 +1400,7 @@ button {
 
 input[type="color"] {
   -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border: solid 1px #000; /*change color of the swatch border here*/
+  width: 100%;
   border-radius: 2px;
   background: none;
 }
@@ -1422,9 +1416,9 @@ input[type="color"]:hover {
   border: solid 2px var(--primary-color); /*change color of the swatch border here*/
 }
 
-input[type="color"]:active {
+/* input[type="color"]:active {
   transform: scale(0.95);
-}
+} */
 
 /* Landing Page */
 .landing {
