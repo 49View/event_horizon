@@ -3,6 +3,7 @@ const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 const sessionController = require("../controllers/sessionController");
 const socketController = require("../controllers/socketController");
+const logger = require("../logger");
 
 const router = express.Router();
 
@@ -218,13 +219,11 @@ const getTokenResponse = async (res, req, project, email, password) => {
         expires: d
       })
       .send(tokenInfo);
-    // next();
+    logger.info(tokenInfo);
   }
 };
 
 router.post("/getToken", async (req, res, next) => {
-  console.log("getToken");
-
   let project = req.body.project;
   const email = req.body.email;
   const password = req.body.password;
