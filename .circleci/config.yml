@@ -120,7 +120,7 @@ jobs:
       - run: *s3utilsbuild
       - run: mkdir builds
 
-       Substance daemon
+      # Substance daemon
       - run:
           name: SubstanceDaemon cmake
           command: |
@@ -133,8 +133,6 @@ jobs:
           name: Store daemon artifact
           command: |
             cd /app/builds/sat/ && s3-artifacts.sh PUT substance_daemon
-
-      # run tests!
 
   deployCPP:
     <<: *machinedefaults
