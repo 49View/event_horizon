@@ -36,6 +36,7 @@ export const checkCommonFileExtension = (group, ext) => {
       ext === "jpeg" ||
       ext === "png" ||
       ext === "jpg" ||
+      ext === "hdr" ||
       ext === "exr" ||
       ext === "tga" ||
       ext === "tiff" ||

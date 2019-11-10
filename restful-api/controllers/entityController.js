@@ -519,10 +519,14 @@ const thumbFromContent = async (content, presetThumb, gtr) => {
   if (gtr === gtr_content_vector) {
     thumbBuff = content;
   } else if (gtr === gtr_content_image) {
-    thumbBuff = await sharp(content)
-      .resize(64, 64, { fit: "inside", withoutEnlargement: true })
-      .toFormat("jpg")
-      .toBuffer();
+    try {
+      thumbBuff = await sharp(content)
+          .resize(64, 64, { fit: "inside", withoutEnlargement: true })
+          .toFormat("jpg")
+          .toBuffer();
+    } catch (e) {
+      console.log( e );
+    }
   } else if (gtr === gtr_content_color) {
     const cp = JSON.parse(content);
     thumbBuff = await sharp({

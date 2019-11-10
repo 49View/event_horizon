@@ -10,7 +10,7 @@ import { DBConfig } from "./DBConfig";
 import { initDB } from "react-indexed-db";
 
 // Redux
-import { Provider } from "react-redux";
+import {Provider} from "react-redux";
 import store from "./store";
 
 import { loadUser } from "./actions/auth";
@@ -22,11 +22,12 @@ initHostEnv();
 initDB(DBConfig);
 
 const App = () => {
+
+  let wasmArgumentList = [getApiHostName()];
+
   useEffect(() => {
     store.dispatch(loadUser());
   });
-
-  const wasmArgumentList = [getApiHostName()];
 
   return (
     <Provider store={store}>
@@ -34,6 +35,9 @@ const App = () => {
         <WasmCanvas
           wasmName="editor"
           argumentList={wasmArgumentList}
+          padding="1px"
+          borderRadius="5px"
+          mandatoryWebGLVersionSupporNumber="webgl2"
         ></WasmCanvas>
         <Navbar />
         <Fragment>

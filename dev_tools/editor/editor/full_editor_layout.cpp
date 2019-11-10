@@ -22,7 +22,7 @@ scene_t scene{ 0 };
 
 //const std::string testLoad = "rock";
 //const std::string skyboxName = "barcelona";
-const std::string skyboxName = "skybox,equirectangular,park,generic,001";
+const std::string skyboxName = "tropical,beach";
 
 void EditorBackEnd::activatePostLoad() {
 
@@ -31,10 +31,10 @@ void EditorBackEnd::activatePostLoad() {
 
     backEnd->process_event( OnActivate{} );
 
-//    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural } );
+    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::CubeProcedural } );
 
-    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture,
-                                        sg.getHash<RawImage>( skyboxName ) } );
+//    rsg.createSkybox( SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture,
+//                                        sg.getHash<RawImage>( skyboxName ) } );
 
     Renderer::clearColor(C4f::WHITE);
     rsg.useSkybox( false );
@@ -54,8 +54,8 @@ void EditorBackEnd::activatePostLoad() {
 void EditorBackEnd::activateImpl() {
 
 //    appData.addRawImage( "skybox,equirectangular,park,generic,001" );
-    appData.addRawImage( skyboxName );
-    appData.addFont("amaranth");
+//    appData.addRawImage( skyboxName );
+//    appData.addFont("amaranth");
 //    appData.addMaterial( testLoad );
 
     loadSceneEntities();

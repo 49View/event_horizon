@@ -21,7 +21,7 @@ const SmallEntriesDialog = () => {
     if ( metadataList.enable ) {
       dispatch(getMetadataListOf(metadataList.group));
     }
-  }, [metadataList.enable]);
+  }, [metadataList.enable, metadataList.group, dispatch]);
 
   const closeModal = flag => {
     dispatch({ type: CLOSE_ENTITIES_MODAL, payload: flag });

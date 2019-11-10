@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useDropzone } from "react-dropzone";
 import { addEntity } from "actions/entities";
 import { checkFileExtensionsOnEntityGroup, GroupImage } from "utils/utils";
+import {SET_MODAL_SELECTED_ENTITY_NAME} from "../../../actions/types";
 
 const DragAndDrop = props => {
   const dispatch = useDispatch();
@@ -24,11 +25,22 @@ const DragAndDrop = props => {
     },
     [dispatch]
   );
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const { getRootProps } = useDropzone({ onDrop });
+
+  const onReplaceEntity = () => {
+    console.log("Dispatching");
+    dispatch({
+      type: SET_MODAL_SELECTED_ENTITY_NAME,
+      payload: {
+        group:GroupImage,
+        onClickCallback: null,
+        // selectedModalEntityName: e.currentTarget.dataset.id
+      }
+    });
+  };
 
   return (
-    <div {...getRootProps()} className="materialPropertyTexture">
-      {/*<input {...getInputProps()} />*/}
+    <div {...getRootProps()} className="materialPropertyTexture" onClick={onReplaceEntity}>
       <img src={props.imgSrc} alt="" />
     </div>
   );

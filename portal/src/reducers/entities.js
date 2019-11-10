@@ -23,7 +23,6 @@ import {
 } from "../actions/types";
 
 import { requestAsset, placeHolderAsset } from "../utils/webSocketClient";
-import {replaceMaterial} from "../actions/entities";
 
 const initialState = {
   events: {},
