@@ -8,19 +8,22 @@ import {
   changeMaterialPropery,
   replaceMaterial
 } from "../../../actions/entities";
-import { fillMaterialParams } from "../../../utils/materialUtils";
-import { GroupMaterial } from "../../../utils/utils";
+import { fillMaterialParams } from "utils/materialUtils";
+import { GroupMaterial } from "utils/utils";
+import DragAndDrop from "./DragAndDrop";
 
 const GeomEditor = ({
-  currentEntity,
   currentEntityNodes,
-  smallEntityModalOn,
   changeMaterialPropery
 }) => {
   const onReplaceEntity = e => {
     store.dispatch({
       type: SET_MODAL_SELECTED_ENTITY_NAME,
-      payload: e.currentTarget.dataset.id
+      payload: {
+        group:GroupMaterial,
+        onClickCallback: replaceMaterial,
+        selectedModalEntityName: e.currentTarget.dataset.id
+      }
     });
   };
 
@@ -55,9 +58,10 @@ const GeomEditor = ({
             onChange={eb => onChangeMaterialPropery(eb)}
           />
         </div>
-        <div className="materialPropertyTexture">
-          <img src={props.textureName} alt="" />
-        </div>
+        {/* <div className="materialPropertyTexture"> */}
+        <DragAndDrop imgSrc={props.textureName}></DragAndDrop>
+        {/* <img src={props.textureName} alt="" /> */}
+        {/* </div> */}
       </div>
     );
   };
@@ -158,12 +162,7 @@ const GeomEditor = ({
 
   return (
     <Fragment>
-      {smallEntityModalOn && (
-        <SmallEntriesDialog
-          group={GroupMaterial}
-          onClickCallback={replaceMaterial}
-        />
-      )}
+        <SmallEntriesDialog/>
       <InObjectMaterials />
     </Fragment>
   );
@@ -172,14 +171,12 @@ const GeomEditor = ({
 GeomEditor.propTypes = {
   currentEntity: PropTypes.object,
   currentEntityNodes: PropTypes.object,
-  smallEntityModalOn: PropTypes.bool,
   changeMaterialPropery: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
   currentEntity: state.entities.currentEntity,
   currentEntityNodes: state.entities.currentEntityNodes,
-  smallEntityModalOn: state.entities.smallEntityModalOn
 });
 
 export default connect(

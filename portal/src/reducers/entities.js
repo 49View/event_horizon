@@ -2,9 +2,9 @@ import {
   GET_ENTITIES,
   CLEAR_ENTITIES,
   GET_APPS,
-  GET_MATERIALS_META,
+  GET_METADATA_LIST,
   UPDATE_ENTITIES_PARTIAL_SEARCH,
-  UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH,
+  UPDATE_METADATA_LIST_PARTIAL_SEARCH,
   ENTITY_ERROR,
   DELETE_ENTITY,
   ADD_ENTITY,
@@ -23,16 +23,22 @@ import {
 } from "../actions/types";
 
 import { requestAsset, placeHolderAsset } from "../utils/webSocketClient";
+import {replaceMaterial} from "../actions/entities";
 
 const initialState = {
   events: {},
   entries: [],
   entriesFiltered: [],
-  matEntries: [],
-  matEntriesFiltered: [],
+  metadataList: {
+    entries: [],
+    filtered: [],
+    sourceEntityName: "",
+    enable: false,
+    group: "",
+    onCallback: null
+  },
   currentEntity: null,
   currentEntityData: null,
-  smallEntityModalOn: false,
   currentEntityNodes: null,
   appKey: "",
   group: "",
@@ -98,30 +104,32 @@ export default function(state = initialState, action) {
         currentEntity: null,
         currentEntityData: null
       };
-    case GET_MATERIALS_META:
+    case GET_METADATA_LIST:
       return {
         ...state,
-        matEntries: payload.data,
-        matEntriesFiltered: payload.data,
+        metadataList: {...state.metadataList, entries: payload.data, filtered: payload.data },
         loading: false
       };
     case REPLACE_MATERIAL:
       return {
         ...state,
         loading: true,
-        smallEntityModalOn: false
+        metadataList: {...state.metadataList, enable: false }
       };
     case CLOSE_ENTITIES_MODAL:
       return {
         ...state,
-        smallEntityModalOn: false,
-        selectedModalEntityName: ""
+        metadataList: {...state.metadataList, enable: false, sourceEntityName: "" }
       };
     case SET_MODAL_SELECTED_ENTITY_NAME:
       return {
         ...state,
-        smallEntityModalOn: true,
-        selectedModalEntityName: payload
+        metadataList: {...state.metadataList,
+          enable: true,
+          sourceEntityName: payload.selectedModalEntityName,
+          group: payload.group,
+          onClickCallback: payload.onClickCallback,
+         }
       };
     case UPDATE_ENTITIES_PARTIAL_SEARCH:
       let filteredResult = [];
@@ -137,18 +145,17 @@ export default function(state = initialState, action) {
         entriesFiltered: filteredResult,
         loading: false
       };
-    case UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH:
+    case UPDATE_METADATA_LIST_PARTIAL_SEARCH:
       let matFilteredResult = [];
-      //   state.entriesFiltered.data.length = 0;
       // eslint-disable-next-line
-      for (const e of state.matEntries) {
+      for (const e of state.metadataList.entries) {
         if (e.metadata.name.toLowerCase().includes(payload)) {
           matFilteredResult.push(e);
         }
       }
       return {
         ...state,
-        matEntriesFiltered: matFilteredResult,
+        metadataList: {...state.metadataList, filtered: matFilteredResult },
         loading: false
       };
 
@@ -175,7 +182,7 @@ export default function(state = initialState, action) {
         currentEntity: payload,
         group: payload.entity.group,
         currentTags: evaluateTags(payload.entity.metadata.tags),
-        smallEntityModalOn: false,
+        metadataList: {...state.metadataList, enable: false },
         loading: requireWasmUpdate || requirePlaceHolder
       };
     case SET_ENTITY_APP_NAME:

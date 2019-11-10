@@ -39,20 +39,14 @@ const EntityDragAndImport = ({
             " to ",
             project
           );
-          addEntity(
-            acceptedFiles[0].name,
-            reader.result,
-            groupSelected,
-            project,
-            user
-          );
+          addEntity(acceptedFiles[0].name, reader.result, groupSelected);
         };
         acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
       } else {
         alert.show("Wrong file type", { type: "error" });
       }
     },
-    [addEntity, groupSelected, project, user, alert]
+    [addEntity, groupSelected, project, alert]
   );
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });

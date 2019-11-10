@@ -2,10 +2,10 @@ import axios from "axios";
 import { setAlert } from "./alert";
 import {
   GET_ENTITIES,
-  GET_MATERIALS_META,
+  GET_METADATA_LIST,
   UPDATE_ENTITIES_PARTIAL_SEARCH,
   ENTITIES_PARTIAL_SEARCH_ERROR,
-  UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH,
+  UPDATE_METADATA_LIST_PARTIAL_SEARCH,
   ENTITY_ERROR,
   DELETE_ENTITY,
   GET_ENTITY,
@@ -99,10 +99,6 @@ export const replaceMaterial = entity => async dispatch => {
       }
     });
 
-    // dispatch({
-    //   type: GET_MATERIALS_META,
-    //   payload: { data: res.data }
-    // });
   } catch (err) {
     dispatch({
       type: ENTITY_ERROR,
@@ -118,10 +114,10 @@ export const getMetadataListOf = (group, project) => async dispatch => {
       payload: null
     });
 
-    const res = await axios.get(`/entities/metadata/list/${group}/${project}`);
+    const res = await axios.get(`/entities/metadata/list/${group}`);
 
     dispatch({
-      type: GET_MATERIALS_META,
+      type: GET_METADATA_LIST,
       payload: { data: res.data }
     });
   } catch (err) {
@@ -161,10 +157,10 @@ export const updateEntriesPartialSearch = partialString => dispatch => {
   }
 };
 
-export const updateReplaceMaterialPartialSearch = partialString => dispatch => {
+export const updateMetadataListPartialSearch = partialString => dispatch => {
   try {
     dispatch({
-      type: UPDATE_REPLACE_MATERIAL_PARTIAL_SEARCH,
+      type: UPDATE_METADATA_LIST_PARTIAL_SEARCH,
       payload: partialString
     });
   } catch (err) {
@@ -349,13 +345,13 @@ const postEntityMaker = (fileName, project, group, uname, uemail) => {
     "entities/" +
     fileName +
     "/" +
-    project +
+    encodeURIComponent(project) +
     "/" +
     group +
     "/" +
-    uname +
+    encodeURIComponent(uname) +
     "/" +
-    uemail
+    encodeURIComponent(uemail)
   );
 };
 
@@ -364,14 +360,12 @@ const placeHolderEntityMaker = group => {
 };
 
 // Add post
-export const addEntity = (
-  fileName,
-  fileData,
-  group,
-  project,
-  user
-) => async dispatch => {
+export const addEntity = (fileName, fileData, group) => async dispatch => {
   try {
+    const state = store.getState();
+    const project = state.auth.userdata.project;
+    const user = state.auth.userdata.user;
+
     dispatch({
       type: GET_ENTITY_LOAD,
       payload: null

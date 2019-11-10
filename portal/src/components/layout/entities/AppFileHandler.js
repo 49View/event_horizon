@@ -11,7 +11,7 @@ import { addEntityToAppData } from "../../../actions/entities";
 // import PopoverTitle from 'react-bootstrap/PopoverTitle'
 // import PopoverContent from 'react-bootstrap/PopoverContent'
 
-const AppFileHandler = ({ appData, smallEntityModalOn }) => {
+const AppFileHandler = ({ appData, metadataList.enable }) => {
   const [data, setData] = useState({});
   const [cursor, setCursor] = useState(false);
   // const [nodeSelected, setNodeSelected] = useState(false);
@@ -93,7 +93,7 @@ const AppFileHandler = ({ appData, smallEntityModalOn }) => {
 
   return (
     <Fragment>
-      {smallEntityModalOn && (
+      {metadataList.enable && (
         <SmallEntriesDialog
           group={currFileHandlerGroup}
           onClickCallback={addEntityToAppData}
@@ -107,12 +107,12 @@ const AppFileHandler = ({ appData, smallEntityModalOn }) => {
 
 AppFileHandler.propTypes = {
   appData: PropTypes.object,
-  smallEntityModalOn: PropTypes.bool
+  metadataList.enable: PropTypes.bool
 };
 
 const mapStateToProps = state => ({
   appData: state.entities.currentEntity.entity,
-  smallEntityModalOn: state.entities.smallEntityModalOn
+  metadataList.enable: state.entities.metadataList.enable
 });
 
 export default connect(

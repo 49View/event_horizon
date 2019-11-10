@@ -5,6 +5,9 @@ import MaterialParametersEditor from "./MaterialParametersEditor";
 
 const MaterialEditor = ({ currentEntity }) => {
   let mainContent = <Fragment />;
+  if ( currentEntity.jsonRet === null ){
+    return mainContent;
+  }
   if (currentEntity.jsonRet.values.mType === "PN_SH") {
     // Base Color
     let depPBRMap = {

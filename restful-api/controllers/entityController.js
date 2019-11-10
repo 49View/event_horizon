@@ -739,7 +739,7 @@ const getEntityDeps = async (project, group, deps) => {
   return result;
 };
 
-const postMultiZip = async (
+exports.postMultiZip = async (
   filename,
   group,
   body,
@@ -761,7 +761,8 @@ const postMultiZip = async (
       mKey: filename,
       values: {
         mType: "PN_SH",
-        mStrings: deps["mStrings"]
+        mStrings: deps["mStrings"],
+        mFloats: [ {key:"metallic", value: 0.5} ]
       }
     };
     metadata.deps = [
@@ -885,7 +886,6 @@ module.exports = {
   getEntitiesOfProjectWithGroup: getEntitiesOfProjectWithGroup,
   getEntityDeps: getEntityDeps,
   getEntitiesByProjectGroupTags: getEntitiesByProjectGroupTags,
-  postMultiZip: postMultiZip,
   getEntitiesRemap: getEntitiesRemap,
   remap: remap
 };
