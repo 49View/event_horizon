@@ -78,8 +78,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-
-#       - run: *s3utils
       - run:
           name: SSH to DigitalOcean and run api node.js server dockerized
           command: |
@@ -98,7 +96,6 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run: *s3utilsbuild
       - run: mkdir builds
 
       # Substance daemon
@@ -118,7 +115,6 @@ jobs:
   deployCPP:
     <<: *machinedefaults
     steps:
-      - run: *s3utils
       - run:
           name: Deploy Substance daemon
           command: |
