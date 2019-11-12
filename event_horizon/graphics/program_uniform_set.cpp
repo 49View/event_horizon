@@ -110,3 +110,8 @@ std::shared_ptr<HeterogeneousMap> GPUHeterogeneousMap::Values() {
 void GPUHeterogeneousMap::textureAssign( const std::string& _key, const TextureUniformDesc& _value ) {
     mTextureMappings[_key] = _value;
 }
+
+void GPUHeterogeneousMap::textureUpdate( const std::string& _key, const std::string& _value, Renderer& _rr ) {
+    mTextureMappings[_key].handle = _rr.TD( _value )->getHandle();
+    mTextureMappings[_key].target = _rr.TD( _value )->getTarget();
+}

@@ -53,6 +53,7 @@ public:
 
     std::shared_ptr<HeterogeneousMap> Values();
     void textureAssign( const std::string& _key, const TextureUniformDesc& _value );
+    void textureUpdate( const std::string& _key, const std::string& _value, Renderer& _rr );
 
 protected:
     std::shared_ptr<HeterogeneousMap> values;

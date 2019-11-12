@@ -31,10 +31,11 @@ const initialState = {
   metadataList: {
     entries: [],
     filtered: [],
+    fatherEntityName: "",
     sourceEntityName: "",
     enable: false,
     group: "",
-    onCallback: null
+    onClickCallback: null
   },
   currentEntity: null,
   currentEntityData: null,
@@ -125,6 +126,7 @@ export default function(state = initialState, action) {
         ...state,
         metadataList: {...state.metadataList,
           enable: true,
+          fatherEntityName: payload.fatherEntityName,
           sourceEntityName: payload.selectedModalEntityName,
           group: payload.group,
           onClickCallback: payload.onClickCallback,

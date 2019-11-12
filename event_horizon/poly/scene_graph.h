@@ -283,6 +283,16 @@ public:
     void loadUI            ( std::string _names, HttpResouceCB _ccf = nullptr );
 
     template <typename R>
+    void acquire( std::string _names, HttpResouceCB _ccf = nullptr ) {
+        auto filenameKey = getFileNameKey(_names);
+        if ( get<RawImage>(filenameKey) ) {
+            _ccf(filenameKey);
+        } else {
+            load<RawImage>( filenameKey, _ccf );
+        }
+    }
+
+    template <typename R>
     void load( std::string _names, HttpResouceCB _ccf = nullptr ) {
 
         replaceAllStrings( _names, " ", "," );
@@ -388,7 +398,9 @@ protected:
     void loadResourceCallback( LoadedResouceCallbackContainer& cba ) {
         if ( !cba.empty()) {
             auto res = cba.back();
-            B<BB>( res.key ).addDF( R{ res.data }, res.ccf );
+            if ( !res.data.empty() ) {
+                B<BB>( res.key ).addDF( R{ res.data }, res.ccf );
+            }
             cba.pop_back();
         }
     }

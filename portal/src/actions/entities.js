@@ -107,6 +107,58 @@ export const replaceMaterial = entity => async dispatch => {
   }
 };
 
+export const sendMaterialPropertyChange = (matName, matId, value) => {
+  try {
+    const [propertyStr, valueType] = matName.split("-", 2);
+    wscSend("ChangeMaterialProperty", {
+      mat_id: matId,
+      property_id: propertyStr,
+      value_str: value,
+      value_type: valueType
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const updateTextureParameterOnMaterial = ( entity, props ) => async dispatch => {
+  try {
+    console.log("Medatadat: ", entity.metadata, "With Props ", props );
+    sendMaterialPropertyChange(props.sourceEntityName+"-string", props.fatherEntityName, entity.metadata.name);
+    // dispatch({
+    //   type: REPLACE_MATERIAL,
+    //   payload: null
+    // });
+    // const state = store.getState();
+    // const matId = entity.metadata.name;
+    // const entityId = state.entities.currentEntity.entity.metadata.name;
+    // const sourceId = state.entities.selectedModalEntityName;
+    // wscSend("ReplaceMaterialOnCurrentObject", {
+    //   mat_id: matId, //entity._id,
+    //   entity_id: entityId,
+    //   source_id: sourceId
+    // });
+    //
+    // const body = {
+    //   sourceEntity: entityId,
+    //   sourceRemap: sourceId,
+    //   destRemap: matId
+    // };
+    //
+    // await axios.put(`/entities/remaps`, body, {
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   }
+    // });
+
+  } catch (err) {
+    dispatch({
+      type: ENTITY_ERROR,
+      payload: { msg: err.response }
+    });
+  }
+};
+
 export const getMetadataListOf = (group, project) => async dispatch => {
   try {
     dispatch({
@@ -171,16 +223,10 @@ export const updateMetadataListPartialSearch = partialString => dispatch => {
   }
 };
 
-export const changeMaterialPropery = event => dispatch => {
+export const changeMaterialPropery = (matName, matId, value) => dispatch => {
   try {
-    const [propertyStr, valueType] = event.target.name.split("-", 2);
-    wscSend("ChangeMaterialProperty", {
-      mat_id: event.target.id,
-      property_id: propertyStr,
-      value_str: event.target.value,
-      value_type: valueType
-    });
-    dispatch({ type: CHANGE_MATERIAL_COLOR, payload: event.target.value });
+    sendMaterialPropertyChange( matName, matId, value );
+    dispatch({ type: CHANGE_MATERIAL_COLOR, payload: value });
   } catch (error) {
     console.log(error);
   }

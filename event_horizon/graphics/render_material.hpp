@@ -37,6 +37,9 @@ public:
     template<typename T>
     void setConstant( const std::string& _name, const T& value ) {
         uniforms->Values()->assign( _name, value );
+        if constexpr ( std::is_same_v<std::string, T> ) {
+            uniforms->GValues()->textureUpdate( _name, value, rr );
+        }
 //        calcHash();
     }
 

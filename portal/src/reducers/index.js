@@ -3,7 +3,7 @@ import alert from "./alert";
 import localalert from "./localalert";
 import confirmalert from "./confirmalert";
 import auth from "./auth";
-import { wasm_reducer as wasm } from "../components/layout/WasmCanvas";
+import { wasmReducer as wasm } from "react-wasm-canvas";
 import codemirror from "./codemirror";
 import entities from "./entities";
 

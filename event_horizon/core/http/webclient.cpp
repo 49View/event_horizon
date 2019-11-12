@@ -182,7 +182,7 @@ namespace Http {
     }
 
     Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf ) {
-        Result lRes;
+        Result lRes{};
         if ( FM::useFileSystemCachePolicy() ) {
             if ( rf == ResponseFlags::JSON || rf == ResponseFlags::Text ) {
                 lRes.bufferString = FM::readLocalTextFile( cacheFolder() + fileHash );
@@ -209,6 +209,14 @@ namespace Http {
             if ( const auto& cc = requestCache.find( cacheKey ); cc == requestCache.end() ) {
                 requestCache.insert( cacheKey );
                 bPerformLoad = true;
+            }
+            if (!bPerformLoad) {
+                if ( callback && FM::useFileSystemCachePolicy() ) {
+                    std::string fileHash = url_encode( url.uri + _data );
+                    auto lRes = tryFileInCache( fileHash, url, rf );
+                    lRes.ccf = mainThreadCallback;
+                    callback( lRes );
+                }
             }
         }
         if ( bPerformLoad ) {

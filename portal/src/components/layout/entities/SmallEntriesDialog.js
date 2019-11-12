@@ -49,7 +49,7 @@ const SmallEntriesDialog = () => {
           placeHolderText="Filter..."
           extraClassName="search-bar-smaller"
         />
-        <EntitiesThumbHandler entries={metadataList.filtered} onClicked={metadataList.onClickCallback} />
+        <EntitiesThumbHandler entries={metadataList.filtered} onClicked={metadataList.onClickCallback} callbackProps={metadataList} />
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={() => closeModal(false)}>Close</Button>

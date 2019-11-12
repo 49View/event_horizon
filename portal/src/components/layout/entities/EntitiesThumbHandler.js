@@ -7,7 +7,12 @@ import {
 } from "../../../utils/utils";
 import store from "../../../store";
 
-const EntitiesThumbHandler = ({ currentEntity, entries, onClicked }) => {
+const EntitiesThumbHandler = (props) => {
+
+  const currentEntity = props.currentEntity;
+  const entries = props.entries;
+  const onClicked = props.onClicked;
+
   // console.log("###Current entity: ", currentEntity);
   let entitiesRes = [];
   if (entries && entries.length > 0) {
@@ -29,7 +34,7 @@ const EntitiesThumbHandler = ({ currentEntity, entries, onClicked }) => {
   }
 
   const viewMore = entityToRender => () => {
-    store.dispatch(onClicked(entityToRender));
+    store.dispatch(onClicked(entityToRender, props.callbackProps));
   };
 
   let displayNames = {};

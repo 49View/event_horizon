@@ -78,10 +78,12 @@ std::shared_ptr<Camera> SceneGraph::DC() {
 }
 
 JSONDATA( MatGeomSerData, mrefs )
+
     std::unordered_map<std::string, MaterialThumbnail> mrefs;
 };
 
 JSONDATA( LoadFinishData, flag )
+
     bool flag = true;
 };
 
@@ -109,7 +111,7 @@ MaterialThumbnail::MaterialThumbnail( SceneGraph *_sg, const Material& _mat ) : 
 
 void SceneGraph::materialsForGeomSocketMessage() {
     MatGeomSerData matSet{};
-    for ( const auto& [k, node] : Nodes() ) {
+    for ( const auto&[k, node] : Nodes()) {
         for ( const auto& data : node->DataV()) {
             auto mat = get<Material>( data.material );
             matSet.mrefs.emplace( mat->Key(), MaterialThumbnail( this, *mat ));
@@ -120,7 +122,7 @@ void SceneGraph::materialsForGeomSocketMessage() {
 
 void SceneGraph::replaceMaterialOnNodes( const std::string& _key ) {
     LOGRS( "OldMaterialRef: " << signalValueMap["source_material_id"] );
-    for ( auto& [k, node] : Nodes() ) {
+    for ( auto&[k, node] : Nodes()) {
         for ( auto& data : node->DataVRef()) {
             auto mat = get<Material>( data.material );
             if ( mat->Key() == signalValueMap["source_material_id"] ) {
@@ -164,24 +166,24 @@ void SceneGraph::realTimeCallbacks() {
     for ( auto&[k, doc] : eventSceneCallback ) {
 
         if ( k == SceneEvents::ReloadLuaScript ) {
-            runLUAScriptSignal(doc["data"].GetString());
+            runLUAScriptSignal( doc["data"].GetString());
         } else if ( k == SceneEvents::UpdateEntity ) {
             clearFromRealTimeCallbacks();
             auto entityGroup = doc["data"]["group"].GetString();
 
             if ( entityGroup == ResourceGroup::UI ) {
                 um.clear();
-                auto rref = addUIIM( UUIDGen::make(), UIContainer{doc["data"]["data"]} );
+                auto rref = addUIIM( UUIDGen::make(), UIContainer{ doc["data"]["data"] } );
                 nodeFullScreenUIContainerSignal( rref );
             }
         } else if ( k == SceneEvents::AddPlaceHolderEntity ) {
             clearFromRealTimeCallbacks();
             auto entityGroup = doc["data"]["group"].GetString();
 
-            LOGRS("EntityGroup of AddPlaceHolder:" << entityGroup);
+            LOGRS( "EntityGroup of AddPlaceHolder:" << entityGroup );
             if ( entityGroup == ResourceGroup::UI ) {
                 um.clear();
-                auto rref = addUIIM( UUIDGen::make(), UIContainer::placeHolder() );
+                auto rref = addUIIM( UUIDGen::make(), UIContainer::placeHolder());
                 nodeFullScreenUIContainerSignal( rref );
             }
         } else if ( k == SceneEvents::LoadGeomAndReset ) {
@@ -196,13 +198,13 @@ void SceneGraph::realTimeCallbacks() {
             if ( entityGroup == ResourceGroup::Geom ) {
                 load<Geom>( v0, [this]( HttpResouceCBSign key ) {
                     auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
-                    geom->updateTransform( V3f::ZERO, Quaternion{ (float)M_PI, V3f::UP_AXIS }, V3f::ONE);
+                    geom->updateTransform( V3f::ZERO, Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
                     DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
                     materialsForGeomSocketMessage();
                 } );
             } else if ( entityGroup == ResourceGroup::Material ) {
                 load<Material>( v0, [this, vHash]( HttpResouceCBSign key ) {
-                    auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M(vHash));
+                    auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M( vHash ));
                     DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Back );
                     Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
                 } );
@@ -224,7 +226,7 @@ void SceneGraph::realTimeCallbacks() {
             auto objId = getFileName( doc["data"]["entity_id"].GetString());
             signalValueMap["source_material_id"] = std::string( doc["data"]["source_id"].GetString());
             load<Material>( matId, [&]( HttpResouceCBSign key ) {
-                replaceMaterialOnNodes(key);
+                replaceMaterialOnNodes( key );
             } );
         } else if ( k == SceneEvents::ChangeMaterialProperty ) {
             if ( doc["data"]["value_type"].GetString() == std::string( "hexcolor" )) {
@@ -235,6 +237,14 @@ void SceneGraph::realTimeCallbacks() {
                 float value = std::stof( doc["data"]["value_str"].GetString()) / 100.0f;
                 changeMaterialPropertyFloatSignal( doc["data"]["property_id"].GetString(),
                                                    doc["data"]["mat_id"].GetString(), value );
+            } else if ( doc["data"]["value_type"].GetString() == std::string( "string" )) {
+                std::string value = doc["data"]["value_str"].GetString();
+                std::string pid = doc["data"]["property_id"].GetString();
+                std::string matid = doc["data"]["mat_id"].GetString();
+                acquire<RawImage>( value, [this, pid, matid]( HttpResouceCBSign key ) {
+                    changeMaterialPropertyStringSignal( pid,
+                                                        matid, key );
+                } );
             }
         }
     }
@@ -242,14 +252,14 @@ void SceneGraph::realTimeCallbacks() {
 }
 
 void SceneGraph::loadCallbacks() {
-    loadResourceCallback<VData, VB>(resourceCallbackVData);
-    loadResourceCallback<RawImage, IB>(resourceCallbackRawImage);
-    loadResourceCallback<Font, FB>(resourceCallbackFont);
-    loadResourceCallback<Profile, PB>(resourceCallbackProfile);
-    loadResourceCallback<UIContainer, UIB>(resourceCallbackUI);
-    loadResourceCallback<MaterialColor, MCB>(resourceCallbackMaterialColor);
-    loadResourceCallbackWithKey<Material, MB>(resourceCallbackMaterial);
-    loadResourceCallbackWithLoader<Geom, GRB >(resourceCallbackGeom, GLTF2Service::load);
+    loadResourceCallback<VData, VB>( resourceCallbackVData );
+    loadResourceCallback<RawImage, IB>( resourceCallbackRawImage );
+    loadResourceCallback<Font, FB>( resourceCallbackFont );
+    loadResourceCallback<Profile, PB>( resourceCallbackProfile );
+    loadResourceCallback<UIContainer, UIB>( resourceCallbackUI );
+    loadResourceCallback<MaterialColor, MCB>( resourceCallbackMaterialColor );
+    loadResourceCallbackWithKey<Material, MB>( resourceCallbackMaterial );
+    loadResourceCallbackWithLoader<Geom, GRB>( resourceCallbackGeom, GLTF2Service::load );
     loadResourceCompositeCallback( resourceCallbackComposite );
 }
 
@@ -337,8 +347,8 @@ SceneGraph::SceneGraph( CommandQueue& cq,
                         CameraManager& _cm,
                         GeomManager& _gm,
                         UIManager& _um,
-                        LightManager& _ll) : vl( _vl ), tl( _tl ), pl( _pl ), ml( _ml ), cl( _cl ), fm( _fm ),
-                                             cm( _cm ), gm( _gm ), um( _um ), ll(_ll) {
+                        LightManager& _ll ) : vl( _vl ), tl( _tl ), pl( _pl ), ml( _ml ), cl( _cl ), fm( _fm ),
+                                              cm( _cm ), gm( _gm ), um( _um ), ll( _ll ) {
 
     hcs = std::make_shared<CommandScriptSceneGraph>( *this );
     cq.registerCommandScript( hcs );
@@ -407,12 +417,12 @@ CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
 }
 
 void SceneGraph::init() {
-    B<IB>( S::WHITE ).addIM(RawImage::WHITE4x4());
-    B<IB>( S::BLACK ).addIM(RawImage::BLACK_ARGB4x4());
-    B<IB>( S::NORMAL ).addIM(RawImage::NORMAL4x4());
-    B<IB>( S::NOISE4x4 ).addIM(RawImage::NOISE4x4());
-    B<IB>( S::DEBUG_UV ).addIM(RawImage::DEBUG_UV());
-    B<IB>( S::LUT_3D_TEST ).addIM(RawImage::LUT_3D_TEST());
+    B<IB>( S::WHITE ).addIM( RawImage::WHITE4x4());
+    B<IB>( S::BLACK ).addIM( RawImage::BLACK_ARGB4x4());
+    B<IB>( S::NORMAL ).addIM( RawImage::NORMAL4x4());
+    B<IB>( S::NOISE4x4 ).addIM( RawImage::NOISE4x4());
+    B<IB>( S::DEBUG_UV ).addIM( RawImage::DEBUG_UV());
+    B<IB>( S::LUT_3D_TEST ).addIM( RawImage::LUT_3D_TEST());
 
     B<MB>( S::WHITE_PBR ).addIM( Material{ S::SH } );
     Profile squared;
@@ -516,7 +526,7 @@ void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _
 
 ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {
     auto matRef = ML().getHash( _matref );
-    if ( matRef.empty() ) {
+    if ( matRef.empty()) {
         matRef = ML().getHash( S::WHITE_PBR );
     }
     if ( _color != C4f::WHITE ) {
@@ -636,14 +646,14 @@ void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {
 }
 
 std::string SceneGraph::possibleRemap( const std::string& _key, const std::string& _value ) const {
-    if ( const auto& it = materialRemap.find(_key + "," + _value ); it != materialRemap.end() ) {
+    if ( const auto& it = materialRemap.find( _key + "," + _value ); it != materialRemap.end()) {
         return it->second;
     }
     return _value;
 }
 
 void SceneGraph::HODResolve( const DependencyList& deps, HODResolverCallback ccf ) {
-    SceneDependencyResolver sdr(*this );
+    SceneDependencyResolver sdr( *this );
 
     sdr.addDeps( deps );
     sdr.addResolveCallback( ccf );
@@ -661,18 +671,18 @@ void HOD::DepRemapsManager::addDep( const std::string& group, const std::string&
 
 void HOD::reducer( SceneGraph& sg, HOD::DepRemapsManager& deps, HODResolverCallback ccf ) {
 
-    HOD::EntityList el{deps.geoms};
-    Http::get( Url{ HttpFilePrefix::entities + "remaps"}, el.serialize(), [&, deps, ccf](HttpResponeParams res) {
-        EntityRemappingContainer erc{res.bufferString};
+    HOD::EntityList el{ deps.geoms };
+    Http::get( Url{ HttpFilePrefix::entities + "remaps" }, el.serialize(), [&, deps, ccf]( HttpResponeParams res ) {
+        EntityRemappingContainer erc{ res.bufferString };
         HOD::DepRemapsManager ndeps = deps;
         AppMaterialsRemapping remaps{};
         for ( const auto& rm : erc.remaps ) {
-            remaps.remap[rm.sourceEntity+","+rm.sourceRemap] = rm.destRemap;
+            remaps.remap[rm.sourceEntity + "," + rm.sourceRemap] = rm.destRemap;
             ndeps.addDep( ResourceGroup::Material, rm.destRemap );
         }
 
         sg.setMaterialRemap( remaps.remap );
 
         sg.HODResolve( ndeps.ret, ccf );
-    });
+    } );
 }

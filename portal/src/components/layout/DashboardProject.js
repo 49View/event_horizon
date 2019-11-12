@@ -8,7 +8,7 @@ import GUIEditor from "./entities/GUIEditor";
 import GeomEditor from "./entities/GeomEditor";
 import FontEditor from "./entities/FontEditor";
 import MaterialEditor from "./entities/MaterialEditor";
-import { wasmSetCanvasSize, wasmSetCanvasVisibility } from "./WasmCanvas";
+import { wasmSetCanvasSize, wasmSetCanvasVisibility } from "react-wasm-canvas";
 import EntityMetaSection from "./entities/EntityMetaSection";
 import RenderParamsToolbar from "./entities/RenderParamsToolbar";
 import { getFullEntity } from "../../actions/entities";

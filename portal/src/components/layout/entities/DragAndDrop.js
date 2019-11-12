@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useDropzone } from "react-dropzone";
-import { addEntity } from "actions/entities";
+import { changeMaterialPropery, updateTextureParameterOnMaterial } from "actions/entities";
 import { checkFileExtensionsOnEntityGroup, GroupImage } from "utils/utils";
-import {SET_MODAL_SELECTED_ENTITY_NAME} from "../../../actions/types";
+import {SET_MODAL_SELECTED_ENTITY_NAME} from "actions/types";
 
 const DragAndDrop = props => {
   const dispatch = useDispatch();
@@ -17,31 +17,32 @@ const DragAndDrop = props => {
         reader.onerror = () => console.log("file reading has failed");
         reader.onload = () => {
           console.log("File read:", acceptedFiles[0].name);
-          dispatch(addEntity(acceptedFiles[0].name, reader.result, GroupImage));
+          //dispatch(addEntity(acceptedFiles[0].name, reader.result, GroupImage));
+          dispatch(changeMaterialPropery(props.entry.inputTextureName+"-string", props.entry.key_id, "49viewlogo"));
         };
 
         acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
       }
     },
-    [dispatch]
+    [dispatch, props]
   );
   const { getRootProps } = useDropzone({ onDrop });
 
-  const onReplaceEntity = () => {
-    console.log("Dispatching");
+  const updateMaterialTextureCallback = () => {
     dispatch({
       type: SET_MODAL_SELECTED_ENTITY_NAME,
       payload: {
         group:GroupImage,
-        onClickCallback: null,
-        // selectedModalEntityName: e.currentTarget.dataset.id
+        fatherEntityName: props.entry.key_id,
+        onClickCallback: updateTextureParameterOnMaterial,
+        selectedModalEntityName: props.entry.inputTextureName
       }
     });
   };
 
   return (
-    <div {...getRootProps()} className="materialPropertyTexture" onClick={onReplaceEntity}>
-      <img src={props.imgSrc} alt="" />
+    <div {...getRootProps()} className="materialPropertyTexture" onClick={updateMaterialTextureCallback}>
+      <img src={props.entry.textureName} alt="" />
     </div>
   );
 };

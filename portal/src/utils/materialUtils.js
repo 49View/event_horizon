@@ -39,10 +39,12 @@ export const fillMaterialParams = (key, values, thumbValues = null) => {
     roughnessTexture: "/white.png",
     aoTexture: "/white.png",
     opacityTexture: "/white.png",
+    heightTexture: "/black.png",
     aoValue: 1.0,
     roughnessValue: 0.8,
     metallicValue: 0.2,
-    opacityValue: 1.0
+    opacityValue: 1.0,
+    heightValue: 1.0
   };
 
   if (values.mV3fs) {

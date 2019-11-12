@@ -17,6 +17,13 @@ const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
 const projectController = require("./controllers/projectController");
 const cryptoController = require("./controllers/cryptoController");
+var StatsD = require('hot-shots');
+var dogstatsd = new StatsD();
+const tracer = require('dd-trace').init({
+  analytics: true
+})
+
+dogstatsd.increment('page.views')
 
 const app = express();
 

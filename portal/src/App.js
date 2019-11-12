@@ -16,7 +16,7 @@ import store from "./store";
 import { loadUser } from "./actions/auth";
 
 import "./App.css";
-import WasmCanvas from "./components/layout/WasmCanvas";
+import WasmCanvas from "react-wasm-canvas";
 
 initHostEnv();
 initDB(DBConfig);

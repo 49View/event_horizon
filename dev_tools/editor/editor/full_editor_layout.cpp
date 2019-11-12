@@ -53,7 +53,7 @@ void EditorBackEnd::activatePostLoad() {
 
 void EditorBackEnd::activateImpl() {
 
-//    appData.addRawImage( "skybox,equirectangular,park,generic,001" );
+//    appData.addRawImage( "49viewlogo" );
 //    appData.addRawImage( skyboxName );
 //    appData.addFont("amaranth");
 //    appData.addMaterial( testLoad );
