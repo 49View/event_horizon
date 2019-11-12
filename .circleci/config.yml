@@ -86,8 +86,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-              - ./restful-api/*
-              - ./portal/*
+              - ./portal_static.gz
 
 #       - run:
 #           name: Save portal_static artifact
