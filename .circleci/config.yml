@@ -31,13 +31,13 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Git LFS install
-        command: |
-          curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get install git-lfs && git lfs install
+          name: Git LFS install
+          command: |
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get install git-lfs && git lfs install
       - run:
-        name: Pull Git Large Files
-        command: |
-          git lfs pull
+          name: Pull Git Large Files
+          command: |
+            git lfs pull
       - restore_cache:
           keys:
             - v2-dependencies-{{ checksum "restful-api/package.json" }}
