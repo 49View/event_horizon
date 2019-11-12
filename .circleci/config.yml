@@ -51,7 +51,7 @@ jobs:
           git lfs install
       - run: >
           git lfs pull
-      - run: *s3utils
+#       - run: *s3utils
       - restore_cache:
           keys:
             - v2-dependencies-{{ checksum "restful-api/package.json" }}
@@ -83,16 +83,25 @@ jobs:
           cd portal && npm run build
       - run: >
           tar -zcvf portal_static.gz ./portal/build
-      - run:
-          name: Save portal_static artifact
-          command: |
-            s3-artifacts.sh PUT portal_static.gz
+      - persist_to_workspace:
+          root: .
+          paths:
+              - ./restful-api/*
+              - ./portal/*
+
+#       - run:
+#           name: Save portal_static artifact
+#           command: |
+#             s3-artifacts.sh PUT portal_static.gz
 
 
   deployNODEJSAPI:
     <<: *machinedefaults
     steps:
-      - run: *s3utils
+      - attach_workspace:
+          at: ~/repo
+
+#       - run: *s3utils
       - run:
           name: SSH to DigitalOcean and run api node.js server dockerized
           command: |
@@ -100,7 +109,6 @@ jobs:
       - run:
           name: Deploy Portal to nginx as static webpage
           command: |
-            s3-artifacts.sh GET portal_static.gz
             scp portal_static.gz $DROPLET_USER@$DROPLET_IP:/home/circleci/
             ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP 'sudo tar -xvzf portal_static.gz;
             cd portal/build;
