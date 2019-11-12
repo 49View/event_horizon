@@ -101,7 +101,7 @@ jobs:
       - run:
           name: SSH to DigitalOcean and run api node.js server dockerized
           command: |
-            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP '(git clone git@github.com:49View/event_horizon.git 2> /dev/null || (cd event_horizon; git pull)); sudo docker kill $(docker ps --filter "ancestor=eventhorizon-api" -q); sudo docker build -t eventhorizon-api ./event_horizon/restful-api;sudo docker run -p:3000:3000 -d eventhorizon-api'
+            ssh -oStrictHostKeyChecking=no -v $DROPLET_USER@$DROPLET_IP '(git clone git@github.com:49View/event_horizon.git 2> /dev/null || (cd event_horizon; git lfs pull)); sudo docker kill $(docker ps --filter "ancestor=eventhorizon-api" -q); sudo docker build -t eventhorizon-api ./event_horizon/restful-api;sudo docker run -p:3000:3000 -d eventhorizon-api'
       - run:
           name: Deploy Portal to nginx as static webpage
           command: |
