@@ -4,19 +4,6 @@
 parameters:
   docker_cpp_build_version: &docker_cpp_build_version sixthview/build:1.2.13
 
-s3utils: &s3utils
-           name: S3 utils
-           # this installs also vim-commond which has the xxd dependency that s3 utils need
-           command: |
-             sudo apt-get update
-             sudo apt-get install --fix-missing -y vim-common
-             wget $S3_ARTIFACTS && chmod u+x s3-artifacts.sh && sudo mv s3-artifacts.sh /usr/local/bin
-
-s3utilsbuild: &s3utilsbuild
-  name: S3 utils non sudo for build
-  command: |
-    wget $S3_ARTIFACTS && chmod u+x s3-artifacts.sh && mv s3-artifacts.sh /usr/local/bin
-
 defaults: &defaults
   docker:
     - image: *docker_cpp_build_version
@@ -43,15 +30,14 @@ jobs:
     <<: *nodejsfaults
     steps:
       - checkout
-      - run: >
-          curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-      - run: >
-          sudo apt-get install git-lfs
-      - run: >
-          git lfs install
-      - run: >
+      - run:
+        name: Git LFS install
+        command: |
+          curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash && sudo apt-get install git-lfs && git lfs install
+      - run:
+        name: Pull Git Large Files
+        command: |
           git lfs pull
-#       - run: *s3utils
       - restore_cache:
           keys:
             - v2-dependencies-{{ checksum "restful-api/package.json" }}
@@ -65,7 +51,6 @@ jobs:
           key: v2-dependencies-{{ checksum "restful-api/package.json" }}
 #      - run: >
 #          cd restful-api && npm test
-
       - restore_cache:
           keys:
             - v2-dependencies-{{ checksum "portal/package.json" }}
@@ -87,12 +72,6 @@ jobs:
           root: .
           paths:
               - ./portal_static.gz
-
-#       - run:
-#           name: Save portal_static artifact
-#           command: |
-#             s3-artifacts.sh PUT portal_static.gz
-
 
   deployNODEJSAPI:
     <<: *machinedefaults
