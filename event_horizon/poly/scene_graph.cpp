@@ -180,7 +180,6 @@ void SceneGraph::realTimeCallbacks() {
             clearFromRealTimeCallbacks();
             auto entityGroup = doc["data"]["group"].GetString();
 
-            LOGRS( "EntityGroup of AddPlaceHolder:" << entityGroup );
             if ( entityGroup == ResourceGroup::UI ) {
                 um.clear();
                 auto rref = addUIIM( UUIDGen::make(), UIContainer::placeHolder());
@@ -242,8 +241,13 @@ void SceneGraph::realTimeCallbacks() {
                 std::string pid = doc["data"]["property_id"].GetString();
                 std::string matid = doc["data"]["mat_id"].GetString();
                 acquire<RawImage>( value, [this, pid, matid]( HttpResouceCBSign key ) {
-                    changeMaterialPropertyStringSignal( pid,
-                                                        matid, key );
+                    auto mat = get<Material>(matid);
+                    if ( mat ) {
+                        mat->Values()->assign( pid, key );
+                        changeMaterialPropertyStringSignal( pid,
+                                                            matid, key );
+                        materialsForGeomSocketMessage();
+                    }
                 } );
             }
         }

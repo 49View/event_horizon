@@ -39,7 +39,7 @@ const initialState = {
   },
   currentEntity: null,
   currentEntityData: null,
-  currentEntityNodes: null,
+  currentEntityNodes: [],
   appKey: "",
   group: "",
   groupSelected: "",
@@ -195,7 +195,7 @@ export default function(state = initialState, action) {
       return {
         ...state,
         loading: false,
-        currentEntityNodes: payload,
+        currentEntityNodes: payload.mrefs,
         currentEntityData: null
       };
     case ADD_ENTITY:

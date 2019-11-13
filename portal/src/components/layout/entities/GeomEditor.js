@@ -7,6 +7,7 @@ import {changeMaterialPropery, replaceMaterial} from "actions/entities";
 import {fillMaterialParams} from "utils/materialUtils";
 import {GroupMaterial} from "utils/utils";
 import DragAndDrop from "./DragAndDrop";
+import {GroupImage} from "../../../utils/utils";
 
 const GeomEditor = () => {
 
@@ -26,13 +27,11 @@ const GeomEditor = () => {
 
     let matSimples = [];
 
-    if (currentEntityNodes) {
-        // eslint-disable-next-line
-        for (const e of currentEntityNodes.mrefs) {
-            matSimples.push(
-                fillMaterialParams(e.key, e.value.values, e.value.thumbValues)
-            );
-        }
+    // eslint-disable-next-line
+    for (const e of currentEntityNodes) {
+        matSimples.push(
+            fillMaterialParams(e.key, e.value.values, e.value.thumbValues)
+        );
     }
 
     const MaterialTextureEntry = props => {
@@ -71,6 +70,7 @@ const GeomEditor = () => {
                             </div>
                             <div className="materialTextureContainer">
                                 <MaterialTextureEntry
+                                    groupName={GroupImage}
                                     key_id={e.key}
                                     value={e.baseColor}
                                     label="Color"
@@ -78,9 +78,10 @@ const GeomEditor = () => {
                                     inputname="diffuseColor-hexcolor"
                                     inputTextureName="diffuseTexture"
                                     textureName={e.diffuseTexture}
-                                ></MaterialTextureEntry>
+                                />
 
                                 <MaterialTextureEntry
+                                    groupName={GroupImage}
                                     key_id={e.key}
                                     value="100"
                                     label="Normal"
@@ -88,9 +89,10 @@ const GeomEditor = () => {
                                     inputname=""
                                     inputTextureName="normalTexture"
                                     textureName={e.normalTexture}
-                                ></MaterialTextureEntry>
+                                />
 
                                 <MaterialTextureEntry
+                                    groupName={GroupImage}
                                     key_id={e.key}
                                     value={e.metallicValue * 100}
                                     label="Metallic"
@@ -98,9 +100,10 @@ const GeomEditor = () => {
                                     inputname="metallicV-float100"
                                     inputTextureName="metallicTexture"
                                     textureName={e.metallicTexture}
-                                ></MaterialTextureEntry>
+                                />
 
                                 <MaterialTextureEntry
+                                    groupName={GroupImage}
                                     key_id={e.key}
                                     value={e.roughnessValue * 100}
                                     label="Roughness"
@@ -108,9 +111,10 @@ const GeomEditor = () => {
                                     inputname="roughnessV-float100"
                                     inputTextureName="roughnessTexture"
                                     textureName={e.roughnessTexture}
-                                ></MaterialTextureEntry>
+                                />
 
                                 <MaterialTextureEntry
+                                    groupName={GroupImage}
                                     key_id={e.key}
                                     value={e.aoValue * 100}
                                     label="Ambient Occlusion"
@@ -118,9 +122,10 @@ const GeomEditor = () => {
                                     inputname="aoV-float100"
                                     inputTextureName="aoTexture"
                                     textureName={e.aoTexture}
-                                ></MaterialTextureEntry>
+                                />
 
                                 <MaterialTextureEntry
+                                    groupName={GroupImage}
                                     key_id={e.key}
                                     value={e.opacityValue * 100}
                                     label="Opacity"
@@ -128,9 +133,10 @@ const GeomEditor = () => {
                                     inputname="opacity-float100"
                                     inputTextureName="opacityTexture"
                                     textureName={e.opacityTexture}
-                                ></MaterialTextureEntry>
+                                />
 
                                 <MaterialTextureEntry
+                                    groupName={GroupImage}
                                     key_id={e.key}
                                     value={e.translucencyValue * 100}
                                     label="Translucency"
@@ -138,9 +144,10 @@ const GeomEditor = () => {
                                     inputname="translucency-float100"
                                     inputTextureName="diffuseTexture"
                                     textureName={e.translucencyTexture}
-                                ></MaterialTextureEntry>
+                                />
 
                                 <MaterialTextureEntry
+                                    groupName={GroupImage}
                                     key_id={e.key}
                                     value={e.heightValue * 100}
                                     label="Height"
@@ -148,7 +155,7 @@ const GeomEditor = () => {
                                     inputname="height-float100"
                                     inputTextureName="heightTexture"
                                     textureName={e.heightTexture}
-                                ></MaterialTextureEntry>
+                                />
                             </div>
                         </div>
                     ))}
