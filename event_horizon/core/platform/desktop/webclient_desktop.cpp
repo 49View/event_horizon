@@ -69,16 +69,7 @@ namespace Http {
             if ( !checkBitWiseFlag(rf, ResponseFlags::HeaderOnly) ) {
                 if ( res.length > 0 ) {
                     restbed::Http::fetch( res.length, response );
-                    if ( res.contentType.find("application/json") != std::string::npos ||
-                         res.contentType.find("application/text") != std::string::npos ) {
-                        std::vector<unsigned char> a = response->get_body();
-                        std::stringstream ss;
-                        for ( size_t i = 0; i < res.length; i++ ) { ss << a[i]; }
-                        res.bufferString = ss.str();
-                        orBitWiseFlag( res.flags, ResponseFlags::Text );
-                    } else {
-                        res.setBuffer( reinterpret_cast<const char*>(response->get_body().data()), res.length );
-                    }
+                    res.setBuffer( reinterpret_cast<const char*>(response->get_body().data()), res.length );
                 }
             }
         }

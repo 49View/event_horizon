@@ -154,7 +154,10 @@ namespace Http {
             length = _length;
             buffer = std::make_unique<unsigned char[]>( static_cast<size_t>(length));
             std::memcpy( buffer.get(), cbuffer, static_cast<size_t>(length));
-            bufferString = std::string{ (char*)buffer.get(), static_cast<unsigned long>(length) };
+            if ( contentType.find("application/json") != std::string::npos ||
+                 contentType.find("application/text") != std::string::npos ) {
+                bufferString = std::string{ (char *) buffer.get(), static_cast<unsigned long>(length) };
+            }
         }
 
         Result( uint64_t length = 0, int statusCode = 500 ) : length( length ), statusCode( statusCode ) {}

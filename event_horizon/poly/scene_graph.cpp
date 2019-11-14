@@ -38,6 +38,20 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackGeom;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackUI;
 LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite;
 
+namespace HOD { // HighOrderDependency
+
+    template <>
+    DepRemapsManager resolveDependencies<ResourceScene>( const ResourceScene* _resources ) {
+        DepRemapsManager ret{};
+
+        _resources->visit( ResourceGroup::Geom, [&]( const std::string& key, const std::string& entry ) {
+            ret.addDep( key, entry );
+        });
+
+        return ret;
+    }
+}
+
 void SceneGraph::addNode( GeomSP _node ) {
     nodeAddSignal( _node );
     nodes.emplace( _node->UUiD(), _node );
@@ -645,6 +659,22 @@ void SceneGraph::loadGeom( std::string _names, HttpResouceCB _ccf ) {
     B<GRB>( _names ).load( _ccf );
 }
 
+void SceneGraph::loadScene( const ResourceScene& gs, HODResolverCallback _ccf ) {
+    HOD::resolver<ResourceScene>( *this, &gs, _ccf );
+}
+
+void SceneGraph::addScene( const ResourceScene& gs ) {
+    HOD::resolver<ResourceScene>( *this, &gs, [this, gs]() {
+        gs.visit( ResourceGroup::Geom, [&]( const std::string& _key, const std::string& _value ) {
+            addNode(get<Geom>(_value));
+        });
+    });
+}
+
+void SceneGraph::addGeomScene( const std::string& geomName ) {
+    addScene( {ResourceGroup::Geom, geomName } );
+}
+
 void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {
     materialRemap = _materialRemap;
 }
@@ -688,5 +718,5 @@ void HOD::reducer( SceneGraph& sg, HOD::DepRemapsManager& deps, HODResolverCallb
         sg.setMaterialRemap( remaps.remap );
 
         sg.HODResolve( ndeps.ret, ccf );
-    } );
+    }, nullptr, Http::ResponseFlags::JSON );
 }

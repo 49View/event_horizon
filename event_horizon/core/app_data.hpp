@@ -25,10 +25,6 @@ JSONDATA( EntityRemappingContainer, remaps )
     std::vector<EntityRemapping> remaps;
 };
 
-JSONDATA( EntityRemappingDependencies, erd )
-    std::unordered_map<std::string, std::vector<std::string>> erd;
-};
-
 JSONDATA( AppMaterialsRemapping, remap )
     MaterialMap remap;
 };

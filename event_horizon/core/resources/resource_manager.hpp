@@ -77,19 +77,14 @@ public:
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = {}, const std::string& _key = {} ) {
         add( _elem, _name, _hash, _aliasKey, _key );
-//        resolveDependencies( [&]() {
-            addSignal( { _elem, _hash, {_hash, _name, _aliasKey, _key} } );
-//        });
-
+        addSignal( { _elem, _hash, {_hash, _name, _aliasKey, _key} } );
     }
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
                       const ResourceRef& _hash, const std::string& _aliasKey = "", const std::string& _key = "",
                       HttpResouceCB _ccf = nullptr) {
         add( _elem, _name, _hash, _aliasKey, _key );
-//        resolveDependencies( [&]() {
-            addToSignal( signalAddElements, { _elem, _hash, { _hash, _name, _aliasKey, _key }, _ccf } );
-//        });
+        addToSignal( signalAddElements, { _elem, _hash, { _hash, _name, _aliasKey, _key }, _ccf } );
     }
 
     std::shared_ptr<T> getFromHash( const std::string& _hash ) {

@@ -32,6 +32,23 @@ class Camera;
 using HODResolverCallback = std::function<void()>;
 using MaterialMap = std::unordered_map<std::string, std::string>;
 
+JSONDATA( ResourceScene, resources )
+
+    ResourceScene( const std::string& _resGroup, const std::string& _geomRes ) {
+        resources[_resGroup].emplace_back(_geomRes);
+    }
+
+    void visit( const std::string& _key, std::function<void( const std::string&, const std::string& )> cb ) const {
+        if ( auto it = resources.find(_key); it != resources.end() ) {
+            for ( const auto& entry : it->second ) {
+                cb( _key, entry );
+            }
+        }
+    }
+
+    std::unordered_map<std::string, std::vector<std::string>> resources;
+};
+
 namespace HOD { // HighOrderDependency
 
     JSONDATA( EntityList, entities )
@@ -48,12 +65,12 @@ namespace HOD { // HighOrderDependency
     };
 
     template <typename T>
-    DepRemapsManager resolveDependencies( T* data );
+    DepRemapsManager resolveDependencies( const T* data );
 
     void reducer( SceneGraph& sg, DepRemapsManager& deps, HODResolverCallback ccf );
 
     template<typename T>
-    void resolver( SceneGraph& sg, T* data, HODResolverCallback ccf ) {
+    void resolver( SceneGraph& sg, const T* data, HODResolverCallback ccf ) {
         auto deps = HOD::resolveDependencies<T>( data );
         reducer( sg, deps, ccf );
     }
@@ -281,6 +298,10 @@ public:
     void loadLogicalUI     ( std::string _names, HttpResouceCB _ccf = nullptr );
     void loadGeom          ( std::string _names, HttpResouceCB _ccf = nullptr );
     void loadUI            ( std::string _names, HttpResouceCB _ccf = nullptr );
+
+    void loadScene         ( const ResourceScene& gs, HODResolverCallback _ccf = nullptr );
+    void addScene          ( const ResourceScene& gs );
+    void addGeomScene      ( const std::string& geomName );
 
     template <typename R>
     void acquire( std::string _names, HttpResouceCB _ccf = nullptr ) {

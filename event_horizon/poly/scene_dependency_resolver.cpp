@@ -61,7 +61,7 @@ void SceneDependencyResolver::resolve() {
 SceneDependencyResolver::SceneDependencyResolver( SceneGraph& sg ) : sgl( sg ) {}
 
 void SceneDependencyResolver::activateFinalLoadInternal() {
-    activatePostLoad();
+    if ( activatePostLoad ) activatePostLoad();
 }
 
 void SceneDependencyResolver::activatePostLoadInternal() {
