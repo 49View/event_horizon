@@ -23,7 +23,7 @@ initDB(DBConfig);
 
 const App = () => {
 
-  let wasmArgumentList = [getApiHostName()];
+  let wasmArgumentList = ["hostname="+getApiHostName()];
 
   useEffect(() => {
     store.dispatch(loadUser());

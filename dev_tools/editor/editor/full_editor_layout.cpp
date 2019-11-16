@@ -44,6 +44,7 @@ void EditorBackEnd::activatePostLoad() {
     rsg.setRigCameraController<CameraControlOrbit3d>();
     rsg.DC()->setFoV(60.0f);
 
+//    sg.addGeomScene("5d60844ea683f7913c3a3f6e");
 //        sg.load<Geom>( "window", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );

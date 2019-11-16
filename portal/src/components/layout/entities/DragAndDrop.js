@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useDropzone } from "react-dropzone";
-import { changeMaterialPropery, updateTextureParameterOnMaterial } from "actions/entities";
+import { updateTextureParameterOnMaterial } from "actions/entities";
 import { checkFileExtensionsOnEntityGroup, GroupImage } from "utils/utils";
 import {SET_MODAL_SELECTED_ENTITY_NAME} from "actions/types";
 
@@ -33,7 +33,7 @@ const DragAndDrop = props => {
         acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
       }
     },
-    [dispatch, props]
+    []
   );
   const { getRootProps } = useDropzone({ onDrop });
 

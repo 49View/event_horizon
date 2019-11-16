@@ -32,15 +32,42 @@ namespace di = boost::di;
 
 //#define __USE_OFFLINE__
 
+class CLIParamMap {
+public:
+    CLIParamMap( int argc, char *argv[] ) {
+        for ( auto t = 0; t < argc; t++ ) {
+            auto ret = split(argv[t], '=' );
+            if ( ret.size() == 2 ) {
+                params.emplace( ret[0], ret[1] );
+            }
+        }
+    }
+
+    [[nodiscard]] std::optional<std::string> getParam( const std::string& key ) const {
+        if ( auto it = params.find(key); it != params.end() ) {
+            return it->second;
+        }
+        return std::nullopt;
+    }
+
+private:
+    KVStringMap params;
+};
+
 template<typename BE>
 class EventHorizon {
 public:
     explicit EventHorizon( int argc, char *argv[] ) {
-        bool bUseLocalHost = argc > 1 && std::string( argv[1] ) == "localhost";
+        CLIParamMap params{ argc, argv };
+        bool bUseLocalHost = params.getParam("hostname") == "localhost";
         Http::useLocalHost(bUseLocalHost );
 #if !defined(__USE_OFFLINE__) && !defined(__EMSCRIPTEN__)
-        if constexpr ( BE::hasLF() ) {
-            Http::init( BE::loginCert() );
+        auto username = params.getParam("username");
+        auto password = params.getParam("password");
+        auto project  = params.getParam("project");
+
+        if ( username && password && project ) {
+            Http::init( LoginFields{*username, *password, *project} );
         } else {
             Http::init();
         }
@@ -49,7 +76,7 @@ public:
         Http::init();
 #endif
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
-        mainLoop(checkLayoutArgvs( argc, argv ), std::move(backEnd) );
+        mainLoop(checkLayoutArgvs( params ), std::move(backEnd) );
     }
 
 private:
@@ -64,14 +91,8 @@ private:
         return std::nullopt;
     }
 
-    InitializeWindowFlagsT checkLayoutArgvs(int argc, char *argv[]) {
-        InitializeWindowFlagsT initFlags =  InitializeWindowFlags::Normal;
-        for ( auto t = 1; t < argc; t++ ) {
-            std::string arg{argv[t]};
-            if  ( auto param = checkLayoutParam( arg ); param ) {
-                orBitWiseFlag( initFlags, *param );
-            }
-        }
-        return initFlags;
+    InitializeWindowFlagsT checkLayoutArgvs( const CLIParamMap& params ) {
+        auto wsize = params.getParam("defaultwindowsize");
+        return wsize ? *checkLayoutParam(*wsize) : InitializeWindowFlags::Normal;
     }
 };

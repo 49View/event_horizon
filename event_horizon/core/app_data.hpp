@@ -21,7 +21,8 @@ JSONDATA( EntityRemapping, sourceEntity, sourceRemap, destRemap )
     std::string destRemap;
 };
 
-JSONDATA( EntityRemappingContainer, remaps )
+JSONDATA( EntityRemappingContainer, kv, remaps )
+    KVStringMap kv;
     std::vector<EntityRemapping> remaps;
 };
 

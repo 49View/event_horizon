@@ -22,6 +22,7 @@ using CommandArgumentsT 		= std::vector< std::string >;
 using CommandCallbackFunction 	= std::function<void(const CommandArgumentsT& )>;
 using SerializableContainer     = std::vector<unsigned char>;
 using SerializableContainerDict = std::unordered_map<std::string, SerializableContainer>;
+using KVStringMap               = std::unordered_map<std::string, std::string>;
 using StringsPair               = std::pair<std::string, std::string>;
 using SetOfStringPair           = std::set<StringsPair>;
 using DependencyList            = std::set<StringsPair>;

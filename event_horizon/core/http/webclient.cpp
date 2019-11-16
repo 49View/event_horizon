@@ -183,11 +183,10 @@ namespace Http {
 
     Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf ) {
         Result lRes{};
-        if ( FM::useFileSystemCachePolicy() ) {
-            if ( rf == ResponseFlags::JSON || rf == ResponseFlags::Text ) {
+        if ( FM::useFileSystemCachePolicy() && !checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache)) {
+            lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
+            if ( checkBitWiseFlag( rf, ResponseFlags::JSON | ResponseFlags::Text ) ) {
                 lRes.bufferString = FM::readLocalTextFile( cacheFolder() + fileHash );
-            } else {
-                lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
             }
             if ( lRes.length || !lRes.bufferString.empty() ) {
                 lRes.uri = url.uri;
@@ -389,7 +388,7 @@ namespace Http {
 
     void refreshToken() {
         post( Url{HttpFilePrefix::refreshtoken}, [](HttpResponeParams res) {
-            RefreshToken rt( res.bufferString );
+            RefreshToken rt( std::string{ (char *) res.buffer.get(), static_cast<unsigned long>(res.length) } );
             userToken( rt.token );
             sessionId( rt.session );
         } );
@@ -397,7 +396,7 @@ namespace Http {
 
     void loginSession() {
         get( Url{HttpFilePrefix::user}, [](HttpResponeParams res) {
-                UserLogin ul{ res.bufferString };
+                UserLogin ul{ std::string{ (char *) res.buffer.get(), static_cast<unsigned long>(res.length) } };
                 sessionId( ul.session );
                 project( ul.project );
                 Socket::createConnection();
@@ -411,7 +410,7 @@ namespace Http {
 
     void login( const LoginFields& lf, const LoginCallback& loginCallback ) {
         post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf, loginCallback](HttpResponeParams res) {
-                LoginToken lt(res.bufferString);
+                LoginToken lt(std::string{ (char *) res.buffer.get(), static_cast<unsigned long>(res.length) });
                 userToken( lt.token );
                 sessionId( lt.session );
                 project( lt.project );

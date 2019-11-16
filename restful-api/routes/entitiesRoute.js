@@ -15,13 +15,6 @@ const sendResult = (res, ret, successCode = 200, failCode = 400) => {
     }
 };
 
-router.get("/remaps", async (req, res, next) => {
-    sendResult(
-        res,
-        await entityController.getEntitiesRemap(req.user.project, req.body)
-    );
-});
-
 router.get("/check/:id", async (req, res, next) => {
     try {
         const entityId = req.params.id;
@@ -273,6 +266,13 @@ router.put("/metadata/addtags/:id", async (req, res, next) => {
         console.log("ERROR addtags: ", ex);
         res.sendStatus(400);
     }
+});
+
+router.post("/remaps", async (req, res, next) => {
+    sendResult(
+        res,
+        await entityController.getEntitiesRemap(req.user.project, req.body)
+    );
 });
 
 router.post("/", async (req, res, next) => {

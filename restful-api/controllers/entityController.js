@@ -829,19 +829,33 @@ const remap = (project, data) => {
 
 const getEntitiesRemap = async (project, entities) => {
   try {
-    const entitiesArray = entities.entities;
-    if (Array.isArray(entitiesArray)) {
-      let remaps = await remapModel.find({
-        $and: [{ project: project }, { sourceEntity: { $in: entitiesArray } }]
-      });
-      return {
-        remaps: remaps
-      };
-    } else {
-      throw "entities inputs needs to be an array";
+    const entitiesArray = Array.isArray(entities.entities) ? entities.entities : [entities.entities];
+    let reparsedArray = [];
+    let kvMap = [];
+    for ( const entry of entitiesArray ) {
+      const tags = metadataAssistant.splitTags(entry);
+      const ret = await getEntitiesByProjectGroupTags(project, "geom", tags, entry, false, null );
+      if ( ret && ret.length > 0 ) {
+        const kname = ret[0].metadata.name;
+        reparsedArray.push(kname);
+        kvMap.push( {
+          key: kname,
+          value: entry
+        })
+      }
     }
+    let remaps = await remapModel.find({
+      $and: [{ project: project }, { sourceEntity: { $in: reparsedArray } }]
+    });
+    const ret = {
+      kv: kvMap,
+      remaps: remaps
+    };
+    console.log('Remaps: ', ret );
+    return ret;
   } catch (ex) {
     console.log("[ERROR] entityController.remap \n", ex);
+    console.log( "Parameters: \n Project: ", project, " entities: ", entities );
     return null;
   }
 };

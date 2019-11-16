@@ -40,13 +40,13 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite;
 
 namespace HOD { // HighOrderDependency
 
-    template <>
-    DepRemapsManager resolveDependencies<ResourceScene>( const ResourceScene* _resources ) {
+    template<>
+    DepRemapsManager resolveDependencies<ResourceScene>( const ResourceScene *_resources ) {
         DepRemapsManager ret{};
 
         _resources->visit( ResourceGroup::Geom, [&]( const std::string& key, const std::string& entry ) {
             ret.addDep( key, entry );
-        });
+        } );
 
         return ret;
     }
@@ -209,12 +209,14 @@ void SceneGraph::realTimeCallbacks() {
             auto entityGroup = doc["data"]["group"].GetString();
 
             if ( entityGroup == ResourceGroup::Geom ) {
-                load<Geom>( v0, [this]( HttpResouceCBSign key ) {
-                    auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
-                    geom->updateTransform( V3f::ZERO, Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
-                    DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
-                    materialsForGeomSocketMessage();
-                } );
+//                loadScene( ResourceScene{ ResourceGroup::Geom, v0 } );
+                addGeomScene( v0 );
+//                load<Geom>( v0, [this]( HttpResouceCBSign key ) {
+//                    auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
+//                    geom->updateTransform( V3f::ZERO, Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
+//                    DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
+//                    materialsForGeomSocketMessage();
+//                } );
             } else if ( entityGroup == ResourceGroup::Material ) {
                 load<Material>( v0, [this, vHash]( HttpResouceCBSign key ) {
                     auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M( vHash ));
@@ -255,7 +257,7 @@ void SceneGraph::realTimeCallbacks() {
                 std::string pid = doc["data"]["property_id"].GetString();
                 std::string matid = doc["data"]["mat_id"].GetString();
                 acquire<RawImage>( value, [this, pid, matid]( HttpResouceCBSign key ) {
-                    auto mat = get<Material>(matid);
+                    auto mat = get<Material>( matid );
                     if ( mat ) {
                         mat->Values()->assign( pid, key );
                         changeMaterialPropertyStringSignal( pid,
@@ -666,13 +668,16 @@ void SceneGraph::loadScene( const ResourceScene& gs, HODResolverCallback _ccf ) 
 void SceneGraph::addScene( const ResourceScene& gs ) {
     HOD::resolver<ResourceScene>( *this, &gs, [this, gs]() {
         gs.visit( ResourceGroup::Geom, [&]( const std::string& _key, const std::string& _value ) {
-            addNode(get<Geom>(_value));
-        });
-    });
+            auto geom = GB<GT::Asset>( _value, GT::Tag( 1001 ));
+            geom->updateTransform( V3f::ZERO, Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
+            DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
+            materialsForGeomSocketMessage();
+        } );
+    } );
 }
 
 void SceneGraph::addGeomScene( const std::string& geomName ) {
-    addScene( {ResourceGroup::Geom, geomName } );
+    addScene( { ResourceGroup::Geom, geomName } );
 }
 
 void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {
@@ -680,6 +685,7 @@ void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {
 }
 
 std::string SceneGraph::possibleRemap( const std::string& _key, const std::string& _value ) const {
+
     if ( const auto& it = materialRemap.find( _key + "," + _value ); it != materialRemap.end()) {
         return it->second;
     }
@@ -706,17 +712,22 @@ void HOD::DepRemapsManager::addDep( const std::string& group, const std::string&
 void HOD::reducer( SceneGraph& sg, HOD::DepRemapsManager& deps, HODResolverCallback ccf ) {
 
     HOD::EntityList el{ deps.geoms };
-    Http::get( Url{ HttpFilePrefix::entities + "remaps" }, el.serialize(), [&, deps, ccf]( HttpResponeParams res ) {
-        EntityRemappingContainer erc{ res.bufferString };
-        HOD::DepRemapsManager ndeps = deps;
-        AppMaterialsRemapping remaps{};
-        for ( const auto& rm : erc.remaps ) {
-            remaps.remap[rm.sourceEntity + "," + rm.sourceRemap] = rm.destRemap;
-            ndeps.addDep( ResourceGroup::Material, rm.destRemap );
-        }
+    Http::post( Url{ HttpFilePrefix::entities + "remaps" },
+               el.serialize(),
+               [&, deps, ccf, el]( HttpResponeParams res ) {
+                   EntityRemappingContainer erc{ res.bufferString };
+                   LOGRS("Remaps bufferstring " << res.bufferString );
+                   HOD::DepRemapsManager ndeps = deps;
+                   AppMaterialsRemapping remaps{};
+                   for ( const auto& rm : erc.remaps ) {
+                       remaps.remap[rm.sourceEntity + "," + rm.sourceRemap] = rm.destRemap;
+                       remaps.remap[erc.kv[rm.sourceEntity] + "," + rm.sourceRemap] = rm.destRemap;
+                       ndeps.addDep( ResourceGroup::Material, rm.destRemap );
+                   }
 
-        sg.setMaterialRemap( remaps.remap );
+                   sg.setMaterialRemap( remaps.remap );
 
-        sg.HODResolve( ndeps.ret, ccf );
-    }, nullptr, Http::ResponseFlags::JSON );
+                   sg.HODResolve( ndeps.ret, ccf );
+               }
+    );
 }

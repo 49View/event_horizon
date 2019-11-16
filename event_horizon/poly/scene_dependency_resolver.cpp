@@ -48,7 +48,7 @@ void SceneDependencyResolver::resolve() {
 #define LRFUNC std::bind(&SceneDependencyResolver::loadResCount, this, std::placeholders::_1)
 
     if ( firstTierResourceCount() == 0 ) {
-        activatePostLoadInternal();
+        activateGeomLoad();
     } else {
         for ( const auto& r : Fonts()     ) sgl.load<Font>( r, LRFUNC );
         for ( const auto& r : RawImages() ) sgl.load<RawImage>( r, LRFUNC );

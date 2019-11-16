@@ -16,23 +16,23 @@ namespace Http {
     callbackRespondeCCF argCallbackMapCCF;
 
     void responseCallback( callbackRespondeMap& argCallbackMap,
-                           const char* ckey, int code, const char* etag, void* data, unsigned numBytes ) {
+                           const char* ckey, int code, const char* etag, const char* contentType, void* data, unsigned numBytes ) {
         auto skey = std::string( ckey );
         if ( argCallbackMap[skey] ) {
-            argCallbackMap[skey]( { skey, reinterpret_cast<const char*>(data), numBytes, code,
+            argCallbackMap[skey]( { skey, std::string(contentType), reinterpret_cast<const char*>(data), numBytes, code,
                                     std::string(etag), argCallbackMapCCF[skey] } );
         }
         delete [] ckey;
     }
 
-    void onSuccessWget( unsigned boh, void* arg, int code, const char* etag, void* data, unsigned numBytes ) {
-        LOGR( "[HTTP-RESPONSE] code: %d, etag: %s, handle %d, numBytes: %d", code, etag, boh, numBytes );
-        responseCallback( argCallbackMapOk, reinterpret_cast<char*>(arg), code, etag, data, numBytes );
+    void onSuccessWget( unsigned boh, void* arg, int code, const char* etag, const char* contentType, void* data, unsigned numBytes ) {
+        LOGR( "[HTTP-RESPONSE] code: %d, etag: %s, contentType: %s, handle %d, numBytes: %d", code, etag, contentType, boh, numBytes );
+        responseCallback( argCallbackMapOk, reinterpret_cast<char*>(arg), code, etag, contentType, data, numBytes );
     }
 
     void onFailWget( [[maybe_unused]] unsigned boh, void *arg, int code, const char* why ) {
         LOGR("[HTTP-RESPONSE][ERROR] handle: %d code: %d URI: %s -- %s", boh, code, reinterpret_cast<char*>(arg), why );
-        responseCallback( argCallbackMapFail,  reinterpret_cast<char*>(arg), code, nullptr, nullptr, 0 );
+        responseCallback( argCallbackMapFail,  reinterpret_cast<char*>(arg), code, nullptr, nullptr, nullptr, 0 );
     }
 
     void onProgressWget( [[maybe_unused]] unsigned boh, [[maybe_unused]] void* arg,
@@ -71,11 +71,14 @@ namespace Http {
                       [[maybe_unused]] ResponseFlags rf,
                       HttpResouceCB ccf ) {
 
+        // NDDado:
+        // http req specification doesn't allow body on GET requests, so we have to ignore them
+
         emscripten_async_http_request(uri.toString().c_str(),
                                     "GET",
                                     makeHeaders().c_str(),
-                                      _data.c_str(),
-                                    _data.size(),
+                                      nullptr,
+                                    0,
                                     nullptr,
                                     reinterpret_cast<void*>(urlKeyPassing(uri, callback, callbackFailed, ccf)),
                                     false,
