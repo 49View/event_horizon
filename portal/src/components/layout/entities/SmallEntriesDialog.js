@@ -16,7 +16,6 @@ const SmallEntriesDialog = () => {
   const dispatch = useDispatch();
   const metadataList = useSelector(state => state.entities.metadataList);
 
-  console.log("SmallEntriesDialog re-render");
   useEffect(() => {
     if ( metadataList.enable ) {
       dispatch(getMetadataListOf(metadataList.group));

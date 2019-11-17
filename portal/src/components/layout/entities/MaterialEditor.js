@@ -1,108 +1,30 @@
 import React, { Fragment } from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
 import MaterialParametersEditor from "./MaterialParametersEditor";
+import {fillMaterialParams} from "../../../utils/materialUtils";
+import {useSelector} from "react-redux";
 
-const MaterialEditor = ({ currentEntity }) => {
-  let mainContent = <Fragment />;
-  if ( currentEntity.jsonRet === null ){
-    return mainContent;
-  }
-  if (currentEntity.jsonRet.values.mType === "PN_SH") {
-    // Base Color
-    let depPBRMap = {
-      albedoTexture: "/empty.png",
-      normalTexture: "/empty.png",
-      roughnessTexture: "/empty.png",
-      metallicTexture: "/empty.png",
-      aoTexture: "/empty.png",
-      heightTexture: "/empty.png",
-      opacityTexture: "/empty.png",
-      translucencyTexture: "/empty.png"
-    };
+const MaterialEditor = () => {
+  let mainContent = "";
+
+  const currentEntity = useSelector(state => state.entities.currentEntity);
+
+  // This is a PBR material editor, make sure material is PBR, if it's not, skip it!
+  if ( currentEntity.jsonRet && currentEntity.jsonRet.values.mType === "PN_SH") {
+    const mat = currentEntity.jsonRet;
+
+    let depPBRMap = [];
 
     // eslint-disable-next-line
-    for (const dep of currentEntity.jsonRet.values.mStrings) {
-      if (dep.key === "diffuseTexture") {
-        depPBRMap.albedoTexture = currentEntity.deps[dep.value];
-      }
-      if (dep.key === "normalTexture") {
-        depPBRMap.normalTexture = currentEntity.deps[dep.value];
-      }
-      if (dep.key === "roughnessTexture") {
-        depPBRMap.roughnessTexture = currentEntity.deps[dep.value];
-      }
-      if (dep.key === "metallicTexture") {
-        depPBRMap.metallicTexture = currentEntity.deps[dep.value];
-      }
-      if (dep.key === "aoTexture") {
-        depPBRMap.aoTexture = currentEntity.deps[dep.value];
-      }
-      if (dep.key === "heightTexture") {
-        depPBRMap.heightTexture = currentEntity.deps[dep.value];
-      }
-      if (dep.key === "opacityTexture") {
-        depPBRMap.opacityTexture = currentEntity.deps[dep.value];
-      }
-      if (dep.key === "translucencyTexture") {
-        depPBRMap.translucencyTexture = currentEntity.deps[dep.value];
-      }
+    for (const dep of mat.values.mStrings) {
+      depPBRMap.push( { key: dep.key, value: currentEntity.deps[dep.value] } );
     }
 
+    const m = fillMaterialParams(mat.key, mat.values, depPBRMap);
     mainContent = (
       <div className="nodeViewer-a">
         <MaterialParametersEditor
-          entity={currentEntity}
-          cname="materialParams"
+          entity={m}
         ></MaterialParametersEditor>
-        <div className="mediumPBRquad">
-          <img src={depPBRMap.albedoTexture} alt="" />
-          <div className="normal text-secondary text-center material-text">
-            Albedo
-          </div>
-        </div>
-        <div className="mediumPBRquad">
-          <img src={depPBRMap.roughnessTexture} alt="" />
-          <div className="normal text-secondary text-center material-text">
-            Roughness
-          </div>
-        </div>
-        <div className="mediumPBRquad">
-          <img src={depPBRMap.aoTexture} alt="" />
-          <div className="normal text-secondary text-center material-text">
-            Ambient Occlusion
-          </div>
-        </div>
-        <div className="mediumPBRquad">
-          <img src={depPBRMap.heightTexture} alt="" />
-          <div className="normal text-secondary text-center material-text">
-            Height
-          </div>
-        </div>
-        <div className="mediumPBRquad">
-          <img src={depPBRMap.normalTexture} alt="" />
-          <div className="normal text-secondary text-center material-text">
-            Normal
-          </div>
-        </div>
-        <div className="mediumPBRquad">
-          <img src={depPBRMap.metallicTexture} alt="" />
-          <div className="normal text-secondary text-center material-text">
-            Metallic
-          </div>
-        </div>
-        <div className="mediumPBRquad">
-          <img src={depPBRMap.opacityTexture} alt="" />
-          <div className="normal text-secondary text-center material-text">
-            Opacity
-          </div>
-        </div>
-        <div className="mediumPBRquad">
-          <img src={depPBRMap.translucencyTexture} alt="" />
-          <div className="normal text-secondary text-center material-text">
-            Translucency
-          </div>
-        </div>
       </div>
     );
   }
@@ -110,15 +32,4 @@ const MaterialEditor = ({ currentEntity }) => {
   return <Fragment>{mainContent}</Fragment>;
 };
 
-MaterialEditor.propTypes = {
-  currentEntity: PropTypes.object
-};
-
-const mapStateToProps = state => ({
-  currentEntity: state.entities.currentEntity
-});
-
-export default connect(
-  mapStateToProps,
-  {}
-)(MaterialEditor);
+export default MaterialEditor;

@@ -1,5 +1,4 @@
 import React, { Fragment } from "react";
-import { connect } from "react-redux";
 import { decode } from "base64-arraybuffer";
 import {
   entityTypeSelector,
@@ -27,13 +26,14 @@ const EntitiesThumbHandler = (props) => {
       if (currentEntity && e._id === currentEntity.entity._id) {
         entryWithThumb.cname += " leftSideBarGroupSelected";
       }
-
+      entryWithThumb.entityId = e._id;
       entitiesRes.push(entryWithThumb);
       return 0;
     });
   }
 
   const viewMore = entityToRender => () => {
+    console.log( "Entity callback: ", entityToRender);
     store.dispatch(onClicked(entityToRender, props.callbackProps));
   };
 
@@ -79,4 +79,4 @@ const EntitiesThumbHandler = (props) => {
   );
 };
 
-export default connect()(EntitiesThumbHandler);
+export default EntitiesThumbHandler;
