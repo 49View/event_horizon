@@ -357,8 +357,7 @@ void SceneGraph::cmdReloadShaders( const std::vector<std::string>& _params ) {
 //    cmdChangeTimeImpl( _params );
 }
 
-SceneGraph::SceneGraph( CommandQueue& cq,
-                        VDataManager& _vl,
+SceneGraph::SceneGraph( VDataManager& _vl,
                         ImageManager& _tl,
                         ProfileManager& _pl,
                         MaterialManager& _ml,
@@ -370,8 +369,6 @@ SceneGraph::SceneGraph( CommandQueue& cq,
                         LightManager& _ll ) : vl( _vl ), tl( _tl ), pl( _pl ), ml( _ml ), cl( _cl ), fm( _fm ),
                                               cm( _cm ), gm( _gm ), um( _um ), ll( _ll ) {
 
-    hcs = std::make_shared<CommandScriptSceneGraph>( *this );
-    cq.registerCommandScript( hcs );
     mapGeomType( 0, "none" );
     mapGeomType( 1, "generic" );
 }
@@ -422,18 +419,6 @@ bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
     }
 
     return ret;
-}
-
-CommandScriptSceneGraph::CommandScriptSceneGraph( SceneGraph& _hm ) {
-    addCommandDefinition( "change material",
-                          std::bind( &SceneGraph::cmdChangeMaterialTag, &_hm, std::placeholders::_1 ));
-    addCommandDefinition( "paint", std::bind( &SceneGraph::cmdChangeMaterialColorTag, &_hm, std::placeholders::_1 ));
-    addCommandDefinition( "add", std::bind( &SceneGraph::cmdCreateGeometry, &_hm, std::placeholders::_1 ));
-    addCommandDefinition( "remove", std::bind( &SceneGraph::cmdRemoveGeometry, &_hm, std::placeholders::_1 ));
-    addCommandDefinition( "load object", std::bind( &SceneGraph::cmdLoadObject, &_hm, std::placeholders::_1 ));
-    addCommandDefinition( "lightmaps", std::bind( &SceneGraph::cmdCalcLightmaps, &_hm, std::placeholders::_1 ));
-    addCommandDefinition( "change time", std::bind( &SceneGraph::cmdChangeTime, &_hm, std::placeholders::_1 ));
-    addCommandDefinition( "reload shaders", std::bind( &SceneGraph::cmdReloadShaders, &_hm, std::placeholders::_1 ));
 }
 
 void SceneGraph::init() {

@@ -13,7 +13,6 @@
 
 #include <core/http/webclient.h>
 #include <core/uuid.hpp>
-#include <core/command.hpp>
 #include <core/geom.hpp>
 #include <core/resources/material.h>
 #include <core/recursive_transformation.hpp>
@@ -77,19 +76,13 @@ namespace HOD { // HighOrderDependency
 
 }
 
-class CommandScriptSceneGraph : public CommandScript {
-public:
-    explicit CommandScriptSceneGraph( SceneGraph& hm );
-    virtual ~CommandScriptSceneGraph() = default;
-};
-
 using GenericSceneCallbackValueMap = std::tuple<std::string, SerializableContainer, std::string>;
 using GenericSceneCallback = std::unordered_map<std::string, GenericSceneCallbackValueMap>;
 using EventSceneCallback = std::unordered_map<std::string, SocketCallbackDataType>;
 
 class SceneGraph : public NodeGraph {
 public:
-    explicit SceneGraph( CommandQueue& cq,
+    explicit SceneGraph(
                          VDataManager& _vl,
                          ImageManager& _tl,
                          ProfileManager& _pm,
@@ -474,7 +467,6 @@ protected:
     UIManager& um;
     LightManager& ll;
 
-    std::shared_ptr<CommandScriptSceneGraph> hcs;
     MaterialMap materialRemap;
     std::vector<SceneDependencyResolver> dependencyResovlers;
 };
