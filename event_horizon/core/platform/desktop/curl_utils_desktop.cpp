@@ -2,6 +2,8 @@
 // Created by Dado on 01/05/2018.
 //
 
+#ifdef _CURL_ENABLED_
+
 #include "../../http/curl_utils.h"
 #include <cstring>
 #include <curlpp/cURLpp.hpp>
@@ -97,3 +99,5 @@ namespace CurlUtil {
         return m_pBuffer;
     }
 }
+
+#endif

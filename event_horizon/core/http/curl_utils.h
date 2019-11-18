@@ -6,6 +6,8 @@
 
 #include <string>
 
+#ifdef _CURL_ENABLED_
+
 namespace CurlUtil {
 
     std::string read( const std::string& url );
@@ -13,5 +15,5 @@ namespace CurlUtil {
 
 };
 
-
+#endif
 
