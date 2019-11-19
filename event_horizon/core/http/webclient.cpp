@@ -10,7 +10,6 @@
 #include "core/string_util.h"
 #include "core/file_manager.h"
 
-static bool sUseLocalhost = false;
 static bool sUserLoggedIn = false;
 static std::string sProject;
 static std::string sUserToken;
@@ -287,14 +286,6 @@ namespace Http {
             return ret;
         }
         return LoginFields{}; // this is guest / guest
-    }
-
-    void useLocalHost( const bool _flag ) {
-        sUseLocalhost = _flag;
-    }
-
-    bool isLocalHost() {
-        return sUseLocalhost;
     }
 
     void userLoggedIn( const bool _flag ) {

@@ -30,8 +30,6 @@
 
 namespace di = boost::di;
 
-//#define __USE_OFFLINE__
-
 class CLIParamMap {
 public:
     CLIParamMap( int argc, char *argv[] ) {
