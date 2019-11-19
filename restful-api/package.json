@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "start-docker": "rm -rf node_modules/sharp && npm install && nodemon ./bin/www",
+    "start-docker": "rm -rf node_modules/sharp && npm install sharp && nodemon ./bin/www",
     "devstart": "NODE_ENV=\"dev\" nodemon ./bin/www",
     "startw": "set \"PORT=3000\" && set \"NODE_ENV=dev\" && node ./bin/www",
     "devstartw": "set \"PORT=3000\" && set \"NODE_ENV=dev\" && forever --minUptime 1000 --spinSleepTime 10000 -w ./bin/www",
@@ -36,6 +36,7 @@
     "query-string": "^6.2.0",
     "serve-favicon": "~2.4.2",
     "sha256": "^0.2.0",
+    "sharp": "^0.23.3",
     "stripe": "^7.5.0",
     "tar": "^4.4.8",
     "tar-stream": "^2.0.1",
