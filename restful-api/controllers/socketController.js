@@ -87,13 +87,11 @@ const onSocketClientMessage = async (client, message) => {
   }
 };
 
-exports.createSocketServer = server => {
-  this.wsServer = new webSocket.Server({
-    server
-  });
-
+exports.createSocketServer = port => {
+  this.wsServer = new webSocket.Server({ port: port });
   this.wsServer.on("connection", onSocketServerConnection);
   this.sendPingHandler = setInterval(onSocketServerSendPing, 30000);
+  console.log("Starting WSS on Port: ", port);
 };
 
 exports.sendMessageToAllClients = message => {

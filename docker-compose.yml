@@ -1,0 +1,25 @@
+version: "3"
+services:
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+  restful-api:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./restful-api
+    volumes:
+      - /app/node_modules
+      - ./restful-api:/app
+  sat:
+    depends_on:
+      - restful-api
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./daemons/substance_daemon/docker
+    volumes:
+      - ./daemons/substance_daemon/docker:/app
