@@ -48,18 +48,8 @@ void Url::fromString( const std::string& _fullurl ) {
 
     std::smatch base_match = parseUrl( _fullurl );
     if ( base_match.size() == 5 ) {
-        protocol = base_match[1].str();
+        auto protocol = base_match[1].str();
         host = base_match[2].str();
-        if ( !base_match[3].str().empty() ) {
-            std::string strPort = base_match[3].str();
-            strPort = string_trim_after( strPort, ":" );
-            try {
-                port = std::stoi( strPort );
-            } catch ( const std::exception& ex ) {
-                LOGR( "[URL-FROMSTRING][ERROR] on %s, port: %s", _fullurl.c_str(), strPort.c_str() );
-                LOGR( "execption %s %s", typeid( ex ).name(), ex.what());
-            }
-        }
         uri = "/" + base_match[4].str();
     }
 }
@@ -74,11 +64,7 @@ std::string Url::hostOnly() const {
     return ret;
 }
 
-std::string Url::toString( const Http::UsePort _up ) const {
-    if ( _up == Http::UsePort::True || sUseLocalhost ) {
-        short lPort = (Http::CLOUD_PROTOCOL() == Url::HttpsProtocol) ? Http::CLOUD_PORT_SSL() : Http::CLOUD_PORT();
-        return Http::CLOUD_PROTOCOL() + "://" + host + ":" + std::to_string( lPort ) + uri;
-    }
+std::string Url::toString() const {
     return Http::CLOUD_PROTOCOL() + "://" + host + uri;
 }
 
@@ -329,34 +315,24 @@ namespace Http {
         return sUserSessionId;
     }
 
-    const std::string CLOUD_PROTOCOL() {
+    std::string CLOUD_PROTOCOL() {
         return Url::HttpsProtocol;
-        // We do NOT allow anything that's not HTTPS, sorry folks!!
-//        if ( sUseLocalhost ) {
-//            return Url::HttpsProtocol;
-//        } else{
-//            return Url::HttpsProtocol;
-//        }
     }
 
-    const std::string CLOUD_SERVER() {
-        if ( sUseLocalhost ) {
-            return "localhost";
-        } else {
-            return Config::HOSTNAME;
-        }
+    std::string CLOUD_API() {
+        return "/api";
     }
 
-    short CLOUD_PORT() {
-        return 80;
+    std::string CLOUD_WSS() {
+        return "/wss";
     }
 
-    short CLOUD_PORT_SSL() {
-        if ( sUseLocalhost ) {
-            return 3000;
-        } else {
-            return 443;
-        }
+    std::string CLOUD_SERVER() {
+        return "localhost" + CLOUD_API();
+    }
+
+    std::string CLOUD_WSS_SERVER() {
+        return "localhost" + CLOUD_WSS();
     }
 
     void xProjectHeader( const LoginFields& _lf ) {

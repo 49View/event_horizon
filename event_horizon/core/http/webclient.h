@@ -113,11 +113,6 @@ public:
 
 namespace Http {
 
-    enum UsePort {
-        False = 0,
-        True = 1
-    };
-
     enum ResponseFlags {
         None = 0,
         HeaderOnly = 1,
@@ -245,8 +240,11 @@ namespace Http {
     std::string_view sessionId();
     const std::string userBearerToken();
 
-    const std::string CLOUD_PROTOCOL();
-    const std::string CLOUD_SERVER();
+    std::string CLOUD_PROTOCOL();
+    std::string CLOUD_SERVER();
+    std::string CLOUD_API();
+    std::string CLOUD_WSS();
+    std::string CLOUD_WSS_SERVER();
     short CLOUD_PORT();
     short CLOUD_PORT_SSL();
 };
@@ -260,15 +258,8 @@ struct Url {
     Url() = default;
     explicit Url( std::string _uri );
 
-    Url( std::string _host, short _port, std::string _uri ) {
-        host = _host;
-        port = _port;
-        uri = _uri;
-    }
-
-    static std::string Host( const std::string& protocol, const std::string& host, const int portNumber,
-                             const Http::UsePort _up = Http::UsePort::False ) {
-        if ( _up == Http::UsePort::True ) {
+    static std::string Host( const std::string& protocol, const std::string& host, const int portNumber = 0 ) {
+        if ( portNumber != 0 ) {
             return protocol + "://" + host + ":" + std::to_string(portNumber);
         }
         return protocol + "://" + host;
@@ -278,12 +269,10 @@ struct Url {
         return "/" + _service + "/" + _path;
     }
 
-    std::string protocol = Http::CLOUD_PROTOCOL();
     std::string host = Http::CLOUD_SERVER();
-    short port = Http::CLOUD_PORT_SSL();
     std::string uri = "/";
 
-    std::string toString( const Http::UsePort _up = Http::UsePort::False ) const;
+    std::string toString() const;
 
     static std::smatch parseUrl( const std::string& _fullurl );
     static bool parsedMatchIsUrl( const std::smatch& base_match );

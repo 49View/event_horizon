@@ -144,7 +144,7 @@ void elaborateGeom( const std::string& _filename, const std::string& project, co
 
 int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
-    LOGRS("Daemon version 2.0.2");
+    LOGRS("Daemon version 2.5.0");
 
     Http::initDaemon();
 
