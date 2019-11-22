@@ -36,7 +36,7 @@
     "websocket": "^1.0.29"
   },
   "scripts": {
-    "start": "HTTPS=true PORT=5000 react-scripts start",
+    "start": "react-scripts start",
     "startw": "set \"PORT=5000\" && set \"HTTPS=true\" && set \"REACT_APP_USE_API=production\" && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

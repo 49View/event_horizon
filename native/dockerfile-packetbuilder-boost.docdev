@@ -1,0 +1,13 @@
+FROM alpine
+ARG P1
+ARG P2
+ARG P3
+ARG LIBNAME="boost"
+
+WORKDIR /builder/$LIBNAME
+RUN wget https://dl.bintray.com/boostorg/release/$P1.$P2.$P3/source/boost_"$P1"_"$P2"_"$P3".tar.bz2
+RUN tar --bzip2 -xf "$LIBNAME"_"$P1"_"$P2"_"$P3".tar.bz2
+WORKDIR /build/boost/include/boost
+RUN cp -r /builder/$LIBNAME/"$LIBNAME"_"$P1"_"$P2"_"$P3"/$LIBNAME/. .
+WORKDIR /build/boost
+

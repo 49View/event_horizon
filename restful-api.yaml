@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rest-api
+  labels:
+    component: rest-api
+spec:
+  containers:
+    - name: rest-api
+      image: configurations_restful-api
+      ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-port-port
+spec:
+  type: NodePort
+  ports:
+    - port: 3050
+      targetPort: 3000
+      nodePort: 30001
+  selector:
+    component: rest-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: rest-api
+  template:
+    metadata:
+      labels:
+        component: rest-api
+    spec:
+      containers:
+        - name: rest-api-deployment
+          image: configurations_restful-api
+          ports:
+            - containerPort: 3000

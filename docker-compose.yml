@@ -15,11 +15,16 @@ services:
     volumes:
       - /app/node_modules
       - ./restful-api:/app
-  sat:
-    depends_on:
-      - restful-api
+  portal:
     build:
       dockerfile: Dockerfile.dev
-      context: ./daemons/substance_daemon/docker
+      context: ./portal
     volumes:
-      - ./daemons/substance_daemon/docker:/app
+      - /app/node_modules
+      - ./portal:/app
+  sat:
+    build:
+      dockerfile: dockerfile-assetdaemon.docdev
+      context: ./native
+    volumes:
+      - ./native:/app

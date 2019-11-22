@@ -1,0 +1,21 @@
+apiVersion: skaffold/v1
+kind: Config
+metadata:
+  name: configurations
+build:
+  local:
+    push: false
+  artifacts:
+    - image: restful-api
+      context: restful-api
+      docker:
+        dockerfile: Dockerfile.dev
+      sync:
+        infer:
+          - "**/*.js"
+          - "**/*.css"
+          - "**/*.html"
+deploy:
+  kubectl:
+    manifests:
+      - restful-api.yaml

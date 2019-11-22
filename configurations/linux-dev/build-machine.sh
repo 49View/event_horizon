@@ -25,7 +25,7 @@ fi
 
 ./gitbuild.sh curlpp v0.8.4 ziocleto
 ./gitbuild.sh socket.io-client-cpp 1.6.1.2 ziocleto 
-./gitbuild.sh restbed 4.6.1 ziocleto "-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib"
+./gitbuild.sh restbed 4.6.5 ziocleto "-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib"
 
 # opencv 
 ./gitbuild.sh opencv 3.4.1 opencv "-DBUILD_SHARED_LIBS=FALSE -DBUILD_TESTS=FALSE -DBUILD_OPENEXR=TRUE -DBUILD_WEBP=TRUE -DHAVE_DSHOW=FALSE -DBUILD_JAVA=FALSE -DBUILD_opencv_java=FALSE -DBUILDopencv_java_bindings_generator=FALSE" 

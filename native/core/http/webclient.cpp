@@ -1,0 +1,393 @@
+#include "webclient.h"
+
+#include <iomanip>
+#include <unordered_set>
+
+#include "../util.h"
+#include "../platform_util.h"
+#include "core/zlib_util.h"
+#include "core/string_util.h"
+#include "core/file_manager.h"
+
+static bool sUserLoggedIn = false;
+static std::string sProject;
+static std::string sUserToken;
+static std::string sUserSessionId;
+static LoginFields sCachedLoginFields;
+
+const std::string Url::WsProtocol = "ws";
+const std::string Url::WssProtocol = "wss";
+const std::string Url::HttpProtocol = "http";
+const std::string Url::HttpsProtocol = "https";
+
+namespace zlibUtil {
+    // Decompress
+    SerializableContainer inflateFromMemory( const Http::Result& _fin ) {
+        return inflateFromMemory( uint8_p{std::move(_fin.buffer), _fin.length} );
+    }
+}
+
+Url::Url( std::string _uri ) : uri( _uri ) {
+}
+
+std::smatch Url::parseUrl( const std::string& _fullurl ) {
+    std::regex regv = std::regex( "(https?):\\/{2}(\\w.*?)(:?\\d*)\\/(.*)" );
+    std::smatch base_match;
+    std::regex_search( _fullurl, base_match, regv );
+
+    return base_match;
+}
+
+bool Url::parsedMatchIsUrl( const std::smatch& base_match ) {
+    return ( base_match.size() == 5 );
+}
+
+void Url::fromString( const std::string& _fullurl ) {
+
+    std::smatch base_match = parseUrl( _fullurl );
+    if ( base_match.size() == 5 ) {
+        auto protocol = base_match[1].str();
+        host = base_match[2].str();
+        uri = "/" + base_match[4].str();
+    }
+}
+
+std::string Url::hostOnly() const {
+    auto ret = host;
+    auto p = ret.find_first_of("/");
+    if ( p != std::string::npos ) {
+       ret = { ret.begin(), ret.begin()+p };
+    }
+
+    return ret;
+}
+
+std::string Url::toString() const {
+    return Http::CLOUD_PROTOCOL() + "://" + host + uri;
+}
+
+Url Url::privateAPI( const std::string& _params ) {
+    auto luri = _params.at(0) == '/' ? _params : "/" + _params;
+    return Url{ "/" + Http::project() + luri };
+}
+
+std::string Url::entityURLParams( const std::string& _key, const std::string& _name ) {
+    return url_encode_spacesonly( ( _name.empty() ? _key : ( _key + "/"+_name) ) );
+}
+
+Url Url::entityMetadata( const std::string& _key, const std::string& _name ) {
+    return Url( HttpFilePrefix::entities_all + entityURLParams( _key, _name) );
+}
+
+Url Url::entityContent( const std::string& _key, const std::string& _name ) {
+    return Url( HttpFilePrefix::entities_onebinary + entityURLParams( _key, _name) );
+}
+
+std::string url_encode( const std::string& value ) {
+    std::ostringstream escaped;
+    escaped.fill( '0' );
+    escaped << std::hex;
+
+    for ( std::string::const_iterator i = value.begin(), n = value.end(); i != n; ++i ) {
+        std::string::value_type c = ( *i );
+
+        // Keep alphanumeric and other accepted characters intact
+        if ( isalnumCC( c ) || c == '-' || c == '_' || c == '.' || c == '~' ) {
+            escaped << c;
+            continue;
+        }
+
+        // Any other characters are percent-encoded
+        escaped << std::uppercase;
+        escaped << '%' << std::setw( 2 ) << int((unsigned char) c );
+        escaped << std::nouppercase;
+    }
+
+    return escaped.str();
+}
+
+std::string url_encode_spacesonly( const std::string& value ) {
+    std::ostringstream escaped;
+    escaped.fill( '0' );
+    escaped << std::hex;
+
+    for ( std::string::const_iterator i = value.begin(), n = value.end(); i != n; ++i ) {
+        std::string::value_type c = ( *i );
+
+        // Keep alphanumeric and other accepted characters intact
+        if ( isalnumCC( c ) || c == '-' || c == '_' || c == '.' || c == ',' || c == '~' || c == '/' ) {
+            escaped << c;
+            continue;
+        }
+
+        if ( c == ' ' ) {
+            // Any other characters are percent-encoded
+            escaped << std::uppercase;
+            escaped << '%' << std::setw( 2 ) << int((unsigned char) c );
+            escaped << std::nouppercase;
+        }
+    }
+
+    return escaped.str();
+}
+
+
+std::string url_decode(const std::string& str) {
+    std::string ret;
+    char ch;
+    int i, ii, len = str.length();
+
+    for (i=0; i < len; i++){
+        if(str[i] != '%'){
+            if(str[i] == '+')
+                ret += ' ';
+            else
+                ret += str[i];
+        }else{
+            sscanf(str.substr(i + 1, 2).c_str(), "%x", &ii);
+            ch = static_cast<char>(ii);
+            ret += ch;
+            i = i + 2;
+        }
+    }
+    return ret;
+}
+
+bool isSuccessStatusCode( int statusCode ) {
+    return statusCode >= 200 && ( statusCode - 200 ) < 100;
+} //all 200s
+
+namespace Http {
+
+    static std::unordered_set<std::string> requestCache;
+
+    void clearRequestCache() {
+        requestCache.clear();
+    }
+
+    Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf ) {
+        Result lRes{};
+        if ( FM::useFileSystemCachePolicy() && !checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache)) {
+            lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
+            if ( checkBitWiseFlag( rf, ResponseFlags::JSON | ResponseFlags::Text ) ) {
+                lRes.bufferString = FM::readLocalTextFile( cacheFolder() + fileHash );
+            }
+            if ( lRes.length || !lRes.bufferString.empty() ) {
+                lRes.uri = url.uri;
+                lRes.statusCode = 200;
+                lRes.ETag = cacheFolder() + fileHash + std::to_string(lRes.length);
+            }
+        }
+        return lRes;
+    }
+
+    void get( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+              ResponseCallbackFunc callbackFailed, ResponseFlags rf, HttpResouceCB mainThreadCallback ) {
+        bool bPerformLoad = false;
+
+        if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) ) {
+            bPerformLoad = true;
+        } else {
+            auto cacheKey = url.toString() + std::to_string( static_cast<int>(rf) );
+            if ( const auto& cc = requestCache.find( cacheKey ); cc == requestCache.end() ) {
+                requestCache.insert( cacheKey );
+                bPerformLoad = true;
+            }
+            if (!bPerformLoad) {
+                if ( callback && FM::useFileSystemCachePolicy() ) {
+                    std::string fileHash = url_encode( url.uri + _data );
+                    auto lRes = tryFileInCache( fileHash, url, rf );
+                    lRes.ccf = mainThreadCallback;
+                    callback( lRes );
+                }
+            }
+        }
+        if ( bPerformLoad ) {
+            LOGR("[HTTP-GET] %s", url.toString().c_str() );
+            getInternal( url, _data, callback, callbackFailed, rf, mainThreadCallback );
+        }
+    }
+
+    void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
+              HttpResouceCB mainThreadCallback ) {
+        get( url, "", std::move(callback), std::move(callbackFailed), rf, std::move(mainThreadCallback));
+    }
+
+    void post( const Url& url, const std::string& _data,
+               ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
+               HttpResouceCB mainThreadCallback ) {
+        postInternal( url, _data.data(), _data.size(), HttpQuery::JSON, callback, callbackFailed, mainThreadCallback );
+    }
+
+    void post( const Url& url, const uint8_p& buffer,
+               ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
+               HttpResouceCB mainThreadCallback ) {
+        postInternal( url, reinterpret_cast<const char*>(buffer.first.get()), buffer.second, HttpQuery::Binary,
+                      callback, callbackFailed, mainThreadCallback );
+    }
+
+    void post( const Url& url, const char *buff, uint64_t length,
+               ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
+               HttpResouceCB mainThreadCallback) {
+        postInternal( url, buff, length, HttpQuery::Binary, callback, callbackFailed, mainThreadCallback );
+    }
+
+    void post( const Url& url, const std::vector<unsigned  char>& buffer,
+               ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
+               HttpResouceCB mainThreadCallback ) {
+        postInternal( url, reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary,
+                      callback, callbackFailed, mainThreadCallback );
+    }
+
+    void post( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
+               HttpResouceCB mainThreadCallback ) {
+        postInternal( url, nullptr, 0, HttpQuery::Binary, callback, callbackFailed, mainThreadCallback );
+    }
+
+    void project( const std::string& _project ) {
+        sProject = _project;
+    }
+
+    std::string project() {
+        return sProject;
+    }
+
+    void cacheLoginFields( const LoginFields& _lf ) {
+        sCachedLoginFields = _lf;
+        if ( !_lf.isDaemon() ) {
+            FM::writeLocalTextFile( cacheFolder() + "lf", _lf.serialize() );
+        }
+    }
+
+    LoginFields cachedLoginFields() {
+        return sCachedLoginFields;
+    }
+
+    LoginFields gatherCachedLogin() {
+        auto lf = FM::readLocalTextFile( cacheFolder() + "lf" );
+        if ( !lf.empty() ) {
+            LoginFields ret{lf};
+            cacheLoginFields( ret );
+            return ret;
+        }
+        return LoginFields{}; // this is guest / guest
+    }
+
+    void userLoggedIn( const bool _flag ) {
+        sUserLoggedIn = _flag;
+    }
+
+    bool hasUserLoggedIn() {
+        return sUserLoggedIn;
+    }
+
+    void userToken( std::string_view _token ) {
+        sUserToken = _token;
+    }
+
+    std::string_view userToken() {
+        return sUserToken;
+    }
+
+    const std::string userBearerToken() {
+#ifdef __EMSCRIPTEN__
+        return std::string{"Bearer+"} + std::string{Http::userToken()};
+#else
+        return std::string{"Bearer "} + std::string{Http::userToken()};
+#endif
+    }
+
+    void sessionId( std::string_view _sid ) {
+        sUserSessionId = _sid;
+    }
+
+    std::string_view sessionId() {
+        return sUserSessionId;
+    }
+
+    std::string CLOUD_PROTOCOL() {
+        return Url::HttpsProtocol;
+    }
+
+    std::string CLOUD_API() {
+        return "/api";
+    }
+
+    std::string CLOUD_WSS() {
+        return "/wss";
+    }
+
+    std::string CLOUD_SERVER() {
+        return "localhost" + CLOUD_API();
+    }
+
+    std::string CLOUD_WSS_SERVER() {
+        return "localhost" + CLOUD_WSS();
+    }
+
+    void xProjectHeader( const LoginFields& _lf ) {
+        Http::project( _lf.project );
+//        Http::cacheLoginFields( _lf );
+    }
+
+    void initBase() {
+        FM::initPersistent();
+    }
+    void init() {
+        initBase();
+        Http::login();
+    }
+
+    void init( const LoginFields& lf ) {
+        initBase();
+        Http::login( lf );
+    }
+
+    void initDaemon() {
+        initBase();
+        Http::login(LoginFields::Daemon());
+    }
+
+    void login() {
+        loginSession();
+    }
+
+    void refreshToken() {
+        post( Url{HttpFilePrefix::refreshtoken}, [](HttpResponeParams res) {
+            RefreshToken rt( std::string{ (char *) res.buffer.get(), static_cast<unsigned long>(res.length) } );
+            userToken( rt.token );
+            sessionId( rt.session );
+        } );
+    }
+
+    void loginSession() {
+        get( Url{HttpFilePrefix::user}, [](HttpResponeParams res) {
+                UserLogin ul{ std::string{ (char *) res.buffer.get(), static_cast<unsigned long>(res.length) } };
+                sessionId( ul.session );
+                project( ul.project );
+                Socket::createConnection();
+                userLoggedIn( true );
+            }, [](HttpResponeParams res) {
+                LOGRS( "[HTTP-RETRY] login ");
+                login ( Http::gatherCachedLogin() );
+            }
+        );
+    }
+
+    void login( const LoginFields& lf, const LoginCallback& loginCallback ) {
+        post( Url{HttpFilePrefix::gettoken}, lf.serialize(), [lf, loginCallback](HttpResponeParams res) {
+                LoginToken lt(std::string{ (char *) res.buffer.get(), static_cast<unsigned long>(res.length) });
+                userToken( lt.token );
+                sessionId( lt.session );
+                project( lt.project );
+                Http::cacheLoginFields( lf );
+                Socket::createConnection();
+                userLoggedIn( true );
+                if (loginCallback) loginCallback();
+        } );
+    }
+
+    void shutDown() {
+        Socket::close();
+    }
+}

@@ -1,0 +1,19 @@
+FROM gcc:latest
+WORKDIR /app
+RUN apt-get update && apt-get install -y cmake libssl-dev libgl1-mesa-glx
+
+COPY --from=sixthview/restbed-package       /build/restbed/.            /usr/local/
+COPY --from=sixthview/rapidjson-package     /build/rapidjson/.          /usr/local/
+COPY --from=sixthview/stb-package           /build/stb/.                /usr/local/
+COPY --from=sixthview/boost-package         /build/boost/.              /usr/local/
+COPY --from=sixthview/websocketpp-package   /build/websocketpp/.        /usr/local/
+
+COPY . .
+
+RUN cd tools/asset_daemon && cmake -DBUILD_FROM_SOURCE=TRUE . && make -j8
+RUN cd tools/asset_daemon && make install
+RUN cd tools/asset_daemon && make clean
+RUN rm -rf /app
+
+ENTRYPOINT asset_daemon
+/app/tools/asset_daemon/app/tools/asset_daemon

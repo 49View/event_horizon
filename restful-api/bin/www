@@ -3,7 +3,7 @@
 var app = require("../app");
 const socketController = require("../controllers/socketController");
 
-var port = 3000;
+var port = 5000;
 var wssport = 3500;
 app.listen(port, err => {
   if (err) {
