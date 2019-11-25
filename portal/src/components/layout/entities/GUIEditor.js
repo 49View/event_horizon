@@ -49,6 +49,7 @@ const GUIEditor = () => {
   const saveEntityData = async fileC => {
     try {
       const jc = JSON.parse(fileC);
+      const res = await axios.put("/api/entities/" + currentEntity.entity._id, jc, {
         headers: {
           "Content-Type": "application/json"
         }

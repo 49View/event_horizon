@@ -410,7 +410,6 @@ export const addEntity = (fileName, fileData, group) => async dispatch => {
             const fileext = fileName.split(".").pop();
             if (group === GroupMaterial && fileext === "zip") {
                 const fname = getFileNameOnlyNoExt(fileName);
-                await axios.post(
                 await axios.post("/api/entities/multizip/" + fname + "/" + group,
                     fileData,
                     octet
