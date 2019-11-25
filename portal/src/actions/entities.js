@@ -32,7 +32,7 @@ export const getEntitiesOfGroup = (group, project) => async dispatch => {
 
         let res = null;
         let dtype = GET_ENTITIES;
-        res = await axios.get(`/entities/metadata/list/${group}/${project}`);
+        res = await axios.get(`/api/entities/metadata/list/${group}/${project}`);
         dispatch({
             type: dtype,
             payload: {data: res.data, group: group}
@@ -86,7 +86,7 @@ export const replaceMaterial = entity => async dispatch => {
             destRemap: matId
         };
 
-        await axios.put(`/entities/remaps`, body, {
+        await axios.put(`/api/entities/remaps`, body, {
             headers: {
                 "Content-Type": "application/json"
             }
@@ -138,7 +138,7 @@ export const updateTextureParameterOnMaterial = (entity, props) => async dispatc
         //   destRemap: matId
         // };
         //
-        // await axios.put(`/entities/remaps`, body, {
+        // await axios.put(`/api/entities/remaps`, body, {
         //   headers: {
         //     "Content-Type": "application/json"
         //   }
@@ -159,7 +159,7 @@ export const getMetadataListOf = (group, project) => async dispatch => {
             payload: null
         });
 
-        const res = await axios.get(`/entities/metadata/list/${group}`);
+        const res = await axios.get(`/api/entities/metadata/list/${group}`);
 
         dispatch({
             type: GET_METADATA_LIST,
@@ -242,7 +242,7 @@ export const addEntityToAppData = entitySource => async dispatch => {
         const state = store.getState();
         const appKey = state.entities.currentEntity.entity.mKey;
         const appDataJson = await axios.put(
-            `/appdata/${appKey}/${entitySource.group}/${entitySource.metadata.name}`
+            `/api/appdata/${appKey}/${entitySource.group}/${entitySource.metadata.name}`
         );
         dispatch({type: CLOSE_ENTITIES_MODAL, payload: false});
 
@@ -288,14 +288,14 @@ export const getFullEntity = entitySource => async dispatch => {
         for (const depElem of entitySource.metadata.deps) {
             // eslint-disable-next-line
             for (const depValue of depElem.value) {
-                const res = await axios.get(`/entities/content/byHash/${depValue}`, {
+                const res = await axios.get(`/api/entities/content/byHash/${depValue}`, {
                     responseType: "arraybuffer"
                 });
                 deps[depValue] = URL.createObjectURL(new Blob([res.data]));
             }
         }
 
-        fullData = await axios.get(`/entities/content/byId/${entitySource._id}`, {
+        fullData = await axios.get(`/api/entities/content/byId/${entitySource._id}`, {
             responseType: responseTypeValue
         });
 
@@ -335,7 +335,7 @@ export const addTagsToEntity = (id, tags) => async dispatch => {
             tags: tags
         };
 
-        await axios.put(`/entities/metadata/addtags/${id}`, bodyTags, config);
+        await axios.put(`/api/entities/metadata/addtags/${id}`, bodyTags, config);
 
         dispatch({
             type: REPLACE_ENTITY_TAGS,
@@ -371,7 +371,7 @@ export const deleteEntity = id => async dispatch => {
 
 const postEntityMaker = (fileName, project, group, uname, uemail) => {
     return (
-        "entities/" +
+        "/api/entities/" +
         fileName +
         "/" +
         encodeURIComponent(project) +
@@ -411,7 +411,7 @@ export const addEntity = (fileName, fileData, group) => async dispatch => {
             if (group === GroupMaterial && fileext === "zip") {
                 const fname = getFileNameOnlyNoExt(fileName);
                 await axios.post(
-                    "/entities/multizip/" + fname + "/" + group,
+                await axios.post("/api/entities/multizip/" + fname + "/" + group,
                     fileData,
                     octet
                 );
@@ -420,8 +420,7 @@ export const addEntity = (fileName, fileData, group) => async dispatch => {
                     "elaborate/" + group + "/" + fileName
                 );
                 console.log("Url encoded resource: ", urlEnc);
-                res = await axios.post(
-                    "fs/entity_to_elaborate/" + group + "/" + urlEnc,
+                res = await axios.post("/api/fs/entity_to_elaborate/" + group + "/" + urlEnc,
                     fileData,
                     octet
                 );
@@ -433,8 +432,7 @@ export const addEntity = (fileName, fileData, group) => async dispatch => {
                 octet
             );
 
-            const fullres = await axios.get(
-                `/entities/content/byId/${res.data._id}`,
+            const fullres = await axios.get(`/api/entities/content/byId/${res.data._id}`,
                 {
                     responseType: "arraybuffer"
                 }

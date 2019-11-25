@@ -4,7 +4,7 @@ import Landing from "./components/layout/Landing";
 import Navbar from "./components/layout/Navbar";
 import Routes from "./components/routing/Routes";
 
-import { initHostEnv, getApiHostName } from "./HostEnv";
+import { initHostEnv } from "./HostEnv";
 
 import { DBConfig } from "./DBConfig";
 import { initDB } from "react-indexed-db";
@@ -23,7 +23,7 @@ initDB(DBConfig);
 
 const App = () => {
 
-  let wasmArgumentList = ["hostname="+getApiHostName()];
+  let wasmArgumentList = [];
 
   useEffect(() => {
     store.dispatch(loadUser());

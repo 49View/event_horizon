@@ -16,4 +16,3 @@ RUN cd tools/asset_daemon && make clean
 RUN rm -rf /app
 
 ENTRYPOINT asset_daemon
-/app/tools/asset_daemon/app/tools/asset_daemon

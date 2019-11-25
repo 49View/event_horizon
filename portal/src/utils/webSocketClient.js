@@ -58,17 +58,7 @@ export const requestAsset = currentEntity => {
 };
 
 export const wscConnect = session => {
-  let webSocketServerAddress = "wss://api.ateventhorizon.com";
-  if (
-    process.env.NODE_ENV &&
-    process.env.NODE_ENV === "development" &&
-    (!process.env.REACT_APP_USE_API ||
-      process.env.REACT_APP_USE_API !== "production")
-  ) {
-    // dev code
-    webSocketServerAddress = "wss://localhost:3000";
-  }
-  webSocketServerAddress += "/?s=" + session;
+  let webSocketServerAddress = "wss://localhost/wss/?s=" + session;
 
   webSocketClient = new W3CWebSocket(webSocketServerAddress);
   webSocketClient.onopen = () => {

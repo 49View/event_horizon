@@ -18,7 +18,7 @@ export const loadUser = () => async dispatch => {
   // if (localStorage.token === undefined) return {};
 
   try {
-    const res = await axios.get("/user");
+    const res = await axios.get(`/api/user`);
 
     dispatch({
       type: USER_LOADED,
@@ -42,7 +42,7 @@ export const register = ({ name, email, password }) => async dispatch => {
   const body = JSON.stringify({ name, email, password });
 
   try {
-    const res = await axios.post("/createuser", body, config);
+    const res = await axios.post("/api/createuser", body, config);
 
     dispatch({
       type: REGISTER_SUCCESS,
@@ -73,13 +73,13 @@ export const login = (email, password, project) => async dispatch => {
 
   let body = JSON.stringify({ email, password, project });
   try {
-    let res = await axios.post("/gettoken", body, config);
+    let res = await axios.post("/api/gettoken", body, config);
 
     if (project === null || project.length === 0) {
       // Make sure we re-login with project set, otherwise most of the entity rest api req will fail
       project = res.data.project;
       body = JSON.stringify({ email, password, project });
-      res = await axios.post("/gettoken", body, config);
+      res = await axios.post("/api/gettoken", body, config);
     }
 
     dispatch({
@@ -105,7 +105,7 @@ export const login = (email, password, project) => async dispatch => {
 // Logout / Clear Profile
 export const logout = () => async dispatch => {
   try {
-    await axios.get("/cleanToken");
+    await axios.get(`/api/cleanToken`);
     dispatch({ type: LOGOUT });
   } catch (error) {
     dispatch({
@@ -130,10 +130,10 @@ export const createProject = projectName => async dispatch => {
     };
 
     console.log("Create user Project post ", projectName);
-    await axios.post("user/createProject/" + projectName);
+    await axios.post("/api/user/createProject/" + projectName);
 
     // Make sure we re-login with project set, otherwise most of the entity rest api req will fail
-    const res = await axios.post("/refreshtoken/" + projectName, {}, config);
+    const res = await axios.post("/api/refreshtoken/" + projectName, {}, config);
 
     dispatch({
       type: LOGIN_SUCCESS,
@@ -166,7 +166,7 @@ export const acceptInvitation = (projectName, userEmail) => async dispatch => {
       roles: ["user"]
     };
     await axios.put(
-      "user/addRolesFor/" + projectName,
+      "/api/user/addRolesFor/" + projectName,
       JSON.stringify(body),
       config
     );
@@ -226,7 +226,7 @@ export const declineInvitation = (projectName, userEmail) => async dispatch => {
 export const setCurrentProject = projectName => async dispatch => {
   try {
     // Make sure we re-login with project set, otherwise most of the entity rest api req will fail
-    const res = await axios.post("/refreshtoken/" + projectName);
+    const res = await axios.post("/api/refreshtoken/" + projectName);
 
     dispatch({
       type: LOGIN_SUCCESS,
@@ -261,7 +261,7 @@ export const sendInvitationToProject = (
       persontoadd: personToAdd
     };
 
-    const res = await axios.put("/user/invitetoproject", body, config);
+    const res = await axios.put("/api/user/invitetoproject", body, config);
     console.log(res);
     dispatch(
       setLocalAlert(res.data.msg, res.data.code === 200 ? "success" : "danger")

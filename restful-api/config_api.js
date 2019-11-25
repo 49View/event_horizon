@@ -4,7 +4,7 @@ class GlobalConfig {
 		this.mMongoDBUser = lMongoDBUser;
 		this.mMongoDBPass = lMongoDBPass;
 		this.mMongoDBURI = lMongoDBURI;
-		this.mMongoDBdbName = lMongoDBdbName;			
+		this.mMongoDBdbName = lMongoDBdbName;
 		this.mAWSConfigAccessKeyId = lAWSAccessId;
 		this.mAWSConfigSecretKeyId = lAWSSecretKeyId;
 		this.mJWTSecret = lJWTSecret;
@@ -40,12 +40,24 @@ class GlobalConfig {
 	}
 }
 
+// const gc = new GlobalConfig(
+// 	"eventhorizonfs"
+// 	, "dado"
+// 	, "luckycarrot1803"
+// 	, "sixthviewmdb001-a0hba.mongodb.net"
+// 	, "sixthviewdb"
+// 	, "AKIAJWSLLXTAUPNWMBOA"
+// 	, "9lP99+jK8Ki1XD/MoDv/Ci2/Bo6pzurZjntltd0r"
+// 	, "1sg2&db9(4h23bd?dhs3+1t6-36jh/4fgmm+++xc29hgjq2&www4346sd234sdf23"
+// 	, "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"
+// );
+
 const gc = new GlobalConfig(
 	"eventhorizonfs"
-	, "dado"
-	, "luckycarrot1803"
-	, "sixthviewmdb001-a0hba.mongodb.net"
-	, "sixthviewdb"
+	, ""
+	, ""
+	, "localhost"
+	, "event_horizon"
 	, "AKIAJWSLLXTAUPNWMBOA"
 	, "9lP99+jK8Ki1XD/MoDv/Ci2/Bo6pzurZjntltd0r"
 	, "1sg2&db9(4h23bd?dhs3+1t6-36jh/4fgmm+++xc29hgjq2&www4346sd234sdf23"
