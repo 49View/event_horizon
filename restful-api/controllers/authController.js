@@ -1,7 +1,7 @@
 const passport = require("passport");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
-const ClientCertificateStrategy = require("passport-client-cert").Strategy;
+const CustomStrategy = require("passport-custom").Strategy;
 const RequestStrategy = require("passport-request").Strategy;
 const globalConfig = require("../config_api.js");
 const jsonWebToken = require("jsonwebtoken");
@@ -18,14 +18,14 @@ const jwtOptions = {
 };
 
 exports.InitializeAuthentication = () => {
+
   //
   //Configure client certificate strategy
   //
-  passport.use(
-    new ClientCertificateStrategy(async (clientCert, done) => {
-      // console.log("CLIENT CERTIFICATE STRATEGY");
-
-      const commonName = clientCert.subject.CN;
+  passport.use("ngix-clientcertificate-header", new CustomStrategy(async (req, done) => {
+      // console.log("CUSTOM STRATEGY");
+  
+      // const commonName = clientCert.subject.CN;
       let user = false;
       let error = null;
 
@@ -33,31 +33,38 @@ exports.InitializeAuthentication = () => {
       // console.log('Certificate expires: ', clientCert.valid_to);
       // console.log('Certificate expires: ', Date.parse(clientCert.valid_to)/1000);
 
-      const query = { clientCommonName: commonName };
-
       try {
-        const clientCertificateInfoDB = await clientCertificateModel.findOne(
-          query
-        );
-
-        const clientCertificateInfo = clientCertificateInfoDB.toObject();
-        session = await sessionController.getValidSessionById(
-          clientCertificateInfo.sessionId
-        );
-        if (session !== null) {
-          user = await userController.getUserByIdProject(
-            session.userId,
-            session.project
+        let commonName = null;
+        if (req && req.headers && req.headers["x_auth_eh"]) {
+          commonName = req.headers["x_auth_eh"];
+        } else {
+          error = "Invalid certificate";
+        }
+        if (error===null) {
+          const query = { clientCommonName: commonName };
+          const clientCertificateInfoDB = await clientCertificateModel.findOne(
+            query
           );
-          if (user === null) {
-            error = "User not found!!!!";
-          } else {
-            user.roles = user.roles.map(v => v.toLowerCase());
-            user.project = session.project;
-            user.expires = session.expiresAt;
-            user.sessionId = clientCertificateInfo.sessionId;
-            user.hasSession = true;
-            //console.log("Store user: ", user);
+
+          const clientCertificateInfo = clientCertificateInfoDB.toObject();
+          session = await sessionController.getValidSessionById(
+            clientCertificateInfo.sessionId
+          );
+          if (session !== null) {
+            user = await userController.getUserByIdProject(
+              session.userId,
+              session.project
+            );
+            if (user === null) {
+              error = "User not found!!!!";
+            } else {
+              user.roles = user.roles.map(v => v.toLowerCase());
+              user.project = session.project;
+              user.expires = session.expiresAt;
+              user.sessionId = clientCertificateInfo.sessionId;
+              user.hasSession = true;
+              //console.log("Store user: ", user);
+            }
           }
         }
       } catch (ex) {
@@ -249,7 +256,7 @@ exports.verifyToken = async jwtToken => {
 
 // NDDado: Reintroduce "client-cert" also, when we are ready
 exports.authenticate = passport.authenticate(
-  ["client-cert", "jwt", "request"],
+  ["ngix-clientcertificate-header", "jwt", "request"],
   {
     session: false
   }
