@@ -23,8 +23,8 @@ exports.InitializeAuthentication = () => {
   //Configure client certificate strategy
   //
   passport.use("ngix-clientcertificate-header", new CustomStrategy(async (req, done) => {
-      // console.log("CUSTOM STRATEGY");
-  
+      console.log("CUSTOM STRATEGY");
+
       // const commonName = clientCert.subject.CN;
       let user = false;
       let error = null;
@@ -37,46 +37,53 @@ exports.InitializeAuthentication = () => {
         let commonName = null;
         if (req && req.headers && req.headers["x_auth_eh"]) {
           commonName = req.headers["x_auth_eh"];
+          console.log("Client Cert: ", commonName);
+          done(null, { name: commonName});
         } else {
           error = "Invalid certificate";
+          done(null, false, { message: error });
         }
-        if (error===null) {
-          const query = { clientCommonName: commonName };
-          const clientCertificateInfoDB = await clientCertificateModel.findOne(
-            query
-          );
-
-          const clientCertificateInfo = clientCertificateInfoDB.toObject();
-          session = await sessionController.getValidSessionById(
-            clientCertificateInfo.sessionId
-          );
-          if (session !== null) {
-            user = await userController.getUserByIdProject(
-              session.userId,
-              session.project
-            );
-            if (user === null) {
-              error = "User not found!!!!";
-            } else {
-              user.roles = user.roles.map(v => v.toLowerCase());
-              user.project = session.project;
-              user.expires = session.expiresAt;
-              user.sessionId = clientCertificateInfo.sessionId;
-              user.hasSession = true;
-              //console.log("Store user: ", user);
-            }
-          }
-        }
+        // if (error===null) {
+        //   const query = { clientCommonName: commonName };
+        //   const clientCertificateInfoDB = await clientCertificateModel.findOne(
+        //     query
+        //   );
+        //
+        //   const clientCertificateInfo = clientCertificateInfoDB.toObject();
+        //   console.log("ClientCertInfo ", clientCertificateInfo.sessionId );
+        //   const session = await sessionController.getValidSessionById(
+        //     clientCertificateInfo.sessionId
+        //   );
+        //   console.log("Session: ", session );
+        //   if (session !== null) {
+        //     user = await userController.getUserByIdProject(
+        //       session.userId,
+        //       session.project
+        //     );
+        //     console.log("User session ", user );
+        //     if (user === null) {
+        //       error = "User not found!!!!";
+        //     } else {
+        //       user.roles = user.roles.map(v => v.toLowerCase());
+        //       user.project = session.project;
+        //       user.expires = session.expiresAt;
+        //       user.sessionId = clientCertificateInfo.sessionId;
+        //       user.hasSession = true;
+        //       //console.log("Store user: ", user);
+        //     }
+        //   }
+        // }
       } catch (ex) {
         console.log("Unknown common name", ex);
         error = "Invalid certificate";
+        done(null, false, { message: error });
       }
 
-      if (error !== null) {
-        done(null, false, { message: error });
-      } else {
-        done(null, user);
-      }
+      // if (error !== null) {
+      //   done(null, false, { message: error });
+      // } else {
+      //   done(null, user);
+      // }
     })
   );
 
@@ -118,7 +125,7 @@ exports.InitializeAuthentication = () => {
 
   passport.use(
     new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
-      // console.log("JWT STRATEGY");
+      console.log("JWT STRATEGY");
 
       //console.log("JWT PAYLOAD", jwtPayload);
       let error = null;
@@ -162,7 +169,7 @@ exports.InitializeAuthentication = () => {
 
   passport.use(
     new RequestStrategy(async (req, done) => {
-      // console.log("REQUEST STRATEGY");
+      console.log("REQUEST STRATEGY");
       let user = false;
       let error = null;
       try {

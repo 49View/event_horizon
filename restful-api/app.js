@@ -17,7 +17,7 @@ const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
 const projectController = require("./controllers/projectController");
 const cryptoController = require("./controllers/cryptoController");
-const delay = require('delay');
+const db = require("./db");
 
 const app = express();
 
@@ -27,30 +27,7 @@ console.log("Started");
 
 //Set up default mongoose connection
 
-const initDB = async () => {
-    const dbMaxConnectionTimeSeconds = 300;
-    const dbConnectionRetryInterval = 5;
-    let dbConnectionTimeElaped = 0;
-    const mongoDB = `mongodb://eh:eh_37127@mongo:27017/event_horizon`;
-
-    while (dbConnectionTimeElaped < dbMaxConnectionTimeSeconds) {
-        try {
-            await mongoose.connect(mongoDB, {
-                useNewUrlParser: true,
-                useUnifiedTopology: true
-            });
-            console.log("MongoDB connected");
-            return mongoose.connection;
-        } catch (err) {
-            console.log(err);
-            await delay(dbConnectionRetryInterval*1000);
-            dbConnectionTimeElaped+=dbConnectionRetryInterval;
-        }
-    }
-    return null;
-}
-
-initDB();
+db.initDB();
 
 // cryptoController.generateKey();
 authController.InitializeAuthentication();
@@ -61,6 +38,7 @@ app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
 app.use(cookieParser(globalConfig.mJWTSecret));
 
 app.use(function (req, res, next) {
+    // console.log( req.headers );
     res.header("Access-Control-Allow-Origin", req.headers.origin);
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");

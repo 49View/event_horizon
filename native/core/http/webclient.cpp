@@ -10,6 +10,7 @@
 #include "core/file_manager.h"
 
 static bool sUserLoggedIn = false;
+static bool sUseClientCertificate = false;
 static std::string sProject;
 static std::string sUserToken;
 static std::string sUserSessionId;
@@ -246,6 +247,14 @@ namespace Http {
 
     void project( const std::string& _project ) {
         sProject = _project;
+    }
+
+    void useClientCertificate( bool bUse ) {
+        sUseClientCertificate = bUse;
+    }
+
+    bool useClientCertificate() {
+        return sUseClientCertificate;
     }
 
     std::string project() {

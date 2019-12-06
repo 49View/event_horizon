@@ -5,6 +5,7 @@
 #pragma once
 
 #include <core/math/vector2f.h>
+#include <ostream>
 
 enum PixelFormat {
     PIXEL_FORMAT_UNFORCED = -1,
@@ -300,6 +301,12 @@ struct ImageParams {
         filterMode = _filterMode;
         return *this;
     }
-                                                                      
+
+    friend std::ostream& operator<<( std::ostream& os, const ImageParams& params ) {
+        os << "width: " << params.width << " height: " << params.height << " depth: " << params.depth << " channels: "
+           << params.channels << " bpp: " << params.bpp << " outFormat: " << params.outFormat << " ttm: " << params.ttm
+           << " wrapMode: " << params.wrapMode << " filterMode: ";
+        return os;
+    }
 };
 

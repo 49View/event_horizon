@@ -36,7 +36,7 @@ const getMetadataFromBody = (checkGroup, checkRaw, req) => {
   return metadata;
 };
 
-const createMetadataStartup = (filename, username, useremail) => {
+const createMetadataStartup = (filename, username, useremail, thumb = "") => {
   const tags = metadataAssistant.splitTags(filename);
   return (metadata = {
     creator: {
@@ -44,7 +44,7 @@ const createMetadataStartup = (filename, username, useremail) => {
       email: useremail
     },
     name: filename,
-    thumb: "",
+    thumb: thumb,
     tags: tags,
     deps: []
   });
@@ -123,6 +123,40 @@ const createEntityFromMetadata = async (
 
       return entity;
     }
+  } catch (error) {
+    console.log("Cannot create entity: ", error);
+    return null;
+  }
+};
+
+const createEntityWithFSID = async (
+    fsid,
+    project,
+    group,
+    cleanMetadata,
+) => {
+  try {
+      //Create entity
+      let entity = await createEntity(
+          fsid,
+          project,
+          group,
+          true,
+          false,
+          cleanMetadata
+      );
+
+      // if (entity !== null) {
+      //   let json = {
+      //     msg: "entityAdded",
+      //     data: entity
+      //   };
+      //   if (sendBroadcast) {
+      //     socketController.sendMessageToAllClients(JSON.stringify(json));
+      //   }
+      // }
+
+      return entity;
   } catch (error) {
     console.log("Cannot create entity: ", error);
     return null;
@@ -238,6 +272,7 @@ const checkFileExists = async (project, group, hash) => {
 };
 
 const createEntityModel = (
+  fsid,
   project,
   group,
   isPublic,
@@ -245,30 +280,13 @@ const createEntityModel = (
   metadata
 ) => {
   return new entityModel({
+    fsid: fsid,
     project: project,
     group: group,
     isPublic: isPublic,
     isRestricted: isRestricted,
     metadata: metadata
   });
-};
-
-const createEntity = async (
-  project,
-  group,
-  isPublic,
-  isRestricted,
-  metadata
-) => {
-  const newEntityDB = createEntityModel(
-    project,
-    group,
-    isPublic,
-    isRestricted,
-    metadata
-  );
-  await newEntityDB.save();
-  return newEntityDB.toObject();
 };
 
 const updateEntity = async (entityId, metadata) => {
@@ -885,7 +903,33 @@ module.exports = {
   getFilePath: getFilePath,
   getEntityContent: getEntityContent,
   checkFileExists: checkFileExists,
-  createEntity: createEntity,
+
+  createEntity: async (
+      fsid,
+      filename,
+      project,
+      group,
+      username,
+      useremail
+  ) => {
+    try {
+      console.log( "Ci arriva?" );
+      const newEntityDB = createEntityModel(
+          fsid,
+          project,
+          group,
+          true,
+          false,
+          metadataAssistant.createMetadata( filename, username, useremail )
+      );
+      console.log( "Aspettiamo..." );
+      await newEntityDB.save();
+      return newEntityDB.toObject();
+    } catch (ex) {
+      console.log( "CreateEntity catch: ", ex );
+    }
+  },
+
   updateById: updateById,
   makePublicAll: makePublicAll,
   updateEntity: updateEntity,

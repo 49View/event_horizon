@@ -11,16 +11,22 @@ module.exports = {
     return gsplitTags(source);
   },
 
-  createMetadata: content => {
+  createMetadata: ( filename, username, useremail ) => {
     let cleanMetadata = {};
-    cleanMetadata.name = "";
-    if (content.mKey) cleanMetadata.name = content.mKey;
-    if (content.name) cleanMetadata.name = content.name;
-    cleanMetadata.hash = md5(content);
+    cleanMetadata.name = filename;
+    // if (content.mKey) cleanMetadata.name = content.mKey;
+    // if (content.name) cleanMetadata.name = content.name;
+    // cleanMetadata.hash = md5(content);
     const idate = new Date();
+    cleanMetadata.creator = {
+        name: username,
+        email: useremail
+    };
     cleanMetadata.lastUpdatedDate = idate;
     cleanMetadata.creationDate = idate;
     cleanMetadata.accessCount = 0;
+    cleanMetadata.unitValue = 0;
+    cleanMetadata.absValue = 0;
     cleanMetadata.thumb = "";
     cleanMetadata.tags = gsplitTags(cleanMetadata.name);
     cleanMetadata.deps = [];

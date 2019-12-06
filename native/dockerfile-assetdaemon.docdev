@@ -7,6 +7,8 @@ COPY --from=sixthview/rapidjson-package     /build/rapidjson/.          /usr/loc
 COPY --from=sixthview/stb-package           /build/stb/.                /usr/local/
 COPY --from=sixthview/boost-package         /build/boost/.              /usr/local/
 COPY --from=sixthview/websocketpp-package   /build/websocketpp/.        /usr/local/
+COPY --from=pomeranian/opt-sat-indie        /build/sat/.                /opt/Allegorithmic
+COPY --from=pomeranian/fbx2gltf-linux       /build/fbx2gltf/.           /usr/local/
 
 COPY . .
 

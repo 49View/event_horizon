@@ -3,21 +3,22 @@
 #include <chrono>
 #include <string>
 #include <iostream>
+#include <utility>
 
 struct Profiler {
 	std::string name;
 	std::chrono::high_resolution_clock::time_point p;
-	std::size_t taskId;
+	std::size_t taskId{};
 	std::string infos;
 	bool inTask;
 
-	Profiler( std::string const &n ) :
-		name( n ), p( std::chrono::high_resolution_clock::now() ) {
+	explicit Profiler( std::string n ) :
+		name(std::move( n )), p( std::chrono::high_resolution_clock::now() ) {
 		inTask = false;
 	}
 
-	Profiler( std::string const &n, const size_t &  id ) :
-		name( n ), p( std::chrono::high_resolution_clock::now() ), taskId( id ) {
+	Profiler( std::string n, const size_t &  id ) :
+		name(std::move( n )), p( std::chrono::high_resolution_clock::now() ), taskId( id ) {
 		inTask = true;
 	}
 

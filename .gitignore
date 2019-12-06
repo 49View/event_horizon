@@ -110,7 +110,9 @@ dev_tools/wasmloader/editor.wasm
 platform/android/include
 platform/android/lib
 # Project exclude paths
-/portal/public/.cmake/
+native/portal/public/.cmake/
+portal/public/.cmake/
 nginx/localhost.pfx
 nginx/localhost.pem
 nginx/localhost-key.pem
+configurations/bin/

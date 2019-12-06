@@ -228,6 +228,8 @@ namespace Http {
 
     void project( const std::string& _project );
     std::string project();
+    [[nodiscard]] bool useClientCertificate();
+    void useClientCertificate( bool bUse );
 
     void cacheLoginFields( const LoginFields& _lf );
     LoginFields gatherCachedLogin();

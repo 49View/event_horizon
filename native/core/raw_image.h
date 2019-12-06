@@ -6,6 +6,7 @@
 #include <core/math/vector2i.h>
 #include <core/htypes_shared.hpp>
 #include <core/image_constants.h>
+#include <ostream>
 
 namespace JMATH { class Rect2f; }
 
@@ -112,6 +113,7 @@ public:
     static RawImage NORMAL4x4();
     static RawImage NOISE4x4();
     static RawImage LUT_3D_TEST();
+    friend std::ostream& operator<<( std::ostream& os, const RawImage& image );
 };
 
 //RawImage rawImageDecodeFromMemory( const std::string& _base64, const std::string& _name = "", int forceChannels = 0 );

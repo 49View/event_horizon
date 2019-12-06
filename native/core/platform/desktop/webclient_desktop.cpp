@@ -19,6 +19,17 @@ namespace Http {
         return request;
     }
 
+    auto makeSettingsBase() {
+        auto settings = std::make_shared<restbed::Settings>();
+        auto ssl_settings = std::make_shared< restbed::SSLSettings >( );
+        ssl_settings->set_client_authentication_enabled( useClientCertificate() );
+        ssl_settings->set_private_key( restbed::Uri( "file:///Users/Dado/Documents/49View/certificates/client-certs/daemon.key" ) );
+        ssl_settings->set_certificate( restbed::Uri( "file:///Users/Dado/Documents/49View/certificates/client-certs/daemon.crt" ) );
+        ssl_settings->set_server_authentication_enabled( false );
+        settings->set_ssl_settings( ssl_settings );
+        return settings;
+    }
+    
     std::shared_ptr<restbed::Request> makeGetRequest( const Url& url, const char *buff = nullptr, uint64_t length = 0 ) {
         auto request = makeRequestBase(url);
         request->set_method( "GET" );
@@ -88,9 +99,7 @@ namespace Http {
             Result lRes = tryFileInCache( fileHash, url, rf );
             if ( !lRes.isSuccessStatusCode() ) {
                 auto request = makeGetRequest( url, _data.data(), _data.size() );
-                auto settings = std::make_shared< restbed::Settings >( );
-                settings->set_connection_limit( 60*60*60*60 );
-                settings->set_connection_timeout( std::chrono::seconds(120) );
+                auto settings = makeSettingsBase();
                 std::shared_ptr< restbed::Response > res;
                 res = restbed::Http::sync( request, settings );
                 LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
@@ -145,8 +154,7 @@ namespace Http {
 //        LOGR( "[HTTP-POST-DATA] %s", dataCut.c_str() );
 
         auto request = makePostRequest( url, buff, length, qt );
-        auto settings = std::make_shared<restbed::Settings>();
-        settings->set_connection_timeout( std::chrono::seconds( 86400 ));
+        auto settings = makeSettingsBase();
 
         try {
             restbed::Http::async( request,

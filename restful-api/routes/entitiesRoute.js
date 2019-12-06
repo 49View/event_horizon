@@ -378,28 +378,59 @@ router.post("/:group/:filename", async (req, res, next) => {
     }
 });
 
+// // this post have a binary body and will automatically create metadata itself
+// // it will probably come from a daemon so it won't have req.user information
+// // hence we need to pass them down
+// router.post(
+//     "/:filename/:project/:group/:username/:useremail",
+//     async (req, res, next) => {
+//         const filename = req.params.filename;
+//         const group = req.params.group;
+//         const project = decodeURIComponent(req.params.project);
+//         const username = decodeURIComponent(req.params.username);
+//         const useremail = decodeURIComponent(req.params.useremail);
+//
+//         try {
+//             const entity = await entityController.createEntityFromMetadata(
+//                 req.body,
+//                 project,
+//                 group,
+//                 true,
+//                 false,
+//                 entityController.createMetadataStartup(filename, username, useremail),
+//                 true,
+//                 null
+//             );
+//
+//             if (entity !== null) {
+//                 res
+//                     .status(201)
+//                     .json(entity)
+//                     .end();
+//             } else {
+//                 throw "[post.entity] Entity created is null";
+//             }
+//         } catch (ex) {
+//             console.log("[POST] Entity error: ", ex);
+//             res.sendStatus(400);
+//         }
+//     }
+// );
+
 // this post have a binary body and will automatically create metadata itself
 // it will probably come from a daemon so it won't have req.user information
 // hence we need to pass them down
 router.post(
-    "/:filename/:project/:group/:username/:useremail",
+    "/:filename/:filenameFSID/:project/:group/:username/:useremail",
     async (req, res, next) => {
-        const filename = req.params.filename;
-        const group = req.params.group;
-        const project = req.params.project;
-        const username = decodeURIComponent(req.params.username);
-        const useremail = decodeURIComponent(req.params.useremail);
-
         try {
-            const entity = await entityController.createEntityFromMetadata(
-                req.body,
-                project,
-                group,
-                true,
-                false,
-                entityController.createMetadataStartup(filename, username, useremail),
-                true,
-                null
+            const entity = await entityController.createEntity(
+                req.params.filenameFSID,
+                req.params.filename,
+                decodeURIComponent(req.params.project),
+                req.params.group,
+                decodeURIComponent(req.params.username),
+                decodeURIComponent(req.params.useremail)
             );
 
             if (entity !== null) {

@@ -339,4 +339,9 @@ ImageParamsJSONAble RawImage::serializeParams() const {
     return sr;
 }
 
+std::ostream& operator<<( std::ostream& os, const RawImage& image ) {
+    os << static_cast<const ImageParams&>(image);
+    return os;
+}
+
 
