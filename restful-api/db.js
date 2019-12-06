@@ -5,6 +5,7 @@ const md5 = require("md5");
 const streamifier = require('streamifier');
 const stream = require('stream');
 const util = require('util');
+const logger = require('./logger');
 
 //Set up default mongoose connection
 
@@ -53,7 +54,7 @@ function WMStrm(key, options) {
     }
     Writable.call(this, options); // init super
     this.key = key; // save key
-    memStore[key] = new Buffer(''); // empty
+    memStore[key] = new Buffer.from(''); // empty
 }
 util.inherits(WMStrm, Writable);
 
@@ -79,53 +80,83 @@ const memoryPromise = async ( bucketFSModel, filename, callback ) => {
     });
 }
 
-exports.fsExists = ( bucketFSModel, filename, metadata ) => {
-    return bucketFSModel.find( { filename: filename, ...metadata } );
+exports.fsExists = async ( bucketFSModel, filename, metadata ) => {
+    try {
+        const ret = bucketFSModel.find( { filename: filename, ...metadata } );
+        const entries = await ret.toArray();
+        logger.info( "Filename " + filename + (entries.length > 0 ? " already exists" : " not found") );
+        return entries;
+    } catch (e) {
+        logger.error("fsExists of: " + filename + " failed because " + e );
+        return null;
+    }
 }
 
 exports.fsEqual = async ( bucketFSModel, filename, data, metadata ) => {
-    const queryLength = { filename: filename, ...metadata, length: data.length };
-    const existSameLengthAsset = bucketFSModel.find( queryLength );
-    let ret = false;
-    if ( existSameLengthAsset ) {
-        await memoryPromise(bucketFSModel, filename, () => {
-            if ( md5(memStore.file) === md5(data) ) {
-                ret = true;
-            }
-        });
+    try {
+        const queryLength = { filename: filename, ...metadata, length: data.length };
+        const existSameLengthAsset = bucketFSModel.find( queryLength );
+        let ret = false;
+        if ( existSameLengthAsset ) {
+            await memoryPromise(bucketFSModel, filename, () => {
+                if ( md5(memStore.file) === md5(data) ) {
+                    ret = true;
+                }
+            });
+        }
+        logger.info("Exact copy of " + filename + ( ret ? "" : " NOT" ) + " found");
+        return ret;
+    } catch (e) {
+        logger.error("fsEqual of: " + filename + " failed because " + e );
+        return null;
     }
-    return ret;
 }
 
 exports.fsDelete = async ( bucketFSModel, id ) => {
-    await bucketFSModel.delete( id );
+    try {
+        logger.info("Deleting asset: " + id.toString() );
+        await bucketFSModel.delete( id );
+    } catch (e) {
+        logger.error("fsDelete of: " + id + " failed because " + e );
+    }
 }
 
 exports.fsInsert = async( bucketFSModel, filename, data, metadata ) => {
-    return new Promise( (resolve, reject) => {
-        streamifier.createReadStream(data).pipe(bucketFSModel.openUploadStream(filename, {
-            metadata: metadata,
-            disableMD5: true
-        })).on('error', reject ).on('finish', resolve );
-    });
+    try {
+        logger.info("Inserting new asset: " + filename );
+        return new Promise( (resolve, reject) => {
+            streamifier.createReadStream(data).pipe(bucketFSModel.openUploadStream(filename, {
+                metadata: metadata,
+                disableMD5: true
+            })).on('error', reject ).on('finish', resolve );
+        });
+    } catch (e) {
+        logger.error("fsInsert of: " + filename + " failed because " + e );
+    }
 }
 
 exports.fsUpsert = async ( bucketFSModel, filename, data, metadata, metadataComp ) => {
 
-    let ret = 200;
-    const existAsset = module.exports.fsExists( bucketFSModel, filename, metadataComp );
-    if ( existAsset ) {
-        const res = await existAsset.toArray();
-        for ( const elem of res ) {
-            if ( ! await module.exports.fsEqual( bucketFSModel, filename, data, metadataComp ) ) {
+    try {
+        logger.info("Performing upsert...");
+        let bPerformInsert = true;
+        const entries = await module.exports.fsExists( bucketFSModel, filename, metadataComp );
+        for ( const elem of entries ) {
+            const bIsExactCopy = await module.exports.fsEqual( bucketFSModel, filename, data, metadataComp );
+            if ( !bIsExactCopy ) {
                 await module.exports.fsDelete( bucketFSModel, elem._id );
-            } else {
-                ret = 204;
             }
+            bPerformInsert &= !bIsExactCopy;
         }
+        if ( bPerformInsert ) {
+            await module.exports.fsInsert( bucketFSModel, filename, data, metadata );
+        } else {
+            logger.warn("No upsert operation performed of " + filename + " because there's already an exact binary copy present");
+        }
+        return bPerformInsert;
+    } catch (e) {
+        logger.error("fsUpsert of: " + filename + " failed because " + e);
+        return false;
     }
-    if ( ret === 200 ) {
-        await module.exports.fsInsert( bucketFSModel, filename, data, metadata );
-    }
-    return ret;
 }
+

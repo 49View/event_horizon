@@ -92,14 +92,14 @@ router.post("/entity_to_elaborate/:group/:key(*)", async (req, res, next) => {
             username: req.user.name,
             useremail: req.user.email,
         }
-        const retStatus = await db.fsUpsert( db.bucketSourceAssets, filename, req.body, metadata, metadataComp );
+        const bInserted = await db.fsUpsert( db.bucketSourceAssets, filename, req.body, metadata, metadataComp );
 
         // socketController.sendMessageToAllClients(JSON.stringify(json));
         // if (res) {
         //   res.status(201).json({ ETag: data.ETag });
         //   res.end();
         // }
-        res.sendStatus( retStatus );
+        res.sendStatus( bInserted ? 200 : 204 );
     } catch (ex) {
         console.log("ERROR ADDING FILE TO FS: ", ex);
         res.sendStatus(400);
