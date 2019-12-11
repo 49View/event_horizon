@@ -125,6 +125,17 @@ namespace MPBRTextures {
                                                       "_roughness", "_emission",
                                                       "_metallic","_height", "_opacity", "_translucency" };
 
+    static inline auto SBSARTextureOutputs() {
+        return std::array< std::string, 6 > {
+                MPBRTextures::basecolorString,
+                MPBRTextures::metallicString,
+                MPBRTextures::ambientOcclusionString,
+                MPBRTextures::roughnessString,
+                MPBRTextures::heightString,
+                MPBRTextures::normalString
+        };
+    }
+
     static inline const std::vector<std::string>& Names() {
         return g_pbrNames;
     }

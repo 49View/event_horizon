@@ -3,8 +3,7 @@ project(asset_daemon)
 
 include(../../CMakeLists.txt NO_POLICY_SCOPE)
 
-compile( core )
-add_lib( mongodb )
+compile( core mongo )
 
 add_executable(${PROJECT_NAME} ${BUILD_FILES})
 

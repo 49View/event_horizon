@@ -6,6 +6,7 @@ const metaAssistant = require("../assistants/metadataAssistant");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
 const md5 = require("md5");
+const logger = require('../logger');
 
 const sendResult = (res, ret, successCode = 200, failCode = 400) => {
     if (ret !== null) {
@@ -424,6 +425,8 @@ router.post(
     "/:filename/:filenameFSID/:project/:group/:username/:useremail",
     async (req, res, next) => {
         try {
+            logger.info("Post from daemon...");
+
             const entity = await entityController.createEntity(
                 req.params.filenameFSID,
                 req.params.filename,

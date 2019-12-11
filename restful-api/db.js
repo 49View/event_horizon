@@ -22,8 +22,8 @@ exports.initDB = async () => {
                 useNewUrlParser: true,
                 useUnifiedTopology: true
             });
-            exports.bucketSourceAssets = new mongodb.GridFSBucket(mongoose.connection.client.db('event_horizon'), { bucketName: "fs_source_assets"});
-            exports.bucketEntities = new mongodb.GridFSBucket(mongoose.connection.client.db('event_horizon'), { bucketName: "fs_entities"});
+            exports.bucketSourceAssets = new mongodb.GridFSBucket(mongoose.connection.client.db('event_horizon'), { bucketName: "fs_assets_to_elaborate"});
+            exports.bucketEntities = new mongodb.GridFSBucket(mongoose.connection.client.db('event_horizon'), { bucketName: "fs_entity_assets"});
             console.log("MongoDB connected with GridFS");
 
             return mongoose.connection;
@@ -151,7 +151,7 @@ exports.fsUpsert = async ( bucketFSModel, filename, data, metadata, metadataComp
         if ( bPerformInsert ) {
             await module.exports.fsInsert( bucketFSModel, filename, data, metadata );
         } else {
-            logger.warn("No upsert operation performed of " + filename + " because there's already an exact binary copy present");
+            logger.info("No upsert operation performed of " + filename + " because there's already an exact binary copy present");
         }
         return bPerformInsert;
     } catch (e) {

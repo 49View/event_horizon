@@ -11,6 +11,9 @@
 
 static bool sUserLoggedIn = false;
 static bool sUseClientCertificate = false;
+static bool sUseServerCertificate = false;
+static std::string sClientCertificateCrtFilename{};
+static std::string sClientCertificateKeyFilename{};
 static std::string sProject;
 static std::string sUserToken;
 static std::string sUserSessionId;
@@ -249,13 +252,50 @@ namespace Http {
         sProject = _project;
     }
 
-    void useClientCertificate( bool bUse ) {
+    bool useClientCertificate( bool bUse, const std::string& _certKey, const std::string& _certCrt ) {
         sUseClientCertificate = bUse;
+        if ( sUseClientCertificate ) {
+            auto certKey = std::getenv( _certKey.c_str() );
+            auto certCrt = std::getenv( _certCrt.c_str() );
+
+            if ( certKey && certCrt ) {
+                Http::clientCertificateKey(std::string(certKey));
+                Http::clientCertificateCrt(std::string(certCrt));
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 
     bool useClientCertificate() {
         return sUseClientCertificate;
     }
+
+    void clientCertificateKey( std::string key ) {
+        sClientCertificateKeyFilename = std::move(key);
+    }
+
+    std::string clientCertificateKey() {
+        return sClientCertificateKeyFilename;
+    }
+
+    void clientCertificateCrt( std::string crt ) {
+        sClientCertificateCrtFilename = std::move(crt);
+    }
+
+    std::string clientCertificateCrt() {
+        return sClientCertificateCrtFilename;
+    }
+
+    void useServerCertificate( bool bUse ) {
+        sUseServerCertificate = bUse;
+    }
+
+    bool useServerCertificate() {
+        return sUseServerCertificate;
+    }
+
 
     std::string project() {
         return sProject;

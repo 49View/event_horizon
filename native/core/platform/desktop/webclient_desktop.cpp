@@ -23,9 +23,9 @@ namespace Http {
         auto settings = std::make_shared<restbed::Settings>();
         auto ssl_settings = std::make_shared< restbed::SSLSettings >( );
         ssl_settings->set_client_authentication_enabled( useClientCertificate() );
-        ssl_settings->set_private_key( restbed::Uri( "file:///Users/Dado/Documents/49View/certificates/client-certs/daemon.key" ) );
-        ssl_settings->set_certificate( restbed::Uri( "file:///Users/Dado/Documents/49View/certificates/client-certs/daemon.crt" ) );
-        ssl_settings->set_server_authentication_enabled( false );
+        ssl_settings->set_server_authentication_enabled( useServerCertificate() );
+        ssl_settings->set_private_key( restbed::Uri( "file://" + clientCertificateKey() ) );
+        ssl_settings->set_certificate( restbed::Uri( "file://" + clientCertificateCrt() ) );
         settings->set_ssl_settings( ssl_settings );
         return settings;
     }
@@ -33,12 +33,12 @@ namespace Http {
     std::shared_ptr<restbed::Request> makeGetRequest( const Url& url, const char *buff = nullptr, uint64_t length = 0 ) {
         auto request = makeRequestBase(url);
         request->set_method( "GET" );
-        if ( length > 0 ) {
-            request->set_header( "Content-Type", "application/json; charset=utf-8" );
-            request->set_header( "Content-Length", std::to_string( length ) );
-            const restbed::Bytes bodybuffer(buff, buff + length);
-            request->set_body( bodybuffer );
-        }
+//        if ( length > 0 ) {
+//            request->set_header( "Content-Type", "application/json; charset=utf-8" );
+//            request->set_header( "Content-Length", std::to_string( length ) );
+//            const restbed::Bytes bodybuffer(buff, buff + length);
+//            request->set_body( bodybuffer );
+//        }
 
         return request;
     }
@@ -55,7 +55,7 @@ namespace Http {
                 request->set_header( "Content-Type", "application/json; charset=utf-8" );
                 break;
         }
-        request->set_header( "Content-Length", std::to_string( length ) );
+//        request->set_header( "Content-Length", std::to_string( length ) );
         request->set_method( "POST" );
         if ( length > 0 ) {
             const restbed::Bytes bodybuffer(buff, buff + length);
@@ -148,10 +148,6 @@ namespace Http {
                        HttpResouceCB mainThreadCallback ) {
         LOGR( "[HTTP-POST] %s", url.toString().c_str() );
         LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
-
-//        auto dataCut = _data.substr(0, 512);
-//        if ( _data.size() > 512 ) dataCut += "...";
-//        LOGR( "[HTTP-POST-DATA] %s", dataCut.c_str() );
 
         auto request = makePostRequest( url, buff, length, qt );
         auto settings = makeSettingsBase();

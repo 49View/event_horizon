@@ -812,6 +812,57 @@ exports.postMultiZip = async (
   }
 };
 
+exports.postMultiZip2 = async (
+    filename,
+    group,
+    body,
+    project,
+    username,
+    useremail
+) => {
+  try {
+    let metadata = createMetadataStartup(filename, username, useremail);
+
+    const deps = await decompressZipppedEntityDeps(
+        body,
+        project,
+        username,
+        useremail
+    );
+
+    const material = {
+      mKey: filename,
+      values: {
+        mType: "PN_SH",
+        mStrings: deps["mStrings"],
+        mFloats: [ {key:"metallic", value: 0.5} ]
+      }
+    };
+    metadata.deps = [
+      {
+        key: "image",
+        value: deps["deps"]
+      }
+    ];
+
+    const presetThumb = deps["diffuseTexture"].metadata.thumb;
+
+    return await createEntityFromMetadata(
+        JSON.stringify(material),
+        project,
+        group,
+        true,
+        false,
+        metadata,
+        true,
+        presetThumb
+    );
+  } catch (ex) {
+    console.log(ex);
+    return null;
+  }
+};
+
 const remapSave = async (data, project) => {
   try {
     data.project = project;
@@ -913,7 +964,6 @@ module.exports = {
       useremail
   ) => {
     try {
-      console.log( "Ci arriva?" );
       const newEntityDB = createEntityModel(
           fsid,
           project,
@@ -922,7 +972,6 @@ module.exports = {
           false,
           metadataAssistant.createMetadata( filename, username, useremail )
       );
-      console.log( "Aspettiamo..." );
       await newEntityDB.save();
       return newEntityDB.toObject();
     } catch (ex) {

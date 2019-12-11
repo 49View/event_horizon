@@ -136,6 +136,10 @@ uint8_p ucchar_pTouint8_p( const ucchar_p& _source ) {
 	return ret;
 }
 
+uint8_p make_uint8_p( uint64_t _size ) {
+    return {  std::make_unique<uint8_t[]>(_size), _size };
+}
+
 int32_t getCircularArrayIndex( int32_t pi, int32_t size ) {
 	return pi >= 0 ? ( pi % size ) : size - abs( pi % size );
 }

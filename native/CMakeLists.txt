@@ -85,6 +85,24 @@ macro(register_module_norec FOLDER_NAME)
     list(APPEND HEADERS ${MODULE_ROOT_COMP}/${FOLDER_NAME})
 endmacro(register_module_norec)
 
+macro(register_module_at MODULE_PATH FOLDER_NAME )
+    file(GLOB_RECURSE SRC_LIST "${MODULE_PATH}${FOLDER_NAME}/*.h" "${MODULE_PATH}${FOLDER_NAME}/*.hpp" "${MODULE_PATH}${FOLDER_NAME}/*.cpp" "${MODULE_PATH}${FOLDER_NAME}/*.cc" "${MODULE_PATH}${FOLDER_NAME}/*.c")
+    source_group("${FOLDER_NAME}" FILES ${SRC_LIST})
+    message(STATUS "module name: ${MODULE_PATH}${FOLDER_NAME}")
+
+    list(APPEND BUILD_FILES ${SRC_LIST})
+
+    list(APPEND HEADERS ${MODULE_PATH}${FOLDER_NAME})
+endmacro(register_module)
+
+macro(register_module_at_norec MODULE_PATH FOLDER_NAME)
+    file(GLOB SRC_LIST "${MODULE_PATH}${FOLDER_NAME}/*.h" "${MODULE_PATH}${FOLDER_NAME}/*.hpp" "${MODULE_PATH}${FOLDER_NAME}/*.cpp" "${MODULE_PATH}${FOLDER_NAME}/*.cc" "${MODULE_PATH}${FOLDER_NAME}/*.c")
+    source_group("${FOLDER_NAME}" FILES ${SRC_LIST})
+
+    list(APPEND BUILD_FILES ${SRC_LIST})
+    list(APPEND HEADERS ${MODULE_PATH}/${FOLDER_NAME})
+endmacro(register_module_norec)
+
 macro(register_platform_module_files PLATFORM_FOLDER)
 
     register_module_norec(${PLATFORM_FOLDER})
@@ -179,6 +197,25 @@ macro(register_lua_module)
     add_lib( lua_libs )
 
 endmacro(register_lua_module)
+
+macro(register_mongo_module)
+
+    include_directories(${MODULE_ROOT_COMP}../database)
+    include_directories(${MODULE_ROOT_COMP}../database/nosql)
+    include_directories(${MODULE_ROOT_COMP}../database/nosql/mongo)
+
+    register_module_norec("database")
+    register_module_norec("database/nosql")
+    register_module_at( ${MODULE_ROOT} "database/nosql/mongo")
+
+    if (NOT BUILD_FROM_SOURCE)
+        add_lib( mongo )
+    endif()
+    add_lib( mongodb )
+
+endmacro(register_mongo_module)
+
+
 
 macro(register_graphics_module)
 
@@ -403,6 +440,8 @@ macro(compile)
             register_core_module()
         elseif (${module} STREQUAL "lua")
             register_lua_module()
+        elseif (${module} STREQUAL "mongo")
+            register_mongo_module()
         elseif (${module} STREQUAL "graphics")
             register_graphics_module()
         elseif (${module} STREQUAL "media")

@@ -156,6 +156,13 @@ namespace imageUtil {
         return pngBuffer;
     }
 
+    std::string bufferToPng64( int w, int h, int comp, void* data ) {
+
+        auto res = bufferToPngMemory( w, h, comp, data );
+        auto rawm = bn::encode_b64( SerializableContainer{res.first.get(), res.first.get() + res.second} );
+        return std::string{ rawm.begin(), rawm.end() };
+    }
+
     uint8_p rawToPngMemory( const RawImage& _input ) {
         return bufferToPngMemory( _input.width, _input.height, _input.channels, _input.data() );
     }

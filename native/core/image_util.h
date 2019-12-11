@@ -36,6 +36,7 @@ namespace imageUtil {
     std::unique_ptr<uint8_t[]> zeroImage3( uint32_t color, int width, int height );
 
     uint8_p bufferToPngMemory( int w, int h, int comp, void* data );
+    std::string bufferToPng64( int w, int h, int comp, void* data );
     std::string rawToPng64gzip( const RawImage& _input );
     std::string rawToPng64gzip( std::shared_ptr<RawImage> _input );
     std::string rawResizeToPng64gzip( const RawImage& _input, int tw, int th );

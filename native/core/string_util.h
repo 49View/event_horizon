@@ -84,6 +84,10 @@ static inline std::vector<std::string> split_words( const std::string& input ) {
     return split_regexp( input, "[\\W_]" );
 }
 
+static inline std::vector<std::string> split_tags( const std::string& input ) {
+    return split_regexp( input, "[\\s,._-]" );
+}
+
 template<typename Out>
 static inline void split( const std::string& s, char delim, Out result ) {
     std::stringstream ss;
