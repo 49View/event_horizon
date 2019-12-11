@@ -93,7 +93,7 @@ macro(register_module_at MODULE_PATH FOLDER_NAME )
     list(APPEND BUILD_FILES ${SRC_LIST})
 
     list(APPEND HEADERS ${MODULE_PATH}${FOLDER_NAME})
-endmacro(register_module)
+endmacro(register_module_at)
 
 macro(register_module_at_norec MODULE_PATH FOLDER_NAME)
     file(GLOB SRC_LIST "${MODULE_PATH}${FOLDER_NAME}/*.h" "${MODULE_PATH}${FOLDER_NAME}/*.hpp" "${MODULE_PATH}${FOLDER_NAME}/*.cpp" "${MODULE_PATH}${FOLDER_NAME}/*.cc" "${MODULE_PATH}${FOLDER_NAME}/*.c")
@@ -101,7 +101,7 @@ macro(register_module_at_norec MODULE_PATH FOLDER_NAME)
 
     list(APPEND BUILD_FILES ${SRC_LIST})
     list(APPEND HEADERS ${MODULE_PATH}/${FOLDER_NAME})
-endmacro(register_module_norec)
+endmacro(register_module_at_norec)
 
 macro(register_platform_module_files PLATFORM_FOLDER)
 

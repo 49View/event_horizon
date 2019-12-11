@@ -24,8 +24,10 @@ namespace Http {
         auto ssl_settings = std::make_shared< restbed::SSLSettings >( );
         ssl_settings->set_client_authentication_enabled( useClientCertificate() );
         ssl_settings->set_server_authentication_enabled( useServerCertificate() );
-        ssl_settings->set_private_key( restbed::Uri( "file://" + clientCertificateKey() ) );
-        ssl_settings->set_certificate( restbed::Uri( "file://" + clientCertificateCrt() ) );
+        if ( useClientCertificate() ) {
+            ssl_settings->set_private_key( restbed::Uri( "file://" + clientCertificateKey() ) );
+            ssl_settings->set_certificate( restbed::Uri( "file://" + clientCertificateCrt() ) );
+        }
         settings->set_ssl_settings( ssl_settings );
         return settings;
     }

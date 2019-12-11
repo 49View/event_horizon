@@ -101,6 +101,7 @@ typings/
 # next.js build output
 .next
 
+.cmake/
 event_horizon/graphics/opengl/shaders/.cachedShaderMap.txt
 restful-api/bin/localhost.crt
 restful-api/bin/localhost.key
@@ -110,7 +111,7 @@ dev_tools/wasmloader/editor.wasm
 platform/android/include
 platform/android/lib
 # Project exclude paths
-native/portal/public/.cmake/
+native/portal/public/.cmake/*
 portal/public/.cmake/
 nginx/localhost.pfx
 nginx/localhost.pem
