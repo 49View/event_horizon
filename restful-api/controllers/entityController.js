@@ -10,8 +10,9 @@ const tar = require("tar-stream");
 const streams = require("memory-streams");
 const sharp = require("sharp");
 const JSZip = require("jszip");
-const { uniqueNamesGenerator } = require("unique-names-generator");
+const {uniqueNamesGenerator} = require("unique-names-generator");
 const md5 = require("md5");
+const logger = require('../logger');
 
 const getMetadataFromBody = (checkGroup, checkRaw, req) => {
   if (req.body === null || !(req.body instanceof Object)) {
@@ -71,7 +72,7 @@ const createEntityFromMetadata = async (
     if (copyEntity === null) {
       //Upload file to S3
       // console.log( "Adding: ", filePath );
-      let savedFilename = { changed: false, name: filePath };
+      let savedFilename = {changed: false, name: filePath};
       await fsController.cloudStorageGetFilenameAndDuplicateIfExists(
         filePath,
         "eventhorizonentities",
@@ -130,33 +131,33 @@ const createEntityFromMetadata = async (
 };
 
 const createEntityWithFSID = async (
-    fsid,
-    project,
-    group,
-    cleanMetadata,
+  fsid,
+  project,
+  group,
+  cleanMetadata,
 ) => {
   try {
-      //Create entity
-      let entity = await createEntity(
-          fsid,
-          project,
-          group,
-          true,
-          false,
-          cleanMetadata
-      );
+    //Create entity
+    let entity = await createEntity(
+      fsid,
+      project,
+      group,
+      true,
+      false,
+      cleanMetadata
+    );
 
-      // if (entity !== null) {
-      //   let json = {
-      //     msg: "entityAdded",
-      //     data: entity
-      //   };
-      //   if (sendBroadcast) {
-      //     socketController.sendMessageToAllClients(JSON.stringify(json));
-      //   }
-      // }
+    // if (entity !== null) {
+    //   let json = {
+    //     msg: "entityAdded",
+    //     data: entity
+    //   };
+    //   if (sendBroadcast) {
+    //     socketController.sendMessageToAllClients(JSON.stringify(json));
+    //   }
+    // }
 
-      return entity;
+    return entity;
   } catch (error) {
     console.log("Cannot create entity: ", error);
     return null;
@@ -197,11 +198,11 @@ const createEntitiesFromContainer = async (project, containerBody) => {
   const metadatas = [];
   const entities = [];
 
-  container.on("entry", function(header, stream, next) {
+  container.on("entry", function (header, stream, next) {
     console.log(header.name);
     var writer = new streams.WritableStream();
     stream.pipe(writer);
-    stream.on("end", function() {
+    stream.on("end", function () {
       console.log(writer.toString());
       metadatas.push(writer.toString());
       next(); // ready for next entry
@@ -265,7 +266,7 @@ const getFilePath = (project, group, name) => {
 
 const checkFileExists = async (project, group, hash) => {
   const query = {
-    $and: [{ "metadata.hash": hash }, { group: group }, { project: project }]
+    $and: [{"metadata.hash": hash}, {group: group}, {project: project}]
   };
   const result = await entityModel.findOne(query);
   return result !== null ? result.toObject() : null;
@@ -290,7 +291,7 @@ const createEntityModel = (
 };
 
 const updateEntity = async (entityId, metadata) => {
-  const query = { _id: mongoose.Types.ObjectId(entityId) };
+  const query = {_id: mongoose.Types.ObjectId(entityId)};
 
   await entityModel.updateOne(query, {
     metadata: metadata
@@ -298,7 +299,7 @@ const updateEntity = async (entityId, metadata) => {
 };
 
 const deleteEntity = async entityId => {
-  await entityModel.deleteOne({ _id: mongoose.Types.ObjectId(entityId) });
+  await entityModel.deleteOne({_id: mongoose.Types.ObjectId(entityId)});
 };
 
 const deleteEntityComplete = async (project, entity) => {
@@ -321,13 +322,13 @@ const getEntityByIdProject = async (project, entityId, returnPublic) => {
   if (returnPublic) {
     query = {
       $and: [
-        { _id: mongoose.Types.ObjectId(entityId) },
-        { $or: [{ project: project }, { isPublic: true }] }
+        {_id: mongoose.Types.ObjectId(entityId)},
+        {$or: [{project: project}, {isPublic: true}]}
       ]
     };
   } else {
     query = {
-      $and: [{ _id: mongoose.Types.ObjectId(entityId) }, { project: project }]
+      $and: [{_id: mongoose.Types.ObjectId(entityId)}, {project: project}]
     };
   }
   const result = await entityModel.findOne(query);
@@ -339,7 +340,7 @@ const makePublicAll = async () => {
   let query;
   query = {};
   const result = await entityModel.updateMany(query, {
-    $set: { isPublic: true }
+    $set: {isPublic: true}
   });
 
   return result;
@@ -347,7 +348,7 @@ const makePublicAll = async () => {
 
 const updateById = async (entityId, updatedEntity) => {
   let query;
-  query = { _id: entityId };
+  query = {_id: entityId};
   const result = await entityModel.findOneAndUpdate(query, updatedEntity);
 
   return result !== null ? result.toObject() : null;
@@ -437,7 +438,7 @@ const decompressZipppedEntityDeps = async (
     if (zipEntry.dir === false) {
       if (checkFileExtensionsOnEntityGroup("image", relativePath)) {
         const tags = metadataAssistant.splitTags(getFileName(relativePath));
-        fileList.push({ type: arrangePBRness(tags), entry: zipEntry });
+        fileList.push({type: arrangePBRness(tags), entry: zipEntry});
       }
     }
   });
@@ -539,11 +540,11 @@ const thumbFromContent = async (content, presetThumb, gtr) => {
   } else if (gtr === gtr_content_image) {
     try {
       thumbBuff = await sharp(content)
-          .resize(64, 64, { fit: "inside", withoutEnlargement: true })
-          .toFormat("jpg")
-          .toBuffer();
+        .resize(64, 64, {fit: "inside", withoutEnlargement: true})
+        .toFormat("jpg")
+        .toBuffer();
     } catch (e) {
-      console.log( e );
+      console.log(e);
     }
   } else if (gtr === gtr_content_color) {
     const cp = JSON.parse(content);
@@ -613,7 +614,7 @@ const getEntityContent = async (entityId, project) => {
 
 const getEntityById = async entityId => {
   let query;
-  query = { _id: entityId };
+  query = {_id: entityId};
   const result = await entityModel.findOne(query);
 
   return result !== null ? result.toObject() : null;
@@ -621,7 +622,7 @@ const getEntityById = async entityId => {
 
 const getEntityByHash = async (entityId, project) => {
   let query;
-  query = { project: project, "metadata.hash": entityId };
+  query = {project: project, "metadata.hash": entityId};
   const result = await entityModel.findOne(query);
 
   return result !== null ? result.toObject() : null;
@@ -629,7 +630,7 @@ const getEntityByHash = async (entityId, project) => {
 
 const getEntityByName = async (project, group, name) => {
   let query;
-  query = { project: project, group: group, "metadata.name": name };
+  query = {project: project, group: group, "metadata.name": name};
   const result = await entityModel.findOne(query);
 
   return result !== null ? result.toObject() : null;
@@ -638,9 +639,9 @@ const getEntityByName = async (project, group, name) => {
 const getEntitiesOfProject = async (project, returnPublic) => {
   let query;
   if (returnPublic) {
-    query = [{ project: project }, { isPublic: true }];
+    query = [{project: project}, {isPublic: true}];
   } else {
-    query = { project: project };
+    query = {project: project};
   }
   const result = await entityModel.find(query);
 
@@ -654,9 +655,9 @@ const getEntitiesOfProjectWithGroup = async (
 ) => {
   let query;
   if (returnPublic) {
-    query = { project: project, group: groupID, isPublic: true };
+    query = {project: project, group: groupID, isPublic: true};
   } else {
-    query = { project: project, group: groupID };
+    query = {project: project, group: groupID};
   }
   const result = await entityModel.find(query);
 
@@ -664,75 +665,10 @@ const getEntitiesOfProjectWithGroup = async (
 };
 
 const getEntitiesIdOfProjectWithGroup = async (project, groupID) => {
-  const query = { project: project, group: groupID };
+  const query = {project: project, group: groupID};
   const result = await entityModel.find(query, "id");
 
   return result !== null ? result : null;
-};
-
-const getEntitiesByProjectGroupTags = async (
-  project,
-  group,
-  tags,
-  fullName,
-  fullData,
-  randomElements
-) => {
-  const aggregationQueries = [
-    {
-      $match: {
-        $and: [
-          { isRestricted: false },
-          { group: group },
-          {
-            $or: [{ project: project }, { isPublic: true }]
-          },
-          {
-            $or: [
-              {
-                "metadata.tags": {
-                  $all: tags
-                }
-              },
-              { "metadata.name": tags[0] },
-              { "metadata.name": fullName },
-              {
-                _id:
-                  tags[0].length == 12 || tags[0].length == 24
-                    ? mongoose.Types.ObjectId(tags[0])
-                    : "DDDDDDDDDDDD"
-              }
-            ]
-          }
-        ]
-      }
-    }
-  ];
-
-  if (fullData !== true) {
-    aggregationQueries.push({
-      $project: {
-        project: 0,
-        isPublic: 0,
-        isRestricted: 0
-      }
-    });
-  }
-
-  if (randomElements !== null) {
-    aggregationQueries.push({
-      $sample: {
-        size: randomElements
-      }
-    });
-  }
-
-  const result = await asyncModelOperations.aggregate(
-    entityModel,
-    aggregationQueries
-  );
-
-  return result;
 };
 
 const getEntityDeps = async (project, group, deps) => {
@@ -740,13 +676,13 @@ const getEntityDeps = async (project, group, deps) => {
     {
       $match: {
         $and: [
-          { isRestricted: false },
-          { group: group },
+          {isRestricted: false},
+          {group: group},
           {
-            $or: [{ project: project }, { isPublic: true }]
+            $or: [{project: project}, {isPublic: true}]
           },
           {
-            "metadata.hash": deps
+            "hash": deps
           }
         ]
       }
@@ -784,17 +720,17 @@ exports.postMultiZip = async (
       values: {
         mType: "PN_SH",
         mStrings: deps["mStrings"],
-        mFloats: [ {key:"metallic", value: 0.5} ]
+        mFloats: [{key: "metallic", value: 0.5}]
       }
     };
-    metadata.deps = [
+    deps = [
       {
         key: "image",
         value: deps["deps"]
       }
     ];
 
-    const presetThumb = deps["diffuseTexture"].metadata.thumb;
+    const presetThumb = deps["diffuseTexture"].thumb;
 
     return await createEntityFromMetadata(
       JSON.stringify(material),
@@ -813,21 +749,21 @@ exports.postMultiZip = async (
 };
 
 exports.postMultiZip2 = async (
-    filename,
-    group,
-    body,
-    project,
-    username,
-    useremail
+  filename,
+  group,
+  body,
+  project,
+  username,
+  useremail
 ) => {
   try {
     let metadata = createMetadataStartup(filename, username, useremail);
 
     const deps = await decompressZipppedEntityDeps(
-        body,
-        project,
-        username,
-        useremail
+      body,
+      project,
+      username,
+      useremail
     );
 
     const material = {
@@ -835,27 +771,27 @@ exports.postMultiZip2 = async (
       values: {
         mType: "PN_SH",
         mStrings: deps["mStrings"],
-        mFloats: [ {key:"metallic", value: 0.5} ]
+        mFloats: [{key: "metallic", value: 0.5}]
       }
     };
-    metadata.deps = [
+    deps = [
       {
         key: "image",
         value: deps["deps"]
       }
     ];
 
-    const presetThumb = deps["diffuseTexture"].metadata.thumb;
+    const presetThumb = deps["diffuseTexture"].thumb;
 
     return await createEntityFromMetadata(
-        JSON.stringify(material),
-        project,
-        group,
-        true,
-        false,
-        metadata,
-        true,
-        presetThumb
+      JSON.stringify(material),
+      project,
+      group,
+      true,
+      false,
+      metadata,
+      true,
+      presetThumb
     );
   } catch (ex) {
     console.log(ex);
@@ -869,7 +805,7 @@ const remapSave = async (data, project) => {
     data.hash = md5(
       project + data.sourceEntity + data.sourceRemap + data.destRemap
     );
-    return await remapModel.findOneAndUpdate({ hash: data.hash }, data, {
+    return await remapModel.findOneAndUpdate({hash: data.hash}, data, {
       upsert: true,
       new: true,
       setDefaultsOnInsert: true
@@ -901,30 +837,30 @@ const getEntitiesRemap = async (project, entities) => {
     const entitiesArray = Array.isArray(entities.entities) ? entities.entities : [entities.entities];
     let reparsedArray = [];
     let kvMap = [];
-    for ( const entry of entitiesArray ) {
+    for (const entry of entitiesArray) {
       const tags = metadataAssistant.splitTags(entry);
-      const ret = await getEntitiesByProjectGroupTags(project, "geom", tags, entry, false, null );
-      if ( ret && ret.length > 0 ) {
-        const kname = ret[0].metadata.name;
+      const ret = await module.exports.getEntitiesByProjectGroupTags(project, "geom", tags, entry, false, null);
+      if (ret && ret.length > 0) {
+        const kname = ret[0].name;
         reparsedArray.push(kname);
-        kvMap.push( {
+        kvMap.push({
           key: kname,
           value: entry
         })
       }
     }
     let remaps = await remapModel.find({
-      $and: [{ project: project }, { sourceEntity: { $in: reparsedArray } }]
+      $and: [{project: project}, {sourceEntity: {$in: reparsedArray}}]
     });
     const ret = {
       kv: kvMap,
       remaps: remaps
     };
-    console.log('Remaps: ', ret );
+    console.log('Remaps: ', ret);
     return ret;
   } catch (ex) {
     console.log("[ERROR] entityController.remap \n", ex);
-    console.log( "Parameters: \n Project: ", project, " entities: ", entities );
+    console.log("Parameters: \n Project: ", project, " entities: ", entities);
     return null;
   }
 };
@@ -956,26 +892,26 @@ module.exports = {
   checkFileExists: checkFileExists,
 
   createEntity: async (
-      fsid,
-      filename,
-      project,
-      group,
-      username,
-      useremail
+    fsid,
+    filename,
+    project,
+    group,
+    username,
+    useremail
   ) => {
     try {
       const newEntityDB = createEntityModel(
-          fsid,
-          project,
-          group,
-          true,
-          false,
-          metadataAssistant.createMetadata( filename, username, useremail )
+        fsid,
+        project,
+        group,
+        true,
+        false,
+        metadataAssistant.createMetadata(filename, username, useremail)
       );
       await newEntityDB.save();
       return newEntityDB.toObject();
     } catch (ex) {
-      console.log( "CreateEntity catch: ", ex );
+      console.log("CreateEntity catch: ", ex);
     }
   },
 
@@ -996,7 +932,72 @@ module.exports = {
   getEntitiesOfProject: getEntitiesOfProject,
   getEntitiesOfProjectWithGroup: getEntitiesOfProjectWithGroup,
   getEntityDeps: getEntityDeps,
-  getEntitiesByProjectGroupTags: getEntitiesByProjectGroupTags,
+  getEntitiesByProjectGroupTags: async (
+    project,
+    group,
+    tags,
+    fullName,
+    fullData,
+    randomElements
+  ) => {
+    const aggregationQueries = [
+      {
+        $match: {
+          $and: [
+            {isRestricted: false},
+            {group: group},
+            {
+              $or: [{project: project}, {isPublic: true}]
+            },
+            {
+              $or: [
+                {
+                  "tags": {
+                    $all: tags
+                  }
+                },
+                {"name": tags[0]},
+                {"name": fullName},
+                {
+                  _id:
+                    tags[0].length == 12 || tags[0].length == 24
+                      ? mongoose.Types.ObjectId(tags[0])
+                      : "DDDDDDDDDDDD"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ];
+
+    if (fullData !== true) {
+      aggregationQueries.push({
+        $project: {
+          project: 0,
+          isPublic: 0,
+          isRestricted: 0
+        }
+      });
+    }
+
+    if (randomElements !== null) {
+      aggregationQueries.push({
+        $sample: {
+          size: randomElements
+        }
+      });
+    }
+
+    const result = await asyncModelOperations.aggregate(
+      entityModel,
+      aggregationQueries
+    );
+    logger.debug("Result" + result);
+    return result;
+  },
+
   getEntitiesRemap: getEntitiesRemap,
   remap: remap
-};
+}
+

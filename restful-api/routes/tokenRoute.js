@@ -224,10 +224,13 @@ const getTokenResponse = async (res, req, project, email, password) => {
 };
 
 router.post("/getToken", async (req, res, next) => {
+  logger.info( "/getToken" );
+
   let project = req.body.project;
   const email = req.body.email;
   const password = req.body.password;
 
+  logger.info( "Project: " + project + " email: " + email );
   await getTokenResponse(res, req, project, email, password);
 });
 

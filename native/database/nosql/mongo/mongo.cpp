@@ -20,9 +20,7 @@ Mongo::Mongo( const DBConnection& _cs ) {
 }
 
 MongoBucket Mongo::useBucket( const std::string& _bucketName ) const {
-    mongocxx::options::gridfs::bucket b;
-    b.bucket_name( _bucketName );
-    return MongoBucket{ db.gridfs_bucket( b ) };
+    return MongoBucket{ db, _bucketName };
 }
 
 MongoCollection Mongo::operator[]( const std::string& _collName ) const {
@@ -123,6 +121,7 @@ void Mongo::insertEntityFromAsset( const StreamChangeMetadata& meta ) {
     using bsoncxx::builder::basic::sub_array;
 
     auto builder = bsoncxx::builder::basic::document{};
+    auto timeNow = std::chrono::system_clock::now();
     builder.append(
             kvp( "group", meta.group ),
             kvp( "fsid", meta.id()),
@@ -130,17 +129,34 @@ void Mongo::insertEntityFromAsset( const StreamChangeMetadata& meta ) {
             kvp( "project", meta.project ),
             kvp( "isPublic", true ),
             kvp( "isRestricted", false ),
-            kvp( "username", meta.username ),
-            kvp( "useremail", meta.useremail ),
-            kvp( "hash", meta.md5 ),
+            kvp( "hash", meta.hash ),
             kvp( "thumb", meta.thumb ),
+            kvp( "lastUpdatedDate", bsoncxx::types::b_date{timeNow} ),
+            kvp( "creationDate", bsoncxx::types::b_date{timeNow} ),
             kvp( "tags", [&]( sub_array sa ) {
                 for ( const auto& tag : split_tags( std::string( meta.filename ))) {
                     sa.append( tag );
                 }
             } ),
+            kvp( "creator", bsoncxx::builder::basic::make_document(
+                    kvp( "username", meta.username ),
+                    kvp( "useremail", meta.useremail )
+            ) ),
             kvp( "deps", meta.deps.get_value() )
     );
 
     bsoncxx::stdx::optional<mongocxx::result::insert_one> result = db["entities"].insert_one( builder.view());
+}
+
+void MongoBucket::deleteAll() {
+    bucketFiles.delete_many({});
+    bucketChunks.delete_many({});
+}
+
+MongoBucket::MongoBucket( const mongocxx::database& db, const std::string& _bucketName ) {
+    mongocxx::options::gridfs::bucket options;
+    options.bucket_name( _bucketName );
+    bucket = db.gridfs_bucket( options );
+    bucketFiles = db[_bucketName+".files"];
+    bucketChunks = db[_bucketName+".chunks"];
 }

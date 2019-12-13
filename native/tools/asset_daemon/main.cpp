@@ -228,6 +228,10 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
     auto sourceAssetBucket = mdb.useBucket( "fs_assets_to_elaborate" );
     auto entityBucket = mdb.useBucket( "fs_entity_assets" );
 
+//    sourceAssetBucket.deleteAll();
+//    entityBucket.deleteAll();
+//    mdb["entities"]().delete_many({});
+
     auto streamToElaborate = mdb["fs_assets_to_elaborate.files"].watch();
     auto streamAsset = mdb["fs_entity_assets.files"].watch();
 

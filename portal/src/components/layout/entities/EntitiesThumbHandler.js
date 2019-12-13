@@ -17,10 +17,11 @@ const EntitiesThumbHandler = (props) => {
   if (entries && entries.length > 0) {
     entries.map(e => {
       let entryWithThumb = e;
-      if (!e.metadata.thumb.startsWith("blob:")) {
-        const bb = new Blob([decode(e.metadata.thumb)]);
-        entryWithThumb.metadata.thumb =
-          e.metadata.thumb !== "" ? URL.createObjectURL(bb) : "";
+      console.log("EntityThumb: ", entryWithThumb );
+      if (!e.thumb.startsWith("blob:")) {
+        const bb = new Blob([decode(e.thumb)]);
+        entryWithThumb.thumb =
+          e.thumb !== "" ? URL.createObjectURL(bb) : "";
       }
       entryWithThumb.cname = "EntityThumbnail";
       if (currentEntity && e._id === currentEntity.entity._id) {
@@ -40,10 +41,10 @@ const EntitiesThumbHandler = (props) => {
   let displayNames = {};
   entitiesRes.forEach(entry => {
     displayNames[entry._id] = [];
-    if (entry.metadata.tags.length === 0) {
-      displayNames[entry._id].push(entry.metadata.name);
+    if (entry.tags.length === 0) {
+      displayNames[entry._id].push(entry.name);
     } else {
-      entry.metadata.tags.forEach(element => {
+      entry.tags.forEach(element => {
         if (!checkCommonFileExtension(entry.group, element)) {
           displayNames[entry._id].push(element);
         }
@@ -68,8 +69,8 @@ const EntitiesThumbHandler = (props) => {
               <i className="fas fa-user-tag" />{" "}
             </span>
             <span className="text-secondary">
-              {entry.metadata.creator
-                ? entry.metadata.creator.name
+              {entry.creator
+                ? entry.creator.name
                 : entry.project}
             </span>
           </div>

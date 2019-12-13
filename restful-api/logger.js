@@ -10,7 +10,7 @@ const defFormat = (process.env.NODE_ENV !== 'production') ? winston.format.combi
 const defTransport = (process.env.NODE_ENV !== 'production') ? new transports.Console() :  new transports.File({ filename: `${appRoot}/logs/nodejs-api.log` }) ;
 
 const logger = createLogger({
-  level: "info",
+  level: "silly",
   exitOnError: false,
   format: defFormat,
   transports: [

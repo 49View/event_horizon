@@ -19,12 +19,14 @@ using strview = boost::string_view;
 
 class MongoBucket : public NoSqlStorage {
 public:
-    explicit MongoBucket( mongocxx::gridfs::bucket entityBucket ) : bucket( std::move( entityBucket )) {}
+    explicit MongoBucket( const mongocxx::database& db, const std::string& _bucketName );
 
     mongocxx::gridfs::bucket operator()() { return bucket; }
-
+    void deleteAll();
 private:
     mongocxx::gridfs::bucket bucket;
+    mongocxx::collection bucketFiles;
+    mongocxx::collection bucketChunks;
 };
 
 class MongoCollection : public NoSqlCollection {
@@ -103,7 +105,7 @@ struct StreamChangeMetadata {
         username = metadata["username"].get_utf8().value;
         useremail = metadata["useremail"].get_utf8().value;
         project = metadata["project"].get_utf8().value;
-        md5 = metadata["md5"] ? metadata["md5"].get_utf8().value : "";
+        hash = metadata["hash"] ? metadata["hash"].get_utf8().value : "";
         thumb = metadata["thumb"] ? metadata["thumb"].get_utf8().value : "";
         deps = metadata["deps"] ? metadata["deps"] : bsoncxx::document::element{};
     }
@@ -114,7 +116,7 @@ struct StreamChangeMetadata {
     strview username;
     strview useremail;
     strview project;
-    strview md5;
+    strview hash;
     strview thumb;
     bsoncxx::document::element deps;
 };

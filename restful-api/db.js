@@ -69,7 +69,7 @@ WMStrm.prototype._write = function (chunk, enc, cb) {
     cb();
 };
 
-const memoryPromise = async ( bucketFSModel, filename, callback ) => {
+const downloadByName = async ( bucketFSModel, filename, callback ) => {
     return new Promise(resolve => {
         let wstream = new WMStrm('file');
         wstream.on('finish', () => {
@@ -78,6 +78,19 @@ const memoryPromise = async ( bucketFSModel, filename, callback ) => {
         } );
         bucketFSModel.openDownloadStreamByName(filename).pipe(wstream);
     });
+}
+
+const downloadById = async ( bucketFSModel, id ) => {
+    let data;
+    await new Promise(resolve => {
+        let wstream = new WMStrm('file');
+        wstream.on('finish', () => {
+            data = memStore.file;
+            resolve();
+        } );
+        bucketFSModel.openDownloadStream(id).pipe(wstream);
+    });
+    return data;
 }
 
 exports.fsExists = async ( bucketFSModel, filename, metadata ) => {
@@ -98,7 +111,7 @@ exports.fsEqual = async ( bucketFSModel, filename, data, metadata ) => {
         const existSameLengthAsset = bucketFSModel.find( queryLength );
         let ret = false;
         if ( existSameLengthAsset ) {
-            await memoryPromise(bucketFSModel, filename, () => {
+            await downloadByName(bucketFSModel, filename, () => {
                 if ( md5(memStore.file) === md5(data) ) {
                     ret = true;
                 }
@@ -160,3 +173,11 @@ exports.fsUpsert = async ( bucketFSModel, filename, data, metadata, metadataComp
     }
 }
 
+exports.fsDownloadWithId = async( bucketFSModel, id ) => {
+    try {
+        logger.info("Download asset: " + id );
+        return await downloadById(bucketFSModel, id );
+    } catch (e) {
+        logger.error("fsDownloadWithId of: " + id + " failed because " + e );
+    }
+}

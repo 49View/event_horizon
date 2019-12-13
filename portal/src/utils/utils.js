@@ -108,14 +108,14 @@ export const entityTypeSelector = entry => {
         </span>
       );
   } else if (entry.group === GroupGeom) {
-    if (entry.metadata.thumb === "")
+    if (entry.thumb === "")
       return (
         <span className="geomThumbNotFound">
           <i className="fas fa-cubes" />
         </span>
       );
   } else if (entry.group === GroupImage || entry.group === GroupMaterial) {
-    if (entry.metadata.thumb === "") {
+    if (entry.thumb === "") {
       return (
         <span className="imageThumbNotFound">
           <i className="far fa-frown" />
@@ -135,16 +135,16 @@ export const entityTypeSelector = entry => {
       </span>
     );
   } else if (entry.group === GroupProfile) {
-    if (entry.metadata.thumb === "") {
+    if (entry.thumb === "") {
       return (
         <span className="imageThumbNotFound">
           <i className="far fa-frown" />
         </span>
       );
     } else {
-      return <svg>{entry.metadata.thumb}</svg>;
+      return <svg>{entry.thumb}</svg>;
     }
   }
 
-  return <img className="imgGreyOutline" src={entry.metadata.thumb} alt="" />;
+  return <img className="imgGreyOutline" src={entry.thumb} alt="" />;
 };

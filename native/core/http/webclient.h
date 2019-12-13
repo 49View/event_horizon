@@ -16,9 +16,9 @@
 bool isSuccessStatusCode( int statusCode );
 
 namespace HttpFilePrefix {
-    const static std::string user = "/user/";
-    const static std::string gettoken = "/getToken/";
-    const static std::string refreshtoken = "/refreshToken/";
+    const static std::string user = "/user";
+    const static std::string gettoken = "/getToken";
+    const static std::string refreshtoken = "/refreshToken";
     const static std::string entities = "/entities/";
     const static std::string entities_all = "/entities/metadata/byGroupTags/";
     const static std::string entities_onebinary = "/entities/content/byGroupTags/";

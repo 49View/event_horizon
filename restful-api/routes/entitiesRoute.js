@@ -7,6 +7,7 @@ const tar = require("tar-stream");
 const streams = require("memory-streams");
 const md5 = require("md5");
 const logger = require('../logger');
+const db = require("../db");
 
 const sendResult = (res, ret, successCode = 200, failCode = 400) => {
     if (ret !== null) {
@@ -65,6 +66,7 @@ router.get("/content/byHash/:hashId", async (req, res, next) => {
 
 router.get("/:group/:tags", async (req, res, next) => {
     try {
+        logger.info(req.url);
         const group = req.params.group;
         const tags = metaAssistant.splitTags(req.params.tags);
         const project = req.user.project;
@@ -79,75 +81,82 @@ router.get("/:group/:tags", async (req, res, next) => {
         );
         if (foundEntities !== null && foundEntities.length > 0) {
             let entity = foundEntities[0];
-            for (const ent in foundEntities) {
-                if (ent.project === project) {
-                    entity = ent;
-                    break;
-                }
+            const fileData = await db.fsDownloadWithId(db.bucketEntities, entity.fsid);
+            const dwData = {
+                ContentType : `application/octet`,
+                LastModified: entity.lastUpdatedDate,
+                ETag: entity.hash,
+                ContentLength: fileData.length,
+                body: fileData
             }
 
-            const filePath = entityController.getFilePath(
-                entity.project,
-                entity.group,
-                entity.metadata.name
-            );
-            const fileData = await fsController.cloudStorageEntityGet(filePath);
+            res
+              .status(200)
+              .set({
+                  "Content-Type": `application/octet`,
+                  "Content-Last-Modified": 0,
+                  "ETag": "dashdashasdhakj",
+                  "Content-Length": fileData.length
+              })
+              .send(fileData);
 
+            // fsController.writeFile(res, dwData);
+            // res.send(204);
             // If no deps it's a base resouce, just save the file as it is
-            if (entity.metadata.deps === null || entity.metadata.deps.length == 0) {
-                fsController.writeFile(res, fileData);
-            } else {
-                let tarPack = tar.pack();
-                let tarDict = [];
-                // tarDict.push( { group: entity.group, filename: entity.metadata.name } );
-                tarPack.entry({name: entity.metadata.name}, fileData["Body"]);
-                tarDict.push({
-                    group: entity.group,
-                    filename: entity.metadata.name,
-                    hash: entity.metadata.hash
-                });
-                for (const elementGroup of entity.metadata.deps) {
-                    for (const element of elementGroup.value) {
-                        const depArray = await entityController.getEntityDeps(
-                            entity.project,
-                            elementGroup.key,
-                            element
-                        );
-                        if (depArray !== null && depArray.length > 0) {
-                            const dep = depArray[0];
-                            const depFilePath = entityController.getFilePath(
-                                dep.project,
-                                elementGroup.key,
-                                dep.metadata.name
-                            );
-                            const depData = await fsController.cloudStorageEntityGet(
-                                depFilePath
-                            );
-                            tarPack.entry(
-                                {name: dep.metadata.name, size: depData.ContentLength},
-                                depData["Body"]
-                            );
-                            tarDict.push({
-                                group: elementGroup.key,
-                                filename: dep.metadata.name,
-                                hash: dep.metadata.hash
-                            });
-                        }
-                    }
-                }
-                tarPack.entry({name: "catalog"}, JSON.stringify(tarDict));
-
-                tarPack.finalize();
-                var writer = new streams.WritableStream();
-                tarPack.pipe(writer);
-                tarPack.on("end", () => {
-                    let buff = writer.toBuffer();
-                    res
-                        .status(200)
-                        .set({"Content-Length": Buffer.byteLength(buff)})
-                        .send(buff);
-                });
-            }
+            // if (entity.deps === null || entity.deps.length == 0) {
+            //     fsController.writeFile(res, fileData);
+            // } else {
+            //     let tarPack = tar.pack();
+            //     let tarDict = [];
+            //     // tarDict.push( { group: entity.group, filename: entity.name } );
+            //     tarPack.entry({name: entity.name}, fileData["Body"]);
+            //     tarDict.push({
+            //         group: entity.group,
+            //         filename: entity.name,
+            //         hash: entity.hash
+            //     });
+            //     for (const elementGroup of entity.deps) {
+            //         for (const element of elementGroup.value) {
+            //             const depArray = await entityController.getEntityDeps(
+            //                 entity.project,
+            //                 elementGroup.key,
+            //                 element
+            //             );
+            //             if (depArray !== null && depArray.length > 0) {
+            //                 const dep = depArray[0];
+            //                 const depFilePath = entityController.getFilePath(
+            //                     dep.project,
+            //                     elementGroup.key,
+            //                     dep.name
+            //                 );
+            //                 const depData = await fsController.cloudStorageEntityGet(
+            //                     depFilePath
+            //                 );
+            //                 tarPack.entry(
+            //                     {name: dep.name, size: depData.ContentLength},
+            //                     depData["Body"]
+            //                 );
+            //                 tarDict.push({
+            //                     group: elementGroup.key,
+            //                     filename: dep.name,
+            //                     hash: dep.hash
+            //                 });
+            //             }
+            //         }
+            //     }
+            //     tarPack.entry({name: "catalog"}, JSON.stringify(tarDict));
+            //
+            //     tarPack.finalize();
+            //     var writer = new streams.WritableStream();
+            //     tarPack.pipe(writer);
+            //     tarPack.on("end", () => {
+            //         let buff = writer.toBuffer();
+            //         res
+            //             .status(200)
+            //             .set({"Content-Length": Buffer.byteLength(buff)})
+            //             .send(buff);
+            //     });
+            // }
         } else {
             res.sendStatus(204);
         }
@@ -379,45 +388,6 @@ router.post("/:group/:filename", async (req, res, next) => {
     }
 });
 
-// // this post have a binary body and will automatically create metadata itself
-// // it will probably come from a daemon so it won't have req.user information
-// // hence we need to pass them down
-// router.post(
-//     "/:filename/:project/:group/:username/:useremail",
-//     async (req, res, next) => {
-//         const filename = req.params.filename;
-//         const group = req.params.group;
-//         const project = decodeURIComponent(req.params.project);
-//         const username = decodeURIComponent(req.params.username);
-//         const useremail = decodeURIComponent(req.params.useremail);
-//
-//         try {
-//             const entity = await entityController.createEntityFromMetadata(
-//                 req.body,
-//                 project,
-//                 group,
-//                 true,
-//                 false,
-//                 entityController.createMetadataStartup(filename, username, useremail),
-//                 true,
-//                 null
-//             );
-//
-//             if (entity !== null) {
-//                 res
-//                     .status(201)
-//                     .json(entity)
-//                     .end();
-//             } else {
-//                 throw "[post.entity] Entity created is null";
-//             }
-//         } catch (ex) {
-//             console.log("[POST] Entity error: ", ex);
-//             res.sendStatus(400);
-//         }
-//     }
-// );
-
 // this post have a binary body and will automatically create metadata itself
 // it will probably come from a daemon so it won't have req.user information
 // hence we need to pass them down
@@ -486,7 +456,7 @@ router.put("/:id", async (req, res, next) => {
             const origFilePath = entityController.getFilePath(
                 project,
                 group,
-                currentEntity.metadata.name
+                currentEntity.name
             );
             const tempDeleteFilePath = origFilePath + ".delete";
             // Remove current file from S3
@@ -499,7 +469,7 @@ router.put("/:id", async (req, res, next) => {
             const filePath = entityController.getFilePath(
                 project,
                 group,
-                currentEntity.metadata.name
+                currentEntity.name
             );
             await fsController.cloudStorageFileUpload(
                 content,

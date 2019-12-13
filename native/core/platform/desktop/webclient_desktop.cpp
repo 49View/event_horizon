@@ -10,12 +10,13 @@ namespace Http {
 
     std::shared_ptr<restbed::Request> makeRequestBase( const Url& url ) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri(url.toString()));
+        request->set_header( "User-Agent", "Restbed-native" );
         request->set_header( "Accept", "*/*" );
         request->set_header( "Host", url.hostOnly() );
         request->set_header( "Connection", "keep-alive" );
         request->set_header( "Authorization", Http::userBearerToken() );
-        request->set_header( "x-eventhorizon-guest", Http::project() );
-        request->set_header( "x-eventhorizon-guest-write", Http::project() );
+//        request->set_header( "x-eventhorizon-guest", Http::project() );
+//        request->set_header( "x-eventhorizon-guest-write", Http::project() );
         return request;
     }
 
@@ -54,10 +55,10 @@ namespace Http {
                 break;
             case HttpQuery::JSON:
             case HttpQuery::Text:
-                request->set_header( "Content-Type", "application/json; charset=utf-8" );
+                request->set_header( "Content-Type", "application/json" );
                 break;
         }
-//        request->set_header( "Content-Length", std::to_string( length ) );
+        request->set_header( "Content-Length", std::to_string( length ) );
         request->set_method( "POST" );
         if ( length > 0 ) {
             const restbed::Bytes bodybuffer(buff, buff + length);
