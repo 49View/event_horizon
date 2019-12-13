@@ -31,7 +31,6 @@ exports.createSession = async (
   };
 
   try {
-    console.log("[Session]", session);
     const dbSession = await sessionModel.create(session);
     dbSession.userId = userIdObject;
     await sessionModel.updateOne(

@@ -2,6 +2,7 @@ const webSocket = require("ws");
 const queryString = require("query-string");
 const sessionController = require("../controllers/sessionController");
 const userController = require("../controllers/userController");
+const logger = require("../logger");
 
 let wsServer = null;
 let sendPingHandler = null;
@@ -10,7 +11,7 @@ const noop = () => {};
 
 const onSocketServerSendPing = () => {
   this.wsServer.clients.forEach(client => {
-    //console.log((new Date())+" - Sending PING to ", client.session._id);
+    //logger.info((new Date())+" - Sending PING to ", client.session._id);
     if (client.isAlive === false) {
       client.terminate();
     } else {
@@ -44,13 +45,13 @@ const onSocketServerConnection = async (client, req) => {
   session = await checkSessionById(sessionId, ipAddress, userAgent);
   if (session === null) {
     client.terminate();
-    console.log("[WSS] ", new Date() + " Connection rejected.");
+    logger.info("[WSS] "+ new Date() + " Connection rejected.");
   } else {
     //Save connection in session
     client.session = session;
     client.isAlive = true;
     client.ping(noop);
-    console.log("[WSS] Session connected: ", client.session, " ", new Date());
+    logger.info("[WSS] Session connected: " + client.session + new Date());
     client.on("message", message => onSocketClientMessage(client, message));
     client.on("pong", () => onSocketClientHeartBeat(client));
     client.on("close", () => onSocketClientClose(client));
@@ -58,23 +59,23 @@ const onSocketServerConnection = async (client, req) => {
 };
 
 const onSocketClientClose = client => {
-  console.log(new Date() + " - Client disconnected ", client.session._id);
+  logger.info(new Date() + " - Client disconnected ", client.session._id);
 };
 
 const onSocketClientHeartBeat = client => {
-  //console.log((new Date())+" - Receiving PONG ",client.session._id);
+  //logger.info((new Date())+" - Receiving PONG ",client.session._id);
   client.isAlive = true;
 };
 
 const onSocketClientMessage = async (client, message) => {
-  console.log(
+  logger.info(
     "[WSS]['msg'] {",
     client.session.user ? client.session.user.name : client.session.userId,
     "} ",
     message.slice(0, 50),
     " ...(truncated)"
   );
-  // console.log("Message: "+message);
+  // logger.info("Message: "+message);
   try {
     //   let messageObject=JSON.parse(message);
     this.wsServer.clients.forEach(function each(oclient) {
@@ -83,7 +84,7 @@ const onSocketClientMessage = async (client, message) => {
       }
     });
   } catch (err) {
-    console.log("[WSS][ERROR] Error on send message ", err);
+    logger.info("[WSS][ERROR] Error on send message ", err);
   }
 };
 
@@ -91,19 +92,19 @@ exports.createSocketServer = port => {
   this.wsServer = new webSocket.Server({ port: port });
   this.wsServer.on("connection", onSocketServerConnection);
   this.sendPingHandler = setInterval(onSocketServerSendPing, 30000);
-  console.log("Starting WSS on Port: ", port);
+  logger.info("Starting WSS on Port: "+ port);
 };
 
 exports.sendMessageToAllClients = message => {
-  console.log(new Date() + " - Send message to all client");
+  logger.info(new Date() + " - Send message to all client");
   this.wsServer.clients.forEach(client => {
-    console.log("Client session ", client.session);
+    logger.info("Client session ", client.session);
     client.send(message);
   });
 };
 
 exports.sendMessageToSessionWithRole = (role, message) => {
-  console.log(
+  logger.info(
     new Date() + " - Send message to client with session user role " + role
   );
   this.wsServer.clients.forEach(client => {
@@ -114,7 +115,7 @@ exports.sendMessageToSessionWithRole = (role, message) => {
 };
 
 exports.sendMessageToSessionWithUserId = (userId, message) => {
-  console.log(
+  logger.info(
     new Date() + " - Send message to client with session userId " + userId
   );
   this.wsServer.clients.forEach(client => {
@@ -125,7 +126,7 @@ exports.sendMessageToSessionWithUserId = (userId, message) => {
 };
 
 exports.sendMessageToSessionWithUserIdProject = (userId, project, message) => {
-  console.log(
+  logger.info(
     new Date() +
       " - Send message to client with session userId/project " +
       userId +
@@ -147,7 +148,7 @@ exports.replaceClientsSession = async (previousSessionId, currentSessionId) => {
   if (session !== null) {
     this.wsServer.clients.forEach(client => {
       if (client.session._id.toString() === previousSessionId.toString()) {
-        console.log(
+        logger.info(
           new Date() +
             " - Replace session " +
             previousSessionId +
@@ -163,7 +164,7 @@ exports.replaceClientsSession = async (previousSessionId, currentSessionId) => {
 exports.closeClientsWithSessionId = sessionId => {
   this.wsServer.clients.forEach(client => {
     if (client.session._id.toString() === sessionId.toString()) {
-      console.log(new Date() + " - Close session " + sessionId);
+      logger.info(new Date() + " - Close session " + sessionId);
       client.terminate();
     }
   });
@@ -184,7 +185,7 @@ exports.closeClientsWithSessionId = sessionId => {
 // exports.send = ( req, res ) => {
 //     const jr = req.body;
 //     const jrs = JSON.stringify(jr);
-//     console.log( "[WEB-SOCKET][MESSAGE] " + jrs )
+//     logger.info( "[WEB-SOCKET][MESSAGE] " + jrs )
 //     ws_send( jrs );
 //     res.json( jr );
 // }

@@ -219,7 +219,6 @@ const getTokenResponse = async (res, req, project, email, password) => {
         expires: d
       })
       .send(tokenInfo);
-    logger.info(tokenInfo);
   }
 };
 

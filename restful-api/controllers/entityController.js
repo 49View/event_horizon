@@ -993,7 +993,6 @@ module.exports = {
       entityModel,
       aggregationQueries
     );
-    logger.debug("Result" + result);
     return result;
   },
 

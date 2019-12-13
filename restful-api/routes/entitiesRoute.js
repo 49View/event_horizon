@@ -94,8 +94,8 @@ router.get("/:group/:tags", async (req, res, next) => {
               .status(200)
               .set({
                   "Content-Type": `application/octet`,
-                  "Content-Last-Modified": 0,
-                  "ETag": "dashdashasdhakj",
+                  "Content-Last-Modified": entity.lastUpdatedDate,
+                  "ETag": entity.hash,
                   "Content-Length": fileData.length
               })
               .send(fileData);

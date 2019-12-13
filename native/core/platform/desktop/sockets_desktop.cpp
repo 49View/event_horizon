@@ -53,27 +53,23 @@ namespace Socket {
     std::chrono::high_resolution_clock::time_point m_close;
 
     context_ptr on_tls_init( [[maybe_unused]] const char * hostname, websocketpp::connection_hdl) {
-//        context_ptr ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
-//
-//        try {
-//            ctx->set_options(boost::asio::ssl::context::default_workarounds |
-//                             boost::asio::ssl::context::no_sslv2 |
-//                             boost::asio::ssl::context::no_sslv3 |
-//                             boost::asio::ssl::context::single_dh_use);
-//
-//
-//            ctx->set_verify_mode(boost::asio::ssl::verify_none);
-//            // ### NDDado: reenable those two lines to enable native client certificate verification
-////            ctx->set_verify_callback(bind(&verify_certificate, hostname, ::_1, ::_2));
-////            ctx->load_verify_file("ca-chain.cert.pem");
-//        } catch (std::exception& e) {
-//            LOGRS( e.what() );
-//        }
-//        return ctx;
-        // ***********************************************************************************************************
-        // ### NDDado: reenable SSL!!!!!
-        // ***********************************************************************************************************
-        return nullptr;
+        context_ptr ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
+
+        try {
+            ctx->set_options(boost::asio::ssl::context::default_workarounds |
+                             boost::asio::ssl::context::no_sslv2 |
+                             boost::asio::ssl::context::no_sslv3 |
+                             boost::asio::ssl::context::single_dh_use);
+
+
+            ctx->set_verify_mode(boost::asio::ssl::verify_none);
+            // ### NDDado: reenable those two lines to enable native client certificate verification
+//            ctx->set_verify_callback(bind(&verify_certificate, hostname, ::_1, ::_2));
+//            ctx->load_verify_file("ca-chain.cert.pem");
+        } catch (std::exception& e) {
+            LOGRS( e.what() );
+        }
+        return ctx;
     }
     void on_fail(websocketpp::connection_hdl hdl) {
         g_isConnecting = false;
@@ -137,6 +133,7 @@ namespace Socket {
 
             if (ec) {
                 m_endpoint->get_alog().write(websocketpp::log::alevel::app,ec.message());
+                LOGRS("[WEBSOCKET-ERROR] " << ec.message() );
                 return;
             }
 
@@ -187,7 +184,7 @@ namespace Socket {
             }
             m_endpoint->stop_perpetual();
             m_endpoint->stop();
-            m_thread->join();
+            if ( m_thread) m_thread->join();
         }
     }
 
