@@ -54,16 +54,16 @@ exports.cloudStorageGetFilenameAndDuplicateIfExists = async (
 //     return cloudApi.list( key, completed );
 // }
 
-exports.writeFile = (res, data) => {
+exports.writeFile = (res, entity, data) => {
   res
     .status(200)
     .set({
-      "Content-Type": data.ContentType,
-      "Content-Last-Modified": data.LastModified,
-      ETag: data.ETag,
-      "Content-Length": data.ContentLength
+      "Content-Type": entity.contentType,
+      "Content-Last-Modified": entity.lastUpdatedDate,
+      "ETag": entity.hash,
+      "Content-Length": data.length
     })
-    .send(data["Body"]);
+    .send(data);
 };
 
 exports.writeError = (res, number, err, message) => {

@@ -48,7 +48,7 @@ export const requestAsset = currentEntity => {
   try {
     const obj = {
       group: currentEntity.entity.group,
-      hash: currentEntity.entity.metadata.hash,
+      hash: currentEntity.entity.hash,
       entity_id: currentEntity.entity._id
     };
     wscSend("LoadGeomAndReset", obj);

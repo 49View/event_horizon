@@ -42,24 +42,23 @@ std::optional<uint8_p> Mongo::fileDownloadWithId( MongoBucket& bucket, const std
     return std::nullopt;
 }
 
-void Mongo::fileDownload( MongoBucket& bucket, const MongoObjectId& _id, std::function<void( uint8_p&& )> callback ) {
+uint8_p Mongo::fileDownload( MongoBucket& bucket, const MongoObjectId& _id, std::function<void( uint8_p&& )> callback ) {
     auto downloadStream = bucket().open_download_stream( _id());
     auto buffer = make_uint8_p( downloadStream.file_length());
-    auto ret = downloadStream.read( buffer.first.get(), downloadStream.file_length());
-    if ( ret == downloadStream.file_length()) {
-        if ( callback ) callback( std::move( buffer ));
-    }
+    downloadStream.read( buffer.first.get(), downloadStream.file_length());
+    return buffer;
 }
 
-void Mongo::fileDownload( MongoBucket& bucket, const MongoObjectId& _id, const std::string& filename,
+std::string Mongo::fileDownload( MongoBucket& bucket, const MongoObjectId& _id, const std::string& filename,
                           std::function<void( const std::string& )> callback ) {
     auto downloadStream = bucket().open_download_stream( _id());
     auto buffer = make_uint8_p( downloadStream.file_length());
     auto ret = downloadStream.read( buffer.first.get(), downloadStream.file_length());
     if ( ret == downloadStream.file_length()) {
         FM::writeLocalFile( filename, reinterpret_cast<const char *>(buffer.first.get()), buffer.second, true );
-        if ( callback ) callback( filename );
+        return filename;
     }
+    return "";
 }
 
 MongoFileUpload
@@ -83,6 +82,7 @@ Mongo::fileUpload( MongoBucket& bucket, const std::string& filename, const Seria
 
 MongoDocumentValue Mongo::FSMetadata( const std::string& group, strview project, strview uname,
                                       strview uemail,
+                                      const std::string& contentType,
                                       const std::string& md5, const std::string& thumb,
                                       const ResourceDependencyDict& deps ) {
 
@@ -96,6 +96,7 @@ MongoDocumentValue Mongo::FSMetadata( const std::string& group, strview project,
             kvp( "project", project ),
             kvp( "username", uname ),
             kvp( "useremail", uemail ),
+            kvp( "contentType", contentType ),
             kvp( "hash", md5 ),
             kvp( "thumb", thumb ),
             kvp( "deps", [&]( sub_array sa ) {
@@ -129,6 +130,7 @@ void Mongo::insertEntityFromAsset( const StreamChangeMetadata& meta ) {
             kvp( "project", meta.project ),
             kvp( "isPublic", true ),
             kvp( "isRestricted", false ),
+            kvp( "contentType", meta.contentType ),
             kvp( "hash", meta.hash ),
             kvp( "thumb", meta.thumb ),
             kvp( "lastUpdatedDate", bsoncxx::types::b_date{timeNow} ),

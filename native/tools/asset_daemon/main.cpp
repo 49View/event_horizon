@@ -76,24 +76,25 @@ std::optional<MongoFileUpload> saveImageToGridFS( MongoBucket bucket, const char
                                                   strview uname,
                                                   strview uemail,
                                                   std::vector<std::string>& thumbs ) {
-    int w, h, n;
-    int thumbSize = 128;
-
-    unsigned char *input_data = stbi_load( filename, &w, &h, &n, 0 );
-
-    auto output_data = make_uint8_p( desiredWidth * desiredHeight * n );
-    auto output_data_thumb = make_uint8_p( thumbSize * thumbSize * n );
-    stbir_resize_uint8( input_data, w, h, 0, output_data.first.get(), desiredWidth, desiredHeight, 0, n );
-    stbir_resize_uint8( output_data.first.get(), desiredWidth, desiredHeight, 0, output_data_thumb.first.get(),
-                        thumbSize, thumbSize, 0, n );
-
-    auto bm = imageUtil::bufferToPngMemory( desiredWidth, desiredHeight, n, output_data.first.get());
-    auto bm64 = imageUtil::bufferToPng64( thumbSize, thumbSize, n, output_data_thumb.first.get());
-    thumbs.emplace_back( bm64 );
-
     try {
+        int w = 0, h = 0, n = 0;
+        int thumbSize = 128;
+
+        unsigned char *input_data = stbi_load( filename, &w, &h, &n, 0 );
+
+        auto output_data = make_uint8_p( desiredWidth * desiredHeight * n );
+        auto output_data_thumb = make_uint8_p( thumbSize * thumbSize * n );
+        stbir_resize_uint8( input_data, w, h, 0, output_data.first.get(), desiredWidth, desiredHeight, 0, n );
+        stbir_resize_uint8( output_data.first.get(), desiredWidth, desiredHeight, 0, output_data_thumb.first.get(),
+                            thumbSize, thumbSize, 0, n );
+
+        auto bm = imageUtil::bufferToPngMemory( desiredWidth, desiredHeight, n, output_data.first.get());
+        auto bm64 = imageUtil::bufferToPng64( thumbSize, thumbSize, n, output_data_thumb.first.get());
+        thumbs.emplace_back( bm64 );
+
         return Mongo::fileUpload( bucket, getFileName( filename ), std::move( bm ),
                                   Mongo::FSMetadata( ResourceGroup::Image, project, uname, uemail,
+                                                     HttpContentType::octetStream,
                                                      MD5( bm.first.get(), bm.second ).hexdigest(), bm64 ));
     } catch ( const std::exception& e ) {
         LOGRS( e.what());
@@ -107,6 +108,8 @@ void elaborateMatSBSAR( MongoBucket entity_bucket,
                         int size, strview project,
                         strview uname,
                         strview uemail ) {
+
+    if ( mainFileName.empty()) return;
     auto fileRoot = getDaemonRoot();
 
     std::string fn = getFileNameOnly( mainFileName );
@@ -147,58 +150,48 @@ void elaborateMatSBSAR( MongoBucket entity_bucket,
     // Create PBR material
     auto matSer = pbrmat.serialize();
     Mongo::fileUpload( entity_bucket, fn, matSer,
-                       Mongo::FSMetadata( ResourceGroup::Material, project, uname, uemail, Hashable<>::hashOf( matSer ),
-                                          thumbs[0], deps ));
+                       Mongo::FSMetadata( ResourceGroup::Material, project, uname, uemail,
+                                          HttpContentType::json, Hashable<>::hashOf( matSer ), thumbs[0], deps ));
 
     // Clean up
     std::string cleanup = "cd " + fileRoot + " && rm " + fn + "*";
     std::system( cleanup.c_str());
-
 }
 
-void elaborateGeom( const std::string& _filename, const std::string& project, const std::string& uname,
-                    const std::string& uemail ) {
-    FM::readRemoteSimpleCallback( _filename,
-                                  [project, uname, uemail]( const Http::Result& _res ) {
-                                      std::string dRoot = cacheFolder(); // "/" on linux
-                                      std::string filename = getFileName( _res.uri );
-                                      std::string mainFileName = dRoot + filename;
-                                      FM::writeLocalFile( mainFileName,
-                                                          reinterpret_cast<const char *>(_res.buffer.get()),
-                                                          _res.length, true );
+void elaborateGeomFBX( MongoBucket entity_bucket, const std::string& _filename, strview project,
+                       strview uname,
+                       strview uemail ) {
+    auto dRoot = getDaemonRoot();
+    auto fn = getFileNameOnly( _filename );
 
-                                      std::string cmd = "FBX2glTF -b --pbr-metallic-roughness -o " + dRoot +
-                                                        getFileNameOnly( filename ) + " " +
-                                                        mainFileName;
+    std::string cmd = "FBX2glTF -b --pbr-metallic-roughness -o " + dRoot + fn + " " + _filename;
+    std::system( cmd.c_str());
 
-                                      std::system( cmd.c_str());
+    std::string filenameglb = fn + ".glb";
 
-                                      std::string filenameglb = getFileNameOnly( filename ) + ".glb";
-
-                                      std::string finalPath = dRoot + filenameglb;
-
-                                      std::string reqParams =
-                                              filenameglb + "/" + project + "/" + ResourceGroup::Geom + "/" +
-                                              url_encode( uname ) +
-                                              "/" + url_encode( uemail );
-                                      Http::post( Url{ HttpFilePrefix::entities + reqParams },
-                                                  FM::readLocalFile( finalPath ));
-                                  } );
+    auto fileData = FM::readLocalFile( dRoot + filenameglb );
+    auto fileHash = Hashable<>::hashOf( fileData );
+    Mongo::fileUpload( entity_bucket, filenameglb, std::move( fileData ),
+                       Mongo::FSMetadata( ResourceGroup::Geom, project, uname, uemail,
+                                          HttpContentType::json, fileHash, "", ResourceDependencyDict{} ));
 }
 
 void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAssetBucket, MongoBucket entityBucket ) {
     for ( auto change : stream ) {
         StreamChangeMetadata meta{ change };
+        Profiler p1{ "elaborate time:" };
+        auto fileDownloaded = Mongo::fileDownload( sourceAssetBucket,
+                                                   meta.id,
+                                                   getDaemonRoot() + std::string{ meta.filename } );
         if ( meta.group == ResourceGroup::Material ) {
-            Profiler p1{ "elaborateMat" };
             if ( getFileNameExt( std::string( meta.filename )) == ".sbsar" ) {
-                Mongo::fileDownload( sourceAssetBucket,
-                                     meta.id,
-                                     getDaemonRoot() + std::string{ meta.filename }, [&]( const std::string& _fn ) {
-                            elaborateMatSBSAR( entityBucket, _fn, {}, 512, meta.project,
-                                               meta.username,
-                                               meta.useremail );
-                        } );
+                elaborateMatSBSAR( entityBucket, fileDownloaded, {}, 512, meta.project,
+                                   meta.username,
+                                   meta.useremail );
+            }
+        } else if ( meta.group == ResourceGroup::Geom ) {
+            if ( getFileNameExt( std::string( meta.filename )) == ".fbx" ) {
+                elaborateGeomFBX( entityBucket, fileDownloaded, meta.project, meta.username, meta.useremail );
             }
         }
     }

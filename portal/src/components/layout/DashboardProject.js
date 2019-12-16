@@ -106,7 +106,7 @@ const DashboardProject = ({
   const entityName = (
     <div className="source_tabs-a">
       <div className="source_tabs-internal">
-        {currentEntity && currentEntity.entity.metadata.name}
+        {currentEntity && currentEntity.entity.name}
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ const JSZip = require("jszip");
 const {uniqueNamesGenerator} = require("unique-names-generator");
 const md5 = require("md5");
 const logger = require('../logger');
+const db = require('../db');
 
 const getMetadataFromBody = (checkGroup, checkRaw, req) => {
   if (req.body === null || !(req.body instanceof Object)) {
@@ -570,8 +571,8 @@ const thumbFromContent = async (content, presetThumb, gtr) => {
 };
 
 const upsertThumb = async entityId => {
-  const entity = await getEntityById(entityId);
-  if (entity.metadata.thumb.length == 0) {
+  const entity = await module.exports.getEntityById(entityId);
+  if (entity.metadata.thumb.length === 0) {
     try {
       const gtr = groupThumbnailCalcRule(entity.group);
       const content = await groupThumbnailSourceContent(entity, gtr);
@@ -583,11 +584,11 @@ const upsertThumb = async entityId => {
     }
   }
   return {};
-};
+}
 
 const upsertTags = async (entityId, tags) => {
   try {
-    const entity = await getEntityById(entityId);
+    const entity = await module.exports.getEntityById(entityId);
     entity.metadata.tags = tags;
     await updateById(entityId, entity);
     return 201;
@@ -596,29 +597,7 @@ const upsertTags = async (entityId, tags) => {
     return 204;
   }
   return 204;
-};
-
-const getEntityContent = async (entityId, project) => {
-  //Check existing entity for use project (or public)
-  const currentEntity = await getEntityByIdProject(project, entityId, true);
-  if (currentEntity === null) {
-    throw "Invalid entity for user project";
-  }
-  const filePath = getFilePath(
-    currentEntity.project,
-    currentEntity.group,
-    currentEntity.metadata.name
-  );
-  return await fsController.cloudStorageEntityGet(filePath);
-};
-
-const getEntityById = async entityId => {
-  let query;
-  query = {_id: entityId};
-  const result = await entityModel.findOne(query);
-
-  return result !== null ? result.toObject() : null;
-};
+}
 
 const getEntityByHash = async (entityId, project) => {
   let query;
@@ -626,7 +605,7 @@ const getEntityByHash = async (entityId, project) => {
   const result = await entityModel.findOne(query);
 
   return result !== null ? result.toObject() : null;
-};
+}
 
 const getEntityByName = async (project, group, name) => {
   let query;
@@ -634,7 +613,7 @@ const getEntityByName = async (project, group, name) => {
   const result = await entityModel.findOne(query);
 
   return result !== null ? result.toObject() : null;
-};
+}
 
 const getEntitiesOfProject = async (project, returnPublic) => {
   let query;
@@ -671,31 +650,6 @@ const getEntitiesIdOfProjectWithGroup = async (project, groupID) => {
   return result !== null ? result : null;
 };
 
-const getEntityDeps = async (project, group, deps) => {
-  const aggregationQueries = [
-    {
-      $match: {
-        $and: [
-          {isRestricted: false},
-          {group: group},
-          {
-            $or: [{project: project}, {isPublic: true}]
-          },
-          {
-            "hash": deps
-          }
-        ]
-      }
-    }
-  ];
-
-  const result = await asyncModelOperations.aggregate(
-    entityModel,
-    aggregationQueries
-  );
-
-  return result;
-};
 
 exports.postMultiZip = async (
   filename,
@@ -888,7 +842,30 @@ module.exports = {
   cleanupMetadata: cleanupMetadata,
   decompressZipppedEntityDeps: decompressZipppedEntityDeps,
   getFilePath: getFilePath,
-  getEntityContent: getEntityContent,
+
+  getEntityContentFSId: async (fsid) => {
+    const oid = mongoose.Types.ObjectId(fsid);
+    const meta = await db.fsFind(db.bucketEntities, oid);
+    return {
+      contentType: meta.contentType,
+      lastUpdatedDate: meta.uploadDate,
+      hash: meta.metadata.hash,
+      data: await db.fsDownloadWithId(db.bucketEntities, oid)
+    }
+  },
+
+  getEntityContent: async (entityId) => {
+    try {
+      const currentEntity = await module.exports.getEntityById(mongoose.Types.ObjectId(entityId));
+      if ( currentEntity ) {
+        return await module.exports.getEntityContentFSId(currentEntity.fsid);
+      }
+      return currentEntity;
+    } catch (e) {
+      logger.error( "GetEntityContent: " + e );
+    }
+  },
+
   checkFileExists: checkFileExists,
 
   createEntity: async (
@@ -926,12 +903,14 @@ module.exports = {
   deleteEntityComplete: deleteEntityComplete,
   getEntityByIdProject: getEntityByIdProject,
   getEntitiesIdOfProjectWithGroup: getEntitiesIdOfProjectWithGroup,
-  getEntityById: getEntityById,
+  getEntityById: async (entityId) => {
+    const result = await entityModel.findOne(entityId);
+    return result !== null ? result.toObject() : null;
+  },
   getEntityByHash: getEntityByHash,
   getEntityByName: getEntityByName,
   getEntitiesOfProject: getEntitiesOfProject,
   getEntitiesOfProjectWithGroup: getEntitiesOfProjectWithGroup,
-  getEntityDeps: getEntityDeps,
   getEntitiesByProjectGroupTags: async (
     project,
     group,

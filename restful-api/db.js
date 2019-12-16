@@ -93,6 +93,17 @@ const downloadById = async ( bucketFSModel, id ) => {
     return data;
 }
 
+exports.fsFind = async ( bucketFSModel, id ) => {
+    try {
+        const ret = bucketFSModel.find( { _id: id } );
+        const entries = await ret.toArray();
+        return entries[0];
+    } catch (e) {
+        logger.error("fsFind of: " + id + " failed because " + e );
+        return null;
+    }
+}
+
 exports.fsExists = async ( bucketFSModel, filename, metadata ) => {
     try {
         const ret = bucketFSModel.find( { filename: filename, ...metadata } );
@@ -180,4 +191,8 @@ exports.fsDownloadWithId = async( bucketFSModel, id ) => {
     } catch (e) {
         logger.error("fsDownloadWithId of: " + id + " failed because " + e );
     }
+}
+
+exports.objectId = (objString ) => {
+    return mongodb.ObjectId(objString);
 }

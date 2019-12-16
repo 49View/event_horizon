@@ -30,6 +30,12 @@ namespace HttpFilePrefix {
     const static std::string broadcast = "/broadcast/";
 };
 
+namespace HttpContentType {
+    const static std::string octetStream = "application/octet-stream";
+    const static std::string json = "application/json";
+    const static std::string text = "application/text";
+}
+
 enum class HttpQuery {
     Binary,
     JSON,

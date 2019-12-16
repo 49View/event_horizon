@@ -106,6 +106,7 @@ struct StreamChangeMetadata {
         useremail = metadata["useremail"].get_utf8().value;
         project = metadata["project"].get_utf8().value;
         hash = metadata["hash"] ? metadata["hash"].get_utf8().value : "";
+        contentType = metadata["contentType"] ? metadata["contentType"].get_utf8().value : "application/octet-stream";
         thumb = metadata["thumb"] ? metadata["thumb"].get_utf8().value : "";
         deps = metadata["deps"] ? metadata["deps"] : bsoncxx::document::element{};
     }
@@ -116,6 +117,7 @@ struct StreamChangeMetadata {
     strview username;
     strview useremail;
     strview project;
+    strview contentType;
     strview hash;
     strview thumb;
     bsoncxx::document::element deps;
@@ -129,9 +131,9 @@ public:
     [[nodiscard]] MongoBucket useBucket( const std::string& _bucketName ) const;
     MongoCollection operator[]( const std::string& _collName ) const;
 
-    static void
+    static uint8_p
     fileDownload( MongoBucket& bucket, const MongoObjectId& _id, std::function<void( uint8_p&& )> callback = nullptr );
-    static void fileDownload( MongoBucket& bucket, const MongoObjectId& _id, const std::string& filename,
+    static std::string fileDownload( MongoBucket& bucket, const MongoObjectId& _id, const std::string& filename,
                               std::function<void( const std::string& )> callback = nullptr );
     static std::optional<uint8_p> fileDownloadWithId( MongoBucket& bucket, const std::string& _id );
     static MongoFileUpload fileUpload( MongoBucket& bucket, const std::string& filename,
@@ -144,6 +146,7 @@ public:
     static MongoDocumentValue
     FSMetadata( const std::string& group, strview project, strview uname,
                 strview uemail,
+                const std::string& contentType,
                 const std::string& md5, const std::string& thumb, const ResourceDependencyDict& deps = {} );
 
     void insertEntityFromAsset( const StreamChangeMetadata& meta );

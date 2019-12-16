@@ -37,7 +37,7 @@ void EditorBackEnd::activatePostLoad() {
 //                                        sg.getHash<RawImage>( skyboxName ) } );
 
     Renderer::clearColor(C4f::WHITE);
-    rsg.useSkybox( false );
+    rsg.useSkybox( true );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
     rsg.RR().LM()->setIndoorSceneCoeff(2.0f);
     rsg.changeTime( "winter noon" );
@@ -49,7 +49,8 @@ void EditorBackEnd::activatePostLoad() {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
 
-//    sg.GB<GT::Shape>( ShapeType::Sphere, GT::M( testLoad ));
+//    sg.loadMaterial("carpet");
+//    sg.GB<GT::Shape>( ShapeType::Sphere, GT::M( "carpet" ));
 }
 
 void EditorBackEnd::activateImpl() {
@@ -57,11 +58,11 @@ void EditorBackEnd::activateImpl() {
 //    appData.addRawImage( "49viewlogo" );
 //    appData.addRawImage( skyboxName );
 //    appData.addFont("amaranth");
-//    appData.addMaterial( testLoad );
+//    appData.addMaterial( "carpet" );
 
     loadSceneEntities();
 
-//    sg.GB<GT::Shape>( ShapeType::Cylinder, GT::Tag(1001) );
+//    sg.GB<GT::Shape>( ShapeType::Cylinder, GT::Tag(1001),  GT::M( "carpet" ) );
 
 //    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
 //                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );

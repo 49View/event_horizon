@@ -137,7 +137,7 @@ export default function(state = initialState, action) {
       //   state.entriesFiltered.data.length = 0;
       // eslint-disable-next-line
       for (const e of state.entries) {
-        if (e.metadata.name.toLowerCase().includes(payload)) {
+        if (e.name.toLowerCase().includes(payload)) {
           filteredResult.push(e);
         }
       }
@@ -150,7 +150,7 @@ export default function(state = initialState, action) {
       let matFilteredResult = [];
       // eslint-disable-next-line
       for (const e of state.metadataList.entries) {
-        if (e.metadata.name.toLowerCase().includes(payload)) {
+        if (e.name.toLowerCase().includes(payload)) {
           matFilteredResult.push(e);
         }
       }
@@ -182,7 +182,7 @@ export default function(state = initialState, action) {
         ...state,
         currentEntity: payload,
         group: payload.entity.group,
-        currentTags: evaluateTags(payload.entity.metadata.tags),
+        currentTags: evaluateTags(payload.entity.tags),
         metadataList: {...state.metadataList, enable: false },
         loading: requireWasmUpdate || requirePlaceHolder
       };

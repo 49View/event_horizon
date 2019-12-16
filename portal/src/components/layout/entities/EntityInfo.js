@@ -5,18 +5,18 @@ const moment = require("moment");
 
 const EntityInfo = ({ currentEntity }) => {
   const creationDate =
-    currentEntity && currentEntity.entity.metadata.creationDate
-      ? moment(currentEntity.entity.metadata.creationDate).fromNow()
+    currentEntity && currentEntity.entity.creationDate
+      ? moment(currentEntity.entity.creationDate).fromNow()
       : "1st Jan 1970";
   const updateDate =
     currentEntity &&
-    currentEntity.entity.metadata.lastUpdatedDate &&
-    currentEntity.entity.metadata.lastUpdatedDate !==
-      currentEntity.entity.metadata.creationDate
-      ? moment(currentEntity.entity.metadata.lastUpdatedDate).fromNow()
+    currentEntity.entity.lastUpdatedDate &&
+    currentEntity.entity.lastUpdatedDate !==
+      currentEntity.entity.creationDate
+      ? moment(currentEntity.entity.lastUpdatedDate).fromNow()
       : "Never";
 
-  const hs = currentEntity ? currentEntity.entity.metadata.hash : "";
+  const hs = currentEntity ? currentEntity.entity.hash : "";
   const pad = 6;
   const hashContrived = currentEntity
     ? hs.slice(0, pad) + "..." + hs.slice(hs.length - pad, hs.length)
@@ -33,8 +33,8 @@ const EntityInfo = ({ currentEntity }) => {
           &nbsp;owner&nbsp;
         </span>
         <span className="metaInfoValue normal text-secondary">
-          {currentEntity.entity.metadata.creator
-            ? currentEntity.entity.metadata.creator.name
+          {currentEntity.entity.creator
+            ? currentEntity.entity.creator.name
             : currentEntity.entity.project}
         </span>
         <br />
