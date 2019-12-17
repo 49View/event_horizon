@@ -12,11 +12,21 @@
 
 namespace Socket {
 
+    JSONDATA( SocketMessage, msg, data )
+
+        SocketMessage( const std::string& msg, const std::string& data ) : msg( msg ), data( data ) {}
+
+        std::string msg;
+        std::string data;
+    };
+
     void createConnection() {
         // First thing close if any existing connections are present
 //        close();
         std::string host = Url::Host( Url::WssProtocol, Http::CLOUD_WSS_SERVER() );
-        host += "/?s=" + std::string{Http::sessionId()};
+        auto sessionString = std::string{Http::sessionId()};
+        if ( sessionString.empty() ) sessionString = "daemon";
+        host += "/?s=" + sessionString;
         startClient(host);
     }
 
@@ -25,9 +35,16 @@ namespace Socket {
     }
 
     void emitImpl( const std::string& _message );
+
     void emit( const std::string& _message ) {
         LOGRS("[WSS][CLIENT] Send " << _message );
         emitImpl(_message);
+    }
+
+    void emit( const std::string& _message, const std::string& jsonString ) {
+        LOGRS("[WSS][CLIENT] Send " << _message );
+        SocketMessage sm{ _message, jsonString };
+        emitImpl(sm.serialize());
     }
 
     void onMessage( const std::string& _message ) {

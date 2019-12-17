@@ -22,13 +22,20 @@ const onSocketServerSendPing = () => {
 };
 
 const checkSessionById = async (sessionId, ipAddress, userAgent) => {
-  const session = await sessionController.getValidSessionById(sessionId);
+  let session = await sessionController.getValidSessionById(sessionId);
+  if ( session === null ) {
+    const user = await userController.getUserByEmail("daemon");
+    if ( user ) {
+      session = {};
+      session.user = user;
+      session.userId = user._id;
+    }
+  }
   if (session !== null) {
     const user = await userController.getUserByIdProject(
       session.userId,
       session.project
     );
-
     session.user = user;
   }
 
@@ -39,23 +46,32 @@ const onSocketServerConnection = async (client, req) => {
   const ipAddress = req.client.remoteAddress;
   const userAgent = req.headers["user-agent"];
 
-  let { url, query } = queryString.parseUrl(req.url);
-  const sessionId = query.s;
+  const session = await checkSessionById({}, ipAddress, userAgent);
+  logger.info( "[WSS] new connection: " + ipAddress + " userAgent: " + userAgent );
+  client.session = session;
+  client.isAlive = true;
+  client.ping(noop);
+  client.on("message", message => onSocketClientMessage(client, message));
+  client.on("pong", () => onSocketClientHeartBeat(client));
+  client.on("close", () => onSocketClientClose(client));
 
-  session = await checkSessionById(sessionId, ipAddress, userAgent);
-  if (session === null) {
-    client.terminate();
-    logger.info("[WSS] "+ new Date() + " Connection rejected.");
-  } else {
-    //Save connection in session
-    client.session = session;
-    client.isAlive = true;
-    client.ping(noop);
-    logger.info("[WSS] Session connected: " + client.session + new Date());
-    client.on("message", message => onSocketClientMessage(client, message));
-    client.on("pong", () => onSocketClientHeartBeat(client));
-    client.on("close", () => onSocketClientClose(client));
-  }
+  // let { url, query } = queryString.parseUrl(req.url);
+  // const sessionId = query.s;
+  //
+  // const session = await checkSessionById(sessionId, ipAddress, userAgent);
+  // if (session === null) {
+  //   client.terminate();
+  //   logger.info("[WSS] "+ new Date() + " Connection rejected.");
+  // } else {
+  //   //Save connection in session
+  //   client.session = session;
+  //   client.isAlive = true;
+  //   client.ping(noop);
+  //   logger.info("[WSS] Session connected: " + client.session + new Date());
+  //   client.on("message", message => onSocketClientMessage(client, message));
+  //   client.on("pong", () => onSocketClientHeartBeat(client));
+  //   client.on("close", () => onSocketClientClose(client));
+  // }
 };
 
 const onSocketClientClose = client => {
@@ -89,7 +105,7 @@ const onSocketClientMessage = async (client, message) => {
 };
 
 exports.createSocketServer = port => {
-  this.wsServer = new webSocket.Server({ port: port });
+  this.wsServer = new webSocket.Server({ "port": port });
   this.wsServer.on("connection", onSocketServerConnection);
   this.sendPingHandler = setInterval(onSocketServerSendPing, 30000);
   logger.info("Starting WSS on Port: "+ port);

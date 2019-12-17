@@ -32,7 +32,8 @@ db.initDB();
 // cryptoController.generateKey();
 authController.InitializeAuthentication();
 
-app.use(bodyParser.raw({limit: "500mb"}));
+app.use(bodyParser.raw({limit: "500mb", type:'application/octet-stream'}));
+app.use(bodyParser.text({limit: "500mb"}));
 app.use(bodyParser.json({limit: "100mb"}));
 app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
 app.use(cookieParser(globalConfig.mJWTSecret));

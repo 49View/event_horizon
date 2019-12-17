@@ -67,6 +67,7 @@ namespace Socket {
     void startClient( const std::string& _host );
     void onMessage( const std::string& _message );
     void emit( const std::string& _message );
+    void emit( const std::string& _messageType, const std::string& jsonString );
     void on( const std::string& eventName, SocketCallbackFunc f );
     void close();
 

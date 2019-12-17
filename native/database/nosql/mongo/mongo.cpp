@@ -5,6 +5,7 @@
 #include "mongo.hpp"
 #include <core/file_manager.h>
 #include <core/string_util.h>
+#include <core/http/webclient.h>
 
 Mongo::Mongo( const DBConnection& _cs ) {
     auto host = _cs.host;
@@ -42,7 +43,8 @@ std::optional<uint8_p> Mongo::fileDownloadWithId( MongoBucket& bucket, const std
     return std::nullopt;
 }
 
-uint8_p Mongo::fileDownload( MongoBucket& bucket, const MongoObjectId& _id, std::function<void( uint8_p&& )> callback ) {
+uint8_p
+Mongo::fileDownload( MongoBucket& bucket, const MongoObjectId& _id, std::function<void( uint8_p&& )> callback ) {
     auto downloadStream = bucket().open_download_stream( _id());
     auto buffer = make_uint8_p( downloadStream.file_length());
     downloadStream.read( buffer.first.get(), downloadStream.file_length());
@@ -50,7 +52,7 @@ uint8_p Mongo::fileDownload( MongoBucket& bucket, const MongoObjectId& _id, std:
 }
 
 std::string Mongo::fileDownload( MongoBucket& bucket, const MongoObjectId& _id, const std::string& filename,
-                          std::function<void( const std::string& )> callback ) {
+                                 std::function<void( const std::string& )> callback ) {
     auto downloadStream = bucket().open_download_stream( _id());
     auto buffer = make_uint8_p( downloadStream.file_length());
     auto ret = downloadStream.read( buffer.first.get(), downloadStream.file_length());
@@ -133,8 +135,8 @@ void Mongo::insertEntityFromAsset( const StreamChangeMetadata& meta ) {
             kvp( "contentType", meta.contentType ),
             kvp( "hash", meta.hash ),
             kvp( "thumb", meta.thumb ),
-            kvp( "lastUpdatedDate", bsoncxx::types::b_date{timeNow} ),
-            kvp( "creationDate", bsoncxx::types::b_date{timeNow} ),
+            kvp( "lastUpdatedDate", bsoncxx::types::b_date{ timeNow } ),
+            kvp( "creationDate", bsoncxx::types::b_date{ timeNow } ),
             kvp( "tags", [&]( sub_array sa ) {
                 for ( const auto& tag : split_tags( std::string( meta.filename ))) {
                     sa.append( tag );
@@ -143,22 +145,27 @@ void Mongo::insertEntityFromAsset( const StreamChangeMetadata& meta ) {
             kvp( "creator", bsoncxx::builder::basic::make_document(
                     kvp( "username", meta.username ),
                     kvp( "useremail", meta.useremail )
-            ) ),
-            kvp( "deps", meta.deps.get_value() )
+            )),
+            kvp( "deps", meta.deps.get_value())
     );
 
     bsoncxx::stdx::optional<mongocxx::result::insert_one> result = db["entities"].insert_one( builder.view());
+    if ( result ) {
+        auto dbc = db["entities"].find_one( bsoncxx::builder::stream::document{} << "_id" << ( *result ).inserted_id()
+                                                                                 << bsoncxx::builder::stream::finalize );
+        Socket::emit( "entityAdded", bsoncxx::to_json( dbc->view()));
+    }
 }
 
 void MongoBucket::deleteAll() {
-    bucketFiles.delete_many({});
-    bucketChunks.delete_many({});
+    bucketFiles.delete_many( {} );
+    bucketChunks.delete_many( {} );
 }
 
 MongoBucket::MongoBucket( const mongocxx::database& db, const std::string& _bucketName ) {
     mongocxx::options::gridfs::bucket options;
     options.bucket_name( _bucketName );
     bucket = db.gridfs_bucket( options );
-    bucketFiles = db[_bucketName+".files"];
-    bucketChunks = db[_bucketName+".chunks"];
+    bucketFiles = db[_bucketName + ".files"];
+    bucketChunks = db[_bucketName + ".chunks"];
 }

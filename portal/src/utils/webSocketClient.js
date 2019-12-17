@@ -1,11 +1,7 @@
-import { w3cwebsocket as W3CWebSocket } from "websocket";
+import {w3cwebsocket as W3CWebSocket} from "websocket";
 import store from "../store";
-import { ADD_ENTITY } from "../actions/types";
-import {
-  setEntityNodes,
-  getFullEntity,
-  wasmClientFinishedLoadingData
-} from "../actions/entities";
+import {ADD_ENTITY} from "../actions/types";
+import {getFullEntity, setEntityNodes, wasmClientFinishedLoadingData} from "../actions/entities";
 
 let webSocketClient = null;
 
@@ -65,9 +61,10 @@ export const wscConnect = session => {
     console.log("[WSS-REACT]WebSocket Client Connected");
   };
   webSocketClient.onmessage = message => {
-    const mdata = JSON.parse(message.data);
+    let mdata = JSON.parse(message.data);
+    mdata.data = typeof mdata.data === "object" ? mdata.data : JSON.parse(mdata.data);
     const state = store.getState();
-    //console.log("[WSS-REACT][MSGREC] ", mdata);
+    console.log("[WSS-REACT][MSGREC] ", mdata);
     if (state.entities.currentEntity) {
       if (mdata.msg === "requestAsset") {
         requestAsset(state.entities.currentEntity);
@@ -75,7 +72,7 @@ export const wscConnect = session => {
     }
     if (mdata.msg === "entityAdded") {
       store.dispatch(getFullEntity(mdata.data));
-      store.dispatch({ type: ADD_ENTITY, payload: mdata.data });
+      store.dispatch({type: ADD_ENTITY, payload: mdata.data});
     } else if (mdata.msg === "wasmClientFinishedLoadingData") {
       store.dispatch(wasmClientFinishedLoadingData(mdata.data));
     } else if (mdata.msg === "materialsForGeom") {

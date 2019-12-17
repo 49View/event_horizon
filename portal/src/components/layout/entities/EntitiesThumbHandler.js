@@ -18,7 +18,7 @@ const EntitiesThumbHandler = (props) => {
     entries.map(e => {
       let entryWithThumb = e;
       console.log("EntityThumb: ", entryWithThumb );
-      if (!e.thumb.startsWith("blob:")) {
+      if (e.thumb && !e.thumb.startsWith("blob:")) {
         const bb = new Blob([decode(e.thumb)]);
         entryWithThumb.thumb =
           e.thumb !== "" ? URL.createObjectURL(bb) : "";
