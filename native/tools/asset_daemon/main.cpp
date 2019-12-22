@@ -32,6 +32,10 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 
+// mongod --port 27017 --replSet rs0
+// sudo brew services restart nginx
+// /usr/loca/var/log/nginx/ tail -f aacess.log
+
 void initDeamon() {
     /* Our process ID and Session ID */
     pid_t pid, sid;
@@ -162,18 +166,31 @@ void elaborateGeomFBX( MongoBucket entity_bucket, const std::string& _filename, 
                        strview uname,
                        strview uemail ) {
     auto dRoot = getDaemonRoot();
-    auto fn = getFileNameOnly( _filename );
+    auto filenameEscaped = _filename;
+    replaceAllStrings( filenameEscaped, "(", "\\(" );
+    replaceAllStrings( filenameEscaped, ")", "\\)" );
 
-    std::string cmd = "FBX2glTF -b --pbr-metallic-roughness -o " + dRoot + fn + " " + _filename;
-    std::system( cmd.c_str());
+    auto filenameSanitized = _filename;
+    replaceAllStrings( filenameSanitized, "(", "_" );
+    replaceAllStrings( filenameSanitized, ")", "_" );
 
-    std::string filenameglb = fn + ".glb";
+    auto ret = std::system( std::string{"mv " + filenameEscaped + " " + filenameSanitized}.c_str() );
+    LOGRS( "FBX sanity renamed return code: " << ret );
+    auto fn = getFileNameOnly( filenameSanitized );
 
-    auto fileData = FM::readLocalFile( dRoot + filenameglb );
-    auto fileHash = Hashable<>::hashOf( fileData );
-    Mongo::fileUpload( entity_bucket, filenameglb, std::move( fileData ),
-                       Mongo::FSMetadata( ResourceGroup::Geom, project, uname, uemail,
-                                          HttpContentType::json, fileHash, "", ResourceDependencyDict{} ));
+    std::string cmd = "FBX2glTF -b --compute-normals always --pbr-metallic-roughness -o " + dRoot + fn + " " + filenameSanitized;
+    ret = std::system( cmd.c_str());
+    LOGRS( "FBX elaboration return code: " << ret );
+
+    if ( ret == 0 ) {
+        std::string filenameglb = fn + ".glb";
+
+        auto fileData = FM::readLocalFile( dRoot + filenameglb );
+        auto fileHash = Hashable<>::hashOf( fileData );
+        Mongo::fileUpload( entity_bucket, filenameglb, std::move( fileData ),
+                           Mongo::FSMetadata( ResourceGroup::Geom, project, uname, uemail,
+                                              HttpContentType::json, fileHash, "", ResourceDependencyDict{} ));
+    }
 }
 
 void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAssetBucket, MongoBucket entityBucket ) {

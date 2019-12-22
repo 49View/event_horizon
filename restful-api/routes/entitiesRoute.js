@@ -51,14 +51,17 @@ router.get("/check/:id", async (req, res, next) => {
 });
 
 router.get("/content/byfsid/:id", async (req, res, next) => {
+  logger.info("/content/byfsid/" + req.params.id );
   sendFileResult(res, await entityController.getEntityContentFSId(req.params.id));
 });
 
 router.get("/content/byId/:id", async (req, res, next) => {
+  logger.info("/content/byId/" + req.params.id );
   sendFileResult(res, await entityController.getEntityContent(req.params.id));
 });
 
 router.get("/content/byHash/:hashId", async (req, res, next) => {
+  logger.info("/content/byHash/" + req.params.hashId );
   try {
     const project = req.user.project;
     const entity = await entityController.getEntityByHash(

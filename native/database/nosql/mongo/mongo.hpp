@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <optional>
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/json.hpp>
 

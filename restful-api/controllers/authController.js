@@ -23,7 +23,7 @@ exports.InitializeAuthentication = () => {
   //Configure client certificate strategy
   //
   passport.use("ngix-clientcertificate-header", new CustomStrategy(async (req, done) => {
-      console.log("CUSTOM STRATEGY");
+      // console.log("CUSTOM STRATEGY");
 
       // const commonName = clientCert.subject.CN;
       let user = false;
@@ -125,7 +125,7 @@ exports.InitializeAuthentication = () => {
 
   passport.use(
     new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
-      console.log("JWT STRATEGY");
+      // console.log("JWT STRATEGY");
 
       //console.log("JWT PAYLOAD", jwtPayload);
       let error = null;
@@ -169,7 +169,7 @@ exports.InitializeAuthentication = () => {
 
   passport.use(
     new RequestStrategy(async (req, done) => {
-      console.log("REQUEST STRATEGY");
+      // console.log("REQUEST STRATEGY");
       let user = false;
       let error = null;
       try {

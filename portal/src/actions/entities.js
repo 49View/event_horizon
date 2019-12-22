@@ -281,6 +281,7 @@ export const getFullEntity = entitySource => async dispatch => {
       payload: null
     });
 
+    console.log("getFullEntity  source: ", entitySource );
     const requireWasmUpdate = entitySource.group !== GroupScript;
     // Get dependencies for
     let deps = {};

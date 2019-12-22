@@ -21,7 +21,7 @@ fi
 ./gitbuild.sh kashmir-dependency 0.0.3 ziocleto
 ./gitbuild.sh catch-dependency 0.0.1 ziocleto
 ./gitbuild.sh rapidjson v1.1.0 Tencent "-DRAPIDJSON_BUILD_DOC=OFF -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_TESTS=OFF"
-./gitbuild.sh websocketpp 0.7.1 ziocleto
+./gitbuild.sh websocketpp 0.8.2 ziocleto
 
 ./gitbuild.sh curlpp v0.8.4 ziocleto
 ./gitbuild.sh socket.io-client-cpp 1.6.1.2 ziocleto 

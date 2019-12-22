@@ -62,7 +62,8 @@ export const wscConnect = session => {
   };
   webSocketClient.onmessage = message => {
     let mdata = JSON.parse(message.data);
-    mdata.data = typeof mdata.data === "object" ? mdata.data : JSON.parse(mdata.data);
+    // mdata.data = typeof mdata.data === "object" ? mdata.data : JSON.parse(mdata.data);
+    // let mdata = message.data;
     const state = store.getState();
     console.log("[WSS-REACT][MSGREC] ", mdata);
     if (state.entities.currentEntity) {
@@ -78,7 +79,6 @@ export const wscConnect = session => {
     } else if (mdata.msg === "materialsForGeom") {
       setEntityNodes(mdata.data);
     }
-    // console.log(message);
   };
 };
 
