@@ -117,3 +117,5 @@ nginx/localhost.pfx
 nginx/localhost.pem
 nginx/localhost-key.pem
 configurations/bin/
+external/
+certificates/
