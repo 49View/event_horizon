@@ -18,14 +18,12 @@ const GeomEditor = () => {
 
     const InObjectMaterials = () => {
         return (
-            <Fragment>
-                <div className="nodeViewer-a">
-                    <div className="titleMargin">Materials</div>
-                    {matSimples.map(e => (
-                        <MaterialParametersEditor entity={e}/>
-                    ))}
-                </div>
-            </Fragment>
+            <div className="nodeViewer-a">
+                <div className="titleMargin">Materials</div>
+                {matSimples.map(e => (
+                    <MaterialParametersEditor key={e.key} entity={e}/>
+                ))}
+            </div>
         );
     };
 

@@ -199,10 +199,8 @@ void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, s
         std::string cmd =
                 "cd " + dRoot + " && FBX2glTF -b --compute-normals always --pbr-metallic-roughness -o " + filenameglb + " " +
                 getFileName(filenameSanitized);
-        LOGRS( cmd );
         ret = std::system(cmd.c_str());
         if (ret != 0) throw DaemonException{std::string{"FBX elaboration return code: " + std::to_string(ret)}};
-
 
         auto fileData = FM::readLocalFile(dRoot + filenameglb);
         auto fileHash = Hashable<>::hashOf(fileData);
