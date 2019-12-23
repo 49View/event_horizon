@@ -6,6 +6,7 @@ const streamifier = require('streamifier');
 const stream = require('stream');
 const util = require('util');
 const logger = require('./logger');
+const socketController = require('./controllers/socketController');
 
 //Set up default mongoose connection
 
@@ -175,7 +176,11 @@ exports.fsUpsert = async ( bucketFSModel, filename, data, metadata, metadataComp
         if ( bPerformInsert ) {
             await module.exports.fsInsert( bucketFSModel, filename, data, metadata );
         } else {
-            logger.info("No upsert operation performed of " + filename + " because there's already an exact binary copy present");
+            const msg = "No upsert operation performed of " + filename + " because there's already an exact binary copy present";
+            const msgHuman = filename + " already present. \nNo operation done.";
+            let json = { msg: "daemonLogger", data: { type: "warning", msg: msgHuman} };
+            socketController.sendMessageToAllClients(JSON.stringify(json));
+            logger.info(msg);
         }
         return bPerformInsert;
     } catch (e) {

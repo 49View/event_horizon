@@ -42,193 +42,214 @@ void initDeamon() {
 
     /* Fork off the parent process */
     pid = fork();
-    if ( pid < 0 ) {
-        exit( EXIT_FAILURE );
+    if (pid < 0) {
+        exit(EXIT_FAILURE);
     }
     /* If we got a good PID, then
        we can exit the parent process. */
-    if ( pid > 0 ) {
-        exit( EXIT_SUCCESS );
+    if (pid > 0) {
+        exit(EXIT_SUCCESS);
     }
 
     /* Change the file mode mask */
-    umask( 0 );
+    umask(0);
 
     /* Open any logs here */
 
     /* Create a new SID for the child process */
     sid = setsid();
-    if ( sid < 0 ) {
+    if (sid < 0) {
         /* Log the failure */
-        exit( EXIT_FAILURE );
+        exit(EXIT_FAILURE);
     }
     /* Change the current working directory */
-    if (( chdir( "/" )) < 0 ) {
+    if ((chdir("/")) < 0) {
         /* Log the failure */
-        exit( EXIT_FAILURE );
+        exit(EXIT_FAILURE);
     }
 
     /* Close out the standard file descriptors */
-    close( STDIN_FILENO );
-    close( STDOUT_FILENO );
-    close( STDERR_FILENO );
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 }
 
-std::optional<MongoFileUpload> saveImageToGridFS( MongoBucket bucket, const char *filename,
-                                                  int desiredWidth, int desiredHeight,
-                                                  strview project,
-                                                  strview uname,
-                                                  strview uemail,
-                                                  std::vector<std::string>& thumbs ) {
+class DaemonException : public std::exception {
+public:
+    DaemonException(const std::string &msg) : msg(msg) {}
+
+    virtual const char *what() const throw() {
+        return msg.c_str();
+    }
+private:
+    std::string msg{};
+};
+
+void daemonExceptionLog(const std::exception &e) {
+    LOGRS(e.what());
+    Socket::emit("daemonLogger", serializeLogger( LoggerLevel::Error, e.what()));
+}
+
+std::optional<MongoFileUpload> saveImageToGridFS(MongoBucket bucket, const char *filename,
+                                                 int desiredWidth, int desiredHeight,
+                                                 strview project,
+                                                 strview uname,
+                                                 strview uemail,
+                                                 std::vector<std::string> &thumbs) {
     try {
         int w = 0, h = 0, n = 0;
         int thumbSize = 128;
 
-        unsigned char *input_data = stbi_load( filename, &w, &h, &n, 0 );
+        unsigned char *input_data = stbi_load(filename, &w, &h, &n, 0);
 
-        auto output_data = make_uint8_p( desiredWidth * desiredHeight * n );
-        auto output_data_thumb = make_uint8_p( thumbSize * thumbSize * n );
-        stbir_resize_uint8( input_data, w, h, 0, output_data.first.get(), desiredWidth, desiredHeight, 0, n );
-        stbir_resize_uint8( output_data.first.get(), desiredWidth, desiredHeight, 0, output_data_thumb.first.get(),
-                            thumbSize, thumbSize, 0, n );
+        auto output_data = make_uint8_p(desiredWidth * desiredHeight * n);
+        auto output_data_thumb = make_uint8_p(thumbSize * thumbSize * n);
+        stbir_resize_uint8(input_data, w, h, 0, output_data.first.get(), desiredWidth, desiredHeight, 0, n);
+        stbir_resize_uint8(output_data.first.get(), desiredWidth, desiredHeight, 0, output_data_thumb.first.get(),
+                           thumbSize, thumbSize, 0, n);
 
-        auto bm = imageUtil::bufferToPngMemory( desiredWidth, desiredHeight, n, output_data.first.get());
-        auto bm64 = imageUtil::bufferToPng64( thumbSize, thumbSize, n, output_data_thumb.first.get());
-        thumbs.emplace_back( bm64 );
+        auto bm = imageUtil::bufferToPngMemory(desiredWidth, desiredHeight, n, output_data.first.get());
+        auto bm64 = imageUtil::bufferToPng64(thumbSize, thumbSize, n, output_data_thumb.first.get());
+        thumbs.emplace_back(bm64);
 
-        return Mongo::fileUpload( bucket, getFileName( filename ), std::move( bm ),
-                                  Mongo::FSMetadata( ResourceGroup::Image, project, uname, uemail,
-                                                     HttpContentType::octetStream,
-                                                     MD5( bm.first.get(), bm.second ).hexdigest(), bm64 ));
-    } catch ( const std::exception& e ) {
-        LOGRS( e.what());
+        return Mongo::fileUpload(bucket, getFileName(filename), std::move(bm),
+                                 Mongo::FSMetadata(ResourceGroup::Image, project, uname, uemail,
+                                                   HttpContentType::octetStream,
+                                                   MD5(bm.first.get(), bm.second).hexdigest(), bm64));
+    } catch (const std::exception &e) {
+        LOGRS(e.what());
         return std::nullopt;
     }
 }
 
-void elaborateMatSBSAR( MongoBucket entity_bucket,
-                        const std::string& mainFileName,
-                        const std::string& layerName,
-                        int size, strview project,
-                        strview uname,
-                        strview uemail ) {
+void elaborateMatSBSAR(MongoBucket entity_bucket,
+                       const std::string &mainFileName,
+                       const std::string &layerName,
+                       int size, strview project,
+                       strview uname,
+                       strview uemail) {
 
-    if ( mainFileName.empty()) return;
+    if (mainFileName.empty()) return;
     auto fileRoot = getDaemonRoot();
 
-    std::string fn = getFileNameOnly( mainFileName );
+    std::string fn = getFileNameOnly(mainFileName);
     std::string fext = ".png";
     int nominalSize = 512;
 
-    std::string sizeString = std::to_string( log2( size ));
+    std::string sizeString = std::to_string(log2(size));
     std::string sbRender = "/opt/Allegorithmic/Substance_Automation_Toolkit/sbsrender render --inputs "
                            + mainFileName +
                            " --set-value '$outputsize@" + sizeString + "," + sizeString +
                            "' --output-bit-depth \"8\" --png-format-compression best_compression "
                            "--output-name {inputName}_{outputNodeName}";
-    for ( const auto& output : MPBRTextures::SBSARTextureOutputs()) {
-        sbRender.append( " --input-graph-output " + output );
+    for (const auto &output : MPBRTextures::SBSARTextureOutputs()) {
+        sbRender.append(" --input-graph-output " + output);
     }
-    sbRender.append( " --output-path " + fileRoot );;
+    sbRender.append(" --output-path " + fileRoot);;
 
-    std::system( sbRender.c_str());
+    std::system(sbRender.c_str());
 
     // Gather texture outputs
     ResourceDependencyDict deps;
     std::vector<std::string> thumbs;
-    Material pbrmat{ S::SH, fn };
-    for ( const auto& output : MPBRTextures::SBSARTextureOutputs()) {
+    Material pbrmat{S::SH, fn};
+    for (const auto &output : MPBRTextures::SBSARTextureOutputs()) {
         auto bfilename = fileRoot + fn;
-        bfilename.append( "_" ).append( output ).append( ".png" );
-        if ( FM::fileExist( bfilename )) {
-            auto to = saveImageToGridFS( entity_bucket, bfilename.c_str(), nominalSize, nominalSize, project, uname,
-                                         uemail, thumbs );
-            if ( to ) {
-                auto tid = ( *to ).getStringId();
-                deps[ResourceGroup::Image].emplace_back( tid );
-                pbrmat.Values()->assign( MPBRTextures::mapToTextureUniform( output ), tid );
+        bfilename.append("_").append(output).append(".png");
+        if (FM::fileExist(bfilename)) {
+            auto to = saveImageToGridFS(entity_bucket, bfilename.c_str(), nominalSize, nominalSize, project, uname,
+                                        uemail, thumbs);
+            if (to) {
+                auto tid = (*to).getStringId();
+                deps[ResourceGroup::Image].emplace_back(tid);
+                pbrmat.Values()->assign(MPBRTextures::mapToTextureUniform(output), tid);
             }
         }
     }
 
     // Create PBR material
     auto matSer = pbrmat.serialize();
-    Mongo::fileUpload( entity_bucket, fn, matSer,
-                       Mongo::FSMetadata( ResourceGroup::Material, project, uname, uemail,
-                                          HttpContentType::json, Hashable<>::hashOf( matSer ), thumbs[0], deps ));
+    Mongo::fileUpload(entity_bucket, fn, matSer,
+                      Mongo::FSMetadata(ResourceGroup::Material, project, uname, uemail,
+                                        HttpContentType::json, Hashable<>::hashOf(matSer), thumbs[0], deps));
 
     // Clean up
     std::string cleanup = "cd " + fileRoot + " && rm " + fn + "*";
-    std::system( cleanup.c_str());
+    std::system(cleanup.c_str());
 }
 
-void elaborateGeomFBX( MongoBucket entity_bucket, const std::string& _filename, strview project,
-                       strview uname,
-                       strview uemail ) {
-    auto dRoot = getDaemonRoot();
-    auto filenameEscaped = _filename;
-    replaceAllStrings( filenameEscaped, "(", "\\(" );
-    replaceAllStrings( filenameEscaped, ")", "\\)" );
+void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, strview project,
+                      strview uname,
+                      strview uemail) {
+    try {
+        auto dRoot = getDaemonRoot();
+        auto filenameEscaped = _filename;
+        replaceAllStrings(filenameEscaped, "(", "\\(");
+        replaceAllStrings(filenameEscaped, ")", "\\)");
 
-    auto filenameSanitized = _filename;
-    replaceAllStrings( filenameSanitized, "(", "_" );
-    replaceAllStrings( filenameSanitized, ")", "_" );
+        auto filenameSanitized = _filename;
+        replaceAllStrings(filenameSanitized, "(", "_");
+        replaceAllStrings(filenameSanitized, ")", "_");
 
-    auto ret = std::system( std::string{"mv " + filenameEscaped + " " + filenameSanitized}.c_str() );
-    LOGRS( "FBX sanity renamed return code: " << ret );
-    auto fn = getFileNameOnly( filenameSanitized );
-
-    std::string cmd = "FBX2glTF -b --compute-normals always --pbr-metallic-roughness -o " + dRoot + fn + " " + filenameSanitized;
-    ret = std::system( cmd.c_str());
-    LOGRS( "FBX elaboration return code: " << ret );
-
-    if ( ret == 0 ) {
+        auto ret = std::system(std::string{"mv " + filenameEscaped + " " + filenameSanitized}.c_str());
+        LOGRS("FBX sanity renamed return code: " << ret);
+        auto fn = getFileNameOnly(filenameSanitized);
         std::string filenameglb = fn + ".glb";
 
-        auto fileData = FM::readLocalFile( dRoot + filenameglb );
-        auto fileHash = Hashable<>::hashOf( fileData );
-        Mongo::fileUpload( entity_bucket, filenameglb, std::move( fileData ),
-                           Mongo::FSMetadata( ResourceGroup::Geom, project, uname, uemail,
-                                              HttpContentType::json, fileHash, "", ResourceDependencyDict{} ));
+        std::string cmd =
+                "cd " + dRoot + " && FBX2glTF -b --compute-normals always --pbr-metallic-roughness -o " + filenameglb + " " +
+                getFileName(filenameSanitized);
+        LOGRS( cmd );
+        ret = std::system(cmd.c_str());
+        if (ret != 0) throw DaemonException{std::string{"FBX elaboration return code: " + std::to_string(ret)}};
+
+
+        auto fileData = FM::readLocalFile(dRoot + filenameglb);
+        auto fileHash = Hashable<>::hashOf(fileData);
+        Mongo::fileUpload(entity_bucket, filenameglb, std::move(fileData),
+                          Mongo::FSMetadata(ResourceGroup::Geom, project, uname, uemail,
+                                            HttpContentType::json, fileHash, "", ResourceDependencyDict{}));
+    } catch (const std::exception &e) {
+        daemonExceptionLog(e);
     }
 }
 
-void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAssetBucket, MongoBucket entityBucket ) {
-    for ( auto change : stream ) {
-        StreamChangeMetadata meta{ change };
-        Profiler p1{ "elaborate time:" };
-        auto fileDownloaded = Mongo::fileDownload( sourceAssetBucket,
-                                                   meta.id,
-                                                   getDaemonRoot() + std::string{ meta.filename } );
-        if ( meta.group == ResourceGroup::Material ) {
-            if ( getFileNameExt( std::string( meta.filename )) == ".sbsar" ) {
-                elaborateMatSBSAR( entityBucket, fileDownloaded, {}, 512, meta.project,
-                                   meta.username,
-                                   meta.useremail );
+void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAssetBucket, MongoBucket entityBucket) {
+    for (auto change : stream) {
+        StreamChangeMetadata meta{change};
+        Profiler p1{"elaborate time:"};
+        auto fileDownloaded = Mongo::fileDownload(sourceAssetBucket,
+                                                  meta.id,
+                                                  getDaemonRoot() + std::string{meta.filename});
+        if (meta.group == ResourceGroup::Material) {
+            if (getFileNameExt(std::string(meta.filename)) == ".sbsar") {
+                elaborateMatSBSAR(entityBucket, fileDownloaded, {}, 512, meta.project,
+                                  meta.username,
+                                  meta.useremail);
             }
-        } else if ( meta.group == ResourceGroup::Geom ) {
-            if ( getFileNameExt( std::string( meta.filename )) == ".fbx" ) {
-                elaborateGeomFBX( entityBucket, fileDownloaded, meta.project, meta.username, meta.useremail );
+        } else if (meta.group == ResourceGroup::Geom) {
+            if (getFileNameExt(std::string(meta.filename)) == ".fbx") {
+                elaborateGeomFBX(entityBucket, fileDownloaded, meta.project, meta.username, meta.useremail);
             }
         }
     }
 }
 
-void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
-    for ( auto change : stream ) {
-        StreamChangeMetadata meta{ change };
-        mdb.insertEntityFromAsset( meta );
+void parseAssetStream(Mongo &mdb, mongocxx::change_stream &stream) {
+    for (auto change : stream) {
+        StreamChangeMetadata meta{change};
+        mdb.insertEntityFromAsset(meta);
     }
 }
 
-int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 
-    LOGRS( "Daemon version 3.0.2" );
+    LOGRS("Daemon version 3.0.2");
 
-    if ( !Http::useClientCertificate( true,
-                                      "EH_DEAMON_CERT_KEY_PATH", "EH_DEAMON_CERT_CRT_PATH" )) {
-        LOGRS( "Daemon certificate and key environment variables needs to be present as"
-               "\n$EH_DEAMON_CERT_KEY_PATH\n$EH_DEAMON_CERT_CRT_PATH" );
+    if (!Http::useClientCertificate(true,
+                                    "EH_DEAMON_CERT_KEY_PATH", "EH_DEAMON_CERT_CRT_PATH")) {
+        LOGRS("Daemon certificate and key environment variables needs to be present as"
+              "\n$EH_DEAMON_CERT_KEY_PATH\n$EH_DEAMON_CERT_CRT_PATH");
         return 1;
     }
 
@@ -236,9 +257,9 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
 
 //    initDeamon();
 
-    Mongo mdb{ "event_horizon" };
-    auto sourceAssetBucket = mdb.useBucket( "fs_assets_to_elaborate" );
-    auto entityBucket = mdb.useBucket( "fs_entity_assets" );
+    Mongo mdb{"event_horizon"};
+    auto sourceAssetBucket = mdb.useBucket("fs_assets_to_elaborate");
+    auto entityBucket = mdb.useBucket("fs_entity_assets");
 
     sourceAssetBucket.deleteAll();
     entityBucket.deleteAll();
@@ -247,9 +268,9 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
     auto streamToElaborate = mdb["fs_assets_to_elaborate.files"].watch();
     auto streamAsset = mdb["fs_entity_assets.files"].watch();
 
-    while ( true ) {
-        parseElaborateStream( streamToElaborate, sourceAssetBucket, entityBucket );
-        parseAssetStream( mdb, streamAsset );
+    while (true) {
+        parseElaborateStream(streamToElaborate, sourceAssetBucket, entityBucket);
+        parseAssetStream(mdb, streamAsset);
     }
 
     return 0;

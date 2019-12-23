@@ -2,7 +2,6 @@ import React, { Fragment, useCallback } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { useDropzone } from "react-dropzone";
-import { useAlert } from "react-alert";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Button from "react-bootstrap/Button";
 
@@ -12,6 +11,8 @@ import {
   groupHasCreateEditor,
   groupHasImportFacility
 } from "../../../utils/utils";
+import store from "../../../store";
+import {setAlert} from "../../../actions/alert";
 
 const EntityDragAndImport = ({
   addEntity,
@@ -20,7 +21,6 @@ const EntityDragAndImport = ({
   project,
   user
 }) => {
-  const alert = useAlert();
   const onDrop = useCallback(
     acceptedFiles => {
       // check file dragged has a valid extension for asset type
@@ -43,10 +43,10 @@ const EntityDragAndImport = ({
         };
         acceptedFiles.forEach(file => reader.readAsArrayBuffer(file));
       } else {
-        alert.show("Wrong file type", { type: "error" });
+        store.dispatch(setAlert("Wrong file type for this entity type", "warning"));
       }
     },
-    [addEntity, groupSelected, project, alert]
+    [addEntity, groupSelected, project]
   );
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });

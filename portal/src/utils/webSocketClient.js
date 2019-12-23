@@ -2,6 +2,7 @@ import {w3cwebsocket as W3CWebSocket} from "websocket";
 import store from "../store";
 import {ADD_ENTITY} from "../actions/types";
 import {getFullEntity, setEntityNodes, wasmClientFinishedLoadingData} from "../actions/entities";
+import {setAlert} from "../actions/alert";
 
 let webSocketClient = null;
 
@@ -78,6 +79,8 @@ export const wscConnect = session => {
       store.dispatch(wasmClientFinishedLoadingData(mdata.data));
     } else if (mdata.msg === "materialsForGeom") {
       setEntityNodes(mdata.data);
+    } else if (mdata.msg === "daemonLogger") {
+      store.dispatch(setAlert(mdata.data.msg, mdata.data.type));
     }
   };
 };

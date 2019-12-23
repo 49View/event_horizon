@@ -375,3 +375,15 @@ template<typename TVisitor, typename ...T> inline int deserializeWithHelper( con
 
 	return x[names.size() - 1]; //return last one
 }
+
+JSONDATA(JsonError, type, msg)
+
+    JsonError(const std::string &type, const std::string &msg) : type(type), msg(msg) {}
+
+    std::string type;
+    std::string msg;
+};
+
+inline std::string serializeLogger( const std::string type, const std::string& err ) {
+    return JsonError{type, err}.serialize();
+}

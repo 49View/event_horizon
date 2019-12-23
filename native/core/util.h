@@ -39,6 +39,12 @@ enum class CompositeWrapping {
 	NoWrap
 };
 
+namespace LoggerLevel {
+    inline const static std::string Error   = "error";
+    inline const static std::string Warning = "warning";
+    inline const static std::string Info    = "info";
+}
+
 class UpdateSignals {
     bool mbNeedsUpdate = false;
 public:
