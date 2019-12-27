@@ -535,6 +535,7 @@ macro(link_core)
     endif ()
     if ("core" IN_LIST WHICH_LIBS OR "core_libs" IN_LIST WHICH_LIBS)
         link_restbed()
+        link_archives()
         if (BUILD_CURL)
             link_curl()
         endif ()
@@ -817,6 +818,10 @@ macro(link_restbed)
 
 #    add_postbuild_copy_command("restbed" "librestbed")
 endmacro(link_restbed)
+
+macro(link_archives)
+    link_libraries_multi("zip" "zip" "zip" "zip" OFF)
+endmacro(link_archives)
 
 macro(link_gtest)
     if ("gtest" IN_LIST WHICH_LIBS)
