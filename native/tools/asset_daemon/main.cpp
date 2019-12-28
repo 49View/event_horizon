@@ -13,6 +13,7 @@
 #include <core/tar_util.h>
 #include <core/zlib_util.h>
 #include <core/names.hpp>
+#include <core/descriptors/archives.h>
 #include <core/resources/publisher.hpp>
 #include <core/resources/material.h>
 #include <core/resources/resource_utils.hpp>
@@ -28,7 +29,6 @@
 #include <core/image_util.h>
 #include <core/profiler.h>
 #include <ostream>
-#include <zip.h>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
@@ -123,51 +123,20 @@ std::optional<MongoFileUpload> saveImageToGridFS(MongoBucket bucket, const char 
     }
 }
 
-
-static int
-get_data(void **datap, size_t *sizep, const char *archive) {
-    /* example implementation that reads data from file */
-    struct stat st;
-    FILE *fp;
-
-    if ((fp = fopen(archive, "r")) == NULL) {
-        if (errno != ENOENT) {
-            fprintf(stderr, "can't open %s: %s\n", archive, strerror(errno));
-            return -1;
+std::string chooseMainArchiveFilename( const ArchiveDirectory& ad, strview group ) {
+    if ( group == ResourceGroup::Geom ) {
+        auto candidates = ad.findFilesWithExtension(".fbx");
+        if ( candidates.size() > 0 ) {
+            for ( const auto& elem : candidates ) {
+                if ( elem.name.find( "_upY.fbx") != std::string::npos ) {
+                    return elem.name;
+                }
+            }
         }
-
-        *datap = NULL;
-        *sizep = 0;
-
-        return 0;
+        return candidates.back().name;
     }
-
-    if (fstat(fileno(fp), &st) < 0) {
-        fprintf(stderr, "can't stat %s: %s\n", archive, strerror(errno));
-        fclose(fp);
-        return -1;
-    }
-
-    if ((*datap = malloc((size_t)st.st_size)) == NULL) {
-        fprintf(stderr, "can't allocate buffer\n");
-        fclose(fp);
-        return -1;
-    }
-
-    if (fread(*datap, 1, (size_t)st.st_size, fp) < (size_t)st.st_size) {
-        fprintf(stderr, "can't read %s: %s\n", archive, strerror(errno));
-        free(*datap);
-        fclose(fp);
-        return -1;
-    }
-
-    fclose(fp);
-
-    *sizep = (size_t)st.st_size;
-    return 0;
+    return {};
 }
-
-
 
 void elaborateMatSBSAR(MongoBucket entity_bucket,
                        const std::string &mainFileName,
@@ -238,15 +207,17 @@ void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, s
         replaceAllStrings(filenameSanitized, "(", "_");
         replaceAllStrings(filenameSanitized, ")", "_");
 
-        auto ret = std::system(std::string{"mv " + filenameEscaped + " " + filenameSanitized}.c_str());
-        LOGRS("FBX sanity renamed return code: " << ret);
+        if ( filenameEscaped != filenameSanitized ) {
+            auto ret = std::system(std::string{"cd " + dRoot + " && mv " + filenameEscaped + " " + filenameSanitized}.c_str());
+            LOGRS("FBX sanity renamed return code: " << ret);
+        }
         auto fn = getFileNameOnly(filenameSanitized);
         std::string filenameglb = fn + ".glb";
 
         std::string cmd =
                 "cd " + dRoot + " && FBX2glTF -b --compute-normals always --pbr-metallic-roughness -o " + filenameglb + " " +
                 getFileName(filenameSanitized);
-        ret = std::system(cmd.c_str());
+        auto ret = std::system(cmd.c_str());
         if (ret != 0) throw DaemonException{std::string{"FBX elaboration return code: " + std::to_string(ret)}};
 
         auto fileData = FM::readLocalFile(dRoot + filenameglb);
@@ -263,61 +234,30 @@ void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAss
     for (auto change : stream) {
         StreamChangeMetadata meta{change};
         Profiler p1{"elaborate time:"};
+        auto filename = std::string(meta.filename);
         auto fileDownloaded = Mongo::fileDownload(sourceAssetBucket,
                                                   meta.id,
-                                                  getDaemonRoot() + std::string{meta.filename});
+                                                  getDaemonRoot() + std::string{filename});
+
+        bool bIsInAnArchive = getFileNameExt(std::string(filename)) == ".zip";
+        // First unzip all the content if package arrives in a zip file
+        if ( bIsInAnArchive ) {
+            ArchiveDirectory ad{};
+            if ( getFileNameExt(std::string(filename)) == ".zip" ) {
+                ad = unzipFilesToTempFolder(fileDownloaded);
+            }
+            filename = chooseMainArchiveFilename( ad, meta.group );
+        }
+
         if (meta.group == ResourceGroup::Material) {
-            if (getFileNameExt(std::string(meta.filename)) == ".sbsar") {
+            if (getFileNameExt(std::string(filename)) == ".sbsar") {
                 elaborateMatSBSAR(entityBucket, fileDownloaded, {}, 512, meta.project,
                                   meta.username,
                                   meta.useremail);
             }
         } else if (meta.group == ResourceGroup::Geom) {
-            if (getFileNameExt(std::string(meta.filename)) == ".zip") {
-                void *data;
-                size_t size;
-                zip_source_t *src;
-                zip_t *za;
-                zip_error_t error;
-                /* get buffer with zip archive inside */
-                if (get_data(&data, &size, fileDownloaded.c_str()) < 0) {
-                    LOGRS("Bollox");
-                }
-                zip_error_init(&error);
-                /* create source from buffer */
-                if ((src = zip_source_buffer_create(data, size, 1, &error)) == NULL) {
-                    fprintf(stderr, "can't create source: %s\n", zip_error_strerror(&error));
-                    free(data);
-                    zip_error_fini(&error);
-                    LOGRS("Bollox2");
-                }
-
-                /* open zip archive from source */
-                if ((za = zip_open_from_source(src, 0, &error)) == NULL) {
-                    fprintf(stderr, "can't open zip from source: %s\n", zip_error_strerror(&error));
-                    zip_source_free(src);
-                    zip_error_fini(&error);
-                    LOGRS("Bollox3");
-                }
-
-                auto numFiles = zip_get_num_entries( za, ZIP_FL_UNCHANGED );
-                LOGRS( "NumFiles: " <<  numFiles );
-                for ( auto t = 0; t < numFiles; t++ ) {
-                    auto zFile = zip_fopen_index( za, t, ZIP_FL_UNCHANGED );
-                    zip_stat_t zInfo;
-                    zip_stat_index( za, t, ZIP_FL_UNCHANGED, &zInfo );
-                    auto buff = make_uint8_p( zInfo.size );
-                    auto byteRead = zip_fread( zFile, buff.first.get(), buff.second );
-                    LOGRS(  zip_get_name( za, t, ZIP_FL_UNCHANGED) << " Size: " << buff.second << " Uncompressed: " << zInfo.size << " Read: " << byteRead );
-                    auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
-                    FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
-                }
-
-//                auto container = FM::readLocalFileC(fileDownloaded);
-//                LOGRS(std::string(meta.filename));
-            }
-            if (getFileNameExt(std::string(meta.filename)) == ".fbx") {
-                elaborateGeomFBX(entityBucket, fileDownloaded, meta.project, meta.username, meta.useremail);
+            if (getFileNameExt(filename) == ".fbx") {
+                elaborateGeomFBX(entityBucket, filename, meta.project, meta.username, meta.useremail);
             }
         }
     }
@@ -352,6 +292,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
     sourceAssetBucket.deleteAll();
     entityBucket.deleteAll();
     mdb["entities"]().delete_many({});
+    mdb["remaps"]().delete_many({});
 
     auto streamToElaborate = mdb["fs_assets_to_elaborate.files"].watch();
     auto streamAsset = mdb["fs_entity_assets.files"].watch();
