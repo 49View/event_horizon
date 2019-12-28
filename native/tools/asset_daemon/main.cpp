@@ -82,13 +82,19 @@ public:
     virtual const char *what() const throw() {
         return msg.c_str();
     }
+
 private:
     std::string msg{};
 };
 
 void daemonExceptionLog(const std::exception &e) {
     LOGRS(e.what());
-    Socket::emit("daemonLogger", serializeLogger( LoggerLevel::Error, e.what()));
+    Socket::emit("daemonLogger", serializeLogger(LoggerLevel::Error, e.what()));
+}
+
+void daemonWarningLog(const std::string &e) {
+    LOGRS(e);
+    Socket::emit("daemonLogger", serializeLogger(LoggerLevel::Warning, e));
 }
 
 std::optional<MongoFileUpload> saveImageToGridFS(MongoBucket bucket, const char *filename,
@@ -123,17 +129,17 @@ std::optional<MongoFileUpload> saveImageToGridFS(MongoBucket bucket, const char 
     }
 }
 
-std::string chooseMainArchiveFilename( const ArchiveDirectory& ad, strview group ) {
-    if ( group == ResourceGroup::Geom ) {
+std::string chooseMainArchiveFilename(const ArchiveDirectory &ad, strview group) {
+    if (group == ResourceGroup::Geom) {
         auto candidates = ad.findFilesWithExtension(".fbx");
-        if ( candidates.size() > 0 ) {
-            for ( const auto& elem : candidates ) {
-                if ( elem.name.find( "_upY.fbx") != std::string::npos ) {
+        if (candidates.size() > 0) {
+            for (const auto &elem : candidates) {
+                if (elem.name.find("_upY.fbx") != std::string::npos) {
                     return elem.name;
                 }
             }
+            return candidates.back().name;
         }
-        return candidates.back().name;
     }
     return {};
 }
@@ -207,15 +213,17 @@ void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, s
         replaceAllStrings(filenameSanitized, "(", "_");
         replaceAllStrings(filenameSanitized, ")", "_");
 
-        if ( filenameEscaped != filenameSanitized ) {
-            auto ret = std::system(std::string{"cd " + dRoot + " && mv " + filenameEscaped + " " + filenameSanitized}.c_str());
+        if (filenameEscaped != filenameSanitized) {
+            auto ret = std::system(
+                    std::string{"cd " + dRoot + " && mv " + filenameEscaped + " " + filenameSanitized}.c_str());
             LOGRS("FBX sanity renamed return code: " << ret);
         }
         auto fn = getFileNameOnly(filenameSanitized);
         std::string filenameglb = fn + ".glb";
 
         std::string cmd =
-                "cd " + dRoot + " && FBX2glTF -b --compute-normals always --pbr-metallic-roughness -o " + filenameglb + " " +
+                "cd " + dRoot + " && FBX2glTF -b --compute-normals always --pbr-metallic-roughness -o " + filenameglb +
+                " " +
                 getFileName(filenameSanitized);
         auto ret = std::system(cmd.c_str());
         if (ret != 0) throw DaemonException{std::string{"FBX elaboration return code: " + std::to_string(ret)}};
@@ -231,35 +239,44 @@ void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, s
 }
 
 void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAssetBucket, MongoBucket entityBucket) {
-    for (auto change : stream) {
-        StreamChangeMetadata meta{change};
-        Profiler p1{"elaborate time:"};
-        auto filename = std::string(meta.filename);
-        auto fileDownloaded = Mongo::fileDownload(sourceAssetBucket,
-                                                  meta.id,
-                                                  getDaemonRoot() + std::string{filename});
 
-        bool bIsInAnArchive = getFileNameExt(std::string(filename)) == ".zip";
-        // First unzip all the content if package arrives in a zip file
-        if ( bIsInAnArchive ) {
-            ArchiveDirectory ad{};
-            if ( getFileNameExt(std::string(filename)) == ".zip" ) {
-                ad = unzipFilesToTempFolder(fileDownloaded);
-            }
-            filename = chooseMainArchiveFilename( ad, meta.group );
-        }
+    try {
+        for (auto change : stream) {
+            StreamChangeMetadata meta{change};
+            Profiler p1{"elaborate time:"};
+            auto filename = std::string(meta.filename);
+            auto fileDownloaded = Mongo::fileDownload(sourceAssetBucket,
+                                                      meta.id,
+                                                      getDaemonRoot() + std::string{filename});
 
-        if (meta.group == ResourceGroup::Material) {
-            if (getFileNameExt(std::string(filename)) == ".sbsar") {
-                elaborateMatSBSAR(entityBucket, fileDownloaded, {}, 512, meta.project,
-                                  meta.username,
-                                  meta.useremail);
+            bool bIsInAnArchive = getFileNameExt(std::string(filename)) == ".zip";
+            // First unzip all the content if package arrives in a zip file
+            if (bIsInAnArchive) {
+                ArchiveDirectory ad{};
+                if (getFileNameExt(std::string(filename)) == ".zip") {
+                    ad = unzipFilesToTempFolder(fileDownloaded);
+                }
+                filename = chooseMainArchiveFilename(ad, meta.group);
+                if (filename.empty()) {
+                    daemonWarningLog(filename + " does not contain any appropriate asset file");
+                    continue;
+                }
             }
-        } else if (meta.group == ResourceGroup::Geom) {
-            if (getFileNameExt(filename) == ".fbx") {
-                elaborateGeomFBX(entityBucket, filename, meta.project, meta.username, meta.useremail);
+
+            if (meta.group == ResourceGroup::Material) {
+                if (getFileNameExt(std::string(filename)) == ".sbsar") {
+                    elaborateMatSBSAR(entityBucket, fileDownloaded, {}, 512, meta.project,
+                                      meta.username,
+                                      meta.useremail);
+                }
+            } else if (meta.group == ResourceGroup::Geom) {
+                if (getFileNameExt(filename) == ".fbx") {
+                    elaborateGeomFBX(entityBucket, filename, meta.project, meta.username, meta.useremail);
+                }
             }
         }
+    } catch (const std::exception &e) {
+        daemonExceptionLog(e);
     }
 }
 
