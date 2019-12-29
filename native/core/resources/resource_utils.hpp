@@ -50,6 +50,12 @@ struct ResourceTransfer {
     }
 };
 
+struct ResourceEntityHelper {
+    SerializableContainer sc{};
+    ResourceDependencyDict deps{};
+    std::vector<std::string> thumbs{};
+};
+
 template <typename C>
 using ResourceManagerContainer = std::unordered_map<std::string,std::shared_ptr<C>>;
 

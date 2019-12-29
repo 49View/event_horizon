@@ -417,21 +417,12 @@ export const addEntity = (fileName, fileData, group) => async dispatch => {
     };
     let res = null;
     if (group === GroupGeom || group === GroupMaterial) {
-      const fileext = fileName.split(".").pop();
-      if (group === GroupMaterial && fileext === "zip") {
-        const fname = getFileNameOnlyNoExt(fileName);
-        await axios.post("/api/entities/multizip/" + fname + "/" + group,
-          fileData,
-          octet
-        );
-      } else {
         const urlEnc = encodeURIComponent(fileName);
         console.log("Url encoded resource: ", urlEnc);
         res = await axios.post("/api/fs/entity_to_elaborate/" + group + "/" + urlEnc,
           fileData,
           octet
         );
-      }
     } else {
       res = await axios.post(
         postEntityMaker(fileName, project, group, user.name, user.email),

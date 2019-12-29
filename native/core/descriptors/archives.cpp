@@ -51,7 +51,7 @@ static int getZipData(void **datap, size_t *sizep, const char *archive) {
 }
 
 ArchiveDirectory unzipFilesToTempFolder( const std::string& filename ) {
-    ArchiveDirectory ad{};
+    ArchiveDirectory ad{getFileName(filename)};
     void *data;
     size_t size;
     zip_source_t *src;
@@ -94,12 +94,14 @@ ArchiveDirectory unzipFilesToTempFolder( const std::string& filename ) {
     return ad;
 }
 
-std::vector<ArchiveDirectoryEntityElement> ArchiveDirectory::findFilesWithExtension(const std::string & _ext ) const {
+std::vector<ArchiveDirectoryEntityElement> ArchiveDirectory::findFilesWithExtension(const std::vector<std::string>& _exts) const {
     std::vector<ArchiveDirectoryEntityElement> ret{};
 
-    for ( const auto& elem : admap ) {
-        if ( getFileNameExt( elem.first ) == _ext ) {
-            ret.emplace_back(elem.second);
+    for ( const auto& ext : _exts ) {
+        for ( const auto& elem : admap ) {
+            if ( getFileNameExt( elem.first ) == ext ) {
+                ret.emplace_back(elem.second);
+            }
         }
     }
 
@@ -109,3 +111,24 @@ std::vector<ArchiveDirectoryEntityElement> ArchiveDirectory::findFilesWithExtens
 void ArchiveDirectory::insert(ArchiveDirectoryEntityElement && _elem) {
     admap[_elem.name] = _elem;
 }
+
+ArchiveDirectoryContainerConstIterator ArchiveDirectory::begin() const {
+    return admap.begin();
+}
+
+ArchiveDirectoryContainerConstIterator ArchiveDirectory::end() const {
+    return admap.end();
+}
+
+ArchiveDirectoryContainerIterator ArchiveDirectory::begin() {
+    return admap.begin();
+}
+
+ArchiveDirectoryContainerIterator ArchiveDirectory::end() {
+    return admap.end();
+}
+
+std::string ArchiveDirectory::Name() const {
+    return name;
+}
+

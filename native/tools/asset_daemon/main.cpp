@@ -97,12 +97,12 @@ void daemonWarningLog(const std::string &e) {
     Socket::emit("daemonLogger", serializeLogger(LoggerLevel::Warning, e));
 }
 
-std::optional<MongoFileUpload> saveImageToGridFS(MongoBucket bucket, const char *filename,
-                                                 int desiredWidth, int desiredHeight,
-                                                 strview project,
-                                                 strview uname,
-                                                 strview uemail,
-                                                 std::vector<std::string> &thumbs) {
+std::optional<MongoFileUpload> elaborateImage(MongoBucket bucket, const char *filename,
+                                              int desiredWidth, int desiredHeight,
+                                              strview project,
+                                              strview uname,
+                                              strview uemail,
+                                              std::vector<std::string> &thumbs) {
     try {
         int w = 0, h = 0, n = 0;
         int thumbSize = 128;
@@ -131,7 +131,7 @@ std::optional<MongoFileUpload> saveImageToGridFS(MongoBucket bucket, const char 
 
 std::string chooseMainArchiveFilename(const ArchiveDirectory &ad, strview group) {
     if (group == ResourceGroup::Geom) {
-        auto candidates = ad.findFilesWithExtension(".fbx");
+        auto candidates = ad.findFilesWithExtension({".fbx"});
         if (candidates.size() > 0) {
             for (const auto &elem : candidates) {
                 if (elem.name.find("_upY.fbx") != std::string::npos) {
@@ -141,7 +141,60 @@ std::string chooseMainArchiveFilename(const ArchiveDirectory &ad, strview group)
             return candidates.back().name;
         }
     }
+    if (group == ResourceGroup::Material) {
+        auto candidates = ad.findFilesWithExtension({".png", ".jpg"});
+        if ( candidates.size() > 0 ) {
+            return ad.Name();
+        }
+    }
     return {};
+}
+
+ArchiveDirectory generateActiveDirectoryFromSBSARTempFiles(const std::string &fn) {
+    ArchiveDirectory ret{fn};
+    auto fileRoot = getDaemonRoot();
+
+    for (const auto &output : MPBRTextures::SBSARTextureOutputs()) {
+        std::string outFilename{};
+        outFilename.append(fn).append("_").append(output).append(".png");
+        if (FM::fileExist(fileRoot + outFilename)) {
+            ret.insert({outFilename, 0, output});
+        }
+    }
+    return ret;
+}
+
+ArchiveDirectory& mapActiveDirectoryFilesToPBR( ArchiveDirectory& ad ) {
+    for ( auto& elem : ad ) {
+        elem.second.metaString = MPBRTextures::findTextureInString( elem.second.name );
+    }
+    return ad;
+}
+
+ResourceEntityHelper elaborateInternalMaterial(MongoBucket entity_bucket,
+                                               const ArchiveDirectory &ad,
+                                               int nominalSize,
+                                               strview project,
+                                               strview uname,
+                                               strview uemail) {
+    ResourceEntityHelper mat{};
+    auto fileRoot = getDaemonRoot();
+
+    Material pbrmaterial{S::SH, ad.Name()};
+    for (const auto &output : ad) {
+        std::string fullFileName = fileRoot + output.second.name;
+        auto to = elaborateImage(entity_bucket, fullFileName.c_str(), nominalSize, nominalSize, project, uname,
+                                 uemail, mat.thumbs);
+        if (to && !output.second.metaString.empty()) {
+            auto tid = (*to).getStringId();
+            mat.deps[ResourceGroup::Image].emplace_back(tid);
+            pbrmaterial.Values()->assign(MPBRTextures::mapToTextureUniform(output.second.metaString), tid);
+        }
+    }
+
+    // Create PBR material
+    mat.sc = pbrmaterial.serialize();
+    return mat;
 }
 
 void elaborateMatSBSAR(MongoBucket entity_bucket,
@@ -172,32 +225,32 @@ void elaborateMatSBSAR(MongoBucket entity_bucket,
     std::system(sbRender.c_str());
 
     // Gather texture outputs
-    ResourceDependencyDict deps;
-    std::vector<std::string> thumbs;
-    Material pbrmat{S::SH, fn};
-    for (const auto &output : MPBRTextures::SBSARTextureOutputs()) {
-        auto bfilename = fileRoot + fn;
-        bfilename.append("_").append(output).append(".png");
-        if (FM::fileExist(bfilename)) {
-            auto to = saveImageToGridFS(entity_bucket, bfilename.c_str(), nominalSize, nominalSize, project, uname,
-                                        uemail, thumbs);
-            if (to) {
-                auto tid = (*to).getStringId();
-                deps[ResourceGroup::Image].emplace_back(tid);
-                pbrmat.Values()->assign(MPBRTextures::mapToTextureUniform(output), tid);
-            }
-        }
-    }
-
-    // Create PBR material
-    auto matSer = pbrmat.serialize();
-    Mongo::fileUpload(entity_bucket, fn, matSer,
+    ResourceEntityHelper mat = elaborateInternalMaterial(entity_bucket,
+                                                         generateActiveDirectoryFromSBSARTempFiles(fn), nominalSize,
+                                                         project, uname, uemail);
+    Mongo::fileUpload(entity_bucket, fn, mat.sc,
                       Mongo::FSMetadata(ResourceGroup::Material, project, uname, uemail,
-                                        HttpContentType::json, Hashable<>::hashOf(matSer), thumbs[0], deps));
+                                        HttpContentType::json, Hashable<>::hashOf(mat.sc), mat.thumbs[0], mat.deps));
 
     // Clean up
     std::string cleanup = "cd " + fileRoot + " && rm " + fn + "*";
     std::system(cleanup.c_str());
+}
+
+void elaborateMatFromArchive(MongoBucket entity_bucket,
+                       ArchiveDirectory &ad,
+                       strview project,
+                       strview uname,
+                       strview uemail) {
+
+    const int nominalSize = 512;
+    // Gather texture outputs
+    ResourceEntityHelper mat = elaborateInternalMaterial(entity_bucket,
+                                                         mapActiveDirectoryFilesToPBR(ad), nominalSize,
+                                                         project, uname, uemail);
+    Mongo::fileUpload(entity_bucket, ad.Name(), mat.sc,
+                      Mongo::FSMetadata(ResourceGroup::Material, project, uname, uemail,
+                                        HttpContentType::json, Hashable<>::hashOf(mat.sc), mat.thumbs[0], mat.deps));
 }
 
 void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, strview project,
@@ -250,20 +303,24 @@ void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAss
                                                       getDaemonRoot() + std::string{filename});
 
             bool bIsInAnArchive = getFileNameExt(std::string(filename)) == ".zip";
+            ArchiveDirectory ad{filename};
             // First unzip all the content if package arrives in a zip file
             if (bIsInAnArchive) {
-                ArchiveDirectory ad{};
-                if (getFileNameExt(std::string(filename)) == ".zip") {
+                if (getFileNameExt(filename) == ".zip") {
                     ad = unzipFilesToTempFolder(fileDownloaded);
                 }
-                filename = chooseMainArchiveFilename(ad, meta.group);
-                if (filename.empty()) {
-                    daemonWarningLog(filename + " does not contain any appropriate asset file");
+                if (filename = chooseMainArchiveFilename(ad, meta.group); filename.empty()) {
+                    daemonWarningLog(std::string(meta.filename) + " does not contain any appropriate asset file");
                     continue;
                 }
             }
 
             if (meta.group == ResourceGroup::Material) {
+                if (getFileNameExt(std::string(filename)) == ".zip") {
+                    elaborateMatFromArchive(entityBucket, ad, meta.project,
+                                      meta.username,
+                                      meta.useremail);
+                }
                 if (getFileNameExt(std::string(filename)) == ".sbsar") {
                     elaborateMatSBSAR(entityBucket, fileDownloaded, {}, 512, meta.project,
                                       meta.username,

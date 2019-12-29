@@ -113,11 +113,18 @@ namespace MPBRTextures {
 
     static const std::string basecolorString = "basecolor";
     static const std::string base_colorString = "base_color";
+    static const std::string diffString = "diff";
+    static const std::string colString = "_col";
     static const std::string heightString = "height";
+    static const std::string dispString = "_disp";
     static const std::string metallicString = "metallic";
+    static const std::string rglossString = "rgloss";
     static const std::string roughnessString = "roughness";
+    static const std::string rghString = "_rgh";
     static const std::string normalString = "normal";
+    static const std::string nrmString = "_nrm";
     static const std::string ambientOcclusionString = "ambient_occlusion";
+    static const std::string aoString = "_ao";
     static const std::string opacityString = "opacity";
     static const std::string translucencyString = "translucency";
     static const std::string emissionString = "emission";
@@ -144,11 +151,18 @@ namespace MPBRTextures {
     static inline const std::string findTextureInString( const std::string& _value ) {
         if ( _value.find( basecolorString ) != std::string::npos ) return basecolorString;
         if ( _value.find( base_colorString ) != std::string::npos ) return basecolorString;
+        if ( _value.find( diffString ) != std::string::npos ) return basecolorString;
+        if ( _value.find( colString ) != std::string::npos ) return basecolorString;
         if ( _value.find( heightString  ) != std::string::npos ) return heightString;
+        if ( _value.find( dispString  ) != std::string::npos ) return heightString;
         if ( _value.find( metallicString  ) != std::string::npos ) return metallicString;
+        if ( _value.find( rglossString  ) != std::string::npos ) return metallicString;
         if ( _value.find( roughnessString  ) != std::string::npos ) return roughnessString;
+        if ( _value.find( rghString  ) != std::string::npos ) return roughnessString;
         if ( _value.find( normalString ) != std::string::npos ) return normalString;
+        if ( _value.find( nrmString ) != std::string::npos ) return normalString;
         if ( _value.find( ambientOcclusionString ) != std::string::npos ) return ambientOcclusionString;
+        if ( _value.find( aoString ) != std::string::npos ) return ambientOcclusionString;
         if ( _value.find( opacityString ) != std::string::npos ) return opacityString;
         if ( _value.find( translucencyString ) != std::string::npos ) return translucencyString;
         if ( _value.find( emissionString ) != std::string::npos ) return emissionString;
@@ -158,11 +172,18 @@ namespace MPBRTextures {
     static inline const std::string mapToTextureUniform( const std::string& _value ) {
         if ( _value.find( basecolorString ) != std::string::npos ) return UniformNames::diffuseTexture;
         if ( _value.find( base_colorString ) != std::string::npos ) return UniformNames::diffuseTexture;
+        if ( _value.find( diffString ) != std::string::npos ) return UniformNames::diffuseTexture;
+        if ( _value.find( colString ) != std::string::npos ) return UniformNames::diffuseTexture;
         if ( _value.find( heightString  ) != std::string::npos ) return UniformNames::heightTexture;
+        if ( _value.find( dispString  ) != std::string::npos ) return UniformNames::heightTexture;
         if ( _value.find( metallicString  ) != std::string::npos ) return UniformNames::metallicTexture;
+        if ( _value.find( rglossString  ) != std::string::npos ) return UniformNames::metallicTexture;
         if ( _value.find( roughnessString  ) != std::string::npos ) return UniformNames::roughnessTexture;
+        if ( _value.find( rghString  ) != std::string::npos ) return UniformNames::roughnessTexture;
         if ( _value.find( normalString ) != std::string::npos ) return UniformNames::normalTexture;
+        if ( _value.find( nrmString ) != std::string::npos ) return UniformNames::normalTexture;
         if ( _value.find( ambientOcclusionString ) != std::string::npos ) return UniformNames::aoTexture;
+        if ( _value.find( aoString ) != std::string::npos ) return UniformNames::aoTexture;
         if ( _value.find( opacityString ) != std::string::npos ) return UniformNames::opacityTexture;
         if ( _value.find( emissionString ) != std::string::npos ) return UniformNames::emissionTexture;
         if ( _value.find( translucencyString ) != std::string::npos ) return UniformNames::translucencyTexture;
