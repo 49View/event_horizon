@@ -9,5 +9,5 @@ wget https://dl.bintray.com/boostorg/release/$1.$2.$3/source/boost_$1_$2_$3.tar.
 tar -xvzf boost_$1_$2_$3.tar.gz
 ./boost_$1_$2_$3/bootstrap.sh --prefix=/usr/local/
 cd boost_$1_$2_$3
-./b2 
-./b2 install
+../b2 
+../b2 install

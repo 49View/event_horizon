@@ -16,7 +16,7 @@
 using namespace boost::filesystem;
 
 const std::string cachedFileName = ".cachedShaderMap.txt";
-const std::string sVersionString = "2.1.0";
+const std::string sVersionString = "2.2.0";
 
 JSONDATA(FileCheck, filename, lastWriteTime, size, hash)
 
@@ -120,6 +120,15 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
     int ret = 0;
     LOGRS("ShaderTool Version: " << sVersionString );
 
+    if (!Http::useClientCertificate(true,
+                                    "EH_DEAMON_CERT_KEY_PATH", "EH_DEAMON_CERT_CRT_PATH")) {
+        LOGRS("Daemon certificate and key environment variables needs to be present as"
+              "\n$EH_DEAMON_CERT_KEY_PATH\n$EH_DEAMON_CERT_CRT_PATH");
+        return 1;
+    }
+
+    Socket::createConnection();
+
     if ( !glfwInit() ) {
         LOGE( "Could not start GLFW3" );
     }
@@ -173,10 +182,7 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
     bool performCompilerOnly = true;
     if ( shaderEmit.count() > 0 && sm.loadShaders( performCompilerOnly ) ) {
         FM::writeLocalFile("../shaders.hpp", shaderHeader );
-        Http::useLocalHost(true);
-        Http::login(LoginFields::Daemon(), [&]() {
-            Http::post( Url{HttpFilePrefix::broadcast}, shaderEmit.serialize() );
-        });
+//        Http::post( Url{HttpFilePrefix::broadcast}, shaderEmit.serialize() );
     }
 
     glfwTerminate();
