@@ -182,6 +182,7 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
     bool performCompilerOnly = true;
     if ( shaderEmit.count() > 0 && sm.loadShaders( performCompilerOnly ) ) {
         FM::writeLocalFile("../shaders.hpp", shaderHeader );
+        Socket::emit("shaderchange", shaderEmit.serialize());
 //        Http::post( Url{HttpFilePrefix::broadcast}, shaderEmit.serialize() );
     }
 
