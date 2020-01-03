@@ -646,6 +646,12 @@ void SceneGraph::loadGeom( std::string _names, HttpResouceCB _ccf ) {
     B<GRB>( _names ).load( _ccf );
 }
 
+void SceneGraph::loadAsset( const std::string& _names ) {
+    B<GRB>( _names ).load( [this](HttpResouceCBSign key) {
+        GB<GT::Asset>( key );
+    } );
+}
+
 void SceneGraph::loadScene( const ResourceScene& gs, HODResolverCallback _ccf ) {
     HOD::resolver<ResourceScene>( *this, &gs, _ccf );
 }

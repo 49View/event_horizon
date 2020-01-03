@@ -424,7 +424,7 @@ void RenderOrchestrator::init() {
 
 void RenderOrchestrator::reloadShaders( const std::string& _msg, SocketCallbackDataType&& _data ) {
 
-    ShaderLiveUpdateMap shadersToUpdate{std::move(_data)};
+    ShaderLiveUpdateMap shadersToUpdate{std::move(_data["data"])};
 
 	for ( const auto& ss : shadersToUpdate.shaders ) {
 		rr.injectShader( ss.first, ss.second );

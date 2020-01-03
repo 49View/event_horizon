@@ -275,7 +275,7 @@ void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, s
         std::string filenameglb = fn + ".glb";
 
         std::string cmd =
-                "cd " + dRoot + " && FBX2glTF -b --compute-normals always --pbr-metallic-roughness -o " + filenameglb +
+                "cd " + dRoot + " && FBX2glTF -b --pbr-metallic-roughness -o " + filenameglb +
                 " " +
                 getFileName(filenameSanitized);
         auto ret = std::system(cmd.c_str());
@@ -354,7 +354,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
               "\n$EH_DEAMON_CERT_KEY_PATH\n$EH_DEAMON_CERT_CRT_PATH");
         return 1;
     }
-
     Socket::createConnection();
 
 //    initDeamon();

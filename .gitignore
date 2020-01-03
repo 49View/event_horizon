@@ -119,3 +119,4 @@ nginx/localhost-key.pem
 configurations/bin/
 external/
 certificates/
+forgotten/

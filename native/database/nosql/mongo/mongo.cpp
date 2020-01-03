@@ -139,7 +139,7 @@ void Mongo::insertEntityFromAsset(const StreamChangeMetadata &meta) {
             kvp("creationDate", bsoncxx::types::b_date{timeNow}),
             kvp("tags", [&](sub_array sa) {
                 for (const auto &tag : split_tags(std::string(meta.filename))) {
-                    sa.append(tag);
+                    sa.append(toLower(tag));
                 }
             }),
             kvp("creator", bsoncxx::builder::basic::make_document(

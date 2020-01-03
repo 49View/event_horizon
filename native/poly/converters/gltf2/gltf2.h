@@ -2,7 +2,7 @@
 
 #include <string>
 #include <unordered_map>
-#include "tiny_gltf.h"
+#include <tinygltf/include/tiny_gltf.h>
 #include <core/math/vector4f.h>
 #include <core/name_policy.hpp>
 #include <core/descriptors/uniform_names.h>

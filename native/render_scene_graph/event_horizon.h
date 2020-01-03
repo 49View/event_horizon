@@ -65,7 +65,12 @@ public:
         if ( username && password && project ) {
             Http::init( LoginFields{*username, *password, *project} );
         } else {
-            Http::init();
+            if (!Http::useClientCertificate(true,
+                                            "EH_DEAMON_CERT_KEY_PATH", "EH_DEAMON_CERT_CRT_PATH")) {
+                LOGRS("Daemon certificate and key environment variables needs to be present as"
+                      "\n$EH_DEAMON_CERT_KEY_PATH\n$EH_DEAMON_CERT_CRT_PATH");
+            }
+            Socket::createConnection();
         }
 #endif
 #ifdef __EMSCRIPTEN__

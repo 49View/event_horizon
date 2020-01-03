@@ -4,8 +4,7 @@
 #include <string>
 #include <core/serialization.hpp>
 
-JSONDATA(ShaderLiveUpdateMap, msg, shaders)
-    std::string msg = "shaderchange";
+JSONDATA(ShaderLiveUpdateMap, shaders)
     std::vector<std::pair<std::string, std::string>> shaders;
     size_t count() const { return shaders.size(); }
 };

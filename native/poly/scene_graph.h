@@ -292,6 +292,8 @@ public:
     void loadGeom          ( std::string _names, HttpResouceCB _ccf = nullptr );
     void loadUI            ( std::string _names, HttpResouceCB _ccf = nullptr );
 
+    void loadAsset         ( const std::string& _names );
+
     void loadScene         ( const ResourceScene& gs, HODResolverCallback _ccf = nullptr );
     void addScene          ( const ResourceScene& gs );
     void addGeomScene      ( const std::string& geomName );
