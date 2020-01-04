@@ -50,8 +50,7 @@ static int getZipData(void **datap, size_t *sizep, const char *archive) {
     return 0;
 }
 
-ArchiveDirectory unzipFilesToTempFolder( const std::string& filename ) {
-    ArchiveDirectory ad{getFileName(filename)};
+void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad ) {
     void *data;
     size_t size;
     zip_source_t *src;
@@ -89,9 +88,10 @@ ArchiveDirectory unzipFilesToTempFolder( const std::string& filename ) {
         LOGRS(  zip_get_name( za, t, ZIP_FL_UNCHANGED) << " Size: " << buff.second << " Uncompressed: " << zInfo.size << " Read: " << byteRead );
         auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
         FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
+        if ( getFileNameExt( zInfo.name ) == ".zip" ) {
+            unzipFilesToTempFolder( tempFileName, ad );
+        }
     }
-
-    return ad;
 }
 
 std::vector<ArchiveDirectoryEntityElement> ArchiveDirectory::findFilesWithExtension(const std::vector<std::string>& _exts) const {

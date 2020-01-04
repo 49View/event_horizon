@@ -1,13 +1,16 @@
-#include <stb/stb_image_write.h>
-
-#include <core/http/webclient.h>
-#include <core/util.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <syslog.h>
 #include <cmath>
+
+#define TINYGLTF_IMPLEMENTATION
+#include <tinygltf/include/tiny_gltf.h>
+// #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
+
+#include <core/http/webclient.h>
+#include <core/util.h>
 #include <core/file_manager.h>
 #include <core/runloop_core.h>
 #include <core/tar_util.h>
@@ -253,6 +256,31 @@ void elaborateMatFromArchive(MongoBucket entity_bucket,
                                         HttpContentType::json, Hashable<>::hashOf(mat.sc), mat.thumbs[0], mat.deps));
 }
 
+int resaveGLB( const std::string& filename ) {
+//    using namespace tinygltf;
+//
+//    Model model;
+//    TinyGLTF loader;
+//    std::string err;
+//    std::string warn;
+//
+//    bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename.c_str());
+//
+//    if (!warn.empty()) {
+//        printf("Warn: %s\n", warn.c_str());
+//    }
+//
+//    if (!err.empty()) {
+//        printf("Err: %s\n", err.c_str());
+//    }
+//
+//    if (!ret) {
+//        printf("Failed to parse glTF\n");
+//        return -1;
+//    }
+    return 0;
+}
+
 void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, strview project,
                       strview uname,
                       strview uemail) {
@@ -282,6 +310,7 @@ void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, s
         if (ret != 0) throw DaemonException{std::string{"FBX elaboration return code: " + std::to_string(ret)}};
 
         auto fileData = FM::readLocalFile(dRoot + filenameglb);
+        resaveGLB(dRoot + filenameglb);
         auto fileHash = Hashable<>::hashOf(fileData);
         Mongo::fileUpload(entity_bucket, filenameglb, std::move(fileData),
                           Mongo::FSMetadata(ResourceGroup::Geom, project, uname, uemail,
@@ -307,7 +336,7 @@ void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAss
             // First unzip all the content if package arrives in a zip file
             if (bIsInAnArchive) {
                 if (getFileNameExt(filename) == ".zip") {
-                    ad = unzipFilesToTempFolder(fileDownloaded);
+                    unzipFilesToTempFolder(fileDownloaded, ad);
                 }
                 if (filename = chooseMainArchiveFilename(ad, meta.group); filename.empty()) {
                     daemonWarningLog(std::string(meta.filename) + " does not contain any appropriate asset file");

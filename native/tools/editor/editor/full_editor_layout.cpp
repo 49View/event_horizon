@@ -39,8 +39,8 @@ void EditorBackEnd::activatePostLoad() {
     Renderer::clearColor(C4f::WHITE);
     rsg.useSkybox( true );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
-    rsg.RR().LM()->setIndoorSceneCoeff(2.0f);
-    rsg.changeTime( "winter noon" );
+    rsg.RR().LM()->setIndoorSceneCoeff(1.0f);
+    rsg.changeTime( "summer noon" );
     rsg.setRigCameraController<CameraControlOrbit3d>();
     rsg.DC()->setFoV(60.0f);
 
@@ -63,8 +63,8 @@ void EditorBackEnd::activateImpl() {
     loadSceneEntities();
 
 //    sg.GB<GT::Shape>( ShapeType::Cylinder, GT::Tag(1001),  GT::M( "carpet" ) );
-    sg.GB<GT::Shape>( ShapeType::Sphere, GT::Tag(1002) );
-    sg.GB<GT::Shape>( ShapeType::Cube, GT::Tag(1003), V3f::UP_AXIS_NEG*0.6f, GT::Scale(500.0f, 0.1f, 500.0f) );
+//    sg.GB<GT::Shape>( ShapeType::Sphere, GT::Tag(1002) );
+    sg.GB<GT::Shape>( ShapeType::Cube, GT::Tag(1003), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
 
 //    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
 //                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
@@ -75,9 +75,12 @@ void EditorBackEnd::activateImpl() {
 //    sg.load<Geom>( "bed", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
 //    } );
-//    sg.load<Geom>( "lauter,selije,bedside", [this](HttpResouceCBSign key) {
+//    sg.loadGeom( "nightstand", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key );
 //    } );
+
+    sg.addGeomScene( "nightstand");
+//    sg.loadAsset( "Nightstand" );
 
 //    sg.load<Geom>( "vitra", [this](HttpResouceCBSign key) {
 //        sg.GB<GT::Asset>( key );

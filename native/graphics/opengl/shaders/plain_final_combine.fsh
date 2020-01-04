@@ -79,8 +79,8 @@ void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
 
-//     sceneColor = texture(shadowMapTexture, v_texCoord);
-// FragColor = sceneColor;
+//     sceneColor = texture(shadowMapTexture, v_texCoord).xxxx;
+// FragColor= sceneColor;
 // return;
 
     #if _CAMERA_MOTION_BLURRING_

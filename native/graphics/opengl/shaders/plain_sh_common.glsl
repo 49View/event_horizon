@@ -229,19 +229,23 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     // u_shadowParameters[0] == depth value z offset to avoid horrible aliasing
     // u_shadowParameters[1] == shadowOverBurn coefficient 
 #define_code shadow_code
-    float visibility = u_shadowParameters[2];
+    float visibility = 1.0;//u_shadowParameters[2];
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
-    float nlAngle = clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
-    v_shadowmap_coord3Biases.z -= u_shadowParameters[0];
+    v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
+    float nlAngle = 1.0-clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
+    float tanCosNAngle = tan(acos(nlAngle));
+    v_shadowmap_coord3Biases.z -= u_shadowParameters[0]*0.1;
     // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
     if ( v_shadowmap_coord3Biases.z > 0.0 ) {
-        float overBurnedfactor = 0.25 * u_shadowParameters[1];
+        float overBurnedfactor = 0.2;// * u_shadowParameters[1];
         for ( int i = 0; i < 4; i++ ) {
             int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;        
-            visibility += texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + poissonDisk[index] / 1024.0, v_shadowmap_coord3Biases.z ) ) * overBurnedfactor * tan(acos(1.0-nlAngle));// * u_timeOfTheDay;
+            float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + poissonDisk[index] / 4096.0, v_shadowmap_coord3Biases.z ) ) * tanCosNAngle;// * u_timeOfTheDay;
+            visibility -= smoothstep( 1.0, 0.0, shadow) * overBurnedfactor;// * u_timeOfTheDay;
         }
-    }
+    } 
+    //visibility = 1.0;
 #end_code
 
 #define_code final_combine
@@ -273,17 +277,19 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = u_sunRadiance.xyz;
 
-vec3 ambient = ((Lo + (kD * diffuseV + specular))*ao) * visibility;// * (visibility+diffuseV);
+vec3 ambient = (((Lo + (kD * diffuseV + specular)) * visibility ) * ao);// * (visibility+diffuseV);
+// vec3 ambient = irradiance;// * (visibility+diffuseV);
 #else 
 vec3 diffuseV = Lo * albedo;// * aoLightmapColor;
 vec3 ambient = kD * diffuseV * ao;// * visibility;
 #endif
 
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
+float fog = 1.0-(length(u_eyePos-Position_worldspace)*0.01);
 
 finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
  
-float preMultAlpha = opacityV * alpha;
+float preMultAlpha = opacityV * alpha * fog;
 FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
 
 vec3 bloom = finalColor * (translucencyV*(visibility-1.0));
