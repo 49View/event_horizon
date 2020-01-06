@@ -289,7 +289,7 @@ float fog = 1.0-(length(u_eyePos-Position_worldspace)*0.01);
 
 finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
  
-float preMultAlpha = opacityV * alpha;// * fog;
+float preMultAlpha = opacityV * alpha * fog;
 FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
 
 vec3 bloom = finalColor * (translucencyV*(visibility-1.0));

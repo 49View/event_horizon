@@ -79,7 +79,7 @@ void EditorBackEnd::activateImpl() {
 //        sg.GB<GT::Asset>( key );
 //    } );
 
-    sg.addGeomScene( "artek");
+    sg.addGeomScene( "cestino");
 //    sg.addGeomScene( "8479");
 //    sg.addGeomScene( "objexp");
 //    sg.loadAsset( "Nightstand" );
