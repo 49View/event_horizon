@@ -10,6 +10,7 @@
 #include <pwd.h>
 
 #include "../../../util.h"
+#include "../../../string_util.h"
 
 void platformLogPrint( const std::string& logTag, float time, const std::string& message ) {
     std::cout << logTag << " " << time << " " << message << std::endl;
@@ -20,6 +21,13 @@ void saveImageFromClipboard( [[maybe_unused]] const std::string& folderName) {
 
 bool isalnumCC(char c) {
     return std::isalnum(c);
+}
+
+bool isTempOSFilename(const std::string& filename) {
+    if ( startswith( filename, "__MACOSX")) {
+        return true;
+    }
+    return false;
 }
 
 namespace FileManager {

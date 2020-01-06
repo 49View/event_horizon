@@ -15,6 +15,10 @@ std::string cacheFolder() {
     return "/persistent_data/";
 }
 
+bool isTempOSFilename(const std::string& filename) {
+    return false;
+}
+
 //void FileManager::makeDir(const std::string& dirName) {
 //	mkdir(dirName.c_str(),0775);
 //}

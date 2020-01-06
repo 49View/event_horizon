@@ -85,6 +85,13 @@ RawImage::RawImage( int width,
     copyFrom( buffer );
 }
 
+RawImage::RawImage( int width,
+                    int height,
+                    int channels,
+                    const unsigned char *buffer ) : ImageParams( width, height, channels ) {
+    copyFrom( buffer );
+}
+
 RawImage::RawImage( int width, int height, int channels, const char *_buffer, const std::string& _forcedhash )
         : ImageParams( width, height, channels ) {
     copyFrom( _buffer );
@@ -113,6 +120,11 @@ RawImage rawImageSubImage( const RawImage& _source, const JMATH::Rect2f& _area,
 }
 
 void RawImage::copyFrom( const char *buffer ) {
+    rawBtyes = std::make_unique<uint8_t[]>( memorySize());
+    std::memcpy( rawBtyes.get(), buffer, memorySize());
+}
+
+void RawImage::copyFrom( const unsigned char *buffer ) {
     rawBtyes = std::make_unique<uint8_t[]>( memorySize());
     std::memcpy( rawBtyes.get(), buffer, memorySize());
 }

@@ -41,6 +41,7 @@ namespace GLTF2Service {
         InternalPBRTextureReconstructionMode textureReconstructionMode = InternalPBRTextureReconstructionMode::None;
         Color4f value = Vector4f::ONE;
         std::pair<int, int> texture{-1,-1};
+        int textureIndex = -1;
     };
 
     struct IntermediateMaterial {

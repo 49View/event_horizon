@@ -30,11 +30,13 @@ RESOURCE_CTORS_ONLY( RawImage );
     // A single float number equals a grayscale (1 channel) image
     RawImage( unsigned int _w, unsigned int _h, float _col );
     RawImage( int width, int height, int channels, const char *rawBtyes );
+    RawImage( int width, int height, int channels, const unsigned char *rawBtyes );
     RawImage( int _width, int _height, int _depth, int _channels, int _bpp );
     RawImage( int width, int height, int channels, const char *rawBtyes, const std::string& _forcedhash );
     RawImage( unsigned int _w, unsigned int _h, const Vector4f& _value, int _bpp );
 
     void copyFrom( const char *buffer );
+    void copyFrom( const unsigned char *buffer );
 
     RawImage( RawImage&& _val ) noexcept {
         width = _val.width;

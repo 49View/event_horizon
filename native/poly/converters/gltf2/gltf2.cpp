@@ -193,6 +193,14 @@ namespace GLTF2Service {
         }
     }
 
+    void readParameterJsonDoubleValue( const tinygltf::Parameter v,
+                                       const std::string& s1,
+                                       int& textureIndex ) {
+        if ( auto index = v.json_double_value.find( s1 ); index != v.json_double_value.end()) {
+            textureIndex = static_cast<int>(index->second);
+        }
+    }
+
     void sigmoidMap( const InternalPBRComponent& ic, const IntermediateMaterial& _im, SigmoidSlope _sg ) {
 
         std::shared_ptr<RawImage> greyValue = EF::clone( *_im.grayScaleBaseColor.get());
@@ -231,19 +239,20 @@ namespace GLTF2Service {
                                    const IntermediateMaterial& _im,
                                    const InternalPBRComponent& ic, const std::string& _uniformName ) {
         auto baseFileName = std::string{ _im.name + "_" + ic.baseName };
-        if ( ic.texture.first != -1 ) {
-            auto texture = _gltf.model->textures[ic.texture.first];
+        if ( ic.textureIndex != -1 ) {
+            auto texture = _gltf.model->textures[ic.textureIndex];
             auto image = _gltf.model->images[texture.source];
             uint8_p imgBuffer;
             if ( !image.uri.empty()) {
                 auto ext = getFileNameExt( image.name );
                 imgBuffer = FM::readLocalFile( _gltf.basePath + image.name );
+                auto imRef = _sg.B<IB>( baseFileName ).addIM( RawImage{ std::move( imgBuffer ) } );
+                matRef.Values()->assign( _uniformName, imRef );
             } else {
-                imgBuffer = imageUtil::bufferToPngMemory( image.width, image.height, image.component,
-                                                          image.image.data());
+                auto imRef = _sg.B<IB>( baseFileName ).addIM( RawImage{ image.width, image.height, image.component,
+                                                                       image.image.data() } );
+                matRef.Values()->assign( _uniformName, imRef );
             }
-            auto imRef = _sg.B<IB>( baseFileName ).addIM( RawImage{ std::move( imgBuffer ) } );
-            matRef.Values()->assign( _uniformName, imRef );
         }
     }
 
@@ -261,29 +270,32 @@ namespace GLTF2Service {
             for ( const auto&[k, v] : mat.values ) {
                 if ( k == "baseColorFactor" ) {
                     im.baseColor.value = v.number_array;
+//                    im.baseColor.value.setX( pow( im.baseColor.value.x(), 1.0f/2.2f ));
+//                    im.baseColor.value.setY( pow( im.baseColor.value.y(), 1.0f/2.2f ));
+//                    im.baseColor.value.setZ( pow( im.baseColor.value.z(), 1.0f/2.2f ));
                     imMat.setDiffuseColor( im.baseColor.value.xyz());
                     imMat.setOpacity( im.baseColor.value.w());
                 } else if ( k == "baseColorTexture" ) {
-                    readParameterJsonDoubleValue( v, "index", "texCoord", im.baseColor.texture );
+                    readParameterJsonDoubleValue( v, "index", im.baseColor.textureIndex );
                     saveInternalPBRComponent( _gltf, _sg, imMat, im, im.baseColor, UniformNames::diffuseTexture );
                 } else if ( k == "metallicFactor" ) {
                     auto lv = static_cast<float>(v.number_value);
                     imMat.setMetallicValue( lv );
                 } else if ( k == "metallicTexture" ) {
-                    readParameterJsonDoubleValue( v, "index", "texCoord", im.metallic.texture );
+                    readParameterJsonDoubleValue( v, "index", im.metallic.textureIndex );
                     saveInternalPBRComponent( _gltf, _sg, imMat, im, im.metallic, UniformNames::metallicTexture );
                 } else if ( k == "roughnessFactor" ) {
                     auto lv = static_cast<float>(v.number_value);
                     imMat.setRoughnessValue( lv );
                 } else if ( k == "roughnessTexture" ) {
-                    readParameterJsonDoubleValue( v, "index", "texCoord", im.roughness.texture );
+                    readParameterJsonDoubleValue( v, "index", im.roughness.textureIndex );
                     saveInternalPBRComponent( _gltf, _sg, imMat, im, im.roughness, UniformNames::roughnessTexture );
                 }
             }
 
             for ( const auto&[k, v] : mat.additionalValues ) {
                 if ( k == "normalTexture" ) {
-                    readParameterJsonDoubleValue( v, "index", "texCoord", im.normal.texture );
+                    readParameterJsonDoubleValue( v, "index", im.normal.textureIndex );
                     saveInternalPBRComponent( _gltf, _sg, imMat, im, im.normal, UniformNames::normalTexture );
                 }
             }

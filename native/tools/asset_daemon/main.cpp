@@ -6,6 +6,7 @@
 #include <cmath>
 
 #define TINYGLTF_IMPLEMENTATION
+
 #include <tinygltf/include/tiny_gltf.h>
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 
@@ -78,6 +79,14 @@ void initDeamon() {
     close(STDERR_FILENO);
 }
 
+struct DaemonFileStruct {
+    MongoBucket bucket;
+    std::string filename;
+    strview project;
+    strview uname;
+    strview uemail;
+};
+
 class DaemonException : public std::exception {
 public:
     DaemonException(const std::string &msg) : msg(msg) {}
@@ -100,17 +109,15 @@ void daemonWarningLog(const std::string &e) {
     Socket::emit("daemonLogger", serializeLogger(LoggerLevel::Warning, e));
 }
 
-std::optional<MongoFileUpload> elaborateImage(MongoBucket bucket, const char *filename,
-                                              int desiredWidth, int desiredHeight,
-                                              strview project,
-                                              strview uname,
-                                              strview uemail,
-                                              std::vector<std::string> &thumbs) {
+std::optional<MongoFileUpload> elaborateImage(
+        int desiredWidth, int desiredHeight,
+        DaemonFileStruct dfs,
+        std::vector<std::string> &thumbs) {
     try {
         int w = 0, h = 0, n = 0;
         int thumbSize = 128;
 
-        unsigned char *input_data = stbi_load(filename, &w, &h, &n, 0);
+        unsigned char *input_data = stbi_load(dfs.filename.c_str(), &w, &h, &n, 0);
 
         auto output_data = make_uint8_p(desiredWidth * desiredHeight * n);
         auto output_data_thumb = make_uint8_p(thumbSize * thumbSize * n);
@@ -118,12 +125,12 @@ std::optional<MongoFileUpload> elaborateImage(MongoBucket bucket, const char *fi
         stbir_resize_uint8(output_data.first.get(), desiredWidth, desiredHeight, 0, output_data_thumb.first.get(),
                            thumbSize, thumbSize, 0, n);
 
-        auto bm = imageUtil::bufferToPngMemory(desiredWidth, desiredHeight, n, output_data.first.get());
+        auto bm = imageUtil::bufferToMemoryCompressed(desiredWidth, desiredHeight, n, output_data.first.get(), imageUtil::extToMime(dfs.filename));
         auto bm64 = imageUtil::bufferToPng64(thumbSize, thumbSize, n, output_data_thumb.first.get());
         thumbs.emplace_back(bm64);
 
-        return Mongo::fileUpload(bucket, getFileName(filename), std::move(bm),
-                                 Mongo::FSMetadata(ResourceGroup::Image, project, uname, uemail,
+        return Mongo::fileUpload(dfs.bucket, getFileName(dfs.filename), std::move(bm),
+                                 Mongo::FSMetadata(ResourceGroup::Image, dfs.project, dfs.uname, dfs.uemail,
                                                    HttpContentType::octetStream,
                                                    MD5(bm.first.get(), bm.second).hexdigest(), bm64));
     } catch (const std::exception &e) {
@@ -134,6 +141,10 @@ std::optional<MongoFileUpload> elaborateImage(MongoBucket bucket, const char *fi
 
 std::string chooseMainArchiveFilename(const ArchiveDirectory &ad, strview group) {
     if (group == ResourceGroup::Geom) {
+        auto candidatesObj = ad.findFilesWithExtension({".obj"});
+        if (candidatesObj.size() > 0) {
+            return candidatesObj.back().name;
+        }
         auto candidates = ad.findFilesWithExtension({".fbx"});
         if (candidates.size() > 0) {
             for (const auto &elem : candidates) {
@@ -143,10 +154,11 @@ std::string chooseMainArchiveFilename(const ArchiveDirectory &ad, strview group)
             }
             return candidates.back().name;
         }
+
     }
     if (group == ResourceGroup::Material) {
         auto candidates = ad.findFilesWithExtension({".png", ".jpg"});
-        if ( candidates.size() > 0 ) {
+        if (candidates.size() > 0) {
             return ad.Name();
         }
     }
@@ -167,27 +179,25 @@ ArchiveDirectory generateActiveDirectoryFromSBSARTempFiles(const std::string &fn
     return ret;
 }
 
-ArchiveDirectory& mapActiveDirectoryFilesToPBR( ArchiveDirectory& ad ) {
-    for ( auto& elem : ad ) {
-        elem.second.metaString = MPBRTextures::findTextureInString( elem.second.name );
+ArchiveDirectory &mapActiveDirectoryFilesToPBR(ArchiveDirectory &ad) {
+    for (auto &elem : ad) {
+        elem.second.metaString = MPBRTextures::findTextureInString(elem.second.name);
     }
     return ad;
 }
 
-ResourceEntityHelper elaborateInternalMaterial(MongoBucket entity_bucket,
-                                               const ArchiveDirectory &ad,
-                                               int nominalSize,
-                                               strview project,
-                                               strview uname,
-                                               strview uemail) {
+ResourceEntityHelper elaborateInternalMaterial(
+        const ArchiveDirectory &ad,
+        int nominalSize,
+        DaemonFileStruct dfs) {
     ResourceEntityHelper mat{};
     auto fileRoot = getDaemonRoot();
 
     Material pbrmaterial{S::SH, ad.Name()};
     for (const auto &output : ad) {
         std::string fullFileName = fileRoot + output.second.name;
-        auto to = elaborateImage(entity_bucket, fullFileName.c_str(), nominalSize, nominalSize, project, uname,
-                                 uemail, mat.thumbs);
+        dfs.filename = fullFileName;
+        auto to = elaborateImage(nominalSize, nominalSize, dfs, mat.thumbs);
         if (to && !output.second.metaString.empty()) {
             auto tid = (*to).getStringId();
             mat.deps[ResourceGroup::Image].emplace_back(tid);
@@ -200,23 +210,21 @@ ResourceEntityHelper elaborateInternalMaterial(MongoBucket entity_bucket,
     return mat;
 }
 
-void elaborateMatSBSAR(MongoBucket entity_bucket,
-                       const std::string &mainFileName,
-                       const std::string &layerName,
-                       int size, strview project,
-                       strview uname,
-                       strview uemail) {
+void elaborateMatSBSAR(
+        const std::string &layerName,
+        int size,
+        DaemonFileStruct dfs) {
 
-    if (mainFileName.empty()) return;
+    if (dfs.filename.empty()) return;
     auto fileRoot = getDaemonRoot();
 
-    std::string fn = getFileNameOnly(mainFileName);
+    std::string fn = getFileNameOnly(dfs.filename);
     std::string fext = ".png";
     int nominalSize = 512;
 
     std::string sizeString = std::to_string(log2(size));
     std::string sbRender = "/opt/Allegorithmic/Substance_Automation_Toolkit/sbsrender render --inputs "
-                           + mainFileName +
+                           + dfs.filename +
                            " --set-value '$outputsize@" + sizeString + "," + sizeString +
                            "' --output-bit-depth \"8\" --png-format-compression best_compression "
                            "--output-name {inputName}_{outputNodeName}";
@@ -228,11 +236,11 @@ void elaborateMatSBSAR(MongoBucket entity_bucket,
     std::system(sbRender.c_str());
 
     // Gather texture outputs
-    ResourceEntityHelper mat = elaborateInternalMaterial(entity_bucket,
-                                                         generateActiveDirectoryFromSBSARTempFiles(fn), nominalSize,
-                                                         project, uname, uemail);
-    Mongo::fileUpload(entity_bucket, fn, mat.sc,
-                      Mongo::FSMetadata(ResourceGroup::Material, project, uname, uemail,
+    ResourceEntityHelper mat = elaborateInternalMaterial(
+            generateActiveDirectoryFromSBSARTempFiles(fn), nominalSize,
+            dfs);
+    Mongo::fileUpload(dfs.bucket, fn, mat.sc,
+                      Mongo::FSMetadata(ResourceGroup::Material, dfs.project, dfs.uname, dfs.uemail,
                                         HttpContentType::json, Hashable<>::hashOf(mat.sc), mat.thumbs[0], mat.deps));
 
     // Clean up
@@ -240,80 +248,138 @@ void elaborateMatSBSAR(MongoBucket entity_bucket,
     std::system(cleanup.c_str());
 }
 
-void elaborateMatFromArchive(MongoBucket entity_bucket,
-                       ArchiveDirectory &ad,
-                       strview project,
-                       strview uname,
-                       strview uemail) {
+void elaborateMatFromArchive(
+        ArchiveDirectory &ad,
+        DaemonFileStruct dfs
+) {
 
     const int nominalSize = 512;
     // Gather texture outputs
-    ResourceEntityHelper mat = elaborateInternalMaterial(entity_bucket,
-                                                         mapActiveDirectoryFilesToPBR(ad), nominalSize,
-                                                         project, uname, uemail);
-    Mongo::fileUpload(entity_bucket, ad.Name(), mat.sc,
-                      Mongo::FSMetadata(ResourceGroup::Material, project, uname, uemail,
+    ResourceEntityHelper mat = elaborateInternalMaterial(
+            mapActiveDirectoryFilesToPBR(ad), nominalSize,
+            dfs);
+    Mongo::fileUpload(dfs.bucket, ad.Name(), mat.sc,
+                      Mongo::FSMetadata(ResourceGroup::Material, dfs.project, dfs.uname, dfs.uemail,
                                         HttpContentType::json, Hashable<>::hashOf(mat.sc), mat.thumbs[0], mat.deps));
 }
 
-int resaveGLB( const std::string& filename ) {
-//    using namespace tinygltf;
-//
-//    Model model;
-//    TinyGLTF loader;
-//    std::string err;
-//    std::string warn;
-//
-//    bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename.c_str());
-//
-//    if (!warn.empty()) {
-//        printf("Warn: %s\n", warn.c_str());
-//    }
-//
-//    if (!err.empty()) {
-//        printf("Err: %s\n", err.c_str());
-//    }
-//
-//    if (!ret) {
-//        printf("Failed to parse glTF\n");
-//        return -1;
-//    }
+int resaveGLB(const std::string &filename) {
+    using namespace tinygltf;
+
+    Model model;
+    TinyGLTF loader;
+    std::string err;
+    std::string warn;
+
+    bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename.c_str());
+
+    if (!warn.empty() || !err.empty() || !ret) {
+        if (!warn.empty()) {
+            printf("Warn: %s\n", warn.c_str());
+        }
+        if (!err.empty()) {
+            printf("Err: %s\n", err.c_str());
+        }
+        if (!ret) {
+            printf("Failed to parse glTF\n");
+            return -1;
+        }
+    }
+
+    for ( auto& it : model.accessors ) {
+        if ( string_ends_with( it.name, "_positions") && it.componentType == 5126 && it.type == 3 ) {
+            auto buffView = model.bufferViews[it.bufferView];
+            if ( buffView.target == 34962 ) {
+                auto buffer = model.buffers[buffView.buffer];
+                auto* buffArray = buffer.data.data() + buffView.byteOffset + it.byteOffset;
+                V3f* buffV3f = reinterpret_cast<V3f*>(buffArray);
+                for ( int t = 0; t < it.count; t++ ) {
+                    buffV3f[t] *= 0.01f;
+                }
+            }
+            for ( auto& v : it.maxValues ) v*=0.01f;
+            for ( auto& v : it.minValues ) v*=0.01f;
+        }
+    }
+
+    loader.WriteGltfSceneToFile(&model, filename, true, true, true, true );
+
     return 0;
 }
 
-void elaborateGeomFBX(MongoBucket entity_bucket, const std::string &_filename, strview project,
-                      strview uname,
-                      strview uemail) {
+std::string sanitizeFilename( const std::string& _sourceName ) {
+    auto dRoot = getDaemonRoot();
+    auto filenameEscaped = _sourceName;
+    replaceAllStrings(filenameEscaped, "(", "\\(");
+    replaceAllStrings(filenameEscaped, ")", "\\)");
+
+    auto filenameSanitized = _sourceName;
+    replaceAllStrings(filenameSanitized, "(", "_");
+    replaceAllStrings(filenameSanitized, ")", "_");
+
+    if (filenameEscaped != filenameSanitized) {
+        auto ret = std::system(
+                std::string{"cd " + dRoot + " && mv " + filenameEscaped + " " + filenameSanitized}.c_str());
+        LOGRS("FBX sanity renamed return code: " << ret);
+    }
+    return filenameSanitized;
+}
+
+void elaborateGeomFBX(DaemonFileStruct dfs) {
     try {
         auto dRoot = getDaemonRoot();
-        auto filenameEscaped = _filename;
-        replaceAllStrings(filenameEscaped, "(", "\\(");
-        replaceAllStrings(filenameEscaped, ")", "\\)");
-
-        auto filenameSanitized = _filename;
-        replaceAllStrings(filenameSanitized, "(", "_");
-        replaceAllStrings(filenameSanitized, ")", "_");
-
-        if (filenameEscaped != filenameSanitized) {
-            auto ret = std::system(
-                    std::string{"cd " + dRoot + " && mv " + filenameEscaped + " " + filenameSanitized}.c_str());
-            LOGRS("FBX sanity renamed return code: " << ret);
-        }
-        auto fn = getFileNameOnly(filenameSanitized);
+        dfs.filename = sanitizeFilename(dfs.filename);
+        auto fn = getFileNameOnly(dfs.filename);
         std::string filenameglb = fn + ".glb";
 
         std::string cmd =
                 "cd " + dRoot + " && FBX2glTF -b --pbr-metallic-roughness -o " + filenameglb +
                 " " +
-                getFileName(filenameSanitized);
+                getFileName(dfs.filename);
         auto ret = std::system(cmd.c_str());
         if (ret != 0) throw DaemonException{std::string{"FBX elaboration return code: " + std::to_string(ret)}};
 
         auto fileData = FM::readLocalFile(dRoot + filenameglb);
         resaveGLB(dRoot + filenameglb);
         auto fileHash = Hashable<>::hashOf(fileData);
-        Mongo::fileUpload(entity_bucket, filenameglb, std::move(fileData),
-                          Mongo::FSMetadata(ResourceGroup::Geom, project, uname, uemail,
+        Mongo::fileUpload(dfs.bucket, filenameglb, std::move(fileData),
+                          Mongo::FSMetadata(ResourceGroup::Geom, dfs.project, dfs.uname, dfs.uemail,
+                                            HttpContentType::json, fileHash, "", ResourceDependencyDict{}));
+    } catch (const std::exception &e) {
+        daemonExceptionLog(e);
+    }
+}
+
+void elaborateGeomObj(DaemonFileStruct dfs) {
+    try {
+        auto dRoot = getDaemonRoot();
+        dfs.filename = sanitizeFilename(dfs.filename);
+        auto fn = getFileNameOnly(dfs.filename);
+        std::string filenameglb = fn + ".glb";
+
+        std::string cmd = "cd " + dRoot + " && obj2glTF -i " + getFileName(dfs.filename) + "  -o " + filenameglb;
+        auto ret = std::system(cmd.c_str());
+        if (ret != 0) throw DaemonException{std::string{"OBJ elaboration return code: " + std::to_string(ret)}};
+
+        auto fileData = FM::readLocalFile(dRoot + filenameglb);
+        resaveGLB(dRoot + filenameglb);
+        fileData = FM::readLocalFile(dRoot + filenameglb);
+        auto fileHash = Hashable<>::hashOf(fileData);
+        Mongo::fileUpload(dfs.bucket, filenameglb, std::move(fileData),
+                          Mongo::FSMetadata(ResourceGroup::Geom, dfs.project, dfs.uname, dfs.uemail,
+                                            HttpContentType::json, fileHash, "", ResourceDependencyDict{}));
+    } catch (const std::exception &e) {
+        daemonExceptionLog(e);
+    }
+}
+
+void elaborateGeomGLB(DaemonFileStruct dfs) {
+    try {
+        auto dRoot = getDaemonRoot();
+        auto fileData = FM::readLocalFile(dRoot + dfs.filename);
+        auto fileHash = Hashable<>::hashOf(fileData);
+        Mongo::fileUpload(dfs.bucket, dfs.filename, std::move(fileData),
+                          Mongo::FSMetadata(ResourceGroup::Geom, dfs.project, dfs.uname, dfs.uemail,
                                             HttpContentType::json, fileHash, "", ResourceDependencyDict{}));
     } catch (const std::exception &e) {
         daemonExceptionLog(e);
@@ -330,6 +396,7 @@ void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAss
             auto fileDownloaded = Mongo::fileDownload(sourceAssetBucket,
                                                       meta.id,
                                                       getDaemonRoot() + std::string{filename});
+            DaemonFileStruct dfs{entityBucket, getFileName(fileDownloaded), meta.project, meta.username, meta.useremail};
 
             bool bIsInAnArchive = getFileNameExt(std::string(filename)) == ".zip";
             ArchiveDirectory ad{filename};
@@ -338,26 +405,28 @@ void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAss
                 if (getFileNameExt(filename) == ".zip") {
                     unzipFilesToTempFolder(fileDownloaded, ad);
                 }
-                if (filename = chooseMainArchiveFilename(ad, meta.group); filename.empty()) {
+                if ( dfs.filename = chooseMainArchiveFilename(ad, meta.group); dfs.filename.empty()) {
                     daemonWarningLog(std::string(meta.filename) + " does not contain any appropriate asset file");
                     continue;
                 }
             }
 
             if (meta.group == ResourceGroup::Material) {
-                if (getFileNameExt(std::string(filename)) == ".zip") {
-                    elaborateMatFromArchive(entityBucket, ad, meta.project,
-                                      meta.username,
-                                      meta.useremail);
+                if (getFileNameExt(std::string(dfs.filename)) == ".zip") {
+                    elaborateMatFromArchive(ad, dfs);
                 }
-                if (getFileNameExt(std::string(filename)) == ".sbsar") {
-                    elaborateMatSBSAR(entityBucket, fileDownloaded, {}, 512, meta.project,
-                                      meta.username,
-                                      meta.useremail);
+                if (getFileNameExt(std::string(dfs.filename)) == ".sbsar") {
+                    elaborateMatSBSAR({}, 512, dfs);
                 }
             } else if (meta.group == ResourceGroup::Geom) {
-                if (getFileNameExt(filename) == ".fbx") {
-                    elaborateGeomFBX(entityBucket, filename, meta.project, meta.username, meta.useremail);
+                if (getFileNameExt(dfs.filename) == ".fbx") {
+                    elaborateGeomFBX(dfs);
+                }
+                if (getFileNameExt(dfs.filename) == ".obj") {
+                    elaborateGeomObj(dfs);
+                }
+                if (getFileNameExt(dfs.filename) == ".glb" || getFileNameExt(dfs.filename) == ".gltf") {
+                    elaborateGeomGLB(dfs);
                 }
             }
         }

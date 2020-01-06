@@ -145,26 +145,38 @@ namespace imageUtil {
         return decodedData;
     }
 
-    uint8_p bufferToPngMemory( int w, int h, int comp, void* data ) {
-        uint8_p pngBuffer;
-        stbi_write_png_to_func( [](void* ctx, void*data, int size) {
-            auto* src = reinterpret_cast<uint8_p*>(ctx);
-            src->second = static_cast<uint64_t >(size);
-            src->first = std::make_unique<uint8_t[]>(src->second);
-            std::memcpy( src->first.get(), data, src->second );
-        }, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 0 );
+    uint8_p bufferToMemoryCompressed( int w, int h, int comp, void* data, const std::string& mineType ) {
+        uint8_p pngBuffer{nullptr, 0};
+        if ( mineTypePNG == mineType ) {
+            stbi_write_png_to_func( [](void* ctx, void*data, int size) {
+                auto* src = reinterpret_cast<uint8_p*>(ctx);
+                src->second = static_cast<uint64_t >(size);
+                src->first = std::make_unique<uint8_t[]>(src->second);
+                std::memcpy( src->first.get(), data, src->second );
+            }, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 0 );
+            return pngBuffer;
+        }
+        if ( mineTypeJPG == mineType || mineTypeJPEG == mineType ) {
+            stbi_write_jpg_to_func( [](void* ctx, void*data, int size) {
+                auto* src = reinterpret_cast<uint8_p*>(ctx);
+                src->second = static_cast<uint64_t >(size);
+                src->first = std::make_unique<uint8_t[]>(src->second);
+                std::memcpy( src->first.get(), data, src->second );
+            }, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 100 );
+            return pngBuffer;
+        }
         return pngBuffer;
     }
 
     std::string bufferToPng64( int w, int h, int comp, void* data ) {
 
-        auto res = bufferToPngMemory( w, h, comp, data );
+        auto res = bufferToMemoryCompressed( w, h, comp, data, mineTypePNG );
         auto rawm = bn::encode_b64( SerializableContainer{res.first.get(), res.first.get() + res.second} );
         return std::string{ rawm.begin(), rawm.end() };
     }
 
     uint8_p rawToPngMemory( const RawImage& _input ) {
-        return bufferToPngMemory( _input.width, _input.height, _input.channels, _input.data() );
+        return bufferToMemoryCompressed( _input.width, _input.height, _input.channels, _input.data(), mineTypePNG );
     }
 
     std::string rawToPng64gzip( const RawImage& _input ) {
@@ -178,13 +190,24 @@ namespace imageUtil {
 
     std::string rawResizeToPng64gzip( const RawImage& dt, int tw, int th ) {
         auto dtcr = imageUtil::resize(dt, tw, th );
-        auto dtc = imageUtil::bufferToPngMemory( tw, th, dt.channels, dt.data() );
+        auto dtc = imageUtil::bufferToMemoryCompressed( tw, th, dt.channels, dt.data(), mineTypePNG );
         auto sc = SerializableContainer{ dtc.first.get(), dtc.first.get() + dtc.second };
         return zlibUtil::rawb64gzip(sc);
     }
 
     std::string rawResizeToPng64gzip( std::shared_ptr<RawImage> dt, int tw, int th ) {
         return rawResizeToPng64gzip( *dt, tw, th );
+    }
+
+    std::string extToMime(const std::string &ext) {
+        std::string extLo = toLower( ext );
+        if ( extLo == ".png" ) {
+            return mineTypePNG;
+        }
+        if ( extLo == ".jpg" || extLo == ".jpeg" ) {
+            return mineTypeJPG;
+        }
+        return {};
     }
 
 }

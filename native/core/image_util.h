@@ -8,6 +8,13 @@
 class RawImage;
 
 namespace imageUtil {
+
+    static const std::string mineTypePNG = "image/png";
+    static const std::string mineTypeJPG = "image/jpg";
+    static const std::string mineTypeJPEG = "image/jpeg";
+
+    std::string extToMime( const std::string& ext );
+
     template<typename T>
     std::unique_ptr<uint8_t[]> decodeFromStream( T* _data, int width, int height, int channels ) {
         auto sizeOf = sizeof(T);
@@ -35,7 +42,7 @@ namespace imageUtil {
     std::unique_ptr<uint8_t[]> zeroImage3( uint32_t color, int& width, int& height, int& channels );
     std::unique_ptr<uint8_t[]> zeroImage3( uint32_t color, int width, int height );
 
-    uint8_p bufferToPngMemory( int w, int h, int comp, void* data );
+    uint8_p bufferToMemoryCompressed( int w, int h, int comp, void* data, const std::string& mineType );
     std::string bufferToPng64( int w, int h, int comp, void* data );
     std::string rawToPng64gzip( const RawImage& _input );
     std::string rawToPng64gzip( std::shared_ptr<RawImage> _input );

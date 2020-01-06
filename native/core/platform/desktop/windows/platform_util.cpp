@@ -25,6 +25,10 @@ bool isTouchBased() {
     return false;
 }
 
+bool isTempOSFilename(const std::string& filename) {
+    return false;
+}
+
 std::string cacheFolder() {
 	const char* homeDir = getenv( "TEMP" );
 	return std::string( homeDir ) + "/";

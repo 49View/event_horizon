@@ -117,6 +117,13 @@ ucchar_p uint8_pTouucchar_p( const uint8_p& _source );
 uint8_p ucchar_pTouint8_p( const ucchar_p& _source );
 uint8_p make_uint8_p( uint64_t _size );
 
+template <typename T>
+uint8_p make_uint8_p( uint64_t _size, const T* data ) {
+    auto ret = make_uint8_p( _size );
+    std::memcpy( ret.first.get(), data, _size );
+    return ret;
+}
+
 namespace DaemonPaths {
 	const static std::string UploadDir = "elaborate/";
 

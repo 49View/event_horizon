@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <core/util.h>
 #include <core/file_manager.h>
+#include <core/platform_util.h>
 
 static int getZipData(void **datap, size_t *sizep, const char *archive) {
     /* example implementation that reads data from file */
@@ -82,14 +83,16 @@ void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad )
         auto zFile = zip_fopen_index( za, t, ZIP_FL_UNCHANGED );
         zip_stat_t zInfo;
         zip_stat_index( za, t, ZIP_FL_UNCHANGED, &zInfo );
-        auto buff = make_uint8_p( zInfo.size );
-        auto byteRead = zip_fread( zFile, buff.first.get(), buff.second );
-        ad.insert( { zInfo.name, zInfo.size} );
-        LOGRS(  zip_get_name( za, t, ZIP_FL_UNCHANGED) << " Size: " << buff.second << " Uncompressed: " << zInfo.size << " Read: " << byteRead );
-        auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
-        FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
-        if ( getFileNameExt( zInfo.name ) == ".zip" ) {
-            unzipFilesToTempFolder( tempFileName, ad );
+        if ( !isTempOSFilename( zInfo.name ) ) {
+            auto buff = make_uint8_p( zInfo.size );
+            auto byteRead = zip_fread( zFile, buff.first.get(), buff.second );
+            ad.insert( { zInfo.name, zInfo.size} );
+            LOGRS(  zip_get_name( za, t, ZIP_FL_UNCHANGED) << " Size: " << buff.second << " Uncompressed: " << zInfo.size << " Read: " << byteRead );
+            auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
+            FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
+            if ( getFileNameExt( zInfo.name ) == ".zip" ) {
+                unzipFilesToTempFolder( tempFileName, ad );
+            }
         }
     }
 }

@@ -79,7 +79,9 @@ void EditorBackEnd::activateImpl() {
 //        sg.GB<GT::Asset>( key );
 //    } );
 
-    sg.addGeomScene( "nightstand");
+    sg.addGeomScene( "artek");
+//    sg.addGeomScene( "8479");
+//    sg.addGeomScene( "objexp");
 //    sg.loadAsset( "Nightstand" );
 
 //    sg.load<Geom>( "vitra", [this](HttpResouceCBSign key) {
