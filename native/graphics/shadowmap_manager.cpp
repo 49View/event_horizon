@@ -1,23 +1,21 @@
 #include "shadowmap_manager.h"
 #include <core/math/quaternion.h>
-#include <core/suncalc/sun_builder.h>
+#include <core/math/aabb.h>
 
 ShadowMapManager::ShadowMapManager() {
-	mBiasMatrix = Matrix4f(
-			0.5f, 0.0f, 0.0f, 0.0f,
-			0.0f, 0.5f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.5f, 0.0f,
-			0.5f, 0.5f, 0.5f, 1.0f
-	);
-
-	float bs = 1.25f;
-
-	setFrusom( { -bs, bs}, { -bs, bs}, { 0.0f, 1.25f} );
+    mBiasMatrix = Matrix4f(
+            0.5f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.5f, 0.0f,
+            0.5f, 0.5f, 0.5f, 1.0f
+    );
 }
 
 void ShadowMapManager::updateDepthProjectionMatrix() {
-	depthProjectionMatrix.setOrthogonalProjection( mXFrustom.x(), mXFrustom.y(), mYFrustom.x(), mYFrustom.y(), mZFrustom.x(), mZFrustom.y() );
-	invalidate();
+
+	depthProjectionMatrix.setOrthogonalProjection( mXFrustom.x(), mXFrustom.y(), mYFrustom.y(), mYFrustom.x(), mZFrustom.x(), mZFrustom.y() );
+    calculateShadowMapMatrices();
+    invalidate();
 }
 
 void ShadowMapManager::setFrusomX( const Vector2f& val ) {
@@ -50,7 +48,6 @@ void ShadowMapManager::SunPosition( const Vector3f& sunPos ) {
 	if ( mShadowMapLightSourcePos != sunPos ) {
 		mShadowMapLightSourcePos = sunPos;
 		mShadowMapSunLightDir = normalize( mShadowMapLightSourcePos );
-		mShadowMapLightSourcePos = mShadowMapSunLightDir * ( mYFrustom.y() * 0.5f );
 		calculateShadowMapMatrices();
 		invalidate();
 	}
@@ -58,10 +55,12 @@ void ShadowMapManager::SunPosition( const Vector3f& sunPos ) {
 
 void ShadowMapManager::calculateShadowMapMatrices() {
 	// Compute the MVP matrix from the light's point of view
-	depthViewMatrix.lookAt( mShadowMapLightSourcePos, mShadowMapLightSourcePos + mShadowMapSunLightDir, V3f::Y_AXIS );
-//    depthViewMatrix = Matrix4f::IDENTITY;
-	depthMVP = depthViewMatrix * depthProjectionMatrix;
-	depthBiasMVP = depthMVP * mBiasMatrix;
+	if ( mZFrustom.y() != 0.0f ) {
+//        depthViewMatrix.lookAt2( V3f{0.0f,  10.7f, 0.0f}, V3f::ZERO, V3f{0.0f, 1.0f, 0.000001f} );
+        depthViewMatrix.lookAt2( mShadowMapSunLightDir*mZFrustom.y()*0.5f, V3f::ZERO, V3f{0.0f, 1.0f, 0.000001f} );
+        depthMVP = depthViewMatrix * depthProjectionMatrix;
+        depthBiasMVP = depthMVP * mBiasMatrix;
+	}
 }
 
 const Matrix4f& ShadowMapManager::ShadowMapMVP() const {
@@ -77,4 +76,13 @@ Matrix4f & ShadowMapManager::ShadowMapMVPBias( bool _useInfiniteHorizon ) {
 
 Vector3f ShadowMapManager::SunDirection() const {
 	return mShadowMapSunLightDir;
+}
+
+void ShadowMapManager::setFrusom( const JMATH::AABB& aabb ) {
+    V3f lFrustomAxis{ aabb.calcWidth()*0.505f, aabb.calcDepth()*0.505f, aabb.calcHeight()};
+    float inc = 1.0f+(tan(acos( dot( V3f::UP_AXIS, mShadowMapSunLightDir))));
+    lFrustomAxis *= inc;
+    float aabbDiameter = aabb.calcDiameter();
+
+    setFrusom( { -lFrustomAxis.x(), lFrustomAxis.x()}, { -lFrustomAxis.y(), lFrustomAxis.y()}, { 0.0f, aabbDiameter} );
 }

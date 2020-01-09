@@ -3,6 +3,7 @@
 #include "core/math/matrix4f.h"
 #include "core/math/rect2f.h"
 
+namespace JMATH { class AABB; }
 
 class ShadowMapManager : public FrameInvalidator {
 public:
@@ -16,6 +17,7 @@ public:
 	void SunPosition( const Vector3f& sunPos );
 	Vector3f SunPosition() const { return mShadowMapLightSourcePos; }
 	void setFrusom( const Vector2f& xb, const Vector2f& yb, const Vector2f& zb  );
+	void setFrusom( const JMATH::AABB& aabb );
 	void setFrusomX( const Vector2f& val );
 	void setFrusomY( const Vector2f& val );
 	void setFrusomZ( const Vector2f& val );

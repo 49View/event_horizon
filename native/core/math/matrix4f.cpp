@@ -163,3 +163,14 @@ Matrix4f::Matrix4f( const Vector3f& pos, const Quaternion& axis, const Vector3f&
     *this = mscale * mrot * mpos;
 }
 
+void Matrix4f::lookAt2( const Vector3f& eye, const Vector3f& at, const Vector3f& up ) {
+    Vector3f z = normalize( eye - at );  // Forward
+    Vector3f x = normalize( cross( up, z ) ); // Right
+    Vector3f y = cross( z, x );
+
+    setRow( 0, Vector4f( x.x(), y.x(), z.x(), 0.0f ) );
+    setRow( 1, Vector4f( x.y(), y.y(), z.y(), 0.0f ) );
+    setRow( 2, Vector4f( x.z(), y.z(), z.z(), 0.0f ) );
+    setRow( 3, Vector4f( -( dot( x, eye ) ), -( dot( y, eye ) ), -( dot( z, eye ) ), 1.0f ) );
+}
+

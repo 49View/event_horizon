@@ -167,8 +167,33 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     }
 }
 
+AABB bbox3dOfVPList( const std::vector<std::shared_ptr<VPList>> _map ) {
+    AABB ret = AABB::MINVALID();
+    for ( const auto& vp : _map ) {
+        if ( !vp->isHidden() && vp->tag() != SHADOW_MAGIC_TAG ) {
+            ret.merge( vp->BBox3d());
+        }
+    }
+    return ret;
+}
+
+void RLTargetPBR::calcShadowMapsBBox() {
+    if ( smm->invalidated() ) {
+        AABB totalFrustomBox = AABB::MINVALID();
+        for ( const auto& [k, vl] : rr.CL() ) {
+            if ( isKeyInRange(k) ) {
+                totalFrustomBox.merge( bbox3dOfVPList(vl.mVList) );
+            }
+        }
+        if ( totalFrustomBox != AABB::MINVALID() ) {
+            smm->setFrusom( totalFrustomBox );
+        }
+    }
+}
+
 void RLTargetPBR::addShadowMaps() {
     if ( smm->invalidated() ) {
+
         rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
         rr.CB_U().pushCommand( { CommandBufferCommandName::shadowMapBufferBind } );
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthWriteTrue } );
@@ -425,6 +450,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.setCameraUniforms( cameraRig->getCamera() );
+    calcShadowMapsBBox();
     rr.LM()->setUniforms( Vector3f::ZERO, smm, mainDirectionLightValue() );
 
     bool bAddProbe = mSkybox && mSkybox->precalc( 0.0f );

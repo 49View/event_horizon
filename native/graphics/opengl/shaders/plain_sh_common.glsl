@@ -225,7 +225,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
 
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz*5.0 );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
 
     // single point light 
     for ( int i = 0; i < u_numPointLights; i++ ) {

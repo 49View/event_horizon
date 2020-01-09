@@ -384,7 +384,9 @@ public:
 		setRow( 3, Vector4f( -( dot( x, eye ) ), -( dot( y, eye ) ), -( dot( z, eye ) ), 1.0f ) );
 	}
 
-	Vector2f getXAxis2() const {
+    void lookAt2( const Vector3f& eye, const Vector3f& at, const Vector3f& up );
+
+    Vector2f getXAxis2() const {
 		return Vector2f( mRows[0].x(), mRows[0].y() );
 	}
 
