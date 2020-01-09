@@ -105,3 +105,5 @@ struct TextureUniformDesc {
     unsigned int slot;
     int 		 target;
 };
+
+const static uint64_t SHADOW_MAGIC_TAG = 50420;

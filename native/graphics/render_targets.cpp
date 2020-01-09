@@ -417,11 +417,15 @@ void RLTarget::clearCB() {
     }
 }
 
+V4f RLTargetPBR::mainDirectionLightValue() const {
+    return mbEnableSunLighting ? mSunBuilder->GoldenHourColor() : V4f::ONE;
+}
+
 void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
     cb.setCameraUniforms( cameraRig->getCamera() );
-    rr.LM()->setUniforms( Vector3f::ZERO, smm, mSunBuilder->GoldenHourColor() );
+    rr.LM()->setUniforms( Vector3f::ZERO, smm, mainDirectionLightValue() );
 
     bool bAddProbe = mSkybox && mSkybox->precalc( 0.0f );
     setDirtyCumulative( S::PBR, cameraRig->getCamera()->isDirty() || bAddProbe );
@@ -537,6 +541,10 @@ bool RLTargetPBR::useMotionBlur() const {
 void RLTargetPBR::useMotionBlur( bool _flag ) {
     mbUseMotionBlur = _flag;
     setDirtDelay( _flag ? 2 : 1 );
+}
+
+void RLTargetPBR::enableSunLighting( bool _flag ) {
+    mbEnableSunLighting = _flag;
 }
 
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {

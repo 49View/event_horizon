@@ -38,6 +38,7 @@ void EditorBackEnd::activatePostLoad() {
 
     Renderer::clearColor(C4f::WHITE);
     rsg.useSkybox( true );
+    rsg.useSunLighting( false );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
     rsg.RR().LM()->setIndoorSceneCoeff(1.0f);
     rsg.changeTime( "summer noon" );
@@ -64,7 +65,7 @@ void EditorBackEnd::activateImpl() {
 
 //    sg.GB<GT::Shape>( ShapeType::Cylinder, GT::Tag(1001),  GT::M( "carpet" ) );
 //    sg.GB<GT::Shape>( ShapeType::Sphere, GT::Tag(1002) );
-    sg.GB<GT::Shape>( ShapeType::Cube, GT::Tag(1003), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
+    sg.GB<GT::Shape>( ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
 
 //    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
 //                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
@@ -79,7 +80,7 @@ void EditorBackEnd::activateImpl() {
 //        sg.GB<GT::Asset>( key );
 //    } );
 
-    sg.addGeomScene( "cestino");
+    sg.addGeomScene( "song");
 //    sg.addGeomScene( "8479");
 //    sg.addGeomScene( "objexp");
 //    sg.loadAsset( "Nightstand" );

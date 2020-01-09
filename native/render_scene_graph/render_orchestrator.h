@@ -121,6 +121,7 @@ public:
     void setVisible( uint64_t _cbIndex, bool _value );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     void useSkybox( bool _value );
+    void useSunLighting( bool _value );
     void useSSAO( bool _value );
     void useDOF( bool _value );
     void useMotionBlur( bool _value );

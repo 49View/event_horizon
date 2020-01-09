@@ -93,29 +93,34 @@ MongoDocumentValue Mongo::FSMetadata(const std::string &group, strview project, 
     using bsoncxx::builder::basic::make_document;
 
     auto builder = bsoncxx::builder::basic::document{};
-    builder.append(
-            kvp("group", group),
-            kvp("project", project),
-            kvp("username", uname),
-            kvp("useremail", uemail),
-            kvp("contentType", contentType),
-            kvp("hash", md5),
-            kvp("thumb", thumb),
-            kvp("deps", [&](sub_array sa) {
-                for (const auto &dep : deps) {
-                    sa.append(make_document(
-                            kvp("key", dep.first),
-                            kvp("value", [&](sub_array sa2) {
-                                for (const auto &depv : dep.second) {
-                                    sa2.append(depv);
-                                }
-                            }))
-                    );
-                }
-            })
-    );
 
-    return MongoDocumentValue{builder.extract()};
+    try {
+        builder.append(
+                kvp( "group", group ),
+                kvp( "project", project ),
+                kvp( "username", uname ),
+                kvp( "useremail", uemail ),
+                kvp( "contentType", contentType ),
+                kvp( "hash", md5 ),
+                kvp( "thumb", thumb ),
+                kvp( "deps", [&]( sub_array sa ) {
+                    for ( const auto& dep : deps ) {
+                        sa.append( make_document(
+                                kvp( "key", dep.first ),
+                                kvp( "value", [&]( sub_array sa2 ) {
+                                    for ( const auto& depv : dep.second ) {
+                                        sa2.append( depv );
+                                    }
+                                } ))
+                        );
+                    }
+                } )
+        );
+
+    } catch ( const std::exception& e ) {
+        LOGRS( e.what() );
+    }
+    return MongoDocumentValue{ builder.extract() };
 }
 
 void Mongo::insertEntityFromAsset(const StreamChangeMetadata &meta) {

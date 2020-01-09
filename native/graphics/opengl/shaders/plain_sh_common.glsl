@@ -54,11 +54,29 @@ float translucencyV = 1.0;
 
 const float PI = 3.14159265359;
 
-vec2 poissonDisk[4] = vec2[](
+float random(vec4 seed4){
+    float dot_product = dot(seed4, vec4(12.9898,78.233,45.164,94.673));
+    return fract(sin(dot_product) * 43758.5453);
+    // return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+vec2 poissonDisk[16] = vec2[](
     vec2( -0.94201624, -0.39906216 ),
     vec2( 0.94558609, -0.76890725 ),
     vec2( -0.094184101, -0.92938870 ),
-    vec2( 0.34495938, 0.29387760 )
+    vec2( 0.34495938, 0.29387760 ),
+    vec2( -0.294184101, -0.232938870 ),
+    vec2( 0.394184101, 0.892938870 ),
+    vec2( -0.794184101, -0.93938870 ),
+    vec2( 0.494184101, 0.45938870 ),
+    vec2( -0.694184101, -0.71938870 ),
+    vec2( 0.594184101, 0.15938870 ),
+    vec2( -0.294184101, -0.732938870 ),
+    vec2( 0.194184101, 0.02938870 ),    
+    vec2( -0.714184101, -0.55938870 ),
+    vec2( -0.214184101, 0.39938870 ),
+    vec2( -0.644184101, 0.89938870 ),
+    vec2( 0.34495938, -0.29387760 )
     );
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
@@ -207,7 +225,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
 
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz*5.0 );
 
     // single point light 
     for ( int i = 0; i < u_numPointLights; i++ ) {
@@ -232,20 +250,22 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float visibility = 1.0;//u_shadowParameters[2];
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
-    float nlAngle = 1.0-clamp(dot( N, normalize( u_sunPosition - Position_worldspace )), 0.0, 1.0);
-    float tanCosNAngle = tan(acos(nlAngle));
-    v_shadowmap_coord3Biases.z -= u_shadowParameters[0]*0.1;
+    float nlAngle = dot( N, normalize( u_sunPosition - Position_worldspace ));
+    // float tanCosNAngle = tan(acos(nlAngle));
+    v_shadowmap_coord3Biases.z -= u_shadowParameters[0];
     // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
-    if ( v_shadowmap_coord3Biases.z > 0.0 ) {
+    if ( v_shadowmap_coord3Biases.z > 0.0 && nlAngle > 0.0) {
         float overBurnedfactor = 0.2;// * u_shadowParameters[1];
         for ( int i = 0; i < 4; i++ ) {
-            int index = i;// int( 16.0*random( vec4( gl_FragCoord.xyy, i ) ) ) % 16;        
-            float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + poissonDisk[index] / 4096.0, v_shadowmap_coord3Biases.z ) ) * tanCosNAngle;// * u_timeOfTheDay;
-            visibility -= smoothstep( 1.0, 0.0, shadow) * overBurnedfactor;// * u_timeOfTheDay;
+            int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
+            float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + (poissonDisk[index] / 1024.0), v_shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
+            shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 : 0.0;
+            visibility -= shadow * overBurnedfactor * nlAngle;// * u_timeOfTheDay;
         }
     } 
-    //visibility = 1.0;
+    //clamp(visibility, 0.0, 1.0);
+    // visibility = nlAngle;
 #end_code
 
 #define_code final_combine
@@ -288,8 +308,8 @@ vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_tex
 float fog = 1.0-(length(u_eyePos-Position_worldspace)*0.01);
 
 finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
- 
-float preMultAlpha = opacityV * alpha * fog;
+
+float preMultAlpha = opacityV * alpha;// * fog;
 FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
 
 vec3 bloom = finalColor * (translucencyV*(visibility-1.0));

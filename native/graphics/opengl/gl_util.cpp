@@ -303,6 +303,8 @@ GLenum wrapModeToGl( WrapMode mode ) {
     switch ( mode ) {
         case WRAP_MODE_CLAMP_TO_EDGE:
             return GL_CLAMP_TO_EDGE;
+        case WRAP_MODE_CLAMP_TO_BORDER:
+            return GL_CLAMP_TO_BORDER;
         case WRAP_MODE_REPEAT:
             return GL_REPEAT;
     }
@@ -462,6 +464,8 @@ const char *wrapModeToString( WrapMode wrapMode ) {
             return "CLAMP_TO_EDGE";
         case WRAP_MODE_REPEAT:
             return "REPEAT";
+        case WRAP_MODE_CLAMP_TO_BORDER:
+            return "BORDER";
     }
     ASSERT( false );
     return "UNKNOWN";

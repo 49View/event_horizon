@@ -162,7 +162,7 @@ void Renderer::init() {
     sm->loadShaders();
 //    tm->addTextureWithData(RawImage{54, 54, V4f::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
     tm->addTextureRef( FBNames::lightmap );
-    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 1024 ).depthOnly().build();
+    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 2048 ).depthOnly().build();
     mDepthFB = FrameBufferBuilder{ *this, FBNames::depthmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).format(PIXEL_FORMAT_HDR_R16).build();
 
     auto trd = ImageParams{}.setSize( 32 ).format( pixelFormatResolver( PIXEL_FORMAT_HDR_RGBA_16, Framebuffer::isHDRSupported()) ).setWrapMode( WRAP_MODE_CLAMP_TO_EDGE );
@@ -523,6 +523,8 @@ void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _m
         }
         if ( cam ) {
             addVP = cam->frustomClipping( vp->BBox3d());
+        } else {
+            addVP = vp->tag() != SHADOW_MAGIC_TAG;
         }
         if ( addVP ) {
             CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram, _alphaDrawThreshold );

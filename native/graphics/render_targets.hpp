@@ -299,6 +299,7 @@ public:
     void useSSAO( bool _flag );
     void useDOF( bool _flag );
     void useMotionBlur( bool _flag );
+    void enableSunLighting( bool _flag );
     void enableSkybox( bool _value );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
@@ -320,6 +321,7 @@ protected:
     void cacheShadowMapSunPosition( const Vector3f& _smsp );
     void invalidateShadowMaps();
     void setShadowMapPosition( const Vector3f& _sp );
+    [[nodiscard]] V4f mainDirectionLightValue() const;
 protected:
     std::shared_ptr<CompositePBR> mComposite;
 
@@ -329,6 +331,7 @@ protected:
     SkyBoxInitParams mSkyBoxParams;
     bool bEnableSkyBoxRendering = false;
     bool mbEnableSkybox = false;
+    bool mbEnableSunLighting = false;
     bool mbUseSSAO = false;
     bool mbUseDOF = false;
     bool mbUseMotionBlur = false;

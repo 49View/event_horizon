@@ -141,12 +141,8 @@ std::optional<MongoFileUpload> elaborateImage(
 
 std::string chooseMainArchiveFilename(const ArchiveDirectory &ad, strview group) {
     if (group == ResourceGroup::Geom) {
-        auto candidatesObj = ad.findFilesWithExtension({".obj"});
-        if (candidatesObj.size() > 0) {
-            return candidatesObj.back().name;
-        }
         auto candidates = ad.findFilesWithExtension({".fbx"});
-        if (candidates.size() > 0) {
+        if (!candidates.empty()) {
             for (const auto &elem : candidates) {
                 if (elem.name.find("_upY.fbx") != std::string::npos) {
                     return elem.name;
@@ -154,11 +150,15 @@ std::string chooseMainArchiveFilename(const ArchiveDirectory &ad, strview group)
             }
             return candidates.back().name;
         }
+        auto candidatesObj = ad.findFilesWithExtension({".obj"});
+        if (!candidatesObj.empty()) {
+            return candidatesObj.back().name;
+        }
 
     }
     if (group == ResourceGroup::Material) {
         auto candidates = ad.findFilesWithExtension({".png", ".jpg"});
-        if (candidates.size() > 0) {
+        if (!candidates.empty()) {
             return ad.Name();
         }
     }
@@ -215,37 +215,42 @@ void elaborateMatSBSAR(
         int size,
         DaemonFileStruct dfs) {
 
-    if (dfs.filename.empty()) return;
-    auto fileRoot = getDaemonRoot();
+    try {
+        if ( dfs.filename.empty()) return;
+        auto fileRoot = getDaemonRoot();
 
-    std::string fn = getFileNameOnly(dfs.filename);
-    std::string fext = ".png";
-    int nominalSize = 512;
+        std::string fn = getFileNameOnly( dfs.filename );
+        std::string fext = ".png";
+        int nominalSize = 512;
 
-    std::string sizeString = std::to_string(log2(size));
-    std::string sbRender = "/opt/Allegorithmic/Substance_Automation_Toolkit/sbsrender render --inputs "
-                           + dfs.filename +
-                           " --set-value '$outputsize@" + sizeString + "," + sizeString +
-                           "' --output-bit-depth \"8\" --png-format-compression best_compression "
-                           "--output-name {inputName}_{outputNodeName}";
-    for (const auto &output : MPBRTextures::SBSARTextureOutputs()) {
-        sbRender.append(" --input-graph-output " + output);
+        std::string sizeString = std::to_string( log2( size ));
+        std::string sbRender = "/opt/Allegorithmic/Substance_Automation_Toolkit/sbsrender render --inputs "
+                               + fileRoot + dfs.filename +
+                               " --set-value '$outputsize@" + sizeString + "," + sizeString +
+                               "' --output-bit-depth \"8\" --png-format-compression best_compression "
+                               "--output-name {inputName}_{outputNodeName}";
+        for ( const auto& output : MPBRTextures::SBSARTextureOutputs()) {
+            sbRender.append( " --input-graph-output " + output );
+        }
+        sbRender.append( " --output-path " + fileRoot );;
+
+        std::system( sbRender.c_str());
+
+        // Gather texture outputs
+        ResourceEntityHelper mat = elaborateInternalMaterial(
+                generateActiveDirectoryFromSBSARTempFiles( fn ), nominalSize,
+                dfs );
+        Mongo::fileUpload( dfs.bucket, fn, mat.sc,
+                           Mongo::FSMetadata( ResourceGroup::Material, dfs.project, dfs.uname, dfs.uemail,
+                                              HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumbs[0],
+                                              mat.deps ));
+
+        // Clean up
+        std::string cleanup = "cd " + fileRoot + " && rm " + fn + "*";
+        std::system( cleanup.c_str());
+    } catch ( const std::exception& e ) {
+        daemonExceptionLog(e);
     }
-    sbRender.append(" --output-path " + fileRoot);;
-
-    std::system(sbRender.c_str());
-
-    // Gather texture outputs
-    ResourceEntityHelper mat = elaborateInternalMaterial(
-            generateActiveDirectoryFromSBSARTempFiles(fn), nominalSize,
-            dfs);
-    Mongo::fileUpload(dfs.bucket, fn, mat.sc,
-                      Mongo::FSMetadata(ResourceGroup::Material, dfs.project, dfs.uname, dfs.uemail,
-                                        HttpContentType::json, Hashable<>::hashOf(mat.sc), mat.thumbs[0], mat.deps));
-
-    // Clean up
-    std::string cleanup = "cd " + fileRoot + " && rm " + fn + "*";
-    std::system(cleanup.c_str());
 }
 
 void elaborateMatFromArchive(
@@ -308,21 +313,22 @@ int resaveGLB(const std::string &filename) {
 }
 
 std::string sanitizeFilename( const std::string& _sourceName ) {
-    auto dRoot = getDaemonRoot();
-    auto filenameEscaped = _sourceName;
-    replaceAllStrings(filenameEscaped, "(", "\\(");
-    replaceAllStrings(filenameEscaped, ")", "\\)");
-
-    auto filenameSanitized = _sourceName;
-    replaceAllStrings(filenameSanitized, "(", "_");
-    replaceAllStrings(filenameSanitized, ")", "_");
-
-    if (filenameEscaped != filenameSanitized) {
-        auto ret = std::system(
-                std::string{"cd " + dRoot + " && mv " + filenameEscaped + " " + filenameSanitized}.c_str());
-        LOGRS("FBX sanity renamed return code: " << ret);
-    }
-    return filenameSanitized;
+    return _sourceName;
+//    auto dRoot = getDaemonRoot();
+//    auto filenameEscaped = _sourceName;
+//    replaceAllStrings(filenameEscaped, "(", "\\(");
+//    replaceAllStrings(filenameEscaped, ")", "\\)");
+//
+//    auto filenameSanitized = _sourceName;
+//    replaceAllStrings(filenameSanitized, "(", "_");
+//    replaceAllStrings(filenameSanitized, ")", "_");
+//
+//    if (filenameEscaped != filenameSanitized) {
+//        auto ret = std::system(
+//                std::string{"cd " + dRoot + " && mv " + filenameEscaped + " " + filenameSanitized}.c_str());
+//        LOGRS("FBX sanity renamed return code: " << ret);
+//    }
+//    return filenameSanitized;
 }
 
 void elaborateGeomFBX(DaemonFileStruct dfs) {
@@ -333,9 +339,9 @@ void elaborateGeomFBX(DaemonFileStruct dfs) {
         std::string filenameglb = fn + ".glb";
 
         std::string cmd =
-                "cd " + dRoot + " && FBX2glTF -b --pbr-metallic-roughness -o " + filenameglb +
-                " " +
-                getFileName(dfs.filename);
+                "cd " + dRoot + " && FBX2glTF -b --pbr-metallic-roughness -o '" + filenameglb +
+                "' '" +
+                getFileName(dfs.filename) + "'";
         auto ret = std::system(cmd.c_str());
         if (ret != 0) throw DaemonException{std::string{"FBX elaboration return code: " + std::to_string(ret)}};
 
@@ -357,7 +363,7 @@ void elaborateGeomObj(DaemonFileStruct dfs) {
         auto fn = getFileNameOnly(dfs.filename);
         std::string filenameglb = fn + ".glb";
 
-        std::string cmd = "cd " + dRoot + " && obj2glTF -i " + getFileName(dfs.filename) + "  -o " + filenameglb;
+        std::string cmd = "cd " + dRoot + " && obj2glTF -i '" + getFileName(dfs.filename) + "'  -o '" + filenameglb + "'";
         auto ret = std::system(cmd.c_str());
         if (ret != 0) throw DaemonException{std::string{"OBJ elaboration return code: " + std::to_string(ret)}};
 

@@ -544,6 +544,12 @@ void RenderOrchestrator::useSkybox( bool _value ) {
     }
 }
 
+void RenderOrchestrator::useSunLighting( bool _value ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+        pbrTarget->enableSunLighting( _value );
+    }
+}
+
 void RenderOrchestrator::useSSAO( bool _value ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
         pbrTarget->useSSAO( _value );

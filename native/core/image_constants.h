@@ -112,12 +112,14 @@ static inline std::string FilterFormatToString( Filter value ) {
 enum WrapMode {
     WRAP_MODE_CLAMP_TO_EDGE = 0,
     WRAP_MODE_REPEAT = 1,
+    WRAP_MODE_CLAMP_TO_BORDER = 2,
 };
 
 static inline std::string WrapModeFormatToString( WrapMode value ) {
     switch ( value ) {
         case WRAP_MODE_CLAMP_TO_EDGE: return "WRAP_MODE_CLAMP_TO_EDGE";
         case WRAP_MODE_REPEAT: return "WRAP_MODE_REPEAT";
+        case WRAP_MODE_CLAMP_TO_BORDER: return "WRAP_MODE_CLAMP_TO_BORDER";
     }
     return "WRAP_MODE_INVALID";
 }

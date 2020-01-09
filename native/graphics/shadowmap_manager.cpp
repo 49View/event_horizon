@@ -10,9 +10,9 @@ ShadowMapManager::ShadowMapManager() {
 			0.5f, 0.5f, 0.5f, 1.0f
 	);
 
-	float bs = 12.0f;
+	float bs = 1.25f;
 
-	setFrusom( { -bs, bs}, { -bs, bs}, { 0.0f, bs} );
+	setFrusom( { -bs, bs}, { -bs, bs}, { 0.0f, 1.25f} );
 }
 
 void ShadowMapManager::updateDepthProjectionMatrix() {

@@ -134,7 +134,7 @@ void main()
     );
 
     vec4 gray = vec4(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
-    color = (vec4(1.0) - exp(-1.0 * gray))*10.0;
+    color = (vec4(1.0) - exp(-1.0 * gray))*1.0;
     // color = (vec4(1.0) - exp(-1.0 * color));
     color.w = 1.0;
     
