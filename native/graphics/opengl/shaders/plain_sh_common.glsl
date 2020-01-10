@@ -129,24 +129,24 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 vec3 getNormalFromMap( vec2 texCoords )
 {
     // return v_norm;
-    // vec3 tangentNormal = texture(normalTexture, texCoords).xyz * 2.0 - 1.0;
-
-    // vec3 Q1  = dFdx(Position_worldspace);
-    // vec3 Q2  = dFdy(Position_worldspace);
-    // vec2 st1 = dFdx(texCoords);
-    // vec2 st2 = dFdy(texCoords);
-
-    // vec3 N  = normalize(v_norm);
-    // vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    // vec3 B  = normalize(cross(N, T));
-
-    // mat3 TBN = mat3(T, B, N);
-
-    // return normalize(TBN * tangentNormal);
-
     vec3 tangentNormal = texture(normalTexture, texCoords).xyz * 2.0 - 1.0;
-    mat3 TBN = mat3(v_tan, v_bitan, v_norm);
+
+    vec3 Q1  = dFdx(Position_worldspace);
+    vec3 Q2  = dFdy(Position_worldspace);
+    vec2 st1 = dFdx(texCoords);
+    vec2 st2 = dFdy(texCoords);
+
+    vec3 N  = normalize(v_norm);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = normalize(cross(N, T));
+
+    mat3 TBN = mat3(T, B, N);
+
     return normalize(TBN * tangentNormal);
+
+    // vec3 tangentNormal = texture(normalTexture, texCoords).xyz * 2.0 - 1.0;
+    // mat3 TBN = mat3(v_tan, v_bitan, v_norm);
+    // return normalize(TBN * tangentNormal);
 }
 
 // ------------ BRDF FUNCTIONS -------------
@@ -203,14 +203,14 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float G = GeometrySmith( N, V, L, roughness );
 
     vec3 nominator = NDF * G * F;
-    float denominator = ( (1.0/radiance.r) * max( dot( N, V ), 0.0 ) * NdotL) + 0.000001;
+    float denominator = ( (1.0/radiance.r) * max( dot( N, V ), 0.0 ) * NdotL) + 0.1;    
     vec3 specular = nominator / denominator;
 
     vec3 kS = F;
     vec3 kD = vec3( 1.0 ) - kS;
 
     kD *= 1.0 - metallic;
-
+    
     return ( (kD * (albedo.xyz / PI)) + specular ) * radiance * NdotL;
 }
 
@@ -252,7 +252,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
     float nlAngle = dot( N, normalize( u_sunPosition - Position_worldspace ));
     // float tanCosNAngle = tan(acos(nlAngle));
-    v_shadowmap_coord3Biases.z -= u_shadowParameters[0];
+    v_shadowmap_coord3Biases.z -= u_shadowParameters[0]*0.1;
     // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
     if ( v_shadowmap_coord3Biases.z > 0.0 && nlAngle > 0.0) {
@@ -298,7 +298,6 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 // vec3 ambient = u_sunRadiance.xyz;
 
 vec3 ambient = (((Lo + (kD * diffuseV + specular)) * visibility ) * ao);// * (visibility+diffuseV);
-// ambient = albedo;// * (visibility+diffuseV);
 #else 
 vec3 diffuseV = Lo * albedo;// * aoLightmapColor;
 vec3 ambient = kD;// * diffuseV * ao;// * visibility;

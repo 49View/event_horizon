@@ -1,21 +1,19 @@
 #define TINYGLTF_IMPLEMENTATION
+#define TINY_DNG_LOADER_IMPLEMENTATION
+#define TINY_DNG_NO_EXCEPTION
 
 #include "gltf2.h"
 #include <iostream>
-#include <core/node.hpp>
 #include <core/raw_image.h>
 #include <core/math/quaternion.h>
-#include <core/raw_image.h>
 #include <core/image_util.h>
 #include <core/names.hpp>
 #include <core/heterogeneous_map.hpp>
 #include <core/resources/material.h>
-#include <core/geom.hpp>
 #include <core/file_manager.h>
 #include <core/v_data.hpp>
 #include <core/resources/entity_factory.hpp>
 #include <core/resources/resource_builder.hpp>
-#include <core/recursive_transformation.hpp>
 #include <poly/scene_graph.h>
 
 namespace GLTF2Service {

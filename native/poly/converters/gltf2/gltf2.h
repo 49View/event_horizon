@@ -2,6 +2,8 @@
 
 #include <string>
 #include <unordered_map>
+#include <iostream>
+#include <tinygltf/include/tiny_dng_loader.h>
 #include <tinygltf/include/tiny_gltf.h>
 #include <core/math/vector4f.h>
 #include <core/name_policy.hpp>

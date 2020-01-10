@@ -41,7 +41,7 @@ void EditorBackEnd::activatePostLoad() {
     rsg.useSunLighting( false );
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
     rsg.RR().LM()->setIndoorSceneCoeff(1.0f);
-    rsg.changeTime( "summer 14:00" );
+    rsg.changeTime( "summer 13:50" );
     rsg.setRigCameraController<CameraControlOrbit3d>();
     rsg.DC()->setFoV(60.0f);
 }
@@ -71,6 +71,7 @@ void EditorBackEnd::activateImpl() {
 //        sg.GB<GT::Asset>( key );
 //    } );
 
+//    sg.GB<GT::Shape>( ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
 //    sg.addGeomScene( "song");
 //    sg.addGeomScene( "8479");
 //    sg.addGeomScene( "objexp");

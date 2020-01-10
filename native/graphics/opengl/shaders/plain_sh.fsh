@@ -26,16 +26,10 @@ void main() {
    ao = texture( aoTexture, texCoords ).x * aoV;
    roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
    metallic = (texture( metallicTexture, texCoords ).x * metallicV);
-//    roughness = 0.0;
-//    metallic = 1.0;
    opacityV = texture( opacityTexture, texCoords ).x * opacity; 
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
    albedo = pow(albedo, vec3(2.2/1.0));
-   // albedo *= pow(diffuseColor, vec3(1.0/2.2));
-    // albedo = pow(albedo, vec3(1.0/2.2));
-   // albedo *= diffuseColor;
-   //roughness = pow(roughness, 1.0/2.2);
- 
+   
    vec3 N = getNormalFromMap(texCoords);
 
    shadow_code

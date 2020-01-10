@@ -3,6 +3,7 @@
 #include <core/math/aabb.h>
 
 ShadowMapManager::ShadowMapManager() {
+//    mBiasMatrix = Matrix4f::MIDENTITY();
     mBiasMatrix = Matrix4f(
             0.5f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.5f, 0.0f, 0.0f,
@@ -57,7 +58,7 @@ void ShadowMapManager::calculateShadowMapMatrices() {
 	// Compute the MVP matrix from the light's point of view
 	if ( mZFrustom.y() != 0.0f ) {
 //        depthViewMatrix.lookAt2( V3f{0.0f,  10.7f, 0.0f}, V3f::ZERO, V3f{0.0f, 1.0f, 0.000001f} );
-        depthViewMatrix.lookAt2( mShadowMapSunLightDir*mZFrustom.y()*0.5f, V3f::ZERO, V3f{0.0f, 1.0f, 0.000001f} );
+        depthViewMatrix.lookAt2( mShadowMapSunLightDir*mZFrustom.y()*0.5f, mFrustomCenter, V3f{0.0f, 1.0f, 0.000001f} );
         depthMVP = depthViewMatrix * depthProjectionMatrix;
         depthBiasMVP = depthMVP * mBiasMatrix;
 	}
@@ -79,10 +80,12 @@ Vector3f ShadowMapManager::SunDirection() const {
 }
 
 void ShadowMapManager::setFrusom( const JMATH::AABB& aabb ) {
-    V3f lFrustomAxis{ aabb.calcWidth()*0.505f, aabb.calcDepth()*0.505f, aabb.calcHeight()};
+    V3f lFrustomAxis{ aabb.calcWidth(), aabb.calcDepth(), aabb.calcHeight()};
     float inc = 1.0f+(tan(acos( dot( V3f::UP_AXIS, mShadowMapSunLightDir))));
     lFrustomAxis *= inc;
     float aabbDiameter = aabb.calcDiameter();
+    mFrustomCenter = aabb.centre();
 
-    setFrusom( { -lFrustomAxis.x(), lFrustomAxis.x()}, { -lFrustomAxis.y(), lFrustomAxis.y()}, { 0.0f, aabbDiameter} );
+//    setFrusom( { -lFrustomAxis.x(), lFrustomAxis.x()}, { -lFrustomAxis.y(), lFrustomAxis.y()}, { 0.0f, aabbDiameter} );
+    setFrusom( { -aabbDiameter, aabbDiameter}, { -aabbDiameter, aabbDiameter}, { 0.0f, aabbDiameter*4.0f} );
 }

@@ -6,7 +6,10 @@
 #include <cmath>
 
 #define TINYGLTF_IMPLEMENTATION
+#define TINY_DNG_LOADER_IMPLEMENTATION
 
+#include <iostream>
+#include <tinygltf/include/tiny_dng_loader.h>
 #include <tinygltf/include/tiny_gltf.h>
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 
@@ -346,7 +349,7 @@ void elaborateGeomFBX(DaemonFileStruct dfs) {
         if (ret != 0) throw DaemonException{std::string{"FBX elaboration return code: " + std::to_string(ret)}};
 
         auto fileData = FM::readLocalFile(dRoot + filenameglb);
-        resaveGLB(dRoot + filenameglb);
+//        resaveGLB(dRoot + filenameglb);
         auto fileHash = Hashable<>::hashOf(fileData);
         Mongo::fileUpload(dfs.bucket, filenameglb, std::move(fileData),
                           Mongo::FSMetadata(ResourceGroup::Geom, dfs.project, dfs.uname, dfs.uemail,

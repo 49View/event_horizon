@@ -437,8 +437,12 @@ protected:
         if ( !cba.empty()) {
             auto res = cba.back();
             auto ent = loadFunc( *this, res.key, res.hash, res.data );
-            B<BB>( res.key ).addIM( ent );
-            if ( res.ccf ) res.ccf( res.key );
+            if ( ent ) {
+                B<BB>( res.key ).addIM( ent );
+                if ( res.ccf ) res.ccf( res.key );
+            } else {
+                LOGRS( "[LOAD-RESOURCE][ERROR] " << res.key << " failed to load" );
+            }
             cba.pop_back();
         }
     }

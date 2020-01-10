@@ -36,6 +36,7 @@ private:
 	Vector2f mXFrustom = Vector2f::ZERO;
 	Vector2f mYFrustom = Vector2f::ZERO;
 	Vector2f mZFrustom = Vector2f::ZERO;
+	Vector3f mFrustomCenter = V3f::ZERO;
 };
 
 //#define SMM ShadowMapManager::getInstance()
