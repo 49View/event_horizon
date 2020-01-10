@@ -339,7 +339,7 @@ void elaborateGeomFBX(DaemonFileStruct dfs) {
         std::string filenameglb = fn + ".glb";
 
         std::string cmd =
-                "cd " + dRoot + " && FBX2glTF -b --pbr-metallic-roughness -o '" + filenameglb +
+                "cd " + dRoot + " && FBX2glTF -b --pbr-metallic-roughness -o '" + getFileNameOnly(filenameglb) +
                 "' '" +
                 getFileName(dfs.filename) + "'";
         auto ret = std::system(cmd.c_str());
