@@ -304,7 +304,11 @@ GLenum wrapModeToGl( WrapMode mode ) {
         case WRAP_MODE_CLAMP_TO_EDGE:
             return GL_CLAMP_TO_EDGE;
         case WRAP_MODE_CLAMP_TO_BORDER:
+#ifdef GL_CLAMP_TO_BORDER
             return GL_CLAMP_TO_BORDER;
+#else
+            return GL_CLAMP_TO_EDGE;
+#endif
         case WRAP_MODE_REPEAT:
             return GL_REPEAT;
     }

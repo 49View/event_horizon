@@ -209,14 +209,8 @@ void SceneGraph::realTimeCallbacks() {
             auto entityGroup = doc["data"]["group"].GetString();
 
             if ( entityGroup == ResourceGroup::Geom ) {
-//                loadScene( ResourceScene{ ResourceGroup::Geom, v0 } );
+                GB<GT::Shape>( ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
                 addGeomScene( v0 );
-//                load<Geom>( v0, [this]( HttpResouceCBSign key ) {
-//                    auto geom = GB<GT::Asset>( key, GT::Tag( 1001 ));
-//                    geom->updateTransform( V3f::ZERO, Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
-//                    DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
-//                    materialsForGeomSocketMessage();
-//                } );
             } else if ( entityGroup == ResourceGroup::Material ) {
                 load<Material>( v0, [this, vHash]( HttpResouceCBSign key ) {
                     auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M( vHash ));

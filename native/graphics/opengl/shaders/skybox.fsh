@@ -133,9 +133,9 @@ void main()
         0.758                           // Mie preferred scattering direction
     );
 
-    vec4 gray = vec4(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
-    color = (vec4(1.0) - exp(-1.0 * gray))*1.0;
-    // color = (vec4(1.0) - exp(-1.0 * color));
+    // vec4 gray = vec4(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
+    // color = (vec4(1.0) - exp(-1.0 * gray))*3.0;
+    color = (vec4(1.0) - exp(-1.0 * color));
     color.w = 1.0;
     
     // color.rgb = v_texCoord * 0.5 + 0.5;

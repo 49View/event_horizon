@@ -44,14 +44,6 @@ void EditorBackEnd::activatePostLoad() {
     rsg.changeTime( "summer 14:00" );
     rsg.setRigCameraController<CameraControlOrbit3d>();
     rsg.DC()->setFoV(60.0f);
-
-//    sg.addGeomScene("5d60844ea683f7913c3a3f6e");
-//        sg.load<Geom>( "window", [this](HttpResouceCBSign key) {
-//        sg.GB<GT::Asset>( key, V3f::X_AXIS*3.0f );
-//    } );
-
-//    sg.loadMaterial("carpet");
-//    sg.GB<GT::Shape>( ShapeType::Sphere, GT::M( "carpet" ));
 }
 
 void EditorBackEnd::activateImpl() {
@@ -65,7 +57,6 @@ void EditorBackEnd::activateImpl() {
 
 //    sg.GB<GT::Shape>( ShapeType::Cylinder, GT::Tag(1001),  GT::M( "carpet" ) );
 //    sg.GB<GT::Shape>( ShapeType::Sphere, V3f::UP_AXIS*0.5f, GT::Scale(1.15f, 0.25f, 2.0f) );
-    sg.GB<GT::Shape>( ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
 
 //    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
 //                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );

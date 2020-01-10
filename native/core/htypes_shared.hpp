@@ -266,6 +266,8 @@ static const float MAX_SWIPE_TIME_LIMIT = 0.3f;
 static const float LONG_TAP_TIME_LIMIT = 0.5f;
 static const std::string defaultFontName = "Amaranth-Bold";
 
+const static uint64_t SHADOW_MAGIC_TAG = 50420;
+
 using ScreenShotContainer = std::vector<unsigned char>;
 using ScreenShotContainerPtr = std::shared_ptr<ScreenShotContainer>;
 

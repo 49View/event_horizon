@@ -63,7 +63,7 @@ void Framebuffer::initDepth( std::shared_ptr<TextureManager> tm ) {
     GLCALL( glGenFramebuffers( 1, &mFramebufferHandle ));
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 
-    auto trd = ImageParams{}.size( mWidth, mHeight ).format( PIXEL_FORMAT_DEPTH_32 ).setWrapMode(WRAP_MODE_CLAMP_TO_BORDER);
+    auto trd = ImageParams{}.size( mWidth, mHeight ).format( PIXEL_FORMAT_DEPTH_32 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName, trd }
                                                       .fm( FILTER_LINEAR )
                                                       .setIsFramebufferTarget( true )
@@ -71,8 +71,8 @@ void Framebuffer::initDepth( std::shared_ptr<TextureManager> tm ) {
 
     GLCALL( glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL ) );
     GLCALL( glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE ) );
-    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    GLCALL( glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor));
+//    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+//    GLCALL( glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor));
     GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mRenderToTexture->getHandle(), 0 ) );
     GLCALL( glDrawBuffers(0, GL_NONE) );
     GLCALL( glReadBuffer(GL_NONE) );
