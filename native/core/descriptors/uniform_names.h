@@ -191,4 +191,12 @@ namespace MPBRTextures {
         return "";
     }
 
+    static inline bool isBaseColorTexture( const std::string& _value ) {
+        if ( _value.find( basecolorString ) != std::string::npos ) return true;
+        if ( _value.find( base_colorString ) != std::string::npos ) return true;
+        if ( _value.find( diffString ) != std::string::npos ) return true;
+        if ( _value.find( colString ) != std::string::npos ) return true;
+        return false;
+    }
+
 }

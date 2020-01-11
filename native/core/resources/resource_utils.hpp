@@ -53,7 +53,7 @@ struct ResourceTransfer {
 struct ResourceEntityHelper {
     SerializableContainer sc{};
     ResourceDependencyDict deps{};
-    std::vector<std::string> thumbs{};
+    std::string thumb;
 };
 
 template <typename C>

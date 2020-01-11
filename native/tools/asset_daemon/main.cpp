@@ -115,7 +115,7 @@ void daemonWarningLog(const std::string &e) {
 std::optional<MongoFileUpload> elaborateImage(
         int desiredWidth, int desiredHeight,
         DaemonFileStruct dfs,
-        std::vector<std::string> &thumbs) {
+        std::string& thumb) {
     try {
         int w = 0, h = 0, n = 0;
         int thumbSize = 128;
@@ -130,8 +130,9 @@ std::optional<MongoFileUpload> elaborateImage(
 
         auto bm = imageUtil::bufferToMemoryCompressed(desiredWidth, desiredHeight, n, output_data.first.get(), imageUtil::extToMime(getFileNameExt(dfs.filename)));
         auto bm64 = imageUtil::bufferToPng64(thumbSize, thumbSize, n, output_data_thumb.first.get());
-        thumbs.emplace_back(bm64);
-
+        if ( MPBRTextures::isBaseColorTexture(dfs.filename) ) {
+            thumb = bm64;
+        }
         return Mongo::fileUpload(dfs.bucket, getFileName(dfs.filename), std::move(bm),
                                  Mongo::FSMetadata(ResourceGroup::Image, dfs.project, dfs.uname, dfs.uemail,
                                                    HttpContentType::octetStream,
@@ -200,7 +201,7 @@ ResourceEntityHelper elaborateInternalMaterial(
     for (const auto &output : ad) {
         std::string fullFileName = fileRoot + output.second.name;
         dfs.filename = fullFileName;
-        auto to = elaborateImage(nominalSize, nominalSize, dfs, mat.thumbs);
+        auto to = elaborateImage(nominalSize, nominalSize, dfs, mat.thumb);
         if (to && !output.second.metaString.empty()) {
             auto tid = (*to).getStringId();
             mat.deps[ResourceGroup::Image].emplace_back(tid);
@@ -245,7 +246,7 @@ void elaborateMatSBSAR(
                 dfs );
         Mongo::fileUpload( dfs.bucket, fn, mat.sc,
                            Mongo::FSMetadata( ResourceGroup::Material, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumbs[0],
+                                              HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
                                               mat.deps ));
 
         // Clean up
@@ -268,7 +269,7 @@ void elaborateMatFromArchive(
             dfs);
     Mongo::fileUpload(dfs.bucket, ad.Name(), mat.sc,
                       Mongo::FSMetadata(ResourceGroup::Material, dfs.project, dfs.uname, dfs.uemail,
-                                        HttpContentType::json, Hashable<>::hashOf(mat.sc), mat.thumbs[0], mat.deps));
+                                        HttpContentType::json, Hashable<>::hashOf(mat.sc), mat.thumb, mat.deps));
 }
 
 int resaveGLB(const std::string &filename) {
