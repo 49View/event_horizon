@@ -128,7 +128,7 @@ std::optional<MongoFileUpload> elaborateImage(
         stbir_resize_uint8(output_data.first.get(), desiredWidth, desiredHeight, 0, output_data_thumb.first.get(),
                            thumbSize, thumbSize, 0, n);
 
-        auto bm = imageUtil::bufferToMemoryCompressed(desiredWidth, desiredHeight, n, output_data.first.get(), imageUtil::extToMime(dfs.filename));
+        auto bm = imageUtil::bufferToMemoryCompressed(desiredWidth, desiredHeight, n, output_data.first.get(), imageUtil::extToMime(getFileNameExt(dfs.filename)));
         auto bm64 = imageUtil::bufferToPng64(thumbSize, thumbSize, n, output_data_thumb.first.get());
         thumbs.emplace_back(bm64);
 
