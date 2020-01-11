@@ -80,12 +80,8 @@ Vector3f ShadowMapManager::SunDirection() const {
 }
 
 void ShadowMapManager::setFrusom( const JMATH::AABB& aabb ) {
-    V3f lFrustomAxis{ aabb.calcWidth(), aabb.calcDepth(), aabb.calcHeight()};
-    float inc = 1.0f+(tan(acos( dot( V3f::UP_AXIS, mShadowMapSunLightDir))));
-    lFrustomAxis *= inc;
     float aabbDiameter = aabb.calcDiameter();
     mFrustomCenter = aabb.centre();
 
-//    setFrusom( { -lFrustomAxis.x(), lFrustomAxis.x()}, { -lFrustomAxis.y(), lFrustomAxis.y()}, { 0.0f, aabbDiameter} );
     setFrusom( { -aabbDiameter, aabbDiameter}, { -aabbDiameter, aabbDiameter}, { 0.0f, aabbDiameter*4.0f} );
 }

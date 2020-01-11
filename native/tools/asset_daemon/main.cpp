@@ -206,6 +206,12 @@ ResourceEntityHelper elaborateInternalMaterial(
             auto tid = (*to).getStringId();
             mat.deps[ResourceGroup::Image].emplace_back(tid);
             pbrmaterial.Values()->assign(MPBRTextures::mapToTextureUniform(output.second.metaString), tid);
+            if ( MPBRTextures::isMetallicTexture(output.second.metaString) ) {
+                pbrmaterial.setMetallicValue( 1.0f );
+            }
+            if ( MPBRTextures::isRoughnessTexture(output.second.metaString) ) {
+                pbrmaterial.setRoughnessValue( 1.0f );
+            }
         }
     }
 
