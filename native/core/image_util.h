@@ -48,4 +48,7 @@ namespace imageUtil {
     std::string rawToPng64gzip( std::shared_ptr<RawImage> _input );
     std::string rawResizeToPng64gzip( const RawImage& _input, int tw, int th );
     std::string rawResizeToPng64gzip( std::shared_ptr<RawImage> _input, int tw, int th );
+
+    std::string makeThumbnail64( unsigned char *input_data, int w, int h, int n, int thumbSize = 128 );
+    std::string makeThumbnail64( const std::string& filename, int thumbSize = 128 );
 }

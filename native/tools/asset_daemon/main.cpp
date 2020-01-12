@@ -88,6 +88,7 @@ struct DaemonFileStruct {
     strview project;
     strview uname;
     strview uemail;
+    std::string thumb64{};
 };
 
 class DaemonException : public std::exception {
@@ -143,30 +144,41 @@ std::optional<MongoFileUpload> elaborateImage(
     }
 }
 
-std::string chooseMainArchiveFilename(const ArchiveDirectory &ad, strview group) {
+void chooseMainArchiveFilename(const ArchiveDirectory &ad, DaemonFileStruct& dfs, strview group) {
     if (group == ResourceGroup::Geom) {
         auto candidates = ad.findFilesWithExtension({".fbx"});
         if (!candidates.empty()) {
-            for (const auto &elem : candidates) {
-                if (elem.name.find("_upY.fbx") != std::string::npos) {
-                    return elem.name;
+            // Find potential screenshot -> thumb candidates
+            auto candidateScreenshot = ad.findFilesWithExtension({".jpg"});
+            for (const auto &elem : candidateScreenshot) {
+                if ( elem.name.find("preview_") != std::string::npos ) {
+                    dfs.thumb64 = imageUtil::makeThumbnail64( getDaemonRoot() + elem.name ) ;
                 }
             }
-            return candidates.back().name;
+            for (const auto &elem : candidates) {
+                if (elem.name.find("_upY.fbx") != std::string::npos) {
+                    dfs.filename = elem.name;
+                    return;
+                }
+            }
+            dfs.filename = candidates.back().name;
+            return;
         }
         auto candidatesObj = ad.findFilesWithExtension({".obj"});
         if (!candidatesObj.empty()) {
-            return candidatesObj.back().name;
+            dfs.filename =  candidatesObj.back().name;
+            return;
         }
 
     }
     if (group == ResourceGroup::Material) {
         auto candidates = ad.findFilesWithExtension({".png", ".jpg"});
         if (!candidates.empty()) {
-            return ad.Name();
+            dfs.filename = ad.Name();
+            return;
         }
     }
-    return {};
+
 }
 
 ArchiveDirectory generateActiveDirectoryFromSBSARTempFiles(const std::string &fn) {
@@ -226,7 +238,6 @@ void elaborateMatSBSAR(
         DaemonFileStruct dfs) {
 
     try {
-        if ( dfs.filename.empty()) return;
         auto fileRoot = getDaemonRoot();
 
         std::string fn = getFileNameOnly( dfs.filename );
@@ -322,29 +333,9 @@ int resaveGLB(const std::string &filename) {
     return 0;
 }
 
-std::string sanitizeFilename( const std::string& _sourceName ) {
-    return _sourceName;
-//    auto dRoot = getDaemonRoot();
-//    auto filenameEscaped = _sourceName;
-//    replaceAllStrings(filenameEscaped, "(", "\\(");
-//    replaceAllStrings(filenameEscaped, ")", "\\)");
-//
-//    auto filenameSanitized = _sourceName;
-//    replaceAllStrings(filenameSanitized, "(", "_");
-//    replaceAllStrings(filenameSanitized, ")", "_");
-//
-//    if (filenameEscaped != filenameSanitized) {
-//        auto ret = std::system(
-//                std::string{"cd " + dRoot + " && mv " + filenameEscaped + " " + filenameSanitized}.c_str());
-//        LOGRS("FBX sanity renamed return code: " << ret);
-//    }
-//    return filenameSanitized;
-}
-
 void elaborateGeomFBX(DaemonFileStruct dfs) {
     try {
         auto dRoot = getDaemonRoot();
-        dfs.filename = sanitizeFilename(dfs.filename);
         auto fn = getFileNameOnly(dfs.filename);
         std::string filenameglb = fn + ".glb";
 
@@ -360,7 +351,7 @@ void elaborateGeomFBX(DaemonFileStruct dfs) {
         auto fileHash = Hashable<>::hashOf(fileData);
         Mongo::fileUpload(dfs.bucket, filenameglb, std::move(fileData),
                           Mongo::FSMetadata(ResourceGroup::Geom, dfs.project, dfs.uname, dfs.uemail,
-                                            HttpContentType::json, fileHash, "", ResourceDependencyDict{}));
+                                            HttpContentType::json, fileHash, dfs.thumb64, ResourceDependencyDict{}));
     } catch (const std::exception &e) {
         daemonExceptionLog(e);
     }
@@ -369,7 +360,6 @@ void elaborateGeomFBX(DaemonFileStruct dfs) {
 void elaborateGeomObj(DaemonFileStruct dfs) {
     try {
         auto dRoot = getDaemonRoot();
-        dfs.filename = sanitizeFilename(dfs.filename);
         auto fn = getFileNameOnly(dfs.filename);
         std::string filenameglb = fn + ".glb";
 
@@ -421,7 +411,7 @@ void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAss
                 if (getFileNameExt(filename) == ".zip") {
                     unzipFilesToTempFolder(fileDownloaded, ad);
                 }
-                if ( dfs.filename = chooseMainArchiveFilename(ad, meta.group); dfs.filename.empty()) {
+                if ( chooseMainArchiveFilename(ad, dfs, meta.group); dfs.filename.empty()) {
                     daemonWarningLog(std::string(meta.filename) + " does not contain any appropriate asset file");
                     continue;
                 }

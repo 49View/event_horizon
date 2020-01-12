@@ -210,4 +210,18 @@ namespace imageUtil {
         return {};
     }
 
+    std::string makeThumbnail64( unsigned char *input_data, int w, int h, int n, int thumbSize ) {
+        if ( input_data == nullptr ) return {};
+        auto output_data_thumb = make_uint8_p(thumbSize * thumbSize * n);
+        stbir_resize_uint8(input_data, w, h, 0, output_data_thumb.first.get(),
+                           thumbSize, thumbSize, 0, n);
+        return imageUtil::bufferToPng64(thumbSize, thumbSize, n, output_data_thumb.first.get());
+    }
+
+    std::string makeThumbnail64( const std::string& filename, int thumbSize ) {
+        int w = 0, h = 0, n = 0;
+        unsigned char *input_data = stbi_load(filename.c_str(), &w, &h, &n, 0);
+        return makeThumbnail64( input_data, w, h, n, thumbSize );
+    }
+
 }
