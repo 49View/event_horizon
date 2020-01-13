@@ -88,10 +88,15 @@ void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad )
             auto byteRead = zip_fread( zFile, buff.first.get(), buff.second );
             ad.insert( { zInfo.name, zInfo.size} );
             LOGRS(  zip_get_name( za, t, ZIP_FL_UNCHANGED) << " Size: " << buff.second << " Uncompressed: " << zInfo.size << " Read: " << byteRead );
-            auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
-            FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
-            if ( getFileNameExt( zInfo.name ) == ".zip" ) {
-                unzipFilesToTempFolder( tempFileName, ad );
+            if ( zInfo.size == 0 && zInfo.comp_size == 0 && string_ends_with( zInfo.name, "/" ) ) {
+                auto cmd =  "cd " + getDaemonRoot() + " && mkdir " + getFirstFolderInPath( zInfo.name );
+                system( cmd.c_str() );
+            } else {
+                auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
+                FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
+                if ( getFileNameExt( zInfo.name ) == ".zip" ) {
+                    unzipFilesToTempFolder( tempFileName, ad );
+                }
             }
         }
     }

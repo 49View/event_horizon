@@ -103,6 +103,18 @@ private:
     std::string msg{};
 };
 
+static std::vector<std::string> getExtForGroup( const std::string& _group ) {
+    std::unordered_map<std::string, std::vector<std::string>> extmap;
+
+    extmap[ResourceGroup::Geom] = { ".fbx", ".glb", ".gltf", ".obj" };
+    extmap[ResourceGroup::Material] = { ".sbsar" };
+
+    if ( auto it = extmap.find(_group); it != extmap.end() ) {
+        return it->second;
+    }
+    return {};
+}
+
 void daemonExceptionLog(const std::exception &e) {
     LOGRS(e.what());
     Socket::emit("daemonLogger", serializeLogger(LoggerLevel::Error, e.what()));
@@ -142,43 +154,6 @@ std::optional<MongoFileUpload> elaborateImage(
         LOGRS(e.what());
         return std::nullopt;
     }
-}
-
-void chooseMainArchiveFilename(const ArchiveDirectory &ad, DaemonFileStruct& dfs, strview group) {
-    if (group == ResourceGroup::Geom) {
-        auto candidates = ad.findFilesWithExtension({".fbx"});
-        if (!candidates.empty()) {
-            // Find potential screenshot -> thumb candidates
-            auto candidateScreenshot = ad.findFilesWithExtension({".jpg"});
-            for (const auto &elem : candidateScreenshot) {
-                if ( elem.name.find("preview_") != std::string::npos ) {
-                    dfs.thumb64 = imageUtil::makeThumbnail64( getDaemonRoot() + elem.name ) ;
-                }
-            }
-            for (const auto &elem : candidates) {
-                if (elem.name.find("_upY.fbx") != std::string::npos) {
-                    dfs.filename = elem.name;
-                    return;
-                }
-            }
-            dfs.filename = candidates.back().name;
-            return;
-        }
-        auto candidatesObj = ad.findFilesWithExtension({".obj"});
-        if (!candidatesObj.empty()) {
-            dfs.filename =  candidatesObj.back().name;
-            return;
-        }
-
-    }
-    if (group == ResourceGroup::Material) {
-        auto candidates = ad.findFilesWithExtension({".png", ".jpg"});
-        if (!candidates.empty()) {
-            dfs.filename = ad.Name();
-            return;
-        }
-    }
-
 }
 
 ArchiveDirectory generateActiveDirectoryFromSBSARTempFiles(const std::string &fn) {
@@ -392,6 +367,86 @@ void elaborateGeomGLB(DaemonFileStruct dfs) {
     }
 }
 
+void elaborateGeom(DaemonFileStruct dfs) {
+    if (getFileNameExt(dfs.filename) == ".fbx") {
+        elaborateGeomFBX(dfs);
+    }
+    if (getFileNameExt(dfs.filename) == ".obj") {
+        elaborateGeomObj(dfs);
+    }
+    if (getFileNameExt(dfs.filename) == ".glb" || getFileNameExt(dfs.filename) == ".gltf") {
+        elaborateGeomGLB(dfs);
+    }
+}
+
+void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveDirectory &ad, strview group ) {
+    if ( group == ResourceGroup::Geom ) {
+        auto candidateScreenshot = ad.findFilesWithExtension({".jpg"});
+        for (const auto &elem : candidateScreenshot) {
+            if ( elem.name.find("preview_") != std::string::npos ||
+                 elem.name.find("_preview") != std::string::npos) {
+                dfs.thumb64 = imageUtil::makeThumbnail64( getDaemonRoot() + elem.name ) ;
+            }
+        }
+    }
+}
+
+std::vector<ArchiveDirectoryEntityElement> filterCandidates( const std::vector<ArchiveDirectoryEntityElement>& candidates, strview group ) {
+    auto ret = candidates;
+    if ( group == ResourceGroup::Geom ) {
+        const std::string formatPriority = ".fbx";
+        for ( const auto& elem : candidates ) {
+            auto fn = getFileNameNoExt( elem.name);
+            if ( elem.name.find( formatPriority) != std::string::npos ) {
+                for ( const auto& elem2 : candidates ) {
+                    if ( getFileNameNoExt( elem2.name) == fn && elem.name != elem2.name ) {
+                        erase_if( ret, [elem2](const auto& us) { return us.name == elem2.name; } );
+                    }
+                }
+            }
+            if ( auto pos = elem.name.find( "_fbx_upY.fbx" ); pos != std::string::npos ) {
+                auto fn = elem.name.substr( 0, pos );
+                erase_if ( ret, [fn](const auto& us) {
+                    bool sfn = us.name.find( fn ) == 0;
+                    return sfn && ( us.name.find( "_fbx_upZ.fbx" ) != std::string::npos ||
+                            us.name.find( "_obj.obj" ) != std::string::npos );
+                } );
+            }
+        }
+    }
+    return ret;
+}
+
+void elaborateAsset( DaemonFileStruct& dfs, const std::string& assetName, strview group ) {
+    dfs.filename = assetName;
+    if ( group == ResourceGroup::Geom ) {
+        elaborateGeom(dfs);
+    }
+
+}
+
+uint64_t chooseMainArchiveFilename( const ArchiveDirectory &ad, DaemonFileStruct& dfs, strview group) {
+
+    findCandidatesScreenshotForThumbnail( dfs, ad, group );
+
+    auto candidates = ad.findFilesWithExtension(getExtForGroup(std::string{group}));
+    auto candidatesFiltered = filterCandidates( candidates, group );
+
+    for ( const auto& elem : candidatesFiltered ) {
+        elaborateAsset( dfs, elem.name, group );
+    }
+
+    return candidates.size();
+//    if (group == ResourceGroup::Material) {
+//        auto candidates = ad.findFilesWithExtension({".png", ".jpg"});
+//        if (!candidates.empty()) {
+//            dfs.filename = ad.Name();
+//            return;
+//        }
+//    }
+
+}
+
 void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAssetBucket, MongoBucket entityBucket) {
 
     try {
@@ -404,35 +459,24 @@ void parseElaborateStream(mongocxx::change_stream &stream, MongoBucket sourceAss
                                                       getDaemonRoot() + std::string{filename});
             DaemonFileStruct dfs{entityBucket, getFileName(fileDownloaded), meta.project, meta.username, meta.useremail};
 
-            bool bIsInAnArchive = getFileNameExt(std::string(filename)) == ".zip";
             ArchiveDirectory ad{filename};
             // First unzip all the content if package arrives in a zip file
-            if (bIsInAnArchive) {
-                if (getFileNameExt(filename) == ".zip") {
-                    unzipFilesToTempFolder(fileDownloaded, ad);
-                }
-                if ( chooseMainArchiveFilename(ad, dfs, meta.group); dfs.filename.empty()) {
+            if (getFileNameExt(std::string(filename)) == ".zip") {
+                unzipFilesToTempFolder(fileDownloaded, ad);
+                if ( auto numElaborated = chooseMainArchiveFilename(ad, dfs, meta.group); (dfs.filename.empty() || numElaborated == 0 ) ) {
                     daemonWarningLog(std::string(meta.filename) + " does not contain any appropriate asset file");
                     continue;
                 }
-            }
-
-            if (meta.group == ResourceGroup::Material) {
-                if (getFileNameExt(std::string(dfs.filename)) == ".zip") {
-                    elaborateMatFromArchive(ad, dfs);
-                }
-                if (getFileNameExt(std::string(dfs.filename)) == ".sbsar") {
-                    elaborateMatSBSAR({}, 512, dfs);
-                }
-            } else if (meta.group == ResourceGroup::Geom) {
-                if (getFileNameExt(dfs.filename) == ".fbx") {
-                    elaborateGeomFBX(dfs);
-                }
-                if (getFileNameExt(dfs.filename) == ".obj") {
-                    elaborateGeomObj(dfs);
-                }
-                if (getFileNameExt(dfs.filename) == ".glb" || getFileNameExt(dfs.filename) == ".gltf") {
-                    elaborateGeomGLB(dfs);
+            } else {
+                if (meta.group == ResourceGroup::Material) {
+                    if (getFileNameExt(std::string(dfs.filename)) == ".zip") {
+                        elaborateMatFromArchive(ad, dfs);
+                    }
+                    if (getFileNameExt(std::string(dfs.filename)) == ".sbsar") {
+                        elaborateMatSBSAR({}, 512, dfs);
+                    }
+                } else if (meta.group == ResourceGroup::Geom) {
+                    elaborateGeom( dfs );
                 }
             }
         }
