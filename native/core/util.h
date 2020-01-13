@@ -101,6 +101,7 @@ std::string getLastFolderInPath( const std::string& input );
 std::string getFirstFolderInPath( const std::string& input );
 std::string getFileNameCallbackKey( const std::string& input );
 bool isFileExtAnImage( const std::string& _ext );
+bool isFileExtCompressedArchive( const std::string& _filename );
 std::string toLower( const std::string _input );
 std::string cbToString( uint8_p&& _data );
 

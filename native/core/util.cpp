@@ -473,6 +473,10 @@ std::string boolAlphaBinary( bool _flag ) {
     return _flag ? "1" : "0";
 }
 
+bool isFileExtCompressedArchive( const std::string& _filename ) {
+    return getFileNameExt( std::string( _filename )) == ".zip";
+}
+
 void FrameInvalidator::invalidate() {
 	bInvalidated = true;
 }

@@ -21,7 +21,8 @@ void main() {
 //   vec3 te = itbn * u_eyePos;
 //   vec3 tw = itbn * Position_worldspace;
    
-   vec2 texCoords = v_texCoord;//ParallaxMapping(v_texCoord, V);
+   vec2 texCoords = v_texCoord;
+   // vec2 texCoords = ParallaxMapping(v_texCoord, V);
 
    ao = texture( aoTexture, texCoords ).x * aoV;
    roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
@@ -29,7 +30,7 @@ void main() {
    opacityV = texture( opacityTexture, texCoords ).x * opacity; 
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
    albedo = pow(albedo, vec3(2.2/1.0));
-   
+
    vec3 N = getNormalFromMap(texCoords);
 
    shadow_code
