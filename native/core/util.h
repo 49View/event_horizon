@@ -126,6 +126,13 @@ uint8_p make_uint8_p( uint64_t _size, const T* data ) {
     return ret;
 }
 
+template <typename T>
+uint8_p make_uint8_p( std::vector<T> data ) {
+    auto ret = make_uint8_p( data.size() );
+    std::memcpy( ret.first.get(), data.data(), data.size() );
+    return ret;
+}
+
 namespace DaemonPaths {
 	const static std::string UploadDir = "elaborate/";
 

@@ -146,24 +146,18 @@ namespace imageUtil {
     }
 
     uint8_p bufferToMemoryCompressed( int w, int h, int comp, void* data, const std::string& mineType ) {
-        uint8_p pngBuffer{nullptr, 0};
+        uint8_p pngBuffer = make_uint8_p( w*h*comp );
+        pngBuffer.second = 0;
+        auto callbackLamdba = [](void* ctx, void*data, int size) {
+            auto* src = reinterpret_cast<uint8_p*>(ctx);
+            std::memcpy( src->first.get() + src->second, data, size );
+            src->second += static_cast<uint64_t >(size);
+        };
+
         if ( mineTypePNG == mineType ) {
-            stbi_write_png_to_func( [](void* ctx, void*data, int size) {
-                auto* src = reinterpret_cast<uint8_p*>(ctx);
-                src->second = static_cast<uint64_t >(size);
-                src->first = std::make_unique<uint8_t[]>(src->second);
-                std::memcpy( src->first.get(), data, src->second );
-            }, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 0 );
-            return pngBuffer;
-        }
-        if ( mineTypeJPG == mineType || mineTypeJPEG == mineType ) {
-            stbi_write_jpg_to_func( [](void* ctx, void*data, int size) {
-                auto* src = reinterpret_cast<uint8_p*>(ctx);
-                src->second = static_cast<uint64_t >(size);
-                src->first = std::make_unique<uint8_t[]>(src->second);
-                std::memcpy( src->first.get(), data, src->second );
-            }, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 100 );
-            return pngBuffer;
+            stbi_write_png_to_func( callbackLamdba, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 0 );
+        } else if ( mineTypeJPG == mineType || mineTypeJPEG == mineType ) {
+            stbi_write_jpg_to_func( callbackLamdba, reinterpret_cast<void*>(&pngBuffer), w, h, comp, data, 95 );
         }
         return pngBuffer;
     }
