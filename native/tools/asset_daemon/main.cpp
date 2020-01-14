@@ -411,14 +411,20 @@ void geomFilterOutSameAssetDifferentFormatFromBasePriority(
 void geomFilterDesingConnectCrazyRedundancy(
         const std::string& filename,
         std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
-    if ( auto pos = filename.find( "_fbx_upY.fbx" ); pos != std::string::npos ) {
-        auto fn2 = filename.substr( 0, pos );
-        erase_if( destCandidates, [fn2]( const auto& us ) {
-            bool sfn = us.name.find( fn2 ) == 0;
-            return sfn && ( us.name.find( "_fbx_upZ.fbx" ) != std::string::npos ||
-                            us.name.find( "_obj.obj" ) != std::string::npos );
-        } );
-    }
+
+    auto removeDCCrazyDoubles = [&]( const std::string& _source, const std::string& _d1, const std::string& _d2 ) {
+        if ( auto pos = filename.find( _source ); pos != std::string::npos ) {
+            auto fn2 = filename.substr( 0, pos );
+            erase_if( destCandidates, [fn2, _d1, _d2]( const auto& us ) {
+                bool sfn = us.name.find( fn2 ) == 0;
+                return sfn && ( us.name.find( _d1 ) != std::string::npos ||
+                                us.name.find( _d2 ) != std::string::npos );
+            } );
+        }
+    };
+
+    removeDCCrazyDoubles( "_fbx_upY.fbx", "_fbx_upZ.fbx", "_obj.obj" );
+    removeDCCrazyDoubles( "_fbx_upZ.fbx", "_fbx_upY.fbx", "_obj.obj" );
 }
 
 void materialFilterNonImageAssets(
