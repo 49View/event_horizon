@@ -26,7 +26,9 @@ float ssao() {
     mat3 tbn = mat3(tangent, bitangent, -normal);
 
     float occlusion = 0.0;
-    float uRadius = u_ssaoParameters[0]; // 10.0 default;
+    float pRangeClamped = clamp(0.0, 1.0, pointZ);
+    float uRadius = u_ssaoParameters[0]*pRangeClamped; // 10.0 default;
+    float uRadius100 = uRadius*0.01;
     int numSamples = int(u_ssaoParameters[1]); // u_hemisphereSampleKernelSize
     for (int i = 0; i < numSamples; ++i) {
         // get sample position:
@@ -44,7 +46,7 @@ float ssao() {
         // get zsample depth:
         float sampleDepth = texture(depthMapTexture, offset.xy).r;        
 
-        float rangeCheck = smoothstep(0.0, 1.0, (u_ssaoParameters[0]*0.01)/abs(pointZ-sampleDepth));
+        float rangeCheck = smoothstep(0.0, 1.0, (uRadius100)/abs(pointZ-sampleDepth));
 
         occlusion += (sampleDepth > (compZ-0.0125) ? 0.0 : 1.0) * rangeCheck;
     } 
