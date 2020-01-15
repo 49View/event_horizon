@@ -3,6 +3,7 @@
 #include <string>
 #include <array>
 #include <core/util.h>
+#include <core/string_util.h>
 
 namespace UniformNames {
 
