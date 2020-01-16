@@ -173,11 +173,11 @@ ArchiveDirectory generateActiveDirectoryFromSBSARTempFiles( const std::string& f
 }
 
 ArchiveDirectory mapActiveDirectoryFilesToPBR( DaemonFileStruct dfs ) {
-    ArchiveDirectory ad{dfs.filename};
+    ArchiveDirectory ad{ dfs.filename };
 
     for ( auto&& elem : dfs.candidates ) {
         elem.metaString = MPBRTextures::findTextureInString( elem.name );
-        ad.insert( std::move(elem) );
+        ad.insert( std::move( elem ));
     }
     return ad;
 }
@@ -395,60 +395,66 @@ void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveD
 }
 
 void geomFilterOutSameAssetDifferentFormatFromBasePriority(
-        const std::string& filename,
         const std::string& formatPriority,
-        const std::vector<ArchiveDirectoryEntityElement>& sourceCandidates,
         std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
-    if ( filename.find( formatPriority ) != std::string::npos ) {
-        for ( const auto& elem2 : sourceCandidates ) {
-            if ( getFileNameNoExt( elem2.name ) == filename && filename != elem2.name ) {
-                erase_if( destCandidates, [elem2]( const auto& us ) { return us.name == elem2.name; } );
-            }
+
+    std::vector<std::string> nameChecks{};
+    for ( const auto& elem : destCandidates ) {
+        if ( elem.name.find( formatPriority ) != std::string::npos ) {
+            nameChecks.emplace_back( elem.name );
         }
     }
+
+    erase_if( destCandidates, [nameChecks, formatPriority]( const auto& elem ) {
+        auto fn = getFileNameOnly( elem.name );
+        for ( const auto& name : nameChecks ) {
+            if ( getFileNameOnly( name ) == fn && elem.name != name ) {
+                if ( elem.name.find( formatPriority ) == std::string::npos ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    } );
 }
 
 void geomFilterDesingConnectCrazyRedundancy(
-        const std::string& filename,
         std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
 
-    auto removeDCCrazyDoubles = [&]( const std::string& _source, const std::string& _d1, const std::string& _d2 ) {
-        if ( auto pos = filename.find( _source ); pos != std::string::npos ) {
-            auto fn2 = filename.substr( 0, pos );
-            erase_if( destCandidates, [fn2, _d1, _d2]( const auto& us ) {
-                bool sfn = us.name.find( fn2 ) == 0;
-                return sfn && ( us.name.find( _d1 ) != std::string::npos ||
-                                us.name.find( _d2 ) != std::string::npos );
-            } );
-        }
+    auto removeDCCrazyDoubles = [&]( const std::string& _source, const std::vector<std::string>& _v1 ) {
+        erase_if( destCandidates, [_source, _v1, destCandidates]( const auto& us ) {
+            bool sfn = us.name.find( _source ) != std::string::npos;
+            if ( sfn ) {
+                for ( const auto& v : _v1 ) {
+                    for ( const auto& elem : destCandidates ) {
+                        if ( elem.name.find( v ) != std::string::npos ) return true;
+                    }
+                }
+            }
+            return false;
+        } );
     };
 
-    removeDCCrazyDoubles( "_fbx_upY.fbx", "_fbx_upZ.fbx", "_obj.obj" );
-    removeDCCrazyDoubles( "_fbx_upZ.fbx", "_fbx_upY.fbx", "_obj.obj" );
+    removeDCCrazyDoubles( "_fbx_upZ.fbx", { "_fbx_upY.fbx" } );
+    removeDCCrazyDoubles( "_obj.obj", { "_fbx_upY.fbx", "_fbx_upZ.fbx" } );
 }
 
-void materialFilterNonImageAssets(
-        const std::string& filename,
-        std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
+void materialFilterNonImageAssets( std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
 
-    if ( !nameHasImageExtension( filename )) {
-        erase_if( destCandidates, [filename]( const auto& us ) {
-            return us.name == filename;
-        } );
-    }
+    erase_if( destCandidates, []( const auto& us ) {
+        return !nameHasImageExtension( us.name );
+    } );
 }
 
 std::vector<ArchiveDirectoryEntityElement>
 filterCandidates( const std::vector<ArchiveDirectoryEntityElement>& candidates, strview group ) {
     auto filteredCandidates = candidates;
-    for ( const auto& elem : candidates ) {
-        if ( group == ResourceGroup::Geom ) {
-            auto fn = getFileNameNoExt( elem.name );
-            geomFilterOutSameAssetDifferentFormatFromBasePriority( fn, ".fbx", candidates, filteredCandidates );
-            geomFilterDesingConnectCrazyRedundancy( elem.name, filteredCandidates );
-        } else if ( group == ResourceGroup::Material ) {
-            materialFilterNonImageAssets( elem.name, filteredCandidates );
-        }
+
+    if ( group == ResourceGroup::Geom ) {
+        geomFilterOutSameAssetDifferentFormatFromBasePriority( ".fbx", filteredCandidates );
+        geomFilterDesingConnectCrazyRedundancy( filteredCandidates );
+    } else if ( group == ResourceGroup::Material ) {
+        materialFilterNonImageAssets( filteredCandidates );
     }
 
     return filteredCandidates;
@@ -522,10 +528,16 @@ void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAs
     }
 }
 
+JSONDATA( SocketEntityResponse, entities )
+    std::vector<std::string> entities{};
+};
+
 void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
+    uint64_t counter = 0;
     for ( auto change : stream ) {
         StreamChangeMetadata meta{ change };
-        mdb.insertEntityFromAsset( meta );
+        auto ent = mdb.insertEntityFromAsset( meta );
+        Socket::emit("entityAdded" + std::to_string(counter++), ent );
     }
 }
 

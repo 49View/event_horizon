@@ -39,6 +39,7 @@ void EditorBackEnd::activatePostLoad() {
     Renderer::clearColor(C4f::WHITE);
     rsg.useSkybox( true );
     rsg.useSunLighting( false );
+    rsg.useSSAO(true);
     rsg.RR().LM()->setShadowZFightCofficient(0.02f);
     rsg.RR().LM()->setIndoorSceneCoeff(1.0f);
     rsg.changeTime( "summer 13:50" );
@@ -56,7 +57,9 @@ void EditorBackEnd::activateImpl() {
     loadSceneEntities();
 
 //    sg.GB<GT::Shape>( ShapeType::Cylinder, GT::Tag(1001),  GT::M( "carpet" ) );
-//    sg.GB<GT::Shape>( ShapeType::Sphere, V3f::UP_AXIS*0.5f, GT::Scale(1.15f, 0.25f, 2.0f) );
+//    sg.GB<GT::Shape>( ShapeType::Sphere );
+//    sg.GB<GT::Shape>( ShapeType::Sphere, V3f::X_AXIS*0.5f );
+//    sg.GB<GT::Shape>( ShapeType::Cube, V3f::Z_AXIS*4.5f, GT::Scale(10.0f, 10.0f, 1.0f) );
 
 //    rsg.RR().createGridV2( CommandBufferLimits::UnsortedStart, 1.0f, Color4f::DARK_GRAY,
 //                           (Color4f::PASTEL_GRAYLIGHT*1.35f).A(1.0f), V2f{ 5.0f }, 0.02f );
@@ -72,7 +75,8 @@ void EditorBackEnd::activateImpl() {
 //    } );
 
 //    sg.GB<GT::Shape>( ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
-//    sg.addGeomScene( "song");
+//    sg.addGeomScene( "daybed");
+//    sg.addGeomScene( "clock");
 //    sg.addGeomScene( "8479");
 //    sg.addGeomScene( "objexp");
 //    sg.loadAsset( "Nightstand" );

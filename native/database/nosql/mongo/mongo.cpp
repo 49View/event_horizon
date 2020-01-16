@@ -123,7 +123,7 @@ MongoDocumentValue Mongo::FSMetadata(const std::string &group, strview project, 
     return MongoDocumentValue{ builder.extract() };
 }
 
-void Mongo::insertEntityFromAsset(const StreamChangeMetadata &meta) {
+std::string Mongo::insertEntityFromAsset(const StreamChangeMetadata &meta) {
 
     using bsoncxx::builder::basic::kvp;
     using bsoncxx::builder::basic::sub_array;
@@ -155,11 +155,13 @@ void Mongo::insertEntityFromAsset(const StreamChangeMetadata &meta) {
     );
 
     bsoncxx::stdx::optional<mongocxx::result::insert_one> result = db["entities"].insert_one(builder.view());
-    if (result) {
+    if (result ) {
         auto dbc = db["entities"].find_one(bsoncxx::builder::stream::document{} << "_id" << (*result).inserted_id()
                                                                                 << bsoncxx::builder::stream::finalize);
-        Socket::emit("entityAdded", bsoncxx::to_json(dbc->view()));
+        return bsoncxx::to_json(dbc->view());
     }
+
+    return "";
 }
 
 void MongoBucket::deleteAll() {

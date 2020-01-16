@@ -44,6 +44,7 @@ const initialState = {
   group: "",
   groupSelected: "",
   loading: false,
+  loadingFilename: "",
   error: {}
 };
 
@@ -172,7 +173,8 @@ export default function(state = initialState, action) {
     case GET_ENTITY_LOAD:
       return {
         ...state,
-        loading: true
+        loading: true,
+        loadingFileName: payload
         // currentTags: []
       };
     case GET_ENTITY:

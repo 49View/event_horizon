@@ -12,7 +12,7 @@ import {
 import {setAlert} from "../../../actions/alert";
 import {useSelector, useDispatch} from "react-redux";
 
-const streams = require("memory-streams");
+// const streams = require("memory-streams");
 const tar = require("tar-stream");
 
 const chooseFilenameFromMultiFiles = (files, group) => {
@@ -75,13 +75,13 @@ const EntityDragAndImport = () => {
                     }
                 }
 
-                const tarWrite = (tarPack) => {
-                    return new Promise((resolve, reject) => {
-                        let writer = new streams.WritableStream();
-                        tarPack.pipe(writer);
-                        tarPack.on("end", resolve(writer.toBuffer()));
-                    })
-                }
+                // const tarWrite = (tarPack) => {
+                //     return new Promise((resolve, reject) => {
+                //         let writer = new streams.WritableStream();
+                //         tarPack.pipe(writer);
+                //         tarPack.on("end", resolve(writer.toBuffer()));
+                //     })
+                // }
 
                 const singleFileRead = async (acceptedFile) => {
                     // check file dragged has a valid extension for asset type

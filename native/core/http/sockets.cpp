@@ -42,8 +42,9 @@ namespace Socket {
     }
 
     void emit( const std::string& _message, const std::string& jsonString ) {
-        LOGRS("[WSS][CLIENT] Send " << _message );
+        LOGRS("[WSS][CLIENT] Send msg: " << _message );
         SocketMessage sm{ _message, jsonString };
+
         emitImpl(sm.serialize());
     }
 

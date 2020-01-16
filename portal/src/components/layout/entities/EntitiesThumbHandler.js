@@ -11,24 +11,26 @@ const EntitiesThumbHandler = (props) => {
   const currentEntity = props.currentEntity;
   const entries = props.entries;
   const onClicked = props.onClicked;
+  const group = props.group;
 
   // console.log("###Current entity: ", currentEntity);
   let entitiesRes = [];
   if (entries && entries.length > 0) {
     entries.map(e => {
-      let entryWithThumb = e;
-      console.log("EntityThumb: ", entryWithThumb );
-      if (e.thumb && !e.thumb.startsWith("blob:")) {
-        const bb = new Blob([decode(e.thumb)]);
-        entryWithThumb.thumb =
-          e.thumb !== "" ? URL.createObjectURL(bb) : "";
+      if ( e.group === group ) {
+        let entryWithThumb = e;
+        if (e.thumb && !e.thumb.startsWith("blob:")) {
+          const bb = new Blob([decode(e.thumb)]);
+          entryWithThumb.thumb =
+            e.thumb !== "" ? URL.createObjectURL(bb) : "";
+        }
+        entryWithThumb.cname = "EntityThumbnail";
+        if (currentEntity && e._id === currentEntity.entity._id) {
+          entryWithThumb.cname += " leftSideBarGroupSelected";
+        }
+        entryWithThumb.entityId = e._id;
+        entitiesRes.push(entryWithThumb);
       }
-      entryWithThumb.cname = "EntityThumbnail";
-      if (currentEntity && e._id === currentEntity.entity._id) {
-        entryWithThumb.cname += " leftSideBarGroupSelected";
-      }
-      entryWithThumb.entityId = e._id;
-      entitiesRes.push(entryWithThumb);
       return 0;
     });
   }

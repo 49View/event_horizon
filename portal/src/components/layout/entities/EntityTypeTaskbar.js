@@ -90,6 +90,7 @@ const EntityTypeTaskBar = ({
               currentEntity={currentEntity}
               entries={entries}
               onClicked={getFullEntity}
+              group={currentGroup}
             />
           </Fragment>
         )}

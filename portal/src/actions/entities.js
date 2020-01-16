@@ -20,7 +20,7 @@ import {
 } from "./types";
 import store from "../store";
 import {wscSend} from "../utils/webSocketClient";
-import {getFileNameOnlyNoExt, GroupGeom, GroupMaterial, GroupScript} from "../utils/utils";
+import { GroupGeom, GroupMaterial, GroupScript} from "../utils/utils";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
@@ -160,7 +160,7 @@ export const getMetadataListOf = (group, project) => async dispatch => {
   try {
     dispatch({
       type: GET_ENTITY_LOAD,
-      payload: null
+      payload: group
     });
 
     const res = await axios.get(`/api/entities/metadata/list/${group}`);
@@ -243,7 +243,7 @@ export const addEntityToAppData = entitySource => async dispatch => {
   try {
     dispatch({
       type: GET_ENTITY_LOAD,
-      payload: null
+      payload: entitySource.name
     });
     const state = store.getState();
     const appKey = state.entities.currentEntity.entity.mKey;
@@ -278,10 +278,9 @@ export const getFullEntity = entitySource => async dispatch => {
   try {
     dispatch({
       type: GET_ENTITY_LOAD,
-      payload: null
+      payload: entitySource.name
     });
 
-    console.log("getFullEntity  source: ", entitySource );
     const requireWasmUpdate = entitySource.group !== GroupScript;
     // Get dependencies for
     let deps = {};
@@ -407,7 +406,7 @@ export const addEntity = (fileName, fileData, group) => async dispatch => {
 
     dispatch({
       type: GET_ENTITY_LOAD,
-      payload: null
+      payload: fileName
     });
 
     const octet = {
@@ -459,7 +458,7 @@ export const addPlaceHolderEntity = group => async dispatch => {
   try {
     dispatch({
       type: GET_ENTITY_LOAD,
-      payload: null
+      payload: group
     });
 
     const res = await axios.post(placeHolderEntityMaker(group));

@@ -54,6 +54,15 @@ export const requestAsset = currentEntity => {
   }
 };
 
+// const msgSequentialCounter = ( refMsg, msg ) => {
+//   let counter = 0;
+//   const cex =  msg.length - refMsg.length;
+//   if ( cex > 0 ) {
+//     counter = Number( msg.substr(refMsg.length, cex) );
+//   }
+//   return counter;
+// }
+
 export const wscConnect = session => {
   let webSocketServerAddress = "wss://localhost/wss/?s=" + session;
 
@@ -63,18 +72,25 @@ export const wscConnect = session => {
   };
   webSocketClient.onmessage = message => {
     let mdata = JSON.parse(message.data);
-    // mdata.data = typeof mdata.data === "object" ? mdata.data : JSON.parse(mdata.data);
-    // let mdata = message.data;
     const state = store.getState();
-    console.log("[WSS-REACT][MSGREC] ", mdata);
+    // console.log("[WSS-REACT][MSGREC] ", mdata);
     if (state.entities.currentEntity) {
       if (mdata.msg === "requestAsset") {
         requestAsset(state.entities.currentEntity);
       }
     }
-    if (mdata.msg === "entityAdded") {
-      store.dispatch(getFullEntity(mdata.data));
-      store.dispatch({type: ADD_ENTITY, payload: mdata.data});
+    const entityAddedMsg = "entityAdded";
+    if ( mdata.msg.startsWith(entityAddedMsg) ) {
+      const state = store.getState();
+      const entity = mdata.data;
+      let counter = 0;//msgSequentialCounter(entityAddedMsg, mdata.msg);
+      if (state.entities.groupSelected === entity.group) {
+          store.dispatch({type: ADD_ENTITY, payload: entity});
+          if ( counter++ === 0 ) {
+            store.dispatch(getFullEntity(entity));
+          }
+      }
+      // store.dispatch({type: LOADING_FINISHED, payload: null});
     } else if (mdata.msg === "wasmClientFinishedLoadingData") {
       store.dispatch(wasmClientFinishedLoadingData(mdata.data));
     } else if (mdata.msg === "materialsForGeom") {
