@@ -103,13 +103,14 @@ JSONDATA( LoadFinishData, flag )
 
 void MaterialThumbnail::setThumbnailFor( const std::string& _textureType ) {
     auto dt = sg->get<RawImage>( getTexture( _textureType ));
-    constexpr int ts = 32;
+    constexpr int ts = 64;
 
     if ( dt ) {
-        bool isBigEnough = dt->width > ts || dt->height > ts;
-        thumbValues[_textureType] = isBigEnough ?
-                                    imageUtil::rawResizeToPng64gzip( dt, ts, ts )
-                                                : imageUtil::rawToPng64gzip( *dt );
+        thumbValues[_textureType] = imageUtil::rawResizeToPng64gzip( dt, ts, ts );
+//        bool isBigEnough = dt->width > ts || dt->height > ts;
+//        thumbValues[_textureType] = isBigEnough ?
+//                                    imageUtil::rawResizeToPng64gzip( dt, ts, ts )
+//                                                : imageUtil::rawToPng64gzip( dt );
     }
 
 }
@@ -125,12 +126,15 @@ MaterialThumbnail::MaterialThumbnail( SceneGraph *_sg, const Material& _mat ) : 
 
 void SceneGraph::materialsForGeomSocketMessage() {
     MatGeomSerData matSet{};
-//    for ( const auto&[k, node] : Nodes()) {
-//        for ( const auto& data : node->DataV()) {
-//            auto mat = get<Material>( data.material );
-//            matSet.mrefs.emplace( mat->Key(), MaterialThumbnail( this, *mat ));
-//        }
-//    }
+    for ( const auto&[k, node] : Nodes()) {
+        LOGRS( node );
+        for ( const auto& data : node->DataV()) {
+            LOGRS( "Data material: " << data.material );
+            auto mat = get<Material>( data.material );
+            LOGRS( "mat key: " << mat->Key() );
+            matSet.mrefs.emplace( mat->Key(), MaterialThumbnail( this, *mat ));
+        }
+    }
     Socket::send( "materialsForGeom", matSet );
 }
 
@@ -392,6 +396,10 @@ NodeGraphContainer& SceneGraph::Nodes() {
     return nodes;
 }
 
+const NodeGraphContainer& SceneGraph::Nodes() const {
+    return nodes;
+}
+
 bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback ) {
 
     bool ret = false;
@@ -641,7 +649,7 @@ void SceneGraph::loadGeom( std::string _names, HttpResouceCB _ccf ) {
 }
 
 void SceneGraph::loadAsset( const std::string& _names ) {
-    B<GRB>( _names ).load( [this](HttpResouceCBSign key) {
+    B<GRB>( _names ).load( [this]( HttpResouceCBSign key ) {
         GB<GT::Asset>( key );
     } );
 }
@@ -654,7 +662,8 @@ void SceneGraph::addScene( const ResourceScene& gs ) {
     HOD::resolver<ResourceScene>( *this, &gs, [this, gs]() {
         gs.visit( ResourceGroup::Geom, [&]( const std::string& _key, const std::string& _value ) {
             auto geom = GB<GT::Asset>( _value, GT::Tag( 1001 ));
-            geom->updateTransform( V3f::UP_AXIS_NEG*geom->BBox3dCopy().minPoint().y(), Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
+            geom->updateTransform( V3f::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
+                                   Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
             DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
             materialsForGeomSocketMessage();
         } );
@@ -698,21 +707,21 @@ void HOD::reducer( SceneGraph& sg, HOD::DepRemapsManager& deps, HODResolverCallb
 
     HOD::EntityList el{ deps.geoms };
     Http::post( Url{ HttpFilePrefix::entities + "remaps" },
-               el.serialize(),
-               [&, deps, ccf, el]( HttpResponeParams res ) {
-                   EntityRemappingContainer erc{ res.bufferString };
-                   LOGRS("Remaps bufferstring " << res.bufferString );
-                   HOD::DepRemapsManager ndeps = deps;
-                   AppMaterialsRemapping remaps{};
-                   for ( const auto& rm : erc.remaps ) {
-                       remaps.remap[rm.sourceEntity + "," + rm.sourceRemap] = rm.destRemap;
-                       remaps.remap[erc.kv[rm.sourceEntity] + "," + rm.sourceRemap] = rm.destRemap;
-                       ndeps.addDep( ResourceGroup::Material, rm.destRemap );
-                   }
+                el.serialize(),
+                [&, deps, ccf, el]( HttpResponeParams res ) {
+                    EntityRemappingContainer erc{ res.bufferString };
+                    LOGRS( "Remaps bufferstring " << res.bufferString );
+                    HOD::DepRemapsManager ndeps = deps;
+                    AppMaterialsRemapping remaps{};
+                    for ( const auto& rm : erc.remaps ) {
+                        remaps.remap[rm.sourceEntity + "," + rm.sourceRemap] = rm.destRemap;
+                        remaps.remap[erc.kv[rm.sourceEntity] + "," + rm.sourceRemap] = rm.destRemap;
+                        ndeps.addDep( ResourceGroup::Material, rm.destRemap );
+                    }
 
-                   sg.setMaterialRemap( remaps.remap );
+                    sg.setMaterialRemap( remaps.remap );
 
-                   sg.HODResolve( ndeps.ret, ccf );
-               }
+                    sg.HODResolve( ndeps.ret, ccf );
+                }
     );
 }

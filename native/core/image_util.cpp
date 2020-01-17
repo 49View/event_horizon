@@ -148,9 +148,9 @@ namespace imageUtil {
     uint8_p bufferToMemoryCompressed( int w, int h, int comp, void* data, const std::string& mineType ) {
         uint8_p pngBuffer = make_uint8_p( w*h*comp );
         pngBuffer.second = 0;
-        auto callbackLamdba = [](void* ctx, void*data, int size) {
+        auto callbackLamdba = [](void* ctx, void* dataToAdd, int size) {
             auto* src = reinterpret_cast<uint8_p*>(ctx);
-            std::memcpy( src->first.get() + src->second, data, size );
+            std::memcpy( src->first.get() + src->second, dataToAdd, size );
             src->second += static_cast<uint64_t >(size);
         };
 
@@ -184,7 +184,7 @@ namespace imageUtil {
 
     std::string rawResizeToPng64gzip( const RawImage& dt, int tw, int th ) {
         auto dtcr = imageUtil::resize(dt, tw, th );
-        auto dtc = imageUtil::bufferToMemoryCompressed( tw, th, dt.channels, dt.data(), mineTypePNG );
+        auto dtc = imageUtil::bufferToMemoryCompressed( tw, th, dt.channels, dtcr.get(), mineTypePNG );
         auto sc = SerializableContainer{ dtc.first.get(), dtc.first.get() + dtc.second };
         return zlibUtil::rawb64gzip(sc);
     }

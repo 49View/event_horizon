@@ -331,7 +331,9 @@ public:
     uint64_t getGeomType( const std::string& _key ) const;
 
     void update();
+
     NodeGraphContainer& Nodes();
+    const NodeGraphContainer& Nodes() const ;
 
     template <typename T>
     void visitNode( const UUID& _uuid, T _visitor ) {
