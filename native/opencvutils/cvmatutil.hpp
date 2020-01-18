@@ -10,12 +10,13 @@
 #include <vector>
 #include <array>
 #include <algorithm>
-#include "opencv2/imgproc.hpp"
-#include <opencv2/highgui.hpp>
+#include <opencv4/opencv2/imgproc.hpp>
+#include <opencv4/opencv2/highgui.hpp>
 #include "core/math/vector2f.h"
 
 namespace cv { class Mat; }
-struct RawImage;
+class RawImage;
+struct ImageParams;
 
 void toGrayScale( const cv::Mat& _source, cv::Mat& _dest );
 
@@ -38,10 +39,10 @@ void convertContoursArrayToInt( const std::vector<std::vector<Vector2f> >& conto
                                 std::vector<std::vector<cv::Point2i> >& contours );
 
 
-struct ImageBuilderCVMat : public ImageBuilder {
-    ImageBuilderCVMat( const std::string& _name, cv::Mat& source ) : ImageBuilder(_name), mSource(source){}
-
-    bool makeDirect( DependencyMaker& _md );
-protected:
-    cv::Mat& mSource;
-};
+//struct ImageBuilderCVMat : public ImageBuilder {
+//    ImageBuilderCVMat( const std::string& _name, cv::Mat& source ) : ImageBuilder(_name), mSource(source){}
+//
+//    bool makeDirect( DependencyMaker& _md );
+//protected:
+//    cv::Mat& mSource;
+//};

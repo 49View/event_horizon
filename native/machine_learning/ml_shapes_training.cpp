@@ -20,7 +20,7 @@
 //}
 
 void loadTrainSet( const std::string &pathName, int label, std::vector<cv::Mat> &trainCells, std::vector<int> &trainLabels ) {
-	cv::Mat img = cv::imread( "data/SURFData/" + pathName, CV_LOAD_IMAGE_GRAYSCALE );
+	cv::Mat img = cv::imread( "data/SURFData/" + pathName, cv::IMREAD_GRAYSCALE );
 
 	for ( auto t = 0; t < img.cols; t += 64 ) {
 		cv::Mat sample = img.colRange( t, t + 64 ).clone();
@@ -67,15 +67,7 @@ void CreateTrainTestHOG( std::vector<std::vector<float> > &trainHOG, std::vector
 			cv::Size( cell[y].cols, cell[y].rows ), //winSize
 			cv::Size( cell[y].cols / 2, cell[y].rows / 2 ), //blocksize
 			cv::Size( cell[y].cols / 4, cell[y].rows / 4 ), //blockStride,
-			cv::Size( cell[y].cols / 2, cell[y].rows / 2 ), //cellSize,
-			9, //nbins,
-			1, //derivAper,
-			-1, //winSigma,
-			0, //histogramNormType,
-			0.2, //L2HysThresh,
-			0,//gammal correction,
-			64,//nlevels=64
-			0 );
+			cv::Size( cell[y].cols / 2, cell[y].rows / 2 ), 9 );
 
 		hog.compute( cell[y], descriptors );
 		trainHOG.push_back( descriptors );
@@ -170,14 +162,7 @@ int HouseTraining::predict( const cv::Mat& source ) {
 		cv::Size( testImg.size() / 2 ), //blocksize
 		cv::Size( testImg.size() / 4 ), //blockStride,
 		cv::Size( testImg.size() / 2 ), //cellSize,
-		9, //nbins,
-		1, //derivAper,
-		-1, //winSigma,
-		0, //histogramNormType,
-		0.2, //L2HysThresh,
-		0,//gamma correction,
-		64,//nlevels=64
-		0 );
+		9 );
 
 	hogTest.compute( testImg, descriptors );
 	cv::Mat testMat( 1, static_cast<int>( descriptors.size() ), CV_32F );

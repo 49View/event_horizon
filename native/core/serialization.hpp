@@ -302,6 +302,7 @@ static void sdeeserialize( const MegaReader& visitor, const std::string& name, T
 	} \
 	CLASSNAME( const MegaReader& reader ) { deserialize( reader ); bIsLoaded = true; } \
     inline SerializableContainer serialize() const { MegaWriter mw; serialize(&mw); return mw.getSerializableContainer();} \
+    inline std::string serializeString() const { MegaWriter mw; serialize(&mw); return mw.getString();} \
 	template<typename TV> \
 	void visit() const { traverseWithHelper<TV>( #__VA_ARGS__,__VA_ARGS__ ); } \
 	inline void serialize( MegaWriter* visitor ) const { visitor->StartObject(); serializeWithHelper(visitor, #__VA_ARGS__, __VA_ARGS__ ); visitor->EndObject(); } \

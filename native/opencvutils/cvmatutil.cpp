@@ -74,7 +74,7 @@ std::vector < std::array<double, 7> > huMomentsOnImage(const cv::Mat& src_gray, 
 	std::vector<std::vector<cv::Point>> contoursSource;
 	std::vector<cv::Vec4i> hierarchy;
 	Canny( src_gray, canny_output, thresh, thresh * 2, 3 );
-	findContours( canny_output, contoursSource, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point( 0, 0 ) );
+	cv::findContours( canny_output, contoursSource, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point( 0, 0 ) );
 
 //	std::vector<std::vector<cv::Point>> contours = contoursSource;
 	
@@ -144,8 +144,8 @@ ImageParams getImageParamsFromMat( const cv::Mat& _source ) {
 }
 
 
-bool ImageBuilderCVMat::makeDirect( DependencyMaker& _md ) {
-	setImageParams(getImageParamsFromMat(mSource));
-	raw( true );
-	return ImageBuilder::makeDirect( _md, ucchar_p{mSource.data, mSource.total() * mSource.elemSize()} );
-}
+//bool ImageBuilderCVMat::makeDirect( DependencyMaker& _md ) {
+//	setImageParams(getImageParamsFromMat(mSource));
+//	raw( true );
+//	return ImageBuilder::makeDirect( _md, ucchar_p{mSource.data, mSource.total() * mSource.elemSize()} );
+//}

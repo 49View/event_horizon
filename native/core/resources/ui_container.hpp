@@ -7,6 +7,7 @@
 #include <core/serialization.hpp>
 
 JSONDATA( UIElementContainerLogical, id, type, text, icon, tapType, font, size, color, func, entries )
+
     std::string id;
     std::string type;
     std::string text;
@@ -19,16 +20,26 @@ JSONDATA( UIElementContainerLogical, id, type, text, icon, tapType, font, size, 
     std::vector<UIElementContainerLogical> entries;
 
     void fixUpDefaults() {
-        if ( font.empty() ) font = S::DEFAULT_FONT;
-        if ( size.empty() ) size = "normal";
-        if ( color.empty() ) color = "#FFF";
+        if ( font.empty()) font = S::DEFAULT_FONT;
+        if ( size.empty()) size = "normal";
+        if ( color.empty()) color = "#FFF";
     };
 };
 
 JSONDATA( UIContainer, type, entries )
+
     std::string type;
     std::vector<UIElementContainerLogical> entries;
-    static UIContainer placeHolder();
+
+    static UIContainer placeHolder() {
+        UIContainer ret;
+        ret.type = "UIContainer2d";
+        UIElementContainerLogical le;
+        le.type = "Title";
+        le.text = "New Title";
+        ret.entries.emplace_back( le );
+        return ret;
+    }
 };
 
 using UIContainerSP = std::shared_ptr<UIContainer>;
