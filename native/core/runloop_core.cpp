@@ -33,19 +33,19 @@ std::atomic<bool> deamonBreaker = false;
 
 void daemonLoop( int _sleepSeconds, bool& _awake, std::function<void()> _elaborateFunc ) {
 
-	auto st = std::chrono::system_clock::now();
+//	auto st = std::chrono::system_clock::now();
 
 	while ( !deamonBreaker ) {
 		sleep( _sleepSeconds );
 		if ( _awake ) {
 		    _elaborateFunc();
 		}
-		auto tn = std::chrono::system_clock::now();
-		std::chrono::duration<double> elapsed = tn - st;
-		if ( elapsed.count() > 60*60*24*6.9 ) { // // refresh every week
-			LOGR("Refresh token");
-			Http::refreshToken();
-			st = tn;
-		}
+//		auto tn = std::chrono::system_clock::now();
+//		std::chrono::duration<double> elapsed = tn - st;
+//		if ( elapsed.count() > 60*60*24*6.9 ) { // // refresh every week
+//			LOGR("Refresh token");
+//			Http::refreshToken();
+//			st = tn;
+//		}
 	}
 }

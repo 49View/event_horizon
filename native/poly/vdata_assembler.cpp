@@ -66,7 +66,9 @@ namespace VDataServices {
 
 // ___ SHAPE BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::Shape& _d ) {}
+    bool prepare( SceneGraph& sg, GT::Shape& _d ) {
+        return true;
+    }
 
     void buildInternal( const GT::Shape& _d, std::shared_ptr<VData> _ret ) {
         V3f center = V3f::ZERO;
@@ -107,7 +109,7 @@ namespace VDataServices {
 
 // ___ POLY BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::Poly& _d ) {
+    bool prepare( SceneGraph& sg, GT::Poly& _d ) {
         if ( _d.mappingData.bDoNotScaleMapping ) MappingServices::doNotScaleMapping( _d.mappingData );
         if ( _d.polyLines.empty()) {
             Vector3f ln = _d.forcingNormalPoly;
@@ -130,6 +132,7 @@ namespace VDataServices {
                 }
             }
         }
+        return true;
     }
 
     void buildInternal( const GT::Poly& _d, std::shared_ptr<VData> _ret ) {
@@ -157,7 +160,15 @@ namespace VDataServices {
 
     // ___ EXTRUDER BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::Extrude& _d ) {}
+    bool prepare( SceneGraph& sg, GT::Extrude& _d ) {
+        bool hasData = false;
+        if ( !_d.extrusionVerts.empty() ) {
+            for ( const auto& po : _d.extrusionVerts ) {
+                hasData |= !po.verts.empty();
+            }
+        }
+        return hasData;
+    }
 
     void buildInternal( const GT::Extrude& _d, std::shared_ptr<VData> _ret ) {
         auto dmProgressive = _d.mappingData;
@@ -181,11 +192,12 @@ namespace VDataServices {
 
     // ___ Font BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::Text& _d ) {
-        _d.font = sg.FM().get( _d.fontName );
-        if ( _d.text.empty() ) {
-            _d.text = ".";
+    bool prepare( SceneGraph& sg, GT::Text& _d ) {
+        if ( !_d.text.empty() ) {
+            _d.font = sg.FM().get( _d.fontName );
+            return true;
         }
+        return false;
     }
 
     void buildInternal( const GT::Text& _d, std::shared_ptr<VData> _ret ) {
@@ -232,7 +244,8 @@ namespace VDataServices {
 
     // ___ QUAD MESH BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::Mesh& _d ) {
+    bool prepare( SceneGraph& sg, GT::Mesh& _d ) {
+        return !_d.quads.empty();
     }
 
     void buildInternal( const GT::Mesh& _d, std::shared_ptr<VData> _ret ) {
@@ -255,7 +268,8 @@ namespace VDataServices {
 
     // ___ CLOTH MESH BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::ClothMesh& _d ) {
+    bool prepare( SceneGraph& sg, GT::ClothMesh& _d ) {
+        return true;
     }
 
     void buildInternal( const GT::ClothMesh& _d, std::shared_ptr<VData> _ret ) {
@@ -306,10 +320,11 @@ namespace VDataServices {
 
 // ___ FOLLOWER BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::Follower& _d ) {
+    bool prepare( SceneGraph& sg, GT::Follower& _d ) {
         if ( _d.profilePath.empty() && !_d.profilePath2d.empty() ) {
             for (auto &v: _d.profilePath2d) _d.profilePath.emplace_back( Vector3f{v, _d.z} );
         }
+        return true;
     }
 
     void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret ) {
@@ -360,7 +375,8 @@ namespace VDataServices {
 
     // ___ GLTF2 BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::GLTF2& _d ) {
+    bool prepare( SceneGraph& sg, GT::GLTF2& _d ) {
+        return true;
     }
 
     void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret ) {
@@ -375,8 +391,8 @@ namespace VDataServices {
 
     // ___ ASSET BUILDER ___
 
-    void prepare( SceneGraph& sg, GT::Asset& _d ) {
-
+    bool prepare( SceneGraph& sg, GT::Asset& _d ) {
+        return true;
     }
 
     void buildInternal( const GT::Asset& _d, std::shared_ptr<VData> _ret ) {

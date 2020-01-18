@@ -349,21 +349,22 @@ public:
         if constexpr ( !std::is_same_v<T, GT::Asset> ) {
             auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
 
-            VDataServices::prepare( *this, gb.dataTypeHolder );
-            auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
-            auto vdataRef = VL().getHash( hashRefName );
-            if ( vdataRef.empty() ) {
-                vdataRef = B<VB>( hashRefName ).addIM( VDataServices::build(gb.dataTypeHolder) );
+            if ( VDataServices::prepare( *this, gb.dataTypeHolder ) ) {
+                auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
+                auto vdataRef = VL().getHash( hashRefName );
+                if ( vdataRef.empty() ) {
+                    vdataRef = B<VB>( hashRefName ).addIM( VDataServices::build(gb.dataTypeHolder) );
+                }
+
+                elem = std::make_shared<Geom>(gb.Name());
+                elem->setTag(gb.tag);
+                elem->pushData( vdataRef, get<VData>( vdataRef)->BBox3d(), matRef );
+
+                if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
+                elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
+                auto ref = B<GRB>( gb.Name() ).addIM( elem );
+                if ( !gb.elemInjFather ) addNode(elem);
             }
-
-            elem = std::make_shared<Geom>(gb.Name());
-            elem->setTag(gb.tag);
-            elem->pushData( vdataRef, get<VData>( vdataRef)->BBox3d(), matRef );
-
-            if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
-            elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
-            auto ref = B<GRB>( gb.Name() ).addIM( elem );
-            if ( !gb.elemInjFather ) addNode(elem);
             return elem;
         } else {
             if ( auto elemToClone = get<Geom>(gb.dataTypeHolder.nameId); elemToClone ) {
