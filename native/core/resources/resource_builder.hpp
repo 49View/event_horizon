@@ -39,16 +39,19 @@ public:
     void load( HttpResouceCB _ccf = nullptr ) {
         Http::get( Url( HttpFilePrefix::entities + RV<R>::Prefix() + "/" + url_encode( this->Name() ) ),
                    [](HttpResponeParams _res) {
-                       if ( _res.statusCode == 204 ) return; // empty result, handle defaults??
-                       auto buff = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
-                       if ( tarUtil::isTar(buff) ) {
-                           SG::addDeferredComp( getFileNameCallbackKey( _res.uri ), std::move(buff), _res.ccf );
+                       if ( _res.statusCode == 204 ) { // NDDado: in case the server couldn't find the resource return an emtpy one
+                           if ( _res.ccf ) _res.ccf(ResourceRef{});
                        } else {
-                           auto resHash = _res.ETag.empty() ? _res.uri + std::to_string(_res.length) : _res.ETag;
-                           SG::template addDeferred<R>( getFileNameCallbackKey( _res.uri ),
-                                                       _res.ETag,
-                                                       std::move(buff),
-                                                       _res.ccf );
+                           auto buff = SerializableContainer{_res.buffer.get(), _res.buffer.get()+_res.length};
+                           if ( tarUtil::isTar(buff) ) {
+                               SG::addDeferredComp( getFileNameCallbackKey( _res.uri ), std::move(buff), _res.ccf );
+                           } else {
+                               auto resHash = _res.ETag.empty() ? _res.uri + std::to_string(_res.length) : _res.ETag;
+                               SG::template addDeferred<R>( getFileNameCallbackKey( _res.uri ),
+                                                            _res.ETag,
+                                                            std::move(buff),
+                                                            _res.ccf );
+                           }
                        }
                    },
                    nullptr,
