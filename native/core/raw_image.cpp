@@ -296,7 +296,7 @@ void RawImage::bufferDecode( const unsigned char *_buffer, size_t _length ) {
     headerType = detectHeader( _buffer, _length );
     if ( headerType == ImageHeaderType::Png || headerType == ImageHeaderType::Jpg || headerType == ImageHeaderType::Radiance ) {
         // ### fix this!!
-        stbi_set_flip_vertically_on_load( true );
+        stbi_set_flip_vertically_on_load( false );
         auto _mt = RawImageMemory::Compressed;
         rawBtyes = imageUtil::decodeFromMemory( ucchar_p{ _buffer, _length },
                                                 width, height, channels, bpp, _mt == RawImageMemory::Raw );

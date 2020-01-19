@@ -767,7 +767,7 @@ macro(link_leap)
 endmacro(link_leap)
 
 macro(link_opencv)
-    if ( "opencv" IN_LIST WHICH_LIBS )
+    if ( "opencv" IN_LIST WHICH_LIBS AND NOT EMSCRIPTEN)
 
         include_directories( /usr/local/include/opencv4 )
 
