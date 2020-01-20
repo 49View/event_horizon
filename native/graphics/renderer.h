@@ -40,7 +40,7 @@ struct RendererDrawingSet {
         bucketIndex(bi), color(std::move(c)), name(std::move(n)), shaderName(std::move(sn)) {}
     void setupFontData();
 
-    int bucketIndex = -1;
+    int bucketIndex = CommandBufferLimits::UnsortedStart;
     Primitive prim = PRIMITIVE_TRIANGLE_STRIP;
     VTMVectorWrap verts;
     VTMVectorOfVectorWrap multiVerts;
