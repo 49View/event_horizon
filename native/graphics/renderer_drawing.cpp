@@ -435,6 +435,27 @@ VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
     return addVertexStrips<Pos3dStrip>( *this, lineList, rds);
 }
 
+VPListSP Renderer::drawCircleFinal( RendererDrawingSet& rds ) {
+
+    V3fVector verts;
+
+    auto center = rds.verts.v[0];
+    auto radius = rds.radius;
+    for ( int t = 0; t < rds.archSegments; t++ ) {
+        float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( rds.archSegments )) * TWO_PI;
+        verts.emplace_back( Vector3f( center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius) );
+    }
+
+    V3fVectorOfVector allVLists;
+    auto width = rds.width > rds.radius / 2.5f ? rds.radius *0.1f : rds.width;
+    allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( verts, width, true ) );
+
+    auto lineList = stripInserter<V3f>(allVLists);
+    if ( lineList.empty() ) return nullptr;
+
+    return addVertexStrips<Pos3dStrip>( *this, lineList, rds);
+}
+
 VPListSP Renderer::drawRectFinal( RendererDrawingSet& rds ) {
     return addVertexStrips<Pos3dStrip>( *this, rds.verts.v, rds);
 }

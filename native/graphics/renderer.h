@@ -46,8 +46,10 @@ struct RendererDrawingSet {
     VTMVectorOfVectorWrap multiVerts;
     Rect2f rect = Rect2f::MIDENTITY();
     float roundedCorner = 0.01f;
+    float radius = 0.5f;
     C4f color = C4f::WHITE;
     float width = 0.1f;
+    uint32_t archSegments = 12;
     FDS fds;
     std::string name{};
     std::string shaderName = S::COLOR_3D;
@@ -78,6 +80,15 @@ struct RDSImage {
 struct RDSRoundedCorner {
     template<typename ...Args>
     explicit RDSRoundedCorner( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    float operator()() const noexcept {
+        return data;
+    }
+    float data;
+};
+
+struct RDSCircleLineWidth {
+    template<typename ...Args>
+    explicit RDSCircleLineWidth( Args&& ... args ) : data(std::forward<Args>( args )...) {}
     float operator()() const noexcept {
         return data;
     }
@@ -270,6 +281,7 @@ public:
                float angle, float arrowlength, const std::string& _name = "" );
 
     VPListSP drawLineFinal( RendererDrawingSet& rds );
+    VPListSP drawCircleFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinalTM( RendererDrawingSet& rds );
     VPListSP drawTextFinal( const RendererDrawingSet& rds );
@@ -366,7 +378,11 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<M, float> ) {
-            rds.width = _param;
+            if constexpr ( std::is_same_v<T, DCircle> ) {
+                rds.radius = _param;
+            } else {
+                rds.width = _param;
+            }
             return;
         }
         if constexpr ( std::is_same_v<M, std::string> ) {
@@ -402,6 +418,10 @@ public:
             rds.roundedCorner = _param();
             return;
         }
+        if constexpr ( std::is_same_v<M, RDSCircleLineWidth> ) {
+            rds.width = _param();
+            return;
+        }
         if constexpr ( std::is_same_v<M, V3fVectorOfVectorWrap > ) {
             ASSERTV(false,"Please provide a VTMVectorOfVectorWrap instead of a V3fVectorOfVectorWrap" );
             return;
@@ -428,6 +448,9 @@ public:
         if constexpr ( std::is_same_v<T, DLine2d> ) {
             rds.shaderName = S::COLOR_2D;
             return drawLineFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DCircle> ) {
+            return drawCircleFinal( rds );
         }
         if constexpr ( std::is_same_v<T, DRect> ) {
             return drawRectFinal( rds );

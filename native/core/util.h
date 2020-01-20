@@ -152,6 +152,19 @@ intType getCircularArrayIndexUnsigned( intType pi, utype size ) {
 	return pi >= 0 ? ( pi % size ) : size - ( pi % size );
 }
 
+// This the type traits unified version of getCircularArrayIndex*
+// Plese use it all the time as it's much cleaner and less verbose
+template <typename intType, typename utype>
+utype cai( intType pi, utype size ) {
+    if constexpr ( std::is_unsigned_v<intType> ) {
+        if ( pi == size ) return 0;
+        return pi >= 0 ? ( pi % size ) : size - ( pi % size );
+    } else {
+        if ( std::llabs( pi ) == size ) return 0;
+        return pi >= 0 ? ( pi % size ) : size - static_cast<intType>( std::llabs( pi % size ) );
+    }
+}
+
 template<typename T>
 void eraseCircular( std::vector<T>& contours, uint64_t first, uint64_t last ) {
 	uint64_t csize = contours.size();
