@@ -16,6 +16,7 @@
 #include <graphics/shadowmap_manager.h>
 
 struct DCircle {};
+struct DCircleFilled {};
 struct DLine {};
 struct DLine2d {};
 struct DRect {};
@@ -282,6 +283,7 @@ public:
 
     VPListSP drawLineFinal( RendererDrawingSet& rds );
     VPListSP drawCircleFinal( RendererDrawingSet& rds );
+    VPListSP drawCircleFilledFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinalTM( RendererDrawingSet& rds );
     VPListSP drawTextFinal( const RendererDrawingSet& rds );
@@ -378,7 +380,7 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<M, float> ) {
-            if constexpr ( std::is_same_v<T, DCircle> ) {
+            if constexpr ( std::is_same_v<T, DCircle> || std::is_same_v<T, DCircleFilled> ) {
                 rds.radius = _param;
             } else {
                 rds.width = _param;
@@ -451,6 +453,9 @@ public:
         }
         if constexpr ( std::is_same_v<T, DCircle> ) {
             return drawCircleFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DCircleFilled> ) {
+            return drawCircleFilledFinal( rds );
         }
         if constexpr ( std::is_same_v<T, DRect> ) {
             return drawRectFinal( rds );
