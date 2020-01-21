@@ -356,7 +356,7 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<M, V2fVector> ) {
-            for ( const auto& v : _param ) rds.verts.v.emplace_back(v);
+            rds.verts.v = XZY::C(_param);
             return;
         }
         if constexpr ( std::is_same_v<M, V3fVectorWrap> ) {
@@ -405,8 +405,8 @@ public:
             rds.verts.v.emplace_back( _param );
             return;
         }
-        if constexpr ( std::is_same_v<M, V3f> ) {
-            rds.verts.v.emplace_back( _param );
+        if constexpr ( std::is_same_v<M, V2f> ) {
+            rds.verts.v.emplace_back( XZY::C(_param) );
             return;
         }
         if constexpr ( std::is_same_v<M, RDSPreMult> ) {
