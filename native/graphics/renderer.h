@@ -19,6 +19,7 @@ struct DCircle {};
 struct DCircleFilled {};
 struct DLine {};
 struct DLine2d {};
+struct DPoly {};
 struct DRect {};
 struct DRect2d {};
 struct DRect2dRounded {};
@@ -282,6 +283,7 @@ public:
                float angle, float arrowlength, const std::string& _name = "" );
 
     VPListSP drawLineFinal( RendererDrawingSet& rds );
+    VPListSP drawPolyFinal( RendererDrawingSet& rds );
     VPListSP drawCircleFinal( RendererDrawingSet& rds );
     VPListSP drawCircleFilledFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinal( RendererDrawingSet& rds );
@@ -450,6 +452,9 @@ public:
         if constexpr ( std::is_same_v<T, DLine2d> ) {
             rds.shaderName = S::COLOR_2D;
             return drawLineFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DPoly> ) {
+            return drawPolyFinal( rds );
         }
         if constexpr ( std::is_same_v<T, DCircle> ) {
             return drawCircleFinal( rds );

@@ -158,6 +158,19 @@ Triangulator::execute2d( const vector2fList& _verts, const std::vector<Vector2fL
 	return tri.get2dTrianglesTuple();
 }
 
+std::vector<vector2fList>
+Triangulator::execute2dList( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float _accuracy ) {
+    Triangulator tri{ _verts, _holes, _accuracy };
+    return tri.get2dTrianglesList();
+}
+
+std::vector<vector2fList>
+Triangulator::execute2dList( const vector2fList& _verts, float _accuracy ) {
+    const std::vector<Vector2fList> holes{};
+    Triangulator tri{ _verts, holes, _accuracy };
+    return tri.get2dTrianglesList();
+}
+
 std::vector<Triangle3d>
 Triangulator::execute3d( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float zOff, float _accuracy ) {
     Triangulator tri{ _verts, _holes, _accuracy };

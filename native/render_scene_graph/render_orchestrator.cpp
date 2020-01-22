@@ -159,7 +159,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
 
     sg.VL().connect( [this](const ResourceTransfer<VData>& _val ) {
         LOGRS( "[SG-Resource] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
-        this->RR().addVDataResource(_val);
+        this->RR().addVDataResource(_val); // check if ( _val.elem->numIndices() > 0 ) ????
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 

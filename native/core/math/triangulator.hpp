@@ -52,6 +52,10 @@ private:
 public:
 	static std::vector<Triangle2d> execute2d( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float _accuracy = 0.001f );
     static std::vector<Triangle3d> execute3d( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float zOff, float _accuracy = 0.001f );
+
+    static std::vector<vector2fList> execute2dList( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float _accuracy = 0.001f );
+    static std::vector<vector2fList> execute2dList( const vector2fList& _verts, float _accuracy = 0.001f );
+
     static std::vector<Triangle3d> setZTriangles( std::vector<Triangle3d>& _source, float zOff );
 };
 

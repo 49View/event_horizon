@@ -9,6 +9,7 @@
 #include <graphics/vp_builder.hpp>
 #include <core/font_utils.hpp>
 #include <core/math/matrix_anim.h>
+#include <core/math/triangulator.hpp>
 
 static std::shared_ptr<HeterogeneousMap> mapColor( const Color4f& _matColor ) {
     auto values = std::make_shared<HeterogeneousMap>();
@@ -433,6 +434,26 @@ VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
     if ( lineList.empty() ) return nullptr;
 
     return addVertexStrips<Pos3dStrip>( *this, lineList, rds);
+}
+
+VPListSP Renderer::drawPolyFinal( RendererDrawingSet& rds ) {
+
+    if ( rds.verts.v.empty() ) {
+        return nullptr;
+    }
+
+    auto ret = Triangulator::execute2dList( XZY::C2(rds.verts.v) );
+
+    rds.prim = Primitive::PRIMITIVE_TRIANGLES;
+
+    V3fVector allVLists;
+    for ( const auto& velem : ret ) {
+        for ( const auto& elem : velem ) {
+            allVLists.emplace_back( XZY::C(elem, 0.0f) );
+        }
+    }
+
+    return addVertexStrips<Pos3dStrip>( *this, allVLists, rds);
 }
 
 VPListSP Renderer::drawCircleFinal( RendererDrawingSet& rds ) {
