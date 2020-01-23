@@ -2,6 +2,7 @@ var fsc = require("../controllers/fsController");
 var express = require("express");
 var router = express.Router();
 const socketController = require("../controllers/socketController");
+const entityController = require("../controllers/entityController");
 const sharp = require("sharp");
 const db = require('../db');
 
@@ -92,13 +93,7 @@ router.post("/entity_to_elaborate/:group/:key(*)", async (req, res, next) => {
             username: req.user.name,
             useremail: req.user.email,
         }
-        const bInserted = await db.fsUpsert( db.bucketSourceAssets, filename, req.body, metadata, metadataComp );
-
-        // socketController.sendMessageToAllClients(JSON.stringify(json));
-        // if (res) {
-        //   res.status(201).json({ ETag: data.ETag });
-        //   res.end();
-        // }
+        const bInserted = await db.fsUpsert( db.bucketSourceAssets, filename, req.body, metadata, metadataComp, entityController.checkEntityExistsByFSId );
         res.sendStatus( bInserted ? 200 : 204 );
     } catch (ex) {
         console.log("ERROR ADDING FILE TO FS: ", ex);

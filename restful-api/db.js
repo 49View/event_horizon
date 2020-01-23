@@ -160,7 +160,7 @@ exports.fsInsert = async( bucketFSModel, filename, data, metadata ) => {
     }
 }
 
-exports.fsUpsert = async ( bucketFSModel, filename, data, metadata, metadataComp ) => {
+exports.fsUpsert = async ( bucketFSModel, filename, data, metadata, metadataComp, entityCheckFSID = null ) => {
 
     try {
         logger.info("Performing upsert...");
@@ -168,10 +168,16 @@ exports.fsUpsert = async ( bucketFSModel, filename, data, metadata, metadataComp
         const entries = await module.exports.fsExists( bucketFSModel, filename, metadataComp );
         for ( const elem of entries ) {
             const bIsExactCopy = await module.exports.fsEqual( bucketFSModel, filename, data, metadataComp );
+            let bIsUsedByAnEntity = false;
             if ( !bIsExactCopy ) {
                 await module.exports.fsDelete( bucketFSModel, elem._id );
+            } else {
+                if (entityCheckFSID !== null) {
+                    logger.info("Check if fsid is used by any entity...");
+                    bIsUsedByAnEntity = await entityCheckFSID(elem.fsid);
+                }
             }
-            bPerformInsert &= !bIsExactCopy;
+            bPerformInsert &= !bIsExactCopy || !bIsUsedByAnEntity;
         }
         if ( bPerformInsert ) {
             await module.exports.fsInsert( bucketFSModel, filename, data, metadata );

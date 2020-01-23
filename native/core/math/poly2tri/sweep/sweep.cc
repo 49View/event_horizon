@@ -32,7 +32,7 @@
 #include "sweep.h"
 #include "sweep_context.h"
 #include "advancing_front.h"
-#include "event_horizon/native/core/math/poly2tri/common/utils.h"
+#include "../common/utils.h"
 
 namespace p2t {
 Point SPoint;

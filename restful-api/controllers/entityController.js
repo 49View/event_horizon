@@ -843,6 +843,16 @@ module.exports = {
   decompressZipppedEntityDeps: decompressZipppedEntityDeps,
   getFilePath: getFilePath,
 
+  checkEntityExistsByFSId: async (fsid) => {
+    try {
+      const oid = mongoose.Types.ObjectId(fsid);
+      const meta = await entityModel.findOne( { fsid: oid } );
+      logger.info( "Entity with fsid: ", meta );
+      return meta !== null;
+    } catch (e) {
+      return false;
+    }
+  },
   getEntityContentFSId: async (fsid) => {
     const oid = mongoose.Types.ObjectId(fsid);
     const meta = await db.fsFind(db.bucketEntities, oid);
