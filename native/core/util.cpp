@@ -204,6 +204,10 @@ std::string getFileNameExt( const std::string& input ) {
 	return ret;
 }
 
+std::string getFileNameExtToLower( const std::string& input ) {
+    return toLower(getFileNameExt(input));
+}
+
 std::string getFileName( const std::string& input, EncodingStatusFlag ef ) {
 	std::string ret = input;
 	// trim path before filename
@@ -371,12 +375,8 @@ std::string cbToString( uint8_p&& _data ) {
 }
 
 bool nameHasImageExtension( const std::string& input ) {
-	std::string ext = getFileNameExt(input);
-	if ( ext != "" && ( ext == ".jpg" || ext == ".jpeg" || ext == ".png" ) ) {
-		return true;
-	}
-	
-	return false;
+	std::string ext = getFileNameExtToLower(input);
+    return ext != "" && ( ext == ".jpg" || ext == ".jpeg" || ext == ".png" );
 }
 
 std::string distaneToString( float _distance ) {

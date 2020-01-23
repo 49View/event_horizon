@@ -144,7 +144,7 @@ std::optional<MongoFileUpload> elaborateImage(
                             thumbSize, thumbSize, 0, n );
 
         auto bm = imageUtil::bufferToMemoryCompressed( desiredWidth, desiredHeight, n, output_data.first.get(),
-                                                       imageUtil::extToMime( getFileNameExt( dfs.filename )));
+                                                       imageUtil::extToMime( getFileNameExtToLower( dfs.filename )));
         auto bm64 = imageUtil::bufferToPng64( thumbSize, thumbSize, n, output_data_thumb.first.get());
         if ( MPBRTextures::isBaseColorTexture( dfs.filename )) {
             thumb = bm64;
@@ -349,13 +349,13 @@ void elaborateGeomGLB( DaemonFileStruct dfs ) {
 }
 
 void elaborateGeom( DaemonFileStruct dfs ) {
-    if ( getFileNameExt( dfs.filename ) == ".fbx" ) {
+    if ( getFileNameExtToLower( dfs.filename ) == ".fbx" ) {
         elaborateGeomFBX( dfs );
     }
-    if ( getFileNameExt( dfs.filename ) == ".obj" ) {
+    if ( getFileNameExtToLower( dfs.filename ) == ".obj" ) {
         elaborateGeomObj( dfs );
     }
-    if ( getFileNameExt( dfs.filename ) == ".glb" || getFileNameExt( dfs.filename ) == ".gltf" ) {
+    if ( getFileNameExtToLower( dfs.filename ) == ".glb" || getFileNameExtToLower( dfs.filename ) == ".gltf" ) {
         elaborateGeomGLB( dfs );
     }
 }
@@ -364,10 +364,10 @@ void elaborateMaterial( DaemonFileStruct dfs ) {
     ArchiveDirectory ad{ dfs.filename };
     int nominalSize = 2048;
 
-    if ( getFileNameExt( std::string( dfs.filename )) == ".zip" ) {
+    if ( getFileNameExtToLower( std::string( dfs.filename )) == ".zip" ) {
         ad = mapActiveDirectoryFilesToPBR( dfs );
     }
-    if ( getFileNameExt( std::string( dfs.filename )) == ".sbsar" ) {
+    if ( getFileNameExtToLower( std::string( dfs.filename )) == ".sbsar" ) {
         ad = elaborateMatSBSAR( nominalSize, dfs );
     }
 
@@ -385,7 +385,7 @@ void elaborateMaterial( DaemonFileStruct dfs ) {
 
 void elaborateProfile( DaemonFileStruct dfs ) {
 
-    if ( getFileNameExt( std::string( dfs.filename )) == ".svg" ) {
+    if ( getFileNameExtToLower( std::string( dfs.filename )) == ".svg" ) {
         auto dRoot = getDaemonRoot();
         auto thumbnailFileName = dRoot + dfs.filename + ".png";
         std::string cmdThumbnail = "convert " + dRoot + dfs.filename + " -trim +repage -resize 256x256/! " + thumbnailFileName;

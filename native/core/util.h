@@ -95,6 +95,7 @@ std::string getFileNameOnly( const std::string& input );
 std::string getFileName( const std::string& input, EncodingStatusFlag ef = EncodingStatusFlag::DoEncode );
 std::string getFileNameNoExt( const std::string& input );
 std::string getFileNameExt( const std::string& input );
+std::string getFileNameExtToLower( const std::string& input );
 std::string getFileNameKey( const std::string& input, EncodingStatusFlag ef = EncodingStatusFlag::DoEncode );
 std::string getLastEntryInPath( const std::string& input );
 std::string getLastFolderInPath( const std::string& input );

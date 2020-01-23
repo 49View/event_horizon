@@ -94,7 +94,7 @@ void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad )
             } else {
                 auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
                 FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
-                if ( getFileNameExt( zInfo.name ) == ".zip" ) {
+                if ( getFileNameExtToLower( zInfo.name ) == ".zip" ) {
                     unzipFilesToTempFolder( tempFileName, ad );
                 }
             }
@@ -107,7 +107,7 @@ std::vector<ArchiveDirectoryEntityElement> ArchiveDirectory::findFilesWithExtens
 
     for ( const auto& ext : _exts ) {
         for ( const auto& elem : admap ) {
-            if ( getFileNameExt( elem.first ) == ext ) {
+            if ( getFileNameExtToLower( elem.first ) == ext ) {
                 ret.emplace_back(elem.second);
             }
         }
