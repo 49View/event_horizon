@@ -399,6 +399,22 @@ void elaborateProfile( DaemonFileStruct dfs ) {
     }
 }
 
+void elaborateImage( DaemonFileStruct dfs ) {
+
+    if ( isFileExtAnImage(getFileNameExtToLower( std::string( dfs.filename )) ) ) {
+        auto dRoot = getDaemonRoot();
+        auto thumbnailFileName = dRoot + dfs.filename + ".png";
+        std::string cmdThumbnail = "convert " + dRoot + dfs.filename + " -resize 128x128/! " + thumbnailFileName;
+        std::system( cmdThumbnail.c_str() );
+        auto thumb64 = bn::encode_b64String(FM::readLocalFileC(thumbnailFileName));
+        ResourceEntityHelper mat{ FM::readLocalFileC( dRoot + dfs.filename ), {}, thumb64 };
+        Mongo::fileUpload( dfs.bucket, dfs.filename, mat.sc,
+                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
+                                              HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
+                                              mat.deps ));
+    }
+}
+
 void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveDirectory& ad ) {
     if ( dfs.group == ResourceGroup::Geom ) {
         auto candidateScreenshot = ad.findFilesWithExtension( { ".jpg" } );
@@ -487,6 +503,9 @@ void elaborateAsset( DaemonFileStruct& dfs, const std::string& assetName ) {
     }
     if ( dfs.group == ResourceGroup::Profile ) {
         elaborateProfile( dfs );
+    }
+    if ( dfs.group == ResourceGroup::Image ) {
+        elaborateImage( dfs );
     }
 }
 
