@@ -311,6 +311,14 @@ namespace bn
     }
 
     template<class Iter1>
+    std::string encode_b64String(Iter1 value)
+    {
+        Iter1 out;
+        encode<b64_conversion_traits>(value.begin(), value.end(), back_inserter(out));
+        return std::string{ out.begin(), out.end() };
+    }
+
+    template<class Iter1>
     Iter1 decode_b16(Iter1 value)
     {
         Iter1 out;

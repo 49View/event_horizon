@@ -124,7 +124,7 @@ export const entityTypeSelector = entry => {
           <i className="fas fa-cubes"/>
         </span>
             );
-    } else if (entry.group === GroupImage || entry.group === GroupMaterial) {
+    } else if (entry.group === GroupImage || entry.group === GroupMaterial || entry.group === GroupProfile) {
         if (entry.thumb === "") {
             return (
                 <span className="imageThumbNotFound">
@@ -144,16 +144,6 @@ export const entityTypeSelector = entry => {
         <i className="fas fa-bars"/>
       </span>
         );
-    } else if (entry.group === GroupProfile) {
-        if (entry.thumb === "") {
-            return (
-                <span className="imageThumbNotFound">
-          <i className="far fa-frown"/>
-        </span>
-            );
-        } else {
-            return <svg>{entry.thumb}</svg>;
-        }
     }
 
     return <img className="imgGreyOutline" src={entry.thumb} alt=""/>;

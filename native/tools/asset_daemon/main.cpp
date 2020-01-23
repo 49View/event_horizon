@@ -387,7 +387,11 @@ void elaborateProfile( DaemonFileStruct dfs ) {
 
     if ( getFileNameExt( std::string( dfs.filename )) == ".svg" ) {
         auto dRoot = getDaemonRoot();
-        ResourceEntityHelper mat{ FM::readLocalFileC( dRoot + dfs.filename ), {}, ""};
+        auto thumbnailFileName = dRoot + dfs.filename + ".png";
+        std::string cmdThumbnail = "convert " + dRoot + dfs.filename + " -resize 128x128! -trim +repage " + thumbnailFileName;
+        std::system( cmdThumbnail.c_str() );
+        auto thumb64 = bn::encode_b64String(FM::readLocalFileC(thumbnailFileName));
+        ResourceEntityHelper mat{ FM::readLocalFileC( dRoot + dfs.filename ), {}, thumb64 };
         Mongo::fileUpload( dfs.bucket, dfs.filename, mat.sc,
                            Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
                                               HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
