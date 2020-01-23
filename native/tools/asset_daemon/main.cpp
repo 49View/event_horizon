@@ -388,7 +388,7 @@ void elaborateProfile( DaemonFileStruct dfs ) {
     if ( getFileNameExt( std::string( dfs.filename )) == ".svg" ) {
         auto dRoot = getDaemonRoot();
         auto thumbnailFileName = dRoot + dfs.filename + ".png";
-        std::string cmdThumbnail = "convert " + dRoot + dfs.filename + " -resize 128x128! -trim +repage " + thumbnailFileName;
+        std::string cmdThumbnail = "convert " + dRoot + dfs.filename + " -trim +repage -resize 256x256/! " + thumbnailFileName;
         std::system( cmdThumbnail.c_str() );
         auto thumb64 = bn::encode_b64String(FM::readLocalFileC(thumbnailFileName));
         ResourceEntityHelper mat{ FM::readLocalFileC( dRoot + dfs.filename ), {}, thumb64 };

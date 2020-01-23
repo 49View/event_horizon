@@ -221,11 +221,16 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
                         {0.18f, C4f::DARK_BROWN},
             };
         float fOff = 0.0f;
-        for ( auto t = 0; t < fsize.size(); t++ ) {
-            this->RR().draw<DText2d>( CommandBufferLimits::UI2dStart,FDS{message, pfont.get(), V2f{0.02f, 0.98f - fOff}, fsize[t].first }, fsize[t].second );
-            fOff += fsize[t].first + fsize[t].first*0.25f;
+        for (auto & t : fsize) {
+            this->RR().draw<DText2d>( CommandBufferLimits::UI2dStart,FDS{message, pfont.get(), V2f{0.02f, 0.98f - fOff}, t.first }, t.second );
+            fOff += t.first + t.first*0.25f;
         }
         Socket::send( "wasmClientFinishedLoadingData", pfont->serializeParams() );
+    });
+
+    sg.nodeFullScreenProfileConnect( [this](CResourceRef _node) {
+        auto profile = sg.PL( _node );
+        Socket::send( "wasmClientFinishedLoadingData", profile );
     });
 
     sg.replaceMaterialConnect( [this]( const std::string& _oldMatRef , const std::string& _newMatRef ) {

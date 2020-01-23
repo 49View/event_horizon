@@ -229,7 +229,11 @@ void SceneGraph::realTimeCallbacks() {
                 load<Font>( v0, [this, vHash]( HttpResouceCBSign key ) {
                     nodeFullScreenFontSonnetSignal( key );
                 } );
-            } else if ( entityGroup == ResourceGroup::UI ) {
+            } else if ( entityGroup == ResourceGroup::Profile ) {
+                load<Profile>( v0, [this, vHash]( HttpResouceCBSign key ) {
+                    nodeFullScreenProfileSignal( key );
+                } );
+            }  else if ( entityGroup == ResourceGroup::UI ) {
                 load<UIContainer>( v0, [this, vHash]( HttpResouceCBSign key ) {
                     nodeFullScreenUIContainerSignal( key );
                 } );
