@@ -85,6 +85,7 @@ void initDeamon() {
 struct DaemonFileStruct {
     MongoBucket bucket;
     std::string filename;
+    std::string group;
     strview project;
     strview uname;
     strview uemail;
@@ -304,7 +305,7 @@ void elaborateGeomFBX( DaemonFileStruct dfs ) {
 //        resaveGLB(dRoot + filenameglb);
         auto fileHash = Hashable<>::hashOf( fileData );
         Mongo::fileUpload( dfs.bucket, filenameglb, std::move( fileData ),
-                           Mongo::FSMetadata( ResourceGroup::Geom, dfs.project, dfs.uname, dfs.uemail,
+                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
                                               HttpContentType::json, fileHash, dfs.thumb64, ResourceDependencyDict{} ));
     } catch ( const std::exception& e ) {
         daemonExceptionLog( e );
@@ -327,7 +328,7 @@ void elaborateGeomObj( DaemonFileStruct dfs ) {
         fileData = FM::readLocalFile( dRoot + filenameglb );
         auto fileHash = Hashable<>::hashOf( fileData );
         Mongo::fileUpload( dfs.bucket, filenameglb, std::move( fileData ),
-                           Mongo::FSMetadata( ResourceGroup::Geom, dfs.project, dfs.uname, dfs.uemail,
+                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
                                               HttpContentType::json, fileHash, "", ResourceDependencyDict{} ));
     } catch ( const std::exception& e ) {
         daemonExceptionLog( e );
@@ -340,7 +341,7 @@ void elaborateGeomGLB( DaemonFileStruct dfs ) {
         auto fileData = FM::readLocalFile( dRoot + dfs.filename );
         auto fileHash = Hashable<>::hashOf( fileData );
         Mongo::fileUpload( dfs.bucket, dfs.filename, std::move( fileData ),
-                           Mongo::FSMetadata( ResourceGroup::Geom, dfs.project, dfs.uname, dfs.uemail,
+                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
                                               HttpContentType::json, fileHash, "", ResourceDependencyDict{} ));
     } catch ( const std::exception& e ) {
         daemonExceptionLog( e );
@@ -373,7 +374,7 @@ void elaborateMaterial( DaemonFileStruct dfs ) {
     // Gather texture outputs
     ResourceEntityHelper mat = elaborateInternalMaterial( ad, 512, dfs );
     Mongo::fileUpload( dfs.bucket, dfs.filename, mat.sc,
-                       Mongo::FSMetadata( ResourceGroup::Material, dfs.project, dfs.uname, dfs.uemail,
+                       Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
                                           HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
                                           mat.deps ));
 
@@ -382,8 +383,20 @@ void elaborateMaterial( DaemonFileStruct dfs ) {
 //    std::system( cleanup.c_str());
 }
 
-void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveDirectory& ad, strview group ) {
-    if ( group == ResourceGroup::Geom ) {
+void elaborateProfile( DaemonFileStruct dfs ) {
+
+    if ( getFileNameExt( std::string( dfs.filename )) == ".svg" ) {
+        auto dRoot = getDaemonRoot();
+        ResourceEntityHelper mat{ FM::readLocalFileC( dRoot + dfs.filename ), {}, ""};
+        Mongo::fileUpload( dfs.bucket, dfs.filename, mat.sc,
+                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
+                                              HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
+                                              mat.deps ));
+    }
+}
+
+void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveDirectory& ad ) {
+    if ( dfs.group == ResourceGroup::Geom ) {
         auto candidateScreenshot = ad.findFilesWithExtension( { ".jpg" } );
         for ( const auto& elem : candidateScreenshot ) {
             if ( elem.name.find( "preview_" ) != std::string::npos ||
@@ -460,13 +473,16 @@ filterCandidates( const std::vector<ArchiveDirectoryEntityElement>& candidates, 
     return filteredCandidates;
 }
 
-void elaborateAsset( DaemonFileStruct& dfs, const std::string& assetName, strview group ) {
+void elaborateAsset( DaemonFileStruct& dfs, const std::string& assetName ) {
     dfs.filename = assetName;
-    if ( group == ResourceGroup::Geom ) {
+    if ( dfs.group == ResourceGroup::Geom ) {
         elaborateGeom( dfs );
     }
-    if ( group == ResourceGroup::Material ) {
+    if ( dfs.group == ResourceGroup::Material ) {
         elaborateMaterial( dfs );
+    }
+    if ( dfs.group == ResourceGroup::Profile ) {
+        elaborateProfile( dfs );
     }
 }
 
@@ -474,24 +490,23 @@ bool groupIsAchievable( const std::string& sourceName, strview group ) {
     return group == ResourceGroup::Material && isFileExtCompressedArchive( sourceName );
 }
 
-void elaborateCandidates( DaemonFileStruct& dfs,
-                          strview group ) {
-    if ( groupIsAchievable( dfs.filename, group )) {
-        elaborateAsset( dfs, dfs.filename, group );
+void elaborateCandidates( DaemonFileStruct& dfs ) {
+    if ( groupIsAchievable( dfs.filename, dfs.group )) {
+        elaborateAsset( dfs, dfs.filename );
     } else {
         for ( const auto& elem : dfs.candidates ) {
-            elaborateAsset( dfs, elem.name, group );
+            elaborateAsset( dfs, elem.name );
         }
     }
 }
 
-uint64_t chooseMainArchiveFilename( const ArchiveDirectory& ad, DaemonFileStruct& dfs, strview group ) {
+uint64_t chooseMainArchiveFilename( const ArchiveDirectory& ad, DaemonFileStruct& dfs ) {
 
-    findCandidatesScreenshotForThumbnail( dfs, ad, group );
+    findCandidatesScreenshotForThumbnail( dfs, ad );
 
-    auto candidates = ad.findFilesWithExtension( getExtForGroup( std::string{ group } ));
-    dfs.candidates = filterCandidates( candidates, group );
-    elaborateCandidates( dfs, group );
+    auto candidates = ad.findFilesWithExtension( getExtForGroup( dfs.group ));
+    dfs.candidates = filterCandidates( candidates, dfs.group );
+    elaborateCandidates( dfs );
 
     return dfs.candidates.size();
 }
@@ -507,20 +522,20 @@ void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAs
                                                        meta.id,
                                                        getDaemonRoot() + std::string{ filename } );
 
-            DaemonFileStruct dfs{ entityBucket, getFileName( fileDownloaded ), meta.project, meta.username,
+            DaemonFileStruct dfs{ entityBucket, getFileName( fileDownloaded ), std::string(meta.group), meta.project, meta.username,
                                   meta.useremail };
 
             ArchiveDirectory ad{ filename };
             // First unzip all the content if package arrives in a zip file
             if ( isFileExtCompressedArchive( std::string( filename ))) {
                 unzipFilesToTempFolder( fileDownloaded, ad );
-                auto numElaborated = chooseMainArchiveFilename( ad, dfs, meta.group );
+                auto numElaborated = chooseMainArchiveFilename( ad, dfs );
                 if (( dfs.filename.empty() || numElaborated == 0 )) {
                     daemonWarningLog( std::string( meta.filename ) + " does not contain any appropriate asset file" );
                     continue;
                 }
             } else {
-                elaborateAsset( dfs, filename, meta.group );
+                elaborateAsset( dfs, filename );
             }
         }
     } catch ( const std::exception& e ) {

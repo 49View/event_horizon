@@ -8,7 +8,7 @@ const gsplitTags = source => {
 
 module.exports = {
   splitTags: source => {
-    return gsplitTags(source);
+    return gsplitTags(decodeURIComponent(source));
   },
 
   createMetadata: ( filename, username, useremail ) => {

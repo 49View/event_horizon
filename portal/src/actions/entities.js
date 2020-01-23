@@ -20,7 +20,7 @@ import {
 } from "./types";
 import store from "../store";
 import {wscSend} from "../utils/webSocketClient";
-import { GroupGeom, GroupMaterial, GroupScript} from "../utils/utils";
+import { GroupMaterial, GroupScript} from "../utils/utils";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
@@ -378,21 +378,6 @@ export const deleteEntity = id => async dispatch => {
   }
 };
 
-const postEntityMaker = (fileName, project, group, uname, uemail) => {
-  return (
-    "/api/entities/" +
-    fileName +
-    "/" +
-    encodeURIComponent(project) +
-    "/" +
-    group +
-    "/" +
-    encodeURIComponent(uname) +
-    "/" +
-    encodeURIComponent(uemail)
-  );
-};
-
 const placeHolderEntityMaker = group => {
   return "entities/placeholder/" + group;
 };
@@ -400,10 +385,6 @@ const placeHolderEntityMaker = group => {
 // Add post
 export const addEntity = (fileName, fileData, group) => async dispatch => {
   try {
-    const state = store.getState();
-    const project = state.auth.userdata.project;
-    const user = state.auth.userdata.user;
-
     dispatch({
       type: GET_ENTITY_LOAD,
       payload: fileName
@@ -414,37 +395,12 @@ export const addEntity = (fileName, fileData, group) => async dispatch => {
         "Content-Type": "application/octet-stream"
       }
     };
-    let res = null;
-    if (group === GroupGeom || group === GroupMaterial) {
-        const urlEnc = encodeURIComponent(fileName);
-        console.log("Url encoded resource: ", urlEnc);
-        res = await axios.post("/api/fs/entity_to_elaborate/" + group + "/" + urlEnc,
-          fileData,
-          octet
-        );
-    } else {
-      res = await axios.post(
-        postEntityMaker(fileName, project, group, user.name, user.email),
-        fileData,
-        octet
-      );
-
-      const fullres = await axios.get(`/api/entities/content/byId/${res.data._id}`,
-        {
-          responseType: "arraybuffer"
-        }
-      );
-
-      const entityFull = {
-        entity: res.data,
-        blobURL: URL.createObjectURL(new Blob([fullres.data]))
-      };
-
-      dispatch({
-        type: GET_ENTITY,
-        payload: entityFull
-      });
-    }
+    const urlEnc = encodeURIComponent(fileName);
+    console.log("Url encoded resource: ", urlEnc);
+    await axios.post("/api/fs/entity_to_elaborate/" + group + "/" + urlEnc,
+      fileData,
+      octet
+    );
   } catch (err) {
     console.log(err);
     dispatch({
