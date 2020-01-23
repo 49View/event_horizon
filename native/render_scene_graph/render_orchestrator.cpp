@@ -125,52 +125,52 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
     });
 
     sg.FM().connect( [](const ResourceTransfer<Font>& _val ) {
-        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Font>::Prefix() << ": "  << *_val.names.begin() );
+//        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Font>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
     sg.UM().connect( [](const ResourceTransfer<UIContainer>& _val ) {
-        LOGRS( "[SG-Resource] Add " << ResourceVersioning<UIContainer>::Prefix() << ": "  << *_val.names.begin() );
+//        LOGRS( "[SG-Resource] Add " << ResourceVersioning<UIContainer>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
     sg.PL().connect( [](const ResourceTransfer<Profile>& _val ) {
-        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Profile>::Prefix() << ": "  << *_val.names.begin() );
+//        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Profile>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
     sg.TL().connect( [this](const ResourceTransfer<RawImage>& _val ) {
-        LOGRS( "[SG-Resource] Add " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
+//        LOGRS( "[SG-Resource] Add " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addTextureResource(_val);
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
     sg.ML().connect( [this](const ResourceTransfer<Material>& _val ) {
-        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Material>::Prefix() << ": "  << *_val.names.begin() );
+//        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Material>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addMaterialResource(_val);
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
     sg.LL().connect( [this](const ResourceTransfer<Light>& _val ) {
-        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Light>::Prefix() << ": "  << *_val.names.begin() );
+//        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Light>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().LM()->addPointLight( _val.elem->pos, _val.elem->wattage, _val.elem->intensity, _val.elem->attenuation);
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
     sg.VL().connect( [this](const ResourceTransfer<VData>& _val ) {
-        LOGRS( "[SG-Resource] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
+//        LOGRS( "[SG-Resource] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addVDataResource(_val); // check if ( _val.elem->numIndices() > 0 ) ????
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
     sg.GM().connect( [](const ResourceTransfer<Geom>& _val ) {
-        LOGRS( "[SG-Resource] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
+//        LOGRS( "[SG-Resource] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
     sg.nodeAddConnect( [this]( NodeGraphConnectParamsSig _geom ) {
         auto bEmpty = _geom->empty();
-        LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );
+//        LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );
         if ( bEmpty ) return;
         auto dataRef = _geom->DataRef(0);
         auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.
