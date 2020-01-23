@@ -190,6 +190,10 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     });
 
+    sg.nodeSetSkyboxConnect( [this](CResourceRef _hash) {
+        this->createSkybox( SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture, _hash } );
+    });
+
     sg.nodeFullScreenImageConnect( [this](CResourceRef _node) {
         auto image = sg.TL( _node );
         V2f iar = image->getAspectRatioV();

@@ -32,6 +32,10 @@ void NodeGraph::nodeFullScreenImageConnect( const std::function<NodeGraphConnect
     nodeFullScreenImageSignal.connect( _slot );
 }
 
+void NodeGraph::nodeSetSkyboxConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot ) {
+    nodeSetSkyboxSignal.connect( _slot );
+}
+
 void NodeGraph::nodeFullScreenFontSonnetConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot ) {
     nodeFullScreenFontSonnetSignal.connect( _slot );
 }

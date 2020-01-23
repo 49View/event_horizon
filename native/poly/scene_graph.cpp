@@ -87,6 +87,12 @@ GeomSP SceneGraph::getNode( const UUID& _uuid ) {
     return nullptr;
 }
 
+void SceneGraph::addSkybox( const std::string& skyName ) {
+    if ( auto res = TL().getHash( skyName); !res.empty() ) {
+        nodeSetSkyboxSignal( res );
+    }
+}
+
 std::shared_ptr<Camera> SceneGraph::DC() {
     return CM().get( Name::Foxtrot )->getCamera();
 }
@@ -701,9 +707,11 @@ void SceneGraph::HODResolve( const DependencyList& deps, HODResolverCallback ccf
 }
 
 void HOD::DepRemapsManager::addDep( const std::string& group, const std::string& resName ) {
-    ret.emplace( group, resName );
-    if ( group == ResourceGroup::Geom ) {
-        geoms.emplace( resName );
+    if ( !resName.empty() ) {
+        ret.emplace( group, resName );
+        if ( group == ResourceGroup::Geom ) {
+            geoms.emplace( resName );
+        }
     }
 }
 

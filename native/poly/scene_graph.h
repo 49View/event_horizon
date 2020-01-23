@@ -101,6 +101,8 @@ public:
     void removeNode( const UUID& _uuid );
     void removeNode( GeomSP _node );
 
+    void addSkybox( CResourceRef skyName );
+
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
     void cmdCreateGeometry( const std::vector<std::string>& _params );

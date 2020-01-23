@@ -95,7 +95,7 @@ public:
         if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
             return res->second;
         }
-        LOGRS("Resource " << _key << " unmapped, returning empty hash");
+//        LOGRS("Resource " << _key << " unmapped, returning empty hash");
         return {};
     }
 
@@ -103,13 +103,7 @@ public:
         if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
             return resources[res->second];
         }
-//        else {
-//            if ( !resources.empty() ) {
-//                LOGRS("Resource " << _key << " unmapped returning default elem");
-//                return resources.begin()->second;
-//            }
-//        }
-        LOGRS("Resource " << _key << " unmapped and mamanger empty, returning null");
+//        LOGRS("Resource " << _key << " unmapped and mamanger empty, returning null");
         return nullptr;
     }
 
