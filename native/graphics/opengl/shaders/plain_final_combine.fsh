@@ -101,7 +101,7 @@ void main() {
     #endif
 
     #if _SSAOING_
-    sceneColor.xyz *= ssao(); 
+    sceneColor.xyz *= ssao(); //pow( ssao(), vec3(1.5)); //try with some exp on ssao, might look better
     #endif
 
     #if _VIGNETTING_
