@@ -230,7 +230,7 @@ void RLTargetPBR::renderDepthMap() {
 
     for ( const auto& [k, vl] : rr.CL() ) {
         if ( isKeyInRange( k, CheckEnableBucket::True ) ) {
-            rr.addToCommandBuffer( vl.mVList, nullptr, rr.getMaterial(S::DEPTH_MAP), nullptr, 0.91f );
+            rr.addToCommandBuffer( vl.mVList, nullptr, rr.getMaterial(S::DEPTH_MAP), nullptr, 0.11f );
         }
     }
 }
