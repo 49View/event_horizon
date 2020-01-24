@@ -7,6 +7,7 @@
 #include <core/node.hpp>
 #include <core/raw_image.h>
 #include <core/camera_rig.hpp>
+#include <core/default_font.hpp>
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
 #include <core/image_util.h>
@@ -446,6 +447,7 @@ void SceneGraph::init() {
     squared.createRect( Rect2f::IDENTITY_CENTERED );
     B<PB>( S::SQUARE ).addIM( squared );
     B<CB>( Name::Foxtrot ).addIM( CameraRig{ Name::Foxtrot } );
+    B<FB>( S::DEFAULT_FONT ).addIM( Font{ getDefaultFont() } );
 }
 
 ResourceRef SceneGraph::addVData( const ResourceRef& _key, const VData& _res, HttpResouceCB _ccf ) {

@@ -740,6 +740,7 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, const Ve
 }
 
 void RendererDrawingSet::setupFontData() {
+    if ( fds.font == nullptr ) return;
     auto frect = fds.font->GetMasterRect();
     V3f fscale{ 1.0f/(frect.z - frect.x), 1.0f, 1.0f/(frect.w - frect.y) };
 //    V3f fscale2d{ 1.0f/(frect.z - frect.x), 1.0f/(frect.w - frect.y), 1.0f };
@@ -764,6 +765,9 @@ void RendererDrawingSet::setupFontData() {
 }
 
 VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
+
+    if ( rds.fds.font == nullptr ) return nullptr;
+
     Vector2f cursor = Vector2f::ZERO;
 
     size_t totalVerts = 0;
