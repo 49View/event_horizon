@@ -90,7 +90,7 @@ struct DaemonFileStruct {
     strview uname;
     strview uemail;
     std::string thumb64{};
-    std::vector<ArchiveDirectoryEntityElement> candidates{};
+    std::vector <ArchiveDirectoryEntityElement> candidates{};
 };
 
 class DaemonException : public std::exception {
@@ -105,8 +105,8 @@ private:
     std::string msg{};
 };
 
-static std::vector<std::string> getExtForGroup( const std::string& _group ) {
-    std::unordered_map<std::string, std::vector<std::string>> extmap;
+static std::vector <std::string> getExtForGroup( const std::string& _group ) {
+    std::unordered_map <std::string, std::vector<std::string>> extmap;
 
     extmap[ResourceGroup::Geom] = { ".fbx", ".glb", ".gltf", ".obj" };
     extmap[ResourceGroup::Material] = { ".sbsar", ".png", ".jpg" };
@@ -127,7 +127,7 @@ void daemonWarningLog( const std::string& e ) {
     Socket::emit( "daemonLogger", serializeLogger( LoggerLevel::Warning, e ));
 }
 
-std::optional<MongoFileUpload> elaborateImage(
+std::optional <MongoFileUpload> elaborateImage(
         int desiredWidth, int desiredHeight,
         DaemonFileStruct dfs,
         std::string& thumb ) {
@@ -383,36 +383,44 @@ void elaborateMaterial( DaemonFileStruct dfs ) {
 //    std::system( cleanup.c_str());
 }
 
-void elaborateProfile( DaemonFileStruct dfs ) {
-
-    if ( getFileNameExtToLower( std::string( dfs.filename )) == ".svg" ) {
-        auto dRoot = getDaemonRoot();
-        auto thumbnailFileName = dRoot + dfs.filename + ".png";
-        std::string cmdThumbnail = "convert " + dRoot + dfs.filename + " -trim +repage -resize 256x256/! " + thumbnailFileName;
-        std::system( cmdThumbnail.c_str() );
-        auto thumb64 = bn::encode_b64String(FM::readLocalFileC(thumbnailFileName));
-        ResourceEntityHelper mat{ FM::readLocalFileC( dRoot + dfs.filename ), {}, thumb64 };
-        Mongo::fileUpload( dfs.bucket, dfs.filename, mat.sc,
-                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
-                                              mat.deps ));
+std::string getContentTypeFor( const DaemonFileStruct& dfs ) {
+    if ( dfs.group == ResourceGroup::Material ) {
+        return HttpContentType::json;
+    } else {
+        return HttpContentType::octetStream;
     }
 }
 
-void elaborateImage( DaemonFileStruct dfs ) {
+std::string createThumbnailCommandFor( const DaemonFileStruct& dfs, std::string& thumbnailFileName ) {
+    auto dRoot = getDaemonRoot();
+    thumbnailFileName = dRoot + dfs.filename + ".png";
 
-    if ( isFileExtAnImage(getFileNameExtToLower( std::string( dfs.filename )) ) ) {
-        auto dRoot = getDaemonRoot();
-        auto thumbnailFileName = dRoot + dfs.filename + ".png";
-        std::string cmdThumbnail = "convert " + dRoot + dfs.filename + " -resize 128x128/! " + thumbnailFileName;
-        std::system( cmdThumbnail.c_str() );
-        auto thumb64 = bn::encode_b64String(FM::readLocalFileC(thumbnailFileName));
-        ResourceEntityHelper mat{ FM::readLocalFileC( dRoot + dfs.filename ), {}, thumb64 };
-        Mongo::fileUpload( dfs.bucket, dfs.filename, mat.sc,
-                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
-                                              mat.deps ));
+    if ( dfs.group == ResourceGroup::Image ) {
+        return "convert " + dRoot + dfs.filename + " -resize 128x128/! " + thumbnailFileName;
+    } else if ( dfs.group == ResourceGroup::Profile ) {
+        return "convert " + dRoot + dfs.filename + " -trim +repage -resize 256x256/! " + thumbnailFileName;
+    } else if ( dfs.group == ResourceGroup::Font ) {
+        return "convert -font " + dRoot + dfs.filename + " -pointsize 50 label:\"aA\" " + thumbnailFileName;
     }
+
+    daemonWarningLog( "Asset of type " + dfs.group + " went into the wrong pipeline." );
+
+    return {};
+}
+
+auto generateThumbnail64( const DaemonFileStruct& dfs ) {
+    std::string thumbnailFileName{};
+    std::string cmdThumbnail = createThumbnailCommandFor( dfs, thumbnailFileName );
+    std::system( cmdThumbnail.c_str());
+    return bn::encode_b64String( FM::readLocalFileC( thumbnailFileName ));
+}
+
+void elaboratePassThrough( DaemonFileStruct dfs ) {
+    ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.filename ), {}, generateThumbnail64( dfs ) };
+    Mongo::fileUpload( dfs.bucket, dfs.filename, res.sc,
+                       Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
+                                          getContentTypeFor( dfs ), Hashable<>::hashOf( res.sc ), res.thumb,
+                                          res.deps ));
 }
 
 void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveDirectory& ad ) {
@@ -429,9 +437,9 @@ void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveD
 
 void geomFilterOutSameAssetDifferentFormatFromBasePriority(
         const std::string& formatPriority,
-        std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
+        std::vector <ArchiveDirectoryEntityElement>& destCandidates ) {
 
-    std::vector<std::string> nameChecks{};
+    std::vector <std::string> nameChecks{};
     for ( const auto& elem : destCandidates ) {
         if ( elem.name.find( formatPriority ) != std::string::npos ) {
             nameChecks.emplace_back( elem.name );
@@ -452,9 +460,9 @@ void geomFilterOutSameAssetDifferentFormatFromBasePriority(
 }
 
 void geomFilterDesingConnectCrazyRedundancy(
-        std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
+        std::vector <ArchiveDirectoryEntityElement>& destCandidates ) {
 
-    auto removeDCCrazyDoubles = [&]( const std::string& _source, const std::vector<std::string>& _v1 ) {
+    auto removeDCCrazyDoubles = [&]( const std::string& _source, const std::vector <std::string>& _v1 ) {
         erase_if( destCandidates, [_source, _v1, destCandidates]( const auto& us ) {
             bool sfn = us.name.find( _source ) != std::string::npos;
             if ( sfn ) {
@@ -472,15 +480,15 @@ void geomFilterDesingConnectCrazyRedundancy(
     removeDCCrazyDoubles( "_obj.obj", { "_fbx_upY.fbx", "_fbx_upZ.fbx" } );
 }
 
-void materialFilterNonImageAssets( std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
+void materialFilterNonImageAssets( std::vector <ArchiveDirectoryEntityElement>& destCandidates ) {
 
     erase_if( destCandidates, []( const auto& us ) {
         return !nameHasImageExtension( us.name );
     } );
 }
 
-std::vector<ArchiveDirectoryEntityElement>
-filterCandidates( const std::vector<ArchiveDirectoryEntityElement>& candidates, strview group ) {
+std::vector <ArchiveDirectoryEntityElement>
+filterCandidates( const std::vector <ArchiveDirectoryEntityElement>& candidates, strview group ) {
     auto filteredCandidates = candidates;
 
     if ( group == ResourceGroup::Geom ) {
@@ -501,11 +509,10 @@ void elaborateAsset( DaemonFileStruct& dfs, const std::string& assetName ) {
     if ( dfs.group == ResourceGroup::Material ) {
         elaborateMaterial( dfs );
     }
-    if ( dfs.group == ResourceGroup::Profile ) {
-        elaborateProfile( dfs );
-    }
-    if ( dfs.group == ResourceGroup::Image ) {
-        elaborateImage( dfs );
+    // These are simply file copies, the only tricky bit is to handle the generation of screenshots which is done internally
+    if ( dfs.group == ResourceGroup::Profile || dfs.group == ResourceGroup::Font ||
+         dfs.group == ResourceGroup::Image ) {
+        elaboratePassThrough( dfs );
     }
 }
 
@@ -545,7 +552,8 @@ void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAs
                                                        meta.id,
                                                        getDaemonRoot() + std::string{ filename } );
 
-            DaemonFileStruct dfs{ entityBucket, getFileName( fileDownloaded ), std::string(meta.group), meta.project, meta.username,
+            DaemonFileStruct dfs{ entityBucket, getFileName( fileDownloaded ), std::string( meta.group ), meta.project,
+                                  meta.username,
                                   meta.useremail };
 
             ArchiveDirectory ad{ filename };
@@ -566,8 +574,9 @@ void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAs
     }
 }
 
-JSONDATA( SocketEntityResponse, entities )
-    std::vector<std::string> entities{};
+JSONDATA( SocketEntityResponse, entities
+)
+std::vector <std::string> entities{};
 };
 
 void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
@@ -575,7 +584,7 @@ void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
     for ( auto change : stream ) {
         StreamChangeMetadata meta{ change };
         auto ent = mdb.insertEntityFromAsset( meta );
-        Socket::emit("entityAdded" + std::to_string(counter++), ent );
+        Socket::emit( "entityAdded" + std::to_string( counter++ ), ent );
     }
 }
 
