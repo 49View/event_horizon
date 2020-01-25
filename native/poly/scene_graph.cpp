@@ -465,6 +465,11 @@ ResourceRef SceneGraph::addMaterial( const ResourceRef& _key, const Material& _r
     return _key;
 }
 
+ResourceRef SceneGraph::addRawImageIM( const ResourceRef& _key, const RawImage& _res ) {
+    B<IB>( _key ).addIM( _res );
+    return _key;
+}
+
 ResourceRef SceneGraph::addMaterialIM( const ResourceRef& _key, const Material& _res ) {
     B<MB>( _key ).addIM( _res );
     return _key;

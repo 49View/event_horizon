@@ -268,6 +268,7 @@ public:
     ResourceRef addLight         ( const ResourceRef& _key, const Light&         _res, HttpResouceCB _ccf = nullptr );
     void addResources( CResourceRef _key, const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
 
+    ResourceRef addRawImageIM    ( const ResourceRef& _key, const RawImage     & _res );
     ResourceRef addMaterialIM    ( const ResourceRef& _key, const Material     & _res );
     ResourceRef addUIIM          ( const ResourceRef& _key, const UIContainer& _res );
 
