@@ -26,12 +26,6 @@
 #include <graphics/shader_material.hpp>
 #include <graphics/render_material_manager.hpp>
 #include <graphics/gpuv_data_manager.hpp>
-
-#ifdef _USE_IMGUI_
-#include <graphics/imgui/imgui.h>
-#endif
-
-
 #include <stb/stb_image_write.h>
 #include "core/service_factory.h"
 
@@ -232,10 +226,6 @@ void Renderer::directRenderLoop() {
         afterShaderSetup();
     }
 
-#ifdef _USE_IMGUI_
-    ImGui::NewFrame();
-#endif
-
     CB_U().start();
     CB_U().startList( nullptr, CommandBufferFlags::CBF_DoNotSort );
 //    CB_U().pushCommand( { CommandBufferCommandName::clearDefaultFramebuffer } );
@@ -263,16 +253,6 @@ void Renderer::directRenderLoop() {
     mDrawCallsPerFrame = renderCBList();
 
 //    VRM.update();
-
-#ifdef _USE_IMGUI_
-    ImGui::Begin("Renderer Console");
-    ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate );
-    ImGui::Text("Current FrameRate (%.1f FPS)", ImGui::GetIO().Framerate );
-    ImGui::Text("Number drawcalls: %lu", mDrawCallsPerFrame );
-    ImGui::End();
-
-    ImGui::Render();
-#endif
 
     mUpdateCounter++;
 }

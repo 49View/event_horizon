@@ -1,8 +1,10 @@
 #include "window_handling_opengl_glfw.hpp"
-#include "imgui.h"
 #include <graphics/opengl/gl_headers.hpp>
+#ifdef _USE_IMGUI_
+#include <graphics/imgui/imgui.h>
 #include <graphics/opengl/GLFW/imgui_impl_glfw.h>
 #include <graphics/opengl/imgui_impl_opengl3.h>
+#endif
 
 #include <graphics/window_handling.hpp>
 
@@ -66,6 +68,7 @@ namespace WindowHandling {
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 #endif
     }
 
@@ -85,6 +88,7 @@ namespace WindowHandling {
 
     void flush() {
 #ifdef _USE_IMGUI_
+        ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif
         glfwSwapBuffers( window );
