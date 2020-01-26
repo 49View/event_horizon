@@ -215,6 +215,7 @@ public:
     void setLoadingFlag( bool _value );
     void setProgressionTiming( float _progress );
 
+    [[nodiscard]] size_t drawCallsPerFrame() const;
     const Vector2i& getForcedFrameBufferSize() const;
     void setForcedFrameBufferSize( const Vector2i& mForcedFrameBufferSize );
 

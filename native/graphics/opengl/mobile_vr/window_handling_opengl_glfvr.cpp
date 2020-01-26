@@ -38,4 +38,7 @@ namespace WindowHandling {
         return true;
     }
 
+    void imRenderLoopStats( const RenderStats& rs ) {
+    }
+
 }

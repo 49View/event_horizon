@@ -545,6 +545,10 @@ bool Renderer::isLoading() const {
     return bIsLoading;
 }
 
+size_t Renderer::drawCallsPerFrame() const {
+    return mDrawCallsPerFrame;
+}
+
 void Renderer::setShadowOverBurnCofficient( float _value ) {
     LM()->setShadowOverBurnCofficient( _value );
 }

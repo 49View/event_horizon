@@ -10,6 +10,7 @@
 class TextInput;
 class MouseInput;
 class Renderer;
+class RenderStats;
 
 namespace WindowHandling {
 	void initializeWindow( uint64_t flags, Renderer& rr );
@@ -21,6 +22,7 @@ namespace WindowHandling {
 	void enableInputCallbacks();
 	void disableInputCallbacks();
 	bool isInputEnabled();
+    void imRenderLoopStats( const RenderStats& rs );
 };
 
 namespace WH = WindowHandling;

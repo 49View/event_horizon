@@ -119,4 +119,14 @@ namespace WindowHandling {
         return bUseGLFWPoll;
     }
 
+    void imRenderLoopStats( const RenderStats& rs ) {
+#ifdef _USE_IMGUI_
+        ImGui::Begin("Renderer Console");
+        ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate );
+        ImGui::Text("Current FrameRate (%.1f FPS)", ImGui::GetIO().Framerate );
+//        ImGui::Text("Number drawcalls: %lu", rs.drawCallsPerFrame );
+        ImGui::End();
+#endif
+    }
+
 }
