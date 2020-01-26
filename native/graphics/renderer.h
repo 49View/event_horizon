@@ -41,6 +41,7 @@ struct RendererDrawingSet {
     RendererDrawingSet( int bi, Color4f c, std::string sn, std::string n ) :
         bucketIndex(bi), color(std::move(c)), name(std::move(n)), shaderName(std::move(sn)) {}
     void setupFontData();
+    bool hasTexture() const;
 
     int bucketIndex = CommandBufferLimits::UnsortedStart;
     Primitive prim = PRIMITIVE_TRIANGLE_STRIP;

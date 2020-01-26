@@ -1052,6 +1052,12 @@ public:
         verts[index].a1 = a;
     }
 
+    template<typename A>
+    void setVertexUV1( int32_t index, const A& a ) {
+        ASSERT( numVerts > index );
+        verts[index].a1 = a;
+    }
+
     void init( int32_t _numVerts, Primitive _pt, int32_t _numIndices, std::unique_ptr<V[]>& _verts,
                std::unique_ptr<uint32_t[]>&& _indices, VFVertexAllocation vAlloc = VFVertexAllocation::Ignore ) {
         ASSERT( _numVerts > 0 );

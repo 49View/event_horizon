@@ -79,6 +79,28 @@ auto addVertexStripsTM( Renderer& _rr, std::shared_ptr<TS>& ps, const RendererDr
     return vp;
 }
 
+template <typename TS, typename T>
+auto addVertexStripsTMAutoMapping( Renderer& _rr, const std::vector<T>& verts, const RendererDrawingSet& rds ) {
+
+    ASSERT(!verts.empty());
+    auto ps = std::make_shared<TS>();
+    ps->generateStripsFromVerts( verts, rds.prim );
+    AABB aabb = AABB::INVALID;
+    for ( const auto& v : verts ) {
+        aabb.expand( v );
+    }
+    size_t count = 0;
+    for ( const auto& v : verts ) {
+        ps->setVertexUV1( count, v.xz() / V2f{ aabb.calcWidth(), aabb.calcDepth()} );
+        ++count;
+    }
+
+    auto vp = VPBuilder<TS>{_rr, ShaderMaterial{rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color)}}.
+            t(rds.matrix).p(ps).n(rds.name).build();
+    _rr.VPL( rds.bucketIndex, vp );
+    return vp;
+}
+
 void Renderer::drawIncGridLines( const int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
                        const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
                        const float zoffset, const std::string& _name ) {
@@ -453,7 +475,12 @@ VPListSP Renderer::drawPolyFinal( RendererDrawingSet& rds ) {
         }
     }
 
-    return addVertexStrips<Pos3dStrip>( *this, allVLists, rds);
+    if ( rds.hasTexture() ) {
+        rds.shaderName = S::TEXTURE_3D;
+        return addVertexStripsTMAutoMapping<PosTex3dStrip>( *this, allVLists, rds);
+    } else {
+        return addVertexStrips<Pos3dStrip>( *this, allVLists, rds);
+    }
 }
 
 VPListSP Renderer::drawCircleFinal( RendererDrawingSet& rds ) {
@@ -762,6 +789,10 @@ void RendererDrawingSet::setupFontData() {
     }
     preMultMatrix = Matrix4f{ lTRS };
 
+}
+
+bool RendererDrawingSet::hasTexture() const {
+    return !textureRef.empty();
 }
 
 VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
