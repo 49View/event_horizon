@@ -7,16 +7,17 @@ const stream = require('stream');
 const util = require('util');
 const logger = require('./logger');
 const socketController = require('./controllers/socketController');
-
+const globalConfig = require("./config_api.js");
 //Set up default mongoose connection
 
 exports.initDB = async () => {
     const dbMaxConnectionTimeSeconds = 300;
     const dbConnectionRetryInterval = 55;
     let dbConnectionTimeElaped = 0;
-    const mongoDBUrl = `mongodb://mongo1:27017,mongo2:27017,mongo3:27017/event_horizon?replicaSet=rs0`;
-    // const mongoDBUrl = `mongodb://localhost:27017/event_horizon?replicaSet=rs0`;
+    // const mongoDBUrl = `mongodb://mongo1:27017,mongo2:27017,mongo3:27017/event_horizon?replicaSet=rs0`;
+    const mongoDBUrl = `mongodb://${globalConfig.MongoDBURI}/${globalConfig.MongoDBdbName}?replicaSet=${globalConfig.MongoDBReplicaSetName}`;
 
+    logger.info( mongoDBUrl );
     while (dbConnectionTimeElaped < dbMaxConnectionTimeSeconds) {
         try {
             await mongoose.connect(mongoDBUrl, {
