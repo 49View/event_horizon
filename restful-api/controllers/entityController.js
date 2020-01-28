@@ -8,7 +8,6 @@ const socketController = require("../controllers/socketController");
 const metadataAssistant = require("../assistants/metadataAssistant");
 const tar = require("tar-stream");
 const streams = require("memory-streams");
-const sharp = require("sharp");
 const JSZip = require("jszip");
 const {uniqueNamesGenerator} = require("unique-names-generator");
 const md5 = require("md5");

@@ -1,8 +1,8 @@
-FROM sixthview/node13.1-withsharp
+FROM node:13.7.0
 WORKDIR /app
 COPY ./package.json ./
 RUN npm install
 COPY . .
-EXPOSE 5000
+EXPOSE 4000
 EXPOSE 3500
-CMD [ "npm", "run", "start-docker" ]
+CMD [ "npm", "run", "start" ]

@@ -3,7 +3,6 @@ var express = require("express");
 var router = express.Router();
 const socketController = require("../controllers/socketController");
 const entityController = require("../controllers/entityController");
-const sharp = require("sharp");
 const db = require('../db');
 
 router.get("/:key", async (req, res, next) => {

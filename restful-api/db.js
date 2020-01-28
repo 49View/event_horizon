@@ -14,8 +14,8 @@ exports.initDB = async () => {
     const dbMaxConnectionTimeSeconds = 300;
     const dbConnectionRetryInterval = 55;
     let dbConnectionTimeElaped = 0;
-    // const mongoDBUrl = `mongodb://mongo1:27017,mongo2:27017,mongo3:27017/event_horizon?replicaSet=rs0`;
-    const mongoDBUrl = `mongodb://localhost:27017/event_horizon?replicaSet=rs0`;
+    const mongoDBUrl = `mongodb://mongo1:27017,mongo2:27017,mongo3:27017/event_horizon?replicaSet=rs0`;
+    // const mongoDBUrl = `mongodb://localhost:27017/event_horizon?replicaSet=rs0`;
 
     while (dbConnectionTimeElaped < dbMaxConnectionTimeSeconds) {
         try {

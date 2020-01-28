@@ -8,9 +8,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - 27011
-      - 27012
-      - 27013
   restful-api:
     build:
       dockerfile: Dockerfile.dev
@@ -18,7 +15,7 @@ services:
     volumes:
       - /app/node_modules
       - ./restful-api:/app
-    links:
+    depends_on:
       - mongo1
       - mongo2
       - mongo3
@@ -29,18 +26,18 @@ services:
     volumes:
       - /app/node_modules
       - ./portal:/app
-  sat:
-    depends_on:
-      - restful-api
-    build:
-      dockerfile: dockerfile-assetdaemon.docdev
-      context: ./native
-    volumes:
-      - ./native:/app
-    links:
-      - mongo1
-      - mongo2
-      - mongo3
+#   sat:
+#     depends_on:
+#       - restful-api
+#     build:
+#       dockerfile: dockerfile-assetdaemon.docdev
+#       context: ./native
+#     volumes:
+#       - ./native:/app
+#     depends_on:
+#       - mongo1
+#       - mongo2
+#       - mongo3
   mongo1:
     image: "mongo"
     container_name: "mongodb_container1"
@@ -62,10 +59,10 @@ services:
     restart: always
     expose:
       - 27017
-    ports:
-      - "27012:27017"
     volumes:
       - /dockerdata/dbc2:/data/db
+    ports:
+      - "27012:27017"
     entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
   mongo3:
     image: "mongo"
@@ -76,6 +73,5 @@ services:
     ports:
       - "27013:27017"
     volumes:
-      # - /dockerdata/dbc_init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
       - /dockerdata/dbc3:/data/db
     entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
