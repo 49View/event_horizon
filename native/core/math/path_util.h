@@ -87,5 +87,12 @@ std::vector<T> hermiteInterpolationOnPath( const std::vector<T>& path, int subdi
 	return ret;
 }
 
+template<typename T>
+bool isPathClosed( const std::vector<T>& path, float epsilon = 0.001f ) {
+    if ( path.size() < 2 ) return false;
+
+    return isVerySimilar( path.front(), path.back(), epsilon );
+}
+
 void appendMirror( std::vector<Vector2f>& points, const Vector2f& mirrorAxis );
 void flipAxis( std::vector<Vector2f>& points );
