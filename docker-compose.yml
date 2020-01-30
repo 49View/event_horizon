@@ -1,7 +1,7 @@
 version: "3"
 services:
   nginx:
-    image: "arch-ngnix"
+    image: "ateventhorizon/49view-nginx"
     container_name: "main_nginx"
     restart: always
     ports:
@@ -14,7 +14,7 @@ services:
     #   - /docker-volumes/etc/letsencrypt/live/doublecanny.com/fullchain.pem:/etc/letsencrypt/live/doublecanny.com/fullchain.pem
     #   - /docker-volumes/etc/letsencrypt/live/doublecanny.com/privkey.pem:/etc/letsencrypt/live/doublecanny.com/privkey.pem
   restful-api:
-    image: "arch-restful-api"
+    image: "ateventhorizon/49view-restful-api"
     container_name: "restful-api"
     environment:
       - EH_MONGO_PATH=mongo1:27017,mongo2:27017,mongo3:27017
@@ -25,7 +25,7 @@ services:
       - mongo2
       - mongo3
   portal:
-    image: "arch-portal"
+    image: "ateventhorizon/49view-portal"
     container_name: "portal"
 #   sat:
 #     depends_on:
@@ -46,12 +46,11 @@ services:
     restart: always
     volumes:
       - /dockerdata/dbc:/data/db
-      - /dockerdata/mongod.conf:/etc/mongod.conf
     expose:
       - 27017
     ports:
       - "27011:27017"
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "rs0"]
   mongo2:
     image: "mongo"
     container_name: "mongodb_container2"
@@ -62,7 +61,7 @@ services:
       - /dockerdata/dbc2:/data/db
     ports:
       - "27012:27017"
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "rs0"]
   mongo3:
     image: "mongo"
     container_name: "mongodb_container3"
@@ -73,4 +72,12 @@ services:
       - "27013:27017"
     volumes:
       - /dockerdata/dbc3:/data/db
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "rs0"]
+  rsinitiate:
+    image: "ateventhorizon/49view-mongo-rsinitiate"
+    container_name: "rsinititate"
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    entrypoint: ["sh", "-c", "rsinitiate.sh"]    
