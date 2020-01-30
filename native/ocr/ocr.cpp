@@ -31,20 +31,22 @@ std::string Ocr::ocrFromImage() {
 }
 
 std::string Ocr::setImage( const cv::Mat& source ) {
-	mApi.SetImage( (uchar*)source.data, source.size().width, source.size().height, source.channels(), static_cast<int>( source.step1() ) );
+    auto channels = source.channels();
+    auto w = source.size().width;
+    auto h = source.size().height;
+    auto bytePerLine = w * channels; //source.step1();
+	mApi.SetImage( (uchar*)source.data, w, h, channels, bytePerLine );
+	mApi.SetSourceResolution(600);
 	return ocrFromImage();
 }
 
 Ocr::Ocr() {
-#ifdef OSX
-    const char* trainingRoot = "/usr/local/share/";
-#elif defined(LINUX)
-	const char* trainingRoot = "/usr/share/";
-#elif defined(WIN32)
-	const char* trainingRoot = "c:/usr/local/share";
-#endif
-	auto ret = mApi.Init( trainingRoot, "eng" );
-	if ( ret != 0 ) LOGE( "[ERROR] OCR **NOT** Initialized");
+	auto ret = mApi.Init( nullptr, "eng", tesseract::OEM_LSTM_ONLY );
+	if ( ret != 0 ) {
+	    LOGE( "[ERROR] OCR **NOT** Initialized");
+	    return;
+	}
+	mApi.SetPageSegMode( tesseract::PSM_AUTO );
 }
 
 std::string Ocr::ocrTextFromImage( const cv::Mat& source ) {

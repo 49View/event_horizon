@@ -770,7 +770,7 @@ macro(link_opencv)
 
         include_directories( /usr/local/include/opencv4 )
 
-        SET(OpenCV_LIBS opencv_imgcodecs opencv_ml opencv_objdetect opencv_highgui opencv_imgproc opencv_core )
+        SET(OpenCV_LIBS opencv_imgcodecs opencv_dnn opencv_ml opencv_objdetect opencv_highgui opencv_imgproc opencv_core )
         SET(OpenCV_LIBS_MAC ${OpenCV_LIBS} )
         SET(OpenCV_LIBS_LINUX ${OpenCV_LIBS} )
         link_libraries_multi("opencv" "${OpenCV_LIBS}" "${OpenCV_LIBS_MAC}" "${OpenCV_LIBS_LINUX}" "${OpenCV_LIBS_LINUX}" OFF)
