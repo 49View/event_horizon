@@ -1,21 +1,23 @@
 version: "3"
 services:
   nginx:
-    image: "arch-ngnix"
-    container_name: "main_nginx"
     restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
     ports:
       - "80:80"
       - "443:443"
-    depends_on:
-      - restful-api
-      - portal
     # volumes:
     #   - /docker-volumes/etc/letsencrypt/live/doublecanny.com/fullchain.pem:/etc/letsencrypt/live/doublecanny.com/fullchain.pem
     #   - /docker-volumes/etc/letsencrypt/live/doublecanny.com/privkey.pem:/etc/letsencrypt/live/doublecanny.com/privkey.pem
   restful-api:
-    image: "arch-restful-api"
-    container_name: "restful-api"
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./restful-api
+    volumes:
+      - /app/node_modules
+      - ./restful-api:/app
     environment:
       - EH_MONGO_PATH=mongo1:27017,mongo2:27017,mongo3:27017
       - EH_MONGO_DEFAULT_DB=event_horizon
@@ -25,8 +27,12 @@ services:
       - mongo2
       - mongo3
   portal:
-    image: "arch-portal"
-    container_name: "portal"
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./portal
+    volumes:
+      - /app/node_modules
+      - ./portal:/app
 #   sat:
 #     depends_on:
 #       - restful-api
@@ -39,7 +45,6 @@ services:
 #       - mongo1
 #       - mongo2
 #       - mongo3
-
   mongo1:
     image: "mongo"
     container_name: "mongodb_container1"
@@ -51,7 +56,7 @@ services:
       - 27017
     ports:
       - "27011:27017"
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--config", "/etc/mongod.conf", "--bind_ip_all", "--replSet", "rs0"]
   mongo2:
     image: "mongo"
     container_name: "mongodb_container2"
