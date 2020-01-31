@@ -22,3 +22,13 @@ jobs:
       
     - name: Docker hub login
       run: echo ${{ secrets.DOCKER_HUB_PWD }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
+
+    - name: Docker Push NGINX
+      run: docker push ateventhorizon/49view-nginx
+    - name: Docker Push restful-api
+      run: push ateventhorizon/49view-restful-api
+    - name: Docker Push portal
+      run: push ateventhorizon/49view-portal
+    - name: Docker Push rsinitiate
+      run: push ateventhorizon/49view-mongo-rsinitiate
+
