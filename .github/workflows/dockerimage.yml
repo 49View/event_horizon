@@ -11,10 +11,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - uses: azure/docker-login@v1
-      with:
-        username: ${{ secrets.DOCKER_HUB_ID }}
-        password: ${{ secrets.docker_hub_pass }}
+    - name: Docker hub login
+      run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
         
     - name: Build NGINX
       run: docker build -t ateventhorizon/49view-nginx ./nginx      
@@ -25,9 +23,6 @@ jobs:
     - name: Build rsinitiate
       run: docker build -t ateventhorizon/49view-mongo-rsinitiate ./mongo
       
-#     - name: Docker hub login
-#       run: echo ${{ secrets.DOCKER_HUB_PWD }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
-
     - name: Docker Push NGINX
       run: docker push ateventhorizon/49view-nginx
     - name: Docker Push restful-api
