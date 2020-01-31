@@ -11,8 +11,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: Give SSH access for deployment 
+      run: |
+        mkdir ~/.ssh
+        echo "${{ secrets.SECRET_PRIVATE_DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa 
+    
     - name: Copy deploy script via scp.
-      run: scp -i zioleto ${{ github.workspace }}/docker-compose.yml ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }}:/root
+      run: scp ${{ github.workspace }}/docker-compose.yml ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }}:/root
     - name: Deploy. (Signal cloud hosting via SSH to put new dockers live)
       run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'docker-compose up -d --build'
 
