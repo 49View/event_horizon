@@ -26,9 +26,9 @@ jobs:
     - name: Docker Push NGINX
       run: docker push ateventhorizon/49view-nginx
     - name: Docker Push restful-api
-      run: push ateventhorizon/49view-restful-api
+      run: docker push ateventhorizon/49view-restful-api
     - name: Docker Push portal
-      run: push ateventhorizon/49view-portal
+      run: docker push ateventhorizon/49view-portal
     - name: Docker Push rsinitiate
-      run: push ateventhorizon/49view-mongo-rsinitiate
+      run: docker push ateventhorizon/49view-mongo-rsinitiate
 
