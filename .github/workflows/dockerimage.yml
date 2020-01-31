@@ -10,5 +10,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build -t ateventhorizon/49view-nginx ./nginx
+    - name: Build NGINX
+      run: docker build -t ateventhorizon/49view-nginx ./nginx      
+    - name: Build restful-api
+      run: docker build -t ateventhorizon/49view-restful-api ./restful-api
+    - name: Build portal
+      run: docker build -t ateventhorizon/49view-portal ./portal
+    - name: Build rsinitiate
+      run: docker build -t ateventhorizon/49view-mongo-rsinitiate ./mongo
