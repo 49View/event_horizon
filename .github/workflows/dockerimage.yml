@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Build and Deploy
 
 on: [push]
 
@@ -11,6 +11,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
+    - name: Copy deploy script via scp.
+      run: scp ${{ github.workspace }}/docker-compose.yml ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }}:/root
+    - name: Deploy. (Signal cloud hosting via SSH to put new dockers live)
+      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'docker-compose up -d --build'
+
     - name: Docker hub login
       run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
         
