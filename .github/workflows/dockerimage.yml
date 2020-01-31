@@ -9,21 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    
+    - uses: actions/checkout@v2    
     - uses: webfactory/ssh-agent@v0.2.0
       with:
         ssh-private-key: ${{ secrets.SECRET_PRIVATE_DEPLOY_KEY }}
     
-    - name: Copy deploy script via scp.
-      run: scp -oStrictHostKeyChecking=no ${{ github.workspace }}/deploy/docker-compose/docker-compose.yml ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }}:/
-        
-    - name: Deploy. (Signal cloud hosting via SSH to put new dockers live)
-      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'docker-compose down && docker-compose up -d'
-
-    - name: Docker hub login
-      run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
-        
     - name: Build NGINX
       run: docker build -t ateventhorizon/49view-nginx ./nginx      
     - name: Build restful-api
@@ -32,7 +22,10 @@ jobs:
       run: docker build -t ateventhorizon/49view-portal ./portal
     - name: Build rsinitiate
       run: docker build -t ateventhorizon/49view-mongo-rsinitiate ./mongo
-      
+
+    - name: Docker hub login
+      run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
+              
     - name: Docker Push NGINX
       run: docker push ateventhorizon/49view-nginx
     - name: Docker Push restful-api
@@ -42,3 +35,8 @@ jobs:
     - name: Docker Push rsinitiate
       run: docker push ateventhorizon/49view-mongo-rsinitiate
 
+    - name: Copy deploy script via scp.
+      run: scp -oStrictHostKeyChecking=no ${{ github.workspace }}/deploy/docker-compose/docker-compose.yml ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }}:/
+        
+    - name: Deploy. (Signal cloud hosting via SSH to put new dockers live)
+      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'docker-compose down && docker-compose up -d'
