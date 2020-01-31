@@ -38,4 +38,4 @@ jobs:
     - name: Copy deploy script via scp.
       run: scp -oStrictHostKeyChecking=no ${{ github.workspace }}/deploy/docker-compose/docker-compose.yml ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }}:/
     - name: Deploy. (Signal cloud hosting via SSH to put new dockers live)
-      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} `export MTN_DB_PATH=${{ secrets.MTN_DB_PATH }} && docker-compose down && docker-compose up -d`
+      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} `export MTN_DB_PATH=${{ secrets.MTN_DB_PATH }} && cd / && docker-compose down && docker-compose up -d`
