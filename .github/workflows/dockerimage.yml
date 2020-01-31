@@ -19,7 +19,7 @@ jobs:
       run: scp -oStrictHostKeyChecking=no ${{ github.workspace }}/docker-compose.yml root@188.166.136.160:/
         
     - name: Deploy. (Signal cloud hosting via SSH to put new dockers live)
-      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'docker-compose up -d --build'
+      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'docker-compose down && docker-compose up -d'
 
 
     - name: Docker hub login
