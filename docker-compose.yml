@@ -10,9 +10,9 @@ services:
     depends_on:
       - restful-api
       - portal
-    # volumes:
-    #   - /docker-volumes/etc/letsencrypt/live/doublecanny.com/fullchain.pem:/etc/letsencrypt/live/doublecanny.com/fullchain.pem
-    #   - /docker-volumes/etc/letsencrypt/live/doublecanny.com/privkey.pem:/etc/letsencrypt/live/doublecanny.com/privkey.pem
+    volumes:
+      - /sslcerts/fullchain.pem:/etc/nginx/dns-cert.pem
+      - /sslcerts/privkey.pem:/etc/nginx/dns-cert-key.pem
   restful-api:
     image: "ateventhorizon/49view-restful-api"
     container_name: "restful-api"
