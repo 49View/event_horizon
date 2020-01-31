@@ -1,1 +1,0 @@
- ssh -i ~/.ssh/ziocleto root@159.89.249.161
