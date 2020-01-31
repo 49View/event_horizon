@@ -16,6 +16,8 @@ jobs:
     
     - name: Build NGINX
       run: docker build -t ateventhorizon/49view-nginx ./nginx      
+    - name: Pull restful-api
+      run: docker pull ateventhorizon/49view-restful-api
     - name: Build restful-api
       run: docker build -t ateventhorizon/49view-restful-api ./restful-api
     - name: Build portal
