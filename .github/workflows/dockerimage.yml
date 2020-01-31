@@ -16,7 +16,7 @@ jobs:
         ssh-private-key: ${{ secrets.SECRET_PRIVATE_DEPLOY_KEY }}
     
     - name: Copy deploy script via scp.
-      run: scp -i ~/.ssh/id_rsa.pub ${{ github.workspace }}/docker-compose.yml root@188.166.136.160:/root
+      run: scp ${{ github.workspace }}/docker-compose.yml root@188.166.136.160
         
     - name: Deploy. (Signal cloud hosting via SSH to put new dockers live)
       run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'docker-compose up -d --build'
