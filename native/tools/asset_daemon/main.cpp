@@ -274,7 +274,7 @@ int resaveGLB( const std::string& filename ) {
                 auto *buffer = &model.buffers[buffView.buffer];
                 auto *buffArray = buffer->data.data() + buffView.byteOffset + it.byteOffset;
                 V3f *buffV3f = reinterpret_cast<V3f *>(buffArray);
-                for ( int t = 0; t < it.count; t++ ) {
+                for ( size_t t = 0; t < it.count; t++ ) {
                     buffV3f[t] *= 0.01f;
                 }
             }
