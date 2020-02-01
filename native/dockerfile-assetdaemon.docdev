@@ -1,6 +1,5 @@
-FROM gcc:latest
+FROM pomeranian/builder:9.2.0
 WORKDIR /app
-RUN apt-get update && apt-get install -y cmake libssl-dev libgl1-mesa-glx
 
 COPY --from=pomeranian/restbed              /build/.                    /usr/local/
 COPY --from=sixthview/rapidjson-package     /build/rapidjson/.          /usr/local/
