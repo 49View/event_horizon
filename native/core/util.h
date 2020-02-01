@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <stdint.h>
+#include <cstring>
 #include <sstream>
 #include <vector>
 #include <map>
