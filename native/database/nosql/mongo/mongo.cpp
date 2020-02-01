@@ -36,7 +36,7 @@ std::optional<uint8_p> Mongo::fileDownloadWithId(MongoBucket &bucket, const std:
 
     auto downloadStream = bucket().open_download_stream(MongoObjectId{strview{_id}}());
     auto buffer = make_uint8_p(downloadStream.file_length());
-    auto ret = downloadStream.read(buffer.first.get(), downloadStream.file_length());
+    auto ret = static_cast<size_t >(downloadStream.read(buffer.first.get(), downloadStream.file_length()));
     if (ret == downloadStream.file_length()) {
         return buffer;
     }
@@ -55,7 +55,7 @@ std::string Mongo::fileDownload(MongoBucket &bucket, const MongoObjectId &_id, c
                                 std::function<void(const std::string &)> callback) {
     auto downloadStream = bucket().open_download_stream(_id());
     auto buffer = make_uint8_p(downloadStream.file_length());
-    auto ret = downloadStream.read(buffer.first.get(), downloadStream.file_length());
+    auto ret = static_cast<size_t >(downloadStream.read(buffer.first.get(), downloadStream.file_length()));
     if (ret == downloadStream.file_length()) {
         FM::writeLocalFile(filename, reinterpret_cast<const char *>(buffer.first.get()), buffer.second, true);
         return filename;
