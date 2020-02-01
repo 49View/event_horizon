@@ -37,8 +37,8 @@
 #include <core/profiler.h>
 #include <ostream>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
+//#pragma clang diagnostic push
+//#pragma clang diagnostic ignored "-Wmissing-noreturn"
 
 // mongod --port 27017 --replSet rs0
 // sudo brew services restart nginx
@@ -622,4 +622,4 @@ int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
     return 0;
 }
 
-#pragma clang diagnostic pop
+//#pragma clang diagnostic pop
