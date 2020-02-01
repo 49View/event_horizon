@@ -2,13 +2,17 @@ FROM gcc:latest
 WORKDIR /app
 RUN apt-get update && apt-get install -y cmake libssl-dev libgl1-mesa-glx
 
-COPY --from=sixthview/restbed-package       /build/restbed/.            /usr/local/
+COPY --from=pomeranian/restbed              /build/.                    /usr/local/
 COPY --from=sixthview/rapidjson-package     /build/rapidjson/.          /usr/local/
 COPY --from=sixthview/stb-package           /build/stb/.                /usr/local/
 COPY --from=sixthview/boost-package         /build/boost/.              /usr/local/
 COPY --from=sixthview/websocketpp-package   /build/websocketpp/.        /usr/local/
 COPY --from=pomeranian/opt-sat-indie        /build/sat/.                /opt/Allegorithmic
 COPY --from=pomeranian/fbx2gltf-linux       /build/fbx2gltf/.           /usr/local/
+COPY --from=pomeranian/libzip               /build/.                    /usr/local/
+COPY --from=pomeranian/tinygltf             /build/.                    /usr/local/include/tinygltf/
+COPY --from=pomeranian/mongo-c-driver       /build/.                    /usr/local/
+COPY --from=pomeranian/mongo-cxx-driver     /build/.                    /usr/local/
 
 COPY . .
 
