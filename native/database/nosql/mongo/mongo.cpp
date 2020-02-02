@@ -8,11 +8,8 @@
 #include <core/http/webclient.h>
 
 Mongo::Mongo(const DBConnection &_cs) {
-    auto host = _cs.host;
-    auto port = _cs.ports.empty() && _cs.port == 0 ? 27017 : _cs.port;
-
     auto completeConnectionString =
-            "mongodb://" + host + ":" + std::to_string(port) + "/" + _cs.defaultDatabase + "?replicaSet=" +
+            "mongodb://" + _cs.path + "/" + _cs.defaultDatabase + "?replicaSet=" +
             _cs.replicaSet;
     conn = mongocxx::client{mongocxx::uri{completeConnectionString}};
     if (!_cs.defaultDatabase.empty()) {

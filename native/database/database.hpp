@@ -8,14 +8,10 @@
 #include <string>
 
 struct DBConnection {
-    DBConnection() = default;
-    DBConnection( const std::string& defaultDatabase ) : defaultDatabase( defaultDatabase ) {}
-    DBConnection( const char* defaultDatabase ) : defaultDatabase( defaultDatabase ) {}
+    DBConnection( const std::string& path, const std::string& defaultDatabase, const std::string& replicaSet ) : path(
+            path ), defaultDatabase( defaultDatabase ), replicaSet( replicaSet ) {}
 
-    std::string host = "localhost";
-    unsigned int port = 0;
-    std::vector<std::string> hosts;
-    std::vector<unsigned int> ports;
+    std::string path = "localhost:27017";
     std::string defaultDatabase{};
     std::string replicaSet = "rs0";
 };

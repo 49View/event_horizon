@@ -90,7 +90,7 @@ struct DaemonFileStruct {
     strview uname;
     strview uemail;
     std::string thumb64{};
-    std::vector <ArchiveDirectoryEntityElement> candidates{};
+    std::vector<ArchiveDirectoryEntityElement> candidates{};
 };
 
 class DaemonException : public std::exception {
@@ -105,8 +105,8 @@ private:
     std::string msg{};
 };
 
-static std::vector <std::string> getExtForGroup( const std::string& _group ) {
-    std::unordered_map <std::string, std::vector<std::string>> extmap;
+static std::vector<std::string> getExtForGroup( const std::string& _group ) {
+    std::unordered_map<std::string, std::vector<std::string>> extmap;
 
     extmap[ResourceGroup::Geom] = { ".fbx", ".glb", ".gltf", ".obj" };
     extmap[ResourceGroup::Material] = { ".sbsar", ".png", ".jpg" };
@@ -127,7 +127,7 @@ void daemonWarningLog( const std::string& e ) {
     Socket::emit( "daemonLogger", serializeLogger( LoggerLevel::Warning, e ));
 }
 
-std::optional <MongoFileUpload> elaborateImage(
+std::optional<MongoFileUpload> elaborateImage(
         int desiredWidth, int desiredHeight,
         DaemonFileStruct dfs,
         std::string& thumb ) {
@@ -437,9 +437,9 @@ void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveD
 
 void geomFilterOutSameAssetDifferentFormatFromBasePriority(
         const std::string& formatPriority,
-        std::vector <ArchiveDirectoryEntityElement>& destCandidates ) {
+        std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
 
-    std::vector <std::string> nameChecks{};
+    std::vector<std::string> nameChecks{};
     for ( const auto& elem : destCandidates ) {
         if ( elem.name.find( formatPriority ) != std::string::npos ) {
             nameChecks.emplace_back( elem.name );
@@ -460,9 +460,9 @@ void geomFilterOutSameAssetDifferentFormatFromBasePriority(
 }
 
 void geomFilterDesingConnectCrazyRedundancy(
-        std::vector <ArchiveDirectoryEntityElement>& destCandidates ) {
+        std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
 
-    auto removeDCCrazyDoubles = [&]( const std::string& _source, const std::vector <std::string>& _v1 ) {
+    auto removeDCCrazyDoubles = [&]( const std::string& _source, const std::vector<std::string>& _v1 ) {
         erase_if( destCandidates, [_source, _v1, destCandidates]( const auto& us ) {
             bool sfn = us.name.find( _source ) != std::string::npos;
             if ( sfn ) {
@@ -480,15 +480,15 @@ void geomFilterDesingConnectCrazyRedundancy(
     removeDCCrazyDoubles( "_obj.obj", { "_fbx_upY.fbx", "_fbx_upZ.fbx" } );
 }
 
-void materialFilterNonImageAssets( std::vector <ArchiveDirectoryEntityElement>& destCandidates ) {
+void materialFilterNonImageAssets( std::vector<ArchiveDirectoryEntityElement>& destCandidates ) {
 
     erase_if( destCandidates, []( const auto& us ) {
         return !nameHasImageExtension( us.name );
     } );
 }
 
-std::vector <ArchiveDirectoryEntityElement>
-filterCandidates( const std::vector <ArchiveDirectoryEntityElement>& candidates, strview group ) {
+std::vector<ArchiveDirectoryEntityElement>
+filterCandidates( const std::vector<ArchiveDirectoryEntityElement>& candidates, strview group ) {
     auto filteredCandidates = candidates;
 
     if ( group == ResourceGroup::Geom ) {
@@ -576,33 +576,36 @@ void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAs
 
 JSONDATA( SocketEntityResponse, entities
 )
-std::vector <std::string> entities{};
+
+    std::vector<std::string> entities{};
 };
 
 void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
-    uint64_t counter = 0;
+//    uint64_t counter = 0;
     for ( auto change : stream ) {
         StreamChangeMetadata meta{ change };
         auto ent = mdb.insertEntityFromAsset( meta );
-        Socket::emit( "entityAdded" + std::to_string( counter++ ), ent );
+//        Socket::emit( "entityAdded" + std::to_string( counter++ ), ent );
     }
 }
 
-int main( [[maybe_unused]] int argc, [[maybe_unused]] char **argv ) {
+int main( int argc, char **argv ) {
 
     LOGRS( "Daemon version 3.0.2" );
 
-    if ( !Http::useClientCertificate( true,
-                                      "EH_DEAMON_CERT_KEY_PATH", "EH_DEAMON_CERT_CRT_PATH" )) {
-        LOGRS( "Daemon certificate and key environment variables needs to be present as"
-               "\n$EH_DEAMON_CERT_KEY_PATH\n$EH_DEAMON_CERT_CRT_PATH" );
+//    Socket::createConnection();
+
+    auto mongoPath = std::getenv( "EH_MONGO_PATH" );
+    auto mongoDefaultDB = std::getenv( "EH_MONGO_DEFAULT_DB" );
+    auto mongoRs = std::getenv( "EH_MONGO_REPLICA_SET_NAME" );
+
+    if ( !mongoPath || !mongoDefaultDB || !mongoRs ) {
+        LOGRS( "MongoDB Environment initialization variables not present." );
         return 1;
     }
-    Socket::createConnection();
-
 //    initDeamon();
 
-    Mongo mdb{ "event_horizon" };
+    Mongo mdb{{ std::string( mongoPath ), std::string( mongoDefaultDB ), std::string( mongoRs ) }};
     auto sourceAssetBucket = mdb.useBucket( "fs_assets_to_elaborate" );
     auto entityBucket = mdb.useBucket( "fs_entity_assets" );
 

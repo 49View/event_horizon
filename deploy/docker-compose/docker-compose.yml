@@ -17,9 +17,9 @@ services:
     image: "ateventhorizon/49view-restful-api"
     container_name: "restful-api"
     environment:
-      - EH_MONGO_PATH=mongo1:27017,mongo2:27017,mongo3:27017
-      - EH_MONGO_DEFAULT_DB=event_horizon
-      - EH_MONGO_REPLICA_SET_NAME=rs0
+      - EH_MONGO_PATH=${EH_MONGO_PATH} 
+      - EH_MONGO_DEFAULT_DB=${EH_MONGO_DEFAULT_DB}
+      - EH_MONGO_REPLICA_SET_NAME=${EH_MONGO_REPLICA_SET_NAME}
     depends_on:
       - mongo1
       - mongo2
@@ -27,19 +27,16 @@ services:
   portal:
     image: "ateventhorizon/49view-portal"
     container_name: "portal"
-#   sat:
-#     depends_on:
-#       - restful-api
-#     build:
-#       dockerfile: dockerfile-assetdaemon.docdev
-#       context: ./native
-#     volumes:
-#       - ./native:/app
-#     depends_on:
-#       - mongo1
-#       - mongo2
-#       - mongo3
-
+  asset_daemon:
+    image: "ateventhorizon/asset_daemon"
+    container_name: "asset-daemon"
+    restart: always
+    environment:
+      - EH_MONGO_PATH=${EH_MONGO_PATH} 
+      - EH_MONGO_DEFAULT_DB=${EH_MONGO_DEFAULT_DB}
+      - EH_MONGO_REPLICA_SET_NAME=${EH_MONGO_REPLICA_SET_NAME}
+    depends_on:
+      - rsinitiate
   mongo1:
     image: "mongo"
     container_name: "mongodb_container1"
