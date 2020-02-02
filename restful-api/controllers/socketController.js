@@ -176,16 +176,18 @@ exports.replaceClientsSession = async (previousSessionId, currentSessionId) => {
     let session = await checkSessionById(currentSessionId, null, null);
     if (session !== null) {
         this.wsServer.clients.forEach(client => {
-            if (client.session._id.toString() === previousSessionId.toString()) {
-                logger.info(
-                    new Date() +
-                    " - Replace session " +
-                    previousSessionId +
-                    " with session " +
-                    currentSessionId
-                );
-                client.session = session;
-            }
+            console.log(client)
+            client.session = session;
+            // if (client.session._id.toString() === previousSessionId.toString()) {
+            //     logger.info(
+            //         new Date() +
+            //         " - Replace session " +
+            //         previousSessionId +
+            //         " with session " +
+            //         currentSessionId
+            //     );
+            //     client.session = session;
+            // }
         });
     }
 };
