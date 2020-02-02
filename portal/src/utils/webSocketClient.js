@@ -79,16 +79,14 @@ export const wscConnect = session => {
         requestAsset(state.entities.currentEntity);
       }
     }
-    const entityAddedMsg = "entityAdded";
+    const entityAddedMsg = "EntityAdded";
     if ( mdata.msg.startsWith(entityAddedMsg) ) {
+      console.log( mdata );
       const state = store.getState();
-      const entity = mdata.data;
-      let counter = 0;//msgSequentialCounter(entityAddedMsg, mdata.msg);
+      const entity = mdata.data.fullDocument;
       if (state.entities.groupSelected === entity.group) {
           store.dispatch({type: ADD_ENTITY, payload: entity});
-          if ( counter++ === 0 ) {
-            store.dispatch(getFullEntity(entity));
-          }
+          store.dispatch(getFullEntity(entity));
       }
       // store.dispatch({type: LOADING_FINISHED, payload: null});
     } else if (mdata.msg === "wasmClientFinishedLoadingData") {

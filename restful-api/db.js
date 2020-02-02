@@ -29,7 +29,6 @@ exports.initDB = async () => {
 
       const entities = mongoose.model('entities');
       entities.watch().on('change', data => {
-        console.log(new Date(), data)
         socketController.sendMessageToAllClients( JSON.stringify({ msg: "EntityAdded", data: data }));
       });
       logger.info("Watching on entities collection");
