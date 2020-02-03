@@ -16,6 +16,8 @@ jobs:
     
     - name: Build all core libs
       run: |
+        pwd 
+        ls
         docker build -t ${{ secrets.DOCKER_HUB_ID }}/libcore -f ./native/dockerfile-lib --build-arg core .      
         docker build -t ${{ secrets.DOCKER_HUB_ID }}/libdatabase -f ./native/dockerfile-lib --build-arg database .
     - name: Build asset_daemon
