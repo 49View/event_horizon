@@ -1,19 +1,21 @@
 FROM pomeranian/builder:9.2.0
 WORKDIR /app
 
-COPY --from=pomeranian/restbed              /build/.                    /usr/local/
 COPY --from=sixthview/rapidjson-package     /build/rapidjson/.          /usr/local/
 COPY --from=sixthview/stb-package           /build/stb/.                /usr/local/
-COPY --from=sixthview/boost-package         /build/boost/.              /usr/local/
 COPY --from=sixthview/websocketpp-package   /build/websocketpp/.        /usr/local/
+
+COPY --from=pomeranian/restbed              /build/.                    /usr/local/
+COPY --from=pomeranian/boost                /build/.  		            /usr/local/
 COPY --from=pomeranian/opt-sat-indie        /build/sat/.                /opt/Allegorithmic
 COPY --from=pomeranian/fbx2gltf-linux       /build/fbx2gltf/FBX2glTF    /usr/local/bin/
 COPY --from=pomeranian/libzip               /build/.                    /usr/local/
 COPY --from=pomeranian/tinygltf             /build/.                    /usr/local/include/tinygltf/
 COPY --from=pomeranian/mongo-c-driver       /build/.                    /usr/local/
 COPY --from=pomeranian/mongo-cxx-driver     /build/.                    /usr/local/
-COPY --from=pomeranian/ehcore               /build/.                    /usr/local/
-COPY --from=pomeranian/ehdatabase           /build/.                    /usr/local/
+
+COPY --from=ateventhorizon/libcore          /build/.                    /usr/local/
+COPY --from=ateventhorizon/libdatabase      /build/.                    /usr/local/
 
 COPY . .
 

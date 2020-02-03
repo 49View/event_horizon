@@ -1,6 +1,6 @@
 FROM pomeranian/builder:9.2.0 as builder
-WORKDIR /app
-ARG LIBNAME_NAME
+
+ARG LIB_NAME
 
 # core libs (3rd party)
 COPY --from=pomeranian/restbed              /build/.                    /usr/local/
@@ -16,9 +16,9 @@ COPY --from=pomeranian/mongo-cxx-driver     /build/.                    /usr/loc
 
 COPY . .
 
-RUN echo "cmake_minimum_required (VERSION 2.6)\ninclude(../CMakeLists.txt NO_POLICY_SCOPE)\nbuild_core_lib( $LIBNAME_NAME )" > ./$LIBNAME_NAME/CMakeLists.txt
+RUN cd $LIB_NAME && echo "cmake_minimum_required (VERSION 2.6)\ninclude(../CMakeLists.txt NO_POLICY_SCOPE)\nbuild_core_lib( $LIB_NAME )" > CMakeLists.txt
 
-RUN mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/build ../$LIBNAME_NAME && make -j8 && make install && make clean
+RUN mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/build -DBUILD_FOR_LIB=TRUE -DBUILD_FROM_SOURCE=TRUE ../${LIB_NAME} && make -j8 && make install && make clean
 
 FROM alpine
 COPY --from=builder /build /build
