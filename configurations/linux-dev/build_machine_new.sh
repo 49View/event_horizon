@@ -10,3 +10,10 @@ gitbuild.sh mongo-c-driver 1.15.3 mongodb "-DCMAKE_INSTALL_PREFIX=/usr/local"
 gitbuild.sh mongo-cxx-driver r3.4.0 mongodb "-DCMAKE_INSTALL_PREFIX=/usr/local -DBSONCXX_POLY_USE_BOOST=1 -DBUILD_SHARED_LIBS=OFF"
 
 gitbuild.sh tinygltf master syoyo "-DTINYGLTF_BUILD_EXAMPLES=FALSE -DCMAKE_INSTALL_PREFIX=/usr/local/include/tinygltf"
+gitbuild.sh tinydngloader master syoyo "-DTINYGLTF_BUILD_EXAMPLES=FALSE -DCMAKE_INSTALL_PREFIX=/usr/local/include/tinygltf"
+
+
+./pom.sh boost 1 72 0
+
+./pom.sh mongo-c-driver 1.15.3 mongodb
+./pom.sh mongo-cxx-driver r3.4.0 mongodb "-DBSONCXX_POLY_USE_BOOST=1"
