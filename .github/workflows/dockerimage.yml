@@ -14,13 +14,13 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SECRET_PRIVATE_DEPLOY_KEY }}
     
+    - name: Build asset_daemon
+      run: |
+        docker build -t ${{ secrets.DOCKER_HUB_ID }}/asset_daemon -f ./native/dockerfile-assetdaemon ./native
     - name: Build all core libs
       run: |
         docker build -t ${{ secrets.DOCKER_HUB_ID }}/libcore -f ./native/dockerfile-lib --build-arg LIB_NAME=core ./native      
         docker build -t ${{ secrets.DOCKER_HUB_ID }}/libdatabase -f ./native/dockerfile-lib --build-arg LIB_NAME=database ./native
-    - name: Build asset_daemon
-      run: |
-        docker build -t ${{ secrets.DOCKER_HUB_ID }}/asset_daemon -f ./native/dockerfile-assetdaemon .      
     - name: Build NGINX
       run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/nginx ./nginx      
     - name: Build restful-api
