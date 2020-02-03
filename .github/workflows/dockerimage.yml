@@ -16,11 +16,11 @@ jobs:
     
     - name: Build all core libs
       run: |
-        ./build_native_lib.sh ateventhorizon database
-        docker build -t ${{ secrets.DOCKER_HUB_ID }}/libdatabase -f ./native/dockerfile-lib --build-arg LIB_NAME=database ./native
+        ./build_native_lib.sh ${{ secrets.DOCKER_HUB_ID }} core
+        ./build_native_lib.sh ${{ secrets.DOCKER_HUB_ID }} database
     - name: Build asset_daemon
       run: |
-        docker build -t ${{ secrets.DOCKER_HUB_ID }}/asset_daemon -f ./native/dockerfile-assetdaemon ./native
+        ./build_native_tool.sh ${{ secrets.DOCKER_HUB_ID }} asset_daemon
     - name: Build NGINX
       run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/nginx ./nginx      
     - name: Build restful-api
@@ -35,8 +35,8 @@ jobs:
               
     - name: Docker Push all core-libs
       run: |
-        docker push ${{ secrets.DOCKER_HUB_ID }}/libcore
-        docker push ${{ secrets.DOCKER_HUB_ID }}/libdatabase
+        ./publish_native_lib.sh ${{ secrets.DOCKER_HUB_ID }} core
+        ./publish_native_lib.sh ${{ secrets.DOCKER_HUB_ID }} database
     - name: Docker Push asset_daemon
       run: |
         docker push ${{ secrets.DOCKER_HUB_ID }}/asset_daemon
