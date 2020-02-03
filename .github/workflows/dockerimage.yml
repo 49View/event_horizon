@@ -16,8 +16,8 @@ jobs:
     
     - name: Build all core libs
       run: |
-        docker build -t ${{ secrets.DOCKER_HUB_ID }}/libcore -f ./native/dockerfile-lib --build-arg core ./native      
-        docker build -t ${{ secrets.DOCKER_HUB_ID }}/libdatabase -f ./native/dockerfile-lib --build-arg database ./native
+        docker build -t ${{ secrets.DOCKER_HUB_ID }}/libcore -f ./native/dockerfile-lib --build-arg LIB_NAME=core ./native      
+        docker build -t ${{ secrets.DOCKER_HUB_ID }}/libdatabase -f ./native/dockerfile-lib --build-arg LIB_NAME=database ./native
     - name: Build asset_daemon
       run: |
         docker build -t ${{ secrets.DOCKER_HUB_ID }}/asset_daemon -f ./native/dockerfile-assetdaemon .      
