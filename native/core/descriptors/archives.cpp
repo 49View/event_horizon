@@ -52,8 +52,8 @@ static int getZipData(void **datap, size_t *sizep, const char *archive) {
 }
 
 void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad ) {
-    void *data;
-    size_t size;
+    void *data = nullptr;
+    size_t size = 0;
     zip_source_t *src;
     zip_t *za;
     zip_error_t error;

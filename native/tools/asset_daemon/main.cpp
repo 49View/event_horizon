@@ -119,12 +119,11 @@ static std::vector<std::string> getExtForGroup( const std::string& _group ) {
 
 void daemonExceptionLog( const std::exception& e ) {
     LOGRS( e.what());
-    Socket::emit( "daemonLogger", serializeLogger( LoggerLevel::Error, e.what()));
+    exit(1);
 }
 
 void daemonWarningLog( const std::string& e ) {
     LOGRS( e );
-    Socket::emit( "daemonLogger", serializeLogger( LoggerLevel::Warning, e ));
 }
 
 std::optional<MongoFileUpload> elaborateImage(

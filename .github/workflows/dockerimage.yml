@@ -14,26 +14,34 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SECRET_PRIVATE_DEPLOY_KEY }}
     
+    - name: Build all core libs
+      run: |
+      docker build -t ${{ secrets.DOCKER_HUB_ID }}/libcore -f ./native/dockerfile-lib --build-arg core ./native      
+      docker build -t ${{ secrets.DOCKER_HUB_ID }}/libdatabase -f ./native/dockerfile-lib --build-arg database ./native     
     - name: Build NGINX
-      run: docker build -t ateventhorizon/49view-nginx ./nginx      
+      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/nginx ./nginx      
     - name: Build restful-api
-      run: docker build -t ateventhorizon/49view-restful-api ./restful-api
+      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/restful-api ./restful-api
     - name: Build portal
-      run: docker build -t ateventhorizon/49view-portal ./portal
+      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/portal ./portal
     - name: Build rsinitiate
-      run: docker build -t ateventhorizon/49view-mongo-rsinitiate ./mongo
+      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/mongo-rsinitiate ./mongo
 
     - name: Docker hub login
       run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
               
+    - name: Docker Push all core-libs
+      run: |
+      docker push ${{ secrets.DOCKER_HUB_ID }}/libcore
+      docker push ${{ secrets.DOCKER_HUB_ID }}/libdatabase
     - name: Docker Push NGINX
-      run: docker push ateventhorizon/49view-nginx
+      run: docker push ${{ secrets.DOCKER_HUB_ID }}/nginx
     - name: Docker Push restful-api
-      run: docker push ateventhorizon/49view-restful-api
+      run: docker push ${{ secrets.DOCKER_HUB_ID }}/restful-api
     - name: Docker Push portal
-      run: docker push ateventhorizon/49view-portal
+      run: docker push ${{ secrets.DOCKER_HUB_ID }}/portal
     - name: Docker Push rsinitiate
-      run: docker push ateventhorizon/49view-mongo-rsinitiate
+      run: docker push ${{ secrets.DOCKER_HUB_ID }}/mongo-rsinitiate
 
     - name: Copy deploy script via scp.
       run: scp -oStrictHostKeyChecking=no ${{ github.workspace }}/deploy/docker-compose/docker-compose.yml ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }}:/

@@ -8,9 +8,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    # volumes:
-    #   - /docker-volumes/etc/letsencrypt/live/doublecanny.com/fullchain.pem:/etc/letsencrypt/live/doublecanny.com/fullchain.pem
-    #   - /docker-volumes/etc/letsencrypt/live/doublecanny.com/privkey.pem:/etc/letsencrypt/live/doublecanny.com/privkey.pem
+    volumes:
+      - /sslcerts/fullchain.pem:/etc/nginx/dns-cert.pem
+      - /sslcerts/privkey.pem:/etc/nginx/dns-cert-key.pem
   restful-api:
     build:
       dockerfile: Dockerfile.dev
@@ -19,9 +19,9 @@ services:
       - /app/node_modules
       - ./restful-api:/app
     environment:
-      - EH_MONGO_PATH=mongo1:27017,mongo2:27017,mongo3:27017
-      - EH_MONGO_DEFAULT_DB=event_horizon
-      - EH_MONGO_REPLICA_SET_NAME=rs0
+      - EH_MONGO_PATH=${EH_MONGO_PATH} 
+      - EH_MONGO_DEFAULT_DB=${EH_MONGO_DEFAULT_DB}
+      - EH_MONGO_REPLICA_SET_NAME=${EH_MONGO_REPLICA_SET_NAME}
     depends_on:
       - mongo1
       - mongo2
@@ -33,30 +33,33 @@ services:
     volumes:
       - /app/node_modules
       - ./portal:/app
-#   sat:
-#     depends_on:
-#       - restful-api
-#     build:
-#       dockerfile: dockerfile-assetdaemon.docdev
-#       context: ./native
-#     volumes:
-#       - ./native:/app
-#     depends_on:
-#       - mongo1
-#       - mongo2
-#       - mongo3
+  asset_daemon:
+    build:
+      dockerfile: dockerfile-assetdaemon
+      context: ./native
+    container_name: "asset-daemon-dev"
+    restart: always
+    expose:
+      - 27017
+    ports:
+      - "27017:27017"
+    environment:
+      - EH_MONGO_PATH=${EH_MONGO_PATH} 
+      - EH_MONGO_DEFAULT_DB=${EH_MONGO_DEFAULT_DB}
+      - EH_MONGO_REPLICA_SET_NAME=${EH_MONGO_REPLICA_SET_NAME}
+    depends_on:
+      - rsinitiate      
   mongo1:
     image: "mongo"
     container_name: "mongodb_container1"
     restart: always
     volumes:
-      - /dockerdata/dbc:/data/db
-      - /dockerdata/mongod.conf:/etc/mongod.conf
+      - ${MTN_DB_PATH}/dbc:/data/db
     expose:
       - 27017
     ports:
       - "27011:27017"
-    entrypoint: ["/usr/bin/mongod", "--config", "/etc/mongod.conf", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "${EH_MONGO_REPLICA_SET_NAME}"]
   mongo2:
     image: "mongo"
     container_name: "mongodb_container2"
@@ -64,10 +67,10 @@ services:
     expose:
       - 27017
     volumes:
-      - /dockerdata/dbc2:/data/db
+      - ${MTN_DB_PATH}/dbc2:/data/db
     ports:
       - "27012:27017"
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "${EH_MONGO_REPLICA_SET_NAME}"]
   mongo3:
     image: "mongo"
     container_name: "mongodb_container3"
@@ -77,5 +80,13 @@ services:
     ports:
       - "27013:27017"
     volumes:
-      - /dockerdata/dbc3:/data/db
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0"]
+      - ${MTN_DB_PATH}/dbc3:/data/db
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "${EH_MONGO_REPLICA_SET_NAME}"]
+  rsinitiate:
+    image: "ateventhorizon/49view-mongo-rsinitiate"
+    container_name: "rsinititate-dev"
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    entrypoint: ["sh", "-c", "rsinitiate.sh"]    

@@ -1,7 +1,7 @@
 version: "3"
 services:
   nginx:
-    image: "ateventhorizon/49view-nginx"
+    image: "ateventhorizon/nginx"
     container_name: "main_nginx"
     restart: always
     ports:
@@ -14,7 +14,7 @@ services:
       - /sslcerts/fullchain.pem:/etc/nginx/dns-cert.pem
       - /sslcerts/privkey.pem:/etc/nginx/dns-cert-key.pem
   restful-api:
-    image: "ateventhorizon/49view-restful-api"
+    image: "ateventhorizon/restful-api"
     container_name: "restful-api"
     environment:
       - EH_MONGO_PATH=${EH_MONGO_PATH} 
@@ -25,7 +25,7 @@ services:
       - mongo2
       - mongo3
   portal:
-    image: "ateventhorizon/49view-portal"
+    image: "ateventhorizon/portal"
     container_name: "portal"
   asset_daemon:
     image: "ateventhorizon/asset_daemon"
@@ -47,7 +47,7 @@ services:
       - 27017
     ports:
       - "27011:27017"
-    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "${EH_MONGO_REPLICA_SET_NAME}"]
   mongo2:
     image: "mongo"
     container_name: "mongodb_container2"
@@ -58,7 +58,7 @@ services:
       - ${MTN_DB_PATH}/dbc2:/data/db
     ports:
       - "27012:27017"
-    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "${EH_MONGO_REPLICA_SET_NAME}"]
   mongo3:
     image: "mongo"
     container_name: "mongodb_container3"
@@ -69,9 +69,9 @@ services:
       - "27013:27017"
     volumes:
       - ${MTN_DB_PATH}/dbc3:/data/db
-    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "rs0"]
+    entrypoint: ["/usr/bin/mongod", "--quiet", "--bind_ip_all", "--replSet", "${EH_MONGO_REPLICA_SET_NAME}"]
   rsinitiate:
-    image: "ateventhorizon/49view-mongo-rsinitiate"
+    image: "ateventhorizon/mongo-rsinitiate"
     container_name: "rsinititate"
     depends_on:
       - mongo1
