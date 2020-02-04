@@ -28,14 +28,14 @@ services:
       - mongo3
   portal:
     build:
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
       context: ./portal
     volumes:
       - /app/node_modules
       - ./portal:/app
   asset_daemon:
     build:
-      dockerfile: dockerfile-assetdaemon
+      dockerfile: dockerfile-asset_daemon
       context: ./native
     container_name: "asset-daemon-dev"
     restart: always
