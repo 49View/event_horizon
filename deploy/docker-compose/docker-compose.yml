@@ -31,6 +31,10 @@ services:
     image: "ateventhorizon/asset_daemon"
     container_name: "asset-daemon"
     restart: always
+    expose:
+      - 27017
+    ports:
+      - "27017:27017"
     environment:
       - EH_MONGO_PATH=${EH_MONGO_PATH} 
       - EH_MONGO_DEFAULT_DB=${EH_MONGO_DEFAULT_DB}
