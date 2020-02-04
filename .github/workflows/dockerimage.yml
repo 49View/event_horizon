@@ -54,4 +54,4 @@ jobs:
     - name: Copy deploy script via scp.
       run: scp -oStrictHostKeyChecking=no ${{ github.workspace }}/deploy/docker-compose/docker-compose.yml ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }}:/
     - name: Deploy. (Signal cloud hosting via SSH to put new dockers live)
-      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'cd / && export MTN_DB_PATH=${{ secrets.MTN_DB_PATH }} && export EH_MONGO_DEFAULT_DB=${{ secrets.EH_MONGO_DEFAULT_DB }} && export EH_MONGO_PATH=${{ secrets.EH_MONGO_PATH }} && export EH_MONGO_REPLICA_SET_NAME=${{ secrets.EH_MONGO_REPLICA_SET_NAME }} && docker-compose down && docker-compose up -d'
+      run: ssh -oStrictHostKeyChecking=no -v ${{ secrets.DROPLET_USER}}@${{ secrets.DROPLET_IP }} 'cd / && export MTN_DB_PATH=${{ secrets.MTN_DB_PATH }} && export EH_MONGO_DEFAULT_DB=${{ secrets.EH_MONGO_DEFAULT_DB }} && export EH_MONGO_PATH=${{ secrets.EH_MONGO_PATH }} && export EH_MONGO_REPLICA_SET_NAME=${{ secrets.EH_MONGO_REPLICA_SET_NAME }} && docker-compose down && docker-compose pull && docker-compose up -d'
