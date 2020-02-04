@@ -1,6 +1,6 @@
 import {w3cwebsocket as W3CWebSocket} from "websocket";
 import store from "../store";
-import {ADD_ENTITY} from "../actions/types";
+import {ADD_ENTITY, LOADING_FINISHED} from "../actions/types";
 import {getFullEntity, setEntityNodes, wasmClientFinishedLoadingData} from "../actions/entities";
 import {setAlert} from "../actions/alert";
 
@@ -88,7 +88,7 @@ export const wscConnect = session => {
           store.dispatch({type: ADD_ENTITY, payload: entity});
           store.dispatch(getFullEntity(entity));
       }
-      // store.dispatch({type: LOADING_FINISHED, payload: null});
+      store.dispatch({type: LOADING_FINISHED, payload: null});
     } else if (mdata.msg === "wasmClientFinishedLoadingData") {
       store.dispatch(wasmClientFinishedLoadingData(mdata.data));
     } else if (mdata.msg === "materialsForGeom") {
