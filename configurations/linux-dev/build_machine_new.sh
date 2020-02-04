@@ -14,6 +14,10 @@ gitbuild.sh tinydngloader master syoyo "-DTINYGLTF_BUILD_EXAMPLES=FALSE -DCMAKE_
 
 
 ./pom.sh boost 1 72 0
-
+# not building ./pom.sh glm 0.9.9.6 g-truc 
+./pom.sh stb 0.0.1 ziocleto
+./pom.sh rapidjson v1.1.1 ziocleto "-DRAPIDJSON_BUILD_DOC=OFF -DRAPIDJSON_BUILD_EXAMPLES=OFF -DRAPIDJSON_BUILD_TESTS=OFF"
+./pom.sh restbed 4.7.0 ziocleto "-DCMAKE_INSTALL_LIBDIR=lib"
+./pom.sh libzip rel-1-5-2 nih-at "-DENABLE_COMMONCRYPTO=FALSE -DBUILD_TOOLS=FALSE -DBUILD_REGRESS=FALSE -DBUILD_EXAMPLES=FALSE -DBUILD_DOC=FALSE"
 ./pom.sh mongo-c-driver 1.15.3 mongodb
 ./pom.sh mongo-cxx-driver r3.4.0 mongodb "-DBSONCXX_POLY_USE_BOOST=1"

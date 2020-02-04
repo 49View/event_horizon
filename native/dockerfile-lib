@@ -4,10 +4,10 @@ ARG LIB_NAME
 
 # core libs (3rd party)
 COPY --from=pomeranian/restbed              /build/.                    /usr/local/
-COPY --from=sixthview/rapidjson-package     /build/rapidjson/.          /usr/local/
-COPY --from=sixthview/stb-package           /build/stb/.                /usr/local/
-COPY --from=sixthview/boost-package         /build/boost/.              /usr/local/
-COPY --from=sixthview/websocketpp-package   /build/websocketpp/.        /usr/local/
+COPY --from=pomeranian/rapidjson            /build/.                    /usr/local/
+COPY --from=pomeranian/stb                  /build/.                    /usr/local/
+COPY --from=pomeranian/boost                /build/.                    /usr/local/
+COPY --from=pomeranian/websocketpp          /build/.                    /usr/local/
 COPY --from=pomeranian/libzip               /build/.                    /usr/local/
 
 # database libs (3rd party)

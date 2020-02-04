@@ -1,10 +1,9 @@
 FROM pomeranian/builder:9.2.0
 WORKDIR /app
 
-COPY --from=sixthview/rapidjson-package     /build/rapidjson/.          /usr/local/
-COPY --from=sixthview/stb-package           /build/stb/.                /usr/local/
-COPY --from=sixthview/websocketpp-package   /build/websocketpp/.        /usr/local/
-
+COPY --from=pomeranian/rapidjson            /build/.                    /usr/local/
+COPY --from=pomeranian/stb                  /build/.                    /usr/local/
+COPY --from=pomeranian/websocketpp          /build/.                    /usr/local/
 COPY --from=pomeranian/restbed              /build/.                    /usr/local/
 COPY --from=pomeranian/boost                /build/.  		            /usr/local/
 COPY --from=pomeranian/opt-sat-indie        /build/sat/.                /opt/Allegorithmic
