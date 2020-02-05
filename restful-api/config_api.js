@@ -23,8 +23,8 @@ const gc = new GlobalConfig(
 	, process.env.EH_MONGO_PATH
 	, process.env.EH_MONGO_DEFAULT_DB
 	, process.env.EH_MONGO_REPLICA_SET_NAME
-	, "1sg2&db9(4h23bd?dhs3+1t6-36jh/4fgmm+++xc29hgjq2&www4346sd234sdf23"
-	, "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"
+	, process.env.EH_MASTER_TOKEN
+	, process.env.EH_SEND_GRID_TOKEN
 );
 
 module.exports = gc;

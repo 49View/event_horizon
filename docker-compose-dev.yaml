@@ -22,6 +22,8 @@ services:
       - EH_MONGO_PATH=${EH_MONGO_PATH} 
       - EH_MONGO_DEFAULT_DB=${EH_MONGO_DEFAULT_DB}
       - EH_MONGO_REPLICA_SET_NAME=${EH_MONGO_REPLICA_SET_NAME}
+      - EH_MASTER_TOKEN=${EH_MASTER_TOKEN}
+      - EH_SEND_GRID_TOKEN=${EH_SEND_GRID_TOKEN}
     depends_on:
       - mongo1
       - mongo2

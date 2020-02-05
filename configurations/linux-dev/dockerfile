@@ -1,8 +1,0 @@
-#docker build -t linux-dev --build-arg ssh_prv_key="$(cat ~/.ssh/ziocleto)" --build-arg ssh_pub_key="$(cat ~/.ssh/ziocleto.pub)" --build-arg aws_credentials="$(cat ~/.aws/credentials)" --squash .
-
-FROM gcc:8.1.0
-MAINTAINER sixthview <dado@jfpdlabs.com>
-
-ADD . /
-
-ENV OSNAME linux
