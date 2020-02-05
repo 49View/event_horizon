@@ -27,6 +27,8 @@ services:
   portal:
     image: "ateventhorizon/portal"
     container_name: "portal"
+    environment:
+      - REACT_APP_EH_CLOUD_HOST=${EH_CLOUD_HOST}     
   asset_daemon:
     image: "ateventhorizon/asset_daemon"
     container_name: "asset-daemon"

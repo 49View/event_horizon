@@ -23,7 +23,7 @@ initDB(DBConfig);
 
 const App = () => {
 
-  let wasmArgumentList = [];
+  let wasmArgumentList = [`hostname=${process.env.REACT_APP_EH_CLOUD_HOST}`];
 
   useEffect(() => {
     store.dispatch(loadUser());

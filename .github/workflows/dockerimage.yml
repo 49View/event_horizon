@@ -28,7 +28,7 @@ jobs:
     - name: Build restful-api
       run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/restful-api ./restful-api
     - name: Build portal
-      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/portal ./portal
+      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/portal --build-arg REACT_APP_EH_CLOUD_HOST_ARG=${{ secrets.EH_CLOUD_HOST }} ./portal
     - name: Build rsinitiate
       run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/mongo-rsinitiate ./mongo
 

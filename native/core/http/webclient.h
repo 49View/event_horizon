@@ -230,7 +230,6 @@ namespace Http {
 
     void userLoggedIn( bool _flag );
     bool hasUserLoggedIn();
-    bool isLocalHost();
     void shutDown();
 
     void project( const std::string& _project );
@@ -254,6 +253,9 @@ namespace Http {
     std::string_view sessionId();
     const std::string userBearerToken();
 
+    void cloudHost( const std::string& _sid );
+
+    std::string CLOUD_HOST();
     std::string CLOUD_PROTOCOL();
     std::string CLOUD_SERVER();
     std::string CLOUD_API();

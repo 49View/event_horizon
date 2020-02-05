@@ -1,4 +1,6 @@
 FROM node:13.7.0 as builder
+ARG REACT_APP_EH_CLOUD_HOST_ARG
+ENV REACT_APP_EH_CLOUD_HOST=$REACT_APP_EH_CLOUD_HOST_ARG
 WORKDIR /app
 COPY ./package.json ./
 RUN npm install

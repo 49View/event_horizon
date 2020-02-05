@@ -57,10 +57,15 @@ class EventHorizon {
 public:
     explicit EventHorizon( int argc, char *argv[] ) {
         CLIParamMap params{ argc, argv };
+        auto hostname = params.getParam("hostname");
+        if ( hostname ) {
+            Http::cloudHost( *hostname );
+        }
 #if !defined(__USE_OFFLINE__) && !defined(__EMSCRIPTEN__)
         auto username = params.getParam("username");
         auto password = params.getParam("password");
         auto project  = params.getParam("project");
+
 
         if ( username && password && project ) {
             Http::init( LoginFields{*username, *password, *project} );

@@ -17,6 +17,7 @@ static std::string sClientCertificateKeyFilename{};
 static std::string sProject;
 static std::string sUserToken;
 static std::string sUserSessionId;
+static std::string sCloudHost;
 static LoginFields sCachedLoginFields;
 
 const std::string Url::WsProtocol = "ws";
@@ -366,12 +367,28 @@ namespace Http {
         return "/wss";
     }
 
+    void cloudHost( const std::string& _sid ) {
+        sCloudHost = _sid;
+    }
+
+    std::string CLOUD_HOST() {
+        if ( sCloudHost.empty() ) {
+            auto cloudHostCStr = std::getenv( "EH_CLOUD_HOST" );
+            if ( cloudHostCStr == nullptr ) {
+                LOGRS( "[[WARNING]] You need to have env var EH_CLOUD_HOST set to current host!! [[WARNING]]");
+            } else {
+                sCloudHost = std::string{cloudHostCStr};
+            }
+        }
+        return sCloudHost;
+    }
+
     std::string CLOUD_SERVER() {
-        return "localhost" + CLOUD_API();
+        return CLOUD_HOST() + CLOUD_API();
     }
 
     std::string CLOUD_WSS_SERVER() {
-        return "localhost" + CLOUD_WSS();
+        return CLOUD_HOST() + CLOUD_WSS();
     }
 
     void xProjectHeader( const LoginFields& _lf ) {
