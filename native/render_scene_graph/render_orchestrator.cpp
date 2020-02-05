@@ -420,6 +420,10 @@ void RenderOrchestrator::init() {
         } );
     };
 
+    luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group, const std::string& _hash ) {
+        sg.resetAndLoadEntity( _id, _group, _hash );
+    };
+
 #ifndef _PRODUCTION_
     Socket::on( "shaderchange",
                 std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1, std::placeholders::_2 ) );

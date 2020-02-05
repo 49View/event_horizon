@@ -187,6 +187,39 @@ void SceneGraph::clearFromRealTimeCallbacks() {
     Nodes().clear();
 };
 
+void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup, CResourceRef vHash ) {
+
+    clearFromRealTimeCallbacks();
+    Http::clearRequestCache();
+
+    if ( entityGroup == ResourceGroup::Geom ) {
+        GB<GT::Shape>( ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
+        addGeomScene( v0 );
+    } else if ( entityGroup == ResourceGroup::Material ) {
+        load<Material>( v0, [this, vHash]( HttpResouceCBSign key ) {
+            auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M( vHash ));
+            DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Back );
+            Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
+        } );
+    } else if ( entityGroup == ResourceGroup::Image ) {
+        load<RawImage>( v0, [this, vHash]( HttpResouceCBSign key ) {
+            nodeFullScreenImageSignal( key );
+        } );
+    } else if ( entityGroup == ResourceGroup::Font ) {
+        load<Font>( v0, [this, vHash]( HttpResouceCBSign key ) {
+            nodeFullScreenFontSonnetSignal( key );
+        } );
+    } else if ( entityGroup == ResourceGroup::Profile ) {
+        load<Profile>( v0, [this, vHash]( HttpResouceCBSign key ) {
+            nodeFullScreenProfileSignal( key );
+        } );
+    }  else if ( entityGroup == ResourceGroup::UI ) {
+        load<UIContainer>( v0, [this, vHash]( HttpResouceCBSign key ) {
+            nodeFullScreenUIContainerSignal( key );
+        } );
+    }
+}
+
 void SceneGraph::realTimeCallbacks() {
     for ( auto&[k, doc] : eventSceneCallback ) {
 
@@ -211,40 +244,7 @@ void SceneGraph::realTimeCallbacks() {
                 nodeFullScreenUIContainerSignal( rref );
             }
         } else if ( k == SceneEvents::LoadGeomAndReset ) {
-            auto v0 = getFileName( doc["data"]["entity_id"].GetString());
-            auto vHash = getFileName( doc["data"]["hash"].GetString());
-
-            clearFromRealTimeCallbacks();
-            Http::clearRequestCache();
-
-            auto entityGroup = doc["data"]["group"].GetString();
-
-            if ( entityGroup == ResourceGroup::Geom ) {
-                GB<GT::Shape>( ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
-                addGeomScene( v0 );
-            } else if ( entityGroup == ResourceGroup::Material ) {
-                load<Material>( v0, [this, vHash]( HttpResouceCBSign key ) {
-                    auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M( vHash ));
-                    DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Back );
-                    Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
-                } );
-            } else if ( entityGroup == ResourceGroup::Image ) {
-                load<RawImage>( v0, [this, vHash]( HttpResouceCBSign key ) {
-                    nodeFullScreenImageSignal( key );
-                } );
-            } else if ( entityGroup == ResourceGroup::Font ) {
-                load<Font>( v0, [this, vHash]( HttpResouceCBSign key ) {
-                    nodeFullScreenFontSonnetSignal( key );
-                } );
-            } else if ( entityGroup == ResourceGroup::Profile ) {
-                load<Profile>( v0, [this, vHash]( HttpResouceCBSign key ) {
-                    nodeFullScreenProfileSignal( key );
-                } );
-            }  else if ( entityGroup == ResourceGroup::UI ) {
-                load<UIContainer>( v0, [this, vHash]( HttpResouceCBSign key ) {
-                    nodeFullScreenUIContainerSignal( key );
-                } );
-            }
+            resetAndLoadEntity(doc["data"]["entity_id"].GetString(), doc["data"]["group"].GetString(), doc["data"]["hash"].GetString() );
         } else if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
             auto matId = getFileName( doc["data"]["mat_id"].GetString());
             auto objId = getFileName( doc["data"]["entity_id"].GetString());
@@ -725,22 +725,23 @@ void HOD::DepRemapsManager::addDep( const std::string& group, const std::string&
 void HOD::reducer( SceneGraph& sg, HOD::DepRemapsManager& deps, HODResolverCallback ccf ) {
 
     HOD::EntityList el{ deps.geoms };
-    Http::post( Url{ HttpFilePrefix::entities + "remaps" },
-                el.serialize(),
-                [&, deps, ccf, el]( HttpResponeParams res ) {
-                    EntityRemappingContainer erc{ res.bufferString };
-                    LOGRS( "Remaps bufferstring " << res.bufferString );
-                    HOD::DepRemapsManager ndeps = deps;
-                    AppMaterialsRemapping remaps{};
-                    for ( const auto& rm : erc.remaps ) {
-                        remaps.remap[rm.sourceEntity + "," + rm.sourceRemap] = rm.destRemap;
-                        remaps.remap[erc.kv[rm.sourceEntity] + "," + rm.sourceRemap] = rm.destRemap;
-                        ndeps.addDep( ResourceGroup::Material, rm.destRemap );
-                    }
-
-                    sg.setMaterialRemap( remaps.remap );
-
-                    sg.HODResolve( ndeps.ret, ccf );
-                }
-    );
+    sg.HODResolve( deps.ret, ccf );
+//    Http::post( Url{ HttpFilePrefix::entities + "remaps" },
+//                el.serialize(),
+//                [&, deps, ccf, el]( HttpResponeParams res ) {
+//                    EntityRemappingContainer erc{ res.bufferString };
+//                    LOGRS( "Remaps bufferstring " << res.bufferString );
+//                    HOD::DepRemapsManager ndeps = deps;
+//                    AppMaterialsRemapping remaps{};
+//                    for ( const auto& rm : erc.remaps ) {
+//                        remaps.remap[rm.sourceEntity + "," + rm.sourceRemap] = rm.destRemap;
+//                        remaps.remap[erc.kv[rm.sourceEntity] + "," + rm.sourceRemap] = rm.destRemap;
+//                        ndeps.addDep( ResourceGroup::Material, rm.destRemap );
+//                    }
+//
+//                    sg.setMaterialRemap( remaps.remap );
+//
+//                    sg.HODResolve( ndeps.ret, ccf );
+//                }
+//    );
 }

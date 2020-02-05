@@ -584,6 +584,7 @@ void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
     for ( auto change : stream ) {
         StreamChangeMetadata meta{ change };
         auto ent = mdb.insertEntityFromAsset( meta );
+        LOGRS( ent );
 //        Socket::emit( "entityAdded" + std::to_string( counter++ ), ent );
     }
 }

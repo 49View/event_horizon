@@ -300,6 +300,7 @@ public:
     void loadScene         ( const ResourceScene& gs, HODResolverCallback _ccf = nullptr );
     void addScene          ( const ResourceScene& gs );
     void addGeomScene      ( const std::string& geomName );
+    void resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup, CResourceRef vHash );
 
     template <typename R>
     void acquire( std::string _names, HttpResouceCB _ccf = nullptr ) {

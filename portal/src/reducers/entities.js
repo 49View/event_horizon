@@ -22,7 +22,7 @@ import {
   LOADING_FINISHED
 } from "../actions/types";
 
-import { requestAsset, placeHolderAsset } from "../utils/webSocketClient";
+import { placeHolderAsset } from "../utils/webSocketClient";
 
 const initialState = {
   events: {},
@@ -178,7 +178,11 @@ export default function(state = initialState, action) {
         // currentTags: []
       };
     case GET_ENTITY:
-      if (requireWasmUpdate) requestAsset(payload);
+      if (requireWasmUpdate) {
+        window.Module.addScriptLine(
+          `rr.addSceneObject( "${payload.entity._id}", "${payload.entity.group}", "${payload.entity.hash}" )`
+        );
+      }
       if (requirePlaceHolder) placeHolderAsset(payload.entity.group);
       return {
         ...state,

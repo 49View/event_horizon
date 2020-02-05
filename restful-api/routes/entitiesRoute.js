@@ -160,6 +160,20 @@ router.get("/metadata/byHash/:hashId", async (req, res, next) => {
   }
 });
 
+router.get("/metadata/byId/:id", async (req, res, next) => {
+  try {
+    const project = req.user.project;
+    const entity = await entityController.getEntityById(
+      req.params.id,
+      project
+    );
+    res.status(200).send(entity);
+  } catch (ex) {
+    console.log("ERROR GET METADATA ENTITY BY HASH: ", ex);
+    res.sendStatus(400);
+  }
+});
+
 router.get("/metadata/byGroupTags/:group/:tags", async (req, res, next) => {
   try {
     const group = req.params.group;

@@ -39,8 +39,6 @@ services:
       context: ./native
     container_name: "asset-daemon-dev"
     restart: always
-    expose:
-      - 27017
     ports:
       - "27017:27017"
     environment:

@@ -301,7 +301,7 @@ export const getFullEntity = entitySource => async dispatch => {
       }
     }
 
-    fullData = await axios.get(`/api/entities/content/byId/${entitySource._id}`, {
+    fullData = await axios.get(`/api/entities/metadata/byId/${entitySource._id}`, {
       responseType: responseTypeValue
     });
 

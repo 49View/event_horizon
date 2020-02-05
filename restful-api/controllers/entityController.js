@@ -913,7 +913,7 @@ module.exports = {
   getEntityByIdProject: getEntityByIdProject,
   getEntitiesIdOfProjectWithGroup: getEntitiesIdOfProjectWithGroup,
   getEntityById: async (entityId) => {
-    const result = await entityModel.findOne(entityId);
+    const result = await entityModel.findOne( {_id: mongoose.Types.ObjectId(entityId)} );
     return result !== null ? result.toObject() : null;
   },
   getEntityByHash: getEntityByHash,
