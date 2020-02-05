@@ -60,6 +60,8 @@ jobs:
         export MTN_DB_PATH=${{ secrets.MTN_DB_PATH }} && 
         export EH_MONGO_DEFAULT_DB=${{ secrets.EH_MONGO_DEFAULT_DB }} && 
         export EH_MONGO_PATH=${{ secrets.EH_MONGO_PATH }} && 
+        export EH_MONGO_REPLICA_SET_NAME=${{ secrets.EH_MONGO_REPLICA_SET_NAME }} && 
         export EH_MASTER_TOKEN="${{ secrets.EH_MASTER_TOKEN }}" && 
         export EH_SEND_GRID_TOKEN="${{ secrets.EH_SEND_GRID_TOKEN }}" && 
+        export EH_CLOUD_HOST=${{ secrets.EH_CLOUD_HOST }}
         docker-compose down && docker-compose pull && docker-compose up -d'
