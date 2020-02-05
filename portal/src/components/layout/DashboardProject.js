@@ -1,6 +1,6 @@
-import React, { useEffect, Fragment } from "react";
+import React, {Fragment, useEffect} from "react";
 import PropTypes from "prop-types";
-import { connect } from "react-redux";
+import {connect} from "react-redux";
 import Entries from "./entities/Entries";
 import ImageEditor from "./entities/ImageEditor";
 import AppEditor from "./entities/AppEditor";
@@ -8,18 +8,17 @@ import GUIEditor from "./entities/GUIEditor";
 import GeomEditor from "./entities/GeomEditor";
 import FontEditor from "./entities/FontEditor";
 import MaterialEditor from "./entities/MaterialEditor";
-import { wasmSetCanvasSize, wasmSetCanvasVisibility } from "react-wasm-canvas";
+import {wasmSetCanvasSize, wasmSetCanvasVisibility} from "react-wasm-canvas";
 import EntityMetaSection from "./entities/EntityMetaSection";
 import RenderParamsToolbar from "./entities/RenderParamsToolbar";
-import { getFullEntity } from "../../actions/entities";
 import {
-  groupHasMetadataSection,
-  GroupGeom,
-  GroupMaterial,
-  GroupImage,
-  GroupUI,
   GroupFont,
-  GroupScript
+  GroupGeom,
+  groupHasMetadataSection,
+  GroupImage,
+  GroupMaterial,
+  GroupScript,
+  GroupUI
 } from "../../utils/utils";
 
 import store from "../../store";
@@ -29,55 +28,55 @@ const containerClassFromGroup = (currEntity, group) => {
     case GroupGeom:
       return {
         mainContainerClass: "AppEditorRenderGrid",
-        mainContainerDiv: <GeomEditor />
+        mainContainerDiv: <GeomEditor/>
       };
     case GroupMaterial:
       return {
         mainContainerClass: "AppEditorRenderGrid",
-        mainContainerDiv: <MaterialEditor />
+        mainContainerDiv: <MaterialEditor/>
       };
     case GroupImage:
       return {
         mainContainerClass: "AppEditorRenderGrid",
-        mainContainerDiv: <ImageEditor />
+        mainContainerDiv: <ImageEditor/>
       };
     case GroupScript:
       return {
         mainContainerClass: "AppEditorRenderGrid",
-        mainContainerDiv: <AppEditor />
+        mainContainerDiv: <AppEditor/>
       };
     case GroupFont:
       return {
         mainContainerClass: "AppEditorRenderGrid",
-        mainContainerDiv: <FontEditor />
+        mainContainerDiv: <FontEditor/>
       };
     case GroupUI:
       return {
         mainContainerClass: "AppEditorRenderGrid",
-        mainContainerDiv: <GUIEditor />
+        mainContainerDiv: <GUIEditor/>
       };
     default:
       return {
         mainContainerClass: "AppEditorRenderGrid",
-        mainContainerDiv: <AppEditor />
+        mainContainerDiv: <AppEditor/>
       };
   }
 };
 
 const DashboardProject = ({
-  resize,
-  currentEntity,
-  entities,
-  group,
-  userData
-}) => {
+                            resize,
+                            currentEntity,
+                            entities,
+                            group,
+                            userData
+                          }) => {
   let canvasContainer = React.useRef(null);
 
   useEffect(() => {
     // Shortcut to go straight to app/coding from the outset for most projects
-    if (group === "" && entities.length === 1 && !currentEntity) {
-      store.dispatch(getFullEntity(entities[0]));
-    }
+    // if (group === "" && entities.length === 1 && !currentEntity) {
+    //   store.dispatch(getFullEntity(entities[0]));
+    // }
     store.dispatch(
       wasmSetCanvasVisibility(
         currentEntity && group !== "" ? "visible" : "hidden"
@@ -90,7 +89,7 @@ const DashboardProject = ({
     return <Fragment></Fragment>;
   }
 
-  const { mainContainerClass, mainContainerDiv } = containerClassFromGroup(
+  const {mainContainerClass, mainContainerDiv} = containerClassFromGroup(
     currentEntity,
     group
   );
@@ -114,16 +113,16 @@ const DashboardProject = ({
   const mainEditorDiv = (
     <div className={mainContainerClass}>
       {entityName}
-      <RenderParamsToolbar />
+      <RenderParamsToolbar/>
       <div className="EntryEditorRender" ref={canvasContainer}></div>
       {currentEntity && mainContainerDiv}
-      {bShowMetaSection && <EntityMetaSection />}
+      {bShowMetaSection && <EntityMetaSection/>}
     </div>
   );
 
   return (
     <div className="dashboardContainer">
-      <Entries cname="thumbs-a thumbsEntityArea" />
+      <Entries cname="thumbs-a thumbsEntityArea"/>
       <div className="editor-a">{mainEditorDiv}</div>
     </div>
   );

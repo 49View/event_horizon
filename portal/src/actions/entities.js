@@ -2,7 +2,6 @@ import axios from "axios";
 import {setAlert} from "./alert";
 import {
   CHANGE_MATERIAL_COLOR,
-  CLOSE_ENTITIES_MODAL,
   DELETE_ENTITY,
   ENTITIES_PARTIAL_SEARCH_ERROR,
   ENTITY_ERROR,
@@ -20,7 +19,7 @@ import {
 } from "./types";
 import store from "../store";
 import {wscSend} from "../utils/webSocketClient";
-import { GroupMaterial, GroupScript} from "../utils/utils";
+import {GroupMaterial, GroupScript} from "../utils/utils";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
@@ -239,87 +238,58 @@ export const wasmClientFinishedLoadingData = data => dispatch => {
   });
 };
 
-export const addEntityToAppData = entitySource => async dispatch => {
-  try {
-    dispatch({
-      type: GET_ENTITY_LOAD,
-      payload: entitySource.name
-    });
-    const state = store.getState();
-    const appKey = state.entities.currentEntity.entity.mKey;
-    const appDataJson = await axios.put(
-      `/api/appdata/${appKey}/${entitySource.group}/${entitySource.name}`
-    );
-    dispatch({type: CLOSE_ENTITIES_MODAL, payload: false});
-
-    const entityFull = {
-      entity: appDataJson.data,
-      deps: [],
-      blobURL: null,
-      jsonRet: null
-    };
-
-    dispatch({
-      type: GET_ENTITY,
-      payload: entityFull,
-      requireWasmUpdate: false
-    });
-  } catch (err) {
-    console.log("EntityError: ", err.response);
-    dispatch({
-      type: ENTITY_ERROR,
-      payload: {msg: err.response}
-    });
-  }
-};
-
 // Get entity
 export const getFullEntity = entitySource => async dispatch => {
   try {
+
+    window.Module.addScriptLine(
+      `rr.addSceneObject( "${entitySource._id}", "${entitySource.group}", "${entitySource.hash}" )`
+    );
+
     dispatch({
       type: GET_ENTITY_LOAD,
       payload: entitySource.name
     });
-
-    const requireWasmUpdate = entitySource.group !== GroupScript;
-    // Get dependencies for
-    let deps = {};
-    let fullData = null;
-    let responseTypeValue = "arraybuffer";
-    if (entitySource.group === GroupMaterial) {
-      responseTypeValue = "json";
-    }
-
-    // eslint-disable-next-line
-    for (const depElem of entitySource.deps) {
-      // eslint-disable-next-line
-      for (const depValue of depElem.value) {
-        const res = await axios.get(`/api/entities/content/byfsid/${depValue}`, {
-          responseType: "arraybuffer"
-        });
-        deps[depValue] = URL.createObjectURL(new Blob([res.data]));
-      }
-    }
-
-    fullData = await axios.get(`/api/entities/metadata/byId/${entitySource._id}`, {
-      responseType: responseTypeValue
-    });
-
-    const entityFull = {
-      entity: entitySource,
-      deps: deps,
-      blobURL:
-        responseTypeValue === "arraybuffer"
-          ? URL.createObjectURL(new Blob([fullData.data]))
-          : null,
-      jsonRet: responseTypeValue === "arraybuffer" ? null : fullData.data
-    };
-
+    //
+    // const requireWasmUpdate = entitySource.group !== GroupScript;
+    // // Get dependencies for
+    // let deps = {};
+    // let fullData = null;
+    // let responseTypeValue = "arraybuffer";
+    // if (entitySource.group === GroupMaterial) {
+    //   responseTypeValue = "json";
+    // }
+    //
+    // // eslint-disable-next-line
+    // for (const depElem of entitySource.deps) {
+    //   // eslint-disable-next-line
+    //   for (const depValue of depElem.value) {
+    //     const res = await axios.get(`/api/entities/content/byfsid/${depValue}`, {
+    //       responseType: "arraybuffer"
+    //     });
+    //     deps[depValue] = URL.createObjectURL(new Blob([res.data]));
+    //   }
+    // }
+    //
+    // fullData = await axios.get(`/api/entities/metadata/byId/${entitySource._id}`, {
+    //   responseType: responseTypeValue
+    // });
+    //
+    // const entityFull = {
+    //   entity: entitySource,
+    //   deps: deps,
+    //   blobURL:
+    //     responseTypeValue === "arraybuffer"
+    //       ? URL.createObjectURL(new Blob([fullData.data]))
+    //       : null,
+    //   jsonRet: responseTypeValue === "arraybuffer" ? null : fullData.data
+    // };
+    //
     dispatch({
       type: GET_ENTITY,
-      payload: entityFull,
-      requireWasmUpdate: requireWasmUpdate
+      payload: { entity: entitySource},
     });
+
   } catch (err) {
     console.log(err);
     dispatch({

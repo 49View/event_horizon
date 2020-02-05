@@ -178,11 +178,6 @@ export default function(state = initialState, action) {
         // currentTags: []
       };
     case GET_ENTITY:
-      if (requireWasmUpdate) {
-        window.Module.addScriptLine(
-          `rr.addSceneObject( "${payload.entity._id}", "${payload.entity.group}", "${payload.entity.hash}" )`
-        );
-      }
       if (requirePlaceHolder) placeHolderAsset(payload.entity.group);
       return {
         ...state,
@@ -190,7 +185,7 @@ export default function(state = initialState, action) {
         group: payload.entity.group,
         currentTags: evaluateTags(payload.entity.tags),
         metadataList: {...state.metadataList, enable: false },
-        loading: requireWasmUpdate || requirePlaceHolder
+        loading: false
       };
     case SET_ENTITY_APP_NAME:
       return {
