@@ -19,7 +19,6 @@ import {
 } from "./types";
 import store from "../store";
 import {wscSend} from "../utils/webSocketClient";
-import {GroupMaterial, GroupScript} from "../utils/utils";
 
 // Get entries
 export const getEntitiesOfGroup = (group, project) => async dispatch => {
@@ -287,7 +286,7 @@ export const getFullEntity = entitySource => async dispatch => {
     //
     dispatch({
       type: GET_ENTITY,
-      payload: { entity: entitySource},
+      payload: {entity: entitySource},
     });
 
   } catch (err) {

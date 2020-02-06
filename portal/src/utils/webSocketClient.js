@@ -41,7 +41,7 @@ export const placeHolderAsset = group => {
 };
 
 export const wscConnect = session => {
-  let webSocketServerAddress = "wss://localhost/wss/?s=" + session;
+  const webSocketServerAddress = `wss://${process.env.REACT_APP_EH_CLOUD_HOST}/wss/?s=${session}`;
 
   webSocketClient = new W3CWebSocket(webSocketServerAddress);
   webSocketClient.onopen = () => {

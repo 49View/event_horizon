@@ -1,12 +1,10 @@
-import React, { Fragment } from "react";
-import MaterialParametersEditor from "./MaterialParametersEditor";
-import {fillMaterialParams} from "../../../utils/materialUtils";
-import {useSelector} from "react-redux";
+import React, {Fragment} from "react";
+//import {useSelector} from "react-redux";
 
 const MaterialEditor = () => {
   let mainContent = "";
 
-  const currentEntity = useSelector(state => state.entities.currentEntity);
+  // const currentEntity = useSelector(state => state.entities.currentEntity);
 
   // This is a PBR material editor, make sure material is PBR, if it's not, skip it!
   // if ( currentEntity.jsonRet && currentEntity.jsonRet.values.mType === "PN_SH") {

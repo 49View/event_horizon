@@ -24,6 +24,7 @@ const Login = ({ login, isAuthenticated, user }) => {
 
   // Redirect if logged in
   if (isAuthenticated) {
+    console.log("Redirecting to dashboard...");
     return <Redirect to="/dashboarduser" />;
   }
 

@@ -1,28 +1,28 @@
 import {
-  GET_ENTITIES,
-  CLEAR_ENTITIES,
-  GET_APPS,
-  GET_METADATA_LIST,
-  UPDATE_ENTITIES_PARTIAL_SEARCH,
-  UPDATE_METADATA_LIST_PARTIAL_SEARCH,
-  ENTITY_ERROR,
-  DELETE_ENTITY,
   ADD_ENTITY,
+  CHANGE_MATERIAL_COLOR,
+  CLEAR_ENTITIES,
+  CLOSE_ENTITIES_MODAL,
+  DELETE_ENTITY,
+  ENTITY_ERROR,
+  GET_APPS,
+  GET_ENTITIES,
   GET_ENTITY,
-  SET_ENTITY_APP_NAME,
-  GET_ENTITY_LOAD,
   GET_ENTITY_LIST_PRELOAD,
+  GET_ENTITY_LOAD,
+  GET_METADATA_LIST,
+  LOADING_FINISHED,
+  REPLACE_ENTITY_TAGS,
+  REPLACE_MATERIAL,
+  RESET_CURRENT_ENTITY,
+  SET_ENTITY_APP_NAME,
   SET_ENTITY_NODES,
   SET_MODAL_SELECTED_ENTITY_NAME,
-  CLOSE_ENTITIES_MODAL,
-  REPLACE_MATERIAL,
-  REPLACE_ENTITY_TAGS,
-  CHANGE_MATERIAL_COLOR,
-  RESET_CURRENT_ENTITY,
-  LOADING_FINISHED
+  UPDATE_ENTITIES_PARTIAL_SEARCH,
+  UPDATE_METADATA_LIST_PARTIAL_SEARCH
 } from "../actions/types";
 
-import { placeHolderAsset } from "../utils/webSocketClient";
+import {placeHolderAsset} from "../utils/webSocketClient";
 
 const initialState = {
   events: {},
@@ -48,15 +48,15 @@ const initialState = {
   error: {}
 };
 
-export default function(state = initialState, action) {
-  const { type, payload, requireWasmUpdate, requirePlaceHolder } = action;
+export default function (state = initialState, action) {
+  const {type, payload, requirePlaceHolder} = action;
 
   const evaluateTags = sourceTags => {
     let tags = [];
     let c = 0;
     // eslint-disable-next-line
     for (const tag of sourceTags) {
-      tags.push({ id: c, name: tag });
+      tags.push({id: c, name: tag});
       c++;
     }
     return tags;
@@ -108,30 +108,31 @@ export default function(state = initialState, action) {
     case GET_METADATA_LIST:
       return {
         ...state,
-        metadataList: {...state.metadataList, entries: payload.data, filtered: payload.data },
+        metadataList: {...state.metadataList, entries: payload.data, filtered: payload.data},
         loading: false
       };
     case REPLACE_MATERIAL:
       return {
         ...state,
         loading: true,
-        metadataList: {...state.metadataList, enable: false }
+        metadataList: {...state.metadataList, enable: false}
       };
     case CLOSE_ENTITIES_MODAL:
       return {
         ...state,
-        metadataList: {...state.metadataList, enable: false, sourceEntityName: "" }
+        metadataList: {...state.metadataList, enable: false, sourceEntityName: ""}
       };
     case SET_MODAL_SELECTED_ENTITY_NAME:
       return {
         ...state,
-        metadataList: {...state.metadataList,
+        metadataList: {
+          ...state.metadataList,
           enable: true,
           fatherEntityName: payload.fatherEntityName,
           sourceEntityName: payload.selectedModalEntityName,
           group: payload.group,
           onClickCallback: payload.onClickCallback,
-         }
+        }
       };
     case UPDATE_ENTITIES_PARTIAL_SEARCH:
       let filteredResult = [];
@@ -157,7 +158,7 @@ export default function(state = initialState, action) {
       }
       return {
         ...state,
-        metadataList: {...state.metadataList, filtered: matFilteredResult },
+        metadataList: {...state.metadataList, filtered: matFilteredResult},
         loading: false
       };
 
@@ -184,7 +185,7 @@ export default function(state = initialState, action) {
         currentEntity: payload,
         group: payload.entity.group,
         currentTags: evaluateTags(payload.entity.tags),
-        metadataList: {...state.metadataList, enable: false },
+        metadataList: {...state.metadataList, enable: false},
         loading: false
       };
     case SET_ENTITY_APP_NAME:
