@@ -121,3 +121,4 @@ external/
 certificates/
 forgotten/
 builds/
+local_debug.sh

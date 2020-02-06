@@ -78,8 +78,10 @@ public:
             Socket::createConnection();
         }
 #endif
+
 #ifdef __EMSCRIPTEN__
-        Http::init();
+        // We do not do any  Http::init(); or login as that's done client side by react/whatever framework javascript is using
+        // on the browser.
 #endif
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
         mainLoop(checkLayoutArgvs( params ), std::move(backEnd) );
