@@ -22,7 +22,7 @@ router.get(
         res
           .clearCookie("eh_jwt", {
             httpOnly: true,
-            sameSite: false,
+            sameSite: "None",
             signed: true,
             secure: false
           })
@@ -84,7 +84,7 @@ router.post(
         res
           .cookie("eh_jwt", tokenInfo.token, {
             httpOnly: true,
-            sameSite: false,
+            sameSite: "None",
             signed: true,
             secure: true,
             expires: d
@@ -145,7 +145,7 @@ router.post(
         res
           .cookie("eh_jwt", tokenInfo.token, {
             httpOnly: true,
-            sameSite: false,
+            sameSite: "None",
             signed: true,
             secure: true,
             expires: d
@@ -213,7 +213,7 @@ const getTokenResponse = async (res, req, project, email, password) => {
     res
       .cookie("eh_jwt", tokenInfo.token, {
         httpOnly: true,
-        sameSite: false,
+        sameSite: "None",
         signed: true,
         secure: true,
         expires: d
