@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-include(../../CMakeLists.txt NO_POLICY_SCOPE)
+include(../../native/CMakeLists.txt NO_POLICY_SCOPE)
 project(editor)
 
 set(BUILD_FROM_SOURCE TRUE)
