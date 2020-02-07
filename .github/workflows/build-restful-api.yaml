@@ -1,0 +1,21 @@
+name: restful-api (Build,Test,Deploy)
+
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Build restful-api
+      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/restful-api ./restful-api
+
+    - name: Docker hub login
+      run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
+              
+    - name: Docker Push restful-api
+      run: docker push ${{ secrets.DOCKER_HUB_ID }}/restful-api
