@@ -18,7 +18,7 @@ jobs:
           ${{ runner.os }}-node-
 
     - name: Npm install
-      run: npm install
+      run: cd restful-api && npm install
 
     - name: Build restful-api
       run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/restful-api -f Dockerfile.withcache ./restful-api
