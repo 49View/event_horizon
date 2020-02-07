@@ -1,0 +1,6 @@
+FROM node:13.7.0
+WORKDIR /app
+COPY . .
+EXPOSE 4000
+EXPOSE 3500
+CMD [ "npm", "run", "start" ]
