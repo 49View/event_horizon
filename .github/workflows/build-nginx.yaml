@@ -1,4 +1,4 @@
-name: restful-api (Build,Test,Deploy)
+name: nginx (Build,Test,Deploy)
 
 on: [push]
 
@@ -14,5 +14,5 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_HUB_ID }}
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
-        context: ./restful-api
-        image_name: ${{ secrets.DOCKER_HUB_ID }}/restful-api
+        context: ./nginx
+        image_name: ${{ secrets.DOCKER_HUB_ID }}/nginx
