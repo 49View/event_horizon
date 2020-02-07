@@ -17,11 +17,11 @@ jobs:
         context: ./restful-api
         image_name: ${{ secrets.DOCKER_HUB_ID }}/restful-api
 
-    - name: Build restful-api
-      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/restful-api ./restful-api
+    # - name: Build restful-api
+    #   run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/restful-api ./restful-api
 
-    - name: Docker hub login
-      run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
+    # - name: Docker hub login
+    #   run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
               
-    - name: Docker Push restful-api
-      run: docker push ${{ secrets.DOCKER_HUB_ID }}/restful-api
+    # - name: Docker Push restful-api
+    #   run: docker push ${{ secrets.DOCKER_HUB_ID }}/restful-api
