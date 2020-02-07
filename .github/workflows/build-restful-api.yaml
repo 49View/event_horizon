@@ -10,18 +10,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/cache@v1
+    - uses: whoan/docker-build-with-cache-action@v3
       with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('restful-api/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
-
-    - name: Npm install
-      run: cd restful-api && npm install
-
+        username: ${{ secrets.DOCKER_HUB_ID }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        image_name: ${{ secrets.DOCKER_HUB_ID }}/restful-api
+        
     - name: Build restful-api
-      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/restful-api -f Dockerfile.withcache ./restful-api
+      run: docker build -t ${{ secrets.DOCKER_HUB_ID }}/restful-api ./restful-api
 
     - name: Docker hub login
       run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_ID }} --password-stdin
