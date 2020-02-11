@@ -164,23 +164,6 @@ const createEntityWithFSID = async (
   }
 };
 
-const createPlaceHolderEntity = async (project, group, username, useremail) => {
-  try {
-    // Hashing of content
-    const filename = uniqueNamesGenerator();
-    let metadata = createMetadataStartup(filename, username, useremail);
-    metadata.hash = md5(metadata.name);
-    const idate = new Date();
-    metadata.lastUpdatedDate = idate;
-    metadata.creationDate = idate;
-
-    return createEntityModel(project, group, false, false, metadata).toObject();
-  } catch (error) {
-    console.log("Cannot create entity: ", error);
-    return null;
-  }
-};
-
 const createEntityFromMetadataToBeCleaned = async (project, metadata) => {
   const {
     content,
@@ -270,24 +253,6 @@ const checkFileExists = async (project, group, hash) => {
   };
   const result = await entityModel.findOne(query);
   return result !== null ? result.toObject() : null;
-};
-
-const createEntityModel = (
-  fsid,
-  project,
-  group,
-  isPublic,
-  isRestricted,
-  metadata
-) => {
-  return new entityModel({
-    fsid: fsid,
-    project: project,
-    group: group,
-    isPublic: isPublic,
-    isRestricted: isRestricted,
-    metadata: metadata
-  });
 };
 
 const updateEntity = async (entityId, metadata) => {
@@ -836,7 +801,35 @@ module.exports = {
   createMetadataStartup: createMetadataStartup,
   getMetadataFromBody: getMetadataFromBody,
   createEntityFromMetadata: createEntityFromMetadata,
-  createPlaceHolderEntity: createPlaceHolderEntity,
+  createPlaceHolderEntity: async (project, group, username, useremail) => {
+    try {
+      // Hashing of content
+      const filename = uniqueNamesGenerator();
+      const idate = new Date();
+      return {
+        group: group,
+        fsid: null,
+        name: filename,
+        project: project,
+        isPublic: false,
+        isRestricted: false,
+        contentType: "application/octet-stream",
+        hash: md5(filename),
+        lastUpdatedDate: idate,
+        creationDate: idate,
+        tags: metadataAssistant.splitTags(filename),
+        creator: {
+          name: username,
+          email: useremail
+        },
+        deps: []
+      }
+    } catch (error) {
+      console.log("Cannot create entity: ", error);
+      return null;
+    }
+  },
+
   createEntitiesFromContainer: createEntitiesFromContainer,
   cleanupMetadata: cleanupMetadata,
   decompressZipppedEntityDeps: decompressZipppedEntityDeps,

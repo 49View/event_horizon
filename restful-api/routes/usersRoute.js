@@ -70,7 +70,7 @@ router.post("/createProject/:project", async (req, res, next) => {
     if ((await userController.checkProjectAlreadyExists(project)) === true) {
       error = true;
     } else {
-      await appdataController.addApp(project);
+      await projectController.initializeDefaults(project, email);
       await userController.addRolesForProject(project, email, roles);
     }
   } catch (ex) {
