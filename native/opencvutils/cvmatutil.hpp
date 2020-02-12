@@ -16,6 +16,7 @@
 
 namespace cv { class Mat; }
 class RawImage;
+
 struct ImageParams;
 
 void toGrayScale( const cv::Mat& _source, cv::Mat& _dest );
@@ -23,7 +24,7 @@ void toGrayScale( const cv::Mat& _source, cv::Mat& _dest );
 void add1PixelWhiteContour( const cv::Mat& source, cv::Mat& dest );
 void add1PixelWhiteContour( const cv::Mat& source, cv::Mat& dest, const int numberOfPixels, const int scalar );
 
-cv::Mat decodeRawImageDataIntoMat( int width, int height, int channels, unsigned char* ddata );
+cv::Mat decodeRawImageDataIntoMat( int width, int height, int channels, unsigned char *ddata );
 
 cv::Mat decodeImageIntoMat( const std::string& _floorplanName );
 cv::Mat decodeRawImageIntoMat( const RawImage& _ri );
@@ -32,6 +33,7 @@ ImageParams getImageParamsFromMat( const cv::Mat& _source );
 
 std::vector<std::array<double, 7> >
 huMomentsOnImage( const cv::Mat& src_gray, int thresh = 84, double lengthThresh = 10.0 );
+std::array<double, 7> huMomentsOnImageRaw( const cv::Mat& src_gray );
 
 void convertContoursArrayToFloats( const std::vector<std::vector<cv::Point2i> >& contoursi,
                                    std::vector<std::vector<Vector2f> >& contours );

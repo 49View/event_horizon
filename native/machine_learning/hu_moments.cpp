@@ -7,12 +7,12 @@
 #include <stb/stb_image_write.h>
 
 HuMomentsBuilder::HuMomentsBuilder( const std::string& _type, const std::string& _name,
-                                     const std::string& _source,
-                                     const std::vector<std::array<double, MomentArraySize>>& _value ) {
-     type = _type;
-     name = _name;
-     source = _source;
-     hus = _value;
+                                    const std::string& _source,
+                                    const std::vector<HUV>& _value ) {
+    type = _type;
+    name = _name;
+    source = _source;
+    hus = _value;
 }
 
 HuMomentsBSData HuMomentsBuilder::build() {
@@ -29,7 +29,7 @@ HuMomentsBSData HuMomentsBuilder::build() {
 namespace HuMomentsService {
 
     double compare( const HuMomentsBSData& _source,
-                                      const std::vector<std::array<double, MomentArraySize> >& _compareto ) {
+                    const std::vector<HUV>& _compareto ) {
         double lookalikeness = std::numeric_limits<double>::max();
 
         for ( auto& moment : _source.hus ) {
@@ -46,9 +46,34 @@ namespace HuMomentsService {
         return lookalikeness;
     }
 
-    bool isMostlyStraightLines( const std::vector<std::array<double, MomentArraySize> >& _source ) {
+    double compare( const HUV& _source,
+                    const HUV& _compareto ) {
+        double lookalikeness = std::numeric_limits<double>::max();
 
-        if ( _source.size() == 0 ) return false;
+        double ll = 0.0;
+        for ( int t = 0; t < MomentArraySize; t++ ) {
+            ll += squareDiff( fabs(_source[t]), fabs(_compareto[t]) );
+        }
+        if ( ll > 0.0 )
+            lookalikeness = sqrt(std::min( ll, lookalikeness ));
+
+        return lookalikeness;
+    }
+
+    double compare( const std::vector<HUV>& _source, const HUV& _compareto ) {
+        auto lookalikeness = std::numeric_limits<double>::max();
+        for ( const auto& sv : _source ) {
+            auto dist = compare( sv, _compareto );
+            if ( dist < lookalikeness ) {
+                lookalikeness = dist;
+            }
+        }
+        return lookalikeness;
+    }
+
+    bool isMostlyStraightLines( const std::vector<HUV>& _source ) {
+
+        if ( _source.empty()) return false;
 
         size_t numStraights = 0;
         for ( auto& moment : _source ) {

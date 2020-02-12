@@ -5,18 +5,22 @@
 
 const static int MomentArraySize = 7;
 
+using HUV = std::array<double, MomentArraySize>;
+
 JSONDATA_R( HuMomentsBSData, type, name, source, hus )
+
     std::string type;
     std::string name;
     std::string source;
-    std::vector<std::array<double, MomentArraySize>> hus;
+    std::vector<HUV> hus;
 };
 
 class HuMomentsBuilder {
 public:
     HuMomentsBuilder() {}
+
     HuMomentsBuilder( const std::string& _type, const std::string& _name, const std::string& _source,
-                      const std::vector<std::array<double, MomentArraySize>>& _value );
+                      const std::vector<HUV>& _value );
 
     HuMomentsBSData build();
 public:
@@ -61,12 +65,14 @@ private:
     std::string source;
 
 private:
-    std::vector<std::array<double, MomentArraySize>> hus;
+    std::vector<HUV> hus;
 };
 
 namespace HuMomentsService {
-    double
-    compare( const HuMomentsBSData& _source, const std::vector<std::array<double, MomentArraySize> >& _compareto );
-    bool isMostlyStraightLines( const std::vector<std::array<double, MomentArraySize> >& _source );
+    double compare( const HuMomentsBSData& _source, const std::vector<HUV>& _compareto );
+    double compare( const std::vector<HUV>& _source, const HUV& _compareto );
+    double compare( const HUV& _source, const HUV& _compareto );
+
+    bool isMostlyStraightLines( const std::vector<HUV>& _source );
     void save( const HuMomentsBSData& _source, RawImage& _sourceImage );
 };
