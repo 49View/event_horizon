@@ -5,6 +5,8 @@
 #pragma once
 
 #include <memory>
+#include <unordered_set>
+#include <core/names.hpp>
 
 class Renderer;
 class RenderMaterial;
@@ -58,3 +60,8 @@ namespace FBNames {
 
     bool isPartOf( const std::string& _val );
 }
+
+enum class Use2dDebugRendering {
+    False,
+    True
+};
