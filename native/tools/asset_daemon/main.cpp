@@ -591,7 +591,7 @@ void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
 
 int main( int argc, char **argv ) {
 
-    LOGRS( "Daemon version 3.0.2" );
+    LOGRS( "Daemon version 3.0.3" );
 
 //    Socket::createConnection();
 

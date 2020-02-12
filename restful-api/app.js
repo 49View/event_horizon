@@ -61,7 +61,6 @@ app.use("/", tokenRoute);
 app.use("/stripe", stripeRoute);
 
 app.use(authController.authenticate);
-app.use(projectController.checkProjectRoutes);
 
 app.use("/user", usersRoute);
 app.use("/appdata", appdataRoute);
