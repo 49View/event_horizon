@@ -8,6 +8,7 @@
 #include <core/math/quad_vertices.h>
 #include <core/math/triangulator.hpp>
 #include <poly/vdata_assembler.h>
+#include <poly/polyclipping/clipper.hpp>
 
 void pushQuad( VDataSP vdata, const std::array<Vector3f, 4>& vs, const std::array<Vector2f, 4>& vts,
                const Vector3f& vn, GeomMappingData& m );
@@ -43,9 +44,9 @@ void pushTriangleSubDivRec( VDataSP vdata,
                             int triSubDiv, GeomMappingData& m );
 
 
-Vector3f normalFromPoints( const Vector3f* vs, GeomMappingData& m ) {
+Vector3f normalFromPoints( const Vector3f *vs, GeomMappingData& m ) {
     Vector3f normal = m.windingOrder == WindingOrder::CW ? crossProduct( vs[0], vs[1], vs[2] ) :
-                                                           crossProduct( vs[0], vs[2], vs[1] );
+                      crossProduct( vs[0], vs[2], vs[1] );
     normal = normalize( normal );
     return normal;
 }
@@ -62,10 +63,10 @@ std::vector<Vector3f> utilGenerateFlatBoxFromRect( const JMATH::Rect2f& bbox, fl
 std::vector<Vector3f> utilGenerateFlatBoxFromSize( float width, float height, float z ) {
     std::vector<Vector3f> bboxPoints;
     // Clockwise
-    bboxPoints.emplace_back( -width*0.5f, -height*0.5f, z );
-    bboxPoints.emplace_back( -width*0.5f, height*0.5f, z );
-    bboxPoints.emplace_back( width*0.5f, height*0.5f, z );
-    bboxPoints.emplace_back( width*0.5f, -height*0.5f, z );
+    bboxPoints.emplace_back( -width * 0.5f, -height * 0.5f, z );
+    bboxPoints.emplace_back( -width * 0.5f, height * 0.5f, z );
+    bboxPoints.emplace_back( width * 0.5f, height * 0.5f, z );
+    bboxPoints.emplace_back( width * 0.5f, -height * 0.5f, z );
     return bboxPoints;
 }
 
@@ -140,135 +141,138 @@ auto pullWindingOrderCheck( const std::vector<Vector2f>& verts, float zOffset ) 
 
 namespace MappingServices {
 
-void doNotScaleMapping( GeomMappingData& m ) {
-    m.bDoNotScaleMapping = true;
-    m.fuvScale = 1.0f;
-    m.uvScale = { m.fuvScale, -m.fuvScale };
-    m.uvScaleInv = reciprocal( m.uvScale );
-}
-
-
-void resetMapping( GeomMappingData& m, uint64_t arraySize ) {
-    m.wrapMappingCoords.clear();
-    // fill the lengths vector with 0 to start with adding +1 extra length for not making it wrap to coordinate 0
-    for ( uint64_t l = 0; l < arraySize + 1; l++ ) {
-        m.wrapMappingCoords.push_back( Vector2f::ZERO );
-    }
-}
-
-void resetWrapMapping( GeomMappingData& m, const std::vector<float>& yWrapArray ) {
-    m.wrapMappingCoords.clear();
-    // fill the lengths vector with 0 to start with adding +1 extra length for not making it wrap to coordinate 0
-    for ( auto y : yWrapArray ) {
-        m.wrapMappingCoords.emplace_back( m.direction == MappingDirection::X_POS ? 0.0f : y,
-                                          m.direction == MappingDirection::X_POS ? y : 0.0f );
-    }
-}
-
-void propagateWrapMapping( GeomMappingData& m, const VData* source ) {
-    ASSERT(0);
-//    m.wrapMappingCoords.clear();
-//    WrapMappingCoords( source->WrapMappingCoords() );
-}
-
-void updateWrapMapping( GeomMappingData& m, Vector3f vs[4], Vector2f vtcs[4], uint64_t mi, uint64_t size ) {
-    float lm1 = JMATH::distance( vs[0], vs[1] );
-    float lm2 = JMATH::distance( vs[2], vs[3] );
-
-    if ( m.direction == MappingDirection::X_POS ) {
-        vtcs[0] = m.wrapMappingCoords[mi];
-        vtcs[1] = Vector2f( m.wrapMappingCoords[mi].x() + lm1, m.wrapMappingCoords[mi].y() );
-        vtcs[2] = m.wrapMappingCoords[mi + 1];
-        vtcs[3] = Vector2f( m.wrapMappingCoords[mi + 1].x() + lm2, m.wrapMappingCoords[mi + 1].y() );
-        m.wrapMappingCoords[mi][0] += lm1;
-        if ( mi + 1 == size ) m.wrapMappingCoords[mi + 1][0] += lm2;
-    } else {
-        vtcs[0] = m.wrapMappingCoords[mi];
-        vtcs[1] = Vector2f( m.wrapMappingCoords[mi].x(), m.wrapMappingCoords[mi].y() + lm1 );
-        vtcs[2] = m.wrapMappingCoords[mi + 1];
-        vtcs[3] = Vector2f( m.wrapMappingCoords[mi + 1].x(), m.wrapMappingCoords[mi + 1].y() + lm2 );
-
-        m.wrapMappingCoords[mi][1] += lm1;
-        if ( mi + 1 == size ) m.wrapMappingCoords[mi + 1][1] += lm2;
-    }
-}
-
-template <typename T>
-void updatePullMapping( GeomMappingData& m, const std::array<T, 4>& vs, std::array<Vector2f, 4>& vtcs ) {
-    float lm1 = JMATH::distance( vs[0], vs[2] );
-    float lm2 = JMATH::distance( vs[0], vs[1] );
-
-    // this maps MappingDirection::X_POS
-    vtcs[0] = Vector2f( m.pullMappingCoords.x(),       m.pullMappingCoords.y() );
-    vtcs[1] = Vector2f( m.pullMappingCoords.x() + lm2, m.pullMappingCoords.y() );
-    vtcs[2] = Vector2f( m.pullMappingCoords.x(),       m.pullMappingCoords.y() + lm1 );
-    vtcs[3] = Vector2f( m.pullMappingCoords.x() + lm2, m.pullMappingCoords.y() + lm1 );
-
-    if ( m.direction == MappingDirection::Y_POS ) {
-        for ( uint64_t t = 0; t < 4; t++ ) vtcs[t].swizzle( 0, 1 );
-    }
-    m.pullMappingCoords.setX( m.pullMappingCoords.x() + distance( vs[0], vs[1] ) );
-}
-
-void planarMapping( GeomMappingData& m, const Vector3f& normal, const Vector3f vs[], Vector2f vtcs[], int numVerts ) {
-    IndexPair pairMapping = normal.dominantPair();
-
-    for ( int t = 0; t < numVerts; t++ ) {
-        Vector2f tm = vs[t].pairMapped( pairMapping );
-        vtcs[t] = tm + m.offset;
+    void doNotScaleMapping( GeomMappingData& m ) {
+        m.bDoNotScaleMapping = true;
+        m.fuvScale = 1.0f;
+        m.uvScale = { m.fuvScale, -m.fuvScale };
+        m.uvScaleInv = reciprocal( m.uvScale );
     }
 
-    if ( m.direction == MappingDirection::X_POS ) {
-        for ( int t = 0; t < numVerts; t++ ) vtcs[t].swizzle( 0, 1 );
-    }
 
-    if ( m.bUnitMapping ) {
-        float minC = std::numeric_limits<float>::max();
-        float maxC = std::numeric_limits<float>::lowest();
-        for ( int t = 0; t < numVerts; t++ ) { if ( vtcs[t].x() < minC ) minC = vtcs[t].x(); }
-        for ( int t = 0; t < numVerts; t++ ) { if ( vtcs[t].x() > maxC ) maxC = vtcs[t].x(); }
-        float mappingLength = maxC - minC;
-        for ( int t = 0; t < numVerts; t++ ) vtcs[t].setX( (( vtcs[t].x() - minC ) / mappingLength )*m.uvScaleInv.x());
-        minC = std::numeric_limits<float>::max();
-        maxC = std::numeric_limits<float>::lowest();
-        for ( int t = 0; t < numVerts; t++ ) { if ( vtcs[t].y() < minC ) minC = vtcs[t].y(); }
-        for ( int t = 0; t < numVerts; t++ ) { if ( vtcs[t].y() > maxC ) maxC = vtcs[t].y(); }
-        mappingLength = maxC - minC;
-        for ( int t = 0; t < numVerts; t++ ) vtcs[t].setY( ( ( vtcs[t].y() - minC ) / mappingLength ) * m.uvScaleInv.y
-                    () );
-    }
-}
-
-void calcMirrorUVs( GeomMappingData& m, Vector2f* uvs ) {
-    if ( m.mirroring != MappingMirrorE::None ) {
-        float minC = std::numeric_limits<float>::max();
-        float maxC = std::numeric_limits<float>::lowest();
-        switch ( m.mirroring ) {
-            case MappingMirrorE::X_Only:
-                for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].x() < minC ) minC = uvs[t].x(); }
-                for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].x() > maxC ) maxC = uvs[t].x(); }
-                for ( uint64_t t = 0; t < 3; t++ ) uvs[t].setX( minC + ( maxC - uvs[t].x() ) );
-                break;
-            case MappingMirrorE::Y_Only:
-                for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].y() < minC ) minC = uvs[t].y(); }
-                for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].y() > maxC ) maxC = uvs[t].y(); }
-                for ( uint64_t t = 0; t < 3; t++ ) uvs[t].setY( minC + ( maxC - uvs[t].y() ) );
-                break;
-            case MappingMirrorE::BothWays:
-                for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].x() < minC ) minC = uvs[t].x(); }
-                for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].x() > maxC ) maxC = uvs[t].x(); }
-                for ( uint64_t t = 0; t < 3; t++ ) uvs[t].setX( minC + ( maxC - uvs[t].x() ) );
-                minC = std::numeric_limits<float>::max();
-                maxC = std::numeric_limits<float>::lowest();
-                for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].y() < minC ) minC = uvs[t].y(); }
-                for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].y() > maxC ) maxC = uvs[t].y(); }
-                for ( uint64_t t = 0; t < 3; t++ ) uvs[t].setY( minC + ( maxC - uvs[t].y() ) );
-                break;
-            default:
-                break;
+    void resetMapping( GeomMappingData& m, uint64_t arraySize ) {
+        m.wrapMappingCoords.clear();
+        // fill the lengths vector with 0 to start with adding +1 extra length for not making it wrap to coordinate 0
+        for ( uint64_t l = 0; l < arraySize + 1; l++ ) {
+            m.wrapMappingCoords.push_back( Vector2f::ZERO );
         }
     }
-}
+
+    void resetWrapMapping( GeomMappingData& m, const std::vector<float>& yWrapArray ) {
+        m.wrapMappingCoords.clear();
+        // fill the lengths vector with 0 to start with adding +1 extra length for not making it wrap to coordinate 0
+        for ( auto y : yWrapArray ) {
+            m.wrapMappingCoords.emplace_back( m.direction == MappingDirection::X_POS ? 0.0f : y,
+                                              m.direction == MappingDirection::X_POS ? y : 0.0f );
+        }
+    }
+
+    void propagateWrapMapping( GeomMappingData& m, const VData *source ) {
+        ASSERT( 0 );
+//    m.wrapMappingCoords.clear();
+//    WrapMappingCoords( source->WrapMappingCoords() );
+    }
+
+    void updateWrapMapping( GeomMappingData& m, Vector3f vs[4], Vector2f vtcs[4], uint64_t mi, uint64_t size ) {
+        float lm1 = JMATH::distance( vs[0], vs[1] );
+        float lm2 = JMATH::distance( vs[2], vs[3] );
+
+        if ( m.direction == MappingDirection::X_POS ) {
+            vtcs[0] = m.wrapMappingCoords[mi];
+            vtcs[1] = Vector2f( m.wrapMappingCoords[mi].x() + lm1, m.wrapMappingCoords[mi].y());
+            vtcs[2] = m.wrapMappingCoords[mi + 1];
+            vtcs[3] = Vector2f( m.wrapMappingCoords[mi + 1].x() + lm2, m.wrapMappingCoords[mi + 1].y());
+            m.wrapMappingCoords[mi][0] += lm1;
+            if ( mi + 1 == size ) m.wrapMappingCoords[mi + 1][0] += lm2;
+        } else {
+            vtcs[0] = m.wrapMappingCoords[mi];
+            vtcs[1] = Vector2f( m.wrapMappingCoords[mi].x(), m.wrapMappingCoords[mi].y() + lm1 );
+            vtcs[2] = m.wrapMappingCoords[mi + 1];
+            vtcs[3] = Vector2f( m.wrapMappingCoords[mi + 1].x(), m.wrapMappingCoords[mi + 1].y() + lm2 );
+
+            m.wrapMappingCoords[mi][1] += lm1;
+            if ( mi + 1 == size ) m.wrapMappingCoords[mi + 1][1] += lm2;
+        }
+    }
+
+    template<typename T>
+    void updatePullMapping( GeomMappingData& m, const std::array<T, 4>& vs, std::array<Vector2f, 4>& vtcs ) {
+        float lm1 = JMATH::distance( vs[0], vs[2] );
+        float lm2 = JMATH::distance( vs[0], vs[1] );
+
+        // this maps MappingDirection::X_POS
+        vtcs[0] = Vector2f( m.pullMappingCoords.x(), m.pullMappingCoords.y());
+        vtcs[1] = Vector2f( m.pullMappingCoords.x() + lm2, m.pullMappingCoords.y());
+        vtcs[2] = Vector2f( m.pullMappingCoords.x(), m.pullMappingCoords.y() + lm1 );
+        vtcs[3] = Vector2f( m.pullMappingCoords.x() + lm2, m.pullMappingCoords.y() + lm1 );
+
+        if ( m.direction == MappingDirection::Y_POS ) {
+            for ( uint64_t t = 0; t < 4; t++ ) vtcs[t].swizzle( 0, 1 );
+        }
+        m.pullMappingCoords.setX( m.pullMappingCoords.x() + distance( vs[0], vs[1] ));
+    }
+
+    void
+    planarMapping( GeomMappingData& m, const Vector3f& normal, const Vector3f vs[], Vector2f vtcs[], int numVerts ) {
+        IndexPair pairMapping = normal.dominantPair();
+
+        for ( int t = 0; t < numVerts; t++ ) {
+            Vector2f tm = vs[t].pairMapped( pairMapping );
+            vtcs[t] = tm + m.offset;
+        }
+
+        if ( m.direction == MappingDirection::X_POS ) {
+            for ( int t = 0; t < numVerts; t++ ) vtcs[t].swizzle( 0, 1 );
+        }
+
+        if ( m.bUnitMapping ) {
+            float minC = std::numeric_limits<float>::max();
+            float maxC = std::numeric_limits<float>::lowest();
+            for ( int t = 0; t < numVerts; t++ ) { if ( vtcs[t].x() < minC ) minC = vtcs[t].x(); }
+            for ( int t = 0; t < numVerts; t++ ) { if ( vtcs[t].x() > maxC ) maxC = vtcs[t].x(); }
+            float mappingLength = maxC - minC;
+            for ( int t = 0; t < numVerts; t++ )
+                vtcs[t].setX((( vtcs[t].x() - minC ) / mappingLength ) * m.uvScaleInv.x());
+            minC = std::numeric_limits<float>::max();
+            maxC = std::numeric_limits<float>::lowest();
+            for ( int t = 0; t < numVerts; t++ ) { if ( vtcs[t].y() < minC ) minC = vtcs[t].y(); }
+            for ( int t = 0; t < numVerts; t++ ) { if ( vtcs[t].y() > maxC ) maxC = vtcs[t].y(); }
+            mappingLength = maxC - minC;
+            for ( int t = 0; t < numVerts; t++ )
+                vtcs[t].setY((( vtcs[t].y() - minC ) / mappingLength ) * m.uvScaleInv.y
+                        ());
+        }
+    }
+
+    void calcMirrorUVs( GeomMappingData& m, Vector2f *uvs ) {
+        if ( m.mirroring != MappingMirrorE::None ) {
+            float minC = std::numeric_limits<float>::max();
+            float maxC = std::numeric_limits<float>::lowest();
+            switch ( m.mirroring ) {
+                case MappingMirrorE::X_Only:
+                    for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].x() < minC ) minC = uvs[t].x(); }
+                    for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].x() > maxC ) maxC = uvs[t].x(); }
+                    for ( uint64_t t = 0; t < 3; t++ ) uvs[t].setX( minC + ( maxC - uvs[t].x()));
+                    break;
+                case MappingMirrorE::Y_Only:
+                    for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].y() < minC ) minC = uvs[t].y(); }
+                    for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].y() > maxC ) maxC = uvs[t].y(); }
+                    for ( uint64_t t = 0; t < 3; t++ ) uvs[t].setY( minC + ( maxC - uvs[t].y()));
+                    break;
+                case MappingMirrorE::BothWays:
+                    for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].x() < minC ) minC = uvs[t].x(); }
+                    for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].x() > maxC ) maxC = uvs[t].x(); }
+                    for ( uint64_t t = 0; t < 3; t++ ) uvs[t].setX( minC + ( maxC - uvs[t].x()));
+                    minC = std::numeric_limits<float>::max();
+                    maxC = std::numeric_limits<float>::lowest();
+                    for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].y() < minC ) minC = uvs[t].y(); }
+                    for ( uint64_t t = 0; t < 3; t++ ) { if ( uvs[t].y() > maxC ) maxC = uvs[t].y(); }
+                    for ( uint64_t t = 0; t < 3; t++ ) uvs[t].setY( minC + ( maxC - uvs[t].y()));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
 }
 
@@ -294,9 +298,9 @@ void pushTriangleSubDivRec( VDataSP vdata, const Vector3f& v1, const Vector3f& v
         vni2 = normalize( vni2 );
         vni3 = normalize( vni3 );
 
-        pushTriangleSubDivRec( vdata, v1, vi1, vi3, uv1, uvi1, uvi3, vn1, vni1, vni3,    triSubDiv - 1, m );
-        pushTriangleSubDivRec( vdata, vi1, v2, vi2, uvi1, uv2, uvi2, vni1, vn2, vni2,    triSubDiv - 1, m );
-        pushTriangleSubDivRec( vdata, vi3, vi2, v3, uvi3, uvi2, uv3, vni3, vni2, vn3,    triSubDiv - 1, m );
+        pushTriangleSubDivRec( vdata, v1, vi1, vi3, uv1, uvi1, uvi3, vn1, vni1, vni3, triSubDiv - 1, m );
+        pushTriangleSubDivRec( vdata, vi1, v2, vi2, uvi1, uv2, uvi2, vni1, vn2, vni2, triSubDiv - 1, m );
+        pushTriangleSubDivRec( vdata, vi3, vi2, v3, uvi3, uvi2, uv3, vni3, vni2, vn3, triSubDiv - 1, m );
         pushTriangleSubDivRec( vdata, vi1, vi2, vi3, uvi1, uvi2, uvi3, vni1, vni2, vni3, triSubDiv - 1, m );
     }
 }
@@ -306,10 +310,10 @@ void pushTriangleSubDiv( VDataSP vdata, const Vector3f& v1, const Vector3f& v2, 
                          const Vector3f& vn1, const Vector3f& vn2, const Vector3f& vn3, GeomMappingData& m ) {
     if ( m.subdivAccuracy != accuracyNone ) {
         float d1 = distance( v1, v2 );
-        d1 = min( d1, distance( v2, v3 ) );
-        d1 = min( d1, distance( v1, v3 ) );
+        d1 = min( d1, distance( v2, v3 ));
+        d1 = min( d1, distance( v1, v3 ));
 
-        int triSubDiv = static_cast<int>( max( 1, sqrt( d1 / m.subdivAccuracy ) ) );
+        int triSubDiv = static_cast<int>( max( 1, sqrt( d1 / m.subdivAccuracy )));
 
         pushTriangleSubDivRec( vdata, v1, v2, v3, uv1, uv2, uv3, vn1, vn2, vn3, triSubDiv, m );
     } else {
@@ -323,7 +327,7 @@ void pushTriangle( VDataSP vdata, const std::vector<Vector3f>& vs, const std::ve
 }
 
 void pushQuad( VDataSP vdata, const std::array<Vector3f, 4>& vs, const std::array<Vector2f, 4>& vts,
-              const std::array<Vector3f, 4>& vns, GeomMappingData& m ) {
+               const std::array<Vector3f, 4>& vns, GeomMappingData& m ) {
     pushTriangle( vdata, vs[0], vs[1], vs[2], vts[0], vts[1], vts[2], vns[0], vns[1], vns[2], m );
     pushTriangle( vdata, vs[2], vs[1], vs[3], vts[2], vts[1], vts[3], vns[2], vns[1], vns[3], m );
 }
@@ -337,7 +341,7 @@ void pushQuad( VDataSP vdata, const std::array<Vector3f, 4>& vs, const std::arra
 
 void pushQuad( VDataSP vdata, const QuadVertices3& vs, const QuadVertices2& vts, GeomMappingData& m ) {
     Vector3f normal = m.windingOrder == WindingOrder::CCW ? crossProduct( vs[0], vs[1], vs[2] ) :
-                                                            crossProduct( vs[0], vs[2], vs[1] );
+                      crossProduct( vs[0], vs[2], vs[1] );
     normal = normalize( normal );
     pushTriangle( vdata, vs[0], vs[1], vs[2], vts[0] * m.uvScaleInv, vts[1] * m.uvScaleInv, vts[2] * m.uvScaleInv,
                   normal, normal, normal, m );
@@ -402,9 +406,9 @@ void pushTriangle( VDataSP vdata,
         vco[1] = v2;
         vco[2] = v3;
 
-        vuvo[0] = uv1*m.uvScale;
-        vuvo[1] = uv2*m.uvScale;
-        vuvo[2] = uv3*m.uvScale;
+        vuvo[0] = uv1 * m.uvScale;
+        vuvo[1] = uv2 * m.uvScale;
+        vuvo[2] = uv3 * m.uvScale;
 
         vno[0] = vn1;
         vno[1] = vn2;
@@ -422,9 +426,9 @@ void pushTriangle( VDataSP vdata,
         vco[1] = v2;
         vco[2] = v1;
 
-        vuvo[0] = uv3*m.uvScale;
-        vuvo[1] = uv2*m.uvScale;
-        vuvo[2] = uv1*m.uvScale;
+        vuvo[0] = uv3 * m.uvScale;
+        vuvo[1] = uv2 * m.uvScale;
+        vuvo[2] = uv1 * m.uvScale;
 
         vno[0] = vn3;
         vno[1] = vn2;
@@ -451,7 +455,7 @@ namespace PolyServices {
 
     void addQuad( VDataSP vdata, const std::array<Vector3f, 4>& vs, const std::array<Vector2f, 4>& vts,
                   const std::array<Vector3f, 4>& vns, GeomMappingData& m ) {
-        pushQuad( std::move(vdata), vs, vts, vns, m );
+        pushQuad( std::move( vdata ), vs, vts, vns, m );
     }
 
     void addFlatPoly( VDataSP vdata, const std::vector<Vector3f>& points, WindingOrderT wo, GeomMappingData& m ) {
@@ -472,14 +476,14 @@ namespace PolyServices {
     void addFlatPoly( VDataSP vdata, size_t vsize, const std::vector<Vector2f>& verts, float z, const Vector3f& normal,
                       GeomMappingData& m, bool reverseIfTriangulated ) {
         std::vector<Vector3f> verts3d;
-        verts3d.reserve(verts.size());
+        verts3d.reserve( verts.size());
         for ( auto& v : verts ) {
             verts3d.emplace_back( v, z );
         }
-        addFlatPoly( std::move(vdata), vsize, verts3d.data(), normal, m, reverseIfTriangulated );
+        addFlatPoly( std::move( vdata ), vsize, verts3d.data(), normal, m, reverseIfTriangulated );
     }
 
-    void addFlatPoly( VDataSP vdata, size_t vsize, const Vector3f* verts, const Vector3f& normal, GeomMappingData& m,
+    void addFlatPoly( VDataSP vdata, size_t vsize, const Vector3f *verts, const Vector3f& normal, GeomMappingData& m,
                       bool reverseIfTriangulated ) {
         std::array<Vector3f, 4> vs;
         std::array<Vector2f, 4> vtcs{};
@@ -501,12 +505,14 @@ namespace PolyServices {
             }
         } else {
             Triangulator tri( verts, vsize, normal, 0.00001f );
-            for ( auto& tvs : tri.get3dTrianglesList() ) {
+            for ( auto& tvs : tri.get3dTrianglesList()) {
                 MappingServices::planarMapping( m, normal, tvs.data(), vtcs.data(), 3 );
                 if ( reverseIfTriangulated ) {
-                    pushTriangleSubDiv( vdata, tvs[2], tvs[1], tvs[0], vtcs[2], vtcs[1], vtcs[0], normal, normal, normal, m );
+                    pushTriangleSubDiv( vdata, tvs[2], tvs[1], tvs[0], vtcs[2], vtcs[1], vtcs[0], normal, normal,
+                                        normal, m );
                 } else {
-                    pushTriangleSubDiv( vdata, tvs[0], tvs[1], tvs[2], vtcs[0], vtcs[1], vtcs[2], normal, normal, normal, m );
+                    pushTriangleSubDiv( vdata, tvs[0], tvs[1], tvs[2], vtcs[0], vtcs[1], vtcs[2], normal, normal,
+                                        normal, m );
                 }
             }
         }
@@ -521,17 +527,19 @@ namespace PolyServices {
         addFlatPolyTriangulated( vdata, vsize, verts3d.data(), normal, m, reverse );
     }
 
-    void addFlatPolyTriangulated( VDataSP vdata, size_t vsize, const Vector3f* verts, const Vector3f& normal,
+    void addFlatPolyTriangulated( VDataSP vdata, size_t vsize, const Vector3f *verts, const Vector3f& normal,
                                   GeomMappingData& m, bool reverse ) {
         Vector2f vtcs[4];
 
         Triangulator tri( verts, vsize, normal );
-        for ( auto& tvs : tri.get3dTrianglesList() ) {
+        for ( auto& tvs : tri.get3dTrianglesList()) {
             MappingServices::planarMapping( m, normal, tvs.data(), vtcs, 3 );
             if ( reverse ) {
-                pushTriangleSubDiv( vdata, tvs[2], tvs[1], tvs[0], vtcs[2], vtcs[1], vtcs[0], normal, normal, normal, m );
+                pushTriangleSubDiv( vdata, tvs[2], tvs[1], tvs[0], vtcs[2], vtcs[1], vtcs[0], normal, normal, normal,
+                                    m );
             } else {
-                pushTriangleSubDiv( vdata, tvs[0], tvs[1], tvs[2], vtcs[0], vtcs[1], vtcs[2], normal, normal, normal, m );
+                pushTriangleSubDiv( vdata, tvs[0], tvs[1], tvs[2], vtcs[0], vtcs[1], vtcs[2], normal, normal, normal,
+                                    m );
             }
         }
     }
@@ -540,14 +548,14 @@ namespace PolyServices {
         addFlatPolyWithMapping( vdata, 4, qs.vs().verts(), qs.vts().verts(), m );
     }
 
-    void addFlatPolyWithMapping( VDataSP vdata,  size_t vsize, const Vector3f* vs, const Vector2f* vts,
-                                 GeomMappingData& m, const Vector3f* vn ) {
-        if ( isCollinear( vs[0], vs[1], vs[2] ) ) return;
+    void addFlatPolyWithMapping( VDataSP vdata, size_t vsize, const Vector3f *vs, const Vector2f *vts,
+                                 GeomMappingData& m, const Vector3f *vn ) {
+        if ( isCollinear( vs[0], vs[1], vs[2] )) return;
 
         Vector3f normal = vn ? *vn : normalFromPoints( vs, m );
         if ( vsize == 4 ) {
-            pushQuadSubDiv( vdata, std::array<Vector3f, 4>{ {vs[0], vs[1], vs[2], vs[3]} },
-                            std::array<Vector2f, 4>{ {vts[0], vts[1], vts[2], vts[3]} },
+            pushQuadSubDiv( vdata, std::array<Vector3f, 4>{{ vs[0], vs[1], vs[2], vs[3] }},
+                            std::array<Vector2f, 4>{{ vts[0], vts[1], vts[2], vts[3] }},
                             m, normal );
         } else {
             for ( uint64_t t = 0; t < vsize - 2; t++ ) {
@@ -579,10 +587,10 @@ namespace PolyServices {
         m.pullMappingCoords = m.offset;
         std::array<Vector3f, 4> vss;
 
-        if ( checkBitWiseFlag( pullFlags, PullFlags::Sides ) ) {
+        if ( checkBitWiseFlag( pullFlags, PullFlags::Sides )) {
             for ( uint64_t t = 0; t < nvertsSane.size(); t++ ) {
                 uint64_t index = t;
-                uint32_t nextIndex = static_cast<uint32_t>( getCircularArrayIndexUnsigned( t + 1, nvertsSane.size() ));
+                uint32_t nextIndex = static_cast<uint32_t>( getCircularArrayIndexUnsigned( t + 1, nvertsSane.size()));
 
                 vss[3] = ( vertsSane[index] );
                 vss[2] = ( vertsSane[nextIndex] );
@@ -594,8 +602,8 @@ namespace PolyServices {
             }
         }
 
-        if ( checkBitWiseFlag( pullFlags, PullFlags::Tops ) ) {
-            int32_t nvSize = static_cast<int32_t>( nvertsSane.size() );
+        if ( checkBitWiseFlag( pullFlags, PullFlags::Tops )) {
+            int32_t nvSize = static_cast<int32_t>( nvertsSane.size());
             std::unique_ptr<Vector3f[]> topvertsSane( new Vector3f[nvSize] );
             uint64_t l = 0;
             for ( size_t q = 0; q < static_cast<uint64_t>(nvSize); q++ ) {
@@ -604,7 +612,7 @@ namespace PolyServices {
             // Draw bottom cap
             addFlatPoly( vdata, nvertsSane.size(), topvertsSane.get(), -normal, m, true );
             // Draw top cap
-            for ( size_t q = 0; q < nvertsSane.size(); q++ ) topvertsSane[q] = nvertsSane[nvSize -1 - q] + offset;
+            for ( size_t q = 0; q < nvertsSane.size(); q++ ) topvertsSane[q] = nvertsSane[nvSize - 1 - q] + offset;
             addFlatPoly( vdata, nvertsSane.size(), topvertsSane.get(), normal, m );
         }
     }
@@ -614,7 +622,74 @@ namespace PolyServices {
         if ( vtri.size() < 3 ) return 0.0f;
         Triangulator tri( vtri );
 
-        return getAreaOf(tri.get2dTrianglesTuple());
+        return getAreaOf( tri.get2dTrianglesTuple());
     }
 
+    void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution,
+                             const Vector3f& _normal, ReverseFlag rf ) {
+
+        for ( const auto& cp : solution ) {
+            bool pathOrient = Orientation( cp );
+
+            if ( pathOrient && cp.size()) {
+                std::vector<Vector2f> fpoints;
+                fpoints.reserve( cp.size());
+                for ( const auto& p : cp ) {
+                    fpoints.push_back( Vector2f{ static_cast<int>( p.X ), static_cast<int>( p.Y ) } * 0.001f );
+                }
+                ret.emplace_back( PolyLine2d{ fpoints, _normal, rf } );
+            }
+        }
+
+    }
+
+    std::vector<PolyLine2d> clipperToPolylines( const ClipperLib::Paths& source, const ClipperLib::Path& clipAgainst,
+                                                const Vector3f& _normal, ReverseFlag rf ) {
+        std::vector<PolyLine2d> ret;
+        for ( auto& sl : source ) {
+            ClipperLib::Clipper c;
+            ClipperLib::Paths solution;
+            c.AddPath( sl, ClipperLib::ptSubject, true );
+            c.AddPath( clipAgainst, ClipperLib::ptClip, true );
+            c.Execute( ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero );
+
+            clipperToPolylines( ret, solution, _normal, rf );
+        }
+
+        return ret;
+    }
+
+    ClipperLib::Path v2ListToClipperPath( const std::vector<Vector2f>& _values ) {
+        ClipperLib::Path ret;
+        for ( auto& p : _values ) {
+            ret << p;
+        }
+        return ret;
+    }
+
+    V2fVectorOfVector clipperPathsToV2list( const ClipperLib::Paths& paths ) {
+        V2fVectorOfVector ret{};
+
+        for ( const auto& path : paths ) {
+            V2fVector vv{};
+            for ( const auto& v : path ) {
+                vv.emplace_back( V2f{ static_cast<float>(v.X), static_cast<float>(v.Y) } * 0.001f );
+            }
+            ret.emplace_back( vv );
+        }
+        return ret;
+    }
+
+    V2fVector clipAgainst( const V2fVector& path1, const V2fVector& path2, ClipMode clipMode ) {
+        ClipperLib::Clipper c;
+        ClipperLib::Paths solution;
+        c.AddPath( PolyServices::v2ListToClipperPath( path1 ), ClipperLib::ptSubject, true );
+        c.AddPath( PolyServices::v2ListToClipperPath( path2 ), ClipperLib::ptClip, true );
+        c.Execute( clipMode == ClipMode::Union ? ClipperLib::ctUnion : ClipperLib::ctIntersection, solution,
+                   ClipperLib::pftNonZero, ClipperLib::pftNonZero );
+        V2fVectorOfVector path3 = PolyServices::clipperPathsToV2list( solution );
+        V2fVector ret{};
+        if ( !path3.empty() ) ret = path3.front();
+        return ret;
+    }
 }

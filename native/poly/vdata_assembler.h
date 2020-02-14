@@ -20,12 +20,6 @@ class SceneGraph;
 
 using GeomDataListBuilderRetType = std::vector<std::shared_ptr<VData>>;
 
-namespace ClipperLib {
-    struct IntPoint;
-    typedef std::vector< IntPoint > Path;
-    typedef std::vector< Path > Paths;
-}
-
 struct V2nff {
     V2f v2;
     V3f normal;
@@ -309,55 +303,6 @@ namespace VDataServices {
     }
 }
 
-struct PolyLineBase3d {
-    explicit PolyLineBase3d( std::vector<Vector3f> verts ) : verts( std::move( verts )) {}
-    explicit PolyLineBase3d( const Triangle3d& _verts ) {
-        const auto& [v1,v2,v3] = _verts;
-        verts.emplace_back(v1);
-        verts.emplace_back(v2);
-        verts.emplace_back(v3);
-    }
-
-    std::vector<Vector3f> verts;
-};
-
-struct PolyLineBase2d  {
-    explicit PolyLineBase2d( std::vector<Vector2f> verts ) : verts( std::move( verts )) {}
-
-    std::vector<Vector2f> verts;
-};
-
-struct PolyLineCommond {
-    PolyLineCommond( const Vector3f& normal, ReverseFlag reverseFlag ) : normal( normal ), reverseFlag( reverseFlag ) {}
-
-    Vector3f normal = Vector3f::ZERO;
-    ReverseFlag reverseFlag = ReverseFlag::False;
-};
-
-struct PolyLine : public PolyLineBase3d, public PolyLineCommond {
-    PolyLine( const std::vector<Vector3f>& _verts, const Vector3f& _normal,
-              const ReverseFlag _reverseFlag = ReverseFlag::False ) :
-            PolyLineBase3d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
-    PolyLine( const Triangle3d& _verts, const Vector3f& _normal,
-              const ReverseFlag _reverseFlag = ReverseFlag::False ) :
-            PolyLineBase3d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
-};
-
-struct PolyOutLine : public PolyLineBase3d {
-    PolyOutLine( const std::vector<Vector3f>& _verts, const Vector3f& _normal, const float _zPull,
-                 const ReverseFlag _reverseFlag = ReverseFlag::False ) :
-                 PolyLineBase3d(_verts), normal(_normal), zPull(_zPull), reverseFlag(_reverseFlag) {}
-
-    Vector3f normal;
-    float zPull;
-    ReverseFlag reverseFlag = ReverseFlag::False;
-};
-
-struct PolyLine2d : public PolyLineBase2d, public PolyLineCommond {
-    PolyLine2d( const std::vector<Vector2f>& _verts, const Vector3f& _normal,
-                const ReverseFlag _reverseFlag = ReverseFlag::False ) :
-            PolyLineBase2d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
-};
 
 //class GeomDataQuadMeshBuilder : public GeomDataBuilder {
 //public:
@@ -417,9 +362,3 @@ struct PolyLine2d : public PolyLineBase2d, public PolyLineCommond {
 //    std::string svgAscii;
 //    std::shared_ptr<Profile> mProfile;
 //};
-
-void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution, const Vector3f& _normal,
-                         ReverseFlag rf = ReverseFlag::False );
-std::vector<PolyLine2d> clipperToPolylines( const ClipperLib::Paths& source, const ClipperLib::Path& clipAgainst,
-                                            const Vector3f& _normal, ReverseFlag rf = ReverseFlag::False );
-ClipperLib::Path getPerimeterPath( const std::vector<Vector2f>& _values );

@@ -6,54 +6,11 @@
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
 #include <core/math/poly_shapes.hpp>
-#include <poly/polyclipping/clipper.hpp>
 #include <poly/poly_services.hpp>
 #include <poly/follower.hpp>
 #include <poly/converters/svg/svgtopoly.hpp>
 #include <poly/converters/gltf2/gltf2.h>
 #include <poly/scene_graph.h>
-
-void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution,
-                                            const Vector3f& _normal, ReverseFlag rf ) {
-
-    for ( const auto& cp : solution ) {
-        bool pathOrient = Orientation( cp );
-
-        if ( pathOrient && cp.size() ) {
-            std::vector<Vector2f> fpoints;
-            fpoints.reserve(cp.size());
-            for ( const auto& p : cp ) {
-                fpoints.push_back( Vector2f{ static_cast<int>( p.X ), static_cast<int>( p.Y ) } * 0.001f );
-            }
-            ret.emplace_back( PolyLine2d{ fpoints, _normal, rf  } );
-        }
-    }
-
-}
-
-std::vector<PolyLine2d> clipperToPolylines( const ClipperLib::Paths& source, const ClipperLib::Path& clipAgainst,
-                                            const Vector3f& _normal, ReverseFlag rf ) {
-    std::vector<PolyLine2d> ret;
-    for ( auto& sl : source ) {
-        ClipperLib::Clipper c;
-        ClipperLib::Paths solution;
-        c.AddPath( sl, ClipperLib::ptSubject, true );
-        c.AddPath( clipAgainst, ClipperLib::ptClip, true );
-        c.Execute( ClipperLib::ctIntersection, solution, ClipperLib::pftNonZero, ClipperLib::pftNonZero );
-
-        clipperToPolylines( ret, solution, _normal, rf );
-    }
-
-    return ret;
-}
-
-ClipperLib::Path getPerimeterPath( const std::vector<Vector2f>& _values ) {
-    ClipperLib::Path ret;
-    for ( auto& p : _values ) {
-        ret << p;
-    }
-    return ret;
-}
 
 void internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
     if ( ln == Vector3f::ZERO ) {

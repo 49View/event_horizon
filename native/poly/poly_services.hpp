@@ -7,20 +7,74 @@
 #include <memory>
 #include <vector>
 #include <core/htypes_shared.hpp>
+#include <core/math/vector3f.h>
 
-class Vector2f;
-class Vector3f;
 class QuadStripUV;
 struct GeomMappingData;
 class QuadVertices3;
 class QuadVertices2;
 class VData;
 using VDataSP = std::shared_ptr<VData>;
+namespace ClipperLib {
+    struct IntPoint;
+    typedef std::vector< IntPoint > Path;
+    typedef std::vector< Path > Paths;
+}
 
 enum PullFlags : uint32_t {
     Sides = 1 << 0,
     Tops = 1 << 1,
     All = 0xffffffff,
+};
+
+struct PolyLineBase3d {
+    explicit PolyLineBase3d( std::vector<Vector3f> verts ) : verts( std::move( verts )) {}
+    explicit PolyLineBase3d( const Triangle3d& _verts ) {
+        const auto& [v1,v2,v3] = _verts;
+        verts.emplace_back(v1);
+        verts.emplace_back(v2);
+        verts.emplace_back(v3);
+    }
+
+    std::vector<Vector3f> verts;
+};
+
+struct PolyLineBase2d  {
+    explicit PolyLineBase2d( std::vector<Vector2f> verts ) : verts( std::move( verts )) {}
+
+    std::vector<Vector2f> verts;
+};
+
+struct PolyLineCommond {
+    PolyLineCommond( const Vector3f& normal, ReverseFlag reverseFlag ) : normal( normal ), reverseFlag( reverseFlag ) {}
+
+    Vector3f normal = Vector3f::ZERO;
+    ReverseFlag reverseFlag = ReverseFlag::False;
+};
+
+struct PolyLine : public PolyLineBase3d, public PolyLineCommond {
+    PolyLine( const std::vector<Vector3f>& _verts, const Vector3f& _normal,
+              const ReverseFlag _reverseFlag = ReverseFlag::False ) :
+            PolyLineBase3d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
+    PolyLine( const Triangle3d& _verts, const Vector3f& _normal,
+              const ReverseFlag _reverseFlag = ReverseFlag::False ) :
+            PolyLineBase3d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
+};
+
+struct PolyOutLine : public PolyLineBase3d {
+    PolyOutLine( const std::vector<Vector3f>& _verts, const Vector3f& _normal, const float _zPull,
+                 const ReverseFlag _reverseFlag = ReverseFlag::False ) :
+            PolyLineBase3d(_verts), normal(_normal), zPull(_zPull), reverseFlag(_reverseFlag) {}
+
+    Vector3f normal;
+    float zPull;
+    ReverseFlag reverseFlag = ReverseFlag::False;
+};
+
+struct PolyLine2d : public PolyLineBase2d, public PolyLineCommond {
+    PolyLine2d( const std::vector<Vector2f>& _verts, const Vector3f& _normal,
+                const ReverseFlag _reverseFlag = ReverseFlag::False ) :
+            PolyLineBase2d(_verts), PolyLineCommond(_normal, _reverseFlag) {}
 };
 
 std::vector<Vector2f> utilGenerateFlatRect( const Vector2f& size, WindingOrderT wo, PivotPointPosition ppp );
@@ -38,6 +92,12 @@ namespace MappingServices {
 }
 
 namespace PolyServices {
+
+    enum ClipMode {
+        Union,
+        Intersection
+    };
+
     float areaOf( const std::vector<Vector2f>& vtri );
 
     void addQuad( VDataSP vdata, const std::array<Vector3f, 4>& vs, const std::array<Vector2f, 4>& vts,
@@ -62,4 +122,13 @@ namespace PolyServices {
                GeomMappingData& m, PullFlags pullFlags = PullFlags::All );
     void pull( VDataSP vdata, const std::vector<Vector3f>& verts, const Vector3f& normal, float height,
                GeomMappingData& m, PullFlags pullFlags = PullFlags::All );
+
+    void clipperToPolylines( std::vector<PolyLine2d>& ret, const ClipperLib::Paths& solution, const Vector3f& _normal,
+                             ReverseFlag rf = ReverseFlag::False );
+    std::vector<PolyLine2d> clipperToPolylines( const ClipperLib::Paths& source, const ClipperLib::Path& clipAgainst,
+                                                const Vector3f& _normal, ReverseFlag rf = ReverseFlag::False );
+    ClipperLib::Path v2ListToClipperPath( const std::vector<Vector2f>& _values );
+    V2fVectorOfVector clipperPathsToV2list( const ClipperLib::Paths& paths );
+
+    V2fVector clipAgainst( const V2fVector& path1, const V2fVector& path2, ClipMode clipMode = ClipMode::Intersection );
 }
