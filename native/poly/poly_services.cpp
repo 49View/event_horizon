@@ -672,7 +672,8 @@ namespace PolyServices {
 
         for ( const auto& path : paths ) {
             V2fVector vv{};
-            for ( const auto& v : path ) {
+            for ( auto m = static_cast<int64_t>(path.size()-1); m>=0; m-- ) {
+                auto v = path[m];
                 vv.emplace_back( V2f{ static_cast<float>(v.X), static_cast<float>(v.Y) } * 0.001f );
             }
             ret.emplace_back( vv );
