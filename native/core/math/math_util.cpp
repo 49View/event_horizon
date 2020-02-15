@@ -166,3 +166,4 @@ std::vector<Vector3f> roundedCornerFanFromRect( const JMATH::Rect2f& rect, float
 
     return ret;
 }
+
