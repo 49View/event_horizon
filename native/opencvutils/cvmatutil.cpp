@@ -67,66 +67,6 @@ cv::Mat decodeRawImageIntoMat( const RawImage& _ri ) {
     return decodeRawImageDataIntoMat( _ri.width, _ri.height, _ri.channels, _ri.rawBtyes.get());
 }
 
-std::vector<std::array<double, 7> > huMomentsOnImage( const cv::Mat& src_gray, int thresh, double lengthThresh ) {
-    std::vector<std::array<double, 7> > hus;
-
-    cv::Mat canny_output;
-    std::vector<std::vector<cv::Point>> contoursSource;
-    std::vector<cv::Vec4i> hierarchy;
-    Canny( src_gray, canny_output, thresh, thresh * 2, 3 );
-    cv::findContours( canny_output, contoursSource, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE,
-                      cv::Point( 0, 0 ));
-
-//	std::vector<std::vector<cv::Point>> contours = contoursSource;
-
-    std::vector<double> lengths;
-    for ( auto& i : contoursSource ) {
-        double le = 0;
-        for ( size_t m = 0; m < i.size() - 1; m++ ) {
-            le += cv::norm( i[m] - i[m + 1] );
-        }
-        lengths.push_back( le );
-    }
-
-    std::vector<std::vector<cv::Point> > contours;
-    for ( size_t i = 0; i < contoursSource.size(); i++ ) {
-        if ( lengths[i] < lengthThresh ) continue;
-        contours.emplace_back();
-        cv::approxPolyDP( cv::Mat( contoursSource[i] ), contours[contours.size() - 1],
-                          cv::arcLength( cv::Mat( contoursSource[i] ), true ) * 0.005, true );
-    }
-
-    std::vector<cv::Moments> mu( contours.size());
-    for ( size_t i = 0; i < contours.size(); i++ ) {
-        mu[i] = moments( contours[i], false );
-        hus.push_back( std::array<double, 7>{} );
-        double hu[7];
-        HuMoments( mu[i], hu );
-        for ( int q = 0; q < 7; q++ ) hus[i][q] = hu[q];
-    }
-
-    return hus;
-}
-
-std::array<double, 7> huMomentsOnImageRaw( const cv::Mat& src_gray ) {
-
-    cv::Mat imgGray;
-    cv::Mat imgInv;
-    cv::Mat img;
-    toGrayScale(src_gray, imgGray);
-    cv::bitwise_not(imgGray, img);
-    threshold( img, img, 128, 255, cv::THRESH_BINARY );
-    cv::Moments moments = cv::moments( img, false );
-
-    std::array<double, 7> huMoments{};
-    HuMoments( moments, huMoments );
-    for ( double& huMoment : huMoments ) {
-        huMoment = -1 * copysign( 1.0, huMoment ) * log10( abs( huMoment ));
-    }
-
-    return huMoments;
-}
-
 void convertContoursArrayToFloats( const std::vector<std::vector<cv::Point2i> >& contoursi,
                                    std::vector<std::vector<Vector2f> >& contours ) {
     for ( unsigned long i = 0; i < contoursi.size(); i++ ) {

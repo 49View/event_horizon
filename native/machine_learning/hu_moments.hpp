@@ -6,6 +6,7 @@
 const static int MomentArraySize = 7;
 
 using HUV = std::array<double, MomentArraySize>;
+namespace cv { class Mat; };
 
 JSONDATA_R( HuMomentsBSData, type, name, source, hus )
 
@@ -17,14 +18,14 @@ JSONDATA_R( HuMomentsBSData, type, name, source, hus )
 
 class HuMomentsBuilder {
 public:
-    HuMomentsBuilder() {}
+    HuMomentsBuilder() = default;
 
     HuMomentsBuilder( const std::string& _type, const std::string& _name, const std::string& _source,
                       const std::vector<HUV>& _value );
 
     HuMomentsBSData build();
 public:
-    const std::string& getType() const {
+    [[nodiscard]] const std::string& getType() const {
         return type;
     }
 
@@ -32,7 +33,7 @@ public:
         HuMomentsBuilder::type = _type;
     }
 
-    const std::string& getName() const {
+    [[nodiscard]] const std::string& getName() const {
         return name;
     }
 
@@ -41,7 +42,7 @@ public:
         return *this;
     }
 
-    const std::string& getSource() const {
+    [[nodiscard]] const std::string& getSource() const {
         return source;
     }
 
@@ -50,11 +51,11 @@ public:
         return *this;
     }
 
-    const std::vector<std::array<double, 7>>& getHus() const {
+    [[nodiscard]] const std::vector<HUV>& getHus() const {
         return hus;
     }
 
-    HuMomentsBuilder& setHus( const std::vector<std::array<double, 7>>& _hus ) {
+    HuMomentsBuilder& setHus( const std::vector<HUV>& _hus ) {
         HuMomentsBuilder::hus = _hus;
         return *this;
     }
@@ -73,6 +74,8 @@ namespace HuMomentsService {
     double compare( const std::vector<HUV>& _source, const HUV& _compareto );
     double compare( const HUV& _source, const HUV& _compareto );
 
+    std::vector<HUV> huMomentsOnImage( const cv::Mat& src_gray, int thresh = 84, double lengthThresh = 10.0 );
+    HUV huMomentsOnImageRaw( const cv::Mat& src_gray );
+
     bool isMostlyStraightLines( const std::vector<HUV>& _source );
-    void save( const HuMomentsBSData& _source, RawImage& _sourceImage );
 };

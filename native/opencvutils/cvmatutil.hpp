@@ -31,10 +31,6 @@ cv::Mat decodeRawImageIntoMat( const RawImage& _ri );
 
 ImageParams getImageParamsFromMat( const cv::Mat& _source );
 
-std::vector<std::array<double, 7> >
-huMomentsOnImage( const cv::Mat& src_gray, int thresh = 84, double lengthThresh = 10.0 );
-std::array<double, 7> huMomentsOnImageRaw( const cv::Mat& src_gray );
-
 void convertContoursArrayToFloats( const std::vector<std::vector<cv::Point2i> >& contoursi,
                                    std::vector<std::vector<Vector2f> >& contours );
 void convertContoursArrayToInt( const std::vector<std::vector<Vector2f> >& contoursi,

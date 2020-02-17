@@ -5,6 +5,7 @@
 //#define STB_IMAGE_WRITE_IMPLEMENTATION
 //#endif
 #include <stb/stb_image_write.h>
+#include <opencv4/opencv2/imgproc.hpp>
 
 HuMomentsBuilder::HuMomentsBuilder( const std::string& _type, const std::string& _name,
                                     const std::string& _source,
@@ -88,14 +89,69 @@ namespace HuMomentsService {
         return numStraights >= _source.size() / 2;
     }
 
-    void save( const HuMomentsBSData& _source, RawImage& _sourceImage ) {
-//        std::string tfile = FM::cacheFolder() + "tempmoment.png";
-//        stbi_write_png( tfile.c_str(), _sourceImage.width, _sourceImage.height, _sourceImage.channels,
-//                        _sourceImage.rawBtyes.get(), _sourceImage.width * _sourceImage.channels );
-//        uint64_t l;
-//        auto b = FM::readDataFileInternal( tfile, l );
-//        FM::writeDataFile( _source.source, reinterpret_cast<const char *>(b.get()), l );
-//        _source.save();
+    std::vector<HUV > huMomentsOnImage( const cv::Mat& src_gray, int thresh, double lengthThresh ) {
+        std::vector<HUV> hus;
+
+        cv::Mat canny_output;
+        std::vector<std::vector<cv::Point>> contoursSource;
+        std::vector<cv::Vec4i> hierarchy;
+        Canny( src_gray, canny_output, thresh, thresh * 2, 3 );
+        cv::findContours( canny_output, contoursSource, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE,
+                          cv::Point( 0, 0 ));
+
+//	std::vector<std::vector<cv::Point>> contours = contoursSource;
+
+        std::vector<double> lengths;
+        for ( auto& i : contoursSource ) {
+            double le = 0;
+            for ( size_t m = 0; m < i.size() - 1; m++ ) {
+                le += cv::norm( i[m] - i[m + 1] );
+            }
+            lengths.push_back( le );
+        }
+
+        std::vector<std::vector<cv::Point> > contours;
+        for ( size_t i = 0; i < contoursSource.size(); i++ ) {
+            if ( lengths[i] < lengthThresh ) continue;
+            contours.emplace_back();
+            cv::approxPolyDP( cv::Mat( contoursSource[i] ), contours[contours.size() - 1],
+                              cv::arcLength( cv::Mat( contoursSource[i] ), true ) * 0.005, true );
+        }
+
+        std::vector<cv::Moments> mu( contours.size());
+        for ( size_t i = 0; i < contours.size(); i++ ) {
+            mu[i] = moments( contours[i], false );
+            hus.push_back( std::array<double, 7>{} );
+            double hu[7];
+            HuMoments( mu[i], hu );
+            for ( int q = 0; q < 7; q++ ) hus[i][q] = hu[q];
+        }
+
+        return hus;
+    }
+
+    HUV huMomentsOnImageRaw( const cv::Mat& src_gray ) {
+
+        cv::Mat imgGray;
+        cv::Mat imgInv;
+        cv::Mat img;
+
+        if ( src_gray.channels() == 1 ) {
+            imgGray = src_gray;
+        } else {
+            cv::cvtColor( src_gray, imgGray, cv::COLOR_BGR2GRAY );
+        }
+
+        threshold( imgGray, img, 128, 255, cv::THRESH_BINARY );
+        cv::Moments moments = cv::moments( img, true );
+
+        HUV huMoments{};
+        HuMoments( moments, huMoments );
+        for ( double& huMoment : huMoments ) {
+            huMoment = -1 * copysign( 1.0, huMoment ) * log10( abs( huMoment ));
+        }
+
+        return huMoments;
     }
 
 }
