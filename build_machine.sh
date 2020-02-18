@@ -1,0 +1,12 @@
+pom.sh rapidjson        /usr/local/
+pom.sh stb              /usr/local/
+pom.sh websocketpp      /usr/local/
+pom.sh restbed          /usr/local/
+pom.sh boost            /usr/local/
+pom.sh opt-sat-indie    /opt/Allegorithmic
+pom.sh fbx2gltf-linux   /usr/local/bin/
+pom.sh libzip           /usr/local/
+pom.sh tinygltf         /usr/local/include/tinygltf/
+pom.sh mongo-c-driver   /usr/local/
+pom.sh mongo-cxx-driver /usr/local/
+pom.sh opencv           /usr/local/
