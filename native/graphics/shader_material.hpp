@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 class Renderer;
 class HeterogeneousMap;

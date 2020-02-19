@@ -20,13 +20,13 @@
 //}
 
 void loadTrainSet( const std::string &pathName, int label, std::vector<cv::Mat> &trainCells, std::vector<int> &trainLabels ) {
-	cv::Mat img = cv::imread( "data/SURFData/" + pathName, cv::IMREAD_GRAYSCALE );
-
-	for ( auto t = 0; t < img.cols; t += 64 ) {
-		cv::Mat sample = img.colRange( t, t + 64 ).clone();
-		trainCells.push_back( sample );
-		trainLabels.push_back( label );
-	}
+//	cv::Mat img = cv::imread( "data/SURFData/" + pathName, cv::IMREAD_GRAYSCALE );
+//
+//	for ( auto t = 0; t < img.cols; t += 64 ) {
+//		cv::Mat sample = img.colRange( t, t + 64 ).clone();
+//		trainCells.push_back( sample );
+//		trainLabels.push_back( label );
+//	}
 
 	//cv::Mat img = cv::imread( FM::DataRoot() + pathName, CV_LOAD_IMAGE_GRAYSCALE );
 	//int ImgCount = 0;

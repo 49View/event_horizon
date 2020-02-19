@@ -6,6 +6,7 @@
 #include <tinygltf/include/tiny_dng_loader.h>
 #include <tinygltf/include/tiny_gltf.h>
 #include <core/math/vector4f.h>
+#include <core/raw_image.h>
 #include <core/name_policy.hpp>
 #include <core/descriptors/uniform_names.h>
 #include <poly/poly.hpp>

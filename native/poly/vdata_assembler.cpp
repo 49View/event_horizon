@@ -5,6 +5,7 @@
 #include "vdata_assembler.h"
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
+#include <core/raw_image.h>
 #include <core/math/poly_shapes.hpp>
 #include <poly/poly_services.hpp>
 #include <poly/follower.hpp>
