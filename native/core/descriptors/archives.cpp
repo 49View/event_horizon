@@ -90,7 +90,10 @@ void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad )
             LOGRS(  zip_get_name( za, t, ZIP_FL_UNCHANGED) << " Size: " << buff.second << " Uncompressed: " << zInfo.size << " Read: " << byteRead );
             if ( zInfo.size == 0 && zInfo.comp_size == 0 && string_ends_with( zInfo.name, "/" ) ) {
                 auto cmd =  "cd " + getDaemonRoot() + " && mkdir " + getFirstFolderInPath( zInfo.name );
-                system( cmd.c_str() );
+                auto returnValue = system( cmd.c_str() );
+                if ( returnValue != 0 ) {
+                    LOGRS( cmd << " has return and error, code: " << returnValue );
+                }
             } else {
                 auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
                 FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );

@@ -138,7 +138,7 @@ void CameraControlFly::renderControls() {
     }
 }
 
-CameraControlFly::CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderOrchestrator& rsg )
+CameraControlFly::CameraControlFly( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable( cameraRig, rsg ) {
     toggle( rig()->Cvt(), ViewportToggles::DrawGrid );
     cameraRig->getCamera()->setPosition( Vector3f( 0.0f, 1.0f, 3.0f ) );

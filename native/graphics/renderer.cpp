@@ -59,7 +59,7 @@ generateGeometryVP( std::shared_ptr<VData> _data ) {
     auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( _data->numVerts(), PRIMITIVE_TRIANGLES,
                                                                    VFVertexAllocation::PreAllocate, _data->numIndices(),
                                                                    std::move( _indices ));
-    for ( int32_t t = 0; t < _data->numVerts(); t++ ) {
+    for ( size_t t = 0; t < _data->numVerts(); t++ ) {
         SOAData->addVertex( _data->soaAt( t ));
     }
     return SOAData;

@@ -29,6 +29,12 @@
 #pragma clang diagnostic ignored "-Wold-style-cast"
 #endif
 
+#ifdef __GNUC__
+_Pragma("GCC diagnostic push")
+_Pragma("GCC diagnostic ignored \"-Wunused-function\"")
+_Pragma("GCC diagnostic ignored \"-Wold-style-cast\"")
+#endif
+
 //-----------------------------------------------------------------------------
 // Forward Declarations
 //-----------------------------------------------------------------------------
@@ -428,19 +434,30 @@ struct IMGUI_API ImGuiMenuColumns
 // Internal state of the currently focused/edited text input box
 struct IMGUI_API ImGuiTextEditState
 {
-    ImGuiID             Id;                         // widget id owning the text state
+    ImGuiID             Id{};                         // widget id owning the text state
     ImVector<ImWchar>   Text;                       // edit buffer, we need to persist but can't guarantee the persistence of the user-provided buffer. so we copy into own buffer.
     ImVector<char>      InitialText;                // backup of end-user buffer at the time of focus (in UTF-8, unaltered)
     ImVector<char>      TempTextBuffer;
-    int                 CurLenA, CurLenW;           // we need to maintain our buffer length in both UTF-8 and wchar format.
-    int                 BufSizeA;                   // end-user buffer size
-    float               ScrollX;
-    ImGuiStb::STB_TexteditState   StbState;
-    float               CursorAnim;
-    bool                CursorFollow;
-    bool                SelectedAllMouseLock;
+    int                 CurLenA{}, CurLenW{};           // we need to maintain our buffer length in both UTF-8 and wchar format.
+    int                 BufSizeA{};                   // end-user buffer size
+    float               ScrollX{};
+    ImGuiStb::STB_TexteditState   StbState{};
+    float               CursorAnim{};
+    bool                CursorFollow{};
+    bool                SelectedAllMouseLock{};
 
-    ImGuiTextEditState()                            { memset(this, 0, sizeof(*this)); }
+    ImGuiTextEditState() {}
+
+    ImGuiTextEditState( ImGuiID id, const ImVector<ImWchar> &text, const ImVector<char> &initialText,
+                        const ImVector<char> &tempTextBuffer, int curLenA, int curLenW, int bufSizeA, float scrollX,
+                        const ImGuiStb::STB_TexteditState &stbState, float cursorAnim, bool cursorFollow,
+                        bool selectedAllMouseLock ) : Id( id ), Text( text ), InitialText( initialText ),
+                                                      TempTextBuffer( tempTextBuffer ), CurLenA( curLenA ),
+                                                      CurLenW( curLenW ), BufSizeA( bufSizeA ), ScrollX( scrollX ),
+                                                      StbState( stbState ), CursorAnim( cursorAnim ),
+                                                      CursorFollow( cursorFollow ),
+                                                      SelectedAllMouseLock( selectedAllMouseLock ) {}
+
     void                CursorAnimReset()           { CursorAnim = -0.30f; }                                   // After a user-input the cursor stays on for a while without blinking
     void                CursorClamp()               { StbState.cursor = ImMin(StbState.cursor, CurLenW); StbState.select_start = ImMin(StbState.select_start, CurLenW); StbState.select_end = ImMin(StbState.select_end, CurLenW); }
     bool                HasSelection() const        { return StbState.select_start != StbState.select_end; }

@@ -159,7 +159,7 @@ intType getCircularArrayIndexUnsigned( intType pi, utype size ) {
 template <typename intType, typename utype>
 utype cai( intType pi, utype size ) {
     if constexpr ( std::is_unsigned_v<intType> ) {
-        if ( pi == size ) return 0;
+        if ( pi == static_cast<intType>(size) ) return 0;
         return pi >= 0 ? ( pi % size ) : size - ( pi % size );
     } else {
         if ( std::llabs( pi ) == size ) return 0;

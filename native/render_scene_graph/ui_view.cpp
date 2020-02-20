@@ -324,6 +324,8 @@ C4f UIView::colorFromStatus( UIElementStatus _status ) {
             return getHooverColor();
         case UIElementStatus::Fixed:
             return colorScheme.Complement(1);
+        default:
+            return C4f::WHITE;
     }
 }
 

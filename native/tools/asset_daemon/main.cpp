@@ -86,9 +86,9 @@ struct DaemonFileStruct {
     MongoBucket bucket;
     std::string filename;
     std::string group;
-    strview project;
-    strview uname;
-    strview uemail;
+    core::string_view project;
+    core::string_view uname;
+    core::string_view uemail;
     std::string thumb64{};
     std::vector<ArchiveDirectoryEntityElement> candidates{};
 };
@@ -490,10 +490,10 @@ std::vector<ArchiveDirectoryEntityElement>
 filterCandidates( const std::vector<ArchiveDirectoryEntityElement>& candidates, strview group ) {
     auto filteredCandidates = candidates;
 
-    if ( group == ResourceGroup::Geom ) {
+    if ( group.to_string() == ResourceGroup::Geom ) {
         geomFilterOutSameAssetDifferentFormatFromBasePriority( ".fbx", filteredCandidates );
         geomFilterDesingConnectCrazyRedundancy( filteredCandidates );
-    } else if ( group == ResourceGroup::Material ) {
+    } else if ( group.to_string() == ResourceGroup::Material ) {
         materialFilterNonImageAssets( filteredCandidates );
     }
 
@@ -516,7 +516,7 @@ void elaborateAsset( DaemonFileStruct& dfs, const std::string& assetName ) {
 }
 
 bool groupIsAchievable( const std::string& sourceName, strview group ) {
-    return group == ResourceGroup::Material && isFileExtCompressedArchive( sourceName );
+    return group.to_string() == ResourceGroup::Material && isFileExtCompressedArchive( sourceName );
 }
 
 void elaborateCandidates( DaemonFileStruct& dfs ) {

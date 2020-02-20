@@ -518,9 +518,9 @@ public:
     static constexpr int32_t vsize() { return 3; }
 
 private:
-	float mX;
-	float mY;
-	float mZ;
+	float mX = 0.0f;
+	float mY = 0.0f;
+	float mZ = 0.0f;
 };
 
 using V3f = Vector3f;

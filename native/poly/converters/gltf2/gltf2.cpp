@@ -397,7 +397,7 @@ namespace GLTF2Service {
         }
         auto rootScene = EF::create<Geom>( gltfScene.Name());
         for ( const auto& scene : gltfScene.model->scenes ) {
-            for ( auto nodeIndex = 0; nodeIndex < scene.nodes.size(); nodeIndex++ ) {
+            for ( auto nodeIndex = 0u; nodeIndex < scene.nodes.size(); nodeIndex++ ) {
                 auto node = gltfScene.model->nodes[nodeIndex];
                 addMeshNode( _sg, gltfScene, node, rootScene );
             }

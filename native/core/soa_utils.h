@@ -851,7 +851,7 @@ public:
     }
 
     void transform( const Matrix4f& _mat ) {
-        for ( int32_t t = 0; t < numVerts; t++ ) verts[t].pos = _mat.transform(verts[t].pos );
+        for ( auto t = 0u; t < numVerts; t++ ) verts[t].pos = _mat.transform(verts[t].pos );
     }
 
     void generateStripsFromVerts( const std::vector<Vector3f>& vList, Primitive _prim ) {
@@ -1053,7 +1053,7 @@ public:
     }
 
     template<typename A>
-    void setVertexUV1( int32_t index, const A& a ) {
+    void setVertexUV1( uint32_t index, const A& a ) {
         ASSERT( numVerts > index );
         verts[index].a1 = a;
     }

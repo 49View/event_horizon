@@ -23,7 +23,7 @@ enum class CameraControls {
 
 class CameraControl {
 public:
-    explicit CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
+    CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     virtual ~CameraControl() = default;
     void updateFromInputData( const AggregatedInputData& mi );
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) = 0;
@@ -59,7 +59,7 @@ protected:
 class CameraControlFly : public CameraControlEditable {
 public:
     using CameraControlEditable::CameraControlEditable;
-    CameraControlFly( const std::shared_ptr<CameraRig>& cameraRig, RenderOrchestrator& rsg );
+    CameraControlFly( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
     void renderControls() override;

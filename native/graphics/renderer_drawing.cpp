@@ -489,7 +489,7 @@ VPListSP Renderer::drawCircleFinal( RendererDrawingSet& rds ) {
 
     auto center = rds.verts.v[0];
     auto radius = rds.radius;
-    for ( int t = 0; t < rds.archSegments; t++ ) {
+    for ( auto t = 0u; t < rds.archSegments; t++ ) {
         float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( rds.archSegments )) * TWO_PI;
         verts.emplace_back( Vector3f( center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius) );
     }
@@ -511,7 +511,7 @@ VPListSP Renderer::drawCircleFilledFinal( RendererDrawingSet& rds ) {
     rds.prim = Primitive::PRIMITIVE_TRIANGLE_FAN;
     auto center = rds.verts.v[0];
     auto radius = rds.radius;
-    for ( int t = 0; t < rds.archSegments; t++ ) {
+    for ( auto t = 0u; t < rds.archSegments; t++ ) {
         float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( rds.archSegments )) * TWO_PI;
         verts.emplace_back( Vector3f( center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius) );
     }

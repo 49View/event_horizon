@@ -16,7 +16,7 @@
 
 #include "../no_sql.hpp"
 
-using strview = boost::string_view;
+using strview = core::string_view;
 
 class MongoBucket : public NoSqlStorage {
 public:
@@ -46,7 +46,7 @@ class MongoObjectId : public NoSqlId {
 public:
     explicit MongoObjectId( bsoncxx::types::value _id ) : id( std::move( _id )) {}
 
-    explicit MongoObjectId( strview _id ) : id( bsoncxx::types::b_oid{ bsoncxx::oid{ _id }} ) {}
+    explicit MongoObjectId( strview _id ) : id( bsoncxx::types::b_oid{ bsoncxx::oid{ _id.data(), _id.length() } } ) {}
 
     bsoncxx::types::value operator()() const { return id; }
 
@@ -56,7 +56,7 @@ private:
 
 class MongoDocumentValue : public NoSqlDocumentView {
 public:
-    explicit MongoDocumentValue( bsoncxx::document::value _doc ) : value( _doc ) {}
+    explicit MongoDocumentValue( bsoncxx::document::value _doc ) : value(std::move( _doc )) {}
 
     [[nodiscard]] bsoncxx::document::view view() const { return value.view(); }
 
@@ -113,14 +113,14 @@ struct StreamChangeMetadata {
     }
 
     MongoObjectId id;
-    strview filename;
-    strview group;
-    strview username;
-    strview useremail;
-    strview project;
-    strview contentType;
-    strview hash;
-    strview thumb;
+    core::string_view filename;
+    core::string_view group;
+    core::string_view username;
+    core::string_view useremail;
+    core::string_view project;
+    core::string_view contentType;
+    core::string_view hash;
+    core::string_view thumb;
     bsoncxx::document::element deps;
 };
 

@@ -1,23 +1,37 @@
 sudo apt-get update
 sudo apt-get install -y libssl-dev apt-transport-https libglew-dev libglfw3 libglfw3-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev libopenal-dev libstdc++-9-dev libbz2-dev libjpeg-dev libpng-dev libtiff-dev libwebp-dev nettle-dev gnutls-dev libicu-dev npm 
 
+pom-get.sh openssl 			    /usr/local/
+pom-get.sh mongo-c-driver   /usr/local/
+pom-get.sh mongo-cxx-driver /usr/local/
+pom-get.sh libzip           /usr/local/
+pom-get.sh restbed          /usr/local/
 pom-get.sh rapidjson        /usr/local/
+
+pom-get.sh openjpeg 		    /usr/local/
+pom-get.sh leptonica        /usr/local/
+pom-get.sh tesseract        /usr/local/
+
 pom-get.sh stb              /usr/local/
 pom-get.sh websocketpp      /usr/local/
-pom-get.sh restbed          /usr/local/
 pom-get.sh boost            /usr/local/
 pom-get.sh opt-sat-indie    /opt/Allegorithmic/
 pom-get.sh fbx2gltf-linux   /usr/local/bin/
-pom-get.sh libzip           /usr/local/
 pom-get.sh tinygltf         /usr/local/include/tinygltf/
-pom-get.sh mongo-c-driver   /usr/local/
-pom-get.sh mongo-cxx-driver /usr/local/
 pom-get.sh opencv           /usr/local/
-pom-get.sh leptonica        /usr/local/
-pom-get.sh tesseract        /usr/local/
 pom-get.sh glm 				      /usr/local/
-pom-get.sh openjpeg 		    /usr/local/
-pom-get.sh openssl 			    /usr/local/
+
+sudo gitbuild-make.sh openssl OpenSSL_1_1_1d openssl "-DBUILD_TOOLS=FALSE -DBUILD_EXAMPLES=FALSE" /usr/local
+sudo gitbuild.sh mongo-c-driver 1.15.3 mongodb "-DBUILD_TOOLS=FALSE -DBUILD_EXAMPLES=FALSE" /usr/local
+sudo gitbuild.sh mongo-cxx-driver r3.4.0 mongodb "" /usr/local
+sudo gitbuild.sh libzip rel-1-5-2 nih-at "-DBUILD_TOOLS=FALSE -DBUILD_EXAMPLES=FALSE -DBUILD_REGRESS=false -DBUILD_DOC=FALSE -DENABLE_GNUTLS=OFF" /usr/local
+sudo gitbuild.sh restbed 4.7.0 ziocleto "-DBUILD_TOOLS=FALSE -DBUILD_EXAMPLES=FALSE" /usr/local
+
+sudo gitbuild.sh rapidjson v1.1.1 ziocleto "" /usr/local
+
+sudo gitbuild.sh openjpeg v2.3.1 uclouvain "" /usr/local
+sudo gitbuild.sh leptonica 1.79.0 DanBloomberg "" /usr/local
+sudo gitbuild.sh tesseract 4.1.1 tesseract-ocr "-DSTATIC=TRUE" /usr/local
 
 # Install dev environment
 

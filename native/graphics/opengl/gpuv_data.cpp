@@ -128,13 +128,13 @@ void GPUVData::updateUVs( const uint32_t *xrefs, const std::vector<V3f>& _pos, c
     size_t uvSize = vbib.vElementAttrib[1+_index].size * sizeof(float);
 
     std::vector<V3f> remappedPos{};
-    for ( size_t t = 0; t < vbib.numVerts; t++ ) {
+    for ( auto t = 0; t < vbib.numVerts; t++ ) {
         V3f p{};
         memcpy( (char*)(&p), vbib.bufferVerts.get() + vbib.elenentSize*t, sizeof(float)*3 );
         remappedPos.emplace_back( p );
     }
 
-    for ( size_t t = 0; t < vbib.numVerts; t++ ) {
+    for ( auto t = 0; t < vbib.numVerts; t++ ) {
         memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t + uvStride, (const char*)(&_uvs[t]), uvSize );
         memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t, (const char*)(&_pos[t]), sizeof(float)*3 );
 //        memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t, (const char*)(&remappedPos[xrefs[t+_xrefStart]]), sizeof(float)*3 );
@@ -159,7 +159,7 @@ void GPUVData::updateP3V3( const std::vector<V3f>& _values ) {
     size_t nStride = vbib.vElementAttrib[2].offset;
     size_t nSize = vbib.vElementAttrib[2].size * sizeof(float);
 
-    for ( size_t t = 0; t < vbib.numVerts; t++ ) {
+    for ( auto t = 0; t < vbib.numVerts; t++ ) {
         memcpy( vbib.bufferVerts.get() + vbib.elenentSize*t + nStride, (const char*)(&_values[t]), nSize );
     }
 
