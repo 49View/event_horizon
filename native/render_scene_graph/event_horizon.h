@@ -66,7 +66,6 @@ public:
         auto password = params.getParam("password");
         auto project  = params.getParam("project");
 
-
         if ( username && password && project ) {
             Http::init( LoginFields{*username, *password, *project} );
         } else {

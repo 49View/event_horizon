@@ -537,11 +537,6 @@ macro(link_core)
         if (BUILD_CURL)
             link_curl()
         endif ()
-        if (WIN32)
-            link_libraries_multi("libssl" "ssl" OFF OFF OFF)
-            link_libraries_multi("libcrypto" "crypto" OFF OFF OFF)
-            link_system_libraries_if("${WIN32}" "-lcrypt32")
-        endif ()
     endif ()
 
 endmacro(link_core)
@@ -835,18 +830,6 @@ endmacro(link_opencv)
 
 macro(link_restbed)
     link_libraries_multi("restbed" "restbed" "restbed" "restbed" OFF)
-    if (APPLE OR LINUX)
-        message(STATUS "Linking system library -lcrypto;-lssl")
-        #        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-        link_libraries_if("${APPLE}" "crypto" "/usr/local/opt/openssl/lib/" "libcrypto.a")
-        link_libraries_if("${APPLE}" "ssl" "/usr/local/opt/openssl/lib/" "libssl.a")
-        link_system_libraries_if("${APPLE}" "-lresolv;-lsasl2")
-
-#        link_system_libraries_if("${LINUX}" "-lcrypto;-lssl;-lbz2;-lgnutls;-lnettle;-lresolv;-licuuc")
-        link_system_libraries_if("${LINUX}" "-lcrypto;-lssl;-lbz2;-lgnutls;-lnettle;-lresolv;")
-        #        target_link_libraries(${PROJECT_NAME} "-lcrypto;-lssl")
-    endif ()
-
     #    add_postbuild_copy_command("restbed" "librestbed")
 endmacro(link_restbed)
 
@@ -911,10 +894,6 @@ function(linker PROJECT_NAME WHICH_LIBS)
     endif ()
     message(STATUS "Using library path ${LIBRARIES_ROOT_FOLDER}")
 
-    if (NOT EMSCRIPTEN)
-        link_system_libraries_if("${LINUX}" "-lpthread;-lz;-ldl;-lrt;-lm;")
-    endif ()
-
     link_core_poly()
     link_core_graphics()
     link_core_media()
@@ -944,11 +923,30 @@ function(linker PROJECT_NAME WHICH_LIBS)
         message(STATUS "Linking opt /opt/local/lib/libz.a")
     endif ()
 
+
     #    link_libraries_if("${APPLE}" "libz" "/opt/local/lib/" "libz.a")
     #    link_libraries_if("${APPLE}" "X11" "/usr/X11/lib/" "X11")
 
     link_system_libraries_if("${WIN32}" "-lws2_32")
     link_system_libraries_if("${WIN32}" "-lwsock32")
+
+    if (NOT EMSCRIPTEN)
+        link_system_libraries_if("${LINUX}" "-lz;-ldl;-lrt;-lm;")
+    endif ()
+
+    if (APPLE OR LINUX)
+        message(STATUS "Linking system library -lcrypto;-lssl")
+        #        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+        link_libraries_if("${APPLE}" "crypto" "/usr/local/opt/openssl/lib/" "libcrypto.a")
+        link_libraries_if("${APPLE}" "ssl" "/usr/local/opt/openssl/lib/" "libssl.a")
+        link_system_libraries_if("${APPLE}" "-lresolv;-lsasl2")
+
+        #        link_system_libraries_if("${LINUX}" "-lcrypto;-lssl;-lbz2;-lgnutls;-lnettle;-lresolv;-licuuc")
+        link_libraries_if("${LINUX}" "ssl" "/usr/local/lib/" "libssl.a")
+        link_libraries_if("${LINUX}" "crypto" "/usr/local/lib/" "libcrypto.a")
+        link_system_libraries_if("${LINUX}" "-lbz2;-lgnutls;-lnettle;-lresolv;-lpthread;-licuuc")
+        #        target_link_libraries(${PROJECT_NAME} "-lcrypto;-lssl")
+    endif ()
 
     # apple frameworks
     link_frameworks("OpenCL;OpenAL;AudioToolbox;Accelerate;AudioUnit;Cocoa;CoreAudio;CoreMedia;CoreFoundation;CoreGraphics;CoreServices;CoreVideo;Foundation;IOKit;Security;VideoToolbox;VideoDecodeAcceleration")
@@ -1111,7 +1109,7 @@ function(link_libraries_if condition libName librariesPath libraries)
 
         message(STATUS "	Searching in " ${librariesPath})
         FOREACH (lib ${libraries})
-            find_library(PATHS_${lib} NAMES ${lib} PATHS ${librariesPath})
+            find_library(PATHS_${lib} NAMES ${lib} NO_DEFAULT_PATH PATHS ${librariesPath})
             target_link_libraries(${PROJECT_NAME} ${PATHS_${lib}})
             message(STATUS "		Found ${lib} in ${PATHS_${lib}}")
         ENDFOREACH ()
