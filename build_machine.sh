@@ -15,9 +15,9 @@ pom-get.sh mongo-cxx-driver /usr/local/
 pom-get.sh opencv           /usr/local/
 pom-get.sh leptonica        /usr/local/
 pom-get.sh tesseract        /usr/local/
-pom-get.sh glm 				/usr/local/
-pom-get.sh openjpeg 		/usr/local/
-pom-get.sh openssl 			/usr/local/
+pom-get.sh glm 				      /usr/local/
+pom-get.sh openjpeg 		    /usr/local/
+pom-get.sh openssl 			    /usr/local/
 
 # Install dev environment
 

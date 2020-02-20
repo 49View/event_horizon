@@ -12,6 +12,7 @@ COPY --from=pomeranian/libzip               /build/.                    /usr/loc
 COPY --from=pomeranian/tinygltf             /build/.                    /usr/local/include/tinygltf/
 COPY --from=pomeranian/mongo-c-driver       /build/.                    /usr/local/
 COPY --from=pomeranian/mongo-cxx-driver     /build/.                    /usr/local/
+COPY --from=pomeranian/openssl 			    /build/.                    /usr/local/
 
 COPY --from=ateventhorizon/libcore          /build/.                    /usr/local/
 COPY --from=ateventhorizon/libdatabase      /build/.                    /usr/local/
