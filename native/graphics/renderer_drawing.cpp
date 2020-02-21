@@ -808,6 +808,11 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
         totalVerts += rds.fds.font->GetTriangulation( cp ).verts.size();
     }
 
+    if ( totalVerts == 0 ) {
+        LOGRS("Font rendering didnt generate any glyphs for: " << rds.fds.text );
+        return nullptr;
+    }
+
     auto vhfm = rds.fds.font->GetFontMetrics();
     auto ps = std::make_shared<FontStrip>(totalVerts, PRIMITIVE_TRIANGLES, VFVertexAllocation::PreAllocate);
 

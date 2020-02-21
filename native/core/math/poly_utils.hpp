@@ -86,7 +86,9 @@ WindingOrderT detectWindingOrder( const std::vector<VT>& _input ) {
     }
     if ( area > 0 ) return WindingOrder::CW;
     if ( area < 0 ) return WindingOrder::CCW;
-    LOGR("[ERROR] cannot get winding order of these points cos area is 0");
+    if ( _input.size() > 2 ) {
+        LOGR("[ERROR] cannot get winding order of these points cos area is 0");
+    }
     return WindingOrder::CCW;
 }
 
