@@ -112,7 +112,8 @@ namespace VDataServices {
             oss << static_cast<uint64_t>(poly.reverseFlag);
         }
         auto c = _d.mappingData.serialize();
-        c.insert( std::end( c ), std::begin( oss.str()), std::end( oss.str()));
+        auto ossString = oss.str();
+        c.insert( std::end( c ), std::begin( ossString), std::end( ossString));
         return "Poly--" + Hashable<>::hashOf( c );
     }
 
@@ -144,7 +145,8 @@ namespace VDataServices {
             oss << ot.zPull;
         }
         auto c = _d.mappingData.serialize();
-        c.insert( std::end( c ), std::begin( oss.str()), std::end( oss.str()));
+        auto ossString = oss.str();
+        c.insert( std::end( c ), std::begin( ossString), std::end( ossString));
         return "Extrude--" + Hashable<>::hashOf( c );
     }
 
@@ -194,9 +196,7 @@ namespace VDataServices {
     }
 
     ResourceRef refName( const GT::Text& _d ) {
-        std::stringstream oss;
         auto c = _d.serialize();
-        c.insert( std::end( c ), std::begin( oss.str()), std::end( oss.str()));
         return "Text--" + Hashable<>::hashOf( c );
     }
 
