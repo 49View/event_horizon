@@ -19,6 +19,7 @@
 #include <cmath>
 #include <sstream>
 #include <core/font_params.hpp>
+#include <iostream>
 
 using namespace Utility;
 using namespace TTFCore;
@@ -1372,7 +1373,8 @@ ushort FontInternal::GetGlyphIndex( CodePoint codePoint ) const {
 		// check platform/encoding id
 		if ( rpid == platformId && reid == encodingId ) {
 			// load format and language info
-			ushort format = ReadUSHORT( tableItr + 0 );        // don't advance iterator
+            FItr   tableItrFormat = tableItr;
+			ushort format = ReadUSHORT( tableItrFormat );        // don't advance iterator
 
 			// branch on format
 			ushort glyphIndex = 0;
@@ -2139,7 +2141,8 @@ Mesh FontInternal::GetGlyphMesh( ushort glyphIndex ) const {
 	FItr itr = range.first;
 
 	// get glyph contours
-	short contourCount = ReadSHORT( itr + 0 );
+	auto itrZero = itr;
+	short contourCount = ReadSHORT( itrZero );
 
 	if ( contourCount > 0 ) {
 		return GetSimpleMesh( itr );
