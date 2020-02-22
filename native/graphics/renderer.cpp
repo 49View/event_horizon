@@ -282,6 +282,16 @@ void Renderer::clearBucket( const int _bucket ) {
     }
 }
 
+void Renderer::showBucket( const int _bucket, bool visible ) {
+    if ( auto it = mCommandLists.find( _bucket ); it != mCommandLists.end()) {
+        it->second.foreach( [visible](auto& elem) {
+            for ( auto& value : elem ) {
+                value->setHidden(!visible);
+            }
+        }  );
+    }
+}
+
 void Renderer::removeFromCL( const UUID& _uuid ) {
 
     auto removeUUID = [_uuid]( const auto& us ) -> bool { return us->UUiD() == _uuid; };

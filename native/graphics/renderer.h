@@ -146,6 +146,7 @@ public:
 
 	void removeFromCL( const UUID& _uuid );
     void clearBucket( int _bucket );
+    void showBucket( int _bucket, bool visible );
 
     std::shared_ptr<Texture> addTextureResource( const ResourceTransfer<RawImage>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ResourceTransfer<Material>& _val );
