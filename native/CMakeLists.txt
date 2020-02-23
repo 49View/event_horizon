@@ -768,7 +768,7 @@ macro(link_opencv)
 
         include_directories(/usr/local/include/opencv4)
 
-        SET(OpenCV_LIBS opencv_ml opencv_dnn opencv_highgui opencv_imgproc opencv_objdetect opencv_core opencv_imgcodecs  )
+        SET(OpenCV_LIBS opencv_highgui opencv_imgproc opencv_objdetect opencv_core opencv_imgcodecs opencv_ml opencv_dnn )
         SET(OpenCV_LIBS_MAC ${OpenCV_LIBS})
         SET(OpenCV_LIBS_LINUX ${OpenCV_LIBS})
         link_libraries_multi("opencv" "${OpenCV_LIBS}" "${OpenCV_LIBS_MAC}" "${OpenCV_LIBS_LINUX}" "${OpenCV_LIBS_LINUX}" OFF)
@@ -810,9 +810,14 @@ macro(link_opencv)
             target_link_libraries(${PROJECT_NAME} ${PATHS_libjasper})
             find_library(PATHS_ippicv NAME ippicv PATHS "/usr/local/lib/opencv4/3rdparty")
             target_link_libraries(${PROJECT_NAME} ${PATHS_ippicv})
+            find_library(PATHS_libprotobuf NAME libprotobuf PATHS "/usr/local/lib/opencv4/3rdparty")
+            target_link_libraries(${PROJECT_NAME} ${PATHS_libprotobuf})
         endif ()
 
-        link_system_libraries_if("${LINUX}" "-lpng;-ljpeg;-ltiff;-lwebp")
+        link_system_libraries_if("${LINUX}" "-lpng;-ljpeg;-ltiff;-lwebp;-lcairo;-lglib-2.0;-lgobject-2.0;-lgdk_pixbuf-2.0;-lgdk-x11-2.0;-lgtk-x11-2.0")
+        #        link_system_libraries_if("${LINUX}" "-lXrender;-ldrm;-lXdamage;-lXext;-lX11;-pthread;-lXi;-lXrandr;-lXxf86vm;-lXinerama;-lXcursor;-lGLEW;-lglfw;-lopenal")
+
+        #        link_libraries_if("${LINUX}" "protobuf" "/usr/local/lib/" "libprotobuf.a")
 
         #        link_system_libraries_if("${APPLE}" "-ljpeg;-ltiff;-lpng")
         link_libraries_if("${APPLE}" "jpeg" "/opt/local/lib/" "libjpeg.a")
