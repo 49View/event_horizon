@@ -5,37 +5,19 @@
 //
 //
 
-#ifndef ocr_hpp
-#define ocr_hpp
+#pragma once
 
 #include <string>
 
 #include "core/math/rect2f.h"
 #include "tesseract/baseapi.h"
+#include <opencv2/dnn.hpp>
 
 namespace cv { class Mat; }
 
-class Ocr {
-public:
-	static Ocr& getInstance() {
-		static Ocr instance; // Guaranteed to be destroyed.
-		return instance;// Instantiated on first use.
-	}
-private:
-	Ocr();;                   // Constructor? (the {} brackets) are needed here.
-	Ocr( Ocr const& ) = delete;
-	void operator=( Ocr const& ) = delete;
-
-public:
-	std::string ocrTextFromImage( const cv::Mat& source );
-	std::string ocrTextFromSubRect( const JMATH::Rect2f& _rect );
-	std::string ocrFromImage();
-	std::string setImage( const cv::Mat& source );
-
-private:
-	tesseract::TessBaseAPI mApi;
+namespace OCR {
+    void ocrInitEngine( const std::string& dnnModelName, tesseract::TessBaseAPI& tesseract, cv::dnn::Net& dnnNet );
+	std::string ocrTextDetection( tesseract::TessBaseAPI& ocrEngine, cv::dnn::Net &dnnNet, const cv::Mat& source );
+    std::string ocrTextRecognition( tesseract::TessBaseAPI &ocrEngine, const cv::Mat &source );
 };
 
-#define OCR Ocr::getInstance()
-
-#endif /* ocr_hpp */
