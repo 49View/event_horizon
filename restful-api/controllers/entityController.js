@@ -269,7 +269,7 @@ const deleteEntity = async entityId => {
 
 const deleteEntityComplete = async (project, entity) => {
   if (entity) {
-    currentEntity = entity;
+    const currentEntity = entity;
     console.log("[INFO] deleting entity " + currentEntity.metadata.name);
     const group = currentEntity.group;
     //Remove current file from S3
