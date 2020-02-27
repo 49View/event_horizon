@@ -245,7 +245,7 @@ CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, Rend
         : CameraControl( cameraRig, rsg ) {
 }
 
-CameraControlOrbit3d::CameraControlOrbit3d( const std::shared_ptr<CameraRig>& cameraRig, RenderOrchestrator& rsg )
+CameraControlOrbit3d::CameraControlOrbit3d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable( cameraRig, rsg ) {
     cameraRig->getCamera()->Mode( CameraMode::Orbit );
 }

@@ -46,7 +46,7 @@ protected:
 class CameraControlOrbit3d : public CameraControlEditable {
 public:
     using CameraControlEditable::CameraControlEditable;
-    CameraControlOrbit3d( const std::shared_ptr<CameraRig>& cameraRig, RenderOrchestrator& rsg );
+    CameraControlOrbit3d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControlOrbit3d() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
     void renderControls() override {}
