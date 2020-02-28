@@ -305,7 +305,7 @@ void elaborateGeomFBX( DaemonFileStruct dfs ) {
         auto fileHash = Hashable<>::hashOf( fileData );
         Mongo::fileUpload( dfs.bucket, filenameglb, std::move( fileData ),
                            Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::json, fileHash, dfs.thumb64, ResourceDependencyDict{} ));
+                                              HttpContentType::octetStream, fileHash, dfs.thumb64, ResourceDependencyDict{} ));
     } catch ( const std::exception& e ) {
         daemonExceptionLog( e );
     }
@@ -328,7 +328,7 @@ void elaborateGeomObj( DaemonFileStruct dfs ) {
         auto fileHash = Hashable<>::hashOf( fileData );
         Mongo::fileUpload( dfs.bucket, filenameglb, std::move( fileData ),
                            Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::json, fileHash, "", ResourceDependencyDict{} ));
+                                              HttpContentType::octetStream, fileHash, "", ResourceDependencyDict{} ));
     } catch ( const std::exception& e ) {
         daemonExceptionLog( e );
     }
@@ -341,7 +341,7 @@ void elaborateGeomGLB( DaemonFileStruct dfs ) {
         auto fileHash = Hashable<>::hashOf( fileData );
         Mongo::fileUpload( dfs.bucket, dfs.filename, std::move( fileData ),
                            Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::json, fileHash, "", ResourceDependencyDict{} ));
+                                              HttpContentType::octetStream, fileHash, "", ResourceDependencyDict{} ));
     } catch ( const std::exception& e ) {
         daemonExceptionLog( e );
     }

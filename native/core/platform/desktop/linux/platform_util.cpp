@@ -41,7 +41,7 @@ std::string cacheFolder() {
 }
 
 std::string getDaemonRoot() {
-    return "/";
+    return "/tmp/";
 }
 
 const std::string userComputerName() {

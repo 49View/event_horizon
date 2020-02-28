@@ -47,7 +47,6 @@ namespace OCR {
         auto h = source.size().height;
         auto bytePerLine = w * channels; //source.step1();
         ocrEngine.SetImage((uchar *) source.data, w, h, channels, bytePerLine );
-//        ocrEngine.SetSourceResolution( 600 );
     }
 
     void textDetection( const cv::Mat &scores, const cv::Mat &geometry, float scoreThresh,
@@ -118,15 +117,21 @@ namespace OCR {
         std::vector<int> indices;
         cv::dnn::NMSBoxes( boxes, confidences, confThreshold, nmsThreshold, indices );
 
-        // Prep up image to process
-        prepareImage( ocrEngine, source );
+        std::string retText{};
+        for (int indice : indices) {
+            cv::RotatedRect &box = boxes[indice];
 
-        // Get OCR result
-        char *outText = ocrEngine.GetUTF8Text();
-        std::string ret( outText );
-        delete[] outText;
+            cv::Mat roi{ source, box.boundingRect()};
+            cv::Mat roiGray = roi;
+            if ( roiGray.channels() != 1 ) {
+                cv::cvtColor( roiGray, roiGray, cv::COLOR_BGR2GRAY );
+            }
+            std::string text = OCR::ocrTextRecognition( ocrEngine, roiGray );
+            LOGRS( "Found text: " << text << std::endl );
+            retText += " " + text;
+        }
 
-        return ret;
+        return retText;
     }
 
     std::string ocrTextRecognition( tesseract::TessBaseAPI &ocrEngine, const cv::Mat &source ) {
