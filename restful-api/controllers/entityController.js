@@ -84,7 +84,7 @@ const createEntityFromMetadata = async (
           group,
           cleanMetadata.name
         );
-        await deleteEntityComplete(project, entityToDelete);
+        await deleteEntityComplete(entityToDelete);
       }
 
       cleanMetadata.thumb = await thumbFromContent(
@@ -265,21 +265,6 @@ const updateEntity = async (entityId, metadata) => {
 
 const deleteEntity = async entityId => {
   await entityModel.deleteOne({_id: mongoose.Types.ObjectId(entityId)});
-};
-
-const deleteEntityComplete = async (project, entity) => {
-  if (entity) {
-    const currentEntity = entity;
-    console.log("[INFO] deleting entity " + currentEntity.metadata.name);
-    const group = currentEntity.group;
-    //Remove current file from S3
-    await fsController.cloudStorageDelete(
-      module.exports.getFilePath(project, group, currentEntity.metadata.name),
-      "eventhorizonentities"
-    );
-    //Delete existing entity
-    await module.exports.deleteEntity(currentEntity._id);
-  }
 };
 
 const getEntityByIdProject = async (project, entityId, returnPublic) => {
@@ -902,7 +887,13 @@ module.exports = {
   upsertThumb: upsertThumb,
   thumbFromContent: thumbFromContent,
   deleteEntity: deleteEntity,
-  deleteEntityComplete: deleteEntityComplete,
+  deleteEntityComplete: async (entity) => {
+    //Remove file from storage
+    await db.fsDeleteWithName(db.bucketEntities, entity.name, entity.project);
+    await db.fsDeleteWithName(db.bucketSourceAssets, entity.name, entity.project);
+    //Delete existing entity
+    await module.exports.deleteEntity(entity._id);
+  },
   getEntityByIdProject: getEntityByIdProject,
   getEntitiesIdOfProjectWithGroup: getEntitiesIdOfProjectWithGroup,
   getEntityById: async (entityId) => {

@@ -29,7 +29,7 @@ exports.initDB = async () => {
 
       const entities = mongoose.model('entities');
       entities.watch().on('change', data => {
-        socketController.sendMessageToAllClients( JSON.stringify({ msg: "EntityAdded", data: data }));
+        socketController.sendMessageToAllClients(JSON.stringify({msg: "EntityAdded", data: data}));
       });
       logger.info("Watching on entities collection");
 
@@ -151,6 +151,19 @@ exports.fsDelete = async (bucketFSModel, id) => {
     await bucketFSModel.delete(id);
   } catch (e) {
     logger.error("fsDelete of: " + id + " failed because " + e);
+  }
+}
+
+exports.fsDeleteWithName = async (bucketFSModel, name, project ) => {
+  try {
+    logger.info("removing " + bucketFSModel.bucketName + " asset: " + name + " of: " + project );
+    const cursor = bucketFSModel.find( { filename: name, "metadata.project": project} );
+    for await ( const doc of cursor ) {
+      logger.info("Cursor remove " + doc.filename + " with id: " + doc._id );
+      await bucketFSModel.delete(doc._id);
+    }
+  } catch (e) {
+    logger.error("fsDeleteWithName of: " + name + " failed because " + e);
   }
 }
 

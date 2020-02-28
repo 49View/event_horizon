@@ -19,15 +19,15 @@ const sendResult = (res, ret, successCode = 200, failCode = 400) => {
 
 const sendFileResult = (res, ret, successCode = 200, failCode = 204) => {
   if (ret !== null) {
-      res
-        .status(successCode)
-        .set({
-          "Content-Type": ret.contentType,
-          "Content-Last-Modified": ret.lastUpdatedDate,
-          "ETag": ret.hash,
-          "Content-Length": ret.data.length
-        })
-        .send(ret.data);
+    res
+      .status(successCode)
+      .set({
+        "Content-Type": ret.contentType,
+        "Content-Last-Modified": ret.lastUpdatedDate,
+        "ETag": ret.hash,
+        "Content-Length": ret.data.length
+      })
+      .send(ret.data);
   } else {
     res.sendStatus(failCode);
   }
@@ -51,17 +51,17 @@ router.get("/check/:id", async (req, res, next) => {
 });
 
 router.get("/content/byfsid/:id", async (req, res, next) => {
-  logger.info("/content/byfsid/" + req.params.id );
+  logger.info("/content/byfsid/" + req.params.id);
   sendFileResult(res, await entityController.getEntityContentFSId(req.params.id));
 });
 
 router.get("/content/byId/:id", async (req, res, next) => {
-  logger.info("/content/byId/" + req.params.id );
+  logger.info("/content/byId/" + req.params.id);
   sendFileResult(res, await entityController.getEntityContent(req.params.id));
 });
 
 router.get("/content/byHash/:hashId", async (req, res, next) => {
-  logger.info("/content/byHash/" + req.params.hashId );
+  logger.info("/content/byHash/" + req.params.hashId);
   try {
     const project = req.user.project;
     const entity = await entityController.getEntityByHash(
@@ -495,31 +495,25 @@ router.put("/:id", async (req, res, next) => {
 router.delete("/:id", async (req, res, next) => {
   try {
     const entityId = req.params.id;
-    const project = req.user.project;
+    logger.info("Deleting entity " + entityId);
     //Check existing entity for use project
-    const currentEntity = await entityController.getEntityByIdProject(
-      project,
-      entityId,
-      true
-    );
+    const currentEntity = await entityController.getEntityById(entityId);
     if (currentEntity === null) {
-      console.log(
-        "[INFO] Deletion of " + entityId + " not found, no operations performed"
-      );
+      logger.info("[INFO] Deletion of " + entityId + " not found, no operations performed");
       res.status(204).send();
     } else {
-      for (ktype of currentEntity["metadata"]["deps"]) {
+      const project = currentEntity.project;
+      logger.info("Deleting entity name is " + currentEntity.name + " on project: " + project);
+
+      for (ktype of currentEntity["deps"]) {
         for (key of ktype["value"]) {
-          const currDep = await entityController.getEntityByHash(
-            key,
-            currentEntity.project
-          );
+          const currDep = await entityController.getEntityByHash( key, currentEntity.project );
           if (currDep !== null) {
-            await entityController.deleteEntityComplete(project, currDep);
+            await entityController.deleteEntityComplete(currDep);
           }
         }
       }
-      await entityController.deleteEntityComplete(project, currentEntity);
+      await entityController.deleteEntityComplete(currentEntity);
       res.status(201).send();
     }
   } catch (ex) {
@@ -556,7 +550,7 @@ router.delete("/group/:groupId", async (req, res, next) => {
       res.status(204).send();
     } else {
       for (const entity of entities) {
-        await entityController.deleteEntityComplete(project, entity.toObject());
+        await entityController.deleteEntityComplete(entity.toObject());
       }
       res.status(201).send();
     }
@@ -574,7 +568,7 @@ router.delete("/", async (req, res, next) => {
       res.status(204).send();
     } else {
       for (const entity of entities) {
-        await entityController.deleteEntityComplete(project, entity);
+        await entityController.deleteEntityComplete(entity);
       }
       res.status(201).send();
     }
