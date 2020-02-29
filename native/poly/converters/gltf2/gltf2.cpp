@@ -323,7 +323,7 @@ namespace GLTF2Service {
             scale = { node.scale[0], node.scale[1], node.scale[2] };
         }
 
-        hier->generateLocalTransformData( pos, rot, scale );
+        hier->updateTransform( pos, rot, scale );
 
         if ( node.mesh >= 0 ) {
             for ( size_t k = 0; k < _gltf.model->meshes[node.mesh].primitives.size(); k++ ) {
@@ -397,12 +397,11 @@ namespace GLTF2Service {
         }
         auto rootScene = EF::create<Geom>( gltfScene.Name());
         for ( const auto& scene : gltfScene.model->scenes ) {
-            for ( auto nodeIndex = 0u; nodeIndex < scene.nodes.size(); nodeIndex++ ) {
+            for (int nodeIndex : scene.nodes) {
                 auto node = gltfScene.model->nodes[nodeIndex];
                 addMeshNode( _sg, gltfScene, node, rootScene );
             }
         }
-        rootScene->updateTransform( V3f::ZERO );
 
         return rootScene;
     }
