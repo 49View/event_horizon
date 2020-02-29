@@ -944,6 +944,7 @@ function(linker PROJECT_NAME WHICH_LIBS)
         #        set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
         link_libraries_if("${APPLE}" "crypto" "/usr/local/opt/openssl/lib/" "libcrypto.a")
         link_libraries_if("${APPLE}" "ssl" "/usr/local/opt/openssl/lib/" "libssl.a")
+        link_libraries_if("${APPLE}" "libicuuc" "/opt/local/lib/" "libicuuc.dylib")
         link_system_libraries_if("${APPLE}" "-lresolv;-lsasl2")
 
         #        link_system_libraries_if("${LINUX}" "-lcrypto;-lssl;-lbz2;-lgnutls;-lnettle;-lresolv;-licuuc")

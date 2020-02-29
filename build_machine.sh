@@ -23,8 +23,8 @@ pom-get.sh opt-sat-indie    /opt/Allegorithmic/
 pom-get.sh fbx2gltf-linux   /usr/local/bin/
 
 sudo gitbuild-make.sh openssl OpenSSL_1_1_1d openssl "-DBUILD_TOOLS=FALSE -DBUILD_EXAMPLES=FALSE" /usr/local
-sudo gitbuild.sh mongo-c-driver 1.15.3 mongodb "-DBUILD_TOOLS=FALSE -DBUILD_EXAMPLES=FALSE" /usr/local
-sudo gitbuild.sh mongo-cxx-driver r3.4.0 mongodb "" /usr/local
+sudo gitbuild.sh mongo-c-driver 1.15.3 mongodb "-DENABLE_STATIC=ON -DENABLE_EXAMPLES=FALSE -DENABLE_TESTS=FALSE" /usr/local
+sudo gitbuild.sh mongo-cxx-driver r3.4.0 mongodb "-DENABLE_STATIC=ON -DENABLE_EXAMPLES=FALSE -DENABLE_TESTS=FALSE" /usr/local
 sudo gitbuild.sh libzip rel-1-5-2 nih-at "-DBUILD_TOOLS=FALSE -DBUILD_EXAMPLES=FALSE -DBUILD_REGRESS=false -DBUILD_DOC=FALSE -DENABLE_GNUTLS=OFF" /usr/local
 sudo gitbuild.sh restbed 4.7.0 ziocleto "-DBUILD_TOOLS=FALSE -DBUILD_EXAMPLES=FALSE" /usr/local
 
