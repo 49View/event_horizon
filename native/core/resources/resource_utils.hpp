@@ -115,7 +115,7 @@ public:
         if constexpr ( std::is_same<R, Geom>::value )                   return _val->serialize();
         if constexpr ( std::is_same<R, MaterialColor>::value )          return {};
         if constexpr ( std::is_same<R, Profile>::value )                return _val->serialize();
-        if constexpr ( std::is_same<R, RawImage>::value )               return _val->serialize();
+        if constexpr ( std::is_same<R, RawImage>::value )               return _val->flyweightHashResolver();
         if constexpr ( std::is_same<R, Light>::value )                  return _val->serialize();
         if constexpr ( std::is_same<R, Font>::value )                   return {};
         if constexpr ( std::is_same<R, UIContainer>::value )            return serializableContainerFromString(_val->serialize());

@@ -351,6 +351,17 @@ ImageParamsJSONAble RawImage::serializeParams() const {
     return sr;
 }
 
+SerializableContainer RawImage::flyweightHashResolver() const {
+
+    auto ret = serializableContainerFromString(serializeParams().serialize());
+    auto numSamples = 100;
+    auto sampleMax = size() - 1;
+    for ( auto s = 1u; s < numSamples; s++ ) {
+        ret.emplace_back( static_cast<unsigned char>(rawBtyes[ sampleMax / s]) );
+    }
+    return ret;
+}
+
 std::ostream& operator<<( std::ostream& os, const RawImage& image ) {
     os << static_cast<const ImageParams&>(image);
     return os;

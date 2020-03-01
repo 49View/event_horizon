@@ -105,7 +105,9 @@ RESOURCE_CTORS_ONLY( RawImage );
 
     // NDDADO: unfortunately unique_ptr<[]> cannot be serialized with macros as it needs 2 variables, shame
     // So we have to get a quick custom one here instead, very sad :/
-    SerializableContainer serialize() const;
+    [[nodiscard]] SerializableContainer serialize() const;
+
+    [[nodiscard]] SerializableContainer flyweightHashResolver() const;
 
 public:
     static RawImage WHITE4x4();
