@@ -23,23 +23,23 @@ namespace GLTF2Service {
     }
 
     unsigned int accessorTypeToNumberOfComponent( int ty ) {
-        if ( ty == TINYGLTF_TYPE_SCALAR) {
+        if ( ty == TINYGLTF_TYPE_SCALAR ) {
             return 1;
-        } else if ( ty == TINYGLTF_TYPE_VECTOR) {
+        } else if ( ty == TINYGLTF_TYPE_VECTOR ) {
             return 1;
-        } else if ( ty == TINYGLTF_TYPE_VEC2) {
+        } else if ( ty == TINYGLTF_TYPE_VEC2 ) {
             return 2;
-        } else if ( ty == TINYGLTF_TYPE_VEC3) {
+        } else if ( ty == TINYGLTF_TYPE_VEC3 ) {
             return 3;
-        } else if ( ty == TINYGLTF_TYPE_VEC4) {
+        } else if ( ty == TINYGLTF_TYPE_VEC4 ) {
             return 4;
-        } else if ( ty == TINYGLTF_TYPE_MATRIX) {
+        } else if ( ty == TINYGLTF_TYPE_MATRIX ) {
             return 1;
-        } else if ( ty == TINYGLTF_TYPE_MAT2) {
+        } else if ( ty == TINYGLTF_TYPE_MAT2 ) {
             return 4;
-        } else if ( ty == TINYGLTF_TYPE_MAT3) {
+        } else if ( ty == TINYGLTF_TYPE_MAT3 ) {
             return 9;
-        } else if ( ty == TINYGLTF_TYPE_MAT4) {
+        } else if ( ty == TINYGLTF_TYPE_MAT4 ) {
             return 16;
         }
         ASSERTV( 0, "Accessor type unknown" );
@@ -83,7 +83,7 @@ namespace GLTF2Service {
     };
 
     UCharFiller
-    accessorFiller( const tinygltf::Model& model, int _index, GLTF2Service::ExtraAccessorData *_ead = nullptr ) {
+    accessorFiller( const tinygltf::Model &model, int _index, GLTF2Service::ExtraAccessorData *_ead = nullptr ) {
         UCharFiller ucf{};
 
         auto acc = model.accessors[_index];
@@ -91,7 +91,7 @@ namespace GLTF2Service {
         if ( !acc.maxValues.empty() && _ead ) _ead->max = acc.maxValues;
 
         auto bvi = model.bufferViews[acc.bufferView];
-        auto& bufferContent = model.buffers[bvi.buffer];
+        auto &bufferContent = model.buffers[bvi.buffer];
         auto bs = componentTypeToByteSize( acc.componentType, acc.type );
 
         ucf.data = bufferContent.data.data() + acc.byteOffset + bvi.byteOffset;
@@ -103,9 +103,9 @@ namespace GLTF2Service {
 
     template<typename RT>
     std::vector<RT>
-    fillData( const tinygltf::Model& model, int _index, GLTF2Service::ExtraAccessorData *_ead = nullptr ) {
+    fillData( const tinygltf::Model &model, int _index, GLTF2Service::ExtraAccessorData *_ead = nullptr ) {
         auto ucf = accessorFiller( model, _index, _ead );
-        std::vector<RT> ret;
+        std::vector <RT> ret;
         for ( size_t q = 0; q < ucf.size; q++ ) {
             RT elem{ 0 };
             memcpy( &elem, ucf.data + q * ucf.stride, ucf.stride );
@@ -167,23 +167,26 @@ namespace GLTF2Service {
         }
     }
 
-    void addGeom( SceneGraph& _sg, IntermediateGLTF& _gltf, int meshIndex, int primitiveIndex,
-                  GeomSP father ) {
+    void addGeom( SceneGraph &_sg, IntermediateGLTF &_gltf, int meshIndex, int primitiveIndex, GeomSP hier ) {
 
         auto mesh = _gltf.model->meshes[meshIndex];
         tinygltf::Primitive primitive = mesh.primitives[primitiveIndex];
         if ( primitive.indices < 0 ) return;
 
         auto material = _gltf.model->materials[primitive.material];
-        _sg.GB<GT::GLTF2>( _gltf.contentHash, _gltf.model.get(),
-                           GT::GLTF2MeshIndex( meshIndex ), GT::GLTF2PrimitiveIndex( primitiveIndex ),
-                           GT::M( _gltf.matMap.at( material.name )), father );
+        auto matRef = _gltf.matMap.at( material.name );
+
+        auto hashRefName = _gltf.key + _gltf.Name() + std::to_string( meshIndex ) + std::to_string( primitiveIndex );
+        auto vdata = std::make_shared<VData>();
+        GLTF2Service::fillGeom( vdata, _gltf.model.get(), meshIndex, primitiveIndex );
+        _sg.B<VB>( hashRefName ).addIM( vdata );
+        hier->pushData( hashRefName, vdata->BBox3d(), matRef );
     }
 
     template<typename T1, typename T2>
     void readParameterJsonDoubleValue( const tinygltf::Parameter v,
-                                       const std::string& s1, const std::string& s2,
-                                       std::pair<T1, T2>& baseColorTexture ) {
+                                       const std::string &s1, const std::string &s2,
+                                       std::pair<T1, T2> &baseColorTexture ) {
         if ( auto index = v.json_double_value.find( s1 ); index != v.json_double_value.end()) {
             if ( auto tcoord = v.json_double_value.find( s2 ); tcoord != v.json_double_value.end()) {
                 baseColorTexture = { static_cast<int>(index->second), static_cast<int>(tcoord->second) };
@@ -192,20 +195,20 @@ namespace GLTF2Service {
     }
 
     void readParameterJsonDoubleValue( const tinygltf::Parameter v,
-                                       const std::string& s1,
-                                       int& textureIndex ) {
+                                       const std::string &s1,
+                                       int &textureIndex ) {
         if ( auto index = v.json_double_value.find( s1 ); index != v.json_double_value.end()) {
             textureIndex = static_cast<int>(index->second);
         }
     }
 
-    void sigmoidMap( const InternalPBRComponent& ic, const IntermediateMaterial& _im, SigmoidSlope _sg ) {
+    void sigmoidMap( const InternalPBRComponent &ic, const IntermediateMaterial &_im, SigmoidSlope _sg ) {
 
         std::shared_ptr<RawImage> greyValue = EF::clone( *_im.grayScaleBaseColor.get());
 
         float lFloor = ( _sg == SigmoidSlope::Positive ? 1.0f - ic.value.x() : ic.value.x()) * 0.5f;
 
-        greyValue->transform<uint8_t>( [&]( uint8_t& _value ) {
+        greyValue->transform<uint8_t>( [&]( uint8_t &_value ) {
             float v = ( static_cast<float>(_value) - 127.0f ) / 127.0f;
             float vn = std::clamp( ic.value.x() + ( v * lFloor ), 0.0f, 1.0f );
             _value = static_cast<uint8_t >(vn * 255.0f);
@@ -214,18 +217,18 @@ namespace GLTF2Service {
 //    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory( greyValue ) );
     }
 
-    void valueToColorMap( const InternalPBRComponent& ic, const IntermediateMaterial& _im ) {
+    void valueToColorMap( const InternalPBRComponent &ic, const IntermediateMaterial &_im ) {
         auto vc = RawImage{ 1, 1, 3, ic.value.RGBATOI() };
         vc.grayScale();
 //    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(vc) );
     }
 
-    void grayscaleToNormalMap( const InternalPBRComponent& ic, const IntermediateMaterial& _im ) {
+    void grayscaleToNormalMap( const InternalPBRComponent &ic, const IntermediateMaterial &_im ) {
         RawImage normalMap = _im.grayScaleBaseColor->toNormalMap();
 //    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(normalMap) );
     }
 
-    void colorToBasecolorMap( const InternalPBRComponent& ic, const IntermediateMaterial& _im ) {
+    void colorToBasecolorMap( const InternalPBRComponent &ic, const IntermediateMaterial &_im ) {
         _im.grayScaleBaseColor = std::make_shared<RawImage>( 1, 1, 3, ic.value.RGBATOI());
 
 //    _im.mb->buffer( ic.baseName, imageUtil::rawToPngMemory(_im.grayScaleBaseColor) );
@@ -233,9 +236,9 @@ namespace GLTF2Service {
         _im.grayScaleBaseColor->grayScale();
     }
 
-    void saveInternalPBRComponent( IntermediateGLTF& _gltf, SceneGraph& _sg, Material& matRef,
-                                   const IntermediateMaterial& _im,
-                                   const InternalPBRComponent& ic, const std::string& _uniformName ) {
+    void saveInternalPBRComponent( IntermediateGLTF &_gltf, SceneGraph &_sg, Material &matRef,
+                                   const IntermediateMaterial &_im,
+                                   const InternalPBRComponent &ic, const std::string &_uniformName ) {
         auto baseFileName = std::string{ _im.name + "_" + ic.baseName };
         if ( ic.textureIndex != -1 ) {
             auto texture = _gltf.model->textures[ic.textureIndex];
@@ -248,13 +251,13 @@ namespace GLTF2Service {
                 matRef.Values()->assign( _uniformName, imRef );
             } else {
                 auto imRef = _sg.B<IB>( baseFileName ).addIM( RawImage{ image.width, image.height, image.component,
-                                                                       image.image.data() } );
+                                                                        image.image.data() } );
                 matRef.Values()->assign( _uniformName, imRef );
             }
         }
     }
 
-    IntermediateMaterial elaborateMaterial( SceneGraph& _sg, IntermediateGLTF& _gltf, const tinygltf::Material& mat ) {
+    IntermediateMaterial elaborateMaterial( SceneGraph &_sg, IntermediateGLTF &_gltf, const tinygltf::Material &mat ) {
         IntermediateMaterial im;
         im.name = toLower( mat.name );
         LOGRS( "GLTF2 Material: " << mat.name );
@@ -306,7 +309,7 @@ namespace GLTF2Service {
         return im;
     }
 
-    void addMeshNode( SceneGraph& _sg, IntermediateGLTF& _gltf, const tinygltf::Node& node, GeomSP hier ) {
+    void addMeshNode( SceneGraph &_sg, IntermediateGLTF &_gltf, const tinygltf::Node &node, GeomSP hier ) {
 
         Vector3f pos = Vector3f::ZERO;
         Quaternion rot;
@@ -323,7 +326,8 @@ namespace GLTF2Service {
             scale = { node.scale[0], node.scale[1], node.scale[2] };
         }
 
-        hier->updateTransform( pos, rot, scale );
+        hier->generateLocalTransformData( pos, rot, scale );
+        hier->createLocalHierMatrix( hier->fatherRootTransform() );
 
         if ( node.mesh >= 0 ) {
             for ( size_t k = 0; k < _gltf.model->meshes[node.mesh].primitives.size(); k++ ) {
@@ -331,7 +335,7 @@ namespace GLTF2Service {
             }
         }
 
-        for ( const auto& ci : node.children ) {
+        for ( const auto &ci : node.children ) {
             auto nextNode = _gltf.model->nodes[ci];
             if ( nextNode.mesh >= 0 || !nextNode.children.empty()) {
                 auto c = hier->addChildren( nextNode.name );
@@ -340,7 +344,7 @@ namespace GLTF2Service {
         }
     }
 
-    bool handleLoadingMessages( const std::string& err, const std::string& warn, bool ret ) {
+    bool handleLoadingMessages( const std::string &err, const std::string &warn, bool ret ) {
         if ( !warn.empty()) {
             LOGR( "Warn: %s", warn.c_str());
         }
@@ -357,7 +361,8 @@ namespace GLTF2Service {
         return true;
     }
 
-    GeomSP load( SceneGraph& _sg, const std::string& _key, const std::string& _path, const SerializableContainer& _array ) {
+    GeomSP
+    load( SceneGraph &_sg, const std::string &_key, const std::string &_path, const SerializableContainer &_array ) {
 
         tinygltf::TinyGLTF gltf_ctx;
         std::string err;
@@ -392,16 +397,17 @@ namespace GLTF2Service {
             return nullptr;
         }
 
-        for ( const auto& gltfMaterial : gltfScene.model->materials ) {
+        for ( const auto &gltfMaterial : gltfScene.model->materials ) {
             elaborateMaterial( _sg, gltfScene, gltfMaterial );
         }
-        auto rootScene = EF::create<Geom>( gltfScene.Name());
-        for ( const auto& scene : gltfScene.model->scenes ) {
-            for (int nodeIndex : scene.nodes) {
-                auto node = gltfScene.model->nodes[nodeIndex];
-                addMeshNode( _sg, gltfScene, node, rootScene );
+        auto rootScene = EF::create<Geom>( gltfScene.key );
+        for ( const auto &scene : gltfScene.model->scenes ) {
+            for ( int nodeIndex : scene.nodes ) {
+                addMeshNode( _sg, gltfScene, gltfScene.model->nodes[nodeIndex], rootScene );
             }
         }
+
+        rootScene->calcCompleteBBox3d();
 
         return rootScene;
     }

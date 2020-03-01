@@ -120,7 +120,6 @@ public:
 
 protected:
     MatrixAnim mTRS;
-    Matrix4f mLocalTransform = Matrix4f::IDENTITY;
     std::shared_ptr<Matrix4f> mLocalHierTransform;
 };
 
@@ -150,7 +149,6 @@ public:
         // Parse the data object with the same params, some of them might be redundant
         pushData( std::forward<Args>( args )...);
         // Set the mTRS after parse params
-        mLocalTransform = Matrix4f{ mTRS };
         generateMatrixHierarchy(fatherRootTransform());
         // Then reset it to zero to use it for animations later on
         mTRS.set( V3f::ZERO, Quaternion{}, V3f::ONE );
@@ -271,7 +269,7 @@ public:
     }
 
     void createLocalHierMatrix( Matrix4f cmat ) {
-        *mLocalHierTransform = mLocalTransform * cmat;
+        *mLocalHierTransform = Matrix4f{ mTRS } * cmat;
     }
 
     void setTag( uint64_t _tag ) {
@@ -293,22 +291,8 @@ public:
         calcCompleteBBox3d();
     }
 
-    void generateLocalTransformData( const Vector3f& pos, const Vector4f& rotAxis, const Vector3f& scale = Vector3f::ONE ) {
-        MatrixAnim lTRS;
-        lTRS.set( pos, rotAxis, scale );
-        mLocalTransform = Matrix4f{ lTRS };
-    }
-
-    void generateLocalTransformData( const Vector3f& pos, const Vector3f& rot, const Vector3f& scale = Vector3f::ONE ) {
-        MatrixAnim lTRS;
-        lTRS.set( pos, rot, scale );
-        mLocalTransform = Matrix4f{ lTRS };
-    }
-
     void generateLocalTransformData( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale=Vector3f::ONE ) {
-        MatrixAnim lTRS;
-        lTRS.set( pos, rot, scale );
-        mLocalTransform = Matrix4f{ lTRS };
+        mTRS.set( pos, rot, scale );
     }
 
     void updateTransformRec( const std::string& nodeName,
@@ -371,15 +355,13 @@ public:
     }
 
     void updateTransform() {
-//        generateLocalTransformData( mTRS.Pos(), mTRS.Rot(), mTRS.Scale());
         generateMatrixHierarchy( fatherRootTransform() * Matrix4f{mTRS} );
     }
 
-    void updateExistingTransform( const Vector3f& pos, const Vector4f& rot, const Vector3f& scale ) {
+    void updateExistingTransform( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale ) {
         MatrixAnim lTRS;
-        lTRS.set( pos, rot, scale );
-//        auto mm = Matrix4f{ mTRS };
-        mLocalTransform = mLocalTransform * lTRS;
+        lTRS.set( mTRS.Pos() + pos, mTRS.Rot() * rot, mTRS.Scale() * scale );
+        mTRS = lTRS;
 
         generateMatrixHierarchy( fatherRootTransform() );
     }
@@ -423,12 +405,7 @@ public:
     std::vector<NodeSP>  Children() const { return children; }
     std::vector<NodeSP>& Children() { return children; }
 
-    Matrix4f RootTransform() const { return mLocalTransform; }
-    void RootTransform( const Matrix4f& val ) { mLocalTransform = val; }
     std::shared_ptr<Matrix4f> getLocalHierTransform() { return mLocalHierTransform; }
-    Matrix4f LocalTransform() const { return mLocalTransform; }
-    Matrix4f& LocalTransform() { return mLocalTransform; }
-    void LocalTransform( const Matrix4f& m ) { mLocalTransform = m; }
 
     uint64_t Tag() const { return tag; }
 
@@ -537,7 +514,7 @@ private:
         this->BBox3d( _source.BBox3dCopy() );
         data = _source.data;
 //        _source.TRS().clone(mTRS);
-        mLocalTransform = _source.mLocalTransform;
+        mTRS = _source.TRS();
         mLocalHierTransform = std::make_shared<Matrix4f>(*_source.mLocalHierTransform.get());
     }
 

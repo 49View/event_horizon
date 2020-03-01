@@ -245,7 +245,7 @@ namespace GT {
     };
     struct GTPolicyTRS {
         Vector3f pos = Vector3f::ZERO;
-        Vector4f axis = Vector4f::QUAT_UNIT;
+        Quaternion axis = Quaternion{};
         Vector3f scale = Vector3f::ONE;
     };
     struct GTPolicyText {
