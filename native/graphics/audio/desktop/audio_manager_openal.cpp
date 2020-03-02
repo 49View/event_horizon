@@ -40,18 +40,21 @@ const char *getAlErrorString( ALint error ) {
 }
 
 void checkAlError( const char *op, int line, const char *file ) {
+#ifndef __OSX_AVAILABLE
     ALint error = alGetError();
     if ( error != AL_NO_ERROR ) {
         LOGE( "OpenAL Error: %s - %s, (%s, %d)", op, getAlErrorString( error ), file, line );
     }
+#endif
 }
 
 AudioManagerOpenAL::AudioManagerOpenAL() {
     pimpl = std::make_unique<AudioManagerOpenAL::AudioManagerOpenALImpl>();
 }
 
+#ifndef __OSX_AVAILABLE
 static constexpr ALuint numMaxSources = 16;
-
+#endif
 class AudioStreamOpenAL : public AudioStream {
 public:
     virtual ~AudioStreamOpenAL() = default;
@@ -67,6 +70,7 @@ class AudioManagerOpenAL::AudioManagerOpenALImpl {
 public:
 
     AudioManagerOpenALImpl() {
+#ifndef __OSX_AVAILABLE
         device = alcOpenDevice(NULL);
         if (!device) {
             LOGR("Audio could not be initialized");
@@ -90,6 +94,7 @@ public:
         }
 
         ALCALL(alGenSources(numMaxSources, sources));
+#endif
     }
 
     void list_audio_devices(const ALCchar *devices)
@@ -128,6 +133,7 @@ public:
     }
 
     std::shared_ptr<AudioStream> createStream( const std::string& _streamName, const std::string& _streamId ) {
+#ifndef __OSX_AVAILABLE
         ALuint buffer;
         ALCALL(alGenBuffers((ALuint)1, &buffer));
 
@@ -156,15 +162,20 @@ public:
         auto stream = std::make_shared<AudioStreamOpenAL>(buffer, _streamName);
         streams.emplace(_streamId, stream);
         return stream;
+#else
+        return nullptr;
+#endif
     }
 
     void playStream( const std::string& _streamId, ALuint _ch = 0 ) {
 
+#ifndef __OSX_AVAILABLE
         if ( auto it = streams.find(_streamId); it != streams.end() ) {
             auto stream = it->second;
             ALCALL(alSourcei(sources[_ch], AL_BUFFER, stream->bufferId));
             ALCALL(alSourcePlay(sources[_ch]));
         }
+#endif
 
     }
 
@@ -177,9 +188,11 @@ public:
     }
 
 private:
+#ifndef __OSX_AVAILABLE
     ALCdevice *device = nullptr;
     ALuint sources[numMaxSources];
     std::unordered_map<std::string, std::shared_ptr<AudioStreamOpenAL>> streams;
+#endif
 };
 
 std::shared_ptr<AudioStream> AudioManagerOpenAL::createStream( const std::string& streamName, const std::string& _streamId ) {
