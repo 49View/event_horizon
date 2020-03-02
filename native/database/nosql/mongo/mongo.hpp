@@ -113,14 +113,14 @@ struct StreamChangeMetadata {
     }
 
     MongoObjectId id;
-    core::string_view filename;
-    core::string_view group;
-    core::string_view username;
-    core::string_view useremail;
-    core::string_view project;
-    core::string_view contentType;
-    core::string_view hash;
-    core::string_view thumb;
+    strview filename;
+    strview group;
+    strview username;
+    strview useremail;
+    strview project;
+    strview contentType;
+    strview hash;
+    strview thumb;
     bsoncxx::document::element deps;
 };
 
