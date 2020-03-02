@@ -354,7 +354,7 @@ ImageParamsJSONAble RawImage::serializeParams() const {
 SerializableContainer RawImage::flyweightHashResolver() const {
 
     auto ret = serializableContainerFromString(serializeParams().serialize());
-    auto numSamples = 100;
+    auto numSamples = 100u;
     auto sampleMax = size() - 1;
     for ( auto s = 1u; s < numSamples; s++ ) {
         ret.emplace_back( static_cast<unsigned char>(rawBtyes[ sampleMax / s]) );

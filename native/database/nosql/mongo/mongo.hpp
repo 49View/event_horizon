@@ -16,7 +16,7 @@
 
 #include "../no_sql.hpp"
 
-using strview = core::string_view;
+using strview = core::v1::string_view;
 
 class MongoBucket : public NoSqlStorage {
 public:
