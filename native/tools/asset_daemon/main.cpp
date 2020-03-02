@@ -87,9 +87,9 @@ struct DaemonFileStruct {
     MongoBucket bucket;
     std::string filename;
     std::string group;
-    core::string_view project;
-    core::string_view uname;
-    core::string_view uemail;
+    strview project;
+    strview uname;
+    strview uemail;
     std::string thumb64{};
     std::vector<ArchiveDirectoryEntityElement> candidates{};
 };
