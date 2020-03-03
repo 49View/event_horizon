@@ -409,6 +409,30 @@ void RenderOrchestrator::init() {
     luarr["changeTime"] = [&](const std::string& _val ) {
         changeTime( _val );
     };
+    luarr["addPointLight"] = [&](float x, float y, float z, float _wattage, float _intensity) {
+        rr.LM()->addPointLight( V3f{x,y,z}, _wattage*0.01f, _intensity );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+    luarr["changePointLightPos"] = [&]( int index, float x, float y, float z) {
+        rr.LM()->setPointLightPos( index, V3f{x,y,z} );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+    luarr["changePointLightWatts"] = [&]( int index, float x) {
+        rr.LM()->setPointLightWattage( index, x*0.01f );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+    luarr["changePointLightIntensity"] = [&]( int index, float x) {
+        rr.LM()->setPointLightIntensity( index, x );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+    luarr["removePointLight"] = [&](size_t index) {
+        rr.LM()->removePointLight( index );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+    luarr["removeAllPointLights"] = [&]() {
+        rr.LM()->removeAllPointLights();
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
     luarr["changeColorFor"] = [&](int tag, float r, float g, float b ) {
         rr.changeMaterialColorOnTags( tag, r, g, b );
     };

@@ -26,8 +26,8 @@ public:
 	void Attenuation( const Vector3f& val ) { mAttenuation->value = val; }
 	[[nodiscard]] LightType Type() const { return mType; }
 	void Type( LightType val ) { mType = val; }
-    [[nodiscard]] float getWattage() const { return mWattage; }
-    void setWattage( float _wattage ) { LightBase::mWattage = _wattage; }
+    [[nodiscard]] float Wattage() const { return mWattage; }
+    void Wattage( float _wattage ) { LightBase::mWattage = _wattage; }
 
 protected:
 	std::string name;
@@ -87,14 +87,19 @@ public:
     RenderLightManager();
 
 	void addPointLight( const Vector3f& pos, float _wattage, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
+    void setPointLightPos( size_t index, const Vector3f& _pos );
+    void setPointLightWattage( size_t index, float _watt );
+    void setPointLightIntensity( size_t index, float _intensity );
+
     void setPointLightWattages( float _watt );
+    void setPointLightIntensities( float _intensity );
+
 	void removePointLight( size_t index );
 	void removeAllPointLights();
 	void toggleLightsOnOff();
 	void switchLightsOn( float animTime, TimelineGroupCCF _ccf = nullptr );
 	void switchLightsOff( float animTime, TimelineGroupCCF _ccf = nullptr );
 
-	void setLightsIntensity( float _intensity );
 
 	void setUniforms( const Vector3f& _cameraPos, std::shared_ptr<ShadowMapManager> smm,
 	                  const V4f& _sunRadiance );

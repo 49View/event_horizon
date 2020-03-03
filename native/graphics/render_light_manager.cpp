@@ -56,11 +56,44 @@ void RenderLightManager::addPointLight( const Vector3f& pos, float _wattage, flo
 
 void RenderLightManager::removePointLight( const size_t index ) {
     ASSERT( index < mPointLights.size());
-    mPointLights.erase( mPointLights.begin() + index );
+    if ( index < mPointLights.size() ) {
+        mPointLights.erase( mPointLights.begin() + index );
+    }
 }
 
 void RenderLightManager::removeAllPointLights() {
     mPointLights.clear();
+}
+
+void RenderLightManager::setPointLightWattages( float _watt ) {
+    for ( auto& pl : mPointLights ) {
+        pl.Wattage( _watt );
+    }
+//    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
+}
+
+void RenderLightManager::setPointLightIntensities( float _intensity ) {
+    for ( auto& pl : mPointLights ) {
+        pl.IntensityAnim()->value = _intensity;
+    }
+}
+
+void RenderLightManager::setPointLightPos( size_t index, const Vector3f& _pos ) {
+    if ( index < mPointLights.size() ) {
+        mPointLights[index].Pos( _pos );
+    }
+}
+
+void RenderLightManager::setPointLightWattage( size_t index, float _watt ) {
+    if ( index < mPointLights.size() ) {
+        mPointLights[index].Wattage( _watt );
+    }
+}
+
+void RenderLightManager::setPointLightIntensity( size_t index, float _intensity ) {
+    if ( index < mPointLights.size() ) {
+        mPointLights[index].Intensity( _intensity );
+    }
 }
 
 void RenderLightManager::switchLightsOn( float animTime, TimelineGroupCCF _ccf ) {
@@ -70,24 +103,11 @@ void RenderLightManager::switchLightsOn( float animTime, TimelineGroupCCF _ccf )
 //    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
 }
 
-void RenderLightManager::setPointLightWattages( float _watt ) {
-    for ( auto& pl : mPointLights ) {
-        pl.setWattage( _watt );
-    }
-//    animateTo( mDirectionalLightIntensity, 1.0f, animTime );
-}
-
 void RenderLightManager::switchLightsOff( float animTime, TimelineGroupCCF _ccf ) {
     for ( auto& pl : mPointLights ) {
         Timeline::play( pl.IntensityAnim(), 2, KeyFramePair{animTime, 0.0f }, _ccf );
     }
 //    animateTo( mDirectionalLightIntensity, 0.0f, animTime );
-}
-
-void RenderLightManager::setLightsIntensity( float _intensity ) {
-    for ( auto& pl : mPointLights ) {
-        pl.IntensityAnim()->value = _intensity;
-    }
 }
 
 void RenderLightManager::toggleLightsOnOff() {
