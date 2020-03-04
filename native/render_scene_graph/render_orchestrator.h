@@ -126,6 +126,7 @@ public:
     void useDOF( bool _value );
     void useMotionBlur( bool _value );
     void changeTime( const std::string& _time );
+    void changeCameraControlType( int _type );
     floata& skyBoxDeltaInterpolation();
 
     template<typename T>

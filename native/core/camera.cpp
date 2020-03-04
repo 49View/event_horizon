@@ -769,6 +769,11 @@ void Camera::UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget ) {
     incrementalEulerQuatAngle = V3f{ M_PI } - _qtarget.euler2();
 }
 
+void Camera::resetQuat() {
+    incrementalEulerQuatAngle = V3f::ZERO;
+    qangle->value = Quaternion{V3f::ZERO};
+}
+
 Quaternion Camera::quatAngle() const { return qangle->value; }
 
 V3fa& Camera::PosAnim() { return mPos; }

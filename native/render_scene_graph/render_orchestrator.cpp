@@ -536,20 +536,7 @@ void RenderOrchestrator::init() {
     };
 
     luarr["changeCameraControlType"] = [&]( int _type ) {
-        switch ( _type ) {
-            case CameraControls::Edit2d:
-                setRigCameraController<CameraControl2d>();
-                break;
-            case CameraControls::Orbit:
-                setRigCameraController<CameraControlOrbit3d>();
-                break;
-            case CameraControls::Fly:
-                setRigCameraController<CameraControlFly>();
-                break;
-            case CameraControls::Walk:
-                setRigCameraController<CameraControlWalk>();
-                break;
-        }
+        changeCameraControlType( _type );
     };
 
 #ifndef _PRODUCTION_
@@ -638,6 +625,25 @@ const Camera* RenderOrchestrator::getCamera( const std::string& _name ) const {
     return sg.CM().get(_name)->getMainCamera().get();
 }
 
+void RenderOrchestrator::changeCameraControlType( int _type ) {
+    switch ( _type ) {
+        case CameraControls::Edit2d:
+            setRigCameraController<CameraControl2d>();
+            break;
+        case CameraControls::Orbit:
+            setRigCameraController<CameraControlOrbit3d>();
+            break;
+        case CameraControls::Fly:
+            setRigCameraController<CameraControlFly>();
+            break;
+        case CameraControls::Walk:
+            setRigCameraController<CameraControlWalk>();
+            break;
+        default:
+            break;
+    }
+    sg.DC()->resetQuat();
+}
 void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 }

@@ -65,6 +65,7 @@ public:
     void incrementSphericalAngles( const V2f& _sph );
     void incrementOrbitDistance( float _d );
 
+    void resetQuat();
 	Quaternion quatAngle() const;
 	Vector3f centerScreenOn( const Vector2f& area, const float bMiddleIsCenter = true, const float slack = 0.0f );
 	Vector3f centerScreenOnWithinArea( Vector2f area, const Rect2f& targetArea, const float padding = 1.0f, const float slack = 0.0f );
