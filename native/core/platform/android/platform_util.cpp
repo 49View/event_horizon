@@ -22,10 +22,6 @@ void platformLogPrint( const std::string& logTag, float time, const std::string&
 void saveImageFromClipboard(const std::string& folderName) {
 }
 
-bool isTempOSFilename(const std::string& filename) {
-    return false;
-}
-
 std::string cacheFolder() {
     return "";
 }

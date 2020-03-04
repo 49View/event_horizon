@@ -23,13 +23,6 @@ bool isalnumCC(char c) {
     return std::isalnum(c);
 }
 
-bool isTempOSFilename(const std::string& filename) {
-    if ( startswith( filename, "__MACOSX")) {
-        return true;
-    }
-    return false;
-}
-
 namespace FileManager {
     void makeDir( const std::string& dirName ) {
         mkdir( dirName.c_str(), 0775 );

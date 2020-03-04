@@ -7,7 +7,14 @@
 #include <sys/stat.h>
 #include <core/util.h>
 #include <core/file_manager.h>
-#include <core/platform_util.h>
+#include <core/string_util.h>
+
+static bool isTempOSFilename(const std::string& filename) {
+    if ( startswith( filename, "__MACOSX")) {
+        return true;
+    }
+    return false;
+}
 
 static int getZipData(void **datap, size_t *sizep, const char *archive) {
     /* example implementation that reads data from file */
