@@ -466,9 +466,13 @@ void RenderOrchestrator::init() {
         sg.resetAndLoadEntity( _id, _group, _hash );
     };
 
-    luarr["add"] = [&]( const std::string& _id ) {
+    luarr["load"] = [&]( const std::string& _id ) {
         sg.addGeomScene( _id );
     };
+
+//    luarr["clone"] = [&]( const std::string& _id ) {
+//        sg.addGeomScene( _id );
+//    };
 
     luarr["move"] = [&]( const std::string& _id, float x, float y, float z ) {
         sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
@@ -644,6 +648,7 @@ void RenderOrchestrator::changeCameraControlType( int _type ) {
     }
     sg.DC()->resetQuat();
 }
+
 void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 }

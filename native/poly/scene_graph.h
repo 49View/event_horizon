@@ -339,6 +339,8 @@ public:
     NodeGraphContainer& Nodes();
     const NodeGraphContainer& Nodes() const ;
 
+    [[nodiscard]] bool nodeExists( const std::string& _name ) const;
+
     template <typename T>
     void visitNode( const UUID& _uuid, T _visitor ) {
         if ( auto it = nodes.find(_uuid); it != nodes.end() ) {

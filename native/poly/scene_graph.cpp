@@ -677,6 +677,15 @@ void SceneGraph::loadScene( const ResourceScene& gs, HODResolverCallback _ccf ) 
     HOD::resolver<ResourceScene>( *this, &gs, _ccf );
 }
 
+bool SceneGraph::nodeExists( const std::string &_name ) const {
+    for ( const auto& it : nodes ) {
+        if ( it.second->Name() == _name ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void SceneGraph::addScene( const ResourceScene& gs ) {
     HOD::resolver<ResourceScene>( *this, &gs, [this, gs]() {
         gs.visit( ResourceGroup::Geom, [&]( const std::string& _key, const std::string& _value ) {
@@ -692,6 +701,10 @@ void SceneGraph::addScene( const ResourceScene& gs ) {
 }
 
 void SceneGraph::addGeomScene( const std::string& geomName ) {
+    // If the object is already there, do not load it again
+    if ( nodeExists(geomName) ) {
+        return;
+    }
     addScene( { ResourceGroup::Geom, geomName } );
 }
 
