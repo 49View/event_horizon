@@ -681,10 +681,12 @@ void SceneGraph::addScene( const ResourceScene& gs ) {
     HOD::resolver<ResourceScene>( *this, &gs, [this, gs]() {
         gs.visit( ResourceGroup::Geom, [&]( const std::string& _key, const std::string& _value ) {
             auto geom = GB<GT::Asset>( _value, GT::Tag( 1001 ));
-            geom->updateExistingTransform( V3f::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
-                                   Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
-            DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
-            materialsForGeomSocketMessage();
+            if ( geom ) {
+                geom->updateExistingTransform( V3f::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
+                                               Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE );
+                DC()->center( geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
+//                materialsForGeomSocketMessage();
+            }
         } );
     } );
 }

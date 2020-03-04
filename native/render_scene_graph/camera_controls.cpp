@@ -17,6 +17,32 @@
 CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg ) :
                               mCameraRig(std::move( cameraRig )), rsg( rsg) {}
 
+auto CameraControl::wasd( const AggregatedInputData& mi ) {
+    static float camVelocity = 1.000f;
+    static float accumulatedVelocity = .0003f;
+    float moveForward = 0.0f;
+    float strafe = 0.0f;
+    float moveUp = 0.0f;
+
+    isWASDActive = mi.TI().checkWASDPressed() != -1;
+    if ( isWASDActive ) {
+        float vel = 0.003f*GameTime::getCurrTimeStep();
+        camVelocity = vel + accumulatedVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_W ) || mi.TI().checkKeyPressed( GMK_UP ) ) moveForward = camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_S ) || mi.TI().checkKeyPressed( GMK_DOWN ) ) moveForward = -camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_A ) || mi.TI().checkKeyPressed( GMK_LEFT )) strafe = camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_D ) || mi.TI().checkKeyPressed( GMK_RIGHT )) strafe = -camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_R ) || mi.TI().checkKeyPressed( GMK_PAGE_UP )) moveUp = -camVelocity;
+        if ( mi.TI().checkKeyPressed( GMK_F ) || mi.TI().checkKeyPressed( GMK_PAGE_DOWN )) moveUp = camVelocity;
+        accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
+        if ( camVelocity > 3.50f ) camVelocity = 3.50f;
+    } else {
+        accumulatedVelocity = 0.0003f;
+    }
+
+    return std::tuple<float, float, float>(moveForward, strafe, moveUp);
+}
+
 void CameraControl::updateFromInputData( const AggregatedInputData& mi ) {
 
     auto camera = mCameraRig->getMainCamera();
@@ -72,57 +98,37 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
     if ( !IsAlreadyInUse() || isWASDActive ) {
         togglesUpdate( mi );
 
-        static float camVelocity = 1.000f;
-        static float accumulatedVelocity = .0003f;
-        float moveForward = 0.0f;
-        float strafe = 0.0f;
-        float moveUp = 0.0f;
-
-        isWASDActive = mi.TI().checkWASDPressed() != -1;
-        if ( isWASDActive ) {
-            float vel = 0.003f*GameTime::getCurrTimeStep();
-            camVelocity = vel + accumulatedVelocity;
-            if ( mi.TI().checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
-            if ( mi.TI().checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
-            if ( mi.TI().checkKeyPressed( GMK_A ) ) strafe = camVelocity;
-            if ( mi.TI().checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
-            if ( mi.TI().checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
-            if ( mi.TI().checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
-            accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
-            if ( camVelocity > 3.50f ) camVelocity = 3.50f;
-        } else {
-            accumulatedVelocity = 0.0003f;
-        }
-
+        auto [moveForward, strafe, moveUp]  = wasd( mi );
         _cam->moveForward( moveForward );
         _cam->strafe( strafe );
         _cam->moveUp( moveUp );
         if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO ) {
-            _cam->incrementQuatAngles( V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f } );
+            auto quatAngles = V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f };
+            _cam->incrementQuatAngles( quatAngles);
         }
 
-        if ( !inputIsBlockedOnSelection() && mi.isMouseTouchedDownFirstTime(TOUCH_ZERO) ) {
-            unselectAll();
-            auto rayPick = _cam->rayViewportPickIntersection( mi.mousePos(TOUCH_ZERO) );
-//            bool bHit =
-            rsg.SG().rayIntersect( rayPick.rayNear, rayPick.rayFar, [&]( NodeVariantsSP _geom, float _near) {
-//                ### REF reimplement selection
-//                std::visit( SelectionRecursiveLamba{*this}, _geom );
-            } );
-//            if ( !bHit ) {
+//        if ( !inputIsBlockedOnSelection() && mi.isMouseTouchedDownFirstTime(TOUCH_ZERO) ) {
+//            unselectAll();
+//            auto rayPick = _cam->rayViewportPickIntersection( mi.mousePos(TOUCH_ZERO) );
+////            bool bHit =
+//            rsg.SG().rayIntersect( rayPick.rayNear, rayPick.rayFar, [&]( NodeVariantsSP _geom, float _near) {
+////                ### REF reimplement selection
+////                std::visit( SelectionRecursiveLamba{*this}, _geom );
+//            } );
+////            if ( !bHit ) {
+////            }
+//        }
+//
+//        if ( mi.TI().checkKeyToggleOn( GMK_DELETE )) {
+//            std::vector<UUID> uuids;
+//            for ( const auto& [k,v] : selectedNodes ) {
+//                uuids.emplace_back(k);
 //            }
-        }
-
-        if ( mi.TI().checkKeyToggleOn( GMK_DELETE )) {
-            std::vector<UUID> uuids;
-            for ( const auto& [k,v] : selectedNodes ) {
-                uuids.emplace_back(k);
-            }
-            for ( const auto& ui : uuids ) {
-                rsg.SG().removeNode( ui );
-                erase_if_it( selectedNodes, ui );
-            }
-        }
+//            for ( const auto& ui : uuids ) {
+//                rsg.SG().removeNode( ui );
+//                erase_if_it( selectedNodes, ui );
+//            }
+//        }
 
     }
 
@@ -140,34 +146,14 @@ void CameraControlFly::renderControls() {
 
 CameraControlFly::CameraControlFly( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable( cameraRig, rsg ) {
-    toggle( rig()->Cvt(), ViewportToggles::DrawGrid );
-    cameraRig->getCamera()->setPosition( Vector3f( 0.0f, 1.0f, 3.0f ) );
+    cameraRig->getCamera()->Mode( CameraMode::Doom );
+    cameraRig->getCamera()->LockAtWalkingHeight(false);
 }
 
 void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
     _cam->LockAtWalkingHeight(true);
 
-    static float camVelocity = 1.000f;
-    static float accumulatedVelocity = .0003f;
-    float moveForward = 0.0f;
-    float strafe = 0.0f;
-    float moveUp = 0.0f;
-
-    isWASDActive = mi.TI().checkWASDPressed() != -1;
-    if ( isWASDActive ) {
-        float vel = 0.003f*GameTime::getCurrTimeStep();
-        camVelocity = vel + accumulatedVelocity;
-        if ( mi.TI().checkKeyPressed( GMK_W ) ) moveForward = camVelocity;
-        if ( mi.TI().checkKeyPressed( GMK_S ) ) moveForward = -camVelocity;
-        if ( mi.TI().checkKeyPressed( GMK_A ) ) strafe = camVelocity;
-        if ( mi.TI().checkKeyPressed( GMK_D ) ) strafe = -camVelocity;
-        if ( mi.TI().checkKeyPressed( GMK_R ) ) moveUp = -camVelocity;
-        if ( mi.TI().checkKeyPressed( GMK_F ) ) moveUp = camVelocity;
-        accumulatedVelocity += GameTime::getCurrTimeStep()*0.025f;
-        if ( camVelocity > 3.50f ) camVelocity = 3.50f;
-    } else {
-        accumulatedVelocity = 0.0003f;
-    }
+    auto [moveForward, strafe, moveUp]  = wasd( mi );
     if ( isTouchBased() ) {
         if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO &&
              mi.moveDiffSS(TOUCH_ONE) != Vector2f::ZERO &&
@@ -243,6 +229,8 @@ CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOr
 
 CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControl( cameraRig, rsg ) {
+    cameraRig->getCamera()->Mode( CameraMode::Doom );
+    cameraRig->getCamera()->LockAtWalkingHeight(true);
 }
 
 CameraControlOrbit3d::CameraControlOrbit3d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )

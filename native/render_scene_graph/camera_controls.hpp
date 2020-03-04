@@ -28,6 +28,7 @@ public:
     CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     virtual ~CameraControl() = default;
     void updateFromInputData( const AggregatedInputData& mi );
+    auto wasd( const AggregatedInputData& mi );
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) = 0;
     virtual void renderControls() = 0;
 
@@ -37,6 +38,7 @@ public:
 protected:
     std::shared_ptr<CameraRig> mCameraRig;
     RenderOrchestrator& rsg;
+    bool isWASDActive = false;
 };
 
 class CameraControlEditable : public CameraControl, public Selection {
@@ -69,9 +71,6 @@ public:
 
 protected:
     void unselectImpl( const UUID& _uuid, Selectable& _node ) override;
-
-protected:
-    bool isWASDActive = false;
 };
 
 class CameraControlWalk : public CameraControl {
@@ -81,8 +80,6 @@ public:
     ~CameraControlWalk() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
     void renderControls() override {}
-protected:
-    bool isWASDActive = false;
 };
 
 class CameraControl2d : public CameraControlEditable {

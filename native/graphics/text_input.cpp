@@ -36,6 +36,12 @@ int TextInput::checkWASDPressed() {
 	checkKeyPressedStateless( GMK_D, currKeyPressed );
 	checkKeyPressedStateless( GMK_R, currKeyPressed );
 	checkKeyPressedStateless( GMK_F, currKeyPressed );
+    checkKeyPressedStateless( GMK_UP, currKeyPressed );
+    checkKeyPressedStateless( GMK_DOWN, currKeyPressed );
+    checkKeyPressedStateless( GMK_LEFT, currKeyPressed );
+    checkKeyPressedStateless( GMK_RIGHT, currKeyPressed );
+    checkKeyPressedStateless( GMK_PAGE_UP, currKeyPressed );
+    checkKeyPressedStateless( GMK_PAGE_DOWN, currKeyPressed );
 	return currKeyPressed;
 }
 

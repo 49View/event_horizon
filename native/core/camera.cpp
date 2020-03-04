@@ -378,7 +378,7 @@ Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NameP
 
 	qangle  = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, Name() + "_Angle" );
 	mPos    = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
-	mTarget = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Target" );
+	mTarget = std::make_shared<AnimType<Vector3f>>( V3f::Z_AXIS, Name() + "_Target" );
 	mFov    = std::make_shared<AnimType<float>>( 72.0f, Name() + "_Fov" );
 
 	mProjection.setPerspective( mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ );
@@ -518,7 +518,7 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
         sphericalAcc = V2f{M_PI, M_PI_2};
     } else if ( cca == CameraCenterAngle::Halfway || cca == CameraCenterAngle::HalfwayOpposite ) {
 	    float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : static_cast<float>(TWO_PI - M_PI_4);
-        qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS} * Quaternion{ M_PI_4, Vector3f::Z_AXIS};
+        qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS } * Quaternion{ M_PI_4, Vector3f::Z_AXIS };
         UpdateIncrementalEulerFromQangle();
         sphericalAcc = V2f{TWO_PI - (float)rangle*0.5f, (float)M_PI_4+ (float)M_PI_4*0.5f};
         if ( Mode() == CameraMode::Orbit ) {
@@ -527,6 +527,11 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
             mPos->value = cp + _bbox.centre();
         }
 	}
+    if ( Mode() != CameraMode::Orbit ) {
+        qangle->value = Quaternion{Vector3f::ZERO};
+        incrementalEulerQuatAngle = V3f::ZERO;
+    }
+
 }
 
 void Camera::pan( const Vector3f& posDiff ) {
@@ -649,6 +654,7 @@ void Camera::update() {
 
 	if ( Mode() == CameraMode::Doom ) {
 		quatMatrix = qangle->value.rotationMatrix();
+        quatMatrix.invert( mView );
 	}
 
     if ( Mode() == CameraMode::Orbit ) {

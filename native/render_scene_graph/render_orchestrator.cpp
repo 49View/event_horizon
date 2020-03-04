@@ -345,13 +345,22 @@ void RenderOrchestrator::init() {
     lua.open_libraries( sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::math, sol::lib::table
             , sol::lib::debug, sol::lib::bit32, sol::lib::io, sol::lib::ffi);
 
-    auto v2fLua = lua.new_usertype<Vector2f>("V2f",
-                                          sol::constructors<>());
-    v2fLua["x"] = &Vector2f::x;
-    v2fLua["y"] = &Vector2f::y;
+    auto v2fLua = lua.new_usertype<V2f>("V2f", sol::constructors<>());
+    v2fLua["x"] = &V2f::x;
+    v2fLua["y"] = &V2f::y;
 
-    auto aid = lua.new_usertype<AggregatedInputData>("AggregatedInputData",
-            sol::constructors<>() );
+    auto v3fLua = lua.new_usertype<V3f>("V3f", sol::constructors<>());
+    v3fLua["x"] = &V3f::x;
+    v3fLua["y"] = &V3f::y;
+    v3fLua["z"] = &V3f::z;
+
+    auto v4fLua = lua.new_usertype<V4f>("V4f", sol::constructors<>());
+    v4fLua["x"] = &V4f::x;
+    v4fLua["y"] = &V4f::y;
+    v4fLua["z"] = &V4f::z;
+    v4fLua["w"] = &V4f::w;
+
+    auto aid = lua.new_usertype<AggregatedInputData>("AggregatedInputData", sol::constructors<>() );
 
     aid.set("getScrollValue", sol::readonly(&AggregatedInputData::getScrollValue));
     aid.set("isMouseTouchedDownFirstTime", sol::readonly(&AggregatedInputData::isMouseTouchedDownFirstTime));
@@ -364,6 +373,13 @@ void RenderOrchestrator::init() {
     aid.set("moveDiffSS", sol::readonly(&AggregatedInputData::moveDiffSS));
     aid.set("moveDiff", sol::readonly(&AggregatedInputData::moveDiff));
     aid.set("checkKeyToggleOn", sol::readonly(&AggregatedInputData::checkKeyToggleOn));
+
+    lua["CameraControls"] = lua.create_table_with(
+            "Edit2d", CameraControls::Type::Edit2d,
+            "Orbit", CameraControls::Type::Orbit,
+            "Fly", CameraControls::Type::Fly,
+            "Walk", CameraControls::Type::Walk
+    );
 
     // State machine require
     lua.require_script("statemachine", luaStateMachine);
@@ -519,13 +535,6 @@ void RenderOrchestrator::init() {
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
 
-//    luarr["placeRollModel"] = [&]( const std::string& _id, float x, float y, float z ) {
-//        sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
-//            elem->updateTransform( V3f{x,y,z} );
-//        } );
-//        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
-//    };
-
     luarr["changeCameraControlType"] = [&]( int _type ) {
         switch ( _type ) {
             case CameraControls::Edit2d:
@@ -563,7 +572,6 @@ void RenderOrchestrator::reloadShaders( const std::string& _msg, SocketCallbackD
 	}
 
 	addUpdateCallback( [this](UpdateCallbackSign) { rr.cmdReloadShaders( {} ); } );
-
 }
 
 //void RenderOrchestrator::addImpl( NodeVariants _geom ) {
