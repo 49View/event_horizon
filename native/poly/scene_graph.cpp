@@ -55,7 +55,9 @@ namespace HOD { // HighOrderDependency
 
 void SceneGraph::addNode( GeomSP _node ) {
     nodeAddSignal( _node );
-    nodes.emplace( _node->UUiD(), _node );
+    if ( _node->isRoot() ) {
+        nodes.emplace( _node->UUiD(), _node );
+    }
     for ( const auto& c : _node->Children()) {
         addNode( c );
     }

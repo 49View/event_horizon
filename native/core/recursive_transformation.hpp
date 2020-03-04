@@ -239,6 +239,9 @@ public:
     void Father( NodeP val ) { father = val; }
     NodeP Father() { return father; }
     NodeP Father() const { return father; }
+    [[nodiscard]] bool isRoot() const {
+        return father == nullptr;
+    }
     [[nodiscard]] Matrix4f fatherRootTransform() const {
         if ( father == nullptr ) return Matrix4f::IDENTITY;
         return *father->mLocalHierTransform.get();
@@ -359,6 +362,11 @@ public:
         generateMatrixHierarchy( fatherRootTransform());
     }
 
+    void updateTransform( const Quaternion& quat ) {
+        generateLocalTransformData( mTRS.Pos(), quat, mTRS.Scale());
+        generateMatrixHierarchy( fatherRootTransform());
+    }
+
     void updateTransform() {
         generateMatrixHierarchy( fatherRootTransform() * Matrix4f{mTRS} );
     }
@@ -366,6 +374,14 @@ public:
     void updateExistingTransform( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale ) {
         MatrixAnim lTRS;
         lTRS.set( mTRS.Pos() + pos, mTRS.Rot() * rot, mTRS.Scale() * scale );
+        mTRS = lTRS;
+
+        generateMatrixHierarchy( fatherRootTransform() );
+    }
+
+    void updateExistingTransform( const Quaternion& rot ) {
+        MatrixAnim lTRS;
+        lTRS.set( mTRS.Pos(), mTRS.Rot() * rot, mTRS.Scale() );
         mTRS = lTRS;
 
         generateMatrixHierarchy( fatherRootTransform() );

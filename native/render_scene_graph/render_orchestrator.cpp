@@ -450,16 +450,81 @@ void RenderOrchestrator::init() {
         sg.resetAndLoadEntity( _id, _group, _hash );
     };
 
-    luarr["addModel"] = [&]( const std::string& _id ) {
+    luarr["add"] = [&]( const std::string& _id ) {
         sg.addGeomScene( _id );
     };
 
-    luarr["moveModel"] = [&]( const std::string& _id, float x, float y, float z ) {
+    luarr["move"] = [&]( const std::string& _id, float x, float y, float z ) {
         sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
             elem->updateExistingTransform( V3f{x,y,z}, Quaternion{}, V3f::ONE );
         } );
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
+
+    luarr["moveTo"] = [&]( const std::string& _id, float x, float y, float z ) {
+        sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
+            elem->updateTransform( V3f{x,y,z} );
+        } );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+    luarr["center"] = [&]( const std::string& _id ) {
+        sg.transformNode( _id, [this]( GeomSP elem ) {
+            elem->updateTransform( V3f::ZERO, Quaternion{}, V3f::ONE );
+            this->SG().DC()->center( elem->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
+        } );
+
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+    luarr["pitch"] = [&]( const std::string& _id, float x ) {
+        sg.transformNode( _id, [x]( GeomSP elem ) {
+            elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{1.0f, 0.0f, 0.0f, degToRad(x)}), V3f::ONE );
+        } );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+    luarr["roll"] = [&]( const std::string& _id, float x ) {
+        sg.transformNode( _id, [x]( GeomSP elem ) {
+            elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{0.0f, 0.0f, 1.0f, degToRad(x)}), V3f::ONE );
+        } );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+    luarr["yaw"] = [&]( const std::string& _id, float x ) {
+        sg.transformNode( _id, [x]( GeomSP elem ) {
+            elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{0.0f, 1.0f, 0.0f, degToRad(x)}), V3f::ONE );
+        } );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+    luarr["pitchTo"] = [&]( const std::string& _id, float x ) {
+        sg.transformNode( _id, [x]( GeomSP elem ) {
+            elem->updateTransform( quatFromAxis(V4f{1.0f, 0.0f, 0.0f, degToRad(x)}) );
+        } );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+    luarr["rollTo"] = [&]( const std::string& _id, float x ) {
+        sg.transformNode( _id, [x]( GeomSP elem ) {
+            elem->updateTransform( quatFromAxis(V4f{0.0f, 0.0f, 1.0f, degToRad(x)}) );
+        } );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+    luarr["yawTo"] = [&]( const std::string& _id, float x ) {
+        sg.transformNode( _id, [x]( GeomSP elem ) {
+            elem->updateTransform( quatFromAxis(V4f{0.0f, 1.0f, 0.0f, degToRad(x)}) );
+        } );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+//    luarr["placeRollModel"] = [&]( const std::string& _id, float x, float y, float z ) {
+//        sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
+//            elem->updateTransform( V3f{x,y,z} );
+//        } );
+//        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+//    };
 
     luarr["changeCameraControlType"] = [&]( int _type ) {
         switch ( _type ) {
