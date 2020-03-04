@@ -42,6 +42,7 @@
 
 // mongod --port 27017 --replSet rs0
 // mongod --port 27017 --replSet rs0 --dbpath ~/Documents/mongodata
+// sudo /usr/local/etc/nginx
 // sudo brew services restart nginx
 // /usr/loca/var/log/nginx/ tail -f aacess.log
 

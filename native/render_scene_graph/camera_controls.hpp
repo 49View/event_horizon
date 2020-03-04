@@ -14,11 +14,13 @@ class RenderOrchestrator;
 class TextInput;
 struct AggregatedInputData;
 
-enum class CameraControls {
-    Edit2d,
-    Plan2d,
-    Fly,
-    Walk
+namespace CameraControls {
+    enum Type {
+        Edit2d = 0,
+        Orbit,
+        Fly,
+        Walk
+    };
 };
 
 class CameraControl {

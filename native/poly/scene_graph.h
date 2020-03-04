@@ -346,6 +346,22 @@ public:
         }
     }
 
+    template <typename T>
+    void foreachNode( T _f ) {
+        for ( auto& it : nodes ) {
+            it.second->foreach( _f );
+        }
+    }
+
+    template <typename T>
+    void transformNode( const std::string& _name, T _f ) {
+        for ( auto& it : nodes ) {
+            if ( it.second->Name() == _name ) {
+                it.second->transform( _f );
+            }
+        }
+    }
+
     template <typename T, typename ...Args>
     GeomSP GB( Args&&... args ) {
         VDataAssembler<T> gb{std::forward<Args>(args)...};

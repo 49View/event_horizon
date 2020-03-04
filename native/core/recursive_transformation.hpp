@@ -190,6 +190,11 @@ public:
         }
     }
 
+    void transform( std::function<void(NodeSP)> f ) {
+        f( this->shared_from_this() );
+        generateMatrixHierarchy(fatherRootTransform());
+    }
+
     inline void serialize( MegaWriter* visitor ) const {
         visitor->StartObject();
         visitor->serialize( "UUID", UUiD() );

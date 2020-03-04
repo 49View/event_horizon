@@ -48,7 +48,7 @@ namespace WindowHandling {
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
-        ImGui::GetIO().FontGlobalScale = 0.5f;
+        ImGui::GetIO().FontGlobalScale = 1.f;
 //        ImGui::GetIO().FontAllowUserScaling = true;
         ImGui_ImplGlfw_InitForOpenGL(window, true);
 #ifdef __EMSCRIPTEN__

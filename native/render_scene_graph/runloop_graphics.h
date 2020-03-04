@@ -38,7 +38,6 @@ public:
     void activate() {
         sg.init();
         rsg.init();
-//        lua.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::string, sol::lib::io);
         activateImpl();
     }
 

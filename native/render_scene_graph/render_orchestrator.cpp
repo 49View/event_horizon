@@ -409,6 +409,7 @@ void RenderOrchestrator::init() {
     luarr["changeTime"] = [&](const std::string& _val ) {
         changeTime( _val );
     };
+
     luarr["addPointLight"] = [&](float x, float y, float z, float _wattage, float _intensity) {
         rr.LM()->addPointLight( V3f{x,y,z}, _wattage*0.01f, _intensity );
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
@@ -433,6 +434,7 @@ void RenderOrchestrator::init() {
         rr.LM()->removeAllPointLights();
         setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
     };
+
     luarr["changeColorFor"] = [&](int tag, float r, float g, float b ) {
         rr.changeMaterialColorOnTags( tag, r, g, b );
     };
@@ -446,6 +448,34 @@ void RenderOrchestrator::init() {
 
     luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group, const std::string& _hash ) {
         sg.resetAndLoadEntity( _id, _group, _hash );
+    };
+
+    luarr["addModel"] = [&]( const std::string& _id ) {
+        sg.addGeomScene( _id );
+    };
+
+    luarr["moveModel"] = [&]( const std::string& _id, float x, float y, float z ) {
+        sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
+            elem->updateExistingTransform( V3f{x,y,z}, Quaternion{}, V3f::ONE );
+        } );
+        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    };
+
+    luarr["changeCameraControlType"] = [&]( int _type ) {
+        switch ( _type ) {
+            case CameraControls::Edit2d:
+                setRigCameraController<CameraControl2d>();
+                break;
+            case CameraControls::Orbit:
+                setRigCameraController<CameraControlOrbit3d>();
+                break;
+            case CameraControls::Fly:
+                setRigCameraController<CameraControlFly>();
+                break;
+            case CameraControls::Walk:
+                setRigCameraController<CameraControlWalk>();
+                break;
+        }
     };
 
 #ifndef _PRODUCTION_
