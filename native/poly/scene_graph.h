@@ -349,6 +349,13 @@ public:
     }
 
     template <typename T>
+    void visitNodes( T _visitor ) {
+        for ( const auto& it : nodes ) {
+            it.second->visit( _visitor );
+        }
+    }
+
+    template <typename T>
     void foreachNode( T _f ) {
         for ( auto& it : nodes ) {
             it.second->foreach( _f );

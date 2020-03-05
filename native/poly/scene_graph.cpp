@@ -640,6 +640,10 @@ void SceneGraph::loadRawImage( std::string _names, HttpResouceCB _ccf ) {
 }
 
 void SceneGraph::loadMaterial( std::string _names, HttpResouceCB _ccf ) {
+    if ( auto ret = ML().get(_names); ret != nullptr ) {
+        _ccf( ret->Key() );
+        return;
+    }
     B<MB>( _names ).load( _ccf );
 }
 

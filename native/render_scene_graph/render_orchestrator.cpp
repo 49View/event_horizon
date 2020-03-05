@@ -174,7 +174,8 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr
         if ( bEmpty ) return;
         auto dataRef = _geom->DataRef(0);
         auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.
-                  n(_geom->UUiD()).
+                  n(_geom->Name()).
+                  u(_geom->UUiD()).
                   g(_geom->Tag()).
                   t(_geom->getLocalHierTransform()).
                   b(_geom->BBox3d()).
@@ -455,10 +456,15 @@ void RenderOrchestrator::init() {
         rr.changeMaterialColorOnTags( tag, r, g, b );
     };
 
-    luarr["changeMaterialFor"] = [&](int tag, CResourceRef resource ) {
+    luarr["changeMaterialFor"] = [&](const std::string& name, CResourceRef resource ) {
+        sg.loadMaterial( resource, [this,name](HttpResouceCBSign key) {
+            rr.changeMaterialOn( name, sg.getHash<Material>( key ) );
+        } );
+    };
+
+    luarr["changeMaterialForTag"] = [&](int tag, CResourceRef resource ) {
         sg.loadMaterial( resource, [this,tag](HttpResouceCBSign key) {
-            rr.changeMaterialOnTags(
-                    { (uint64_t)tag, sg.getHash<Material>( key ) } );
+            rr.changeMaterialOn( static_cast<uint64_t>(tag), sg.getHash<Material>( key ) );
         } );
     };
 
@@ -478,14 +484,14 @@ void RenderOrchestrator::init() {
         sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
             elem->updateExistingTransform( V3f{x,y,z}, Quaternion{}, V3f::ONE );
         } );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["moveTo"] = [&]( const std::string& _id, float x, float y, float z ) {
         sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
             elem->updateTransform( V3f{x,y,z} );
         } );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["center"] = [&]( const std::string& _id ) {
@@ -493,50 +499,49 @@ void RenderOrchestrator::init() {
             elem->updateTransform( V3f::ZERO, Quaternion{}, V3f::ONE );
             this->SG().DC()->center( elem->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
         } );
-
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["pitch"] = [&]( const std::string& _id, float x ) {
         sg.transformNode( _id, [x]( GeomSP elem ) {
             elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{1.0f, 0.0f, 0.0f, degToRad(x)}), V3f::ONE );
         } );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["roll"] = [&]( const std::string& _id, float x ) {
         sg.transformNode( _id, [x]( GeomSP elem ) {
             elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{0.0f, 0.0f, 1.0f, degToRad(x)}), V3f::ONE );
         } );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["yaw"] = [&]( const std::string& _id, float x ) {
         sg.transformNode( _id, [x]( GeomSP elem ) {
             elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{0.0f, 1.0f, 0.0f, degToRad(x)}), V3f::ONE );
         } );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["pitchTo"] = [&]( const std::string& _id, float x ) {
         sg.transformNode( _id, [x]( GeomSP elem ) {
             elem->updateTransform( quatFromAxis(V4f{1.0f, 0.0f, 0.0f, degToRad(x)}) );
         } );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["rollTo"] = [&]( const std::string& _id, float x ) {
         sg.transformNode( _id, [x]( GeomSP elem ) {
             elem->updateTransform( quatFromAxis(V4f{0.0f, 0.0f, 1.0f, degToRad(x)}) );
         } );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["yawTo"] = [&]( const std::string& _id, float x ) {
         sg.transformNode( _id, [x]( GeomSP elem ) {
             elem->updateTransform( quatFromAxis(V4f{0.0f, 1.0f, 0.0f, degToRad(x)}) );
         } );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.invalidateOnAdd();
     };
 
     luarr["changeCameraControlType"] = [&]( int _type ) {

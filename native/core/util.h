@@ -46,6 +46,11 @@ namespace LoggerLevel {
     inline const static std::string Info    = "info";
 }
 
+template <typename T, typename ... Args>
+T perfectForward(Args&& ... args){
+    return T(std::forward<Args>(args)...);
+}
+
 class UpdateSignals {
     bool mbNeedsUpdate = false;
 public:

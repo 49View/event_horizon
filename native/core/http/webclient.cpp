@@ -204,6 +204,9 @@ namespace Http {
                     auto lRes = tryFileInCache( fileHash, url, rf );
                     lRes.ccf = mainThreadCallback;
                     callback( lRes );
+                    LOGRS("[HTTP-CACHED] " << url.toString() );
+                } else {
+                    LOGRS("[WARNING][HTTP-CACHED] "<< url.toString() << " no cache policy or no callback performed" );
                 }
             }
         }

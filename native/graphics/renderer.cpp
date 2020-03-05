@@ -359,7 +359,7 @@ std::shared_ptr<GPUVData> Renderer::getGPUVData( const std::string& _key ) {
 }
 
 
-void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt ) {
+void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnContainer& _cmt ) {
     mChangeMaterialCallbacks.emplace_back( _cmt );
 }
 
@@ -396,19 +396,24 @@ void Renderer::remapLightmapUVs( const scene_t& scene ) {
 //    }
 }
 
-void Renderer::changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt ) {
+
+
+void Renderer::changeMaterialOnInternal( const ChangeMaterialOnContainer& _cmt ) {
     auto rmaterial = rmm->getFromHash( _cmt.matHash );
     if ( !rmaterial ) {
         rmaterial = getMaterial( _cmt.matHash );
     }
+    if ( rmaterial == nullptr ) return;
 
     for ( const auto&[k, vl] : CL()) {
         if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
             for ( auto& v : vl.mVList ) {
-                v->setMaterialWithTag( rmaterial, _cmt.tag );
+                if ( _cmt.tag != 0 ) v->setMaterialWithTag( rmaterial, _cmt.tag );
+                if ( !_cmt.name.empty() ) v->setMaterialWithName( rmaterial, _cmt.name );
             }
             for ( auto& v : vl.mVListTransparent ) {
-                v->setMaterialWithTag( rmaterial, _cmt.tag );
+                if ( _cmt.tag != 0 ) v->setMaterialWithTag( rmaterial, _cmt.tag );
+                if ( !_cmt.name.empty() ) v->setMaterialWithName( rmaterial, _cmt.name );
             }
         }
     }

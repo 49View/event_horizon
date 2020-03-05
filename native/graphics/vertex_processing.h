@@ -46,7 +46,7 @@ struct cpuVBIB {
     int vElementAttribSize;
 };
 
-class VPList : public UUIDCopiable {
+class VPList : public UUIDCopiable, NamePolicy<std::string> {
 public:
     using UUIDCopiable::UUIDCopiable;
 
@@ -54,8 +54,11 @@ public:
             std::shared_ptr<RenderMaterial> _mat,
             const std::shared_ptr<Matrix4f>& _transform,
             const std::shared_ptr<AABB>& _bbox3d,
+            const std::string& _name,
             uint64_t _tag,
             const UUID& _uuid );
+
+    virtual ~VPList();
 
     inline std::shared_ptr<RenderMaterial> getMaterial() const {
         return material;
@@ -93,6 +96,7 @@ public:
     void setMaterialConstantOpacity( float alpha );
 
     void setMaterialWithTag( std::shared_ptr<RenderMaterial> mp, uint64_t _tag );
+    void setMaterialWithName( std::shared_ptr<RenderMaterial> mp, const std::string& _name );
     void setMaterialColorWithTag( const Color4f& _color, uint64_t _tag );
     void setMaterialAlphaWithTag( float _alpha, uint64_t _tag );
     void setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid, Color4f& _oldColor );

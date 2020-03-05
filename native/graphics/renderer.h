@@ -123,9 +123,14 @@ private:
 	std::shared_ptr<ProgramUniformSet> mCameraUBO;
 };
 
-struct ChangeMaterialOnTagContainer {
-	uint64_t tag;
-	std::string matHash;
+struct ChangeMaterialOnContainer {
+    ChangeMaterialOnContainer( uint64_t tag, const std::string &matHash ) : tag( tag ), matHash( matHash ) {}
+    ChangeMaterialOnContainer( const std::string &name, const std::string &matHash ) : name( name ),
+                                                                                       matHash( matHash ) {}
+
+    uint64_t tag = 0;
+	std::string name{};
+	std::string matHash{};
 };
 
 struct scene_t;
@@ -157,7 +162,7 @@ public:
 	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
     std::shared_ptr<GPUVData>       getGPUVData( const std::string& _key );
 
-	void changeMaterialOnTagsCallback( const ChangeMaterialOnTagContainer& _cmt );
+	void changeMaterialOnTagsCallback( const ChangeMaterialOnContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
     void changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b );
     void changeMaterialAlphaOnTags( uint64_t _tag, float _alpha );
@@ -209,7 +214,11 @@ public:
 	int UpdateCounter() const { return mUpdateCounter; }
 	void invalidateOnAdd();
 
-    void changeMaterialOnTags( const ChangeMaterialOnTagContainer& _cmt );
+	template<typename ...Args>
+    void changeMaterialOn( Args&&... args ) {
+        changeMaterialOnInternal(perfectForward<ChangeMaterialOnContainer>(std::forward<Args>(args)...));
+    }
+
     void remapLightmapUVs( const scene_t& scene );
 
     [[nodiscard]] bool isLoading() const;
@@ -234,6 +243,9 @@ protected:
 	void clearCommandList();
 	size_t renderCBList();
 	size_t renderCommands( int eye );
+
+protected:
+    void changeMaterialOnInternal( const ChangeMaterialOnContainer& _cmt );
 
 protected:
 	std::shared_ptr<ShaderManager>          sm;
@@ -263,7 +275,7 @@ protected:
 	std::map<int, CommandBufferListVector> mCommandLists;
 	std::unordered_map<UUID, VPListSP> mVPLMap;
 
-	std::vector<ChangeMaterialOnTagContainer> mChangeMaterialCallbacks;
+	std::vector<ChangeMaterialOnContainer> mChangeMaterialCallbacks;
 
 	template <typename V> friend class VPBuilder;
 

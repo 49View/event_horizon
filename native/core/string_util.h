@@ -146,6 +146,15 @@ static inline void removeNonAlphaCharFromString( std::string& s ) {
                            []( auto const& c ) -> bool { return !isalnumCC(c); } ), s.end());
 }
 
+static inline bool comparei(const std::string& a, const std::string& b) {
+    if ( a.size() != b.size() ) return false;
+    return std::equal(a.begin(), a.end(),
+                      b.begin(), b.end(),
+                      [](char a, char b) {
+                          return tolower(a) == tolower(b);
+                      });
+}
+
 static inline std::smatch regEx( const std::string& _regExString, const std::string& _str ) {
     std::regex regv = std::regex( _regExString );
     std::smatch base_match;

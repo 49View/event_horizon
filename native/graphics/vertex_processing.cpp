@@ -18,8 +18,9 @@ VPList::VPList( std::shared_ptr<GPUVData> _gpuData,
                 std::shared_ptr<RenderMaterial> _mat,
                 const std::shared_ptr<Matrix4f>& _transform,
                 const std::shared_ptr<AABB>& _bbox3d,
+                const std::string& _name,
                 const uint64_t _tag,
-                const UUID& _uuid ) : UUIDCopiable(_uuid) {
+                const UUID& _uuid ) : UUIDCopiable(_uuid), NamePolicy<std::string>(_name) {
     gpuData = std::move(_gpuData);
     mTransform = _transform;
     if ( !_transform ) {
@@ -40,6 +41,12 @@ bool VPList::hasTag( const uint64_t _tag) const {
 
 void VPList::setMaterialWithTag( std::shared_ptr<RenderMaterial> mp, uint64_t _tag ) {
     if ( checkBitWiseFlag( tag(), _tag ) ) {
+        setMaterial( mp );
+    }
+}
+
+void VPList::setMaterialWithName( std::shared_ptr<RenderMaterial> mp, const std::string& _name ) {
+    if ( comparei(Name(), _name) ) {
         setMaterial( mp );
     }
 }
@@ -127,4 +134,8 @@ bool VPList::isHidden() const {
 
 void VPList::setHidden( bool _bHidden ) {
     bHidden = _bHidden;
+}
+
+VPList::~VPList() {
+
 }

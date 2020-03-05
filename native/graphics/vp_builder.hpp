@@ -14,13 +14,15 @@ class VPBuilder {
 public:
     VPBuilder( Renderer& _rr,
                ShaderMaterial _sm ) : rr(_rr), shaderMaterial( std::move( _sm )) {
-        name = UUIDGen::make();
+        uuid = UUIDGen::make();
+        name = uuid;
     };
 
     VPBuilder( Renderer& _rr,
                const ResourceRef& _matRef,
                const ResourceRef& _vdataRef ) : rr(_rr) {
-        name = UUIDGen::make();
+        uuid = UUIDGen::make();
+        name = uuid;
         renderMaterialSP = rr.getMaterial( _matRef );
         gpuDataSP = rr.getGPUVData( _vdataRef );
         bStraightRef = true;
@@ -31,6 +33,7 @@ public:
         if ( !_name.empty() ) name = _name;
         return *this;
     }
+    VPBuilder& u( const UUID& _uuid) { uuid = _uuid; return *this; }
     VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
     VPBuilder& t( std::shared_ptr<Matrix4f> _t ) { transformMatrix = _t; return *this; }
     VPBuilder& t( const Matrix4f& _t ) { transformMatrix = std::make_shared<Matrix4f>(_t); return *this; }
@@ -43,16 +46,18 @@ public:
                     renderMaterialSP,
                     transformMatrix,
                     bbox3d,
+                    name,
                     tag,
-                    name );
+                    uuid );
         }
         return std::make_shared<VPList>(
                rr.addVDataResource( cpuVBIB{ ps }, name ),
                rr.addMaterialResource( shaderMaterial, name ),
                transformMatrix,
                bbox3d,
+               name,
                tag,
-               name );
+               uuid );
     }
 
 private:
@@ -65,6 +70,7 @@ private:
     std::shared_ptr<RenderMaterial> renderMaterialSP;
     std::shared_ptr<Matrix4f> transformMatrix;
     std::shared_ptr<AABB> bbox3d;
+    UUID uuid;
     std::string name;
     bool bStraightRef = false;
 };
