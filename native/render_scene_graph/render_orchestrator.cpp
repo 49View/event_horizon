@@ -477,6 +477,7 @@ void RenderOrchestrator::init() {
     };
 
     luarr["print"] = [&]( const std::string& _id = "" ) {
+        LOGRS("### Scene dump ###" );
         sg.visitNodes( [_id]( const GeomSPConst elem) {
             if ( _id.empty() || comparei(elem->Name(), _id) || elem->hasAnchestor(_id) ) {
                 auto elemDepth = elem->nodeDepth();
