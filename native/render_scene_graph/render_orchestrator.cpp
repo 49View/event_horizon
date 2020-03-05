@@ -476,6 +476,18 @@ void RenderOrchestrator::init() {
         sg.addGeomScene( _id );
     };
 
+    luarr["print"] = [&]( const std::string& _id = "" ) {
+        sg.visitNodes( [_id]( const GeomSPConst elem) {
+            if ( _id.empty() || comparei(elem->Name(), _id) || elem->hasAnchestor(_id) ) {
+                auto elemDepth = elem->nodeDepth();
+                std::string hierDash = "-";
+                for ( auto t = 0u; t < elemDepth; t++ ) hierDash+="-";
+                hierDash += elem->empty() ? "  " : "* ";
+                LOGRS(hierDash << " " << elem->Name() );
+            }
+        } );
+    };
+
 //    luarr["clone"] = [&]( const std::string& _id ) {
 //        sg.addGeomScene( _id );
 //    };

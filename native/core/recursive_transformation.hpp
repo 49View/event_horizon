@@ -208,6 +208,18 @@ public:
         return data.empty();
     }
 
+    [[nodiscard]] bool hasAnchestor( const std::string& _name ) const {
+        auto ret = false;
+
+        auto dad = father;
+        while ( dad != nullptr ) {
+            if ( comparei(dad->Name(), _name) ) return true;
+            dad = dad->father;
+        }
+
+        return ret;
+    }
+
     const T& Data( size_t _index = 0 ) const {
         return data[_index];
     }
@@ -276,15 +288,27 @@ public:
         }
     }
 
-    void createLocalHierMatrix( Matrix4f cmat ) {
-        *mLocalHierTransform = Matrix4f{ mTRS } * cmat;
-    }
-
     void setTag( uint64_t _tag ) {
         tag = _tag;
         for ( auto& c : children ) {
             c->setTag( _tag );
         }
+    }
+
+    [[nodiscard]] size_t nodeDepth() const {
+        auto ret = 0u;
+
+        auto dad = father;
+        while ( dad != nullptr ) {
+            ret++;
+            dad = dad->father;
+        }
+
+        return ret;
+    }
+
+    void createLocalHierMatrix( Matrix4f cmat ) {
+        *mLocalHierTransform = Matrix4f{ mTRS } * cmat;
     }
 
     void generateMatrixHierarchyRec( Matrix4f cmat ) {
