@@ -546,6 +546,8 @@ void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAs
 
     try {
         for ( auto change : stream ) {
+            auto optType = change["operationType"].get_value().get_utf8().value;
+            if ( optType != strview("insert") && optType != strview("update") && optType != strview("replace") ) continue;
             StreamChangeMetadata meta{ change };
             Profiler p1{ "elaborate time:" };
             auto filename = std::string( meta.filename );
@@ -584,6 +586,8 @@ JSONDATA( SocketEntityResponse, entities
 void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
 //    uint64_t counter = 0;
     for ( auto change : stream ) {
+        auto optType = change["operationType"].get_value().get_utf8().value;
+        if ( optType != strview("insert") && optType != strview("update") && optType != strview("replace") ) continue;
         StreamChangeMetadata meta{ change };
         auto ent = mdb.insertEntityFromAsset( meta );
         LOGRS( ent );
@@ -593,7 +597,7 @@ void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
 
 int main( int argc, char **argv ) {
 
-    LOGRS( "Daemon version 3.0.3" );
+    LOGRS( "Daemon version 3.0.4" );
 
 //    Socket::createConnection();
 
