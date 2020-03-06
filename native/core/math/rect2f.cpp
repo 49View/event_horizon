@@ -8,7 +8,7 @@ const JMATH::Rect2f JMATH::Rect2f::INVALID = Rect2f( std::numeric_limits<float>:
 													 std::numeric_limits<float>::lowest(),
 													 std::numeric_limits<float>::lowest() );
 
-std::ostream& operator<<( std::ostream& os, const Rect2f& f ) {
+std::ostream& operator<<( std::ostream& os, const JMATH::Rect2f& f ) {
     os << "Min: " << f.topLeft() << " Max: " << f.bottomRight();
     return os;
 }

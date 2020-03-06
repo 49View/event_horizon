@@ -84,9 +84,7 @@ public:
 
 	void update();
 
-	friend std::ostream& operator<<( std::ostream& os, const Camera& camera );
-
-	bool isDoom() const;
+		bool isDoom() const;
 
 	Matrix4f& MVP( const Matrix4f& model = Matrix4f::IDENTITY, CameraProjectionType cpType =
 	CameraProjectionType::Perspective );
@@ -147,6 +145,8 @@ public:
 
 	[[nodiscard]] JMATH::Rect2f ViewPort() const { return mViewPort; }
 	void ViewPort( JMATH::Rect2f val );
+
+    friend std::ostream &operator<<( std::ostream &os, const Camera &camera );
 
 private:
     void lookAtCalc();

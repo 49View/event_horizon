@@ -40,7 +40,7 @@ public:
 	static const Rect2f INVALID;
 	static const Rect2f ZERO;
 
-    friend std::ostream& operator<<( std::ostream& os, const Rect2f& f );
+    friend std::ostream& operator<<( std::ostream& os, const JMATH::Rect2f& f );
 
     static Rect2f& MIDENTITY()  // return reference.
 	{

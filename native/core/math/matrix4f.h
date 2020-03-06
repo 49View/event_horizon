@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <cstring>
+#include <ostream>
 
 #include "math_util.h"
 #include "vector2f.h"
@@ -591,6 +592,8 @@ public:
 
 		return true;
 	}
+
+    friend std::ostream &operator<<( std::ostream &os, const Matrix4f &f );
 
 private:
 	Vector4f mRows[4];

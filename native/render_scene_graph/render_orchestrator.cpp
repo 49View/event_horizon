@@ -489,6 +489,10 @@ void RenderOrchestrator::init() {
         } );
     };
 
+    luarr["printCamera"] = [&]() {
+        LOGRS( *sg.DC().get() )
+    };
+
 //    luarr["clone"] = [&]( const std::string& _id ) {
 //        sg.addGeomScene( _id );
 //    };
