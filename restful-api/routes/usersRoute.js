@@ -103,7 +103,7 @@ router.put("/invitetoproject", async (req, res, next) => {
         console.log("User you are trying to invite doesn't exist");
         res.status(202).send({
           code: 202,
-          msg: "User " + req.body.persontoadd + " doesn't exist in here"
+          msg: req.body.persontoadd + " doesn't exist in here"
         });
         return;
       }
@@ -116,7 +116,7 @@ router.put("/invitetoproject", async (req, res, next) => {
       console.log("User already in project ", isAlreadyInThere);
       res.status(202).send({
         code: 202,
-        msg: "User " + req.body.persontoadd + " already in project"
+        msg: req.body.persontoadd + " already in project"
       });
       return;
     }
@@ -131,7 +131,7 @@ router.put("/invitetoproject", async (req, res, next) => {
       console.log("User already been invited");
       res.status(202).send({
         code: 202,
-        msg: "User " + req.body.persontoadd + " has already been invited"
+        msg: req.body.persontoadd + " has already been invited"
       });
       return;
     }
@@ -180,7 +180,7 @@ router.put("/invitetoproject", async (req, res, next) => {
 
     res.status(200).send({
       code: 200,
-      msg: "User " + req.body.persontoadd + " has been invited"
+      msg: req.body.persontoadd + " has been invited"
     });
   } catch (ex) {
     console.log("Error sending invite for project ", ex);

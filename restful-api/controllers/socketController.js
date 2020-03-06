@@ -94,6 +94,7 @@ const onSocketClientMessage = async (client, message) => {
     //   " ...(truncated)"
     // );
     try {
+        console.log("client message: ", message );
         let messageSanitized = typeof message === 'string' ? JSON.parse(unescape(message)) : message;
         if (messageSanitized.data) {
             if ( typeof messageSanitized.data === 'string' ) messageSanitized.data =  JSON.parse(unescape(messageSanitized.data));
@@ -194,7 +195,7 @@ exports.replaceClientsSession = async (previousSessionId, currentSessionId) => {
 
 exports.closeClientsWithSessionId = sessionId => {
     this.wsServer.clients.forEach(client => {
-        if (client.session._id.toString() === sessionId.toString()) {
+        if (client.session && client.session._id.toString() === sessionId.toString()) {
             logger.info(new Date() + " - Close session " + sessionId);
             client.terminate();
         }
