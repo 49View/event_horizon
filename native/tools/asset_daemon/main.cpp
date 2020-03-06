@@ -119,13 +119,59 @@ static std::vector<std::string> getExtForGroup( const std::string& _group ) {
     return {};
 }
 
-void daemonExceptionLog( const std::exception& e ) {
+void daemonExceptionLog( Mongo& mdb, const std::exception& e ) {
     LOGRS( e.what());
+    mdb.insertDaemonCrashLog(e.what());
     exit(1);
 }
 
 void daemonWarningLog( const std::string& e ) {
     LOGRS( e );
+}
+
+std::string getContentTypeFor( const DaemonFileStruct& dfs ) {
+    if ( dfs.group == ResourceGroup::Material ) {
+        return HttpContentType::json;
+    } else {
+        return HttpContentType::octetStream;
+    }
+}
+
+std::string createThumbnailCommandFor( const DaemonFileStruct& dfs, std::string& thumbnailFileName ) {
+    auto dRoot = getDaemonRoot();
+    thumbnailFileName = dRoot + dfs.filename + ".png";
+
+    if ( dfs.group == ResourceGroup::Image ) {
+        return "convert " + dRoot + dfs.filename + " -resize 128x128/! " + thumbnailFileName;
+    } else if ( dfs.group == ResourceGroup::Profile ) {
+        return "convert " + dRoot + dfs.filename + " -trim +repage -resize 256x256/! " + thumbnailFileName;
+    } else if ( dfs.group == ResourceGroup::Font ) {
+        return "convert -font " + dRoot + dfs.filename + " -pointsize 50 label:\"aA\" " + thumbnailFileName;
+    }
+
+    daemonWarningLog( "Asset of type " + dfs.group + " went into the wrong pipeline." );
+
+    return {};
+}
+
+auto generateThumbnail64( const DaemonFileStruct& dfs ) {
+    std::string thumbnailFileName{};
+    std::string cmdThumbnail = createThumbnailCommandFor( dfs, thumbnailFileName );
+    auto ret = std::system( cmdThumbnail.c_str());
+    if ( ret != 0 ) throw std::string("Failed to generate thumbnail for " + thumbnailFileName);
+    return bn::encode_b64String( FM::readLocalFileC( thumbnailFileName ));
+}
+
+std::optional<MongoFileUpload> upload( DaemonFileStruct dfs, const ResourceEntityHelper& res ) {
+    return Mongo::fileUpload( dfs.bucket, dfs.filename, res.sc,
+                              Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
+                                                 getContentTypeFor( dfs ), Hashable<>::hashOf( res.sc ), res.thumb,
+                                                 res.deps ));
+}
+
+std::optional<MongoFileUpload> elaboratePassThrough( DaemonFileStruct dfs ) {
+    ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.filename ), {}, generateThumbnail64( dfs ) };
+    return upload( dfs, res );
 }
 
 std::optional<MongoFileUpload> elaborateImage(
@@ -192,10 +238,22 @@ ResourceEntityHelper elaborateInternalMaterial(
     auto fileRoot = getDaemonRoot();
 
     Material pbrmaterial{ S::SH, ad.Name() };
+    dfs.group = ResourceGroup::Image;
     for ( const auto& output : ad ) {
-        std::string fullFileName = fileRoot + output.second.name;
-        dfs.filename = fullFileName;
-        auto to = elaborateImage( nominalSize, nominalSize, dfs, mat.thumb );
+        dfs.filename = output.second.name;
+        if ( nominalSize > 0 ) {
+            std::string resizeString = std::to_string(nominalSize) + "x" + std::to_string(nominalSize);
+            auto cmdThumbnail = "convert " +  getDaemonRoot() + dfs.filename + " -resize " + resizeString + " " +  getDaemonRoot() + dfs.filename;
+            auto ret = std::system( cmdThumbnail.c_str());
+            if ( ret != 0 ) throw std::string("Failed to scale down image " + getFileName(dfs.filename));
+        }
+
+        ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.filename ), {}, generateThumbnail64( dfs ) };
+        if ( MPBRTextures::isBaseColorTexture( dfs.filename ) ) {
+            mat.thumb = res.thumb;
+        }
+        auto to = upload( dfs, res );
+//        auto to = elaborateImage( nominalSize, nominalSize, dfs, mat.thumb );
         if ( to && !output.second.metaString.empty()) {
             auto tid = ( *to ).getStringId();
             mat.deps[ResourceGroup::Image].emplace_back( tid );
@@ -218,31 +276,26 @@ ArchiveDirectory elaborateMatSBSAR(
         int size,
         DaemonFileStruct dfs ) {
 
-    try {
-        auto fileRoot = getDaemonRoot();
+    auto fileRoot = getDaemonRoot();
 
-        std::string fn = getFileNameOnly( dfs.filename );
-        std::string fext = ".png";
+    std::string fn = getFileNameOnly( dfs.filename );
+    std::string fext = ".png";
 
-        std::string sizeString = std::to_string( log2( size ));
-        std::string sbRender = "/opt/Allegorithmic/Substance_Automation_Toolkit/sbsrender render --inputs "
-                               + fileRoot + dfs.filename +
-                               " --set-value '$outputsize@" + sizeString + "," + sizeString +
-                               "' --output-bit-depth \"8\" --png-format-compression best_compression "
-                               "--output-name {inputName}_{outputNodeName}";
-        for ( const auto& output : MPBRTextures::SBSARTextureOutputs()) {
-            sbRender.append( " --input-graph-output " + output );
-        }
-        sbRender.append( " --output-path " + fileRoot );;
-
-        std::system( sbRender.c_str());
-
-        return generateActiveDirectoryFromSBSARTempFiles( fn );
-
-    } catch ( const std::exception& e ) {
-        daemonExceptionLog( e );
-        return ArchiveDirectory{};
+    std::string sizeString = std::to_string( log2( size ));
+    std::string sbRender = "/opt/Allegorithmic/Substance_Automation_Toolkit/sbsrender render --inputs "
+                           + fileRoot + dfs.filename +
+                           " --set-value '$outputsize@" + sizeString + "," + sizeString +
+                           "' --output-bit-depth \"8\" --png-format-compression best_compression "
+                           "--output-name {inputName}_{outputNodeName}";
+    for ( const auto& output : MPBRTextures::SBSARTextureOutputs()) {
+        sbRender.append( " --input-graph-output " + output );
     }
+    sbRender.append( " --output-path " + fileRoot );;
+
+    auto ret = std::system( sbRender.c_str());
+    if ( ret != 0 ) throw std::string("Failed to run: " + sbRender);
+
+    return generateActiveDirectoryFromSBSARTempFiles( fn );
 }
 
 int resaveGLB( const std::string& filename ) {
@@ -290,63 +343,51 @@ int resaveGLB( const std::string& filename ) {
 }
 
 void elaborateGeomFBX( DaemonFileStruct dfs ) {
-    try {
-        auto dRoot = getDaemonRoot();
-        auto fn = getFileNameOnly( dfs.filename );
-        std::string filenameglb = fn + ".glb";
+    auto dRoot = getDaemonRoot();
+    auto fn = getFileNameOnly( dfs.filename );
+    std::string filenameglb = fn + ".glb";
 
-        std::string cmd =
-                "cd " + dRoot + " && FBX2glTF -b --pbr-metallic-roughness -o '" + getFileNameOnly( filenameglb ) +
-                "' '" +
-                getFileName( dfs.filename ) + "'";
-        auto ret = std::system( cmd.c_str());
-        if ( ret != 0 ) throw DaemonException{ std::string{ "FBX elaboration return code: " + std::to_string( ret ) }};
+    std::string cmd =
+            "cd " + dRoot + " && FBX2glTF -b --pbr-metallic-roughness -o '" + getFileNameOnly( filenameglb ) +
+            "' '" +
+            getFileName( dfs.filename ) + "'";
+    auto ret = std::system( cmd.c_str());
+    if ( ret != 0 ) throw std::string{ "FBX elaboration return code: " + std::to_string( ret ) };
 
-        auto fileData = FM::readLocalFile( dRoot + filenameglb );
+    auto fileData = FM::readLocalFile( dRoot + filenameglb );
 //        resaveGLB(dRoot + filenameglb);
-        auto fileHash = Hashable<>::hashOf( fileData );
-        Mongo::fileUpload( dfs.bucket, filenameglb, std::move( fileData ),
-                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::octetStream, fileHash, dfs.thumb64, ResourceDependencyDict{} ));
-    } catch ( const std::exception& e ) {
-        daemonExceptionLog( e );
-    }
+    auto fileHash = Hashable<>::hashOf( fileData );
+    Mongo::fileUpload( dfs.bucket, filenameglb, std::move( fileData ),
+                       Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
+                                          HttpContentType::octetStream, fileHash, dfs.thumb64, ResourceDependencyDict{} ));
 }
 
 void elaborateGeomObj( DaemonFileStruct dfs ) {
-    try {
-        auto dRoot = getDaemonRoot();
-        auto fn = getFileNameOnly( dfs.filename );
-        std::string filenameglb = fn + ".glb";
+    auto dRoot = getDaemonRoot();
+    auto fn = getFileNameOnly( dfs.filename );
+    std::string filenameglb = fn + ".glb";
 
-        std::string cmd =
-                "cd " + dRoot + " && obj2glTF -i '" + getFileName( dfs.filename ) + "'  -o '" + filenameglb + "'";
-        auto ret = std::system( cmd.c_str());
-        if ( ret != 0 ) throw DaemonException{ std::string{ "OBJ elaboration return code: " + std::to_string( ret ) }};
+    std::string cmd =
+            "cd " + dRoot + " && obj2glTF -i '" + getFileName( dfs.filename ) + "'  -o '" + filenameglb + "'";
+    auto ret = std::system( cmd.c_str());
+    if ( ret != 0 ) throw std::string{ "OBJ elaboration return code: " + std::to_string( ret ) };
 
-        auto fileData = FM::readLocalFile( dRoot + filenameglb );
-        resaveGLB( dRoot + filenameglb );
-        fileData = FM::readLocalFile( dRoot + filenameglb );
-        auto fileHash = Hashable<>::hashOf( fileData );
-        Mongo::fileUpload( dfs.bucket, filenameglb, std::move( fileData ),
-                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::octetStream, fileHash, "", ResourceDependencyDict{} ));
-    } catch ( const std::exception& e ) {
-        daemonExceptionLog( e );
-    }
+    auto fileData = FM::readLocalFile( dRoot + filenameglb );
+    resaveGLB( dRoot + filenameglb );
+    fileData = FM::readLocalFile( dRoot + filenameglb );
+    auto fileHash = Hashable<>::hashOf( fileData );
+    Mongo::fileUpload( dfs.bucket, filenameglb, std::move( fileData ),
+                       Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
+                                          HttpContentType::octetStream, fileHash, "", ResourceDependencyDict{} ));
 }
 
 void elaborateGeomGLB( DaemonFileStruct dfs ) {
-    try {
-        auto dRoot = getDaemonRoot();
-        auto fileData = FM::readLocalFile( dRoot + dfs.filename );
-        auto fileHash = Hashable<>::hashOf( fileData );
-        Mongo::fileUpload( dfs.bucket, dfs.filename, std::move( fileData ),
-                           Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                              HttpContentType::octetStream, fileHash, "", ResourceDependencyDict{} ));
-    } catch ( const std::exception& e ) {
-        daemonExceptionLog( e );
-    }
+    auto dRoot = getDaemonRoot();
+    auto fileData = FM::readLocalFile( dRoot + dfs.filename );
+    auto fileHash = Hashable<>::hashOf( fileData );
+    Mongo::fileUpload( dfs.bucket, dfs.filename, std::move( fileData ),
+                       Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
+                                          HttpContentType::octetStream, fileHash, "", ResourceDependencyDict{} ));
 }
 
 void elaborateGeom( DaemonFileStruct dfs ) {
@@ -363,17 +404,22 @@ void elaborateGeom( DaemonFileStruct dfs ) {
 
 void elaborateMaterial( DaemonFileStruct dfs ) {
     ArchiveDirectory ad{ dfs.filename };
-    int nominalSize = 2048;
+    int sensibleRescaleSize = 512;
 
     if ( getFileNameExtToLower( std::string( dfs.filename )) == ".zip" ) {
         ad = mapActiveDirectoryFilesToPBR( dfs );
+        // Right so if it comes from a zip file it's the provider decision to have their exact size
+        // so in this case we'll set sensibleRescaleSize to -1 to tell the elaboration not to touch it
+        sensibleRescaleSize = -1;
     }
     if ( getFileNameExtToLower( std::string( dfs.filename )) == ".sbsar" ) {
+        int nominalSize = 1024;
+        sensibleRescaleSize = -1;
         ad = elaborateMatSBSAR( nominalSize, dfs );
     }
 
     // Gather texture outputs
-    ResourceEntityHelper mat = elaborateInternalMaterial( ad, 512, dfs );
+    ResourceEntityHelper mat = elaborateInternalMaterial( ad, sensibleRescaleSize, dfs );
     Mongo::fileUpload( dfs.bucket, dfs.filename, mat.sc,
                        Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
                                           HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
@@ -382,46 +428,6 @@ void elaborateMaterial( DaemonFileStruct dfs ) {
     // Clean up
 //    std::string cleanup = "cd " + fileRoot + " && rm " + fn + "*";
 //    std::system( cleanup.c_str());
-}
-
-std::string getContentTypeFor( const DaemonFileStruct& dfs ) {
-    if ( dfs.group == ResourceGroup::Material ) {
-        return HttpContentType::json;
-    } else {
-        return HttpContentType::octetStream;
-    }
-}
-
-std::string createThumbnailCommandFor( const DaemonFileStruct& dfs, std::string& thumbnailFileName ) {
-    auto dRoot = getDaemonRoot();
-    thumbnailFileName = dRoot + dfs.filename + ".png";
-
-    if ( dfs.group == ResourceGroup::Image ) {
-        return "convert " + dRoot + dfs.filename + " -resize 128x128/! " + thumbnailFileName;
-    } else if ( dfs.group == ResourceGroup::Profile ) {
-        return "convert " + dRoot + dfs.filename + " -trim +repage -resize 256x256/! " + thumbnailFileName;
-    } else if ( dfs.group == ResourceGroup::Font ) {
-        return "convert -font " + dRoot + dfs.filename + " -pointsize 50 label:\"aA\" " + thumbnailFileName;
-    }
-
-    daemonWarningLog( "Asset of type " + dfs.group + " went into the wrong pipeline." );
-
-    return {};
-}
-
-auto generateThumbnail64( const DaemonFileStruct& dfs ) {
-    std::string thumbnailFileName{};
-    std::string cmdThumbnail = createThumbnailCommandFor( dfs, thumbnailFileName );
-    std::system( cmdThumbnail.c_str());
-    return bn::encode_b64String( FM::readLocalFileC( thumbnailFileName ));
-}
-
-void elaboratePassThrough( DaemonFileStruct dfs ) {
-    ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.filename ), {}, generateThumbnail64( dfs ) };
-    Mongo::fileUpload( dfs.bucket, dfs.filename, res.sc,
-                       Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
-                                          getContentTypeFor( dfs ), Hashable<>::hashOf( res.sc ), res.thumb,
-                                          res.deps ));
 }
 
 void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveDirectory& ad ) {
@@ -544,36 +550,32 @@ uint64_t chooseMainArchiveFilename( const ArchiveDirectory& ad, DaemonFileStruct
 
 void parseElaborateStream( mongocxx::change_stream& stream, MongoBucket sourceAssetBucket, MongoBucket entityBucket ) {
 
-    try {
-        for ( auto change : stream ) {
-            auto optType = change["operationType"].get_value().get_utf8().value;
-            if ( optType != strview("insert") && optType != strview("update") && optType != strview("replace") ) continue;
-            StreamChangeMetadata meta{ change };
-            Profiler p1{ "elaborate time:" };
-            auto filename = std::string( meta.filename );
-            auto fileDownloaded = Mongo::fileDownload( sourceAssetBucket,
-                                                       meta.id,
-                                                       getDaemonRoot() + std::string{ filename } );
+    for ( auto change : stream ) {
+        auto optType = change["operationType"].get_value().get_utf8().value;
+        if ( optType != strview("insert") && optType != strview("update") && optType != strview("replace") ) continue;
+        StreamChangeMetadata meta{ change };
+        Profiler p1{ "elaborate time" };
+        auto filename = std::string( meta.filename );
+        auto fileDownloaded = Mongo::fileDownload( sourceAssetBucket,
+                                                   meta.id,
+                                                   getDaemonRoot() + std::string{ filename } );
 
-            DaemonFileStruct dfs{ entityBucket, getFileName( fileDownloaded ), std::string( meta.group ), meta.project,
-                                  meta.username,
-                                  meta.useremail };
+        DaemonFileStruct dfs{ entityBucket, getFileName( fileDownloaded ), std::string( meta.group ), meta.project,
+                              meta.username,
+                              meta.useremail };
 
-            ArchiveDirectory ad{ filename };
-            // First unzip all the content if package arrives in a zip file
-            if ( isFileExtCompressedArchive( std::string( filename ))) {
-                unzipFilesToTempFolder( fileDownloaded, ad );
-                auto numElaborated = chooseMainArchiveFilename( ad, dfs );
-                if (( dfs.filename.empty() || numElaborated == 0 )) {
-                    daemonWarningLog( std::string( meta.filename ) + " does not contain any appropriate asset file" );
-                    continue;
-                }
-            } else {
-                elaborateAsset( dfs, filename );
+        ArchiveDirectory ad{ filename };
+        // First unzip all the content if package arrives in a zip file
+        if ( isFileExtCompressedArchive( std::string( filename ))) {
+            unzipFilesToTempFolder( fileDownloaded, ad );
+            auto numElaborated = chooseMainArchiveFilename( ad, dfs );
+            if (( dfs.filename.empty() || numElaborated == 0 )) {
+                daemonWarningLog( std::string( meta.filename ) + " does not contain any appropriate asset file" );
+                continue;
             }
+        } else {
+            elaborateAsset( dfs, filename );
         }
-    } catch ( const std::exception& e ) {
-        daemonExceptionLog( e );
     }
 }
 
@@ -586,6 +588,7 @@ JSONDATA( SocketEntityResponse, entities
 void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
 //    uint64_t counter = 0;
     for ( auto change : stream ) {
+        Profiler p1{ "Database asset operations time" };
         auto optType = change["operationType"].get_value().get_utf8().value;
         if ( optType != strview("insert") && optType != strview("update") && optType != strview("replace") ) continue;
         StreamChangeMetadata meta{ change };
@@ -597,35 +600,31 @@ void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
 
 int main( int argc, char **argv ) {
 
-    LOGRS( "Daemon version 3.0.4" );
+    LOGRS( "Daemon version 3.1.0" );
 
-//    Socket::createConnection();
-
-    auto mongoPath = std::getenv( "EH_MONGO_PATH" );
-    auto mongoDefaultDB = std::getenv( "EH_MONGO_DEFAULT_DB" );
-    auto mongoRs = std::getenv( "EH_MONGO_REPLICA_SET_NAME" );
+    auto *mongoPath = std::getenv( "EH_MONGO_PATH" );
+    auto *mongoDefaultDB = std::getenv( "EH_MONGO_DEFAULT_DB" );
+    auto *mongoRs = std::getenv( "EH_MONGO_REPLICA_SET_NAME" );
 
     if ( !mongoPath || !mongoDefaultDB || !mongoRs ) {
         LOGRS( "MongoDB Environment initialization variables not present." );
         return 1;
     }
-//    initDeamon();
 
     Mongo mdb{{ std::string( mongoPath ), std::string( mongoDefaultDB ), std::string( mongoRs ) }};
     auto sourceAssetBucket = mdb.useBucket( "fs_assets_to_elaborate" );
     auto entityBucket = mdb.useBucket( "fs_entity_assets" );
 
-//    sourceAssetBucket.deleteAll();
-//    entityBucket.deleteAll();
-//    mdb["entities"]().delete_many( {} );
-//    mdb["remaps"]().delete_many( {} );
-
     auto streamToElaborate = mdb["fs_assets_to_elaborate.files"].watch();
     auto streamAsset = mdb["fs_entity_assets.files"].watch();
 
-    while ( true ) {
-        parseElaborateStream( streamToElaborate, sourceAssetBucket, entityBucket );
-        parseAssetStream( mdb, streamAsset );
+    try {
+        while ( true ) {
+            parseElaborateStream( streamToElaborate, sourceAssetBucket, entityBucket );
+            parseAssetStream( mdb, streamAsset );
+        }
+    } catch ( const std::exception& e ) {
+        daemonExceptionLog( mdb, e );
     }
 
     return 0;

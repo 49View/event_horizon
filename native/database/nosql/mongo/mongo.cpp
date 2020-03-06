@@ -161,6 +161,21 @@ std::string Mongo::insertEntityFromAsset(const StreamChangeMetadata &meta) {
     return "";
 }
 
+void Mongo::insertDaemonCrashLog( const std::string& crash ) {
+    using bsoncxx::builder::basic::kvp;
+    using bsoncxx::builder::basic::sub_array;
+
+    auto builder = bsoncxx::builder::basic::document{};
+    auto timeNow = std::chrono::system_clock::now();
+    builder.append(
+            kvp("crash", crash),
+            kvp("lastUpdatedDate", bsoncxx::types::b_date{timeNow}),
+            kvp("creationDate", bsoncxx::types::b_date{timeNow})
+    );
+
+    bsoncxx::stdx::optional<mongocxx::result::insert_one> result = db["daemon_crashes"].insert_one(builder.view());
+}
+
 void MongoBucket::deleteAll() {
     bucketFiles.delete_many({});
     bucketChunks.delete_many({});

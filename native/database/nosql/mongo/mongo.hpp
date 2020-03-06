@@ -151,6 +151,7 @@ public:
                 const std::string& md5, const std::string& thumb, const ResourceDependencyDict& deps = {} );
 
     std::string insertEntityFromAsset( const StreamChangeMetadata& meta );
+    void insertDaemonCrashLog( const std::string& crash );
 private:
     // The mongocxx::instance constructor and destructor initialize and shut down the driver,
     // respectively. Therefore, a mongocxx::instance must be created before using the driver and
