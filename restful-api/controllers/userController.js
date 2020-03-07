@@ -260,8 +260,8 @@ exports.createUser = async (name, email, password) => {
   return dbUser;
 };
 
-exports.getUserByEmailPasswordProject = async (email, project, password) => {
-  let dbUser = await getUserWithRolesByEmailProject(email, project);
+exports.getUserByEmailPassword = async (email, password) => {
+  let dbUser = await getUserByEmailInternal(email);
   if (dbUser !== null) {
     const cipherPasswordParts = dbUser.cipherPassword.split("$");
     hash = crypto

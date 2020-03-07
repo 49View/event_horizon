@@ -7,7 +7,7 @@ const logger = require("../logger");
 
 const router = express.Router();
 
-router.get(
+router.put(
   "/cleanToken",
   authController.authenticate,
   async (req, res, next) => {
@@ -26,8 +26,8 @@ router.get(
             signed: true,
             secure: false
           })
-          .status(200)
-          .send();
+          .status(204)
+          .send(null);
       } else {
         res.status(401).send();
       }
@@ -52,7 +52,7 @@ router.post(
         if (req.user.hasToken === true) {
           const sessionId = req.user.sessionId;
 
-          await sessionController.invalidateSessionById(sessionId);
+          await sessionController.invalidateSessionBCyId(sessionId);
           tokenInfo = await authController.getToken(
             req.user._id,
             req.user.project,
@@ -156,7 +156,7 @@ router.post(
   }
 );
 
-const getTokenResponse = async (res, req, project, email, password) => {
+const getTokenResponse = async (res, req, email, password) => {
   let error = false;
   let errmessage = "";
   let tokenInfo = null;
@@ -166,26 +166,17 @@ const getTokenResponse = async (res, req, project, email, password) => {
   try {
     let dbUser = null;
 
-    if (email == "guest") {
-      dbUser = await userController.getUserByGuestProject(
-        email,
-        project,
-        password
-      );
-    } else {
-      dbUser = await userController.getUserByEmailPasswordProject(
-        email,
-        project,
-        password
-      );
-    }
+    dbUser = await userController.getUserByEmailPassword(
+      email,
+      password
+    );
 
     if (dbUser === null) {
       error = true;
     } else {
       tokenInfo = await authController.getToken(
         dbUser._id,
-        project,
+        "",
         ipAddress,
         userAgent
       );
@@ -194,7 +185,7 @@ const getTokenResponse = async (res, req, project, email, password) => {
         email: dbUser.email,
         guest: dbUser.guest
       };
-      tokenInfo.project = project !== "" ? project : ""; //await userController.setDefaultUserProject(dbUser._id);
+      tokenInfo.project ="";
     }
   } catch (ex) {
     console.log("gettoken failed", ex);
@@ -204,7 +195,7 @@ const getTokenResponse = async (res, req, project, email, password) => {
 
   if (error === null) {
     res.status(400).send();
-  } else if (error) {
+  } else if (error === true) {
     res.status(401).send(errmessage);
   } else {
     const d = new Date(0);
@@ -225,12 +216,10 @@ const getTokenResponse = async (res, req, project, email, password) => {
 router.post("/getToken", async (req, res, next) => {
   logger.info( "/getToken" );
 
-  let project = req.body.project;
   const email = req.body.email;
   const password = req.body.password;
 
-  logger.info( "Project: " + project + " email: " + email );
-  await getTokenResponse(res, req, project, email, password);
+  await getTokenResponse(res, req, email, password);
 });
 
 router.post("/createuser", async (req, res, next) => {
@@ -251,7 +240,7 @@ router.post("/createuser", async (req, res, next) => {
   if (dbUser === null) {
     res.sendStatus(400);
   } else {
-    await getTokenResponse(res, req, "", email, password);
+    await getTokenResponse(res, req, email, password);
   }
 });
 

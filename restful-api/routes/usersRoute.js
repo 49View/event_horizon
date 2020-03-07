@@ -101,10 +101,7 @@ router.put("/invitetoproject", async (req, res, next) => {
       userEmail = await userController.getUserByEmail(req.body.persontoadd);
       if (userEmail === null) {
         console.log("User you are trying to invite doesn't exist");
-        res.status(202).send({
-          code: 202,
-          msg: req.body.persontoadd + " doesn't exist in here"
-        });
+        res.status(202).send(req.body.persontoadd + " doesn't exist in here");
         return;
       }
     }
@@ -114,10 +111,7 @@ router.put("/invitetoproject", async (req, res, next) => {
     }, 0);
     if (isAlreadyInThere > 0) {
       console.log("User already in project ", isAlreadyInThere);
-      res.status(202).send({
-        code: 202,
-        msg: req.body.persontoadd + " already in project"
-      });
+      res.status(202).send(req.body.persontoadd + " already in project");
       return;
     }
 
@@ -129,10 +123,7 @@ router.put("/invitetoproject", async (req, res, next) => {
       )
     ) {
       console.log("User already been invited");
-      res.status(202).send({
-        code: 202,
-        msg: req.body.persontoadd + " has already been invited"
-      });
+      res.status(202).send(req.body.persontoadd + " has already been invited");
       return;
     }
 
