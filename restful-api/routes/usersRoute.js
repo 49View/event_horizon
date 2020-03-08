@@ -22,7 +22,7 @@ const getUser = async req => {
   const result = {
     expires: req.user.expires,
     user: {name: req.user.name, email: req.user.email, guest: req.user.guest},
-    project: req.user.project != "" ? req.user.project : null,
+    project: req.user.project !== "" ? req.user.project : null,
     projects: [],
     invitations: []
   };
