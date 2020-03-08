@@ -57,28 +57,25 @@ router.put("/addRolesFor/:project", async (req, res, next) => {
   error === null ? res.sendStatus(400) : res.sendStatus(204);
 });
 
-router.post("/createProject/:project", async (req, res, next) => {
-  console.log("Create project ", req.params.project);
+router.post("/createProject", async (req, res, next) => {
+  console.log("Create project ", req.body.project);
 
-  const project = req.params.project;
+  const project = req.body.project;
   const email = req.user.email;
   const roles = ["admin", "user"];
-  let error = false;
 
   try {
     // add default app for this project
     if ((await userController.checkProjectAlreadyExists(project)) === true) {
-      error = true;
-    } else {
-      await projectController.initializeDefaults(project, email);
-      await userController.addRolesForProject(project, email, roles);
+      res.status(400).send("Project exists already");
+      return;
     }
+    await userController.addRolesForProject(project, email, roles);
+    res.send({project});
   } catch (ex) {
     console.log("Error creating project", ex);
-    error = true;
+    res.sendStatus(400)
   }
-
-  error === true ? res.sendStatus(400) : res.sendStatus(204);
 });
 
 router.delete("/invitetoproject", async (req, res, next) => {
@@ -101,7 +98,7 @@ router.put("/invitetoproject", async (req, res, next) => {
       userEmail = await userController.getUserByEmail(req.body.persontoadd);
       if (userEmail === null) {
         console.log("User you are trying to invite doesn't exist");
-        res.status(202).send(req.body.persontoadd + " doesn't exist in here");
+        res.status(400).send(req.body.persontoadd + " doesn't exist in here");
         return;
       }
     }
@@ -111,7 +108,7 @@ router.put("/invitetoproject", async (req, res, next) => {
     }, 0);
     if (isAlreadyInThere > 0) {
       console.log("User already in project ", isAlreadyInThere);
-      res.status(202).send(req.body.persontoadd + " already in project");
+      res.status(400).send(req.body.persontoadd + " already in project");
       return;
     }
 
@@ -123,7 +120,7 @@ router.put("/invitetoproject", async (req, res, next) => {
       )
     ) {
       console.log("User already been invited");
-      res.status(202).send(req.body.persontoadd + " has already been invited");
+      res.status(400).send(req.body.persontoadd + " has already been invited");
       return;
     }
 

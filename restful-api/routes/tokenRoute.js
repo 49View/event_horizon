@@ -27,7 +27,7 @@ router.put(
             secure: false
           })
           .status(204)
-          .send(null);
+          .send();
       } else {
         res.status(401).send();
       }
@@ -173,6 +173,7 @@ const getTokenResponse = async (res, req, email, password) => {
 
     if (dbUser === null) {
       error = true;
+      errmessage = "Username, password or interstellar alignment not quite right";
     } else {
       tokenInfo = await authController.getToken(
         dbUser._id,
@@ -185,7 +186,7 @@ const getTokenResponse = async (res, req, email, password) => {
         email: dbUser.email,
         guest: dbUser.guest
       };
-      tokenInfo.project ="";
+      tokenInfo.project = "";
     }
   } catch (ex) {
     console.log("gettoken failed", ex);
@@ -214,7 +215,7 @@ const getTokenResponse = async (res, req, email, password) => {
 };
 
 router.post("/getToken", async (req, res, next) => {
-  logger.info( "/getToken" );
+  logger.info("/getToken");
 
   const email = req.body.email;
   const password = req.body.password;
@@ -223,7 +224,7 @@ router.post("/getToken", async (req, res, next) => {
 });
 
 router.post("/createuser", async (req, res, next) => {
-  console.log("User create: ", req.body);
+  console.log("User create: ", req.body.name);
 
   const name = req.body.name;
   const email = req.body.email;
@@ -231,6 +232,10 @@ router.post("/createuser", async (req, res, next) => {
   let dbUser = null;
 
   try {
+    if ( await userController.isEmailinUse(email) ) {
+      res.status(400).send("email already been used!");
+      return;
+    }
     dbUser = await userController.createUser(name, email, password);
   } catch (ex) {
     console.log("Error creating user", ex);

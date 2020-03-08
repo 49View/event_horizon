@@ -56,6 +56,10 @@ const getUserByEmailInternal = async email => {
   }
 };
 
+exports.isEmailinUse = async email => {
+  return await getUserByEmailInternal(email) !== null;
+}
+
 exports.getUserByEmail = async email => {
   return await getUserByEmailInternal(email);
 };
@@ -235,6 +239,12 @@ const getProjectsByUser = async id => {
 
 exports.createUser = async (name, email, password) => {
   let dbUser = null;
+
+  // Check is email has already been used
+  if ( await getUserByEmailInternal(email) !== null ) {
+    return null;
+  }
+
   const salt = crypto.randomBytes(16).toString("base64");
   const hash = crypto
     .createHmac("sha512", salt)
@@ -246,6 +256,7 @@ exports.createUser = async (name, email, password) => {
   const user = {
     name: name,
     email: email,
+    emailConfirmed: false,
     cipherPassword: cipherPassword,
     active: true,
     guest: false
