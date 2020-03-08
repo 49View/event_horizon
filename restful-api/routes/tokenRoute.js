@@ -52,7 +52,7 @@ router.post(
         if (req.user.hasToken === true) {
           const sessionId = req.user.sessionId;
 
-          await sessionController.invalidateSessionBCyId(sessionId);
+          await sessionController.invalidateSessionById(sessionId);
           tokenInfo = await authController.getToken(
             req.user._id,
             req.user.project,
@@ -184,9 +184,9 @@ const getTokenResponse = async (res, req, email, password) => {
       tokenInfo.user = {
         name: dbUser.name,
         email: dbUser.email,
-        guest: dbUser.guest
+        guest: dbUser.guest,
+        project: null
       };
-      tokenInfo.project = "";
     }
   } catch (ex) {
     console.log("gettoken failed", ex);

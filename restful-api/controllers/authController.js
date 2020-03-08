@@ -175,7 +175,7 @@ exports.InitializeAuthentication = () => {
       try {
         let project = null;
         if (req && req.headers && req.headers["x-eventhorizon-guest"]) {
-          project = req.headers["x-eventhorizon-guest"];
+          project = req.headers["x-eventhorizon-guest"] !== "" ? req.headers["x-eventhorizon-guest"] : null;
           // console.log("project for guest user: ", project);
           // console.log("P:", project);
           //Check if exists guest user for project
