@@ -18,11 +18,10 @@ router.get("/myProject", async (req, res, next) => {
   dbUsers === null ? res.sendStatus(400) : res.json(dbUsers);
 });
 
-router.get("/", async (req, res, next) => {
-  // console.log("USER GET /");
+const getUser = async req => {
   const result = {
     expires: req.user.expires,
-    user: { name: req.user.name, email: req.user.email, guest: req.user.guest },
+    user: {name: req.user.name, email: req.user.email, guest: req.user.guest},
     project: req.user.project,
     projects: [],
     invitations: []
@@ -32,29 +31,28 @@ router.get("/", async (req, res, next) => {
   }
   result.projects = await userController.getUserProjects(req.user._id);
   result.invitations = await userController.getUserInvites(req.user.email);
-  // if (result.project === "" && result.projects.length == 1) {
-  //   result.project = result.projects[0];
-  // }
 
-  res.send(result);
+  return result;
+}
+
+router.get("/", async (req, res, next) => {
+  // console.log("USER GET /");
+  res.send(await getUser(req));
 });
 
-router.put("/addRolesFor/:project", async (req, res, next) => {
-  console.log('User addRolesFor "' + req.params.project + '": ', req.body);
+router.put("/addRolesFor", async (req, res, next) => {
+  console.log('User addRolesFor "' + req.body.project + '": ', req.body);
 
-  const project = req.params.project;
+  const project = req.body.project;
   const email = req.body.email;
   const roles = req.body.roles;
-  let error = false;
 
   try {
     await userController.addRolesForProject(project, email, roles);
+    res.send(await getUser(req));
   } catch (ex) {
-    console.log("Error adding roles for project", ex);
-    error = true;
+    res.status(400).send("Error adding roles for project " + ex.message)
   }
-
-  error === null ? res.sendStatus(400) : res.sendStatus(204);
 });
 
 router.post("/createProject", async (req, res, next) => {
@@ -65,26 +63,46 @@ router.post("/createProject", async (req, res, next) => {
   const roles = ["admin", "user"];
 
   try {
+    if ( project === "" ) {
+      throw "ehmmm, where's the project???";
+    }
     // add default app for this project
     if ((await userController.checkProjectAlreadyExists(project)) === true) {
-      res.status(400).send("Project exists already");
-      return;
+      throw "Project exists already";
     }
     await userController.addRolesForProject(project, email, roles);
-    res.send({project});
+    res.send(await getUser(req));
   } catch (ex) {
-    console.log("Error creating project", ex);
-    res.sendStatus(400)
+    res.status(400).send(ex);
   }
+});
+
+router.put("/acceptInvitation", async (req, res,) => {
+  console.log('User addRolesFor "' + req.body.project + '": ', req.body);
+
+  const project = req.body.project;
+  const email = req.body.email;
+  const roles = ["user"];
+
+  try {
+    await userController.addRolesForProject(project, email, roles);
+    await userController.removeInvitation({
+      persontoadd: email,
+      project: project
+    });
+    res.send(await getUser(req));
+  } catch (ex) {
+    res.status(400).send(ex.message)
+  }
+
 });
 
 router.delete("/invitetoproject", async (req, res, next) => {
   try {
     await userController.removeInvitation(req.body);
-    res.sendStatus(204);
+    res.send(await getUser(req));
   } catch (ex) {
-    console.log("Error deleting invitation to project", ex);
-    res.sendStatus(400);
+    res.status(400).send(ex.message)
   }
 });
 
