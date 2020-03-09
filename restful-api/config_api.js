@@ -1,12 +1,13 @@
 class GlobalConfig {
-	constructor(lMongoDBUser, lMongoDBPass, lMongoDBURI, lMongoDBdbName, lMongoDBReplicaSetName, lJWTSecret, lSendGrid) {
+	constructor(lMongoDBUser, lMongoDBPass, lMongoDBURI, lMongoDBdbName, lMongoDBReplicaSetName, lJWTSecret, lSendGrid, lCloudHost) {
 		this.MongoDBUser = lMongoDBUser;
 		this.MongoDBPass = lMongoDBPass;
 		this.MongoDBURI = lMongoDBURI;
 		this.MongoDBdbName = lMongoDBdbName;
 		this.MongoDBReplicaSetName = lMongoDBReplicaSetName;
 		this.mJWTSecret = lJWTSecret;
-		this.mSendGrid = lSendGrid
+		this.mSendGrid = lSendGrid,
+		this.CloudHost = lCloudHost
 	}
 
 	get JWTSecret() {
@@ -25,6 +26,7 @@ const gc = new GlobalConfig(
 	, process.env.EH_MONGO_REPLICA_SET_NAME
 	, process.env.EH_MASTER_TOKEN
 	, process.env.EH_SEND_GRID_TOKEN
+	, process.env.EH_CLOUD_HOST
 );
 
 module.exports = gc;

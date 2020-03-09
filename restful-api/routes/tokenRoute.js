@@ -4,8 +4,22 @@ const authController = require("../controllers/authController");
 const sessionController = require("../controllers/sessionController");
 const socketController = require("../controllers/socketController");
 const logger = require("../logger");
+const globalConfig = require("../config_api");
 
 const router = express.Router();
+
+const cookieObject = (d) => {
+  console.log("Cloud host:", globalConfig.CloudHost);
+  const cookieDomain = globalConfig.CloudHost === "localhost" ? globalConfig.CloudHost : `.${globalConfig.CloudHost}`;
+  return {
+    domain: cookieDomain,
+    httpOnly: true,
+    sameSite: "Lax",
+    signed: true,
+    secure: true,
+    expires: d
+  };
+};
 
 router.put(
   "/cleanToken",
@@ -80,16 +94,7 @@ router.post(
       } else {
         const d = new Date(0);
         d.setUTCSeconds(tokenInfo.expires);
-
-        res
-          .cookie("eh_jwt", tokenInfo.token, {
-            httpOnly: true,
-            sameSite: "Lax",
-            signed: true,
-            secure: true,
-            expires: d
-          })
-          .send(tokenInfo);
+        res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);
       }
     }
   }
@@ -141,17 +146,7 @@ router.post(
       } else {
         const d = new Date(0);
         d.setUTCSeconds(tokenInfo.expires);
-
-        res
-          .cookie("eh_jwt", tokenInfo.token, {
-            httpOnly: true,
-            sameSite: "Lax",
-            signed: true,
-            secure: true,
-            expires: d
-          })
-          .send(tokenInfo);
-      }
+        res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);      }
     }
   }
 );
@@ -201,16 +196,7 @@ const getTokenResponse = async (res, req, email, password) => {
   } else {
     const d = new Date(0);
     d.setUTCSeconds(tokenInfo.expires);
-
-    res
-      .cookie("eh_jwt", tokenInfo.token, {
-        httpOnly: true,
-        sameSite: "Lax",
-        signed: true,
-        secure: true,
-        expires: d
-      })
-      .send(tokenInfo);
+    res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);
   }
 };
 
@@ -232,7 +218,7 @@ router.post("/createuser", async (req, res, next) => {
   let dbUser = null;
 
   try {
-    if ( await userController.isEmailinUse(email) ) {
+    if (await userController.isEmailinUse(email)) {
       res.status(400).send("email already been used!");
       return;
     }
