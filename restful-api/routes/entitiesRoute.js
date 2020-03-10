@@ -210,7 +210,13 @@ router.get("/metadata/list/:group/:project?", async (req, res, next) => {
     );
     // const foundEntities = await entityController.getEntitiesByProjectGroupTags(project, group, false, null);
     if (foundEntities !== null && foundEntities.length > 0) {
-      res.status(200).send(foundEntities);
+      res.status(200).send( {
+        metadata: {
+          group: group,
+          project: project,
+          entities: foundEntities
+        }
+      });
     } else {
       res.status(200).json([]);
     }
