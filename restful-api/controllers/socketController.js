@@ -149,7 +149,7 @@ exports.sendMessageToSessionWithUserId = (userId, message) => {
         new Date() + " - Send message to client with session userId " + userId
     );
     this.wsServer.clients.forEach(client => {
-        if (client.session.userId == userId) {
+        if (client.session.userId === userId) {
             client.send(message);
         }
     });
