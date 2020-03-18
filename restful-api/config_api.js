@@ -6,8 +6,8 @@ class GlobalConfig {
 		this.MongoDBdbName = lMongoDBdbName;
 		this.MongoDBReplicaSetName = lMongoDBReplicaSetName;
 		this.mJWTSecret = lJWTSecret;
-		this.mSendGrid = lSendGrid,
-		this.CloudHost = lCloudHost
+		this.mSendGrid = lSendGrid;
+		this.CloudHost = lCloudHost;
 	}
 
 	get JWTSecret() {
