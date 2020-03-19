@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
-const sha256 = require("sha256");
-const uniqid = require("uniqid");
 const sessionModel = require("../models/session");
 const ObjectId = mongoose.Types.ObjectId;
+const cryptoController = require("../controllers/cryptoController");
 
 exports.createSession = async (
   userIdObject,
-  project,
+  antiForgeryToken,
   ipAddress,
   userAgent,
   issuedAt,
@@ -14,18 +13,17 @@ exports.createSession = async (
 ) => {
   const issuedAtDate = new Date(issuedAt * 1000);
   const expiresAtDate = new Date(expiresAt * 1000);
-  const id = sha256(
-    uniqid("A") + "-" + uniqid("B") + "-" + uniqid("C") + "-" + uniqid("D")
-  );
+  // const id = sha256(
+  //   uniqid("A") + "-" + uniqid("B") + "-" + uniqid("C") + "-" + uniqid("D")
+  // );
+  const id = cryptoController.generateId("SessionId");
 
   const session = {
     ids: id,
-    // userId: userIdObject, //new mongoose.mongo.ObjectId(userId),
-    project: project,
+    userId: userIdObject, 
+    antiForgeryToken: antiForgeryToken,
     ipAddress: ipAddress,
     userAgent: userAgent,
-    // issuedAt: issuedAt,
-    // expiresAt: expiresAt,
     issuedAtDate: issuedAtDate,
     expiresAtDate: expiresAtDate
   };

@@ -2,23 +2,26 @@ const express = require("express");
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 const sessionController = require("../controllers/sessionController");
-const socketController = require("../controllers/socketController");
 const logger = require("../logger");
 const globalConfig = require("../config_api");
+const dataSanitizers = require("../helpers/dataSanitizers");
 
 const router = express.Router();
 
-const cookieObject = (d) => {
+const cookieObject = (d,httpOnly) => {
   console.log("Cloud host:", globalConfig.CloudHost);
   const cookieDomain = globalConfig.CloudHost === "localhost" ? globalConfig.CloudHost : `.${globalConfig.CloudHost}`;
-  return {
+  const result={
     domain: cookieDomain,
-    httpOnly: true,
+    httpOnly: httpOnly,
     sameSite: "Lax",
     signed: true,
-    secure: true,
-    expires: d
+    secure: false,
   };
+  if (d!==null) {
+    result["expires"]=d;
+  }
+  return result;
 };
 
 router.put(
@@ -32,16 +35,9 @@ router.put(
         const sessionId = req.user.sessionId;
 
         await sessionController.invalidateSessionById(sessionId);
-        socketController.closeClientsWithSessionId(sessionId);
-        res
-          .clearCookie("eh_jwt", {
-            httpOnly: true,
-            sameSite: "Lax",
-            signed: true,
-            secure: false
-          })
-          .status(204)
-          .send();
+        res.clearCookie("eh_aft", cookieObject(null,false));
+        res.clearCookie("eh_jwt", cookieObject(null,true));
+        res.status(204).send();
       } else {
         res.status(401).send();
       }
@@ -69,13 +65,8 @@ router.post(
           await sessionController.invalidateSessionById(sessionId);
           tokenInfo = await authController.getToken(
             req.user._id,
-            req.user.project,
             ipAddress,
             userAgent
-          );
-          await socketController.replaceClientsSession(
-            sessionId,
-            tokenInfo.session
           );
           tokenInfo.user = {
             name: req.user.name,
@@ -94,59 +85,10 @@ router.post(
       } else {
         const d = new Date(0);
         d.setUTCSeconds(tokenInfo.expires);
-        res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);
+        res.cookie("eh_jwt", tokenInfo.token, cookieObject(d, true));
+        res.cookie("eh_aft", tokenInfo.antiForgeryToken, cookieObject(d, false));
+        res.send(tokenInfo);
       }
-    }
-  }
-);
-
-router.post(
-  "/refreshToken/:project",
-  authController.authenticate,
-  async (req, res, next) => {
-    // console.log(req.user);
-    if (req.user === undefined || req.user === null) {
-      res.status(401).send();
-    } else {
-      let error = false;
-      let tokenInfo = null;
-      const ipAddress = req.ip;
-      const userAgent = req.headers["user-agent"] || null;
-
-      try {
-        if (req.user.hasToken === true) {
-          const sessionId = req.user.sessionId;
-
-          await sessionController.invalidateSessionById(sessionId);
-          tokenInfo = await authController.getToken(
-            req.user._id,
-            req.params.project,
-            ipAddress,
-            userAgent
-          );
-          await socketController.replaceClientsSession(
-            sessionId,
-            tokenInfo.session
-          );
-          tokenInfo.user = {
-            name: req.user.name,
-            email: req.user.email,
-            guest: req.user.guest
-          };
-          tokenInfo.project = req.params.project;
-        } else {
-          throw new Error("Can't refresh token");
-        }
-      } catch (ex) {
-        console.log("Error refreshing token", ex);
-        error = true;
-      }
-      if (error) {
-        res.status(401).send();
-      } else {
-        const d = new Date(0);
-        d.setUTCSeconds(tokenInfo.expires);
-        res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);      }
     }
   }
 );
@@ -172,15 +114,13 @@ const getTokenResponse = async (res, req, email, password) => {
     } else {
       tokenInfo = await authController.getToken(
         dbUser._id,
-        "",
         ipAddress,
         userAgent
       );
       tokenInfo.user = {
         name: dbUser.name,
         email: dbUser.email,
-        guest: dbUser.guest,
-        project: null
+        guest: dbUser.guest
       };
     }
   } catch (ex) {
@@ -196,42 +136,26 @@ const getTokenResponse = async (res, req, email, password) => {
   } else {
     const d = new Date(0);
     d.setUTCSeconds(tokenInfo.expires);
-    res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);
+    res.cookie("eh_jwt", tokenInfo.token, cookieObject(d, true));
+    res.cookie("eh_aft", tokenInfo.antiForgeryToken, cookieObject(d, false));
+    res.send(tokenInfo);
+
   }
 };
 
 router.post("/getToken", async (req, res, next) => {
   logger.info("/getToken");
 
-  const email = req.body.email;
-  const password = req.body.password;
-
-  await getTokenResponse(res, req, email, password);
-});
-
-router.post("/createuser", async (req, res, next) => {
-  console.log("User create: ", req.body.name);
-
-  const name = req.body.name;
-  const email = req.body.email;
-  const password = req.body.password;
-  let dbUser = null;
-
-  try {
-    if (await userController.isEmailinUse(email)) {
-      res.status(400).send("email already been used!");
-      return;
-    }
-    dbUser = await userController.createUser(name, email, password);
-  } catch (ex) {
-    console.log("Error creating user", ex);
-    dbUser = null;
-  }
-
-  if (dbUser === null) {
-    res.sendStatus(400);
+  paramsDef = [
+    { name: "email", type: "email", required: true},
+    { name: "password", type: "string", required: true, min: 8}
+  ];
+  const [params,error] = dataSanitizers.checkBody(req, paramsDef);
+  if (error!==null) {
+    res.status(401).send(error);
   } else {
-    await getTokenResponse(res, req, email, password);
+    logger.info(params);
+    await getTokenResponse(res, req, params.email, params.password);
   }
 });
 

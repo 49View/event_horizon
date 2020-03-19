@@ -6,7 +6,6 @@ const streamifier = require('streamifier');
 const stream = require('stream');
 const util = require('util');
 const logger = require('./logger');
-const socketController = require('./controllers/socketController');
 const globalConfig = require("./config_api.js");
 //Set up default mongoose connection
 
@@ -26,12 +25,6 @@ exports.initDB = async () => {
       exports.bucketSourceAssets = new mongodb.GridFSBucket(mongoose.connection.client.db('event_horizon'), {bucketName: "fs_assets_to_elaborate"});
       exports.bucketEntities = new mongodb.GridFSBucket(mongoose.connection.client.db('event_horizon'), {bucketName: "fs_entity_assets"});
       logger.info("MongoDB connected with GridFS");
-
-      const entities = mongoose.model('entities');
-      entities.watch().on('change', data => {
-        socketController.sendMessageToAllClients(JSON.stringify({msg: "EntityAdded", data: data}));
-      });
-      logger.info("Watching on entities collection");
 
       return mongoose.connection;
     } catch (err) {
@@ -206,7 +199,6 @@ exports.fsUpsert = async (bucketFSModel, filename, data, metadata, metadataComp,
       const msg = "No upsert operation performed of " + filename + " because there's already an exact binary copy present";
       const msgHuman = filename + " already present. \nNo operation done.";
       let json = {msg: "daemonLogger", data: {type: "warning", msg: msgHuman}};
-      socketController.sendMessageToAllClients(JSON.stringify(json));
       logger.info(msg);
     }
     return bPerformInsert;

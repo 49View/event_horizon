@@ -1,22 +1,11 @@
-const mongoose = require("mongoose");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const passport = require("passport");
 const globalConfig = require("./config_api.js");
 const indexRoute = require("./routes/indexRoute");
-const entitiesRoute = require("./routes/entitiesRoute");
-const commandRoute = require("./routes/commandRoute");
-const broadcastRoute = require("./routes/broadcastRoute");
 const usersRoute = require("./routes/usersRoute");
 const tokenRoute = require("./routes/tokenRoute");
-const stripeRoute = require("./routes/stripeRoute");
-const fsRoute = require("./routes/fsRoute");
-const appdataRoute = require("./routes/appdataRoute");
-const socketRoute = require("./routes/socketRoute");
 const authController = require("./controllers/authController");
-const projectController = require("./controllers/projectController");
-const cryptoController = require("./controllers/cryptoController");
 const db = require("./db");
 
 const app = express();
@@ -26,17 +15,15 @@ express.static.mime.types["wasm"] = "application/wasm";
 console.log("Started");
 
 //Set up default mongoose connection
-
 db.initDB();
-
-// cryptoController.generateKey();
-authController.InitializeAuthentication();
 
 app.use(bodyParser.raw({limit: "500mb", type:'application/octet-stream'}));
 app.use(bodyParser.text({limit: "500mb"}));
 app.use(bodyParser.json({limit: "100mb"}));
 app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
 app.use(cookieParser(globalConfig.mJWTSecret));
+
+authController.InitializeAuthentication();
 
 app.use(function (req, res, next) {
     // console.log( req.headers );
@@ -58,17 +45,10 @@ app.use(function (req, res, next) {
 
 app.use("/", indexRoute);
 app.use("/", tokenRoute);
-app.use("/stripe", stripeRoute);
+app.use("/user", usersRoute);
 
 app.use(authController.authenticate);
 
-app.use("/user", usersRoute);
-app.use("/appdata", appdataRoute);
-app.use("/fs", fsRoute);
-app.use("/entities", entitiesRoute);
-app.use("/command", commandRoute);
-app.use("/broadcast", broadcastRoute);
-app.use("/socket", socketRoute);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

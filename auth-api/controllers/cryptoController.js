@@ -1,8 +1,16 @@
 const crypto = require("crypto");
+const mongoose = require("mongoose");
+const sha256 = require("sha256");
+const ObjectId = mongoose.Types.ObjectId;
+
 
 let keyPair = null;
 let privateKey, publicKey;
 const passphrase = "m(73f=fn2wxccv325rs1%$%&Szz2sdjnkl549huuq324u9g1q23";
+
+exports.generateId = (prefix) => {
+  return sha256(prefix + crypto.randomBytes(8).toString("base64") + new ObjectId());
+}
 
 exports.generateKey = async () => {
   try {

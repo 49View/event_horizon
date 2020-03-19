@@ -5,8 +5,8 @@
   "scripts": {
     "start": "node ./bin/www",
     "devstart": "NODE_ENV=\"dev\" nodemon --max-old-space-size=16000 ./bin/www",
-    "startw": "set \"PORT=3000\" && set \"NODE_ENV=dev\" && node ./bin/www",
-    "devstartw": "set \"PORT=3000\" && set \"NODE_ENV=dev\" && forever --minUptime 1000 --spinSleepTime 10000 -w ./bin/www",
+    "startw": "set \"PORT=3000\" && set \"NODE_ENV=dev\" && \"./def_env.cmd\" && node ./bin/www",
+    "devstartw": "set \"PORT=3000\" && set \"NODE_ENV=dev\" && \"./def_env.cmd\" && forever --minUptime 1000 --spinSleepTime 10000 -w ./bin/www",
     "test": "mocha --exit test/tests.js"
   },
   "dependencies": {
