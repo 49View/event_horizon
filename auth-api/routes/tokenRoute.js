@@ -16,7 +16,7 @@ const cookieObject = (d,httpOnly) => {
     httpOnly: httpOnly,
     sameSite: "Lax",
     signed: true,
-    secure: false,
+    secure: true,
   };
   if (d!==null) {
     result["expires"]=d;
