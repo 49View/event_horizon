@@ -1,3 +1,5 @@
+'use strict';
+
 const mongoose = require("mongoose");
 const mongodb = require("mongodb");
 const delay = require('delay');

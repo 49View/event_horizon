@@ -1,3 +1,4 @@
+'use strict';
 const mongoose = require("mongoose");
 const sessionModel = require("../models/session");
 const ObjectId = mongoose.Types.ObjectId;
@@ -59,7 +60,7 @@ exports.getValidSessionById = async sessionId => {
   // console.log(query);
   // console.log(query["$and"]);
   // console.log(query["$and"]);
-  dbSession = await sessionModel.findOne(query);
+  let dbSession = await sessionModel.findOne(query);
   if (dbSession !== null) {
     dbSession = dbSession.toObject();
   }

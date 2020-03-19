@@ -1,3 +1,4 @@
+'use strict';
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 const sha256 = require("sha256");

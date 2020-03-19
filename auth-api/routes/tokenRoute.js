@@ -1,3 +1,4 @@
+'use strict';
 const express = require("express");
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
@@ -9,14 +10,14 @@ const dataSanitizers = require("../helpers/dataSanitizers");
 const router = express.Router();
 
 const cookieObject = (d,httpOnly) => {
-  console.log("Cloud host:", globalConfig.CloudHost);
+  //console.log("Cloud host:", globalConfig.CloudHost);
   const cookieDomain = globalConfig.CloudHost === "localhost" ? globalConfig.CloudHost : `.${globalConfig.CloudHost}`;
   const result={
     domain: cookieDomain,
     httpOnly: httpOnly,
     sameSite: "Lax",
     signed: true,
-    secure: true,
+    secure: false,
   };
   if (d!==null) {
     result["expires"]=d;
@@ -146,7 +147,7 @@ const getTokenResponse = async (res, req, email, password) => {
 router.post("/getToken", async (req, res, next) => {
   logger.info("/getToken");
 
-  paramsDef = [
+  const paramsDef = [
     { name: "email", type: "email", required: true},
     { name: "password", type: "string", required: true, min: 8}
   ];

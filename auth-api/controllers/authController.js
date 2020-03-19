@@ -1,3 +1,4 @@
+'use strict';
 const passport = require("passport");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
@@ -50,20 +51,19 @@ exports.InitializeAuthentication = () => {
       try {
         //logger.info("Anti forgery token strategy");
         //Get jwt token from signed cookies and anti forgery token from headers
-        jwtToken=null;
+        let jwtToken=null;
         if (req && req.signedCookies && req.signedCookies["eh_jwt"]) {
           jwtToken = req.signedCookies["eh_jwt"];
         }
-        aftToken=null;
+        let aftToken=null;
         if (req && req.headers && req.headers["eh_aft"]) {
           aftToken = req.headers["eh_aft"];
         }   
-        
         if (jwtToken===null || aftToken===null) {
           throw "Invalid tokens";
         }
         // Extract token payload
-        jwtPayload=jsonWebToken.verify(
+        const jwtPayload=jsonWebToken.verify(
           jwtToken,
           globalConfig.JWTSecret,
           jwtOptions

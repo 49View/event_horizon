@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require("express");
 const userController = require("../controllers/userController");
 const mailController = require("../controllers/mailController");
@@ -9,7 +11,6 @@ const Base64 = require("js-base64").Base64;
 const router = express.Router();
 
 const getUser = async req => {
-  logger.info("User: ", req.user);
   const result = {
     expires: req.user.expires,
     user: {name: req.user.name, email: req.user.email, guest: req.user.guest},
@@ -34,7 +35,7 @@ router.get("/", authController.authenticate, async (req, res, next) => {
 //
 router.post("/", async (req, res, next) => {
   try {
-    paramsDef = [
+    const paramsDef = [
       { name: "name", type: "string", required: true},
       { name: "email", type: "email", required: true},
       { name: "password", type: "string", required: true, min: 8}
@@ -44,7 +45,7 @@ router.post("/", async (req, res, next) => {
       throw error;
     }
     //logger.info(JSON.stringify(params));
-    user = await userController.createUser(params.name, params.email, params.password);
+    const user = await userController.createUser(params.name, params.email, params.password);
     if (user===null) {
       throw `email or username already used`;
     }

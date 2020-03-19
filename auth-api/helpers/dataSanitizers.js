@@ -1,3 +1,4 @@
+'use strict';
 
 function checkType(value, type) {
 
@@ -115,19 +116,19 @@ module.exports = {
 
     checkBody: (req, paramDef) => {
 
-        result={};
-        error=null;
+        let result={};
+        let error=null;
         try {
             for (let i=0;i<paramDef.length;i++) {            
-                name=paramDef[i].name;
-                type=paramDef[i].type || "string";
-                required=paramDef[i].required || false;
-                min=paramDef[i].min || false;
-                max=paramDef[i].max || false;
+                let name=paramDef[i].name;
+                let type=paramDef[i].type || "string";
+                let required=paramDef[i].required || false;
+                let min=paramDef[i].min || false;
+                let max=paramDef[i].max || false;
                 if (name===undefined || name===null) {
                     throw `invalid params definition`;
                 }
-                param = req.body[name];
+                let param = req.body[name];
 
                 if (required && (param===undefined || param===null)) {
                     throw `param ${name} in required`;

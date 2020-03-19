@@ -1,3 +1,4 @@
+'use strict';
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const userModel = require("../models/user");
@@ -99,7 +100,7 @@ exports.getUserByEmailPassword = async (email, password) => {
   if (dbUser !== null) {
     logger.info("User exists ");
     const cipherPasswordParts = dbUser.cipherPassword.split("$");
-    hash = createCipherPassword(cipherPasswordParts[0], password);
+    const hash = createCipherPassword(cipherPasswordParts[0], password);
     delete dbUser.cipherPassword;
     if (hash !== cipherPasswordParts[1]) {
       dbUser = null;
