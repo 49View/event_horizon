@@ -24,7 +24,7 @@ app.use(bodyParser.json({limit: "100mb"}));
 app.use(bodyParser.urlencoded({limit: "100mb", extended: true}));
 app.use(cookieParser(globalConfig.mJWTSecret));
 
-authController.InitializeAuthentication();
+authController.initializeAuthentication();
 
 app.use(function (req, res, next) {
     // console.log( req.headers );

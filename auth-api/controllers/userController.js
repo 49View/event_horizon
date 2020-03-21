@@ -1,47 +1,10 @@
 'use strict';
-const mongoose = require("mongoose");
 const crypto = require("crypto");
 const userModel = require("../models/user");
-const asyncModelOperations = require("../helpers/asyncModelOperations");
-const ObjectId = mongoose.Types.ObjectId;
 const logger = require('../logger');
 
 
-const getUserByEmailInternal = async email => {
-  let dbUser = null;
-  const query = { email: { $regex: email + "$", $options: "i" } };
-
-  dbUser = await userModel.findOne(query);
-  if (dbUser !== null) {
-    dbUser = dbUser.toObject();
-    return dbUser;
-  } else {
-    return null;
-  }
-};
-
-const getUserByNameInternal = async name => {
-  let dbUser = null;
-  const query = { name: { $regex: name + "$", $options: "i" } };
-
-  dbUser = await userModel.findOne(query);
-  if (dbUser !== null) {
-    dbUser = dbUser.toObject();
-    return dbUser;
-  } else {
-    return null;
-  }
-};
-
-exports.isEmailinUse = async email => {
-  return await getUserByEmailInternal(email) !== null;
-}
-
-exports.isNameinUse = async name => {
-  return await getUserByNameInternal(name) !== null;
-}
-
-exports.getUserById = async id => {
+const getUserById = async id => {
   let dbUser = null;
   const query = { _id: id };
 
@@ -54,24 +17,50 @@ exports.getUserById = async id => {
   }
 }
 
-exports.getUserByEmail = async email => {
-  return await getUserByEmailInternal(email);
+const getUserByEmail = async email => {
+  let dbUser = null;
+  const query = { email: { $regex: email + "$", $options: "i" } };
+
+  dbUser = await userModel.findOne(query);
+  if (dbUser !== null) {
+    dbUser = dbUser.toObject();
+    return dbUser;
+  } else {
+    return null;
+  }
 };
 
-exports.getUserByName = async name => {
-  return await getUserByNameInternal(name);
+const getUserByName = async name => {
+  let dbUser = null;
+  const query = { name: { $regex: name + "$", $options: "i" } };
+
+  dbUser = await userModel.findOne(query);
+  if (dbUser !== null) {
+    dbUser = dbUser.toObject();
+    return dbUser;
+  } else {
+    return null;
+  }
 };
 
-exports.createUser = async (name, email, password) => {
+const isEmailinUse = async email => {
+  return await getUserByEmail(email) !== null;
+}
+
+const isNameinUse = async name => {
+  return await getUserByName(name) !== null;
+}
+
+const createUser = async (name, email, password) => {
   let dbUser = null;
 
   // Check is email has already been used
-  if ( await getUserByEmailInternal(email) !== null ) {
-    return null;
+  if (await isEmailinUse(email)) {
+    throw "email already been used";
   }
   // Check name has already been used
-  if ( await getUserByNameInternal(name) !== null ) {
-    return null;
+  if (await isNameinUse(name)) {
+    throw "username already been used";
   }
 
   const salt = crypto.randomBytes(16).toString("base64");
@@ -95,25 +84,34 @@ exports.createUser = async (name, email, password) => {
   return dbUser;
 };
 
-exports.getUserByEmailPassword = async (email, password) => {
-  let dbUser = await getUserByEmailInternal(email);
-  if (dbUser !== null) {
-    logger.info("User exists ");
-    const cipherPasswordParts = dbUser.cipherPassword.split("$");
-    const hash = createCipherPassword(cipherPasswordParts[0], password);
-    delete dbUser.cipherPassword;
-    if (hash !== cipherPasswordParts[1]) {
-      dbUser = null;
-      logger.info("User specify invalid password");
-    }
+const getUserByEmailPassword = async (email, password) => {
+  let dbUser = await getUserByEmail(email);
+  if (dbUser === null) {
+    throw "Invalid user";
+  }
+  const cipherPasswordParts = dbUser.cipherPassword.split("$");
+  const hash = createCipherPassword(cipherPasswordParts[0], password);
+  delete dbUser.cipherPassword;
+  if (hash !== cipherPasswordParts[1]) {
+    throw "Invalid password";
   }
   return dbUser;
 };
 
-function createCipherPassword(salt,password) {
+const createCipherPassword = (salt,password) => {
   return crypto
   .createHmac("sha512", salt)
   .update(password)
   .digest("base64");
 
+}
+
+module.exports = {
+  getUserById,
+  getUserByEmail,
+  getUserByName,
+  isEmailinUse,
+  isNameinUse,
+  createUser,
+  getUserByEmailPassword
 }

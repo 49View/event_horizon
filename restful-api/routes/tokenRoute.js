@@ -34,7 +34,7 @@ router.put(
         await sessionController.invalidateSessionById(sessionId);
         socketController.closeClientsWithSessionId(sessionId);
         res
-          .clearCookie("eh_jwt", {
+          .clearCookie(globalConfig.TokenCookie, {
             httpOnly: true,
             sameSite: "Lax",
             signed: true,
@@ -94,7 +94,7 @@ router.post(
       } else {
         const d = new Date(0);
         d.setUTCSeconds(tokenInfo.expires);
-        res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);
+        res.cookie(globalConfig.TokenCookie, tokenInfo.token, cookieObject(d)).send(tokenInfo);
       }
     }
   }
@@ -146,7 +146,7 @@ router.post(
       } else {
         const d = new Date(0);
         d.setUTCSeconds(tokenInfo.expires);
-        res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);      }
+        res.cookie(globalConfig.TokenCookie, tokenInfo.token, cookieObject(d)).send(tokenInfo);      }
     }
   }
 );
@@ -196,7 +196,7 @@ const getTokenResponse = async (res, req, email, password) => {
   } else {
     const d = new Date(0);
     d.setUTCSeconds(tokenInfo.expires);
-    res.cookie("eh_jwt", tokenInfo.token, cookieObject(d)).send(tokenInfo);
+    res.cookie(globalConfig.TokenCookie, tokenInfo.token, cookieObject(d)).send(tokenInfo);
   }
 };
 

@@ -90,8 +90,8 @@ exports.InitializeAuthentication = () => {
   const cookieExtractor = function(req) {
     // console.log("COOKIE EXTRACTOR");
     var token = null;
-    if (req && req.signedCookies && req.signedCookies["eh_jwt"]) {
-      token = req.signedCookies["eh_jwt"];
+    if (req && req.signedCookies && req.signedCookies[globalConfig.TokenCookie]) {
+      token = req.signedCookies[globalConfig.TokenCookie];
     }
     return token;
   };
