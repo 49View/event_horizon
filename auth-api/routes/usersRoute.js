@@ -6,7 +6,6 @@ const mailController = require("../controllers/mailController");
 const logger = require('../logger');
 const authController = require("../controllers/authController");
 const dataSanitizers = require("../helpers/dataSanitizers");
-const Base64 = require("js-base64").Base64;
 
 const router = express.Router();
 

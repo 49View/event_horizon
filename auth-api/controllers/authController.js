@@ -1,7 +1,5 @@
 'use strict';
 const passport = require("passport");
-const JwtStrategy = require("passport-jwt").Strategy;
-const ExtractJwt = require("passport-jwt").ExtractJwt;
 const CustomStrategy = require("passport-custom").Strategy;
 const globalConfig = require("../config_api.js");
 const jsonWebToken = require("jsonwebtoken");
@@ -18,27 +16,6 @@ const jwtOptions = {
 };
 
 const initializeAuthentication = () => {
-
-    // const cookieExtractor = function (req) {
-    //     // logger.info("COOKIE EXTRACTOR");
-    //     var token = null;
-    //     if (req && req.signedCookies && req.signedCookies[globalConfig.TokenCookie]) {
-    //         token = req.signedCookies[globalConfig.TokenCookie];
-    //     }
-    //     return token;
-    // };
-
-    // //
-    // //Configure jwt strategy
-    // //
-    // const jwtOptions = {
-    //     jwtFromRequest: ExtractJwt.fromExtractors([
-    //         cookieExtractor
-    //     ]),
-    //     secretOrKey: globalConfig.JWTSecret,
-    //     issuer: "ateventhorizon.com",
-    //     algorithm: "HS384"
-    // };
 
     passport.use("cookie-antiforgery",
         new CustomStrategy(async (req, done) => {
