@@ -15,6 +15,49 @@ const jwtOptions = {
     algorithm: "HS384"
 };
 
+const getUserFromRequest = async req => {
+    //Get jwt token from signed cookies and anti forgery token from headers
+    let jwtToken = null;
+    if (req && req.signedCookies && req.signedCookies[globalConfig.TokenCookie]) {
+        jwtToken = req.signedCookies[globalConfig.TokenCookie];
+    }
+    let aftToken = null;
+    if (req && req.headers && req.headers[globalConfig.AntiForgeryTokenCookie]) {
+        aftToken = req.headers[globalConfig.AntiForgeryTokenCookie];
+    }
+    if (jwtToken === null || aftToken === null) {
+        throw "Invalid tokens";
+    }
+    // Extract token payload
+    const jwtPayload = jsonWebToken.verify(
+        jwtToken,
+        globalConfig.JWTSecret,
+        jwtOptions
+    );
+    //logger.info("JWT PAYLOAD", jwtPayload);
+    const sessionId = jwtPayload.sub;
+    const session = await sessionController.getValidSessionById(sessionId);
+    if (session === null) {
+        throw `Invalid session ${sessionId}`;
+    }
+    //Check antiforgery token
+    if (aftToken !== session.antiForgeryToken) {
+        throw `Invalid antiforgery token for ${sessionId}`;
+    } 
+    //Get session user
+    const user = await userController.getUserById(session.userId);
+    if (user === null) {
+        throw "Invalid user";
+    } 
+    user.roles = user.roles.map(v => v.toLowerCase());
+    user.project = session.project;
+    user.sessionId = sessionId;
+    user.expires = jwtPayload.exp;
+    user.hasToken = true;
+    user.hasSession = true;
+    return user;
+}
+
 const initializeAuthentication = () => {
 
     passport.use("cookie-antiforgery",
@@ -22,45 +65,7 @@ const initializeAuthentication = () => {
 
             try {
                 //logger.info("Anti forgery token strategy");
-                //Get jwt token from signed cookies and anti forgery token from headers
-                let jwtToken = null;
-                if (req && req.signedCookies && req.signedCookies[globalConfig.TokenCookie]) {
-                    jwtToken = req.signedCookies[globalConfig.TokenCookie];
-                }
-                let aftToken = null;
-                if (req && req.headers && req.headers[globalConfig.AntiForgeryTokenCookie]) {
-                    aftToken = req.headers[globalConfig.AntiForgeryTokenCookie];
-                }
-                if (jwtToken === null || aftToken === null) {
-                    throw "Invalid tokens";
-                }
-                // Extract token payload
-                const jwtPayload = jsonWebToken.verify(
-                    jwtToken,
-                    globalConfig.JWTSecret,
-                    jwtOptions
-                );
-                //logger.info("JWT PAYLOAD", jwtPayload);
-                const sessionId = jwtPayload.sub;
-                const session = await sessionController.getValidSessionById(sessionId);
-                if (session === null) {
-                    throw `Invalid session ${sessionId}`;
-                }
-                //Check antiforgery token
-                if (aftToken !== session.antiForgeryToken) {
-                    throw `Invalid antiforgery token for ${sessionId}`;
-                } 
-                //Get session user
-                const user = await userController.getUserById(session.userId);
-                if (user === null) {
-                    throw "Invalid user";
-                } 
-                user.roles = user.roles.map(v => v.toLowerCase());
-                user.project = session.project;
-                user.sessionId = sessionId;
-                user.expires = jwtPayload.exp;
-                user.hasToken = true;
-                user.hasSession = true;
+                const user = await getUserFromRequest(req);
                 done(null, user);
             } catch (ex) {
                 logger.error(`Error in token: ${ex}`);
@@ -188,6 +193,7 @@ const authorize = async (req, res, next) => {
 
 module.exports = {
     initializeAuthentication,
+    getUserFromRequest,
     getToken,
     verifyToken,
     authenticate,

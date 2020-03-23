@@ -22,11 +22,14 @@ const cookieObject = (d, httpOnly) => {
    return result;
 };
 
-const sendCookieTokenInfo = (res, tokenInfo) => {
+const sendCookie = (res, tokenInfo) => {
     const d = new Date(0);
     d.setUTCSeconds(tokenInfo.expires);
     res.cookie(globalConfig.TokenCookie, tokenInfo.token, cookieObject(d, true));
     res.cookie(globalConfig.AntiForgeryTokenCookie, tokenInfo.antiForgeryToken, cookieObject(d, false));
+}
+
+const sendTokenInfo = (res, tokenInfo) => {
     res.send(tokenInfo);
 }
 
@@ -74,7 +77,8 @@ router.post(
                 email: req.user.email,
                 guest: req.user.guest
             };
-            sendCookieTokenInfo(res, tokenInfo);
+            sendCookie(res, tokenInfo);
+            sendTokenInfo(res, tokenInfo);
         } catch (ex) {
             res.status(401).send(ex);
         }
@@ -102,8 +106,9 @@ router.post("/getToken", async (req, res, next) => {
             email: dbUser.email,
             guest: dbUser.guest
         };
-        sendCookieTokenInfo(res, tokenInfo);
-    } catch (ex) {
+        sendCookie(res, tokenInfo);
+        sendTokenInfo(res, tokenInfo);
+} catch (ex) {
         console.log("gettoken failed", ex);
         res.status(401).send(ex);
     }
