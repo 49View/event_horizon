@@ -119,6 +119,44 @@ const verifyToken = async jwtToken => {
     );
 };
 
+const getTokenForUser = async (user, ipAddress, userAgent) => {
+    const tokenInfo = await getToken(user._id, ipAddress, userAgent || null);
+    tokenInfo.user = {
+        name: user.name,
+        email: user.email,
+        guest: user.guest
+    };
+    return tokenInfo;
+}
+
+const cookieObject = (d, httpOnly) => {
+    //console.log("Cloud host:", globalConfig.CloudHost);
+    const result = {
+        domain: (globalConfig.CloudHost === "localhost") ? globalConfig.CloudHost : `.${globalConfig.CloudHost}`,
+        httpOnly: httpOnly,
+        sameSite: "Lax",
+        signed: true,
+        secure: true,
+    };
+   if (d!==null) { result["expires"]=d; }
+   return result;
+};
+
+const sendCookiesTokenInfo = (res, tokenInfo, sendResponse) => {
+    const d = new Date(0);
+    d.setUTCSeconds(tokenInfo.expires);
+    res.cookie(globalConfig.TokenCookie, tokenInfo.token, cookieObject(d, true));
+    res.cookie(globalConfig.AntiForgeryTokenCookie, tokenInfo.antiForgeryToken, cookieObject(d, false));
+    if (sendResponse===true) {
+        res.send(tokenInfo);
+    }
+}
+
+const clearCookiesTokenInfo = (res) => {
+    res.clearCookie(globalConfig.TokenCookie, cookieObject(null, true));
+    res.clearCookie(globalConfig.AntiForgeryTokenCookie, cookieObject(null, false));
+}
+
 const authenticate = passport.authenticate(["cookie-antiforgery"], { session: false });
 
 const authorize = async (req, res, next) => {
@@ -196,6 +234,9 @@ module.exports = {
     getUserFromRequest,
     getToken,
     verifyToken,
+    getTokenForUser,
+    sendCookiesTokenInfo,
+    clearCookiesTokenInfo,
     authenticate,
     authorize
 }

@@ -36,7 +36,8 @@ router.post("/", async (req, res, next) => {
         ];
         const params = dataSanitizers.checkBody(req, paramsDef);
         const user = await userController.createUser(params.name, params.email, params.password);
-        res.status(201).send("OK");
+        const tokenInfo = await authController.getTokenForUser(user, req.ip, req.headers["user-agent"]);
+        authController.sendCookiesTokenInfo(res, tokenInfo, true);
     } catch (ex) {
         logger.error(`Error create user: ${ex}`);
         res.status(400).send(`Error creating user: ${ex}`);

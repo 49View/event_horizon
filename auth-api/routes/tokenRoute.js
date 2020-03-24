@@ -4,34 +4,9 @@ const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 const sessionController = require("../controllers/sessionController");
 const logger = require("../logger");
-const globalConfig = require("../config_api");
 const dataSanitizers = require("../helpers/dataSanitizers");
 
 const router = express.Router();
-
-const cookieObject = (d, httpOnly) => {
-    //console.log("Cloud host:", globalConfig.CloudHost);
-    const result = {
-        domain: (globalConfig.CloudHost === "localhost") ? globalConfig.CloudHost : `.${globalConfig.CloudHost}`,
-        httpOnly: httpOnly,
-        sameSite: "Lax",
-        signed: true,
-        secure: true,
-    };
-   if (d!==null) { result["expires"]=d; }
-   return result;
-};
-
-const sendCookie = (res, tokenInfo) => {
-    const d = new Date(0);
-    d.setUTCSeconds(tokenInfo.expires);
-    res.cookie(globalConfig.TokenCookie, tokenInfo.token, cookieObject(d, true));
-    res.cookie(globalConfig.AntiForgeryTokenCookie, tokenInfo.antiForgeryToken, cookieObject(d, false));
-}
-
-const sendTokenInfo = (res, tokenInfo) => {
-    res.send(tokenInfo);
-}
 
 //
 // Clear current token
@@ -45,8 +20,7 @@ router.put(
                 throw "Unauthorized";
             }
             await sessionController.invalidateSessionById(req.user.sessionId);
-            res.clearCookie(globalConfig.TokenCookie, cookieObject(null, true));
-            res.clearCookie(globalConfig.AntiForgeryTokenCookie, cookieObject(null, false));
+            authController.clearCookiesTokenInfo(res);
             res.status(204).send();
         } catch (ex) {
             res.status(401).send(ex);
@@ -67,18 +41,8 @@ router.post(
                 throw "Unauthorized";
             }
             await sessionController.invalidateSessionById(req.user.sessionId);
-            const tokenInfo = await authController.getToken(
-                req.user._id,
-                req.ip,
-                req.headers["user-agent"] || null
-            );
-            tokenInfo.user = {
-                name: req.user.name,
-                email: req.user.email,
-                guest: req.user.guest
-            };
-            sendCookie(res, tokenInfo);
-            sendTokenInfo(res, tokenInfo);
+            const tokenInfo = await authController.getTokenForUser(req.user, req.ip, req.headers["user-agent"]);
+            authController.sendCookiesTokenInfo(res, tokenInfo, true);
         } catch (ex) {
             res.status(401).send(ex);
         }
@@ -96,19 +60,9 @@ router.post("/getToken", async (req, res, next) => {
         ];
         const params = dataSanitizers.checkBody(req, paramsDef);
         const dbUser = await userController.getUserByEmailPassword(params.email, params.password);
-        const tokenInfo = await authController.getToken(
-            dbUser._id,
-            req.ip,
-            req.headers["user-agent"] || null
-        );
-        tokenInfo.user = {
-            name: dbUser.name,
-            email: dbUser.email,
-            guest: dbUser.guest
-        };
-        sendCookie(res, tokenInfo);
-        sendTokenInfo(res, tokenInfo);
-} catch (ex) {
+        const tokenInfo = await authController.getTokenForUser(dbUser, req.ip, req.headers["user-agent"]);
+        authController.sendCookiesTokenInfo(res, tokenInfo, true);
+    } catch (ex) {
         console.log("gettoken failed", ex);
         res.status(401).send(ex);
     }
