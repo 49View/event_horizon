@@ -1,0 +1,14 @@
+'use strict';
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+var app = require("../app");
+
+var port = 4000;
+app.listen(port, err => {
+  if (err) {
+    console.log("Error starting up the express listener ", err);
+  }
+});
+console.log("Starting server on Port: ", port);
+
+module.exports = app;
