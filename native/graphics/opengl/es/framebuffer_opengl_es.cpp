@@ -4,6 +4,11 @@
 #include "../gl_util.h"
 #include "../../graphic_functions.hpp"
 
+JMATH::Rect2f getPlatformWindowRect() {
+    return Framebuffer::getCurrentViewport();
+//    JMATH::Rect2f r = getScreenRect;
+}
+
 void Framebuffer::checkFrameBufferStatus() {
     GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
     if ( fbs == GL_FRAMEBUFFER_COMPLETE ) return;

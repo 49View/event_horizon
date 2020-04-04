@@ -37,7 +37,7 @@ std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
         ret->mFramebufferHandle = static_cast<GLuint >(dfb);
         if ( mWidth <= 0 || mHeight <= 0 ) {
             GLCALL( glBindFramebuffer( GL_DRAW_FRAMEBUFFER, dfb ));
-            JMATH::Rect2f r = Framebuffer::getCurrentViewport();
+            JMATH::Rect2f r = getPlatformWindowRect();
             ret->mWidth = static_cast<int>( r.width());
             ret->mHeight = static_cast<int>( r.height());
         } else {

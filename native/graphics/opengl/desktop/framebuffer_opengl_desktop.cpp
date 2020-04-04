@@ -1,5 +1,11 @@
 #include "../framebuffer_opengl.h"
 
+
+JMATH::Rect2f getPlatformWindowRect() {
+//            JMATH::Rect2f r = Framebuffer::getCurrentViewport();
+    return getScreenRect;
+}
+
 void Framebuffer::checkFrameBufferStatus() {
     GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
     switch ( fbs ) {
