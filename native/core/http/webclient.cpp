@@ -363,7 +363,7 @@ namespace Http {
     }
 
     std::string CLOUD_API() {
-        return "/api";
+        return "/gapi";
     }
 
     std::string CLOUD_WSS() {
