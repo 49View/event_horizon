@@ -49,7 +49,7 @@
 
 namespace tinyobj {
 
-typedef struct {
+struct material_t {
   std::string name;
 
   float ambient[3];
@@ -73,17 +73,17 @@ typedef struct {
   std::string displacement_texname;       // disp
   std::string alpha_texname;              // map_d
   std::map<std::string, std::string> unknown_parameter;
-} material_t;
+};
 
-typedef struct {
+struct tag_t{
   std::string name;
 
   std::vector<int> intValues;
   std::vector<float> floatValues;
   std::vector<std::string> stringValues;
-} tag_t;
+} ;
 
-typedef struct {
+struct mesh_t{
   std::vector<float> positions;
   std::vector<float> normals;
   std::vector<float> texcoords;
@@ -92,12 +92,12 @@ typedef struct {
       num_vertices;              // The number of vertices per face. Up to 255.
   std::vector<int> material_ids; // per-face material ID
   std::vector<tag_t> tags;       // SubD tag
-} mesh_t;
+};
 
-typedef struct {
+struct shape_t{
   std::string name;
   mesh_t mesh;
-} shape_t;
+};
 
 typedef enum {
   triangulation = 1, // used whether triangulate polygon face in .obj

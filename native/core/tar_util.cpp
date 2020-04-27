@@ -128,8 +128,8 @@ namespace tarUtil {
         std::strcpy( TARHEADER->version, " " );
         std::sprintf( TARHEADER->mtime, "%011lo", time( NULL ));
         std::sprintf( TARHEADER->mode, "%07o", 0644 );
-        const char *s = userComputerName().c_str();
-        if ( s != NULL ) std::snprintf( reinterpret_cast<char *>(TARHEADER), 32, "%s", s );
+        auto s = userComputerName();
+        if ( !s.empty() ) std::snprintf( reinterpret_cast<char *>(TARHEADER), 32, "%s", s.c_str() );
         std::sprintf( TARHEADER->gname, "%s", "users" );
     }
 

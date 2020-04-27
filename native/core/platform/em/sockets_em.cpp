@@ -7,7 +7,7 @@
 #include <emscripten/bind.h>
 
 #include <iostream>
-#include "sio_client.h"
+//#include "sio_client.h"
 #include "../../http/webclient.h"
 #include "core/util.h"
 
