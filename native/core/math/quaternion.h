@@ -69,6 +69,11 @@ public:
 	float z() const { return mData[2]; }
 	float w() const { return real(); }
 
+    float operator[]( int element ) const {
+        ASSERT( element >= 0 && element < 4 );
+        return mData[element];
+    }
+
 	friend std::ostream& operator<<( std::ostream& os, const Quaternion& quaternion ) {
 		os << "[X,Y,Z] = [" << quaternion.mData[0] << "," << quaternion.mData[1] << "," << quaternion.mData[2] << "]"
 		   << "[W] = " << quaternion.mData[3];
@@ -269,7 +274,21 @@ public:
 		return Matrix4f( r0, r1, r2, r3 );
 	}
 
-	/**
+    Matrix3f rotationMatrix3() const {
+        float n = norm();
+        float qx = mData[0] / n;
+        float qy = mData[1] / n;
+        float qz = mData[2] / n;
+        float qw = mData[3] / n;
+
+        Vector3f r0( 1 - 2 * qy*qy - 2 * qz*qz, 2 * qx*qy - 2 * qz*qw    , 2 * qx*qz + 2 * qy*qw);
+        Vector3f r1( 2 * qx*qy + 2 * qz*qw    , 1 - 2 * qx*qx - 2 * qz*qz, 2 * qy*qz - 2 * qx*qw);
+        Vector3f r2( 2 * qx*qz - 2 * qy*qw    , 2 * qy*qz + 2 * qx*qw    , 1 - 2 * qx*qx - 2 * qy*qy);
+
+        return Matrix3f( r0, r1, r2 );
+    }
+
+    /**
 	* @brief Returns the scaled-axis representation of this
 	* quaternion rotation.
 	*/

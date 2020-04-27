@@ -19,6 +19,7 @@
 #include <core/math/rect2f.h>
 #include <core/math/aabb.h>
 #include <core/math/vector4f.h>
+#include <core/math/quaternion.h>
 #include <core/boxable.hpp>
 
 using namespace rapidjson;
@@ -241,7 +242,17 @@ public:
 		writer->EndArray();
 	}
 
-	void serialize( const char* name, const std::pair<int, int>& value ) {
+    void serialize( const char* _name, const Quaternion& value ) {
+        if ( _name != nullptr ) writer->String( _name );
+        writer->StartArray();
+        writer->Double( value[0] );
+        writer->Double( value[1] );
+        writer->Double( value[2] );
+        writer->Double( value[3] );
+        writer->EndArray();
+    }
+
+    void serialize( const char* name, const std::pair<int, int>& value ) {
         if ( name != nullptr )writer->String( name );
 		writer->StartArray();
 		writer->Int( static_cast<int32_t>( value.first ) );

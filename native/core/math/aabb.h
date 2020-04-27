@@ -229,8 +229,7 @@ public:
         return AABB( mi, ma, true );
     }
 
-    AABB rotate( float angle, const Vector3f& axis ) const;
-    AABB rotate( const Vector4f& axisAngle ) const;
+    AABB rotate( const Quaternion& axisAngle ) const;
 
 	std::vector<Vector3f> topDownOutline( CompositeWrapping _wrap = CompositeWrapping::NoWrap ) const;
 

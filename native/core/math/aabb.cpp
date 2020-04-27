@@ -1,5 +1,6 @@
 
 #include "aabb.h"
+#include <core/math/quaternion.h>
 
 const JMATH::AABB JMATH::AABB::IDENTITY = AABB( Vector3f::ZERO, Vector3f::ONE );
 const JMATH::AABB JMATH::AABB::ZERO = AABB( Vector3f::ZERO, Vector3f::ZERO );
@@ -35,25 +36,19 @@ JMATH::Rect2f JMATH::AABB::front() const {
     return Rect2f( mMinPoint.xy(), mMaxPoint.xy() );
 }
 
-JMATH::AABB JMATH::AABB::rotate( const Vector4f& axisAngle ) const {
-    return rotate( axisAngle.w(), axisAngle.xyz() );
-}
+JMATH::AABB JMATH::AABB::rotate( const Quaternion& axisAngle ) const {
+    Matrix3f mat = axisAngle.rotationMatrix3();
 
-JMATH::AABB JMATH::AABB::rotate( float angle, const Vector3f& axis ) const {
-	Matrix3f mat;
-	mat.setRotation( angle, axis );
+    Vector3f mi = mat * (mMinPoint - centre());
+    Vector3f ma = mat * (mMaxPoint - centre());
 
+    mi += centre();
+    ma += centre();
 
-	Vector3f mi = mat * (mMinPoint - centre());
-	Vector3f ma = mat * (mMaxPoint - centre());
+    AABB ret;
+    ret.set( mi, ma );
 
-	mi += centre();
-	ma += centre();
-
-	AABB ret;
-	ret.set( mi, ma );
-
-	return ret;
+    return ret;
 }
 
 const JMATH::AABB JMATH::AABB::INVALID = AABB( Vector3f( std::numeric_limits<float>::max() ), Vector3f(

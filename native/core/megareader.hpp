@@ -15,6 +15,7 @@
 #include "rapidjson/document.h"
 #include "math/rect2f.h"
 #include "math/aabb.h"
+#include <core/math/quaternion.h>
 #include <core/boxable.hpp>
 
 using namespace rapidjson;
@@ -188,6 +189,14 @@ public:
 			}
 		}
 	}
+
+    void deserialize( const char* name, Quaternion& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
+                ret[t] = ( *( value ) )[name][t].GetFloat();
+            }
+        }
+    }
 
 	template<typename T>
 	void deserialize( const char* name, std::vector<T>& ret ) const {

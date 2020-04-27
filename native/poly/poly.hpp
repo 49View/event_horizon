@@ -138,10 +138,10 @@ namespace GT {
     struct Rotate {
         template<typename ...Args>
         explicit Rotate( Args&& ... args ) : data(std::forward<Args>( args )...) {}
-        V4f operator()() const noexcept {
+        Quaternion operator()() const noexcept {
             return data;
         }
-        V4f data;
+        Quaternion data;
     };
 
     struct Direction {
