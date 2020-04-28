@@ -1,10 +1,15 @@
 #pragma once
 #include <math.h>
+#include <ostream>
 
 class Vector2i {
 public:
+    friend std::ostream &operator<<( std::ostream &os, const Vector2i &i ) {
+        os << "x: " << i.mX << " y: " << i.mY;
+        return os;
+    }
 
-	static const Vector2i ZERO;
+    static const Vector2i ZERO;
 	static const Vector2i ONE;
 
 	Vector2i() = default;
@@ -43,6 +48,10 @@ public:
 	bool operator==( const Vector2i& rhs ) const {
 		return mX == rhs.mX && mY == rhs.mY;
 	}
+
+    bool operator!=( const Vector2i& rhs ) const {
+        return mX != rhs.mX || mY != rhs.mY;
+    }
 
 	Vector2i operator+( const Vector2i& rhs ) const {
 		return Vector2i( mX + rhs.mX, mY + rhs.mY );

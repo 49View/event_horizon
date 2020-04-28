@@ -23,17 +23,22 @@ namespace WindowHandling {
         glfwMakeContextCurrent( window );
     }
 
-    void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
-
+    Vector2i captureWindowSize() {
         double width{ 1280.0 };
         double height{ 720.0 };
-        emscripten_get_element_css_size( "#canvas", &width, &height );
-        width*=emscripten_get_device_pixel_ratio();
-        height*=emscripten_get_device_pixel_ratio();
-        AppGlobals::getInstance().setScreenSizei( {static_cast<int>(width), static_cast<int>(height)} );
+        emscripten_get_element_css_size( "#WasmCanvas", &width, &height );
+        auto pixelRatio = emscripten_get_device_pixel_ratio();
+
+        return Vector2i{ static_cast<int>(width*pixelRatio), static_cast<int>(height*pixelRatio)};
+    }
+
+    void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
+
+        Vector2i windowSize = captureWindowSize();
+        AppGlobals::getInstance().setScreenSizei(windowSize);
 
 //        emscripten_set_canvas_element_size( nullptr, int(width), int(height));
-        LOGR( "GetWidnowSize %f %f", width, height );
+        LOGRS( "GetWidnowSize " << windowSize );
 
         LOGR( "--- Initialising Graphics ---" );
 
@@ -53,7 +58,7 @@ namespace WindowHandling {
 
         LOGR( "glfwInit" );
 
-        window = glfwCreateWindow( width, height, "EventHorizon", NULL, NULL );
+        window = glfwCreateWindow( windowSize.x(), windowSize.y(), "EventHorizon", NULL, NULL );
 
         LOGR( "glfwCreateWindow" );
 

@@ -11,6 +11,7 @@ class TextInput;
 class MouseInput;
 class Renderer;
 class RenderStats;
+class Vector2i;
 
 namespace WindowHandling {
 	void initializeWindow( uint64_t flags, Renderer& rr );
@@ -22,6 +23,7 @@ namespace WindowHandling {
 	void enableInputCallbacks();
 	void disableInputCallbacks();
 	bool isInputEnabled();
+    Vector2i captureWindowSize();
     void imRenderLoopStats( const RenderStats& rs );
 };
 
