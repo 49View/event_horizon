@@ -46,6 +46,17 @@ namespace LoggerLevel {
     inline const static std::string Info    = "info";
 }
 
+class CLIParamMap {
+public:
+    CLIParamMap() = default;
+    CLIParamMap( int argc, char *argv[] );
+    [[nodiscard]] std::optional<std::string> getParam( const std::string& key ) const;
+    std::string printAll() const;
+private:
+    KVStringMap params;
+};
+
+
 template <typename T, typename ... Args>
 T perfectForward(Args&& ... args){
     return T(std::forward<Args>(args)...);

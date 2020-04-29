@@ -30,28 +30,6 @@
 
 namespace di = boost::di;
 
-class CLIParamMap {
-public:
-    CLIParamMap( int argc, char *argv[] ) {
-        for ( auto t = 0; t < argc; t++ ) {
-            auto ret = split(argv[t], '=' );
-            if ( ret.size() == 2 ) {
-                params.emplace( ret[0], ret[1] );
-            }
-        }
-    }
-
-    [[nodiscard]] std::optional<std::string> getParam( const std::string& key ) const {
-        if ( auto it = params.find(key); it != params.end() ) {
-            return it->second;
-        }
-        return std::nullopt;
-    }
-
-private:
-    KVStringMap params;
-};
-
 template<typename BE>
 class EventHorizon {
 public:
@@ -83,6 +61,7 @@ public:
         // on the browser.
 #endif
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
+        backEnd->setCLIParams(params);
         mainLoop(checkLayoutArgvs( params ), std::move(backEnd) );
     }
 

@@ -29,6 +29,14 @@ public:
     }
     virtual ~RunLoopBackEndBase() = default;
 
+    const CLIParamMap &getCLIParams() const {
+        return cliParams;
+    }
+
+    void setCLIParams( const CLIParamMap &params ) {
+        cliParams = params;
+    }
+
     void update( AggregatedInputData& _aid ) {
         rsg.updateInputs( _aid );
         sg.update();
@@ -38,13 +46,16 @@ public:
     void activate() {
         sg.init();
         rsg.init();
+        luaFunctionsSetup();
         activateImpl();
     }
 
     virtual void updateImpl( const AggregatedInputData& _aid ) = 0;
     virtual void activateImpl() = 0;
+    virtual void luaFunctionsSetup() {}
 
 protected:
+    CLIParamMap cliParams;
     SceneGraph& sg;
     RenderOrchestrator& rsg;
 };
