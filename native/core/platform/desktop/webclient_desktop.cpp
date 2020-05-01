@@ -103,28 +103,31 @@ namespace Http {
             if ( !lRes.isSuccessStatusCode() ) {
                 auto request = makeGetRequest( url, _data.data(), _data.size() );
                 auto settings = makeSettingsBase();
-                std::shared_ptr< restbed::Response > res;
-                res = restbed::Http::sync( request, settings );
-                LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
-                lRes = handleResponse( res, url, rf );
-                if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() ) {
-                    if ( lRes.buffer ) {
-                        FM::writeLocalFile( cacheFolder() + fileHash,
-                                            reinterpret_cast<const char *>( lRes.buffer.get() ),
-                                            lRes.length );
-                    } else {
-                        FM::writeLocalFile( cacheFolder() + fileHash,
-                                            lRes.bufferString );
-                    }
-                }
+//                std::shared_ptr< restbed::Response > res;
+                restbed::Http::async( request, [url, rf, fileHash, callback, callbackFailed, mainThreadCallback](const std::shared_ptr< restbed::Request > req, const std::shared_ptr< restbed::Response > res) {
+                                                LOGR( "[HTTP-GET] Response code: %d - %s - Length: %d", res->get_status_code(), res->get_status_message().c_str(),  res->get_header( "Content-Length", 0 ) );
+                                                auto lRes = handleResponse( res, url, rf );
+                                                if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() ) {
+                                                    if ( lRes.buffer ) {
+                                                        FM::writeLocalFile( cacheFolder() + fileHash,
+                                                                            reinterpret_cast<const char *>( lRes.buffer.get() ),
+                                                                            lRes.length );
+                                                    } else {
+                                                        FM::writeLocalFile( cacheFolder() + fileHash,
+                                                                            lRes.bufferString );
+                                                    }
+                                                }
+                                                if ( lRes.isSuccessStatusCode() ) {
+                                                    lRes.ccf = mainThreadCallback;
+                                                    if ( callback ) callback( lRes );
+                                                } else {
+                                                    if ( callbackFailed ) callbackFailed( lRes );
+                                                }
+
+                },
+                        settings );
             }
 
-            if ( lRes.isSuccessStatusCode() ) {
-                lRes.ccf = mainThreadCallback;
-                if ( callback ) callback( lRes );
-            } else {
-                if ( callbackFailed ) callbackFailed( lRes );
-            }
 
 //            restbed::Http::async(
 //                request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
