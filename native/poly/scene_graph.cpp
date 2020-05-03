@@ -477,6 +477,11 @@ ResourceRef SceneGraph::addMaterialIM( const ResourceRef& _key, const Material& 
     return _key;
 }
 
+ResourceRef SceneGraph::addProfileIM( const ResourceRef& _key, const Profile & _res ) {
+    B<PB>( _key ).addIM( _res );
+    return _key;
+}
+
 ResourceRef SceneGraph::addFont( const ResourceRef& _key, const Font& _res, HttpResouceCB _ccf ) {
     B<FB>( _key ).addDF( _res, _ccf );
     return _key;

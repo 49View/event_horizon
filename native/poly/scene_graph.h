@@ -270,6 +270,7 @@ public:
 
     ResourceRef addRawImageIM    ( const ResourceRef& _key, const RawImage     & _res );
     ResourceRef addMaterialIM    ( const ResourceRef& _key, const Material     & _res );
+    ResourceRef addProfileIM     ( const ResourceRef& _key, const Profile      & _res );
     ResourceRef addUIIM          ( const ResourceRef& _key, const UIContainer& _res );
 
     static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
