@@ -127,6 +127,8 @@ public:
     void useMotionBlur( bool _value );
     void changeTime( const std::string& _time );
     void changeCameraControlType( int _type );
+    void drawCameraLocator( const Matrix4f& preMult = Matrix4f::IDENTITY );
+
     floata& skyBoxDeltaInterpolation();
 
     template<typename T>

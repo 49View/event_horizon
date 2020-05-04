@@ -671,6 +671,14 @@ void RenderOrchestrator::changeCameraControlType( int _type ) {
     sg.DC()->resetQuat();
 }
 
+void RenderOrchestrator::drawCameraLocator( const Matrix4f& preMult ) {
+    auto camPos = DC()->getPosition() * V3f::MASK_Y_OUT;
+    auto camDir = -DC()->getDirection()*0.7f;
+    RR().clearBucket(CommandBufferLimits::CameraLocator);
+    RR().draw<DCircleFilled2d>( CommandBufferLimits::CameraLocator, camPos, V4f::DARK_RED, 0.4f, RDSPreMult(preMult), "CameraOminoKey" );
+    RR().draw<DArrow2d>( CommandBufferLimits::CameraLocator, V3fVector{camPos, camPos+camDir}, RDSArrowAngle(0.45f), RDSArrowLength(0.6f), V4f::RED, 0.004f, RDSPreMult(preMult), "CameraOminoKeyDirection1" );
+}
+
 void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 }
