@@ -21,6 +21,8 @@ struct DCircleFilled {};
 struct DCircleFilled2d {};
 struct DLine {};
 struct DLine2d {};
+struct DArrow {};
+struct DArrow2d {};
 struct DPoly {};
 struct DPoly2d {};
 struct DRect {};
@@ -52,6 +54,8 @@ struct RendererDrawingSet {
     VTMVectorOfVectorWrap multiVerts;
     Rect2f rect = Rect2f::MIDENTITY();
     float roundedCorner = 0.01f;
+    float arrowAngle = 0.3f;
+    float arrowLength = 0.3f;
     float radius = 0.5f;
     C4f color = C4f::WHITE;
     float width = 0.1f;
@@ -86,6 +90,24 @@ struct RDSImage {
 struct RDSRoundedCorner {
     template<typename ...Args>
     explicit RDSRoundedCorner( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    float operator()() const noexcept {
+        return data;
+    }
+    float data;
+};
+
+struct RDSArrowAngle {
+    template<typename ...Args>
+    explicit RDSArrowAngle( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    float operator()() const noexcept {
+        return data;
+    }
+    float data;
+};
+
+struct RDSArrowLength {
+    template<typename ...Args>
+    explicit RDSArrowLength( Args&& ... args ) : data(std::forward<Args>( args )...) {}
     float operator()() const noexcept {
         return data;
     }
@@ -301,6 +323,7 @@ public:
                float angle, float arrowlength, const std::string& _name = "" );
 
     VPListSP drawLineFinal( RendererDrawingSet& rds );
+    VPListSP drawArrowFinal( RendererDrawingSet& rds );
     VPListSP drawPolyFinal( RendererDrawingSet& rds );
     VPListSP drawCircleFinal( RendererDrawingSet& rds );
     VPListSP drawCircleFilledFinal( RendererDrawingSet& rds );
@@ -441,6 +464,14 @@ public:
             rds.roundedCorner = _param();
             return;
         }
+        if constexpr ( std::is_same_v<M, RDSArrowAngle> ) {
+            rds.arrowAngle = _param();
+            return;
+        }
+        if constexpr ( std::is_same_v<M, RDSArrowLength> ) {
+            rds.arrowLength = _param();
+            return;
+        }
         if constexpr ( std::is_same_v<M, RDSCircleLineWidth> ) {
             rds.width = _param();
             return;
@@ -471,6 +502,13 @@ public:
         if constexpr ( std::is_same_v<T, DLine2d> ) {
             rds.shaderName = S::COLOR_2D;
             return drawLineFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DArrow> ) {
+            return drawArrowFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DArrow2d> ) {
+            rds.shaderName = S::COLOR_2D;
+            return drawArrowFinal( rds );
         }
         if constexpr ( std::is_same_v<T, DPoly> ) {
             return drawPolyFinal( rds );
