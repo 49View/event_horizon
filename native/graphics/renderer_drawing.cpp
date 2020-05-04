@@ -457,7 +457,7 @@ VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
                     p = rds.preMultMatrix.transform( p );
                 }
             }
-            allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( lines.v, rds.width, lines.wrap ) );
+            allVLists.emplace_back( XYZ2D3D( extrudePointsWithWidth<ExtrudeStrip>( lines.v, rds.width, lines.wrap ), rds) );
         }
     }
 
@@ -478,8 +478,11 @@ VPListSP Renderer::drawPolyFinal( RendererDrawingSet& rds ) {
     rds.prim = Primitive::PRIMITIVE_TRIANGLES;
 
     V3fVector allVLists;
-    for ( const auto& velem : ret ) {
-        for ( const auto& elem : velem ) {
+    for ( auto& velem : ret ) {
+        for ( auto& elem : velem ) {
+            if ( rds.usePreMult ) {
+                elem = rds.preMultMatrix.transform( elem );
+            }
             allVLists.emplace_back( is2dShader(rds.shaderName) ? V3f{elem} : XZY::C(elem, 0.0f) );
         }
     }
