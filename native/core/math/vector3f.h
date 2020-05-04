@@ -673,8 +673,14 @@ using QuadVector3f = std::array<Vector3f, 4>;
 using QuadVector3fList = std::vector<QuadVector3f>;
 
 struct XZY {
-	static Vector3f C( const Vector3f& _v );
-	static Vector3f C( const Vector2f& v2, const float z );
+    enum Conversion {
+        PassThrough = 0,
+        Convert = 1
+    };
+
+    static Vector3f C( const Vector3f& _v );
+    static std::vector<Vector3f> C( const std::vector<Vector3f>& _v, XZY::Conversion convertOrPassThrough );
+    static Vector3f C( const Vector2f& v2, const float z );
 	static Vector2f C2( const Vector3f& v2 );
 	static Vector3f C( float x, float y, float z );
 	static std::vector<Vector3f> C( const std::vector<Vector3f>& _v );

@@ -136,6 +136,10 @@ std::vector<Vector3f> XZY::C( const std::vector<Vector3f>& _v ) {
 	return ret;
 }
 
+std::vector<Vector3f> XZY::C( const std::vector<Vector3f>& _v, XZY::Conversion convertOrPassThrough ) {
+    return convertOrPassThrough == XZY::Conversion::Convert ? XZY::C(_v) : _v;
+}
+
 std::vector<Vector2f> XZY::C2( const std::vector<Vector3f>& _v ) {
     std::vector<Vector2f> ret;
     for ( auto& v : _v ) ret.emplace_back(v.xz());

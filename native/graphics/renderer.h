@@ -16,10 +16,13 @@
 #include <graphics/shadowmap_manager.h>
 
 struct DCircle {};
+struct DCircle2d {};
 struct DCircleFilled {};
+struct DCircleFilled2d {};
 struct DLine {};
 struct DLine2d {};
 struct DPoly {};
+struct DPoly2d {};
 struct DRect {};
 struct DRect2d {};
 struct DRect2dRounded {};
@@ -43,7 +46,7 @@ struct RendererDrawingSet {
     void setupFontData();
     bool hasTexture() const;
 
-    int bucketIndex = CommandBufferLimits::UnsortedStart;
+    int bucketIndex = CommandBufferLimits::UI2dStart;
     Primitive prim = PRIMITIVE_TRIANGLE_STRIP;
     VTMVectorWrap verts;
     VTMVectorOfVectorWrap multiVerts;
@@ -397,7 +400,8 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<M, float> ) {
-            if constexpr ( std::is_same_v<T, DCircle> || std::is_same_v<T, DCircleFilled> ) {
+            if constexpr ( std::is_same_v<T, DCircle> || std::is_same_v<T, DCircleFilled> ||
+                    std::is_same_v<T, DCircle2d> || std::is_same_v<T, DCircleFilled2d>) {
                 rds.radius = _param;
             } else {
                 rds.width = _param;
@@ -471,10 +475,22 @@ public:
         if constexpr ( std::is_same_v<T, DPoly> ) {
             return drawPolyFinal( rds );
         }
+        if constexpr ( std::is_same_v<T, DPoly2d> ) {
+            rds.shaderName = S::COLOR_2D;
+            return drawPolyFinal( rds );
+        }
         if constexpr ( std::is_same_v<T, DCircle> ) {
             return drawCircleFinal( rds );
         }
+        if constexpr ( std::is_same_v<T, DCircle2d> ) {
+            rds.shaderName = S::COLOR_2D;
+            return drawCircleFinal( rds );
+        }
         if constexpr ( std::is_same_v<T, DCircleFilled> ) {
+            return drawCircleFilledFinal( rds );
+        }
+        if constexpr ( std::is_same_v<T, DCircleFilled2d> ) {
+            rds.shaderName = S::COLOR_2D;
             return drawCircleFilledFinal( rds );
         }
         if constexpr ( std::is_same_v<T, DRect> ) {

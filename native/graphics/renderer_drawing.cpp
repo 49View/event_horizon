@@ -26,6 +26,15 @@ static std::shared_ptr<HeterogeneousMap> mapTextureAndColor( const std::string& 
     return values;
 }
 
+static bool is2dShader(const std::string& shaderName) {
+    return shaderName == S::COLOR_2D || shaderName == S::TEXTURE_2D;
+}
+
+template <typename T>
+T XYZ2D3D(const T& v, const RendererDrawingSet& rds) {
+    return XZY::C(v, is2dShader(rds.shaderName) ? XZY::Conversion::Convert : XZY::PassThrough );
+}
+
 template <typename T>
 auto inBetweenInserterFunc( std::vector<T>& ret, const std::vector<T>& t) {
     if ( t.empty() ) return;
@@ -471,7 +480,7 @@ VPListSP Renderer::drawPolyFinal( RendererDrawingSet& rds ) {
     V3fVector allVLists;
     for ( const auto& velem : ret ) {
         for ( const auto& elem : velem ) {
-            allVLists.emplace_back( XZY::C(elem, 0.0f) );
+            allVLists.emplace_back( is2dShader(rds.shaderName) ? V3f{elem} : XZY::C(elem, 0.0f) );
         }
     }
 
@@ -490,13 +499,14 @@ VPListSP Renderer::drawCircleFinal( RendererDrawingSet& rds ) {
     auto center = rds.verts.v[0];
     auto radius = rds.radius;
     for ( auto t = 0u; t < rds.archSegments; t++ ) {
-        float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( rds.archSegments )) * TWO_PI;
-        verts.emplace_back( Vector3f( center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius) );
+        float angle = ( static_cast<float>( t ) / static_cast<float>( rds.archSegments )) * TWO_PI;
+        V3f v{ center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius};
+        verts.emplace_back( v );
     }
 
     V3fVectorOfVector allVLists;
     auto width = rds.width > rds.radius / 2.5f ? rds.radius *0.1f : rds.width;
-    allVLists.emplace_back( extrudePointsWithWidth<ExtrudeStrip>( verts, width, true ) );
+    allVLists.emplace_back( XYZ2D3D(extrudePointsWithWidth<ExtrudeStrip>( verts, width, true ), rds) );
 
     auto lineList = stripInserter<V3f>(allVLists);
     if ( lineList.empty() ) return nullptr;
@@ -512,11 +522,11 @@ VPListSP Renderer::drawCircleFilledFinal( RendererDrawingSet& rds ) {
     auto center = rds.verts.v[0];
     auto radius = rds.radius;
     for ( auto t = 0u; t < rds.archSegments; t++ ) {
-        float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( rds.archSegments )) * TWO_PI;
+        float angle = ( static_cast<float>( t ) / static_cast<float>( rds.archSegments )) * TWO_PI;
         verts.emplace_back( Vector3f( center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius) );
     }
 
-    auto lineList = stripInserter<V3f>(verts);
+    auto lineList = stripInserter<V3f>( XYZ2D3D(verts, rds));
 
     return addVertexStrips<Pos3dStrip>( *this, lineList, rds);
 }
@@ -701,8 +711,8 @@ VPListSP Renderer::drawCircle( int bucketIndex, const Vector3f& center, float ra
         _indices[t] = t;
     }
     _verts[0].pos = center;
-    for ( int t = 1; t < numIndices; t++ ) {
-        float angle = ( static_cast<float>( t - 1 ) / static_cast<float>( subdivs - 1 )) * TWO_PI;
+    for ( int t = 0; t < numIndices; t++ ) {
+        float angle = ( static_cast<float>( t ) / static_cast<float>( subdivs )) * TWO_PI;
         _verts[t].pos = Vector3f( center + V3f( sinf( angle ), 0.0f, cosf( angle )) * radius);
     }
 
