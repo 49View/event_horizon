@@ -28,21 +28,6 @@ namespace FileManager {
 //    }
 
     bool fileExist( const std::string& filename ) {
-        std::ofstream ffile( "data/" + filename, std::ios::in | std::ios::binary );
-        if ( ffile.is_open()) {
-            ffile.close();
-            return true;
-        }
-        std::ofstream ffileAbsolute( filename, std::ios::in | std::ios::binary );
-        if ( ffileAbsolute.is_open()) {
-            ffileAbsolute.close();
-            return true;
-        }
-
-        return false;
-    }
-
-    bool fileExistAbs( const std::string& filename ) {
         std::ofstream ffileAbsolute( filename, std::ios::in | std::ios::binary );
         if ( ffileAbsolute.is_open()) {
             ffileAbsolute.close();

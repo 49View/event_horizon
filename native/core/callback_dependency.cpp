@@ -163,7 +163,7 @@ bool checkInCache( const Http::Result& header ) {
     // storing folder structures into cache, which will be a flat list
     std::string cachedFileName = cacheFolder() + url_encode( header.ETag );
 
-    if ( FM::fileExistAbs( cachedFileName ) ) {
+    if ( FM::fileExist( cachedFileName ) ) {
         std::string bufferString;
         std::unique_ptr<uint8_t[]> bufferData;
         uint64_t bufferLength = 0;

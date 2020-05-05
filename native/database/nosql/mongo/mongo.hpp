@@ -13,6 +13,7 @@
 #include <mongocxx/gridfs/downloader.hpp>
 
 #include <core/util.h>
+#include <core/string_util.h>
 
 #include "../no_sql.hpp"
 
@@ -151,6 +152,42 @@ public:
                 const std::string& md5, const std::string& thumb, const ResourceDependencyDict& deps = {} );
 
     std::string insertEntityFromAsset( const StreamChangeMetadata& meta );
+
+    template<typename N>
+    std::string insertEntityFromAsset2(const N& meta) {
+
+        using bsoncxx::builder::basic::kvp;
+        using bsoncxx::builder::basic::sub_array;
+
+        auto builder = bsoncxx::builder::basic::document{};
+        builder.append(
+                kvp("group", meta.group),
+                kvp("source", meta.source),
+                kvp("name", meta.name),
+                kvp("project", meta.project),
+                kvp("isPublic", meta.isPublic),
+                kvp("isRestricted", meta.isRestricted),
+                kvp("contentType", meta.contentType),
+                kvp("hash", meta.hash),
+                kvp("userId", meta.userId()),
+                kvp("thumb", meta.thumb),
+                kvp("tags", [&](sub_array sa) {
+                    for (const auto &tag : split_tags(std::string(meta.name))) {
+                        sa.append(toLower(tag));
+                    }
+                })
+        );
+
+        bsoncxx::stdx::optional<mongocxx::result::insert_one> result = db["entities"].insert_one(builder.view());
+        if (result ) {
+            auto dbc = db["entities"].find_one(bsoncxx::builder::stream::document{} << "_id" << (*result).inserted_id()
+                                                                                    << bsoncxx::builder::stream::finalize);
+            return bsoncxx::to_json(dbc->view());
+        }
+
+        return "";
+    }
+
     void insertDaemonCrashLog( const std::string& crash );
 private:
     // The mongocxx::instance constructor and destructor initialize and shut down the driver,
