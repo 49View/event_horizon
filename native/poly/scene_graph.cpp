@@ -527,28 +527,39 @@ ResourceRef SceneGraph::addUIIM( const ResourceRef& _key, const UIContainer& _re
 void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _data, HttpResouceCB _ccf ) {
 
     auto fs = tarUtil::untar( _data );
-    ASSERT( fs.find( ResourceCatalog::Key ) != fs.end());
-    auto dict = deserializeArray<ResourceTarDict>( fs[ResourceCatalog::Key] );
+    if (fs.find( ResourceCatalog::Key ) != fs.end() ) {
+        auto dict = deserializeArray<ResourceTarDict>( fs[ResourceCatalog::Key] );
 
-    std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
-        return resourcePriority( a.group ) < resourcePriority( b.group );
-    } );
+        std::sort( dict.begin(), dict.end(), []( const auto& a, const auto& b ) -> bool {
+            return resourcePriority( a.group ) < resourcePriority( b.group );
+        } );
 
-    for ( const auto& rd : dict ) {
-        if ( rd.group == ResourceGroup::Image ) {
-            B<IB>( rd.filename ).make( fs[rd.filename], rd.hash );
-        } else if ( rd.group == ResourceGroup::Font ) {
-            B<FB>( rd.filename ).make( fs[rd.filename], rd.hash );
-        } else if ( rd.group == ResourceGroup::Profile ) {
-            B<PB>( rd.filename ).make( fs[rd.filename], rd.hash );
-        } else if ( rd.group == ResourceGroup::Color ) {
-            B<MCB>( rd.filename ).make( fs[rd.filename], rd.hash );
-        } else if ( rd.group == ResourceGroup::Material ) {
-            auto mat = B<MB>( rd.filename ).make( fs[rd.filename], rd.hash, _key );
-            mat->Key( _key );
-        } else {
-            LOGRS( "{" << rd.group << "} Resource not supported yet in dependency unpacking" );
-            ASSERT( 0 );
+        for ( const auto& rd : dict ) {
+            if ( rd.group == ResourceGroup::Image ) {
+                B<IB>( rd.filename ).make( fs[rd.filename], rd.hash );
+            } else if ( rd.group == ResourceGroup::Font ) {
+                B<FB>( rd.filename ).make( fs[rd.filename], rd.hash );
+            } else if ( rd.group == ResourceGroup::Profile ) {
+                B<PB>( rd.filename ).make( fs[rd.filename], rd.hash );
+            } else if ( rd.group == ResourceGroup::Color ) {
+                B<MCB>( rd.filename ).make( fs[rd.filename], rd.hash );
+            } else if ( rd.group == ResourceGroup::Material ) {
+                auto mat = B<MB>( rd.filename ).make( fs[rd.filename], rd.hash, _key );
+                mat->Key( _key );
+            } else {
+                LOGRS( "{" << rd.group << "} Resource not supported yet in dependency unpacking" );
+                ASSERT( 0 );
+            }
+        }
+    } else {
+        for ( const auto& entry : fs ) {
+            if ( isFileExtAnImage(getFileNameExt(entry.first)) ) {
+                B<IB>( entry.first ).make( entry.second, Hashable<>::hashOf(entry.first) );
+            } else if ( getFileNameExt(entry.first) == ".mat" ) {
+                auto mat = B<MB>( entry.first ).make( entry.second, Hashable<>::hashOf(entry.first), _key );
+                mat->Key( _key );
+            }
+
         }
     }
 

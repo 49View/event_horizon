@@ -175,6 +175,9 @@ std::string createThumbnailCommandFor( DaemonFileStruct2 &dfs ) {
     if ( dfs.entity.group == ResourceGroup::Image ) {
         return "convert " + dfs.fileRoot + dfs.entity.source +
                " -thumbnail '128x128^' -gravity center -extent '128x128' -quality 90 " + dfs.entity.thumb;
+    } else if ( dfs.entity.group == ResourceGroup::Material ) {
+        return "convert " + dfs.fileRoot + getFileNamePath(dfs.entity.source) + "/" + getFileNameOnly(dfs.entity.source) + "_basecolor.png" +
+               " -thumbnail '128x128^' -gravity center -extent '128x128' -quality 90 " + dfs.entity.thumb;
     } else if ( dfs.entity.group == ResourceGroup::Profile ) {
         return "convert " + dfs.fileRoot + dfs.entity.source +
                " -trim +repage -background white -thumbnail '256x256^' -gravity center -extent '256x256' -quality 90 " +
@@ -194,10 +197,10 @@ void generateThumbnail( DaemonFileStruct2 &dfs ) {
     if ( !FM::fileExist( dfs.entity.thumb )) {
         std::string cmdThumbnail = createThumbnailCommandFor( dfs );
         auto ret = std::system( cmdThumbnail.c_str());
-        dfs.entity.thumb = getFileName( dfs.entity.thumb );
         if ( ret != 0 ) {
             throw std::runtime_error( std::string{ "Failed to generate thumbnail for " + dfs.entity.thumb } );
         }
+        dfs.entity.thumb = getFileName( dfs.entity.thumb );
     }
 }
 
@@ -211,10 +214,19 @@ void generateThumbnail( DaemonFileStruct2 &dfs ) {
 void elaboratePassThrough( DaemonFileStruct2 &dfs, const SerializableContainer &filedata ) {
     dfs.entity.hash = Hashable<>::hashOf( filedata );
     if ( dfs.entity.group == ResourceGroup::Profile || dfs.entity.group == ResourceGroup::Font ||
-         dfs.entity.group == ResourceGroup::Image ) {
+         dfs.entity.group == ResourceGroup::Image, dfs.entity.group == ResourceGroup::Material ) {
         generateThumbnail( dfs );
     }
     dfs.entity.contentType = HttpContentType::octetStream;
+
+    auto filePath = dfs.filePath() + dfs.entity.hash;
+    if ( !FM::fileExist( filePath )) {
+        FM::writeLocalFile( filePath, filedata );
+        auto ent = dfs.mdb.insertEntityFromAsset2( dfs.entity );
+        LOGRS( ent );
+    } else {
+        LOGRS( "Status 204 - file " << filePath << " already exists" );
+    }
 
 //    ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.entity.source ), {}, generateThumbnail( dfs2 ) };
 //    return upload( dfs, res );
@@ -275,14 +287,10 @@ ArchiveDirectory mapActiveDirectoryFilesToPBR( DaemonFileStruct2 dfs ) {
     return ad;
 }
 
-ResourceEntityHelper elaborateInternalMaterial( const ArchiveDirectory &ad, int nominalSize, DaemonFileStruct2 dfs ) {
+std::string elaborateInternalMaterial( const ArchiveDirectory &ad, int nominalSize, DaemonFileStruct2& dfs ) {
 
-    ResourceEntityHelper mat{};
-//    auto fileRoot = getDaemonRoot();
-//
-//    Material pbrmaterial{ S::SH, ad.Name() };
-//    dfs.group = ResourceGroup::Image;
-//    for ( const auto& output : ad ) {
+    Material pbrmaterial{ S::SH, ad.Name() };
+    for ( const auto& output : ad ) {
 //        dfs.entity.source = output.second.name;
 //        if ( nominalSize > 0 ) {
 //            std::string resizeString = std::to_string(nominalSize) + "x" + std::to_string(nominalSize);
@@ -290,28 +298,23 @@ ResourceEntityHelper elaborateInternalMaterial( const ArchiveDirectory &ad, int 
 //            auto ret = std::system( cmdThumbnail.c_str());
 //            if ( ret != 0 ) throw std::string("Failed to scale down image " + getFileName(dfs.entity.source));
 //        }
-//
-//        ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.entity.source ), {}, generateThumbnail( dfs ) };
-//        if ( MPBRTextures::isBaseColorTexture( dfs.entity.source ) ) {
-//            mat.thumb = res.thumb;
-//        }
-//        auto to = upload( dfs, res );
-//        if ( to && !output.second.metaString.empty()) {
-//            auto tid = ( *to ).getStringId();
-//            mat.deps[ResourceGroup::Image].emplace_back( tid );
-//            pbrmaterial.Values()->assign( MPBRTextures::mapToTextureUniform( output.second.metaString ), tid );
-//            if ( MPBRTextures::isMetallicTexture( output.second.metaString )) {
-//                pbrmaterial.setMetallicValue( 1.0f );
-//            }
-//            if ( MPBRTextures::isRoughnessTexture( output.second.metaString )) {
-//                pbrmaterial.setRoughnessValue( 1.0f );
-//            }
-//        }
-//    }
-//
-//    // Create PBR material
-//    mat.sc = pbrmaterial.serialize();
-    return mat;
+
+        if ( !output.second.metaString.empty()) {
+            auto tid = output.second.name;
+            pbrmaterial.Values()->assign( MPBRTextures::mapToTextureUniform( output.second.metaString ), tid );
+            if ( MPBRTextures::isMetallicTexture( output.second.metaString )) {
+                pbrmaterial.setMetallicValue( 1.0f );
+            }
+            if ( MPBRTextures::isRoughnessTexture( output.second.metaString )) {
+                pbrmaterial.setRoughnessValue( 1.0f );
+            }
+        }
+    }
+
+    auto filePath = dfs.fileRoot + getFileNamePath(dfs.entity.source) + "/" + ad.Name() + ".mat";
+    FM::writeLocalFile(filePath, pbrmaterial.serialize());
+
+    return filePath;
 }
 
 ArchiveDirectory elaborateMatSBSAR(
@@ -319,7 +322,7 @@ ArchiveDirectory elaborateMatSBSAR(
         DaemonFileStruct2& dfs ) {
 
     auto fileRoot = dfs.fileRoot;
-    auto outputPath = fileRoot + getFileNamePath( dfs.entity.source );
+    auto outputPath = fileRoot + getFileNamePath( dfs.entity.source ) + "/";
 
     std::string fn = getFileNameOnly( dfs.entity.source );
     std::string fext = ".png";
@@ -417,19 +420,17 @@ SerializableContainer elaborateGeomFile( DaemonFileStruct2& dfs, const Serializa
     return FM::readLocalFileC( filenameglb );
 }
 
-void elaborateGeom( DaemonFileStruct2 &dfs, const SerializableContainer &filedata ) {
+SerializableContainer elaborateGeom( DaemonFileStruct2 &dfs, const SerializableContainer &filedata ) {
 
     auto fext = getFileNameExtToLower( dfs.entity.source );
     if ( fext == ".fbx" || fext == ".obj")  {
-        elaboratePassThrough( dfs, elaborateGeomFile( dfs, filedata, fext ));
+        return elaborateGeomFile( dfs, filedata, fext );
     }
-    if ( getFileNameExtToLower( dfs.entity.source ) == ".glb" ||
-         getFileNameExtToLower( dfs.entity.source ) == ".gltf" ) {
-        elaboratePassThrough( dfs, filedata );
-    }
+    // ".glb" || ".gltf"
+    return filedata;
 }
 
-void elaborateMaterial( DaemonFileStruct2 dfs ) {
+SerializableContainer elaborateMaterial( DaemonFileStruct2 dfs, const SerializableContainer &filedata ) {
     ArchiveDirectory ad{ dfs.entity.source };
     int sensibleRescaleSize = 512;
 
@@ -440,13 +441,33 @@ void elaborateMaterial( DaemonFileStruct2 dfs ) {
         sensibleRescaleSize = -1;
     }
     if ( getFileNameExtToLower( std::string( dfs.entity.source )) == ".sbsar" ) {
-        int nominalSize = 1024;
+        int nominalSize = 512;
         sensibleRescaleSize = -1;
         ad = elaborateMatSBSAR( nominalSize, dfs );
     }
 
     // Gather texture outputs
-    ResourceEntityHelper mat = elaborateInternalMaterial( ad, sensibleRescaleSize, dfs );
+    auto pbrFile = elaborateInternalMaterial( ad, sensibleRescaleSize, dfs );
+
+    auto filePath = dfs.fileRoot + getFileNamePath( dfs.entity.source );
+    auto tarname = ad.Name() + ".tar";
+    std::string cmd = "cd " + filePath + " && tar cvf " + tarname + " " + getFileName(pbrFile) + " ";
+    for ( const auto& output : ad ) {
+        cmd += output.second.name + " ";
+    }
+    auto ret = std::system( cmd.c_str());
+    if ( ret != 0 ) {
+        throw std::runtime_error( std::string{ "Tarring material elaboration return code: " + std::to_string( ret ) } );
+    };
+
+    return FM::readLocalFileC( filePath + "/" + tarname );
+
+        //        ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.entity.source ), {}, generateThumbnail( dfs ) };
+//        if ( MPBRTextures::isBaseColorTexture( output.second.name ) ) {
+//            generateThumbnail(dfs);
+//        }
+//        auto to = upload( dfs, res );
+
 //    Mongo::fileUpload( dfs.bucket, dfs.entity.source, mat.sc,
 //                       Mongo::FSMetadata( dfs.group, dfs.project, dfs.uname, dfs.uemail,
 //                                          HttpContentType::json, Hashable<>::hashOf( mat.sc ), mat.thumb,
@@ -538,22 +559,13 @@ filterCandidates( const std::vector<ArchiveDirectoryEntityElement> &candidates, 
 void elaborateAsset( DaemonFileStruct2 &dfs, const std::string &assetName, const SerializableContainer &filedata ) {
     dfs.entity.source = assetName;
     if ( dfs.entity.group == ResourceGroup::Geom ) {
-        elaborateGeom( dfs, filedata );
+        elaboratePassThrough( dfs, elaborateGeom( dfs, filedata ));
     } else if ( dfs.entity.group == ResourceGroup::Material ) {
-        elaborateMaterial( dfs );
+        elaboratePassThrough( dfs, elaborateMaterial( dfs, filedata ));
     } else {
         // These are simply file copies, the only tricky bit is to handle the generation of screenshots which is done internally
         elaboratePassThrough( dfs, filedata );
-    }
-    auto filePath = dfs.filePath() + dfs.entity.hash;
-    if ( !FM::fileExist( filePath )) {
-        FM::writeLocalFile( filePath, filedata );
-        auto ent = dfs.mdb.insertEntityFromAsset2( dfs.entity );
-        LOGRS( ent );
-    } else {
-        LOGRS( "Status 204 - file " << filePath << " already exists" );
-    }
-}
+    }}
 
 bool groupIsAchievable( const std::string &sourceName, strview group ) {
     return group.to_string() == ResourceGroup::Material && isFileExtCompressedArchive( sourceName );
