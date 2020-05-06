@@ -514,6 +514,16 @@ macro(compile_local module)
 
 endmacro(compile_local)
 
+macro(compile_submodule module)
+
+    include_directories(${PROJECT_SOURCE_DIR}/../../..)
+    set(MODULES_ROOT "../../../")
+    set(MODULE_ROOT_COMP "")
+    message(STATUS "adding folder ${module} to compiler")
+    register_module(${MODULES_ROOT}${module})
+
+endmacro(compile_submodule)
+
 macro(link_aws_s3)
     if ("s3" IN_LIST WHICH_LIBS)
         SET(S3_LIBS aws-cpp-sdk-s3 aws-cpp-sdk-core)
