@@ -10,20 +10,25 @@
 #include <memory>
 #include <core/profiler.h>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 namespace OCR {
 
-    void ocrInitEngine( const std::string &dnnModelName, tesseract::TessBaseAPI &tesseract, cv::dnn::Net &dnnNet ) {
+    tesseract::TessBaseAPI ocrEngine;
+
+    void ocrInitEngine() {
         PROFILE_BLOCK( "ocrInitEngine()" );
 //        std::locale::global( std::locale( "C" ));
-        auto ret = tesseract.Init( "/usr/local/share/opencv4/tesseract", "eng", tesseract::OEM_LSTM_ONLY );
-        if ( ret != 0 ) {
-            LOGE( "[ERROR] OCR **NOT** Initialized" );
-            return;
+        static bool initialized = false;
+        if ( !initialized ) {
+            auto ret = ocrEngine.Init( "/usr/local/share/opencv4/tesseract", "eng", tesseract::OEM_LSTM_ONLY );
+            if ( ret != 0 ) {
+                LOGE( "[ERROR] OCR **NOT** Initialized" );
+                return;
+            }
+            ocrEngine.SetPageSegMode( tesseract::PSM_AUTO );
+            initialized = true;
         }
-        tesseract.SetPageSegMode( tesseract::PSM_AUTO );
-
-        dnnNet = cv::dnn::readNet( dnnModelName );
     }
 
     cv::Mat prepImageForSceneDetection( cv::dnn::Net &net, const cv::Mat &frame ) {
@@ -41,11 +46,12 @@ namespace OCR {
         return blob;
     }
 
-    void prepareImage( tesseract::TessBaseAPI &ocrEngine, const cv::Mat &source ) {
+    void prepareImage( const cv::Mat &source ) {
         auto channels = source.channels();
         auto w = source.size().width;
         auto h = source.size().height;
         auto bytePerLine = w * channels; //source.step1();
+        bytePerLine = source.step1();
         ocrEngine.SetImage((uchar *) source.data, w, h, channels, bytePerLine );
     }
 
@@ -95,8 +101,8 @@ namespace OCR {
         }
     }
 
-    std::string ocrTextDetection( tesseract::TessBaseAPI &ocrEngine, cv::dnn::Net &dnnNet, const cv::Mat &source ) {
-
+//    int ocrgc = 0;
+    std::string ocrTextDetection( cv::dnn::Net &dnnNet, const cv::Mat &source ) {
         auto dnnImage = prepImageForSceneDetection( dnnNet, source );
         std::vector<cv::Mat> outs;
         std::vector<cv::String> outNames( 2 );
@@ -126,7 +132,8 @@ namespace OCR {
             if ( roiGray.channels() != 1 ) {
                 cv::cvtColor( roiGray, roiGray, cv::COLOR_BGR2GRAY );
             }
-            std::string text = OCR::ocrTextRecognition( ocrEngine, roiGray );
+//            cv::imwrite(std::string{"rc"} + std::to_string(ocrgc++) + ".png", roiGray);
+            std::string text = OCR::ocrTextRecognition( roiGray );
             LOGRS( "Found text: " << text << std::endl );
             retText += " " + text;
         }
@@ -134,10 +141,10 @@ namespace OCR {
         return retText;
     }
 
-    std::string ocrTextRecognition( tesseract::TessBaseAPI &ocrEngine, const cv::Mat &source ) {
+    std::string ocrTextRecognition( const cv::Mat &source ) {
 
         // Prep up image to process
-        prepareImage( ocrEngine, source );
+        prepareImage( source );
 
         // Get OCR result
         char *outText = ocrEngine.GetUTF8Text();

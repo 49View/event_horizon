@@ -16,8 +16,8 @@
 namespace cv { class Mat; }
 
 namespace OCR {
-    void ocrInitEngine( const std::string& dnnModelName, tesseract::TessBaseAPI& tesseract, cv::dnn::Net& dnnNet );
-	std::string ocrTextDetection( tesseract::TessBaseAPI& ocrEngine, cv::dnn::Net &dnnNet, const cv::Mat& source );
-    std::string ocrTextRecognition( tesseract::TessBaseAPI &ocrEngine, const cv::Mat &source );
+    void ocrInitEngine();
+	std::string ocrTextDetection( cv::dnn::Net &dnnNet, const cv::Mat& source );
+    std::string ocrTextRecognition( const cv::Mat &source );
 };
 

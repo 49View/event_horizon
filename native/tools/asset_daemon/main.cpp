@@ -596,8 +596,7 @@ void parseUploadStream( Mongo &mdb, mongocxx::change_stream &stream, const std::
 
     for ( auto change : stream ) {
         auto optType = change["operationType"].get_value().get_utf8().value;
-        if ( optType != strview( "insert" ) && optType != strview( "update" ) &&
-             optType != strview( "replace" ))
+        if ( optType != strview( "insert" ) )
             continue;
 
         auto doc = change["fullDocument"];
