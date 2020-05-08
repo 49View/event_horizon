@@ -227,6 +227,7 @@ void elaboratePassThrough( DaemonFileStruct2 &dfs, const SerializableContainer &
     } else {
         LOGRS( "Status 204 - file " << filePath << " already exists" );
     }
+    dfs.mdb.updateUploads(dfs.entity);
 
 //    ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.entity.source ), {}, generateThumbnail( dfs2 ) };
 //    return upload( dfs, res );
