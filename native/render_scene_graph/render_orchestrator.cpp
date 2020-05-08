@@ -468,8 +468,8 @@ void RenderOrchestrator::init() {
         } );
     };
 
-    luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group, const std::string& _hash ) {
-        sg.resetAndLoadEntity( _id, _group, _hash );
+    luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group ) {
+        sg.resetAndLoadEntity( _id, _group );
     };
 
     luarr["load"] = [&]( const std::string& _id ) {

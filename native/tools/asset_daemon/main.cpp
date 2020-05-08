@@ -584,7 +584,7 @@ void elaborateCandidates( DaemonFileStruct &dfs ) {
 
 uint64_t chooseMainArchiveFilename( const ArchiveDirectory &ad, DaemonFileStruct &dfs ) {
 
-    findCandidatesScreenshotForThumbnail( dfs, ad );
+//    findCandidatesScreenshotForThumbnail( dfs, ad );
 
     auto candidates = ad.findFilesWithExtension( getExtForGroup( dfs.group ));
     dfs.candidates = filterCandidates( candidates, dfs.group );
@@ -612,16 +612,16 @@ void parseUploadStream( Mongo &mdb, mongocxx::change_stream &stream, const std::
 
         ArchiveDirectory ad{ filename };
         // First unzip all the content if package arrives in a zip file
-//        if ( isFileExtCompressedArchive( std::string( filename ))) {
-//            unzipFilesToTempFolder( fileDownloaded, ad );
+        if ( isFileExtCompressedArchive( std::string( filename ))) {
+            unzipFilesToTempFolder( filename, ad );
 //            auto numElaborated = chooseMainArchiveFilename( ad, dfs );
 //            if (( dfs.entity.source.empty() || numElaborated == 0 )) {
 //                daemonWarningLog( std::string( meta.source ) + " does not contain any appropriate asset file" );
 //                continue;
 //            }
-//        } else {
-        elaborateAsset( dfs, filename, fileDownloaded );
-//        }
+        } else {
+            elaborateAsset( dfs, filename, fileDownloaded );
+        }
     }
 }
 

@@ -189,7 +189,7 @@ void SceneGraph::clearFromRealTimeCallbacks() {
     Nodes().clear();
 };
 
-void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup, CResourceRef vHash ) {
+void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup ) {
 
     clearFromRealTimeCallbacks();
     Http::clearRequestCache();
@@ -198,25 +198,25 @@ void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityG
         GB<GT::Shape>( ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG*0.05f, GT::Scale(500.0f, 0.1f, 500.0f) );
         addGeomScene( v0 );
     } else if ( entityGroup == ResourceGroup::Material ) {
-        load<Material>( v0, [this, vHash]( HttpResouceCBSign key ) {
-            auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M( vHash ));
+        load<Material>( v0, [this, v0]( HttpResouceCBSign key ) {
+            auto geom = GB<GT::Shape>( ShapeType::Sphere, GT::Tag( 1001 ), GT::M( v0 ));
             DC()->center( geom->BBox3dCopy(), CameraCenterAngle::Back );
-            Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
+//            Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
         } );
     } else if ( entityGroup == ResourceGroup::Image ) {
-        load<RawImage>( v0, [this, vHash]( HttpResouceCBSign key ) {
+        load<RawImage>( v0, [this, v0]( HttpResouceCBSign key ) {
             nodeFullScreenImageSignal( key );
         } );
     } else if ( entityGroup == ResourceGroup::Font ) {
-        load<Font>( v0, [this, vHash]( HttpResouceCBSign key ) {
+        load<Font>( v0, [this, v0]( HttpResouceCBSign key ) {
             nodeFullScreenFontSonnetSignal( key );
         } );
     } else if ( entityGroup == ResourceGroup::Profile ) {
-        load<Profile>( v0, [this, vHash]( HttpResouceCBSign key ) {
+        load<Profile>( v0, [this, v0]( HttpResouceCBSign key ) {
             nodeFullScreenProfileSignal( key );
         } );
     }  else if ( entityGroup == ResourceGroup::UI ) {
-        load<UIContainer>( v0, [this, vHash]( HttpResouceCBSign key ) {
+        load<UIContainer>( v0, [this, v0]( HttpResouceCBSign key ) {
             nodeFullScreenUIContainerSignal( key );
         } );
     }
@@ -246,7 +246,7 @@ void SceneGraph::realTimeCallbacks() {
                 nodeFullScreenUIContainerSignal( rref );
             }
         } else if ( k == SceneEvents::LoadGeomAndReset ) {
-            resetAndLoadEntity(doc["data"]["entity_id"].GetString(), doc["data"]["group"].GetString(), doc["data"]["hash"].GetString() );
+            resetAndLoadEntity(doc["data"]["entity_id"].GetString(), doc["data"]["group"].GetString() );
         } else if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
             auto matId = getFileName( doc["data"]["mat_id"].GetString());
             auto objId = getFileName( doc["data"]["entity_id"].GetString());
