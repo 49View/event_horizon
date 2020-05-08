@@ -40,4 +40,4 @@ private:
     std::unordered_map<std::string, ArchiveDirectoryEntityElement> admap;
 };
 
-void unzipFilesToTempFolder(const std::string &filename, ArchiveDirectory& ad);
+void unzipFilesToTempFolder(const std::string &filename, ArchiveDirectory& ad, const std::string& forcePathName = {});

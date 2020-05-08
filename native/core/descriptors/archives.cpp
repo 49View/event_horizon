@@ -58,12 +58,14 @@ static int getZipData(void **datap, size_t *sizep, const char *archive) {
     return 0;
 }
 
-void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad ) {
+void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad, const std::string& forcePathName ) {
     void *data = nullptr;
     size_t size = 0;
     zip_source_t *src;
     zip_t *za;
     zip_error_t error;
+    std::string root = (forcePathName.empty() ? getDaemonRoot() : forcePathName);
+
     /* get buffer with zip archive inside */
     LOGRS("[UNZIP]" << " Start unzipping" << filename);
     if (getZipData(&data, &size, filename.c_str()) < 0) {
@@ -96,13 +98,13 @@ void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad )
             ad.insert( { zInfo.name, zInfo.size} );
             LOGRS(  zip_get_name( za, t, ZIP_FL_UNCHANGED) << " Size: " << buff.second << " Uncompressed: " << zInfo.size << " Read: " << byteRead );
             if ( zInfo.size == 0 && zInfo.comp_size == 0 && string_ends_with( zInfo.name, "/" ) ) {
-                auto cmd =  "cd " + getDaemonRoot() + " && mkdir " + getFirstFolderInPath( zInfo.name );
+                auto cmd =  "cd " + root + " && mkdir " + getFirstFolderInPath( zInfo.name );
                 auto returnValue = system( cmd.c_str() );
                 if ( returnValue != 0 ) {
                     LOGRS( cmd << " has return and error, code: " << returnValue );
                 }
             } else {
-                auto tempFileName = getDaemonRoot() + "/" + zInfo.name;
+                auto tempFileName = root + "/" + zInfo.name;
                 FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
                 if ( getFileNameExtToLower( zInfo.name ) == ".zip" ) {
                     unzipFilesToTempFolder( tempFileName, ad );

@@ -161,7 +161,7 @@ std::string Mongo::insertEntityFromAsset(const StreamChangeMetadata &meta) {
     return "";
 }
 
-void Mongo::insertDaemonCrashLog( const std::string& crash ) {
+void Mongo::insertDaemonCrashLog( const std::string& crash, const std::string& username ) {
     using bsoncxx::builder::basic::kvp;
     using bsoncxx::builder::basic::sub_array;
 
@@ -169,6 +169,7 @@ void Mongo::insertDaemonCrashLog( const std::string& crash ) {
     auto timeNow = std::chrono::system_clock::now();
     builder.append(
             kvp("crash", crash),
+            kvp("username", username),
             kvp("lastUpdatedDate", bsoncxx::types::b_date{timeNow}),
             kvp("creationDate", bsoncxx::types::b_date{timeNow})
     );

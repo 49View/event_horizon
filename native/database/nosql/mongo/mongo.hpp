@@ -220,7 +220,7 @@ public:
                                                                                       << bsoncxx::builder::stream::finalize );
     }
 
-    void insertDaemonCrashLog( const std::string &crash );
+    void insertDaemonCrashLog( const std::string &crash, const std::string& username );
 
 private:
     // The mongocxx::instance constructor and destructor initialize and shut down the driver,
