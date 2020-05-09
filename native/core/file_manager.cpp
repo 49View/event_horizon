@@ -5,6 +5,7 @@
 #include "file_manager.h"
 #include <fstream>
 #include <sys/stat.h>
+#include <filesystem>
 
 #include "http/webclient.h"
 #include "util.h"
@@ -221,6 +222,7 @@ namespace FileManager {
     }
 
     bool writeLocalFile( const std::string& filename, const std::vector<unsigned char>& s ) {
+        std::filesystem::create_directories( std::filesystem::path( getFileNamePath(filename) ));
         std::ofstream fp(filename);
         if ( fp.is_open()) {
             for ( const auto& b : s ) fp << b;

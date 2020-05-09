@@ -289,7 +289,10 @@ void elaboratePassThrough( DaemonFileStruct2 &dfs, const SerializableContainer &
 
     auto filePath = dfs.filePath() + dfs.entity.hash;
     if ( !FM::fileExist( filePath )) {
-        FM::writeLocalFile( filePath, filedata );
+        auto writeRes = FM::writeLocalFile( filePath, filedata );
+        if (!writeRes) {
+            throw std::runtime_error( std::string{"Can't write file: " + filePath});
+        }
         auto ent = dfs.mdb.insertEntityFromAsset2( dfs.entity );
         LOGRS( ent );
     } else {
