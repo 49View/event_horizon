@@ -776,6 +776,7 @@ Renderer::drawCircle( int bucketIndex, const Vector3f &center, float radius, con
 void RendererDrawingSet::setupFontData() {
     if ( fds.font == nullptr ) return;
     auto frect = fds.font->GetMasterRect();
+    matrix = std::make_shared<Matrix4f>(preMultMatrix);
     V3f fscale{ 1.0f / ( frect.z - frect.x ), 1.0f, 1.0f / ( frect.w - frect.y ) };
 //    V3f fscale2d{ 1.0f/(frect.z - frect.x), 1.0f/(frect.w - frect.y), 1.0f };
 
@@ -784,15 +785,9 @@ void RendererDrawingSet::setupFontData() {
     if ( shaderName == S::FONT_2D ) {
         lTRS.Rot( quatFromAxis( V4f{ V3f::Z_AXIS, fds.fontAngle } ));
         lTRS.Scale( V3f{ 1.0f, -1.0f, 1.0f } * fds.fontHeight * 0.001f );
-//        preMultMatrix = Matrix4f( fds.pos,
-//                                  V3f::Z_AXIS * fds.fontAngle,
-//                                  fscale2d * V3f{1.0f, 1.0f, 1.0f} * fds.fontHeight );
     } else {
         lTRS.Rot( quatFromAxis( V4f{ V3f::Y_AXIS, fds.fontAngle } ));
         lTRS.Scale( fscale * V3f{ 1.0f, -1.0f, -1.0f } * fds.fontHeight );
-//        preMultMatrix = Matrix4f( fds.pos,
-//                                  V3f::Y_AXIS * fds.fontAngle,
-//                                  fscale * V3f{1.0f, -1.0f, -1.0f} * fds.fontHeight );
     }
     preMultMatrix = Matrix4f{ lTRS };
 

@@ -190,7 +190,7 @@ namespace Http {
               ResponseCallbackFunc callbackFailed, ResponseFlags rf, HttpResouceCB mainThreadCallback ) {
         bool bPerformLoad = false;
 
-        if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) ) {
+        if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) || !FM::useFileSystemCachePolicy() ) {
             bPerformLoad = true;
         } else {
             auto cacheKey = url.toString() + std::to_string( static_cast<int>(rf) );
