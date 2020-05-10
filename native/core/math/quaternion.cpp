@@ -101,6 +101,50 @@ void Quaternion::fromAxis( const Vector4f& w ) {
     mData[3] = cosf( theta / 2.0f );
 }
 
+Matrix4f Quaternion::rotationMatrix() const {
+    float n = norm();
+    float qx = mData[0] / n;
+    float qy = mData[1] / n;
+    float qz = mData[2] / n;
+    float qw = mData[3] / n;
+
+    Vector4f r0( 1 - 2 * qy*qy - 2 * qz*qz, 2 * qx*qy - 2 * qz*qw    , 2 * qx*qz + 2 * qy*qw, 0.0f);
+    Vector4f r1( 2 * qx*qy + 2 * qz*qw    , 1 - 2 * qx*qx - 2 * qz*qz, 2 * qy*qz - 2 * qx*qw, 0.0f);
+    Vector4f r2( 2 * qx*qz - 2 * qy*qw    , 2 * qy*qz + 2 * qx*qw    , 1 - 2 * qx*qx - 2 * qy*qy, 0.0f);
+    Vector4f r3( 0.0f, 0.0f, 0.0f, 1.0f );
+
+    return Matrix4f( r0, r1, r2, r3 );
+}
+
+Matrix3f Quaternion::rotationMatrix3() const {
+    float n = norm();
+    float qx = mData[0] / n;
+    float qy = mData[1] / n;
+    float qz = mData[2] / n;
+    float qw = mData[3] / n;
+
+    Vector3f r0( 1 - 2 * qy*qy - 2 * qz*qz, 2 * qx*qy - 2 * qz*qw    , 2 * qx*qz + 2 * qy*qw);
+    Vector3f r1( 2 * qx*qy + 2 * qz*qw    , 1 - 2 * qx*qx - 2 * qz*qz, 2 * qy*qz - 2 * qx*qw);
+    Vector3f r2( 2 * qx*qz - 2 * qy*qw    , 2 * qy*qz + 2 * qx*qw    , 1 - 2 * qx*qx - 2 * qy*qy);
+
+    return Matrix3f( r0, r1, r2 );
+}
+
+Matrix4f Quaternion::rotationMatrixNotNormalised() const {
+    float n = norm();
+    float qx = mData[0] / n;
+    float qy = mData[1] / n;
+    float qz = mData[2] / n;
+    float qw = mData[3] / n;
+
+    Vector4f r0( 1 - 2 * qy*qy - 2 * qz*qz, 2 * qx*qy - 2 * qz*qw    , 2 * qx*qz + 2 * qy*qw, 0.0f);
+    Vector4f r1( 2 * qx*qy + 2 * qz*qw    , 1 - 2 * qx*qx - 2 * qz*qz, 2 * qy*qz - 2 * qx*qw, 0.0f);
+    Vector4f r2( 2 * qx*qz - 2 * qy*qw    , 2 * qy*qz + 2 * qx*qw    , 1 - 2 * qx*qx - 2 * qy*qy, 0.0f);
+    Vector4f r3( 0.0f, 0.0f, 0.0f, 1.0f );
+
+    return Matrix4f( r0, r1, r2, r3 );
+}
+
 Quaternion quatFromAxis( const Vector4f& w ) {
     float theta = w.w();
     float s = sinf( theta / 2.0f );

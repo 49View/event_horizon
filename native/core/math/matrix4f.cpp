@@ -145,7 +145,7 @@ void Matrix4f::setOrthogonalProjection( float left, float right, float bottom, f
 }
 
 Matrix4f::Matrix4f( const Quaternion &rot ) {
-    *this = rot.rotationMatrix();
+    *this = rot.rotationMatrixNotNormalised();
 }
 
 Matrix4f::Matrix4f( const MatrixAnim &rts ) {
