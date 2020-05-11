@@ -586,7 +586,19 @@ public:
 		return ret;
 	}
 
-	inline Vector2f topLeft() const { return mTopLeft; }
+    inline Rect2f squaredBothSides() const {
+        Rect2f ret = *this;
+        if ( width() < height() ) {
+            ret.expand( centre() - height() );
+            ret.expand( centre() + height() );
+        } else {
+            ret.expand( centre() - width() );
+            ret.expand( centre() + width() );
+        }
+        return ret;
+    }
+
+    inline Vector2f topLeft() const { return mTopLeft; }
 	inline Vector2f bottomRight() const { return mBottomRight; }
 	inline Vector2f topRight() const { return Vector2f( right(), top() ); }
 	inline Vector2f bottomLeft() const { return Vector2f( left(), bottom() ); }
