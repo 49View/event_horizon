@@ -263,10 +263,10 @@ namespace GLTF2Service {
         LOGRS( "GLTF2 Material: " << mat.name );
         removeNonAlphaCharFromString( im.name );
 
-        auto mname = _sg.possibleRemap( _gltf.key, mat.name );
-
-        auto matRef = _sg.getHash<Material>( mname );
-        if ( matRef.empty()) {
+        auto mname = mat.name+_gltf.key;
+//        auto mname = _sg.possibleRemap( _gltf.key, mat.name );
+//        auto matRef = _sg.getHash<Material>( mname );
+//        if ( matRef.empty()) {
             Material imMat{ S::SH, mname };
             for ( const auto&[k, v] : mat.values ) {
                 if ( k == "baseColorFactor" ) {
@@ -301,8 +301,8 @@ namespace GLTF2Service {
                 }
             }
 
-            matRef = _sg.addMaterialIM( mname, imMat );
-        }
+            auto matRef = _sg.addMaterialIM( mname, imMat );
+//        }
 
         _gltf.matMap[mat.name] = matRef;
 

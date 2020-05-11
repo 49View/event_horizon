@@ -660,8 +660,6 @@ int main( int argc, char **argv ) {
     try {
         while ( true ) {
             parseUploadStream( mdb, uploadStream, fileRoot );
-//            parseElaborateStream( streamToElaborate, sourceAssetBucket, entityBucket );
-//            parseAssetStream( mdb, streamAsset );
         }
     } catch ( const std::exception &e ) {
         daemonExceptionLog( mdb, e );
