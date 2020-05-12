@@ -162,39 +162,71 @@ public:
     std::string insertEntityFromAsset( const StreamChangeMetadata &meta );
 
     template<typename N>
-    std::string insertEntityFromAsset2( const N &meta ) {
+    void upsertEntity( const N &meta ) {
 
         using bsoncxx::builder::basic::kvp;
         using bsoncxx::builder::basic::sub_array;
+        using bsoncxx::builder::basic::sub_document;
 
         auto builder = bsoncxx::builder::basic::document{};
-        builder.append(
-                kvp( "group", meta.group ),
-                kvp( "source", meta.source ),
-                kvp( "name", meta.name ),
-                kvp( "project", meta.project ),
-                kvp( "isPublic", meta.isPublic ),
-                kvp( "isRestricted", meta.isRestricted ),
-                kvp( "contentType", meta.contentType ),
-                kvp( "hash", meta.hash ),
-                kvp( "userId", meta.userId()),
-                kvp( "thumb", meta.thumb ),
-                kvp( "tags", [&]( sub_array sa ) {
-                    for ( const auto &tag : split_tags( std::string( meta.name ))) {
-                        sa.append( toLower( tag ));
-                    }
-                } )
+        builder.append( kvp( "$set",
+                             [&]( sub_document subdoc ) {
+                                 subdoc.append(
+                                         kvp( "group", meta.group ),
+                                         kvp( "source", meta.source ),
+                                         kvp( "name", meta.name ),
+                                         kvp( "project", meta.project ),
+                                         kvp( "isPublic", meta.isPublic ),
+                                         kvp( "isRestricted", meta.isRestricted ),
+                                         kvp( "contentType", meta.contentType ),
+                                         kvp( "hash", meta.hash ),
+                                         kvp( "userId", meta.userId()),
+                                         kvp( "thumb", meta.thumb ),
+                                         kvp( "bboxSize", [&]( sub_array sa ) {
+                                             sa.append( meta.bboxSize[0] );
+                                             sa.append( meta.bboxSize[1] );
+                                             sa.append( meta.bboxSize[2] );
+                                         } ),
+                                         kvp( "tags", [&]( sub_array sa ) {
+                                             for ( const auto &tag : split_tags( std::string( meta.name ))) {
+                                                 sa.append( toLower( tag ));
+                                             }
+                                         } ));
+                             } ));
+
+        auto filter = bsoncxx::builder::basic::document{};
+        filter.append(
+                kvp( "filename", meta.source ),
+                kvp( "group", meta.group )
         );
 
-        bsoncxx::stdx::optional<mongocxx::result::insert_one> result = db["entities"].insert_one( builder.view());
-        if ( result ) {
-            auto dbc = db["entities"].find_one(
-                    bsoncxx::builder::stream::document{} << "_id" << ( *result ).inserted_id()
-                                                         << bsoncxx::builder::stream::finalize );
-            return bsoncxx::to_json( dbc->view());
-        }
+//        bsoncxx::stdx::optional<mongocxx::result::insert_one> result = db["entities"].insert_one( builder.view());
+        mongocxx::options::update options;
+        options.upsert( true );
+        db["entities"].update_one( filter.view(), builder.view(), options );
+    }
 
-        return "";
+    template<typename N, typename M>
+    void upsertBBox( M doc, const N &bboxSize ) {
+
+        using bsoncxx::builder::basic::kvp;
+        using bsoncxx::builder::basic::sub_array;
+        using bsoncxx::builder::basic::sub_document;
+
+        auto builder = bsoncxx::builder::basic::document{};
+        builder.append( kvp( "$set",
+                             [&]( sub_document subdoc ) {
+                                 subdoc.append(
+                                         kvp( "bboxSize", [&]( sub_array sa ) {
+                                             sa.append( bboxSize[0] );
+                                             sa.append( bboxSize[1] );
+                                             sa.append( bboxSize[2] );
+                                         } ));
+                             } ));
+
+        auto filter = bsoncxx::builder::basic::document{};
+        filter.append( kvp( "_id", doc["_id"].get_oid().value ));
+        db["entities"].update_one( filter.view(), builder.view());
     }
 
     template<typename N>
@@ -220,7 +252,19 @@ public:
                                                                                       << bsoncxx::builder::stream::finalize );
     }
 
-    void insertDaemonCrashLog( const std::string &crash, const std::string& username );
+    mongocxx::cursor find( const std::string &collection, const std::vector<std::string> &query ) {
+
+        auto filter = bsoncxx::builder::basic::document{};
+        using bsoncxx::builder::basic::kvp;
+        filter.append(
+                kvp( query[0], query[1] )
+        );
+
+        std::vector<std::string> ret{};
+        return db["entities"].find( filter.view());
+    }
+
+    void insertDaemonCrashLog( const std::string &crash, const std::string &username );
 
 private:
     // The mongocxx::instance constructor and destructor initialize and shut down the driver,

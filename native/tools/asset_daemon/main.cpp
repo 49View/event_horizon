@@ -28,6 +28,7 @@
 #include <core/resources/resource_builder.hpp>
 #include <core/resources/resource_pipe.hpp>
 #include <core/resources/publisher.hpp>
+#include <core/descriptors/gltf2utils.h>
 
 #include <database/nosql/mongo/mongo.hpp>
 
@@ -107,6 +108,7 @@ struct EntityMeta {
     std::string contentType;
     std::string hash;
     std::string thumb;
+    V3f bboxSize = V3f::ZERO;
     bool isPublic = true;
     bool isRestricted = false;
 };
@@ -286,18 +288,16 @@ void elaboratePassThrough( DaemonFileStruct2 &dfs, const SerializableContainer &
         generateThumbnail( dfs );
     }
     dfs.entity.contentType = HttpContentType::octetStream;
+    if ( dfs.entity.group == ResourceGroup::Geom ) {
+        dfs.entity.bboxSize = GLTF2Service::GLTFSize( dfs.entity.hash, "", filedata);
+    }
 
     auto filePath = dfs.filePath() + dfs.entity.hash;
-    if ( !FM::fileExist( filePath )) {
-        auto writeRes = FM::writeLocalFile( filePath, filedata );
-        if (!writeRes) {
-            throw std::runtime_error( std::string{"Can't write file: " + filePath});
-        }
-        auto ent = dfs.mdb.insertEntityFromAsset2( dfs.entity );
-        LOGRS( ent );
-    } else {
-        LOGRS( "Status 204 - file " << filePath << " already exists" );
+    auto writeRes = FM::writeLocalFile( filePath, filedata );
+    if (!writeRes) {
+        throw std::runtime_error( std::string{"Can't write file: " + filePath});
     }
+    dfs.mdb.upsertEntity( dfs.entity );
     dfs.mdb.updateUploads( dfs.entity );
 
 //    ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.entity.source ), {}, generateThumbnail( dfs2 ) };
@@ -625,18 +625,15 @@ void parseUploadStream( Mongo &mdb, mongocxx::change_stream &stream, const std::
     }
 }
 
-//void parseAssetStream( Mongo& mdb, mongocxx::change_stream& stream ) {
-////    uint64_t counter = 0;
-//    for ( auto change : stream ) {
-//        Profiler p1{ "Database asset operations time" };
-//        auto optType = change["operationType"].get_value().get_utf8().value;
-//        if ( optType != strview("insert") && optType != strview("update") && optType != strview("replace") ) continue;
-//        StreamChangeMetadata meta{ change };
-//        auto ent = mdb.insertEntityFromAsset( meta );
-//        LOGRS( ent );
-////        Socket::emit( "entityAdded" + std::to_string( counter++ ), ent );
-//    }
-//}
+void updateGeomsBBox(Mongo &mdb, const std::string &fileRoot) {
+    auto cursor = mdb.find( "entities", std::vector<std::string>{"group", ResourceGroup::Geom} );
+    for(auto doc : cursor) {
+        auto filename = doc["hash"].get_utf8().value;
+        auto size = GLTF2Service::GLTFSize(std::string{filename}, std::string{fileRoot}+"entities/" + ResourceGroup::Geom + "/" + std::string{filename}, {});
+        mdb.upsertBBox(doc, size);
+        LOGRS(size);
+    }
+}
 
 int main( int argc, char **argv ) {
 
@@ -653,8 +650,6 @@ int main( int argc, char **argv ) {
     }
 
     Mongo mdb{{ std::string( mongoPath ), std::string( mongoDefaultDB ), std::string( mongoRs ) }};
-    auto sourceAssetBucket = mdb.useBucket( "fs_assets_to_elaborate" );
-
     auto uploadStream = mdb["uploads"].watch();
 
     try {

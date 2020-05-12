@@ -4,16 +4,7 @@
 
 #include "gltf2.h"
 #include <iostream>
-#include <core/raw_image.h>
-#include <core/math/quaternion.h>
-#include <core/image_util.h>
-#include <core/names.hpp>
-#include <core/heterogeneous_map.hpp>
-#include <core/resources/material.h>
-#include <core/file_manager.h>
-#include <core/v_data.hpp>
-#include <core/resources/entity_factory.hpp>
-#include <core/resources/resource_builder.hpp>
+#include <core/descriptors/gltf2utils.h>
 #include <poly/scene_graph.h>
 
 namespace GLTF2Service {
@@ -23,23 +14,23 @@ namespace GLTF2Service {
     }
 
     unsigned int accessorTypeToNumberOfComponent( int ty ) {
-        if ( ty == TINYGLTF_TYPE_SCALAR ) {
+        if ( ty == TINYGLTF_TYPE_SCALAR) {
             return 1;
-        } else if ( ty == TINYGLTF_TYPE_VECTOR ) {
+        } else if ( ty == TINYGLTF_TYPE_VECTOR) {
             return 1;
-        } else if ( ty == TINYGLTF_TYPE_VEC2 ) {
+        } else if ( ty == TINYGLTF_TYPE_VEC2) {
             return 2;
-        } else if ( ty == TINYGLTF_TYPE_VEC3 ) {
+        } else if ( ty == TINYGLTF_TYPE_VEC3) {
             return 3;
-        } else if ( ty == TINYGLTF_TYPE_VEC4 ) {
+        } else if ( ty == TINYGLTF_TYPE_VEC4) {
             return 4;
-        } else if ( ty == TINYGLTF_TYPE_MATRIX ) {
+        } else if ( ty == TINYGLTF_TYPE_MATRIX) {
             return 1;
-        } else if ( ty == TINYGLTF_TYPE_MAT2 ) {
+        } else if ( ty == TINYGLTF_TYPE_MAT2) {
             return 4;
-        } else if ( ty == TINYGLTF_TYPE_MAT3 ) {
+        } else if ( ty == TINYGLTF_TYPE_MAT3) {
             return 9;
-        } else if ( ty == TINYGLTF_TYPE_MAT4 ) {
+        } else if ( ty == TINYGLTF_TYPE_MAT4) {
             return 16;
         }
         ASSERTV( 0, "Accessor type unknown" );
@@ -105,7 +96,7 @@ namespace GLTF2Service {
     std::vector<RT>
     fillData( const tinygltf::Model &model, int _index, GLTF2Service::ExtraAccessorData *_ead = nullptr ) {
         auto ucf = accessorFiller( model, _index, _ead );
-        std::vector <RT> ret;
+        std::vector<RT> ret;
         for ( size_t q = 0; q < ucf.size; q++ ) {
             RT elem{ 0 };
             memcpy( &elem, ucf.data + q * ucf.stride, ucf.stride );
@@ -263,46 +254,39 @@ namespace GLTF2Service {
         LOGRS( "GLTF2 Material: " << mat.name );
         removeNonAlphaCharFromString( im.name );
 
-        auto mname = mat.name+_gltf.key;
-//        auto mname = _sg.possibleRemap( _gltf.key, mat.name );
-//        auto matRef = _sg.getHash<Material>( mname );
-//        if ( matRef.empty()) {
-            Material imMat{ S::SH, mname };
-            for ( const auto&[k, v] : mat.values ) {
-                if ( k == "baseColorFactor" ) {
-                    im.baseColor.value = v.number_array;
-//                    im.baseColor.value.setX( pow( im.baseColor.value.x(), 1.0f/2.2f ));
-//                    im.baseColor.value.setY( pow( im.baseColor.value.y(), 1.0f/2.2f ));
-//                    im.baseColor.value.setZ( pow( im.baseColor.value.z(), 1.0f/2.2f ));
-                    imMat.setDiffuseColor( im.baseColor.value.xyz());
-                    imMat.setOpacity( im.baseColor.value.w());
-                } else if ( k == "baseColorTexture" ) {
-                    readParameterJsonDoubleValue( v, "index", im.baseColor.textureIndex );
-                    saveInternalPBRComponent( _gltf, _sg, imMat, im, im.baseColor, UniformNames::diffuseTexture );
-                } else if ( k == "metallicFactor" ) {
-                    auto lv = static_cast<float>(v.number_value);
-                    imMat.setMetallicValue( lv );
-                } else if ( k == "metallicTexture" ) {
-                    readParameterJsonDoubleValue( v, "index", im.metallic.textureIndex );
-                    saveInternalPBRComponent( _gltf, _sg, imMat, im, im.metallic, UniformNames::metallicTexture );
-                } else if ( k == "roughnessFactor" ) {
-                    auto lv = static_cast<float>(v.number_value);
-                    imMat.setRoughnessValue( lv );
-                } else if ( k == "roughnessTexture" ) {
-                    readParameterJsonDoubleValue( v, "index", im.roughness.textureIndex );
-                    saveInternalPBRComponent( _gltf, _sg, imMat, im, im.roughness, UniformNames::roughnessTexture );
-                }
+        auto mname = mat.name + _gltf.key;
+        Material imMat{ S::SH, mname };
+        for ( const auto&[k, v] : mat.values ) {
+            if ( k == "baseColorFactor" ) {
+                im.baseColor.value = v.number_array;
+                imMat.setDiffuseColor( im.baseColor.value.xyz());
+                imMat.setOpacity( im.baseColor.value.w());
+            } else if ( k == "baseColorTexture" ) {
+                readParameterJsonDoubleValue( v, "index", im.baseColor.textureIndex );
+                saveInternalPBRComponent( _gltf, _sg, imMat, im, im.baseColor, UniformNames::diffuseTexture );
+            } else if ( k == "metallicFactor" ) {
+                auto lv = static_cast<float>(v.number_value);
+                imMat.setMetallicValue( lv );
+            } else if ( k == "metallicTexture" ) {
+                readParameterJsonDoubleValue( v, "index", im.metallic.textureIndex );
+                saveInternalPBRComponent( _gltf, _sg, imMat, im, im.metallic, UniformNames::metallicTexture );
+            } else if ( k == "roughnessFactor" ) {
+                auto lv = static_cast<float>(v.number_value);
+                imMat.setRoughnessValue( lv );
+            } else if ( k == "roughnessTexture" ) {
+                readParameterJsonDoubleValue( v, "index", im.roughness.textureIndex );
+                saveInternalPBRComponent( _gltf, _sg, imMat, im, im.roughness, UniformNames::roughnessTexture );
             }
+        }
 
-            for ( const auto&[k, v] : mat.additionalValues ) {
-                if ( k == "normalTexture" ) {
-                    readParameterJsonDoubleValue( v, "index", im.normal.textureIndex );
-                    saveInternalPBRComponent( _gltf, _sg, imMat, im, im.normal, UniformNames::normalTexture );
-                }
+        for ( const auto&[k, v] : mat.additionalValues ) {
+            if ( k == "normalTexture" ) {
+                readParameterJsonDoubleValue( v, "index", im.normal.textureIndex );
+                saveInternalPBRComponent( _gltf, _sg, imMat, im, im.normal, UniformNames::normalTexture );
             }
+        }
 
-            auto matRef = _sg.addMaterialIM( mname, imMat );
-//        }
+        auto matRef = _sg.addMaterialIM( mname, imMat );
 
         _gltf.matMap[mat.name] = matRef;
 
@@ -327,7 +311,7 @@ namespace GLTF2Service {
         }
 
         hier->generateLocalTransformData( pos, rot, scale );
-        hier->createLocalHierMatrix( hier->fatherRootTransform() );
+        hier->createLocalHierMatrix( hier->fatherRootTransform());
 
         if ( node.mesh >= 0 ) {
             for ( size_t k = 0; k < _gltf.model->meshes[node.mesh].primitives.size(); k++ ) {
@@ -344,58 +328,10 @@ namespace GLTF2Service {
         }
     }
 
-    bool handleLoadingMessages( const std::string &err, const std::string &warn, bool ret ) {
-        if ( !warn.empty()) {
-            LOGR( "Warn: %s", warn.c_str());
-        }
-
-        if ( !err.empty()) {
-            LOGR( "Err: %s", err.c_str());
-        }
-
-        if ( !ret ) {
-            LOGR( "Failed to parse glTF" );
-            return false;
-        }
-
-        return true;
-    }
-
     GeomSP
     load( SceneGraph &_sg, const std::string &_key, const std::string &_path, const SerializableContainer &_array ) {
 
-        tinygltf::TinyGLTF gltf_ctx;
-        std::string err;
-        std::string warn;
-        std::string ext = getFileNameExt( _path ); //GetFilePathExtension( _path );
-
-        IntermediateGLTF gltfScene;
-
-        gltfScene.basePath = getFileNamePath( _path ) + "/";
-        gltfScene.contentHash = _path;
-        gltfScene.Name( getFileNameOnly( _path ));
-        gltfScene.model = std::make_shared<tinygltf::Model>();
-        gltfScene.key = _key;
-
-        bool ret = false;
-        if ( _array.empty()) {
-            ret = gltf_ctx.LoadBinaryFromFile( gltfScene.model.get(), &err, &warn, _path );
-            if ( !ret ) {
-                auto str = std::string( _array.begin(), _array.end());
-                ret = gltf_ctx.LoadASCIIFromString( gltfScene.model.get(), &err, &warn, str.c_str(), str.size(), "" );
-            }
-        } else {
-            ret = gltf_ctx.LoadBinaryFromMemory( gltfScene.model.get(), &err, &warn,
-                                                 reinterpret_cast<const unsigned char *>(_array.data()),
-                                                 _array.size());
-            if ( !ret ) {
-                ret = gltf_ctx.LoadASCIIFromFile( gltfScene.model.get(), &err, &warn, _path );
-            }
-        }
-
-        if ( !handleLoadingMessages( err, warn, ret )) {
-            return nullptr;
-        }
+        IntermediateGLTF gltfScene = loadGLTFAsset( _key, _path, _array );
 
         for ( const auto &gltfMaterial : gltfScene.model->materials ) {
             elaborateMaterial( _sg, gltfScene, gltfMaterial );
@@ -403,7 +339,7 @@ namespace GLTF2Service {
         auto rootScene = EF::create<Geom>( gltfScene.key );
         for ( const auto &scene : gltfScene.model->scenes ) {
             for ( int nodeIndex : scene.nodes ) {
-                auto child = rootScene->addChildren(gltfScene.model->nodes[nodeIndex].name);
+                auto child = rootScene->addChildren( gltfScene.model->nodes[nodeIndex].name );
                 addMeshNode( _sg, gltfScene, gltfScene.model->nodes[nodeIndex], child );
             }
         }
@@ -412,4 +348,5 @@ namespace GLTF2Service {
 
         return rootScene->BBox3d()->isValid() ? rootScene : nullptr;
     }
+
 }
