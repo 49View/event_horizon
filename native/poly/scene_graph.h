@@ -392,7 +392,7 @@ public:
 
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
                 elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
-                auto ref = B<GRB>( gb.Name() ).addIM( elem );
+                B<GRB>( gb.Name() ).addIM( elem );
                 if ( !gb.elemInjFather ) addNode(elem);
             }
             return elem;

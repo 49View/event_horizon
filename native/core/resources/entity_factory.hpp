@@ -43,6 +43,16 @@ public:
         return std::make_shared<T>(_elem);
     }
 
+    template <typename T>
+    static T copy( const T& _elem ) {
+        return T{_elem.serialize()};
+    }
+
+    template <typename T>
+    static T copy( const std::shared_ptr<T> _elem ) {
+        return T{_elem->serialize()};
+    }
+
 };
 
 using EF = EntityFactory;
