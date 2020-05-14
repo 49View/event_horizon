@@ -4624,6 +4624,14 @@ std::ostream& operator <<(std::ostream &s, const Paths &p)
   s << "\n";
   return s;
 }
+
+ClipperLib::Path V2fToPath( const std::vector<Vector2f>& _values ) {
+    ClipperLib::Path ret;
+    for ( auto &p : _values ) {
+        ret << p;
+    }
+    return ret;
+}
 //------------------------------------------------------------------------------
 
 } //ClipperLib namespace

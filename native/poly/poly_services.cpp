@@ -592,10 +592,10 @@ namespace PolyServices {
                 uint64_t index = t;
                 uint32_t nextIndex = static_cast<uint32_t>( getCircularArrayIndexUnsigned( t + 1, nvertsSane.size()));
 
-                vss[3] = ( vertsSane[index] );
-                vss[2] = ( vertsSane[nextIndex] );
-                vss[1] = ( vertsSane[index] + offset );
-                vss[0] = ( vertsSane[nextIndex] + offset );
+                vss[1] = ( vertsSane[index] );
+                vss[0] = ( vertsSane[nextIndex] );
+                vss[3] = ( vertsSane[index] + offset );
+                vss[2] = ( vertsSane[nextIndex] + offset );
 
                 MappingServices::updatePullMapping( m, vss, vtcs );
                 pushQuadSubDiv( vdata, vss, vtcs, m );

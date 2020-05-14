@@ -41,6 +41,8 @@ namespace FollowerService {
                   const Profile& profile,
                   const Vector3f& suggestedAxis = Vector3f::ZERO,
                   const FollowerFlags& ff = FollowerFlags::Defaults );
+
+    std::vector<Vector3f> createLinePath( const V2f& a, const V2f& b, float width, float z );
 }
 
 class Follower {

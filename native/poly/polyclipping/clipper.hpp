@@ -394,6 +394,9 @@ private:
 	std::string m_descr;
 };
 //------------------------------------------------------------------------------
+
+ClipperLib::Path V2fToPath( const std::vector<Vector2f> &_values );
+
 } //ClipperLib namespace
 
 #endif //clipper_hpp
