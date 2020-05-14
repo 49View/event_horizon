@@ -129,14 +129,12 @@ void Renderer::drawIncGridLines( const int bucketIndex, int numGridLines, float 
                                        constAxis0.dominantElement() == 2 ? constAxis0.z() : delta );
         Vector3f lerpRightX = Vector3f( constAxis1.dominantElement() == 0 ? constAxis1.x() : delta, zoffset,
                                         constAxis1.dominantElement() == 2 ? constAxis1.z() : delta );
-        draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
-                     _name + std::to_string( t ) + "+" );
+        draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth );
         lerpLeftX = Vector3f( constAxis0.dominantElement() == 0 ? constAxis0.x() : -delta, zoffset,
                               constAxis0.dominantElement() == 2 ? constAxis0.z() : -delta );
         lerpRightX = Vector3f( constAxis1.dominantElement() == 0 ? constAxis1.x() : -delta, zoffset,
                                constAxis1.dominantElement() == 2 ? constAxis1.z() : -delta );
-        draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth, false, 0.0f, 1.0f,
-                     _name + std::to_string( t ) + "-" );
+        draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth);
         delta += deltaInc;
     }
 }
@@ -163,8 +161,10 @@ void Renderer::createGrid( const int bucketIndex, float unit, const Color4f &mai
                       bottomYAxis, smallAxisColor, zoffset - 0.01f, _name + "x_axis" );
 
     // Main axis
-    draw<DLine>( bucketIndex, leftXAxis, rightXAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "xAxis" );
-    draw<DLine>( bucketIndex, topYAxis, bottomYAxis, mainAxisColor, mainAxisWidth, false, 0.0f, 1.0f, _name + "yAxis" );
+    draw<DLine>( bucketIndex, leftXAxis, V3f::ZERO, C4f::DARK_GREEN, mainAxisWidth );
+    draw<DLine>( bucketIndex, V3f::ZERO, rightXAxis, C4f::GREEN, mainAxisWidth );
+    draw<DLine>( bucketIndex, topYAxis, V3f::ZERO, C4f::RED, mainAxisWidth );
+    draw<DLine>( bucketIndex, V3f::ZERO, bottomYAxis, C4f::MAROON, mainAxisWidth );
 }
 
 std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit, const Color4f &mainAxisColor,
