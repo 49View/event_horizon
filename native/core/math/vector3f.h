@@ -684,7 +684,8 @@ struct XZY {
 	static Vector2f C2( const Vector3f& v2 );
 	static Vector3f C( float x, float y, float z );
 	static std::vector<Vector3f> C( const std::vector<Vector3f>& _v );
-	static std::vector<Vector3f> C( const std::vector<Vector2f>& _v, float _z = 0.0f );
+    static std::vector<Vector3f> C( const std::vector<Vector3f>& _v, float _z );
+    static std::vector<Vector3f> C( const std::vector<Vector2f>& _v, float _z = 0.0f );
     static std::vector<Vector2f> C2( const std::vector<Vector3f>& _v );
 };
 
