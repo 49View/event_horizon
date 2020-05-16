@@ -787,7 +787,8 @@ void Camera::setQuat( const Quaternion &a ) {
 
 void Camera::setQuatAngles( const Vector3f &a ) {
     if ( mbLocked ) return;
-    qangle->value = quatCompose( a );
+    incrementalEulerQuatAngle = a;
+    qangle->value = quatCompose( incrementalEulerQuatAngle );
 }
 
 void Camera::incrementQuatAngles( const Vector3f &a ) {
