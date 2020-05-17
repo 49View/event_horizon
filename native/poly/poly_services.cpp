@@ -70,6 +70,18 @@ std::vector<Vector3f> utilGenerateFlatBoxFromSize( float width, float height, fl
     return bboxPoints;
 }
 
+std::pair<int32_t, int32_t> dominantMappingPair(const V3f& n) {
+    auto dom = n.dominantElement();
+    if ( dom == 0 ) {
+        return {2,1};
+    }
+    if ( dom == 1 ) {
+        return {0,2};
+    }
+    return {0,1}; // ( dom == 2 )
+}
+
+
 std::vector<Vector2f> utilGenerateFlatRect( const Vector2f& size, const WindingOrderT wo, PivotPointPosition ppp ) {
     std::vector<Vector2f> fverts;
 
@@ -213,7 +225,7 @@ namespace MappingServices {
 
     void
     planarMapping( GeomMappingData& m, const Vector3f& normal, const Vector3f vs[], Vector2f vtcs[], int numVerts ) {
-        IndexPair pairMapping = normal.dominantPair();
+        IndexPair pairMapping = dominantMappingPair(normal);
 
         for ( int t = 0; t < numVerts; t++ ) {
             Vector2f tm = vs[t].pairMapped( pairMapping );
