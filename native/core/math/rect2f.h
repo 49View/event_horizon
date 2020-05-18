@@ -574,29 +574,8 @@ public:
 		return ret;
 	}
 
-	inline Rect2f squared() const {
-		Rect2f ret = *this;
-		if ( width() < height() ) {
-			ret.expand( centre() - height()*0.5f );
-			ret.expand( centre() + height()*0.5f );
-		} else {
-			ret.expand( centre() - width()*0.5f );
-			ret.expand( centre() + width()*0.5f );
-		}
-		return ret;
-	}
-
-    inline Rect2f squaredBothSides() const {
-        Rect2f ret = *this;
-        if ( width() < height() ) {
-            ret.expand( centre() - height() );
-            ret.expand( centre() + height() );
-        } else {
-            ret.expand( centre() - width() );
-            ret.expand( centre() + width() );
-        }
-        return ret;
-    }
+	[[nodiscard]] Rect2f squared() const;
+    [[nodiscard]] Rect2f squaredBothSides() const;
 
     inline Vector2f topLeft() const { return mTopLeft; }
 	inline Vector2f bottomRight() const { return mBottomRight; }

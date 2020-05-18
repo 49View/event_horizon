@@ -183,3 +183,28 @@ bool Rect2f::intersect( const Rect2f& rect, float _epsilon, EdgeTouchingIsInters
     return (abs(ac.x() - bc.x()) * (2.0f+_epsilon) < (width() + rect.width())) &&
            (abs(ac.y() - bc.y()) * (2.0f+_epsilon) < (height() + rect.height()));
 }
+
+Rect2f Rect2f::squared() const {
+    Rect2f ret = *this;
+    if ( width() < height() ) {
+        ret.expand( centre() - height()*0.5f );
+        ret.expand( centre() + height()*0.5f );
+    } else {
+        ret.expand( centre() - width()*0.5f );
+        ret.expand( centre() + width()*0.5f );
+    }
+    return ret;
+}
+
+
+Rect2f Rect2f::squaredBothSides() const {
+    Rect2f ret = *this;
+    if ( width() < height() ) {
+        ret.expand( centre() - V2f::Y_AXIS*height() );
+        ret.expand( centre() + V2f::Y_AXIS*height() );
+    } else {
+        ret.expand( centre() - V2f::X_AXIS*width() );
+        ret.expand( centre() + V2f::X_AXIS*width() );
+    }
+    return ret;
+}

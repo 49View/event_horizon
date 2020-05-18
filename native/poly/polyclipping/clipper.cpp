@@ -47,6 +47,7 @@
 #include <cstdlib>
 #include <ostream>
 #include <functional>
+#include <core/math/rect2f.h>
 
 namespace ClipperLib {
 
@@ -4632,6 +4633,15 @@ ClipperLib::Path V2fToPath( const std::vector<Vector2f>& _values ) {
     }
     return ret;
 }
+
+V2f pathSize( const ClipperLib::Path& input ) {
+    Rect2f rect = Rect2f::INVALID;
+    for ( auto t = 0u; t < input.size(); t++) {
+        rect.expand(input[t].X, input[t].Y);
+    }
+    return rect.size();
+}
+
 //------------------------------------------------------------------------------
 
 } //ClipperLib namespace

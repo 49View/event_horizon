@@ -396,6 +396,7 @@ private:
 //------------------------------------------------------------------------------
 
 ClipperLib::Path V2fToPath( const std::vector<Vector2f> &_values );
+V2f pathSize( const ClipperLib::Path& input );
 
 } //ClipperLib namespace
 
