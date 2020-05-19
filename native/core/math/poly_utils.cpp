@@ -179,3 +179,39 @@ WindingOrderT detectWindingOrderOpt2d( const V2fVector& vlist ) {
     auto ret = sign(detOrient) > 0.0f ? WindingOrder::CCW : WindingOrder::CW;
     return ret;
 }
+
+WindingOrderT detectWindingOrder( const std::vector<V2f>& _input ) {
+    size_t i1, i2;
+    float area = 0;
+    for ( i1 = 0; i1 < _input.size(); i1++ ) {
+        i2 = i1 + 1;
+        if ( i2 == _input.size() ) i2 = 0;
+        area += _input[i1].x() * _input[i2].y() - _input[i1].y() * _input[i2].x();
+    }
+
+    if ( area > 0 ) return WindingOrder::CW;
+    if ( area < 0 ) return WindingOrder::CCW;
+    if ( _input.size() > 2 ) {
+        LOGR("[ERROR] cannot get winding order of these points cos area is 0");
+    }
+    return WindingOrder::CCW;
+}
+
+WindingOrderT detectWindingOrder( const std::vector<V3f>& _input, const V3f& axis ) {
+    size_t i1, i2;
+    float area = 0;
+    auto dominantPair = axis.leastDominantPair();
+    for ( i1 = 0; i1 < _input.size(); i1++ ) {
+        i2 = i1 + 1;
+        if ( i2 == _input.size() ) i2 = 0;
+        area += _input[i1][dominantPair.second] * _input[i2][dominantPair.first] -
+                _input[i1][dominantPair.first] * _input[i2][dominantPair.second];
+    }
+
+    if ( area > 0 ) return WindingOrder::CW;
+    if ( area < 0 ) return WindingOrder::CCW;
+    if ( _input.size() > 2 ) {
+        LOGR("[ERROR] cannot get winding order of these points cos area is 0");
+    }
+    return WindingOrder::CCW;
+}

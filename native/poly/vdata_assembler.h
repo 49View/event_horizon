@@ -146,6 +146,13 @@ public:
             dataTypeHolder.extrusionVerts.emplace_back( _param );
             return *this;
         }
+        if constexpr ( std::is_same<M, std::vector<PolyOutLine>>::value ) {
+            static_assert( std::is_same<SGT, GT::Extrude>::value );
+            for ( const auto& ol : _param ) {
+                dataTypeHolder.extrusionVerts.emplace_back( ol );
+            }
+            return *this;
+        }
         if constexpr ( std::is_same<M, V2nff>::value ) {
             static_assert( std::is_same<SGT, GT::Extrude>::value );
             dataTypeHolder.extrusionVerts.emplace_back(

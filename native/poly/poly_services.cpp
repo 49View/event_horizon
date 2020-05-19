@@ -602,7 +602,7 @@ namespace PolyServices {
         if ( checkBitWiseFlag( pullFlags, PullFlags::Sides )) {
             for ( uint64_t t = 0; t < nvertsSane.size(); t++ ) {
                 uint64_t index = t;
-                uint32_t nextIndex = static_cast<uint32_t>( getCircularArrayIndexUnsigned( t + 1, nvertsSane.size()));
+                auto nextIndex = cai( t + 1, nvertsSane.size());
 
                 vss[1] = ( vertsSane[index] );
                 vss[0] = ( vertsSane[nextIndex] );
