@@ -200,11 +200,11 @@ Rect2f Rect2f::squared() const {
 Rect2f Rect2f::squaredBothSides() const {
     Rect2f ret = *this;
     if ( width() < height() ) {
-        ret.expand( centre() - V2f::Y_AXIS*height() );
-        ret.expand( centre() + V2f::Y_AXIS*height() );
+        ret.expand( centre() - V2f::X_AXIS*height() );
+        ret.expand( centre() + V2f::X_AXIS*height() );
     } else {
-        ret.expand( centre() - V2f::X_AXIS*width() );
-        ret.expand( centre() + V2f::X_AXIS*width() );
+        ret.expand( centre() - V2f::Y_AXIS*width() );
+        ret.expand( centre() + V2f::Y_AXIS*width() );
     }
     return ret;
 }
