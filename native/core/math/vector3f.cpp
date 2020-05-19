@@ -61,6 +61,16 @@ Vector3f Vector3f::fmod( float _value ) const {
 	return {fmodAntiGimbal( mX, _value ), fmodAntiGimbal( mY, _value ), fmodAntiGimbal( mZ, _value )};
 }
 
+std::pair<int32_t, int32_t> Vector3f::leastDominantPair() const {
+    if ( fabs( x() ) >= fabs( y() ) && fabs( x() ) >= fabs( z() ) ) {
+        return std::make_pair<int32_t, int32_t>( 1, 2 );
+    }
+    if ( fabs( y() ) >= fabs( x() ) && fabs( y() ) >= fabs( z() ) ) {
+        return std::make_pair<int32_t, int32_t>( 0, 2 );
+    }
+    return std::make_pair<int32_t, int32_t>( 0, 1 );
+}
+
 void removeCollinear( std::vector<Vector3f>& cs ) {
 	int csize = static_cast<int>( cs.size() );
 	if ( csize < 3 ) return;

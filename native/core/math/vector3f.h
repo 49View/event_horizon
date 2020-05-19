@@ -443,15 +443,7 @@ public:
 		return std::make_pair<int32_t, int32_t>( 0, 1 );
 	}
 
-	std::pair<int32_t, int32_t> leastDominantPair() const {
-		if ( fabs( x() ) <= fabs( y() ) && fabs( x() ) <= fabs( z() ) ) {
-			return std::make_pair<int32_t, int32_t>( 1, 2 );
-		}
-		if ( fabs( y() ) <= fabs( x() ) && fabs( y() ) <= fabs( z() ) ) {
-			return std::make_pair<int32_t, int32_t>( 0, 2 );
-		}
-		return std::make_pair<int32_t, int32_t>( 0, 1 );
-	}
+	std::pair<int32_t, int32_t> leastDominantPair() const;
 
 	Vector2f pairMapped( const std::pair<int32_t, int32_t>& pm ) const {
 		return Vector2f{ ( *this )[pm.first], ( *this )[pm.second] };
