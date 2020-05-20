@@ -119,6 +119,10 @@ namespace WindowHandling {
         return bUseGLFWPoll;
     }
 
+    void enableMouseCursor( bool flag ) {
+        glfwSetInputMode(window, GLFW_CURSOR, flag ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    }
+
     void imRenderLoopStats( const RenderStats& rs ) {
 #ifdef _USE_IMGUI_
         ImGui::Begin("Renderer Console");

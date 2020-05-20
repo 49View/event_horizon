@@ -23,6 +23,7 @@ namespace WindowHandling {
 	void enableInputCallbacks();
 	void disableInputCallbacks();
 	bool isInputEnabled();
+    void enableMouseCursor( bool flag );
     Vector2i captureWindowSize();
     void imRenderLoopStats( const RenderStats& rs );
 };

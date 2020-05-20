@@ -48,6 +48,7 @@ void MouseInput::onTouchDown( int _touchIndex, const Vector2f& pos, UpdateSignal
 }
 
 void MouseInput::onTouchMove( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals ) {
+    WH::enableMouseCursor(false);
 	status[_touchIndex].mouseButtonStatus = MouseButtonStatusValues::MOVING;
 	status[_touchIndex].touchedDownFirstTime = false;
 	if ( status[_touchIndex].gesturesTaps.empty() ) {
@@ -70,6 +71,7 @@ void MouseInput::onTouchMove( int _touchIndex, const Vector2f& pos, UpdateSignal
 }
 
 void MouseInput::onTouchUp( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals ) {
+    WH::enableMouseCursor(true);
 	status[_touchIndex].mouseButtonStatus = MouseButtonStatusValues::UP;
 	status[_touchIndex].gesturesTaps.push_back( pos );
 	status[_touchIndex].canTriggerLongTap = false;

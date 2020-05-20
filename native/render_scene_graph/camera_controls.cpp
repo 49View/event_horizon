@@ -17,11 +17,14 @@
 CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg ) :
         mCameraRig(std::move(cameraRig)), rsg(rsg) {}
 
+auto CameraControl::updateDollyWalkingVerticalMovement() {
+    dollyWalkingVerticalMovement += GameTime::getCurrTimeStep() * dollyFrequency;
+}
+
 auto CameraControl::wasd( const AggregatedInputData& mi ) {
     float moveForward = 0.0f;
     float strafe = 0.0f;
     float moveUp = 0.0f;
-    float dollyFrequency = 10.0f;
     dampingVelocityFactor = 52.0f*GameTime::getCurrTimeStep();
     dampingVelocityFactor = clamp(dampingVelocityFactor, 0.0f, 1.0f);
     baseVelocity = 0.35f;
@@ -34,14 +37,20 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
             moveUpInertia += currentVelocity;
         if ( mi.TI().checkKeyPressed(GMK_W) || mi.TI().checkKeyPressed(GMK_UP) ) {
             moveForwardInertia += currentVelocity;
-            dollyWalkingVerticalMovement += GameTime::getCurrTimeStep() * dollyFrequency;
+            updateDollyWalkingVerticalMovement();
         }
         if ( mi.TI().checkKeyPressed(GMK_S) || mi.TI().checkKeyPressed(GMK_DOWN) ) {
             moveForwardInertia -= currentVelocity;
-            dollyWalkingVerticalMovement += GameTime::getCurrTimeStep() * dollyFrequency;
+            updateDollyWalkingVerticalMovement();
         }
-        if ( mi.TI().checkKeyPressed(GMK_A) || mi.TI().checkKeyPressed(GMK_LEFT) ) strafeInertia += currentVelocity;
-        if ( mi.TI().checkKeyPressed(GMK_D) || mi.TI().checkKeyPressed(GMK_RIGHT) ) strafeInertia -= currentVelocity;
+        if ( mi.TI().checkKeyPressed(GMK_A) || mi.TI().checkKeyPressed(GMK_LEFT) ) {
+            strafeInertia += currentVelocity;
+            updateDollyWalkingVerticalMovement();
+        }
+        if ( mi.TI().checkKeyPressed(GMK_D) || mi.TI().checkKeyPressed(GMK_RIGHT) ) {
+            strafeInertia -= currentVelocity;
+            updateDollyWalkingVerticalMovement();
+        }
         if ( mi.TI().checkKeyPressed(GMK_COMMA) ) baseVelocity += 0.001f;
         if ( mi.TI().checkKeyPressed(GMK_PERIOD) ) baseVelocity -= 0.001f;
     }

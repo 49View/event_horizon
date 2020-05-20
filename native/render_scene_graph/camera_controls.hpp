@@ -29,6 +29,7 @@ public:
     virtual ~CameraControl() = default;
     void updateFromInputData( const AggregatedInputData& mi );
     auto wasd( const AggregatedInputData& mi );
+    auto updateDollyWalkingVerticalMovement();
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) = 0;
     virtual void renderControls() = 0;
 
@@ -44,6 +45,7 @@ protected:
     float strafeInertia = 0.0f;
     float moveUpInertia = 0.0f;
     float dollyWalkingVerticalMovement = 0.0f;
+    float dollyFrequency = 10.0f;
     float baseVelocity = 0.06f;
     float baseAngularVelocity = 0.6f;
     float currentVelocity = 0.0f;
