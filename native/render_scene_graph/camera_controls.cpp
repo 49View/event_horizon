@@ -25,13 +25,13 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
     float moveForward = 0.0f;
     float strafe = 0.0f;
     float moveUp = 0.0f;
-    dampingVelocityFactor = (ONE_OVER_60HZ/GameTime::getCurrTimeStep()) * 0.866667f;
+    dampingVelocityFactor = 0.866667f / (GameTime::getCurrTimeStep()/ONE_OVER_60HZ);
     dampingVelocityFactor = clamp(dampingVelocityFactor, 0.0f, 1.0f);
-    baseVelocity = 0.35f;
+    baseVelocity = 0.35f*ONE_OVER_60HZ;
 
     isWASDActive = mi.TI().checkWASDPressed() != -1;
     if ( isWASDActive ) {
-        currentVelocity = log10( 1.0f + currentVelocity + baseVelocity * GameTime::getCurrTimeStep() );
+        currentVelocity = log10( 1.0f + currentVelocity + baseVelocity * exp2(GameTime::getCurrTimeStep()/ONE_OVER_60HZ - 1.0f) );
         if ( mi.TI().checkKeyPressed(GMK_R) || mi.TI().checkKeyPressed(GMK_PAGE_UP) ) moveUpInertia -= currentVelocity;
         if ( mi.TI().checkKeyPressed(GMK_F) || mi.TI().checkKeyPressed(GMK_PAGE_DOWN) )
             moveUpInertia += currentVelocity;
@@ -192,7 +192,7 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     _cam->moveUp(moveUp + headJogging);
     auto mdss = mi.moveDiffSS(TOUCH_ZERO);
     auto mdss1 = mi.moveDiffSS(TOUCH_ONE);
-    float currAngularVelocity = baseAngularVelocity * ( ONE_OVER_60HZ / GameTime::getCurrTimeStep());
+    float currAngularVelocity = baseAngularVelocity * (GameTime::getCurrTimeStep() / ONE_OVER_60HZ);
     if ( mdss != Vector2f::ZERO && mdss1 == V2f::ZERO ) {
         auto angledd = isTouchBased() ? mdss.yx() * V2f::Y_INV : mdss.yx();
         currentAngularVelocity += V2f{ angledd.x() * log10( 1.0f + currAngularVelocity ),
