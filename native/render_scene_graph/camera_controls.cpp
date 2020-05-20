@@ -25,13 +25,15 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
     float moveForward = 0.0f;
     float strafe = 0.0f;
     float moveUp = 0.0f;
-    dampingVelocityFactor = 0.866667f / (GameTime::getCurrTimeStep()/ONE_OVER_60HZ);
+    float velRatio = ( GameTime::getCurrTimeStep() / ONE_OVER_60HZ );
+    dampingVelocityFactor = 0.866667f / velRatio;
     dampingVelocityFactor = clamp(dampingVelocityFactor, 0.0f, 1.0f);
-    baseVelocity = 0.35f*ONE_OVER_60HZ;
+    baseVelocity = 0.04f * GameTime::getCurrTimeStep();
 
     isWASDActive = mi.TI().checkWASDPressed() != -1;
     if ( isWASDActive ) {
-        currentVelocity = log10( 1.0f + currentVelocity + baseVelocity * exp2(GameTime::getCurrTimeStep()/ONE_OVER_60HZ - 1.0f) );
+        currentVelocity = log(1.0f + currentVelocity + baseVelocity );
+//        currentVelocity = currentVelocity + baseVelocity;
         if ( mi.TI().checkKeyPressed(GMK_R) || mi.TI().checkKeyPressed(GMK_PAGE_UP) ) moveUpInertia -= currentVelocity;
         if ( mi.TI().checkKeyPressed(GMK_F) || mi.TI().checkKeyPressed(GMK_PAGE_DOWN) )
             moveUpInertia += currentVelocity;
@@ -186,17 +188,17 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
             strafe += mi.moveDiffSS(TOUCH_ONE).x() * -4.0f;
         }
     }
-    float headJogging = sin( dollyWalkingVerticalMovement ) * (currentVelocity*0.3f);
+    float headJogging = sin(dollyWalkingVerticalMovement) * ( currentVelocity * 0.3f );
     _cam->moveForward(moveForward);
     _cam->strafe(strafe);
     _cam->moveUp(moveUp + headJogging);
     auto mdss = mi.moveDiffSS(TOUCH_ZERO);
     auto mdss1 = mi.moveDiffSS(TOUCH_ONE);
-    float currAngularVelocity = baseAngularVelocity * (GameTime::getCurrTimeStep() / ONE_OVER_60HZ);
+    float currAngularVelocity = baseAngularVelocity * ( GameTime::getCurrTimeStep() / ONE_OVER_60HZ );
     if ( mdss != Vector2f::ZERO && mdss1 == V2f::ZERO ) {
         auto angledd = isTouchBased() ? mdss.yx() * V2f::Y_INV : mdss.yx();
-        currentAngularVelocity += V2f{ angledd.x() * log10( 1.0f + currAngularVelocity ),
-                                      angledd.y() * log10( 1.0f + currAngularVelocity )};
+        currentAngularVelocity += V2f{ angledd.x() * log10(1.0f + currAngularVelocity),
+                                       angledd.y() * log10(1.0f + currAngularVelocity) };
     }
     _cam->incrementQuatAngles(V3f{ currentAngularVelocity, 0.0f });
     currentAngularVelocity *= dampingVelocityFactor;

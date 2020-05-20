@@ -47,7 +47,7 @@ protected:
     float dollyWalkingVerticalMovement = 0.0f;
     float dollyFrequency = 10.0f;
     float baseVelocity = 0.06f;
-    float baseAngularVelocity = 0.6f;
+    float baseAngularVelocity = 0.4f;
     float currentVelocity = 0.0f;
     V2f currentAngularVelocity = V2f::ZERO;
     float topVelocity = 0.05f;
