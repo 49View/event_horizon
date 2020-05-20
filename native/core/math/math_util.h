@@ -105,6 +105,7 @@
 #include <algorithm>
 
 const float M_PIF = 3.14159265358979323846f;
+const float ONE_OVER_60HZ = 0.016666667f;
 
 #undef M_PI
 #ifndef M_PI

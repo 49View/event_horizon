@@ -25,7 +25,7 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
     float moveForward = 0.0f;
     float strafe = 0.0f;
     float moveUp = 0.0f;
-    dampingVelocityFactor = 52.0f*GameTime::getCurrTimeStep();
+    dampingVelocityFactor = (ONE_OVER_60HZ/GameTime::getCurrTimeStep()) * 0.866667f;
     dampingVelocityFactor = clamp(dampingVelocityFactor, 0.0f, 1.0f);
     baseVelocity = 0.35f;
 
@@ -192,11 +192,11 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     _cam->moveUp(moveUp + headJogging);
     auto mdss = mi.moveDiffSS(TOUCH_ZERO);
     auto mdss1 = mi.moveDiffSS(TOUCH_ONE);
-    baseAngularVelocity = 60.0f;
+    float currAngularVelocity = baseAngularVelocity * ( ONE_OVER_60HZ / GameTime::getCurrTimeStep());
     if ( mdss != Vector2f::ZERO && mdss1 == V2f::ZERO ) {
         auto angledd = isTouchBased() ? mdss.yx() * V2f::Y_INV : mdss.yx();
-        currentAngularVelocity += V2f{ angledd.x() * log10( 1.0f + baseAngularVelocity * GameTime::getCurrTimeStep() ),
-                                      angledd.y() * log10( 1.0f + baseAngularVelocity * GameTime::getCurrTimeStep() )};
+        currentAngularVelocity += V2f{ angledd.x() * log10( 1.0f + currAngularVelocity ),
+                                      angledd.y() * log10( 1.0f + currAngularVelocity )};
     }
     _cam->incrementQuatAngles(V3f{ currentAngularVelocity, 0.0f });
     currentAngularVelocity *= dampingVelocityFactor;
