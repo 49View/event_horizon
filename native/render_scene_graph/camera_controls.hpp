@@ -39,6 +39,17 @@ protected:
     std::shared_ptr<CameraRig> mCameraRig;
     RenderOrchestrator& rsg;
     bool isWASDActive = false;
+
+    float moveForwardInertia = 0.0f;
+    float strafeInertia = 0.0f;
+    float moveUpInertia = 0.0f;
+    float dollyWalkingVerticalMovement = 0.0f;
+    float baseVelocity = 0.06f;
+    float baseAngularVelocity = 0.6f;
+    float currentVelocity = 0.0f;
+    V2f currentAngularVelocity = V2f::ZERO;
+    float topVelocity = 0.05f;
+    float dampingVelocityFactor = 0.985f;
 };
 
 class CameraControlEditable : public CameraControl, public Selection {
