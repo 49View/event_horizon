@@ -32,7 +32,7 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
 
     isWASDActive = mi.TI().checkWASDPressed() != -1;
     if ( isWASDActive ) {
-        currentVelocity = log(1.0f + currentVelocity + baseVelocity );
+        currentVelocity = log(1.0f + currentVelocity + baseVelocity);
 //        currentVelocity = currentVelocity + baseVelocity;
         if ( mi.TI().checkKeyPressed(GMK_R) || mi.TI().checkKeyPressed(GMK_PAGE_UP) ) moveUpInertia -= currentVelocity;
         if ( mi.TI().checkKeyPressed(GMK_F) || mi.TI().checkKeyPressed(GMK_PAGE_DOWN) )

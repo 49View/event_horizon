@@ -21,6 +21,7 @@
 #include <poly/converters/gltf2/gltf2.h>
 #include <poly/baking/xatlas_client.hpp>
 #include <poly/scene_events.h>
+#include <poly/collision_mesh.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 
@@ -419,15 +420,14 @@ bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
     bool ret = false;
 
     for ( const auto&[k, v] : nodes ) {
-        AABB box = AABB::INVALID;
         UUID uuid{};
 //        ### REF reimplement box and UUID
-//        box = v->BBox3d();
+        auto box = v->BBox3d();
 //        uuid = (*as)->UUiD();
         float tn = 0.0f;
         float tf = std::numeric_limits<float>::max();
         auto ldir = normalize(_far - _near);
-        if ( box.intersectLine(_near, ldir, tn, tf)) {
+        if ( box->intersectLine(_near, ldir, tn, tf)) {
             _callback(v, tn);
             ret = true;
             break;
@@ -752,6 +752,23 @@ void SceneGraph::HODResolve( const DependencyList& deps, HODResolverCallback ccf
 
     dependencyResovlers.push_back(sdr);
     dependencyResovlers.back().resolve();
+}
+
+void SceneGraph::loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm ) {
+    collisionMesh = _cm;
+}
+
+void SceneGraph::cameraCollisionDetection( std::shared_ptr<Camera> cam ) {
+    if ( !collisionMesh ) return;
+    auto ret = collisionMesh->collisionDetection( XZY::C2(cam->getPosition()), 0.25f );
+    if ( ret >= 0.0f ) {
+        cam->setPosition(collisionMesh->getLastKnownGoodPosition());
+    }
+}
+
+void SceneGraph::setLastKnownGoodPosition( const V3f& _pos ) {
+    if ( !collisionMesh ) return;
+    collisionMesh->setLastKnownGoodPosition(_pos);
 }
 
 void HOD::DepRemapsManager::addDep( const std::string& group, const std::string& resName ) {

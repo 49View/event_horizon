@@ -27,6 +27,7 @@
 class SceneGraph;
 struct scene_t;
 class Camera;
+class CollisionMesh;
 
 using HODResolverCallback = std::function<void()>;
 using MaterialMap = std::unordered_map<std::string, std::string>;
@@ -82,8 +83,7 @@ using EventSceneCallback = std::unordered_map<std::string, SocketCallbackDataTyp
 
 class SceneGraph : public NodeGraph {
 public:
-    explicit SceneGraph(
-                         VDataManager& _vl,
+    explicit SceneGraph( VDataManager& _vl,
                          ImageManager& _tl,
                          ProfileManager& _pm,
                          MaterialManager& _ml,
@@ -92,7 +92,7 @@ public:
                          CameraManager& _cm,
                          GeomManager& _gm,
                          UIManager& _um,
-                         LightManager& _ll);
+                         LightManager& _ll );
 
     void init();
     GeomSP getNode( const UUID& _uuid );
@@ -416,6 +416,9 @@ public:
         return elem;
     }
 
+    void loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm );
+    void cameraCollisionDetection( std::shared_ptr<Camera> cam );
+    void setLastKnownGoodPosition( const V3f& _pos );
     void chartMeshes( scene_t& scene );
     void chartMeshes2( scene_t& scene );
 
@@ -506,6 +509,7 @@ protected:
     UIManager& um;
     LightManager& ll;
 
+    std::shared_ptr<CollisionMesh> collisionMesh;
     MaterialMap materialRemap;
     std::vector<SceneDependencyResolver> dependencyResovlers;
 };
