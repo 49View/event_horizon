@@ -337,7 +337,7 @@ void RenderOrchestrator::updateInputs( AggregatedInputData& _aid ) {
     updateCallbacks();
 
     for ( auto& [k,v] : mRigs ) {
-        v->updateFromInputData( _aid );
+        v->updateFromInputData( sg, _aid );
     }
 }
 

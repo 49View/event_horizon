@@ -417,7 +417,7 @@ public:
     }
 
     void loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm );
-    void cameraCollisionDetection( std::shared_ptr<Camera> cam );
+    float cameraCollisionDetection( std::shared_ptr<Camera> cam );
     void setLastKnownGoodPosition( const V3f& _pos );
     void chartMeshes( scene_t& scene );
     void chartMeshes2( scene_t& scene );

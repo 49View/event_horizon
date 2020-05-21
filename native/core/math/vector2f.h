@@ -531,7 +531,7 @@ inline bool isVectorIntersectingWithLine( std::vector<Vector2f> tvr, Vector2f& v
 	return false;
 }
 
-inline float minDistanceFromTwoPoints( const Vector2f& p, Vector2f& p1, const Vector2f& p2 ) {
+inline float minDistanceFromTwoPoints( const Vector2f& p, const Vector2f& p1, const Vector2f& p2 ) {
 	Vector2f diff = p2 - p1;
 	if ( ( diff.x() == 0.0f ) && ( diff.y() == 0.0f ) ) {
 		diff = p - p1;

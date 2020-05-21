@@ -16,7 +16,7 @@ float lineSegmentCircleIntersection( const V2f& p1, const V2f& p2, const V2f& ce
     float c = dot(f, f ) - radius*radius;
 
     float discriminant = b*b-4*a*c;
-    if( discriminant < 0 )
+    if( discriminant < 0.0f )
     {
         return -1.0f;
         // no intersection
@@ -32,8 +32,8 @@ float lineSegmentCircleIntersection( const V2f& p1, const V2f& p2, const V2f& ce
         // either solution may be on or off the ray so need to test both
         // t1 is always the smaller value, because BOTH discriminant and
         // a are nonnegative.
-        float t1 = (-b - discriminant)/(2*a);
-        float t2 = (-b + discriminant)/(2*a);
+        float t1 = (-b - discriminant)/(2.0f*a);
+        float t2 = (-b + discriminant)/(2.0f*a);
 
         // 3x HIT cases:
         //          -o->             --|-->  |            |  --|->
@@ -43,7 +43,7 @@ float lineSegmentCircleIntersection( const V2f& p1, const V2f& p2, const V2f& ce
         //       ->  o                     o ->              | -> |
         // FallShort (t1>1,t2>1), Past (t1<0,t2<0), CompletelyInside(t1<0, t2>1)
 
-        if( t1 >= 0 && t1 <= 1 )
+        if( t1 >= 0.0f && t1 <= 1.0f )
         {
             // t1 is the intersection, and it's closer than t2
             // (since t1 uses -b - discriminant)
@@ -53,7 +53,7 @@ float lineSegmentCircleIntersection( const V2f& p1, const V2f& p2, const V2f& ce
 
         // here t1 didn't intersect so we are either started
         // inside the sphere or completely past it
-        if( t2 >= 0 && t2 <= 1 )
+        if( t2 >= 0.0f && t2 <= 1.0f )
         {
             // ExitWound
             return t2;

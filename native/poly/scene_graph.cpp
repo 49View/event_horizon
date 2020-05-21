@@ -758,12 +758,11 @@ void SceneGraph::loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm ) {
     collisionMesh = _cm;
 }
 
-void SceneGraph::cameraCollisionDetection( std::shared_ptr<Camera> cam ) {
-    if ( !collisionMesh ) return;
-    auto ret = collisionMesh->collisionDetection( XZY::C2(cam->getPosition()), 0.25f );
-    if ( ret >= 0.0f ) {
-        cam->setPosition(collisionMesh->getLastKnownGoodPosition());
-    }
+float SceneGraph::cameraCollisionDetection( std::shared_ptr<Camera> cam ) {
+    if ( !collisionMesh ) return 0.0f;
+    float ret = collisionMesh->collisionDetection( cam->getPosition(), 0.10f );
+    cam->setPosition(collisionMesh->getLastKnownGoodPosition());
+    return ret;
 }
 
 void SceneGraph::setLastKnownGoodPosition( const V3f& _pos ) {

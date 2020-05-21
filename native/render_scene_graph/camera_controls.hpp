@@ -27,7 +27,7 @@ class CameraControl {
 public:
     CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     virtual ~CameraControl() = default;
-    void updateFromInputData( const AggregatedInputData& mi );
+    void updateFromInputData( SceneGraph& sg, const AggregatedInputData& mi );
     auto wasd( const AggregatedInputData& mi );
     auto updateDollyWalkingVerticalMovement();
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) = 0;

@@ -68,12 +68,15 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
     return std::tuple<float, float, float>(moveForward, strafe, moveUp);
 }
 
-void CameraControl::updateFromInputData( const AggregatedInputData& mi ) {
+void CameraControl::updateFromInputData( SceneGraph& sg, const AggregatedInputData& mi ) {
 
     auto camera = mCameraRig->getMainCamera();
 //    if ( !camera->ViewPort().contains( mi.mousePos) ) return;
 
     updateFromInputDataImpl(camera, mi);
+    if ( sg.cameraCollisionDetection(camera) > 0.0f ) {
+        currentVelocity = 0.0f;
+    }
     camera->update();
 
 }
