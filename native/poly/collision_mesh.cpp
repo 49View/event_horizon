@@ -14,6 +14,7 @@ void CollisionMesh::resolveCollision( V2f& pos, float radius, int repCount, floa
             for ( const auto& room : group.collisionRooms ) {
                 if ( room.bbox.contains(pos) ) {
                     for ( const auto& element : room.collisionCollisionElement ) {
+//                        bool i = lineSegmentCapsuleIntersection( element.p1, element.p2, pos, XZY::C2(lastKnownGoodPosition), radius);
                         float i = lineSegmentCircleIntersection( element.p1, element.p2, pos, radius );
                         if ( i >= 0.0f ) {
                             if ( repCount > 50 ) {
@@ -23,9 +24,9 @@ void CollisionMesh::resolveCollision( V2f& pos, float radius, int repCount, floa
                             V2f pointOfContact = lerp(i, element.p1, element.p2);
                             float hitDistance = (radius - distance(pointOfContact, pos));
                             hitAccumulation+= hitDistance;
-                            LOGRS("Hit number: " << repCount << " Camera at " << pos);
-                            LOGRS("Collided with " << element.p1 << " / " << element.p2);
-                            LOGRS("distance:" << hitDistance);
+//                            LOGRS("Hit number: " << repCount << " Camera at " << pos);
+//                            LOGRS("Collided with " << element.p1 << " / " << element.p2);
+//                            LOGRS("distance:" << hitDistance);
                             pos += element.normal * (hitDistance + 0.001f);
                             resolveCollision(pos, radius, ++repCount, hitAccumulation, hasGivenUp );
                         }
@@ -40,6 +41,11 @@ float CollisionMesh::collisionDetection( const V3f& pos, float radius ) {
     V2f newPos = XZY::C2(pos);
     float hitAccumulation = 0.0f;
     bool hasGivenUp = false;
+
+    if ( lastKnownGoodPosition == V3f::HUGE_VALUE_NEG ) {
+        lastKnownGoodPosition = pos;
+        return hitAccumulation;
+    }
 
     resolveCollision(newPos, radius, 0, hitAccumulation, hasGivenUp);
     if ( !hasGivenUp ) {

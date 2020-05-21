@@ -261,6 +261,51 @@ bool intersection(const V2f& p, const V2f& p2, const V2f& q, const V2f& q2, Vect
     return false;
 }
 
+bool intersection(const V2f& p, const V2f& p2, const V2f& q, const V2f& q2, float& i ) {
+    auto r = p2 - p;
+    auto s = q2 - q;
+    auto rxs = r.cross(s);
+    auto qpxr = (q - p).cross(r);
+
+    // If r x s = 0 and (q - p) x r = 0, then the two lines are collinear.
+    if ( rxs == 0.0f && qpxr == 0.0f ) {
+        // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
+        // then the two lines are overlapping,
+//        if (considerCollinearOverlapAsIntersect)
+        return ( V2f::ZERO <= ( q - p ) * r && ( q - p ) * r <= r * r ) ||
+               ( V2f::ZERO <= ( p - q ) * s && ( p - q ) * s <= s * s );
+
+        // 2. If neither 0 <= (q - p) * r = r * r nor 0 <= (p - q) * s <= s * s
+        // then the two lines are collinear but disjoint.
+        // No need to implement this expression, as it follows from the expression above.
+    }
+
+    // 3. If r x s = 0 and (q - p) x r != 0, then the two lines are parallel and non-intersecting.
+    if ( rxs == 0.0f && qpxr != 0.0f)
+        return false;
+
+    // t = (q - p) x s / (r x s)
+    auto t = (q - p).cross(s)/rxs;
+
+    // u = (q - p) x r / (r x s)
+
+    auto u = (q - p).cross(r)/rxs;
+
+    // 4. If r x s != 0 and 0 <= t <= 1 and 0 <= u <= 1
+    // the two line segments meet at the point p + t r = q + u s.
+    if ( rxs != 0.0f && (0.0f <= t && t <= 1.0f) && (0.0f <= u && u <= 1.0f))
+    {
+        // We can calculate the intersection point using either t or u.
+        i = t;
+
+        // An intersection was found.
+        return true;
+    }
+
+    // 5. Otherwise, the two line segments are not parallel but do not intersect.
+    return false;
+}
+
 float getAreaOf( const std::vector<Triangle2d>& tris ) {
     float ret = 0.0f;
     for ( const auto& tr : tris ) {

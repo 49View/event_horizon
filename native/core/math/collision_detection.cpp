@@ -64,3 +64,20 @@ float lineSegmentCircleIntersection( const V2f& p1, const V2f& p2, const V2f& ce
     }
 }
 
+float lineSegmentCapsuleIntersection( const V2f& p1, const V2f& p2, const V2f& center1, const V2f& center2, float radius ) {
+    float i = -1.0f;
+
+    i = lineSegmentCircleIntersection(p1,p2,center1,radius);
+    if ( i >= 0.0f ) {
+        return i;
+    }
+
+    i = lineSegmentCircleIntersection(p1,p2,center2,radius);
+    if ( i >= 0.0f ) {
+        return i;
+    }
+
+    intersection(p1, p2, center1, center2, i);
+
+    return i;
+}

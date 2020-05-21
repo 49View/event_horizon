@@ -517,6 +517,7 @@ inline bool isInsideRect( const Vector2f& position, const Vector2f& rectPos, con
 bool isInsideTriangle( const Vector2f& P, const Vector2f& A, const Vector2f& B, const Vector2f& C );
 
 bool intersection( Vector2f const& p0, Vector2f const& p1, Vector2f const& p2, Vector2f const& p3, Vector2f& i );
+bool intersection(const V2f& p, const V2f& p2, const V2f& q, const V2f& q2, float& i );
 
 inline bool isVectorIntersectingWithLine( std::vector<Vector2f> tvr, Vector2f& v1, Vector2f& v2 ) {
 	for ( int64_t m = 0; m < static_cast<int64_t>( tvr.size() ); m++ ) {
