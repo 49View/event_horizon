@@ -34,6 +34,8 @@
 	double fraction(double x);
 	bool isValid(float x);
 	bool isValid(double x);
+    bool isEven(T n);
+    bool isOdd(T n);
 
 	// RANGE CONVERSION AND CLAMPING
 	T clamp(T value, T min, T max);
@@ -541,6 +543,16 @@ namespace JMATH {
 
     inline bool isValid( double x ) {
         return !std::isinf( x ) && !std::isnan( x );
+    }
+
+    template<typename T>
+    inline bool isEven( T x ) {
+        return x % 2 == 0;
+    }
+
+    template<typename T>
+    inline bool isOdd( T x ) {
+        return !isEven(x);
     }
 
     template<typename T>
