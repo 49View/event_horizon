@@ -522,7 +522,7 @@ void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _m
         } else {
             addVP = vp->tag() != SHADOW_MAGIC_TAG;
         }
-        if ( addVP ) {
+        if ( addVP && vp->PvsIndex() == -1) {
             CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram, _alphaDrawThreshold );
         }
     }

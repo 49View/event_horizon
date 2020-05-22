@@ -113,6 +113,7 @@ public:
 
     bool hasTag( uint64_t _tag) const;
     uint64_t tag() const { return mTag; }
+    inline int PvsIndex() const { return pvsIndex; }
     void tag( const uint64_t tag ) { mTag = tag; }
 
     void draw( Program* _program = nullptr );
