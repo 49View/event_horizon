@@ -49,13 +49,17 @@ public:
     int NumNormals() const { return mNumNormals; }
     void NumNormals( int val ) { mNumNormals = val; }
     int& NumNormals() { return mNumNormals; }
-
-
     int NumGeoms() const { return mNumGeoms; }
     void NumGeoms( int val ) { mNumGeoms = val; }
     int& NumGeoms() { return mNumGeoms; }
-
+    const int& getDrawCallsPerFrame() const {
+        return drawCallsPerFrame;
+    }
+    void setDrawCallsPerFrame( int _drawCallsPerFrame ) {
+        drawCallsPerFrame = _drawCallsPerFrame;
+    }
     void clear() {
+        drawCallsPerFrame=0;
         mNumTriangles = 0;
         mNumVerts = 0;
         mNumIndices = 0;
@@ -64,12 +68,13 @@ public:
     }
 
 private:
-    int mNumTriangles;
-    int mNumVerts;
-    int mNumIndices;
-    int mNumNormals;
+    int drawCallsPerFrame=0;
+    int mNumTriangles=0;
+    int mNumVerts=0;
+    int mNumIndices=0;
+    int mNumNormals=0;
     //	int mNumMaterials;
-    int mNumGeoms;
+    int mNumGeoms=0;
     //	std::set < std::shared_ptr<RenderMaterial> > mMaterialSet;
 };
 

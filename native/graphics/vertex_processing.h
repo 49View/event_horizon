@@ -129,6 +129,7 @@ private:
     std::shared_ptr<Matrix4f>           mTransform;
     std::shared_ptr<AABB>               bbox3d;
     uint64_t                            mTag = GT_Generic;
+    int                                 pvsIndex = -1;
     bool                                bHidden = false;
 };
 

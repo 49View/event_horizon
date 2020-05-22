@@ -159,6 +159,7 @@ struct ChangeMaterialOnContainer {
 };
 
 struct scene_t;
+class  RenderStats;
 
 class Renderer {
 public:
@@ -172,7 +173,7 @@ public:
 	void afterShaderSetup();
 	void injectShader( const std::string& _key, const std::string& content );
 
-	void directRenderLoop();
+	void directRenderLoop( RenderStats& rs );
 
 	void removeFromCL( const UUID& _uuid );
     void clearBucket( int _bucket );

@@ -125,8 +125,9 @@ protected:
     }
 
     void render() {
-        RR().directRenderLoop();
-        WH::imRenderLoopStats( RenderStats{});
+        RenderStats rs{};
+        RR().directRenderLoop(rs);
+        WH::imRenderLoopStats(rs);
         WH::flush();
     }
 

@@ -220,7 +220,7 @@ void Renderer::setGlobalTextures() {
 //    }
 }
 
-void Renderer::directRenderLoop() {
+void Renderer::directRenderLoop( RenderStats& rs ) {
 
     if ( SM()->reloadDirtyPrograms() ) {
         afterShaderSetup();
@@ -251,6 +251,7 @@ void Renderer::directRenderLoop() {
     am.setUniforms_r();
 
     mDrawCallsPerFrame = renderCBList();
+    rs.setDrawCallsPerFrame(mDrawCallsPerFrame);
 
 //    VRM.update();
 

@@ -7,6 +7,7 @@
 #endif
 
 #include <graphics/window_handling.hpp>
+#include <graphics/render_list.h>
 
 //#define _USE_IMGUI_
 
@@ -128,7 +129,7 @@ namespace WindowHandling {
         ImGui::Begin("Renderer Console");
         ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate );
         ImGui::Text("Current FrameRate (%.1f FPS)", ImGui::GetIO().Framerate );
-//        ImGui::Text("Number drawcalls: %lu", rs.drawCallsPerFrame );
+        ImGui::Text("Number drawcalls: %d", rs.getDrawCallsPerFrame() );
         ImGui::End();
 #endif
     }
