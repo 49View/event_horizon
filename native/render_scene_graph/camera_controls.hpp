@@ -52,6 +52,7 @@ protected:
     V2f currentAngularVelocity = V2f::ZERO;
     float topVelocity = 0.05f;
     float dampingVelocityFactor = 0.985f;
+    float dampingAngularVelocityFactor = 0.985f;
 };
 
 class CameraControlEditable : public CameraControl, public Selection {
