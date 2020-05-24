@@ -9,7 +9,6 @@
 #include <core/observer.h>
 #include <core/soa_utils.h>
 #include <core/streaming_mediator.hpp>
-#include <poly/scene_graph.h>
 #include <graphics/renderer.h>
 #include <graphics/render_targets.hpp>
 #include <render_scene_graph/camera_controls.hpp>
@@ -27,6 +26,7 @@ struct AggregatedInputData;
 struct ShaderLiveUpdateMap;
 
 class Renderer;
+class SceneGraph;
 class VData;
 
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;

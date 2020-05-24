@@ -12,6 +12,8 @@
 #include <core/image_params.hpp>
 #include <core/TTF.h>
 #include <core/font_params.hpp>
+#include <core/v_data.hpp>
+#include <core/resources/resource_builder.hpp>
 #include <core/resources/material.h>
 #include <core/resources/ui_container.hpp>
 #include <graphics/renderer.h>
@@ -19,6 +21,7 @@
 #include <graphics/render_light_manager.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/window_handling.hpp>
+#include <poly/scene_graph.h>
 #include <poly/scene_events.h>
 #include <render_scene_graph/render_orchestrator_callbacks.hpp>
 #include <render_scene_graph/lua_scripts.hpp>
@@ -592,6 +595,44 @@ void RenderOrchestrator::init(const CLIParamMap& params) {
     luarr["changeCameraControlType"] = [&]( int _type ) {
         changeCameraControlType( _type );
     };
+
+    luarr["showMaterial"] = [&]( const std::string& matName ) {
+        auto m0 = sg.getHash<Material>(matName);
+        if ( !m0.empty() ) {
+            auto m1 = sg.get<Material>(m0);
+            sg.GB<GT::Shape>(ShapeType::Sphere, GT::Tag(1001), GT::M(m0));
+            RR().draw<DRect2d>(Rect2f{ V2f{1.0f, 0.78f}, V2f{1.2f, 0.98f} }, RDSImage{m1->getNormalTexture()});
+        }
+    };
+
+    luarr["loadMaterial"] = [&]( const std::string& matName ) {
+        sg.load<Material>(matName, [this, matName]( HttpResouceCBSign key ) {
+            auto m1 = sg.get<Material>(matName);
+            auto geom = sg.GB<GT::Shape>(ShapeType::Sphere, GT::Tag(1001), GT::M(matName));
+            float tsize = 0.10f;
+            float ygap = .005f;
+            float x1 = getScreenAspectRatio-tsize-ygap;
+            float x2 = getScreenAspectRatio-ygap;
+            float y = 1.0f-ygap;
+            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getDiffuseTexture()});
+            y-=(tsize+ygap);
+            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getNormalTexture()});
+            y-=(tsize+ygap);
+            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getRoughnessTexture()});
+            y-=(tsize+ygap);
+            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getMetallicTexture()});
+            y-=(tsize+ygap);
+            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getOpacityTexture()});
+            y-=(tsize+ygap);
+            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getAOTexture()});
+            y-=(tsize+ygap);
+            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getTranslucencyTexture()});
+            y-=(tsize+ygap);
+            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getHeightTexture()});
+        });
+    };
+
+
 
 #ifndef _PRODUCTION_
     fw = std::make_unique<FileWatcher>();

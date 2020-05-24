@@ -30,6 +30,7 @@ struct DRect2d {};
 struct DRect2dRounded {};
 struct DText {};
 struct DText2d {};
+struct DImage2d {};
 
 struct FontDrawingSet {
     std::string text{};

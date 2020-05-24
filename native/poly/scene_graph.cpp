@@ -200,11 +200,14 @@ void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityG
                       GT::Scale(500.0f, 0.1f, 500.0f));
         addGeomScene(v0);
     } else if ( entityGroup == ResourceGroup::Material ) {
-        load<Material>(v0, [this, v0]( HttpResouceCBSign key ) {
-            auto geom = GB<GT::Shape>(ShapeType::Sphere, GT::Tag(1001), GT::M(v0));
-            DC()->center(geom->BBox3dCopy(), CameraCenterAngle::Back);
-//            Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
-        });
+        auto loadMatCommand = "rr.loadMaterial(\"" + v0 + "\")";
+        LOGRS("Load material LUA command: " << loadMatCommand );
+        runLUAScriptSignal(loadMatCommand);
+//        load<Material>(v0, [this, v0]( HttpResouceCBSign key ) {
+//            auto geom = GB<GT::Shape>(ShapeType::Sphere, GT::Tag(1001), GT::M(v0));
+//            DC()->center(geom->BBox3dCopy(), CameraCenterAngle::Back);
+////            Socket::send( "wasmClientFinishedLoadingData", LoadFinishData{} );
+//        });
     } else if ( entityGroup == ResourceGroup::Image ) {
         load<RawImage>(v0, [this, v0]( HttpResouceCBSign key ) {
             nodeFullScreenImageSignal(key);
