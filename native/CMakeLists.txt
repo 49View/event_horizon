@@ -1177,6 +1177,7 @@ macro(set_cpp_flags)
             set(CMAKE_CXX_STANDARD 17) # C++17...
             set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
             set(CMAKE_CXX_EXTENSIONS OFF) #...without compiler extensions like gnu++11
+            add_definitions(-D_PRODUCTION_)
             add_definitions(-DUSE_GLFW)
             add_definitions(-DEMSCRIPTEN)
             add_definitions(-DGL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED)

@@ -134,7 +134,7 @@ vec3 getNormalFromMap( vec2 texCoords )
     vec3 Q1  = dFdx(Position_worldspace);
     vec3 Q2  = dFdy(Position_worldspace);
     vec2 st1 = dFdx(texCoords);
-    vec2 st2 = dFdy(texCoords);
+    vec2 st2 = dFdy(texCoords)+vec2(0.00000001, 0.00000001);
 
     vec3 N  = normalize(v_norm);
     vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
@@ -225,7 +225,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
 
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz )*0.2;
 
     // single point light 
     for ( int i = 0; i < u_numPointLights; i++ ) {
@@ -235,7 +235,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         vec3 L = normalize( plmfrag );
         float plattenuation = 1.0 / (pldistance*pldistance );
         vec3 lradiance = (((u_pointLightIntensity[i])*(u_sunRadiance.xyz*u_sunRadiance.w) + vec3(1.0-(1.0-u_sunRadiance.w)) )) * plattenuation * (1.0+translucencyV);
-        Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
+        Lo += rendering_equation( albedo, L, V, N, F0, lradiance )*0.5;
     }
 
 #ifdef sh_reflections
@@ -299,8 +299,8 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 vec3 ambient = (((Lo + (kD * diffuseV + specular)) * visibility ) * ao);// * (visibility+diffuseV);
 #else 
-vec3 diffuseV = Lo * albedo;// * aoLightmapColor;
-vec3 ambient = kD;// * diffuseV * ao;// * visibility;
+vec3 diffuseV = Lo;// * aoLightmapColor;
+vec3 ambient = kD * diffuseV * ao;// * visibility;
 #endif
 
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);

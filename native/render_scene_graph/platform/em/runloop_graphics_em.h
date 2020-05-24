@@ -4,4 +4,4 @@
 
 #pragma once
 
-void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be );
+void mainLoop( const CLIParamMap& params, std::unique_ptr<RunLoopBackEndBase>&& _be );

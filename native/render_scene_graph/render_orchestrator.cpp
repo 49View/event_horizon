@@ -92,6 +92,33 @@ void RenderOrchestrator::updateCallbacks() {
 
     if ( dragAndDropFunc ) dragAndDropFunc( callbackPaths );
 
+#ifndef _PRODUCTION_
+    fw->watchNonBlocking( [&] (std::string path_to_watch, FileStatus status) -> void {
+        // Process only regular files, all other file types are ignored
+        if(!std::filesystem::is_regular_file(std::filesystem::path(path_to_watch)) && status != FileStatus::erased) {
+            return;
+        }
+
+        switch(status) {
+            case FileStatus::created:
+                std::cout << "File created: " << path_to_watch << '\n';
+                break;
+            case FileStatus::modified:
+                std::cout << "File modified: " << path_to_watch << '\n';
+                {
+                    auto fileContent = FM::readLocalTextFile(path_to_watch);
+                    RenderOrchestrator::reloadShaders(fileContent);
+                }
+                break;
+            case FileStatus::erased:
+                std::cout << "File erased: " << path_to_watch << '\n';
+                break;
+            default:
+                std::cout << "Error! Unknown file status.\n";
+        }
+    });
+
+#endif
     resizeCallbacks();
 }
 
@@ -341,7 +368,7 @@ void RenderOrchestrator::updateInputs( AggregatedInputData& _aid ) {
     }
 }
 
-void RenderOrchestrator::init() {
+void RenderOrchestrator::init(const CLIParamMap& params) {
     initWHCallbacks();
 
     lua.open_libraries( sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::math, sol::lib::table
@@ -567,9 +594,11 @@ void RenderOrchestrator::init() {
     };
 
 #ifndef _PRODUCTION_
-    Socket::on( "shaderchange",
-                std::bind(&RenderOrchestrator::reloadShaders, this, std::placeholders::_1, std::placeholders::_2 ) );
-
+    fw = std::make_unique<FileWatcher>();
+    auto shader_emit = params.getParam("shader_emit");
+    if ( shader_emit ) {
+        fw->watchFile(*shader_emit);
+    }
     allCallbacksEntitySetup();
 #endif
 
@@ -586,6 +615,17 @@ void RenderOrchestrator::reloadShaders( const std::string& _msg, SocketCallbackD
 	}
 
 	addUpdateCallback( [this](UpdateCallbackSign) { rr.cmdReloadShaders( {} ); } );
+}
+
+void RenderOrchestrator::reloadShaders( const std::string& _shadershpp ) {
+
+    ShaderLiveUpdateMap shadersToUpdate{_shadershpp};
+
+    for ( const auto& ss : shadersToUpdate.shaders ) {
+        rr.injectShader( ss.first, ss.second );
+    }
+
+    addUpdateCallback( [this](UpdateCallbackSign) { rr.cmdReloadShaders( {} ); } );
 }
 
 //void RenderOrchestrator::addImpl( NodeVariants _geom ) {

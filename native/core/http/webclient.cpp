@@ -367,7 +367,7 @@ namespace Http {
     }
 
     std::string CLOUD_WSS() {
-        return "/wss";
+        return "/webrtc";
     }
 
     void cloudHost( const std::string& _sid ) {

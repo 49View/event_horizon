@@ -11,12 +11,15 @@
 #include <graphics/platform_graphics.hpp>
 #include <graphics/shader_manager.h>
 #include <core/http/basen.hpp>
-#include <boost/filesystem.hpp>
+#include <chrono>
+#include <filesystem>
+#include <core/file_watcher.hpp>
 
-using namespace boost::filesystem;
+using namespace std::filesystem;
+using namespace std::chrono_literals;
 
 const std::string cachedFileName = ".cachedShaderMap.txt";
-const std::string sVersionString = "2.2.0";
+const std::string sVersionString = "3.0.0";
 
 JSONDATA(FileCheck, filename, lastWriteTime, size, hash)
 
@@ -24,7 +27,7 @@ JSONDATA(FileCheck, filename, lastWriteTime, size, hash)
             filename ), lastWriteTime( lastWriteTime ), size( size ), hash( hash ) {}
 
     std::string filename;
-    uint64_t lastWriteTime = 0;
+    uint64_t lastWriteTime{};
     uint64_t size = 0;
     uint64_t hash = 0;
 };
@@ -58,11 +61,14 @@ std::vector<FileCheck> getFilesInFolder( const std::string& _folder ) {
 
     try {
         if (exists(p) && is_directory(p) ) {
-            for (directory_entry& x : directory_iterator(p)) {
+            for (auto& x : directory_iterator(p)) {
                 auto filename = x.path().generic_string();
 
-                if ( x.status().type() == file_type::regular_file && filename.find("./.") == std::string::npos ) {
-                    ret.emplace_back(FileCheck{getFileName(filename), static_cast<uint64_t >(last_write_time(x)), file_size(x), 0 });
+                if ( x.status().type() == file_type::regular && filename.find("./.") == std::string::npos ) {
+                    auto ftime = last_write_time(x);
+                    auto cftime = decltype(ftime)::clock::duration(0);
+                    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(cftime);
+                    ret.emplace_back(FileCheck{getFileName(filename), static_cast<uint64_t>(ms.count()), file_size(x), 0 });
                 }
             }
         } else {
@@ -115,52 +121,12 @@ bool checkFileChanged( const FileCheck& _fc, const CacheCheckMap& _cache ) {
     return true;
 }
 
-int main( int argc, [[maybe_unused]] char *argv[] ) {
-
-    int ret = 0;
-    LOGRS("ShaderTool Version: " << sVersionString );
-
-    if (!Http::useClientCertificate(true,
-                                    "EH_DEAMON_CERT_KEY_PATH", "EH_DEAMON_CERT_CRT_PATH")) {
-        LOGRS("Daemon certificate and key environment variables needs to be present as"
-              "\n$EH_DEAMON_CERT_KEY_PATH\n$EH_DEAMON_CERT_CRT_PATH");
-        return 1;
-    }
-
-    Socket::createConnection();
-
-    if ( !glfwInit() ) {
-        LOGE( "Could not start GLFW3" );
-    }
-    initGraphics();
-    glfwWindowHint(  GLFW_VISIBLE, GLFW_TRUE );
-    auto window = glfwCreateWindow( 100, 100, "Sixth view", NULL, NULL );
-    if (!window) {
-        ret = -1;
-        std::cout << "Cannot initialize GL to compile shaders";
-        glfwTerminate();
-        return ret;
-    }
-
-    initGraphicsExtensions();
-
-    glfwMakeContextCurrent( window );
-
-    checkGlError( "GlewInit", __LINE__, __FILE__ );
-
-    // get version info
-    const GLubyte *renderer = glGetString( GL_RENDERER ); // get renderer string
-    const GLubyte *version = glGetString( GL_VERSION ); // version as a string
-    LOGR( "Renderer: %s", renderer );
-    LOGR( "OpenGL version supported %s", version );
-
+void calculateShaders() {
     ShaderManager sm;
 
     auto files = getFilesInFolder(".");
 
-    if ( files.empty() ) return 1; // what no files???
-
-//    auto filesCached = getCachedFile(files);
+    if ( files.empty() ) return; // what no files???
 
     std::stringstream shaderHeader;
     ShaderLiveUpdateMap shaderEmit;
@@ -171,23 +137,45 @@ int main( int argc, [[maybe_unused]] char *argv[] ) {
         std::string fileContent = FM::readLocalTextFile( line );
         auto fileContent64 = bn::encode_b64(fileContent);
         shaderHeader << "{ \"" << fkey << "\", \"" << fileContent64 << "\"},\n";
-//        if ( checkFileChanged( fc, filesCached) ) {
-            sm.inject(fkey, fileContent64);
-            shaderEmit.shaders.emplace_back( fkey, fileContent64 );
-//        }
+        sm.inject(fkey, fileContent64);
+        shaderEmit.shaders.emplace_back( fkey, fileContent64 );
     }
 
     shaderHeader << "};\n";
 
     bool performCompilerOnly = true;
     if ( shaderEmit.count() > 0 && sm.loadShaders( performCompilerOnly ) ) {
+        FM::writeLocalFile("../shader_emit.txt", shaderEmit.serialize());
         FM::writeLocalFile("../shaders.hpp", shaderHeader );
-        Socket::emit("shaderchange", shaderEmit.serialize());
-//        Http::post( Url{HttpFilePrefix::broadcast}, shaderEmit.serialize() );
+    }
+}
+
+int main( int argc, [[maybe_unused]] char *argv[] ) {
+
+    int ret = 0;
+    LOGRS("ShaderTool Version: " << sVersionString );
+
+    if ( !glfwInit() ) {
+        LOGE( "Could not start GLFW3" );
+    }
+    glfwWindowHint(  GLFW_VISIBLE, GLFW_FALSE );
+    auto window = glfwCreateWindow( 1, 1, "Sixth view", NULL, NULL );
+    if (!window) {
+        ret = -1;
+        std::cout << "Cannot initialize GL to compile shaders";
+        glfwTerminate();
+        return ret;
     }
 
+    glfwMakeContextCurrent( window );
+
+    initGraphicsExtensions();
+
+    checkGlError( "GlewInit", __LINE__, __FILE__ );
+
+    calculateShaders();
+
     glfwTerminate();
-    Http::shutDown();
 
     return ret;
 }

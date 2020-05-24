@@ -68,11 +68,10 @@ void main_loop_em() {
 	rl.singleThreadLoop();
 }
 
-void mainLoop( InitializeWindowFlagsT initFlags, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
+void mainLoop( const CLIParamMap& params, std::unique_ptr<RunLoopBackEndBase>&& _be ) {
     emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, em_resize_callback );
     emscripten_set_focus_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, em_focus_callback );
-
     rl.setBackEnd(std::move(_be));
-    rl.init( initFlags );
+    rl.init( params );
     emscripten_set_main_loop( main_loop_em, 0, 0 );
 }

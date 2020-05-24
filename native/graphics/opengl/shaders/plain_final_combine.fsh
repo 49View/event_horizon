@@ -2,12 +2,12 @@
 #precision_high
 
 #define _CAMERA_MOTION_BLURRING_ 0
-#define _VIGNETTING_ 0
-#define _GRAINING_ 0
+#define _VIGNETTING_ 1
+#define _GRAINING_ 1
 #define _DOFING_ 0
 #define _LUT3DING_ 0
 #define _BLOOMING_ 0
-#define _SSAOING_ 0
+#define _SSAOING_ 1
 
 #include "lighting_uniforms.glsl"
 #include "camera_uniforms.glsl"

@@ -43,9 +43,9 @@ public:
         updateImpl( _aid );
     };
 
-    void activate() {
+    void activate(const CLIParamMap& params) {
         sg.init();
-        rsg.init();
+        rsg.init(params);
         luaFunctionsSetup();
         activateImpl();
     }
@@ -60,6 +60,9 @@ protected:
     RenderOrchestrator& rsg;
 };
 
+[[nodiscard]] std::optional<InitializeWindowFlagsT> checkLayoutParam( const std::string& _param );
+InitializeWindowFlagsT checkLayoutArgvs( const CLIParamMap& params );
+
 class RunLoopGraphics : public RunLoop {
 public:
     using RunLoop::RunLoop;
@@ -71,10 +74,11 @@ public:
         rlbackEnd = std::move(_be);
 	}
 
-    void init( InitializeWindowFlagsT _initFlags ) {
-        WH::initializeWindow( _initFlags, rr );
+    void init( const CLIParamMap& params ) {
+        InitializeWindowFlagsT initFlags = checkLayoutArgvs( params );
+        WH::initializeWindow( initFlags, rr );
         rr.init();
-        rlbackEnd->activate();
+        rlbackEnd->activate(params);
         //	mi.subscribe( pm );
     }
 

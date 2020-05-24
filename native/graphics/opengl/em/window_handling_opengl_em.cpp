@@ -46,6 +46,7 @@ namespace WindowHandling {
 
         LOGR( "glfwSetErrorCallback" );
 
+
         if ( !glfwInit()) {
             fputs( "Faileid to initialize GLFW", stderr );
             emscripten_force_exit( EXIT_FAILURE );
@@ -55,6 +56,7 @@ namespace WindowHandling {
         glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
         glfwWindowHint(GLFW_FOCUSED, 1);
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+        glfwWindowHint( GLFW_SRGB_CAPABLE, GLFW_TRUE );
 
         LOGR( "glfwInit" );
 

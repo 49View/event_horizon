@@ -15,63 +15,68 @@
 #include <render_scene_graph/camera_controls.hpp>
 #include <render_scene_graph/scene_bridge.h>
 #include <render_scene_graph/ui_view.hpp>
+#include <core/file_watcher.hpp>
 
 #define SOL_ALL_SAFETIES_ON 1
+
 #include <lua/sol/sol.hpp> // or #include "sol.hpp", whichever suits your needs
 
 struct scene_t;
 struct PickRayData;
+
 class Renderer;
+
 class VData;
+
 struct AggregatedInputData;
 
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
-using UpdateCallbackSign = RenderOrchestrator*;
-using PresenterUpdateCallbackFunc = std::function<void(UpdateCallbackSign)>;
-using DragAndDropFunction = std::function<void(std::vector<std::string>& _paths)>;
+using UpdateCallbackSign = RenderOrchestrator *;
+using PresenterUpdateCallbackFunc = std::function<void( UpdateCallbackSign )>;
+using DragAndDropFunction = std::function<void( std::vector<std::string>& _paths )>;
 
 class RenderOrchestrator {
 public:
     RenderOrchestrator( Renderer& rr, SceneGraph& _sg );
     virtual ~RenderOrchestrator() = default;
 
-    void init();
+    void init( const CLIParamMap& params );
     void updateInputs( AggregatedInputData& _aid );
 
     // Viewport madness
-    template <typename T>
+    template<typename T>
     void addRig( const std::string& _name, float _l, float _r, float _t, float _b ) {
         SceneScreenBox _box{ { sPresenterArrangerLeftFunction3d,
                                sPresenterArrangerRightFunction3d,
                                sPresenterArrangerTopFunction3d,
                                sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, nullptr };
-        addBoxToViewport( _name, _box );
+        addBoxToViewport(_name, _box);
         auto lViewport = boxes[_name].updateAndGetRect();
-        addViewport<T>( RenderTargetType::PBR, _name, lViewport, BlitType::OffScreen );
+        addViewport<T>(RenderTargetType::PBR, _name, lViewport, BlitType::OffScreen);
     }
 
-    template <typename T>
+    template<typename T>
     void addViewport( RenderTargetType _rtt, const std::string& _rigname, const Rect2f& _viewport, BlitType _bt ) {
         auto _rig = getRig(_rigname);
         _rig->setViewport(_viewport);
 
         if ( mRigs.find(_rig->Name()) == mRigs.end() ) {
-            RenderTargetFactory::make( _rtt, _rig, _viewport, _bt, rr );
-            mRigs[_rig->Name()] = std::make_shared<T>( _rig, *this );
+            RenderTargetFactory::make(_rtt, _rig, _viewport, _bt, rr);
+            mRigs[_rig->Name()] = std::make_shared<T>(_rig, *this);
         } else {
-            setViewportOnRig( _rig, _viewport );
+            setViewportOnRig(_rig, _viewport);
         }
     }
 
-    template <typename T>
+    template<typename T>
     void setRigCameraController( const std::string& _rigname = Name::Foxtrot ) {
         if ( auto rig = getRig(_rigname); rig ) {
-            mRigs[rig->Name()] = std::make_shared<T>( rig, *this );
+            mRigs[rig->Name()] = std::make_shared<T>(rig, *this);
         }
     }
 
     std::shared_ptr<Camera> DC() {
-        return getRig( Name::Foxtrot )->getCamera();
+        return getRig(Name::Foxtrot)->getCamera();
     }
 
     void addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible = true );
@@ -87,7 +92,7 @@ public:
         if ( auto it = boxes.find(_key); it != boxes.end() ) {
             return it->second.updateAndGetRect();
         }
-        static Rect2f invalid{Rect2f::INVALID};
+        static Rect2f invalid{ Rect2f::INVALID };
         return invalid;
     }
 
@@ -98,7 +103,8 @@ public:
     }
 
     void clearUIView();
-    void addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus = UIElementStatus::Enabled  );
+    void
+    addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus = UIElementStatus::Enabled );
 
     void resizeCallback( const Vector2i& _resize );
 
@@ -108,10 +114,11 @@ public:
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
     void setDragAndDropFunction( DragAndDropFunction dd );
     void reloadShaders( const std::string& _msg, SocketCallbackDataType&& _data );
+    void reloadShaders( const std::string& );
 
-    template <typename T>
+    template<typename T>
     void addHttpStream( const std::string& _streamName ) {
-        rr.SSM().addStream<T>( _streamName, avcbTM() );
+        rr.SSM().addStream<T>(_streamName, avcbTM());
     }
 
     void setDirtyFlagOnPBRRender( const std::string& _target, const std::string& _sub, bool _flag );
@@ -147,12 +154,12 @@ public:
 
 protected:
     AVInitCallback avcbTM();
-    std::shared_ptr<Camera>    getCamera( const std::string& _name );
-    const Camera* getCamera( const std::string& _name ) const;
+    std::shared_ptr<Camera> getCamera( const std::string& _name );
+    const Camera *getCamera( const std::string& _name ) const;
     void addBoxToViewport( const std::string& _nane, const SceneScreenBox& _box );
     void setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport );
     void setViewportOnRig( const std::string& _rigName, const Rect2f& _viewport );
-    void luaUpdate(const AggregatedInputData& _aid);
+    void luaUpdate( const AggregatedInputData& _aid );
 
 public:
     Renderer& RR();
@@ -167,7 +174,7 @@ protected:
     void changeMaterialTagCallback( const std::vector<std::string>& _params );
     void changeMaterialColorCallback( const std::vector<std::string>& _params );
 
-    int bake(scene_t *scene);
+    int bake( scene_t *scene );
 
 private:
     Renderer& rr;
@@ -177,7 +184,9 @@ private:
     std::unordered_map<std::string, SceneScreenBox> boxes;
     sol::state lua{};
     std::string luaScriptHotReload;
-
+#ifndef _PRODUCTION_
+    std::unique_ptr<FileWatcher> fw;
+#endif
     DragAndDropFunction dragAndDropFunc = nullptr;
 
 public:

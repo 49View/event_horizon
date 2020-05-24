@@ -62,23 +62,6 @@ public:
 #endif
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
         backEnd->setCLIParams(params);
-        mainLoop(checkLayoutArgvs( params ), std::move(backEnd) );
-    }
-
-private:
-    [[nodiscard]] std::optional<InitializeWindowFlagsT> checkLayoutParam( const std::string& _param ) const {
-        if ( toLower(_param) == toLower("Normal"       ) ) return InitializeWindowFlags::Normal;
-        if ( toLower(_param) == toLower("FullScreen"   ) ) return InitializeWindowFlags::FullScreen;
-        if ( toLower(_param) == toLower("Minimize"     ) ) return InitializeWindowFlags::Minimize;
-        if ( toLower(_param) == toLower("Maximize"     ) ) return InitializeWindowFlags::Maximize;
-        if ( toLower(_param) == toLower("HalfSize"     ) ) return InitializeWindowFlags::HalfSize;
-        if ( toLower(_param) == toLower("ThreeQuarter" ) ) return InitializeWindowFlags::ThreeQuarter;
-
-        return std::nullopt;
-    }
-
-    InitializeWindowFlagsT checkLayoutArgvs( const CLIParamMap& params ) {
-        auto wsize = params.getParam("defaultwindowsize");
-        return wsize ? *checkLayoutParam(*wsize) : InitializeWindowFlags::Normal;
+        mainLoop( params, std::move(backEnd) );
     }
 };
