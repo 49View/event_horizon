@@ -91,6 +91,10 @@ public:
 	    rsg.setLuaScriptHotReload( _lscript );
 	}
 
+	void reloadShadersViaHttp() {
+	    rsg.reloadShadersViaHttp();
+	}
+
     void singleThreadLoop() {
 
         update();

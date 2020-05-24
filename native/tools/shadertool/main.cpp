@@ -145,8 +145,10 @@ void calculateShaders() {
 
     bool performCompilerOnly = true;
     if ( shaderEmit.count() > 0 && sm.loadShaders( performCompilerOnly ) ) {
-        FM::writeLocalFile("../shader_emit.txt", shaderEmit.serialize());
+        auto shaderEmitSerialized = shaderEmit.serialize();
+        FM::writeLocalFile("../shader_emit.txt", shaderEmitSerialized);
         FM::writeLocalFile("../shaders.hpp", shaderHeader );
+        Http::post( Url{"/shaders"}, shaderEmitSerialized);
     }
 }
 

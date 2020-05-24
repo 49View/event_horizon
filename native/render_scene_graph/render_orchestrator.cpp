@@ -606,9 +606,7 @@ void RenderOrchestrator::init(const CLIParamMap& params) {
     addRig<CameraControlFly>( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f );
 }
 
-void RenderOrchestrator::reloadShaders( const std::string& _msg, SocketCallbackDataType&& _data ) {
-
-    ShaderLiveUpdateMap shadersToUpdate{std::move(_data["data"])};
+void RenderOrchestrator::reloadShaders( const ShaderLiveUpdateMap& shadersToUpdate ) {
 
 	for ( const auto& ss : shadersToUpdate.shaders ) {
 		rr.injectShader( ss.first, ss.second );
@@ -618,14 +616,7 @@ void RenderOrchestrator::reloadShaders( const std::string& _msg, SocketCallbackD
 }
 
 void RenderOrchestrator::reloadShaders( const std::string& _shadershpp ) {
-
-    ShaderLiveUpdateMap shadersToUpdate{_shadershpp};
-
-    for ( const auto& ss : shadersToUpdate.shaders ) {
-        rr.injectShader( ss.first, ss.second );
-    }
-
-    addUpdateCallback( [this](UpdateCallbackSign) { rr.cmdReloadShaders( {} ); } );
+    reloadShaders(ShaderLiveUpdateMap{_shadershpp});
 }
 
 //void RenderOrchestrator::addImpl( NodeVariants _geom ) {
@@ -875,5 +866,12 @@ void RenderOrchestrator::clearUIView() {
 void RenderOrchestrator::addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus ) {
     UIViewContainer container{ *this, _res, SG().get<UIContainer>( _res ).get() };
     uiView.add( _at, container, _initialStatus);
+}
+
+void RenderOrchestrator::reloadShadersViaHttp() {
+    Http::get(Url{"/shaders"}, [&](HttpResponeParams res){
+        reloadShaders( ShaderLiveUpdateMap{res.bufferString});
+    });
+
 }
 

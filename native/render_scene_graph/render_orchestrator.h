@@ -23,12 +23,11 @@
 
 struct scene_t;
 struct PickRayData;
+struct AggregatedInputData;
+struct ShaderLiveUpdateMap;
 
 class Renderer;
-
 class VData;
-
-struct AggregatedInputData;
 
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 using UpdateCallbackSign = RenderOrchestrator *;
@@ -113,7 +112,7 @@ public:
 
     void addUpdateCallback( PresenterUpdateCallbackFunc uc );
     void setDragAndDropFunction( DragAndDropFunction dd );
-    void reloadShaders( const std::string& _msg, SocketCallbackDataType&& _data );
+    void reloadShaders( const ShaderLiveUpdateMap& shadersToUpdate );
     void reloadShaders( const std::string& );
 
     template<typename T>
@@ -151,6 +150,8 @@ public:
     void setLuaScriptHotReload( const std::string& _luaScriptHotReload ) {
         luaScriptHotReload = _luaScriptHotReload;
     }
+
+    void reloadShadersViaHttp();
 
 protected:
     AVInitCallback avcbTM();

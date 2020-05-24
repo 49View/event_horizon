@@ -6,7 +6,7 @@
         {
             "label": "build shaders",
             "type": "shell",
-            "command": "shadertool",
+            "command": "export EH_CLOUD_HOST=localhost && shadertool",
             "group": {
                 "kind": "build",
                 "isDefault": true
