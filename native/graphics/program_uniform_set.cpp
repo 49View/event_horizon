@@ -98,6 +98,7 @@ GPUHeterogeneousMap::GPUHeterogeneousMap( std::shared_ptr<HeterogeneousMap> _val
         u.handle = _rr.TD( n )->getHandle();
         u.target = _rr.TD( n )->getTarget();
         u.slot = counter++;
+//        LOGRS(k << " " << n << " has slot " << u.slot << " with handle: " << u.handle);
         mTextureMappings.emplace( k, u );
     };
 

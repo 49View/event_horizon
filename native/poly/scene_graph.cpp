@@ -557,13 +557,15 @@ void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _
         }
     } else {
         for ( const auto& entry : fs ) {
-            if ( isFileExtAnImage(getFileNameExt(entry.first))) {
-                B<IB>(entry.first).make(entry.second, Hashable<>::hashOf(entry.first));
-            } else if ( getFileNameExt(entry.first) == ".mat" ) {
+            if ( isFileExtAnImage(getFileNameExt(entry.first)) ) {
+                B<IB>(entry.first).make(entry.second, Hashable<>::hashOf(entry.first), entry.first);
+            }
+        }
+        for ( const auto& entry : fs ) {
+            if ( getFileNameExt(entry.first) == ".mat" ) {
                 auto mat = B<MB>(entry.first).make(entry.second, Hashable<>::hashOf(entry.first), _key);
                 mat->Key(_key);
             }
-
         }
     }
 

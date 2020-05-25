@@ -203,7 +203,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float G = GeometrySmith( N, V, L, roughness );
 
     vec3 nominator = NDF * G * F;
-    float denominator = ( (1.0/radiance.r) * max( dot( N, V ), 0.0 ) * NdotL) + 0.1;    
+    float denominator = ( (1.0/radiance.r) * max( dot( N, V ), 0.0 ) * NdotL) + 0.01;
     vec3 specular = nominator / denominator;
 
     vec3 kS = F;
@@ -225,7 +225,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
 
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz )*0.2;
+    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
 
     // single point light 
     for ( int i = 0; i < u_numPointLights; i++ ) {
@@ -233,9 +233,10 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         vec3 plmfrag = vec3(u_pointLightPos[i]) - Position_worldspace;
         float pldistance = length( plmfrag );
         vec3 L = normalize( plmfrag );
-        float plattenuation = 1.0 / (pldistance*pldistance );
-        vec3 lradiance = (((u_pointLightIntensity[i])*(u_sunRadiance.xyz*u_sunRadiance.w) + vec3(1.0-(1.0-u_sunRadiance.w)) )) * plattenuation * (1.0+translucencyV);
-        Lo += rendering_equation( albedo, L, V, N, F0, lradiance )*0.5;
+        float plDistanceAtt = (pldistance*1.4);
+        float plattenuation = (1.0 / plDistanceAtt);
+        vec3 lradiance = u_pointLightIntensity[i] * plattenuation;
+        Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
     }
 
 #ifdef sh_reflections
@@ -249,21 +250,25 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 #define_code shadow_code
     float visibility = 1.0;//u_shadowParameters[2];
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
-    v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
+    // v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
     float nlAngle = dot( N, normalize( u_sunPosition - Position_worldspace ));
     // float tanCosNAngle = tan(acos(nlAngle));
     v_shadowmap_coord3Biases.z -= u_shadowParameters[0]*0.1;
     // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
-    if ( v_shadowmap_coord3Biases.z > 0.0 && nlAngle > 0.0) {
-        float overBurnedfactor = 0.2;// * u_shadowParameters[1];
-        for ( int i = 0; i < 4; i++ ) {
-            int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
-            float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + (poissonDisk[index] / 1024.0), v_shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
-            shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 : 0.0;
-            visibility -= shadow * overBurnedfactor * nlAngle;// * u_timeOfTheDay;
+    if ( v_shadowmap_coord3Biases.z > 0.0 ) {
+        if ( nlAngle > 0.0) {
+            float overBurnedfactor = 0.2;// * u_shadowParameters[1];
+            for ( int i = 0; i < 4; i++ ) {
+                int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
+                float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + (poissonDisk[index] / 1024.0), v_shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
+                shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 : 0.0;
+                visibility -= shadow * 0.2;// * u_timeOfTheDay;
+            }
+        } else {
+            visibility -= 0.8;
         }
-    } 
+    }
     //clamp(visibility, 0.0, 1.0);
     // visibility = nlAngle;
 #end_code
@@ -299,7 +304,7 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 vec3 ambient = (((Lo + (kD * diffuseV + specular)) * visibility ) * ao);// * (visibility+diffuseV);
 #else 
-vec3 diffuseV = Lo;// * aoLightmapColor;
+vec3 diffuseV = Lo*Lo;// * aoLightmapColor;
 vec3 ambient = kD * diffuseV * ao;// * visibility;
 #endif
 
