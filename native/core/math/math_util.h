@@ -560,11 +560,13 @@ namespace JMATH {
         float lPerimeter = 0.0f;
         for ( auto& rws : cs ) {
             int csize = static_cast<int>( rws.size());
-            for ( int q = 0; q < csize - 1; q++ ) {
-                lPerimeter += distance( rws[q], rws[q + 1] );
-            }
-            if ( bWrap ) {
-                lPerimeter += distance( rws[0], rws[csize - 1] );
+            if ( csize > 0 ) {
+                for ( int q = 0; q < csize - 1; q++ ) {
+                    lPerimeter += distance( rws[q], rws[q + 1] );
+                }
+                if ( bWrap ) {
+                    lPerimeter += distance( rws[0], rws[csize - 1] );
+                }
             }
         }
         return lPerimeter;
