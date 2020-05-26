@@ -165,9 +165,9 @@ void removeCollinear( vector2fList& cs, float epsilon ) {
 
 	for ( auto t = 0; t < csize; t++ ) {
 		Vector2f currPoint1 = cs[t];
-		int t1 = getCircularArrayIndex( t + 1, csize );
+		int t1 = cai( t + 1, csize );
 		Vector2f currPoint2 = cs[t1];
-		Vector2f currPoint3 = cs[getCircularArrayIndex( t + 2, csize )];
+		Vector2f currPoint3 = cs[cai( t + 2, csize )];
 		if ( isCollinear( currPoint1, currPoint2, currPoint3, epsilon ) ) {
 			// check if degenerate
 			if ( isVerySimilar( currPoint1, currPoint3, epsilon ) ) {
