@@ -4,6 +4,7 @@
 
 #include "scene_loader.hpp"
 #include <poly/scene_graph.h>
+#include <graphics/renderer.h>
 #include <render_scene_graph/render_orchestrator.h>
 
 void ScenePreLoader::loadResCount( HttpResouceCBSign _key ) {

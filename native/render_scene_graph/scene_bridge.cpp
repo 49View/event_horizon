@@ -43,6 +43,8 @@ float sPresenterArrangerBottomFunction3d( float _value ) {
     return getScreenSizef.y() - ( getScreenSizef.y() * ( _value ) );
 }
 
+const SceneScreenBox SceneScreenBox::INVALID;
+
 //    ### REF move to editor side of code
 //	boxFunctionMapping.emplace( SceneLayoutDefaultNames::Taskbar,
 //			std::make_shared<ImGuiTaskbar>(SceneLayoutDefaultNames::Taskbar) );

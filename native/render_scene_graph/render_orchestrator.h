@@ -7,10 +7,7 @@
 #include <map>
 #include <string>
 #include <core/observer.h>
-#include <core/soa_utils.h>
 #include <core/streaming_mediator.hpp>
-#include <graphics/renderer.h>
-#include <graphics/render_targets.hpp>
 #include <render_scene_graph/camera_controls.hpp>
 #include <render_scene_graph/scene_bridge.h>
 #include <render_scene_graph/ui_view.hpp>
@@ -28,6 +25,9 @@ struct ShaderLiveUpdateMap;
 class Renderer;
 class SceneGraph;
 class VData;
+class UIView;
+
+enum class UIElementStatus;
 
 using cameraRigsMap = std::unordered_map<std::string, std::shared_ptr<CameraControl>>;
 using UpdateCallbackSign = RenderOrchestrator *;
@@ -43,67 +43,26 @@ public:
     void updateInputs( AggregatedInputData& _aid );
 
     // Viewport madness
-    template<typename T>
-    void addRig( const std::string& _name, float _l, float _r, float _t, float _b ) {
-        SceneScreenBox _box{ { sPresenterArrangerLeftFunction3d,
-                               sPresenterArrangerRightFunction3d,
-                               sPresenterArrangerTopFunction3d,
-                               sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, nullptr };
-        addBoxToViewport(_name, _box);
-        auto lViewport = boxes[_name].updateAndGetRect();
-        addViewport<T>(RenderTargetType::PBR, _name, lViewport, BlitType::OffScreen);
-    }
+    void addRig( CameraControls::Type _ct, const std::string& _name, float _l, float _r, float _t, float _b );
+    void
+    addViewport( CameraControls::Type _ct, RenderTargetType _rtt, const std::string& _rigname, const Rect2f& _viewport,
+                 BlitType _bt );
+    void setRigCameraController( CameraControls::Type _ct, const std::string& _rigname = Name::Foxtrot );
+    CameraControls::Type getRigCameraController( const std::string& _rigname = Name::Foxtrot );
 
-    template<typename T>
-    void addViewport( RenderTargetType _rtt, const std::string& _rigname, const Rect2f& _viewport, BlitType _bt ) {
-        auto _rig = getRig(_rigname);
-        _rig->setViewport(_viewport);
-
-        if ( mRigs.find(_rig->Name()) == mRigs.end() ) {
-            RenderTargetFactory::make(_rtt, _rig, _viewport, _bt, rr);
-            mRigs[_rig->Name()] = std::make_shared<T>(_rig, *this);
-        } else {
-            setViewportOnRig(_rig, _viewport);
-        }
-    }
-
-    template<typename T>
-    void setRigCameraController( const std::string& _rigname = Name::Foxtrot ) {
-        if ( auto rig = getRig(_rigname); rig ) {
-            mRigs[rig->Name()] = std::make_shared<T>(rig, *this);
-        }
-    }
-
-    std::shared_ptr<Camera> DC() {
-        return getRig(Name::Foxtrot)->getCamera();
-    }
+    std::shared_ptr<Camera> DC();
 
     void addBox( const std::string& _name, float _l, float _r, float _t, float _b, bool _bVisible = true );
 
-    const SceneScreenBox& Box( const std::string& _key ) const {
-        if ( const auto& it = boxes.find(_key); it != boxes.end() ) {
-            return it->second;
-        }
-        return SceneScreenBox::INVALID;
-    }
+    const SceneScreenBox& Box( const std::string& _key ) const;
 
-    Rect2f& BoxUpdateAndGet( const std::string& _key ) {
-        if ( auto it = boxes.find(_key); it != boxes.end() ) {
-            return it->second.updateAndGetRect();
-        }
-        static Rect2f invalid{ Rect2f::INVALID };
-        return invalid;
-    }
+    Rect2f& BoxUpdateAndGet( const std::string& _key );
 
-    void toggleVisible( const std::string& _key ) {
-        if ( auto it = boxes.find(_key); it != boxes.end() ) {
-            it->second.toggleVisible();
-        }
-    }
+    void toggleVisible( const std::string& _key );
 
     void clearUIView();
     void
-    addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus = UIElementStatus::Enabled );
+    addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus );
 
     void resizeCallback( const Vector2i& _resize );
 
@@ -117,7 +76,8 @@ public:
 
     template<typename T>
     void addHttpStream( const std::string& _streamName ) {
-        rr.SSM().addStream<T>(_streamName, avcbTM());
+        // ### NDDado: check that it will still work
+//        rr.SSM().addStream<T>(_streamName, avcbTM());
     }
 
     void setDirtyFlagOnPBRRender( const std::string& _target, const std::string& _sub, bool _flag );
@@ -143,13 +103,8 @@ public:
         luaKey[_fname] = _func;
     }
 
-    const std::string& getLuaScriptHotReload() const {
-        return luaScriptHotReload;
-    }
-
-    void setLuaScriptHotReload( const std::string& _luaScriptHotReload ) {
-        luaScriptHotReload = _luaScriptHotReload;
-    }
+    const std::string& getLuaScriptHotReload() const;
+    void setLuaScriptHotReload( const std::string& _luaScriptHotReload );
 
     void reloadShadersViaHttp();
 

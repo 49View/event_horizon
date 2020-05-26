@@ -17,6 +17,7 @@
 #include <core/resources/material.h>
 #include <core/resources/ui_container.hpp>
 #include <graphics/renderer.h>
+#include <graphics/render_targets.hpp>
 #include <graphics/shader_manager.h>
 #include <graphics/render_light_manager.h>
 #include <graphics/vp_builder.hpp>
@@ -25,6 +26,7 @@
 #include <poly/scene_events.h>
 #include <render_scene_graph/render_orchestrator_callbacks.hpp>
 #include <render_scene_graph/lua_scripts.hpp>
+#include <render_scene_graph/scene_bridge.h>
 
 static const inline std::string colorScheme = "\n"
                                               "#####  Color Palette by Paletton.com\n"
@@ -81,28 +83,28 @@ void RenderOrchestrator::setDragAndDropFunction( DragAndDropFunction dd ) {
 }
 
 void RenderOrchestrator::addUpdateCallback( PresenterUpdateCallbackFunc uc ) {
-    sUpdateCallbacks.push_back( uc );
+    sUpdateCallbacks.push_back(uc);
 }
 
 void RenderOrchestrator::updateCallbacks() {
 
     if ( !sUpdateCallbacks.empty() ) {
         for ( auto& c : sUpdateCallbacks ) {
-            c( this );
+            c(this);
         }
         sUpdateCallbacks.clear();
     }
 
-    if ( dragAndDropFunc ) dragAndDropFunc( callbackPaths );
+    if ( dragAndDropFunc ) dragAndDropFunc(callbackPaths);
 
 #ifndef _PRODUCTION_
-    fw->watchNonBlocking( [&] (std::string path_to_watch, FileStatus status) -> void {
+    fw->watchNonBlocking([&]( std::string path_to_watch, FileStatus status ) -> void {
         // Process only regular files, all other file types are ignored
-        if(!std::filesystem::is_regular_file(std::filesystem::path(path_to_watch)) && status != FileStatus::erased) {
+        if ( !std::filesystem::is_regular_file(std::filesystem::path(path_to_watch)) && status != FileStatus::erased ) {
             return;
         }
 
-        switch(status) {
+        switch ( status ) {
             case FileStatus::created:
                 std::cout << "File created: " << path_to_watch << '\n';
                 break;
@@ -125,181 +127,183 @@ void RenderOrchestrator::updateCallbacks() {
     resizeCallbacks();
 }
 
-template <typename T>
+template<typename T>
 void setMatProperty( std::vector<std::shared_ptr<VPList>>& vList, std::shared_ptr<RenderMaterial> mat,
                      const std::string& _uniform, const T& _value ) {
     for ( const auto& v : vList ) {
-        if ( v->getMaterial() == mat ) v->getMaterial()->setConstant( _uniform, _value );
+        if ( v->getMaterial() == mat ) v->getMaterial()->setConstant(_uniform, _value);
     }
 }
 
-template <typename F, typename T, typename ...Args>
+template<typename F, typename T, typename ...Args>
 void foreachCL( CommandBufferListVectorMap& CL, F func, const T& _value, Args ...args ) {
     for ( auto&[k, vl] : CL ) {
-        vl.foreach( func, std::forward<Args>( args )..., _value );
+        vl.foreach(func, std::forward<Args>(args)..., _value);
     }
 }
 
-RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr( rr ), sg(_sg), uiView(_sg, colorScheme) {
+RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr), sg(_sg), uiView(_sg, colorScheme) {
 
-    sg.runLUAScript( [this]( const std::string& _value) {
+    sg.runLUAScript([this]( const std::string& _value ) {
         this->setLuaScriptHotReload(_value);
-    } );
-
-    sg.preloadCompleteConnect( [this]( ConnectVoidParamSig _value ) {
-        this->RR().setLoadingFlag(!_value );
     });
 
-    sg.propagateDirtyFlagConnect( [this]( ConnectPairStringBoolParamSig _value ) {
-        setDirtyFlagOnPBRRender( Name::Foxtrot, _value.first, _value.second );
+    sg.preloadCompleteConnect([this]( ConnectVoidParamSig _value ) {
+        this->RR().setLoadingFlag(!_value);
     });
 
-    sg.FM().connect( [](const ResourceTransfer<Font>& _val ) {
+    sg.propagateDirtyFlagConnect([this]( ConnectPairStringBoolParamSig _value ) {
+        setDirtyFlagOnPBRRender(Name::Foxtrot, _value.first, _value.second);
+    });
+
+    sg.FM().connect([]( const ResourceTransfer<Font>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Font>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.UM().connect( [](const ResourceTransfer<UIContainer>& _val ) {
+    sg.UM().connect([]( const ResourceTransfer<UIContainer>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<UIContainer>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.PL().connect( [](const ResourceTransfer<Profile>& _val ) {
+    sg.PL().connect([]( const ResourceTransfer<Profile>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Profile>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.TL().connect( [this](const ResourceTransfer<RawImage>& _val ) {
+    sg.TL().connect([this]( const ResourceTransfer<RawImage>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<RawImage>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addTextureResource(_val);
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.ML().connect( [this](const ResourceTransfer<Material>& _val ) {
+    sg.ML().connect([this]( const ResourceTransfer<Material>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Material>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addMaterialResource(_val);
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.LL().connect( [this](const ResourceTransfer<Light>& _val ) {
+    sg.LL().connect([this]( const ResourceTransfer<Light>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Light>::Prefix() << ": "  << *_val.names.begin() );
-        this->RR().LM()->addPointLight( _val.elem->pos, _val.elem->wattage, _val.elem->intensity, _val.elem->attenuation);
+        this->RR().LM()->addPointLight(_val.elem->pos, _val.elem->wattage, _val.elem->intensity,
+                                       _val.elem->attenuation);
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.VL().connect( [this](const ResourceTransfer<VData>& _val ) {
+    sg.VL().connect([this]( const ResourceTransfer<VData>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
         this->RR().addVDataResource(_val); // check if ( _val.elem->numIndices() > 0 ) ????
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.GM().connect( [](const ResourceTransfer<Geom>& _val ) {
+    sg.GM().connect([]( const ResourceTransfer<Geom>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<VData>::Prefix() << ": "  << *_val.names.begin() );
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.nodeAddConnect( [this]( NodeGraphConnectParamsSig _geom ) {
+    sg.nodeAddConnect([this]( NodeGraphConnectParamsSig _geom ) {
         auto bEmpty = _geom->empty();
 //        LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );
         if ( bEmpty ) return;
         for ( const auto& dataRef : _geom->DataVRef() ) {
-            auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData}.
+            auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData }.
                     n(_geom->Name()).
                     u(_geom->UUiD()).
                     g(_geom->Tag()).
                     t(_geom->getLocalHierTransform()).
                     b(_geom->BBox3d()).
                     build();
-            this->RR().VPL( CommandBufferLimits::PBRStart, vp);
+            this->RR().VPL(CommandBufferLimits::PBRStart, vp);
         }
         this->RR().invalidateOnAdd();
     });
 
-    sg.nodeRemoveConnect( [this]( NodeGraphConnectParamsSig _geom ) {
-        this->RR().clearBucket( CommandBufferLimits::UI2dStart );
-        this->RR().clearBucket( CommandBufferLimits::PBRStart );
-        this->RR().clearBucket( CommandBufferLimits::UnsortedStart );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    sg.nodeRemoveConnect([this]( NodeGraphConnectParamsSig _geom ) {
+        this->RR().clearBucket(CommandBufferLimits::UI2dStart);
+        this->RR().clearBucket(CommandBufferLimits::PBRStart);
+        this->RR().clearBucket(CommandBufferLimits::UnsortedStart);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     });
 
-    sg.nodeSetSkyboxConnect( [this](CResourceRef _hash) {
-        this->createSkybox( SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture, _hash } );
+    sg.nodeSetSkyboxConnect([this]( CResourceRef _hash ) {
+        this->createSkybox(SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture, _hash });
     });
 
-    sg.nodeFullScreenImageConnect( [this](CResourceRef _node) {
-        auto image = sg.TL( _node );
+    sg.nodeFullScreenImageConnect([this]( CResourceRef _node ) {
+        auto image = sg.TL(_node);
         V2f iar = image->getAspectRatioV();
-        auto fit = getFullScreenAspectFit( iar.ratio() );
-        this->RR().drawRect2d( CommandBufferLimits::UI2dStart, fit.first, fit.second, _node );
-        Socket::send( "wasmClientFinishedLoadingData", image->serializeParams() );
+        auto fit = getFullScreenAspectFit(iar.ratio());
+        this->RR().drawRect2d(CommandBufferLimits::UI2dStart, fit.first, fit.second, _node);
+        Socket::send("wasmClientFinishedLoadingData", image->serializeParams());
     });
 
-    sg.nodeFullScreenUIContainerConnect( [this](CResourceRef _node) {
-        auto ui = sg.UL( _node );
+    sg.nodeFullScreenUIContainerConnect([this]( CResourceRef _node ) {
+        auto ui = sg.UL(_node);
         clearUIView();
-        addUIContainer( MPos2d{ 0.02f, 0.02f*getScreenAspectRatio }, _node );
+        addUIContainer(MPos2d{ 0.02f, 0.02f * getScreenAspectRatio }, _node, UIElementStatus::Enabled);
         UI().loadResources();
-        Socket::send( "wasmClientFinishedLoadingData", *ui.get() );
+        Socket::send("wasmClientFinishedLoadingData", *ui.get());
     });
 
-    sg.nodeFullScreenFontSonnetConnect( [this](CResourceRef _node) {
-        auto pfont = sg.FM( _node );
+    sg.nodeFullScreenFontSonnetConnect([this]( CResourceRef _node ) {
+        auto pfont = sg.FM(_node);
         std::string message = "Roads? Where we're going, we don't need roads";
-        std::vector<std::pair<float,C4f>> fsize{
-                {0.02f, C4f::LIGHT_GREY},
-                 {0.03f, C4f::DARK_BLUE},
-                  {0.04f, C4f::DARK_CYAN},
-                   {0.05f, C4f::DARK_YELLOW},
-                    {0.07f, C4f::DARK_PURPLE},
-                     {0.10f, C4f::DARK_RED},
-                      {0.12f, C4f::DARK_SALMON},
-                       {0.15f, C4f::DARK_GREEN},
-                        {0.18f, C4f::DARK_BROWN},
-            };
+        std::vector<std::pair<float, C4f>> fsize{
+                { 0.02f, C4f::LIGHT_GREY },
+                { 0.03f, C4f::DARK_BLUE },
+                { 0.04f, C4f::DARK_CYAN },
+                { 0.05f, C4f::DARK_YELLOW },
+                { 0.07f, C4f::DARK_PURPLE },
+                { 0.10f, C4f::DARK_RED },
+                { 0.12f, C4f::DARK_SALMON },
+                { 0.15f, C4f::DARK_GREEN },
+                { 0.18f, C4f::DARK_BROWN },
+        };
         float fOff = 0.0f;
-        for (auto & t : fsize) {
-            this->RR().draw<DText2d>( CommandBufferLimits::UI2dStart,FDS{message, pfont.get(), V2f{0.02f, 0.98f - fOff}, t.first }, t.second );
-            fOff += t.first + t.first*0.25f;
+        for ( auto& t : fsize ) {
+            this->RR().draw<DText2d>(CommandBufferLimits::UI2dStart,
+                                     FDS{ message, pfont.get(), V2f{ 0.02f, 0.98f - fOff }, t.first }, t.second);
+            fOff += t.first + t.first * 0.25f;
         }
-        Socket::send( "wasmClientFinishedLoadingData", pfont->serializeParams() );
+        Socket::send("wasmClientFinishedLoadingData", pfont->serializeParams());
     });
 
-    sg.nodeFullScreenProfileConnect( [this](CResourceRef _node) {
-        auto profile = sg.PL( _node );
-        Socket::send( "wasmClientFinishedLoadingData", profile );
+    sg.nodeFullScreenProfileConnect([this]( CResourceRef _node ) {
+        auto profile = sg.PL(_node);
+        Socket::send("wasmClientFinishedLoadingData", profile);
     });
 
-    sg.replaceMaterialConnect( [this]( const std::string& _oldMatRef , const std::string& _newMatRef ) {
-        this->RR().replaceMaterial( _oldMatRef, _newMatRef );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    sg.replaceMaterialConnect([this]( const std::string& _oldMatRef, const std::string& _newMatRef ) {
+        this->RR().replaceMaterial(_oldMatRef, _newMatRef);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     });
 
-    sg.changeMaterialPropertyConnectString( [this]( const std::string& _prop, const std::string& _key,
-                                                 const std::string& _value ) {
-        foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
-                   this->RR().getRenderMaterialFromHash( _key ), _prop );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    sg.changeMaterialPropertyConnectString([this]( const std::string& _prop, const std::string& _key,
+                                                   const std::string& _value ) {
+        foreachCL(this->RR().CL(), setMatProperty<decltype(_value)>, _value,
+                  this->RR().getRenderMaterialFromHash(_key), _prop);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     });
 
-    sg.changeMaterialPropertyConnectFloat( [this]( const std::string& _prop, const std::string& _key,
-                                                 const float& _value ) {
-        foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
-                   this->RR().getRenderMaterialFromHash( _key ), _prop );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    sg.changeMaterialPropertyConnectFloat([this]( const std::string& _prop, const std::string& _key,
+                                                  const float& _value ) {
+        foreachCL(this->RR().CL(), setMatProperty<decltype(_value)>, _value,
+                  this->RR().getRenderMaterialFromHash(_key), _prop);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     });
 
-    sg.changeMaterialPropertyConnectV3f( [this]( const std::string& _prop, const std::string& _key,
-                                              const V3f& _value ) {
-        foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
-                this->RR().getRenderMaterialFromHash( _key ), _prop );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    sg.changeMaterialPropertyConnectV3f([this]( const std::string& _prop, const std::string& _key,
+                                                const V3f& _value ) {
+        foreachCL(this->RR().CL(), setMatProperty<decltype(_value)>, _value,
+                  this->RR().getRenderMaterialFromHash(_key), _prop);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     });
 
-    sg.changeMaterialPropertyConnectV4f( [this]( const std::string& _prop, const std::string& _key,
-                                                 const V4f& _value ) {
-        foreachCL( this->RR().CL(), setMatProperty<decltype(_value)>, _value,
-                   this->RR().getRenderMaterialFromHash( _key ), _prop );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    sg.changeMaterialPropertyConnectV4f([this]( const std::string& _prop, const std::string& _key,
+                                                const V4f& _value ) {
+        foreachCL(this->RR().CL(), setMatProperty<decltype(_value)>, _value,
+                  this->RR().getRenderMaterialFromHash(_key), _prop);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     });
 
 }
@@ -321,11 +325,11 @@ function update(aid)
 #else
     if ( auto luaScript = getLuaScriptHotReload(); !luaScript.empty() ) {
         try {
-            lua.safe_script( luaScript );
-        } catch (const std::exception& e) { // caught by reference to base
+            lua.safe_script(luaScript);
+        } catch ( const std::exception& e ) { // caught by reference to base
             std::cout << " a standard exception was caught, with message '"
                       << e.what() << "'\n";
-        } catch (...) {
+        } catch ( ... ) {
             std::cout << "... Except not handled";
         }
 
@@ -338,27 +342,27 @@ function update(aid)
         if ( updateFunction ) {
             updateFunction(_aid);
         }
-    } catch (const std::exception& e) { // caught by reference to base
+    } catch ( const std::exception& e ) { // caught by reference to base
         std::cout << " a standard exception was caught, with message '"
                   << e.what() << "'\n";
-    } catch (...) {
+    } catch ( ... ) {
         std::cout << "... Except not handled";
     }
 }
 
 void RenderOrchestrator::uiViewUpdate( AggregatedInputData& _aid ) {
-    if ( _aid.hasMouseMoved( TOUCH_ZERO ) &&
-         !_aid.isMouseTouchedDown( TOUCH_ZERO ) &&
-         !_aid.isMouseTouchedUp( TOUCH_ZERO )) {
-        UI().hoover( _aid.mousePos( TOUCH_ZERO ) );
+    if ( _aid.hasMouseMoved(TOUCH_ZERO) &&
+         !_aid.isMouseTouchedDown(TOUCH_ZERO) &&
+         !_aid.isMouseTouchedUp(TOUCH_ZERO) ) {
+        UI().hoover(_aid.mousePos(TOUCH_ZERO));
     }
-    if ( _aid.isMouseTouchedDownFirstTime( TOUCH_ZERO )) {
-        UI().handleTouchDownEvent( _aid.mousePos( TOUCH_ZERO ) );
+    if ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) ) {
+        UI().handleTouchDownEvent(_aid.mousePos(TOUCH_ZERO));
     }
-    if ( _aid.isMouseTouchedUp( TOUCH_ZERO )) {
-        UI().handleTouchUpEvent( _aid.mousePos( TOUCH_ZERO ) );
+    if ( _aid.isMouseTouchedUp(TOUCH_ZERO) ) {
+        UI().handleTouchUpEvent(_aid.mousePos(TOUCH_ZERO));
     }
-    _aid.setMouseHasBeenEaten( UI().pointInUIArea( _aid.mousePos( TOUCH_ZERO ), UICheckActiveOnly::False ) );
+    _aid.setMouseHasBeenEaten(UI().pointInUIArea(_aid.mousePos(TOUCH_ZERO), UICheckActiveOnly::False));
 }
 
 void RenderOrchestrator::updateInputs( AggregatedInputData& _aid ) {
@@ -366,16 +370,16 @@ void RenderOrchestrator::updateInputs( AggregatedInputData& _aid ) {
     luaUpdate(_aid);
     updateCallbacks();
 
-    for ( auto& [k,v] : mRigs ) {
-        v->updateFromInputData( sg, _aid );
+    for ( auto&[k, v] : mRigs ) {
+        v->updateFromInputData(sg, _aid);
     }
 }
 
-void RenderOrchestrator::init(const CLIParamMap& params) {
+void RenderOrchestrator::init( const CLIParamMap& params ) {
     initWHCallbacks();
 
-    lua.open_libraries( sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::math, sol::lib::table
-            , sol::lib::debug, sol::lib::bit32, sol::lib::io, sol::lib::ffi);
+    lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::math, sol::lib::table,
+                       sol::lib::debug, sol::lib::bit32, sol::lib::io, sol::lib::ffi);
 
     auto v2fLua = lua.new_usertype<V2f>("V2f", sol::constructors<>());
     v2fLua["x"] = &V2f::x;
@@ -392,7 +396,7 @@ void RenderOrchestrator::init(const CLIParamMap& params) {
     v4fLua["z"] = &V4f::z;
     v4fLua["w"] = &V4f::w;
 
-    auto aid = lua.new_usertype<AggregatedInputData>("AggregatedInputData", sol::constructors<>() );
+    auto aid = lua.new_usertype<AggregatedInputData>("AggregatedInputData", sol::constructors<>());
 
     aid.set("getScrollValue", sol::readonly(&AggregatedInputData::getScrollValue));
     aid.set("isMouseTouchedDownFirstTime", sol::readonly(&AggregatedInputData::isMouseTouchedDownFirstTime));
@@ -419,109 +423,110 @@ void RenderOrchestrator::init(const CLIParamMap& params) {
     auto luarr = lua["rr"].get_or_create<sol::table>();
 
     luarr["clearColor"] = [&]( const std::string& _col ) {
-        Renderer::clearColor( V4f::XTORGBA(_col) );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        Renderer::clearColor(V4f::XTORGBA(_col));
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
-    luarr["useSkybox"] = [&](bool _flag) {
+    luarr["useSkybox"] = [&]( bool _flag ) {
         useSkybox(_flag);
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
 
-    luarr["useVignette"] = [&](bool _flag) {
-        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine", "_VIGNETTING_", boolAlphaBinary(_flag) );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    luarr["useVignette"] = [&]( bool _flag ) {
+        rr.SM()->injectDefine(S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine", "_VIGNETTING_",
+                              boolAlphaBinary(_flag));
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
 
-    luarr["useFilmGrain"] = [&](bool _flag) {
-        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
-                                     "_GRAINING_", boolAlphaBinary(_flag) );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    luarr["useFilmGrain"] = [&]( bool _flag ) {
+        rr.SM()->injectDefine(S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+                              "_GRAINING_", boolAlphaBinary(_flag));
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
 
-    luarr["useBloom"] = [&](bool _flag) {
-        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
-                               "_BLOOMING_", boolAlphaBinary(_flag) );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    luarr["useBloom"] = [&]( bool _flag ) {
+        rr.SM()->injectDefine(S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+                              "_BLOOMING_", boolAlphaBinary(_flag));
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
 
-    luarr["useDOF"] = [&](bool _flag) {
-        useDOF( _flag );
+    luarr["useDOF"] = [&]( bool _flag ) {
+        useDOF(_flag);
     };
 
-    luarr["useSSAO"] = [&](bool _flag) {
+    luarr["useSSAO"] = [&]( bool _flag ) {
         useSSAO(_flag);
-        rr.SM()->injectDefine( S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
-                               "_SSAOING_", boolAlphaBinary(_flag) );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        rr.SM()->injectDefine(S::FINAL_COMBINE, Shader::TYPE_FRAGMENT_SHADER, "plain_final_combine",
+                              "_SSAOING_", boolAlphaBinary(_flag));
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
-    luarr["changeTime"] = [&](const std::string& _val ) {
-        changeTime( _val );
+    luarr["changeTime"] = [&]( const std::string& _val ) {
+        changeTime(_val);
     };
 
-    luarr["addPointLight"] = [&](float x, float y, float z, float _wattage, float _intensity) {
-        rr.LM()->addPointLight( V3f{x,y,z}, _wattage*0.01f, _intensity );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    luarr["addPointLight"] = [&]( float x, float y, float z, float _wattage, float _intensity ) {
+        rr.LM()->addPointLight(V3f{ x, y, z }, _wattage * 0.01f, _intensity);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
-    luarr["changePointLightPos"] = [&]( int index, float x, float y, float z) {
-        rr.LM()->setPointLightPos( index, V3f{x,y,z} );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    luarr["changePointLightPos"] = [&]( int index, float x, float y, float z ) {
+        rr.LM()->setPointLightPos(index, V3f{ x, y, z });
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
-    luarr["changePointLightWatts"] = [&]( int index, float x) {
-        rr.LM()->setPointLightWattage( index, x*0.01f );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    luarr["changePointLightWatts"] = [&]( int index, float x ) {
+        rr.LM()->setPointLightWattage(index, x * 0.01f);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
-    luarr["changePointLightIntensity"] = [&]( int index, float x) {
-        rr.LM()->setPointLightIntensity( index, x );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    luarr["changePointLightIntensity"] = [&]( int index, float x ) {
+        rr.LM()->setPointLightIntensity(index, x);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
-    luarr["removePointLight"] = [&](size_t index) {
-        rr.LM()->removePointLight( index );
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    luarr["removePointLight"] = [&]( size_t index ) {
+        rr.LM()->removePointLight(index);
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
     luarr["removeAllPointLights"] = [&]() {
         rr.LM()->removeAllPointLights();
-        setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
 
-    luarr["changeColorFor"] = [&](int tag, float r, float g, float b ) {
-        rr.changeMaterialColorOnTags( tag, r, g, b );
+    luarr["changeColorFor"] = [&]( int tag, float r, float g, float b ) {
+        rr.changeMaterialColorOnTags(tag, r, g, b);
     };
 
-    luarr["changeMaterialFor"] = [&](const std::string& name, CResourceRef resource ) {
-        sg.loadMaterial( resource, [this,name](HttpResouceCBSign key) {
-            rr.changeMaterialOn( name, sg.getHash<Material>( key ) );
-        } );
+    luarr["changeMaterialFor"] = [&]( const std::string& name, CResourceRef resource ) {
+        sg.loadMaterial(resource, [this, name]( HttpResouceCBSign key ) {
+            rr.changeMaterialOn(name, sg.getHash<Material>(key));
+        });
     };
 
-    luarr["changeMaterialForTag"] = [&](int tag, CResourceRef resource ) {
-        sg.loadMaterial( resource, [this,tag](HttpResouceCBSign key) {
-            rr.changeMaterialOn( static_cast<uint64_t>(tag), sg.getHash<Material>( key ) );
-        } );
+    luarr["changeMaterialForTag"] = [&]( int tag, CResourceRef resource ) {
+        sg.loadMaterial(resource, [this, tag]( HttpResouceCBSign key ) {
+            rr.changeMaterialOn(static_cast<uint64_t>(tag), sg.getHash<Material>(key));
+        });
     };
 
     luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group ) {
-        sg.resetAndLoadEntity( _id, _group );
+        sg.resetAndLoadEntity(_id, _group);
     };
 
     luarr["load"] = [&]( const std::string& _id ) {
-        sg.addGeomScene( _id );
+        sg.addGeomScene(_id);
     };
 
     luarr["print"] = [&]( const std::string& _id = "" ) {
-        LOGRS("### Scene dump ###" );
-        sg.visitNodes( [_id]( const GeomSPConst elem) {
+        LOGRS("### Scene dump ###");
+        sg.visitNodes([_id]( const GeomSPConst elem ) {
             if ( _id.empty() || comparei(elem->Name(), _id) || elem->hasAnchestor(_id) ) {
                 auto elemDepth = elem->nodeDepth();
                 std::string hierDash = "-";
-                for ( auto t = 0u; t < elemDepth; t++ ) hierDash+="-";
+                for ( auto t = 0u; t < elemDepth; t++ ) hierDash += "-";
                 hierDash += elem->empty() ? "  " : "* ";
-                LOGRS(hierDash << " " << elem->Name() );
+                LOGRS(hierDash << " " << elem->Name());
             }
-        } );
+        });
     };
 
     luarr["printCamera"] = [&]() {
-        LOGRS( *sg.DC().get() )
+        LOGRS(*sg.DC().get())
     };
 
 //    luarr["clone"] = [&]( const std::string& _id ) {
@@ -529,71 +534,71 @@ void RenderOrchestrator::init(const CLIParamMap& params) {
 //    };
 
     luarr["move"] = [&]( const std::string& _id, float x, float y, float z ) {
-        sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
-            elem->updateExistingTransform( V3f{x,y,z}, Quaternion{}, V3f::ONE );
-        } );
+        sg.transformNode(_id, [x, y, z]( GeomSP elem ) {
+            elem->updateExistingTransform(V3f{ x, y, z }, Quaternion{}, V3f::ONE);
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["moveTo"] = [&]( const std::string& _id, float x, float y, float z ) {
-        sg.transformNode( _id, [x,y,z]( GeomSP elem ) {
-            elem->updateTransform( V3f{x,y,z} );
-        } );
+        sg.transformNode(_id, [x, y, z]( GeomSP elem ) {
+            elem->updateTransform(V3f{ x, y, z });
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["center"] = [&]( const std::string& _id ) {
-        sg.transformNode( _id, [this]( GeomSP elem ) {
-            elem->updateTransform( V3f::ZERO, Quaternion{}, V3f::ONE );
-            this->SG().DC()->center( elem->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite );
-        } );
+        sg.transformNode(_id, [this]( GeomSP elem ) {
+            elem->updateTransform(V3f::ZERO, Quaternion{}, V3f::ONE);
+            this->SG().DC()->center(elem->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["pitch"] = [&]( const std::string& _id, float x ) {
-        sg.transformNode( _id, [x]( GeomSP elem ) {
-            elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{1.0f, 0.0f, 0.0f, degToRad(x)}), V3f::ONE );
-        } );
+        sg.transformNode(_id, [x]( GeomSP elem ) {
+            elem->updateExistingTransform(V3f::ZERO, quatFromAxis(V4f{ 1.0f, 0.0f, 0.0f, degToRad(x) }), V3f::ONE);
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["roll"] = [&]( const std::string& _id, float x ) {
-        sg.transformNode( _id, [x]( GeomSP elem ) {
-            elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{0.0f, 0.0f, 1.0f, degToRad(x)}), V3f::ONE );
-        } );
+        sg.transformNode(_id, [x]( GeomSP elem ) {
+            elem->updateExistingTransform(V3f::ZERO, quatFromAxis(V4f{ 0.0f, 0.0f, 1.0f, degToRad(x) }), V3f::ONE);
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["yaw"] = [&]( const std::string& _id, float x ) {
-        sg.transformNode( _id, [x]( GeomSP elem ) {
-            elem->updateExistingTransform( V3f::ZERO, quatFromAxis(V4f{0.0f, 1.0f, 0.0f, degToRad(x)}), V3f::ONE );
-        } );
+        sg.transformNode(_id, [x]( GeomSP elem ) {
+            elem->updateExistingTransform(V3f::ZERO, quatFromAxis(V4f{ 0.0f, 1.0f, 0.0f, degToRad(x) }), V3f::ONE);
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["pitchTo"] = [&]( const std::string& _id, float x ) {
-        sg.transformNode( _id, [x]( GeomSP elem ) {
-            elem->updateTransform( quatFromAxis(V4f{1.0f, 0.0f, 0.0f, degToRad(x)}) );
-        } );
+        sg.transformNode(_id, [x]( GeomSP elem ) {
+            elem->updateTransform(quatFromAxis(V4f{ 1.0f, 0.0f, 0.0f, degToRad(x) }));
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["rollTo"] = [&]( const std::string& _id, float x ) {
-        sg.transformNode( _id, [x]( GeomSP elem ) {
-            elem->updateTransform( quatFromAxis(V4f{0.0f, 0.0f, 1.0f, degToRad(x)}) );
-        } );
+        sg.transformNode(_id, [x]( GeomSP elem ) {
+            elem->updateTransform(quatFromAxis(V4f{ 0.0f, 0.0f, 1.0f, degToRad(x) }));
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["yawTo"] = [&]( const std::string& _id, float x ) {
-        sg.transformNode( _id, [x]( GeomSP elem ) {
-            elem->updateTransform( quatFromAxis(V4f{0.0f, 1.0f, 0.0f, degToRad(x)}) );
-        } );
+        sg.transformNode(_id, [x]( GeomSP elem ) {
+            elem->updateTransform(quatFromAxis(V4f{ 0.0f, 1.0f, 0.0f, degToRad(x) }));
+        });
         rr.invalidateOnAdd();
     };
 
     luarr["changeCameraControlType"] = [&]( int _type ) {
-        changeCameraControlType( _type );
+        changeCameraControlType(_type);
     };
 
     luarr["showMaterial"] = [&]( const std::string& matName ) {
@@ -601,7 +606,7 @@ void RenderOrchestrator::init(const CLIParamMap& params) {
         if ( !m0.empty() ) {
             auto m1 = sg.get<Material>(m0);
             sg.GB<GT::Shape>(ShapeType::Sphere, GT::Tag(1001), GT::M(m0));
-            RR().draw<DRect2d>(Rect2f{ V2f{1.0f, 0.78f}, V2f{1.2f, 0.98f} }, RDSImage{m1->getNormalTexture()});
+            RR().draw<DRect2d>(Rect2f{ V2f{ 1.0f, 0.78f }, V2f{ 1.2f, 0.98f } }, RDSImage{ m1->getNormalTexture() });
         }
     };
 
@@ -611,27 +616,26 @@ void RenderOrchestrator::init(const CLIParamMap& params) {
             auto geom = sg.GB<GT::Shape>(ShapeType::Sphere, GT::Tag(1001), GT::M(matName));
             float tsize = 0.10f;
             float ygap = .005f;
-            float x1 = getScreenAspectRatio-tsize-ygap;
-            float x2 = getScreenAspectRatio-ygap;
-            float y = 1.0f-ygap;
-            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getDiffuseTexture()});
-            y-=(tsize+ygap);
-            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getNormalTexture()});
-            y-=(tsize+ygap);
-            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getRoughnessTexture()});
-            y-=(tsize+ygap);
-            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getMetallicTexture()});
-            y-=(tsize+ygap);
-            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getOpacityTexture()});
-            y-=(tsize+ygap);
-            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getAOTexture()});
-            y-=(tsize+ygap);
-            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getTranslucencyTexture()});
-            y-=(tsize+ygap);
-            RR().draw<DRect2d>(Rect2f{ V2f{x1, y-tsize}, V2f{x2, y} }, RDSImage{m1->getHeightTexture()});
+            float x1 = getScreenAspectRatio - tsize - ygap;
+            float x2 = getScreenAspectRatio - ygap;
+            float y = 1.0f - ygap;
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getDiffuseTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getNormalTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getRoughnessTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getMetallicTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getOpacityTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getAOTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getTranslucencyTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getHeightTexture() });
         });
     };
-
 
 
 #ifndef _PRODUCTION_
@@ -644,20 +648,20 @@ void RenderOrchestrator::init(const CLIParamMap& params) {
 #endif
 
     // Set a fullscreen camera by default
-    addRig<CameraControlFly>( Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f );
+    addRig(CameraControls::Fly, Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 void RenderOrchestrator::reloadShaders( const ShaderLiveUpdateMap& shadersToUpdate ) {
 
-	for ( const auto& ss : shadersToUpdate.shaders ) {
-		rr.injectShader( ss.first, ss.second );
-	}
+    for ( const auto& ss : shadersToUpdate.shaders ) {
+        rr.injectShader(ss.first, ss.second);
+    }
 
-	addUpdateCallback( [this](UpdateCallbackSign) { rr.cmdReloadShaders( {} ); } );
+    addUpdateCallback([this]( UpdateCallbackSign ) { rr.cmdReloadShaders({}); });
 }
 
 void RenderOrchestrator::reloadShaders( const std::string& _shadershpp ) {
-    reloadShaders(ShaderLiveUpdateMap{_shadershpp});
+    reloadShaders(ShaderLiveUpdateMap{ _shadershpp });
 }
 
 //void RenderOrchestrator::addImpl( NodeVariants _geom ) {
@@ -702,7 +706,7 @@ void RenderOrchestrator::changeMaterialTagCallback( const std::vector<std::strin
 //}
 
 void RenderOrchestrator::changeMaterialColorCallback( const std::vector<std::string>& _params ) {
-    rr.changeMaterialColorOnTags( sg.getGeomType( _params[0] ), sg.CL().get(concatParams(_params, 1))->color );
+    rr.changeMaterialColorOnTags(sg.getGeomType(_params[0]), sg.CL().get(concatParams(_params, 1))->color);
 }
 
 Renderer& RenderOrchestrator::RR() { return rr; }
@@ -720,36 +724,23 @@ std::shared_ptr<Camera> RenderOrchestrator::getCamera( const std::string& _name 
     return sg.CM().get(_name)->getMainCamera();
 }
 
-const Camera* RenderOrchestrator::getCamera( const std::string& _name ) const {
+const Camera *RenderOrchestrator::getCamera( const std::string& _name ) const {
     return sg.CM().get(_name)->getMainCamera().get();
 }
 
 void RenderOrchestrator::changeCameraControlType( int _type ) {
-    switch ( _type ) {
-        case CameraControls::Edit2d:
-            setRigCameraController<CameraControl2d>();
-            break;
-        case CameraControls::Orbit:
-            setRigCameraController<CameraControlOrbit3d>();
-            break;
-        case CameraControls::Fly:
-            setRigCameraController<CameraControlFly>();
-            break;
-        case CameraControls::Walk:
-            setRigCameraController<CameraControlWalk>();
-            break;
-        default:
-            break;
-    }
+    setRigCameraController( static_cast<CameraControls::Type>(_type) );
     sg.DC()->resetQuat();
 }
 
 void RenderOrchestrator::drawCameraLocator( const Matrix4f& preMult ) {
     auto camPos = DC()->getPosition() * V3f::MASK_Y_OUT;
-    auto camDir = -DC()->getDirection()*0.7f;
+    auto camDir = -DC()->getDirection() * 0.7f;
     RR().clearBucket(CommandBufferLimits::CameraLocator);
-    RR().draw<DCircleFilled2d>( CommandBufferLimits::CameraLocator, camPos, V4f::DARK_RED, 0.4f, RDSPreMult(preMult), "CameraOminoKey" );
-    RR().draw<DArrow2d>( CommandBufferLimits::CameraLocator, V3fVector{camPos, camPos+camDir}, RDSArrowAngle(0.45f), RDSArrowLength(0.6f), V4f::RED, 0.004f, RDSPreMult(preMult), "CameraOminoKeyDirection1" );
+    RR().draw<DCircleFilled2d>(CommandBufferLimits::CameraLocator, camPos, V4f::DARK_RED, 0.4f, RDSPreMult(preMult),
+                               "CameraOminoKey");
+    RR().draw<DArrow2d>(CommandBufferLimits::CameraLocator, V3fVector{ camPos, camPos + camDir }, RDSArrowAngle(0.45f),
+                        RDSArrowLength(0.6f), V4f::RED, 0.004f, RDSPreMult(preMult), "CameraOminoKeyDirection1");
 }
 
 void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
@@ -757,79 +748,79 @@ void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, cons
 }
 
 void RenderOrchestrator::setDirtyFlagOnPBRRender( const std::string& _target, const std::string& _sub, bool _flag ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->setDirty( _sub, _flag );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->setDirty(_sub, _flag);
     }
 }
 
 void RenderOrchestrator::clearPBRRender( const std::string& _target ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
         pbrTarget->clearCB();
     }
 }
 
 void RenderOrchestrator::hidePBRRender( const std::string& _target ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->enableBucket( false );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->enableBucket(false);
     }
 }
 
 void RenderOrchestrator::showPBRRender( const std::string& _target ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->enableBucket( true );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->enableBucket(true);
     }
 }
 
 void RenderOrchestrator::createSkybox( const SkyBoxInitParams& _skyboxParams ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->createSkybox( _skyboxParams );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->createSkybox(_skyboxParams);
     }
 }
 
 void RenderOrchestrator::changeTime( const std::string& _time ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->changeTime( _time );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->changeTime(_time);
     }
 }
 
 void RenderOrchestrator::useSkybox( bool _value ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->enableSkybox( _value );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->enableSkybox(_value);
     }
 }
 
 void RenderOrchestrator::useSunLighting( bool _value ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->enableSunLighting( _value );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->enableSunLighting(_value);
     }
 }
 
 void RenderOrchestrator::useSSAO( bool _value ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->useSSAO( _value );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->useSSAO(_value);
     }
     rr.useSSAO(_value);
-    setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
 }
 
 void RenderOrchestrator::useDOF( bool _value ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->useDOF( _value );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->useDOF(_value);
     }
     rr.useDOF(_value);
-    setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
 }
 
 void RenderOrchestrator::useMotionBlur( bool _value ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->useMotionBlur( _value );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->useMotionBlur(_value);
     }
     rr.useMotionBlur(_value);
-    setDirtyFlagOnPBRRender( Name::Foxtrot, S::PBR, true );
+    setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
 }
 
 floata& RenderOrchestrator::skyBoxDeltaInterpolation() {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
         return pbrTarget->skyBoxDeltaInterpolation();
     }
     ASSERT("Target doesnt have skybox!");
@@ -850,20 +841,20 @@ void RenderOrchestrator::addBox( const std::string& _name, float _l, float _r, f
 
 void RenderOrchestrator::resizeCallback( const Vector2i& _resize ) {
     LOGR("ResizeCallbackViewports Start");
-    for ( auto& [k,v] : boxes ) {
+    for ( auto&[k, v] : boxes ) {
         LOGRS("Resizing " << k);
-        orBitWiseFlag( v.flags, BoxFlags::Resize );
+        orBitWiseFlag(v.flags, BoxFlags::Resize);
         if ( getRig(k) ) {
             LOGRS("Resizing Rig " << k);
             auto r = v.updateAndGetRect();
-            rr.getTarget( k )->resize( r );
-            sg.CM().get(k)->setViewport( r );
+            rr.getTarget(k)->resize(r);
+            sg.CM().get(k)->setViewport(r);
         }
     }
 }
 
 PickRayData RenderOrchestrator::rayViewportPickIntersection( const V2f& _screenPos ) const {
-    return getCamera( Name::Foxtrot )->rayViewportPickIntersection( _screenPos );
+    return getCamera(Name::Foxtrot)->rayViewportPickIntersection(_screenPos);
 }
 
 
@@ -889,8 +880,8 @@ AVInitCallback RenderOrchestrator::avcbTM() {
 }
 
 void RenderOrchestrator::setVisible( uint64_t _cbIndex, bool _value ) {
-    if ( auto pbrTarget = dynamic_cast<RLTargetPBR*>( rr.getTarget( Name::Foxtrot ).get() ); pbrTarget ) {
-        pbrTarget->setVisibleCB( _cbIndex, _value );
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->setVisibleCB(_cbIndex, _value);
     }
 }
 
@@ -905,14 +896,83 @@ void RenderOrchestrator::clearUIView() {
 }
 
 void RenderOrchestrator::addUIContainer( const MPos2d& _at, CResourceRef _res, UIElementStatus _initialStatus ) {
-    UIViewContainer container{ *this, _res, SG().get<UIContainer>( _res ).get() };
-    uiView.add( _at, container, _initialStatus);
+    UIViewContainer container{ *this, _res, SG().get<UIContainer>(_res).get() };
+    uiView.add(_at, container, _initialStatus);
 }
 
 void RenderOrchestrator::reloadShadersViaHttp() {
-    Http::get(Url{"/shaders"}, [&](HttpResponeParams res){
-        reloadShaders( ShaderLiveUpdateMap{res.bufferString});
+    Http::get(Url{ "/shaders" }, [&]( HttpResponeParams res ) {
+        reloadShaders(ShaderLiveUpdateMap{ res.bufferString });
     });
 
 }
+
+void
+RenderOrchestrator::addRig( CameraControls::Type _ct, const std::string& _name, float _l, float _r, float _t, float _b ) {
+    SceneScreenBox _box{ { sPresenterArrangerLeftFunction3d,
+                           sPresenterArrangerRightFunction3d,
+                           sPresenterArrangerTopFunction3d,
+                           sPresenterArrangerBottomFunction3d, _l, _r, _b, _t }, nullptr };
+    addBoxToViewport(_name, _box);
+    auto lViewport = boxes[_name].updateAndGetRect();
+    addViewport(_ct, RenderTargetType::PBR, _name, lViewport, BlitType::OffScreen);
+}
+
+void RenderOrchestrator::
+addViewport( CameraControls::Type _ct, RenderTargetType _rtt, const std::string& _rigname,
+                                      const Rect2f& _viewport, BlitType _bt ) {
+    auto _rig = getRig(_rigname);
+    _rig->setViewport(_viewport);
+
+    if ( mRigs.find(_rig->Name()) == mRigs.end() ) {
+        RenderTargetFactory::make(_rtt, _rig, _viewport, _bt, rr);
+        mRigs[_rig->Name()] = CameraControlFactory::create(_ct, _rig, *this);
+    } else {
+        setViewportOnRig(_rig, _viewport);
+    }
+}
+
+void RenderOrchestrator::setRigCameraController( CameraControls::Type _ct, const std::string& _rigname ) {
+    if ( auto rig = getRig(_rigname); rig ) {
+        mRigs[rig->Name()] = CameraControlFactory::create(_ct, rig, *this);
+    }
+}
+
+CameraControls::Type RenderOrchestrator::getRigCameraController( const std::string& _rigname ) {
+    return mRigs[_rigname]->getControlType();
+}
+
+std::shared_ptr<Camera> RenderOrchestrator::DC() {
+    return getRig(Name::Foxtrot)->getCamera();
+}
+
+const SceneScreenBox& RenderOrchestrator::Box( const std::string& _key ) const {
+    if ( const auto& it = boxes.find(_key); it != boxes.end() ) {
+        return it->second;
+    }
+    return SceneScreenBox::INVALID;
+}
+
+Rect2f& RenderOrchestrator::BoxUpdateAndGet( const std::string& _key ) {
+    if ( auto it = boxes.find(_key); it != boxes.end() ) {
+        return it->second.updateAndGetRect();
+    }
+    static Rect2f invalid{ Rect2f::INVALID };
+    return invalid;
+}
+
+void RenderOrchestrator::toggleVisible( const std::string& _key ) {
+    if ( auto it = boxes.find(_key); it != boxes.end() ) {
+        it->second.toggleVisible();
+    }
+}
+
+const std::string& RenderOrchestrator::getLuaScriptHotReload() const {
+    return luaScriptHotReload;
+}
+
+void RenderOrchestrator::setLuaScriptHotReload( const std::string& _luaScriptHotReload ) {
+    luaScriptHotReload = _luaScriptHotReload;
+}
+
 

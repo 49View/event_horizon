@@ -534,7 +534,7 @@ public:
             return drawCircleFilledFinal( rds );
         }
         if constexpr ( std::is_same_v<T, DRect> ) {
-            return drawRectFinal( rds );
+            return drawRectFinalTM( rds );
         }
         if constexpr ( std::is_same_v<T, DText2d> || std::is_same_v<T, DText> ) {
             rds.shaderName = std::is_same_v<T, DText2d> ? S::FONT_2D : S::FONT;

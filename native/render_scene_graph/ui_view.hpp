@@ -14,27 +14,12 @@
 #include <core/resources/ui_container.hpp>
 #include <poly/poly.hpp>
 #include <graphics/ghtypes.hpp>
+#include "ui_view_types.hpp"
 
 class SceneGraph;
 class RenderOrchestrator;
 class UIView;
 
-struct UICallbackHandle {
-    UICallbackHandle() = default;
-    UICallbackHandle( const std::string& _index ) {
-        index = std::stoi( _index );
-    }
-    UICallbackHandle( int _index ) : index( _index ) {}
-
-    int index = -1;
-};
-
-using ControlDefKey = std::string;
-using ControlTapKey = uint64_t;
-using ControlDefIconRef = std::string;
-using UICallbackFunc = std::function<void( const UICallbackHandle& )>;
-using ControlSingleTapCallback = UICallbackFunc;//std::function<void( ControlTapKey )>;
-using UICallbackMap  = std::unordered_map<std::string, UICallbackFunc>;
 const static auto sUIEmptyCallback = []( const UICallbackHandle& ) { LOGRS("[WARNING] void UI callback called")};
 const static auto ControlTapCallbackEmpty = sUIEmptyCallback;//[]( ControlTapKey ) {};
 

@@ -7,6 +7,7 @@
 #ifdef _USE_IMGUI_
 
 #include <render_scene_graph/render_orchestrator.h>
+#include <graphics/renderer.h>
 #include <graphics/imgui/imgui.h>
 
 struct ExampleAppConsole {
