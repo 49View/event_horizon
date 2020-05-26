@@ -17,11 +17,11 @@ enum class CameraProjectionType {
     Orthogonal
 };
 
-enum CameraMode {
+enum class CameraControlType {
     Edit2d = 0,
-    Doom,
     Orbit,
-    CameraMode_max
+    Fly,
+    Walk
 };
 
 enum CameraState {

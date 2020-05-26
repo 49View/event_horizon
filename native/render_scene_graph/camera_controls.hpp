@@ -5,27 +5,15 @@
 #pragma once
 
 #include <core/math/vector2f.h>
+#include <core/camera_utils.hpp>
 #include <graphics/graphic_constants.h>
 #include <render_scene_graph/selection.hpp>
 
 class CameraRig;
-
 class Camera;
-
 class RenderOrchestrator;
-
 class TextInput;
-
 struct AggregatedInputData;
-
-namespace CameraControls {
-    enum Type {
-        Edit2d = 0,
-        Orbit,
-        Fly,
-        Walk
-    };
-};
 
 class CameraControl {
 public:
@@ -36,14 +24,15 @@ public:
     auto updateDollyWalkingVerticalMovement();
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) = 0;
     virtual void renderControls() = 0;
-    CameraControls::Type getControlType() const;
+    CameraControlType getControlType() const;
+    void setControlType( CameraControlType _ct );
 
     std::shared_ptr<CameraRig> rig();
     std::shared_ptr<Camera> getMainCamera();
 
 protected:
     std::shared_ptr<CameraRig> mCameraRig;
-    CameraControls::Type controlType;
+    CameraControlType controlType;
     RenderOrchestrator& rsg;
     bool isWASDActive = false;
 
@@ -120,5 +109,5 @@ protected:
 
 namespace CameraControlFactory {
     std::shared_ptr<CameraControl>
-    create( CameraControls::Type _ct, std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
+    create( CameraControlType _ct, std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
 }

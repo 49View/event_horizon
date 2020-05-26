@@ -36,7 +36,7 @@ CubeMapRigContainer addCubeMapRig( const std::string& _name,
         c->getCamera()->setFoV( cubeMapFOV );
         c->getCamera()->setPosition( _pos );
         c->getCamera()->setQuatAngles( camAngles[faceIndex] );
-        c->getCamera()->Mode( CameraMode::Doom );
+        c->getCamera()->Mode( CameraControlType::Walk );
         c->getCamera()->update();
 
         ret[faceIndex] = c;
@@ -109,6 +109,6 @@ const Rect2f& CameraRig::getViewport() const {
     return mViewport;
 }
 
-CameraMode CameraRig::getMainCameraMode() const { return mCamera->Mode(); }
+CameraControlType CameraRig::getMainCameraMode() const { return mCamera->Mode(); }
 
 bool CameraRig::isActive() const { return Status() == CameraState::Active; }

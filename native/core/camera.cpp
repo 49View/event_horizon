@@ -427,13 +427,6 @@ Camera::Camera( const std::string &cameraName, const Rect2f &_viewport ) : NameP
     mAspectRatio.setAspectRatioMatrix( mViewPort.ratio());
 }
 
-void Camera::ModeInc() {
-    int modeInt = static_cast<int>( mMode );
-    modeInt++;
-    mMode = static_cast<CameraMode>( modeInt );
-    if ( mMode >= CameraMode::CameraMode_max ) mMode = static_cast<CameraMode>( 0 );
-}
-
 void Camera::setFoV( float fieldOfView ) {
     if ( mbLocked ) return;
     mFov->value = fieldOfView;
@@ -457,7 +450,7 @@ void Camera::setProjectionMatrix( const Matrix4f &val ) {
 void Camera::translate( const Vector3f &pos ) {
     if ( mbLocked ) return;
     Vector3f mask = LockAtWalkingHeight() ? Vector3f::MASK_UP_OUT : Vector3f::ONE;
-    if ( Mode() == CameraMode::Orbit ) {
+    if ( Mode() == CameraControlType::Orbit ) {
 //	    mTarget->value += pos*mask;
         mOrbitStrafe += pos;
     } else {
@@ -470,7 +463,7 @@ void Camera::zoom2d( float amount ) {
 
     if ( mbLocked ) return;
     amount /= -UI_ZOOM_SCALER;
-    if ( Mode() == CameraMode::Edit2d ) {
+    if ( Mode() == CameraControlType::Edit2d ) {
         mPos->value.setY( clamp( mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d ));
     }
 }
@@ -562,13 +555,13 @@ void Camera::center( const AABB &_bbox, CameraCenterAngle cca ) {
         qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS } * Quaternion{ M_PI_4, Vector3f::Z_AXIS };
         UpdateIncrementalEulerFromQangle();
         sphericalAcc = V2f{ TWO_PI - (float) rangle * 0.5f, (float) M_PI_4 + (float) M_PI_4 * 0.5f };
-        if ( Mode() == CameraMode::Orbit ) {
+        if ( Mode() == CameraControlType::Orbit ) {
             computeOrbitPosition();
         } else {
             mPos->value = cp + _bbox.centre();
         }
     }
-    if ( Mode() != CameraMode::Orbit ) {
+    if ( Mode() != CameraControlType::Orbit ) {
         qangle->value = Quaternion{ Vector3f::ZERO };
         incrementalEulerQuatAngle = V3f::ZERO;
     }
@@ -685,25 +678,25 @@ void Camera::update() {
     Matrix4f oldViewMatrix = mView;
     Matrix4f oldProjectonMatrix = mProjection;
 
-    if ( Mode() == CameraMode::Edit2d ) {
+    if ( Mode() == CameraControlType::Edit2d ) {
         Quaternion qy( M_PI_2, Vector3f::X_AXIS );
         quatMatrix = qy.rotationMatrix();
     }
 
-    if ( Mode() == CameraMode::Doom ) {
+    if ( Mode() == CameraControlType::Walk ) {
         quatMatrix = qangle->value.rotationMatrix();
     }
 
-    if ( Mode() == CameraMode::Orbit ) {
+    if ( Mode() == CameraControlType::Orbit ) {
         lookAtCalc();
     }
 
-    if ( Mode() != CameraMode::Orbit ) {
+    if ( Mode() != CameraControlType::Orbit ) {
         quatMatrix.setTranslation( mPos->value );
         quatMatrix.invert( mView );
     }
 
-    if ( Mode() == CameraMode::Edit2d ) {
+    if ( Mode() == CameraControlType::Edit2d ) {
         float vs = mPos->value.y();
         mProjection.setOrthogonalProjection( -0.5f * mViewPort.ratio() * vs, 0.5f * mViewPort.ratio() * vs,
                                              -0.5f * vs, 0.5f * vs );
@@ -729,7 +722,7 @@ Vector2f Camera::mousePickRayOrtho( const Vector2f &_pos ) {
 
 std::ostream &operator<<( std::ostream &os, const Camera &camera ) {
     os << std::endl
-       << "mMode: " << camera.mMode << std::endl
+       << "mMode: " << static_cast<uint64_t>(camera.mMode) << std::endl
        << "mPos: " << camera.mPos->value << std::endl
        << "qangle: " << camera.qangle->value << std::endl
        << "quatMatrix: " << camera.quatMatrix << std::endl
@@ -900,11 +893,11 @@ void Camera::AspectRatioMultiplier( float val ) {
     mAspectRatioMultiplier = val;
 }
 
-void Camera::Mode( const CameraMode &val ) {
+void Camera::Mode( const CameraControlType &val ) {
     mMode = val;
 }
 
-CameraMode Camera::Mode() const {
+CameraControlType Camera::Mode() const {
     return mMode;
 }
 
@@ -935,7 +928,7 @@ Matrix4f Camera::getPrevMVP() const {
 }
 
 bool Camera::isDoom() const {
-    return Mode() == CameraMode::Doom;
+    return Mode() == CameraControlType::Walk;
 }
 
 

@@ -132,9 +132,8 @@ public:
 	[[nodiscard]] PickRayData rayViewportPickIntersection( const Vector2f& p1 ) const;
 	Vector2f mousePickRayOrtho( const Vector2f& _pos );
 
-	void ModeInc();
-	void Mode( const CameraMode& val );
-	[[nodiscard]] CameraMode Mode() const;
+	void Mode( const CameraControlType& val );
+	[[nodiscard]] CameraControlType Mode() const;
 
 	[[nodiscard]] bool LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
 	void LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
@@ -154,7 +153,7 @@ private:
     void computeOrbitPosition();
 
 private:
-	CameraMode mMode = CameraMode::Edit2d;
+	CameraControlType mMode = CameraControlType::Edit2d;
 	Frustum mFrustom{};
 
     float mAspectRatioMultiplier = 1.0f;

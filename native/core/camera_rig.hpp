@@ -43,7 +43,7 @@ public:
     int CurrEye() const { return mCurrEye; }
     void CurrEye( int val ) { mCurrEye = val; }
 
-    CameraMode getMainCameraMode() const;
+    CameraControlType getMainCameraMode() const;
 
     ViewportTogglesT getCvt() const { return mCvt; }
     ViewportTogglesT& Cvt() { return mCvt; }

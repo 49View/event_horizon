@@ -43,12 +43,12 @@ public:
     void updateInputs( AggregatedInputData& _aid );
 
     // Viewport madness
-    void addRig( CameraControls::Type _ct, const std::string& _name, float _l, float _r, float _t, float _b );
+    void addRig( CameraControlType _ct, const std::string& _name, float _l, float _r, float _t, float _b );
     void
-    addViewport( CameraControls::Type _ct, RenderTargetType _rtt, const std::string& _rigname, const Rect2f& _viewport,
+    addViewport( CameraControlType _ct, RenderTargetType _rtt, const std::string& _rigname, const Rect2f& _viewport,
                  BlitType _bt );
-    void setRigCameraController( CameraControls::Type _ct, const std::string& _rigname = Name::Foxtrot );
-    CameraControls::Type getRigCameraController( const std::string& _rigname = Name::Foxtrot );
+    void setRigCameraController( CameraControlType _ct, const std::string& _rigname = Name::Foxtrot );
+    CameraControlType getRigCameraController( const std::string& _rigname = Name::Foxtrot );
 
     std::shared_ptr<Camera> DC();
 

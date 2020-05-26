@@ -411,10 +411,10 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
     aid.set("checkKeyToggleOn", sol::readonly(&AggregatedInputData::checkKeyToggleOn));
 
     lua["CameraControls"] = lua.create_table_with(
-            "Edit2d", CameraControls::Type::Edit2d,
-            "Orbit", CameraControls::Type::Orbit,
-            "Fly", CameraControls::Type::Fly,
-            "Walk", CameraControls::Type::Walk
+            "Edit2d", CameraControlType::Edit2d,
+            "Orbit", CameraControlType::Orbit,
+            "Fly", CameraControlType::Fly,
+            "Walk", CameraControlType::Walk
     );
 
     // State machine require
@@ -648,7 +648,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
 #endif
 
     // Set a fullscreen camera by default
-    addRig(CameraControls::Fly, Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f);
+    addRig(CameraControlType::Fly, Name::Foxtrot, 0.0f, 1.0f, 0.0f, 1.0f);
 }
 
 void RenderOrchestrator::reloadShaders( const ShaderLiveUpdateMap& shadersToUpdate ) {
@@ -729,7 +729,7 @@ const Camera *RenderOrchestrator::getCamera( const std::string& _name ) const {
 }
 
 void RenderOrchestrator::changeCameraControlType( int _type ) {
-    setRigCameraController( static_cast<CameraControls::Type>(_type) );
+    setRigCameraController(static_cast<CameraControlType>(_type));
     sg.DC()->resetQuat();
 }
 
@@ -908,7 +908,8 @@ void RenderOrchestrator::reloadShadersViaHttp() {
 }
 
 void
-RenderOrchestrator::addRig( CameraControls::Type _ct, const std::string& _name, float _l, float _r, float _t, float _b ) {
+RenderOrchestrator::addRig( CameraControlType _ct, const std::string& _name, float _l, float _r, float _t,
+                            float _b ) {
     SceneScreenBox _box{ { sPresenterArrangerLeftFunction3d,
                            sPresenterArrangerRightFunction3d,
                            sPresenterArrangerTopFunction3d,
@@ -919,8 +920,8 @@ RenderOrchestrator::addRig( CameraControls::Type _ct, const std::string& _name, 
 }
 
 void RenderOrchestrator::
-addViewport( CameraControls::Type _ct, RenderTargetType _rtt, const std::string& _rigname,
-                                      const Rect2f& _viewport, BlitType _bt ) {
+addViewport( CameraControlType _ct, RenderTargetType _rtt, const std::string& _rigname,
+             const Rect2f& _viewport, BlitType _bt ) {
     auto _rig = getRig(_rigname);
     _rig->setViewport(_viewport);
 
@@ -932,13 +933,13 @@ addViewport( CameraControls::Type _ct, RenderTargetType _rtt, const std::string&
     }
 }
 
-void RenderOrchestrator::setRigCameraController( CameraControls::Type _ct, const std::string& _rigname ) {
+void RenderOrchestrator::setRigCameraController( CameraControlType _ct, const std::string& _rigname ) {
     if ( auto rig = getRig(_rigname); rig ) {
-        mRigs[rig->Name()] = CameraControlFactory::create(_ct, rig, *this);
+        mRigs[rig->Name()]->setControlType( _ct );
     }
 }
 
-CameraControls::Type RenderOrchestrator::getRigCameraController( const std::string& _rigname ) {
+CameraControlType RenderOrchestrator::getRigCameraController( const std::string& _rigname ) {
     return mRigs[_rigname]->getControlType();
 }
 

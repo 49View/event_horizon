@@ -91,8 +91,13 @@ std::shared_ptr<Camera> CameraControl::getMainCamera() {
     return mCameraRig->getMainCamera();
 }
 
-CameraControls::Type CameraControl::getControlType() const {
+CameraControlType CameraControl::getControlType() const {
     return controlType;
+}
+
+void CameraControl::setControlType( CameraControlType _ct ) {
+    controlType = _ct;
+    mCameraRig->getMainCamera()->Mode(_ct);
 }
 
 void CameraControlEditable::togglesUpdate( const AggregatedInputData& _aid ) {
@@ -180,9 +185,9 @@ void CameraControlFly::renderControls() {
 
 CameraControlFly::CameraControlFly( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable(cameraRig, rsg) {
-    cameraRig->getCamera()->Mode(CameraMode::Doom);
+    cameraRig->getCamera()->Mode(CameraControlType::Walk);
     cameraRig->getCamera()->LockAtWalkingHeight(false);
-    controlType = CameraControls::Type::Fly;
+    controlType = CameraControlType::Fly;
 }
 
 void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
@@ -263,21 +268,21 @@ void CameraControl2d::renderControls() {
 
 CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable(cameraRig, rsg) {
-    controlType = CameraControls::Type::Edit2d;
+    controlType = CameraControlType::Edit2d;
 }
 
 
 CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControl(cameraRig, rsg) {
-    cameraRig->getCamera()->Mode(CameraMode::Doom);
+    cameraRig->getCamera()->Mode(CameraControlType::Walk);
     cameraRig->getCamera()->LockAtWalkingHeight(true);
-    controlType = CameraControls::Type::Walk;
+    controlType = CameraControlType::Walk;
 }
 
 CameraControlOrbit3d::CameraControlOrbit3d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable(cameraRig, rsg) {
-    cameraRig->getCamera()->Mode(CameraMode::Orbit);
-    controlType = CameraControls::Type::Orbit;
+    cameraRig->getCamera()->Mode(CameraControlType::Orbit);
+    controlType = CameraControlType::Orbit;
 }
 
 void CameraControlOrbit3d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
@@ -296,17 +301,17 @@ void CameraControlOrbit3d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam
 }
 
 std::shared_ptr<CameraControl>
-CameraControlFactory::create( CameraControls::Type _ct, std::shared_ptr<CameraRig> cameraRig,
+CameraControlFactory::create( CameraControlType _ct, std::shared_ptr<CameraRig> cameraRig,
                               RenderOrchestrator& rsg ) {
 
     switch ( _ct ) {
-        case CameraControls::Edit2d:
+        case CameraControlType::Edit2d:
             return std::make_shared<CameraControl2d>( cameraRig, rsg );
-        case CameraControls::Orbit:
+        case CameraControlType::Orbit:
             return std::make_shared<CameraControlOrbit3d>( cameraRig, rsg );
-        case CameraControls::Fly:
+        case CameraControlType::Fly:
             return std::make_shared<CameraControlFly>( cameraRig, rsg );
-        case CameraControls::Walk:
+        case CameraControlType::Walk:
             return std::make_shared<CameraControlWalk>( cameraRig, rsg );
         default:
             return nullptr;

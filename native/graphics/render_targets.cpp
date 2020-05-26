@@ -57,7 +57,7 @@ RLTargetPBR::RLTargetPBR( std::shared_ptr<CameraRig> cameraRig, const Rect2f& sc
     mComposite->useBloom(true);
     framebuffer = mComposite->getColorFB();
     bucketRanges.emplace_back( CommandBufferLimits::PBRStart, CommandBufferLimits::PBREnd );
-    cameraRig->getMainCamera()->Mode( CameraMode::Doom );
+    cameraRig->getMainCamera()->Mode( CameraControlType::Walk );
 
     smm = std::make_unique<ShadowMapManager>();
 
