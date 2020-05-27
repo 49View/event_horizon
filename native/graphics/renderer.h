@@ -23,8 +23,6 @@ struct DLine {
 };
 struct DArrow {
 };
-struct DArrow2d {
-};
 struct DPoly {
 };
 struct DRect {
@@ -559,10 +557,6 @@ public:
             return drawLineFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DArrow> ) {
-            return drawArrowFinal(rds);
-        }
-        if constexpr ( std::is_same_v<T, DArrow2d> ) {
-            rds.shaderName = S::COLOR_2D;
             return drawArrowFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DPoly> ) {

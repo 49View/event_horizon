@@ -493,6 +493,7 @@ VPListSP Renderer::drawArrowFinal( RendererDrawingSet& rds ) {
     V3fVectorOfVector allVLists;
     allVLists.emplace_back(XYZ2D3D(extrudePointsWithWidth<ExtrudeStrip>(verts, rds.width, false), rds));
 
+    if ( allVLists[0].empty() ) return nullptr;
     auto lineList = stripInserter<V3f>(allVLists);
     if ( lineList.empty() ) return nullptr;
 
