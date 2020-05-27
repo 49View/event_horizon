@@ -61,8 +61,3 @@ namespace FBNames {
 
     bool isPartOf( const std::string& _val );
 }
-
-enum class Use2dDebugRendering {
-    False,
-    True
-};

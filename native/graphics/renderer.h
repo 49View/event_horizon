@@ -15,26 +15,61 @@
 #include <graphics/ghtypes.hpp>
 #include <graphics/shadowmap_manager.h>
 
-struct DCircle {};
-struct DCircle2d {};
-struct DCircleFilled {};
-struct DCircleFilled2d {};
-struct DLine {};
-struct DLine2d {};
-struct DArrow {};
-struct DArrow2d {};
-struct DPoly {};
-struct DPoly2d {};
-struct DRect {};
-struct DRect2d {};
-struct DRect2dRounded {};
-struct DText {};
-struct DText2d {};
-struct DImage2d {};
+struct DCircle {
+};
+struct DCircle2d {
+};
+struct DCircleFilled {
+};
+struct DCircleFilled2d {
+};
+struct DLine {
+};
+struct DLine2d {
+};
+struct DArrow {
+};
+struct DArrow2d {
+};
+struct DPoly {
+};
+struct DPoly2d {
+};
+struct DRect {
+};
+struct DRect2d {
+};
+struct DRect2dRounded {
+};
+struct DText {
+};
+struct DText2d {
+};
+
+using DShaderMatrixValue = uint64_t;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dColor   = 1 << 1;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dTexture = 1 << 2;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dColor   = 1 << 3;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dTexture = 1 << 4;
+
+struct DShaderMatrix {
+    template<typename ...Args>
+    explicit DShaderMatrix( Args&& ... args ) : data(std::forward<Args>(args)...) {}
+    DShaderMatrixValue operator()() const noexcept {
+        return data;
+    }
+    bool has2d() const {
+        return checkBitWiseFlag(data, DShaderMatrixValue2dColor) || checkBitWiseFlag(data, DShaderMatrixValue2dTexture);
+    }
+    bool hasTexture() const {
+        return checkBitWiseFlag(data, DShaderMatrixValue2dTexture) || checkBitWiseFlag(data, DShaderMatrixValue3dTexture);
+    }
+    DShaderMatrixValue data;
+};
 
 struct FontDrawingSet {
     std::string text{};
-    const Font* font = nullptr;
+    const Font *font = nullptr;
     V3f pos = V3f::ZERO;
     float fontHeight = 0.01f;
     float fontAngle = 0.0f;
@@ -42,18 +77,26 @@ struct FontDrawingSet {
 
 using FDS = FontDrawingSet;
 
+enum class RDSRectAxis {
+    XY,
+    XZ
+};
+
 struct RendererDrawingSet {
     RendererDrawingSet() = default;
     RendererDrawingSet( int bi, Color4f c, std::string sn, std::string n ) :
-        bucketIndex(bi), color(std::move(c)), name(std::move(n)), shaderName(std::move(sn)) {}
+            bucketIndex(bi), color(std::move(c)), name(std::move(n)), shaderName(std::move(sn)) {}
     void setupFontData();
     bool hasTexture() const;
+    void resolveShaderMatrix();
 
     int bucketIndex = CommandBufferLimits::UI2dStart;
     Primitive prim = PRIMITIVE_TRIANGLE_STRIP;
     VTMVectorWrap verts;
+    std::vector<Triangle2d> triangles{};
     VTMVectorOfVectorWrap multiVerts;
     Rect2f rect = Rect2f::MIDENTITY();
+    RDSRectAxis rectAxis = RDSRectAxis::XY;
     float roundedCorner = 0.01f;
     float arrowAngle = 0.3f;
     float arrowLength = 0.3f;
@@ -63,16 +106,17 @@ struct RendererDrawingSet {
     uint32_t archSegments = 12;
     FDS fds;
     std::string name{};
+    DShaderMatrix shaderMatrix;
     std::string shaderName = S::COLOR_3D;
     std::string textureRef{};
     std::shared_ptr<Matrix4f> matrix;
-    Matrix4f preMultMatrix{Matrix4f::IDENTITY};
+    Matrix4f preMultMatrix{ Matrix4f::IDENTITY };
     bool usePreMult = false;
 };
 
 struct RDSPreMult {
     template<typename ...Args>
-    explicit RDSPreMult( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    explicit RDSPreMult( Args&& ... args ) : data(std::forward<Args>(args)...) {}
     Matrix4f operator()() const noexcept {
         return data;
     }
@@ -81,7 +125,7 @@ struct RDSPreMult {
 
 struct RDSImage {
     template<typename ...Args>
-    explicit RDSImage( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    explicit RDSImage( Args&& ... args ) : data(std::forward<Args>(args)...) {}
     ResourceRef operator()() const noexcept {
         return data;
     }
@@ -90,7 +134,7 @@ struct RDSImage {
 
 struct RDSRoundedCorner {
     template<typename ...Args>
-    explicit RDSRoundedCorner( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    explicit RDSRoundedCorner( Args&& ... args ) : data(std::forward<Args>(args)...) {}
     float operator()() const noexcept {
         return data;
     }
@@ -99,7 +143,7 @@ struct RDSRoundedCorner {
 
 struct RDSArrowAngle {
     template<typename ...Args>
-    explicit RDSArrowAngle( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    explicit RDSArrowAngle( Args&& ... args ) : data(std::forward<Args>(args)...) {}
     float operator()() const noexcept {
         return data;
     }
@@ -108,7 +152,7 @@ struct RDSArrowAngle {
 
 struct RDSArrowLength {
     template<typename ...Args>
-    explicit RDSArrowLength( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    explicit RDSArrowLength( Args&& ... args ) : data(std::forward<Args>(args)...) {}
     float operator()() const noexcept {
         return data;
     }
@@ -117,7 +161,7 @@ struct RDSArrowLength {
 
 struct RDSCircleLineWidth {
     template<typename ...Args>
-    explicit RDSCircleLineWidth( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    explicit RDSCircleLineWidth( Args&& ... args ) : data(std::forward<Args>(args)...) {}
     float operator()() const noexcept {
         return data;
     }
@@ -130,7 +174,7 @@ using CommandBufferListVectorMap = std::map<int, CommandBufferListVector>;
 class RenderAnimationManager {
 public:
     void init();
-	void generateUBO( std::shared_ptr<ShaderManager> sm );
+    void generateUBO( std::shared_ptr<ShaderManager> sm );
     void setTiming();
     void setProgressionTiming( float _progress );
     void setUniforms_r();
@@ -141,42 +185,43 @@ private:
 
 class RenderCameraManager {
 public:
-	void init();
-	void generateUBO( std::shared_ptr<ShaderManager> sm );
-	void setUniforms_r();
-	std::shared_ptr<ProgramUniformSet>& UBO();
+    void init();
+    void generateUBO( std::shared_ptr<ShaderManager> sm );
+    void setUniforms_r();
+    std::shared_ptr<ProgramUniformSet>& UBO();
 private:
-	std::shared_ptr<ProgramUniformSet> mCameraUBO;
+    std::shared_ptr<ProgramUniformSet> mCameraUBO;
 };
 
 struct ChangeMaterialOnContainer {
-    ChangeMaterialOnContainer( uint64_t tag, const std::string &matHash ) : tag( tag ), matHash( matHash ) {}
-    ChangeMaterialOnContainer( const std::string &name, const std::string &matHash ) : name( name ),
-                                                                                       matHash( matHash ) {}
+    ChangeMaterialOnContainer( uint64_t tag, const std::string& matHash ) : tag(tag), matHash(matHash) {}
+    ChangeMaterialOnContainer( const std::string& name, const std::string& matHash ) : name(name),
+                                                                                       matHash(matHash) {}
 
     uint64_t tag = 0;
-	std::string name{};
-	std::string matHash{};
+    std::string name{};
+    std::string matHash{};
 };
 
 struct scene_t;
-class  RenderStats;
+
+class RenderStats;
 
 class Renderer {
 public:
     explicit Renderer( StreamingMediator& _ssm );
-	virtual ~Renderer() = default;
+    virtual ~Renderer() = default;
 
     void cmdReloadShaders( const std::vector<std::string>& _params );
 
-	void init();
-	static void clearColor( const C4f& _color );
-	void afterShaderSetup();
-	void injectShader( const std::string& _key, const std::string& content );
+    void init();
+    static void clearColor( const C4f& _color );
+    void afterShaderSetup();
+    void injectShader( const std::string& _key, const std::string& content );
 
-	void directRenderLoop( RenderStats& rs );
+    void directRenderLoop( RenderStats& rs );
 
-	void removeFromCL( const UUID& _uuid );
+    void removeFromCL( const UUID& _uuid );
     void clearBucket( int _bucket );
     void showBucket( int _bucket, bool visible );
 
@@ -186,63 +231,63 @@ public:
     std::shared_ptr<GPUVData> addVDataResource( const ResourceTransfer<VData>& _val );
     std::shared_ptr<GPUVData> addVDataResource( cpuVBIB&& _val, const std::string& _name );
 
-	std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
-    std::shared_ptr<GPUVData>       getGPUVData( const std::string& _key );
+    std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
+    std::shared_ptr<GPUVData> getGPUVData( const std::string& _key );
 
-	void changeMaterialOnTagsCallback( const ChangeMaterialOnContainer& _cmt );
+    void changeMaterialOnTagsCallback( const ChangeMaterialOnContainer& _cmt );
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
     void changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b );
     void changeMaterialAlphaOnTags( uint64_t _tag, float _alpha );
-	void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
-	void replaceMaterial( const std::string& _oldMatRef , const std::string& _newMatRef );
+    void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
+    void replaceMaterial( const std::string& _oldMatRef, const std::string& _newMatRef );
     void changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value );
 
-	std::shared_ptr<Program> P(const std::string& _id);
-	std::shared_ptr<Texture> TD( const std::string& _id, int tSlot = -1 );
+    std::shared_ptr<Program> P( const std::string& _id );
+    std::shared_ptr<Texture> TD( const std::string& _id, int tSlot = -1 );
     TextureUniformDesc TDI( const std::string& _id, unsigned int tSlot );
 
-	void addToCommandBuffer( CommandBufferLimitsT _entry );
-	void addToCommandBuffer( std::vector<std::shared_ptr<VPList>> _map,
-                             CameraRig* _cameraRig = nullptr,
-							 std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr,
-                             Program* _forceProgram = nullptr,
+    void addToCommandBuffer( CommandBufferLimitsT _entry );
+    void addToCommandBuffer( std::vector<std::shared_ptr<VPList>> _map,
+                             CameraRig *_cameraRig = nullptr,
+                             std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr,
+                             Program *_forceProgram = nullptr,
                              float _alphaDrawThreshold = 0.0f );
 
-	void setRenderHook( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _hook );
-	void setGlobalTextures();
+    void setRenderHook( const std::string& _key, std::weak_ptr<CommandBufferEntry>& _hook );
+    void setGlobalTextures();
     [[nodiscard]] std::shared_ptr<RenderMaterial> getRenderMaterialFromHash( CResourceRef _hash );
 
-	std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
-    std::shared_ptr<RenderLightManager>   LM() { return lm; }
-	std::shared_ptr<TextureManager> TM() { return tm; }
-	std::shared_ptr<ShaderManager>  SM() { return sm; }
+    std::shared_ptr<ProgramUniformSet>& CameraUBO() { return rcm.UBO(); }
+    std::shared_ptr<RenderLightManager> LM() { return lm; }
+    std::shared_ptr<TextureManager> TM() { return tm; }
+    std::shared_ptr<ShaderManager> SM() { return sm; }
     std::shared_ptr<Framebuffer> BRDFTarget() { return mBRDF; };
-	StreamingMediator& SSM();
+    StreamingMediator& SSM();
 
     void VPL( int _bucket, std::shared_ptr<VPList> nvp, float alpha = 1.0f );
 
-	bool hasTag( uint64_t _tag ) const;
+    bool hasTag( uint64_t _tag ) const;
 
-	inline CommandBufferList& CB_U() { return *mCommandBuffers; }
-	inline CommandBufferListVectorMap& CL() { return mCommandLists; }
+    inline CommandBufferList& CB_U() { return *mCommandBuffers; }
+    inline CommandBufferListVectorMap& CL() { return mCommandLists; }
     inline const CommandBufferListVectorMap& CL() const { return mCommandLists; }
 
-	void resetDefaultFB( const Vector2i& forceSize = Vector2i{-1});
+    void resetDefaultFB( const Vector2i& forceSize = Vector2i{ -1 } );
 
-	void addTarget( std::shared_ptr<RLTarget> _target );
-	std::shared_ptr<RLTarget> getTarget( const std::string& _name );
-	void clearTargets();
+    void addTarget( std::shared_ptr<RLTarget> _target );
+    std::shared_ptr<RLTarget> getTarget( const std::string& _name );
+    void clearTargets();
 
-	std::shared_ptr<Framebuffer> getDefaultFB() { return mDefaultFB; }
+    std::shared_ptr<Framebuffer> getDefaultFB() { return mDefaultFB; }
     std::shared_ptr<Framebuffer> getShadowMapFB() { return mShadowMapFB; }
     std::shared_ptr<Framebuffer> getDepthMapFB() { return mDepthFB; }
-    std::shared_ptr<Framebuffer> getProbing(int _index);
+    std::shared_ptr<Framebuffer> getProbing( int _index );
 
-	int UpdateCounter() const { return mUpdateCounter; }
-	void invalidateOnAdd();
+    int UpdateCounter() const { return mUpdateCounter; }
+    void invalidateOnAdd();
 
-	template<typename ...Args>
-    void changeMaterialOn( Args&&... args ) {
+    template<typename ...Args>
+    void changeMaterialOn( Args&& ... args ) {
         changeMaterialOnInternal(perfectForward<ChangeMaterialOnContainer>(std::forward<Args>(args)...));
     }
 
@@ -256,73 +301,75 @@ public:
     const Vector2i& getForcedFrameBufferSize() const;
     void setForcedFrameBufferSize( const Vector2i& mForcedFrameBufferSize );
 
-    void useVignette(bool _flag);
-    void useFilmGrain(bool _flag);
-    void useBloom(bool _flag);
-    void useDOF(bool _flag);
-    void useSSAO(bool _flag);
-    void useMotionBlur(bool _flag);
+    void useVignette( bool _flag );
+    void useFilmGrain( bool _flag );
+    void useBloom( bool _flag );
+    void useDOF( bool _flag );
+    void useSSAO( bool _flag );
+    void useMotionBlur( bool _flag );
     void setShadowOverBurnCofficient( float _overBurn );
     void setShadowZFightCofficient( float _value );
     void setIndoorSceneCoeff( float _value );
 
 protected:
-	void clearCommandList();
-	size_t renderCBList();
-	size_t renderCommands( int eye );
+    void clearCommandList();
+    size_t renderCBList();
+    size_t renderCommands( int eye );
 
 protected:
     void changeMaterialOnInternal( const ChangeMaterialOnContainer& _cmt );
 
 protected:
-	std::shared_ptr<ShaderManager>          sm;
-	std::shared_ptr<TextureManager>         tm;
-	std::shared_ptr<RenderMaterialManager>  rmm;
-    std::shared_ptr<RenderLightManager>           lm;
-    std::shared_ptr<GPUVDataManager>        gm;
+    std::shared_ptr<ShaderManager> sm;
+    std::shared_ptr<TextureManager> tm;
+    std::shared_ptr<RenderMaterialManager> rmm;
+    std::shared_ptr<RenderLightManager> lm;
+    std::shared_ptr<GPUVDataManager> gm;
     StreamingMediator& ssm;
 
-	RenderAnimationManager am;
-	RenderCameraManager rcm;
+    RenderAnimationManager am;
+    RenderCameraManager rcm;
 
-	std::shared_ptr<Framebuffer> mDefaultFB;
+    std::shared_ptr<Framebuffer> mDefaultFB;
     std::shared_ptr<Framebuffer> mBRDF;
     std::shared_ptr<Framebuffer> mShadowMapFB;
     std::shared_ptr<Framebuffer> mDepthFB;
     std::unordered_map<int, std::shared_ptr<Framebuffer>> mProbingsFB;
 
-	int mUpdateCounter = 0;
-	size_t mDrawCallsPerFrame = 0;
-	bool bInvalidated = false;
+    int mUpdateCounter = 0;
+    size_t mDrawCallsPerFrame = 0;
+    bool bInvalidated = false;
     bool bIsLoading = true;
-    Vector2i mForcedFrameBufferSize{-1, -1};
+    Vector2i mForcedFrameBufferSize{ -1, -1 };
 
-	std::vector<std::shared_ptr<RLTarget>> mTargets;
-	std::shared_ptr<CommandBufferList> mCommandBuffers;
-	std::map<int, CommandBufferListVector> mCommandLists;
-	std::unordered_map<UUID, VPListSP> mVPLMap;
+    std::vector<std::shared_ptr<RLTarget>> mTargets;
+    std::shared_ptr<CommandBufferList> mCommandBuffers;
+    std::map<int, CommandBufferListVector> mCommandLists;
+    std::unordered_map<UUID, VPListSP> mVPLMap;
 
-	std::vector<ChangeMaterialOnContainer> mChangeMaterialCallbacks;
+    std::vector<ChangeMaterialOnContainer> mChangeMaterialCallbacks;
 
-	template <typename V> friend class VPBuilder;
+    template<typename V> friend
+    class VPBuilder;
 
 public:
-	void drawIncGridLines( int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
-						   const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
-						   float zoffset, const std::string& _name = "" );
+    void drawIncGridLines( int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
+                           const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
+                           float zoffset, const std::string& _name = "" );
     VPListSP drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
-						const Vector4f& color, float width, int32_t subdivs, const std::string& _name = "" );
+                            const Vector4f& color, float width, int32_t subdivs, const std::string& _name = "" );
 
-	void createGrid( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
-					 const Vector2f& limits, float axisSize, const std::string& _name = "" );
-    std::vector<VPListSP> createGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
+    void createGrid( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
                      const Vector2f& limits, float axisSize, const std::string& _name = "" );
+    std::vector<VPListSP>
+    createGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
+                  const Vector2f& limits, float axisSize, const std::string& _name = "" );
     VPListSP
-	drawArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
-			   float angle, float arrowlength, const std::string& _name = "" );
+    drawArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
+               float angle, float arrowlength, const std::string& _name = "" );
     VPListSP
     drawDoubleArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
-               float angle, float arrowlength, const std::string& _name = "" );
+                     float angle, float arrowlength, const std::string& _name = "" );
 
     VPListSP drawLineFinal( RendererDrawingSet& rds );
     VPListSP drawArrowFinal( RendererDrawingSet& rds );
@@ -334,62 +381,71 @@ public:
     VPListSP drawTextFinal( const RendererDrawingSet& rds );
 
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
-					   const std::string& _name = "" );
+                           const std::string& _name = "" );
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-					   const std::string& _name = "" );
-    VPListSP drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-					   const std::string& _name="");
-    VPListSP drawTriangles(int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
-					   const Vector4f& color, const std::string& _name="");
+                           const std::string& _name = "" );
+    VPListSP drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
+                            const std::string& _name = "" );
+    VPListSP drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
+                            const Vector4f& color, const std::string& _name = "" );
     VPListSP
-	draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
-				  const std::string& _name = "" );
-    VPListSP drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color, const std::string& _name = "" );
+    draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
+                  const std::string& _name = "" );
+    VPListSP drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
+                      const std::string& _name = "" );
     VPListSP drawCircle( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
-					 int32_t subdivs = 12, const std::string& _name = "" );
+                         int32_t subdivs = 12, const std::string& _name = "" );
     VPListSP drawCircle( int bucketIndex, const Vector3f& center, const Vector3f& normal, float radius,
-					 const Color4f& color, int32_t subdivs, const std::string& _name = "" );
+                         const Color4f& color, int32_t subdivs, const std::string& _name = "" );
     VPListSP drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color,
-					   int32_t subdivs = 12, const std::string& _name = "" );
+                           int32_t subdivs = 12, const std::string& _name = "" );
     VPListSP drawArc( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
-				  const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
-				  const std::string& _name = "" );
+                      const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
+                      const std::string& _name = "" );
     VPListSP drawArc( int bucketIndex, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
-				  const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
-				  const std::string& _name = "" );
+                      const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
+                      const std::string& _name = "" );
     VPListSP
-	drawCylinder( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
-				  const std::string& _name = "" );
+    drawCylinder( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
+                  const std::string& _name = "" );
 
     VPListSP drawCone( int bucketIndex, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
-				   float size, const std::string& _name = "" );
+                       float size, const std::string& _name = "" );
 
     VPListSP drawRect( int bi, const Rect2f& r, const Color4f& color, const std::string& _name = {} );
 
-    VPListSP drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
-                   const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
+    VPListSP
+    drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
+              const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
     VPListSP drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
-                   const std::string& _name = {} );
-    VPListSP drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
-                   const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
+                       const std::string& _name = {} );
+    VPListSP
+    drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
+                const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale,
+                const std::string& _name = {} );
     VPListSP drawRect2d( int bucketIndex, const Rect2f& r1, CResourceRef _texture, float ratio = 1.0f,
-                     const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
+                         const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale,
+                         const std::string& _name = {} );
     VPListSP drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
-                   const std::string& _name = {} );
+                         const std::string& _name = {} );
     VPListSP drawRect2d( int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name = {} );
 
     VPListSP drawMeasurementArrow1( int bucketIndex, const Vector3f& p1, const Vector3f& p2,
                                     const V4f& color, float width, float angle, float arrowlength,
-                                    float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
+                                    float offsetGap, const Font *font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
     VPListSP drawMeasurementArrow2( int bucketIndex, const Vector3f& p1, const Vector3f& p2,
                                     const V2f& p12n, const Vector3f& op1, const Vector3f& op2,
                                     const V4f& color, float width, float angle, float arrowlength,
-                                    float offsetGap, const Font* font, float fontHeight, const C4f& fontColor,
+                                    float offsetGap, const Font *font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
 
     template<typename T, typename M>
     void addRendererDrawingSetParam( RendererDrawingSet& rds, const M& _param ) {
+        if constexpr ( std::is_same_v<M, DShaderMatrix> ) {
+            rds.shaderMatrix = _param;
+            return;
+        }
         if constexpr ( std::is_integral_v<M> && !std::is_same_v<M, bool> ) {
             rds.bucketIndex = _param;
             return;
@@ -410,9 +466,13 @@ public:
             rds.verts = _param;
             return;
         }
+        if constexpr ( std::is_same_v<M, std::vector<Triangle2d>> ) {
+            rds.triangles = _param;
+            return;
+        }
         if constexpr ( std::is_same_v<M, Rect2f> ) {
-            if constexpr ( std::is_same_v<T, DRect2d> || std::is_same_v<T, DRect2dRounded> )
-            {
+            if constexpr ( std::is_same_v<T, DRect2d> || std::is_same_v<T, DRect2dRounded> ||
+                           std::is_same_v<T, DRect> ) {
                 rds.rect = _param;
             } else {
                 rds.verts.v = _param.points3dcw_xzy();
@@ -426,7 +486,7 @@ public:
         }
         if constexpr ( std::is_same_v<M, float> ) {
             if constexpr ( std::is_same_v<T, DCircle> || std::is_same_v<T, DCircleFilled> ||
-                    std::is_same_v<T, DCircle2d> || std::is_same_v<T, DCircleFilled2d>) {
+                           std::is_same_v<T, DCircle2d> || std::is_same_v<T, DCircleFilled2d> ) {
                 rds.radius = _param;
             } else {
                 rds.width = _param;
@@ -450,11 +510,15 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<M, V3f> ) {
-            rds.verts.v.emplace_back( _param );
+            rds.verts.v.emplace_back(_param);
             return;
         }
         if constexpr ( std::is_same_v<M, V2f> ) {
-            rds.verts.v.emplace_back( XZY::C(_param) );
+            rds.verts.v.emplace_back(XZY::C(_param));
+            return;
+        }
+        if constexpr ( std::is_same_v<M, RDSRectAxis> ) {
+            rds.rectAxis = _param;
             return;
         }
         if constexpr ( std::is_same_v<M, RDSPreMult> ) {
@@ -478,79 +542,78 @@ public:
             rds.width = _param();
             return;
         }
-        if constexpr ( std::is_same_v<M, V3fVectorOfVectorWrap > ) {
-            ASSERTV(false,"Please provide a VTMVectorOfVectorWrap instead of a V3fVectorOfVectorWrap" );
+        if constexpr ( std::is_same_v<M, V3fVectorOfVectorWrap> ) {
+            ASSERTV(false, "Please provide a VTMVectorOfVectorWrap instead of a V3fVectorOfVectorWrap");
             return;
         }
         if constexpr ( std::is_same_v<M, std::shared_ptr<Profile> > ) {
             rds.multiVerts = _param->Paths3dWithUV();
             return;
         }
-        if constexpr ( std::is_same_v<M, VTMVectorOfVectorWrap > ) {
+        if constexpr ( std::is_same_v<M, VTMVectorOfVectorWrap> ) {
             rds.multiVerts = _param;
             return;
         }
     }
 
-    template <typename T, typename ...Args>
+    template<typename T, typename ...Args>
     VPListSP draw( Args&& ... args ) {
         RendererDrawingSet rds{};
 
-        (addRendererDrawingSetParam<T>( rds, std::forward<Args>( args )), ...);
+        (addRendererDrawingSetParam<T>(rds, std::forward<Args>(args)), ...);
+
+        rds.resolveShaderMatrix();
 
         if constexpr ( std::is_same_v<T, DLine> ) {
-            return drawLineFinal( rds );
+            return drawLineFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DLine2d> ) {
             rds.shaderName = S::COLOR_2D;
-            return drawLineFinal( rds );
+            return drawLineFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DArrow> ) {
-            return drawArrowFinal( rds );
+            return drawArrowFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DArrow2d> ) {
             rds.shaderName = S::COLOR_2D;
-            return drawArrowFinal( rds );
+            return drawArrowFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DPoly> ) {
-            return drawPolyFinal( rds );
-        }
-        if constexpr ( std::is_same_v<T, DPoly2d> ) {
-            rds.shaderName = S::COLOR_2D;
-            return drawPolyFinal( rds );
+            return drawPolyFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DCircle> ) {
-            return drawCircleFinal( rds );
+            return drawCircleFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DCircle2d> ) {
             rds.shaderName = S::COLOR_2D;
-            return drawCircleFinal( rds );
+            return drawCircleFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DCircleFilled> ) {
-            return drawCircleFilledFinal( rds );
+            return drawCircleFilledFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DCircleFilled2d> ) {
             rds.shaderName = S::COLOR_2D;
-            return drawCircleFilledFinal( rds );
+            return drawCircleFilledFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DRect> ) {
-            return drawRectFinalTM( rds );
+            rds.shaderName = S::TEXTURE_3D;
+            return drawRectFinalTM(rds);
         }
         if constexpr ( std::is_same_v<T, DText2d> || std::is_same_v<T, DText> ) {
             rds.shaderName = std::is_same_v<T, DText2d> ? S::FONT_2D : S::FONT;
             rds.setupFontData();
-            return drawTextFinal( rds );
+            return drawTextFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DRect2d> ) {
 //            rds.shaderName = S::COLOR_2D;
             rds.shaderName = S::TEXTURE_2D;
-            return drawRectFinalTM( rds );
+            return drawRectFinalTM(rds);
         }
         if constexpr ( std::is_same_v<T, DRect2dRounded> ) {
             rds.shaderName = S::COLOR_2D;
             rds.prim = PRIMITIVE_TRIANGLE_FAN;
-            rds.verts.v = roundedCornerFanFromRect( rds.rect, rds.roundedCorner );
-            return drawRectFinal( rds );
+            rds.verts.v = roundedCornerFanFromRect(rds.rect, rds.roundedCorner);
+            return drawRectFinal(rds);
         }
         return nullptr;
     }

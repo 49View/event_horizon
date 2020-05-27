@@ -935,7 +935,7 @@ addViewport( CameraControlType _ct, RenderTargetType _rtt, const std::string& _r
 
 void RenderOrchestrator::setRigCameraController( CameraControlType _ct, const std::string& _rigname ) {
     if ( auto rig = getRig(_rigname); rig ) {
-        mRigs[rig->Name()]->setControlType( _ct );
+        mRigs[rig->Name()] = CameraControlFactory::create(_ct, rig, *this);
     }
 }
 
