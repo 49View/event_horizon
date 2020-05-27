@@ -17,23 +17,15 @@
 
 struct DCircle {
 };
-struct DCircle2d {
-};
 struct DCircleFilled {
 };
-struct DCircleFilled2d {
-};
 struct DLine {
-};
-struct DLine2d {
 };
 struct DArrow {
 };
 struct DArrow2d {
 };
 struct DPoly {
-};
-struct DPoly2d {
 };
 struct DRect {
 };
@@ -485,8 +477,7 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<M, float> ) {
-            if constexpr ( std::is_same_v<T, DCircle> || std::is_same_v<T, DCircleFilled> ||
-                           std::is_same_v<T, DCircle2d> || std::is_same_v<T, DCircleFilled2d> ) {
+            if constexpr ( std::is_same_v<T, DCircle> || std::is_same_v<T, DCircleFilled> ) {
                 rds.radius = _param;
             } else {
                 rds.width = _param;
@@ -567,10 +558,6 @@ public:
         if constexpr ( std::is_same_v<T, DLine> ) {
             return drawLineFinal(rds);
         }
-        if constexpr ( std::is_same_v<T, DLine2d> ) {
-            rds.shaderName = S::COLOR_2D;
-            return drawLineFinal(rds);
-        }
         if constexpr ( std::is_same_v<T, DArrow> ) {
             return drawArrowFinal(rds);
         }
@@ -584,15 +571,7 @@ public:
         if constexpr ( std::is_same_v<T, DCircle> ) {
             return drawCircleFinal(rds);
         }
-        if constexpr ( std::is_same_v<T, DCircle2d> ) {
-            rds.shaderName = S::COLOR_2D;
-            return drawCircleFinal(rds);
-        }
         if constexpr ( std::is_same_v<T, DCircleFilled> ) {
-            return drawCircleFilledFinal(rds);
-        }
-        if constexpr ( std::is_same_v<T, DCircleFilled2d> ) {
-            rds.shaderName = S::COLOR_2D;
             return drawCircleFilledFinal(rds);
         }
         if constexpr ( std::is_same_v<T, DRect> ) {

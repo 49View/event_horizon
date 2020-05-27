@@ -110,10 +110,7 @@ void MouseInput::onTouchUp( int _touchIndex, const Vector2f& pos, UpdateSignals&
 }
 
 void MouseInput::onScroll( float amount, UpdateSignals& _updateSignals ) {
-	float scroll_dir = -1.0f;
-#ifdef OSX
-	scroll_dir *= -1.0f;
-#endif
+	float scroll_dir = 1.0f;
 	mScrollValue = amount*scroll_dir;
 	if ( amount != 0.0f ) {
 		notify( *this, "onScroll");
