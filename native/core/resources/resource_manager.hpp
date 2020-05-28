@@ -74,6 +74,10 @@ public:
         }
     }
 
+    void update( CResourceRef _hash ) {
+        updateSignal( { resources[_hash], _hash } );
+    }
+
     void addImmediate( std::shared_ptr<T> _elem, const std::string& _name,
                        const std::string& _hash, const std::string& _aliasKey = {}, const std::string& _key = {} ) {
         add( _elem, _name, _hash, _aliasKey, _key );
@@ -115,8 +119,12 @@ public:
         return ret;
     }
 
-    void connect( std::function<void (const ResourceTransfer<T>&)> _slot ) {
+    void add( std::function<void (const ResourceTransfer<T>&)> _slot ) {
         addSignal.connect( _slot );
+    }
+
+    void update( std::function<void (const ResourceTransfer<T>&)> _slot ) {
+        updateSignal.connect( _slot );
     }
 
     std::vector<std::shared_ptr<T>> list() const {
@@ -182,6 +190,9 @@ private:
 
     SignalsDeferredContainer<T> signalAddElements;
     boost::signals2::signal<void(const ResourceTransfer<T>&)> addSignal;
+
+    SignalsDeferredContainer<T> signalUpdateElements;
+    boost::signals2::signal<void(const ResourceTransfer<T>&)> updateSignal;
 
     SignalsDeferredContainer<T> signalRemoveElement;
     boost::signals2::signal<void(const ResourceTransfer<T>&)> removeSignal;

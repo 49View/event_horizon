@@ -37,8 +37,9 @@ namespace WindowHandling {
             float scaleFactor = 1.0f;
             if ( checkBitWiseFlag( flags, InitializeWindowFlags::HalfSize )) scaleFactor = 2.0f;
             if ( checkBitWiseFlag( flags, InitializeWindowFlags::ThreeQuarter )) scaleFactor = 1.5f;
-            window = glfwCreateWindow( static_cast<int>( mode->width / scaleFactor ),
-                                           static_cast<int>( mode->height / scaleFactor ), "Event Horizon", NULL, NULL );
+            float xs = mode->width / scaleFactor;
+            float ys = mode->height / scaleFactor;
+            window = glfwCreateWindow( static_cast<int>(xs), static_cast<int>(ys), "Event Horizon", NULL, NULL );
         }
         glfwSwapInterval( -1 );
 

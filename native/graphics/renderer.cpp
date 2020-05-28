@@ -335,6 +335,10 @@ std::shared_ptr<Texture> Renderer::addTextureResource( const ResourceTransfer<Ra
     return tm->addTextureWithData( *_val.elem, _val.names );
 }
 
+void Renderer::updateTextureResource( const ResourceTransfer<RawImage>& _val ) {
+    tm->updateTexture( _val.hash, _val.elem->data() );
+}
+
 std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ShaderMaterial& _val, const std::string& _name ) {
     return rmm->addRenderMaterial( _val.SN(), _val.Values(), { _name } );
 }

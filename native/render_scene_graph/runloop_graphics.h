@@ -122,13 +122,13 @@ public:
 protected:
 	void update() {
         updateTime();
-        WH::preUpdate();
         mUpdateSignals.NeedsUpdate(false);
         Timeline::update();
         cq.execute();
         WH::pollEvents();
         mi.update( mUpdateSignals );
         auto aid = aggregateInputs();
+        WH::preUpdate();
         rlbackEnd->update( aid );
     }
 

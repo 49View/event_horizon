@@ -216,6 +216,7 @@ public:
     void showBucket( int _bucket, bool visible );
 
     std::shared_ptr<Texture> addTextureResource( const ResourceTransfer<RawImage>& _val );
+    void updateTextureResource( const ResourceTransfer<RawImage>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ResourceTransfer<Material>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ShaderMaterial& _val, const std::string& _name );
     std::shared_ptr<GPUVData> addVDataResource( const ResourceTransfer<VData>& _val );

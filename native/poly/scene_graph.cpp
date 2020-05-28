@@ -466,6 +466,10 @@ ResourceRef SceneGraph::addRawImage( const ResourceRef& _key, const RawImage& _r
     return _key;
 }
 
+void SceneGraph::updateRawImage( const ResourceRef& _key ) {
+    B<IB>(_key).updateIM( getHash<RawImage>(_key) );
+}
+
 ResourceRef SceneGraph::addMaterial( const ResourceRef& _key, const Material& _res, HttpResouceCB _ccf ) {
     B<MB>(_key).addDF(_res, _ccf);
     return _key;

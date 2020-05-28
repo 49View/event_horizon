@@ -64,6 +64,9 @@ public:
     ResourceRef addIM( const R& _res ) {
         return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), {}, AddResourcePolicy::Immediate );
     }
+    void updateIM( CResourceRef _hash ) {
+        sg.template M<R>().update( _hash );
+    }
     ResourceRef addDF( const R& _res, HttpResouceCB _ccf = nullptr ) {
         return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), {}, AddResourcePolicy::Deferred, _ccf );
     }

@@ -280,6 +280,8 @@ public:
         SceneGraph::eventSceneCallback.emplace( _key, std::move(_value) );
     }
 
+    void updateRawImage      ( const ResourceRef& _key );
+
     template <typename T>
     T B( const std::string& _name ) {
         return T{ *this, _name };
