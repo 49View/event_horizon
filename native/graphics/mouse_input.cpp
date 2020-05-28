@@ -6,7 +6,7 @@
 #include "window_handling.hpp"
 #include "core/app_globals.h"
 
-Vector2f MouseInput::GScrollData{V2f::ZERO};
+Vector2f MouseInput::GScrollData{V2fc::ZERO};
 MouseButtonData MouseInput::GMouseButtonData{};
 
 Vector2f AggregatedInputData::getCurrMoveDiff( int _touchIndex, YGestureInvert yInv ) const {
@@ -40,7 +40,7 @@ void MouseInput::onTouchDown( int _touchIndex, const Vector2f& pos, UpdateSignal
     status[_touchIndex].hasTouchedUp = false;
 	status[_touchIndex].touchedDownFirstTime = (!status[_touchIndex].touchedDown);
 	status[_touchIndex].touchedDown = true;
-	status[_touchIndex].moveDiff = Vector2f::ZERO;
+	status[_touchIndex].moveDiff = V2fc::ZERO;
 	status[_touchIndex].rawTouchDownPos = pos;
 	status[_touchIndex].normTouchDownPos = pos / getScreenSizef;
     notify( *this, "OnTouchDown");
@@ -58,7 +58,7 @@ void MouseInput::onTouchMove( int _touchIndex, const Vector2f& pos, UpdateSignal
 		status[_touchIndex].moveDiff = pos - status[_touchIndex].gesturesTaps.back();
 		status[_touchIndex].gesturesTaps.push_back( pos );
 	} else {
-		status[_touchIndex].moveDiff = Vector2f::ZERO;
+		status[_touchIndex].moveDiff = V2fc::ZERO;
 		status[_touchIndex].moveDiffMousePick = Vector3f::ZERO;
 	}
 
@@ -78,7 +78,7 @@ void MouseInput::onTouchUp( int _touchIndex, const Vector2f& pos, UpdateSignals&
 	status[_touchIndex].hasTouchedUp = true;
 	status[_touchIndex].touchedDown = false;
 	status[_touchIndex].touchedDownFirstTime = false;
-    status[_touchIndex].moveDiff = Vector2f::ZERO;
+    status[_touchIndex].moveDiff = V2fc::ZERO;
 
     Vector2f xyd = status[_touchIndex].gesturesTaps.back() - status[_touchIndex].gesturesTaps.front();
 	// Check if a single tap was performed
@@ -189,7 +189,7 @@ void MouseInput::setPaused( bool isPaused ) {
 }
 
 Vector2f MouseInput::getLastTap( int _touchIndex, YGestureInvert yInv /*= YGestureInvert::No*/ ) const {
-	Vector2f pos = Vector2f::ZERO;
+	Vector2f pos = V2fc::ZERO;
 	if ( !status[_touchIndex].gesturesTaps.empty() ) {
 		pos = status[_touchIndex].gesturesTaps.back();
 		if ( yInv == YGestureInvert::Yes ) pos.invertY();
@@ -289,8 +289,8 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
 	
 	for ( size_t _touchIndex = 0; _touchIndex < NUM_MOUSE_BUTTONS; _touchIndex++ ) {
         status[_touchIndex].gestureTime += GameTime::getCurrTimeStep();
-        status[_touchIndex].gestureTapsFront = Vector2f::ZERO;
-        status[_touchIndex].gestureTapsBack = Vector2f::ZERO;
+        status[_touchIndex].gestureTapsFront = V2fc::ZERO;
+        status[_touchIndex].gestureTapsBack = V2fc::ZERO;
         status[_touchIndex].singleTapEvent = false;
         status[_touchIndex].doubleTapEvent = false;
         status[_touchIndex].hasTouchedUp = false;

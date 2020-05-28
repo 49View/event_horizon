@@ -23,7 +23,7 @@ int UiCheckBox::toggleState() {
 //
 //	if ( mTouchDownResult == TOUCH_RESULT_HIT ) {
 //		AcceptInputs( true );
-//		animateTo( mScale, Vector2f::ONE, 0.05f, 0.0f );
+//		animateTo( mScale, V2fc::ONE, 0.05f, 0.0f );
 //		if ( MI.wasTouchUpSingleEvent() && mCallbackOnToggleAction ) {
 //			auto bs = toggleState();
 //			mCallbackOnToggleAction( bs );

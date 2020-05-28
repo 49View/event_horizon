@@ -149,15 +149,15 @@ std::vector<Vector3f> roundedCornerFanFromRect( const JMATH::Rect2f& rect, float
 
     float cornerRatio = cornerAngle;
 
-    V2f tl1 = rect.topLeft() + (V2f::Y_AXIS * cornerRatio);
-    V2f tl2 = rect.topLeft() + (V2f::X_AXIS * cornerRatio);
-    V2f tr1 = rect.topRight() + (V2f::X_AXIS_NEG * cornerRatio);
-    V2f tr2 = rect.topRight() + (V2f::Y_AXIS * cornerRatio);
+    V2f tl1 = rect.topLeft() + (V2fc::Y_AXIS * cornerRatio);
+    V2f tl2 = rect.topLeft() + (V2fc::X_AXIS * cornerRatio);
+    V2f tr1 = rect.topRight() + (V2fc::X_AXIS_NEG * cornerRatio);
+    V2f tr2 = rect.topRight() + (V2fc::Y_AXIS * cornerRatio);
 
-    V2f br1 = rect.bottomRight() + (V2f::Y_AXIS_NEG * cornerRatio);
-    V2f br2 = rect.bottomRight() + (V2f::X_AXIS_NEG * cornerRatio);
-    V2f bl1 = rect.bottomLeft() + (V2f::X_AXIS * cornerRatio);
-    V2f bl2 = rect.bottomLeft() + (V2f::Y_AXIS_NEG *cornerRatio);
+    V2f br1 = rect.bottomRight() + (V2fc::Y_AXIS_NEG * cornerRatio);
+    V2f br2 = rect.bottomRight() + (V2fc::X_AXIS_NEG * cornerRatio);
+    V2f bl1 = rect.bottomLeft() + (V2fc::X_AXIS * cornerRatio);
+    V2f bl2 = rect.bottomLeft() + (V2fc::Y_AXIS_NEG *cornerRatio);
 
     innerRoundCornerInter( ret, tl1, rect.topLeft(),     tl2 );
     innerRoundCornerInter( ret, tr1, rect.topRight(),    tr2 );

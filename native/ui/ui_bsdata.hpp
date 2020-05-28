@@ -20,7 +20,7 @@ JSONDATA ( LayoutElement, control, position, sizeType, size, color, backGroundCo
 	std::string control;
 	std::string	position;
     std::string sizeType;
-	Vector2f	size = Vector2f::ZERO;
+	Vector2f	size = V2fc::ZERO;
 	Color4f     color = Color4f{ 255.0f, 255.0f, 255.0f, 1.0f };
 	Color4f     backGroundColor = Color4f::HUGE_VALUE_NEG;
     std::string name;
@@ -35,7 +35,7 @@ JSONDATA ( LayoutElement, control, position, sizeType, size, color, backGroundCo
 
 JSONDATA_R ( Layout, name, size, margins, padding, elements )
 	std::string name;
-	Vector2f	size = Vector2f::ZERO;
+	Vector2f	size = V2fc::ZERO;
     Vector4f	margins = Vector4f{ 0.0f };
     Vector4f	padding = Vector4f{ 0.0f };
 	std::vector<LayoutElement> elements;
@@ -53,7 +53,7 @@ JSONDATA( LayoutArrangement, layout, is_array, is_dynamic, position, margins, st
 JSONDATA_R( UIView, name, rootPosition, customRootPosition, margins, arrangements )
 	std::string name;
 	std::string rootPosition;
-	Vector2f	customRootPosition = Vector2f::Y_AXIS;
+	Vector2f	customRootPosition = V2fc::Y_AXIS;
 	Vector4f	margins = Vector4f{ 0.0f };
 	std::vector<LayoutArrangement> arrangements;
 

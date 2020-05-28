@@ -52,8 +52,8 @@ struct TouchStatus {
     float gestureTime{0.0f}; // From Touch Down to Up
     std::vector<float> touchupTimeStamps{0.0f};
 
-    Vector2f rawTouchDownPos {Vector2f::ZERO};
-    Vector2f normTouchDownPos{Vector2f::ZERO};
+    Vector2f rawTouchDownPos {V2fc::ZERO};
+    Vector2f normTouchDownPos{V2fc::ZERO};
 
     int32_t touchPressTick{0};
 
@@ -62,11 +62,11 @@ struct TouchStatus {
     double xposOld {0.0};
     double yposOld {0.0};
 
-    Vector2f  moveDiff            {V2f::ZERO};
+    Vector2f  moveDiff            {V2fc::ZERO};
     Vector3f  moveDiffMousePick   {V3f::ZERO};
-    Vector2f  singleTapPos        {V2f::ZERO};
-    Vector2f  gestureTapsFront    {V2f::ZERO};
-    Vector2f  gestureTapsBack     {V2f::ZERO};
+    Vector2f  singleTapPos        {V2fc::ZERO};
+    Vector2f  gestureTapsFront    {V2fc::ZERO};
+    Vector2f  gestureTapsBack     {V2fc::ZERO};
     V2fVector gesturesTaps{};
 
     MouseButtonStatusValues mouseButtonStatus{MouseButtonStatusValues::UNKNOWN};

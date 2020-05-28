@@ -3,18 +3,6 @@
 #include "matrix2f.h"
 #include "math_util.h"
 
-const Vector2f Vector2f::ZERO = Vector2f( 0.0f, 0.0f );
-const Vector2f Vector2f::X_AXIS = Vector2f( 1.0f, 0.0f );
-const Vector2f Vector2f::Y_AXIS = Vector2f( 0.0f, 1.0f );
-const Vector2f Vector2f::X_AXIS_NEG = Vector2f( -1.0f, 0.0f );
-const Vector2f Vector2f::Y_AXIS_NEG = Vector2f( 0.0f, -1.0f );
-const Vector2f Vector2f::Y_INV = Vector2f( 1.0f, -1.0f );
-const Vector2f Vector2f::X_INV = Vector2f( -1.0f, 1.0f );
-const Vector2f Vector2f::ONE = Vector2f( 1.0f, 1.0f );
-const Vector2f Vector2f::HUGE_VALUE_POS = Vector2f( std::numeric_limits<float>::max(), std::numeric_limits<float>::max() );
-const Vector2f Vector2f::HUGE_VALUE_NEG = Vector2f( std::numeric_limits<float>::lowest(),
-													std::numeric_limits<float>::lowest() );
-
 int64_t Vector2f::hash() const {
 	size_t h1 = std::hash<float>()( mX );
 	size_t h2 = std::hash<float>()( mY );
@@ -109,7 +97,7 @@ bool distanceFromLineCapsule( const Vector2f& p, const Vector2f& p1, const Vecto
 
 bool isPointInsideLineCapsule( const Vector2f& p, const Vector2f& p1, const Vector2f& p2, float radius ) {
 	float ret = 0.0f;
-	Vector2f pointOfIntersection = Vector2f::ZERO;
+	Vector2f pointOfIntersection = V2fc::ZERO;
 
 	return distanceFromLineCapsule( p, p1, p2, radius, ret, pointOfIntersection );
 }
@@ -171,23 +159,23 @@ void removeCollinear( vector2fList& cs, float epsilon ) {
 		if ( isCollinear( currPoint1, currPoint2, currPoint3, epsilon ) ) {
 			// check if degenerate
 			if ( isVerySimilar( currPoint1, currPoint3, epsilon ) ) {
-				cc[t] = Vector2f::HUGE_VALUE_POS;
+				cc[t] = V2fc::HUGE_VALUE_POS;
 			} else {
-				cc[t1] = Vector2f::HUGE_VALUE_POS;
+				cc[t1] = V2fc::HUGE_VALUE_POS;
 			}
 		}
 	}
 
 	//int ccTz = 0;
 	//for ( auto t = 0; t < csize; t++ ) {
-	//	if ( cc[t] == Vector2f::HUGE_VALUE_POS ) ccTz++;
+	//	if ( cc[t] == V2fc::HUGE_VALUE_POS ) ccTz++;
 	//}
 	//ASSERT( ccTz < csize );
 
 	for ( auto t = 0; t < csize; t++ ) {
-		if ( cc[t] == Vector2f::HUGE_VALUE_POS ) cs[t] = cc[t];
+		if ( cc[t] == V2fc::HUGE_VALUE_POS ) cs[t] = cc[t];
 	}
-	cs.erase( remove_if( cs.begin(), cs.end(), []( Vector2f const& sc ) -> bool { return sc == Vector2f::HUGE_VALUE_POS; } ), cs.end() );
+	cs.erase( remove_if( cs.begin(), cs.end(), []( Vector2f const& sc ) -> bool { return sc == V2fc::HUGE_VALUE_POS; } ), cs.end() );
 }
 
 bool pointWithinSegment( const V2f& p, const V2f& p1, const V2f& p2 ) {
@@ -227,8 +215,8 @@ bool intersection(const V2f& p, const V2f& p2, const V2f& q, const V2f& q2, Vect
         // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
         // then the two lines are overlapping,
 //        if (considerCollinearOverlapAsIntersect)
-        return ( V2f::ZERO <= ( q - p ) * r && ( q - p ) * r <= r * r ) ||
-               ( V2f::ZERO <= ( p - q ) * s && ( p - q ) * s <= s * s );
+        return ( V2fc::ZERO <= ( q - p ) * r && ( q - p ) * r <= r * r ) ||
+               ( V2fc::ZERO <= ( p - q ) * s && ( p - q ) * s <= s * s );
 
         // 2. If neither 0 <= (q - p) * r = r * r nor 0 <= (p - q) * s <= s * s
         // then the two lines are collinear but disjoint.
@@ -272,8 +260,8 @@ bool intersection(const V2f& p, const V2f& p2, const V2f& q, const V2f& q2, floa
         // 1. If either  0 <= (q - p) * r <= r * r or 0 <= (p - q) * s <= * s
         // then the two lines are overlapping,
 //        if (considerCollinearOverlapAsIntersect)
-        return ( V2f::ZERO <= ( q - p ) * r && ( q - p ) * r <= r * r ) ||
-               ( V2f::ZERO <= ( p - q ) * s && ( p - q ) * s <= s * s );
+        return ( V2fc::ZERO <= ( q - p ) * r && ( q - p ) * r <= r * r ) ||
+               ( V2fc::ZERO <= ( p - q ) * s && ( p - q ) * s <= s * s );
 
         // 2. If neither 0 <= (q - p) * r = r * r nor 0 <= (p - q) * s <= s * s
         // then the two lines are collinear but disjoint.

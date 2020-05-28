@@ -47,7 +47,7 @@ ColorScheme::ColorScheme( const std::string& colorDescriptor ) {
 
 void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
     auto ssBBox = bbox3d->front();
-    ssBBox.translate( V2f::Y_AXIS_NEG * ssBBox.height() );
+    ssBBox.translate( V2fc::Y_AXIS_NEG * ssBBox.height() );
 
     if ( type() == UIT::separator_h() ) {
         defaultBackgroundColor = C4f::WHITE.A(0.4f);
@@ -473,7 +473,7 @@ void UIViewContainer::addLabel( const UIFontText& _text,
     auto fsize = FontUtils::measure( _text.text, rsg.SG().get<Font>(_text.fontRef).get(), _text.height ).size();
     fsize.setY( _text.height );
     auto child = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), UIT::label, MScale2d{fsize}, _text );
-//    child->BBox3d( V2f::ZERO, fsize );
+//    child->BBox3d( V2fc::ZERO, fsize );
     auto tpos = caret;
     if ( lsize().x() != 0.0f ) tpos.setX( (lsize().x() - fsize.x()*0.5f) );
     node->addChildren( child, tpos );

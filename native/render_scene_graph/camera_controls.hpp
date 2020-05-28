@@ -44,7 +44,7 @@ protected:
     float baseVelocity = 0.06f;
     float baseAngularVelocity = 0.4f;
     float currentVelocity = 0.0f;
-    V2f currentAngularVelocity = V2f::ZERO;
+    V2f currentAngularVelocity = V2fc::ZERO;
     float topVelocity = 0.05f;
     float dampingVelocityFactor = 0.985f;
     float dampingAngularVelocityFactor = 0.985f;

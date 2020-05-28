@@ -29,8 +29,8 @@ public:
 	}
 
 	explicit Matrix3fAffine( const Vector2f& position ) {
-		mRows[0] = Vector2f::X_AXIS;
-		mRows[1] = Vector2f::Y_AXIS;
+		mRows[0] = V2fc::X_AXIS;
+		mRows[1] = V2fc::Y_AXIS;
 		mRows[2] = position;
 	}
 

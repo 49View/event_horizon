@@ -303,7 +303,7 @@ public:
 	void deserialize( const char* name, std::vector<Vector2f>& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
 			for ( SizeType t = 0; t < ( *( value ) )[name].Size(); t++ ) {
-				Vector2f v1 = Vector2f::ZERO;
+				Vector2f v1 = V2fc::ZERO;
 				for ( SizeType m = 0; m < ( *( value ) )[name][t].Size(); m++ ) {
 					v1[m] = ( ( *( value ) )[name][t][m].GetFloat() );
 				}
@@ -316,7 +316,7 @@ public:
     void deserialize( const char* name, VectorWrap<T>& ret ) const {
         if ( value->FindMember( name ) != value->MemberEnd() ) {
             for ( SizeType t = 0; t < ( *( value ) )[name]["v"].Size(); t++ ) {
-                Vector2f v1 = Vector2f::ZERO;
+                Vector2f v1 = V2fc::ZERO;
                 for ( SizeType m = 0; m < ( *( value ) )[name]["v"][t].Size(); m++ ) {
                     v1[m] = ( ( *( value ) )[name][t][m].GetFloat() );
                 }

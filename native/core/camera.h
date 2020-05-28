@@ -184,7 +184,7 @@ private:
     floata mFov;
 
     V3f incrementalEulerQuatAngle = Vector3f::ZERO;
-    V2f sphericalAcc = V2f::ZERO;
+    V2f sphericalAcc = V2fc::ZERO;
     V3f mOrbitStrafe = V3f::ZERO;
     float mOrbitDistance = 2.0f;
 

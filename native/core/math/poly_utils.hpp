@@ -97,7 +97,7 @@ std::vector<V3f> forceWindingOrder( const std::vector<V3f>& _input, const V3f& a
     return ret;
 }
 
-std::vector<Vector3f> createQuadPoints( const Vector2f& size = Vector2f::ONE );
+std::vector<Vector3f> createQuadPoints( const Vector2f& size = V2fc::ONE );
 
 template<typename T>
 std::vector<T> lineRL( const T& direction, float length ) {

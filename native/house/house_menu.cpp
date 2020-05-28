@@ -142,5 +142,5 @@ bool HouseMenu::isManagingObject( int64_t id ) {
 }
 
 void HouseMenu::executeTriggerPressed( [[maybe_unused]] const TriggerPressedInfo& i ) {
-	//mRoot->onTouchUp( i.hitInfo.objectId - menuId, /*i.hitInfo.finalPosition*/ Vector2f::ZERO );
+	//mRoot->onTouchUp( i.hitInfo.objectId - menuId, /*i.hitInfo.finalPosition*/ V2fc::ZERO );
 }

@@ -33,9 +33,9 @@ private:
 	Matrix4f depthViewMatrix;
 	Vector3f mShadowMapLightSourcePos;
 	Vector3f mShadowMapSunLightDir = Vector3f::Z_AXIS_NEG;
-	Vector2f mXFrustom = Vector2f::ZERO;
-	Vector2f mYFrustom = Vector2f::ZERO;
-	Vector2f mZFrustom = Vector2f::ZERO;
+	Vector2f mXFrustom = V2fc::ZERO;
+	Vector2f mYFrustom = V2fc::ZERO;
+	Vector2f mZFrustom = V2fc::ZERO;
 	Vector3f mFrustomCenter = V3f::ZERO;
 };
 

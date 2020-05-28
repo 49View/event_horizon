@@ -142,7 +142,7 @@ namespace GLTF2Service {
                 NTBFill |= TEXCOORD_MASK;
                 auto fillingUV = fillData<Vector2f>( *model, v );
                 geom->fillUV( fillingUV, 0 );
-                geom->fillSetUV( fillingUV.size(), V2f::ZERO, 1 ); // By default fill second uvs anyway
+                geom->fillSetUV( fillingUV.size(), V2fc::ZERO, 1 ); // By default fill second uvs anyway
             } else if ( k == "TEXCOORD_1" ) {
 //                geom->fillUV( fillData<Vector2f>( *model, v ), 1 );
             }

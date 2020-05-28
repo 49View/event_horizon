@@ -829,7 +829,7 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
 
     if ( rds.fds.font == nullptr ) return nullptr;
 
-    Vector2f cursor = Vector2f::ZERO;
+    Vector2f cursor = V2fc::ZERO;
 
     size_t totalVerts = 0;
     for ( size_t t = 0; t < rds.fds.text.size(); t++ ) {

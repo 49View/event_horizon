@@ -61,12 +61,12 @@ TouchResult UiControl::checkTouchDown( const Vector2f& pos ) const {
 
 void UiControl::touchDownAnimation() {
     AcceptInputs( false );
-//    animateTo( mScale, Vector2f::ONE * 0.95f, 0.05f, 0.0f );
+//    animateTo( mScale, V2fc::ONE * 0.95f, 0.05f, 0.0f );
 }
 
 void UiControl::touchUpAnimation() {
     AcceptInputs( true );
-//    animateTo( mScale, Vector2f::ONE, 0.05f, 0.0f );
+//    animateTo( mScale, V2fc::ONE, 0.05f, 0.0f );
 }
 
 void UiControl::addFlag( UiControlFlag flag ) {

@@ -25,10 +25,10 @@ static inline TextureFillModeScalers getTextureFillModeScalers( const RectFillMo
                                                                 const Vector2f& size, float _aspectRation ) {
     // Those 2 variables handle basically a "AspectFit" scaling, in which the image is scaled in a way the whole image is present maintaining the aspect ratio.
     Vector2f texAspectVector = size.vectorRatio();
-    Vector2f texAspectVectorOffset = Vector2f::ZERO;
+    Vector2f texAspectVectorOffset = V2fc::ZERO;
 
     if ( fm == RectFillMode::Scale ) {
-        texAspectVector = Vector2f::ONE;
+        texAspectVector = V2fc::ONE;
     }
 
     if ( fm == RectFillMode::AspectFill ) {
@@ -48,7 +48,7 @@ static inline TextureFillModeScalers getTextureFillModeScalers( const RectFillMo
         if ( sizeTexRatio > 1.0f ) {
             texAspectVector = { sizeTexRatio, 1.0f };
             texAspectVectorOffset = { sizeTexRatio * -0.5f + 0.5f, 0.0f };
-            if ( fm == RectFillMode::AspectFitLeft ) texAspectVectorOffset = Vector2f::ZERO;
+            if ( fm == RectFillMode::AspectFitLeft ) texAspectVectorOffset = V2fc::ZERO;
             if ( fm == RectFillMode::AspectFitRight )
                 texAspectVectorOffset.setX( texAspectVectorOffset.x() * 2.0f );
         } else {
@@ -63,12 +63,12 @@ static inline TextureFillModeScalers getTextureFillModeScalers( const RectFillMo
 
 static inline TextureFillModeScalers getTextureFillModeScalers( const RectFillMode fm, const Vector2f& size ) {
     // Those 2 variables handle basically a "AspectFit" scaling, in which the image is scaled in a way the whole image is present maintaining the aspect ratio.
-    Vector2f texAspectVector = Vector2f::ONE;// size.vectorRatio();
-    Vector2f texAspectVectorOffset = Vector2f::ZERO;
+    Vector2f texAspectVector = V2fc::ONE;// size.vectorRatio();
+    Vector2f texAspectVectorOffset = V2fc::ZERO;
 
     switch ( fm ) {
         case RectFillMode::Scale:
-            texAspectVector = Vector2f::ONE;
+            texAspectVector = V2fc::ONE;
             break;
         case RectFillMode::AspectFit:
         case RectFillMode::AspectFill:

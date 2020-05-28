@@ -141,7 +141,7 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
         _cam->moveForward(moveForward);
         _cam->strafe(strafe);
         _cam->moveUp(moveUp);
-        if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO ) {
+        if ( mi.moveDiffSS(TOUCH_ZERO) != V2fc::ZERO ) {
             auto quatAngles = V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f };
             _cam->incrementQuatAngles(quatAngles);
         }
@@ -195,8 +195,8 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
 
     auto[moveForward, strafe, moveUp]  = wasd(mi);
     if ( isTouchBased() ) {
-        if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO &&
-             mi.moveDiffSS(TOUCH_ONE) != Vector2f::ZERO &&
+        if ( mi.moveDiffSS(TOUCH_ZERO) != V2fc::ZERO &&
+             mi.moveDiffSS(TOUCH_ONE) != V2fc::ZERO &&
              mi.isMouseTouchedDown(TOUCH_ZERO) &&
              mi.isMouseTouchedDown(TOUCH_ONE) ) {
             moveForward += mi.moveDiffSS(TOUCH_ONE).y() * -4.0f;
@@ -210,8 +210,8 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     auto mdss = mi.moveDiffSS(TOUCH_ZERO);
     auto mdss1 = mi.moveDiffSS(TOUCH_ONE);
     float currAngularVelocity = baseAngularVelocity;// * ( GameTime::getCurrTimeStep() / ONE_OVER_60HZ );
-    if ( mdss != Vector2f::ZERO && mdss1 == V2f::ZERO ) {
-        auto angledd = isTouchBased() ? mdss.yx() * V2f::Y_INV : mdss.yx();
+    if ( mdss != V2fc::ZERO && mdss1 == V2fc::ZERO ) {
+        auto angledd = isTouchBased() ? mdss.yx() * V2fc::Y_INV : mdss.yx();
         currentAngularVelocity += V2f{ angledd.x() * log10(1.0f + currAngularVelocity),
                                        angledd.y() * log10(1.0f + currAngularVelocity) };
     }
@@ -252,7 +252,18 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
     if ( mi.isMouseTouchedDown(TOUCH_ONE) ) {
         moveUp = mi.moveDiff(TOUCH_ONE).y();
         strafe = mi.moveDiff(TOUCH_ONE).x();
+
     }
+
+    if ( mi.isMouseTouchedDown(TOUCH_ZERO) ) {
+//        auto pickedRay = _cam->rayViewportPickIntersection(mi.mousePos(TOUCH_ZERO));
+//        Plane3f zeroPlane{V3f::UP_AXIS, 0.0f};
+//        auto is = zeroPlane.intersectLine(pickedRay.rayNear, pickedRay.rayFar) * V3f{1.0f, 1.0f, -1.0f};
+//        LOGRS("Mouse Position on the screen near: " << pickedRay.rayNear );
+//        LOGRS("Mouse Position on the screen far: " << pickedRay.rayFar );
+//        LOGRS("Intersection with screen: " << is );
+    }
+
     moveForward = mi.getScrollValue(); // It's safe to call it every frame as no gesture on wheel/magic mouse
     _cam->moveForward(moveForward);
     _cam->strafe(strafe);
@@ -290,10 +301,10 @@ void CameraControlOrbit3d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam
         _cam->incrementOrbitDistance(-mi.getScrollValue());
     }
 
-    if ( mi.moveDiffSS(TOUCH_ZERO) != Vector2f::ZERO ) {
+    if ( mi.moveDiffSS(TOUCH_ZERO) != V2fc::ZERO ) {
         _cam->incrementSphericalAngles(mi.moveDiffSS(TOUCH_ZERO));
     }
-    if ( mi.moveDiffSS(TOUCH_ONE) != Vector2f::ZERO ) {
+    if ( mi.moveDiffSS(TOUCH_ONE) != V2fc::ZERO ) {
         _cam->strafe(mi.moveDiff(TOUCH_ONE).x());
         _cam->moveUp(mi.moveDiff(TOUCH_ONE).y());
     }

@@ -163,7 +163,7 @@ namespace VDataServices {
 
     void buildInternal( const GT::Text& _d, std::shared_ptr<VData> _ret ) {
         float gliphScaler = 1000.0f; // It looks like glyphs are stored in a box [1000,1000], so we normalise it to [1,1]
-        Vector2f cursor = Vector2f::ZERO;
+        Vector2f cursor = V2fc::ZERO;
         Topology mesh;
         size_t q = 0;
 
@@ -290,21 +290,21 @@ namespace VDataServices {
         ASSERT( !_d.profile->Points().empty() );
 
         Profile lProfile{ *_d.profile.get() };
-        Vector2f lRaise{V2f::ZERO};
+        Vector2f lRaise{V2fc::ZERO};
         if ( _d.fraise != PolyRaise::None ) {
             switch ( _d.fraise ) {
                 case PolyRaise::None:break;
                 case PolyRaise::HorizontalPos:
-                    lRaise= ( Vector2f::X_AXIS * lProfile.width() );
+                    lRaise= ( V2fc::X_AXIS * lProfile.width() );
                     break;
                 case PolyRaise::HorizontalNeg:
-                    lRaise= ( Vector2f::X_AXIS_NEG * lProfile.width());
+                    lRaise= ( V2fc::X_AXIS_NEG * lProfile.width());
                     break;
                 case PolyRaise::VerticalPos:
-                    lRaise= ( Vector2f::Y_AXIS * lProfile.height() );
+                    lRaise= ( V2fc::Y_AXIS * lProfile.height() );
                     break;
                 case PolyRaise::VerticalNeg:
-                    lRaise= ( Vector2f::Y_AXIS_NEG * lProfile.height() );
+                    lRaise= ( V2fc::Y_AXIS_NEG * lProfile.height() );
                     break;
             };
         }

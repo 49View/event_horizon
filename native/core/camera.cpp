@@ -577,7 +577,7 @@ void Camera::pan( const Vector3f &posDiff ) {
 
 Vector3f Camera::centerScreenOn( const Vector2f &area, const float bMiddleIsCenter, const float slack ) {
     float mainSize = ( area.ratio() > mViewPort.ratio()) ? ( area.x() * 0.5f ) / mViewPort.ratio() : area.y() * 0.5f;
-    Vector2f center = bMiddleIsCenter ? area * -0.5f : Vector2f::ZERO;
+    Vector2f center = bMiddleIsCenter ? area * -0.5f : V2fc::ZERO;
     float aperture = ( tanf( degToRad( 140.0f )));
     return { center, ( -mainSize * ( 1.0f + slack )) / aperture };
 }

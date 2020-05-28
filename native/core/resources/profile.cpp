@@ -232,7 +232,7 @@ void Profile::createArbitrary( const std::vector<Vector2f>& points ) {
 }
 
 void Profile::raise( const Vector2f& v ) {
-	if ( v == Vector2f::ZERO ) return;
+	if ( v == V2fc::ZERO ) return;
 
 	for ( auto& p : mPoints.v ) {
 		p += v;
@@ -258,7 +258,7 @@ void Profile::mirror( const Vector2f& axis ) {
 
 void Profile::flip( const Vector2f& axis ) {
 
-	if ( axis == Vector2f::ZERO ) return;
+	if ( axis == V2fc::ZERO ) return;
 
 	std::vector<Vector2f> pointsCopy;
 	for ( auto& v : mPoints.v ) {
@@ -363,7 +363,7 @@ ProfileMaker& ProfileMaker::ay( float radius, int32_t _subdivs ) {
 }
 
 ProfileMaker& ProfileMaker::o() {
-	add( V2f::ZERO );
+	add( V2fc::ZERO );
 	return *this;
 }
 

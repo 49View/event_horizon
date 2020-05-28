@@ -39,8 +39,8 @@ struct UiControlInitData {
 	std::string       control;
 	UiControlPosition position = UiControlPosition::Invalid;
 	UiControlSizeType sizeType = UiControlSizeType::Invalid;
-	Vector2f		  origin = Vector2f::ZERO;
-	Vector2f		  size = Vector2f::ZERO;
+	Vector2f		  origin = V2fc::ZERO;
+	Vector2f		  size = V2fc::ZERO;
 	Color4f			  color = Vector4f::WHITE;
 	Color4f			  backGroundColor = Color4f::HUGE_VALUE_NEG;
 	float 			  alpha = 1.0f;
@@ -56,7 +56,7 @@ struct UiControlInitData {
 struct UiControlBuilder {
 	const std::string name{};
 	Vector3f pos = Vector3f::ZERO;
-	Vector2f size = Vector2f::ZERO;
+	Vector2f size = V2fc::ZERO;
 	Color4f mainColor = Color4f::ALMOND;
 	Color4f backgroundColor = Vector4f::HUGE_VALUE_NEG;
     float alpha = 1.0f;

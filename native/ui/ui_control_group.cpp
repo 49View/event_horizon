@@ -48,10 +48,10 @@ Vector2f UiControlGroup::getStartingOffsetFromRootPosition( const std::string& _
     if ( _rootPos == "Custom" ) {
         return _customTRootPos;
     } else if ( _rootPos == "TopLeft" ) {
-        return Vector2f::Y_AXIS;
+        return V2fc::Y_AXIS;
     }
 
-    return Vector2f::ZERO;
+    return V2fc::ZERO;
 }
 
 void UiControlGroup::pushAnchor( const Vector2f& _size, const UiAlignElement& _margins ) {
@@ -193,8 +193,8 @@ void UiControlGroup::advanceZ( const LayoutElement& _element, int /*ai*/ ) {
 void UiControlGroup::push_layout( const LayoutArrangement& _layoutArrangement ) {
     auto& l = _layoutArrangement.layout;
 
-    Vector2f screen2dRatio = mIsScreenSpace ? getScreenAspectRatioVector : Vector2f::ONE;
-    mRect = Rect2f{ Vector2f::ZERO, l.size * screen2dRatio };
+    Vector2f screen2dRatio = mIsScreenSpace ? getScreenAspectRatioVector : V2fc::ONE;
+    mRect = Rect2f{ V2fc::ZERO, l.size * screen2dRatio };
 
     int maxArrayInjectionElements = getNumberOfArrayLayoutsFromInjection( l, _layoutArrangement );
 

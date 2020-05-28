@@ -62,11 +62,11 @@ public:
 	}
 
 	Rect2f getScreenRect() const {
-		return Rect2f{ Vector2f::ZERO, mScreenSizef };
+		return Rect2f{ V2fc::ZERO, mScreenSizef };
 	}
 
 	Rect2f getScreenRectUI() const {
-		return Rect2f{ Vector2f::ZERO, mScreenSizefUI };
+		return Rect2f{ V2fc::ZERO, mScreenSizefUI };
 	}
 
 	Vector2f getAspectRatio2dFromUnnormalizedScreenPos( const Vector2f& _pos ) const {
@@ -81,9 +81,9 @@ public:
 	}
 
 private:
-	Vector2f mScreenSizef=Vector2f::ZERO;
+	Vector2f mScreenSizef=V2fc::ZERO;
 	Vector2i mScreenSizei=Vector2i::ZERO;
-    Vector2f mScreenSizefUI=Vector2f::ZERO;
+    Vector2f mScreenSizefUI=V2fc::ZERO;
 	float	 mFootageFrameRateNormal{0.0f};
 };
 

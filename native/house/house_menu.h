@@ -38,8 +38,8 @@ private:
 	void CreatePageSelector();
 
 	float rowWidth() const { return ( tilesPerRow * tileSize.x() ) + ( tilesPerRow * tilesMargins.x() * 2.0f ) + 0.001f; }
-	Vector2f headerSize() const { return showHeader ? Vector2f{ rowWidth(), logoSize.y() } : Vector2f::ZERO; }
-	Vector2f footerSize() const { return showFooter ? Vector2f{ rowWidth(), logoSize.y() } : Vector2f::ZERO; }
+	Vector2f headerSize() const { return showHeader ? Vector2f{ rowWidth(), logoSize.y() } : V2fc::ZERO; }
+	Vector2f footerSize() const { return showFooter ? Vector2f{ rowWidth(), logoSize.y() } : V2fc::ZERO; }
 	Vector2f bodySize() const { return Vector2f{ rowWidth(), rows * ( tileSize.y() + tilesMargins.y() + tilesMargins.w() ) }; }
 	Vector2f menuSize() const { return headerSize() + bodySize() + footerSize(); }
 
@@ -53,7 +53,7 @@ private:
 
 	bool mIsVisible = false;
 
-	Vector2f initialPositon = Vector2f::ONE * -2.0f;
+	Vector2f initialPositon = V2fc::ONE * -2.0f;
 
 	//x is left, y is top, z is right, w is bottom
 	Vector4f tilesMargins = Vector4f::ONE * 0.005f;
@@ -62,7 +62,7 @@ private:
 	Vector4f navigationMargins = Vector4f::ONE * 0.05f;
 
 	//x is the width, y the height
-	Vector2f tileSize = Vector2f::ONE * 0.05f;
+	Vector2f tileSize = V2fc::ONE * 0.05f;
 	Vector2f logoSize = Vector2f{ 1.0, 0.5 };
 
 	size_t tilesPerRow = 3;

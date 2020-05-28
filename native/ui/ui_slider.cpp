@@ -32,7 +32,7 @@ void UiSlider::setValuesRange( const int _vstart, const int _vend, const int _cu
 //
 //	if ( mTouchDownResult == TOUCH_RESULT_HIT ) {
 //		AcceptInputs( true );
-//		animateTo( mScale, Vector2f::ONE, 0.05f, 0.0f );
+//		animateTo( mScale, V2fc::ONE, 0.05f, 0.0f );
 //		mTouchDownResult = TOUCH_RESULT_NOT_HIT;
 //		if ( mCallbackOnClickAction ) mCallbackOnClickAction();
 //		return true;

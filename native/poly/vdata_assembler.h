@@ -328,7 +328,7 @@ namespace VDataServices {
 //                             std::vector<Vector3f> _verts,
 //                             const FollowerFlags f = FollowerFlags::Defaults,
 //                             const PolyRaise _r = PolyRaise::None,
-//                             const Vector2f& _flipVector = Vector2f::ZERO,
+//                             const Vector2f& _flipVector = V2fc::ZERO,
 //                             FollowerGap _gaps = FollowerGap::Empty,
 //                             const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
 //                             mProfile( std::move( _profile )), mVerts( std::move( _verts )),
@@ -342,9 +342,9 @@ namespace VDataServices {
 //    std::shared_ptr<Profile> mProfile;
 //    std::vector<Vector3f> mVerts;
 //    FollowerFlags followersFlags = FollowerFlags::Defaults;
-//    Vector2f mRaise = Vector2f::ZERO;
+//    Vector2f mRaise = V2fc::ZERO;
 //    PolyRaise mRaiseEnum = PolyRaise::None;
-//    Vector2f mFlipVector = Vector2f::ZERO;
+//    Vector2f mFlipVector = V2fc::ZERO;
 //    FollowerGap mGaps = FollowerGap::Empty;
 //    Vector3f mSuggestedAxis = Vector3f::ZERO;
 //};

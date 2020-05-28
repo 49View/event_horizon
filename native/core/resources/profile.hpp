@@ -72,8 +72,8 @@ private:
 	void calcBBox();
 
 private:
-	V2f		        		mBBox = V2f::ZERO;
-	V2f                     mTotalBBox = V2f::ZERO;
+	V2f		        		mBBox = V2fc::ZERO;
+	V2f                     mTotalBBox = V2fc::ZERO;
 	V2fVectorWrap           mPoints;
 	std::vector<float>		mLengths;
 	float					mPerimeter = 0.0f;
@@ -99,7 +99,7 @@ public:
 private:
 	void add( const V2f& _p );
 	int setPointerSubdivs( int _sd ) const;
-	V2f pointer() const { return points.empty() ? V2f::ZERO : points.back(); }
+	V2f pointer() const { return points.empty() ? V2fc::ZERO : points.back(); }
 
 private:
 	std::string name;

@@ -62,7 +62,7 @@ public:
 
 	explicit Rect2f( const Vector2f& topLeft ) {
 		mTopLeft = topLeft;
-		mBottomRight = Vector2f::ZERO;
+		mBottomRight = V2fc::ZERO;
 	}
 
     Rect2f( const Vector2f& _center, RectV2f rt) { // = RectV2f::Centered
@@ -346,7 +346,7 @@ public:
 
 	void cropOnMainAxis( const Vector2f& cropPerc ) {
 		ASSERT( cropPerc.x() <= 1.0f && cropPerc.y() <= 1.0f );
-		Vector2f crop = Vector2f::ONE;
+		Vector2f crop = V2fc::ONE;
 
 		if ( width() > height() ) {
 			crop = Vector2f( ( width() * cropPerc.x() ) * 0.5f, ( height() * cropPerc.y() ) * 0.5f );
@@ -383,7 +383,7 @@ public:
 
 	// This return a vector2f normalized [0...1] against the rect
 	// optionally it will scale it by the vscale vector
-	Vector2f normalizeWithinRect( const Vector2f& v, const Vector2f& vscale = Vector2f::ONE ) const {
+	Vector2f normalizeWithinRect( const Vector2f& v, const Vector2f& vscale = V2fc::ONE ) const {
 		Vector2f offCenter = v - topLeft();
 		return  absolute( ( offCenter / Vector2f( width(), height() ) ) * vscale );
 	}
@@ -471,9 +471,9 @@ public:
 		case JMATH::Rect2fFeature::bottomRight:
 		return bottomRight();
 		default:
-		return Vector2f::ZERO;
+		return V2fc::ZERO;
 		}
-		return Vector2f::ZERO;
+		return V2fc::ZERO;
 	}
 
 	JMATH::Rect2fFeatureT isPointNearAFeature( const Vector2f& pos, float minDist, float& ret_distance ) {

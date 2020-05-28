@@ -70,7 +70,7 @@ void CameraRig::init( const Rect2f& _viewport ) {
 //CameraRig::CameraRig( const std::string& _name, std::shared_ptr<Framebuffer> _fb ) {
 //    ASSERT(_fb != nullptr);
 //    mName = _name;
-//    mViewport = Rect2f{ Vector2f::ZERO, {_fb->getWidth(), _fb->getHeight()} };
+//    mViewport = Rect2f{ V2fc::ZERO, {_fb->getWidth(), _fb->getHeight()} };
 //    mFramebuffer = _fb;
 //
 //    mCamera = std::make_shared<Camera>( _name, mViewport );
@@ -79,7 +79,7 @@ void CameraRig::init( const Rect2f& _viewport ) {
 //}
 
 //void CameraRig::setFramebuffer( std::shared_ptr<Framebuffer> framebuffer ) {
-//    mViewport = Rect2f{ Vector2f::ZERO, {framebuffer->getWidth(), framebuffer->getHeight()} };
+//    mViewport = Rect2f{ V2fc::ZERO, {framebuffer->getWidth(), framebuffer->getHeight()} };
 //    mFramebuffer = framebuffer;
 //}
 

@@ -28,7 +28,7 @@ JSONDATA( FontParamsJSONAble, fontRevision, unitsPerEm, createdDate, modifiedDat
     float ascent = 0.0f;
     float descent = 0.0f;     // distance in 'font units' of the glyphs will go from y = 0 (baseline)
     float lineGap = 0.0f;             // distance in 'font units' between lines
-    V2f   caretSlope = V2f::ZERO;          // caret slope, vector in 'font units'
+    V2f   caretSlope = V2fc::ZERO;          // caret slope, vector in 'font units'
     float caretOffset = 0.0f;         // caret offset in font units
     float minLeftSideBearing = 0.0f;  // minimum (smallest) left side bearing
     float minRightSideBearing = 0.0f; // minimum right side bearing (why not the max? not sure, maybe this is for right to left text?)

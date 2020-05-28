@@ -429,9 +429,9 @@ private:
     void advanceCaret( CSSDisplayMode _displayMode, const MScale2d& _elemSize );
     void addSeparator( float percScaleY = 1.0f );
     void addLabel( const UIFontText& _text, const MScale2d& bsize, CSSDisplayMode displayMode,
-                   const V2f& _pos = V2f::ZERO );
+                   const V2f& _pos = V2fc::ZERO );
     UIElementSP addButton( const ControlDef& _cd, const MScale2d& bisze, CSSDisplayMode displayMode,
-                           UITapAreaType _bt = UIT::pushButton, const V2f& _pos = V2f::ZERO );
+                           UITapAreaType _bt = UIT::pushButton, const V2f& _pos = V2fc::ZERO );
 
 private:
     RenderOrchestrator& rsg;
@@ -444,8 +444,8 @@ private:
 
     std::unordered_map<std::string, UIElementSP> icontrols;
     float innerPaddedX = 0.0f;
-    V2f caret{ V2f::ZERO };
-    V2f boundaries{ V2f::ZERO };
+    V2f caret{ V2fc::ZERO };
+    V2f boundaries{ V2fc::ZERO };
     std::vector<V2f> caretQueue;
     std::vector<UIElementSP> wholeLiners;
     MScale2d wholeLineSize{ 0.0f, 0.0f };

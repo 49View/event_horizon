@@ -708,21 +708,21 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
             auto vi1 = q;
             auto vi2 = q+1;
             auto vi3 = q+2;
-            uvCorrection[vi1] = Vector2f::ZERO;
-            uvCorrection[vi2] = Vector2f::ZERO;
-            uvCorrection[vi3] = Vector2f::ZERO;
+            uvCorrection[vi1] = V2fc::ZERO;
+            uvCorrection[vi2] = V2fc::ZERO;
+            uvCorrection[vi3] = V2fc::ZERO;
             auto uv1 = ret.uvs[vi1];
             auto uv2 = ret.uvs[vi2];
             auto uv3 = ret.uvs[vi3];
             float areaDiv = 0.35f;
             if ( uv2.x() - uv1.x() > areaDiv || uv3.x() - uv1.x() > areaDiv ) {
-                uvCorrection[vi1] = Vector2f::X_AXIS;
+                uvCorrection[vi1] = V2fc::X_AXIS;
             }
             if ( uv1.x() - uv2.x() > areaDiv || uv3.x() - uv2.x() > areaDiv ) {
-                uvCorrection[vi2] = Vector2f::X_AXIS;
+                uvCorrection[vi2] = V2fc::X_AXIS;
             }
             if ( uv1.x() - uv3.x() > areaDiv || uv2.x() - uv3.x() > areaDiv ) {
-                uvCorrection[vi3] = Vector2f::X_AXIS;
+                uvCorrection[vi3] = V2fc::X_AXIS;
             }
         }
 
@@ -747,9 +747,9 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
             auto vi1 = q;
             auto vi2 = q+1;
             auto vi3 = q+2;
-            uvCorrection[vi1] = Vector2f::ZERO;
-            uvCorrection[vi2] = Vector2f::ZERO;
-            uvCorrection[vi3] = Vector2f::ZERO;
+            uvCorrection[vi1] = V2fc::ZERO;
+            uvCorrection[vi2] = V2fc::ZERO;
+            uvCorrection[vi3] = V2fc::ZERO;
             auto& uv1 = ret.uvs[vi1];
             auto& uv2 = ret.uvs[vi2];
             auto& uv3 = ret.uvs[vi3];

@@ -125,7 +125,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
 
     int preFilterSize = 128;
 
-    auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2f::ZERO, V2f{preFilterSize}, true) );
+    auto cubeMapRig = addCubeMapRig( "cubemapRig", _at, Rect2f(V2fc::ZERO, V2f{preFilterSize}, true) );
 
     auto probe = std::make_shared<RLTargetCubeMap>( cubeMapRig, rr.getProbing(preFilterSize), rr );
     probe->render( probeRenderTarget, preFilterSize, 0, [&]() {
@@ -138,7 +138,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     });
 
     // convolution
-    auto cubeMapRigConvolution = addCubeMapRig( "cubemapRigConvolution", Vector3f::ZERO, Rect2f(V2f::ZERO, V2f{32}, true) );
+    auto cubeMapRigConvolution = addCubeMapRig( "cubemapRigConvolution", Vector3f::ZERO, Rect2f(V2fc::ZERO, V2f{32}, true) );
     auto convolutionProbe = std::make_shared<RLTargetCubeMap>( cubeMapRigConvolution, rr.getProbing(32), rr );
     convolutionProbe->render( convolutionRT, 32, 0, [&]() {
         rr.CB_U().pushCommand( { CommandBufferCommandName::depthTestFalse } );
@@ -149,7 +149,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     });
 
     // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
-    auto cubeMapRigPre = addCubeMapRig( "cubemapRigPre", Vector3f::ZERO, Rect2f(V2f::ZERO, V2f{preFilterSize}, true) );
+    auto cubeMapRigPre = addCubeMapRig( "cubemapRigPre", Vector3f::ZERO, Rect2f(V2fc::ZERO, V2f{preFilterSize}, true) );
     int preFilterMipMaps = 1 + static_cast<GLuint>( floor( log( (float)preFilterSize ) ) );
     for ( int m = 0; m < preFilterMipMaps; m++ ) {
         auto fbSize = preFilterSize>>m;
@@ -652,7 +652,7 @@ RLTargetCubeMap::RLTargetCubeMap( const CubeMapRigContainer& _rig, std::shared_p
 }
 
 void RLTargetCubeMap::render( std::shared_ptr<Texture> _renderToTexture, int cmsize, int mip, CubeMapRenderFunction rcb ) {
-    Rect2f lViewport(V2f::ZERO, V2f{cmsize}, true);
+    Rect2f lViewport(V2fc::ZERO, V2f{cmsize}, true);
     for ( uint32_t t = 0; t < 6; t++ ) {
         rr.CB_U().startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
         cameraRig[t]->setViewport( lViewport );

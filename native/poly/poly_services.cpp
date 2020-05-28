@@ -89,9 +89,9 @@ std::vector<Vector2f> utilGenerateFlatRect( const Vector2f& size, const WindingO
         fverts.emplace_back( size.x(), 0.0f );
         fverts.emplace_back( size.x(), size.y());
         fverts.emplace_back( 0.0f, size.y());
-        fverts.push_back( Vector2f::ZERO );
+        fverts.push_back( V2fc::ZERO );
     } else {
-        fverts.push_back( Vector2f::ZERO );
+        fverts.push_back( V2fc::ZERO );
         fverts.emplace_back( 0.0f, size.y());
         fverts.emplace_back( size.x(), size.y());
         fverts.emplace_back( size.x(), 0.0f );
@@ -165,7 +165,7 @@ namespace MappingServices {
         m.wrapMappingCoords.clear();
         // fill the lengths vector with 0 to start with adding +1 extra length for not making it wrap to coordinate 0
         for ( uint64_t l = 0; l < arraySize + 1; l++ ) {
-            m.wrapMappingCoords.push_back( Vector2f::ZERO );
+            m.wrapMappingCoords.push_back( V2fc::ZERO );
         }
     }
 

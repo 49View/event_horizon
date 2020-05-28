@@ -88,13 +88,13 @@ struct GeomMappingData {
 
     void setUVScale( const V2f& _scale ) {
         uvScale = _scale;
-        uvScaleInv = V2f::ONE / uvScale;
+        uvScaleInv = V2fc::ONE / uvScale;
     }
 
     // Mapping constants
     MappingDirection direction = MappingDirection::X_POS;
     bool bDoNotScaleMapping = false;
-    Vector2f offset = Vector2f::ZERO;
+    Vector2f offset = V2fc::ZERO;
     MappingMirrorE mirroring = MappingMirrorE::None;
     bool bUnitMapping = false;
     subdivisionAccuray subdivAccuracy = accuracyNone;
@@ -103,10 +103,10 @@ struct GeomMappingData {
     JSONSERIALBIN( direction, bDoNotScaleMapping, offset, mirroring, bUnitMapping, subdivAccuracy, windingOrder)
     // Mappping computed
     mutable float fuvScale = 1.0f;
-    mutable Vector2f uvScale = Vector2f::ONE;
-    mutable Vector2f uvScaleInv = Vector2f::ONE;
+    mutable Vector2f uvScale = V2fc::ONE;
+    mutable Vector2f uvScaleInv = V2fc::ONE;
     mutable std::vector<Vector2f> wrapMappingCoords;
-    mutable Vector2f pullMappingCoords = Vector2f::ZERO;
+    mutable Vector2f pullMappingCoords = V2fc::ZERO;
 };
 
 struct QuadVector3fNormal {
@@ -275,7 +275,7 @@ namespace GT {
         std::vector<Vector2f> profilePath2d;
         FollowerFlags fflags = FollowerFlags::Defaults;
         PolyRaise fraise = PolyRaise::None;
-        Vector2f flipVector = Vector2f::ZERO;
+        Vector2f flipVector = V2fc::ZERO;
         FollowerGap mGaps = FollowerGap::Empty;
         Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
     };

@@ -16,16 +16,6 @@ class Vector3f;
 class Vector2f {
 public:
     friend std::ostream& operator<<( std::ostream& os, const Vector2f& f );
-    static const Vector2f ZERO;
-	static const Vector2f X_AXIS;
-	static const Vector2f Y_AXIS;
-	static const Vector2f X_AXIS_NEG;
-	static const Vector2f Y_AXIS_NEG;
-	static const Vector2f Y_INV;
-	static const Vector2f X_INV;
-	static const Vector2f ONE;
-	static const Vector2f HUGE_VALUE_POS;
-	static const Vector2f HUGE_VALUE_NEG;
 
 	Vector2f() = default;
 
@@ -389,6 +379,20 @@ using V2fVectorOfVector = std::vector<std::vector<Vector2f>>;
 
 typedef std::pair<V2f, float> NormalDirPair;
 typedef std::tuple<V2f, V2f, V2f> Triangle2d;
+
+namespace V2fc {
+    static const Vector2f ZERO = Vector2f( 0.0f, 0.0f );
+    static const Vector2f X_AXIS = Vector2f( 1.0f, 0.0f );
+    static const Vector2f Y_AXIS = Vector2f( 0.0f, 1.0f );
+    static const Vector2f X_AXIS_NEG = Vector2f( -1.0f, 0.0f );
+    static const Vector2f Y_AXIS_NEG = Vector2f( 0.0f, -1.0f );
+    static const Vector2f X_INV{-1.0f, 1.0f};
+    static const Vector2f Y_INV = Vector2f( 1.0f, -1.0f );
+    static const Vector2f ONE = Vector2f( 1.0f, 1.0f );
+    static const Vector2f HUGE_VALUE_POS = Vector2f( std::numeric_limits<float>::max(), std::numeric_limits<float>::max() );
+    static const Vector2f HUGE_VALUE_NEG = Vector2f( std::numeric_limits<float>::lowest(),
+                                                        std::numeric_limits<float>::lowest() );
+}
 
 inline float dot( const Vector2f& a, const Vector2f& b ) {
 	return a.x() * b.x() + a.y() * b.y();
