@@ -309,7 +309,7 @@ size_t Renderer::renderCommands( int eye ) {
 }
 
 void Renderer::VPL( const int _bucket, std::shared_ptr<VPList> nvp, float alpha ) {
-    if ( alpha < 1.0f ) {
+    if ( alpha < 1.0f || nvp->transparencyValue() < 1.0f ) {
         mCommandLists[_bucket].mVListTransparent.push_back( nvp );
     } else {
         mCommandLists[_bucket].mVList.push_back( nvp );

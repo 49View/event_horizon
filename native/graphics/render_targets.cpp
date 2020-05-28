@@ -486,6 +486,11 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                     rr.addToCommandBuffer( vl.mVList, cameraRig.get());
                 }
             }
+            for ( const auto&[k, vl] : rr.CL()) {
+                if ( isKeyInRange( k, CheckEnableBucket::True )) {
+                    rr.addToCommandBuffer( vl.mVListTransparent, cameraRig.get());
+                }
+            }
             cb.pushCommand( { CommandBufferCommandName::resolvePBR } );
         }
 
