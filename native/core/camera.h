@@ -80,6 +80,7 @@ public:
 	void setViewMatrixVR( const Vector3f&pos, const Quaternion& q, const Matrix4f& origRotMatrix );
 	void lookAt( const Vector3f& _at );
 	void pan( const Vector3f& posDiff );
+    Vector3f center( const Rect2f &area, float slack = 0.0f );
 	void center( const AABB& _bbox, CameraCenterAngle cca = CameraCenterAngle::Front );
 
 	void update();

@@ -56,9 +56,9 @@ int glhUnProjectf( float winx, float winy, float winz, const float *modelview, c
     float in[4], out[4];
     //Calculation for inverting a matrix, compute projection x modelview
     //and store in A[16]
-    MultiplyMatrices4by4OpenGL_FLOAT( A, projection, modelview );
+    MultiplyMatrices4by4OpenGL_FLOAT(A, projection, modelview);
     //Now compute the inverse of matrix A
-    if ( glhInvertMatrixf2( A, m ) == 0 )
+    if ( glhInvertMatrixf2(A, m) == 0 )
         return 0;
     //Transformation of normalized coordinates between -1 and 1
     in[0] = ( winx - (float) viewport[0] ) / (float) viewport[2] * 2.0f - 1.0f;
@@ -66,7 +66,7 @@ int glhUnProjectf( float winx, float winy, float winz, const float *modelview, c
     in[2] = 2.0f * winz - 1.0f;
     in[3] = 1.0f;
     //Objects coordinates
-    MultiplyMatrixByVector4by4OpenGL_FLOAT( out, m, in );
+    MultiplyMatrixByVector4by4OpenGL_FLOAT(out, m, in);
     if ( out[3] == 0.0f )
         return 0;
     out[3] = 1.0f / out[3];
@@ -167,34 +167,34 @@ int glhInvertMatrixf2( float *m, float *out ) {
     r1 = wtmp[1];
     r2 = wtmp[2];
     r3 = wtmp[3];
-    r0[0] = MAT( m, 0, 0 );
-    r0[1] = MAT( m, 0, 1 );
-    r0[2] = MAT( m, 0, 2 );
-    r0[3] = MAT( m, 0, 3 );
+    r0[0] = MAT(m, 0, 0);
+    r0[1] = MAT(m, 0, 1);
+    r0[2] = MAT(m, 0, 2);
+    r0[3] = MAT(m, 0, 3);
     r0[4] = 1.0f;
     r0[5] = r0[6] = r0[7] = 0.0f;
-    r1[0] = MAT( m, 1, 0 );
-    r1[1] = MAT( m, 1, 1 );
-    r1[2] = MAT( m, 1, 2 );
-    r1[3] = MAT( m, 1, 3 );
+    r1[0] = MAT(m, 1, 0);
+    r1[1] = MAT(m, 1, 1);
+    r1[2] = MAT(m, 1, 2);
+    r1[3] = MAT(m, 1, 3);
     r1[5] = 1.0f;
     r1[4] = r1[6] = r1[7] = 0.0f;
-    r2[0] = MAT( m, 2, 0 );
-    r2[1] = MAT( m, 2, 1 );
-    r2[2] = MAT( m, 2, 2 );
-    r2[3] = MAT( m, 2, 3 );
+    r2[0] = MAT(m, 2, 0);
+    r2[1] = MAT(m, 2, 1);
+    r2[2] = MAT(m, 2, 2);
+    r2[3] = MAT(m, 2, 3);
     r2[6] = 1.0f;
     r2[4] = r2[5] = r2[7] = 0.0f;
-    r3[0] = MAT( m, 3, 0 );
-    r3[1] = MAT( m, 3, 1 );
-    r3[2] = MAT( m, 3, 2 );
-    r3[3] = MAT( m, 3, 3 );
+    r3[0] = MAT(m, 3, 0);
+    r3[1] = MAT(m, 3, 1);
+    r3[2] = MAT(m, 3, 2);
+    r3[3] = MAT(m, 3, 3);
     r3[7] = 1.0f;
     r3[4] = r3[5] = r3[6] = 0.0f;
     /* choose pivot - or die */
-    if ( fabsf( r3[0] ) > fabsf( r2[0] )) SWAP_ROWS_FLOAT( r3, r2 );
-    if ( fabsf( r2[0] ) > fabsf( r1[0] )) SWAP_ROWS_FLOAT( r2, r1 );
-    if ( fabsf( r1[0] ) > fabsf( r0[0] )) SWAP_ROWS_FLOAT( r1, r0 );
+    if ( fabsf(r3[0]) > fabsf(r2[0]) ) SWAP_ROWS_FLOAT(r3, r2);
+    if ( fabsf(r2[0]) > fabsf(r1[0]) ) SWAP_ROWS_FLOAT(r2, r1);
+    if ( fabsf(r1[0]) > fabsf(r0[0]) ) SWAP_ROWS_FLOAT(r1, r0);
     if ( 0.0f == r0[0] )
         return 0;
     /* eliminate first variable     */
@@ -238,8 +238,8 @@ int glhInvertMatrixf2( float *m, float *out ) {
         r3[7] -= m3 * s;
     }
     /* choose pivot - or die */
-    if ( fabsf( r3[1] ) > fabsf( r2[1] )) SWAP_ROWS_FLOAT( r3, r2 );
-    if ( fabsf( r2[1] ) > fabsf( r1[1] )) SWAP_ROWS_FLOAT( r2, r1 );
+    if ( fabsf(r3[1]) > fabsf(r2[1]) ) SWAP_ROWS_FLOAT(r3, r2);
+    if ( fabsf(r2[1]) > fabsf(r1[1]) ) SWAP_ROWS_FLOAT(r2, r1);
     if ( 0.0f == r1[1] )
         return 0;
     /* eliminate second variable */
@@ -270,7 +270,7 @@ int glhInvertMatrixf2( float *m, float *out ) {
         r3[7] -= m3 * s;
     }
     /* choose pivot - or die */
-    if ( fabsf( r3[2] ) > fabsf( r2[2] )) SWAP_ROWS_FLOAT( r3, r2 );
+    if ( fabsf(r3[2]) > fabsf(r2[2]) ) SWAP_ROWS_FLOAT(r3, r2);
     if ( 0.0f == r2[2] )
         return 0;
     /* eliminate third variable */
@@ -321,76 +321,76 @@ int glhInvertMatrixf2( float *m, float *out ) {
     r0[5] = s * ( r0[5] - r1[5] * m0 );
     r0[6] = s * ( r0[6] - r1[6] * m0 );
     r0[7] = s * ( r0[7] - r1[7] * m0 );
-    MAT( out, 0, 0 ) = r0[4];
-    MAT( out, 0, 1 ) = r0[5];
-    MAT( out, 0, 2 ) = r0[6];
-    MAT( out, 0, 3 ) = r0[7];
-    MAT( out, 1, 0 ) = r1[4];
-    MAT( out, 1, 1 ) = r1[5];
-    MAT( out, 1, 2 ) = r1[6];
-    MAT( out, 1, 3 ) = r1[7];
-    MAT( out, 2, 0 ) = r2[4];
-    MAT( out, 2, 1 ) = r2[5];
-    MAT( out, 2, 2 ) = r2[6];
-    MAT( out, 2, 3 ) = r2[7];
-    MAT( out, 3, 0 ) = r3[4];
-    MAT( out, 3, 1 ) = r3[5];
-    MAT( out, 3, 2 ) = r3[6];
-    MAT( out, 3, 3 ) = r3[7];
+    MAT(out, 0, 0) = r0[4];
+    MAT(out, 0, 1) = r0[5];
+    MAT(out, 0, 2) = r0[6];
+    MAT(out, 0, 3) = r0[7];
+    MAT(out, 1, 0) = r1[4];
+    MAT(out, 1, 1) = r1[5];
+    MAT(out, 1, 2) = r1[6];
+    MAT(out, 1, 3) = r1[7];
+    MAT(out, 2, 0) = r2[4];
+    MAT(out, 2, 1) = r2[5];
+    MAT(out, 2, 2) = r2[6];
+    MAT(out, 2, 3) = r2[7];
+    MAT(out, 3, 0) = r3[4];
+    MAT(out, 3, 1) = r3[5];
+    MAT(out, 3, 2) = r3[6];
+    MAT(out, 3, 3) = r3[7];
     return 1;
 }
 
-void getViewporti( int *viewport, const JMATH::Rect2f &viewportRect ) {
+void getViewporti( int *viewport, const JMATH::Rect2f& viewportRect ) {
     viewport[0] = static_cast<int>( viewportRect.topLeft()[0] );
     viewport[1] = static_cast<int>( viewportRect.topLeft()[1] );
     viewport[2] = static_cast<int>( viewportRect.width());
     viewport[3] = static_cast<int>( viewportRect.height());
 }
 
-void Frustum::calculateFromMVP( const V3f &cameraPos, const Matrix4f &viewMat, const Matrix4f &projMat,
-                                const Rect2f &viewportRect ) {
+void Frustum::calculateFromMVP( const V3f& cameraPos, const Matrix4f& viewMat, const Matrix4f& projMat,
+                                const Rect2f& viewportRect ) {
     Matrix4f mat = viewMat * projMat;
     int viewport[4];
-    getViewporti( viewport, viewportRect );
+    getViewporti(viewport, viewportRect);
 
-    l.n.setX( mat[3] + mat[0] );
-    l.n.setY( mat[7] + mat[4] );
-    l.n.setZ( mat[11] + mat[8] );
+    l.n.setX(mat[3] + mat[0]);
+    l.n.setY(mat[7] + mat[4]);
+    l.n.setZ(mat[11] + mat[8]);
     l.d = mat[15] + mat[12];
 
     // Right Plane
     // col4 - col1
-    r.n.setX( mat[3] - mat[0] );
-    r.n.setY( mat[7] - mat[4] );
-    r.n.setZ( mat[11] - mat[8] );
+    r.n.setX(mat[3] - mat[0]);
+    r.n.setY(mat[7] - mat[4]);
+    r.n.setZ(mat[11] - mat[8]);
     r.d = mat[15] - mat[12];
 
     // Bottom Plane
     // col4 + col2
-    b.n.setX( mat[3] + mat[1] );
-    b.n.setY( mat[7] + mat[5] );
-    b.n.setZ( mat[11] + mat[9] );
+    b.n.setX(mat[3] + mat[1]);
+    b.n.setY(mat[7] + mat[5]);
+    b.n.setZ(mat[11] + mat[9]);
     b.d = mat[15] + mat[13];
 
     // Top Plane
     // col4 - col2
-    t.n.setX( mat[3] - mat[1] );
-    t.n.setY( mat[7] - mat[5] );
-    t.n.setZ( mat[11] - mat[9] );
+    t.n.setX(mat[3] - mat[1]);
+    t.n.setY(mat[7] - mat[5]);
+    t.n.setZ(mat[11] - mat[9]);
     t.d = mat[15] - mat[13];
 
     // Near Plane
     // col4 + col3
-    n.n.setX( mat[3] + mat[2] );
-    n.n.setY( mat[7] + mat[6] );
-    n.n.setZ( mat[11] + mat[10] );
+    n.n.setX(mat[3] + mat[2]);
+    n.n.setY(mat[7] + mat[6]);
+    n.n.setZ(mat[11] + mat[10]);
     n.d = mat[15] + mat[14];
 
     // Far Plane
     // col4 - mProjection
-    f.n.setX( mat[3] - mat[2] );
-    f.n.setY( mat[7] - mat[6] );
-    f.n.setZ( mat[11] - mat[10] );
+    f.n.setX(mat[3] - mat[2]);
+    f.n.setY(mat[7] - mat[6]);
+    f.n.setZ(mat[11] - mat[10]);
     f.d = mat[15] - mat[14];
 
     Vector2f p1 = viewportRect.topRight();
@@ -399,13 +399,13 @@ void Frustum::calculateFromMVP( const V3f &cameraPos, const Matrix4f &viewMat, c
     Vector2f p4 = viewportRect.bottomLeft();
 
     float farPj[3] = { 0.0f, 0.0f, 0.0f };
-    glhUnProjectf( p1.x(), p1.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
+    glhUnProjectf(p1.x(), p1.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj);
     cornersFar[0] = V3f{ farPj };
-    glhUnProjectf( p2.x(), p2.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
+    glhUnProjectf(p2.x(), p2.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj);
     cornersFar[1] = V3f{ farPj };
-    glhUnProjectf( p3.x(), p3.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
+    glhUnProjectf(p3.x(), p3.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj);
     cornersFar[2] = V3f{ farPj };
-    glhUnProjectf( p4.x(), p4.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj );
+    glhUnProjectf(p4.x(), p4.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj);
     cornersFar[3] = V3f{ farPj };
 
     for ( int t = 0; t < 4; t++ ) {
@@ -413,18 +413,18 @@ void Frustum::calculateFromMVP( const V3f &cameraPos, const Matrix4f &viewMat, c
     }
 }
 
-Camera::Camera( const std::string &cameraName, const Rect2f &_viewport ) : NamePolicy( cameraName ) {
+Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NamePolicy(cameraName) {
 
-    ViewPort( _viewport );
+    ViewPort(_viewport);
 
-    qangle = std::make_shared<AnimType<Quaternion>>( Quaternion{ Vector3f::ZERO }, Name() + "_Angle" );
-    mPos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, Name() + "_Pos" );
-    mTarget = std::make_shared<AnimType<Vector3f>>( V3f::Z_AXIS, Name() + "_Target" );
-    mFov = std::make_shared<AnimType<float>>( 72.0f, Name() + "_Fov" );
+    qangle = std::make_shared<AnimType<Quaternion>>(Quaternion{ Vector3f::ZERO }, Name() + "_Angle");
+    mPos = std::make_shared<AnimType<Vector3f>>(Vector3f::ZERO, Name() + "_Pos");
+    mTarget = std::make_shared<AnimType<Vector3f>>(V3f::Z_AXIS, Name() + "_Target");
+    mFov = std::make_shared<AnimType<float>>(72.0f, Name() + "_Fov");
 
-    mProjection.setPerspective( mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ );
+    mProjection.setPerspective(mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ);
     mOrthogonal.setOrthogonalProjection();
-    mAspectRatio.setAspectRatioMatrix( mViewPort.ratio());
+    mAspectRatio.setAspectRatioMatrix(mViewPort.ratio());
 }
 
 void Camera::setFoV( float fieldOfView ) {
@@ -432,29 +432,29 @@ void Camera::setFoV( float fieldOfView ) {
     mFov->value = fieldOfView;
 }
 
-void Camera::setPosition( const Vector3f &pos ) {
+void Camera::setPosition( const Vector3f& pos ) {
     if ( mbLocked ) return;
     mPos->value = pos;
 }
 
 void Camera::setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar ) {
-    mProjection.setPerspective( fovyInDegrees, aspectRatio, znear, zfar );
-    mFrustom.calculateFromMVP( mPos->value, mView, mProjection, mViewPort );
+    mProjection.setPerspective(fovyInDegrees, aspectRatio, znear, zfar);
+    mFrustom.calculateFromMVP(mPos->value, mView, mProjection, mViewPort);
 }
 
-void Camera::setProjectionMatrix( const Matrix4f &val ) {
+void Camera::setProjectionMatrix( const Matrix4f& val ) {
     mProjection = val;
-    mFrustom.calculateFromMVP( mPos->value, mView, mProjection, mViewPort );
+    mFrustom.calculateFromMVP(mPos->value, mView, mProjection, mViewPort);
 }
 
-void Camera::translate( const Vector3f &pos ) {
+void Camera::translate( const Vector3f& pos ) {
     if ( mbLocked ) return;
     Vector3f mask = LockAtWalkingHeight() ? Vector3f::MASK_UP_OUT : Vector3f::ONE;
     if ( Mode() == CameraControlType::Orbit ) {
 //	    mTarget->value += pos*mask;
         mOrbitStrafe += pos;
     } else {
-        setPosition( mPos->value + ( pos * mask ));
+        setPosition(mPos->value + ( pos * mask ));
     }
 }
 
@@ -464,77 +464,77 @@ void Camera::zoom2d( float amount ) {
     if ( mbLocked ) return;
     amount /= -UI_ZOOM_SCALER;
     if ( Mode() == CameraControlType::Edit2d ) {
-        mPos->value.setY( clamp( mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d ));
+        mPos->value.setY(clamp(mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d));
     }
 }
 
 void Camera::moveUp( float amount ) {
     if ( amount == 0.0f || mbLocked ) return;
     Matrix4f invView;
-    mView.invert( invView );
-    Vector3f dir = invView.getRow( 1 ).xyz();
-    dir = normalize( dir );
+    mView.invert(invView);
+    Vector3f dir = invView.getRow(1).xyz();
+    dir = normalize(dir);
     bool lSaveLock = LockAtWalkingHeight();
-    LockAtWalkingHeight( false );
-    translate( dir * -amount );
-    LockAtWalkingHeight( lSaveLock );
+    LockAtWalkingHeight(false);
+    translate(dir * -amount);
+    LockAtWalkingHeight(lSaveLock);
 }
 
 void Camera::moveForward( float amount ) {
     if ( amount == 0.0f || mbLocked ) return;
     Matrix4f invView;
-    mView.invert( invView );
-    Vector3f dir = invView.getRow( 2 ).xyz();
-    dir = normalize( dir );
-    translate( dir * -amount );
+    mView.invert(invView);
+    Vector3f dir = invView.getRow(2).xyz();
+    dir = normalize(dir);
+    translate(dir * -amount);
 }
 
 void Camera::strafe( float amount ) {
     if ( amount == 0.0f || mbLocked ) return;
     Matrix4f invView;
-    mView.invert( invView );
-    Vector3f dir = invView.getRow( 0 ).xyz();
-    dir = normalize( dir );
-    translate( dir * -amount );
+    mView.invert(invView);
+    Vector3f dir = invView.getRow(0).xyz();
+    dir = normalize(dir);
+    translate(dir * -amount);
 }
 
-void Camera::setViewMatrix( const Vector3f &pos, const Quaternion &q ) {
+void Camera::setViewMatrix( const Vector3f& pos, const Quaternion& q ) {
     if ( mbLocked ) return;
     quatMatrix = q.rotationMatrix();// * Matrix4f( Vector3f::ZERO, M_PI_2, Vector3f::X_AXIS );
 
-    quatMatrix.invert( quatMatrix );
-    mView = Matrix4f( pos ) * quatMatrix;
+    quatMatrix.invert(quatMatrix);
+    mView = Matrix4f(pos) * quatMatrix;
 }
 
-void Camera::setViewMatrixVR( const Vector3f &pos, const Quaternion &q, const Matrix4f &origRotMatrix ) {
+void Camera::setViewMatrixVR( const Vector3f& pos, const Quaternion& q, const Matrix4f& origRotMatrix ) {
     if ( mbLocked ) return;
     quatMatrix = q.rotationMatrix() * origRotMatrix;
 
     //	quatMatrix.invert(quatMatrix);
-    mView = Matrix4f( pos ) * quatMatrix;
+    mView = Matrix4f(pos) * quatMatrix;
 }
 
-void Camera::lookAt( const Vector3f &posAt ) {
+void Camera::lookAt( const Vector3f& posAt ) {
     if ( mbLocked ) return;
     mTarget->value = posAt;
 }
 
 void Camera::lookAtCalc() {
     if ( mbLocked ) return;
-    Vector3f z = normalize( mPos->value - mTarget->value );  // Forward
-    Vector3f x = normalize( cross( V3f::UP_AXIS, z )); // Right
-    Vector3f y = cross( z, x );
+    Vector3f z = normalize(mPos->value - mTarget->value);  // Forward
+    Vector3f x = normalize(cross(V3f::UP_AXIS, z)); // Right
+    Vector3f y = cross(z, x);
 
     auto finalPos = mPos->value + mOrbitStrafe;
-    mView = Matrix4f( Vector4f( x.x(), y.x(), z.x(), 0.0f ),
-                      Vector4f( x.y(), y.y(), z.y(), 0.0f ),
-                      Vector4f( x.z(), y.z(), z.z(), 0.0f ),
-                      Vector4f( -( dot( x, finalPos )), -( dot( y, finalPos )), -( dot( z, finalPos )), 1.0f ));
+    mView = Matrix4f(Vector4f(x.x(), y.x(), z.x(), 0.0f),
+                     Vector4f(x.y(), y.y(), z.y(), 0.0f),
+                     Vector4f(x.z(), y.z(), z.z(), 0.0f),
+                     Vector4f(-( dot(x, finalPos) ), -( dot(y, finalPos) ), -( dot(z, finalPos) ), 1.0f));
 }
 
-void Camera::center( const AABB &_bbox, CameraCenterAngle cca ) {
+void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
     if ( mbLocked ) return;
-    float aperture = ( tanf( degToRad( 90.0f - ( mFov->value )))) / mViewPort.ratio();
+    float aperture = ( tanf(degToRad(90.0f - ( mFov->value ))) ) / mViewPort.ratio();
 
     float bdiameter = _bbox.calcDiameter();
     float orbitDistance = aperture + bdiameter;
@@ -568,56 +568,65 @@ void Camera::center( const AABB &_bbox, CameraCenterAngle cca ) {
 
 }
 
-void Camera::pan( const Vector3f &posDiff ) {
+void Camera::pan( const Vector3f& posDiff ) {
     if ( mbLocked ) return;
 
-    mPos->value += ( Vector3f::X_AXIS * posDiff.x());
-    mPos->value += ( Vector3f::Z_AXIS * posDiff.y());
+    mPos->value += ( Vector3f::X_AXIS * posDiff.x() );
+    mPos->value += ( Vector3f::Z_AXIS * posDiff.y() );
 }
 
-Vector3f Camera::centerScreenOn( const Vector2f &area, const float bMiddleIsCenter, const float slack ) {
-    float mainSize = ( area.ratio() > mViewPort.ratio()) ? ( area.x() * 0.5f ) / mViewPort.ratio() : area.y() * 0.5f;
+Vector3f Camera::centerScreenOn( const Vector2f& area, const float bMiddleIsCenter, const float slack ) {
+    float mainSize = ( area.ratio() > mViewPort.ratio() ) ? ( area.x() * 0.5f ) / mViewPort.ratio() : area.y() * 0.5f;
     Vector2f center = bMiddleIsCenter ? area * -0.5f : V2fc::ZERO;
-    float aperture = ( tanf( degToRad( 140.0f )));
-    return { center, ( -mainSize * ( 1.0f + slack )) / aperture };
+    float aperture = ( tanf(degToRad(140.0f)) );
+    return { center, ( -mainSize * ( 1.0f + slack ) ) / aperture };
+}
+
+Vector3f Camera::center( const Rect2f& area, float slack ) {
+    float mainSize = ( area.ratio() > mViewPort.ratio() ) ? ( area.width() * 0.5f ) / mViewPort.ratio()
+                                                          : area.height() *0.5f;
+    Vector2f center = area.centre();
+    float aperture = ( tanf(degToRad(FoV() * 0.5f)) );
+    float z = mainSize * aperture * 2.0f;
+    return XZY::C({ center, z });
 }
 
 Vector3f
-Camera::centerScreenOnWithinArea( Vector2f area, const Rect2f &targetArea, const float padding, const float slack ) {
+Camera::centerScreenOnWithinArea( Vector2f area, const Rect2f& targetArea, const float padding, const float slack ) {
     area *= 1.0f + slack;
-    float mainSize = ( area.ratio() > targetArea.aspectRatio()) ? ( area.x() * 0.5f ) / targetArea.aspectRatio() : (
+    float mainSize = ( area.ratio() > targetArea.aspectRatio() ) ? ( area.x() * 0.5f ) / targetArea.aspectRatio() : (
             area.y() * 0.5f );
-    float aperture = ( tanf( degToRad( FoV())));
+    float aperture = ( tanf(degToRad(FoV())) );
     float xratio = getScreenAspectRatio / targetArea.width();
     float totalWidth = xratio * area.x();
-    float origin = (( targetArea.origin().x() / getScreenAspectRatio ) * totalWidth ) + ( padding * area.x());
+    float origin = ( ( targetArea.origin().x() / getScreenAspectRatio ) * totalWidth ) + ( padding * area.x() );
     return { -totalWidth * 0.5f + origin + area.x() * slack * 0.5f / getScreenAspectRatio,
              targetArea.origin().y() * totalWidth + -area.y() * padding + area.y() * slack * 0.5f,
              -mainSize / aperture };
 }
 
-Matrix4f &Camera::MVP( const Matrix4f &model, CameraProjectionType cpType ) {
+Matrix4f& Camera::MVP( const Matrix4f& model, CameraProjectionType cpType ) {
     mPrevMVP = mMVP;
     mMVP = model;
     switch ( cpType ) {
         case CameraProjectionType::Perspective:
-            mMVP.mult( mView );
-            mMVP.mult( mProjection );
+            mMVP.mult(mView);
+            mMVP.mult(mProjection);
             break;
         case CameraProjectionType::Orthogonal:
-            mMVP.mult( mAspectRatio );
-            mMVP.mult( mOrthogonal );
+            mMVP.mult(mAspectRatio);
+            mMVP.mult(mOrthogonal);
             break;
 
         default:
             break;
     }
-    mView.invert( mInverseMV );
+    mView.invert(mInverseMV);
 
     return mMVP;
 }
 
-bool Camera::frustomClipping( const AABB &bbox ) const {
+bool Camera::frustomClipping( const AABB& bbox ) const {
     // Indexed for the 'index trick' later
     Vector3f box[] = { bbox.minPoint(), bbox.maxPoint() };
 
@@ -629,7 +638,7 @@ bool Camera::frustomClipping( const AABB &bbox ) const {
     // We only need to do 6 point-plane tests
     for ( int i = 0; i < NUM_PLANES; ++i ) {
         // This is the current plane
-        const Plane3f &p = *planes[i];
+        const Plane3f& p = *planes[i];
 
         // p-vertex selection (with the index trick)
         // According to the plane normal we can know the
@@ -641,7 +650,7 @@ bool Camera::frustomClipping( const AABB &bbox ) const {
         // Dot product
         // project p-vertex on plane normal
         // (How far is p-vertex from the origin)
-        const float dp = dot( p.n, { box[px].x(), box[py].y(), box[pz].z() } );
+        const float dp = dot(p.n, { box[px].x(), box[py].y(), box[pz].z() });
         //( p.n.x() *  ) +
         //( p.n.y() * box[py].y ) +
         //( p.n.z() *  box[pz].z );
@@ -654,23 +663,23 @@ bool Camera::frustomClipping( const AABB &bbox ) const {
     return true;
 }
 
-PickRayData Camera::rayViewportPickIntersection( const Vector2f &p1 ) const {
+PickRayData Camera::rayViewportPickIntersection( const Vector2f& p1 ) const {
 
     const float *matModelView = mView.rawPtr();
     const float *matProjection = mProjection.rawPtr();
     int viewport[4];
-    getViewporti( viewport );
+    getViewporti(viewport);
 
     float nearPj[3] = { 0.0f, 0.0f, 0.0f };
     float farPj[3] = { 0.0f, 0.0f, 0.0f };
 
     // get point on the 'near' plane (third param is set to 0.0f)
-    glhUnProjectf( p1.x(), p1.y(), 0.0f, matModelView, matProjection, viewport, nearPj );
+    glhUnProjectf(p1.x(), p1.y(), 0.0f, matModelView, matProjection, viewport, nearPj);
 
     // get point on the 'far' plane (third param is set to 1.0f)
-    glhUnProjectf( p1.x(), p1.y(), 1.0f, matModelView, matProjection, viewport, farPj );
+    glhUnProjectf(p1.x(), p1.y(), 1.0f, matModelView, matProjection, viewport, farPj);
 
-    return PickRayData{ V3f( nearPj ), V3f( farPj ) };
+    return PickRayData{ V3f(nearPj), V3f(farPj) };
 }
 
 void Camera::update() {
@@ -679,7 +688,7 @@ void Camera::update() {
     Matrix4f oldProjectonMatrix = mProjection;
 
     if ( Mode() == CameraControlType::Edit2d ) {
-        Quaternion qy( M_PI_2, Vector3f::X_AXIS );
+        Quaternion qy(M_PI_2, Vector3f::X_AXIS);
         quatMatrix = qy.rotationMatrix();
     }
 
@@ -692,26 +701,26 @@ void Camera::update() {
     }
 
     if ( Mode() != CameraControlType::Orbit ) {
-        quatMatrix.setTranslation( mPos->value );
-        quatMatrix.invert( mView );
+        quatMatrix.setTranslation(mPos->value);
+        quatMatrix.invert(mView);
     }
 
     if ( Mode() == CameraControlType::Edit2d ) {
         float vs = mPos->value.y();
-        mProjection.setOrthogonalProjection( -0.5f * mViewPort.ratio() * vs, 0.5f * mViewPort.ratio() * vs,
-                                             -0.5f * vs, 0.5f * vs );
+        mProjection.setOrthogonalProjection(-0.5f * mViewPort.ratio() * vs, 0.5f * mViewPort.ratio() * vs,
+                                            -0.5f * vs, 0.5f * vs);
     } else {
-        mProjection.setPerspective( mFov->value, mViewPort.ratio() * mAspectRatioMultiplier, mNearClipPlaneZ,
-                                    mFarClipPlaneZ );
+        mProjection.setPerspective(mFov->value, mViewPort.ratio() * mAspectRatioMultiplier, mNearClipPlaneZ,
+                                   mFarClipPlaneZ);
     }
 
-    mFrustom.calculateFromMVP( mPos->value, mView, mProjection, mViewPort );
+    mFrustom.calculateFromMVP(mPos->value, mView, mProjection, mViewPort);
 
-    setDirty( oldViewMatrix != mView || oldProjectonMatrix != mProjection );
+    setDirty(oldViewMatrix != mView || oldProjectonMatrix != mProjection);
 }
 
-Vector2f Camera::mousePickRayOrtho( const Vector2f &_pos ) {
-    auto vc = mViewPort.normalizeWithinRect( _pos );
+Vector2f Camera::mousePickRayOrtho( const Vector2f& _pos ) {
+    auto vc = mViewPort.normalizeWithinRect(_pos);
     auto p = getPosition();
     float z = p.z();
     auto v2p = Vector2f{ z * mViewPort.ratio(), z };
@@ -720,7 +729,7 @@ Vector2f Camera::mousePickRayOrtho( const Vector2f &_pos ) {
     return vf;
 }
 
-std::ostream &operator<<( std::ostream &os, const Camera &camera ) {
+std::ostream& operator<<( std::ostream& os, const Camera& camera ) {
     os << std::endl
        << "mMode: " << static_cast<uint64_t>(camera.mMode) << std::endl
        << "mPos: " << camera.mPos->value << std::endl
@@ -747,8 +756,7 @@ std::ostream &operator<<( std::ostream &os, const Camera &camera ) {
        << "incrementalEulerQuatAngle: " << camera.incrementalEulerQuatAngle << std::endl
        << "sphericalAcc: " << camera.sphericalAcc << std::endl
        << "mOrbitStrafe: " << camera.mOrbitStrafe << std::endl
-       << "mOrbitDistance: " << camera.mOrbitDistance << std::endl
-       ;// << " mViewPort: " << camera.mViewPort;
+       << "mOrbitDistance: " << camera.mOrbitDistance << std::endl;// << " mViewPort: " << camera.mViewPort;
     return os;
 }
 
@@ -756,7 +764,7 @@ float Camera::FoV() const {
     return mFov->value;
 }
 
-floata &Camera::FoVAnim() {
+floata& Camera::FoVAnim() {
     return mFov;
 }
 
@@ -774,20 +782,20 @@ Vector3f Camera::getPositionRH() const {
     return lPos;
 }
 
-void Camera::setQuat( const Quaternion &a ) {
+void Camera::setQuat( const Quaternion& a ) {
     qangle->value = a;
 }
 
-void Camera::setQuatAngles( const Vector3f &a ) {
+void Camera::setQuatAngles( const Vector3f& a ) {
     if ( mbLocked ) return;
     incrementalEulerQuatAngle = a;
-    qangle->value = quatCompose( incrementalEulerQuatAngle );
+    qangle->value = quatCompose(incrementalEulerQuatAngle);
 }
 
-void Camera::incrementQuatAngles( const Vector3f &a ) {
+void Camera::incrementQuatAngles( const Vector3f& a ) {
     if ( mbLocked ) return;
     incrementalEulerQuatAngle += a;
-    qangle->value = quatCompose( incrementalEulerQuatAngle );
+    qangle->value = quatCompose(incrementalEulerQuatAngle);
 }
 
 void Camera::incrementOrbitDistance( float _d ) {
@@ -800,30 +808,30 @@ void Camera::incrementOrbitDistance( float _d ) {
     computeOrbitPosition();
 }
 
-void Camera::incrementSphericalAngles( const V2f &_sph ) {
+void Camera::incrementSphericalAngles( const V2f& _sph ) {
     sphericalAcc -= _sph;
     float sphericalSafeAntiGLockClamp = 0.02f;
 
-    if ( sphericalAcc.y() <= sphericalSafeAntiGLockClamp ) sphericalAcc.setY( sphericalSafeAntiGLockClamp );
+    if ( sphericalAcc.y() <= sphericalSafeAntiGLockClamp ) sphericalAcc.setY(sphericalSafeAntiGLockClamp);
     if ( sphericalAcc.y() >= M_PI - sphericalSafeAntiGLockClamp )
-        sphericalAcc.setY( M_PI - sphericalSafeAntiGLockClamp );
+        sphericalAcc.setY(M_PI - sphericalSafeAntiGLockClamp);
 
-    if ( sphericalAcc.x() <= 0.0f ) sphericalAcc.setX( TWO_PI - 0.0001f );
-    if ( sphericalAcc.x() >= TWO_PI ) sphericalAcc.setX( 0.0f );
+    if ( sphericalAcc.x() <= 0.0f ) sphericalAcc.setX(TWO_PI - 0.0001f);
+    if ( sphericalAcc.x() >= TWO_PI ) sphericalAcc.setX(0.0f);
 
     computeOrbitPosition();
 }
 
 void Camera::computeOrbitPosition() {
-    auto stc = sphericalToCartasian( V3f{ sphericalAcc, mOrbitDistance } );
-    setPosition( mTarget->value * V3f::UP_AXIS + XZY::C( stc ));
+    auto stc = sphericalToCartasian(V3f{ sphericalAcc, mOrbitDistance });
+    setPosition(mTarget->value * V3f::UP_AXIS + XZY::C(stc));
 }
 
 void Camera::UpdateIncrementalEulerFromQangle() {
     incrementalEulerQuatAngle = V3f{ M_PI } - qangle->value.euler2();
 }
 
-void Camera::UpdateIncrementalEulerFromQangle( const Quaternion &_qtarget ) {
+void Camera::UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget ) {
     incrementalEulerQuatAngle = V3f{ M_PI } - _qtarget.euler2();
 }
 
@@ -834,11 +842,11 @@ void Camera::resetQuat() {
 
 Quaternion Camera::quatAngle() const { return qangle->value; }
 
-V3fa &Camera::PosAnim() { return mPos; }
+V3fa& Camera::PosAnim() { return mPos; }
 
-Quaterniona &Camera::QAngleAnim() { return qangle; }
+Quaterniona& Camera::QAngleAnim() { return qangle; }
 
-TimelineSet Camera::addKeyFrame( const std::string &_name, float _time ) {
+TimelineSet Camera::addKeyFrame( const std::string& _name, float _time ) {
     TimelineSet ret{};
 
 //    Timeline::add( _name, PosAnim(),    KeyFramePair{_time, getPosition() } );
@@ -856,36 +864,36 @@ void Camera::getViewporti( int *viewport ) const {
 
 void Camera::ViewPort( JMATH::Rect2f val ) {
     mViewPort = val;
-    mScreenAspectRatio.setAspectRatioMatrixScreenSpace( mViewPort.ratio());
+    mScreenAspectRatio.setAspectRatioMatrixScreenSpace(mViewPort.ratio());
 }
 
 Vector3f Camera::getYawVector() const {
-    return mView.getCol( 0 ).xyz();
+    return mView.getCol(0).xyz();
 }
 
 Vector3f Camera::getYawVectorInv() const {
-    return -mView.getCol( 0 ).xyz();
+    return -mView.getCol(0).xyz();
 }
 
 Vector3f Camera::getUpVector() const {
-    return mView.getCol( 1 ).xyz();
+    return mView.getCol(1).xyz();
 }
 
 Vector3f Camera::getUpVectorInv() const {
-    return -mView.getCol( 1 ).xyz();
+    return -mView.getCol(1).xyz();
 }
 
 Vector3f Camera::getDirection() const {
-    return mView.getCol( 2 ).xyz();
+    return mView.getCol(2).xyz();
 }
 
 Vector3f Camera::getDirectionInv() const {
-    return -mView.getCol( 2 ).xyz();
+    return -mView.getCol(2).xyz();
 }
 
 Vector3f Camera::getDirectionRH() const {
-    Vector3f ret = mView.getCol( 2 ).xzy();
-    ret.setX( -ret.x());
+    Vector3f ret = mView.getCol(2).xzy();
+    ret.setX(-ret.x());
     return ret;
 }
 
@@ -893,7 +901,7 @@ void Camera::AspectRatioMultiplier( float val ) {
     mAspectRatioMultiplier = val;
 }
 
-void Camera::Mode( const CameraControlType &val ) {
+void Camera::Mode( const CameraControlType& val ) {
     mMode = val;
 }
 
@@ -907,7 +915,7 @@ Vector4f Camera::getNearFar() const {
 
 std::vector<V3f> Camera::frustumFarViewPort() const {
     std::vector<V3f> ret;
-    for ( int t = 0; t < 4; t++ ) ret.emplace_back( mFrustom.cornersFar[t] );
+    for ( int t = 0; t < 4; t++ ) ret.emplace_back(mFrustom.cornersFar[t]);
     return ret;
 }
 
