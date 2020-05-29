@@ -982,4 +982,12 @@ void RenderOrchestrator::setLuaScriptHotReload( const std::string& _luaScriptHot
     luaScriptHotReload = _luaScriptHotReload;
 }
 
+void RenderOrchestrator::setMICursorCapture(bool _flag) {
+    bMICursorCapture = _flag;
+}
+
+bool RenderOrchestrator::getMICursorCapture() const {
+    return bMICursorCapture;
+}
+
 

@@ -62,3 +62,11 @@ void MouseInput::setWheelScrollcallbackOnce() {
 void MouseInput::getCursorPos( double& xpos, double& ypos ) {
     glfwGetCursorPos( WH::window, &xpos, &ypos );
 }
+
+bool MouseInput::UseCaptureOnMove() const {
+    return bUseCaptureOnMove;
+}
+
+void MouseInput::UseCaptureOnMove( bool _bUseCaptureOnMove ) {
+    MouseInput::bUseCaptureOnMove = _bUseCaptureOnMove;
+}

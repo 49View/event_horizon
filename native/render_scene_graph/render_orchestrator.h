@@ -107,6 +107,8 @@ public:
     void setLuaScriptHotReload( const std::string& _luaScriptHotReload );
 
     void reloadShadersViaHttp();
+    void setMICursorCapture( bool _flag );
+    [[nodiscard]] bool getMICursorCapture() const;
 
 protected:
     AVInitCallback avcbTM();
@@ -137,6 +139,7 @@ private:
     SceneGraph& sg;
     UIView uiView;
     cameraRigsMap mRigs;
+    bool bMICursorCapture = false;
     std::unordered_map<std::string, SceneScreenBox> boxes;
     sol::state lua{};
     std::string luaScriptHotReload;

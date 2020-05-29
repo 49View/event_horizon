@@ -15,7 +15,9 @@
 
 
 CameraControl::CameraControl( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg ) :
-        mCameraRig(std::move(cameraRig)), rsg(rsg) {}
+        mCameraRig(std::move(cameraRig)), rsg(rsg) {
+    rsg.setMICursorCapture(false);
+}
 
 auto CameraControl::updateDollyWalkingVerticalMovement() {
     dollyWalkingVerticalMovement += GameTime::getCurrTimeStep() * dollyFrequency;
@@ -287,6 +289,7 @@ CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, Rend
         : CameraControl(cameraRig, rsg) {
     cameraRig->getCamera()->Mode(CameraControlType::Walk);
     cameraRig->getCamera()->LockAtWalkingHeight(true);
+    rsg.setMICursorCapture(true);
     controlType = CameraControlType::Walk;
 }
 

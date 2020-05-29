@@ -37,7 +37,8 @@ public:
         cliParams = params;
     }
 
-    void update( AggregatedInputData& _aid ) {
+    void update( AggregatedInputData& _aid, MouseInput& mi ) {
+        mi.UseCaptureOnMove(rsg.getMICursorCapture());
         rsg.updateInputs( _aid );
         sg.update();
         updateImpl( _aid );
@@ -129,7 +130,7 @@ protected:
         mi.update( mUpdateSignals );
         auto aid = aggregateInputs();
         WH::preUpdate();
-        rlbackEnd->update( aid );
+        rlbackEnd->update( aid, mi );
     }
 
     void render() {

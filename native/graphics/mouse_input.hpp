@@ -157,6 +157,8 @@ public: // these are globals data accessed from low level functions on inputs et
     std::array<TouchStatus, MAX_TAPS> Status() const;
 	void update( UpdateSignals& _updateSignals );
 
+    [[nodiscard]] bool UseCaptureOnMove() const;
+    void UseCaptureOnMove( bool _bUseCaptureOnMove );
 private:
     void setWheelScrollcallbackOnce();
     void mouseButtonUpdatePositions( int _touchIndex, double xpos, double ypos );
@@ -166,6 +168,7 @@ private:
 
 private:
 	bool  mPaused = false;
+	bool  bUseCaptureOnMove = false;
     float mCurrTimeStamp = 0.0f;
 
     std::array<TouchStatus, MAX_TAPS> status;
