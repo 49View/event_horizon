@@ -537,7 +537,9 @@ public:
             return;
         }
         if constexpr ( std::is_same_v<M, std::shared_ptr<Profile> > ) {
-            rds.multiVerts = _param->Paths3dWithUV();
+            if ( _param ) {
+                rds.multiVerts = _param->Paths3dWithUV();
+            }
             return;
         }
         if constexpr ( std::is_same_v<M, VTMVectorOfVectorWrap> ) {

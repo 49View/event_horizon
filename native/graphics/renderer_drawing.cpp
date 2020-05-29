@@ -470,6 +470,8 @@ VPListSP Renderer::drawLineFinal( RendererDrawingSet& rds ) {
         rds.multiVerts.emplace_back(rds.verts);
     }
 
+    if ( rds.multiVerts.empty() ) return nullptr;
+
     V3fVectorOfVector allVLists;
     for ( auto& lines : rds.multiVerts ) {
         preMult(lines.v, rds);
