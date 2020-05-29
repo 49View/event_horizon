@@ -77,8 +77,8 @@ namespace HOD { // HighOrderDependency
 
 }
 
-using GenericSceneCallbackValueMap = std::tuple<std::string, SerializableContainer, std::string>;
-using GenericSceneCallback = std::unordered_map<std::string, GenericSceneCallbackValueMap>;
+using GenericSceneCallbackValue = std::function<void()>;
+using GenericSceneCallback = std::vector<GenericSceneCallbackValue>;
 using EventSceneCallback = std::unordered_map<std::string, SocketCallbackDataType>;
 
 class SceneGraph : public NodeGraph {
@@ -273,12 +273,8 @@ public:
     ResourceRef addProfileIM     ( const ResourceRef& _key, const Profile      & _res );
     ResourceRef addUIIM          ( const ResourceRef& _key, const UIContainer& _res );
 
-    static void addGenericCallback( const std::string& _key, GenericSceneCallbackValueMap&& _value ) {
-        SceneGraph::genericSceneCallback.emplace( _key, std::move(_value) );
-    }
-    static void addEventCallback( const std::string& _key, SocketCallbackDataType&& _value ) {
-        SceneGraph::eventSceneCallback.emplace( _key, std::move(_value) );
-    }
+    static void addGenericCallback( GenericSceneCallbackValue _value );
+    static void addEventCallback( const std::string& _key, SocketCallbackDataType&& _value );
 
     void updateRawImage      ( const ResourceRef& _key );
 
@@ -485,7 +481,7 @@ protected:
         }
     }
 
-    void publishAndAddCallback();
+    void genericCallbacks();
     void realTimeCallbacks();
     void loadCallbacks();
 

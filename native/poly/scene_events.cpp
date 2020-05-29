@@ -49,12 +49,12 @@ void allCallbacksEntitySetup() {
     Socket::on( SceneEvents::ChangeMaterialProperty, SceneGraph::addEventCallback );
 }
 
-template<typename T>
-void addFileCallback( const std::string& _path ) {
-    SerializableContainer fileContent;
-    FM::readLocalFile( _path, fileContent );
-    SceneGraph::addGenericCallback( ResourceVersioning<T>::Prefix(), { getFileName( _path ), fileContent, _path } );
-}
+//template<typename T>
+//void addFileCallback( const std::string& _path ) {
+//    SerializableContainer fileContent;
+//    FM::readLocalFile( _path, fileContent );
+//    SceneGraph::addGenericCallback( ResourceVersioning<T>::Prefix(), { getFileName( _path ), fileContent, _path } );
+//}
 
 void allConversionsDragAndDropCallbackMultiplePaths( const std::vector<std::string>& _paths ) {
     ResourcePipe rpipe;
@@ -96,18 +96,18 @@ void allConversionsDragAndDropCallback( std::vector<std::string>& _paths ) {
 //    } else if ( extl == ".stl" ) {
 //        stl::parse_stl(pathSanitized);
 //    }
-        else if ( isFileExtAnImage( extl )) {
-            addFileCallback<RawImage>( pathSanitized );
-        } else if ( extl == ".ttf" ) {
-            addFileCallback<Font>( pathSanitized );
-        } else if ( extl == ".svg" ) {
-            addFileCallback<Profile>( pathSanitized );
-        } else if ( extl == ".sbsar" ) {
-            FM::copyLocalToRemote( pathSanitized,
-                                   DaemonPaths::upload( ResourceGroup::Material ) + getFileName( pathSanitized ));
-        } else if ( extl == ".gltf" || extl == ".glb" ) {
-            addFileCallback<Geom>( pathSanitized );
-        }
+//        else if ( isFileExtAnImage( extl )) {
+//            addFileCallback<RawImage>( pathSanitized );
+//        } else if ( extl == ".ttf" ) {
+//            addFileCallback<Font>( pathSanitized );
+//        } else if ( extl == ".svg" ) {
+//            addFileCallback<Profile>( pathSanitized );
+//        } else if ( extl == ".sbsar" ) {
+//            FM::copyLocalToRemote( pathSanitized,
+//                                   DaemonPaths::upload( ResourceGroup::Material ) + getFileName( pathSanitized ));
+//        } else if ( extl == ".gltf" || extl == ".glb" ) {
+//            addFileCallback<Geom>( pathSanitized );
+//        }
     } else {
         allConversionsDragAndDropCallbackMultiplePaths( _paths );
     }

@@ -162,24 +162,9 @@ void SceneGraph::replaceMaterialOnNodes( const std::string& _key ) {
     replaceMaterialSignal(signalValueMap["source_material_id"], _key);
 }
 
-void SceneGraph::publishAndAddCallback() {
-    for ( auto&[k, v] : genericSceneCallback ) {
-        if ( k == ResourceGroup::Image ) {
-            B<IB>(std::get<0>(v)).publishAndAdd(std::get<1>(v));
-        } else if ( k == ResourceGroup::Font ) {
-            B<FB>(std::get<0>(v)).publishAndAdd(std::get<1>(v));
-        } else if ( k == ResourceGroup::Profile ) {
-            B<PB>(std::get<0>(v)).publishAndAdd(std::get<1>(v));
-        } else if ( k == ResourceGroup::Color ) {
-            B<MCB>(std::get<0>(v)).publishAndAdd(std::get<1>(v));
-        } else if ( k == ResourceGroup::Material ) {
-            B<MB>(std::get<0>(v)).publishAndAdd(std::get<1>(v));
-        } else if ( k == ResourceGroup::Geom ) {
-            B<GRB>(std::get<0>(v)).publishAndAdd(std::get<1>(v));
-        } else {
-            LOGRS("{" << k << "} Resource not supported yet in callback updating");
-            ASSERT(0);
-        }
+void SceneGraph::genericCallbacks() {
+    for ( auto& cb : genericSceneCallback ) {
+        cb();
     }
     genericSceneCallback.clear();
 }
@@ -309,7 +294,7 @@ void SceneGraph::update() {
     }
 
     // NDDado, these are mainly dealt with the react portal now, might become obsolete soon
-    publishAndAddCallback();
+    genericCallbacks();
     realTimeCallbacks();
     loadCallbacks();
 
@@ -777,6 +762,14 @@ float SceneGraph::cameraCollisionDetection( std::shared_ptr<Camera> cam ) {
 void SceneGraph::setLastKnownGoodPosition( const V3f& _pos ) {
     if ( !collisionMesh ) return;
     collisionMesh->setLastKnownGoodPosition(_pos);
+}
+
+void SceneGraph::addGenericCallback( GenericSceneCallbackValue _value ) {
+    SceneGraph::genericSceneCallback.emplace_back( _value );
+}
+
+void SceneGraph::addEventCallback( const std::string& _key, SocketCallbackDataType&& _value ) {
+    SceneGraph::eventSceneCallback.emplace( _key, std::move(_value) );
 }
 
 void HOD::DepRemapsManager::addDep( const std::string& group, const std::string& resName ) {
