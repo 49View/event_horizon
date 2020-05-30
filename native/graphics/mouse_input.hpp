@@ -25,6 +25,7 @@
 
 class Renderer;
 class TextInput;
+class Camera;
 
 static constexpr size_t MAX_TAPS = 10;
 
@@ -87,6 +88,7 @@ struct AggregatedInputData {
 
     [[nodiscard]] bool isMouseTouchedDownFirstTime( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].touchedDownFirstTime; }
     [[nodiscard]] bool isMouseTouchedDown( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].touchedDown; }
+    [[nodiscard]] bool isMouseTouchedDownAndMoving( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].touchedDown && hasMouseMoved(_touchIndex); }
     [[nodiscard]] bool isMouseTouchedUp( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].hasTouchedUp; }
     [[nodiscard]] bool isMouseSingleTap( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].singleTapEvent; }
     [[nodiscard]] bool hasMouseMoved( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].bHasMouseMoved; }
@@ -98,6 +100,8 @@ struct AggregatedInputData {
 
     [[nodiscard]] bool isMouseHasBeenEaten() const { return mouseHasBeenEaten; }
     void setMouseHasBeenEaten( bool _mouseHasBeenEaten ) { mouseHasBeenEaten = _mouseHasBeenEaten; }
+
+    [[nodiscard]] V2f  mouseViewportPos( int _touchIndex, std::shared_ptr<Camera> cam ) const;
 
     [[nodiscard]] bool checkKeyToggleOn( int keyCode, bool overrideTextInput = false ) const;
     [[nodiscard]] TextInput& TI() const { return ti; }

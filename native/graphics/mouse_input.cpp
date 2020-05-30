@@ -4,7 +4,9 @@
 
 #include "mouse_input.hpp"
 #include "window_handling.hpp"
-#include "core/app_globals.h"
+#include <core/app_globals.h>
+#include <core/camera.h>
+#include <core/math/vector_util.hpp>
 
 Vector2f MouseInput::GScrollData{V2fc::ZERO};
 MouseButtonData MouseInput::GMouseButtonData{};
@@ -130,6 +132,12 @@ void MouseInput::clearTaps() {
 
 bool AggregatedInputData::checkKeyToggleOn( int keyCode, bool overrideTextInput ) const {
     return ti.checkKeyToggleOn( keyCode, overrideTextInput );
+}
+
+V2f AggregatedInputData::mouseViewportPos( int _touchIndex, std::shared_ptr<Camera> cam ) const {
+    auto pickedRay = cam->rayViewportPickIntersection(mousePos(_touchIndex));
+    Plane3f zeroPlane{ V3f::UP_AXIS, 0.0f };
+    return XZY::C(zeroPlane.intersectLine(pickedRay.rayNear, pickedRay.rayFar));
 }
 
 SwipeDirection MouseInput::checkSwipe( int _touchIndex ) {

@@ -133,6 +133,18 @@ bool isInsideTriangle( const Vector2f& P, const Vector2f& A, const Vector2f& B, 
 	return ( u >= 0.0f ) && ( v >= 0.0f ) && ( u + v < 1.0f );
 }
 
+bool isNearTriangle( const Vector2f& P, float radius, const Vector2f& A, const Vector2f& B, const Vector2f& C ) {
+
+    if ( isInsideTriangle(P, A, B, C) ) return true;
+
+    V2f i = V2fc::ZERO;
+    if ( distanceFromLine(P, A, B, i) < radius ) return true;
+    if ( distanceFromLine(P, A, C, i) < radius ) return true;
+    if ( distanceFromLine(P, B, C, i) < radius ) return true;
+
+    return false;
+}
+
 void straightenOnMainAxis( Vector2f& a, Vector2f& b, float straightCoeff ) {
 	Vector2f vdiff = normalize( a - b );
 	float ad = fabs( dot( vdiff, Vector2f( 1.0f, 0.0f ) ) );
