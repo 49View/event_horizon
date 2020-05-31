@@ -384,9 +384,9 @@ Range<It> reverse( ORange&& originalRange ) {
     return Range<It>(It(std::end(originalRange)), It(std::begin(originalRange)));
 }
 
-
-extern int64_t globalHash;
-//static const int64_t HashInc();
+using HashEH = int64_t;
+extern HashEH globalHash;
+HashEH HashInc();
 
 // Release log functions
 #define ASSERTR( X ) doAssert(X, #X, __LINE__, __FILE__)

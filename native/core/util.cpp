@@ -27,7 +27,7 @@
 #include <core/game_time.h>
 
 static bool gError = false;
-int64_t globalHash = 1;
+HashEH globalHash = 1;
 
 //====================================
 // Logging
@@ -148,7 +148,7 @@ void platform_sleep( long long milliseconds ) {
 	std::this_thread::sleep_for( std::chrono::milliseconds( milliseconds ) );
 }
 
-int64_t HashInc() {
+HashEH HashInc() {
 	return ++globalHash;
 }
 
