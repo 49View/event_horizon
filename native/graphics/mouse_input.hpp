@@ -91,6 +91,7 @@ struct AggregatedInputData {
     [[nodiscard]] bool isMouseTouchedDownAndMoving( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].touchedDown && hasMouseMoved(_touchIndex); }
     [[nodiscard]] bool isMouseTouchedUp( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].hasTouchedUp; }
     [[nodiscard]] bool isMouseSingleTap( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].singleTapEvent; }
+    [[nodiscard]] bool isMouseDoubleTap( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].doubleTapEvent; }
     [[nodiscard]] bool hasMouseMoved( int _touchIndex ) const { return !mouseHasBeenEaten && status[_touchIndex].bHasMouseMoved; }
 
     [[nodiscard]] V2f  mousePos( int _touchIndex ) const { return V2f{ status[_touchIndex].xpos, status[_touchIndex].ypos }; }
