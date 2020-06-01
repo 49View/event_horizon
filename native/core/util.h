@@ -388,6 +388,19 @@ using HashEH = int64_t;
 extern HashEH globalHash;
 HashEH HashInc();
 
+template<typename T, std::size_t N>
+constexpr bool is_pointer_to_const_char(T(&)[N])
+{
+    return std::is_same_v<const char, T>;
+}
+
+template<typename T>
+constexpr bool is_pointer_to_const_char(T &&)
+{
+    return std::is_same_v<const char *, T>;
+}
+
+
 // Release log functions
 #define ASSERTR( X ) doAssert(X, #X, __LINE__, __FILE__)
 //#define THREAD_INFO

@@ -82,7 +82,7 @@ auto addVertexStrips( Renderer& _rr, const std::vector<T>& verts, const Renderer
     auto colorStrip = std::make_shared<TS>();
     colorStrip->generateStripsFromVerts(verts, rds.prim);
 
-    auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapColor(rds.color) } }.
+    auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapColor(rds.color) }, rds.name }.
             t(rds.matrix).p(colorStrip).n(rds.name).build();
     _rr.VPL(rds.bucketIndex, vp);
     return vp;
@@ -91,7 +91,7 @@ auto addVertexStrips( Renderer& _rr, const std::vector<T>& verts, const Renderer
 template<typename TS>
 auto addVertexStripsTM( Renderer& _rr, std::shared_ptr<TS> ps, const RendererDrawingSet& rds ) {
 
-    auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) } }.
+    auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) }, rds.name }.
             t(rds.matrix).p(ps).n(rds.name).build();
     _rr.VPL(rds.bucketIndex, vp);
     return vp;
@@ -113,7 +113,8 @@ auto addVertexStripsTMAutoMapping( Renderer& _rr, const std::vector<T>& verts, c
         ++count;
     }
 
-    auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) } }.
+    auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) },
+                             rds.name }.
             t(rds.matrix).p(ps).n(rds.name).build();
     _rr.VPL(rds.bucketIndex, vp);
     return vp;
@@ -269,7 +270,7 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
 VPListSP Renderer::drawRect( const int bi, const Rect2f& r, const Color4f& color, const std::string& _name ) {
 
     auto ps = std::make_shared<Pos3dStrip>(r, 0.0f);
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(ps).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
     VPL(bi, vp);
     return vp;
@@ -281,7 +282,7 @@ VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Ve
     QuadVertices2 qvt = textureQuadFillModeMapping(fm, rect, ratio);
     auto ps = std::make_shared<PosTex3dStrip>(rect, qvt, 0.0f);
     auto vp = VPBuilder<PosTex3dStrip>{ *this,
-                                        ShaderMaterial{ S::TEXTURE_3D, mapTextureAndColor(_texture, color) } }.p(
+                                        ShaderMaterial{ S::TEXTURE_3D, mapTextureAndColor(_texture, color) }, _name }.p(
             ps).n(_name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -290,7 +291,7 @@ VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Ve
 VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
                              const std::string& _name ) {
     auto ps = std::make_shared<Pos3dStrip>(Rect2f{ p1, p2, true }, 0.0f);
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(ps).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -299,7 +300,7 @@ VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Ve
 VPListSP
 Renderer::drawRect2d( const int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name ) {
     auto ps = std::make_shared<Pos3dStrip>(r1);
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_2D, mapColor(color) } }.p(ps).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_2D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -315,7 +316,7 @@ VPListSP Renderer::drawRect2d( const int bucketIndex, const Rect2f& rect, CResou
                                float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
     auto ps = std::make_shared<PosTex3dStrip>(rect, QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS);
     auto vp = VPBuilder<PosTex3dStrip>{ *this,
-                                        ShaderMaterial{ S::TEXTURE_2D, mapTextureAndColor(_texture, color) } }.p(
+                                        ShaderMaterial{ S::TEXTURE_2D, mapTextureAndColor(_texture, color) }, _name }.p(
             ps).n(_name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -606,7 +607,7 @@ VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& v
     colorStrip->addStripVertex(Vector3f{ verts[0], _z });
     colorStrip->addStripVertex(Vector3f{ verts[1], _z });
     colorStrip->addStripVertex(Vector3f{ verts[2], _z });
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(colorStrip).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -620,7 +621,7 @@ VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector3f>& v
     colorStrip->addStripVertex(verts[0]);
     colorStrip->addStripVertex(verts[1]);
     colorStrip->addStripVertex(verts[2]);
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(colorStrip).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -637,7 +638,7 @@ VPListSP Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& 
     for ( auto& v : verts ) {
         colorStrip->addStripVertex(v);
     }
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(colorStrip).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -663,7 +664,7 @@ Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, co
         colorStrip->addVertex(v);
     }
 
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(colorStrip).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -740,7 +741,7 @@ VPListSP Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>(numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                   _verts, std::move(_indices));
 
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(ps).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -763,7 +764,7 @@ VPListSP Renderer::drawDot( int bucketIndex, const Vector3f& center, float radiu
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>(4, PRIMITIVE_TRIANGLE_FAN, 4,
                                                                   _verts, std::move(_indices));
 
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(ps).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -789,7 +790,7 @@ Renderer::drawCircle( int bucketIndex, const Vector3f& center, float radius, con
     std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>(numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
                                                                   _verts, std::move(_indices));
 
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) } }.p(ps).n(
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
     VPL(bucketIndex, vp);
     return vp;
@@ -885,7 +886,7 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
     ps->transform(rds.preMultMatrix);
 //    auto trams = std::make_shared<Matrix4f>( rds.preMultMatrix );//
 
-    auto vp = VPBuilder<FontStrip>{ *this, ShaderMaterial{ rds.shaderName, mapColor(rds.color) } }.
+    auto vp = VPBuilder<FontStrip>{ *this, ShaderMaterial{ rds.shaderName, mapColor(rds.color) }, rds.fds.text }.
             p(ps).t(rds.matrix).n(rds.fds.text).
             build();
 

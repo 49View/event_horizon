@@ -24,6 +24,8 @@ std::shared_ptr<RenderMaterial> RenderMaterialManager::addRenderMaterial(
         std::shared_ptr<HeterogeneousMap> _values,
         const StringUniqueCollection& _names) {
 
+    if ( auto mat = find(_names); mat ) return mat;
+
     ShaderMaterial shaderMaterial{ _type, _values };
     shaderMaterial.activate(rr);
     auto rmaterial = std::make_shared<RenderMaterial>( shaderMaterial.P(), shaderMaterial.Values(), rr );

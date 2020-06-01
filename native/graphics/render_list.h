@@ -58,17 +58,42 @@ public:
     void setDrawCallsPerFrame( int _drawCallsPerFrame ) {
         drawCallsPerFrame = _drawCallsPerFrame;
     }
-    void clear() {
-        drawCallsPerFrame=0;
-        mNumTriangles = 0;
-        mNumVerts = 0;
-        mNumIndices = 0;
-        mNumNormals = 0;
-        mNumGeoms = 0;
+    int getInMemoryMaterials() const {
+        return inMemoryMaterials;
     }
+    void setInMemoryMaterials( int _inMemoryMaterials ) {
+        RenderStats::inMemoryMaterials = _inMemoryMaterials;
+    }
+    int getInMemoryVertexBuffers() const {
+        return inMemoryVertexBuffers;
+    }
+    void setInMemoryVertexBuffers( int _inMemoryVertexBuffers ) {
+        RenderStats::inMemoryVertexBuffers = _inMemoryVertexBuffers;
+    }
+    int getInMemoryTextures() const {
+        return inMemoryTextures;
+    }
+    void setInMemoryTextures( int _inMemoryTextures ) {
+        RenderStats::inMemoryTextures = _inMemoryTextures;
+    }
+
+//    void clear() {
+//        drawCallsPerFrame=0;
+//        inMemoryMaterials = 0;
+//        inMemoryTextures = 0;
+//        inMemoryVertexBuffers = 0;
+//        mNumTriangles = 0;
+//        mNumVerts = 0;
+//        mNumIndices = 0;
+//        mNumNormals = 0;
+//        mNumGeoms = 0;
+//    }
 
 private:
     int drawCallsPerFrame=0;
+    int inMemoryMaterials=0;
+    int inMemoryTextures=0;
+    int inMemoryVertexBuffers=0;
     int mNumTriangles=0;
     int mNumVerts=0;
     int mNumIndices=0;

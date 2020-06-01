@@ -46,3 +46,7 @@ const std::shared_ptr <HeterogeneousMap>& ShaderMaterial::Values() const {
 ShaderMaterial::ShaderMaterial( std::string shaderName, Renderer& _rr ) : shaderName( std::move( shaderName )) {
     activate(_rr);
 }
+
+std::string ShaderMaterial::calculateHash() const {
+    return SN() + (values ? values->Hash() : "");
+}

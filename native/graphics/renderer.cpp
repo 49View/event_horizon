@@ -252,6 +252,9 @@ void Renderer::directRenderLoop( RenderStats& rs ) {
 
     mDrawCallsPerFrame = renderCBList();
     rs.setDrawCallsPerFrame(mDrawCallsPerFrame);
+    rs.setInMemoryMaterials(rmm->count());
+    rs.setInMemoryVertexBuffers(gm->count());
+    rs.setInMemoryTextures(TM()->count());
 
 //    VRM.update();
 
@@ -314,7 +317,7 @@ void Renderer::VPL( const int _bucket, std::shared_ptr<VPList> nvp, float alpha 
     } else {
         mCommandLists[_bucket].mVList.push_back( nvp );
     }
-    mVPLMap.emplace( nvp->UUiD(), nvp );
+//    mVPLMap.emplace( nvp->UUiD(), nvp );
 }
 
 bool Renderer::hasTag( uint64_t _tag ) const {

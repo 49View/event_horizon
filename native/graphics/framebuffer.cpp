@@ -73,12 +73,12 @@ std::shared_ptr<Framebuffer> FrameBufferBuilder::build() {
     if ( !mIMShaderName.empty() ) {
         std::string vn = mName + std::to_string(mDestViewport.size().x()) + std::to_string(mDestViewport.size().y());
         if ( mHashViewSpace ) {
-            ret->mVPListIM = VPBuilder<PosTexNor2dStrip>{ rr, ShaderMaterial{mIMShaderName} }.
+            ret->mVPListIM = VPBuilder<PosTexNor2dStrip>{ rr, ShaderMaterial{mIMShaderName}, mName }.
                     p( std::make_shared<PosTexNor2dStrip>( mDestViewport.ss(),
                             QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS, QuadVertices3::QUAD_VERTICES_Z)).
                     n(vn).build();
         } else {
-            ret->mVPListIM = VPBuilder<PosTex2dStrip>{ rr, ShaderMaterial{mIMShaderName} }.
+            ret->mVPListIM = VPBuilder<PosTex2dStrip>{ rr, ShaderMaterial{mIMShaderName}, mName }.
                p( std::make_shared<PosTex2dStrip>( mDestViewport.ss(),QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS) ).
                n(vn).build();
         }

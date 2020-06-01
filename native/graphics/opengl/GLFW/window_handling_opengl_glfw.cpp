@@ -130,6 +130,9 @@ namespace WindowHandling {
         ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate );
         ImGui::Text("Current FrameRate (%.1f FPS)", ImGui::GetIO().Framerate );
         ImGui::Text("Number drawcalls: %d", rs.getDrawCallsPerFrame() );
+        ImGui::Text("Number render materials: %d", rs.getInMemoryMaterials() );
+        ImGui::Text("Number vertex buffers: %d", rs.getInMemoryVertexBuffers() );
+        ImGui::Text("Number textures: %d", rs.getInMemoryTextures() );
         ImGui::End();
 #endif
     }

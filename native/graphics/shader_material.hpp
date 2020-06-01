@@ -17,6 +17,7 @@ public:
     explicit ShaderMaterial( std::string _sn );
     ShaderMaterial( std::string shaderName, Renderer& _rr );
     ShaderMaterial( std::string shaderName, std::shared_ptr<HeterogeneousMap> values );
+    std::string calculateHash() const;
     void activate( Renderer& _rr );
 
     const std::string& SN() const;

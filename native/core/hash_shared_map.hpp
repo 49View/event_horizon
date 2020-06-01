@@ -11,29 +11,58 @@
 template <typename T>
 class HashSharedMap {
     using  HSMap = std::unordered_map<std::string, std::shared_ptr<T>>;
-    using  HSMaper = std::unordered_map<std::string, std::string>;
 public:
     size_t count() const { return mData.size(); }
 
+    static std::string calcTotalHash( const StringUniqueCollection& _names ) {
+        std::string totalHash{};
+        for ( const auto& lName : _names ) {
+            if ( !lName.empty() ) {
+                totalHash+="@"+lName;
+            }
+        }
+        return totalHash;
+    }
+
     void add( const StringUniqueCollection& _names, std::shared_ptr<T> _elem ) {
-        for ( const auto& lName : _names )
-            if ( !lName.empty() ) mData.emplace( lName, _elem );
+        auto totalHash = calcTotalHash( _names );
+
+        if ( !totalHash.empty() ) {
+            for ( const auto& lName : _names ) {
+                if ( !lName.empty() ) {
+                    mData.emplace( lName, _elem );
+                }
+            }
+            mHashDataMap[totalHash] = _elem;
+        }
+    }
+
+    [[nodiscard]] bool exists( const StringUniqueCollection& _names ) const {
+        return mHashDataMap.find(calcTotalHash( _names )) != mHashDataMap.end();
+    }
+
+    [[nodiscard]] std::shared_ptr<T> find( const StringUniqueCollection& _names ) {
+        if ( auto it = mHashDataMap.find(calcTotalHash( _names )); it != mHashDataMap.end() ) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    void remove( const std::string& _hash ) {
+        if ( auto it = mHashDataMap.find(_hash); it != mHashDataMap.end() ) {
+            erase_if( mData, [&, it](const auto& elem) {
+                return elem == it->second;
+            } );
+            mHashDataMap.erase(it);
+        }
     }
 
     inline std::shared_ptr<T> getFromHash( const std::string& _hash ) {
         return mData[_hash];
     }
 
-    inline std::shared_ptr<T> getFromName( const std::string& _name ) {
-        return mData[mMapper[_name]];
-    }
-
     std::shared_ptr<T> get( const std::string& _id ) {
-        auto ret = getFromHash(_id);
-        if ( !ret ) {
-            return getFromName(_id);
-        }
-        return ret;
+        return getFromHash(_id);
     }
 
     auto begin() {
@@ -54,5 +83,5 @@ public:
 
 protected:
     HSMap    mData;
-    HSMaper  mMapper;
+    HSMap    mHashDataMap;
 };

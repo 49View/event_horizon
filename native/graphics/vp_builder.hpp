@@ -13,16 +13,17 @@ template <typename V>
 class VPBuilder {
 public:
     VPBuilder( Renderer& _rr,
-               ShaderMaterial _sm ) : rr(_rr), shaderMaterial( std::move( _sm )) {
+               ShaderMaterial _sm,
+               const std::string& _name ) : rr(_rr), shaderMaterial( std::move( _sm )) {
         uuid = UUIDGen::make();
-        name = uuid;
+        name = name.empty() ? uuid : _name;
     };
 
     VPBuilder( Renderer& _rr,
                const ResourceRef& _matRef,
                const ResourceRef& _vdataRef ) : rr(_rr) {
         uuid = UUIDGen::make();
-        name = uuid;
+        name = _matRef + _vdataRef;
         renderMaterialSP = rr.getMaterial( _matRef );
         gpuDataSP = rr.getGPUVData( _vdataRef );
         bStraightRef = true;
