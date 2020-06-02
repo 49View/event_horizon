@@ -782,25 +782,6 @@ void HOD::DepRemapsManager::addDep( const std::string& group, const std::string&
 }
 
 void HOD::reducer( SceneGraph& sg, HOD::DepRemapsManager& deps, HODResolverCallback ccf ) {
-
     HOD::EntityList el{ deps.geoms };
     sg.HODResolve(deps.ret, ccf);
-//    Http::post( Url{ HttpFilePrefix::entities + "remaps" },
-//                el.serialize(),
-//                [&, deps, ccf, el]( HttpResponeParams res ) {
-//                    EntityRemappingContainer erc{ res.bufferString };
-//                    LOGRS( "Remaps bufferstring " << res.bufferString );
-//                    HOD::DepRemapsManager ndeps = deps;
-//                    AppMaterialsRemapping remaps{};
-//                    for ( const auto& rm : erc.remaps ) {
-//                        remaps.remap[rm.sourceEntity + "," + rm.sourceRemap] = rm.destRemap;
-//                        remaps.remap[erc.kv[rm.sourceEntity] + "," + rm.sourceRemap] = rm.destRemap;
-//                        ndeps.addDep( ResourceGroup::Material, rm.destRemap );
-//                    }
-//
-//                    sg.setMaterialRemap( remaps.remap );
-//
-//                    sg.HODResolve( ndeps.ret, ccf );
-//                }
-//    );
 }
