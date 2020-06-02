@@ -8,9 +8,11 @@ const JMATH::Rect2f JMATH::Rect2f::INVALID = Rect2f( std::numeric_limits<float>:
 													 std::numeric_limits<float>::lowest(),
 													 std::numeric_limits<float>::lowest() );
 
-std::ostream& operator<<( std::ostream& os, const JMATH::Rect2f& f ) {
-    os << "Min: " << f.topLeft() << " Max: " << f.bottomRight();
-    return os;
+namespace JMATH {
+    std::ostream& operator<<( std::ostream& os, const JMATH::Rect2f& f ) {
+        os << "Min: " << f.topLeft() << " Max: " << f.bottomRight();
+        return os;
+    }
 }
 
 void poly_edge_clip( std::vector<Vector2f>& sub, Vector2f& x0, Vector2f& x1, int left, std::vector<Vector2f>& res ) {
