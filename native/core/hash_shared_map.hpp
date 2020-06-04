@@ -57,6 +57,11 @@ public:
         }
     }
 
+    void clear() {
+        mData.clear();
+        mHashDataMap.clear();
+    }
+
     inline std::shared_ptr<T> getFromHash( const std::string& _hash ) {
         return mData[_hash];
     }

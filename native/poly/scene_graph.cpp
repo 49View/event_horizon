@@ -75,7 +75,7 @@ void SceneGraph::removeNode( const UUID& _uuid ) {
 }
 
 void SceneGraph::removeNode( GeomSP _node ) {
-    nodeRemoveSignal(_node);
+    gmNodeRemoveSignal(_node);
     if ( _node ) {
         for ( const auto& c : _node->Children()) {
             removeNode(c);
@@ -169,7 +169,7 @@ void SceneGraph::genericCallbacks() {
     genericSceneCallback.clear();
 }
 
-void SceneGraph::clearFromRealTimeCallbacks() {
+void SceneGraph::clearGMNodes() {
     removeNode(!nodes.empty() ? nodes.begin()->second : nullptr);
     GM().clear();
     Nodes().clear();
@@ -177,7 +177,7 @@ void SceneGraph::clearFromRealTimeCallbacks() {
 
 void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup ) {
 
-    clearFromRealTimeCallbacks();
+    clearGMNodes();
     Http::clearRequestCache();
 
     if ( entityGroup == ResourceGroup::Geom ) {
@@ -218,7 +218,7 @@ void SceneGraph::realTimeCallbacks() {
         if ( k == SceneEvents::ReloadLuaScript ) {
             runLUAScriptSignal(doc["data"].GetString());
         } else if ( k == SceneEvents::UpdateEntity ) {
-            clearFromRealTimeCallbacks();
+            clearGMNodes();
             auto entityGroup = doc["data"]["group"].GetString();
 
             if ( entityGroup == ResourceGroup::UI ) {
@@ -227,7 +227,7 @@ void SceneGraph::realTimeCallbacks() {
                 nodeFullScreenUIContainerSignal(rref);
             }
         } else if ( k == SceneEvents::AddPlaceHolderEntity ) {
-            clearFromRealTimeCallbacks();
+            clearGMNodes();
             auto entityGroup = doc["data"]["group"].GetString();
 
             if ( entityGroup == ResourceGroup::UI ) {

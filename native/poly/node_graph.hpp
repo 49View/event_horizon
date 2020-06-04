@@ -35,6 +35,7 @@ public:
     void runLUAScript( const std::function<ConnectLUAScriptSig>& _slot );
     void nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
+    void gmNodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
     void nodeFullScreenImageConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void nodeSetSkyboxConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
@@ -54,6 +55,7 @@ protected:
     boost::signals2::signal<ConnectPairStringBoolFuncSig> propagateDirtyFlagSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeRemoveSignal;
+    boost::signals2::signal<NodeGraphConnectFuncSig> gmNodeRemoveSignal;
     boost::signals2::signal<ConnectVoidFuncSig> preloadCompleteSignal;
     boost::signals2::signal<NodeGraphConnectReplaceFuncSig> replaceMaterialSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeSetSkyboxSignal;

@@ -135,17 +135,27 @@ void RenderLightManager::setUniforms( const Vector3f& _cameraPos,
     std::vector<float> lbeamAngle;
     std::vector<int> lType;
 
-    int numLightsClamped = 0;
-    for ( auto& pl : mPointLights ) {
-        lpos.push_back(  pl.Pos() );
+    // Load defaults
+    for ( auto t = 0; t< mMaxLights; t++ ) {
+        lpos.push_back( V3f::ZERO );
         ldir.push_back( Vector3f::Y_AXIS );
-        lintensity.emplace_back( pl.Intensity() );
-        lattn.push_back( pl.Attenuation() );
+        lintensity.emplace_back( 0.0f );
+        lattn.push_back( V3f::ZERO );
         lbeamdir.push_back( Vector3f::Z_AXIS );
         lbeamAngle.push_back( 60.0f );
         lType.push_back( 0 );
-        numLightsClamped++;
-        if ( numLightsClamped == mMaxLights ) break;
+    }
+
+    int numLightsClamped = 0;
+    for ( auto& pl : mPointLights ) {
+        lpos[numLightsClamped]=(  pl.Pos() );
+        ldir[numLightsClamped]=( Vector3f::Y_AXIS );
+        lintensity[numLightsClamped]= V3f{pl.Intensity()};
+        lattn[numLightsClamped]=( pl.Attenuation() );
+        lbeamdir[numLightsClamped]=( Vector3f::Z_AXIS );
+        lbeamAngle[numLightsClamped]=( 60.0f );
+        lType[numLightsClamped]=( 0 );
+        if ( ++numLightsClamped == mMaxLights ) break;
     }
 
     auto uSunDirection = smm->SunDirection();

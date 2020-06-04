@@ -485,12 +485,12 @@ protected:
     void realTimeCallbacks();
     void loadCallbacks();
 
-    void clearFromRealTimeCallbacks();
     ResourceRef GBMatInternal( CResourceRef _matref, const C4f& _color );
     void materialsForGeomSocketMessage();
     void replaceMaterialOnNodes( const std::string& _key );
 
 public:
+    void clearGMNodes();
     void setMaterialRemap( const MaterialMap& materialRemap );
     [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
     void HODResolve( const DependencyList& deps, HODResolverCallback ccf );
