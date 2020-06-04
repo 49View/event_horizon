@@ -27,3 +27,8 @@ bool TextInput::checkKeyPressed( int keyCode ) {
 void TextInput::checkKeyPressedStateless( int keyCode, int& currKeyPressed ) {
     if ( glfwGetKey( WH::window, keyCode ) == GLFW_PRESS ) currKeyPressed = keyCode;
 }
+
+bool TextInput::checkModKeyPressed( int keyCode ) const {
+    return ( glfwGetKey( WH::window, keyCode ) == GLFW_PRESS );
+//    return checkBitWiseFlag( ModKeyCurrent( keyCode ), anyModKeyPressed );
+}

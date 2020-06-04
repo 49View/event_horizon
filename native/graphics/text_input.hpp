@@ -53,6 +53,7 @@ public: // these are globals data accessed from low level functions on inputs et
 	bool ModKeyCurrent( ModifiersKey val ) const;
 	void forceModKeyCurrent( ModifiersKey val ) { mModKeyCurrent = val; }
 	bool IsAnyModKeyPressed() const { return anyModKeyPressed; };
+    bool checkModKeyPressed( int keyCode ) const;
 
 	void startListeningForTextInput( const std::string& title, std::function<bool()> enterCallbackFunction, std::function<void()> escapeCallbackFunction );
 
