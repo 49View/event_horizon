@@ -412,7 +412,7 @@ VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f&
         v4 = extrudePointsWithWidth<ExtrudeStrip>({ rightLinePos, op1 }, width, false);
     }
 
-    draw<DText>(bucketIndex, FDS{ measureText, font, textPos, fontHeight, textAngle }, fontColor);
+    draw<DText>(bucketIndex, FDS{ measureText, font, textPos, fontHeight, textAngle }, RDSRectAxis::XZ, fontColor);
 
     RendererDrawingSet rds{ bucketIndex, color, S::COLOR_3D, _name };
 
@@ -455,7 +455,7 @@ VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f&
         auto rightLinePos = lerp(0.5f + textOffGap, p2, p1);
         v3 = extrudePointsWithWidth<ExtrudeStrip>({ leftLinePos, p2 }, width, false);
         v4 = extrudePointsWithWidth<ExtrudeStrip>({ rightLinePos, p1 }, width, false);
-        draw<DText>(bucketIndex, FDS{ measureText, font, textPos, fontHeight, textAngle }, fontColor);
+        draw<DText>(bucketIndex, FDS{ measureText, font, textPos, fontHeight, textAngle }, RDSRectAxis::XZ, fontColor);
     }
 
     auto v5 = extrudePointsWithWidth<ExtrudeStrip>({ p1, op1 }, width * 0.75f);
@@ -809,7 +809,7 @@ void RendererDrawingSet::setupFontData() {
         lTRS.Rot(quatFromAxis(V4f{ V3f::Z_AXIS, fds.fontAngle }));
         lTRS.Scale(V3f{ 1.0f, -1.0f, 1.0f } * fds.fontHeight * 0.001f);
     } else {
-        lTRS.Pos(XZY::C(fds.pos));
+        rectAxis == RDSRectAxis::XZ ? lTRS.Pos(fds.pos) : lTRS.Pos(XZY::C(fds.pos));
         lTRS.Rot(quatFromAxis(V4f{ V3f::Y_AXIS, fds.fontAngle }));
         lTRS.Scale(fscale * V3f{ 1.0f, -1.0f, -1.0f } * fds.fontHeight);
     }
