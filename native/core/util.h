@@ -99,8 +99,10 @@ std::string cacheFolder();
 std::string getDaemonRoot();
 
 std::string distaneToString( float _distance );
+std::string distaneToStringMeters( float _distance );
 std::string priceMaker( uint64_t price );
 std::string sizeToString( const float x, const float y );
+std::string sizeToStringMeters( const float x, const float y );
 std::string sqmToString( const float sqm );
 float stringFeetInchesToCm( const std::string& _text );
 float feetInchesToMeters( const float feetf, const float inchesf );

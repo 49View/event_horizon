@@ -17,6 +17,7 @@ namespace FontUtils {
     JMATH::Rect2f measure( const std::string& msg, const Font* f, float height );
     JMATH::Rect2f optimalSizeForText( const Vector2f& size, const Font* f,
                                       const std::string& text, float& outputHeight );
+    Vector2f fitTextInBox( const Font* font, const std::string& text, const JMATH::Rect2f& bbox, float& fontHeight);
 };
 
 

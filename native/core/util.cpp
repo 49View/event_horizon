@@ -383,12 +383,19 @@ std::string distaneToString( float _distance ) {
 
 	if ( _distance < 1.0f ) {
 		int idistance = static_cast<int>( _distance * 1000.0f );
-		return std::to_string( idistance ) + " " + " meters";
+		return std::to_string( idistance ) + " " + " m";
 	}
 
 	std::ostringstream so;
 	so << std::fixed << std::setprecision( 1 ) << _distance << " km";
 	return so.str();
+}
+
+std::string distaneToStringMeters( float _distance ) {
+
+    std::ostringstream so;
+    so << std::fixed << std::setprecision( 2 ) << _distance << " m";
+    return so.str();
 }
 
 std::string priceMaker( uint64_t price ) {
@@ -405,8 +412,15 @@ std::string priceMaker( uint64_t price ) {
 std::string sizeToString( const float x, const float y ) {
 
 	std::ostringstream so;
-	so << std::fixed << std::setprecision( 1 ) << x << "m x " << y << "m";
+	so << distaneToString(x) << " x " << distaneToString(y);
 	return so.str();
+}
+
+std::string sizeToStringMeters( const float x, const float y ) {
+
+    std::ostringstream so;
+    so << distaneToStringMeters(x) << " x " << distaneToStringMeters(y);
+    return so.str();
 }
 
 std::string sqmToString( const float sqm ) {

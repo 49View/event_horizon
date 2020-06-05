@@ -804,16 +804,16 @@ void RendererDrawingSet::setupFontData() {
 //    V3f fscale2d{ 1.0f/(frect.z - frect.x), 1.0f/(frect.w - frect.y), 1.0f };
 
     MatrixAnim lTRS;
-    lTRS.Pos(fds.pos);
     if ( shaderName == S::FONT_2D ) {
+        lTRS.Pos(fds.pos);
         lTRS.Rot(quatFromAxis(V4f{ V3f::Z_AXIS, fds.fontAngle }));
         lTRS.Scale(V3f{ 1.0f, -1.0f, 1.0f } * fds.fontHeight * 0.001f);
     } else {
+        lTRS.Pos(XZY::C(fds.pos));
         lTRS.Rot(quatFromAxis(V4f{ V3f::Y_AXIS, fds.fontAngle }));
         lTRS.Scale(fscale * V3f{ 1.0f, -1.0f, -1.0f } * fds.fontHeight);
     }
     preMultMatrix = Matrix4f{ lTRS };
-
 }
 
 bool RendererDrawingSet::hasTexture() const {
