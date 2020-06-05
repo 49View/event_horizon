@@ -385,6 +385,7 @@ void RenderOrchestrator::updateInputs( AggregatedInputData& _aid ) {
     for ( auto&[k, v] : mRigs ) {
         v->updateFromInputData(sg, _aid);
     }
+    UI().updateAnim();
 }
 
 void RenderOrchestrator::init( const CLIParamMap& params ) {
