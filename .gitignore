@@ -122,3 +122,4 @@ certificates/
 forgotten/
 builds/
 local_debug.sh
+native/graphics/opengl/shader_emit.txt

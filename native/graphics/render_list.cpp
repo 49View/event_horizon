@@ -439,15 +439,16 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
 
         case CommandBufferCommandName::preFlush:
             if ( rr.isLoading() ) {
+//if ( cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP() ) {
                 cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
                         rr.SM()->P(S::LOADING_SCREEN).get() );
+//}
             }
             break;
         default:
             break;
     };
 }
-
 
 CommandBufferEntryCommand::CommandBufferEntryCommand( CommandBufferCommand _command ) {
     mType = CommandBufferEntryCommandType::Comamnd;

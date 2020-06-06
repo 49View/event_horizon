@@ -4,6 +4,12 @@ in vec2 v_texCoord;
 out vec4 fragColor;
 vec2 iResolution = vec2(640.0, 360.0);
 
+float N21(vec2 p) {
+	p = fract(p * vec2(233.34, 851.73));
+    p += dot(p, p + 23.45);
+    return fract(p.x * p.y);
+}
+
 float inRect(vec2 pos, vec2 topLeft, vec2 rightBottom) {
 	return step(topLeft.x, pos.x) * step(rightBottom.y, pos.y) * step(-rightBottom.x, -pos.x) * step(-topLeft.y, -pos.y);
 }
@@ -12,7 +18,19 @@ float inBetween(float x, float a, float b) {
     return step(a, x) * step(-b, -x);
 }
 
-vec3 loadingColor( vec2 uv, float progress ) {
+float boxLayer(float depth, vec2 uv, float size, float pos, float iTime) {
+
+    const float fullDepth = 4.0;
+    
+    float boxHalfSize = size * 0.5;
+
+    vec2 boxCenter = vec2(fullDepth * pos, (1.0 - boxHalfSize) * sin(iTime * 10.0 * (0.3 + 0.7 * N21(vec2(depth, size))) ));
+    
+    return inRect(uv, boxCenter + vec2(-boxHalfSize, boxHalfSize), boxCenter + vec2(boxHalfSize, -boxHalfSize))
+    * inRect(uv, vec2(0.0, 1.0), vec2(3.99, -1.0)) * mix(1.0, 0.0, pos);
+}
+
+vec3 loadingColor( vec2 uv, float progress, float iTime ) {
     vec2 inv_resolution = 1.0 / iResolution.xy;
 	float sWidth = iResolution.x * inv_resolution.y;
     const float barWidthRatio = 0.7;
@@ -32,7 +50,7 @@ vec3 loadingColor( vec2 uv, float progress ) {
     float isInActiveRect = inRect(uv_bar, vec2(0.0, 0.5 * barHeight), vec2(progress, -0.5 * barHeight));
     vec3 baseColor = vec3(0.12941, 0.13725, 0.17647);
     vec3 activeColor = mix(vec3(0.2, 0.35294, 0.91373), vec3(0.43529, 0.43529, 0.96078), uv_bar.x);
-    vec3 color = vec3(0.0, 0.0, 0.0);
+    vec3 color = vec3(0.0);
     color = mix(color, baseColor, isInBaseRect);
     color = mix(color, activeColor, isInActiveRect);
 
@@ -55,7 +73,7 @@ void main() {
     	alphaing = 1.0 - smoothstep(higherLimit, 1.0f, progress);
     }
 
-    vec4 c = vec4(loadingColor(uv, progress) * alphaing, 1.0);
+    vec4 c = vec4(loadingColor(uv, progress, iTime) * alphaing, 0.5);
     //c *= alphaing;
 
     fragColor = c;

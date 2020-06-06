@@ -483,7 +483,7 @@ public:
             }
             return;
         }
-        if constexpr ( std::is_same_v<M, std::string> || is_pointer_to_const_char(_param) ) {
+        if constexpr ( std::is_same_v<M, std::string> ||  std::is_same_v<typename std::remove_all_extents<M>::type, char> ) {
             rds.name = _param;
             return;
         }

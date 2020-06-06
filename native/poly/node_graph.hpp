@@ -19,6 +19,7 @@ using SceneRayIntersectCallback = std::function<void(NodeVariantsSP, float)>;
 using ConnectVoidParamSig = bool;
 using ConnectPairStringBoolParamSig = std::pair<std::string, bool>;
 using ConnectVoidFuncSig = void(ConnectVoidParamSig);
+using ConnectVoidFloatFuncSig = void(float);
 using ConnectLUAScriptSig = void(const std::string&);
 using ConnectPairStringBoolFuncSig = void(ConnectPairStringBoolParamSig);
 using NodeGraphConnectParamsSig = NodeVariantsSP;
@@ -43,20 +44,20 @@ public:
     void nodeFullScreenProfileConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void nodeFullScreenUIContainerConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void preloadCompleteConnect( const std::function<ConnectVoidFuncSig>& _slot );
+    void preloadProgressConnect( const std::function<ConnectVoidFloatFuncSig>& _slot );
     void propagateDirtyFlagConnect( const std::function<ConnectPairStringBoolFuncSig>& _slot );
     void changeMaterialPropertyConnectString( const std::function<NodeGraphConnectChangeMaterialPropertySFuncSig>& _slot );
     void changeMaterialPropertyConnectFloat( const std::function<NodeGraphConnectChangeMaterialPropertyFFuncSig>& _slot );
     void changeMaterialPropertyConnectV3f( const std::function<NodeGraphConnectChangeMaterialPropertyV3fFuncSig>& _slot );
     void changeMaterialPropertyConnectV4f( const std::function<NodeGraphConnectChangeMaterialPropertyV4fFuncSig>& _slot );
 
-protected:
-    NodeGraphContainer nodes;
     boost::signals2::signal<ConnectLUAScriptSig> runLUAScriptSignal;
     boost::signals2::signal<ConnectPairStringBoolFuncSig> propagateDirtyFlagSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeRemoveSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> gmNodeRemoveSignal;
     boost::signals2::signal<ConnectVoidFuncSig> preloadCompleteSignal;
+    boost::signals2::signal<ConnectVoidFloatFuncSig> preloadProgressSignal;
     boost::signals2::signal<NodeGraphConnectReplaceFuncSig> replaceMaterialSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeSetSkyboxSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenImageSignal;
@@ -67,6 +68,9 @@ protected:
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertyFFuncSig> changeMaterialPropertyFloatSignal;
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertyV3fFuncSig> changeMaterialPropertyV3fSignal;
     boost::signals2::signal<NodeGraphConnectChangeMaterialPropertyV4fFuncSig> changeMaterialPropertyV4fSignal;
+
+protected:
+    NodeGraphContainer nodes;
     std::unordered_map<std::string, uint64_t> geomTypeMap;
     std::unordered_map<std::string, std::string> signalValueMap;
 };

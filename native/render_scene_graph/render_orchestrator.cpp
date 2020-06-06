@@ -152,6 +152,10 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         this->RR().setLoadingFlag(!_value);
     });
 
+    sg.preloadProgressConnect([this]( float _value ) {
+        this->RR().setProgressionTiming( _value );
+    });
+
     sg.propagateDirtyFlagConnect([this]( ConnectPairStringBoolParamSig _value ) {
         setDirtyFlagOnPBRRender(Name::Foxtrot, _value.first, _value.second);
     });

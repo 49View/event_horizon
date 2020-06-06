@@ -9,8 +9,9 @@ void SceneDependencyResolver::loadResCount( HttpResouceCBSign _key ) {
     size_t targetNum = firstTierResourceCount();
 
     loadedResCounter.emplace_back( _key );
-//    float progress = ( static_cast<float>(loadedResCounter.size()) / static_cast<float>(appData.totalResourceCount()));
-//    rsgl.RR().setProgressionTiming( progress );
+    float progress = ( static_cast<float>(loadedResCounter.size()) / static_cast<float>(totalResourceCount()));
+    LOGRS("Progress: "<< progress);
+    sgl.preloadProgressSignal( progress );
     if ( loadedResCounter.size() == targetNum ) {
         loadedResCounter.clear();
         activateGeomLoad();
@@ -19,9 +20,10 @@ void SceneDependencyResolver::loadResCount( HttpResouceCBSign _key ) {
 
 void SceneDependencyResolver::loadGeomResCount( HttpResouceCBSign _key ) {
     loadedResCounter.emplace_back( _key );
-//    float progress = ( static_cast<float>(loadedResCounter.size() + appData.firstTierResourceCount()) /
-//                       static_cast<float>(appData.totalResourceCount()));
-//    rsgl.RR().setProgressionTiming( progress );
+    float progress = ( static_cast<float>(loadedResCounter.size() + firstTierResourceCount()) /
+                       static_cast<float>(totalResourceCount()));
+    LOGRS("Progress: "<< progress);
+    sgl.preloadProgressSignal( progress );
     if ( loadedResCounter.size() == secondTierResourceCount()) {
         loadedResCounter.clear();
         activatePostLoadInternal();
