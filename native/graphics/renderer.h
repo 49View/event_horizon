@@ -48,12 +48,8 @@ struct DShaderMatrix {
     DShaderMatrixValue operator()() const noexcept {
         return data;
     }
-    bool has2d() const {
-        return checkBitWiseFlag(data, DShaderMatrixValue2dColor) || checkBitWiseFlag(data, DShaderMatrixValue2dTexture);
-    }
-    bool hasTexture() const {
-        return checkBitWiseFlag(data, DShaderMatrixValue2dTexture) || checkBitWiseFlag(data, DShaderMatrixValue3dTexture);
-    }
+    bool has2d() const;
+    bool hasTexture() const;
     DShaderMatrixValue data;
 };
 

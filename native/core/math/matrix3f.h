@@ -2,7 +2,6 @@
 #define D_MATH_MATRIX3_H
 
 #include "vector3f.h"
-#include "../util.h"
 
 // SHARED CLASS: Any changes to this, should be integrated to /svn/shared, and a mail should be send to everyone
 

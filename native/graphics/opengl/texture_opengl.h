@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <core/math/vector2f.h>
-#include <core/util.h>
+#include <core/util_logs.hpp>
 #include <core/htypes_shared.hpp>
 #include <core/name_policy.hpp>
 

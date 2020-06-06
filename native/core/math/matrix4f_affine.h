@@ -3,7 +3,6 @@
 
 #include "vector3f.h"
 #include "matrix3f.h"
-#include "../util.h"
 
 // SHARED CLASS: Any changes to this, should be integrated to /svn/shared, and a mail should be send to everyone
 

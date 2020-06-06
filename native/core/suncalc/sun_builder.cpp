@@ -1,14 +1,13 @@
-#include <iostream>
 #include <utility>
 #include "sun_builder.h"
 
 #include "datetime.h"
 #include "golden_color.hpp"
 #include "../math/spherical_harmonics.h"
-#include "../math/math_util.h"
 #include "../service_factory.h"
 #include "../configuration/app_options.h"
 #include <core/raw_image.h>
+#include <core/util.h>
 
 SunBuilder::SunBuilder() {
 	dateParts["spring"] = std::make_tuple( 20, 3 );

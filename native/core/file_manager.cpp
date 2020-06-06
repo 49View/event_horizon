@@ -17,6 +17,180 @@ size_t fcseek(void *cookie, fpos_t offset, int whence);
 void fcclose(void *cookie);
 FILE * fcopen(const char *filename, const char *mode);
 
+bool isFilenameAFolder( const std::string& input ) {
+    size_t pos = input.find_last_of( "/" );
+    if ( pos != std::string::npos && pos == input.size() - 1 ) return true;
+    pos = input.find_last_of( "\\" );
+    if ( pos != std::string::npos && pos == input.size() - 1 ) return true;
+
+    return false;
+}
+
+std::string getFileNameNoExt( const std::string& input ) {
+    std::string ret = input;
+    size_t pos = ret.find_last_of( "." );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( 0, pos );
+    }
+
+    return ret;
+}
+
+std::string getFileNameKey( const std::string& input, EncodingStatusFlag ef ) {
+    return getFileNameNoExt( getFileName( input, ef ) );
+}
+
+
+std::string getFileNameCallbackKey( const std::string& input ) {
+    return url_decode(getFileNameKey( input, EncodingStatusFlag::NotEncode));
+}
+
+std::string getFileNameExt( const std::string& input ) {
+    std::string ret = "";
+    size_t pos = input.find_last_of( "." );
+    if ( pos != std::string::npos ) {
+        ret = input.substr( pos, input.length() - pos );
+    }
+
+    return ret;
+}
+
+std::string getFileNameExtToLower( const std::string& input ) {
+    return toLower(getFileNameExt(input));
+}
+
+std::string getFileName( const std::string& input, EncodingStatusFlag ef ) {
+    std::string ret = input;
+    // trim path before filename
+    size_t pos = ret.find_last_of( "/" );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( pos + 1, ret.length() );
+    }
+    pos = ret.find_last_of( "\\" );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( pos + 1, ret.length() );
+    }
+
+    if ( checkBitWiseFlag(ef, EncodingStatusFlag::DoEncode ) ) {
+        pos = ret.rfind( "%2F" );
+        if ( pos != std::string::npos ) {
+            ret = ret.substr( pos + 3, ret.length() );
+        }
+    }
+
+    return ret;
+}
+
+std::string getFileNamePath( const std::string& input ) {
+    std::string ret = input;
+    // trim path before filename
+    size_t pos = ret.find_last_of( "/" );
+    if ( pos != std::string::npos ) {
+        return ret.substr( 0, pos );
+    }
+    pos = ret.find_last_of( "\\" );
+    if ( pos != std::string::npos ) {
+        return ret.substr( 0, pos );
+    }
+
+    return ret;
+}
+
+std::string getFileNameOnly( const std::string& input ) {
+    std::string ret = input;
+    // trim path before filename
+    size_t pos = ret.find_last_of( "/" );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( pos + 1, ret.length() );
+    }
+    pos = ret.find_last_of( "\\" );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( pos + 1, ret.length() );
+    }
+    pos = ret.find_last_of( "." );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( 0, pos );
+    }
+
+    return ret;
+}
+
+std::string getLastEntryInPath( const std::string& input ) {
+    std::string ret = input;
+    if ( ret[ret.size()-1] == '/' ) {
+        ret = ret.substr(0, ret.size()-1);
+    }
+    // trim path before filename
+    size_t pos = ret.find_last_of( "/" );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( pos + 1, ret.length() );
+    }
+
+    return ret;
+}
+
+std::string getLastFolderInPath( const std::string& input ) {
+    std::string ret = input;
+    if ( ret[ret.size()-1] == '/' ) {
+        ret = ret.substr(0, ret.size()-1);
+    }
+    // trim path before filename
+    size_t pos = ret.find_last_of( "/" );
+    if ( pos != std::string::npos ) {
+        ret = ret.substr( 0, pos );
+        pos = ret.find_last_of( "/" );
+        if ( pos != std::string::npos ) {
+            ret = ret.substr( pos + 1, ret.length() );
+        }
+    }
+
+    return ret;
+}
+
+std::string getFirstFolderInPath( const std::string& input ) {
+    std::string ret = input;
+    if ( ret[ret.size()-1] == '/' ) {
+        ret = ret.substr(0, ret.size()-1);
+    }
+    // trim path before filename
+    size_t pos = ret.find_first_of( "/" );
+    if ( pos != std::string::npos ) {
+        size_t pos2 = ret.find_first_of( "/", pos );
+        if ( pos2 != std::string::npos ) {
+            return input.substr( pos, pos2 - pos );
+        }
+    }
+
+    return ret;
+}
+
+bool isFileExtAnImage( const std::string& _ext ) {
+
+    auto ext = toLower(_ext);
+
+    if ( ext == ".jpg" ) return true;
+    if ( ext == ".png" ) return true;
+    if ( ext == ".jpeg" ) return true;
+    if ( ext == ".tga" ) return true;
+    if ( ext == ".bmp" ) return true;
+    if ( ext == ".psd" ) return true;
+    if ( ext == ".gif" ) return true;
+    if ( ext == ".hdr" ) return true;
+    if ( ext == ".pic" ) return true;
+    if ( ext == ".exr" ) return true;
+
+    return false;
+}
+
+bool nameHasImageExtension( const std::string& input ) {
+    std::string ext = getFileNameExtToLower(input);
+    return ext != "" && ( ext == ".jpg" || ext == ".jpeg" || ext == ".png" );
+}
+
+bool isFileExtCompressedArchive( const std::string& _filename ) {
+    return getFileNameExt( std::string( _filename )) == ".zip";
+}
+
 namespace FileManager {
 
 //    std::string filenameOnlyNoExtension( const std::string& input ) {

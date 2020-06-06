@@ -3,8 +3,7 @@
 //
 
 #include "text_input.hpp"
-#include "window_handling.hpp"
-#include "mouse_input.hpp"
+#include <core/util.h>
 
 std::wstring TextInput::GInputString;
 ModifiersKey TextInput::mModKeyCurrent;

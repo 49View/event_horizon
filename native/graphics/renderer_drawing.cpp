@@ -3,6 +3,7 @@
 //
 
 #include "renderer.h"
+#include <core/util.h>
 #include <core/TTF.h>
 #include <core/raw_image.h>
 #include <core/image_mapping.hpp>

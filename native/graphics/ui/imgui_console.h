@@ -6,7 +6,6 @@
 
 #include "core/command.hpp"
 #include "graphics/imgui/imgui.h"
-#include "core/util.h"
 
 namespace  JMATH {
     class Rect2f;

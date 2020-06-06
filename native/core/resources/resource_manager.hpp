@@ -6,7 +6,6 @@
 
 #include <unordered_set>
 #include <boost/signals2.hpp>
-#include <core/util.h>
 #include <core/names.hpp>
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/entity_factory.hpp>

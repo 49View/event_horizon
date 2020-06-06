@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <vector>
 #include <cstring>
+#include <core/util_logs.hpp>
 #include "zlib_util.h"
 
 #include <core/http/basen.hpp>

@@ -3,7 +3,6 @@
 #include <utility>
 #include <cstring>
 #include <vector>
-#include "../util.h"
 #include "math_util.h"
 #include "vector2f.h"
 #include "vector2i.h"

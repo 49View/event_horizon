@@ -4,6 +4,7 @@
 
 #include "v_data.hpp"
 
+#include <core/util.h>
 #include <core/soa_utils.h>
 #include <core/math/plane3f.h>
 

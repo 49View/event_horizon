@@ -9,7 +9,6 @@
 #pragma once
 
 #include <core/runloop_core.h>
-#include <core/util.h>
 #include <core/http/webclient.h>
 #include <core/di.hpp>
 #include <core/resources/resource_manager.hpp>

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstring>
-#include "core/util.h"
 #include "gl_headers.hpp"
 #include "../graphic_constants.h"
 #include "core/soa_utils.h"

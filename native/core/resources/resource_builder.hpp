@@ -7,6 +7,7 @@
 #include <boost/signals2.hpp>
 
 #include <core/tar_util.h>
+#include <core/file_manager.h>
 #include <core/resources/resource_manager.hpp>
 #include <core/resources/publisher.hpp>
 #include <core/resources/entity_factory.hpp>

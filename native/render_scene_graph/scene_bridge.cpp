@@ -3,12 +3,9 @@
 //
 
 #include "scene_bridge.h"
-#include <core/app_globals.h>
-#include <core/camera.h>
-#include <core/camera_rig.hpp>
+#include <core/util.h>
 #include <core/app_globals.h>
 #include <core/resources/resource_manager.hpp>
-#include <graphics/render_targets.hpp>
 #include <graphics/framebuffer.h>
 
 float sPresenterArrangerLeftFunction( float _value ) {

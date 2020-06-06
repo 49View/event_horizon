@@ -9,6 +9,7 @@
 #include <core/math/rect2f.h>
 #include <core/camera_utils.hpp>
 #include <core/name_policy.hpp>
+#include <core/htypes_shared.hpp>
 
 class Camera;
 

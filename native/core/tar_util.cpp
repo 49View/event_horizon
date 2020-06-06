@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include "tar_util.h"
+#include <core/util.h>
 #include <core/file_manager.h>
 #include <core/hashable.hpp>
 

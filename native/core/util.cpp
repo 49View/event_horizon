@@ -27,7 +27,6 @@
 #include <core/game_time.h>
 
 static bool gError = false;
-HashEH globalHash = 1;
 
 //====================================
 // Logging
@@ -148,10 +147,6 @@ void platform_sleep( long long milliseconds ) {
 	std::this_thread::sleep_for( std::chrono::milliseconds( milliseconds ) );
 }
 
-HashEH HashInc() {
-	return ++globalHash;
-}
-
 bool invalidChar (unsigned char c)
 {  
     return !(c>=0 && c <128);   
@@ -160,223 +155,6 @@ bool invalidChar (unsigned char c)
 void stripUnicode(std::string & str)
 { 
     str.erase(std::remove_if(str.begin(),str.end(), invalidChar), str.end());  
-}
-
-SerializableContainer serializableContainerFromString( const std::string& s ) {
-    return SerializableContainer{ s.data(), s.data() + s.size() };
-}
-
-bool isFilenameAFolder( const std::string& input ) {
-	size_t pos = input.find_last_of( "/" );
-	if ( pos != std::string::npos && pos == input.size() - 1 ) return true;
-	pos = input.find_last_of( "\\" );
-	if ( pos != std::string::npos && pos == input.size() - 1 ) return true;
-	
-	return false;
-}
-
-std::string getFileNameNoExt( const std::string& input ) {
-	std::string ret = input;
-	size_t pos = ret.find_last_of( "." );
-	if ( pos != std::string::npos ) {
-		ret = ret.substr( 0, pos );
-	}
-
-	return ret;
-}
-
-std::string getFileNameKey( const std::string& input, EncodingStatusFlag ef ) {
-	return getFileNameNoExt( getFileName( input, ef ) );
-}
-
-
-std::string getFileNameCallbackKey( const std::string& input ) {
-	return url_decode(getFileNameKey( input, EncodingStatusFlag::NotEncode));
-}
-
-std::string getFileNameExt( const std::string& input ) {
-	std::string ret = "";
-	size_t pos = input.find_last_of( "." );
-	if ( pos != std::string::npos ) {
-		ret = input.substr( pos, input.length() - pos );
-	}
-
-	return ret;
-}
-
-std::string getFileNameExtToLower( const std::string& input ) {
-    return toLower(getFileNameExt(input));
-}
-
-std::string getFileName( const std::string& input, EncodingStatusFlag ef ) {
-	std::string ret = input;
-	// trim path before filename
-	size_t pos = ret.find_last_of( "/" );
-	if ( pos != std::string::npos ) {
-		ret = ret.substr( pos + 1, ret.length() );
-	}
-	pos = ret.find_last_of( "\\" );
-	if ( pos != std::string::npos ) {
-		ret = ret.substr( pos + 1, ret.length() );
-	}
-
-	if ( checkBitWiseFlag(ef, EncodingStatusFlag::DoEncode ) ) {
-		pos = ret.rfind( "%2F" );
-		if ( pos != std::string::npos ) {
-			ret = ret.substr( pos + 3, ret.length() );
-		}
-	}
-
-	return ret;
-}
-
-std::string getFileNamePath( const std::string& input ) {
-    std::string ret = input;
-    // trim path before filename
-    size_t pos = ret.find_last_of( "/" );
-    if ( pos != std::string::npos ) {
-        return ret.substr( 0, pos );
-    }
-    pos = ret.find_last_of( "\\" );
-    if ( pos != std::string::npos ) {
-        return ret.substr( 0, pos );
-    }
-
-    return ret;
-}
-
-std::string getFileNameOnly( const std::string& input ) {
-	std::string ret = input;
-	// trim path before filename
-	size_t pos = ret.find_last_of( "/" );
-	if ( pos != std::string::npos ) {
-		ret = ret.substr( pos + 1, ret.length() );
-	}
-	pos = ret.find_last_of( "\\" );
-	if ( pos != std::string::npos ) {
-		ret = ret.substr( pos + 1, ret.length() );
-	}
-	pos = ret.find_last_of( "." );
-	if ( pos != std::string::npos ) {
-		ret = ret.substr( 0, pos );
-	}
-
-	return ret;
-}
-
-std::string getLastEntryInPath( const std::string& input ) {
-	std::string ret = input;
-	if ( ret[ret.size()-1] == '/' ) {
-		ret = ret.substr(0, ret.size()-1);
-	}
-	// trim path before filename
-	size_t pos = ret.find_last_of( "/" );
-	if ( pos != std::string::npos ) {
-		ret = ret.substr( pos + 1, ret.length() );
-	}
-
-	return ret;
-}
-
-std::string getLastFolderInPath( const std::string& input ) {
-    std::string ret = input;
-    if ( ret[ret.size()-1] == '/' ) {
-        ret = ret.substr(0, ret.size()-1);
-    }
-    // trim path before filename
-    size_t pos = ret.find_last_of( "/" );
-    if ( pos != std::string::npos ) {
-        ret = ret.substr( 0, pos );
-        pos = ret.find_last_of( "/" );
-        if ( pos != std::string::npos ) {
-            ret = ret.substr( pos + 1, ret.length() );
-        }
-    }
-
-    return ret;
-}
-
-std::string getFirstFolderInPath( const std::string& input ) {
-    std::string ret = input;
-    if ( ret[ret.size()-1] == '/' ) {
-        ret = ret.substr(0, ret.size()-1);
-    }
-    // trim path before filename
-    size_t pos = ret.find_first_of( "/" );
-    if ( pos != std::string::npos ) {
-        size_t pos2 = ret.find_first_of( "/", pos );
-		if ( pos2 != std::string::npos ) {
-			return input.substr( pos, pos2 - pos );
-		}
-    }
-
-    return ret;
-}
-
-bool isFileExtAnImage( const std::string& _ext ) {
-
-	auto ext = toLower(_ext);
-
-	if ( ext == ".jpg" ) return true;
-	if ( ext == ".png" ) return true;
-	if ( ext == ".jpeg" ) return true;
-	if ( ext == ".tga" ) return true;
-	if ( ext == ".bmp" ) return true;
-	if ( ext == ".psd" ) return true;
-	if ( ext == ".gif" ) return true;
-	if ( ext == ".hdr" ) return true;
-	if ( ext == ".pic" ) return true;
-	if ( ext == ".exr" ) return true;
-
-	return false;
-}
-
-std::string toLower( const std::string _input ) {
-	std::string ret = _input;
-	std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
-	return ret;
-}
-
-bool string_ends_with( const std::string& source, const std::string& match ) {
-	size_t pos = source.rfind( match );
-	if ( pos != std::string::npos ) {
-		size_t targetPos = source.length() - match.length();
-		return pos == targetPos;
-	}
-	return false;
-}
-
-std::string string_trim_upto( const std::string& source, const std::string& match ) {
-	size_t pos = source.rfind( match );
-	if ( pos != std::string::npos ) {
-		return source.substr(0, pos);
-	}
-	return source;
-}
-
-std::string string_trim_after( const std::string& source, const std::string& match ) {
-    size_t pos = source.rfind( match );
-    if ( pos != std::string::npos ) {
-        return source.substr(pos + 1, source.length() - pos);
-    }
-    return source;
-}
-
-std::string string_trim_upto( const std::string& source, const std::vector<std::string>& matches ) {
-	for ( auto & match : matches ) {
-		auto ret = string_trim_upto( source, match );
-		if ( ret != source ) return ret;
-	}
-	return source;
-}
-
-std::string cbToString( uint8_p&& _data ) {
-	return std::string( reinterpret_cast<const char*>(_data.first.get()), _data.second);
-}
-
-bool nameHasImageExtension( const std::string& input ) {
-	std::string ext = getFileNameExtToLower(input);
-    return ext != "" && ( ext == ".jpg" || ext == ".jpeg" || ext == ".png" );
 }
 
 std::string distaneToString( float _distance ) {
@@ -486,23 +264,6 @@ float stringFeetInchesToCm( const std::string& _text ) {
 std::string boolAlphaBinary( bool _flag ) {
     return _flag ? "1" : "0";
 }
-
-bool isFileExtCompressedArchive( const std::string& _filename ) {
-    return getFileNameExt( std::string( _filename )) == ".zip";
-}
-
-void FrameInvalidator::invalidate() {
-	bInvalidated = true;
-}
-
-bool FrameInvalidator::invalidated() const {
-	return bInvalidated;
-}
-
-void FrameInvalidator::validated() {
-	bInvalidated = false;
-}
-
 
 namespace DaemonPaths {
 	std::string upload( const std::string& _type, const std::string& _name ) {

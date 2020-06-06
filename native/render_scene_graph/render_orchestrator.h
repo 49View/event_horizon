@@ -26,6 +26,7 @@ class Renderer;
 class SceneGraph;
 class VData;
 class UIView;
+class CLIParamMap;
 
 enum class UIElementStatus;
 

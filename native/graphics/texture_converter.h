@@ -2,7 +2,6 @@
 #define __GRAPHICS_TEXTURE_CONVERTER_H__
 
 #include "graphic_constants.h"
-#include "core/util.h"
 #include "core/math/vector2i.h"
 
 

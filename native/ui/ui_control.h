@@ -5,7 +5,6 @@
 #include "core/math/matrix4f.h"
 #include "core/math/rect2f.h"
 #include "core/math/math_util.h"
-#include "core/util.h"
 #include "../font_manager.h"
 #include "core/formatting_utils.h"
 

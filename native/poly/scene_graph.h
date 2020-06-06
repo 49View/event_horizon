@@ -11,6 +11,7 @@
 #include <typeinfo>
 #include <variant>
 
+#include <core/file_manager.h>
 #include <core/http/webclient.h>
 #include <core/uuid.hpp>
 #include <core/geom.hpp>

@@ -5,8 +5,8 @@
 #pragma once
 
 #include <string>
+#include <core/htypes_shared.hpp>
 #include <core/hashing/crypto_utils.hpp>
-
 // Defaults to MD5, which is more than enough, for now!
 #include <core/hashing/md5.hpp>
 

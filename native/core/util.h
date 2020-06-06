@@ -1,7 +1,5 @@
 #pragma once
 
-#include "htypes_shared.hpp"
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -13,38 +11,9 @@
 #include <map>
 #include <iterator>
 #include <algorithm>
-
-#define  LOG_TAG    "EventHorizon-cpp"
-
-typedef std::pair<int32_t, int32_t> IndexPair;
-
-enum LogPriority {
-    LOG_PRIOTITY_INFO,
-    LOG_PRIORITY_ERROR,
-    LOG_PRIORITY_WARN
-};
-
-enum class PerfOptions {
-    Print,
-    NoPrint
-};
-
-enum EncodingStatusFlag {
-    None = 0,
-    DoEncode = 1 << 0,
-    NotEncode = 1 << 1
-};
-
-enum class CompositeWrapping {
-    Wrap,
-    NoWrap
-};
-
-namespace LoggerLevel {
-    inline const static std::string Error = "error";
-    inline const static std::string Warning = "warning";
-    inline const static std::string Info = "info";
-}
+#include "htypes_shared.hpp"
+#include "util_logs.hpp"
+#include "util_array.hpp"
 
 class CLIParamMap {
 public:
@@ -56,32 +25,6 @@ private:
     KVStringMap params;
 };
 
-
-template<typename T, typename ... Args>
-T perfectForward( Args&& ... args ) {
-    return T(std::forward<Args>(args)...);
-}
-
-class UpdateSignals {
-    bool mbNeedsUpdate = false;
-public:
-    bool NeedsUpdate() const {
-        return mbNeedsUpdate;
-    }
-
-    void NeedsUpdate( bool mbNeedsUpdate ) {
-        UpdateSignals::mbNeedsUpdate = mbNeedsUpdate;
-    }
-};
-
-using logCF = std::function<void( const char * )>;
-
-void hookLogCallbackFunction( logCF _cf );
-void logPrint( LogPriority logPriority, const char *tag, const char *fmt, ... );
-void doAssert( bool condition, const char *text, int line, const char *file );
-void doAssertV( bool condition, const char *text, int line, const char *file, const char *fmt, ... );
-void platformBreakpoint();
-void platformLogPrint( const std::string& logTag, float time, const std::string& message );
 int threadId();
 
 namespace ClipBoard {
@@ -108,32 +51,6 @@ float stringFeetInchesToCm( const std::string& _text );
 float feetInchesToMeters( const float feetf, const float inchesf );
 
 const wchar_t *char_to_wchar( const char *name );
-bool isFilenameAFolder( const std::string& input );
-std::string getFileNamePath( const std::string& input );
-std::string getFileNameOnly( const std::string& input );
-std::string getFileName( const std::string& input, EncodingStatusFlag ef = EncodingStatusFlag::DoEncode );
-std::string getFileNameNoExt( const std::string& input );
-std::string getFileNameExt( const std::string& input );
-std::string getFileNameExtToLower( const std::string& input );
-std::string getFileNameKey( const std::string& input, EncodingStatusFlag ef = EncodingStatusFlag::DoEncode );
-std::string getLastEntryInPath( const std::string& input );
-std::string getLastFolderInPath( const std::string& input );
-std::string getFirstFolderInPath( const std::string& input );
-std::string getFileNameCallbackKey( const std::string& input );
-bool isFileExtAnImage( const std::string& _ext );
-bool isFileExtCompressedArchive( const std::string& _filename );
-std::string toLower( const std::string _input );
-std::string cbToString( uint8_p&& _data );
-
-SerializableContainer serializableContainerFromString( const std::string& s );
-
-bool nameHasImageExtension( const std::string& input );
-bool string_ends_with( const std::string& source, const std::string& match );
-std::string string_trim_upto( const std::string& source, const std::string& match );
-std::string string_trim_after( const std::string& source, const std::string& match );
-std::string string_trim_upto( const std::string& source, const std::vector<std::string>& matches );
-
-bool ensureFolderExists( const std::string& folder, bool throwOnError = false );
 
 ucchar_p uint8_pTouucchar_p( const uint8_p& _source );
 uint8_p ucchar_pTouint8_p( const ucchar_p& _source );
@@ -159,31 +76,6 @@ namespace DaemonPaths {
     std::string upload( const std::string& _type, const std::string& _name = "" );
     std::string store( const std::string& _type, const std::string& _name = "" );
 };
-
-template<typename intType, typename utype>
-utype getCircularArrayIndex( intType pi, utype size ) {
-    if ( std::llabs(pi) == size ) return 0;
-    return pi >= 0 ? ( pi % size ) : size - static_cast<intType>( std::llabs(pi % size) );
-}
-
-template<typename intType, typename utype>
-intType getCircularArrayIndexUnsigned( intType pi, utype size ) {
-    if ( pi == size ) return 0;
-    return pi >= 0 ? ( pi % size ) : size - ( pi % size );
-}
-
-// This the type traits unified version of getCircularArrayIndex*
-// Plese use it all the time as it's much cleaner and less verbose
-template<typename intType, typename utype>
-utype cai( intType pi, utype size ) {
-    if constexpr ( std::is_unsigned_v<intType> ) {
-        if ( pi == static_cast<intType>(size) ) return 0;
-        return pi >= 0 ? ( pi % size ) : size - ( pi % size );
-    } else {
-        if ( std::llabs(pi) == size ) return 0;
-        return pi >= 0 ? ( pi % size ) : size - static_cast<intType>( std::llabs(pi) % size  );
-    }
-}
 
 template<typename T>
 void eraseCircular( std::vector<T>& contours, uint64_t first, uint64_t last ) {
@@ -280,58 +172,8 @@ void swapVectorPair( std::vector<T>& v, size_t i1, size_t i2 ) {
 }
 
 template<typename T>
-T getLeftVectorFromList( const std::vector<T>& va, int64_t m, bool wrapIt ) {
-    T ret;
-
-    if ( m > 0 ) return va[m - 1];
-
-    if ( wrapIt ) {
-        int64_t index = m == 0 ? va.size() - 1 : m - 1;
-        return va[index];
-    }
-    // do not wrap it so it needs to extend the vector as it there was another on one the same line opposite the first point (index 1)
-    T ext = va[0] - va[1];
-    return va[0] + ext;
-}
-
-template<typename T>
-T getRightVectorFromList( const std::vector<T>& va, int64_t m, bool wrapIt ) {
-    T ret;
-
-    if ( m < static_cast<int64_t>( va.size() - 1 ) ) return va[m + 1];
-
-    if ( wrapIt ) {
-        int64_t index = m == static_cast<int64_t>( va.size() ) - 1 ? 0 : m + 1;
-        return va[index];
-    }
-    // do not wrap it so it needs to extend the vector as it there was another on one the same line continuing from the last point
-    T ext = va[va.size() - 1] - va[va.size() - 2];
-    return va[va.size() - 1] + ext;
-}
-
-template<typename T>
 void inserter( std::vector<T>& dest, const std::vector<T>& source ) {
     dest.insert(std::end(dest), std::begin(source), std::end(source));
-}
-
-template<typename T>
-bool inRange( const T _key, const std::pair<T, T>& _range ) {
-    return _range.first <= _key && _range.second >= _key;
-}
-
-template<typename T>
-bool inRangeEx( const T _key, const std::pair<T, T>& _range ) {
-    return _range.first <= _key && _range.second > _key;
-}
-
-template<typename T>
-bool inRange( const T _key, const T _r1, const T _r2 ) {
-    return _r1 <= _key && _r2 >= _key;
-}
-
-template<typename T>
-bool inRangeEx( const T _key, const T _r1, const T _r2 ) {
-    return _r1 <= _key && _r2 > _key;
 }
 
 bool invalidChar( unsigned char c );
@@ -386,10 +228,6 @@ Range<It> reverse( ORange&& originalRange ) {
     return Range<It>(It(std::end(originalRange)), It(std::begin(originalRange)));
 }
 
-using HashEH = int64_t;
-extern HashEH globalHash;
-HashEH HashInc();
-
 template<typename T, std::size_t N>
 constexpr bool is_pointer_to_const_char(T(&)[N])
 {
@@ -401,111 +239,3 @@ constexpr bool is_pointer_to_const_char(T &&)
 {
     return std::is_same_v<const char *, T>;
 }
-
-
-// Release log functions
-#define ASSERTR( X ) doAssert(X, #X, __LINE__, __FILE__)
-//#define THREAD_INFO
-
-#define ARRAY_LENGTH( X ) (sizeof(X) / sizeof((X)[0]))
-
-#ifndef _PRODUCTION_
-
-#ifdef TRACE_FUNCTIONS
-#define FUNCTION_BEGIN() logPrint(LOG_PRIOTITY_INFO, LOG_TAG, "%s() - begin\n", __FUNCTION__ )
-#define FUNCTION_END() logPrint(LOG_PRIOTITY_INFO, LOG_TAG, "%s() - end\n", __FUNCTION__ )
-#else
-#define FUNCTION_BEGIN()
-#define FUNCTION_END()
-#endif
-
-#ifdef THREAD_INFO
-#define LOGI(X,...)  logPrint(LOG_PRIOTITY_INFO,LOG_TAG, "[Thread: %d] " X, threadId(), ##__VA_ARGS__)
-#define LOGR(X,...)  logPrint(LOG_PRIOTITY_INFO,LOG_TAG, "[Thread: %d] " X, threadId(), ##__VA_ARGS__)
-#define LOGE(X,...) logPrint(LOG_PRIORITY_ERROR,LOG_TAG, "[Thread: %d] " X, threadId(), ##__VA_ARGS__)
-#define LOGW(X,...)  logPrint(LOG_PRIORITY_WARN,LOG_TAG, "[Thread: %d] " X, threadId(), ##__VA_ARGS__)
-#define LOGN()  logPrint(LOG_PRIOTITY_INFO,LOG_TAG, "[Thread: %d] " __FILE__ ":%d" , threadId(), __LINE__)
-#else
-#define LOGI( ... ) logPrint(LOG_PRIOTITY_INFO,LOG_TAG,  __VA_ARGS__)
-#define LOGR( ... )  logPrint(LOG_PRIOTITY_INFO,LOG_TAG, __VA_ARGS__)
-#define LOGE( ... ) logPrint(LOG_PRIORITY_ERROR,LOG_TAG, __VA_ARGS__)
-#define LOGW( ... )  logPrint(LOG_PRIORITY_WARN,LOG_TAG, __VA_ARGS__)
-#define LOGN()  logPrint(LOG_PRIOTITY_INFO,LOG_TAG, "" __FILE__ ":%d", __LINE__)
-#define LOGRS( X ) { std::ostringstream _ss; _ss << X; LOGR(_ss.str().c_str()); }
-#endif
-
-#define CONDLOG( X ) LOGI("*** " #X " // %s", X ? "True" : "False");
-#define LOGIT( X, ... ) logPrint(LOG_PRIOTITY_INFO,X,__VA_ARGS__)
-#define ASSERT( X ) doAssert(X, #X, __LINE__, __FILE__)
-#define ASSERTV( X, ... ) doAssertV(X, #X, __LINE__, __FILE__, __VA_ARGS__)
-#define PERF_TIMER_START() perfTimerStart(0)
-#define PERF_TIMER_END( NAME ) perfTimerEnd(0, NAME)
-#define N_PERF_TIMER_START( INDEX ) perfTimerStart(INDEX)
-#define N_PERF_TIMER_END( INDEX, NAME ) perfTimerEnd(INDEX, NAME)
-#define ASSERTSTATIC( exp ) {typedef char temp[(exp) ? 1 : -1];}
-#else
-#define LOGI(...)
-#define LOGIT(...)
-#define LOGN(...)
-#define ASSERT(X)
-#define ASSERTV(X, ...)
-#define PERF_TIMER_START()
-#define PERF_TIMER_END(X)
-#define N_PERF_TIMER_START(INDEX)
-#define N_PERF_TIMER_END(INDEX, NAME)
-#define ASSERTSTATIC(exp)
-
-#define LOGR(...) logPrint(LOG_PRIOTITY_INFO,LOG_TAG,__VA_ARGS__)
-#define LOGE(...) logPrint(LOG_PRIORITY_ERROR,LOG_TAG,__VA_ARGS__)
-#define LOGW(...)  logPrint(LOG_PRIORITY_WARN,LOG_TAG,__VA_ARGS__)
-#define LOGRS( X ) { std::ostringstream _ss; _ss << X; LOGR(_ss.str().c_str()); }
-#endif
-
-typedef std::map<uint64_t, FollowerGapData> gapMap;
-typedef gapMap::iterator gapMapIt;
-
-class FollowerGap {
-public:
-    FollowerGap() {
-        mGaps.clear();
-    }
-
-    FollowerGap( const uint64_t size ) {
-        for ( uint64_t t = 0; t < size; t++ ) mGaps.push_back(FollowerGapData(FollowerGapSide::NoGap));
-    }
-
-    void pushGap( const FollowerGapData& val ) {
-        mGaps.push_back(val);
-    }
-
-    void createGap( uint64_t start_index, uint64_t end_index, float insetStart, float insetEnd = -1.0f ) {
-        ASSERT(start_index < mGaps.size());
-        ASSERT(end_index < mGaps.size());
-
-        if ( insetEnd == -1.0f ) insetEnd = insetStart;
-        mGaps[start_index] = FollowerGapData(FollowerGapSide::Start, insetStart);
-        mGaps[end_index] = FollowerGapData(FollowerGapSide::End, insetEnd);
-    }
-
-    bool isGap( FollowerGapSide side, uint64_t index, float& inset ) const;
-    bool isGapAt( uint64_t index ) const;
-    bool isStartGapAt( uint64_t index ) const;
-    bool isEndGapAt( uint64_t index ) const;
-    bool isVisibleAt( uint64_t index ) const;
-    void tagAllNotVisible();
-public:
-    static const FollowerGap Empty;
-private:
-    std::vector<FollowerGapData> mGaps;
-};
-
-class FrameInvalidator {
-public:
-    void invalidate();
-    bool invalidated() const;
-    void validated();
-
-private:
-    bool bInvalidated = false;
-};
-

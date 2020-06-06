@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <core/htypes_shared.hpp>
 
 using SerializeDependencyHash      = std::string;
 

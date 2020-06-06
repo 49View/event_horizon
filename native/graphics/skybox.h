@@ -3,9 +3,9 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <core/util.h>
 #include <core/camera_utils.hpp>
 #include <core/math/anim_type.hpp>
+#include <core/frame_invalidator.hpp>
 
 class VPList;
 class Texture;

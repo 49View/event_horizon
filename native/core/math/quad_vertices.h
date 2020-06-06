@@ -6,7 +6,6 @@
 #include "matrix4f.h"
 #include "rect2f.h"
 #include "aabb.h"
-#include "../util.h"
 
 //====================================
 // QuadVertices2

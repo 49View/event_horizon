@@ -6,8 +6,8 @@
 #include <cstdint>
 #include <string>
 #include <unordered_set>
-
-#include "../util.h"
+#include <core/util_logs.hpp>
+#include <core/util_array.hpp>
 
 // SHARED CLASS: Any changes to this, should be integrated to /svn/shared, and a mail should be sent to everyone
 
@@ -825,8 +825,8 @@ std::vector<T> sanitizePath( const std::vector<T>& _verts, bool wrapPath = true,
     std::unordered_set<int> doNotCopyList{};
     int wrappingOff = wrapPath ? 0 : 1;
     for ( int q = wrappingOff; q < csize - wrappingOff; q++ ) {
-        int qm1 = getCircularArrayIndex( q - 1, csize );
-        int qp1 = getCircularArrayIndex( q + 1, csize );
+        int qm1 = cai( q - 1, csize );
+        int qp1 = cai( q + 1, csize );
         T p1 = _verts[qm1];
         T p2 = _verts[q];
         T p3 = _verts[qp1];
@@ -842,6 +842,32 @@ std::vector<T> sanitizePath( const std::vector<T>& _verts, bool wrapPath = true,
 
     return ret;
 }
+
+template <typename T>
+struct VectorWrap {
+    VectorWrap() = default;
+    VectorWrap( const std::vector<T>& v, bool wrap ) : v( v ), wrap( wrap ) {}
+
+    std::vector<T> v;
+    bool wrap = false;
+};
+
+template <typename T, typename M>
+struct VectorWrapT2 {
+    VectorWrapT2() = default;
+    VectorWrapT2( const std::vector<T>& _v, bool wrap ) : v(  _v ), wrap( wrap ) {}
+    VectorWrapT2( const std::vector<T>& _v, const std::vector<T>& _m, bool wrap ) : v(  _v ), vm( _m ), wrap( wrap ) {}
+
+    std::vector<T> v;
+    std::vector<M> vm;
+    bool wrap = false;
+};
+
+template <typename T>
+using VectorOfVectorWrap = std::vector<VectorWrap<T>>;
+
+template <typename T, typename M>
+using VectorOfVectorWrapT2 = std::vector<VectorWrapT2<T, M>>;
 
 class Vector3f;
 namespace JMATH { class Rect2f; }

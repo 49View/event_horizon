@@ -9,6 +9,7 @@
 #include <memory>
 #include <unordered_set>
 #include <core/soa_utils.h>
+#include <core/htypes_shared.hpp>
 
 class VData;
 

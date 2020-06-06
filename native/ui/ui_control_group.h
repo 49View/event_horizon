@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core/util.h"
-
 #include <memory>
 #include <vector>
 #include <stack>

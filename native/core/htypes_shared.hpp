@@ -18,6 +18,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+using HashEH = int64_t;
+
 using CommandArgumentsT 		= std::vector< std::string >;
 using CommandCallbackFunction 	= std::function<void(const CommandArgumentsT& )>;
 using SerializableContainer     = std::vector<unsigned char>;
@@ -32,6 +34,8 @@ typedef std::pair<char*, uint64_t> char_p;
 typedef std::pair<unsigned char*, uint64_t> uchar_p;
 typedef std::pair<const unsigned char*, uint64_t> ucchar_p;
 typedef std::pair<std::unique_ptr<uint8_t[]>, uint64_t> uint8_p;
+
+typedef std::pair<int32_t, int32_t> IndexPair;
 
 struct HashIndexPairU32 {
     std::string hash;
@@ -271,11 +275,6 @@ const static uint64_t SHADOW_MAGIC_TAG = 50420;
 using ScreenShotContainer = std::vector<unsigned char>;
 using ScreenShotContainerPtr = std::shared_ptr<ScreenShotContainer>;
 
-enum class BlitType {
-	OnScreen,
-	OffScreen
-};
-
 namespace Name {
 	const static std::string Alpha	  = "Alpha	 ";
 	const static std::string Bravo	  = "Bravo	 ";
@@ -369,28 +368,7 @@ using ResourceRef = std::string;
 using CResourceRef = const std::string&;
 using ResourceDependencyDict    = std::unordered_map<std::string, std::vector<ResourceRef>>;
 
-template <typename T>
-struct VectorWrap {
-    VectorWrap() = default;
-    VectorWrap( const std::vector<T>& v, bool wrap ) : v( v ), wrap( wrap ) {}
-
-    std::vector<T> v;
-    bool wrap = false;
-};
-
-template <typename T, typename M>
-struct VectorWrapT2 {
-    VectorWrapT2() = default;
-    VectorWrapT2( const std::vector<T>& _v, bool wrap ) : v(  _v ), wrap( wrap ) {}
-    VectorWrapT2( const std::vector<T>& _v, const std::vector<T>& _m, bool wrap ) : v(  _v ), vm( _m ), wrap( wrap ) {}
-
-    std::vector<T> v;
-    std::vector<M> vm;
-    bool wrap = false;
-};
-
-template <typename T>
-using VectorOfVectorWrap = std::vector<VectorWrap<T>>;
-
-template <typename T, typename M>
-using VectorOfVectorWrapT2 = std::vector<VectorWrapT2<T, M>>;
+template<typename T, typename ... Args>
+T perfectForward( Args&& ... args ) {
+    return T(std::forward<Args>(args)...);
+}

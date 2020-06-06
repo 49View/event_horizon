@@ -4,6 +4,7 @@
 
 #include "ui_view.hpp"
 
+#include <core/util.h>
 #include <core/math/anim.h>
 #include <core/descriptors/uniform_names.h>
 #include <core/font_utils.hpp>

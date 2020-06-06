@@ -3,6 +3,7 @@
 //
 
 #include "render_orchestrator.h"
+#include <core/util.h>
 #include <core/resources/resource_utils.hpp>
 #include <core/math/vector_util.hpp>
 #include <core/raw_image.h>

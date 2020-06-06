@@ -4,6 +4,7 @@
 
 #include "render_targets.hpp"
 
+#include <core/util.h>
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
 #include <core/raw_image.h>

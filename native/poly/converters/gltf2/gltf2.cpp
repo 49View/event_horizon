@@ -4,6 +4,7 @@
 
 #include "gltf2.h"
 #include <iostream>
+#include <core/util.h>
 #include <core/descriptors/gltf2utils.h>
 #include <poly/scene_graph.h>
 

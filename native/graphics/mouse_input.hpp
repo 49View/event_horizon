@@ -14,6 +14,7 @@
 #include <core/htypes_shared.hpp>
 #include <utility>
 #include <core/observable.h>
+#include <core/update_signals.hpp>
 
 #include "text_input.hpp"
 

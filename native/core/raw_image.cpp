@@ -11,6 +11,7 @@
 #include <core/http/basen.hpp>
 #include <core/util.h>
 #include <core/serializebin.hpp>
+#include <core/serializable_container.hpp>
 #include <core/image_params.hpp>
 
 #define TINYEXR_IMPLEMENTATION

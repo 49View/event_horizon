@@ -631,3 +631,11 @@ void RenderCameraManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
 std::shared_ptr<ProgramUniformSet>& RenderCameraManager::UBO() {
     return mCameraUBO;
 }
+
+bool DShaderMatrix::has2d() const {
+    return checkBitWiseFlag(data, DShaderMatrixValue2dColor) || checkBitWiseFlag(data, DShaderMatrixValue2dTexture);
+}
+
+bool DShaderMatrix::hasTexture() const {
+    return checkBitWiseFlag(data, DShaderMatrixValue2dTexture) || checkBitWiseFlag(data, DShaderMatrixValue3dTexture);
+}

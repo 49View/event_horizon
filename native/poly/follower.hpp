@@ -10,7 +10,6 @@
 
 #include <vector>
 #include <map>
-#include "core/util.h"
 #include "core/v_data.hpp"
 #include "core/math/vector4f.h"
 #include "core/math/plane3f.h"

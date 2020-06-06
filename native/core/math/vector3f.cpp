@@ -1,6 +1,7 @@
 #include "vector3f.h"
 
 #include <map>
+#include <sstream>
 #include "math_util.h"
 #include "matrix4f.h"
 

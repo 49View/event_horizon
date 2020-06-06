@@ -3,6 +3,7 @@
 //
 
 #include "selection.hpp"
+#include <core/util.h>
 #include <core/app_globals.h>
 #include <core/camera.h>
 #include <core/geom.hpp>

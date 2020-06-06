@@ -12,7 +12,6 @@
 #include <typeinfo>
 #include <utility>
 
-#include <core/util.h>
 #include <core/htypes_shared.hpp>
 
 template< typename B>

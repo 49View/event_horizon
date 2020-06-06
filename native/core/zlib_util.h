@@ -1,7 +1,6 @@
 #pragma once
 
 #include <zlib.h>
-#include <core/util.h>
 #include <core/htypes_shared.hpp>
 
 namespace zlibUtil {

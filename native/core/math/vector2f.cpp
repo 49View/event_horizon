@@ -1,4 +1,5 @@
 #include "vector2f.h"
+#include <sstream>
 #include "vector3f.h"
 #include "matrix2f.h"
 #include "math_util.h"

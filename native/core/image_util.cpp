@@ -4,6 +4,7 @@
 
 #include "image_util.h"
 #include <core/util.h>
+#include <core/string_util.h>
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_resize.h>

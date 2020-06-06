@@ -10,6 +10,7 @@
 
 #include <stb/stb_image_write.h>
 #include <core/http/basen.hpp>
+#include <core/util.h>
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
 #include <core/descriptors/uniform_names.h>
@@ -21,7 +22,7 @@
 #include <graphics/shader_manager.h>
 
 std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
-    switch (cname) {
+    switch ( cname ) {
         case CommandBufferCommandName::nop:
             return "nop";
         case CommandBufferCommandName::depthWriteTrue:
@@ -93,11 +94,11 @@ std::string commandToNmeHumanReadable( CommandBufferCommandName cname ) {
 }
 
 void CommandBuffer::push( const CommandBufferEntry& entry ) {
-    mCommandList.emplace_back( entry );
+    mCommandList.emplace_back(entry);
 }
 
 void CommandBuffer::push( const CommandBufferCommand& entry ) {
-    mCommandList.emplace_back( entry );
+    mCommandList.emplace_back(entry);
 }
 
 void CommandBuffer::clear() {
@@ -109,10 +110,10 @@ void CommandBuffer::sort() {
 //               []( const auto& a, const auto& b ) -> bool { return a.mHash > b.mHash; } );
 }
 
-size_t CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer* cb ) const {
+size_t CommandBufferEntryCommand::run( Renderer& rr, CommandBuffer *cb ) const {
     if ( Type() == CommandBufferEntryCommandType::Comamnd ) {
 //        LOGRS("        Command: " << commandToNmeHumanReadable(mCommand.name) );
-        mCommand.issue( rr, cb );
+        mCommand.issue(rr, cb);
         return 0;
     } else {
 //        LOGRS("        Render geom: " << mVP->mVPList.Name() );
@@ -130,7 +131,7 @@ size_t CommandBuffer::render( Renderer& rr ) {
 //    LOGR("****************************************************************************");
     size_t ret = 0;
     for ( const auto& i : mCommandList ) {
-        ret += i.run( rr, this );
+        ret += i.run(rr, this);
     }
     return ret;
 //    LOGR("****************************************************************************");
@@ -138,7 +139,7 @@ size_t CommandBuffer::render( Renderer& rr ) {
 }
 
 std::shared_ptr<Framebuffer> CommandBuffer::fb( CommandBufferFrameBufferType fbt ) {
-    return mTarget->getFrameBuffer( fbt );
+    return mTarget->getFrameBuffer(fbt);
 }
 
 Rect2f CommandBuffer::destViewport() {
@@ -161,10 +162,10 @@ bool CommandBuffer::findEntry( const std::string& _key, std::weak_ptr<CommandBuf
     return false;
 }
 
-void screenShotBase64Callback( void* ctx, void*data, int size ) {
-    auto* rawThumbl = reinterpret_cast<ScreenShotContainer*>(ctx);
-    ScreenShotContainer img{  reinterpret_cast<unsigned char*>(data), reinterpret_cast<unsigned char*>(data) + size };
-    *rawThumbl = bn::encode_b64( img );
+void screenShotBase64Callback( void *ctx, void *data, int size ) {
+    auto *rawThumbl = reinterpret_cast<ScreenShotContainer *>(ctx);
+    ScreenShotContainer img{ reinterpret_cast<unsigned char *>(data), reinterpret_cast<unsigned char *>(data) + size };
+    *rawThumbl = bn::encode_b64(img);
 }
 
 void CommandBuffer::postBlit() {
@@ -175,9 +176,9 @@ void CommandBuffer::postBlit() {
         ssd->clear();
         int w = lfb->getWidth();
         int h = lfb->getHeight();
-        auto outB = std::make_unique<unsigned char[]>( w * h * 4 );
-        grabScreen( 0, 0, w, h , reinterpret_cast<void*>(outB.get()) );
-        stbi_write_png_to_func(screenShotBase64Callback, reinterpret_cast<void*>(ssd.get()), w, h, 4, outB.get(), 0);
+        auto outB = std::make_unique<unsigned char[]>(w * h * 4);
+        grabScreen(0, 0, w, h, reinterpret_cast<void *>(outB.get()));
+        stbi_write_png_to_func(screenShotBase64Callback, reinterpret_cast<void *>(ssd.get()), w, h, 4, outB.get(), 0);
         Target()->takeScreenShot(false);
     }
 }
@@ -189,7 +190,7 @@ void CommandBufferList::start() {
 
 void CommandBufferList::end() {
     for ( auto& i : mCommandBuffers ) {
-        if ( !checkBitWiseFlag( i.flags, CommandBufferFlags::CBF_DoNotSort )) {
+        if ( !checkBitWiseFlag(i.flags, CommandBufferFlags::CBF_DoNotSort) ) {
             i.sort();
         }
     }
@@ -198,25 +199,25 @@ void CommandBufferList::end() {
 void CommandBufferList::pushVP( std::shared_ptr<VPList> _vp,
                                 std::shared_ptr<RenderMaterial> _mat,
                                 std::shared_ptr<Matrix4f> _modelMatrix,
-                                Program* _forceProgram,
+                                Program *_forceProgram,
                                 float alphaDrawThreshold ) {
     if ( _vp->transparencyValue() > alphaDrawThreshold ) {
-        mCurrent->push( CommandBufferEntry{ _vp, _mat, _modelMatrix, _forceProgram } );
+        mCurrent->push(CommandBufferEntry{ _vp, _mat, _modelMatrix, _forceProgram });
     }
 }
 
 void CommandBufferList::pushCommand( const CommandBufferCommand& cmd ) {
-    mCurrent->push( cmd );
+    mCurrent->push(cmd);
 }
 
 void CommandBufferList::startTarget( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) {
-    startList( std::make_shared<RLTargetFB>( _fbt, _rr ), CommandBufferFlags::CBF_DoNotSort );
-    pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-    pushCommand( { CommandBufferCommandName::cullModeNone } );
+    startList(std::make_shared<RLTargetFB>(_fbt, _rr), CommandBufferFlags::CBF_DoNotSort);
+    pushCommand({ CommandBufferCommandName::colorBufferBindAndClear });
+    pushCommand({ CommandBufferCommandName::cullModeNone });
 }
 
 void CommandBufferList::startList( std::shared_ptr<RLTarget> _target, CommandBufferFlags flags ) {
-    mCommandBuffers.emplace_back( CommandBuffer{flags} );
+    mCommandBuffers.emplace_back(CommandBuffer{ flags });
     mCurrent = &mCommandBuffers.back();
     mCurrent->mTarget = _target;
 }
@@ -224,7 +225,7 @@ void CommandBufferList::startList( std::shared_ptr<RLTarget> _target, CommandBuf
 size_t CommandBufferList::render( [[maybe_unused]] int eye ) {
     size_t numDrawCalls = 0;
     for ( auto& cb : mCommandBuffers ) {
-        numDrawCalls += cb.render( rr );
+        numDrawCalls += cb.render(rr);
     }
     return numDrawCalls;
 }
@@ -232,7 +233,7 @@ size_t CommandBufferList::render( [[maybe_unused]] int eye ) {
 void CommandBufferList::getCommandBufferEntry( const std::string& _key, std::weak_ptr<CommandBufferEntry>& wp ) {
 
     for ( auto& cb : mCommandBuffers ) {
-        if ( bool bFound = cb.findEntry( _key, wp ); bFound ) {
+        if ( bool bFound = cb.findEntry(_key, wp); bFound ) {
             return;
         }
     }
@@ -244,60 +245,62 @@ void CommandBufferList::setFramebufferTexture( const FrameBufferTextureValues& v
 }
 
 void CommandBufferList::setCameraUniforms( std::shared_ptr<Camera> c0 ) {
-    mCurrent->UBOCameraBuffer = std::make_unique<char[]>( rr.CameraUBO()->getUBOSize() );
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::mvpMatrix, c0->MVP(), mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::viewMatrix, c0->getViewMatrix(), mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::projMatrix, c0->getProjectionMatrix(), mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::screenSpaceMatrix, c0->ScreenAspectRatio(),mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyePos, c0->getPosition(), mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::eyeDir, c0->getDirection(), mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::nearFar, c0->getNearFar(), mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::inverseMvMatrix, c0->getInverseMV(), mCurrent->UBOCameraBuffer.get());
-    UBO::mapUBOData( rr.CameraUBO(), UniformNames::prevMvpMatrix, c0->getPrevMVP(), mCurrent->UBOCameraBuffer.get());
+    mCurrent->UBOCameraBuffer = std::make_unique<char[]>(rr.CameraUBO()->getUBOSize());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::mvpMatrix, c0->MVP(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::viewMatrix, c0->getViewMatrix(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::projMatrix, c0->getProjectionMatrix(),
+                    mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::screenSpaceMatrix, c0->ScreenAspectRatio(),
+                    mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::eyePos, c0->getPosition(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::eyeDir, c0->getDirection(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::nearFar, c0->getNearFar(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::inverseMvMatrix, c0->getInverseMV(), mCurrent->UBOCameraBuffer.get());
+    UBO::mapUBOData(rr.CameraUBO(), UniformNames::prevMvpMatrix, c0->getPrevMVP(), mCurrent->UBOCameraBuffer.get());
 
-    pushCommand( { CommandBufferCommandName::setCameraUniforms } );
+    pushCommand({ CommandBufferCommandName::setCameraUniforms });
 }
 
-void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
+void CommandBufferCommand::issue( Renderer& rr, CommandBuffer *cstack ) const {
     switch ( name ) {
         case CommandBufferCommandName::depthWriteTrue:
-            setDepthWrite( true );
+            setDepthWrite(true);
             break;
         case CommandBufferCommandName::depthWriteFalse:
-            setDepthWrite( false );
+            setDepthWrite(false);
             break;
         case CommandBufferCommandName::depthTestLEqual:
-            setDepthTest( true, DepthFunction::LEQUAL );
+            setDepthTest(true, DepthFunction::LEQUAL);
             break;
         case CommandBufferCommandName::depthTestLess:
-            setDepthTest( true, DepthFunction::LESS );
+            setDepthTest(true, DepthFunction::LESS);
             break;
         case CommandBufferCommandName::depthTestFalse:
-            enableDepthTest( false );
+            enableDepthTest(false);
             break;
         case CommandBufferCommandName::depthTestTrue:
-            enableDepthTest( true );
+            enableDepthTest(true);
             break;
         case CommandBufferCommandName::cullModeNone:
-            setCullMode( CULL_NONE );
+            setCullMode(CULL_NONE);
             break;
         case CommandBufferCommandName::cullModeFront:
-            setCullMode( CULL_FRONT );
+            setCullMode(CULL_FRONT);
             break;
         case CommandBufferCommandName::cullModeBack:
-            setCullMode( CULL_BACK );
+            setCullMode(CULL_BACK);
             break;
         case CommandBufferCommandName::alphaBlendingTrue:
-            setAlphaBlending( true );
+            setAlphaBlending(true);
             break;
         case CommandBufferCommandName::alphaBlendingFalse:
-            setAlphaBlending( false );
+            setAlphaBlending(false);
             break;
         case CommandBufferCommandName::wireFrameModeTrue:
-            setWireFrame( true );
+            setWireFrame(true);
             break;
         case CommandBufferCommandName::wireFrameModeFalse:
-            setWireFrame( false );
+            setWireFrame(false);
             break;
         case CommandBufferCommandName::setGlobalTextures:
             rr.setGlobalTextures();
@@ -306,7 +309,7 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             rr.getDefaultFB()->bindAndClear();
             break;
         case CommandBufferCommandName::setCameraUniforms:
-            rr.CameraUBO()->submitUBOData( cstack->UBOCameraBuffer.get() ); //
+            rr.CameraUBO()->submitUBOData(cstack->UBOCameraBuffer.get()); //
             break;
         case CommandBufferCommandName::colorBufferBind:
             cstack->fb(CommandBufferFrameBufferType::sourceColor)->bind(cstack->frameBufferTextureValues.get());
@@ -315,7 +318,8 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::sourceColor)->bindAndClear(cstack->frameBufferTextureValues.get());
             break;
         case CommandBufferCommandName::colorBufferBindAndClearDepthOnly:
-            cstack->fb(CommandBufferFrameBufferType::sourceColor)->bindAndClearDepthOnly(cstack->frameBufferTextureValues.get());
+            cstack->fb(CommandBufferFrameBufferType::sourceColor)->bindAndClearDepthOnly(
+                    cstack->frameBufferTextureValues.get());
             break;
         case CommandBufferCommandName::colorBufferClear:
             cstack->fb(CommandBufferFrameBufferType::sourceColor)->clearColorBuffer();
@@ -331,71 +335,71 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::normalMap)->bindAndClearWithColor(C4f::NORMAL_MAP_COLOR);
             break;
         case CommandBufferCommandName::ssaoBufferBindAndClear:
-            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->bindAndClearWithColor(C4f::WHITE);
+            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->bindAndClearWithColor(C4f::WHITE);
             break;
         case CommandBufferCommandName::uiBufferBindAndClear:
-            cstack->fb( CommandBufferFrameBufferType::uiMap )->bindAndClearWithColor(C4f::ZERO);
+            cstack->fb(CommandBufferFrameBufferType::uiMap)->bindAndClearWithColor(C4f::ZERO);
             break;
         case CommandBufferCommandName::ssaoRender: {
-            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->bind();
-            enableDepthTest( false );
-            setCullMode( CULL_NONE );
-            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->setMaterialConstant(
+            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->bind();
+            enableDepthTest(false);
+            setCullMode(CULL_NONE);
+            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->VP()->setMaterialConstant(
                     UniformNames::depthMapTexture,
-                    rr.getDepthMapFB()->RenderToTexture()->TDI( 0 ));
-            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->setMaterialConstant(
+                    rr.getDepthMapFB()->RenderToTexture()->TDI(0));
+            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->VP()->setMaterialConstant(
                     UniformNames::normalMapTexture,
-                    cstack->fb( CommandBufferFrameBufferType::normalMap )->RenderToTexture()->TDI( 1 ));
-            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->setMaterialConstant(
+                    cstack->fb(CommandBufferFrameBufferType::normalMap)->RenderToTexture()->TDI(1));
+            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->VP()->setMaterialConstant(
                     UniformNames::noise4x4Texture,
-                    rr.TM()->TD( S::NOISE4x4 )->TDI( 2 ));
+                    rr.TM()->TD(S::NOISE4x4)->TDI(2));
 
 //            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->updateGPUVData( vbib );
             auto farClipCorners = cstack->Target()->getCamera()->frustumFarViewPort();
-            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->updateP3V3(farClipCorners);
-            cstack->fb( CommandBufferFrameBufferType::ssaoMap )->VP()->draw();
-            enableDepthTest( true );
-            setCullMode( CULL_BACK );
+            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->VP()->updateP3V3(farClipCorners);
+            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->VP()->draw();
+            enableDepthTest(true);
+            setCullMode(CULL_BACK);
         }
             break;
         case CommandBufferCommandName::shadowMapClearDepthBufferZero:
-            cstack->fb(CommandBufferFrameBufferType::shadowMap)->clearDepthBuffer( 0.0f );
+            cstack->fb(CommandBufferFrameBufferType::shadowMap)->clearDepthBuffer(0.0f);
             break;
         case CommandBufferCommandName::shadowMapClearDepthBufferOne:
-            cstack->fb(CommandBufferFrameBufferType::shadowMap)->clearDepthBuffer( 1.0f );
+            cstack->fb(CommandBufferFrameBufferType::shadowMap)->clearDepthBuffer(1.0f);
             break;
         case CommandBufferCommandName::defaultFrameBufferBind:
             rr.getDefaultFB()->bind();
             break;
         case CommandBufferCommandName::blitToScreen:
-            Framebuffer::blitWithRect( cstack->fb(CommandBufferFrameBufferType::sourceColor), rr.getDefaultFB(),
-                               GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0,
-                               cstack->sourceViewport(), cstack->destViewport() );
+            Framebuffer::blitWithRect(cstack->fb(CommandBufferFrameBufferType::sourceColor), rr.getDefaultFB(),
+                                      GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0,
+                                      cstack->sourceViewport(), cstack->destViewport());
             break;
         case CommandBufferCommandName::blitPBRToScreen:
-            Framebuffer::blit( cstack->fb(CommandBufferFrameBufferType::finalBlit),
-                               cstack->fb(CommandBufferFrameBufferType::screen),
-                               GL_COLOR_ATTACHMENT0,
-                               GL_COLOR_ATTACHMENT0 );
+            Framebuffer::blit(cstack->fb(CommandBufferFrameBufferType::finalBlit),
+                              cstack->fb(CommandBufferFrameBufferType::screen),
+                              GL_COLOR_ATTACHMENT0,
+                              GL_COLOR_ATTACHMENT0);
             break;
         case CommandBufferCommandName::resolvePBR:
 
-            dynamic_cast<CompositePBR*>(dynamic_cast<RLTargetPBR*>(cstack->Target().get())->Composite().get())->bloom();
-            Framebuffer::blit( cstack->fb(CommandBufferFrameBufferType::sourceColor),
-                               cstack->fb(CommandBufferFrameBufferType::finalResolve),
-                               GL_COLOR_ATTACHMENT0,
-                               GL_COLOR_ATTACHMENT0 );
+            dynamic_cast<CompositePBR *>(dynamic_cast<RLTargetPBR *>(cstack->Target().get())->Composite().get())->bloom();
+            Framebuffer::blit(cstack->fb(CommandBufferFrameBufferType::sourceColor),
+                              cstack->fb(CommandBufferFrameBufferType::finalResolve),
+                              GL_COLOR_ATTACHMENT0,
+                              GL_COLOR_ATTACHMENT0);
             break;
         case CommandBufferCommandName::resolveUI:
-            Framebuffer::blit( cstack->fb(CommandBufferFrameBufferType::uiMap),
-                               cstack->fb(CommandBufferFrameBufferType::uiMapResolve),
-                               GL_COLOR_ATTACHMENT0,
-                               GL_COLOR_ATTACHMENT0 );
+            Framebuffer::blit(cstack->fb(CommandBufferFrameBufferType::uiMap),
+                              cstack->fb(CommandBufferFrameBufferType::uiMapResolve),
+                              GL_COLOR_ATTACHMENT0,
+                              GL_COLOR_ATTACHMENT0);
             break;
         case CommandBufferCommandName::blitPRB:
-            setCullMode( CULL_NONE );
-            enableDepthTest( false );
-            setWireFrame( false );
+            setCullMode(CULL_NONE);
+            enableDepthTest(false);
+            setWireFrame(false);
 
             cstack->fb(CommandBufferFrameBufferType::finalBlit)->bind();
 
@@ -427,7 +431,8 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
                     UniformNames::uiTexture,
                     cstack->fb(CommandBufferFrameBufferType::uiMapResolve)->RenderToTexture()->TDI(6));
 
-            cstack->fb( CommandBufferFrameBufferType::finalResolve )->VP()->updateP3V3(cstack->Target()->getCamera()->frustumFarViewPort());
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->updateP3V3(
+                    cstack->Target()->getCamera()->frustumFarViewPort());
 
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->draw();
 
@@ -439,10 +444,10 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer* cstack ) const {
 
         case CommandBufferCommandName::preFlush:
             if ( rr.isLoading() ) {
-//if ( cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP() ) {
-                cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
-                        rr.SM()->P(S::LOADING_SCREEN).get() );
-//}
+                if ( cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP() ) {
+                    cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->drawWithProgram(
+                            rr.SM()->P(S::LOADING_SCREEN).get());
+                }
             }
             break;
         default:

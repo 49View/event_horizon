@@ -1,7 +1,6 @@
-#include <utility>
-
 #include "vertex_processing.h"
 
+#include <core/util.h>
 #include <core/math/matrix4f.h>
 #include <core/descriptors/uniform_names.h>
 

@@ -3,6 +3,7 @@
 //
 
 #include "camera_controls.hpp"
+#include <core/util.h>
 #include <core/camera.h>
 #include <core/node.hpp>
 #include <core/camera_rig.hpp>

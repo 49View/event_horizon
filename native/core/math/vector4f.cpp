@@ -1,6 +1,8 @@
 #include "vector4f.h"
-#include "math_util.h"
 
+#include <sstream>
+#include "math_util.h"
+#include <core/string_util.h>
 
 
 Vector3f::Vector3f( const Vector4f& v4 ) {

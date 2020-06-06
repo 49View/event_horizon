@@ -98,6 +98,12 @@ enum ReservedGraphicsTags {
 };
 
 class Framebuffer;
+
+enum class BlitType {
+    OnScreen,
+    OffScreen
+};
+
 using cubeMapFrameBuffers = std::vector<std::shared_ptr<Framebuffer>>;
 
 struct TextureUniformDesc {

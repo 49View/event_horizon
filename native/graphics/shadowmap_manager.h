@@ -1,7 +1,8 @@
 #pragma once
 
-#include "core/math/matrix4f.h"
-#include "core/math/rect2f.h"
+#include <core/math/matrix4f.h>
+#include <core/math/rect2f.h>
+#include <core/frame_invalidator.hpp>
 
 namespace JMATH { class AABB; }
 

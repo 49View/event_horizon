@@ -5,7 +5,6 @@
 #include <core/service_factory.h>
 #include <core/hash_shared_map.hpp>
 
-#include "core/util.h"
 #include "texture.h"
 
 //====================================

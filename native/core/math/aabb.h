@@ -6,6 +6,10 @@
 
 // SHARED CLASS: Any changes to this, should be integrated to /svn/shared, and a mail should be send to everyone
 
+enum class CompositeWrapping {
+    Wrap,
+    NoWrap
+};
 
 namespace JMATH {
 enum class AABBFeature {

@@ -8,6 +8,7 @@
 #include <variant>
 #include <string>
 #include <vector>
+#include <core/util_follower.hpp>
 #include <core/math/poly_shapes.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/resources/resource_serialization.hpp>

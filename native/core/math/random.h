@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../util.h"
-
 // Simple and fast pseudo-random number generator, based on a linear congruential generator algorithm.
 // http://en.wikipedia.org/wiki/Linear_congruential_generator
+
+#include <cstdint>
 
 class Random {
 public:

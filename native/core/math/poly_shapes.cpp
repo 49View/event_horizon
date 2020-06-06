@@ -9,6 +9,7 @@
 #include "poly_shapes.hpp"
 #include <unordered_map>
 #include <core/soa_utils.h>
+#include <core/string_util.h>
 
 Vector3f Topology::normalFromSmartSmoothing( uint32_t index, int vIndex ) {
     size_t idx = vertices[index].hash();

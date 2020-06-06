@@ -19,7 +19,30 @@ struct FileInfo {
 	uint64_t    size;
 };
 
+enum EncodingStatusFlag {
+    None = 0,
+    DoEncode = 1 << 0,
+    NotEncode = 1 << 1
+};
+
 struct Url;
+
+bool isFilenameAFolder( const std::string& input );
+std::string getFileNamePath( const std::string& input );
+std::string getFileNameOnly( const std::string& input );
+std::string getFileName( const std::string& input, EncodingStatusFlag ef = EncodingStatusFlag::DoEncode );
+std::string getFileNameNoExt( const std::string& input );
+std::string getFileNameExt( const std::string& input );
+std::string getFileNameExtToLower( const std::string& input );
+std::string getFileNameKey( const std::string& input, EncodingStatusFlag ef = EncodingStatusFlag::DoEncode );
+std::string getLastEntryInPath( const std::string& input );
+std::string getLastFolderInPath( const std::string& input );
+std::string getFirstFolderInPath( const std::string& input );
+std::string getFileNameCallbackKey( const std::string& input );
+bool isFileExtAnImage( const std::string& _ext );
+bool isFileExtCompressedArchive( const std::string& _filename );
+bool nameHasImageExtension( const std::string& input );
+bool ensureFolderExists( const std::string& folder, bool throwOnError = false );
 
 namespace FileManager {
 

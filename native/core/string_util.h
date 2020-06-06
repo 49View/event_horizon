@@ -8,7 +8,18 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <core/htypes_shared.hpp>
 #include <core/platform_util.h>
+
+static inline std::string cbToString( uint8_p&& _data ) {
+    return std::string( reinterpret_cast<const char*>(_data.first.get()), _data.second);
+}
+
+static inline std::string toLower( const std::string _input ) {
+    std::string ret = _input;
+    std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
+    return ret;
+}
 
 // trim from start
 static inline std::string& ltrim( std::string& s ) {
@@ -43,6 +54,38 @@ static inline std::string& trim( std::string& s, const char _r ) {
     return ltrim( rtrim( s, _r ), _r);
 }
 
+static inline bool string_ends_with( const std::string& source, const std::string& match ) {
+    size_t pos = source.rfind( match );
+    if ( pos != std::string::npos ) {
+        size_t targetPos = source.length() - match.length();
+        return pos == targetPos;
+    }
+    return false;
+}
+
+static inline std::string string_trim_upto( const std::string& source, const std::string& match ) {
+    size_t pos = source.rfind( match );
+    if ( pos != std::string::npos ) {
+        return source.substr(0, pos);
+    }
+    return source;
+}
+
+static inline std::string string_trim_after( const std::string& source, const std::string& match ) {
+    size_t pos = source.rfind( match );
+    if ( pos != std::string::npos ) {
+        return source.substr(pos + 1, source.length() - pos);
+    }
+    return source;
+}
+
+static inline std::string string_trim_upto( const std::string& source, const std::vector<std::string>& matches ) {
+    for ( auto & match : matches ) {
+        auto ret = string_trim_upto( source, match );
+        if ( ret != source ) return ret;
+    }
+    return source;
+}
 
 static inline bool startswith( const std::string& s, const std::string& t ) {
     return (s.compare(0, t.length(), t) == 0);

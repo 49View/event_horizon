@@ -5,6 +5,8 @@
 #include <unordered_map>
 
 #include "parse_stl.h"
+
+#include <core/file_manager.h>
 #include <core/node.hpp>
 #include <core/v_data.hpp>
 #include <poly/poly.hpp>

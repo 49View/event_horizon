@@ -12,10 +12,10 @@
 #include <unordered_map>
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <core/serialize_types.hpp>
 #include <core/hashable.hpp>
-#include <core/util.h>
 
 class SerializeBin : public std::enable_shared_from_this<SerializeBin> {
 public:

@@ -4,6 +4,7 @@
 
 #include "poly_services.hpp"
 #include <array>
+#include <core/util.h>
 #include <core/math/vector3f.h>
 #include <core/math/quad_vertices.h>
 #include <core/math/triangulator.hpp>

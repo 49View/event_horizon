@@ -11,7 +11,8 @@
 #include <map>
 #include <memory>
 
-#include "core/math/vector3f.h"
+#include <core/htypes_shared.hpp>
+#include <core/math/vector3f.h>
 #include "poly2tri/poly2tri.h"
 
 class Triangulator {

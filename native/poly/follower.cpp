@@ -7,10 +7,11 @@
 //
 
 #include "follower.hpp"
-#include "poly_services.hpp"
+#include <core/util.h>
 #include <core/math/quaternion.h>
 #include <poly/vdata_assembler.h>
 #include <poly/poly_services.hpp>
+#include "poly_services.hpp"
 
 FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
                             const std::array<size_t, 4>& indices, WindingOrderT _wo ) {
