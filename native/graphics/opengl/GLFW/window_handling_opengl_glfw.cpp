@@ -8,6 +8,7 @@
 
 #include <graphics/window_handling.hpp>
 #include <graphics/render_list.h>
+#include <core/default_font.hpp>
 
 //#define _USE_IMGUI_
 
@@ -49,7 +50,10 @@ namespace WindowHandling {
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
-        ImGui::GetIO().FontGlobalScale = 1.5f;
+        static SerializableContainer defaultFont = getDefaultFont();
+        ImFont* font = io.Fonts->AddFontFromMemoryTTF(defaultFont.data(), defaultFont.size(), 30.0f);
+        ASSERT(font);
+//        ImGui::GetIO().FontGlobalScale = 1.5f;
 //        ImGui::GetIO().FontAllowUserScaling = true;
         ImGui_ImplGlfw_InitForOpenGL(window, true);
 #ifdef __EMSCRIPTEN__

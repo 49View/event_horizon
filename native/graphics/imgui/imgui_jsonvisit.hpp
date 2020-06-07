@@ -1,6 +1,5 @@
 //
-//  megawriter.hpp
-//  sixthview
+//  imgui_jsonvisit.hpp
 //
 //  Created by Dado on 01/10/2015.
 //
@@ -10,12 +9,9 @@
 
 #include <array>
 #include <core/math/matrix_anim.h>
-
-#include "core/htypes_shared.hpp"
 #include "core/math/rect2f.h"
 #include "core/math/aabb.h"
 #include "core/math/vector4f.h"
-#include "core/serialization.hpp"
 
 #include "imgui.h"
 
@@ -30,11 +26,6 @@ namespace ImGUIJsonColors {
 	const static ImVec4 SquareBracket = ImVec4(0.1f, 0.7f, 0.8f, 1.0f);
 	const static ImVec4 CurlyBracket  = ImVec4(0.95f, 0.7f, 0.8f, 1.0f);
 	const static ImVec4 Danger  = ImVec4(0.95f, 0.0f, 0.0f, 1.0f);
-}
-
-static void drawNodeRootBox( const char* value ) {
-	ImGui::Begin( value, nullptr, ImGuiWindowFlags_NoCollapse );
-	ImGui::End();
 }
 
 static void drawKey( const char* _name ) {
@@ -253,11 +244,7 @@ static std::string arrayName( const char* _name, const std::vector<T>& array ) {
 }
 
 static inline void drawStringRoot( const char* _name, const char* value ) {
-	if ( strcmp(_name, "Name") == 0 ) {
-		drawNodeRootBox( value );
-	} else {
-		drawString( _name, value );
-	}
+    drawString( _name, value );
 }
 
 class ImGuiStandardJson {
