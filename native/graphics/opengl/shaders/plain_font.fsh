@@ -8,7 +8,7 @@ out vec4 FragColor;
 void main()
 {
     float alphaV = 1.0;
-    if ( tpos.z < 1.0 ) {
+    if ( tpos.z < 0.5 ) {
         vec2 p = tpos.xy;
         // Gradients
         vec2 px = dFdx(p);
