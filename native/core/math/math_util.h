@@ -106,6 +106,11 @@
 #include <stdlib.h>
 #include <algorithm>
 
+enum class CollinearWrap {
+    False = 0,
+    True = 1
+};
+
 const float M_PIF = 3.14159265358979323846f;
 const float ONE_OVER_60HZ = 0.016666667f;
 

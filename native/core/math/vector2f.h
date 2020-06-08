@@ -575,7 +575,7 @@ bool distanceFromLineClamped( const Vector2f& p, const Vector2f& p1, const Vecto
 bool distanceFromLineCapsule( const Vector2f& p, const Vector2f& p1, const Vector2f& p2, float radius, float& ret, Vector2f& pointOfIntersection );
 bool isPointInsideLineCapsule( const Vector2f& p, const Vector2f& p1, const Vector2f& p2, float radius );
 void straightenOnMainAxis( Vector2f& a, Vector2f& b, float straightCoeff );
-void removeCollinear( vector2fList& cs, float epsilon );
+void removeCollinear( vector2fList& cs, float epsilon, CollinearWrap cw = CollinearWrap::True );
 bool pointWithinSegment( const V2f& p, const V2f& p1, const V2f& p2 );
 float getAreaOf( const std::vector<Triangle2d>& tris );
 

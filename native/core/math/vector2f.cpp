@@ -158,13 +158,31 @@ void straightenOnMainAxis( Vector2f& a, Vector2f& b, float straightCoeff ) {
 	}
 }
 
-void removeCollinear( vector2fList& cs, float epsilon ) {
+void removeCollinear( vector2fList& cs, float epsilon, CollinearWrap cw ) {
 	int csize = static_cast<int>( cs.size() );
 	if ( csize < 3 ) return;
 
-	vector2fList cc = cs;
+	// We need to run these 2 steps in order otherwise the collider removal will remove too many vertices if there
+	// are consecutive vertices that have the same value
 
-	for ( auto t = 0; t < csize; t++ ) {
+	// first remove all points that are the same
+	int wrapSingleOffset = cw == CollinearWrap::True ? 0 : 1;
+    for ( auto it2 = cs.begin(); it2 != cs.end()-wrapSingleOffset; ) {
+        auto tNext = it2+1 == cs.end() ? cs.begin() : it2+1;
+        if ( isVerySimilar( *tNext, *it2, epsilon ) ) {
+            it2 = cs.erase( it2 );
+        } else {
+            ++it2;
+        }
+    }
+
+    // Second run a collinear algorithm.
+    csize = static_cast<int>( cs.size() );
+    vector2fList cc = cs;
+
+    int wrapOffset = cw == CollinearWrap::True ? 0 : 2;
+
+	for ( auto t = 0; t < csize - wrapOffset; t++ ) {
 		Vector2f currPoint1 = cs[t];
 		int t1 = cai( t + 1, csize );
 		Vector2f currPoint2 = cs[t1];
