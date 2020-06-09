@@ -251,6 +251,8 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
     float moveForward = 0.0f;
     float strafe = 0.0f;
     float moveUp = 0.0f;
+    constexpr float xzPlaneDistanceClamp = 0.1f;
+    constexpr float turboBoostScrollFactor = 10.0f;
 
     if ( mi.isMouseTouchedDown(TOUCH_ONE) ) {
         moveUp = mi.moveDiff(TOUCH_ONE).y();
@@ -268,7 +270,13 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
     }
 
     moveForward = mi.getScrollValue(); // It's safe to call it every frame as no gesture on wheel/magic mouse
+    // Turbo boost scrolling here
+    if ( mi.TI().checkModKeyPressed(GMK_LEFT_CONTROL) ) moveForward *= turboBoostScrollFactor;
     _cam->moveForward(moveForward);
+
+    // Clamp the Y position to a decent distance from the plane, sanity first
+    if ( _cam->getPosition().y() < xzPlaneDistanceClamp ) _cam->setPosition({_cam->getPosition().x(), xzPlaneDistanceClamp, _cam->getPosition().z()});
+
     _cam->strafe(strafe);
     _cam->moveUp(moveUp);
 
