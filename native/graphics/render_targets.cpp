@@ -391,7 +391,7 @@ void RLTarget::addToCBCore( CommandBufferList& cb ) {
     }
 
     if ( checkBitWiseFlag( lcvt, ViewportToggles::DrawGrid ) ) {
-        rr.addToCommandBuffer( CommandBufferLimits::CoreGrid );
+        rr.addToCommandBuffer( CommandBufferLimits::GridStart );
     }
 
     cb.pushCommand( { CommandBufferCommandName::depthTestTrue } );
@@ -511,6 +511,11 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
         for ( const auto& [k, vl] : rr.CL() ) {
             if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
+                rr.addToCommandBuffer( k );
+            }
+        }
+        for ( const auto& [k, vl] : rr.CL() ) {
+            if ( inRange( k, { CommandBufferLimits::GridStart, CommandBufferLimits::GridEnd} ) && !hiddenCB(k) ) {
                 rr.addToCommandBuffer( k );
             }
         }

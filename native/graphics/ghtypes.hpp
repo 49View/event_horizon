@@ -31,7 +31,6 @@ using VPListSP = std::shared_ptr<VPList>;
 
 namespace CommandBufferLimits {
     const static int CoreStart =         0;
-    const static int CoreGrid =          1;
     const static int CoreEnd =         999;
     const static int UnsortedStart =  1000;
     const static int UnsortedEnd =    1999;
@@ -42,6 +41,8 @@ namespace CommandBufferLimits {
     const static int UI2dStart = 100000000;
     const static int CameraLocator =     UI2dStart+1;
     const static int UI2dEnd   = 100999999;
+    const static int GridStart = 101000000;
+    const static int GridEnd   = 101010000;
 }
 
 namespace FBNames {
