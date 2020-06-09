@@ -210,6 +210,16 @@ namespace JMATH {
         return a * b + c;
     }
 
+    template <typename T>
+    inline T half( const T& v ) {
+        return v*0.5f;
+    }
+
+    template <typename T>
+    inline T quarter( const T& v ) {
+        return v*0.25f;
+    }
+
 //inline float fma(float a, float b, float c) {
 //#ifdef D_LANGUAGE_CXX11
 //	return std::fma(a, b, c);
