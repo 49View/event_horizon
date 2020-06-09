@@ -51,7 +51,7 @@ public:
     Vector2f( const Vector3f& v );
 
     template <typename T>
-    Vector2f( const std::vector<T> _v ) {
+    explicit Vector2f( const std::vector<T> _v ) {
         ASSERT( _v.size() == 2 );
         mX = static_cast<float>(_v[0]);
         mY = static_cast<float>(_v[1]);
