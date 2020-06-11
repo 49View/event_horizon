@@ -798,6 +798,10 @@ void Camera::incrementQuatAngles( const Vector3f& a ) {
     qangle->value = quatCompose(incrementalEulerQuatAngle);
 }
 
+void Camera::setIncrementQuatAngles( const Vector3f& a ) {
+    incrementalEulerQuatAngle = a;
+}
+
 void Camera::incrementOrbitDistance( float _d ) {
     if ( _d == 0.0f ) return;
 
@@ -832,7 +836,7 @@ void Camera::UpdateIncrementalEulerFromQangle() {
 }
 
 void Camera::UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget ) {
-    incrementalEulerQuatAngle = V3f{ M_PI } - _qtarget.euler2();
+    incrementalEulerQuatAngle = _qtarget.euler2();
 }
 
 void Camera::resetQuat() {

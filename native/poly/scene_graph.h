@@ -59,20 +59,20 @@ namespace HOD { // HighOrderDependency
 
     class DepRemapsManager {
         public:
-            void addDep( const std::string& group, const std::string& resName );
+            void addDep( SceneGraph& sg, const std::string& group, const std::string& resName );
         public:
             std::unordered_set<std::string> geoms;
             DependencyList ret{};
     };
 
     template <typename T>
-    DepRemapsManager resolveDependencies( const T* data );
+    DepRemapsManager resolveDependencies( const T* data, SceneGraph& sg );
 
     void reducer( SceneGraph& sg, DepRemapsManager& deps, HODResolverCallback ccf );
 
     template<typename T>
     void resolver( SceneGraph& sg, const T* data, HODResolverCallback ccf ) {
-        auto deps = HOD::resolveDependencies<T>( data );
+        auto deps = HOD::resolveDependencies<T>( data, sg );
         reducer( sg, deps, ccf );
     }
 
@@ -239,8 +239,23 @@ public:
         if constexpr ( std::is_same_v<R, UIContainer    > ) resourceCallbackUI           .emplace_back( _key, _hash, std::move(_res), _ccf );
         if constexpr ( std::is_same_v<R, Light          > ) resourceCallbackLight        .emplace_back( _key, _hash, std::move(_res), _ccf );
     }
+
     static void addDeferredComp( const ResourceRef& _key, SerializableContainer&& _data, HttpResouceCB _ccf = nullptr ) {
         resourceCallbackComposite.emplace_back( _key, "", std::move(_data), _ccf );
+    }
+
+    bool exists( const std::string& group, const std::string& resName ) {
+        if ( ResourceGroup::VData         == group ) return VL().exists(resName) != nullptr;
+        if ( ResourceGroup::Image         == group ) return TL().exists(resName) != nullptr;
+        if ( ResourceGroup::Material      == group ) return ML().exists(resName) != nullptr;
+        if ( ResourceGroup::Font          == group ) return FM().exists(resName) != nullptr;
+        if ( ResourceGroup::Profile       == group ) return PL().exists(resName) != nullptr;
+        if ( ResourceGroup::Color         == group ) return MC().exists(resName) != nullptr;
+        if ( ResourceGroup::CameraRig     == group ) return CM().exists(resName) != nullptr;
+        if ( ResourceGroup::Geom          == group ) return GM().exists(resName) != nullptr;
+        if ( ResourceGroup::UI            == group ) return UM().exists(resName) != nullptr;
+        if ( ResourceGroup::Light         == group ) return LL().exists(resName) != nullptr;
+        return false;
     }
 
     template <typename R>
@@ -491,6 +506,7 @@ protected:
     void replaceMaterialOnNodes( const std::string& _key );
 
 public:
+    void clearNodes();
     void clearGMNodes();
     void setMaterialRemap( const MaterialMap& materialRemap );
     [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;

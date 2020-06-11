@@ -43,11 +43,11 @@ LoadedResouceCallbackContainer SceneGraph::resourceCallbackComposite;
 namespace HOD { // HighOrderDependency
 
     template<>
-    DepRemapsManager resolveDependencies<ResourceScene>( const ResourceScene *_resources ) {
+    DepRemapsManager resolveDependencies<ResourceScene>( const ResourceScene *_resources, SceneGraph& sg ) {
         DepRemapsManager ret{};
 
         _resources->visit(ResourceGroup::Geom, [&]( const std::string& key, const std::string& entry ) {
-            ret.addDep(key, entry);
+            ret.addDep(sg, key, entry);
         });
 
         return ret;
@@ -172,6 +172,10 @@ void SceneGraph::genericCallbacks() {
 void SceneGraph::clearGMNodes() {
     removeNode(!nodes.empty() ? nodes.begin()->second : nullptr);
     GM().clear();
+    Nodes().clear();
+};
+
+void SceneGraph::clearNodes() {
     Nodes().clear();
 };
 
@@ -772,8 +776,8 @@ void SceneGraph::addEventCallback( const std::string& _key, SocketCallbackDataTy
     SceneGraph::eventSceneCallback.emplace( _key, std::move(_value) );
 }
 
-void HOD::DepRemapsManager::addDep( const std::string& group, const std::string& resName ) {
-    if ( !resName.empty()) {
+void HOD::DepRemapsManager::addDep( SceneGraph& sg, const std::string& group, const std::string& resName ) {
+    if ( !sg.exists(group, resName) && !resName.empty() ) {
         ret.emplace(group, resName);
         if ( group == ResourceGroup::Geom ) {
             geoms.emplace(resName);

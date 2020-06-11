@@ -141,6 +141,7 @@ public:
 	void ToggleLockAtWalkingHeight() { mLockAtWalkingHeight = !mLockAtWalkingHeight; }
     void UpdateIncrementalEulerFromQangle();
     void UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget);
+    void setIncrementQuatAngles( const Vector3f& a );
 	void enableInputs( bool _enableInputs ) { mbLocked = _enableInputs; }
 
 	[[nodiscard]] JMATH::Rect2f ViewPort() const { return mViewPort; }
