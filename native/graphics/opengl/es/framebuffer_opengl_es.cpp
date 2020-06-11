@@ -1,5 +1,6 @@
 #include "../framebuffer_opengl.h"
 
+#include <core/util_logs.hpp>
 #include <graphics/texture.h>
 #include "../gl_util.h"
 #include "../../graphic_functions.hpp"

@@ -10,6 +10,8 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <cstring>
+#include <string>
+#include <sstream>
 #include <functional>
 
 #define  LOG_TAG    "EventHorizon-cpp"

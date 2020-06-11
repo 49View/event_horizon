@@ -40,6 +40,10 @@ void NodeGraph::nodeFullScreenImageConnect( const std::function<NodeGraphConnect
     nodeFullScreenImageSignal.connect( _slot );
 }
 
+void NodeGraph::nodeFullScreenMaterialConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot ) {
+    nodeFullScreenMaterialSignal.connect( _slot );
+}
+
 void NodeGraph::nodeSetSkyboxConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot ) {
     nodeSetSkyboxSignal.connect( _slot );
 }

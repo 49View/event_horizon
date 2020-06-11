@@ -39,6 +39,7 @@ public:
     void gmNodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
     void nodeFullScreenImageConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
+    void nodeFullScreenMaterialConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void nodeSetSkyboxConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void nodeFullScreenFontSonnetConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void nodeFullScreenProfileConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
@@ -61,6 +62,7 @@ public:
     boost::signals2::signal<NodeGraphConnectReplaceFuncSig> replaceMaterialSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeSetSkyboxSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenImageSignal;
+    boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenMaterialSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenFontSonnetSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenProfileSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenUIContainerSignal;
