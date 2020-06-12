@@ -99,6 +99,11 @@ void VPList::setMaterialConstantAlpha( float alpha ) {
     material->setConstant( UniformNames::alpha, alpha );
 }
 
+float VPList::getMaterialConstantAlpha() const {
+    auto alpha = material->Constants()->Values()->get<float>(UniformNames::alpha);
+    return alpha ? *alpha : 12.0f;
+}
+
 void VPList::setMaterialConstantOpacity( float alpha ) {
     material->setConstant( UniformNames::opacity, alpha );
 }

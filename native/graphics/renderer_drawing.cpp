@@ -888,7 +888,7 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
 //    auto trams = std::make_shared<Matrix4f>( rds.preMultMatrix );//
 
     auto vp = VPBuilder<FontStrip>{ *this, ShaderMaterial{ rds.shaderName, mapColor(rds.color) }, rds.fds.text }.
-            p(ps).t(rds.matrix).n(rds.fds.text).
+            p(ps).t(rds.matrix).n(rds.fds.text+rds.name).
             build();
 
     VPL(rds.bucketIndex, vp);

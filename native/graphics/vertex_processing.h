@@ -92,6 +92,7 @@ public:
     }
 
     void setMaterialConstantAlpha( float alpha );
+    float getMaterialConstantAlpha() const;
 
     void setMaterialConstantOpacity( float alpha );
 
@@ -153,12 +154,13 @@ void fader( float _duration, float _value, Args&& ...args ) {
     ( parseFader( vplists, std::forward<Args>(args)),... );
 
     Timeline::intermezzo( _duration, 0, AnimUpdateCallback([vplists, _value, _duration](float _elapsed) {
+        float current = (_elapsed / _duration);
         for ( auto& vl : vplists ) {
             if ( _elapsed > 0.0f ) {
                 if ( _value > 0.0f ) {
-                    vl->setMaterialConstantAlpha( min( _value, (_elapsed / _duration) ) );
+                    vl->setMaterialConstantAlpha( min( _value, max( vl->getMaterialConstantAlpha(), current) ) );
                 } else {
-                    vl->setMaterialConstantAlpha( max( _value, (1.0f-_value)-(_elapsed / _duration) ) );
+                    vl->setMaterialConstantAlpha( max( _value, min( vl->getMaterialConstantAlpha(),(1.0f-_value)-current )) );
                 }
             }
         }
