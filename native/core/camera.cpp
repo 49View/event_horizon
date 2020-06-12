@@ -692,7 +692,7 @@ void Camera::update() {
         quatMatrix = qy.rotationMatrix();
     }
 
-    if ( Mode() == CameraControlType::Walk ) {
+    if ( Mode() == CameraControlType::Walk || Mode() == CameraControlType::Fly ) {
         quatMatrix = qangle->value.rotationMatrix();
     }
 
@@ -794,12 +794,17 @@ void Camera::setQuatAngles( const Vector3f& a ) {
 
 void Camera::incrementQuatAngles( const Vector3f& a ) {
     if ( mbLocked ) return;
+    if ( qangle->isAnimating ) return;
     incrementalEulerQuatAngle += a;
     qangle->value = quatCompose(incrementalEulerQuatAngle);
 }
 
 void Camera::setIncrementQuatAngles( const Vector3f& a ) {
     incrementalEulerQuatAngle = a;
+}
+
+V3f Camera::getIncrementQuatAngles() const {
+    return incrementalEulerQuatAngle;
 }
 
 void Camera::incrementOrbitDistance( float _d ) {

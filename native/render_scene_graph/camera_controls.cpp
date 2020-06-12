@@ -190,6 +190,7 @@ CameraControlFly::CameraControlFly( std::shared_ptr<CameraRig> cameraRig, Render
         : CameraControlEditable(cameraRig, rsg) {
     cameraRig->getCamera()->Mode(CameraControlType::Walk);
     cameraRig->getCamera()->LockAtWalkingHeight(false);
+    rsg.setMICursorCapture(true);
     controlType = CameraControlType::Fly;
 }
 

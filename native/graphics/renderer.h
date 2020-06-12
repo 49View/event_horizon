@@ -225,6 +225,7 @@ public:
     void changeMaterialColorOnTags( uint64_t _tag, const Color4f& _color );
     void changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b );
     void changeMaterialAlphaOnTags( uint64_t _tag, float _alpha );
+    void setVisibilityOnTags( uint64_t _tag, bool _visibility );
     void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
     void replaceMaterial( const std::string& _oldMatRef, const std::string& _newMatRef );
     void changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value );
@@ -257,6 +258,7 @@ public:
 
     inline CommandBufferList& CB_U() { return *mCommandBuffers; }
     inline CommandBufferListVectorMap& CL() { return mCommandLists; }
+    std::vector<std::shared_ptr<VPList>> CLI( uint64_t cli );
     inline const CommandBufferListVectorMap& CL() const { return mCommandLists; }
 
     void resetDefaultFB( const Vector2i& forceSize = Vector2i{ -1 } );

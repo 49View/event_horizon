@@ -584,6 +584,14 @@ void RLTargetPBR::enableSunLighting( bool _flag ) {
     mbEnableSunLighting = _flag;
 }
 
+const V3f& RLTargetPBR::getProbePosition() const {
+    return mProbePosition;
+}
+
+void RLTargetPBR::setProbePosition( const V3f& _probePosition ) {
+    mProbePosition = _probePosition;
+}
+
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget( _rr ) {
     framebuffer = _fbt;
 }

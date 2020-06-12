@@ -142,6 +142,7 @@ public:
     void UpdateIncrementalEulerFromQangle();
     void UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget);
     void setIncrementQuatAngles( const Vector3f& a );
+    V3f getIncrementQuatAngles() const;
 	void enableInputs( bool _enableInputs ) { mbLocked = _enableInputs; }
 
 	[[nodiscard]] JMATH::Rect2f ViewPort() const { return mViewPort; }

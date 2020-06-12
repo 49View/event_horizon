@@ -918,6 +918,13 @@ void RenderOrchestrator::setVisible( uint64_t _cbIndex, bool _value ) {
     }
 }
 
+void RenderOrchestrator::setProbePosition( const V3f& _pos ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->setProbePosition( _pos );
+        rr.invalidateOnAdd();
+    }
+}
+
 SceneGraph& RenderOrchestrator::SG() { return sg; }
 
 UIView& RenderOrchestrator::UI() { return uiView; }
@@ -1016,5 +1023,6 @@ void RenderOrchestrator::setMICursorCapture( bool _flag ) {
 bool RenderOrchestrator::getMICursorCapture() const {
     return bMICursorCapture;
 }
+
 
 

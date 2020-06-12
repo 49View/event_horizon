@@ -474,6 +474,24 @@ void Renderer::changeMaterialAlphaOnTags( uint64_t _tag, float _alpha ) {
     invalidateOnAdd();
 }
 
+void Renderer::setVisibilityOnTags( uint64_t _tag, bool _visibility ) {
+    for ( const auto&[k, vl] : CL()) {
+        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
+            for ( const auto& v : vl.mVList ) {
+                if ( checkBitWiseFlag( v->tag(), _tag ) ) {
+                    v->setHidden( !_visibility);
+                }
+            }
+            for ( const auto& v : vl.mVListTransparent ) {
+                if ( checkBitWiseFlag( v->tag(), _tag ) ) {
+                    v->setHidden( !_visibility);
+                }
+            }
+        }
+    }
+    invalidateOnAdd();
+}
+
 void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor ) {
     // NDDado: we only use RGB, not Alpha, in here
     for ( const auto&[k, vl] : CL()) {
@@ -638,4 +656,11 @@ bool DShaderMatrix::has2d() const {
 
 bool DShaderMatrix::hasTexture() const {
     return checkBitWiseFlag(data, DShaderMatrixValue2dTexture) || checkBitWiseFlag(data, DShaderMatrixValue3dTexture);
+}
+
+std::vector<std::shared_ptr<VPList>> Renderer::CLI( uint64_t cli ) {
+    std::vector<std::shared_ptr<VPList>> ret;
+    std::copy (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret));
+    std::copy (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret));
+    return ret;
 }

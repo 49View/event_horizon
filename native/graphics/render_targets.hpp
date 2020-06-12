@@ -309,6 +309,9 @@ public:
     void invalidateOnAdd() override;
     floata& skyBoxDeltaInterpolation();
 
+    const V3f& getProbePosition() const;
+    void setProbePosition( const V3f& _probePosition );
+
     std::shared_ptr<CompositePBR> Composite();
 protected:
     void renderDepthMap();
