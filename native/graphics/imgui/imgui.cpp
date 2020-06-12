@@ -12472,12 +12472,16 @@ static void ImGui::DockNodeRemoveWindow(ImGuiDockNode* node, ImGuiWindow* window
     UpdateWindowParentAndRootLinks(window, window->Flags & ~ImGuiWindowFlags_ChildWindow, NULL); // Update immediately
 
     // Remove window
+#ifdef _DEBUG
     bool erased = false;
+#endif
     for (int n = 0; n < node->Windows.Size; n++)
         if (node->Windows[n] == window)
         {
             node->Windows.erase(node->Windows.Data + n);
+#ifdef _DEBUG
             erased = true;
+#endif
             break;
         }
     IM_ASSERT(erased);
