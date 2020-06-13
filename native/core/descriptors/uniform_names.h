@@ -235,8 +235,8 @@ namespace MPBRTextures {
         if ( isHeightTexture( value )) return UniformNames::heightTexture;
         if ( isAOTexture( value )) return UniformNames::aoTexture;
         if ( isOpacityTexture( value )) return UniformNames::opacityTexture;
-        if ( isTranslucencyTexture( value )) return UniformNames::emissionTexture;
-        if ( isEmissiveTexture( value )) return UniformNames::translucencyTexture;
+        if ( isTranslucencyTexture( value )) return UniformNames::translucencyTexture;
+        if ( isEmissiveTexture( value )) return UniformNames::emissionTexture;
 
         ASSERTV( 0, "Couldn't map PBR texture %s", _value.c_str());
         return "";

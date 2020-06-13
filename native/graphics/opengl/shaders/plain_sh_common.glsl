@@ -228,7 +228,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
 
     Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
-    if ( opacityV < 1.0 ) {
+    if ( translucencyV > 0.0 ) {
         Lo += rendering_equation( albedo, -L_Sun, V, N, F0, u_sunRadiance.xyz );
     }
 
@@ -257,7 +257,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     // v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
     vec3 VN = N;
-    if ( opacityV < 1.0 ) {
+    if ( translucencyV > 0.0 ) {
         VN *= -1.0;
     }
     float nlAngle = dot( VN, normalize( u_sunPosition - Position_worldspace ));

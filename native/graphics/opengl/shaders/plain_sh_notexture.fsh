@@ -42,7 +42,7 @@ void main() {
    roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
    metallic = (texture( metallicTexture, texCoords ).x * metallicV);
    opacityV = texture( opacityTexture, texCoords ).x; // * 1.0 - 0.0 ) * opacity; 
-   translucencyV = 1.0 + (texture( translucencyTexture, texCoords ).x);
+   translucencyV = (texture( translucencyTexture, texCoords ).x);
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
     albedo = pow(albedo, vec3(2.2/1.0));
     //albedo = pow(albedo, vec3(1.0/2.2));

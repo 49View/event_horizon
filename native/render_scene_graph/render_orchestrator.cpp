@@ -269,26 +269,26 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
             DC()->setPosition(V3f{ 0.22f, 1.02f, -1.8f });
             DC()->setIncrementQuatAngles(V3f{ 0.33f, -2.8f, 0.0f });
 
-//            float tsize = 0.10f;
-//            float ygap = .005f;
-//            float x1 = getScreenAspectRatio - tsize - ygap;
-//            float x2 = getScreenAspectRatio - ygap;
-//            float y = 1.0f - ygap;
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getDiffuseTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getNormalTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getRoughnessTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getMetallicTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getOpacityTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getAOTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getTranslucencyTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getHeightTexture() });
+            float tsize = 0.10f;
+            float ygap = .005f;
+            float x1 = getScreenAspectRatio - tsize - ygap;
+            float x2 = getScreenAspectRatio - ygap;
+            float y = 1.0f - ygap;
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getDiffuseTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getNormalTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getRoughnessTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getMetallicTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getOpacityTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getAOTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getTranslucencyTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getHeightTexture() });
         }
     });
 
