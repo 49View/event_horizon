@@ -25,15 +25,19 @@ void Framebuffer::attachDepthBuffer() {
     GLCALL(glGenRenderbuffers(1, &depthTexture) );
     GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, depthTexture) );
 
+#ifndef _WEBGL1
     if ( mMultisample ) {
         GLCALL(glRenderbufferStorageMultisample( GL_RENDERBUFFER, getMultiSampleCount(), GL_DEPTH_COMPONENT32F, mWidth, mHeight ) );
     } else {
         GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, mWidth, mHeight ) );
     }
+#else
+    GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mWidth, mHeight ) );
+#endif
 
     GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture) );
 
-    checkFrameBufferStatus();
+//    checkFrameBufferStatus();
 }
 
 void Framebuffer::attachColorBuffer( unsigned int index ) {
@@ -44,11 +48,15 @@ void Framebuffer::attachColorBuffer( unsigned int index ) {
     GLCALL(glGenRenderbuffers(1, &depthBuffer) );
     GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer) );
 
+#ifndef _WEBGL1
     if ( mMultisample ) {
         GLCALL(glRenderbufferStorageMultisample( GL_RENDERBUFFER, getMultiSampleCount(), pixelFormatToGlInternalFormat(mFormat), mWidth, mHeight ) );
     } else {
         GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, pixelFormatToGlInternalFormat(mFormat), mWidth, mHeight ) );
     }
+#else
+    GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_RGB565, mWidth, mHeight ) );
+#endif
 
     GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, depthBuffer) );
 
@@ -63,19 +71,26 @@ void Framebuffer::initDepth( std::shared_ptr<TextureManager> tm ) {
     GLCALL( glGenFramebuffers( 1, &mFramebufferHandle ));
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 
+    mFormat = PIXEL_FORMAT_DEPTH_32;
     auto trd = ImageParams{}.size( mWidth, mHeight ).format( PIXEL_FORMAT_DEPTH_32 ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName, trd }
                                                       .fm( FILTER_LINEAR )
                                                       .setIsFramebufferTarget( true )
                                                       .GPUSlot( mTextureGPUSlot ).setGenerateMipMaps(false) );
 
+#ifndef _WEBGL1
     GLCALL( glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL ) );
     GLCALL( glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE ) );
+#endif
 //    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 //    GLCALL( glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor));
     GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mRenderToTexture->getHandle(), 0 ) );
+    // ###WEBGL1###
+#ifndef _WEBGL1
+    // Not sure what this is in the first place
     GLCALL( glDrawBuffers(0, GL_NONE) );
     GLCALL( glReadBuffer(GL_NONE) );
+#endif
 
     checkFrameBufferStatus();
 }
@@ -84,6 +99,7 @@ void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
     GLCALL( glGenFramebuffers( 1, &mFramebufferHandle ));
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 
+#ifndef _WEBGL1
     if ( mMultisample ) {
         GLCALL( glGenRenderbuffers(1, &mRenderbufferHandle) );
         GLCALL( glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferHandle) );
@@ -101,16 +117,25 @@ void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
 
         LOGRS( "[FRAMEBUFFER] " << mName << " Target: [" << mRenderToTexture->getGlTextureImageTargetString()
             << "] Format: [" << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "]" )
-
-//        mTargetType = mRenderToTexture->getGlTextureImageTarget();
-//        mTargetHandle = mRenderToTexture->getHandle();
-//        mTargetMipmap = 0;
-
         GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                         mRenderToTexture->getGlTextureImageTarget(),
                                         mRenderToTexture->getHandle(), 0 ));
 
     }
+#else
+    auto trd = ImageParams{}.size( mWidth, mHeight ).format( mFormat ).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+        mRenderToTexture = tm->addTextureNoData( TextureRenderData{ mName, trd }
+                                                          .setIsFramebufferTarget( true )
+                                                          .GPUSlot( mTextureGPUSlot )
+                                                          .setGenerateMipMaps( mUseMipMaps )
+                                                          .setMultisample( mMultisample ));
+
+        LOGRS( "[FRAMEBUFFER] " << mName << " Target: [" << mRenderToTexture->getGlTextureImageTargetString()
+            << "] Format: [" << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "]" )
+        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                        mRenderToTexture->getGlTextureImageTarget(),
+                                        mRenderToTexture->getHandle(), 0 ));
+#endif
 //    GLenum attch = GL_COLOR_ATTACHMENT0;
 //    GLCALL( glDrawBuffers( 1, &attch ));
     checkFrameBufferStatus();
@@ -254,6 +279,9 @@ void Framebuffer::enableDepthTest( bool enabled ) {
 
 void Framebuffer::blit( std::shared_ptr<Framebuffer> source, std::shared_ptr<Framebuffer> dest,
                         GLenum atthSource, GLenum atthDest ) {
+    // ###WEBGL1###
+    // Well we need to re-implement blitbuffer for ES2 :/
+#ifndef _WEBGL1
     GLCALL( glBindFramebuffer( GL_READ_FRAMEBUFFER, source->Handle()));
     GLCALL( glReadBuffer( atthSource ));
 
@@ -271,6 +299,7 @@ void Framebuffer::blit( std::shared_ptr<Framebuffer> source, std::shared_ptr<Fra
 
     GLCALL( glBlitFramebuffer( 0, 0, source->getWidth(), source->getHeight(), 0, 0, dest->getWidth(), dest->getHeight(),
                                GL_COLOR_BUFFER_BIT, GL_LINEAR ));
+#endif
 }
 
 void Framebuffer::blitWithRect( std::shared_ptr<Framebuffer> source,
@@ -279,6 +308,7 @@ void Framebuffer::blitWithRect( std::shared_ptr<Framebuffer> source,
                                 GLenum atthDest,
                                 Rect2f _sourceRect,
                                 Rect2f _destRect ) {
+#ifndef _WEBGL1
     GLCALL( glBindFramebuffer( GL_READ_FRAMEBUFFER, source->Handle()));
     GLCALL( glReadBuffer( atthSource ));
 
@@ -293,7 +323,7 @@ void Framebuffer::blitWithRect( std::shared_ptr<Framebuffer> source,
                                _destRect.left(), _destRect.top(),
                                _destRect.right(), _destRect.bottom(),
                                GL_COLOR_BUFFER_BIT, GL_LINEAR ));
-
+#endif
 }
 
 bool Framebuffer::isHDRSupported() {

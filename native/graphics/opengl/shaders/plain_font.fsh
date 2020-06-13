@@ -2,8 +2,7 @@
 
 #include "color_uniforms.glsl"
 
-attribute vec3 tpos;
-varying vec4 FragColor;
+varying vec3 tpos;
 
 void main()
 {
@@ -24,8 +23,11 @@ void main()
             alphaV *= clamp(0.5 - sd, 0.0, 1.0);
         }
     } else {
-        alphaV *= round((tpos.x * tpos.x - tpos.y) * tpos.z + 0.5f);
+        // ###WEBGL1###
+        // removed round
+//        alphaV *= round((tpos.x * tpos.x - tpos.y) * tpos.z + 0.5);
+        alphaV *= (tpos.x * tpos.x - tpos.y) * tpos.z + 0.5;
     }
     float aFactor = alpha*alphaV*opacity;
-    FragColor = vec4(diffuseColor * aFactor, aFactor);
+    gl_FragColor = vec4(diffuseColor * aFactor, aFactor);
 }

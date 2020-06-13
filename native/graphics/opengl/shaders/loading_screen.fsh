@@ -1,7 +1,6 @@
 #version #opengl_version
 #include "animation_uniforms.glsl"
-attribute vec2 v_texCoord;
-varying vec4 fragColor;
+varying vec2 v_texCoord;
 vec2 iResolution = vec2(640.0, 360.0);
 
 float N21(vec2 p) {
@@ -64,17 +63,17 @@ void main() {
     vec2 uv = v_texCoord;
 
     float lowerLimit = 0.2;
-    float higherLimit = 1.0f - lowerLimit;
+    float higherLimit = 1.0 - lowerLimit;
     float alphaing = progress < lowerLimit ? progress : 1.0;
 
     if ( progress < lowerLimit ) {
-    	alphaing = smoothstep(0.0f, lowerLimit, progress);
+    	alphaing = smoothstep(0.0, lowerLimit, progress);
     } else if ( progress > higherLimit ) {
-    	alphaing = 1.0 - smoothstep(higherLimit, 1.0f, progress);
+    	alphaing = 1.0 - smoothstep(higherLimit, 1.0, progress);
     }
 
     vec4 c = vec4(loadingColor(uv, progress, iTime) * alphaing, 0.5);
     //c *= alphaing;
 
-    fragColor = c;
+    gl_FragColor = c;
 }

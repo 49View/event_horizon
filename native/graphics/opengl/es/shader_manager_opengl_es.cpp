@@ -2,7 +2,6 @@
 
 void ShaderManager::createCCInjectionMap() {
 //    ccShaderMap["#opengl_version"] = "300 es\nprecision mediump float;\nprecision mediump int;\nprecision mediump sampler2DShadow;\nprecision mediump sampler3D;";
-
     ccShaderMap["#opengl_version"] = "100\n#extension GL_OES_standard_derivatives : enable\n#extension GL_EXT_shader_texture_lod : enable\n#extension GL_EXT_frag_depth : enable\nprecision mediump float;";
 #ifdef ANDROID
     ccShaderMap["#precision_high"] = "precision highp float;";
@@ -13,3 +12,4 @@ void ShaderManager::createCCInjectionMap() {
 
 // this was required for font rendering but probably legacy 1.00 GL_ES
 //#extension GL_OES_standard_derivatives : enable
+

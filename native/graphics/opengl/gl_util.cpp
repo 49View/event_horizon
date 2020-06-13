@@ -7,6 +7,9 @@ const int SHADER_ERROR_BUFFER_COUNT = 16;
 static char gShaderErrorBuffer[SHADER_ERROR_BUFFER_COUNT][SHADER_ERROR_BUFFER_SIZE];
 static int gShaderErrorCount = 0;
 
+#define GL_RGB_EXT GL_RGB
+#define GL_RGBA_EXT GL_RGBA
+
 void setTextureAligment( int i ) {
     GLCALL( glPixelStorei( GL_PACK_ALIGNMENT, i ));
     GLCALL( glPixelStorei( GL_UNPACK_ALIGNMENT, i ));
@@ -109,16 +112,16 @@ const char *glRenderBufferFormatToString( int renderBufferFormat ) {
     } else if ( renderBufferFormat == GL_STENCIL_INDEX8 ) {
         return "GL_STENCIL_INDEX8";
     } else if ( renderBufferFormat ==
-                #if OPENGLES
-                GL_RGB8_OES
+                #if _WEBGL1
+                GL_RGB_EXT
                 #else
                 GL_RGB8
 #endif
             ) {
         return "GL_RGB8";
     } else if ( renderBufferFormat ==
-                #if OPENGLES
-                GL_RGBA8_OES
+                #if _WEBGL1
+                GL_RGBA_EXT
                 #else
                 GL_RGBA8
 #endif
@@ -133,59 +136,114 @@ GLenum pixelFormatToGlInternalFormat( PixelFormat _pixelFormat ) {
     auto pixelFormat = pixelFormatResolver( _pixelFormat, Framebuffer::isHDRSupported() );
     switch ( pixelFormat ) {
         case PIXEL_FORMAT_DEPTH_16:
+#ifdef _WEBGL1
+            return GL_DEPTH_COMPONENT;
+#else
             return GL_DEPTH_COMPONENT16;
+#endif
         case PIXEL_FORMAT_DEPTH_24:
+#ifdef _WEBGL1
+            return GL_DEPTH_COMPONENT;
+#else
             return GL_DEPTH_COMPONENT24;
+#endif
         case PIXEL_FORMAT_DEPTH_32:
+#ifdef _WEBGL1
+            return GL_DEPTH_COMPONENT;
+#else
             return GL_DEPTH_COMPONENT32F;
+#endif
         case PIXEL_FORMAT_HDR_RGB_16:
+#if _WEBGL1
+            return GL_RGB_EXT;
+#else
             return GL_RGB16F;
+#endif
         case PIXEL_FORMAT_HDR_RGBA_16:
+#if _WEBGL1
+            return GL_RGBA_EXT;
+#else
             return GL_RGBA16F;
+#endif
         case PIXEL_FORMAT_HDR_RGB_32:
+#if _WEBGL1
+            return GL_RGB_EXT;
+#else
             return GL_RGB32F;
+#endif
         case PIXEL_FORMAT_HDR_RGBA_32:
+#if _WEBGL1
+            return GL_RGBA_EXT;
+#else
             return GL_RGBA32F;
+#endif
         case PIXEL_FORMAT_SRGB:
+#if _WEBGL1
+            return GL_RGB_EXT;
+#else
             return GL_SRGB8;
+#endif
         case PIXEL_FORMAT_SRGBA:
             return GL_SRGB8_ALPHA8;
         case PIXEL_FORMAT_RGB:
-#if OPENGLES
-            return GL_RGB8_OES;
+#if _WEBGL1
+            return GL_RGB_EXT;
 #else
             return GL_RGB8;
 #endif
         case PIXEL_FORMAT_RGB565:
+#if _WEBGL1
+            return GL_RGB_EXT;
+#else
             return GL_RGB565;
+#endif
         case PIXEL_FORMAT_RGBA:
         case PIXEL_FORMAT_BGRA:
-#if OPENGLES
-            return GL_RGBA8_OES;
+#if _WEBGL1
+            return GL_RGBA_EXT;
 #else
             return GL_RGBA8;
 #endif
         case PIXEL_FORMAT_RG:
             return GL_RG8;
         case PIXEL_FORMAT_HDR_RG_16:
+#if _WEBGL1
+            return GL_LUMINANCE_ALPHA;
+#else
             return GL_RG16F;
+#endif
         case PIXEL_FORMAT_HDR_RG32:
+#if _WEBGL1
+            return GL_LUMINANCE;
+#else
             return GL_RG32F;
+#endif
         case PIXEL_FORMAT_R:
+#if _WEBGL1
+            return GL_LUMINANCE;
+#else
             return GL_R8;
+#endif
         case PIXEL_FORMAT_HDR_R16:
+#if _WEBGL1
+            return GL_LUMINANCE;
+#else
             return GL_R16F;
+#endif
         case PIXEL_FORMAT_HDR_R32:
+#if _WEBGL1
+            return GL_LUMINANCE;
+#else
             return GL_R32F;
+#endif
         case PIXEL_FORMAT_LUMINANCE:
-#if OPENGLES
-//            return GL_LUMINANCE;
-            return GL_R8;
+#if _WEBGL1
+            return GL_LUMINANCE;
 #else
             return GL_R8;
 #endif
         case PIXEL_FORMAT_LUMINANCE_ALPHA:
-#if OPENGLES
+#if _WEBGL1
             return GL_LUMINANCE_ALPHA;
 #else
             return GL_RG8;
@@ -201,11 +259,23 @@ GLenum pixelFormatToGlInternalFormat( PixelFormat _pixelFormat ) {
 GLenum pixelFormatToGlFormat( PixelFormat pixelFormat ) {
     switch ( pixelFormat ) {
         case PIXEL_FORMAT_DEPTH_16:
+#if _WEBGL1
             return GL_DEPTH_COMPONENT;
+#else
+            return GL_DEPTH_COMPONENT;
+#endif
         case PIXEL_FORMAT_DEPTH_24:
+#if _WEBGL1
             return GL_DEPTH_COMPONENT;
+#else
+            return GL_DEPTH_COMPONENT;
+#endif
         case PIXEL_FORMAT_DEPTH_32:
+#if _WEBGL1
             return GL_DEPTH_COMPONENT;
+#else
+            return GL_DEPTH_COMPONENT;
+#endif
         case PIXEL_FORMAT_SRGB:
             return GL_SRGB8;
         case PIXEL_FORMAT_SRGBA:
@@ -222,11 +292,19 @@ GLenum pixelFormatToGlFormat( PixelFormat pixelFormat ) {
         case PIXEL_FORMAT_HDR_RG32:
         case PIXEL_FORMAT_HDR_RG_16:
         case PIXEL_FORMAT_RG:
+#if _WEBGL1
+            return GL_LUMINANCE_ALPHA;
+#else
             return GL_RG;
+#endif
         case PIXEL_FORMAT_HDR_R32:
         case PIXEL_FORMAT_HDR_R16:
         case PIXEL_FORMAT_R:
+#if _WEBGL1
+            return GL_LUMINANCE;
+#else
             return GL_RED;
+#endif
         case PIXEL_FORMAT_BGRA:
 #ifdef GL_BGRA_EXT
             return GL_BGRA_EXT;
@@ -234,13 +312,13 @@ GLenum pixelFormatToGlFormat( PixelFormat pixelFormat ) {
             return GL_RGBA;
 #endif
         case PIXEL_FORMAT_LUMINANCE:
-#if OPENGLES
+#if _WEBGL1
             return GL_LUMINANCE;
 #else
             return GL_RED;
 #endif
         case PIXEL_FORMAT_LUMINANCE_ALPHA:
-#if OPENGLES
+#if _WEBGL1
             return GL_LUMINANCE_ALPHA;
 #else
             return GL_RG;
@@ -266,7 +344,13 @@ GLenum pixelFormatToGlType( PixelFormat pixelFormat ) {
         case PIXEL_FORMAT_HDR_RGBA_32:
         case PIXEL_FORMAT_HDR_RG32:
         case PIXEL_FORMAT_HDR_R32:
+// ###WEBGL1###
+// Why GL_FLOAT is not supported even tought the extension OES_texture_float is supported???
+#ifdef _WEBGL1
+            return GL_UNSIGNED_INT;
+#else
             return GL_FLOAT;
+#endif
         case PIXEL_FORMAT_SRGB:
         case PIXEL_FORMAT_SRGBA:
         case PIXEL_FORMAT_R:
@@ -580,6 +664,8 @@ std::string glEnumToString( GLenum value ) {
             return "GL_BOOL";
         case GL_INT:
             return "GL_INT";
+        case GL_UNSIGNED_INT:
+            return "GL_UNSIGNED_INT";
         case GL_FLOAT_VEC2:
             return "GL_FLOAT_VEC2";
         case GL_FLOAT_VEC3:
@@ -610,6 +696,8 @@ std::string glEnumToString( GLenum value ) {
             return "GL_SAMPLER_CUBE";
         case GL_SAMPLER_2D_SHADOW:
             return "GL_SAMPLER_2D_SHADOW";
+        case GL_DEPTH_COMPONENT:
+            return "GL_DEPTH_COMPONENT";
         case GL_DEPTH_COMPONENT16:
             return "GL_DEPTH_COMPONENT16";
         case GL_DEPTH_COMPONENT24:
@@ -644,16 +732,16 @@ std::string glEnumToString( GLenum value ) {
             return "GL_R32F";
         case GL_LUMINANCE:
             return "GL_LUMINANCE";
-#if OPENGLES
+#if _WEBGL1
         case GL_LUMINANCE_ALPHA:
             return "GL_LUMINANCE_ALPHA";
 #else
         case GL_R8:
             return "GL_R8";
 #endif
-#if OPENGLES
-        case GL_LUMINANCE_ALPHA:
-            return "GL_LUMINANCE_ALPHA";
+#if _WEBGL1
+//        case GL_LUMINANCE_ALPHA:
+//            return "GL_LUMINANCE_ALPHA";
 #else
         case GL_RG8:
             return "GL_RG8";
@@ -678,13 +766,13 @@ std::string glEnumToString( GLenum value ) {
                 return "GL_RGB5_A1";
         case GL_STENCIL_INDEX8:
                 return "GL_STENCIL_INDEX8";
-#if OPENGLES
-        case GL_RGB8_OES:
-            return "GL_RGB8_OES";
+#if _WEBGL1
+//        case GL_RGB_EXT:
+//            return "GL_RGB_EXT";
 #endif
-#if OPENGLES
-        case GL_RGBA8_OES:
-            return "GL_RGBA8_OES";
+#if _WEBGL1
+//        case GL_RGBA_EXT:
+//            return "GL_RGBA_EXT";
 #endif
         case GL_LINEAR:
             return "GL_LINEAR";

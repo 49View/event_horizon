@@ -88,6 +88,13 @@ namespace WindowHandling {
         gatherMainScreenInfo();
 
         Framebuffer::checkHDRSupport();
+        bool hasFloatingPointTexgtures = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "OES_texture_float");
+        bool hasDepthTexture = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "WEBGL_depth_texture");
+        bool has_sRGB = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "EXT_sRGB");
+
+        LOGRS( "Floating point texture " << boolAlphaBinary(hasFloatingPointTexgtures) );
+        LOGRS( "Depth texture " << boolAlphaBinary(hasDepthTexture) );
+        LOGRS( "sRGB support " << boolAlphaBinary(has_sRGB) );
 
         initImGUI();
 

@@ -2,8 +2,6 @@
 
 #include "color_uniforms.glsl"
 
-varying vec4 FragColor;
-
 void main()
 {
 // NDDado: this is a barycentric wireframe shader, needs a full vertex
@@ -15,5 +13,5 @@ void main()
 // float f_alpha = smoothstep(f_thickness, f_thickness + f_width, f_closest_edge); // calculate alpha
 // // opacityV *= 1.0-f_alpha;
 
-    FragColor = vec4(diffuseColor, alpha*opacity);
+    gl_FragColor = vec4(diffuseColor, alpha*opacity);
 }

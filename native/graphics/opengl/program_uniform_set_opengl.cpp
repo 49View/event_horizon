@@ -6,6 +6,7 @@
 
 void ProgramUniformSet::generateUBO( std::shared_ptr<ShaderManager> sm, const std::string& uniformName ) {
 
+#ifndef _WEBGL1
 	mUBOBuffer = std::make_unique<char[]>( mUBOSize );
 	if ( mUBOHandle != 0 ) glDeleteBuffers( 1, &mUBOHandle );
 	glGenBuffers( 1, &mUBOHandle );
@@ -23,16 +24,21 @@ void ProgramUniformSet::generateUBO( std::shared_ptr<ShaderManager> sm, const st
 	}
 
 	glBindBufferBase( GL_UNIFORM_BUFFER, mUBOPoint, mUBOHandle );
+#endif
 }
 
 void ProgramUniformSet::submitUBOData() {
+#ifndef _WEBGL1
 	GLCALL( glBindBuffer( GL_UNIFORM_BUFFER, mUBOHandle ) );
 	GLCALL( glBufferData( GL_UNIFORM_BUFFER, mUBOSize, reinterpret_cast<void*>( mUBOBuffer.get() ), GL_STATIC_DRAW ) );
+#endif
 }
 
 void ProgramUniformSet::submitUBOData( void* data ) {
+#ifndef _WEBGL1
 	GLCALL( glBindBuffer( GL_UNIFORM_BUFFER, mUBOHandle ) );
 	GLCALL( glBufferData( GL_UNIFORM_BUFFER, mUBOSize, data, GL_STATIC_DRAW ) );
+#endif
 }
 
 ////// Naked Uniforms

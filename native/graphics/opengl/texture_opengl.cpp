@@ -19,7 +19,18 @@ void Texture::init_data_r( const uint8_t* _data ) {
             GLuint num_mipmaps = 1 + static_cast<GLuint>( floor( log( (float)max( mWidth, mHeight ) ) ) );
             // if it's a ui texture or is a framebuffer target do not generate mipmaps
             if ( updateStorage ) {
+#ifndef _WEBGL1
                 GLCALL( glTexStorage2D( glTextureTarget, num_mipmaps, glInternalFormat, mWidth, mHeight ));
+#else
+                auto lWidth = mWidth;
+                auto lHeight = mHeight;
+    for (auto i = 0; i < num_mipmaps; i++)
+    {
+        glTexImage2D(glTextureTarget, i, glInternalFormat, lWidth, lHeight, 0, glFormat, glType, NULL);
+        lWidth = max(1, (lWidth / 2));
+        lHeight = max(1, (lHeight / 2));
+    }
+#endif
             }
             if ( _data ) {
                 GLCALL( glTexSubImage2D( glTextureImageTarget, 0, 0, 0, mWidth, mHeight, glFormat, glType,
@@ -27,11 +38,17 @@ void Texture::init_data_r( const uint8_t* _data ) {
             }
         } else {
             if ( glTextureImageTarget == GL_TEXTURE_3D ) {
+#ifndef _WEBGL1
                 GLCALL( glTexImage3D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, mDepth, 0, glFormat, glType,
                                       _data));
+#endif
             } else {
-                GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType,
-                                      _data));
+                LOGRS("glTextureImageTarget: " << glEnumToString(glTextureImageTarget));
+                LOGRS("glInternalFormat: " << glEnumToString(glInternalFormat));
+                LOGRS("glFormat: " << glEnumToString(glFormat));
+                LOGRS("glType: " << glEnumToString(glType));
+                    GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType,
+                                          _data));
             }
         }
     }
@@ -64,8 +81,9 @@ void Texture::init_r( const uint8_t* _data ) {
     // Make sure we are not recreating the handle every time
     GLCALL( glGenTextures( 1, &mHandle ));
     GLCALL( glBindTexture( glTextureImageTarget, mHandle ));
-
+#ifndef _WEBGL1
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_R, glWrapMode ));
+#endif
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_S, glWrapMode ));
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_T, glWrapMode ));
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MAG_FILTER, glFilter ));
@@ -97,7 +115,9 @@ void Texture::init_cubemap_r() {
     GLCALL( glGenTextures( 1, &mHandle ));
     GLCALL( glBindTexture( glTextureImageTarget, mHandle ));
 
+#ifndef _WEBGL1
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_R, glWrapMode ));
+#endif
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_S, glWrapMode ));
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_T, glWrapMode ));
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_MAG_FILTER, glFilter ));

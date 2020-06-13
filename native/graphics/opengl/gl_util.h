@@ -43,7 +43,7 @@ const char* pixelFormatToString( PixelFormat pixelFormat );
 const char* wrapModeToString( WrapMode wrapMode );
 int getPixelFormatChannels( PixelFormat pixelFormat );
 
-//#define _ULTRADEBUG
+#define _ULTRADEBUG
 
 #ifdef _ULTRADEBUG
 #define SHADER_ERROR(X, Y, Z) /*shaderError(X, Y, Z)*/
