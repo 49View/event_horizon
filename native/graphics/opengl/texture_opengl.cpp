@@ -43,12 +43,12 @@ void Texture::init_data_r( const uint8_t* _data ) {
                                       _data));
 #endif
             } else {
-                LOGRS("glTextureImageTarget: " << glEnumToString(glTextureImageTarget));
-                LOGRS("glInternalFormat: " << glEnumToString(glInternalFormat));
-                LOGRS("glFormat: " << glEnumToString(glFormat));
-                LOGRS("glType: " << glEnumToString(glType));
-                    GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType,
-                                          _data));
+//                LOGRS("glTextureImageTarget: " << glEnumToString(glTextureImageTarget));
+//                LOGRS("glInternalFormat: " << glEnumToString(glInternalFormat));
+//                LOGRS("glFormat: " << glEnumToString(glFormat));
+//                LOGRS("glType: " << glEnumToString(glType));
+//                LOGRS("glType: " << glType);
+                GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType, _data));
             }
         }
     }

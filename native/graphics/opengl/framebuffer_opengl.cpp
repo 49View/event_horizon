@@ -130,9 +130,11 @@ void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
                                                           .setGenerateMipMaps( mUseMipMaps )
                                                           .setMultisample( mMultisample ));
 
-        LOGRS( "[FRAMEBUFFER] " << mName << " Target: [" << mRenderToTexture->getGlTextureImageTargetString()
-            << "] Format: [" << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "]" )
-        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+//        LOGRS( "[FRAMEBUFFER] " << mName << " Target: [" << mRenderToTexture->getGlTextureImageTargetString()
+//            << "] Format: [" << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "]"
+//            << "] AttachmentFormat: [" << glEnumToString( pixelFormatToFrameBufferAttachment(mFormat) ) << "]"
+//            )
+        GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, pixelFormatToFrameBufferAttachment(mFormat),
                                         mRenderToTexture->getGlTextureImageTarget(),
                                         mRenderToTexture->getHandle(), 0 ));
 #endif
@@ -281,6 +283,10 @@ void Framebuffer::blit( std::shared_ptr<Framebuffer> source, std::shared_ptr<Fra
                         GLenum atthSource, GLenum atthDest ) {
     // ###WEBGL1###
     // Well we need to re-implement blitbuffer for ES2 :/
+
+    // ### Artificially make it crash so we can debug it easier
+    GLCALL( glReadBuffer( atthSource ));
+
 #ifndef _WEBGL1
     GLCALL( glBindFramebuffer( GL_READ_FRAMEBUFFER, source->Handle()));
     GLCALL( glReadBuffer( atthSource ));

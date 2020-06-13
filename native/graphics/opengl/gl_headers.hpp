@@ -21,5 +21,11 @@
 #include <emscripten/html5.h>
 #define GLFW_INCLUDE_ES3
 #include <GLFW/glfw3.h>
+
+#ifdef _WEBGL1
+#include <GLES2/gl2.h>
+#else
 #include <GLES3/gl3.h>
+#endif
+
 #endif

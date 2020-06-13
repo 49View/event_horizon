@@ -22,6 +22,7 @@ bool get24BitRenderbuffersSupported();
 
 GLenum pixelFormatToGlInternalFormat( PixelFormat pixelFormat );
 GLenum pixelFormatToGlInternalFormatSized( PixelFormat pixelFormat );
+GLenum pixelFormatToFrameBufferAttachment( PixelFormat _pixelFormat );
 GLenum pixelFormatToGlFormat( PixelFormat pixelFormat );
 GLenum pixelFormatToGlType( PixelFormat pixelFormat );
 GLenum primitiveToGl( Primitive primitive );

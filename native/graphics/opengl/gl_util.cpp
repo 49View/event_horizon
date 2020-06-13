@@ -131,6 +131,38 @@ const char *glRenderBufferFormatToString( int renderBufferFormat ) {
     return "Unknown";
 }
 
+GLenum pixelFormatToFrameBufferAttachment( PixelFormat _pixelFormat ) {
+    auto pixelFormat = pixelFormatResolver( _pixelFormat, Framebuffer::isHDRSupported() );
+    switch ( pixelFormat ) {
+        case PIXEL_FORMAT_DEPTH_24:
+        case PIXEL_FORMAT_DEPTH_32:
+        case PIXEL_FORMAT_DEPTH_16:
+        case PIXEL_FORMAT_HDR_R16:
+        case PIXEL_FORMAT_HDR_R32:
+            return GL_DEPTH_ATTACHMENT;
+        case PIXEL_FORMAT_HDR_RGB_16:
+        case PIXEL_FORMAT_HDR_RGBA_16:
+        case PIXEL_FORMAT_HDR_RGB_32:
+        case PIXEL_FORMAT_HDR_RGBA_32:
+        case PIXEL_FORMAT_SRGB:
+        case PIXEL_FORMAT_SRGBA:
+        case PIXEL_FORMAT_RGB:
+        case PIXEL_FORMAT_RGB565:
+        case PIXEL_FORMAT_RGBA:
+        case PIXEL_FORMAT_BGRA:
+        case PIXEL_FORMAT_RG:
+        case PIXEL_FORMAT_HDR_RG_16:
+        case PIXEL_FORMAT_HDR_RG32:
+        case PIXEL_FORMAT_R:
+        case PIXEL_FORMAT_LUMINANCE:
+        case PIXEL_FORMAT_LUMINANCE_ALPHA:
+            return GL_COLOR_ATTACHMENT0;
+        default:
+            return GL_COLOR_ATTACHMENT0;
+    }
+    return GL_COLOR_ATTACHMENT0;
+}
+
 GLenum pixelFormatToGlInternalFormat( PixelFormat _pixelFormat ) {
 
     auto pixelFormat = pixelFormatResolver( _pixelFormat, Framebuffer::isHDRSupported() );
@@ -214,7 +246,7 @@ GLenum pixelFormatToGlInternalFormat( PixelFormat _pixelFormat ) {
 #endif
         case PIXEL_FORMAT_HDR_RG32:
 #if _WEBGL1
-            return GL_LUMINANCE;
+            return GL_LUMINANCE_ALPHA;
 #else
             return GL_RG32F;
 #endif
@@ -226,13 +258,13 @@ GLenum pixelFormatToGlInternalFormat( PixelFormat _pixelFormat ) {
 #endif
         case PIXEL_FORMAT_HDR_R16:
 #if _WEBGL1
-            return GL_LUMINANCE;
+            return GL_DEPTH_COMPONENT;
 #else
             return GL_R16F;
 #endif
         case PIXEL_FORMAT_HDR_R32:
 #if _WEBGL1
-            return GL_LUMINANCE;
+            return GL_DEPTH_COMPONENT;
 #else
             return GL_R32F;
 #endif
@@ -299,6 +331,11 @@ GLenum pixelFormatToGlFormat( PixelFormat pixelFormat ) {
 #endif
         case PIXEL_FORMAT_HDR_R32:
         case PIXEL_FORMAT_HDR_R16:
+#if _WEBGL1
+            return GL_DEPTH_COMPONENT;
+#else
+            return GL_RED;
+#endif
         case PIXEL_FORMAT_R:
 #if _WEBGL1
             return GL_LUMINANCE;
@@ -337,7 +374,13 @@ GLenum pixelFormatToGlType( PixelFormat pixelFormat ) {
         case PIXEL_FORMAT_HDR_RGBA_16:
         case PIXEL_FORMAT_HDR_RG_16:
         case PIXEL_FORMAT_HDR_R16:
+// ###WEBGL1###
+// Why GL_FLOAT is not supported even tought the extension OES_texture_float is supported???
+#ifdef _WEBGL1
+            return GL_UNSIGNED_INT;
+#else
             return GL_HALF_FLOAT;
+#endif
         case PIXEL_FORMAT_DEPTH_24:
         case PIXEL_FORMAT_DEPTH_32:
         case PIXEL_FORMAT_HDR_RGB_32:
@@ -802,6 +845,11 @@ std::string glEnumToString( GLenum value ) {
             return "GL_TEXTURE_CUBE_MAP_POSITIVE_Z";
         case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
             return "GL_TEXTURE_CUBE_MAP_NEGATIVE_Z";
+
+        case GL_DEPTH_ATTACHMENT:
+            return "GL_DEPTH_ATTACHMENT";
+        case GL_COLOR_ATTACHMENT0:
+            return "GL_COLOR_ATTACHMENT0";
 
         default:
             return "unknown";
