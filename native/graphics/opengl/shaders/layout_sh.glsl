@@ -29,5 +29,7 @@
        out vec3 v_shadowmap_coord3;
       //  out vec4 v_t8;
 
-       out vec3 Position_worldspace;
+      out vec3 Position_worldspace;
+      out vec3 tangentViewPos;
+      out vec3 tangentFragPos;
     

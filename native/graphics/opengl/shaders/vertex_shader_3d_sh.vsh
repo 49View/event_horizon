@@ -11,10 +11,13 @@ void main() {
        //	if (dot(cross(v_norm, v_tan), v_bitan) < 0.0) {
        //		v_tan *= -1.0;
        //	}
-    //    mat3 itbn;
-    //    itbn[0] = v_tan;
-    //    itbn[1] = v_bitan;
-    //    itbn[2] = v_norm;
-    //    itbn = transpose( itbn );
+       mat3 itbn;
+       itbn[0] = v_tan;
+       itbn[1] = v_bitan;
+       itbn[2] = v_norm;
+       itbn = transpose( itbn );
+
+      tangentViewPos  = itbn * u_eyePos;
+      tangentFragPos  = itbn * Position_worldspace;
 }
     

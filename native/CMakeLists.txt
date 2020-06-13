@@ -1206,10 +1206,6 @@ macro(set_cpp_flags)
 
     set(BUILD_SHARED_LIBS OFF)
 
-    if ( NOT EMSCRIPTEN )
-        set(_USE_IMGUI_ TRUE)
-    endif()
-
     add_definitions(-D_OPENGL)
     add_definitions(-DSIXTHVIEW)
     if (_PRODUCTION_)

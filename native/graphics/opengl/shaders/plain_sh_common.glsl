@@ -12,6 +12,8 @@ in vec3 v_tan;
 in vec3 v_bitan;
 in vec3 v_shadowmap_coord3;
 in vec3 Position_worldspace;
+in vec3 tangentViewPos;
+in vec3 tangentFragPos;
 // in vec4 v_t8;
 
 #include "lighting_uniforms.glsl"
@@ -90,7 +92,7 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
     // depth of current layer
     float currentLayerDepth = 0.0;
     // the amount to shift the texture coordinates per layer (from vector P)
-    vec2 P = viewDir.xy / viewDir.z * height_scale;
+    vec2 P = viewDir.xy / -viewDir.z * height_scale;
     vec2 deltaTexCoords = P / numLayers;
 
     // get initial values
@@ -226,6 +228,9 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
 
     Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
+    if ( opacityV < 1.0 ) {
+        Lo += rendering_equation( albedo, -L_Sun, V, N, F0, u_sunRadiance.xyz );
+    }
 
     // single point light 
     for ( int i = 0; i < u_numPointLights; i++ ) {
@@ -251,24 +256,32 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     float visibility = 1.0;//u_shadowParameters[2];
     vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
     // v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
-    float nlAngle = dot( N, normalize( u_sunPosition - Position_worldspace ));
+    vec3 VN = N;
+    if ( opacityV < 1.0 ) {
+        VN *= -1.0;
+    }
+    float nlAngle = dot( VN, normalize( u_sunPosition - Position_worldspace ));
     // float tanCosNAngle = tan(acos(nlAngle));
-    v_shadowmap_coord3Biases.z -= u_shadowParameters[0]*0.1;
+    v_shadowmap_coord3Biases.z -= u_shadowParameters[0];
     // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
     if ( v_shadowmap_coord3Biases.z > 0.0 ) {
         if ( nlAngle > 0.0) {
-            float overBurnedfactor = 0.2;// * u_shadowParameters[1];
-            for ( int i = 0; i < 4; i++ ) {
-                int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
-                float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + (poissonDisk[index] / 1024.0), v_shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
-                shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 : 0.0;
-                visibility -= shadow * 0.2;// * u_timeOfTheDay;
-            }
+            // float overBurnedfactor = 0.2;// * u_shadowParameters[1];
+            // for ( int i = 0; i < 1; i++ ) {
+            //     int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
+            //     float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + (poissonDisk[index] / 4096.0), v_shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
+            //     shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 : 0.0;
+            //     visibility -= shadow * 0.78;// * u_timeOfTheDay;
+            // }
+            float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy, v_shadowmap_coord3Biases.z ) );
+            shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 * 0.78 : 0.0;
+            visibility -=  shadow;
         } else {
-            visibility -= 0.8;
+            visibility -= 0.78;
         }
     }
+    // visibility = pow(visibility, 2.0);
     //clamp(visibility, 0.0, 1.0);
     // visibility = nlAngle;
 #end_code
@@ -297,7 +310,7 @@ vec3 R = reflect(-V, N);
 // vec3 prefilteredColor = textureLod(ibl_specularMap, R, 0.0 + (0.5 * MAX_REFLECTION_LOD)).rgb;
 vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness*MAX_REFLECTION_LOD).rgb;
 // vec3 prefilteredColor = texture(ibl_specularMap, R).rgb;
-vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
+vec2 brdf = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = u_sunRadiance.xyz;

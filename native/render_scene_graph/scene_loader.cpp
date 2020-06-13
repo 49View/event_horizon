@@ -66,11 +66,6 @@ ScenePreLoader::ScenePreLoader( SceneGraph& sg, RenderOrchestrator& _rsg ) : sgl
 
 void ScenePreLoader::activateFinalLoadInternal() {
     rsgl.RR().setLoadingFlag( false );
-
-    rsgl.RR().setShadowOverBurnCofficient( appData.getRenderSettings().shadowOverBurnCofficient );
-    rsgl.RR().setIndoorSceneCoeff(appData.getRenderSettings().indoorSceneCoeff);
-    rsgl.RR().setShadowZFightCofficient(appData.getRenderSettings().shadowZFightCofficient);
-
     activatePostLoad();
 }
 
