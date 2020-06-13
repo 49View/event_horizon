@@ -13,13 +13,14 @@
 #include "camera_uniforms.glsl"
 #include "animation_uniforms.glsl"
 
-in vec2 v_texCoord;
-in vec3 v_texT2;
-out vec4 FragColor;
+varying vec2 v_texCoord;
+varying vec3 v_texT2;
 uniform sampler2D colorFBTexture;
 uniform sampler2D bloomTexture;
 uniform sampler2D shadowMapTexture;
-uniform sampler3D lut3dTexture;
+// ###WEBGL1###
+// I think lut3d it's not possible in webGL1
+//uniform sampler3D lut3dTexture;
 uniform sampler2D depthMapTexture;
 uniform sampler2D ssaoMapTexture;
 uniform sampler2D uiTexture;
@@ -43,19 +44,22 @@ float grain() {
 }
 
 vec3 bloom( float amount ) {
-    return vec3(texture(bloomTexture, v_texCoord).r*amount);
+    return vec3(texture2D(bloomTexture, v_texCoord).r*amount);
 }
 
 vec3 ssao() {
-    return texture(ssaoMapTexture, v_texCoord).xyz;
+    return texture2D(ssaoMapTexture, v_texCoord).xyz;
 }
 
 vec3 lut3d( vec3 sceneColor ) {
-    return texture( lut3dTexture, sceneColor ).xyz;
+    // ###WEBGL1###
+    // I think lut3d it's not possible in webGL1
+//    return texture( lut3dTexture, sceneColor ).xyz;
+    return sceneColor;
 }
 
 vec3 cameraMotionBlur( vec3 sceneColor ) {
-    vec4 current = vec4(v_texT2 * texture(depthMapTexture, v_texCoord).r, 1.0);
+    vec4 current = vec4(v_texT2 * texture2D(depthMapTexture, v_texCoord).r, 1.0);
     current = u_inverseMvMatrix * current; 
     vec4 previous = u_prevMvpMatrix * vec4(current.xyz, 1.0);
     previous.xy /= -previous.w;
@@ -66,7 +70,7 @@ vec3 cameraMotionBlur( vec3 sceneColor ) {
     const int nSamples = 4;
     for (int i = 1; i < nSamples; ++i) {
         vec2 offset = blurVec * (float(i) / float(nSamples - 1) - 0.5);  
-        sceneColor.xyz += texture(colorFBTexture, v_texCoord + offset ).xyz;
+        sceneColor.xyz += texture2D(colorFBTexture, v_texCoord + offset ).xyz;
     }
  
     sceneColor.xyz /= float(nSamples);
@@ -77,9 +81,9 @@ vec3 cameraMotionBlur( vec3 sceneColor ) {
 
 void main() {
 
-    vec4 sceneColor = texture(colorFBTexture, v_texCoord);
+    vec4 sceneColor = texture2D(colorFBTexture, v_texCoord);
 
-    // sceneColor = texture(shadowMapTexture, v_texCoord).xxxx;
+    // sceneColor = texture2D(shadowMapTexture, v_texCoord).xxxx;
     // FragColor.rgb= sceneColor.rgb;
     // FragColor.a = 1.0;
     // return;
@@ -112,8 +116,8 @@ void main() {
     sceneColor.xyz *= grain();
     #endif
 
-    vec4 uiColor = texture(uiTexture, v_texCoord);
+    vec4 uiColor = texture2D(uiTexture, v_texCoord);
     sceneColor.rgb = mix(sceneColor.rgb, uiColor.rgb, uiColor.a);
 
-    FragColor = sceneColor;
+    gl_FragColor = sceneColor;
 }

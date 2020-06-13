@@ -130,7 +130,7 @@ float bdepth(vec2 coords) {
 
 
     for( int i=0; i<9; i++ ) {
-        float tmp = texture(depthMapTexture, coords + offset[i]).r;
+        float tmp = texture2D(depthMapTexture, coords + offset[i]).r;
         d += tmp * kernel[i];
     }
 
@@ -143,9 +143,9 @@ vec3 color(vec2 coords,float blur) {
 
     vec3 col = vec3(0.0);
 
-    col.r = texture(colorFBTexture,coords + vec2(0.0,1.0)*texel*fringe*blur).r;
-    col.g = texture(colorFBTexture,coords + vec2(-0.866,-0.5)*texel*fringe*blur).g;
-    col.b = texture(colorFBTexture,coords + vec2(0.866,-0.5)*texel*fringe*blur).b;
+    col.r = texture2D(colorFBTexture,coords + vec2(0.0,1.0)*texel*fringe*blur).r;
+    col.g = texture2D(colorFBTexture,coords + vec2(-0.866,-0.5)*texel*fringe*blur).g;
+    col.b = texture2D(colorFBTexture,coords + vec2(0.866,-0.5)*texel*fringe*blur).b;
 
     vec3 lumcoeff = vec3(0.299,0.587,0.114);
     float lum = dot(col.rgb, lumcoeff);
@@ -194,7 +194,7 @@ float gather(float i, float j, int ringsamples, inout vec3 col, float w, float h
 vec3 dof() {
     //scene depth calculation
 
-    float depth = linearize(texture(depthMapTexture,v_texCoord.xy).x);
+    float depth = linearize(texture2D(depthMapTexture,v_texCoord.xy).x);
 
     // Blur depth?
     if (depthblur) {
@@ -207,7 +207,7 @@ vec3 dof() {
 
     if (autofocus) {
 
-        fDepth = linearize(texture(depthMapTexture,focusCoords).x);
+        fDepth = linearize(texture2D(depthMapTexture,focusCoords).x);
 
     }
 
@@ -249,9 +249,9 @@ vec3 dof() {
 
     if(blur < 0.05) {
         //some optimization thingy
-        col = texture(colorFBTexture, v_texCoord.xy).rgb;
+        col = texture2D(colorFBTexture, v_texCoord.xy).rgb;
     } else {
-        col = texture(colorFBTexture, v_texCoord.xy).rgb;
+        col = texture2D(colorFBTexture, v_texCoord.xy).rgb;
         float s = 1.0;
         int ringsamples;
 

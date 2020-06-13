@@ -5,7 +5,7 @@ import sys, string, os, re
 CONVERSION_TYPES = ['2TG','GT1','GT2']
 EXTENSIONS = {'2TG':'.gen','GT1':'.wgl1','GT2':'.wgl2'}
 
-DICT_2TG = {'\\s*(layout\\s*\\(\\s*location\\s*=\\s*(\\d+)\\s*\\))':'%LOCATION#1#%','\\s*(in)\\s*':'%IN%','\\s*(out)\\s*':'%OUT%','\\s*(texture2d)\\s*':'%TEXTURE2D%'}
+DICT_2TG = {'\\s*(layout\\s*\\(\\s*location\\s+=\\s*(\\d+)\\s*\\))':'%LOCATION#1#%','\\s*(layout\\s*\\(\\s*std140\\s+\\))':'%LOCATION#1#%','\\s*(in)\\s+':'%IN%','\\s*(out)\\s+':'%OUT%','\\s*(texture2d)\\s+':'%TEXTURE2D%'}
 DICT_GT2 = {'\\s*(\\%LOCATION(\\d+)\\%)\\s*':'layout( location = #1# )','\\s*(\\%IN\\%)\\s*':'in','\\s*(\\%OUT\\%)\\s*':'out','\\s*(\\%TEXTURE2D\\%)\\s*':'texture2d'}
 DICT_GT1 = {'\\s*(\\%LOCATION(\\d+)\\%)\\s*':'','\\s*(\\%IN\\%)\\s*':'attribute','\\s*(\\%OUT\\%)\\s*':'varying','\\s*(\\%TEXTURE2D\\%)\\s*':'texture'}
 

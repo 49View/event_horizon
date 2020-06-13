@@ -1,6 +1,5 @@
 #version #opengl_version
-in vec3 v_texCoord;
-out vec4 color;
+varying vec3 v_texCoord;
 
 uniform sampler2D colorTexture;
 
@@ -18,7 +17,8 @@ vec2 SampleSphericalMap(vec3 v)
 void main()
 {
     vec2 uv = SampleSphericalMap(normalize(v_texCoord));
-    color = texture(colorTexture, uv);
-    color.xyz = vec3(1.0) - exp(-color.xyz * u_sunRadiance.xyz);
+    vec4 color = texture2D(colorTexture, uv);
+
+    gl_FragColor = vec4(vec3(1.0) - exp(-color.xyz * u_sunRadiance.xyz), 1.0);
 }
     

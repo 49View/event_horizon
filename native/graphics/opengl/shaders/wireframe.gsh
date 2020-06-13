@@ -3,11 +3,11 @@
 
 layout( triangles ) in;
 layout( triangle_strip, max_vertices = 3 ) out;
-out vec3 GNormal;
-out vec3 GPosition;
-noperspective out vec3 GEdgeDistance;
-in vec3 v_norm[];
-in vec3 Position_worldspace[];
+varying vec3 GNormal;
+varying vec3 GPosition;
+noperspective varying vec3 GEdgeDistance;
+attribute vec3 v_norm[];
+attribute vec3 Position_worldspace[];
 void main()
 {
  // Transform each vertex into viewport space

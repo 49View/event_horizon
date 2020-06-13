@@ -1,5 +1,5 @@
 #version #opengl_version
-       layout( location = 0 ) in vec3 a_position;
-       layout( location = 1 ) in vec2 a_t1;
-       out vec3 tpos;
+        attribute vec3 a_position;
+        attribute vec2 a_t1;
+       varying vec3 tpos;
     

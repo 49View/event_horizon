@@ -38,12 +38,12 @@ void main() {
    
    vec2 texCoords = v_texCoord;//ParallaxMapping(v_texCoord, V);
  
-   ao = texture( aoTexture, texCoords ).x * aoV; 
-   roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
-   metallic = (texture( metallicTexture, texCoords ).x * metallicV);
-   opacityV = texture( opacityTexture, texCoords ).x; // * 1.0 - 0.0 ) * opacity; 
-   translucencyV = 1.0 + (texture( translucencyTexture, texCoords ).x);
-   vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
+   ao = texture2D( aoTexture, texCoords ).x * aoV;
+   roughness = (texture2D( roughnessTexture, texCoords ).x * roughnessV);
+   metallic = (texture2D( metallicTexture, texCoords ).x * metallicV);
+   opacityV = texture2D( opacityTexture, texCoords ).x; // * 1.0 - 0.0 ) * opacity;
+   translucencyV = 1.0 + (texture2D( translucencyTexture, texCoords ).x);
+   vec3 albedo = texture2D( diffuseTexture, texCoords ).xyz * diffuseColor;
     albedo = pow(albedo, vec3(2.2/1.0));
     //albedo = pow(albedo, vec3(1.0/2.2));
 //    albedo *= diffuseColor;

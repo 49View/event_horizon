@@ -3,9 +3,9 @@
 #include "lighting_uniforms.glsl"
 #include "animation_uniforms.glsl"
 
-uniform float u_sunHDRMult; 
-in vec3 v_texCoord;
-out vec4 color;
+uniform float u_sunHDRMult;
+
+varying vec3 v_texCoord;
 
 #define PI 3.141592
 #define iSteps 16
@@ -118,14 +118,15 @@ vec3 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
 void main()
 {
     vec3 light_pos = normalize( u_sunDirection ).xyz;
+    vec4 color;
 
     color.xyz = atmosphere(
         normalize(v_texCoord),          // normalized ray direction
-        vec3(0,6373e3,0),               // ray origin
+        vec3(0,6373e3,0),               // ray origattribute
         light_pos,                      // position of the sun
         69.0,                           // intensity of the sun
-        6371e3,                         // radius of the planet in meters
-        6471e3,                         // radius of the atmosphere in meters
+        6371e3,                         // radius of the planet attribute meters
+        6471e3,                         // radius of the atmosphere attribute meters
         vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
         51e-6,                          // Mie scattering coefficient
         5e3,                            // Rayleigh scale height
@@ -136,7 +137,8 @@ void main()
     color.xyz += vec3(0.0);
     color = (vec4(1.0) - exp(-1.0 * color));
     color.w = 1.0;
-    
+
+    gl_FragColor = color;
     // color.rgb = v_texCoord * 0.5 + 0.5;
     // color = vec4(.8);
 }

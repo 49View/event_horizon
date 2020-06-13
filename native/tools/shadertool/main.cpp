@@ -19,7 +19,7 @@ using namespace std::filesystem;
 using namespace std::chrono_literals;
 
 const std::string cachedFileName = ".cachedShaderMap.txt";
-const std::string sVersionString = "3.0.0";
+const std::string sVersionString = "3.0.1";
 
 JSONDATA(FileCheck, filename, lastWriteTime, size, hash)
 
@@ -143,8 +143,8 @@ void calculateShaders() {
 
     shaderHeader << "};\n";
 
-    bool performCompilerOnly = true;
-    if ( shaderEmit.count() > 0 && sm.loadShaders( performCompilerOnly ) ) {
+//    bool performCompilerOnly = true;
+    if ( shaderEmit.count() > 0 ) {
         auto shaderEmitSerialized = shaderEmit.serialize();
         FM::writeLocalFile("../shader_emit.txt", shaderEmitSerialized);
         FM::writeLocalFile("../shaders.hpp", shaderHeader );

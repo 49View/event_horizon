@@ -2,8 +2,8 @@
 
 #include "color_uniforms.glsl"
 
-in vec3 tpos;
-out vec4 FragColor;
+attribute vec3 tpos;
+varying vec4 FragColor;
 
 void main()
 {
@@ -13,7 +13,7 @@ void main()
         // Gradients
         vec2 px = dFdx(p);
         vec2 py = dFdy(p);
-        // Chain rule
+        // Chaattribute rule
         float fx = ((2.0*p.x)*px.x - px.y);
         float fy = ((2.0*p.x)*py.x - py.y);
         // Signed distance

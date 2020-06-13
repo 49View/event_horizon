@@ -1,19 +1,16 @@
 #version #opengl_version
 #precision_high
-in vec3 v_texCoord;
-
-layout( location = 0 ) out vec4 FragColor;
-layout( location = 1 ) out vec4 BloomColor;
+varying vec3 v_texCoord;
 
 uniform samplerCube cubeMapTexture;
-uniform float delta;
+//uniform float delta;
 
 void main()
 {
-    // color.xyz = mix( texture(cubeMapTexture, v_texCoord ).xyz, vec3(1.0), delta);
-    FragColor.xyz = texture(cubeMapTexture, v_texCoord ).xyz;
-    FragColor.w = 1.0;
-    BloomColor = vec4(FragColor.xyz, 1.0);
+    // color.xyz = mix( texture2D(cubeMapTexture, v_texCoord ).xyz, vec3(1.0), delta);
+    gl_FragColor.xyz = textureCube(cubeMapTexture, v_texCoord ).xyz;
+    gl_FragColor.w = 1.0;
+//    BloomColor = vec4(FragColor.xyz, 1.0);
     // color = vec4( v_texCoord, 1.0);
 }
     

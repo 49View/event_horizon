@@ -1,7 +1,7 @@
 #version #opengl_version
 #include "animation_uniforms.glsl"
-in vec2 v_texCoord;
-out vec4 fragColor;
+attribute vec2 v_texCoord;
+varying vec4 fragColor;
 vec2 iResolution = vec2(640.0, 360.0);
 
 float N21(vec2 p) {

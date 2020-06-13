@@ -1,7 +1,7 @@
 #version #opengl_version
 
-in vec2 v_texCoord;
-out vec4 FragColor;
+attribute vec2 v_texCoord;
+varying vec4 FragColor;
 uniform sampler2D colorFBTexture;
 uniform sampler2D bloomTexture;
 uniform sampler2D shadowMapTexture;
@@ -13,7 +13,7 @@ float randt(vec2 co){
 
 // Volumetric clouds. It performs level of detail (LOD) for faster rendering
 
-float noise( in vec3 x )
+float noise( attribute vec3 x )
 {
     vec3 p = floor(x);
     vec3 f = fract(x);
@@ -35,7 +35,7 @@ float noise( in vec3 x )
 	return -1.0+2.0*mix( rg.x, rg.y, f.z );
 }
 
-float map5( in vec3 p )
+float map5( attribute vec3 p )
 {
 	vec3 q = p - vec3(0.0,0.1,1.0)*iTime;
 	float f;
@@ -47,7 +47,7 @@ float map5( in vec3 p )
 	return clamp( 1.5 - p.y - 2.0 + 1.75*f, 0.0, 1.0 );
 }
 
-float map4( in vec3 p )
+float map4( attribute vec3 p )
 {
 	vec3 q = p - vec3(0.0,0.1,1.0)*iTime;
 	float f;
@@ -57,7 +57,7 @@ float map4( in vec3 p )
     f += 0.06250*noise( q );
 	return clamp( 1.5 - p.y - 2.0 + 1.75*f, 0.0, 1.0 );
 }
-float map3( in vec3 p )
+float map3( attribute vec3 p )
 {
 	vec3 q = p - vec3(0.0,0.1,1.0)*iTime;
 	float f;
@@ -66,7 +66,7 @@ float map3( in vec3 p )
     f += 0.12500*noise( q );
 	return clamp( 1.5 - p.y - 2.0 + 1.75*f, 0.0, 1.0 );
 }
-float map2( in vec3 p )
+float map2( attribute vec3 p )
 {
 	vec3 q = p - vec3(0.0,0.1,1.0)*iTime;
 	float f;
@@ -77,10 +77,10 @@ float map2( in vec3 p )
 
 vec3 sundir = normalize( vec3(-1.0,0.0,-1.0) );
 
-vec4 integrate( in vec4 sum, in float dif, in float den, in vec3 bgcol, in float t )
+vec4 integrate( attribute vec4 sum, attribute float dif, attribute float den, attribute vec3 bgcol, attribute float t )
 {
     // lighting
-    vec3 lin = vec3(0.65,0.7,0.75)*1.4 + vec3(1.0, 0.6, 0.3)*dif;        
+    vec3 lattribute = vec3(0.65,0.7,0.75)*1.4 + vec3(1.0, 0.6, 0.3)*dif;        
     vec4 col = vec4( mix( vec3(1.0,0.95,0.8), vec3(0.25,0.3,0.35), den ), den );
     col.xyz *= lin;
     col.xyz = mix( col.xyz, bgcol, 1.0-exp(-0.003*t*t) );
@@ -92,7 +92,7 @@ vec4 integrate( in vec4 sum, in float dif, in float den, in vec3 bgcol, in float
 
 #define MARCH(STEPS,MAPLOD) for(int i=0; i<STEPS; i++) { vec3  pos = ro + t*rd; if( pos.y<-3.0 || pos.y>2.0 || sum.a > 0.99 ) break; float den = MAPLOD( pos ); if( den>0.01 ) { float dif =  clamp((den - MAPLOD(pos+0.3*sundir))/0.6, 0.0, 1.0 ); sum = integrate( sum, dif, den, bgcol, t ); } t += max(0.05,0.02*t); }
 
-vec4 raymarch( in vec3 ro, in vec3 rd, in vec3 bgcol, in ivec2 px )
+vec4 raymarch( attribute vec3 ro, attribute vec3 rd, attribute vec3 bgcol, attribute ivec2 px )
 {
 	vec4 sum = vec4(0.0);
 
@@ -106,7 +106,7 @@ vec4 raymarch( in vec3 ro, in vec3 rd, in vec3 bgcol, in ivec2 px )
     return clamp( sum, 0.0, 1.0 );
 }
 
-mat3 setCamera( in vec3 ro, in vec3 ta, float cr )
+mat3 setCamera( attribute vec3 ro, attribute vec3 ta, float cr )
 {
 	vec3 cw = normalize(ta-ro);
 	vec3 cp = vec3(sin(cr), cos(cr),0.0);
@@ -115,7 +115,7 @@ mat3 setCamera( in vec3 ro, in vec3 ta, float cr )
     return mat3( cu, cv, cw );
 }
 
-vec4 render( in vec3 ro, in vec3 rd, in ivec2 px )
+vec4 render( attribute vec3 ro, attribute vec3 rd, attribute ivec2 px )
 {
     // background sky     
 	float sun = clamp( dot(sundir,rd), 0.0, 1.0 );

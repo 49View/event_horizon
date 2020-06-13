@@ -52,7 +52,7 @@ namespace WindowHandling {
             emscripten_force_exit( EXIT_FAILURE );
         }
 
-        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 2 );
         glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 0 );
         glfwWindowHint(GLFW_FOCUSED, 1);
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);

@@ -1,6 +1,6 @@
 #version #opengl_version
-out vec4 FragColor;
-in vec3 v_texCoord;
+varying vec4 FragColor;
+attribute vec3 v_texCoord;
 
 uniform samplerCube cubeMapTexture;
 uniform float roughnessV;

@@ -1,13 +1,11 @@
 
-layout( std140 ) uniform CameraUniforms{
-    mat4 u_mvpMatrix;
-    mat4 u_viewMatrix;
-    mat4 u_projMatrix;
-    mat4 u_screenSpaceMatrix;
-    vec3 u_eyePos;
-    vec3 u_eyeDir;
-    vec4 u_nearFar;
-    mat4 u_inverseMvMatrix;
-    mat4 u_prevMvpMatrix;
-};
-    
+
+uniform mat4 u_mvpMatrix;
+uniform mat4 u_viewMatrix;
+uniform mat4 u_projMatrix;
+uniform mat4 u_screenSpaceMatrix;
+uniform vec3 u_eyePos;
+uniform vec3 u_eyeDir;
+uniform vec4 u_nearFar;
+uniform mat4 u_inverseMvMatrix;
+uniform mat4 u_prevMvpMatrix;

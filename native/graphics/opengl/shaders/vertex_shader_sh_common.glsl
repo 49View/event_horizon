@@ -16,7 +16,7 @@ mat3 shVertexData() {
    modelMatrix3x3[1] = normalize( modelMatrix3x3[1] );
    modelMatrix3x3[2] = normalize( modelMatrix3x3[2] );
 
-   // Position of the vertex, in worldspace : M * position
+   // Position of the vertex, attribute worldspace : M * position
    Position_worldspace = ( u_modelMatrix * pos4 ).xyz;
 
    // Shadowmap

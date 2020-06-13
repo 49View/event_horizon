@@ -1,18 +1,15 @@
 #version #opengl_version
 #precision_high
 
-layout( location = 0 ) out vec4 FragColor;
-layout( location = 1 ) out vec4 FragAttach1;
-
-in vec2 v_texCoord;
-in vec2 v_texCoord2;
-// in vec3 v_color;
-in vec3 v_norm;
-in vec3 v_tan;
-in vec3 v_bitan;
-in vec3 v_shadowmap_coord3;
-in vec3 Position_worldspace;
-// in vec4 v_t8;
+//varying vec4 FragColor;
+//varying vec4 FragAttach1;
+varying vec2 v_texCoord;
+varying vec2 v_texCoord2;
+varying vec3 v_norm;
+varying vec3 v_tan;
+varying vec3 v_bitan;
+varying vec3 v_shadowmap_coord3;
+varying vec3 Position_worldspace;
 
 #include "lighting_uniforms.glsl"
 #include "camera_uniforms.glsl"
@@ -20,7 +17,7 @@ in vec3 Position_worldspace;
 
 uniform sampler2D diffuseTexture;         // 0 glTextureSlot
 uniform sampler2D normalTexture;          // 1 glTextureSlot
-uniform sampler2DShadow shadowMapTexture; // 2 glTextureSlot
+uniform sampler2D shadowMapTexture; // 2 glTextureSlot
 uniform sampler2D aoTexture;              // 6 glTextureSlot
 uniform sampler2D roughnessTexture;
 uniform sampler2D metallicTexture;        // 8 glTextureSlot
@@ -60,76 +57,79 @@ float random(vec4 seed4){
     // return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
-vec2 poissonDisk[16] = vec2[](
-    vec2( -0.94201624, -0.39906216 ),
-    vec2( 0.94558609, -0.76890725 ),
-    vec2( -0.094184101, -0.92938870 ),
-    vec2( 0.34495938, 0.29387760 ),
-    vec2( -0.294184101, -0.232938870 ),
-    vec2( 0.394184101, 0.892938870 ),
-    vec2( -0.794184101, -0.93938870 ),
-    vec2( 0.494184101, 0.45938870 ),
-    vec2( -0.694184101, -0.71938870 ),
-    vec2( 0.594184101, 0.15938870 ),
-    vec2( -0.294184101, -0.732938870 ),
-    vec2( 0.194184101, 0.02938870 ),    
-    vec2( -0.714184101, -0.55938870 ),
-    vec2( -0.214184101, 0.39938870 ),
-    vec2( -0.644184101, 0.89938870 ),
-    vec2( 0.34495938, -0.29387760 )
-    );
+// ###WEBGL1###
+// reinitialise poisson
+vec2 poissonDisk[16];
+//= vec2[](
+//    vec2( -0.94201624, -0.39906216 ),
+//    vec2( 0.94558609, -0.76890725 ),
+//    vec2( -0.094184101, -0.92938870 ),
+//    vec2( 0.34495938, 0.29387760 ),
+//    vec2( -0.294184101, -0.232938870 ),
+//    vec2( 0.394184101, 0.892938870 ),
+//    vec2( -0.794184101, -0.93938870 ),
+//    vec2( 0.494184101, 0.45938870 ),
+//    vec2( -0.694184101, -0.71938870 ),
+//    vec2( 0.594184101, 0.15938870 ),
+//    vec2( -0.294184101, -0.732938870 ),
+//    vec2( 0.194184101, 0.02938870 ),
+//    vec2( -0.714184101, -0.55938870 ),
+//    vec2( -0.214184101, 0.39938870 ),
+//    vec2( -0.644184101, 0.89938870 ),
+//    vec2( 0.34495938, -0.29387760 )
+//    );
 
-vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
-{
-    // number of depth layers
-    const float minLayers = 8.0;
-    const float maxLayers = 32.0;
-    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));
-    // calculate the size of each layer
-    float layerDepth = 1.0 / numLayers;
-    // depth of current layer
-    float currentLayerDepth = 0.0;
-    // the amount to shift the texture coordinates per layer (from vector P)
-    vec2 P = viewDir.xy / viewDir.z * height_scale;
-    vec2 deltaTexCoords = P / numLayers;
-
-    // get initial values
-    vec2  currentTexCoords     = texCoords;
-    float currentDepthMapValue = texture(heightTexture, currentTexCoords).r;
-
-    while(currentLayerDepth < currentDepthMapValue)
-    {
-        // shift texture coordinates along direction of P
-        currentTexCoords -= deltaTexCoords;
-        // get depthmap value at current texture coordinates
-        currentDepthMapValue = texture(heightTexture, currentTexCoords).r;
-        // get depth of next layer
-        currentLayerDepth += layerDepth;
-    }
-
-    // get texture coordinates before collision (reverse operations)
-    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
-
-    // get depth after and before collision for linear interpolation
-    float afterDepth  = currentDepthMapValue - currentLayerDepth;
-    float beforeDepth = texture(heightTexture, prevTexCoords).r - currentLayerDepth + layerDepth;
-
-    // interpolation of texture coordinates
-    float weight = afterDepth / (afterDepth - beforeDepth);
-    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
-
-    return finalTexCoords;
-}
+//vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+//{
+//    // number of depth layers
+//    const float minLayers = 8.0;
+//    const float maxLayers = 32.0;
+//    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));
+//    // calculate the size of each layer
+//    float layerDepth = 1.0 / numLayers;
+//    // depth of current layer
+//    float currentLayerDepth = 0.0;
+//    // the amount to shift the texture coordinates per layer (from vector P)
+//    vec2 P = viewDir.xy / viewDir.z * height_scale;
+//    vec2 deltaTexCoords = P / numLayers;
+//
+//    // get initial values
+//    vec2  currentTexCoords     = texCoords;
+//    float currentDepthMapValue = texture2D(heightTexture, currentTexCoords).r;
+//
+//    while(currentLayerDepth < currentDepthMapValue)
+//    {
+//        // shift texture coordinates along direction of P
+//        currentTexCoords -= deltaTexCoords;
+//        // get depthmap value at current texture coordinates
+//        currentDepthMapValue = texture2D(heightTexture, currentTexCoords).r;
+//        // get depth of next layer
+//        currentLayerDepth += layerDepth;
+//    }
+//
+//    // get texture coordinates before collision (reverse operations)
+//    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+//
+//    // get depth after and before collision for linear interpolation
+//    float afterDepth  = currentDepthMapValue - currentLayerDepth;
+//    float beforeDepth = texture2D(heightTexture, prevTexCoords).r - currentLayerDepth + layerDepth;
+//
+//    // interpolation of texture coordinates
+//    float weight = afterDepth / (afterDepth - beforeDepth);
+//    vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+//
+//    return finalTexCoords;
+//}
 
 // ----------------------------------------------------------------------------
 // Easy trick to get tangent-normals to world-space to keep PBR code simplified.
 // Don't worry if you don't get what's going on; you generally want to do normal
 // mapping the usual way for performance anways; I do plan make a note of this
-// technique somewhere later in the normal mapping tutorial.
+// technique somewhere later attribute the normal mapping tutorial.
 vec3 getNormalFromMap( vec2 texCoords )
 {
     // return v_norm;
-    vec3 tangentNormal = texture(normalTexture, texCoords).xyz * 2.0 - 1.0;
+    vec3 tangentNormal = texture2D(normalTexture, texCoords).xyz * 2.0 - 1.0;
 
     vec3 Q1  = dFdx(Position_worldspace);
     vec3 Q2  = dFdy(Position_worldspace);
@@ -144,7 +144,7 @@ vec3 getNormalFromMap( vec2 texCoords )
 
     return normalize(TBN * tangentNormal);
 
-    // vec3 tangentNormal = texture(normalTexture, texCoords).xyz * 2.0 - 1.0;
+    // vec3 tangentNormal = texture2D(normalTexture, texCoords).xyz * 2.0 - 1.0;
     // mat3 TBN = mat3(v_tan, v_bitan, v_norm);
     // return normalize(TBN * tangentNormal);
 }
@@ -227,8 +227,10 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
 
-    // single point light 
-    for ( int i = 0; i < u_numPointLights; i++ ) {
+    // single point light
+    // ###WEBGL1###
+    // reinstate numPointLights
+    for ( int i = 0; i < 2; i++ ) {
         // vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;
         vec3 plmfrag = vec3(u_pointLightPos[i]) - Position_worldspace;
         float pldistance = length( plmfrag );
@@ -249,26 +251,26 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     // u_shadowParameters[1] == shadowOverBurn coefficient 
 #define_code shadow_code
     float visibility = 1.0;//u_shadowParameters[2];
-    vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
-    // v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
-    float nlAngle = dot( N, normalize( u_sunPosition - Position_worldspace ));
-    // float tanCosNAngle = tan(acos(nlAngle));
-    v_shadowmap_coord3Biases.z -= u_shadowParameters[0]*0.1;
-    // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
-
-    if ( v_shadowmap_coord3Biases.z > 0.0 ) {
-        if ( nlAngle > 0.0) {
-            float overBurnedfactor = 0.2;// * u_shadowParameters[1];
-            for ( int i = 0; i < 4; i++ ) {
-                int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
-                float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + (poissonDisk[index] / 1024.0), v_shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
-                shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 : 0.0;
-                visibility -= shadow * 0.2;// * u_timeOfTheDay;
-            }
-        } else {
-            visibility -= 0.8;
-        }
-    }
+//    vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
+//    // v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
+//    float nlAngle = dot( N, normalize( u_sunPosition - Position_worldspace ));
+//    // float tanCosNAngle = tan(acos(nlAngle));
+//    v_shadowmap_coord3Biases.z -= u_shadowParameters[0]*0.1;
+//    // visibility += texture2D( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
+//
+//    if ( v_shadowmap_coord3Biases.z > 0.0 ) {
+//        if ( nlAngle > 0.0) {
+//            float overBurnedfactor = 0.2;// * u_shadowParameters[1];
+//            for ( int i = 0; i < 4; i++ ) {
+//                int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;
+//                float shadow = texture2D( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + (poissonDisk[index] / 1024.0), v_shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
+//                shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 : 0.0;
+//                visibility -= shadow * 0.2;// * u_timeOfTheDay;
+//            }
+//        } else {
+//            visibility -= 0.8;
+//        }
+//    }
     //clamp(visibility, 0.0, 1.0);
     // visibility = nlAngle;
 #end_code
@@ -282,8 +284,8 @@ vec3 kS = F;
 vec3 kD = 1.0 - kS;
 kD *= 1.0 - metallic;
 
-vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
-vec3 aoLightmapColor = texture(lightmapTexture, v_texCoord2).rrr;
+vec3 irradiance = textureCube(ibl_irradianceMap, N).rgb;
+vec3 aoLightmapColor = texture2D(lightmapTexture, v_texCoord2).rrr;
 
 vec3 specular = vec3(0.0);
 
@@ -295,9 +297,9 @@ const float MAX_REFLECTION_LOD = 4.0;
 vec3 R = reflect(-V, N);
 
 // vec3 prefilteredColor = textureLod(ibl_specularMap, R, 0.0 + (0.5 * MAX_REFLECTION_LOD)).rgb;
-vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness*MAX_REFLECTION_LOD).rgb;
-// vec3 prefilteredColor = texture(ibl_specularMap, R).rgb;
-vec2 brdf  = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
+vec3 prefilteredColor = textureCubeLodEXT(ibl_specularMap, R, roughness*MAX_REFLECTION_LOD).rgb;
+// vec3 prefilteredColor = texture2D(ibl_specularMap, R).rgb;
+vec2 brdf  = texture2D(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
 specular = prefilteredColor * (F * brdf.x + brdf.y);
 // specular = pow(specular, vec3(2.2/1.0)); 
 // vec3 ambient = u_sunRadiance.xyz;
@@ -308,17 +310,17 @@ vec3 diffuseV = Lo*Lo;// * aoLightmapColor;
 vec3 ambient = kD * diffuseV * ao;// * visibility;
 #endif
 
-vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
+vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture2D(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
 float fogZ = length(u_eyePos-Position_worldspace);
 float fog = 1.0-(smoothstep(10.,90.,fogZ)*1.0);
 
 finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
 
 float preMultAlpha = opacityV * alpha * fog;
-FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
+gl_FragColor = vec4( finalColor * preMultAlpha, preMultAlpha );
 
-vec3 bloom = finalColor * (translucencyV*(visibility-1.0));
-FragAttach1 = vec4( bloom, 1.0 );//vec4(gl_FragCoord.z);
+//vec3 bloom = finalColor * (translucencyV*(visibility-1.0));
+//FragAttach1 = vec4( bloom, 1.0 );//vec4(gl_FragCoord.z);
 //	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
 // BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );
 //        BloomColor = vec4( finalColor*2, 1.0 );
