@@ -28,7 +28,7 @@ float ssao() {
     float occlusion = 0.0;
     float pRangeClamped = clamp(0.0, 1.0, pointZ);
     float uRadius = u_ssaoParameters[0]*pRangeClamped; // 10.0 default;
-    float uRadius100 = uRadius*0.01;
+    float uRadius100 = uRadius*0.015;
     int numSamples = int(u_ssaoParameters[1]); // u_hemisphereSampleKernelSize
     for (int i = 0; i < numSamples; ++i) {
         // get sample position:
