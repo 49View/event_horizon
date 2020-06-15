@@ -166,7 +166,6 @@ public: // these are globals data accessed from low level functions on inputs et
     [[nodiscard]] bool UseCaptureOnMove() const;
     void UseCaptureOnMove( bool _bUseCaptureOnMove );
 private:
-    void setWheelScrollcallbackOnce();
     void mouseButtonUpdatePositions( int _touchIndex, double xpos, double ypos );
     void mouseButtonEventsUpdate( int _touchIndex, UpdateSignals& _updateSignals );
     void getCursorPos( double& xpos, double& ypos );

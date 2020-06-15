@@ -40,25 +40,6 @@ void GMouseButtonCallback( [[maybe_unused]] GLFWwindow* window, int button, int 
     MouseInput::GMouseButtonData.button[button].mods = mods;
 }
 
-void MouseInput::setWheelScrollcallbackOnce() {
-    static bool firstTimer = true;
-    if ( firstTimer ) {
-        glfwSetScrollCallback(WH::window, GscrollCallback);
-        glfwSetMouseButtonCallback(WH::window, GMouseButtonCallback);
-    }
-}
-
-//int MouseInput::getMouseButtonState( int _touchIndex ) {
-//    switch ( _touchIndex ) {
-//        case 0:
-//            return glfwGetMouseButton(WH::window, GLFW_MOUSE_BUTTON_LEFT);
-//        case 1:
-//            return glfwGetMouseButton(WH::window, GLFW_MOUSE_BUTTON_RIGHT);
-//        default:
-//            return MB_RELEASE;
-//    }
-//}
-
 void MouseInput::getCursorPos( double& xpos, double& ypos ) {
     glfwGetCursorPos( WH::window, &xpos, &ypos );
 }

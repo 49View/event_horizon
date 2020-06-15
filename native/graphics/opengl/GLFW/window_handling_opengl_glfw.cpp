@@ -149,14 +149,14 @@ namespace WindowHandling {
     void enableInputCallbacks() {
         bUseGLFWPoll = true;
 #ifdef _USE_IMGUI_
-        ImGui_ImplGlfw_InstallCallbacks( window );
+//        ImGui_ImplGlfw_InstallCallbacks( window );
 #endif
     }
 
     void disableInputCallbacks() {
         bUseGLFWPoll = false;
 #ifdef _USE_IMGUI_
-        ImGui_ImplGlfw_DisableCallbacks( window );
+//        ImGui_ImplGlfw_DisableCallbacks( window );
 #endif
     }
 

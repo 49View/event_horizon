@@ -583,8 +583,8 @@ Vector3f Camera::centerScreenOn( const Vector2f& area, const float bMiddleIsCent
 }
 
 Vector3f Camera::center( const Rect2f& area, float slack ) {
-    float mainSize = ( area.ratio() > mViewPort.ratio() ) ? ( area.width() * 0.5f ) / mViewPort.ratio()
-                                                          : area.height() *0.5f;
+    float mainSize = ( area.ratio() > mViewPort.ratio() ) ? ( (area.width()+slack) * 0.5f ) / mViewPort.ratio()
+                                                          : (area.height()+slack) *0.5f;
     Vector2f center = area.centre();
     float aperture = ( tanf(degToRad(FoV() * 0.5f)) );
     float z = mainSize * aperture * 2.0f;

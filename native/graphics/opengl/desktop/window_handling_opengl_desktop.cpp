@@ -2,6 +2,7 @@
 
 #include <core/util.h>
 #include <graphics/opengl/GLFW/window_handling_opengl_glfw.hpp>
+#include <graphics/opengl/GLFW/mouse_input_glfw.hpp>
 #include <graphics/framebuffer.h>
 #include "imgui.h"
 #include "../imgui_impl_opengl3.h"
@@ -74,6 +75,9 @@ namespace WindowHandling {
         // Get info on default framebuffer:
         gatherMainScreenInfo();
 //        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+        glfwSetScrollCallback(window, GscrollCallback);
+        glfwSetMouseButtonCallback(window, GMouseButtonCallback);
 
         initImGUI();
     }

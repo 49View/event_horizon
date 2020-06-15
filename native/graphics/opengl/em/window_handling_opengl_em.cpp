@@ -89,6 +89,9 @@ namespace WindowHandling {
 
         Framebuffer::checkHDRSupport();
 
+        glfwSetScrollCallback(window, GscrollCallback);
+        glfwSetMouseButtonCallback(window, GMouseButtonCallback);
+
         initImGUI();
 
         rr.setForcedFrameBufferSize( getScreenSizei );
