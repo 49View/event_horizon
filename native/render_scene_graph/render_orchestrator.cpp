@@ -1024,5 +1024,12 @@ bool RenderOrchestrator::getMICursorCapture() const {
     return bMICursorCapture;
 }
 
+unsigned int RenderOrchestrator::TH( CResourceRef _value ) {
+    if ( auto texture = RR().TD(_value); texture ) {
+        return texture->getHandle();
+    }
+    return 0;
+}
+
 
 

@@ -126,6 +126,7 @@ public:
     SceneGraph& SG();
     UIView& UI();
     UICallbackMap& UICB();
+    unsigned int TH( CResourceRef _value ); // direct access to texture handle, it's a very common pattern for GUIs so let's do it
 protected:
     void uiViewUpdate( AggregatedInputData& _aid );
     void updateCallbacks();
