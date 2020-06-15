@@ -6,7 +6,7 @@
 
 #include <core/serialization.hpp>
 
-JSONDATA(EntityMetaData, group, source, name, project, isPublic, isRestricted, contentType, hash, userId, thumb, tags)
+JSONDATA(EntityMetaData, group, source, name, project, isPublic, isRestricted, contentType, hash, userId, thumb, color, tags)
     std::string group;
     std::string source;
     std::string name;
@@ -17,6 +17,7 @@ JSONDATA(EntityMetaData, group, source, name, project, isPublic, isRestricted, c
     std::string hash;
     std::string userId;
     std::string thumb;
+    C4f color = C4f::WHITE;
     std::vector<std::string> tags;
 };
 

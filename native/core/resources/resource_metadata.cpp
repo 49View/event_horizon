@@ -12,7 +12,6 @@ void ResourceMetaData::getListOf( const std::string& entityGroup, const std::str
 		document.Parse<rapidjson::kParseStopWhenDoneFlag>( params.bufferString.c_str() );
 		MegaReader reader( document );
 		reader.deserialize(el);
-
 		ccf(el);
     });
 }
