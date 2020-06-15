@@ -6,10 +6,11 @@
 
 #include <core/serialization.hpp>
 
-JSONDATA(EntityMetaData, group, source, name, project, isPublic, isRestricted, contentType, hash, userId, thumb, color, tags)
+JSONDATA(EntityMetaData, group, source, name, brand, project, isPublic, isRestricted, contentType, hash, userId, thumb, color, tags)
     std::string group;
     std::string source;
     std::string name;
+    std::string brand;
     std::string project;
     bool isPublic;
     bool isRestricted;
