@@ -7,11 +7,13 @@
 
 void ResourceMetaData::getListOf( const std::string& entityGroup, const std::string& tags, const ResourceMetadataListCallback& ccf ) {
     Http::get(Url{ "/entities/list/" + entityGroup + "/" + tags }, [ccf]( HttpResponeParams params ) {
-        std::vector<EntityMetaData> el;
-        rapidjson::Document document;
-		document.Parse<rapidjson::kParseStopWhenDoneFlag>( params.bufferString.c_str() );
-		MegaReader reader( document );
-		reader.deserialize(el);
+        std::vector<EntityMetaData> el{};
+        if ( !params.bufferString.empty() ) {
+            rapidjson::Document document;
+            document.Parse<rapidjson::kParseStopWhenDoneFlag>( params.bufferString.c_str() );
+            MegaReader reader( document );
+            reader.deserialize(el);
+        }
 		ccf(el);
     });
 }
