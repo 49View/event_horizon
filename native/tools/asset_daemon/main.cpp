@@ -127,6 +127,9 @@ struct DaemonFileStruct2 {
     std::string filePath() {
         return fileRoot + "entities/" + entity.group + "/";
     }
+    std::string uploadFilePath() {
+        return fileRoot + "uploads/" + entity.group + "/";
+    }
 };
 
 class DaemonException : public std::exception {
@@ -462,14 +465,14 @@ getGeomElaborateCommand( DaemonFileStruct2 &dfs, const std::string &filenameglb,
 
     if ( ftype == ".fbx" ) {
         return
-                "cd " + dfs.fileRoot + getFileNamePath( dfs.entity.source ) +
+                "cd " + dfs.uploadFilePath() +
                 " && FBX2glTF -b --pbr-metallic-roughness -o '" + filenameglb +
                 "' '" +
                 getFileName( dfs.entity.source ) + "'";
     }
     if ( ftype == ".obj" ) {
         return
-                "cd " + dfs.fileRoot + getFileNamePath( dfs.entity.source ) + " && obj2glTF -i '" +
+                "cd " + dfs.uploadFilePath() + " && obj2glTF -i '" +
                 getFileName( dfs.entity.source ) + "'  -o '" + filenameglb + "'";
     }
 
@@ -492,7 +495,14 @@ elaborateGeomFile( DaemonFileStruct2 &dfs, const SerializableContainer &filedata
 SerializableContainer elaborateGeom( DaemonFileStruct2 &dfs, const SerializableContainer &filedata ) {
 
     auto fext = getFileNameExtToLower( dfs.entity.source );
-    if ( fext == ".fbx" || fext == ".obj" ) {
+    if ( fext == ".zip" ) {
+        ArchiveDirectory ad{ dfs.entity.source };
+        auto filePath = dfs.fileRoot + getFileNamePath( dfs.entity.source );
+        unzipFilesToTempFolder( dfs.fileRoot + dfs.entity.source, ad, filePath );
+        auto candidates = ad.findFilesWithExtension( getExtForGroup( dfs.entity.group ));
+        dfs.candidates = filterCandidates( candidates, dfs.entity.group );
+        return {};
+    } else if ( fext == ".fbx" || fext == ".obj" ) {
         return elaborateGeomFile( dfs, filedata, fext );
     }
     // ".glb" || ".gltf"
@@ -512,8 +522,7 @@ SerializableContainer elaborateMaterial( DaemonFileStruct2& dfs, const Serializa
         // Right so if it comes from a zip file it's the provider decision to have their exact size
         // so in this case we'll set sensibleRescaleSize to -1 to tell the elaboration not to touch it
         sensibleRescaleSize = -1;
-    }
-    if ( getFileNameExtToLower( std::string( dfs.entity.source )) == ".sbsar" ) {
+    } else if ( getFileNameExtToLower( std::string( dfs.entity.source )) == ".sbsar" ) {
         int nominalSize = 512;
         sensibleRescaleSize = -1;
         ad = elaborateMatSBSAR( nominalSize, dfs );
@@ -566,7 +575,18 @@ void findCandidatesScreenshotForThumbnail( DaemonFileStruct &dfs, const ArchiveD
 void elaborateAsset( DaemonFileStruct2 &dfs, const std::string &assetName, const SerializableContainer &filedata ) {
     dfs.entity.source = assetName;
     if ( dfs.entity.group == ResourceGroup::Geom ) {
-        elaboratePassThrough( dfs, elaborateGeom( dfs, filedata ));
+        auto candidate = elaborateGeom( dfs, filedata );
+        if ( !candidate.empty() ) {
+            elaboratePassThrough( dfs, candidate );
+        } else {
+            if ( !dfs.candidates.empty() ) {
+                for ( const auto& candidateFile : dfs.candidates ) {
+                    dfs.entity.source = candidateFile.name;
+                    dfs.entity.name = candidateFile.name;
+                    elaboratePassThrough( dfs, elaborateGeom( dfs, FM::readLocalFileC( dfs.uploadFilePath() + candidateFile.name ) ));
+                }
+            }
+        }
     } else if ( dfs.entity.group == ResourceGroup::Material ) {
         elaboratePassThrough( dfs, elaborateMaterial( dfs, filedata ));
     } else {
