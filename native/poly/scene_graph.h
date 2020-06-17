@@ -12,7 +12,6 @@
 #include <variant>
 
 #include <core/file_manager.h>
-#include <core/http/webclient.h>
 #include <core/uuid.hpp>
 #include <core/geom.hpp>
 #include <core/resources/material.h>
@@ -20,6 +19,7 @@
 #include <core/resources/light.hpp>
 #include <core/resources/resource_utils.hpp>
 #include <core/resources/resource_manager.hpp>
+#include <core/http/webclient_types.hpp>
 #include <poly/poly.hpp>
 #include <poly/node_graph.hpp>
 #include <poly/vdata_assembler.h>

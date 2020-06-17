@@ -11,45 +11,11 @@
 #include <core/htypes_shared.hpp>
 #include <core/string_util.h>
 #include "login.hpp"
+#include "webclient_types.hpp"
 
 
 bool isSuccessStatusCode( int statusCode );
 
-namespace HttpFilePrefix {
-    const static std::string user = "/user";
-    const static std::string gettoken = "/getToken";
-    const static std::string refreshtoken = "/refreshToken";
-    const static std::string entities = "/entities/";
-    const static std::string entities_all = "/entities/metadata/byGroupTags/";
-    const static std::string entities_onebinary = "/entities/content/byGroupTags/";
-    const static std::string get = "/fs/";
-    const static std::string fileupload = "/fs/";
-    const static std::string catalog = "/catalog/";
-    const static std::string getname = "/name/";
-    const static std::string getnotexactname = "/get/notexact/name/";
-    const static std::string broadcast = "/broadcast/";
-};
-
-namespace HttpContentType {
-    const static std::string octetStream = "application/octet-stream";
-    const static std::string json = "application/json";
-    const static std::string text = "application/text";
-}
-
-enum class HttpQuery {
-    Binary,
-    JSON,
-    Text
-};
-
-struct Url;
-
-using SocketCallbackDataType = rapidjson::Document;
-using SocketCallbackDataTypeConstRef = const SocketCallbackDataType&;
-using SocketCallbackFunc = std::function<void( const std::string& msg,  SocketCallbackDataType&& message )>;
-using LoginCallback = std::function<void()>;
-using HttpResouceCBSign = const std::string&;
-using HttpResouceCB = std::function<void(HttpResouceCBSign)>;
 //using HttpResouceCB = std::function<void(const std::string&)>;
 
 namespace Socket {
@@ -94,11 +60,12 @@ JSONDATA( UserLogin, expires, user, project, session )
     std::string     session;
 };
 
-JSONDATA( LoginToken, session, token, expires, project )
+JSONDATA( LoginToken, session, token, expires, project, antiForgeryToken )
     std::string session;
     std::string token;
     uint64_t expires;
     std::string project;
+    std::string antiForgeryToken;
 };
 
 JSONDATA( RefreshToken, session, token, expires )
@@ -234,6 +201,8 @@ namespace Http {
 
     void project( const std::string& _project );
     std::string project();
+    std::string AFT();
+    void aft( const std::string& _aft );
     [[nodiscard]] bool useClientCertificate();
     bool useClientCertificate(  bool bUse, const std::string& _certKey, const std::string& _certCrt );
     [[nodiscard]] bool useServerCertificate();

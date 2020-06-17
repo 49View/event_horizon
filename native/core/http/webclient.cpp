@@ -15,6 +15,7 @@ static bool sUseServerCertificate = false;
 static std::string sClientCertificateCrtFilename{};
 static std::string sClientCertificateKeyFilename{};
 static std::string sProject;
+static std::string sAFT;
 static std::string sUserToken;
 static std::string sUserSessionId;
 static std::string sCloudHost;
@@ -256,6 +257,10 @@ namespace Http {
         sProject = _project;
     }
 
+    void aft( const std::string& _aft ) {
+        sAFT = _aft;
+    }
+
     bool useClientCertificate( bool bUse, const std::string& _certKey, const std::string& _certCrt ) {
         sUseClientCertificate = bUse;
         if ( sUseClientCertificate ) {
@@ -303,6 +308,10 @@ namespace Http {
 
     std::string project() {
         return sProject;
+    }
+
+    std::string AFT() {
+        return sAFT;
     }
 
     void cacheLoginFields( const LoginFields& _lf ) {
@@ -434,7 +443,7 @@ namespace Http {
                 UserLogin ul{ std::string{ (char *) res.buffer.get(), static_cast<unsigned long>(res.length) } };
                 sessionId( ul.session );
                 project( ul.project );
-                Socket::createConnection();
+//                Socket::createConnection();
                 userLoggedIn( true );
             }, [](HttpResponeParams res) {
                 LOGRS( "[HTTP-RETRY] login ");
@@ -449,8 +458,9 @@ namespace Http {
                 userToken( lt.token );
                 sessionId( lt.session );
                 project( lt.project );
+                aft( lt.antiForgeryToken );
                 Http::cacheLoginFields( lf );
-                Socket::createConnection();
+//                Socket::createConnection();
                 userLoggedIn( true );
                 if (loginCallback) loginCallback();
         } );

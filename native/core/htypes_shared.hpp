@@ -330,6 +330,8 @@ enum class HttpUrlEncode {
 namespace Http { struct Result; }
 using HttpResponeParams = const Http::Result&;
 using ResponseCallbackFunc = std::function<void(HttpResponeParams)>;
+using HttpResouceCBSign = const std::string&;
+using HttpResouceCB = std::function<void(HttpResouceCBSign)>;
 
 // Dependencies
 

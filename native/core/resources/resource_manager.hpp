@@ -161,10 +161,10 @@ public:
         return false;
     }
 
-    void publish( std::shared_ptr<T> elem, const std::string& _name ) {
-        auto fname = _name.empty() ? S::makeImaginary() : _name;
-        Http::post( Url{ HttpFilePrefix::entities + RV::Prefix() + "/" + fname}, elem->serialize() );
-    }
+//    void publish( std::shared_ptr<T> elem, const std::string& _name ) {
+//        auto fname = _name.empty() ? S::makeImaginary() : _name;
+//        Http::post( Url{ HttpFilePrefix::entities + RV::Prefix() + "/" + fname}, elem->serialize() );
+//    }
 
 protected:
     void add( std::shared_ptr<T> _elem, const std::string& _name,

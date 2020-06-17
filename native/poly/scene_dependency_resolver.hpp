@@ -7,7 +7,6 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <core/http/webclient.h>
 #include <core/app_data.hpp>
 
 class SceneGraph;
