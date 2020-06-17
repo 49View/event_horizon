@@ -1,9 +1,8 @@
-#include "../../window_handling.hpp"
 #include <iostream>
-#include "../../platform_graphics.hpp"
-
-#include "../gl_util.h"
 #include <core/util.h>
+
+#include "../../window_handling.hpp"
+#include <graphics/opengl/GLFW/mouse_input_glfw.hpp>
 
 namespace WindowHandling {
 
