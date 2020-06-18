@@ -10,7 +10,8 @@ namespace Http {
 
     std::shared_ptr<restbed::Request> makeRequestBase( const Url& url ) {
         auto request = std::make_shared<restbed::Request>( restbed::Uri(url.toString()));
-        request->set_header( "User-Agent", "Restbed-native" );
+//        request->set_header( "User-Agent", "Restbed-native" );
+        request->set_header( "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36" );
         request->set_header( "Accept", "*/*" );
         request->set_header( "Host", url.hostOnly() );
         request->set_header( "Connection", "keep-alive" );
