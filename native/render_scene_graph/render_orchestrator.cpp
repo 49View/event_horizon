@@ -1031,5 +1031,9 @@ unsigned int RenderOrchestrator::TH( CResourceRef _value ) {
     return 0;
 }
 
+std::vector<std::string>& RenderOrchestrator::CallbackPaths() {
+    return callbackPaths;
+}
+
 
 

@@ -45,9 +45,9 @@ std::string getFileNameCallbackKey( const std::string& input ) {
     return url_decode(getFileNameKey( input, EncodingStatusFlag::NotEncode));
 }
 
-std::string getFileNameExt( const std::string& input ) {
+std::string getFileNameExt( const std::string& input, bool noDot ) {
     std::string ret = "";
-    size_t pos = input.find_last_of( "." );
+    size_t pos = input.find_last_of( "." ) + (noDot ? 1 : 0);
     if ( pos != std::string::npos ) {
         ret = input.substr( pos, input.length() - pos );
     }

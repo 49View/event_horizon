@@ -153,6 +153,7 @@ private:
 
 public:
     static std::vector<std::string> callbackPaths;
+    static std::vector<std::string>& CallbackPaths();
     static std::vector<PresenterUpdateCallbackFunc> sUpdateCallbacks;
 };
 
