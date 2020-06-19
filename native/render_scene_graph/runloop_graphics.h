@@ -11,9 +11,9 @@
 #include <core/runloop_core.h>
 #include <core/http/webclient.h>
 #include <core/di.hpp>
+#include <core/cli_param_map.hpp>
 #include <core/resources/resource_manager.hpp>
 #include <core/state_machine_helper.hpp>
-#include <core/command.hpp>
 #include <graphics/window_handling.hpp>
 #include <core/math/anim.h>
 #include <poly/scene_graph.h>
@@ -66,9 +66,9 @@ InitializeWindowFlagsT checkLayoutArgvs( const CLIParamMap& params );
 class RunLoopGraphics : public RunLoop {
 public:
     using RunLoop::RunLoop;
-	RunLoopGraphics( CommandQueue& _cq, Renderer& rr, TextInput& ti,
+	RunLoopGraphics( Renderer& rr, TextInput& ti,
 	                 MouseInput& mi, SceneGraph& _sg, RenderOrchestrator& _rsg )
-                     : RunLoop( _cq ), rr( rr ), ti( ti), mi( mi), sg(_sg), rsg(_rsg) {}
+                     : RunLoop(), rr( rr ), ti( ti), mi( mi), sg(_sg), rsg(_rsg) {}
 
     void setBackEnd( std::unique_ptr<RunLoopBackEndBase>&& _be ) {
         rlbackEnd = std::move(_be);
@@ -110,11 +110,6 @@ public:
         Http::shutDown();
     }
 
-
-    void addScriptLine( const std::string& _cmd ) {
-        cq.script( _cmd );
-    }
-
     Renderer& RR() { return rr; }
     TextInput& TI() { return ti; }
 	MouseInput& MI() { return mi; }
@@ -124,7 +119,6 @@ protected:
         updateTime();
         mUpdateSignals.NeedsUpdate(false);
         Timeline::update();
-        cq.execute();
         WH::pollEvents();
         mi.update( mUpdateSignals );
         auto aid = aggregateInputs();

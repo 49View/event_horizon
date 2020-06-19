@@ -1,7 +1,6 @@
 #pragma once
 
 #include <core/di.hpp>
-#include <core/command.hpp>
 #include <core/streaming_mediator.hpp>
 #include <core/resources/light.hpp>
 #include <graphics/renderer.h>

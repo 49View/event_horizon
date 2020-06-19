@@ -12,7 +12,6 @@
 #include "core/callback_dependency.h"
 #include "core/observable.h"
 #include "core/file_manager.h"
-#include "core/command.hpp"
 #include "render_scene_graph/di_modules.h"
 
 struct OsmArea;

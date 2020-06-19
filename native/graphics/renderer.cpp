@@ -1,7 +1,6 @@
 #include "renderer.h"
 
 #include <core/math/spherical_harmonics.h>
-#include <core/command.hpp>
 #include <core/raw_image.h>
 #include <core/game_time.h>
 #include <core/configuration/app_options.h>
@@ -12,6 +11,7 @@
 #include <core/tar_util.h>
 #include <core/profiler.h>
 #include <core/v_data.hpp>
+#include <core/util.h>
 #include <core/resources/material.h>
 #include <core/streaming_mediator.hpp>
 #include <core/lightmap_exchange_format.h>

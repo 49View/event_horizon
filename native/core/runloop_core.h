@@ -11,8 +11,6 @@
 #include <cstdint>
 #include <functional>
 
-class CommandQueue;
-
 enum class RunLoopThreading {
     Sync,
     ASynch
@@ -20,7 +18,7 @@ enum class RunLoopThreading {
 
 class RunLoop {
 public:
-    explicit RunLoop( CommandQueue& _cq ) : cq( _cq ) {}
+    RunLoop() = default;
 	virtual ~RunLoop() = default;
 
     void coreLoop();
@@ -29,14 +27,11 @@ public:
 	virtual void runConsolePrompt();
     virtual void runSingleThread() {}
 
-    CommandQueue& CQ();
-
 protected:
 	void updateTime();
 
 protected:
 	bool mbExitTriggered = false;
-	CommandQueue& cq;
 };
 
 void updateTime();

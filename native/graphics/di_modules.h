@@ -1,7 +1,6 @@
 #pragma once
 
 #include <core/di.hpp>
-#include <core/command.hpp>
 #include <core/streaming_mediator.hpp>
 #include <graphics/renderer.h>
 #include <graphics/text_input.hpp>

@@ -10,7 +10,6 @@
 
 class Renderer;
 class RenderMaterial;
-class CommandQueue;
 class ShaderManager;
 class RenderLightManager;
 class RenderOrchestrator;

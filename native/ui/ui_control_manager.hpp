@@ -6,7 +6,6 @@
 #pragma once
 
 #include "core/kvfmapping.h"
-#include "core/command.hpp"
 #include "core/htypes_shared.hpp"
 #include "../di_modules.h"
 #include "../text_input.hpp"
