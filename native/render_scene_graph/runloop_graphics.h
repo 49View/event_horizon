@@ -120,9 +120,9 @@ protected:
         mUpdateSignals.NeedsUpdate(false);
         Timeline::update();
         WH::pollEvents();
+        WH::preUpdate();
         mi.update( mUpdateSignals );
         auto aid = aggregateInputs();
-        WH::preUpdate();
         rlbackEnd->update( aid, mi );
     }
 
@@ -134,6 +134,7 @@ protected:
     }
 
     AggregatedInputData aggregateInputs() {
+	    ti.setEnabled(WH::isKeyboardInputActive());
         return AggregatedInputData{ ti, mi.getScrollValue(), mi.Status() };
     }
 

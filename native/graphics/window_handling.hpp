@@ -22,7 +22,9 @@ namespace WindowHandling {
 	void enableVSync( bool val );
 	void enableInputCallbacks();
 	void disableInputCallbacks();
-	bool isInputEnabled();
+    bool isMouseInputActive();
+    bool isKeyboardInputActive();
+    bool isInputEnabled();
     void enableMouseCursor( bool flag );
     Vector2i captureWindowSize();
     void imRenderLoopStats( const RenderStats& rs );
