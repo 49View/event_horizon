@@ -83,7 +83,13 @@ public:
 
     std::shared_ptr<R> make( const SerializableContainer& _data, const ResourceRef& _hash = {}, const ResourceRef& _key = {} ) {
         auto ret = prepAndCheck(_data, _hash );
-        if ( ret ) return ret;
+        if ( ret ) {
+            // If the element already exists just add the potential new _key to the mapping dictionary, to cover the
+            // cases when adding keys from http queries that different from hash and keys already present in the
+            // dictionary. 
+            sg.template M<R>().addKey( _key, this->Hash() );
+            return ret;
+        }
         return add<R>(_data, this->Name(), this->Hash(), _key, AddResourcePolicy::Immediate);
     }
 

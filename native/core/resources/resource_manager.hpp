@@ -110,6 +110,10 @@ public:
         return nullptr;
     }
 
+    void addKey( const std::string& _key, const std::string& _hash ) {
+        resourcesMapper[_key] = _hash;
+    }
+
     std::vector<std::string> getNames( const std::string& _key ) {
         std::vector<std::string> ret{};
         for ( const auto& [k,v] : resourcesMapper ) {
