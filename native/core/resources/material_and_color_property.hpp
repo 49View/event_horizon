@@ -19,5 +19,10 @@ JSONDATA(MaterialAndColorProperty, materialName, materialHash, colorName, colorH
     std::string colorName{};
     std::string colorHash{};
     C4f color{ C4f::WHITE };
+
+    bool operator<( const MaterialAndColorProperty& a) const {
+        return materialHash+color.toString() < a.materialHash+a.color.toString();
+    }
+
 };
 
