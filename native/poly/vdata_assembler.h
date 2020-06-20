@@ -234,6 +234,11 @@ public:
             dataTypeHolder.quads = _param;
             return *this;
         }
+        if constexpr ( std::is_same<M, QuadVector3fNormal>::value ) {
+            static_assert( std::is_same<SGT, GT::Mesh>::value );
+            dataTypeHolder.quads.emplace_back(_param);
+            return *this;
+        }
 
         if constexpr ( std::is_same_v<M, tinygltf::Model*> ) {
             static_assert( std::is_same_v<SGT, GT::GLTF2> );
