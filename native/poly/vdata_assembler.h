@@ -12,6 +12,7 @@
 #include <core/math/matrix_anim.h>
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/resource_types.hpp>
+#include <core/resources/material_and_color_property.hpp>
 #include <poly/poly_services.hpp>
 #include <poly/poly.hpp>
 
@@ -42,6 +43,11 @@ public:
 
         if constexpr ( std::is_same_v<M, GT::M> ) {
             matRef = _param();
+            return *this;
+        }
+        if constexpr ( std::is_same_v<M, MaterialAndColorProperty> ) {
+            matRef = _param.materialHash;
+            matColor = _param.color;
             return *this;
         }
         if constexpr ( std::is_same_v<M, GT::A> ) {

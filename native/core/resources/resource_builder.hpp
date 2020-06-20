@@ -86,7 +86,7 @@ public:
         if ( ret ) {
             // If the element already exists just add the potential new _key to the mapping dictionary, to cover the
             // cases when adding keys from http queries that different from hash and keys already present in the
-            // dictionary. 
+            // dictionary.
             sg.template M<R>().addKey( _key, this->Hash() );
             return ret;
         }
