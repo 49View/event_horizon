@@ -190,17 +190,17 @@ namespace MappingServices {
         float lm2 = JMATH::distance( vs[2], vs[3] );
 
         if ( m.direction == MappingDirection::X_POS ) {
-            vtcs[0] = m.wrapMappingCoords[mi];
-            vtcs[1] = Vector2f( m.wrapMappingCoords[mi].x() + lm1, m.wrapMappingCoords[mi].y());
-            vtcs[2] = m.wrapMappingCoords[mi + 1];
-            vtcs[3] = Vector2f( m.wrapMappingCoords[mi + 1].x() + lm2, m.wrapMappingCoords[mi + 1].y());
+            vtcs[0] = (m.wrapMappingCoords[mi]) * m.fuvScale;
+            vtcs[1] = (Vector2f( m.wrapMappingCoords[mi].x() + lm1, m.wrapMappingCoords[mi].y())) * m.fuvScale;
+            vtcs[2] = (m.wrapMappingCoords[mi + 1]) * m.fuvScale;
+            vtcs[3] = (Vector2f( m.wrapMappingCoords[mi + 1].x() + lm2, m.wrapMappingCoords[mi + 1].y())) * m.fuvScale;
             m.wrapMappingCoords[mi][0] += lm1;
             if ( mi + 1 == size ) m.wrapMappingCoords[mi + 1][0] += lm2;
         } else {
-            vtcs[0] = m.wrapMappingCoords[mi];
-            vtcs[1] = Vector2f( m.wrapMappingCoords[mi].x(), m.wrapMappingCoords[mi].y() + lm1 );
-            vtcs[2] = m.wrapMappingCoords[mi + 1];
-            vtcs[3] = Vector2f( m.wrapMappingCoords[mi + 1].x(), m.wrapMappingCoords[mi + 1].y() + lm2 );
+            vtcs[0] = (m.wrapMappingCoords[mi] ) * m.fuvScale;
+            vtcs[1] = (Vector2f( m.wrapMappingCoords[mi].x(), m.wrapMappingCoords[mi].y() + lm1 ) ) * m.fuvScale;
+            vtcs[2] = (m.wrapMappingCoords[mi + 1] ) * m.fuvScale;
+            vtcs[3] = (Vector2f( m.wrapMappingCoords[mi + 1].x(), m.wrapMappingCoords[mi + 1].y() + lm2 ) ) * m.fuvScale;
 
             m.wrapMappingCoords[mi][1] += lm1;
             if ( mi + 1 == size ) m.wrapMappingCoords[mi + 1][1] += lm2;
@@ -213,10 +213,10 @@ namespace MappingServices {
         float lm2 = JMATH::distance( vs[0], vs[1] );
 
         // this maps MappingDirection::X_POS
-        vtcs[0] = Vector2f( m.pullMappingCoords.x(), m.pullMappingCoords.y());
-        vtcs[1] = Vector2f( m.pullMappingCoords.x() + lm2, m.pullMappingCoords.y());
-        vtcs[2] = Vector2f( m.pullMappingCoords.x(), m.pullMappingCoords.y() + lm1 );
-        vtcs[3] = Vector2f( m.pullMappingCoords.x() + lm2, m.pullMappingCoords.y() + lm1 );
+        vtcs[0] = V2f( m.pullMappingCoords.x(), m.pullMappingCoords.y()) * m.fuvScale;
+        vtcs[1] = V2f( m.pullMappingCoords.x() + lm2, m.pullMappingCoords.y()) * m.fuvScale;
+        vtcs[2] = V2f( m.pullMappingCoords.x(), m.pullMappingCoords.y() + lm1 ) * m.fuvScale;
+        vtcs[3] = V2f( m.pullMappingCoords.x() + lm2, m.pullMappingCoords.y() + lm1 ) * m.fuvScale;
 
         if ( m.direction == MappingDirection::Y_POS ) {
             for ( uint64_t t = 0; t < 4; t++ ) vtcs[t].swizzle( 0, 1 );
@@ -230,7 +230,7 @@ namespace MappingServices {
 
         for ( int t = 0; t < numVerts; t++ ) {
             Vector2f tm = vs[t].pairMapped( pairMapping );
-            vtcs[t] = tm + m.offset;
+            vtcs[t] = (tm + m.offset)*m.fuvScale;
         }
 
         if ( m.direction == MappingDirection::X_POS ) {

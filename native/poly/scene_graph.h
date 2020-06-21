@@ -391,9 +391,9 @@ public:
         VDataAssembler<T> gb{std::forward<Args>(args)...};
         GeomSP elem;
         if constexpr ( !std::is_same_v<T, GT::Asset> ) {
-            auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
+            auto [matRef, matPtr] = GBMatInternal(gb.matRef, gb.matColor );
 
-            if ( VDataServices::prepare( *this, gb.dataTypeHolder ) ) {
+            if ( VDataServices::prepare( *this, gb.dataTypeHolder, matPtr ) ) {
                 auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
                 auto vdataRef = VL().getHash( hashRefName );
                 if ( vdataRef.empty() ) {
@@ -417,7 +417,7 @@ public:
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
                 elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
                 if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
-                    auto matRef     = GBMatInternal(gb.matRef, gb.matColor );
+                    auto [matRef, matPtr] = GBMatInternal(gb.matRef, gb.matColor );
                     elem->foreach( [&matRef](GeomSP _geom) {
                         if ( !_geom->empty() ) {
                             _geom->DataRef().material = matRef;
@@ -501,7 +501,7 @@ protected:
     void realTimeCallbacks();
     void loadCallbacks();
 
-    ResourceRef GBMatInternal( CResourceRef _matref, const C4f& _color );
+    std::tuple<ResourceRef, Material*> GBMatInternal( CResourceRef _matref, const C4f& _color );
     void materialsForGeomSocketMessage();
     void replaceMaterialOnNodes( const std::string& _key );
 

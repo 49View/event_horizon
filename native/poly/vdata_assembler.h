@@ -277,39 +277,39 @@ public:
 
 namespace VDataServices {
 
-    bool prepare( SceneGraph& sg, GT::Shape& _d );
+    bool prepare( SceneGraph& sg, GT::Shape& _d, Material* matPtr );
     void buildInternal( const GT::Shape& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Shape& _d );
 
-    bool prepare( SceneGraph& sg, GT::Poly& _d );
+    bool prepare( SceneGraph& sg, GT::Poly& _d, Material* matPtr );
     void buildInternal( const GT::Poly& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Poly& _d );
 
-    bool prepare( SceneGraph& sg, GT::Extrude& _d );
+    bool prepare( SceneGraph& sg, GT::Extrude& _d, Material* matPtr );
     void buildInternal( const GT::Extrude& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Extrude& _d );
 
-    bool prepare( SceneGraph& sg, GT::Text& _d );
+    bool prepare( SceneGraph& sg, GT::Text& _d, Material* matPtr );
     void buildInternal( const GT::Text& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Text& _d );
 
-    bool prepare( SceneGraph& sg, GT::Mesh& _d );
+    bool prepare( SceneGraph& sg, GT::Mesh& _d, Material* matPtr );
     void buildInternal( const GT::Mesh& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Mesh& _d );
 
-    bool prepare( SceneGraph& sg, GT::ClothMesh& _d );
+    bool prepare( SceneGraph& sg, GT::ClothMesh& _d, Material* matPtr );
     void buildInternal( const GT::ClothMesh& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::ClothMesh& _d );
 
-    bool prepare( SceneGraph& sg, GT::Follower& _d );
+    bool prepare( SceneGraph& sg, GT::Follower& _d, Material* matPtr );
     void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Follower& _d );
 
-    bool prepare( SceneGraph& sg, GT::GLTF2& _d );
+    bool prepare( SceneGraph& sg, GT::GLTF2& _d, Material* matPtr );
     void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::GLTF2& _d );
 
-    bool prepare( SceneGraph& sg, GT::Asset& _d );
+    bool prepare( SceneGraph& sg, GT::Asset& _d, Material* matPtr );
     void buildInternal( const GT::Asset& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Asset& _d );
 

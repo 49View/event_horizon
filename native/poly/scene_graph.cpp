@@ -560,18 +560,19 @@ void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _
     if ( _ccf ) _ccf(_key);
 }
 
-ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {
-    auto matRef = ML().getHash(_matref);
-    if ( matRef.empty()) {
-        matRef = ML().getHash(S::WHITE_PBR);
+std::tuple<ResourceRef, Material*> SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {
+    auto matRef = ML().getHashAndPointer(_matref);
+    if ( std::get<0>(matRef).empty()) {
+        matRef = ML().getHashAndPointer(S::WHITE_PBR);
     }
     if ( _color != C4f::WHITE ) {
-        matRef = ML().getHash(_matref + _color.toString());
-        if ( matRef.empty()) {
+        matRef = ML().getHashAndPointer(_matref + _color.toString());
+        if ( std::get<0>(matRef).empty()) {
             Material matCopy = EF::copy(ML().get(_matref));
             matCopy.setDiffuseColor(_color.xyz());
             matCopy.setOpacity(_color.w());
-            matRef = B<MB>(_matref + _color.toString()).addIM(matCopy);
+            auto mRef = B<MB>(_matref + _color.toString()).addIM(matCopy);
+            matRef = ML().getHashAndPointer(mRef);
         }
     }
     return matRef;

@@ -102,6 +102,13 @@ public:
         return {};
     }
 
+    std::tuple<ResourceRef, T*> getHashAndPointer( const std::string& _key ) {
+        if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
+            return std::make_tuple(res->second, resources[res->second].get());
+        }
+        return std::make_tuple(std::string{}, nullptr);
+    }
+
     std::shared_ptr<T> get( const std::string& _key ) {
         if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
             return resources[res->second];

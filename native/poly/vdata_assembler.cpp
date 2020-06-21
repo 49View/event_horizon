@@ -24,7 +24,7 @@ namespace VDataServices {
 
 // ___ SHAPE BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::Shape& _d ) {
+    bool prepare( SceneGraph& sg, GT::Shape& _d, Material* matPtr ) {
         return true;
     }
 
@@ -67,7 +67,8 @@ namespace VDataServices {
 
 // ___ POLY BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::Poly& _d ) {
+    bool prepare( SceneGraph& sg, GT::Poly& _d, Material* matPtr ) {
+        _d.mappingData.fuvScale *= matPtr->getTexelRatio();
         if ( _d.mappingData.bDoNotScaleMapping ) MappingServices::doNotScaleMapping( _d.mappingData );
         if ( _d.polyLines.empty()) {
             Vector3f ln = _d.forcingNormalPoly;
@@ -119,8 +120,9 @@ namespace VDataServices {
 
     // ___ EXTRUDER BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::Extrude& _d ) {
+    bool prepare( SceneGraph& sg, GT::Extrude& _d, Material* matPtr ) {
         bool hasData = false;
+        _d.mappingData.fuvScale *= matPtr->getTexelRatio();
         if ( !_d.extrusionVerts.empty() ) {
             for ( const auto& po : _d.extrusionVerts ) {
                 hasData |= !po.verts.empty();
@@ -203,7 +205,8 @@ namespace VDataServices {
 
     // ___ QUAD MESH BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::Mesh& _d ) {
+    bool prepare( SceneGraph& sg, GT::Mesh& _d, Material* matPtr ) {
+        _d.mappingData.fuvScale *= matPtr->getTexelRatio();
         return !_d.quads.empty();
     }
 
@@ -227,7 +230,8 @@ namespace VDataServices {
 
     // ___ CLOTH MESH BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::ClothMesh& _d ) {
+    bool prepare( SceneGraph& sg, GT::ClothMesh& _d, Material* matPtr ) {
+        _d.mappingData.fuvScale *= matPtr->getTexelRatio();
         return true;
     }
 
@@ -279,7 +283,8 @@ namespace VDataServices {
 
 // ___ FOLLOWER BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::Follower& _d ) {
+    bool prepare( SceneGraph& sg, GT::Follower& _d, Material* matPtr ) {
+        _d.mappingData.fuvScale *= matPtr->getTexelRatio();
         if ( _d.profilePath.empty() && !_d.profilePath2d.empty() ) {
             for (auto &v: _d.profilePath2d) _d.profilePath.emplace_back( Vector3f{v, _d.z} );
         }
@@ -334,7 +339,7 @@ namespace VDataServices {
 
     // ___ GLTF2 BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::GLTF2& _d ) {
+    bool prepare( SceneGraph& sg, GT::GLTF2& _d, Material* matPtr ) {
         return true;
     }
 
@@ -350,7 +355,7 @@ namespace VDataServices {
 
     // ___ ASSET BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::Asset& _d ) {
+    bool prepare( SceneGraph& sg, GT::Asset& _d, Material* matPtr ) {
         return true;
     }
 

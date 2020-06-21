@@ -133,3 +133,11 @@ ResourceRef Material::getTranslucencyTexture() const {
     auto ret = values->get<std::string>( UniformNames::translucencyTexture );
     return ret ? *ret : "";
 }
+
+float Material::getTexelRatio() const {
+    return texelRatio;
+}
+
+void Material::setTexelRatio( float _value ) {
+    texelRatio = _value;
+}

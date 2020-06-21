@@ -22,7 +22,7 @@ public:
 
 class Material : public Keyable<> {
 public:
-    JSONSERIAL( Material, mKey, values );
+    JSONSERIAL( Material, mKey, texelRatio, values );
     explicit Material( const std::string& _type );
     explicit Material( const std::string& _type, const std::string& _key );
     explicit Material( std::shared_ptr<HeterogeneousMap> _values );
@@ -38,6 +38,7 @@ public:
     void setOpacity( float _opacityValue );
     [[nodiscard]] V3f getDiffuseColor() const;
     void setDiffuseColor( const V3f& _value );
+    void setTexelRatio( float _value );
 
     [[nodiscard]] ResourceRef getTexture( const std::string& _tt ) const;
     [[nodiscard]] ResourceRef getDiffuseTexture() const;
@@ -48,6 +49,7 @@ public:
     [[nodiscard]] ResourceRef getHeightTexture() const;
     [[nodiscard]] ResourceRef getOpacityTexture() const;
     [[nodiscard]] ResourceRef getTranslucencyTexture() const;
+    [[nodiscard]] float getTexelRatio() const;
 
     //    bool isStreammable() const;
     [[nodiscard]] float translucency() const;
@@ -59,5 +61,6 @@ public:
 private:
     void makeValues(  const std::string& _type );
 protected:
+    float texelRatio = 1.0f;
     std::shared_ptr<HeterogeneousMap> values;
 };
