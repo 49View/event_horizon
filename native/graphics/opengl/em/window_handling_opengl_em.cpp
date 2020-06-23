@@ -1,5 +1,6 @@
 #include <iostream>
 #include <core/util.h>
+#include <core/version.hpp>
 
 #include "../../window_handling.hpp"
 #include <graphics/opengl/GLFW/mouse_input_glfw.hpp>
@@ -33,13 +34,14 @@ namespace WindowHandling {
 
     void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
 
+        LOGRS("EH version " << ehVersion() )
+
         Vector2i windowSize = captureWindowSize();
         AppGlobals::getInstance().setScreenSizei(windowSize);
 
 //        emscripten_set_canvas_element_size( nullptr, int(width), int(height));
-        LOGRS("GetWidnowSize " << windowSize);
-
         LOGR("--- Initialising Graphics ---");
+        LOGRS("GetWidnowSize " << windowSize);
 
         glfwSetErrorCallback(output_error);
 
