@@ -460,21 +460,21 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     bool bAddProbe = mSkybox && mSkybox->precalc( 0.0f );
     setDirtyCumulative( S::PBR, cameraRig->getCamera()->isDirty() || bAddProbe );
 
-//    setDirty( S::PBR, true);
+    setDirty( S::PBR, true);
     if ( bAddProbe ) {
         addProbes();
     } else {
         if ( isDirty(S::PBR) ) {
             addShadowMaps();
 
-            if( useSSAO() || useDOF() || useMotionBlur() ) {
+            if ( useSSAO() || useDOF() || useMotionBlur() ) {
                 renderDepthMap();
             }
             renderSSAO();
-
+        }
             cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
             cb.pushCommand( { CommandBufferCommandName::colorBufferBindAndClear } );
-
+        if ( isDirty(S::PBR) ) {
             if ( mbEnableSkybox && mSkybox ) {
                 mSkybox->render();
             }
@@ -495,38 +495,38 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                     rr.addToCommandBuffer( vl.mVListTransparent, cameraRig.get());
                 }
             }
-
-            cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-#ifdef USE_UIBLITBUFFER
-            cb.pushCommand( { CommandBufferCommandName::uiBufferBindAndClear } );
-#endif
-            cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
-            cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
-            cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
-
-            for ( const auto&[k, vl] : rr.CL()) {
-                if ( inRange( k,
-                              { CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd } ) &&
-                     !hiddenCB(k)) {
-                    rr.addToCommandBuffer( k );
-                }
-            }
-            for ( const auto& [k, vl] : rr.CL() ) {
-                if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
-                    rr.addToCommandBuffer( k );
-                }
-            }
-            for ( const auto& [k, vl] : rr.CL() ) {
-                if ( inRange( k, { CommandBufferLimits::GridStart, CommandBufferLimits::GridEnd} ) && !hiddenCB(k) ) {
-                    rr.addToCommandBuffer( k );
-                }
-            }
-#ifdef USE_UIBLITBUFFER
-            cb.pushCommand( { CommandBufferCommandName::resolveUI } );
-#endif
-
-            cb.pushCommand( { CommandBufferCommandName::resolvePBR } );
         }
+
+        cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+#ifdef USE_UIBLITBUFFER
+        cb.pushCommand( { CommandBufferCommandName::uiBufferBindAndClear } );
+#endif
+        cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
+        cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
+        cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+
+        for ( const auto&[k, vl] : rr.CL()) {
+            if ( inRange( k,
+                          { CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd } ) &&
+                 !hiddenCB(k)) {
+                rr.addToCommandBuffer( k );
+            }
+        }
+        for ( const auto& [k, vl] : rr.CL() ) {
+            if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
+                rr.addToCommandBuffer( k );
+            }
+        }
+        for ( const auto& [k, vl] : rr.CL() ) {
+            if ( inRange( k, { CommandBufferLimits::GridStart, CommandBufferLimits::GridEnd} ) && !hiddenCB(k) ) {
+                rr.addToCommandBuffer( k );
+            }
+        }
+#ifdef USE_UIBLITBUFFER
+        cb.pushCommand( { CommandBufferCommandName::resolveUI } );
+#endif
+
+        cb.pushCommand( { CommandBufferCommandName::resolvePBR } );
 
         blit( cb );
 
