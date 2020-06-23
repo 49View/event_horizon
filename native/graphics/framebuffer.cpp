@@ -7,16 +7,6 @@
 #include <graphics/vertex_processing.h>
 #include <graphics/vp_builder.hpp>
 
-static int gMultiSampleCount = 4;
-
-void setMultiSampleCount( int count ) {
-    gMultiSampleCount = count;
-}
-
-int getMultiSampleCount() {
-    return gMultiSampleCount;
-}
-
 std::shared_ptr<Framebuffer> FrameBufferBuilder::buildSimple() {
     auto ret = ServiceFactory::create<Framebuffer>();
     ret->mName = mName;

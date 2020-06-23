@@ -222,5 +222,4 @@ namespace WindowHandling {
         ImGui::End();
 #endif
     }
-
 }

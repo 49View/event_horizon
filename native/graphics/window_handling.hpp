@@ -28,6 +28,8 @@ namespace WindowHandling {
     void enableMouseCursor( bool flag );
     Vector2i captureWindowSize();
     void imRenderLoopStats( const RenderStats& rs );
+    void setMultiSampleCount(int count);
+    int  getMultiSampleCount();
 };
 
 namespace WH = WindowHandling;

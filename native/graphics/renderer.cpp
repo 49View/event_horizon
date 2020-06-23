@@ -147,7 +147,6 @@ void Renderer::init() {
     rmm = std::make_shared<RenderMaterialManager>( *this );
     mCommandBuffers = std::make_shared<CommandBufferList>( *this );
 
-    setMultiSampleCount(1);
 //    auto bSupportsHDR = Framebuffer::checkHDRSupport();
 //    LOGRS( "Is HDR Framebuffer supported: " << bSupportsHDR );
     resetDefaultFB(mForcedFrameBufferSize);

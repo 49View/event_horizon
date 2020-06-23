@@ -417,8 +417,9 @@ public:
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
                 elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
                 if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
-                    auto [matRef, matPtr] = GBMatInternal(gb.matRef, gb.matColor );
-                    elem->foreach( [&matRef](GeomSP _geom) {
+                    std::tuple<ResourceRef, Material*> mt = GBMatInternal(gb.matRef, gb.matColor );
+                    ResourceRef matRef = std::get<0>(mt);
+                    elem->foreach( [matRef](GeomSP _geom) {
                         if ( !_geom->empty() ) {
                             _geom->DataRef().material = matRef;
                         }

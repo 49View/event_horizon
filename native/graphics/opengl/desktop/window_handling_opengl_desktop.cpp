@@ -1,6 +1,7 @@
 #include "../../platform_graphics.hpp"
 
 #include <core/util.h>
+#include <graphics/window_handling.hpp>
 #include <graphics/opengl/GLFW/window_handling_opengl_glfw.hpp>
 #include <graphics/opengl/GLFW/mouse_input_glfw.hpp>
 #include <graphics/framebuffer.h>
@@ -19,7 +20,7 @@ namespace WindowHandling {
         LOGR( "--- Initialising Graphics ---" );
 
         glfwWindowHint( GLFW_SRGB_CAPABLE, GLFW_TRUE );
-//        glfwWindowHint( GLFW_SAMPLES, 16 );
+        glfwWindowHint( GLFW_SAMPLES, getMultiSampleCount() );
 
         if ( !glfwInit() ) {
             LOGE( "Could not start GLFW3" );

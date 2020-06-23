@@ -190,8 +190,6 @@ private:
 };
 
 bool canUseMultiSample();
-void setMultiSampleCount( int count );
-int getMultiSampleCount();
 JMATH::Rect2f getPlatformWindowRect();
 
 #ifdef _OPENGL
