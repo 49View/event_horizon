@@ -89,10 +89,12 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
             return mComposite->getNormalMapFB();
         case CommandBufferFrameBufferType::ssaoMap:
             return mComposite->getSSAOMapFB();
+#ifdef USE_UIBLITBUFFER
         case CommandBufferFrameBufferType::uiMap:
             return mComposite->getUIMapFB();
         case CommandBufferFrameBufferType::uiMapResolve:
             return mComposite->getUIMapResolveFB();
+#endif
         case CommandBufferFrameBufferType::finalResolve:
             return mComposite->getColorFinalFB();
         case CommandBufferFrameBufferType::blurVertical:
@@ -350,11 +352,12 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
     Vector2f vsize = _destViewport.size();
     mColorFB = FrameBufferBuilder{rr,"colorFrameBuffer"}.multisampled().size(vsize).format
             (PIXEL_FORMAT_HDR_RGBA_16).addColorBufferAttachments({ "colorFrameBufferAtth1", 1 }).build();
+#ifdef USE_UIBLITBUFFER
     mUIFB = FrameBufferBuilder{rr,"uiFrameBuffer"}.multisampled().size(vsize).format
             (PIXEL_FORMAT_RGBA).build();
     mUIBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer}.size(vsize).noDepth()
             .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).build();
-
+#endif
     mBlurHorizontalFB = FrameBufferBuilder{ rr, FBNames::blur_horizontal }.size(vsize*bloomScale).noDepth()
             .format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_BLOOM).IM(S::BLUR_HORIZONTAL).build();
     mBlurVerticalFB = FrameBufferBuilder{ rr, FBNames::blur_vertical }.size(vsize*bloomScale).noDepth()
@@ -492,34 +495,38 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                     rr.addToCommandBuffer( vl.mVListTransparent, cameraRig.get());
                 }
             }
+
+            cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
+#ifdef USE_UIBLITBUFFER
+            cb.pushCommand( { CommandBufferCommandName::uiBufferBindAndClear } );
+#endif
+            cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
+            cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
+            cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
+
+            for ( const auto&[k, vl] : rr.CL()) {
+                if ( inRange( k,
+                              { CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd } ) &&
+                     !hiddenCB(k)) {
+                    rr.addToCommandBuffer( k );
+                }
+            }
+            for ( const auto& [k, vl] : rr.CL() ) {
+                if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
+                    rr.addToCommandBuffer( k );
+                }
+            }
+            for ( const auto& [k, vl] : rr.CL() ) {
+                if ( inRange( k, { CommandBufferLimits::GridStart, CommandBufferLimits::GridEnd} ) && !hiddenCB(k) ) {
+                    rr.addToCommandBuffer( k );
+                }
+            }
+#ifdef USE_UIBLITBUFFER
+            cb.pushCommand( { CommandBufferCommandName::resolveUI } );
+#endif
+
             cb.pushCommand( { CommandBufferCommandName::resolvePBR } );
         }
-
-        cb.startList( shared_from_this(), CommandBufferFlags::CBF_DoNotSort );
-        cb.pushCommand( { CommandBufferCommandName::uiBufferBindAndClear } );
-        cb.pushCommand( { CommandBufferCommandName::cullModeNone } );
-        cb.pushCommand( { CommandBufferCommandName::depthTestFalse } );
-        cb.pushCommand( { CommandBufferCommandName::alphaBlendingTrue } );
-
-        for ( const auto&[k, vl] : rr.CL()) {
-            if ( inRange( k,
-                 { CommandBufferLimits::UnsortedStart, CommandBufferLimits::UnsortedEnd } ) &&
-                 !hiddenCB(k)) {
-                rr.addToCommandBuffer( k );
-            }
-        }
-
-        for ( const auto& [k, vl] : rr.CL() ) {
-            if ( inRange( k, { CommandBufferLimits::UI2dStart, CommandBufferLimits::UI2dEnd} ) && !hiddenCB(k) ) {
-                rr.addToCommandBuffer( k );
-            }
-        }
-        for ( const auto& [k, vl] : rr.CL() ) {
-            if ( inRange( k, { CommandBufferLimits::GridStart, CommandBufferLimits::GridEnd} ) && !hiddenCB(k) ) {
-                rr.addToCommandBuffer( k );
-            }
-        }
-        cb.pushCommand( { CommandBufferCommandName::resolveUI } );
 
         blit( cb );
 

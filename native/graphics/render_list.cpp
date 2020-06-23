@@ -337,9 +337,11 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer *cstack ) const {
         case CommandBufferCommandName::ssaoBufferBindAndClear:
             cstack->fb(CommandBufferFrameBufferType::ssaoMap)->bindAndClearWithColor(C4f::WHITE);
             break;
+#ifdef USE_UIBLITBUFFER
         case CommandBufferCommandName::uiBufferBindAndClear:
             cstack->fb(CommandBufferFrameBufferType::uiMap)->bindAndClearWithColor(C4f::ZERO);
             break;
+#endif
         case CommandBufferCommandName::ssaoRender: {
             cstack->fb(CommandBufferFrameBufferType::ssaoMap)->bind();
             enableDepthTest(false);
@@ -390,12 +392,14 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer *cstack ) const {
                               GL_COLOR_ATTACHMENT0,
                               GL_COLOR_ATTACHMENT0);
             break;
+#ifdef USE_UIBLITBUFFER
         case CommandBufferCommandName::resolveUI:
             Framebuffer::blit(cstack->fb(CommandBufferFrameBufferType::uiMap),
                               cstack->fb(CommandBufferFrameBufferType::uiMapResolve),
                               GL_COLOR_ATTACHMENT0,
                               GL_COLOR_ATTACHMENT0);
             break;
+#endif
         case CommandBufferCommandName::blitPRB:
             setCullMode(CULL_NONE);
             enableDepthTest(false);
@@ -427,10 +431,11 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer *cstack ) const {
                     UniformNames::ssaoMapTexture,
                     cstack->fb(CommandBufferFrameBufferType::ssaoMap)->RenderToTexture()->TDI(5));
 
-            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+#ifdef USE_UIBLITBUFFER
+        cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::uiTexture,
                     cstack->fb(CommandBufferFrameBufferType::uiMapResolve)->RenderToTexture()->TDI(6));
-
+#endif
             cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->updateP3V3(
                     cstack->Target()->getCamera()->frustumFarViewPort());
 

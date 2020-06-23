@@ -77,8 +77,10 @@ public:
 protected:
     Renderer& rr;
     std::shared_ptr<Framebuffer> mColorFB;
+#ifdef USE_UIBLITBUFFER
     std::shared_ptr<Framebuffer> mUIFB;
     std::shared_ptr<Framebuffer> mUIBlitFB;
+#endif
     std::shared_ptr<Framebuffer> mOffScreenBlitFB;
     BlitType mCompositeFinalDest = BlitType::OnScreen;
 };
@@ -121,9 +123,10 @@ public:
 
     std::shared_ptr<Framebuffer> getNormalMapFB() { return mNormalFB; }
     std::shared_ptr<Framebuffer> getSSAOMapFB() { return mSSAOFB; }
+#ifdef USE_UIBLITBUFFER
     std::shared_ptr<Framebuffer> getUIMapFB() { return mUIFB; }
     std::shared_ptr<Framebuffer> getUIMapResolveFB() { return mUIBlitFB; }
-
+#endif
     void setBlurVerticalFB( const std::shared_ptr<Framebuffer>& _BlurVerticalFB ) {
         mBlurVerticalFB = _BlurVerticalFB;
     }

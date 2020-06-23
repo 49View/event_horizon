@@ -35,6 +35,8 @@ struct FrameBufferTextureValues;
 using MVList = std::map<std::string, std::shared_ptr<VPList>>;
 using CubeMapRenderFunction = std::function<void()>;
 
+//#define USE_UIBLITBUFFER 1
+
 class RenderStats {
 public:
     int NumTriangles() const { return mNumTriangles; }
@@ -145,11 +147,15 @@ enum class CommandBufferCommandName {
     depthMapBufferBindAndClear,
     normalMapBufferBindAndClear,
     ssaoBufferBindAndClear,
+#ifdef USE_UIBLITBUFFER
     uiBufferBindAndClear,
+#endif
     ssaoRender,
 
     resolvePBR,
+#ifdef USE_UIBLITBUFFER
     resolveUI,
+#endif
 
     blitToScreen,
     blitPRB,
@@ -186,8 +192,10 @@ enum class CommandBufferFrameBufferType {
     depthMap,
     normalMap,
     ssaoMap,
+#ifdef USE_UIBLITBUFFER
     uiMap,
     uiMapResolve,
+#endif
     finalResolve,
     finalBlit,
     blurVertical,

@@ -22,7 +22,7 @@ uniform sampler2D shadowMapTexture;
 uniform sampler3D lut3dTexture;
 uniform sampler2D depthMapTexture;
 uniform sampler2D ssaoMapTexture;
-uniform sampler2D uiTexture;
+//uniform sampler2D uiTexture;
 
 float vignetting() {
     // Vignetting
@@ -112,8 +112,8 @@ void main() {
     sceneColor.xyz *= grain();
     #endif
 
-    vec4 uiColor = texture(uiTexture, v_texCoord);
-    sceneColor.rgb = mix(sceneColor.rgb, uiColor.rgb, uiColor.a);
+//    vec4 uiColor = texture(uiTexture, v_texCoord);
+//    sceneColor.rgb = mix(sceneColor.rgb, uiColor.rgb, uiColor.a);
 
     FragColor = sceneColor;
 }
