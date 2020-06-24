@@ -657,7 +657,7 @@ void updateGeomsBBox(Mongo &mdb, const std::string &fileRoot) {
 
 int main( int argc, char **argv ) {
 
-    LOGRS( "Daemon version 4.0.1" );
+    LOGRS( "Daemon version 4.0.2" );
 
     auto *mongoPath = std::getenv( "EH_MONGO_PATH" );
     auto *mongoDefaultDB = std::getenv( "EH_MONGO_DEFAULT_DB" );

@@ -185,8 +185,10 @@ void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityG
     Http::clearRequestCache();
 
     if ( entityGroup == ResourceGroup::Geom ) {
-        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.05f,
+        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.1f,
                       GT::Scale(500.0f, 0.1f, 500.0f));
+        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.025f,
+                      GT::Scale(1.0f, 0.05f, 1.0f), C4f::ORANGE_SCHEME1_1);
         addGeomScene(v0);
     } else if ( entityGroup == ResourceGroup::Material ) {
         load<Material>(v0, [this, v0]( HttpResouceCBSign key ) {
@@ -712,7 +714,6 @@ void SceneGraph::addScene( const ResourceScene& gs ) {
                 geom->updateExistingTransform(V3f::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
                                               Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE);
                 DC()->center(geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
-//                materialsForGeomSocketMessage();
             }
         });
     });

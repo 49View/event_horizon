@@ -244,9 +244,7 @@ public:
         std::time_t t = std::chrono::system_clock::to_time_t( p );
         db["uploads"].update_one( filter.view(), bsoncxx::builder::stream::document{} << "$set"
                                                                                       << bsoncxx::builder::stream::open_document
-                                                                                      <<
-                                                                                      "completed" << meta.source
-                                                                                      << "completedat"
+                                                                                      << "updatedAt"
                                                                                       << std::ctime( &t )
                                                                                       << bsoncxx::builder::stream::close_document
                                                                                       << bsoncxx::builder::stream::finalize );
