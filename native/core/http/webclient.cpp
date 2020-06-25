@@ -173,50 +173,33 @@ namespace Http {
         if ( FM::useFileSystemCachePolicy() && !checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache)) {
             lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
             if ( checkBitWiseFlag( rf, ResponseFlags::JSON | ResponseFlags::Text ) ) {
-                lRes.bufferString = FM::readLocalTextFile( cacheFolder() + fileHash );
+                lRes.BufferString() = FM::readLocalTextFile( cacheFolder() + fileHash );
             }
-            if ( lRes.length || !lRes.bufferString.empty() ) {
+            if ( lRes.length || !lRes.BufferString().empty() ) {
                 lRes.uri = uri;
                 lRes.statusCode = 200;
                 lRes.ETag = cacheFolder() + fileHash + std::to_string(lRes.length);
             }
+            LOGRS("[HTTP-GET-CACHED] " << uri );
         }
         return lRes;
     }
 
-    void get( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+    void get( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed, ResponseFlags rf, HttpResouceCB mainThreadCallback ) {
-        bool bPerformLoad = false;
 
-        if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) || !FM::useFileSystemCachePolicy() ) {
-            bPerformLoad = true;
+        auto res = tryFileInCache( url_encode(url.uri), url.uri, rf );
+        if ( res.isSuccessStatusCode() ) {
+            handleResponseCallbacks( res, callback, callbackFailed, mainThreadCallback );
         } else {
-            auto cacheKey = url.toString() + std::to_string( static_cast<int>(rf) );
-            if ( const auto& cc = requestCache.find( cacheKey ); cc == requestCache.end() ) {
-                requestCache.insert( cacheKey );
-                bPerformLoad = true;
-            }
-            if (!bPerformLoad) {
-                if ( callback && FM::useFileSystemCachePolicy() ) {
-                    std::string fileHash = url_encode( url.uri + _data );
-                    auto lRes = tryFileInCache( fileHash, url.uri, rf );
-                    lRes.ccf = mainThreadCallback;
-                    callback( lRes );
-                    LOGRS("[HTTP-CACHED] " << url.toString() );
-                } else {
-                    LOGRS("[WARNING][HTTP-CACHED] "<< url.toString() << " no cache policy or no callback performed" );
-                }
-            }
-        }
-        if ( bPerformLoad ) {
             LOGR("[HTTP-GET] %s", url.toString().c_str() );
-            getInternal( url, _data, callback, callbackFailed, rf, mainThreadCallback );
+            getInternal( url, callback, callbackFailed, rf, mainThreadCallback );
         }
     }
 
-    void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
+    void getNoCache( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
               HttpResouceCB mainThreadCallback ) {
-        get( url, "", std::move(callback), std::move(callbackFailed), rf, std::move(mainThreadCallback));
+        get( url, std::move(callback), std::move(callbackFailed), orBitWiseFlag(rf, ResponseFlags::ExcludeFromCache), std::move(mainThreadCallback));
     }
 
     void post( const Url& url, const std::string& _data,

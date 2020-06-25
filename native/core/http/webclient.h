@@ -113,11 +113,19 @@ namespace Http {
         ResponseFlags flags;
         mutable std::unique_ptr<uint8_t[]> buffer;
         uint64_t length = 0;
-        std::string bufferString;
         int statusCode = 0;
         std::string ETag;
         std::string lastModified;
         HttpResouceCB ccf = nullptr;
+
+        std::string BufferString() const {
+            if ( !bufferString.empty() ) return bufferString;
+            return std::string{ (char *) buffer.get(), static_cast<unsigned long>(length) };
+        }
+
+        std::string& BufferString() {
+            return bufferString;
+        }
 
         void setBuffer( const char* cbuffer, uint64_t _length ) {
             length = _length;
@@ -144,6 +152,8 @@ namespace Http {
         }
 
         bool isSuccessStatusCode() const; //all 200s
+    private:
+        std::string bufferString;
     };
 
     void init();
@@ -157,6 +167,9 @@ namespace Http {
     void xProjectHeader( const LoginFields& _lf );
     void clearRequestCache();
     Result tryFileInCache( const std::string& fileHash, const std::string& uri, ResponseFlags rf );
+    void handleResponseCallbacks( Result& lRes, ResponseCallbackFunc callback,
+                                  ResponseCallbackFunc callbackFailed,
+                                  HttpResouceCB mainThreadCallback);
 
     SerializableContainer getSync( const std::string& url );
 
@@ -164,11 +177,11 @@ namespace Http {
               ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
-    void get( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+    void getNoCache( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
-    void getInternal( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+    void getInternal( const Url& url, const ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed, ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
 

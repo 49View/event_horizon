@@ -123,7 +123,7 @@ void setCallbackData( const Http::Result& header ) {
     if ( v->status == DependencyStatus::LoadedSuccessfully ) {
         if ( header.flags == Http::ResponseFlags::Text  ) {
             std::unique_ptr<uint8_t[]> buf = std::make_unique<uint8_t[]>(header.length);
-            std::memcpy( buf.get(), header.bufferString.c_str(), header.length );
+            std::memcpy( buf.get(), header.BufferString().c_str(), header.length );
             v->data = { std::move( buf ), header.length };
         } else {
             v->data = { std::move( header.buffer ), header.length };
@@ -151,7 +151,7 @@ void saveCacheFiles( const Http::Result& header ) {
         // Save to local cache
         FM::writeLocalFile( cacheFolder() + url_encode( header.ETag ),
                             header.buffer.get() == nullptr ?
-                            reinterpret_cast<const char *>( header.bufferString.c_str() ) :
+                            reinterpret_cast<const char *>( header.BufferString().c_str() ) :
                             reinterpret_cast<const char *>( header.buffer.get() ),
                             static_cast<uint64_t>( header.length ), true );
     }

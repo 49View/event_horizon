@@ -98,7 +98,7 @@ public:
 
         this->publish( _data, _res, [&]( HttpResponeParams _res ) {
             if ( _res.statusCode == 204 ) return; // Nothing to do
-            JSONResourceResponse resJson( _res.bufferString );
+            JSONResourceResponse resJson( _res.BufferString() );
             // We make sure that in case server side has to change name in case
             // of duplicates we reflect it here client side
             this->Name( resJson.metadata.name );

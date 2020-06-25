@@ -70,6 +70,17 @@ namespace Http {
         return request;
     }
 
+    void handleResponseCallbacks( Result& lRes, ResponseCallbackFunc callback,
+                                  ResponseCallbackFunc callbackFailed,
+                                  HttpResouceCB mainThreadCallback) {
+        if ( lRes.isSuccessStatusCode() ) {
+            lRes.ccf = mainThreadCallback;
+            if ( callback ) callback(lRes);
+        } else {
+            if ( callbackFailed ) callbackFailed(lRes);
+        }
+    }
+
     template<typename URL>
     Result handleResponse( const std::shared_ptr<restbed::Response>& response,
                            const URL& url, ResponseFlags rf ) {
@@ -97,59 +108,37 @@ namespace Http {
         return res;
     }
 
+    void addToCacheIfNecessary( const Result& lRes, const std::string& uri ) {
+        if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() ) {
+            if ( lRes.buffer ) {
+                FM::writeLocalFile(cacheFolder() + url_encode(uri),
+                                   reinterpret_cast<const char *>( lRes.buffer.get() ),
+                                   lRes.length);
+            } else {
+                FM::writeLocalFile(cacheFolder() + url_encode(uri),
+                                   lRes.BufferString());
+            }
+        }
+    }
+
     void getInternal( const Url& url,
-                      const std::string& _data,
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       ResponseFlags rf,
                       HttpResouceCB mainThreadCallback ) {
 
         try {
-            std::string fileHash = url_encode(url.uri + _data);
-            Result lRes = tryFileInCache(fileHash, url.uri, rf);
-            if ( !lRes.isSuccessStatusCode() ) {
-                auto request = makeGetRequest(url);
-                auto settings = makeSettingsBase();
-//                std::shared_ptr< restbed::Response > res;
-                restbed::Http::async(request, [url, rf, fileHash, callback, callbackFailed, mainThreadCallback](
-                                             const std::shared_ptr<restbed::Request> req, const std::shared_ptr<restbed::Response> res ) {
-                                         LOGR("[HTTP-GET] Response code: %d - %s - Length: %d", res->get_status_code(),
-                                              res->get_status_message().c_str(), res->get_header("Content-Length", 0));
-                                         auto lRes = handleResponse(res, url, rf);
-                                         if ( FM::useFileSystemCachePolicy() && lRes.isSuccessStatusCode() ) {
-                                             if ( lRes.buffer ) {
-                                                 FM::writeLocalFile(cacheFolder() + fileHash,
-                                                                    reinterpret_cast<const char *>( lRes.buffer.get() ),
-                                                                    lRes.length);
-                                             } else {
-                                                 FM::writeLocalFile(cacheFolder() + fileHash,
-                                                                    lRes.bufferString);
-                                             }
-                                         }
-                                         if ( lRes.isSuccessStatusCode() ) {
-                                             lRes.ccf = mainThreadCallback;
-                                             if ( callback ) callback(lRes);
-                                         } else {
-                                             if ( callbackFailed ) callbackFailed(lRes);
-                                         }
-
-                                     },
-                                     settings);
-            }
-
-
-//            restbed::Http::async(
-//                request, [&]( [[maybe_unused]] std::shared_ptr< restbed::Request > request,
-//                              std::shared_ptr< restbed::Response > res) {
-//                LOGR( "[HTTP-GET] Response code: %d - %s", res->get_status_code(), res->get_status_message().c_str() );
-//                auto lRes = handleResponse( res, url, rf );
-//                if ( lRes.isSuccessStatusCode() ) {
-//                    lRes.ccf = mainThreadCallback;
-//                    if ( callback ) callback( lRes );
-//                } else {
-//                    if ( callbackFailed ) callbackFailed( lRes );
-//                }
-//            }, settings );
+            auto request = makeGetRequest(url);
+            auto settings = makeSettingsBase();
+            restbed::Http::async(request, [url, rf, callback, callbackFailed, mainThreadCallback](
+                                         const std::shared_ptr<restbed::Request> req, const std::shared_ptr<restbed::Response> res ) {
+                                     LOGR("[HTTP-GET] Response code: %d - %s - Length: %d", res->get_status_code(),
+                                          res->get_status_message().c_str(), res->get_header("Content-Length", 0));
+                                     auto lRes = handleResponse(res, url, rf);
+                                     addToCacheIfNecessary(lRes, url.uri);
+                                     handleResponseCallbacks(lRes, callback, callbackFailed, mainThreadCallback);
+                                 },
+                                 settings);
         } catch ( const std::exception& ex ) {
             LOGR("[HTTP-GET-RESPONSE][ERROR] on %s", url.toString().c_str());
             LOGR("execption %s %s", typeid(ex).name(), ex.what());
@@ -167,6 +156,7 @@ namespace Http {
                 auto settings = makeSettingsBase();
                 std::shared_ptr<restbed::Response> res = restbed::Http::sync(request, settings);
                 lRes = handleResponse(res, url, ResponseFlags::None);
+                addToCacheIfNecessary(lRes, url);
             }
             return SerializableContainer{ lRes.buffer.get(), lRes.buffer.get() + lRes.length };
         } catch ( const std::exception& ex ) {

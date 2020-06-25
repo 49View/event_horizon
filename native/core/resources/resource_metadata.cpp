@@ -7,6 +7,6 @@
 
 void ResourceMetaData::getListOf( const std::string& entityGroup, const std::string& tags, const ResourceMetadataListCallback& ccf ) {
     Http::get(Url{ "/entities/list/" + entityGroup + "/" + tags }, [ccf]( HttpResponeParams params ) {
-		ccf(deserializeVector<EntityMetaData>(params.bufferString));
+		ccf(deserializeVector<EntityMetaData>(params.BufferString()));
     });
 }

@@ -93,9 +93,10 @@ bool checkBitWiseFlag( Tint source, T flag ) {
 }
 
 template<typename Tint, typename T>
-void orBitWiseFlag( Tint& source, T flag ) {
+Tint orBitWiseFlag( Tint& source, T flag ) {
     int dest = source + flag;
     source = static_cast<Tint>(dest);
+    return source;
 }
 
 template<typename Tint, typename T>

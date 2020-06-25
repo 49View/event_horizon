@@ -943,7 +943,7 @@ void RenderOrchestrator::addUIContainer( const MPos2d& _at, CResourceRef _res, U
 
 void RenderOrchestrator::reloadShadersViaHttp() {
     Http::get(Url{ "/shaders" }, [&]( HttpResponeParams res ) {
-        reloadShaders(ShaderLiveUpdateMap{ res.bufferString });
+        reloadShaders(ShaderLiveUpdateMap{ res.BufferString() });
     });
 
 }
