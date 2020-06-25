@@ -156,7 +156,9 @@ namespace Http {
     void refreshToken();
     void xProjectHeader( const LoginFields& _lf );
     void clearRequestCache();
-    Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf );
+    Result tryFileInCache( const std::string& fileHash, const std::string& uri, ResponseFlags rf );
+
+    SerializableContainer getSync( const std::string& url );
 
     void get( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,
@@ -242,6 +244,10 @@ namespace zlibUtil {
 struct Url {
     Url() = default;
     explicit Url( std::string _uri );
+
+    static bool isValidUrl( const std::string& _url ) {
+        return startswith(_url, "http");
+    }
 
     static std::string Host( const std::string& protocol, const std::string& host, const int portNumber = 0 ) {
         if ( portNumber != 0 ) {

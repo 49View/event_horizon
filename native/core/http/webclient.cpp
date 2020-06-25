@@ -121,16 +121,13 @@ std::string url_encode_spacesonly( const std::string& value ) {
         std::string::value_type c = ( *i );
 
         // Keep alphanumeric and other accepted characters intact
-        if ( isalnumCC( c ) || c == '-' || c == '_' || c == '.' || c == ',' || c == '~' || c == '/' ) {
-            escaped << c;
-            continue;
-        }
-
         if ( c == ' ' ) {
             // Any other characters are percent-encoded
             escaped << std::uppercase;
             escaped << '%' << std::setw( 2 ) << int((unsigned char) c );
             escaped << std::nouppercase;
+        } else {
+            escaped << c;
         }
     }
 
@@ -171,7 +168,7 @@ namespace Http {
         requestCache.clear();
     }
 
-    Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf ) {
+    Result tryFileInCache( const std::string& fileHash, const std::string& uri, ResponseFlags rf ) {
         Result lRes{};
         if ( FM::useFileSystemCachePolicy() && !checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache)) {
             lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
@@ -179,7 +176,7 @@ namespace Http {
                 lRes.bufferString = FM::readLocalTextFile( cacheFolder() + fileHash );
             }
             if ( lRes.length || !lRes.bufferString.empty() ) {
-                lRes.uri = url.uri;
+                lRes.uri = uri;
                 lRes.statusCode = 200;
                 lRes.ETag = cacheFolder() + fileHash + std::to_string(lRes.length);
             }
@@ -202,7 +199,7 @@ namespace Http {
             if (!bPerformLoad) {
                 if ( callback && FM::useFileSystemCachePolicy() ) {
                     std::string fileHash = url_encode( url.uri + _data );
-                    auto lRes = tryFileInCache( fileHash, url, rf );
+                    auto lRes = tryFileInCache( fileHash, url.uri, rf );
                     lRes.ccf = mainThreadCallback;
                     callback( lRes );
                     LOGRS("[HTTP-CACHED] " << url.toString() );

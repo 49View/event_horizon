@@ -265,6 +265,9 @@ namespace FileManager {
     }
 
     SerializableContainer readLocalFileC( const std::string& filename ) {
+        if ( Url::isValidUrl(filename) ) {
+            return Http::getSync( filename );
+        }
         SerializableContainer _ret;
         std::ifstream file( filename, std::ios::in | std::ios::binary | std::ios::ate );
         if ( file.is_open()) {
