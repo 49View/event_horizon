@@ -754,7 +754,7 @@ void SceneGraph::loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm ) {
 }
 
 float SceneGraph::cameraCollisionDetection( std::shared_ptr<Camera> cam ) {
-    if ( !collisionMesh ) return 0.0f;
+    if ( !collisionMesh || !bCollisionEnabled ) return 0.0f;
     float ret = collisionMesh->collisionDetection( cam->getPosition(), 0.10f );
     cam->setPosition(collisionMesh->getLastKnownGoodPosition());
     return ret;
@@ -771,6 +771,13 @@ void SceneGraph::addGenericCallback( GenericSceneCallbackValue _value ) {
 
 void SceneGraph::addEventCallback( const std::string& _key, SocketCallbackDataType&& _value ) {
     SceneGraph::eventSceneCallback.emplace( _key, std::move(_value) );
+}
+
+bool SceneGraph::isCollisionEnabled() const {
+    return bCollisionEnabled;
+}
+void SceneGraph::setCollisionEnabled( bool _bCollisionEnabled ) {
+    bCollisionEnabled = _bCollisionEnabled;
 }
 
 void HOD::DepRemapsManager::addDep( SceneGraph& sg, const std::string& group, const std::string& resName ) {

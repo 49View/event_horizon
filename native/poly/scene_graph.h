@@ -507,6 +507,8 @@ protected:
     void replaceMaterialOnNodes( const std::string& _key );
 
 public:
+    bool isCollisionEnabled() const;
+    void setCollisionEnabled( bool );
     void clearNodes();
     void clearGMNodes();
     void setMaterialRemap( const MaterialMap& materialRemap );
@@ -526,6 +528,7 @@ protected:
     LightManager& ll;
 
     std::shared_ptr<CollisionMesh> collisionMesh;
+    bool bCollisionEnabled = true;
     MaterialMap materialRemap;
     std::vector<SceneDependencyResolver> dependencyResovlers;
 };
