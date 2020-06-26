@@ -141,7 +141,7 @@ public:
 
 	void deserialize( const char* name, std::string& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
-			ret = std::string( ( *( value ) )[name].GetString() );
+            ret = ( ( *( value ) )[name].IsString() ) ?  std::string( ( *( value ) )[name].GetString() ) : "";
 		}
 	}
 
