@@ -10,46 +10,54 @@
 template <typename T>
 class Memento {
 public:
+    Memento() {
+        mementos.emplace_back(nullptr);
+    }
+
+    void push() {
+        push( current );
+    }
+
     void push(std::shared_ptr<T> _value) {
         if ( _value ) {
-            if ( stackPointer != static_cast<int>( mementos.size() - 1 ) ) {
-                mementos.erase(mementos.begin() + stackPointer+1, mementos.end());
+            mementos.erase(mementos.begin() + stackPointer + 1, mementos.end());
+            if ( mementos.size() == 1 ) {
+                current = std::make_shared<T>(_value->serialize());
             }
-            if ( mementos.empty() ) {
-                current = _value;
-            }
-            mementos.emplace_back(_value);
+            mementos.emplace_back(std::make_shared<T>(_value->serialize()));
             stackPointer = mementos.size()-1;
         }
     }
 
-    std::shared_ptr<T> undo() {
-        stackPointer = max( -1, --stackPointer);
-        current = stackPointer >= 0 ? mementos[stackPointer] : nullptr;
-        return current;
+    void undo() {
+        if ( stackPointer > 0 ) {
+            auto ptr = mementos[--stackPointer];
+            current =  ptr ? std::make_shared<T>(ptr->serialize()) : nullptr;
+        }
     }
 
-    std::shared_ptr<T> redo() {
-        if ( stackPointer < static_cast<int>( mementos.size() - 1 ) ) {
-            current = mementos[++stackPointer];
+    void redo() {
+        if ( stackPointer+1 != static_cast<int>( mementos.size() ) ) {
+            current = std::make_shared<T>(mementos[++stackPointer]->serialize());
         }
-        return current;
     }
 
     std::shared_ptr<T> operator()() {
         return current;
     }
 
+    std::shared_ptr<T> bufferAt(size_t index) {
+        return index < mementos.size() ? mementos[index] : nullptr;
+    }
+
     void reset( std::shared_ptr<T> _value ) {
-        mementos.clear();
-        stackPointer = -1;
+        stackPointer = 0;
         push(_value);
-        current = _value;
     }
 
 private:
     std::vector<std::shared_ptr<T>> mementos{};
     std::shared_ptr<T> current = nullptr;
-    int stackPointer = -1;
+    int stackPointer = 0;
 };
 
