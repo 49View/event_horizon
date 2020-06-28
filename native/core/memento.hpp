@@ -15,6 +15,9 @@ public:
             if ( stackPointer != static_cast<int>( mementos.size() - 1 ) ) {
                 mementos.erase(mementos.begin() + stackPointer+1, mementos.end());
             }
+            if ( mementos.empty() ) {
+                current = _value;
+            }
             mementos.emplace_back(_value);
             stackPointer = mementos.size()-1;
         }
@@ -22,34 +25,31 @@ public:
 
     std::shared_ptr<T> undo() {
         stackPointer = max( -1, --stackPointer);
-        if ( stackPointer >= 0 ) {
-            return mementos[stackPointer];
-        }
-        return nullptr;
+        current = stackPointer >= 0 ? mementos[stackPointer] : nullptr;
+        return current;
     }
 
     std::shared_ptr<T> redo() {
-        if ( stackPointer == static_cast<int>( mementos.size() - 1 ) ) {
-            return mementos[stackPointer];
-        }
         if ( stackPointer < static_cast<int>( mementos.size() - 1 ) ) {
-            return mementos[++stackPointer];
+            current = mementos[++stackPointer];
         }
-        return nullptr;
+        return current;
     }
 
     std::shared_ptr<T> operator()() {
-        return stackPointer < 0 ? nullptr : mementos[stackPointer];
+        return current;
     }
 
     void reset( std::shared_ptr<T> _value ) {
         mementos.clear();
         stackPointer = -1;
         push(_value);
+        current = _value;
     }
 
 private:
     std::vector<std::shared_ptr<T>> mementos{};
+    std::shared_ptr<T> current = nullptr;
     int stackPointer = -1;
 };
 
