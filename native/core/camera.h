@@ -13,9 +13,8 @@
 #include <core/math/rect2f.h>
 #include <core/math/plane3f.h>
 #include <core/math/aabb.h>
-#include <core/math/quaternion.h>
+#include <core/math/camera_spatials.hpp>
 #include <core/math/math_util.h>
-#include <core/math/anim_type.hpp>
 #include <core/camera_utils.hpp>
 #include <core/name_policy.hpp>
 #include <core/dirtable.hpp>
@@ -181,11 +180,9 @@ private:
 	Matrix4f mPrevMVP           = Matrix4f::MIDENTITY();
 	Matrix4f quatMatrix         = Matrix4f::MIDENTITY();
 
-	V3fa mPos;
-	V3fa mTarget;
-	Quaterniona qangle; // angles of x,y,z axis to be fed into quaternion math
-    floata mFov;
+	CameraSpatials spatials;
 
+    V3f mTarget;
     V3f incrementalEulerQuatAngle = Vector3f::ZERO;
     V2f sphericalAcc = V2fc::ZERO;
     V3f mOrbitStrafe = V3f::ZERO;

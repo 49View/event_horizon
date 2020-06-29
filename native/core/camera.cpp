@@ -416,45 +416,44 @@ void Frustum::calculateFromMVP( const V3f& cameraPos, const Matrix4f& viewMat, c
 Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NamePolicy(cameraName) {
 
     ViewPort(_viewport);
+    mTarget = V3f::Z_AXIS;
 
-    qangle = std::make_shared<AnimType<Quaternion>>(Quaternion{ Vector3f::ZERO }, Name() + "_Angle");
-    mPos = std::make_shared<AnimType<Vector3f>>(Vector3f::ZERO, Name() + "_Pos");
-    mTarget = std::make_shared<AnimType<Vector3f>>(V3f::Z_AXIS, Name() + "_Target");
-    mFov = std::make_shared<AnimType<float>>(72.0f, Name() + "_Fov");
+    spatials.qangle = std::make_shared<AnimType<Quaternion>>(Quaternion{ Vector3f::ZERO }, Name() + "_Angle");
+    spatials.mPos = std::make_shared<AnimType<Vector3f>>(Vector3f::ZERO, Name() + "_Pos");
+    spatials.mFov = std::make_shared<AnimType<float>>(72.0f, Name() + "_Fov");
 
-    mProjection.setPerspective(mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ);
+    mProjection.setPerspective(spatials.mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ);
     mOrthogonal.setOrthogonalProjection();
     mAspectRatio.setAspectRatioMatrix(mViewPort.ratio());
 }
 
 void Camera::setFoV( float fieldOfView ) {
     if ( mbLocked ) return;
-    mFov->value = fieldOfView;
+    spatials.mFov->value = fieldOfView;
 }
 
 void Camera::setPosition( const Vector3f& pos ) {
     if ( mbLocked ) return;
-    mPos->value = pos;
+    spatials.mPos->value = pos;
 }
 
 void Camera::setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar ) {
     mProjection.setPerspective(fovyInDegrees, aspectRatio, znear, zfar);
-    mFrustom.calculateFromMVP(mPos->value, mView, mProjection, mViewPort);
+    mFrustom.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
 }
 
 void Camera::setProjectionMatrix( const Matrix4f& val ) {
     mProjection = val;
-    mFrustom.calculateFromMVP(mPos->value, mView, mProjection, mViewPort);
+    mFrustom.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
 }
 
 void Camera::translate( const Vector3f& pos ) {
     if ( mbLocked ) return;
     Vector3f mask = LockAtWalkingHeight() ? Vector3f::MASK_UP_OUT : Vector3f::ONE;
     if ( Mode() == CameraControlType::Orbit ) {
-//	    mTarget->value += pos*mask;
         mOrbitStrafe += pos;
     } else {
-        setPosition(mPos->value + ( pos * mask ));
+        setPosition(spatials.mPos->value + ( pos * mask ));
     }
 }
 
@@ -464,7 +463,7 @@ void Camera::zoom2d( float amount ) {
     if ( mbLocked ) return;
     amount /= -UI_ZOOM_SCALER;
     if ( Mode() == CameraControlType::Edit2d ) {
-        mPos->value.setY(clamp(mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d));
+        spatials.mPos->value.setY(clamp(spatials.mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d));
     }
 }
 
@@ -516,16 +515,16 @@ void Camera::setViewMatrixVR( const Vector3f& pos, const Quaternion& q, const Ma
 
 void Camera::lookAt( const Vector3f& posAt ) {
     if ( mbLocked ) return;
-    mTarget->value = posAt;
+    mTarget = posAt;
 }
 
 void Camera::lookAtCalc() {
     if ( mbLocked ) return;
-    Vector3f z = normalize(mPos->value - mTarget->value);  // Forward
+    Vector3f z = normalize(spatials.mPos->value - mTarget);  // Forward
     Vector3f x = normalize(cross(V3f::UP_AXIS, z)); // Right
     Vector3f y = cross(z, x);
 
-    auto finalPos = mPos->value + mOrbitStrafe;
+    auto finalPos = spatials.mPos->value + mOrbitStrafe;
     mView = Matrix4f(Vector4f(x.x(), y.x(), z.x(), 0.0f),
                      Vector4f(x.y(), y.y(), z.y(), 0.0f),
                      Vector4f(x.z(), y.z(), z.z(), 0.0f),
@@ -534,35 +533,35 @@ void Camera::lookAtCalc() {
 
 void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
     if ( mbLocked ) return;
-    float aperture = ( tanf(degToRad(90.0f - ( mFov->value ))) ) / mViewPort.ratio();
+    float aperture = ( tanf(degToRad(90.0f - ( spatials.mFov->value ))) ) / mViewPort.ratio();
 
     float bdiameter = _bbox.calcDiameter();
     float orbitDistance = aperture + bdiameter;
     Vector3f cp = { 0.0f, 0.0f, orbitDistance };
-    mTarget->value = _bbox.centre();
+    mTarget = _bbox.centre();
 
     if ( cca == CameraCenterAngle::Front ) {
-        mPos->value = cp + _bbox.centre();
-        qangle->value = Quaternion{ Vector3f::ZERO };
+        spatials.mPos->value = cp + _bbox.centre();
+        spatials.qangle->value = Quaternion{ Vector3f::ZERO };
         sphericalAcc = V2f{ 0.0f, M_PI_2 };
     } else if ( cca == CameraCenterAngle::Back ) {
-        mPos->value = _bbox.centre() - cp;
-        qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS };
+        spatials.mPos->value = _bbox.centre() - cp;
+        spatials.qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS };
         UpdateIncrementalEulerFromQangle();
         sphericalAcc = V2f{ M_PI, M_PI_2 };
     } else if ( cca == CameraCenterAngle::Halfway || cca == CameraCenterAngle::HalfwayOpposite ) {
         float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : static_cast<float>(TWO_PI - M_PI_4);
-        qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS } * Quaternion{ M_PI_4, Vector3f::Z_AXIS };
+        spatials.qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS } * Quaternion{ M_PI_4, Vector3f::Z_AXIS };
         UpdateIncrementalEulerFromQangle();
         sphericalAcc = V2f{ TWO_PI - (float) rangle * 0.5f, (float) M_PI_4 + (float) M_PI_4 * 0.5f };
         if ( Mode() == CameraControlType::Orbit ) {
             computeOrbitPosition();
         } else {
-            mPos->value = cp + _bbox.centre();
+            spatials.mPos->value = cp + _bbox.centre();
         }
     }
     if ( Mode() != CameraControlType::Orbit ) {
-        qangle->value = Quaternion{ Vector3f::ZERO };
+        spatials.qangle->value = Quaternion{ Vector3f::ZERO };
         incrementalEulerQuatAngle = V3f::ZERO;
     }
 
@@ -571,8 +570,8 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
 void Camera::pan( const Vector3f& posDiff ) {
     if ( mbLocked ) return;
 
-    mPos->value += ( Vector3f::X_AXIS * posDiff.x() );
-    mPos->value += ( Vector3f::Z_AXIS * posDiff.y() );
+    spatials.mPos->value += ( Vector3f::X_AXIS * posDiff.x() );
+    spatials.mPos->value += ( Vector3f::Z_AXIS * posDiff.y() );
 }
 
 Vector3f Camera::centerScreenOn( const Vector2f& area, const float bMiddleIsCenter, const float slack ) {
@@ -693,7 +692,7 @@ void Camera::update() {
     }
 
     if ( Mode() == CameraControlType::Walk || Mode() == CameraControlType::Fly ) {
-        quatMatrix = qangle->value.rotationMatrix();
+        quatMatrix = spatials.qangle->value.rotationMatrix();
     }
 
     if ( Mode() == CameraControlType::Orbit ) {
@@ -701,20 +700,20 @@ void Camera::update() {
     }
 
     if ( Mode() != CameraControlType::Orbit ) {
-        quatMatrix.setTranslation(mPos->value);
+        quatMatrix.setTranslation(spatials.mPos->value);
         quatMatrix.invert(mView);
     }
 
     if ( Mode() == CameraControlType::Edit2d ) {
-        float vs = mPos->value.y();
+        float vs = spatials.mPos->value.y();
         mProjection.setOrthogonalProjection(-0.5f * mViewPort.ratio() * vs, 0.5f * mViewPort.ratio() * vs,
                                             -0.5f * vs, 0.5f * vs);
     } else {
-        mProjection.setPerspective(mFov->value, mViewPort.ratio() * mAspectRatioMultiplier, mNearClipPlaneZ,
+        mProjection.setPerspective(spatials.mFov->value, mViewPort.ratio() * mAspectRatioMultiplier, mNearClipPlaneZ,
                                    mFarClipPlaneZ);
     }
 
-    mFrustom.calculateFromMVP(mPos->value, mView, mProjection, mViewPort);
+    mFrustom.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
 
     setDirty(oldViewMatrix != mView || oldProjectonMatrix != mProjection);
 }
@@ -732,17 +731,17 @@ Vector2f Camera::mousePickRayOrtho( const Vector2f& _pos ) {
 std::ostream& operator<<( std::ostream& os, const Camera& camera ) {
     os << std::endl
        << "mMode: " << static_cast<uint64_t>(camera.mMode) << std::endl
-       << "mPos: " << camera.mPos->value << std::endl
-       << "qangle: " << camera.qangle->value << std::endl
+       << "spatials.mPos: " << camera.spatials.mPos->value << std::endl
+       << "spatials.qangle: " << camera.spatials.qangle->value << std::endl
        << "quatMatrix: " << camera.quatMatrix << std::endl
        << "mView: " << camera.mView << std::endl
        << "mProjection: " << camera.mProjection << std::endl
-       << "mTarget: " << camera.mTarget->value << std::endl
+       << "mTarget: " << camera.mTarget << std::endl
        << "mVP: " << camera.mVP << std::endl
        << "mMVP: " << camera.mMVP << std::endl
        << "mInverseMV: " << camera.mInverseMV << std::endl
        << "mPrevMVP: " << camera.mPrevMVP << std::endl
-       << "mFov: " << camera.mFov->value << std::endl
+       << "spatials.mFov: " << camera.spatials.mFov->value << std::endl
        << "mOrthogonal: " << camera.mOrthogonal << std::endl
        << "mAspectRatio: " << camera.mAspectRatio << std::endl
        << "mScreenAspectRatio: " << camera.mScreenAspectRatio << std::endl
@@ -761,42 +760,42 @@ std::ostream& operator<<( std::ostream& os, const Camera& camera ) {
 }
 
 float Camera::FoV() const {
-    return mFov->value;
+    return spatials.mFov->value;
 }
 
 floata& Camera::FoVAnim() {
-    return mFov;
+    return spatials.mFov;
 }
 
 Vector3f Camera::getPosition() const {
-    return mPos->value;
+    return spatials.mPos->value;
 }
 
 Vector3f Camera::getPositionInv() const {
-    return -mPos->value;
+    return -spatials.mPos->value;
 }
 
 Vector3f Camera::getPositionRH() const {
-    Vector3f lPos = mPos->value.xzy();
+    Vector3f lPos = spatials.mPos->value.xzy();
     lPos.invZ();
     return lPos;
 }
 
 void Camera::setQuat( const Quaternion& a ) {
-    qangle->value = a;
+    spatials.qangle->value = a;
 }
 
 void Camera::setQuatAngles( const Vector3f& a ) {
     if ( mbLocked ) return;
     incrementalEulerQuatAngle = a;
-    qangle->value = quatCompose(incrementalEulerQuatAngle);
+    spatials.qangle->value = quatCompose(incrementalEulerQuatAngle);
 }
 
 void Camera::incrementQuatAngles( const Vector3f& a ) {
     if ( mbLocked ) return;
-    if ( qangle->isAnimating ) return;
+    if ( spatials.qangle->isAnimating ) return;
     incrementalEulerQuatAngle += a;
-    qangle->value = quatCompose(incrementalEulerQuatAngle);
+    spatials.qangle->value = quatCompose(incrementalEulerQuatAngle);
 }
 
 void Camera::setIncrementQuatAngles( const Vector3f& a ) {
@@ -833,11 +832,11 @@ void Camera::incrementSphericalAngles( const V2f& _sph ) {
 
 void Camera::computeOrbitPosition() {
     auto stc = sphericalToCartasian(V3f{ sphericalAcc, mOrbitDistance });
-    setPosition(mTarget->value * V3f::UP_AXIS + XZY::C(stc));
+    setPosition(mTarget * V3f::UP_AXIS + XZY::C(stc));
 }
 
 void Camera::UpdateIncrementalEulerFromQangle() {
-    incrementalEulerQuatAngle = V3f{ M_PI } - qangle->value.euler2();
+    incrementalEulerQuatAngle = V3f{ M_PI } - spatials.qangle->value.euler2();
 }
 
 void Camera::UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget ) {
@@ -846,14 +845,14 @@ void Camera::UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget ) {
 
 void Camera::resetQuat() {
     incrementalEulerQuatAngle = V3f::ZERO;
-    qangle->value = Quaternion{ V3f::ZERO };
+    spatials.qangle->value = Quaternion{ V3f::ZERO };
 }
 
-Quaternion Camera::quatAngle() const { return qangle->value; }
+Quaternion Camera::quatAngle() const { return spatials.qangle->value; }
 
-V3fa& Camera::PosAnim() { return mPos; }
+V3fa& Camera::PosAnim() { return spatials.mPos; }
 
-Quaterniona& Camera::QAngleAnim() { return qangle; }
+Quaterniona& Camera::QAngleAnim() { return spatials.qangle; }
 
 TimelineSet Camera::addKeyFrame( const std::string& _name, float _time ) {
     TimelineSet ret{};
@@ -919,7 +918,7 @@ CameraControlType Camera::Mode() const {
 }
 
 Vector4f Camera::getNearFar() const {
-    return V4f{ mNearClipPlaneZ, mFarClipPlaneZ, mFov->value, 1.0f };
+    return V4f{ mNearClipPlaneZ, mFarClipPlaneZ, spatials.mFov->value, 1.0f };
 }
 
 std::vector<V3f> Camera::frustumFarViewPort() const {
