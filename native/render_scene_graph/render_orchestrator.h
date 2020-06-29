@@ -1,3 +1,4 @@
+
 //
 // Created by Dado on 08/02/2018.
 //
@@ -95,7 +96,6 @@ public:
     void useMotionBlur( bool _value );
     void changeTime( const std::string& _time );
     void changeCameraControlType( int _type );
-    void drawCameraLocator( const Matrix4f& preMult = Matrix4f::IDENTITY );
 
     floata& skyBoxDeltaInterpolation();
 

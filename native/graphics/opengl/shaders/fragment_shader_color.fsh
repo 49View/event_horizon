@@ -2,7 +2,8 @@
 
 #include "color_uniforms.glsl"
 
-out vec4 FragColor;
+layout( location = 0 ) out vec4 FragColor;
+layout( location = 1 ) out vec4 FragAttach1;
 
 void main()
 {
