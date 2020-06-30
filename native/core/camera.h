@@ -106,6 +106,7 @@ public:
 	void setNearClipPlaneZClampEdit2d( float _value ) { mNearClipPlaneZClampEdit2d = _value; }
 	void setFarClipPlaneZClampEdit2d( float _value ) { mFarClipPlaneZClampEdit2d = _value;}
 
+	const CameraSpatials& getSpatials() const;
 	Vector3f getPosition() const;
 	Vector4f getNearFar() const;
 	Vector3f getPositionInv() const;

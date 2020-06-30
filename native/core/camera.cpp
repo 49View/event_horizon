@@ -947,4 +947,8 @@ bool Camera::isDoom() const {
     return Mode() == CameraControlType::Walk;
 }
 
+const CameraSpatials& Camera::getSpatials() const {
+    return spatials;
+}
+
 
