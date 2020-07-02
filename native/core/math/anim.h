@@ -312,8 +312,8 @@ public:
         return timelineIndex;
     }
 
-    void setTimelineIndex( TimelineIndex timelineIndex ) {
-        TimelineStream::timelineIndex = timelineIndex;
+    void setTimelineIndex( TimelineIndex _timelineIndex ) {
+        TimelineStream::timelineIndex = _timelineIndex;
     }
 
     T value() const {
@@ -380,8 +380,11 @@ public:
             frameTickCount = 0;
             frameTickOffset = 0;
             if ( cuf ) cuf( timeElapsed );
-            if ( ccf ) {
+            if ( ccf && loopType == AnimLoopType::Linear ) {
                 ccf();
+            }
+            if ( loopType == AnimLoopType::Loop ) {
+                play();
             }
         } else {
             if ( cuf ) cuf( timeElapsed );
@@ -411,6 +414,10 @@ public:
         cuf = _value;
     }
 
+    void setLooping( AnimLoopType _value ) {
+        loopType = _value;
+    }
+
     TimelineStream<V> stream;
 
 private:
@@ -419,6 +426,7 @@ private:
     float timeElapsed = 0.0f;
     float meanTimeDelta = 0.0f;
     bool bIsPlaying = false;
+    AnimLoopType loopType = AnimLoopType::Linear;
     bool bForceOneFrameOnly = false;
     uint64_t frameTickOffset = 0;
     uint64_t frameTickCount = 0;
@@ -568,6 +576,10 @@ public:
         if constexpr ( std::is_same_v<M, AnimEndCallback> ) {
             tg->CCF(_param());
         }
+        if constexpr ( std::is_same_v<M, AnimLoopType> ) {
+            tg->setLooping(_param);
+        }
+
     }
 
 //    static bool deleteKey( const std::string& _group, TimelineIndex _ti, uint64_t _index ) {
