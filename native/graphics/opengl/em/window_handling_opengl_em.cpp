@@ -38,7 +38,7 @@ namespace WindowHandling {
 
         Vector2i windowSize = captureWindowSize();
         AppGlobals::getInstance().setScreenSizei(windowSize);
-
+        AppGlobals::getInstance().setWindowSize(V2f{windowSize.x(), windowSize.y()});
 //        emscripten_set_canvas_element_size( nullptr, int(width), int(height));
         LOGR("--- Initialising Graphics ---");
         LOGRS("GetWidnowSize " << windowSize);

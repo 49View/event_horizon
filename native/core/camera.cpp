@@ -408,8 +408,8 @@ void Frustum::calculateFromMVP( const V3f& cameraPos, const Matrix4f& viewMat, c
     glhUnProjectf(p4.x(), p4.y(), 1.0f, viewMat.rawPtr(), projMat.rawPtr(), viewport, farPj);
     cornersFar[3] = V3f{ farPj };
 
-    for ( int t = 0; t < 4; t++ ) {
-        cornersFar[t] = viewMat * cornersFar[t];
+    for ( int i = 0; i < 4; i++ ) {
+        cornersFar[i] = viewMat * cornersFar[i];
     }
 }
 
@@ -582,12 +582,14 @@ Vector3f Camera::centerScreenOn( const Vector2f& area, const float bMiddleIsCent
 }
 
 Vector3f Camera::center( const Rect2f& area, float slack ) {
-    float mainSize = ( area.ratio() > mViewPort.ratio() ) ? ( (area.width()+slack) * 0.5f ) / mViewPort.ratio()
-                                                          : (area.height()+slack) *0.5f;
+    float mainSize = area.height()+slack;
     Vector2f center = area.centre();
-    float aperture = ( tanf(degToRad(FoV() * 0.5f)) );
-    float z = mainSize * aperture * 2.0f;
-    return XZY::C({ center, z });
+    float aperture = (tanf(degToRad(FoV() * 0.5f)));
+    float z = (mainSize * 0.5f) / aperture;
+    V3f ret = XZY::C({ center, z });
+//    LOGRS("Area: " << area << " Fov: " << FoV() << " slack: " << slack );
+//    LOGRS("CameraCenter: " << ret );
+    return ret;
 }
 
 Vector3f

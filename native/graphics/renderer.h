@@ -37,10 +37,10 @@ struct DText2d {
 };
 
 using DShaderMatrixValue = uint64_t;
-static constexpr DShaderMatrixValue DShaderMatrixValue2dColor   = 1 << 1;
-static constexpr DShaderMatrixValue DShaderMatrixValue2dTexture = 1 << 2;
-static constexpr DShaderMatrixValue DShaderMatrixValue3dColor   = 1 << 3;
-static constexpr DShaderMatrixValue DShaderMatrixValue3dTexture = 1 << 4;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dColor   = 1u << 1;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dTexture = 1u << 2;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dColor   = 1u << 3;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dTexture = 1u << 4;
 
 struct DShaderMatrix {
     template<typename ...Args>
@@ -48,8 +48,9 @@ struct DShaderMatrix {
     DShaderMatrixValue operator()() const noexcept {
         return data;
     }
-    bool has2d() const;
-    bool hasTexture() const;
+    [[nodiscard]] bool has2d() const;
+    [[nodiscard]] bool hasTexture() const;
+    [[nodiscard]] std::string hash() const;
     DShaderMatrixValue data;
 };
 
@@ -226,6 +227,7 @@ public:
     void changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b );
     void changeMaterialAlphaOnTags( uint64_t _tag, float _alpha );
     void setVisibilityOnTags( uint64_t _tag, bool _visibility );
+    std::vector<std::shared_ptr<VPList>> getVPListWithTags( uint64_t _tag );
     void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
     void replaceMaterial( const std::string& _oldMatRef, const std::string& _newMatRef );
     void changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value );
@@ -259,6 +261,7 @@ public:
     inline CommandBufferList& CB_U() { return *mCommandBuffers; }
     inline CommandBufferListVectorMap& CL() { return mCommandLists; }
     std::vector<std::shared_ptr<VPList>> CLI( uint64_t cli );
+    std::vector<std::shared_ptr<VPList>> CLIExcludingTag( uint64_t cli, uint64_t excludingTag );
     inline const CommandBufferListVectorMap& CL() const { return mCommandLists; }
 
     void resetDefaultFB( const Vector2i& forceSize = Vector2i{ -1 } );

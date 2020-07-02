@@ -538,11 +538,11 @@ public:
         play( sleepingBeauty, frameSkipper, _ccf, KeyFramePair{ _seconds, 0.0f } );
     }
 
-    static void intermezzo( float _seconds, uint64_t frameSkipper, AnimUpdateCallback _cuf ) {
+    static void intermezzo( float _seconds, uint64_t frameSkipper, AnimUpdateCallback _cuf, AnimEndCallback _cef ) {
         auto groupName = UUIDGen::make();
         auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Intermezzo");
 
-        play( sleepingBeauty, frameSkipper, KeyFramePair{ _seconds, 0.0f }, _cuf );
+        play( sleepingBeauty, frameSkipper, KeyFramePair{ _seconds, 0.0f }, _cuf, _cef );
     }
 
     template<typename SGT, typename M>
@@ -566,7 +566,7 @@ public:
             tg->CUF(_param());
         }
         if constexpr ( std::is_same_v<M, AnimEndCallback> ) {
-            tg->CCF(_param);
+            tg->CCF(_param());
         }
     }
 

@@ -491,6 +491,25 @@ void Renderer::setVisibilityOnTags( uint64_t _tag, bool _visibility ) {
     invalidateOnAdd();
 }
 
+std::vector<std::shared_ptr<VPList>> Renderer::getVPListWithTags( uint64_t _tag ) {
+    std::vector<std::shared_ptr<VPList>> ret{};
+    for ( const auto&[k, vl] : CL()) {
+        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
+            for ( const auto& v : vl.mVList ) {
+                if ( checkBitWiseFlag( v->tag(), _tag ) ) {
+                    ret.push_back(v);
+                }
+            }
+            for ( const auto& v : vl.mVListTransparent ) {
+                if ( checkBitWiseFlag( v->tag(), _tag ) ) {
+                    ret.push_back(v);
+                }
+            }
+        }
+    }
+    return ret;
+}
+
 void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor ) {
     // NDDado: we only use RGB, not Alpha, in here
     for ( const auto&[k, vl] : CL()) {
@@ -657,9 +676,24 @@ bool DShaderMatrix::hasTexture() const {
     return checkBitWiseFlag(data, DShaderMatrixValue2dTexture) || checkBitWiseFlag(data, DShaderMatrixValue3dTexture);
 }
 
+std::string DShaderMatrix::hash() const {
+    return std::to_string(data);
+}
+
 std::vector<std::shared_ptr<VPList>> Renderer::CLI( uint64_t cli ) {
     std::vector<std::shared_ptr<VPList>> ret;
     std::copy (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret));
     std::copy (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret));
     return ret;
 }
+
+std::vector<std::shared_ptr<VPList>> Renderer::CLIExcludingTag( uint64_t cli, uint64_t excludingTag ) {
+    std::vector<std::shared_ptr<VPList>> ret;
+    auto pred = [excludingTag](const auto& elem) {
+        return !checkBitWiseFlag( elem->tag(), excludingTag );
+    };
+    std::copy_if (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret), pred);
+    std::copy_if (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret), pred);
+    return ret;
+}
+

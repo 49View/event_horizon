@@ -203,10 +203,15 @@ std::string sizeToStringMeters( const float x, const float y ) {
 
 std::string sqmToString( const float sqm ) {
 	std::ostringstream so;
-	so << std::fixed << std::setprecision( 1 ) << sqm << "sqm";
+	so << std::fixed << std::setprecision( 1 ) << sqm << "sq m";
 	return so.str();
 }
 
+std::string sqmToSqFtString( const float sqm ) {
+    std::ostringstream so;
+    so << std::fixed << std::setprecision( 0 ) << sqm*10.764f << "sq ft";
+    return so.str();
+}
 
 std::string UTCMillisToString() {
 	return std::to_string( std::chrono::duration_cast< std::chrono::milliseconds >(

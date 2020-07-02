@@ -136,7 +136,7 @@ private:
 };
 
 template <typename M>
-void parseFader( std::vector<std::shared_ptr<VPList>>& vp, const M& _param ) {
+void parseFader( std::vector<std::shared_ptr<VPList>>& vp, AnimEndCallback& aec, const M& _param ) {
 
     if constexpr ( std::is_same_v<M, std::shared_ptr<VPList>> ) {
         if ( _param ) vp.emplace_back( _param );
@@ -144,14 +144,19 @@ void parseFader( std::vector<std::shared_ptr<VPList>>& vp, const M& _param ) {
     if constexpr ( std::is_same_v<M, std::vector<std::shared_ptr<VPList>>> ) {
         std::copy (_param.begin(), _param.end(), std::back_inserter(vp));
     }
+    if constexpr ( std::is_same_v<M, AnimEndCallback> ) {
+        aec = _param;
+    }
+
 }
 
 template<typename ...Args>
 void fader( float _duration, float _value, Args&& ...args ) {
 
     std::vector<std::shared_ptr<VPList>> vplists{};
+    AnimEndCallback aec{};
 
-    ( parseFader( vplists, std::forward<Args>(args)),... );
+    ( parseFader( vplists, aec, std::forward<Args>(args)),... );
 
     Timeline::intermezzo( _duration, 0, AnimUpdateCallback([vplists, _value, _duration](float _elapsed) {
         float current = (_elapsed / _duration);
@@ -164,5 +169,6 @@ void fader( float _duration, float _value, Args&& ...args ) {
                 }
             }
         }
-    }) );
+    }), aec );
 }
+

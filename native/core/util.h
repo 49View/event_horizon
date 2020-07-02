@@ -37,6 +37,7 @@ std::string priceMaker( uint64_t price );
 std::string sizeToString( const float x, const float y );
 std::string sizeToStringMeters( const float x, const float y );
 std::string sqmToString( const float sqm );
+std::string sqmToSqFtString( const float sqm );
 float stringFeetInchesToCm( const std::string& _text );
 float feetInchesToMeters( const float feetf, const float inchesf );
 

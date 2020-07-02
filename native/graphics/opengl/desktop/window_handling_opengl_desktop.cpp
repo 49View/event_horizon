@@ -35,13 +35,18 @@ namespace WindowHandling {
             glfwWindowHint( GLFW_REFRESH_RATE, 90 );// mode->refreshRate
             glfwSwapInterval( 1 );
             window = glfwCreateWindow( mode->width, mode->height, "Event Horizon", glfwGetPrimaryMonitor(), NULL );
+            AppGlobals::getInstance().setWindowSize(V2f{mode->width, mode->height});
         } else {
+            glfwWindowHint( GLFW_REFRESH_RATE, 90 );// mode->refreshRate
             float scaleFactor = 1.0f;
             if ( checkBitWiseFlag( flags, InitializeWindowFlags::HalfSize )) scaleFactor = 2.0f;
             if ( checkBitWiseFlag( flags, InitializeWindowFlags::ThreeQuarter )) scaleFactor = 1.5f;
             float xs = mode->width / scaleFactor;
             float ys = mode->height / scaleFactor;
+            xs = 1152*2.0f;
+            ys = 768*2.0f;
             window = glfwCreateWindow( static_cast<int>(xs), static_cast<int>(ys), "Event Horizon", NULL, NULL );
+            AppGlobals::getInstance().setWindowSize(V2f{xs,ys});
         }
         glfwSwapInterval( -1 );
 

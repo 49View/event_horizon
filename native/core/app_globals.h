@@ -29,7 +29,15 @@ public:
 #endif
 	}
 
-	void setScreenSizei( const Vector2i& s ) {
+    void setWindowSize(  const Vector2f& w ) {
+        mWindowSizef = w;
+    }
+
+    Vector2f getWindowSize(  const Vector2f& w ) const {
+        return mWindowSizef;
+    }
+
+    void setScreenSizei( const Vector2i& s ) {
 		mScreenSizei = s;
 	}
 
@@ -53,7 +61,11 @@ public:
 		return mScreenSizef.x() / mScreenSizef.y();
 	}
 
-	Vector2f getScreenAspectRatioVector() const {
+    float getWindowAspectRatio() const {
+        return mWindowSizef.x() / mWindowSizef.y();
+    }
+
+    Vector2f getScreenAspectRatioVector() const {
 		return Vector2f( mScreenSizef.x() / mScreenSizef.y(), 1.0f );
 	}
 
@@ -81,6 +93,7 @@ public:
 	}
 
 private:
+	Vector2f mWindowSizef=V2fc::ZERO;
 	Vector2f mScreenSizef=V2fc::ZERO;
 	Vector2i mScreenSizei=Vector2i::ZERO;
     Vector2f mScreenSizefUI=V2fc::ZERO;
@@ -89,6 +102,8 @@ private:
 
 #define AG AppGlobals::getInstance()
 
+#define getWindowSize AppGlobals::getInstance().getWindowSize()
+#define getWindowAspectRatio AppGlobals::getInstance().getWindowAspectRatio()
 #define getScreenSizef AppGlobals::getInstance().getScreenSizef()
 #define getScreenSizefUI AppGlobals::getInstance().getScreenSizefUI()
 #define getScreenSizei AppGlobals::getInstance().getScreenSizei()

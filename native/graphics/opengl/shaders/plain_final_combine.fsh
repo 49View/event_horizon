@@ -101,6 +101,7 @@ void main() {
     #endif
 
     #if _SSAOING_
+//    sceneColor.xyz *= mix(vec3(1.0), pow( ssao(), vec3(1.5)), vec3(0.1)); //try with some exp on ssao, might look better
     sceneColor.xyz *= pow( ssao(), vec3(1.5)); //try with some exp on ssao, might look better
     #endif
 

@@ -55,6 +55,7 @@ int em_resize_callback( int eventType, const EmscriptenUiEvent *uiEvent, void *u
     LOGR("windowOuter size %d, %d: ", uiEvent->windowOuterWidth, uiEvent->windowOuterHeight);
     LOGRS("canvas size with retina" << ws);
 
+    AppGlobals::getInstance().setWindowSize(V2f{ws.x(), ws.y()});
     GResizeFramebufferCallback(nullptr, ws.x(), ws.y());
 
     return true;

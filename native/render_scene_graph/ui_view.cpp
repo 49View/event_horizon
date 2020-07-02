@@ -227,7 +227,7 @@ void UIElement::fadeTo( float _duration, float _value ) {
         } else if ( _elapsed >= _duration && _value == 0.0f ) {
             setVisible( false );
         }
-    }));
+    }), AnimEndCallback{});
 }
 
 void UIElement::insertGroupElement( UIElementSP _elem ) {
