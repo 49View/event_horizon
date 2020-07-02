@@ -431,6 +431,9 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer *cstack ) const {
                     UniformNames::ssaoMapTexture,
                     cstack->fb(CommandBufferFrameBufferType::ssaoMap)->RenderToTexture()->TDI(5));
 
+            cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
+                    UniformNames::ssaoBlendFactor, rr.ssaoBlendFactor());
+
 #ifdef USE_UIBLITBUFFER
         cstack->fb(CommandBufferFrameBufferType::finalResolve)->VP()->setMaterialConstant(
                     UniformNames::uiTexture,

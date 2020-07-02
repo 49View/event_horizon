@@ -420,7 +420,7 @@ Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NameP
 
     spatials.qangle = std::make_shared<AnimType<Quaternion>>(Quaternion{ Vector3f::ZERO }, Name() + "_Angle");
     spatials.mPos = std::make_shared<AnimType<Vector3f>>(Vector3f::ZERO, Name() + "_Pos");
-    spatials.mFov = std::make_shared<AnimType<float>>(72.0f, Name() + "_Fov");
+    spatials.mFov = std::make_shared<AnimType<float>>(60.0f, Name() + "_Fov");
 
     mProjection.setPerspective(spatials.mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ);
     mOrthogonal.setOrthogonalProjection();

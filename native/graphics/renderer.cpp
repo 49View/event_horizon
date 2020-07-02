@@ -192,6 +192,8 @@ void Renderer::init() {
     rmm->addRenderMaterial( S::DEPTH_MAP );
     rmm->addRenderMaterial( S::NORMAL_MAP );
 
+    mSsaoBlendFactor = std::make_shared<AnimType<float>>(0.0f, "ssaoBlendFactor");
+
     afterShaderSetup();
 }
 
@@ -697,3 +699,14 @@ std::vector<std::shared_ptr<VPList>> Renderer::CLIExcludingTag( uint64_t cli, ui
     return ret;
 }
 
+float Renderer::ssaoBlendFactor() const {
+    return mSsaoBlendFactor->value;
+}
+
+floata& Renderer::ssaoBlendFactorAnim() {
+    return mSsaoBlendFactor;
+}
+
+void Renderer::ssaoBlendFactor( float _ssaoBlendFactor ) {
+    mSsaoBlendFactor->value = _ssaoBlendFactor;
+}

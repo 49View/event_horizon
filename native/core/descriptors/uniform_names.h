@@ -74,6 +74,7 @@ namespace UniformNames {
     const std::string clip_plane = "clip_plane";
     const std::string screenSizeInv = "screenSizeInv";
     const std::string reflectionScreenSizeInv = "reflectionScreenSizeInv";
+    const std::string ssaoBlendFactor = "ssaoBlendFactor";
 
     const std::string diffuseColor = "diffuseColor";
     const std::string ambient = "ambient";

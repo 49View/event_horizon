@@ -24,6 +24,9 @@ uniform sampler2D depthMapTexture;
 uniform sampler2D ssaoMapTexture;
 //uniform sampler2D uiTexture;
 
+// Post processing control uniforms 
+uniform float ssaoBlendFactor;
+
 float vignetting() {
     // Vignetting
     float fstop = 0.5;
@@ -101,8 +104,8 @@ void main() {
     #endif
 
     #if _SSAOING_
-//    sceneColor.xyz *= mix(vec3(1.0), pow( ssao(), vec3(1.5)), vec3(0.1)); //try with some exp on ssao, might look better
-    sceneColor.xyz *= pow( ssao(), vec3(1.5)); //try with some exp on ssao, might look better
+    sceneColor.xyz *= mix(ssao(), vec3(1.0), vec3(ssaoBlendFactor)); //try with some exp on ssao, might look better
+//    sceneColor.xyz *= pow( ssao(), vec3(1.5)); //try with some exp on ssao, might look better
     #endif
 
     #if _VIGNETTING_

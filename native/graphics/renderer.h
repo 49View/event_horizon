@@ -14,6 +14,7 @@
 #include <graphics/graphic_constants.h>
 #include <graphics/ghtypes.hpp>
 #include <graphics/shadowmap_manager.h>
+#include <core/math/anim_type.hpp>
 
 struct DCircle {
 };
@@ -303,6 +304,9 @@ public:
     void setShadowZFightCofficient( float _value );
     void setIndoorSceneCoeff( float _value );
 
+    [[nodiscard]] float ssaoBlendFactor() const;
+    [[nodiscard]] floata& ssaoBlendFactorAnim();
+    void ssaoBlendFactor( float mSsaoBlendFactor );
 protected:
     void clearCommandList();
     size_t renderCBList();
@@ -333,6 +337,9 @@ protected:
     bool bInvalidated = false;
     bool bIsLoading = true;
     Vector2i mForcedFrameBufferSize{ -1, -1 };
+
+    // Post processing controls
+    floata mSsaoBlendFactor;
 
     std::vector<std::shared_ptr<RLTarget>> mTargets;
     std::shared_ptr<CommandBufferList> mCommandBuffers;
