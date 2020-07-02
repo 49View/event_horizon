@@ -225,11 +225,13 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     vec3 Lo = vec3( 0.0 );
 
-    vec3 L_Sun = normalize( u_sunPosition - Position_worldspace );
+    vec3 L_Sun = u_sunDirection;// normalize( u_sunPosition - Position_worldspace );
 
-    Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
-    if ( translucencyV > 0.0 ) {
-        Lo += rendering_equation( albedo, -L_Sun, V, N, F0, u_sunRadiance.xyz );
+    if ( u_sunDirection.y > 0.0 ) {
+        Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
+        if ( translucencyV > 0.0 ) {
+            Lo += rendering_equation( albedo, -L_Sun, V, N, F0, u_sunRadiance.xyz );
+        }
     }
 
     // single point light 
@@ -253,34 +255,36 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     // u_shadowParameters[0] == depth value z offset to avoid horrible aliasing
     // u_shadowParameters[1] == shadowOverBurn coefficient 
 #define_code shadow_code
-    float visibility = 1.0;//u_shadowParameters[2];
-    vec3 v_shadowmap_coord3Biases = v_shadowmap_coord3;
-    // v_shadowmap_coord3Biases=clamp( v_shadowmap_coord3, vec3(0.0), vec3(1.0));
-    vec3 VN = N;
-    if ( translucencyV > 0.0 ) {
-        VN *= -1.0;
-    }
-    float nlAngle = dot( VN, normalize( u_sunPosition - Position_worldspace ));
-    // float tanCosNAngle = tan(acos(nlAngle));
-    v_shadowmap_coord3Biases.z -= u_shadowParameters[0];
-    // visibility += texture( shadowMapTexture, v_shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
+    float visibility = u_sunDirection.y > 0.0 ? 1.0 : 0.22;//u_shadowParameters[2];
+    if ( u_sunDirection.y > 0.0 ) {
+        vec3 shadowmap_coord3Biases = v_shadowmap_coord3;
+        vec3 VN = v_norm;
+        if ( translucencyV > 0.0 ) {
+            VN *= -1.0;
+        }
+        float nlAngle = dot( VN, u_sunDirection);
+        // float tanCosNAngle = tan(acos(nlAngle));
+        // visibility += texture( shadowMapTexture, shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
-    if ( v_shadowmap_coord3Biases.z > 0.0 ) {
-        if ( nlAngle > 0.0) {
+        // if ( shadowmap_coord3Biases.z > 0.0 ) {
+        if ( nlAngle > 0.0 ) {
+            shadowmap_coord3Biases = clamp( shadowmap_coord3Biases, vec3(0.0), vec3(1.0) );
+            shadowmap_coord3Biases.z -= u_shadowParameters[0]+0.00024;
             // float overBurnedfactor = 0.2;// * u_shadowParameters[1];
             // for ( int i = 0; i < 1; i++ ) {
             //     int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
-            //     float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy + (poissonDisk[index] / 4096.0), v_shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
-            //     shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 : 0.0;
+            //     float shadow = texture( shadowMapTexture, vec3( shadowmap_coord3Biases.xy + (poissonDisk[index] / 4096.0), shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
+            //     shadow = shadow < shadowmap_coord3Biases.z ? 1.0 : 0.0;
             //     visibility -= shadow * 0.78;// * u_timeOfTheDay;
             // }
-            float shadow = texture( shadowMapTexture, vec3( v_shadowmap_coord3Biases.xy, v_shadowmap_coord3Biases.z ) );
-            shadow = shadow < v_shadowmap_coord3Biases.z ? 1.0 * 0.78 : 0.0;
+            float shadow = texture( shadowMapTexture, vec3( shadowmap_coord3Biases.xy, shadowmap_coord3Biases.z ) );
+            shadow = shadow < shadowmap_coord3Biases.z ? 1.0 * 0.78 : 0.0;
             visibility -=  shadow;
         } else {
             visibility -= 0.78;
         }
     }
+    // }
     // visibility = pow(visibility, 2.0);
     //clamp(visibility, 0.0, 1.0);
     // visibility = nlAngle;
