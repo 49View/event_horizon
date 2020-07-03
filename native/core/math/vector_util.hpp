@@ -19,6 +19,3 @@ struct RayPair {
     T origin{0.0f};
     T dir{0.0f};
 };
-
-using RayPair3 = RayPair<Vector3f>;
-using RayPair2 = RayPair<Vector2f>;
