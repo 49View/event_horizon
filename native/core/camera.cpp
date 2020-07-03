@@ -574,13 +574,6 @@ void Camera::pan( const Vector3f& posDiff ) {
     spatials.mPos->value += ( Vector3f::Z_AXIS * posDiff.y() );
 }
 
-Vector3f Camera::centerScreenOn( const Vector2f& area, const float bMiddleIsCenter, const float slack ) {
-    float mainSize = ( area.ratio() > mViewPort.ratio() ) ? ( area.x() * 0.5f ) / mViewPort.ratio() : area.y() * 0.5f;
-    Vector2f center = bMiddleIsCenter ? area * -0.5f : V2fc::ZERO;
-    float aperture = ( tanf(degToRad(140.0f)) );
-    return { center, ( -mainSize * ( 1.0f + slack ) ) / aperture };
-}
-
 Vector3f Camera::center( const Rect2f& area, float slack ) {
     float mainSize = area.height()+slack;
     Vector2f center = area.centre();

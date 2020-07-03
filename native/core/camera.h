@@ -66,7 +66,6 @@ public:
 
     void resetQuat();
 	Quaternion quatAngle() const;
-	Vector3f centerScreenOn( const Vector2f& area, const float bMiddleIsCenter = true, const float slack = 0.0f );
 	Vector3f centerScreenOnWithinArea( Vector2f area, const Rect2f& targetArea, const float padding = 1.0f, const float slack = 0.0f );
 
     TimelineSet addKeyFrame( const std::string& name, float _time ) override;
@@ -131,7 +130,7 @@ public:
 	void getViewporti( int* viewport ) const;
 
 	[[nodiscard]] PickRayData rayViewportPickIntersection( const Vector2f& p1 ) const;
-	Vector2f mousePickRayOrtho( const Vector2f& _pos );
+	V2f mousePickRayOrtho( const V2f& _pos );
 
 	void Mode( const CameraControlType& val );
 	[[nodiscard]] CameraControlType Mode() const;

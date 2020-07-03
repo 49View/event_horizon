@@ -140,6 +140,11 @@ V2f AggregatedInputData::mouseViewportPos( int _touchIndex, std::shared_ptr<Came
     return XZY::C(zeroPlane.intersectLine(pickedRay.rayNear, pickedRay.rayFar));
 }
 
+V3f AggregatedInputData::mouseViewportDir( int _touchIndex, std::shared_ptr<Camera> cam ) const {
+    auto pickedRay = cam->rayViewportPickIntersection(mousePos(_touchIndex));
+    return normalize(pickedRay.rayFar-pickedRay.rayNear);
+}
+
 SwipeDirection MouseInput::checkSwipe( int _touchIndex ) {
     // Check Swipe
     if ( status[_touchIndex].overridedSwipe ) {

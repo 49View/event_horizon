@@ -278,6 +278,10 @@ public:
     [[nodiscard]] bool containsXZ( const V2f& _point ) const;
     [[nodiscard]] bool containsXY( const V2f& _point ) const;
 
+    [[nodiscard]] bool containsX( float _value ) const;
+    [[nodiscard]] bool containsY( float _value ) const;
+    [[nodiscard]] bool containsZ( float _value ) const;
+
 	//std::vector<Vector3f> points3d() const {
 	//	std::vector<Vector3f> ret;
 
