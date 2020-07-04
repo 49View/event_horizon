@@ -9,7 +9,8 @@
 #pragma once
 
 #include <array>
-#include "vector3f.h"
+#include <core/math/vector_util.hpp>
+#include <core/math/htypes.hpp>
 
 struct Plane3f {
 	Vector3f n; // normal
@@ -109,6 +110,34 @@ struct Plane3f {
 		return inters;
 	}
 
+    bool intersectRayOnTriangleMin( const RayPair3& rayPair, const Vector3f& a, const Vector3f& b, const Vector3f& c, float& nearV ) const {
+        Vector3f i;
+        float bu;
+        float bv;
+        if ( intersectRayOnTriangle( rayPair.origin, rayPair.dir, a, b, c, i, bu, bv ) ) {
+            float dist = distance( rayPair.origin, i);
+            if ( dist < nearV ) {
+                nearV = dist;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool intersectRayOnTriangles2dMin( const RayPair3& rayPair, const std::vector<Triangle2d>& tris, float z, float& nearV ) const {
+
+        for ( const auto& floorPoly : tris ) {
+            V3f a = XZY::C(std::get<0>(floorPoly), z);
+            V3f b = XZY::C(std::get<2>(floorPoly), z);
+            V3f c = XZY::C(std::get<1>(floorPoly), z);
+            if ( intersectRayOnTriangleMin(rayPair, a, c, b, nearV) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool intersectRayOnQuad( const Vector3f& p0, const Vector3f& v, std::array<Vector3f,4> quad, Vector3f& i ) const {
         bool inters = false;
         i = intersectRay( p0, v, inters );
@@ -132,6 +161,18 @@ struct Plane3f {
             return true;
         }
         return inters;
+    }
+
+    bool intersectRayOnQuadMin( const RayPair3& rayPair, std::array<Vector3f,4> quad, float& nearV ) const {
+	    Vector3f i{V3f::ZERO};
+	    if ( intersectRayOnQuad(rayPair.origin, rayPair.dir, quad, i) ) {
+            float dist = distance( rayPair.origin, i);
+            if ( dist < nearV ) {
+                nearV = dist;
+                return true;
+            }
+        }
+	    return false;
     }
 
 };
