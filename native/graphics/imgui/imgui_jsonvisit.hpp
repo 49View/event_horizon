@@ -234,6 +234,17 @@ static void drawArrayOfVector( const char* _name, const std::vector<T>& array ) 
 	}
 }
 
+template <typename T, std::size_t N>
+static void drawArrayOfVector( const char* _name, const std::array<T, N>& array ) {
+    //drawKey( _name );
+    if (ImGui::TreeNode(_name)) {
+        for ( auto& value : array ) {
+            drawVector( value );
+        }
+        ImGui::TreePop();
+    }
+}
+
 template <typename T>
 static std::string arrayName( const char* _name, const std::vector<T>& array ) {
 	std::string ret = std::string(_name);
@@ -369,7 +380,22 @@ public:
 
 	template <typename C, typename T>
 	static void visit( const char* _name, const std::vector<T>& array ) {
-		arrayVisitDot
+	    if constexpr ( std::is_same_v<T, std::array<V3f, 4>> ) {
+            drawKey( _name );
+            if (ImGui::TreeNode(_name)) {
+                if (ImGui::TreeNode( std::string{std::string{_name}+"v"}.c_str())) {
+                    size_t counter = 0;
+                    for ( auto& value : array ) {
+                        std::string label = std::string{_name} + "[" + std::to_string(counter++) + "]";
+                        drawArrayOfVector( label.c_str(), value );
+                    }
+                    ImGui::TreePop();
+                }
+                ImGui::TreePop();
+            }
+	    } else {
+            arrayVisitDot
+	    }
 	}
 
 	template<typename C, typename T, std::size_t N>
@@ -393,7 +419,23 @@ public:
 		}
     }
 
-	static void visit( const char* _name, const std::vector<Vector2f>& array ) {
+    template<typename T, std::size_t N>
+    static void visit( const char* _name, const std::vector<std::array<T, N>>& array ) {
+        drawKey( _name );
+        if (ImGui::TreeNode(_name)) {
+            if (ImGui::TreeNode( std::string{std::string{_name}+"v"}.c_str())) {
+                size_t counter = 0;
+                for ( auto& value : array ) {
+                    std::string label = std::string{_name} + "[" + std::to_string(counter++) + "]";
+                    drawArrayOfVector( label.c_str(), value );
+                }
+                ImGui::TreePop();
+            }
+            ImGui::TreePop();
+        }
+    }
+
+    static void visit( const char* _name, const std::vector<Vector2f>& array ) {
 		drawArrayOfVector( _name, array );
 	}
 

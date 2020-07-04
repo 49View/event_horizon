@@ -129,6 +129,12 @@ void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
     bitangent3 = bitangent1;
 }
 
+QuadVector3f makeQuadV3f( const Vector3f& p1, const Vector3f& p2, float z2 ) {
+    V3f v3 = p1 + V3f::UP_AXIS * z2;
+    V3f v4 = p2 + V3f::UP_AXIS * z2;
+    return QuadVector3f{ { p1, p2, v4, v3 } };
+}
+
 Vector3f XZY::C( const Vector3f& _v ) {
 	return _v.xzy();
 }
@@ -172,3 +178,4 @@ std::vector<Vector3f> XZY::C( const std::vector<Vector2f>& _v, float _z ) {
 Vector2f XZY::C2( const Vector3f& v2 ) {
     return V2f{v2.x(), v2.z()};
 }
+

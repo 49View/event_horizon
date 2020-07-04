@@ -19,3 +19,5 @@ struct RayPair {
     T origin{0.0f};
     T dir{0.0f};
 };
+
+QuadVector3f makeQuadV3f( const Vector3f& p1, const Vector3f& p2, float z2 );
