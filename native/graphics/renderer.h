@@ -99,6 +99,7 @@ struct RendererDrawingSet {
     std::string textureRef{};
     std::shared_ptr<Matrix4f> matrix;
     Matrix4f preMultMatrix{ Matrix4f::IDENTITY };
+    V3f rotationNormalAxis = V3f::ZERO;
     bool usePreMult = false;
 };
 
@@ -154,6 +155,15 @@ struct RDSCircleLineWidth {
         return data;
     }
     float data;
+};
+
+struct RDSRotationNormalAxis {
+    template<typename ...Args>
+    explicit RDSRotationNormalAxis( Args&& ... args ) : data(std::forward<Args>(args)...) {}
+    V3f operator()() const noexcept {
+        return data;
+    }
+    V3f data;
 };
 
 using CommandBufferLimitsT = int;
@@ -538,6 +548,10 @@ public:
         }
         if constexpr ( std::is_same_v<M, RDSCircleLineWidth> ) {
             rds.width = _param();
+            return;
+        }
+        if constexpr ( std::is_same_v<M, RDSRotationNormalAxis> ) {
+            rds.rotationNormalAxis = _param();
             return;
         }
         if constexpr ( std::is_same_v<M, V3fVectorOfVectorWrap> ) {

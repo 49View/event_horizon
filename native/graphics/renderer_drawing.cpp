@@ -92,7 +92,8 @@ auto addVertexStrips( Renderer& _rr, const std::vector<T>& verts, const Renderer
 template<typename TS>
 auto addVertexStripsTM( Renderer& _rr, std::shared_ptr<TS> ps, const RendererDrawingSet& rds ) {
 
-    auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) }, rds.name }.
+    auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) },
+                             rds.name }.
             t(rds.matrix).p(ps).n(rds.name).build();
     _rr.VPL(rds.bucketIndex, vp);
     return vp;
@@ -571,11 +572,21 @@ VPListSP Renderer::drawCircleFilledFinal( RendererDrawingSet& rds ) {
     V3fVector verts;
 
     rds.prim = Primitive::PRIMITIVE_TRIANGLE_FAN;
-    auto center = rds.verts.v[0];
+    bool hasRotation = rds.rotationNormalAxis != V3f::ZERO;
+    auto center = hasRotation ? V3f::ZERO : rds.verts.v[0];
     auto radius = rds.radius;
     for ( auto t = 0u; t < rds.archSegments; t++ ) {
         float angle = ( static_cast<float>( t ) / static_cast<float>( rds.archSegments ) ) * TWO_PI;
-        verts.emplace_back(Vector3f(center + V3f(sinf(angle), 0.0f, cosf(angle)) * radius));
+        verts.emplace_back( (V3f{ sinf(angle), 0.0f, cosf(angle) } * radius) + center);
+    }
+
+    if ( hasRotation ) {
+        Quaternion quat{};
+        quat.rotateFromAxis(V3f::UP_AXIS, rds.rotationNormalAxis);
+        Matrix4f mattor = quat.matrix4(rds.verts.v[0]); // rds.verts.v[0] == center
+        for ( auto& v : verts ) {
+            v = mattor.transform( v );
+        }
     }
     preMult(verts, rds);
 
@@ -888,7 +899,7 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
 //    auto trams = std::make_shared<Matrix4f>( rds.preMultMatrix );//
 
     auto vp = VPBuilder<FontStrip>{ *this, ShaderMaterial{ rds.shaderName, mapColor(rds.color) }, rds.fds.text }.
-            p(ps).t(rds.matrix).n(rds.fds.text+rds.name).
+            p(ps).t(rds.matrix).n(rds.fds.text + rds.name).
             build();
 
     VPL(rds.bucketIndex, vp);
