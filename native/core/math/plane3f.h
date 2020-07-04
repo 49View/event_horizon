@@ -6,9 +6,9 @@
 //  Copyright © 2015 EpicGames. All rights reserved.
 //
 
-#ifndef plane3f_h
-#define plane3f_h
+#pragma once
 
+#include <array>
 #include "vector3f.h"
 
 struct Plane3f {
@@ -108,6 +108,31 @@ struct Plane3f {
 		}
 		return inters;
 	}
+
+    bool intersectRayOnQuad( const Vector3f& p0, const Vector3f& v, std::array<Vector3f,4> quad, Vector3f& i ) const {
+        bool inters = false;
+        i = intersectRay( p0, v, inters );
+        if ( inters ) {
+            Vector3f crossBA = cross( quad[1] - quad[0], i - quad[0] );
+            float d1 = dot( n, crossBA );
+            if ( d1 < 0.0f ) return false;
+
+            Vector3f crossCB = cross( quad[2] - quad[1], i - quad[1] );
+            float d2 = dot( n, crossCB );
+            if ( d2 < 0.0f ) return false;
+
+            Vector3f crossAC = cross( quad[3] - quad[2], i - quad[2] );
+            float d3 = dot( n, crossAC );
+            if ( d3 < 0.0f ) return false;
+
+            Vector3f crossAD = cross( quad[0] - quad[3], i - quad[3] );
+            float d4 = dot( n, crossAD );
+            if ( d4 < 0.0f ) return false;
+
+            return true;
+        }
+        return inters;
+    }
+
 };
 
-#endif /* plane3f_h */
