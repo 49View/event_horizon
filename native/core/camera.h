@@ -59,8 +59,6 @@ public:
 	void setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar );
 	void setProjectionMatrix( const Matrix4f & val );
 
-	void setQuatAngles( const Vector3f&a );
-	void incrementQuatAngles( const Vector3f& a );
     void incrementSphericalAngles( const V2f& _sph );
     void incrementOrbitDistance( float _d );
 
@@ -108,14 +106,10 @@ public:
 	const CameraSpatials& getSpatials() const;
 	Vector3f getPosition() const;
 	Vector4f getNearFar() const;
-	Vector3f getPositionInv() const;
 	Vector3f getPositionRH() const;
 	Vector3f getYawVector() const;
-	Vector3f getYawVectorInv() const;
 	Vector3f getUpVector() const;
-	Vector3f getUpVectorInv() const;
 	Vector3f getDirection() const;
-	Vector3f getDirectionInv() const;
 	Vector3f getDirectionRH() const;
 
 	[[nodiscard]] std::vector<V3f> frustumFarViewPort() const;
@@ -138,10 +132,6 @@ public:
 	[[nodiscard]] bool LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
 	void LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
 	void ToggleLockAtWalkingHeight() { mLockAtWalkingHeight = !mLockAtWalkingHeight; }
-    void UpdateIncrementalEulerFromQangle();
-    void UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget);
-    void setIncrementQuatAngles( const Vector3f& a );
-    V3f getIncrementQuatAngles() const;
 	void enableInputs( bool _enableInputs ) { mbLocked = _enableInputs; }
 
 	[[nodiscard]] JMATH::Rect2f ViewPort() const { return mViewPort; }
@@ -183,7 +173,6 @@ private:
 	CameraSpatials spatials;
 
     V3f mTarget;
-    V3f incrementalEulerQuatAngle = Vector3f::ZERO;
     V2f sphericalAcc = V2fc::ZERO;
     V3f mOrbitStrafe = V3f::ZERO;
     float mOrbitDistance = 2.0f;

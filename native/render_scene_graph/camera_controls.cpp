@@ -141,12 +141,20 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
         togglesUpdate(mi);
 
         auto[moveForward, strafe, moveUp]  = wasd(mi);
-        _cam->moveForward(moveForward);
-        _cam->strafe(strafe);
-        _cam->moveUp(moveUp);
+        _cam->moveForward(moveForward*3.0f);
+        _cam->strafe(strafe*3.0f);
+        _cam->moveUp(moveUp*3.0f);
         if ( mi.moveDiffSS(TOUCH_ZERO) != V2fc::ZERO ) {
-            auto quatAngles = V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f };
-            _cam->incrementQuatAngles(quatAngles);
+            auto quatAngles = V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f }*3.0f;
+
+            Quaternion qy( quatAngles.y(), Vector3f::Y_AXIS );
+            Quaternion qx( quatAngles.x(), Vector3f::X_AXIS );
+            Quaternion qSequence = _cam->quatAngle() * qy;
+            qSequence = qx * qSequence;
+            qSequence.normalise();
+            _cam->setQuat( qSequence );
+
+//            _cam->setQuat(_cam->quatAngle() * quatCompose(quatAngles));
         }
 
 //        if ( !inputIsBlockedOnSelection() && mi.isMouseTouchedDownFirstTime(TOUCH_ZERO) ) {
@@ -219,7 +227,12 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
         currentAngularVelocity += V2f{ angledd.x() * log10(1.0f + currAngularVelocity),
                                        angledd.y() * log10(1.0f + currAngularVelocity) };
     }
-    _cam->incrementQuatAngles(V3f{ currentAngularVelocity, 0.0f });
+    Quaternion qy( currentAngularVelocity.y(), Vector3f::Y_AXIS );
+    Quaternion qx( currentAngularVelocity.x(), Vector3f::X_AXIS );
+    Quaternion qSequence = _cam->quatAngle() * qy;
+    qSequence = qx * qSequence;
+    qSequence.normalise();
+    _cam->setQuat( qSequence );
     currentAngularVelocity *= dampingAngularVelocityFactor;
 }
 

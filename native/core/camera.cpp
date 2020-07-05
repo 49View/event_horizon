@@ -547,12 +547,10 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
     } else if ( cca == CameraCenterAngle::Back ) {
         spatials.mPos->value = _bbox.centre() - cp;
         spatials.qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS };
-        UpdateIncrementalEulerFromQangle();
         sphericalAcc = V2f{ M_PI, M_PI_2 };
     } else if ( cca == CameraCenterAngle::Halfway || cca == CameraCenterAngle::HalfwayOpposite ) {
         float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : static_cast<float>(TWO_PI - M_PI_4);
         spatials.qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS } * Quaternion{ M_PI_4, Vector3f::Z_AXIS };
-        UpdateIncrementalEulerFromQangle();
         sphericalAcc = V2f{ TWO_PI - (float) rangle * 0.5f, (float) M_PI_4 + (float) M_PI_4 * 0.5f };
         if ( Mode() == CameraControlType::Orbit ) {
             computeOrbitPosition();
@@ -562,7 +560,6 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
     }
     if ( Mode() != CameraControlType::Orbit ) {
         spatials.qangle->value = Quaternion{ Vector3f::ZERO };
-        incrementalEulerQuatAngle = V3f::ZERO;
     }
 
 }
@@ -747,7 +744,6 @@ std::ostream& operator<<( std::ostream& os, const Camera& camera ) {
        << "mFarClipPlaneZClampEdit2d: " << camera.mFarClipPlaneZClampEdit2d << std::endl
        << "mLockAtWalkingHeight: " << camera.mLockAtWalkingHeight << std::endl
        << "mbLocked: " << camera.mbLocked << std::endl
-       << "incrementalEulerQuatAngle: " << camera.incrementalEulerQuatAngle << std::endl
        << "sphericalAcc: " << camera.sphericalAcc << std::endl
        << "mOrbitStrafe: " << camera.mOrbitStrafe << std::endl
        << "mOrbitDistance: " << camera.mOrbitDistance << std::endl;// << " mViewPort: " << camera.mViewPort;
@@ -766,10 +762,6 @@ Vector3f Camera::getPosition() const {
     return spatials.mPos->value;
 }
 
-Vector3f Camera::getPositionInv() const {
-    return -spatials.mPos->value;
-}
-
 Vector3f Camera::getPositionRH() const {
     Vector3f lPos = spatials.mPos->value.xzy();
     lPos.invZ();
@@ -778,27 +770,6 @@ Vector3f Camera::getPositionRH() const {
 
 void Camera::setQuat( const Quaternion& a ) {
     spatials.qangle->value = a;
-}
-
-void Camera::setQuatAngles( const Vector3f& a ) {
-    if ( mbLocked ) return;
-    incrementalEulerQuatAngle = a;
-    spatials.qangle->value = quatCompose(incrementalEulerQuatAngle);
-}
-
-void Camera::incrementQuatAngles( const Vector3f& a ) {
-    if ( mbLocked ) return;
-    if ( spatials.qangle->isAnimating ) return;
-    incrementalEulerQuatAngle += a;
-    spatials.qangle->value = quatCompose(incrementalEulerQuatAngle);
-}
-
-void Camera::setIncrementQuatAngles( const Vector3f& a ) {
-    incrementalEulerQuatAngle = a;
-}
-
-V3f Camera::getIncrementQuatAngles() const {
-    return incrementalEulerQuatAngle;
 }
 
 void Camera::incrementOrbitDistance( float _d ) {
@@ -830,16 +801,7 @@ void Camera::computeOrbitPosition() {
     setPosition(mTarget * V3f::UP_AXIS + XZY::C(stc));
 }
 
-void Camera::UpdateIncrementalEulerFromQangle() {
-    incrementalEulerQuatAngle = V3f{ M_PI } - spatials.qangle->value.euler2();
-}
-
-void Camera::UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget ) {
-    incrementalEulerQuatAngle = _qtarget.euler2();
-}
-
 void Camera::resetQuat() {
-    incrementalEulerQuatAngle = V3f::ZERO;
     spatials.qangle->value = Quaternion{ V3f::ZERO };
 }
 
@@ -874,24 +836,12 @@ Vector3f Camera::getYawVector() const {
     return mView.getCol(0).xyz();
 }
 
-Vector3f Camera::getYawVectorInv() const {
-    return -mView.getCol(0).xyz();
-}
-
 Vector3f Camera::getUpVector() const {
     return mView.getCol(1).xyz();
 }
 
-Vector3f Camera::getUpVectorInv() const {
-    return -mView.getCol(1).xyz();
-}
-
 Vector3f Camera::getDirection() const {
     return mView.getCol(2).xyz();
-}
-
-Vector3f Camera::getDirectionInv() const {
-    return -mView.getCol(2).xyz();
 }
 
 Vector3f Camera::getDirectionRH() const {

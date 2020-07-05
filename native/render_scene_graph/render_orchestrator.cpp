@@ -268,7 +268,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
             sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.01f,
                              GT::Scale(10.0f, 0.1f, 10.0f));
             DC()->setPosition(V3f{ 0.22f, 1.02f, -1.8f });
-            DC()->setIncrementQuatAngles(V3f{ 0.33f, -2.8f, 0.0f });
+            DC()->setQuat(quatCompose( V3f{0.33f, -2.8f, 0.0f} ));
 
             float tsize = 0.10f;
             float ygap = .005f;

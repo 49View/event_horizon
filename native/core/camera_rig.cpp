@@ -35,7 +35,7 @@ CubeMapRigContainer addCubeMapRig( const std::string& _name,
         auto c = std::make_shared<CameraRig>( rigName, _viewPort );
         c->getCamera()->setFoV( cubeMapFOV );
         c->getCamera()->setPosition( _pos );
-        c->getCamera()->setQuatAngles( camAngles[faceIndex] );
+        c->getCamera()->setQuat( quatCompose(camAngles[faceIndex]) );
         c->getCamera()->Mode( CameraControlType::Walk );
         c->getCamera()->update();
 
