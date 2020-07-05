@@ -130,6 +130,15 @@ struct RDSRoundedCorner {
     float data;
 };
 
+struct RDSArchSegments {
+    template<typename ...Args>
+    explicit RDSArchSegments( Args&& ... args ) : data(std::forward<Args>(args)...) {}
+    size_t operator()() const noexcept {
+        return data;
+    }
+    size_t data;
+};
+
 struct RDSArrowAngle {
     template<typename ...Args>
     explicit RDSArrowAngle( Args&& ... args ) : data(std::forward<Args>(args)...) {}
@@ -536,6 +545,10 @@ public:
         }
         if constexpr ( std::is_same_v<M, RDSRoundedCorner> ) {
             rds.roundedCorner = _param();
+            return;
+        }
+        if constexpr ( std::is_same_v<M, RDSArchSegments> ) {
+            rds.archSegments = _param();
             return;
         }
         if constexpr ( std::is_same_v<M, RDSArrowAngle> ) {
