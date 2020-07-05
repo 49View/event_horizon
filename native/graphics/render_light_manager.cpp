@@ -1,6 +1,7 @@
 #include "render_light_manager.h"
 
 #include <core/math/spherical_harmonics.h>
+#include <core/math/anim.h>
 #include <core/descriptors/uniform_names.h>
 #include <graphics/shadowmap_manager.h>
 #include <graphics/program_uniform_set.h>

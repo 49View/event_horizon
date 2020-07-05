@@ -2,7 +2,7 @@
 
 #include <core/math/vector3f.h>
 #include <core/math/anim_type.hpp>
-#include <core/math/anim.h>
+#include <core/math/anim_type.hpp>
 #include <core/resources/light.hpp>
 
 class ProgramUniformSet;

@@ -6,7 +6,10 @@
 
 #include <variant>
 #include <string>
+#include <vector>
 #include <memory>
+#include <functional>
+#include <unordered_map>
 #include <set>
 #include <cstdint>
 
@@ -67,3 +70,40 @@ using V2fa 			= AnimValue<Vector2f>;
 using V3fa 			= AnimValue<Vector3f>;
 using V4fa 			= AnimValue<Vector4f>;
 using Quaterniona 	= AnimValue<Quaternion>;
+
+enum class AnimLoopType {
+    Linear,
+    Reverse,
+    Bounce,
+    Loop,
+    Toggle
+};
+
+enum class AnimVelocityType {
+    Linear,
+    Cosine,
+    Exp,
+    Hermite
+};
+
+using KeyFrameTimes_t = std::vector<float>;
+using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, TimelineIndex, int)>;
+using TimelineLinks = std::unordered_map< TimelineIndex, TimelineSet >;
+using TimelineGroupCCF = std::function<void()>;
+using TimelineUpdateGroupCCF = std::function<void(float)>;
+
+const static TimelineIndex   tiNorm  = 1000000000;
+
+constexpr static TimelineIndex   tiFloat = 0;
+constexpr static TimelineIndex   tiV2f   = tiFloat + tiNorm;
+constexpr static TimelineIndex   tiV3f   = tiV2f   + tiNorm;
+constexpr static TimelineIndex   tiV4f   = tiV3f   + tiNorm;
+constexpr static TimelineIndex   tiQuat  = tiV4f   + tiNorm;
+constexpr static TimelineIndex   tiInt   = tiQuat  + tiNorm;
+
+constexpr static TimelineIndex   tiFloatIndex   = tiFloat / tiNorm;
+constexpr static TimelineIndex   tiV2fIndex     = tiV2f   / tiNorm;
+constexpr static TimelineIndex   tiV3fIndex     = tiV3f   / tiNorm;
+constexpr static TimelineIndex   tiV4fIndex     = tiV4f   / tiNorm;
+constexpr static TimelineIndex   tiQuatIndex    = tiQuat  / tiNorm;
+constexpr static TimelineIndex   tiIntIndex     = tiInt   / tiNorm;

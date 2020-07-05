@@ -24,43 +24,6 @@
 #include <core/uuid.hpp>
 #include <core/util_range.hpp>
 
-enum class AnimLoopType {
-	Linear,
-	Reverse,
-	Bounce,
-	Loop,
-	Toggle
-};
-
-enum class AnimVelocityType {
-	Linear,
-	Cosine,
-	Exp,
-	Hermite
-};
-
-using KeyFrameTimes_t = std::vector<float>;
-using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, TimelineIndex, int)>;
-using TimelineLinks = std::unordered_map< TimelineIndex, TimelineSet >;
-using TimelineGroupCCF = std::function<void()>;
-using TimelineUpdateGroupCCF = std::function<void(float)>;
-
-const static TimelineIndex   tiNorm  = 1000000000;
-
-constexpr static TimelineIndex   tiFloat = 0;
-constexpr static TimelineIndex   tiV2f   = tiFloat + tiNorm;
-constexpr static TimelineIndex   tiV3f   = tiV2f   + tiNorm;
-constexpr static TimelineIndex   tiV4f   = tiV3f   + tiNorm;
-constexpr static TimelineIndex   tiQuat  = tiV4f   + tiNorm;
-constexpr static TimelineIndex   tiInt   = tiQuat  + tiNorm;
-
-constexpr static TimelineIndex   tiFloatIndex   = tiFloat / tiNorm;
-constexpr static TimelineIndex   tiV2fIndex     = tiV2f   / tiNorm;
-constexpr static TimelineIndex   tiV3fIndex     = tiV3f   / tiNorm;
-constexpr static TimelineIndex   tiV4fIndex     = tiV4f   / tiNorm;
-constexpr static TimelineIndex   tiQuatIndex    = tiQuat  / tiNorm;
-constexpr static TimelineIndex   tiIntIndex     = tiInt   / tiNorm;
-
 namespace TLU {
 
 inline static TimelineIndex getTI( inta _source ) {
@@ -112,7 +75,8 @@ enum class KeyFramePosition {
 template <typename T>
 struct KeyFramePair {
     KeyFramePair( float timeStamp, T value ) : time( timeStamp ), value( value ) {}
-
+    KeyFramePair( float time, T value, AnimVelocityType velocityType ) : time(time), value(value),
+                                                                         velocityType(velocityType) {}
     float time = 0.0f;
     T value;
     AnimVelocityType velocityType = AnimVelocityType::Hermite;
@@ -202,6 +166,7 @@ public:
     T valueAt( float _timeElapsed ) {
         auto value = source->value;
         uint64_t keyFrameIndex = 0;
+
         float delta = 0.0f;
         auto keyFramePos = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
         source->isAnimating = keyFramePos == KeyFramePosition::Pre ||
@@ -556,7 +521,7 @@ public:
     template<typename SGT, typename M>
     static void addParam( std::shared_ptr<TimelineGroup<SGT>> tg, const M& _param ) {
         if constexpr ( std::is_same_v<M, KeyFramePair<SGT>> ) {
-            tg->stream.k( { 0.0f, tg->stream.value() } );
+            tg->stream.k( { 0.0f, tg->stream.value(), _param.velocityType } );
             tg->stream.k( _param );
         }
         if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
