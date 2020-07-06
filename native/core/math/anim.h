@@ -504,6 +504,15 @@ public:
         _source->value = _restoreValue;
     }
 
+    static void clear() {
+        timelinef.clear();
+        timelineV2.clear();
+        timelineV3.clear();
+        timelineV4.clear();
+        timelineQ.clear();
+        timelinei.clear();
+    }
+
     static void sleep( float _seconds = 0.016f, uint64_t frameSkipper = 0, TimelineGroupCCF _ccf = nullptr ) {
         auto groupName = UUIDGen::make();
         auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Sleeping");
