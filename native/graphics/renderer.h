@@ -282,6 +282,7 @@ public:
     inline CommandBufferListVectorMap& CL() { return mCommandLists; }
     std::vector<std::shared_ptr<VPList>> CLI( uint64_t cli );
     std::vector<std::shared_ptr<VPList>> CLIExcludingTag( uint64_t cli, uint64_t excludingTag );
+    std::vector<std::shared_ptr<VPList>> CLIIncludingTag( uint64_t cli, uint64_t _tag );
     inline const CommandBufferListVectorMap& CL() const { return mCommandLists; }
 
     void resetDefaultFB( const Vector2i& forceSize = Vector2i{ -1 } );

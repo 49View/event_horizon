@@ -699,6 +699,16 @@ std::vector<std::shared_ptr<VPList>> Renderer::CLIExcludingTag( uint64_t cli, ui
     return ret;
 }
 
+std::vector<std::shared_ptr<VPList>> Renderer::CLIIncludingTag( uint64_t cli, uint64_t _tag ) {
+    std::vector<std::shared_ptr<VPList>> ret;
+    auto pred = [_tag](const auto& elem) {
+        return checkBitWiseFlag( elem->tag(), _tag );
+    };
+    std::copy_if (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret), pred);
+    std::copy_if (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret), pred);
+    return ret;
+}
+
 float Renderer::ssaoBlendFactor() const {
     return mSsaoBlendFactor->value;
 }
