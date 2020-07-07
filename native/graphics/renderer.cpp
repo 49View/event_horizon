@@ -691,7 +691,7 @@ std::vector<std::shared_ptr<VPList>> Renderer::CLI( uint64_t cli ) {
 
 std::vector<std::shared_ptr<VPList>> Renderer::CLIExcludingTag( uint64_t cli, uint64_t excludingTag ) {
     std::vector<std::shared_ptr<VPList>> ret;
-    auto pred = [excludingTag](const auto& elem) {
+    auto pred = [excludingTag](const auto& elem) -> bool {
         return !checkBitWiseFlag( elem->tag(), excludingTag );
     };
     std::copy_if (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret), pred);
@@ -701,7 +701,7 @@ std::vector<std::shared_ptr<VPList>> Renderer::CLIExcludingTag( uint64_t cli, ui
 
 std::vector<std::shared_ptr<VPList>> Renderer::CLIIncludingTag( uint64_t cli, uint64_t _tag ) {
     std::vector<std::shared_ptr<VPList>> ret;
-    auto pred = [_tag](const auto& elem) {
+    auto pred = [_tag](const auto& elem) -> bool {
         return checkBitWiseFlag( elem->tag(), _tag );
     };
     std::copy_if (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret), pred);
