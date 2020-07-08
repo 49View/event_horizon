@@ -22,8 +22,8 @@ bool canUseMultiSample() {
 void Framebuffer::attachDepthBuffer() {
     GLCALL(glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferHandle));
 
-    GLCALL(glGenRenderbuffers(1, &depthTexture));
-    GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, depthTexture));
+    GLCALL(glGenRenderbuffers(1, &mDepthBufferHandle));
+    GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBufferHandle));
 
     if ( mMultisample ) {
         GLCALL(glRenderbufferStorageMultisample(GL_RENDERBUFFER, WH::getMultiSampleCount(), GL_DEPTH_COMPONENT32F,
@@ -32,7 +32,7 @@ void Framebuffer::attachDepthBuffer() {
         GLCALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, mWidth, mHeight));
     }
 
-    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture));
+    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBufferHandle));
 
     checkFrameBufferStatus();
 }
@@ -123,35 +123,25 @@ void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
 }
 
 void Framebuffer::initSimple() {
-    GLCALL(glGenFramebuffers(1, &mFramebufferHandle));
+
     GLCALL(glGenRenderbuffers(1, &mRenderbufferHandle));
-    GLCALL(glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferHandle));
     GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferHandle));
+    GLCALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB565, mWidth, mHeight));
+    GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, 0 ));
 
-    GLCALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight));
-    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRenderbufferHandle));
-
-//    checkFrameBufferStatus();
-
-//    GLuint color_renderbuffer;
-//    glGenRenderbuffers(1, &color_renderbuffer);
-//    glBindRenderbuffer( GL_RENDERBUFFER, (GLuint)color_renderbuffer );
-//    glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA8, fbo_width, fbo_height );
-//    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
-//
 //// Build the texture that will serve as the depth attachment for the framebuffer.
-//    GLuint depth_renderbuffer;
-//    glGenRenderbuffers(1, &depth_renderbuffer);
-//    glBindRenderbuffer( GL_RENDERBUFFER, (GLuint)depth_renderbuffer );
-//    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT, fbo_width, fbo_height );
-//    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
-//
+    GLCALL(glGenRenderbuffers(1, &mDepthBufferHandle));
+    GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBufferHandle));
+    GLCALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mWidth, mHeight));
+    GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, 0 ));
+
 //// Build the framebuffer.
-//    GLuint framebuffer;
-//    glGenFramebuffers(1, &framebuffer);
-//    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)framebuffer);
-//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, color_renderbuffer);
-//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_renderbuffer);
+    GLCALL(glGenFramebuffers(1, &mFramebufferHandle));
+    GLCALL(glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferHandle));
+    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mRenderbufferHandle));
+    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBufferHandle));
+
+    checkFrameBufferStatus();
 
     LOGR("Allocating FRAMEBUFFER %s, [%d,%d], handle %d, renderHandle %d",
          mName.c_str(), mWidth, mHeight, mFramebufferHandle, mRenderbufferHandle);

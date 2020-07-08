@@ -84,7 +84,7 @@ public:
 private:
 	GLuint mFramebufferHandle = 0;
 	GLuint mRenderbufferHandle = 0; // This is only used if we don't have a texture
-    GLuint depthTexture = 0;
+    GLuint mDepthBufferHandle = 0;
 
 	std::string mName;
 	int mWidth{};
