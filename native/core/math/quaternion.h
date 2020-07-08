@@ -263,6 +263,8 @@ public:
 	Matrix4f rotationMatrixNotNormalised() const;
     Matrix3f rotationMatrix3() const;
 
+    Matrix4f matrix4( const V3f& _pos ) const;
+
     /**
 	* @brief Returns the scaled-axis representation of this
 	* quaternion rotation.
@@ -301,6 +303,15 @@ public:
     * @brief Sets quaternion to be same as rotation by scaled axis w.
     */
     void fromAxis( const Vector4f& w );
+
+    /// @brief https://stackoverflow.com/questions/1171849/finding-quaternion-representing-the-rotation-from-one-vector-to-another
+    ///    Quaternion q;
+    ///    vector a = crossproduct(v1, v2);
+    ///    q.xyz = a;
+    ///    q.w = sqrt((v1.Length ^ 2) * (v2.Length ^ 2)) + dotproduct(v1, v2);
+    /// \param fromAxis
+    /// \param rotateToAxis
+    void rotateFromAxis( const Vector3f& fromAxis, const Vector3f& rotateToAxis );
 
     /**
 	* @brief Returns a vector rotated by this quaternion.

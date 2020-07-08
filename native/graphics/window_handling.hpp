@@ -14,18 +14,22 @@ class RenderStats;
 class Vector2i;
 
 namespace WindowHandling {
-	void initializeWindow( uint64_t flags, Renderer& rr );
-	void reinitializeWindowWithSize( int width, int height );
-	bool shouldWindowBeClosed();
-	void flush();
-	void pollEvents();
-	void enableVSync( bool val );
-	void enableInputCallbacks();
-	void disableInputCallbacks();
-	bool isInputEnabled();
+    void initializeWindow( uint64_t flags, Renderer& rr );
+    void reinitializeWindowWithSize( int width, int height );
+    bool shouldWindowBeClosed();
+    void flush();
+    void pollEvents();
+    void enableVSync( bool val );
+    void enableInputCallbacks();
+    void disableInputCallbacks();
+    bool isMouseInputActive();
+    bool isKeyboardInputActive();
+    bool isInputEnabled();
     void enableMouseCursor( bool flag );
     Vector2i captureWindowSize();
     void imRenderLoopStats( const RenderStats& rs );
+    void setMultiSampleCount(int count);
+    int  getMultiSampleCount();
 };
 
 namespace WH = WindowHandling;

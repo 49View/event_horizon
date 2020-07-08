@@ -15,16 +15,6 @@
 #include "util_logs.hpp"
 #include "util_array.hpp"
 
-class CLIParamMap {
-public:
-    CLIParamMap() = default;
-    CLIParamMap( int argc, char *argv[] );
-    [[nodiscard]] std::optional<std::string> getParam( const std::string& key ) const;
-    std::string printAll() const;
-private:
-    KVStringMap params;
-};
-
 int threadId();
 
 namespace ClipBoard {
@@ -47,6 +37,7 @@ std::string priceMaker( uint64_t price );
 std::string sizeToString( const float x, const float y );
 std::string sizeToStringMeters( const float x, const float y );
 std::string sqmToString( const float sqm );
+std::string sqmToSqFtString( const float sqm );
 float stringFeetInchesToCm( const std::string& _text );
 float feetInchesToMeters( const float feetf, const float inchesf );
 
@@ -103,9 +94,10 @@ bool checkBitWiseFlag( Tint source, T flag ) {
 }
 
 template<typename Tint, typename T>
-void orBitWiseFlag( Tint& source, T flag ) {
+Tint orBitWiseFlag( Tint& source, T flag ) {
     int dest = source + flag;
     source = static_cast<Tint>(dest);
+    return source;
 }
 
 template<typename Tint, typename T>

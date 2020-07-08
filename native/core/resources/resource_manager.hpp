@@ -102,12 +102,23 @@ public:
         return {};
     }
 
+    std::tuple<ResourceRef, T*> getHashAndPointer( const std::string& _key ) {
+        if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
+            return std::make_tuple(res->second, resources[res->second].get());
+        }
+        return std::make_tuple(std::string{}, nullptr);
+    }
+
     std::shared_ptr<T> get( const std::string& _key ) {
         if ( auto res = resourcesMapper.find(_key); res != resourcesMapper.end() ) {
             return resources[res->second];
         }
 //        LOGRS("Resource " << _key << " unmapped and mamanger empty, returning null");
         return nullptr;
+    }
+
+    void addKey( const std::string& _key, const std::string& _hash ) {
+        resourcesMapper[_key] = _hash;
     }
 
     std::vector<std::string> getNames( const std::string& _key ) {
@@ -161,10 +172,10 @@ public:
         return false;
     }
 
-    void publish( std::shared_ptr<T> elem, const std::string& _name ) {
-        auto fname = _name.empty() ? S::makeImaginary() : _name;
-        Http::post( Url{ HttpFilePrefix::entities + RV::Prefix() + "/" + fname}, elem->serialize() );
-    }
+//    void publish( std::shared_ptr<T> elem, const std::string& _name ) {
+//        auto fname = _name.empty() ? S::makeImaginary() : _name;
+//        Http::post( Url{ HttpFilePrefix::entities + RV::Prefix() + "/" + fname}, elem->serialize() );
+//    }
 
 protected:
     void add( std::shared_ptr<T> _elem, const std::string& _name,

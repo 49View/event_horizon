@@ -203,10 +203,15 @@ std::string sizeToStringMeters( const float x, const float y ) {
 
 std::string sqmToString( const float sqm ) {
 	std::ostringstream so;
-	so << std::fixed << std::setprecision( 1 ) << sqm << "sqm";
+	so << std::fixed << std::setprecision( 1 ) << sqm << "sq m";
 	return so.str();
 }
 
+std::string sqmToSqFtString( const float sqm ) {
+    std::ostringstream so;
+    so << std::fixed << std::setprecision( 0 ) << sqm*10.764f << "sq ft";
+    return so.str();
+}
 
 std::string UTCMillisToString() {
 	return std::to_string( std::chrono::duration_cast< std::chrono::milliseconds >(
@@ -273,28 +278,4 @@ namespace DaemonPaths {
 	std::string store( const std::string& _type, const std::string& _name ) {
 		return UploadDir + _type + "_outputs/" + _name;
 	}
-}
-
-CLIParamMap::CLIParamMap( int argc, char **argv ) {
-    for ( auto t = 0; t < argc; t++ ) {
-        auto ret = split(argv[t], '=' );
-        if ( ret.size() == 2 ) {
-            params.emplace( ret[0], ret[1] );
-        }
-    }
-}
-
-std::optional<std::string> CLIParamMap::getParam( const std::string &key ) const {
-    if ( auto it = params.find(key); it != params.end() ) {
-        return it->second;
-    }
-    return std::nullopt;
-}
-
-std::string CLIParamMap::printAll() const {
-    std::string ret;
-    for ( const auto& v : params ) {
-        ret+=v.first+"="+v.second+"\n";
-    }
-    return ret;
 }

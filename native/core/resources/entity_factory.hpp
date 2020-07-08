@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <core/zlib_util.h>
+#include <core/hashing/incremental_hash.hpp>
 
 class EntityFactory {
 public:
@@ -41,6 +42,20 @@ public:
     template <typename T>
     static std::shared_ptr<T> clone( const T& _elem ) {
         return std::make_shared<T>(_elem);
+    }
+
+    template <typename T>
+    static std::shared_ptr<T> cloneHashed( const std::shared_ptr<T> _elem ) {
+        auto ret = std::make_shared<T>(*_elem.get());
+        ret->hash = HashInc();
+        return ret;
+    }
+
+    template <typename T>
+    static std::shared_ptr<T> cloneHashed( const T& _elem ) {
+        auto ret = std::make_shared<T>(_elem);
+        ret->hash = HashInc();
+        return ret;
     }
 
     template <typename T>

@@ -185,8 +185,10 @@ void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityG
     Http::clearRequestCache();
 
     if ( entityGroup == ResourceGroup::Geom ) {
-        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.05f,
+        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.1f,
                       GT::Scale(500.0f, 0.1f, 500.0f));
+        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.025f,
+                      GT::Scale(1.0f, 0.05f, 1.0f), C4f::ORANGE_SCHEME1_1);
         addGeomScene(v0);
     } else if ( entityGroup == ResourceGroup::Material ) {
         load<Material>(v0, [this, v0]( HttpResouceCBSign key ) {
@@ -560,18 +562,19 @@ void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _
     if ( _ccf ) _ccf(_key);
 }
 
-ResourceRef SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {
-    auto matRef = ML().getHash(_matref);
-    if ( matRef.empty()) {
-        matRef = ML().getHash(S::WHITE_PBR);
+std::tuple<ResourceRef, Material*> SceneGraph::GBMatInternal( CResourceRef _matref, const C4f& _color ) {
+    auto matRef = ML().getHashAndPointer(_matref);
+    if ( std::get<0>(matRef).empty()) {
+        matRef = ML().getHashAndPointer(S::WHITE_PBR);
     }
     if ( _color != C4f::WHITE ) {
-        matRef = ML().getHash(_matref + _color.toString());
-        if ( matRef.empty()) {
+        matRef = ML().getHashAndPointer(_matref + _color.toString());
+        if ( std::get<0>(matRef).empty()) {
             Material matCopy = EF::copy(ML().get(_matref));
             matCopy.setDiffuseColor(_color.xyz());
             matCopy.setOpacity(_color.w());
-            matRef = B<MB>(_matref + _color.toString()).addIM(matCopy);
+            auto mRef = B<MB>(_matref + _color.toString()).addIM(matCopy);
+            matRef = ML().getHashAndPointer(mRef);
         }
     }
     return matRef;
@@ -711,7 +714,6 @@ void SceneGraph::addScene( const ResourceScene& gs ) {
                 geom->updateExistingTransform(V3f::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
                                               Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE);
                 DC()->center(geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
-//                materialsForGeomSocketMessage();
             }
         });
     });
@@ -752,7 +754,7 @@ void SceneGraph::loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm ) {
 }
 
 float SceneGraph::cameraCollisionDetection( std::shared_ptr<Camera> cam ) {
-    if ( !collisionMesh ) return 0.0f;
+    if ( !collisionMesh || !bCollisionEnabled ) return 0.0f;
     float ret = collisionMesh->collisionDetection( cam->getPosition(), 0.10f );
     cam->setPosition(collisionMesh->getLastKnownGoodPosition());
     return ret;
@@ -769,6 +771,13 @@ void SceneGraph::addGenericCallback( GenericSceneCallbackValue _value ) {
 
 void SceneGraph::addEventCallback( const std::string& _key, SocketCallbackDataType&& _value ) {
     SceneGraph::eventSceneCallback.emplace( _key, std::move(_value) );
+}
+
+bool SceneGraph::isCollisionEnabled() const {
+    return bCollisionEnabled;
+}
+void SceneGraph::setCollisionEnabled( bool _bCollisionEnabled ) {
+    bCollisionEnabled = _bCollisionEnabled;
 }
 
 void HOD::DepRemapsManager::addDep( SceneGraph& sg, const std::string& group, const std::string& resName ) {

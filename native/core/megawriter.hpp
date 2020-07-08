@@ -92,6 +92,24 @@ public:
 		writer->EndArray();
 	}
 
+    template<typename T, std::size_t N>
+    void serialize( const char* _name, const std::vector<std::array<T, N>>& array ) {
+        if ( _name != nullptr ) writer->String( _name );
+        writer->StartArray();
+        for ( auto& varr : array ) {
+            writer->StartArray();
+            for ( auto& value : varr ) {
+                writer->StartArray();
+                writer->Double( value[0] );
+                writer->Double( value[1] );
+                writer->Double( value[2] );
+                writer->EndArray();
+            }
+            writer->EndArray();
+        }
+        writer->EndArray();
+    }
+
     template<typename T>
     void serialize( const char* _name, const VectorWrap<T>& array ) {
         if ( _name != nullptr ) writer->String( _name );

@@ -127,7 +127,7 @@ void Selection::showGizmo( Selectable& _node, std::shared_ptr<Camera> _cam ) {
 
     static float matrix2[16];
     static V3f oldScaleDelta{1.0f};
-    static float oldRotationAngle = 0.0f;
+//    static float oldRotationAngle = 0.0f;
     Matrix4f localTransform = Matrix4f{ _trs };
     float* matrix = localTransform.rawPtr();
 
@@ -151,27 +151,27 @@ void Selection::showGizmo( Selectable& _node, std::shared_ptr<Camera> _cam ) {
             _trs.set( mtt + V3f{matrixTranslationDelta}, mtr, mts );
             break;
         case ImGuizmo::ROTATE: {
-            if ( ImGuizmo::IsUsing() ) {
-                auto rt = ImGuizmo::getRotationType();
-                auto ra = ( ImGuizmo::getRotationAngle() - oldRotationAngle );
-                V3f rot{};
-                switch (rt) {
-                    case ImGuizmo::MOVETYPE::ROTATE_X:
-                        rot = V3f::X_AXIS * ra;
-                        break;
-                    case ImGuizmo::MOVETYPE::ROTATE_Y:
-                        rot = V3f::Y_AXIS * ra;
-                        break;
-                    case ImGuizmo::MOVETYPE::ROTATE_Z:
-                        rot = V3f::Z_AXIS * ra;
-                        break;
-                    default:
-                        rot = Vector3f::ZERO;
-                        break;
-                }
-                _trs.set( mtt, mtr + rot*-1.0f, mts );
-                oldRotationAngle = ImGuizmo::getRotationAngle();
-            }
+//            if ( ImGuizmo::IsUsing() ) {
+//                auto rt = ImGuizmo::getRotationType();
+//                auto ra = ( ImGuizmo::getRotationAngle() - oldRotationAngle );
+//                V3f rot{};
+//                switch (rt) {
+//                    case ImGuizmo::ROTATE_X:
+//                        rot = V3f::X_AXIS * ra;
+//                        break;
+//                    case ImGuizmo::MOVETYPE::ROTATE_Y:
+//                        rot = V3f::Y_AXIS * ra;
+//                        break;
+//                    case ImGuizmo::MOVETYPE::ROTATE_Z:
+//                        rot = V3f::Z_AXIS * ra;
+//                        break;
+//                    default:
+//                        rot = Vector3f::ZERO;
+//                        break;
+//                }
+//                _trs.set( mtt, mtr + rot*-1.0f, mts );
+//                oldRotationAngle = ImGuizmo::getRotationAngle();
+//            }
         }
             break;
         case ImGuizmo::SCALE: {

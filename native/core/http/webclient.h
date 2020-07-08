@@ -11,45 +11,11 @@
 #include <core/htypes_shared.hpp>
 #include <core/string_util.h>
 #include "login.hpp"
+#include "webclient_types.hpp"
 
 
 bool isSuccessStatusCode( int statusCode );
 
-namespace HttpFilePrefix {
-    const static std::string user = "/user";
-    const static std::string gettoken = "/getToken";
-    const static std::string refreshtoken = "/refreshToken";
-    const static std::string entities = "/entities/";
-    const static std::string entities_all = "/entities/metadata/byGroupTags/";
-    const static std::string entities_onebinary = "/entities/content/byGroupTags/";
-    const static std::string get = "/fs/";
-    const static std::string fileupload = "/fs/";
-    const static std::string catalog = "/catalog/";
-    const static std::string getname = "/name/";
-    const static std::string getnotexactname = "/get/notexact/name/";
-    const static std::string broadcast = "/broadcast/";
-};
-
-namespace HttpContentType {
-    const static std::string octetStream = "application/octet-stream";
-    const static std::string json = "application/json";
-    const static std::string text = "application/text";
-}
-
-enum class HttpQuery {
-    Binary,
-    JSON,
-    Text
-};
-
-struct Url;
-
-using SocketCallbackDataType = rapidjson::Document;
-using SocketCallbackDataTypeConstRef = const SocketCallbackDataType&;
-using SocketCallbackFunc = std::function<void( const std::string& msg,  SocketCallbackDataType&& message )>;
-using LoginCallback = std::function<void()>;
-using HttpResouceCBSign = const std::string&;
-using HttpResouceCB = std::function<void(HttpResouceCBSign)>;
 //using HttpResouceCB = std::function<void(const std::string&)>;
 
 namespace Socket {
@@ -94,11 +60,12 @@ JSONDATA( UserLogin, expires, user, project, session )
     std::string     session;
 };
 
-JSONDATA( LoginToken, session, token, expires, project )
+JSONDATA( LoginToken, session, token, expires, project, antiForgeryToken )
     std::string session;
     std::string token;
     uint64_t expires;
     std::string project;
+    std::string antiForgeryToken;
 };
 
 JSONDATA( RefreshToken, session, token, expires )
@@ -146,11 +113,19 @@ namespace Http {
         ResponseFlags flags;
         mutable std::unique_ptr<uint8_t[]> buffer;
         uint64_t length = 0;
-        std::string bufferString;
         int statusCode = 0;
         std::string ETag;
         std::string lastModified;
         HttpResouceCB ccf = nullptr;
+
+        std::string BufferString() const {
+            if ( !bufferString.empty() ) return bufferString;
+            return std::string{ (char *) buffer.get(), static_cast<unsigned long>(length) };
+        }
+
+        std::string& BufferString() {
+            return bufferString;
+        }
 
         void setBuffer( const char* cbuffer, uint64_t _length ) {
             length = _length;
@@ -177,6 +152,8 @@ namespace Http {
         }
 
         bool isSuccessStatusCode() const; //all 200s
+    private:
+        std::string bufferString;
     };
 
     void init();
@@ -189,17 +166,22 @@ namespace Http {
     void refreshToken();
     void xProjectHeader( const LoginFields& _lf );
     void clearRequestCache();
-    Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf );
+    Result tryFileInCache( const std::string& fileHash, const std::string& uri, ResponseFlags rf );
+    void handleResponseCallbacks( Result& lRes, ResponseCallbackFunc callback,
+                                  ResponseCallbackFunc callbackFailed,
+                                  HttpResouceCB mainThreadCallback);
+
+    SerializableContainer getSync( const std::string& url );
 
     void get( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
-    void get( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+    void getNoCache( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
-    void getInternal( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+    void getInternal( const Url& url, const ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed, ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
 
@@ -234,6 +216,8 @@ namespace Http {
 
     void project( const std::string& _project );
     std::string project();
+    std::string AFT();
+    void aft( const std::string& _aft );
     [[nodiscard]] bool useClientCertificate();
     bool useClientCertificate(  bool bUse, const std::string& _certKey, const std::string& _certCrt );
     [[nodiscard]] bool useServerCertificate();
@@ -273,6 +257,10 @@ namespace zlibUtil {
 struct Url {
     Url() = default;
     explicit Url( std::string _uri );
+
+    static bool isValidUrl( const std::string& _url ) {
+        return startswith(_url, "http");
+    }
 
     static std::string Host( const std::string& protocol, const std::string& host, const int portNumber = 0 ) {
         if ( portNumber != 0 ) {

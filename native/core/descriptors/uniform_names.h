@@ -74,6 +74,7 @@ namespace UniformNames {
     const std::string clip_plane = "clip_plane";
     const std::string screenSizeInv = "screenSizeInv";
     const std::string reflectionScreenSizeInv = "reflectionScreenSizeInv";
+    const std::string ssaoBlendFactor = "ssaoBlendFactor";
 
     const std::string diffuseColor = "diffuseColor";
     const std::string ambient = "ambient";
@@ -235,8 +236,8 @@ namespace MPBRTextures {
         if ( isHeightTexture( value )) return UniformNames::heightTexture;
         if ( isAOTexture( value )) return UniformNames::aoTexture;
         if ( isOpacityTexture( value )) return UniformNames::opacityTexture;
-        if ( isTranslucencyTexture( value )) return UniformNames::emissionTexture;
-        if ( isEmissiveTexture( value )) return UniformNames::translucencyTexture;
+        if ( isTranslucencyTexture( value )) return UniformNames::translucencyTexture;
+        if ( isEmissiveTexture( value )) return UniformNames::emissionTexture;
 
         ASSERTV( 0, "Couldn't map PBR texture %s", _value.c_str());
         return "";

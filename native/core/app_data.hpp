@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <core/serialization.hpp>
 #include <core/name_policy.hpp>
 #include <core/names.hpp>
 

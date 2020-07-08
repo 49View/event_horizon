@@ -24,43 +24,6 @@
 #include <core/uuid.hpp>
 #include <core/util_range.hpp>
 
-enum class AnimLoopType {
-	Linear,
-	Reverse,
-	Bounce,
-	Loop,
-	Toggle
-};
-
-enum class AnimVelocityType {
-	Linear,
-	Cosine,
-	Exp,
-	Hermite
-};
-
-using KeyFrameTimes_t = std::vector<float>;
-using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, TimelineIndex, int)>;
-using TimelineLinks = std::unordered_map< TimelineIndex, TimelineSet >;
-using TimelineGroupCCF = std::function<void()>;
-using TimelineUpdateGroupCCF = std::function<void(float)>;
-
-const static TimelineIndex   tiNorm  = 1000000000;
-
-constexpr static TimelineIndex   tiFloat = 0;
-constexpr static TimelineIndex   tiV2f   = tiFloat + tiNorm;
-constexpr static TimelineIndex   tiV3f   = tiV2f   + tiNorm;
-constexpr static TimelineIndex   tiV4f   = tiV3f   + tiNorm;
-constexpr static TimelineIndex   tiQuat  = tiV4f   + tiNorm;
-constexpr static TimelineIndex   tiInt   = tiQuat  + tiNorm;
-
-constexpr static TimelineIndex   tiFloatIndex   = tiFloat / tiNorm;
-constexpr static TimelineIndex   tiV2fIndex     = tiV2f   / tiNorm;
-constexpr static TimelineIndex   tiV3fIndex     = tiV3f   / tiNorm;
-constexpr static TimelineIndex   tiV4fIndex     = tiV4f   / tiNorm;
-constexpr static TimelineIndex   tiQuatIndex    = tiQuat  / tiNorm;
-constexpr static TimelineIndex   tiIntIndex     = tiInt   / tiNorm;
-
 namespace TLU {
 
 inline static TimelineIndex getTI( inta _source ) {
@@ -112,7 +75,8 @@ enum class KeyFramePosition {
 template <typename T>
 struct KeyFramePair {
     KeyFramePair( float timeStamp, T value ) : time( timeStamp ), value( value ) {}
-
+    KeyFramePair( float time, T value, AnimVelocityType velocityType ) : time(time), value(value),
+                                                                         velocityType(velocityType) {}
     float time = 0.0f;
     T value;
     AnimVelocityType velocityType = AnimVelocityType::Hermite;
@@ -202,6 +166,7 @@ public:
     T valueAt( float _timeElapsed ) {
         auto value = source->value;
         uint64_t keyFrameIndex = 0;
+
         float delta = 0.0f;
         auto keyFramePos = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
         source->isAnimating = keyFramePos == KeyFramePosition::Pre ||
@@ -312,8 +277,8 @@ public:
         return timelineIndex;
     }
 
-    void setTimelineIndex( TimelineIndex timelineIndex ) {
-        TimelineStream::timelineIndex = timelineIndex;
+    void setTimelineIndex( TimelineIndex _timelineIndex ) {
+        TimelineStream::timelineIndex = _timelineIndex;
     }
 
     T value() const {
@@ -380,8 +345,11 @@ public:
             frameTickCount = 0;
             frameTickOffset = 0;
             if ( cuf ) cuf( timeElapsed );
-            if ( ccf ) {
+            if ( ccf && loopType == AnimLoopType::Linear ) {
                 ccf();
+            }
+            if ( loopType == AnimLoopType::Loop ) {
+                play();
             }
         } else {
             if ( cuf ) cuf( timeElapsed );
@@ -411,6 +379,10 @@ public:
         cuf = _value;
     }
 
+    void setLooping( AnimLoopType _value ) {
+        loopType = _value;
+    }
+
     TimelineStream<V> stream;
 
 private:
@@ -419,6 +391,7 @@ private:
     float timeElapsed = 0.0f;
     float meanTimeDelta = 0.0f;
     bool bIsPlaying = false;
+    AnimLoopType loopType = AnimLoopType::Linear;
     bool bForceOneFrameOnly = false;
     uint64_t frameTickOffset = 0;
     uint64_t frameTickCount = 0;
@@ -531,6 +504,15 @@ public:
         _source->value = _restoreValue;
     }
 
+    static void clear() {
+        timelinef.clear();
+        timelineV2.clear();
+        timelineV3.clear();
+        timelineV4.clear();
+        timelineQ.clear();
+        timelinei.clear();
+    }
+
     static void sleep( float _seconds = 0.016f, uint64_t frameSkipper = 0, TimelineGroupCCF _ccf = nullptr ) {
         auto groupName = UUIDGen::make();
         auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Sleeping");
@@ -538,17 +520,17 @@ public:
         play( sleepingBeauty, frameSkipper, _ccf, KeyFramePair{ _seconds, 0.0f } );
     }
 
-    static void intermezzo( float _seconds, uint64_t frameSkipper, AnimUpdateCallback _cuf ) {
+    static void intermezzo( float _seconds, uint64_t frameSkipper, AnimUpdateCallback _cuf, AnimEndCallback _cef ) {
         auto groupName = UUIDGen::make();
         auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Intermezzo");
 
-        play( sleepingBeauty, frameSkipper, KeyFramePair{ _seconds, 0.0f }, _cuf );
+        play( sleepingBeauty, frameSkipper, KeyFramePair{ _seconds, 0.0f }, _cuf, _cef );
     }
 
     template<typename SGT, typename M>
     static void addParam( std::shared_ptr<TimelineGroup<SGT>> tg, const M& _param ) {
         if constexpr ( std::is_same_v<M, KeyFramePair<SGT>> ) {
-            tg->stream.k( { 0.0f, tg->stream.value() } );
+            tg->stream.k( { 0.0f, tg->stream.value(), _param.velocityType } );
             tg->stream.k( _param );
         }
         if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
@@ -566,8 +548,12 @@ public:
             tg->CUF(_param());
         }
         if constexpr ( std::is_same_v<M, AnimEndCallback> ) {
-            tg->CCF(_param);
+            tg->CCF(_param());
         }
+        if constexpr ( std::is_same_v<M, AnimLoopType> ) {
+            tg->setLooping(_param);
+        }
+
     }
 
 //    static bool deleteKey( const std::string& _group, TimelineIndex _ti, uint64_t _index ) {

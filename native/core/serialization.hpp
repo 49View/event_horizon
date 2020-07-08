@@ -388,3 +388,15 @@ JSONDATA(JsonError, type, msg)
 inline std::string serializeLogger( const std::string type, const std::string& err ) {
     return JsonError{type, err}.serialize();
 }
+
+template <typename R>
+std::vector<R> deserializeVector( const std::string& sourceString ) {
+    std::vector<R> el{};
+    if ( !sourceString.empty() ) {
+        rapidjson::Document document;
+        document.Parse<rapidjson::kParseStopWhenDoneFlag>( sourceString.c_str() );
+        MegaReader reader( document );
+        reader.deserialize(el);
+    }
+    return el;
+}

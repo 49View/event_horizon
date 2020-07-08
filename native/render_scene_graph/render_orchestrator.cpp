@@ -4,6 +4,7 @@
 
 #include "render_orchestrator.h"
 #include <core/util.h>
+#include <core/cli_param_map.hpp>
 #include <core/resources/resource_utils.hpp>
 #include <core/math/vector_util.hpp>
 #include <core/raw_image.h>
@@ -267,28 +268,28 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
             sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.01f,
                              GT::Scale(10.0f, 0.1f, 10.0f));
             DC()->setPosition(V3f{ 0.22f, 1.02f, -1.8f });
-            DC()->setIncrementQuatAngles(V3f{ 0.33f, -2.8f, 0.0f });
+            DC()->setQuat(quatCompose( V3f{0.33f, -2.8f, 0.0f} ));
 
-//            float tsize = 0.10f;
-//            float ygap = .005f;
-//            float x1 = getScreenAspectRatio - tsize - ygap;
-//            float x2 = getScreenAspectRatio - ygap;
-//            float y = 1.0f - ygap;
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getDiffuseTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getNormalTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getRoughnessTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getMetallicTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getOpacityTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getAOTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getTranslucencyTexture() });
-//            y -= ( tsize + ygap );
-//            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getHeightTexture() });
+            float tsize = 0.10f;
+            float ygap = .005f;
+            float x1 = getScreenAspectRatio - tsize - ygap;
+            float x2 = getScreenAspectRatio - ygap;
+            float y = 1.0f - ygap;
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getDiffuseTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getNormalTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getRoughnessTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getMetallicTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getOpacityTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getAOTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getTranslucencyTexture() });
+            y -= ( tsize + ygap );
+            RR().draw<DRect2d>(Rect2f{ V2f{ x1, y - tsize }, V2f{ x2, y } }, RDSImage{ m1->getHeightTexture() });
         }
     });
 
@@ -765,17 +766,6 @@ void RenderOrchestrator::changeCameraControlType( int _type ) {
     sg.DC()->resetQuat();
 }
 
-void RenderOrchestrator::drawCameraLocator( const Matrix4f& preMult ) {
-    auto camPos = DC()->getPosition() * V3f::MASK_Y_OUT;
-    auto camDir = -DC()->getDirection() * 0.7f;
-    auto sm = DShaderMatrix{ DShaderMatrixValue2dColor };
-    RR().clearBucket(CommandBufferLimits::CameraLocator);
-    RR().draw<DCircleFilled>(CommandBufferLimits::CameraLocator, camPos, V4f::DARK_RED, 0.4f, RDSPreMult(preMult),
-                             sm, "CameraOminoKey");
-    RR().draw<DArrow>(CommandBufferLimits::CameraLocator, V3fVector{ camPos, camPos + camDir }, RDSArrowAngle(0.45f),
-                      RDSArrowLength(0.6f), V4f::RED, 0.004f, sm, RDSPreMult(preMult), "CameraOminoKeyDirection1");
-}
-
 void RenderOrchestrator::setViewportOnRig( std::shared_ptr<CameraRig> _rig, const Rect2f& _viewport ) {
     rr.getTarget(_rig->Name())->getRig()->setViewport(_viewport);
 }
@@ -820,6 +810,7 @@ void RenderOrchestrator::useSkybox( bool _value ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
         pbrTarget->enableSkybox(_value);
     }
+    setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
 }
 
 void RenderOrchestrator::useSunLighting( bool _value ) {
@@ -942,7 +933,7 @@ void RenderOrchestrator::addUIContainer( const MPos2d& _at, CResourceRef _res, U
 
 void RenderOrchestrator::reloadShadersViaHttp() {
     Http::get(Url{ "/shaders" }, [&]( HttpResponeParams res ) {
-        reloadShaders(ShaderLiveUpdateMap{ res.bufferString });
+        reloadShaders(ShaderLiveUpdateMap{ res.BufferString() });
     });
 
 }
@@ -1022,6 +1013,17 @@ void RenderOrchestrator::setMICursorCapture( bool _flag ) {
 
 bool RenderOrchestrator::getMICursorCapture() const {
     return bMICursorCapture;
+}
+
+unsigned int RenderOrchestrator::TH( CResourceRef _value ) {
+    if ( auto texture = RR().TD(_value); texture ) {
+        return texture->getHandle();
+    }
+    return 0;
+}
+
+std::vector<std::string>& RenderOrchestrator::CallbackPaths() {
+    return callbackPaths;
 }
 
 

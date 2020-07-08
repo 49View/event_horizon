@@ -107,7 +107,7 @@ void unzipFilesToTempFolder( const std::string& filename, ArchiveDirectory& ad, 
                 auto tempFileName = root + "/" + zInfo.name;
                 FM::writeLocalFile( tempFileName, SerializableContainer{buff.first.get(), buff.first.get()+buff.second} );
                 if ( getFileNameExtToLower( zInfo.name ) == ".zip" ) {
-                    unzipFilesToTempFolder( tempFileName, ad );
+                    unzipFilesToTempFolder( tempFileName, ad, getFileNamePath(tempFileName) );
                 }
             }
         }

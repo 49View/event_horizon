@@ -14,6 +14,7 @@
 #include <graphics/graphic_constants.h>
 #include <graphics/ghtypes.hpp>
 #include <graphics/shadowmap_manager.h>
+#include <core/math/anim_type.hpp>
 
 struct DCircle {
 };
@@ -37,10 +38,10 @@ struct DText2d {
 };
 
 using DShaderMatrixValue = uint64_t;
-static constexpr DShaderMatrixValue DShaderMatrixValue2dColor   = 1 << 1;
-static constexpr DShaderMatrixValue DShaderMatrixValue2dTexture = 1 << 2;
-static constexpr DShaderMatrixValue DShaderMatrixValue3dColor   = 1 << 3;
-static constexpr DShaderMatrixValue DShaderMatrixValue3dTexture = 1 << 4;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dColor   = 1u << 1;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dTexture = 1u << 2;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dColor   = 1u << 3;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dTexture = 1u << 4;
 
 struct DShaderMatrix {
     template<typename ...Args>
@@ -48,8 +49,9 @@ struct DShaderMatrix {
     DShaderMatrixValue operator()() const noexcept {
         return data;
     }
-    bool has2d() const;
-    bool hasTexture() const;
+    [[nodiscard]] bool has2d() const;
+    [[nodiscard]] bool hasTexture() const;
+    [[nodiscard]] std::string hash() const;
     DShaderMatrixValue data;
 };
 
@@ -97,6 +99,7 @@ struct RendererDrawingSet {
     std::string textureRef{};
     std::shared_ptr<Matrix4f> matrix;
     Matrix4f preMultMatrix{ Matrix4f::IDENTITY };
+    V3f rotationNormalAxis = V3f::ZERO;
     bool usePreMult = false;
 };
 
@@ -127,6 +130,15 @@ struct RDSRoundedCorner {
     float data;
 };
 
+struct RDSArchSegments {
+    template<typename ...Args>
+    explicit RDSArchSegments( Args&& ... args ) : data(std::forward<Args>(args)...) {}
+    size_t operator()() const noexcept {
+        return data;
+    }
+    size_t data;
+};
+
 struct RDSArrowAngle {
     template<typename ...Args>
     explicit RDSArrowAngle( Args&& ... args ) : data(std::forward<Args>(args)...) {}
@@ -152,6 +164,15 @@ struct RDSCircleLineWidth {
         return data;
     }
     float data;
+};
+
+struct RDSRotationNormalAxis {
+    template<typename ...Args>
+    explicit RDSRotationNormalAxis( Args&& ... args ) : data(std::forward<Args>(args)...) {}
+    V3f operator()() const noexcept {
+        return data;
+    }
+    V3f data;
 };
 
 using CommandBufferLimitsT = int;
@@ -226,6 +247,7 @@ public:
     void changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b );
     void changeMaterialAlphaOnTags( uint64_t _tag, float _alpha );
     void setVisibilityOnTags( uint64_t _tag, bool _visibility );
+    std::vector<std::shared_ptr<VPList>> getVPListWithTags( uint64_t _tag );
     void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
     void replaceMaterial( const std::string& _oldMatRef, const std::string& _newMatRef );
     void changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value );
@@ -259,6 +281,8 @@ public:
     inline CommandBufferList& CB_U() { return *mCommandBuffers; }
     inline CommandBufferListVectorMap& CL() { return mCommandLists; }
     std::vector<std::shared_ptr<VPList>> CLI( uint64_t cli );
+    std::vector<std::shared_ptr<VPList>> CLIExcludingTag( uint64_t cli, uint64_t excludingTag );
+    std::vector<std::shared_ptr<VPList>> CLIIncludingTag( uint64_t cli, uint64_t _tag );
     inline const CommandBufferListVectorMap& CL() const { return mCommandLists; }
 
     void resetDefaultFB( const Vector2i& forceSize = Vector2i{ -1 } );
@@ -300,6 +324,9 @@ public:
     void setShadowZFightCofficient( float _value );
     void setIndoorSceneCoeff( float _value );
 
+    [[nodiscard]] float ssaoBlendFactor() const;
+    [[nodiscard]] floata& ssaoBlendFactorAnim();
+    void ssaoBlendFactor( float mSsaoBlendFactor );
 protected:
     void clearCommandList();
     size_t renderCBList();
@@ -330,6 +357,9 @@ protected:
     bool bInvalidated = false;
     bool bIsLoading = true;
     Vector2i mForcedFrameBufferSize{ -1, -1 };
+
+    // Post processing controls
+    floata mSsaoBlendFactor;
 
     std::vector<std::shared_ptr<RLTarget>> mTargets;
     std::shared_ptr<CommandBufferList> mCommandBuffers;
@@ -518,6 +548,10 @@ public:
             rds.roundedCorner = _param();
             return;
         }
+        if constexpr ( std::is_same_v<M, RDSArchSegments> ) {
+            rds.archSegments = _param();
+            return;
+        }
         if constexpr ( std::is_same_v<M, RDSArrowAngle> ) {
             rds.arrowAngle = _param();
             return;
@@ -528,6 +562,10 @@ public:
         }
         if constexpr ( std::is_same_v<M, RDSCircleLineWidth> ) {
             rds.width = _param();
+            return;
+        }
+        if constexpr ( std::is_same_v<M, RDSRotationNormalAxis> ) {
+            rds.rotationNormalAxis = _param();
             return;
         }
         if constexpr ( std::is_same_v<M, V3fVectorOfVectorWrap> ) {

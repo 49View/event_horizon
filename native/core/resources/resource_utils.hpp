@@ -13,7 +13,6 @@
 
 #include <core/serialization.hpp>
 #include <core/serializable_container.hpp>
-#include <core/http/webclient.h>
 #include <core/resources/resource_types.hpp>
 
 enum class AddResourcePolicy {

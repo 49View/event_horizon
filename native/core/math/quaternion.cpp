@@ -116,6 +116,21 @@ Matrix4f Quaternion::rotationMatrix() const {
     return Matrix4f( r0, r1, r2, r3 );
 }
 
+Matrix4f Quaternion::matrix4( const V3f& _pos ) const {
+    float n = norm();
+    float qx = mData[0] / n;
+    float qy = mData[1] / n;
+    float qz = mData[2] / n;
+    float qw = mData[3] / n;
+
+    Vector4f r0( 1 - 2 * qy*qy - 2 * qz*qz, 2 * qx*qy - 2 * qz*qw    , 2 * qx*qz + 2 * qy*qw, 0.0f);
+    Vector4f r1( 2 * qx*qy + 2 * qz*qw    , 1 - 2 * qx*qx - 2 * qz*qz, 2 * qy*qz - 2 * qx*qw, 0.0f);
+    Vector4f r2( 2 * qx*qz - 2 * qy*qw    , 2 * qy*qz + 2 * qx*qw    , 1 - 2 * qx*qx - 2 * qy*qy, 0.0f);
+    Vector4f r3( _pos, 1.0f );
+
+    return Matrix4f( r0, r1, r2, r3 );
+}
+
 Matrix3f Quaternion::rotationMatrix3() const {
     float n = norm();
     float qx = mData[0] / n;
@@ -143,6 +158,14 @@ Matrix4f Quaternion::rotationMatrixNotNormalised() const {
     Vector4f r3( 0.0f, 0.0f, 0.0f, 1.0f );
 
     return Matrix4f( r0, r1, r2, r3 );
+}
+
+void Quaternion::rotateFromAxis( const Vector3f& fromAxis, const Vector3f& rotateToAxis ) {
+
+    // both vectors needs to be normalised
+    V4f q{cross(fromAxis, rotateToAxis), 1.0f + dot(fromAxis, rotateToAxis)};
+    for ( auto t = 0u; t < 4; t++ ) mData[t] = q[t];
+    normalise();
 }
 
 Quaternion quatFromAxis( const Vector4f& w ) {

@@ -9,6 +9,7 @@
 #include <core/descriptors/uniform_names.h>
 #include <core/font_utils.hpp>
 #include <graphics/renderer.h>
+#include <graphics/vertex_processing_anim.h>
 #include <render_scene_graph/render_orchestrator.h>
 
 V2f ssOneMinusY( const V2f& _point ) {
@@ -227,7 +228,7 @@ void UIElement::fadeTo( float _duration, float _value ) {
         } else if ( _elapsed >= _duration && _value == 0.0f ) {
             setVisible( false );
         }
-    }));
+    }), AnimEndCallback{});
 }
 
 void UIElement::insertGroupElement( UIElementSP _elem ) {

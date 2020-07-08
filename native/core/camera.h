@@ -13,9 +13,8 @@
 #include <core/math/rect2f.h>
 #include <core/math/plane3f.h>
 #include <core/math/aabb.h>
-#include <core/math/quaternion.h>
+#include <core/math/camera_spatials.hpp>
 #include <core/math/math_util.h>
-#include <core/math/anim_type.hpp>
 #include <core/camera_utils.hpp>
 #include <core/name_policy.hpp>
 #include <core/dirtable.hpp>
@@ -60,14 +59,11 @@ public:
 	void setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar );
 	void setProjectionMatrix( const Matrix4f & val );
 
-	void setQuatAngles( const Vector3f&a );
-	void incrementQuatAngles( const Vector3f& a );
     void incrementSphericalAngles( const V2f& _sph );
     void incrementOrbitDistance( float _d );
 
     void resetQuat();
 	Quaternion quatAngle() const;
-	Vector3f centerScreenOn( const Vector2f& area, const float bMiddleIsCenter = true, const float slack = 0.0f );
 	Vector3f centerScreenOnWithinArea( Vector2f area, const Rect2f& targetArea, const float padding = 1.0f, const float slack = 0.0f );
 
     TimelineSet addKeyFrame( const std::string& name, float _time ) override;
@@ -107,16 +103,13 @@ public:
 	void setNearClipPlaneZClampEdit2d( float _value ) { mNearClipPlaneZClampEdit2d = _value; }
 	void setFarClipPlaneZClampEdit2d( float _value ) { mFarClipPlaneZClampEdit2d = _value;}
 
+	const CameraSpatials& getSpatials() const;
 	Vector3f getPosition() const;
 	Vector4f getNearFar() const;
-	Vector3f getPositionInv() const;
 	Vector3f getPositionRH() const;
 	Vector3f getYawVector() const;
-	Vector3f getYawVectorInv() const;
 	Vector3f getUpVector() const;
-	Vector3f getUpVectorInv() const;
 	Vector3f getDirection() const;
-	Vector3f getDirectionInv() const;
 	Vector3f getDirectionRH() const;
 
 	[[nodiscard]] std::vector<V3f> frustumFarViewPort() const;
@@ -131,7 +124,7 @@ public:
 	void getViewporti( int* viewport ) const;
 
 	[[nodiscard]] PickRayData rayViewportPickIntersection( const Vector2f& p1 ) const;
-	Vector2f mousePickRayOrtho( const Vector2f& _pos );
+	V2f mousePickRayOrtho( const V2f& _pos );
 
 	void Mode( const CameraControlType& val );
 	[[nodiscard]] CameraControlType Mode() const;
@@ -139,10 +132,6 @@ public:
 	[[nodiscard]] bool LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
 	void LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
 	void ToggleLockAtWalkingHeight() { mLockAtWalkingHeight = !mLockAtWalkingHeight; }
-    void UpdateIncrementalEulerFromQangle();
-    void UpdateIncrementalEulerFromQangle( const Quaternion& _qtarget);
-    void setIncrementQuatAngles( const Vector3f& a );
-    V3f getIncrementQuatAngles() const;
 	void enableInputs( bool _enableInputs ) { mbLocked = _enableInputs; }
 
 	[[nodiscard]] JMATH::Rect2f ViewPort() const { return mViewPort; }
@@ -181,12 +170,9 @@ private:
 	Matrix4f mPrevMVP           = Matrix4f::MIDENTITY();
 	Matrix4f quatMatrix         = Matrix4f::MIDENTITY();
 
-	V3fa mPos;
-	V3fa mTarget;
-	Quaterniona qangle; // angles of x,y,z axis to be fed into quaternion math
-    floata mFov;
+	CameraSpatials spatials;
 
-    V3f incrementalEulerQuatAngle = Vector3f::ZERO;
+    V3f mTarget;
     V2f sphericalAcc = V2fc::ZERO;
     V3f mOrbitStrafe = V3f::ZERO;
     float mOrbitDistance = 2.0f;

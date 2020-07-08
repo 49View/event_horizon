@@ -6,10 +6,11 @@
 //  Copyright © 2015 EpicGames. All rights reserved.
 //
 
-#ifndef plane3f_h
-#define plane3f_h
+#pragma once
 
-#include "vector3f.h"
+#include <array>
+#include <core/math/vector_util.hpp>
+#include <core/math/htypes.hpp>
 
 struct Plane3f {
 	Vector3f n; // normal
@@ -108,6 +109,71 @@ struct Plane3f {
 		}
 		return inters;
 	}
+
+    bool intersectRayOnTriangleMin( const RayPair3& rayPair, const Vector3f& a, const Vector3f& b, const Vector3f& c, float& nearV ) const {
+        Vector3f i;
+        float bu;
+        float bv;
+        if ( intersectRayOnTriangle( rayPair.origin, rayPair.dir, a, b, c, i, bu, bv ) ) {
+            float dist = distance( rayPair.origin, i);
+            if ( dist < nearV ) {
+                nearV = dist;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool intersectRayOnTriangles2dMin( const RayPair3& rayPair, const std::vector<Triangle2d>& tris, float z, float& nearV ) const {
+
+        for ( const auto& floorPoly : tris ) {
+            V3f a = XZY::C(std::get<0>(floorPoly), z);
+            V3f b = XZY::C(std::get<2>(floorPoly), z);
+            V3f c = XZY::C(std::get<1>(floorPoly), z);
+            if ( intersectRayOnTriangleMin(rayPair, a, c, b, nearV) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool intersectRayOnQuad( const Vector3f& p0, const Vector3f& v, std::array<Vector3f,4> quad, Vector3f& i ) const {
+        bool inters = false;
+        i = intersectRay( p0, v, inters );
+        if ( inters ) {
+            Vector3f crossBA = cross( quad[1] - quad[0], i - quad[0] );
+            float d1 = dot( n, crossBA );
+            if ( d1 < 0.0f ) return false;
+
+            Vector3f crossCB = cross( quad[2] - quad[1], i - quad[1] );
+            float d2 = dot( n, crossCB );
+            if ( d2 < 0.0f ) return false;
+
+            Vector3f crossAC = cross( quad[3] - quad[2], i - quad[2] );
+            float d3 = dot( n, crossAC );
+            if ( d3 < 0.0f ) return false;
+
+            Vector3f crossAD = cross( quad[0] - quad[3], i - quad[3] );
+            float d4 = dot( n, crossAD );
+            if ( d4 < 0.0f ) return false;
+
+            return true;
+        }
+        return inters;
+    }
+
+    bool intersectRayOnQuadMin( const RayPair3& rayPair, std::array<Vector3f,4> quad, float& nearV ) const {
+	    Vector3f i{V3f::ZERO};
+	    if ( intersectRayOnQuad(rayPair.origin, rayPair.dir, quad, i) ) {
+            float dist = distance( rayPair.origin, i);
+            if ( dist < nearV ) {
+                nearV = dist;
+                return true;
+            }
+        }
+	    return false;
+    }
+
 };
 
-#endif /* plane3f_h */

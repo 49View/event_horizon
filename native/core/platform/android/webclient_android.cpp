@@ -5,7 +5,6 @@
 namespace Http {
 
     void getInternal( const Url& url,
-                      const std::string& _data,
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       [[maybe_unused]] ResponseFlags rf,

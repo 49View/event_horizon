@@ -15,6 +15,7 @@ static bool sUseServerCertificate = false;
 static std::string sClientCertificateCrtFilename{};
 static std::string sClientCertificateKeyFilename{};
 static std::string sProject;
+static std::string sAFT;
 static std::string sUserToken;
 static std::string sUserSessionId;
 static std::string sCloudHost;
@@ -120,16 +121,13 @@ std::string url_encode_spacesonly( const std::string& value ) {
         std::string::value_type c = ( *i );
 
         // Keep alphanumeric and other accepted characters intact
-        if ( isalnumCC( c ) || c == '-' || c == '_' || c == '.' || c == ',' || c == '~' || c == '/' ) {
-            escaped << c;
-            continue;
-        }
-
         if ( c == ' ' ) {
             // Any other characters are percent-encoded
             escaped << std::uppercase;
             escaped << '%' << std::setw( 2 ) << int((unsigned char) c );
             escaped << std::nouppercase;
+        } else {
+            escaped << c;
         }
     }
 
@@ -170,55 +168,38 @@ namespace Http {
         requestCache.clear();
     }
 
-    Result tryFileInCache( const std::string& fileHash, const Url url, ResponseFlags rf ) {
+    Result tryFileInCache( const std::string& fileHash, const std::string& uri, ResponseFlags rf ) {
         Result lRes{};
         if ( FM::useFileSystemCachePolicy() && !checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache)) {
             lRes.buffer = FM::readLocalFile( cacheFolder() + fileHash, lRes.length );
             if ( checkBitWiseFlag( rf, ResponseFlags::JSON | ResponseFlags::Text ) ) {
-                lRes.bufferString = FM::readLocalTextFile( cacheFolder() + fileHash );
+                lRes.BufferString() = FM::readLocalTextFile( cacheFolder() + fileHash );
             }
-            if ( lRes.length || !lRes.bufferString.empty() ) {
-                lRes.uri = url.uri;
+            if ( lRes.length || !lRes.BufferString().empty() ) {
+                lRes.uri = uri;
                 lRes.statusCode = 200;
                 lRes.ETag = cacheFolder() + fileHash + std::to_string(lRes.length);
             }
+            LOGRS("[HTTP-GET-CACHED] " << uri );
         }
         return lRes;
     }
 
-    void get( const Url& url, const std::string& _data, ResponseCallbackFunc callback,
+    void get( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed, ResponseFlags rf, HttpResouceCB mainThreadCallback ) {
-        bool bPerformLoad = false;
 
-        if ( checkBitWiseFlag(rf, ResponseFlags::ExcludeFromCache) || !FM::useFileSystemCachePolicy() ) {
-            bPerformLoad = true;
+        auto res = tryFileInCache( url_encode(url.uri), url.uri, rf );
+        if ( res.isSuccessStatusCode() ) {
+            handleResponseCallbacks( res, callback, callbackFailed, mainThreadCallback );
         } else {
-            auto cacheKey = url.toString() + std::to_string( static_cast<int>(rf) );
-            if ( const auto& cc = requestCache.find( cacheKey ); cc == requestCache.end() ) {
-                requestCache.insert( cacheKey );
-                bPerformLoad = true;
-            }
-            if (!bPerformLoad) {
-                if ( callback && FM::useFileSystemCachePolicy() ) {
-                    std::string fileHash = url_encode( url.uri + _data );
-                    auto lRes = tryFileInCache( fileHash, url, rf );
-                    lRes.ccf = mainThreadCallback;
-                    callback( lRes );
-                    LOGRS("[HTTP-CACHED] " << url.toString() );
-                } else {
-                    LOGRS("[WARNING][HTTP-CACHED] "<< url.toString() << " no cache policy or no callback performed" );
-                }
-            }
-        }
-        if ( bPerformLoad ) {
             LOGR("[HTTP-GET] %s", url.toString().c_str() );
-            getInternal( url, _data, callback, callbackFailed, rf, mainThreadCallback );
+            getInternal( url, callback, callbackFailed, rf, mainThreadCallback );
         }
     }
 
-    void get( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
+    void getNoCache( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
               HttpResouceCB mainThreadCallback ) {
-        get( url, "", std::move(callback), std::move(callbackFailed), rf, std::move(mainThreadCallback));
+        get( url, std::move(callback), std::move(callbackFailed), orBitWiseFlag(rf, ResponseFlags::ExcludeFromCache), std::move(mainThreadCallback));
     }
 
     void post( const Url& url, const std::string& _data,
@@ -254,6 +235,10 @@ namespace Http {
 
     void project( const std::string& _project ) {
         sProject = _project;
+    }
+
+    void aft( const std::string& _aft ) {
+        sAFT = _aft;
     }
 
     bool useClientCertificate( bool bUse, const std::string& _certKey, const std::string& _certCrt ) {
@@ -303,6 +288,10 @@ namespace Http {
 
     std::string project() {
         return sProject;
+    }
+
+    std::string AFT() {
+        return sAFT;
     }
 
     void cacheLoginFields( const LoginFields& _lf ) {
@@ -434,7 +423,7 @@ namespace Http {
                 UserLogin ul{ std::string{ (char *) res.buffer.get(), static_cast<unsigned long>(res.length) } };
                 sessionId( ul.session );
                 project( ul.project );
-                Socket::createConnection();
+//                Socket::createConnection();
                 userLoggedIn( true );
             }, [](HttpResponeParams res) {
                 LOGRS( "[HTTP-RETRY] login ");
@@ -449,8 +438,9 @@ namespace Http {
                 userToken( lt.token );
                 sessionId( lt.session );
                 project( lt.project );
+                aft( lt.antiForgeryToken );
                 Http::cacheLoginFields( lf );
-                Socket::createConnection();
+//                Socket::createConnection();
                 userLoggedIn( true );
                 if (loginCallback) loginCallback();
         } );

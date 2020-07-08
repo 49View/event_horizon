@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/di.hpp"
-#include "core/command.hpp"
 #include "scene_graph.h"
 
 namespace di = boost::di;

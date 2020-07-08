@@ -1,7 +1,6 @@
 #include "renderer.h"
 
 #include <core/math/spherical_harmonics.h>
-#include <core/command.hpp>
 #include <core/raw_image.h>
 #include <core/game_time.h>
 #include <core/configuration/app_options.h>
@@ -12,6 +11,7 @@
 #include <core/tar_util.h>
 #include <core/profiler.h>
 #include <core/v_data.hpp>
+#include <core/util.h>
 #include <core/resources/material.h>
 #include <core/streaming_mediator.hpp>
 #include <core/lightmap_exchange_format.h>
@@ -147,7 +147,6 @@ void Renderer::init() {
     rmm = std::make_shared<RenderMaterialManager>( *this );
     mCommandBuffers = std::make_shared<CommandBufferList>( *this );
 
-    setMultiSampleCount(1);
 //    auto bSupportsHDR = Framebuffer::checkHDRSupport();
 //    LOGRS( "Is HDR Framebuffer supported: " << bSupportsHDR );
     resetDefaultFB(mForcedFrameBufferSize);
@@ -192,6 +191,8 @@ void Renderer::init() {
     rmm->addRenderMaterial( S::SHADOW_MAP );
     rmm->addRenderMaterial( S::DEPTH_MAP );
     rmm->addRenderMaterial( S::NORMAL_MAP );
+
+    mSsaoBlendFactor = std::make_shared<AnimType<float>>(0.0f, "ssaoBlendFactor");
 
     afterShaderSetup();
 }
@@ -492,6 +493,25 @@ void Renderer::setVisibilityOnTags( uint64_t _tag, bool _visibility ) {
     invalidateOnAdd();
 }
 
+std::vector<std::shared_ptr<VPList>> Renderer::getVPListWithTags( uint64_t _tag ) {
+    std::vector<std::shared_ptr<VPList>> ret{};
+    for ( const auto&[k, vl] : CL()) {
+        if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
+            for ( const auto& v : vl.mVList ) {
+                if ( checkBitWiseFlag( v->tag(), _tag ) ) {
+                    ret.push_back(v);
+                }
+            }
+            for ( const auto& v : vl.mVListTransparent ) {
+                if ( checkBitWiseFlag( v->tag(), _tag ) ) {
+                    ret.push_back(v);
+                }
+            }
+        }
+    }
+    return ret;
+}
+
 void Renderer::changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor ) {
     // NDDado: we only use RGB, not Alpha, in here
     for ( const auto&[k, vl] : CL()) {
@@ -658,9 +678,45 @@ bool DShaderMatrix::hasTexture() const {
     return checkBitWiseFlag(data, DShaderMatrixValue2dTexture) || checkBitWiseFlag(data, DShaderMatrixValue3dTexture);
 }
 
+std::string DShaderMatrix::hash() const {
+    return std::to_string(data);
+}
+
 std::vector<std::shared_ptr<VPList>> Renderer::CLI( uint64_t cli ) {
     std::vector<std::shared_ptr<VPList>> ret;
     std::copy (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret));
     std::copy (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret));
     return ret;
+}
+
+std::vector<std::shared_ptr<VPList>> Renderer::CLIExcludingTag( uint64_t cli, uint64_t excludingTag ) {
+    std::vector<std::shared_ptr<VPList>> ret;
+    auto pred = [excludingTag](const auto& elem) -> bool {
+        return !checkBitWiseFlag( elem->tag(), excludingTag );
+    };
+    std::copy_if (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret), pred);
+    std::copy_if (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret), pred);
+    return ret;
+}
+
+std::vector<std::shared_ptr<VPList>> Renderer::CLIIncludingTag( uint64_t cli, uint64_t _tag ) {
+    std::vector<std::shared_ptr<VPList>> ret;
+    auto pred = [_tag](const auto& elem) -> bool {
+        return checkBitWiseFlag( elem->tag(), _tag );
+    };
+    std::copy_if (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret), pred);
+    std::copy_if (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret), pred);
+    return ret;
+}
+
+float Renderer::ssaoBlendFactor() const {
+    return mSsaoBlendFactor->value;
+}
+
+floata& Renderer::ssaoBlendFactorAnim() {
+    return mSsaoBlendFactor;
+}
+
+void Renderer::ssaoBlendFactor( float _ssaoBlendFactor ) {
+    mSsaoBlendFactor->value = _ssaoBlendFactor;
 }

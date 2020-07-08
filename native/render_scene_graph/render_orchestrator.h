@@ -1,3 +1,4 @@
+
 //
 // Created by Dado on 08/02/2018.
 //
@@ -95,7 +96,6 @@ public:
     void useMotionBlur( bool _value );
     void changeTime( const std::string& _time );
     void changeCameraControlType( int _type );
-    void drawCameraLocator( const Matrix4f& preMult = Matrix4f::IDENTITY );
 
     floata& skyBoxDeltaInterpolation();
 
@@ -126,6 +126,7 @@ public:
     SceneGraph& SG();
     UIView& UI();
     UICallbackMap& UICB();
+    unsigned int TH( CResourceRef _value ); // direct access to texture handle, it's a very common pattern for GUIs so let's do it
 protected:
     void uiViewUpdate( AggregatedInputData& _aid );
     void updateCallbacks();
@@ -152,6 +153,7 @@ private:
 
 public:
     static std::vector<std::string> callbackPaths;
+    static std::vector<std::string>& CallbackPaths();
     static std::vector<PresenterUpdateCallbackFunc> sUpdateCallbacks;
 };
 

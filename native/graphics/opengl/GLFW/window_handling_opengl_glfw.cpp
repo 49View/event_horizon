@@ -16,6 +16,8 @@ namespace WindowHandling {
 
     GLFWwindow* window = nullptr;
     bool bUseGLFWPoll = true;
+    bool mousePassThrough = true;
+    bool keyboardPassThrough = true;
 
     void setDropCallback( GLFWdropfun fn ) {
         glfwSetDropCallback( window, fn );
@@ -27,6 +29,14 @@ namespace WindowHandling {
 
     void setResizeFramebufferCallback( GLFWframebuffersizefun fn ) {
         glfwSetFramebufferSizeCallback( window, fn );
+    }
+
+    bool isMouseInputActive() {
+        return mousePassThrough;
+    }
+
+    bool isKeyboardInputActive() {
+        return keyboardPassThrough;
     }
 
     void gatherMainScreenInfo() {
@@ -143,20 +153,23 @@ namespace WindowHandling {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImGuiIO& io = ImGui::GetIO();
+        mousePassThrough = !io.WantCaptureMouse;
+        keyboardPassThrough = !io.WantCaptureKeyboard || !io.WantTextInput;
 #endif
     }
 
     void enableInputCallbacks() {
         bUseGLFWPoll = true;
 #ifdef _USE_IMGUI_
-        ImGui_ImplGlfw_InstallCallbacks( window );
+//        ImGui_ImplGlfw_InstallCallbacks( window );
 #endif
     }
 
     void disableInputCallbacks() {
         bUseGLFWPoll = false;
 #ifdef _USE_IMGUI_
-        ImGui_ImplGlfw_DisableCallbacks( window );
+//        ImGui_ImplGlfw_DisableCallbacks( window );
 #endif
     }
 
@@ -209,5 +222,4 @@ namespace WindowHandling {
         ImGui::End();
 #endif
     }
-
 }

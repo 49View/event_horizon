@@ -141,7 +141,7 @@ public:
 
 	void deserialize( const char* name, std::string& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
-			ret = std::string( ( *( value ) )[name].GetString() );
+            ret = ( ( *( value ) )[name].IsString() ) ?  std::string( ( *( value ) )[name].GetString() ) : "";
 		}
 	}
 
@@ -206,6 +206,21 @@ public:
 			}
 		}
 	}
+
+    template<typename T, std::size_t N>
+    void deserialize( const char* name, std::vector<std::array<T, N>>& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            for ( SizeType q = 0; q < ( *( value ) )[name].Size(); q++ ) {
+                std::array<T, N> v1;
+                for ( SizeType t = 0; t < ( *( value ) )[name][q].Size(); t++ ) {
+                    for ( SizeType m = 0; m < ( *( value ) )[name][q][t].Size(); m++ ) {
+                        v1[t][m] = ( ( *( value ) )[name][q][t][m].GetFloat() );
+                    }
+                }
+                ret.push_back(v1);
+            }
+        }
+    }
 
     template<typename T>
     void deserialize( std::vector<T>& ret ) const {
