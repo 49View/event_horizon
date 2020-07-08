@@ -12,14 +12,14 @@ JMATH::Rect2f getPlatformWindowRect() {
 
 void Framebuffer::checkFrameBufferStatus() {
 
-//    LOGRS( "Framebuffer " << mName << " size: [" << mWidth << ":" << mHeight << "] format : ["
-//                          << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "] "
-//                          << "Texture Slot: [" << mTextureGPUSlot << "] "
-//                          << "mIsMultisampled: ["  << std::boolalpha << mMultisample << "] "
-//                          << "mIsHDR         : ["  << std::boolalpha << mHDR       << "] "
-//                          << "mIsCubemap     : ["  << std::boolalpha << mCubeMap   << "] "
-//                          << "mUseMipMaps    : ["  << std::boolalpha << mUseMipMaps  << "] "
-//    );
+    LOGRS( "Check Framebuffer " << mName << " size: [" << mWidth << ":" << mHeight << "] format : ["
+                          << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "] "
+                          << "Texture Slot: [" << mTextureGPUSlot << "] "
+                          << "mIsMultisampled: ["  << std::boolalpha << mMultisample << "] "
+                          << "mIsHDR         : ["  << std::boolalpha << mHDR       << "] "
+                          << "mIsCubemap     : ["  << std::boolalpha << mCubeMap   << "] "
+                          << "mUseMipMaps    : ["  << std::boolalpha << mUseMipMaps  << "] "
+    );
 
     GLenum fbs = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if ( fbs == GL_FRAMEBUFFER_COMPLETE ) {

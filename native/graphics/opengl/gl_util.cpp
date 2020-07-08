@@ -375,9 +375,9 @@ GLenum pixelFormatToGlType( PixelFormat pixelFormat ) {
         case PIXEL_FORMAT_HDR_RG_16:
         case PIXEL_FORMAT_HDR_R16:
 // ###WEBGL1###
-// Why GL_FLOAT is not supported even tought the extension OES_texture_float is supported???
+// Remember that if OES_texture_float is not supported then we should bail out in initialization as nothing will work
 #ifdef _WEBGL1
-            return GL_UNSIGNED_INT;
+            return GL_HALF_FLOAT_OES;
 #else
             return GL_HALF_FLOAT;
 #endif
@@ -388,12 +388,8 @@ GLenum pixelFormatToGlType( PixelFormat pixelFormat ) {
         case PIXEL_FORMAT_HDR_RG32:
         case PIXEL_FORMAT_HDR_R32:
 // ###WEBGL1###
-// Why GL_FLOAT is not supported even tought the extension OES_texture_float is supported???
-#ifdef _WEBGL1
-            return GL_UNSIGNED_INT;
-#else
+// Remember that if OES_texture_float is not supported then we should bail out in initialization as nothing will work
             return GL_FLOAT;
-#endif
         case PIXEL_FORMAT_SRGB:
         case PIXEL_FORMAT_SRGBA:
         case PIXEL_FORMAT_R:
@@ -448,6 +444,13 @@ GLenum targetToGl( TextureTargetMode mode ) {
         case TEXTURE_2D:
             return GL_TEXTURE_2D;
         case TEXTURE_3D:
+            // ###WEBGL1### It's clearly wrong to return a 2D texture if we request a 3D texture, must be dealt upstream
+            // maybe blocking the creation on 3d textures altogether
+#ifdef _WEBGL1
+            return GL_TEXTURE_2D;
+#else
+            return GL_TEXTURE_3D;
+#endif
             return GL_TEXTURE_3D;
         case TEXTURE_CUBE_MAP:
             return GL_TEXTURE_CUBE_MAP;
@@ -701,6 +704,8 @@ std::string glEnumToString( GLenum value ) {
     switch ( value ) {
         case GL_BYTE:
             return "GL_BYTE";
+        case GL_HALF_FLOAT:
+            return "GL_HALF_FLOAT";
         case GL_FLOAT:
             return "GL_FLOAT";
         case GL_BOOL:
@@ -709,6 +714,8 @@ std::string glEnumToString( GLenum value ) {
             return "GL_INT";
         case GL_UNSIGNED_INT:
             return "GL_UNSIGNED_INT";
+        case GL_UNSIGNED_INT_24_8:
+            return "GL_UNSIGNED_INT_24_8";
         case GL_FLOAT_VEC2:
             return "GL_FLOAT_VEC2";
         case GL_FLOAT_VEC3:

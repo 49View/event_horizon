@@ -89,14 +89,22 @@ namespace WindowHandling {
 
         Framebuffer::checkHDRSupport();
         bool hasFloatingPointTexgtures = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "OES_texture_float");
+        bool hasFloatingPointLinearFiltering = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "OES_texture_float_linear");
         bool hasDepthTexture = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "WEBGL_depth_texture");
         bool has_sRGB = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "EXT_sRGB");
         bool hasHalfFloat = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "OES_texture_half_float");
+        bool hasHalfFloatLinearFiltering = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "OES_texture_half_float_linear");
+        bool hasDrawBuffers = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "WEBGL_draw_buffers");
+        bool hasFloatColorBuffer = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "WEBGL_color_buffer_float");
 
-        LOGRS( "Floating point texture " << boolAlphaBinary(hasFloatingPointTexgtures) );
-        LOGRS( "Depth texture " << boolAlphaBinary(hasDepthTexture) );
-        LOGRS( "sRGB support " << boolAlphaBinary(has_sRGB) );
-        LOGRS( "Half float " << boolAlphaBinary(hasHalfFloat) );
+        LOGRS( "[WebGL1-EXT] Floating point texture " << boolAlphaBinary(hasFloatingPointTexgtures) );
+        LOGRS( "[WebGL1-EXT] Floating point texture filtering " << boolAlphaBinary(hasFloatingPointLinearFiltering) );
+        LOGRS( "[WebGL1-EXT] Depth texture " << boolAlphaBinary(hasDepthTexture) );
+        LOGRS( "[WebGL1-EXT] sRGB support " << boolAlphaBinary(has_sRGB) );
+        LOGRS( "[WebGL1-EXT] Half float " << boolAlphaBinary(hasHalfFloat) );
+        LOGRS( "[WebGL1-EXT] Half float linear filtering " << boolAlphaBinary(hasHalfFloatLinearFiltering) );
+        LOGRS( "[WebGL1-EXT] DrawBuffers " << boolAlphaBinary(hasDrawBuffers) );
+        LOGRS( "[WebGL1-EXT] Floating point color buffer " << boolAlphaBinary(hasFloatColorBuffer) );
 
         initImGUI();
 

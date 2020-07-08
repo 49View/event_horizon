@@ -24,6 +24,7 @@
 
 #ifdef _WEBGL1
 #include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #else
 #include <GLES3/gl3.h>
 #endif

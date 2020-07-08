@@ -149,10 +149,14 @@ void Framebuffer::initSimple() {
     GLCALL( glBindFramebuffer ( GL_FRAMEBUFFER, mFramebufferHandle ));
     GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, mRenderbufferHandle) );
 
+#ifdef _WEBGL1
+    GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mWidth, mHeight ) );
+#else
     GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight ) );
+#endif
     GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRenderbufferHandle) );
 
-//    checkFrameBufferStatus();
+    checkFrameBufferStatus();
 
     LOGR( "Allocating FRAMEBUFFER %s, [%d,%d], handle %d, renderHandle %d",
             mName.c_str(), mWidth, mHeight, mFramebufferHandle, mRenderbufferHandle );
@@ -168,7 +172,11 @@ void Framebuffer::initCubeMap( std::shared_ptr<Texture> cubemapTarget, uint32_t 
     mWidth  = static_cast<unsigned int>( mWidth  * std::pow(0.5, mipIndex) );
     mHeight = static_cast<unsigned int>( mHeight * std::pow(0.5, mipIndex) );
 
+#ifdef _WEBGL1
+    GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mWidth, mHeight ) );
+#else
     GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight ) );
+#endif
     GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRenderbufferHandle) );
 
 //    mTargetType = GL_TEXTURE_CUBE_MAP_POSITIVE_X + cubemapFaceIndex;
@@ -203,7 +211,13 @@ void Framebuffer::bind( const FrameBufferTextureValues* _values ) {
     if ( _values ) {
         GLCALL( glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                         frameBufferTargetToGl(_values->targetType),
-                                        _values->targetHandle, _values->targetMipmap ));
+                                        _values->targetHandle,
+#ifdef _WEBGL1
+                                        0
+#else
+                                        _values->targetMipmap
+#endif
+                                        ));
 //        LOGRS( "[FramebufferValues] format: [" << glEnumToString( frameBufferTargetToGl(_values->targetType)) << "]"
 //        << " target: [" << _values->targetHandle << "]"
 //        << " targetMipmap: [" << _values->targetMipmap << "]"

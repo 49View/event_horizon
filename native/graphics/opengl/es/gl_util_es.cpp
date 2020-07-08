@@ -26,7 +26,13 @@ GLenum imageTargetToGl( TextureTargetMode mode, [[maybe_unused]] bool multiSampl
         case TEXTURE_2D:
             return GL_TEXTURE_2D;
         case TEXTURE_3D:
+            // ###WEBGL1### It's clearly wrong to return a 2D texture if we request a 3D texture, must be dealt upstream
+            // maybe blocking the creation on 3d textures altogether
+#ifdef _WEBGL1
+            return GL_TEXTURE_2D;
+#else
             return GL_TEXTURE_3D;
+#endif
         case TEXTURE_CUBE_MAP:
             return GL_TEXTURE_CUBE_MAP;
     }

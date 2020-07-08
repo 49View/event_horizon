@@ -11,7 +11,7 @@ void Texture::init_data_r( const uint8_t* _data ) {
     bool updateStorage = true;
 
     if ( mMultisample ) {
-        texImage2DMultisample(4, glInternalFormat, mWidth, mHeight );
+        GLCALL(texImage2DMultisample(4, glInternalFormat, mWidth, mHeight ));
     } else {
         if ( mGenerateMipMaps ) {
             // Always use trilinear filtering
@@ -26,7 +26,7 @@ void Texture::init_data_r( const uint8_t* _data ) {
                 auto lHeight = mHeight;
     for (auto i = 0; i < num_mipmaps; i++)
     {
-        glTexImage2D(glTextureTarget, i, glInternalFormat, lWidth, lHeight, 0, glFormat, glType, NULL);
+        GLCALL( glTexImage2D(glTextureTarget, i, glInternalFormat, lWidth, lHeight, 0, glFormat, glType, NULL));
         lWidth = max(1, (lWidth / 2));
         lHeight = max(1, (lHeight / 2));
     }
@@ -43,11 +43,24 @@ void Texture::init_data_r( const uint8_t* _data ) {
                                       _data));
 #endif
             } else {
-//                LOGRS("glTextureImageTarget: " << glEnumToString(glTextureImageTarget));
-//                LOGRS("glInternalFormat: " << glEnumToString(glInternalFormat));
-//                LOGRS("glFormat: " << glEnumToString(glFormat));
-//                LOGRS("glType: " << glEnumToString(glType));
-//                LOGRS("glType: " << glType);
+#ifdef _WEBGL1
+                if ( glInternalFormat == GL_DEPTH_COMPONENT ) {
+                // ###WEBGL1### it should be glType = GL_UNSIGNED_INT_24_8 but for some reason it's not working
+                    glType = GL_UNSIGNED_INT;
+                }
+                // ###WEBGL1### GL_LUMINANCE_ALPHA doesn't allow floating point values, to be checked why
+                if ( glInternalFormat == GL_LUMINANCE_ALPHA ) {
+                    glType = GL_UNSIGNED_BYTE;
+                    glInternalFormat = GL_RGB;
+                    glFormat  = GL_RGB;
+                }
+
+#endif
+                LOGRS("glTextureImageTarget: " << glEnumToString(glTextureImageTarget));
+                LOGRS("glInternalFormat: " << glEnumToString(glInternalFormat));
+                LOGRS("glFormat: " << glEnumToString(glFormat));
+                LOGRS("glType: " << glEnumToString(glType));
+                LOGRS("glType: " << glType);
                 GLCALL( glTexImage2D( glTextureImageTarget, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType, _data));
             }
         }
@@ -80,6 +93,7 @@ void Texture::init_r( const uint8_t* _data ) {
 
     // Make sure we are not recreating the handle every time
     GLCALL( glGenTextures( 1, &mHandle ));
+    LOGRS("Binding texture " << Name() << " with handle " << mHandle << " to imageTarget " << glEnumToString(glTextureImageTarget) )
     GLCALL( glBindTexture( glTextureImageTarget, mHandle ));
 #ifndef _WEBGL1
     GLCALL( glTexParameteri( glTextureTarget, GL_TEXTURE_WRAP_R, glWrapMode ));
@@ -132,7 +146,8 @@ void Texture::init_cubemap_r() {
 
     for (unsigned int i = 0; i < 6; ++i)
     {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType, nullptr);
+//        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, mWidth, mHeight, 0, glFormat, glType, nullptr);
+        GLCALL( glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB, GL_FLOAT, nullptr));
     }
 
 //    GLCALL( glTexStorage2D( glTextureTarget, mips, glInternalFormat, mWidth, mHeight ));
