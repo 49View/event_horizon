@@ -133,6 +133,26 @@ void Framebuffer::initSimple() {
 
 //    checkFrameBufferStatus();
 
+//    GLuint color_renderbuffer;
+//    glGenRenderbuffers(1, &color_renderbuffer);
+//    glBindRenderbuffer( GL_RENDERBUFFER, (GLuint)color_renderbuffer );
+//    glRenderbufferStorage( GL_RENDERBUFFER, GL_RGBA8, fbo_width, fbo_height );
+//    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+//
+//// Build the texture that will serve as the depth attachment for the framebuffer.
+//    GLuint depth_renderbuffer;
+//    glGenRenderbuffers(1, &depth_renderbuffer);
+//    glBindRenderbuffer( GL_RENDERBUFFER, (GLuint)depth_renderbuffer );
+//    glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT, fbo_width, fbo_height );
+//    glBindRenderbuffer( GL_RENDERBUFFER, 0 );
+//
+//// Build the framebuffer.
+//    GLuint framebuffer;
+//    glGenFramebuffers(1, &framebuffer);
+//    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)framebuffer);
+//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, color_renderbuffer);
+//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_renderbuffer);
+
     LOGR("Allocating FRAMEBUFFER %s, [%d,%d], handle %d, renderHandle %d",
          mName.c_str(), mWidth, mHeight, mFramebufferHandle, mRenderbufferHandle);
 }
