@@ -22,8 +22,8 @@ bool canUseMultiSample() {
 void Framebuffer::attachDepthBuffer() {
     GLCALL( glBindFramebuffer( GL_FRAMEBUFFER, mFramebufferHandle ));
 
-    GLCALL(glGenRenderbuffers(1, &depthTexture) );
-    GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, depthTexture) );
+    GLCALL(glGenRenderbuffers(1, &mDepthBufferHandle) );
+    GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBufferHandle) );
 
 #ifndef _WEBGL1
     if ( mMultisample ) {
@@ -35,7 +35,7 @@ void Framebuffer::attachDepthBuffer() {
     GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mWidth, mHeight ) );
 #endif
 
-    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture) );
+    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBufferHandle) );
 
 //    checkFrameBufferStatus();
 }
@@ -144,22 +144,28 @@ void Framebuffer::init( std::shared_ptr<TextureManager> tm ) {
 }
 
 void Framebuffer::initSimple() {
-    GLCALL( glGenFramebuffers ( 1, &mFramebufferHandle ));
-    GLCALL( glGenRenderbuffers( 1, &mRenderbufferHandle) );
-    GLCALL( glBindFramebuffer ( GL_FRAMEBUFFER, mFramebufferHandle ));
-    GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, mRenderbufferHandle) );
 
-#ifdef _WEBGL1
-    GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mWidth, mHeight ) );
-#else
-    GLCALL(glRenderbufferStorage( GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mWidth, mHeight ) );
-#endif
-    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRenderbufferHandle) );
+    GLCALL(glGenRenderbuffers(1, &mRenderbufferHandle));
+    GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferHandle));
+    GLCALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB565, mWidth, mHeight));
+    GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, 0 ));
+
+//// Build the texture that will serve as the depth attachment for the framebuffer.
+    GLCALL(glGenRenderbuffers(1, &mDepthBufferHandle));
+    GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, mDepthBufferHandle));
+    GLCALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, mWidth, mHeight));
+    GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, 0 ));
+
+//// Build the framebuffer.
+    GLCALL(glGenFramebuffers(1, &mFramebufferHandle));
+    GLCALL(glBindFramebuffer(GL_FRAMEBUFFER, mFramebufferHandle));
+    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mRenderbufferHandle));
+    GLCALL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBufferHandle));
 
     checkFrameBufferStatus();
 
-    LOGR( "Allocating FRAMEBUFFER %s, [%d,%d], handle %d, renderHandle %d",
-            mName.c_str(), mWidth, mHeight, mFramebufferHandle, mRenderbufferHandle );
+    LOGR("Allocating FRAMEBUFFER %s, [%d,%d], handle %d, renderHandle %d",
+         mName.c_str(), mWidth, mHeight, mFramebufferHandle, mRenderbufferHandle);
 }
 
 void Framebuffer::initCubeMap( std::shared_ptr<Texture> cubemapTarget, uint32_t cubemapFaceIndex, uint32_t mipIndex ) {
@@ -229,7 +235,7 @@ void Framebuffer::bind( const FrameBufferTextureValues* _values ) {
         GLCALL( glViewport( 0, 0, mWidth, mHeight ));
     }
     enableMultiSample( mMultisample );
-    checkFrameBufferStatus();
+//    checkFrameBufferStatus();
 }
 
 void Framebuffer::bindAndClear( const FrameBufferTextureValues* _values ) {
@@ -299,9 +305,9 @@ void Framebuffer::blit( std::shared_ptr<Framebuffer> source, std::shared_ptr<Fra
     // Well we need to re-implement blitbuffer for ES2 :/
 
     // ### Artificially make it crash so we can debug it easier
-    GLCALL( glReadBuffer( atthSource ));
+#ifdef _WEBGL1
 
-#ifndef _WEBGL1
+#else
     GLCALL( glBindFramebuffer( GL_READ_FRAMEBUFFER, source->Handle()));
     GLCALL( glReadBuffer( atthSource ));
 

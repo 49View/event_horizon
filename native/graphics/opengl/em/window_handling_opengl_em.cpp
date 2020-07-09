@@ -96,6 +96,7 @@ namespace WindowHandling {
         bool hasHalfFloatLinearFiltering = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "OES_texture_half_float_linear");
         bool hasDrawBuffers = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "WEBGL_draw_buffers");
         bool hasFloatColorBuffer = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "WEBGL_color_buffer_float");
+        bool hasVAO = emscripten_webgl_enable_extension( emscripten_webgl_get_current_context(), "OES_vertex_array_object");
 
         LOGRS( "[WebGL1-EXT] Floating point texture " << boolAlphaBinary(hasFloatingPointTexgtures) );
         LOGRS( "[WebGL1-EXT] Floating point texture filtering " << boolAlphaBinary(hasFloatingPointLinearFiltering) );
@@ -105,6 +106,7 @@ namespace WindowHandling {
         LOGRS( "[WebGL1-EXT] Half float linear filtering " << boolAlphaBinary(hasHalfFloatLinearFiltering) );
         LOGRS( "[WebGL1-EXT] DrawBuffers " << boolAlphaBinary(hasDrawBuffers) );
         LOGRS( "[WebGL1-EXT] Floating point color buffer " << boolAlphaBinary(hasFloatColorBuffer) );
+        LOGRS( "[WebGL1-EXT] VAO (Vertex Array Object) " << boolAlphaBinary(hasVAO) );
 
         initImGUI();
 
