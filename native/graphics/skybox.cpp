@@ -53,7 +53,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     mSkyboxTexture = rr.TM()->addCubemapTexture(TextureRenderData{ skyBoxName, trd }
                                                         .setGenerateMipMaps(false)
                                                         .setIsFramebufferTarget(true));
-    cubeMapRig = addCubeMapRig("cubemapRig", V3f::UP_AXIS, Rect2f(V2f{ 512 }));
+    cubeMapRig = addCubeMapRig("cubemapRig", V3f::ZERO, Rect2f(V2f{ 512 }));
 
 }
 

@@ -23,7 +23,7 @@ void main() {
    //vec2 texCoords = ParallaxMapping(v_texCoord, vtang);
 
    ao = texture( aoTexture, texCoords ).x * aoV;
-   roughness = (texture( roughnessTexture, texCoords ).x * roughnessV)+0.02;
+   roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
    metallic = (texture( metallicTexture, texCoords ).x * metallicV);
    opacityV = texture( opacityTexture, texCoords ).x * opacity; 
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor*1.3183;
