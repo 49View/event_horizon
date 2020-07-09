@@ -713,6 +713,7 @@ void SceneGraph::addScene( const ResourceScene& gs ) {
             if ( geom ) {
                 geom->updateExistingTransform(V3f::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
                                               Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE);
+                DC()->Mode(CameraControlType::Orbit);
                 DC()->center(geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
             }
         });

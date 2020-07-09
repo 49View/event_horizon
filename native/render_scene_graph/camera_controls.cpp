@@ -305,6 +305,7 @@ void CameraControl2d::renderControls() {
 CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable(cameraRig, rsg) {
     controlType = CameraControlType::Edit2d;
+    rsg.setMICursorCapture(false);
 }
 
 
@@ -319,6 +320,7 @@ CameraControlWalk::CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, Rend
 CameraControlOrbit3d::CameraControlOrbit3d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable(cameraRig, rsg) {
     cameraRig->getCamera()->Mode(CameraControlType::Orbit);
+    rsg.setMICursorCapture(true);
     controlType = CameraControlType::Orbit;
 }
 

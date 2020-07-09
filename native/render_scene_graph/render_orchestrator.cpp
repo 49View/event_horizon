@@ -562,6 +562,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
     };
 
     luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group ) {
+        setRigCameraController(CameraControlType::Orbit);
         sg.resetAndLoadEntity(_id, _group);
     };
 
