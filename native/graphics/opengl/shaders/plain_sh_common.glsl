@@ -228,21 +228,23 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     vec3 L_Sun = u_sunDirection;// normalize( u_sunPosition - Position_worldspace );
 
     if ( u_sunDirection.y > 0.0 ) {
+        vec3 H = -normalize( vec3(0.0, 1.0, 0.0) + u_sunDirection );
+
         Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
+        Lo += rendering_equation( albedo, H, V, N, F0, u_sunRadiance.xyz*0.5 );
         if ( translucencyV > 0.0 ) {
             Lo += rendering_equation( albedo, -L_Sun, V, N, F0, u_sunRadiance.xyz );
         }
     }
 
+    vec3 daiLightAmountTrick = vec3(3.5 * u_sunRadiance.w);
     // single point light 
     for ( int i = 0; i < u_numPointLights; i++ ) {
-        // vec3 plmfrag = u_pointLightPos[i] - Position_worldspace;
         vec3 plmfrag = vec3(u_pointLightPos[i]) - Position_worldspace;
         float pldistance = length( plmfrag );
         vec3 L = normalize( plmfrag );
-        float plDistanceAtt = (pldistance*1.4);
-        float plattenuation = (1.0 / plDistanceAtt);
-        vec3 lradiance = u_pointLightIntensity[i] * plattenuation;
+        float plDistanceAtt = (pldistance*pldistance);
+        vec3 lradiance = ( u_pointLightIntensity[i] + daiLightAmountTrick ) / plDistanceAtt;
         Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
     }
 
@@ -267,7 +269,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         // visibility += texture( shadowMapTexture, shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
         // if ( shadowmap_coord3Biases.z > 0.0 ) {
-        if ( nlAngle > 0.0 ) {
+        if ( nlAngle > 0.1 ) {
             shadowmap_coord3Biases = clamp( shadowmap_coord3Biases, vec3(0.0), vec3(1.0) );
             shadowmap_coord3Biases.z -= u_shadowParameters[0]+0.00024;
             // float overBurnedfactor = 0.2;// * u_shadowParameters[1];

@@ -15,29 +15,32 @@ class SunBuilder {
 public:
     SunBuilder();
     SunPosition buildFromString( const std::string& _naturalTime );
-    void buildFromHour( double _hours );
+    [[maybe_unused]] void buildFromHour( double _hours );
     void setCurrentTimeUniforms();
     void setCurrentLocation( std::string locationHint );
     void update( float timeStamp );
     void changeDefaultYear( int year );
     [[nodiscard]] V3f getSunPosition() const;
     [[nodiscard]] V4f GoldenHourColor() const;
+    [[nodiscard]] V3f dailyGradientColor( float _dayDelta ) const;
     [[nodiscard]] int getHour() const;
 
 private:
     void moveSun( const DateTime& date, const GeoPosition& location );
     std::string hintTimeFrom( const std::vector<std::string>& _tokens );
     void hintDateFrom( const std::vector<std::string>& _tokens );
-    std::tuple<int, int, int> hintFixedTimeFrom( const std::string& _naturalTime );
-    std::tuple<double, double, double> dumpDate( const std::string& timeString, std::unordered_map<std::string, DateTime> times, const GeoPosition& location );
+    static std::tuple<int, int, int> hintFixedTimeFrom( const std::string& _naturalTime );
+    std::tuple<double, double, double>
+    dumpDate( const std::string& timeString, std::unordered_map<std::string, DateTime> times,
+              const GeoPosition& location );
 
 private:
     DateTime mCurrentTime;
-    GeoPosition mCurrentGeoPos;
+    GeoPosition mCurrentGeoPos{};
 
-    SunCalculations sunPostionCalculator;
+    SunCalculations sunPositionCalculator;
     LocationProvider locationProvider;
-    SunPosition mSunPosition;
+    SunPosition mSunPosition{};
     V4f mSunRadiance = V4f::ONE;
     int defaultYear = 2019;
     bool mbDirtyTime = false;

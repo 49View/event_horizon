@@ -10,7 +10,10 @@
 #include <core/util.h>
 
 SunBuilder::SunBuilder() {
-	dateParts["spring"] = std::make_tuple( 20, 3 );
+
+    goldenHourGradient = std::make_shared<RawImage>(golden_color_png, golden_color_png_len);
+
+    dateParts["spring"] = std::make_tuple( 20, 3 );
 	dateParts["summer"] = std::make_tuple( 21, 6 );
 	dateParts["autumn"] = std::make_tuple( 22, 9 );
 	dateParts["winter"] = std::make_tuple( 21, 12 );
@@ -64,7 +67,6 @@ SunBuilder::SunBuilder() {
 
 	buildFromString( "spring sunriseEnd" );
 
-	goldenHourGradient = std::make_shared<RawImage>(golden_color_png, golden_color_png_len);
 }
 
 void SunBuilder::changeDefaultYear( int _year ) {
@@ -86,13 +88,14 @@ float calcGoldenHourRatio( double _azimut, float _k  ) {
 std::tuple<double, double, double> SunBuilder::dumpDate( const std::string& timeString, std::unordered_map<std::string, DateTime> times, const GeoPosition& location ) {
     float k = 20.0f;
     auto date = times[timeString];
-    auto sunPsunSetStart = sunPostionCalculator.getPosition( date, location.latitude, location.longitude );
+    auto sunPsunSetStart = sunPositionCalculator.getPosition(date, location.latitude, location.longitude );
     auto ghr = calcGoldenHourRatio(sunPsunSetStart.altitudeRad, k);
 //    LOGRS( timeString << " " << date << " Golden Hour: " << ghr << "Altitude: " << sunPsunSetStart.altitudeRad );
     return { date.getTimeStamp(), ghr, sunPsunSetStart.altitudeRad };
 }
 
-bool checkTimesRange( double x, double a, double b, const V4f& ac, const V4f& bc, V4f& radiance ) {
+template <typename T>
+bool checkTimesRange( double x, double a, double b, const T& ac, const T& bc, T& radiance ) {
     if ( x >= a && x < b ) {
         auto i = interpolateInverse( a, b, x );
         radiance = interpolate( ac, bc, i );
@@ -107,14 +110,10 @@ void SunBuilder::moveSun( const DateTime& date, const GeoPosition& location ) {
 	mbDirtyTime = true;
     float k = 20.0f;
 
-    auto lSunriseColor = V4f::XTORGBA("#C6FFDD") ;
-    auto lNoonColor = V4f::XTORGBA("#FBD786");
-    auto lSunsetColor = V4f::XTORGBA("#f7999d");
+    auto times = sunPositionCalculator.getTimes(date, mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
+    auto timesDayLater = sunPositionCalculator.getTimes(date.addSeconds(86400), mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
 
-    auto times = sunPostionCalculator.getTimes( date, mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
-    auto timesDayLater = sunPostionCalculator.getTimes( date.addSeconds(86400), mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
-
-    mSunPosition = sunPostionCalculator.getPosition( date, location.latitude, location.longitude );
+    mSunPosition = sunPositionCalculator.getPosition(date, location.latitude, location.longitude );
 
     auto nadir = dumpDate( "nadir", times, location );
     auto nadirNextDay = dumpDate( "nadir", timesDayLater, location );
@@ -131,7 +130,11 @@ void SunBuilder::moveSun( const DateTime& date, const GeoPosition& location ) {
     // [0,1] golden hour
     // 1 day
 
+    auto lSunriseColor = V4f::XTORGBA("#C6FFDD") ;
+    auto lNoonColor = V4f::XTORGBA("#FBD786");
+    auto lSunsetColor = V4f::XTORGBA("#f7999d");
     auto nightColor = V4f{V3f{0.05f}, 0.0f};
+
     mSunRadiance = nightColor;
     float ghr = calcGoldenHourRatio(mSunPosition.altitudeRad, k);
     checkTimesRange( currTimeStamp, std::get<0>(nadir), std::get<0>(sunrise), nightColor, nightColor,mSunRadiance );
@@ -141,10 +144,15 @@ void SunBuilder::moveSun( const DateTime& date, const GeoPosition& location ) {
     checkTimesRange( currTimeStamp, std::get<0>(sunsetStart), std::get<0>(sunset), lNoonColor, lSunsetColor,mSunRadiance );
     checkTimesRange( currTimeStamp, std::get<0>(sunset), std::get<0>(nadirNextDay), lSunsetColor, nightColor,mSunRadiance );
 
-    float sunMult = max( 0.0f, ghr + mSunPosition.altitudeRad );
+    float sunK = 1.0f;
+    float sunMult = max( 0.0f, ghr + static_cast<float>(mSunPosition.altitudeRad) ) * sunK;
 
-    mSunRadiance *= V4f{V3f{sunMult}, 1.0f + ( 1.0f - ghr)};
-//    LOGRS( "Current " << date << " Golden Hour: " << ghr << "Altitude: " << mSunPosition.altitudeRad );
+    float dayDelta = 0.5f;
+    checkTimesRange( currTimeStamp, std::get<0>(sunrise), std::get<0>(sunset), 0.0f, 1.0f, dayDelta );
+
+    auto dayGradientColor = dailyGradientColor(dayDelta);
+    mSunRadiance = V4f{V3f{sunMult} + dayGradientColor*2.0f, ghr};
+    LOGRS( "Current " << date << " dayDelta: " << dayDelta << " Golden Hour: " << ghr << "Altitude: " << mSunPosition.altitudeRad << " Day Gradient Color: " << dayGradientColor );
 }
 
 std::string SunBuilder::hintTimeFrom( const std::vector<std::string>& _tokens ) {
@@ -185,7 +193,7 @@ std::tuple<int, int, int> SunBuilder::hintFixedTimeFrom( const std::string& _nat
 	int m = 0;
 	int s = 0;
 
-	auto mt = regEx( "(\\d{1,2}):?-?(\\d{1,2}):?-?(\\d{1,2})*", _naturalTime );
+	auto mt = regEx( R"((\d{1,2}):?-?(\d{1,2}):?-?(\d{1,2})*)", _naturalTime );
 	size_t mts = mt.size();
 	if ( mts >= 3 ) {
 		if ( mt[1].matched ) h = convertStringToHour( mt[1].str() );
@@ -233,7 +241,7 @@ SunPosition SunBuilder::buildFromString( const std::string& _naturalTime ) {
                 date = DateTime::from( date, year, month, day, hourValue, minuteValue, secondValue );
             } else {
                 auto searchDate = DateTime::from( date, year, month, day, hourValue, minuteValue, secondValue );
-                auto times = sunPostionCalculator.getTimes( searchDate, mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
+                auto times = sunPositionCalculator.getTimes(searchDate, mCurrentGeoPos.latitude, mCurrentGeoPos.longitude );
 
                 if ( auto timeItr = times.find( timeHint ); timeItr != times.end() ) {
                     date = timeItr->second;
@@ -264,7 +272,7 @@ SunPosition SunBuilder::buildFromString( const std::string& _naturalTime ) {
 	return mSunPosition;
 }
 
-void SunBuilder::buildFromHour( const double _hours ) {
+[[maybe_unused]] void SunBuilder::buildFromHour( const double _hours ) {
 	int iHours = static_cast<int>( _hours );
 	mCurrentTime = DateTime::from( mCurrentTime, -1, -1, -1, iHours, static_cast<int>( ( _hours - iHours ) * 60.0 ) );
 	moveSun( mCurrentTime, mCurrentGeoPos );
@@ -309,10 +317,18 @@ V4f SunBuilder::GoldenHourColor() const {
     return mSunRadiance;
 //	ASSERT( GoldenHour() >= 0.0f && GoldenHour() <= 1.0f );
 //	const float sunK = 1.0f;
-//	float sunPower = mSunPosition.altitudeRad > 0.0f ? ((mSunPosition.altitudeRad+0.1f) / M_PI_2) * sunK : 0.0f;
+//	float sunPower = mSunPosition.altitudeRad > 0.0f ? ((mSunPosition.altitudeRad) / M_PI_2) * sunK : 0.0f;
 //    auto gdl = static_cast<size_t>(goldenHourGradient->width - 1);
-//	auto index = gdl - static_cast<size_t>(GoldenHour() * gdl);
+//	auto index = gdl - static_cast<size_t>(((mSunPosition.altitudeRad) / M_PI_2) * gdl);
 //	auto col = goldenHourGradient->at<uint32_t>( static_cast<unsigned int>(index), 0);
-//	auto ret = Vector4f::ITORGBA(col) * GoldenHour() * sunPower;
+//	auto ret = Vector4f::ITORGBA(col) * sunPower;
 //	return ret.xyz();
+}
+
+V3f SunBuilder::dailyGradientColor( float _dayDelta ) const {
+    auto gdl = static_cast<size_t>(goldenHourGradient->width - 1);
+	auto index = gdl - static_cast<size_t>( _dayDelta * gdl);
+	auto col = goldenHourGradient->at<uint32_t>( static_cast<unsigned int>(index), 0);
+	auto ret = Vector4f::ITORGBA(col);
+	return ret.xyz();
 }
