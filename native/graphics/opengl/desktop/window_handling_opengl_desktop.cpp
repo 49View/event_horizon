@@ -43,9 +43,10 @@ namespace WindowHandling {
             if ( checkBitWiseFlag( flags, InitializeWindowFlags::ThreeQuarter )) scaleFactor = 1.5f;
             float xs = mode->width / scaleFactor;
             float ys = mode->height / scaleFactor;
-            xs = 1152*2.0f;
-            ys = 768*2.0f;
+            xs = 3200;
+            ys = 1800;
             window = glfwCreateWindow( static_cast<int>(xs), static_cast<int>(ys), "Event Horizon", NULL, NULL );
+            glfwSetWindowSize( window, static_cast<int>(xs), static_cast<int>(ys));
             AppGlobals::getInstance().setWindowSize(V2f{xs,ys});
         }
         glfwSwapInterval( -1 );

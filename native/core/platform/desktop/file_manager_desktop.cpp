@@ -46,7 +46,7 @@ namespace FileManager {
     void persistanceSync() {}
 
     bool useFileSystemCachePolicy() {
-        return true;
+        return false;
     }
 
     std::string systemRootDir() {
