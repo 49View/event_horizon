@@ -100,6 +100,9 @@ struct DaemonFileStruct {
 };
 
 struct EntityMeta {
+    EntityMeta( const std::string& name, const std::string& source, const std::string& group,
+                const std::string& project, const MongoObjectId& userId ) : name(name), source(source), group(group),
+                                                                            project(project), userId(userId) {}
     std::string name;
     std::string source;
     std::string group;
@@ -300,8 +303,8 @@ void elaboratePassThrough( DaemonFileStruct2 &dfs, const SerializableContainer &
     if (!writeRes) {
         throw std::runtime_error( std::string{"Can't write file: " + filePath});
     }
-    dfs.mdb.upsertEntity( dfs.entity );
-    dfs.mdb.updateUploads( dfs.entity );
+    auto entityId = dfs.mdb.upsertEntity( dfs.entity );
+    dfs.mdb.updateUploads( dfs.entity, entityId );
 
 //    ResourceEntityHelper res{ FM::readLocalFileC( getDaemonRoot() + dfs.entity.source ), {}, generateThumbnail( dfs2 ) };
 //    return upload( dfs, res );
@@ -657,7 +660,7 @@ void updateGeomsBBox(Mongo &mdb, const std::string &fileRoot) {
 
 int main( int argc, char **argv ) {
 
-    LOGRS( "Daemon version 4.0.2" );
+    LOGRS( "Daemon version 4.0.3" );
 
     auto *mongoPath = std::getenv( "EH_MONGO_PATH" );
     auto *mongoDefaultDB = std::getenv( "EH_MONGO_DEFAULT_DB" );

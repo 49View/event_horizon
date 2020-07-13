@@ -333,7 +333,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         takeScreenShot(
         [&, _id]( const SerializableContainer& image ) {
             if ( !_id.empty() ) {
-                Http::put( Url{"/entities/upsertThumb/geom/"+_id}, image );
+                Http::post( Url{"/entities/upsertThumb/geom/"+_id}, image );
             }
             RR().createGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
                                 ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);

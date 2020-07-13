@@ -162,7 +162,7 @@ public:
     std::string insertEntityFromAsset( const StreamChangeMetadata &meta );
 
     template<typename N>
-    void upsertEntity( const N &meta ) {
+    MongoObjectId upsertEntity( N &meta ) {
 
         using bsoncxx::builder::basic::kvp;
         using bsoncxx::builder::basic::sub_array;
@@ -203,7 +203,13 @@ public:
 //        bsoncxx::stdx::optional<mongocxx::result::insert_one> result = db["entities"].insert_one( builder.view());
         mongocxx::options::update options;
         options.upsert( true );
-        db["entities"].update_one( filter.view(), builder.view(), options );
+        auto ret = db["entities"].update_one( filter.view(), builder.view(), options );
+        auto oid = ret->upserted_id();
+        if ( !oid ) {
+            auto retDocument = db["entities"].find_one( filter.view() );
+                return MongoObjectId{(retDocument->view())["_id"].get_value()};
+        }
+        return MongoObjectId{oid->get_value()};
     }
 
     template<typename N, typename M>
@@ -230,7 +236,7 @@ public:
     }
 
     template<typename N>
-    void updateUploads( const N &meta ) {
+    void updateUploads( const N &meta, const MongoObjectId& id ) {
 
         using bsoncxx::builder::basic::kvp;
         using bsoncxx::builder::basic::sub_array;
@@ -246,6 +252,8 @@ public:
                                                                                       << bsoncxx::builder::stream::open_document
                                                                                       << "updatedAt"
                                                                                       << std::ctime( &t )
+                                                                                      << "entityId"
+                                                                                      << id()
                                                                                       << bsoncxx::builder::stream::close_document
                                                                                       << bsoncxx::builder::stream::finalize );
     }

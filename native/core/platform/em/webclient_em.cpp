@@ -90,8 +90,8 @@ namespace Http {
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
                        HttpResouceCB ccf ) {
 
-        LOGR( "[HTTP-POST] %s", uri.toString().c_str() );
-        LOGR( "[HTTP-POST-DATA-LENGTH] %d", length );
+        LOGRS( "[HTTP-" << method << "] " << uri.toString() );
+        LOGRS( "[HTTP-" << method << "-DATA-LENGTH] " << length );
 
         std::string contenType = qt==HttpQuery::Binary ? "application/octet-stream" : "application/json; charset=utf-8";
         emscripten_async_http_request( uri.toString().c_str(),
