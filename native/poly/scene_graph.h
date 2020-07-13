@@ -313,7 +313,7 @@ public:
     void loadAsset         ( const std::string& _names );
 
     void loadScene         ( const ResourceScene& gs, HODResolverCallback _ccf = nullptr );
-    void addScene          ( const ResourceScene& gs );
+    void addScene          ( const ResourceScene& gs, bool bTakeScreenShot );
     void addGeomScene      ( const std::string& geomName );
     void resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup );
 
@@ -511,6 +511,7 @@ public:
     void setCollisionEnabled( bool );
     void clearNodes();
     void clearGMNodes();
+    const ResourceRef& getCurrLoadedEntityId() const;
     void setMaterialRemap( const MaterialMap& materialRemap );
     [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
     void HODResolve( const DependencyList& deps, HODResolverCallback ccf );
@@ -530,6 +531,7 @@ protected:
     std::shared_ptr<CollisionMesh> collisionMesh;
     bool bCollisionEnabled = true;
     MaterialMap materialRemap;
+    ResourceRef currLoadedEntityID{};
     std::vector<SceneDependencyResolver> dependencyResovlers;
 };
 

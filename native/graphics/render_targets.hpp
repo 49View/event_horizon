@@ -8,19 +8,33 @@
 #include <graphics/render_list.h>
 
 class Framebuffer;
+
 class CommandBuffer;
+
 class CameraRig;
+
 class ShaderManager;
+
 class Renderer;
+
 class CommandBufferList;
+
 class ShadowMapManager;
+
 class Skybox;
+
 class CubeEnvironmentMap;
+
 class PrefilterSpecularMap;
+
 class PrefilterBRDF;
+
 class RLTarget;
+
 class Camera;
+
 class SunBuilder;
+
 struct FrameBufferTextureValues;
 
 enum class RenderTargetType {
@@ -42,7 +56,7 @@ enum class RLClearFlag {
 
 struct RenderBucketRange {
     RenderBucketRange() = default;
-    explicit RenderBucketRange( int _r1, int _r2, bool enabled = true ) : enabled( enabled ) {
+    explicit RenderBucketRange( int _r1, int _r2, bool enabled = true ) : enabled(enabled) {
         range = { _r1, _r2 };
     }
 
@@ -52,10 +66,10 @@ struct RenderBucketRange {
 
 class Composite {
 public:
-    explicit Composite( Renderer& rr ) : rr( rr ) {}
+    explicit Composite( Renderer& rr ) : rr(rr) {}
     virtual ~Composite() = default;
 
-    virtual void blit(CommandBufferList& cbl) = 0;
+    virtual void blit( CommandBufferList& cbl ) = 0;
     virtual void setup( const Rect2f& _destViewport ) = 0;
 
     const std::shared_ptr<Framebuffer>& getColorFB() const {
@@ -90,7 +104,7 @@ public:
     ~CompositePlain() override = default;
     CompositePlain( Renderer& rr, const std::string& _name, const Rect2f& _destViewport,
                     BlitType _bt = BlitType::OnScreen );
-    void blit(CommandBufferList& cbl) override;
+    void blit( CommandBufferList& cbl ) override;
     void setup( const Rect2f& _destViewport ) override;
 };
 
@@ -155,9 +169,9 @@ private:
 
 class RLTarget : public Dirtable, public std::enable_shared_from_this<RLTarget> {
 public:
-    explicit RLTarget( Renderer& _rr ) : rr( _rr ) {}
+    explicit RLTarget( Renderer& _rr ) : rr(_rr) {}
     RLTarget( std::shared_ptr<CameraRig> cameraRig, const Rect2f& screenViewport, BlitType _bt, Renderer& _rr ) :
-            cameraRig( cameraRig ), screenViewport( screenViewport ), finalDestBlit(_bt), rr( _rr ) {}
+            cameraRig(cameraRig), screenViewport(screenViewport), finalDestBlit(_bt), rr(_rr) {}
     virtual ~RLTarget() = default;
 
     std::shared_ptr<Camera> getCamera();
@@ -176,21 +190,11 @@ public:
     bool isKeyInRange( int _key, CheckEnableBucket _checkBucketVisibility = CheckEnableBucket::False,
                        RLClearFlag _clearFlags = RLClearFlag::All ) const;
 
-    bool isTakingScreenShot() {
-        return mbTakeScreenShot && ++mTakeScreenShotDelay > 2;
-    }
-
-    void takeScreenShot( bool _value = true ) {
-        mbTakeScreenShot = _value;
-        disable();
-    }
-
-    void takeScreenShot( ScreenShotContainerPtr _outdata ) {
-        mbTakeScreenShot = true;
-        screenShotContainer = _outdata;
-        mTakeScreenShotDelay = 0;
-        enable();
-    }
+    bool isTakingScreenShot();
+    void takeScreenShot( bool _value = true );
+    void takeScreenShot( std::function<void( const SerializableContainer& )> _endScreenShotCallback );
+    void endScreenShotCallback( const SerializableContainer& _image );
+    void endScreenShotCallback( std::function<void( const SerializableContainer& )> _endScreenShotCallback );
 
     BlitType FinalDestBlit() const {
         return finalDestBlit;
@@ -210,7 +214,7 @@ public:
     void disable() { bEnabled = false; }
     void setVisibleCB( int _index, bool _value );
 
-    void enableBucket( bool _flag,  size_t _bucketInndex = 0 ) {
+    void enableBucket( bool _flag, size_t _bucketInndex = 0 ) {
         bucketRanges[_bucketInndex].enabled = _flag;
     }
 
@@ -231,7 +235,8 @@ protected:
 protected:
     std::unordered_map<std::string, std::shared_ptr<CameraRig>> mAncillaryCameraRigs;
     bool mbTakeScreenShot = false;
-    int  mTakeScreenShotDelay = 0;
+    int mTakeScreenShotDelay = 0;
+    std::function<void( const SerializableContainer& )> mEndScreenShotCallback;
     Renderer& rr;
 };
 
@@ -241,7 +246,7 @@ public:
     ~RLTargetPlain() override = default;
 
     void addToCB( CommandBufferList& cb ) override;
-    virtual void blit(CommandBufferList& cbl) override;
+    virtual void blit( CommandBufferList& cbl ) override;
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void resize( const Rect2f& _r ) override;
 
@@ -254,7 +259,7 @@ public:
     RLTargetFB( std::shared_ptr<Framebuffer> _fbt, [[maybe_unused]] Renderer& _rr );
     ~RLTargetFB() override = default;
     void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
-    void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
+    void blit( [[maybe_unused]] CommandBufferList& cbl ) override {};
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void resize( const Rect2f& _r ) override;
 };
@@ -264,7 +269,7 @@ public:
     RLTargetCubeMap( const CubeMapRigContainer& _rig, std::shared_ptr<Framebuffer> _fb, Renderer& _rr );
     ~RLTargetCubeMap() override = default;
     void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
-    virtual void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
+    virtual void blit( [[maybe_unused]] CommandBufferList& cbl ) override {};
     void render( std::shared_ptr<Texture> _renderToTexture, int cmsize, int mip, CubeMapRenderFunction rcb );
     void resize( [[maybe_unused]] const Rect2f& _r ) override {}
 
@@ -277,12 +282,12 @@ public:
     RLTargetProbe( std::shared_ptr<CameraRig> _crig, Renderer& _rr );
     ~RLTargetProbe() override = default;
     void addToCB( [[maybe_unused]] CommandBufferList& cb ) override {}
-    virtual void blit( [[maybe_unused]] CommandBufferList& cbl) override {};
+    virtual void blit( [[maybe_unused]] CommandBufferList& cbl ) override {};
     virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void resize( [[maybe_unused]] const Rect2f& _r ) override {}
 
 protected:
-    std::string  cameraName;
+    std::string cameraName;
 };
 
 class RLTargetPBR : public RLTarget {
@@ -292,7 +297,7 @@ public:
     ~RLTargetPBR() override = default;
 
     void addToCB( CommandBufferList& cb ) override;
-    void blit(CommandBufferList& cbl) override;
+    void blit( CommandBufferList& cbl ) override;
     std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) override;
     void resize( const Rect2f& _r ) override;
 
@@ -334,7 +339,7 @@ protected:
 
     bool mbUseInfiniteHorizonForShadows = true;
     Vector3f mCachedSunPosition = Vector3f::ZERO;
-    V3f mProbePosition = Vector3f{2.0f, 1.6f, 6.0f};
+    V3f mProbePosition = Vector3f{ 2.0f, 1.6f, 6.0f };
     SkyBoxInitParams mSkyBoxParams;
     bool bEnableSkyBoxRendering = false;
     bool mbEnableSkybox = false;

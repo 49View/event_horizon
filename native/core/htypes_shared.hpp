@@ -28,6 +28,7 @@ using KVStringMap               = std::unordered_map<std::string, std::string>;
 using StringsPair               = std::pair<std::string, std::string>;
 using SetOfStringPair           = std::set<StringsPair>;
 using DependencyList            = std::set<StringsPair>;
+using GenericCallback           = std::function<void()>;
 
 typedef std::pair<void*, uint64_t> void_p;
 typedef std::pair<char*, uint64_t> char_p;
@@ -147,15 +148,15 @@ enum UiControlFlag {
 
 typedef float subdivisionAccuray;
 
-const static float accuracy1Meter = 1.0f;
-const static float accuracy50cm = .5f;
-const static float accuracy25cm = .25f;
-const static float accuracy10cm = .1f;
-const static float accuracy5cm = .05f;
-const static float accuracy1cm = .01f;
-const static float accuracy1mm = .001f;
-const static float accuracy1Sqmm = 0.000001f;
-const static float accuracyNone = 0.0f;
+[[maybe_unused]] const static float accuracy1Meter = 1.0f;
+[[maybe_unused]] const static float accuracy50cm = .5f;
+[[maybe_unused]] const static float accuracy25cm = .25f;
+[[maybe_unused]] const static float accuracy10cm = .1f;
+[[maybe_unused]] const static float accuracy5cm = .05f;
+[[maybe_unused]] const static float accuracy1cm = .01f;
+[[maybe_unused]] const static float accuracy1mm = .001f;
+[[maybe_unused]] const static float accuracy1Sqmm = 0.000001f;
+[[maybe_unused]] const static float accuracyNone = 0.0f;
 
 enum class FollowerSide {
 	In = -1,
@@ -248,29 +249,29 @@ enum class MouseCursorType {
 };
 
 using NodeType = uint64_t;
-static const uint64_t NodeTypeGeneric = 1;
-static const uint64_t NodeTypeLocator = 1 << 23;
-static const uint64_t NodeTypeAll = 0xffffffffffffffff;
+[[maybe_unused]] static const uint64_t NodeTypeGeneric = 1;
+[[maybe_unused]] static const uint64_t NodeTypeLocator = 1 << 23;
+[[maybe_unused]] static const uint64_t NodeTypeAll = 0xffffffffffffffff;
 
 namespace InitializeWindowFlags {
-	const static uint64_t Normal = 0;
-	const static uint64_t FullScreen = 1 << 1;
-	const static uint64_t Minimize = 1 << 2;
-	const static uint64_t Maximize = 1 << 3;
-	const static uint64_t HalfSize = 1 << 4;
-	const static uint64_t ThreeQuarter = 1 << 5;
+	[[maybe_unused]] const static uint64_t Normal = 0;
+	[[maybe_unused]] const static uint64_t FullScreen = 1 << 1;
+	[[maybe_unused]] const static uint64_t Minimize = 1 << 2;
+	[[maybe_unused]] const static uint64_t Maximize = 1 << 3;
+	[[maybe_unused]] const static uint64_t HalfSize = 1 << 4;
+	[[maybe_unused]] const static uint64_t ThreeQuarter = 1 << 5;
 }
 
 using InitializeWindowFlagsT = uint64_t;
 
-static const float SINGLE_TAP_TIME_LIMIT = 0.33f;
-static const float DOUBLE_TAP_TIME_LIMIT = 0.5f;
-static const float TAP_AREA = 0.05f;
-static const float MAX_SWIPE_TIME_LIMIT = 0.3f;
-static const float LONG_TAP_TIME_LIMIT = 0.5f;
+[[maybe_unused]] static const float SINGLE_TAP_TIME_LIMIT = 0.33f;
+[[maybe_unused]] static const float DOUBLE_TAP_TIME_LIMIT = 0.5f;
+[[maybe_unused]] static const float TAP_AREA = 0.05f;
+[[maybe_unused]] static const float MAX_SWIPE_TIME_LIMIT = 0.3f;
+[[maybe_unused]] static const float LONG_TAP_TIME_LIMIT = 0.5f;
 static const std::string defaultFontName = "Amaranth-Bold";
 
-const static uint64_t SHADOW_MAGIC_TAG = 50420;
+[[maybe_unused]] const static uint64_t SHADOW_MAGIC_TAG = 50420;
 
 using ScreenShotContainer = std::vector<unsigned char>;
 using ScreenShotContainerPtr = std::shared_ptr<ScreenShotContainer>;

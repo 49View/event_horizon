@@ -3,13 +3,8 @@
 #include <core/math/spherical_harmonics.h>
 #include <core/raw_image.h>
 #include <core/game_time.h>
-#include <core/configuration/app_options.h>
-#include <core/suncalc/sun_builder.h>
-#include <core/zlib_util.h>
 #include <core/camera_rig.hpp>
 #include <core/camera.h>
-#include <core/tar_util.h>
-#include <core/profiler.h>
 #include <core/v_data.hpp>
 #include <core/util.h>
 #include <core/resources/material.h>
@@ -22,12 +17,9 @@
 #include <graphics/render_list.h>
 #include <graphics/render_targets.hpp>
 #include <graphics/shader_manager.h>
-#include <graphics/shadowmap_manager.h>
 #include <graphics/shader_material.hpp>
 #include <graphics/render_material_manager.hpp>
 #include <graphics/gpuv_data_manager.hpp>
-#include <stb/stb_image_write.h>
-#include "core/service_factory.h"
 
 namespace FBNames {
     static std::unordered_set<std::string> sFBNames;
@@ -99,8 +91,8 @@ const Vector2i& Renderer::getForcedFrameBufferSize() const {
     return mForcedFrameBufferSize;
 }
 
-void Renderer::setForcedFrameBufferSize( const Vector2i& mForcedFrameBufferSize ) {
-    Renderer::mForcedFrameBufferSize = mForcedFrameBufferSize;
+void Renderer::setForcedFrameBufferSize( const Vector2i& _forcedFrameBufferSize ) {
+    mForcedFrameBufferSize = _forcedFrameBufferSize;
 }
 
 void Renderer::resetDefaultFB( const Vector2i& forceSize ) {

@@ -86,7 +86,7 @@ namespace Http {
                                     true );
     }
 
-    void postInternal( const Url& uri, const char *buff, uint64_t length, HttpQuery qt,
+    void postInternal( const Url& uri, const std::string& method, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
                        HttpResouceCB ccf ) {
 
@@ -95,7 +95,7 @@ namespace Http {
 
         std::string contenType = qt==HttpQuery::Binary ? "application/octet-stream" : "application/json; charset=utf-8";
         emscripten_async_http_request( uri.toString().c_str(),
-                                       "POST",
+                                       method.c_str(),
                                        makeHeaders().c_str(),
                                        buff,
                                        static_cast<int>(length),

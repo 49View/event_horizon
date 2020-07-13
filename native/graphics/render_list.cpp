@@ -9,10 +9,12 @@
 #include "render_list.h"
 
 #include <stb/stb_image_write.h>
+#include <stb/stb_image_resize.h>
 #include <core/http/basen.hpp>
 #include <core/util.h>
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
+#include <core/image_util.h>
 #include <core/descriptors/uniform_names.h>
 #include <graphics/renderer.h>
 #include <graphics/graphic_functions.hpp>
@@ -162,24 +164,21 @@ bool CommandBuffer::findEntry( const std::string& _key, std::weak_ptr<CommandBuf
     return false;
 }
 
-void screenShotBase64Callback( void *ctx, void *data, int size ) {
-    auto *rawThumbl = reinterpret_cast<ScreenShotContainer *>(ctx);
-    ScreenShotContainer img{ reinterpret_cast<unsigned char *>(data), reinterpret_cast<unsigned char *>(data) + size };
-    *rawThumbl = bn::encode_b64(img);
-}
-
 void CommandBuffer::postBlit() {
     if ( Target()->isTakingScreenShot() ) {
         auto lfb = fb(CommandBufferFrameBufferType::finalBlit);
         lfb->bind();
-        auto ssd = Target()->ScreenShotData();
-        ssd->clear();
         int w = lfb->getWidth();
         int h = lfb->getHeight();
         auto outB = std::make_unique<unsigned char[]>(w * h * 4);
         grabScreen(0, 0, w, h, reinterpret_cast<void *>(outB.get()));
-        stbi_write_png_to_func(screenShotBase64Callback, reinterpret_cast<void *>(ssd.get()), w, h, 4, outB.get(), 0);
-        Target()->takeScreenShot(false);
+        auto resizedWidth = 256;
+        auto resizedHeight = resizedWidth * (static_cast<float>(h)/static_cast<float>(w));
+        auto outC = std::make_unique<unsigned char []>(resizedWidth*resizedHeight*4);
+        stbir_resize_uint8(outB.get(), w, h, 0, outC.get(), resizedWidth, resizedHeight, 0, 4);
+        auto imageup8 = imageUtil::bufferToMemoryCompressed(resizedWidth, resizedHeight, 4, (void*)(outC.get()), imageUtil::mineTypeJPEG);
+        Target()->endScreenShotCallback( SerializableContainer{(unsigned char*)imageup8.first.get(), (unsigned char*)imageup8.first.get()+imageup8.second} );
+//        FM::writeLocalFile("screenshot.jpg", (const char*)imageup8.first.get(), imageup8.second, true);
     }
 }
 

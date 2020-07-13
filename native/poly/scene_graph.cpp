@@ -183,12 +183,11 @@ void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityG
 
     clearGMNodes();
     Http::clearRequestCache();
+    currLoadedEntityID = v0;
 
     if ( entityGroup == ResourceGroup::Geom ) {
-        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.1f,
+        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.05f,
                       GT::Scale(500.0f, 0.1f, 500.0f));
-        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.025f,
-                      GT::Scale(1.0f, 0.05f, 1.0f), C4f::ORANGE_SCHEME1_1);
         addGeomScene(v0);
     } else if ( entityGroup == ResourceGroup::Material ) {
         load<Material>(v0, [this, v0]( HttpResouceCBSign key ) {
@@ -706,15 +705,18 @@ bool SceneGraph::nodeExists( const std::string& _name ) const {
     return false;
 }
 
-void SceneGraph::addScene( const ResourceScene& gs ) {
-    HOD::resolver<ResourceScene>(*this, &gs, [this, gs]() {
-        gs.visit(ResourceGroup::Geom, [&]( const std::string& _key, const std::string& _value ) {
+void SceneGraph::addScene( const ResourceScene& gs, bool bTakeScreenShot ) {
+    HOD::resolver<ResourceScene>(*this, &gs, [this, gs, bTakeScreenShot]() {
+        gs.visit(ResourceGroup::Geom, [&, bTakeScreenShot]( const std::string& _key, const std::string& _value ) {
             auto geom = GB<GT::Asset>(_value, GT::Tag(1001));
             if ( geom ) {
                 geom->updateExistingTransform(V3f::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
                                               Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE);
                 DC()->Mode(CameraControlType::Orbit);
                 DC()->center(geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
+                if ( bTakeScreenShot ) {
+                    takeScreenShotOnImportSignal(getCurrLoadedEntityId());
+                }
             }
         });
     });
@@ -725,7 +727,7 @@ void SceneGraph::addGeomScene( const std::string& geomName ) {
     if ( nodeExists(geomName)) {
         return;
     }
-    addScene({ ResourceGroup::Geom, geomName });
+    addScene({ ResourceGroup::Geom, geomName }, true );
 }
 
 void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {
@@ -779,6 +781,10 @@ bool SceneGraph::isCollisionEnabled() const {
 }
 void SceneGraph::setCollisionEnabled( bool _bCollisionEnabled ) {
     bCollisionEnabled = _bCollisionEnabled;
+}
+
+const ResourceRef& SceneGraph::getCurrLoadedEntityId() const {
+    return currLoadedEntityID;
 }
 
 void HOD::DepRemapsManager::addDep( SceneGraph& sg, const std::string& group, const std::string& resName ) {

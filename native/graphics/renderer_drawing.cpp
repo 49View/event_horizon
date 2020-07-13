@@ -157,6 +157,11 @@ void Renderer::createGrid( const int bucketIndex, float unit, const Color4f& mai
 
     Vector2f axisLenghts = { limits.x() * 2.0f, limits.y() * 2.0f };
 
+    drawIncGridLines(bucketIndex, 10, 0.1f, gridLinesWidth*0.5f,
+                     V3f::X_AXIS_NEG, V3f::X_AXIS, smallAxisColor, zoffset - 0.01f, _name + "y_axis_01");
+    drawIncGridLines(bucketIndex, 10, 0.1f, gridLinesWidth*0.5f,
+                     V3f::Z_AXIS_NEG, V3f::Z_AXIS, smallAxisColor, zoffset - 0.01f, _name + "x_axis_01");
+
     drawIncGridLines(bucketIndex, static_cast<int>(( axisLenghts.y() / unit ) / 2.0f ), unit, gridLinesWidth,
                      leftXAxis,
                      rightXAxis, smallAxisColor, zoffset - 0.01f, _name + "y_axis");

@@ -24,6 +24,7 @@ using ConnectLUAScriptSig = void(const std::string&);
 using ConnectPairStringBoolFuncSig = void(ConnectPairStringBoolParamSig);
 using NodeGraphConnectParamsSig = NodeVariantsSP;
 using NodeGraphConnectFuncSig = void(NodeGraphConnectParamsSig);
+using NodeGraphConnectSerializableContainerSig = void(const std::string&);
 using NodeGraphConnectReplaceFuncSig = void(const std::string&, const std::string&);
 using NodeGraphConnectCResourceRefFuncSig = void(CResourceRef);
 using NodeGraphConnectChangeMaterialPropertySFuncSig = void(const std::string&, const std::string&, const std::string&);
@@ -38,6 +39,7 @@ public:
     void nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void gmNodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
+    void nodeTakeScreenShotOnImportConnect( const std::function<NodeGraphConnectSerializableContainerSig>& _slot );
     void nodeFullScreenImageConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void nodeFullScreenMaterialConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
     void nodeSetSkyboxConnect( const std::function<NodeGraphConnectCResourceRefFuncSig>& _slot );
@@ -60,6 +62,7 @@ public:
     boost::signals2::signal<ConnectVoidFuncSig> preloadCompleteSignal;
     boost::signals2::signal<ConnectVoidFloatFuncSig> preloadProgressSignal;
     boost::signals2::signal<NodeGraphConnectReplaceFuncSig> replaceMaterialSignal;
+    boost::signals2::signal<NodeGraphConnectSerializableContainerSig> takeScreenShotOnImportSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeSetSkyboxSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenImageSignal;
     boost::signals2::signal<NodeGraphConnectCResourceRefFuncSig> nodeFullScreenMaterialSignal;

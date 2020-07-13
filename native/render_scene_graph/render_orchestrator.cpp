@@ -329,6 +329,17 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         Socket::send("wasmClientFinishedLoadingData", profile);
     });
 
+    sg.nodeTakeScreenShotOnImportConnect( [this]( CResourceRef& _id) {
+        takeScreenShot(
+        [&, _id]( const SerializableContainer& image ) {
+            if ( !_id.empty() ) {
+                Http::put( Url{"/entities/upsertThumb/geom/"+_id}, image );
+            }
+            RR().createGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
+                                ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
+        });
+    });
+
     sg.replaceMaterialConnect([this]( const std::string& _oldMatRef, const std::string& _newMatRef ) {
         this->RR().replaceMaterial(_oldMatRef, _newMatRef);
         setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
@@ -563,6 +574,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
 
     luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group ) {
         setRigCameraController(CameraControlType::Orbit);
+        useSkybox(true);
         sg.resetAndLoadEntity(_id, _group);
     };
 
@@ -1025,6 +1037,12 @@ unsigned int RenderOrchestrator::TH( CResourceRef _value ) {
 
 std::vector<std::string>& RenderOrchestrator::CallbackPaths() {
     return callbackPaths;
+}
+
+void RenderOrchestrator::takeScreenShot(std::function<void(const SerializableContainer&)> screenShotCallback) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->takeScreenShot(screenShotCallback);
+    }
 }
 
 

@@ -24,9 +24,13 @@ struct AggregatedInputData;
 struct ShaderLiveUpdateMap;
 
 class Renderer;
+
 class SceneGraph;
+
 class VData;
+
 class UIView;
+
 class CLIParamMap;
 
 enum class UIElementStatus;
@@ -94,6 +98,7 @@ public:
     void useSSAO( bool _value );
     void useDOF( bool _value );
     void useMotionBlur( bool _value );
+    void takeScreenShot( std::function<void( const SerializableContainer& )> screenShotCallback );
     void changeTime( const std::string& _time );
     void changeCameraControlType( int _type );
 
@@ -126,7 +131,8 @@ public:
     SceneGraph& SG();
     UIView& UI();
     UICallbackMap& UICB();
-    unsigned int TH( CResourceRef _value ); // direct access to texture handle, it's a very common pattern for GUIs so let's do it
+    unsigned int
+    TH( CResourceRef _value ); // direct access to texture handle, it's a very common pattern for GUIs so let's do it
 protected:
     void uiViewUpdate( AggregatedInputData& _aid );
     void updateCallbacks();

@@ -185,7 +185,7 @@ namespace Http {
               ResponseCallbackFunc callbackFailed, ResponseFlags rf = ResponseFlags::None,
               HttpResouceCB mainThreadCallback = nullptr );
 
-    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt,
+    void postInternal( const Url& url, const std::string& method, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
                        HttpResouceCB mainThreadCallback );
 
@@ -207,6 +207,11 @@ namespace Http {
                HttpResouceCB mainThreadCallback = nullptr );
     void post( const Url& url,
                ResponseCallbackFunc callback,
+               ResponseCallbackFunc callbackFailed = nullptr,
+               HttpResouceCB mainThreadCallback = nullptr );
+
+    void put( const Url& url, const std::vector<unsigned char>& buffer,
+               ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
                HttpResouceCB mainThreadCallback = nullptr );
 

@@ -108,7 +108,7 @@ void CameraControlEditable::togglesUpdate( const AggregatedInputData& _aid ) {
         ViewportTogglesT cvtTggles = ViewportToggles::None;
         // Keyboards
         if ( _aid.checkKeyToggleOn(GMK_0) ) cvtTggles |= ViewportToggles::DrawWireframe;
-        if ( _aid.checkKeyToggleOn(GMK_G) ) cvtTggles |= ViewportToggles::DrawGrid;
+//        if ( _aid.checkKeyToggleOn(GMK_G) ) cvtTggles |= ViewportToggles::DrawGrid;
         if ( cvtTggles != ViewportToggles::None ) {
             toggle(rig()->Cvt(), cvtTggles);
         }

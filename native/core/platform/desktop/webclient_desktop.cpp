@@ -48,7 +48,7 @@ namespace Http {
     }
 
     std::shared_ptr<restbed::Request>
-    makePostRequest( const Url& url, const char *buff, uint64_t length, HttpQuery qt ) {
+    makeRequest( const Url& url, const std::string& method, const char *buff, uint64_t length, HttpQuery qt ) {
         auto request = makeRequestBase(url);
 
         switch ( qt ) {
@@ -61,7 +61,7 @@ namespace Http {
                 break;
         }
         request->set_header("Content-Length", std::to_string(length));
-        request->set_method("POST");
+        request->set_method(method);
         if ( length > 0 ) {
             const restbed::Bytes bodybuffer(buff, buff + length);
             request->set_body(bodybuffer);
@@ -168,13 +168,13 @@ namespace Http {
         return {};
     }
 
-    void postInternal( const Url& url, const char *buff, uint64_t length, HttpQuery qt,
+    void postInternal( const Url& url, const std::string& method, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
                        HttpResouceCB mainThreadCallback ) {
         LOGR("[HTTP-POST] %s", url.toString().c_str());
         LOGR("[HTTP-POST-DATA-LENGTH] %d", length);
 
-        auto request = makePostRequest(url, buff, length, qt);
+        auto request = makeRequest(url, method, buff, length, qt);
         auto settings = makeSettingsBase();
 
         try {

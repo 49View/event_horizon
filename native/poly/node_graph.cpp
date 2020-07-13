@@ -75,3 +75,7 @@ void NodeGraph::changeMaterialPropertyConnectV3f( const std::function<NodeGraphC
 void NodeGraph::changeMaterialPropertyConnectV4f( const std::function<NodeGraphConnectChangeMaterialPropertyV4fFuncSig>& _slot ) {
     changeMaterialPropertyV4fSignal.connect(_slot);
 }
+
+void NodeGraph::nodeTakeScreenShotOnImportConnect( const std::function<NodeGraphConnectSerializableContainerSig>& _slot ) {
+    takeScreenShotOnImportSignal.connect(_slot);
+}
