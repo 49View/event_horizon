@@ -243,23 +243,12 @@ public:
         auto filter = bsoncxx::builder::basic::document{};
         filter.append(
                 kvp( "filename", meta.source ),
-                kvp( "group", meta.group )
+                kvp( "group", meta.group ),
+                kvp( "project", meta.project ),
+                kvp( "userId", meta.userId() ),
+                kvp( "entityId", id() )
         );
-        std::chrono::system_clock::time_point p = std::chrono::system_clock::now();
-        std::time_t t = std::chrono::system_clock::to_time_t( p );
-        db["uploads"].insert_one( bsoncxx::builder::stream::document{}
-                                                                                      << "filename"
-                                                                                      << meta.source
-                                                                                      << "group"
-                                                                                      << meta.group
-                                          << "userId"
-                                          << meta.userId()
-                                                                                      << "updatedAt"
-                                                                                      << std::ctime( &t )
-                                                                                      << "entityId"
-                                                                                      << id()
-
-                                                                                      << bsoncxx::builder::stream::finalize );
+        db["completed_uploads"].insert_one( filter.view() );
     }
 
     mongocxx::cursor find( const std::string &collection, const std::vector<std::string> &query ) {
