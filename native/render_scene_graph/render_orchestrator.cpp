@@ -573,6 +573,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
     };
 
     luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group ) {
+        LOGRS("Loading " << _group << " " << _id);
         setRigCameraController(CameraControlType::Orbit);
         useSkybox(true);
         sg.resetAndLoadEntity(_id, _group);

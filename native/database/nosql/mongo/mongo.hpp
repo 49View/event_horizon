@@ -181,7 +181,6 @@ public:
                                          kvp( "contentType", meta.contentType ),
                                          kvp( "hash", meta.hash ),
                                          kvp( "userId", meta.userId()),
-                                         kvp( "thumb", meta.thumb ),
                                          kvp( "bboxSize", [&]( sub_array sa ) {
                                              sa.append( meta.bboxSize[0] );
                                              sa.append( meta.bboxSize[1] );
@@ -248,13 +247,18 @@ public:
         );
         std::chrono::system_clock::time_point p = std::chrono::system_clock::now();
         std::time_t t = std::chrono::system_clock::to_time_t( p );
-        db["uploads"].update_one( filter.view(), bsoncxx::builder::stream::document{} << "$set"
-                                                                                      << bsoncxx::builder::stream::open_document
+        db["uploads"].insert_one( bsoncxx::builder::stream::document{}
+                                                                                      << "filename"
+                                                                                      << meta.source
+                                                                                      << "group"
+                                                                                      << meta.group
+                                          << "userId"
+                                          << meta.userId()
                                                                                       << "updatedAt"
                                                                                       << std::ctime( &t )
                                                                                       << "entityId"
                                                                                       << id()
-                                                                                      << bsoncxx::builder::stream::close_document
+
                                                                                       << bsoncxx::builder::stream::finalize );
     }
 
