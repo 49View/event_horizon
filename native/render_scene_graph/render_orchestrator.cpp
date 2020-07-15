@@ -575,6 +575,11 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
         });
     };
 
+    luarr["clear"] = [&]() {
+        RR().clearTargets();
+        sg.clearGMNodes();
+    };
+
     luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group, bool bTakeScreenShot ) {
         LOGRS("Loading " << _group << " " << _id);
         setRigCameraController(CameraControlType::Orbit);
