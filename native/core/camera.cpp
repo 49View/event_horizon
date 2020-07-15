@@ -533,11 +533,14 @@ void Camera::lookAtCalc() {
 
 void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
     if ( mbLocked ) return;
-    float aperture = ( tanf(degToRad(90.0f - ( spatials.mFov->value ))) ) / mViewPort.ratio();
+//    float aperture = ( tanf(degToRad(90.0f - ( spatials.mFov->value ))) ) / mViewPort.ratio();
+    float aperture = (tanf(degToRad(FoV() * 0.5f )));
 
     float bdiameter = _bbox.calcDiameter();
-    float orbitDistance = aperture + bdiameter;
-    Vector3f cp = { 0.0f, 0.0f, orbitDistance };
+//    mOrbitDistance = bdiameter * (aperture + (cos(degToRad(FoV())) * 0.5f) + mNearClipPlaneZ );
+    mOrbitDistance = ((bdiameter * 0.5f) / aperture) + (cos(degToRad(FoV())) * 0.5f) + mNearClipPlaneZ;
+    mOrbitStrafe = V3f::ZERO;
+    Vector3f cp = { 0.0f, 0.0f, mOrbitDistance };
     mTarget = _bbox.centre();
 
     if ( cca == CameraCenterAngle::Front ) {
@@ -549,7 +552,7 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
         spatials.qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS };
         sphericalAcc = V2f{ M_PI, M_PI_2 };
     } else if ( cca == CameraCenterAngle::Halfway || cca == CameraCenterAngle::HalfwayOpposite ) {
-        float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : static_cast<float>(TWO_PI - M_PI_4);
+        float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : M_PI_4+M_PI*2.0f;
         spatials.qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS } * Quaternion{ M_PI_4, Vector3f::Z_AXIS };
         sphericalAcc = V2f{ TWO_PI - (float) rangle * 0.5f, (float) M_PI_4 + (float) M_PI_4 * 0.5f };
         if ( Mode() == CameraControlType::Orbit ) {
@@ -798,7 +801,7 @@ void Camera::incrementSphericalAngles( const V2f& _sph ) {
 
 void Camera::computeOrbitPosition() {
     auto stc = sphericalToCartasian(V3f{ sphericalAcc, mOrbitDistance });
-    setPosition(mTarget * V3f::UP_AXIS + XZY::C(stc));
+    setPosition(mTarget + XZY::C(stc));
 }
 
 void Camera::resetQuat() {

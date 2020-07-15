@@ -179,16 +179,16 @@ void SceneGraph::clearNodes() {
     Nodes().clear();
 };
 
-void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup ) {
+void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup, bool bTakeScreenShot ) {
 
     clearGMNodes();
     Http::clearRequestCache();
     currLoadedEntityID = v0;
 
     if ( entityGroup == ResourceGroup::Geom ) {
-        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.05f,
-                      GT::Scale(500.0f, 0.1f, 500.0f));
-        addGeomScene(v0);
+        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.051f,
+                      GT::Scale(500.0f, 0.1f, 500.0f), C4f::XTORGBA("e76848"));
+        addGeomScene(v0, bTakeScreenShot);
     } else if ( entityGroup == ResourceGroup::Material ) {
         load<Material>(v0, [this, v0]( HttpResouceCBSign key ) {
             nodeFullScreenMaterialSignal(key);
@@ -236,7 +236,7 @@ void SceneGraph::realTimeCallbacks() {
                 nodeFullScreenUIContainerSignal(rref);
             }
         } else if ( k == SceneEvents::LoadGeomAndReset ) {
-            resetAndLoadEntity(doc["data"]["entity_id"].GetString(), doc["data"]["group"].GetString());
+            resetAndLoadEntity(doc["data"]["entity_id"].GetString(), doc["data"]["group"].GetString(), false);
         } else if ( k == SceneEvents::ReplaceMaterialOnCurrentObject ) {
             auto matId = getFileName(doc["data"]["mat_id"].GetString());
             auto objId = getFileName(doc["data"]["entity_id"].GetString());
@@ -714,20 +714,18 @@ void SceneGraph::addScene( const ResourceScene& gs, bool bTakeScreenShot ) {
                                               Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE);
                 DC()->Mode(CameraControlType::Orbit);
                 DC()->center(geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
-                if ( bTakeScreenShot ) {
-                    takeScreenShotOnImportSignal(getCurrLoadedEntityId());
-                }
+                takeScreenShotOnImportSignal(getCurrLoadedEntityId(), bTakeScreenShot);
             }
         });
     });
 }
 
-void SceneGraph::addGeomScene( const std::string& geomName ) {
+void SceneGraph::addGeomScene( const std::string& geomName, bool bTakeScreenShot ) {
     // If the object is already there, do not load it again
     if ( nodeExists(geomName)) {
         return;
     }
-    addScene({ ResourceGroup::Geom, geomName }, true );
+    addScene({ ResourceGroup::Geom, geomName }, bTakeScreenShot );
 }
 
 void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {

@@ -522,11 +522,15 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                 rr.addToCommandBuffer(k);
             }
         }
+        cb.pushCommand({ CommandBufferCommandName::depthTestTrue });
+        cb.pushCommand({ CommandBufferCommandName::depthWriteFalse });
         for ( const auto&[k, vl] : rr.CL() ) {
             if ( inRange(k, { CommandBufferLimits::GridStart, CommandBufferLimits::GridEnd }) && !hiddenCB(k) ) {
                 rr.addToCommandBuffer(k);
             }
         }
+        cb.pushCommand({ CommandBufferCommandName::depthTestFalse });
+        cb.pushCommand({ CommandBufferCommandName::depthWriteTrue });
 #ifdef USE_UIBLITBUFFER
         cb.pushCommand( { CommandBufferCommandName::resolveUI } );
 #endif

@@ -329,15 +329,18 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         Socket::send("wasmClientFinishedLoadingData", profile);
     });
 
-    sg.nodeTakeScreenShotOnImportConnect( [this]( CResourceRef& _id) {
-        takeScreenShot(
-        [&, _id]( const SerializableContainer& image ) {
-            if ( !_id.empty() ) {
-                Http::post( Url{"/entities/upsertThumb/geom/"+_id}, image );
-            }
-            RR().createGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
-                                ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
-        });
+    sg.nodeTakeScreenShotOnImportConnect( [this]( CResourceRef& _id, bool _bTakeScreenShot) {
+        if ( _bTakeScreenShot ) {
+            takeScreenShot(
+                    [&, _id]( const SerializableContainer& image ) {
+                        if ( !_id.empty() ) {
+                            Http::post( Url{"/entities/upsertThumb/geom/"+_id}, image );
+                        }
+                        RR().showBucket(CommandBufferLimits::GridStart, true);
+                    });
+        } else {
+            RR().showBucket(CommandBufferLimits::GridStart, true);
+        }
     });
 
     sg.replaceMaterialConnect([this]( const std::string& _oldMatRef, const std::string& _newMatRef ) {
@@ -572,15 +575,19 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
         });
     };
 
-    luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group ) {
+    luarr["addSceneObject"] = [&]( const std::string& _id, const std::string& _group, bool bTakeScreenShot ) {
         LOGRS("Loading " << _group << " " << _id);
         setRigCameraController(CameraControlType::Orbit);
         useSkybox(true);
-        sg.resetAndLoadEntity(_id, _group);
+        RR().clearBucket(CommandBufferLimits::GridStart);
+        RR().createGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
+                            ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
+        RR().showBucket(CommandBufferLimits::GridStart, false);
+        sg.resetAndLoadEntity(_id, _group, bTakeScreenShot);
     };
 
     luarr["load"] = [&]( const std::string& _id ) {
-        sg.addGeomScene(_id);
+        sg.addGeomScene(_id, false);
     };
 
     luarr["print"] = [&]( const std::string& _id = "" ) {
@@ -599,10 +606,6 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
     luarr["printCamera"] = [&]() {
         LOGRS(*sg.DC().get())
     };
-
-//    luarr["clone"] = [&]( const std::string& _id ) {
-//        sg.addGeomScene( _id );
-//    };
 
     luarr["move"] = [&]( const std::string& _id, float x, float y, float z ) {
         sg.transformNode(_id, [x, y, z]( GeomSP elem ) {
@@ -681,7 +684,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
     };
 
     luarr["loadMaterial"] = [&]( const std::string& matName ) {
-        sg.resetAndLoadEntity(matName, ResourceGroup::Material);
+        sg.resetAndLoadEntity(matName, ResourceGroup::Material, false);
     };
 
 
