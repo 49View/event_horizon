@@ -229,11 +229,12 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 
     if ( u_sunDirection.y > 0.0 ) {
         vec3 H = -normalize( vec3(0.0, 1.0, 0.0) + u_sunDirection );
-
-        Lo += rendering_equation( albedo, L_Sun, V, N, F0, u_sunRadiance.xyz );
-        Lo += rendering_equation( albedo, H, V, N, F0, u_sunRadiance.xyz*0.5 );
+        // u_shadowParameters[2] == Indoor Scene Coeff
+        vec3 sunColor = u_sunRadiance.xyz*u_shadowParameters[2];
+        Lo += rendering_equation( albedo, L_Sun, V, N, F0, sunColor );
+        Lo += rendering_equation( albedo, H, V, N, F0, sunColor*0.5 );
         if ( translucencyV > 0.0 ) {
-            Lo += rendering_equation( albedo, -L_Sun, V, N, F0, u_sunRadiance.xyz );
+            Lo += rendering_equation( albedo, -L_Sun, V, N, F0, sunColor );
         }
     }
 
@@ -257,7 +258,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     // u_shadowParameters[0] == depth value z offset to avoid horrible aliasing
     // u_shadowParameters[1] == shadowOverBurn coefficient 
 #define_code shadow_code
-    float visibility = u_sunDirection.y > 0.0 ? 1.0 : 0.22;//u_shadowParameters[2];
+    float visibility = u_sunDirection.y > 0.0 ? 1.0 : 0.22;
     if ( u_sunDirection.y > 0.0 ) {
         vec3 shadowmap_coord3Biases = v_shadowmap_coord3;
         vec3 VN = v_norm;
@@ -323,6 +324,7 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 // vec3 ambient = u_sunRadiance.xyz;
 
 vec3 ambient = (((Lo + (kD * diffuseV + specular)) * visibility ) * ao);// * (visibility+diffuseV);
+
 #else 
 vec3 ambient = kD *Lo * Lo * visibility; //kD * Lo * ao;// * visibility;
 #endif
