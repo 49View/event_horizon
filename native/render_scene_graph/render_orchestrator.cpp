@@ -24,6 +24,7 @@
 #include <graphics/render_light_manager.h>
 #include <graphics/vp_builder.hpp>
 #include <graphics/window_handling.hpp>
+#include <graphics/vertex_processing_anim.h>
 #include <poly/scene_graph.h>
 #include <poly/scene_events.h>
 #include <render_scene_graph/render_orchestrator_callbacks.hpp>
@@ -589,6 +590,21 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
                             ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
         RR().showBucket(CommandBufferLimits::GridStart, false);
         sg.resetAndLoadEntity(_id, _group, bTakeScreenShot);
+    };
+
+    luarr["takeScreenShot"] = [&]() {
+        fader(0.33f, 0.0f, RR().CLI(CommandBufferLimits::GridStart), AnimEndCallback{
+                [&]() {
+                    takeScreenShot({
+                            [&]( const SerializableContainer& image ) {
+                                auto resourceID = sg.getCurrLoadedEntityId();
+                                if ( !resourceID.empty() ) {
+                                    Http::post(Url{ "/entities/upsertThumb/geom/" + resourceID }, image);
+                                }
+                            }
+                    });
+                }
+        });
     };
 
     luarr["load"] = [&]( const std::string& _id ) {
