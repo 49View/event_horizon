@@ -335,7 +335,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
             takeScreenShot(
                     [&, _id]( const SerializableContainer& image ) {
                         if ( !_id.empty() ) {
-                            Http::post( Url{"/entities/upsertThumb/geom/"+_id}, image );
+                            Http::post( Url{"/entitymanager/upsertThumb/geom/"+_id}, image );
                         }
                         RR().showBucket(CommandBufferLimits::GridStart, true);
                     });
@@ -600,7 +600,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
                             [&]( const SerializableContainer& image ) {
                                 auto resourceID = sg.getCurrLoadedEntityId();
                                 if ( !resourceID.empty() ) {
-                                    Http::post(Url{ "/entities/upsertThumb/geom/" + resourceID }, image);
+                                    Http::post(Url{ "/entitymanager/upsertThumb/geom/" + resourceID }, image);
                                 }
                             }
                     });

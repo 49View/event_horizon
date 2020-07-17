@@ -59,6 +59,12 @@ public:
 #ifdef __EMSCRIPTEN__
         // We do not do any  Http::init(); or login as that's done client side by react/whatever framework javascript is using
         // on the browser.
+
+        // The ony thing we do is to grab the aft from the session
+        auto aft = params.getParam("eh_aft");
+        if ( aft ) {
+            Http::aft( *aft );
+        }
 #endif
         auto backEnd = di::make_injector().create<std::unique_ptr<BE>>();
         backEnd->setCLIParams(params);

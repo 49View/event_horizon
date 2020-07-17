@@ -40,13 +40,10 @@ namespace Http {
 
     }
 
-    // We inject "x-eventhorizon-guest guest" (space separated header key/value please notice)
-    // To allow demo pages to be served without being logged in, that's the main purpose if this.
-    // If you remove this header we can't have anything public to showcase running as a wasm module that requires
-    // some data/api from RESTFul-api or our databases services.
+    // We inject space separated header key/value, please notice the space
     std::string makeHeaders() {
         std::stringstream ss;
-        ss << "x-eventhorizon-guest guest";
+        ss << "eh_aft " << Http::AFT();
         return ss.str();
     }
 
