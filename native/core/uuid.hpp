@@ -16,6 +16,15 @@ private:
 
 using UUID = std::string;
 
+struct UUIDT {
+    template<typename ...Args>
+    explicit UUIDT( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    UUID operator()() const noexcept {
+        return data;
+    }
+    UUID data;
+};
+
 class UUIDIntegerInc {
 public:
     explicit UUIDIntegerInc( uint64_t _base = 0 );
