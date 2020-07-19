@@ -219,8 +219,11 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     _cam->moveForward(moveForward);
     _cam->strafe(strafe);
     _cam->moveUp(moveUp + headJogging);
-    auto mdss = mi.moveDiffSS(TOUCH_ZERO);
-    auto mdss1 = mi.moveDiffSS(TOUCH_ONE);
+    bool isControlKeyDown =
+            mi.TI().checkModKeyPressed(GMK_LEFT_CONTROL) || mi.TI().checkModKeyPressed(GMK_RIGHT_CONTROL);
+
+    auto mdss = isControlKeyDown ? V2fc::ZERO : mi.moveDiffSS(TOUCH_ZERO);
+    auto mdss1 = isControlKeyDown ? V2fc::ZERO : mi.moveDiffSS(TOUCH_ONE);
     float currAngularVelocity = baseAngularVelocity;// * ( GameTime::getCurrTimeStep() / ONE_OVER_60HZ );
     if ( mdss != V2fc::ZERO && mdss1 == V2fc::ZERO ) {
         auto angledd = isTouchBased() ? mdss.yx() * V2fc::Y_INV : mdss.yx();
