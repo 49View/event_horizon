@@ -38,7 +38,8 @@ namespace CommandBufferLimits {
     const static int PBRStart  =     10000;
     const static int PBREnd    =  99999999;
     const static int UI2dStart = 100000000;
-    const static int CameraLocator =     UI2dStart+1;
+    const static int CameraLocatorIM         = UI2dStart+1;
+    const static int CameraMousePointers     = UI2dStart+2;
     const static int UI2dEnd   = 100999999;
     const static int GridStart = 101000000;
     const static int GridEnd   = 101010000;

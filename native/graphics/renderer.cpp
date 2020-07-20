@@ -251,6 +251,10 @@ void Renderer::directRenderLoop( RenderStats& rs ) {
 
 //    VRM.update();
 
+    // Clear IM buckets ready for next frame full redraw
+    clearBucket(CommandBufferLimits::CameraLocatorIM);
+    clearBucket(CommandBufferLimits::CameraMousePointers);
+
     mUpdateCounter++;
 }
 

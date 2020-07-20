@@ -84,11 +84,10 @@ enum TouchIndex {
 };
 
 struct AggregatedInputData {
-    AggregatedInputData( TextInput& ti, float scrollValue, std::array<TouchStatus, MAX_TAPS> status ) : ti(ti),
-                                                                                                        scrollValue(
-                                                                                                                scrollValue),
-                                                                                                        status(std::move(
-                                                                                                                status)) {}
+    AggregatedInputData( TextInput& ti, float scrollValue, std::array<TouchStatus, MAX_TAPS> status, InputMods _mods )
+            : ti(ti), scrollValue(scrollValue), status(std::move(status)), inputMods(std::move(_mods)) {
+
+    }
 
     [[nodiscard]] bool isMouseTouchedDownFirstTime( int _touchIndex ) const {
         return !mouseHasBeenEaten && status[_touchIndex].touchedDownFirstTime;
@@ -100,7 +99,7 @@ struct AggregatedInputData {
         return !mouseHasBeenEaten && status[_touchIndex].touchedDown && hasMouseMoved(_touchIndex);
     }
     [[nodiscard]] bool isMouseTouchedUp( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].hasTouchedUp;
+        return !mouseHasBeenEaten && status[_touchIndex].hasTouchedUp && !isMouseSingleTap(_touchIndex);
     }
     [[nodiscard]] bool isMouseSingleTap( int _touchIndex ) const {
         return !mouseHasBeenEaten && status[_touchIndex].singleTapEvent;
@@ -129,6 +128,8 @@ struct AggregatedInputData {
 
     [[nodiscard]] bool checkKeyToggleOn( int keyCode, bool overrideTextInput = false ) const;
     [[nodiscard]] TextInput& TI() const { return ti; }
+    [[nodiscard]] const InputMods& mods() const;
+
 private:
     [[nodiscard]] V2f getCurrMoveDiff( int _touchIndex, YGestureInvert yInv = YGestureInvert::Yes ) const;
     [[nodiscard]] V2f getCurrMoveDiffNorm( int _touchIndex, YGestureInvert yInv = YGestureInvert::Yes ) const;
@@ -138,6 +139,7 @@ private:
     TextInput& ti;
     float scrollValue = 0.0f;
     std::array<TouchStatus, MAX_TAPS> status;
+    InputMods inputMods{};
     bool mouseHasBeenEaten = false;
 };
 

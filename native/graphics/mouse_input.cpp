@@ -145,6 +145,10 @@ V3f AggregatedInputData::mouseViewportDir( int _touchIndex, std::shared_ptr<Came
     return normalize( pickedRay.rayFar-cam->getPosition());
 }
 
+const InputMods& AggregatedInputData::mods() const {
+    return inputMods;
+}
+
 SwipeDirection MouseInput::checkSwipe( int _touchIndex ) {
     // Check Swipe
     if ( status[_touchIndex].overridedSwipe ) {

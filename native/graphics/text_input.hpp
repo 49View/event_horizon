@@ -30,6 +30,12 @@ struct TICallbackFunctions {
 	std::function<void()> mEscapeCallbackFunction;
 };
 
+struct InputMods {
+    bool isAltPressed = false;
+    bool isShiftPressed = false;
+    bool isControlKeyDown = false;
+};
+
 class TextInput {
 public:
 	TextInput();
@@ -73,6 +79,8 @@ public: // these are globals data accessed from low level functions on inputs et
 	void setEnabled( bool _mbEnabled ) {
 		mbEnabled = _mbEnabled;
 	}
+
+    InputMods mods() const;
 
 public:
 	static std::wstring GInputString;

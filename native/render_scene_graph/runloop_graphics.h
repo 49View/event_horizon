@@ -134,7 +134,7 @@ protected:
 
     AggregatedInputData aggregateInputs() {
 	    ti.setEnabled(WH::isKeyboardInputActive());
-        return AggregatedInputData{ ti, mi.getScrollValue(), mi.Status() };
+        return AggregatedInputData{ ti, mi.getScrollValue(), mi.Status(), ti.mods() };
     }
 
 protected:
