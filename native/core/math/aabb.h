@@ -182,17 +182,13 @@ public:
 		return centre;
 	}
 
-	Vector3f centreTop() const {
-		return calcCentre() + Vector3f::Z_AXIS*calcDepth()*0.5f;
-	}
+	Vector3f centreTop() const;
 
-	Vector3f centreFront() const {
-		return calcCentre() + Vector3f::Y_AXIS*calcHeight()*0.5f;
-	}
+    Vector3f centreBottom() const;
 
-	Vector3f bottomFront() const {
-		return Vector3f{ calcCentre().xy(), minPoint().z() } +Vector3f::Y_AXIS*calcHeight()*0.5f;
-	}
+	Vector3f centreFront() const;
+
+	Vector3f bottomFront() const;
 
 	void translate( const Vector3f& offset ) {
 		mMinPoint += offset;
