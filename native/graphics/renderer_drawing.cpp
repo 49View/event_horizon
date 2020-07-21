@@ -549,6 +549,44 @@ VPListSP Renderer::drawPolyFinal( RendererDrawingSet& rds ) {
     }
 }
 
+//VPListSP Renderer::drawTrianglesFinal( RendererDrawingSet& rds ) {
+//
+//    if ( rds.verts.v.empty() && rds.triangles.empty() ) {
+//        return nullptr;
+//    }
+//
+//    std::vector<vector2fList> ret{};
+//
+//    if ( rds.triangles.empty() ) {
+//        ret = Triangulator::execute2dList(XZY::C2(rds.verts.v));
+//    } else {
+//        vector2fList v2List{};
+//        for ( const auto& triangle : rds.triangles ) {
+//            v2List.emplace_back(std::get<0>(triangle));
+//            v2List.emplace_back(std::get<1>(triangle));
+//            v2List.emplace_back(std::get<2>(triangle));
+//        }
+//        ret.emplace_back(v2List);
+//    }
+//
+//    rds.prim = Primitive::PRIMITIVE_TRIANGLES;
+//
+//    V3fVector allVLists;
+//    for ( auto& velem : ret ) {
+//        preMult(velem, rds);
+//        for ( auto& elem : velem ) {
+//            allVLists.emplace_back(is2dShader(rds.shaderName) ? V3f{ elem } : XZY::C(elem, 0.0f));
+//        }
+//    }
+//
+//    if ( rds.hasTexture() ) {
+//        rds.shaderName = rds.shaderMatrix.has2d() ? S::TEXTURE_2D : S::TEXTURE_3D;
+//        return addVertexStripsTMAutoMapping<PosTex3dStrip>(*this, allVLists, rds);
+//    } else {
+//        return addVertexStrips<Pos3dStrip>(*this, allVLists, rds);
+//    }
+//}
+
 VPListSP Renderer::drawCircleFinal( RendererDrawingSet& rds ) {
 
     V3fVector verts;
@@ -633,7 +671,7 @@ VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& v
 
 VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
                                  const std::string& _name ) {
-    if ( verts.size() != 3 ) return nullptr;
+    if ( verts.size() < 3 ) return nullptr;
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(3, 3, PRIMITIVE_TRIANGLE_STRIP,
                                                                           VFVertexAllocation::PreAllocate);
     colorStrip->addStripVertex(verts[0]);
@@ -652,6 +690,23 @@ VPListSP Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& 
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
                                                                           static_cast<int32_t>(verts.size()),
                                                                           PRIMITIVE_TRIANGLES,
+                                                                          VFVertexAllocation::PreAllocate);
+    for ( auto& v : verts ) {
+        colorStrip->addStripVertex(v);
+    }
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
+            _name).build();
+    VPL(bucketIndex, vp);
+    return vp;
+}
+
+VPListSP Renderer::drawTriangleStrip( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
+                                  const std::string& _name ) {
+    //Multiple of 3
+    if ( verts.size() < 3 ) return nullptr;
+    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
+                                                                          static_cast<int32_t>(verts.size()),
+                                                                          PRIMITIVE_TRIANGLE_STRIP,
                                                                           VFVertexAllocation::PreAllocate);
     for ( auto& v : verts ) {
         colorStrip->addStripVertex(v);

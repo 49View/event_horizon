@@ -407,6 +407,8 @@ public:
                             const std::string& _name = "" );
     VPListSP drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
                             const Vector4f& color, const std::string& _name = "" );
+    VPListSP drawTriangleStrip( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
+                                           const std::string& _name );
     VPListSP
     draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
                   const std::string& _name = "" );
