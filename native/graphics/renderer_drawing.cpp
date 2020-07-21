@@ -717,6 +717,25 @@ VPListSP Renderer::drawTriangleStrip( int bucketIndex, const std::vector<Vector3
     return vp;
 }
 
+VPListSP Renderer::drawTriangleQuad( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
+                                      const std::string& _name ) {
+    //Multiple of 3
+    if ( verts.size() < 4 ) return nullptr;
+    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
+                                                                          static_cast<int32_t>(verts.size()),
+                                                                          PRIMITIVE_TRIANGLE_STRIP,
+                                                                          VFVertexAllocation::PreAllocate);
+    colorStrip->addStripVertex(verts[0]);
+    colorStrip->addStripVertex(verts[3]);
+    colorStrip->addStripVertex(verts[1]);
+    colorStrip->addStripVertex(verts[2]);
+
+    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
+            _name).build();
+    VPL(bucketIndex, vp);
+    return vp;
+}
+
 VPListSP
 Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
                          const Vector4f& color, const std::string& _name ) {
