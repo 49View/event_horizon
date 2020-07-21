@@ -1,4 +1,5 @@
 
+
 //
 // Created by Dado on 08/02/2018.
 //
@@ -114,8 +115,8 @@ public:
     void setLuaScriptHotReload( const std::string& _luaScriptHotReload );
 
     void reloadShadersViaHttp();
-    void setMICursorCapture( bool _flag );
-    [[nodiscard]] bool getMICursorCapture() const;
+    void setMICursorCapture( bool _flag, MouseCursorType _mct = MouseCursorType::ARROW );
+    [[nodiscard]] std::pair<bool, MouseCursorType> getMICursorCapture() const;
 
 protected:
     AVInitCallback avcbTM();
@@ -149,6 +150,7 @@ private:
     UIView uiView;
     cameraRigsMap mRigs;
     bool bMICursorCapture = false;
+    MouseCursorType currMouseCursorType = MouseCursorType::ARROW;
     std::unordered_map<std::string, SceneScreenBox> boxes;
     sol::state lua{};
     std::string luaScriptHotReload;

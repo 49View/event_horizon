@@ -1046,12 +1046,13 @@ void RenderOrchestrator::setLuaScriptHotReload( const std::string& _luaScriptHot
     luaScriptHotReload = _luaScriptHotReload;
 }
 
-void RenderOrchestrator::setMICursorCapture( bool _flag ) {
+void RenderOrchestrator::setMICursorCapture( bool _flag, MouseCursorType _mct  ) {
     bMICursorCapture = _flag;
+    currMouseCursorType = _mct;
 }
 
-bool RenderOrchestrator::getMICursorCapture() const {
-    return bMICursorCapture;
+std::pair<bool, MouseCursorType> RenderOrchestrator::getMICursorCapture() const {
+    return std::make_pair(bMICursorCapture, currMouseCursorType);
 }
 
 unsigned int RenderOrchestrator::TH( CResourceRef _value ) {

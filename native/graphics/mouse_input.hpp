@@ -187,8 +187,8 @@ public: // these are globals data accessed from low level functions on inputs et
     std::array<TouchStatus, MAX_TAPS> Status() const;
     void update( UpdateSignals& _updateSignals );
 
-    [[nodiscard]] bool UseCaptureOnMove() const;
-    void UseCaptureOnMove( bool _bUseCaptureOnMove );
+    [[nodiscard]] std::pair<bool, MouseCursorType> UseCaptureOnMove() const;
+    void UseCaptureOnMove( std::pair<bool, MouseCursorType> _bUseCaptureOnMove );
 private:
     void mouseButtonUpdatePositions( int _touchIndex, double xpos, double ypos );
     void mouseButtonEventsUpdate( int _touchIndex, UpdateSignals& _updateSignals );
@@ -198,6 +198,7 @@ private:
 private:
     bool mPaused = false;
     bool bUseCaptureOnMove = false;
+    MouseCursorType currCursorType = MouseCursorType::ARROW;
     float mCurrTimeStamp = 0.0f;
 
     std::array<TouchStatus, MAX_TAPS> status;

@@ -49,10 +49,12 @@ void MouseInput::getCursorPos( double& xpos, double& ypos ) {
     glfwGetCursorPos( WH::window, &xpos, &ypos );
 }
 
-bool MouseInput::UseCaptureOnMove() const {
-    return bUseCaptureOnMove;
+std::pair<bool, MouseCursorType> MouseInput::UseCaptureOnMove() const {
+    return std::make_pair( bUseCaptureOnMove, currCursorType);
 }
 
-void MouseInput::UseCaptureOnMove( bool _bUseCaptureOnMove ) {
-    MouseInput::bUseCaptureOnMove = _bUseCaptureOnMove;
+void MouseInput::UseCaptureOnMove( std::pair<bool, MouseCursorType> _value ) {
+    bUseCaptureOnMove = _value.first;
+    currCursorType = _value.second;
+    setCursorType(currCursorType);
 }
