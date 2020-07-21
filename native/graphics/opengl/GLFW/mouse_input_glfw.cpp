@@ -11,10 +11,15 @@ void MouseInput::setCursorType( MouseCursorType mct ) {
     // cursor types
     static GLFWcursor* mCursorArrow = nullptr;
     static GLFWcursor* mCursorHResize = nullptr;
+    static GLFWcursor* mCursorHand = nullptr;
     switch ( mct ) {
         case MouseCursorType::ARROW:
             if ( mCursorArrow == nullptr ) mCursorArrow = glfwCreateStandardCursor( GLFW_ARROW_CURSOR );
             glfwSetCursor( WH::window, mCursorArrow );
+            break;
+        case MouseCursorType::HAND:
+            if ( mCursorHand == nullptr ) mCursorHand = glfwCreateStandardCursor( GLFW_HAND_CURSOR );
+            glfwSetCursor( WH::window, mCursorHand );
             break;
         case MouseCursorType::HRESIZE:
             if ( mCursorHResize == nullptr ) mCursorHResize = glfwCreateStandardCursor( GLFW_HRESIZE_CURSOR );

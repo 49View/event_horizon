@@ -183,10 +183,11 @@ public:
 	}
 
 	Vector3f centreTop() const;
-
     Vector3f centreBottom() const;
-
 	Vector3f centreFront() const;
+	Vector3f centreBack() const;
+	Vector3f centreLeft() const;
+	Vector3f centreRight() const;
 
 	Vector3f bottomFront() const;
 

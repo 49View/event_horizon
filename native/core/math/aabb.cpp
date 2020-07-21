@@ -168,20 +168,42 @@ bool AABB::containsZ( float _value ) const {
     return isbetween(_value, mMinPoint.z(), mMaxPoint.z());
 }
 
+Vector3f AABB::centreFront() const {
+    V3f ret = calcCentre();
+    ret.setX(mMaxPoint.x());
+    return ret;
+}
+
+Vector3f AABB::centreBack() const {
+    V3f ret = calcCentre();
+    ret.setX(mMinPoint.x());
+    return ret;
+}
+
+Vector3f AABB::centreTop() const {
+    V3f ret = calcCentre();
+    ret.setY(mMaxPoint.y());
+    return ret;
+}
+
 Vector3f AABB::centreBottom() const {
     V3f ret = calcCentre();
     ret.setY(mMinPoint.y());
     return ret;
 }
 
-Vector3f AABB::centreFront() const {
-    return calcCentre() + Vector3f::Y_AXIS*calcHeight()*0.5f;
+Vector3f AABB::centreLeft() const {
+    V3f ret = calcCentre();
+    ret.setZ(mMaxPoint.z());
+    return ret;
+}
+
+Vector3f AABB::centreRight() const {
+    V3f ret = calcCentre();
+    ret.setZ(mMinPoint.z());
+    return ret;
 }
 
 Vector3f AABB::bottomFront() const {
     return Vector3f{ calcCentre().xy(), minPoint().z() } +Vector3f::Y_AXIS*calcHeight()*0.5f;
-}
-
-Vector3f AABB::centreTop() const {
-    return calcCentre() + Vector3f::Z_AXIS*calcDepth()*0.5f;
 }
