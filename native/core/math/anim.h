@@ -26,30 +26,30 @@
 
 namespace TLU {
 
-inline static TimelineIndex getTI( inta _source ) {
-    return tiInt + _source->UID();
-}
-inline static TimelineIndex getTI( floata _source ) {
-    return tiFloat + _source->UID();
-}
-inline static TimelineIndex getTI( V2fa _source ) {
-    return tiV2f + _source->UID();
-}
-inline static TimelineIndex getTI( V3fa _source ) {
-    return tiV3f + _source->UID();
-}
-inline static TimelineIndex getTI( V4fa _source ) {
-    return tiV4f + _source->UID();
-}
-inline static TimelineIndex getTI( Quaterniona _source ) {
-    return tiQuat + _source->UID();
-}
+    [[maybe_unused]] inline static TimelineIndex getTI( inta _source ) {
+        return tiInt + _source->UID();
+    }
+    [[maybe_unused]] inline static TimelineIndex getTI( floata _source ) {
+        return tiFloat + _source->UID();
+    }
+    [[maybe_unused]] inline static TimelineIndex getTI( V2fa _source ) {
+        return tiV2f + _source->UID();
+    }
+    [[maybe_unused]] inline static TimelineIndex getTI( V3fa _source ) {
+        return tiV3f + _source->UID();
+    }
+    [[maybe_unused]] inline static TimelineIndex getTI( V4fa _source ) {
+        return tiV4f + _source->UID();
+    }
+    [[maybe_unused]] inline static TimelineIndex getTI( Quaterniona _source ) {
+        return tiQuat + _source->UID();
+    }
 
 }
 
 struct AnimUpdateCallback {
     template<typename ...Args>
-    explicit AnimUpdateCallback( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    explicit AnimUpdateCallback( Args&& ... args ) : data(std::forward<Args>(args)...) {}
     TimelineUpdateGroupCCF operator()() const noexcept {
         return data;
     }
@@ -58,7 +58,7 @@ struct AnimUpdateCallback {
 
 struct AnimEndCallback {
     template<typename ...Args>
-    explicit AnimEndCallback( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+    explicit AnimEndCallback( Args&& ... args ) : data(std::forward<Args>(args)...) {}
     TimelineGroupCCF operator()() const noexcept {
         return data;
     }
@@ -72,9 +72,9 @@ enum class KeyFramePosition {
     Post
 };
 
-template <typename T>
+template<typename T>
 struct KeyFramePair {
-    KeyFramePair( float timeStamp, T value ) : time( timeStamp ), value( value ) {}
+    KeyFramePair( float timeStamp, T value ) : time(timeStamp), value(value) {}
     KeyFramePair( float time, T value, AnimVelocityType velocityType ) : time(time), value(value),
                                                                          velocityType(velocityType) {}
     float time = 0.0f;
@@ -82,31 +82,31 @@ struct KeyFramePair {
     AnimVelocityType velocityType = AnimVelocityType::Hermite;
 };
 
-template < typename T>
+template<typename T>
 using KFP = KeyFramePair<T>;
 
-template <typename T>
+template<typename T>
 class TimelineStream {
 public:
     TimelineStream() = default;
-    explicit TimelineStream( AnimValue<T> _source ) : source( std::move( _source )) {}
+    explicit TimelineStream( AnimValue<T> _source ) : source(std::move(_source)) {}
 
     void Source( AnimValue<T> _source ) {
         source = _source;
     }
 
     void sortOnTime() {
-        std::sort( keyframes.begin(), keyframes.end(),
-           []( const auto& a, const auto& b ) -> bool { return a.time < b.time; } );
+        std::sort(keyframes.begin(), keyframes.end(),
+                  []( const auto& a, const auto& b ) -> bool { return a.time < b.time; });
     }
 
-    TimelineStream& k( const KeyFramePair<T>& _kf  ) {
+    TimelineStream& k( const KeyFramePair<T>& _kf ) {
         addKey(_kf);
         return *this;
     }
 
     TimelineStream& k( float _timeAt, const T& _value ) {
-        addKey({_timeAt, _value});
+        addKey({ _timeAt, _value });
         return *this;
     }
 
@@ -120,14 +120,14 @@ public:
             }
         }
         if ( !bUpdateOnly ) {
-            keyframes.emplace_back( _kf );
+            keyframes.emplace_back(_kf);
             sortOnTime();
         }
     }
 
     bool deleteKey( size_t _index ) {
         if ( _index >= keyframes.size() ) return false;
-        keyframes.erase( keyframes.begin() + _index );
+        keyframes.erase(keyframes.begin() + _index);
         return keyframes.empty();
     }
 
@@ -142,16 +142,16 @@ public:
         if ( keyframes.size() < 2 ) return KeyFramePosition::Invalid;
         if ( _timeElapsed < keyframes[0].time ) return KeyFramePosition::Pre;
 
-        for ( uint64_t t = 0; t < keyframes.size()-1; t++ ) {
-            if ( inRangeEx( _timeElapsed, keyframes[t].time, keyframes[t+1].time) ) {
-                _delta = interpolateInverse( keyframes[t].time, keyframes[t+1].time, _timeElapsed );
+        for ( uint64_t t = 0; t < keyframes.size() - 1; t++ ) {
+            if ( inRangeEx(_timeElapsed, keyframes[t].time, keyframes[t + 1].time) ) {
+                _delta = interpolateInverse(keyframes[t].time, keyframes[t + 1].time, _timeElapsed);
                 _index = t;
                 return KeyFramePosition::Valid;
             }
         }
         // Time is outside the last keyframe, so clamp it to the end
         _delta = 1.0f;
-        _index = keyframes.size()-2;
+        _index = keyframes.size() - 2;
 
         return KeyFramePosition::Post;
     }
@@ -168,30 +168,31 @@ public:
         uint64_t keyFrameIndex = 0;
 
         float delta = 0.0f;
-        auto keyFramePos = getKeyFrameIndexAt( _timeElapsed, keyFrameIndex, delta );
+        auto keyFramePos = getKeyFrameIndexAt(_timeElapsed, keyFrameIndex, delta);
         source->isAnimating = keyFramePos == KeyFramePosition::Pre ||
                               keyFramePos == KeyFramePosition::Valid ||
                               ( keyFramePos == KeyFramePosition::Post && !triggeredPost );
         if ( keyFramePos == KeyFramePosition::Valid || ( keyFramePos == KeyFramePosition::Post && !triggeredPost ) ) {
             uint64_t p1 = keyFrameIndex;
-            uint64_t p2 = keyFrameIndex+1;
+            uint64_t p2 = keyFrameIndex + 1;
             switch ( keyframes[p2].velocityType ) {
                 case AnimVelocityType::Linear:
-                    value = interpolate( keyframes[p1].value, keyframes[p2].value, delta );
+                    value = interpolate(keyframes[p1].value, keyframes[p2].value, delta);
                     break;
                 case AnimVelocityType::Cosine:
-                    value = interpolate( keyframes[p1].value, keyframes[p2].value, asinf( delta ) / M_PI_2 );
+                    value = interpolate(keyframes[p1].value, keyframes[p2].value, asinf(delta) / M_PI_2);
                     break;
                 case AnimVelocityType::Exp:
-                    value = interpolate( keyframes[p1].value, keyframes[p2].value, static_cast<float>(( expf( delta ) - 1.0f ) / ( M_E - 1.0f )) );
+                    value = interpolate(keyframes[p1].value, keyframes[p2].value,
+                                        static_cast<float>(( expf(delta) - 1.0f ) / ( M_E - 1.0f )));
                     break;
                 case AnimVelocityType::Hermite: {
                     uint64_t p0 = p1 > 0 ? p1 - 1 : 0;
                     uint64_t p3 = p2 < keyframes.size() - 2 ? p2 + 1 : p2;
-                    value = interpolateHermite( keyframes[p0].value, keyframes[p1].value,
-                                                keyframes[p2].value, keyframes[p3].value, delta );
+                    value = interpolateHermite(keyframes[p0].value, keyframes[p1].value,
+                                               keyframes[p2].value, keyframes[p3].value, delta);
                 }
-                break;
+                    break;
                 default:
                     break;
             }
@@ -206,7 +207,7 @@ public:
     }
 
     int strideDumpForType( TimelineIndex _valueType ) {
-        switch (_valueType) {
+        switch ( _valueType ) {
             case tiIntIndex:
                 return 2;
             case tiFloatIndex:
@@ -225,49 +226,49 @@ public:
     }
 
     void visit( AnimVisitCallback _callback, TimelineIndex _k, TimelineIndex _valueType ) {
-        _callback(Name(), dump(), _k, _valueType, strideDumpForType(_valueType) );
+        _callback(Name(), dump(), _k, _valueType, strideDumpForType(_valueType));
     }
 
     std::vector<float> dump() const {
         std::vector<float> ret;
-        if constexpr (std::is_same_v<T, float>) {
+        if constexpr ( std::is_same_v<T, float> ) {
             for ( const auto& v : keyframes ) {
-                ret.emplace_back( v.time );
-                ret.emplace_back( v.value );
+                ret.emplace_back(v.time);
+                ret.emplace_back(v.value);
             }
-        } else if constexpr (std::is_same_v<T, V2f>) {
+        } else if constexpr ( std::is_same_v<T, V2f> ) {
             for ( const auto& v : keyframes ) {
-                ret.emplace_back( v.time );
-                ret.emplace_back( v.value.x());
-                ret.emplace_back( v.value.y());
+                ret.emplace_back(v.time);
+                ret.emplace_back(v.value.x());
+                ret.emplace_back(v.value.y());
             }
-        } else if constexpr (std::is_same_v<T, V3f>) {
+        } else if constexpr ( std::is_same_v<T, V3f> ) {
             for ( const auto& v : keyframes ) {
-                ret.emplace_back( v.time );
-                ret.emplace_back( v.value.x());
-                ret.emplace_back( v.value.y());
-                ret.emplace_back( v.value.z());
+                ret.emplace_back(v.time);
+                ret.emplace_back(v.value.x());
+                ret.emplace_back(v.value.y());
+                ret.emplace_back(v.value.z());
             }
-        } else if constexpr (std::is_same_v<T, V4f>) {
+        } else if constexpr ( std::is_same_v<T, V4f> ) {
             for ( const auto& v : keyframes ) {
-                ret.emplace_back( v.time );
-                ret.emplace_back( v.value.x());
-                ret.emplace_back( v.value.y());
-                ret.emplace_back( v.value.z());
-                ret.emplace_back( v.value.w());
+                ret.emplace_back(v.time);
+                ret.emplace_back(v.value.x());
+                ret.emplace_back(v.value.y());
+                ret.emplace_back(v.value.z());
+                ret.emplace_back(v.value.w());
             }
-        } else if constexpr (std::is_same_v<T, Quaternion>) {
+        } else if constexpr ( std::is_same_v<T, Quaternion> ) {
             for ( const auto& v : keyframes ) {
-                ret.emplace_back( v.time );
-                ret.emplace_back( v.value.x());
-                ret.emplace_back( v.value.y());
-                ret.emplace_back( v.value.z());
-                ret.emplace_back( v.value.w());
+                ret.emplace_back(v.time);
+                ret.emplace_back(v.value.x());
+                ret.emplace_back(v.value.y());
+                ret.emplace_back(v.value.z());
+                ret.emplace_back(v.value.w());
             }
-        } else if constexpr (std::is_same_v<T, int>) {
+        } else if constexpr ( std::is_same_v<T, int> ) {
             for ( const auto& v : keyframes ) {
-                ret.emplace_back( v.time );
-                ret.emplace_back( static_cast<float>(v.value) );
+                ret.emplace_back(v.time);
+                ret.emplace_back(static_cast<float>(v.value));
             }
         }
         return ret;
@@ -296,17 +297,17 @@ private:
 template<typename V>
 using TimelineMap = std::unordered_map<uint64_t, TimelineStream<V>>;
 
-template <typename V>
+template<typename V>
 class TimelineGroup {
 public:
     TimelineGroup() = default;
     explicit TimelineGroup( AnimValue<V> _source ) {
-        stream.Source( std::move(_source) );
+        stream.Source(std::move(_source));
     }
 
     void play() {
         animationStartTime = -1.0f;
-        stream.addDelay( startTimeOffset );
+        stream.addDelay(startTimeOffset);
         bIsPlaying = true;
         bForceOneFrameOnly = false;
     }
@@ -329,7 +330,7 @@ public:
 
 //    uint64_t realFrameTicks = frameTickCount - frameTickOffset;
 //    float timeDelta = timeElapsed;
-        timeElapsed = ( currGameStamp - animationStartTime);// + animationInitialDelay;
+        timeElapsed = ( currGameStamp - animationStartTime );// + animationInitialDelay;
 //    timeDelta = timeElapsed - timeDelta;
 //    float meanTimeDeltaAvr = meanTimeDelta / realFrameTicks;
 //    if ( timeDelta > meanTimeDeltaAvr*3.0f && realFrameTicks > 3 ) {
@@ -338,13 +339,13 @@ public:
 //        timeDelta = meanTimeDeltaAvr;
 //    }
 //    meanTimeDelta += timeDelta;
-        bIsPlaying = stream.update( timeElapsed );
+        bIsPlaying = stream.update(timeElapsed);
         if ( !bIsPlaying ) {
             timeElapsed = 0.0f;
             meanTimeDelta = 0.0f;
             frameTickCount = 0;
             frameTickOffset = 0;
-            if ( cuf ) cuf( timeElapsed );
+            if ( cuf ) cuf(timeElapsed);
             if ( ccf && loopType == AnimLoopType::Linear ) {
                 ccf();
             }
@@ -352,7 +353,7 @@ public:
                 play();
             }
         } else {
-            if ( cuf ) cuf( timeElapsed );
+            if ( cuf ) cuf(timeElapsed);
         }
         if ( bForceOneFrameOnly ) {
             bIsPlaying = false;
@@ -403,24 +404,24 @@ class Timeline {
 public:
 
     static void update() {
-       for( auto& [k,g] : timelinei ) {
-           g->update();
-       }
-       for( auto& [k,g] : timelinef ) {
-           g->update();
-       }
-       for( auto& [k,g] : timelineV2 ) {
-           g->update();
-       }
-       for( auto& [k,g] : timelineV3 ) {
-           g->update();
-       }
-       for( auto& [k,g] : timelineV4 ) {
-           g->update();
-       }
-       for( auto& [k,g] : timelineQ ) {
-           g->update();
-       }
+        for ( auto&[k, g] : timelinei ) {
+            g->update();
+        }
+        for ( auto&[k, g] : timelinef ) {
+            g->update();
+        }
+        for ( auto&[k, g] : timelineV2 ) {
+            g->update();
+        }
+        for ( auto&[k, g] : timelineV3 ) {
+            g->update();
+        }
+        for ( auto&[k, g] : timelineV4 ) {
+            g->update();
+        }
+        for ( auto&[k, g] : timelineQ ) {
+            g->update();
+        }
     }
 
 //    static void play( const std::string & _groupName ) {
@@ -461,47 +462,63 @@ public:
 //        (timelineGroups[_group].addTimeline(timelines.add( _source, args )), ...);
 //    }
 
-    template <typename T, typename ...Args>
+    template<typename T, typename ...Args>
     static std::string play( AnimValue<T>& _source, Args&& ... args ) {
         auto groupName = UUIDGen::make();
         auto tg = std::make_shared<TimelineGroup<T>>(_source);
 
-        (addParam<T>( tg, std::forward<Args>( args )), ...); // Fold expression (c++17)
+        (addParam<T>(tg, std::forward<Args>(args)), ...); // Fold expression (c++17)
 
-        if constexpr (std::is_same_v<T, float>) {
-            timelinef.emplace( groupName, tg );
-        } else if constexpr (std::is_same_v<T, V2f>) {
-            timelineV2.emplace( groupName, tg );
-        } else if constexpr (std::is_same_v<T, V3f>) {
-            timelineV3.emplace( groupName, tg );
-        } else if constexpr (std::is_same_v<T, V4f>) {
-            timelineV4.emplace( groupName, tg );
-        } else if constexpr (std::is_same_v<T, Quaternion>) {
-            timelineQ.emplace( groupName, tg );
-        } else if constexpr (std::is_same_v<T, int>) {
-            timelinei.emplace( groupName, tg );
+        if constexpr ( std::is_same_v<T, float> ) {
+            timelinef.emplace(groupName, tg);
+        } else if constexpr ( std::is_same_v<T, V2f> ) {
+            timelineV2.emplace(groupName, tg);
+        } else if constexpr ( std::is_same_v<T, V3f> ) {
+            timelineV3.emplace(groupName, tg);
+        } else if constexpr ( std::is_same_v<T, V4f> ) {
+            timelineV4.emplace(groupName, tg);
+        } else if constexpr ( std::is_same_v<T, Quaternion> ) {
+            timelineQ.emplace(groupName, tg);
+        } else if constexpr ( std::is_same_v<T, int> ) {
+            timelinei.emplace(groupName, tg);
         }
 
         tg->play();
         return groupName;
     }
 
-    template <typename T>
-    static void stop( AnimValue<T>& _source, const std::string& groupName, const T& _restoreValue ) {
-        if constexpr (std::is_same_v<T, float>) {
-            timelinef.erase( groupName );
-        } else if constexpr (std::is_same_v<T, V2f>) {
-            timelineV2.erase( groupName );
-        } else if constexpr (std::is_same_v<T, V3f>) {
-            timelineV3.erase( groupName );
-        } else if constexpr (std::is_same_v<T, V4f>) {
-            timelineV4.erase( groupName );
-        } else if constexpr (std::is_same_v<T, Quaternion>) {
-            timelineQ.erase( groupName );
-        } else if constexpr (std::is_same_v<T, int>) {
-            timelinei.erase( groupName );
+    template<typename T>
+    static bool stop( AnimValue<T>& _source, const std::string& groupName, const T& _restoreValue ) {
+        bool hasErased = false;
+        if constexpr ( std::is_same_v<T, float> ) {
+            auto tSize = timelinef.size();
+            timelinef.erase(groupName);
+            hasErased = tSize != timelinef.size();
+        } else if constexpr ( std::is_same_v<T, V2f> ) {
+            auto tSize = timelineV2.size();
+            timelineV2.erase(groupName);
+            hasErased = tSize != timelineV2.size();
+        } else if constexpr ( std::is_same_v<T, V3f> ) {
+            auto tSize = timelineV3.size();
+            timelineV3.erase(groupName);
+            hasErased = tSize != timelineV3.size();
+        } else if constexpr ( std::is_same_v<T, V4f> ) {
+            auto tSize = timelineV4.size();
+            timelineV4.erase(groupName);
+            hasErased = tSize != timelineV4.size();
+        } else if constexpr ( std::is_same_v<T, Quaternion> ) {
+            auto tSize = timelineQ.size();
+            timelineQ.erase(groupName);
+            hasErased = tSize != timelineQ.size();
+        } else if constexpr ( std::is_same_v<T, int> ) {
+            auto tSize = timelinei.size();
+            timelinei.erase(groupName);
+            hasErased = tSize != timelinei.size();
         }
-        _source->value = _restoreValue;
+        if ( hasErased ) {
+            _source->value = _restoreValue;
+        }
+        return hasErased;
     }
 
     static void clear() {
@@ -517,25 +534,25 @@ public:
         auto groupName = UUIDGen::make();
         auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Sleeping");
 
-        play( sleepingBeauty, frameSkipper, _ccf, KeyFramePair{ _seconds, 0.0f } );
+        play(sleepingBeauty, frameSkipper, _ccf, KeyFramePair{ _seconds, 0.0f });
     }
 
     static void intermezzo( float _seconds, uint64_t frameSkipper, AnimUpdateCallback _cuf, AnimEndCallback _cef ) {
         auto groupName = UUIDGen::make();
         auto sleepingBeauty = std::make_shared<AnimType<float>>(0.0f, "Intermezzo");
 
-        play( sleepingBeauty, frameSkipper, KeyFramePair{ _seconds, 0.0f }, _cuf, _cef );
+        play(sleepingBeauty, frameSkipper, KeyFramePair{ _seconds, 0.0f }, _cuf, _cef);
     }
 
     template<typename SGT, typename M>
     static void addParam( std::shared_ptr<TimelineGroup<SGT>> tg, const M& _param ) {
         if constexpr ( std::is_same_v<M, KeyFramePair<SGT>> ) {
-            tg->stream.k( { 0.0f, tg->stream.value(), _param.velocityType } );
-            tg->stream.k( _param );
+            tg->stream.k({ 0.0f, tg->stream.value(), _param.velocityType });
+            tg->stream.k(_param);
         }
         if constexpr ( std::is_same_v<M, std::vector<KeyFramePair<SGT>>> ) {
-            for (const auto& elem : _param ) {
-                tg->stream.k( elem );
+            for ( const auto& elem : _param ) {
+                tg->stream.k(elem);
             }
         }
         if constexpr ( std::is_integral_v<M> ) {
@@ -609,6 +626,7 @@ private:
 //    static TimelineMapSpec  timelines;
 //    static TimelineLinks    links;
 
-    template <typename U>
-    friend class TimelineStream;
+    template<typename U>
+    friend
+    class TimelineStream;
 };
