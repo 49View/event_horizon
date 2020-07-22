@@ -18,6 +18,7 @@
 #define SOL_ALL_SAFETIES_ON 1
 
 #include <lua/sol/sol.hpp> // or #include "sol.hpp", whichever suits your needs
+#include <core/state_machine_helper.hpp>
 
 struct scene_t;
 struct PickRayData;
@@ -132,8 +133,7 @@ public:
     SceneGraph& SG();
     UIView& UI();
     UICallbackMap& UICB();
-    unsigned int
-    TH( CResourceRef _value ); // direct access to texture handle, it's a very common pattern for GUIs so let's do it
+    unsigned int TH( CResourceRef _value ); // direct access to texture handle, it's a very common pattern for GUIs so let's do it
 protected:
     void uiViewUpdate( AggregatedInputData& _aid );
     void updateCallbacks();

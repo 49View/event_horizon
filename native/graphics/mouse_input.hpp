@@ -123,8 +123,8 @@ struct AggregatedInputData {
     [[nodiscard]] bool isMouseHasBeenEaten() const { return mouseHasBeenEaten; }
     void setMouseHasBeenEaten( bool _mouseHasBeenEaten ) { mouseHasBeenEaten = _mouseHasBeenEaten; }
 
-    [[nodiscard]] V2f mouseViewportPos( int _touchIndex, std::shared_ptr<Camera> cam ) const;
-    [[nodiscard]] V3f mouseViewportDir( int _touchIndex, std::shared_ptr<Camera> cam ) const;
+    [[nodiscard]] V2f mouseViewportPos( int _touchIndex, const Camera* cam ) const;
+    [[nodiscard]] V3f mouseViewportDir( int _touchIndex, const Camera* cam ) const;
 
     [[nodiscard]] bool checkKeyToggleOn( int keyCode, bool overrideTextInput = false ) const;
     [[nodiscard]] TextInput& TI() const { return ti; }
@@ -169,8 +169,8 @@ public: // these are globals data accessed from low level functions on inputs et
 
     inline const vector2fList& getGestureTaps( int _touchIndex ) const;
 
-    MouseButtonStatusValues MouseButtonStatus( int _touchIndex ) const;
-    void MouseButtonStatus( int _touchIndex, MouseButtonStatusValues val );
+    [[maybe_unused]] MouseButtonStatusValues MouseButtonStatus( int _touchIndex ) const;
+    [[maybe_unused]] void MouseButtonStatus( int _touchIndex, MouseButtonStatusValues val );
 
     Vector2f getCurrPos( int _touchIndex ) const;
     Vector2f getCurrPosSS( int _touchIndex ) const;

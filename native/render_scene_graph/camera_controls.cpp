@@ -12,6 +12,7 @@
 #include <graphics/mouse_input.hpp>
 #include <graphics/text_input.hpp>
 #include <graphics/renderer.h>
+#include <poly/scene_graph.h>
 #include <render_scene_graph/render_orchestrator.h>
 
 
@@ -104,40 +105,18 @@ void CameraControl::setControlType( CameraControlType _ct ) {
 }
 
 void CameraControlEditable::togglesUpdate( const AggregatedInputData& _aid ) {
-    if ( !inputIsBlockedOnSelection() ) {
-        ViewportTogglesT cvtTggles = ViewportToggles::None;
-        // Keyboards
-        if ( _aid.checkKeyToggleOn(GMK_0) ) cvtTggles |= ViewportToggles::DrawWireframe;
-//        if ( _aid.checkKeyToggleOn(GMK_G) ) cvtTggles |= ViewportToggles::DrawGrid;
-        if ( cvtTggles != ViewportToggles::None ) {
-            toggle(rig()->Cvt(), cvtTggles);
-        }
-    }
-}
-
-void CameraControlFly::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariantsSP _node, SelectableFlagT _flags ) {
-    auto sn = selectedNodes.find(_uuid);
-    auto selectColor = sn != selectedNodes.end() ? sn->second.oldColor : Color4f::DARK_YELLOW;
-    Color4f oldColor{ Color4f::WHITE };
-
-    if ( checkBitWiseFlag(_flags, SelectableFlag::Highlighted) ) {
-        rsg.RR().changeMaterialColorOnUUID(_uuid, selectColor, oldColor);
-    }
-    if ( sn != selectedNodes.end() ) {
-        selectedNodes.erase(sn);
-    } else {
-        selectedNodes.emplace(_uuid, Selectable{ oldColor, _trs, _node, _flags });
-    }
-}
-
-void CameraControlFly::unselectImpl( const UUID& _uuid, Selectable& _node ) {
-    Color4f oldColor{ Color4f::WHITE };
-    rsg.RR().changeMaterialColorOnUUID(_uuid, _node.oldColor, oldColor);
+//        ViewportTogglesT cvtTggles = ViewportToggles::None;
+//        // Keyboards
+//        if ( _aid.checkKeyToggleOn(GMK_0) ) cvtTggles |= ViewportToggles::DrawWireframe;
+////        if ( _aid.checkKeyToggleOn(GMK_G) ) cvtTggles |= ViewportToggles::DrawGrid;
+//        if ( cvtTggles != ViewportToggles::None ) {
+//            toggle(rig()->Cvt(), cvtTggles);
+//        }
 }
 
 void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
 
-    if ( !IsAlreadyInUse() || isWASDActive ) {
+    if ( isWASDActive ) {
         togglesUpdate(mi);
 
         auto[moveForward, strafe, moveUp]  = wasd(mi);
@@ -188,12 +167,6 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
 //    }
 }
 
-void CameraControlFly::renderControls() {
-    for ( auto&[k, n] : selectedNodes ) {
-        showGizmo(n, getMainCamera());
-    }
-}
-
 CameraControlFly::CameraControlFly( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
         : CameraControlEditable(cameraRig, rsg) {
     cameraRig->getCamera()->Mode(CameraControlType::Walk);
@@ -239,29 +212,7 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     currentAngularVelocity *= dampingAngularVelocityFactor;
 }
 
-void CameraControl2d::selected( const UUID& _uuid, MatrixAnim& _trs, NodeVariantsSP _node, SelectableFlagT _flags ) {
-    auto sn = selectedNodes.find(_uuid);
-    auto selectColor = sn != selectedNodes.end() ? sn->second.oldColor : Color4f::DARK_YELLOW;
-    Color4f oldColor{ Color4f::WHITE };
-
-    if ( checkBitWiseFlag(_flags, SelectableFlag::Highlighted) ) {
-        rsg.RR().changeMaterialColorOnUUID(_uuid, selectColor, oldColor);
-    }
-    if ( sn != selectedNodes.end() ) {
-        selectedNodes.erase(sn);
-    } else {
-        selectedNodes.emplace(_uuid, Selectable{ oldColor, _trs, _node, _flags });
-    }
-}
-
-void CameraControl2d::unselectImpl( const UUID& _uuid, Selectable& _node ) {
-    Color4f oldColor{ Color4f::WHITE };
-    rsg.RR().changeMaterialColorOnUUID(_uuid, _node.oldColor, oldColor);
-}
-
 void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
-
-    if ( IsAlreadyInUse() ) return;
 
     togglesUpdate(mi);
 
@@ -297,12 +248,6 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
     _cam->strafe(strafe);
     _cam->moveUp(moveUp);
 
-}
-
-void CameraControl2d::renderControls() {
-    for ( auto&[k, n] : selectedNodes ) {
-        showGizmo(n, getMainCamera());
-    }
 }
 
 CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )

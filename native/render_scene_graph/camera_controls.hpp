@@ -7,12 +7,12 @@
 #include <core/math/vector2f.h>
 #include <core/camera_utils.hpp>
 #include <graphics/graphic_constants.h>
-#include <render_scene_graph/selection.hpp>
 
 class CameraRig;
 class Camera;
 class RenderOrchestrator;
 class TextInput;
+class SceneGraph;
 struct AggregatedInputData;
 
 class CameraControl {
@@ -23,8 +23,7 @@ public:
     auto wasd( const AggregatedInputData& mi );
     auto updateDollyWalkingVerticalMovement();
     virtual void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) = 0;
-    virtual void renderControls() = 0;
-    CameraControlType getControlType() const;
+    [[nodiscard]] CameraControlType getControlType() const;
     void setControlType( CameraControlType _ct );
 
     std::shared_ptr<CameraRig> rig();
@@ -50,7 +49,7 @@ protected:
     float dampingAngularVelocityFactor = 0.985f;
 };
 
-class CameraControlEditable : public CameraControl, public Selection {
+class CameraControlEditable : public CameraControl {
 protected:
     using CameraControl::CameraControl;
     void togglesUpdate( const AggregatedInputData& mi );
@@ -62,12 +61,6 @@ public:
     CameraControlOrbit3d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControlOrbit3d() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
-    void renderControls() override {}
-    void
-    selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariantsSP _node, SelectableFlagT _flags ) override {}
-
-protected:
-    void unselectImpl( const UUID& _uuid, Selectable& _node ) override {}
 };
 
 class CameraControlFly : public CameraControlEditable {
@@ -76,12 +69,6 @@ public:
     CameraControlFly( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControlFly() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
-    void renderControls() override;
-    void
-    selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariantsSP _node, SelectableFlagT _flags ) override;
-
-protected:
-    void unselectImpl( const UUID& _uuid, Selectable& _node ) override;
 };
 
 class CameraControlWalk : public CameraControl {
@@ -90,7 +77,6 @@ public:
     CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControlWalk() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
-    void renderControls() override {}
 };
 
 class CameraControl2d : public CameraControlEditable {
@@ -99,12 +85,6 @@ public:
     CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControl2d() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
-    void renderControls() override;
-    void
-    selected( const UUID& _uuid, MatrixAnim& _localTransform, NodeVariantsSP _node, SelectableFlagT _flags ) override;
-
-protected:
-    void unselectImpl( const UUID& _uuid, Selectable& _node ) override;
 };
 
 namespace CameraControlFactory {

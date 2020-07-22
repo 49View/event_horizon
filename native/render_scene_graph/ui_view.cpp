@@ -10,6 +10,7 @@
 #include <core/font_utils.hpp>
 #include <graphics/renderer.h>
 #include <graphics/vertex_processing_anim.h>
+#include <poly/scene_graph.h>
 #include <render_scene_graph/render_orchestrator.h>
 
 V2f ssOneMinusY( const V2f& _point ) {

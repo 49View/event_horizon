@@ -134,13 +134,13 @@ bool AggregatedInputData::checkKeyToggleOn( int keyCode, bool overrideTextInput 
     return ti.checkKeyToggleOn(keyCode, overrideTextInput);
 }
 
-V2f AggregatedInputData::mouseViewportPos( int _touchIndex, std::shared_ptr<Camera> cam ) const {
+V2f AggregatedInputData::mouseViewportPos( int _touchIndex, const Camera* cam ) const {
     auto pickedRay = cam->rayViewportPickIntersection(mousePos(_touchIndex));
     Plane3f zeroPlane{ V3f::UP_AXIS, 0.0f };
     return XZY::C(zeroPlane.intersectLine(pickedRay.rayNear, pickedRay.rayFar));
 }
 
-V3f AggregatedInputData::mouseViewportDir( int _touchIndex, std::shared_ptr<Camera> cam ) const {
+V3f AggregatedInputData::mouseViewportDir( int _touchIndex, const Camera* cam ) const {
     auto pickedRay = cam->rayViewportPickIntersection(mousePos(_touchIndex));
     return normalize( pickedRay.rayFar-cam->getPosition());
 }
@@ -209,7 +209,7 @@ void MouseInput::setPaused( bool isPaused ) {
     mPaused = isPaused;
 }
 
-Vector2f MouseInput::getLastTap( int _touchIndex, YGestureInvert yInv /*= YGestureInvert::No*/ ) const {
+[[maybe_unused]] Vector2f MouseInput::getLastTap( int _touchIndex, YGestureInvert yInv /*= YGestureInvert::No*/ ) const {
     Vector2f pos = V2fc::ZERO;
     if ( !status[_touchIndex].gesturesTaps.empty() ) {
         pos = status[_touchIndex].gesturesTaps.back();
@@ -230,7 +230,7 @@ bool MouseInput::hasMouseMoved( int _touchIndex ) const {
     return status[_touchIndex].bHasMouseMoved;
 }
 
-Vector2f MouseInput::getFirstTap( int _touchIndex, YGestureInvert yInv ) const {
+[[maybe_unused]] Vector2f MouseInput::getFirstTap( int _touchIndex, YGestureInvert yInv ) const {
     Vector2f pos = status[_touchIndex].gesturesTaps.front();
     if ( yInv == YGestureInvert::Yes ) pos.invertY();
     return pos;
@@ -256,11 +256,11 @@ const vector2fList& MouseInput::getGestureTaps( int _touchIndex ) const {
     return status[_touchIndex].gesturesTaps;
 }
 
-MouseButtonStatusValues MouseInput::MouseButtonStatus( int _touchIndex ) const {
+[[maybe_unused]] MouseButtonStatusValues MouseInput::MouseButtonStatus( int _touchIndex ) const {
     return status[_touchIndex].mouseButtonStatus;
 }
 
-void MouseInput::MouseButtonStatus( int _touchIndex, MouseButtonStatusValues val ) {
+[[maybe_unused]] void MouseInput::MouseButtonStatus( int _touchIndex, MouseButtonStatusValues val ) {
     status[_touchIndex].mouseButtonStatus = val;
 }
 
