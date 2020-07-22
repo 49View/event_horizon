@@ -232,9 +232,13 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
     });
 
     sg.gmNodeRemoveConnect([this]( NodeGraphConnectParamsSig _geom ) {
-        this->RR().clearBucket(CommandBufferLimits::PBRStart);
-        this->RR().LM()->removeAllPointLights();
-        this->RR().clearTargets();
+        if ( !_geom ) {
+            this->RR().clearBucket(CommandBufferLimits::PBRStart);
+            this->RR().LM()->removeAllPointLights();
+            this->RR().clearTargets();
+        } else {
+            this->RR().removeFromCL( _geom->UUiDCopy() );
+        }
         setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     });
 

@@ -170,7 +170,7 @@ void SceneGraph::genericCallbacks() {
 }
 
 void SceneGraph::clearGMNodes() {
-    removeNode(!nodes.empty() ? nodes.begin()->second : nullptr);
+    removeNode(GeomSP{});
     GM().clear();
     Nodes().clear();
 };
