@@ -39,6 +39,7 @@ public:
         mi.UseCaptureOnMove(rsg.getMICursorCapture());
         rsg.updateInputs( _aid );
         sg.update();
+        backEndIOServices(_aid);
         updateImpl( _aid );
     };
 
@@ -50,6 +51,7 @@ public:
     }
 
     virtual void updateImpl( const AggregatedInputData& _aid ) = 0;
+    virtual void backEndIOServices( const AggregatedInputData& _aid ) = 0;
     virtual void activateImpl() = 0;
     virtual void luaFunctionsSetup() {}
 
