@@ -19,6 +19,10 @@ namespace WindowHandling {
     bool mousePassThrough = true;
     bool keyboardPassThrough = true;
 
+    void setKeyCallback( GLFWkeyfun fn ) {
+        glfwSetKeyCallback( window, fn );
+    }
+
     void setDropCallback( GLFWdropfun fn ) {
         glfwSetDropCallback( window, fn );
     }

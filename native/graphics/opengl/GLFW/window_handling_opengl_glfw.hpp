@@ -18,6 +18,7 @@ namespace WindowHandling {
 	void preUpdate();
 	void resizeWindow( const Vector2i& _newSize );
 	void gatherMainScreenInfo();
+    void setKeyCallback( GLFWkeyfun fn );
 	void setDropCallback( GLFWdropfun fn );
 	void setResizeWindowCallback( GLFWwindowsizefun fn );
 	void setResizeFramebufferCallback( GLFWframebuffersizefun fn );
@@ -26,3 +27,4 @@ namespace WindowHandling {
 	extern bool bUseGLFWPoll;
 };
 
+namespace WH = WindowHandling;

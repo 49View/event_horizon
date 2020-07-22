@@ -14,6 +14,9 @@ struct ResizeData {
 static inline Vector2i callbackResizeFrameBuffer = Vector2i(-2, -2);
 static inline Vector2i callbackResizeFrameBufferOld = Vector2i(-2, -2);
 
+static inline void GSetKeyCallback([[maybe_unused]]GLFWwindow* window, [[maybe_unused]]int key, [[maybe_unused]]int scancode, [[maybe_unused]]int action, [[maybe_unused]] int mods) {
+}
+
 static inline void GDropCallback( [[maybe_unused]] GLFWwindow *window, int count, const char **paths ) {
     ASSERT( count > 0 );
 
@@ -30,6 +33,7 @@ static inline void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, in
 
 inline void RenderOrchestrator::initWHCallbacks() {
 #ifdef USE_GLFW
+    WH::setKeyCallback( GSetKeyCallback );
     WH::setDropCallback( GDropCallback );
     WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
 #endif

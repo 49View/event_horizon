@@ -421,3 +421,7 @@ Quaternion operator*( float s, const Quaternion& q );
 
 Quaternion quatCompose( const Vector3f& a );
 Quaternion quatFromAxis( const Vector4f& w );
+
+namespace QuaternionC {
+    static const Quaternion QuarterRotation = quatFromAxis(V4f{0.0f, 1.0f, 0.0f, static_cast<float>(M_PI_4)});
+}
