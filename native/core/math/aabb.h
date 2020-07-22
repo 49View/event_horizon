@@ -191,6 +191,8 @@ public:
 
 	Vector3f bottomFront() const;
 
+	Vector3fList bottomFace() const;
+
 	void translate( const Vector3f& offset ) {
 		mMinPoint += offset;
 		mMaxPoint += offset;

@@ -207,3 +207,12 @@ Vector3f AABB::centreRight() const {
 Vector3f AABB::bottomFront() const {
     return Vector3f{ calcCentre().xy(), minPoint().z() } +Vector3f::Y_AXIS*calcHeight()*0.5f;
 }
+
+Vector3fList AABB::bottomFace() const {
+    Vector3fList ret;
+    ret.push_back(mMinPoint);
+    ret.push_back(V3f{ mMinPoint.x(), mMinPoint.y(), mMaxPoint.z() });
+    ret.push_back(V3f{ mMaxPoint.x(), mMinPoint.y(), mMaxPoint.z() });
+    ret.push_back(V3f{ mMaxPoint.x(), mMinPoint.y(), mMinPoint.z() });
+    return ret;
+}
