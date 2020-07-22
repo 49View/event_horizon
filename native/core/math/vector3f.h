@@ -652,7 +652,7 @@ struct ExtrudeStrip {};
 struct ExtrudeComtour {};
 
 using Color3f = Vector3f;
-using vector3fList = std::vector<Vector3f>;
+using Vector3fList = std::vector<Vector3f>;
 using V3fVector         = std::vector<Vector3f>;
 using V3fVectorOfVector = std::vector<V3fVector>;
 using V3fVectorWrap = VectorWrap<V3f>;

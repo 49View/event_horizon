@@ -19,7 +19,7 @@ class Triangulator {
 public:
 	explicit Triangulator( const vector2fList& _verts, float _accuracy = 0.001f );
 	Triangulator( const vector2fList& _verts, const std::vector<Vector2fList>& _holes, float _accuracy = 0.001f );
-	Triangulator( const vector3fList& _verts, const Vector3f& normal, float _accuracy = 0.001f );
+	Triangulator( const Vector3fList& _verts, const Vector3f& normal, float _accuracy = 0.001f );
 	Triangulator( const Vector3f* verts, size_t vsize, const Vector3f& normal, float _accuracy = 0.001f );
     virtual ~Triangulator();
     void gather3dTriangularizationWithNeighbours( std::vector<std::vector<Vector2f>>& tri_neighbours );
@@ -27,7 +27,7 @@ public:
 	std::vector<vector2fList>& get2dTrianglesList();
 	std::vector<Triangle2d>& get2dTrianglesTuple();
 
-	std::vector<vector3fList>& get3dTrianglesList();
+	std::vector<Vector3fList>& get3dTrianglesList();
 	std::vector<Triangle3d>& get3dTrianglesTuple();
 
 private:
@@ -40,7 +40,7 @@ private:
 	std::vector<Vector2fList> m2dTriangulationHoles;
 
 	std::vector<Vector2fList> m2dTriangulation;
-	std::vector<vector3fList> m3dTriangulation;
+	std::vector<Vector3fList> m3dTriangulation;
 
 	std::vector<Triangle2d> m2dTriangulationTuples;
 	std::vector<Triangle3d> m3dTriangulationTuples;

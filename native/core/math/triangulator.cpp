@@ -35,7 +35,7 @@ Triangulator::Triangulator( const Vector3f* _verts, const size_t vsize, const Ve
 	init3d( l2dCollinearCheck.data(), static_cast<int>( l2dCollinearCheck.size() ) );
 }
 
-Triangulator::Triangulator( const vector3fList& _verts, const Vector3f& normal, float _accuracy ) {
+Triangulator::Triangulator( const Vector3fList& _verts, const Vector3f& normal, float _accuracy ) {
 	dominantPair = normal.dominantPair();
 
 	vector2fList l2dCollinearCheck;
@@ -140,7 +140,7 @@ std::vector<Triangle2d>& Triangulator::get2dTrianglesTuple() {
 	return m2dTriangulationTuples;
 }
 
-std::vector<vector3fList>& Triangulator::get3dTrianglesList() {
+std::vector<Vector3fList>& Triangulator::get3dTrianglesList() {
 	return m3dTriangulation;
 }
 
