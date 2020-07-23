@@ -40,6 +40,7 @@ struct OnFirstTimeTouchDownWithModKeyCtrlEvent {
 
 struct OnFirstTimeTouchDownEvent {
     V2f mousePos{ V2fc::HUGE_VALUE_NEG };
+    const AggregatedInputData& aid;
 };
 struct OnFirstTimeTouchDownViewportSpaceEvent {
     V2f viewportPos{ V2fc::HUGE_VALUE_NEG };
@@ -47,6 +48,7 @@ struct OnFirstTimeTouchDownViewportSpaceEvent {
 
 struct OnTouchMoveEvent {
     V2f mousePos{ V2fc::HUGE_VALUE_NEG };
+    const AggregatedInputData& aid;
 };
 
 struct OnTouchMoveWithModKeyCtrlEvent {
@@ -66,6 +68,10 @@ struct OnTouchUpEvent {
 };
 
 struct OnSingleTapViewportSpaceEvent {
+    V2f viewportPos{ V2fc::HUGE_VALUE_NEG };
+};
+
+struct OnSingleTapSecondaryEvent {
     V2f viewportPos{ V2fc::HUGE_VALUE_NEG };
 };
 
@@ -97,11 +103,7 @@ template <typename T>
 void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera* cam ) {
     // This acts like a classic update loop function in conventional render/update rendering, expect it's wired in the
     // state machine so we can unify the whole code path.
-    if ( _aid.mods().isControlKeyDown ) {
-        backEnd->process_event(OnTickControlKeyEvent{_aid});
-    } else {
-        backEnd->process_event(OnTickEvent{_aid});
-    }
+    backEnd->process_event(OnTickEvent{_aid});
 
     if ( _aid.mods().isAltPressed ) {
         backEnd->process_event(OnAltPressedEvent{});
@@ -126,33 +128,22 @@ void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera*
     // Comprehensive mouse events taps with mod keys
 
     if ( _aid.isMouseTouchedDownFirstTime(TOUCH_ZERO) ) {
-        if ( _aid.mods().isControlKeyDown ) {
-            backEnd->process_event(OnFirstTimeTouchDownWithModKeyCtrlEvent{ _aid.mousePos(TOUCH_ZERO), _aid });
-        } else {
-            backEnd->process_event(OnFirstTimeTouchDownEvent{ _aid.mousePos(TOUCH_ZERO) });
-        }
+        backEnd->process_event(OnFirstTimeTouchDownEvent{ _aid.mousePos(TOUCH_ZERO), _aid });
         backEnd->process_event(OnFirstTimeTouchDownViewportSpaceEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
     }
     if ( _aid.isMouseTouchedDownAndMoving(TOUCH_ZERO) ) {
-        if ( _aid.mods().isControlKeyDown ) {
-            backEnd->process_event(OnTouchMoveWithModKeyCtrlEvent{ _aid.mousePos(TOUCH_ZERO) , _aid});
-        } else {
-            backEnd->process_event(OnTouchMoveEvent{ _aid.mousePos(TOUCH_ZERO) });
-            backEnd->process_event(OnTouchMoveViewportSpaceEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
-        }
+        backEnd->process_event(OnTouchMoveEvent{ _aid.mousePos(TOUCH_ZERO), _aid });
+        backEnd->process_event(OnTouchMoveViewportSpaceEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
     }
     if ( _aid.isMouseSingleTap( TOUCH_ZERO) ) {
-        if ( !_aid.mods().isControlKeyDown ) {
-            backEnd->process_event(OnSingleTapEvent{ _aid.mousePos(TOUCH_ZERO) });
-        }
+        backEnd->process_event(OnSingleTapEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
         backEnd->process_event(OnSingleTapViewportSpaceEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
     }
+    if ( _aid.isMouseSingleTap( TOUCH_ONE) ) {
+        backEnd->process_event(OnSingleTapSecondaryEvent{ _aid.mouseViewportPos(TOUCH_ONE, cam) });
+    }
     if ( _aid.isMouseTouchedUp(TOUCH_ZERO) ) {
-        if ( _aid.mods().isControlKeyDown ) {
-            backEnd->process_event(OnTouchUpWithModKeyCtrlEvent{ _aid.mousePos(TOUCH_ZERO) });
-        } else {
-            backEnd->process_event(OnTouchUpEvent{ _aid.mousePos(TOUCH_ZERO) });
-        }
+        backEnd->process_event(OnTouchUpEvent{ _aid.mousePos(TOUCH_ZERO) });
         backEnd->process_event(OnTouchUpViewportSpaceEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
     }
 

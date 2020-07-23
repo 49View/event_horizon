@@ -36,7 +36,7 @@ public:
     }
 
     void update( AggregatedInputData& _aid, MouseInput& mi ) {
-        mi.UseCaptureOnMove(rsg.getMICursorCapture());
+        mi.UseCaptureOnMove(rsg.getMICursorCapture() );
         rsg.updateInputs( _aid );
         sg.update();
         backEndIOServices(_aid);

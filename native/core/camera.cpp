@@ -463,7 +463,8 @@ void Camera::zoom2d( float amount ) {
     if ( mbLocked ) return;
     amount /= -UI_ZOOM_SCALER;
     if ( Mode() == CameraControlType::Edit2d ) {
-        spatials.mPos->value.setY(clamp(spatials.mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d));
+        spatials.mPos->value.setY(
+                clamp(spatials.mPos->value.y() + amount, mNearClipPlaneZClampEdit2d, mFarClipPlaneZClampEdit2d));
     }
 }
 
@@ -534,11 +535,11 @@ void Camera::lookAtCalc() {
 void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
     if ( mbLocked ) return;
 //    float aperture = ( tanf(degToRad(90.0f - ( spatials.mFov->value ))) ) / mViewPort.ratio();
-    float aperture = (tanf(degToRad(FoV() * 0.5f )));
+    float aperture = ( tanf(degToRad(FoV() * 0.5f)) );
 
     float bdiameter = _bbox.calcDiameter();
 //    mOrbitDistance = bdiameter * (aperture + (cos(degToRad(FoV())) * 0.5f) + mNearClipPlaneZ );
-    mOrbitDistance = ((bdiameter * 0.5f) / aperture) + (cos(degToRad(FoV())) * 0.5f) + mNearClipPlaneZ;
+    mOrbitDistance = ( ( bdiameter * 0.5f ) / aperture ) + ( cos(degToRad(FoV())) * 0.5f ) + mNearClipPlaneZ;
     mOrbitStrafe = V3f::ZERO;
     Vector3f cp = { 0.0f, 0.0f, mOrbitDistance };
     mTarget = _bbox.centre();
@@ -552,7 +553,7 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
         spatials.qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS };
         sphericalAcc = V2f{ M_PI, M_PI_2 };
     } else if ( cca == CameraCenterAngle::Halfway || cca == CameraCenterAngle::HalfwayOpposite ) {
-        float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : M_PI_4+M_PI*2.0f;
+        float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : M_PI_4 + M_PI * 2.0f;
         spatials.qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS } * Quaternion{ M_PI_4, Vector3f::Z_AXIS };
         sphericalAcc = V2f{ TWO_PI - (float) rangle * 0.5f, (float) M_PI_4 + (float) M_PI_4 * 0.5f };
         if ( Mode() == CameraControlType::Orbit ) {
@@ -575,10 +576,10 @@ void Camera::pan( const Vector3f& posDiff ) {
 }
 
 Vector3f Camera::center( const Rect2f& area, float slack ) {
-    float mainSize = area.height()+slack;
+    float mainSize = area.height() + slack;
     Vector2f center = area.centre();
-    float aperture = (tanf(degToRad(FoV() * 0.5f)));
-    float z = (mainSize * 0.5f) / aperture;
+    float aperture = ( tanf(degToRad(FoV() * 0.5f)) );
+    float z = ( mainSize * 0.5f ) / aperture;
     V3f ret = XZY::C({ center, z });
 //    LOGRS("Area: " << area << " Fov: " << FoV() << " slack: " << slack );
 //    LOGRS("CameraCenter: " << ret );
@@ -772,6 +773,7 @@ Vector3f Camera::getPositionRH() const {
 }
 
 void Camera::setQuat( const Quaternion& a ) {
+    if ( mbLocked ) return;
     spatials.qangle->value = a;
 }
 
@@ -786,7 +788,7 @@ void Camera::incrementOrbitDistance( float _d ) {
 }
 
 void Camera::incrementSphericalAngles( const V2f& _sph ) {
-    sphericalAcc -= _sph*5.0f;
+    sphericalAcc -= _sph * 5.0f;
     float sphericalSafeAntiGLockClamp = 0.02f;
 
     if ( sphericalAcc.y() <= sphericalSafeAntiGLockClamp ) sphericalAcc.setY(sphericalSafeAntiGLockClamp);
@@ -897,6 +899,10 @@ bool Camera::isDoom() const {
 
 const CameraSpatials& Camera::getSpatials() const {
     return spatials;
+}
+
+void Camera::enableInputs( bool _enableInputs ) {
+    mbLocked = !_enableInputs;
 }
 
 

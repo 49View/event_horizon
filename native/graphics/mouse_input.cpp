@@ -32,6 +32,7 @@ MouseInput::MouseInput() {
 }
 
 void MouseInput::onTouchDown( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals ) {
+    WH::enableMouseCursor(!bUseCaptureOnMove);
     status[_touchIndex].mouseButtonStatus = MouseButtonStatusValues::DOWN;
     if ( status[_touchIndex].gesturesTaps.size() > 2 ) status[_touchIndex].gesturesTaps.clear();
     status[_touchIndex].gesturesTaps.push_back(pos);
@@ -50,9 +51,7 @@ void MouseInput::onTouchDown( int _touchIndex, const Vector2f& pos, UpdateSignal
 }
 
 void MouseInput::onTouchMove( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals ) {
-    if ( bUseCaptureOnMove ) {
-        WH::enableMouseCursor(false);
-    }
+    WH::enableMouseCursor(!bUseCaptureOnMove);
     status[_touchIndex].mouseButtonStatus = MouseButtonStatusValues::MOVING;
     status[_touchIndex].touchedDownFirstTime = false;
     if ( status[_touchIndex].gesturesTaps.empty() ) {
@@ -75,9 +74,7 @@ void MouseInput::onTouchMove( int _touchIndex, const Vector2f& pos, UpdateSignal
 }
 
 void MouseInput::onTouchUp( int _touchIndex, const Vector2f& pos, UpdateSignals& _updateSignals ) {
-    if ( bUseCaptureOnMove ) {
-        WH::enableMouseCursor(true);
-    }
+    WH::enableMouseCursor(true);
     status[_touchIndex].mouseButtonStatus = MouseButtonStatusValues::UP;
     status[_touchIndex].gesturesTaps.push_back(pos);
     status[_touchIndex].canTriggerLongTap = false;
