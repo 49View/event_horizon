@@ -86,6 +86,11 @@ enum class AnimVelocityType {
     Hermite
 };
 
+enum class FadeInternalPhase {
+    In,
+    Out
+};
+
 using KeyFrameTimes_t = std::vector<float>;
 using AnimVisitCallback = std::function<void(const std::string&, const std::vector<float>&, TimelineIndex, TimelineIndex, int)>;
 using TimelineLinks = std::unordered_map< TimelineIndex, TimelineSet >;

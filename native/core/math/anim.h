@@ -630,3 +630,26 @@ private:
     friend
     class TimelineStream;
 };
+
+struct FadeInOutSwitch {
+    FadeInOutSwitch( float _fullOpacityValue, float _fadeTime );
+
+    [[nodiscard]] float value() const;
+    void setValue( float _value);
+    floata& anim();
+
+    void fade(FadeInternalPhase phase);
+    void fadeIn();
+    void fadeOut();
+
+    float getFullOpacityValue() const;
+    void setFullOpacityValue( float fullOpacityValue );
+    float getFadeTime() const;
+    void setFadeTime( float fadeTime );
+    std::string inPhaseId;
+    std::string outPhaseId;
+private:
+    floata floatAnim;
+    float  fullOpacityValue = 1.0f;
+    float  fadeTime = 0.15f;
+};

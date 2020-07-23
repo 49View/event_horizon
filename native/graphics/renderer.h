@@ -38,9 +38,9 @@ struct DText2d {
 };
 
 using DShaderMatrixValue = uint64_t;
-static constexpr DShaderMatrixValue DShaderMatrixValue2dColor   = 1u << 1;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dColor = 1u << 1;
 static constexpr DShaderMatrixValue DShaderMatrixValue2dTexture = 1u << 2;
-static constexpr DShaderMatrixValue DShaderMatrixValue3dColor   = 1u << 3;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dColor = 1u << 3;
 static constexpr DShaderMatrixValue DShaderMatrixValue3dTexture = 1u << 4;
 
 struct DShaderMatrix {
@@ -408,9 +408,9 @@ public:
     VPListSP drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
                             const Vector4f& color, const std::string& _name = "" );
     VPListSP drawTriangleStrip( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                                           const std::string& _name );
-    VPListSP drawTriangleQuad( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
                                 const std::string& _name );
+    VPListSP drawTriangleQuad( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
+                               const std::string& _name );
     VPListSP
     draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
                   const std::string& _name = "" );
@@ -462,6 +462,10 @@ public:
                                     const V4f& color, float width, float angle, float arrowlength,
                                     float offsetGap, const Font *font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
+
+    std::vector<VPListSP>
+    drawDotCircled( float dotSize, const V3f& centrePoint, const V3f& normal, const C4f& _dotColor,
+                    float finalAlphaValue, const std::string& _name );
 
     template<typename T, typename M>
     void addRendererDrawingSetParam( RendererDrawingSet& rds, const M& _param ) {
@@ -515,7 +519,8 @@ public:
             }
             return;
         }
-        if constexpr ( std::is_same_v<M, std::string> ||  std::is_same_v<typename std::remove_all_extents<M>::type, char> ) {
+        if constexpr ( std::is_same_v<M, std::string> ||
+                       std::is_same_v<typename std::remove_all_extents<M>::type, char> ) {
             rds.name = _param;
             return;
         }

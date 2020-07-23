@@ -11,6 +11,7 @@
 #include <core/font_utils.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/math/triangulator.hpp>
+#include <iomanip>
 
 static std::shared_ptr<HeterogeneousMap> mapColor( const Color4f& _matColor ) {
     auto values = std::make_shared<HeterogeneousMap>();
@@ -157,9 +158,9 @@ void Renderer::createGrid( const int bucketIndex, float unit, const Color4f& mai
 
     Vector2f axisLenghts = { limits.x() * 2.0f, limits.y() * 2.0f };
 
-    drawIncGridLines(bucketIndex, 10, 0.1f, gridLinesWidth*0.5f,
+    drawIncGridLines(bucketIndex, 10, 0.1f, gridLinesWidth * 0.5f,
                      V3f::X_AXIS_NEG, V3f::X_AXIS, smallAxisColor, zOffset, _name + "y_axis_01");
-    drawIncGridLines(bucketIndex, 10, 0.1f, gridLinesWidth*0.5f,
+    drawIncGridLines(bucketIndex, 10, 0.1f, gridLinesWidth * 0.5f,
                      V3f::Z_AXIS_NEG, V3f::Z_AXIS, smallAxisColor, zOffset, _name + "x_axis_01");
 
     drawIncGridLines(bucketIndex, static_cast<int>(( axisLenghts.y() / unit ) / 2.0f ), unit, gridLinesWidth,
@@ -621,7 +622,7 @@ VPListSP Renderer::drawCircleFilledFinal( RendererDrawingSet& rds ) {
     auto radius = rds.radius;
     for ( auto t = 0u; t < rds.archSegments; t++ ) {
         float angle = ( static_cast<float>( t ) / static_cast<float>( rds.archSegments ) ) * TWO_PI;
-        verts.emplace_back( (V3f{ sinf(angle), 0.0f, cosf(angle) } * radius) + center);
+        verts.emplace_back(( V3f{ sinf(angle), 0.0f, cosf(angle) } * radius ) + center);
     }
 
     if ( hasRotation ) {
@@ -629,7 +630,7 @@ VPListSP Renderer::drawCircleFilledFinal( RendererDrawingSet& rds ) {
         quat.rotateFromAxis(V3f::UP_AXIS, rds.rotationNormalAxis);
         Matrix4f mattor = quat.matrix4(rds.verts.v[0]); // rds.verts.v[0] == center
         for ( auto& v : verts ) {
-            v = mattor.transform( v );
+            v = mattor.transform(v);
         }
     }
     preMult(verts, rds);
@@ -637,6 +638,36 @@ VPListSP Renderer::drawCircleFilledFinal( RendererDrawingSet& rds ) {
     auto lineList = stripInserter<V3f>(XYZ2D3D(verts, rds));
 
     return addVertexStrips<Pos3dStrip>(*this, lineList, rds);
+}
+
+std::vector<VPListSP>
+Renderer::drawDotCircled( float dotSize, const V3f& centrePoint, const V3f& normal, const C4f& _dotColor,
+                          float finalAlphaValue, const std::string& _name ) {
+    static constexpr float outerDotSize = 0.2f;
+    static constexpr float outerDotBorderRatio = 1.0f / 13.333333333333333333333333f;
+    static constexpr float smallDotRatio = 0.8f;
+
+    std::vector<VPListSP> ret{};
+
+    C4f outerDotColor = _dotColor.A(finalAlphaValue);
+    auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(2) << finalAlphaValue;
+    std::string nameTag = _dotColor.toString() + stream.str();
+
+    ret.emplace_back(draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, centrePoint,
+                                         V4f::WHITE.A(finalAlphaValue),
+                                         dotSize + outerDotSize * outerDotBorderRatio, sm3,
+                                         RDSRotationNormalAxis{ normal },
+                                         RDSArchSegments{ 36 }, _name + "d1" + nameTag));
+    ret.emplace_back(draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, centrePoint, outerDotColor,
+                                         dotSize, sm3, RDSRotationNormalAxis{ normal }, RDSArchSegments{ 36 },
+                                         _name + "d2" + nameTag));
+    ret.emplace_back(draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, centrePoint,
+                                         V4f::WHITE.A(finalAlphaValue),
+                                         dotSize * smallDotRatio, sm3, RDSRotationNormalAxis{ normal },
+                                         RDSArchSegments{ 36 }, _name + "d3" + nameTag));
+    return ret;
 }
 
 VPListSP Renderer::drawRectFinal( RendererDrawingSet& rds ) {
@@ -701,7 +732,7 @@ VPListSP Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& 
 }
 
 VPListSP Renderer::drawTriangleStrip( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                                  const std::string& _name ) {
+                                      const std::string& _name ) {
     //Multiple of 3
     if ( verts.size() < 3 ) return nullptr;
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
@@ -718,7 +749,7 @@ VPListSP Renderer::drawTriangleStrip( int bucketIndex, const std::vector<Vector3
 }
 
 VPListSP Renderer::drawTriangleQuad( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                                      const std::string& _name ) {
+                                     const std::string& _name ) {
     //Multiple of 3
     if ( verts.size() < 4 ) return nullptr;
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),

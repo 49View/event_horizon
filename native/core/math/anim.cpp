@@ -9,148 +9,56 @@ std::unordered_map<std::string, std::shared_ptr<TimelineGroup<Vector3f>   >> Tim
 std::unordered_map<std::string, std::shared_ptr<TimelineGroup<Vector4f>   >> Timeline::timelineV4;
 std::unordered_map<std::string, std::shared_ptr<TimelineGroup<Quaternion> >> Timeline::timelineQ;
 
-//void TimelineMapSpec::addDelay( TimelineIndex _k, float _delay ) {
-//    auto ki = _k / tiNorm;
-//    switch (ki) {
-//        case tiIntIndex:
-//            tmapi[_k].addDelay( _delay );
-//            break;
-//        case tiFloatIndex:
-//            tmapf[_k].addDelay( _delay );
-//            break;
-//        case tiV2fIndex:
-//            tmapV2[_k].addDelay( _delay );
-//            break;
-//        case tiV3fIndex:
-//            tmapV3[_k].addDelay( _delay );
-//            break;
-//        case tiV4fIndex:
-//            tmapV4[_k].addDelay( _delay );
-//            break;
-//        case tiQuatIndex:
-//            tmapQ[_k].addDelay( _delay );
-//        default:
-//            break;
-//    }
-//}
-//
-//bool TimelineMapSpec::update( TimelineIndex _k, float _timeElapsed ) {
-//    auto ki = _k / tiNorm;
-//    switch (ki) {
-//        case tiIntIndex:
-//            return tmapi[_k].update( _timeElapsed );
-//            break;
-//        case tiFloatIndex:
-//            return tmapf[_k].update( _timeElapsed );
-//            break;
-//        case tiV2fIndex:
-//            return tmapV2[_k].update( _timeElapsed );
-//            break;
-//        case tiV3fIndex:
-//            return tmapV3[_k].update( _timeElapsed );
-//            break;
-//        case tiV4fIndex:
-//            return tmapV4[_k].update( _timeElapsed );
-//            break;
-//        case tiQuatIndex:
-//            return tmapQ[_k].update( _timeElapsed );
-//            break;
-//        default:
-//            break;
-//    }
-//    return false;
-//}
-//
-//bool TimelineMapSpec::deleteKey( TimelineIndex _k, uint64_t _index ) {
-//    auto ki = _k / tiNorm;
-//    switch (ki) {
-//        case tiIntIndex:
-//            return tmapi[_k].deleteKey(_index);
-//        case tiFloatIndex:
-//            return tmapf[_k].deleteKey(_index);
-//        case tiV2fIndex:
-//            return tmapV2[_k].deleteKey(_index);
-//        case tiV3fIndex:
-//            return tmapV3[_k].deleteKey(_index);
-//        case tiV4fIndex:
-//            return tmapV4[_k].deleteKey(_index);
-//        case tiQuatIndex:
-//            return tmapQ[_k].deleteKey(_index);
-//        default:
-//            break;
-//    }
-//    return false;
-//}
-//
-//void TimelineMapSpec::updateKeyTime( TimelineIndex _k, uint64_t _index, float _time ) {
-//    auto ki = _k / tiNorm;
-//    switch (ki) {
-//        case tiIntIndex:
-//            tmapi[_k].updateKeyTime( _index, _time);
-//            break;
-//        case tiFloatIndex:
-//            tmapf[_k].updateKeyTime( _index, _time);
-//            break;
-//        case tiV2fIndex:
-//            tmapV2[_k].updateKeyTime( _index, _time);
-//            break;
-//        case tiV3fIndex:
-//            tmapV3[_k].updateKeyTime( _index, _time);
-//            break;
-//        case tiV4fIndex:
-//            tmapV4[_k].updateKeyTime( _index, _time);
-//            break;
-//        case tiQuatIndex:
-//            tmapQ[_k].updateKeyTime( _index, _time);
-//            break;
-//        default:
-//            break;
-//    }
-//}
-//
-//bool TimelineMapSpec::isActive( TimelineIndex _k ) const {
-//    auto ki = _k / tiNorm;
-//    switch (ki) {
-//        case tiIntIndex:
-//            return tmapi.at(_k).isActive();
-//        case tiFloatIndex:
-//            return tmapf.at(_k).isActive();
-//        case tiV2fIndex:
-//            return tmapV2.at(_k).isActive();
-//        case tiV3fIndex:
-//            return tmapV3.at(_k).isActive();
-//        case tiV4fIndex:
-//            return tmapV4.at(_k).isActive();
-//        case tiQuatIndex:
-//            return tmapQ.at(_k).isActive();
-//        default:
-//            break;
-//    }
-//    return false;
-//}
-//
-//void TimelineMapSpec::visit( TimelineIndex _k, AnimVisitCallback _callback ) {
-//    auto ki = _k / tiNorm;
-//    switch (ki) {
-//        case tiIntIndex:
-//            tmapi.at(_k).visit(_callback, _k, tiIntIndex);
-//            break;
-//        case tiFloatIndex:
-//            tmapf.at(_k).visit(_callback, _k, tiFloatIndex);
-//            break;
-//        case tiV2fIndex:
-//            tmapV2.at(_k).visit(_callback, _k, tiV2fIndex);
-//            break;
-//        case tiV3fIndex:
-//            tmapV3.at(_k).visit(_callback, _k, tiV3fIndex);
-//            break;
-//        case tiV4fIndex:
-//            tmapV4.at(_k).visit(_callback, _k, tiV4fIndex);
-//            break;
-//        case tiQuatIndex:
-//            tmapQ.at(_k).visit(_callback, _k, tiQuatIndex);
-//            break;
-//        default:
-//            break;
-//    }
-//}
+FadeInOutSwitch::FadeInOutSwitch( float _fullOpacityValue, float _fadeTime ) : fullOpacityValue(_fullOpacityValue), fadeTime(_fadeTime) {
+    floatAnim = std::make_shared<AnimType<float >>(fullOpacityValue, UUIDGen::make());
+}
+
+float FadeInOutSwitch::value() const {
+    return floatAnim->value;
+}
+
+floata& FadeInOutSwitch::anim() {
+    return floatAnim;
+}
+
+void FadeInOutSwitch::setValue( float _value ) {
+    floatAnim->value = _value;
+}
+
+void FadeInOutSwitch::fade( FadeInternalPhase phase ) {
+    auto hasStopped = Timeline::stop(anim(), phase == FadeInternalPhase::In ? outPhaseId : inPhaseId,
+                                     value());
+    if ( !anim()->isAnimating || hasStopped ) {
+        if ( phase == FadeInternalPhase::In ) {
+            inPhaseId = Timeline::play(anim(), 0,
+                                       KeyFramePair{ fadeTime, fullOpacityValue, AnimVelocityType::Cosine });
+        } else {
+            outPhaseId = Timeline::play(anim(), 0,
+                                        KeyFramePair{ fadeTime, 0.0f, AnimVelocityType::Cosine });
+        }
+    }
+}
+
+void FadeInOutSwitch::fadeIn() {
+    fade(FadeInternalPhase::In);
+}
+
+void FadeInOutSwitch::fadeOut() {
+    fade(FadeInternalPhase::Out);
+}
+
+float FadeInOutSwitch::getFullOpacityValue() const {
+    return fullOpacityValue;
+}
+
+void FadeInOutSwitch::setFullOpacityValue( float _fullOpacityValue ) {
+    FadeInOutSwitch::fullOpacityValue = _fullOpacityValue;
+}
+
+float FadeInOutSwitch::getFadeTime() const {
+    return fadeTime;
+}
+
+void FadeInOutSwitch::setFadeTime( float _fadeTime ) {
+    FadeInOutSwitch::fadeTime = _fadeTime;
+}
