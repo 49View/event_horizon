@@ -27,6 +27,7 @@ auto CameraControl::updateDollyWalkingVerticalMovement() {
 
 auto CameraControl::wasd( const AggregatedInputData& mi ) {
     float moveForward = 0.0f;
+    float scrollWheelMult = 35.0f;
     float strafe = 0.0f;
     float moveUp = 0.0f;
     float velRatio = ( GameTime::getCurrTimeStep() / ONE_OVER_60HZ );
@@ -62,6 +63,7 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
         if ( mi.TI().checkKeyPressed(GMK_COMMA) ) baseVelocity += 0.001f;
         if ( mi.TI().checkKeyPressed(GMK_PERIOD) ) baseVelocity -= 0.001f;
     }
+    moveForwardInertia += baseVelocity * sign(mi.getScrollValue()) * scrollWheelMult;
     moveForward = moveForwardInertia;
     strafe = strafeInertia;
     moveUp = moveUpInertia;
@@ -115,7 +117,6 @@ void CameraControlEditable::togglesUpdate( const AggregatedInputData& _aid ) {
 }
 
 void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) {
-
     if ( isWASDActive ) {
         togglesUpdate(mi);
 
@@ -132,39 +133,8 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
             qSequence = qx * qSequence;
             qSequence.normalise();
             _cam->setQuat( qSequence );
-
-//            _cam->setQuat(_cam->quatAngle() * quatCompose(quatAngles));
         }
-
-//        if ( !inputIsBlockedOnSelection() && mi.isMouseTouchedDownFirstTime(TOUCH_ZERO) ) {
-//            unselectAll();
-//            auto rayPick = _cam->rayViewportPickIntersection( mi.mousePos(TOUCH_ZERO) );
-////            bool bHit =
-//            rsg.SG().rayIntersect( rayPick.rayNear, rayPick.rayFar, [&]( NodeVariantsSP _geom, float _near) {
-////                ### REF reimplement selection
-////                std::visit( SelectionRecursiveLamba{*this}, _geom );
-//            } );
-////            if ( !bHit ) {
-////            }
-//        }
-//
-//        if ( mi.TI().checkKeyToggleOn( GMK_DELETE )) {
-//            std::vector<UUID> uuids;
-//            for ( const auto& [k,v] : selectedNodes ) {
-//                uuids.emplace_back(k);
-//            }
-//            for ( const auto& ui : uuids ) {
-//                rsg.SG().removeNode( ui );
-//                erase_if_it( selectedNodes, ui );
-//            }
-//        }
-
     }
-
-//        ### REF selected needs to be worked out with new assets graphs
-//    for ( const auto& [k,v] : selectedNodes ) {
-//        rsg.SG().visitNode( k, lambdaUpdateNodeTransform );
-//    }
 }
 
 CameraControlFly::CameraControlFly( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
@@ -179,6 +149,7 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
     _cam->LockAtWalkingHeight(true);
 
     auto[moveForward, strafe, moveUp]  = wasd(mi);
+
     if ( isTouchBased() ) {
         if ( mi.moveDiffSS(TOUCH_ZERO) != V2fc::ZERO &&
              mi.moveDiffSS(TOUCH_ONE) != V2fc::ZERO &&
@@ -225,7 +196,6 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
     if ( mi.isMouseTouchedDown(TOUCH_ONE) ) {
         moveUp = mi.moveDiff(TOUCH_ONE).y();
         strafe = mi.moveDiff(TOUCH_ONE).x();
-
     }
 
     if ( mi.isMouseTouchedDown(TOUCH_ZERO) ) {
