@@ -849,6 +849,12 @@ void RenderOrchestrator::changeTime( const std::string& _time ) {
     }
 }
 
+void RenderOrchestrator::addSecondsToTime( int _seconds ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->addSecondsToTime(_seconds);
+    }
+}
+
 void RenderOrchestrator::useSkybox( bool _value ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
         pbrTarget->enableSkybox(_value);

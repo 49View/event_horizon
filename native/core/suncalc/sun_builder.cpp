@@ -292,21 +292,9 @@ void SunBuilder::setCurrentTimeUniforms() {
 //	SMM.SunPosition( { sp.x, sp.y, sp.z } );
 }
 
-void SunBuilder::update( [[maybe_unused]] float timeStamp ) {
-//	if ( AOS->sunOptions.autoTransition ) {
-//		auto elapsedSeconds = mPrevtimeStamp - timeStamp;
-//
-//		if ( elapsedSeconds > 0 ) {
-//			mPrevtimeStamp = timeStamp;
-//
-//			DateTime newDate = mCurrentTime.addSeconds( static_cast<int>( elapsedSeconds * AOS->sunOptions.transitionSpeed ), false );
-//
-//			moveSun( newDate, mCurrentGeoPos );
-//		}
-//	}
-
-//	SMM.needsRedraw( mbDirtyTime );
-	mbDirtyTime = false;
+void SunBuilder::addSeconds( int seconds ) {
+    DateTime newDate = mCurrentTime.addSeconds( seconds, true );
+    moveSun( newDate, mCurrentGeoPos );
 }
 
 void SunBuilder::setCurrentLocation( std::string locationHint ) {

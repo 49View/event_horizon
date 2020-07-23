@@ -551,6 +551,12 @@ void RLTargetPBR::resize( const Rect2f& _r ) {
     framebuffer = mComposite->getColorFB();
 }
 
+void RLTargetPBR::addSecondsToTime( int _seconds ) {
+    mSunBuilder->addSeconds( _seconds );
+    if ( mSkybox ) mSkybox->invalidate();
+    setShadowMapPosition(mSunBuilder->getSunPosition());
+}
+
 void RLTargetPBR::changeTime( const std::string& _time ) {
     mSunBuilder->buildFromString(_time);
 //    RR().changeTime( SB().getSunPosition() );

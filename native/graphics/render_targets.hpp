@@ -314,6 +314,7 @@ public:
     void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
 
     void changeTime( const std::string& time ) override;
+    void addSecondsToTime( int _seconds );
     void invalidateOnAdd() override;
     floata& skyBoxDeltaInterpolation();
 

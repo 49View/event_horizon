@@ -60,8 +60,6 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
             strafeInertia -= currentVelocity;
             updateDollyWalkingVerticalMovement();
         }
-        if ( mi.TI().checkKeyPressed(GMK_COMMA) ) baseVelocity += 0.001f;
-        if ( mi.TI().checkKeyPressed(GMK_PERIOD) ) baseVelocity -= 0.001f;
     }
     moveForwardInertia += baseVelocity * sign(mi.getScrollValue()) * scrollWheelMult;
     moveForward = moveForwardInertia;

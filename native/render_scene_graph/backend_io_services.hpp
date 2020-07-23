@@ -99,6 +99,22 @@ struct OnSpecialSpaceEvent {
 struct OnDeleteEvent {
 };
 
+struct OnDecreaseValueFastAltEvent{
+    int increment = -5;
+};
+
+struct OnIncreaseValueFastAltEvent{
+    int increment = 5;
+};
+
+struct OnDecreaseValueAltEvent{
+    int increment = -1;
+};
+
+struct OnIncreaseValueAltEvent{
+    int increment = 1;
+};
+
 template <typename T>
 void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera* cam ) {
     // This acts like a classic update loop function in conventional render/update rendering, expect it's wired in the
@@ -112,6 +128,18 @@ void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera*
         if ( _aid.TI().checkKeyToggleOn(GMK_DELETE) ) {
             backEnd->process_event(OnClearEvent{});
         }
+        if ( _aid.TI().checkKeyToggleOn(GMK_COMMA) ) {
+            backEnd->process_event(OnDecreaseValueFastAltEvent{-5});
+        }
+        if ( _aid.TI().checkKeyToggleOn(GMK_PERIOD) ) {
+            backEnd->process_event(OnIncreaseValueFastAltEvent{5});
+        }
+    }
+    if ( _aid.TI().checkKeyToggleOn(GMK_COMMA) ) {
+        backEnd->process_event(OnDecreaseValueAltEvent{-1});
+    }
+    if ( _aid.TI().checkKeyToggleOn(GMK_PERIOD) ) {
+        backEnd->process_event(OnIncreaseValueAltEvent{1});
     }
 
     if ( _aid.mods().isControlKeyDown ) {

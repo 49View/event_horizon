@@ -18,7 +18,7 @@ public:
     [[maybe_unused]] void buildFromHour( double _hours );
     void setCurrentTimeUniforms();
     void setCurrentLocation( std::string locationHint );
-    void update( float timeStamp );
+    void addSeconds( int seconds );
     void changeDefaultYear( int year );
     [[nodiscard]] V3f getSunPosition() const;
     [[nodiscard]] V4f GoldenHourColor() const;
