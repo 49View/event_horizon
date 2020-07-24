@@ -909,4 +909,9 @@ bool Camera::areInputsEnabled() const {
     return !mbLocked;
 }
 
+bool Camera::LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
+void Camera::LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
+void Camera::LockScrollWheelMovements( bool _val ) { mbLockScrollWheelMovements = _val; }
+bool Camera::areScrollWheelMovementsLocked() const { return mbLockScrollWheelMovements; }
+
 

@@ -61,7 +61,9 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
             updateDollyWalkingVerticalMovement();
         }
     }
-    moveForwardInertia += baseVelocity * sign(mi.getScrollValue()) * scrollWheelMult;
+    if ( !getMainCamera()->areScrollWheelMovementsLocked() ) {
+        moveForwardInertia += baseVelocity * sign(mi.getScrollValue()) * scrollWheelMult;
+    }
     moveForward = moveForwardInertia;
     strafe = strafeInertia;
     moveUp = moveUpInertia;

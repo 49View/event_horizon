@@ -129,8 +129,10 @@ public:
 	void Mode( const CameraControlType& val );
 	[[nodiscard]] CameraControlType Mode() const;
 
-	[[nodiscard]] bool LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
-	void LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
+	[[nodiscard]] bool LockAtWalkingHeight() const;
+	void LockAtWalkingHeight( bool val );
+    void LockScrollWheelMovements( bool _val );
+    [[nodiscard]] bool areScrollWheelMovementsLocked() const;
 	void ToggleLockAtWalkingHeight() { mLockAtWalkingHeight = !mLockAtWalkingHeight; }
 	void enableInputs( bool _enableInputs );
 	[[nodiscard]] bool areInputsEnabled() const;
@@ -158,6 +160,7 @@ private:
 
 	bool mLockAtWalkingHeight = false;
 	bool mbLocked = false;
+	bool mbLockScrollWheelMovements = false;
 
 	Matrix4f mView              = Matrix4f::MIDENTITY();
 	Matrix4f mProjection        = Matrix4f::MIDENTITY();
