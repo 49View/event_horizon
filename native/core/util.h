@@ -168,6 +168,20 @@ void inserter( std::vector<T>& dest, const std::vector<T>& source ) {
     dest.insert(std::end(dest), std::begin(source), std::end(source));
 }
 
+// NDDado: The fist parameter (v1) needs to be already sorted as it's a const ref, for performance reason
+// NDDado: needs some concepts here to check T is sortable
+template<typename T>
+std::vector<T> vectorsIntersection( const std::vector<T>& v1, std::vector<T> &v2){
+    std::vector<T> v3;
+
+    std::sort(v2.begin(), v2.end());
+
+    std::set_intersection(v1.begin(),v1.end(),
+                          v2.begin(),v2.end(),
+                          back_inserter(v3));
+    return v3;
+}
+
 bool invalidChar( unsigned char c );
 void stripUnicode( std::string& str );
 
