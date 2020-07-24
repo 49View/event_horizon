@@ -115,6 +115,9 @@ struct OnIncreaseValueAltEvent{
     int increment = 1;
 };
 
+struct OnCloneEvent{
+};
+
 template <typename T>
 void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera* cam ) {
     // This acts like a classic update loop function in conventional render/update rendering, expect it's wired in the
@@ -186,6 +189,9 @@ void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera*
     }
     if ( _aid.TI().checkKeyToggleOn(GMK_DELETE) ) {
         backEnd->process_event(OnDeleteEvent{});
+    }
+    if ( _aid.TI().checkKeyToggleOn(GMK_BACKSLASH) ) {
+        backEnd->process_event(OnCloneEvent{});
     }
 
 }

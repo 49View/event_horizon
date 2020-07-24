@@ -133,6 +133,7 @@ public:
 	void LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
 	void ToggleLockAtWalkingHeight() { mLockAtWalkingHeight = !mLockAtWalkingHeight; }
 	void enableInputs( bool _enableInputs );
+	[[nodiscard]] bool areInputsEnabled() const;
 
 	[[nodiscard]] JMATH::Rect2f ViewPort() const { return mViewPort; }
 	void ViewPort( JMATH::Rect2f val );

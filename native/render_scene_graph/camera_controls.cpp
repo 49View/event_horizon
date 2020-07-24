@@ -79,7 +79,9 @@ void CameraControl::updateFromInputData( SceneGraph& sg, const AggregatedInputDa
     auto camera = mCameraRig->getMainCamera();
 //    if ( !camera->ViewPort().contains( mi.mousePos) ) return;
 
-    updateFromInputDataImpl(camera, mi);
+    if ( camera->areInputsEnabled() ) {
+        updateFromInputDataImpl(camera, mi);
+    }
     if ( sg.cameraCollisionDetection(camera) > 0.0f ) {
         currentVelocity = 0.0f;
     }

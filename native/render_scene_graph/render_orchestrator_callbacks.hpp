@@ -33,7 +33,7 @@ static inline void GResizeFramebufferCallback( [[maybe_unused]] GLFWwindow *, in
 
 inline void RenderOrchestrator::initWHCallbacks() {
 #ifdef USE_GLFW
-    WH::setKeyCallback( GSetKeyCallback );
+//    WH::setKeyCallback( GSetKeyCallback );
     WH::setDropCallback( GDropCallback );
     WH::setResizeFramebufferCallback( GResizeFramebufferCallback );
 #endif

@@ -905,4 +905,8 @@ void Camera::enableInputs( bool _enableInputs ) {
     mbLocked = !_enableInputs;
 }
 
+bool Camera::areInputsEnabled() const {
+    return !mbLocked;
+}
+
 
