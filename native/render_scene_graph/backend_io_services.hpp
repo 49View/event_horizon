@@ -115,6 +115,10 @@ struct OnIncreaseValueAltEvent{
     int increment = 1;
 };
 
+struct OnScrollEvent{
+    float scrollAmount = 1.0f;
+};
+
 struct OnCloneEvent{
 };
 
@@ -177,6 +181,11 @@ void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera*
         backEnd->process_event(OnTouchUpEvent{ _aid.mousePos(TOUCH_ZERO) });
         backEnd->process_event(OnTouchUpViewportSpaceEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
     }
+    if ( _aid.getScrollValue() != 0.0f ) {
+        backEnd->process_event(OnScrollEvent{_aid.getScrollValue()});
+    }
+
+    // Principal keyboard inputs
 
     if ( _aid.TI().checkKeyToggleOn(GMK_ENTER) ) {
         backEnd->process_event(OnFinaliseEvent{});
