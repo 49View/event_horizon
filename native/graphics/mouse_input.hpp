@@ -49,6 +49,7 @@ struct TouchStatus {
     bool touchedDownFirstTime{ false };
     bool doubleTapEvent{ false };
     bool singleTapEvent{ false };
+    bool longTapEvent{ false };
     bool bHasMouseMoved{ false };
     bool overridedSwipe{ false };
     bool canTriggerLongTap{ false };
@@ -106,6 +107,9 @@ struct AggregatedInputData {
     }
     [[nodiscard]] bool isMouseDoubleTap( int _touchIndex ) const {
         return !mouseHasBeenEaten && status[_touchIndex].doubleTapEvent;
+    }
+    [[nodiscard]] bool isMouseLongTap( int _touchIndex ) const {
+        return !mouseHasBeenEaten && status[_touchIndex].longTapEvent;
     }
     [[nodiscard]] bool hasMouseMoved( int _touchIndex ) const {
         return !mouseHasBeenEaten && status[_touchIndex].bHasMouseMoved;

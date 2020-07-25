@@ -39,6 +39,7 @@ void MouseInput::onTouchDown( int _touchIndex, const Vector2f& pos, UpdateSignal
     status[_touchIndex].gestureTime = 0.0f;
     status[_touchIndex].overridedSwipe = false;
     status[_touchIndex].canTriggerLongTap = true;
+    status[_touchIndex].longTapEvent = false;
 
     status[_touchIndex].hasTouchedUp = false;
     status[_touchIndex].touchedDownFirstTime = ( !status[_touchIndex].touchedDown );
@@ -318,8 +319,13 @@ void MouseInput::update( UpdateSignals& _updateSignals ) {
             status[_touchIndex].gestureTapsBack = status[_touchIndex].gesturesTaps.back();
         }
 
+        if ( status[_touchIndex].longTapEvent ) {
+            status[_touchIndex].longTapEvent = false;
+        }
+
         if ( status[_touchIndex].canTriggerLongTap && status[_touchIndex].gestureTime > LONG_TAP_TIME_LIMIT ) {
             status[_touchIndex].canTriggerLongTap = false;
+            status[_touchIndex].longTapEvent = true;
         }
 
         mouseButtonEventsUpdate(_touchIndex, _updateSignals);

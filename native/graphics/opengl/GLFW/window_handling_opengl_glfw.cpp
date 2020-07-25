@@ -63,12 +63,14 @@ namespace WindowHandling {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
 
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
 
         static SerializableContainer defaultFont = getDefaultFont();
-        ImFont* font = io.Fonts->AddFontFromMemoryTTF(defaultFont.data(), defaultFont.size(), 30.0f);
-        ASSERT(font);
+//        ImFont* font =
+                io.Fonts->AddFontFromMemoryTTF(defaultFont.data(), defaultFont.size(), 30.0f);
+//        ASSERT(font);
 
         ImGui::GetStyle().FrameRounding = 2.0f;
         ImGui::GetStyle().GrabRounding = 2.0f;
@@ -215,6 +217,7 @@ namespace WindowHandling {
     }
 
     void imRenderLoopStats( const RenderStats& rs ) {
+#ifndef __EMSCRIPTEN__
 #ifdef _USE_IMGUI_
         ImGui::Begin("Renderer Console");
         ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate );
@@ -224,6 +227,7 @@ namespace WindowHandling {
         ImGui::Text("Number vertex buffers: %d", rs.getInMemoryVertexBuffers() );
         ImGui::Text("Number textures: %d", rs.getInMemoryTextures() );
         ImGui::End();
+#endif
 #endif
     }
 }

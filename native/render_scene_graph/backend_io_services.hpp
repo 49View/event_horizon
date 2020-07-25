@@ -63,6 +63,10 @@ struct OnSingleTapEvent {
     V2f mousePos{ V2fc::HUGE_VALUE_NEG };
 };
 
+struct OnLongTapEvent {
+    V2f mousePos{ V2fc::HUGE_VALUE_NEG };
+};
+
 struct OnTouchUpEvent {
     V2f mousePos{ V2fc::HUGE_VALUE_NEG };
 };
@@ -173,6 +177,9 @@ void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera*
     if ( _aid.isMouseSingleTap( TOUCH_ZERO) ) {
         backEnd->process_event(OnSingleTapEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
         backEnd->process_event(OnSingleTapViewportSpaceEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
+    }
+    if ( _aid.isMouseLongTap( TOUCH_ZERO) ) {
+        backEnd->process_event(OnLongTapEvent{ _aid.mouseViewportPos(TOUCH_ZERO, cam) });
     }
     if ( _aid.isMouseSingleTap( TOUCH_ONE) ) {
         backEnd->process_event(OnSingleTapSecondaryEvent{ _aid.mouseViewportPos(TOUCH_ONE, cam) });
