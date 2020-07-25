@@ -2,8 +2,7 @@
 // Created by dado on 20/06/2020.
 //
 
-#ifndef HOUSE_MAKER_IM_GUI_UTILS_H
-#define HOUSE_MAKER_IM_GUI_UTILS_H
+#pragma once
 
 template<typename T>
 static ImTextureID ImGuiRenderTexture( const T& im ) {
@@ -11,5 +10,3 @@ static ImTextureID ImGuiRenderTexture( const T& im ) {
 };
 
 static constexpr int thumbSize = 128;
-
-#endif //HOUSE_MAKER_IM_GUI_UTILS_H
