@@ -147,6 +147,41 @@ const InputMods& AggregatedInputData::mods() const {
     return inputMods;
 }
 
+V2f AggregatedInputData::mousePosYInv( int _touchIndex ) const {
+    return V2f{ status[_touchIndex].xpos, getScreenSizef.y() -status[_touchIndex].ypos };
+}
+bool AggregatedInputData::isMouseTouchedDownFirstTime( int _touchIndex ) const {
+    return !mouseHasBeenEaten && status[_touchIndex].touchedDownFirstTime;
+}
+bool AggregatedInputData::isMouseTouchedDown( int _touchIndex ) const {
+    return !mouseHasBeenEaten && status[_touchIndex].touchedDown;
+}
+bool AggregatedInputData::isMouseTouchedDownAndMoving( int _touchIndex ) const {
+    return !mouseHasBeenEaten && status[_touchIndex].touchedDown && hasMouseMoved(_touchIndex);
+}
+bool AggregatedInputData::isMouseTouchedUp( int _touchIndex ) const {
+    return !mouseHasBeenEaten && status[_touchIndex].hasTouchedUp && !isMouseSingleTap(_touchIndex);
+}
+bool AggregatedInputData::isMouseSingleTap( int _touchIndex ) const {
+    return !mouseHasBeenEaten && status[_touchIndex].singleTapEvent;
+}
+bool AggregatedInputData::isMouseDoubleTap( int _touchIndex ) const {
+    return !mouseHasBeenEaten && status[_touchIndex].doubleTapEvent;
+}
+bool AggregatedInputData::isMouseLongTap( int _touchIndex ) const {
+    return !mouseHasBeenEaten && status[_touchIndex].longTapEvent;
+}
+bool AggregatedInputData::hasMouseMoved( int _touchIndex ) const {
+    return !mouseHasBeenEaten && status[_touchIndex].bHasMouseMoved;
+}
+V2f AggregatedInputData::mousePos( int _touchIndex ) const {
+    return V2f{ status[_touchIndex].xpos, status[_touchIndex].ypos };
+}
+V2f AggregatedInputData::moveDiff( int _touchIndex ) const {
+    return getCurrMoveDiff(_touchIndex, YGestureInvert::No).dominant() * 0.01f;
+}
+bool AggregatedInputData::isMouseHasBeenEaten() const { return mouseHasBeenEaten; }
+
 SwipeDirection MouseInput::checkSwipe( int _touchIndex ) {
     // Check Swipe
     if ( status[_touchIndex].overridedSwipe ) {

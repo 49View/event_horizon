@@ -126,6 +126,9 @@ struct OnScrollEvent{
 struct OnCloneEvent{
 };
 
+struct OnToggleShortCut1Event{
+};
+
 template <typename T>
 void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera* cam ) {
     // This acts like a classic update loop function in conventional render/update rendering, expect it's wired in the
@@ -208,6 +211,9 @@ void backEndIOEvents( T* backEnd, const AggregatedInputData& _aid, const Camera*
     }
     if ( _aid.TI().checkKeyToggleOn(GMK_BACKSLASH) ) {
         backEnd->process_event(OnCloneEvent{});
+    }
+    if ( _aid.TI().checkKeyToggleOn(GMK_GRAVE_ACCENT) || _aid.TI().checkKeyToggleOn(GMK_M)  ) {
+        backEnd->process_event(OnToggleShortCut1Event{});
     }
 
 }

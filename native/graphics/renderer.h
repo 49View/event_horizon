@@ -493,6 +493,10 @@ public:
             rds.verts = _param;
             return;
         }
+        if constexpr ( std::is_same_v<M, std::array<V3f,4>> ) {
+            for ( auto t = 0u; t < 4; t++) rds.verts.v.emplace_back(_param[t]);
+            return;
+        }
         if constexpr ( std::is_same_v<M, std::vector<Triangle2d>> ) {
             rds.triangles = _param;
             return;

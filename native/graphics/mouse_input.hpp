@@ -90,41 +90,21 @@ struct AggregatedInputData {
 
     }
 
-    [[nodiscard]] bool isMouseTouchedDownFirstTime( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].touchedDownFirstTime;
-    }
-    [[nodiscard]] bool isMouseTouchedDown( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].touchedDown;
-    }
-    [[nodiscard]] bool isMouseTouchedDownAndMoving( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].touchedDown && hasMouseMoved(_touchIndex);
-    }
-    [[nodiscard]] bool isMouseTouchedUp( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].hasTouchedUp && !isMouseSingleTap(_touchIndex);
-    }
-    [[nodiscard]] bool isMouseSingleTap( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].singleTapEvent;
-    }
-    [[nodiscard]] bool isMouseDoubleTap( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].doubleTapEvent;
-    }
-    [[nodiscard]] bool isMouseLongTap( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].longTapEvent;
-    }
-    [[nodiscard]] bool hasMouseMoved( int _touchIndex ) const {
-        return !mouseHasBeenEaten && status[_touchIndex].bHasMouseMoved;
-    }
-
-    [[nodiscard]] V2f mousePos( int _touchIndex ) const {
-        return V2f{ status[_touchIndex].xpos, status[_touchIndex].ypos };
-    }
+    [[nodiscard]] bool isMouseTouchedDownFirstTime( int _touchIndex ) const;
+    [[nodiscard]] bool isMouseTouchedDown( int _touchIndex ) const;
+    [[nodiscard]] bool isMouseTouchedDownAndMoving( int _touchIndex ) const;
+    [[nodiscard]] bool isMouseTouchedUp( int _touchIndex ) const;
+    [[nodiscard]] bool isMouseSingleTap( int _touchIndex ) const;
+    [[nodiscard]][[maybe_unused]] bool isMouseDoubleTap( int _touchIndex ) const;
+    [[nodiscard]] bool isMouseLongTap( int _touchIndex ) const;
+    [[nodiscard]] bool hasMouseMoved( int _touchIndex ) const;
+    [[nodiscard]] V2f mousePos( int _touchIndex ) const;
+    [[nodiscard]] V2f mousePosYInv( int _touchIndex ) const;
     [[nodiscard]] V2f moveDiffSS( int _touchIndex ) const { return getCurrMoveDiffNorm(_touchIndex).dominant(); }
-    [[nodiscard]] V2f moveDiff( int _touchIndex ) const {
-        return getCurrMoveDiff(_touchIndex, YGestureInvert::No).dominant() * 0.01f;
-    }
+    [[nodiscard]] V2f moveDiff( int _touchIndex ) const;
     [[nodiscard]] float getScrollValue() const { return scrollValue; }
 
-    [[nodiscard]] bool isMouseHasBeenEaten() const { return mouseHasBeenEaten; }
+    [[nodiscard]] bool isMouseHasBeenEaten() const;
     void setMouseHasBeenEaten( bool _mouseHasBeenEaten ) { mouseHasBeenEaten = _mouseHasBeenEaten; }
 
     [[nodiscard]] V2f mouseViewportPos( int _touchIndex, const Camera* cam ) const;

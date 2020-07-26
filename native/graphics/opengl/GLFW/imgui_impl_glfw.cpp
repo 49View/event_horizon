@@ -44,6 +44,8 @@
 
 // GLFW
 #include <GLFW/glfw3.h>
+#include <iostream>
+
 #ifdef _WIN32
 #undef APIENTRY
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -117,7 +119,17 @@ void ImGui_ImplGlfw_ScrollCallback(GLFWwindow* window, double xoffset, double yo
 
     ImGuiIO& io = ImGui::GetIO();
     io.MouseWheelH += (float)xoffset;
+// NDDado: I can't seem to find where the wrong code in emscripten is, following this but I do not get it:
+// https://github.com/emscripten-core/emscripten/issues/6283
+// So for now, we do the hack of normalizing [-1.0, 1.0], oh well...
+#ifdef __EMSCRIPTEN__
+    auto clampedYOffset = 0.0f;
+    if ( yoffset  > 0.0 ) clampedYOffset = -1.0;
+    if ( yoffset  < 0.0 ) clampedYOffset = 1.0;
+    io.MouseWheel += (float)clampedYOffset;
+#else
     io.MouseWheel += (float)yoffset;
+#endif
 }
 
 void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
