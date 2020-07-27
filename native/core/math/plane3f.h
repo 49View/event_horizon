@@ -11,6 +11,7 @@
 #include <array>
 #include <core/math/vector_util.hpp>
 #include <core/math/htypes.hpp>
+#include <core/htypes_shared.hpp>
 
 struct Plane3f {
 	Vector3f n; // normal
@@ -124,13 +125,13 @@ struct Plane3f {
         return false;
     }
 
-    bool intersectRayOnTriangles2dMin( const RayPair3& rayPair, const std::vector<Triangle2d>& tris, float z, float& nearV ) const {
+    bool intersectRayOnTriangles2dMin( const RayPair3& rayPair, const std::vector<Triangle2d>& tris, float z, float& nearV, WindingOrderT wo = WindingOrder::CCW  ) const {
 
         for ( const auto& floorPoly : tris ) {
             V3f a = XZY::C(std::get<0>(floorPoly), z);
             V3f b = XZY::C(std::get<2>(floorPoly), z);
             V3f c = XZY::C(std::get<1>(floorPoly), z);
-            if ( intersectRayOnTriangleMin(rayPair, a, c, b, nearV) ) {
+            if ( intersectRayOnTriangleMin(rayPair, a, wo == WindingOrder::CCW ? c : b, wo == WindingOrder::CCW ? b : c, nearV) ) {
                 return true;
             }
         }
