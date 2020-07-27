@@ -9,4 +9,4 @@ static ImTextureID ImGuiRenderTexture( const T& im ) {
     return reinterpret_cast<ImTextureID *>(im);
 };
 
-static constexpr int thumbSize = 128;
+static constexpr float thumbSize = 128.0f;
