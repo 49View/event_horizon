@@ -6,6 +6,15 @@
 #include <graphics/shadowmap_manager.h>
 #include <graphics/program_uniform_set.h>
 
+void LightBase::toggleLightIntensity( float _intensity ) {
+    goingUpToggle();
+    Timeline::play( IntensityAnim(), 2, KeyFramePair{0.8f, _intensity*GoingUp() } );
+}
+
+void LightBase::updateLightIntensityAfterToggle( float _intensity ) {
+    Timeline::play( IntensityAnim(), 2, KeyFramePair{0.8f, _intensity*GoingUp() } );
+}
+
 RenderLightManager::RenderLightManager() {
     mbGlobalOnOffSwitch = true;
     mDirectionalLightIntensity = std::make_shared<AnimType<float>>( 1.0f, "LightDirectionalIntensity" );
@@ -51,8 +60,8 @@ void RenderLightManager::generateUBO( std::shared_ptr<ShaderManager> sm ) {
     mLigthingUniform->generateUBO( sm, "LightingUniforms");
 }
 
-void RenderLightManager::addPointLight( const Vector3f& pos, float _wattage, float intensity, const Vector3f& attenuation ) {
-    mPointLights.emplace_back( pos, _wattage, intensity, attenuation );
+void RenderLightManager::addPointLight( const std::string& _key, const Vector3f& pos, float _wattage, float intensity, const Vector3f& attenuation ) {
+    mPointLights.emplace_back( _key, pos, _wattage, intensity, attenuation );
 }
 
 void RenderLightManager::removePointLight( const size_t index ) {
@@ -93,8 +102,15 @@ void RenderLightManager::setPointLightWattage( size_t index, float _watt ) {
 
 void RenderLightManager::setPointLightIntensity( size_t index, float _intensity ) {
     if ( index < mPointLights.size() ) {
-        mPointLights[index].Intensity( _intensity );
+        Timeline::play( mPointLights[index].IntensityAnim(), 2, KeyFramePair{0.8f, _intensity } );
     }
+}
+
+PointLight* RenderLightManager::findPointLight( const std::string& _key ) {
+    for ( auto& light : mPointLights ) {
+        if ( light.Key() == _key ) return &light;
+    }
+    return nullptr;
 }
 
 void RenderLightManager::switchLightsOn( float animTime, TimelineGroupCCF _ccf ) {

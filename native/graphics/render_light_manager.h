@@ -11,7 +11,8 @@ class ShadowMapManager;
 
 class LightBase {
 public:
-	LightBase( float wattage, float intensity, const Vector3f& attenuation ) {
+	LightBase( const std::string& _key, float wattage, float intensity, const Vector3f& attenuation ) {
+	    mKey = _key;
 	    name = "Default";
 		mType = LightType_Invalid;
 		mWattage = wattage;
@@ -19,7 +20,14 @@ public:
 		mAttenuation = std::make_shared<AnimType<Vector3f>>( attenuation, "lightAttenuation" );
 	}
 
-	[[nodiscard]] float Intensity() const { return mIntensity->value * mWattage; }
+    [[nodiscard]] const std::string& Key() const { return mKey; }
+    [[nodiscard]] bool GoingUp() const { return bGoingUp; }
+    [[nodiscard]] bool& GoingUp() { return bGoingUp; }
+    void goingUpToggle() { bGoingUp = !bGoingUp; }
+    void toggleLightIntensity( float _intensity = 1.0f );
+    void updateLightIntensityAfterToggle( float _intensity = 1.0f );
+
+    [[nodiscard]] float Intensity() const { return mIntensity->value * mWattage; }
 	std::shared_ptr<AnimType<float>>& IntensityAnim() { return mIntensity; }
 	void Intensity( float val ) { mIntensity->value = val; }
 	[[nodiscard]] Vector3f Attenuation() const { return mAttenuation->value; }
@@ -30,7 +38,9 @@ public:
     void Wattage( float _wattage ) { LightBase::mWattage = _wattage; }
 
 protected:
+    std::string mKey;
 	std::string name;
+	bool bGoingUp = false; // Direction of light when animating, going up == true == turning on.
 	LightType mType;
 	float mWattage;
 	std::shared_ptr<AnimType<float>> mIntensity;
@@ -39,7 +49,7 @@ protected:
 
 class DirectionalLight : public LightBase {
 public:
-	explicit DirectionalLight( const Vector3f& dir, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( wattage, intensity, attenuation ) {
+	explicit DirectionalLight( const Vector3f& dir, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( "dir", wattage, intensity, attenuation ) {
 		Type( LightType_Point );
 		mDir = std::make_shared<AnimType<Vector3f>>( dir, "lightDirection" );
 	}
@@ -52,7 +62,7 @@ private:
 
 class PointLight : public LightBase {
 public:
-	explicit PointLight( const Vector3f& pos, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( wattage, intensity, attenuation ) {
+	explicit PointLight( const std::string& _key, const Vector3f& pos, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( _key, wattage, intensity, attenuation ) {
 		Type( LightType_Point );
 		mPos = std::make_shared<AnimType<Vector3f>>( pos, "lightPos" );
 	}
@@ -65,7 +75,7 @@ protected:
 
 class SpotLight : public PointLight {
 public:
-	SpotLight( const Vector3f& pos, const Vector3f& dir, float beamAngle = 60.0f, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : PointLight( pos, wattage, intensity, attenuation ) {
+	SpotLight( const Vector3f& pos, const Vector3f& dir, float beamAngle = 60.0f, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : PointLight( "spot", pos, wattage, intensity, attenuation ) {
 		Type( LightType_Spotlight );
 		mDir = std::make_shared<AnimType<Vector3f>>( dir, "lightDirection" );
 		mBeamAngle = std::make_shared<AnimType<float>>( beamAngle, "lightBeamAngle" );
@@ -86,10 +96,11 @@ class RenderLightManager {
 public:
     RenderLightManager();
 
-	void addPointLight( const Vector3f& pos, float _wattage, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
+	void addPointLight( const std::string& _key, const Vector3f& pos, float _wattage, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
     void setPointLightPos( size_t index, const Vector3f& _pos );
     void setPointLightWattage( size_t index, float _watt );
     void setPointLightIntensity( size_t index, float _intensity );
+    void togglePointLightIntensity( const std::string& _key, float _intensity );
 
     void setPointLightWattages( float _watt );
     void setPointLightIntensities( float _intensity );
@@ -112,6 +123,8 @@ public:
     void setSSAOKernelRadius( float _value );
     void setSSAOFalloffRadius( float _value );
     void setSSAONumRealTimeSamples( float _value );
+
+    PointLight* findPointLight( const std::string& _key );
 private:
 	bool mbGlobalOnOffSwitch;
 	std::vector<DirectionalLight> mDirectionalLights;

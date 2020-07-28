@@ -198,7 +198,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
 
     sg.LL().add([this]( const ResourceTransfer<Light>& _val ) {
 //        LOGRS( "[SG-Resource] Add " << ResourceVersioning<Light>::Prefix() << ": "  << *_val.names.begin() );
-        this->RR().LM()->addPointLight(_val.elem->pos, _val.elem->wattage, _val.elem->intensity,
+        this->RR().LM()->addPointLight( _val.elem->mKey, _val.elem->pos, _val.elem->wattage, _val.elem->intensity,
                                        _val.elem->attenuation);
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
@@ -539,10 +539,10 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
         changeTime(_val);
     };
 
-    luarr["addPointLight"] = [&]( float x, float y, float z, float _wattage, float _intensity ) {
-        rr.LM()->addPointLight(V3f{ x, y, z }, _wattage * 0.01f, _intensity);
-        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
-    };
+//    luarr["addPointLight"] = [&]( float x, float y, float z, float _wattage, float _intensity ) {
+//        rr.LM()->addPointLight(V3f{ x, y, z }, _wattage * 0.01f, _intensity);
+//        setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
+//    };
     luarr["changePointLightPos"] = [&]( int index, float x, float y, float z ) {
         rr.LM()->setPointLightPos(index, V3f{ x, y, z });
         setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
