@@ -308,7 +308,7 @@ kD *= 1.0 - metallic;
 #ifdef sh_reflections
 vec3 R = reflect(-V, N);
 
-vec3 irradiance = texture(ibl_irradianceMap, -N).rgb;
+vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
 vec3 specular = vec3(0.0);
 // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
 vec3 diffuseV = (irradiance * albedo);// * aoLightmapColor;
