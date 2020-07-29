@@ -161,7 +161,7 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
             strafe += mi.moveDiffSS(TOUCH_ONE).x() * -4.0f;
         }
     }
-    float headJogging = sin(dollyWalkingVerticalMovement) * ( currentVelocity * 0.3f );
+    float headJogging = sin(dollyWalkingVerticalMovement) * ( currentVelocity * 0.3f ) * (moveForward > 0.001f ? 1.0f : 0.0f);
     _cam->moveForward(moveForward);
     _cam->strafe(strafe);
     _cam->moveUp(moveUp + headJogging);
