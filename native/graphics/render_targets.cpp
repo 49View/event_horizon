@@ -267,9 +267,9 @@ void RLTargetPBR::cacheShadowMapSunPosition( const Vector3f& _smsp ) {
 }
 
 // This DOES update and invalida skybox and probes
-void RLTargetPBR::setShadowMapPosition( const Vector3f& _sp ) {
+void RLTargetPBR::setShadowMapPosition( const Vector3f& _sp, float _artificialWorldRotationAngle ) {
     cacheShadowMapSunPosition(_sp);
-    smm->SunPosition(_sp);
+    smm->SunPosition(_sp, _artificialWorldRotationAngle );
     if ( mSkybox ) mSkybox->invalidate();
 }
 
@@ -551,17 +551,17 @@ void RLTargetPBR::resize( const Rect2f& _r ) {
     framebuffer = mComposite->getColorFB();
 }
 
-void RLTargetPBR::addSecondsToTime( int _seconds ) {
+void RLTargetPBR::addSecondsToTime( int _seconds, float _artificialWorldRotationAngle ) {
     mSunBuilder->addSeconds( _seconds );
     if ( mSkybox ) mSkybox->invalidate();
-    setShadowMapPosition(mSunBuilder->getSunPosition());
+    setShadowMapPosition(mSunBuilder->getSunPosition(), _artificialWorldRotationAngle);
 }
 
-void RLTargetPBR::changeTime( const std::string& _time ) {
+void RLTargetPBR::changeTime( const std::string& _time, float _artificialWorldRotationAngle ) {
     mSunBuilder->buildFromString(_time);
 //    RR().changeTime( SB().getSunPosition() );
     if ( mSkybox ) mSkybox->invalidate();
-    setShadowMapPosition(mSunBuilder->getSunPosition());
+    setShadowMapPosition(mSunBuilder->getSunPosition(), _artificialWorldRotationAngle );
 }
 
 void RLTargetPBR::invalidateOnAdd() {

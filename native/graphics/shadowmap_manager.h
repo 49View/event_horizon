@@ -15,7 +15,7 @@ public:
 
 	Vector3f SunDirection() const;
 
-	void SunPosition( const Vector3f& sunPos );
+	void SunPosition( const Vector3f& sunPos, float _artificialWorldRotationAngle );
 	Vector3f SunPosition() const { return mShadowMapLightSourcePos; }
 	void setFrusom( const Vector2f& xb, const Vector2f& yb, const Vector2f& zb  );
 	void setFrusom( const JMATH::AABB& aabb );

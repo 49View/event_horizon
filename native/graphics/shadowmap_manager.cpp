@@ -45,10 +45,13 @@ void ShadowMapManager::setFrusom( const Vector2f& xb, const Vector2f& yb, const 
 	updateDepthProjectionMatrix();
 }
 
-void ShadowMapManager::SunPosition( const Vector3f& sunPos ) {
+void ShadowMapManager::SunPosition( const Vector3f& sunPos, float _artificialWorldRotationAngle ) {
 	if ( mShadowMapLightSourcePos != sunPos ) {
 		mShadowMapLightSourcePos = sunPos;
 		mShadowMapSunLightDir = normalize( mShadowMapLightSourcePos );
+		Matrix4f mat{};
+		mat.setRotation(_artificialWorldRotationAngle, V3f::UP_AXIS);
+		mShadowMapSunLightDir = mat.transform(mShadowMapSunLightDir);
 		calculateShadowMapMatrices();
 		invalidate();
 	}

@@ -101,8 +101,8 @@ public:
     void useDOF( bool _value );
     void useMotionBlur( bool _value );
     void takeScreenShot( std::function<void( const SerializableContainer& )> screenShotCallback );
-    void changeTime( const std::string& _time );
-    void addSecondsToTime( int _seconds );
+    void changeTime( const std::string& _time, float _artificialWorldRotationAngle );
+    void addSecondsToTime( int _seconds, float _artificialWorldRotationAngle );
     void changeCameraControlType( int _type );
 
     floata& skyBoxDeltaInterpolation();

@@ -536,7 +536,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
         setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
     luarr["changeTime"] = [&]( const std::string& _val ) {
-        changeTime(_val);
+        changeTime(_val, 0.0f);
     };
 
 //    luarr["addPointLight"] = [&]( float x, float y, float z, float _wattage, float _intensity ) {
@@ -843,15 +843,15 @@ void RenderOrchestrator::createSkybox( const SkyBoxInitParams& _skyboxParams ) {
     }
 }
 
-void RenderOrchestrator::changeTime( const std::string& _time ) {
+void RenderOrchestrator::changeTime( const std::string& _time, float _artificialWorldRotationAngle ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
-        pbrTarget->changeTime(_time);
+        pbrTarget->changeTime(_time, _artificialWorldRotationAngle);
     }
 }
 
-void RenderOrchestrator::addSecondsToTime( int _seconds ) {
+void RenderOrchestrator::addSecondsToTime( int _seconds, float _artificialWorldRotationAngle ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
-        pbrTarget->addSecondsToTime(_seconds);
+        pbrTarget->addSecondsToTime(_seconds, _artificialWorldRotationAngle );
     }
 }
 

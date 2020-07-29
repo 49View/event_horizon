@@ -179,7 +179,7 @@ public:
     void addToCBCore( CommandBufferList& cb );
     void updateStreams();
     virtual void invalidateOnAdd() {}
-    virtual void changeTime( const std::string& time ) {}
+    virtual void changeTime( const std::string& time, float _artificialWorldRotationAngle ) {}
     virtual void addToCB( CommandBufferList& cb ) = 0;
     virtual std::shared_ptr<Framebuffer> getFrameBuffer( CommandBufferFrameBufferType fbt ) { return framebuffer; }
     virtual void blit( CommandBufferList& cbl ) = 0;
@@ -313,8 +313,8 @@ public:
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
     void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
 
-    void changeTime( const std::string& time ) override;
-    void addSecondsToTime( int _seconds );
+    void changeTime( const std::string& time, float _artificialWorldRotationAngle ) override;
+    void addSecondsToTime( int _seconds, float _artificialWorldRotationAngle );
     void invalidateOnAdd() override;
     floata& skyBoxDeltaInterpolation();
 
@@ -333,7 +333,7 @@ protected:
     void calcShadowMapsBBox();
     void cacheShadowMapSunPosition( const Vector3f& _smsp );
     void invalidateShadowMaps();
-    void setShadowMapPosition( const Vector3f& _sp );
+    void setShadowMapPosition( const Vector3f& _sp, float _artificialWorldRotationAngle );
     [[nodiscard]] V4f mainDirectionLightValue() const;
 protected:
     std::shared_ptr<CompositePBR> mComposite;
