@@ -190,88 +190,34 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
     Vector3f bottomYAxis = Vector3f(0.0f, 0.0f, limits.y());
 
     Vector2f axisLenghts = { limits.x() * 2.0f, limits.y() * 2.0f };
+    float subUnitsRatio = 1.0f;
 
     V3fVectorOfVector smallLines;
     V3fVectorOfVector bigLines;
     auto numGridLinesY = static_cast<int>(( axisLenghts.y() / unit ));
     float delta = topYAxis.z();
-    for ( int t = 0; t < numGridLinesY; t++ ) {
+    for ( int t = 0; t < numGridLinesY+1; t++ ) {
         // xLines
         Vector3f lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
         Vector3f lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-        for ( int q = 0; q < 3; q++ ) {
-            delta += unit * 0.25f;
-            lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
-            lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
             smallLines.emplace_back(
                     extrudePointsWithWidth<ExtrudeStrip>({ lerpLeftX, lerpRightX }, gridLinesWidth * 0.75f));
-        }
-        delta += unit * 0.25f;
+        delta += unit * subUnitsRatio;
     }
 
     auto numGridLinesX = static_cast<int>(( axisLenghts.x() / unit ));
     delta = leftXAxis.x();
-    for ( int t = 0; t < numGridLinesX; t++ ) {
+    for ( int t = 0; t < numGridLinesX+1; t++ ) {
         // xLines
         Vector3f lerpLeftX = topYAxis + V3f::X_AXIS * delta;
         Vector3f lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-        for ( int q = 0; q < 3; q++ ) {
-            delta += unit * 0.25f;
-            lerpLeftX = topYAxis + V3f::X_AXIS * delta;
-            lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
             smallLines.emplace_back(
                     extrudePointsWithWidth<ExtrudeStrip>({ lerpLeftX, lerpRightX }, gridLinesWidth * 0.75f));
-        }
-        delta += unit * 0.25f;
+        delta += unit * subUnitsRatio;
     }
 
     RendererDrawingSet rds{ bucketIndex, smallAxisColor, S::COLOR_3D, _name };
     ret.emplace_back(addVertexStrips<Pos3dStrip>(*this, stripInserter<V3f>(smallLines), rds));
-
-    delta = topYAxis.z();
-    for ( int t = 0; t < numGridLinesY; t++ ) {
-        // xLines
-        Vector3f lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
-        Vector3f lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-//        ret.emplace_back( draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
-        bigLines.emplace_back(extrudePointsWithWidth<ExtrudeStrip>({ lerpLeftX, lerpRightX }, gridLinesWidth));
-        for ( int q = 0; q < 3; q++ ) {
-            delta += unit * 0.25f;
-            lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
-            lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-        }
-        delta += unit * 0.25f;
-        if ( t == numGridLinesY - 1 ) {
-            lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
-            lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
-//            ret.emplace_back( draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth) );
-            bigLines.emplace_back(extrudePointsWithWidth<ExtrudeStrip>({ lerpLeftX, lerpRightX }, gridLinesWidth));
-        }
-    }
-
-    delta = leftXAxis.x();
-    for ( int t = 0; t < numGridLinesX; t++ ) {
-        // xLines
-        Vector3f lerpLeftX = topYAxis + V3f::X_AXIS * delta;
-        Vector3f lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-//        ret.emplace_back( draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
-        bigLines.emplace_back(extrudePointsWithWidth<ExtrudeStrip>({ lerpLeftX, lerpRightX }, gridLinesWidth));
-        for ( int q = 0; q < 3; q++ ) {
-            delta += unit * 0.25f;
-            lerpLeftX = topYAxis + V3f::X_AXIS * delta;
-            lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-        }
-        delta += unit * 0.25f;
-        if ( t == numGridLinesX - 1 ) {
-            lerpLeftX = topYAxis + V3f::X_AXIS * delta;
-            lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
-//            ret.emplace_back( draw<DLine>( bucketIndex, lerpLeftX, lerpRightX, mainAxisColor, gridLinesWidth ) );
-            bigLines.emplace_back(extrudePointsWithWidth<ExtrudeStrip>({ lerpLeftX, lerpRightX }, gridLinesWidth));
-        }
-    }
-
-    RendererDrawingSet rds2{ bucketIndex, mainAxisColor, S::COLOR_3D, _name + "_big" };
-    ret.emplace_back(addVertexStrips<Pos3dStrip>(*this, stripInserter<V3f>(bigLines), rds2));
 
     return ret;
 }

@@ -217,7 +217,7 @@ namespace WindowHandling {
     }
 
     void imRenderLoopStats( const RenderStats& rs ) {
-#ifndef __EMSCRIPTEN__
+#if !defined __EMSCRIPTEN__ && !defined _PRODUCTION_
 #ifdef _USE_IMGUI_
         ImGui::Begin("Renderer Console");
         ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate );
