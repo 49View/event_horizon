@@ -15,6 +15,7 @@
 #include <graphics/graphic_functions.hpp>
 #include <graphics/render_light_manager.h>
 #include <graphics/render_list.h>
+#include <graphics/render_stats.hpp>
 #include <graphics/render_targets.hpp>
 #include <graphics/shader_manager.h>
 #include <graphics/shader_material.hpp>

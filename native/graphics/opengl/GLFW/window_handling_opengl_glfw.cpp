@@ -6,9 +6,10 @@
 #include <graphics/opengl/imgui_impl_opengl3.h>
 #endif
 
-#include <graphics/window_handling.hpp>
-#include <graphics/render_list.h>
 #include <core/default_font.hpp>
+#include <core/app_globals.h>
+#include <graphics/window_handling.hpp>
+#include <graphics/render_stats.hpp>
 
 //#define _USE_IMGUI_
 

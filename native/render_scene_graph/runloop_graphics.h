@@ -15,6 +15,8 @@
 #include <core/resources/resource_manager.hpp>
 #include <core/state_machine_helper.hpp>
 #include <graphics/window_handling.hpp>
+#include <graphics/renderer.h>
+#include <graphics/render_stats.hpp>
 #include <poly/scene_graph.h>
 #include <render_scene_graph/scene_bridge.h>
 #include <render_scene_graph/render_orchestrator.h>

@@ -123,7 +123,7 @@ auto addVertexStripsTMAutoMapping( Renderer& _rr, const std::vector<T>& verts, c
     return vp;
 }
 
-void Renderer::drawIncGridLines( const int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
+void drawIncGridLines( Renderer& rr, const int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
                                  const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
                                  const float zoffset, const std::string& _name ) {
     float delta = deltaInc;
@@ -133,12 +133,12 @@ void Renderer::drawIncGridLines( const int bucketIndex, int numGridLines, float 
                                       constAxis0.dominantElement() == 2 ? constAxis0.z() : delta);
         Vector3f lerpRightX = Vector3f(constAxis1.dominantElement() == 0 ? constAxis1.x() : delta, zoffset,
                                        constAxis1.dominantElement() == 2 ? constAxis1.z() : delta);
-        draw<DLine>(bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth);
+        rr.draw<DLine>(bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth);
         lerpLeftX = Vector3f(constAxis0.dominantElement() == 0 ? constAxis0.x() : -delta, zoffset,
                              constAxis0.dominantElement() == 2 ? constAxis0.z() : -delta);
         lerpRightX = Vector3f(constAxis1.dominantElement() == 0 ? constAxis1.x() : -delta, zoffset,
                               constAxis1.dominantElement() == 2 ? constAxis1.z() : -delta);
-        draw<DLine>(bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth);
+        rr.draw<DLine>(bucketIndex, lerpLeftX, lerpRightX, smallAxisColor, gridLinesWidth);
         delta += deltaInc;
     }
 }
@@ -158,15 +158,15 @@ void Renderer::createGrid( const int bucketIndex, float unit, const Color4f& mai
 
     Vector2f axisLenghts = { limits.x() * 2.0f, limits.y() * 2.0f };
 
-    drawIncGridLines(bucketIndex, 10, 0.1f, gridLinesWidth * 0.5f,
+    drawIncGridLines(*this, bucketIndex, 10, 0.1f, gridLinesWidth * 0.5f,
                      V3f::X_AXIS_NEG, V3f::X_AXIS, smallAxisColor, zOffset, _name + "y_axis_01");
-    drawIncGridLines(bucketIndex, 10, 0.1f, gridLinesWidth * 0.5f,
+    drawIncGridLines(*this, bucketIndex, 10, 0.1f, gridLinesWidth * 0.5f,
                      V3f::Z_AXIS_NEG, V3f::Z_AXIS, smallAxisColor, zOffset, _name + "x_axis_01");
 
-    drawIncGridLines(bucketIndex, static_cast<int>(( axisLenghts.y() / unit ) / 2.0f ), unit, gridLinesWidth,
+    drawIncGridLines(*this, bucketIndex, static_cast<int>(( axisLenghts.y() / unit ) / 2.0f ), unit, gridLinesWidth,
                      leftXAxis,
                      rightXAxis, smallAxisColor, zOffset, _name + "y_axis");
-    drawIncGridLines(bucketIndex, static_cast<int>(( axisLenghts.x() / unit ) / 2.0f ), unit, gridLinesWidth, topYAxis,
+    drawIncGridLines(*this, bucketIndex, static_cast<int>(( axisLenghts.x() / unit ) / 2.0f ), unit, gridLinesWidth, topYAxis,
                      bottomYAxis, smallAxisColor, zOffset, _name + "x_axis");
 
     // Main axis
@@ -495,44 +495,6 @@ VPListSP Renderer::drawPolyFinal( RendererDrawingSet& rds ) {
         return addVertexStrips<Pos3dStrip>(*this, allVLists, rds);
     }
 }
-
-//VPListSP Renderer::drawTrianglesFinal( RendererDrawingSet& rds ) {
-//
-//    if ( rds.verts.v.empty() && rds.triangles.empty() ) {
-//        return nullptr;
-//    }
-//
-//    std::vector<vector2fList> ret{};
-//
-//    if ( rds.triangles.empty() ) {
-//        ret = Triangulator::execute2dList(XZY::C2(rds.verts.v));
-//    } else {
-//        vector2fList v2List{};
-//        for ( const auto& triangle : rds.triangles ) {
-//            v2List.emplace_back(std::get<0>(triangle));
-//            v2List.emplace_back(std::get<1>(triangle));
-//            v2List.emplace_back(std::get<2>(triangle));
-//        }
-//        ret.emplace_back(v2List);
-//    }
-//
-//    rds.prim = Primitive::PRIMITIVE_TRIANGLES;
-//
-//    V3fVector allVLists;
-//    for ( auto& velem : ret ) {
-//        preMult(velem, rds);
-//        for ( auto& elem : velem ) {
-//            allVLists.emplace_back(is2dShader(rds.shaderName) ? V3f{ elem } : XZY::C(elem, 0.0f));
-//        }
-//    }
-//
-//    if ( rds.hasTexture() ) {
-//        rds.shaderName = rds.shaderMatrix.has2d() ? S::TEXTURE_2D : S::TEXTURE_3D;
-//        return addVertexStripsTMAutoMapping<PosTex3dStrip>(*this, allVLists, rds);
-//    } else {
-//        return addVertexStrips<Pos3dStrip>(*this, allVLists, rds);
-//    }
-//}
 
 VPListSP Renderer::drawCircleFinal( RendererDrawingSet& rds ) {
 

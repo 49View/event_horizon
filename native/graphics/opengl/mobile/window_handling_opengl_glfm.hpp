@@ -7,7 +7,6 @@
 
 #include <graphics/text_input.hpp>
 #include <graphics/mouse_input.hpp>
-#include <graphics/renderer.h>
 
 struct GLFMDisplay;
 extern GLFMDisplay *glfmdisplay;

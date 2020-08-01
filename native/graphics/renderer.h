@@ -375,9 +375,6 @@ protected:
     class VPBuilder;
 
 public:
-    void drawIncGridLines( int bucketIndex, int numGridLines, float deltaInc, float gridLinesWidth,
-                           const Vector3f& constAxis0, const Vector3f& constAxis1, const Color4f& smallAxisColor,
-                           float zoffset, const std::string& _name = "" );
     VPListSP drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
                             const Vector4f& color, float width, int32_t subdivs, const std::string& _name = "" );
 
@@ -392,15 +389,6 @@ public:
     VPListSP
     drawDoubleArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
                      float angle, float arrowlength, const std::string& _name = "" );
-
-    VPListSP drawLineFinal( RendererDrawingSet& rds );
-    VPListSP drawArrowFinal( RendererDrawingSet& rds );
-    VPListSP drawPolyFinal( RendererDrawingSet& rds );
-    VPListSP drawCircleFinal( RendererDrawingSet& rds );
-    VPListSP drawCircleFilledFinal( RendererDrawingSet& rds );
-    VPListSP drawRectFinal( RendererDrawingSet& rds );
-    VPListSP drawRectFinalTM( RendererDrawingSet& rds );
-    VPListSP drawTextFinal( const RendererDrawingSet& rds );
 
     VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
                            const std::string& _name = "" );
@@ -645,4 +633,15 @@ public:
         }
         return nullptr;
     }
+
+private:
+    VPListSP drawLineFinal( RendererDrawingSet& rds );
+    VPListSP drawArrowFinal( RendererDrawingSet& rds );
+    VPListSP drawPolyFinal( RendererDrawingSet& rds );
+    VPListSP drawCircleFinal( RendererDrawingSet& rds );
+    VPListSP drawCircleFilledFinal( RendererDrawingSet& rds );
+    VPListSP drawRectFinal( RendererDrawingSet& rds );
+    VPListSP drawRectFinalTM( RendererDrawingSet& rds );
+    VPListSP drawTextFinal( const RendererDrawingSet& rds );
+
 };

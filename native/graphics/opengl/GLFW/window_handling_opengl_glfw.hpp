@@ -7,7 +7,7 @@
 
 #include <graphics/text_input.hpp>
 #include <graphics/mouse_input.hpp>
-#include <graphics/renderer.h>
+#include <graphics/opengl/gl_headers.hpp>
 
 struct GLFWwindow;
 typedef void (* GLFWdropfun)(GLFWwindow*,int,const char**);
