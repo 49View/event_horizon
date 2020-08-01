@@ -115,7 +115,6 @@ public:
 
     Renderer& RR() { return rr; }
     TextInput& TI() { return ti; }
-	MouseInput& MI() { return mi; }
 
 protected:
 	void update() {

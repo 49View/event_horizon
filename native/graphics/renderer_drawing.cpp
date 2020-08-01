@@ -143,7 +143,7 @@ void drawIncGridLines( Renderer& rr, const int bucketIndex, int numGridLines, fl
     }
 }
 
-void Renderer::createGrid( const int bucketIndex, float unit, const Color4f& mainAxisColor,
+void Renderer::drawGrid( const int bucketIndex, float unit, const Color4f& mainAxisColor,
                            const Color4f& smallAxisColor, const Vector2f& limits, const float axisSize,
                            const std::string& _name ) {
     float mainAxisWidth = axisSize;
@@ -177,7 +177,7 @@ void Renderer::createGrid( const int bucketIndex, float unit, const Color4f& mai
     draw<DCircleFilled>(bucketIndex, V3f::ZERO, C4f::BLACK, mainAxisWidth);
 }
 
-std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit, const Color4f& mainAxisColor,
+std::vector<VPListSP> Renderer::drawGridV2( const int bucketIndex, float unit, const Color4f& mainAxisColor,
                                               const Color4f& smallAxisColor, const Vector2f& limits,
                                               const float gridLinesWidth,
                                               const std::string& _name ) {
@@ -222,67 +222,6 @@ std::vector<VPListSP> Renderer::createGridV2( const int bucketIndex, float unit,
     return ret;
 }
 
-VPListSP Renderer::drawRect( const int bi, const Rect2f& r, const Color4f& color, const std::string& _name ) {
-
-    auto ps = std::make_shared<Pos3dStrip>(r, 0.0f);
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
-            _name).build();
-    VPL(bi, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture,
-                             float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
-    Rect2f rect{ p1, p2, true };
-    QuadVertices2 qvt = textureQuadFillModeMapping(fm, rect, ratio);
-    auto ps = std::make_shared<PosTex3dStrip>(rect, qvt, 0.0f);
-    auto vp = VPBuilder<PosTex3dStrip>{ *this,
-                                        ShaderMaterial{ S::TEXTURE_3D, mapTextureAndColor(_texture, color) }, _name }.p(
-            ps).n(_name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
-                             const std::string& _name ) {
-    auto ps = std::make_shared<Pos3dStrip>(Rect2f{ p1, p2, true }, 0.0f);
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP
-Renderer::drawRect2d( const int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name ) {
-    auto ps = std::make_shared<Pos3dStrip>(r1);
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_2D, mapColor(color) }, _name }.p(ps).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
-                               const std::string& _name ) {
-
-    return drawRect2d(bucketIndex, Rect2f{ p1, p2, true }, color, _name);
-}
-
-VPListSP Renderer::drawRect2d( const int bucketIndex, const Rect2f& rect, CResourceRef _texture,
-                               float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
-    auto ps = std::make_shared<PosTex3dStrip>(rect, QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS);
-    auto vp = VPBuilder<PosTex3dStrip>{ *this,
-                                        ShaderMaterial{ S::TEXTURE_2D, mapTextureAndColor(_texture, color) }, _name }.p(
-            ps).n(_name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawRect2d( const int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture,
-                               float ratio, const Color4f& color, RectFillMode fm, const std::string& _name ) {
-    Rect2f rect{ p1, p2 };
-    return drawRect2d(bucketIndex, rect, _texture, ratio, color, fm, _name);
-}
-
 auto createAngleBrackets( const Vector3f& p1, const Vector3f& p2, float angle, float arrowlength ) {
     std::vector<Vector3f> vlist;
     Vector2f n = normalize(p2 - p1).xz();
@@ -303,25 +242,6 @@ auto creteDoubleArrow( const Vector3f& p1, const Vector3f& p2, float width, floa
     auto v3 = extrudePointsWithWidth<ExtrudeStrip>({ p1, p2 }, width, false);
 
     return stripInserter<V3f>(v1, v2, v3);
-}
-
-VPListSP Renderer::drawArrow( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
-                              const V4f& color, float width, float angle, float arrowlength,
-                              const std::string& _name ) {
-    auto vlist = createAngleBrackets(p1, p2, angle, arrowlength);
-
-    auto v1 = extrudePointsWithWidth<ExtrudeStrip>(vlist, width, false);
-    auto v2 = extrudePointsWithWidth<ExtrudeStrip>({ p1, p2 }, width, false);
-
-    RendererDrawingSet rds{ bucketIndex, color, S::COLOR_3D, _name };
-    return addVertexStrips<Pos3dStrip>(*this, stripInserter<V3f>(v1, v2), rds);
-}
-
-VPListSP Renderer::drawDoubleArrow( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
-                                    const V4f& color, float width, float angle, float arrowlength,
-                                    const std::string& _name ) {
-    RendererDrawingSet rds{ bucketIndex, color, S::COLOR_3D, _name };
-    return addVertexStrips<Pos3dStrip>(*this, creteDoubleArrow(p1, p2, width, angle, arrowlength), rds);
 }
 
 VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
@@ -459,6 +379,28 @@ VPListSP Renderer::drawArrowFinal( RendererDrawingSet& rds ) {
 }
 
 VPListSP Renderer::drawPolyFinal( RendererDrawingSet& rds ) {
+    if ( rds.verts.v.size() < 3 ) {
+        return nullptr;
+    }
+
+    return addVertexStrips<Pos3dStrip>(*this, rds.verts.v, rds);
+
+//    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
+//                                                                          static_cast<int32_t>(verts.size()),
+//                                                                          PRIMITIVE_TRIANGLE_STRIP,
+//                                                                          VFVertexAllocation::PreAllocate);
+//    colorStrip->addStripVertex(verts[0]);
+//    colorStrip->addStripVertex(verts[3]);
+//    colorStrip->addStripVertex(verts[1]);
+//    colorStrip->addStripVertex(verts[2]);
+//
+//    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
+//            _name).build();
+//    VPL(bucketIndex, vp );
+//    return vp;
+}
+
+VPListSP Renderer::drawFlatPolyFinal( RendererDrawingSet& rds ) {
 
     if ( rds.verts.v.empty() && rds.triangles.empty() ) {
         return nullptr;
@@ -589,239 +531,6 @@ VPListSP Renderer::drawRectFinalTM( RendererDrawingSet& rds ) {
     return addVertexStripsTM<PosTex3dStrip>(*this, std::make_shared<PosTex3dStrip>(rds.rect,
                                                                                    QuadVertices2::QUAD_TEX_STRIP_INV_Y_COORDS,
                                                                                    0.0f), rds);
-}
-
-VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
-                                 const std::string& _name ) {
-    if ( verts.size() != 3 ) return nullptr;
-    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(3, 3, PRIMITIVE_TRIANGLE_STRIP,
-                                                                          VFVertexAllocation::PreAllocate);
-    colorStrip->addStripVertex(Vector3f{ verts[0], _z });
-    colorStrip->addStripVertex(Vector3f{ verts[1], _z });
-    colorStrip->addStripVertex(Vector3f{ verts[2], _z });
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                                 const std::string& _name ) {
-    if ( verts.size() < 3 ) return nullptr;
-    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(3, 3, PRIMITIVE_TRIANGLE_STRIP,
-                                                                          VFVertexAllocation::PreAllocate);
-    colorStrip->addStripVertex(verts[0]);
-    colorStrip->addStripVertex(verts[1]);
-    colorStrip->addStripVertex(verts[2]);
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                                  const std::string& _name ) {
-    //Multiple of 3
-    if ( verts.size() == 0 || verts.size() % 3 != 0 ) return nullptr;
-    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
-                                                                          static_cast<int32_t>(verts.size()),
-                                                                          PRIMITIVE_TRIANGLES,
-                                                                          VFVertexAllocation::PreAllocate);
-    for ( auto& v : verts ) {
-        colorStrip->addStripVertex(v);
-    }
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawTriangleStrip( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                                      const std::string& _name ) {
-    //Multiple of 3
-    if ( verts.size() < 3 ) return nullptr;
-    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
-                                                                          static_cast<int32_t>(verts.size()),
-                                                                          PRIMITIVE_TRIANGLE_STRIP,
-                                                                          VFVertexAllocation::PreAllocate);
-    for ( auto& v : verts ) {
-        colorStrip->addStripVertex(v);
-    }
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawTriangleQuad( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                                     const std::string& _name ) {
-    //Multiple of 3
-    if ( verts.size() < 4 ) return nullptr;
-    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
-                                                                          static_cast<int32_t>(verts.size()),
-                                                                          PRIMITIVE_TRIANGLE_STRIP,
-                                                                          VFVertexAllocation::PreAllocate);
-    colorStrip->addStripVertex(verts[0]);
-    colorStrip->addStripVertex(verts[3]);
-    colorStrip->addStripVertex(verts[1]);
-    colorStrip->addStripVertex(verts[2]);
-
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP
-Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
-                         const Vector4f& color, const std::string& _name ) {
-    //Multiple of 3.d
-    if ( verts.size() == 0 || indices.size() == 0 || indices.size() % 3 != 0 ) return nullptr;
-
-    std::unique_ptr<uint32_t[]> i = std::make_unique<uint32_t[]>(indices.size());
-
-    memcpy(i.get(), indices.data(), sizeof(int32_t) * indices.size());
-
-    std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(static_cast<int32_t>(verts.size()),
-                                                                          PRIMITIVE_TRIANGLES,
-                                                                          VFVertexAllocation::PreAllocate,
-                                                                          static_cast<uint32_t>(indices.size()),
-                                                                          std::move(i));
-
-    for ( auto& v : verts ) {
-        colorStrip->addVertex(v);
-    }
-
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawCylinder( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f&
-color, float size,
-                                 const std::string& _name ) {
-    draw<DLine>(bucketIndex, pos, dir, color, size, false, 0.0f, 1.0f, _name);
-    //### FIXME VP
-    return draw<DLine>(bucketIndex, pos, dir, color, size, false, M_PI_2, 1.0f, _name);
-}
-
-VPListSP Renderer::drawCone( int bucketIndex, const Vector3f& /*posBase*/, const Vector3f& /*posTop*/,
-                             const Vector4f& /*color*/, float /*size*/, const std::string& /*_name*/ ) {
-    return nullptr;
-}
-
-VPListSP
-Renderer::draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
-                        const std::string& _name ) {
-//    draw3dPoint( bucketIndex, pos, color, size * 1.25f, _name );
-    return drawCylinder(bucketIndex, pos, pos + dir, color, size, _name);
-}
-
-VPListSP Renderer::drawArc( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
-                            const Vector4f& color, float width, int32_t subdivs, float percToBeDrawn,
-                            const std::string& _name ) {
-    std::vector<Vector3f> points;
-    for ( int t = 0; t < subdivs; t++ ) {
-        float delta = ( static_cast<float>( t ) / static_cast<float>( subdivs - 1 ) );
-        float angle = JMATH::lerp(delta, fromAngle, toAngle);
-        points.push_back(Vector3f(center.xy() + Vector2f(sinf(angle), cosf(angle)) * radius, center.z()));
-    }
-
-    return draw<DLine>(bucketIndex, points, color, width, false, 0.0f, percToBeDrawn, _name);
-}
-
-VPListSP Renderer::drawArc( int bucketIndex, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
-                            const Vector4f& color, float width, int32_t subdivs, float percToBeDrawn,
-                            const std::string& _name ) {
-    std::vector<Vector3f> points;
-
-    Vector2f n1 = normalize(( p1 - center ).xy());
-    Vector2f n2 = normalize(( p2 - center ).xy());
-
-    float radius = length(center - p2);
-    for ( int t = 0; t < subdivs; t++ ) {
-        float delta = ( static_cast<float>( t ) / static_cast<float>( subdivs - 1 ) );
-        Vector3f pm = center + Vector3f(normalize(lerp(delta, n1, n2)) * radius, center.z());
-        points.push_back(pm);
-    }
-
-    return draw<DLine>(bucketIndex, points, color, width, false, 0.0f, percToBeDrawn, _name);
-}
-
-VPListSP Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
-                                  const Vector4f& color, float /*width*/, int32_t subdivs, const std::string& _name ) {
-    int32_t numIndices = subdivs + 1;
-    if ( numIndices < 3 ) return nullptr;
-    std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>(new uint32_t[numIndices]);
-    std::unique_ptr<VFPos3d[]> _verts = std::unique_ptr<VFPos3d[]>(new VFPos3d[numIndices]);
-
-    for ( int t = 0; t < numIndices; t++ ) {
-        _indices[t] = t;
-    }
-    _verts[0].pos = center;
-    for ( int t = 1; t < numIndices; t++ ) {
-        float delta = ( static_cast<float>( t - 1 ) / static_cast<float>( subdivs - 1 ) );
-        float angle = JMATH::lerp(delta, fromAngle, toAngle);
-        _verts[t].pos = Vector3f(center.xy() + Vector2f(sinf(angle), cosf(angle)) * radius, center.z());
-    }
-
-    std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>(numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
-                                                                  _verts, std::move(_indices));
-
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP Renderer::drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
-                            const std::string& _name ) {
-    auto numIndices = 5;
-    std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>(new uint32_t[numIndices]);
-    std::unique_ptr<VFPos3d[]> _verts = std::unique_ptr<VFPos3d[]>(new VFPos3d[numIndices]);
-
-    for ( int t = 0; t < numIndices; t++ ) {
-        _indices[t] = t;
-    }
-    for ( int t = 0; t < numIndices; t++ ) {
-        float angle = M_PI_4 + ( static_cast<float>( t - 1 ) / static_cast<float>( numIndices - 1 ) ) * TWO_PI;
-        _verts[t].pos = Vector3f(center + V3f(sinf(angle), 0.0f, cosf(angle)) * radius * sqrt(2.0f));
-    }
-
-    std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>(4, PRIMITIVE_TRIANGLE_FAN, 4,
-                                                                  _verts, std::move(_indices));
-
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
-}
-
-VPListSP
-Renderer::drawCircle( int bucketIndex, const Vector3f& center, float radius, const Color4f& color, int32_t subdivs,
-                      const std::string& _name ) {
-    int32_t numIndices = subdivs + 1;
-    if ( numIndices < 3 ) return nullptr;
-    std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>(new uint32_t[numIndices]);
-    std::unique_ptr<VFPos3d[]> _verts = std::unique_ptr<VFPos3d[]>(new VFPos3d[numIndices]);
-
-    for ( int t = 0; t < numIndices; t++ ) {
-        _indices[t] = t;
-    }
-    _verts[0].pos = center;
-    for ( int t = 0; t < numIndices; t++ ) {
-        float angle = ( static_cast<float>( t ) / static_cast<float>( subdivs ) ) * TWO_PI;
-        _verts[t].pos = Vector3f(center + V3f(sinf(angle), 0.0f, cosf(angle)) * radius);
-    }
-
-    std::shared_ptr<Pos3dStrip> ps = std::make_shared<Pos3dStrip>(numIndices, PRIMITIVE_TRIANGLE_FAN, numIndices,
-                                                                  _verts, std::move(_indices));
-
-    auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
-            _name).build();
-    VPL(bucketIndex, vp );
-    return vp;
 }
 
 void RendererDrawingSet::setupFontData() {

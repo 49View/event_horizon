@@ -26,6 +26,8 @@ struct DArrow {
 };
 struct DPoly {
 };
+struct DFlatPoly {
+};
 struct DRect {
 };
 struct DRect2d {
@@ -75,7 +77,7 @@ struct RendererDrawingSet {
     RendererDrawingSet( int bi, Color4f c, std::string sn, std::string n ) :
             bucketIndex(bi), color(std::move(c)), name(std::move(n)), shaderName(std::move(sn)) {}
     void setupFontData();
-    bool hasTexture() const;
+    [[nodiscard]] bool hasTexture() const;
     void resolveShaderMatrix();
 
     int bucketIndex = CommandBufferLimits::UI2dStart;
@@ -371,78 +373,15 @@ protected:
 
     std::vector<ChangeMaterialOnContainer> mChangeMaterialCallbacks;
 
-    template<typename V> friend
-    class VPBuilder;
+    template<typename V> friend class VPBuilder;
 
 public:
-    VPListSP drawArcFilled( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
-                            const Vector4f& color, float width, int32_t subdivs, const std::string& _name = "" );
 
-    void createGrid( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
+    void drawGrid( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
                      const Vector2f& limits, float axisSize, const std::string& _name = "" );
     std::vector<VPListSP>
-    createGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
+    drawGridV2( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
                   const Vector2f& limits, float axisSize, const std::string& _name = "" );
-    VPListSP
-    drawArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
-               float angle, float arrowlength, const std::string& _name = "" );
-    VPListSP
-    drawDoubleArrow( int bucketIndex, const Vector3f& p1, const Vector3f& p2, const C4f& color, float width,
-                     float angle, float arrowlength, const std::string& _name = "" );
-
-    VPListSP drawTriangle( int bucketIndex, const std::vector<Vector2f>& verts, float _z, const Vector4f& color,
-                           const std::string& _name = "" );
-    VPListSP drawTriangle( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                           const std::string& _name = "" );
-    VPListSP drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                            const std::string& _name = "" );
-    VPListSP drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, const std::vector<int32_t>& indices,
-                            const Vector4f& color, const std::string& _name = "" );
-    VPListSP drawTriangleStrip( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                                const std::string& _name );
-    VPListSP drawTriangleQuad( int bucketIndex, const std::vector<Vector3f>& verts, const Vector4f& color,
-                               const std::string& _name );
-    VPListSP
-    draw3dVector( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
-                  const std::string& _name = "" );
-    VPListSP drawDot( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
-                      const std::string& _name = "" );
-    VPListSP drawCircle( int bucketIndex, const Vector3f& center, float radius, const Color4f& color,
-                         int32_t subdivs = 12, const std::string& _name = "" );
-    VPListSP drawCircle( int bucketIndex, const Vector3f& center, const Vector3f& normal, float radius,
-                         const Color4f& color, int32_t subdivs, const std::string& _name = "" );
-    VPListSP drawCircle2d( int bucketIndex, const Vector2f& center, float radius, const Color4f& color,
-                           int32_t subdivs = 12, const std::string& _name = "" );
-    VPListSP drawArc( int bucketIndex, const Vector3f& center, float radius, float fromAngle, float toAngle,
-                      const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
-                      const std::string& _name = "" );
-    VPListSP drawArc( int bucketIndex, const Vector3f& center, const Vector3f& p1, const Vector3f& p2,
-                      const Vector4f& color, float width, int32_t subdivs = 10, float percToBeDrawn = 1.0f,
-                      const std::string& _name = "" );
-    VPListSP
-    drawCylinder( int bucketIndex, const Vector3f& pos, const Vector3f& dir, const Vector4f& color, float size,
-                  const std::string& _name = "" );
-
-    VPListSP drawCone( int bucketIndex, const Vector3f& posBase, const Vector3f& posTop, const Vector4f& color,
-                       float size, const std::string& _name = "" );
-
-    VPListSP drawRect( int bi, const Rect2f& r, const Color4f& color, const std::string& _name = {} );
-
-    VPListSP
-    drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
-              const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale, const std::string& _name = {} );
-    VPListSP drawRect( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
-                       const std::string& _name = {} );
-    VPListSP
-    drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, CResourceRef _texture, float ratio = 1.0f,
-                const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale,
-                const std::string& _name = {} );
-    VPListSP drawRect2d( int bucketIndex, const Rect2f& r1, CResourceRef _texture, float ratio = 1.0f,
-                         const Color4f& color = C4f::WHITE, RectFillMode fm = RectFillMode::Scale,
-                         const std::string& _name = {} );
-    VPListSP drawRect2d( int bucketIndex, const Vector2f& p1, const Vector2f& p2, const Color4f& color,
-                         const std::string& _name = {} );
-    VPListSP drawRect2d( int bucketIndex, const Rect2f& r1, const Color4f& color, const std::string& _name = {} );
 
     VPListSP drawMeasurementArrow1( int bucketIndex, const Vector3f& p1, const Vector3f& p2,
                                     const V4f& color, float width, float angle, float arrowlength,
@@ -454,9 +393,8 @@ public:
                                     float offsetGap, const Font *font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
 
-    std::vector<VPListSP>
-    drawDotCircled( float dotSize, const V3f& centrePoint, const V3f& normal, const C4f& _dotColor,
-                    float finalAlphaValue, const std::string& _name );
+    std::vector<VPListSP> drawDotCircled( float dotSize, const V3f& centrePoint, const V3f& normal,
+                                          const C4f& _dotColor, float finalAlphaValue, const std::string& _name );
 
     template<typename T, typename M>
     void addRendererDrawingSetParam( RendererDrawingSet& rds, const M& _param ) {
@@ -605,6 +543,9 @@ public:
         if constexpr ( std::is_same_v<T, DPoly> ) {
             return drawPolyFinal(rds);
         }
+        if constexpr ( std::is_same_v<T, DFlatPoly> ) {
+            return drawFlatPolyFinal(rds);
+        }
         if constexpr ( std::is_same_v<T, DCircle> ) {
             return drawCircleFinal(rds);
         }
@@ -638,10 +579,10 @@ private:
     VPListSP drawLineFinal( RendererDrawingSet& rds );
     VPListSP drawArrowFinal( RendererDrawingSet& rds );
     VPListSP drawPolyFinal( RendererDrawingSet& rds );
+    VPListSP drawFlatPolyFinal( RendererDrawingSet& rds );
     VPListSP drawCircleFinal( RendererDrawingSet& rds );
     VPListSP drawCircleFilledFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinal( RendererDrawingSet& rds );
     VPListSP drawRectFinalTM( RendererDrawingSet& rds );
     VPListSP drawTextFinal( const RendererDrawingSet& rds );
-
 };

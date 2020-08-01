@@ -254,11 +254,11 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
     });
 
     sg.nodeFullScreenImageConnect([this]( CResourceRef _node ) {
-        auto image = sg.TL(_node);
-        V2f iar = image->getAspectRatioV();
-        auto fit = getFullScreenAspectFit(iar.ratio());
-        this->RR().drawRect2d(CommandBufferLimits::UI2dStart, fit.first, fit.second, _node);
-        Socket::send("wasmClientFinishedLoadingData", image->serializeParams());
+//        auto image = sg.TL(_node);
+//        V2f iar = image->getAspectRatioV();
+//        auto fit = getFullScreenAspectFit(iar.ratio());
+//        this->RR().drawRect2d(CommandBufferLimits::UI2dStart, fit.first, fit.second, _node);
+//        Socket::send("wasmClientFinishedLoadingData", image->serializeParams());
     });
 
     sg.nodeFullScreenMaterialConnect([this]( CResourceRef _node ) {
@@ -590,7 +590,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
         setRigCameraController(CameraControlType::Orbit);
         useSkybox(true);
         RR().clearBucket(CommandBufferLimits::GridStart);
-        RR().createGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
+        RR().drawGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
                             ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
         RR().showBucket(CommandBufferLimits::GridStart, false);
         RR().setIndoorSceneCoeff(0.5f); // We dim the sunlight otherwise outdoor scenes are too bright
