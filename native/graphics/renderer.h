@@ -236,8 +236,10 @@ public:
     void updateTextureResource( const ResourceTransfer<RawImage>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ResourceTransfer<Material>& _val );
     std::shared_ptr<RenderMaterial> addMaterialResource( const ShaderMaterial& _val, const std::string& _name );
+    std::shared_ptr<RenderMaterial> upsertMaterialResource( const ShaderMaterial& _val, const std::string& _name );
     std::shared_ptr<GPUVData> addVDataResource( const ResourceTransfer<VData>& _val );
     std::shared_ptr<GPUVData> addVDataResource( cpuVBIB&& _val, const std::string& _name );
+    std::shared_ptr<GPUVData> upsertVDataResource( cpuVBIB&& _val, const std::string& _name );
 
     std::shared_ptr<RenderMaterial> getMaterial( const std::string& _key );
     std::shared_ptr<GPUVData> getGPUVData( const std::string& _key );
@@ -247,7 +249,7 @@ public:
     void changeMaterialColorOnTags( uint64_t _tag, float r, float g, float b );
     void changeMaterialAlphaOnTags( uint64_t _tag, float _alpha );
     void setVisibilityOnTags( uint64_t _tag, bool _visibility );
-    std::vector<std::shared_ptr<VPList>> getVPListWithTags( uint64_t _tag );
+    [[maybe_unused]] VPListFlatContainer getVPListWithTags( uint64_t _tag );
     void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
     void replaceMaterial( const std::string& _oldMatRef, const std::string& _newMatRef );
     void changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value );
@@ -257,7 +259,7 @@ public:
     TextureUniformDesc TDI( const std::string& _id, unsigned int tSlot );
 
     void addToCommandBuffer( CommandBufferLimitsT _entry );
-    void addToCommandBuffer( std::vector<std::shared_ptr<VPList>> _map,
+    void addToCommandBuffer( VPListContainerCRef _map,
                              CameraRig *_cameraRig = nullptr,
                              std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr,
                              Program *_forceProgram = nullptr,
@@ -280,9 +282,10 @@ public:
 
     inline CommandBufferList& CB_U() { return *mCommandBuffers; }
     inline CommandBufferListVectorMap& CL() { return mCommandLists; }
-    std::vector<std::shared_ptr<VPList>> CLI( uint64_t cli );
-    std::vector<std::shared_ptr<VPList>> CLIExcludingTag( uint64_t cli, uint64_t excludingTag );
-    std::vector<std::shared_ptr<VPList>> CLIIncludingTag( uint64_t cli, uint64_t _tag );
+    VPListFlatContainer CLI( uint64_t cli );
+    VPListFlatContainer CLIWithPred( uint64_t cli, std::function<bool(const std::shared_ptr<VPList>&)> );
+    VPListFlatContainer CLIExcludingTag( uint64_t cli, uint64_t excludingTag );
+    VPListFlatContainer CLIIncludingTag( uint64_t cli, uint64_t _tag );
     inline const CommandBufferListVectorMap& CL() const { return mCommandLists; }
 
     void resetDefaultFB( const Vector2i& forceSize = Vector2i{ -1 } );

@@ -10,6 +10,7 @@
 
 #include <map>
 #include <ostream>
+#include <unordered_map>
 #include <atomic>
 #include <mutex>
 #include "graphic_constants.h"
@@ -296,8 +297,8 @@ private:
 
 struct CommandBufferListVector {
     CommandBufferFlags flags = CommandBufferFlags::CBF_None;
-    std::vector<std::shared_ptr<VPList>> mVList;
-    std::vector<std::shared_ptr<VPList>> mVListTransparent;
+    VPListContainer mVList;
+    VPListContainer mVListTransparent;
 
     template <typename F, typename ...Args>
     void foreach( F func, Args ...args ) {

@@ -85,8 +85,8 @@ auto addVertexStrips( Renderer& _rr, const std::vector<T>& verts, const Renderer
     colorStrip->generateStripsFromVerts(verts, rds.prim);
 
     auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapColor(rds.color) }, rds.name }.
-            t(rds.matrix).p(colorStrip).n(rds.name).build();
-    _rr.VPL(rds.bucketIndex, vp);
+            t(rds.matrix).p(colorStrip).n(rds.name).buildUpsert();
+    _rr.VPL(rds.bucketIndex, vp );
     return vp;
 }
 
@@ -96,7 +96,7 @@ auto addVertexStripsTM( Renderer& _rr, std::shared_ptr<TS> ps, const RendererDra
     auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) },
                              rds.name }.
             t(rds.matrix).p(ps).n(rds.name).build();
-    _rr.VPL(rds.bucketIndex, vp);
+    _rr.VPL(rds.bucketIndex, vp );
     return vp;
 }
 
@@ -119,7 +119,7 @@ auto addVertexStripsTMAutoMapping( Renderer& _rr, const std::vector<T>& verts, c
     auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) },
                              rds.name }.
             t(rds.matrix).p(ps).n(rds.name).build();
-    _rr.VPL(rds.bucketIndex, vp);
+    _rr.VPL(rds.bucketIndex, vp );
     return vp;
 }
 
@@ -227,7 +227,7 @@ VPListSP Renderer::drawRect( const int bi, const Rect2f& r, const Color4f& color
     auto ps = std::make_shared<Pos3dStrip>(r, 0.0f);
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
-    VPL(bi, vp);
+    VPL(bi, vp );
     return vp;
 }
 
@@ -239,7 +239,7 @@ VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Ve
     auto vp = VPBuilder<PosTex3dStrip>{ *this,
                                         ShaderMaterial{ S::TEXTURE_3D, mapTextureAndColor(_texture, color) }, _name }.p(
             ps).n(_name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -248,7 +248,7 @@ VPListSP Renderer::drawRect( const int bucketIndex, const Vector2f& p1, const Ve
     auto ps = std::make_shared<Pos3dStrip>(Rect2f{ p1, p2, true }, 0.0f);
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -257,7 +257,7 @@ Renderer::drawRect2d( const int bucketIndex, const Rect2f& r1, const Color4f& co
     auto ps = std::make_shared<Pos3dStrip>(r1);
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_2D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -273,7 +273,7 @@ VPListSP Renderer::drawRect2d( const int bucketIndex, const Rect2f& rect, CResou
     auto vp = VPBuilder<PosTex3dStrip>{ *this,
                                         ShaderMaterial{ S::TEXTURE_2D, mapTextureAndColor(_texture, color) }, _name }.p(
             ps).n(_name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -597,22 +597,19 @@ Renderer::drawDotCircled( float dotSize, const V3f& centrePoint, const V3f& norm
 
     C4f outerDotColor = _dotColor.A(finalAlphaValue);
     auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(2) << finalAlphaValue;
-    std::string nameTag = _dotColor.toString() + stream.str();
 
     ret.emplace_back(draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, centrePoint,
                                          V4f::WHITE.A(finalAlphaValue),
                                          dotSize + outerDotSize * outerDotBorderRatio, sm3,
                                          RDSRotationNormalAxis{ normal },
-                                         RDSArchSegments{ 36 }, _name + "d1" + nameTag));
+                                         RDSArchSegments{ 36 }, _name + "d1"));
     ret.emplace_back(draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, centrePoint, outerDotColor,
                                          dotSize, sm3, RDSRotationNormalAxis{ normal }, RDSArchSegments{ 36 },
-                                         _name + "d2" + nameTag));
+                                         _name + "d2"));
     ret.emplace_back(draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, centrePoint,
                                          V4f::WHITE.A(finalAlphaValue),
                                          dotSize * smallDotRatio, sm3, RDSRotationNormalAxis{ normal },
-                                         RDSArchSegments{ 36 }, _name + "d3" + nameTag));
+                                         RDSArchSegments{ 36 }, _name + "d3"));
     return ret;
 }
 
@@ -642,7 +639,7 @@ VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector2f>& v
     colorStrip->addStripVertex(Vector3f{ verts[2], _z });
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -656,7 +653,7 @@ VPListSP Renderer::drawTriangle( int bucketIndex, const std::vector<Vector3f>& v
     colorStrip->addStripVertex(verts[2]);
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -673,7 +670,7 @@ VPListSP Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& 
     }
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -690,7 +687,7 @@ VPListSP Renderer::drawTriangleStrip( int bucketIndex, const std::vector<Vector3
     }
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -709,7 +706,7 @@ VPListSP Renderer::drawTriangleQuad( int bucketIndex, const std::vector<Vector3f
 
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -735,7 +732,7 @@ Renderer::drawTriangles( int bucketIndex, const std::vector<Vector3f>& verts, co
 
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(colorStrip).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -812,7 +809,7 @@ VPListSP Renderer::drawArcFilled( int bucketIndex, const Vector3f& center, float
 
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -835,7 +832,7 @@ VPListSP Renderer::drawDot( int bucketIndex, const Vector3f& center, float radiu
 
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -861,7 +858,7 @@ Renderer::drawCircle( int bucketIndex, const Vector3f& center, float radius, con
 
     auto vp = VPBuilder<Pos3dStrip>{ *this, ShaderMaterial{ S::COLOR_3D, mapColor(color) }, _name }.p(ps).n(
             _name).build();
-    VPL(bucketIndex, vp);
+    VPL(bucketIndex, vp );
     return vp;
 }
 
@@ -959,6 +956,6 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
             p(ps).t(rds.matrix).n(rds.fds.text + rds.name).
             build();
 
-    VPL(rds.bucketIndex, vp);
+    VPL(rds.bucketIndex, vp );
     return vp;
 }

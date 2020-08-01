@@ -15,16 +15,24 @@ std::shared_ptr<RenderMaterial> RenderMaterialManager::addRenderMaterial( const 
 
 std::shared_ptr<RenderMaterial> RenderMaterialManager::addRenderMaterial(
         const std::string& _type,
-        const StringUniqueCollection& _names) {
-    return addRenderMaterial( _type, nullptr, _names );
-}
-
-std::shared_ptr<RenderMaterial> RenderMaterialManager::addRenderMaterial(
-        const std::string& _type,
         std::shared_ptr<HeterogeneousMap> _values,
         const StringUniqueCollection& _names) {
 
     if ( auto mat = find(_names); mat ) return mat;
+
+    ShaderMaterial shaderMaterial{ _type, _values };
+    shaderMaterial.activate(rr);
+    auto rmaterial = std::make_shared<RenderMaterial>( shaderMaterial.P(), shaderMaterial.Values(), rr );
+
+    add( _names, rmaterial );
+
+    return rmaterial;
+}
+
+std::shared_ptr<RenderMaterial> RenderMaterialManager::upsertRenderMaterial(
+        const std::string& _type,
+        std::shared_ptr<HeterogeneousMap> _values,
+        const StringUniqueCollection& _names) {
 
     ShaderMaterial shaderMaterial{ _type, _values };
     shaderMaterial.activate(rr);

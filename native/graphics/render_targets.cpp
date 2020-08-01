@@ -172,7 +172,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     }
 }
 
-AABB bbox3dOfVPList( const std::vector<std::shared_ptr<VPList>> _map ) {
+AABB bbox3dOfVPList( VPListContainerCRef _map ) {
     AABB ret = AABB::MINVALID();
     for ( const auto& vp : _map ) {
         if ( !vp->isHidden() && vp->tag() != SHADOW_MAGIC_TAG ) {

@@ -296,10 +296,13 @@ void Renderer::showBucket( const int _bucket, bool visible ) {
 void Renderer::removeFromCL( const UUID& _uuid ) {
 
     auto removeUUID = [_uuid]( const auto& us ) -> bool { return us->UUiD() == _uuid; };
+//    auto removeUUID = []( const auto& us, const UUID& _uuid ) -> bool { return us->UUiD() == _uuid; };
 
-    for ( auto&[k, vl] : CL()) {
+    for ( auto& [k, vl] : CL()) {
         erase_if( vl.mVList, removeUUID );
         erase_if( vl.mVListTransparent, removeUUID );
+//        erase_if_iter( vl.mVList, removeUUID, _uuid );
+//        erase_if_iter( vl.mVListTransparent, removeUUID, _uuid );
     }
 }
 
@@ -310,9 +313,9 @@ size_t Renderer::renderCommands( int eye ) {
 
 void Renderer::VPL( const int _bucket, std::shared_ptr<VPList> nvp, float alpha ) {
     if ( alpha < 1.0f || nvp->transparencyValue() < 1.0f ) {
-        mCommandLists[_bucket].mVListTransparent.push_back( nvp );
+        mCommandLists[_bucket].mVListTransparent.emplace_back(nvp);
     } else {
-        mCommandLists[_bucket].mVList.push_back( nvp );
+        mCommandLists[_bucket].mVList.emplace_back(nvp);
     }
 //    mVPLMap.emplace( nvp->UUiD(), nvp );
 }
@@ -347,11 +350,19 @@ std::shared_ptr<RenderMaterial> Renderer::addMaterialResource( const ResourceTra
     return rmm->addRenderMaterial( _val.elem->Values()->Type(), _val.elem->Values(), _val.names );
 }
 
+std::shared_ptr<RenderMaterial> Renderer::upsertMaterialResource( const ShaderMaterial& _val, const std::string& _name ) {
+    return rmm->upsertRenderMaterial( _val.SN(), _val.Values(), { _name } );
+}
+
 std::shared_ptr<RenderMaterial> Renderer::getMaterial( const std::string& _key ) {
     return rmm->get( _key );
 }
 
 std::shared_ptr<GPUVData> Renderer::addVDataResource( cpuVBIB&& _val, const std::string& _name ) {
+    return gm->addGPUVData( std::move( _val ), { _name } );
+}
+
+std::shared_ptr<GPUVData> Renderer::upsertVDataResource( cpuVBIB&& _val, const std::string& _name ) {
     return gm->addGPUVData( std::move( _val ), { _name } );
 }
 
@@ -489,8 +500,8 @@ void Renderer::setVisibilityOnTags( uint64_t _tag, bool _visibility ) {
     invalidateOnAdd();
 }
 
-std::vector<std::shared_ptr<VPList>> Renderer::getVPListWithTags( uint64_t _tag ) {
-    std::vector<std::shared_ptr<VPList>> ret{};
+VPListFlatContainer Renderer::getVPListWithTags( uint64_t _tag ) {
+    VPListFlatContainer ret{};
     for ( const auto&[k, vl] : CL()) {
         if ( CommandBufferLimits::PBRStart <= k && CommandBufferLimits::PBREnd >= k ) {
             for ( const auto& v : vl.mVList ) {
@@ -547,7 +558,7 @@ void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {
     addToCommandBuffer( CL()[_entry].mVListTransparent );
 }
 
-void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _map,
+void Renderer::addToCommandBuffer( VPListContainerCRef _map,
                                    CameraRig *_cameraRig,
                                    std::shared_ptr<RenderMaterial> _forcedMaterial,
                                    Program *_forceProgram,
@@ -563,7 +574,7 @@ void Renderer::addToCommandBuffer( const std::vector<std::shared_ptr<VPList>> _m
         } else {
             addVP = vp->tag() != SHADOW_MAGIC_TAG;
         }
-        if ( addVP && vp->PvsIndex() == -1) {
+        if ( addVP && vp->PvsIndex() == -1 ) {
             CB_U().pushVP( vp, _forcedMaterial, nullptr, _forceProgram, _alphaDrawThreshold );
         }
     }
@@ -678,31 +689,40 @@ std::string DShaderMatrix::hash() const {
     return std::to_string(data);
 }
 
-std::vector<std::shared_ptr<VPList>> Renderer::CLI( uint64_t cli ) {
-    std::vector<std::shared_ptr<VPList>> ret;
-    std::copy (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret));
-    std::copy (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret));
+VPListFlatContainer Renderer::CLI( uint64_t cli ) {
+    VPListFlatContainer ret;
+    for ( const auto& v : mCommandLists[cli].mVList ) {
+        ret.emplace_back(v);
+    }
+    for ( const auto& v : mCommandLists[cli].mVListTransparent ) {
+        ret.emplace_back(v);
+    }
     return ret;
 }
 
-std::vector<std::shared_ptr<VPList>> Renderer::CLIExcludingTag( uint64_t cli, uint64_t excludingTag ) {
-    std::vector<std::shared_ptr<VPList>> ret;
+VPListFlatContainer Renderer::CLIWithPred( uint64_t cli, std::function<bool(const std::shared_ptr<VPList>&)> pred ) {
+    VPListFlatContainer ret;
+    for ( const auto& v : mCommandLists[cli].mVList ) {
+        if ( pred(v) ) ret.emplace_back(v);
+    }
+    for ( const auto& v : mCommandLists[cli].mVListTransparent ) {
+        if ( pred(v) ) ret.emplace_back(v);
+    }
+    return ret;
+}
+
+VPListFlatContainer Renderer::CLIExcludingTag( uint64_t cli, uint64_t excludingTag ) {
     auto pred = [excludingTag](const auto& elem) -> bool {
         return !checkBitWiseFlag( elem->tag(), excludingTag );
     };
-    std::copy_if (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret), pred);
-    std::copy_if (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret), pred);
-    return ret;
+    return CLIWithPred(cli, pred);
 }
 
-std::vector<std::shared_ptr<VPList>> Renderer::CLIIncludingTag( uint64_t cli, uint64_t _tag ) {
-    std::vector<std::shared_ptr<VPList>> ret;
+VPListFlatContainer Renderer::CLIIncludingTag( uint64_t cli, uint64_t _tag ) {
     auto pred = [_tag](const auto& elem) -> bool {
         return checkBitWiseFlag( elem->tag(), _tag );
     };
-    std::copy_if (mCommandLists[cli].mVList.begin(), mCommandLists[cli].mVList.end(), std::back_inserter(ret), pred);
-    std::copy_if (mCommandLists[cli].mVListTransparent.begin(), mCommandLists[cli].mVListTransparent.end(), std::back_inserter(ret), pred);
-    return ret;
+    return CLIWithPred(cli, pred);
 }
 
 float Renderer::ssaoBlendFactor() const {

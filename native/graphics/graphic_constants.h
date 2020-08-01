@@ -111,3 +111,9 @@ struct TextureUniformDesc {
     unsigned int slot;
     int 		 target;
 };
+
+class VPList;
+
+using VPListContainer = std::vector<std::shared_ptr<VPList>>;//std::unordered_map<std::string, std::shared_ptr<VPList>>;
+using VPListFlatContainer = std::vector<std::shared_ptr<VPList>>;
+using VPListContainerCRef = const VPListContainer&;

@@ -61,6 +61,17 @@ public:
                uuid );
     }
 
+    auto buildUpsert() {
+        return std::make_shared<VPList>(
+                rr.upsertVDataResource( cpuVBIB{ ps }, name ),
+                rr.upsertMaterialResource( shaderMaterial, name ),
+                transformMatrix,
+                bbox3d,
+                name,
+                tag,
+                uuid );
+    }
+
 private:
     Renderer& rr;
     uint64_t tag = GT_Generic;

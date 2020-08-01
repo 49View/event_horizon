@@ -4,12 +4,12 @@
 #include <core/math/anim.h>
 
 template <typename M>
-void parseFader( std::vector<std::shared_ptr<VPList>>& vp, AnimEndCallback& aec, const M& _param ) {
+void parseFader( VPListFlatContainer& vp, AnimEndCallback& aec, const M& _param ) {
 
     if constexpr ( std::is_same_v<M, std::shared_ptr<VPList>> ) {
         if ( _param ) vp.emplace_back( _param );
     }
-    if constexpr ( std::is_same_v<M, std::vector<std::shared_ptr<VPList>>> ) {
+    if constexpr ( std::is_same_v<M, VPListFlatContainer> ) {
         std::copy (_param.begin(), _param.end(), std::back_inserter(vp));
     }
     if constexpr ( std::is_same_v<M, AnimEndCallback> ) {
@@ -21,7 +21,7 @@ void parseFader( std::vector<std::shared_ptr<VPList>>& vp, AnimEndCallback& aec,
 template<typename ...Args>
 void fader( float _duration, float _value, Args&& ...args ) {
 
-    std::vector<std::shared_ptr<VPList>> vplists{};
+    VPListFlatContainer vplists{};
     AnimEndCallback aec{};
 
     ( parseFader( vplists, aec, std::forward<Args>(args)),... );

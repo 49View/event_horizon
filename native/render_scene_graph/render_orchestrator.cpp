@@ -131,7 +131,7 @@ void RenderOrchestrator::updateCallbacks() {
 }
 
 template<typename T>
-void setMatProperty( std::vector<std::shared_ptr<VPList>>& vList, std::shared_ptr<RenderMaterial> mat,
+void setMatProperty( VPListContainer& vList, std::shared_ptr<RenderMaterial> mat,
                      const std::string& _uniform, const T& _value ) {
     for ( const auto& v : vList ) {
         if ( v->getMaterial() == mat ) v->getMaterial()->setConstant(_uniform, _value);
@@ -140,7 +140,7 @@ void setMatProperty( std::vector<std::shared_ptr<VPList>>& vList, std::shared_pt
 
 template<typename F, typename T, typename ...Args>
 void foreachCL( CommandBufferListVectorMap& CL, F func, const T& _value, Args ...args ) {
-    for ( auto&[k, vl] : CL ) {
+    for ( auto& [k, vl] : CL ) {
         vl.foreach(func, std::forward<Args>(args)..., _value);
     }
 }
@@ -226,7 +226,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
                     t(_geom->getLocalHierTransform()).
                     b(_geom->BBox3d()).
                     build();
-            this->RR().VPL(CommandBufferLimits::PBRStart, vp);
+            this->RR().VPL(CommandBufferLimits::PBRStart, vp );
         }
         this->RR().invalidateOnAdd();
     });
