@@ -105,6 +105,15 @@ struct RendererDrawingSet {
     bool usePreMult = false;
 };
 
+struct RDSPrimitive {
+    template<typename ...Args>
+    explicit RDSPrimitive( Args&& ... args ) : data(std::forward<Args>(args)...) {}
+    Primitive operator()() const noexcept {
+        return data;
+    }
+    Primitive data = PRIMITIVE_TRIANGLE_STRIP;
+};
+
 struct RDSPreMult {
     template<typename ...Args>
     explicit RDSPreMult( Args&& ... args ) : data(std::forward<Args>(args)...) {}
@@ -459,6 +468,10 @@ public:
         }
         if constexpr ( std::is_same_v<M, FDS> ) {
             rds.fds = _param;
+            return;
+        }
+        if constexpr ( std::is_same_v<M, RDSPrimitive> ) {
+            rds.prim = _param();
             return;
         }
         if constexpr ( std::is_same_v<M, RDSImage> ) {

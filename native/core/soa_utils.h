@@ -68,6 +68,19 @@ enum class VFAttribTypes {
     Float
 };
 
+static inline V3fVector stripifyVertsLine( const V3fVector& vList ) {
+    if ( vList.size() < 3 ) return { };
+    if ( vList.size() == 3 ) return vList;
+
+    V3fVector ret{ vList[0], vList[vList.size()-1], vList[1] };
+
+    for ( auto t = 2u; t < vList.size()-1; t++ ) {
+        ret.emplace_back(vList[t]);
+    }
+    return ret;
+}
+
+
 template<typename P>
 struct VFA1 {
     P pos;

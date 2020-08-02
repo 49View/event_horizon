@@ -117,8 +117,7 @@ auto addVertexStripsTMAutoMapping( Renderer& _rr, const std::vector<T>& verts, c
     }
 
     auto vp = VPBuilder<TS>{ _rr, ShaderMaterial{ rds.shaderName, mapTextureAndColor(rds.textureRef, rds.color) },
-                             rds.name }.
-            t(rds.matrix).p(ps).n(rds.name).build();
+                             rds.name }.t(rds.matrix).p(ps).n(rds.name).build();
     _rr.VPL(rds.bucketIndex, vp );
     return vp;
 }
