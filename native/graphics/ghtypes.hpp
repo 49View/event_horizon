@@ -32,6 +32,7 @@ namespace CommandBufferLimits {
     const static int CoreStart =         0;
     const static int CoreEnd =         999;
     const static int UnsortedStart =  1000;
+    const static int UnsortedCustom = 1499;
     const static int UnsortedEnd =    1999;
     const static int UIStart   =      2000;
     const static int UIEnd     =      9999;

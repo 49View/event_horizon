@@ -79,7 +79,7 @@ public:
 
     void init( const CLIParamMap& params ) {
         InitializeWindowFlagsT initFlags = checkLayoutArgvs( params );
-        WH::initializeWindow( initFlags, rr );
+        WH::initializeWindow( params.getParam("title"), initFlags, rr );
         rr.init();
         rlbackEnd->activate(params);
         //	mi.subscribe( pm );

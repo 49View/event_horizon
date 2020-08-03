@@ -32,7 +32,7 @@ namespace WindowHandling {
         return Vector2i{ static_cast<int>(width * pixelRatio), static_cast<int>(height * pixelRatio) };
     }
 
-    void initializeWindow( [[maybe_unused]] uint64_t flags, Renderer& rr ) {
+    void initializeWindow( [[maybe_unused]] std::optional<std::string> title, [[maybe_unused]] uint64_t flags, Renderer& rr ) {
 
         LOGRS("EH version " << ehVersion() )
 

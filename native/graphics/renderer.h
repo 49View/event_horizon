@@ -293,6 +293,7 @@ public:
 
     inline CommandBufferList& CB_U() { return *mCommandBuffers; }
     inline CommandBufferListVectorMap& CL() { return mCommandLists; }
+    void CLI( uint64_t cli, std::function<void(const std::shared_ptr<VPList>&)> func );
     VPListFlatContainer CLI( uint64_t cli );
     VPListFlatContainer CLIWithPred( uint64_t cli, std::function<bool(const std::shared_ptr<VPList>&)> );
     VPListFlatContainer CLIExcludingTag( uint64_t cli, uint64_t excludingTag );

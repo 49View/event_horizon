@@ -148,7 +148,7 @@ void Renderer::init() {
     sm->loadShaders();
 //    tm->addTextureWithData(RawImage{54, 54, V4f::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
     tm->addTextureRef( FBNames::lightmap );
-    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 2048 ).depthOnly().build();
+    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 4096 ).depthOnly().build();
     mDepthFB = FrameBufferBuilder{ *this, FBNames::depthmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).format(PIXEL_FORMAT_HDR_R16).build();
 
     auto trd = ImageParams{}.setSize( 32 ).format( pixelFormatResolver( PIXEL_FORMAT_HDR_RGBA_16, Framebuffer::isHDRSupported()) ).setWrapMode( WRAP_MODE_CLAMP_TO_EDGE );
@@ -688,6 +688,15 @@ bool DShaderMatrix::hasTexture() const {
 
 std::string DShaderMatrix::hash() const {
     return std::to_string(data);
+}
+
+void Renderer::CLI( uint64_t cli, std::function<void(const std::shared_ptr<VPList>&)> func ) {
+    for ( const auto& v : mCommandLists[cli].mVList ) {
+        func(v);
+    }
+    for ( const auto& v : mCommandLists[cli].mVListTransparent ) {
+        func(v);
+    }
 }
 
 VPListFlatContainer Renderer::CLI( uint64_t cli ) {

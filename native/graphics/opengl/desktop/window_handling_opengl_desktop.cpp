@@ -16,7 +16,7 @@ namespace WindowHandling {
 //        glfwSetWindowSize( window, _newSize.x(), _newSize.y() );
     }
 
-    void initializeWindow( uint64_t flags, Renderer& rr ) {
+    void initializeWindow( std::optional<std::string> title, uint64_t flags, Renderer& rr ) {
         LOGR( "--- Initialising Graphics ---" );
 
         glfwWindowHint( GLFW_SRGB_CAPABLE, GLFW_TRUE );
@@ -27,6 +27,8 @@ namespace WindowHandling {
         }
         initGraphics();
 
+        std::string wTitle = title ? *title : "Event Horizon";
+
         const GLFWvidmode *mode = glfwGetVideoMode( glfwGetPrimaryMonitor());
         if ( flags & InitializeWindowFlags::FullScreen ) {
             glfwWindowHint( GLFW_RED_BITS, mode->redBits );
@@ -34,7 +36,7 @@ namespace WindowHandling {
             glfwWindowHint( GLFW_BLUE_BITS, mode->blueBits );
             glfwWindowHint( GLFW_REFRESH_RATE, 90 );// mode->refreshRate
             glfwSwapInterval( 1 );
-            window = glfwCreateWindow( mode->width, mode->height, "Event Horizon", glfwGetPrimaryMonitor(), NULL );
+            window = glfwCreateWindow( mode->width, mode->height, wTitle.c_str(), glfwGetPrimaryMonitor(), NULL );
             AppGlobals::getInstance().setWindowSize(V2f{mode->width, mode->height});
         } else {
             glfwWindowHint( GLFW_REFRESH_RATE, 90 );// mode->refreshRate
@@ -45,7 +47,7 @@ namespace WindowHandling {
             float ys = mode->height / scaleFactor;
             xs = 3200;
             ys = 1800;
-            window = glfwCreateWindow( static_cast<int>(xs), static_cast<int>(ys), "Event Horizon", NULL, NULL );
+            window = glfwCreateWindow( static_cast<int>(xs), static_cast<int>(ys), wTitle.c_str(), NULL, NULL );
             glfwSetWindowSize( window, static_cast<int>(xs), static_cast<int>(ys));
             AppGlobals::getInstance().setWindowSize(V2f{xs,ys});
         }

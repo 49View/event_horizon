@@ -6,6 +6,8 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
+#include <string>
 
 class TextInput;
 class MouseInput;
@@ -14,7 +16,7 @@ class RenderStats;
 class Vector2i;
 
 namespace WindowHandling {
-	void initializeWindow( uint64_t flags, Renderer& rr );
+	void initializeWindow( std::optional<std::string> title, uint64_t flags, Renderer& rr );
 	void reinitializeWindowWithSize( int width, int height );
 	bool shouldWindowBeClosed();
 	void flush();
