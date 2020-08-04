@@ -44,13 +44,19 @@ inline void RenderOrchestrator::resizeCallbacks() {
 //    LOGR("Resizing window: [%d,%d]", ResizeData::callbackResizeFrameBuffer.x(), ResizeData::callbackResizeFrameBuffer.y() );
     if (!(ResizeData::callbackResizeFrameBuffer == getScreenSizei) &&
             (ResizeData::callbackResizeFrameBuffer != ResizeData::callbackResizeFrameBufferOld) ) {
-        LOGR("Resizing window: [%d,%d]", ResizeData::callbackResizeFrameBuffer.x(), ResizeData::callbackResizeFrameBuffer.y() );
-        WH::resizeWindow( ResizeData::callbackResizeFrameBuffer );
-        WH::gatherMainScreenInfo();
-        rr.resetDefaultFB(ResizeData::callbackResizeFrameBuffer);
-        resizeCallback( ResizeData::callbackResizeFrameBuffer );
-        AppGlobals::getInstance().setScreenSizei( ResizeData::callbackResizeFrameBuffer );
-        ResizeData::callbackResizeFrameBufferOld = ResizeData::callbackResizeFrameBuffer;
+        // Check if it's the first frame, when ResizeData::callbackResizeFrameBufferOld == 0, in that case, just set
+        // the Old to the current framebuffer size
+        if ( ResizeData::callbackResizeFrameBufferOld.x() == 0 ) {
+            ResizeData::callbackResizeFrameBufferOld = ResizeData::callbackResizeFrameBuffer;
+        } else {
+            LOGR("Resizing window: [%d,%d]", ResizeData::callbackResizeFrameBuffer.x(), ResizeData::callbackResizeFrameBuffer.y() );
+            WH::resizeWindow( ResizeData::callbackResizeFrameBuffer );
+            WH::gatherMainScreenInfo();
+            rr.resetDefaultFB(ResizeData::callbackResizeFrameBuffer);
+            resizeCallback( ResizeData::callbackResizeFrameBuffer );
+            AppGlobals::getInstance().setScreenSizei( ResizeData::callbackResizeFrameBuffer );
+            ResizeData::callbackResizeFrameBufferOld = ResizeData::callbackResizeFrameBuffer;
+        }
     }
 #endif
 }
