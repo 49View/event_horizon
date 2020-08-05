@@ -43,8 +43,8 @@ std::shared_ptr<Framebuffer> RLTargetPlain::getFrameBuffer( CommandBufferFrameBu
         case CommandBufferFrameBufferType::finalBlit:
             if ( mComposite->blitOnScreen() )
                 return rr.getDefaultFB();
-            else
-                return mComposite->getOffScreenFB();
+//            else
+//                return mComposite->getOffScreenFB();
         default:
             ASSERT(0);
     }
@@ -105,8 +105,8 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
         case CommandBufferFrameBufferType::finalBlit:
             if ( mComposite->blitOnScreen() )
                 return rr.getDefaultFB();
-            else
-                return mComposite->getOffScreenFB();
+//            else
+//                return mComposite->getOffScreenFB();
         case CommandBufferFrameBufferType::screen:
             return rr.getDefaultFB();
         default:
@@ -337,9 +337,11 @@ void CompositePlain::setup( const Rect2f& _destViewport ) {
     auto vsize = _destViewport.size();
     mColorFB = FrameBufferBuilder{ rr, "plainFrameBuffer" }.size(vsize).build();
     if ( mCompositeFinalDest == BlitType::OffScreen ) {
-        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer" }.size(vsize).noDepth().
-                dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).
-                IM(S::FINAL_COMBINE).build();
+        // What is this?
+        LOGRS("What is this?")
+//        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer" }.size(vsize).noDepth().
+//                dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).
+//                IM(S::FINAL_COMBINE).build();
     }
 }
 
@@ -371,10 +373,10 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
             dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).
             IM(S::FINAL_COMBINE).build();
 
-    mOffScreenBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer }.size(vsize).noDepth()
-            .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).build();
+//    mOffScreenBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer }.size(vsize).noDepth()
+//            .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).build();
 
-    float ssaoScaling = 1.0f;
+    float ssaoScaling = 2.0f;
     auto ssaoSize = vsize * ssaoScaling;
     mNormalFB = FrameBufferBuilder{ rr, FBNames::normalmap }.size(ssaoSize).format(PIXEL_FORMAT_RGBA).build();
 

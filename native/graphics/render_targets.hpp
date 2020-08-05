@@ -76,9 +76,9 @@ public:
         return mColorFB;
     }
 
-    const std::shared_ptr<Framebuffer>& getOffScreenFB() const {
-        return mOffScreenBlitFB;
-    }
+//    const std::shared_ptr<Framebuffer>& getOffScreenFB() const {
+//        return mOffScreenBlitFB;
+//    }
 
     void setColorFB( const std::shared_ptr<Framebuffer>& _ColorFB ) {
         mColorFB = _ColorFB;
@@ -95,7 +95,7 @@ protected:
     std::shared_ptr<Framebuffer> mUIFB;
     std::shared_ptr<Framebuffer> mUIBlitFB;
 #endif
-    std::shared_ptr<Framebuffer> mOffScreenBlitFB;
+//    std::shared_ptr<Framebuffer> mOffScreenBlitFB;
     BlitType mCompositeFinalDest = BlitType::OnScreen;
 };
 
