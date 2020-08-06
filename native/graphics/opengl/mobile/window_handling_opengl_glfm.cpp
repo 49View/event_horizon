@@ -6,7 +6,7 @@
 
 namespace WindowHandling {
 
-    void initializeWindow( [[maybe_unused]] std::optional<std::string> title, [[maybe_unused]] uint64_t flags, Renderer& rr ) {
+    void initializeWindow( [[maybe_unused]] std::optional<std::string> title, [[maybe_unused]] std::optional<std::string> _width, [[maybe_unused]] std::optional<std::string> _height, [[maybe_unused]] uint64_t flags, Renderer& rr ) {
     }
 
     bool shouldWindowBeClosed() {

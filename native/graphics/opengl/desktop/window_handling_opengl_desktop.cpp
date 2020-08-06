@@ -10,17 +10,22 @@
 
 namespace WindowHandling {
 
+    constexpr int titleBarHeight() {
+        return 34;
+    }
+
     void resizeWindow( const Vector2i& _newSize ) {
         // we do not need to call this as we have the callback active in native/desktop.
         // (we do it in emscripten because it's weird!) :/
 //        glfwSetWindowSize( window, _newSize.x(), _newSize.y() );
     }
 
-    void initializeWindow( std::optional<std::string> title, uint64_t flags, Renderer& rr ) {
+    void initializeWindow( std::optional<std::string> title, [[maybe_unused]] std::optional<std::string> _width, [[maybe_unused]] std::optional<std::string> _height, uint64_t flags, Renderer& rr ) {
         LOGR( "--- Initialising Graphics ---" );
 
         glfwWindowHint( GLFW_SRGB_CAPABLE, GLFW_TRUE );
         glfwWindowHint( GLFW_SAMPLES, getMultiSampleCount() );
+        glfwWindowHint(GLFW_DECORATED, 1);
 
         if ( !glfwInit() ) {
             LOGE( "Could not start GLFW3" );
@@ -30,27 +35,30 @@ namespace WindowHandling {
         std::string wTitle = title ? *title : "Event Horizon";
 
         const GLFWvidmode *mode = glfwGetVideoMode( glfwGetPrimaryMonitor());
-        if ( flags & InitializeWindowFlags::FullScreen ) {
+        auto xs = mode->width;
+        auto ys = mode->height;
+        if ( checkBitWiseFlag( flags, InitializeWindowFlags::FullScreen ) ) {
             glfwWindowHint( GLFW_RED_BITS, mode->redBits );
             glfwWindowHint( GLFW_GREEN_BITS, mode->greenBits );
             glfwWindowHint( GLFW_BLUE_BITS, mode->blueBits );
             glfwWindowHint( GLFW_REFRESH_RATE, 90 );// mode->refreshRate
             glfwSwapInterval( 1 );
-            window = glfwCreateWindow( mode->width, mode->height, wTitle.c_str(), glfwGetPrimaryMonitor(), NULL );
-            AppGlobals::getInstance().setWindowSize(V2f{mode->width, mode->height});
+            window = glfwCreateWindow( xs, ys, wTitle.c_str(), glfwGetPrimaryMonitor(), nullptr );
         } else {
-            glfwWindowHint( GLFW_REFRESH_RATE, 90 );// mode->refreshRate
-            float scaleFactor = 1.0f;
-            if ( checkBitWiseFlag( flags, InitializeWindowFlags::HalfSize )) scaleFactor = 2.0f;
-            if ( checkBitWiseFlag( flags, InitializeWindowFlags::ThreeQuarter )) scaleFactor = 1.5f;
-            float xs = mode->width / scaleFactor;
-            float ys = mode->height / scaleFactor;
-            xs = 3200;
-            ys = 1800;
-            window = glfwCreateWindow( static_cast<int>(xs), static_cast<int>(ys), wTitle.c_str(), NULL, NULL );
-            glfwSetWindowSize( window, static_cast<int>(xs), static_cast<int>(ys));
-            AppGlobals::getInstance().setWindowSize(V2f{xs,ys});
+            glfwWindowHint( GLFW_REFRESH_RATE, 60 );// mode->refreshRate
+            if ( !_width || !_height ) {
+                float scaleFactor = 1.0f;
+                if ( checkBitWiseFlag( flags, InitializeWindowFlags::HalfSize )) scaleFactor = 2.0f;
+                if ( checkBitWiseFlag( flags, InitializeWindowFlags::ThreeQuarter )) scaleFactor = 1.5f;
+                xs /= scaleFactor;
+                ys /= scaleFactor;
+            } else {
+                xs = std::atoi(_width->c_str());
+                ys = std::atoi(_height->c_str());
+            }
+            window = glfwCreateWindow( static_cast<int>(xs), static_cast<int>(ys), wTitle.c_str(), nullptr, nullptr );
         }
+        AppGlobals::getInstance().setWindowSize(V2f{xs,ys});
         glfwSwapInterval( -1 );
 
         if ( flags & InitializeWindowFlags::Minimize )
@@ -67,7 +75,6 @@ namespace WindowHandling {
         }
 
         glfwMakeContextCurrent( window );
-        //	glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 
         initGraphicsExtensions();
 

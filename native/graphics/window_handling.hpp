@@ -16,7 +16,7 @@ class RenderStats;
 class Vector2i;
 
 namespace WindowHandling {
-	void initializeWindow( std::optional<std::string> title, uint64_t flags, Renderer& rr );
+	void initializeWindow( std::optional<std::string> title, std::optional<std::string> _width, std::optional<std::string> _height, uint64_t flags, Renderer& rr );
 	void reinitializeWindowWithSize( int width, int height );
 	bool shouldWindowBeClosed();
 	void flush();
