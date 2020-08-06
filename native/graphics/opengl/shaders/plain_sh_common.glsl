@@ -270,19 +270,19 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         // visibility += texture( shadowMapTexture, shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
         // if ( shadowmap_coord3Biases.z > 0.0 ) {
-        if ( nlAngle > 0.1 ) {
+        if ( nlAngle > 0.3 ) {
             shadowmap_coord3Biases = clamp( shadowmap_coord3Biases, vec3(0.0), vec3(1.0) );
             shadowmap_coord3Biases.z -= u_shadowParameters[0]+0.00024;
             // float overBurnedfactor = 0.2;// * u_shadowParameters[1];
-            // for ( int i = 0; i < 1; i++ ) {
-            //     int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
-            //     float shadow = texture( shadowMapTexture, vec3( shadowmap_coord3Biases.xy + (poissonDisk[index] / 4096.0), shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
-            //     shadow = shadow < shadowmap_coord3Biases.z ? 1.0 : 0.0;
-            //     visibility -= shadow * 0.78;// * u_timeOfTheDay;
-            // }
-            float shadow = texture( shadowMapTexture, vec3( shadowmap_coord3Biases.xy, shadowmap_coord3Biases.z ) );
-            shadow = shadow < shadowmap_coord3Biases.z ? 1.0 * 0.78 : 0.0;
-            visibility -=  shadow;
+            for ( int i = 0; i < 4; i++ ) {
+                int index = i;//int( 4.0*random( gl_FragCoord.xyyx ) ) % 4;        
+                float shadow = texture( shadowMapTexture, vec3( shadowmap_coord3Biases.xy + (poissonDisk[index] / 2048.0), shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
+                shadow = shadow < shadowmap_coord3Biases.z ? 1.0 : 0.0;
+                visibility -= shadow * 0.195;// * u_timeOfTheDay;
+            }
+            // float shadow = texture( shadowMapTexture, vec3( shadowmap_coord3Biases.xy, shadowmap_coord3Biases.z ) );
+            // shadow = shadow < shadowmap_coord3Biases.z ? 1.0 * 0.78 : 0.0;
+            // visibility -=  shadow;
         } else {
             visibility -= 0.78;
         }
