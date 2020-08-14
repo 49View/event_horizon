@@ -1,42 +1,22 @@
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <syslog.h>
 #include <cmath>
-
-#define TINYGLTF_IMPLEMENTATION
-#define TINY_DNG_LOADER_IMPLEMENTATION
-
-#include <iostream>
-#include <tinygltf/include/tiny_dng_loader.h>
-#include <tinygltf/include/tiny_gltf.h>
-// #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 
 #include <core/http/webclient.h>
 #include <core/util.h>
 #include <core/file_manager.h>
-#include <core/runloop_core.h>
-#include <core/tar_util.h>
-#include <core/zlib_util.h>
 #include <core/names.hpp>
 #include <core/descriptors/archives.h>
-#include <core/resources/publisher.hpp>
 #include <core/resources/material.h>
-#include <core/resources/resource_utils.hpp>
 #include <core/descriptors/uniform_names.h>
-#include <core/resources/resource_builder.hpp>
-#include <core/resources/resource_pipe.hpp>
-#include <core/resources/publisher.hpp>
 #include <core/descriptors/gltf2utils.h>
 
 #include <database/nosql/mongo/mongo.hpp>
 
-#include <stb/stb_image.h>
 #include <stb/stb_image_resize.h>
 #include <core/image_util.h>
 #include <core/string_util.h>
-#include <core/profiler.h>
 #include <ostream>
 #include <utility>
 #include <filesystem>
@@ -48,9 +28,9 @@
 // mongod --port 27017 --replSet rs0 --dbpath ~/Documents/mongodata
 // sudo /usr/local/etc/nginx
 // sudo brew services restart nginx
-// /usr/loca/var/log/nginx/ tail -f aacess.log
+// /usr/local/var/log/nginx/ tail -f access.log
 
-void initDeamon() {
+[[maybe_unused]] void initDeamon() {
     /* Our process ID and Session ID */
     pid_t pid, sid;
 
@@ -98,9 +78,9 @@ struct DaemonFileStruct {
 };
 
 struct EntityMeta {
-    EntityMeta( const std::string& name, const std::string& source, const std::string& group,
-                const std::string& project, const MongoObjectId& userId ) : name(name), source(source), group(group),
-                                                                            project(project), userId(userId) {}
+    EntityMeta( std::string  name, std::string  source, std::string  group,
+                std::string  project, MongoObjectId  userId ) : name(std::move(name)), source(std::move(source)), group(std::move(group)),
+                                                                            project(std::move(project)), userId(std::move(userId)) {}
     std::string name;
     std::string source;
     std::string group;
@@ -109,7 +89,8 @@ struct EntityMeta {
     std::string contentType;
     std::string hash;
     std::string thumb;
-    V3f bboxSize = V3f::ZERO;
+    AABB bbox3d{AABB::MINVALID()};
+    V3f bboxSize{V3f::ZERO};
     bool isPublic = true;
     bool isRestricted = false;
 };
@@ -125,19 +106,19 @@ struct DaemonFileStruct2 {
     EntityMeta entity;
     std::vector<ArchiveDirectoryEntityElement> candidates{};
 
-    std::string filePath() {
+    [[nodiscard]] std::string filePath() const {
         return fileRoot + "entities/" + entity.group + "/";
     }
-    std::string uploadFilePath() {
+    [[nodiscard]] std::string uploadFilePath() const {
         return fileRoot + "uploads/" + entity.group + "/";
     }
 };
 
-class DaemonException : public std::exception {
+class [[maybe_unused]] DaemonException : public std::exception {
 public:
-    DaemonException( const std::string& msg ) : msg(msg) {}
+    [[maybe_unused]] explicit DaemonException( std::string  msg ) : msg(std::move(msg)) {}
 
-    virtual const char *what() const throw() {
+    [[nodiscard]] const char *what() const noexcept override {
         return msg.c_str();
     }
 
@@ -146,28 +127,28 @@ private:
 };
 
 static std::vector<std::string> getExtForGroup( const std::string& _group ) {
-    std::unordered_map<std::string, std::vector<std::string>> extmap;
+    std::unordered_map<std::string, std::vector<std::string>> extMap;
 
-    extmap[ResourceGroup::Geom] = { ".fbx", ".glb", ".gltf", ".obj" };
-    extmap[ResourceGroup::Material] = { ".sbsar", ".png", ".jpg" };
+    extMap[ResourceGroup::Geom] = { ".fbx", ".glb", ".gltf", ".obj" };
+    extMap[ResourceGroup::Material] = { ".sbsar", ".png", ".jpg" };
 
-    if ( auto it = extmap.find(_group); it != extmap.end() ) {
+    if ( auto it = extMap.find(_group); it != extMap.end() ) {
         return it->second;
     }
     return {};
 }
 
 void daemonExceptionLog( Mongo& mdb, const std::exception& e, const std::string& username = {} ) {
-    LOGRS(e.what());
+    LOGRS(e.what())
     mdb.insertDaemonCrashLog(e.what(), username);
     exit(1);
 }
 
 void daemonWarningLog( const std::string& e ) {
-    LOGRS(e);
+    LOGRS(e)
 }
 
-std::string getContentTypeFor( const DaemonFileStruct& dfs ) {
+[[maybe_unused]] std::string getContentTypeFor( const DaemonFileStruct& dfs ) {
     if ( dfs.group == ResourceGroup::Material ) {
         return HttpContentType::json;
     } else {
@@ -288,12 +269,13 @@ void generateThumbnail( DaemonFileStruct2& dfs ) {
 void elaboratePassThrough( DaemonFileStruct2& dfs, const SerializableContainer& filedata ) {
     dfs.entity.hash = Hashable<>::hashOf(filedata);
     if ( dfs.entity.group == ResourceGroup::Profile || dfs.entity.group == ResourceGroup::Font ||
-         dfs.entity.group == ResourceGroup::Image, dfs.entity.group == ResourceGroup::Material ) {
+         dfs.entity.group == ResourceGroup::Image || dfs.entity.group == ResourceGroup::Material ) {
         generateThumbnail(dfs);
     }
     dfs.entity.contentType = HttpContentType::octetStream;
     if ( dfs.entity.group == ResourceGroup::Geom ) {
-        dfs.entity.bboxSize = GLTF2Service::GLTFSize(dfs.entity.hash, "", filedata);
+        dfs.entity.bbox3d = GLTF2Service::GLTFBBox(dfs.entity.hash, "", filedata);
+        dfs.entity.bboxSize = dfs.entity.bbox3d.size();
     }
 
     auto filePath = dfs.filePath() + dfs.entity.hash;
@@ -363,7 +345,7 @@ ArchiveDirectory mapActiveDirectoryFilesToPBR( DaemonFileStruct2 dfs ) {
     return ad;
 }
 
-std::string elaborateInternalMaterial( const ArchiveDirectory& ad, int nominalSize, DaemonFileStruct2& dfs ) {
+std::string elaborateInternalMaterial( const ArchiveDirectory& ad, [[maybe_unused]] int nominalSize, DaemonFileStruct2& dfs ) {
 
     Material pbrmaterial{ S::SH, ad.Name() };
     for ( const auto& output : ad ) {
@@ -396,7 +378,6 @@ ArchiveDirectory elaborateMatSBSAR(
     auto outputPath = fileRoot + getFileNamePath(dfs.entity.source) + "/";
 
     std::string fn = getFileNameOnly(dfs.entity.source);
-    std::string fext = ".png";
 
     std::string sizeString = std::to_string(log2(size));
     std::string sbRender = "/opt/Allegorithmic/Substance_Automation_Toolkit/sbsrender render --inputs "
@@ -417,49 +398,49 @@ ArchiveDirectory elaborateMatSBSAR(
     return generateActiveDirectoryFromSBSARTempFiles(outputPath, fn);
 }
 
-int resaveGLB( const std::string& filename ) {
-    using namespace tinygltf;
-
-    Model model;
-    TinyGLTF loader;
-    std::string err;
-    std::string warn;
-
-    bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename.c_str());
-
-    if ( !warn.empty() || !err.empty() || !ret ) {
-        if ( !warn.empty() ) {
-            printf("Warn: %s\n", warn.c_str());
-        }
-        if ( !err.empty() ) {
-            printf("Err: %s\n", err.c_str());
-        }
-        if ( !ret ) {
-            printf("Failed to parse glTF\n");
-            return -1;
-        }
-    }
-
-    for ( auto& it : model.accessors ) {
-        if ( string_ends_with(it.name, "_positions") && it.componentType == 5126 && it.type == 3 ) {
-            auto buffView = model.bufferViews[it.bufferView];
-            if ( buffView.target == 34962 ) {
-                auto *buffer = &model.buffers[buffView.buffer];
-                auto *buffArray = buffer->data.data() + buffView.byteOffset + it.byteOffset;
-                V3f *buffV3f = reinterpret_cast<V3f *>(buffArray);
-                for ( size_t t = 0; t < it.count; t++ ) {
-                    buffV3f[t] *= 0.01f;
-                }
-            }
-            for ( auto& v : it.maxValues ) v *= 0.01f;
-            for ( auto& v : it.minValues ) v *= 0.01f;
-        }
-    }
-
-    loader.WriteGltfSceneToFile(&model, filename, true, true, true, true);
-
-    return 0;
-}
+//[[maybe_unused]] int resaveGLB( const std::string& filename ) {
+//    using namespace tinygltf;
+//
+//    Model model;
+//    TinyGLTF loader;
+//    std::string err;
+//    std::string warn;
+//
+//    bool ret = loader.LoadBinaryFromFile(&model, &err, &warn, filename);
+//
+//    if ( !warn.empty() || !err.empty() || !ret ) {
+//        if ( !warn.empty() ) {
+//            printf("Warn: %s\n", warn.c_str());
+//        }
+//        if ( !err.empty() ) {
+//            printf("Err: %s\n", err.c_str());
+//        }
+//        if ( !ret ) {
+//            printf("Failed to parse glTF\n");
+//            return -1;
+//        }
+//    }
+//
+//    for ( auto& it : model.accessors ) {
+//        if ( string_ends_with(it.name, "_positions") && it.componentType == 5126 && it.type == 3 ) {
+//            auto buffView = model.bufferViews[it.bufferView];
+//            if ( buffView.target == 34962 ) {
+//                auto *buffer = &model.buffers[buffView.buffer];
+//                auto *buffArray = buffer->data.data() + buffView.byteOffset + it.byteOffset;
+//                V3f *buffV3f = reinterpret_cast<V3f *>(buffArray);
+//                for ( size_t t = 0; t < it.count; t++ ) {
+//                    buffV3f[t] *= 0.01f;
+//                }
+//            }
+//            for ( auto& v : it.maxValues ) v *= 0.01f;
+//            for ( auto& v : it.minValues ) v *= 0.01f;
+//        }
+//    }
+//
+//    loader.WriteGltfSceneToFile(&model, filename, true, true, true, true);
+//
+//    return 0;
+//}
 
 std::string
 getGeomElaborateCommand( DaemonFileStruct2& dfs, const std::string& filenameglb, const std::string& ftype ) {
@@ -488,7 +469,7 @@ elaborateGeomFile( DaemonFileStruct2& dfs, const SerializableContainer& filedata
     auto ret = std::system(cmd.c_str());
     if ( ret != 0 ) {
         throw std::runtime_error(std::string{ ftype + " elaboration return code: " + std::to_string(ret) });
-    };
+    }
 
     return FM::readLocalFileC(filenameglb);
 }
@@ -540,7 +521,7 @@ SerializableContainer elaborateMaterial( DaemonFileStruct2& dfs, const Serializa
     auto ret = std::system(cmd.c_str());
     if ( ret != 0 ) {
         throw std::runtime_error(std::string{ "Tarring material elaboration return code: " + std::to_string(ret) });
-    };
+    }
 
     return FM::readLocalFileC(filePath + "/" + tarname);
 
@@ -560,7 +541,7 @@ SerializableContainer elaborateMaterial( DaemonFileStruct2& dfs, const Serializa
 //    std::system( cleanup.c_str());
 }
 
-void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveDirectory& ad ) {
+[[maybe_unused]] void findCandidatesScreenshotForThumbnail( DaemonFileStruct& dfs, const ArchiveDirectory& ad ) {
     if ( dfs.group == ResourceGroup::Geom ) {
         auto candidateScreenshot = ad.findFilesWithExtension({ ".jpg" });
         for ( const auto& elem : candidateScreenshot ) {
@@ -597,7 +578,7 @@ void elaborateAsset( DaemonFileStruct2& dfs, const std::string& assetName, const
     }
 }
 
-bool groupIsAchievable( const std::string& sourceName, strview group ) {
+[[maybe_unused]] bool groupIsAchievable( const std::string& sourceName, const strview& group ) {
     return group.to_string() == ResourceGroup::Material && isFileExtCompressedArchive(sourceName);
 }
 
@@ -611,7 +592,7 @@ void elaborateCandidates( DaemonFileStruct& dfs ) {
 //    }
 }
 
-uint64_t chooseMainArchiveFilename( const ArchiveDirectory& ad, DaemonFileStruct& dfs ) {
+[[maybe_unused]] uint64_t chooseMainArchiveFilename( const ArchiveDirectory& ad, DaemonFileStruct& dfs ) {
 
 //    findCandidatesScreenshotForThumbnail( dfs, ad );
 
@@ -647,21 +628,21 @@ void parseUploadStream( Mongo& mdb, mongocxx::change_stream& stream, const std::
     }
 }
 
-void updateGeomsBBox( Mongo& mdb, const std::string& fileRoot ) {
+[[maybe_unused]] void updateGeomsBBox( Mongo& mdb, const std::string& fileRoot ) {
     auto cursor = mdb.find("entities", std::vector<std::string>{ "group", ResourceGroup::Geom });
     for ( auto doc : cursor ) {
         auto filename = doc["hash"].get_utf8().value;
-        auto size = GLTF2Service::GLTFSize(std::string{ filename },
+        auto bbox3d = GLTF2Service::GLTFBBox(std::string{ filename },
                                            std::string{ fileRoot } + "entities/" + ResourceGroup::Geom + "/" +
                                            std::string{ filename }, {});
-        mdb.upsertBBox(doc, size);
-        LOGRS(size);
+        mdb.upsertBBox(doc, bbox3d);
+        LOGRS(bbox3d)
     }
 }
 
 int main( int argc, char **argv ) {
 
-    LOGRS("Daemon version 4.0.5");
+    LOGRS("Daemon version 4.1.0")
 
     auto *mongoPath = std::getenv("EH_MONGO_PATH");
     auto *mongoDefaultDB = std::getenv("EH_MONGO_DEFAULT_DB");
@@ -669,12 +650,14 @@ int main( int argc, char **argv ) {
     auto *fileRoot = std::getenv("EH_FILE_ROOT");
 
     if ( !mongoPath || !mongoDefaultDB || !mongoRs ) {
-        LOGRS("MongoDB Environment initialization variables not present.");
+        LOGRS("MongoDB Environment initialization variables not present.")
         return 1;
     }
 
     Mongo mdb{ { std::string(mongoPath), std::string(mongoDefaultDB), std::string(mongoRs) } };
     auto uploadStream = mdb["uploads"].watch();
+
+//    updateGeomsBBox( mdb, fileRoot );
 
     try {
         while ( true ) {

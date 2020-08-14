@@ -1,7 +1,3 @@
-#define TINYGLTF_IMPLEMENTATION
-#define TINY_DNG_LOADER_IMPLEMENTATION
-#define TINY_DNG_NO_EXCEPTION
-
 #include "gltf2.h"
 #include <iostream>
 #include <core/util.h>
@@ -349,5 +345,4 @@ namespace GLTF2Service {
 
         return rootScene->BBox3d()->isValid() ? rootScene : nullptr;
     }
-
 }

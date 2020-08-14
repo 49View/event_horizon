@@ -34,7 +34,7 @@ public:
             ssTranslate.oneMinusY();
             _m.setTranslation( ssTranslate );
         }
-        bbox3dT->set( bbox3d->gettransform( _m ) );
+        bbox3dT->set( bbox3d->getTransform( _m ) );
         return *bbox3dT;
     }
     inline const T* BBox3dPtr() const { return bbox3d.get(); }

@@ -25,7 +25,7 @@ public:
 
     mongocxx::gridfs::bucket operator()() { return bucket; }
 
-    void deleteAll();
+    [[maybe_unused]] void deleteAll();
 
 private:
     mongocxx::gridfs::bucket bucket;
@@ -87,7 +87,7 @@ public:
 
     mongocxx::result::gridfs::upload operator()() const { return value; }
 
-    std::string getStringId() const {
+    [[maybe_unused]] [[nodiscard]] std::string getStringId() const {
         auto lId = value.id();
         auto lId8 = lId.get_oid();
         auto lId8v = lId8.value;
@@ -98,8 +98,8 @@ private:
     mongocxx::result::gridfs::upload value;
 };
 
-struct StreamChangeMetadata {
-    explicit StreamChangeMetadata( bsoncxx::document::view change ) : id( change["fullDocument"]["_id"].get_value()) {
+struct [[maybe_unused]] StreamChangeMetadata {
+    [[maybe_unused]] explicit StreamChangeMetadata( bsoncxx::document::view change ) : id( change["fullDocument"]["_id"].get_value()) {
 
         auto doc = change["fullDocument"];
         auto metadata = doc["metadata"];
@@ -133,17 +133,17 @@ public:
 
     explicit Mongo( const DBConnection &_cs );
 
-    [[nodiscard]] MongoBucket useBucket( const std::string &_bucketName ) const;
+    [[maybe_unused]] [[nodiscard]] MongoBucket useBucket( const std::string &_bucketName ) const;
 
     MongoCollection operator[]( const std::string &_collName ) const;
 
-    static uint8_p
+    [[maybe_unused]] static uint8_p
     fileDownload( MongoBucket &bucket, const MongoObjectId &_id, std::function<void( uint8_p && )> callback = nullptr );
 
-    static std::string fileDownload( MongoBucket &bucket, const MongoObjectId &_id, const std::string &filename,
+    [[maybe_unused]] static std::string fileDownload( MongoBucket &bucket, const MongoObjectId &_id, const std::string &filename,
                                      std::function<void( const std::string & )> callback = nullptr );
 
-    static std::optional<uint8_p> fileDownloadWithId( MongoBucket &bucket, const std::string &_id );
+    [[maybe_unused]] static std::optional<uint8_p> fileDownloadWithId( MongoBucket &bucket, const std::string &_id );
 
     static MongoFileUpload fileUpload( MongoBucket &bucket, const std::string &filename,
                                        uint8_p &&buffer, MongoDocumentValue doc,
@@ -153,13 +153,13 @@ public:
                                        const SerializableContainer &buffer, MongoDocumentValue doc,
                                        std::function<void( const std::string & )> callback = nullptr );
 
-    static MongoDocumentValue
+    [[maybe_unused]] static MongoDocumentValue
     FSMetadata( const std::string &group, strview project, strview uname,
-                strview uemail,
+                strview uEmail,
                 const std::string &contentType,
                 const std::string &md5, const std::string &thumb, const ResourceDependencyDict &deps = {} );
 
-    std::string insertEntityFromAsset( const StreamChangeMetadata &meta );
+    [[maybe_unused]] std::string insertEntityFromAsset( const StreamChangeMetadata &meta );
 
     template<typename N>
     MongoObjectId upsertEntity( N &meta ) {
@@ -170,8 +170,8 @@ public:
 
         auto builder = bsoncxx::builder::basic::document{};
         builder.append( kvp( "$set",
-                             [&]( sub_document subdoc ) {
-                                 subdoc.append(
+                             [&]( sub_document subDoc ) {
+                                 subDoc.append(
                                          kvp( "group", meta.group ),
                                          kvp( "source", meta.source ),
                                          kvp( "name", meta.name ),
@@ -181,6 +181,14 @@ public:
                                          kvp( "contentType", meta.contentType ),
                                          kvp( "hash", meta.hash ),
                                          kvp( "userId", meta.userId()),
+                                         kvp( "bbox3d", [&]( sub_array sa ) {
+                                             sa.append( meta.bbox3d.minPoint()[0] );
+                                             sa.append( meta.bbox3d.minPoint()[1] );
+                                             sa.append( meta.bbox3d.minPoint()[2] );
+                                             sa.append( meta.bbox3d.maxPoint()[0] );
+                                             sa.append( meta.bbox3d.maxPoint()[1] );
+                                             sa.append( meta.bbox3d.maxPoint()[2] );
+                                         } ),
                                          kvp( "bboxSize", [&]( sub_array sa ) {
                                              sa.append( meta.bboxSize[0] );
                                              sa.append( meta.bboxSize[1] );
@@ -212,7 +220,7 @@ public:
     }
 
     template<typename N, typename M>
-    void upsertBBox( M doc, const N &bboxSize ) {
+    void upsertBBox( M doc, const N &bbox3d ) {
 
         using bsoncxx::builder::basic::kvp;
         using bsoncxx::builder::basic::sub_array;
@@ -220,12 +228,20 @@ public:
 
         auto builder = bsoncxx::builder::basic::document{};
         builder.append( kvp( "$set",
-                             [&]( sub_document subdoc ) {
-                                 subdoc.append(
+                             [&]( sub_document subDoc ) {
+                                 subDoc.append(
+                                         kvp( "bbox3d", [&]( sub_array sa ) {
+                                             sa.append( bbox3d.minPoint()[0] );
+                                             sa.append( bbox3d.minPoint()[1] );
+                                             sa.append( bbox3d.minPoint()[2] );
+                                             sa.append( bbox3d.maxPoint()[0] );
+                                             sa.append( bbox3d.maxPoint()[1] );
+                                             sa.append( bbox3d.maxPoint()[2] );
+                                         } ),
                                          kvp( "bboxSize", [&]( sub_array sa ) {
-                                             sa.append( bboxSize[0] );
-                                             sa.append( bboxSize[1] );
-                                             sa.append( bboxSize[2] );
+                                             sa.append( bbox3d.size()[0] );
+                                             sa.append( bbox3d.size()[1] );
+                                             sa.append( bbox3d.size()[2] );
                                          } ));
                              } ));
 
