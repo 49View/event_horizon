@@ -77,6 +77,7 @@ enum class PivotPointPosition {
 	TopCenter,
 	LeftCenter,
 	RightCenter,
+	FrontCenter,
 
 	BottomRight,
 	BottomLeft,
