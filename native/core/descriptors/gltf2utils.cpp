@@ -5,7 +5,7 @@
 #define TINYGLTF_IMPLEMENTATION
 #define TINY_DNG_LOADER_IMPLEMENTATION
 #include <iostream>
-#include <tinygltf/include/tiny_dng_loader.h>
+#include <core/descriptors/tiny_dng_loader.h>
 #include <tinygltf/include/tiny_gltf.h>
 
 #include "gltf2utils.h"
