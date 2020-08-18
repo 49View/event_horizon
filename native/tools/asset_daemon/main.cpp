@@ -2,6 +2,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <cmath>
+#include <iostream>
+
+#define TINYGLTF_IMPLEMENTATION
+#define TINY_DNG_LOADER_IMPLEMENTATION
+#include <tinygltf/include/tiny_dng_loader.h>
+#include <tinygltf/include/tiny_gltf.h>
 
 #include <core/http/webclient.h>
 #include <core/util.h>
