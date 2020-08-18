@@ -253,7 +253,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         this->createSkybox(SkyBoxInitParams{ SkyBoxMode::EquirectangularTexture, _hash });
     });
 
-    sg.nodeFullScreenImageConnect([this]( CResourceRef _node ) {
+    sg.nodeFullScreenImageConnect([]( CResourceRef _node ) {
 //        auto image = sg.TL(_node);
 //        V2f iar = image->getAspectRatioV();
 //        auto fit = getFullScreenAspectFit(iar.ratio());

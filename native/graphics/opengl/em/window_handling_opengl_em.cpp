@@ -1,9 +1,13 @@
 #include <iostream>
+
 #include <core/util.h>
 #include <core/version.hpp>
+#include <core/app_globals.h>
 
 #include "../../window_handling.hpp"
+#include <graphics/renderer.h>
 #include <graphics/opengl/GLFW/mouse_input_glfw.hpp>
+#include <graphics/opengl/framebuffer_opengl.h>
 
 namespace WindowHandling {
 

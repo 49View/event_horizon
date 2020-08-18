@@ -631,12 +631,14 @@ void parseUploadStream( Mongo& mdb, mongocxx::change_stream& stream, const std::
 [[maybe_unused]] void updateGeomsBBox( Mongo& mdb, const std::string& fileRoot ) {
     auto cursor = mdb.find("entities", std::vector<std::string>{ "group", ResourceGroup::Geom });
     for ( auto doc : cursor ) {
-        auto filename = doc["hash"].get_utf8().value;
-        auto bbox3d = GLTF2Service::GLTFBBox(std::string{ filename },
-                                           std::string{ fileRoot } + "entities/" + ResourceGroup::Geom + "/" +
-                                           std::string{ filename }, {});
-        mdb.upsertBBox(doc, bbox3d);
-        LOGRS(bbox3d)
+        if ( doc["bbox3d"].length() == 0 ) {
+            auto filename = doc["hash"].get_utf8().value;
+            auto bbox3d = GLTF2Service::GLTFBBox(std::string{ filename },
+                                                 std::string{ fileRoot } + "entities/" + ResourceGroup::Geom + "/" +
+                                                 std::string{ filename }, {});
+            mdb.upsertBBox(doc, bbox3d);
+//            LOGRS(bbox3d)
+        }
     }
 }
 
@@ -657,7 +659,7 @@ int main( int argc, char **argv ) {
     Mongo mdb{ { std::string(mongoPath), std::string(mongoDefaultDB), std::string(mongoRs) } };
     auto uploadStream = mdb["uploads"].watch();
 
-//    updateGeomsBBox( mdb, fileRoot );
+    updateGeomsBBox( mdb, fileRoot );
 
     try {
         while ( true ) {
