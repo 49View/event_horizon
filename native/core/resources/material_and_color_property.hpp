@@ -11,7 +11,7 @@ JSONDATA(MaterialAndColorProperty, materialName, materialHash, colorName, colorH
                                                                                     color(color) {
         materialName = materialHash;
     }
-    MaterialAndColorProperty( const char *materialHash ) : materialHash(materialHash) {
+    explicit MaterialAndColorProperty( const char *materialHash ) : materialHash(materialHash) {
         materialName = materialHash;
     }
     std::string materialName{};
