@@ -29,20 +29,28 @@ public:
         }
     }
 
-    void undo() {
+    bool undo() {
         if ( stackPointer > 0 ) {
             auto ptr = mementos[--stackPointer];
             current =  ptr ? std::make_shared<T>(ptr->serialize()) : nullptr;
+            return true;
         }
+        return false;
     }
 
-    void redo() {
+    bool redo() {
         if ( stackPointer+1 != static_cast<int>( mementos.size() ) ) {
             current = std::make_shared<T>(mementos[++stackPointer]->serialize());
+            return true;
         }
+        return false;
     }
 
     std::shared_ptr<T> operator()() {
+        return current;
+    }
+
+    [[nodiscard]] const std::shared_ptr<T>& operator()() const {
         return current;
     }
 
@@ -53,6 +61,13 @@ public:
     void reset( std::shared_ptr<T> _value ) {
         stackPointer = 0;
         push(_value);
+    }
+
+    void reset() {
+        stackPointer = 0;
+        current = nullptr;
+        mementos.clear();
+        mementos.emplace_back(nullptr);
     }
 
 private:
