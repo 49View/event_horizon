@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <memory>
 #include <variant>
 #include <vector>
@@ -103,7 +104,7 @@
 */
 
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
 #include <algorithm>
 
 enum class CollinearWrap {
@@ -111,8 +112,7 @@ enum class CollinearWrap {
     True = 1
 };
 
-const float M_PIF = 3.14159265358979323846f;
-const float ONE_OVER_60HZ = 0.016666667f;
+[[maybe_unused]] const float ONE_OVER_60HZ = 0.016666667f;
 
 #undef M_PI
 #ifndef M_PI
@@ -122,10 +122,11 @@ constexpr T PI = T( 3.14159265358979323846f );
 #endif
 #undef M_PI_2
 #ifndef M_PI_2
-const float M_PI_2 = 1.57079632679489661923f;
+constexpr float M_PI_2 = 1.57079632679489661923f;
 #endif
+#undef M_PI_4
 #ifndef M_PI_4
-const float M_PI_4 = M_PI_2 / 2.0f;
+constexpr float M_PI_4 = M_PI_2 / 2.0f;
 #endif
 #ifndef M_SQRT2
 const float M_SQRT2 = 1.41421356237309504880f;
@@ -235,7 +236,7 @@ namespace JMATH {
     inline float absolute( float x ) {
         // Note: we name this absolute() to avoid name collision with std::abs(int). If we used abs() then unqualified code calling abs()
         // (not jfdp::abs()) and passing a float will accidentally call std::abs(int) with implicit float->int conversion (possibly silent).
-        return fabs( x );
+        return std::fabs( x );
     }
 
 // For consistency, alias all std::sqrt() overloads into this namespace so they are available alongside our other functions,

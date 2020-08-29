@@ -362,6 +362,41 @@ ProfileMaker& ProfileMaker::ay( float radius, int32_t _subdivs ) {
 	return *this;
 }
 
+ProfileMaker& ProfileMaker::ax( float radius, int32_t _subdivs ) {
+    auto subdivs = setPointerSubdivs(_subdivs);
+    V2f start = pointer();
+    for ( int t = 1; t < subdivs; t++ ) {
+        float delta = ( static_cast<float>( t ) / static_cast<float>( subdivs - 1 ));
+        float angle = JMATH::lerp( delta, M_PI_2, M_PI + M_PI_2 );
+        add( start + ( V2f{1.0f-sinf(angle), cosf(angle)*-1.0f} * radius ) );
+    }
+    return *this;
+}
+
+ProfileMaker& ProfileMaker::axHalfLeft( float radius, int32_t _subdivs ) {
+    auto subdivs = setPointerSubdivs(_subdivs);
+    V2f start = pointer();
+    for ( int t = 1; t < subdivs; t++ ) {
+        float delta = ( static_cast<float>( t ) / static_cast<float>( subdivs - 1 ));
+        float angle = JMATH::lerp( delta, M_PI_2, M_PI);
+        auto p = start + ( V2f{1.0f-sinf(angle), cosf(angle)*-1.0f} * radius );
+        add( p );
+    }
+    return *this;
+}
+
+ProfileMaker& ProfileMaker::axHalfRight( float radius, int32_t _subdivs ) {
+    auto subdivs = setPointerSubdivs(_subdivs);
+    V2f start = pointer();
+    for ( int t = 1; t < subdivs; t++ ) {
+        float delta = ( static_cast<float>( t ) / static_cast<float>( subdivs - 1 ));
+        float angle = JMATH::lerp( delta, M_PI, M_PI + M_PI_2 );
+        auto p = start + ( V2f{1.0f-sinf(angle), cosf(angle)*-1.0f} * radius ) + V2fc::Y_AXIS_NEG*radius;
+        add( p );
+    }
+    return *this;
+}
+
 ProfileMaker& ProfileMaker::o() {
 	add( V2fc::ZERO );
 	return *this;

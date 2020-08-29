@@ -119,7 +119,7 @@ void Matrix4f::setFromRTS( const Vector3f &pos, const Vector3f &axis, const Vect
 void Matrix4f::setPerspective( float fovyInDegrees, float aspectRatio, float znear, float zfar ) {
     float ymax, xmax;
     float temp, temp2, temp3, temp4;
-    ymax = znear * tanf( fovyInDegrees * M_PIF / 360.0f );
+    ymax = znear * tanf( fovyInDegrees * M_PI / 360.0f );
     xmax = ymax * aspectRatio;
     float left = -xmax;
     float right = xmax;

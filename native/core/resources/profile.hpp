@@ -90,6 +90,9 @@ public:
 	ProfileMaker& s( float _s );
 	ProfileMaker& sd( uint32_t _sd );
 	ProfileMaker& ay( float radius, int32_t subdivs = -1 );
+	ProfileMaker& ax( float radius, int32_t subdivs = -1 );
+	ProfileMaker& axHalfLeft( float radius, int32_t subdivs = -1 );
+	ProfileMaker& axHalfRight( float radius, int32_t subdivs = -1 );
 	ProfileMaker& l( const V2f& _p1 );
 	ProfileMaker& ly( float _y1 );
 	ProfileMaker& lx( float _x1 );
