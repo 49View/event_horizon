@@ -325,9 +325,9 @@ int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
             auto vData = sg.VL().get(gg->Data(0).vData);
             auto ghash = gg->UUiD();
 
-            vData->flattenStride( posData + vcurrUnchartOffset*meshDecl.vertexPositionStride, 0, mat );
-            vData->flattenStride( uvData+ vcurrUnchartOffset*meshDecl.vertexUvStride, 1, mat );
-            vData->flattenStride( normalData+ vcurrUnchartOffset*meshDecl.vertexNormalStride, 3, mat );
+            vData->flattenStride( posData + vcurrUnchartOffset*meshDecl.vertexPositionStride, 0, mat.get() );
+            vData->flattenStride( uvData+ vcurrUnchartOffset*meshDecl.vertexUvStride, 1, mat.get() );
+            vData->flattenStride( normalData+ vcurrUnchartOffset*meshDecl.vertexNormalStride, 3, mat.get() );
             vData->mapIndices( indicesData, icurrUnchartOffset, vcurrUnchartOffset, ghash, scene->unchart );
 
             vcurrUnchartOffset += vData->numVerts();

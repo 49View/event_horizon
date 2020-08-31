@@ -20,6 +20,7 @@ class SceneGraph;
 namespace GLTF2Service {
 
     GeomSP load( SceneGraph& _sg, const std::string& _key, const std::string& _path, const SerializableContainer& _array = {} );
+    void save(  SceneGraph &sg, GeomSP asset );
 
     void fillGeom( std::shared_ptr<VData> geom, tinygltf::Model* model, int meshIndex, int primitiveIndex );
 };

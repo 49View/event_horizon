@@ -26,7 +26,7 @@ void VData::fillCoors3d( const std::vector<Vector3f>& _verts ) {
     vSoaData.resize( _verts.size() );
     for ( size_t t = 0; t < _verts.size(); t++ ) {
         vSoaData[t].pos = _verts[t];
-//        vSoaData[t].a6 = Vector4f::ONE; // Just inizialise the color to one
+//        vSoaData[t].a6 = Vector4f::ONE; // Just initialize the color to one
     }
 }
 
@@ -68,7 +68,7 @@ void VData::fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert ) 
     }
 }
 
-void VData::fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert ) {
+void VData::fillTangents( const std::vector<Vector3f>& _tangents, bool _bInvert ) {
     vSoaData.resize( _tangents.size() );
     float bi = _bInvert ? -1.0f : 1.0f;
     for ( size_t t = 0; t < _tangents.size(); t++ ) {
@@ -76,7 +76,7 @@ void VData::fillTangets( const std::vector<Vector3f>& _tangents, bool _bInvert )
     }
 }
 
-void VData::fillTangets( const std::vector<Vector4f>& _tangents, bool _bInvert ) {
+void VData::fillTangents( const std::vector<Vector4f>& _tangents, bool _bInvert ) {
     vSoaData.resize( _tangents.size() );
     float bi = _bInvert ? -1.0f : 1.0f;
     for ( size_t t = 0; t < _tangents.size(); t++ ) {
@@ -108,7 +108,7 @@ void VData::changeHandness() {
     }
 }
 
-void VData::sanitizeUVMap() {
+[[maybe_unused]] void VData::sanitizeUVMap() {
     for ( auto& v : vSoaData ) {
         v.a1 = v.pos.dominantVector2();
         v.a2 = v.a1;
@@ -171,7 +171,7 @@ void VData::mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox
     }
 }
 
-void VData::checkBaricentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, uint32_t pIndexEnd, uint32_t& pIndex,
+void VData::checkBarycentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, uint32_t pIndexEnd, uint32_t& pIndex,
                                       float& u, float& v ) {
     Vector3f a = Vector3f::ZERO;
     Vector3f b = Vector3f::ZERO;
@@ -186,7 +186,7 @@ void VData::checkBaricentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, u
     if ( pIndexEnd - pIndexStart > 3 ) {
         // Shortest distance from i
         float minD = std::numeric_limits<float>::max();
-        float d = 0.0f;
+        float d;
         for ( auto q = pIndexStart; q < pIndexEnd; q += 3 ) {
             d = distance( i, vSoaData[q].pos );
             if ( d < minD ) {
@@ -220,8 +220,8 @@ void VData::checkBaricentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, u
                 a = vSoaData[vi + q].pos;
                 b = vSoaData[q == 2 ? vi : vi + q + 1].pos;
                 c = a + vSoaData[vi + q].a3;
-                Plane3f pplane = { a,b,c };
-                if ( pplane.checkSide( i ) > 0.0f ) continue;
+                Plane3f pPlane = { a, b, c };
+                if ( pPlane.checkSide(i ) > 0.0f ) continue;
                 ++passes;
             }
             if ( passes == 3 ) break;
@@ -264,7 +264,6 @@ void VData::swapIndicesWinding( Primitive _pr ) {
             }
             break;
         case PRIMITIVE_TRIANGLE_STRIP:
-            break;
         case PRIMITIVE_TRIANGLE_FAN:
             break;
         default:
@@ -288,65 +287,13 @@ const std::vector<uint32_t>& VData::getVIndices() const {
     return vIndices;
 }
 
-//const std::vector<Vector3f>& VData::getVcoords3d() const {
-//    return vcoords3d;
-//}
-//
-//const std::vector<Vector3f>& VData::getVnormals3d() const {
-//    return vnormals3d;
-//}
-//
-//const std::vector<Vector3f>& VData::getVtangents3d() const {
-//    return vtangents3d;
-//}
-//
-//const std::vector<Vector3f>& VData::getVbinormals3d() const {
-//    return vbinormals3d;
-//}
-//
-//const std::vector<Vector2f>& VData::getVUVs() const {
-//    return vUVs;
-//}
-//
-//const std::vector<Vector2f>& VData::getVUV2s() const {
-//    return vUV2s;
-//}
-//
-//const std::vector<Vector4f>& VData::getVColor() const {
-//    return vColor;
-//}
-
 void VData::setVIndices( const size_t _index, const uint32_t& _value ) {
     vIndices[_index] = _value;
 }
 
-//void VData::setVcoords3d( const size_t _index, const Vector3f& _value ) {
-//    vcoords3d[_index] = _value;
-//}
-//
-//void VData::setVnormals3d( const size_t _index, const Vector3f& _value ) {
-//    vnormals3d[_index] = _value;
-//}
-//
-//void VData::setVtangents3d( const size_t _index, const Vector3f& _value ) {
-//    vtangents3d[_index] = _value;
-//}
-//
-//void VData::setVbinormals3d( const size_t _index, const Vector3f& _value ) {
-//    vbinormals3d[_index] = _value;
-//}
-//
-//void VData::setVUVs( const size_t _index, const Vector2f& _value ) {
-//    vUVs[_index] = _value;
-//}
-//
 void VData::setVUV2s( const size_t _index, const Vector2f& _value ) {
     vSoaData[_index].a2 = _value;
 }
-//
-//void VData::setVColor( const size_t _index, const Vector4f& _value ) {
-//    vColor[_index] = _value;
-//}
 
 const Vector3f& VData::getMin() const {
     return BBox3d().minPoint();
@@ -380,7 +327,7 @@ void VData::forcePlanarMapping() {
 
 }
 
-void VData::flattenStride( void* ret, size_t _index, std::shared_ptr<Matrix4f> _mat ) {
+void VData::flattenStride( void* ret, size_t _index, const Matrix4f* _mat ) {
 
     size_t off = 0;
     size_t stride = sizeof(float)*3;
@@ -437,12 +384,20 @@ void VData::flattenStride( void* ret, size_t _index, std::shared_ptr<Matrix4f> _
     }
 }
 
-void VData::mapIndices( void* ret, uint32_t _startIndex, uint32_t _voffsetIndex,
+void VData::mapIndices( void* ret, uint32_t _startIndex, uint32_t _vOffsetIndex,
                             const std::string& _oRef, std::unordered_map<uint32_t, HashIndexPairU32>& _oMap  ) {
     auto fill = (uint32_t*)ret;
     fill += _startIndex;
     for ( size_t t = 0; t < vIndices.size(); t++ ) {
-        fill[t] = vIndices[t] + _voffsetIndex;
+        fill[t] = vIndices[t] + _vOffsetIndex;
         _oMap[_startIndex+t] = { _oRef, vIndices[t] };
     }
+}
+
+ucchar_p VData::bufferPtr() const {
+    return ucchar_p{ reinterpret_cast<const unsigned char*>(vSoaData.data()), vSoaData.size() * sizeof(PUUNTBC) };
+}
+
+ucchar_p VData::indexPtr() const {
+    return ucchar_p{ reinterpret_cast<const unsigned char*>(vIndices.data()), vIndices.size() * sizeof(uint32_t) };
 }
