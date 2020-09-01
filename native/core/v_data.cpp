@@ -327,7 +327,7 @@ void VData::forcePlanarMapping() {
 
 }
 
-void VData::flattenStride( void* ret, size_t _index, const Matrix4f* _mat ) {
+void VData::flattenStride( void* ret, size_t _index, const Matrix4f* _mat ) const {
 
     size_t off = 0;
     size_t stride = sizeof(float)*3;

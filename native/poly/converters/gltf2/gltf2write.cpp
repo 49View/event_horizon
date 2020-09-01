@@ -32,43 +32,65 @@ namespace GLTF2Service {
         return accessor;
     }
 
-    void writeNode( SceneGraph& sg, GeomSP asset, tinygltf::Model& model ) {
-        auto vData = sg.VL().get(asset->DataV()[0].vData);
-
+    tinygltf::BufferView writeIndexData( const VData* vData, tinygltf::Buffer& buffer, tinygltf::Model& model ) {
         auto bufferID = vData->indexPtr();
-
-        tinygltf::Buffer buffer;
         auto indexData = SerializableContainer{ bufferID.first, bufferID.first + bufferID.second };
-        SerializableContainer posData{};
-        SerializableContainer tex0Data{};
-//        size_t bufferViewStride = sizeof(V3f) + sizeof(V2f);
-        posData.resize(vData->numVerts() * sizeof(V3f));
-        tex0Data.resize(vData->numVerts() * sizeof(V2f));
-        vData->flattenStride(posData.data(), 0);
-        vData->flattenStride(tex0Data.data(), 1);
 
         buffer.data.insert(buffer.data.end(), indexData.begin(), indexData.end());
-        buffer.data.insert(buffer.data.end(), posData.begin(), posData.end());
-        buffer.data.insert(buffer.data.end(), tex0Data.begin(), tex0Data.end());
 
         tinygltf::BufferView bufferViewIndex;
-        tinygltf::BufferView bufferViewPos;
-        tinygltf::BufferView bufferViewTex0;
 
         bufferViewIndex.buffer = model.buffers.size();
         bufferViewIndex.byteLength = indexData.size();
         bufferViewIndex.byteOffset = 0;
         bufferViewIndex.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
 
+        return bufferViewIndex;
+    }
+
+    tinygltf::BufferView writeVertexElementData( const VData* vData, std::size_t byteOffset, tinygltf::Buffer& buffer, tinygltf::Model& model ) {
+        SerializableContainer posData{};
+        PosTexNorTanBinUV2Col3d vformat;
+
+        posData.resize(vData->numVerts() * vformat.size(0) * sizeof(float));
+        vData->flattenStride(posData.data(), 0);
+        buffer.data.insert(buffer.data.end(), posData.begin(), posData.end());
+
+        tinygltf::BufferView bufferViewPos;
+
         bufferViewPos.buffer = model.buffers.size();
         bufferViewPos.byteLength = posData.size() ;
-        bufferViewPos.byteOffset = bufferViewIndex.byteLength;
+        bufferViewPos.byteOffset = byteOffset;
         bufferViewPos.target = TINYGLTF_TARGET_ARRAY_BUFFER;
 
-        bufferViewTex0.buffer = model.buffers.size();
-        bufferViewTex0.byteLength = tex0Data.size();
-        bufferViewTex0.byteOffset = posData.size() + bufferViewIndex.byteLength;
-        bufferViewTex0.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+        return bufferViewPos;
+    }
+
+    tinygltf::BufferView writeVertexData( const VData* vData, std::size_t byteOffset, tinygltf::Buffer& buffer, tinygltf::Model& model ) {
+        auto bufferID = vData->bufferPtr();
+        auto indexData = SerializableContainer{ bufferID.first, bufferID.first + bufferID.second };
+        PosTexNorTanBinUV2Col3d vformat;
+
+        buffer.data.insert(buffer.data.end(), indexData.begin(), indexData.end());
+
+        tinygltf::BufferView bufferViewIndex;
+
+        bufferViewIndex.buffer = model.buffers.size();
+        bufferViewIndex.byteLength = indexData.size();
+        bufferViewIndex.byteOffset = byteOffset;
+        bufferViewIndex.byteStride = vformat.stride();
+        bufferViewIndex.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+
+        return bufferViewIndex;
+    }
+
+    void writeNode( SceneGraph& sg, GeomSP asset, tinygltf::Model& model ) {
+        tinygltf::Buffer buffer;
+        PosTexNorTanBinUV2Col3d vformat;
+        auto vData = sg.VL().get(asset->DataV()[0].vData);
+
+        auto bufferViewIndex = writeIndexData( vData.get(), buffer, model );
+        auto bufferViewSoA = writeVertexData(vData.get(), bufferViewIndex.byteLength, buffer, model );
 
         std::vector<double> minV = { vData->getMin()[0], vData->getMin()[1], vData->getMin()[2] };
         std::vector<double> maxV = { vData->getMax()[0], vData->getMax()[1], vData->getMax()[2] };
@@ -79,25 +101,50 @@ namespace GLTF2Service {
         tinygltf::Accessor posAccessor = makeAccessor(model.bufferViews.size()+1, 0,
                                                       TINYGLTF_COMPONENT_TYPE_FLOAT, vData->numVerts(),
                                                       TINYGLTF_TYPE_VEC3, &minV, &maxV);
-        tinygltf::Accessor tex0Accessor = makeAccessor(model.bufferViews.size()+2, 0,
+        tinygltf::Accessor tex0Accessor = makeAccessor(model.bufferViews.size()+1, vformat.offset(1),
                                                        TINYGLTF_COMPONENT_TYPE_FLOAT, vData->numVerts(),
                                                        TINYGLTF_TYPE_VEC2);
+        tinygltf::Accessor tex1Accessor = makeAccessor(model.bufferViews.size()+1, vformat.offset(2),
+                                                       TINYGLTF_COMPONENT_TYPE_FLOAT, vData->numVerts(),
+                                                       TINYGLTF_TYPE_VEC2);
+        tinygltf::Accessor norAccessor = makeAccessor(model.bufferViews.size()+1, vformat.offset(3),
+                                                       TINYGLTF_COMPONENT_TYPE_FLOAT, vData->numVerts(),
+                                                       TINYGLTF_TYPE_VEC3);
+        tinygltf::Accessor tanAccessor = makeAccessor(model.bufferViews.size()+1, vformat.offset(4),
+                                                      TINYGLTF_COMPONENT_TYPE_FLOAT, vData->numVerts(),
+                                                      TINYGLTF_TYPE_VEC4);
+        tinygltf::Accessor binAccessor = makeAccessor(model.bufferViews.size()+1, vformat.offset(5),
+                                                      TINYGLTF_COMPONENT_TYPE_FLOAT, vData->numVerts(),
+                                                      TINYGLTF_TYPE_VEC3);
+        tinygltf::Accessor colAccessor = makeAccessor(model.bufferViews.size()+1, vformat.offset(6),
+                                                      TINYGLTF_COMPONENT_TYPE_FLOAT, vData->numVerts(),
+                                                      TINYGLTF_TYPE_VEC4);
 
-        tinygltf::Mesh mesh;
         tinygltf::Primitive meshPrimitive;
         meshPrimitive.attributes.emplace("POSITION", model.accessors.size() + 1);
         meshPrimitive.attributes.emplace("TEXCOORD_0", model.accessors.size() + 2);
+        meshPrimitive.attributes.emplace("TEXCOORD_1", model.accessors.size() + 3);
+        meshPrimitive.attributes.emplace("NORMAL", model.accessors.size() + 4);
+        meshPrimitive.attributes.emplace("TANGENT", model.accessors.size() + 5);
+        meshPrimitive.attributes.emplace("_BINORMAL", model.accessors.size() + 6);
+        meshPrimitive.attributes.emplace("COLOR_0", model.accessors.size() + 7);
         meshPrimitive.indices = model.accessors.size();
         meshPrimitive.mode = TINYGLTF_MODE_TRIANGLES;
+
+        tinygltf::Mesh mesh;
         mesh.primitives.emplace_back(meshPrimitive);
 
         model.bufferViews.emplace_back(bufferViewIndex);
-        model.bufferViews.emplace_back(bufferViewPos);
-        model.bufferViews.emplace_back(bufferViewTex0);
+        model.bufferViews.emplace_back(bufferViewSoA);
         model.buffers.emplace_back(buffer);
         model.accessors.emplace_back(indexAccessor);
         model.accessors.emplace_back(posAccessor);
         model.accessors.emplace_back(tex0Accessor);
+        model.accessors.emplace_back(tex1Accessor);
+        model.accessors.emplace_back(norAccessor);
+        model.accessors.emplace_back(tanAccessor);
+        model.accessors.emplace_back(binAccessor);
+        model.accessors.emplace_back(colAccessor);
 
         model.meshes.emplace_back(mesh);
     }

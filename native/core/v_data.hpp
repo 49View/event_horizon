@@ -35,7 +35,7 @@ public:
     void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
     void fillColors( const std::vector<Vector4f>& _colors );
 
-    void flattenStride( void* ret, size_t _index, const Matrix4f* _mat = nullptr );
+    void flattenStride( void* ret, size_t _index, const Matrix4f* _mat = nullptr ) const;
 
     void mapIndices( void* ret, uint32_t _startIndex, uint32_t _vOffsetIndex,
                      const std::string& _oRef, std::unordered_map<uint32_t, HashIndexPairU32>& _oMap );
