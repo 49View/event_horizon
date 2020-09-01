@@ -1,0 +1,28 @@
+I can't make the cronjob to work, yet :/
+So this is what I'm doing instead:
+
+docker-compose down of running site form root (yep)
+
+cd /docker/letsencrypt-docker-nginx/src/letsencrypt
+sudo docker-compose up -d
+
+sudo docker run -it --rm \
+-v /docker-volumes/etc/letsencrypt:/etc/letsencrypt \
+-v /docker-volumes/var/lib/letsencrypt:/var/lib/letsencrypt \
+-v /docker/letsencrypt-docker-nginx/src/letsencrypt/letsencrypt-site:/data/letsencrypt \
+-v "/docker-volumes/var/log/letsencrypt:/var/log/letsencrypt" \
+certbot/certbot \
+certonly --webroot \
+--email ziocleto@gmail.com --agree-tos --no-eff-email \
+--webroot-path=/data/letsencrypt \
+-d xxxxx.xxx -d www.xxxxx.xxx
+
+sudo docker-compose down
+
+cd /docker-volumes/etc/letsencrypt/live/xxxxx.xxx
+cp fullchain.pem /sslcerts/
+cp privkey.pem /sslcerts/
+
+Rerun jobs for build. (CD/CI)
+
+
