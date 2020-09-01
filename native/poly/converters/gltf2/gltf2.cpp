@@ -140,7 +140,7 @@ namespace GLTF2Service {
                 geom->fillNormals( fillData<Vector3f>( *model, v ));
             } else if ( k == "TANGENT" ) {
                 NTBFill |= TANGENT_MASK;
-                geom->fillTangets( fillData<Vector4f>( *model, v ));
+                geom->fillTangents(fillData<Vector4f>(*model, v));
             } else if ( k == "TEXCOORD_0" ) {
                 NTBFill |= TEXCOORD_MASK;
                 auto fillingUV = fillData<Vector2f>( *model, v );
@@ -336,6 +336,9 @@ namespace GLTF2Service {
 
         IntermediateGLTF gltfScene = loadGLTFAsset( _key, _path, _array );
 
+//        tinygltf::TinyGLTF loader;
+//        loader.WriteGltfSceneToFile(gltfScene.model.get(), _key, true, true, true, false);
+
         for ( const auto &gltfMaterial : gltfScene.model->materials ) {
             elaborateMaterial( _sg, gltfScene, gltfMaterial );
         }
@@ -351,4 +354,48 @@ namespace GLTF2Service {
 
         return rootScene->BBox3d()->isValid() ? rootScene : nullptr;
     }
+
+    void save( SceneGraph &sg, GeomSP asset ) {
+        tinygltf::Model model;
+        tinygltf::TinyGLTF loader;
+
+        model.asset.minVersion = "2.0";
+        model.asset.version = "2.0";
+        model.asset.generator = "49view";
+        model.asset.copyright = "(C) 2020 49view Ltd";
+
+        model.defaultScene = 0;
+
+        tinygltf::Node node;
+        node.name = asset->Name();
+
+        auto vData = sg.VL().get( asset->DataV()[0].vData );
+
+        auto bufferVD = vData->bufferPtr();
+        auto bufferID = vData->indexPtr();
+
+        tinygltf::Buffer buffer;
+        auto indexData = SerializableContainer{ bufferID.first, bufferID.first + bufferID.second };
+        auto soaData = SerializableContainer{ bufferVD.first, bufferVD.first + bufferVD.second };
+
+        buffer.data.insert( buffer.data.end(), indexData.begin(), indexData.end() );
+        buffer.data.insert( buffer.data.end(), soaData.begin(), soaData.end() );
+
+        tinygltf::BufferView bufferViewIndex;
+        tinygltf::BufferView bufferViewSoa;
+
+        model.bufferViews.emplace_back(bufferViewIndex);
+        model.bufferViews.emplace_back(bufferViewSoa);
+        model.buffers.emplace_back(buffer);
+
+        tinygltf::Scene defaultScene{};
+        defaultScene.name = asset->Name();
+        defaultScene.nodes.push_back(0);
+
+        model.nodes.emplace_back(node);
+        model.scenes.emplace_back(defaultScene);
+
+        loader.WriteGltfSceneToFile(&model, "ecube.glb", true, true, true, false);
+    }
+
 }
