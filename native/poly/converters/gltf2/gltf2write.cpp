@@ -186,6 +186,7 @@ namespace GLTF2Service {
     }
 
     void save( SceneGraph& sg, GeomSP asset ) {
+
         tinygltf::Model model;
         tinygltf::TinyGLTF loader;
         tinygltf::Buffer buffer;

@@ -372,6 +372,76 @@ namespace VDataServices {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 //
+// ___ OSM BUILDER ___
+//
+// ********************************************************************************************************************
+// ********************************************************************************************************************
+
+    bool prepare( SceneGraph& sg, GT::OSM& _d, Material *matPtr ) {
+        return true;
+    }
+
+    V2f coordToProjection( const V2f& latLon ) {
+        return V2f{ latLon.x(), radToDeg(log(tan((latLon.y() / 90.0f + 1.0f) * M_PI_4 )))};
+    }
+
+    float calcGeoDistance( const V2f& p1, const V2f& p2) {
+        auto lat1 = p1.y();
+        auto lon1 = p1.x();
+        auto lat2 = p2.y();
+        auto lon2 = p2.x();
+        auto R = 6371e3f; // metres
+        auto phi1 = degToRad(lat1); // φ, λ in radians
+        auto phi2 = degToRad(lat2);
+        auto deltaPhi = degToRad(lat2-lat1);
+        auto deltaLambda = degToRad(lon2-lon1);
+
+        auto a = sin(deltaPhi/2.0f) * sin(deltaPhi/2.0f) +
+                  cos(phi1) * cos(phi2) *
+                  sin(deltaLambda/2.0f) * sin(deltaLambda/2.0f);
+        auto c = 2.0f * atan2(sqrt(a), sqrt(1.0f-a));
+
+        auto d = (R * c); // in metres
+
+        return d;
+    }
+
+    void buildInternal( const GT::OSM& _d, std::shared_ptr<VData> _ret ) {
+
+        Topology mesh{};
+
+        V2f centerProj = coordToProjection(_d.locationLatLon);
+        size_t indexOffset = 0;
+
+        for ( const auto& element : _d.osmData.elements ) {
+            V2f elemLatLon = V2f{element.center.lon,element.center.lat};
+            V2f elemCenterProj = coordToProjection(elemLatLon);// - centerProj;
+            float coordDistance = calcGeoDistance(_d.locationLatLon, elemLatLon);
+            V2f elemCenterOffset = normalize( elemCenterProj - centerProj ) * coordDistance;
+            V3f elemCenterProj3d = XZY::C( elemCenterOffset, 0.0f);
+            for ( const auto& group : element.groups ) {
+                for ( const auto& vertex : group.triangles ) {
+                    mesh.addVertex(XZY::C(vertex) + elemCenterProj3d);
+                }
+                for ( auto ti = indexOffset; ti < indexOffset + group.triangles.size(); ti+=3  ) {
+                    mesh.addTriangle(ti, ti+2, ti+1);
+                }
+                indexOffset += group.triangles.size();
+            }
+        }
+
+        PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping{ GeomMappingT::Cube, V3f::ONE} );
+        _ret->fill( ps );
+        _ret->BBox3d( ps.bbox3d );
+    }
+
+    ResourceRef refName( const GT::OSM& _d ) {
+        return ResourceRef();
+    }
+
+// ********************************************************************************************************************
+// ********************************************************************************************************************
+//
 // ___ SVG BUILDER ___
 //
 // ********************************************************************************************************************

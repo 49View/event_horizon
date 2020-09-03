@@ -162,6 +162,10 @@ double Topology::distance( const Vector3f& p ) const {
     return min;
 }
 
+void Topology::addVertex( const V3f& _vertex ) {
+    vertices.emplace_back(_vertex);
+}
+
 ShapeType shapeTypeFromString( const std::string& value ) {
 
     if ( toLower(value) == "cube" ) return ShapeType::Cube;

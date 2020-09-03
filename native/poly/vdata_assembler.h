@@ -9,6 +9,7 @@
 #include <core/uuid.hpp>
 #include <core/names.hpp>
 #include <core/name_policy.hpp>
+#include <core/descriptors/osm_parsing.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/resource_types.hpp>
@@ -70,6 +71,12 @@ public:
             static_assert( std::is_base_of_v<GT::GTPolicyColor, SGT> );
             dataTypeHolder.color = _param;
             matColor = _param;
+            return *this;
+        }
+        if constexpr ( std::is_same_v<M, Vector2f> ) {
+            if constexpr ( std::is_same_v<SGT, GT::OSM> ) {
+                dataTypeHolder.locationLatLon = _param;
+            }
             return *this;
         }
         if constexpr ( std::is_same_v<M, Vector3f> ) {
@@ -258,6 +265,12 @@ public:
             return *this;
         }
 
+        if constexpr ( std::is_same_v<M, OSMData> ) {
+            static_assert( std::is_same_v<SGT, GT::OSM> );
+            dataTypeHolder.osmData = _param;
+            return *this;
+        }
+
         if constexpr ( std::is_same_v<M, GeomSP> ) {
             elemInjFather = _param;
             return *this;
@@ -309,6 +322,10 @@ namespace VDataServices {
     void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::GLTF2& _d );
 
+    bool prepare( SceneGraph& sg, GT::OSM& _d, Material* matPtr );
+    void buildInternal( const GT::OSM& _d, std::shared_ptr<VData> _ret );
+    ResourceRef refName( const GT::OSM& _d );
+
     bool prepare( SceneGraph& sg, GT::Asset& _d, Material* matPtr );
     void buildInternal( const GT::Asset& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::Asset& _d );
@@ -320,63 +337,3 @@ namespace VDataServices {
         return ret;
     }
 }
-
-
-//class GeomDataQuadMeshBuilder : public GeomDataBuilder {
-//public:
-//    explicit GeomDataQuadMeshBuilder( QuadVector3fNormalfList _quads ) : quads( std::move( _quads )) {}
-//    virtual ~GeomDataQuadMeshBuilder() = default;
-//    void setupRefName() override;
-//protected:
-//    void buildInternal( std::shared_ptr<VData> _ret ) override;
-//protected:
-//    QuadVector3fNormalfList quads;
-//};
-//
-//class GeomDataFollowerBuilder : public GeomDataBuilder {
-//public:
-//    GeomDataFollowerBuilder( std::shared_ptr<Profile> _profile,
-//                             std::vector<Vector3f> _verts,
-//                             const FollowerFlags f = FollowerFlags::Defaults,
-//                             const PolyRaise _r = PolyRaise::None,
-//                             const Vector2f& _flipVector = V2fc::ZERO,
-//                             FollowerGap _gaps = FollowerGap::Empty,
-//                             const Vector3f& _suggestedAxis = Vector3f::ZERO ) :
-//                             mProfile( std::move( _profile )), mVerts( std::move( _verts )),
-//                             followersFlags(f), mRaiseEnum(_r),
-//                             mFlipVector(_flipVector), mGaps( std::move( _gaps )), mSuggestedAxis(_suggestedAxis) {}
-//    virtual ~GeomDataFollowerBuilder() = default;
-//    void setupRefName() override;
-//protected:
-//    void buildInternal( std::shared_ptr<VData> _ret ) override;
-//protected:
-//    std::shared_ptr<Profile> mProfile;
-//    std::vector<Vector3f> mVerts;
-//    FollowerFlags followersFlags = FollowerFlags::Defaults;
-//    Vector2f mRaise = V2fc::ZERO;
-//    PolyRaise mRaiseEnum = PolyRaise::None;
-//    Vector2f mFlipVector = V2fc::ZERO;
-//    FollowerGap mGaps = FollowerGap::Empty;
-//    Vector3f mSuggestedAxis = Vector3f::ZERO;
-//};
-//
-//template <typename T>
-//class GeomDataBuilderBaseList {
-//public:
-//    virtual std::vector<std::shared_ptr<T>> build() = 0;
-//};
-//
-//class GeomDataBuilderList : public GeomDataBuilderBaseList<VData> {
-//public:
-//    virtual ~GeomDataBuilderList() = default;
-//};
-//
-//class GeomDataSVGBuilder : public GeomDataBuilderList {
-//public:
-//    GeomDataSVGBuilder( std::string _svgString, std::shared_ptr<Profile> _profile ) :
-//                        svgAscii(std::move( _svgString )), mProfile(std::move(_profile)) {}
-//    GeomDataListBuilderRetType build() override;
-//protected:
-//    std::string svgAscii;
-//    std::shared_ptr<Profile> mProfile;
-//};

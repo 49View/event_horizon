@@ -49,6 +49,7 @@ struct Topology {
 
     Vector3f normalFromSmartSmoothing( uint32_t index, int vIndex );
 
+    void addVertex( const V3f& _vertex );
     void addTriangle( uint32_t a, uint32_t b, uint32_t c );
     void addQuad( uint32_t a, uint32_t b, uint32_t c, uint32_t d );
     void addQuadAlt( uint32_t a, uint32_t b, uint32_t c, uint32_t d );

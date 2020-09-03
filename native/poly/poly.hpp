@@ -9,11 +9,14 @@
 #include <string>
 #include <vector>
 #include <core/util_follower.hpp>
+#include <core/descriptors/osm_parsing.hpp>
 #include <core/math/poly_shapes.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/resources/resource_serialization.hpp>
 #include <core/names.hpp>
 #include <poly/cloth/cloth.h>
+
+struct OSMData;
 
 enum class UIShapeType {
     CameraFrustom2d,
@@ -303,6 +306,10 @@ namespace GT {
     struct GTPolicyModifiers {
         bool flipNormals = false;
     };
+    struct GTPolicyOSMData {
+        OSMData osmData;
+        V2f locationLatLon = V2fc::ZERO;
+    };
 
     struct Shape     : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
     struct Follower  : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals, ForceNormalAxis {};
@@ -312,7 +319,7 @@ namespace GT {
     struct ClothMesh : GTPolicyTRS, GTPolicyCloth, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
     struct GLTF2     : GTPolicyTRS, GTPolicyGLTF2Model, GTPolicyNameId, GTPolicyModifiers {};
     struct Asset     : GTPolicyTRS, GTPolicyNameId {};
-    struct SVG       : GTPolicyTRS {};
+    struct OSM       : GTPolicyTRS, GTPolicyOSMData {};
     struct VData     : GTPolicyTRS {};
     struct Text      : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
 }
