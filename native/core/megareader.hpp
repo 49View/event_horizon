@@ -94,6 +94,11 @@ public:
 		}
 	}
 
+    void deserialize( const char* name, double& ret ) const {
+        if ( value->FindMember( name ) != value->MemberEnd() ) {
+            ret = ( *( value ) )[name].GetDouble();
+        }
+    }
 
 	void deserialize( const char* name, bool& ret ) const {
 		if ( value->FindMember( name ) != value->MemberEnd() ) {
