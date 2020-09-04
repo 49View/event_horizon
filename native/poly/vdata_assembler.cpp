@@ -381,25 +381,28 @@ namespace VDataServices {
         return true;
     }
 
+
     V2f coordToProjection( const V2f& latLon ) {
         return V2f{ latLon.x(), radToDeg(log(tan((latLon.y() / 90.0f + 1.0f) * M_PI_4 )))};
     }
 
-    float calcGeoDistance( const V2f& p1, const V2f& p2) {
-        auto lat1 = p1.y();
-        auto lon1 = p1.x();
-        auto lat2 = p2.y();
-        auto lon2 = p2.x();
-        auto R = 6371e3f; // metres
+    template <typename T>
+    T latToY( T lat ) {
+        return radToDeg(log(tan((lat / 90.0 + 1.0) * M_PI_4 )));
+    }
+
+    template <typename T>
+    float calcGeoDistance( T lat1, T lon1, T lat2, T lon2 ) {
+        auto R = 6371e3; // metres
         auto phi1 = degToRad(lat1); // φ, λ in radians
         auto phi2 = degToRad(lat2);
         auto deltaPhi = degToRad(lat2-lat1);
         auto deltaLambda = degToRad(lon2-lon1);
 
-        auto a = sin(deltaPhi/2.0f) * sin(deltaPhi/2.0f) +
+        auto a = sin(deltaPhi/2.0) * sin(deltaPhi/2.0) +
                   cos(phi1) * cos(phi2) *
-                  sin(deltaLambda/2.0f) * sin(deltaLambda/2.0f);
-        auto c = 2.0f * atan2(sqrt(a), sqrt(1.0f-a));
+                  sin(deltaLambda/2.0) * sin(deltaLambda/2.0);
+        auto c = 2.0 * atan2(sqrt(a), sqrt(1.0-a));
 
         auto d = (R * c); // in metres
 
@@ -416,15 +419,19 @@ namespace VDataServices {
         for ( const auto& element : _d.osmData.elements ) {
             V2f elemLatLon = V2f{element.center.lon,element.center.lat};
             V2f elemCenterProj = coordToProjection(elemLatLon);// - centerProj;
-            float coordDistance = calcGeoDistance(_d.locationLatLon, elemLatLon);
+            float coordDistance = calcGeoDistance( (double)_d.locationLatLon.x(), (double)latToY(_d.locationLatLon.y()), element.center.lon, latToY(element.center.lat));
             V2f elemCenterOffset = normalize( elemCenterProj - centerProj ) * coordDistance;
             V3f elemCenterProj3d = XZY::C( elemCenterOffset, 0.0f);
             for ( const auto& group : element.groups ) {
                 for ( const auto& vertex : group.triangles ) {
-                    mesh.addVertex(XZY::C(vertex) + elemCenterProj3d);
+                    V3f pp{XZY::C(vertex) + elemCenterProj3d};
+                    pp.swizzle(0,2);
+                    mesh.addVertex( pp );
                 }
                 for ( auto ti = indexOffset; ti < indexOffset + group.triangles.size(); ti+=3  ) {
-                    mesh.addTriangle(ti, ti+2, ti+1);
+                    if ( !isCollinear(mesh.vertices[ti], mesh.vertices[ti+1], mesh.vertices[ti+2]) ) {
+                        mesh.addTriangle(ti, ti+1, ti+2);
+                    }
                 }
                 indexOffset += group.triangles.size();
             }

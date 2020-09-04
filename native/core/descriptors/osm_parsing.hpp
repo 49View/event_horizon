@@ -7,10 +7,10 @@
 #include "core/serialization.hpp"
 
 JSONDATA(OSMCenter, x, y, lat, lon)
-    float x;
-    float y;
-    float lat;
-    float lon;
+    double x;
+    double y;
+    double lat;
+    double lon;
 };
 
 JSONDATA(OSMGroup, colour, triangles)

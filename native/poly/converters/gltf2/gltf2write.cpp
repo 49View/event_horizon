@@ -194,7 +194,7 @@ namespace GLTF2Service {
         writeModelAssetInfo(model);
 
         writeScene(sg, asset, buffer, model);
-        loader.WriteGltfSceneToFile(&model, "ecube.glb", true, true, true, false);
+        loader.WriteGltfSceneToFile(&model, "ecube.glb", true, true, true, true);
     }
 
 }
