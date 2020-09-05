@@ -625,7 +625,7 @@ void RoundedCube( Topology& mesh, uint32_t subdivs, float radius ) {
 //    *targetV = (-normal->y + 1) / 2;
 //}
 
-PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs, ReverseFlag rf ) {
+PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs, ReverseFlag rf, const std::vector<C4f>& _vertexColors ) {
 
     for ( int j = 0; j < subdivs; ++j ) {
         mesh = SubdivideMesh( mesh );
@@ -648,8 +648,12 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     t = 0;
     for ( auto& tr : mesh.triangles ) {
         ret.indices[t] = tr;
-        auto cv = (t%3) == 0 ? Color4f::RED : ( (t%3) == 1 ? Color4f::GREEN : Color4f::BLUE );
-        ret.colors[t] = cv;
+        if ( _vertexColors.empty() ) {
+            auto cv = (t%3) == 0 ? Color4f::RED : ( (t%3) == 1 ? Color4f::GREEN : Color4f::BLUE );
+            ret.colors[t] = cv;
+        } else {
+            ret.colors[t] = _vertexColors[tr];
+        }
         ++t;
     }
 

@@ -125,7 +125,7 @@ namespace GLTF2Service {
         meshPrimitive.attributes.emplace("NORMAL", model.accessors.size() + 4);
         meshPrimitive.attributes.emplace("TANGENT", model.accessors.size() + 5);
         meshPrimitive.attributes.emplace("_BINORMAL", model.accessors.size() + 6);
-        meshPrimitive.attributes.emplace("_COLOR", model.accessors.size() + 7);
+        meshPrimitive.attributes.emplace("COLOR_0", model.accessors.size() + 7);
         meshPrimitive.indices = model.accessors.size();
         meshPrimitive.mode = TINYGLTF_MODE_TRIANGLES;
 

@@ -18,6 +18,12 @@
 
 struct OSMData;
 
+namespace GTBucket {
+    [[maybe_unused]] static constexpr inline int Near = 0;
+    [[maybe_unused]] static constexpr inline int Medium = 1;
+    [[maybe_unused]] static constexpr inline int Far = 2;
+}
+
 enum class UIShapeType {
     CameraFrustom2d,
     CameraFrustom3d,
@@ -188,6 +194,15 @@ namespace GT {
             return data;
         }
         uint64_t data;
+    };
+
+    struct Bucket {
+        template<typename ...Args>
+        explicit Bucket( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        int operator()() const noexcept {
+            return data;
+        }
+        int data;
     };
 
     struct A {

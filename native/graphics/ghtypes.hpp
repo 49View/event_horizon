@@ -29,21 +29,23 @@ class VPList;
 using VPListSP = std::shared_ptr<VPList>;
 
 namespace CommandBufferLimits {
-    const static int CoreStart =         0;
-    const static int CoreEnd =         999;
-    const static int UnsortedStart =  1000;
-    const static int UnsortedCustom = 1499;
-    const static int UnsortedEnd =    1999;
-    const static int UIStart   =      2000;
-    const static int UIEnd     =      9999;
-    const static int PBRStart  =     10000;
-    const static int PBREnd    =  99999999;
-    const static int UI2dStart = 100000000;
-    const static int CameraLocatorIM         = UI2dStart+1;
-    const static int CameraMousePointers     = UI2dStart+2;
-    const static int UI2dEnd   = 100999999;
-    const static int GridStart = 101000000;
-    const static int GridEnd   = 101010000;
+    constexpr static int CoreStart =         0;
+    constexpr static int CoreEnd =         999;
+    constexpr static int UnsortedStart =  1000;
+    constexpr static int UnsortedCustom = 1499;
+    constexpr static int UnsortedEnd =    1999;
+    constexpr static int UIStart   =      2000;
+    constexpr static int UIEnd     =      9999;
+    constexpr static int PBRStart  =     10000;
+    constexpr static int PBREnd    =  89999999;
+    constexpr static int PBRStartFar  =  PBREnd+1;
+    constexpr static int PBREndFar    =  99999999;
+    constexpr static int UI2dStart = 100000000;
+    constexpr static int CameraLocatorIM         = UI2dStart+1;
+    constexpr static int CameraMousePointers     = UI2dStart+2;
+    constexpr static int UI2dEnd   = 100999999;
+    constexpr static int GridStart = 101000000;
+    constexpr static int GridEnd   = 101010000;
 }
 
 namespace FBNames {

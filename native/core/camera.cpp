@@ -677,6 +677,11 @@ PickRayData Camera::rayViewportPickIntersection( const Vector2f& p1 ) const {
     return PickRayData{ V3f(nearPj), V3f(farPj) };
 }
 
+void Camera::calcProjectionMatrix() {
+    mProjection.setPerspective(spatials.mFov->value, mViewPort.ratio() * mAspectRatioMultiplier, mNearClipPlaneZ,
+                               mFarClipPlaneZ);
+}
+
 void Camera::update() {
 
     Matrix4f oldViewMatrix = mView;
@@ -705,8 +710,7 @@ void Camera::update() {
         mProjection.setOrthogonalProjection(-0.5f * mViewPort.ratio() * vs, 0.5f * mViewPort.ratio() * vs,
                                             -0.5f * vs, 0.5f * vs);
     } else {
-        mProjection.setPerspective(spatials.mFov->value, mViewPort.ratio() * mAspectRatioMultiplier, mNearClipPlaneZ,
-                                   mFarClipPlaneZ);
+        calcProjectionMatrix();
     }
 
     mFrustom.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);

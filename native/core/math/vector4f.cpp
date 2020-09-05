@@ -42,9 +42,9 @@ Vector4f Vector4f:: ITORGBA( uint32_t number, int32_t numbits ) {
 }
 
 Vector4f Vector4f::XTORGBA( const std::string& _hexstring ) {
-	if ( _hexstring.empty() ) return Vector4f::BLACK;
+	if ( _hexstring.empty() ) return Vector4f::WHITE;
 	std::string sanitized = string_trim_after(_hexstring, "#");
-	if ( sanitized.size() != 3 && sanitized.size() != 6 && sanitized.size() != 8 ) return Vector4f::BLACK;
+	if ( sanitized.size() != 3 && sanitized.size() != 6 && sanitized.size() != 8 ) return Vector4f::WHITE;
     std::string red  {};
     std::string green{};
     std::string blue {};

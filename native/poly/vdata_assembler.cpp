@@ -412,6 +412,7 @@ namespace VDataServices {
     void buildInternal( const GT::OSM& _d, std::shared_ptr<VData> _ret ) {
 
         Topology mesh{};
+        std::vector<C4f> vertexColors;
 
         V2f centerProj = coordToProjection(_d.locationLatLon);
         size_t indexOffset = 0;
@@ -423,10 +424,12 @@ namespace VDataServices {
             V2f elemCenterOffset = normalize( elemCenterProj - centerProj ) * coordDistance;
             V3f elemCenterProj3d = XZY::C( elemCenterOffset, 0.0f);
             for ( const auto& group : element.groups ) {
+                C4f color = C4f::XTORGBA(group.colour);
                 for ( const auto& vertex : group.triangles ) {
                     V3f pp{XZY::C(vertex) + elemCenterProj3d};
                     pp.swizzle(0,2);
                     mesh.addVertex( pp );
+                    vertexColors.emplace_back( color );
                 }
                 for ( auto ti = indexOffset; ti < indexOffset + group.triangles.size(); ti+=3  ) {
                     if ( !isCollinear(mesh.vertices[ti], mesh.vertices[ti+1], mesh.vertices[ti+2]) ) {
@@ -437,7 +440,7 @@ namespace VDataServices {
             }
         }
 
-        PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping{ GeomMappingT::Cube, V3f::ONE} );
+        PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping{ GeomMappingT::Cube, V3f::ONE}, 0, ReverseFlag::False, vertexColors );
         _ret->fill( ps );
         _ret->BBox3d( ps.bbox3d );
     }

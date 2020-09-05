@@ -54,18 +54,18 @@ namespace HOD { // HighOrderDependency
     }
 }
 
-void SceneGraph::addNode( GeomSP _node ) {
-    nodeAddSignal(_node);
+void SceneGraph::addNode( GeomSP _node, int _nodeBucket ) {
+    nodeAddSignal({_node, _nodeBucket});
     if ( _node->isRoot()) {
         nodes.emplace(_node->UUiD(), _node);
     }
     for ( const auto& c : _node->Children()) {
-        addNode(c);
+        addNode(c, _nodeBucket);
     }
 }
 
-void SceneGraph::addNode( const UUID& _uuid ) {
-    addNode(get<Geom>(_uuid));
+void SceneGraph::addNode( const UUID& _uuid, int _nodeBucket ) {
+    addNode(get<Geom>(_uuid), _nodeBucket );
 }
 
 void SceneGraph::removeNode( const UUID& _uuid ) {
@@ -75,7 +75,7 @@ void SceneGraph::removeNode( const UUID& _uuid ) {
 }
 
 void SceneGraph::removeNode( GeomSP _node ) {
-    gmNodeRemoveSignal(_node);
+    gmNodeRemoveSignal({_node, 0});
     if ( _node ) {
         for ( const auto& c : _node->Children()) {
             removeNode(c);

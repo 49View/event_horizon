@@ -214,30 +214,32 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         if ( _val.ccf ) _val.ccf(_val.hash);
     });
 
-    sg.nodeAddConnect([this]( NodeGraphConnectParamsSig _geom ) {
-        auto bEmpty = _geom->empty();
+    sg.nodeAddConnect([this]( NodeGraphConnectParamsSig _geomAndBucket ) {
+        auto geom = _geomAndBucket.first;
+        auto bEmpty = geom->empty();
 //        LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );
         if ( bEmpty ) return;
-        for ( const auto& dataRef : _geom->DataVRef() ) {
+        for ( const auto& dataRef : geom->DataVRef() ) {
             auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData }.
-                    n(_geom->Name()).
-                    u(_geom->UUiD()).
-                    g(_geom->Tag()).
-                    t(_geom->getLocalHierTransform()).
-                    b(_geom->BBox3d()).
+                    n(geom->Name()).
+                    u(geom->UUiD()).
+                    g(geom->Tag()).
+                    t(geom->getLocalHierTransform()).
+                    b(geom->BBox3d()).
                     build();
-            this->RR().VPL(CommandBufferLimits::PBRStart, vp );
+            auto bucket = _geomAndBucket.second == GTBucket::Near ? CommandBufferLimits::PBRStart : CommandBufferLimits::PBRStartFar;
+            this->RR().VPL(bucket, vp );
         }
         this->RR().invalidateOnAdd();
     });
 
     sg.gmNodeRemoveConnect([this]( NodeGraphConnectParamsSig _geom ) {
-        if ( !_geom ) {
+        if ( !_geom.first ) {
             this->RR().clearBucket(CommandBufferLimits::PBRStart);
             this->RR().LM()->removeAllPointLights();
             this->RR().clearTargets();
         } else {
-            this->RR().removeFromCL( _geom->UUiDCopy() );
+            this->RR().removeFromCL( _geom.first->UUiDCopy() );
         }
         setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     });
@@ -1034,7 +1036,7 @@ const SceneScreenBox& RenderOrchestrator::Box( const std::string& _key ) const {
     return SceneScreenBox::INVALID;
 }
 
-Rect2f& RenderOrchestrator::BoxUpdateAndGet( const std::string& _key ) {
+[[maybe_unused]] Rect2f& RenderOrchestrator::BoxUpdateAndGet( const std::string& _key ) {
     if ( auto it = boxes.find(_key); it != boxes.end() ) {
         return it->second.updateAndGetRect();
     }

@@ -58,6 +58,7 @@ public:
 	void setQuat( const Quaternion& a );
 	void setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar );
 	void setProjectionMatrix( const Matrix4f & val );
+    void calcProjectionMatrix(); // This uses the current values to calculate the projection matrix
 
     void incrementSphericalAngles( const V2f& _sph );
     void incrementOrbitDistance( float _d );
@@ -103,7 +104,11 @@ public:
 	void setNearClipPlaneZClampEdit2d( float _value ) { mNearClipPlaneZClampEdit2d = _value; }
 	void setFarClipPlaneZClampEdit2d( float _value ) { mFarClipPlaneZClampEdit2d = _value;}
 
-	const CameraSpatials& getSpatials() const;
+    void setNearClipPlane( float _value ) { mNearClipPlaneZ = _value; }
+    void setFarClipPlane( float _value ) { mFarClipPlaneZ = _value;}
+    void setNearFarClipPlane( float _near, float _far ) { mNearClipPlaneZ = _near; mFarClipPlaneZ = _far; }
+
+    const CameraSpatials& getSpatials() const;
 	Vector3f getPosition() const;
 	Vector4f getNearFar() const;
 	Vector3f getPositionRH() const;

@@ -66,7 +66,7 @@ PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, co
 PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs = 5, float radius = 0.05f );
 
 PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt,
-                       int subdivs = 0, ReverseFlag rf = ReverseFlag::False );
+                       int subdivs = 0, ReverseFlag rf = ReverseFlag::False, const std::vector<C4f>& _vertexColors = {} );
 
 ShapeType shapeTypeFromString( const std::string& value );
 std::string shapeTypeToString( ShapeType value );

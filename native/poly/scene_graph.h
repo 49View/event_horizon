@@ -97,8 +97,8 @@ public:
 
     void init();
     GeomSP getNode( const UUID& _uuid );
-    void addNode( GeomSP _node );
-    void addNode( const UUID& _uuid );
+    void addNode( GeomSP _node, int _nodeBucket );
+    void addNode( const UUID& _uuid, int _nodeBucket );
     void removeNode( const UUID& _uuid );
     void removeNode( GeomSP _node );
 
@@ -407,9 +407,7 @@ public:
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
                 elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
                 B<GRB>( gb.Name() ).addIM( elem );
-                if ( !gb.elemInjFather ) addNode(elem);
             }
-            return elem;
         } else {
             if ( auto elemToClone = get<Geom>(gb.dataTypeHolder.nameId); elemToClone ) {
                 elem = EF::clone(elemToClone);
@@ -425,8 +423,10 @@ public:
                         }
                     });
                 }
-                if ( !gb.elemInjFather ) addNode(elem);
             }
+        }
+        if ( !gb.elemInjFather ) {
+            addNode(elem, gb.bucketIndex);
         }
         return elem;
     }

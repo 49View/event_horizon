@@ -64,7 +64,7 @@ public:
 
     const SceneScreenBox& Box( const std::string& _key ) const;
 
-    Rect2f& BoxUpdateAndGet( const std::string& _key );
+    [[maybe_unused]] [[maybe_unused]] Rect2f& BoxUpdateAndGet( const std::string& _key );
 
     void toggleVisible( const std::string& _key );
 
