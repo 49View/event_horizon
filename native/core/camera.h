@@ -104,9 +104,9 @@ public:
 	void setNearClipPlaneZClampEdit2d( float _value ) { mNearClipPlaneZClampEdit2d = _value; }
 	void setFarClipPlaneZClampEdit2d( float _value ) { mFarClipPlaneZClampEdit2d = _value;}
 
-    void setNearClipPlane( float _value ) { mNearClipPlaneZ = _value; }
-    void setFarClipPlane( float _value ) { mFarClipPlaneZ = _value;}
-    void setNearFarClipPlane( float _near, float _far ) { mNearClipPlaneZ = _near; mFarClipPlaneZ = _far; }
+    void setNearClipPlane( float _value );
+    void setFarClipPlane( float _value );
+    void setNearFarClipPlane( float _near, float _far );
 
     const CameraSpatials& getSpatials() const;
 	Vector3f getPosition() const;

@@ -417,6 +417,7 @@ Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NameP
 
     ViewPort(_viewport);
     mTarget = V3f::Z_AXIS;
+    mNearClipPlaneZ = 0.05f;
 
     spatials.qangle = std::make_shared<AnimType<Quaternion>>(Quaternion{ Vector3f::ZERO }, Name() + "_Angle");
     spatials.mPos = std::make_shared<AnimType<Vector3f>>(Vector3f::ZERO, Name() + "_Pos");
@@ -917,5 +918,21 @@ bool Camera::LockAtWalkingHeight() const { return mLockAtWalkingHeight; }
 void Camera::LockAtWalkingHeight( bool val ) { mLockAtWalkingHeight = val; }
 void Camera::LockScrollWheelMovements( bool _val ) { mbLockScrollWheelMovements = _val; }
 bool Camera::areScrollWheelMovementsLocked() const { return mbLockScrollWheelMovements; }
+
+void Camera::setNearClipPlane( float _value ) {
+    mNearClipPlaneZ = _value;
+    calcProjectionMatrix();
+}
+
+void Camera::setFarClipPlane( float _value ) {
+    mFarClipPlaneZ = _value;
+    calcProjectionMatrix();
+}
+
+void Camera::setNearFarClipPlane( float _near, float _far ) {
+    mNearClipPlaneZ = _near;
+    mFarClipPlaneZ = _far;
+    calcProjectionMatrix();
+}
 
 

@@ -8,6 +8,7 @@
 #include <core/util_range.hpp>
 #include <core/camera.h>
 #include <core/camera_rig.hpp>
+#include <core/resources/entity_factory.hpp>
 #include <core/raw_image.h>
 #include <core/suncalc/sun_builder.h>
 #include <core/streaming_mediator.hpp>
@@ -460,12 +461,13 @@ V4f RLTargetPBR::mainDirectionLightValue() const {
 void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
     cb.startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
-    cb.setCameraUniforms(cameraRig->getCamera());
+    auto currentCamera = cameraRig->getCamera();
+    cb.setCameraUniforms(currentCamera);
     calcShadowMapsBBox();
     rr.LM()->setUniforms(Vector3f::ZERO, smm, mainDirectionLightValue());
 
     bool bAddProbe = mSkybox && mSkybox->precalc(0.0f);
-    setDirtyCumulative(S::PBR, cameraRig->getCamera()->isDirty() || bAddProbe);
+    setDirtyCumulative(S::PBR, currentCamera->isDirty() || bAddProbe);
 
     setDirty(S::PBR, true);
     if ( bAddProbe ) {
@@ -494,14 +496,34 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
 
             for ( const auto&[k, vl] : rr.CL() ) {
                 if ( isKeyInRange(k, CheckEnableBucket::True) ) {
-                    rr.addToCommandBuffer(vl.mVList, cameraRig.get());
+                    rr.addToCommandBuffer(vl.mVList, currentCamera.get());
                 }
             }
             for ( const auto&[k, vl] : rr.CL() ) {
                 if ( isKeyInRange(k, CheckEnableBucket::True) ) {
-                    rr.addToCommandBuffer(vl.mVListTransparent, cameraRig.get());
+                    rr.addToCommandBuffer(vl.mVListTransparent, currentCamera.get());
                 }
             }
+
+//            cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
+//            currentCamera->setNearFarClipPlane(1.0f, 2000.0f);
+//            cb.setCameraUniforms(currentCamera);
+//            for ( const auto&[k, vl] : rr.CL() ) {
+//                if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) &&
+//                     !hiddenCB(k) ) {
+//                    rr.addToCommandBuffer(vl.mVList, currentCamera.get());
+//                }
+//            }
+//            for ( const auto&[k, vl] : rr.CL() ) {
+//                if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) &&
+//                     !hiddenCB(k) ) {
+//                    rr.addToCommandBuffer(vl.mVListTransparent, currentCamera.get());
+//                }
+//            }
+//
+//            cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
+//            currentCamera->setNearFarClipPlane(0.01f, 100.0f);
+//            cb.setCameraUniforms(currentCamera);
         }
 
         cb.startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);

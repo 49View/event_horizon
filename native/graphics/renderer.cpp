@@ -560,11 +560,10 @@ void Renderer::addToCommandBuffer( const CommandBufferLimitsT _entry ) {
 }
 
 void Renderer::addToCommandBuffer( VPListContainerCRef _map,
-                                   CameraRig *_cameraRig,
+                                   const Camera* cam,
                                    std::shared_ptr<RenderMaterial> _forcedMaterial,
                                    Program *_forceProgram,
                                    float _alphaDrawThreshold ) {
-    Camera *cam = _cameraRig ? _cameraRig->getCamera().get() : nullptr;
     bool addVP = true;
     for ( const auto& vp : _map ) {
         if ( vp->isHidden() ) {

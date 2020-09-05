@@ -16,6 +16,8 @@
 #include <graphics/shadowmap_manager.h>
 #include <core/math/anim_type.hpp>
 
+class Camera;
+
 struct DCircle {
 };
 struct DCircleFilled {
@@ -271,7 +273,7 @@ public:
 
     void addToCommandBuffer( CommandBufferLimitsT _entry );
     void addToCommandBuffer( VPListContainerCRef _map,
-                             CameraRig *_cameraRig = nullptr,
+                             const Camera *_cameraRig = nullptr,
                              std::shared_ptr<RenderMaterial> _forcedMaterial = nullptr,
                              Program *_forceProgram = nullptr,
                              float _alphaDrawThreshold = 0.0f );

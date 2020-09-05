@@ -8,6 +8,7 @@ mat3 shVertexData() {
    vec4 pos4 = vec4( a_position, 1.0 );
    v_texCoord = a_t1;
    v_texCoord2 = a_tuv2;
+   v_color = a_t5;
 
    //	mat3 modelMatrix3x3 = mat3(transpose(inverse(u_modelMatrix)));//mat3( u_modelMatrix );
    mat3 modelMatrix3x3 = mat3( u_modelMatrix );
