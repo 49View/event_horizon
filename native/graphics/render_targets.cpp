@@ -133,7 +133,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     auto cubeMapRig = addCubeMapRig("cubemapRig", _at, Rect2f(V2fc::ZERO, V2f{ preFilterSize }, true));
 
     auto probe = std::make_shared<RLTargetCubeMap>(cubeMapRig, rr.getProbing(preFilterSize), rr);
-    probe->render(probeRenderTarget, preFilterSize, 0, [&]() {
+    probe->render(probeRenderTarget, preFilterSize, 0, [&](CubeMapRenderFunctionParams) {
         mSkybox->render();
         for ( const auto&[k, vl] : rr.CL() ) {
             if ( isKeyInRange(k) ) {
@@ -146,7 +146,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     auto cubeMapRigConvolution = addCubeMapRig("cubemapRigConvolution", Vector3f::ZERO,
                                                Rect2f(V2fc::ZERO, V2f{ 32 }, true));
     auto convolutionProbe = std::make_shared<RLTargetCubeMap>(cubeMapRigConvolution, rr.getProbing(32), rr);
-    convolutionProbe->render(convolutionRT, 32, 0, [&]() {
+    convolutionProbe->render(convolutionRT, 32, 0, [&](CubeMapRenderFunctionParams) {
         rr.CB_U().pushCommand({ CommandBufferCommandName::depthTestFalse });
         rr.CB_U().pushCommand({ CommandBufferCommandName::cullModeFront });
         mConvolution->render(probeRenderTarget);
@@ -162,7 +162,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
         auto preFilterProbe = std::make_shared<RLTargetCubeMap>(cubeMapRigPre, rr.getProbing(fbSize), rr);
         auto lIBLPrefilterSpecular = std::make_unique<PrefilterSpecularMap>(rr);
 
-        preFilterProbe->render(preFilterSpecularRT, fbSize, m, [&]() {
+        preFilterProbe->render(preFilterSpecularRT, fbSize, m, [&](CubeMapRenderFunctionParams) {
             rr.CB_U().pushCommand({ CommandBufferCommandName::depthTestFalse });
             rr.CB_U().pushCommand({ CommandBufferCommandName::cullModeFront });
             float roughness = (float) m / (float) ( preFilterMipMaps - 1 );
@@ -466,7 +466,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     calcShadowMapsBBox();
     rr.LM()->setUniforms(Vector3f::ZERO, smm, mainDirectionLightValue());
 
-    bool bAddProbe = mSkybox && mSkybox->precalc(0.0f);
+    bool bAddProbe = mSkybox && mSkybox->preCalc(0.0f);
     setDirtyCumulative(S::PBR, currentCamera->isDirty() || bAddProbe);
 
     setDirty(S::PBR, true);
@@ -504,26 +504,6 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                     rr.addToCommandBuffer(vl.mVListTransparent, currentCamera.get());
                 }
             }
-
-//            cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
-//            currentCamera->setNearFarClipPlane(1.0f, 2000.0f);
-//            cb.setCameraUniforms(currentCamera);
-//            for ( const auto&[k, vl] : rr.CL() ) {
-//                if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) &&
-//                     !hiddenCB(k) ) {
-//                    rr.addToCommandBuffer(vl.mVList, currentCamera.get());
-//                }
-//            }
-//            for ( const auto&[k, vl] : rr.CL() ) {
-//                if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) &&
-//                     !hiddenCB(k) ) {
-//                    rr.addToCommandBuffer(vl.mVListTransparent, currentCamera.get());
-//                }
-//            }
-//
-//            cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
-//            currentCamera->setNearFarClipPlane(0.01f, 100.0f);
-//            cb.setCameraUniforms(currentCamera);
         }
 
         cb.startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
@@ -745,6 +725,8 @@ RLTargetCubeMap::render( std::shared_ptr<Texture> _renderToTexture, int cmsize, 
     for ( uint32_t t = 0; t < 6; t++ ) {
         rr.CB_U().startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
         cameraRig[t]->setViewport(lViewport);
+        cameraRig[t]->getCamera()->setNearFarClipPlane(1.0f, 2000.0f);
+
         rr.CB_U().setFramebufferTexture(
                 FrameBufferTextureValues{ indexToFBT(t),
                                           _renderToTexture->getHandle(),
@@ -752,6 +734,6 @@ RLTargetCubeMap::render( std::shared_ptr<Texture> _renderToTexture, int cmsize, 
                                           cmsize, cmsize });
         rr.CB_U().pushCommand({ CommandBufferCommandName::colorBufferBindAndClear });
         rr.CB_U().setCameraUniforms(cameraRig[t]->getCamera());
-        rcb();
+        rcb(cameraRig[t]->getCamera().get());
     }
 }

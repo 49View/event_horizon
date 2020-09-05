@@ -172,6 +172,8 @@ void Renderer::init() {
     // add cascades framebuffer for downsampling, as OpenGLES does not support difference between render_frame_buffer
     // sizes and render target texture sizes on framebuffer, or at least this seems to be the case in my observations
 
+    mProbingsFB.emplace( 2048, FrameBufferBuilder{ *this, "Probing2048" }.size( 2048 ).buildSimple());
+    mProbingsFB.emplace( 1024, FrameBufferBuilder{ *this, "Probing1024" }.size( 1024 ).buildSimple());
     mProbingsFB.emplace( 512, FrameBufferBuilder{ *this, "Probing512" }.size( 512 ).buildSimple());
     mProbingsFB.emplace( 256, FrameBufferBuilder{ *this, "Probing256" }.size( 256 ).buildSimple());
     mProbingsFB.emplace( 128, FrameBufferBuilder{ *this, "Probing128" }.size( 128 ).buildSimple());

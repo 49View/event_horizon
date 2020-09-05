@@ -873,7 +873,7 @@ CameraControlType Camera::Mode() const {
 }
 
 Vector4f Camera::getNearFar() const {
-    return V4f{ mNearClipPlaneZ, mFarClipPlaneZ, spatials.mFov->value, 1.0f };
+    return V4f{ mNearClipPlaneZ, mFarClipPlaneZ, spatials.mFov->value, mFarClipPlaneZ*0.95f };
 }
 
 std::vector<V3f> Camera::frustumFarViewPort() const {

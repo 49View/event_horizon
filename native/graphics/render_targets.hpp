@@ -8,33 +8,19 @@
 #include <graphics/render_list.h>
 
 class Framebuffer;
-
 class CommandBuffer;
-
 class CameraRig;
-
 class ShaderManager;
-
 class Renderer;
-
 class CommandBufferList;
-
 class ShadowMapManager;
-
 class Skybox;
-
 class CubeEnvironmentMap;
-
 class PrefilterSpecularMap;
-
 class PrefilterBRDF;
-
 class RLTarget;
-
 class Camera;
-
 class SunBuilder;
-
 struct FrameBufferTextureValues;
 
 enum class RenderTargetType {

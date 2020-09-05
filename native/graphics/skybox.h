@@ -35,19 +35,19 @@ struct SkyBoxInitParams {
 
 class CubeEnvironmentMap : public RenderModule {
 public:
-	enum class InifinititeSkyBox {
+	enum class InfiniteSkyBox {
 		True,
 		False
 	};
 	using RenderModule::RenderModule;
-	explicit CubeEnvironmentMap( Renderer& rr, InifinititeSkyBox mbInfiniteSkyboxMode = InifinititeSkyBox::False );
+	explicit CubeEnvironmentMap( Renderer& rr, InfiniteSkyBox mbInfiniteSkyboxMode = InfiniteSkyBox::False );
 
 	void render( std::shared_ptr<Texture> cmt );
-	bool InfiniteSkyboxMode() const {
-		return mbInfiniteSkyboxMode == InifinititeSkyBox::True;
+	[[nodiscard]] bool InfiniteSkyboxMode() const {
+		return mbInfiniteSkyboxMode == InfiniteSkyBox::True;
 	}
 	void InfiniteSkyboxMode( bool _infiniteSkyboxMode ) {
-		mbInfiniteSkyboxMode = _infiniteSkyboxMode ? InifinititeSkyBox::True : InifinititeSkyBox::False;
+		mbInfiniteSkyboxMode = _infiniteSkyboxMode ? InfiniteSkyBox::True : InfiniteSkyBox::False;
 	}
     floata& DeltaInterpolation() {
 	    return mDeltaInterpolation;
@@ -55,7 +55,7 @@ public:
 
 private:
 	void init();
-	InifinititeSkyBox mbInfiniteSkyboxMode = InifinititeSkyBox::False;
+	InfiniteSkyBox mbInfiniteSkyboxMode = InfiniteSkyBox::False;
 	floata mDeltaInterpolation;
 };
 
@@ -66,7 +66,7 @@ public:
 	Skybox( Renderer& rr, const SkyBoxInitParams& mode );
 
 	void render();
-    bool precalc(float _sunHDRMult);
+    bool preCalc( float _sunHDRMult);
 
     std::shared_ptr<Texture> getSkyboxTexture() { return mSkyboxTexture; }
 
@@ -76,6 +76,7 @@ private:
 	void equirectangularTextureInit( const std::vector<std::string>& params );
 private:
 	SkyBoxMode mode = SkyBoxMode::CubeProcedural;
+    std::shared_ptr<VPList> mVPListInfiniteIshPlane;
 	std::unique_ptr<CubeEnvironmentMap> mCubeMapRender;
 	std::shared_ptr<Texture> mSkyboxTexture;
     CubeMapRigContainer cubeMapRig;
@@ -94,16 +95,16 @@ class PrefilterSpecularMap : public RenderModule {
 public:
 	using RenderModule::RenderModule;
 	explicit PrefilterSpecularMap( Renderer& rr );
-    void render( std::shared_ptr<Texture> cmt, const float roughness );
+    void render( std::shared_ptr<Texture> cmt, float roughness );
 private:
 	void init();
 };
 
-class PrefilterBRDF : public RenderModule {
+class [[maybe_unused]] PrefilterBRDF : public RenderModule {
 public:
 	using RenderModule::RenderModule;
 	void render();
-	explicit PrefilterBRDF( Renderer& rr );
+    [[maybe_unused]] explicit PrefilterBRDF( Renderer& rr );
 private:
 	void init();
 };

@@ -34,7 +34,8 @@ class Camera;
 struct FrameBufferTextureValues;
 
 using MVList = std::map<std::string, std::shared_ptr<VPList>>;
-using CubeMapRenderFunction = std::function<void()>;
+using CubeMapRenderFunctionParams = const Camera*;
+using CubeMapRenderFunction = std::function<void(CubeMapRenderFunctionParams)>;
 
 //#define USE_UIBLITBUFFER 1
 

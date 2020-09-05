@@ -331,7 +331,7 @@ vec3 ambient = kD * Lo * Lo * visibility; //kD * Lo * ao;// * visibility;
 
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
 float fogZ = length(u_eyePos-Position_worldspace);
-float fog = 1.0-(smoothstep(30.,100.,fogZ)*1.0);
+float fog = 1.0-(smoothstep(u_nearFar[3],u_nearFar[1],fogZ)*1.0);
 
 finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
 

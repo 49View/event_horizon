@@ -2,6 +2,7 @@
 
 #include <core/math/poly_shapes.hpp>
 #include <core/camera_utils.hpp>
+#include <core/util_range.hpp>
 #include <graphics/vertex_processing.h>
 #include <graphics/framebuffer.h>
 #include <graphics/renderer.h>
@@ -22,7 +23,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     invalidate();
     PolyStruct sp;
 
-    mCubeMapRender = std::make_unique<CubeEnvironmentMap>(rr, CubeEnvironmentMap::InifinititeSkyBox::True);
+    mCubeMapRender = std::make_unique<CubeEnvironmentMap>(rr, CubeEnvironmentMap::InfiniteSkyBox::True);
 
     auto mat = std::make_shared<HeterogeneousMap>();
     switch ( mode ) {
@@ -49,24 +50,48 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     std::string skyBoxName = "skybox";
     mVPList = VPBuilder<Pos3dStrip>{ rr, sm, skyBoxName }.p(colorStrip).n(skyBoxName).build();
 
-    auto trd = ImageParams{}.setSize(512).format(PIXEL_FORMAT_HDR_RGBA_16).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto trd = ImageParams{}.setSize(2048).format(PIXEL_FORMAT_HDR_RGBA_16).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     mSkyboxTexture = rr.TM()->addCubemapTexture(TextureRenderData{ skyBoxName, trd }
                                                         .setGenerateMipMaps(false)
                                                         .setIsFramebufferTarget(true));
-    cubeMapRig = addCubeMapRig("cubemapRig", V3f::ZERO, Rect2f(V2f{ 512 }));
+    cubeMapRig = addCubeMapRig("cubemapRig", V3f{ 0.0f, 0.0f, 0.0f }, Rect2f(V2f{ trd.width }));
+
+    // Infinite plane
+//        sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
+//                         GT::Scale(5000.0f, 0.1f, 5000.0f));
+
 
 }
 
-bool Skybox::precalc( float _sunHDRMult ) {
+bool Skybox::preCalc( float _sunHDRMult ) {
     if ( invalidated() ) {
-        auto probe = std::make_shared<RLTargetCubeMap>(cubeMapRig, rr.getProbing(512), rr);
-        probe->render(mSkyboxTexture, 512, 0, [&]() {
+        auto probe = std::make_shared<RLTargetCubeMap>(cubeMapRig, rr.getProbing(mSkyboxTexture->getWidth()), rr);
+        probe->render(mSkyboxTexture, mSkyboxTexture->getWidth(), 0, [&](CubeMapRenderFunctionParams cam) {
             mVPList->setMaterialConstant(UniformNames::sunHRDMult, _sunHDRMult);
             rr.CB_U().pushCommand({ CommandBufferCommandName::depthTestLEqual });
             rr.CB_U().pushCommand({ CommandBufferCommandName::cullModeFront });
             rr.CB_U().pushVP(mVPList);
             rr.CB_U().pushCommand({ CommandBufferCommandName::cullModeBack });
             rr.CB_U().pushCommand({ CommandBufferCommandName::depthTestLess });
+
+//            cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
+//            currentCamera->setNearFarClipPlane(1.0f, 2000.0f);
+//            cb.setCameraUniforms(currentCamera);
+            for ( const auto&[k, vl] : rr.CL() ) {
+                if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) ) {
+                    rr.addToCommandBuffer(vl.mVList, cam);
+                }
+            }
+            for ( const auto&[k, vl] : rr.CL() ) {
+                if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) ) {
+                    rr.addToCommandBuffer(vl.mVListTransparent, cam);
+                }
+            }
+
+//            cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
+//            currentCamera->setNearFarClipPlane(0.01f, 100.0f);
+//            cb.setCameraUniforms(currentCamera);
+
         });
         validated();
         return true;
@@ -96,7 +121,7 @@ void CubeEnvironmentMap::init() {
             cubeEnvName).build();
 }
 
-CubeEnvironmentMap::CubeEnvironmentMap( Renderer& rr, CubeEnvironmentMap::InifinititeSkyBox mbInfiniteSkyboxMode ) :
+CubeEnvironmentMap::CubeEnvironmentMap( Renderer& rr, CubeEnvironmentMap::InfiniteSkyBox mbInfiniteSkyboxMode ) :
         RenderModule(rr), mbInfiniteSkyboxMode(mbInfiniteSkyboxMode) {
     init();
 }
@@ -175,6 +200,6 @@ void PrefilterBRDF::render() {
     rr.CB_U().pushVP(rr.BRDFTarget()->VP());
 }
 
-PrefilterBRDF::PrefilterBRDF( Renderer& rr ) : RenderModule(rr) {
+[[maybe_unused]] PrefilterBRDF::PrefilterBRDF( Renderer& rr ) : RenderModule(rr) {
     init();
 }
