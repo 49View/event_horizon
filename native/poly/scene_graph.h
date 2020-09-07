@@ -106,8 +106,6 @@ public:
 
     void cmdChangeMaterialTag( const std::vector<std::string>& _params );
     void cmdChangeMaterialColorTag( const std::vector<std::string>& _params );
-    void cmdCreateGeometry( const std::vector<std::string>& _params );
-    void cmdRemoveGeometry( const std::vector<std::string>& _params );
     void cmdLoadObject( const std::vector<std::string>& _params );
     void cmdCalcLightmaps( const std::vector<std::string>& _params );
     void cmdChangeTime( const std::vector<std::string>& params );
@@ -498,6 +496,8 @@ protected:
         }
     }
 
+    void getNodeRec( const UUID& _uuid, const GeomSP& _node, GeomSP& ret );
+
     void genericCallbacks();
     void realTimeCallbacks();
     void loadCallbacks();
@@ -513,7 +513,7 @@ public:
     void clearGMNodes();
     const ResourceRef& getCurrLoadedEntityId() const;
     void setMaterialRemap( const MaterialMap& materialRemap );
-    [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
+    [[maybe_unused]] [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
     void HODResolve( const DependencyList& deps, HODResolverCallback ccf );
 
 protected:

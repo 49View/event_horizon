@@ -84,11 +84,22 @@ void SceneGraph::removeNode( GeomSP _node ) {
     }
 }
 
-GeomSP SceneGraph::getNode( const UUID& _uuid ) {
-    if ( auto it = nodes.find(_uuid); it != nodes.end()) {
-        return it->second;
+void SceneGraph::getNodeRec( const UUID& _uuid, const GeomSP& _node, GeomSP& ret ) {
+    if ( _node->UUiDCopy() != _uuid ) {
+        for ( const auto& c : _node->Children()) {
+            getNodeRec(_uuid, c, ret );
+        }
+    } else {
+        ret = _node;
     }
-    return nullptr;
+}
+
+GeomSP SceneGraph::getNode( const UUID& _uuid ) {
+    GeomSP ret = nullptr;
+    for ( const auto& [key, value] : nodes ) {
+        getNodeRec( _uuid, value, ret );
+    }
+    return ret;
 }
 
 void SceneGraph::addSkybox( const std::string& skyName ) {
@@ -322,26 +333,6 @@ void SceneGraph::cmdChangeMaterialColorTag( const std::vector<std::string>& _par
 //    changeMaterialColorTagImpl( _params );
 }
 
-void SceneGraph::cmdCreateGeometry( const std::vector<std::string>& _params ) {
-    auto st = shapeTypeFromString(_params[0]);
-    if ( st != ShapeType::None ) {
-        auto mat = ( _params.size() > 1 ) ? _params[1] : S::WHITE_PBR;
-//        GB{ *this, st }.m(mat).n("ucarcamagnu").g(9200).build();
-//        GB{ *this, Rect2f::IDENTITY, 0.0f }.build();
-//        std::vector<V3f> vlist { V3f::ZERO, V3f{0.8f, 0.0f, 0.0f}, V3f{0.2f, 0.0f, 0.9f } };
-//        GB{ *this, vlist, 0.2f }.build();
-//        auto pr = std::make_shared<Profile>();
-//        pr->createWire(0.1f, 6);
-//        auto prId = B<PB>("ProfileWire").addIM(pr);
-//        auto gref = GB{ *this, GeomBuilderType::follower, prId, vlist }.c(Color4f::RED).build();
-//        addNode( gref );
-    }
-}
-
-void SceneGraph::cmdRemoveGeometry( const std::vector<std::string>& _params ) {
-//    cmdRemoveGeometryImpl( _params );
-}
-
 void SceneGraph::cmdLoadObject( const std::vector<std::string>& _params ) {
 //    cmdloadObjectImpl( _params );
 }
@@ -392,7 +383,7 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
     catch ( ... ) {
         return 0;
     }
-    return 0;
+    //return 0;
 }
 
 NodeGraphContainer& SceneGraph::Nodes() {
@@ -732,7 +723,7 @@ void SceneGraph::setMaterialRemap( const MaterialMap& _materialRemap ) {
     materialRemap = _materialRemap;
 }
 
-std::string SceneGraph::possibleRemap( const std::string& _key, const std::string& _value ) const {
+[[maybe_unused]] std::string SceneGraph::possibleRemap( const std::string& _key, const std::string& _value ) const {
 
     if ( const auto& it = materialRemap.find(_key + "," + _value); it != materialRemap.end()) {
         return it->second;
