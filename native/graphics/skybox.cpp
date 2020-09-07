@@ -50,7 +50,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     std::string skyBoxName = "skybox";
     mVPList = VPBuilder<Pos3dStrip>{ rr, sm, skyBoxName }.p(colorStrip).n(skyBoxName).build();
 
-    auto trd = ImageParams{}.setSize(2048).format(PIXEL_FORMAT_HDR_RGBA_16).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto trd = ImageParams{}.setSize(512).format(PIXEL_FORMAT_HDR_RGBA_16).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     mSkyboxTexture = rr.TM()->addCubemapTexture(TextureRenderData{ skyBoxName, trd }
                                                         .setGenerateMipMaps(false)
                                                         .setIsFramebufferTarget(true));
@@ -74,9 +74,6 @@ bool Skybox::preCalc( float _sunHDRMult ) {
             rr.CB_U().pushCommand({ CommandBufferCommandName::cullModeBack });
             rr.CB_U().pushCommand({ CommandBufferCommandName::depthTestLess });
 
-//            cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
-//            currentCamera->setNearFarClipPlane(1.0f, 2000.0f);
-//            cb.setCameraUniforms(currentCamera);
             for ( const auto&[k, vl] : rr.CL() ) {
                 if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) ) {
                     rr.addToCommandBuffer(vl.mVList, cam);
@@ -87,11 +84,6 @@ bool Skybox::preCalc( float _sunHDRMult ) {
                     rr.addToCommandBuffer(vl.mVListTransparent, cam);
                 }
             }
-
-//            cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
-//            currentCamera->setNearFarClipPlane(0.01f, 100.0f);
-//            cb.setCameraUniforms(currentCamera);
-
         });
         validated();
         return true;

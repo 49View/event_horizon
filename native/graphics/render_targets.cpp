@@ -725,7 +725,6 @@ RLTargetCubeMap::render( std::shared_ptr<Texture> _renderToTexture, int cmsize, 
     for ( uint32_t t = 0; t < 6; t++ ) {
         rr.CB_U().startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
         cameraRig[t]->setViewport(lViewport);
-        cameraRig[t]->getCamera()->setNearFarClipPlane(1.0f, 2000.0f);
 
         rr.CB_U().setFramebufferTexture(
                 FrameBufferTextureValues{ indexToFBT(t),
