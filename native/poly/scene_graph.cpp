@@ -147,7 +147,7 @@ MaterialThumbnail::MaterialThumbnail( SceneGraph *_sg, const Material& _mat ) : 
 
 void SceneGraph::materialsForGeomSocketMessage() {
     MatGeomSerData matSet{};
-    for ( const auto&[k, node] : Nodes()) {
+    for ( const auto&[k, node] : nodes) {
         LOGRS(node);
         for ( const auto& data : node->DataV()) {
             LOGRS("Data material: " << data.material);
@@ -161,7 +161,7 @@ void SceneGraph::materialsForGeomSocketMessage() {
 
 void SceneGraph::replaceMaterialOnNodes( const std::string& _key ) {
     LOGRS("OldMaterialRef: " << signalValueMap["source_material_id"]);
-    for ( auto&[k, node] : Nodes()) {
+    for ( auto&[k, node] : nodes) {
         for ( auto& data : node->DataVRef()) {
             auto mat = get<Material>(data.material);
             if ( mat->Key() == signalValueMap["source_material_id"] ) {
@@ -183,11 +183,11 @@ void SceneGraph::genericCallbacks() {
 void SceneGraph::clearGMNodes() {
     removeNode(GeomSP{});
     GM().clear();
-    Nodes().clear();
+    nodes.clear();
 };
 
 void SceneGraph::clearNodes() {
-    Nodes().clear();
+    nodes.clear();
 };
 
 void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup, bool bTakeScreenShot ) {
@@ -384,14 +384,6 @@ uint64_t SceneGraph::getGeomType( const std::string& _key ) const {
         return 0;
     }
     //return 0;
-}
-
-NodeGraphContainer& SceneGraph::Nodes() {
-    return nodes;
-}
-
-const NodeGraphContainer& SceneGraph::Nodes() const {
-    return nodes;
 }
 
 bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayIntersectCallback _callback ) {

@@ -349,8 +349,8 @@ public:
 
     void update();
 
-    NodeGraphContainer& Nodes();
-    const NodeGraphContainer& Nodes() const ;
+//    NodeGraphContainer& Nodes();
+//    const NodeGraphContainer& Nodes() const ;
 
     [[nodiscard]] bool nodeExists( const std::string& _name ) const;
 
