@@ -295,6 +295,7 @@ public:
     void useMotionBlur( bool _flag );
     void enableSunLighting( bool _flag );
     void enableSkybox( bool _value );
+    void setSkyboxCenter( const V3f& _value );
     void createSkybox( const SkyBoxInitParams& _skyboxParams );
     bool UseInfiniteHorizonForShadows() const { return mbUseInfiniteHorizonForShadows; }
     void UseInfiniteHorizonForShadows( bool val ) { mbUseInfiniteHorizonForShadows = val; }
@@ -327,6 +328,7 @@ protected:
     bool mbUseInfiniteHorizonForShadows = true;
     Vector3f mCachedSunPosition = Vector3f::ZERO;
     V3f mProbePosition = Vector3f{ 2.0f, 1.6f, 6.0f };
+    V3f mSkyboxCenter = V3f::ZERO;
     SkyBoxInitParams mSkyBoxParams;
     bool bEnableSkyBoxRendering = false;
     bool mbEnableSkybox = false;

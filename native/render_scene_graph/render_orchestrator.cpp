@@ -864,6 +864,13 @@ void RenderOrchestrator::useSkybox( bool _value ) {
     setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
 }
 
+void RenderOrchestrator::setSkyboxCenter( const V3f& _value ) {
+    if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
+        pbrTarget->setSkyboxCenter(_value);
+    }
+    setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
+}
+
 void RenderOrchestrator::useSunLighting( bool _value ) {
     if ( auto pbrTarget = dynamic_cast<RLTargetPBR *>( rr.getTarget(Name::Foxtrot).get() ); pbrTarget ) {
         pbrTarget->enableSunLighting(_value);

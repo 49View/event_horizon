@@ -440,12 +440,12 @@ void Camera::setPosition( const Vector3f& pos ) {
 
 void Camera::setProjectionMatrix( float fovyInDegrees, float aspectRatio, float znear, float zfar ) {
     mProjection.setPerspective(fovyInDegrees, aspectRatio, znear, zfar);
-    mFrustom.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
+    mFrustum.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
 }
 
 void Camera::setProjectionMatrix( const Matrix4f& val ) {
     mProjection = val;
-    mFrustom.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
+    mFrustum.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
 }
 
 void Camera::translate( const Vector3f& pos ) {
@@ -622,14 +622,14 @@ Matrix4f& Camera::MVP( const Matrix4f& model, CameraProjectionType cpType ) {
     return mMVP;
 }
 
-bool Camera::frustomClipping( const AABB& bbox ) const {
+bool Camera::frustumClipping( const AABB& bbox ) const {
     // Indexed for the 'index trick' later
     Vector3f box[] = { bbox.minPoint(), bbox.maxPoint() };
 
     // We have 6 planes defining the frustum
     static const int NUM_PLANES = 6;
-    const Plane3f *planes[NUM_PLANES] = { &mFrustom.n, &mFrustom.l, &mFrustom.r, &mFrustom.b, &mFrustom.t,
-                                          &mFrustom.f };
+    const Plane3f *planes[NUM_PLANES] = { &mFrustum.n, &mFrustum.l, &mFrustum.r, &mFrustum.b, &mFrustum.t,
+                                          &mFrustum.f };
 
     // We only need to do 6 point-plane tests
     for ( int i = 0; i < NUM_PLANES; ++i ) {
@@ -681,6 +681,7 @@ PickRayData Camera::rayViewportPickIntersection( const Vector2f& p1 ) const {
 void Camera::calcProjectionMatrix() {
     mProjection.setPerspective(spatials.mFov->value, mViewPort.ratio() * mAspectRatioMultiplier, mNearClipPlaneZ,
                                mFarClipPlaneZ);
+    mFrustum.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
 }
 
 void Camera::update() {
@@ -714,7 +715,7 @@ void Camera::update() {
         calcProjectionMatrix();
     }
 
-    mFrustom.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
+    mFrustum.calculateFromMVP(spatials.mPos->value, mView, mProjection, mViewPort);
 
     setDirty(oldViewMatrix != mView || oldProjectonMatrix != mProjection);
 }
@@ -878,7 +879,7 @@ Vector4f Camera::getNearFar() const {
 
 std::vector<V3f> Camera::frustumFarViewPort() const {
     std::vector<V3f> ret;
-    for ( int t = 0; t < 4; t++ ) ret.emplace_back(mFrustom.cornersFar[t]);
+    for ( int t = 0; t < 4; t++ ) ret.emplace_back(mFrustum.cornersFar[t]);
     return ret;
 }
 

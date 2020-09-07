@@ -572,7 +572,7 @@ void Renderer::addToCommandBuffer( VPListContainerCRef _map,
             continue;
         }
         if ( cam ) {
-            addVP = cam->frustomClipping( vp->BBox3d());
+            addVP = cam->frustumClipping(vp->BBox3d());
         } else {
             addVP = vp->tag() != SHADOW_MAGIC_TAG;
         }

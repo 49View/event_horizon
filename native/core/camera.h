@@ -87,7 +87,7 @@ public:
 	Matrix4f& MVP( const Matrix4f& model = Matrix4f::IDENTITY, CameraProjectionType cpType =
 	CameraProjectionType::Perspective );
 
-	[[nodiscard]] bool frustomClipping( const AABB& bbox ) const;
+	[[nodiscard]] bool frustumClipping( const AABB& bbox ) const;
 
 	[[nodiscard]] Matrix4f getViewMatrix() const;
 	[[nodiscard]] Matrix4f getProjectionMatrix() const;
@@ -154,7 +154,7 @@ private:
 
 private:
 	CameraControlType mMode = CameraControlType::Edit2d;
-	Frustum mFrustom{};
+	Frustum mFrustum{};
 
     float mAspectRatioMultiplier = 1.0f;
     float mNearClipPlaneZ = 0.01f;

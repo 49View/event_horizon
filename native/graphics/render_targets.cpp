@@ -466,7 +466,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     calcShadowMapsBBox();
     rr.LM()->setUniforms(Vector3f::ZERO, smm, mainDirectionLightValue());
 
-    bool bAddProbe = mSkybox && mSkybox->preCalc(0.0f);
+    bool bAddProbe = mSkybox && mSkybox->preCalc(0.0f, mSkyboxCenter);
     setDirtyCumulative(S::PBR, currentCamera->isDirty() || bAddProbe);
 
     setDirty(S::PBR, true);
@@ -616,6 +616,10 @@ const V3f& RLTargetPBR::getProbePosition() const {
 
 void RLTargetPBR::setProbePosition( const V3f& _probePosition ) {
     mProbePosition = _probePosition;
+}
+
+void RLTargetPBR::setSkyboxCenter( const V3f& _value ) {
+    mSkyboxCenter = _value;
 }
 
 RLTargetFB::RLTargetFB( std::shared_ptr<Framebuffer> _fbt, Renderer& _rr ) : RLTarget(_rr) {

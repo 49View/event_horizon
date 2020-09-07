@@ -66,7 +66,7 @@ public:
 	Skybox( Renderer& rr, const SkyBoxInitParams& mode );
 
 	void render();
-    bool preCalc( float _sunHDRMult);
+    bool preCalc( float _sunHDRMult, const Vector3f& _cubeMapCenter);
 
     std::shared_ptr<Texture> getSkyboxTexture() { return mSkyboxTexture; }
 

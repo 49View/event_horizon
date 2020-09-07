@@ -12,9 +12,9 @@
 void Skybox::equirectangularTextureInit( const std::vector<std::string>& params ) {
 
     PolyStruct sp = createGeomForCube(Vector3f::ZERO, Vector3f{ 1.0f });
-    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
+    std::unique_ptr<VFPos3d[]> vPos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                          sp.numIndices, vpos3d, std::move(sp.indices));
+                                                                          sp.numIndices, vPos3d, std::move(sp.indices));
 
 }
 
@@ -38,9 +38,9 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
             mat->assign(UniformNames::colorTexture, _textureName);
     }
 
-    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
+    std::unique_ptr<VFPos3d[]> vPos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                          sp.numIndices, vpos3d, std::move(sp.indices));
+                                                                          sp.numIndices, vPos3d, std::move(sp.indices));
 
 
     ShaderMaterial sm = mode == SkyBoxMode::EquirectangularTexture ?
@@ -54,7 +54,6 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     mSkyboxTexture = rr.TM()->addCubemapTexture(TextureRenderData{ skyBoxName, trd }
                                                         .setGenerateMipMaps(false)
                                                         .setIsFramebufferTarget(true));
-    cubeMapRig = addCubeMapRig("cubemapRig", V3f{ 0.0f, 0.0f, 0.0f }, Rect2f(V2f{ trd.width }), 1.0f, 2000.0f);
 
     // Infinite plane
 //        sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,
@@ -63,8 +62,10 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
 
 }
 
-bool Skybox::preCalc( float _sunHDRMult ) {
+bool Skybox::preCalc( float _sunHDRMult, const V3f& _cubeMapCenter ) {
     if ( invalidated() ) {
+        cubeMapRig = addCubeMapRig("cubemapRig", _cubeMapCenter * V3f::UP_AXIS, Rect2f(V2f{ mSkyboxTexture->getWidth() }), 1.0f, 2000.0f);
+
         auto probe = std::make_shared<RLTargetCubeMap>(cubeMapRig, rr.getProbing(mSkyboxTexture->getWidth()), rr);
         probe->render(mSkyboxTexture, mSkyboxTexture->getWidth(), 0, [&](CubeMapRenderFunctionParams cam) {
             mVPList->setMaterialConstant(UniformNames::sunHRDMult, _sunHDRMult);
@@ -103,9 +104,9 @@ void CubeEnvironmentMap::init() {
     auto sp = createGeomForCube(Vector3f::ZERO, Vector3f{ 1.0f });
     mDeltaInterpolation = std::make_shared<AnimType<float>>(1.0f, "deltaInterpolation");
 
-    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
+    std::unique_ptr<VFPos3d[]> vPos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                          sp.numIndices, vpos3d, std::move(sp.indices));
+                                                                          sp.numIndices, vPos3d, std::move(sp.indices));
 
     auto shaderName = InfiniteSkyboxMode() ? S::SKYBOX_CUBEMAP : S::PLAIN_CUBEMAP;
     std::string cubeEnvName = "cubeEnvMap-" + shaderName;
@@ -140,9 +141,9 @@ void CubeEnvironmentMap::render( std::shared_ptr<Texture> cmt ) {
 void ConvolutionEnvironmentMap::init() {
     auto sp = createGeomForCube(Vector3f::ZERO, Vector3f{ 1.0f });
 
-    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
+    std::unique_ptr<VFPos3d[]> vPos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                          sp.numIndices, vpos3d, std::move(sp.indices));
+                                                                          sp.numIndices, vPos3d, std::move(sp.indices));
 
     std::string cubeName = "cubeEnvMap";
     mVPList = VPBuilder<Pos3dStrip>{ rr, ShaderMaterial{ S::CONVOLUTION }, cubeName }.p(colorStrip).n(cubeName).build();
@@ -163,9 +164,9 @@ ConvolutionEnvironmentMap::ConvolutionEnvironmentMap( Renderer& rr ) : RenderMod
 void PrefilterSpecularMap::init() {
     auto sp = createGeomForCube(Vector3f::ZERO, Vector3f{ 1.0f });
 
-    std::unique_ptr<VFPos3d[]> vpos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
+    std::unique_ptr<VFPos3d[]> vPos3d = Pos3dStrip::vtoVF(sp.verts, sp.numVerts);
     std::shared_ptr<Pos3dStrip> colorStrip = std::make_shared<Pos3dStrip>(sp.numVerts, PRIMITIVE_TRIANGLES,
-                                                                          sp.numIndices, vpos3d, std::move(sp.indices));
+                                                                          sp.numIndices, vPos3d, std::move(sp.indices));
 
     std::string IBLName = "iblSpecularEnvMap";
     mVPList = VPBuilder<Pos3dStrip>{ rr, ShaderMaterial{ S::IBL_SPECULAR }, IBLName }.p(colorStrip).n(IBLName).build();
