@@ -54,7 +54,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     mSkyboxTexture = rr.TM()->addCubemapTexture(TextureRenderData{ skyBoxName, trd }
                                                         .setGenerateMipMaps(false)
                                                         .setIsFramebufferTarget(true));
-    cubeMapRig = addCubeMapRig("cubemapRig", V3f{ 0.0f, 0.0f, 0.0f }, Rect2f(V2f{ trd.width }));
+    cubeMapRig = addCubeMapRig("cubemapRig", V3f{ 0.0f, 0.0f, 0.0f }, Rect2f(V2f{ trd.width }), 1.0f, 2000.0f);
 
     // Infinite plane
 //        sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.15f,

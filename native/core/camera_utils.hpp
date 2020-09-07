@@ -39,9 +39,9 @@ enum CubemapFaces {
 };
 
 namespace ViewportToggles {
-    const static int None          		= 0;
-    const static int DrawWireframe 		= 1 << 0;
-    const static int DrawGrid      		= 1 << 1;
+    const static int None = 0;
+    const static int DrawWireframe = 1 << 0;
+    const static int DrawGrid = 1 << 1;
 }
 
 using ViewportTogglesT = int;
@@ -53,5 +53,7 @@ std::string cubemapFaceToString( const CubemapFaces cmf );
 
 // Rig utils
 using CubeMapRigContainer = std::array<std::shared_ptr<CameraRig>, 6>;
-CubeMapRigContainer addCubeMapRig( const std::string& _name, const Vector3f& _pos, const JMATH::Rect2f& _viewPort );
+CubeMapRigContainer
+addCubeMapRig( const std::string& _name, const Vector3f& _pos, const JMATH::Rect2f& _viewPort, float _nearClip = -1.0f,
+               float _farClip = -1.0f);
 std::string cubeRigName( int t, const std::string& _probeName );

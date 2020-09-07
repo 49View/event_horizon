@@ -21,7 +21,9 @@ std::string cubeRigName( int t, const std::string& _probeName ) {
 
 CubeMapRigContainer addCubeMapRig( const std::string& _name,
                                    const Vector3f& _pos,
-                                   const Rect2f& _viewPort) {
+                                   const Rect2f& _viewPort,
+                                   float _nearClip,
+                                   float _farClip ) {
 
     static std::vector<Vector3f> camAngles { CameraRigAngles::Right, CameraRigAngles::Left,
                                              CameraRigAngles::Top, CameraRigAngles::Bottom,
@@ -37,6 +39,9 @@ CubeMapRigContainer addCubeMapRig( const std::string& _name,
         c->getCamera()->setPosition( _pos );
         c->getCamera()->setQuat( quatCompose(camAngles[faceIndex]) );
         c->getCamera()->Mode( CameraControlType::Walk );
+        if ( _nearClip > 0.0f && _farClip > 0.0f ) {
+            c->getCamera()->setNearFarClipPlane(_nearClip, _farClip);
+        }
         c->getCamera()->update();
 
         ret[faceIndex] = c;
