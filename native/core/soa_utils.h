@@ -1135,7 +1135,7 @@ typedef VFA5<Vector3f, Vector2f, Vector3f, Vector3f, Vector3f> VFPosTexNorTanBin
 typedef VFA6<Vector3f, Vector2f, Vector3f, Vector3f, Vector3f, Vector4f> VFPosTexNorTanBinCol3d;
 typedef VFA6<Vector3f, Vector2f, Vector3f, Vector3f, Vector3f, Matrix3f> VFPosTexNorTanBinSH3d;
 
-typedef VFA7<Vector3f, Vector2f, Vector2f, Vector3f, Vector4f, Vector3f, Vector4f> PosTexNorTanBinUV2Col3d;
+typedef VFA7<Vector3f, Vector2f, Vector2f, Vector3f, Vector4f, Vector3f, Vector3f> PosTexNorTanBinUV2Col3d;
 
 typedef VFA8<Vector3f, Vector2f, Vector3f, Vector3f, Vector3f, Matrix3f, Matrix3f, Matrix3f, Vector4f>
         PosTexNorTanBinSHCol3d;

@@ -92,7 +92,7 @@ void VData::fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert
     }
 }
 
-void VData::fillColors( const std::vector<Vector4f>& _colors ) {
+void VData::fillColors( const std::vector<Vector3f>& _colors ) {
     vSoaData.resize( _colors.size() );
     for ( size_t t = 0; t < _colors.size(); t++ ) {
         vSoaData[t].a6 = _colors[t];
