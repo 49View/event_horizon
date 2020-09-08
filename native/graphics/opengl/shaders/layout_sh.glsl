@@ -5,7 +5,7 @@
        layout( location = 3 ) in vec3 a_t2;
        layout( location = 4 ) in vec4 a_t3;
        layout( location = 5 ) in vec3 a_t4;
-       layout( location = 6 ) in vec3 a_t5;
+       layout( location = 6 ) in vec4 a_t5;
 
     //    layout( location = 5 ) in vec3 shR1;
     //    layout( location = 6 ) in vec3 shR2;
@@ -26,7 +26,7 @@
        out vec3 v_norm;
        out vec3 v_tan;
        out vec3 v_bitan;
-       out vec3 v_color;
+       out vec4 v_color;
        out vec3 v_shadowmap_coord3;
       //  out vec4 v_t8;
 

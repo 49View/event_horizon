@@ -92,10 +92,16 @@ void VData::fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert
     }
 }
 
-void VData::fillColors( const std::vector<Vector3f>& _colors ) {
+void VData::fillColors( const std::vector<Vector4f>& _colors ) {
     vSoaData.resize( _colors.size() );
     for ( size_t t = 0; t < _colors.size(); t++ ) {
         vSoaData[t].a6 = _colors[t];
+    }
+}
+
+void VData::fillWithColor( const Vector4f& _color ) {
+    for (auto & t : vSoaData) {
+        t.a6 = _color;
     }
 }
 
@@ -242,7 +248,7 @@ void VData::checkBarycentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, u
 }
 
 void VData::addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector2f& _uv2, const Vector3f& _vn,
-                               const Vector4f& _vt, const Vector3f& _vb, const Vector3f& _v8 ) {
+                               const Vector4f& _vt, const Vector3f& _vb, const Vector4f& _v8 ) {
 
     BBox3d().expand(_vc);
     vSoaData.emplace_back( _vc, _uv, _uv2, _vn, _vt, _vb, _v8 );

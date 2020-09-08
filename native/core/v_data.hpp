@@ -33,7 +33,8 @@ public:
     void fillTangents( const std::vector<Vector3f>& _tangents, bool _bInvert = false );
     void fillTangents( const std::vector<Vector4f>& _tangents, bool _bInvert = false );
     void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
-    void fillColors( const std::vector<Vector3f>& _colors );
+    void fillColors( const std::vector<Vector4f>& _colors );
+    void fillWithColor( const Vector4f& _color );
 
     void flattenStride( void* ret, size_t _index, const Matrix4f* _mat = nullptr ) const;
 
@@ -51,7 +52,7 @@ public:
     void checkBarycentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, uint32_t pIndexEnd,
                                    uint32_t& pIndex, float& u, float& v );
     void addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector2f& _uv2, const Vector3f& _vn,
-                            const Vector4f& _vt, const Vector3f& _vb, const Vector3f& _v8 );
+                            const Vector4f& _vt, const Vector3f& _vb, const Vector4f& _v8 );
     void swapIndicesWinding( Primitive _pr );
 
     [[nodiscard]] const std::vector<uint32_t>&  getVIndices() const;

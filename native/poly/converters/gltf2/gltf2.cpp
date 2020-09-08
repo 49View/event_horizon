@@ -126,6 +126,7 @@ namespace GLTF2Service {
         geom->fillIndices( fillData<uint32_t>( *model, primitive.indices ));
 
         int64_t NTBFill = 0;
+        bool colorsFilled = false;
         constexpr uint64_t NORMAL_MASK = 2;
         constexpr uint64_t TANGENT_MASK = 4;
         constexpr uint64_t TEXCOORD_MASK = 1;
@@ -147,7 +148,10 @@ namespace GLTF2Service {
                 geom->fillUV( fillingUV, 0 );
                 geom->fillSetUV( fillingUV.size(), V2fc::ZERO, 1 ); // By default fill second uvs anyway
             } else if ( k == "TEXCOORD_1" ) {
-//                geom->fillUV( fillData<Vector2f>( *model, v ), 1 );
+                geom->fillUV( fillData<Vector2f>( *model, v ), 1 );
+            } else if ( k == "COLOR_0" ) {
+                geom->fillColors( fillData<Vector4f>( *model, v ) );
+                colorsFilled = true;
             }
         }
 
@@ -159,6 +163,10 @@ namespace GLTF2Service {
         } else {
             geom->calcBinormal();
         }
+        if ( !colorsFilled ) {
+            geom->fillWithColor(C4f::WHITE);
+        }
+
     }
 
     void addGeom( SceneGraph &_sg, IntermediateGLTF &_gltf, int meshIndex, int primitiveIndex, GeomSP hier ) {

@@ -685,7 +685,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     for ( auto& tr : mesh.triangles ) {
         ret.indices[t] = tr;
         if ( _vertexColors.empty() ) {
-            auto cv = V3f::ONE;// (t%3) == 0 ? Color4f::RED : ( (t%3) == 1 ? Color4f::GREEN : Color4f::BLUE );
+            auto cv = V4f::WHITE;// (t%3) == 0 ? Color4f::RED : ( (t%3) == 1 ? Color4f::GREEN : Color4f::BLUE );
             ret.colors[t] = cv;
         } else {
             ret.colors[t] = _vertexColors[tr];

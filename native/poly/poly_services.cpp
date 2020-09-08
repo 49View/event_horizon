@@ -460,8 +460,7 @@ void pushTriangle( VDataSP vdata,
 
     for ( auto t = 0; t < 3; t++ ) {
 //        auto cv = t == 0 ? Color4f::RED : ( t == 1 ? Color4f::GREEN : Color4f::BLUE );
-        auto cv = V3f::ONE;
-        vdata->addTriangleVertex(vco[t], vuvo[t], vuvo[t], vno[t], vto[t], vbo[t], cv);
+        vdata->addTriangleVertex(vco[t], vuvo[t], vuvo[t], vno[t], vto[t], vbo[t], C4f::WHITE);
     }
 }
 
