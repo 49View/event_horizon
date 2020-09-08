@@ -38,7 +38,7 @@ public:
     VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
     VPBuilder& t( std::shared_ptr<Matrix4f> _t ) { transformMatrix = _t; return *this; }
     VPBuilder& t( const Matrix4f& _t ) { transformMatrix = std::make_shared<Matrix4f>(_t); return *this; }
-    VPBuilder& b( std::shared_ptr<AABB> _value ) { bbox3d = _value; return *this; }
+    VPBuilder& b( const AABB* _value ) { bbox3d = _value; return *this; }
 
     auto build() {
         if ( bStraightRef ) {
@@ -81,7 +81,7 @@ private:
     std::shared_ptr<GPUVData> gpuDataSP;
     std::shared_ptr<RenderMaterial> renderMaterialSP;
     std::shared_ptr<Matrix4f> transformMatrix;
-    std::shared_ptr<AABB> bbox3d;
+    const AABB* bbox3d = nullptr;
     UUID uuid;
     std::string name;
     bool bStraightRef = false;

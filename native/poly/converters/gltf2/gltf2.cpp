@@ -352,6 +352,6 @@ namespace GLTF2Service {
 
         rootScene->calcCompleteBBox3d();
 
-        return rootScene->BBox3d()->isValid() ? rootScene : nullptr;
+        return rootScene->BBox3d().isValid() ? rootScene : nullptr;
     }
 }

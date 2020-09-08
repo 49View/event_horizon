@@ -125,17 +125,17 @@ protected:
 
 struct PFC{};
 
-template <typename T, typename B>
-class RecursiveTransformation : public Boxable<B>,
+template <typename T>
+class RecursiveTransformation : public Boxable,
                                 public NamePolicy<>,
                                 public UUIDable,
                                 public TransformNodeData,
-                                public std::enable_shared_from_this<RecursiveTransformation<T,B>> {
+                                public std::enable_shared_from_this<RecursiveTransformation<T>> {
 public:
 
-    using NodeSP = std::shared_ptr<RecursiveTransformation<T, B>>;
-    using NodeSPConst = std::shared_ptr<const RecursiveTransformation<T, B>>;
-    using NodeP = RecursiveTransformation<T, B>*;
+    using NodeSP = std::shared_ptr<RecursiveTransformation<T>>;
+    using NodeSPConst = std::shared_ptr<const RecursiveTransformation<T>>;
+    using NodeP = RecursiveTransformation<T>*;
 
     RESOURCE_CTORS(RecursiveTransformation);
     void bufferDecode( const unsigned char* rawData, size_t length ) {}
@@ -155,10 +155,10 @@ public:
     }
 
     // This ctor is effectively a "clone"
-    RecursiveTransformation( const RecursiveTransformation<T,B>& _source ) {
+    RecursiveTransformation( const RecursiveTransformation<T>& _source ) {
         addNodeRec( _source, nullptr );
     }
-    explicit RecursiveTransformation( const RecursiveTransformation<T,B>& _source, NodeP _father  ) {
+    explicit RecursiveTransformation( const RecursiveTransformation<T>& _source, NodeP _father  ) {
         addNodeRec( _source, _father );
     }
     // This ctor is effectively a "clone"
@@ -264,28 +264,22 @@ public:
     }
 
     JMATH::AABB calcCompleteBBox3dRec() {
-        if constexpr ( std::is_same_v<JMATH::AABB, B> ) {
-            this->BBox3d(AABB::INVALID);
-            if ( !data.empty() ) {
-                for ( auto & bd : data ) {
-                    this->BBox3d()->merge( bd.BBoxTransform( *mLocalHierTransform ) );
-                }
+        this->BBox3d(AABB::INVALID);
+        if ( !data.empty() ) {
+            for ( auto & bd : data ) {
+                this->BBox3d().merge( bd.BBoxTransform( *mLocalHierTransform ) );
             }
-
-            for ( auto& c : children ) {
-                this->BBox3d()->merge( c->calcCompleteBBox3dRec() );
-            }
-
-            return this->BBox3dCopy();
-        } else {
-            return AABB::INVALID;
         }
+
+        for ( auto& c : children ) {
+            this->BBox3d().merge( c->calcCompleteBBox3dRec() );
+        }
+
+        return this->BBox3dCopy();
     }
 
     void calcCompleteBBox3d() {
-        if constexpr ( std::is_same_v<B, AABB> ) {
-            this->BBox3d(calcCompleteBBox3dRec());
-        }
+        this->BBox3d(calcCompleteBBox3dRec());
     }
 
     void setTag( uint64_t _tag ) {
@@ -427,7 +421,7 @@ public:
     }
 
     NodeSP addChildren( const std::string& _name ) {
-        NodeSP node = std::make_shared<RecursiveTransformation<T,B>>();
+        NodeSP node = std::make_shared<RecursiveTransformation<T>>();
         node->Father( this );
         node->Name( _name );
         node->updateTransform();
@@ -440,7 +434,7 @@ public:
                             const R& rot = R::ZERO,
                             const Vector3f& scale = Vector3f::ONE ) {
         static_assert( std::is_same<R, Vector3f>::value || std::is_same<R, Quaternion>::value );
-        NodeSP node = std::make_shared<RecursiveTransformation<T,B>>(pos, rot, scale);
+        NodeSP node = std::make_shared<RecursiveTransformation<T>>(pos, rot, scale);
         node->Father( this->shared_from_this() );
         node->updateTransform( pos, rot, scale );
         children.push_back( node );
@@ -464,29 +458,29 @@ public:
 #define VisibleCallbackHide AnimEndCallback([this]() {this->setVisible( false );})
 
     void slideLeftIn( float _duration ) {
-        slide( _duration, V3f::X_AXIS_NEG, this->BBox3d()->calcWidth(), VisibleCallbackShow );
+        slide( _duration, V3f::X_AXIS_NEG, this->BBox3d().calcWidth(), VisibleCallbackShow );
     }
     void slideRightIn( float _duration ) {
-        slide( _duration, V3f::X_AXIS, this->BBox3d()->calcWidth(), VisibleCallbackShow );
+        slide( _duration, V3f::X_AXIS, this->BBox3d().calcWidth(), VisibleCallbackShow );
     }
     void slideUpIn( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::Y_AXIS_NEG, this->BBox3d()->calcHeight(), VisibleCallbackShow );
+        slide( _duration, V3f::Y_AXIS_NEG, this->BBox3d().calcHeight(), VisibleCallbackShow );
     }
     void slideDownIn( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::Y_AXIS, this->BBox3d()->calcHeight(), VisibleCallbackShow );
+        slide( _duration, V3f::Y_AXIS, this->BBox3d().calcHeight(), VisibleCallbackShow );
     }
 
     void slideLeftOut( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::ZERO,  this->BBox3d()->calcWidth(), VisibleCallbackHide);
+        slide( _duration, V3f::ZERO,  this->BBox3d().calcWidth(), VisibleCallbackHide);
     }
     void slideRightOut( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::X_AXIS,  this->BBox3d()->calcWidth(), VisibleCallbackHide );
+        slide( _duration, V3f::X_AXIS,  this->BBox3d().calcWidth(), VisibleCallbackHide );
     }
     void slideUpOut( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::Y_AXIS_NEG,  this->BBox3d()->calcHeight(), VisibleCallbackHide );
+        slide( _duration, V3f::Y_AXIS_NEG,  this->BBox3d().calcHeight(), VisibleCallbackHide );
     }
     void slideDownOut( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::Y_AXIS,  this->BBox3d()->calcHeight(), VisibleCallbackHide );
+        slide( _duration, V3f::Y_AXIS,  this->BBox3d().calcHeight(), VisibleCallbackHide );
     }
 
     void fadeTo( float _duration, float _value ) {
@@ -545,14 +539,14 @@ private:
         }
     }
 
-    void addNodeRec( const RecursiveTransformation<T,B>& _node, NodeP _father ) {
+    void addNodeRec( const RecursiveTransformation<T>& _node, NodeP _father ) {
         cloneData( _node, _father );
         for ( const auto& c : _node.Children() ) {
-            children.emplace_back( std::make_shared<RecursiveTransformation<T,B>>( c, this ) );
+            children.emplace_back( std::make_shared<RecursiveTransformation<T>>( c, this ) );
         }
     }
 
-    void cloneData( const RecursiveTransformation<T,B>& _source, NodeP _father ) {
+    void cloneData( const RecursiveTransformation<T>& _source, NodeP _father ) {
         assingNewUUID();
         father = _father;
         Name( _source.Name() );

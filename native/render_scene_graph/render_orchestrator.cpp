@@ -225,7 +225,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
                     u(geom->UUiD()).
                     g(geom->Tag()).
                     t(geom->getLocalHierTransform()).
-                    b(geom->BBox3d()).
+                    b(geom->BBox3dPtr()).
                     build();
             auto bucket = _geomAndBucket.second == GTBucket::Near ? CommandBufferLimits::PBRStart : CommandBufferLimits::PBRStartFar;
             this->RR().VPL(bucket, vp );

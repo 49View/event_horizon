@@ -204,7 +204,7 @@ namespace GLTF2Service {
 
         rootScene->calcCompleteBBox3d();
 
-        return *rootScene->BBox3d();
+        return rootScene->BBox3d();
     }
 
     V3f GLTFSize( const std::string& _key, const std::string& _path, const SerializableContainer& _array ) {

@@ -7,7 +7,7 @@
 #include <core/htypes_shared.hpp>
 #include <core/boxable.hpp>
 
-struct GeomData : public Boxable<JMATH::AABB> {
+struct GeomData : public Boxable {
     GeomData() = default;
     GeomData( ResourceRef vData, JMATH::AABB _bbox, ResourceRef material );
 

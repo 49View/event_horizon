@@ -49,7 +49,7 @@ ColorScheme::ColorScheme( const std::string& colorDescriptor ) {
 
 
 void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
-    auto ssBBox = bbox3d->front();
+    auto ssBBox = bbox3d.front();
     ssBBox.translate( V2fc::Y_AXIS_NEG * ssBBox.height() );
 
     if ( type() == UIT::separator_h() ) {
@@ -83,7 +83,7 @@ void UIElement::transform( float _duration, uint64_t _frameSkipper,
             KeyFramePair{ downtime, backgroundAnim.Pos() + _pos }
     };
 
-    bbox3d->front().translate( _pos.xy() );
+    bbox3d.front().translate( _pos.xy() );
 
     Timeline::play( backgroundAnim.pos, _frameSkipper, colDown, AnimUpdateCallback([this](float) {
         if ( backgroundVP ) backgroundVP->getTransform()->setTranslation( backgroundAnim.Pos() );
@@ -167,12 +167,12 @@ bool UIElement::hasActiveStatus() const {
 
 bool UIElement::contains( const V2f& _point ) const {
     if ( !bVisible ) return false;
-    return bbox3dT->containsXY( _point );
+    return bbox3dT.containsXY( _point );
 }
 
 bool UIElement::containsActive( const V2f& _point ) const {
     if ( !hasActiveStatus() ) return false;
-    return bbox3dT->containsXY( _point );
+    return bbox3dT.containsXY( _point );
 }
 
 void UIElement::singleTap() {
@@ -607,7 +607,7 @@ void UIViewContainer::finalize( const MPos2d& _at ) {
     fakeAA.scaleY(boundaries.y() );
     innerPaddedX = boundaries.x() - ( padding.x() * 2.0f );
     for ( auto& wle : wholeLiners ) {
-        wle->DataRef().BBox3d()->setMaxPoint(V3f{innerPaddedX, wle->DataRef().BBox3d()->maxPoint().y(), 0.0f} );
+        wle->DataRef().BBox3d().setMaxPoint(V3f{innerPaddedX, wle->DataRef().BBox3d().maxPoint().y(), 0.0f} );
     }
     Node()->DataRef().BBox3d( fakeAA );
     Node()->updateTransform( _at() );

@@ -341,7 +341,7 @@ public:
     }
 
     std::tuple<std::string, V3f> getGeomNameSize( const ResourceRef& _ref ) const {
-        return { _ref, get<Geom>( _ref )->BBox3dPtr()->size() };
+        return { _ref, get<Geom>( _ref )->BBox3d().size() };
     }
 
     void mapGeomType( uint64_t _value, const std::string& _key );

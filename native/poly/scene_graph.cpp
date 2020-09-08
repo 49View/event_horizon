@@ -398,7 +398,7 @@ bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
         float tn = 0.0f;
         float tf = std::numeric_limits<float>::max();
         auto ldir = normalize(_far - _near);
-        if ( box->intersectLine(_near, ldir, tn, tf)) {
+        if ( box.intersectLine(_near, ldir, tn, tf)) {
             _callback(v, tn);
             ret = true;
             break;

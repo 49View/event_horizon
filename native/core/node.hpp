@@ -46,7 +46,7 @@ inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { ret
 
 template <typename D>
 class Node : public Animable,
-             public virtual Boxable<JMATH::AABB>,
+             public virtual Boxable,
              public virtual UUIDable,
              public virtual NamePolicy<>,
              public std::enable_shared_from_this<Node<D>> {

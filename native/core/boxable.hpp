@@ -13,38 +13,30 @@ struct EmptyBox {
     static EmptyBox MINVALID() { return EmptyBox{}; };
 };
 
-struct BBoxProjection3d {};
-struct BBoxProjection2d {};
-
-template <typename T = JMATH::AABB, typename D = BBoxProjection3d>
 class Boxable {
 public:
-    Boxable() {
-        bbox3d = std::make_shared<T>();
-        bbox3dT = std::make_shared<T>();
+    [[nodiscard]] const AABB& BBox3d() const { return bbox3d; }
+    [[nodiscard]] const AABB* BBox3dPtr() const { return &bbox3d; }
+    AABB& BBox3d() { return bbox3d; }
+    AABB& BBox3dT() { return bbox3dT; }
+    [[maybe_unused]] [[nodiscard]] AABB BBox3dCopy() const { return bbox3d; }
+    [[maybe_unused]] const AABB& BBoxTransform( Matrix4f _m ) {
+//        if ( std::is_same_v<D, BBoxProjection2d> ) {
+//            V3f ssTranslate = _m.getPosition3();
+//            ssTranslate.oneMinusY();
+//            _m.setTranslation( ssTranslate );
+//        }
+        bbox3dT.set( bbox3d.getTransform( _m ) );
+        return bbox3dT;
     }
-
-    inline const std::shared_ptr<T>& BBox3d() const { return bbox3d; }
-    inline std::shared_ptr<T>& BBox3d() { return bbox3d; }
-    inline std::shared_ptr<T>& BBox3dT() { return bbox3dT; }
-    inline T BBox3dCopy() const { return *bbox3d.get(); }
-    inline const AABB& BBoxTransform( Matrix4f _m ) {
-        if ( std::is_same_v<D, BBoxProjection2d> ) {
-            V3f ssTranslate = _m.getPosition3();
-            ssTranslate.oneMinusY();
-            _m.setTranslation( ssTranslate );
-        }
-        bbox3dT->set( bbox3d->getTransform( _m ) );
-        return *bbox3dT;
-    }
-    inline const T* BBox3dPtr() const { return bbox3d.get(); }
-    inline const T* BBox3dTPtr() const { return bbox3dT.get(); }
-    inline void BBox3d( const Vector3f& bmix, const Vector3f& bmax ) { *bbox3d.get() = T{ bmix, bmax }; }
-    inline void BBox3d( const T& _value ) { *bbox3d.get() = _value; }
+    inline void BBox3d( const Vector3f& bMin, const Vector3f& bMax ) { bbox3d = AABB{ bMin, bMax }; }
+    inline void BBox3d( const AABB& _value ) { bbox3d = _value; }
 
 protected:
-    std::shared_ptr<T> bbox3d;
-    std::shared_ptr<T> bbox3dT;
+    JMATH::AABB bbox3d{AABB::INVALID};
+    JMATH::AABB bbox3dT{AABB::INVALID};
+    Rect2f bbox{Rect2f::INVALID};
+    Rect2f bboxT{Rect2f::INVALID};
 };
 
 template <typename T = JMATH::AABB>
@@ -52,8 +44,8 @@ class BoxableRef {
 public:
     inline const T& BBox3d() const { return bbox3d; }
     inline T& BBox3d() { return bbox3d; }
-    inline T  BBox3dCopy() const { return bbox3d; }
-    inline void BBox3d( const Vector3f& bmix, const Vector3f& bmax ) { bbox3d = T{ bmix, bmax }; }
+    [[maybe_unused]] inline T  BBox3dCopy() const { return bbox3d; }
+    inline void BBox3d( const Vector3f& bMin, const Vector3f& bMax ) { bbox3d = T{ bMin, bMax }; }
     inline void BBox3d( const T& _value ) { bbox3d = _value; }
 
 protected:

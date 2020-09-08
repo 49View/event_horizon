@@ -11,7 +11,7 @@ namespace JMATH {
     class AABB;
 }
 
-template <typename T, typename B = JMATH::AABB> class RecursiveTransformation;
+template <typename T> class RecursiveTransformation;
 
 class AppData;
 class VData;

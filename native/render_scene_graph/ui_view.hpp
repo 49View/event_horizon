@@ -221,17 +221,17 @@ private:
 
 class UIElement;
 
-using UIElementRT       = RecursiveTransformation<UIElement, JMATH::AABB>;
+using UIElementRT       = RecursiveTransformation<UIElement>;
 using UIElementSP       = std::shared_ptr<UIElementRT>;
 using UIElementSPConst  = std::shared_ptr<const UIElementRT>;
 using UIElementSPCC     = const UIElementSPConst;
 
-class UIElement : public Boxable<JMATH::AABB, BBoxProjection2d>, public UUIDIntegerInc {
+class UIElement : public Boxable, public UUIDIntegerInc {
 public:
     template<typename ...Args>
     explicit UIElement( RenderOrchestrator& _rsg, Args&& ... args ) : UUIDIntegerInc( CommandBufferLimits::UI2dStart ),
                                                                       rsg( _rsg ) {
-        bbox3d->identity();
+        bbox3d.identity();
         (parseParam( std::forward<Args>( args )), ...); // Fold expression (c++17)
         if ( type() == UIT::background() || type() == UIT::label()) {
             status = UITS::Fixed;
@@ -261,9 +261,9 @@ private:
                        std::is_same_v<M, MScale2dXS> ||
                        std::is_same_v<M, MScale2dYS> ||
                        std::is_same_v<M, MScale2dXYS> ) {
-            bbox3d->scaleX( _param().x());
-            bbox3d->scaleY( _param().y());
-            bbox3d->scaleZ( 0.0f );
+            bbox3d.scaleX( _param().x());
+            bbox3d.scaleY( _param().y());
+            bbox3d.scaleZ( 0.0f );
         }
         if constexpr ( std::is_same_v<M, UITapAreaType> ) {
             type = _param;
@@ -308,7 +308,7 @@ public:
     }
 
     [[nodiscard]] Rect2f Area() const {
-        return bbox3d->topDown();
+        return bbox3d.topDown();
     }
 
     [[nodiscard]] UIElementStatus Status() const {

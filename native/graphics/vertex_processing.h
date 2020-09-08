@@ -52,7 +52,7 @@ public:
     VPList( std::shared_ptr<GPUVData> value,
             std::shared_ptr<RenderMaterial> _mat,
             const std::shared_ptr<Matrix4f>& _transform,
-            const std::shared_ptr<AABB>& _bbox3d,
+            const AABB* _bbox3d,
             const std::string& _name,
             uint64_t _tag,
             const UUID& _uuid );
@@ -128,7 +128,7 @@ private:
     std::shared_ptr<GPUVData>           gpuData;
     std::shared_ptr<RenderMaterial>     material;
     std::shared_ptr<Matrix4f>           mTransform;
-    std::shared_ptr<AABB>               bbox3d;
+    const AABB*                         bbox3d = nullptr;
     uint64_t                            mTag = GT_Generic;
     int                                 pvsIndex = -1;
     bool                                bHidden = false;
