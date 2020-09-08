@@ -265,14 +265,15 @@ public:
 
     JMATH::AABB calcCompleteBBox3dRec() {
         this->BBox3d(AABB::INVALID);
+
+        for ( auto& c : children ) {
+            this->BBox3d().merge( c->calcCompleteBBox3dRec() );
+        }
+
         if ( !data.empty() ) {
             for ( auto & bd : data ) {
                 this->BBox3d().merge( bd.BBoxTransform( *mLocalHierTransform ) );
             }
-        }
-
-        for ( auto& c : children ) {
-            this->BBox3d().merge( c->calcCompleteBBox3dRec() );
         }
 
         return this->BBox3dCopy();
