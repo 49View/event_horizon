@@ -98,6 +98,11 @@ public:
             dataTypeHolder.scale = _param();
             return *this;
         }
+        if constexpr ( std::is_same_v<M, AABB> ) {
+            static_assert( std::is_same_v<GT::Shape, SGT> );
+            dataTypeHolder.aabb = _param;
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, MatrixAnim> ) {
             static_assert( std::is_base_of_v<GT::GTPolicyTRS, SGT> );
             mTRS = _param;

@@ -303,6 +303,7 @@ namespace GT {
     };
     struct GTPolicyShape {
         ShapeType shapeType = ShapeType::None;
+        AABB aabb;
     };
     struct GTPolicyMapping {
         GeomMappingData mappingData;

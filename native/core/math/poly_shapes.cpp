@@ -195,6 +195,8 @@ std::string shapeTypeToString( const ShapeType value ) {
             return "Pillow";
         case ShapeType::Arrow:
             return "Arrow";
+        case ShapeType::AABB:
+            return "AABB";
     }
 
     return {};
@@ -209,7 +211,7 @@ uint32_t subdivideEdge( uint32_t f0, uint32_t f1, const Vector3f& v0, const Vect
     }
 
     const Vector3f v = normalize( Vector3f( 0.5 ) * ( v0 + v1 ));
-    const uint32_t f = static_cast<uint32_t>(io_mesh.vertices.size());
+    const auto f = static_cast<uint32_t>(io_mesh.vertices.size());
     io_mesh.vertices.emplace_back( v );
     io_divisions.emplace( edge, f );
     return f;
@@ -336,6 +338,40 @@ void UVSphere( Topology& mesh ) {
 
 }
 
+void AxisAlignedBoundingBox( Topology& mesh, const AABB& aabb ) {
+    // Vertices
+
+    mesh.vertices.emplace_back( aabb.centre() + V3f( -0.500000*aabb.calcWidth(), -0.500000*aabb.calcHeight(),  0.500000 * aabb.calcDepth() ));
+    mesh.vertices.emplace_back( aabb.centre() + V3f( 0.500000 *aabb.calcWidth(), -0.500000*aabb.calcHeight(),  0.500000 * aabb.calcDepth() ));
+    mesh.vertices.emplace_back( aabb.centre() + V3f( -0.500000*aabb.calcWidth(), 0.500000 *aabb.calcHeight(),  0.500000 * aabb.calcDepth() ));
+    mesh.vertices.emplace_back( aabb.centre() + V3f( 0.500000 *aabb.calcWidth(), 0.500000 *aabb.calcHeight(),  0.500000 * aabb.calcDepth() ));
+    mesh.vertices.emplace_back( aabb.centre() + V3f( -0.500000*aabb.calcWidth(), 0.500000 *aabb.calcHeight(), -0.500000 * aabb.calcDepth() ));
+    mesh.vertices.emplace_back( aabb.centre() + V3f( 0.500000 *aabb.calcWidth(), 0.500000 *aabb.calcHeight(), -0.500000 * aabb.calcDepth() ));
+    mesh.vertices.emplace_back( aabb.centre() + V3f( -0.500000*aabb.calcWidth(), -0.500000*aabb.calcHeight(), -0.500000 * aabb.calcDepth() ));
+    mesh.vertices.emplace_back( aabb.centre() + V3f( 0.500000 *aabb.calcWidth(), -0.500000*aabb.calcHeight(), -0.500000 * aabb.calcDepth() ));
+
+    // Faces
+
+    // bottom
+    mesh.addTriangle( 0, 1, 2 );
+    mesh.addTriangle( 2, 1, 3 );
+    // top
+    mesh.addTriangle( 2, 3, 4 );
+    mesh.addTriangle( 4, 3, 5 );
+    // right
+    mesh.addTriangle( 4, 5, 6 );
+    mesh.addTriangle( 6, 5, 7 );
+    // left
+    mesh.addTriangle( 6, 7, 0 );
+    mesh.addTriangle( 0, 7, 1 );
+    // front
+    mesh.addTriangle( 1, 7, 3 );
+    mesh.addTriangle( 3, 7, 5 );
+    // back
+    mesh.addTriangle( 6, 0, 4 );
+    mesh.addTriangle( 4, 0, 2 );
+}
+
 void Cube( Topology& mesh ) {
     // Vertices
 
@@ -387,7 +423,7 @@ void Cylinder( Topology& mesh, int edges ) {
 
     std::vector<float> angles;
     angles.reserve( edges );
-    float inc = 360.0f / edges;
+    float inc = 360.0f / static_cast<float>(edges);
     float angle = 0.0f;
     for ( int t = 0; t < edges; t++ ) {
         angles.emplace_back( angle );
@@ -436,7 +472,7 @@ void addPillowSide( Topology& mesh, uint32_t subdivs, uint32_t q, uint32_t a, ui
 
 void subdivPillowSide( Topology& mesh, int subdivs, float radius, const Vector3f& p1, const Vector3f& p2,
                        const Vector3f& m1, const Vector3f& m2 ) {
-    float deltaI = (1.0f / subdivs);
+    float deltaI = (1.0f / static_cast<float>(subdivs));
     float deltaC = 0.0f;
     for ( int t = 1; t < subdivs; t++ ) {
         deltaC += deltaI;
@@ -524,7 +560,7 @@ void addBackQuad( Topology& mesh, const V3f& sz ) {
     mesh.vertices.emplace_back( -sz.x() ,  sz.y() , -sz.z()  );
 }
 
-void RoundedCube( Topology& mesh, uint32_t subdivs, float radius ) {
+void RoundedCube( Topology& mesh, [[maybe_unused]] uint32_t subdivs, float radius ) {
     // Vertices
 
     float quadLength = 0.5f * (1.0f - radius);
@@ -797,7 +833,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     return ret;
 }
 
-PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, const int subdivs ) {
+PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, [[maybe_unused]] const int subdivs ) {
 
     Topology mesh;
 //    Icosahedron( mesh );
@@ -812,6 +848,14 @@ PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
     Cube( mesh );
 
     return createGeom( mesh, size, GeomMappingT::Cube, 0 );
+}
+
+PolyStruct createGeomForAABB( const AABB& aabb ) {
+
+    Topology mesh;
+    AxisAlignedBoundingBox( mesh, aabb );
+
+    return createGeom( mesh, V3f::ONE, GeomMappingT::Cube, 0 );
 }
 
 PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {

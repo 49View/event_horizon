@@ -44,6 +44,9 @@ namespace VDataServices {
             case ShapeType::Cube:
                 ps = createGeomForCube( center, size );
                 break;
+            case ShapeType::AABB:
+                ps = createGeomForAABB( _d.aabb );
+                break;
             case ShapeType::Panel:
                 ps = createGeomForPanel( center, size );
                 break;
@@ -62,7 +65,24 @@ namespace VDataServices {
     }
 
     ResourceRef refName( const GT::Shape& _d ) {
-        return shapeTypeToString( _d.shapeType );
+        auto ret = shapeTypeToString( _d.shapeType );
+        switch ( _d.shapeType ) {
+            case ShapeType::Cylinder:
+            case ShapeType::Sphere:
+            case ShapeType::Cube:
+            case ShapeType::Panel:
+            case ShapeType::Pillow:
+            case ShapeType::RoundedCube:
+            case ShapeType::None:
+            case ShapeType::Pyramid:
+            case ShapeType::Arrow:
+                break;
+            case ShapeType::AABB:
+                ret += _d.aabb.minPoint().toString() + _d.aabb.maxPoint().toString();
+                break;
+        }
+
+        return ret;
     }
 
 // ___ POLY BUILDER ___
