@@ -9,6 +9,8 @@
 #include <graphics/vp_builder.hpp>
 #include <graphics/render_targets.hpp>
 
+int Skybox::sSkyboxCubemapSize = 2048;
+
 void Skybox::equirectangularTextureInit( const std::vector<std::string>& params ) {
 
     PolyStruct sp = createGeomForCube(Vector3f::ZERO, Vector3f{ 1.0f });
@@ -50,7 +52,7 @@ void Skybox::init( const SkyBoxMode _sbm, const std::string& _textureName ) {
     std::string skyBoxName = "skybox";
     mVPList = VPBuilder<Pos3dStrip>{ rr, sm, skyBoxName }.p(colorStrip).n(skyBoxName).build();
 
-    auto trd = ImageParams{}.setSize(512).format(PIXEL_FORMAT_HDR_RGBA_16).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
+    auto trd = ImageParams{}.setSize(Skybox::sSkyboxCubemapSize).format(PIXEL_FORMAT_HDR_RGBA_16).setWrapMode(WRAP_MODE_CLAMP_TO_EDGE);
     mSkyboxTexture = rr.TM()->addCubemapTexture(TextureRenderData{ skyBoxName, trd }
                                                         .setGenerateMipMaps(false)
                                                         .setIsFramebufferTarget(true));
@@ -77,12 +79,12 @@ bool Skybox::preCalc( float _sunHDRMult, const V3f& _cubeMapCenter ) {
 
             for ( const auto&[k, vl] : rr.CL() ) {
                 if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) ) {
-                    rr.addToCommandBuffer(vl.mVList, cam);
+                    rr.addToCommandBuffer(vl.mVList, cam, nullptr, rr.P(S::SH_DIRECT_LIGHTING).get());
                 }
             }
             for ( const auto&[k, vl] : rr.CL() ) {
                 if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) ) {
-                    rr.addToCommandBuffer(vl.mVListTransparent, cam);
+                    rr.addToCommandBuffer(vl.mVListTransparent, cam, nullptr, rr.P(S::SH_DIRECT_LIGHTING).get());
                 }
             }
         });

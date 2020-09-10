@@ -80,6 +80,7 @@ private:
 	std::unique_ptr<CubeEnvironmentMap> mCubeMapRender;
 	std::shared_ptr<Texture> mSkyboxTexture;
     CubeMapRigContainer cubeMapRig;
+    static int sSkyboxCubemapSize;
 };
 
 class ConvolutionEnvironmentMap : public RenderModule {

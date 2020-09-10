@@ -32,9 +32,7 @@ void main() {
 
    vec3 N = getNormalFromMap(texCoords);
 
-   shadow_code
-
    light_code
 
-   final_combine
+   final_combine_no_reflections
 }
