@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include "vector3f.h"
 #include "matrix4f.h"
 #include "aabb.h"
@@ -11,38 +12,24 @@ class OOBB {
 public:
     static constexpr bool IsSerializable() { return true; }
 
-    friend std::ostream& operator<<( std::ostream& os, const OOBB& f );
+    friend std::ostream& operator<<( std::ostream& os, const OOBB& oobb );
 
     OOBB() = default;
     OOBB(const OOBB &) = default;
 
-    OOBB( const Vector3f& minPoint, const Vector3f& maxPoint ) {
-        mMinPoint = minPoint;
-        mMaxPoint = maxPoint;
-    }
+    OOBB( const Vector3f& minPoint, const Vector3f& maxPoint );
 //    explicit OOBB( const std::vector<Vector3f> points ) {
 //        for ( auto& p : points ) expand(p);
 //    }
-    void set( const OOBB& _aabb ) {
-        *this = _aabb;
-    }
+    void set( const OOBB& _aabb );
     
-    OOBB(AABB & aabb){
-        mMinPoint = aabb.mMinPoint;
-        mMaxPoint = aabb.mMaxPoint;
-    }
+    explicit OOBB(AABB & aabb);
 
-    OOBB & operator=(AABB & aabb){
-        mMinPoint = aabb.mMinPoint;
-        mMaxPoint = aabb.mMaxPoint;
-        return *this;
-    }
+    OOBB & operator=(AABB & aabb);
 
-    inline Vector3f center(){ return 0.5*(mMaxPoint + mMinPoint);}
+    inline Vector3f center();
 
-    inline Vector3f extent() const{
-        return mMaxPoint - mMinPoint;
-    }
+    [[nodiscard]] inline Vector3f extent() const;
 
 //    inline PREC maxExtent() const{
 //        return (mMaxPoint - mMinPoint).maxCoeff();
@@ -118,19 +105,13 @@ public:
     Vector3f mMaxPoint;
 };
 
-namespace OOBBC {
+namespace OOBBc {
     static const OOBB IDENTITY;
     static const OOBB INVALID;
     static const OOBB ZERO;
 
-    static OOBB MIDENTITY() {
-        static OOBB a( Vector3f( 0.0f ), Vector3f( 1.0f ) );
-        return a;
-    }
+    OOBB MIDENTITY();
 
-    static OOBB MIDENTITYCENTER() {
-        static OOBB a( Vector3f( -0.5f ), Vector3f( 0.5f ) );
-        return a;
-    }
+    OOBB MIDENTITYCENTER();
 }
 
