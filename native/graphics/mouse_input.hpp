@@ -68,7 +68,7 @@ struct TouchStatus {
     double yposOld{ 0.0 };
 
     Vector2f moveDiff{ V2fc::ZERO };
-    Vector3f moveDiffMousePick{ V3f::ZERO };
+    Vector3f moveDiffMousePick{ V3fc::ZERO };
     Vector2f singleTapPos{ V2fc::ZERO };
     Vector2f gestureTapsFront{ V2fc::ZERO };
     Vector2f gestureTapsBack{ V2fc::ZERO };

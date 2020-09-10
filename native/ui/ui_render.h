@@ -61,7 +61,7 @@ protected:
 	Matrix4f origRot = Matrix4f::IDENTITY;
 	Matrix4f mPreRotation = Matrix4f::IDENTITY;
 	std::shared_ptr<Matrix4f> mTransform;
-	Vector3f mUINormalAxis = Vector3f::Z_AXIS;
+	Vector3f mUINormalAxis = V3fc::Z_AXIS;
 	std::weak_ptr<UiControl> mControl;
 };
 

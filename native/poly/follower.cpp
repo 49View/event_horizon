@@ -103,7 +103,7 @@ Vector3f suggestedFollowerAxisCalcBestAxis( const std::vector<Vector3f>& _verts 
 Vector3f suggestedFollowerAxis( const std::vector<Vector3f>& _verts, const Vector3f& _suggestedAxis ) {
 
     Vector3f ret = _suggestedAxis;
-    if ( _suggestedAxis == Vector3f::ZERO ) {
+    if ( _suggestedAxis == V3fc::ZERO ) {
         ret = suggestedFollowerAxisCalcBestAxis(_verts);
     } else {
         // Check that the suggested axis is not bonkers
@@ -295,7 +295,7 @@ Vector3f rotateFollowerPlane90( const Vector3f& vpos, const Vector3f& vn3d ) {
 void Follower::reserveVBounding( uint64_t size ) {
     // Reserve space for the vBoundingContours
     for ( uint64_t vbi = 0; vbi <= size * 2 - 1; vbi++ ) {
-        vboundingContours.push_back(Vector3f::ZERO);
+        vboundingContours.push_back(V3fc::ZERO);
     }
 }
 

@@ -39,7 +39,7 @@ public:
 	void move( const Vector2f& pos );
 	void centered();
 	std::vector<Vector3f> rotatePoints( const Vector3f& nx, const Vector3f& ny,
-										const Vector3f& offset = Vector3f::ZERO ) const;
+										const Vector3f& offset = V3fc::ZERO ) const;
 
 	inline int32_t numVerts() const { return static_cast<int32_t>( mPoints.v.size() ); }
 	inline float width() const { return mBBox.x(); }
@@ -77,7 +77,7 @@ private:
 	V2fVectorWrap           mPoints;
 	std::vector<float>		mLengths;
 	float					mPerimeter = 0.0f;
-	V3f	        			mNormal = V3f::X_AXIS;
+	V3f	        			mNormal = V3fc::X_AXIS;
 	V2fVectorOfVectorWrap   mPaths;
 };
 

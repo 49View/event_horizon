@@ -21,7 +21,7 @@ JSONDATA( CameraSpatialsKeyFrame, pos, qangle, fov, timestamp )
         qangle = _cs.qangle->value;
         fov = _cs.mFov->value;
     }
-    V3f pos = V3f::ZERO;
+    V3f pos = V3fc::ZERO;
     Quaternion qangle{};
     float fov = 0.0f;
     float timestamp = 0.0f;

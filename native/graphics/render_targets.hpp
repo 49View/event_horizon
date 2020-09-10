@@ -326,9 +326,9 @@ protected:
     std::shared_ptr<CompositePBR> mComposite;
 
     bool mbUseInfiniteHorizonForShadows = true;
-    Vector3f mCachedSunPosition = Vector3f::ZERO;
+    Vector3f mCachedSunPosition = V3fc::ZERO;
     V3f mProbePosition = Vector3f{ 2.0f, 1.6f, 6.0f };
-    V3f mSkyboxCenter = V3f::ZERO;
+    V3f mSkyboxCenter = V3fc::ZERO;
     SkyBoxInitParams mSkyBoxParams;
     bool bEnableSkyBoxRendering = false;
     bool mbEnableSkybox = false;

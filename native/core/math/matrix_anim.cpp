@@ -6,21 +6,21 @@
 #include <core/math/anim.h>
 
 MatrixAnim::MatrixAnim() {
-    pos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, "Pos" );
-    rot = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, "Rot");
-    scale = std::make_shared<AnimType<Vector3f>>( Vector3f::ONE, "Scale" );
+    pos = std::make_shared<AnimType<Vector3f>>( V3fc::ZERO, "Pos" );
+    rot = std::make_shared<AnimType<Quaternion>>( Quaternion{V3fc::ZERO}, "Rot");
+    scale = std::make_shared<AnimType<Vector3f>>( V3fc::ONE, "Scale" );
 }
 
 MatrixAnim::MatrixAnim( const V3f& _pos ) {
     pos = std::make_shared<AnimType<Vector3f>>( _pos, "Pos" );
-    rot = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, "Rot");
-    scale = std::make_shared<AnimType<Vector3f>>( Vector3f::ONE, "Scale" );
+    rot = std::make_shared<AnimType<Quaternion>>( Quaternion{V3fc::ZERO}, "Rot");
+    scale = std::make_shared<AnimType<Vector3f>>( V3fc::ONE, "Scale" );
 }
 
 MatrixAnim::MatrixAnim( const V3f& _pos, const Quaternion& _rot ) {
     pos = std::make_shared<AnimType<Vector3f>>( _pos, "Pos" );
     rot = std::make_shared<AnimType<Quaternion>>( _rot, "Rot");
-    scale = std::make_shared<AnimType<Vector3f>>( Vector3f::ONE, "Scale" );
+    scale = std::make_shared<AnimType<Vector3f>>( V3fc::ONE, "Scale" );
 }
 
 MatrixAnim::MatrixAnim( const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
@@ -30,14 +30,14 @@ MatrixAnim::MatrixAnim( const V3f& _pos, const Quaternion& _rot, const V3f& _sca
 }
 
 MatrixAnim::MatrixAnim( const MA::Rotate& _rot ) {
-    pos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, "Pos" );
+    pos = std::make_shared<AnimType<Vector3f>>( V3fc::ZERO, "Pos" );
     rot = std::make_shared<AnimType<Quaternion>>( _rot(), "Rot");
-    scale = std::make_shared<AnimType<Vector3f>>( Vector3f::ONE, "Scale" );
+    scale = std::make_shared<AnimType<Vector3f>>( V3fc::ONE, "Scale" );
 }
 
 MatrixAnim::MatrixAnim( const MA::Scale& _scale ) {
-    pos = std::make_shared<AnimType<Vector3f>>( Vector3f::ZERO, "Pos" );
-    rot = std::make_shared<AnimType<Quaternion>>( Quaternion{Vector3f::ZERO}, "Rot");
+    pos = std::make_shared<AnimType<Vector3f>>( V3fc::ZERO, "Pos" );
+    rot = std::make_shared<AnimType<Quaternion>>( Quaternion{V3fc::ZERO}, "Rot");
     scale = std::make_shared<AnimType<Vector3f>>( _scale(), "Scale" );
 }
 
@@ -57,9 +57,9 @@ void MatrixAnim::Pos( const Vector3f& val ) { pos->value = val; }
 Quaternion MatrixAnim::Rot() const { return rot->value; }
 void MatrixAnim::Rot( const Quaternion& val ) { rot->value = val; }
 
-void MatrixAnim::RotX( const float& val ) { rot->value = Quaternion{Vector3f::X_AXIS*val}; }
-void MatrixAnim::RotY( const float& val ) { rot->value = Quaternion{Vector3f::Y_AXIS*val}; }
-void MatrixAnim::RotZ( const float& val ) { rot->value = Quaternion{Vector3f::Z_AXIS*val}; }
+void MatrixAnim::RotX( const float& val ) { rot->value = Quaternion{V3fc::X_AXIS*val}; }
+void MatrixAnim::RotY( const float& val ) { rot->value = Quaternion{V3fc::Y_AXIS*val}; }
+void MatrixAnim::RotZ( const float& val ) { rot->value = Quaternion{V3fc::Z_AXIS*val}; }
 
 const Vector3f& MatrixAnim::Scale() const { return scale->value; }
 void MatrixAnim::Scale( const Vector3f& val ) { scale->value = val; }

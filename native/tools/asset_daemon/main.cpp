@@ -96,7 +96,7 @@ struct EntityMeta {
     std::string hash;
     std::string thumb;
     AABB bbox3d{AABB::MINVALID()};
-    V3f bboxSize{V3f::ZERO};
+    V3f bboxSize{V3fc::ZERO};
     bool isPublic = true;
     bool isRestricted = false;
 };

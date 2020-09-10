@@ -74,7 +74,7 @@ namespace stl {
             auto v1 = parse_point( stl_file );
             auto v2 = parse_point( stl_file );
             auto v3 = parse_point( stl_file );
-            if ( normal == Vector3f::ZERO ) {
+            if ( normal == V3fc::ZERO ) {
                 normal = normalize( crossProduct( v1, v3, v2 ));
             }
             addNormalToDic( v1, normal, normalsDic );

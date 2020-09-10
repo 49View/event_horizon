@@ -263,9 +263,9 @@ namespace GT {
         std::string nameId;
     };
     struct GTPolicyTRS {
-        Vector3f pos = Vector3f::ZERO;
+        Vector3f pos = V3fc::ZERO;
         Quaternion axis = Quaternion{};
-        Vector3f scale = Vector3f::ONE;
+        Vector3f scale = V3fc::ONE;
     };
     struct GTPolicyText {
         std::string text;
@@ -286,7 +286,7 @@ namespace GT {
         std::vector<Triangle3d> sourcePolysTris;
         std::vector<PolyLine2d> sourcePolylines2d;
         std::vector<PolyLine> polyLines;
-        Vector3f forcingNormalPoly = Vector3f::ZERO;
+        Vector3f forcingNormalPoly = V3fc::ZERO;
     };
     struct GTPolicyFollower {
         std::shared_ptr<Profile> profile;
@@ -296,7 +296,7 @@ namespace GT {
         PolyRaise fraise = PolyRaise::None;
         Vector2f flipVector = V2fc::ZERO;
         FollowerGap mGaps = FollowerGap::Empty;
-        Vector3f mFollowerSuggestedAxis = Vector3f::ZERO;
+        Vector3f mFollowerSuggestedAxis = V3fc::ZERO;
     };
     struct GTPolicyZ {
         float z = 0.0f;

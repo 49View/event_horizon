@@ -95,7 +95,7 @@ void Triangulator::gather3dTriangularizationResult() {
 		for ( int32_t j = 2; j >= 0; j-- ) {
 			p2t::Point* p = triangles[t]->GetPoint( j );
 			if ( mVHash.find( Vector2f( p->x, p->y ).hash() ) == mVHash.end() ) {
-				Vector3f steinerPoint = Vector3f::HUGE_VALUE_POS;
+				Vector3f steinerPoint = V3fc::HUGE_VALUE_POS;
 				steinerPoint[dominantPair.first] = static_cast<float>( p->x );
 				steinerPoint[dominantPair.second] = static_cast<float>( p->y );
 				steinerPoint[steinerPoint.dominantElement()] = mVHash.begin()->second[steinerPoint.dominantElement()];

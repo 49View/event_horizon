@@ -19,7 +19,7 @@ void pushQuad( VDataSP vdata, const QuadVertices3& vs, const QuadVertices2& vts,
 
 void pushQuadSubDiv( VDataSP vdata, const std::array<Vector3f, 4>& vss, const std::array<Vector2f, 4>& vtcs,
                      GeomMappingData& m,
-                     const Vector3f& vn = Vector3f::HUGE_VALUE_NEG );
+                     const Vector3f& vn = V3fc::HUGE_VALUE_NEG );
 void pushQuadSubDiv( VDataSP vdata, const std::array<Vector3f, 4>& vss, const std::array<Vector2f, 4>& vtcs,
                      const std::array<Vector3f, 4>& vns, GeomMappingData& m );
 
@@ -32,10 +32,10 @@ void pushTriangle( VDataSP vdata,
                    const Vector2f& uv1, const Vector2f& uv2, const Vector2f& uv3,
                    const Vector3f& vn1, const Vector3f& vn2, const Vector3f& vn3,
                    GeomMappingData& m,
-                   const Vector3f& vt1 = Vector3f::ZERO, const Vector3f& vt2 = Vector3f::ZERO,
-                   const Vector3f& vt3 = Vector3f::ZERO,
-                   const Vector3f& vb1 = Vector3f::ZERO, const Vector3f& vb2 = Vector3f::ZERO,
-                   const Vector3f& vb3 = Vector3f::ZERO );
+                   const Vector3f& vt1 = V3fc::ZERO, const Vector3f& vt2 = V3fc::ZERO,
+                   const Vector3f& vt3 = V3fc::ZERO,
+                   const Vector3f& vb1 = V3fc::ZERO, const Vector3f& vb2 = V3fc::ZERO,
+                   const Vector3f& vb3 = V3fc::ZERO );
 void pushTriangle( VDataSP vdata, const std::vector<Vector3f>& vs, const std::vector<Vector2f>& vuv,
                    const std::vector<Vector3f>& vn, GeomMappingData& m );
 void pushTriangleSubDivRec( VDataSP vdata,
@@ -404,7 +404,7 @@ void pushTriangle( VDataSP vdata,
     Vector3f bitangent2 = vb2;
     Vector3f bitangent3 = vb3;
 
-    if ( vt1 == Vector3f::ZERO ) { // Needs to calculate tangents and bitangents
+    if ( vt1 == V3fc::ZERO ) { // Needs to calculate tangents and bitangents
         tbCalc(v1, v2, v3, uv1, uv2, uv3, tangent1, tangent2, tangent3, bitangent1, bitangent2, bitangent3);
     }
 

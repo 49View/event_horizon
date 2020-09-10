@@ -18,28 +18,6 @@ class Vector4f;
 class Vector3f {
 public:
 
-	static const Vector3f ZERO;
-	static const Vector3f X_AXIS;
-	static const Vector3f Y_AXIS;
-	static const Vector3f Z_AXIS;
-	static const Vector3f X_AXIS_NEG;
-	static const Vector3f Y_AXIS_NEG;
-	static const Vector3f Z_AXIS_NEG;
-	static const Vector3f X_AXIS_NEG_MASK;
-	static const Vector3f Y_AXIS_NEG_MASK;
-	static const Vector3f Z_AXIS_NEG_MASK;
-	static const Vector3f MASK_X_OUT;
-	static const Vector3f MASK_Y_OUT;
-	static const Vector3f MASK_Z_OUT;
-	static const Vector3f MASK_UP_OUT;
-	static const Vector3f UE4_PROFILE_AXIS;
-	static const Vector3f UE4_PROFILE_AXIS_NORM;
-	static const Vector3f UP_AXIS;
-	static const Vector3f UP_AXIS_NEG;
-	static const Vector3f ONE;
-	static const Vector3f HUGE_VALUE_POS;
-	static const Vector3f HUGE_VALUE_NEG;
-
 	Vector3f() {
 	}
 
@@ -182,6 +160,16 @@ public:
     float b() const {
         return mZ;
     }
+
+    [[nodiscard]] inline static Vector3f ZERO           () { return  Vector3f( 0.0f, 0.0f, 0.0f ); }
+    [[nodiscard]] inline static Vector3f X_AXIS         () { return  Vector3f( 1.0f, 0.0f, 0.0f ); }
+    [[nodiscard]] inline static Vector3f Y_AXIS         () { return  Vector3f( 0.0f, 1.0f, 0.0f ); }
+    [[nodiscard]] inline static Vector3f UP_AXIS        () { return  Vector3f( 0.0f, 1.0f, 0.0f ); }
+    [[nodiscard]] inline static Vector3f UP_AXIS_NEG    () { return  Vector3f( 0.0f, -1.0f, 0.0f ); }
+    [[nodiscard]] inline static Vector3f Z_AXIS         () { return  Vector3f( 0.0f, 0.0f, 1.0f ); }
+    [[nodiscard]] inline static Vector3f X_AXIS_NEG     () { return  Vector3f( -1.0f, 0.0f, 0.0f ); }
+    [[nodiscard]] inline static Vector3f Y_AXIS_NEG     () { return  Vector3f( 0.0f, -1.0f, 0.0f ); }
+    [[nodiscard]] inline static Vector3f Z_AXIS_NEG     () { return  Vector3f( 0.0f, 0.0f, -1.0f ); }
 
     float width() const {
         return mX;
@@ -515,6 +503,60 @@ private:
 };
 
 using V3f = Vector3f;
+using Color3f = Vector3f;
+using Vector3fList = std::vector<Vector3f>;
+using V3fVector         = std::vector<Vector3f>;
+using V3fVectorOfVector = std::vector<V3fVector>;
+using V3fVectorWrap = VectorWrap<V3f>;
+using V3fVectorOfVectorWrap = VectorOfVectorWrap<V3f>;
+using VTMVectorWrap = VectorWrapT2<V3f, V2f>;
+using VTMVectorOfVectorWrap = VectorOfVectorWrapT2<V3f, V2f>;
+using Triangle3d   = std::tuple<Vector3f, Vector3f, Vector3f>;
+using QuadVector3f = std::array<Vector3f, 4>;
+using QuadVector3fList = std::vector<QuadVector3f>;
+
+struct XZY {
+    enum Conversion {
+        PassThrough = 0,
+        Convert = 1
+    };
+
+    static Vector3f C( const Vector3f& _v );
+    static std::vector<Vector3f> C( const std::vector<Vector3f>& _v, XZY::Conversion convertOrPassThrough );
+    static Vector3f C( const Vector2f& v2, const float z );
+    static Vector2f C2( const Vector3f& v2 );
+    static Vector3f C( float x, float y, float z );
+    static std::vector<Vector3f> C( const std::vector<Vector3f>& _v );
+    static std::vector<Vector3f> C( const std::vector<Vector3f>& _v, float _z );
+    static std::vector<Vector3f> C( const std::vector<Vector2f>& _v, float _z = 0.0f );
+    static std::vector<Vector2f> C2( const std::vector<Vector3f>& _v );
+};
+
+namespace V3fc {
+    static const Vector3f ZERO = Vector3f( 0.0f, 0.0f, 0.0f );
+    static const Vector3f X_AXIS = Vector3f( 1.0f, 0.0f, 0.0f );
+    static const Vector3f Y_AXIS = Vector3f( 0.0f, 1.0f, 0.0f );
+    static const Vector3f UP_AXIS = Vector3f( 0.0f, 1.0f, 0.0f );
+    static const Vector3f UP_AXIS_NEG = Vector3f( 0.0f, -1.0f, 0.0f );
+    static const Vector3f Z_AXIS = Vector3f( 0.0f, 0.0f, 1.0f );
+    static const Vector3f X_AXIS_NEG = Vector3f( -1.0f, 0.0f, 0.0f );
+    static const Vector3f Y_AXIS_NEG = Vector3f( 0.0f, -1.0f, 0.0f );
+    static const Vector3f Z_AXIS_NEG = Vector3f( 0.0f, 0.0f, -1.0f );
+
+    static const Vector3f X_AXIS_NEG_MASK = Vector3f( -1.0f, 1.0f, 1.0f );
+    static const Vector3f Y_AXIS_NEG_MASK = Vector3f( 1.0f, -1.0f, 1.0f );
+    static const Vector3f Z_AXIS_NEG_MASK = Vector3f( 1.0f, 1.0f, -1.0f );
+
+    static const Vector3f MASK_X_OUT = Vector3f( 0.0f, 1.0f, 1.0f );
+    static const Vector3f MASK_Y_OUT = Vector3f( 1.0f, 0.0f, 1.0f );
+    static const Vector3f MASK_Z_OUT = Vector3f( 1.0f, 1.0f, 0.0f );
+    static const Vector3f MASK_UP_OUT = Vector3f( 1.0f, 0.0f, 1.0f );
+
+    static const Vector3f UE4_PROFILE_AXIS = Vector3f( 0.0f, 0.0f, -1.0f );
+    static const Vector3f ONE = Vector3f( 1.0f, 1.0f, 1.0f );
+    static const Vector3f HUGE_VALUE_POS = Vector3f( std::numeric_limits<float>::max() );
+    static const Vector3f HUGE_VALUE_NEG = Vector3f( std::numeric_limits<float>::lowest() );
+}
 
 inline float dot( const Vector3f& a, const Vector3f& b ) {
 	return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
@@ -536,7 +578,7 @@ inline Vector3f normalize( const Vector3f& v ) {
 	return result;
 }
 
-inline Vector2f dominantMapping( const V3f& n, const V3f& v, const V3f& size = V3f::ONE ) {
+inline Vector2f dominantMapping( const V3f& n, const V3f& v, const V3f& size = V3fc::ONE ) {
     switch ( n.dominantElement() ) {
         case 0:
             return ( n[0] > 0.0f ? v.yz() : -v.yz()) * size.yz();
@@ -572,8 +614,8 @@ inline bool isCollinear( const Vector3f& a, const Vector3f& b, const Vector3f& c
 	if ( a == b || b == c || c == a ) return true;
 	Vector3f p1 = a - b;
 	Vector3f p2 = c - b;
-	if ( p1 == Vector3f::ZERO ) return true;
-	if ( p2 == Vector3f::ZERO ) return true;
+	if ( p1 == V3fc::ZERO ) return true;
+	if ( p2 == V3fc::ZERO ) return true;
 
 	p1 = normalize( p1 );
 	p2 = normalize( p2 );
@@ -651,35 +693,6 @@ void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
 struct ExtrudeStrip {};
 struct ExtrudeComtour {};
 
-using Color3f = Vector3f;
-using Vector3fList = std::vector<Vector3f>;
-using V3fVector         = std::vector<Vector3f>;
-using V3fVectorOfVector = std::vector<V3fVector>;
-using V3fVectorWrap = VectorWrap<V3f>;
-using V3fVectorOfVectorWrap = VectorOfVectorWrap<V3f>;
-using VTMVectorWrap = VectorWrapT2<V3f, V2f>;
-using VTMVectorOfVectorWrap = VectorOfVectorWrapT2<V3f, V2f>;
-using Triangle3d   = std::tuple<Vector3f, Vector3f, Vector3f>;
-using QuadVector3f = std::array<Vector3f, 4>;
-using QuadVector3fList = std::vector<QuadVector3f>;
-
-struct XZY {
-    enum Conversion {
-        PassThrough = 0,
-        Convert = 1
-    };
-
-    static Vector3f C( const Vector3f& _v );
-    static std::vector<Vector3f> C( const std::vector<Vector3f>& _v, XZY::Conversion convertOrPassThrough );
-    static Vector3f C( const Vector2f& v2, const float z );
-	static Vector2f C2( const Vector3f& v2 );
-	static Vector3f C( float x, float y, float z );
-	static std::vector<Vector3f> C( const std::vector<Vector3f>& _v );
-    static std::vector<Vector3f> C( const std::vector<Vector3f>& _v, float _z );
-    static std::vector<Vector3f> C( const std::vector<Vector2f>& _v, float _z = 0.0f );
-    static std::vector<Vector2f> C2( const std::vector<Vector3f>& _v );
-};
-
 template <typename T>
 std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, float width, bool wrapIt = false )  {
     ASSERT( va.size() > 1 );
@@ -715,7 +728,7 @@ std::vector<Vector3f> extrudePointsWithWidth( const std::vector<Vector3f>& va, f
 
         float ndot = dot( v1, v2 );
         float extwidth = JMATH::lerp( ndot, sqrtf( width * width + width * width ), width );
-        Vector3f vn = v1 + v2;  //crossProduct(v1, v2, Vector3f::Z_AXIS);
+        Vector3f vn = v1 + v2;  //crossProduct(v1, v2, V3fc::Z_AXIS);
         if ( length( vn ) == 0.0f ) {
             vn = v2;
         }

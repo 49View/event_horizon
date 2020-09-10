@@ -31,12 +31,12 @@ JSONSERIAL(Light, mKey, type, mesh, wattage, intensity, attenuation, color, dir,
     LightTypeT type = LightType_Invalid;
     std::string mKey;
     std::string mesh{};
-    Vector3f pos = V3f::ZERO;
+    Vector3f pos = V3fc::ZERO;
     float wattage = 50.0f;
     float intensity = 1.0f;
-    Vector3f attenuation = V3f::ONE;
-    Vector3f color = V3f::ONE;
-    Vector3f dir = V3f::UP_AXIS_NEG;
+    Vector3f attenuation = V3fc::ONE;
+    Vector3f color = V3fc::ONE;
+    Vector3f dir = V3fc::UP_AXIS_NEG;
     float beamAngle = 0.0f;
 };
 

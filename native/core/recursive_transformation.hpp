@@ -29,7 +29,7 @@ struct MPos2d {
     V3f operator()() const noexcept {
         return data;
     }
-    V3f data = V3f::ZERO;
+    V3f data = V3fc::ZERO;
 };
 
 struct MScale {
@@ -47,7 +47,7 @@ struct MScale2d {
     V3f operator()() const noexcept {
         return data;
     }
-    V3f data = V3f::ONE;
+    V3f data = V3fc::ONE;
 };
 
 struct MScale2dXS {
@@ -58,7 +58,7 @@ struct MScale2dXS {
     V3f operator()() const noexcept {
         return data;
     }
-    V3f data = V3f::ONE;
+    V3f data = V3fc::ONE;
 };
 
 struct MScale2dYS {
@@ -69,7 +69,7 @@ struct MScale2dYS {
     V3f operator()() const noexcept {
         return data;
     }
-    V3f data = V3f::ONE;
+    V3f data = V3fc::ONE;
 };
 
 struct MScale2dXYS {
@@ -80,7 +80,7 @@ struct MScale2dXYS {
     V3f operator()() const noexcept {
         return data;
     }
-    V3f data = V3f::ONE;
+    V3f data = V3fc::ONE;
 };
 
 class TransformNodeData {
@@ -151,7 +151,7 @@ public:
         // Set the mTRS after parse params
         generateMatrixHierarchy(fatherRootTransform());
         // Then reset it to zero to use it for animations later on
-        mTRS.set( V3f::ZERO, Quaternion{}, V3f::ONE );
+        mTRS.set( V3fc::ZERO, Quaternion{}, V3fc::ONE );
     }
 
     // This ctor is effectively a "clone"
@@ -318,7 +318,7 @@ public:
         calcCompleteBBox3d();
     }
 
-    void generateLocalTransformData( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale=Vector3f::ONE ) {
+    void generateLocalTransformData( const Vector3f& pos, const Quaternion& rot, const Vector3f& scale=V3fc::ONE ) {
         mTRS.set( pos, rot, scale );
     }
 
@@ -411,9 +411,9 @@ public:
         generateMatrixHierarchy( fatherRootTransform());
     }
 
-    NodeSP addChildren( NodeSP _node, const Vector3f& pos = Vector3f::ZERO,
-                            const Vector3f& rot = Vector3f::ZERO,
-                            const Vector3f& scale = Vector3f::ONE, bool visible = true ) {
+    NodeSP addChildren( NodeSP _node, const Vector3f& pos = V3fc::ZERO,
+                            const Vector3f& rot = V3fc::ZERO,
+                            const Vector3f& scale = V3fc::ONE, bool visible = true ) {
         auto geom = _node;
         geom->Father( this );
         geom->updateTransform( pos, rot, scale );
@@ -431,9 +431,9 @@ public:
     }
 
     template <typename R>
-    NodeSP addChildren( const Vector3f& pos = Vector3f::ZERO,
+    NodeSP addChildren( const Vector3f& pos = V3fc::ZERO,
                             const R& rot = R::ZERO,
-                            const Vector3f& scale = Vector3f::ONE ) {
+                            const Vector3f& scale = V3fc::ONE ) {
         static_assert( std::is_same<R, Vector3f>::value || std::is_same<R, Quaternion>::value );
         NodeSP node = std::make_shared<RecursiveTransformation<T>>(pos, rot, scale);
         node->Father( this->shared_from_this() );
@@ -459,29 +459,29 @@ public:
 #define VisibleCallbackHide AnimEndCallback([this]() {this->setVisible( false );})
 
     void slideLeftIn( float _duration ) {
-        slide( _duration, V3f::X_AXIS_NEG, this->BBox3d().calcWidth(), VisibleCallbackShow );
+        slide( _duration, V3fc::X_AXIS_NEG, this->BBox3d().calcWidth(), VisibleCallbackShow );
     }
     void slideRightIn( float _duration ) {
-        slide( _duration, V3f::X_AXIS, this->BBox3d().calcWidth(), VisibleCallbackShow );
+        slide( _duration, V3fc::X_AXIS, this->BBox3d().calcWidth(), VisibleCallbackShow );
     }
     void slideUpIn( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::Y_AXIS_NEG, this->BBox3d().calcHeight(), VisibleCallbackShow );
+        slide( _duration, V3fc::Y_AXIS_NEG, this->BBox3d().calcHeight(), VisibleCallbackShow );
     }
     void slideDownIn( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::Y_AXIS, this->BBox3d().calcHeight(), VisibleCallbackShow );
+        slide( _duration, V3fc::Y_AXIS, this->BBox3d().calcHeight(), VisibleCallbackShow );
     }
 
     void slideLeftOut( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::ZERO,  this->BBox3d().calcWidth(), VisibleCallbackHide);
+        slide( _duration, V3fc::ZERO,  this->BBox3d().calcWidth(), VisibleCallbackHide);
     }
     void slideRightOut( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::X_AXIS,  this->BBox3d().calcWidth(), VisibleCallbackHide );
+        slide( _duration, V3fc::X_AXIS,  this->BBox3d().calcWidth(), VisibleCallbackHide );
     }
     void slideUpOut( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::Y_AXIS_NEG,  this->BBox3d().calcHeight(), VisibleCallbackHide );
+        slide( _duration, V3fc::Y_AXIS_NEG,  this->BBox3d().calcHeight(), VisibleCallbackHide );
     }
     void slideDownOut( float _duration, float _overrideAmount = 0.0f ) {
-        slide( _duration, V3f::Y_AXIS,  this->BBox3d().calcHeight(), VisibleCallbackHide );
+        slide( _duration, V3fc::Y_AXIS,  this->BBox3d().calcHeight(), VisibleCallbackHide );
     }
 
     void fadeTo( float _duration, float _value ) {
@@ -499,27 +499,27 @@ public:
 
     template <typename S>
     void scaleDown( float _duration, const S& _scale ) {
-        scale( _duration, V3f::ONE * _scale, nullptr );
+        scale( _duration, V3fc::ONE * _scale, nullptr );
     }
 
     template <typename S>
     void moveDown( float _duration, const S& _amount ) {
-        animMove( _duration, V3f::Y_AXIS_NEG * _amount, nullptr );
+        animMove( _duration, V3fc::Y_AXIS_NEG * _amount, nullptr );
     }
 
     template <typename S>
     void moveUp( float _duration, const S& _amount ) {
-        animMove( _duration, V3f::Y_AXIS * _amount, nullptr );
+        animMove( _duration, V3fc::Y_AXIS * _amount, nullptr );
     }
 
     template <typename S>
     void moveDownRight( float _duration, const S& _amount ) {
-        animMove( _duration, V3f::MASK_Z_OUT * V3f::Y_AXIS_NEG_MASK * _amount, nullptr );
+        animMove( _duration, V3fc::MASK_Z_OUT * V3fc::Y_AXIS_NEG_MASK * _amount, nullptr );
     }
 
     template <typename S>
     void moveUpLeft( float _duration, const S& _amount ) {
-        animMove( _duration, V3f::MASK_Z_OUT * _amount, nullptr );
+        animMove( _duration, V3fc::MASK_Z_OUT * _amount, nullptr );
     }
 
 private:

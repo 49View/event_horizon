@@ -242,7 +242,7 @@ Vector3f AABB::centreRight() const {
 }
 
 Vector3f AABB::bottomFront() const {
-    return Vector3f{ calcCentre().xy(), minPoint().z() } + Vector3f::Y_AXIS * calcHeight() * 0.5f;
+    return Vector3f{ calcCentre().xy(), minPoint().z() } + V3fc::Y_AXIS * calcHeight() * 0.5f;
 }
 
 Vector3fList AABB::bottomFace() const {
@@ -299,8 +299,8 @@ void AABB::calc( const std::initializer_list<Vector3f>& iList, const Matrix4f& t
     calc(vList, tMat);
 }
 void AABB::calc( const std::vector<Vector3f>& vList, const Matrix4f& tMat ) {
-    Vector3f b3dMin = Vector3f::HUGE_VALUE_POS;
-    Vector3f b3dMax = Vector3f::HUGE_VALUE_NEG;
+    Vector3f b3dMin = V3fc::HUGE_VALUE_POS;
+    Vector3f b3dMax = V3fc::HUGE_VALUE_NEG;
 
     for ( auto& v : vList ) {
         b3dMin = min(b3dMin, v);

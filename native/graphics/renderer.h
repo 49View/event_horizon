@@ -62,7 +62,7 @@ struct DShaderMatrix {
 struct FontDrawingSet {
     std::string text{};
     const Font *font = nullptr;
-    V3f pos = V3f::ZERO;
+    V3f pos = V3fc::ZERO;
     float fontHeight = 0.01f;
     float fontAngle = 0.0f;
 };
@@ -103,7 +103,7 @@ struct RendererDrawingSet {
     std::string textureRef{};
     std::shared_ptr<Matrix4f> matrix;
     Matrix4f preMultMatrix{ Matrix4f::IDENTITY };
-    V3f rotationNormalAxis = V3f::ZERO;
+    V3f rotationNormalAxis = V3fc::ZERO;
     bool usePreMult = false;
 };
 

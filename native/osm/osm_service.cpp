@@ -36,10 +36,10 @@ void OSMManager::notified( OSMBuilder& _source, const std::string& generator ) {
     medianLatitude = lerp( 0.5f, bsdata->maxLatitude, bsdata->minLatitude );
     latitudeScale = medianLatitude / 90.0f;
 
-    auto tg = terrainGrid(Vector3f::ZERO);
+    auto tg = terrainGrid(V3fc::ZERO);
 //    drawTriangles(RL.VPListPre3d(), std::get<0>(terrainGrid), std::get<1>(terrainGrid), C4fc::PASTEL_GRAY, "");
 //
-    for ( auto& rl : roadLines( Vector3f::ZERO ) ) {
+    for ( auto& rl : roadLines( V3fc::ZERO ) ) {
         UISB{ UIShapeType::Line3d }.v(std::get<0>(rl)).build(sg.RR());
     	//drawLine(RL.VPListPre3d(), std::get<0>(rl), std::get<2>(rl) / 255.0f, std::get<1>(rl) / 1000.0f, false);
     }
@@ -120,7 +120,7 @@ std::vector<std::tuple<std::vector<Vector3f>, float>> OSMManager::buildings() {
 
             for ( const auto& point : reverse(buildingPart.outer.points) ) {
                 Vector3f point3d = get3DCoord( point.longitude, point.latitude, point.elevation+buildingPart.baseHeight,
-                                               Vector3f::ZERO );
+                                               V3fc::ZERO );
                 basePoints.push_back( point3d );
             }
             //basePoints.pop_back();

@@ -23,30 +23,6 @@ std::string Vector3f::toStringObj( const std::string& _prefix ) const {
     return ss.str();
 }
 
-const Vector3f Vector3f::ZERO = Vector3f( 0.0f, 0.0f, 0.0f );
-const Vector3f Vector3f::X_AXIS = Vector3f( 1.0f, 0.0f, 0.0f );
-const Vector3f Vector3f::Y_AXIS = Vector3f( 0.0f, 1.0f, 0.0f );
-const Vector3f Vector3f::UP_AXIS = Vector3f( 0.0f, 1.0f, 0.0f );
-const Vector3f Vector3f::UP_AXIS_NEG = Vector3f( 0.0f, -1.0f, 0.0f );
-const Vector3f Vector3f::Z_AXIS = Vector3f( 0.0f, 0.0f, 1.0f );
-const Vector3f Vector3f::X_AXIS_NEG = Vector3f( -1.0f, 0.0f, 0.0f );
-const Vector3f Vector3f::Y_AXIS_NEG = Vector3f( 0.0f, -1.0f, 0.0f );
-const Vector3f Vector3f::Z_AXIS_NEG = Vector3f( 0.0f, 0.0f, -1.0f );
-
-const Vector3f Vector3f::X_AXIS_NEG_MASK = Vector3f( -1.0f, 1.0f, 1.0f );
-const Vector3f Vector3f::Y_AXIS_NEG_MASK = Vector3f( 1.0f, -1.0f, 1.0f );
-const Vector3f Vector3f::Z_AXIS_NEG_MASK = Vector3f( 1.0f, 1.0f, -1.0f );
-
-const Vector3f Vector3f::MASK_X_OUT = Vector3f( 0.0f, 1.0f, 1.0f );
-const Vector3f Vector3f::MASK_Y_OUT = Vector3f( 1.0f, 0.0f, 1.0f );
-const Vector3f Vector3f::MASK_Z_OUT = Vector3f( 1.0f, 1.0f, 0.0f );
-const Vector3f Vector3f::MASK_UP_OUT = Vector3f( 1.0f, 0.0f, 1.0f );
-
-const Vector3f Vector3f::UE4_PROFILE_AXIS = Vector3f( 0.0f, 0.0f, -1.0f );
-const Vector3f Vector3f::ONE = Vector3f( 1.0f, 1.0f, 1.0f );
-const Vector3f Vector3f::HUGE_VALUE_POS = Vector3f( std::numeric_limits<float>::max() );
-const Vector3f Vector3f::HUGE_VALUE_NEG = Vector3f( std::numeric_limits<float>::lowest() );
-
 float fmodAntiGimbal( float _a, float _value ) {
 	float c = fmodf( _a, _value );
 	return c == 0.0f && _a > 0.0f ? _value : c;
@@ -88,17 +64,17 @@ void removeCollinear( std::vector<Vector3f>& cs ) {
 		if ( !isValid( cp.x()) ) {
 			// check if degenerate
 			if ( currPoint1 == currPoint3 ) {
-				cc[t] = Vector3f::HUGE_VALUE_POS;
+				cc[t] = V3fc::HUGE_VALUE_POS;
 			} else {
-				cc[t1] = Vector3f::HUGE_VALUE_POS;
+				cc[t1] = V3fc::HUGE_VALUE_POS;
 			}
 		}
 	}
 
 	for ( auto t = 0; t < csize; t++ ) {
-		if ( cc[t] == Vector3f::HUGE_VALUE_POS ) cs[t] = cc[t];
+		if ( cc[t] == V3fc::HUGE_VALUE_POS ) cs[t] = cc[t];
 	}
-	cs.erase( remove_if( cs.begin(), cs.end(), []( Vector3f const& sc ) -> bool { return sc == Vector3f::HUGE_VALUE_POS; } ), cs.end() );
+	cs.erase( remove_if( cs.begin(), cs.end(), []( Vector3f const& sc ) -> bool { return sc == V3fc::HUGE_VALUE_POS; } ), cs.end() );
 }
 
 void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
@@ -130,8 +106,8 @@ void tbCalc( const Vector3f& v1, const Vector3f& v2, const Vector3f& v3,
 }
 
 QuadVector3f makeQuadV3f( const Vector3f& p1, const Vector3f& p2, float z2 ) {
-    V3f v3 = p1 + V3f::UP_AXIS * z2;
-    V3f v4 = p2 + V3f::UP_AXIS * z2;
+    V3f v3 = p1 + V3fc::UP_AXIS * z2;
+    V3f v4 = p2 + V3fc::UP_AXIS * z2;
     return QuadVector3f{ { p1, p2, v4, v3 } };
 }
 

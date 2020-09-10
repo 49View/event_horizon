@@ -13,7 +13,7 @@ JSONDATA(EntityMetaData, group, source, name, brand, project, bbox3d, bboxSize, 
     std::string brand;
     std::string project;
     AABB bbox3d{AABB::MINVALID()};
-    V3f bboxSize{V3f::ZERO};
+    V3f bboxSize{V3fc::ZERO};
     bool isPublic = true;
     bool isRestricted = true;
     std::string contentType;

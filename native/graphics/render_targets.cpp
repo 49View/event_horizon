@@ -143,7 +143,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     });
 
     // convolution
-    auto cubeMapRigConvolution = addCubeMapRig("cubemapRigConvolution", Vector3f::ZERO,
+    auto cubeMapRigConvolution = addCubeMapRig("cubemapRigConvolution", V3fc::ZERO,
                                                Rect2f(V2fc::ZERO, V2f{ 32 }, true));
     auto convolutionProbe = std::make_shared<RLTargetCubeMap>(cubeMapRigConvolution, rr.getProbing(32), rr);
     convolutionProbe->render(convolutionRT, 32, 0, [&](CubeMapRenderFunctionParams) {
@@ -155,7 +155,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
     });
 
     // pbr: run a quasi monte-carlo simulation on the environment lighting to create a prefilter (cube)map.
-    auto cubeMapRigPre = addCubeMapRig("cubemapRigPre", Vector3f::ZERO, Rect2f(V2fc::ZERO, V2f{ preFilterSize }, true));
+    auto cubeMapRigPre = addCubeMapRig("cubemapRigPre", V3fc::ZERO, Rect2f(V2fc::ZERO, V2f{ preFilterSize }, true));
     int preFilterMipMaps = 1 + static_cast<GLuint>( floor(log((float) preFilterSize)) );
     for ( int m = 0; m < preFilterMipMaps; m++ ) {
         auto fbSize = preFilterSize >> m;
@@ -464,7 +464,7 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
     auto currentCamera = cameraRig->getCamera();
     cb.setCameraUniforms(currentCamera);
     calcShadowMapsBBox();
-    rr.LM()->setUniforms(Vector3f::ZERO, smm, mainDirectionLightValue());
+    rr.LM()->setUniforms(V3fc::ZERO, smm, mainDirectionLightValue());
 
     bool bAddProbe = mSkybox && mSkybox->preCalc(0.0f, mSkyboxCenter);
     setDirtyCumulative(S::PBR, currentCamera->isDirty() || bAddProbe);

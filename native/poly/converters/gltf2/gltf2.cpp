@@ -306,9 +306,9 @@ namespace GLTF2Service {
 
     void addMeshNode( SceneGraph &_sg, IntermediateGLTF &_gltf, const tinygltf::Node &node, GeomSP hier ) {
 
-        Vector3f pos = Vector3f::ZERO;
+        Vector3f pos = V3fc::ZERO;
         Quaternion rot;
-        Vector3f scale = Vector3f::ONE;
+        Vector3f scale = V3fc::ONE;
 
         if ( !node.translation.empty()) {
             pos = { node.translation[0], node.translation[1], node.translation[2] };

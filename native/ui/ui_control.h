@@ -54,7 +54,7 @@ struct UiControlInitData {
 
 struct UiControlBuilder {
 	const std::string name{};
-	Vector3f pos = Vector3f::ZERO;
+	Vector3f pos = V3fc::ZERO;
 	Vector2f size = V2fc::ZERO;
 	Color4f mainColor = C4fc::ALMOND;
 	Color4f backgroundColor = Vector4f::HUGE_VALUE_NEG;

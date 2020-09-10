@@ -154,11 +154,11 @@ void RenderLightManager::setUniforms( const Vector3f& _cameraPos,
 
     // Load defaults
     for ( auto t = 0; t< mMaxLights; t++ ) {
-        lpos.push_back( V3f::ZERO );
-        ldir.push_back( Vector3f::Y_AXIS );
+        lpos.push_back( V3fc::ZERO );
+        ldir.push_back( V3fc::Y_AXIS );
         lintensity.emplace_back( 0.0f );
-        lattn.push_back( V3f::ZERO );
-        lbeamdir.push_back( Vector3f::Z_AXIS );
+        lattn.push_back( V3fc::ZERO );
+        lbeamdir.push_back( V3fc::Z_AXIS );
         lbeamAngle.push_back( 60.0f );
         lType.push_back( 0 );
     }
@@ -166,10 +166,10 @@ void RenderLightManager::setUniforms( const Vector3f& _cameraPos,
     int numLightsClamped = 0;
     for ( auto& pl : mPointLights ) {
         lpos[numLightsClamped]=(  pl.Pos() );
-        ldir[numLightsClamped]=( Vector3f::Y_AXIS );
+        ldir[numLightsClamped]=( V3fc::Y_AXIS );
         lintensity[numLightsClamped]= V3f{pl.Intensity()};
         lattn[numLightsClamped]=( pl.Attenuation() );
-        lbeamdir[numLightsClamped]=( Vector3f::Z_AXIS );
+        lbeamdir[numLightsClamped]=( V3fc::Z_AXIS );
         lbeamAngle[numLightsClamped]=( 60.0f );
         lType[numLightsClamped]=( 0 );
         if ( ++numLightsClamped == mMaxLights ) break;

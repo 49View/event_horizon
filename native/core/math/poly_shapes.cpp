@@ -25,7 +25,7 @@ Vector3f Topology::normalFromSmartSmoothing( uint32_t index, int vIndex ) {
         }
     }
     if ( bSmooth ) {
-        Vector3f tn = Vector3f::ZERO;
+        Vector3f tn = V3fc::ZERO;
         for ( const auto& v : smoothing[idx] ) {
             tn += v;
         }
@@ -289,7 +289,7 @@ void UVSphere( Topology& mesh ) {
     uint32_t meridians = 40;
     uint32_t parallels = 40;
 
-    mesh.vertices.emplace_back(V3f::Y_AXIS*0.5f);
+    mesh.vertices.emplace_back(V3fc::Y_AXIS*0.5f);
     for (uint32_t j = 0; j < parallels - 1; ++j)
     {
         double const polar = M_PI * double(j+1) / double(parallels);
@@ -306,7 +306,7 @@ void UVSphere( Topology& mesh ) {
             mesh.vertices.emplace_back( V3f{x, y, z}*0.5f );
         }
     }
-    mesh.vertices.emplace_back(V3f::Y_AXIS_NEG*0.5f);
+    mesh.vertices.emplace_back(V3fc::Y_AXIS_NEG*0.5f);
 
     for (uint32_t i = 0; i < meridians; ++i)
     {
@@ -477,10 +477,10 @@ void subdivPillowSide( Topology& mesh, int subdivs, float radius, const Vector3f
     for ( int t = 1; t < subdivs; t++ ) {
         deltaC += deltaI;
         float delta = sin(deltaC * M_PI);
-        Vector3f n1 = p1 * Vector3f::MASK_Y_OUT + m1 * delta * radius;
-        Vector3f n2 = p2 * Vector3f::MASK_Y_OUT + m2 * delta * radius;
-        mesh.vertices.emplace_back( n1 + Vector3f::Y_AXIS*(0.5f-deltaC) );
-        mesh.vertices.emplace_back( n2 + Vector3f::Y_AXIS*(0.5f-deltaC) );
+        Vector3f n1 = p1 * V3fc::MASK_Y_OUT + m1 * delta * radius;
+        Vector3f n2 = p2 * V3fc::MASK_Y_OUT + m2 * delta * radius;
+        mesh.vertices.emplace_back( n1 + V3fc::Y_AXIS*(0.5f-deltaC) );
+        mesh.vertices.emplace_back( n2 + V3fc::Y_AXIS*(0.5f-deltaC) );
     }
 }
 
@@ -699,7 +699,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
 
     for ( int q = 0; q < ret.numIndices; q++ ) {
         ret.tangents[q] = V4fc::ONE;
-        ret.binormals[q] = Vector3f::ONE;
+        ret.binormals[q] = V3fc::ONE;
     }
     ret.uvs = std::make_unique<Vector2f[]>( ret.numIndices );
     ret.uv2s = std::make_unique<Vector2f[]>( ret.numIndices );
@@ -855,7 +855,7 @@ PolyStruct createGeomForAABB( const AABB& aabb ) {
     Topology mesh;
     AxisAlignedBoundingBox( mesh, aabb );
 
-    return createGeom( mesh, V3f::ONE, GeomMappingT::Cube, 0 );
+    return createGeom( mesh, V3fc::ONE, GeomMappingT::Cube, 0 );
 }
 
 PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {

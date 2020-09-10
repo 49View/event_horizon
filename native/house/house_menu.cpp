@@ -58,8 +58,8 @@ void HouseMenu::init( [[maybe_unused]] const std::vector<std::shared_ptr<HouseMe
 //	Matrix4f yRot = Matrix4f::IDENTITY;
 //
 //	//!!menu rotation angles!!
-//	xRot.setRotation( M_PI_4, Vector3f::X_AXIS );
-//	yRot.setRotation( M_PI_2, Vector3f::Z_AXIS );
+//	xRot.setRotation( M_PI_4, V3fc::X_AXIS );
+//	yRot.setRotation( M_PI_2, V3fc::Z_AXIS );
 //
 //	preRot = xRot * yRot * preRot;
 //
@@ -104,7 +104,7 @@ void HouseMenu::update() {
 	Matrix4f rotS;
 	rotMat.invert( rotS );
 
-	rotS.setTranslation( Vector3f::ZERO );
+	rotS.setTranslation( V3fc::ZERO );
 	rotS.invert( rotS );
 
 	Matrix4f rotSF = rotS;

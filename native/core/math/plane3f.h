@@ -165,7 +165,7 @@ struct Plane3f {
     }
 
     bool intersectRayOnQuadMin( const RayPair3& rayPair, std::array<Vector3f,4> quad, float& nearV ) const {
-	    Vector3f i{V3f::ZERO};
+	    Vector3f i{V3fc::ZERO};
 	    if ( intersectRayOnQuad(rayPair.origin, rayPair.dir, quad, i) ) {
             float dist = distance( rayPair.origin, i);
             if ( dist < nearV ) {

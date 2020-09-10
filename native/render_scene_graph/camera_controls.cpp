@@ -129,8 +129,8 @@ void CameraControlFly::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, co
         if ( mi.moveDiffSS(TOUCH_ZERO) != V2fc::ZERO ) {
             auto quatAngles = V3f{ mi.moveDiffSS(TOUCH_ZERO).yx(), 0.0f }*3.0f;
 
-            Quaternion qy( quatAngles.y(), Vector3f::Y_AXIS );
-            Quaternion qx( quatAngles.x(), Vector3f::X_AXIS );
+            Quaternion qy( quatAngles.y(), V3fc::Y_AXIS );
+            Quaternion qx( quatAngles.x(), V3fc::X_AXIS );
             Quaternion qSequence = _cam->quatAngle() * qy;
             qSequence = qx * qSequence;
             qSequence.normalise();
@@ -176,8 +176,8 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
         currentAngularVelocity += V2f{ angledd.x() * log10(1.0f + currAngularVelocity),
                                        angledd.y() * log10(1.0f + currAngularVelocity) };
     }
-    Quaternion qy( currentAngularVelocity.y(), Vector3f::Y_AXIS );
-    Quaternion qx( currentAngularVelocity.x(), Vector3f::X_AXIS );
+    Quaternion qy( currentAngularVelocity.y(), V3fc::Y_AXIS );
+    Quaternion qx( currentAngularVelocity.x(), V3fc::X_AXIS );
     Quaternion qSequence = _cam->quatAngle() * qy;
     qSequence = qx * qSequence;
     qSequence.normalise();
@@ -202,7 +202,7 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
 
     if ( mi.isMouseTouchedDown(TOUCH_ZERO) ) {
 //        auto pickedRay = _cam->rayViewportPickIntersection(mi.mousePos(TOUCH_ZERO));
-//        Plane3f zeroPlane{V3f::UP_AXIS, 0.0f};
+//        Plane3f zeroPlane{V3fc::UP_AXIS, 0.0f};
 //        auto is = zeroPlane.intersectLine(pickedRay.rayNear, pickedRay.rayFar) * V3f{1.0f, 1.0f, -1.0f};
 //        LOGRS("Mouse Position on the screen near: " << pickedRay.rayNear );
 //        LOGRS("Mouse Position on the screen far: " << pickedRay.rayFar );

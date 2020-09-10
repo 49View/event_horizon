@@ -67,7 +67,7 @@ void Matrix4f::make3x3NormalizedRotationMatrix() {
 void Matrix4f::setFromRotationAnglePos( const Vector3f &normal, const Vector3f &originAxis, const Vector3f &pos ) {
     if ( !isVerySimilar( normal, originAxis )) {
         if ( isVerySimilar( normal, originAxis * -1.0f )) {
-            setRotation( M_PI, Vector3f::X_AXIS );
+            setRotation( M_PI, V3fc::X_AXIS );
         } else {
             float cosTetha = dot( normal, originAxis );
             Vector3f nn = normalize( cross( normal, originAxis ));
@@ -84,9 +84,9 @@ void Matrix4f::setFromRTS( const Vector3f &pos, const Vector3f &axis, const Vect
     Matrix4f rotMZ = Matrix4f::IDENTITY;
     Matrix4f scaleM = Matrix4f::IDENTITY;
     Matrix4f posM = Matrix4f::IDENTITY;
-    rotMX.setRotation( axis.x(), Vector3f::X_AXIS );
-    rotMY.setRotation( axis.y(), Vector3f::Y_AXIS );
-    rotMZ.setRotation( axis.z(), Vector3f::Z_AXIS );
+    rotMX.setRotation( axis.x(), V3fc::X_AXIS );
+    rotMY.setRotation( axis.y(), V3fc::Y_AXIS );
+    rotMZ.setRotation( axis.z(), V3fc::Z_AXIS );
     scaleM.scale( zoom );
     posM.translate( pos );
     Matrix4f rotM;

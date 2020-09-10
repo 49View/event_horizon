@@ -179,9 +179,9 @@ void VData::mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox
 
 void VData::checkBarycentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, uint32_t pIndexEnd, uint32_t& pIndex,
                                       float& u, float& v ) {
-    Vector3f a = Vector3f::ZERO;
-    Vector3f b = Vector3f::ZERO;
-    Vector3f c = Vector3f::ZERO;
+    Vector3f a = V3fc::ZERO;
+    Vector3f b = V3fc::ZERO;
+    Vector3f c = V3fc::ZERO;
     uint32_t vi = pIndexStart;
     uint32_t possibleIndices[256];
     uint32_t pii = 0;

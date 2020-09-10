@@ -232,11 +232,11 @@ void UiControlGroupBuilder::assemble( DependencyMaker& _md ) {
 //    }
 //    AnimUpdateTimeline::startTimeline( t1 );
 
-//    static Vector3f sposgc = Vector3f::ONE*0.4f;
+//    static Vector3f sposgc = V3fc::ONE*0.4f;
 //    for ( auto& elem : *ret ) {
 //        elem.first->PositionAnim()->value += sposgc;
 //    }
-//    sposgc+= Vector3f::X_AXIS * 0.001f;
+//    sposgc+= V3fc::X_AXIS * 0.001f;
 
 }
 

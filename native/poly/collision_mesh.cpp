@@ -42,7 +42,7 @@ float CollisionMesh::collisionDetection( const V3f& pos, float radius ) {
     float hitAccumulation = 0.0f;
     bool hasGivenUp = false;
 
-    if ( lastKnownGoodPosition == V3f::HUGE_VALUE_NEG ) {
+    if ( lastKnownGoodPosition == V3fc::HUGE_VALUE_NEG ) {
         lastKnownGoodPosition = pos;
         return hitAccumulation;
     }

@@ -197,7 +197,7 @@ void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityG
     currLoadedEntityID = v0;
 
     if ( entityGroup == ResourceGroup::Geom ) {
-        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.051f,
+        GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3fc::UP_AXIS_NEG * 0.051f,
                       GT::Scale(500.0f, 0.1f, 500.0f), C4fc::XTORGBA("e76848"));
         addGeomScene(v0, bTakeScreenShot);
     } else if ( entityGroup == ResourceGroup::Material ) {
@@ -693,8 +693,8 @@ void SceneGraph::addScene( const ResourceScene& gs, bool bTakeScreenShot ) {
         gs.visit(ResourceGroup::Geom, [&, bTakeScreenShot]( const std::string& _key, const std::string& _value ) {
             auto geom = GB<GT::Asset>(_value, GT::Tag(1001));
             if ( geom ) {
-                geom->updateExistingTransform(V3f::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
-                                              Quaternion{ (float) M_PI, V3f::UP_AXIS }, V3f::ONE);
+                geom->updateExistingTransform(V3fc::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
+                                              Quaternion{ (float) M_PI, V3fc::UP_AXIS }, V3fc::ONE);
                 DC()->Mode(CameraControlType::Orbit);
                 DC()->center(geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
                 takeScreenShotOnImportSignal(getCurrLoadedEntityId(), bTakeScreenShot);

@@ -8,8 +8,8 @@ struct HitInfo {
 	HitInfo() {
 		objectId = -1;
 		isHit = false;
-		finalPosition = Vector3f::ZERO;
-		normal = Vector3f::ZERO;
+		finalPosition = V3fc::ZERO;
+		normal = V3fc::ZERO;
 		distance = 0.0f;
 	}
 

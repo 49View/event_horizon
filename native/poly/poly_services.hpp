@@ -48,7 +48,7 @@ struct PolyLineBase2d  {
 struct PolyLineCommond {
     PolyLineCommond( const Vector3f& normal, ReverseFlag reverseFlag ) : normal( normal ), reverseFlag( reverseFlag ) {}
 
-    Vector3f normal = Vector3f::ZERO;
+    Vector3f normal = V3fc::ZERO;
     ReverseFlag reverseFlag = ReverseFlag::False;
 };
 

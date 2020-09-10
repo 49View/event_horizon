@@ -33,11 +33,11 @@ private:
 	Matrix4f depthProjectionMatrix;
 	Matrix4f depthViewMatrix;
 	Vector3f mShadowMapLightSourcePos;
-	Vector3f mShadowMapSunLightDir = Vector3f::Z_AXIS_NEG;
+	Vector3f mShadowMapSunLightDir = V3fc::Z_AXIS_NEG;
 	Vector2f mXFrustom = V2fc::ZERO;
 	Vector2f mYFrustom = V2fc::ZERO;
 	Vector2f mZFrustom = V2fc::ZERO;
-	Vector3f mFrustomCenter = V3f::ZERO;
+	Vector3f mFrustomCenter = V3fc::ZERO;
 };
 
 //#define SMM ShadowMapManager::getInstance()

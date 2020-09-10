@@ -27,8 +27,8 @@ enum class SigmoidSlope {
 namespace GLTF2Service {
 
     struct ExtraAccessorData {
-        Vector3f min = Vector3f::ZERO;
-        Vector3f max = Vector3f::ZERO;
+        Vector3f min = V3fc::ZERO;
+        Vector3f max = V3fc::ZERO;
     };
 
     enum class InternalPBRTextureReconstructionMode {
@@ -103,9 +103,9 @@ namespace GLTF2Service {
 
     void addMeshBBoxNode( IntermediateGLTF& _gltf, const tinygltf::Node& node, const GeomSP& hier ) {
 
-        Vector3f pos = Vector3f::ZERO;
+        Vector3f pos = V3fc::ZERO;
         Quaternion rot;
-        Vector3f scale = Vector3f::ONE;
+        Vector3f scale = V3fc::ONE;
 
         if ( !node.translation.empty()) {
             pos = { node.translation[0], node.translation[1], node.translation[2] };

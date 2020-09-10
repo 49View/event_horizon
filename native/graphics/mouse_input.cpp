@@ -63,7 +63,7 @@ void MouseInput::onTouchMove( int _touchIndex, const Vector2f& pos, UpdateSignal
         status[_touchIndex].gesturesTaps.push_back(pos);
     } else {
         status[_touchIndex].moveDiff = V2fc::ZERO;
-        status[_touchIndex].moveDiffMousePick = Vector3f::ZERO;
+        status[_touchIndex].moveDiffMousePick = V3fc::ZERO;
     }
 
     if ( status[_touchIndex].gestureTime > MAX_SWIPE_TIME_LIMIT ) {
@@ -134,7 +134,7 @@ bool AggregatedInputData::checkKeyToggleOn( int keyCode, bool overrideTextInput 
 
 V2f AggregatedInputData::mouseViewportPos( int _touchIndex, const Camera* cam ) const {
     auto pickedRay = cam->rayViewportPickIntersection(mousePos(_touchIndex));
-    Plane3f zeroPlane{ V3f::UP_AXIS, 0.0f };
+    Plane3f zeroPlane{ V3fc::UP_AXIS, 0.0f };
     return XZY::C(zeroPlane.intersectLine(pickedRay.rayNear, pickedRay.rayFar));
 }
 

@@ -183,7 +183,7 @@ private:
 
     V3f mTarget;
     V2f sphericalAcc = V2fc::ZERO;
-    V3f mOrbitStrafe = V3f::ZERO;
+    V3f mOrbitStrafe = V3fc::ZERO;
     float mOrbitDistance = 2.0f;
 
     JMATH::Rect2f mViewPort{};

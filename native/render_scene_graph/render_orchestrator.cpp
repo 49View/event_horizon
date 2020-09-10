@@ -268,11 +268,11 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         useSkybox(true);
         auto m1 = sg.get<Material>(_node);
         if ( m1 ) {
-            sg.GB<GT::Shape>(ShapeType::Sphere, GT::Tag(1001), GT::M(_node), V3f::UP_AXIS * 0.6f);
+            sg.GB<GT::Shape>(ShapeType::Sphere, GT::Tag(1001), GT::M(_node), V3fc::UP_AXIS * 0.6f);
             sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(1002), GT::M(_node), V3f{ -1.5f, 0.25f, 0.0f },
                              GT::Scale(1.0f, 0.4f, 1.0f));
 
-            sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.01f,
+            sg.GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3fc::UP_AXIS_NEG * 0.01f,
                              GT::Scale(10.0f, 0.1f, 10.0f));
             DC()->setPosition(V3f{ 0.22f, 1.02f, -1.8f });
             DC()->setQuat(quatCompose( V3f{0.33f, -2.8f, 0.0f} ));
@@ -637,7 +637,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
 
     luarr["move"] = [&]( const std::string& _id, float x, float y, float z ) {
         sg.transformNode(_id, [x, y, z]( GeomSP elem ) {
-            elem->updateExistingTransform(V3f{ x, y, z }, Quaternion{}, V3f::ONE);
+            elem->updateExistingTransform(V3f{ x, y, z }, Quaternion{}, V3fc::ONE);
         });
         rr.invalidateOnAdd();
     };
@@ -651,7 +651,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
 
     luarr["center"] = [&]( const std::string& _id ) {
         sg.transformNode(_id, [this]( GeomSP elem ) {
-            elem->updateTransform(V3f::ZERO, Quaternion{}, V3f::ONE);
+            elem->updateTransform(V3fc::ZERO, Quaternion{}, V3fc::ONE);
             this->SG().DC()->center(elem->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
         });
         rr.invalidateOnAdd();
@@ -659,21 +659,21 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
 
     luarr["pitch"] = [&]( const std::string& _id, float x ) {
         sg.transformNode(_id, [x]( GeomSP elem ) {
-            elem->updateExistingTransform(V3f::ZERO, quatFromAxis(V4f{ 1.0f, 0.0f, 0.0f, degToRad(x) }), V3f::ONE);
+            elem->updateExistingTransform(V3fc::ZERO, quatFromAxis(V4f{ 1.0f, 0.0f, 0.0f, degToRad(x) }), V3fc::ONE);
         });
         rr.invalidateOnAdd();
     };
 
     luarr["roll"] = [&]( const std::string& _id, float x ) {
         sg.transformNode(_id, [x]( GeomSP elem ) {
-            elem->updateExistingTransform(V3f::ZERO, quatFromAxis(V4f{ 0.0f, 0.0f, 1.0f, degToRad(x) }), V3f::ONE);
+            elem->updateExistingTransform(V3fc::ZERO, quatFromAxis(V4f{ 0.0f, 0.0f, 1.0f, degToRad(x) }), V3fc::ONE);
         });
         rr.invalidateOnAdd();
     };
 
     luarr["yaw"] = [&]( const std::string& _id, float x ) {
         sg.transformNode(_id, [x]( GeomSP elem ) {
-            elem->updateExistingTransform(V3f::ZERO, quatFromAxis(V4f{ 0.0f, 1.0f, 0.0f, degToRad(x) }), V3f::ONE);
+            elem->updateExistingTransform(V3fc::ZERO, quatFromAxis(V4f{ 0.0f, 1.0f, 0.0f, degToRad(x) }), V3fc::ONE);
         });
         rr.invalidateOnAdd();
     };
@@ -758,8 +758,8 @@ void RenderOrchestrator::reloadShaders( const std::string& _shadershpp ) {
 //}
 //
 //void RenderOrchestrator::cmdloadObjectImpl( const std::vector<std::string>& _params ) {
-//    Vector3f pos = Vector3f::ZERO;
-//    Vector3f rot = Vector3f::ZERO;
+//    Vector3f pos = V3fc::ZERO;
+//    Vector3f rot = V3fc::ZERO;
 //    std::string objName = _params[0];
 //    if ( _params.size() == 4 || _params.size() == 7 ) {
 //        pos = { std::stof(_params[1]), std::stof(_params[2]), std::stof(_params[3]) };

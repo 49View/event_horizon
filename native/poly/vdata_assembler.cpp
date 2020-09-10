@@ -14,7 +14,7 @@
 #include <poly/scene_graph.h>
 
 void internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
-    if ( ln == Vector3f::ZERO ) {
+    if ( ln == V3fc::ZERO ) {
         ln = normalize( crossProduct( v1, v2, v3 ));
         if ( rf == ReverseFlag::True ) ln *= -1.0f;
     }
@@ -29,8 +29,8 @@ namespace VDataServices {
     }
 
     void buildInternal( const GT::Shape& _d, std::shared_ptr<VData> _ret ) {
-        V3f center = V3f::ZERO;
-        V3f size = V3f::ONE;
+        V3f center = V3fc::ZERO;
+        V3f size = V3fc::ONE;
         int subDivs = 3;
         PolyStruct ps;
 
@@ -213,7 +213,7 @@ namespace VDataServices {
             cursor += nextCharPos;
         }
 
-        PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMappingT::Planar );
+        PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMappingT::Planar );
         _ret->fill( ps );
         _ret->BBox3d( ps.bbox3d );
     }
@@ -289,7 +289,7 @@ namespace VDataServices {
                 q+=3;
             }
 
-            PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping{ GeomMappingT::Cube, V3f::ONE*8.0f}, 0, _d.rfPoly );
+            PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::Cube, V3fc::ONE*8.0f}, 0, _d.rfPoly );
             _ret->fill( ps );
             _ret->BBox3d( ps.bbox3d );
         }
@@ -460,7 +460,7 @@ namespace VDataServices {
             }
         }
 
-        PolyStruct ps = createGeom( mesh, V3f::ONE, GeomMapping{ GeomMappingT::Cube, V3f::ONE}, 0, ReverseFlag::False, vertexColors );
+        PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::Cube, V3fc::ONE}, 0, ReverseFlag::False, vertexColors );
         _ret->fill( ps );
         _ret->BBox3d( ps.bbox3d );
     }

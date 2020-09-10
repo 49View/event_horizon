@@ -50,7 +50,7 @@ void ShadowMapManager::SunPosition( const Vector3f& sunPos, float _artificialWor
 		mShadowMapLightSourcePos = sunPos;
 		mShadowMapSunLightDir = normalize( mShadowMapLightSourcePos );
 		Matrix4f mat{};
-		mat.setRotation(_artificialWorldRotationAngle, V3f::UP_AXIS);
+		mat.setRotation(_artificialWorldRotationAngle, V3fc::UP_AXIS);
 		mShadowMapSunLightDir = mat.transform(mShadowMapSunLightDir);
 		calculateShadowMapMatrices();
 		invalidate();
@@ -60,7 +60,7 @@ void ShadowMapManager::SunPosition( const Vector3f& sunPos, float _artificialWor
 void ShadowMapManager::calculateShadowMapMatrices() {
 	// Compute the MVP matrix from the light's point of view
 	if ( mZFrustom.y() != 0.0f ) {
-//        depthViewMatrix.lookAt2( V3f{0.0f,  10.7f, 0.0f}, V3f::ZERO, V3f{0.0f, 1.0f, 0.000001f} );
+//        depthViewMatrix.lookAt2( V3f{0.0f,  10.7f, 0.0f}, V3fc::ZERO, V3f{0.0f, 1.0f, 0.000001f} );
         depthViewMatrix.lookAt2( mShadowMapSunLightDir*mZFrustom.y()*0.5f, mFrustomCenter, V3f{0.0f, 1.0f, 0.000001f} );
         depthMVP = depthViewMatrix * depthProjectionMatrix;
         depthBiasMVP = depthMVP * mBiasMatrix;

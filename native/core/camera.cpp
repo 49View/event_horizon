@@ -416,11 +416,11 @@ void Frustum::calculateFromMVP( const V3f& cameraPos, const Matrix4f& viewMat, c
 Camera::Camera( const std::string& cameraName, const Rect2f& _viewport ) : NamePolicy(cameraName) {
 
     ViewPort(_viewport);
-    mTarget = V3f::Z_AXIS;
+    mTarget = V3fc::Z_AXIS;
     mNearClipPlaneZ = 0.05f;
 
-    spatials.qangle = std::make_shared<AnimType<Quaternion>>(Quaternion{ Vector3f::ZERO }, Name() + "_Angle");
-    spatials.mPos = std::make_shared<AnimType<Vector3f>>(Vector3f::ZERO, Name() + "_Pos");
+    spatials.qangle = std::make_shared<AnimType<Quaternion>>(Quaternion{ V3fc::ZERO }, Name() + "_Angle");
+    spatials.mPos = std::make_shared<AnimType<Vector3f>>(V3fc::ZERO, Name() + "_Pos");
     spatials.mFov = std::make_shared<AnimType<float>>(72.0f, Name() + "_Fov");
 
     mProjection.setPerspective(spatials.mFov->value, 1.0f, mNearClipPlaneZ, mFarClipPlaneZ);
@@ -450,7 +450,7 @@ void Camera::setProjectionMatrix( const Matrix4f& val ) {
 
 void Camera::translate( const Vector3f& pos ) {
     if ( mbLocked ) return;
-    Vector3f mask = LockAtWalkingHeight() ? Vector3f::MASK_UP_OUT : Vector3f::ONE;
+    Vector3f mask = LockAtWalkingHeight() ? V3fc::MASK_UP_OUT : V3fc::ONE;
     if ( Mode() == CameraControlType::Orbit ) {
         mOrbitStrafe += pos;
     } else {
@@ -501,7 +501,7 @@ void Camera::strafe( float amount ) {
 
 void Camera::setViewMatrix( const Vector3f& pos, const Quaternion& q ) {
     if ( mbLocked ) return;
-    quatMatrix = q.rotationMatrix();// * Matrix4f( Vector3f::ZERO, M_PI_2, Vector3f::X_AXIS );
+    quatMatrix = q.rotationMatrix();// * Matrix4f( V3fc::ZERO, M_PI_2, V3fc::X_AXIS );
 
     quatMatrix.invert(quatMatrix);
     mView = Matrix4f(pos) * quatMatrix;
@@ -523,7 +523,7 @@ void Camera::lookAt( const Vector3f& posAt ) {
 void Camera::lookAtCalc() {
     if ( mbLocked ) return;
     Vector3f z = normalize(spatials.mPos->value - mTarget);  // Forward
-    Vector3f x = normalize(cross(V3f::UP_AXIS, z)); // Right
+    Vector3f x = normalize(cross(V3fc::UP_AXIS, z)); // Right
     Vector3f y = cross(z, x);
 
     auto finalPos = spatials.mPos->value + mOrbitStrafe;
@@ -541,21 +541,21 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
     float bdiameter = _bbox.calcDiameter();
 //    mOrbitDistance = bdiameter * (aperture + (cos(degToRad(FoV())) * 0.5f) + mNearClipPlaneZ );
     mOrbitDistance = ( ( bdiameter * 0.5f ) / aperture ) + ( cos(degToRad(FoV())) * 0.5f ) + mNearClipPlaneZ;
-    mOrbitStrafe = V3f::ZERO;
+    mOrbitStrafe = V3fc::ZERO;
     Vector3f cp = { 0.0f, 0.0f, mOrbitDistance };
     mTarget = _bbox.centre();
 
     if ( cca == CameraCenterAngle::Front ) {
         spatials.mPos->value = cp + _bbox.centre();
-        spatials.qangle->value = Quaternion{ Vector3f::ZERO };
+        spatials.qangle->value = Quaternion{ V3fc::ZERO };
         sphericalAcc = V2f{ 0.0f, M_PI_2 };
     } else if ( cca == CameraCenterAngle::Back ) {
         spatials.mPos->value = _bbox.centre() - cp;
-        spatials.qangle->value = Quaternion{ M_PI, Vector3f::UP_AXIS };
+        spatials.qangle->value = Quaternion{ M_PI, V3fc::UP_AXIS };
         sphericalAcc = V2f{ M_PI, M_PI_2 };
     } else if ( cca == CameraCenterAngle::Halfway || cca == CameraCenterAngle::HalfwayOpposite ) {
         float rangle = cca == CameraCenterAngle::Halfway ? M_PI_4 : M_PI_4 + M_PI * 2.0f;
-        spatials.qangle->value = Quaternion{ rangle, Vector3f::UP_AXIS } * Quaternion{ M_PI_4, Vector3f::Z_AXIS };
+        spatials.qangle->value = Quaternion{ rangle, V3fc::UP_AXIS } * Quaternion{ M_PI_4, V3fc::Z_AXIS };
         sphericalAcc = V2f{ TWO_PI - (float) rangle * 0.5f, (float) M_PI_4 + (float) M_PI_4 * 0.5f };
         if ( Mode() == CameraControlType::Orbit ) {
             computeOrbitPosition();
@@ -564,7 +564,7 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
         }
     }
     if ( Mode() != CameraControlType::Orbit ) {
-        spatials.qangle->value = Quaternion{ Vector3f::ZERO };
+        spatials.qangle->value = Quaternion{ V3fc::ZERO };
     }
 
 }
@@ -572,8 +572,8 @@ void Camera::center( const AABB& _bbox, CameraCenterAngle cca ) {
 void Camera::pan( const Vector3f& posDiff ) {
     if ( mbLocked ) return;
 
-    spatials.mPos->value += ( Vector3f::X_AXIS * posDiff.x() );
-    spatials.mPos->value += ( Vector3f::Z_AXIS * posDiff.y() );
+    spatials.mPos->value += ( V3fc::X_AXIS * posDiff.x() );
+    spatials.mPos->value += ( V3fc::Z_AXIS * posDiff.y() );
 }
 
 Vector3f Camera::center( const Rect2f& area, float slack ) {
@@ -690,7 +690,7 @@ void Camera::update() {
     Matrix4f oldProjectonMatrix = mProjection;
 
     if ( Mode() == CameraControlType::Edit2d ) {
-        Quaternion qy(M_PI_2, Vector3f::X_AXIS);
+        Quaternion qy(M_PI_2, V3fc::X_AXIS);
         quatMatrix = qy.rotationMatrix();
     }
 
@@ -813,7 +813,7 @@ void Camera::computeOrbitPosition() {
 }
 
 void Camera::resetQuat() {
-    spatials.qangle->value = Quaternion{ V3f::ZERO };
+    spatials.qangle->value = Quaternion{ V3fc::ZERO };
 }
 
 Quaternion Camera::quatAngle() const { return spatials.qangle->value; }

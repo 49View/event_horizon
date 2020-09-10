@@ -35,7 +35,7 @@ public:
 //        return (mMaxPoint - mMinPoint).maxCoeff();
 //    }
 //
-//    inline PREC maxExtent(Vector3f::Index & i) const{
+//    inline PREC maxExtent(V3fc::Index & i) const{
 //        return (mMaxPoint - mMinPoint).maxCoeff(&i);
 //    }
 
@@ -72,7 +72,7 @@ public:
 //
 //    inline Vector3f getDirection(unsigned int i) const{
 ////        ApproxMVBB_ASSERTMSG(i<3,"Index wrong: " << i)
-//        Vector3f d = Vector3f::ZERO;
+//        Vector3f d = V3fc::ZERO;
 //        d[i] = 1.0;
 //        return mQuat * d; // A_IK* d;
 //    }

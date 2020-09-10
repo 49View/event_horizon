@@ -348,7 +348,7 @@ public:
     void transform( float _duration, uint64_t _frameSkipper,
                     const V3f& _pos,
                     const Quaternion& _rot = Quaternion{},
-                    const V3f& _scale = V3f::ONE );
+                    const V3f& _scale = V3fc::ONE );
     void loadResource( std::shared_ptr<Matrix4f> _localHierMat );
     void hoover( bool isHoovering );
     void setStatus( UIElementStatus _status );
@@ -438,7 +438,7 @@ private:
 
     MPos2d pos;
     V2f padding{ 0.02f, -0.01f };
-    V3f size = V3f::ONE;
+    V3f size = V3fc::ONE;
     UIElementSP node;
     MScale2d bsize{ 0.07f, 0.07f };
 

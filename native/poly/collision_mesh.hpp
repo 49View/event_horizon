@@ -40,7 +40,7 @@ protected:
 public:
     std::vector<CollisionGroup> collisionGroups;
     Rect2f bbox;
-    V3f lastKnownGoodPosition = V3f::HUGE_VALUE_NEG;
+    V3f lastKnownGoodPosition = V3fc::HUGE_VALUE_NEG;
 };
 
 

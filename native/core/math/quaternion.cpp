@@ -176,9 +176,9 @@ Quaternion quatFromAxis( const Vector4f& w ) {
 }
 
 Quaternion quatCompose( const Vector3f& a ) {
-    Quaternion qz( a.z(), Vector3f::Z_AXIS );
-    Quaternion qy( a.y(), Vector3f::Y_AXIS );
-    Quaternion qx( a.x(), Vector3f::X_AXIS );
+    Quaternion qz( a.z(), V3fc::Z_AXIS );
+    Quaternion qy( a.y(), V3fc::Y_AXIS );
+    Quaternion qx( a.x(), V3fc::X_AXIS );
 
     return  qx * qy * qz;
 }

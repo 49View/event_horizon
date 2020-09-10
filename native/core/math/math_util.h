@@ -736,12 +736,12 @@ negative towards the other
         if ( !snapPoints.empty() && ret == value && value != snapPoints.back()) {
             T lastLine = value - snapPoints.back();
             constexpr float slopeMinAngle = 0.06f;
-            float slope = dot( T::X_AXIS, normalize( lastLine ));
+            float slope = dot( T::X_AXIS(), normalize( lastLine ));
             if constexpr ( T::vsize() == 3 ) {
                 if ( fabs( acos( slope )) < slopeMinAngle ) {
                     ret.setZ( snapPoints.back().z());
                 }
-                slope = dot( T::Z_AXIS, normalize( lastLine ));
+                slope = dot( T::Z_AXIS(), normalize( lastLine ));
                 if ( fabs( acos( slope )) < slopeMinAngle ) {
                     ret.setX( snapPoints.back().x());
                 }
@@ -750,7 +750,7 @@ negative towards the other
                 if ( fabs( acos( slope )) < slopeMinAngle ) {
                     ret.setY( snapPoints.back().y());
                 }
-                slope = dot( T::Y_AXIS, normalize( lastLine ));
+                slope = dot( T::Y_AXIS(), normalize( lastLine ));
                 if ( fabs( acos( slope )) < slopeMinAngle ) {
                     ret.setX( snapPoints.back().x());
                 }

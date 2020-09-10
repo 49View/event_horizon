@@ -23,7 +23,7 @@ struct GeomMapping {
     GeomMapping( GeomMappingT _type, const V3f& _scaling ) : type(_type), scaling(_scaling) {}
 
     GeomMappingT type;
-    V3f scaling = V3f::ONE;
+    V3f scaling = V3fc::ONE;
 };
 
 enum ReservedPolyTags {

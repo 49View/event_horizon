@@ -49,7 +49,7 @@ protected:
 
 class DirectionalLight : public LightBase {
 public:
-	explicit DirectionalLight( const Vector3f& dir, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( "dir", wattage, intensity, attenuation ) {
+	explicit DirectionalLight( const Vector3f& dir, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = V3fc::ONE ) : LightBase( "dir", wattage, intensity, attenuation ) {
 		Type( LightType_Point );
 		mDir = std::make_shared<AnimType<Vector3f>>( dir, "lightDirection" );
 	}
@@ -62,7 +62,7 @@ private:
 
 class PointLight : public LightBase {
 public:
-	explicit PointLight( const std::string& _key, const Vector3f& pos, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : LightBase( _key, wattage, intensity, attenuation ) {
+	explicit PointLight( const std::string& _key, const Vector3f& pos, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = V3fc::ONE ) : LightBase( _key, wattage, intensity, attenuation ) {
 		Type( LightType_Point );
 		mPos = std::make_shared<AnimType<Vector3f>>( pos, "lightPos" );
 	}
@@ -75,7 +75,7 @@ protected:
 
 class SpotLight : public PointLight {
 public:
-	SpotLight( const Vector3f& pos, const Vector3f& dir, float beamAngle = 60.0f, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE ) : PointLight( "spot", pos, wattage, intensity, attenuation ) {
+	SpotLight( const Vector3f& pos, const Vector3f& dir, float beamAngle = 60.0f, float wattage = 50.0f, float intensity = 1.0f, const Vector3f& attenuation = V3fc::ONE ) : PointLight( "spot", pos, wattage, intensity, attenuation ) {
 		Type( LightType_Spotlight );
 		mDir = std::make_shared<AnimType<Vector3f>>( dir, "lightDirection" );
 		mBeamAngle = std::make_shared<AnimType<float>>( beamAngle, "lightBeamAngle" );
@@ -96,7 +96,7 @@ class RenderLightManager {
 public:
     RenderLightManager();
 
-	void addPointLight( const std::string& _key, const Vector3f& pos, float _wattage, float intensity = 1.0f, const Vector3f& attenuation = Vector3f::ONE );
+	void addPointLight( const std::string& _key, const Vector3f& pos, float _wattage, float intensity = 1.0f, const Vector3f& attenuation = V3fc::ONE );
     void setPointLightPos( size_t index, const Vector3f& _pos );
     void setPointLightWattage( size_t index, float _watt );
     void setPointLightIntensity( size_t index, float _intensity );

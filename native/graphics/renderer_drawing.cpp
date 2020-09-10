@@ -158,9 +158,9 @@ void Renderer::drawGrid( const int bucketIndex, float unit, const Color4f& mainA
     Vector2f axisLenghts = { limits.x() * 2.0f, limits.y() * 2.0f };
 
     drawIncGridLines(*this, bucketIndex, 10, 0.1f, gridLinesWidth * 0.5f,
-                     V3f::X_AXIS_NEG, V3f::X_AXIS, smallAxisColor, zOffset, _name + "y_axis_01");
+                     V3fc::X_AXIS_NEG, V3fc::X_AXIS, smallAxisColor, zOffset, _name + "y_axis_01");
     drawIncGridLines(*this, bucketIndex, 10, 0.1f, gridLinesWidth * 0.5f,
-                     V3f::Z_AXIS_NEG, V3f::Z_AXIS, smallAxisColor, zOffset, _name + "x_axis_01");
+                     V3fc::Z_AXIS_NEG, V3fc::Z_AXIS, smallAxisColor, zOffset, _name + "x_axis_01");
 
     drawIncGridLines(*this, bucketIndex, static_cast<int>(( axisLenghts.y() / unit ) / 2.0f ), unit, gridLinesWidth,
                      leftXAxis,
@@ -169,11 +169,11 @@ void Renderer::drawGrid( const int bucketIndex, float unit, const Color4f& mainA
                      bottomYAxis, smallAxisColor, zOffset, _name + "x_axis");
 
     // Main axis
-    draw<DLine>(bucketIndex, leftXAxis, V3f::ZERO, C4fc::DARK_GREEN, mainAxisWidth);
-    draw<DLine>(bucketIndex, V3f::ZERO, rightXAxis, C4fc::GREEN, mainAxisWidth);
-    draw<DLine>(bucketIndex, topYAxis, V3f::ZERO, C4fc::RED, mainAxisWidth);
-    draw<DLine>(bucketIndex, V3f::ZERO, bottomYAxis, C4fc::MAROON, mainAxisWidth);
-    draw<DCircleFilled>(bucketIndex, V3f::ZERO, C4fc::BLACK, mainAxisWidth);
+    draw<DLine>(bucketIndex, leftXAxis, V3fc::ZERO, C4fc::DARK_GREEN, mainAxisWidth);
+    draw<DLine>(bucketIndex, V3fc::ZERO, rightXAxis, C4fc::GREEN, mainAxisWidth);
+    draw<DLine>(bucketIndex, topYAxis, V3fc::ZERO, C4fc::RED, mainAxisWidth);
+    draw<DLine>(bucketIndex, V3fc::ZERO, bottomYAxis, C4fc::MAROON, mainAxisWidth);
+    draw<DCircleFilled>(bucketIndex, V3fc::ZERO, C4fc::BLACK, mainAxisWidth);
 }
 
 std::vector<VPListSP> Renderer::drawGridV2( const int bucketIndex, float unit, const Color4f& mainAxisColor,
@@ -197,8 +197,8 @@ std::vector<VPListSP> Renderer::drawGridV2( const int bucketIndex, float unit, c
     float delta = topYAxis.z();
     for ( int t = 0; t < numGridLinesY+1; t++ ) {
         // xLines
-        Vector3f lerpLeftX = leftXAxis + V3f::Z_AXIS * delta;
-        Vector3f lerpRightX = rightXAxis + V3f::Z_AXIS * delta;
+        Vector3f lerpLeftX = leftXAxis + V3fc::Z_AXIS * delta;
+        Vector3f lerpRightX = rightXAxis + V3fc::Z_AXIS * delta;
             smallLines.emplace_back(
                     extrudePointsWithWidth<ExtrudeStrip>({ lerpLeftX, lerpRightX }, gridLinesWidth * 0.75f));
         delta += unit * subUnitsRatio;
@@ -208,8 +208,8 @@ std::vector<VPListSP> Renderer::drawGridV2( const int bucketIndex, float unit, c
     delta = leftXAxis.x();
     for ( int t = 0; t < numGridLinesX+1; t++ ) {
         // xLines
-        Vector3f lerpLeftX = topYAxis + V3f::X_AXIS * delta;
-        Vector3f lerpRightX = bottomYAxis + V3f::X_AXIS * delta;
+        Vector3f lerpLeftX = topYAxis + V3fc::X_AXIS * delta;
+        Vector3f lerpRightX = bottomYAxis + V3fc::X_AXIS * delta;
             smallLines.emplace_back(
                     extrudePointsWithWidth<ExtrudeStrip>({ lerpLeftX, lerpRightX }, gridLinesWidth * 0.75f));
         delta += unit * subUnitsRatio;
@@ -466,8 +466,8 @@ VPListSP Renderer::drawCircleFilledFinal( RendererDrawingSet& rds ) {
     V3fVector verts;
 
     rds.prim = Primitive::PRIMITIVE_TRIANGLE_FAN;
-    bool hasRotation = rds.rotationNormalAxis != V3f::ZERO;
-    auto center = hasRotation ? V3f::ZERO : rds.verts.v[0];
+    bool hasRotation = rds.rotationNormalAxis != V3fc::ZERO;
+    auto center = hasRotation ? V3fc::ZERO : rds.verts.v[0];
     auto radius = rds.radius;
     for ( auto t = 0u; t < rds.archSegments; t++ ) {
         float angle = ( static_cast<float>( t ) / static_cast<float>( rds.archSegments ) ) * TWO_PI;
@@ -476,7 +476,7 @@ VPListSP Renderer::drawCircleFilledFinal( RendererDrawingSet& rds ) {
 
     if ( hasRotation ) {
         Quaternion quat{};
-        quat.rotateFromAxis(V3f::UP_AXIS, rds.rotationNormalAxis);
+        quat.rotateFromAxis(V3fc::UP_AXIS, rds.rotationNormalAxis);
         Matrix4f mattor = quat.matrix4(rds.verts.v[0]); // rds.verts.v[0] == center
         for ( auto& v : verts ) {
             v = mattor.transform(v);
@@ -542,11 +542,11 @@ void RendererDrawingSet::setupFontData() {
     MatrixAnim lTRS;
     if ( shaderName == S::FONT_2D ) {
         lTRS.Pos(fds.pos);
-        lTRS.Rot(quatFromAxis(V4f{ V3f::Z_AXIS, fds.fontAngle }));
+        lTRS.Rot(quatFromAxis(V4f{ V3fc::Z_AXIS, fds.fontAngle }));
         lTRS.Scale(V3f{ 1.0f, -1.0f, 1.0f } * fds.fontHeight * 0.001f);
     } else {
         rectAxis == RDSRectAxis::XZ ? lTRS.Pos(fds.pos) : lTRS.Pos(XZY::C(fds.pos));
-        lTRS.Rot(quatFromAxis(V4f{ V3f::Y_AXIS, fds.fontAngle }));
+        lTRS.Rot(quatFromAxis(V4f{ V3fc::Y_AXIS, fds.fontAngle }));
         lTRS.Scale(fscale * V3f{ 1.0f, -1.0f, -1.0f } * fds.fontHeight);
     }
     preMultMatrix = Matrix4f{ lTRS };

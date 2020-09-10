@@ -27,7 +27,7 @@ struct FollowerPoly {
 
 struct FollowerIntermediateData {
 	std::vector<Vector3f> vcoords;
-	Vector3f			  vplanet = Vector3f::ZERO;
+	Vector3f			  vplanet = V3fc::ZERO;
 	std::vector<Vector3f> vdirs;
 	std::vector<Plane3f>  vplanesn;
 	std::vector<Vector3f> vplanesb;
@@ -38,7 +38,7 @@ namespace FollowerService {
 	void extrude( std::shared_ptr<VData> geom,
                   const std::vector<Vector3f>& verts,
                   const Profile& profile,
-                  const Vector3f& suggestedAxis = Vector3f::ZERO,
+                  const Vector3f& suggestedAxis = V3fc::ZERO,
                   const FollowerFlags& ff = FollowerFlags::Defaults );
 
     std::vector<Vector3f> createLinePath( const V2f& a, const V2f& b, float width, float z );
