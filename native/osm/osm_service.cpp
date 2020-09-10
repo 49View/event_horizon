@@ -37,7 +37,7 @@ void OSMManager::notified( OSMBuilder& _source, const std::string& generator ) {
     latitudeScale = medianLatitude / 90.0f;
 
     auto tg = terrainGrid(Vector3f::ZERO);
-//    drawTriangles(RL.VPListPre3d(), std::get<0>(terrainGrid), std::get<1>(terrainGrid), Color4f::PASTEL_GRAY, "");
+//    drawTriangles(RL.VPListPre3d(), std::get<0>(terrainGrid), std::get<1>(terrainGrid), C4fc::PASTEL_GRAY, "");
 //
     for ( auto& rl : roadLines( Vector3f::ZERO ) ) {
         UISB{ UIShapeType::Line3d }.v(std::get<0>(rl)).build(sg.RR());

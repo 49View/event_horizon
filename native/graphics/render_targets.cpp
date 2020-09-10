@@ -455,7 +455,7 @@ void RLTarget::clearCB() {
 }
 
 V4f RLTargetPBR::mainDirectionLightValue() const {
-    return mbEnableSunLighting ? mSunBuilder->GoldenHourColor() : V4f::ONE * 3.0f;
+    return mbEnableSunLighting ? mSunBuilder->GoldenHourColor() : V4fc::ONE * 3.0f;
 }
 
 void RLTargetPBR::addToCB( CommandBufferList& cb ) {

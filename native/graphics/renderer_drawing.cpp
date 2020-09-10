@@ -169,11 +169,11 @@ void Renderer::drawGrid( const int bucketIndex, float unit, const Color4f& mainA
                      bottomYAxis, smallAxisColor, zOffset, _name + "x_axis");
 
     // Main axis
-    draw<DLine>(bucketIndex, leftXAxis, V3f::ZERO, C4f::DARK_GREEN, mainAxisWidth);
-    draw<DLine>(bucketIndex, V3f::ZERO, rightXAxis, C4f::GREEN, mainAxisWidth);
-    draw<DLine>(bucketIndex, topYAxis, V3f::ZERO, C4f::RED, mainAxisWidth);
-    draw<DLine>(bucketIndex, V3f::ZERO, bottomYAxis, C4f::MAROON, mainAxisWidth);
-    draw<DCircleFilled>(bucketIndex, V3f::ZERO, C4f::BLACK, mainAxisWidth);
+    draw<DLine>(bucketIndex, leftXAxis, V3f::ZERO, C4fc::DARK_GREEN, mainAxisWidth);
+    draw<DLine>(bucketIndex, V3f::ZERO, rightXAxis, C4fc::GREEN, mainAxisWidth);
+    draw<DLine>(bucketIndex, topYAxis, V3f::ZERO, C4fc::RED, mainAxisWidth);
+    draw<DLine>(bucketIndex, V3f::ZERO, bottomYAxis, C4fc::MAROON, mainAxisWidth);
+    draw<DCircleFilled>(bucketIndex, V3f::ZERO, C4fc::BLACK, mainAxisWidth);
 }
 
 std::vector<VPListSP> Renderer::drawGridV2( const int bucketIndex, float unit, const Color4f& mainAxisColor,
@@ -502,7 +502,7 @@ Renderer::drawDotCircled( float dotSize, const V3f& centrePoint, const V3f& norm
     auto sm3 = DShaderMatrix{ DShaderMatrixValue3dColor };
 
     ret.emplace_back(draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, centrePoint,
-                                         V4f::WHITE.A(finalAlphaValue),
+                                         C4fc::WHITE.A(finalAlphaValue),
                                          dotSize + outerDotSize * outerDotBorderRatio, sm3,
                                          RDSRotationNormalAxis{ normal },
                                          RDSArchSegments{ 36 }, _name + "d1"));
@@ -510,7 +510,7 @@ Renderer::drawDotCircled( float dotSize, const V3f& centrePoint, const V3f& norm
                                          dotSize, sm3, RDSRotationNormalAxis{ normal }, RDSArchSegments{ 36 },
                                          _name + "d2"));
     ret.emplace_back(draw<DCircleFilled>(CommandBufferLimits::CameraMousePointers, centrePoint,
-                                         V4f::WHITE.A(finalAlphaValue),
+                                         C4fc::WHITE.A(finalAlphaValue),
                                          dotSize * smallDotRatio, sm3, RDSRotationNormalAxis{ normal },
                                          RDSArchSegments{ 36 }, _name + "d3"));
     return ret;

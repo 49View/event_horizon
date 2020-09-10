@@ -164,7 +164,7 @@ namespace GLTF2Service {
             geom->calcBinormal();
         }
         if ( !colorsFilled ) {
-            geom->fillWithColor(C4f::WHITE);
+            geom->fillWithColor(C4fc::WHITE);
         }
 
     }

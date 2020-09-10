@@ -40,23 +40,23 @@ struct UiControlInitData {
 	UiControlSizeType sizeType = UiControlSizeType::Invalid;
 	Vector2f		  origin = V2fc::ZERO;
 	Vector2f		  size = V2fc::ZERO;
-	Color4f			  color = Vector4f::WHITE;
-	Color4f			  backGroundColor = Color4f::HUGE_VALUE_NEG;
+	Color4f			  color = V4fc::WHITE;
+	Color4f			  backGroundColor = C4fc::HUGE_VALUE_NEG;
 	float 			  alpha = 1.0f;
 	std::string		  text;
 	std::string		  title;
 	std::string		  font;
 	int				  flags = 0;
-	Vector4f		  params = Vector4f::ZERO;
-	UiAlignElement	  margins = Vector4f::ZERO;
-	UiAlignElement	  padding = Vector4f::ZERO;
+	Vector4f		  params = V4fc::ZERO;
+	UiAlignElement	  margins = V4fc::ZERO;
+	UiAlignElement	  padding = V4fc::ZERO;
 };
 
 struct UiControlBuilder {
 	const std::string name{};
 	Vector3f pos = Vector3f::ZERO;
 	Vector2f size = V2fc::ZERO;
-	Color4f mainColor = Color4f::ALMOND;
+	Color4f mainColor = C4fc::ALMOND;
 	Color4f backgroundColor = Vector4f::HUGE_VALUE_NEG;
     float alpha = 1.0f;
 	std::string cname;

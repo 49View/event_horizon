@@ -114,7 +114,7 @@ struct UIFontText {
 
     ResourceRef fontRef;
     float height = 0.1f;
-    C4f color = C4f::WHITE;
+    C4f color = C4fc::WHITE;
     std::string text;
 };
 
@@ -185,7 +185,7 @@ struct ControlDef {
     std::vector<UIFontText> textLines;
     ControlSingleTapCallback singleTapCallback = ControlTapCallbackEmpty;
     ControlSingleTapCallback singleTapOffToggleCallback = ControlTapCallbackEmpty;
-    Color4f tintColor = C4f::WHITE;
+    Color4f tintColor = C4fc::WHITE;
     UICallbackHandle cbParam;
 };
 
@@ -237,7 +237,7 @@ public:
             status = UITS::Fixed;
         }
 
-        backgroundColor = std::make_shared<AnimType<V4f>>( Vector4f::ZERO, "BackGroundButtonColor" );
+        backgroundColor = std::make_shared<AnimType<V4f>>( V4fc::ZERO, "BackGroundButtonColor" );
     }
 
 private:
@@ -369,7 +369,7 @@ private:
     std::string text;
     float fontAngle = 0.0f;
     float fontHeight = 0.2f;
-    C4f fontColor = C4f::WHITE;
+    C4f fontColor = C4fc::WHITE;
 
     std::string foreground;
 
@@ -382,8 +382,8 @@ private:
     VPListSP shadowVP;
     MatrixAnim backgroundAnim;
     V4fa backgroundColor;
-    C4f defaultBackgroundColor = C4f::WHITE;
-    C4f tintColor = C4f::WHITE;
+    C4f defaultBackgroundColor = C4fc::WHITE;
+    C4f tintColor = C4fc::WHITE;
     ControlSingleTapCallback singleTapCallback = ControlTapCallbackEmpty;
     ControlSingleTapCallback singleTapOffToggleCallback = ControlTapCallbackEmpty;
     UICallbackHandle cbParam;

@@ -130,9 +130,9 @@ void SunBuilder::moveSun( const DateTime& date, const GeoPosition& location ) {
     // [0,1] golden hour
     // 1 day
 
-    auto lSunriseColor = V4f::XTORGBA("#C6FFDD") ;
-    auto lNoonColor = V4f::XTORGBA("#FBD786");
-    auto lSunsetColor = V4f::XTORGBA("#f7999d");
+    auto lSunriseColor = V4fc::XTORGBA("#C6FFDD") ;
+    auto lNoonColor = V4fc::XTORGBA("#FBD786");
+    auto lSunsetColor = V4fc::XTORGBA("#f7999d");
     auto nightColor = V4f{V3f{0.05f}, 0.0f};
 
     mSunRadiance = nightColor;
@@ -309,7 +309,7 @@ V4f SunBuilder::GoldenHourColor() const {
 //    auto gdl = static_cast<size_t>(goldenHourGradient->width - 1);
 //	auto index = gdl - static_cast<size_t>(((mSunPosition.altitudeRad) / M_PI_2) * gdl);
 //	auto col = goldenHourGradient->at<uint32_t>( static_cast<unsigned int>(index), 0);
-//	auto ret = Vector4f::ITORGBA(col) * sunPower;
+//	auto ret = V4fc::ITORGBA(col) * sunPower;
 //	return ret.xyz();
 }
 
@@ -317,6 +317,6 @@ V3f SunBuilder::dailyGradientColor( float _dayDelta ) const {
     auto gdl = static_cast<size_t>(goldenHourGradient->width - 1);
 	auto index = gdl - static_cast<size_t>( _dayDelta * gdl);
 	auto col = goldenHourGradient->at<uint32_t>( static_cast<unsigned int>(index), 0);
-	auto ret = Vector4f::ITORGBA(col);
+	auto ret = V4fc::ITORGBA(col);
 	return ret.xyz();
 }

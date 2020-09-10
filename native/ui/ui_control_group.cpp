@@ -127,7 +127,7 @@ void UiControlGroup::overrideStyleIfNeeded( UiControlInitData& cid, const StyleS
         cid.size = ss.size;
     }
     if ( ss.color.x() >= 0.0f ) {
-        cid.color = Color4f::FTORGBA( ss.color );
+        cid.color = C4fc::FTORGBA( ss.color );
     }
     if ( ss.margins.x() >= 0.0f ) {
         cid.margins = ss.margins;
@@ -222,8 +222,8 @@ void UiControlGroup::push_layout( const LayoutArrangement& _layoutArrangement ) 
             cid.margins = l.margins;
             cid.padding = l.padding;
 
-            cid.color = Color4f::FTORGBA( element.color );
-            cid.backGroundColor = Color4f::FTORGBA( element.backGroundColor );
+            cid.color = C4fc::FTORGBA( element.color );
+            cid.backGroundColor = C4fc::FTORGBA( element.backGroundColor );
             cid.text = element.text;
             cid.title = element.title;
             cid.font = element.font;

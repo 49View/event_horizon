@@ -312,15 +312,15 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         auto pfont = sg.FM(_node);
         std::string message = "Roads? Where we're going, we don't need roads";
         std::vector<std::pair<float, C4f>> fsize{
-                { 0.02f, C4f::LIGHT_GREY },
-                { 0.03f, C4f::DARK_BLUE },
-                { 0.04f, C4f::DARK_CYAN },
-                { 0.05f, C4f::DARK_YELLOW },
-                { 0.07f, C4f::DARK_PURPLE },
-                { 0.10f, C4f::DARK_RED },
-                { 0.12f, C4f::DARK_SALMON },
-                { 0.15f, C4f::DARK_GREEN },
-                { 0.18f, C4f::DARK_BROWN },
+                { 0.02f, C4fc::LIGHT_GREY },
+                { 0.03f, C4fc::DARK_BLUE },
+                { 0.04f, C4fc::DARK_CYAN },
+                { 0.05f, C4fc::DARK_YELLOW },
+                { 0.07f, C4fc::DARK_PURPLE },
+                { 0.10f, C4fc::DARK_RED },
+                { 0.12f, C4fc::DARK_SALMON },
+                { 0.15f, C4fc::DARK_GREEN },
+                { 0.18f, C4fc::DARK_BROWN },
         };
         float fOff = 0.0f;
         for ( auto& t : fsize ) {
@@ -501,7 +501,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
     auto luarr = lua["rr"].get_or_create<sol::table>();
 
     luarr["clearColor"] = [&]( const std::string& _col ) {
-        Renderer::clearColor(V4f::XTORGBA(_col));
+        Renderer::clearColor(V4fc::XTORGBA(_col));
         setDirtyFlagOnPBRRender(Name::Foxtrot, S::PBR, true);
     };
     luarr["useSkybox"] = [&]( bool _flag ) {
@@ -592,8 +592,8 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
         setRigCameraController(CameraControlType::Orbit);
         useSkybox(true);
         RR().clearBucket(CommandBufferLimits::GridStart);
-        RR().drawGrid(CommandBufferLimits::GridStart, 1.0f, ( Color4f::PASTEL_GRAYLIGHT ),
-                            ( Color4f::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
+        RR().drawGrid(CommandBufferLimits::GridStart, 1.0f, ( C4fc::PASTEL_GRAYLIGHT ),
+                            ( C4fc::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
         RR().showBucket(CommandBufferLimits::GridStart, false);
         RR().setIndoorSceneCoeff(0.5f); // We dim the sunlight otherwise outdoor scenes are too bright
         sg.resetAndLoadEntity(_id, _group, bTakeScreenShot);

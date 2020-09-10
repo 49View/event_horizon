@@ -95,7 +95,7 @@ private:
 	bool mUseMipMaps = false;
     int  mNumColorAttachments = 0;
 	TextureSlots mTextureGPUSlot = TextureSlots::TSLOT_NORMAL;
-	Vector4f mClearColor = Vector4f::BLACK;
+	Vector4f mClearColor = V4fc::BLACK;
 	std::shared_ptr<Texture> mRenderToTexture;
 	std::shared_ptr<Texture> mColorAttachment1Texture;
 	std::shared_ptr<VPList>  mVPListIM; // immediate render

@@ -93,7 +93,7 @@ struct RendererDrawingSet {
     float arrowAngle = 0.3f;
     float arrowLength = 0.3f;
     float radius = 0.5f;
-    C4f color = C4f::WHITE;
+    C4f color = C4fc::WHITE;
     float width = 0.1f;
     uint32_t archSegments = 12;
     FDS fds;

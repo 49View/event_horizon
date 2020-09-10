@@ -87,7 +87,7 @@ public:
         if constexpr ( std::is_same<T, int>::value )                   { auto v = get<T>( uniformName ); return (v ? *v : 0); }
         if constexpr ( std::is_same<T, V2f>::value )                   { auto v = get<T>( uniformName ); return (v ? *v : V2fc::ZERO); }
         if constexpr ( std::is_same<T, V3f>::value )                   { auto v = get<T>( uniformName ); return (v ? *v : V3f::ZERO); }
-        if constexpr ( std::is_same<T, V4f>::value )                   { auto v = get<T>( uniformName ); return (v ? *v : V4f::ZERO); }
+        if constexpr ( std::is_same<T, V4f>::value )                   { auto v = get<T>( uniformName ); return (v ? *v : V4fc::ZERO); }
         if constexpr ( std::is_same<T, Matrix3f>::value )              { auto v = get<T>( uniformName ); return (v ? *v : Matrix3f::ZERO); }
         if constexpr ( std::is_same<T, Matrix4f>::value )              { auto v = get<T>( uniformName ); return (v ? *v : Matrix4f::ZERO); }
         if constexpr ( std::is_same<T, std::vector<Vector3f>>::value ) { auto v = get<T>( uniformName ); return (v ? *v : T{}); }

@@ -54,14 +54,14 @@ const Matrix4f Matrix4f::BEEF = Matrix4f( Vector4f( 32432.0f, 0.423432432f, 4324
                                           Vector4f( 894343.0f, 7897432.0f, 343221.0f, 23.0f ),
                                           Vector4f( 0.4324324230f, 243343220.0f, 23154.0f, 5676751.0f ));
 
-const Matrix4f Matrix4f::ZERO = Matrix4f( V4f::ZERO, V4f::ZERO, V4f::ZERO, V4f::ZERO );
-const Matrix4f Matrix4f::ONE = Matrix4f( V4f::ONE, V4f::ONE, V4f::ONE, V4f::ONE );
+const Matrix4f Matrix4f::ZERO = Matrix4f( V4fc::ZERO, V4fc::ZERO, V4fc::ZERO, V4fc::ZERO );
+const Matrix4f Matrix4f::ONE = Matrix4f( V4fc::ONE, V4fc::ONE, V4fc::ONE, V4fc::ONE );
 
 void Matrix4f::make3x3NormalizedRotationMatrix() {
     setRow( 0, { normalize( getRow( 0 ).xyz()), 0.0f } );
     setRow( 1, { normalize( getRow( 1 ).xyz()), 0.0f } );
     setRow( 2, { normalize( getRow( 2 ).xyz()), 0.0f } );
-    setRow( 3, Vector4f::W_AXIS );
+    setRow( 3,V4fc::W_AXIS );
 }
 
 void Matrix4f::setFromRotationAnglePos( const Vector3f &normal, const Vector3f &originAxis, const Vector3f &pos ) {

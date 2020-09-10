@@ -11,12 +11,12 @@ namespace SVGC {
 
     Color4f pathColor( NSVGshape* shape ) {
         if ( shape->stroke.type != 0 ) {
-            return Vector4f::ITORGBA( shape->stroke.color );
+            return V4fc::ITORGBA( shape->stroke.color );
         }
         if ( shape->fill.type != 0 ) {
-            return Vector4f::ITORGBA( shape->fill.color );
+            return V4fc::ITORGBA( shape->fill.color );
         }
-        return Vector4f::DARK_CYAN;
+        return C4fc::DARK_CYAN;
     }
 
     std::vector<SVGPath> SVGToPoly( const std::string& _sourceString ) {

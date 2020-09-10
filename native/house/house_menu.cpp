@@ -16,9 +16,9 @@ HouseMenu::HouseMenu() {
 
 void HouseMenu::CreateHeader() {
 //	mRoot->startTag( "Header" );
-//	mRoot->addControl<UiImage>( logoSize, Color4f::WHITE, "logo", UiControlFlag::FloatLeft );
+//	mRoot->addControl<UiImage>( logoSize, C4fc::WHITE, "logo", UiControlFlag::FloatLeft );
 //
-//	mRoot->addControl<UiImage>( Vector2f{ rowWidth(), 0.01f }, Color4f::WHITE, "menu_header_bottom", UiControlFlag::FloatLeft );
+//	mRoot->addControl<UiImage>( Vector2f{ rowWidth(), 0.01f }, C4fc::WHITE, "menu_header_bottom", UiControlFlag::FloatLeft );
 //	mRoot->endTag( "Header" );
 }
 
@@ -30,7 +30,7 @@ void HouseMenu::CreateBody( [[maybe_unused]] const std::vector<std::shared_ptr<H
 //
 //	for ( auto& item : items ) {
 //		TM.addTextureWithData( item->imageName, item->image );
-//		auto img = mRoot->addControl<UiImage>( tileSize, Color4f::WHITE, item->imageName, UiControlFlag::FloatLeft );
+//		auto img = mRoot->addControl<UiImage>( tileSize, C4fc::WHITE, item->imageName, UiControlFlag::FloatLeft );
 //		img->setOnClickAction( item->onSelected );
 //	}
 //
@@ -63,8 +63,8 @@ void HouseMenu::init( [[maybe_unused]] const std::vector<std::shared_ptr<HouseMe
 //
 //	preRot = xRot * yRot * preRot;
 //
-//	//mRoot->init(Rect2f(-hs*Vector2f{ 0.5f,-0.5f }, hs*Vector2f{ 0.5f,-.5f }), Color4f::PASTEL_GRAY, UiControlFlag::HasRoundedCorners, animMatrix, preRot);
-//	mRoot->init( Rect2f( hs * Vector2f{ -0.5f, 1.0f }, hs*Vector2f{ 0.5f, 0.0f } ), Color4f::PASTEL_GRAY, UiControlFlag::HasRoundedCorners, animMatrix, preRot );
+//	//mRoot->init(Rect2f(-hs*Vector2f{ 0.5f,-0.5f }, hs*Vector2f{ 0.5f,-.5f }), C4fc::PASTEL_GRAY, UiControlFlag::HasRoundedCorners, animMatrix, preRot);
+//	mRoot->init( Rect2f( hs * Vector2f{ -0.5f, 1.0f }, hs*Vector2f{ 0.5f, 0.0f } ), C4fc::PASTEL_GRAY, UiControlFlag::HasRoundedCorners, animMatrix, preRot );
 //
 //	mRoot->Padding( tilesMargins );
 //

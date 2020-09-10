@@ -327,18 +327,18 @@ void CommandBufferCommand::issue( Renderer& rr, CommandBuffer *cstack ) const {
             cstack->fb(CommandBufferFrameBufferType::shadowMap)->bind();
             break;
         case CommandBufferCommandName::depthMapBufferBindAndClear:
-            cstack->fb(CommandBufferFrameBufferType::depthMap)->bindAndClearWithColor(C4f::BLACK);
+            cstack->fb(CommandBufferFrameBufferType::depthMap)->bindAndClearWithColor(C4fc::BLACK);
 //            cstack->fb(CommandBufferFrameBufferType::depthMap)->clearDepthBuffer( 100.0f );
             break;
         case CommandBufferCommandName::normalMapBufferBindAndClear:
-            cstack->fb(CommandBufferFrameBufferType::normalMap)->bindAndClearWithColor(C4f::NORMAL_MAP_COLOR);
+            cstack->fb(CommandBufferFrameBufferType::normalMap)->bindAndClearWithColor(C4fc::NORMAL_MAP_COLOR);
             break;
         case CommandBufferCommandName::ssaoBufferBindAndClear:
-            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->bindAndClearWithColor(C4f::WHITE);
+            cstack->fb(CommandBufferFrameBufferType::ssaoMap)->bindAndClearWithColor(C4fc::WHITE);
             break;
 #ifdef USE_UIBLITBUFFER
         case CommandBufferCommandName::uiBufferBindAndClear:
-            cstack->fb(CommandBufferFrameBufferType::uiMap)->bindAndClearWithColor(C4f::ZERO);
+            cstack->fb(CommandBufferFrameBufferType::uiMap)->bindAndClearWithColor(C4fc::ZERO);
             break;
 #endif
         case CommandBufferCommandName::ssaoRender: {

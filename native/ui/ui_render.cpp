@@ -31,7 +31,7 @@ void UiButtonRender::make() {
     auto _control = mControl.lock();
     if ( _control ) {
         // Debug rectangle, uncomment to use
-//        createRoundedRect(mVPList, _control->getSize(), { 0.0f, 0.0f, _control->getParams()[1] }, Color4f::RED, nullptr);
+//        createRoundedRect(mVPList, _control->getSize(), { 0.0f, 0.0f, _control->getParams()[1] }, C4fc::RED, nullptr);
 
         float insidePaddingRatio = 0.15f;
         auto al = UiAlignElement{ _control->getSize().x() * insidePaddingRatio,
@@ -167,7 +167,7 @@ void UiCheckBoxRender::make() {
 //        rr.createRoundedRect( mVPList,
 //                           { lTextRect.height(), lTextRect.height() * 0.5f },
 //                           Vector3f{ checkbox_control->getSliderBallOnLeftValue(), 0.0f, _control->getParams()[1] },
-//                           Color4f::BLUE_SHADOW.A( 0.75f ),
+//                           C4fc::BLUE_SHADOW.A( 0.75f ),
 //                           nullptr, 0, 0.5f, RectCreateAnchor::Top );
 //
 //        auto tb = ImageBuilder{  "ui_slider_ball.png" };
@@ -175,7 +175,7 @@ void UiCheckBoxRender::make() {
 //                           { lTextRect.height() * 0.5f, lTextRect.height() * 0.5f },
 //                           Vector3f{ checkbox_control->State() ? checkbox_control->getSliderBallOffRightValue() :
 //                                     checkbox_control->getSliderBallOnLeftValue(), 0.0f, UIZ.level( 4 ) },
-//                           Color4f::WHITE, rr.T( tb ), 0, 0.5f, RectCreateAnchor::Top,
+//                           C4fc::WHITE, rr.T( tb ), 0, 0.5f, RectCreateAnchor::Top,
 //                           RectFillMode::AspectFill, std::to_string( _control->getId()) + "state" );
     }
 }
@@ -275,8 +275,8 @@ void UiTextInputRenderer::printTextInput( const std::string& _title, const std::
     UiAlignElement padding{ tpad * getScreenAspectRatio, tpad * getScreenAspectRatio, fontHeight * 0.15f,
                             fontHeight * 0.15f };
 
-    UISB{ UIShapeType::Text2d }.ti(_title + _text + " |").c(Color4f::WHITE)
-            .cb(Color4f::PASTEL_CYAN)
+    UISB{ UIShapeType::Text2d }.ti(_title + _text + " |").c(C4fc::WHITE)
+            .cb(C4fc::PASTEL_CYAN)
             .origin({ tcenter * getScreenAspectRatio, tcenter})
             .s(Vector2f{ tsize, fontHeight })
             .ZLevel(41)
@@ -291,8 +291,8 @@ void UiTextInputRenderer::printTextInput( const std::string& _title, const std::
 
 //    rr.createText3dWithRect( mVPList, _title + _text + " |",
 //                          Vector3f{ tcenter * getScreenAspectRatio, tcenter, UIZ.level( 41 ) },
-//                          Vector2f{ tsize, fontHeight }, _font, fontHeight, Color4f::WHITE,
-//                          Color4f::PASTEL_CYAN, padding, 0.03f, RectCreateAnchor::Center, _title,
+//                          Vector2f{ tsize, fontHeight }, _font, fontHeight, C4fc::WHITE,
+//                          C4fc::PASTEL_CYAN, padding, 0.03f, RectCreateAnchor::Center, _title,
 //                          false, true );
 }
 

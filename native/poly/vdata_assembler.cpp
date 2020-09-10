@@ -444,7 +444,7 @@ namespace VDataServices {
             V2f elemCenterOffset = normalize( elemCenterProj - centerProj ) * coordDistance;
             V3f elemCenterProj3d = XZY::C( elemCenterOffset, 0.0f);
             for ( const auto& group : element.groups ) {
-                C4f color = C4f::XTORGBA(group.colour);
+                C4f color = C4fc::XTORGBA(group.colour);
                 for ( const auto& vertex : group.triangles ) {
                     V3f pp{XZY::C(vertex) + elemCenterProj3d};
                     pp.swizzle(0,2);

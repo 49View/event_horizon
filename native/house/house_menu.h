@@ -56,10 +56,10 @@ private:
 	Vector2f initialPositon = V2fc::ONE * -2.0f;
 
 	//x is left, y is top, z is right, w is bottom
-	Vector4f tilesMargins = Vector4f::ONE * 0.005f;
-	Vector4f logoMargins = Vector4f::ONE * 0.05f;
+	Vector4f tilesMargins = V4fc::ONE * 0.005f;
+	Vector4f logoMargins = V4fc::ONE * 0.05f;
 
-	Vector4f navigationMargins = Vector4f::ONE * 0.05f;
+	Vector4f navigationMargins = V4fc::ONE * 0.05f;
 
 	//x is the width, y the height
 	Vector2f tileSize = V2fc::ONE * 0.05f;

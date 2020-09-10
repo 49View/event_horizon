@@ -459,8 +459,8 @@ void pushTriangle( VDataSP vdata,
     MappingServices::calcMirrorUVs(m, vuvo);
 
     for ( auto t = 0; t < 3; t++ ) {
-//        auto cv = t == 0 ? Color4f::RED : ( t == 1 ? Color4f::GREEN : Color4f::BLUE );
-        vdata->addTriangleVertex(vco[t], vuvo[t], vuvo[t], vno[t], vto[t], vbo[t], C4f::WHITE);
+//        auto cv = t == 0 ? C4fc::RED : ( t == 1 ? C4fc::GREEN : C4fc::BLUE );
+        vdata->addTriangleVertex(vco[t], vuvo[t], vuvo[t], vno[t], vto[t], vbo[t], C4fc::WHITE);
     }
 }
 

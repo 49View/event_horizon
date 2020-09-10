@@ -103,9 +103,9 @@ namespace stl {
             tbCalc( t.v1, t.v2, t.v3, uv1, uv2, uv3, tangent[0], tangent[1], tangent[2], bitangent[0], bitangent[1],
                     bitangent[2] );
 
-            gd.add( i++, t.v1, normalize(normalsDic[t.v1.hash()]), uv1, uv1, tangent[0], bitangent[0], Color4f::RED );
-            gd.add( i++, t.v3, normalize(normalsDic[t.v3.hash()]), uv3, uv3, tangent[2], bitangent[2], Color4f::GREEN );
-            gd.add( i++, t.v2, normalize(normalsDic[t.v2.hash()]), uv2, uv2, tangent[1], bitangent[1], Color4f::BLUE );
+            gd.add( i++, t.v1, normalize(normalsDic[t.v1.hash()]), uv1, uv1, tangent[0], bitangent[0], C4fc::RED );
+            gd.add( i++, t.v3, normalize(normalsDic[t.v3.hash()]), uv3, uv3, tangent[2], bitangent[2], C4fc::GREEN );
+            gd.add( i++, t.v2, normalize(normalsDic[t.v2.hash()]), uv2, uv2, tangent[1], bitangent[1], C4fc::BLUE );
         }
 
         auto fname = getFileNameOnly(stl_path);

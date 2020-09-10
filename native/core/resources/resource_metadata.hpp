@@ -20,7 +20,7 @@ JSONDATA(EntityMetaData, group, source, name, brand, project, bbox3d, bboxSize, 
     std::string hash;
     std::string userId;
     std::string thumb;
-    C4f color = C4f::WHITE;
+    C4f color = C4fc::WHITE;
     std::vector<std::string> tags;
 };
 

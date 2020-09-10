@@ -198,7 +198,7 @@ void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityG
 
     if ( entityGroup == ResourceGroup::Geom ) {
         GB<GT::Shape>(ShapeType::Cube, GT::Tag(SHADOW_MAGIC_TAG), V3f::UP_AXIS_NEG * 0.051f,
-                      GT::Scale(500.0f, 0.1f, 500.0f), C4f::XTORGBA("e76848"));
+                      GT::Scale(500.0f, 0.1f, 500.0f), C4fc::XTORGBA("e76848"));
         addGeomScene(v0, bTakeScreenShot);
     } else if ( entityGroup == ResourceGroup::Material ) {
         load<Material>(v0, [this, v0]( HttpResouceCBSign key ) {
@@ -257,7 +257,7 @@ void SceneGraph::realTimeCallbacks() {
             });
         } else if ( k == SceneEvents::ChangeMaterialProperty ) {
             if ( doc["data"]["value_type"].GetString() == std::string("hexcolor")) {
-                auto value = C4f::XTORGBA(doc["data"]["value_str"].GetString()).xyz();
+                auto value = C4fc::XTORGBA(doc["data"]["value_str"].GetString()).xyz();
                 changeMaterialPropertyV3fSignal(doc["data"]["property_id"].GetString(),
                                                 doc["data"]["mat_id"].GetString(), value);
             } else if ( doc["data"]["value_type"].GetString() == std::string("float100")) {
@@ -549,7 +549,7 @@ std::tuple<ResourceRef, Material*> SceneGraph::GBMatInternal( CResourceRef _matr
     if ( std::get<0>(matRef).empty()) {
         matRef = ML().getHashAndPointer(S::WHITE_PBR);
     }
-    if ( _color != C4f::WHITE ) {
+    if ( _color != C4fc::WHITE ) {
         matRef = ML().getHashAndPointer(_matref + _color.toString());
         if ( std::get<0>(matRef).empty()) {
             Material matCopy = EF::copy(ML().get(_matref));

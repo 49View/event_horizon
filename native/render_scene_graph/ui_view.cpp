@@ -28,16 +28,16 @@ ColorScheme::ColorScheme( const std::string& colorDescriptor ) {
             auto pc = colorDescriptor.substr( i2, 7);
             switch ( t ) {
                 case 0:
-                    primaryColors[q] = C4f::XTORGBA( pc);
+                    primaryColors[q] = C4fc::XTORGBA( pc);
                     break;
                 case 1:
-                    secondary1Colors[q] = C4f::XTORGBA( pc);
+                    secondary1Colors[q] = C4fc::XTORGBA( pc);
                     break;
                 case 2:
-                    secondary2Colors[q] = C4f::XTORGBA( pc);
+                    secondary2Colors[q] = C4fc::XTORGBA( pc);
                     break;
                 case 3:
-                    complementColors[q] = C4f::XTORGBA( pc);
+                    complementColors[q] = C4fc::XTORGBA( pc);
                     break;
                 default:
                     break;
@@ -53,12 +53,12 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
     ssBBox.translate( V2fc::Y_AXIS_NEG * ssBBox.height() );
 
     if ( type() == UIT::separator_h() ) {
-        defaultBackgroundColor = C4f::WHITE.A(0.4f);
+        defaultBackgroundColor = C4fc::WHITE.A(0.4f);
         backgroundVP = rsg.RR().draw<DRect2dRounded>(CommandBufferLimits::UI2dStart, ssBBox, _localHierMat,
                 RDSRoundedCorner(ssBBox.height()*0.33f), defaultBackgroundColor );
     } else {
         if ( text.empty() ) {
-            defaultBackgroundColor = type() == UIT::background() ? Color4f::XTORGBA("#036FAB").A(0.9f) : C4f::WHITE.A(0.3f);
+            defaultBackgroundColor = type() == UIT::background() ? C4fc::XTORGBA("#036FAB").A(0.9f) : C4fc::WHITE.A(0.3f);
             backgroundVP =rsg.RR().draw<DRect2dRounded>(CommandBufferLimits::UI2dStart, ssBBox, _localHierMat, defaultBackgroundColor);
         }
         if ( !foreground.empty() && text.empty() ) {
@@ -328,7 +328,7 @@ C4f UIView::colorFromStatus( UIElementStatus _status ) {
         case UIElementStatus::Fixed:
             return colorScheme.Complement(1);
         default:
-            return C4f::WHITE;
+            return C4fc::WHITE;
     }
 }
 
@@ -370,15 +370,15 @@ void UIView::updateAnim() {
 }
 
 C4f UIView::getEnabledColor() const {
-    return C4f::WHITE.A(0.4f);//colorScheme.Secondary1(0);
+    return C4fc::WHITE.A(0.4f);//colorScheme.Secondary1(0);
 }
 
 C4f UIView::getSelectedColor() const {
-    return C4f::DARK_GRAY.A(0.5f);//colorScheme.Secondary1(3);
+    return C4fc::DARK_GRAY.A(0.5f);//colorScheme.Secondary1(3);
 }
 
 C4f UIView::getDisabledColor() const {
-    return C4f::DARK_GRAY.A(0.15f); //colorScheme.Secondary1(4);
+    return C4fc::DARK_GRAY.A(0.15f); //colorScheme.Secondary1(4);
 }
 
 C4f UIView::getHooverColor() const {
@@ -508,7 +508,7 @@ void UIViewContainer::addNavBar( const ControlDef& _logo ) {
 //                         V2f{ padding, headerTop },
 //                         V2f{ getScreenAspectRatioVector.x(), 1.0f - headerTop } -
 //                         V2f{ padding * 2.0f, padding / getScreenAspectRatio },
-//                         C4f::PASTEL_YELLOW.A( 0.9f ));
+//                         C4fc::PASTEL_YELLOW.A( 0.9f ));
 //
 //    float ar = sg.TL( "carillo,logo" )->getAspectRatio();
 //    float logoPadding = (( 1.0f - headerTop ) - padding - 0.01f ) * 0.5f;
@@ -648,7 +648,7 @@ void UIViewContainer::unpack( UIContainer* _data ) {
             std::vector<UIFontText> te;
             for ( auto tf : entry.entries ) {
                 tf.fixUpDefaults();
-                te.emplace_back( tf.font, uiFontSizes[tf.size], C4f::XTORGBA(tf.color), tf.text );
+                te.emplace_back( tf.font, uiFontSizes[tf.size], C4fc::XTORGBA(tf.color), tf.text );
             }
             auto cb = entry.func.empty() ? sUIEmptyCallback : rsg.UICB()[entry.func[0]];
             auto cbParam = entry.func.size() >= 2 ? entry.func[1] : "-1";
@@ -659,7 +659,7 @@ void UIViewContainer::unpack( UIContainer* _data ) {
                 tf.fixUpDefaults();
                 auto cb = tf.func.empty() ? sUIEmptyCallback : rsg.UICB()[tf.func[0]];
                 auto cbParam = tf.func.size() >= 2 ? tf.func[1] : "-1";
-                te.emplace_back( ControlDef{tf.id, tf.icon, {tf.font, uiFontSizes[tf.size], C4f::XTORGBA(tf.color), tf.text}, cb, cbParam} );
+                te.emplace_back( ControlDef{tf.id, tf.icon, {tf.font, uiFontSizes[tf.size], C4fc::XTORGBA(tf.color), tf.text}, cb, cbParam} );
             }
 
             addButtonGroupLine( tapTypeFromString(entry.tapType), te );

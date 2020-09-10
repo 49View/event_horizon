@@ -1,133 +1,19 @@
 #pragma once
 
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 #include "vector2f.h"
 #include "vector3f.h"
 
-
-
 // SHARED CLASS: Any changes to this, should be integrated to /svn/shared, and a mail should be sent to everyone
 
 class Vector4f {
 public:
-
-	static const Vector4f ZERO;
-	static const Vector4f QUAT_UNIT;
-	static const Vector4f X_AXIS;
-	static const Vector4f Y_AXIS;
-	static const Vector4f Z_AXIS;
-	static const Vector4f W_AXIS;
-	static const Vector4f ONE;
-	static const Vector4f HUGE_VALUE_POS;
-	static const Vector4f HUGE_VALUE_NEG;
-
-	static const Vector4f NORMAL_MAP_COLOR;
-
-	static const Vector4f WHITE;
-	static const Vector4f BLACK;
-	static const Vector4f YELLOW;
-	static const Vector4f RED;
-	static const Vector4f GREEN;
-	static const Vector4f BLUE;
-	static const Vector4f BROWN;
-	static const Vector4f CYAN;
-	static const Vector4f PURPLE;
-	static const Vector4f PASTEL_GRAY;
-	static const Vector4f PASTEL_GRAYLIGHT;
-	static const Vector4f PASTEL_ORANGE;
-	static const Vector4f PASTEL_RED;
-	static const Vector4f PASTEL_CYAN;
-	static const Vector4f PASTEL_GREEN;
-	static const Vector4f PASTEL_YELLOW;
-	static const Vector4f PASTEL_BROWN;
-	static const Vector4f ACQUA_T;
-
-	static const Vector4f SAND;
-
-	static const Vector4f ORANGE_SCHEME1_1;
-	static const Vector4f ORANGE_SCHEME1_2;
-	static const Vector4f ORANGE_SCHEME1_3;
-	static const Vector4f BLUE_SHADOW;
-
-	static const Vector4f BRIGHT_PINK;
-	static const Vector4f DARK_GRAY;
-	static const Vector4f DARK_BLUE;
-	static const Vector4f DARK_YELLOW;
-	static const Vector4f DARK_RED;
-	static const Vector4f DARK_GREEN;
-	static const Vector4f DARK_BROWN;
-	static const Vector4f DARK_PURPLE;
-	static const Vector4f INDIAN_RED;
-	static const Vector4f LIGHT_CORAL;
-	static const Vector4f SALMON;
-	static const Vector4f DARK_SALMON;
-	static const Vector4f LIGHT_SALMON;
-	static const Vector4f CRIMSON;
-	static const Vector4f FIRE_BRICK;
-	static const Vector4f PINK;
-	static const Vector4f HOT_PINK;
-	static const Vector4f DEEP_PINK;
-	static const Vector4f GOLD;
-	static const Vector4f PEACH;
-	static const Vector4f LAVANDER;
-	static const Vector4f VIOLET;
-	static const Vector4f FUCHSIA;
-	static const Vector4f DARK_VIOLET;
-	static const Vector4f INDINGO;
-	static const Vector4f SPRING_GREEN;
-	static const Vector4f FOREST_GREEN;
-	static const Vector4f OLIVE;
-	static const Vector4f DARK_CYAN;
-	static const Vector4f AQUAMARINE;
-	static const Vector4f STEEL_BLUE;
-	static const Vector4f SKY_BLUE;
-	static const Vector4f DODGER_BLUE;
-	static const Vector4f ROYAL_BLUE;
-	static const Vector4f NAVY;
-	static const Vector4f ALMOND;
-	static const Vector4f TAN;
-	static const Vector4f SANDY_BROWN;
-	static const Vector4f SIENNA;
-	static const Vector4f MAROON;
-	static const Vector4f SNOW;
-	static const Vector4f HONEYDEW;
-	static const Vector4f LIGHT_GREY;
-
-	static Vector4f XTORGBA( const std::string& _hexstring );
-	static Vector4f ITORGBA( uint32_t number, int32_t numbits = 32 );
-	static Vector3f ITORGB( const unsigned int r, const unsigned int g, const unsigned int b );
-	static Vector4f ITORGBA( const unsigned int r, const unsigned int g, const unsigned int b, const unsigned int a );
-	static Vector3f FTORGB( const float r, const float g, const float b );
-	static Vector4f FTORGBA( const float r, const float g, const float b, const float a );
-	static Vector4f FTORGBA( const Vector4f& _val );
-	static Vector4f COLORA( const Vector4f& source, const float a );
-	static Vector4f RANDA1();
-
-	Vector4f() {
-	}
-
-	explicit Vector4f( int xyzw ) {
-		mX = xyzw;
-		mY = xyzw;
-		mZ = xyzw;
-		mW = xyzw;
-	}
-
-	explicit Vector4f( float xyzw ) {
-		mX = xyzw;
-		mY = xyzw;
-		mZ = xyzw;
-		mW = xyzw;
-	}
-
-	Vector4f( float x, float y, float z, float w ) {
-		mX = x;
-		mY = y;
-		mZ = z;
-		mW = w;
-	}
+	Vector4f() = default;
+	explicit Vector4f( int xyzw );
+	explicit Vector4f( float xyzw );
+	Vector4f( float x, float y, float z, float w );
 
 	Vector4f( double x, double y, double z, double w ) {
 		mX = static_cast<float>( x );
@@ -166,23 +52,23 @@ public:
 		mW = static_cast<float>(_v[3]);
 	}
 
-	float x() const {
+	[[nodiscard]] float x() const {
 		return mX;
 	}
 
-	float y() const {
+	[[nodiscard]] float y() const {
 		return mY;
 	}
 
-	float z() const {
+	[[nodiscard]] float z() const {
 		return mZ;
 	}
 
-	float w() const {
+	[[nodiscard]] float w() const {
 		return mW;
 	}
 
-	int size() const {
+	[[nodiscard]] int size() const {
 		return 4;
 	}
 
@@ -196,15 +82,15 @@ public:
 		return ( &mX )[element];
 	}
 
-	Vector2f xy() const {
+	[[nodiscard]] Vector2f xy() const {
 		return Vector2f( mX, mY );
 	}
 
-	Vector3f xyz() const {
+	[[nodiscard]] Vector3f xyz() const {
 		return Vector3f( mX, mY, mZ );
 	}
 
-	Vector3f xzy() const {
+	[[nodiscard]] Vector3f xzy() const {
 		return{ mX, mZ, mY };
 	}
 
@@ -303,7 +189,7 @@ public:
 		return Vector4f( mX * rhs, mY * rhs, mZ * rhs, mW * rhs );
 	}
 
-	float dot( const Vector4f& rhs ) const {
+	[[nodiscard]] float dot( const Vector4f& rhs ) const {
 		return mX * rhs.mX + mY * rhs.mY + mZ * rhs.mZ + mW * rhs.mW;
 	}
 
@@ -336,7 +222,7 @@ public:
 
 	std::string toString() const;
 	std::string toStringCommaSeparated() const;
-	std::string toStringJSONArray() const;
+    [[maybe_unused]] std::string toStringJSONArray() const;
     std::string toStringObj( const std::string& _prefix) const;
 
 	size_t hash() const {
@@ -349,19 +235,7 @@ public:
 		return seed;
 	}
 
-	inline std::string toStringColor() const {
-		if ( *this == Vector4f::WHITE ) return "white";
-		if ( *this == Vector4f::BLACK ) return "black";
-		if ( *this == Vector4f::YELLOW ) return "yellow";
-		if ( *this == Vector4f::RED ) return "red";
-		if ( *this == Vector4f::GREEN ) return "green";
-		if ( *this == Vector4f::BLUE ) return "blue";
-		if ( *this == Vector4f::BROWN ) return "brown";
-		if ( *this == Vector4f::CYAN ) return "cyan";
-		if ( *this == Vector4f::PURPLE ) return "purple";
-
-		return "R" + std::to_string( (int)( x()*255.0f ) ) + "G" + std::to_string( (int)( y()*255.0f ) ) + "B" + std::to_string( (int)( z()*255.0f ) ) + "A" + std::to_string( (int)( w()*255.0f ) );
-	}
+	[[nodiscard]] inline std::string toStringColor() const;
 
 	inline Vector4f A( const float _alpha ) const {
 		return{ mX, mY, mZ, _alpha };
@@ -481,10 +355,7 @@ inline Vector4f fma( const Vector4f& a, const Vector4f& b, const Vector4f& c ) {
 	);
 }
 
-inline Vector4f convertStringHexColorInVector4( const std::string& color, int32_t numbits = 32 ) {
-	auto number = (uint32_t)strtol( color.c_str(), nullptr, 0 );
-	return Vector4f::ITORGBA( number, numbits );
-}
+[[maybe_unused]] inline Vector4f convertStringHexColorInVector4( const std::string& color, int32_t numBits = 32 );
 
 inline Vector4f color4fAlpha( const float alpha ) {
 	return Vector4f( 1.0f, 1.0f, 1.0f, alpha );
@@ -498,3 +369,94 @@ using V4fVectorOfVector = std::vector<V4fVector>;
 
 using V4fVectorWrap = VectorWrap<V4f>;
 using V4fVectorOfVectorWrap = VectorOfVectorWrap<V4f>;
+
+namespace V4fc {
+    static const Vector4f ZERO = Vector4f( 0.0f, 0.0f, 0.0f, 0.0f );
+    static const Vector4f QUAT_UNIT = Vector4f( 0.0f, 0.0f, 0.0f, 1.0f );
+    static const Vector4f X_AXIS = Vector4f( 1.0f, 0.0f, 0.0f, 0.0f );
+    static const Vector4f Y_AXIS = Vector4f( 0.0f, 1.0f, 0.0f, 0.0f );
+    static const Vector4f Z_AXIS = Vector4f( 0.0f, 0.0f, 1.0f, 0.0f );
+    static const Vector4f W_AXIS = Vector4f( 0.0f, 0.0f, 0.0f, 1.0f );
+    static const Vector4f ONE = Vector4f( 1.0f, 1.0f, 1.0f, 1.0f );
+    static const Vector4f HUGE_VALUE_POS = Vector4f( std::numeric_limits<float>::max() );
+    static const Vector4f HUGE_VALUE_NEG = Vector4f( std::numeric_limits<float>::lowest() );
+    static const Vector4f WHITE = Vector4f( 1.0f, 1.0f, 1.0f, 1.0f );
+    static const Vector4f BLACK = Vector4f( 0.0f, 0.0f, 0.0f, 1.0f );
+    static const Vector4f YELLOW = Vector4f( 1.0f, 1.0f, 0.0f, 1.0f );
+    static const Vector4f RED = Vector4f( 1.0f, 0.0f, 0.0f, 1.0f );
+    static const Vector4f GREEN = Vector4f( 0.0f, 1.0f, 0.0f, 1.0f );
+    static const Vector4f BLUE = Vector4f( 0.0f, 0.0f, 1.0f, 1.0f );
+    static const Vector4f BROWN = Vector4f( 0.6f, 0.2f, 0.2f, 1.0f );
+    static const Vector4f CYAN = Vector4f( 0.0f, 1.0f, 1.0f, 1.0f );
+    static const Vector4f PURPLE = Vector4f( 1.0f, 0.0f, 1.0f, 1.0f );
+    static const Vector4f NORMAL_MAP_COLOR = Vector4f( 0.5f, 0.5f, 1.0f, 1.0f );
+    static const Vector4f PASTEL_GRAY = Vector4f( 64.0f / 255.0f, 64.0f / 255.0f, 64.0f / 255.0f, 1.0f );
+    static const Vector4f PASTEL_GRAYLIGHT = Vector4f( 128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f, 1.0f );
+    static const Vector4f PASTEL_ORANGE = Vector4f( 241.0f / 255.0f, 103.0f / 255.0f, 69.0f / 255.0f, 1.0f );
+    static const Vector4f PASTEL_RED = Vector4f( 255.0f / 255.0f, 100.0f / 255.0f, 97.0f / 255.0f, 1.0f );
+    static const Vector4f PASTEL_CYAN = Vector4f( 76.0f / 255.0f, 195.0f / 255.0f, 217.0f / 255.0f, 1.0f );
+    static const Vector4f PASTEL_GREEN = Vector4f( 123.0f / 255.0f, 200.0f / 255.0f, 164.0f / 255.0f, 1.0f );
+    static const Vector4f PASTEL_YELLOW = Vector4f( 255.0f / 255.0f, 198.0f / 255.0f, 93.0f / 255.0f, 1.0f );
+    static const Vector4f PASTEL_BROWN = Vector4f( 131.0f / 255.0f, 105.0f / 255.0f, 83.0f / 255.0f, 1.0f );
+    static const Vector4f SAND = Vector4f( 70.0f / 255.0f, 70.0f / 255.0f, 50.0f / 255.0f, 1.0f );
+    static const Vector4f ORANGE_SCHEME1_1 = Vector4f( 255.0f / 255.0f, 116.0f / 255.0f, 0.0f / 255.0f, 1.0f );
+    static const Vector4f ORANGE_SCHEME1_2 = Vector4f( 166.0f / 255.0f, 75.0f / 255.0f, 0.0f / 255.0f, 1.0f );
+    static const Vector4f ORANGE_SCHEME1_3 = Vector4f( 255.0f / 255.0f, 178.0f / 115.0f, 0.0f / 255.0f, 1.0f );
+    static const Vector4f ACQUA_T = Vector4f( .15f, 0.7f, .95f, 0.5f );
+    static const Vector4f BLUE_SHADOW = Vector4f( 0.15294f, 0.0f, 0.53510f, 0.6f );
+    static const Vector4f BRIGHT_PINK = Vector4f( 255.0f / 255.0f, 16.0f / 255.0f, 201.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_GRAY = Vector4f( 32.0f / 255.0f, 32.0f / 255.0f, 32.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_BLUE = Vector4f( 68.0f / 255.0f, 24.0f / 255.0f, 255.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_YELLOW = Vector4f( 232.0f / 255.0f, 184.0f / 255.0f, 49.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_RED = Vector4f( 173.0f / 255.0f, 22.0f / 255.0f, 41.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_GREEN = Vector4f( 44.0f / 255.0f, 82.0f / 255.0f, 5.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_BROWN = Vector4f( 59.0f / 255.0f, 28.0f / 255.0f, 12.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_PURPLE = Vector4f( 65.0f / 255.0f, 16.0f / 255.0f, 178.0f / 255.0f, 1.0f );
+    static const Vector4f INDIAN_RED = Vector4f( 205.0f / 255.0f, 92.0f / 255.0f, 92.0f / 255.0f, 1.0f );
+    static const Vector4f LIGHT_CORAL = Vector4f( 240.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f, 1.0f );
+    static const Vector4f SALMON = Vector4f( 250.0f / 255.0f, 128.0f / 255.0f, 114.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_SALMON = Vector4f( 233.0f / 255.0f, 150.0f / 255.0f, 122.0f / 255.0f, 1.0f );
+    static const Vector4f LIGHT_SALMON = Vector4f( 255.0f / 255.0f, 160.0f / 255.0f, 122.0f / 255.0f, 1.0f );
+    static const Vector4f CRIMSON = Vector4f( 220.0f / 255.0f, 20.0f / 255.0f, 60.0f / 255.0f, 1.0f );
+    static const Vector4f FIRE_BRICK = Vector4f( 178.0f / 255.0f, 30.0f / 255.0f, 30.0f / 255.0f, 1.0f );
+    static const Vector4f PINK = Vector4f( 255.0f / 255.0f, 192.0f / 255.0f, 203.0f / 255.0f, 1.0f );
+    static const Vector4f HOT_PINK = Vector4f( 255.0f / 255.0f, 105.0f / 255.0f, 180.0f / 255.0f, 1.0f );
+    static const Vector4f DEEP_PINK = Vector4f( 255.0f / 255.0f, 20.0f / 255.0f, 150.0f / 255.0f, 1.0f );
+    static const Vector4f GOLD = Vector4f( 255.0f / 255.0f, 215.0f / 255.0f, 0.0f / 255.0f, 1.0f );
+    static const Vector4f PEACH = Vector4f( 255.0f / 255.0f, 218.0f / 255.0f, 185.0f / 255.0f, 1.0f );
+    static const Vector4f LAVANDER = Vector4f( 230.0f / 255.0f, 230.0f / 255.0f, 250.0f / 255.0f, 1.0f );
+    static const Vector4f VIOLET = Vector4f( 238.0f / 255.0f, 130.0f / 255.0f, 238.0f / 255.0f, 1.0f );
+    static const Vector4f FUCHSIA = Vector4f( 255.0f / 255.0f, 0.0f / 255.0f, 255.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_VIOLET = Vector4f( 148.0f / 255.0f, 0.0f / 255.0f, 211.0f / 255.0f, 1.0f );
+    static const Vector4f INDINGO = Vector4f( 75.0f / 255.0f, 0.0f / 255.0f, 130.0f / 255.0f, 1.0f );
+    static const Vector4f SPRING_GREEN = Vector4f( 0.0f / 255.0f, 255.0f / 255.0f, 127.0f / 255.0f, 1.0f );
+    static const Vector4f FOREST_GREEN = Vector4f( 34.0f / 255.0f, 139.0f / 255.0f, 34.0f / 255.0f, 1.0f );
+    static const Vector4f OLIVE = Vector4f( 128.0f / 255.0f, 128.0f / 255.0f, 0.0f / 255.0f, 1.0f );
+    static const Vector4f DARK_CYAN = Vector4f( 0.0f / 255.0f, 139.0f / 255.0f, 139.0f / 255.0f, 1.0f );
+    static const Vector4f AQUAMARINE = Vector4f( 129.0f / 255.0f, 255.0f / 255.0f, 212.0f / 255.0f, 1.0f );
+    static const Vector4f STEEL_BLUE = Vector4f( 70.0f / 255.0f, 130.0f / 255.0f, 180.0f / 255.0f, 1.0f );
+    static const Vector4f SKY_BLUE = Vector4f( 135.0f / 255.0f, 206.0f / 255.0f, 235.0f / 255.0f, 1.0f );
+    static const Vector4f DODGER_BLUE = Vector4f( 30.0f / 255.0f, 144.0f / 255.0f, 255.0f / 255.0f, 1.0f );
+    static const Vector4f ROYAL_BLUE = Vector4f( 65.0f / 255.0f, 105.0f / 255.0f, 255.0f / 255.0f, 1.0f );
+    static const Vector4f NAVY = Vector4f( 0.0f / 255.0f, 0.0f / 255.0f, 128.0f / 255.0f, 1.0f );
+    static const Vector4f ALMOND = Vector4f( 255.0f / 255.0f, 235.0f / 255.0f, 205.0f / 255.0f, 1.0f );
+    static const Vector4f TAN = Vector4f( 210.0f / 255.0f, 180.0f / 255.0f, 140.0f / 255.0f, 1.0f );
+    static const Vector4f SANDY_BROWN = Vector4f( 244.0f / 255.0f, 164.0f / 255.0f, 96.0f / 255.0f, 1.0f );
+    static const Vector4f SIENNA = Vector4f( 160.0f / 255.0f, 82.0f / 255.0f, 45.0f / 255.0f, 1.0f );
+    static const Vector4f MAROON = Vector4f( 128.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f );
+    static const Vector4f SNOW = Vector4f( 255.0f / 255.0f, 250.0f / 255.0f, 250.0f / 255.0f, 1.0f );
+    static const Vector4f HONEYDEW = Vector4f( 185.0f / 255.0f, 70.0f / 255.0f, 36.0f / 255.0f, 1.0f );
+    static const Vector4f LIGHT_GREY = Vector4f( 211.0f / 255.0f, 211.0f / 255.0f, 211.0f / 255.0f, 1.0f );
+
+    Vector4f XTORGBA( const std::string& _hexString );
+    Vector4f ITORGBA( uint32_t number, int32_t numBits = 32 );
+    Vector3f ITORGB( unsigned int r, unsigned int g, unsigned int b );
+    Vector4f ITORGBA( unsigned int r, unsigned int g, unsigned int b, unsigned int a );
+    Vector3f FTORGB( float r, float g, float b );
+    Vector4f FTORGBA( float r, float g, float b, float a );
+    Vector4f FTORGBA( const Vector4f& _val );
+    Vector4f COLORA( const Vector4f& source, float a );
+    Vector4f RANDA1();
+}
+
+namespace C4fc = V4fc;

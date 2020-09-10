@@ -42,8 +42,8 @@ void VRPointer::update() {
 	if ( lastHitInfo.isHit ) {
 		RL.VPListPost3d()->setMaterialConstantOn( "pointerUp", UniformNames::alpha, 1.0f );
 		RL.VPListPost3d()->setMaterialConstantOn( "pointerDown", UniformNames::alpha, 1.0f );
-		drawCircle( RL.VPListPost3d(), lastHitInfo.finalPosition, lastHitInfo.normal, 0.02f * sqrt( log( lastHitInfo.distance + 1 ) ), Color4f::BLUE, 1000, "pointerUp" );
-		drawCircle( RL.VPListPost3d(), lastHitInfo.finalPosition, lastHitInfo.normal * -1, 0.02f * sqrt( log( lastHitInfo.distance + 1 ) ), Color4f::BLUE, 1000, "pointerDown" );
+		drawCircle( RL.VPListPost3d(), lastHitInfo.finalPosition, lastHitInfo.normal, 0.02f * sqrt( log( lastHitInfo.distance + 1 ) ), C4fc::BLUE, 1000, "pointerUp" );
+		drawCircle( RL.VPListPost3d(), lastHitInfo.finalPosition, lastHitInfo.normal * -1, 0.02f * sqrt( log( lastHitInfo.distance + 1 ) ), C4fc::BLUE, 1000, "pointerDown" );
 	} else {
 		RL.VPListPost3d()->setMaterialConstantOn( "pointerUp", UniformNames::alpha, 0.0f );
 		RL.VPListPost3d()->setMaterialConstantOn( "pointerDown", UniformNames::alpha, 0.0f );

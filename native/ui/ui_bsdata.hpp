@@ -22,7 +22,7 @@ JSONDATA ( LayoutElement, control, position, sizeType, size, color, backGroundCo
     std::string sizeType;
 	Vector2f	size = V2fc::ZERO;
 	Color4f     color = Color4f{ 255.0f, 255.0f, 255.0f, 1.0f };
-	Color4f     backGroundColor = Color4f::HUGE_VALUE_NEG;
+	Color4f     backGroundColor = C4fc::HUGE_VALUE_NEG;
     std::string name;
 	std::string text;
 	std::string title;

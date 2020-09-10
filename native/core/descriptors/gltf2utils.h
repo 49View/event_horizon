@@ -42,7 +42,7 @@ namespace GLTF2Service {
     struct InternalPBRComponent {
         std::string baseName;
         InternalPBRTextureReconstructionMode textureReconstructionMode = InternalPBRTextureReconstructionMode::None;
-        Color4f value = Vector4f::ONE;
+        Color4f value = V4fc::ONE;
         std::pair<int, int> texture{-1,-1};
         int textureIndex = -1;
     };

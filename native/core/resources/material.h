@@ -7,7 +7,7 @@ class MaterialColor {
 public:
     JSONSERIAL( MaterialColor, color, name, category, brand, code, application );
 
-    Vector4f color = Vector4f::WHITE;
+    Vector4f color = V4fc::WHITE;
     std::string name = "perfect white";
     std::string category = "white";
     std::string brand = "natural";

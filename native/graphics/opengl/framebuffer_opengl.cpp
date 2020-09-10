@@ -8,7 +8,7 @@
 #include "../render_material.hpp"
 #include "../render_list.h"
 
-Color4f Framebuffer::clearColorValue = Color4f::XTORGBA("#238FCBFF");
+Color4f Framebuffer::clearColorValue = C4fc::XTORGBA("#238FCBFF");
 bool Framebuffer::gbIsHDRSupported = true;
 
 bool canUseMultiSample() {

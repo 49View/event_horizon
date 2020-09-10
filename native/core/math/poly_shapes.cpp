@@ -685,7 +685,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     for ( auto& tr : mesh.triangles ) {
         ret.indices[t] = tr;
         if ( _vertexColors.empty() ) {
-            auto cv = V4f::WHITE;// (t%3) == 0 ? Color4f::RED : ( (t%3) == 1 ? Color4f::GREEN : Color4f::BLUE );
+            auto cv = C4fc::WHITE;// (t%3) == 0 ? C4fc::RED : ( (t%3) == 1 ? C4fc::GREEN : C4fc::BLUE );
             ret.colors[t] = cv;
         } else {
             ret.colors[t] = _vertexColors[tr];
@@ -698,7 +698,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     ret.binormals = std::make_unique<Vector3f[]>( ret.numIndices );
 
     for ( int q = 0; q < ret.numIndices; q++ ) {
-        ret.tangents[q] = Vector4f::ONE;
+        ret.tangents[q] = V4fc::ONE;
         ret.binormals[q] = Vector3f::ONE;
     }
     ret.uvs = std::make_unique<Vector2f[]>( ret.numIndices );

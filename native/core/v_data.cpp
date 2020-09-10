@@ -26,7 +26,7 @@ void VData::fillCoors3d( const std::vector<Vector3f>& _verts ) {
     vSoaData.resize( _verts.size() );
     for ( size_t t = 0; t < _verts.size(); t++ ) {
         vSoaData[t].pos = _verts[t];
-//        vSoaData[t].a6 = Vector4f::ONE; // Just initialize the color to one
+//        vSoaData[t].a6 = V4fc::ONE; // Just initialize the color to one
     }
 }
 

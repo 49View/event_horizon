@@ -41,7 +41,7 @@ private:
     SunCalculations sunPositionCalculator;
     LocationProvider locationProvider;
     SunPosition mSunPosition{};
-    V4f mSunRadiance = V4f::ONE;
+    V4f mSunRadiance = V4fc::ONE;
     int defaultYear = 2019;
     bool mbDirtyTime = false;
 

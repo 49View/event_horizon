@@ -27,7 +27,7 @@ private:
 
 class UiAlignElement {
 public:
-	UiAlignElement( const Vector4f& value = Vector4f::ZERO );
+	UiAlignElement( const Vector4f& value = V4fc::ZERO );
 	UiAlignElement( const float x, const float y, const float z, const float w );
 
     inline float Width() const { return mElement[0] + mElement[1]; }

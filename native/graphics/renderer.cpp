@@ -146,7 +146,7 @@ void Renderer::init() {
     rcm.init();
     am.init();
     sm->loadShaders();
-//    tm->addTextureWithData(RawImage{54, 54, V4f::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
+//    tm->addTextureWithData(RawImage{54, 54, V4fc::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
     tm->addTextureRef( FBNames::lightmap );
     mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 4096 ).depthOnly().build();
     mDepthFB = FrameBufferBuilder{ *this, FBNames::depthmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).format(PIXEL_FORMAT_HDR_R16).build();

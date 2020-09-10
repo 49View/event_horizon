@@ -291,7 +291,7 @@ public:
 
     T dataTypeHolder;
     ResourceRef matRef = S::WHITE_PBR;
-    Color4f matColor = C4f::WHITE;
+    Color4f matColor = C4fc::WHITE;
     uint64_t tag = 0;
     int bucketIndex = GTBucket::Near;
     MatrixAnim mTRS;

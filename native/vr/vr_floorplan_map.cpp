@@ -22,8 +22,8 @@ void VRFloorplanMap::update() {
 	//	RL.VPListPost3d()->remove( "pointerUp" );
 	//	RL.VPListPost3d()->remove( "pointerDown" );
 
-	//	RL.VPListPost3d()->drawCircle( lastHitInfo.finalPosition, lastHitInfo.normal, 0.02f * sqrt( log( lastHitInfo.distance + 1 ) ), Color4f::BLUE, 1000, "pointerUp" );
-	//	RL.VPListPost3d()->drawCircle( lastHitInfo.finalPosition, lastHitInfo.normal * -1, 0.02f * sqrt( log( lastHitInfo.distance + 1 ) ), Color4f::BLUE, 1000, "pointerDown" );
+	//	RL.VPListPost3d()->drawCircle( lastHitInfo.finalPosition, lastHitInfo.normal, 0.02f * sqrt( log( lastHitInfo.distance + 1 ) ), C4fc::BLUE, 1000, "pointerUp" );
+	//	RL.VPListPost3d()->drawCircle( lastHitInfo.finalPosition, lastHitInfo.normal * -1, 0.02f * sqrt( log( lastHitInfo.distance + 1 ) ), C4fc::BLUE, 1000, "pointerDown" );
 	//}
 }
 

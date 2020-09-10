@@ -21,7 +21,7 @@ JSONDATA( FontParamsJSONAble, fontRevision, unitsPerEm, createdDate, modifiedDat
     int   unitsPerEm = 0;
     uint64_t createdDate = 0;  // seconds since 12:00 midnight, January 1, 1904
     uint64_t modifiedData = 0; // seconds since 12:00 midnight, January 1, 1904
-    V4f bbox = V4f::ZERO;
+    V4f bbox = V4fc::ZERO;
     int macStyle = 0;        // flags (bold, underline, ect...)
     int lowestRecPPEM = 0;   // smallest size this font is legible
 
