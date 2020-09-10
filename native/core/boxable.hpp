@@ -5,6 +5,7 @@
 #pragma once
 
 #include <core/math/aabb.h>
+#include <core/math/oobb.h>
 
 struct EmptyBox {
     static constexpr bool IsSerializable() { return false; }
@@ -26,6 +27,7 @@ public:
     void BBox3d( const AABB& _value );
 
 protected:
+    OOBB oobb{};
     JMATH::AABB bbox3d{AABB::INVALID};
     JMATH::AABB bbox3dT{AABB::INVALID};
     Rect2f bbox{Rect2f::INVALID};
