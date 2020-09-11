@@ -46,7 +46,6 @@ inline constexpr static uint64_t NodeVersion( const uint64_t dataVersion ) { ret
 
 template <typename D>
 class Node : public Animable,
-             public virtual Boxable,
              public virtual UUIDable,
              public virtual NamePolicy<>,
              public std::enable_shared_from_this<Node<D>> {
@@ -300,7 +299,7 @@ public:
 
     template<typename TV>
     void visit() const {
-        traverseWithHelper<TV>( "Name,Hash,BBbox,Data,Children", this->Name(), this->UUiD(), Boxable::BBox3d(),mData,children );
+        traverseWithHelper<TV>( "Name,Hash,Data,Children", this->Name(), this->UUiD(), mData, children );
     }
 protected:
 
@@ -400,7 +399,6 @@ private:
 //        writer->write( mUUID );
 //        writer->write( this->Name() );
 //        writer->write( mLocalTransform );
-//        writer->write( Boxable::BBox3d() );
 //
 //        writer->write( mData );
 //
