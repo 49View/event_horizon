@@ -61,7 +61,6 @@ namespace VDataServices {
         }
 
         _ret->fill( ps );
-        _ret->BBox3d( ps.bbox3d );
     }
 
     ResourceRef refName( const GT::Shape& _d ) {
@@ -215,7 +214,6 @@ namespace VDataServices {
 
         PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMappingT::Planar );
         _ret->fill( ps );
-        _ret->BBox3d( ps.bbox3d );
     }
 
     ResourceRef refName( const GT::Text& _d ) {
@@ -291,7 +289,6 @@ namespace VDataServices {
 
             PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::Cube, V3fc::ONE*8.0f}, 0, _d.rfPoly );
             _ret->fill( ps );
-            _ret->BBox3d( ps.bbox3d );
         }
     }
 
@@ -462,7 +459,6 @@ namespace VDataServices {
 
         PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::Cube, V3fc::ONE}, 0, ReverseFlag::False, vertexColors );
         _ret->fill( ps );
-        _ret->BBox3d( ps.bbox3d );
     }
 
     ResourceRef refName( const GT::OSM& _d ) {

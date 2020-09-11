@@ -400,7 +400,8 @@ public:
 
                 elem = std::make_shared<Geom>(gb.Name());
                 elem->setTag(gb.tag);
-                elem->pushData( vdataRef, get<VData>( vdataRef)->BBox3d(), matRef );
+                auto vDataPtr = get<VData>(vdataRef);
+                elem->pushData( vdataRef, AABB{vDataPtr->getMin(), vDataPtr->getMax()}, matRef );
 
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
                 elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );

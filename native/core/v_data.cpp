@@ -16,6 +16,8 @@ void VData::fill( const PolyStruct& ps ) {
         vSoaData.emplace_back( d1 );
         vIndices.push_back( q );
     }
+    setMin( ps.bbox3d.minPoint() );
+    setMax( ps.bbox3d.maxPoint() );
 }
 
 void VData::fillIndices( const std::vector<uint32_t>& _indices ) {
@@ -250,14 +252,14 @@ void VData::checkBarycentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, u
 void VData::addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector2f& _uv2, const Vector3f& _vn,
                                const Vector4f& _vt, const Vector3f& _vb, const Vector4f& _v8 ) {
 
-    BBox3d().expand(_vc);
+    expandVolume(_vc);
     vSoaData.emplace_back( _vc, _uv, _uv2, _vn, _vt, _vb, _v8 );
     vIndices.push_back( vIndices.size() );
 }
 
 void VData::add( uint32_t _i, const Vector3f& _v, const Vector3f& _n, const Vector2f& _uv, const Vector2f& _uv2,
                  const Vector4f& _t, const Vector3f& _b, const Vector4f& _c ) {
-    BBox3d().expand(_v);
+    expandVolume(_v);
     vIndices.push_back( _i );
     vSoaData.emplace_back( _v, _uv, _uv2, _n, _t, _b, _c );
 }
@@ -302,19 +304,19 @@ void VData::setVUV2s( const size_t _index, const Vector2f& _value ) {
 }
 
 const Vector3f& VData::getMin() const {
-    return BBox3d().minPoint();
+    return vMin;
 }
 
 void VData::setMin( const Vector3f& min ) {
-    BBox3d().setMinPoint(min);
+    vMin = min;
 }
 
 const Vector3f& VData::getMax() const {
-    return BBox3d().maxPoint();
+    return vMax;
 }
 
 void VData::setMax( const Vector3f& max ) {
-    BBox3d().setMaxPoint(max);
+    vMax = max;
 }
 
 Primitive VData::getPrimitive() const {
@@ -406,4 +408,9 @@ ucchar_p VData::bufferPtr() const {
 
 ucchar_p VData::indexPtr() const {
     return ucchar_p{ reinterpret_cast<const unsigned char*>(vIndices.data()), vIndices.size() * sizeof(uint32_t) };
+}
+
+void VData::expandVolume( const V3f& _value ) {
+    vMax = max( vMax, _value );
+    vMin = min( vMin, _value );
 }

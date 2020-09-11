@@ -226,7 +226,7 @@ using UIElementSP       = std::shared_ptr<UIElementRT>;
 using UIElementSPConst  = std::shared_ptr<const UIElementRT>;
 using UIElementSPCC     = const UIElementSPConst;
 
-class UIElement : public Boxable, public UUIDIntegerInc {
+class UIElement : public UUIDIntegerInc {
 public:
     template<typename ...Args>
     explicit UIElement( RenderOrchestrator& _rsg, Args&& ... args ) : UUIDIntegerInc( CommandBufferLimits::UI2dStart ),
@@ -354,12 +354,14 @@ public:
     void setStatus( UIElementStatus _status );
     void singleTap();
     void toggleSelected();
+    AABB& BBox3d();
 private:
     void updateStatus();
     void applyVisibility();
 private:
     RenderOrchestrator& rsg;
 
+    AABB bbox3d{AABB::INVALID};
     std::string key;
     UITapAreaType type;
     UIElementStatus status = UIElementStatus::Enabled;

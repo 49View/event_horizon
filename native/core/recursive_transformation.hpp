@@ -264,17 +264,17 @@ public:
     }
 
     JMATH::AABB calcCompleteBBox3dRec() {
-        this->BBox3d(AABB::INVALID);
+        this->invalidateVolume();
 
-        for ( auto& c : children ) {
-            this->BBox3d().merge( c->calcCompleteBBox3dRec() );
-        }
-
-        if ( !data.empty() ) {
-            for ( auto & bd : data ) {
-                this->BBox3d().merge( bd.BBoxTransform( *mLocalHierTransform ) );
-            }
-        }
+//        for ( auto& c : children ) {
+//            this->BBox3d().merge( c->calcCompleteBBox3dRec() );
+//        }
+//
+//        if ( !data.empty() ) {
+//            for ( auto & bd : data ) {
+//                this->BBox3d().merge( bd.BBoxTransform( *mLocalHierTransform ) );
+//            }
+//        }
 
         return this->BBox3dCopy();
     }

@@ -179,10 +179,10 @@ namespace GLTF2Service {
         auto matRef = _gltf.matMap.at( material.name );
 
         auto hashRefName = _gltf.key + _gltf.Name() + std::to_string( meshIndex ) + std::to_string( primitiveIndex );
-        auto vdata = std::make_shared<VData>();
-        GLTF2Service::fillGeom( vdata, _gltf.model.get(), meshIndex, primitiveIndex );
-        _sg.B<VB>( hashRefName ).addIM( vdata );
-        hier->pushData( hashRefName, vdata->BBox3d(), matRef );
+        auto vData = std::make_shared<VData>();
+        GLTF2Service::fillGeom(vData, _gltf.model.get(), meshIndex, primitiveIndex );
+        _sg.B<VB>( hashRefName ).addIM(vData );
+        hier->pushData( hashRefName, AABB{ vData->getMin(), vData->getMax()}, matRef );
     }
 
     template<typename T1, typename T2>

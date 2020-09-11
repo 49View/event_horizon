@@ -12,7 +12,7 @@
 #include <core/soa_utils.h>
 #include <core/resources/resource_serialization.hpp>
 
-class VData : public Boxable {
+class VData {
 public:
     VData() = default;
     [[nodiscard]] size_t numIndices() const;
@@ -80,9 +80,14 @@ public:
     [[nodiscard]] ucchar_p bufferPtr() const;
     [[nodiscard]] ucchar_p indexPtr() const;
 
-    JSONRESOURCECLASSSERIALBIN( VData, vIndices, vSoaData, primitive, bbox3d)
+    JSONRESOURCECLASSSERIALBIN( VData, vIndices, vSoaData, vMin, vMax, primitive )
+protected:
+    void expandVolume( const V3f& _value );
+
 private:
     std::vector<uint32_t>  vIndices;
     std::vector<PUUNTBC>  vSoaData;
+    V3f vMin{V3f::ZERO()};
+    V3f vMax{V3f::ZERO()};
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };

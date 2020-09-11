@@ -167,12 +167,12 @@ bool UIElement::hasActiveStatus() const {
 
 bool UIElement::contains( const V2f& _point ) const {
     if ( !bVisible ) return false;
-    return bbox3dT.containsXY( _point );
+    return bbox3d.containsXY( _point );
 }
 
 bool UIElement::containsActive( const V2f& _point ) const {
     if ( !hasActiveStatus() ) return false;
-    return bbox3dT.containsXY( _point );
+    return bbox3d.containsXY( _point );
 }
 
 void UIElement::singleTap() {
@@ -234,6 +234,9 @@ void UIElement::fadeTo( float _duration, float _value ) {
 
 void UIElement::insertGroupElement( UIElementSP _elem ) {
     groupElements.emplace_back( _elem );
+}
+AABB& UIElement::BBox3d() {
+    return bbox3d;
 }
 
 void UIView::foreach( std::function<void(UIElementSP)> f ) {
@@ -609,7 +612,7 @@ void UIViewContainer::finalize( const MPos2d& _at ) {
     for ( auto& wle : wholeLiners ) {
         wle->DataRef().BBox3d().setMaxPoint(V3f{innerPaddedX, wle->DataRef().BBox3d().maxPoint().y(), 0.0f} );
     }
-    Node()->DataRef().BBox3d( fakeAA );
+    Node()->DataRef().BBox3d() = fakeAA;
     Node()->updateTransform( _at() );
 }
 

@@ -89,7 +89,8 @@ namespace stl {
             box.expand(v3);
         }
 
-        mGeom->BBox3d( box );
+        mGeom->setMax( box.maxPoint() );
+        mGeom->setMin( box.minPoint() );
 
         int i = 0;
         Vector2f bs{ box.calcWidth(), -box.calcHeight() };
