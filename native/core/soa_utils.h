@@ -29,7 +29,7 @@ public:
     std::unique_ptr<uint32_t[]> indices;
     int numVerts = 0;
     int32_t numIndices = 0;
-    AABB bbox3d = AABB::INVALID;
+    AABB bbox3d = AABB::MINVALID();;
 };
 
 enum Primitive {
@@ -842,13 +842,13 @@ public:
     }
 
     Vector3f centre() const {
-        AABB ret{AABB::INVALID};
+        AABB ret{AABB::MINVALID()};
         for ( int32_t t = 0; t < numVerts; t++ ) ret.expand( verts[t].pos );
         return ret.calcCentre();
     }
 
     AABB BBox3d() const {
-        AABB ret{AABB::INVALID};
+        AABB ret{AABB::MINVALID()};
         for ( int32_t t = 0; t < numVerts; t++ ) ret.expand( verts[t].pos );
         return ret;
     }

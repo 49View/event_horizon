@@ -19,13 +19,10 @@ namespace JMATH {
     class AABB {
     public:
 
-        static const AABB IDENTITY;
-        static const AABB INVALID;
-        static const AABB ZERO;
-
         static AABB& MIDENTITY();
+        static AABB& ZERO();
         static AABB& MIDENTITYCENTER();
-        static AABB MINVALID();
+        static AABB& MINVALID();
 
         AABB() = default;
         AABB( const Vector3f& minPoint, const Vector3f& maxPoint );

@@ -339,6 +339,24 @@ namespace GLTF2Service {
         }
     }
 
+    bool nodeHasGeomRec( IntermediateGLTF &_gltf, const tinygltf::Node &node, bool& ret ) {
+
+        if ( node.mesh >= 0  ) {
+            ret = true;
+        } else {
+            for ( const auto &ci : node.children ) {
+                nodeHasGeomRec( _gltf, _gltf.model->nodes[ci], ret );
+            }
+        }
+
+        return ret;
+    }
+
+    bool nodeHasGeom( IntermediateGLTF &_gltf, const tinygltf::Node &node ) {
+        bool ret = false;
+        return nodeHasGeomRec(_gltf, node, ret );
+    }
+
     GeomSP
     load( SceneGraph &_sg, const std::string &_key, const std::string &_path, const SerializableContainer &_array ) {
 
@@ -353,8 +371,10 @@ namespace GLTF2Service {
         auto rootScene = EF::create<Geom>( gltfScene.key );
         for ( const auto &scene : gltfScene.model->scenes ) {
             for ( int nodeIndex : scene.nodes ) {
-                auto child = rootScene->addChildren( gltfScene.model->nodes[nodeIndex].name );
-                addMeshNode( _sg, gltfScene, gltfScene.model->nodes[nodeIndex], child );
+                if ( nodeHasGeom( gltfScene, gltfScene.model->nodes[nodeIndex] ) ) {
+                    auto child = rootScene->addChildren( gltfScene.model->nodes[nodeIndex].name );
+                    addMeshNode( _sg, gltfScene, gltfScene.model->nodes[nodeIndex], child );
+                }
             }
         }
 

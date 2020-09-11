@@ -361,7 +361,7 @@ private:
 private:
     RenderOrchestrator& rsg;
 
-    AABB bbox3d{AABB::INVALID};
+    AABB bbox3d{AABB::MINVALID()};
     std::string key;
     UITapAreaType type;
     UIElementStatus status = UIElementStatus::Enabled;

@@ -34,8 +34,8 @@ public:
 
 protected:
     OOBB oobb{};
-    JMATH::AABB bbox3d{AABB::INVALID};
-    JMATH::AABB bbox3dT{AABB::INVALID};
+    JMATH::AABB bbox3d{AABB::MINVALID()};
+    JMATH::AABB bbox3dT{AABB::MINVALID()};
     Rect2f bbox{Rect2f::INVALID};
     Rect2f bboxT{Rect2f::INVALID};
 };

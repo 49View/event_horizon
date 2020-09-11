@@ -106,7 +106,7 @@ auto addVertexStripsTMAutoMapping( Renderer& _rr, const std::vector<T>& verts, c
     ASSERT(!verts.empty());
     auto ps = std::make_shared<TS>();
     ps->generateStripsFromVerts(verts, rds.prim);
-    AABB aabb = AABB::INVALID;
+    AABB aabb = AABB::MINVALID();;
     for ( const auto& v : verts ) {
         aabb.expand(v);
     }

@@ -65,7 +65,7 @@ namespace stl {
         stl_data info( h );
         auto *r = (unsigned int *) n_triangles;
         unsigned int num_triangles = *r;
-        AABB box = AABB::INVALID;
+        AABB box = AABB::MINVALID();;
 
         std::unordered_map<uint64_t, Vector3f> normalsDic;
 

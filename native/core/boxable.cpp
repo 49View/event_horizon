@@ -49,7 +49,7 @@ void Boxable::setMaxPoint( const V3f& _value ) {
 }
 
 void Boxable::invalidateVolume() {
-    bbox3d = AABB::INVALID;
+    bbox3d = AABB::MINVALID();;
     bbox = Rect2f::INVALID;
     oobb = OOBBc::INVALID;
 }

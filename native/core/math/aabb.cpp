@@ -2,9 +2,25 @@
 #include "aabb.h"
 #include <core/math/quaternion.h>
 
-const AABB AABB::IDENTITY = AABB(V3f{ 0.0f }, V3f{ 1.0f });
-const AABB AABB::ZERO = AABB(V3f{ 0.0f }, V3f{ 0.0f });
-const AABB AABB::INVALID = AABB(V3f(std::numeric_limits<float>::max()), V3f(std::numeric_limits<float>::lowest()));
+AABB& AABB::MIDENTITY() {
+    static AABB a(Vector3f(0.0f), Vector3f(1.0f));
+    return a;
+}
+
+AABB& AABB::MIDENTITYCENTER() {
+    static AABB a(Vector3f(-0.5f), Vector3f(0.5f));
+    return a;
+}
+
+AABB& AABB::ZERO() {
+    static AABB a(V3f{ 0.0f }, V3f{ 0.0f });
+    return a;
+}
+
+AABB& AABB::MINVALID() {
+    static AABB a(V3f(std::numeric_limits<float>::max()), V3f(std::numeric_limits<float>::lowest()));
+    return a;
+}
 
 // *********************************************************************************************************************
 // Constructors and operators
@@ -20,7 +36,7 @@ AABB::AABB( const Vector3f& minPoint, const Vector3f& maxPoint, [[maybe_unused]]
 }
 
 AABB::AABB( const std::vector<Vector3f>& points ) {
-    *this = INVALID;
+    *this = AABB::MINVALID();
     for ( const auto& p : points ) expand(p);
 }
 
@@ -266,38 +282,30 @@ void AABB::calc( const Rect2f& bbox, float minHeight, float maxHeight, const Mat
     set(b3dMin, b3dMax);
 }
 
-AABB& AABB::MIDENTITY() {
-    static AABB a(Vector3f(0.0f), Vector3f(1.0f));
-    return a;
-}
-
-AABB& AABB::MIDENTITYCENTER() {
-    static AABB a(Vector3f(-0.5f), Vector3f(0.5f));
-    return a;
-}
-
-AABB AABB::MINVALID() {
-    return AABB::INVALID;
-}
 void AABB::set( const AABB& _aabb ) {
     *this = _aabb;
 }
+
 bool AABB::isValid() const {
-    return *this != AABB::INVALID;
+    return *this != AABB::MINVALID();
 }
+
 float *AABB::rawPtr() {
     return reinterpret_cast<float *>( &mMinPoint[0] );
 }
+
 void AABB::set( const Vector3f& minPoint, const Vector3f& maxPoint ) {
-    *this = INVALID;
+    *this = AABB::MINVALID();
     expand(minPoint);
     expand(maxPoint);
 }
+
 void AABB::calc( const std::initializer_list<Vector3f>& iList, const Matrix4f& tMat ) {
     std::vector<Vector3f> vList;
     for ( auto& v : iList ) vList.push_back(v);
     calc(vList, tMat);
 }
+
 void AABB::calc( const std::vector<Vector3f>& vList, const Matrix4f& tMat ) {
     Vector3f b3dMin = V3fc::HUGE_VALUE_POS;
     Vector3f b3dMax = V3fc::HUGE_VALUE_NEG;
@@ -312,12 +320,14 @@ void AABB::calc( const std::vector<Vector3f>& vList, const Matrix4f& tMat ) {
 
     set(b3dMin, b3dMax);
 }
+
 void AABB::setCenterAndSize( const Vector3f& _center, const Vector3f& _size ) {
     mMinPoint = _center;
     mMaxPoint = _center;
     expand(_center + _size * 0.5f);
     expand(_center + _size * -0.5f);
 }
+
 void AABB::expand( const Vector3f& p ) {
     if ( p.x() < mMinPoint.x() ) mMinPoint.setX(p.x());
     if ( p.x() > mMaxPoint.x() ) mMaxPoint.setX(p.x());
