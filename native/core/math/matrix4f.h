@@ -28,14 +28,13 @@ class Quaternion;
 class Matrix4f {
 public:
 
-	static const Matrix4f IDENTITY;
-	static const Matrix4f IDENTITY_YINV;
-	static const Matrix4f BEEF;
-    static const Matrix4f ZERO;
-    static const Matrix4f ONE;
+	static const Matrix4f& IDENTITY();
+	static const Matrix4f& IDENTITY_YINV();
+	static const Matrix4f& BEEF();
+    static const Matrix4f& ZERO();
+    static const Matrix4f& ONE();
 
-	Matrix4f() {
-	}
+	Matrix4f() = default;
 
 	Matrix4f( const Vector3f& pos, float angle, const Vector3f& axis ) {
 		setRotation( angle, axis );
@@ -43,9 +42,9 @@ public:
 	}
 
 	Matrix4f( const Vector3f& pos, float angle, const Vector3f& axis, const Vector3f& zoom ) {
-		Matrix4f rotM = Matrix4f::IDENTITY;
-		Matrix4f scaleM = Matrix4f::IDENTITY;
-		Matrix4f posM = Matrix4f::IDENTITY;
+		Matrix4f rotM = Matrix4f::IDENTITY();
+		Matrix4f scaleM = Matrix4f::IDENTITY();
+		Matrix4f posM = Matrix4f::IDENTITY();
 		rotM.setRotation( angle, axis );
 		scaleM.scale( zoom );
 		posM.translate( pos );
@@ -63,16 +62,16 @@ public:
     Matrix4f( const Vector3f& pos, const Quaternion& axis, const Vector3f& zoom );
 	// This just sets the translation
 	Matrix4f( const Vector3f& row3 ) {
-		mRows[0] = Matrix4f::IDENTITY.getRow( 0 );
-		mRows[1] = Matrix4f::IDENTITY.getRow( 1 );
-		mRows[2] = Matrix4f::IDENTITY.getRow( 2 );
+		mRows[0] = Matrix4f::IDENTITY().getRow( 0 );
+		mRows[1] = Matrix4f::IDENTITY().getRow( 1 );
+		mRows[2] = Matrix4f::IDENTITY().getRow( 2 );
 		mRows[3] = Vector4f( row3 );
 	}
 
 	Matrix4f( const Vector4f& row3 ) {
-		mRows[0] = Matrix4f::IDENTITY.getRow( 0 );
-		mRows[1] = Matrix4f::IDENTITY.getRow( 1 );
-		mRows[2] = Matrix4f::IDENTITY.getRow( 2 );
+		mRows[0] = Matrix4f::IDENTITY().getRow( 0 );
+		mRows[1] = Matrix4f::IDENTITY().getRow( 1 );
+		mRows[2] = Matrix4f::IDENTITY().getRow( 2 );
 		mRows[3] = row3;
 	}
 
@@ -325,7 +324,7 @@ public:
 	}
 
 	void identityWithPos( const Vector3f& offset ) {
-		std::memcpy(this,  &Matrix4f::IDENTITY, sizeof(Matrix4f));
+		std::memcpy(this,  &Matrix4f::IDENTITY(), sizeof(Matrix4f));
 		setTranslation( offset );
 	}
 

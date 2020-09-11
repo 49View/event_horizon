@@ -23,7 +23,7 @@ VPList::VPList( std::shared_ptr<GPUVData> _gpuData,
     gpuData = std::move(_gpuData);
     mTransform = _transform;
     if ( !_transform ) {
-        mTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
+        mTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY());
     }
     bbox3d = _bbox3d;
     material = _mat;

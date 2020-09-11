@@ -58,8 +58,8 @@ public:
 protected:
 	Renderer& rr;
 	MatrixAnim mAnimMatrix;
-	Matrix4f origRot = Matrix4f::IDENTITY;
-	Matrix4f mPreRotation = Matrix4f::IDENTITY;
+	Matrix4f origRot = Matrix4f::IDENTITY();
+	Matrix4f mPreRotation = Matrix4f::IDENTITY();
 	std::shared_ptr<Matrix4f> mTransform;
 	Vector3f mUINormalAxis = V3fc::Z_AXIS;
 	std::weak_ptr<UiControl> mControl;

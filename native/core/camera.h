@@ -84,7 +84,7 @@ public:
 
 		bool isDoom() const;
 
-	Matrix4f& MVP( const Matrix4f& model = Matrix4f::IDENTITY, CameraProjectionType cpType =
+	Matrix4f& MVP( const Matrix4f& model = Matrix4f::IDENTITY(), CameraProjectionType cpType =
 	CameraProjectionType::Perspective );
 
 	[[nodiscard]] bool frustumClipping( const AABB& bbox ) const;

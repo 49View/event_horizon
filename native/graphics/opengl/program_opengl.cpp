@@ -50,7 +50,7 @@ void ProgramOpenGL::setDefaultUniforms( const std::string& _name, GLenum uf ) {
             break;
 
         case GL_FLOAT_MAT4:
-            uniformDefaults->assign( _name, Matrix4f::IDENTITY );
+            uniformDefaults->assign( _name, Matrix4f::IDENTITY() );
             break;
         case GL_SAMPLER_2D:
             if ( _name == UniformNames::diffuseTexture ) {

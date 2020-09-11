@@ -39,23 +39,44 @@ void Matrix4f::setAspectRatioMatrixScreenSpace( float aspectRatio ) {
     mRows[3] = Vector4f( -1.0f, -1.0f, 0.0f, 1.0f );
 }
 
-const Matrix4f Matrix4f::IDENTITY = Matrix4f( Vector4f( 1.0f, 0.0f, 0.0f, 0.0f ),
+static const Matrix4f SIDENTITY = Matrix4f( Vector4f( 1.0f, 0.0f, 0.0f, 0.0f ),
                                               Vector4f( 0.0f, 1.0f, 0.0f, 0.0f ),
                                               Vector4f( 0.0f, 0.0f, 1.0f, 0.0f ),
                                               Vector4f( 0.0f, 0.0f, 0.0f, 1.0f ));
 
-const Matrix4f Matrix4f::IDENTITY_YINV = Matrix4f( Vector4f( 1.0f, 0.0f, 0.0f, 0.0f ),
+static const Matrix4f SIDENTITY_YINV = Matrix4f( Vector4f( 1.0f, 0.0f, 0.0f, 0.0f ),
                                                    Vector4f( 0.0f, -1.0f, 0.0f, 0.0f ),
                                                    Vector4f( 0.0f, 0.0f, 1.0f, 0.0f ),
                                                    Vector4f( 0.0f, 0.0f, 0.0f, 1.0f ));
 
-const Matrix4f Matrix4f::BEEF = Matrix4f( Vector4f( 32432.0f, 0.423432432f, 43243242.0f, 972378298.0f ),
+static const Matrix4f SBEEF = Matrix4f( Vector4f( 32432.0f, 0.423432432f, 43243242.0f, 972378298.0f ),
                                           Vector4f( 5.0f, 1.0f, 432432432.0f, 4324230.0f ),
                                           Vector4f( 894343.0f, 7897432.0f, 343221.0f, 23.0f ),
                                           Vector4f( 0.4324324230f, 243343220.0f, 23154.0f, 5676751.0f ));
 
-const Matrix4f Matrix4f::ZERO = Matrix4f( V4fc::ZERO, V4fc::ZERO, V4fc::ZERO, V4fc::ZERO );
-const Matrix4f Matrix4f::ONE = Matrix4f( V4fc::ONE, V4fc::ONE, V4fc::ONE, V4fc::ONE );
+static const Matrix4f SZERO = Matrix4f( V4fc::ZERO, V4fc::ZERO, V4fc::ZERO, V4fc::ZERO );
+static const Matrix4f SONE = Matrix4f( V4fc::ONE, V4fc::ONE, V4fc::ONE, V4fc::ONE );
+
+const Matrix4f& Matrix4f::IDENTITY() {
+    return SIDENTITY;
+}
+
+const Matrix4f& Matrix4f::IDENTITY_YINV() {
+    return SIDENTITY_YINV;
+}
+
+const Matrix4f& Matrix4f::BEEF() {
+    return SBEEF;
+}
+
+const Matrix4f& Matrix4f::ZERO() {
+    return SZERO;
+}
+
+const Matrix4f& Matrix4f::ONE() {
+    return SONE;
+}
+
 
 void Matrix4f::make3x3NormalizedRotationMatrix() {
     setRow( 0, { normalize( getRow( 0 ).xyz()), 0.0f } );
@@ -79,11 +100,11 @@ void Matrix4f::setFromRotationAnglePos( const Vector3f &normal, const Vector3f &
 
 void Matrix4f::setFromRTS( const Vector3f &pos, const Vector3f &axis, const Vector3f &zoom,
                            MatrixRotationOrder mro /*= MatrixRotationOrder::xyz*/ ) {
-    Matrix4f rotMX = Matrix4f::IDENTITY;
-    Matrix4f rotMY = Matrix4f::IDENTITY;
-    Matrix4f rotMZ = Matrix4f::IDENTITY;
-    Matrix4f scaleM = Matrix4f::IDENTITY;
-    Matrix4f posM = Matrix4f::IDENTITY;
+    Matrix4f rotMX = Matrix4f::IDENTITY();
+    Matrix4f rotMY = Matrix4f::IDENTITY();
+    Matrix4f rotMZ = Matrix4f::IDENTITY();
+    Matrix4f scaleM = Matrix4f::IDENTITY();
+    Matrix4f posM = Matrix4f::IDENTITY();
     rotMX.setRotation( axis.x(), V3fc::X_AXIS );
     rotMY.setRotation( axis.y(), V3fc::Y_AXIS );
     rotMZ.setRotation( axis.z(), V3fc::Z_AXIS );
@@ -150,7 +171,7 @@ Matrix4f::Matrix4f( const Quaternion &rot ) {
 
 Matrix4f::Matrix4f( const MatrixAnim &rts ) {
     Matrix4f mpos = Matrix4f{ rts.Pos() };
-    Matrix4f mscale = Matrix4f::IDENTITY;
+    Matrix4f mscale = Matrix4f::IDENTITY();
     Matrix4f mrot{ rts.Rot() };
     mscale.scale( rts.Scale());
 
@@ -159,7 +180,7 @@ Matrix4f::Matrix4f( const MatrixAnim &rts ) {
 
 Matrix4f::Matrix4f( const Vector3f &pos, const Quaternion &axis, const Vector3f &zoom ) {
     Matrix4f mpos = Matrix4f{ pos };
-    Matrix4f mscale = Matrix4f::IDENTITY;
+    Matrix4f mscale = Matrix4f::IDENTITY();
     Matrix4f mrot{ axis };
     mscale.scale( zoom );
 

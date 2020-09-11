@@ -26,7 +26,7 @@ void VertexBuffer::update( const Matrix4f& transform ) {
 
 unsigned QuadVertexBuffer::putInScene( RTCScene scene ) {
 	mScene = scene;
-	mLastTransform = Matrix4f::IDENTITY;
+	mLastTransform = Matrix4f::IDENTITY();
 	RTCGeometryFlags geomFlags = RTC_GEOMETRY_DEFORMABLE;
 
 	geomID = rtcNewQuadMesh( scene, geomFlags, 1, mVertices.size() );

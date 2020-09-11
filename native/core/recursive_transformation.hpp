@@ -255,7 +255,7 @@ public:
         return father == nullptr;
     }
     [[nodiscard]] Matrix4f fatherRootTransform() const {
-        if ( father == nullptr ) return Matrix4f::IDENTITY;
+        if ( father == nullptr ) return Matrix4f::IDENTITY();
         return *father->mLocalHierTransform.get();
     }
 
@@ -313,7 +313,7 @@ public:
         }
     }
 
-    void generateMatrixHierarchy( Matrix4f cmat = Matrix4f::IDENTITY ) {
+    void generateMatrixHierarchy( Matrix4f cmat = Matrix4f::IDENTITY() ) {
         generateMatrixHierarchyRec( cmat );
         calcCompleteBBox3d();
     }

@@ -215,7 +215,7 @@ void UiSliderRender::make() {
 
 void UiControlRenderer::UINormalAxis( const Vector3f& val ) {
     mUINormalAxis = val;
-    origRot = Matrix4f::IDENTITY;
+    origRot = Matrix4f::IDENTITY();
     origRot.setFromRotationAnglePos( UINormalAxis(), V3fc::Z_AXIS, V3fc::ZERO );
 }
 

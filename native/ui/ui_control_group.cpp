@@ -20,7 +20,7 @@ UiControlGroup::UiControlGroup( UiControlManager& _uicm, const std::string& _uiV
     mHash = ++mNextId;
     mVisible = true;
     mAnimMatrix = MatrixAnim();
-    mPreRotation = Matrix4f::IDENTITY;
+    mPreRotation = Matrix4f::IDENTITY();
 
     mMapping = _mapping;
     mSchemaName = _uiViewName;

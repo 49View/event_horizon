@@ -102,7 +102,7 @@ struct RendererDrawingSet {
     std::string shaderName = S::COLOR_3D;
     std::string textureRef{};
     std::shared_ptr<Matrix4f> matrix;
-    Matrix4f preMultMatrix{ Matrix4f::IDENTITY };
+    Matrix4f preMultMatrix{ Matrix4f::IDENTITY() };
     V3f rotationNormalAxis = V3fc::ZERO;
     bool usePreMult = false;
 };

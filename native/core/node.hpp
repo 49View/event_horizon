@@ -51,7 +51,7 @@ class Node : public Animable,
              public std::enable_shared_from_this<Node<D>> {
 public:
     Node() {
-        mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
+        mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY());
     }
     virtual ~Node() = default;
 
@@ -378,7 +378,7 @@ private:
 //        reader->read( mGHType );
 //        reader->read( mUUID );
 //        reader->read( this->NameRef() );
-//        mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY);
+//        mLocalHierTransform = std::make_shared<Matrix4f>(Matrix4f::IDENTITY());
 //        reader->read( mLocalTransform );
 //        reader->read( BBox3d() );
 //
@@ -412,7 +412,7 @@ private:
 protected:
     Node *father = nullptr;
     NodeType mGHType = NodeTypeGeneric;
-    Matrix4f mLocalTransform = Matrix4f::IDENTITY;
+    Matrix4f mLocalTransform = Matrix4f::IDENTITY();
     std::shared_ptr<Matrix4f> mLocalHierTransform;
     MatrixAnim mTRS;
 

@@ -52,10 +52,10 @@ void HouseMenu::init( [[maybe_unused]] const std::vector<std::shared_ptr<HouseMe
 //	animMatrix.Pos( Vector3f( 0.0f, 0.0f, 0.0f ) );
 //	animMatrix.AngleX( M_PI_2 );
 //
-//	Matrix4f preRot = Matrix4f::IDENTITY;
+//	Matrix4f preRot = Matrix4f::IDENTITY();
 //
-//	Matrix4f xRot = Matrix4f::IDENTITY;
-//	Matrix4f yRot = Matrix4f::IDENTITY;
+//	Matrix4f xRot = Matrix4f::IDENTITY();
+//	Matrix4f yRot = Matrix4f::IDENTITY();
 //
 //	//!!menu rotation angles!!
 //	xRot.setRotation( M_PI_4, V3fc::X_AXIS );
