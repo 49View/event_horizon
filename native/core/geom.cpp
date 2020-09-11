@@ -8,8 +8,7 @@ void GeomData::bufferDecode( const unsigned char* rawData, size_t length ) {
 
 }
 
-GeomData::GeomData( ResourceRef vData, JMATH::AABB _bbox, ResourceRef material ) :
+GeomData::GeomData( ResourceRef vData, ResourceRef material ) :
                     vData(std::move( vData )),
                     material(std::move( material )) {
-    BBox3d(std::move( _bbox ));
 }

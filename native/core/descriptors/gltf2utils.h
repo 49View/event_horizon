@@ -98,7 +98,7 @@ namespace GLTF2Service {
         auto hashRefName = _gltf.key + _gltf.Name() + std::to_string( meshIndex ) + std::to_string( primitiveIndex );
         auto vData = std::make_shared<VData>();
         GLTF2Service::geomBBox(vData, _gltf.model.get(), meshIndex, primitiveIndex );
-        hier->pushData(hashRefName, AABB{ vData->getMin(), vData->getMax()}, "" );
+        hier->pushData(hashRefName, "" );
     }
 
     void addMeshBBoxNode( IntermediateGLTF& _gltf, const tinygltf::Node& node, const GeomSP& hier ) {

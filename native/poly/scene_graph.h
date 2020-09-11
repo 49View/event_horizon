@@ -393,15 +393,14 @@ public:
 
             if ( VDataServices::prepare( *this, gb.dataTypeHolder, matPtr ) ) {
                 auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
-                auto vdataRef = VL().getHash( hashRefName );
-                if ( vdataRef.empty() ) {
-                    vdataRef = B<VB>( hashRefName ).addIM( VDataServices::build(gb.dataTypeHolder) );
+                auto vDataRef = VL().getHash(hashRefName );
+                if ( vDataRef.empty() ) {
+                    vDataRef = B<VB>(hashRefName ).addIM(VDataServices::build(gb.dataTypeHolder) );
                 }
 
                 elem = std::make_shared<Geom>(gb.Name());
                 elem->setTag(gb.tag);
-                auto vDataPtr = get<VData>(vdataRef);
-                elem->pushData( vdataRef, AABB{vDataPtr->getMin(), vDataPtr->getMax()}, matRef );
+                elem->pushData(vDataRef, matRef );
 
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
                 elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );

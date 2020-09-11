@@ -182,7 +182,7 @@ namespace GLTF2Service {
         auto vData = std::make_shared<VData>();
         GLTF2Service::fillGeom(vData, _gltf.model.get(), meshIndex, primitiveIndex );
         _sg.B<VB>( hashRefName ).addIM(vData );
-        hier->pushData( hashRefName, AABB{ vData->getMin(), vData->getMax()}, matRef );
+        hier->pushData( hashRefName, matRef );
     }
 
     template<typename T1, typename T2>
