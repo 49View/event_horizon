@@ -236,8 +236,16 @@ public:
         return data[_index];
     }
 
+    template<typename SGT, typename M>
+    void pushDataParam( const M& _param ) {
+        if constexpr ( std::is_same_v<M, AABB> ) {
+            boundaries.merge(_param);
+        }
+    }
+
     template <typename ...Args>
     void pushData( Args&&... args ) {
+        (pushDataParam<T>( std::forward<Args>( args )), ...); // Fold expression (c++17)
         data.emplace_back( std::move(T{std::forward<Args>( args )...}) );
     }
 
@@ -261,26 +269,6 @@ public:
 
     void prune() {
         pruneRec( this->shared_from_this() );
-    }
-
-    JMATH::AABB calcCompleteBBox3dRec() {
-        this->invalidateVolume();
-
-//        for ( auto& c : children ) {
-//            this->BBox3d().merge( c->calcCompleteBBox3dRec() );
-//        }
-//
-//        if ( !data.empty() ) {
-//            for ( auto & bd : data ) {
-//                this->BBox3d().merge( bd.BBoxTransform( *mLocalHierTransform ) );
-//            }
-//        }
-
-        return this->BBox3dCopy();
-    }
-
-    void calcCompleteBBox3d() {
-        this->BBox3d(calcCompleteBBox3dRec());
     }
 
     void setTag( uint64_t _tag ) {
@@ -412,34 +400,13 @@ public:
     }
 
     NodeSP addChildren( NodeSP _node, const Vector3f& pos = V3fc::ZERO,
-                            const Vector3f& rot = V3fc::ZERO,
+                            const Quaternion& rot = Quaternion{},
                             const Vector3f& scale = V3fc::ONE, bool visible = true ) {
         auto geom = _node;
         geom->Father( this );
         geom->updateTransform( pos, rot, scale );
         children.push_back( geom );
         return geom;
-    }
-
-    NodeSP addChildren( const std::string& _name ) {
-        NodeSP node = std::make_shared<RecursiveTransformation<T>>();
-        node->Father( this );
-        node->Name( _name );
-        node->updateTransform();
-        children.push_back( node );
-        return node;
-    }
-
-    template <typename R>
-    NodeSP addChildren( const Vector3f& pos = V3fc::ZERO,
-                            const R& rot = R::ZERO,
-                            const Vector3f& scale = V3fc::ONE ) {
-        static_assert( std::is_same<R, Vector3f>::value || std::is_same<R, Quaternion>::value );
-        NodeSP node = std::make_shared<RecursiveTransformation<T>>(pos, rot, scale);
-        node->Father( this->shared_from_this() );
-        node->updateTransform( pos, rot, scale );
-        children.push_back( node );
-        return node;
     }
 
     std::vector<NodeSP>  Children() const { return children; }
@@ -524,6 +491,37 @@ public:
 
 private:
 
+    void calcCompleteBBox3dRec( AABB& bb ) {
+
+        if ( !this->data.empty() ) {
+            AABB dataBB = this->boundaries;
+            dataBB.transform(*this->mLocalHierTransform);
+            bb.merge( dataBB );
+        }
+
+        for ( auto& c : this->children ) {
+            c->calcCompleteBBox3dRec(bb);
+        }
+
+        if ( bb.isValid() ) {
+            this->expandVolume(bb.minPoint());
+            this->expandVolume(bb.maxPoint());
+        }
+    }
+
+    void calcCompleteBBox3d() {
+        AABB bb{AABB::MINVALID()};
+        this->calcCompleteBBox3dRec(bb);
+        if ( bbox3d.isValid() ) {
+            auto fp = father;
+            while ( fp != nullptr ) {
+                fp->expandVolume(bbox3d.minPoint());
+                fp->expandVolume(bbox3d.maxPoint());
+                fp = fp->father;
+            }
+        }
+    }
+
     template <typename M>
     void parseParams( const M& _param ) {
         if constexpr ( std::is_same_v<M, NodeP > ) {
@@ -555,6 +553,7 @@ private:
         data = _source.data;
 //        _source.TRS().clone(mTRS);
         mTRS = _source.TRS();
+        boundaries = _source.boundaries;
         mLocalHierTransform = std::make_shared<Matrix4f>(*_source.mLocalHierTransform.get());
     }
 
@@ -572,6 +571,7 @@ private:
 protected:
     NodeP father = nullptr;
     uint64_t tag = 0;
+    AABB boundaries{AABB::MINVALID()};
     std::vector<T> data;
     std::vector<NodeSP> children;
 };

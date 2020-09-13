@@ -394,24 +394,24 @@ public:
             if ( VDataServices::prepare( *this, gb.dataTypeHolder, matPtr ) ) {
                 auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
                 auto vDataRef = VL().getHash(hashRefName );
+
                 if ( vDataRef.empty() ) {
                     vDataRef = B<VB>(hashRefName ).addIM(VDataServices::build(gb.dataTypeHolder) );
                 }
+                auto vDataPtr = VL().getFromHash(vDataRef);
 
                 elem = std::make_shared<Geom>(gb.Name());
                 elem->setTag(gb.tag);
-                elem->pushData(vDataRef, matRef );
+                elem->pushData( AABB{vDataPtr->getMin(), vDataPtr->getMax()}, vDataRef, matRef );
 
-                if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
-                elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
+                if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
                 B<GRB>( gb.Name() ).addIM( elem );
             }
         } else {
             if ( auto elemToClone = get<Geom>(gb.dataTypeHolder.nameId); elemToClone ) {
                 elem = EF::clone(elemToClone);
                 elem->setTag(gb.tag);
-                if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem);
-                elem->updateExistingTransform( gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale );
+                if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
                 if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
                     std::tuple<ResourceRef, Material*> mt = GBMatInternal(gb.matRef, gb.matColor );
                     ResourceRef matRef = std::get<0>(mt);

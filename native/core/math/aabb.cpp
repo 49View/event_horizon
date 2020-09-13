@@ -2,6 +2,8 @@
 #include "aabb.h"
 #include <core/math/quaternion.h>
 
+static AABB AABBINVALID{V3f(std::numeric_limits<float>::max()), V3f(std::numeric_limits<float>::lowest())};
+
 AABB& AABB::MIDENTITY() {
     static AABB a(Vector3f(0.0f), Vector3f(1.0f));
     return a;
@@ -18,8 +20,7 @@ AABB& AABB::ZERO() {
 }
 
 AABB& AABB::MINVALID() {
-    static AABB a(V3f(std::numeric_limits<float>::max()), V3f(std::numeric_limits<float>::lowest()));
-    return a;
+    return AABBINVALID;
 }
 
 // *********************************************************************************************************************

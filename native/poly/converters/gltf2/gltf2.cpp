@@ -182,7 +182,7 @@ namespace GLTF2Service {
         auto vData = std::make_shared<VData>();
         GLTF2Service::fillGeom(vData, _gltf.model.get(), meshIndex, primitiveIndex );
         _sg.B<VB>( hashRefName ).addIM(vData );
-        hier->pushData( hashRefName, matRef );
+        hier->pushData( AABB{vData->getMin(), vData->getMax()}, hashRefName, matRef );
     }
 
     template<typename T1, typename T2>
@@ -304,10 +304,12 @@ namespace GLTF2Service {
         return im;
     }
 
-    void addMeshNode( SceneGraph &_sg, IntermediateGLTF &_gltf, const tinygltf::Node &node, GeomSP hier ) {
+    void addMeshNode( SceneGraph &_sg, IntermediateGLTF &_gltf, const tinygltf::Node &node, GeomSP father ) {
+
+        auto hier = EF::create<Geom>( node.name );
 
         Vector3f pos = V3fc::ZERO;
-        Quaternion rot;
+        Quaternion rot{};
         Vector3f scale = V3fc::ONE;
 
         if ( !node.translation.empty()) {
@@ -321,20 +323,18 @@ namespace GLTF2Service {
             scale = { node.scale[0], node.scale[1], node.scale[2] };
         }
 
-        hier->generateLocalTransformData( pos, rot, scale );
-        hier->createLocalHierMatrix( hier->fatherRootTransform());
-
         if ( node.mesh >= 0 ) {
             for ( size_t k = 0; k < _gltf.model->meshes[node.mesh].primitives.size(); k++ ) {
                 addGeom( _sg, _gltf, node.mesh, k, hier );
             }
         }
 
+        father->addChildren(hier, pos, rot, scale);
+
         for ( const auto &ci : node.children ) {
             auto nextNode = _gltf.model->nodes[ci];
             if ( nextNode.mesh >= 0 || !nextNode.children.empty()) {
-                auto c = hier->addChildren( nextNode.name );
-                addMeshNode( _sg, _gltf, nextNode, c );
+                addMeshNode( _sg, _gltf, nextNode, hier );
             }
         }
     }
@@ -372,13 +372,12 @@ namespace GLTF2Service {
         for ( const auto &scene : gltfScene.model->scenes ) {
             for ( int nodeIndex : scene.nodes ) {
                 if ( nodeHasGeom( gltfScene, gltfScene.model->nodes[nodeIndex] ) ) {
-                    auto child = rootScene->addChildren( gltfScene.model->nodes[nodeIndex].name );
-                    addMeshNode( _sg, gltfScene, gltfScene.model->nodes[nodeIndex], child );
+                    addMeshNode( _sg, gltfScene, gltfScene.model->nodes[nodeIndex], rootScene );
                 }
             }
         }
 
-        rootScene->calcCompleteBBox3d();
+//        rootScene->calcCompleteBBox3d();
 
         return rootScene->BBox3d().isValid() ? rootScene : nullptr;
     }

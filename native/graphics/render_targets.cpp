@@ -191,7 +191,7 @@ void RLTargetPBR::calcShadowMapsBBox() {
                 totalFrustomBox.merge(bbox3dOfVPList(vl.mVList));
             }
         }
-        if ( totalFrustomBox != AABB::MINVALID() ) {
+        if ( totalFrustomBox.isValid() ) {
             smm->setFrusom(totalFrustomBox);
         }
     }
