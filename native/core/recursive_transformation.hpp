@@ -126,8 +126,7 @@ protected:
 struct PFC{};
 
 template <typename T>
-class RecursiveTransformation : public Boxable,
-                                public NamePolicy<>,
+class RecursiveTransformation : public NamePolicy<>,
                                 public UUIDable,
                                 public TransformNodeData,
                                 public std::enable_shared_from_this<RecursiveTransformation<T>> {
@@ -236,16 +235,8 @@ public:
         return data[_index];
     }
 
-    template<typename SGT, typename M>
-    void pushDataParam( const M& _param ) {
-        if constexpr ( std::is_same_v<M, AABB> ) {
-            boundaries.merge(_param);
-        }
-    }
-
     template <typename ...Args>
     void pushData( Args&&... args ) {
-        (pushDataParam<T>( std::forward<Args>( args )), ...); // Fold expression (c++17)
         data.emplace_back( std::move(T{std::forward<Args>( args )...}) );
     }
 
@@ -399,6 +390,21 @@ public:
         generateMatrixHierarchy( fatherRootTransform());
     }
 
+    [[nodiscard]] AABB volume() const {
+        AABB ret{AABB::MINVALID()};
+        if constexpr ( std::is_base_of_v<T, Boxable> ) {
+            volumeRec(ret);
+        }
+        return ret;
+    }
+
+    [[nodiscard]] V3f size() const {
+        if constexpr ( std::is_base_of_v<T, Boxable> ) {
+            return volume().size();
+        }
+        return V3fc::ZERO;
+    }
+
     NodeSP addChildren( NodeSP _node, const Vector3f& pos = V3fc::ZERO,
                             const Quaternion& rot = Quaternion{},
                             const Vector3f& scale = V3fc::ONE, bool visible = true ) {
@@ -491,35 +497,30 @@ public:
 
 private:
 
-    void calcCompleteBBox3dRec( AABB& bb ) {
-
-        if ( !this->data.empty() ) {
-            AABB dataBB = this->boundaries;
-            dataBB.transform(*this->mLocalHierTransform);
-            bb.merge( dataBB );
+    void volumeRec( AABB& bb ) {
+        for ( auto& d : data ) {
+            bb.merge(d.BBox3d());
         }
 
         for ( auto& c : this->children ) {
-            c->calcCompleteBBox3dRec(bb);
+            c->volumeRec(bb);
+        }
+    }
+
+    void calcCompleteBBox3dRec() {
+
+        for ( auto& d : data ) {
+
+            d.transform(*this->mLocalHierTransform);
         }
 
-        if ( bb.isValid() ) {
-            this->expandVolume(bb.minPoint());
-            this->expandVolume(bb.maxPoint());
+        for ( auto& c : this->children ) {
+            c->calcCompleteBBox3dRec();
         }
     }
 
     void calcCompleteBBox3d() {
-        AABB bb{AABB::MINVALID()};
-        this->calcCompleteBBox3dRec(bb);
-        if ( bbox3d.isValid() ) {
-            auto fp = father;
-            while ( fp != nullptr ) {
-                fp->expandVolume(bbox3d.minPoint());
-                fp->expandVolume(bbox3d.maxPoint());
-                fp = fp->father;
-            }
-        }
+        this->calcCompleteBBox3dRec();
     }
 
     template <typename M>
@@ -549,11 +550,10 @@ private:
         assingNewUUID();
         father = _father;
         Name( _source.Name() );
-        this->BBox3d( _source.BBox3dCopy() );
+//        this->BBox3d( _source.BBox3dCopy() );
         data = _source.data;
 //        _source.TRS().clone(mTRS);
         mTRS = _source.TRS();
-        boundaries = _source.boundaries;
         mLocalHierTransform = std::make_shared<Matrix4f>(*_source.mLocalHierTransform.get());
     }
 
@@ -571,7 +571,6 @@ private:
 protected:
     NodeP father = nullptr;
     uint64_t tag = 0;
-    AABB boundaries{AABB::MINVALID()};
     std::vector<T> data;
     std::vector<NodeSP> children;
 };

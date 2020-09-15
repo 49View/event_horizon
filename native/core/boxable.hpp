@@ -19,12 +19,8 @@ public:
     [[nodiscard]] const JMATH::Rect2f& BBox() const;
     [[nodiscard]] const AABB& BBox3d() const;
     [[nodiscard]] const AABB* BBox3dPtr() const;
-//    AABB& BBox3d();
-//    AABB& BBox3dT();
-    [[maybe_unused]] [[nodiscard]] AABB BBox3dCopy() const;
-    [[maybe_unused]] const AABB& BBoxTransform( Matrix4f _m );
 
-
+    void transform( const Matrix4f& _m );
     void expandVolume( const V3f& _value );
     void invalidateVolume();
     void setMinPoint( const V3f& _value );

@@ -377,8 +377,8 @@ namespace GLTF2Service {
             }
         }
 
+        return rootScene;
 //        rootScene->calcCompleteBBox3d();
-
-        return rootScene->BBox3d().isValid() ? rootScene : nullptr;
+//        return rootScene->BBox3d().isValid() ? rootScene : nullptr;
     }
 }

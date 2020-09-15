@@ -225,7 +225,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
                     u(geom->UUiD()).
                     g(geom->Tag()).
                     t(geom->getLocalHierTransform()).
-                    b(geom->BBox3dPtr()).
+                    b(dataRef.BBox3dPtr()).
                     build();
             auto bucket = _geomAndBucket.second == GTBucket::Near ? CommandBufferLimits::PBRStart : CommandBufferLimits::PBRStartFar;
             this->RR().VPL(bucket, vp );
@@ -652,7 +652,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
     luarr["center"] = [&]( const std::string& _id ) {
         sg.transformNode(_id, [this]( GeomSP elem ) {
             elem->updateTransform(V3fc::ZERO, Quaternion{}, V3fc::ONE);
-            this->SG().DC()->center(elem->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
+            this->SG().DC()->center(elem->volume(), CameraCenterAngle::HalfwayOpposite);
         });
         rr.invalidateOnAdd();
     };

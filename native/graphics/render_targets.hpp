@@ -310,9 +310,9 @@ public:
 
     std::shared_ptr<CompositePBR> Composite();
 protected:
-    void renderDepthMap();
-    void renderNormalMap();
-    void renderSSAO();
+    void renderDepthMap( const Camera* _cameraRig );
+    void renderNormalMap( const Camera* _cameraRig );
+    void renderSSAO( const Camera* _cameraRig );
     void addProbes();
     void addProbeToCB( const std::string& _probeCameraName, const Vector3f& _at );
     std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName, int mipmap );

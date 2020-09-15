@@ -223,7 +223,7 @@ void RLTargetPBR::addShadowMaps() {
     }
 }
 
-void RLTargetPBR::renderDepthMap() {
+void RLTargetPBR::renderDepthMap( const Camera* _cameraRig ) {
 
     rr.CB_U().startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
     rr.CB_U().pushCommand({ CommandBufferCommandName::depthMapBufferBindAndClear });
@@ -236,27 +236,27 @@ void RLTargetPBR::renderDepthMap() {
 
     for ( const auto&[k, vl] : rr.CL() ) {
         if ( isKeyInRange(k, CheckEnableBucket::True) ) {
-            rr.addToCommandBuffer(vl.mVList, nullptr, rr.getMaterial(S::DEPTH_MAP), nullptr, 0.11f);
+            rr.addToCommandBuffer(vl.mVList, _cameraRig, rr.getMaterial(S::DEPTH_MAP), nullptr, 0.11f);
         }
     }
 }
 
-void RLTargetPBR::renderNormalMap() {
+void RLTargetPBR::renderNormalMap( const Camera* _cameraRig ) {
     rr.CB_U().startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
     rr.CB_U().pushCommand({ CommandBufferCommandName::normalMapBufferBindAndClear });
 
     for ( const auto&[k, vl] : rr.CL() ) {
         if ( isKeyInRange(k, CheckEnableBucket::True) ) {
-            rr.addToCommandBuffer(vl.mVList, nullptr, rr.getMaterial(S::NORMAL_MAP));
+            rr.addToCommandBuffer(vl.mVList, _cameraRig, rr.getMaterial(S::NORMAL_MAP));
         }
     }
 }
 
-void RLTargetPBR::renderSSAO() {
+void RLTargetPBR::renderSSAO( const Camera* _cameraRig ) {
 
     if ( !useSSAO() ) return;
 
-    renderNormalMap();
+    renderNormalMap(_cameraRig);
 
     rr.CB_U().startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
     rr.CB_U().pushCommand({ CommandBufferCommandName::ssaoRender });
@@ -477,9 +477,9 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
             addShadowMaps();
 
             if ( useSSAO() || useDOF() || useMotionBlur() ) {
-                renderDepthMap();
+                renderDepthMap(currentCamera.get());
             }
-            renderSSAO();
+            renderSSAO(currentCamera.get());
         }
         cb.startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
         cb.pushCommand({ CommandBufferCommandName::colorBufferBindAndClear });

@@ -391,17 +391,16 @@ bool SceneGraph::rayIntersect( const V3f& _near, const V3f& _far, SceneRayInters
     bool ret = false;
 
     for ( const auto&[k, v] : nodes ) {
-        UUID uuid{};
-//        ### REF reimplement box and UUID
-        auto box = v->BBox3d();
-//        uuid = (*as)->UUiD();
-        float tn = 0.0f;
-        float tf = std::numeric_limits<float>::max();
-        auto ldir = normalize(_far - _near);
-        if ( box.intersectLine(_near, ldir, tn, tf)) {
-            _callback(v, tn);
-            ret = true;
-            break;
+        for ( const auto& d : v->DataV() ) {
+            auto box = d.BBox3d();
+            float tn = 0.0f;
+            float tf = std::numeric_limits<float>::max();
+            auto lDir = normalize(_far - _near);
+            if ( box.intersectLine(_near, lDir, tn, tf)) {
+                _callback(v, tn);
+                ret = true;
+                break;
+            }
         }
     }
 
@@ -693,10 +692,10 @@ void SceneGraph::addScene( const ResourceScene& gs, bool bTakeScreenShot ) {
         gs.visit(ResourceGroup::Geom, [&, bTakeScreenShot]( const std::string& _key, const std::string& _value ) {
             auto geom = GB<GT::Asset>(_value, GT::Tag(1001));
             if ( geom ) {
-                geom->updateExistingTransform(V3fc::UP_AXIS_NEG * geom->BBox3dCopy().minPoint().y(),
+                geom->updateExistingTransform(V3fc::UP_AXIS_NEG * geom->volume().minPoint().y(),
                                               Quaternion{ (float) M_PI, V3fc::UP_AXIS }, V3fc::ONE);
                 DC()->Mode(CameraControlType::Orbit);
-                DC()->center(geom->BBox3dCopy(), CameraCenterAngle::HalfwayOpposite);
+                DC()->center(geom->volume(), CameraCenterAngle::HalfwayOpposite);
                 takeScreenShotOnImportSignal(getCurrLoadedEntityId(), bTakeScreenShot);
             }
         });

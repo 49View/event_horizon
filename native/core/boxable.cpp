@@ -4,28 +4,39 @@
 
 #include "boxable.hpp"
 
-const JMATH::Rect2f& Boxable::BBox() const { return bbox; }
-const AABB& Boxable::BBox3d() const { return bbox3d; }
-const AABB *Boxable::BBox3dPtr() const { return &bbox3d; }
+const JMATH::Rect2f& Boxable::BBox() const {
+    return bbox;
+}
+
+const AABB& Boxable::BBox3d() const {
+    return bbox3d;
+}
+
+const AABB *Boxable::BBox3dPtr() const {
+    return &bbox3d;
+}
+
 //AABB& Boxable::BBox3d() { return bbox3d; }
 //AABB& Boxable::BBox3dT() { return bbox3dT; }
-AABB Boxable::BBox3dCopy() const { return bbox3d; }
-const AABB& Boxable::BBoxTransform( Matrix4f _m ) {
+
+void Boxable::transform( const Matrix4f& _m ) {
 //        if ( std::is_same_v<D, BBoxProjection2d> ) {
 //            V3f ssTranslate = _m.getPosition3();
 //            ssTranslate.oneMinusY();
 //            _m.setTranslation( ssTranslate );
 //        }
-    bbox3dT.set(bbox3d.getTransform(_m));
-    return bbox3dT;
+    bbox3dT = bbox3d;
+    bbox3dT.transform(_m);
 }
 
 void Boxable::BBox3d( const Vector3f& bMin, const Vector3f& bMax ) {
     bbox3d = AABB{ bMin, bMax };
+    bbox3dT = bbox3d;
 }
 
 void Boxable::BBox3d( const AABB& _value ) {
     bbox3d = _value;
+    bbox3dT = bbox3d;
 }
 
 void Boxable::expandVolume( const V3f& _value ) {

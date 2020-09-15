@@ -74,7 +74,7 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
     applyVisibility();
 }
 
-void UIElement::transform( float _duration, uint64_t _frameSkipper,
+void UIElement::transformUI( float _duration, uint64_t _frameSkipper,
                            const V3f& _pos, const Quaternion& _rot, const V3f& _scale ) {
 
     const float downtime = _duration;

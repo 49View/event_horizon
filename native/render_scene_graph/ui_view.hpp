@@ -226,7 +226,7 @@ using UIElementSP       = std::shared_ptr<UIElementRT>;
 using UIElementSPConst  = std::shared_ptr<const UIElementRT>;
 using UIElementSPCC     = const UIElementSPConst;
 
-class UIElement : public UUIDIntegerInc {
+class UIElement : public UUIDIntegerInc, public Boxable {
 public:
     template<typename ...Args>
     explicit UIElement( RenderOrchestrator& _rsg, Args&& ... args ) : UUIDIntegerInc( CommandBufferLimits::UI2dStart ),
@@ -345,7 +345,7 @@ public:
     [[nodiscard]] bool hasActiveStatus() const;
     void touchedDown();
     void touchedUp( const V2f& _point );
-    void transform( float _duration, uint64_t _frameSkipper,
+    void transformUI( float _duration, uint64_t _frameSkipper,
                     const V3f& _pos,
                     const Quaternion& _rot = Quaternion{},
                     const V3f& _scale = V3fc::ONE );
