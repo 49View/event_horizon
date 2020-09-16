@@ -9,20 +9,13 @@ const JMATH::Rect2f& Boxable::BBox() const {
 }
 
 const AABB& Boxable::BBox3d() const {
-    return bbox3d;
+    return bbox3dT;
 }
-
-const AABB *Boxable::BBox3dPtr() const {
-    return &bbox3d;
-}
-
-//AABB& Boxable::BBox3d() { return bbox3d; }
-//AABB& Boxable::BBox3dT() { return bbox3dT; }
 
 void Boxable::transform( const Matrix4f& _m ) {
 //        if ( std::is_same_v<D, BBoxProjection2d> ) {
 //            V3f ssTranslate = _m.getPosition3();
-//            ssTranslate.oneMinusY();
+//            ssTranslate.oneMinusY();rep
 //            _m.setTranslation( ssTranslate );
 //        }
     bbox3dT = bbox3d;
@@ -42,25 +35,38 @@ void Boxable::BBox3d( const AABB& _value ) {
 void Boxable::expandVolume( const V3f& _value ) {
     bbox3d.expand( _value );
     bbox.expand( _value.xz() );
+    bboxT = bbox;
+    bbox3dT = bbox3d;
     // ### TODO OOBB expand
 }
 
 void Boxable::setMinPoint( const V3f& _value ) {
     bbox3d.setMinPoint( _value );
     bbox.setBottomRight( _value.xz() );
+    bboxT = bbox;
+    bbox3dT = bbox3d;
     // ### TODO OOBB expand
-
 }
 
 void Boxable::setMaxPoint( const V3f& _value ) {
     bbox3d.setMaxPoint( _value );
     bbox.setTopLeft( _value.xz() );
+    bboxT = bbox;
+    bbox3dT = bbox3d;
     // ### TODO OOBB expand
-
 }
 
 void Boxable::invalidateVolume() {
-    bbox3d = AABB::MINVALID();;
+    bbox3d = AABB::MINVALID();
     bbox = Rect2f::INVALID;
+    bboxT = bbox;
+    bbox3dT = bbox3d;
     oobb = OOBBc::INVALID;
+}
+
+void Boxable::BBox( const Rect2f& _value ) {
+    bbox = _value;
+    bbox3d = AABB{ XZY::C(bbox.bottomRight(), 0.0f), XZY::C( bbox.topLeft(), 0.0f) };
+    bboxT = _value;
+    bbox3dT = bbox3d;
 }
