@@ -392,14 +392,14 @@ public:
 
     [[nodiscard]] AABB volume() const {
         AABB ret{AABB::MINVALID()};
-        if constexpr ( std::is_base_of_v<T, Boxable> ) {
+        if constexpr ( std::is_base_of_v<Boxable, T> ) {
             volumeRec(ret);
         }
         return ret;
     }
 
     [[nodiscard]] V3f size() const {
-        if constexpr ( std::is_base_of_v<T, Boxable> ) {
+        if constexpr ( std::is_base_of_v<Boxable, T> ) {
             return volume().size();
         }
         return V3fc::ZERO;
@@ -497,7 +497,7 @@ public:
 
 private:
 
-    void volumeRec( AABB& bb ) {
+    void volumeRec( AABB& bb ) const {
         for ( auto& d : data ) {
             bb.merge(d.BBox3d());
         }

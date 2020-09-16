@@ -6,7 +6,7 @@
 
 void Spatial::internalUpdate() {
     centre = BBox3d().centre();
-    size = BBox3d().size();
+//    size = BBox3d().size();
 }
 
 void Spatial::initialiseVolume( const Rect2f& _value ) {
@@ -50,6 +50,7 @@ void Spatial::updateVolumeInternal() {
 Spatial Spatial::updateVolume() {
     invalidateVolume();
     updateVolumeInternal();
+    internalUpdate();
     return *this;
 }
 
