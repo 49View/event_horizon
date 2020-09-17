@@ -45,7 +45,7 @@ public:
     void reset() { m_start = clock(); }
     double elapsed() const { return (clock() - m_start) * 1000.0 / CLOCKS_PER_SEC; }
 private:
-    clock_t m_start{};
+    clock_t m_start;
 };
 
 static int Print(const char *format, ...)
@@ -58,10 +58,13 @@ static int Print(const char *format, ...)
     return result;
 }
 
+// May be called from any thread.
 static void PrintProgress(const char *name, const char *indent1, const char *indent2, int progress, Stopwatch *stopwatch)
 {
     if (s_verbose)
         return;
+    static std::mutex progressMutex;
+    std::unique_lock<std::mutex> lock(progressMutex);
     if (progress == 0)
         stopwatch->reset();
     printf("\r%s%s [", indent1, name);
@@ -73,11 +76,18 @@ static void PrintProgress(const char *name, const char *indent1, const char *ind
         printf("\n%s%.2f seconds (%g ms) elapsed\n", indent2, stopwatch->elapsed() / 1000.0, stopwatch->elapsed());
 }
 
-static void ProgressCallback(xatlas::ProgressCategory::Enum category, int progress, void *userData)
+static bool ProgressCallback(xatlas::ProgressCategory::Enum category, int progress, void *userData)
 {
     Stopwatch *stopwatch = (Stopwatch *)userData;
     PrintProgress(xatlas::StringForEnum(category), "   ", "      ", progress, stopwatch);
+    return true;
 }
+
+//static void ProgressCallback(xatlas::ProgressCategory::Enum category, int progress, void *userData)
+//{
+//    Stopwatch *stopwatch = (Stopwatch *)userData;
+//    PrintProgress(xatlas::StringForEnum(category), "   ", "      ", progress, stopwatch);
+//}
 
 void saveToObj( xatlas::Atlas *atlas, std::vector<tinyobj::shape_t>& shapes ) {
     // Write meshes.
@@ -114,10 +124,10 @@ void saveToObj( xatlas::Atlas *atlas, std::vector<tinyobj::shape_t>& shapes ) {
                 const xatlas::Chart *chart = &mesh.chartArray[c];
                 fprintf(file, "o chart%04u\n", c);
                 fprintf(file, "s off\n");
-                for (uint32_t f = 0; f < chart->indexCount; f += 3) {
+                for (uint32_t f = 0; f < chart->faceCount; f += 3) {
                     fprintf(file, "f ");
                     for (uint32_t j = 0; j < 3; j++) {
-                        const uint32_t index = firstVertex + chart->indexArray[f + j] + 1; // 1-indexed
+                        const uint32_t index = firstVertex + chart->faceArray[f + j] + 1; // 1-indexed
                         fprintf(file, "%d/%d/%d%c", index, index, index, j == 2 ? '\n' : ' ');
                     }
                 }
@@ -246,9 +256,8 @@ int xatlasParametrize( std::vector<tinyobj::shape_t>& shapes, scene_t* scene ) {
     // Generate atlas.
     printf("Generating atlas\n");
     xatlas::PackOptions packerOptions;
-    packerOptions.conservative = true;
     packerOptions.padding = 1;
-    xatlas::Generate(atlas, xatlas::ChartOptions(), NULL, packerOptions, ProgressCallback, &stopwatch);
+    xatlas::Generate(atlas, xatlas::ChartOptions(), packerOptions);
     printf("   %d charts\n", atlas->chartCount);
     printf("   %d atlases\n", atlas->atlasCount);
     for (uint32_t i = 0; i < atlas->atlasCount; i++)
@@ -275,29 +284,62 @@ int xatlasParametrize( std::vector<tinyobj::shape_t>& shapes, scene_t* scene ) {
     return 0;
 }
 
+void mapXAtlasScene( SceneGraph& sg, GeomSP gg, scene_t* scene, size_t& totalVerts, size_t& totalIndices ) {
+    for ( const auto& dd : gg->DataV() ) {
+        auto vData = sg.VL().get(dd.vData);
+        totalVerts += vData->numVerts();
+        totalIndices += vData->numIndices();
+//        scene->ggLImap[gg->UUiD()] = sg.VL().get(gg->Data(0).vData);
+        scene->ggLImap[gg->UUiD() + dd.vData] = vData;
+    }
+
+    for ( const auto& c : gg->Children() ) {
+        mapXAtlasScene( sg, c, scene, totalVerts, totalIndices);
+    }
+}
+
+void flattenXAtlasScene( SceneGraph& sg, GeomSP gg, scene_t* scene,
+                         size_t& vcurrUnchartOffset, size_t& icurrUnchartOffset,
+                         xatlas::MeshDecl& meshDecl,
+                         char* posData, char* uvData, char* normalData, char* indicesData ) {
+
+    for ( const auto& dd : gg->DataV() ) {
+        auto vData = sg.VL().get(dd.vData);
+
+        auto mat = gg->getLocalHierTransform();
+        auto ghash = gg->UUiD() + dd.vData;
+
+        vData->flattenStride(posData + vcurrUnchartOffset * meshDecl.vertexPositionStride, 0, mat.get());
+        vData->flattenStride(uvData + vcurrUnchartOffset * meshDecl.vertexUvStride, 1, mat.get());
+        vData->flattenStride(normalData + vcurrUnchartOffset * meshDecl.vertexNormalStride, 3, mat.get());
+        vData->mapIndices(indicesData, icurrUnchartOffset, vcurrUnchartOffset, ghash, scene->unchart);
+
+        vcurrUnchartOffset += vData->numVerts();
+        icurrUnchartOffset += vData->numIndices();
+    }
+
+    for ( const auto& c : gg->Children() ) {
+        flattenXAtlasScene( sg, c, scene, vcurrUnchartOffset, icurrUnchartOffset, meshDecl, posData, uvData, normalData, indicesData);
+    }
+
+}
+
+
 int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t* scene ) {
 
     // Create atlas.
     xatlas::SetPrint(Print, false);
     xatlas::Atlas *atlas = xatlas::Create();
     Stopwatch globalStopwatch, stopwatch;
+    xatlas::SetProgressCallback(atlas, ProgressCallback, &stopwatch);
 
     // Create single flattened mesh
     xatlas::MeshDecl meshDecl;// = saoToXMesh(source);
     size_t totalVerts = 0;
     size_t totalIndices = 0;
 
-    size_t vcurrUnchartOffset = 0;
-    size_t icurrUnchartOffset = 0;
     for ( const auto& [k, gg] : nodes ) {
-        if ( !gg->empty() ) {
-            auto vData = sg.VL().get(gg->Data(0).vData);
-            vcurrUnchartOffset += vData->numVerts();
-            icurrUnchartOffset += vData->numIndices();
-            totalVerts += vData->numVerts();
-            totalIndices += vData->numIndices();
-            scene->ggLImap[gg->UUiD()] = sg.VL().get(gg->Data(0).vData);
-        }
+        mapXAtlasScene( sg, gg, scene, totalVerts, totalIndices);
     }
 
     meshDecl.vertexCount = totalVerts;//source->numVerts();// (int)objMesh.positions.size() / 3;
@@ -317,22 +359,10 @@ int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
     meshDecl.indexData = indicesData;
     meshDecl.indexFormat = xatlas::IndexFormat::UInt32;
 
-    vcurrUnchartOffset = 0;
-    icurrUnchartOffset = 0;
+    size_t vcurrUnchartOffset = 0;
+    size_t icurrUnchartOffset = 0;
     for ( const auto& [k, gg] : nodes ) {
-        if ( !gg->empty() ) {
-            auto mat = gg->getLocalHierTransform();
-            auto vData = sg.VL().get(gg->Data(0).vData);
-            auto ghash = gg->UUiD();
-
-            vData->flattenStride( posData + vcurrUnchartOffset*meshDecl.vertexPositionStride, 0, mat.get() );
-            vData->flattenStride( uvData+ vcurrUnchartOffset*meshDecl.vertexUvStride, 1, mat.get() );
-            vData->flattenStride( normalData+ vcurrUnchartOffset*meshDecl.vertexNormalStride, 3, mat.get() );
-            vData->mapIndices( indicesData, icurrUnchartOffset, vcurrUnchartOffset, ghash, scene->unchart );
-
-            vcurrUnchartOffset += vData->numVerts();
-            icurrUnchartOffset += vData->numIndices();
-        }
+        flattenXAtlasScene( sg, gg, scene, vcurrUnchartOffset, icurrUnchartOffset, meshDecl, posData, uvData, normalData, indicesData);
     }
 
     xatlas::AddMeshError::Enum error = xatlas::AddMesh(atlas, meshDecl);
@@ -343,9 +373,8 @@ int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
     // Generate atlas.
     printf("Generating atlas\n");
     xatlas::PackOptions packerOptions;
-    packerOptions.conservative = true;
-    packerOptions.padding = 1;
-    xatlas::Generate(atlas, xatlas::ChartOptions(), NULL, packerOptions, ProgressCallback, &stopwatch);
+    packerOptions.resolution = 128;
+    xatlas::Generate(atlas, xatlas::ChartOptions(), packerOptions);
     printf("   %d charts\n", atlas->chartCount);
     printf("   %d atlases\n", atlas->atlasCount);
     for (uint32_t i = 0; i < atlas->atlasCount; i++)

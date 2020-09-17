@@ -112,10 +112,10 @@ void xatlasDump(xatlas::Atlas *atlas) {
                 color[0] = rand() % 255;
                 color[1] = rand() % 255;
                 color[2] = rand() % 255;
-                for (uint32_t k = 0; k < chart->indexCount; k += 3) {
+                for (uint32_t k = 0; k < chart->faceCount; k += 3) {
                     int verts[3][2];
                     for (int l = 0; l < 3; l++) {
-                        const xatlas::Vertex &v = mesh.vertexArray[chart->indexArray[k + l]];
+                        const xatlas::Vertex &v = mesh.vertexArray[chart->faceArray[k + l]];
                         verts[l][0] = int(v.uv[0]);
                         verts[l][1] = int(v.uv[1]);
                     }
