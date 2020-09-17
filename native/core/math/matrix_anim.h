@@ -53,7 +53,7 @@ public:
 	void set( const Vector3f& _pos, const Vector4f& _angleAxis, const Vector3f& _scale );
 	void set( const Vector3f& _pos, const Quaternion& _rot, const Vector3f& _scale );
 
-    [[nodiscard]] MatrixAnim clone( const MatrixAnim& _source) const;
+    [[nodiscard]] MatrixAnim clone() const;
 	[[nodiscard]] bool isAnimating() const;
 	[[nodiscard]] Matrix4f transform( const Matrix4f& _sourceMatrix ) const;
 
