@@ -6,7 +6,7 @@
 
 void Spatial::internalUpdate() {
     centre = BBox3d().centre();
-//    size = BBox3d().size();
+    size = BBox3d().size();
 }
 
 void Spatial::initialiseVolume( const Rect2f& _value ) {
@@ -40,35 +40,35 @@ const AABB& Spatial::BBox3d() const {
     return bbox3d;
 }
 
-void Spatial::updateVolumeInternal() {
-    V3f scaledHalf = half(size * scaling);
-    bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
-    bbox3d = bbox3d.rotate(rotation);
-    bbox = bbox3d.topDown();
-}
+//void Spatial::updateVolumeInternal() {
+//    V3f scaledHalf = half(size * scaling);
+//    bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
+//    bbox3d = bbox3d.rotate(rotation);
+//    bbox = bbox3d.topDown();
+//}
 
 Spatial Spatial::updateVolume() {
     invalidateVolume();
     updateVolumeInternal();
-    internalUpdate();
     return *this;
 }
 
 void Spatial::mergeVolume( const Spatial& _spatial ) {
     bbox3d.merge(_spatial.BBox3d());
     bbox.merge(_spatial.BBox());
+    internalUpdate();
 }
 
 void Spatial::posBBox() {
-//    V3f scaledHalf = half(size * scaling);
-//    bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
-//    bbox = bbox3d.topDown();
+    V3f scaledHalf = half(size * scaling);
+    bbox3d = AABB{ ( centre + pos ) - scaledHalf, ( centre + pos ) + scaledHalf };
+    bbox = bbox3d.topDown();
 }
 
 void Spatial::rotateBBox( const Quaternion& _rot ) {
-//    rot() = _rot;
-//    bbox3d = bbox3d.rotate(rotation);
-//    bbox = bbox3d.topDown();
+    rot() = _rot;
+    bbox3d = bbox3d.rotate(rotation);
+    bbox = bbox3d.topDown();
 }
 
 void Spatial::scaleBBox( const V3f& _scale ) {

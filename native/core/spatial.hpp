@@ -58,7 +58,7 @@ protected:
     [[nodiscard]] V3f& scale();
 
 private:
-    virtual void updateVolumeInternal();
+    virtual void updateVolumeInternal() {}
     void invalidateVolume();
     void posBBox();
     void rotateBBox( const Quaternion& _rot );
@@ -68,7 +68,7 @@ private:
 protected:
     void mergeVolume( const Spatial& _spatial );
 
-protected:
+private:
     JMATH::AABB bbox3d{AABB::MINVALID()};
     Rect2f bbox{Rect2f::INVALID};
     V3f size{ V3fc::ZERO };
@@ -78,4 +78,16 @@ protected:
     Quaternion rotation{ V3fc::ZERO, 1.0f };
     Vector3f scaling = V3fc::ONE;
     std::vector<Triangle2d> mTriangles2d;
+
+    friend struct HouseBSData;
+    friend struct FittedFurniture;
+    friend struct DoorBSData;
+    friend struct RoomBSData;
+    friend struct WindowBSData;
+    friend struct WallBSData;
+    friend struct FloorBSData;
+    friend struct OutdoorAreaBSData;
+    friend struct StairsBSData;
+    friend struct ArchSpatial;
+    friend struct TwoUShapesBased;
 };

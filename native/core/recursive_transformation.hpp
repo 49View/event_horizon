@@ -550,9 +550,7 @@ private:
         assingNewUUID();
         father = _father;
         Name( _source.Name() );
-//        this->BBox3d( _source.BBox3dCopy() );
         data = _source.data;
-//        _source.TRS().clone(mTRS);
         mTRS = _source.TRS().clone();
         mLocalHierTransform = std::make_shared<Matrix4f>(*_source.mLocalHierTransform.get());
     }

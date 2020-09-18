@@ -405,10 +405,10 @@ JMATH::AABB JMATH::AABB::rotate( const Quaternion& axisAngle ) const {
     mi += centre();
     ma += centre();
 
-    AABB ret;
-    ret.set(mi, ma);
+    return AABB{mi, ma, false};
 
-    return ret;
+//    Vector3f mi = mat * mMinPoint;
+//    Vector3f ma = mat * mMaxPoint;
 }
 
 void AABB::scaleX( float x ) {
