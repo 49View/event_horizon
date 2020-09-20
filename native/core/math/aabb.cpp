@@ -399,11 +399,12 @@ void AABB::translate( const Vector3f& offset ) {
 JMATH::AABB JMATH::AABB::rotate( const Quaternion& axisAngle ) const {
     Matrix3f mat = axisAngle.rotationMatrix3();
 
-    Vector3f mi = mat * ( mMinPoint - centre() );
-    Vector3f ma = mat * ( mMaxPoint - centre() );
+    auto c = centre();
+    Vector3f mi = mat * ( mMinPoint - c );
+    Vector3f ma = mat * ( mMaxPoint - c );
 
-    mi += centre();
-    ma += centre();
+    mi += c;
+    ma += c;
 
     return AABB{mi, ma, false};
 

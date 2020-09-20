@@ -12,9 +12,7 @@ public:
     [[nodiscard]] const JMATH::Rect2f& BBox() const;
     [[nodiscard]] const AABB& BBox3d() const;
 
-    void initialiseVolume( const Rect2f& _value );
     void initialiseVolume( const AABB& _value );
-    void initialiseVolume( const V3f& _size, const V3f& _center );
 
     [[nodiscard]] float Width() const;
     [[nodiscard]] float Height() const;
@@ -29,12 +27,11 @@ public:
     [[maybe_unused]] [[nodiscard]] float PositionY() const;
     [[maybe_unused]] [[nodiscard]] float PositionZ() const;
     [[nodiscard]] V2f Position2d() const;
-    [[nodiscard]] V3f Center() const;
-//    [[nodiscard]] V2f Center2d() const { return centre.xz(); }
-    [[nodiscard]] const V3f& Size() const;
-    [[nodiscard]] const V3f& Scale() const;
 
     [[nodiscard]] const Quaternion& Rotation() const;
+
+    [[nodiscard]] const V3f& Size() const;
+    [[nodiscard]] const V3f Scale() const;
 
     [[nodiscard]] const std::vector<Triangle2d>& Triangles2d() const;
 
@@ -42,7 +39,6 @@ public:
     virtual void move( const V2f& _off );
     virtual void position( const V3f& _pos );
     virtual void position( const V2f& _pos );
-    virtual void center( const V3f& _pos );
     virtual void rotate( const Quaternion& _rot );
     virtual void scale( const V3f& _scale );
 
@@ -53,17 +49,13 @@ protected:
     [[nodiscard]] float& h();
     [[nodiscard]] float& d();
     [[nodiscard]] V3f& position();
-//    [[nodiscard]] V3f& center() { return centre; }
     [[nodiscard]] Quaternion& rot();
     [[nodiscard]] V3f& scale();
 
 private:
     virtual void updateVolumeInternal() {}
     void invalidateVolume();
-    void posBBox();
-    void rotateBBox( const Quaternion& _rot );
-    void scaleBBox( const V3f& _scale );
-    void internalUpdate();
+    void elaborateBBox();
 
 protected:
     void mergeVolume( const Spatial& _spatial );
