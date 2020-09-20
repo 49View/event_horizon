@@ -43,8 +43,8 @@ void Spatial::mergeVolume( const Spatial& _spatial ) {
 void Spatial::elaborateBBox() {
     V3f scaledHalf = half(size * scaling);
     bbox3d = AABB{ -scaledHalf, scaledHalf };
-    bbox3d = bbox3d.rotate(rotation);
     bbox3d.translate( pos + centre );
+    bbox3d = bbox3d.rotate(rotation);
     bbox = bbox3d.topDown();
 }
 
@@ -89,7 +89,7 @@ V3f Spatial::Position() const { return pos; }
 float Spatial::PositionY() const { return Position().y(); }
 float Spatial::PositionZ() const { return Position().z(); }
 V2f Spatial::Position2d() const { return pos.xz(); }
-const V3f Spatial::Scale() const { return scaling; }
+V3f Spatial::Scale() const { return scaling; }
 const V3f& Spatial::Size() const { return size; }
 const Quaternion& Spatial::Rotation() const { return rotation; }
 const std::vector<Triangle2d>& Spatial::Triangles2d() const { return mTriangles2d; }

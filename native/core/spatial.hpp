@@ -31,7 +31,7 @@ public:
     [[nodiscard]] const Quaternion& Rotation() const;
 
     [[nodiscard]] const V3f& Size() const;
-    [[nodiscard]] const V3f Scale() const;
+    [[nodiscard]] V3f Scale() const;
 
     [[nodiscard]] const std::vector<Triangle2d>& Triangles2d() const;
 
