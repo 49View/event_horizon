@@ -195,10 +195,10 @@ void saveToSceneT( SceneGraph& sg, xatlas::Atlas *atlas, const float* positions,
             strideOff +=sizeof(float) * 3;
             memcpy( (char*)scene->vertices + voff + strideOff, uvs, sizeof(float) * 2 );
 
-            auto lNode = sg.getNode( scene->unchart[vertex.xref].hash );
-            auto gref = lNode->DataRef();
-            auto vdata = sg.get<VData>(gref.vData);
-            vdata->setVUV2s( scene->unchart[vertex.xref].index, V2f{uvs[0], uvs[1]} );
+//            auto lNode = sg.getNode( scene->unchart[vertex.xref].hash );
+//            auto gref = lNode->DataRef();
+//            auto vdata = sg.get<VData>(gref.vData);
+//            vdata->setVUV2s( scene->unchart[vertex.xref].index, V2f{uvs[0], uvs[1]} );
         }
         for (uint32_t f = 0; f < mesh.indexCount; f++) {
             const uint32_t index = firstVertex + mesh.indexArray[f]; // add +1 for obj file indexed
@@ -206,82 +206,6 @@ void saveToSceneT( SceneGraph& sg, xatlas::Atlas *atlas, const float* positions,
         }
         firstVertex += mesh.indexCount;
     }
-}
-
-int xatlasParametrize( std::vector<tinyobj::shape_t>& shapes, scene_t* scene ) {
-
-    // Create atlas.
-    xatlas::SetPrint(Print, false);
-    xatlas::Atlas *atlas = xatlas::Create();
-    // Add meshes to atlas.
-    Stopwatch globalStopwatch, stopwatch;
-    int progress = 0;
-    PrintProgress("Adding meshes", "", "   ", 0, &stopwatch);
-    uint32_t totalVertices = 0, totalFaces = 0;
-    for (int i = 0; i < (int)shapes.size(); i++) {
-        const tinyobj::mesh_t &objMesh = shapes[i].mesh;
-        xatlas::MeshDecl meshDecl;
-        meshDecl.vertexCount = (int)objMesh.positions.size() / 3;
-        meshDecl.vertexPositionData = objMesh.positions.data();
-        meshDecl.vertexPositionStride = sizeof(float) * 3;
-        if (!objMesh.normals.empty()) {
-            meshDecl.vertexNormalData = objMesh.normals.data();
-            meshDecl.vertexNormalStride = sizeof(float) * 3;
-        }
-        if (!objMesh.texcoords.empty()) {
-            meshDecl.vertexUvData = objMesh.texcoords.data();
-            meshDecl.vertexUvStride = sizeof(float) * 2;
-        }
-        meshDecl.indexCount = (int)objMesh.indices.size();
-        meshDecl.indexData = objMesh.indices.data();
-        meshDecl.indexFormat = xatlas::IndexFormat::UInt32;
-        xatlas::AddMeshError::Enum error = xatlas::AddMesh(atlas, meshDecl);
-        if (error != xatlas::AddMeshError::Success) {
-            printf("\rError adding mesh %d '%s': %s\n", i, shapes[i].name.c_str(), xatlas::StringForEnum(error));
-            return EXIT_FAILURE;
-        }
-        totalVertices += meshDecl.vertexCount;
-        totalFaces += meshDecl.indexCount / 3;
-        const int newProgress = int((i + 1) / (float)shapes.size() * 100.0f);
-        if (newProgress != progress)
-        {
-            progress = newProgress;
-            PrintProgress("Adding meshes", "", "   ", progress, &stopwatch);
-        }
-    }
-    if (progress != 100)
-        PrintProgress("Adding meshes", "", "   ", 100, &stopwatch);
-    printf("   %u total vertices\n", totalVertices);
-    printf("   %u total triangles\n", totalFaces);
-    // Generate atlas.
-    printf("Generating atlas\n");
-    xatlas::PackOptions packerOptions;
-    packerOptions.padding = 1;
-    xatlas::Generate(atlas, xatlas::ChartOptions(), packerOptions);
-    printf("   %d charts\n", atlas->chartCount);
-    printf("   %d atlases\n", atlas->atlasCount);
-    for (uint32_t i = 0; i < atlas->atlasCount; i++)
-        printf("      %d: %0.2f%% utilization\n", i, atlas->utilization[i] * 100.0f);
-    printf("   %ux%u resolution\n", atlas->width, atlas->height);
-    totalVertices = 0;
-    totalFaces = 0;
-    for (uint32_t i = 0; i < atlas->meshCount; i++) {
-        const xatlas::Mesh &mesh = atlas->meshes[i];
-        totalVertices += mesh.vertexCount;
-        totalFaces += mesh.indexCount / 3;
-    }
-    printf("   %u total vertices\n", totalVertices);
-    printf("   %u total triangles\n", totalFaces);
-    printf("%.2f seconds (%g ms) elapsed total\n", globalStopwatch.elapsed() / 1000.0, globalStopwatch.elapsed());
-
-    saveToSceneT( atlas, shapes, scene );
-
-//    saveToObj( atlas, shapes );
-    xatlasDump(atlas);
-
-    // Cleanup.
-    xatlas::Destroy(atlas);
-    return 0;
 }
 
 void mapXAtlasScene( SceneGraph& sg, GeomSP gg, scene_t* scene, size_t& totalVerts, size_t& totalIndices ) {
@@ -305,7 +229,6 @@ void flattenXAtlasScene( SceneGraph& sg, GeomSP gg, scene_t* scene,
 
     for ( const auto& dd : gg->DataV() ) {
         auto vData = sg.VL().get(dd.vData);
-
         auto mat = gg->getLocalHierTransform();
         auto ghash = gg->UUiD() + dd.vData;
 
@@ -397,6 +320,6 @@ int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
     xatlasDump(atlas);
 #endif
     // Cleanup.
-    xatlas::Destroy(atlas);
+//    xatlas::Destroy(atlas);
     return 0;
 }
