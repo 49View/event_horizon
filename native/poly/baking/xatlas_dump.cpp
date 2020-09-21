@@ -12,6 +12,12 @@
 
 #include <poly/baking/xatlas.h>
 
+static void RandomColor(uint8_t *color)
+{
+    for (int i = 0; i < 3; i++)
+        color[i] = uint8_t((rand() % 255 + 192) * 0.5f);
+}
+
 static void SetPixel(uint8_t *dest, int destWidth, int x, int y, const uint8_t *color)
 {
     uint8_t *pixel = &dest[x * 3 + y * (destWidth * 3)];
@@ -89,16 +95,16 @@ void xatlasDump(xatlas::Atlas *atlas) {
             for (uint32_t j = 0; j < mesh.indexCount; j += 3) {
                 int32_t atlasIndex = -1;
                 int verts[3][2];
-                uint8_t color[3];
                 for (int k = 0; k < 3; k++) {
                     const xatlas::Vertex &v = mesh.vertexArray[mesh.indexArray[j + k]];
                     atlasIndex = v.atlasIndex; // The same for every vertex in the triangle.
                     verts[k][0] = int(v.uv[0]);
                     verts[k][1] = int(v.uv[1]);
-                    color[k] = rand() % 255;
                 }
                 if (atlasIndex < 0)
                     continue; // Skip triangles that weren't atlased.
+                uint8_t color[3];
+                RandomColor(color);
                 uint8_t *imageData = &outputTrisImage[atlasIndex * imageDataSize];
                 RasterizeTriangle(imageData, atlas->width, verts[0], verts[1], verts[2], color);
                 RasterizeLine(imageData, atlas->width, verts[0], verts[1], white);
@@ -109,13 +115,11 @@ void xatlasDump(xatlas::Atlas *atlas) {
             for (uint32_t j = 0; j < mesh.chartCount; j++) {
                 const xatlas::Chart *chart = &mesh.chartArray[j];
                 uint8_t color[3];
-                color[0] = rand() % 255;
-                color[1] = rand() % 255;
-                color[2] = rand() % 255;
-                for (uint32_t k = 0; k < chart->faceCount; k += 3) {
+                RandomColor(color);
+                for (uint32_t k = 0; k < chart->faceCount; k++) {
                     int verts[3][2];
                     for (int l = 0; l < 3; l++) {
-                        const xatlas::Vertex &v = mesh.vertexArray[chart->faceArray[k + l]];
+                        const xatlas::Vertex &v = mesh.vertexArray[mesh.indexArray[chart->faceArray[k] * 3 + l]];
                         verts[l][0] = int(v.uv[0]);
                         verts[l][1] = int(v.uv[1]);
                     }
@@ -127,14 +131,17 @@ void xatlasDump(xatlas::Atlas *atlas) {
                 }
             }
         }
-        char filename[256];
         for (uint32_t i = 0; i < atlas->atlasCount; i++) {
-            snprintf(filename, sizeof(filename), "output_tris%02u.tga", i);
+            char filename[256];
+            snprintf(filename, sizeof(filename), "example_uvmesh_tris%02u.tga", i);
             printf("Writing '%s'...\n", filename);
             stbi_write_tga(filename, atlas->width, atlas->height, 3, &outputTrisImage[i * imageDataSize]);
-            snprintf(filename, sizeof(filename), "output_charts%02u.tga", i);
+            snprintf(filename, sizeof(filename), "example_uvmesh_charts%02u.tga", i);
             printf("Writing '%s'...\n", filename);
             stbi_write_tga(filename, atlas->width,atlas->height, 3, &outputChartsImage[i * imageDataSize]);
         }
     }
+    // Cleanup.
+    xatlas::Destroy(atlas);
+    printf("Done\n");
 }
