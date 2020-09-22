@@ -424,6 +424,7 @@ public:
             }
         }
         if ( !gb.elemInjFather ) {
+            elem->updateTransform(gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
             addNode(elem, gb.bucketIndex);
         }
         return elem;
