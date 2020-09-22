@@ -65,22 +65,7 @@ namespace VDataServices {
 
     ResourceRef refName( const GT::Shape& _d ) {
         auto ret = shapeTypeToString( _d.shapeType );
-        switch ( _d.shapeType ) {
-            case ShapeType::Cylinder:
-            case ShapeType::Sphere:
-            case ShapeType::Cube:
-            case ShapeType::Panel:
-            case ShapeType::Pillow:
-            case ShapeType::RoundedCube:
-            case ShapeType::None:
-            case ShapeType::Pyramid:
-            case ShapeType::Arrow:
-                break;
-            case ShapeType::AABB:
-                ret += _d.aabb.minPoint().toString() + _d.aabb.maxPoint().toString();
-                break;
-        }
-
+        ret += UUIDGen::make();
         return ret;
     }
 

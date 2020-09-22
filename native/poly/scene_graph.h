@@ -396,7 +396,7 @@ public:
                 auto vDataRef = VL().getHash(hashRefName );
 
                 if ( vDataRef.empty() ) {
-                    vDataRef = B<VB>(hashRefName ).addIM(VDataServices::build(gb.dataTypeHolder) );
+                    vDataRef = B<VB>(hashRefName ).addIM(VDataServices::build(gb.dataTypeHolder), hashRefName );
                 }
                 auto vDataPtr = VL().getFromHash(vDataRef);
 
@@ -433,7 +433,6 @@ public:
     void loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm );
     float cameraCollisionDetection( std::shared_ptr<Camera> cam );
     void setLastKnownGoodPosition( const V3f& _pos );
-    void chartMeshes( scene_t& scene );
     void chartMeshes2( scene_t& scene );
 
     static GenericSceneCallback           genericSceneCallback         ;

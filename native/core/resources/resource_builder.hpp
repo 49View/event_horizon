@@ -74,6 +74,9 @@ public:
     ResourceRef addIM( std::shared_ptr<R> _res ) {
         return addInternal<R>( _res, this->Name(), this->Hash(), {}, AddResourcePolicy::Immediate );
     }
+    ResourceRef addIM( std::shared_ptr<R> _res, CResourceRef _hash ) {
+        return addInternal<R>( _res, this->Name(), _hash, {}, AddResourcePolicy::Immediate );
+    }
     ResourceRef addDF( std::shared_ptr<R> _res, HttpResouceCB _ccf = nullptr ) {
         return addInternal<R>( _res, this->Name(), this->Hash(), {}, AddResourcePolicy::Deferred, _ccf );
     }
