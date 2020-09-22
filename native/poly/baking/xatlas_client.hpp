@@ -13,5 +13,6 @@
 class VData;
 class SceneGraph;
 
-int xatlasParametrize( std::vector<tinyobj::shape_t>& shapes, scene_t* scene );
-int xatlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t* scene );
+using XAtlasExchangeMap = std::unordered_map<std::size_t, VData*>;
+
+int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t* scene );

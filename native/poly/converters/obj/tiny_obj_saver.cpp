@@ -64,3 +64,85 @@
 ////    FM::writeLocalFile("house.obj", ss.str() );
 //
 //}
+
+//void saveToObj( xatlas::Atlas *atlas, std::vector<tinyobj::shape_t>& shapes ) {
+//    // Write meshes.
+//    char filename[256];
+//    snprintf(filename, sizeof(filename), "output.obj");
+//    printf("Writing '%s'...\n", filename);
+//    FILE *file;
+//    FOPEN(file, filename, "w");
+//    if (file) {
+//        uint32_t firstVertex = 0;
+//        for (uint32_t i = 0; i < atlas->meshCount; i++) {
+//            const xatlas::Mesh &mesh = atlas->meshes[i];
+//            for (uint32_t v = 0; v < mesh.vertexCount; v++) {
+//                const xatlas::Vertex &vertex = mesh.vertexArray[v];
+//                const float *pos = &shapes[i].mesh.positions[vertex.xref * 3];
+//                fprintf(file, "v %g %g %g\n", pos[0], pos[1], pos[2]);
+//                if (!shapes[i].mesh.normals.empty()) {
+//                    const float *normal = &shapes[i].mesh.normals[vertex.xref * 3];
+//                    fprintf(file, "vn %g %g %g\n", normal[0], normal[1], normal[2]);
+//                }
+//                fprintf(file, "vt %g %g\n", vertex.uv[0] / atlas->width, vertex.uv[1] / atlas->height);
+//            }
+//            fprintf(file, "o mesh%03u\n", i);
+//            fprintf(file, "s off\n");
+//            for (uint32_t f = 0; f < mesh.indexCount; f += 3) {
+//                fprintf(file, "f ");
+//                for (uint32_t j = 0; j < 3; j++) {
+//                    const uint32_t index = firstVertex + mesh.indexArray[f + j] + 1; // 1-indexed
+//                    fprintf(file, "%d/%d/%d%c", index, index, index, j == 2 ? '\n' : ' ');
+//                }
+//            }
+//            fprintf(file, "g charts\n");
+//            for (uint32_t c = 0; c < mesh.chartCount; c++) {
+//                const xatlas::Chart *chart = &mesh.chartArray[c];
+//                fprintf(file, "o chart%04u\n", c);
+//                fprintf(file, "s off\n");
+//                for (uint32_t f = 0; f < chart->faceCount; f += 3) {
+//                    fprintf(file, "f ");
+//                    for (uint32_t j = 0; j < 3; j++) {
+//                        const uint32_t index = firstVertex + chart->faceArray[f + j] + 1; // 1-indexed
+//                        fprintf(file, "%d/%d/%d%c", index, index, index, j == 2 ? '\n' : ' ');
+//                    }
+//                }
+//            }
+//            firstVertex += mesh.vertexCount;
+//        }
+//        fclose(file);
+//    }
+//}
+//
+//void saveToSceneT( xatlas::Atlas *atlas, std::vector<tinyobj::shape_t>& shapes, scene_t* scene ) {
+//
+//    // allocate memory
+//    scene->vertexCount = atlas->meshes[0].vertexCount;
+//    scene->vertices = (vertex_t *)calloc(scene->vertexCount, sizeof(vertex_t));
+//    scene->indexCount = atlas->meshes[0].indexCount;
+//    scene->indices = (unsigned short *)calloc(scene->indexCount, sizeof(unsigned short));
+//    scene->xrefs   = (uint32_t *)calloc(scene->indexCount, sizeof(uint32_t));
+//
+//    uint32_t firstVertex = 0;
+//    for (uint32_t i = 0; i < atlas->meshCount; i++) {
+//        const xatlas::Mesh &mesh = atlas->meshes[i];
+//        for (uint32_t v = 0; v < mesh.vertexCount; v++) {
+//            const xatlas::Vertex &vertex = mesh.vertexArray[v];
+//            const float *pos = &shapes[i].mesh.positions[vertex.xref * 3];
+//            size_t voff = (v * sizeof(vertex_t));
+//            float uvs[2];
+//            uvs[0] = vertex.uv[0] / atlas->width;
+//            uvs[1] = vertex.uv[1] / atlas->height;
+//            memcpy( (char*)scene->vertices + voff + 0, pos, sizeof(float) * 3 );
+//            memcpy( (char*)scene->vertices + voff + sizeof(float) * 3, uvs, sizeof(float) * 2 );
+//            scene->xrefs[v] = vertex.xref;
+//        }
+//        for (uint32_t f = 0; f < mesh.indexCount; f += 3) {
+//            for (uint32_t j = 0; j < 3; j++) {
+//                const uint32_t index = firstVertex + mesh.indexArray[f + j]; // add +1 for obj file indexed
+//                scene->indices[f+j] = index;
+//            }
+//        }
+//        firstVertex += mesh.vertexCount;
+//    }
+//}

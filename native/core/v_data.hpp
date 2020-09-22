@@ -61,7 +61,7 @@ public:
     [[nodiscard]] Primitive getPrimitive() const;
 
     void setVIndices( size_t _index, const uint32_t& _value );
-    void setVUV2s( size_t _index, const Vector2f& _value );
+    void setUV2At( size_t _index, const Vector2f& _value );
     void setMin( const Vector3f& min );
     void setMax( const Vector3f& max );
     void setPrimitive( Primitive _primitive );

@@ -299,7 +299,7 @@ void VData::setVIndices( const size_t _index, const uint32_t& _value ) {
     vIndices[_index] = _value;
 }
 
-void VData::setVUV2s( const size_t _index, const Vector2f& _value ) {
+void VData::setUV2At( const size_t _index, const Vector2f& _value ) {
     vSoaData[_index].a2 = _value;
 }
 

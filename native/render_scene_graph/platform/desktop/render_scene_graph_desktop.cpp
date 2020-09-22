@@ -86,7 +86,7 @@
 ////        auto& vData = _g->Data()->vData();
 ////        for ( size_t q = 0; q < vData.numVerts(); q++ ) {
 ////            Vector2f newUV{ _va[_vi+q].uv[0], _va[_vi+q].uv[1] };
-////            vData.setVUV2s( q, newUV );
+////            vData.setUV2At( q, newUV );
 ////            for ( auto i = 0; i < 3; i++ ) _outputScene.vertices[_vi+q].p[i] = _inputVerts[_vi+q].position[i];
 ////            newUV.fill( _outputScene.vertices[_vi+q].t );
 ////        }
