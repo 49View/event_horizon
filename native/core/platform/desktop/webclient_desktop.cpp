@@ -72,7 +72,7 @@ namespace Http {
 
     void handleResponseCallbacks( Result& lRes, ResponseCallbackFunc callback,
                                   ResponseCallbackFunc callbackFailed,
-                                  HttpResouceCB mainThreadCallback) {
+                                  HttpResourceCB mainThreadCallback) {
         if ( lRes.isSuccessStatusCode() ) {
             lRes.ccf = mainThreadCallback;
             if ( callback ) callback(lRes);
@@ -125,7 +125,7 @@ namespace Http {
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       ResponseFlags rf,
-                      HttpResouceCB mainThreadCallback ) {
+                      HttpResourceCB mainThreadCallback ) {
 
         try {
             auto request = makeGetRequest(url);
@@ -170,7 +170,7 @@ namespace Http {
 
     void postInternal( const Url& url, const std::string& method, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-                       HttpResouceCB mainThreadCallback ) {
+                       HttpResourceCB mainThreadCallback ) {
         LOGR("[HTTP-POST] %s", url.toString().c_str());
         LOGR("[HTTP-POST-DATA-LENGTH] %d", length);
 

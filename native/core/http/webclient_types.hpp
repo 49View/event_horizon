@@ -30,7 +30,7 @@ enum class HttpQuery {
 struct Url;
 
 using LoginCallback = std::function<void()>;
-//using HttpResouceCB = std::function<void(const std::string&)>;
+//using HttpResourceCB = std::function<void(const std::string&)>;
 
 using SocketCallbackDataType = rapidjson::Document;
 using SocketCallbackDataTypeConstRef = const SocketCallbackDataType&;

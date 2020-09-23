@@ -2,6 +2,17 @@
 // Created by dado on 22/09/2020.
 //
 
+//struct VertexOffsetScene {
+//    VertexOffsetScene( const std::string& uuid, size_t voffset, size_t vsize, size_t ioffset, size_t isize ) : uuid(
+//            uuid ), voffset( voffset ), vsize( vsize ), ioffset( ioffset ), isize( isize ) {}
+//
+//    std::string uuid;
+//    size_t voffset = 0;
+//    size_t vsize = 0;
+//    size_t ioffset = 0;
+//    size_t isize = 0;
+//};
+
 //void writeFace( size_t base, size_t i1, size_t i2, size_t i3, std::ostringstream& ssf ) {
 //    size_t pi1 = base + i1;
 //    size_t pi2 = base + i2;

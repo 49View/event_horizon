@@ -16,20 +16,7 @@ class VData;
 struct vertex_t {
     float p[3];
     float t[2];
-
-    PUUNTBC orig;
 } ;
-
-struct VertexOffsetScene {
-    VertexOffsetScene( const std::string& uuid, size_t voffset, size_t vsize, size_t ioffset, size_t isize ) : uuid(
-            uuid ), voffset( voffset ), vsize( vsize ), ioffset( ioffset ), isize( isize ) {}
-
-    std::string uuid;
-    size_t voffset = 0;
-    size_t vsize = 0;
-    size_t ioffset = 0;
-    size_t isize = 0;
-};
 
 struct scene_t
 {

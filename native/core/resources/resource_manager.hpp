@@ -65,7 +65,7 @@ public:
     void add( std::shared_ptr<T> _elem, const std::string& _name,
               const std::string& _hash, AddResourcePolicy _arp, const std::string& _aliasKey = "",
               const std::string& _key = {},
-              HttpResouceCB _ccf = nullptr ) {
+              HttpResourceCB _ccf = nullptr ) {
         if ( _arp == AddResourcePolicy::Deferred ) {
             addDeferred( _elem, _name, _hash, _aliasKey, _key, _ccf );
         } else {
@@ -85,7 +85,7 @@ public:
 
     void addDeferred( std::shared_ptr<T> _elem, const std::string& _name,
                       const ResourceRef& _hash, const std::string& _aliasKey = "", const std::string& _key = "",
-                      HttpResouceCB _ccf = nullptr) {
+                      HttpResourceCB _ccf = nullptr) {
         add( _elem, _name, _hash, _aliasKey, _key );
         addToSignal( signalAddElements, { _elem, _hash, { _hash, _name, _aliasKey, _key }, _ccf } );
     }

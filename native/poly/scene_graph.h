@@ -9,6 +9,7 @@
 #include <string>
 #include <cstdint>
 #include <typeinfo>
+#include <utility>
 #include <variant>
 
 #include <core/file_manager.h>
@@ -39,7 +40,7 @@ JSONDATA( ResourceScene, resources )
         resources[_resGroup].emplace_back(_geomRes);
     }
 
-    void visit( const std::string& _key, std::function<void( const std::string&, const std::string& )> cb ) const {
+    void visit( const std::string& _key, const std::function<void( const std::string&, const std::string& )>& cb ) const {
         if ( auto it = resources.find(_key); it != resources.end() ) {
             for ( const auto& entry : it->second ) {
                 cb( _key, entry );
@@ -53,7 +54,7 @@ JSONDATA( ResourceScene, resources )
 namespace HOD { // HighOrderDependency
 
     JSONDATA( EntityList, entities )
-        EntityList( const std::unordered_set<std::string>& entities ) : entities( entities ) {}
+        explicit EntityList( std::unordered_set<std::string>  entities ) : entities(std::move( entities )) {}
         std::unordered_set<std::string> entities;
     };
 
@@ -81,6 +82,12 @@ namespace HOD { // HighOrderDependency
 using GenericSceneCallbackValue = std::function<void()>;
 using GenericSceneCallback = std::vector<GenericSceneCallbackValue>;
 using EventSceneCallback = std::unordered_map<std::string, SocketCallbackDataType>;
+
+struct SceneStats {
+    unsigned int numNodes = 0;
+    unsigned int numVerts = 0;
+    unsigned int numIndices = 0;
+};
 
 class SceneGraph : public NodeGraph {
 public:
@@ -128,17 +135,17 @@ public:
     UIManager&       UM() { return um; }
     LightManager&    LL() { return ll; }
 
-    [[nodiscard]] std::shared_ptr<VData        >  VL( const ResourceRef& _ref ) const { return vl.get(_ref); }
-    [[nodiscard]] std::shared_ptr<RawImage     >  TL( const ResourceRef& _ref ) const { return tl.get(_ref); }
-    [[nodiscard]] std::shared_ptr<Material     >  ML( const ResourceRef& _ref ) const { return ml.get(_ref); }
-    [[nodiscard]] std::shared_ptr<Font         >  FM( const ResourceRef& _ref ) const { return fm.get(_ref); }
-    [[nodiscard]] std::shared_ptr<Profile      >  PL( const ResourceRef& _ref ) const { return pl.get(_ref); }
-    [[nodiscard]] std::shared_ptr<MaterialColor>  CL( const ResourceRef& _ref ) const { return cl.get(_ref); }
-    [[nodiscard]] std::shared_ptr<CameraRig    >  CM( const ResourceRef& _ref ) const { return cm.get(_ref); }
-    [[nodiscard]] std::shared_ptr<Geom         >  GM( const ResourceRef& _ref ) const { return gm.get(_ref); }
-    [[nodiscard]] std::shared_ptr<MaterialColor>  MC( const ResourceRef& _ref ) const { return cl.get(_ref); }
-    [[nodiscard]] std::shared_ptr<UIContainer>    UL( const ResourceRef& _ref ) const { return um.get(_ref); }
-    [[nodiscard]] std::shared_ptr<Light>          LL( const ResourceRef& _ref ) const { return ll.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<VData        >  VL( const ResourceRef& _ref ) const { return vl.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<RawImage     >  TL( const ResourceRef& _ref ) const { return tl.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<Material     >  ML( const ResourceRef& _ref ) const { return ml.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<Font         >  FM( const ResourceRef& _ref ) const { return fm.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<Profile      >  PL( const ResourceRef& _ref ) const { return pl.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<MaterialColor>  CL( const ResourceRef& _ref ) const { return cl.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<CameraRig    >  CM( const ResourceRef& _ref ) const { return cm.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<Geom         >  GM( const ResourceRef& _ref ) const { return gm.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<MaterialColor>  MC( const ResourceRef& _ref ) const { return cl.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<UIContainer>    UL( const ResourceRef& _ref ) const { return um.get(_ref); }
+    [[maybe_unused,nodiscard]] std::shared_ptr<Light>          LL( const ResourceRef& _ref ) const { return ll.get(_ref); }
 
     template <typename T>
     std::shared_ptr<T> get( const ResourceRef& _ref ) {
@@ -225,20 +232,20 @@ public:
     }
 
     template <typename R>
-    static void addDeferred( const ResourceRef& _key, const ResourceRef& _hash, SerializableContainer&& _res, HttpResouceCB _ccf = nullptr ) {
+    static void addDeferred( const ResourceRef& _key, const ResourceRef& _hash, SerializableContainer&& _res, HttpResourceCB _ccf = nullptr ) {
         if constexpr ( std::is_same_v<R, VData          > ) resourceCallbackVData        .emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, RawImage       > ) resourceCallbackRawImage     .emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Material       > ) resourceCallbackMaterial     .emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Font           > ) resourceCallbackFont         .emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Profile        > ) resourceCallbackProfile      .emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, MaterialColor  > ) resourceCallbackMaterialColor.emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, CameraRig      > ) resourceCallbackCameraRig    .emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Geom           > ) resourceCallbackGeom         .emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, UIContainer    > ) resourceCallbackUI           .emplace_back( _key, _hash, std::move(_res), _ccf );
-        if constexpr ( std::is_same_v<R, Light          > ) resourceCallbackLight        .emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, RawImage       > ) resourceCallbackRawImage     .emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, Material       > ) resourceCallbackMaterial     .emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, Font           > ) resourceCallbackFont         .emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, Profile        > ) resourceCallbackProfile      .emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, MaterialColor  > ) resourceCallbackMaterialColor.emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, CameraRig      > ) resourceCallbackCameraRig    .emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, Geom           > ) resourceCallbackGeom         .emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, UIContainer    > ) resourceCallbackUI           .emplace_back( _key, _hash, std::move(_res), _ccf );
+        else if constexpr ( std::is_same_v<R, Light          > ) resourceCallbackLight        .emplace_back( _key, _hash, std::move(_res), _ccf );
     }
 
-    static void addDeferredComp( const ResourceRef& _key, SerializableContainer&& _data, HttpResouceCB _ccf = nullptr ) {
+    static void addDeferredComp( const ResourceRef& _key, SerializableContainer&& _data, CHttpResourceCB& _ccf = nullptr ) {
         resourceCallbackComposite.emplace_back( _key, "", std::move(_data), _ccf );
     }
 
@@ -257,7 +264,7 @@ public:
     }
 
     template <typename R>
-    ResourceRef add( const ResourceRef& _key, const R& _res, HttpResouceCB _ccf = nullptr ) {
+    ResourceRef add( const ResourceRef& _key, const R& _res, CHttpResourceCB& _ccf = nullptr ) {
         if constexpr ( std::is_same_v<R, VData          > ) return addVData        ( _key, _res, _ccf );
         if constexpr ( std::is_same_v<R, RawImage       > ) return addRawImage     ( _key, _res, _ccf );
         if constexpr ( std::is_same_v<R, Material       > ) return addMaterial     ( _key, _res, _ccf );
@@ -270,17 +277,17 @@ public:
         if constexpr ( std::is_same_v<R, Light          > ) return addLight        ( _key, _res, _ccf );
     }
 
-    ResourceRef addVData         ( const ResourceRef& _key, const VData        & _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addRawImage      ( const ResourceRef& _key, const RawImage     & _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addMaterial      ( const ResourceRef& _key, const Material     & _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addFont          ( const ResourceRef& _key, const Font         & _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addGeom          ( const ResourceRef& _key,       GeomSP         _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addUI            ( const ResourceRef& _key, const UIContainer&   _res, HttpResouceCB _ccf = nullptr );
-    ResourceRef addLight         ( const ResourceRef& _key, const Light&         _res, HttpResouceCB _ccf = nullptr );
-    void addResources( CResourceRef _key, const SerializableContainer& _data, HttpResouceCB _ccf = nullptr );
+    ResourceRef addVData         ( const ResourceRef& _key, const VData        & _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addRawImage      ( const ResourceRef& _key, const RawImage     & _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addMaterial      ( const ResourceRef& _key, const Material     & _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addFont          ( const ResourceRef& _key, const Font         & _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addProfile       ( const ResourceRef& _key, const Profile      & _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addMaterialColor ( const ResourceRef& _key, const MaterialColor& _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addCameraRig     ( const ResourceRef& _key, const CameraRig    & _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addGeom          ( const ResourceRef& _key,       GeomSP         _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addUI            ( const ResourceRef& _key, const UIContainer&   _res, HttpResourceCB _ccf = nullptr );
+    ResourceRef addLight         ( const ResourceRef& _key, const Light&         _res, HttpResourceCB _ccf = nullptr );
+    void addResources( CResourceRef _key, const SerializableContainer& _data, HttpResourceCB _ccf = nullptr );
 
     ResourceRef addRawImageIM    ( const ResourceRef& _key, const RawImage     & _res );
     ResourceRef addMaterialIM    ( const ResourceRef& _key, const Material     & _res );
@@ -297,16 +304,16 @@ public:
         return T{ *this, _name };
     }
 
-    void loadVData         ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadRawImage      ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadMaterial      ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadFont          ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadProfile       ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadMaterialColor ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadCameraRig     ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadLogicalUI     ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadGeom          ( std::string _names, HttpResouceCB _ccf = nullptr );
-    void loadUI            ( std::string _names, HttpResouceCB _ccf = nullptr );
+    void loadVData         ( std::string _names, HttpResourceCB _ccf = nullptr );
+    void loadRawImage      ( std::string _names, HttpResourceCB _ccf = nullptr );
+    void loadMaterial      ( std::string _names, HttpResourceCB _ccf = nullptr );
+    void loadFont          ( std::string _names, HttpResourceCB _ccf = nullptr );
+    void loadProfile       ( std::string _names, HttpResourceCB _ccf = nullptr );
+    void loadMaterialColor ( std::string _names, HttpResourceCB _ccf = nullptr );
+    void loadCameraRig     ( std::string _names, HttpResourceCB _ccf = nullptr );
+//    void loadLogicalUI     ( std::string _names, HttpResourceCB _ccf = nullptr );
+    void loadGeom          ( std::string _names, HttpResourceCB _ccf = nullptr );
+    void loadUI            ( std::string _names, HttpResourceCB _ccf = nullptr );
 
     void loadAsset         ( const std::string& _names );
 
@@ -316,7 +323,7 @@ public:
     void resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup, bool bTakeScreenShot );
 
     template <typename R>
-    void acquire( std::string _names, HttpResouceCB _ccf = nullptr ) {
+    void acquire( const std::string& _names, CHttpResourceCB& _ccf = nullptr ) {
         auto filenameKey = getFileNameKey(_names);
         if ( get<RawImage>(filenameKey) ) {
             _ccf(filenameKey);
@@ -326,18 +333,18 @@ public:
     }
 
     template <typename R>
-    void load( std::string _names, HttpResouceCB _ccf = nullptr ) {
+    void load( std::string _names, CHttpResourceCB& _ccf = nullptr ) {
 
         replaceAllStrings( _names, " ", "," );
         if constexpr ( std::is_same_v<R, VData               > ) loadVData        ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, RawImage            > ) loadRawImage     ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, Material            > ) loadMaterial     ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, Font                > ) loadFont         ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, Profile             > ) loadProfile      ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, MaterialColor       > ) loadMaterialColor( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, CameraRig           > ) loadCameraRig    ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, UIContainer         > ) loadUI           ( std::move(_names), _ccf );
-        if constexpr ( std::is_same_v<R, Geom                > ) loadGeom         ( std::move(_names), _ccf );
+        else if constexpr ( std::is_same_v<R, RawImage            > ) loadRawImage     ( std::move(_names), _ccf );
+        else if constexpr ( std::is_same_v<R, Material            > ) loadMaterial     ( std::move(_names), _ccf );
+        else if constexpr ( std::is_same_v<R, Font                > ) loadFont         ( std::move(_names), _ccf );
+        else if constexpr ( std::is_same_v<R, Profile             > ) loadProfile      ( std::move(_names), _ccf );
+        else if constexpr ( std::is_same_v<R, MaterialColor       > ) loadMaterialColor( std::move(_names), _ccf );
+        else if constexpr ( std::is_same_v<R, CameraRig           > ) loadCameraRig    ( std::move(_names), _ccf );
+        else if constexpr ( std::is_same_v<R, UIContainer         > ) loadUI           ( std::move(_names), _ccf );
+        else if constexpr ( std::is_same_v<R, Geom                > ) loadGeom         ( std::move(_names), _ccf );
     }
 
     std::tuple<std::string, V3f> getGeomNameSize( const ResourceRef& _ref ) const {
@@ -415,7 +422,7 @@ public:
                 if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
                     std::tuple<ResourceRef, Material*> mt = GBMatInternal(gb.matRef, gb.matColor );
                     ResourceRef matRef = std::get<0>(mt);
-                    elem->foreach( [matRef](GeomSP _geom) {
+                    elem->foreach( [matRef](const GeomSP& _geom) {
                         if ( !_geom->empty() ) {
                             _geom->DataRef().material = matRef;
                         }
@@ -490,19 +497,20 @@ protected:
                 B<BB>( res.key ).addIM( ent );
                 if ( res.ccf ) res.ccf( res.key );
             } else {
-                LOGRS( "[LOAD-RESOURCE][ERROR] " << res.key << " failed to load" );
+                LOGRS( "[LOAD-RESOURCE][ERROR] " << res.key << " failed to load" )
             }
             cba.pop_back();
         }
     }
 
     void getNodeRec( const UUID& _uuid, const GeomSP& _node, GeomSP& ret );
+    void getSceneStatsRec( const Geom* gg, SceneStats& stats ) const;
 
     void genericCallbacks();
     void realTimeCallbacks();
     void loadCallbacks();
 
-    std::tuple<ResourceRef, Material*> GBMatInternal( CResourceRef _matref, const C4f& _color );
+    std::tuple<ResourceRef, Material*> GBMatInternal( CResourceRef _matRef, const C4f& _color );
     void materialsForGeomSocketMessage();
     void replaceMaterialOnNodes( const std::string& _key );
 
@@ -511,6 +519,7 @@ public:
     void setCollisionEnabled( bool );
     void clearNodes();
     void clearGMNodes();
+    [[nodiscard]] SceneStats getSceneStats() const ;
     const ResourceRef& getCurrLoadedEntityId() const;
     void setMaterialRemap( const MaterialMap& materialRemap );
     [[maybe_unused]] [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;
@@ -532,7 +541,7 @@ protected:
     bool bCollisionEnabled = true;
     MaterialMap materialRemap;
     ResourceRef currLoadedEntityID{};
-    std::vector<SceneDependencyResolver> dependencyResovlers;
+    std::vector<SceneDependencyResolver> dependencyResolvers;
 };
 
 class MaterialThumbnail : public Material {

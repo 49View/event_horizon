@@ -7,9 +7,8 @@
 #include <core/lightmap_exchange_format.h>
 
 class Renderer;
+class SceneGraph;
 
 namespace LightmapManager {
-    int initScene( scene_t *scene, Renderer& rr );
-    int bake( scene_t *scene, Renderer& rr );
-    void apply( scene_t &scene, Renderer& rr );
+    void bakeLightmaps( SceneGraph& sg, Renderer& rr );
 }

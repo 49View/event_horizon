@@ -16,7 +16,7 @@
 
 bool isSuccessStatusCode( int statusCode );
 
-//using HttpResouceCB = std::function<void(const std::string&)>;
+//using HttpResourceCB = std::function<void(const std::string&)>;
 
 namespace Socket {
 
@@ -116,7 +116,7 @@ namespace Http {
         int statusCode = 0;
         std::string ETag;
         std::string lastModified;
-        HttpResouceCB ccf = nullptr;
+        HttpResourceCB ccf = nullptr;
 
         std::string BufferString() const {
             if ( !bufferString.empty() ) return bufferString;
@@ -139,14 +139,14 @@ namespace Http {
 
         Result( uint64_t length = 0, int statusCode = 500 ) : length( length ), statusCode( statusCode ) {}
 
-        Result( const std::string& uri, std::unique_ptr<uint8_t[]>&& buffer, uint64_t length, int statusCode, HttpResouceCB _ccf = nullptr)
+        Result( const std::string& uri, std::unique_ptr<uint8_t[]>&& buffer, uint64_t length, int statusCode, HttpResourceCB _ccf = nullptr)
                 : uri( uri ), buffer( std::move(buffer) ), length( length ), statusCode( statusCode ), ccf(_ccf) {}
 
-        Result( const std::string& uri, const char* cbuffer, uint64_t length, int statusCode, HttpResouceCB _ccf = nullptr )
+        Result( const std::string& uri, const char* cbuffer, uint64_t length, int statusCode, HttpResourceCB _ccf = nullptr )
                 : uri( uri ), length( length ), statusCode( statusCode ), ccf(_ccf) {
             setBuffer(cbuffer, length);
         }
-        Result( const std::string& uri,  std::string _contentType, const char* cbuffer, uint64_t length, int statusCode, std::string _etag, HttpResouceCB _ccf = nullptr )
+        Result( const std::string& uri,  std::string _contentType, const char* cbuffer, uint64_t length, int statusCode, std::string _etag, HttpResourceCB _ccf = nullptr )
                 : uri( uri ), contentType(std::move(_contentType)), length( length ), statusCode( statusCode ), ETag(std::move(_etag)), ccf(_ccf) {
             setBuffer(cbuffer, length);
         }
@@ -169,51 +169,51 @@ namespace Http {
     Result tryFileInCache( const std::string& fileHash, const std::string& uri, ResponseFlags rf );
     void handleResponseCallbacks( Result& lRes, ResponseCallbackFunc callback,
                                   ResponseCallbackFunc callbackFailed,
-                                  HttpResouceCB mainThreadCallback);
+                                  HttpResourceCB mainThreadCallback);
 
     SerializableContainer getSync( const std::string& url );
 
     void get( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
-              HttpResouceCB mainThreadCallback = nullptr );
+              HttpResourceCB mainThreadCallback = nullptr );
     void getNoCache( const Url& url, ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed = nullptr,
               ResponseFlags rf = ResponseFlags::None,
-              HttpResouceCB mainThreadCallback = nullptr );
+              HttpResourceCB mainThreadCallback = nullptr );
     void getInternal( const Url& url, const ResponseCallbackFunc callback,
               ResponseCallbackFunc callbackFailed, ResponseFlags rf = ResponseFlags::None,
-              HttpResouceCB mainThreadCallback = nullptr );
+              HttpResourceCB mainThreadCallback = nullptr );
 
     void postInternal( const Url& url, const std::string& method, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-                       HttpResouceCB mainThreadCallback );
+                       HttpResourceCB mainThreadCallback );
 
     void post( const Url& url, const std::string& _data,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpResouceCB mainThreadCallback = nullptr );
+               HttpResourceCB mainThreadCallback = nullptr );
     void post( const Url& url, const uint8_p& buffer,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpResouceCB mainThreadCallback = nullptr );
+               HttpResourceCB mainThreadCallback = nullptr );
     void post( const Url& url, const char *buff, uint64_t length,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpResouceCB mainThreadCallback = nullptr );
+               HttpResourceCB mainThreadCallback = nullptr );
     void post( const Url& url, const std::vector<unsigned char>& buffer,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpResouceCB mainThreadCallback = nullptr );
+               HttpResourceCB mainThreadCallback = nullptr );
     void post( const Url& url,
                ResponseCallbackFunc callback,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpResouceCB mainThreadCallback = nullptr );
+               HttpResourceCB mainThreadCallback = nullptr );
 
     void put( const Url& url, const std::vector<unsigned char>& buffer,
                ResponseCallbackFunc callback = nullptr,
                ResponseCallbackFunc callbackFailed = nullptr,
-               HttpResouceCB mainThreadCallback = nullptr );
+               HttpResourceCB mainThreadCallback = nullptr );
 
     void userLoggedIn( bool _flag );
     bool hasUserLoggedIn();

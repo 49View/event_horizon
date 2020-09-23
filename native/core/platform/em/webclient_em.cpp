@@ -10,7 +10,7 @@
 namespace Http {
 
     using callbackRespondeMap = std::unordered_map<std::string, ResponseCallbackFunc>;
-    using callbackRespondeCCF = std::unordered_map<std::string, HttpResouceCB>;
+    using callbackRespondeCCF = std::unordered_map<std::string, HttpResourceCB>;
     callbackRespondeMap argCallbackMapOk;
     callbackRespondeMap argCallbackMapFail;
     callbackRespondeCCF argCallbackMapCCF;
@@ -49,7 +49,7 @@ namespace Http {
 
     char* urlKeyPassing( const Url& uri, const ResponseCallbackFunc callbackOk,
                                          const ResponseCallbackFunc callbackFail,
-                                         HttpResouceCB ccf ) {
+                                         HttpResourceCB ccf ) {
         auto key = uri.toString();
         argCallbackMapOk[key] = callbackOk;
         argCallbackMapFail[key] = callbackFail;
@@ -64,7 +64,7 @@ namespace Http {
                       ResponseCallbackFunc callback,
                       ResponseCallbackFunc callbackFailed,
                       [[maybe_unused]] ResponseFlags rf,
-                      HttpResouceCB ccf ) {
+                      HttpResourceCB ccf ) {
 
         // NDDado:
         // http req specification doesn't allow body on GET requests, so we have to ignore them
@@ -85,7 +85,7 @@ namespace Http {
 
     void postInternal( const Url& uri, const std::string& method, const char *buff, uint64_t length, HttpQuery qt,
                        ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-                       HttpResouceCB ccf ) {
+                       HttpResourceCB ccf ) {
 
         LOGRS( "[HTTP-" << method << "] " << uri.toString() );
         LOGRS( "[HTTP-" << method << "-DATA-LENGTH] " << length );

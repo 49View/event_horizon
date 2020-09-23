@@ -189,7 +189,7 @@ namespace Http {
     }
 
     void get( const Url& url, ResponseCallbackFunc callback,
-              ResponseCallbackFunc callbackFailed, ResponseFlags rf, HttpResouceCB mainThreadCallback ) {
+              ResponseCallbackFunc callbackFailed, ResponseFlags rf, HttpResourceCB mainThreadCallback ) {
 
         auto res = tryFileInCache( url_encode(url.uri), url.uri, rf );
         if ( res.isSuccessStatusCode() ) {
@@ -201,44 +201,44 @@ namespace Http {
     }
 
     void getNoCache( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed, ResponseFlags rf,
-              HttpResouceCB mainThreadCallback ) {
+              HttpResourceCB mainThreadCallback ) {
         get( url, std::move(callback), std::move(callbackFailed), orBitWiseFlag(rf, ResponseFlags::ExcludeFromCache), std::move(mainThreadCallback));
     }
 
     void post( const Url& url, const std::string& _data,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpResouceCB mainThreadCallback ) {
+               HttpResourceCB mainThreadCallback ) {
         postInternal( url, POST(), _data.data(), _data.size(), HttpQuery::JSON, callback, callbackFailed, mainThreadCallback );
     }
 
     void post( const Url& url, const uint8_p& buffer,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpResouceCB mainThreadCallback ) {
+               HttpResourceCB mainThreadCallback ) {
         postInternal( url, POST(), reinterpret_cast<const char*>(buffer.first.get()), buffer.second, HttpQuery::Binary,
                       callback, callbackFailed, mainThreadCallback );
     }
 
     void post( const Url& url, const char *buff, uint64_t length,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpResouceCB mainThreadCallback) {
+               HttpResourceCB mainThreadCallback) {
         postInternal( url, POST(), buff, length, HttpQuery::Binary, callback, callbackFailed, mainThreadCallback );
     }
 
     void post( const Url& url, const std::vector<unsigned  char>& buffer,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpResouceCB mainThreadCallback ) {
+               HttpResourceCB mainThreadCallback ) {
         postInternal( url, POST(), reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary,
                       callback, callbackFailed, mainThreadCallback );
     }
 
     void post( const Url& url, ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpResouceCB mainThreadCallback ) {
+               HttpResourceCB mainThreadCallback ) {
         postInternal( url, POST(),nullptr, 0, HttpQuery::Binary, callback, callbackFailed, mainThreadCallback );
     }
 
     void put( const Url& url, const std::vector<unsigned  char>& buffer,
                ResponseCallbackFunc callback, ResponseCallbackFunc callbackFailed,
-               HttpResouceCB mainThreadCallback ) {
+               HttpResourceCB mainThreadCallback ) {
         postInternal( url, PUT(),reinterpret_cast<const char*>(buffer.data()), buffer.size(), HttpQuery::Binary,
                       callback, callbackFailed, mainThreadCallback );
     }

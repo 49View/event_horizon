@@ -5,6 +5,7 @@
 #include "lightmap_manager.hpp"
 
 #define _USE_MATH_DEFINES
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -13,14 +14,16 @@
 #include <core/game_time.h>
 
 #include <graphics/opengl/gl_headers.hpp>
+
 #define LIGHTMAPPER_IMPLEMENTATION
 #define LM_DEBUG_INTERPOLATION
+
 #include <graphics/opengl/lightmapper_opengl.h>
 #include <graphics/renderer.h>
 #include <graphics/texture.h>
+#include <poly/scene_graph.h>
 
-static void drawScene(scene_t *scene, float *view, float *projection)
-{
+static void drawScene( scene_t *scene, float *view, float *projection ) {
     glEnable(GL_DEPTH_TEST);
 
     glUseProgram(scene->program);
@@ -45,11 +48,9 @@ static void drawScene(scene_t *scene, float *view, float *projection)
 //    glDeleteProgram(scene->program);
 //}
 
-static GLuint loadShader(GLenum type, const char *source)
-{
+static GLuint loadShader( GLenum type, const char *source ) {
     GLuint shader = glCreateShader(type);
-    if (shader == 0)
-    {
+    if ( shader == 0 ) {
         fprintf(stderr, "Could not create shader!\n");
         return 0;
     }
@@ -57,14 +58,12 @@ static GLuint loadShader(GLenum type, const char *source)
     glCompileShader(shader);
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    if (!compiled)
-    {
+    if ( !compiled ) {
         fprintf(stderr, "Could not compile shader!\n");
         GLint infoLen = 0;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-        if (infoLen)
-        {
-            char* infoLog = (char*)malloc(infoLen);
+        if ( infoLen ) {
+            char *infoLog = (char *) malloc(infoLen);
             glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
             fprintf(stderr, "%s\n", infoLog);
             free(infoLog);
@@ -74,28 +73,25 @@ static GLuint loadShader(GLenum type, const char *source)
     }
     return shader;
 }
-static GLuint loadProgram(const char *vp, const char *fp, const char **attributes, int attributeCount)
-{
+static GLuint loadProgram( const char *vp, const char *fp, const char **attributes, int attributeCount ) {
     GLuint vertexShader = loadShader(GL_VERTEX_SHADER, vp);
-    if (!vertexShader)
+    if ( !vertexShader )
         return 0;
     GLuint fragmentShader = loadShader(GL_FRAGMENT_SHADER, fp);
-    if (!fragmentShader)
-    {
+    if ( !fragmentShader ) {
         glDeleteShader(vertexShader);
         return 0;
     }
 
     GLuint program = glCreateProgram();
-    if (program == 0)
-    {
+    if ( program == 0 ) {
         fprintf(stderr, "Could not create program!\n");
         return 0;
     }
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
 
-    for (int i = 0; i < attributeCount; i++)
+    for ( int i = 0; i < attributeCount; i++ )
         glBindAttribLocation(program, i, attributes[i]);
 
     glLinkProgram(program);
@@ -103,14 +99,12 @@ static GLuint loadProgram(const char *vp, const char *fp, const char **attribute
     glDeleteShader(fragmentShader);
     GLint linked;
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    if (!linked)
-    {
+    if ( !linked ) {
         fprintf(stderr, "Could not link program!\n");
         GLint infoLen = 0;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
-        if (infoLen)
-        {
-            char* infoLog = (char*)malloc(sizeof(char) * infoLen);
+        if ( infoLen ) {
+            char *infoLog = (char *) malloc(sizeof(char) * infoLen);
             glGetProgramInfoLog(program, infoLen, NULL, infoLog);
             fprintf(stderr, "%s\n", infoLog);
             free(infoLog);
@@ -215,176 +209,236 @@ static GLuint loadProgram(const char *vp, const char *fp, const char **attribute
 
 namespace LightmapManager {
 
-int bake( scene_t *scene, Renderer& rr )
-{
-    lm_context *ctx = lmCreate(
-            64,               // hemisphere resolution (power of two, max=512)
-            0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
-            1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
-            2, 0.01f,         // lightmap interpolation threshold (small differences are interpolated rather than sampled)
-            // check debug_interpolation.tga for an overview of sampled (red) vs interpolated (green) pixels.
-            0.0f);            // modifier for camera-to-surface distance for hemisphere rendering.
-    // tweak this to trade-off between interpolated normals quality and other artifacts (see declaration).
+    int bake( scene_t *scene, Renderer& rr ) {
+        lm_context *ctx = lmCreate(
+                64,               // hemisphere resolution (power of two, max=512)
+                0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
+                1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
+                2,
+                0.01f,         // lightmap interpolation threshold (small differences are interpolated rather than sampled)
+                // check debug_interpolation.tga for an overview of sampled (red) vs interpolated (green) pixels.
+                0.0f);            // modifier for camera-to-surface distance for hemisphere rendering.
+        // tweak this to trade-off between interpolated normals quality and other artifacts (see declaration).
 
-    if (!ctx)
-    {
-        fprintf(stderr, "Error: Could not initialize lightmapper.\n");
-        return 0;
-    }
-
-    int w = scene->w, h = scene->h;
-    float *data = (float*)calloc(w * h * 4, sizeof(float));
-    lmSetTargetLightmap(ctx, data, w, h, 4);
-
-    lmSetGeometry(ctx, NULL,                                                                 // no transformation in this example
-                  LM_FLOAT, (unsigned char*)scene->vertices + offsetof(vertex_t, p), sizeof(vertex_t),
-                  LM_NONE , NULL                                                   , 0               , // no interpolated normals in this example
-                  LM_FLOAT, (unsigned char*)scene->vertices + offsetof(vertex_t, t), sizeof(vertex_t),
-                  scene->indexCount, LM_UNSIGNED_SHORT, scene->indices);
-
-    int vp[4];
-    float view[16], projection[16];
-    double lastUpdateTime = 0.0;
-//    glDisable( GL_BLEND );
-    while (lmBegin(ctx, vp, view, projection))
-    {
-        // render to lightmapper framebuffer
-        glViewport(vp[0], vp[1], vp[2], vp[3]);
-        drawScene(scene, view, projection);
-
-        // display progress every second (printf is expensive)
-        double time = GameTime::getCurrTimeStep();
-        if (time - lastUpdateTime > 1.0)
-        {
-            lastUpdateTime = time;
-            printf("\r%6.2f%%", lmProgress(ctx) * 100.0f);
-            fflush(stdout);
+        if ( !ctx ) {
+            fprintf(stderr, "Error: Could not initialize lightmapper.\n");
+            return 0;
         }
 
-        lmEnd(ctx);
-    }
-    printf("\rFinished baking %d triangles.\n", scene->indexCount / 3);
+        int w = scene->w, h = scene->h;
+        float *data = (float *) calloc(w * h * 4, sizeof(float));
+        lmSetTargetLightmap(ctx, data, w, h, 4);
 
-    lmDestroy(ctx);
+        lmSetGeometry(ctx,
+                      NULL,                                                                 // no transformation in this example
+                      LM_FLOAT, (unsigned char *) scene->vertices + offsetof(vertex_t, p), sizeof(vertex_t),
+                      LM_NONE, NULL, 0, // no interpolated normals in this example
+                      LM_FLOAT, (unsigned char *) scene->vertices + offsetof(vertex_t, t), sizeof(vertex_t),
+                      scene->indexCount, LM_UNSIGNED_SHORT, scene->indices);
 
-    // postprocess texture
-    float *temp = (float*)calloc(w * h * 4, sizeof(float));
-    for (int i = 0; i < 16; i++)
-    {
-        lmImageDilate(data, temp, w, h, 4);
+        int vp[4];
+        float view[16], projection[16];
+        double lastUpdateTime = 0.0;
+//    glDisable( GL_BLEND );
+        while ( lmBegin(ctx, vp, view, projection) ) {
+            // render to lightmapper framebuffer
+            glViewport(vp[0], vp[1], vp[2], vp[3]);
+            drawScene(scene, view, projection);
+
+            // display progress every second (printf is expensive)
+            double time = GameTime::getCurrTimeStep();
+            if ( time - lastUpdateTime > 1.0 ) {
+                lastUpdateTime = time;
+                printf("\r%6.2f%%", lmProgress(ctx) * 100.0f);
+                fflush(stdout);
+            }
+
+            lmEnd(ctx);
+        }
+        printf("\rFinished baking %d triangles.\n", scene->indexCount / 3);
+
+        lmDestroy(ctx);
+
+        // postprocess texture
+        float *temp = (float *) calloc(w * h * 4, sizeof(float));
+        for ( int i = 0; i < 16; i++ ) {
+            lmImageDilate(data, temp, w, h, 4);
+            lmImageDilate(temp, data, w, h, 4);
+        }
+        lmImageSmooth(data, temp, w, h, 4);
         lmImageDilate(temp, data, w, h, 4);
-    }
-    lmImageSmooth(data, temp, w, h, 4);
-    lmImageDilate(temp, data, w, h, 4);
-    lmImagePower(data, w, h, 4, 1.0f / 3.0f, 0x7); // gamma correct color channels
-    free(temp);
+        lmImagePower(data, w, h, 4, 1.0f / 3.0f, 0x7); // gamma correct color channels
+        free(temp);
 
 #ifndef ANDROID
-    // save result to a file
-    if (lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f))
-        printf("Saved result.tga\n");
+        // save result to a file
+        if ( lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f) )
+            printf("Saved result.tga\n");
 #endif
 
-    // upload result
-    glBindTexture(GL_TEXTURE_2D, scene->lightmap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
-    free(data);
+        // upload result
+        glBindTexture(GL_TEXTURE_2D, scene->lightmap);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
+        free(data);
 
-    glEnable( GL_BLEND );
+        glEnable(GL_BLEND);
 
-    return 1;
-}
+        return 1;
+    }
 
-int initScene( scene_t *scene, Renderer& rr ) {
+    int initScene( scene_t *scene, Renderer& rr ) {
 
-    glGenVertexArrays(1, &scene->vao);
-    glBindVertexArray(scene->vao);
+        glGenVertexArrays(1, &scene->vao);
+        glBindVertexArray(scene->vao);
 
-    glDisable( GL_BLEND );
+        glDisable(GL_BLEND);
 //    glDisable(GL_CULL_FACE);
 //    glDisable(GL_DEPTH_TEST);
 //    glDisable(GL_SCISSOR_TEST);
 
-    glGenBuffers(1, &scene->vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
-    glBufferData(GL_ARRAY_BUFFER, scene->vertexCount * sizeof(vertex_t), scene->vertices, GL_STATIC_DRAW);
+        glGenBuffers(1, &scene->vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
+        glBufferData(GL_ARRAY_BUFFER, scene->vertexCount * sizeof(vertex_t), scene->vertices, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &scene->ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, scene->indexCount * sizeof(unsigned short), scene->indices, GL_STATIC_DRAW);
+        glGenBuffers(1, &scene->ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, scene->indexCount * sizeof(unsigned short), scene->indices,
+                     GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, p));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)offsetof(vertex_t, t));
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, p));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, t));
 
-    // create lightmap texture
-    auto sceneTexture = rr.TD(FBNames::lightmap);
+        // create lightmap texture
+        auto sceneTexture = rr.TD(FBNames::lightmap);
 //    scene->w = sceneTexture->getWidth();
 //    scene->h = sceneTexture->getHeight();
-    scene->lightmap = sceneTexture->getHandle();
+        scene->lightmap = sceneTexture->getHandle();
 //    glBindTexture(GL_TEXTURE_2D, scene->lightmap);
 //    unsigned char emissive[] = { 0, 0, 0, 255 };
 //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
 
-    scene->w = 512;
-    scene->h = 512;
+        scene->w = 512;
+        scene->h = 512;
 //    glGenTextures(1, &scene->lightmap);
-    glBindTexture(GL_TEXTURE_2D, scene->lightmap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    unsigned char emissive[] = { 0, 0, 0, 255 };
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
+        glBindTexture(GL_TEXTURE_2D, scene->lightmap);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        unsigned char emissive[] = { 0, 0, 0, 255 };
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
 
-    // load shader
-    const char *vp =
-            "#version 150 core\n"
-            "in vec3 a_position;\n"
-            "in vec2 a_texcoord;\n"
-            "uniform mat4 u_view;\n"
-            "uniform mat4 u_projection;\n"
-            "out vec2 v_texcoord;\n"
+        // load shader
+        const char *vp =
+                "#version 150 core\n"
+                "in vec3 a_position;\n"
+                "in vec2 a_texcoord;\n"
+                "uniform mat4 u_view;\n"
+                "uniform mat4 u_projection;\n"
+                "out vec2 v_texcoord;\n"
 
-            "void main()\n"
-            "{\n"
-            "gl_Position = u_projection * (u_view * vec4(a_position, 1.0));\n"
-            "v_texcoord = a_texcoord;\n"
-            "}\n";
+                "void main()\n"
+                "{\n"
+                "gl_Position = u_projection * (u_view * vec4(a_position, 1.0));\n"
+                "v_texcoord = a_texcoord;\n"
+                "}\n";
 
-    const char *fp =
-            "#version 150 core\n"
-            "in vec2 v_texcoord;\n"
-            "uniform sampler2D u_lightmap;\n"
-            "out vec4 o_color;\n"
+        const char *fp =
+                "#version 150 core\n"
+                "in vec2 v_texcoord;\n"
+                "uniform sampler2D u_lightmap;\n"
+                "out vec4 o_color;\n"
 
-            "void main()\n"
-            "{\n"
-            "o_color = vec4(texture(u_lightmap, v_texcoord).rgb, gl_FrontFacing ? 1.0 : 0.0);\n"
-            "}\n";
+                "void main()\n"
+                "{\n"
+                "o_color = vec4(texture(u_lightmap, v_texcoord).rgb, gl_FrontFacing ? 1.0 : 0.0);\n"
+                "}\n";
 
-    const char *attribs[] =
-            {
-                    "a_position",
-                    "a_texcoord"
-            };
+        const char *attribs[] =
+                {
+                        "a_position",
+                        "a_texcoord"
+                };
 
-    scene->program = loadProgram(vp, fp, attribs, 2);
-    if (!scene->program)
-    {
-        fprintf(stderr, "Error loading shader\n");
-        return 0;
+        scene->program = loadProgram(vp, fp, attribs, 2);
+        if ( !scene->program ) {
+            fprintf(stderr, "Error loading shader\n");
+            return 0;
+        }
+        scene->u_view = glGetUniformLocation(scene->program, "u_view");
+        scene->u_projection = glGetUniformLocation(scene->program, "u_projection");
+        scene->u_lightmap = glGetUniformLocation(scene->program, "u_lightmap");
+
+        return 1;
     }
-    scene->u_view = glGetUniformLocation(scene->program, "u_view");
-    scene->u_projection = glGetUniformLocation(scene->program, "u_projection");
-    scene->u_lightmap = glGetUniformLocation(scene->program, "u_lightmap");
 
-    return 1;
-}
+    void apply( scene_t& scene, Renderer& rr ) {
+        rr.remapLightmapUVs(scene);
+    }
 
-void apply( scene_t &scene, Renderer& rr ) {
-    rr.remapLightmapUVs( scene );
-}
+//    void convertNodesToScene( SceneGraph& sg, const Geom* gg ) {
+//
+//        for ( const auto& dd : gg->DataV() ) {
+//            auto vData = sg.VL().get(dd.vData);
+//            auto mat = gg->getLocalHierTransform();
+//
+//            atlasMeshMapping[atmI++] = vData.get();
+//
+//            xatlas::MeshDecl meshDecl;// = saoToXMesh(source);
+//            size_t totalVerts = vData->numVerts();
+//            size_t totalIndices = vData->numIndices();
+//
+//            meshDecl.vertexCount = totalVerts;//source->numVerts();// (int)objMesh.positions.size() / 3;
+//            meshDecl.vertexPositionStride = sizeof(float) * 3;
+//            auto totalPosSize = totalVerts*meshDecl.vertexPositionStride;
+//            auto posData = new char[totalPosSize];
+//            meshDecl.vertexPositionData = posData;
+//            meshDecl.vertexNormalStride = sizeof(float) * 3;
+//            auto normalData = new char[totalVerts*meshDecl.vertexNormalStride];
+//            meshDecl.vertexNormalData = normalData;
+//            meshDecl.vertexUvStride = sizeof(float) * 2;
+//            auto uvData = new char[totalVerts*meshDecl.vertexUvStride];
+//            meshDecl.vertexUvData = uvData;
+//
+//            meshDecl.indexCount = totalIndices;//(int)objMesh.indices.size();
+//            auto indicesData = new char[totalIndices*sizeof(uint32_t)]; //objMesh.indices.data();
+//            meshDecl.indexData = indicesData;
+//            meshDecl.indexFormat = xatlas::IndexFormat::UInt32;
+//
+//            vData->flattenStride(posData, 0, mat.get());
+//            vData->flattenStride(uvData, 1, mat.get());
+//            vData->flattenStride(normalData, 3, mat.get());
+//            vData->mapIndices(indicesData, 0, 0);
+//
+//            xatlas::AddMeshError::Enum error = xatlas::AddMesh(atlas, meshDecl);
+//            if (error != xatlas::AddMeshError::Success) {
+//                LOGR("\rError adding saoToXMesh: %s\n", xatlas::StringForEnum(error));
+//            }
+//        }
+//
+//        for ( const auto& c : gg->Children() ) {
+//            flattenXAtlasScene( sg, c.get(), atlas, atmI, atlasMeshMapping );
+//        }
+//
+//    }
+
+    void bakeLightmaps( SceneGraph& sg, Renderer& rr ) {
+        scene_t scene{ 0 };
+
+        // Five step plan
+//#pragma error
+        // add sg.stats to retrive num meshes, num verts, num indices for scenegraph
+        // fill scene_t with verts and indices (maybe doing it inside SceneGraph???)
+        // bake as normal
+
+        auto stats = sg.getSceneStats();
+        scene.vertexCount = stats.numVerts;
+        scene.indexCount = stats.numIndices;
+//        LightmapManager::initScene(&scene, rr);
+//        LightmapManager::bake(&scene, rr);
+//    LightmapManager::apply( scene, rr );
+    }
 
 }

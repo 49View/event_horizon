@@ -418,12 +418,12 @@ void SceneGraph::init() {
     B<FB>(S::DEFAULT_FONT).addIM(Font{ getDefaultFont() });
 }
 
-ResourceRef SceneGraph::addVData( const ResourceRef& _key, const VData& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addVData( const ResourceRef& _key, const VData& _res, HttpResourceCB _ccf ) {
     B<VB>(_key).addDF(_res, _ccf);
     return _key;
 }
 
-ResourceRef SceneGraph::addRawImage( const ResourceRef& _key, const RawImage& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addRawImage( const ResourceRef& _key, const RawImage& _res, HttpResourceCB _ccf ) {
     B<IB>(_key).addDF(_res, _ccf);
     return _key;
 }
@@ -432,7 +432,7 @@ void SceneGraph::updateRawImage( const ResourceRef& _key ) {
     B<IB>(_key).updateIM( getHash<RawImage>(_key) );
 }
 
-ResourceRef SceneGraph::addMaterial( const ResourceRef& _key, const Material& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addMaterial( const ResourceRef& _key, const Material& _res, HttpResourceCB _ccf ) {
     B<MB>(_key).addDF(_res, _ccf);
     return _key;
 }
@@ -452,39 +452,39 @@ ResourceRef SceneGraph::addProfileIM( const ResourceRef& _key, const Profile& _r
     return _key;
 }
 
-ResourceRef SceneGraph::addFont( const ResourceRef& _key, const Font& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addFont( const ResourceRef& _key, const Font& _res, HttpResourceCB _ccf ) {
     B<FB>(_key).addDF(_res, _ccf);
     return _key;
 }
 
-ResourceRef SceneGraph::addProfile( const ResourceRef& _key, const Profile& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addProfile( const ResourceRef& _key, const Profile& _res, HttpResourceCB _ccf ) {
     B<PB>(_key).addDF(_res, _ccf);
     return _key;
 }
 
-ResourceRef SceneGraph::addMaterialColor( const ResourceRef& _key, const MaterialColor& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addMaterialColor( const ResourceRef& _key, const MaterialColor& _res, HttpResourceCB _ccf ) {
     B<MCB>(_key).addDF(_res, _ccf);
     return _key;
 }
 
-ResourceRef SceneGraph::addCameraRig( const ResourceRef& _key, const CameraRig& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addCameraRig( const ResourceRef& _key, const CameraRig& _res, HttpResourceCB _ccf ) {
     B<CB>(_key).addDF(_res, _ccf);
     return _key;
 }
 
-ResourceRef SceneGraph::addGeom( const ResourceRef& _key, GeomSP _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addGeom( const ResourceRef& _key, GeomSP _res, HttpResourceCB _ccf ) {
     B<GRB>(_key).addIM(_res);
     if ( _ccf ) _ccf(_key);
     return _key;
 }
 
-ResourceRef SceneGraph::addLight( const ResourceRef& _key, const Light& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addLight( const ResourceRef& _key, const Light& _res, HttpResourceCB _ccf ) {
     B<LB>(_key).addIM(_res);
     if ( _ccf ) _ccf(_key);
     return _key;
 }
 
-ResourceRef SceneGraph::addUI( const ResourceRef& _key, const UIContainer& _res, HttpResouceCB _ccf ) {
+ResourceRef SceneGraph::addUI( const ResourceRef& _key, const UIContainer& _res, HttpResourceCB _ccf ) {
     B<UIB>(_key).addDF(_res, _ccf);
     return _key;
 }
@@ -494,7 +494,7 @@ ResourceRef SceneGraph::addUIIM( const ResourceRef& _key, const UIContainer& _re
     return _key;
 }
 
-void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _data, HttpResouceCB _ccf ) {
+void SceneGraph::addResources( CResourceRef _key, const SerializableContainer& _data, HttpResourceCB _ccf ) {
 
     auto fs = tarUtil::untar(_data);
     if ( fs.find(ResourceCatalog::Key) != fs.end()) {
@@ -560,15 +560,15 @@ void SceneGraph::uvUnwrapNodes() {
     xAtlasParametrize(*this, nodes);
 }
 
-void SceneGraph::loadVData( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadVData( std::string _names, HttpResourceCB _ccf ) {
     B<VB>(_names).load(_ccf);
 }
 
-void SceneGraph::loadRawImage( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadRawImage( std::string _names, HttpResourceCB _ccf ) {
     B<IB>(_names).load(_ccf);
 }
 
-void SceneGraph::loadMaterial( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadMaterial( std::string _names, HttpResourceCB _ccf ) {
     if ( auto ret = ML().get(_names); ret != nullptr ) {
         _ccf(ret->Key());
         return;
@@ -576,27 +576,27 @@ void SceneGraph::loadMaterial( std::string _names, HttpResouceCB _ccf ) {
     B<MB>(_names).load(_ccf);
 }
 
-void SceneGraph::loadFont( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadFont( std::string _names, HttpResourceCB _ccf ) {
     B<FB>(_names).load(_ccf);
 }
 
-void SceneGraph::loadProfile( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadProfile( std::string _names, HttpResourceCB _ccf ) {
     B<PB>(_names).load(_ccf);
 }
 
-void SceneGraph::loadMaterialColor( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadMaterialColor( std::string _names, HttpResourceCB _ccf ) {
     B<MCB>(_names).load(_ccf);
 }
 
-void SceneGraph::loadCameraRig( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadCameraRig( std::string _names, HttpResourceCB _ccf ) {
     B<CB>(_names).load(_ccf);
 }
 
-void SceneGraph::loadUI( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadUI( std::string _names, HttpResourceCB _ccf ) {
     B<UIB>(_names).load(_ccf);
 }
 
-void SceneGraph::loadGeom( std::string _names, HttpResouceCB _ccf ) {
+void SceneGraph::loadGeom( std::string _names, HttpResourceCB _ccf ) {
     B<GRB>(_names).load(_ccf);
 }
 
@@ -660,8 +660,8 @@ void SceneGraph::HODResolve( const DependencyList& deps, HODResolverCallback ccf
     sdr.addDeps(deps);
     sdr.addResolveCallback(ccf);
 
-    dependencyResovlers.push_back(sdr);
-    dependencyResovlers.back().resolve();
+    dependencyResolvers.push_back(sdr);
+    dependencyResolvers.back().resolve();
 }
 
 void SceneGraph::loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm ) {
@@ -697,6 +697,32 @@ void SceneGraph::setCollisionEnabled( bool _bCollisionEnabled ) {
 
 const ResourceRef& SceneGraph::getCurrLoadedEntityId() const {
     return currLoadedEntityID;
+}
+
+
+void SceneGraph::getSceneStatsRec( const Geom* gg, SceneStats& stats ) const {
+
+    for ( const auto& dd : gg->DataV() ) {
+        auto vData = vl.get(dd.vData);
+        stats.numNodes++;
+        stats.numVerts += vData->numVerts();
+        stats.numIndices += vData->numIndices();
+    }
+
+    for ( const auto& c : gg->Children() ) {
+        getSceneStatsRec( c.get(), stats );
+    }
+
+}
+
+SceneStats SceneGraph::getSceneStats() const {
+    SceneStats ret{};
+
+    for ( const auto& [k, gg] : nodes ) {
+        getSceneStatsRec(  gg.get(), ret );
+    }
+
+    return ret;
 }
 
 void HOD::DepRemapsManager::addDep( SceneGraph& sg, const std::string& group, const std::string& resName ) {

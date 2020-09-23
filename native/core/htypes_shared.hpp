@@ -333,7 +333,8 @@ namespace Http { struct Result; }
 using HttpResponeParams = const Http::Result&;
 using ResponseCallbackFunc = std::function<void(HttpResponeParams)>;
 using HttpResouceCBSign = const std::string&;
-using HttpResouceCB = std::function<void(HttpResouceCBSign)>;
+using HttpResourceCB = std::function<void(HttpResouceCBSign)>;
+using CHttpResourceCB = const std::function<void(HttpResouceCBSign)>;
 
 // Dependencies
 

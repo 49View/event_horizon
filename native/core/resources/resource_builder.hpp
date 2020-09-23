@@ -37,7 +37,7 @@ public:
     }
     virtual ~ResourceBuilder() = default;
 
-    void load( HttpResouceCB _ccf = nullptr ) {
+    void load( HttpResourceCB _ccf = nullptr ) {
         Http::get( Url( HttpFilePrefix::entities + RV<R>::Prefix() + "/" + url_encode( this->Name() ) ),
                    [](HttpResponeParams _res) {
                        if ( _res.statusCode == 204 ) { // NDDado: in case the server couldn't find the resource return an emtpy one
@@ -68,7 +68,7 @@ public:
     void updateIM( CResourceRef _hash ) {
         sg.template M<R>().update( _hash );
     }
-    ResourceRef addDF( const R& _res, HttpResouceCB _ccf = nullptr ) {
+    ResourceRef addDF( const R& _res, HttpResourceCB _ccf = nullptr ) {
         return addInternal<R>( EF::clone(_res), this->Name(), this->Hash(), {}, AddResourcePolicy::Deferred, _ccf );
     }
     ResourceRef addIM( std::shared_ptr<R> _res ) {
@@ -77,10 +77,10 @@ public:
     ResourceRef addIM( std::shared_ptr<R> _res, CResourceRef _hash ) {
         return addInternal<R>( _res, this->Name(), _hash, {}, AddResourcePolicy::Immediate );
     }
-    ResourceRef addDF( std::shared_ptr<R> _res, HttpResouceCB _ccf = nullptr ) {
+    ResourceRef addDF( std::shared_ptr<R> _res, HttpResourceCB _ccf = nullptr ) {
         return addInternal<R>( _res, this->Name(), this->Hash(), {}, AddResourcePolicy::Deferred, _ccf );
     }
-    ResourceRef add( std::shared_ptr<R> _res, AddResourcePolicy _arp, HttpResouceCB _ccf = nullptr ) {
+    ResourceRef add( std::shared_ptr<R> _res, AddResourcePolicy _arp, HttpResourceCB _ccf = nullptr ) {
         return addInternal<R>( _res, this->Name(), this->Hash(), {}, _arp, _ccf );
     }
 
@@ -128,7 +128,7 @@ protected:
                               const ResourceRef& _hash,
                               const ResourceRef& _key,
                               AddResourcePolicy _arp,
-                              HttpResouceCB _ccf = nullptr ) {
+                              HttpResourceCB _ccf = nullptr ) {
         auto ret = EF::create<DEP>(_data);
         addInternal<DEP>( ret, _name, _hash, _key, _arp, _ccf );
         return ret;
@@ -140,7 +140,7 @@ protected:
                       const ResourceRef& _hash,
                       const ResourceRef& _key,
                       AddResourcePolicy _arp,
-                             HttpResouceCB _ccf = nullptr ) {
+                             HttpResourceCB _ccf = nullptr ) {
         // NDDADO: This could be very slow, might need to find a flyweight to calculate the whole hash
         ResourceRef resolvedHash = _hash;
         if constexpr ( std::is_same<R, DEP>::value ) {
@@ -159,5 +159,5 @@ protected:
     SG& sg;
     std::map<std::string, std::vector<ResourceRef>> dependencies;
     std::vector<std::string> params;
-    HttpResouceCB ccf = nullptr;
+    HttpResourceCB ccf = nullptr;
 };

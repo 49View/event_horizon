@@ -42,7 +42,7 @@ struct ResourceTransfer {
     std::shared_ptr<T>      elem;
     std::string             hash;
     StringUniqueCollection  names;
-    HttpResouceCB ccf = nullptr;
+    HttpResourceCB ccf = nullptr;
 
     // operator < is needed for boost signal sorting
     bool operator <(const ResourceTransfer &b) const {
@@ -62,7 +62,7 @@ using ResourceManagerContainer = std::unordered_map<std::string,std::shared_ptr<
 template <typename T>
 using SignalsDeferredContainer = std::set<ResourceTransfer<T>>;
 
-inline static size_t resourcePriority( const ResourceRef& ref ) {
+[[maybe_unused]] inline static size_t resourcePriority( const ResourceRef& ref ) {
     if ( ref == ResourceGroup::AppData ) return 0;
 
     if ( ref == ResourceGroup::Image ||
@@ -136,7 +136,7 @@ public:
         if constexpr ( std::is_same<R, Light>::value ) return ResourceGroup::Light;
     }
 
-    inline static std::string GenerateThumbnail( const R& _res ) {
+    [[maybe_unused]] inline static std::string GenerateThumbnail( const R& _res ) {
         if ( std::is_same<R, AppData>::value    )               return "appData";
         if ( std::is_same<R, VData>::value    )                 return "vdata";
         if ( std::is_same<R, Material>::value )                 return "material";
@@ -158,9 +158,6 @@ public:
 template<typename R, typename SG, template<typename T> typename RV> class ResourceBuilder;
 
 class SceneGraph;
-
-using AppDataBuilder = ResourceBuilder<AppData, SceneGraph, ResourceVersioning>;
-using AB = AppDataBuilder;
 
 using VDataBuilder = ResourceBuilder<VData, SceneGraph, ResourceVersioning>;
 using VB = VDataBuilder;
@@ -194,7 +191,6 @@ using GRB = GeomRBuilder;
 
 template<typename T, typename C, typename RV> class ResourceManager;
 
-using AppDataManager    = ResourceManager<AppData, ResourceManagerContainer<AppData>, ResourceVersioning<AppData>>;
 using VDataManager      = ResourceManager<VData, ResourceManagerContainer<VData>, ResourceVersioning<VData>>;
 using ImageManager      = ResourceManager<RawImage, ResourceManagerContainer<RawImage>, ResourceVersioning<RawImage>>;
 using FontManager       = ResourceManager<Font, ResourceManagerContainer<Font>, ResourceVersioning<Font>>;
@@ -206,16 +202,16 @@ using GeomManager       = ResourceManager<Geom, ResourceManagerContainer<Geom>, 
 using UIManager         = ResourceManager<UIContainer, ResourceManagerContainer<UIContainer>, ResourceVersioning<UIContainer>>;
 using LightManager      = ResourceManager<Light, ResourceManagerContainer<Light>, ResourceVersioning<Light>>;
 
-struct LoadedResouceCallbackData {
-    LoadedResouceCallbackData( ResourceRef  key, ResourceRef _hash, SerializableContainer&& data,
-                               HttpResouceCB  ccf ) :
+struct LoadedResourceCallbackData {
+    LoadedResourceCallbackData( ResourceRef  key, ResourceRef _hash, SerializableContainer&& data,
+                                HttpResourceCB  ccf ) :
             key(std::move( key )), hash(std::move( _hash )),
             data( std::move(data) ), ccf(std::move( ccf )) {}
 
     ResourceRef                         key;
     ResourceRef                         hash;
     SerializableContainer               data;
-    HttpResouceCB ccf;
+    HttpResourceCB ccf;
 };
 
-using LoadedResouceCallbackContainer = std::vector<LoadedResouceCallbackData>;
+using LoadedResouceCallbackContainer = std::vector<LoadedResourceCallbackData>;
