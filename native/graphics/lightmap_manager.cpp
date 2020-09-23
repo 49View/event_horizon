@@ -209,6 +209,8 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
 
 namespace LightmapManager {
 
+    static constexpr int sLightMapSize = 512;
+
     int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
         lm_context *ctx = lmCreate(
                 64,               // hemisphere resolution (power of two, max=512)
@@ -229,8 +231,9 @@ namespace LightmapManager {
         float *data = (float *) calloc(w * h * 4, sizeof(float));
         lmSetTargetLightmap(ctx, data, w, h, 4);
 
+        Matrix4f mIdentity{Matrix4f::MIDENTITY()};
         lmSetGeometry(ctx,
-                      NULL,                                                                 // no transformation in this example
+                      mIdentity.rawPtr(),                                                                 // no transformation in this example
                       LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, p), sizeof(LightmapVertexExchanger),
                       LM_NONE, NULL, 0, // no interpolated normals in this example
                       LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, t), sizeof(LightmapVertexExchanger),
@@ -242,8 +245,8 @@ namespace LightmapManager {
 //        glDisable( GL_BLEND );
         while ( lmBegin(ctx, vp, view, projection) ) {
             // render to lightmapper framebuffer
-//            glViewport(vp[0], vp[1], vp[2], vp[3]);
-//            drawScene(scene, view, projection);
+            glViewport(vp[0], vp[1], vp[2], vp[3]);
+            drawScene(scene, view, projection);
 
             // display progress every second (printf is expensive)
             double time = GameTime::getCurrTimeStep();
@@ -312,16 +315,9 @@ namespace LightmapManager {
 
         // create lightmap texture
         auto sceneTexture = rr.TD(FBNames::lightmap);
-//    scene->w = sceneTexture->getWidth();
-//    scene->h = sceneTexture->getHeight();
         scene->lightmap = sceneTexture->getHandle();
-//    glBindTexture(GL_TEXTURE_2D, scene->lightmap);
-//    unsigned char emissive[] = { 0, 0, 0, 255 };
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
-
-        scene->w = 512;
-        scene->h = 512;
-//    glGenTextures(1, &scene->lightmap);
+        scene->w = sLightMapSize;
+        scene->h = sLightMapSize;
         glBindTexture(GL_TEXTURE_2D, scene->lightmap);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
