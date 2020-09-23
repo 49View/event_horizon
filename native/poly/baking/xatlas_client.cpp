@@ -4,35 +4,21 @@
 
 #include "xatlas_client.hpp"
 
+#define DUMP_XATLAS
+
 #include <cstdarg>
 #include <cstdio>
 #include <ctime>
-#include <poly/baking/xatlas.h>
-#include <poly/baking/xatlas_dump.hpp>
-#include <core/lightmap_exchange_format.h>
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4201)
-#endif
-#include <poly/converters/obj/tiny_obj_loader.h>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-#ifdef _MSC_VER
-#define FOPEN(_file, _filename, _mode) { if (fopen_s(&_file, _filename, _mode) != 0) _file = NULL; }
-#define STRICMP _stricmp
-#else
-#define FOPEN(_file, _filename, _mode) _file = fopen(_filename, _mode)
-#include <strings.h>
-
-#define STRICMP strcasecmp
-#endif
-
-#include <core/v_data.hpp>
 #include <core/recursive_transformation.hpp>
 #include <core/geom.hpp>
+
+#include <poly/baking/xatlas.h>
+
+#ifdef DUMP_XATLAS
+#include <poly/baking/xatlas_dump.hpp>
+#endif
+
 #include <poly/scene_graph.h>
 
 static bool s_verbose = false;
@@ -42,7 +28,7 @@ class Stopwatch
 public:
     Stopwatch() { reset(); }
     void reset() { m_start = clock(); }
-    [[nodiscard]] double elapsed() const { return (clock() - m_start) * 1000.0 / CLOCKS_PER_SEC; }
+    [[nodiscard]] double elapsed() const { return static_cast<double>((clock() - m_start)) * 1000.0 / CLOCKS_PER_SEC; }
 private:
     clock_t m_start{};
 };
@@ -51,7 +37,7 @@ static int Print(const char *format, ...)
 {
     va_list arg;
     va_start(arg, format);
-    printf("\r"); // Clear progress text (PrintProgress).
+    LOGR("\r"); // Clear progress text (PrintProgress).
     const int result = vprintf(format, arg);
     va_end(arg);
     return result;
@@ -66,13 +52,13 @@ static void PrintProgress(const char *name, const char *indent1, const char *ind
     std::unique_lock<std::mutex> lock(progressMutex);
     if (progress == 0)
         stopwatch->reset();
-    printf("\r%s%s [", indent1, name);
+    LOGR("\r%s%s [", indent1, name);
     for (int i = 0; i < 10; i++)
-        printf(progress / ((i + 1) * 10) ? "*" : " ");
-    printf("] %d%%", progress);
+        LOGR(progress / ((i + 1) * 10) ? "*" : " ");
+    LOGR("] %d%%", progress);
     fflush(stdout);
     if (progress == 100)
-        printf("\n%s%.2f seconds (%g ms) elapsed\n", indent2, stopwatch->elapsed() / 1000.0, stopwatch->elapsed());
+        LOGR("\n%s%.2f seconds (%g ms) elapsed\n", indent2, stopwatch->elapsed() / 1000.0, stopwatch->elapsed());
 }
 
 static bool ProgressCallback(xatlas::ProgressCategory::Enum category, int progress, void *userData)
@@ -82,7 +68,7 @@ static bool ProgressCallback(xatlas::ProgressCategory::Enum category, int progre
     return true;
 }
 
-void saveToSceneT( SceneGraph& sg, xatlas::Atlas *atlas, XAtlasExchangeMap& atlasMeshMapping ) {
+void mapUV2( SceneGraph& sg, xatlas::Atlas *atlas, XAtlasExchangeMap& atlasMeshMapping ) {
 
     for (uint32_t i = 0; i < atlas->meshCount; i++) {
         auto vData = atlasMeshMapping[i];
@@ -91,12 +77,11 @@ void saveToSceneT( SceneGraph& sg, xatlas::Atlas *atlas, XAtlasExchangeMap& atla
             const xatlas::Vertex &vertex = mesh.vertexArray[v];
             V2f lightmapUV{vertex.uv[0] / atlas->width, vertex.uv[1] / atlas->height};
             vData->setUV2At(vertex.xref, lightmapUV);
-//            LOGR("xref %d - vt %g %g", vertex.xref, vertex.uv[0] / atlas->width, vertex.uv[1] / atlas->height);
         }
     }
 }
 
-void flattenXAtlasScene( SceneGraph& sg, GeomSP gg, xatlas::Atlas *atlas, std::size_t& atmI, XAtlasExchangeMap& atlasMeshMapping ) {
+void flattenXAtlasScene( SceneGraph& sg, const Geom* gg, xatlas::Atlas *atlas, std::size_t& atmI, XAtlasExchangeMap& atlasMeshMapping ) {
 
     for ( const auto& dd : gg->DataV() ) {
         auto vData = sg.VL().get(dd.vData);
@@ -137,7 +122,7 @@ void flattenXAtlasScene( SceneGraph& sg, GeomSP gg, xatlas::Atlas *atlas, std::s
     }
 
     for ( const auto& c : gg->Children() ) {
-        flattenXAtlasScene( sg, c, atlas, atmI, atlasMeshMapping );
+        flattenXAtlasScene( sg, c.get(), atlas, atmI, atlasMeshMapping );
     }
 
 }
@@ -154,19 +139,19 @@ int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes ) {
     XAtlasExchangeMap atlasMeshMapping{};
     size_t atmI = 0;
     for ( const auto& [k, gg] : nodes ) {
-        flattenXAtlasScene( sg, gg, atlas, atmI, atlasMeshMapping );
+        flattenXAtlasScene( sg, gg.get(), atlas, atmI, atlasMeshMapping );
     }
 
     // Generate atlas.
-    printf("Generating atlas\n");
+    LOGR("Generating atlas\n");
     xatlas::PackOptions packerOptions;
     packerOptions.resolution = 128;
     xatlas::Generate(atlas, xatlas::ChartOptions(), packerOptions);
-    printf("   %d charts\n", atlas->chartCount);
-    printf("   %d atlases\n", atlas->atlasCount);
+    LOGR("   %d charts\n", atlas->chartCount);
+    LOGR("   %d atlases\n", atlas->atlasCount);
     for (uint32_t i = 0; i < atlas->atlasCount; i++)
-        printf("      %d: %0.2f%% utilization\n", i, atlas->utilization[i] * 100.0f);
-    printf("   %ux%u resolution\n", atlas->width, atlas->height);
+        LOGR("      %d: %0.2f%% utilization\n", i, atlas->utilization[i] * 100.0f);
+    LOGR("   %ux%u resolution\n", atlas->width, atlas->height);
     uint32_t totalVertices = 0;
     uint32_t totalFaces = 0;
     for (uint32_t i = 0; i < atlas->meshCount; i++) {
@@ -174,16 +159,18 @@ int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes ) {
         totalVertices += mesh.vertexCount;
         totalFaces += mesh.indexCount / 3;
     }
-    printf("   %u total vertices\n", totalVertices);
-    printf("   %u total triangles\n", totalFaces);
-    printf("%.2f seconds (%g ms) elapsed total\n", globalStopwatch.elapsed() / 1000.0, globalStopwatch.elapsed());
+    LOGR("   %u total vertices\n", totalVertices);
+    LOGR("   %u total triangles\n", totalFaces);
+    LOGR("%.2f seconds (%g ms) elapsed total\n", globalStopwatch.elapsed() / 1000.0, globalStopwatch.elapsed());
 
-    saveToSceneT( sg, atlas, atlasMeshMapping );
+    mapUV2( sg, atlas, atlasMeshMapping );
 
 #ifndef ANDROID
+#ifdef DUMP_XATLAS
     xatlasDump(atlas);
 #endif
+#endif
     // Cleanup.
-//    xatlas::Destroy(atlas);
+    xatlas::Destroy(atlas);
     return 0;
 }

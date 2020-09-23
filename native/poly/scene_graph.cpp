@@ -3,7 +3,6 @@
 //
 
 #include "scene_graph.h"
-#include <core/lightmap_exchange_format.h>
 #include <core/node.hpp>
 #include <core/raw_image.h>
 #include <core/camera_rig.hpp>
@@ -22,10 +21,6 @@
 #include <poly/baking/xatlas_client.hpp>
 #include <poly/scene_events.h>
 #include <poly/collision_mesh.hpp>
-
-#define TINYOBJLOADER_IMPLEMENTATION
-
-#include <poly/converters/obj/tiny_obj_loader.h>
 
 GenericSceneCallback           SceneGraph::genericSceneCallback;
 EventSceneCallback             SceneGraph::eventSceneCallback;

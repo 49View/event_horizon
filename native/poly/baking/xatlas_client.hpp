@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include <vector>
-#include <poly/converters/obj/tiny_obj_loader.h>
-#include <core/lightmap_exchange_format.h>
 #include <poly/node_graph.hpp>
 #include "xatlas.h"
 

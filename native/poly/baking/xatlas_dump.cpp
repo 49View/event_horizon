@@ -141,7 +141,4 @@ void xatlasDump(xatlas::Atlas *atlas) {
             stbi_write_tga(filename, atlas->width,atlas->height, 3, &outputChartsImage[i * imageDataSize]);
         }
     }
-    // Cleanup.
-    xatlas::Destroy(atlas);
-    printf("Done\n");
 }

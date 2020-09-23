@@ -418,9 +418,9 @@ public:
     std::vector<NodeSP>  Children() const { return children; }
     std::vector<NodeSP>& Children() { return children; }
 
-    std::shared_ptr<Matrix4f> getLocalHierTransform() { return mLocalHierTransform; }
+    [[nodiscard]] std::shared_ptr<Matrix4f> getLocalHierTransform() const { return mLocalHierTransform; }
 
-    uint64_t Tag() const { return tag; }
+    [[nodiscard]] uint64_t Tag() const { return tag; }
 
     void setVisible( bool _value ) {
         foreach( [_value]( NodeSP _node) {
