@@ -15,4 +15,4 @@ class SceneGraph;
 
 using XAtlasExchangeMap = std::unordered_map<std::size_t, VData*>;
 
-int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t* scene );
+int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes );

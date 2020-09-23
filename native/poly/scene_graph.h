@@ -433,7 +433,7 @@ public:
     void loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm );
     float cameraCollisionDetection( std::shared_ptr<Camera> cam );
     void setLastKnownGoodPosition( const V3f& _pos );
-    void chartMeshes2( scene_t& scene );
+    void uvUnwrapNodes();
 
     static GenericSceneCallback           genericSceneCallback         ;
     static EventSceneCallback             eventSceneCallback           ;

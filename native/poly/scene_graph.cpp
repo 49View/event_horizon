@@ -561,8 +561,8 @@ std::tuple<ResourceRef, Material*> SceneGraph::GBMatInternal( CResourceRef _matr
     return matRef;
 }
 
-void SceneGraph::chartMeshes2( scene_t& scene ) {
-    xAtlasParametrize(*this, nodes, &scene);
+void SceneGraph::uvUnwrapNodes() {
+    xAtlasParametrize(*this, nodes);
 }
 
 void SceneGraph::loadVData( std::string _names, HttpResouceCB _ccf ) {

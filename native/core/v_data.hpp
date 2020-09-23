@@ -38,8 +38,7 @@ public:
 
     void flattenStride( void* ret, size_t _index, const Matrix4f* _mat = nullptr ) const;
 
-    void mapIndices( void* ret, uint32_t _startIndex, uint32_t _vOffsetIndex,
-                     const std::string& _oRef, std::unordered_map<uint32_t, HashIndexPairU32>& _oMap );
+    void mapIndices( void* ret, uint32_t _startIndex, uint32_t _vOffsetIndex );
 
     void forcePlanarMapping();
     void changeWindingOrder();

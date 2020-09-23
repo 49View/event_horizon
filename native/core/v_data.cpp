@@ -392,13 +392,11 @@ void VData::flattenStride( void* ret, size_t _index, const Matrix4f* _mat ) cons
     }
 }
 
-void VData::mapIndices( void* ret, uint32_t _startIndex, uint32_t _vOffsetIndex,
-                            const std::string& _oRef, std::unordered_map<uint32_t, HashIndexPairU32>& _oMap  ) {
+void VData::mapIndices( void* ret, uint32_t _startIndex, uint32_t _vOffsetIndex ) {
     auto fill = (uint32_t*)ret;
     fill += _startIndex;
     for ( size_t t = 0; t < vIndices.size(); t++ ) {
         fill[t] = vIndices[t] + _vOffsetIndex;
-        _oMap[_startIndex+t] = { _oRef, vIndices[t] };
     }
 }
 

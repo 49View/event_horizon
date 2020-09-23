@@ -96,12 +96,11 @@ void saveToSceneT( SceneGraph& sg, xatlas::Atlas *atlas, XAtlasExchangeMap& atla
     }
 }
 
-void flattenXAtlasScene( SceneGraph& sg, GeomSP gg, scene_t* scene, xatlas::Atlas *atlas, std::size_t& atmI, XAtlasExchangeMap& atlasMeshMapping ) {
+void flattenXAtlasScene( SceneGraph& sg, GeomSP gg, xatlas::Atlas *atlas, std::size_t& atmI, XAtlasExchangeMap& atlasMeshMapping ) {
 
     for ( const auto& dd : gg->DataV() ) {
         auto vData = sg.VL().get(dd.vData);
         auto mat = gg->getLocalHierTransform();
-        auto ghash = gg->UUiD() + dd.vData;
 
         atlasMeshMapping[atmI++] = vData.get();
 
@@ -129,7 +128,7 @@ void flattenXAtlasScene( SceneGraph& sg, GeomSP gg, scene_t* scene, xatlas::Atla
         vData->flattenStride(posData, 0, mat.get());
         vData->flattenStride(uvData, 1, mat.get());
         vData->flattenStride(normalData, 3, mat.get());
-        vData->mapIndices(indicesData, 0, 0, ghash, scene->unchart);
+        vData->mapIndices(indicesData, 0, 0);
 
         xatlas::AddMeshError::Enum error = xatlas::AddMesh(atlas, meshDecl);
         if (error != xatlas::AddMeshError::Success) {
@@ -138,13 +137,13 @@ void flattenXAtlasScene( SceneGraph& sg, GeomSP gg, scene_t* scene, xatlas::Atla
     }
 
     for ( const auto& c : gg->Children() ) {
-        flattenXAtlasScene( sg, c, scene, atlas, atmI, atlasMeshMapping );
+        flattenXAtlasScene( sg, c, atlas, atmI, atlasMeshMapping );
     }
 
 }
 
 
-int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t* scene ) {
+int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes ) {
 
     // Create atlas.
     xatlas::SetPrint(Print, false);
@@ -155,7 +154,7 @@ int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, scene_t*
     XAtlasExchangeMap atlasMeshMapping{};
     size_t atmI = 0;
     for ( const auto& [k, gg] : nodes ) {
-        flattenXAtlasScene( sg, gg, scene, atlas, atmI, atlasMeshMapping );
+        flattenXAtlasScene( sg, gg, atlas, atmI, atlasMeshMapping );
     }
 
     // Generate atlas.
