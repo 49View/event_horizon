@@ -23,7 +23,7 @@
 #include <graphics/texture.h>
 #include <poly/scene_graph.h>
 
-static void drawScene( scene_t *scene, float *view, float *projection ) {
+[[maybe_unused]] static void drawScene( LightmapSceneExchanger *scene, float *view, float *projection ) {
     glEnable(GL_DEPTH_TEST);
 
     glUseProgram(scene->program);
@@ -209,7 +209,7 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
 
 namespace LightmapManager {
 
-    int bake( scene_t *scene, Renderer& rr ) {
+    int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
         lm_context *ctx = lmCreate(
                 64,               // hemisphere resolution (power of two, max=512)
                 0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
@@ -231,19 +231,19 @@ namespace LightmapManager {
 
         lmSetGeometry(ctx,
                       NULL,                                                                 // no transformation in this example
-                      LM_FLOAT, (unsigned char *) scene->vertices + offsetof(vertex_t, p), sizeof(vertex_t),
+                      LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, p), sizeof(LightmapVertexExchanger),
                       LM_NONE, NULL, 0, // no interpolated normals in this example
-                      LM_FLOAT, (unsigned char *) scene->vertices + offsetof(vertex_t, t), sizeof(vertex_t),
+                      LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, t), sizeof(LightmapVertexExchanger),
                       scene->indexCount, LM_UNSIGNED_SHORT, scene->indices);
 
         int vp[4];
         float view[16], projection[16];
         double lastUpdateTime = 0.0;
-//    glDisable( GL_BLEND );
+//        glDisable( GL_BLEND );
         while ( lmBegin(ctx, vp, view, projection) ) {
             // render to lightmapper framebuffer
-            glViewport(vp[0], vp[1], vp[2], vp[3]);
-            drawScene(scene, view, projection);
+//            glViewport(vp[0], vp[1], vp[2], vp[3]);
+//            drawScene(scene, view, projection);
 
             // display progress every second (printf is expensive)
             double time = GameTime::getCurrTimeStep();
@@ -286,7 +286,7 @@ namespace LightmapManager {
         return 1;
     }
 
-    int initScene( scene_t *scene, Renderer& rr ) {
+    int initScene( LightmapSceneExchanger *scene, Renderer& rr ) {
 
         glGenVertexArrays(1, &scene->vao);
         glBindVertexArray(scene->vao);
@@ -298,7 +298,7 @@ namespace LightmapManager {
 
         glGenBuffers(1, &scene->vbo);
         glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
-        glBufferData(GL_ARRAY_BUFFER, scene->vertexCount * sizeof(vertex_t), scene->vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, scene->vertexCount * sizeof(LightmapVertexExchanger), scene->vertices, GL_STATIC_DRAW);
 
         glGenBuffers(1, &scene->ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
@@ -306,9 +306,9 @@ namespace LightmapManager {
                      GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, p));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LightmapVertexExchanger), (void *) offsetof(LightmapVertexExchanger, p));
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void *) offsetof(vertex_t, t));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(LightmapVertexExchanger), (void *) offsetof(LightmapVertexExchanger, t));
 
         // create lightmap texture
         auto sceneTexture = rr.TD(FBNames::lightmap);
@@ -374,70 +374,21 @@ namespace LightmapManager {
         return 1;
     }
 
-    void apply( scene_t& scene, Renderer& rr ) {
+    void apply( LightmapSceneExchanger& scene, Renderer& rr ) {
         rr.remapLightmapUVs(scene);
     }
 
-//    void convertNodesToScene( SceneGraph& sg, const Geom* gg ) {
-//
-//        for ( const auto& dd : gg->DataV() ) {
-//            auto vData = sg.VL().get(dd.vData);
-//            auto mat = gg->getLocalHierTransform();
-//
-//            atlasMeshMapping[atmI++] = vData.get();
-//
-//            xatlas::MeshDecl meshDecl;// = saoToXMesh(source);
-//            size_t totalVerts = vData->numVerts();
-//            size_t totalIndices = vData->numIndices();
-//
-//            meshDecl.vertexCount = totalVerts;//source->numVerts();// (int)objMesh.positions.size() / 3;
-//            meshDecl.vertexPositionStride = sizeof(float) * 3;
-//            auto totalPosSize = totalVerts*meshDecl.vertexPositionStride;
-//            auto posData = new char[totalPosSize];
-//            meshDecl.vertexPositionData = posData;
-//            meshDecl.vertexNormalStride = sizeof(float) * 3;
-//            auto normalData = new char[totalVerts*meshDecl.vertexNormalStride];
-//            meshDecl.vertexNormalData = normalData;
-//            meshDecl.vertexUvStride = sizeof(float) * 2;
-//            auto uvData = new char[totalVerts*meshDecl.vertexUvStride];
-//            meshDecl.vertexUvData = uvData;
-//
-//            meshDecl.indexCount = totalIndices;//(int)objMesh.indices.size();
-//            auto indicesData = new char[totalIndices*sizeof(uint32_t)]; //objMesh.indices.data();
-//            meshDecl.indexData = indicesData;
-//            meshDecl.indexFormat = xatlas::IndexFormat::UInt32;
-//
-//            vData->flattenStride(posData, 0, mat.get());
-//            vData->flattenStride(uvData, 1, mat.get());
-//            vData->flattenStride(normalData, 3, mat.get());
-//            vData->mapIndices(indicesData, 0, 0);
-//
-//            xatlas::AddMeshError::Enum error = xatlas::AddMesh(atlas, meshDecl);
-//            if (error != xatlas::AddMeshError::Success) {
-//                LOGR("\rError adding saoToXMesh: %s\n", xatlas::StringForEnum(error));
-//            }
-//        }
-//
-//        for ( const auto& c : gg->Children() ) {
-//            flattenXAtlasScene( sg, c.get(), atlas, atmI, atlasMeshMapping );
-//        }
-//
-//    }
-
     void bakeLightmaps( SceneGraph& sg, Renderer& rr ) {
-        scene_t scene{ 0 };
+        LightmapSceneExchanger scene{};
 
         // Five step plan
-//#pragma error
         // add sg.stats to retrive num meshes, num verts, num indices for scenegraph
         // fill scene_t with verts and indices (maybe doing it inside SceneGraph???)
         // bake as normal
 
-        auto stats = sg.getSceneStats();
-        scene.vertexCount = stats.numVerts;
-        scene.indexCount = stats.numIndices;
-//        LightmapManager::initScene(&scene, rr);
-//        LightmapManager::bake(&scene, rr);
+        sg.fillLightmapScene(scene);
+        LightmapManager::initScene(&scene, rr);
+        LightmapManager::bake(&scene, rr);
 //    LightmapManager::apply( scene, rr );
     }
 

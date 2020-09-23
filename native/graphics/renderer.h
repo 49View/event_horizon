@@ -223,7 +223,7 @@ struct ChangeMaterialOnContainer {
     std::string matHash{};
 };
 
-struct scene_t;
+struct LightmapSceneExchanger;
 
 class RenderStats;
 
@@ -321,7 +321,7 @@ public:
         changeMaterialOnInternal(perfectForward<ChangeMaterialOnContainer>(std::forward<Args>(args)...));
     }
 
-    void remapLightmapUVs( const scene_t& scene );
+    void remapLightmapUVs( const LightmapSceneExchanger& scene );
 
     [[nodiscard]] bool isLoading() const;
     void setLoadingFlag( bool _value );

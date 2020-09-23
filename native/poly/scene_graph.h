@@ -27,7 +27,7 @@
 #include <poly/scene_dependency_resolver.hpp>
 
 class SceneGraph;
-struct scene_t;
+struct LightmapSceneExchanger;
 class Camera;
 class CollisionMesh;
 
@@ -505,6 +505,7 @@ protected:
 
     void getNodeRec( const UUID& _uuid, const GeomSP& _node, GeomSP& ret );
     void getSceneStatsRec( const Geom* gg, SceneStats& stats ) const;
+    void fillLightmapSceneRec( const Geom* gg, LightmapSceneExchanger& _lightmapScene, unsigned int& vOff, unsigned int& iOff ) const;
 
     void genericCallbacks();
     void realTimeCallbacks();
@@ -519,7 +520,8 @@ public:
     void setCollisionEnabled( bool );
     void clearNodes();
     void clearGMNodes();
-    [[nodiscard]] SceneStats getSceneStats() const ;
+    [[nodiscard]] SceneStats getSceneStats() const;
+    void fillLightmapScene(LightmapSceneExchanger& _lightmapScene) const;
     const ResourceRef& getCurrLoadedEntityId() const;
     void setMaterialRemap( const MaterialMap& materialRemap );
     [[maybe_unused]] [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;

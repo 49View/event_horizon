@@ -382,12 +382,12 @@ void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnContainer& _c
     mChangeMaterialCallbacks.emplace_back( _cmt );
 }
 
-void Renderer::remapLightmapUVs( const scene_t& scene ) {
+void Renderer::remapLightmapUVs( const LightmapSceneExchanger& scene ) {
 
-    for ( const auto&[k, v] : scene.ggLImap ) {
-        auto vl = generateGeometryVP( v );
-        mVPLMap[k]->updateGPUVData( cpuVBIB{ vl } );
-    }
+//    for ( const auto&[k, v] : scene.ggLImap ) {
+//        auto vl = generateGeometryVP( v );
+//        mVPLMap[k]->updateGPUVData( cpuVBIB{ vl } );
+//    }
 
 //    for ( const auto& vo : scene.unchart ) {
 //        std::vector<V2f> ev{};

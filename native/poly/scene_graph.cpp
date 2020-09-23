@@ -12,6 +12,7 @@
 #include <core/image_util.h>
 #include <core/geom.hpp>
 #include <core/camera.h>
+#include <core/lightmap_exchange_format.h>
 #include <core/names.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <core/resources/material.h>
@@ -723,6 +724,49 @@ SceneStats SceneGraph::getSceneStats() const {
     }
 
     return ret;
+}
+
+void SceneGraph::fillLightmapSceneRec( const Geom* gg, LightmapSceneExchanger& _lightmapScene, unsigned int& vOff, unsigned int& iOff ) const {
+
+    auto vStride = sizeof(LightmapVertexExchanger);
+    for ( const auto& dd : gg->DataV() ) {
+        auto vData = vl.get(dd.vData);
+
+        for (uint32_t v = 0; v < vData->numVerts(); v++) {
+            auto pos = vData->vertexAt(v);
+            auto mat = gg->getLocalHierTransform();
+            pos = mat->transform(pos);
+            auto uv = vData->uv2At(v);
+            memcpy( (char*)_lightmapScene.vertices + vOff + vStride*v + 0, (const void*)&pos, sizeof(float) * 3 );
+            memcpy( (char*)_lightmapScene.vertices + vOff + vStride*v + sizeof(float) * 3, (const void*)&uv, sizeof(float) * 2 );
+        }
+        for (uint32_t f = 0; f < vData->numIndices(); f++) {
+            _lightmapScene.indices[f+iOff] = iOff + vData->vIndexAt(f);
+        }
+        vOff += vData->numVerts() * sizeof(LightmapVertexExchanger);
+        iOff += vData->numIndices();
+    }
+
+    for ( const auto& c : gg->Children() ) {
+        fillLightmapSceneRec( c.get(), _lightmapScene, vOff, iOff );
+    }
+
+}
+
+void SceneGraph::fillLightmapScene(LightmapSceneExchanger& _lightmapScene) const {
+    auto stats = getSceneStats();
+
+    _lightmapScene.vertexCount = stats.numVerts;
+    _lightmapScene.vertices = (LightmapVertexExchanger *)calloc(_lightmapScene.vertexCount, sizeof(LightmapVertexExchanger));
+    _lightmapScene.indexCount = stats.numIndices;
+    _lightmapScene.indices = (unsigned short *)calloc(_lightmapScene.indexCount, sizeof(unsigned short));
+
+    unsigned int vOff = 0;
+    unsigned int iOff = 0;
+    for ( const auto& [k, gg] : nodes ) {
+        fillLightmapSceneRec( gg.get(), _lightmapScene, vOff, iOff );
+    }
+
 }
 
 void HOD::DepRemapsManager::addDep( SceneGraph& sg, const std::string& group, const std::string& resName ) {

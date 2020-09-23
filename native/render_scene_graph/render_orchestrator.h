@@ -20,7 +20,7 @@
 #include <lua/sol/sol.hpp> // or #include "sol.hpp", whichever suits your needs
 #include <core/state_machine_helper.hpp>
 
-struct scene_t;
+struct LightmapSceneExchanger;
 struct PickRayData;
 struct AggregatedInputData;
 struct ShaderLiveUpdateMap;
@@ -144,7 +144,7 @@ protected:
     void changeMaterialTagCallback( const std::vector<std::string>& _params );
     void changeMaterialColorCallback( const std::vector<std::string>& _params );
 
-    int bake( scene_t *scene );
+    int bake( LightmapSceneExchanger *scene );
 
 private:
     Renderer& rr;

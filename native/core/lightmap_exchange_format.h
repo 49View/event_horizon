@@ -13,27 +13,31 @@
 
 class VData;
 
-struct vertex_t {
+struct LightmapVertexExchanger {
     float p[3];
     float t[2];
 } ;
 
-struct scene_t
+struct LightmapSceneExchanger
 {
-    unsigned int program;
-    int u_lightmap;
-    int u_projection;
-    int u_view;
+    unsigned int program = 0;
+    int u_lightmap = 0;
+    int u_projection = 0;
+    int u_view = 0;
 
-    unsigned int lightmap;
-    int w, h;
+    unsigned int lightmap = 0;
+    int w = 0;
+    int h = 0;
 
-    unsigned int vao, vbo, ibo;
-    vertex_t *vertices;
-    unsigned short *indices;
-    uint32_t *xrefs;
-    unsigned int vertexCount, indexCount;
+    unsigned int vao = 0;
+    unsigned int vbo = 0;
+    unsigned int ibo = 0;
+    LightmapVertexExchanger *vertices = nullptr;
+    unsigned short *indices = nullptr;
+    unsigned int vertexCount = 0;
+    unsigned int indexCount = 0;
 
-    std::unordered_map<uint32_t, HashIndexPairU32> unchart;
-    std::unordered_map<std::string, std::shared_ptr<VData>> ggLImap;
+//    uint32_t *xrefs;
+//    std::unordered_map<uint32_t, HashIndexPairU32> unchart;
+//    std::unordered_map<std::string, std::shared_ptr<VData>> ggLImap;
 };
