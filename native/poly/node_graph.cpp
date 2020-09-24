@@ -20,6 +20,10 @@ void NodeGraph::nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _s
     nodeAddSignal.connect( _slot );
 }
 
+void NodeGraph::nodeUpdateConnect( const std::function<NodeGraphConnectFuncSig>& _slot ) {
+    nodeUpdateSignal.connect( _slot );
+}
+
 void NodeGraph::runLUAScript( const std::function<ConnectLUAScriptSig>& _slot ) {
     runLUAScriptSignal.connect( _slot );
 }

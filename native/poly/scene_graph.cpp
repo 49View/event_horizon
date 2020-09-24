@@ -50,23 +50,28 @@ namespace HOD { // HighOrderDependency
     }
 }
 
-void SceneGraph::addNode( GeomSP _node, int _nodeBucket ) {
-    nodeAddSignal({_node, _nodeBucket});
+void SceneGraph::traverseNode( GeomSP _node, int _nodeBucket, NodeTraverseMode _ntm ) {
+    if ( _ntm == NodeTraverseMode::Add ) {
+        nodeAddSignal({_node, _nodeBucket});
+    }
+    if ( _ntm == NodeTraverseMode::Upsert) {
+        nodeUpdateSignal({_node, _nodeBucket});
+    }
     if ( _node->isRoot()) {
         nodes.emplace(_node->UUiD(), _node);
     }
     for ( const auto& c : _node->Children()) {
-        addNode(c, _nodeBucket);
+        traverseNode(c, _nodeBucket, _ntm);
     }
 }
 
-void SceneGraph::addNode( const UUID& _uuid, int _nodeBucket ) {
-    addNode(get<Geom>(_uuid), _nodeBucket );
+void SceneGraph::traverseNode( const UUID& _uuid, int _nodeBucket, NodeTraverseMode _ntm ) {
+    traverseNode(get<Geom>(_uuid), _nodeBucket, _ntm );
 }
 
 void SceneGraph::updateNodes(int _nodeBucket) {
     for ( auto [k,v] : nodes ) {
-        addNode(v, _nodeBucket);
+        traverseNode(v, _nodeBucket, NodeTraverseMode::Upsert);
     }
 }
 

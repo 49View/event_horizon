@@ -36,6 +36,7 @@ class NodeGraph {
 public:
     void runLUAScript( const std::function<ConnectLUAScriptSig>& _slot );
     void nodeAddConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
+    void nodeUpdateConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void nodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void gmNodeRemoveConnect( const std::function<NodeGraphConnectFuncSig>& _slot );
     void replaceMaterialConnect( const std::function<NodeGraphConnectReplaceFuncSig>& _slot );
@@ -57,6 +58,7 @@ public:
     boost::signals2::signal<ConnectLUAScriptSig> runLUAScriptSignal;
     boost::signals2::signal<ConnectPairStringBoolFuncSig> propagateDirtyFlagSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeAddSignal;
+    boost::signals2::signal<NodeGraphConnectFuncSig> nodeUpdateSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> nodeRemoveSignal;
     boost::signals2::signal<NodeGraphConnectFuncSig> gmNodeRemoveSignal;
     boost::signals2::signal<ConnectVoidFuncSig> preloadCompleteSignal;

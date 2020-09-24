@@ -233,6 +233,28 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         this->RR().invalidateOnAdd();
     });
 
+    sg.nodeUpdateConnect([this]( NodeGraphConnectParamsSig _geomAndBucket ) {
+        auto geom = _geomAndBucket.first;
+        auto bEmpty = geom->empty();
+//        LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );
+        if ( bEmpty ) return;
+        for ( const auto& dataRef : geom->DataVRef() ) {
+            auto newvDataRef = UUIDGen::make();
+            ResourceTransfer<VData> vDataRT{ sg.VL().getFromHash(dataRef.vData), newvDataRef, {newvDataRef}};
+            this->RR().addVDataResource( vDataRT );
+            auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, newvDataRef }.
+                    n(geom->Name()).
+                    u(geom->UUiD()).
+                    g(geom->Tag()).
+                    t(geom->getLocalHierTransform()).
+                    b(&dataRef.BBox3d()).
+                    build();
+            auto bucket = _geomAndBucket.second == GTBucket::Near ? CommandBufferLimits::PBRStart : CommandBufferLimits::PBRStartFar;
+            this->RR().VPL(bucket, vp );
+        }
+        this->RR().invalidateOnAdd();
+    });
+
     sg.gmNodeRemoveConnect([this]( NodeGraphConnectParamsSig _geom ) {
         if ( !_geom.first ) {
             this->RR().clearBucket(CommandBufferLimits::PBRStart);

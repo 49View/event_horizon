@@ -89,6 +89,11 @@ struct SceneStats {
     unsigned int numIndices = 0;
 };
 
+enum class NodeTraverseMode {
+    Add,
+    Upsert
+};
+
 class SceneGraph : public NodeGraph {
 public:
     explicit SceneGraph( VDataManager& _vl,
@@ -104,8 +109,8 @@ public:
 
     void init();
     GeomSP getNode( const UUID& _uuid );
-    void addNode( GeomSP _node, int _nodeBucket );
-    void addNode( const UUID& _uuid, int _nodeBucket );
+    void traverseNode( GeomSP _node, int _nodeBucket, NodeTraverseMode _ntm );
+    void traverseNode( const UUID& _uuid, int _nodeBucket, NodeTraverseMode _ntm );
     void updateNodes(int _nodeBucket);
     void removeNode( const UUID& _uuid );
     void removeNode( GeomSP _node );
@@ -453,7 +458,7 @@ public:
         }
         if ( !gb.elemInjFather ) {
             elem->updateTransform(gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
-            addNode(elem, gb.bucketIndex);
+            traverseNode(elem, gb.bucketIndex, NodeTraverseMode::Add);
         }
         return elem;
     }
