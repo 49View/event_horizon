@@ -42,10 +42,10 @@ struct DText2d {
 };
 
 using DShaderMatrixValue = uint64_t;
-static constexpr DShaderMatrixValue DShaderMatrixValue2dColor = 1u << 1;
-static constexpr DShaderMatrixValue DShaderMatrixValue2dTexture = 1u << 2;
-static constexpr DShaderMatrixValue DShaderMatrixValue3dColor = 1u << 3;
-static constexpr DShaderMatrixValue DShaderMatrixValue3dTexture = 1u << 4;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dColor = 1u << 1u;
+static constexpr DShaderMatrixValue DShaderMatrixValue2dTexture = 1u << 2u;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dColor = 1u << 3u;
+static constexpr DShaderMatrixValue DShaderMatrixValue3dTexture = 1u << 4u;
 
 struct DShaderMatrix {
     template<typename ...Args>
@@ -77,7 +77,7 @@ enum class RDSRectAxis {
 struct RendererDrawingSet {
     RendererDrawingSet() = default;
     RendererDrawingSet( int bi, Color4f c, std::string sn, std::string n ) :
-            bucketIndex(bi), color(std::move(c)), name(std::move(n)), shaderName(std::move(sn)) {}
+            bucketIndex(bi), color(c), name(std::move(n)), shaderName(std::move(sn)) {}
     void setupFontData();
     [[nodiscard]] bool hasTexture() const;
     void resolveShaderMatrix();
@@ -122,7 +122,7 @@ struct RDSPreMult {
     Matrix4f operator()() const noexcept {
         return data;
     }
-    Matrix4f data;
+    Matrix4f data{Matrix4f::MIDENTITY()};
 };
 
 struct RDSImage {
@@ -140,7 +140,7 @@ struct RDSRoundedCorner {
     float operator()() const noexcept {
         return data;
     }
-    float data;
+    float data = 0.0f;
 };
 
 struct RDSArchSegments {
@@ -149,7 +149,7 @@ struct RDSArchSegments {
     size_t operator()() const noexcept {
         return data;
     }
-    size_t data;
+    size_t data = 0;
 };
 
 struct RDSArrowAngle {
@@ -158,7 +158,7 @@ struct RDSArrowAngle {
     float operator()() const noexcept {
         return data;
     }
-    float data;
+    float data = 0.0f;
 };
 
 struct RDSArrowLength {
@@ -167,7 +167,7 @@ struct RDSArrowLength {
     float operator()() const noexcept {
         return data;
     }
-    float data;
+    float data = 0.0f;
 };
 
 struct RDSCircleLineWidth {
@@ -176,7 +176,7 @@ struct RDSCircleLineWidth {
     float operator()() const noexcept {
         return data;
     }
-    float data;
+    float data = 0.0f;
 };
 
 struct RDSRotationNormalAxis {
@@ -207,7 +207,6 @@ class RenderCameraManager {
 public:
     void init();
     void generateUBO( std::shared_ptr<ShaderManager> sm );
-    void setUniforms_r();
     std::shared_ptr<ProgramUniformSet>& UBO();
 private:
     std::shared_ptr<ProgramUniformSet> mCameraUBO;
@@ -321,7 +320,7 @@ public:
         changeMaterialOnInternal(perfectForward<ChangeMaterialOnContainer>(std::forward<Args>(args)...));
     }
 
-    void remapLightmapUVs( const LightmapSceneExchanger& scene );
+    void remapVP( const VData* _vData, CResourceRef _hash );
 
     [[nodiscard]] bool isLoading() const;
     void setLoadingFlag( bool _value );

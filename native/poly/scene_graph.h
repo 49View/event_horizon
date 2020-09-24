@@ -106,6 +106,7 @@ public:
     GeomSP getNode( const UUID& _uuid );
     void addNode( GeomSP _node, int _nodeBucket );
     void addNode( const UUID& _uuid, int _nodeBucket );
+    void updateNodes(int _nodeBucket);
     void removeNode( const UUID& _uuid );
     void removeNode( GeomSP _node );
 
@@ -372,6 +373,26 @@ public:
     void visitNodes( T _visitor ) {
         for ( const auto& it : nodes ) {
             it.second->visit( _visitor );
+        }
+    }
+
+
+    template <typename T>
+    void foreachNodeDataRec( const Geom* gg, T _f ) {
+
+        for ( const auto& dd : gg->DataV() ) {
+            _f(vl.get(dd.vData).get(), dd.vData);
+        }
+
+        for ( const auto& c : gg->Children() ) {
+            foreachNodeDataRec( c.get(), _f );
+        }
+    }
+
+    template <typename T>
+    void foreachNodeData( T _f ) {
+        for ( auto& it : nodes ) {
+            foreachNodeDataRec( it.second.get(), _f );
         }
     }
 

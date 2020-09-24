@@ -371,21 +371,18 @@ namespace LightmapManager {
     }
 
     void apply( LightmapSceneExchanger& scene, Renderer& rr ) {
-        rr.remapLightmapUVs(scene);
+//        rr.remapLightmapUVs(scene);
     }
 
     void bakeLightmaps( SceneGraph& sg, Renderer& rr ) {
         LightmapSceneExchanger scene{};
 
-        // Five step plan
-        // add sg.stats to retrive num meshes, num verts, num indices for scenegraph
-        // fill scene_t with verts and indices (maybe doing it inside SceneGraph???)
-        // bake as normal
-
         sg.fillLightmapScene(scene);
         LightmapManager::initScene(&scene, rr);
         LightmapManager::bake(&scene, rr);
-//    LightmapManager::apply( scene, rr );
+        rr.clearBucket(CommandBufferLimits::PBRStart);
+        sg.updateNodes(GTBucket::Near);
+//        LightmapManager::apply( scene, rr );
     }
 
 }

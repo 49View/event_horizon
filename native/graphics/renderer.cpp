@@ -44,7 +44,7 @@ namespace FBNames {
 }
 
 std::shared_ptr<PosTexNorTanBinUV2Col3dStrip>
-generateGeometryVP( std::shared_ptr<VData> _data ) {
+generateGeometryVP( const VData* _data ) {
     if ( _data->numIndices() < 3 ) return nullptr;
 
     auto _indices = std::unique_ptr<uint32_t[]>( new uint32_t[_data->numIndices()] );
@@ -370,7 +370,7 @@ std::shared_ptr<GPUVData> Renderer::upsertVDataResource( cpuVBIB&& _val, const s
 }
 
 std::shared_ptr<GPUVData> Renderer::addVDataResource( const ResourceTransfer<VData>& _val ) {
-    return gm->addGPUVData( cpuVBIB{ generateGeometryVP( _val.elem ) }, _val.names );
+    return gm->addGPUVData( cpuVBIB{ generateGeometryVP( _val.elem.get() ) }, _val.names );
 }
 
 std::shared_ptr<GPUVData> Renderer::getGPUVData( const std::string& _key ) {
@@ -382,12 +382,11 @@ void Renderer::changeMaterialOnTagsCallback( const ChangeMaterialOnContainer& _c
     mChangeMaterialCallbacks.emplace_back( _cmt );
 }
 
-void Renderer::remapLightmapUVs( const LightmapSceneExchanger& scene ) {
+void Renderer::remapVP( const VData* _vData, CResourceRef _hash ) {
 
-//    for ( const auto&[k, v] : scene.ggLImap ) {
-//        auto vl = generateGeometryVP( v );
-//        mVPLMap[k]->updateGPUVData( cpuVBIB{ vl } );
-//    }
+    auto vl = generateGeometryVP( _vData );
+    upsertVDataResource( cpuVBIB{ vl }, _hash );
+    invalidateOnAdd();
 
 //    for ( const auto& vo : scene.unchart ) {
 //        std::vector<V2f> ev{};

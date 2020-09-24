@@ -64,6 +64,12 @@ void SceneGraph::addNode( const UUID& _uuid, int _nodeBucket ) {
     addNode(get<Geom>(_uuid), _nodeBucket );
 }
 
+void SceneGraph::updateNodes(int _nodeBucket) {
+    for ( auto [k,v] : nodes ) {
+        addNode(v, _nodeBucket);
+    }
+}
+
 void SceneGraph::removeNode( const UUID& _uuid ) {
     if ( auto it = nodes.find(_uuid); it != nodes.end()) {
         nodes.erase(it);
