@@ -770,7 +770,7 @@ void SceneGraph::fillLightmapScene(LightmapSceneExchanger& _lightmapScene) const
     _lightmapScene.vertexCount = stats.numVerts;
     _lightmapScene.vertices = (LightmapVertexExchanger *)calloc(_lightmapScene.vertexCount, sizeof(LightmapVertexExchanger));
     _lightmapScene.indexCount = stats.numIndices;
-    _lightmapScene.indices = (unsigned short *)calloc(_lightmapScene.indexCount, sizeof(unsigned short));
+    _lightmapScene.indices = (uint32_t *)calloc(_lightmapScene.indexCount, sizeof(uint32_t));
 
     unsigned int vOff = 0;
     unsigned int iOff = 0;

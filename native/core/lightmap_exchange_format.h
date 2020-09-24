@@ -33,7 +33,7 @@ struct LightmapSceneExchanger
     unsigned int vbo = 0;
     unsigned int ibo = 0;
     LightmapVertexExchanger *vertices = nullptr;
-    unsigned short *indices = nullptr;
+    uint32_t *indices = nullptr;
     unsigned int vertexCount = 0;
     unsigned int indexCount = 0;
 

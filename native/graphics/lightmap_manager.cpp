@@ -34,7 +34,7 @@
     glBindTexture(GL_TEXTURE_2D, scene->lightmap);
 
     glBindVertexArray(scene->vao);
-    glDrawElements(GL_TRIANGLES, scene->indexCount, GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, scene->indexCount, GL_UNSIGNED_INT, 0);
 }
 
 //static void destroyScene(scene_t *scene)
@@ -237,7 +237,7 @@ namespace LightmapManager {
                       LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, p), sizeof(LightmapVertexExchanger),
                       LM_NONE, NULL, 0, // no interpolated normals in this example
                       LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, t), sizeof(LightmapVertexExchanger),
-                      scene->indexCount, LM_UNSIGNED_SHORT, scene->indices);
+                      scene->indexCount, LM_UNSIGNED_INT, scene->indices);
 
         int vp[4];
         float view[16], projection[16];
@@ -305,7 +305,7 @@ namespace LightmapManager {
 
         glGenBuffers(1, &scene->ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, scene->ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, scene->indexCount * sizeof(unsigned short), scene->indices,
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, scene->indexCount * sizeof(uint32_t), scene->indices,
                      GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
