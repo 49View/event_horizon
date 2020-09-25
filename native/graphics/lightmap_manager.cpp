@@ -209,11 +209,11 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
 
 namespace LightmapManager {
 
-    static constexpr int sLightMapSize = 512;
+    static constexpr int sLightMapSize = 128;
 
     int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
         lm_context *ctx = lmCreate(
-                512,               // hemisphere resolution (power of two, max=512)
+                16,               // hemisphere resolution (power of two, max=512)
                 0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
                 1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
                 2,
@@ -295,9 +295,6 @@ namespace LightmapManager {
         glBindVertexArray(scene->vao);
 
         glDisable(GL_BLEND);
-//    glDisable(GL_CULL_FACE);
-//    glDisable(GL_DEPTH_TEST);
-//    glDisable(GL_SCISSOR_TEST);
 
         glGenBuffers(1, &scene->vbo);
         glBindBuffer(GL_ARRAY_BUFFER, scene->vbo);
