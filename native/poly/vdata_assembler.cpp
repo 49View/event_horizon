@@ -108,18 +108,19 @@ namespace VDataServices {
     }
 
     ResourceRef refName( const GT::Poly& _d ) {
-        std::stringstream oss;
-        for ( const auto& poly : _d.polyLines ) {
-            for ( const auto& v : poly.verts ) {
-                oss << v.toString();
-            }
-            oss << poly.normal.toString();
-            oss << static_cast<uint64_t>(poly.reverseFlag);
-        }
-        auto c = _d.mappingData.serialize();
-        auto ossString = oss.str();
-        c.insert( std::end( c ), std::begin( ossString), std::end( ossString));
-        return "Poly--" + Hashable<>::hashOf( c );
+//        std::stringstream oss;
+//        for ( const auto& poly : _d.polyLines ) {
+//            for ( const auto& v : poly.verts ) {
+//                oss << v.toString();
+//            }
+//            oss << poly.normal.toString();
+//            oss << static_cast<uint64_t>(poly.reverseFlag);
+//        }
+//        auto c = _d.mappingData.serialize();
+//        auto ossString = oss.str();
+//        c.insert( std::end( c ), std::begin( ossString), std::end( ossString));
+//        return "Poly--" + Hashable<>::hashOf( c );
+        return "Poly--" + UUIDGen::make();
     }
 
     // ___ EXTRUDER BUILDER ___
@@ -144,17 +145,18 @@ namespace VDataServices {
     }
 
     ResourceRef refName( const GT::Extrude& _d ) {
-        std::stringstream oss;
-        for ( const auto& ot : _d.extrusionVerts ) {
-            for ( const auto& v : ot.verts ) {
-                oss << v.toString();
-            }
-            oss << ot.zPull;
-        }
-        auto c = _d.mappingData.serialize();
-        auto ossString = oss.str();
-        c.insert( std::end( c ), std::begin( ossString), std::end( ossString));
-        return "Extrude--" + Hashable<>::hashOf( c );
+//        std::stringstream oss;
+//        for ( const auto& ot : _d.extrusionVerts ) {
+//            for ( const auto& v : ot.verts ) {
+//                oss << v.toString();
+//            }
+//            oss << ot.zPull;
+//        }
+//        auto c = _d.mappingData.serialize();
+//        auto ossString = oss.str();
+//        c.insert( std::end( c ), std::begin( ossString), std::end( ossString));
+//        return "Extrude--" + Hashable<>::hashOf( c );
+        return "Extrude--" + UUIDGen::make();
     }
 
     // ___ Font BUILDER ___
@@ -323,20 +325,21 @@ namespace VDataServices {
     }
 
     ResourceRef refName( const GT::Follower& _d ) {
-        std::stringstream oss;
-        oss << _d.profile->Name();
-        for ( const auto& v : _d.profilePath ) {
-            oss << v.toString();
-        }
-        oss << _d.fflags;
-        oss << static_cast<uint64_t>(_d.fraise);
-        oss << _d.flipVector.toString();
-        // ### Implement this for gaps
-//    for ( const auto& v : mGaps ) {
-//        oss << static_cast<uint64_t>(v);
-//    }
-        oss << _d.mFollowerSuggestedAxis.toString();
-       return "Follower--" + Hashable<>::hashOf(oss.str());
+//        std::stringstream oss;
+//        oss << _d.profile->Name();
+//        for ( const auto& v : _d.profilePath ) {
+//            oss << v.toString();
+//        }
+//        oss << _d.fflags;
+//        oss << static_cast<uint64_t>(_d.fraise);
+//        oss << _d.flipVector.toString();
+//        // ### Implement this for gaps
+////    for ( const auto& v : mGaps ) {
+////        oss << static_cast<uint64_t>(v);
+////    }
+//        oss << _d.mFollowerSuggestedAxis.toString();
+//       return "Follower--" + Hashable<>::hashOf(oss.str());
+       return "Follower--" + UUIDGen::make(); //Hashable<>::hashOf(oss.str());
     }
 
     // ___ GLTF2 BUILDER ___
