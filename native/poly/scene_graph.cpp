@@ -568,8 +568,8 @@ std::tuple<ResourceRef, Material*> SceneGraph::GBMatInternal( CResourceRef _matr
     return matRef;
 }
 
-void SceneGraph::uvUnwrapNodes() {
-    xAtlasParametrize(*this, nodes);
+void SceneGraph::uvUnwrapNodes( const std::unordered_set<uint64_t>& _exclusionTags ) {
+    xAtlasParametrize(*this, nodes, _exclusionTags);
 }
 
 void SceneGraph::loadVData( std::string _names, HttpResourceCB _ccf ) {
@@ -712,7 +712,11 @@ const ResourceRef& SceneGraph::getCurrLoadedEntityId() const {
 }
 
 
-void SceneGraph::getSceneStatsRec( const Geom* gg, SceneStats& stats ) const {
+void SceneGraph::getSceneStatsRec( const Geom* gg, SceneStats& stats, const std::unordered_set<uint64_t>& _exclusionTags ) const {
+
+    for ( const auto& tag : _exclusionTags ) {
+        if ( gg->Tag() == tag ) return;
+    }
 
     for ( const auto& dd : gg->DataV() ) {
         auto vData = vl.get(dd.vData);
@@ -722,22 +726,27 @@ void SceneGraph::getSceneStatsRec( const Geom* gg, SceneStats& stats ) const {
     }
 
     for ( const auto& c : gg->Children() ) {
-        getSceneStatsRec( c.get(), stats );
+        getSceneStatsRec( c.get(), stats, _exclusionTags );
     }
 
 }
 
-SceneStats SceneGraph::getSceneStats() const {
+SceneStats SceneGraph::getSceneStats( const std::unordered_set<uint64_t>& _exclusionTags ) const {
     SceneStats ret{};
 
     for ( const auto& [k, gg] : nodes ) {
-        getSceneStatsRec(  gg.get(), ret );
+        getSceneStatsRec(  gg.get(), ret, _exclusionTags );
     }
 
     return ret;
 }
 
-void SceneGraph::fillLightmapSceneRec( const Geom* gg, LightmapSceneExchanger& _lightmapScene, unsigned int& vOff, unsigned int& iOff ) const {
+void SceneGraph::fillLightmapSceneRec( const Geom* gg, LightmapSceneExchanger& _lightmapScene, unsigned int& vOff, unsigned int& iOff, const std::unordered_set<uint64_t>& _exclusionTags ) const {
+
+    // Check if we need to exclude the geom
+    for ( const auto& tag : _exclusionTags ) {
+        if ( gg->Tag() == tag ) return;
+    }
 
     auto vStride = sizeof(LightmapVertexExchanger);
     for ( const auto& dd : gg->DataV() ) {
@@ -759,13 +768,13 @@ void SceneGraph::fillLightmapSceneRec( const Geom* gg, LightmapSceneExchanger& _
     }
 
     for ( const auto& c : gg->Children() ) {
-        fillLightmapSceneRec( c.get(), _lightmapScene, vOff, iOff );
+        fillLightmapSceneRec( c.get(), _lightmapScene, vOff, iOff, _exclusionTags );
     }
 
 }
 
-void SceneGraph::fillLightmapScene(LightmapSceneExchanger& _lightmapScene) const {
-    auto stats = getSceneStats();
+void SceneGraph::fillLightmapScene(LightmapSceneExchanger& _lightmapScene, const std::unordered_set<uint64_t>& _exclusionTags) const {
+    auto stats = getSceneStats( _exclusionTags );
 
     _lightmapScene.vertexCount = stats.numVerts;
     _lightmapScene.vertices = (LightmapVertexExchanger *)calloc(_lightmapScene.vertexCount, sizeof(LightmapVertexExchanger));
@@ -775,7 +784,7 @@ void SceneGraph::fillLightmapScene(LightmapSceneExchanger& _lightmapScene) const
     unsigned int vOff = 0;
     unsigned int iOff = 0;
     for ( const auto& [k, gg] : nodes ) {
-        fillLightmapSceneRec( gg.get(), _lightmapScene, vOff, iOff );
+        fillLightmapSceneRec( gg.get(), _lightmapScene, vOff, iOff, _exclusionTags );
     }
 
 }

@@ -17,6 +17,8 @@ class Material;
 class VData;
 class SceneGraph;
 
+inline static constexpr uint64_t GLTF2Tag = 0xdad087452;
+
 namespace GLTF2Service {
 
     GeomSP load( SceneGraph& _sg, const std::string& _key, const std::string& _path, const SerializableContainer& _array = {} );

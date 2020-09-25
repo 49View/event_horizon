@@ -434,7 +434,7 @@ public:
                 auto vDataPtr = VL().getFromHash(vDataRef);
 
                 elem = std::make_shared<Geom>(gb.Name());
-                elem->setTag(gb.tag);
+                if ( gb.tag ) elem->setTag(gb.tag);
                 elem->pushData( AABB{vDataPtr->getMin(), vDataPtr->getMax()}, vDataRef, matRef );
 
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
@@ -443,7 +443,7 @@ public:
         } else {
             if ( auto elemToClone = get<Geom>(gb.dataTypeHolder.nameId); elemToClone ) {
                 elem = EF::clone(elemToClone);
-                elem->setTag(gb.tag);
+                if ( gb.tag ) elem->setTag(gb.tag);
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
                 if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
                     std::tuple<ResourceRef, Material*> mt = GBMatInternal(gb.matRef, gb.matColor );
@@ -466,7 +466,7 @@ public:
     void loadCollisionMesh( std::shared_ptr<CollisionMesh> _cm );
     float cameraCollisionDetection( std::shared_ptr<Camera> cam );
     void setLastKnownGoodPosition( const V3f& _pos );
-    void uvUnwrapNodes();
+    void uvUnwrapNodes( const std::unordered_set<uint64_t>& _exclusionTags );
 
     static GenericSceneCallback           genericSceneCallback         ;
     static EventSceneCallback             eventSceneCallback           ;
@@ -530,8 +530,8 @@ protected:
     }
 
     void getNodeRec( const UUID& _uuid, const GeomSP& _node, GeomSP& ret );
-    void getSceneStatsRec( const Geom* gg, SceneStats& stats ) const;
-    void fillLightmapSceneRec( const Geom* gg, LightmapSceneExchanger& _lightmapScene, unsigned int& vOff, unsigned int& iOff ) const;
+    void getSceneStatsRec( const Geom* gg, SceneStats& stats, const std::unordered_set<uint64_t>& _exclusionTags ) const;
+    void fillLightmapSceneRec( const Geom* gg, LightmapSceneExchanger& _lightmapScene, unsigned int& vOff, unsigned int& iOff, const std::unordered_set<uint64_t>& _exclusionTags ) const;
 
     void genericCallbacks();
     void realTimeCallbacks();
@@ -546,8 +546,8 @@ public:
     void setCollisionEnabled( bool );
     void clearNodes();
     void clearGMNodes();
-    [[nodiscard]] SceneStats getSceneStats() const;
-    void fillLightmapScene(LightmapSceneExchanger& _lightmapScene) const;
+    [[nodiscard]] SceneStats getSceneStats(const std::unordered_set<uint64_t>& _exclusionTags = {}) const;
+    void fillLightmapScene(LightmapSceneExchanger& _lightmapScene, const std::unordered_set<uint64_t>& _exclusionTags) const;
     const ResourceRef& getCurrLoadedEntityId() const;
     void setMaterialRemap( const MaterialMap& materialRemap );
     [[maybe_unused]] [[nodiscard]] std::string possibleRemap( const std::string& _key, const std::string& _value ) const;

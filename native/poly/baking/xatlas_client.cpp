@@ -81,7 +81,12 @@ void mapUV2( SceneGraph& sg, xatlas::Atlas *atlas, XAtlasExchangeMap& atlasMeshM
     }
 }
 
-void flattenXAtlasScene( SceneGraph& sg, const Geom* gg, xatlas::Atlas *atlas, std::size_t& atmI, XAtlasExchangeMap& atlasMeshMapping ) {
+void flattenXAtlasScene( SceneGraph& sg, const Geom* gg, xatlas::Atlas *atlas, std::size_t& atmI, XAtlasExchangeMap& atlasMeshMapping, const std::unordered_set<uint64_t>& exclusionTags ) {
+
+    // Check if we need to exclude the geom
+    for ( const auto& tag : exclusionTags ) {
+        if ( gg->Tag() == tag ) return;
+    }
 
     for ( const auto& dd : gg->DataV() ) {
         auto vData = sg.VL().get(dd.vData);
@@ -122,13 +127,13 @@ void flattenXAtlasScene( SceneGraph& sg, const Geom* gg, xatlas::Atlas *atlas, s
     }
 
     for ( const auto& c : gg->Children() ) {
-        flattenXAtlasScene( sg, c.get(), atlas, atmI, atlasMeshMapping );
+        flattenXAtlasScene( sg, c.get(), atlas, atmI, atlasMeshMapping, exclusionTags );
     }
 
 }
 
 
-int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes ) {
+int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, const std::unordered_set<uint64_t>& exclusionTags ) {
 
     // Create atlas.
     xatlas::SetPrint(Print, false);
@@ -139,7 +144,7 @@ int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes ) {
     XAtlasExchangeMap atlasMeshMapping{};
     size_t atmI = 0;
     for ( const auto& [k, gg] : nodes ) {
-        flattenXAtlasScene( sg, gg.get(), atlas, atmI, atlasMeshMapping );
+        flattenXAtlasScene( sg, gg.get(), atlas, atmI, atlasMeshMapping, exclusionTags );
     }
 
     // Generate atlas.

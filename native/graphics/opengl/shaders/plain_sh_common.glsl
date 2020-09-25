@@ -303,7 +303,7 @@ vec3 kD = 1.0 - kS;
 kD *= 1.0 - metallic;
 
 float li = texture(lightmapTexture, v_texCoord2).r;
-li = pow(li, 4.0);
+//li = pow(li, 4.0);
 ao *= li;
 
 #ifdef sh_reflections

@@ -213,7 +213,7 @@ namespace LightmapManager {
 
     int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
         lm_context *ctx = lmCreate(
-                64,               // hemisphere resolution (power of two, max=512)
+                512,               // hemisphere resolution (power of two, max=512)
                 0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
                 1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
                 2,
@@ -374,14 +374,17 @@ namespace LightmapManager {
 //        rr.remapLightmapUVs(scene);
     }
 
-    void bakeLightmaps( SceneGraph& sg, Renderer& rr ) {
+    void bakeLightmaps( SceneGraph& sg, Renderer& rr, const std::unordered_set<uint64_t>& _exclusionTags ) {
         LightmapSceneExchanger scene{};
 
-        sg.fillLightmapScene(scene);
-        LightmapManager::initScene(&scene, rr);
-        LightmapManager::bake(&scene, rr);
-        rr.clearBucket(CommandBufferLimits::PBRStart);
-        sg.updateNodes(GTBucket::Near);
+        sg.uvUnwrapNodes(_exclusionTags);
+        sg.fillLightmapScene(scene, _exclusionTags);
+        if ( scene.vertexCount > 0 ) {
+            LightmapManager::initScene(&scene, rr);
+            LightmapManager::bake(&scene, rr);
+            rr.clearBucket(CommandBufferLimits::PBRStart);
+            sg.updateNodes(GTBucket::Near);
+        }
 //        LightmapManager::apply( scene, rr );
     }
 

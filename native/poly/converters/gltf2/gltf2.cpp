@@ -377,6 +377,7 @@ namespace GLTF2Service {
             }
         }
 
+        rootScene->setTag(GLTF2Tag);
         return rootScene;
 //        rootScene->calcCompleteBBox3d();
 //        return rootScene->BBox3d().isValid() ? rootScene : nullptr;

@@ -528,6 +528,9 @@ private:
         if constexpr ( std::is_same_v<M, NodeP > ) {
             father = _param;
         }
+        if constexpr ( std::is_same_v<M, uint64_t > ) {
+            tag = _param;
+        }
         if constexpr ( std::is_same_v<M, MPos2d > ) {
             mTRS.Pos( _param());
         }
@@ -549,6 +552,7 @@ private:
     void cloneData( const RecursiveTransformation<T>& _source, NodeP _father ) {
         assingNewUUID();
         father = _father;
+        tag = _source.Tag();
         Name( _source.Name() );
         data = _source.data;
         mTRS = _source.TRS().clone();
