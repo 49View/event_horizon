@@ -209,11 +209,11 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
 
 namespace LightmapManager {
 
-    static constexpr int sLightMapSize = 128;
+    static constexpr int sLightMapSize = 256;
 
     int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
         lm_context *ctx = lmCreate(
-                16,               // hemisphere resolution (power of two, max=512)
+                64,               // hemisphere resolution (power of two, max=512)
                 0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
                 1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
                 2,
@@ -229,49 +229,55 @@ namespace LightmapManager {
 
         int w = scene->w, h = scene->h;
         float *data = (float *) calloc(w * h * 4, sizeof(float));
-        lmSetTargetLightmap(ctx, data, w, h, 4);
-
-        Matrix4f mIdentity{Matrix4f::MIDENTITY()};
-        lmSetGeometry(ctx,
-                      mIdentity.rawPtr(),                                                                 // no transformation in this example
-                      LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, p), sizeof(LightmapVertexExchanger),
-                      LM_NONE, NULL, 0, // no interpolated normals in this example
-                      LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, t), sizeof(LightmapVertexExchanger),
-                      scene->indexCount, LM_UNSIGNED_INT, scene->indices);
-
-        int vp[4];
-        float view[16], projection[16];
-        double lastUpdateTime = 0.0;
-//        glDisable( GL_BLEND );
-        while ( lmBegin(ctx, vp, view, projection) ) {
-            // render to lightmapper framebuffer
-            glViewport(vp[0], vp[1], vp[2], vp[3]);
-            drawScene(scene, view, projection);
-
-            // display progress every second (printf is expensive)
-            double time = GameTime::getCurrTimeStep();
-            if ( time - lastUpdateTime > 1.0 ) {
-                lastUpdateTime = time;
-                printf("\r%6.2f%%", lmProgress(ctx) * 100.0f);
-                fflush(stdout);
-            }
-
-            lmEnd(ctx);
-        }
-        printf("\rFinished baking %d triangles.\n", scene->indexCount / 3);
-
-        lmDestroy(ctx);
-
-        // postprocess texture
         float *temp = (float *) calloc(w * h * 4, sizeof(float));
+
+//        for ( int t = 0; t < 2; t++ ) {
+
+            lmSetTargetLightmap(ctx, data, w, h, 4);
+
+            Matrix4f mIdentity{Matrix4f::MIDENTITY()};
+            lmSetGeometry(ctx,
+                          mIdentity.rawPtr(),                                                                 // no transformation in this example
+                          LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, p), sizeof(LightmapVertexExchanger),
+                          LM_NONE, NULL, 0, // no interpolated normals in this example
+                          LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, t), sizeof(LightmapVertexExchanger),
+                          scene->indexCount, LM_UNSIGNED_INT, scene->indices);
+
+            int vp[4];
+            float view[16], projection[16];
+            auto lastUpdateTime = std::chrono::system_clock::now();
+            glDisable(GL_CULL_FACE);
+            while ( lmBegin(ctx, vp, view, projection) ) {
+                // render to lightmapper framebuffer
+                glViewport(vp[0], vp[1], vp[2], vp[3]);
+                drawScene(scene, view, projection);
+
+                // display progress every second (printf is expensive)
+                auto time = std::chrono::system_clock::now();
+                std::chrono::duration<double> elapsed_seconds = time - lastUpdateTime;
+                if ( elapsed_seconds.count() > 1.0 ) {
+                    lastUpdateTime = time;
+                    printf("\r%6.2f%%", lmProgress(ctx) * 100.0f);
+                    fflush(stdout);
+                }
+
+                lmEnd(ctx);
+            }
+            printf("\rFinished baking %d triangles.\n", scene->indexCount / 3);
+
+//        }
+        // postprocess texture
         for ( int i = 0; i < 16; i++ ) {
             lmImageDilate(data, temp, w, h, 4);
             lmImageDilate(temp, data, w, h, 4);
         }
+
         lmImageSmooth(data, temp, w, h, 4);
         lmImageDilate(temp, data, w, h, 4);
         lmImagePower(data, w, h, 4, 1.0f / 3.0f, 0x7); // gamma correct color channels
         free(temp);
+
+        lmDestroy(ctx);
 
 #ifndef ANDROID
         // save result to a file
