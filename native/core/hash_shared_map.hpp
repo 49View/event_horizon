@@ -12,7 +12,7 @@ template <typename T>
 class HashSharedMap {
     using  HSMap = std::unordered_map<std::string, std::shared_ptr<T>>;
 public:
-    size_t count() const { return mData.size(); }
+    [[nodiscard]] size_t count() const { return mData.size(); }
 
     static std::string calcTotalHash( const StringUniqueCollection& _names ) {
         std::string totalHash{};
