@@ -289,6 +289,7 @@ public:
     StreamingMediator& SSM();
 
     void VPL( int _bucket, std::shared_ptr<VPList> nvp, float alpha = 1.0f );
+    void VPL( int _bucket, CResourceRef _uuid, std::shared_ptr<GPUVData> _ps );
 
     bool hasTag( uint64_t _tag ) const;
 

@@ -91,7 +91,7 @@ public:
     }
 
     void setMaterialConstantAlpha( float alpha );
-    float getMaterialConstantAlpha() const;
+    [[nodiscard]] float getMaterialConstantAlpha() const;
 
     void setMaterialConstantOpacity( float alpha );
 
@@ -101,19 +101,20 @@ public:
     void setMaterialAlphaWithTag( float _alpha, uint64_t _tag );
     void setMaterialColorWithUUID( const Color4f& _color, const UUID& _uuid, Color4f& _oldColor );
 
-    std::shared_ptr<Matrix4f> getTransform() const;
+    [[nodiscard]] std::shared_ptr<Matrix4f> getTransform() const;
 
     void setTransform( std::shared_ptr<Matrix4f> lTransform );
 
     void updateP3V3( const std::vector<V3f>& _values );
+    void setGpuData( std::shared_ptr<GPUVData> _gpuData );
     void updateGPUVData( cpuVBIB&& _vbib );
     void remapUVs( uint32_t *indices, const std::vector<V3f>& _pos, const std::vector<V2f>& _uvs, uint64_t _index, uint64_t _xrefStart );
 
-    const AABB& BBox3d() const;
+    [[nodiscard]] const AABB& BBox3d() const;
 
-    bool hasTag( uint64_t _tag) const;
-    uint64_t tag() const { return mTag; }
-    inline int PvsIndex() const { return pvsIndex; }
+    [[nodiscard]] bool hasTag( uint64_t _tag) const;
+    [[nodiscard]] uint64_t tag() const { return mTag; }
+    [[nodiscard]] inline int PvsIndex() const { return pvsIndex; }
     void tag( const uint64_t tag ) { mTag = tag; }
 
     void draw( Program* _program = nullptr );

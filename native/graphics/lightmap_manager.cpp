@@ -22,6 +22,7 @@
 #include <graphics/renderer.h>
 #include <graphics/texture.h>
 #include <poly/scene_graph.h>
+#include <poly/baking/xatlas_client.hpp>
 
 [[maybe_unused]] static void drawScene( LightmapSceneExchanger *scene, float *view, float *projection ) {
     glEnable(GL_DEPTH_TEST);
@@ -373,22 +374,58 @@ namespace LightmapManager {
         return 1;
     }
 
-    void apply( LightmapSceneExchanger& scene, Renderer& rr ) {
-//        rr.remapLightmapUVs(scene);
+    LightmapSceneExchanger fillLightmapScene( SceneGraph& sg, FlattenGeomSP lightmapNodes ) {
+        LightmapSceneExchanger _lightmapScene;
+
+        // Get counting
+        for ( const auto& gg : lightmapNodes ) {
+            for ( const auto& dd : gg->DataV() ) {
+                auto vData = sg.VL().get(dd.vData);
+                _lightmapScene.vertexCount += vData->numVerts();
+                _lightmapScene.indexCount += vData->numIndices();
+            }
+        }
+
+        _lightmapScene.vertices = (LightmapVertexExchanger *)calloc(_lightmapScene.vertexCount, sizeof(LightmapVertexExchanger));
+        _lightmapScene.indices = (uint32_t *)calloc(_lightmapScene.indexCount, sizeof(uint32_t));
+
+        unsigned int vOff = 0;
+        unsigned int iOff = 0;
+        for ( const auto& gg : lightmapNodes ) {
+
+            auto vStride = sizeof(LightmapVertexExchanger);
+            for ( const auto& dd : gg->DataV() ) {
+                auto vData = sg.VL().get(dd.vData);
+
+                for (uint32_t v = 0; v < vData->numVerts(); v++) {
+                    auto pos = vData->vertexAt(v);
+                    auto mat = gg->getLocalHierTransform();
+                    pos = mat->transform(pos);
+                    auto uv = vData->uv2At(v);
+                    memcpy( (char*)_lightmapScene.vertices + vOff + vStride*v + 0, (const void*)&pos, sizeof(float) * 3 );
+                    memcpy( (char*)_lightmapScene.vertices + vOff + vStride*v + sizeof(float) * 3, (const void*)&uv, sizeof(float) * 2 );
+                }
+                for (uint32_t f = 0; f < vData->numIndices(); f++) {
+                    _lightmapScene.indices[f+iOff] = iOff + vData->vIndexAt(f);
+                }
+                vOff += vData->numVerts() * sizeof(LightmapVertexExchanger);
+                iOff += vData->numIndices();
+            }
+        }
+
+        return _lightmapScene;
     }
 
     void bakeLightmaps( SceneGraph& sg, Renderer& rr, const std::unordered_set<uint64_t>& _exclusionTags ) {
-        LightmapSceneExchanger scene{};
 
-        sg.uvUnwrapNodes(_exclusionTags);
-        sg.fillLightmapScene(scene, _exclusionTags);
+        auto lightmapNodes = sg.getFlattenNodes(_exclusionTags);
+        xAtlasParametrize(sg, lightmapNodes);
+        LightmapSceneExchanger scene = fillLightmapScene(sg, lightmapNodes);
         if ( scene.vertexCount > 0 ) {
             LightmapManager::initScene(&scene, rr);
             LightmapManager::bake(&scene, rr);
-            rr.clearBucket(CommandBufferLimits::PBRStart);
-            sg.updateNodes(GTBucket::Near);
+            sg.updateNodes(lightmapNodes, GTBucket::Near);
         }
-//        LightmapManager::apply( scene, rr );
     }
 
 }

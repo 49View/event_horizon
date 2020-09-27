@@ -746,3 +746,11 @@ floata& Renderer::ssaoBlendFactorAnim() {
 void Renderer::ssaoBlendFactor( float _ssaoBlendFactor ) {
     mSsaoBlendFactor->value = _ssaoBlendFactor;
 }
+
+void Renderer::VPL( int _bucket, const std::string& _uuid, std::shared_ptr<GPUVData> _ps ) {
+    CLI( _bucket, [_uuid, _ps](const std::shared_ptr<VPList>& _vp) {
+        if ( _vp->UUiD() == _uuid ) {
+            _vp->setGpuData(_ps);
+        }
+    });
+}

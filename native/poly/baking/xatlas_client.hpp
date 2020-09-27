@@ -12,4 +12,4 @@ class SceneGraph;
 
 using XAtlasExchangeMap = std::unordered_map<std::size_t, VData*>;
 
-int xAtlasParametrize( SceneGraph& sg, const NodeGraphContainer& nodes, const std::unordered_set<uint64_t>& exclusionTags );
+int xAtlasParametrize( SceneGraph& sg, const FlattenGeomSP& nodes );

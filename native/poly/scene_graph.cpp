@@ -53,8 +53,7 @@ namespace HOD { // HighOrderDependency
 void SceneGraph::traverseNode( GeomSP _node, int _nodeBucket, NodeTraverseMode _ntm ) {
     if ( _ntm == NodeTraverseMode::Add ) {
         nodeAddSignal({_node, _nodeBucket});
-    }
-    if ( _ntm == NodeTraverseMode::Upsert) {
+    } else if ( _ntm == NodeTraverseMode::Upsert) {
         nodeUpdateSignal({_node, _nodeBucket});
     }
     if ( _node->isRoot()) {
@@ -69,9 +68,9 @@ void SceneGraph::traverseNode( const UUID& _uuid, int _nodeBucket, NodeTraverseM
     traverseNode(get<Geom>(_uuid), _nodeBucket, _ntm );
 }
 
-void SceneGraph::updateNodes(int _nodeBucket) {
-    for ( auto [k,v] : nodes ) {
-        traverseNode(v, _nodeBucket, NodeTraverseMode::Upsert);
+void SceneGraph::updateNodes( const FlattenGeomSP& _nodes, int _nodeBucket) {
+    for ( const auto& v : _nodes ) {
+        nodeUpdateSignal({v, _nodeBucket});
     }
 }
 
@@ -568,10 +567,6 @@ std::tuple<ResourceRef, Material*> SceneGraph::GBMatInternal( CResourceRef _matr
     return matRef;
 }
 
-void SceneGraph::uvUnwrapNodes( const std::unordered_set<uint64_t>& _exclusionTags ) {
-    xAtlasParametrize(*this, nodes, _exclusionTags);
-}
-
 void SceneGraph::loadVData( std::string _names, HttpResourceCB _ccf ) {
     B<VB>(_names).load(_ccf);
 }
@@ -741,51 +736,27 @@ SceneStats SceneGraph::getSceneStats( const std::unordered_set<uint64_t>& _exclu
     return ret;
 }
 
-void SceneGraph::fillLightmapSceneRec( const Geom* gg, LightmapSceneExchanger& _lightmapScene, unsigned int& vOff, unsigned int& iOff, const std::unordered_set<uint64_t>& _exclusionTags ) const {
+void SceneGraph::getFlattenNodesRec( const GeomSP& gg, std::vector<GeomSP>& _ret, const std::unordered_set<uint64_t>& _exclusionTags ) const {
 
     // Check if we need to exclude the geom
     for ( const auto& tag : _exclusionTags ) {
         if ( gg->Tag() == tag ) return;
     }
 
-    auto vStride = sizeof(LightmapVertexExchanger);
-    for ( const auto& dd : gg->DataV() ) {
-        auto vData = vl.get(dd.vData);
-
-        for (uint32_t v = 0; v < vData->numVerts(); v++) {
-            auto pos = vData->vertexAt(v);
-            auto mat = gg->getLocalHierTransform();
-            pos = mat->transform(pos);
-            auto uv = vData->uv2At(v);
-            memcpy( (char*)_lightmapScene.vertices + vOff + vStride*v + 0, (const void*)&pos, sizeof(float) * 3 );
-            memcpy( (char*)_lightmapScene.vertices + vOff + vStride*v + sizeof(float) * 3, (const void*)&uv, sizeof(float) * 2 );
-        }
-        for (uint32_t f = 0; f < vData->numIndices(); f++) {
-            _lightmapScene.indices[f+iOff] = iOff + vData->vIndexAt(f);
-        }
-        vOff += vData->numVerts() * sizeof(LightmapVertexExchanger);
-        iOff += vData->numIndices();
-    }
+    _ret.emplace_back(gg);
 
     for ( const auto& c : gg->Children() ) {
-        fillLightmapSceneRec( c.get(), _lightmapScene, vOff, iOff, _exclusionTags );
+        getFlattenNodesRec( c, _ret, _exclusionTags );
     }
 
 }
 
-void SceneGraph::fillLightmapScene(LightmapSceneExchanger& _lightmapScene, const std::unordered_set<uint64_t>& _exclusionTags) const {
-    auto stats = getSceneStats( _exclusionTags );
-
-    _lightmapScene.vertexCount = stats.numVerts;
-    _lightmapScene.vertices = (LightmapVertexExchanger *)calloc(_lightmapScene.vertexCount, sizeof(LightmapVertexExchanger));
-    _lightmapScene.indexCount = stats.numIndices;
-    _lightmapScene.indices = (uint32_t *)calloc(_lightmapScene.indexCount, sizeof(uint32_t));
-
-    unsigned int vOff = 0;
-    unsigned int iOff = 0;
+std::vector<GeomSP> SceneGraph::getFlattenNodes(const std::unordered_set<uint64_t>& _exclusionTags) const {
+    std::vector<GeomSP> ret;
     for ( const auto& [k, gg] : nodes ) {
-        fillLightmapSceneRec( gg.get(), _lightmapScene, vOff, iOff, _exclusionTags );
+        getFlattenNodesRec( gg, ret, _exclusionTags );
     }
+    return ret;
 
 }
 

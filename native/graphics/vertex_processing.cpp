@@ -116,6 +116,10 @@ void VPList::setTransform( std::shared_ptr<Matrix4f> lTransform ) {
     if ( lTransform ) VPList::mTransform = lTransform;
 }
 
+void VPList::setGpuData( std::shared_ptr<GPUVData> _gpuData ) {
+    gpuData = _gpuData;
+}
+
 void VPList::updateGPUVData( cpuVBIB&& _vbib ) {
     gpuData->updateVBO( std::move(_vbib) );
 }

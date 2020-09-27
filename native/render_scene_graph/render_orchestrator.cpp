@@ -222,7 +222,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         for ( const auto& dataRef : geom->DataVRef() ) {
             auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData }.
                     n(geom->Name()).
-                    u(geom->UUiD()).
+                    u(geom->UUiD() + dataRef.vData).
                     g(geom->Tag()).
                     t(geom->getLocalHierTransform()).
                     b(&dataRef.BBox3d()).
@@ -235,22 +235,13 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
 
     sg.nodeUpdateConnect([this]( NodeGraphConnectParamsSig _geomAndBucket ) {
         auto geom = _geomAndBucket.first;
-        auto bEmpty = geom->empty();
-//        LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );
-        if ( bEmpty ) return;
+        if ( geom->empty() ) return;
+        auto bucket = _geomAndBucket.second == GTBucket::Near ? CommandBufferLimits::PBRStart : CommandBufferLimits::PBRStartFar;
         for ( const auto& dataRef : geom->DataVRef() ) {
             auto newvDataRef = UUIDGen::make();
             ResourceTransfer<VData> vDataRT{ sg.VL().getFromHash(dataRef.vData), newvDataRef, {newvDataRef}};
-            this->RR().addVDataResource( vDataRT );
-            auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, newvDataRef }.
-                    n(geom->Name()).
-                    u(geom->UUiD()).
-                    g(geom->Tag()).
-                    t(geom->getLocalHierTransform()).
-                    b(&dataRef.BBox3d()).
-                    build();
-            auto bucket = _geomAndBucket.second == GTBucket::Near ? CommandBufferLimits::PBRStart : CommandBufferLimits::PBRStartFar;
-            this->RR().VPL(bucket, vp );
+            auto ps = this->RR().addVDataResource( vDataRT );
+            this->RR().VPL(bucket, geom->UUiD()+dataRef.vData, ps);
         }
         this->RR().invalidateOnAdd();
     });
