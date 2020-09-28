@@ -220,7 +220,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
 //        LOGRS( "[SG-Node] Add " << (bEmpty ? "Root " : "") << _geom->Name() );
         if ( bEmpty ) return;
         for ( const auto& dataRef : geom->DataVRef() ) {
-            auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData }.
+            auto vp = VPBuilder<PosTexNorTanBinUV2Col3dStrip>{ this->RR(), dataRef.material, dataRef.vData, dataRef.program }.
                     n(geom->Name()).
                     u(geom->UUiD() + dataRef.vData).
                     g(geom->Tag()).

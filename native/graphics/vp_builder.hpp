@@ -20,12 +20,16 @@ public:
     };
 
     VPBuilder( Renderer& _rr,
-               const ResourceRef& _matRef,
-               const ResourceRef& _vdataRef ) : rr(_rr) {
+               CResourceRef _matRef,
+               CResourceRef _vDataRef,
+               CResourceRef _programRef) : rr(_rr) {
         uuid = UUIDGen::make();
-        name = _matRef + _vdataRef;
+        name = _matRef + _vDataRef;
         renderMaterialSP = rr.getMaterial( _matRef );
-        gpuDataSP = rr.getGPUVData( _vdataRef );
+        if ( renderMaterialSP->BoundProgram()->getId() != _programRef ) {
+            renderMaterialSP->BoundProgram( _rr.P( _programRef ) );
+        }
+        gpuDataSP = rr.getGPUVData(_vDataRef );
         bStraightRef = true;
     };
 
@@ -36,7 +40,7 @@ public:
     }
     VPBuilder& u( const UUID& _uuid) { uuid = _uuid; return *this; }
     VPBuilder& g( const uint64_t _tag) { tag = _tag; return *this; }
-    VPBuilder& t( std::shared_ptr<Matrix4f> _t ) { transformMatrix = _t; return *this; }
+    VPBuilder& t( const std::shared_ptr<Matrix4f>& _t ) { transformMatrix = _t; return *this; }
     VPBuilder& t( const Matrix4f& _t ) { transformMatrix = std::make_shared<Matrix4f>(_t); return *this; }
     VPBuilder& b( const AABB* _value ) { bbox3d = _value; return *this; }
 

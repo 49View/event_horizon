@@ -43,7 +43,7 @@ struct Topology {
     std::vector<uint32_t> triangles;
     std::unordered_map<size_t, std::vector<Vector3f>> smoothing;
     std::vector<Vector3f> vertexNormals;
-    std::vector<Vector2f> vertexUVs;
+    std::vector<Vector4f> vertexUVs;
 
     uint32_t indexCount() const { return static_cast<uint32_t >( triangles.size()); }
     uint32_t triangleCount() const { return static_cast<uint32_t >( triangles.size() / 3 ); }
@@ -53,6 +53,7 @@ struct Topology {
 
     void addVertex( const V3f& _vertex );
     void addVertex( const V3f& _vertex, const V2f& _uv );
+    void addVertex( const V3f& _vertex, const V4f& _uv );
     void addTriangle( uint32_t a, uint32_t b, uint32_t c );
     void addQuad( uint32_t a, uint32_t b, uint32_t c, uint32_t d );
     void addQuadAlt( uint32_t a, uint32_t b, uint32_t c, uint32_t d );

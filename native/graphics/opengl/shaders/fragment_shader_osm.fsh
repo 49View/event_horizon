@@ -6,10 +6,10 @@ void main() {
    vec3 V = normalize( u_eyePos - Position_worldspace );
    vec3 vtang = normalize( tangentViewPos - tangentFragPos );
 
-   vec2 position = vec2(2.0/16.0, 1.0/16.0);
+   vec2 position = v_texCoord2;
    vec2 size = vec2(1.0/16.0, 1.0/16.0);
 
-   vec2 texCoords = position + size * fract(v_texCoord)*10.0;
+   vec2 texCoords = position + size * fract(v_texCoord);
 
    ao = texture( aoTexture, texCoords ).x * aoV;
    roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);

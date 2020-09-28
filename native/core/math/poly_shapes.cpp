@@ -168,6 +168,11 @@ void Topology::addVertex( const V3f& _vertex ) {
 
 void Topology::addVertex( const V3f& _vertex, const V2f& _uv ) {
     vertices.emplace_back(_vertex);
+    vertexUVs.emplace_back(V4f{_uv, V2fc::ZERO});
+}
+
+void Topology::addVertex( const V3f& _vertex, const V4f& _uv ) {
+    vertices.emplace_back(_vertex);
     vertexUVs.emplace_back(_uv);
 }
 
@@ -709,7 +714,6 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     ret.uvs = std::make_unique<Vector2f[]>( ret.numIndices );
     ret.uv2s = std::make_unique<Vector2f[]>( ret.numIndices );
 
-
     for ( int q = 0; q < ret.numIndices; q++ ) {
         ret.normals[q] = mesh.normalFromSmartSmoothing( mesh.triangles[q], q );
     }
@@ -724,7 +728,8 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
 
     if ( mt.type == GeomMappingT::PreBaked ) {
         for ( int q = 0; q < ret.numIndices; q++ ) {
-            ret.uvs[q] = mesh.vertexUVs[ret.indices[q]];
+            ret.uvs[q] = mesh.vertexUVs[ret.indices[q]].xy();
+            ret.uv2s[q] = mesh.vertexUVs[ret.indices[q]].zw();
         }
     }
 

@@ -421,6 +421,8 @@ namespace VDataServices {
 
         V2f centerProj = coordToProjection(_d.locationLatLon);
         size_t indexOffset = 0;
+        float globalScale = 0.01f;
+        float facadeMappingScale = 0.2f;
 
         for ( const auto& element : _d.osmData.elements ) {
             V2f elemLatLon = V2f{element.center.lon,element.center.lat};
@@ -428,16 +430,70 @@ namespace VDataServices {
             float coordDistance = calcGeoDistance( (double)_d.locationLatLon.x(), (double)latToY(_d.locationLatLon.y()), element.center.lon, latToY(element.center.lat));
             V2f elemCenterOffset = normalize( elemCenterProj - centerProj ) * coordDistance;
             V3f elemCenterProj3d = XZY::C( elemCenterOffset, 0.0f);
+            
             for ( const auto& group : element.groups ) {
-                C4f color = C4fc::XTORGBA(group.colour);
-                auto mapping = group.part == "roof" ? 0 : 1;
-                for ( const auto& vertex : group.triangles ) {
+                auto mp = [group, elemCenterProj3d, globalScale]( auto i ) -> V3f {
+                    auto vertex = group.triangles[i];
                     V3f pp{XZY::C(vertex) + elemCenterProj3d};
                     pp.swizzle(0,2);
-                    V2f uv = mapping == 0 ? dominantMapping( V3f::UP_AXIS(), pp, V3fc::ONE ) : V2fc::ZERO;
-                    mesh.addVertex( pp, uv );
-                    vertexColors.emplace_back( color );
+                    pp*=globalScale;
+                    return pp;
+                };
+
+                C4f color = C4fc::XTORGBA(group.colour);
+                // && element.type == "road"
+                if ( group.part.empty() ) {
+                    for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
+                        auto v1 = mp(ti);
+                        mesh.addVertex( v1, V4fc::ZERO );
+                        vertexColors.emplace_back( color );
+                    }
+                } else if ( group.part == "roof_faces" ) {
+                    float yOff = 12.0f + static_cast<float>(unitRandI(3)) ;
+                    V2f tile{static_cast<float>(unitRandI(15))/16.0f, yOff/16.0f};
+                    for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
+                        auto v1 = mp(ti);
+                        V2f uv1 = dominantMapping( V3f::UP_AXIS(), v1, V3fc::ONE );
+                        mesh.addVertex( v1, V4f{uv1, tile} );
+                        vertexColors.emplace_back( color );
+                    }
+                } else if ( group.part == "lateral_faces" ) {
+                    auto yOff = static_cast<float>(unitRandI(12));
+                    V2f tile{static_cast<float>(unitRandI(15))/16.0f, yOff/16.0f};
+                    float xAcc = 0.0f;
+                    for ( auto ti = 0u; ti < group.triangles.size(); ti+=6 ) {
+
+                        auto v1 = mp(ti);
+                        auto v2 = mp(ti+1);
+                        auto v3 = mp(ti+2);
+                        auto v4 = mp(ti+3);
+                        auto v5 = mp(ti+4);
+                        auto v6 = mp(ti+5);
+
+                        float dist = distance(v1, v2);
+                        V2f uv1 = V2f{xAcc, -v1.y()};
+                        V2f uv2 = V2f{xAcc + dist, -v2.y()};
+                        V2f uv3 = V2f{xAcc + dist, -v3.y()};
+                        V2f uv4 = V2f{xAcc, -v4.y()};
+                        V2f uv5 = V2f{xAcc + dist, -v5.y()};
+                        V2f uv6 = V2f{xAcc, -v6.y()};
+
+                        mesh.addVertex( v1, V4f{uv1*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
+                        mesh.addVertex( v2, V4f{uv2*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
+                        mesh.addVertex( v3, V4f{uv3*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
+                        mesh.addVertex( v4, V4f{uv4*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
+                        mesh.addVertex( v5, V4f{uv5*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
+                        mesh.addVertex( v6, V4f{uv6*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
+                        vertexColors.emplace_back( color );
+                        vertexColors.emplace_back( color );
+                        vertexColors.emplace_back( color );
+                        vertexColors.emplace_back( color );
+                        vertexColors.emplace_back( color );
+                        vertexColors.emplace_back( color );
+                        xAcc += dist;
+                    }
                 }
+
                 for ( auto ti = indexOffset; ti < indexOffset + group.triangles.size(); ti+=3 ) {
                     if ( !isCollinear(mesh.vertices[ti], mesh.vertices[ti+1], mesh.vertices[ti+2]) ) {
                         mesh.addTriangle(ti, ti+1, ti+2);

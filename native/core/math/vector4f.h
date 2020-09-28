@@ -86,6 +86,10 @@ public:
 		return Vector2f( mX, mY );
 	}
 
+    [[nodiscard]] Vector2f zw() const {
+        return Vector2f( mZ, mW );
+    }
+
 	[[nodiscard]] Vector3f xyz() const {
 		return Vector3f( mX, mY, mZ );
 	}
