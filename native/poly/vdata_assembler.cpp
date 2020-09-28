@@ -422,7 +422,7 @@ namespace VDataServices {
         V2f centerProj = coordToProjection(_d.locationLatLon);
         size_t indexOffset = 0;
         float globalScale = 0.01f;
-        float facadeMappingScale = 0.2f;
+        float facadeMappingScale = 0.1f;
 
         for ( const auto& element : _d.osmData.elements ) {
             V2f elemLatLon = V2f{element.center.lon,element.center.lat};
