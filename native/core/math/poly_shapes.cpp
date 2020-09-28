@@ -166,6 +166,11 @@ void Topology::addVertex( const V3f& _vertex ) {
     vertices.emplace_back(_vertex);
 }
 
+void Topology::addVertex( const V3f& _vertex, const V2f& _uv ) {
+    vertices.emplace_back(_vertex);
+    vertexUVs.emplace_back(_uv);
+}
+
 ShapeType shapeTypeFromString( const std::string& value ) {
 
     if ( toLower(value) == "cube" ) return ShapeType::Cube;
@@ -716,6 +721,12 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
 //    for ( int q = 0; q < ret.numIndices; q++ ) {
 //        ret.normals[q] = normalize( ret.normals[q] );
 //    }
+
+    if ( mt.type == GeomMappingT::PreBaked ) {
+        for ( int q = 0; q < ret.numIndices; q++ ) {
+            ret.uvs[q] = mesh.vertexUVs[ret.indices[q]];
+        }
+    }
 
     if ( mt.type == GeomMappingT::Cube ) {
         for ( int q = 0; q < ret.numIndices; q++ ) {

@@ -15,7 +15,8 @@ enum class GeomMappingT {
     Cube,
     Planar,
     PlanarNoTile,
-    Cylindrical
+    Cylindrical,
+    PreBaked
 };
 
 struct GeomMapping {

@@ -13,8 +13,9 @@ JSONDATA(OSMCenter, x, y, lat, lon)
     double lon;
 };
 
-JSONDATA(OSMGroup, colour, triangles)
+JSONDATA(OSMGroup, colour, part, triangles)
     std::string colour;
+    std::string part;
     std::vector<V3f> triangles;
 };
 

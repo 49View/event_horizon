@@ -430,13 +430,15 @@ namespace VDataServices {
             V3f elemCenterProj3d = XZY::C( elemCenterOffset, 0.0f);
             for ( const auto& group : element.groups ) {
                 C4f color = C4fc::XTORGBA(group.colour);
+                auto mapping = group.part == "roof" ? 0 : 1;
                 for ( const auto& vertex : group.triangles ) {
                     V3f pp{XZY::C(vertex) + elemCenterProj3d};
                     pp.swizzle(0,2);
-                    mesh.addVertex( pp );
+                    V2f uv = mapping == 0 ? dominantMapping( V3f::UP_AXIS(), pp, V3fc::ONE ) : V2fc::ZERO;
+                    mesh.addVertex( pp, uv );
                     vertexColors.emplace_back( color );
                 }
-                for ( auto ti = indexOffset; ti < indexOffset + group.triangles.size(); ti+=3  ) {
+                for ( auto ti = indexOffset; ti < indexOffset + group.triangles.size(); ti+=3 ) {
                     if ( !isCollinear(mesh.vertices[ti], mesh.vertices[ti+1], mesh.vertices[ti+2]) ) {
                         mesh.addTriangle(ti, ti+1, ti+2);
                     }
@@ -445,7 +447,7 @@ namespace VDataServices {
             }
         }
 
-        PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::Cube, V3fc::ONE}, 0, ReverseFlag::False, vertexColors );
+        PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked}, 0, ReverseFlag::False, vertexColors );
         _ret->fill( ps );
     }
 

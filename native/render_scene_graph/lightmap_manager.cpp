@@ -8,8 +8,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
-#include <assert.h>
 #include <core/lightmap_exchange_format.h>
 #include <core/game_time.h>
 

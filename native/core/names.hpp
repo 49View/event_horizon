@@ -43,6 +43,7 @@ namespace S {
     const std::string SH = "PN_SH";
     const std::string SH_NOTEXTURE = "PN_SH_NOTEXTURE";
     const std::string SH_DIRECT_LIGHTING = "PN_SH_DIRECT_LIGHTING";
+    const std::string SH_CITY_ATLAS = "PN_SH_CITY_ATLAS";
 
     const std::string SHOWNORMAL = "PN_SHOWNORMAL";
     const std::string BLUR_HORIZONTAL = "PN_BLUR_HORIZONTAL";

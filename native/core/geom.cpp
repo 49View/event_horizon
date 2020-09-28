@@ -14,8 +14,10 @@ GeomData::GeomData( ResourceRef vData, ResourceRef material ) :
                     material(std::move( material )) {
 }
 
-GeomData::GeomData( const AABB& _nodeAABB, ResourceRef vData, ResourceRef material ) :
+GeomData::GeomData( const AABB& _nodeAABB, ResourceRef vData, ResourceRef material,
+                    ResourceRef _program ) :
         vData(std::move( vData )),
-        material(std::move( material )) {
+        material(std::move( material )),
+        program(std::move( _program )) {
     BBox3d(_nodeAABB);
 }

@@ -435,7 +435,7 @@ public:
 
                 elem = std::make_shared<Geom>(gb.Name());
                 if ( gb.tag ) elem->setTag(gb.tag);
-                elem->pushData( AABB{vDataPtr->getMin(), vDataPtr->getMax()}, vDataRef, matRef );
+                elem->pushData( AABB{vDataPtr->getMin(), vDataPtr->getMax()}, vDataRef, matRef, gb.programRef );
 
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
                 B<GRB>( gb.Name() ).addIM( elem );
@@ -446,11 +446,13 @@ public:
                 if ( gb.tag ) elem->setTag(gb.tag);
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
                 if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
-                    std::tuple<ResourceRef, Material*> mt = GBMatInternal(gb.matRef, gb.matColor );
+                    auto mt = GBMatInternal(gb.matRef, gb.matColor );
                     ResourceRef matRef = std::get<0>(mt);
-                    elem->foreach( [matRef](const GeomSP& _geom) {
+                    auto programRef = gb.programRef;
+                    elem->foreach( [matRef, programRef](const GeomSP& _geom) {
                         if ( !_geom->empty() ) {
                             _geom->DataRef().material = matRef;
+                            _geom->DataRef().program = programRef;
                         }
                     });
                 }

@@ -79,12 +79,12 @@ bool Skybox::preCalc( float _sunHDRMult, const V3f& _cubeMapCenter ) {
 
             for ( const auto&[k, vl] : rr.CL() ) {
                 if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) ) {
-                    rr.addToCommandBuffer(vl.mVList, cam, nullptr, rr.P(S::SH_DIRECT_LIGHTING).get());
+                    rr.addToCommandBuffer(vl.mVList, cam, nullptr, rr.P(S::SH_CITY_ATLAS).get());
                 }
             }
             for ( const auto&[k, vl] : rr.CL() ) {
                 if ( inRange(k, { CommandBufferLimits::PBRStartFar, CommandBufferLimits::PBREndFar }) ) {
-                    rr.addToCommandBuffer(vl.mVListTransparent, cam, nullptr, rr.P(S::SH_DIRECT_LIGHTING).get());
+                    rr.addToCommandBuffer(vl.mVListTransparent, cam, nullptr, rr.P(S::SH_CITY_ATLAS).get());
                 }
             }
         });

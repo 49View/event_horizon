@@ -223,6 +223,15 @@ namespace GT {
         ResourceRef data;
     };
 
+    struct Program {
+        template<typename ...Args>
+        explicit Program( Args&& ... args ) : data(std::forward<Args>( args )...) {}
+        ResourceRef operator()() const noexcept {
+            return data;
+        }
+        ResourceRef data;
+    };
+
     struct ForceNormalAxis {
         template<typename ...Args>
         explicit ForceNormalAxis( Args&& ... args ) : data(std::forward<Args>( args )...) {}

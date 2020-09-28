@@ -51,6 +51,10 @@ public:
             matColor = _param.color;
             return *this;
         }
+        if constexpr ( std::is_same_v<M, GT::Program> ) {
+            programRef = _param();
+            return *this;
+        }
         if constexpr ( std::is_same_v<M, GT::A> ) {
             matColor.setW( _param() );
             return *this;
@@ -290,6 +294,7 @@ public:
     }
 
     T dataTypeHolder;
+    ResourceRef programRef = S::SH;
     ResourceRef matRef = S::WHITE_PBR;
     Color4f matColor = C4fc::WHITE;
     uint64_t tag = 0;
