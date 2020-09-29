@@ -414,23 +414,36 @@ namespace VDataServices {
         return d;
     }
 
+    template <typename T>
+    T remap( T x, T a1, T a2, T b1, T b2 ) {
+        return lerp( lerpInv(x, a1, a2), b1, b2 );
+    }
+
     void buildInternal( const GT::OSM& _d, std::shared_ptr<VData> _ret ) {
 
         Topology mesh{};
         std::vector<C4f> vertexColors;
 
-        V2f centerProj = coordToProjection(_d.locationLatLon);
         size_t indexOffset = 0;
         float globalScale = 0.01f;
         float facadeMappingScale = 0.1f;
 
+        double minX = std::numeric_limits<double>::max(), minY = std::numeric_limits<double>::max();
+        double maxX = std::numeric_limits<double>::lowest(), maxY = std::numeric_limits<double>::lowest();
+
         for ( const auto& element : _d.osmData.elements ) {
-            V2f elemLatLon = V2f{element.center.lon,element.center.lat};
-            V2f elemCenterProj = coordToProjection(elemLatLon);// - centerProj;
-            float coordDistance = calcGeoDistance( (double)_d.locationLatLon.x(), (double)latToY(_d.locationLatLon.y()), element.center.lon, latToY(element.center.lat));
-            V2f elemCenterOffset = normalize( elemCenterProj - centerProj ) * coordDistance;
-            V3f elemCenterProj3d = XZY::C( elemCenterOffset, 0.0f);
-            
+            if ( element.center.x < minX ) minX = element.center.x;
+            if ( element.center.y < minY ) minY = element.center.y;
+            if ( element.center.x > maxX ) maxX = element.center.x;
+            if ( element.center.y > maxY ) maxY = element.center.y;
+        }
+        double sizeX = maxX - minX;
+        double sizeY = maxY - minY;
+        for ( const auto& element : _d.osmData.elements ) {
+            double elemCX = remap( element.center.x, minX, maxX, -sizeX*0.5, sizeX*0.5 );
+            double elemCY = remap( element.center.y, minY, maxY, -sizeY*0.5, sizeY*0.5 );
+            V3f elemCenterProj3d = XZY::C( V2f{elemCX, elemCY}, 0.0f);
+
             for ( const auto& group : element.groups ) {
                 auto mp = [group, elemCenterProj3d, globalScale]( auto i ) -> V3f {
                     auto vertex = group.triangles[i];
