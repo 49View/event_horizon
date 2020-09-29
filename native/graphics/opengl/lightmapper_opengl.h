@@ -107,7 +107,7 @@ lm_bool lmImageSaveTGAf(const char *filename, const float *image, int w, int h, 
 
 #endif
 ////////////////////// END OF HEADER //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef LIGHTMAPPER_IMPLEMENTATION
+//#ifdef LIGHTMAPPER_IMPLEMENTATION
 #undef LIGHTMAPPER_IMPLEMENTATION
 
 #include <stdlib.h>
@@ -116,6 +116,7 @@ lm_bool lmImageSaveTGAf(const char *filename, const float *image, int w, int h, 
 #include <float.h>
 #include <assert.h>
 #include <limits.h>
+#include <ostream>
 
 #define LM_SWAP(type, a, b) { type tmp = (a); (a) = (b); (b) = tmp; }
 
@@ -261,7 +262,7 @@ static int lm_convexClip(lm_vec2 *poly, int nPoly, const lm_vec2 *clip, int nCli
 
 struct lm_context
 {
-	struct
+    struct
 	{
 		const float *modelMatrix;
 		float normalMatrix[9];
@@ -1338,6 +1339,8 @@ lm_context *lmCreate(int hemisphereSize, float zNear, float zFar,
 
 	// allocate batchPosition-to-lightmapPosition map
 	ctx->hemisphere.fbHemiToLightmapLocation = (lm_ivec2*)LM_CALLOC(ctx->hemisphere.fbHemiCountX * ctx->hemisphere.fbHemiCountY, sizeof(lm_ivec2));
+    ctx->hemisphere.fbHemiToLightmapLocation->x = 0;
+    ctx->hemisphere.fbHemiToLightmapLocation->y = 0;
 
 	return ctx;
 }
@@ -1442,8 +1445,12 @@ void lmSetTargetLightmap(lm_context *ctx, float *outLightmap, int w, int h, int 
 		LM_FREE(ctx->hemisphere.storage.toLightmapLocation);
 	ctx->hemisphere.storage.toLightmapLocation = (lm_ivec2*)LM_CALLOC(w * h, sizeof(lm_ivec2));
 	// invalidate all positions
-	for (int i = 0; i < w * h; i++)
-		ctx->hemisphere.storage.toLightmapLocation[i].x = -1;
+	for (int i = 0; i < w * h; i++) {
+        ctx->hemisphere.storage.toLightmapLocation[i].x = -1;
+	}
+
+    ctx->hemisphere.fbHemiToLightmapLocation->x = 0;
+    ctx->hemisphere.fbHemiToLightmapLocation->y = 0;
 
 #ifdef LM_DEBUG_INTERPOLATION
 	if (ctx->lightmap.debug)
@@ -1773,4 +1780,4 @@ lm_bool lmImageSaveTGAf(const char *filename, const float *image, int w, int h, 
 	return success;
 }
 
-#endif // LIGHTMAPPER_IMPLEMENTATION
+//#endif // LIGHTMAPPER_IMPLEMENTATION

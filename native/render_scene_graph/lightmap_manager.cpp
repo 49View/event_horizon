@@ -14,7 +14,7 @@
 #include <graphics/opengl/gl_headers.hpp>
 
 #define LIGHTMAPPER_IMPLEMENTATION
-#define LM_DEBUG_INTERPOLATION
+//#define LM_DEBUG_INTERPOLATION
 
 #include <graphics/opengl/lightmapper_opengl.h>
 #include <graphics/renderer.h>
@@ -208,9 +208,12 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
 
 namespace LightmapManager {
 
-    static constexpr int sLightMapSize = 256;
+    static constexpr int sLightMapSize = 1024;
 
     int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
+
+        int w = scene->w, h = scene->h;
+
         lm_context *ctx = lmCreate(
                 64,               // hemisphere resolution (power of two, max=512)
                 0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
@@ -226,11 +229,13 @@ namespace LightmapManager {
             return 0;
         }
 
-        int w = scene->w, h = scene->h;
-        float *data = (float *) calloc(w * h * 4, sizeof(float));
-        float *temp = (float *) calloc(w * h * 4, sizeof(float));
+        constexpr int numBounces = 2;
+        for ( int bounce = 0; bounce < numBounces; bounce++ ) {
 
-//        for ( int t = 0; t < 2; t++ ) {
+            float *data = (float *) calloc(w * h * 4, sizeof(float));
+            float *temp = (float *) calloc(w * h * 4, sizeof(float));
+
+            glDisable(GL_CULL_FACE);
 
             lmSetTargetLightmap(ctx, data, w, h, 4);
 
@@ -245,7 +250,7 @@ namespace LightmapManager {
             int vp[4];
             float view[16], projection[16];
             auto lastUpdateTime = std::chrono::system_clock::now();
-            glDisable(GL_CULL_FACE);
+//            int iLoop = 0;
             while ( lmBegin(ctx, vp, view, projection) ) {
                 // render to lightmapper framebuffer
                 glViewport(vp[0], vp[1], vp[2], vp[3]);
@@ -254,6 +259,7 @@ namespace LightmapManager {
                 // display progress every second (printf is expensive)
                 auto time = std::chrono::system_clock::now();
                 std::chrono::duration<double> elapsed_seconds = time - lastUpdateTime;
+//                LOGRS("Loops: " << iLoop++ );
                 if ( elapsed_seconds.count() > 1.0 ) {
                     lastUpdateTime = time;
                     printf("\r%6.2f%%", lmProgress(ctx) * 100.0f);
@@ -264,30 +270,33 @@ namespace LightmapManager {
             }
             printf("\rFinished baking %d triangles.\n", scene->indexCount / 3);
 
-//        }
-        // postprocess texture
-        for ( int i = 0; i < 16; i++ ) {
-            lmImageDilate(data, temp, w, h, 4);
+            // postprocess texture
+            for ( int i = 0; i < 16; i++ ) {
+                lmImageDilate(data, temp, w, h, 4);
+                lmImageDilate(temp, data, w, h, 4);
+            }
+
+            lmImageSmooth(data, temp, w, h, 4);
             lmImageDilate(temp, data, w, h, 4);
+
+            if ( bounce == numBounces-1 ) {
+//                lmImagePower(data, w, h, 4, 1.0f / 3.0f, 0x7); // gamma correct color channels
+#ifndef ANDROID
+                // save result to a file
+                if ( lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f) )
+                    printf("Saved result.tga\n");
+#endif
+            }
+
+            // upload result
+            glBindTexture(GL_TEXTURE_2D, scene->lightmap);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
+
+            free(data);
+            free(temp);
         }
 
-        lmImageSmooth(data, temp, w, h, 4);
-        lmImageDilate(temp, data, w, h, 4);
-        lmImagePower(data, w, h, 4, 1.0f / 3.0f, 0x7); // gamma correct color channels
-        free(temp);
-
         lmDestroy(ctx);
-
-#ifndef ANDROID
-        // save result to a file
-        if ( lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f) )
-            printf("Saved result.tga\n");
-#endif
-
-        // upload result
-        glBindTexture(GL_TEXTURE_2D, scene->lightmap);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
-        free(data);
 
         glEnable(GL_BLEND);
 
