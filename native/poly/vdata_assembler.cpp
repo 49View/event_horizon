@@ -5,11 +5,11 @@
 #include "vdata_assembler.h"
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
-#include <core/raw_image.h>
 #include <core/math/poly_shapes.hpp>
 #include <poly/poly_services.hpp>
 #include <poly/follower.hpp>
 #include <poly/converters/svg/svgtopoly.hpp>
+#include <utility>
 #include <poly/converters/gltf2/gltf2.h>
 #include <poly/scene_graph.h>
 
@@ -24,11 +24,11 @@ namespace VDataServices {
 
 // ___ SHAPE BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::Shape& _d, Material* matPtr ) {
+    bool prepare( SceneGraph& sg, GT::Shape& _d, Material* ) {
         return true;
     }
 
-    void buildInternal( const GT::Shape& _d, std::shared_ptr<VData> _ret ) {
+    [[maybe_unused]] void buildInternal( const GT::Shape& _d, const std::shared_ptr<VData>& _ret ) {
         V3f center = V3fc::ZERO;
         V3f size = V3fc::ONE;
         int subDivs = 3;
@@ -98,7 +98,7 @@ namespace VDataServices {
         return true;
     }
 
-    void buildInternal( const GT::Poly& _d, std::shared_ptr<VData> _ret ) {
+    [[maybe_unused]] void buildInternal( const GT::Poly& _d, const std::shared_ptr<VData>& _ret ) {
         auto dmProgressive = _d.mappingData;
         for ( const auto& poly : _d.polyLines ) {
             PolyServices::addFlatPolyTriangulated( _ret, poly.verts.size(), poly.verts.data(), poly.normal,
@@ -136,7 +136,7 @@ namespace VDataServices {
         return hasData;
     }
 
-    void buildInternal( const GT::Extrude& _d, std::shared_ptr<VData> _ret ) {
+    [[maybe_unused]] void buildInternal( const GT::Extrude& _d, const std::shared_ptr<VData>& _ret ) {
         auto dmProgressive = _d.mappingData;
         for ( auto& ot : _d.extrusionVerts ) {
             auto evt = forceWindingOrder(ot.verts, ot.normal, WindingOrder::CCW);
@@ -169,8 +169,8 @@ namespace VDataServices {
         return false;
     }
 
-    void buildInternal( const GT::Text& _d, std::shared_ptr<VData> _ret ) {
-        float gliphScaler = 1000.0f; // It looks like glyphs are stored in a box [1000,1000], so we normalise it to [1,1]
+    [[maybe_unused]] void buildInternal( const GT::Text& _d, const std::shared_ptr<VData>& _ret ) {
+        float glyphScaler = 1000.0f; // It looks like glyphs are stored in a box [1000,1000], so we normalise it to [1,1]
         Vector2f cursor = V2fc::ZERO;
         Topology mesh;
         size_t q = 0;
@@ -182,20 +182,19 @@ namespace VDataServices {
             // Don't draw an empty space
             if ( !m.verts.empty() ) {
                 for ( size_t t = 0; t < m.verts.size(); t+=3 ) {
-                    Vector2f p1{ m.verts[t].pos.x / gliphScaler  , 1.0f - ( m.verts[t].pos.y / gliphScaler ) };
-                    Vector2f p3{ m.verts[t+2].pos.x / gliphScaler, 1.0f - ( m.verts[t+2].pos.y / gliphScaler ) };
-                    Vector2f p2{ m.verts[t+1].pos.x / gliphScaler, 1.0f - ( m.verts[t+1].pos.y / gliphScaler ) };
+                    Vector2f p1{ m.verts[t].pos.x / glyphScaler  , 1.0f - ( m.verts[t].pos.y / glyphScaler ) };
+                    Vector2f p3{ m.verts[t+2].pos.x / glyphScaler, 1.0f - ( m.verts[t + 2].pos.y / glyphScaler ) };
+                    Vector2f p2{ m.verts[t+1].pos.x / glyphScaler, 1.0f - ( m.verts[t + 1].pos.y / glyphScaler ) };
                     mesh.vertices.emplace_back( XZY::C( p1 + cursor ) );
                     mesh.vertices.emplace_back( XZY::C( p2 + cursor ) );
                     mesh.vertices.emplace_back( XZY::C( p3 + cursor ) );
                     mesh.addTriangle( q, q+1, q+2 );
                     q+=3;
-//                    fs->addVertex( XZY::C( pos4.xyz()), Vector2f{ m.verts[t].texCoord, m.verts[t].coef } );
                 }
             }
 
             Utility::TTFCore::vec2f kerning = _d.font->GetKerning( Utility::TTF::CodePoint( i ), cp );
-            Vector2f nextCharPos = Vector2f( kerning.x / gliphScaler, kerning.y / gliphScaler );
+            Vector2f nextCharPos = Vector2f(kerning.x / glyphScaler, kerning.y / glyphScaler );
             cursor += nextCharPos;
         }
 
@@ -215,7 +214,7 @@ namespace VDataServices {
         return !_d.quads.empty();
     }
 
-    void buildInternal( const GT::Mesh& _d, std::shared_ptr<VData> _ret ) {
+    [[maybe_unused]] void buildInternal( const GT::Mesh& _d, const std::shared_ptr<VData>& _ret ) {
         auto dmProgressive = _d.mappingData;
         for ( const auto& q : _d.quads ) {
             PolyServices::addFlatPoly( _ret, q.quad, q.normal, dmProgressive );
@@ -240,7 +239,7 @@ namespace VDataServices {
         return true;
     }
 
-    void buildInternal( const GT::ClothMesh& _d, std::shared_ptr<VData> _ret ) {
+    [[maybe_unused]] void buildInternal( const GT::ClothMesh& _d, const std::shared_ptr<VData>& _ret ) {
         if ( _d.cloth ) {
             Topology mesh;
 
@@ -295,10 +294,10 @@ namespace VDataServices {
         return true;
     }
 
-    void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret ) {
+    [[maybe_unused]] void buildInternal( const GT::Follower& _d, std::shared_ptr<VData> _ret ) {
         ASSERT( !_d.profile->Points().empty() );
 
-        Profile lProfile{ *_d.profile.get() };
+        Profile lProfile{ *_d.profile };
         Vector2f lRaise{V2fc::ZERO};
         if ( _d.fraise != PolyRaise::None ) {
             switch ( _d.fraise ) {
@@ -315,13 +314,13 @@ namespace VDataServices {
                 case PolyRaise::VerticalNeg:
                     lRaise= ( V2fc::Y_AXIS_NEG * lProfile.height() );
                     break;
-            };
+            }
         }
 
         lProfile.raise( lRaise );
         lProfile.flip( _d.flipVector );
 
-        FollowerService::extrude( _ret, _d.profilePath, lProfile, _d.mFollowerSuggestedAxis, _d.fflags );
+        FollowerService::extrude( std::move(_ret), _d.profilePath, lProfile, _d.mFollowerSuggestedAxis, _d.fflags );
     }
 
     ResourceRef refName( const GT::Follower& _d ) {
@@ -344,12 +343,12 @@ namespace VDataServices {
 
     // ___ GLTF2 BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::GLTF2& _d, Material* matPtr ) {
+    bool prepare( SceneGraph& sg, GT::GLTF2& _d, Material* ) {
         return true;
     }
 
-    void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret ) {
-        GLTF2Service::fillGeom( _ret, _d.model, _d.meshIndex, _d.primitiveIndex );
+    [[maybe_unused]] void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret ) {
+        GLTF2Service::fillGeom( std::move(_ret), _d.model, _d.meshIndex, _d.primitiveIndex );
     }
 
     ResourceRef refName( const GT::GLTF2& _d ) {
@@ -360,11 +359,11 @@ namespace VDataServices {
 
     // ___ ASSET BUILDER ___
 
-    bool prepare( SceneGraph& sg, GT::Asset& _d, Material* matPtr ) {
+    bool prepare( SceneGraph& sg, GT::Asset& _d, Material* ) {
         return true;
     }
 
-    void buildInternal( const GT::Asset& _d, std::shared_ptr<VData> _ret ) {
+    void buildInternal( const GT::Asset& _d, [[maybe_unused]] const std::shared_ptr<VData>& _ret ) {
 
     }
 
@@ -382,7 +381,7 @@ namespace VDataServices {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-    bool prepare( SceneGraph& sg, GT::OSM& _d, Material *matPtr ) {
+    bool prepare( SceneGraph& sg, GT::OSM& _d, Material* ) {
         return true;
     }
 
@@ -391,35 +390,7 @@ namespace VDataServices {
         return V2f{ latLon.x(), radToDeg(log(tan((latLon.y() / 90.0f + 1.0f) * M_PI_4 )))};
     }
 
-    template <typename T>
-    T latToY( T lat ) {
-        return radToDeg(log(tan((lat / 90.0 + 1.0) * M_PI_4 )));
-    }
-
-    template <typename T>
-    float calcGeoDistance( T lat1, T lon1, T lat2, T lon2 ) {
-        auto R = 6371e3; // metres
-        auto phi1 = degToRad(lat1); // φ, λ in radians
-        auto phi2 = degToRad(lat2);
-        auto deltaPhi = degToRad(lat2-lat1);
-        auto deltaLambda = degToRad(lon2-lon1);
-
-        auto a = sin(deltaPhi/2.0) * sin(deltaPhi/2.0) +
-                  cos(phi1) * cos(phi2) *
-                  sin(deltaLambda/2.0) * sin(deltaLambda/2.0);
-        auto c = 2.0 * atan2(sqrt(a), sqrt(1.0-a));
-
-        auto d = (R * c); // in metres
-
-        return d;
-    }
-
-    template <typename T>
-    T remap( T x, T a1, T a2, T b1, T b2 ) {
-        return lerp( lerpInv(x, a1, a2), b1, b2 );
-    }
-
-    void buildInternal( const GT::OSM& _d, std::shared_ptr<VData> _ret ) {
+    [[maybe_unused]] void buildInternal( const GT::OSM& _d, const std::shared_ptr<VData>& _ret ) {
 
         Topology mesh{};
         std::vector<C4f> vertexColors;

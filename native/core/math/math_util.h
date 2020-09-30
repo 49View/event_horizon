@@ -455,6 +455,11 @@ namespace JMATH {
         return ( r - a ) / ( b - a );
     }
 
+    template <typename T>
+    T remap( T x, T a1, T a2, T b1, T b2 ) {
+        return lerp( lerpInv(x, a1, a2), b1, b2 );
+    }
+
     inline float unitRand( float scale = 1.0f ) {
         // Regarding precision: the result will have 24-bit precision (i.e. full float32_t precision) on iOS and Android (where RAND_MAX is 2^31-1).
         // On platforms where RAND_MAX is 2^15-1 (e.g. Windows desktop and mobile) the result will only have 15-bit precision.
