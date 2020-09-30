@@ -421,7 +421,24 @@ public:
     GeomSP GB( Args&&... args ) {
         VDataAssembler<T> gb{std::forward<Args>(args)...};
         GeomSP elem;
-        if constexpr ( !std::is_same_v<T, GT::Asset> ) {
+        if constexpr ( std::is_same_v<T, GT::Asset> ) {
+            if ( auto elemToClone = get<Geom>(gb.dataTypeHolder.nameId); elemToClone ) {
+                elem = EF::clone(elemToClone);
+                if ( gb.tag ) elem->setTag(gb.tag);
+                if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
+                if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
+                    auto mt = GBMatInternal(gb.matRef, gb.matColor );
+                    ResourceRef matRef = std::get<0>(mt);
+                    auto programRef = gb.programRef;
+                    elem->foreach( [matRef, programRef](const GeomSP& _geom) {
+                        if ( !_geom->empty() ) {
+                            _geom->DataRef().material = matRef;
+                            _geom->DataRef().program = programRef;
+                        }
+                    });
+                }
+            }
+        } else {
             auto [matRef, matPtr] = GBMatInternal(gb.matRef, gb.matColor );
 
             if ( VDataServices::prepare( *this, gb.dataTypeHolder, matPtr ) ) {
@@ -439,23 +456,6 @@ public:
 
                 if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
                 B<GRB>( gb.Name() ).addIM( elem );
-            }
-        } else {
-            if ( auto elemToClone = get<Geom>(gb.dataTypeHolder.nameId); elemToClone ) {
-                elem = EF::clone(elemToClone);
-                if ( gb.tag ) elem->setTag(gb.tag);
-                if ( gb.elemInjFather ) gb.elemInjFather->addChildren(elem, gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
-                if ( !gb.matRef.empty() && gb.matRef != S::WHITE_PBR ) {
-                    auto mt = GBMatInternal(gb.matRef, gb.matColor );
-                    ResourceRef matRef = std::get<0>(mt);
-                    auto programRef = gb.programRef;
-                    elem->foreach( [matRef, programRef](const GeomSP& _geom) {
-                        if ( !_geom->empty() ) {
-                            _geom->DataRef().material = matRef;
-                            _geom->DataRef().program = programRef;
-                        }
-                    });
-                }
             }
         }
         if ( !gb.elemInjFather ) {
