@@ -14,25 +14,6 @@
 #include <ostream>
 #include <core/math/vector2f.h>
 
-//struct V2f
-//{
-//    double x;
-//    double y;
-//
-//    V2f(double _x, double _y) : x(_x), y(_y) {}
-//
-//    V2f() : x(0.0), y(0.0) {}
-//
-//    bool operator<(const V2f &p) const
-//    {
-//        return x < p.x || (x == p.x && y < p.y);
-//    }
-//    friend ostream& operator<<( ostream& os, const V2f& point ) {
-//        os << "x: " << point.x << " y: " << point.y;
-//        return os;
-//    }
-//};
-
 struct MinAreaRect
 {
     double width;

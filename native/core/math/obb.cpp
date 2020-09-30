@@ -19,7 +19,9 @@ std::vector<V2f> RotatingCalipers::convexHull(std::vector<V2f> P)
     if (n <= 3) return P;
 
     std::vector<V2f> H(2 * n);
-    std::sort(P.begin(), P.end());
+    std::sort(P.begin(), P.end(), [](const auto& a, const auto& b) -> bool {
+        return a.x() < b.x() || (a.x() == b.x() && a.y() < b.y());
+    });
 
     for (size_t i = 0; i < n; ++i)
     {

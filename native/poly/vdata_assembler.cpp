@@ -5,6 +5,7 @@
 #include "vdata_assembler.h"
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
+#include <core/math/obb.hpp>
 #include <core/math/poly_shapes.hpp>
 #include <poly/poly_services.hpp>
 #include <poly/follower.hpp>
@@ -428,14 +429,23 @@ namespace VDataServices {
                 if ( group.part.empty() ) {
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
                         auto v1 = mp(ti);
-                        mesh.addVertex( v1, V4fc::ZERO, color );
+                        mesh.addVertex( v1, V4fc::ZERO, color*10.0 );
                     }
                 } else if ( group.part == "roof_faces" ) {
+                    std::vector<V2f> rootPoints{};
+                    for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
+                        V3f p = mp(ti);
+                        rootPoints.emplace_back( V2f(p.xz()) );
+                    }
+                    auto gObb = RotatingCalipers::minAreaRect(rootPoints);
+
                     float yOff = 12.0f + static_cast<float>(unitRandI(3)) ;
                     V2f tile{static_cast<float>(unitRandI(15))/16.0f, yOff/16.0f};
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
                         auto v1 = mp(ti);
                         V2f uv1 = dominantMapping( V3f::UP_AXIS(), v1, V3fc::ONE );
+                        uv1*=V2fc::ONE*(1.0f/globalScale)*facadeMappingScale;
+                        uv1.rotate(gObb.angle_width);
                         mesh.addVertex( v1, V4f{uv1, tile}, color );
                     }
                 } else if ( group.part == "lateral_faces" ) {
