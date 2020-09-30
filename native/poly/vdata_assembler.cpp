@@ -394,6 +394,7 @@ namespace VDataServices {
     [[maybe_unused]] void buildInternal( const GT::OSM& _d, const std::shared_ptr<VData>& _ret ) {
 
         Topology mesh{};
+        Rect2f bigBoundary{Rect2f::INVALID};
 
         size_t indexOffset = 0;
         float globalScale = 0.01f;
@@ -416,11 +417,12 @@ namespace VDataServices {
             V3f elemCenterProj3d = XZY::C( V2f{elemCX, elemCY}, 0.0f);
 
             for ( const auto& group : element.groups ) {
-                auto mp = [group, elemCenterProj3d, globalScale]( auto i ) -> V3f {
+                auto mp = [group, elemCenterProj3d, globalScale]( auto i, Rect2f& boundary ) -> V3f {
                     auto vertex = group.triangles[i];
                     V3f pp{XZY::C(vertex) + elemCenterProj3d};
                     pp.swizzle(0,2);
                     pp*=globalScale;
+                    boundary.expand(pp.xz());
                     return pp;
                 };
 
@@ -428,13 +430,13 @@ namespace VDataServices {
                 // && element.type == "road"
                 if ( group.part.empty() ) {
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
-                        auto v1 = mp(ti);
+                        auto v1 = mp(ti, bigBoundary);
                         mesh.addVertex( v1, V4fc::ZERO, color*10.0 );
                     }
                 } else if ( group.part == "roof_faces" ) {
                     std::vector<V2f> rootPoints{};
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
-                        V3f p = mp(ti);
+                        V3f p = mp(ti, bigBoundary);
                         rootPoints.emplace_back( V2f(p.xz()) );
                     }
                     auto gObb = RotatingCalipers::minAreaRect(rootPoints);
@@ -442,10 +444,10 @@ namespace VDataServices {
                     float yOff = 12.0f + static_cast<float>(unitRandI(3)) ;
                     V2f tile{static_cast<float>(unitRandI(15))/16.0f, yOff/16.0f};
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
-                        auto v1 = mp(ti);
+                        auto v1 = mp(ti, bigBoundary);
                         V2f uv1 = dominantMapping( V3f::UP_AXIS(), v1, V3fc::ONE );
-                        uv1*=V2fc::ONE*(1.0f/globalScale)*facadeMappingScale;
-                        uv1.rotate(gObb.angle_width);
+                        uv1*=V2fc::ONE*(1.0f/globalScale)*facadeMappingScale*.25f;
+                        uv1.rotate(static_cast<float>(gObb.angle_width));
                         mesh.addVertex( v1, V4f{uv1, tile}, color );
                     }
                 } else if ( group.part == "lateral_faces" ) {
@@ -454,12 +456,12 @@ namespace VDataServices {
                     float xAcc = 0.0f;
                     for ( auto ti = 0u; ti < group.triangles.size(); ti+=6 ) {
 
-                        auto v1 = mp(ti);
-                        auto v2 = mp(ti+1);
-                        auto v3 = mp(ti+2);
-                        auto v4 = mp(ti+3);
-                        auto v5 = mp(ti+4);
-                        auto v6 = mp(ti+5);
+                        auto v1 = mp(ti  , bigBoundary);
+                        auto v2 = mp(ti+1, bigBoundary);
+                        auto v3 = mp(ti+2, bigBoundary);
+                        auto v4 = mp(ti+3, bigBoundary);
+                        auto v5 = mp(ti+4, bigBoundary);
+                        auto v6 = mp(ti+5, bigBoundary);
 
                         float dist = distance(v1, v2);
                         V2f uv1 = V2f{xAcc, -v1.y()};
@@ -487,6 +489,16 @@ namespace VDataServices {
                 indexOffset += group.triangles.size();
             }
         }
+
+        auto bList = bigBoundary.pointsTriangleList();
+
+        for ( const auto& bv : bList ) {
+            mesh.addVertex( XZY::C(bv, 0.0f), V4fc::ZERO, C4fc::SANDY_BROWN );
+        }
+        for ( auto ti = indexOffset; ti < indexOffset + 6; ti+=3 ) {
+            mesh.addTriangle(ti, ti+1, ti+2);
+        }
+        indexOffset += 6;
 
         PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked}, 0, ReverseFlag::False );
         _ret->fill( ps );
