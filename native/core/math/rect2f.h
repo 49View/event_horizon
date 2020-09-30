@@ -133,13 +133,14 @@ public:
 	Vector2f coordOfFeature( JMATH::Rect2fFeatureT feature );
 	JMATH::Rect2fFeatureT isPointNearAFeature( const Vector2f& pos, float minDist, float& ret_distance );
 
-	std::vector<Vector2f> points() const;
-    V2fVector pointsStrip() const;
-    std::vector<Vector2f> pointscw() const;
-	std::vector<Vector3f> points3d( float z = 0.0f ) const;
-    std::vector<Vector3f> points3d_xzy() const;
-    std::vector<Vector3f> points3dcw_xzy() const;
-    std::vector<Vector3f> points3dcw( float z = 0.0f ) const;
+	[[nodiscard]] std::vector<Vector2f> points() const;
+    [[nodiscard]] V2fVector pointsStrip() const;
+    [[nodiscard]] V2fVector pointsTriangleList() const;
+    [[nodiscard]] std::vector<Vector2f> pointscw() const;
+	[[nodiscard]] std::vector<Vector3f> points3d( float z = 0.0f ) const;
+    [[nodiscard]] std::vector<Vector3f> points3d_xzy() const;
+    [[nodiscard]] std::vector<Vector3f> points3dcw_xzy() const;
+    [[nodiscard]] std::vector<Vector3f> points3dcw( float z = 0.0f ) const;
 
 	[[nodiscard]] Rect2f squared() const;
     [[nodiscard]] Rect2f squaredBothSides() const;

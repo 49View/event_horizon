@@ -676,6 +676,19 @@ V2fVector Rect2f::pointsStrip() const {
     return ret;
 }
 
+V2fVector Rect2f::pointsTriangleList() const {
+    V2fVector ret;
+
+    ret.push_back( bottomRight());
+    ret.push_back( topRight());
+    ret.push_back( bottomLeft());
+    ret.push_back( topLeft());
+    ret.push_back( bottomLeft());
+    ret.push_back( topRight());
+
+    return ret;
+}
+
 std::vector<Vector2f> Rect2f::pointscw() const {
     std::vector<Vector2f> ret;
 
