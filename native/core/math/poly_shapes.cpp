@@ -176,6 +176,12 @@ void Topology::addVertex( const V3f& _vertex, const V4f& _uv ) {
     vertexUVs.emplace_back(_uv);
 }
 
+void Topology::addVertex( const V3f& _vertex, const V4f& _uv, const C4f& _color ) {
+    vertices.emplace_back(_vertex);
+    vertexUVs.emplace_back(_uv);
+    colors.emplace_back(_color);
+}
+
 ShapeType shapeTypeFromString( const std::string& value ) {
 
     if ( toLower(value) == "cube" ) return ShapeType::Cube;
@@ -671,7 +677,7 @@ void RoundedCube( Topology& mesh, [[maybe_unused]] uint32_t subdivs, float radiu
 //    *targetV = (-normal->y + 1) / 2;
 //}
 
-PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs, ReverseFlag rf, const std::vector<C4f>& _vertexColors ) {
+PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs, ReverseFlag rf ) {
 
     for ( int j = 0; j < subdivs; ++j ) {
         mesh = SubdivideMesh( mesh );
@@ -694,11 +700,11 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     t = 0;
     for ( auto& tr : mesh.triangles ) {
         ret.indices[t] = tr;
-        if ( _vertexColors.empty() ) {
+        if ( mesh.colors.empty() ) {
             auto cv = C4fc::WHITE;// (t%3) == 0 ? C4fc::RED : ( (t%3) == 1 ? C4fc::GREEN : C4fc::BLUE );
             ret.colors[t] = cv;
         } else {
-            ret.colors[t] = _vertexColors[tr];
+            ret.colors[t] = mesh.colors[tr];
         }
         ++t;
     }

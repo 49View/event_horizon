@@ -393,7 +393,6 @@ namespace VDataServices {
     [[maybe_unused]] void buildInternal( const GT::OSM& _d, const std::shared_ptr<VData>& _ret ) {
 
         Topology mesh{};
-        std::vector<C4f> vertexColors;
 
         size_t indexOffset = 0;
         float globalScale = 0.01f;
@@ -429,8 +428,7 @@ namespace VDataServices {
                 if ( group.part.empty() ) {
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
                         auto v1 = mp(ti);
-                        mesh.addVertex( v1, V4fc::ZERO );
-                        vertexColors.emplace_back( color );
+                        mesh.addVertex( v1, V4fc::ZERO, color );
                     }
                 } else if ( group.part == "roof_faces" ) {
                     float yOff = 12.0f + static_cast<float>(unitRandI(3)) ;
@@ -438,8 +436,7 @@ namespace VDataServices {
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
                         auto v1 = mp(ti);
                         V2f uv1 = dominantMapping( V3f::UP_AXIS(), v1, V3fc::ONE );
-                        mesh.addVertex( v1, V4f{uv1, tile} );
-                        vertexColors.emplace_back( color );
+                        mesh.addVertex( v1, V4f{uv1, tile}, color );
                     }
                 } else if ( group.part == "lateral_faces" ) {
                     auto yOff = static_cast<float>(unitRandI(12));
@@ -462,18 +459,12 @@ namespace VDataServices {
                         V2f uv5 = V2f{xAcc + dist, -v5.y()};
                         V2f uv6 = V2f{xAcc, -v6.y()};
 
-                        mesh.addVertex( v1, V4f{uv1*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
-                        mesh.addVertex( v2, V4f{uv2*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
-                        mesh.addVertex( v3, V4f{uv3*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
-                        mesh.addVertex( v4, V4f{uv4*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
-                        mesh.addVertex( v5, V4f{uv5*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
-                        mesh.addVertex( v6, V4f{uv6*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile} );
-                        vertexColors.emplace_back( color );
-                        vertexColors.emplace_back( color );
-                        vertexColors.emplace_back( color );
-                        vertexColors.emplace_back( color );
-                        vertexColors.emplace_back( color );
-                        vertexColors.emplace_back( color );
+                        mesh.addVertex( v1, V4f{uv1*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertex( v2, V4f{uv2*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertex( v3, V4f{uv3*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertex( v4, V4f{uv4*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertex( v5, V4f{uv5*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertex( v6, V4f{uv6*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
                         xAcc += dist;
                     }
                 }
@@ -487,7 +478,7 @@ namespace VDataServices {
             }
         }
 
-        PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked}, 0, ReverseFlag::False, vertexColors );
+        PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked}, 0, ReverseFlag::False );
         _ret->fill( ps );
     }
 
