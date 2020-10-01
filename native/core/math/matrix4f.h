@@ -420,6 +420,10 @@ public:
 						 position.dot( Vector4f( mRows[0].w(), mRows[1].w(), mRows[2].w(), mRows[3].w() ) ) ).xyz();
 	}
 
+    Vector3f transform( const Vector2f& position2 ) const {
+        return transform(V3f{position2} );
+    }
+
 	Vector3f transform3x3( const Vector3f& position3 ) const {
 		return Vector3f( dot( position3, { mRows[0].x(), mRows[1].x(), mRows[2].x() } ),
 						 dot( position3, { mRows[0].y(), mRows[1].y(), mRows[2].y() } ),

@@ -52,6 +52,13 @@ public:
 		mW = static_cast<float>(_v[3]);
 	}
 
+    explicit Vector4f( const float* coords ) {
+        mX = coords[0];
+        mY = coords[1];
+        mZ = coords[2];
+        mW = coords[3];
+    }
+
 	[[nodiscard]] float x() const {
 		return mX;
 	}

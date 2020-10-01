@@ -411,7 +411,7 @@ void pushTriangle( VDataSP vdata,
     Vector3f vco[3];
     Vector2f vuvo[3];
     Vector3f vno[3];
-    Vector3f vto[3];
+    Vector4f vto[3];
     Vector3f vbo[3];
 
     if ( m.windingOrder == WindingOrder::CCW ) {

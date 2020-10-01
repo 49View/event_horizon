@@ -191,13 +191,23 @@ double Topology::distance( const Vector3f& p ) const {
         auto a = triangles.size()-3;
         auto b = triangles.size()-2;
         auto c = triangles.size()-1;
-        Vector3f n = normalize( crossProduct( vertices[a], vertices[c], vertices[b] ) );
-        vertexNormals.emplace_back( n );
-        vertexNormals.emplace_back( n );
-        vertexNormals.emplace_back( n );
+        auto cp = crossProduct( vertices[a], vertices[c], vertices[b] );
+        if ( cp.isValid() ) {
+            Vector3f n = normalize( cp );
+            vertexNormals.emplace_back( n );
+            vertexNormals.emplace_back( n );
+            vertexNormals.emplace_back( n );
 //        smoothing[vertices[a].hash()].emplace_back( n );
 //        smoothing[vertices[b].hash()].emplace_back( n );
 //        smoothing[vertices[c].hash()].emplace_back( n );
+        } else {
+            for ( int q = 0; q < 3; q++ ) {
+                vertices.pop_back();
+                vertexUVs.pop_back();
+                colors.pop_back();
+                triangles.pop_back();
+            }
+        }
     }
 }
 
@@ -821,7 +831,7 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
         Vector2f uvSphericalNorm{ 3.0f, 1.5f };
         for ( int q = 0; q < ret.numIndices; q++ ) {
             Vector3f p = ret.verts[ret.indices[q]];
-            Vector3f uv = cartasianToSpherical(XZY::C(p)) * Vector3f{1.0f/M_PI, 1.0f/M_PI_2, 1.0f};
+            Vector3f uv = cartesianToSpherical(XZY::C(p)) * Vector3f{ 1.0f / M_PI, 1.0f / M_PI_2, 1.0f};
             ret.uvs[q] = uv.xy();// * Vector2f(2.0f, 1.0f);
             ret.uvs[q] += V2f{1.0f, 0.0f};
             ret.uvs[q] *= uvSphericalNorm;

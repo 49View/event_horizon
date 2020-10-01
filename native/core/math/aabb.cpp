@@ -183,9 +183,9 @@ bool AABB::intersectLine( const Vector3f& linePos, const Vector3f& lineDir, floa
 std::vector<Vector3f> AABB::topDownOutline( CompositeWrapping _wrap ) const {
     std::vector<Vector3f> ret;
     ret.emplace_back(mMinPoint.xy());
-    ret.push_back(Vector2f{ mMaxPoint.x(), mMinPoint.y() });
+    ret.emplace_back( mMaxPoint.x(), mMinPoint.y() );
     ret.emplace_back(mMaxPoint.xy());
-    ret.push_back(Vector2f{ mMinPoint.x(), mMaxPoint.y() });
+    ret.emplace_back( mMinPoint.x(), mMaxPoint.y() );
     if ( _wrap == CompositeWrapping::Wrap ) {
         ret.emplace_back(mMinPoint.xy());
     }

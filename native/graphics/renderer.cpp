@@ -398,10 +398,10 @@ void Renderer::remapVP( const VData* _vData, CResourceRef _hash ) {
 //            _indices[t] = scene.indices[t + vo.ioffset] - vo.ioffset;
 //        }
 //
-//        auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( (int32_t)vo.vsize, PRIMITIVE_TRIANGLES,
+//        auto SOAData = std::make_shared<PosTexNorTanBinUV2Col3dStrip>( (int32_t)vo.vSize, PRIMITIVE_TRIANGLES,
 //                                                                       VFVertexAllocation::PreAllocate, (int32_t)vo.isize,
 //                                                                       std::move(_indices) );
-//        for ( size_t t = 0; t < vo.vsize; t++ ) {
+//        for ( size_t t = 0; t < vo.vSize; t++ ) {
 //            const auto& v = scene.vertices[vo.voffset+t];
 //            PUUNTBC p = scene.vertices[vo.voffset+t].orig;
 //            p.a2  = V2f{ v.t[0], v.t[1] };

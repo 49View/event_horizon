@@ -808,7 +808,7 @@ void Camera::incrementSphericalAngles( const V2f& _sph ) {
 }
 
 void Camera::computeOrbitPosition() {
-    auto stc = sphericalToCartasian(V3f{ sphericalAcc, mOrbitDistance });
+    auto stc = sphericalToCartesian(V3f{ sphericalAcc, mOrbitDistance });
     setPosition(mTarget + XZY::C(stc));
 }
 

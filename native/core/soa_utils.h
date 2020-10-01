@@ -809,13 +809,13 @@ public:
         std::unique_ptr<uint32_t[]> _indices = std::unique_ptr<uint32_t[]>( new uint32_t[4]{ 0, 1, 2, 3 } );
         std::unique_ptr<V[]> _verts = std::unique_ptr<V[]>( new V[4] );
 
-        _verts[0].pos = Vector2f( rect.bottomRight());
+        _verts[0].pos = Vector3f( rect.bottomRight());
         _verts[0].a1 = tcoords[0];// Vector2f(1.0f, 0.0f);
-        _verts[1].pos = Vector2f( rect.topRight());
+        _verts[1].pos = Vector3f( rect.topRight());
         _verts[1].a1 = tcoords[1];//Vector2f(1.0f, 1.0f);
-        _verts[2].pos = Vector2f( rect.bottomLeft());
+        _verts[2].pos = Vector3f( rect.bottomLeft());
         _verts[2].a1 = tcoords[2];//Vector2f(0.0f, 0.0f);
-        _verts[3].pos = Vector2f( rect.topLeft());
+        _verts[3].pos = Vector3f( rect.topLeft());
         _verts[3].a1 = tcoords[3];//Vector2f(0.0f, 1.0f);
 
         init( 4, PRIMITIVE_TRIANGLE_STRIP, 4, _verts, std::move(_indices) );

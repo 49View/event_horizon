@@ -289,7 +289,7 @@ Vector3f rotateFollowerPlane90( const Vector3f& vpos, const Vector3f& vn3d ) {
     Quaternion r1{ halfAngle, vn3d };
     Quaternion r2{ -halfAngle, vn3d };
     Quaternion vqn = r1 * qp * r2;
-    return vqn.vector();
+    return V3f{vqn.vector()};
 }
 
 void Follower::reserveVBounding( uint64_t size ) {

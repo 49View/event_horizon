@@ -597,9 +597,9 @@ VPListSP Renderer::drawTextFinal( const RendererDrawingSet& rds ) {
                     Vector2f p1{ m.verts[tr + 0].pos.x, vhfm.ascent - ( m.verts[tr + 0].pos.y ) };
                     Vector2f p3{ m.verts[tr + 1].pos.x, vhfm.ascent - ( m.verts[tr + 1].pos.y ) };
                     Vector2f p2{ m.verts[tr + 2].pos.x, vhfm.ascent - ( m.verts[tr + 2].pos.y ) };
-                    ps->addVertex(p1 + cursor, V2f{ m.verts[tr + 0].texCoord, m.verts[tr + 0].coef });
-                    ps->addVertex(p2 + cursor, V2f{ m.verts[tr + 2].texCoord, m.verts[tr + 2].coef });
-                    ps->addVertex(p3 + cursor, V2f{ m.verts[tr + 1].texCoord, m.verts[tr + 1].coef });
+                    ps->addVertex(V3f{p1 + cursor}, V2f{ m.verts[tr + 0].texCoord, m.verts[tr + 0].coef });
+                    ps->addVertex(V3f{p2 + cursor}, V2f{ m.verts[tr + 2].texCoord, m.verts[tr + 2].coef });
+                    ps->addVertex(V3f{p3 + cursor}, V2f{ m.verts[tr + 1].texCoord, m.verts[tr + 1].coef });
                 } else {
                     Vector2f p1{ m.verts[tr + 0].pos.x, ( m.verts[tr + 0].pos.y ) };
                     Vector2f p3{ m.verts[tr + 1].pos.x, ( m.verts[tr + 1].pos.y ) };

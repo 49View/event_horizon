@@ -24,7 +24,7 @@ struct MPos2d {
     template<typename ...Args>
     explicit MPos2d( Args&& ... args ) : data( std::forward<Args>( args )...) {
         data.oneMinusY();
-        data *= getScreenAspectRatioVector;
+        data *= V3f{getScreenAspectRatioVector};
     }
     V3f operator()() const noexcept {
         return data;

@@ -48,6 +48,10 @@ std::pair<int32_t, int32_t> Vector3f::leastDominantPair() const {
     return std::make_pair<int32_t, int32_t>( 0, 1 );
 }
 
+bool Vector3f::isValid() const {
+    return ::isValid(mX) && ::isValid(mY) && ::isValid(mZ);
+}
+
 void removeCollinear( std::vector<Vector3f>& cs ) {
 	int csize = static_cast<int>( cs.size() );
 	if ( csize < 3 ) return;
@@ -113,6 +117,10 @@ QuadVector3f makeQuadV3f( const Vector3f& p1, const Vector3f& p2, float z2 ) {
 
 Vector3f XZY::C( const Vector3f& _v ) {
 	return _v.xzy();
+}
+
+Vector3f XZY::C( const Vector2f& _v ) {
+    return V3f{_v}.xzy();
 }
 
 Vector3f XZY::C( const Vector2f& v2, const float z ) {

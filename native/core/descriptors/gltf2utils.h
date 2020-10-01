@@ -81,8 +81,8 @@ namespace GLTF2Service {
             if ( k == "POSITION" ) {
                 GLTF2Service::ExtraAccessorData ead;
                 auto acc = model->accessors[v];
-                ead.min = acc.minValues;
-                ead.max = acc.maxValues;
+                ead.min = V3f{acc.minValues};
+                ead.max = V3f{acc.maxValues};
                 geom->setMax(ead.max);
                 geom->setMin(ead.min);
             }

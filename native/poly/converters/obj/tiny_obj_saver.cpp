@@ -3,12 +3,12 @@
 //
 
 //struct VertexOffsetScene {
-//    VertexOffsetScene( const std::string& uuid, size_t voffset, size_t vsize, size_t ioffset, size_t isize ) : uuid(
-//            uuid ), voffset( voffset ), vsize( vsize ), ioffset( ioffset ), isize( isize ) {}
+//    VertexOffsetScene( const std::string& uuid, size_t voffset, size_t vSize, size_t ioffset, size_t isize ) : uuid(
+//            uuid ), voffset( voffset ), vsize( vSize ), ioffset( ioffset ), isize( isize ) {}
 //
 //    std::string uuid;
 //    size_t voffset = 0;
-//    size_t vsize = 0;
+//    size_t vSize = 0;
 //    size_t ioffset = 0;
 //    size_t isize = 0;
 //};

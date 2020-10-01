@@ -351,7 +351,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
         float fOff = 0.0f;
         for ( auto& t : fsize ) {
             this->RR().draw<DText2d>(CommandBufferLimits::UI2dStart,
-                                     FDS{ message, pfont.get(), V2f{ 0.02f, 0.98f - fOff }, t.first }, t.second);
+                                     FDS{ message, pfont.get(), V3f{ 0.02f, 0.98f - fOff }, t.first }, t.second);
             fOff += t.first + t.first * 0.25f;
         }
         Socket::send("wasmClientFinishedLoadingData", pfont->serializeParams());

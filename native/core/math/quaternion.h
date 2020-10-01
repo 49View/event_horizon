@@ -234,7 +234,7 @@ public:
 	*
 	* This is simply the vector [x y z w]<sup>T</sup>
 	*/
-	Vector4f vector() const { return Vector4f( mData ); }
+	Vector4f vector() const { return Vector4f{ mData }; }
 
 	/**
 	* @brief Returns the norm ("magnitude") of the quaternion.

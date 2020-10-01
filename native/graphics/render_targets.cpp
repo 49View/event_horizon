@@ -340,7 +340,7 @@ void CompositePlain::setup( const Rect2f& _destViewport ) {
     if ( mCompositeFinalDest == BlitType::OffScreen ) {
         // What is this?
         LOGRS("What is this?")
-//        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer" }.size(vsize).noDepth().
+//        mOffScreenBlitFB = FrameBufferBuilder{ rr, "offScreenFinalFrameBuffer" }.size(vSize).noDepth().
 //                dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).GPUSlot(TSLOT_COLOR).
 //                IM(S::FINAL_COMBINE).build();
     }
@@ -362,7 +362,7 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
 #ifdef USE_UIBLITBUFFER
     mUIFB = FrameBufferBuilder{rr,"uiFrameBuffer"}.multisampled().size(vsize).format
             (PIXEL_FORMAT_RGBA).build();
-    mUIBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer}.size(vsize).noDepth()
+    mUIBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer}.size(vSize).noDepth()
             .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).build();
 #endif
     mBlurHorizontalFB = FrameBufferBuilder{ rr, FBNames::blur_horizontal }.size(vsize * bloomScale).noDepth()
@@ -374,7 +374,7 @@ void CompositePBR::setup( const Rect2f& _destViewport ) {
             dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_HDR_RGBA_16).GPUSlot(TSLOT_COLOR).
             IM(S::FINAL_COMBINE).build();
 
-//    mOffScreenBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer }.size(vsize).noDepth()
+//    mOffScreenBlitFB = FrameBufferBuilder{ rr, FBNames::offScreenFinalFrameBuffer }.size(vSize).noDepth()
 //            .dv(_destViewport, mCompositeFinalDest).format(PIXEL_FORMAT_RGBA).build();
 
     float ssaoScaling = 2.0f;

@@ -81,8 +81,8 @@ namespace GLTF2Service {
         UCharFiller ucf{};
 
         auto acc = model.accessors[_index];
-        if ( !acc.minValues.empty() && _ead ) _ead->min = acc.minValues;
-        if ( !acc.maxValues.empty() && _ead ) _ead->max = acc.maxValues;
+        if ( !acc.minValues.empty() && _ead ) _ead->min = V3f{acc.minValues};
+        if ( !acc.maxValues.empty() && _ead ) _ead->max = V3f{acc.maxValues};
 
         auto bvi = model.bufferViews[acc.bufferView];
         auto &bufferContent = model.buffers[bvi.buffer];

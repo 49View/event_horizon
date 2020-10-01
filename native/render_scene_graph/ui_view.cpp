@@ -66,7 +66,7 @@ void UIElement::loadResource( std::shared_ptr<Matrix4f> _localHierMat ) {
         }
         if ( !text.empty() ) {
             foregroundVP =rsg.RR().draw<DText2d>( CommandBufferLimits::UI2dStart,
-                                                  FDS{ text, font, ssBBox.bottomLeft(), fontHeight, fontAngle},
+                                                  FDS{ text, font, V3f{ssBBox.bottomLeft()}, fontHeight, fontAngle},
                                                   _localHierMat, fontColor );
         }
     }
@@ -470,7 +470,7 @@ void UIViewContainer::addSeparator( float percScaleY ) {
     auto childDadeT2 = EF::create<UIElementRT>(PFC{}, rsg, UUIDGen::make(), MScale2d{innerPaddedX, 0.0025f*percScaleY},
                                                UIT::separator_h );
 
-    wholeLiners.push_back( node->addChildren( childDadeT2, caret ) );
+    wholeLiners.push_back( node->addChildren( childDadeT2, V3f{caret} ) );
     advanceCaret( CSSDisplayMode::Block, MScale2d{ innerPaddedX, padding.y() } );
 }
 
@@ -482,7 +482,7 @@ void UIViewContainer::addLabel( const UIFontText& _text,
 //    child->BBox3d( V2fc::ZERO, fsize );
     auto tpos = caret;
     if ( lsize().x() != 0.0f ) tpos.setX( (lsize().x() - fsize.x()*0.5f) );
-    node->addChildren( child, tpos );
+    node->addChildren( child, V3f{tpos} );
     advanceCaret( displayMode, MScale2d{fsize} );
 }
 
@@ -490,7 +490,7 @@ UIElementSP UIViewContainer::addButton( const ControlDef& _cd, const MScale2d& _
                                         UITapAreaType _bt, const V2f& _pos ) {
 
     auto child = EF::create<UIElementRT>(PFC{}, rsg, _cd, _bsize, _bt, UIForegroundIcon{_cd.icon}, _cd.tintColor, _cd.cbParam );
-    node->addChildren( child, caret );
+    node->addChildren( child, V3f{caret} );
     advanceCaret( displayMode, _bsize );
     return child;
 }
