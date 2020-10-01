@@ -52,25 +52,26 @@ struct Topology {
 
     Vector3f normalFromSmartSmoothing( uint32_t index, int vIndex );
 
-    void addVertex( const V3f& _vertex );
-    void addVertex( const V3f& _vertex, const V2f& _uv );
-    void addVertex( const V3f& _vertex, const V4f& _uv );
-    void addVertex( const V3f& _vertex, const V4f& _uv, const C4f& _color );
+    [[maybe_unused]] void addVertex( const V3f& _vertex );
+    [[maybe_unused]] void addVertex( const V3f& _vertex, const V2f& _uv );
+    [[maybe_unused]] void addVertex( const V3f& _vertex, const V4f& _uv );
+    [[maybe_unused]] void addVertex( const V3f& _vertex, const V4f& _uv, const C4f& _color );
+    [[maybe_unused]] void addVertexOfTriangle( const V3f& _vertex, const V4f& _uv, const C4f& _color );
     void addTriangle( uint32_t a, uint32_t b, uint32_t c );
     void addQuad( uint32_t a, uint32_t b, uint32_t c, uint32_t d );
     void addQuadAlt( uint32_t a, uint32_t b, uint32_t c, uint32_t d );
     void clear();
-    double distance( const Vector3f& p, uint32_t tidx ) const;
+    double distance( const Vector3f& p, uint32_t tidX ) const;
     double distance( const Vector3f& p ) const;
 };
 
-PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, const int subdivs );
-PolyStruct createGeomForCylinder( const Vector3f& center, const Vector2f& size, const int subdivs = 1 );
+PolyStruct createGeomForSphere( const Vector3f& center, float diameter, int subdivs );
+PolyStruct createGeomForCylinder( const Vector3f& center, const Vector2f& size, int subdivs = 1 );
 PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size );
 PolyStruct createGeomForAABB( const AABB& aabb );
 PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size );
-PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs = 5, float radius = 0.15f );
-PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs = 5, float radius = 0.05f );
+PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, int subdivs = 5, float radius = 0.15f );
+PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, int subdivs = 5, float radius = 0.05f );
 
 PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt,
                        int subdivs = 0, ReverseFlag rf = ReverseFlag::False );

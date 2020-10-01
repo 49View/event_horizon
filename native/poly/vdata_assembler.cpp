@@ -382,21 +382,87 @@ namespace VDataServices {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-    bool prepare( SceneGraph& sg, GT::OSM& _d, Material* ) {
-        return true;
-    }
-
-
     V2f coordToProjection( const V2f& latLon ) {
         return V2f{ latLon.x(), radToDeg(log(tan((latLon.y() / 90.0f + 1.0f) * M_PI_4 )))};
     }
 
-    [[maybe_unused]] void buildInternal( const GT::OSM& _d, const std::shared_ptr<VData>& _ret ) {
+    bool prepare( SceneGraph& sg, GT::OSMTile& _d, Material* ) {
+        return true;
+    }
+
+    [[maybe_unused]] void buildInternal( const GT::OSMTile& _d, const std::shared_ptr<VData>& _ret ) {
 
         Topology mesh{};
         Rect2f bigBoundary{Rect2f::INVALID};
 
-        size_t indexOffset = 0;
+        float globalScale = 0.01f;
+
+        double minX = std::numeric_limits<double>::max(), minY = std::numeric_limits<double>::max();
+        double maxX = std::numeric_limits<double>::lowest(), maxY = std::numeric_limits<double>::lowest();
+
+        for ( const auto& element : _d.osmData.elements ) {
+            if ( element.center.x < minX ) minX = element.center.x;
+            if ( element.center.y < minY ) minY = element.center.y;
+            if ( element.center.x > maxX ) maxX = element.center.x;
+            if ( element.center.y > maxY ) maxY = element.center.y;
+        }
+        double sizeX = maxX - minX;
+        double sizeY = maxY - minY;
+        std::vector<std::pair<V3f, C4f>> tilePoints{};
+
+        for ( const auto& element : _d.osmData.elements ) {
+            double elemCX = remap( element.center.x, minX, maxX, -sizeX*0.5, sizeX*0.5 );
+            double elemCY = remap( element.center.y, minY, maxY, -sizeY*0.5, sizeY*0.5 );
+            V3f elemCenterProj3d = XZY::C( V2f{elemCX, elemCY}, 0.0f);
+
+            for ( const auto& group : element.groups ) {
+                auto mp = [group, elemCenterProj3d, globalScale]( auto i, Rect2f& boundary ) -> V3f {
+                    auto vertex = group.triangles[i];
+                    V3f pp{XZY::C(vertex) + elemCenterProj3d};
+                    pp.swizzle(0,2);
+                    pp*=globalScale;
+                    boundary.expand(pp.xz());
+                    return pp;
+                };
+
+                C4f color = C4fc::XTORGBA(group.colour);
+                // && element.type == "road"
+                if ( group.part.empty() ) {
+                    for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
+                        tilePoints.emplace_back(mp(ti, bigBoundary), color*10.0f );
+                    }
+                }
+            }
+        }
+
+        auto bList = bigBoundary.pointsTriangleList();
+
+        for ( const auto& bv : bList ) {
+            mesh.addVertexOfTriangle( XZY::C(bv, 0.0f), V4fc::ZERO, C4fc::SANDY_BROWN );
+        }
+
+        for ( const auto& tp : tilePoints ) {
+            mesh.addVertexOfTriangle( tp.first, V4fc::ZERO, tp.second );
+        }
+
+
+        PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked}, 0, ReverseFlag::False );
+        _ret->fill( ps );
+    }
+
+    ResourceRef refName( const GT::OSMTile& _d ) {
+        return "OSMTile--" + UUIDGen::make();
+    }
+
+    bool prepare( SceneGraph& sg, GT::OSMBuildings& _d, Material* ) {
+        return true;
+    }
+
+    [[maybe_unused]] void buildInternal( const GT::OSMBuildings& _d, const std::shared_ptr<VData>& _ret ) {
+
+        Topology mesh{};
+        Rect2f bigBoundary{Rect2f::INVALID};
+
         float globalScale = 0.01f;
         float facadeMappingScale = 0.1f;
 
@@ -428,12 +494,7 @@ namespace VDataServices {
 
                 C4f color = C4fc::XTORGBA(group.colour);
                 // && element.type == "road"
-                if ( group.part.empty() ) {
-                    for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
-                        auto v1 = mp(ti, bigBoundary);
-                        mesh.addVertex( v1, V4fc::ZERO, color*10.0 );
-                    }
-                } else if ( group.part == "roof_faces" ) {
+                if ( group.part == "roof_faces" ) {
                     std::vector<V2f> rootPoints{};
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
                         V3f p = mp(ti, bigBoundary);
@@ -448,7 +509,7 @@ namespace VDataServices {
                         V2f uv1 = dominantMapping( V3f::UP_AXIS(), v1, V3fc::ONE );
                         uv1*=V2fc::ONE*(1.0f/globalScale)*facadeMappingScale*.25f;
                         uv1.rotate(static_cast<float>(gObb.angle_width));
-                        mesh.addVertex( v1, V4f{uv1, tile}, color );
+                        mesh.addVertexOfTriangle( v1, V4f{uv1, tile}, color );
                     }
                 } else if ( group.part == "lateral_faces" ) {
                     auto yOff = static_cast<float>(unitRandI(12));
@@ -471,41 +532,24 @@ namespace VDataServices {
                         V2f uv5 = V2f{xAcc + dist, -v5.y()};
                         V2f uv6 = V2f{xAcc, -v6.y()};
 
-                        mesh.addVertex( v1, V4f{uv1*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
-                        mesh.addVertex( v2, V4f{uv2*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
-                        mesh.addVertex( v3, V4f{uv3*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
-                        mesh.addVertex( v4, V4f{uv4*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
-                        mesh.addVertex( v5, V4f{uv5*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
-                        mesh.addVertex( v6, V4f{uv6*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertexOfTriangle( v1, V4f{uv1*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertexOfTriangle( v2, V4f{uv2*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertexOfTriangle( v3, V4f{uv3*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertexOfTriangle( v4, V4f{uv4*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertexOfTriangle( v5, V4f{uv5*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
+                        mesh.addVertexOfTriangle( v6, V4f{uv6*V2fc::ONE*(1.0f/globalScale)*facadeMappingScale, tile}, color );
                         xAcc += dist;
                     }
                 }
-
-                for ( auto ti = indexOffset; ti < indexOffset + group.triangles.size(); ti+=3 ) {
-                    if ( !isCollinear(mesh.vertices[ti], mesh.vertices[ti+1], mesh.vertices[ti+2]) ) {
-                        mesh.addTriangle(ti, ti+1, ti+2);
-                    }
-                }
-                indexOffset += group.triangles.size();
             }
         }
-
-        auto bList = bigBoundary.pointsTriangleList();
-
-        for ( const auto& bv : bList ) {
-            mesh.addVertex( XZY::C(bv, 0.0f), V4fc::ZERO, C4fc::SANDY_BROWN );
-        }
-        for ( auto ti = indexOffset; ti < indexOffset + 6; ti+=3 ) {
-            mesh.addTriangle(ti, ti+1, ti+2);
-        }
-//        indexOffset += 6;
 
         PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked}, 0, ReverseFlag::False );
         _ret->fill( ps );
     }
 
-    ResourceRef refName( const GT::OSM& _d ) {
-        return ResourceRef();
+    ResourceRef refName( const GT::OSMBuildings& _d ) {
+        return "OSMBuildings--" + UUIDGen::make();
     }
 
 // ********************************************************************************************************************

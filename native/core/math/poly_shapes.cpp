@@ -63,10 +63,10 @@ void Topology::clear() {
     triangles.clear();
 }
 
-double Topology::distance( const Vector3f& p, uint32_t tidx ) const {
-    const uint32_t idx0 = triangles[tidx];
-    const uint32_t idx1 = triangles[tidx + 1];
-    const uint32_t idx2 = triangles[tidx + 2];
+double Topology::distance( const Vector3f& p, uint32_t tidX ) const {
+    const uint32_t idx0 = triangles[tidX];
+    const uint32_t idx1 = triangles[tidX + 1];
+    const uint32_t idx2 = triangles[tidX + 2];
     const Vector3f v0 = vertices[idx0];
     const Vector3f v1 = vertices[idx1];
     const Vector3f v2 = vertices[idx2];
@@ -162,24 +162,43 @@ double Topology::distance( const Vector3f& p ) const {
     return min;
 }
 
-void Topology::addVertex( const V3f& _vertex ) {
+[[maybe_unused]] void Topology::addVertex( const V3f& _vertex ) {
     vertices.emplace_back(_vertex);
 }
 
-void Topology::addVertex( const V3f& _vertex, const V2f& _uv ) {
+[[maybe_unused]] void Topology::addVertex( const V3f& _vertex, const V2f& _uv ) {
     vertices.emplace_back(_vertex);
     vertexUVs.emplace_back(V4f{_uv, V2fc::ZERO});
 }
 
-void Topology::addVertex( const V3f& _vertex, const V4f& _uv ) {
+[[maybe_unused]] void Topology::addVertex( const V3f& _vertex, const V4f& _uv ) {
     vertices.emplace_back(_vertex);
     vertexUVs.emplace_back(_uv);
 }
 
-void Topology::addVertex( const V3f& _vertex, const V4f& _uv, const C4f& _color ) {
+[[maybe_unused]] void Topology::addVertex( const V3f& _vertex, const V4f& _uv, const C4f& _color ) {
     vertices.emplace_back(_vertex);
     vertexUVs.emplace_back(_uv);
     colors.emplace_back(_color);
+}
+
+[[maybe_unused]] void Topology::addVertexOfTriangle( const V3f& _vertex, const V4f& _uv, const C4f& _color ) {
+    vertices.emplace_back(_vertex);
+    vertexUVs.emplace_back(_uv);
+    colors.emplace_back(_color);
+    triangles.emplace_back( triangles.size() );
+    if ( triangles.size() % 3 == 0 && !triangles.empty() ) {
+        auto a = triangles.size()-3;
+        auto b = triangles.size()-2;
+        auto c = triangles.size()-1;
+        Vector3f n = normalize( crossProduct( vertices[a], vertices[c], vertices[b] ) );
+        vertexNormals.emplace_back( n );
+        vertexNormals.emplace_back( n );
+        vertexNormals.emplace_back( n );
+//        smoothing[vertices[a].hash()].emplace_back( n );
+//        smoothing[vertices[b].hash()].emplace_back( n );
+//        smoothing[vertices[c].hash()].emplace_back( n );
+    }
 }
 
 ShapeType shapeTypeFromString( const std::string& value ) {
@@ -188,7 +207,7 @@ ShapeType shapeTypeFromString( const std::string& value ) {
     if ( toLower(value) == "sphere" ) return ShapeType::Sphere;
 
     return ShapeType::None;
-};
+}
 
 std::string shapeTypeToString( const ShapeType value ) {
 
@@ -216,7 +235,7 @@ std::string shapeTypeToString( const ShapeType value ) {
     }
 
     return {};
-};
+}
 
 uint32_t subdivideEdge( uint32_t f0, uint32_t f1, const Vector3f& v0, const Vector3f& v1, Topology& io_mesh,
                         std::map<Edge, uint32_t>& io_divisions ) {
@@ -260,7 +279,7 @@ Topology SubdivideMesh( const Topology& meshIn ) {
     return meshOut;
 }
 
-void Icosahedron( Topology& mesh ) {
+[[maybe_unused]] void Icosahedron( Topology& mesh ) {
     const double t = ( 1.0 + std::sqrt( 5.0 )) / 2.0;
 
     // Vertices

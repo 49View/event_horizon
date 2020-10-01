@@ -339,15 +339,16 @@ namespace GT {
         V2f locationLatLon = V2fc::ZERO;
     };
 
-    struct Shape     : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
-    struct Follower  : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals, ForceNormalAxis {};
-    struct Extrude   : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
-    struct Poly      : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
-    struct Mesh      : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
-    struct ClothMesh : GTPolicyTRS, GTPolicyCloth, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
-    struct GLTF2     : GTPolicyTRS, GTPolicyGLTF2Model, GTPolicyNameId, GTPolicyModifiers {};
-    struct Asset     : GTPolicyTRS, GTPolicyNameId {};
-    struct OSM       : GTPolicyTRS, GTPolicyOSMData {};
-    struct VData     : GTPolicyTRS {};
-    struct Text      : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
+    struct Shape        : GTPolicyTRS, GTPolicyShape, GTPolicyColor {};
+    struct Follower     : GTPolicyTRS, GTPolicyFollower, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals, ForceNormalAxis {};
+    struct Extrude      : GTPolicyTRS, GTPolicyExtrusion, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
+    struct Poly         : GTPolicyTRS, GTPolicyPolyline, GTPolicyMapping, GTPolicyColor, GTPolicyZ, GTReverseNormals {};
+    struct Mesh         : GTPolicyTRS, GTPolicyQuad, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
+    struct ClothMesh    : GTPolicyTRS, GTPolicyCloth, GTPolicyMapping, GTPolicyColor, GTReverseNormals {};
+    struct GLTF2        : GTPolicyTRS, GTPolicyGLTF2Model, GTPolicyNameId, GTPolicyModifiers {};
+    struct Asset        : GTPolicyTRS, GTPolicyNameId {};
+    struct OSMTile      : GTPolicyTRS, GTPolicyOSMData {};
+    struct OSMBuildings : GTPolicyTRS, GTPolicyOSMData {};
+    struct VData        : GTPolicyTRS {};
+    struct Text         : GTPolicyTRS, GTPolicyText, GTPolicyColor {};
 }

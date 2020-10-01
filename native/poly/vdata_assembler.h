@@ -82,7 +82,7 @@ public:
             return *this;
         }
         if constexpr ( std::is_same_v<M, Vector2f> ) {
-            if constexpr ( std::is_same_v<SGT, GT::OSM> ) {
+            if constexpr ( std::is_same_v<SGT, GT::OSMBuildings> || std::is_same_v<SGT, GT::OSMTile> ) {
                 dataTypeHolder.locationLatLon = _param;
             }
             return *this;
@@ -279,7 +279,7 @@ public:
         }
 
         if constexpr ( std::is_same_v<M, OSMData> ) {
-            static_assert( std::is_same_v<SGT, GT::OSM> );
+            static_assert( std::is_same_v<SGT, GT::OSMBuildings> || std::is_same_v<SGT, GT::OSMTile> );
             dataTypeHolder.osmData = _param;
             return *this;
         }
@@ -337,9 +337,13 @@ namespace VDataServices {
     void buildInternal( const GT::GLTF2& _d, std::shared_ptr<VData> _ret );
     ResourceRef refName( const GT::GLTF2& _d );
 
-    bool prepare( SceneGraph& sg, GT::OSM& _d, Material* matPtr );
-    void buildInternal( const GT::OSM& _d, const std::shared_ptr<VData>& _ret );
-    ResourceRef refName( const GT::OSM& _d );
+    bool prepare( SceneGraph& sg, GT::OSMTile& _d, Material* matPtr );
+    void buildInternal( const GT::OSMTile& _d, const std::shared_ptr<VData>& _ret );
+    ResourceRef refName( const GT::OSMTile& _d );
+
+    bool prepare( SceneGraph& sg, GT::OSMBuildings& _d, Material* matPtr );
+    void buildInternal( const GT::OSMBuildings& _d, const std::shared_ptr<VData>& _ret );
+    ResourceRef refName( const GT::OSMBuildings& _d );
 
     bool prepare( SceneGraph& sg, GT::Asset& _d, Material* matPtr );
     void buildInternal( const GT::Asset& _d, const std::shared_ptr<VData>& _ret );
