@@ -488,6 +488,23 @@ void RLTargetPBR::addToCB( CommandBufferList& cb ) {
                 mSkybox->render();
             }
 
+            cb.startList(shared_from_this(), CommandBufferFlags::CBF_DoNotSort);
+            cb.pushCommand({ CommandBufferCommandName::depthWriteTrue });
+            cb.pushCommand({ CommandBufferCommandName::depthTestFalse });
+            cb.pushCommand({ CommandBufferCommandName::cullModeBack });
+            cb.pushCommand({ CommandBufferCommandName::alphaBlendingTrue });
+
+            for ( const auto&[k, vl] : rr.CL() ) {
+                if ( inRange(k, { CommandBufferLimits::PBRStartUnsorted, CommandBufferLimits::PBREndUnsorted }) && !hiddenCB(k) ) {
+                    rr.addToCommandBuffer(vl.mVList, currentCamera.get());
+                }
+            }
+            for ( const auto&[k, vl] : rr.CL() ) {
+                if ( inRange(k, { CommandBufferLimits::PBRStartUnsorted, CommandBufferLimits::PBREndUnsorted }) && !hiddenCB(k) ) {
+                    rr.addToCommandBuffer(vl.mVListTransparent, currentCamera.get());
+                }
+            }
+
             cb.startList(shared_from_this(), CommandBufferFlags::CBF_None);
             cb.pushCommand({ CommandBufferCommandName::depthWriteTrue });
             cb.pushCommand({ CommandBufferCommandName::depthTestTrue });

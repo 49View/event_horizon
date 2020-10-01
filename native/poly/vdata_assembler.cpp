@@ -498,7 +498,7 @@ namespace VDataServices {
         for ( auto ti = indexOffset; ti < indexOffset + 6; ti+=3 ) {
             mesh.addTriangle(ti, ti+1, ti+2);
         }
-        indexOffset += 6;
+//        indexOffset += 6;
 
         PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked}, 0, ReverseFlag::False );
         _ret->fill( ps );

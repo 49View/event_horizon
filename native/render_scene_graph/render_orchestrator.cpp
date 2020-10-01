@@ -145,6 +145,19 @@ void foreachCL( CommandBufferListVectorMap& CL, F func, const T& _value, Args ..
     }
 }
 
+int bucketToCL( int bucket ) {
+    switch ( bucket ) {
+        case GTBucket::NearUnsorted:
+            return CommandBufferLimits::PBRStartUnsorted;
+        case GTBucket::Far:
+            return CommandBufferLimits::PBRStartFar;
+        case GTBucket::FarUnsorted:
+            return CommandBufferLimits::PBREndFarUnsorted;
+        default:
+            return CommandBufferLimits::PBRStart;
+    }
+}
+
 RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr), sg(_sg), uiView(_sg, colorScheme) {
 
     sg.runLUAScript([this]( const std::string& _value ) {
@@ -227,7 +240,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
                     t(geom->getLocalHierTransform()).
                     b(&dataRef.BBox3d()).
                     build();
-            auto bucket = _geomAndBucket.second == GTBucket::Near ? CommandBufferLimits::PBRStart : CommandBufferLimits::PBRStartFar;
+            auto bucket = bucketToCL(_geomAndBucket.second);
             this->RR().VPL(bucket, vp );
         }
         this->RR().invalidateOnAdd();
@@ -236,7 +249,7 @@ RenderOrchestrator::RenderOrchestrator( Renderer& rr, SceneGraph& _sg ) : rr(rr)
     sg.nodeUpdateConnect([this]( NodeGraphConnectParamsSig _geomAndBucket ) {
         auto geom = _geomAndBucket.first;
         if ( geom->empty() ) return;
-        auto bucket = _geomAndBucket.second == GTBucket::Near ? CommandBufferLimits::PBRStart : CommandBufferLimits::PBRStartFar;
+        auto bucket = bucketToCL(_geomAndBucket.second);
         for ( const auto& dataRef : geom->DataVRef() ) {
             auto newvDataRef = UUIDGen::make();
             ResourceTransfer<VData> vDataRT{ sg.VL().getFromHash(dataRef.vData), newvDataRef, {newvDataRef}};

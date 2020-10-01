@@ -20,8 +20,11 @@ struct OSMData;
 
 namespace GTBucket {
     [[maybe_unused]] static constexpr inline int Near = 0;
-    [[maybe_unused]] static constexpr inline int Medium = 1;
-    [[maybe_unused]] static constexpr inline int Far = 2;
+    [[maybe_unused]] static constexpr inline int NearUnsorted = 1;
+    [[maybe_unused]] static constexpr inline int Medium = 2;
+    [[maybe_unused]] static constexpr inline int MediumUnsorted = 3;
+    [[maybe_unused]] static constexpr inline int Far = 4;
+    [[maybe_unused]] static constexpr inline int FarUnsorted = 5;
 }
 
 enum class UIShapeType {
