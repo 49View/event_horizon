@@ -6,6 +6,21 @@
 
 #include "core/serialization.hpp"
 
+namespace OSMElementName {
+    static inline std::string building() {
+        return "building";
+    }
+    static inline std::string park() {
+        return "park";
+    }
+    static inline std::string water() {
+        return "water";
+    }
+    static inline std::string tree() {
+        return "tree";
+    }
+}
+
 template <typename T>
 [[maybe_unused]] T latToY( T lat ) {
     return radToDeg(log(tan((lat / 90.0 + 1.0) * M_PI_4 )));
@@ -29,13 +44,12 @@ template <typename T>
     return d;
 }
 
-JSONDATA(OSMCenter, x, y, lat, lon, deltaX, deltaY)
+JSONDATA(OSMCenter, x, y, lat, lon, deltaPosInTile)
     double x = 0.0;
     double y = 0.0;
     double lat = 0.0;
     double lon = 0.0;
-    double deltaX = 0.0;
-    double deltaY = 0.0;
+    std::vector<double> deltaPosInTile{};
 };
 
 JSONDATA(OSMGroup, colour, part, triangles)
