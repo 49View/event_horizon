@@ -397,29 +397,15 @@ namespace VDataServices {
 
         float globalScale = 0.01f;
 
-        double minX = std::numeric_limits<double>::max(), minY = std::numeric_limits<double>::max();
-        double maxX = std::numeric_limits<double>::lowest(), maxY = std::numeric_limits<double>::lowest();
-
-        for ( const auto& element : _d.osmData.elements ) {
-            if ( element.center.x < minX ) minX = element.center.x;
-            if ( element.center.y < minY ) minY = element.center.y;
-            if ( element.center.x > maxX ) maxX = element.center.x;
-            if ( element.center.y > maxY ) maxY = element.center.y;
-        }
-        double sizeX = maxX - minX;
-        double sizeY = maxY - minY;
         std::vector<std::pair<V3f, C4f>> tilePoints{};
 
         for ( const auto& element : _d.osmData.elements ) {
-            double elemCX = remap( element.center.x, minX, maxX, -sizeX*0.5, sizeX*0.5 );
-            double elemCY = remap( element.center.y, minY, maxY, -sizeY*0.5, sizeY*0.5 );
-            V3f elemCenterProj3d = XZY::C( V2f{elemCX, elemCY}, 0.0f);
+            V3f elemCenterProj3d = XZY::C( V2f{element.center.deltaX, element.center.deltaY}, 0.0f);
 
             for ( const auto& group : element.groups ) {
                 auto mp = [group, elemCenterProj3d, globalScale]( auto i, Rect2f& boundary ) -> V3f {
                     auto vertex = group.triangles[i];
                     V3f pp{XZY::C(vertex) + elemCenterProj3d};
-                    pp.swizzle(0,2);
                     pp*=globalScale;
                     boundary.expand(pp.xz());
                     return pp;
@@ -430,7 +416,7 @@ namespace VDataServices {
                     // && element.type == "road"
                     if ( group.part.empty() ) {
                         for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
-                            tilePoints.emplace_back(mp(ti, bigBoundary), color*10.0f );
+                            tilePoints.emplace_back(mp(ti, bigBoundary), color );
                         }
                     }
 //                }
@@ -465,27 +451,14 @@ namespace VDataServices {
         float globalScale = 0.01f;
         float facadeMappingScale = 0.1f;
 
-        double minX = std::numeric_limits<double>::max(), minY = std::numeric_limits<double>::max();
-        double maxX = std::numeric_limits<double>::lowest(), maxY = std::numeric_limits<double>::lowest();
-
         for ( const auto& element : _d.osmData.elements ) {
-            if ( element.center.x < minX ) minX = element.center.x;
-            if ( element.center.y < minY ) minY = element.center.y;
-            if ( element.center.x > maxX ) maxX = element.center.x;
-            if ( element.center.y > maxY ) maxY = element.center.y;
-        }
-        double sizeX = maxX - minX;
-        double sizeY = maxY - minY;
-        for ( const auto& element : _d.osmData.elements ) {
-            double elemCX = remap( element.center.x, minX, maxX, -sizeX*0.5, sizeX*0.5 );
-            double elemCY = remap( element.center.y, minY, maxY, -sizeY*0.5, sizeY*0.5 );
-            V3f elemCenterProj3d = XZY::C( V2f{element.center.deltaX, element.center.deltaY}, 0.0f) - XZY::C( V2f{elemCX, elemCY}, 0.0f);
+            V3f elemCenterProj3d = XZY::C( V2f{element.center.deltaX, element.center.deltaY}, 0.0f);// - XZY::C( V2f{elemCX, elemCY}, 0.0f);
 
             for ( const auto& group : element.groups ) {
                 auto mp = [group, elemCenterProj3d, globalScale]( auto i, Rect2f& boundary ) -> V3f {
                     auto vertex = group.triangles[i];
                     V3f pp{XZY::C(vertex) + elemCenterProj3d};
-                    pp.swizzle(0,2);
+//                    pp.swizzle(0,2);
                     pp*=globalScale;
                     boundary.expand(pp.xz());
                     return pp;
