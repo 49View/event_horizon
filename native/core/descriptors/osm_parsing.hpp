@@ -29,11 +29,13 @@ template <typename T>
     return d;
 }
 
-JSONDATA(OSMCenter, x, y, lat, lon)
+JSONDATA(OSMCenter, x, y, lat, lon, deltaX, deltaY)
     double x = 0.0;
     double y = 0.0;
     double lat = 0.0;
     double lon = 0.0;
+    double deltaX = 0.0;
+    double deltaY = 0.0;
 };
 
 JSONDATA(OSMGroup, colour, part, triangles)

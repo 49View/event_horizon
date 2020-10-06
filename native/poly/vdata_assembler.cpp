@@ -425,26 +425,25 @@ namespace VDataServices {
                     return pp;
                 };
 
-                C4f color = C4fc::XTORGBA(group.colour);
-                // && element.type == "road"
-                if ( group.part.empty() ) {
-                    for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
-                        tilePoints.emplace_back(mp(ti, bigBoundary), color*10.0f );
+//                if ( element.type != "water" ) {
+                    C4f color = C4fc::XTORGBA(group.colour);
+                    // && element.type == "road"
+                    if ( group.part.empty() ) {
+                        for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
+                            tilePoints.emplace_back(mp(ti, bigBoundary), color*10.0f );
+                        }
                     }
-                }
+//                }
             }
         }
 
-        auto bList = bigBoundary.pointsTriangleList();
-
-        for ( const auto& bv : bList ) {
-            mesh.addVertexOfTriangle( XZY::C(bv, 0.0f), V4fc::ZERO, C4fc::SANDY_BROWN );
+        for ( const auto& bv : bigBoundary.pointsTriangleList() ) {
+            mesh.addVertexOfTriangle( XZY::C(bv, 0.0f), V4fc::ZERO, C4fc::WHITE*1000.0F );
         }
 
         for ( const auto& tp : tilePoints ) {
             mesh.addVertexOfTriangle( tp.first, V4fc::ZERO, tp.second );
         }
-
 
         PolyStruct ps = createGeom( mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked}, 0, ReverseFlag::False );
         _ret->fill( ps );
@@ -480,7 +479,7 @@ namespace VDataServices {
         for ( const auto& element : _d.osmData.elements ) {
             double elemCX = remap( element.center.x, minX, maxX, -sizeX*0.5, sizeX*0.5 );
             double elemCY = remap( element.center.y, minY, maxY, -sizeY*0.5, sizeY*0.5 );
-            V3f elemCenterProj3d = XZY::C( V2f{elemCX, elemCY}, 0.0f);
+            V3f elemCenterProj3d = XZY::C( V2f{element.center.deltaX, element.center.deltaY}, 0.0f) - XZY::C( V2f{elemCX, elemCY}, 0.0f);
 
             for ( const auto& group : element.groups ) {
                 auto mp = [group, elemCenterProj3d, globalScale]( auto i, Rect2f& boundary ) -> V3f {
@@ -493,7 +492,6 @@ namespace VDataServices {
                 };
 
                 C4f color = C4fc::XTORGBA(group.colour);
-                // && element.type == "road"
                 if ( group.part == "roof_faces" ) {
                     std::vector<V2f> rootPoints{};
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
@@ -504,6 +502,7 @@ namespace VDataServices {
 
                     float yOff = 12.0f + static_cast<float>(unitRandI(3)) ;
                     V2f tile{static_cast<float>(unitRandI(15))/16.0f, yOff/16.0f};
+                    tile = V2fc::ZERO;
                     for ( auto ti = 0u; ti < group.triangles.size(); ti++ ) {
                         auto v1 = mp(ti, bigBoundary);
                         V2f uv1 = dominantMapping( V3f::UP_AXIS(), v1, V3fc::ONE );
@@ -514,6 +513,7 @@ namespace VDataServices {
                 } else if ( group.part == "lateral_faces" ) {
                     auto yOff = static_cast<float>(unitRandI(12));
                     V2f tile{static_cast<float>(unitRandI(15))/16.0f, yOff/16.0f};
+                    tile = V2fc::ZERO;
                     float xAcc = 0.0f;
                     for ( auto ti = 0u; ti < group.triangles.size(); ti+=6 ) {
 
