@@ -329,12 +329,12 @@ Topology SubdivideMesh( const Topology& meshIn ) {
     mesh.addTriangle( 9, 8, 1 );
 }
 
-void UVSphere( Topology& mesh, int subdivs ) {
+void UVSphere( Topology& mesh, int subdivs, const C4f& color ) {
 
     uint32_t meridians = subdivs*12;
     uint32_t parallels = subdivs*12;
 
-    mesh.vertices.emplace_back(V3fc::Y_AXIS*0.5f);
+    mesh.addVertex(V3fc::Y_AXIS*0.5f, V4fc::ZERO, color);
     for (uint32_t j = 0; j < parallels - 1; ++j)
     {
         double const polar = M_PI * double(j+1) / double(parallels);
@@ -348,10 +348,10 @@ void UVSphere( Topology& mesh, int subdivs ) {
             double const x = sp * ca;
             double const y = cp;
             double const z = sp * sa;
-            mesh.vertices.emplace_back( V3f{x, y, z}*0.5f );
+            mesh.addVertex( V3f{x, y, z}*0.5f, V4fc::ZERO, color );
         }
     }
-    mesh.vertices.emplace_back(V3fc::Y_AXIS_NEG*0.5f);
+    mesh.addVertex(V3fc::Y_AXIS_NEG*0.5f, V4fc::ZERO, color);
 
     for (uint32_t i = 0; i < meridians; ++i)
     {
@@ -503,6 +503,40 @@ void Cylinder( Topology& mesh, int edges ) {
     }
     mesh.addQuad( 0, st-1,
                   st, st*2-1 );
+}
+
+void Cone( Topology& mesh, int edges, const C4f& color = C4fc::WHITE ) {
+    // Vertices
+
+    std::vector<float> angles;
+    angles.reserve( edges );
+    float inc = 360.0f / static_cast<float>(edges);
+    float angle = 0.0f;
+    for ( int t = 0; t < edges; t++ ) {
+        angles.emplace_back( angle );
+        angle+=inc;
+    }
+
+    for ( const auto a : angles ) {
+        auto a1 = degToRad(a);
+        mesh.addVertex( V3f( cosf(a1), 0.0f, sinf(a1) ), V4fc::ZERO, color );
+    }
+    mesh.addVertex( V3f( 0.0f, 1.0f, 0.0f ), V4fc::ZERO, color );
+
+    // Faces
+
+    // bottom
+//    for ( int t = 1; t < edges-1; t++ ) {
+//        mesh.addTriangle( 0, t, t+1 );
+//    }
+
+    // sizes
+    auto st = static_cast<uint32_t >( angles.size() );
+    for ( uint32_t i = 0; i < st-1; i++ ) {
+        mesh.addTriangle(i,st, i+1 );
+    }
+    mesh.addTriangle(st-1,st, 0 );
+
 }
 
 
@@ -885,16 +919,16 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& center, const Vector3f& s
     return ret;
 }
 
-PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, const int subdivs ) {
+PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, const int subdivs, const C4f& color ) {
 
     Topology mesh;
 //    Icosahedron( mesh );
 //    return createGeom( mesh, center, Vector3f{ diameter }, GeomMappingT::Spherical, subdivs );
-    UVSphere( mesh, subdivs );
+    UVSphere( mesh, subdivs, color );
     return createGeom( mesh, center, Vector3f{ diameter }, GeomMappingT::SphericalUV, 0 );
 }
 
-PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
+PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size, const C4f& color ) {
 
     Topology mesh;
     Cube( mesh );
@@ -902,7 +936,7 @@ PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
     return createGeom( mesh, center, size, GeomMappingT::Cube, 0 );
 }
 
-PolyStruct createGeomForAABB( const AABB& aabb ) {
+PolyStruct createGeomForAABB( const AABB& aabb, const C4f& color ) {
 
     Topology mesh;
     AxisAlignedBoundingBox( mesh, aabb );
@@ -910,7 +944,7 @@ PolyStruct createGeomForAABB( const AABB& aabb ) {
     return createGeom( mesh, V3f::ZERO(), V3fc::ONE, GeomMappingT::Cube, 0 );
 }
 
-PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
+PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size, const C4f& color ) {
 
     Topology mesh;
     Panel( mesh );
@@ -918,7 +952,7 @@ PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
     return createGeom( mesh, center, size, GeomMappingT::PlanarNoTile, 0 );
 }
 
-PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const int subdivs ) {
+PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const int subdivs, const C4f& color ) {
 
     Topology mesh;
     int edges = subdivs * 8;
@@ -927,7 +961,16 @@ PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const
     return createGeom( mesh, center, Vector3f{ size.x(), size.y(), size.x() }, GeomMappingT::Cylindrical, 0 );
 }
 
-PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
+PolyStruct createGeomForCone( const Vector3f& center, const V3f& size, const int subdivs, const C4f& color ) {
+
+    Topology mesh;
+    int edges = subdivs * 8;
+    Cone( mesh, edges, color );
+
+    return createGeom( mesh, center, Vector3f{ size.x(), size.y(), size.x() }, GeomMappingT::Cylindrical, 0 );
+}
+
+PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs, float radius, const C4f& color ) {
 
     Topology mesh;
     Pillow( mesh, subdivs, radius * size.y() *0.05f );
@@ -935,7 +978,7 @@ PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, co
     return createGeom( mesh, center, size, GeomMappingT::Cube, 0 );
 }
 
-PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
+PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs, float radius, const C4f& color ) {
 
     Topology mesh;
     RoundedCube( mesh, subdivs, radius * size.y() );

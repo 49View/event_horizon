@@ -519,8 +519,9 @@ namespace VDataServices {
             V3f tilePosDelta = osmTileDeltaPos(element);
             for ( const auto& group : element.groups ) {
                 if ( element.type == OSMElementName::tree() ) {
-                    trees.emplace_back(createGeomForSphere( tilePosDelta* globalOSMScale, 1.0f * globalOSMScale, 1 ));
-                } else {
+                    trees.emplace_back(createGeomForCone( tilePosDelta * globalOSMScale, V3f{0.2f, 3.14f, 0.2f}* globalOSMScale, 1, C4fc::PASTEL_BROWN ));
+                    trees.emplace_back(createGeomForSphere( (tilePosDelta + V3fc::UP_AXIS*3.0f) * globalOSMScale, globalOSMScale, 1, C4fc::FOREST_GREEN ));
+                } if ( element.type == OSMElementName::building() ) {
                     osmCreateBuilding(mesh, group, tilePosDelta);
                 }
             }

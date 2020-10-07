@@ -65,13 +65,14 @@ struct Topology {
     double distance( const Vector3f& p ) const;
 };
 
-PolyStruct createGeomForSphere( const Vector3f& center, float diameter, int subdivs = 3 );
-PolyStruct createGeomForCylinder( const Vector3f& center, const Vector2f& size, int subdivs = 1 );
-PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size );
-PolyStruct createGeomForAABB( const AABB& aabb );
-PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size );
-PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, int subdivs = 5, float radius = 0.15f );
-PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, int subdivs = 5, float radius = 0.05f );
+PolyStruct createGeomForSphere( const Vector3f& center, float diameter, int subdivs = 3, const C4f& color = C4fc::WHITE );
+PolyStruct createGeomForCylinder( const Vector3f& center, const Vector2f& size, int subdivs = 1, const C4f& color = C4fc::WHITE );
+PolyStruct createGeomForCone( const Vector3f& center, const Vector3f& size, int subdivs = 1, const C4f& color = C4fc::WHITE );
+PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size, const C4f& color = C4fc::WHITE );
+PolyStruct createGeomForAABB( const AABB& aabb, const C4f& color = C4fc::WHITE );
+PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size, const C4f& color = C4fc::WHITE );
+PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, int subdivs = 5, float radius = 0.15f, const C4f& color = C4fc::WHITE );
+PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, int subdivs = 5, float radius = 0.05f, const C4f& color = C4fc::WHITE );
 
 PolyStruct createGeom( Topology& mesh, const Vector3f& center, const Vector3f& size, GeomMapping mt,
                        int subdivs = 0, ReverseFlag rf = ReverseFlag::False );
