@@ -10,14 +10,15 @@
 
 void VData::fill( const PolyStruct& ps ) {
 
+    auto startIndex = vIndices.size();
     for ( int q = 0; q < ps.numIndices; q++ ) {
         auto idx = ps.indices[q];
         PUUNTBC d1{ ps.verts[idx],ps.uvs[q],ps.uv2s[q],ps.normals[q],ps.tangents[q],ps.binormals[q],ps.colors[q] };
         vSoaData.emplace_back( d1 );
-        vIndices.push_back( q );
+        vIndices.push_back( q + startIndex );
     }
-    setMin( ps.bbox3d.minPoint() );
-    setMax( ps.bbox3d.maxPoint() );
+    expandVolume( ps.bbox3d.minPoint() );
+    expandVolume( ps.bbox3d.maxPoint() );
 }
 
 void VData::fillIndices( const std::vector<uint32_t>& _indices ) {

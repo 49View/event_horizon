@@ -65,7 +65,7 @@ struct Topology {
     double distance( const Vector3f& p ) const;
 };
 
-PolyStruct createGeomForSphere( const Vector3f& center, float diameter, int subdivs );
+PolyStruct createGeomForSphere( const Vector3f& center, float diameter, int subdivs = 3 );
 PolyStruct createGeomForCylinder( const Vector3f& center, const Vector2f& size, int subdivs = 1 );
 PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size );
 PolyStruct createGeomForAABB( const AABB& aabb );
@@ -73,7 +73,7 @@ PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size );
 PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, int subdivs = 5, float radius = 0.15f );
 PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, int subdivs = 5, float radius = 0.05f );
 
-PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt,
+PolyStruct createGeom( Topology& mesh, const Vector3f& center, const Vector3f& size, GeomMapping mt,
                        int subdivs = 0, ReverseFlag rf = ReverseFlag::False );
 
 ShapeType shapeTypeFromString( const std::string& value );

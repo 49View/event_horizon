@@ -329,10 +329,10 @@ Topology SubdivideMesh( const Topology& meshIn ) {
     mesh.addTriangle( 9, 8, 1 );
 }
 
-void UVSphere( Topology& mesh ) {
+void UVSphere( Topology& mesh, int subdivs ) {
 
-    uint32_t meridians = 40;
-    uint32_t parallels = 40;
+    uint32_t meridians = subdivs*12;
+    uint32_t parallels = subdivs*12;
 
     mesh.vertices.emplace_back(V3fc::Y_AXIS*0.5f);
     for (uint32_t j = 0; j < parallels - 1; ++j)
@@ -706,7 +706,7 @@ void RoundedCube( Topology& mesh, [[maybe_unused]] uint32_t subdivs, float radiu
 //    *targetV = (-normal->y + 1) / 2;
 //}
 
-PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int subdivs, ReverseFlag rf ) {
+PolyStruct createGeom( Topology& mesh, const Vector3f& center, const Vector3f& size, GeomMapping mt, int subdivs, ReverseFlag rf ) {
 
     for ( int j = 0; j < subdivs; ++j ) {
         mesh = SubdivideMesh( mesh );
@@ -723,8 +723,9 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
 
     int t = 0;
     for ( auto& v : mesh.vertices ) {
-        ret.verts[t++] = v;
-        ret.bbox3d.expand( v );
+        auto nv = v*size + center;
+        ret.verts[t++] = nv;
+        ret.bbox3d.expand( nv );
     }
     t = 0;
     for ( auto& tr : mesh.triangles ) {
@@ -884,13 +885,13 @@ PolyStruct createGeom( Topology& mesh, const Vector3f& size, GeomMapping mt, int
     return ret;
 }
 
-PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, [[maybe_unused]] const int subdivs ) {
+PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, const int subdivs ) {
 
     Topology mesh;
 //    Icosahedron( mesh );
 //    return createGeom( mesh, center, Vector3f{ diameter }, GeomMappingT::Spherical, subdivs );
-    UVSphere( mesh );
-    return createGeom( mesh, Vector3f{ diameter }, GeomMappingT::SphericalUV, 0 );
+    UVSphere( mesh, subdivs );
+    return createGeom( mesh, center, Vector3f{ diameter }, GeomMappingT::SphericalUV, 0 );
 }
 
 PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
@@ -898,7 +899,7 @@ PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size ) {
     Topology mesh;
     Cube( mesh );
 
-    return createGeom( mesh, size, GeomMappingT::Cube, 0 );
+    return createGeom( mesh, center, size, GeomMappingT::Cube, 0 );
 }
 
 PolyStruct createGeomForAABB( const AABB& aabb ) {
@@ -906,7 +907,7 @@ PolyStruct createGeomForAABB( const AABB& aabb ) {
     Topology mesh;
     AxisAlignedBoundingBox( mesh, aabb );
 
-    return createGeom( mesh, V3fc::ONE, GeomMappingT::Cube, 0 );
+    return createGeom( mesh, V3f::ZERO(), V3fc::ONE, GeomMappingT::Cube, 0 );
 }
 
 PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
@@ -914,7 +915,7 @@ PolyStruct createGeomForPanel( const Vector3f& center, const Vector3f& size ) {
     Topology mesh;
     Panel( mesh );
 
-    return createGeom( mesh, size, GeomMappingT::PlanarNoTile, 0 );
+    return createGeom( mesh, center, size, GeomMappingT::PlanarNoTile, 0 );
 }
 
 PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const int subdivs ) {
@@ -923,7 +924,7 @@ PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const
     int edges = subdivs * 8;
     Cylinder( mesh, edges );
 
-    return createGeom( mesh, Vector3f{ size.x(), size.y(), size.x() }, GeomMappingT::Cylindrical, 0 );
+    return createGeom( mesh, center, Vector3f{ size.x(), size.y(), size.x() }, GeomMappingT::Cylindrical, 0 );
 }
 
 PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
@@ -931,7 +932,7 @@ PolyStruct createGeomForPillow( const Vector3f& center, const Vector3f& size, co
     Topology mesh;
     Pillow( mesh, subdivs, radius * size.y() *0.05f );
 
-    return createGeom( mesh, size, GeomMappingT::Cube, 0 );
+    return createGeom( mesh, center, size, GeomMappingT::Cube, 0 );
 }
 
 PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& size, const int subdivs, float radius ) {
@@ -939,5 +940,5 @@ PolyStruct createGeomForRoundedCube( const Vector3f& center, const Vector3f& siz
     Topology mesh;
     RoundedCube( mesh, subdivs, radius * size.y() );
 
-    return createGeom( mesh, size, GeomMappingT::Cube, 0 );
+    return createGeom( mesh, center, size, GeomMappingT::Cube, 0 );
 }

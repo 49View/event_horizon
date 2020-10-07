@@ -200,7 +200,7 @@ namespace VDataServices {
             cursor += nextCharPos;
         }
 
-        PolyStruct ps = createGeom(mesh, V3fc::ONE, GeomMappingT::Planar);
+        PolyStruct ps = createGeom(mesh, V3f::ZERO(), V3fc::ONE, GeomMappingT::Planar);
         _ret->fill(ps);
     }
 
@@ -278,7 +278,7 @@ namespace VDataServices {
                 q += 3;
             }
 
-            PolyStruct ps = createGeom(mesh, V3fc::ONE, GeomMapping{ GeomMappingT::Cube, V3fc::ONE * 8.0f }, 0,
+            PolyStruct ps = createGeom(mesh, V3f::ZERO(), V3fc::ONE, GeomMapping{ GeomMappingT::Cube, V3fc::ONE * 8.0f }, 0,
                                        _d.rfPoly);
             _ret->fill(ps);
         }
@@ -388,7 +388,7 @@ namespace VDataServices {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-    static constexpr float globalOSMScale = 0.01f;
+    static constexpr float globalOSMScale = 0.1f;
 
     V3f osmTileProject( const V3f& vertex, const V3f& elemCenterProj3d, Rect2f& boundary ) {
         V3f pp{ XZY::C(vertex) + elemCenterProj3d };
@@ -435,7 +435,7 @@ namespace VDataServices {
             mesh.addVertexOfTriangle(tp.first, V4fc::ZERO, tp.second);
         }
 
-        PolyStruct ps = createGeom(mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked }, 0, ReverseFlag::False);
+        PolyStruct ps = createGeom(mesh, V3f::ZERO(), V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked }, 0, ReverseFlag::False);
         _ret->fill(ps);
     }
 
@@ -447,79 +447,91 @@ namespace VDataServices {
         return true;
     }
 
+    void osmCreateBuilding( Topology& mesh, const OSMGroup& group, const V3f& tilePosDelta ) {
+        float facadeMappingScale = 0.1f;
+        Rect2f bigBoundary{Rect2f::INVALID};
+        C4f color = C4fc::XTORGBA(group.colour);
+
+        if ( group.part == "roof_faces" ) {
+            std::vector<V2f> rootPoints{};
+            for ( const auto& triangle : group.triangles ) {
+                V3f p = osmTileProject(triangle, tilePosDelta, bigBoundary);
+                rootPoints.emplace_back(V2f(p.xz()));
+            }
+            auto gObb = RotatingCalipers::minAreaRect(rootPoints);
+
+            float yOff = 12.0f + static_cast<float>(unitRandI(3));
+            V2f tile{ static_cast<float>(unitRandI(15)) / 16.0f, yOff / 16.0f };
+            tile = V2fc::ZERO;
+            for ( const auto& triangle : group.triangles ) {
+                V3f v1 = osmTileProject(triangle, tilePosDelta, bigBoundary);
+                V2f uv1 = dominantMapping(V3f::UP_AXIS(), v1, V3fc::ONE);
+                uv1 *= V2fc::ONE * ( 1.0f / globalOSMScale ) * facadeMappingScale * .25f;
+                uv1.rotate(static_cast<float>(gObb.angle_width));
+                mesh.addVertexOfTriangle(v1, V4f{ uv1, tile }, color);
+            }
+        } else if ( group.part == "lateral_faces" ) {
+            auto yOff = static_cast<float>(unitRandI(12));
+            V2f tile{ static_cast<float>(unitRandI(15)) / 16.0f, yOff / 16.0f };
+            tile = V2fc::ZERO;
+            float xAcc = 0.0f;
+            for ( auto ti = 0u; ti < group.triangles.size(); ti += 6 ) {
+
+                auto v1 = osmTileProject(group.triangles[ti], tilePosDelta, bigBoundary);
+                auto v2 = osmTileProject(group.triangles[ti + 1], tilePosDelta, bigBoundary);
+                auto v3 = osmTileProject(group.triangles[ti + 2], tilePosDelta, bigBoundary);
+                auto v4 = osmTileProject(group.triangles[ti + 3], tilePosDelta, bigBoundary);
+                auto v5 = osmTileProject(group.triangles[ti + 4], tilePosDelta, bigBoundary);
+                auto v6 = osmTileProject(group.triangles[ti + 5], tilePosDelta, bigBoundary);
+
+                float dist = distance(v1, v2);
+                V2f uv1 = V2f{ xAcc, -v1.y() };
+                V2f uv2 = V2f{ xAcc + dist, -v2.y() };
+                V2f uv3 = V2f{ xAcc + dist, -v3.y() };
+                V2f uv4 = V2f{ xAcc, -v4.y() };
+                V2f uv5 = V2f{ xAcc + dist, -v5.y() };
+                V2f uv6 = V2f{ xAcc, -v6.y() };
+
+                mesh.addVertexOfTriangle(v1, V4f{ uv1 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
+                                                  facadeMappingScale, tile }, color);
+                mesh.addVertexOfTriangle(v2, V4f{ uv2 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
+                                                  facadeMappingScale, tile }, color);
+                mesh.addVertexOfTriangle(v3, V4f{ uv3 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
+                                                  facadeMappingScale, tile }, color);
+                mesh.addVertexOfTriangle(v4, V4f{ uv4 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
+                                                  facadeMappingScale, tile }, color);
+                mesh.addVertexOfTriangle(v5, V4f{ uv5 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
+                                                  facadeMappingScale, tile }, color);
+                mesh.addVertexOfTriangle(v6, V4f{ uv6 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
+                                                  facadeMappingScale, tile }, color);
+                xAcc += dist;
+            }
+        }
+    }
+
     [[maybe_unused]] void buildInternal( const GT::OSMBuildings& _d, const std::shared_ptr<VData>& _ret ) {
 
         Topology mesh{};
+        std::vector<PolyStruct> trees;
         Rect2f bigBoundary{ Rect2f::INVALID };
 
-        float facadeMappingScale = 0.1f;
-
         for ( const auto& element : _d.osmData.elements ) {
-            V3f elemCenterProj3d = osmTileDeltaPos(element);
+            V3f tilePosDelta = osmTileDeltaPos(element);
             for ( const auto& group : element.groups ) {
-                C4f color = C4fc::XTORGBA(group.colour);
                 if ( element.type == OSMElementName::building() ) {
-                    if ( group.part == "roof_faces" ) {
-                        std::vector<V2f> rootPoints{};
-                        for ( const auto& triangle : group.triangles ) {
-                            V3f p = osmTileProject(triangle, elemCenterProj3d, bigBoundary);
-                            rootPoints.emplace_back(V2f(p.xz()));
-                        }
-                        auto gObb = RotatingCalipers::minAreaRect(rootPoints);
-
-                        float yOff = 12.0f + static_cast<float>(unitRandI(3));
-                        V2f tile{ static_cast<float>(unitRandI(15)) / 16.0f, yOff / 16.0f };
-                        tile = V2fc::ZERO;
-                        for ( const auto& triangle : group.triangles ) {
-                            V3f v1 = osmTileProject(triangle, elemCenterProj3d, bigBoundary);
-                            V2f uv1 = dominantMapping(V3f::UP_AXIS(), v1, V3fc::ONE);
-                            uv1 *= V2fc::ONE * ( 1.0f / globalOSMScale ) * facadeMappingScale * .25f;
-                            uv1.rotate(static_cast<float>(gObb.angle_width));
-                            mesh.addVertexOfTriangle(v1, V4f{ uv1, tile }, color);
-                        }
-                    } else if ( group.part == "lateral_faces" ) {
-                        auto yOff = static_cast<float>(unitRandI(12));
-                        V2f tile{ static_cast<float>(unitRandI(15)) / 16.0f, yOff / 16.0f };
-                        tile = V2fc::ZERO;
-                        float xAcc = 0.0f;
-                        for ( auto ti = 0u; ti < group.triangles.size(); ti += 6 ) {
-
-                            auto v1 = osmTileProject(group.triangles[ti], elemCenterProj3d, bigBoundary);
-                            auto v2 = osmTileProject(group.triangles[ti + 1], elemCenterProj3d, bigBoundary);
-                            auto v3 = osmTileProject(group.triangles[ti + 2], elemCenterProj3d, bigBoundary);
-                            auto v4 = osmTileProject(group.triangles[ti + 3], elemCenterProj3d, bigBoundary);
-                            auto v5 = osmTileProject(group.triangles[ti + 4], elemCenterProj3d, bigBoundary);
-                            auto v6 = osmTileProject(group.triangles[ti + 5], elemCenterProj3d, bigBoundary);
-
-                            float dist = distance(v1, v2);
-                            V2f uv1 = V2f{ xAcc, -v1.y() };
-                            V2f uv2 = V2f{ xAcc + dist, -v2.y() };
-                            V2f uv3 = V2f{ xAcc + dist, -v3.y() };
-                            V2f uv4 = V2f{ xAcc, -v4.y() };
-                            V2f uv5 = V2f{ xAcc + dist, -v5.y() };
-                            V2f uv6 = V2f{ xAcc, -v6.y() };
-
-                            mesh.addVertexOfTriangle(v1, V4f{ uv1 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
-                                                              facadeMappingScale, tile }, color);
-                            mesh.addVertexOfTriangle(v2, V4f{ uv2 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
-                                                              facadeMappingScale, tile }, color);
-                            mesh.addVertexOfTriangle(v3, V4f{ uv3 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
-                                                              facadeMappingScale, tile }, color);
-                            mesh.addVertexOfTriangle(v4, V4f{ uv4 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
-                                                              facadeMappingScale, tile }, color);
-                            mesh.addVertexOfTriangle(v5, V4f{ uv5 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
-                                                              facadeMappingScale, tile }, color);
-                            mesh.addVertexOfTriangle(v6, V4f{ uv6 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
-                                                              facadeMappingScale, tile }, color);
-                            xAcc += dist;
-                        }
-                    }
+                    osmCreateBuilding( mesh, group, tilePosDelta );
+                } else if ( element.type == OSMElementName::tree() ) {
+                    trees.emplace_back(createGeomForSphere( tilePosDelta* globalOSMScale, 1.0f * globalOSMScale, 1 ));
                 }
+
             }
         }
 
-        PolyStruct ps = createGeom(mesh, V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked }, 0, ReverseFlag::False);
+        PolyStruct ps = createGeom(mesh, V3f::ZERO(), V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked }, 0, ReverseFlag::False);
         _ret->fill(ps);
+        for ( const auto& tree : trees ) {
+            _ret->fill(tree);
+        }
     }
 
     ResourceRef refName( const GT::OSMBuildings& _d ) {

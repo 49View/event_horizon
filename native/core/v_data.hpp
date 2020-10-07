@@ -86,7 +86,7 @@ protected:
 private:
     std::vector<uint32_t>  vIndices;
     std::vector<PUUNTBC>  vSoaData;
-    V3f vMin{V3f::ZERO()};
-    V3f vMax{V3f::ZERO()};
+    V3f vMin{V3fc::HUGE_VALUE_POS};
+    V3f vMax{V3fc::HUGE_VALUE_NEG};
     Primitive primitive = PRIMITIVE_TRIANGLES;
 };
