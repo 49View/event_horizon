@@ -518,12 +518,11 @@ namespace VDataServices {
         for ( const auto& element : _d.osmData.elements ) {
             V3f tilePosDelta = osmTileDeltaPos(element);
             for ( const auto& group : element.groups ) {
-                if ( element.type == OSMElementName::building() ) {
-                    osmCreateBuilding( mesh, group, tilePosDelta );
-                } else if ( element.type == OSMElementName::tree() ) {
+                if ( element.type == OSMElementName::tree() ) {
                     trees.emplace_back(createGeomForSphere( tilePosDelta* globalOSMScale, 1.0f * globalOSMScale, 1 ));
+                } else {
+                    osmCreateBuilding(mesh, group, tilePosDelta);
                 }
-
             }
         }
 
