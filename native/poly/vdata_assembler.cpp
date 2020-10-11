@@ -409,6 +409,10 @@ namespace VDataServices {
         return true;
     }
 
+    bool isOSMTileElement( const OSMElement& element ) {
+        return ( element.type != OSMElementName::building() && element.type != OSMElementName::tree() );
+    }
+
     [[maybe_unused]] void buildInternal( const GT::OSMTile& _d, const std::shared_ptr<VData>& _ret ) {
 
         Topology mesh{};
@@ -416,12 +420,14 @@ namespace VDataServices {
         std::vector<std::pair<V3f, C4f>> tilePoints{};
 
         for ( const auto& element : _d.osmData.elements ) {
-            V3f elemCenterProj3d = osmTileDeltaPos(element);
-            for ( const auto& group : element.groups ) {
-                C4f color = C4fc::XTORGBA(group.colour);
-                if ( group.part.empty() ) {
-                    for ( const auto& triangle : group.triangles ) {
-                        tilePoints.emplace_back(osmTileProject(triangle, elemCenterProj3d, bigBoundary), color);
+            if ( isOSMTileElement(element) ) {
+                V3f elemCenterProj3d = osmTileDeltaPos(element);
+                for ( const auto& group : element.meshes ) {
+                    C4f color = C4fc::XTORGBA(group.colour);
+                    if ( group.name.empty() ) {
+                        for ( const auto& triangle : group.triangles ) {
+                            tilePoints.emplace_back(osmTileProject(triangle, elemCenterProj3d, bigBoundary), color);
+                        }
                     }
                 }
             }
@@ -452,7 +458,7 @@ namespace VDataServices {
         Rect2f bigBoundary{Rect2f::INVALID};
         C4f color = C4fc::XTORGBA(group.colour);
 
-        if ( group.part == "roof_faces" ) {
+        if ( group.name == "roof" ) {
             std::vector<V2f> rootPoints{};
             for ( const auto& triangle : group.triangles ) {
                 V3f p = osmTileProject(triangle, tilePosDelta, bigBoundary);
@@ -470,7 +476,7 @@ namespace VDataServices {
                 uv1.rotate(static_cast<float>(gObb.angle_width));
                 mesh.addVertexOfTriangle(v1, V4f{ uv1, tile }, color);
             }
-        } else if ( group.part == "lateral_faces" ) {
+        } else if ( group.name == "lateral" ) {
             auto yOff = static_cast<float>(unitRandI(12));
             V2f tile{ static_cast<float>(unitRandI(15)) / 16.0f, yOff / 16.0f };
             tile = V2fc::ZERO;
@@ -517,7 +523,7 @@ namespace VDataServices {
 
         for ( const auto& element : _d.osmData.elements ) {
             V3f tilePosDelta = osmTileDeltaPos(element);
-            for ( const auto& group : element.groups ) {
+            for ( const auto& group : element.meshes ) {
                 if ( element.type == OSMElementName::tree() ) {
                     trees.emplace_back(createGeomForCone( tilePosDelta * globalOSMScale, V3f{0.2f, 3.14f, 0.2f}* globalOSMScale, 1, C4fc::PASTEL_BROWN ));
                     trees.emplace_back(createGeomForSphere( (tilePosDelta + V3fc::UP_AXIS*3.0f) * globalOSMScale, globalOSMScale, 1, C4fc::FOREST_GREEN ));

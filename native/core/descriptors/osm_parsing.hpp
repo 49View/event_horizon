@@ -52,9 +52,9 @@ JSONDATA(OSMCenter, x, y, lat, lon, deltaPosInTile)
     std::vector<double> deltaPosInTile{};
 };
 
-JSONDATA(OSMGroup, colour, part, triangles)
+JSONDATA(OSMGroup, colour, name, triangles)
     std::string colour;
-    std::string part;
+    std::string name;
     std::vector<V3f> triangles;
 };
 
@@ -62,11 +62,11 @@ JSONDATA(OSMTags, name)
     std::string name;
 };
 
-JSONDATA(OSMElement, id, type, center, groups, tags)
+JSONDATA(OSMElement, id, type, center, meshes, tags)
     std::string id;
     std::string type;
     OSMCenter center;
-    std::vector<OSMGroup> groups;
+    std::vector<OSMGroup> meshes;
     OSMTags tags;
 };
 
