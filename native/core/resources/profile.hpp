@@ -38,32 +38,33 @@ public:
 	void flip( const Vector2f& axis );
 	void move( const Vector2f& pos );
 	void centered();
-	std::vector<Vector3f> rotatePoints( const Vector3f& nx, const Vector3f& ny,
+	[[nodiscard]] std::vector<Vector3f> rotatePoints( const Vector3f& nx, const Vector3f& ny,
 										const Vector3f& offset = V3fc::ZERO ) const;
 
-	inline int32_t numVerts() const { return static_cast<int32_t>( mPoints.v.size() ); }
-	inline float width() const { return mBBox.x(); }
-	inline float height() const { return mBBox.y(); }
+	[[nodiscard]] inline int32_t numVerts() const { return static_cast<int32_t>( mPoints.v.size() ); }
+	[[nodiscard]] inline float width() const { return mBBox.x(); }
+	[[nodiscard]] inline float height() const { return mBBox.y(); }
 
-	inline Vector2f pointAt( uint64_t index ) const { return mPoints.v[index]; }
+	[[nodiscard]] inline Vector2f pointAt( uint64_t index ) const { return mPoints.v[index]; }
 	inline float lengthAt( uint64_t index ) { return mLengths[index]; }
 
-	V2fVector Points() const { return mPoints.v; }
-    V3fVector Points3d( const Vector3f& mainAxis ) const;
+	[[nodiscard]] V2fVector Points() const { return mPoints.v; }
+    [[maybe_unused]] [[nodiscard, maybe_unused]] V3fVector Points3d( const Vector3f& mainAxis ) const;
 	void Points( const V2fVector& val ) { mPoints.v = val; }
 
-	std::vector<float> Lengths() const { return mLengths; }
+	[[nodiscard]] std::vector<float> Lengths() const { return mLengths; }
 	void Lengths( std::vector<float> val ) { mLengths = std::move(val); }
 
-	Vector3f Normal() const { return mNormal; }
+	[[nodiscard]] Vector3f Normal() const { return mNormal; }
 	void Normal( Vector3f val ) { mNormal = val; }
 
-	const V2fVectorOfVectorWrap& Paths() const { return mPaths; }
-    V3fVectorOfVectorWrap Paths3d() const;
-    VTMVectorOfVectorWrap Paths3dWithUV() const;
+	[[nodiscard]] const V2fVectorOfVectorWrap& Paths() const { return mPaths; }
+    [[maybe_unused]] [[nodiscard, maybe_unused]] V3fVectorOfVectorWrap Paths3d() const;
+    [[nodiscard]] VTMVectorOfVectorWrap Paths3dWithUV() const;
 
     static std::shared_ptr<Profile> makeLine(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
-    static std::shared_ptr<Profile> makeWire(const std::string& _name, const std::vector<Vector2f>& vv2fs, const std::vector<float>& vfs);
+    static std::shared_ptr<Profile> makeWire( float radius, int numSubDivs = 0 );
+    static std::shared_ptr<Profile> makeRect( const V2f& sizes, const V2f& offset = V2fc::ZERO );
 
     static std::shared_ptr<Profile> fromPoints( const std::string& name, const std::vector<Vector2f>& points );
 
@@ -73,7 +74,6 @@ private:
 
 private:
 	V2f		        		mBBox = V2fc::ZERO;
-	V2f                     mTotalBBox = V2fc::ZERO;
 	V2fVectorWrap           mPoints;
 	std::vector<float>		mLengths;
 	float					mPerimeter = 0.0f;
@@ -97,16 +97,16 @@ public:
 	ProfileMaker& ly( float _y1 );
 	ProfileMaker& lx( float _x1 );
 
-	std::shared_ptr<Profile> make() const { return Profile::fromPoints( name, points ); }
+	[[nodiscard]] std::shared_ptr<Profile> make() const { return Profile::fromPoints( name, points ); }
 
 private:
 	void add( const V2f& _p );
-	int setPointerSubdivs( int _sd ) const;
-	V2f pointer() const { return points.empty() ? V2fc::ZERO : points.back(); }
+	[[nodiscard]] int setPointerSubdivs( int _sd ) const;
+	[[nodiscard]] V2f pointer() const { return points.empty() ? V2fc::ZERO : points.back(); }
 
 private:
 	std::string name;
 	std::vector<V2f> points;
-	int32_t gsubdivs = 4;
+	int32_t gSubDivs = 4;
 	float scale = 1.0f;
 };

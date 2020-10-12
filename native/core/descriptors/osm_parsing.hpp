@@ -19,6 +19,9 @@ namespace OSMElementName {
     static inline std::string tree() {
         return "tree";
     }
+    static inline std::string barrier() {
+        return "barrier";
+    }
 }
 
 template <typename T>
@@ -52,10 +55,16 @@ JSONDATA(OSMCenter, x, y, lat, lon, deltaPosInTile)
     std::vector<double> deltaPosInTile{};
 };
 
-JSONDATA(OSMGroup, colour, name, triangles)
+namespace OSMMeshVertexType {
+    static inline constexpr int triangles = 0;
+    static inline constexpr int points = 1;
+}
+
+JSONDATA(OSMMesh, colour, part, vertexType, vertices)
     std::string colour;
-    std::string name;
-    std::vector<V3f> triangles;
+    std::string part;
+    int vertexType = OSMMeshVertexType::triangles;
+    std::vector<V3f> vertices;
 };
 
 JSONDATA(OSMTags, name)
@@ -66,7 +75,7 @@ JSONDATA(OSMElement, id, type, center, meshes, tags)
     std::string id;
     std::string type;
     OSMCenter center;
-    std::vector<OSMGroup> meshes;
+    std::vector<OSMMesh> meshes;
     OSMTags tags;
 };
 

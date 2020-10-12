@@ -10,9 +10,9 @@
 #include <poly/poly_services.hpp>
 #include <poly/follower.hpp>
 #include <poly/converters/svg/svgtopoly.hpp>
-#include <utility>
 #include <poly/converters/gltf2/gltf2.h>
 #include <poly/scene_graph.h>
+#include <poly/osm/osm_barrier.hpp>
 
 void
 internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
@@ -331,20 +331,6 @@ namespace VDataServices {
     }
 
     ResourceRef refName( const GT::Follower& _d ) {
-//        std::stringstream oss;
-//        oss << _d.profile->Name();
-//        for ( const auto& v : _d.profilePath ) {
-//            oss << v.toString();
-//        }
-//        oss << _d.fflags;
-//        oss << static_cast<uint64_t>(_d.fraise);
-//        oss << _d.flipVector.toString();
-//        // ### Implement this for gaps
-////    for ( const auto& v : mGaps ) {
-////        oss << static_cast<uint64_t>(v);
-////    }
-//        oss << _d.mFollowerSuggestedAxis.toString();
-//       return "Follower--" + Hashable<>::hashOf(oss.str());
         return "Follower--" + UUIDGen::make(); //Hashable<>::hashOf(oss.str());
     }
 
@@ -424,8 +410,8 @@ namespace VDataServices {
                 V3f elemCenterProj3d = osmTileDeltaPos(element);
                 for ( const auto& group : element.meshes ) {
                     C4f color = C4fc::XTORGBA(group.colour);
-                    if ( group.name.empty() ) {
-                        for ( const auto& triangle : group.triangles ) {
+                    if ( group.part.empty() ) {
+                        for ( const auto& triangle : group.vertices ) {
                             tilePoints.emplace_back(osmTileProject(triangle, elemCenterProj3d, bigBoundary), color);
                         }
                     }
@@ -453,14 +439,14 @@ namespace VDataServices {
         return true;
     }
 
-    void osmCreateBuilding( Topology& mesh, const OSMGroup& group, const V3f& tilePosDelta ) {
+    void osmCreateBuilding( Topology& mesh, const OSMMesh& group, const V3f& tilePosDelta ) {
         float facadeMappingScale = 0.1f;
         Rect2f bigBoundary{Rect2f::INVALID};
         C4f color = C4fc::XTORGBA(group.colour);
 
-        if ( group.name == "roof" ) {
+        if ( group.part == "roof" ) {
             std::vector<V2f> rootPoints{};
-            for ( const auto& triangle : group.triangles ) {
+            for ( const auto& triangle : group.vertices ) {
                 V3f p = osmTileProject(triangle, tilePosDelta, bigBoundary);
                 rootPoints.emplace_back(V2f(p.xz()));
             }
@@ -469,26 +455,26 @@ namespace VDataServices {
             float yOff = 12.0f + static_cast<float>(unitRandI(3));
             V2f tile{ static_cast<float>(unitRandI(15)) / 16.0f, yOff / 16.0f };
             tile = V2fc::ZERO;
-            for ( const auto& triangle : group.triangles ) {
+            for ( const auto& triangle : group.vertices ) {
                 V3f v1 = osmTileProject(triangle, tilePosDelta, bigBoundary);
                 V2f uv1 = dominantMapping(V3f::UP_AXIS(), v1, V3fc::ONE);
                 uv1 *= V2fc::ONE * ( 1.0f / globalOSMScale ) * facadeMappingScale * .25f;
                 uv1.rotate(static_cast<float>(gObb.angle_width));
                 mesh.addVertexOfTriangle(v1, V4f{ uv1, tile }, color);
             }
-        } else if ( group.name == "lateral" ) {
+        } else if ( group.part == "lateral" ) {
             auto yOff = static_cast<float>(unitRandI(12));
             V2f tile{ static_cast<float>(unitRandI(15)) / 16.0f, yOff / 16.0f };
             tile = V2fc::ZERO;
             float xAcc = 0.0f;
-            for ( auto ti = 0u; ti < group.triangles.size(); ti += 6 ) {
+            for ( auto ti = 0u; ti < group.vertices.size(); ti += 6 ) {
 
-                auto v1 = osmTileProject(group.triangles[ti], tilePosDelta, bigBoundary);
-                auto v2 = osmTileProject(group.triangles[ti + 1], tilePosDelta, bigBoundary);
-                auto v3 = osmTileProject(group.triangles[ti + 2], tilePosDelta, bigBoundary);
-                auto v4 = osmTileProject(group.triangles[ti + 3], tilePosDelta, bigBoundary);
-                auto v5 = osmTileProject(group.triangles[ti + 4], tilePosDelta, bigBoundary);
-                auto v6 = osmTileProject(group.triangles[ti + 5], tilePosDelta, bigBoundary);
+                auto v1 = osmTileProject(group.vertices[ti], tilePosDelta, bigBoundary);
+                auto v2 = osmTileProject(group.vertices[ti + 1], tilePosDelta, bigBoundary);
+                auto v3 = osmTileProject(group.vertices[ti + 2], tilePosDelta, bigBoundary);
+                auto v4 = osmTileProject(group.vertices[ti + 3], tilePosDelta, bigBoundary);
+                auto v5 = osmTileProject(group.vertices[ti + 4], tilePosDelta, bigBoundary);
+                auto v6 = osmTileProject(group.vertices[ti + 5], tilePosDelta, bigBoundary);
 
                 float dist = distance(v1, v2);
                 V2f uv1 = V2f{ xAcc, -v1.y() };
@@ -519,6 +505,7 @@ namespace VDataServices {
 
         Topology mesh{};
         std::vector<PolyStruct> trees;
+        std::vector<PolyStruct> barriers;
         Rect2f bigBoundary{ Rect2f::INVALID };
 
         for ( const auto& element : _d.osmData.elements ) {
@@ -529,6 +516,8 @@ namespace VDataServices {
                     trees.emplace_back(createGeomForSphere( (tilePosDelta + V3fc::UP_AXIS*3.0f) * globalOSMScale, globalOSMScale, 1, C4fc::FOREST_GREEN ));
                 } if ( element.type == OSMElementName::building() ) {
                     osmCreateBuilding(mesh, group, tilePosDelta);
+                } if ( element.type == OSMElementName::barrier() ) {
+                    osmCreateBarrier(barriers, group, globalOSMScale);
                 }
             }
         }
@@ -537,6 +526,9 @@ namespace VDataServices {
         _ret->fill(ps);
         for ( const auto& tree : trees ) {
             _ret->fill(tree);
+        }
+        for ( const auto& barrier : barriers ) {
+            _ret->fill(barrier);
         }
     }
 

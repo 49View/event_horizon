@@ -13,6 +13,25 @@
 #include <poly/poly_services.hpp>
 #include "poly_services.hpp"
 
+struct FollowerPoly {
+    FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
+                  const std::array<size_t,4>& indices, WindingOrderT _wo );
+    std::array<Vector3f, 4> vs;
+    std::array<Vector2f, 4> vtcs;
+    std::array<Vector3f, 4> vncs;
+    std::array<size_t,   4> vindices;
+    Vector3f vn;
+};
+
+struct FollowerIntermediateData {
+    std::vector<Vector3f> vcoords;
+    Vector3f			  vplanet = V3fc::ZERO;
+    std::vector<Vector3f> vdirs;
+    std::vector<Plane3f>  vplanesn;
+    std::vector<Vector3f> vplanesb;
+    std::vector<Vector4f> vtcoords;
+};
+
 FollowerPoly::FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
                             const std::array<size_t, 4>& indices, WindingOrderT _wo ) {
 
@@ -185,24 +204,22 @@ namespace FollowerService {
 
     }
 
-    void extrude( std::shared_ptr<VData> geom,
-                  const std::vector<Vector3f>& _verts,
-                  const Profile& profile,
-                  const Vector3f& _suggestedAxis,
-                  const FollowerFlags& ff ) {
-
-        GeomMappingData mapping;
-
+    std::vector<FollowerPoly> extrudeInner(const std::vector<Vector3f>& _verts,
+                      const Profile& profile,
+                      const Vector3f& _suggestedAxis,
+                      const FollowerFlags& ff,
+                      GeomMappingData& mapping) {
         bool bWrap = checkBitWiseFlag(ff, FollowerFlags::WrapPath);
 
         // Sanitize same points and collinear
-        std::vector<Vector3f> verts;
+        std::vector<FollowerPoly> polys{};
+        std::vector<Vector3f> verts{};
         verts = sanitizePath(_verts, bWrap);
 
         auto vaCount = verts.size();
         if ( vaCount < 2 ) {
             LOGR("[ERROR] Extruded geometry has less then 2 vertices, impossible to extrude.");
-            return;
+            return polys;
         }
         if ( vaCount == 2 ) bWrap = false;
 
@@ -217,7 +234,6 @@ namespace FollowerService {
         // Temp data for triangulation
         std::vector<Vector3f> rp2;
         std::vector<Vector3f> rp1;
-        std::vector<FollowerPoly> polys;
 
         MappingServices::resetWrapMapping(mapping, profile.Lengths());
         auto wo = detectWindingOrder(profile.Points());
@@ -262,6 +278,50 @@ namespace FollowerService {
             rp1 = rp2;
         }
 
+        return polys;
+    }
+
+    PolyStruct extrudePolyStruct( const std::vector<Vector3f>& _verts,
+                  const Profile& profile,
+                  const C4f& color,
+                  const Vector3f& _suggestedAxis,
+                  const FollowerFlags& ff ) {
+
+        GeomMappingData mapping;
+
+        auto polys = extrudeInner( _verts, profile, _suggestedAxis, ff, mapping );
+
+        PolyStruct ret{};
+        // Add all the polys
+        Topology mesh;
+        for ( auto& fp : polys ) {
+            size_t i = 0;
+            mesh.addVertexOfTriangle( fp.vs[i], V4f{fp.vtcs[i], V2fc::ZERO}, color );
+            i = 2;
+            mesh.addVertexOfTriangle( fp.vs[i], V4f{fp.vtcs[i], V2fc::ZERO}, color );
+            i = 1;
+            mesh.addVertexOfTriangle( fp.vs[i], V4f{fp.vtcs[i], V2fc::ZERO}, color );
+            i = 2;
+            mesh.addVertexOfTriangle( fp.vs[i], V4f{fp.vtcs[i], V2fc::ZERO}, color );
+            i = 3;
+            mesh.addVertexOfTriangle( fp.vs[i], V4f{fp.vtcs[i], V2fc::ZERO}, color );
+            i = 1;
+            mesh.addVertexOfTriangle( fp.vs[i], V4f{fp.vtcs[i], V2fc::ZERO}, color );
+        }
+
+        ret = createGeom( mesh, V3f::ZERO(), V3fc::ONE, GeomMappingT::Cube, 0 );;
+        return ret;
+    }
+
+    void extrude( std::shared_ptr<VData> geom,
+                  const std::vector<Vector3f>& _verts,
+                  const Profile& profile,
+                  const Vector3f& _suggestedAxis,
+                  const FollowerFlags& ff ) {
+
+        GeomMappingData mapping;
+        auto polys = extrudeInner( _verts, profile, _suggestedAxis, ff, mapping );
+
         // Add all the polys
         for ( auto& fp : polys ) {
             PolyServices::addQuad(geom, fp.vs, fp.vtcs, fp.vncs, mapping);
@@ -270,90 +330,90 @@ namespace FollowerService {
 
 }
 
-Follower::Follower( subdivisionAccuray subDivs /*= accuracyNone*/,
-                    const FollowerFlags& ff /*= FollowerFlags::Defaults*/,
-                    const std::string& _name /*= "FollowerUnnamed"*/,
-                    const MappingDirection _md /*= MappingDirection::X_POS*/, bool _bUseFlatMapping /*= false */ ) {
-    CurrentFlags(ff);
-    mSubDivAcc = subDivs;
-    mGeomName = _name;
-    mGeomType = 0;
-    mCapsGeomType = 0;
-    mbUsePlanarMapping = _bUseFlatMapping;
-    mMappingDirection = _md;
-}
-
-Vector3f rotateFollowerPlane90( const Vector3f& vpos, const Vector3f& vn3d ) {
-    Quaternion qp{ vpos, 0.0f };
-    float halfAngle = M_PI_2;
-    Quaternion r1{ halfAngle, vn3d };
-    Quaternion r2{ -halfAngle, vn3d };
-    Quaternion vqn = r1 * qp * r2;
-    return V3f{vqn.vector()};
-}
-
-void Follower::reserveVBounding( uint64_t size ) {
-    // Reserve space for the vBoundingContours
-    for ( uint64_t vbi = 0; vbi <= size * 2 - 1; vbi++ ) {
-        vboundingContours.push_back(V3fc::ZERO);
-    }
-}
-
-void
-Follower::createQuadPath( std::vector<Vector2f>& fverts, float width, float height, PivotPointPosition /*alignment*/ ) {
-    fverts.clear();
-    fverts.emplace_back(Vector2f(-width * 0.5f, -height * 0.5f));
-    fverts.emplace_back(Vector2f(-width * 0.5f, height * 0.5f));
-    fverts.emplace_back(Vector2f(width * 0.5f, height * 0.5f));
-    fverts.emplace_back(Vector2f(width * 0.5f, -height * 0.5f));
-}
-
-//bool Follower::skipGapAt( int t ) {
-//    return ( mGaps.isStartGapAt( t + 1 ) && mGaps.isVisibleAt( t + 1 ));
+//Follower::Follower( subdivisionAccuray subDivs /*= accuracyNone*/,
+//                    const FollowerFlags& ff /*= FollowerFlags::Defaults*/,
+//                    const std::string& _name /*= "FollowerUnnamed"*/,
+//                    const MappingDirection _md /*= MappingDirection::X_POS*/, bool _bUseFlatMapping /*= false */ ) {
+//    CurrentFlags(ff);
+//    mSubDivAcc = subDivs;
+//    mGeomName = _name;
+//    mGeomType = 0;
+//    mCapsGeomType = 0;
+//    mbUsePlanarMapping = _bUseFlatMapping;
+//    mMappingDirection = _md;
 //}
-
-//void averagePoly( std::vector<FollowerPoly>& polys, uint64_t pi, uint64_t i,
-//                  uint64_t i1, uint64_t i2, uint64_t i3 ) {
-////    Vector3f vn = polys[pi].vn;
-////    polys[pi].vncs[i] = vn;
 //
-////	float w1 = dot( vn,  polys[i1].vn ) > 0.05f ? 1.0f : 0.0f;
-////	polys[pi].vncs[i] += polys[i1].vn * w1;
-////
-////	w1 = dot( vn, polys[i2].vn ) > 0.05f ? 1.0f : 0.0f;
-////	polys[pi].vncs[i] += polys[i2].vn * w1;
-////
-////	w1 = dot( vn, polys[i3].vn ) > 0.05f ? 1.0f : 0.0f;
-////	polys[pi].vncs[i] += polys[i3].vn * w1;
+//Vector3f rotateFollowerPlane90( const Vector3f& vpos, const Vector3f& vn3d ) {
+//    Quaternion qp{ vpos, 0.0f };
+//    float halfAngle = M_PI_2;
+//    Quaternion r1{ halfAngle, vn3d };
+//    Quaternion r2{ -halfAngle, vn3d };
+//    Quaternion vqn = r1 * qp * r2;
+//    return V3f{vqn.vector()};
+//}
 //
-////    polys[pi].vncs[i] = normalize( polys[pi].vncs[i] );
+//void Follower::reserveVBounding( uint64_t size ) {
+//    // Reserve space for the vBoundingContours
+//    for ( uint64_t vbi = 0; vbi <= size * 2 - 1; vbi++ ) {
+//        vboundingContours.push_back(V3fc::ZERO);
+//    }
 //}
-
-std::vector<Vector2f> Follower::vboundingContours2f() const {
-    std::vector<Vector2f> ret;
-    for ( auto v : vboundingContours ) {
-        ret.push_back(v.xy());
-    }
-    return ret;
-}
-
-void Follower::type( NodeType _gt ) {
-    mGeomType |= _gt;
-    mCapsGeomType |= _gt;
-}
-
-void Follower::capsType( NodeType _gt ) {
-    mCapsGeomType |= _gt;
-}
-
-//void Follower::excludeAxisFromExtrusion( const Vector3f& _axis ) {
-//    mAxisExtrudeExclusions.push_back( _axis );
+//
+//void
+//Follower::createQuadPath( std::vector<Vector2f>& fverts, float width, float height, PivotPointPosition /*alignment*/ ) {
+//    fverts.clear();
+//    fverts.emplace_back(Vector2f(-width * 0.5f, -height * 0.5f));
+//    fverts.emplace_back(Vector2f(-width * 0.5f, height * 0.5f));
+//    fverts.emplace_back(Vector2f(width * 0.5f, height * 0.5f));
+//    fverts.emplace_back(Vector2f(width * 0.5f, -height * 0.5f));
 //}
-
-std::string Follower::Name() const {
-    return mGeomName;
-}
-
-void Follower::Name( const std::string& val ) {
-    mGeomName = val;
-}
+//
+////bool Follower::skipGapAt( int t ) {
+////    return ( mGaps.isStartGapAt( t + 1 ) && mGaps.isVisibleAt( t + 1 ));
+////}
+//
+////void averagePoly( std::vector<FollowerPoly>& polys, uint64_t pi, uint64_t i,
+////                  uint64_t i1, uint64_t i2, uint64_t i3 ) {
+//////    Vector3f vn = polys[pi].vn;
+//////    polys[pi].vncs[i] = vn;
+////
+//////	float w1 = dot( vn,  polys[i1].vn ) > 0.05f ? 1.0f : 0.0f;
+//////	polys[pi].vncs[i] += polys[i1].vn * w1;
+//////
+//////	w1 = dot( vn, polys[i2].vn ) > 0.05f ? 1.0f : 0.0f;
+//////	polys[pi].vncs[i] += polys[i2].vn * w1;
+//////
+//////	w1 = dot( vn, polys[i3].vn ) > 0.05f ? 1.0f : 0.0f;
+//////	polys[pi].vncs[i] += polys[i3].vn * w1;
+////
+//////    polys[pi].vncs[i] = normalize( polys[pi].vncs[i] );
+////}
+//
+//std::vector<Vector2f> Follower::vboundingContours2f() const {
+//    std::vector<Vector2f> ret;
+//    for ( auto v : vboundingContours ) {
+//        ret.push_back(v.xy());
+//    }
+//    return ret;
+//}
+//
+//void Follower::type( NodeType _gt ) {
+//    mGeomType |= _gt;
+//    mCapsGeomType |= _gt;
+//}
+//
+//void Follower::capsType( NodeType _gt ) {
+//    mCapsGeomType |= _gt;
+//}
+//
+////void Follower::excludeAxisFromExtrusion( const Vector3f& _axis ) {
+////    mAxisExtrudeExclusions.push_back( _axis );
+////}
+//
+//std::string Follower::Name() const {
+//    return mGeomName;
+//}
+//
+//void Follower::Name( const std::string& val ) {
+//    mGeomName = val;
+//}

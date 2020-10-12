@@ -7,10 +7,8 @@
 //
 #include "profile.hpp"
 
-#include "core/math/matrix4f.h"
 #include "core/math/rect2f.h"
 #include "core/file_manager.h"
-#include "core/serializebin.hpp"
 #include "core/math/poly_utils.hpp"
 #include "core/service_factory.h"
 #define NANOSVG_IMPLEMENTATION	// Expands implementation
@@ -23,24 +21,24 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
         std::memcpy( prof.get(), svgString.c_str(), svgString.length() );
         NSVGimage* image = nsvgParse( reinterpret_cast<char *>(prof.get()), "pc", 96 );
         mBBox = { image->width, image->height };
-        Rect2f lbbox = Rect2f::INVALID;
-        Rect2f lTotalbbox = Rect2f::INVALID;
+        Rect2f lBBox = Rect2f::INVALID;
+        Rect2f lTotalBBox = Rect2f::INVALID;
         V2fVectorWrap rawPoints{};
         // #### NDDADO: we fix subDivs=0 because it's dangerous to interpolate bezier paths when you need total accuracy
         // on connecting profiles with straight elements (IE think about a flat wall)
         int subDivs = 4;
-        for ( auto shape = image->shapes; shape != NULL; shape = shape->next ) {
-            for ( auto path = shape->paths; path != NULL; path = path->next ) {
+        for ( auto shape = image->shapes; shape != nullptr; shape = shape->next ) {
+            for ( auto path = shape->paths; path != nullptr; path = path->next ) {
                 V2fVector lPath{};
                 for ( auto i = 0; i < path->npts - 1; i += 3 ) {
                     float *p = &path->pts[i * 2];
                     for ( int s = 0; s < subDivs+1; s++ ) {
                         if ( (i > 0 && s == 0) ) continue;
-                        float t = s / static_cast<float>(subDivs);
+                        float t = static_cast<float>(s) / static_cast<float>(subDivs);
                         V2f pi = interpolateBezier( V2f{ p[0], p[1] }, V2f{ p[2], p[3] },
                                                     V2f{ p[4], p[5] }, V2f{ p[6], p[7] }, t );
                         lPath.emplace_back(pi);
-                        lTotalbbox.expand(pi);
+                        lTotalBBox.expand(pi);
                         // NDDADO in case of profile path just add the last one, we should clearly change it!
                     }
                     if ( shape->next == nullptr ) {
@@ -49,7 +47,7 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
                         pi *= 0.01f;
                         rawPoints.v.push_back( pi );
                         rawPoints.wrap = path->closed;
-                        lbbox.expand( pi );
+                        lBBox.expand(pi );
                     }
                 }
 
@@ -59,7 +57,7 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
 //                    LOGRS( ppp );
 //                }
 
-//                mPaths.emplace_back( lPath, (path->closed && path->npts % 4 != 0) );
+//                mPaths.emplace_back( lPath, (path->closed && path->nPts % 4 != 0) );
                 mPaths.emplace_back( pathSan, path->closed );
             }
         }
@@ -68,25 +66,24 @@ void Profile::bufferDecode( const unsigned char* _buffer, size_t _length ) {
 
         for ( auto& ps : mPaths ) {
             for ( auto& pp : ps.v ) {
-                pp -= lTotalbbox.centre();
-                pp /= lTotalbbox.size();
+                pp -= lTotalBBox.centre();
+                pp /= lTotalBBox.size();
             }
         }
-        mTotalBBox = lTotalbbox.size();
 
         mPoints.v = sanitizePath( rawPoints.v, rawPoints.wrap, 0.0001f * 0.0001f );
         mPoints.v = forceWindingOrder( mPoints.v, WindingOrder::CCW );
         for ( auto& p : mPoints.v ) {
-            p.setY( lbbox.height() - p.y());
+            p.setY(lBBox.height() - p.y());
         }
         mPoints.wrap = rawPoints.wrap;
-        mBBox = { lbbox.calcWidth(), lbbox.calcHeight() };
+        mBBox = { lBBox.calcWidth(), lBBox.calcHeight() };
     }
 
     calculatePerimeter();
 }
 
-V3fVectorOfVectorWrap Profile::Paths3d() const {
+[[maybe_unused]] V3fVectorOfVectorWrap Profile::Paths3d() const {
     V3fVectorOfVectorWrap ret;
 
     for ( const auto& path : mPaths ) {
@@ -117,7 +114,7 @@ VTMVectorOfVectorWrap Profile::Paths3dWithUV() const {
     return ret;
 }
 
-V3fVector Profile::Points3d( const Vector3f & /*mainAxis*/ ) const {
+[[maybe_unused]] V3fVector Profile::Points3d( const Vector3f & /*mainAxis*/ ) const {
     V3fVector ret;
 	for ( auto& p : mPoints.v ) {
 		ret.emplace_back( p.x(), 0.0f, p.y());
@@ -136,19 +133,13 @@ void Profile::calculatePerimeter() {
 		mPerimeter += JMATH::distance( mPoints.v[t], mPoints.v[nextIndex] );
 		mLengths.push_back( mPerimeter );
 	}
-
-//	ASSERT( mPerimeter > 0.0f );
-	// Normalise distances
-//	for ( auto&& l : mLenghts ) {
-//		l /= mPerimeter;
-//	}
 }
 
 void Profile::createWire( const float radius, int numSubDivs ) {
 
 	int pSize = (numSubDivs+1) * 3;
-	float inc = 360.0f / pSize;
-	for ( auto t = 0; t < pSize; t++ ) {
+	float inc = 360.0f / static_cast<float>(pSize);
+	for ( auto t = 0; t < static_cast<float>(pSize); t++ ) {
 		auto angle = degToRad( t * inc );
 		mPoints.v.push_back( Vector2f{ sin(angle), cos(angle)} * radius);
 	}
@@ -188,7 +179,6 @@ void Profile::createRect( const Vector2f& size, WindingOrderT wo ) {
 	// In this case the bbox is the same as the rect's size
 	mPoints.wrap = true;
 	mBBox = size;
-    mTotalBBox = mBBox;
     mPaths.push_back(mPoints);
 
 	calculatePerimeter();
@@ -203,7 +193,6 @@ void Profile::createRect( const JMATH::Rect2f& _rect ) {
 	// In this case the bbox is the same as the rect's size
 	mPoints.wrap = true;
 	mBBox = _rect.size();
-    mTotalBBox = mBBox;
     mPaths.push_back(mPoints);
 
 	calculatePerimeter();
@@ -211,11 +200,11 @@ void Profile::createRect( const JMATH::Rect2f& _rect ) {
 
 void Profile::createArc( float startAngle, float angle, float radius, float numSegments ) {
 
-	for ( int t = 0; t < numSegments; t++ ) {
+	for ( int t = 0; t < static_cast<int>(numSegments); t++ ) {
 		float delta = (( static_cast<float>( t ) / ( numSegments - 1 )) * angle ) + startAngle;
-		float cosa = cos( delta ) * radius;
-		float sina = sin( delta ) * radius;
-		mPoints.v.emplace_back( cosa, sina );
+		float cosAngle = cos(delta ) * radius;
+		float sinAngle = sin(delta ) * radius;
+		mPoints.v.emplace_back(cosAngle, sinAngle );
 	}
     mPoints.wrap = false;
     mBBox = { radius * 2.0f, radius * 2.0f };
@@ -296,11 +285,11 @@ std::vector<Vector3f> Profile::rotatePoints( const Vector3f& nx, const Vector3f&
 }
 
 void Profile::calcBBox() {
-	Rect2f lbbox = Rect2f::INVALID;
+	Rect2f lBBox = Rect2f::INVALID;
 	for ( const auto& p : mPoints.v ) {
-		lbbox.expand(p);
+		lBBox.expand(p);
 	}
-	mBBox = lbbox.size();
+	mBBox = lBBox.size();
 }
 
 std::shared_ptr<Profile> Profile::makeLine( const std::string& _name, const std::vector<Vector2f>& vv2fs,
@@ -313,15 +302,20 @@ std::shared_ptr<Profile> Profile::makeLine( const std::string& _name, const std:
     return profile;
 }
 
-std::shared_ptr<Profile> Profile::makeWire( const std::string& _name,
-											[[maybe_unused]] const std::vector<Vector2f>& vv2fs,
-											const std::vector<float>& vfs) {
+std::shared_ptr<Profile> Profile::makeWire( float radius, int numSubDivs ) {
 
-    ASSERT( vfs.size() && vfs.size() < 3);
-    auto subdivs = vfs.size() == 1 ? 3 : static_cast<int>(vfs[1]);
     std::shared_ptr<Profile> profile = std::make_shared<Profile>();
 
-    profile->createWire( vfs[0], subdivs );
+    profile->createWire( radius, numSubDivs );
+
+    return profile;
+}
+
+std::shared_ptr<Profile> Profile::makeRect( const V2f& sizes, const V2f& offset ) {
+    std::shared_ptr<Profile> profile = std::make_shared<Profile>();
+
+    profile->createRect(sizes);
+    profile->move(offset);
 
     return profile;
 }
@@ -348,7 +342,7 @@ ProfileMaker& ProfileMaker::s( float _s ) {
 }
 
 int ProfileMaker::setPointerSubdivs( int _sd ) const {
-	return _sd == -1 ? gsubdivs : _sd;
+	return _sd == -1 ? gSubDivs : _sd;
 }
 
 ProfileMaker& ProfileMaker::ay( float radius, int32_t _subdivs ) {
@@ -418,6 +412,6 @@ ProfileMaker& ProfileMaker::lx( float _x1 ) {
 }
 
 ProfileMaker& ProfileMaker::sd( uint32_t _sd ) {
-	gsubdivs = static_cast<int32_t >(_sd);
+    gSubDivs = static_cast<int32_t >(_sd);
 	return *this;
 }

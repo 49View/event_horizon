@@ -252,6 +252,7 @@ macro(register_poly_module)
     register_module("resources")
     register_module("converters")
     register_module("polyclipping")
+    register_module("osm")
     #    register_module("cloth")
     register_module("baking")
 

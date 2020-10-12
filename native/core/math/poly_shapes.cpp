@@ -417,17 +417,17 @@ void AxisAlignedBoundingBox( Topology& mesh, const AABB& aabb ) {
     mesh.addTriangle( 4, 0, 2 );
 }
 
-void Cube( Topology& mesh ) {
+void Cube( Topology& mesh, const C4f& color ) {
     // Vertices
 
-    mesh.vertices.emplace_back( Vector3f( -0.500000, -0.500000, 0.500000 ));
-    mesh.vertices.emplace_back( Vector3f( 0.500000 , -0.500000, 0.500000 ));
-    mesh.vertices.emplace_back( Vector3f( -0.500000, 0.500000 , 0.500000 ));
-    mesh.vertices.emplace_back( Vector3f( 0.500000 , 0.500000 , 0.500000 ));
-    mesh.vertices.emplace_back( Vector3f( -0.500000, 0.500000 , -0.500000 ));
-    mesh.vertices.emplace_back( Vector3f( 0.500000 , 0.500000 , -0.500000 ));
-    mesh.vertices.emplace_back( Vector3f( -0.500000, -0.500000, -0.500000 ));
-    mesh.vertices.emplace_back( Vector3f( 0.500000 , -0.500000, -0.500000 ));
+    mesh.addVertex( V3f{ -0.500000, -0.500000, 0.500000 }, V4fc::ZERO, color);
+    mesh.addVertex( V3f{ 0.500000 , -0.500000, 0.500000 }, V4fc::ZERO, color);
+    mesh.addVertex( V3f{ -0.500000, 0.500000 , 0.500000 }, V4fc::ZERO, color);
+    mesh.addVertex( V3f{ 0.500000 , 0.500000 , 0.500000 }, V4fc::ZERO, color);
+    mesh.addVertex( V3f{ -0.500000, 0.500000 , -0.500000 }, V4fc::ZERO, color);
+    mesh.addVertex( V3f{ 0.500000 , 0.500000 , -0.500000 }, V4fc::ZERO, color);
+    mesh.addVertex( V3f{ -0.500000, -0.500000, -0.500000 }, V4fc::ZERO, color);
+    mesh.addVertex( V3f{ 0.500000 , -0.500000, -0.500000 }, V4fc::ZERO, color);
 
     // Faces
 
@@ -463,7 +463,7 @@ void Panel( Topology& mesh ) {
     mesh.addQuad(1, 0, 3, 2);
 }
 
-void Cylinder( Topology& mesh, int edges ) {
+void Cylinder( Topology& mesh, int edges, const C4f& color ) {
     // Vertices
 
     std::vector<float> angles;
@@ -477,11 +477,11 @@ void Cylinder( Topology& mesh, int edges ) {
 
     for ( const auto a : angles ) {
         auto a1 = degToRad(a);
-        mesh.vertices.emplace_back( V3f( cosf(a1), -0.5f, sinf(a1) ) );
+        mesh.addVertex( V3f{ cosf(a1), -0.5f, sinf(a1) }, V4fc::ZERO, color );
     }
     for ( const auto a : angles ) {
         auto a1 = degToRad(a);
-        mesh.vertices.emplace_back( V3f( cosf(a1), 0.5f, sinf(a1) ) );
+        mesh.addVertex( V3f{ cosf(a1), 0.5f, sinf(a1) }, V4fc::ZERO, color );
     }
 
     // Faces
@@ -931,7 +931,7 @@ PolyStruct createGeomForSphere( const Vector3f& center, const float diameter, co
 PolyStruct createGeomForCube( const Vector3f& center, const Vector3f& size, const C4f& color ) {
 
     Topology mesh;
-    Cube( mesh );
+    Cube( mesh, color );
 
     return createGeom( mesh, center, size, GeomMappingT::Cube, 0 );
 }
@@ -956,7 +956,7 @@ PolyStruct createGeomForCylinder( const Vector3f& center, const V2f& size, const
 
     Topology mesh;
     int edges = subdivs * 8;
-    Cylinder( mesh, edges );
+    Cylinder( mesh, edges, color );
 
     return createGeom( mesh, center, Vector3f{ size.x(), size.y(), size.x() }, GeomMappingT::Cylindrical, 0 );
 }
