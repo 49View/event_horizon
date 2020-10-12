@@ -4,7 +4,7 @@
 
 #include "osm_barrier.hpp"
 #include <core/math/poly_shapes.hpp>
-#include <core/descriptors/osm_parsing.hpp>
+#include <core/descriptors/osm_bsdata.hpp>
 #include <poly/follower.hpp>
 
 void osmCreateFenceBarrier( std::vector<PolyStruct>& barriers, const std::vector<V3f>& vertices, float globalOSMScale, const C4f& mainColor ) {

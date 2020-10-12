@@ -12,6 +12,7 @@
 #include <poly/converters/svg/svgtopoly.hpp>
 #include <poly/converters/gltf2/gltf2.h>
 #include <poly/scene_graph.h>
+#include <poly/osm/osm_names.hpp>
 #include <poly/osm/osm_barrier.hpp>
 
 void
@@ -507,6 +508,7 @@ namespace VDataServices {
         std::vector<PolyStruct> trees;
         std::vector<PolyStruct> barriers;
         Rect2f bigBoundary{ Rect2f::INVALID };
+        std::set<std::string> barrierNames;
 
         for ( const auto& element : _d.osmData.elements ) {
             V3f tilePosDelta = osmTileDeltaPos(element);
@@ -517,6 +519,7 @@ namespace VDataServices {
                 } if ( element.type == OSMElementName::building() ) {
                     osmCreateBuilding(mesh, group, tilePosDelta);
                 } if ( element.type == OSMElementName::barrier() ) {
+                    barrierNames.insert( group.part );
                     osmCreateBarrier(barriers, group, globalOSMScale);
                 }
             }

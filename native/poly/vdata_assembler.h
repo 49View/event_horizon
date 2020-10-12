@@ -9,7 +9,7 @@
 #include <core/uuid.hpp>
 #include <core/names.hpp>
 #include <core/name_policy.hpp>
-#include <core/descriptors/osm_parsing.hpp>
+#include <core/descriptors/osm_bsdata.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/resource_types.hpp>

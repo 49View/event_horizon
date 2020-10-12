@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "osm_bsdata.hpp"
+#include "osm_bsdata_legacy.hpp"
 #include "core/service_factory.h"
 #include "core/callback_dependency.h"
 #include "core/observable.h"
