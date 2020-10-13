@@ -41,16 +41,12 @@ void addOSMTileTriangles( const std::shared_ptr<VData>& _ret, const std::vector<
 
 void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float globalOSMScale ) {
 
+    std::array<std::vector<const OSMElement*>,4> sortedRoads;
+
     addOSMTileBoundaries( _ret, osm->tileBoundary, globalOSMScale );
 
     for ( const auto& element : osm->elements ) {
         V3f elemCenterProj3d = osmTileDeltaPos(element);
-        if ( element.type == OSMElementName::unclassified() ) {
-            addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
-        }
-        if ( element.type == OSMElementName::road() ) {
-            addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
-        }
         if ( element.type == OSMElementName::water() ) {
             addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
         }
@@ -59,6 +55,32 @@ void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float g
         }
         if ( element.type == OSMElementName::park() ) {
             addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
+        }
+    }
+
+    for ( const auto& element : osm->elements ) {
+        V3f elemCenterProj3d = osmTileDeltaPos(element);
+        if ( element.type == OSMElementName::unclassified() ) {
+            addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
+        }
+        if ( element.type == OSMElementName::road() ) {
+            const auto& it = element.tags.find(OSMElementName::highway());
+            if ( it->second == OSMElementName::primary() || it->second == OSMElementName::secondary() ) {
+                sortedRoads[3].emplace_back(&element);
+            } else if ( it->second == OSMElementName::tertiary() ) {
+                sortedRoads[2].emplace_back(&element);
+            } else if ( it->second == OSMElementName::residential() ) {
+                sortedRoads[1].emplace_back(&element);
+            } else {
+                sortedRoads[0].emplace_back(&element);
+            }
+        }
+    }
+
+    for ( const auto& sr : sortedRoads ) {
+        for ( const auto& element : sr ) {
+            V3f elemCenterProj3d = osmTileDeltaPos(*element);
+            addOSMTileTriangles( _ret, element->meshes, elemCenterProj3d, globalOSMScale);
         }
     }
 

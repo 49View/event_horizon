@@ -10,9 +10,6 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string unclassified() {
         return "unclassified";
     }
-    [[maybe_unused]] static inline std::string road() {
-        return "road";
-    }
     [[maybe_unused]] static inline std::string park() {
         return "park";
     }
@@ -29,6 +26,60 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string tree() {
         return "tree";
     }
+
+    // Roads
+    [[maybe_unused]] static inline std::string road() {
+        return "road";
+    }
+    [[maybe_unused]] static inline std::string highway() {
+        return "highway";
+    }
+    [[maybe_unused]] static inline std::string motorway() {
+        return "motorway";
+    }
+    [[maybe_unused]] static inline std::string primary() {
+        return "primary";
+    }
+    [[maybe_unused]] static inline std::string secondary() {
+        return "secondary";
+    }
+    [[maybe_unused]] static inline std::string crossing() {
+        return "crossing";
+    }
+    [[maybe_unused]] static inline std::string cycleway() {
+        return "cycleway";
+    }
+    [[maybe_unused]] static inline std::string footway() {
+        return "footway";
+    }
+    [[maybe_unused]] static inline std::string give_way() {
+        return "give_way";
+    }
+    [[maybe_unused]] static inline std::string mini_roundabout() {
+        return "mini_roundabout";
+    }
+    [[maybe_unused]] static inline std::string path() {
+        return "path";
+    }
+    [[maybe_unused]] static inline std::string pedestrian() {
+        return "pedestrian";
+    }
+    [[maybe_unused]] static inline std::string residential() {
+        return "residential";
+    }
+    [[maybe_unused]] static inline std::string service() {
+        return "service";
+    }
+    [[maybe_unused]] static inline std::string steps() {
+        return "steps";
+    }
+    [[maybe_unused]] static inline std::string tertiary() {
+        return "tertiary";
+    }
+    [[maybe_unused]] static inline std::string traffic_signals() {
+        return "traffic_signals";
+    }
+
 
     // Barrier
     [[maybe_unused]] static inline std::string barrier() {

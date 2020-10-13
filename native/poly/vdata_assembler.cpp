@@ -379,7 +379,7 @@ namespace VDataServices {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-    static constexpr float globalOSMScale = 0.1f;
+    static constexpr float globalOSMScale = 0.01f;
 
     bool prepare( SceneGraph& sg, GT::OSMTile& _d, Material * ) {
         return true;
