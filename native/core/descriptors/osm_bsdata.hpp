@@ -37,16 +37,12 @@ JSONDATA(OSMMesh, colour, part, vertexType, vertices)
     std::vector<V3f> vertices;
 };
 
-JSONDATA(OSMTags, name)
-    std::string name;
-};
-
-JSONDATA(OSMElement, id, type, center, meshes, tags)
+JSONDATA(OSMElement, id, type, center, tags, meshes )
     std::string id;
     std::string type;
     OSMCenter center;
+    KVStringMap tags;
     std::vector<OSMMesh> meshes;
-    OSMTags tags;
 };
 
 JSONDATA(OSMTileBoundary, zoom, tileX, tileY, bbox, rect, center, size, tilePos)

@@ -40,7 +40,6 @@ void addOSMTileTriangles( const std::shared_ptr<VData>& _ret, const std::vector<
 }
 
 void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float globalOSMScale ) {
-    std::set<std::string> roadNames;
 
     addOSMTileBoundaries( _ret, osm->tileBoundary, globalOSMScale );
 
@@ -62,6 +61,7 @@ void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float g
             addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
         }
     }
+
 }
 
 void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, float globalOSMScale ) {
