@@ -9,14 +9,11 @@
 #include <string>
 #include <vector>
 #include <core/util_follower.hpp>
-#include <core/descriptors/osm_bsdata.hpp>
 #include <core/math/poly_shapes.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/resources/resource_serialization.hpp>
 #include <core/names.hpp>
 #include <poly/cloth/cloth.h>
-
-struct OSMData;
 
 namespace GTBucket {
     [[maybe_unused]] static constexpr inline int Near = 0;
@@ -95,7 +92,7 @@ struct GeomMappingData {
 //    void WrapMappingCoords( const std::vector<Vector2f>& val ) { wrapMappingCoords = val; }
 
     GeomMappingData() = default;
-    GeomMappingData(const V2f& _scale) {
+    explicit GeomMappingData(const V2f& _scale) {
         setUVScale(_scale);
     }
 
@@ -130,6 +127,7 @@ struct QuadVector3fNormal {
 struct PolyOutLine;
 struct PolyLine;
 struct PolyLine2d;
+struct OSMData;
 class Profile;
 namespace Utility::TTFCore { class FontInternal;}
 using Font = Utility::TTFCore::FontInternal;
@@ -172,7 +170,7 @@ namespace GT {
         V2f operator()() const noexcept {
             return data;
         }
-        V2f data;
+        V2f data{V2fc::ZERO};
     };
 
     struct FlipNormal {
@@ -187,7 +185,7 @@ namespace GT {
         float operator()() const noexcept {
             return data;
         }
-        float data;
+        float data = 0;
     };
 
     struct Tag {
@@ -196,7 +194,7 @@ namespace GT {
         uint64_t operator()() const noexcept {
             return data;
         }
-        uint64_t data;
+        uint64_t data = 0;
     };
 
     struct Bucket {
@@ -205,7 +203,7 @@ namespace GT {
         int operator()() const noexcept {
             return data;
         }
-        int data;
+        int data = 0;
     };
 
     struct A {
@@ -214,7 +212,7 @@ namespace GT {
         float operator()() const noexcept {
             return data;
         }
-        float data;
+        float data = 0.0f;
     };
 
     struct M {
@@ -223,7 +221,7 @@ namespace GT {
         ResourceRef operator()() const noexcept {
             return data;
         }
-        ResourceRef data;
+        ResourceRef data{};
     };
 
     struct Program {
@@ -232,7 +230,7 @@ namespace GT {
         ResourceRef operator()() const noexcept {
             return data;
         }
-        ResourceRef data;
+        ResourceRef data{};
     };
 
     struct ForceNormalAxis {
@@ -241,7 +239,7 @@ namespace GT {
         V3f operator()() const noexcept {
             return data;
         }
-        V3f data;
+        V3f data{V3f::ZERO()};
     };
 
     struct GLTF2PrimitiveIndex {
@@ -250,7 +248,7 @@ namespace GT {
         int operator()() const noexcept {
             return data;
         }
-        int data;
+        int data = 0;
     };
 
     struct GLTF2MeshIndex {
@@ -259,7 +257,7 @@ namespace GT {
         int operator()() const noexcept {
             return data;
         }
-        int data;
+        int data = 0;
     };
 
     enum class TextType {
@@ -269,7 +267,7 @@ namespace GT {
     };
 
     struct GTPolicyColor {
-        C4f color;
+        C4f color{C4fc::WHITE};
     };
     struct GTPolicyNameId {
         std::string nameId;
@@ -335,7 +333,7 @@ namespace GT {
         bool flipNormals = false;
     };
     struct GTPolicyOSMData {
-        OSMData osmData;
+        OSMData* osmData = nullptr;
         V2f locationLatLon = V2fc::ZERO;
     };
 

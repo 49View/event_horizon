@@ -31,7 +31,6 @@ template<typename T>
     return d;
 }
 
-[[maybe_unused]] V3f osmTileProject( const V3f& vertex, const V3f& elemCenterProj3d, Rect2f& boundary,
-                                     float globalOSMScale );
+[[maybe_unused]] V3f osmTileProject( const V3f& vertex, const V3f& elemCenterProj3d, float globalOSMScale );
 V2f coordToProjection( const V2f& latLon );
 [[maybe_unused]] V3f osmTileDeltaPos( const OSMElement& element );

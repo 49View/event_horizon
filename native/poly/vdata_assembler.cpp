@@ -3,6 +3,7 @@
 //
 
 #include "vdata_assembler.h"
+#include <core/descriptors/osm_bsdata.hpp>
 #include <core/resources/profile.hpp>
 #include <core/TTF.h>
 #include <core/math/obb.hpp>
@@ -15,6 +16,7 @@
 #include <poly/osm/osm_names.hpp>
 #include <poly/osm/osm_barrier.hpp>
 #include <poly/osm/osm_building.hpp>
+#include <poly/osm/osm_tile_element.hpp>
 #include <poly/osm/osm_calc.hpp>
 
 void
@@ -389,35 +391,21 @@ namespace VDataServices {
 
     [[maybe_unused]] void buildInternal( const GT::OSMTile& _d, const std::shared_ptr<VData>& _ret ) {
 
-        Topology mesh{};
-        Rect2f bigBoundary{ Rect2f::INVALID };
-        std::vector<std::pair<V3f, C4f>> tilePoints{};
         std::set<std::string> roadNames;
 
-        for ( const auto& element : _d.osmData.elements ) {
+        addOSMTileBoundaries( _ret, _d.osmData->tileBoundary, globalOSMScale );
+
+        for ( const auto& element : _d.osmData->elements ) {
             if ( isOSMTileElement(element) ) {
                 V3f elemCenterProj3d = osmTileDeltaPos(element);
                 for ( const auto& group : element.meshes ) {
-                    C4f color = C4fc::XTORGBA(group.colour);
                     if ( group.part.empty() ) {
-                        for ( const auto& triangle : group.vertices ) {
-                            tilePoints.emplace_back(osmTileProject(triangle, elemCenterProj3d, bigBoundary, globalOSMScale), color);
-                        }
+                        addOSMTileTriangles( _ret, group, elemCenterProj3d, globalOSMScale);
                     }
                 }
             }
         }
 
-        for ( const auto& bv : bigBoundary.pointsTriangleList() ) {
-            mesh.addVertexOfTriangle(XZY::C(bv, 0.0f), V4fc::ZERO, C4fc::WHITE);
-        }
-
-        for ( const auto& tp : tilePoints ) {
-            mesh.addVertexOfTriangle(tp.first, V4fc::ZERO, tp.second);
-        }
-
-        PolyStruct ps = createGeom(mesh, V3f::ZERO(), V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked }, 0, ReverseFlag::False);
-        _ret->fill(ps);
     }
 
     ResourceRef refName( const GT::OSMTile& _d ) {
@@ -433,9 +421,8 @@ namespace VDataServices {
         Topology mesh{};
         std::vector<PolyStruct> trees;
         std::vector<PolyStruct> barriers;
-        Rect2f bigBoundary{ Rect2f::INVALID };
 
-        for ( const auto& element : _d.osmData.elements ) {
+        for ( const auto& element : _d.osmData->elements ) {
             V3f tilePosDelta = osmTileDeltaPos(element);
             for ( const auto& group : element.meshes ) {
                 if ( element.type == OSMElementName::tree() ) {
@@ -449,7 +436,7 @@ namespace VDataServices {
             }
         }
 
-        PolyStruct ps = createGeom(mesh, V3f::ZERO(), V3fc::ONE, GeomMapping{ GeomMappingT::PreBaked }, 0, ReverseFlag::False);
+        PolyStruct ps = createGeom(mesh);
         _ret->fill(ps);
         for ( const auto& tree : trees ) {
             _ret->fill(tree);

@@ -9,7 +9,6 @@
 #include <core/uuid.hpp>
 #include <core/names.hpp>
 #include <core/name_policy.hpp>
-#include <core/descriptors/osm_bsdata.hpp>
 #include <core/math/matrix_anim.h>
 #include <core/math/poly_shapes.hpp>
 #include <core/resources/resource_types.hpp>
@@ -19,6 +18,7 @@
 
 class Profile;
 class SceneGraph;
+struct OSMData;
 
 using GeomDataListBuilderRetType = std::vector<std::shared_ptr<VData>>;
 
@@ -278,7 +278,7 @@ public:
             return *this;
         }
 
-        if constexpr ( std::is_same_v<M, OSMData> ) {
+        if constexpr ( std::is_same_v<M, OSMData*> ) {
             static_assert( std::is_same_v<SGT, GT::OSMBuildings> || std::is_same_v<SGT, GT::OSMTile> );
             dataTypeHolder.osmData = _param;
             return *this;

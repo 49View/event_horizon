@@ -5,11 +5,9 @@
 #include "osm_calc.hpp"
 #include <core/descriptors/osm_bsdata.hpp>
 
-[[maybe_unused]] V3f osmTileProject( const V3f& vertex, const V3f& elemCenterProj3d, Rect2f& boundary,
-                                     float globalOSMScale ) {
+[[maybe_unused]] V3f osmTileProject( const V3f& vertex, const V3f& elemCenterProj3d, float globalOSMScale ) {
     V3f pp{ XZY::C(vertex) + elemCenterProj3d };
     pp *= globalOSMScale;
-    boundary.expand(pp.xz());
     return pp;
 }
 
