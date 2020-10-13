@@ -18,6 +18,7 @@
 #include <poly/osm/osm_building.hpp>
 #include <poly/osm/osm_tile_element.hpp>
 #include <poly/osm/osm_calc.hpp>
+#include <poly/osm/osm_tree.hpp>
 
 void
 internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
@@ -420,30 +421,22 @@ namespace VDataServices {
 
         Topology mesh{};
         std::vector<PolyStruct> trees;
-        std::vector<PolyStruct> barriers;
 
         for ( const auto& element : _d.osmData->elements ) {
             V3f tilePosDelta = osmTileDeltaPos(element);
             for ( const auto& group : element.meshes ) {
                 if ( element.type == OSMElementName::tree() ) {
-                    trees.emplace_back(createGeomForCone( tilePosDelta * globalOSMScale, V3f{0.2f, 3.14f, 0.2f}* globalOSMScale, 1, C4fc::PASTEL_BROWN ));
-                    trees.emplace_back(createGeomForSphere( (tilePosDelta + V3fc::UP_AXIS*3.0f) * globalOSMScale, globalOSMScale, 1, C4fc::FOREST_GREEN ));
+                    osmCreateTree(_ret, tilePosDelta, globalOSMScale );
                 } if ( element.type == OSMElementName::building() ) {
                     osmCreateBuilding(mesh, group, tilePosDelta, globalOSMScale);
                 } if ( element.type == OSMElementName::barrier() ) {
-                    osmCreateBarrier(barriers, group, globalOSMScale);
+                    osmCreateBarrier(_ret, group, globalOSMScale);
                 }
             }
         }
 
         PolyStruct ps = createGeom(mesh);
         _ret->fill(ps);
-        for ( const auto& tree : trees ) {
-            _ret->fill(tree);
-        }
-        for ( const auto& barrier : barriers ) {
-            _ret->fill(barrier);
-        }
     }
 
     ResourceRef refName( const GT::OSMBuildings& _d ) {

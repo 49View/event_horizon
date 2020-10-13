@@ -6,14 +6,20 @@
 
 #include <memory>
 #include <core/v_data.hpp>
+#include <core/descriptors/osm_bsdata.hpp>
 #include <core/math/poly_shapes.hpp>
 #include <poly/osm/osm_calc.hpp>
 
-template<typename F>
-[[maybe_unused]] void addOSMMesh( const std::shared_ptr<VData>& _ret, F&& func ) {
+void addOSMMesh( const std::shared_ptr<VData>& _ret, std::function<void(Topology&)> func ) {
     Topology mesh{};
     func(mesh);
     _ret->fill(createGeom(mesh));
+}
+
+void addOSMPolyStruct( const std::shared_ptr<VData>& _ret, std::function<std::vector<PolyStruct>()> func ) {
+    for ( const auto& ps : func() ) {
+        _ret->fill(ps);
+    }
 }
 
 void addOSMTileBoundaries( const std::shared_ptr<VData>& _ret, const OSMTileBoundary& tileBoundary, float globalOSMScale ) {
