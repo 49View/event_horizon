@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <memory>
+#include <vector>
 
-struct VData;
+struct PolyStruct;
 struct Vector3f;
 
-void osmCreateTree( const std::shared_ptr<VData>& _ret, const Vector3f& treePos, float globalOSMScale );
+std::vector<PolyStruct> osmCreateTree( const Vector3f& treePos, float globalOSMScale );
 
 

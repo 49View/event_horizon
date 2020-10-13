@@ -7,7 +7,7 @@
 #include <core/descriptors/osm_bsdata.hpp>
 #include <poly/follower.hpp>
 #include <poly/osm/osm_names.hpp>
-#include <poly/osm/osm_tile_element.hpp>
+#include <poly/osm/osm_tile.hpp>
 
 template <typename F>
 void lerpConstantPath( std::vector<PolyStruct>& barriers, const std::vector<V3f>& vertices, float elemSize, float gap, F&& func ) {
@@ -64,21 +64,19 @@ void osmCreateGateBarrier( std::vector<PolyStruct>& barriers, const std::vector<
     }
 }
 
-void osmCreateBarrier( const std::shared_ptr<VData>& _ret, const OSMMesh& group, float globalOSMScale ) {
-    addOSMPolyStruct( _ret, [group, globalOSMScale]() -> std::vector<PolyStruct> {
-        std::vector<PolyStruct> barriers;
-        auto mainColor = C4fc::XTORGBA(group.colour);
-        if ( group.part == OSMElementName::fence() ) {
-            osmCreateFenceBarrier( barriers, group.vertices, globalOSMScale, mainColor );
-        } else if ( group.part == OSMElementName::wall() || group.part == OSMElementName::retaining_wall() ) {
-            osmCreateWallBarrier( barriers, group.vertices, V2f{ 0.3f, 1.0f}, globalOSMScale, mainColor );
-        } else if ( group.part == OSMElementName::bollard() ) {
-            osmCreateBollardBarrier( barriers, group.vertices, globalOSMScale, mainColor );
-        } else if ( group.part == OSMElementName::gate() ) {
-            osmCreateGateBarrier( barriers, group.vertices, globalOSMScale, mainColor );
-        } else if ( group.part == OSMElementName::kerb() ) {
-            osmCreateWallBarrier( barriers, group.vertices, V2f{ 0.2f, 0.1f}, globalOSMScale, mainColor );
-        }
-        return barriers;
-    });
+std::vector<PolyStruct> osmCreateBarrier( const OSMMesh& group, float globalOSMScale ) {
+    std::vector<PolyStruct> barriers;
+    auto mainColor = C4fc::XTORGBA(group.colour);
+    if ( group.part == OSMElementName::fence() ) {
+        osmCreateFenceBarrier( barriers, group.vertices, globalOSMScale, mainColor );
+    } else if ( group.part == OSMElementName::wall() || group.part == OSMElementName::retaining_wall() ) {
+        osmCreateWallBarrier( barriers, group.vertices, V2f{ 0.3f, 1.0f}, globalOSMScale, mainColor );
+    } else if ( group.part == OSMElementName::bollard() ) {
+        osmCreateBollardBarrier( barriers, group.vertices, globalOSMScale, mainColor );
+    } else if ( group.part == OSMElementName::gate() ) {
+        osmCreateGateBarrier( barriers, group.vertices, globalOSMScale, mainColor );
+    } else if ( group.part == OSMElementName::kerb() ) {
+        osmCreateWallBarrier( barriers, group.vertices, V2f{ 0.2f, 0.1f}, globalOSMScale, mainColor );
+    }
+    return barriers;
 }

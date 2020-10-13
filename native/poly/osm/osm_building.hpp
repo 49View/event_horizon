@@ -4,12 +4,11 @@
 
 #pragma once
 
-struct Topology;
+#include <vector>
+
+struct PolyStruct;
 struct OSMMesh;
 
 class Vector3f;
 
-[[maybe_unused]] [[maybe_unused]] void
-osmCreateBuilding( Topology& mesh, const OSMMesh& group, const Vector3f& tilePosDelta, float globalOSMScale );
-
-
+PolyStruct osmCreateBuilding( const OSMMesh& group, const Vector3f& tilePosDelta, float globalOSMScale );

@@ -7,14 +7,24 @@
 #include <string>
 
 namespace OSMElementName {
-    [[maybe_unused]] static inline std::string building() {
-        return "building";
+    [[maybe_unused]] static inline std::string unclassified() {
+        return "unclassified";
+    }
+    [[maybe_unused]] static inline std::string road() {
+        return "road";
     }
     [[maybe_unused]] static inline std::string park() {
         return "park";
     }
+    [[maybe_unused]] static inline std::string parking() {
+        return "parking";
+    }
     [[maybe_unused]] static inline std::string water() {
         return "water";
+    }
+
+    [[maybe_unused]] static inline std::string building() {
+        return "building";
     }
     [[maybe_unused]] static inline std::string tree() {
         return "tree";

@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <memory>
+#include <vector>
 
-struct VData;
+struct PolyStruct;
 struct OSMMesh;
 
-void osmCreateBarrier( const std::shared_ptr<VData>& _ret, const OSMMesh& group, float globalOSMScale );
+std::vector<PolyStruct> osmCreateBarrier( const OSMMesh& group, float globalOSMScale );

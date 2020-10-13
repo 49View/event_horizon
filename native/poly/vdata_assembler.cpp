@@ -10,13 +10,12 @@
 #include <core/math/poly_shapes.hpp>
 #include <poly/poly_services.hpp>
 #include <poly/follower.hpp>
-#include <poly/converters/svg/svgtopoly.hpp>
 #include <poly/converters/gltf2/gltf2.h>
 #include <poly/scene_graph.h>
 #include <poly/osm/osm_names.hpp>
 #include <poly/osm/osm_barrier.hpp>
 #include <poly/osm/osm_building.hpp>
-#include <poly/osm/osm_tile_element.hpp>
+#include <poly/osm/osm_tile.hpp>
 #include <poly/osm/osm_calc.hpp>
 #include <poly/osm/osm_tree.hpp>
 
@@ -386,27 +385,8 @@ namespace VDataServices {
         return true;
     }
 
-    bool isOSMTileElement( const OSMElement& element ) {
-        return ( element.type != OSMElementName::building() && element.type != OSMElementName::tree() );
-    }
-
     [[maybe_unused]] void buildInternal( const GT::OSMTile& _d, const std::shared_ptr<VData>& _ret ) {
-
-        std::set<std::string> roadNames;
-
-        addOSMTileBoundaries( _ret, _d.osmData->tileBoundary, globalOSMScale );
-
-        for ( const auto& element : _d.osmData->elements ) {
-            if ( isOSMTileElement(element) ) {
-                V3f elemCenterProj3d = osmTileDeltaPos(element);
-                for ( const auto& group : element.meshes ) {
-                    if ( group.part.empty() ) {
-                        addOSMTileTriangles( _ret, group, elemCenterProj3d, globalOSMScale);
-                    }
-                }
-            }
-        }
-
+        addOSMTile( _ret, _d.osmData, globalOSMScale );
     }
 
     ResourceRef refName( const GT::OSMTile& _d ) {
@@ -418,25 +398,7 @@ namespace VDataServices {
     }
 
     [[maybe_unused]] void buildInternal( const GT::OSMBuildings& _d, const std::shared_ptr<VData>& _ret ) {
-
-        Topology mesh{};
-        std::vector<PolyStruct> trees;
-
-        for ( const auto& element : _d.osmData->elements ) {
-            V3f tilePosDelta = osmTileDeltaPos(element);
-            for ( const auto& group : element.meshes ) {
-                if ( element.type == OSMElementName::tree() ) {
-                    osmCreateTree(_ret, tilePosDelta, globalOSMScale );
-                } if ( element.type == OSMElementName::building() ) {
-                    osmCreateBuilding(mesh, group, tilePosDelta, globalOSMScale);
-                } if ( element.type == OSMElementName::barrier() ) {
-                    osmCreateBarrier(_ret, group, globalOSMScale);
-                }
-            }
-        }
-
-        PolyStruct ps = createGeom(mesh);
-        _ret->fill(ps);
+        addOSMSolid( _ret, _d.osmData, globalOSMScale );
     }
 
     ResourceRef refName( const GT::OSMBuildings& _d ) {

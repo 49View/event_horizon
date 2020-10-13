@@ -4,14 +4,15 @@
 
 #include "osm_building.hpp"
 #include <core/math/vector3f.h>
+#include <core/soa_utils.h>
 #include <core/math/poly_shapes.hpp>
 #include <core/descriptors/osm_bsdata.hpp>
 #include <poly/osm/osm_names.hpp>
 #include <poly/osm/osm_calc.hpp>
 #include <core/math/obb.hpp>
 
-[[maybe_unused]] void
-osmCreateBuilding( Topology& mesh, const OSMMesh& group, const V3f& tilePosDelta, float globalOSMScale ) {
+PolyStruct osmCreateBuilding( const OSMMesh& group, const V3f& tilePosDelta, float globalOSMScale ) {
+    Topology mesh;
     float facadeMappingScale = 0.1f;
     C4f color = C4fc::XTORGBA(group.colour);
 
@@ -70,4 +71,6 @@ osmCreateBuilding( Topology& mesh, const OSMMesh& group, const V3f& tilePosDelta
             xAcc += dist;
         }
     }
+
+    return createGeom(mesh);
 }
