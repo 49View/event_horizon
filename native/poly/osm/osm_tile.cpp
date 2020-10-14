@@ -22,7 +22,7 @@ void addOSMMesh( const std::shared_ptr<VData>& _ret, const std::function<void(To
 void addOSMTileBoundaries( const std::shared_ptr<VData>& _ret, const OSMTileBoundary& tileBoundary, float globalOSMScale ) {
     addOSMMesh(_ret, [tileBoundary, globalOSMScale]( Topology& mesh ) {
         for ( const auto& v : tileBoundary.rect.pointsTriangleList() ) {
-            mesh.addVertexOfTriangle(XZY::C(v * globalOSMScale, 0.0f), V4fc::ZERO, C4fc::XTORGBA("#fffdd0"));
+            mesh.addVertexOfTriangle(XZY::C(v * globalOSMScale, 0.0f), V4fc::ZERO, C4fc::XTORGBA("#E8E3EF"));
         }
     });
 }
