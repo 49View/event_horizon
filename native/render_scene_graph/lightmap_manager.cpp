@@ -208,14 +208,14 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
 
 namespace LightmapManager {
 
-    static constexpr int sLightMapSize = 1024;
+    static constexpr int sLightMapSize = 512;
 
     int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
 
         int w = scene->w, h = scene->h;
 
         lm_context *ctx = lmCreate(
-                64,               // hemisphere resolution (power of two, max=512)
+                128,               // hemisphere resolution (power of two, max=512)
                 0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
                 1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
                 2,
@@ -229,7 +229,7 @@ namespace LightmapManager {
             return 0;
         }
 
-        constexpr int numBounces = 2;
+        constexpr int numBounces = 3;
         for ( int bounce = 0; bounce < numBounces; bounce++ ) {
 
             float *data = (float *) calloc(w * h * 4, sizeof(float));
@@ -280,7 +280,7 @@ namespace LightmapManager {
             lmImageDilate(temp, data, w, h, 4);
 
             if ( bounce == numBounces-1 ) {
-//                lmImagePower(data, w, h, 4, 1.0f / 3.0f, 0x7); // gamma correct color channels
+                lmImagePower(data, w, h, 4, 1.0f / 1.75f, 0x7); // gamma correct color channels
 #ifndef ANDROID
                 // save result to a file
                 if ( lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f) )
