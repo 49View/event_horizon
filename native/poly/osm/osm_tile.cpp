@@ -39,6 +39,11 @@ void addOSMTileTriangles( const std::shared_ptr<VData>& _ret, const std::vector<
     }
 }
 
+bool checkTagOnElement( const OSMElement& element, const std::string& tag, const std::string& value ) {
+    auto it = element.tags.find(tag);
+    return it != element.tags.end() && it->second == value;
+}
+
 void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float globalOSMScale ) {
 
     std::array<std::vector<const OSMElement*>,4> sortedRoads;
@@ -98,8 +103,19 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, float 
     for ( const auto& element : osm->elements ) {
         V3f tilePosDelta = osmTileDeltaPos(element);
         for ( const auto& group : element.meshes ) {
-            if ( element.type == OSMElementName::tree() ) {
-                addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+            if ( element.type == OSMElementName::entity() ) {
+                if ( checkTagOnElement(element, OSMElementName::amenity(), OSMElementName::telephone()) ) {
+                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+                }
+                if ( checkTagOnElement(element, OSMElementName::historic(), OSMElementName::monument()) ) {
+                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+                }
+                if ( checkTagOnElement(element, OSMElementName::natural(), OSMElementName::tree()) ) {
+                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+                }
+                if ( checkTagOnElement(element, OSMElementName::highway(), OSMElementName::bus_stop()) ) {
+                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+                }
             } else if ( element.type == OSMElementName::building() ) {
                 addToOSM(osmCreateBuilding(group, tilePosDelta, globalOSMScale));
             } else if ( element.type == OSMElementName::barrier() ) {

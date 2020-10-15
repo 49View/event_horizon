@@ -23,8 +23,29 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string building() {
         return "building";
     }
+    [[maybe_unused]] static inline std::string entity() {
+        return "entity";
+    }
     [[maybe_unused]] static inline std::string tree() {
         return "tree";
+    }
+    [[maybe_unused]] static inline std::string amenity() {
+        return "amenity";
+    }
+    [[maybe_unused]] static inline std::string telephone() {
+        return "telephone";
+    }
+    [[maybe_unused]] static inline std::string natural() {
+        return "natural";
+    }
+    [[maybe_unused]] static inline std::string historic() {
+        return "historic";
+    }
+    [[maybe_unused]] static inline std::string monument() {
+        return "monument";
+    }
+    [[maybe_unused]] static inline std::string bus_stop() {
+        return "bus_stop";
     }
 
     // Roads
