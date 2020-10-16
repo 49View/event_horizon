@@ -124,4 +124,18 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string wall() {
         return "wall";
     }
+
+    // Trees
+    [[maybe_unused]] static inline std::string fir_tree() {
+        return "fir,tree";
+    }
+    [[maybe_unused]] static inline std::string oak_tree() {
+        return "oak,tree";
+    }
+    [[maybe_unused]] static inline std::string poplar_tree() {
+        return "poplar,tree";
+    }
+    [[maybe_unused]] static inline std::string palm_tree() {
+        return "palm,tree";
+    }
 }

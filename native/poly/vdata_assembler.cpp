@@ -391,10 +391,9 @@ namespace VDataServices {
         return "OSMTile--" + UUIDGen::make();
     }
 
-    bool prepare( SceneGraph& sg, GT::OSMBuildings& _d, Material * ) {
-        std::string firTree{"fir,tree"};
-        std::string firTreeBaked = firTree+",baked";
-        auto tree = sg.get<Geom>(firTree);
+    ResourceRef bakeVData( SceneGraph& sg, CResourceRef assetRef ) {
+        std::string assetRefBaked = assetRef+",baked";
+        auto tree = sg.get<Geom>(assetRef);
         auto baked = tree->reduce<VData>( [&]( const GeomSPConst node, VData& reduced ) {
             for ( const auto& geomData : node->DataV() ) {
                 auto vd = sg.get<VData>(geomData.vData);
@@ -403,8 +402,20 @@ namespace VDataServices {
                 reduced.fill(*vd, col);
             }
         });
-        sg.addVDataIM( firTreeBaked, baked );
-        _d.osmAssets.emplace(firTreeBaked, sg.get<VData>(firTreeBaked).get());
+        sg.addVDataIM( assetRefBaked, baked );
+        return assetRefBaked;
+    }
+
+    void addOSMAsset( SceneGraph& sg, CResourceRef assetRef, GT::OSMBuildings& _d ) {
+        auto assetRefBaked = bakeVData(sg, assetRef);
+        _d.osmAssets.emplace(assetRef, sg.get<VData>(assetRefBaked).get());
+    }
+
+    bool prepare( SceneGraph& sg, GT::OSMBuildings& _d, Material * ) {
+        addOSMAsset(sg, OSMElementName::fir_tree(), _d);
+        addOSMAsset(sg, OSMElementName::oak_tree(), _d);
+        addOSMAsset(sg, OSMElementName::poplar_tree(), _d);
+        addOSMAsset(sg, OSMElementName::palm_tree(), _d);
         return true;
     }
 

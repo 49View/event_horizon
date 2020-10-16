@@ -3,8 +3,3 @@
 //
 
 #pragma once
-
-namespace HOD { // HighOrderDependency
-
-
-}

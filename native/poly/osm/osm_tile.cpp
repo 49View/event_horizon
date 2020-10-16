@@ -104,7 +104,8 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
         V3f tilePosDelta = osmTileDeltaPos(element);
         for ( const auto& group : element.meshes ) {
             if ( element.type == OSMElementName::entity() ) {
-                Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*3.0f}};
+                auto randScale = 2.0f + unitRand(1.5f);
+                Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*randScale}};
 
                 if ( checkTagOnElement(element, OSMElementName::amenity(), OSMElementName::telephone()) ) {
 //                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
@@ -113,7 +114,23 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
 //                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
                 }
                 if ( checkTagOnElement(element, OSMElementName::natural(), OSMElementName::tree()) ) {
-                    _ret->fill( *assets.find("fir,tree,baked")->second, mat);
+                    auto rand = static_cast<int>(unitRand(4.0f));
+                    switch ( rand ) {
+                        case 0:
+                            _ret->fill( *assets.find(OSMElementName::fir_tree())->second, mat);
+                            break;
+                        case 1:
+                            _ret->fill( *assets.find(OSMElementName::oak_tree())->second, mat);
+                            break;
+                        case 2:
+                            _ret->fill( *assets.find(OSMElementName::palm_tree())->second, mat);
+                            break;
+                        case 3:
+                            _ret->fill( *assets.find(OSMElementName::poplar_tree())->second, mat);
+                            break;
+                        default:
+                            _ret->fill( *assets.find(OSMElementName::fir_tree())->second, mat);
+                    }
 //                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
                 }
                 if ( checkTagOnElement(element, OSMElementName::highway(), OSMElementName::bus_stop()) ) {
