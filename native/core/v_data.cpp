@@ -13,12 +13,54 @@ void VData::fill( const PolyStruct& ps ) {
     auto startIndex = vIndices.size();
     for ( int q = 0; q < ps.numIndices; q++ ) {
         auto idx = ps.indices[q];
-        PUUNTBC d1{ ps.verts[idx],ps.uvs[q],ps.uv2s[q],ps.normals[q],ps.tangents[q],ps.binormals[q],ps.colors[q] };
+        PUUNTBC d1{ ps.verts[idx],ps.uvs[idx],ps.uv2s[idx],ps.normals[idx],ps.tangents[idx],ps.binormals[idx],ps.colors[idx] };
         vSoaData.emplace_back( d1 );
         vIndices.push_back( q + startIndex );
     }
     expandVolume( ps.bbox3d.minPoint() );
     expandVolume( ps.bbox3d.maxPoint() );
+}
+
+void VData::fill( const VData& ps ) {
+    auto startIndex = vIndices.size();
+    for ( auto q = 0u; q < ps.numIndices(); q++ ) {
+        auto idx = ps.vIndexAt(q);
+        auto d1 = ps.soaAt(idx);
+        vSoaData.emplace_back( d1 );
+        vIndices.emplace_back( q + startIndex );
+    }
+
+    expandVolume( ps.getMin() );
+    expandVolume( ps.getMax() );
+}
+
+void VData::fill( const VData& ps, const C4f& _color ) {
+    auto startIndex = vIndices.size();
+    for ( auto q = 0u; q < ps.numIndices(); q++ ) {
+        auto idx = ps.vIndexAt(q);
+        auto d1 = ps.soaAt(idx);
+        d1.a6 = _color;
+        vSoaData.emplace_back( d1 );
+        vIndices.emplace_back( q + startIndex );
+    }
+
+    expandVolume( ps.getMin() );
+    expandVolume( ps.getMax() );
+}
+
+void VData::fill( const VData& ps, const Matrix4f& _mat ) {
+    auto startIndex = vIndices.size();
+    for ( auto q = 0u; q < ps.numIndices(); q++ ) {
+        auto idx = ps.vIndexAt(q);
+        auto d1 = ps.soaAt(idx);
+        d1.pos = _mat.transform(d1.pos);
+//        PUUNTBC d1{ ps.vertexAt(idx)*0.01f, ps.uvAt(idx),ps.uv2At(idx),ps.normalAt(idx),ps.tangentAt(idx),ps.binormalAt(idx),ps.colorAt(idx) };
+        vSoaData.emplace_back( d1 );
+        vIndices.emplace_back( q + startIndex );
+    }
+
+    expandVolume( ps.getMin() );
+    expandVolume( ps.getMax() );
 }
 
 void VData::fillIndices( const std::vector<uint32_t>& _indices ) {
@@ -87,7 +129,7 @@ void VData::fillTangents( const std::vector<Vector4f>& _tangents, bool _bInvert 
     }
 }
 
-void VData::fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert ) {
+[[maybe_unused]] void VData::fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert ) {
     vSoaData.resize( _binormals.size() );
     float bi = _bInvert ? -1.0f : 1.0f;
     for ( size_t t = 0; t < _binormals.size(); t++ ) {
@@ -108,7 +150,7 @@ void VData::fillWithColor( const Vector4f& _color ) {
     }
 }
 
-void VData::changeHandness() {
+[[maybe_unused]] void VData::changeHandness() {
     for (auto & i : vSoaData) {
         i.pos.swizzle( 1, 2 );
         i.a3.swizzle( 1, 2 );
@@ -158,7 +200,7 @@ void VData::changeWindingOrder() {
     }
 }
 
-void VData::mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox ) {
+[[maybe_unused]] void VData::mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox ) {
     Vector3f flipXNormal = Vector3f( -1.0f, 1.0f, 1.0f );
     Vector3f flipYNormal = Vector3f( 1.0f, -1.0f, 1.0f );
     for (auto & index : vSoaData) {
@@ -182,9 +224,9 @@ void VData::mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox
 
 void VData::checkBarycentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, uint32_t pIndexEnd, uint32_t& pIndex,
                                       float& u, float& v ) {
-    Vector3f a = V3fc::ZERO;
-    Vector3f b = V3fc::ZERO;
-    Vector3f c = V3fc::ZERO;
+    Vector3f a{};
+    Vector3f b{};
+    Vector3f c{};
     uint32_t vi = pIndexStart;
     uint32_t possibleIndices[256];
     uint32_t pii = 0;
@@ -265,7 +307,7 @@ void VData::add( uint32_t _i, const Vector3f& _v, const Vector3f& _n, const Vect
     vSoaData.emplace_back( _v, _uv, _uv2, _n, _t, _b, _c );
 }
 
-void VData::swapIndicesWinding( Primitive _pr ) {
+[[maybe_unused]] void VData::swapIndicesWinding( Primitive _pr ) {
     switch ( _pr ) {
         case PRIMITIVE_TRIANGLES:
             for ( size_t i = 0; i < vIndices.size(); i+=3 ) {

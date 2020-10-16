@@ -597,13 +597,13 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
     };
 
     luarr["changeMaterialFor"] = [&]( const std::string& name, CResourceRef resource ) {
-        sg.loadMaterial(resource, [this, name]( HttpResouceCBSign key ) {
+        sg.loadMaterial(resource, [this, name]( HttpResourceCBSign key ) {
             rr.changeMaterialOn(name, sg.getHash<Material>(key));
         });
     };
 
     luarr["changeMaterialForTag"] = [&]( int tag, CResourceRef resource ) {
-        sg.loadMaterial(resource, [this, tag]( HttpResouceCBSign key ) {
+        sg.loadMaterial(resource, [this, tag]( HttpResourceCBSign key ) {
             rr.changeMaterialOn(static_cast<uint64_t>(tag), sg.getHash<Material>(key));
         });
     };

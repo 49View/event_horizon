@@ -2,10 +2,10 @@
 #include "../serializebin.hpp"
 
 std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
-									 const std::array<Vector2f, 4>& vtcs,
-									 const std::array<Vector3f, 4>& vns,
-									 subdivisionAccuray _accuracy,
- 									 FlipSubdiv subDivDir ) {
+                                     const std::array<Vector2f, 4>& vtcs,
+                                     const std::array<Vector3f, 4>& vns,
+                                     subdivisionAccuracy _accuracy,
+                                     FlipSubdiv subDivDir ) {
 	std::vector<polyQuadSub> ret;
 	std::array<Vector3f, 4> vs;
 	std::array<Vector2f, 4> vtcsi{};
@@ -66,18 +66,18 @@ std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
 }
 
 std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
-									 const std::array<Vector2f, 4>& vtcs,
-									 const Vector3f& nomal,
-									 subdivisionAccuray _accuracy ) {
+                                     const std::array<Vector2f, 4>& vtcs,
+                                     const Vector3f& nomal,
+                                     subdivisionAccuracy _accuracy ) {
 	std::array<Vector3f, 4> vns;
 	for ( int t = 0; t < 4; t++ ) vns[t] = nomal;
 	return quadSubDiv(vss, vtcs, vns, _accuracy, FlipSubdiv::False );
 }
 
 std::vector<polyQuadSub> quadSubDivInv( const std::array<Vector3f, 4>& vss,
-                                     const std::array<Vector2f, 4>& vtcs,
-                                     const Vector3f& nomal,
-                                     subdivisionAccuray _accuracy ) {
+                                        const std::array<Vector2f, 4>& vtcs,
+                                        const Vector3f& nomal,
+                                        subdivisionAccuracy _accuracy ) {
     std::array<Vector3f, 4> vns;
     for ( int t = 0; t < 4; t++ ) vns[t] = nomal;
     std::array<Vector3f, 4> vssInv = vss;

@@ -2,8 +2,7 @@
 
 #include <map>
 #include <sstream>
-#include "math_util.h"
-#include "matrix4f.h"
+#include <core/math/vector4f.h>
 
 std::string Vector3f::toString() const {
 	return "X = " + floatToFixedDigits( mX ) + " Y = " + floatToFixedDigits( mY ) + " Z = " + floatToFixedDigits( mZ );

@@ -45,8 +45,8 @@ namespace DependencyHandler {
                     bool cbStatus = q.second->executeCallback(q.first, qd->status);
                     // Also tag the status as "it has passed the loading stage, was it successful or not? in the
                     // callback ?
-                    qd->status = cbStatus ? DependencyStatus::CallbackSuccessfullyExectuted
-                                          : DependencyStatus::CallbackFailedOnExectution;
+                    qd->status = cbStatus ? DependencyStatus::CallbackSuccessfullyExecuted
+                                          : DependencyStatus::CallbackFailedOnExecution;
                     callbacksDataMapExecuted[q.first] = q.second;
                 }
                 // If it has failed to laod then just leave the status as it is (LoadingFailed)

@@ -12,7 +12,6 @@
 #include <core/image_util.h>
 #include <core/geom.hpp>
 #include <core/camera.h>
-#include <core/lightmap_exchange_format.h>
 #include <core/names.hpp>
 #include <core/resources/resource_builder.hpp>
 #include <core/resources/material.h>
@@ -154,11 +153,11 @@ MaterialThumbnail::MaterialThumbnail( SceneGraph *_sg, const Material& _mat ) : 
 void SceneGraph::materialsForGeomSocketMessage() {
     MatGeomSerData matSet{};
     for ( const auto&[k, node] : nodes) {
-        LOGRS(node);
+        LOGRS(node)
         for ( const auto& data : node->DataV()) {
-            LOGRS("Data material: " << data.material);
+            LOGRS("Data material: " << data.material)
             auto mat = get<Material>(data.material);
-            LOGRS("mat key: " << mat->Key());
+            LOGRS("mat key: " << mat->Key())
             matSet.mrefs.emplace(mat->Key(), MaterialThumbnail(this, *mat));
         }
     }
@@ -166,7 +165,7 @@ void SceneGraph::materialsForGeomSocketMessage() {
 }
 
 void SceneGraph::replaceMaterialOnNodes( const std::string& _key ) {
-    LOGRS("OldMaterialRef: " << signalValueMap["source_material_id"]);
+    LOGRS("OldMaterialRef: " << signalValueMap["source_material_id"])
     for ( auto&[k, node] : nodes) {
         for ( auto& data : node->DataVRef()) {
             auto mat = get<Material>(data.material);
@@ -190,11 +189,11 @@ void SceneGraph::clearGMNodes() {
     removeNode(GeomSP{});
     GM().clear();
     nodes.clear();
-};
+}
 
 void SceneGraph::clearNodes() {
     nodes.clear();
-};
+}
 
 void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityGroup, bool bTakeScreenShot ) {
 
@@ -207,23 +206,23 @@ void SceneGraph::resetAndLoadEntity( CResourceRef v0, const std::string& entityG
                       GT::Scale(500.0f, 0.1f, 500.0f), C4fc::XTORGBA("e76848"));
         addGeomScene(v0, bTakeScreenShot);
     } else if ( entityGroup == ResourceGroup::Material ) {
-        load<Material>(v0, [this, v0]( HttpResouceCBSign key ) {
+        load<Material>(v0, [this, v0]( HttpResourceCBSign key ) {
             nodeFullScreenMaterialSignal(key);
         });
     } else if ( entityGroup == ResourceGroup::Image ) {
-        load<RawImage>(v0, [this, v0]( HttpResouceCBSign key ) {
+        load<RawImage>(v0, [this, v0]( HttpResourceCBSign key ) {
             nodeFullScreenImageSignal(key);
         });
     } else if ( entityGroup == ResourceGroup::Font ) {
-        load<Font>(v0, [this, v0]( HttpResouceCBSign key ) {
+        load<Font>(v0, [this, v0]( HttpResourceCBSign key ) {
             nodeFullScreenFontSonnetSignal(key);
         });
     } else if ( entityGroup == ResourceGroup::Profile ) {
-        load<Profile>(v0, [this, v0]( HttpResouceCBSign key ) {
+        load<Profile>(v0, [this, v0]( HttpResourceCBSign key ) {
             nodeFullScreenProfileSignal(key);
         });
     } else if ( entityGroup == ResourceGroup::UI ) {
-        load<UIContainer>(v0, [this, v0]( HttpResouceCBSign key ) {
+        load<UIContainer>(v0, [this, v0]( HttpResourceCBSign key ) {
             nodeFullScreenUIContainerSignal(key);
         });
     }
@@ -258,7 +257,7 @@ void SceneGraph::realTimeCallbacks() {
             auto matId = getFileName(doc["data"]["mat_id"].GetString());
             auto objId = getFileName(doc["data"]["entity_id"].GetString());
             signalValueMap["source_material_id"] = std::string(doc["data"]["source_id"].GetString());
-            load<Material>(matId, [&]( HttpResouceCBSign key ) {
+            load<Material>(matId, [&]( HttpResourceCBSign key ) {
                 replaceMaterialOnNodes(key);
             });
         } else if ( k == SceneEvents::ChangeMaterialProperty ) {
@@ -274,7 +273,7 @@ void SceneGraph::realTimeCallbacks() {
                 std::string value = doc["data"]["value_str"].GetString();
                 std::string pid = doc["data"]["property_id"].GetString();
                 std::string matid = doc["data"]["mat_id"].GetString();
-                acquire<RawImage>(value, [this, pid, matid]( HttpResouceCBSign key ) {
+                acquire<RawImage>(value, [this, pid, matid]( HttpResourceCBSign key ) {
                     auto mat = get<Material>(matid);
                     if ( mat ) {
                         mat->Values()->assign(pid, key);
@@ -431,6 +430,11 @@ void SceneGraph::init() {
 
 ResourceRef SceneGraph::addVData( const ResourceRef& _key, const VData& _res, HttpResourceCB _ccf ) {
     B<VB>(_key).addDF(_res, _ccf);
+    return _key;
+}
+
+ResourceRef SceneGraph::addVDataIM( const ResourceRef& _key, const VData& _res ) {
+    B<VB>(_key).addIM(_res);
     return _key;
 }
 
@@ -608,7 +612,7 @@ void SceneGraph::loadGeom( std::string _names, HttpResourceCB _ccf ) {
 }
 
 void SceneGraph::loadAsset( const std::string& _names ) {
-    B<GRB>(_names).load([this]( HttpResouceCBSign key ) {
+    B<GRB>(_names).load([this]( HttpResourceCBSign key ) {
         GB<GT::Asset>(key);
     });
 }

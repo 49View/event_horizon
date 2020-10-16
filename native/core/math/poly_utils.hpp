@@ -54,18 +54,18 @@ enum class PolyRaise {
 std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
                                      const std::array<Vector2f, 4>& vtcs,
                                      const std::array<Vector3f, 4>& vns,
-                                     subdivisionAccuray _accuracy,
+                                     subdivisionAccuracy _accuracy,
                                      FlipSubdiv subDivDir = FlipSubdiv::False );
 
-std::vector<polyQuadSub> quadSubDiv(const std::array<Vector3f, 4>& vss,
-                                      const std::array<Vector2f, 4>& vtcs,
-                                      const Vector3f& nomal,
-                                      subdivisionAccuray _accuracy );
+std::vector<polyQuadSub> quadSubDiv( const std::array<Vector3f, 4>& vss,
+                                     const std::array<Vector2f, 4>& vtcs,
+                                     const Vector3f& nomal,
+                                     subdivisionAccuracy _accuracy );
 
-std::vector<polyQuadSub> quadSubDivInv(const std::array<Vector3f, 4>& vss,
-                                    const std::array<Vector2f, 4>& vtcs,
-                                    const Vector3f& nomal,
-                                    subdivisionAccuray _accuracy );
+std::vector<polyQuadSub> quadSubDivInv( const std::array<Vector3f, 4>& vss,
+                                        const std::array<Vector2f, 4>& vtcs,
+                                        const Vector3f& nomal,
+                                        subdivisionAccuracy _accuracy );
 
 Vector3f utilMirrorFlip( const Vector3f& v, WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );
 WindingOrderT detectWindingOrder( const Vector2f& pa, const Vector2f& pb, const Vector2f& pc );

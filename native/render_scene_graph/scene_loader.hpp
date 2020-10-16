@@ -18,9 +18,9 @@ public:
     void loadSceneEntities();
     const SerializableContainer& getPreloadCustomSerializableContainer( const std::string& _key, size_t _index );
 protected:
-    virtual void loadResCount( HttpResouceCBSign _key );
-    virtual void loadGeomResCount( HttpResouceCBSign _key );
-    virtual void loadCustomResCount( HttpResouceCBSign _key );
+    virtual void loadResCount( HttpResourceCBSign _key );
+    virtual void loadGeomResCount( HttpResourceCBSign _key );
+    virtual void loadCustomResCount( HttpResourceCBSign _key );
     virtual void activateGeomLoad();
     void activatePostLoadInternal();
     void activateFinalLoadInternal();

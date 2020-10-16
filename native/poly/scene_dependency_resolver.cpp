@@ -5,7 +5,7 @@
 #include "scene_dependency_resolver.hpp"
 #include <poly/scene_graph.h>
 
-void SceneDependencyResolver::loadResCount( HttpResouceCBSign _key ) {
+void SceneDependencyResolver::loadResCount( HttpResourceCBSign _key ) {
     size_t targetNum = firstTierResourceCount();
 
     loadedResCounter.emplace_back( _key );
@@ -18,7 +18,7 @@ void SceneDependencyResolver::loadResCount( HttpResouceCBSign _key ) {
     }
 }
 
-void SceneDependencyResolver::loadGeomResCount( HttpResouceCBSign _key ) {
+void SceneDependencyResolver::loadGeomResCount( HttpResourceCBSign _key ) {
     loadedResCounter.emplace_back( _key );
     float progress = ( static_cast<float>(loadedResCounter.size() + firstTierResourceCount()) /
                        static_cast<float>(totalResourceCount()));

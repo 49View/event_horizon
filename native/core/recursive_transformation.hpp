@@ -189,6 +189,21 @@ public:
         }
     }
 
+    template <typename R>
+    R reduce( std::function<void( const NodeSPConst, R& )> f ) const {
+        R ret{};
+        reduceRec( f, ret );
+        return ret;
+    }
+
+    template <typename R>
+    void reduceRec( std::function<void( const NodeSPConst, R& )> f, R& _reduced ) const {
+        f(this->shared_from_this(), _reduced);
+        for ( auto& c : Children() ) {
+            c->reduceRec( f, _reduced );
+        }
+    }
+
     void transform( std::function<void(NodeSP)> f ) {
         f( this->shared_from_this() );
         generateMatrixHierarchy(fatherRootTransform());

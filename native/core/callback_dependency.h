@@ -78,8 +78,8 @@ struct CallbackData {
                  status == DependencyStatus::LoadingFailed );
     }
     bool isComplete() const {
-        return ( status == DependencyStatus::CallbackSuccessfullyExectuted ||
-                 status == DependencyStatus::CallbackFailedOnExectution );
+        return ( status == DependencyStatus::CallbackSuccessfullyExecuted ||
+                 status == DependencyStatus::CallbackFailedOnExecution );
     }
 
     std::string asString() const {
@@ -124,7 +124,7 @@ struct FileCallbackHandler {
         return cbData->isComplete();
     }
     bool hasCompletedSuccessfully() const {
-        return cbData->status == DependencyStatus::CallbackSuccessfullyExectuted;
+        return cbData->status == DependencyStatus::CallbackSuccessfullyExecuted;
     }
     bool needsReload() const {
         return cbData->needsReload();

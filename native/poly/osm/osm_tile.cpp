@@ -91,7 +91,7 @@ void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float g
 
 }
 
-void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, float globalOSMScale ) {
+void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const OSMAssetMap& assets, float globalOSMScale ) {
     auto addToOSMV = [_ret]( const std::vector<PolyStruct>& pss ) {
         for ( const auto& ps : pss ) _ret->fill(ps);
     };
@@ -104,17 +104,20 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, float 
         V3f tilePosDelta = osmTileDeltaPos(element);
         for ( const auto& group : element.meshes ) {
             if ( element.type == OSMElementName::entity() ) {
+                Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*3.0f}};
+
                 if ( checkTagOnElement(element, OSMElementName::amenity(), OSMElementName::telephone()) ) {
-                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+//                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
                 }
                 if ( checkTagOnElement(element, OSMElementName::historic(), OSMElementName::monument()) ) {
-                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+//                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
                 }
                 if ( checkTagOnElement(element, OSMElementName::natural(), OSMElementName::tree()) ) {
-                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+                    _ret->fill( *assets.find("fir,tree,baked")->second, mat);
+//                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
                 }
                 if ( checkTagOnElement(element, OSMElementName::highway(), OSMElementName::bus_stop()) ) {
-                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+//                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
                 }
             } else if ( element.type == OSMElementName::building() ) {
                 addToOSM(osmCreateBuilding(group, tilePosDelta, globalOSMScale));

@@ -8,7 +8,7 @@
 #include <graphics/renderer.h>
 #include <render_scene_graph/render_orchestrator.h>
 
-void ScenePreLoader::loadResCount( HttpResouceCBSign _key ) {
+void ScenePreLoader::loadResCount( HttpResourceCBSign _key ) {
     size_t targetNum = appData.firstTierResourceCount();
 
     loadedResCounter.emplace_back( _key );
@@ -20,7 +20,7 @@ void ScenePreLoader::loadResCount( HttpResouceCBSign _key ) {
     }
 }
 
-void ScenePreLoader::loadGeomResCount( HttpResouceCBSign _key ) {
+void ScenePreLoader::loadGeomResCount( HttpResourceCBSign _key ) {
     loadedResCounter.emplace_back( _key );
     float progress = ( static_cast<float>(loadedResCounter.size() + appData.firstTierResourceCount()) /
                        static_cast<float>(appData.totalResourceCount()));
@@ -70,7 +70,7 @@ void ScenePreLoader::activateFinalLoadInternal() {
     activatePostLoad();
 }
 
-void ScenePreLoader::loadCustomResCount( HttpResouceCBSign _key ) {
+void ScenePreLoader::loadCustomResCount( HttpResourceCBSign _key ) {
 
     loadedResCounter.emplace_back( _key );
     float progress = ( static_cast<float>(loadedResCounter.size() + appData.firstTierResourceCount()+ appData.secondTierResourceCount()) /

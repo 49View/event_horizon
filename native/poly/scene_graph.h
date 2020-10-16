@@ -295,6 +295,7 @@ public:
     ResourceRef addLight         ( const ResourceRef& _key, const Light&         _res, HttpResourceCB _ccf = nullptr );
     void addResources( CResourceRef _key, const SerializableContainer& _data, HttpResourceCB _ccf = nullptr );
 
+    ResourceRef addVDataIM       ( const ResourceRef& _key, const VData& _res );
     ResourceRef addRawImageIM    ( const ResourceRef& _key, const RawImage     & _res );
     ResourceRef addMaterialIM    ( const ResourceRef& _key, const Material     & _res );
     ResourceRef addProfileIM     ( const ResourceRef& _key, const Profile      & _res );

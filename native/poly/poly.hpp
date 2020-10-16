@@ -13,6 +13,7 @@
 #include <core/math/matrix_anim.h>
 #include <core/resources/resource_serialization.hpp>
 #include <core/names.hpp>
+#include <poly/osm/osm_htypes.hpp>
 #include <poly/cloth/cloth.h>
 
 namespace GTBucket {
@@ -107,7 +108,7 @@ struct GeomMappingData {
     Vector2f offset = V2fc::ZERO;
     MappingMirrorE mirroring = MappingMirrorE::None;
     bool bUnitMapping = false;
-    subdivisionAccuray subdivAccuracy = accuracyNone;
+    subdivisionAccuracy subdivAccuracy = accuracyNone;
     WindingOrderT windingOrder = WindingOrder::CCW;
 
     JSONSERIALBIN( direction, bDoNotScaleMapping, offset, mirroring, bUnitMapping, subdivAccuracy, windingOrder)
@@ -128,6 +129,7 @@ struct PolyOutLine;
 struct PolyLine;
 struct PolyLine2d;
 struct OSMData;
+class VData;
 class Profile;
 namespace Utility::TTFCore { class FontInternal;}
 using Font = Utility::TTFCore::FontInternal;
@@ -334,6 +336,7 @@ namespace GT {
     };
     struct GTPolicyOSMData {
         OSMData* osmData = nullptr;
+        OSMAssetMap osmAssets{};
         V2f locationLatLon = V2fc::ZERO;
     };
 

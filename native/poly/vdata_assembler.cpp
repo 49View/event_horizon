@@ -14,10 +14,8 @@
 #include <poly/scene_graph.h>
 #include <poly/osm/osm_names.hpp>
 #include <poly/osm/osm_barrier.hpp>
-#include <poly/osm/osm_building.hpp>
 #include <poly/osm/osm_tile.hpp>
 #include <poly/osm/osm_calc.hpp>
-#include <poly/osm/osm_tree.hpp>
 
 void
 internalCheckPolyNormal( Vector3f& ln, const Vector3f& v1, const Vector3f& v2, const Vector3f& v3, ReverseFlag rf ) {
@@ -394,11 +392,24 @@ namespace VDataServices {
     }
 
     bool prepare( SceneGraph& sg, GT::OSMBuildings& _d, Material * ) {
+        std::string firTree{"fir,tree"};
+        std::string firTreeBaked = firTree+",baked";
+        auto tree = sg.get<Geom>(firTree);
+        auto baked = tree->reduce<VData>( [&]( const GeomSPConst node, VData& reduced ) {
+            for ( const auto& geomData : node->DataV() ) {
+                auto vd = sg.get<VData>(geomData.vData);
+                auto mat = sg.get<Material>(geomData.material);
+                C4f col = V4f{mat->getDiffuseColor(), mat->translucency()};
+                reduced.fill(*vd, col);
+            }
+        });
+        sg.addVDataIM( firTreeBaked, baked );
+        _d.osmAssets.emplace(firTreeBaked, sg.get<VData>(firTreeBaked).get());
         return true;
     }
 
     [[maybe_unused]] void buildInternal( const GT::OSMBuildings& _d, const std::shared_ptr<VData>& _ret ) {
-        addOSMSolid( _ret, _d.osmData, globalOSMScale );
+        addOSMSolid( _ret, _d.osmData, _d.osmAssets, globalOSMScale );
     }
 
     ResourceRef refName( const GT::OSMBuildings& _d ) {

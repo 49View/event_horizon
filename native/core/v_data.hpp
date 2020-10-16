@@ -14,6 +14,7 @@
 
 class VData {
 public:
+public:
     VData() = default;
     [[nodiscard]] size_t numIndices() const;
     [[nodiscard]] size_t numVerts() const;
@@ -25,6 +26,9 @@ public:
               const Vector3f& _b,
               const Vector4f& _c );
     void fill( const PolyStruct& ps );
+    void fill( const VData& ps );
+    void fill( const VData& ps, const C4f& _color );
+    void fill( const VData& ps, const Matrix4f& _transform );
     void fillIndices( const std::vector<uint32_t>& _indices );
     void fillCoors3d( const std::vector<Vector3f>& _verts );
     void fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index = 0 );
@@ -32,7 +36,7 @@ public:
     void fillNormals( const std::vector<Vector3f>& _normals, bool _bInvert = false );
     void fillTangents( const std::vector<Vector3f>& _tangents, bool _bInvert = false );
     void fillTangents( const std::vector<Vector4f>& _tangents, bool _bInvert = false );
-    void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
+    [[maybe_unused]] [[maybe_unused]] void fillBinormal( const std::vector<Vector3f>& _binormals, bool _bInvert = false );
     void fillColors( const std::vector<Vector4f>& _colors );
     void fillWithColor( const Vector4f& _color );
 
@@ -45,14 +49,14 @@ public:
     [[maybe_unused]] void sanitizeUVMap();
     void calcBinormal();
     void calcBinormalFromNormAndTang();
-    void changeHandness();
+    [[maybe_unused]] void changeHandness();
     void flipNormals();
-    void mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );
+    [[maybe_unused]] void mirrorFlip( WindingOrderT wow, WindingOrderT woh, const Rect2f& bbox );
     void checkBarycentricCoordsOn( const Vector3f& i, uint32_t pIndexStart, uint32_t pIndexEnd,
                                    uint32_t& pIndex, float& u, float& v );
     void addTriangleVertex( const Vector3f& _vc, const Vector2f& _uv, const Vector2f& _uv2, const Vector3f& _vn,
                             const Vector4f& _vt, const Vector3f& _vb, const Vector4f& _v8 );
-    void swapIndicesWinding( Primitive _pr );
+    [[maybe_unused]] void swapIndicesWinding( Primitive _pr );
 
     [[nodiscard]] const std::vector<uint32_t>&  getVIndices() const;
     [[nodiscard]] const Vector3f& getMin() const;
@@ -69,7 +73,7 @@ public:
     [[nodiscard]] uint32_t vIndexAt( uint32_t i ) const { return vIndices[i]; }
     [[nodiscard]] PUUNTBC soaAt( uint32_t i ) const { return vSoaData[i]; }
     [[nodiscard]] Vector3f vertexAt( uint32_t i ) const { return vSoaData[i].pos; }
-    [[nodiscard]] Vector2f uvAt( uint32_t i ) const { return vSoaData[i].a1; }
+    [[maybe_unused]] [[nodiscard]] Vector2f uvAt( uint32_t i ) const { return vSoaData[i].a1; }
     [[nodiscard]] Vector2f uv2At( uint32_t i ) const { return vSoaData[i].a2; }
     [[nodiscard]] Vector3f normalAt( uint32_t i ) const { return vSoaData[i].a3; }
     [[nodiscard]] Vector4f tangentAt( uint32_t i ) const { return vSoaData[i].a4; }

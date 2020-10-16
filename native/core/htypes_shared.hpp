@@ -147,7 +147,7 @@ enum UiControlFlag {
 	Invalid = 1 << 31
 };
 
-typedef float subdivisionAccuray;
+typedef float subdivisionAccuracy;
 
 [[maybe_unused]] const static float accuracy1Meter = 1.0f;
 [[maybe_unused]] const static float accuracy50cm = .5f;
@@ -300,7 +300,7 @@ namespace Name {
 	const static std::string Tango	  = "Tango	 ";
 	const static std::string Uniform  = "Uniform ";
 	const static std::string Victor   = "Victor  ";
-	const static std::string Whiske   = "Whiske  ";
+	const static std::string Whiskey  = "Whiskey ";
 	const static std::string X_Ray	  = "X_Ray	 ";
 	const static std::string Yankee   = "Yankee  ";
 	const static std::string Zulu	  = "Zulu	 ";
@@ -332,9 +332,9 @@ enum class HttpUrlEncode {
 namespace Http { struct Result; }
 using HttpResponeParams = const Http::Result&;
 using ResponseCallbackFunc = std::function<void(HttpResponeParams)>;
-using HttpResouceCBSign = const std::string&;
-using HttpResourceCB = std::function<void(HttpResouceCBSign)>;
-using CHttpResourceCB = const std::function<void(HttpResouceCBSign)>;
+using HttpResourceCBSign = const std::string&;
+using HttpResourceCB = std::function<void( HttpResourceCBSign)>;
+using CHttpResourceCB = const std::function<void( HttpResourceCBSign)>;
 
 // Dependencies
 
@@ -345,8 +345,8 @@ enum class DependencyStatus {
 	LoadedSuccessfully,
 	LoadedSuccessfully204,
 	LoadingFailed,
-	CallbackSuccessfullyExectuted,
-	CallbackFailedOnExectution,
+	CallbackSuccessfullyExecuted,
+	CallbackFailedOnExecution,
 	Complete,
 	CompleteWithErrors
 };

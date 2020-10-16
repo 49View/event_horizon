@@ -137,8 +137,8 @@ protected:
         return {};
     }
 
-    void loadResCount( HttpResouceCBSign _key );
-    void loadGeomResCount( HttpResouceCBSign _key );
+    void loadResCount( HttpResourceCBSign _key );
+    void loadGeomResCount( HttpResourceCBSign _key );
     void activateGeomLoad();
     void activatePostLoadInternal();
     void activateFinalLoadInternal();
