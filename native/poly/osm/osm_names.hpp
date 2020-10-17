@@ -6,6 +6,7 @@
 
 #include <string>
 #include <core/htypes_shared.hpp>
+#include <core/util.h>
 
 namespace OSMElementName {
     [[maybe_unused]] static inline std::string unclassified() {
@@ -139,6 +140,15 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string palm_tree() {
         return "palm,tree";
     }
+
+    // Amenities
+    [[maybe_unused]] static inline std::string phone_booth() {
+        return "phone,booth";
+    }
+    [[maybe_unused]] static inline std::string dolphin_statue() {
+        return "dolphin_statue";
+    }
+
 }
 
 [[maybe_unused]] static inline ddContainer OSMTreeList() {
@@ -149,6 +159,38 @@ namespace OSMElementName {
         ret.emplace_back(OSMElementName::oak_tree());
         ret.emplace_back(OSMElementName::palm_tree());
         ret.emplace_back(OSMElementName::poplar_tree());
+    }
+
+    return ret;
+}
+
+[[maybe_unused]] static inline ddContainer OSMAmenityList() {
+    static ddContainer ret{};
+
+    if ( ret.empty() ) {
+        ret.emplace_back(OSMElementName::phone_booth());
+        ret.emplace_back(OSMElementName::dolphin_statue());
+    }
+
+    return ret;
+}
+
+[[maybe_unused]] static inline ddContainer OSMMonumentList() {
+    static ddContainer ret{};
+
+    if ( ret.empty() ) {
+        ret.emplace_back(OSMElementName::phone_booth());
+    }
+
+    return ret;
+}
+
+[[maybe_unused]] static inline ddContainer OSMGeomEntityList() {
+    static ddContainer ret{};
+
+    if ( ret.empty() ) {
+        inserter(ret, OSMTreeList());
+        inserter(ret, OSMAmenityList());
     }
 
     return ret;

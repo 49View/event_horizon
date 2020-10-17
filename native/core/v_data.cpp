@@ -54,7 +54,21 @@ void VData::fill( const VData& ps, const Matrix4f& _mat ) {
         auto idx = ps.vIndexAt(q);
         auto d1 = ps.soaAt(idx);
         d1.pos = _mat.transform(d1.pos);
-//        PUUNTBC d1{ ps.vertexAt(idx)*0.01f, ps.uvAt(idx),ps.uv2At(idx),ps.normalAt(idx),ps.tangentAt(idx),ps.binormalAt(idx),ps.colorAt(idx) };
+        vSoaData.emplace_back( d1 );
+        vIndices.emplace_back( q + startIndex );
+    }
+
+    expandVolume( ps.getMin() );
+    expandVolume( ps.getMax() );
+}
+
+void VData::fill( const VData& ps, const Matrix4f& _mat, const C4f& _color ) {
+    auto startIndex = vIndices.size();
+    for ( auto q = 0u; q < ps.numIndices(); q++ ) {
+        auto idx = ps.vIndexAt(q);
+        auto d1 = ps.soaAt(idx);
+        d1.pos = _mat.transform(d1.pos);
+        d1.a6 = _color;
         vSoaData.emplace_back( d1 );
         vIndices.emplace_back( q + startIndex );
     }

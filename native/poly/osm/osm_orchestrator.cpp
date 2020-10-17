@@ -13,8 +13,8 @@ namespace HOD { // HighOrderDependency
         DepRemapsManager ret{};
 
         ret.addDep(sg, ResourceGroup::Material, "city,atlas");
-        for ( const auto& tree : OSMTreeList() ) {
-            ret.addDep(sg, ResourceGroup::Geom, tree);
+        for ( const auto& elem : OSMGeomEntityList() ) {
+            ret.addDep(sg, ResourceGroup::Geom, elem);
         }
 
         return ret;

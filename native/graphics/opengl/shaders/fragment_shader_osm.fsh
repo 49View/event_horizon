@@ -18,11 +18,14 @@ void main() {
    opacityV = texture( opacityTexture, texCoords ).x * opacity; 
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
    translucencyV = texture( translucencyTexture, texCoords ).x;
-   //albedo = pow(albedo, vec3(2.2/1.0));
+//   albedo = pow(albedo, vec3(2.2/1.0));
+   albedo = pow(albedo, vec3(1.0/2.2));
 
    vec3 N = getNormalFromMap(texCoords);
 
+   shadow_code
+
    light_code
 
-   final_combine_no_reflections
+   final_combine_osm
 }

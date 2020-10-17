@@ -29,6 +29,7 @@ public:
     void fill( const VData& ps );
     void fill( const VData& ps, const C4f& _color );
     void fill( const VData& ps, const Matrix4f& _transform );
+    void fill( const VData& ps, const Matrix4f& _transform, const C4f& _color );
     void fillIndices( const std::vector<uint32_t>& _indices );
     void fillCoors3d( const std::vector<Vector3f>& _verts );
     void fillUV( const std::vector<Vector2f>& _uvs, uint32_t _index = 0 );

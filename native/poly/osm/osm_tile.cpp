@@ -108,16 +108,19 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
         V3f tilePosDelta = osmTileDeltaPos(element);
         for ( const auto& group : element.meshes ) {
             if ( element.type == OSMElementName::entity() ) {
-                auto randScale = 2.0f + unitRand(1.5f);
-                Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*randScale}};
-
                 if ( checkTagOnElement(element, OSMElementName::amenity(), OSMElementName::telephone()) ) {
-//                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+                    auto randScale = 1.0f;
+                    Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*randScale}};
+                    addToOSMVData( *assets.find(OSMElementName::phone_booth())->second, mat);
                 }
                 if ( checkTagOnElement(element, OSMElementName::historic(), OSMElementName::monument()) ) {
-//                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+                    auto randScale = 2.0f + unitRand(1.5f);
+                    Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*randScale}};
+                    addToOSMVData( *assets.find(OSMElementName::dolphin_statue())->second, mat);
                 }
                 if ( checkTagOnElement(element, OSMElementName::natural(), OSMElementName::tree()) ) {
+                    auto randScale = 2.0f + unitRand(1.5f);
+                    Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*randScale}};
                     auto rand = static_cast<int>(unitRand(OSMTreeList().size()));
                     addToOSMVData( *assets.find(OSMTreeList()[rand])->second, mat);
                 }

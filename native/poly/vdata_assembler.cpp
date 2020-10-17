@@ -377,7 +377,7 @@ namespace VDataServices {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-    static constexpr float globalOSMScale = 0.01f;
+    static constexpr float globalOSMScale = 0.1f;
 
     bool prepare( SceneGraph& sg, GT::OSMTile& _d, Material * ) {
         return true;
@@ -399,7 +399,7 @@ namespace VDataServices {
                 auto vd = sg.get<VData>(geomData.vData);
                 auto mat = sg.get<Material>(geomData.material);
                 C4f col = V4f{mat->getDiffuseColor(), mat->translucency()};
-                reduced.fill(*vd, col);
+                reduced.fill(*vd, *node->getLocalHierTransform(), col);
             }
         });
         sg.addVDataIM( assetRefBaked, baked );
@@ -412,7 +412,7 @@ namespace VDataServices {
     }
 
     bool prepare( SceneGraph& sg, GT::OSMBuildings& _d, Material * ) {
-        for ( const auto& tree : OSMTreeList() ) {
+        for ( const auto& tree : OSMGeomEntityList() ) {
             addOSMAsset(sg, tree, _d);
         }
         return true;
