@@ -100,6 +100,10 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
         _ret->fill(ps);
     };
 
+    auto addToOSMVData = [_ret]( const VData& ps, const Matrix4f& mat ) {
+        _ret->fill(ps, mat);
+    };
+
     for ( const auto& element : osm->elements ) {
         V3f tilePosDelta = osmTileDeltaPos(element);
         for ( const auto& group : element.meshes ) {
@@ -115,7 +119,7 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
                 }
                 if ( checkTagOnElement(element, OSMElementName::natural(), OSMElementName::tree()) ) {
                     auto rand = static_cast<int>(unitRand(OSMTreeList().size()));
-                    _ret->fill( *assets.find(OSMTreeList()[rand])->second, mat);
+                    addToOSMVData( *assets.find(OSMTreeList()[rand])->second, mat);
                 }
                 if ( checkTagOnElement(element, OSMElementName::highway(), OSMElementName::bus_stop()) ) {
 //                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
