@@ -412,10 +412,9 @@ namespace VDataServices {
     }
 
     bool prepare( SceneGraph& sg, GT::OSMBuildings& _d, Material * ) {
-        addOSMAsset(sg, OSMElementName::fir_tree(), _d);
-        addOSMAsset(sg, OSMElementName::oak_tree(), _d);
-        addOSMAsset(sg, OSMElementName::poplar_tree(), _d);
-        addOSMAsset(sg, OSMElementName::palm_tree(), _d);
+        for ( const auto& tree : OSMTreeList() ) {
+            addOSMAsset(sg, tree, _d);
+        }
         return true;
     }
 

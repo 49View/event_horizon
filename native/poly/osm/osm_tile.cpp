@@ -114,24 +114,8 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
 //                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
                 }
                 if ( checkTagOnElement(element, OSMElementName::natural(), OSMElementName::tree()) ) {
-                    auto rand = static_cast<int>(unitRand(4.0f));
-                    switch ( rand ) {
-                        case 0:
-                            _ret->fill( *assets.find(OSMElementName::fir_tree())->second, mat);
-                            break;
-                        case 1:
-                            _ret->fill( *assets.find(OSMElementName::oak_tree())->second, mat);
-                            break;
-                        case 2:
-                            _ret->fill( *assets.find(OSMElementName::palm_tree())->second, mat);
-                            break;
-                        case 3:
-                            _ret->fill( *assets.find(OSMElementName::poplar_tree())->second, mat);
-                            break;
-                        default:
-                            _ret->fill( *assets.find(OSMElementName::fir_tree())->second, mat);
-                    }
-//                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
+                    auto rand = static_cast<int>(unitRand(OSMTreeList().size()));
+                    _ret->fill( *assets.find(OSMTreeList()[rand])->second, mat);
                 }
                 if ( checkTagOnElement(element, OSMElementName::highway(), OSMElementName::bus_stop()) ) {
 //                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));

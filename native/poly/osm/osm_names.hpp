@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <core/htypes_shared.hpp>
 
 namespace OSMElementName {
     [[maybe_unused]] static inline std::string unclassified() {
@@ -138,4 +139,17 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string palm_tree() {
         return "palm,tree";
     }
+}
+
+[[maybe_unused]] static inline ddContainer OSMTreeList() {
+    static ddContainer ret{};
+
+    if ( ret.empty() ) {
+        ret.emplace_back(OSMElementName::fir_tree());
+        ret.emplace_back(OSMElementName::oak_tree());
+        ret.emplace_back(OSMElementName::palm_tree());
+        ret.emplace_back(OSMElementName::poplar_tree());
+    }
+
+    return ret;
 }
