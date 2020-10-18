@@ -83,7 +83,7 @@ void main() {
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
 
     //sceneColor = texture(shadowMapTexture, v_texCoord).xxxx;
-    //FragColor.rgb= pow(sceneColor.rgb, vec3(10.0/10.0));
+    //FragColor.rgb= pow(sceneColor.rgb, vec3(4.0/1.0));
     //FragColor.a = 1.0;
     //return;
 

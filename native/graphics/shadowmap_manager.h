@@ -15,7 +15,7 @@ public:
 
 	[[nodiscard]] Vector3f SunDirection() const;
 
-	void SunPosition( const Vector3f& sunPos, float _artificialWorldRotationAngle );
+	void SunPosition( const Vector3f& sunPos, float _dayDelta, float _artificialWorldRotationAngle );
 	[[nodiscard]] Vector3f SunPosition() const { return mShadowMapLightSourcePos; }
 	void setFrustum( const Vector2f& xb, const Vector2f& yb, const Vector2f& zb );
 	void setFrustum( const JMATH::AABB& aabb );
@@ -30,6 +30,7 @@ private:
 	void updateDepthProjectionMatrix();
 	
 private:
+    float optimisedSunAngle = 0.5f;
 	Matrix4f mBiasMatrix{Matrix4f::MIDENTITY()};
 	Matrix4f depthMVP{Matrix4f::MIDENTITY()};
 	Matrix4f depthBiasMVP{Matrix4f::MIDENTITY()};

@@ -270,16 +270,17 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         // visibility += texture( shadowMapTexture, shadowmap_coord3Biases ) * u_shadowParameters[1];// * tan(acos(1.0-nlAngle));
 
         // if ( shadowmap_coord3Biases.z > 0.0 ) {
-        if ( nlAngle > 0.3 ) {
+        const int numShadowSamples = 16;
+        const float numShadowSamplesFloat = 16.0;
+        const float visibilityFadeScale = 1.0/(numShadowSamplesFloat*1.2);
+        const float neutralShadow = visibilityFadeScale * numShadowSamplesFloat;
+        if ( nlAngle > 0.1 ) {
             shadowmap_coord3Biases = clamp( shadowmap_coord3Biases, vec3(0.0), vec3(1.0) );
-            shadowmap_coord3Biases.z -= u_shadowParameters[0]+0.000024;
-            const int numShadowSamples = 16;
-            const float numShadowSamplesFloat = 16.0;
-            const float visibilityFadeScale = 1.0/(numShadowSamplesFloat*1.2);
+            shadowmap_coord3Biases.z -= u_shadowParameters[0]+0.00044;
             // float overBurnedfactor = 0.2;// * u_shadowParameters[1];
             for ( int i = 0; i < numShadowSamples; i++ ) {
                 int index = i;//int( numShadowSamplesFloat*random( gl_FragCoord.xyyx ) ) % numShadowSamples;        
-                float shadow = texture( shadowMapTexture, vec3( shadowmap_coord3Biases.xy + (poissonDisk[index] / 8192.0), shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
+                float shadow = texture( shadowMapTexture, vec3( shadowmap_coord3Biases.xy + (poissonDisk[index] / 4096.0), shadowmap_coord3Biases.z ) );// * u_timeOfTheDay;
                 shadow = shadow < shadowmap_coord3Biases.z ? 1.0 : 0.0;
                 visibility -= shadow * visibilityFadeScale;// * u_timeOfTheDay;
             }
@@ -287,7 +288,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
             // shadow = shadow < shadowmap_coord3Biases.z ? 1.0 * 0.78 : 0.0;
             // visibility -=  shadow;
         } else {
-            visibility -= 0.78;
+            visibility -= neutralShadow;
         }
     }
     // }

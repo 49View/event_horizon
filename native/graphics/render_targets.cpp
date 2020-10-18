@@ -118,7 +118,7 @@ std::shared_ptr<Framebuffer> RLTargetPBR::getFrameBuffer( CommandBufferFrameBuff
     return framebuffer;
 }
 
-std::shared_ptr<CameraRig> RLTargetPBR::getProbeRig( int t, const std::string& _probeName, int mipmap ) {
+std::shared_ptr<CameraRig> RLTargetPBR::getProbeRig( int t, const std::string& _probeName, int /*mipmap*/ ) {
     auto camName = cubeRigName(t, _probeName);
     return mAncillaryCameraRigs[camName];
 }
@@ -301,9 +301,9 @@ void RLTargetPBR::cacheShadowMapSunPosition( const Vector3f& _smsp ) {
 }
 
 // This DOES update and invalida skybox and probes
-void RLTargetPBR::setShadowMapPosition( const Vector3f& _sp, float _artificialWorldRotationAngle ) {
+void RLTargetPBR::setShadowMapPosition( const Vector3f& _sp, float _dayDelta, float _artificialWorldRotationAngle ) {
     cacheShadowMapSunPosition(_sp);
-    smm->SunPosition(_sp, _artificialWorldRotationAngle );
+    smm->SunPosition(_sp, _dayDelta, _artificialWorldRotationAngle );
     if ( mSkybox ) mSkybox->invalidate();
 }
 
@@ -608,14 +608,14 @@ void RLTargetPBR::resize( const Rect2f& _r ) {
 void RLTargetPBR::addSecondsToTime( int _seconds, float _artificialWorldRotationAngle ) {
     mSunBuilder->addSeconds( _seconds );
     if ( mSkybox ) mSkybox->invalidate();
-    setShadowMapPosition(mSunBuilder->getSunPosition(), _artificialWorldRotationAngle);
+    setShadowMapPosition(mSunBuilder->getSunPosition(), mSunBuilder->getDayDelta(), _artificialWorldRotationAngle);
 }
 
 void RLTargetPBR::changeTime( const std::string& _time, float _artificialWorldRotationAngle ) {
     mSunBuilder->buildFromString(_time);
 //    RR().changeTime( SB().getSunPosition() );
     if ( mSkybox ) mSkybox->invalidate();
-    setShadowMapPosition(mSunBuilder->getSunPosition(), _artificialWorldRotationAngle );
+    setShadowMapPosition(mSunBuilder->getSunPosition(), mSunBuilder->getDayDelta(), _artificialWorldRotationAngle );
 }
 
 void RLTargetPBR::invalidateOnAdd() {

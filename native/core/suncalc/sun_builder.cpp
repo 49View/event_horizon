@@ -147,7 +147,6 @@ void SunBuilder::moveSun( const DateTime& date, const GeoPosition& location ) {
     float sunK = 1.0f;
     float sunMult = max( 0.0f, ghr + static_cast<float>(mSunPosition.altitudeRad) ) * sunK;
 
-    float dayDelta = 0.5f;
     checkTimesRange( currTimeStamp, std::get<0>(sunrise), std::get<0>(sunset), 0.0f, 1.0f, dayDelta );
 
     auto dayGradientColor = dailyGradientColor(dayDelta);
@@ -319,4 +318,8 @@ V3f SunBuilder::dailyGradientColor( float _dayDelta ) const {
 	auto col = goldenHourGradient->at<uint32_t>( static_cast<unsigned int>(index), 0);
 	auto ret = V4fc::ITORGBA(col);
 	return ret.xyz();
+}
+
+float SunBuilder::getDayDelta() const {
+    return dayDelta;
 }

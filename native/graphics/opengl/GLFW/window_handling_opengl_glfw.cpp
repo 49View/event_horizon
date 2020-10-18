@@ -231,10 +231,6 @@ namespace WindowHandling {
         ImGui::Text("Number render materials: %d", rs.getInMemoryMaterials());
         ImGui::Text("Number vertex buffers: %d", rs.getInMemoryVertexBuffers());
         ImGui::Text("Number textures: %d", rs.getInMemoryTextures());
-
-        static float vec2f[4] = { 0.10f, 0.20f };
-        ImGui::InputFloat2("SSM Frustum X", vec2f);
-
         ImGui::End();
 #endif
 #endif

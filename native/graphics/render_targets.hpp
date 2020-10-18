@@ -321,7 +321,7 @@ protected:
     void setShadowMapFrustomFromRenderVolume();
     void cacheShadowMapSunPosition( const Vector3f& _smsp );
     void invalidateShadowMaps();
-    void setShadowMapPosition( const Vector3f& _sp, float _artificialWorldRotationAngle );
+    void setShadowMapPosition( const Vector3f& _sp, float _dayDelta, float _artificialWorldRotationAngle );
     [[nodiscard]] V4f mainDirectionLightValue() const;
 protected:
     std::shared_ptr<CompositePBR> mComposite;

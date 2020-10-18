@@ -43,8 +43,9 @@ void ShadowMapManager::setFrustum( const Vector2f& xb, const Vector2f& yb, const
     updateDepthProjectionMatrix();
 }
 
-void ShadowMapManager::SunPosition( const Vector3f& sunPos, float _artificialWorldRotationAngle ) {
+void ShadowMapManager::SunPosition( const Vector3f& sunPos, float _dayDelta, float _artificialWorldRotationAngle ) {
     if ( mShadowMapLightSourcePos != sunPos ) {
+        optimisedSunAngle = _dayDelta;
         mShadowMapLightSourcePos = sunPos;
         mShadowMapSunLightDir = normalize(mShadowMapLightSourcePos);
         Matrix4f mat{};
@@ -58,7 +59,7 @@ void ShadowMapManager::SunPosition( const Vector3f& sunPos, float _artificialWor
 void ShadowMapManager::calculateShadowMapMatrices() {
     // Compute the MVP matrix from the light's point of view
     if ( mZFrustum.y() != 0.0f ) {
-        depthViewMatrix.lookAt2(mShadowMapSunLightDir * 100.0f, mShadowMapSunLightDir, V3f{ 0.0f, 1.0f, 0.000001f });
+        depthViewMatrix.lookAt2(mShadowMapSunLightDir * half( mZFrustum.y()), mShadowMapSunLightDir, V3f{ 0.0f, 1.0f, 0.000001f });
         depthMVP = depthViewMatrix * depthProjectionMatrix;
         depthBiasMVP = depthMVP * mBiasMatrix;
     }
@@ -80,6 +81,6 @@ Vector3f ShadowMapManager::SunDirection() const {
 }
 
 void ShadowMapManager::setFrustum( const JMATH::AABB& aabb ) {
-    float aabbDiameter = aabb.calcDiameter();
-    setFrustum({ 0.0f, aabbDiameter }, { -half(aabbDiameter), half(aabbDiameter) }, { 0.0f, aabbDiameter * 2.0f });
+    float aabbDiameter = aabb.calcDiameter()*1.75f;
+    setFrustum({ -aabbDiameter, aabbDiameter }, { -half(aabb.calcDiameter()), aabbDiameter }, { 0.0f, aabbDiameter*2.0f });
 }

@@ -24,6 +24,7 @@ public:
     [[nodiscard]] V4f GoldenHourColor() const;
     [[nodiscard]] V3f dailyGradientColor( float _dayDelta ) const;
     [[nodiscard]] int getHour() const;
+    [[nodiscard]] float getDayDelta() const;
 
 private:
     void moveSun( const DateTime& date, const GeoPosition& location );
@@ -52,6 +53,7 @@ private:
     int minuteValue = 0;
     int secondValue = 0;
 
+    float dayDelta = 0.5f;
     std::shared_ptr<RawImage> goldenHourGradient;
     std::unordered_map<std::string, std::tuple<int, int>> dateParts;
     std::unordered_set<std::string> timeParts;
