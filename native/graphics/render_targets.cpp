@@ -14,6 +14,7 @@
 #include <core/streaming_mediator.hpp>
 #include <core/descriptors/uniform_names.h>
 #include <graphics/renderer.h>
+#include <graphics/render_stats.hpp>
 #include <graphics/render_light_manager.h>
 
 std::shared_ptr<RLTarget>
@@ -183,17 +184,49 @@ AABB bbox3dOfVPList( VPListContainerCRef _map ) {
     return ret;
 }
 
+void RLTargetPBR::setShadowMapFrustomFromRenderVolume() {
+    AABB totalFrustomBox = AABB::MINVALID();
+    for ( const auto&[k, vl] : rr.CL() ) {
+        if ( isKeyInRange(k) ) {
+            totalFrustomBox.merge(bbox3dOfVPList(vl.mVList));
+        }
+    }
+    if ( totalFrustomBox.isValid() ) {
+        smm->setFrustum(totalFrustomBox);
+#ifndef _PRODUCTION_
+        if ( !rr.debugRenderTweaks->dShadowMap.enabled ) {
+            auto& rsm = rr.debugRenderTweaks->dShadowMap;
+            rsm.leftFrustum = smm->getFrustumX().x();
+            rsm.rightFrustum = smm->getFrustumX().y();
+            rsm.topFrustum = smm->getFrustumY().x();
+            rsm.bottomFrustum = smm->getFrustumY().y();
+            rsm.nearFrustum = smm->getFrustumZ().x();
+            rsm.farFrustum = smm->getFrustumZ().y();
+        }
+#endif
+    }
+}
+
 void RLTargetPBR::calcShadowMapsBBox() {
+#ifndef _PRODUCTION_
+    if ( rr.debugRenderTweaks->dShadowMap.invalidate ) {
+        smm->invalidate();
+        rr.debugRenderTweaks->dShadowMap.invalidate = false;
+    }
+#endif
     if ( smm->invalidated() ) {
-        AABB totalFrustomBox = AABB::MINVALID();
-        for ( const auto&[k, vl] : rr.CL() ) {
-            if ( isKeyInRange(k) ) {
-                totalFrustomBox.merge(bbox3dOfVPList(vl.mVList));
-            }
+#ifndef _PRODUCTION_
+        if ( rr.debugRenderTweaks->dShadowMap.enabled ) {
+            auto& rsm = rr.debugRenderTweaks->dShadowMap;
+            smm->setFrustum( V2f{rsm.leftFrustum, rsm.rightFrustum},
+                             V2f{rsm.topFrustum, rsm.bottomFrustum},
+                             V2f{rsm.nearFrustum, rsm.farFrustum} );
+        } else {
+            setShadowMapFrustomFromRenderVolume();
         }
-        if ( totalFrustomBox.isValid() ) {
-            smm->setFrusom(totalFrustomBox);
-        }
+#else
+        setShadowMapFrustomFromRenderVolume();
+#endif
     }
 }
 

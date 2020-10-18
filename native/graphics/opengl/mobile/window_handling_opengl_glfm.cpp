@@ -41,4 +41,7 @@ namespace WindowHandling {
     void imRenderLoopStats( const RenderStats& rs ) {
     }
 
+    void imRenderTweaks( DebugRenderTweaks& rt ) {
+    }
+
 }

@@ -318,6 +318,7 @@ protected:
     std::shared_ptr<CameraRig> getProbeRig( int t, const std::string& _probeName, int mipmap );
     void addShadowMaps();
     void calcShadowMapsBBox();
+    void setShadowMapFrustomFromRenderVolume();
     void cacheShadowMapSunPosition( const Vector3f& _smsp );
     void invalidateShadowMaps();
     void setShadowMapPosition( const Vector3f& _sp, float _artificialWorldRotationAngle );

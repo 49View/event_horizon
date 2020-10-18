@@ -148,7 +148,9 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string dolphin_statue() {
         return "dolphin_statue";
     }
-
+    [[maybe_unused]] static inline std::string david_statue() {
+        return "david_statue";
+    }
 }
 
 [[maybe_unused]] static inline ddContainer OSMTreeList() {
@@ -169,7 +171,6 @@ namespace OSMElementName {
 
     if ( ret.empty() ) {
         ret.emplace_back(OSMElementName::phone_booth());
-        ret.emplace_back(OSMElementName::dolphin_statue());
     }
 
     return ret;
@@ -179,7 +180,8 @@ namespace OSMElementName {
     static ddContainer ret{};
 
     if ( ret.empty() ) {
-        ret.emplace_back(OSMElementName::phone_booth());
+        ret.emplace_back(OSMElementName::dolphin_statue());
+        ret.emplace_back(OSMElementName::david_statue());
     }
 
     return ret;
@@ -191,6 +193,7 @@ namespace OSMElementName {
     if ( ret.empty() ) {
         inserter(ret, OSMTreeList());
         inserter(ret, OSMAmenityList());
+        inserter(ret, OSMMonumentList());
     }
 
     return ret;

@@ -58,8 +58,10 @@ void VData::fill( const VData& ps, const Matrix4f& _mat ) {
         vIndices.emplace_back( q + startIndex );
     }
 
-    expandVolume( ps.getMin() );
-    expandVolume( ps.getMax() );
+    auto lMin = _mat.transform(ps.getMin());
+    auto lMax = _mat.transform(ps.getMax());
+    expandVolume( lMin );
+    expandVolume( lMax );
 }
 
 void VData::fill( const VData& ps, const Matrix4f& _mat, const C4f& _color ) {
@@ -73,8 +75,10 @@ void VData::fill( const VData& ps, const Matrix4f& _mat, const C4f& _color ) {
         vIndices.emplace_back( q + startIndex );
     }
 
-    expandVolume( ps.getMin() );
-    expandVolume( ps.getMax() );
+    auto lMin = _mat.transform(ps.getMin());
+    auto lMax = _mat.transform(ps.getMax());
+    expandVolume( lMin );
+    expandVolume( lMax );
 }
 
 void VData::fillIndices( const std::vector<uint32_t>& _indices ) {

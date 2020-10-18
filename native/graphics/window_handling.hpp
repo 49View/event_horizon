@@ -14,6 +14,7 @@ class MouseInput;
 class Renderer;
 class RenderStats;
 class Vector2i;
+struct DebugRenderTweaks;
 
 namespace WindowHandling {
 	void initializeWindow( std::optional<std::string> title, std::optional<std::string> _width, std::optional<std::string> _height, uint64_t flags, Renderer& rr );
@@ -30,6 +31,7 @@ namespace WindowHandling {
     void enableMouseCursor( bool flag );
     Vector2i captureWindowSize();
     void imRenderLoopStats( const RenderStats& rs );
+    void imRenderTweaks( DebugRenderTweaks& rt );
     void setMultiSampleCount(int count);
     int  getMultiSampleCount();
 };

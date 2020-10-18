@@ -14,77 +14,72 @@ ShadowMapManager::ShadowMapManager() {
 
 void ShadowMapManager::updateDepthProjectionMatrix() {
 
-	depthProjectionMatrix.setOrthogonalProjection( mXFrustom.x(), mXFrustom.y(), mYFrustom.y(), mYFrustom.x(), mZFrustom.x(), mZFrustom.y() );
+    depthProjectionMatrix.setOrthogonalProjection(mXFrustum.x(), mXFrustum.y(), mYFrustum.y(), mYFrustum.x(),
+                                                  mZFrustum.x(), mZFrustum.y());
     calculateShadowMapMatrices();
     invalidate();
 }
 
-void ShadowMapManager::setFrusomX( const Vector2f& val ) {
-	mXFrustom = val;
-	
-	updateDepthProjectionMatrix();
+[[maybe_unused]] void ShadowMapManager::setFrustumX( const Vector2f& val ) {
+    mXFrustum = val;
+    updateDepthProjectionMatrix();
 }
 
-void ShadowMapManager::setFrusomY( const Vector2f& val ) {
-	mYFrustom = val;
-	
-	updateDepthProjectionMatrix();
+[[maybe_unused]] void ShadowMapManager::setFrustumY( const Vector2f& val ) {
+    mYFrustum = val;
+    updateDepthProjectionMatrix();
 }
 
-void ShadowMapManager::setFrusomZ( const Vector2f& val ) {
-	mZFrustom = val;
-	
-	updateDepthProjectionMatrix();
+[[maybe_unused]] void ShadowMapManager::setFrustumZ( const Vector2f& val ) {
+    mZFrustum = val;
+    updateDepthProjectionMatrix();
 }
 
-void ShadowMapManager::setFrusom( const Vector2f& xb, const Vector2f& yb, const Vector2f& zb ) {
-	mXFrustom = xb;
-	mYFrustom = yb;
-	mZFrustom = zb;
-	
-	updateDepthProjectionMatrix();
+void ShadowMapManager::setFrustum( const Vector2f& xb, const Vector2f& yb, const Vector2f& zb ) {
+    mXFrustum = xb;
+    mYFrustum = yb;
+    mZFrustum = zb;
+    mFrustumCenter = V3f::ZERO();
+    updateDepthProjectionMatrix();
 }
 
 void ShadowMapManager::SunPosition( const Vector3f& sunPos, float _artificialWorldRotationAngle ) {
-	if ( mShadowMapLightSourcePos != sunPos ) {
-		mShadowMapLightSourcePos = sunPos;
-		mShadowMapSunLightDir = normalize( mShadowMapLightSourcePos );
-		Matrix4f mat{};
-		mat.setRotation(_artificialWorldRotationAngle, V3fc::UP_AXIS);
-		mShadowMapSunLightDir = mat.transform(mShadowMapSunLightDir);
-		calculateShadowMapMatrices();
-		invalidate();
-	}
+    if ( mShadowMapLightSourcePos != sunPos ) {
+        mShadowMapLightSourcePos = sunPos;
+        mShadowMapSunLightDir = normalize(mShadowMapLightSourcePos);
+        Matrix4f mat{};
+        mat.setRotation(_artificialWorldRotationAngle, V3fc::UP_AXIS);
+        mShadowMapSunLightDir = mat.transform(mShadowMapSunLightDir);
+        calculateShadowMapMatrices();
+        invalidate();
+    }
 }
 
 void ShadowMapManager::calculateShadowMapMatrices() {
-	// Compute the MVP matrix from the light's point of view
-	if ( mZFrustom.y() != 0.0f ) {
-//        depthViewMatrix.lookAt2( V3f{0.0f,  10.7f, 0.0f}, V3fc::ZERO, V3f{0.0f, 1.0f, 0.000001f} );
-        depthViewMatrix.lookAt2( mShadowMapSunLightDir*mZFrustom.y()*0.5f, mFrustomCenter, V3f{0.0f, 1.0f, 0.000001f} );
+    // Compute the MVP matrix from the light's point of view
+    if ( mZFrustum.y() != 0.0f ) {
+        depthViewMatrix.lookAt2(mShadowMapSunLightDir * 100.0f, mShadowMapSunLightDir, V3f{ 0.0f, 1.0f, 0.000001f });
         depthMVP = depthViewMatrix * depthProjectionMatrix;
         depthBiasMVP = depthMVP * mBiasMatrix;
-	}
+    }
 }
 
 const Matrix4f& ShadowMapManager::ShadowMapMVP() const {
-	return depthMVP;
+    return depthMVP;
 }
 
-Matrix4f & ShadowMapManager::ShadowMapMVPBias( bool _useInfiniteHorizon ) {
-	if ( mShadowMapLightSourcePos.y() < 0.0f && _useInfiniteHorizon ) {
-		return mBiasMatrix;
-	}
-	return depthBiasMVP;
+Matrix4f& ShadowMapManager::ShadowMapMVPBias( bool _useInfiniteHorizon ) {
+    if ( mShadowMapLightSourcePos.y() < 0.0f && _useInfiniteHorizon ) {
+        return mBiasMatrix;
+    }
+    return depthBiasMVP;
 }
 
 Vector3f ShadowMapManager::SunDirection() const {
-	return mShadowMapSunLightDir;
+    return mShadowMapSunLightDir;
 }
 
-void ShadowMapManager::setFrusom( const JMATH::AABB& aabb ) {
+void ShadowMapManager::setFrustum( const JMATH::AABB& aabb ) {
     float aabbDiameter = aabb.calcDiameter();
-    mFrustomCenter = aabb.centre();
-
-    setFrusom( { -aabbDiameter, aabbDiameter}, { -aabbDiameter, aabbDiameter}, { 0.0f, aabbDiameter*4.0f} );
+    setFrustum({ 0.0f, aabbDiameter }, { -half(aabbDiameter), half(aabbDiameter) }, { 0.0f, aabbDiameter * 2.0f });
 }

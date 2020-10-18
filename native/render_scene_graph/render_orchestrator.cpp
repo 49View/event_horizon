@@ -621,7 +621,7 @@ void RenderOrchestrator::init( const CLIParamMap& params ) {
         RR().drawGrid(CommandBufferLimits::GridStart, 1.0f, ( C4fc::PASTEL_GRAYLIGHT ),
                             ( C4fc::DARK_GRAY ), V2f{ 15.0f }, 0.015f);
         RR().showBucket(CommandBufferLimits::GridStart, false);
-        RR().setIndoorSceneCoeff(0.5f); // We dim the sunlight otherwise outdoor scenes are too bright
+        RR().setIndoorSceneCoefficient(0.5f); // We dim the sunlight otherwise outdoor scenes are too bright
         sg.resetAndLoadEntity(_id, _group, bTakeScreenShot);
     };
 

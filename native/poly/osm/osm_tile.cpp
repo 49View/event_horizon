@@ -46,9 +46,10 @@ bool checkTagOnElement( const OSMElement& element, const std::string& tag, const
 
 void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float globalOSMScale ) {
 
-    std::array<std::vector<const OSMElement*>,4> sortedRoads;
 
     addOSMTileBoundaries( _ret, osm->tileBoundary, globalOSMScale );
+
+    std::array<std::vector<const OSMElement*>,4> sortedRoads;
 
     for ( const auto& element : osm->elements ) {
         V3f elemCenterProj3d = osmTileDeltaPos(element);
@@ -65,6 +66,7 @@ void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float g
 
     for ( const auto& element : osm->elements ) {
         V3f elemCenterProj3d = osmTileDeltaPos(element);
+
         if ( element.type == OSMElementName::unclassified() ) {
             addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
         }
@@ -106,6 +108,9 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
 
     for ( const auto& element : osm->elements ) {
         V3f tilePosDelta = osmTileDeltaPos(element);
+        if ( !osm->tileBoundary.rect.contains( tilePosDelta.xz()) ) {
+            continue;
+        }
         for ( const auto& group : element.meshes ) {
             if ( element.type == OSMElementName::entity() ) {
                 if ( checkTagOnElement(element, OSMElementName::amenity(), OSMElementName::telephone()) ) {
@@ -114,9 +119,10 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
                     addToOSMVData( *assets.find(OSMElementName::phone_booth())->second, mat);
                 }
                 if ( checkTagOnElement(element, OSMElementName::historic(), OSMElementName::monument()) ) {
-                    auto randScale = 2.0f + unitRand(1.5f);
+                    auto randScale = 1.0f;//2.0f + unitRand(1.5f);
                     Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*randScale}};
-                    addToOSMVData( *assets.find(OSMElementName::dolphin_statue())->second, mat);
+                    auto rand = static_cast<int>(unitRand(OSMMonumentList().size()));
+                    addToOSMVData( *assets.find(OSMMonumentList()[rand])->second, mat);
                 }
                 if ( checkTagOnElement(element, OSMElementName::natural(), OSMElementName::tree()) ) {
                     auto randScale = 2.0f + unitRand(1.5f);
@@ -134,4 +140,6 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
             }
         }
     }
+
+    LOGRS(_ret->getMin() << _ret->getMax() )
 }

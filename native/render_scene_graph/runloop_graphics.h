@@ -74,14 +74,14 @@ public:
                      : RunLoop(), rr( rr ), ti( ti), mi( mi), sg(_sg), rsg(_rsg) {}
 
     void setBackEnd( std::unique_ptr<RunLoopBackEndBase>&& _be ) {
-        rlbackEnd = std::move(_be);
+        rlBackEnd = std::move(_be);
 	}
 
     void init( const CLIParamMap& params ) {
         InitializeWindowFlagsT initFlags = checkLayoutArgvs( params );
         WH::initializeWindow( params.getParam("title"), params.getParam("width"), params.getParam("height"), initFlags, rr );
         rr.init();
-        rlbackEnd->activate(params);
+        rlBackEnd->activate(params);
         //	mi.subscribe( pm );
     }
 
@@ -90,8 +90,8 @@ public:
         // to be supported properly within wasm, atm out of the scope of current understanding :D
     }
 
-    void updateLuaScript( const std::string& _lscript ) {
-	    rsg.setLuaScriptHotReload( _lscript );
+    void updateLuaScript( const std::string& _script ) {
+	    rsg.setLuaScriptHotReload(_script );
 	}
 
 	void reloadShadersViaHttp() {
@@ -125,13 +125,14 @@ protected:
         WH::preUpdate();
         mi.update( mUpdateSignals );
         auto aid = aggregateInputs();
-        rlbackEnd->update( aid, mi );
+        rlBackEnd->update(aid, mi );
     }
 
     void render() {
         RenderStats rs{};
         RR().directRenderLoop(rs);
         WH::imRenderLoopStats(rs);
+        WH::imRenderTweaks(*RR().debugRenderTweaks);
         WH::flush();
     }
 
@@ -146,7 +147,7 @@ protected:
     MouseInput& mi;
     SceneGraph& sg;
     RenderOrchestrator& rsg;
-    std::unique_ptr<RunLoopBackEndBase> rlbackEnd;
+    std::unique_ptr<RunLoopBackEndBase> rlBackEnd;
 
 	int nUpdates = 0;
 	int nRenders = 0;

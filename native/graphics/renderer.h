@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <utility>
 #include <array>
 #include <unordered_set>
 #include <core/uuid.hpp>
@@ -213,9 +212,9 @@ private:
 };
 
 struct ChangeMaterialOnContainer {
-    ChangeMaterialOnContainer( uint64_t tag, const std::string& matHash ) : tag(tag), matHash(matHash) {}
-    ChangeMaterialOnContainer( const std::string& name, const std::string& matHash ) : name(name),
-                                                                                       matHash(matHash) {}
+    ChangeMaterialOnContainer( uint64_t tag, std::string  matHash ) : tag(tag), matHash(std::move(matHash)) {}
+    ChangeMaterialOnContainer( std::string  name, std::string  matHash ) : name(std::move(name)),
+                                                                                       matHash(std::move(matHash)) {}
 
     uint64_t tag = 0;
     std::string name{};
@@ -225,6 +224,7 @@ struct ChangeMaterialOnContainer {
 struct LightmapSceneExchanger;
 
 class RenderStats;
+class DebugRenderTweaks;
 
 class Renderer {
 public:
@@ -264,7 +264,6 @@ public:
     [[maybe_unused]] VPListFlatContainer getVPListWithTags( uint64_t _tag );
     void changeMaterialColorOnUUID( const UUID& _tag, const Color4f& _color, Color4f& _oldColor );
     void replaceMaterial( const std::string& _oldMatRef, const std::string& _newMatRef );
-    void changeMaterialProperty( const std::string& _prop, const std::string& _matKey, const std::string& _value );
 
     std::shared_ptr<Program> P( const std::string& _id );
     std::shared_ptr<Texture> TD( const std::string& _id, int tSlot = -1 );
@@ -313,7 +312,6 @@ public:
     std::shared_ptr<Framebuffer> getDepthMapFB() { return mDepthFB; }
     std::shared_ptr<Framebuffer> getProbing( int _index );
 
-    int UpdateCounter() const { return mUpdateCounter; }
     void invalidateOnAdd();
 
     template<typename ...Args>
@@ -337,9 +335,9 @@ public:
     void useDOF( bool _flag );
     void useSSAO( bool _flag );
     void useMotionBlur( bool _flag );
-    void setShadowOverBurnCofficient( float _overBurn );
-    void setShadowZFightCofficient( float _value );
-    void setIndoorSceneCoeff( float _value );
+    void setShadowOverBurnCoefficient( float _overBurn );
+    void setShadowZFightCoefficient( float _value );
+    void setIndoorSceneCoefficient( float _value );
 
     [[nodiscard]] float ssaoBlendFactor() const;
     [[nodiscard]] floata& ssaoBlendFactorAnim();
@@ -387,6 +385,13 @@ protected:
 
     template<typename V> friend class VPBuilder;
 
+    // [START-DEBUG] Accessor made public to work with IMGUI
+#ifndef _PRODUCTION_
+public:
+    std::shared_ptr<DebugRenderTweaks> debugRenderTweaks;
+#endif
+    // [END-DEBUG] Debug accessor made public to work with IMGUI
+
 public:
 
     void drawGrid( int bucketIndex, float unit, const Color4f& mainAxisColor, const Color4f& smallAxisColor,
@@ -396,12 +401,12 @@ public:
                   const Vector2f& limits, float axisSize, const std::string& _name = "" );
 
     VPListSP drawMeasurementArrow1( int bucketIndex, const Vector3f& p1, const Vector3f& p2,
-                                    const V4f& color, float width, float angle, float arrowlength,
+                                    const V4f& color, float width, float angle, float arrowLength,
                                     float offsetGap, const Font *font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
     VPListSP drawMeasurementArrow2( int bucketIndex, const Vector3f& p1, const Vector3f& p2,
                                     const V2f& p12n, const Vector3f& op1, const Vector3f& op2,
-                                    const V4f& color, float width, float angle, float arrowlength,
+                                    const V4f& color, float width, float angle, float arrowLength,
                                     float offsetGap, const Font *font, float fontHeight, const C4f& fontColor,
                                     const C4f& fontBackGroundColor, const std::string& _name = {} );
 

@@ -244,7 +244,7 @@ auto creteDoubleArrow( const Vector3f& p1, const Vector3f& p2, float width, floa
 }
 
 VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
-                                          const V4f& color, float width, float angle, float arrowlength,
+                                          const V4f& color, float width, float angle, float arrowLength,
                                           float offsetGap, const Font *font, float fontHeight, const C4f& fontColor,
                                           const C4f& fontBackGroundColor, const std::string& _name ) {
 
@@ -264,8 +264,8 @@ VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f&
     auto op2 = sp2 + seg90_1 * offsetGap;
     auto l1 = extrudePointsWithWidth<ExtrudeStrip>({ sp1, op1 }, width, false);
     auto l2 = extrudePointsWithWidth<ExtrudeStrip>({ sp2, op2 }, width, false);
-    auto v1 = extrudePointsWithWidth<ExtrudeStrip>(createAngleBrackets(op1, op2, angle, arrowlength), width);
-    auto v2 = extrudePointsWithWidth<ExtrudeStrip>(createAngleBrackets(op2, op1, -angle, arrowlength), width);
+    auto v1 = extrudePointsWithWidth<ExtrudeStrip>(createAngleBrackets(op1, op2, angle, arrowLength), width);
+    auto v2 = extrudePointsWithWidth<ExtrudeStrip>(createAngleBrackets(op2, op1, -angle, arrowLength), width);
 
     float measure = JMATH::distance(sp1, sp2);
     std::string measureText = floatToDistance(measure);
@@ -295,15 +295,15 @@ VPListSP Renderer::drawMeasurementArrow1( const int bucketIndex, const Vector3f&
 
 VPListSP Renderer::drawMeasurementArrow2( const int bucketIndex, const Vector3f& p1, const Vector3f& p2,
                                           const V2f& p12n, const Vector3f& op1, const Vector3f& op2,
-                                          const V4f& color, float width, float angle, float arrowlength,
+                                          const V4f& color, float width, float angle, float arrowLength,
                                           float minDistance, const Font *font, float fontHeight, const C4f& fontColor,
                                           const C4f& fontBackGroundColor, const std::string& _name ) {
 
     if ( distance(p1, p2) < minDistance ) { return nullptr; }
     float textAngle = atan2(p12n.y(), p12n.x());
     auto seg90_1 = XZY::C(rotate90(p12n));
-    auto v1 = extrudePointsWithWidth<ExtrudeStrip>(createAngleBrackets(p1, p2, angle, arrowlength), width);
-    auto v2 = extrudePointsWithWidth<ExtrudeStrip>(createAngleBrackets(p2, p1, -angle, arrowlength), width);
+    auto v1 = extrudePointsWithWidth<ExtrudeStrip>(createAngleBrackets(p1, p2, angle, arrowLength), width);
+    auto v2 = extrudePointsWithWidth<ExtrudeStrip>(createAngleBrackets(p2, p1, -angle, arrowLength), width);
 
     float measure = JMATH::distance(p1, p2);
     std::string measureText = floatToDistance(measure);

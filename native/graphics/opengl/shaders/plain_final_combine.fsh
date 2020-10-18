@@ -82,10 +82,10 @@ void main() {
 
     vec4 sceneColor = texture(colorFBTexture, v_texCoord);
 
-    // sceneColor = texture(shadowMapTexture, v_texCoord).xxxx;
-    // FragColor.rgb= sceneColor.rgb;
-    // FragColor.a = 1.0;
-    // return;
+    //sceneColor = texture(shadowMapTexture, v_texCoord).xxxx;
+    //FragColor.rgb= pow(sceneColor.rgb, vec3(10.0/10.0));
+    //FragColor.a = 1.0;
+    //return;
 
     #if _CAMERA_MOTION_BLURRING_
     sceneColor.xyz = cameraMotionBlur(sceneColor.xyz);

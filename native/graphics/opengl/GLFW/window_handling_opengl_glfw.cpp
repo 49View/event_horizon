@@ -1,9 +1,12 @@
 #include "window_handling_opengl_glfw.hpp"
 #include <graphics/opengl/gl_headers.hpp>
+
 #ifdef _USE_IMGUI_
+
 #include <graphics/imgui/imgui.h>
 #include <graphics/opengl/GLFW/imgui_impl_glfw.h>
 #include <graphics/opengl/imgui_impl_opengl3.h>
+
 #endif
 
 #include <core/default_font.hpp>
@@ -15,25 +18,25 @@
 
 namespace WindowHandling {
 
-    GLFWwindow* window = nullptr;
+    GLFWwindow *window = nullptr;
     bool bUseGLFWPoll = true;
     bool mousePassThrough = true;
     bool keyboardPassThrough = true;
 
     void setKeyCallback( GLFWkeyfun fn ) {
-        glfwSetKeyCallback( window, fn );
+        glfwSetKeyCallback(window, fn);
     }
 
     void setDropCallback( GLFWdropfun fn ) {
-        glfwSetDropCallback( window, fn );
+        glfwSetDropCallback(window, fn);
     }
 
     void setResizeWindowCallback( GLFWwindowsizefun fn ) {
-        glfwSetWindowSizeCallback( window, fn );
+        glfwSetWindowSizeCallback(window, fn);
     }
 
     void setResizeFramebufferCallback( GLFWframebuffersizefun fn ) {
-        glfwSetFramebufferSizeCallback( window, fn );
+        glfwSetFramebufferSizeCallback(window, fn);
     }
 
     bool isMouseInputActive() {
@@ -45,15 +48,15 @@ namespace WindowHandling {
     }
 
     void gatherMainScreenInfo() {
-        int w,h;
-        glfwGetFramebufferSize( window, &w, &h );
-        Vector2i sizei{ w, h };
-        AppGlobals::getInstance().setScreenSizef( Vector2f{w,h});
-        AppGlobals::getInstance().setScreenSizei( sizei );
+        int w, h;
+        glfwGetFramebufferSize(window, &w, &h);
+        Vector2i sizeI{ w, h };
+        AppGlobals::getInstance().setScreenSizef(Vector2f{ w, h });
+        AppGlobals::getInstance().setScreenSizei(sizeI);
     }
 
     bool shouldWindowBeClosed() {
-        return glfwWindowShouldClose( window ) != 0;
+        return glfwWindowShouldClose(window) != 0;
     }
 
     void initImGUI() {
@@ -61,7 +64,8 @@ namespace WindowHandling {
         // Setup Dear ImGui binding
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGuiIO& io = ImGui::GetIO();
+        (void) io;
 
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
@@ -70,7 +74,7 @@ namespace WindowHandling {
 
         static SerializableContainer defaultFont = getDefaultFont();
 //        ImFont* font =
-                io.Fonts->AddFontFromMemoryTTF(defaultFont.data(), defaultFont.size(), 30.0f);
+        io.Fonts->AddFontFromMemoryTTF(defaultFont.data(), defaultFont.size(), 30.0f);
 //        ASSERT(font);
 
         ImGui::GetStyle().FrameRounding = 2.0f;
@@ -89,7 +93,7 @@ namespace WindowHandling {
 
         ImGui::GetStyle().DisplaySafeAreaPadding = ImVec2(4, 4);
 
-        ImVec4* colors = ImGui::GetStyle().Colors;
+        ImVec4 *colors = ImGui::GetStyle().Colors;
         colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
         colors[ImGuiCol_TextDisabled] = ImVec4(0.36f, 0.42f, 0.47f, 1.00f);
         colors[ImGuiCol_WindowBg] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
@@ -145,7 +149,7 @@ namespace WindowHandling {
 #ifdef __EMSCRIPTEN__
         const char* glsl_version = "#version 300 es";
 #else
-        const char* glsl_version = "#version 410";
+        const char *glsl_version = "#version 410";
 #endif
         ImGui_ImplOpenGL3_Init(glsl_version);
 
@@ -185,7 +189,7 @@ namespace WindowHandling {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif
-        glfwSwapBuffers( window );
+        glfwSwapBuffers(window);
 #ifdef __APPLE__
         static bool macMoved = false;
 
@@ -206,7 +210,7 @@ namespace WindowHandling {
     }
 
     void enableVSync( const bool val ) {
-        glfwSwapInterval( val != 0 ? 1 : 0 );
+        glfwSwapInterval(val != 0 ? 1 : 0);
     }
 
     bool isInputEnabled() {
@@ -221,14 +225,54 @@ namespace WindowHandling {
 #if !defined __EMSCRIPTEN__ && !defined _PRODUCTION_
 #ifdef _USE_IMGUI_
         ImGui::Begin("Renderer Console");
-        ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate );
-        ImGui::Text("Current FrameRate (%.1f FPS)", ImGui::GetIO().Framerate );
-        ImGui::Text("Number drawcalls: %d", rs.getDrawCallsPerFrame() );
-        ImGui::Text("Number render materials: %d", rs.getInMemoryMaterials() );
-        ImGui::Text("Number vertex buffers: %d", rs.getInMemoryVertexBuffers() );
-        ImGui::Text("Number textures: %d", rs.getInMemoryTextures() );
+        ImGui::Text("Application average %.3f", 1000.0f / ImGui::GetIO().Framerate);
+        ImGui::Text("Current FrameRate (%.1f FPS)", ImGui::GetIO().Framerate);
+        ImGui::Text("Number draw calls: %d", rs.getDrawCallsPerFrame());
+        ImGui::Text("Number render materials: %d", rs.getInMemoryMaterials());
+        ImGui::Text("Number vertex buffers: %d", rs.getInMemoryVertexBuffers());
+        ImGui::Text("Number textures: %d", rs.getInMemoryTextures());
+
+        static float vec2f[4] = { 0.10f, 0.20f };
+        ImGui::InputFloat2("SSM Frustum X", vec2f);
+
         ImGui::End();
 #endif
 #endif
     }
+
+    void imRenderTweaks( DebugRenderTweaks& rt ) {
+#if !defined __EMSCRIPTEN__ && !defined _PRODUCTION_
+#ifdef _USE_IMGUI_
+        ImGui::Begin("Renderer Tweaks");
+        if ( ImGui::Button("Force SSM") ) {
+            rt.dShadowMap.enabled = true;
+            rt.dShadowMap.invalidate = true;
+        }
+        if ( ImGui::InputFloat("Left", &rt.dShadowMap.leftFrustum) ) {
+            rt.dShadowMap.invalidate = true;
+        }
+        if ( ImGui::InputFloat("Right", &rt.dShadowMap.rightFrustum) ) {
+            rt.dShadowMap.invalidate = true;
+        }
+        if ( ImGui::InputFloat("Bottom", &rt.dShadowMap.bottomFrustum) ) {
+            rt.dShadowMap.invalidate = true;
+        }
+        if ( ImGui::InputFloat("Top", &rt.dShadowMap.topFrustum) ) {
+            rt.dShadowMap.invalidate = true;
+        }
+        if ( ImGui::InputFloat("Near", &rt.dShadowMap.nearFrustum) ) {
+            rt.dShadowMap.invalidate = true;
+        }
+        if ( ImGui::InputFloat("Far", &rt.dShadowMap.farFrustum) ) {
+            rt.dShadowMap.invalidate = true;
+        }
+        if ( ImGui::InputFloat("Dist", &rt.dShadowMap.lookAtZDistInterpolator) ) {
+            rt.dShadowMap.invalidate = true;
+        }
+
+        ImGui::End();
+#endif
+#endif
+    }
+
 }

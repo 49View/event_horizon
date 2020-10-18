@@ -6,40 +6,40 @@
 
 class RenderStats {
 public:
-    int NumTriangles() const { return mNumTriangles; }
-    int& NumTriangles() { return mNumTriangles; }
-    void NumTriangles( int val ) { mNumTriangles = val; }
-    int NumVerts() const { return mNumVerts; }
+    [[nodiscard, maybe_unused]] int NumTriangles() const { return mNumTriangles; }
+    [[maybe_unused]] int& NumTriangles() { return mNumTriangles; }
+    [[maybe_unused]] void NumTriangles( int val ) { mNumTriangles = val; }
+    [[nodiscard]] int NumVerts() const { return mNumVerts; }
     void NumVerts( int val ) { mNumVerts = val; }
     int& NumVerts() { return mNumVerts; }
-    int NumIndices() const { return mNumIndices; }
+    [[nodiscard]] int NumIndices() const { return mNumIndices; }
     void NumIndices( int val ) { mNumIndices = val; }
     int& NumIndices() { return mNumIndices; }
-    int NumNormals() const { return mNumNormals; }
+    [[nodiscard]] int NumNormals() const { return mNumNormals; }
     void NumNormals( int val ) { mNumNormals = val; }
     int& NumNormals() { return mNumNormals; }
-    int NumGeoms() const { return mNumGeoms; }
+    [[nodiscard]] int NumGeoms() const { return mNumGeoms; }
     void NumGeoms( int val ) { mNumGeoms = val; }
     int& NumGeoms() { return mNumGeoms; }
-    const int& getDrawCallsPerFrame() const {
+    [[nodiscard]] const int& getDrawCallsPerFrame() const {
         return drawCallsPerFrame;
     }
     void setDrawCallsPerFrame( int _drawCallsPerFrame ) {
         drawCallsPerFrame = _drawCallsPerFrame;
     }
-    int getInMemoryMaterials() const {
+    [[nodiscard]] int getInMemoryMaterials() const {
         return inMemoryMaterials;
     }
     void setInMemoryMaterials( int _inMemoryMaterials ) {
         RenderStats::inMemoryMaterials = _inMemoryMaterials;
     }
-    int getInMemoryVertexBuffers() const {
+    [[nodiscard]] int getInMemoryVertexBuffers() const {
         return inMemoryVertexBuffers;
     }
     void setInMemoryVertexBuffers( int _inMemoryVertexBuffers ) {
         RenderStats::inMemoryVertexBuffers = _inMemoryVertexBuffers;
     }
-    int getInMemoryTextures() const {
+    [[nodiscard]] int getInMemoryTextures() const {
         return inMemoryTextures;
     }
     void setInMemoryTextures( int _inMemoryTextures ) {
@@ -72,5 +72,20 @@ private:
     //	std::set < std::shared_ptr<RenderMaterial> > mMaterialSet;
 };
 
+#ifndef _PRODUCTION_
+struct DebugRenderTweaks {
+    struct DebugShadowMap {
+        bool enabled = false;
+        bool invalidate = false;
+        float leftFrustum = 0.0f;
+        float rightFrustum = 0.0f;
+        float topFrustum = 0.0f;
+        float bottomFrustum = 0.0f;
+        float nearFrustum = 0.0f;
+        float farFrustum = 0.0f;
+        float lookAtZDistInterpolator = 1.0f;
+    };
 
-
+    DebugShadowMap dShadowMap{};
+};
+#endif

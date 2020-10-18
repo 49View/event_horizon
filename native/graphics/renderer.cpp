@@ -65,6 +65,9 @@ void Renderer::cmdReloadShaders( [[maybe_unused]] const std::vector<std::string>
 }
 
 Renderer::Renderer( StreamingMediator& _ssm ) : ssm( _ssm ) {
+#ifndef _PRODUCTION_
+    debugRenderTweaks = std::make_shared<DebugRenderTweaks>();
+#endif
 }
 
 std::shared_ptr<RLTarget> Renderer::getTarget( const std::string& _name ) {
@@ -618,15 +621,15 @@ size_t Renderer::drawCallsPerFrame() const {
     return mDrawCallsPerFrame;
 }
 
-void Renderer::setShadowOverBurnCofficient( float _value ) {
-    LM()->setShadowOverBurnCofficient( _value );
+void Renderer::setShadowOverBurnCoefficient( float _value ) {
+    LM()->setShadowOverBurnCofficient(_value );
 }
 
-void Renderer::setShadowZFightCofficient( float _value ) {
+void Renderer::setShadowZFightCoefficient( float _value ) {
     LM()->setShadowZFightCofficient(_value);
 }
 
-void Renderer::setIndoorSceneCoeff( float _value ) {
+void Renderer::setIndoorSceneCoefficient( float _value ) {
     LM()->setIndoorSceneCoeff(_value);
 }
 
