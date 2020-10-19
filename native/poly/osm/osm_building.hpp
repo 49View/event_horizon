@@ -11,4 +11,4 @@ struct OSMMesh;
 
 class Vector3f;
 
-PolyStruct osmCreateBuilding( const OSMMesh& group, const Vector3f& tilePosDelta, float globalOSMScale );
+std::vector<PolyStruct> osmCreateBuilding( const OSMMesh& group, const Vector3f& tilePosDelta, float globalOSMScale );

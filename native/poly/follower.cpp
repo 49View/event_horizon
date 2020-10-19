@@ -11,15 +11,14 @@
 #include <core/math/quaternion.h>
 #include <poly/vdata_assembler.h>
 #include <poly/poly_services.hpp>
-#include "poly_services.hpp"
 
 struct FollowerPoly {
     FollowerPoly( const std::vector<Vector3f>& rp1, const std::vector<Vector3f>& rp2,
                   const std::array<size_t,4>& indices, WindingOrderT _wo );
     std::array<Vector3f, 4> vs;
-    std::array<Vector2f, 4> vtcs;
+    std::array<Vector2f, 4> vtcs{};
     std::array<Vector3f, 4> vncs;
-    std::array<size_t,   4> vindices;
+    std::array<size_t,   4> vindices{};
     Vector3f vn;
 };
 
@@ -309,11 +308,11 @@ namespace FollowerService {
             mesh.addVertexOfTriangle( fp.vs[i], V4f{fp.vtcs[i], V2fc::ZERO}, color );
         }
 
-        ret = createGeom( mesh, V3f::ZERO(), V3fc::ONE, GeomMappingT::Cube, 0 );;
+        ret = createGeom( mesh, V3f::ZERO(), V3fc::ONE, GeomMappingT::Cube, 0 );
         return ret;
     }
 
-    void extrude( std::shared_ptr<VData> geom,
+    void extrude( const std::shared_ptr<VData>& geom,
                   const std::vector<Vector3f>& _verts,
                   const Profile& profile,
                   const Vector3f& _suggestedAxis,

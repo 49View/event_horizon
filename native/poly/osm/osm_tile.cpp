@@ -134,7 +134,7 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
 //                    addToOSMV(osmCreateTree(tilePosDelta, globalOSMScale ));
                 }
             } else if ( element.type == OSMElementName::building() ) {
-                addToOSM(osmCreateBuilding(group, tilePosDelta, globalOSMScale));
+                addToOSMV(osmCreateBuilding(group, tilePosDelta, globalOSMScale));
             } else if ( element.type == OSMElementName::barrier() ) {
                 addToOSMV(osmCreateBarrier(group, globalOSMScale));
             }

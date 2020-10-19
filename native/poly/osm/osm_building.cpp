@@ -10,8 +10,10 @@
 #include <poly/osm/osm_names.hpp>
 #include <poly/osm/osm_calc.hpp>
 #include <core/math/obb.hpp>
+#include <poly/follower.hpp>
 
-PolyStruct osmCreateBuilding( const OSMMesh& group, const V3f& tilePosDelta, float globalOSMScale ) {
+std::vector<PolyStruct> osmCreateBuilding( const OSMMesh& group, const V3f& tilePosDelta, float globalOSMScale ) {
+    std::vector<PolyStruct> parts{};
     Topology mesh;
     float facadeMappingScale = 0.1f;
     C4f color = C4fc::XTORGBA(group.colour);
@@ -37,6 +39,7 @@ PolyStruct osmCreateBuilding( const OSMMesh& group, const V3f& tilePosDelta, flo
     } else if ( group.part == "lateral" ) {
         auto yOff = static_cast<float>(unitRandI(12));
         V2f tile{ static_cast<float>(unitRandI(15)) / 16.0f, yOff / 16.0f };
+        std::vector<V3f> topVerts{};
         tile = V2fc::ZERO;
         float xAcc = 0.0f;
         for ( auto ti = 0u; ti < group.vertices.size(); ti += 6 ) {
@@ -56,6 +59,9 @@ PolyStruct osmCreateBuilding( const OSMMesh& group, const V3f& tilePosDelta, flo
             V2f uv5 = V2f{ xAcc + dist, -v5.y() };
             V2f uv6 = V2f{ xAcc, -v6.y() };
 
+            topVerts.emplace_back(v2);
+            //topVerts.emplace_back(v4);
+
             mesh.addVertexOfTriangle(v1, V4f{ uv1 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
                                               facadeMappingScale, tile }, color);
             mesh.addVertexOfTriangle(v2, V4f{ uv2 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
@@ -70,7 +76,9 @@ PolyStruct osmCreateBuilding( const OSMMesh& group, const V3f& tilePosDelta, flo
                                               facadeMappingScale, tile }, color);
             xAcc += dist;
         }
+        parts.emplace_back(FollowerService::extrudePolyStruct( topVerts, *Profile::makeRect(V2f{0.03f}, V2fc::ZERO), color, V3fc::UP_AXIS, FollowerFlags::WrapPath ));
     }
 
-    return createGeom(mesh);
+    parts.emplace_back(createGeom(mesh));
+    return parts;
 }
