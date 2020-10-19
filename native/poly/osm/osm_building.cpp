@@ -12,6 +12,11 @@
 #include <core/math/obb.hpp>
 #include <poly/follower.hpp>
 
+template <typename T>
+T bLerp(const T& c00, const T& c10, const T& c01, const T& c11, float tx, float ty) {
+    return mix(mix(c00, c10, tx), mix(c01, c11, tx), ty);
+}
+
 std::vector<PolyStruct> osmCreateBuilding( const OSMMesh& group, const V3f& tilePosDelta, float globalOSMScale ) {
     std::vector<PolyStruct> parts{};
     Topology mesh;
@@ -50,12 +55,16 @@ std::vector<PolyStruct> osmCreateBuilding( const OSMMesh& group, const V3f& tile
             auto pCurr = group.vertices[tiNext];
             auto pNext = group.vertices[ti];
 
-            auto v1 = osmTileProject(V3f{pCurr.xy(), minHeight}, tilePosDelta, globalOSMScale);
-            auto v2 = osmTileProject(V3f{pNext.xy(), minHeight}, tilePosDelta, globalOSMScale);
-            auto v3 = osmTileProject(V3f{pNext.xy(), maxHeight}, tilePosDelta, globalOSMScale);
-            auto v4 = osmTileProject(V3f{pCurr.xy(), minHeight}, tilePosDelta, globalOSMScale);
-            auto v5 = osmTileProject(V3f{pNext.xy(), maxHeight}, tilePosDelta, globalOSMScale);
-            auto v6 = osmTileProject(V3f{pCurr.xy(), maxHeight}, tilePosDelta, globalOSMScale);
+            auto bottomLeft  = V3f{pCurr.xy(), minHeight};
+            auto bottomRight = V3f{pNext.xy(), minHeight};
+            auto topLeft     = V3f{pCurr.xy(), maxHeight};
+            auto topRight    = V3f{pNext.xy(), maxHeight};
+            auto v1 = osmTileProject(bottomLeft, tilePosDelta, globalOSMScale);
+            auto v2 = osmTileProject(bottomRight, tilePosDelta, globalOSMScale);
+            auto v3 = osmTileProject(topRight, tilePosDelta, globalOSMScale);
+            auto v4 = osmTileProject(bottomLeft, tilePosDelta, globalOSMScale);
+            auto v5 = osmTileProject(topRight, tilePosDelta, globalOSMScale);
+            auto v6 = osmTileProject(topLeft, tilePosDelta, globalOSMScale);
 
             float dist = distance(v1, v2);
             V2f uv1 = V2f{ xAcc, -v1.y() };
