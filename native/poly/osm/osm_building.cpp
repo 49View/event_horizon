@@ -42,14 +42,20 @@ std::vector<PolyStruct> osmCreateBuilding( const OSMMesh& group, const V3f& tile
         std::vector<V3f> topVerts{};
         tile = V2fc::ZERO;
         float xAcc = 0.0f;
-        for ( auto ti = 0u; ti < group.vertices.size(); ti += 6 ) {
 
-            auto v1 = osmTileProject(group.vertices[ti], tilePosDelta, globalOSMScale);
-            auto v2 = osmTileProject(group.vertices[ti + 1], tilePosDelta, globalOSMScale);
-            auto v3 = osmTileProject(group.vertices[ti + 2], tilePosDelta, globalOSMScale);
-            auto v4 = osmTileProject(group.vertices[ti + 3], tilePosDelta, globalOSMScale);
-            auto v5 = osmTileProject(group.vertices[ti + 4], tilePosDelta, globalOSMScale);
-            auto v6 = osmTileProject(group.vertices[ti + 5], tilePosDelta, globalOSMScale);
+        auto minHeight = group.minHeight;
+        auto maxHeight = group.maxHeight;
+        for ( auto ti = 0u; ti < group.vertices.size(); ti++ ) {
+            auto tiNext = cai(ti+1, group.vertices.size());
+            auto pCurr = group.vertices[tiNext];
+            auto pNext = group.vertices[ti];
+
+            auto v1 = osmTileProject(V3f{pCurr.xy(), minHeight}, tilePosDelta, globalOSMScale);
+            auto v2 = osmTileProject(V3f{pNext.xy(), minHeight}, tilePosDelta, globalOSMScale);
+            auto v3 = osmTileProject(V3f{pNext.xy(), maxHeight}, tilePosDelta, globalOSMScale);
+            auto v4 = osmTileProject(V3f{pCurr.xy(), minHeight}, tilePosDelta, globalOSMScale);
+            auto v5 = osmTileProject(V3f{pNext.xy(), maxHeight}, tilePosDelta, globalOSMScale);
+            auto v6 = osmTileProject(V3f{pCurr.xy(), maxHeight}, tilePosDelta, globalOSMScale);
 
             float dist = distance(v1, v2);
             V2f uv1 = V2f{ xAcc, -v1.y() };
@@ -59,8 +65,7 @@ std::vector<PolyStruct> osmCreateBuilding( const OSMMesh& group, const V3f& tile
             V2f uv5 = V2f{ xAcc + dist, -v5.y() };
             V2f uv6 = V2f{ xAcc, -v6.y() };
 
-            topVerts.emplace_back(v2);
-            //topVerts.emplace_back(v4);
+            topVerts.emplace_back(v6);
 
             mesh.addVertexOfTriangle(v1, V4f{ uv1 * V2fc::ONE * ( 1.0f / globalOSMScale ) *
                                               facadeMappingScale, tile }, color);

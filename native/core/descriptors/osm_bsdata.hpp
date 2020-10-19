@@ -30,11 +30,13 @@ namespace OSMMeshVertexType {
     static inline constexpr int points = 1;
 }
 
-JSONDATA(OSMMesh, colour, part, vertexType, vertices)
+JSONDATA(OSMMesh, colour, part, vertexType, vertices, minHeight, maxHeight)
     std::string colour;
     std::string part;
     int vertexType = OSMMeshVertexType::triangles;
     std::vector<V3f> vertices;
+    float minHeight = 0.0f;
+    float maxHeight = 0.0f;
 };
 
 JSONDATA(OSMElement, id, type, center, tags, meshes )
