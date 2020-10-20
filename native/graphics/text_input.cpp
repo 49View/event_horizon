@@ -25,7 +25,7 @@ TextInput::TextInput() {
 	mModKeyCurrent = GMK_MOD_NONE;
 }
 
-int TextInput::checkWASDPressed() {
+int TextInput::checkWASDPressed() const {
 	if ( !isEnabled() ) return false;
 	if ( GIsEnteringText || IsAnyModKeyPressed() ) return -1;
 	int currKeyPressed = -1;
@@ -105,8 +105,6 @@ bool TextInput::readNumber( float& _number ) {
 	} catch ( ... ) {
 		return false;
 	}
-
-	return true;
 }
 
 void TextInput::push_back_callbacks( std::function<bool()> enterCallbackFunction, std::function<void()> escapeCallbackFunction ) {
@@ -135,11 +133,11 @@ void TextInput::resetInput() {
 	}
 }
 
-bool TextInput::ModKeyCurrent( ModifiersKey val ) const {
+bool TextInput::ModKeyCurrent( ModifiersKey val ) {
 	return checkBitWiseFlag( mModKeyCurrent, val );
 }
 
-InputMods TextInput::mods() const {
+InputMods TextInput::mods() {
     return InputMods{checkModKeyPressed(GMK_LEFT_ALT) || checkModKeyPressed(GMK_RIGHT_ALT),
                      checkModKeyPressed(GMK_LEFT_SHIFT) || checkModKeyPressed(GMK_RIGHT_SHIFT),
                      checkModKeyPressed(GMK_LEFT_CONTROL) || checkModKeyPressed(GMK_RIGHT_CONTROL)

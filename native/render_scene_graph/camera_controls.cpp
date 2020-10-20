@@ -5,8 +5,8 @@
 #include "camera_controls.hpp"
 #include <core/util.h>
 #include <core/camera.h>
-#include <core/node.hpp>
 #include <core/camera_rig.hpp>
+#include <utility>
 #include <core/math/vector_util.hpp>
 #include <core/v_data.hpp>
 #include <graphics/mouse_input.hpp>
@@ -25,11 +25,33 @@ auto CameraControl::updateDollyWalkingVerticalMovement() {
     dollyWalkingVerticalMovement += GameTime::getCurrTimeStep() * dollyFrequency;
 }
 
+
+void CameraControlWalk::elaborateJump(const AggregatedInputData& mi) {
+    if ( mi.TI().checkKeyToggleOn(GMK_SPACE) ) {
+        jumpTimeAcc = GameTime::getCurrTimeStep();
+    }
+
+    float d = 0.06f;
+    float v = 0.3f;
+    float h = 0.06f;
+
+    float v0 = (2.0f * h * v) / d;
+    float g = (-2.0f * h * v*v) / (d*d);
+    float jumpExecTime = (d*2.0f/v);
+    if ( jumpTimeAcc > 0.0f && jumpTimeAcc < jumpExecTime ) {
+        float y = (half(g*jumpTimeAcc*jumpTimeAcc)) + (v0 * jumpTimeAcc);
+        moveUpInertia += jumpY - y;
+        jumpY = y;
+        jumpTimeAcc +=  GameTime::getCurrTimeStep();
+    }
+
+}
+
 auto CameraControl::wasd( const AggregatedInputData& mi ) {
-    float moveForward = 0.0f;
     float scrollWheelMult = 35.0f;
-    float strafe = 0.0f;
-    float moveUp = 0.0f;
+    float moveForward;
+    float strafe;
+    float moveUp;
     float velRatio = ( GameTime::getCurrTimeStep() / ONE_OVER_60HZ );
     dampingVelocityFactor = 0.866667f - ( ( velRatio - 1.0f ) * 0.01f );
     dampingAngularVelocityFactor = 0.866667f - ( ( velRatio - 1.0f ) * 0.03f );
@@ -61,6 +83,7 @@ auto CameraControl::wasd( const AggregatedInputData& mi ) {
             updateDollyWalkingVerticalMovement();
         }
     }
+
     if ( !getMainCamera()->areScrollWheelMovementsLocked() ) {
         moveForwardInertia += baseVelocity * sign(mi.getScrollValue()) * scrollWheelMult;
     }
@@ -108,13 +131,14 @@ void CameraControl::setControlType( CameraControlType _ct ) {
     mCameraRig->getMainCamera()->Mode(_ct);
 }
 
+
 void CameraControlEditable::togglesUpdate( const AggregatedInputData& _aid ) {
-//        ViewportTogglesT cvtTggles = ViewportToggles::None;
+//        ViewportTogglesT cvtToggles = ViewportToggles::None;
 //        // Keyboards
-//        if ( _aid.checkKeyToggleOn(GMK_0) ) cvtTggles |= ViewportToggles::DrawWireframe;
-////        if ( _aid.checkKeyToggleOn(GMK_G) ) cvtTggles |= ViewportToggles::DrawGrid;
-//        if ( cvtTggles != ViewportToggles::None ) {
-//            toggle(rig()->Cvt(), cvtTggles);
+//        if ( _aid.checkKeyToggleOn(GMK_0) ) cvtToggles |= ViewportToggles::DrawWireframe;
+////        if ( _aid.checkKeyToggleOn(GMK_G) ) cvtToggles |= ViewportToggles::DrawGrid;
+//        if ( cvtToggles != ViewportToggles::None ) {
+//            toggle(rig()->Cvt(), cvtToggles);
 //        }
 }
 
@@ -161,20 +185,25 @@ void CameraControlWalk::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, c
             strafe += mi.moveDiffSS(TOUCH_ONE).x() * -4.0f;
         }
     }
+    constexpr float turboBoostScrollFactor = 3.0f;
+    if ( TextInput::checkModKeyPressed(GMK_LEFT_SHIFT) ) moveForward *= turboBoostScrollFactor;
+
+    elaborateJump(mi);
+
     float headJogging = sin(dollyWalkingVerticalMovement) * ( currentVelocity * 0.3f ) * (moveForward > 0.001f ? 1.0f : 0.0f);
     _cam->moveForward(moveForward);
     _cam->strafe(strafe);
     _cam->moveUp(moveUp + headJogging);
     bool isControlKeyDown =
-            mi.TI().checkModKeyPressed(GMK_LEFT_CONTROL) || mi.TI().checkModKeyPressed(GMK_RIGHT_CONTROL);
+            TextInput::checkModKeyPressed(GMK_LEFT_CONTROL) || TextInput::checkModKeyPressed(GMK_RIGHT_CONTROL);
 
-    auto mdss = isControlKeyDown ? V2fc::ZERO : mi.moveDiffSS(TOUCH_ZERO);
-    auto mdss1 = isControlKeyDown ? V2fc::ZERO : mi.moveDiffSS(TOUCH_ONE);
+    auto mouseDiffZero = isControlKeyDown ? V2fc::ZERO : mi.moveDiffSS(TOUCH_ZERO);
+    auto mouseDiffOne = isControlKeyDown ? V2fc::ZERO : mi.moveDiffSS(TOUCH_ONE);
     float currAngularVelocity = baseAngularVelocity;// * ( GameTime::getCurrTimeStep() / ONE_OVER_60HZ );
-    if ( mdss != V2fc::ZERO && mdss1 == V2fc::ZERO ) {
-        auto angledd = isTouchBased() ? mdss.yx() * V2fc::Y_INV : mdss.yx();
-        currentAngularVelocity += V2f{ angledd.x() * log10(1.0f + currAngularVelocity),
-                                       angledd.y() * log10(1.0f + currAngularVelocity) };
+    if ( mouseDiffZero != V2fc::ZERO && mouseDiffOne == V2fc::ZERO ) {
+        auto angleDiff = isTouchBased() ? mouseDiffZero.yx() * V2fc::Y_INV : mouseDiffZero.yx();
+        currentAngularVelocity += V2f{ angleDiff.x() * log10(1.0f + currAngularVelocity),
+                                       angleDiff.y() * log10(1.0f + currAngularVelocity) };
     }
     Quaternion qy( currentAngularVelocity.y(), V3fc::Y_AXIS );
     Quaternion qx( currentAngularVelocity.x(), V3fc::X_AXIS );
@@ -189,7 +218,7 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
 
     togglesUpdate(mi);
 
-    float moveForward = 0.0f;
+    float moveForward;
     float strafe = 0.0f;
     float moveUp = 0.0f;
     constexpr float xzPlaneDistanceClamp = 0.1f;
@@ -211,7 +240,7 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
 
     moveForward = mi.getScrollValue(); // It's safe to call it every frame as no gesture on wheel/magic mouse
     // Turbo boost scrolling here
-    if ( mi.TI().checkModKeyPressed(GMK_LEFT_CONTROL) ) moveForward *= turboBoostScrollFactor;
+    if ( TextInput::checkModKeyPressed(GMK_LEFT_CONTROL) ) moveForward *= turboBoostScrollFactor;
     _cam->moveForward(moveForward);
 
     // Clamp the Y position to a decent distance from the plane, sanity first
@@ -223,7 +252,7 @@ void CameraControl2d::updateFromInputDataImpl( std::shared_ptr<Camera> _cam, con
 }
 
 CameraControl2d::CameraControl2d( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg )
-        : CameraControlEditable(cameraRig, rsg) {
+        : CameraControlEditable(std::move(cameraRig), rsg) {
     controlType = CameraControlType::Edit2d;
     rsg.setMICursorCapture(false);
 }

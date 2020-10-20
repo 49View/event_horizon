@@ -47,7 +47,7 @@ public: // these are globals data accessed from low level functions on inputs et
 	bool checkKeyToggleOn( int keyCode, bool overrideTextInput = false );
 	bool checkKeyPressed( int keyCode ) const;
     static void checkKeyPressedStateless( int keyCode, int& currKeyPressed );
-	int  checkWASDPressed();
+	int  checkWASDPressed() const;
 	void update_render_thread();
 	void update_update_thread();
 
@@ -56,8 +56,8 @@ public: // these are globals data accessed from low level functions on inputs et
 	bool HasToggledEscape() const { return mHasToggledEscape; }
 	void HasToggledEscape( bool val ) { mHasToggledEscape = val; }
 
-	bool ModKeyCurrent( ModifiersKey val ) const;
-	void forceModKeyCurrent( ModifiersKey val ) { mModKeyCurrent = val; }
+	static bool ModKeyCurrent( ModifiersKey val ) ;
+	static void forceModKeyCurrent( ModifiersKey val ) { mModKeyCurrent = val; }
 	bool IsAnyModKeyPressed() const { return anyModKeyPressed; };
     static bool checkModKeyPressed( int keyCode ) ;
 
@@ -69,7 +69,7 @@ public: // these are globals data accessed from low level functions on inputs et
 	void push_back_callbacks( std::function<bool()> enterCallbackFunction, std::function<void()> escapeCallbackFunction );
 	void pop_callbacks();
 
-	bool readNumber( float& _number); 
+	static bool readNumber( float& _number);
 	void update_pop_back() { mbPopBack = true; }
 
 	bool isEnabled() const {
@@ -80,7 +80,7 @@ public: // these are globals data accessed from low level functions on inputs et
 		mbEnabled = _mbEnabled;
 	}
 
-    InputMods mods() const;
+    static InputMods mods() ;
 
 public:
 	static std::wstring GInputString;

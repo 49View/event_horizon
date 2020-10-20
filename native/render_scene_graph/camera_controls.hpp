@@ -31,7 +31,7 @@ public:
 
 protected:
     std::shared_ptr<CameraRig> mCameraRig;
-    CameraControlType controlType;
+    CameraControlType controlType=CameraControlType::Walk;
     RenderOrchestrator& rsg;
     bool isWASDActive = false;
 
@@ -77,6 +77,11 @@ public:
     CameraControlWalk( std::shared_ptr<CameraRig> cameraRig, RenderOrchestrator& rsg );
     ~CameraControlWalk() override = default;
     void updateFromInputDataImpl( std::shared_ptr<Camera> _cam, const AggregatedInputData& mi ) override;
+protected:
+    void elaborateJump(const AggregatedInputData& mi);
+protected:
+    float jumpTimeAcc = 0.0f;
+    float jumpY = 0.0f;
 };
 
 class CameraControl2d : public CameraControlEditable {
