@@ -57,6 +57,7 @@ struct Topology {
     [[maybe_unused]] void addVertex( const V3f& _vertex, const V4f& _uv );
     [[maybe_unused]] void addVertex( const V3f& _vertex, const V4f& _uv, const C4f& _color );
     [[maybe_unused]] void addVertexOfTriangle( const V3f& _vertex, const V4f& _uv, const C4f& _color );
+    [[maybe_unused]] void addQuad( const std::vector<V3f>& _vertex, const std::vector<V4f>& _uv, const std::vector<C4f>& _color );
     void addTriangle( uint32_t a, uint32_t b, uint32_t c );
     void addQuad( uint32_t a, uint32_t b, uint32_t c, uint32_t d );
     void addQuadAlt( uint32_t a, uint32_t b, uint32_t c, uint32_t d );

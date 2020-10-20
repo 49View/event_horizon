@@ -211,6 +211,15 @@ double Topology::distance( const Vector3f& p ) const {
     }
 }
 
+[[maybe_unused]] void Topology::addQuad( const std::vector<V3f>& _v, const std::vector<V4f>& _uv, const std::vector<C4f>& _color ) {
+    addVertexOfTriangle(_v[1-1], _uv[1-1], _color[1-1]);
+    addVertexOfTriangle(_v[2-1], _uv[2-1], _color[2-1]);
+    addVertexOfTriangle(_v[3-1], _uv[3-1], _color[3-1]);
+    addVertexOfTriangle(_v[1-1], _uv[1-1], _color[1-1]);
+    addVertexOfTriangle(_v[3-1], _uv[3-1], _color[3-1]);
+    addVertexOfTriangle(_v[4-1], _uv[4-1], _color[4-1]);
+}
+
 ShapeType shapeTypeFromString( const std::string& value ) {
 
     if ( toLower(value) == "cube" ) return ShapeType::Cube;
