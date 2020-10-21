@@ -32,8 +32,10 @@ class CollisionMesh {
 public:
     float collisionDetection( const V3f& pos, float radius );
     void setLastKnownGoodPosition( const V3f& _pos );
-    V3f getLastKnownGoodPosition() const;
+    [[nodiscard]] V3f getLastKnownGoodPosition() const;
 
+    [[nodiscard]] bool isGravityEnabled() const;
+    void enableGravity( bool _bGravity );
 protected:
     void resolveCollision( V2f& pos, float radius, int countRep, float& hitAccumulation, bool& hasGivenUp );
 
@@ -41,6 +43,9 @@ public:
     std::vector<CollisionGroup> collisionGroups;
     Rect2f bbox;
     V3f lastKnownGoodPosition = V3fc::HUGE_VALUE_NEG;
+
+private:
+    bool bGravity = false;
 };
 
 

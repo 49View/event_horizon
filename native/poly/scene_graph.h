@@ -546,6 +546,9 @@ protected:
 public:
     bool isCollisionEnabled() const;
     void setCollisionEnabled( bool );
+    [[nodiscard]] bool isCollisionGravityEnabled() const;
+    void enableCollisionGravity( bool _bGravity );
+
     void clearNodes();
     void clearGMNodes();
     [[nodiscard]] FlattenGeomSP getFlattenNodes(const std::unordered_set<uint64_t>& _exclusionTags) const;

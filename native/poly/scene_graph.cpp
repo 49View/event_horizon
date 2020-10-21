@@ -702,8 +702,19 @@ void SceneGraph::addEventCallback( const std::string& _key, SocketCallbackDataTy
 bool SceneGraph::isCollisionEnabled() const {
     return bCollisionEnabled;
 }
+
 void SceneGraph::setCollisionEnabled( bool _bCollisionEnabled ) {
     bCollisionEnabled = _bCollisionEnabled;
+}
+
+void SceneGraph::enableCollisionGravity( bool _bGravity ) {
+    if ( collisionMesh ) {
+        collisionMesh->enableGravity(_bGravity);
+    }
+}
+
+bool SceneGraph::isCollisionGravityEnabled() const {
+    return collisionMesh && collisionMesh->isGravityEnabled();
 }
 
 const ResourceRef& SceneGraph::getCurrLoadedEntityId() const {

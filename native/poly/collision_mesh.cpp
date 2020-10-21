@@ -4,6 +4,7 @@
 
 #include "collision_mesh.hpp"
 #include <core/math/collision_detection.hpp>
+#include <core/game_time.h>
 
 CollisionElement::CollisionElement( const V2f& p1, const V2f& p2, const V2f& normal ) : p1(p1), p2(p2),
                                                                                         normal(normal) {}
@@ -48,8 +49,21 @@ float CollisionMesh::collisionDetection( const V3f& pos, float radius ) {
     }
 
     resolveCollision(newPos, radius, 0, hitAccumulation, hasGivenUp);
+
+    float newY = pos.y();
+    if ( isGravityEnabled() ) {
+        static float acc = 0.0f;
+        acc += 9.8f*GameTime::getCurrTimeStep()*GameTime::getCurrTimeStep();
+        // Gravity
+        newY = pos.y() - acc;
+        if ( newY < radius ) {
+            newY = radius;
+            acc = 0.0f;
+        }
+    }
+
     if ( !hasGivenUp ) {
-        lastKnownGoodPosition = {newPos.x(), pos.y(), newPos.y()};
+        lastKnownGoodPosition = {newPos.x(), newY, newPos.y()};
     }
     return hitAccumulation;
 }
@@ -60,4 +74,12 @@ void CollisionMesh::setLastKnownGoodPosition( const V3f& _pos ) {
 
 V3f CollisionMesh::getLastKnownGoodPosition() const {
     return lastKnownGoodPosition;
+}
+
+bool CollisionMesh::isGravityEnabled() const {
+    return bGravity;
+}
+
+void CollisionMesh::enableGravity( bool _bGravity ) {
+    bGravity = _bGravity;
 }

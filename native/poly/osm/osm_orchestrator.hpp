@@ -4,3 +4,11 @@
 
 #pragma once
 
+#include <memory>
+
+class CollisionMesh;
+struct OSMData;
+
+namespace OSMService {
+    std::shared_ptr<CollisionMesh> createCollisionMesh( const OSMData *house );
+}
