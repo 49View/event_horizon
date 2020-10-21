@@ -4,10 +4,8 @@
 
 #include "lightmap_manager.hpp"
 
-#define _USE_MATH_DEFINES
-
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <core/lightmap_exchange_format.h>
 #include <core/game_time.h>
 
@@ -33,7 +31,7 @@
     glBindTexture(GL_TEXTURE_2D, scene->lightmap);
 
     glBindVertexArray(scene->vao);
-    glDrawElements(GL_TRIANGLES, scene->indexCount, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, scene->indexCount, GL_UNSIGNED_INT, nullptr);
 }
 
 //static void destroyScene(scene_t *scene)
@@ -53,7 +51,7 @@ static GLuint loadShader( GLenum type, const char *source ) {
         fprintf(stderr, "Could not create shader!\n");
         return 0;
     }
-    glShaderSource(shader, 1, &source, NULL);
+    glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
@@ -63,7 +61,7 @@ static GLuint loadShader( GLenum type, const char *source ) {
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
         if ( infoLen ) {
             char *infoLog = (char *) malloc(infoLen);
-            glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
+            glGetShaderInfoLog(shader, infoLen, nullptr, infoLog);
             fprintf(stderr, "%s\n", infoLog);
             free(infoLog);
         }
@@ -104,7 +102,7 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
         if ( infoLen ) {
             char *infoLog = (char *) malloc(sizeof(char) * infoLen);
-            glGetProgramInfoLog(program, infoLen, NULL, infoLog);
+            glGetProgramInfoLog(program, infoLen, nullptr, infoLog);
             fprintf(stderr, "%s\n", infoLog);
             free(infoLog);
         }
@@ -214,10 +212,11 @@ namespace LightmapManager {
 
         int w = scene->w, h = scene->h;
 
+        constexpr float clearFactor = 10.0f;
         lm_context *ctx = lmCreate(
                 128,               // hemisphere resolution (power of two, max=512)
                 0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
-                1.0f, 1.0f, 1.0f, // background color (white for ambient occlusion)
+                clearFactor, clearFactor, clearFactor, // background color (white for ambient occlusion)
                 2,
                 0.01f,         // lightmap interpolation threshold (small differences are interpolated rather than sampled)
                 // check debug_interpolation.tga for an overview of sampled (red) vs interpolated (green) pixels.
@@ -229,11 +228,11 @@ namespace LightmapManager {
             return 0;
         }
 
-        constexpr int numBounces = 3;
+        constexpr int numBounces = 1;
         for ( int bounce = 0; bounce < numBounces; bounce++ ) {
 
-            float *data = (float *) calloc(w * h * 4, sizeof(float));
-            float *temp = (float *) calloc(w * h * 4, sizeof(float));
+            auto *data = (float *) calloc(w * h * 4, sizeof(float));
+            auto *temp = (float *) calloc(w * h * 4, sizeof(float));
 
             glDisable(GL_CULL_FACE);
 
@@ -243,9 +242,9 @@ namespace LightmapManager {
             lmSetGeometry(ctx,
                           mIdentity.rawPtr(),                                                                 // no transformation in this example
                           LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, p), sizeof(LightmapVertexExchanger),
-                          LM_NONE, NULL, 0, // no interpolated normals in this example
+                          LM_NONE, nullptr, 0, // no interpolated normals in this example
                           LM_FLOAT, (unsigned char *) scene->vertices + offsetof(LightmapVertexExchanger, t), sizeof(LightmapVertexExchanger),
-                          scene->indexCount, LM_UNSIGNED_INT, scene->indices);
+                          static_cast<int>(scene->indexCount), LM_UNSIGNED_INT, scene->indices);
 
             int vp[4];
             float view[16], projection[16];
@@ -292,8 +291,8 @@ namespace LightmapManager {
             glBindTexture(GL_TEXTURE_2D, scene->lightmap);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
 
-            free(data);
-            free(temp);
+            if ( data) free(data);
+            if ( temp) free(temp);
         }
 
         lmDestroy(ctx);
@@ -381,7 +380,7 @@ namespace LightmapManager {
         return 1;
     }
 
-    LightmapSceneExchanger fillLightmapScene( SceneGraph& sg, FlattenGeomSP lightmapNodes ) {
+    LightmapSceneExchanger fillLightmapScene( SceneGraph& sg, const FlattenGeomSP& lightmapNodes ) {
         LightmapSceneExchanger _lightmapScene;
 
         // Get counting

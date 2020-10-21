@@ -148,7 +148,8 @@ namespace GLTF2Service {
                 geom->fillUV( fillingUV, 0 );
                 geom->fillSetUV( fillingUV.size(), V2fc::ZERO, 1 ); // By default fill second uvs anyway
             } else if ( k == "TEXCOORD_1" ) {
-                geom->fillUV( fillData<Vector2f>( *model, v ), 1 );
+                // ### FIXME: temporarily disabling second UV map
+//                geom->fillUV( fillData<Vector2f>( *model, v ), 1 );
             } else if ( k == "COLOR_0" ) {
                 geom->fillColors( fillData<Vector4f>( *model, v ) );
                 colorsFilled = true;

@@ -307,7 +307,7 @@ vec3 kD = 1.0 - kS;
 kD *= 1.0 - metallic;
 
 float li = texture(lightmapTexture, v_texCoord2).r;
-// li = pow(li, 2.0);
+// li = pow(li, 1.0/1.5);
 ao *= li;
 
 #ifdef sh_reflections
@@ -331,7 +331,7 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 vec3 ambient = (((Lo + (kD * diffuseV + specular)) * visibility ) * ao);// * (visibility+diffuseV);
 
 #else 
-vec3 ambient = Lo * ((kD * albedo * v_color.rgb ) * visibility ) * ao; //kD * Lo * ao;// * visibility;
+vec3 ambient = Lo + ((kD * albedo * v_color.rgb ) * visibility ) * ao; //kD * Lo * ao;// * visibility;
 #endif
 
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
