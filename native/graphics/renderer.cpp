@@ -151,7 +151,13 @@ void Renderer::init() {
     sm->loadShaders();
 //    tm->addTextureWithData(RawImage{54, 54, V4fc::ONE, 32}, FBNames::lightmap, TSLOT_LIGHTMAP );
     tm->addTextureRef( FBNames::lightmap );
-    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( 4096 ).depthOnly().build();
+
+#ifdef __EMSCRIPTEN__
+    constexpr int shadowMapSize = 1024;
+#else
+    constexpr int shadowMapSize = 4096;
+#endif
+    mShadowMapFB = FrameBufferBuilder{ *this, FBNames::shadowmap }.size( shadowMapSize ).depthOnly().build();
     mDepthFB = FrameBufferBuilder{ *this, FBNames::depthmap }.size( mDefaultFB->getWidth(), mDefaultFB->getHeight() ).format(PIXEL_FORMAT_HDR_R16).build();
 
     auto trd = ImageParams{}.setSize( 32 ).format( pixelFormatResolver( PIXEL_FORMAT_HDR_RGBA_16, Framebuffer::isHDRSupported()) ).setWrapMode( WRAP_MODE_CLAMP_TO_EDGE );
