@@ -14,6 +14,33 @@ void Framebuffer::checkFrameBufferStatus() {
     GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
     if ( fbs == GL_FRAMEBUFFER_COMPLETE ) return;
 
+    std::string errMessage{};
+
+    switch ( fbs ) {
+        case GL_FRAMEBUFFER_UNDEFINED:
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_UNDEFINED";
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+            break;
+
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+            break;
+
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_UNSUPPORTED";
+            break;
+
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
+            break;
+
+        default:
+            errMessage = "Frame Buffer creation error code: UNKNOWN (You should be very scared about this";
+            break;
+    }
+
     LOGRS( "Framebuffer " << mName << " size: [" << mWidth << ":" << mHeight << "] format : ["
                           << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "] "
                           << "Texture Slot: [" << mTextureGPUSlot << "] "
@@ -22,31 +49,8 @@ void Framebuffer::checkFrameBufferStatus() {
 //                          << "mIsCubemap     : ["  << std::boolalpha << mCubeMap   << "] "
 //                          << "mUseMipMaps    : ["  << std::boolalpha << mUseMipMaps  << "] "
 //                          << "Name           : ["  << mRenderToTexture->names.begin() << "] "
-    );
-    switch ( fbs ) {
-        case GL_FRAMEBUFFER_UNDEFINED:
-            LOGR( "Frame Buffer creation error code: GL_FRAMEBUFFER_UNDEFINED" );
-            break;
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-            LOGR( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" );
-            break;
+    )
 
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-            LOGR( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" );
-            break;
-
-        case GL_FRAMEBUFFER_UNSUPPORTED:
-            LOGR( "Frame Buffer creation error code: GL_FRAMEBUFFER_UNSUPPORTED" );
-            break;
-
-        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-            LOGR( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" );
-            break;
-
-        default:
-            LOGR( "Frame Buffer creation error code (not handled)" );
-            break;
-    }
 //    ASSERT( fbs == GL_FRAMEBUFFER_COMPLETE );
 }
 

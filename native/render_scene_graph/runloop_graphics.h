@@ -132,7 +132,9 @@ protected:
         RenderStats rs{};
         RR().directRenderLoop(rs);
         WH::imRenderLoopStats(rs);
+#ifndef _PRODUCTION_
         WH::imRenderTweaks(*RR().debugRenderTweaks);
+#endif
         WH::flush();
     }
 

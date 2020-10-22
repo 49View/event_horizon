@@ -224,7 +224,7 @@ struct ChangeMaterialOnContainer {
 struct LightmapSceneExchanger;
 
 class RenderStats;
-class DebugRenderTweaks;
+struct DebugRenderTweaks;
 
 class Renderer {
 public:

@@ -7,7 +7,7 @@
 #include <vector>
 
 struct PolyStruct;
-struct Vector3f;
+class Vector3f;
 
 std::vector<PolyStruct> osmCreateTree( const Vector3f& treePos, float globalOSMScale );
 

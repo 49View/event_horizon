@@ -31,8 +31,6 @@ utype cai( intType pi, utype size ) {
 
 template<typename T>
 T getLeftVectorFromList( const std::vector<T>& va, int64_t m, bool wrapIt ) {
-    T ret;
-
     if ( m > 0 ) return va[m - 1];
 
     if ( wrapIt ) {
@@ -46,8 +44,6 @@ T getLeftVectorFromList( const std::vector<T>& va, int64_t m, bool wrapIt ) {
 
 template<typename T>
 T getRightVectorFromList( const std::vector<T>& va, int64_t m, bool wrapIt ) {
-    T ret;
-
     if ( m < static_cast<int64_t>( va.size() - 1 ) ) return va[m + 1];
 
     if ( wrapIt ) {

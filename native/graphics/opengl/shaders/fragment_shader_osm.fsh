@@ -27,5 +27,5 @@ void main() {
 
    light_code
 
-   final_combine_osm
+   final_combine_osm2
 }

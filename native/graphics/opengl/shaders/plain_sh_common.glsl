@@ -376,7 +376,8 @@ FragColor = vec4( finalColor * preMultAlpha, preMultAlpha );
 #end_code
 
 
-#define_code final_combine_osm
+#define_code final_combine_osm2
+
 float ndotl = max(dot(N, V), 0.0);
 vec3 F = fresnelSchlickRoughness(ndotl, F0, roughness);
 //vec3 F = fresnelSchlick(max(dot(N, V), 0.0), F0);

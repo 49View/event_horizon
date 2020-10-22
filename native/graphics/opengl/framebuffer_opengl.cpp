@@ -126,7 +126,7 @@ void Framebuffer::initSimple() {
 
     GLCALL(glGenRenderbuffers(1, &mRenderbufferHandle));
     GLCALL(glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferHandle));
-    GLCALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB16F, mWidth, mHeight));
+    GLCALL(glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB8, mWidth, mHeight));
     GLCALL( glBindRenderbuffer( GL_RENDERBUFFER, 0 ));
 
 //// Build the texture that will serve as the depth attachment for the framebuffer.

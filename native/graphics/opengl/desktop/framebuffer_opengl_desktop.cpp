@@ -8,41 +8,50 @@ JMATH::Rect2f getPlatformWindowRect() {
 
 void Framebuffer::checkFrameBufferStatus() {
     GLenum fbs = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+    if ( fbs == GL_FRAMEBUFFER_COMPLETE ) return;
+
+    std::string errMessage{};
     switch ( fbs ) {
         case GL_FRAMEBUFFER_UNDEFINED:
-            LOGE( "Frame Buffer creation error code: GL_FRAMEBUFFER_UNDEFINED" );
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_UNDEFINED";
             break;
         case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-            LOGE( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" );
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
             break;
 
         case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-            LOGE( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" );
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
             break;
 
         case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-            LOGE( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER" );
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER";
             break;
 
         case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-            LOGE( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER" );
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
             break;
 
         case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-            LOGE( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS" );
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS";
             break;
 
         case GL_FRAMEBUFFER_UNSUPPORTED:
-            LOGE( "Frame Buffer creation error code: GL_FRAMEBUFFER_UNSUPPORTED" );
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_UNSUPPORTED";
             break;
 
         case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-            LOGE( "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" );
+            errMessage = "Frame Buffer creation error code: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE";
             break;
 
         default:
+            errMessage = "Frame Buffer creation error code: UNKNOWN (You should be very scared about this";
             break;
     }
+
+    LOGRS( "[ERROR] Framebuffer " << mName << " size: [" << mWidth << ":" << mHeight << "] format : ["
+                          << glEnumToString( pixelFormatToGlInternalFormat(mFormat) ) << "] "
+                          << "Texture Slot: [" << mTextureGPUSlot << "] " << std::endl << errMessage )
+
     ASSERT( fbs == GL_FRAMEBUFFER_COMPLETE );
 }
 
