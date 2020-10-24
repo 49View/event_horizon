@@ -19,6 +19,8 @@
 #include <graphics/texture.h>
 #include <poly/scene_graph.h>
 #include <poly/baking/xatlas_client.hpp>
+#include <core/image_util.h>
+#include <core/tinyexr.h>
 
 [[maybe_unused]] static void drawScene( LightmapSceneExchanger *scene, float *view, float *projection ) {
     glEnable(GL_DEPTH_TEST);
@@ -206,7 +208,7 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
 
 namespace LightmapManager {
 
-    static constexpr int sLightMapSize = 512;
+    static constexpr int sLightMapSize = 256;
 
     int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
 
@@ -214,7 +216,7 @@ namespace LightmapManager {
 
         constexpr float clearFactor = 10.0f;
         lm_context *ctx = lmCreate(
-                128,               // hemisphere resolution (power of two, max=512)
+                64,               // hemisphere resolution (power of two, max=512)
                 0.001f, 100.0f,   // zNear, zFar of hemisphere cameras
                 clearFactor, clearFactor, clearFactor, // background color (white for ambient occlusion)
                 2,
@@ -290,6 +292,11 @@ namespace LightmapManager {
             // upload result
             glBindTexture(GL_TEXTURE_2D, scene->lightmap);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
+
+            auto buffer = saveEXRFromMemory(data, w, h, 4, 0);
+//            auto imageup8 = imageUtil::bufferToMemoryCompressed(w, h, 4, (void*)data, imageUtil::mineTypePNG);
+//            FM::writeLocalFile("screenshot.exr", reinterpret_cast<const char*>(buffer.first), buffer.second, true);
+            FM::writeRemoteEntity( scene->lightmapID, ResourceGroup::Image, SerializableContainer{ buffer.first, buffer.first + buffer.second });
 
             if ( data) free(data);
             if ( temp) free(temp);
@@ -380,7 +387,7 @@ namespace LightmapManager {
         return 1;
     }
 
-    LightmapSceneExchanger fillLightmapScene( SceneGraph& sg, const FlattenGeomSP& lightmapNodes ) {
+    LightmapSceneExchanger fillLightmapScene( SceneGraph& sg, const std::string& lightmapID, const FlattenGeomSP& lightmapNodes ) {
         LightmapSceneExchanger _lightmapScene;
 
         // Get counting
@@ -419,14 +426,15 @@ namespace LightmapManager {
             }
         }
 
+        _lightmapScene.lightmapID = lightmapID;
         return _lightmapScene;
     }
 
-    void bakeLightmaps( SceneGraph& sg, Renderer& rr, const std::unordered_set<uint64_t>& _exclusionTags ) {
+    void bakeLightmaps( SceneGraph& sg, Renderer& rr, const std::string& lightmapID, const std::unordered_set<uint64_t>& _exclusionTags ) {
 
         auto lightmapNodes = sg.getFlattenNodes(_exclusionTags);
         xAtlasParametrize(sg, lightmapNodes);
-        LightmapSceneExchanger scene = fillLightmapScene(sg, lightmapNodes);
+        LightmapSceneExchanger scene = fillLightmapScene(sg, lightmapID, lightmapNodes);
         if ( scene.vertexCount > 0 ) {
             LightmapManager::initScene(&scene, rr);
             LightmapManager::bake(&scene, rr);

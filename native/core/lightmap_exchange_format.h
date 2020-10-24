@@ -37,6 +37,7 @@ struct LightmapSceneExchanger
     unsigned int vertexCount = 0;
     unsigned int indexCount = 0;
 
+    std::string lightmapID{};
 //    uint32_t *xrefs;
 //    std::unordered_map<uint32_t, HashIndexPairU32> unchart;
 //    std::unordered_map<std::string, std::shared_ptr<VData>> ggLImap;

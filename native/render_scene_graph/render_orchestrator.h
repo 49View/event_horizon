@@ -144,8 +144,6 @@ protected:
     void changeMaterialTagCallback( const std::vector<std::string>& _params );
     void changeMaterialColorCallback( const std::vector<std::string>& _params );
 
-    int bake( LightmapSceneExchanger *scene );
-
 private:
     Renderer& rr;
     SceneGraph& sg;

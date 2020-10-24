@@ -40,6 +40,7 @@ std::string getLastFolderInPath( const std::string& input );
 std::string getFirstFolderInPath( const std::string& input );
 std::string getFileNameCallbackKey( const std::string& input );
 bool isFileExtAnImage( const std::string& _ext );
+bool isFileExtAnScreenshotableImage( const std::string& _ext );
 bool isFileExtCompressedArchive( const std::string& _filename );
 bool nameHasImageExtension( const std::string& input );
 bool ensureFolderExists( const std::string& folder, bool throwOnError = false );

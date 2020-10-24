@@ -182,6 +182,20 @@ bool isFileExtAnImage( const std::string& _ext ) {
     return false;
 }
 
+bool isFileExtAnScreenshotableImage( const std::string& _ext ) {
+
+    auto ext = toLower(_ext);
+
+    if ( ext == ".jpg" ) return true;
+    if ( ext == ".png" ) return true;
+    if ( ext == ".jpeg" ) return true;
+    if ( ext == ".tga" ) return true;
+    if ( ext == ".bmp" ) return true;
+    if ( ext == ".gif" ) return true;
+
+    return false;
+}
+
 bool nameHasImageExtension( const std::string& input ) {
     std::string ext = getFileNameExtToLower(input);
     return ext != "" && ( ext == ".jpg" || ext == ".jpeg" || ext == ".png" );
@@ -241,8 +255,7 @@ namespace FileManager {
 
     void writeRemoteEntity( const std::string& _filename, const std::string& _group, const SerializableContainer& data ) {
         auto fn = url_encode( _filename );
-        Http::post(
-    Url{HttpFilePrefix::entities + _group + "/" + _filename}, data );
+        Http::post(Url{HttpFilePrefix::fileupload + _group + "/" + _filename}, data );
     }
 
     void writeRemoteFile( const std::string& _filename, const std::vector<unsigned char>& _data ) {

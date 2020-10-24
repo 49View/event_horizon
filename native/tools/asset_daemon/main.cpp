@@ -167,8 +167,11 @@ std::string createThumbnailCommandFor( DaemonFileStruct2& dfs ) {
     auto filepath = dfs.filePath();
     std::filesystem::create_directories(std::filesystem::path(filepath));
     if ( dfs.entity.group == ResourceGroup::Image ) {
-        return "convert " + dfs.fileRoot + dfs.entity.source +
-               " -thumbnail '128x128^' -gravity center -extent '128x128' -quality 90 " + dfs.entity.thumb;
+        if ( isFileExtAnScreenshotableImage( getFileNameExt(dfs.entity.source)) ) {
+            return "convert " + dfs.fileRoot + dfs.entity.source +
+                   " -thumbnail '128x128^' -gravity center -extent '128x128' -quality 90 " + dfs.entity.thumb;
+        }
+        return {};
     } else if ( dfs.entity.group == ResourceGroup::Material ) {
         return "convert " + dfs.fileRoot + getFileNamePath(dfs.entity.source) + "/" +
                dfs.thumbHint +
@@ -257,11 +260,15 @@ void generateThumbnail( DaemonFileStruct2& dfs ) {
     dfs.entity.thumb = dfs.filePath() + dfs.entity.hash + "_thumb.jpg";
     if ( !FM::fileExist(dfs.entity.thumb) ) {
         std::string cmdThumbnail = createThumbnailCommandFor(dfs);
-        auto ret = std::system(cmdThumbnail.c_str());
-        if ( ret != 0 ) {
-            throw std::runtime_error(std::string{ "Failed to generate thumbnail for " + dfs.entity.thumb });
+        if ( !cmdThumbnail.empty() ) {
+            auto ret = std::system(cmdThumbnail.c_str());
+            if ( ret != 0 ) {
+                throw std::runtime_error(std::string{ "Failed to generate thumbnail for " + dfs.entity.thumb });
+            }
+            dfs.entity.thumb = getFileName(dfs.entity.thumb);
+        } else {
+            dfs.entity.thumb = "";
         }
-        dfs.entity.thumb = getFileName(dfs.entity.thumb);
     }
 }
 
@@ -650,7 +657,7 @@ void parseUploadStream( Mongo& mdb, mongocxx::change_stream& stream, const std::
 
 int main( int argc, char **argv ) {
 
-    LOGRS("Daemon version 4.1.0")
+    LOGRS("Daemon version 4.1.1")
 
     auto *mongoPath = std::getenv("EH_MONGO_PATH");
     auto *mongoDefaultDB = std::getenv("EH_MONGO_DEFAULT_DB");
