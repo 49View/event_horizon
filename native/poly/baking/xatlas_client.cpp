@@ -4,7 +4,7 @@
 
 #include "xatlas_client.hpp"
 
-#define DUMP_XATLAS
+//#define DUMP_XATLAS
 
 #include <cstdarg>
 #include <cstdio>
@@ -138,15 +138,15 @@ int xAtlasParametrize( SceneGraph& sg, const FlattenGeomSP& nodes ) {
     }
 
     // Generate atlas.
-    LOGR("Generating atlas\n");
+    LOGR("Generating atlas");
     xatlas::PackOptions packerOptions;
     packerOptions.resolution = 128;
     xatlas::Generate(atlas, xatlas::ChartOptions(), packerOptions);
-    LOGR("   %d charts\n", atlas->chartCount);
-    LOGR("   %d atlases\n", atlas->atlasCount);
+    LOGR("   %d charts", atlas->chartCount);
+    LOGR("   %d atlases", atlas->atlasCount);
     for (uint32_t i = 0; i < atlas->atlasCount; i++)
-        LOGR("      %d: %0.2f%% utilization\n", i, atlas->utilization[i] * 100.0f);
-    LOGR("   %ux%u resolution\n", atlas->width, atlas->height);
+        LOGR("      %d: %0.2f%% utilization", i, atlas->utilization[i] * 100.0f);
+    LOGR("   %ux%u resolution", atlas->width, atlas->height);
     uint32_t totalVertices = 0;
     uint32_t totalFaces = 0;
     for (uint32_t i = 0; i < atlas->meshCount; i++) {
@@ -154,9 +154,9 @@ int xAtlasParametrize( SceneGraph& sg, const FlattenGeomSP& nodes ) {
         totalVertices += mesh.vertexCount;
         totalFaces += mesh.indexCount / 3;
     }
-    LOGR("   %u total vertices\n", totalVertices);
-    LOGR("   %u total triangles\n", totalFaces);
-    LOGR("%.2f seconds (%g ms) elapsed total\n", globalStopwatch.elapsed() / 1000.0, globalStopwatch.elapsed());
+    LOGR("   %u total vertices", totalVertices);
+    LOGR("   %u total triangles", totalFaces);
+    LOGR("%.2f seconds (%g ms) elapsed total", globalStopwatch.elapsed() / 1000.0, globalStopwatch.elapsed());
 
     mapUV2( sg, atlas, atlasMeshMapping );
 

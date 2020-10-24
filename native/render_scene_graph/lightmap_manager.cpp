@@ -283,9 +283,11 @@ namespace LightmapManager {
             if ( bounce == numBounces-1 ) {
                 lmImagePower(data, w, h, 4, 1.0f / 1.75f, 0x7); // gamma correct color channels
 #ifndef ANDROID
+#ifdef SAVE_LIGHTMAP_TGA
                 // save result to a file
                 if ( lmImageSaveTGAf("result.tga", data, w, h, 4, 1.0f) )
                     printf("Saved result.tga\n");
+#endif
 #endif
             }
 
@@ -430,10 +432,15 @@ namespace LightmapManager {
         return _lightmapScene;
     }
 
-    void bakeLightmaps( SceneGraph& sg, Renderer& rr, const std::string& lightmapID, const std::unordered_set<uint64_t>& _exclusionTags ) {
-
+    std::vector<GeomSP> xAtlasParametrizeScene( SceneGraph& sg, const std::unordered_set<uint64_t>& _exclusionTags ) {
         auto lightmapNodes = sg.getFlattenNodes(_exclusionTags);
         xAtlasParametrize(sg, lightmapNodes);
+        return lightmapNodes;
+    }
+
+    void bakeLightmaps( SceneGraph& sg, Renderer& rr, const std::string& lightmapID, const std::unordered_set<uint64_t>& _exclusionTags ) {
+
+        auto lightmapNodes = xAtlasParametrizeScene( sg, _exclusionTags );
         LightmapSceneExchanger scene = fillLightmapScene(sg, lightmapID, lightmapNodes);
         if ( scene.vertexCount > 0 ) {
             LightmapManager::initScene(&scene, rr);
