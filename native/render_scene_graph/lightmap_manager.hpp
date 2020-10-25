@@ -11,4 +11,5 @@ class SceneGraph;
 
 namespace LightmapManager {
     void bakeLightmaps( SceneGraph& sg, Renderer& rr, const std::string& lightmapID, const std::unordered_set<uint64_t>& _exclusionTags );
+    void deserialiseLightmap( SceneGraph& sg, Renderer& rr, const std::string& lightmapID, const std::unordered_set<uint64_t>& _exclusionTags );
 }

@@ -14,13 +14,14 @@
 #define LIGHTMAPPER_IMPLEMENTATION
 //#define LM_DEBUG_INTERPOLATION
 
+#include <core/image_util.h>
+#include <core/raw_image.h>
+#include <core/tinyexr.h>
 #include <graphics/opengl/lightmapper_opengl.h>
 #include <graphics/renderer.h>
 #include <graphics/texture.h>
 #include <poly/scene_graph.h>
 #include <poly/baking/xatlas_client.hpp>
-#include <core/image_util.h>
-#include <core/tinyexr.h>
 
 [[maybe_unused]] static void drawScene( LightmapSceneExchanger *scene, float *view, float *projection ) {
     glEnable(GL_DEPTH_TEST);
@@ -208,6 +209,16 @@ static GLuint loadProgram( const char *vp, const char *fp, const char **attribut
 
 namespace LightmapManager {
 
+    void updateLightmapTexture( Renderer& rr, int lightmapSize, float* buffer ) {
+        auto lightmapTexture = rr.TD(FBNames::lightmap);
+        glBindTexture(GL_TEXTURE_2D, lightmapTexture->getHandle());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, lightmapSize, lightmapSize, 0, GL_RGBA, GL_FLOAT, buffer);
+    }
+
     static constexpr int sLightMapSize = 256;
 
     int bake( LightmapSceneExchanger *scene, Renderer& rr ) {
@@ -291,13 +302,9 @@ namespace LightmapManager {
 #endif
             }
 
-            // upload result
-            glBindTexture(GL_TEXTURE_2D, scene->lightmap);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_FLOAT, data);
+            updateLightmapTexture(rr, w, data);
 
             auto buffer = saveEXRFromMemory(data, w, h, 4, 0);
-//            auto imageup8 = imageUtil::bufferToMemoryCompressed(w, h, 4, (void*)data, imageUtil::mineTypePNG);
-//            FM::writeLocalFile("screenshot.exr", reinterpret_cast<const char*>(buffer.first), buffer.second, true);
             FM::writeRemoteEntity( scene->lightmapID, ResourceGroup::Image, SerializableContainer{ buffer.first, buffer.first + buffer.second });
 
             if ( data) free(data);
@@ -337,13 +344,8 @@ namespace LightmapManager {
         scene->lightmap = sceneTexture->getHandle();
         scene->w = sLightMapSize;
         scene->h = sLightMapSize;
-        glBindTexture(GL_TEXTURE_2D, scene->lightmap);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        unsigned char emissive[] = { 0, 0, 0, 255 };
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, emissive);
+        float emissive[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        updateLightmapTexture( rr, 1, emissive );
 
         // load shader
         const char *vp =
@@ -436,6 +438,14 @@ namespace LightmapManager {
         auto lightmapNodes = sg.getFlattenNodes(_exclusionTags);
         xAtlasParametrize(sg, lightmapNodes);
         return lightmapNodes;
+    }
+
+    void deserialiseLightmap( SceneGraph& sg, Renderer& rr, const std::string& lightmapID, const std::unordered_set<uint64_t>& _exclusionTags ) {
+        if ( auto lightmapImage = sg.get<RawImage>(lightmapID); lightmapImage ) {
+            auto lightmapNodes = xAtlasParametrizeScene( sg, _exclusionTags );
+            updateLightmapTexture( rr, lightmapImage->width, reinterpret_cast<float*>(sg.get<RawImage>(lightmapID)->data()) );
+            sg.updateNodes(lightmapNodes, GTBucket::Near);
+        }
     }
 
     void bakeLightmaps( SceneGraph& sg, Renderer& rr, const std::string& lightmapID, const std::unordered_set<uint64_t>& _exclusionTags ) {
