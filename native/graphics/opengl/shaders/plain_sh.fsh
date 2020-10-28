@@ -1,6 +1,5 @@
 #include "plain_sh_common.glsl"
 #include "texture_notile.glsl"
-#define sh_reflections
 
 // float edgeFactorTri() {
 //       vec3 d = fwidth( v_t8.xyz );

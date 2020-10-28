@@ -249,10 +249,6 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
         Lo += rendering_equation( albedo, L, V, N, F0, lradiance );
     }
 
-#ifdef sh_reflections
-
-#endif
-
 #end_code
 
     // u_shadowParameters[0] == depth value z offset to avoid horrible aliasing
@@ -297,20 +293,33 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
     // visibility = nlAngle;
 #end_code
 
+#define_code diffuseCalc
+    float ndotl = max(dot(N, V), 0.0);
+    vec3 F = fresnelSchlickRoughness(ndotl, F0, roughness);
+    //vec3 F = fresnelSchlick(max(dot(N, V), 0.0), F0);
+
+    vec3 kS = F;
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;
+#end_code
+
+#define_code finalColorWithFog
+    float fogZ = length(u_eyePos-Position_worldspace);
+    float fog = 1.0-(smoothstep(u_nearFar[3],u_nearFar[1],fogZ)*1.0);
+
+    finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
+
+    float preMultAlpha = opacityV * alpha * fog;
+    FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
+#end_code
+
 #define_code final_combine
-float ndotl = max(dot(N, V), 0.0);
-vec3 F = fresnelSchlickRoughness(ndotl, F0, roughness);
-//vec3 F = fresnelSchlick(max(dot(N, V), 0.0), F0);
 
-vec3 kS = F;
-vec3 kD = 1.0 - kS;
-kD *= 1.0 - metallic;
-
+diffuseCalc
 float li = texture(lightmapTexture, v_texCoord2).r;
 // li = pow(li, 1.0/1.5);
-ao *= li;
+//ao *= li;
 
-#ifdef sh_reflections
 vec3 R = reflect(-V, N);
 
 vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
@@ -330,41 +339,23 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 vec3 ambient = (((Lo + (kD * diffuseV + specular)) * visibility ) * ao);// * (visibility+diffuseV);
 
-#else 
-vec3 ambient = Lo + ((kD * albedo * v_color.rgb ) * visibility ) * ao; //kD * Lo * ao;// * visibility;
-#endif
-
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
-float fogZ = length(u_eyePos-Position_worldspace);
-float fog = 1.0-(smoothstep(u_nearFar[3],u_nearFar[1],fogZ)*1.0);
 
-finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
+finalColorWithFog
 
-float preMultAlpha = opacityV * alpha * fog;
-FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
-
-vec3 bloom = finalColor * (translucencyV*(visibility-1.0));
-FragAttach1 = vec4( bloom, 1.0 );//vec4(gl_FragCoord.z);
-//	BloomColor = vec4( ( incandescenceColor * incandescenceFactor ) + max(visibility-1.7, 0.0), 1.0 );
-// BloomColor = vec4( ( incandescenceColor * incandescenceFactor * finalColor ), 1.0 );
-//        BloomColor = vec4( finalColor*2, 1.0 );
+// vec3 bloom = finalColor * (translucencyV*(visibility-1.0));
+// FragAttach1 = vec4( bloom, 1.0 );//vec4(gl_FragCoord.z);
 
 #end_code
 
 #define_code final_combine_lightmap
-float ndotl = max(dot(N, V), 0.0);
-vec3 F = fresnelSchlickRoughness(ndotl, F0, roughness);
-//vec3 F = fresnelSchlick(max(dot(N, V), 0.0), F0);
 
-vec3 kS = F;
-vec3 kD = 1.0 - kS;
-kD *= 1.0 - metallic;
+diffuseCalc
 
 float li = texture(lightmapTexture, v_texCoord2).r;
 // li = pow(li, 1.0/1.5);
 ao *= li;
 
-#ifdef sh_reflections
 vec3 R = reflect(-V, N);
 
 vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
@@ -384,18 +375,9 @@ specular = prefilteredColor * (F * brdf.x + brdf.y);
 
 vec3 ambient = (((Lo + (kD * diffuseV + specular)) * visibility ) * ao);// * (visibility+diffuseV);
 
-#else 
-vec3 ambient = Lo + ((kD * albedo * v_color.rgb ) * visibility ) * ao; //kD * Lo * ao;// * visibility;
-#endif
-
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
-float fogZ = length(u_eyePos-Position_worldspace);
-float fog = 1.0-(smoothstep(u_nearFar[3],u_nearFar[1],fogZ)*1.0);
 
-finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
-
-float preMultAlpha = opacityV * alpha * fog;
-FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
+finalColorWithFog
 
 vec3 bloom = finalColor * (translucencyV*(visibility-1.0));
 FragAttach1 = vec4( bloom, 1.0 );//vec4(gl_FragCoord.z);
@@ -407,47 +389,24 @@ FragAttach1 = vec4( bloom, 1.0 );//vec4(gl_FragCoord.z);
 
 
 #define_code final_combine_no_reflections
-float ndotl = max(dot(N, V), 0.0);
-vec3 F = fresnelSchlickRoughness(ndotl, F0, roughness);
-//vec3 F = fresnelSchlick(max(dot(N, V), 0.0), F0);
 
-vec3 kS = F;
-vec3 kD = 1.0 - kS;
-kD *= 1.0 - metallic;
+diffuseCalc
 
 vec3 ambient = Lo * (kD * albedo * v_color.rgb ); //kD * Lo * ao;// * visibility;
-
 vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
-float fogZ = length(u_eyePos-Position_worldspace);
-float fog = 1.0-(smoothstep(u_nearFar[3],u_nearFar[1],fogZ)*1.0);
 
-finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
-
-float preMultAlpha = opacityV * alpha * fog;
-FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
+finalColorWithFog
 
 #end_code
 
 
 #define_code final_combine_osm2
 
-float ndotl = max(dot(N, V), 0.0);
-vec3 F = fresnelSchlickRoughness(ndotl, F0, roughness);
-//vec3 F = fresnelSchlick(max(dot(N, V), 0.0), F0);
+diffuseCalc
 
-vec3 kS = F;
-vec3 kD = 1.0 - kS;
-kD *= 1.0 - metallic;
+vec3 ambient = Lo * (kD * albedo * v_color.rgb ) * visibility;
+vec3 finalColor = ambient;
 
-vec3 ambient = Lo * (kD * albedo * v_color.rgb ) * visibility; //kD * Lo * ao;// * visibility;
-
-vec3 finalColor = ambient; //pow(aoLightmapColor, vec3(8.2));//N*0.5+0.5;//v_texCoord.xyx;//;//prefilteredColor;//vec3(brdf, 1.0);//ambient;//vec3(texture(metallicTexture, v_texCoord).rrr);//(N + vec3(1.0) ) * vec3(0.5);;//irradiance;// ambient;// prefilteredColor;//(V + vec3(1.0) ) * vec3(0.5);//ambient; //specular;//vec3(brdf.xy, 0.0);
-float fogZ = length(u_eyePos-Position_worldspace);
-float fog = 1.0-(smoothstep(u_nearFar[3],u_nearFar[1],fogZ)*1.0);
-
-finalColor = vec3(1.0) - exp(-finalColor * u_hdrExposures.x);
-
-float preMultAlpha = opacityV * alpha * fog;
-FragColor = vec4( finalColor * preMultAlpha, preMultAlpha ); 
+finalColorWithFog
 
 #end_code
