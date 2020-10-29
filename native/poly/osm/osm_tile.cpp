@@ -101,10 +101,6 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
         for ( const auto& ps : pss ) _ret->fill(ps);
     };
 
-    auto addToOSM = [_ret]( const PolyStruct& ps ) {
-        _ret->fill(ps);
-    };
-
     auto addToOSMVData = [_ret]( const VData& ps, const Matrix4f& mat ) {
         _ret->fill(ps, mat);
     };
