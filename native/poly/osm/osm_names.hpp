@@ -21,6 +21,9 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string water() {
         return "water";
     }
+    [[maybe_unused]] static inline std::string beach() {
+        return "beach";
+    }
 
     [[maybe_unused]] static inline std::string building() {
         return "building";
@@ -46,9 +49,7 @@ namespace OSMElementName {
     [[maybe_unused]] static inline std::string monument() {
         return "monument";
     }
-    [[maybe_unused]] static inline std::string bus_stop() {
-        return "bus_stop";
-    }
+
 
     // Roads
     [[maybe_unused]] static inline std::string road() {
@@ -101,6 +102,12 @@ namespace OSMElementName {
     }
     [[maybe_unused]] static inline std::string traffic_signals() {
         return "traffic_signals";
+    }
+    [[maybe_unused]] static inline std::string bus_stop() {
+        return "bus_stop";
+    }
+    [[maybe_unused]] static inline std::string street_lamp() {
+        return "street_lamp";
     }
 
 
@@ -171,6 +178,7 @@ namespace OSMElementName {
 
     if ( ret.empty() ) {
         ret.emplace_back(OSMElementName::phone_booth());
+        ret.emplace_back(OSMElementName::street_lamp());
     }
 
     return ret;

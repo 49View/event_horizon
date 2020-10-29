@@ -8,15 +8,12 @@ void main() {
 
    vec2 texCoords = v_texCoord;
 
-//   vec2 texCoords = vec2(0,0);
-
    ao = texture( aoTexture, texCoords ).x * aoV;
    roughness = (texture( roughnessTexture, texCoords ).x * roughnessV);
    metallic = (texture( metallicTexture, texCoords ).x * metallicV);
    opacityV = texture( opacityTexture, texCoords ).x * opacity; 
    vec3 albedo = texture( diffuseTexture, texCoords ).xyz * diffuseColor;
    translucencyV = texture( translucencyTexture, texCoords ).x;
-   albedo = pow(albedo, vec3(2.2/1.0));
 
    vec3 N = getNormalFromMap(texCoords);
 

@@ -56,6 +56,9 @@ void addOSMTile( const std::shared_ptr<VData>& _ret, const OSMData* osm, float g
         if ( element.type == OSMElementName::water() ) {
             addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
         }
+        if ( element.type == OSMElementName::beach() ) {
+            addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
+        }
         if ( element.type == OSMElementName::parking() ) {
             addOSMTileTriangles( _ret, element.meshes, elemCenterProj3d, globalOSMScale);
         }
@@ -117,6 +120,11 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
                     auto randScale = 1.0f;
                     Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*randScale}};
                     addToOSMVData( *assets.find(OSMElementName::phone_booth())->second, mat);
+                }
+                if ( checkTagOnElement(element, OSMElementName::highway(), OSMElementName::street_lamp()) ) {
+                    auto randScale = 1.0f;
+                    Matrix4f mat{tilePosDelta*globalOSMScale, Quaternion{}, V3f{globalOSMScale*randScale}};
+                    addToOSMVData( *assets.find(OSMElementName::street_lamp())->second, mat);
                 }
                 if ( checkTagOnElement(element, OSMElementName::historic(), OSMElementName::monument()) ) {
                     auto randScale = 1.0f;//2.0f + unitRand(1.5f);
