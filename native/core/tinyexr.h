@@ -86,7 +86,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>  // guess stdint.h is available(C99)
 
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif
 
 // Use embedded miniz or not to decode ZIP format pixel. Linking with zlib
@@ -460,7 +460,7 @@ extern int LoadEXRFromMemory(float **out_rgba, int *width, int *height,
                              const char **err);
 
 #ifdef __cplusplus
-}
+//}
 #endif
 
 #endif  // TINYEXR_H_

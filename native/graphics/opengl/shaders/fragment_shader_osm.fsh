@@ -27,5 +27,7 @@ void main() {
 
    light_code
 
+   diffuseCalc
+
    final_combine_osm2
 }

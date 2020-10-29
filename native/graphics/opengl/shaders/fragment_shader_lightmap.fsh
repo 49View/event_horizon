@@ -21,5 +21,7 @@ void main() {
 
    light_code
 
+   diffuseCalc
+
    final_combine_lightmap
 }
