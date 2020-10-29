@@ -19,7 +19,7 @@ using namespace std::filesystem;
 using namespace std::chrono_literals;
 
 const std::string cachedFileName = ".cachedShaderMap.txt";
-const std::string sVersionString = "3.0.2";
+const std::string sVersionString = "3.0.3";
 
 JSONDATA(FileCheck, filename, lastWriteTime, size, hash)
 

@@ -138,7 +138,7 @@ void RLTargetPBR::addProbeToCB( const std::string& _probeCameraName, const Vecto
         mSkybox->render();
         for ( const auto&[k, vl] : rr.CL() ) {
             if ( isKeyInRange(k) ) {
-                rr.addToCommandBuffer(vl.mVList, nullptr, nullptr, rr.P(S::SH_NOTEXTURE).get());
+                rr.addToCommandBuffer(vl.mVList, nullptr, nullptr, rr.P(S::SH_DIRECT_LIGHTING).get());
             }
         }
     });

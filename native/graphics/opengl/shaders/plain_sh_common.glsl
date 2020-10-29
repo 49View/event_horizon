@@ -318,7 +318,7 @@ vec3 rendering_equation( vec3 albedo, vec3 L, vec3 V, vec3 N, vec3 F0, vec3 radi
 diffuseCalc
 float li = texture(lightmapTexture, v_texCoord2).r;
 // li = pow(li, 1.0/1.5);
-//ao *= li;
+// ao *= li;
 
 vec3 R = reflect(-V, N);
 
