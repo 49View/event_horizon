@@ -324,7 +324,7 @@ vec3 R = reflect(-V, N);
 vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
 vec3 specular = vec3(0.0);
 // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
-vec3 diffuseV = (irradiance * albedo * v_color.rbg);
+vec3 diffuseV = (irradiance * albedo * v_color.rgb);
 
 const float MAX_REFLECTION_LOD = 5.0;
 
@@ -358,7 +358,7 @@ vec3 R = reflect(-V, N);
 vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
 vec3 specular = vec3(0.0);
 // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
-vec3 diffuseV = (irradiance * albedo * v_color.rbg);
+vec3 diffuseV = (irradiance * albedo * v_color.rgb);
 
 const float MAX_REFLECTION_LOD = 5.0;
 
@@ -397,7 +397,20 @@ finalColorWithFog
 
 #define_code final_combine_osm2
 
-vec3 ambient = Lo * (kD * albedo * v_color.rgb ) * visibility;
+vec3 irradiance = texture(ibl_irradianceMap, N).rgb;
+vec3 specular = vec3(0.0);
+
+vec3 R = reflect(-V, N);
+const float MAX_REFLECTION_LOD = 5.0;
+vec3 prefilteredColor = textureLod(ibl_specularMap, R, roughness*MAX_REFLECTION_LOD).rgb;
+vec2 brdf = texture(ibl_brdfLUTMap, vec2( ndotl, roughness)).rg;
+specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+vec3 ambient = (Lo + (kD * irradiance.b + specular)) * v_color.rgb;
+ambient *= visibility+0.1;
+ambient *= ao;
+
+// vec3 ambient = Lo + (kD * albedo * v_color.rgb * irradiance ) * visibility;
 vec3 finalColor = ambient;
 
 finalColorWithFog
