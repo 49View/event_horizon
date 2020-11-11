@@ -377,10 +377,14 @@ namespace VDataServices {
 // ********************************************************************************************************************
 // ********************************************************************************************************************
 
-    static constexpr float globalOSMScale = 0.1f;
+    static constexpr float globalOSMScale = 1.0f;
 
     bool prepare( SceneGraph& sg, GT::OSMTile& _d, Material * ) {
-        return true;
+        auto elemCounts = 0u;
+        for ( const auto& elem : _d.osmData->elements ) {
+            elemCounts += ( elem.type != OSMElementName::building() );
+        }
+        return elemCounts > 0;
     }
 
     [[maybe_unused]] void buildInternal( const GT::OSMTile& _d, const std::shared_ptr<VData>& _ret ) {
@@ -412,10 +416,14 @@ namespace VDataServices {
     }
 
     bool prepare( SceneGraph& sg, GT::OSMBuildings& _d, Material * ) {
-        for ( const auto& tree : OSMGeomEntityList() ) {
-            addOSMAsset(sg, tree, _d);
+        auto elemCounts = 0u;
+        for ( const auto& elem : _d.osmData->elements ) {
+            elemCounts += ( elem.type == OSMElementName::building() );
         }
-        return true;
+        for ( const auto& entity : OSMGeomEntityList() ) {
+            addOSMAsset(sg, entity, _d);
+        }
+        return elemCounts > 0;
     }
 
     [[maybe_unused]] void buildInternal( const GT::OSMBuildings& _d, const std::shared_ptr<VData>& _ret ) {

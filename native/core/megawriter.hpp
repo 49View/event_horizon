@@ -233,7 +233,12 @@ public:
 		writer->String( value.c_str() );
 	}
 
-	void serialize( const char* _name, const Vector2f& value ) {
+    void serialize( const char* name, const std::wstring& value ) {
+        if ( name ) writer->String( name );
+        writer->String( "Unsupported wstring serialization" );
+    }
+
+    void serialize( const char* _name, const Vector2f& value ) {
 		if ( _name != nullptr ) writer->String( _name );
 		writer->StartArray();
 		writer->Double( value[0] );

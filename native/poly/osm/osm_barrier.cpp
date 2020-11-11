@@ -65,18 +65,18 @@ void osmCreateGateBarrier( std::vector<PolyStruct>& barriers, const std::vector<
 }
 
 std::vector<PolyStruct> osmCreateBarrier( const OSMMesh& group, float globalOSMScale ) {
-    std::vector<PolyStruct> barriers;
-    auto mainColor = C4fc::XTORGBA(group.colour);
-    if ( group.part == OSMElementName::fence() ) {
-        osmCreateFenceBarrier( barriers, group.vertices, globalOSMScale, mainColor );
-    } else if ( group.part == OSMElementName::wall() || group.part == OSMElementName::retaining_wall() ) {
-        osmCreateWallBarrier( barriers, group.vertices, V2f{ 0.3f, 1.0f}, globalOSMScale, mainColor );
-    } else if ( group.part == OSMElementName::bollard() ) {
-        osmCreateBollardBarrier( barriers, group.vertices, globalOSMScale, mainColor );
-    } else if ( group.part == OSMElementName::gate() ) {
-        osmCreateGateBarrier( barriers, group.vertices, globalOSMScale, mainColor );
-    } else if ( group.part == OSMElementName::kerb() ) {
-        osmCreateWallBarrier( barriers, group.vertices, V2f{ 0.2f, 0.1f}, globalOSMScale, mainColor );
-    }
+    std::vector<PolyStruct> barriers{};
+//    auto mainColor = C4fc::XTORGBA(group.colour);
+//    if ( group.part == OSMElementName::fence() ) {
+//        osmCreateFenceBarrier( barriers, group.vertices, globalOSMScale, mainColor );
+//    } else if ( group.part == OSMElementName::wall() || group.part == OSMElementName::retaining_wall() ) {
+//        osmCreateWallBarrier( barriers, group.vertices, V2f{ 0.3f, 1.0f}, globalOSMScale, mainColor );
+//    } else if ( group.part == OSMElementName::bollard() ) {
+//        osmCreateBollardBarrier( barriers, group.vertices, globalOSMScale, mainColor );
+//    } else if ( group.part == OSMElementName::gate() ) {
+//        osmCreateGateBarrier( barriers, group.vertices, globalOSMScale, mainColor );
+//    } else if ( group.part == OSMElementName::kerb() ) {
+//        osmCreateWallBarrier( barriers, group.vertices, V2f{ 0.2f, 0.1f}, globalOSMScale, mainColor );
+//    }
     return barriers;
 }

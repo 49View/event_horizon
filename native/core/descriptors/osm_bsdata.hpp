@@ -7,12 +7,12 @@
 #include "core/serialization.hpp"
 
 
-JSONDATA(OSMCenter, x, y, lat, lon, deltaPosInTile)
+JSONDATA(OSMCenter, x, y, lat, lon, tilePos)
     double x = 0.0;
     double y = 0.0;
     double lat = 0.0;
     double lon = 0.0;
-    std::vector<double> deltaPosInTile{};
+    std::vector<double> tilePos{};
 };
 
 JSONDATA(OSMSize, x, y)
@@ -34,7 +34,7 @@ JSONDATA(OSMMesh, colour, part, vertexType, vertices, minHeight, maxHeight)
     std::string colour;
     std::string part;
     int vertexType = OSMMeshVertexType::triangles;
-    std::vector<V3f> vertices;
+    std::vector<std::vector<double>> vertices;
     float minHeight = 0.0f;
     float maxHeight = 0.0f;
 };

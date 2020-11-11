@@ -31,8 +31,10 @@ void addOSMTileTriangles( const std::shared_ptr<VData>& _ret, const std::vector<
     for ( const auto& osmMesh : osmMeshes ) {
         addOSMMesh(_ret, [osmMesh, elemCenterProj3d, globalOSMScale]( Topology& mesh ) {
             C4f color = C4fc::XTORGBA(osmMesh.colour);
-            for ( const auto& v : osmMesh.vertices ) {
-                mesh.addVertexOfTriangle(osmTileProject(v, elemCenterProj3d, globalOSMScale),
+            for ( const auto& vd : osmMesh.vertices ) {
+                double lcx = 12709527.581054647;
+                double lcy = 2547258.119848553;
+                mesh.addVertexOfTriangle(osmTileProject(vd, lcx, lcy),
                                          V4fc::ZERO, color);
             }
         });
@@ -107,9 +109,9 @@ void addOSMSolid( const std::shared_ptr<VData>& _ret, const OSMData* osm, const 
 
     for ( const auto& element : osm->elements ) {
         V3f tilePosDelta = osmTileDeltaPos(element);
-        if ( !osm->tileBoundary.rect.contains( tilePosDelta.xz()) ) {
-            continue;
-        }
+//        if ( !osm->tileBoundary.rect.contains( tilePosDelta.xz()) ) {
+//            continue;
+//        }
         for ( const auto& group : element.meshes ) {
             if ( element.type == OSMElementName::entity() ) {
                 if ( checkTagOnElement(element, OSMElementName::amenity(), OSMElementName::telephone()) ) {

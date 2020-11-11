@@ -31,6 +31,7 @@ template<typename T>
     return d;
 }
 
-[[maybe_unused]] V3f osmTileProject( const V3f& vertex, const V3f& elemCenterProj3d, float globalOSMScale );
+//[[maybe_unused]] V3f osmTileProject( const V3f& vertex, const V3f& elemCenterProj3d, float globalOSMScale );
+[[maybe_unused]] V3f osmTileProject( const std::vector<double>& vertex, double lcx, double lcy );
 V2f coordToProjection( const V2f& latLon );
 [[maybe_unused]] V3f osmTileDeltaPos( const OSMElement& element );

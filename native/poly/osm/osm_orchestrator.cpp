@@ -10,6 +10,7 @@
 #include <poly/scene_graph.h>
 #include <poly/collision_mesh.hpp>
 #include <poly/osm/osm_names.hpp>
+#include <poly/converters/gltf2/gltf2.h>
 
 namespace HOD { // HighOrderDependency
 
@@ -52,11 +53,11 @@ void OsmOrchestrator::loadOSM( double lon, double lat, double zoomLevel ) {
                              map->elements = deserializeVector<OSMElement>(params.BufferString());
                              OSM(map);
                              HOD::resolver<OSMData>(sg, OSM(), [&]() {
-//                                 OSMData map{FM::readLocalFileC("../../elements.json")};
                                  sg.loadCollisionMesh(OSMService::createCollisionMesh(map.get()));
                                  sg.setCollisionEnabled(true);
-                                 sg.GB<GT::OSMTile>(OSM(), V2f{-0.1344f, 51.4892f}, GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::NearUnsorted), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
-                                 sg.GB<GT::OSMBuildings>(OSM(), V2f{-0.1344f, 51.4892f}, GT::Bucket(GTBucket::Near), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
+                                 auto tiles = sg.GB<GT::OSMTile>(OSM(), GT::Tag(SHADOW_MAGIC_TAG), GT::Bucket(GTBucket::NearUnsorted), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
+                                 auto buildings = sg.GB<GT::OSMBuildings>(OSM(), GT::Bucket(GTBucket::Near), GT::M("city,atlas"), GT::Program(S::SH_CITY_ATLAS));
+                                 GLTF2Service::save( sg, buildings );
                              });
                          }
                      });

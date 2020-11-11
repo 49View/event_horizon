@@ -422,6 +422,7 @@ public:
     GeomSP GB( Args&&... args ) {
         VDataAssembler<T> gb{std::forward<Args>(args)...};
         GeomSP elem;
+        bool hasBeenPrepared = true;
         if constexpr ( std::is_same_v<T, GT::Asset> ) {
             if ( auto elemToClone = get<Geom>(gb.dataTypeHolder.nameId); elemToClone ) {
                 elem = EF::clone(elemToClone);
@@ -442,7 +443,8 @@ public:
         } else {
             auto [matRef, matPtr] = GBMatInternal(gb.matRef, gb.matColor );
 
-            if ( VDataServices::prepare( *this, gb.dataTypeHolder, matPtr ) ) {
+            hasBeenPrepared = VDataServices::prepare( *this, gb.dataTypeHolder, matPtr );
+            if ( hasBeenPrepared ) {
                 auto hashRefName = VDataServices::refName( gb.dataTypeHolder );
                 auto vDataRef = VL().getHash(hashRefName );
 
@@ -459,7 +461,7 @@ public:
                 B<GRB>( gb.Name() ).addIM( elem );
             }
         }
-        if ( !gb.elemInjFather ) {
+        if ( !gb.elemInjFather && hasBeenPrepared ) {
             elem->updateTransform(gb.dataTypeHolder.pos, gb.dataTypeHolder.axis, gb.dataTypeHolder.scale);
             traverseNode(elem, gb.bucketIndex, NodeTraverseMode::Add);
         }

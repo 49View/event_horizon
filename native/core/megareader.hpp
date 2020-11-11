@@ -244,6 +244,9 @@ public:
                     if constexpr ( std::is_same<T, std::string>::value ) {
                         ret.emplace(tname, std::string((*(value))[name][t]["value"].GetString()));
                     }
+                    if constexpr ( std::is_same<T, std::wstring>::value ) {
+                        ret.emplace(tname, L"unsupported wstring");
+                    }
                     if constexpr ( std::is_integral<T>::value ) {
                         ret.emplace(tname, (*(value))[name][t]["value"].GetInt());
                     }

@@ -288,7 +288,9 @@ void AABB::set( const AABB& _aabb ) {
 }
 
 bool AABB::isValid() const {
-    return *this != AABB::MINVALID();
+//    return *this != AABB::MINVALID();
+    return minPoint() != std::numeric_limits<float>::max() && minPoint() != std::numeric_limits<float>::lowest() &&
+            maxPoint() != std::numeric_limits<float>::max() && maxPoint() != std::numeric_limits<float>::lowest();
 }
 
 float *AABB::rawPtr() {
