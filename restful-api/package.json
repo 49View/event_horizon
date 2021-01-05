@@ -14,7 +14,7 @@
     "app-root-path": "^3.0.0",
     "async": "^2.6.3",
     "aws-sdk": "^2.625.0",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
     "dd-trace": "^0.16.3",
