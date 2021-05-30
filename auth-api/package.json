@@ -46,7 +46,7 @@
     "unique-names-generator": "^3.1.1",
     "uuid": "^3.4.0",
     "winston": "^3.2.1",
-    "ws": "^6.2.1"
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "chai": "^4.2.0",
