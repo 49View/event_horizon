@@ -19,7 +19,7 @@
     "cookie-parser": "^1.4.4",
     "dd-trace": "^0.16.3",
     "delay": "^4.3.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "hot-shots": "^6.8.7",
     "js-base64": "^2.5.2",
     "jsonwebtoken": "^8.5.1",
